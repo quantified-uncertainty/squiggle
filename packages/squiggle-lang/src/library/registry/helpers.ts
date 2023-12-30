@@ -1,5 +1,6 @@
 import intersection from "lodash/intersection.js";
 import last from "lodash/last.js";
+import mergeWith from "lodash/mergeWith.js";
 
 import { BaseDist } from "../../dist/BaseDist.js";
 import { DistError } from "../../dist/DistError.js";
@@ -21,7 +22,7 @@ import { ReducerContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
 import { upTo } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
-import { Input, Value } from "../../value/index.js";
+import { Input, Scale, Value, VDomain } from "../../value/index.js";
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
 import {
@@ -516,3 +517,96 @@ export function checkNumericTickFormat(tickFormat: string | null) {
     throw new REArgumentError(`Tick format [${tickFormat}] is invalid.`);
   }
 }
+
+// This function both extract the domain and checks that the function has only one parameter.
+export function extractDomainFromOneArgFunction(
+  fn: Lambda
+): VDomain | undefined {
+  const counts = fn.parameterCounts();
+  if (!counts.includes(1)) {
+    throw new REOther(
+      `Unreachable: extractDomainFromOneArgFunction() called with function that doesn't have exactly one parameter.`
+    );
+  }
+
+  let domain;
+  if (fn.type === "UserDefinedLambda") {
+    domain = fn.parameters[0]?.domain;
+  } else {
+    domain = undefined;
+  }
+  // We could also verify a domain here, to be more confident that the function expects numeric args.
+  // But we might get other numeric domains besides `NumericRange`, so checking domain type here would be risky.
+  return domain;
+}
+
+export function assertValidMinMax(scale: Scale) {
+  const hasMin = scale.min !== undefined;
+  const hasMax = scale.max !== undefined;
+
+  // Validate scale properties
+  if (hasMin !== hasMax) {
+    throw new REArgumentError(
+      `Scale ${hasMin ? "min" : "max"} set without ${
+        hasMin ? "max" : "min"
+      }. Must set either both or neither.`
+    );
+  } else if (hasMin && hasMax && scale.min! >= scale.max!) {
+    throw new REArgumentError(
+      `Scale min (${scale.min}) is greater or equal than than max (${scale.max})`
+    );
+  }
+}
+
+const defaultScale = { type: "linear" } satisfies Scale;
+
+export function assertScaleMatchesDomain(
+  scale: Scale | undefined,
+  domain: VDomain | undefined
+): void {
+  if (domain && scale) {
+    if (domain.value.type === "NumericRange" && scale.type === "date") {
+      throw new REArgumentError("Cannot use numeric domain with date scale");
+    } else if (domain.value.type === "DateRange" && scale.type !== "date") {
+      throw new REArgumentError("Cannot use date domain with non-date scale");
+    }
+  }
+}
+
+export function createScaleUsingDomain(
+  scale: Scale | null,
+  domain: VDomain | undefined
+): Scale {
+  /*
+   * There are several possible combinations here:
+   * 1. Scale with min/max -> ignore domain, keep scale
+   * 2. Scale without min/max, domain defined -> copy min/max from domain
+   * 3. Scale without min/max, no domain -> keep scale
+   * 4. No scale and no domain -> default scale
+   */
+  //TODO: It might be good to check if scale is outside the bounds of the domain, and throw an error then or something.
+
+  scale && assertValidMinMax(scale);
+
+  assertScaleMatchesDomain(scale || undefined, domain);
+
+  const _defaultScale = domain ? domain.value.toDefaultScale() : defaultScale;
+
+  // _defaultScale can have a lot of undefined values. These should be over-written.
+  const resultScale = mergeWith(
+    {},
+    scale || {},
+    _defaultScale,
+    (scaleValue, defaultValue) => scaleValue ?? defaultValue
+  );
+
+  return resultScale;
+}
+
+export const assertScaleNotDateScale = (scale: Scale | null) => {
+  if (scale && scale.type === "date") {
+    throw new REArgumentError(
+      "Using a date scale as the plot yScale is not yet supported."
+    );
+  }
+};

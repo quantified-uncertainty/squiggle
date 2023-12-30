@@ -1,6 +1,4 @@
-import mergeWith from "lodash/mergeWith.js";
-
-import { REArgumentError, REOther } from "../errors/messages.js";
+import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
@@ -20,12 +18,15 @@ import {
   frWithTags,
 } from "../library/registry/frTypes.js";
 import {
+  assertScaleNotDateScale,
+  createScaleUsingDomain,
+  extractDomainFromOneArgFunction,
   FnFactory,
   parseDistFromDistOrNumber,
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { clamp, sort, uniq } from "../utility/E_A_Floats.js";
-import { LabeledDistribution, Plot, Scale, VDomain } from "../value/index.js";
+import { LabeledDistribution, Plot, Scale } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Plot",
@@ -39,78 +40,6 @@ const defaultScaleWithName = (name: string | undefined): Scale => {
     return { ...defaultScale, title: name };
   } else {
     return defaultScale;
-  }
-};
-
-export function assertValidMinMax(scale: Scale) {
-  const hasMin = scale.min !== undefined;
-  const hasMax = scale.max !== undefined;
-
-  // Validate scale properties
-  if (hasMin !== hasMax) {
-    throw new REArgumentError(
-      `Scale ${hasMin ? "min" : "max"} set without ${
-        hasMin ? "max" : "min"
-      }. Must set either both or neither.`
-    );
-  } else if (hasMin && hasMax && scale.min! >= scale.max!) {
-    throw new REArgumentError(
-      `Scale min (${scale.min}) is greater or equal than than max (${scale.max})`
-    );
-  }
-}
-
-function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
-  /*
-   * There are several possible combinations here:
-   * 1. Scale with min/max -> ignore domain, keep scale
-   * 2. Scale without min/max, domain defined -> copy min/max from domain
-   * 3. Scale without min/max, no domain -> keep scale
-   * 4. No scale and no domain -> default scale
-   */
-  //TODO: It might be good to check if scale is outside the bounds of the domain, and throw an error then or something.
-  //TODO: It might also be good to check if the domain type matches the scale type, and throw an error if not.
-
-  scale && assertValidMinMax(scale);
-
-  const _defaultScale = domain ? domain.value.toDefaultScale() : defaultScale;
-
-  // _defaultScale can have a lot of undefined values. These should be over-written.
-  const resultScale = mergeWith(
-    {},
-    scale || {},
-    _defaultScale,
-    (scaleValue, defaultValue) => scaleValue ?? defaultValue
-  );
-
-  return resultScale;
-}
-
-// This function both extract the domain and checks that the function has only one parameter.
-function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
-  const counts = fn.parameterCounts();
-  if (!counts.includes(1)) {
-    throw new REOther(
-      `Unreachable: extractDomainFromOneArgFunction() called with function that doesn't have exactly one parameter.`
-    );
-  }
-
-  let domain;
-  if (fn.type === "UserDefinedLambda") {
-    domain = fn.parameters[0]?.domain;
-  } else {
-    domain = undefined;
-  }
-  // We could also verify a domain here, to be more confident that the function expects numeric args.
-  // But we might get other numeric domains besides `NumericRange`, so checking domain type here would be risky.
-  return domain;
-}
-
-const _assertYScaleNotDateScale = (yScale: Scale | null) => {
-  if (yScale && yScale.type === "date") {
-    throw new REArgumentError(
-      "Using a date scale as the plot yScale is not yet supported."
-    );
   }
 };
 
@@ -150,12 +79,12 @@ const numericFnDef = () => {
     title: string | null,
     xPoints: number[] | null
   ): Plot => {
-    _assertYScaleNotDateScale(yScale);
+    assertScaleNotDateScale(yScale);
     const domain = extractDomainFromOneArgFunction(fn);
     return {
       type: "numericFn",
       fn,
-      xScale: createScale(xScale, domain),
+      xScale: createScaleUsingDomain(xScale, domain),
       yScale: yScale ?? defaultScale,
       title: title ?? undefined,
       xPoints: xPoints ?? undefined,
@@ -191,8 +120,8 @@ const numericFnDef = () => {
           const { xScale, yScale, title, xPoints } = params ?? {};
           return toPlot(
             value,
-            xScale || null,
-            yScale || null,
+            xScale || tags.xScale() || null,
+            yScale || tags.yScale() || null,
             title || tags.name() || null,
             formatXPoints(xPoints || null, xScale || null)
           );
@@ -261,7 +190,7 @@ export const library = [
         frPlot,
         ([dists, params]) => {
           const { xScale, yScale, title, showSummary } = params ?? {};
-          yScale && _assertYScaleNotDateScale(yScale);
+          yScale && assertScaleNotDateScale(yScale);
           const distributions: LabeledDistribution[] = [];
           if (dists.tag === "2") {
             dists.value.forEach(({ name, value }, index) => {
@@ -303,7 +232,7 @@ export const library = [
         ],
         frPlot,
         ([{ dists, xScale, yScale, title, showSummary }]) => {
-          _assertYScaleNotDateScale(yScale);
+          assertScaleNotDateScale(yScale);
 
           const distributions: LabeledDistribution[] = [];
           dists.forEach(({ name, value }) => {
@@ -336,7 +265,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frNamed("dist", frDist),
+          frNamed("dist", frWithTags(frDist)),
           frNamed(
             "params",
             frOptional(
@@ -350,13 +279,17 @@ export const library = [
           ),
         ],
         frPlot,
-        ([dist, params]) => {
+        ([{ value, tags }, params]) => {
           const { xScale, yScale, title, showSummary } = params ?? {};
+          const _yScale = yScale ?? tags.yScale();
+          _yScale && assertScaleNotDateScale(_yScale);
+          const _xScale = xScale ?? tags.xScale();
+          _xScale && assertScaleNotDateScale(_xScale);
           return {
             type: "distributions",
-            distributions: [{ distribution: dist }],
-            xScale: xScale ?? defaultScale,
-            yScale: yScale ?? defaultScale,
+            distributions: [{ distribution: value }],
+            xScale: _xScale ?? defaultScale,
+            yScale: _yScale ?? defaultScale,
             title: title ?? undefined,
             showSummary: showSummary ?? true,
           };
@@ -374,7 +307,7 @@ export const library = [
         ],
         frPlot,
         ([{ dist, xScale, yScale, title, showSummary }]) => {
-          _assertYScaleNotDateScale(yScale);
+          assertScaleNotDateScale(yScale);
           return {
             type: "distributions",
             distributions: [{ distribution: dist }],
@@ -416,8 +349,12 @@ export const library = [
         ([{ value, tags }, params]) => {
           const domain = extractDomainFromOneArgFunction(value);
           const { xScale, yScale, distXScale, title, xPoints } = params ?? {};
-          yScale && _assertYScaleNotDateScale(yScale);
-          const _xScale = createScale(xScale || null, domain);
+          const _yScale = yScale || tags.yScale();
+          _yScale && assertScaleNotDateScale(_yScale);
+          const _xScale = createScaleUsingDomain(
+            xScale || tags.xScale() || null,
+            domain
+          );
           return {
             fn: value,
             type: "distFn",
@@ -442,9 +379,9 @@ export const library = [
         ],
         frPlot,
         ([{ fn, xScale, yScale, distXScale, title, xPoints }]) => {
-          _assertYScaleNotDateScale(yScale);
+          assertScaleNotDateScale(yScale);
           const domain = extractDomainFromOneArgFunction(fn);
-          const _xScale = createScale(xScale, domain);
+          const _xScale = createScaleUsingDomain(xScale, domain);
           return {
             type: "distFn",
             fn,
@@ -479,7 +416,7 @@ export const library = [
         ],
         frPlot,
         ([{ xDist, yDist, xScale, yScale, title }]) => {
-          _assertYScaleNotDateScale(yScale);
+          assertScaleNotDateScale(yScale);
           const xTitle = xDist.tags.name();
           const yTitle = yDist.tags.name();
           return {

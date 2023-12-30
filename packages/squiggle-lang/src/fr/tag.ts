@@ -17,13 +17,17 @@ import {
   frOr,
   FrOrType,
   frPlot,
+  frScale,
   frString,
   frTableChart,
   FRType,
   frWithTags,
 } from "../library/registry/frTypes.js";
 import {
+  assertScaleMatchesDomain,
+  assertScaleNotDateScale,
   checkNumericTickFormat,
+  extractDomainFromOneArgFunction,
   FnFactory,
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
@@ -133,6 +137,96 @@ export const library = [
       makeDefinition([frAny()], frString, ([value]) => {
         return value.tags?.value.description || "";
       }),
+    ],
+  }),
+  maker.make({
+    name: "xScale",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frDist), frScale],
+        frWithTags(frDist),
+        ([{ value, tags }, xScale]) => {
+          assertScaleNotDateScale(xScale);
+          return {
+            value,
+            tags: tags.merge({ xScale }),
+          };
+        },
+        { isDecorator: true }
+      ),
+      makeDefinition(
+        [frWithTags(frLambdaTyped([frNumber], frDistOrNumber)), frScale],
+        frWithTags(frLambdaTyped([frNumber], frDistOrNumber)),
+        ([{ value, tags }, xScale]) => {
+          const domain = extractDomainFromOneArgFunction(value);
+          assertScaleMatchesDomain(xScale, domain);
+          return {
+            value,
+            tags: tags.merge({ xScale }),
+          };
+        },
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getXScale",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frOr(frDist, frLambdaTyped([frNumber], frDistOrNumber)))],
+        frOr(frScale, frString),
+        ([{ tags }]) => {
+          const _xScale = tags.xScale();
+          return _xScale
+            ? { tag: "1", value: _xScale }
+            : { tag: "2", value: "None" };
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "yScale",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frDist), frScale],
+        frWithTags(frDist),
+        ([{ value, tags }, yScale]) => {
+          assertScaleNotDateScale(yScale);
+          return {
+            value,
+            tags: tags.merge({ yScale }),
+          };
+        },
+        { isDecorator: true }
+      ),
+      makeDefinition(
+        [frWithTags(frLambdaTyped([frNumber], frDistOrNumber)), frScale],
+        frWithTags(frLambdaTyped([frNumber], frDistOrNumber)),
+        ([{ value, tags }, yScale]) => {
+          assertScaleNotDateScale(yScale);
+          return {
+            value,
+            tags: tags.merge({ yScale }),
+          };
+        },
+        { isDecorator: true }
+      ),
+    ],
+  }),
+
+  maker.make({
+    name: "getYScale",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frOr(frDist, frLambdaTyped([frNumber], frDistOrNumber)))],
+        frOr(frScale, frString),
+        ([{ tags }]) => {
+          const _yScale = tags.yScale();
+          return _yScale
+            ? { tag: "1", value: _yScale }
+            : { tag: "2", value: "None" };
+        }
+      ),
     ],
   }),
   maker.make({
