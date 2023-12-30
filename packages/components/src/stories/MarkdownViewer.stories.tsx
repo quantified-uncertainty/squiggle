@@ -45,6 +45,13 @@ function helloWorld() {
 }
 \`\`\`
 
+\`\`\`squiggle
+pianoTunersPerPiano = {
+  pianosPerPianoTuner = 2k to 50k
+  1 / pianosPerPianoTuner
+}
+\`\`\`
+
 ### Blockquotes
 
 > Markdown is a lightweight markup language with plain-text formatting syntax.

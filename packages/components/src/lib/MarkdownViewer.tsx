@@ -1,11 +1,9 @@
 import clsx from "clsx";
 import { Element } from "hast";
-import React from "react";
+import React, { FC, HTMLAttributes, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-//Make sure this uses cjs, not esm. See: https://github.com/react-syntax-highlighter/react-syntax-highlighter/issues/509
-import * as style from "react-syntax-highlighter/dist/cjs/styles/prism";
 import remarkGfm from "remark-gfm";
+import { codeToHtml } from "shikiji";
 import { Node, Parent } from "unist";
 import { visitParents } from "unist-util-visit-parents";
 
@@ -25,6 +23,35 @@ function rehypeInlineCodeProperty() {
     });
   };
 }
+
+const SyntaxHighlighter: FC<
+  { children: string; language: string } & Omit<
+    HTMLAttributes<HTMLElement>,
+    "children"
+  >
+> = ({ children, language, ...rest }) => {
+  const [html, setHtml] = useState(children);
+
+  // Syntax-highlighted blocks will start unstyled, that's fine.
+  useEffect(() => {
+    (async () => {
+      setHtml(
+        await codeToHtml(children, {
+          lang: language,
+          theme: "vitesse-light", // TODO - write a custom theme that would match Codemirror styles
+        })
+      );
+    })();
+  });
+
+  return (
+    <div
+      className="*:!bg-inherit" // shiki themes add background color, so we have to override it
+      dangerouslySetInnerHTML={{ __html: html }}
+      {...rest}
+    />
+  );
+};
 
 type MarkdownViewerProps = {
   md: string;
@@ -50,7 +77,11 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
       remarkPlugins={[remarkGfm]}
       components={{
         pre({ children }) {
-          return <pre className="not-prose">{children}</pre>;
+          return (
+            <pre className="rounded bg-slate-50 p-3 my-1 not-prose text-[.9em]">
+              {children}
+            </pre>
+          );
         },
         code(props) {
           const { node, children, className, ...rest } = props;
@@ -60,20 +91,14 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
             return (
               <code
                 {...rest}
-                className="not-prose border-black border border-opacity-[0.04] bg-opacity-[0.03] bg-black px-[0.25rem] py-0.5 rounded-sm break-words font-mono text-[.9em]"
+                className="not-prose border-black border border-opacity-[0.04] bg-opacity-[0.03] bg-black px-1 py-0.5 rounded-sm break-words font-mono text-[.9em]"
               >
                 {children}
               </code>
             );
           }
           return match ? (
-            <SyntaxHighlighter
-              {...rest}
-              language={match[1]}
-              PreTag="div"
-              style={style["oneLight"]}
-              customStyle={{ fontSize: "0.9em", borderRadius: "0.2rem" }}
-            >
+            <SyntaxHighlighter {...rest} language={match[1]}>
               {String(children).replace(/\n$/, "")}
             </SyntaxHighlighter>
           ) : (
