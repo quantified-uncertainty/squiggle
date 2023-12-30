@@ -2,18 +2,16 @@ import lodashIsEqual from "lodash/isEqual.js";
 import isInteger from "lodash/isInteger.js";
 
 import { BaseDist } from "../dist/BaseDist.js";
-import { SampleSetDist } from "../dist/SampleSetDist/index.js";
 import {
   REArrayIndexNotFound,
   REDictPropertyNotFound,
   REOther,
 } from "../errors/messages.js";
-import { BaseLambda, Lambda } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { SDate } from "../utility/SDate.js";
 import { SDuration } from "../utility/SDuration.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
-import { anyToSimpleValue, SimpleValue } from "./simpleValue.js";
 import { ValueTags, ValueTagsType } from "./valueTags.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
@@ -770,177 +768,4 @@ export function uniqBy(
   }
 
   return uniqueArray;
-}
-
-// Note: it would be pretty easy to modify this (send in a function) to replace Lambdas with Dicts - but this would be easiest if this code is mostly in one place (at least, the parts with lambdas)
-export function toSimpleValue(value: Value): SimpleValue {
-  if (
-    value instanceof VBool ||
-    value instanceof VNumber ||
-    value instanceof VString
-  ) {
-    return value.value;
-  } else if (value instanceof VDate) {
-    return value.value.toDate();
-  } else if (value instanceof VVoid) {
-    return null;
-  } else if (value instanceof VLambda) {
-    return value.value;
-  }
-  switch (value.type) {
-    case "Array":
-      return value.value.map(toSimpleValue);
-    case "Dict":
-      return ImmutableMap(
-        [...value.value.entries()].map(([k, v]) => [k, toSimpleValue(v)])
-      );
-    case "Calculator": {
-      const fields: [string, SimpleValue][] = [
-        ["vType", "Calculator"],
-        ["fn", value.value.fn],
-        ["inputs", value.value.inputs.map((x) => toSimpleValue(vInput(x)))],
-        ["autorun", value.value.autorun],
-        ["description", value.value.description || ""],
-        ["title", value.value.title || ""],
-        ["sampleCount", value.value.sampleCount || 100],
-      ];
-      return ImmutableMap(fields);
-    }
-    case "Plot": {
-      const fields: [string, SimpleValue][] = [
-        ["vType", "Plot"],
-        ["type", value.value.type],
-        ["title", value.value.title || ""],
-      ];
-      switch (value.value.type) {
-        case "distributions":
-          fields.push([
-            "distributions",
-            value.value.distributions.map((x) =>
-              ImmutableMap([
-                ["name", x.name || ""],
-                ["distribution", toSimpleValue(vDist(x.distribution))],
-              ])
-            ),
-          ]);
-          fields.push(["xScale", toSimpleValue(vScale(value.value.xScale))]);
-          fields.push(["yScale", toSimpleValue(vScale(value.value.yScale))]);
-          fields.push(["showSummary", value.value.showSummary]);
-          break;
-        case "numericFn":
-          fields.push(["fn", value.value.fn]);
-          fields.push(["xScale", toSimpleValue(vScale(value.value.xScale))]);
-          fields.push(["yScale", toSimpleValue(vScale(value.value.yScale))]);
-          if (value.value.xPoints) {
-            fields.push(["points", value.value.xPoints]);
-          }
-          break;
-        case "distFn":
-          fields.push(["fn", value.value.fn]);
-          fields.push(["xScale", toSimpleValue(vScale(value.value.xScale))]);
-          fields.push(["yScale", toSimpleValue(vScale(value.value.yScale))]);
-          fields.push([
-            "distXScale",
-            toSimpleValue(vScale(value.value.distXScale)),
-          ]);
-          if (value.value.xPoints) {
-            fields.push(["points", value.value.xPoints]);
-          }
-          break;
-        case "scatter":
-          fields.push(["xDist", toSimpleValue(vDist(value.value.xDist))]);
-          fields.push(["yDist", toSimpleValue(vDist(value.value.yDist))]);
-          fields.push(["xScale", toSimpleValue(vScale(value.value.xScale))]);
-          fields.push(["yScale", toSimpleValue(vScale(value.value.yScale))]);
-          break;
-        case "relativeValues":
-          fields.push(["fn", value.value.fn]);
-          fields.push(["ids", [...value.value.ids]]);
-          break;
-      }
-      return ImmutableMap(fields);
-    }
-    case "TableChart": {
-      const fields: [string, SimpleValue][] = [
-        ["vType", "TableChart"],
-        ["data", value.value.data.map(toSimpleValue)],
-        [
-          "columns",
-          value.value.columns.map((column) => {
-            const data: [string, SimpleValue][] = [
-              ["fn", column.fn],
-              ["name", column.name || ""],
-            ];
-            return ImmutableMap(data);
-          }),
-        ],
-      ];
-      return ImmutableMap(fields);
-    }
-    case "Scale": {
-      const fields: [string, SimpleValue][] = [
-        ["vType", "Scale"],
-        ["type", value.value.type],
-        ["tickFormat", value.value.tickFormat || ""],
-        ["title", value.value.title || ""],
-      ];
-      value.value.min && fields.push(["min", value.value.min]);
-      value.value.max && fields.push(["max", value.value.max]);
-      switch (value.value.type) {
-        case "symlog":
-          fields.push([
-            "constant",
-            value.value.constant || SCALE_SYMLOG_DEFAULT_CONSTANT,
-          ]);
-          break;
-        case "power":
-          fields.push([
-            "exponent",
-            value.value.exponent || SCALE_POWER_DEFAULT_CONSTANT,
-          ]);
-          break;
-      }
-      return ImmutableMap(fields);
-    }
-    case "Dist":
-      switch (value.value.type) {
-        case "PointSetDist":
-          return anyToSimpleValue(value.value);
-        case "SymbolicDist":
-          return anyToSimpleValue(value.value);
-        case "SampleSetDist": {
-          const dist = value.value as SampleSetDist;
-          return [...dist.samples];
-        }
-        default:
-          return anyToSimpleValue(value.value);
-      }
-    default:
-      throw new REOther(`Can't convert ${value.type} to simple value`);
-  }
-}
-export function fromSimpleValue(value: SimpleValue): Value {
-  if (Array.isArray(value)) {
-    return vArray(value.map(fromSimpleValue));
-  } else if (value instanceof Map) {
-    return vDict(
-      ImmutableMap(
-        [...value.entries()].map(([k, v]) => [k, fromSimpleValue(v)])
-      )
-    );
-  } else if (typeof value === "boolean") {
-    return vBool(value);
-  } else if (typeof value === "number") {
-    return vNumber(value);
-  } else if (typeof value === "string") {
-    return vString(value);
-  } else if (value === null) {
-    return vVoid();
-  } else if (value instanceof Date) {
-    return vDate(SDate.fromDate(value));
-  } else if (value instanceof BaseLambda) {
-    return vLambda(value);
-  } else {
-    return vVoid();
-  }
 }

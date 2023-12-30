@@ -13,6 +13,7 @@ import {
   makeNumericComparisons,
 } from "../library/registry/helpers.js";
 import { isEqual } from "../value/index.js";
+import { toValue, valueToSimpleValue } from "../value/simpleValue.js";
 
 const maker = new FnFactory({
   nameSpace: "", // no namespaced versions
@@ -99,14 +100,14 @@ export const library = [
       }),
     ],
   }),
-  // maker.make({
-  //   name: "JSON",
-  //   definitions: [
-  //     makeDefinition([frAny()], frAny(), ([v]) => {
-  //       return fromSimpleValue(toSimpleValue(v));
-  //     }),
-  //   ],
-  // }),
+  maker.make({
+    name: "JSON",
+    definitions: [
+      makeDefinition([frAny()], frAny(), ([v]) => {
+        return toValue(valueToSimpleValue(v));
+      }),
+    ],
+  }),
   maker.make({
     name: "inspect",
     definitions: [
