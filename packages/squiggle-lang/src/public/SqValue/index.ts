@@ -1,7 +1,6 @@
 import { result } from "../../utility/result.js";
 import { SDate } from "../../utility/SDate.js";
 import {
-  SimpleValue,
   toSimpleValue,
   Value,
   vCalculator,
@@ -10,17 +9,18 @@ import {
   vNumber,
   vString,
 } from "../../value/index.js";
+import { SimpleValue } from "../../value/simpleValue.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
 import { SqCalculator } from "./SqCalculator.js";
 import { SqDict } from "./SqDict.js";
-import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
-import { SqDomain, wrapDomain } from "./SqDomain.js";
-import { SqInput, wrapInput } from "./SqInput.js";
+import { wrapDistribution } from "./SqDistribution/index.js";
+import { wrapDomain } from "./SqDomain.js";
+import { wrapInput } from "./SqInput.js";
 import { SqLambda } from "./SqLambda.js";
-import { SqDistributionsPlot, SqPlot, wrapPlot } from "./SqPlot.js";
-import { SqScale, wrapScale } from "./SqScale.js";
+import { SqDistributionsPlot, wrapPlot } from "./SqPlot.js";
+import { wrapScale } from "./SqScale.js";
 import { SqTableChart } from "./SqTableChart.js";
 import { SqTags } from "./SqTags.js";
 
@@ -94,15 +94,15 @@ export abstract class SqAbstractValue<Type extends string, JSType> {
   abstract asJS(): JSType;
 }
 
-export class SqArrayValue extends SqAbstractValue<"Array", unknown[]> {
+export class SqArrayValue extends SqAbstractValue<"Array", SimpleValue[]> {
   tag = "Array" as const;
 
   get value() {
     return new SqArray(this._value.value, this.context);
   }
 
-  asJS(): unknown[] {
-    return this.value.getValues().map((value) => value.asJS());
+  asJS(): SimpleValue[] {
+    return this._value.value.map(toSimpleValue);
   }
 }
 
@@ -113,7 +113,7 @@ export class SqBoolValue extends SqAbstractValue<"Bool", boolean> {
     return this._value.value;
   }
 
-  asJS() {
+  asJS(): boolean {
     return this.value;
   }
 }
@@ -139,10 +139,7 @@ export class SqDateValue extends SqAbstractValue<"Date", Date> {
   }
 }
 
-export class SqDistributionValue extends SqAbstractValue<
-  "Dist",
-  SqDistribution
-> {
+export class SqDistributionValue extends SqAbstractValue<"Dist", SimpleValue> {
   tag = "Dist" as const;
 
   get value() {
@@ -159,11 +156,11 @@ export class SqDistributionValue extends SqAbstractValue<
   }
 
   asJS() {
-    return this.value; // should we return BaseDist instead?
+    return toSimpleValue(this._value);
   }
 }
 
-export class SqLambdaValue extends SqAbstractValue<"Lambda", SqLambda> {
+export class SqLambdaValue extends SqAbstractValue<"Lambda", SimpleValue> {
   tag = "Lambda" as const;
 
   static create(value: SqLambda) {
@@ -175,7 +172,7 @@ export class SqLambdaValue extends SqAbstractValue<"Lambda", SqLambda> {
   }
 
   asJS() {
-    return this.value; // SqLambda is nicer than internal Lambda, so we use that
+    return toSimpleValue(this._value);
   }
 
   toCalculator(): SqCalculatorValue | undefined {
@@ -197,20 +194,20 @@ export class SqNumberValue extends SqAbstractValue<"Number", number> {
     return this._value.value;
   }
 
-  asJS() {
+  asJS(): number {
     return this.value;
   }
 }
 
-export class SqDictValue extends SqAbstractValue<"Dict", Map<string, unknown>> {
+export class SqDictValue extends SqAbstractValue<"Dict", SimpleValue> {
   tag = "Dict" as const;
 
   get value() {
     return new SqDict(this._value.value, this.context);
   }
 
-  asJS(): Map<string, unknown> {
-    return new Map(this.value.entries().map(([k, v]) => [k, v.asJS()])); // this is a native Map, not immutable Map
+  asJS(): SimpleValue {
+    return toSimpleValue(this._value);
   }
 }
 
@@ -246,7 +243,7 @@ export class SqDurationValue extends SqAbstractValue<"Duration", number> {
   }
 }
 
-export class SqPlotValue extends SqAbstractValue<"Plot", SqPlot> {
+export class SqPlotValue extends SqAbstractValue<"Plot", SimpleValue> {
   tag = "Plot" as const;
 
   get value() {
@@ -258,12 +255,12 @@ export class SqPlotValue extends SqAbstractValue<"Plot", SqPlot> {
   }
 
   asJS() {
-    return this.value;
+    return toSimpleValue(this._value);
   }
 }
 export class SqTableChartValue extends SqAbstractValue<
   "TableChart",
-  SqTableChart
+  SimpleValue
 > {
   tag = "TableChart" as const;
 
@@ -272,12 +269,12 @@ export class SqTableChartValue extends SqAbstractValue<
   }
 
   asJS() {
-    return this.value;
+    return toSimpleValue(this._value);
   }
 }
 export class SqCalculatorValue extends SqAbstractValue<
   "Calculator",
-  SqCalculator
+  SimpleValue
 > {
   tag = "Calculator" as const;
 
@@ -286,7 +283,7 @@ export class SqCalculatorValue extends SqAbstractValue<
   }
 
   asJS() {
-    return this.value;
+    return toSimpleValue(this._value);
   }
 
   override title() {
@@ -294,7 +291,7 @@ export class SqCalculatorValue extends SqAbstractValue<
   }
 }
 
-export class SqScaleValue extends SqAbstractValue<"Scale", SqScale> {
+export class SqScaleValue extends SqAbstractValue<"Scale", SimpleValue> {
   tag = "Scale" as const;
 
   get value() {
@@ -302,11 +299,11 @@ export class SqScaleValue extends SqAbstractValue<"Scale", SqScale> {
   }
 
   asJS() {
-    return this.value;
+    return toSimpleValue(this._value);
   }
 }
 
-export class SqInputValue extends SqAbstractValue<"Input", SqInput> {
+export class SqInputValue extends SqAbstractValue<"Input", SimpleValue> {
   tag = "Input" as const;
 
   get value() {
@@ -314,7 +311,7 @@ export class SqInputValue extends SqAbstractValue<"Input", SqInput> {
   }
 
   asJS() {
-    return this.value;
+    return toSimpleValue(this._value);
   }
 }
 
@@ -330,7 +327,7 @@ export class SqVoidValue extends SqAbstractValue<"Void", null> {
   }
 }
 
-export class SqDomainValue extends SqAbstractValue<"Domain", SqDomain> {
+export class SqDomainValue extends SqAbstractValue<"Domain", SimpleValue> {
   tag = "Domain" as const;
 
   get value() {
@@ -338,7 +335,7 @@ export class SqDomainValue extends SqAbstractValue<"Domain", SqDomain> {
   }
 
   asJS() {
-    return this.value;
+    return toSimpleValue(this._value);
   }
 }
 
