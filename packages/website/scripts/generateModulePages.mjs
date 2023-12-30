@@ -28,7 +28,7 @@ exampleFn(f) = f^2
   
 myVarTags = Tag.all(exampleFn)
   
-docs = Tag.getDoc(exampleFn)
+tagDocumentation = Tag.getDoc(exampleFn)
   
 @hide // Hide this variable in the Playground
 helperFn(f) = f \`}/>
@@ -83,7 +83,7 @@ function toMarkdownDefinitions(definitions) {
 
 function toMarkdown(documentation) {
   return `### ${documentation.name}
-${documentation.tagDescription || ""}
+${documentation.tagDocumentation || ""}
 <FnDocumentationFromName functionName="${
     documentation.nameSpace + "." + documentation.name
   }" showNameAndDescription={false} size="medium" />
