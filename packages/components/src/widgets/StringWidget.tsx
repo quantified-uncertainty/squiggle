@@ -1,6 +1,5 @@
-import ReactMarkdown from "react-markdown";
-
 import { SHORT_STRING_LENGTH } from "../lib/constants.js";
+import { MarkdownViewer } from "../lib/MarkdownViewer.js";
 import { widgetRegistry } from "./registry.js";
 import { truncateStr } from "./utils.js";
 
@@ -11,10 +10,8 @@ widgetRegistry.register("String", {
     </div>
   ),
   Chart: (value) => (
-    <div className="text-neutral-800 px-1 py-0.5 my-1">
-      <ReactMarkdown className="prose max-w-4xl text-sm">
-        {value.value}
-      </ReactMarkdown>
+    <div className="px-1 py-0.5 my-1 max-w-4xl">
+      <MarkdownViewer md={value.value} textColor="prose-stone" textSize="sm" />
     </div>
   ),
 });

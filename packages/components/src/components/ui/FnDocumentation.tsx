@@ -1,6 +1,5 @@
 import { clsx } from "clsx";
 import { FC, PropsWithChildren } from "react";
-import ReactMarkdown from "react-markdown";
 
 import {
   FnDefinition,
@@ -9,6 +8,7 @@ import {
 } from "@quri/squiggle-lang";
 
 import { SQUIGGLE_DOCS_URL } from "../../lib/constants.js";
+import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 
 type Size = "small" | "normal";
 
@@ -123,9 +123,11 @@ export const FnDocumentation: FC<{
 
       {description && showNameAndDescription ? (
         <Section>
-          <ReactMarkdown className={clsx("prose text-slate-600", textSize)}>
-            {description}
-          </ReactMarkdown>
+          <MarkdownViewer
+            md={description}
+            textColor="prose-slate"
+            textSize={size === "small" ? "xs" : "sm"}
+          />
         </Section>
       ) : null}
       {definitions ? (
