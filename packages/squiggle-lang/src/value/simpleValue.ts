@@ -48,7 +48,7 @@ export type SimpleValueWithoutLambda =
   | string
   | null;
 
-function removeLambdas(value: SimpleValue): SimpleValueWithoutLambda {
+export function removeLambdas(value: SimpleValue): SimpleValueWithoutLambda {
   if (value instanceof BaseLambda) {
     return ImmutableMap([
       ["vType", "Lambda"],

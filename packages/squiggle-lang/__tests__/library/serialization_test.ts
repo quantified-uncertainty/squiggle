@@ -1,7 +1,7 @@
 import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("JSON", () => {
-  testEvalToBe("JSON(1)", "1");
-  testEvalToBe("JSON([1,2,3])", "[1,2,3]");
-  testEvalToBe("JSON({foo: 'bar'})", '{foo: "bar"}');
+  testEvalToBe("Danger.json(1)", "1");
+  testEvalToBe("Danger.json([1,2,3])", "[1,2,3]");
+  testEvalToBe("Danger.json({foo: 'bar'})", '{foo: "bar"}');
 });
