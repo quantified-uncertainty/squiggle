@@ -1,6 +1,10 @@
 import * as d3 from "d3";
 
-import { SqScale } from "@quri/squiggle-lang";
+import {
+  SCALE_POWER_DEFAULT_CONSTANT,
+  SCALE_SYMLOG_DEFAULT_CONSTANT,
+  SqScale,
+} from "@quri/squiggle-lang";
 
 import { DEFAULT_DATE_FORMAT } from "../constants.js";
 import {
@@ -18,19 +22,23 @@ export function sqScaleToD3(
   // That's because the domain can depend on the data that we draw, so that part is done later.
 
   // See also: `scaleTypeToSqScale` function in PlaygroundSettingsForm, for default scales we create when SqScale is not provided.
-  switch (scale.tag) {
+  const method = scale.method;
+  if (!method) return scaleLinear();
+  switch (method.type) {
     case "linear":
       return scaleLinear();
     case "symlog":
-      return scaleSymlog().constant(scale.constant);
+      return scaleSymlog().constant(
+        method.constant || SCALE_SYMLOG_DEFAULT_CONSTANT
+      );
     case "power":
-      return scalePow().exponent(scale.exponent);
+      return scalePow().exponent(
+        method.exponent || SCALE_POWER_DEFAULT_CONSTANT
+      );
     case "log":
       return scaleLog();
     case "date":
       return scaleDate();
-    default:
-      throw new Error(`Unknown scale: ${scale satisfies never}`);
   }
 }
 
