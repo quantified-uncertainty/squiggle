@@ -47,8 +47,8 @@ const promptPage = async () => {
   const promptPage = readFile("./public/llms/prompt.txt");
   const introduction = `---
 description: LLM Prompt Example
+notes: "This Doc is generated using a script, do not edit directly!"
 ---
-<!-- This Doc is generated using a script, do not edit directly! -->
 
 # LLM Prompt Example
 

@@ -7,9 +7,10 @@
     "dev": "next dev",
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
-    "compileDocsForLLM": "node scripts/compileDocsForLLM.js",
-    "generateModulePages": "node scripts/generateModulePages.mjs",
-    "build": "next build && pnpm run compileDocsForLLM && pnpm run generateModulePages"
+    "gen:docsForLLM": "node scripts/compileDocsForLLM.js",
+    "gen:modulePages": "node scripts/generateModulePages.mjs",
+    "gen": "pnpm run gen:docsForLLM && pnpm run gen:modulePages",
+    "build": "pnpm run gen && next build"
   },
   "dependencies": {
     "@quri/squiggle-components": "workspace:*",

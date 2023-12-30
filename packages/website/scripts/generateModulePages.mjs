@@ -110,4 +110,6 @@ const main = async ({ name, intro }) => {
 };
 
 //Remember to add any new Modules to .gitignore
-sections.forEach(main);
+for (const section of sections) {
+  await main(section);
+}
