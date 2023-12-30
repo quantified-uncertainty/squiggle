@@ -335,6 +335,23 @@ export type ScaleShift =
       exponent?: number;
     };
 
+export function scaleShiftWithDefaultParams(shift: ScaleShift) {
+  switch (shift.type) {
+    case "symlog":
+      return {
+        ...shift,
+        constant: shift.constant ?? SCALE_SYMLOG_DEFAULT_CONSTANT,
+      };
+    case "power":
+      return {
+        ...shift,
+        exponent: shift.exponent ?? SCALE_POWER_DEFAULT_CONSTANT,
+      };
+    default:
+      return shift;
+  }
+}
+
 export type CommonScaleArgs = {
   min?: number;
   max?: number;
@@ -344,17 +361,11 @@ export type CommonScaleArgs = {
 
 export type Scale = CommonScaleArgs & { scaleShift?: ScaleShift };
 
-function scaleIsEqual(valueA: Scale, valueB: Scale) {
-  if (
-    valueA.scaleShift?.type !== valueB.scaleShift?.type ||
-    valueA.min !== valueB.min ||
-    valueA.max !== valueB.max ||
-    valueA.tickFormat !== valueB.tickFormat
-  ) {
+function scaleShiftIsEqual(valueA: ScaleShift, valueB: ScaleShift) {
+  if (valueA.type !== valueB.type) {
     return false;
   }
-
-  switch (valueA.scaleShift?.type) {
+  switch (valueA.type) {
     case "symlog":
       return (
         (valueA as { constant?: number }).constant ===
@@ -368,6 +379,21 @@ function scaleIsEqual(valueA: Scale, valueB: Scale) {
     default:
       return true;
   }
+}
+
+function scaleIsEqual(valueA: Scale, valueB: Scale) {
+  if (
+    valueA.scaleShift?.type !== valueB.scaleShift?.type ||
+    valueA.min !== valueB.min ||
+    valueA.max !== valueB.max ||
+    valueA.tickFormat !== valueB.tickFormat
+  ) {
+    return false;
+  }
+  if (valueA.scaleShift && valueB.scaleShift) {
+    return scaleShiftIsEqual(valueA.scaleShift, valueB.scaleShift);
+  }
+  return true;
 }
 
 export const SCALE_SYMLOG_DEFAULT_CONSTANT = 0.0001;

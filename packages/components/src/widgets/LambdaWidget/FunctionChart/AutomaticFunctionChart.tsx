@@ -99,7 +99,7 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
     return <FunctionCallErrorAlert error={inferredOutputType.value} />;
   }
 
-  const yScale = new SqScale({ scaleShift: { type: "linear" } });
+  const yScale = SqScale.linearDefault();
   const xScale = xDomain.toDefaultScale();
 
   switch (inferredOutputType.value) {
@@ -126,7 +126,7 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
       const plot = SqNumericFnPlot.create({
         fn,
         xScale,
-        yScale: new SqScale({ scaleShift: { type: "linear" } }),
+        yScale: SqScale.linearDefault(),
       });
 
       return (

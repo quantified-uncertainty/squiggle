@@ -35,10 +35,8 @@ widgetRegistry.register("Dist", {
     const plot = SqDistributionsPlot.create({
       distribution: value.value,
       showSummary: false,
-      xScale:
-        distPlot?.xScale ?? new SqScale({ scaleShift: { type: "linear" } }),
-      yScale:
-        distPlot?.yScale ?? new SqScale({ scaleShift: { type: "linear" } }),
+      xScale: distPlot?.xScale ?? SqScale.linearDefault(),
+      yScale: distPlot?.yScale ?? SqScale.linearDefault(),
     });
     return oneValue ? (
       showNumber(p05)

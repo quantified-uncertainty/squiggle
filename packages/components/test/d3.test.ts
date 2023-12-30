@@ -3,7 +3,7 @@ import { SqScale } from "@quri/squiggle-lang";
 import { sqScaleToD3 } from "../src/lib/d3/index.js";
 
 describe.each([
-  new SqScale({ scaleShift: { type: "linear" } }),
+  SqScale.linearDefault(),
   new SqScale({ scaleShift: { type: "log" } }),
   new SqScale({ scaleShift: { type: "symlog" } }),
   new SqScale({ scaleShift: { type: "power" } }),
