@@ -162,7 +162,7 @@ test("frTableChart", () => {
 });
 
 test("frScale", () => {
-  const scale: Scale = { type: "linear" };
+  const scale: Scale = { scaleShift: { type: "linear" } };
   const value = vScale(scale);
   expect(frScale.unpack(value)).toBe(scale);
   expect(frScale.pack(scale)).toEqual(value);
@@ -179,8 +179,8 @@ test("frPlot", () => {
   const plot: Plot = {
     type: "distributions",
     distributions: [],
-    xScale: { type: "linear" },
-    yScale: { type: "linear" },
+    xScale: { scaleShift: { type: "linear" } },
+    yScale: { scaleShift: { type: "linear" } },
     showSummary: false,
   };
   const value = vPlot(plot);

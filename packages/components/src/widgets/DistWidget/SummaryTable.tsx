@@ -65,7 +65,7 @@ export const SummaryTable: FC<SummaryTableProps> = ({
 }) => {
   const setSelectedVerticalLine = useSetSelectedVerticalLine();
   const showNames = plot.distributions.some((d) => d.name);
-  const isDate = plot.xScale?.tag === "date";
+  const isDate = plot.xScale?.scaleShift?.type === "date";
   const valueType = isDate ? "date" : "number";
   const tickFormat = plot.xScale?.tickFormat;
   const sizeIsLarge = size === "large";

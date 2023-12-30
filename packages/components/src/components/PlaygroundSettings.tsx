@@ -1,12 +1,7 @@
 import React from "react";
 import { z } from "zod";
 
-import {
-  SqLinearScale,
-  SqLogScale,
-  SqPowerScale,
-  SqSymlogScale,
-} from "@quri/squiggle-lang";
+import { SqScale } from "@quri/squiggle-lang";
 import { CheckboxFormField, NumberFormField, RadioFormField } from "@quri/ui";
 
 import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../lib/constants.js";
@@ -44,13 +39,11 @@ function scaleTypeToSqScale(
 ) {
   switch (scaleType) {
     case "linear":
-      return SqLinearScale.create(args);
     case "log":
-      return SqLogScale.create(args);
     case "symlog":
-      return SqSymlogScale.create(args);
+      return new SqScale({ scaleShift: { type: scaleType }, ...args });
     case "exp":
-      return SqPowerScale.create(args);
+      return new SqScale({ scaleShift: { type: "power" }, ...args });
     default:
       // should never happen, just a precaution
       throw new Error("Internal error");

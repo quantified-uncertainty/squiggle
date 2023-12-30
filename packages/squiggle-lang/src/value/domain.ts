@@ -80,7 +80,7 @@ export class NumericRangeDomain extends BaseDomain {
 
   toDefaultScale(): Scale {
     return {
-      type: "linear",
+      scaleShift: { type: "linear" },
       min: this.min,
       max: this.max,
     };
@@ -127,7 +127,7 @@ export class DateRangeDomain extends BaseDomain {
 
   toDefaultScale(): Scale {
     return {
-      type: "date",
+      scaleShift: { type: "date" },
       min: this.min.toMs(),
       max: this.max.toMs(),
     };

@@ -534,7 +534,8 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
   }
 
   const hasLogError =
-    plot.xScale.tag === "log" && shapes.value.some(hasMassBelowZero);
+    plot.xScale.scaleShift?.type === "log" &&
+    shapes.value.some(hasMassBelowZero);
 
   return (
     <DistProvider generateInitialValue={() => ({})}>

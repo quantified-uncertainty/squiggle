@@ -68,7 +68,7 @@ export const NumericFunctionChart: FC<Props> = ({
       });
 
       if (
-        plot.xScale.tag === "log" &&
+        plot.xScale.scaleShift?.type === "log" &&
         functionImage[0] &&
         functionImage[0].x <= 0
       ) {

@@ -7,9 +7,9 @@ import {
   SqDomain,
   SqError,
   SqLambda,
-  SqLinearScale,
   SqNumericFnPlot,
   SqNumericRangeDomain,
+  SqScale,
 } from "@quri/squiggle-lang";
 
 import { MessageAlert } from "../../../components/Alert.js";
@@ -99,7 +99,7 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
     return <FunctionCallErrorAlert error={inferredOutputType.value} />;
   }
 
-  const yScale = SqLinearScale.create({});
+  const yScale = new SqScale({ scaleShift: { type: "linear" } });
   const xScale = xDomain.toDefaultScale();
 
   switch (inferredOutputType.value) {
@@ -126,7 +126,7 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
       const plot = SqNumericFnPlot.create({
         fn,
         xScale,
-        yScale: SqLinearScale.create(),
+        yScale: new SqScale({ scaleShift: { type: "linear" } }),
       });
 
       return (

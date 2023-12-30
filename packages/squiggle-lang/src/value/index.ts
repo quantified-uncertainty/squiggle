@@ -316,6 +316,25 @@ class VDuration extends BaseValue {
 }
 export const vDuration = (v: SDuration) => new VDuration(v);
 
+export type ScaleShift =
+  | {
+      type: "linear";
+    }
+  | {
+      type: "date";
+    }
+  | {
+      type: "log";
+    }
+  | {
+      type: "symlog";
+      constant?: number;
+    }
+  | {
+      type: "power";
+      exponent?: number;
+    };
+
 export type CommonScaleArgs = {
   min?: number;
   max?: number;
@@ -323,30 +342,11 @@ export type CommonScaleArgs = {
   title?: string;
 };
 
-export type Scale = CommonScaleArgs &
-  (
-    | {
-        type: "linear";
-      }
-    | {
-        type: "date";
-      }
-    | {
-        type: "log";
-      }
-    | {
-        type: "symlog";
-        constant?: number;
-      }
-    | {
-        type: "power";
-        exponent?: number;
-      }
-  );
+export type Scale = CommonScaleArgs & { scaleShift?: ScaleShift };
 
 function scaleIsEqual(valueA: Scale, valueB: Scale) {
   if (
-    valueA.type !== valueB.type ||
+    valueA.scaleShift?.type !== valueB.scaleShift?.type ||
     valueA.min !== valueB.min ||
     valueA.max !== valueB.max ||
     valueA.tickFormat !== valueB.tickFormat
@@ -354,7 +354,7 @@ function scaleIsEqual(valueA: Scale, valueB: Scale) {
     return false;
   }
 
-  switch (valueA.type) {
+  switch (valueA.scaleShift?.type) {
     case "symlog":
       return (
         (valueA as { constant?: number }).constant ===
@@ -381,21 +381,23 @@ class VScale extends BaseValue {
   }
 
   valueToString(): string {
-    switch (this.value.type) {
+    switch (this.value.scaleShift?.type) {
       case "linear":
         return "Linear scale"; // TODO - mix in min/max if specified
       case "log":
         return "Logarithmic scale";
       case "symlog":
         return `Symlog scale ({constant: ${
-          this.value.constant || SCALE_SYMLOG_DEFAULT_CONSTANT
+          this.value.scaleShift.constant || SCALE_SYMLOG_DEFAULT_CONSTANT
         }})`;
       case "power":
         return `Power scale ({exponent: ${
-          this.value.exponent || SCALE_POWER_DEFAULT_CONSTANT
+          this.value.scaleShift.exponent || SCALE_POWER_DEFAULT_CONSTANT
         }})`;
       case "date":
         return "Date scale";
+      default:
+        return "Unspecified scale";
     }
   }
 

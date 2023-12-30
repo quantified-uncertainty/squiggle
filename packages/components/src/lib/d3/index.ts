@@ -18,19 +18,19 @@ export function sqScaleToD3(
   // That's because the domain can depend on the data that we draw, so that part is done later.
 
   // See also: `scaleTypeToSqScale` function in PlaygroundSettingsForm, for default scales we create when SqScale is not provided.
-  switch (scale.tag) {
+  const scaleShift = scale.scaleShift;
+  if (!scaleShift) throw new Error(`Scale shift is not defined`);
+  switch (scaleShift.type) {
     case "linear":
       return scaleLinear();
     case "symlog":
-      return scaleSymlog().constant(scale.constant);
+      return scaleSymlog().constant(scaleShift.constant || 1.0);
     case "power":
-      return scalePow().exponent(scale.exponent);
+      return scalePow().exponent(scaleShift.exponent || 1.0);
     case "log":
       return scaleLog();
     case "date":
       return scaleDate();
-    default:
-      throw new Error(`Unknown scale: ${scale satisfies never}`);
   }
 }
 

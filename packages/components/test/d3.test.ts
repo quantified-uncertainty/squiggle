@@ -1,17 +1,12 @@
-import {
-  SqLinearScale,
-  SqLogScale,
-  SqPowerScale,
-  SqSymlogScale,
-} from "@quri/squiggle-lang";
+import { SqScale } from "@quri/squiggle-lang";
 
 import { sqScaleToD3 } from "../src/lib/d3/index.js";
 
 describe.each([
-  SqLinearScale.create(),
-  SqLogScale.create(),
-  SqSymlogScale.create({}),
-  SqPowerScale.create({}),
+  new SqScale({ scaleShift: { type: "linear" } }),
+  new SqScale({ scaleShift: { type: "log" } }),
+  new SqScale({ scaleShift: { type: "symlog" } }),
+  new SqScale({ scaleShift: { type: "power" } }),
 ])("%s", (sqScale) => {
   const scale = sqScaleToD3(sqScale);
 
@@ -31,14 +26,14 @@ describe.each([
     [5_000_000_000_000, "5T"],
     [5_000_000_000_000_000, "5e+15"],
   ])("%f -> %s", (num, result) => {
-    if (num === 0 && sqScale instanceof SqLogScale) {
+    if (num === 0 && sqScale.scaleShift?.type === "log") {
       return;
     }
     test("positive", () => {
       expect(format(num)).toEqual(result);
     });
 
-    if (num !== 0 && !(sqScale instanceof SqLogScale)) {
+    if (num !== 0 && !(sqScale.scaleShift?.type === "log")) {
       test("negative", () => {
         expect(format(-num)).toEqual(result === "0" ? result : "-" + result);
       });
