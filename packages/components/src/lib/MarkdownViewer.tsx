@@ -13,7 +13,10 @@ import {
 import { Node, Parent } from "unist";
 import { visitParents } from "unist-util-visit-parents";
 
-import squiggleGrammar from "@quri/squiggle-textmate-grammar/dist/squiggle.tmLanguage.json" assert { type: "json" };
+// Import assertion here would be nice, but storybook doesn't support "assert" syntax yet, only "with" syntax,
+// and our import sorter auto-replaces with the newer "assert" syntax.
+// This will be fixed in storybook eventually, https://github.com/storybookjs/storybook/issues/23599
+import squiggleGrammar from "@quri/squiggle-textmate-grammar/dist/squiggle.tmLanguage.json";
 
 type SupportedLanguage = BundledLanguage | "squiggle";
 
