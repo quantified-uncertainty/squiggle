@@ -59,7 +59,7 @@ Was given arguments: ((x,y) => internal code)`
       `Plot.numericFn({|x: [3, 5]| x * 5})`,
       "numericFn",
       (plot) => {
-        expect(plot.xScale.type).toBe("linear");
+        expect(plot.xScale.method?.type).toBe("linear");
         expect(plot.xScale.min).toBe(3);
         expect(plot.xScale.max).toBe(5);
       }
@@ -73,7 +73,7 @@ Was given arguments: ((x,y) => internal code)`
       )`,
       "numericFn",
       (plot) => {
-        expect(plot.xScale.type).toBe("linear");
+        expect(plot.xScale.method?.type).toBe("linear");
         expect(plot.xScale.min).toBe(100);
         expect(plot.xScale.max).toBe(200);
       }
@@ -87,7 +87,7 @@ Was given arguments: ((x,y) => internal code)`
       )`,
       "numericFn",
       (plot) => {
-        expect(plot.xScale.type).toBe("log");
+        expect(plot.xScale.method?.type).toBe("log");
         expect(plot.xScale.min).toBe(3);
         expect(plot.xScale.max).toBe(5);
       }
@@ -101,7 +101,7 @@ Was given arguments: ((x,y) => internal code)`
       )`,
       "numericFn",
       (plot) => {
-        expect(plot.xScale.type).toBe("symlog");
+        expect(plot.xScale.method?.type).toBe("symlog");
         expect(plot.xScale.min).toBe(3);
         expect(plot.xScale.max).toBe(5);
       }
@@ -149,7 +149,7 @@ Was given arguments: ((x,y) => internal code)`
     `Plot.distFn({|x: [3, 5]| uniform(x, x + 1)})`,
     "distFn",
     (plot) => {
-      expect(plot.xScale.type).toBe("linear");
+      expect(plot.xScale.method?.type).toBe("linear");
       expect(plot.xScale.min).toBe(3);
       expect(plot.xScale.max).toBe(5);
     }
@@ -160,7 +160,7 @@ Was given arguments: ((x,y) => internal code)`
     `Plot.distFn({|t: [Date(1500), Date(1600)]| uniform(toYears(t)-Date(1500), 3)})`,
     "distFn",
     (plot) => {
-      expect(plot.xScale.type).toBe("date");
+      expect(plot.xScale.method?.type).toBe("date");
       expect(plot.xScale.min).toBe(new Date(1500, 0, 1).getTime());
       expect(plot.xScale.max).toBe(new Date(1600, 0, 1).getTime());
     }
@@ -174,7 +174,7 @@ Was given arguments: ((x,y) => internal code)`
       )`,
     "distFn",
     (plot) => {
-      expect(plot.xScale.type).toBe("linear");
+      expect(plot.xScale.method?.type).toBe("linear");
       expect(plot.xScale.min).toBe(100);
       expect(plot.xScale.max).toBe(200);
     }

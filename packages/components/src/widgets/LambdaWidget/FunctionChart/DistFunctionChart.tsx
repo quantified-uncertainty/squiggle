@@ -8,8 +8,8 @@ import {
   SqDistFnPlot,
   SqDistributionsPlot,
   SqError,
-  SqLinearScale,
   SqOtherError,
+  SqScale,
   SqValue,
 } from "@quri/squiggle-lang";
 import { TailwindContext } from "@quri/ui";
@@ -273,7 +273,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
         plot={SqDistributionsPlot.create({
           distribution: valueAtCursor.value.value,
           xScale: plot.distXScale,
-          yScale: SqLinearScale.create(),
+          yScale: SqScale.linearDefault(),
           showSummary: false,
           // TODO - use an original function name? it could be obtained with `pathToShortName`, but there's a corner case for arrays.
           title: `f(${xScale.tickFormat(

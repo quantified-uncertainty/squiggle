@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { FC, useCallback, useMemo } from "react";
 
-import { Env, SqLinearScale, SqScatterPlot } from "@quri/squiggle-lang";
+import { Env, SqScale, SqScatterPlot } from "@quri/squiggle-lang";
 
 import { ErrorAlert } from "../../../components/Alert.js";
 import { sqScaleToD3 } from "../../../lib/d3/index.js";
@@ -43,14 +43,14 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
 
       const points = SqScatterPlot.zipToPoints(xDist.value, yDist.value);
 
-      const xSqScale = plot.xScale ?? SqLinearScale.create();
+      const xSqScale = plot.xScale ?? SqScale.linearDefault();
       const xScale = sqScaleToD3(xSqScale);
       xScale.domain([
         xSqScale.min ?? d3.min(xDist.value.getSamples()) ?? 0,
         xSqScale.max ?? d3.max(xDist.value.getSamples()) ?? 0,
       ]);
 
-      const ySqScale = plot.yScale ?? SqLinearScale.create();
+      const ySqScale = plot.yScale ?? SqScale.linearDefault();
       const yScale = sqScaleToD3(ySqScale);
       yScale.domain([
         ySqScale.min ?? d3.min(yDist.value.getSamples()) ?? 0,
