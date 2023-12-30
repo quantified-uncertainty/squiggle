@@ -17,7 +17,7 @@ description: The Tag module handles tags, which allow the additions of metadata 
 import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
 
 # Tag
-Tags are metadata that can be added to Squiggle variables. They are used to add additional information to variables, such as names, descriptions, and visualization options. While tags can be accessed at runtime, they are primarily meant for use with the Squiggle Playground and other visualizations.
+Tags are metadata that can be added to Squiggle variables. They are used to add additional information to variables, such as names, tagDescriptions, and visualization options. While tags can be accessed at runtime, they are primarily meant for use with the Squiggle Playground and other visualizations.
 Tags can be added to variables either by using their name \`Tag.[name]\` or by using decorators.
 ## Examples
 <SquiggleEditor
@@ -36,7 +36,7 @@ helperFn(f) = f \`}/>
 | Tag Name    | Description |
 | --------- | ----------- |
 | \`name\` | Change the default display name for the variable, in the Playground.       |
-| \`description\` | Adds a description to the variable in the playground.       |
+| \`tagDescription\` | Adds a tagDescription to the variable in the playground.       |
 | \`showAs\` | Change the default view for the value when displayed. |
 | \`format\` | Format a number, date, or duration when displayed. |
 | \`hide\` | Don't show the variable in the Playground |
@@ -83,7 +83,7 @@ function toMarkdownDefinitions(definitions) {
 
 function toMarkdown(documentation) {
   return `### ${documentation.name}
-${documentation.description || ""}
+${documentation.tagDescription || ""}
 <FnDocumentationFromName functionName="${
     documentation.nameSpace + "." + documentation.name
   }" showNameAndDescription={false} size="medium" />
