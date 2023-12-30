@@ -46,12 +46,12 @@ test("test decorated exports", async () => {
     export x = 5
 
     @name("Y")
-    @description("whatever")
+    @doc("whatever")
     export y = 6
   `
   );
   expect(await runFetchExports(project, "main")).toBe(
-    '{x: 5, with params name: "X",y: 6, with params name: "Y", description: "whatever"}'
+    '{x: 5, with params name: "X",y: 6, with params name: "Y", doc: "whatever"}'
   );
 });
 
