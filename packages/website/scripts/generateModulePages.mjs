@@ -31,7 +31,7 @@ myVarTags = Tag.all(exampleFn)
 tagDocumentation = Tag.getDoc(exampleFn)
   
 @hide // Hide this variable in the Playground
-helperFn(f) = f \`}/>
+helperFunction(f) = f \`}/>
 ## List of Tags
 | Tag Name    | Description |
 | --------- | ----------- |
