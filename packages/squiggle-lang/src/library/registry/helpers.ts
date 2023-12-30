@@ -558,16 +558,19 @@ export function assertValidMinMax(scale: Scale) {
   }
 }
 
-const defaultScale = { type: "linear" } satisfies Scale;
+const defaultScale = { method: { type: "linear" } };
 
 export function assertScaleMatchesDomain(
   scale: Scale | undefined,
   domain: VDomain | undefined
 ): void {
   if (domain && scale) {
-    if (domain.value.type === "NumericRange" && scale.type === "date") {
+    if (domain.value.type === "NumericRange" && scale.method?.type === "date") {
       throw new REArgumentError("Cannot use numeric domain with date scale");
-    } else if (domain.value.type === "DateRange" && scale.type !== "date") {
+    } else if (
+      domain.value.type === "DateRange" &&
+      scale.method?.type !== "date"
+    ) {
       throw new REArgumentError("Cannot use date domain with non-date scale");
     }
   }
@@ -604,7 +607,7 @@ export function createScaleUsingDomain(
 }
 
 export const assertScaleNotDateScale = (scale: Scale | null) => {
-  if (scale && scale.type === "date") {
+  if (scale && scale.method?.type === "date") {
     throw new REArgumentError(
       "Using a date scale as the plot yScale is not yet supported."
     );

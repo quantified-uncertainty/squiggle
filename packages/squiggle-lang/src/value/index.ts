@@ -316,68 +316,54 @@ class VDuration extends BaseValue {
 }
 export const vDuration = (v: SDuration) => new VDuration(v);
 
-export type CommonScaleArgs = {
+export type ScaleMethod =
+  | {
+      type: "linear";
+    }
+  | {
+      type: "date";
+    }
+  | {
+      type: "log";
+    }
+  | {
+      type: "symlog";
+      constant?: number;
+    }
+  | {
+      type: "power";
+      exponent?: number;
+    };
+
+export function methodWithDefaultParams(shift: ScaleMethod) {
+  switch (shift.type) {
+    case "symlog":
+      return {
+        ...shift,
+        constant: shift.constant ?? SCALE_SYMLOG_DEFAULT_CONSTANT,
+      };
+    case "power":
+      return {
+        ...shift,
+        exponent: shift.exponent ?? SCALE_POWER_DEFAULT_CONSTANT,
+      };
+    default:
+      return shift;
+  }
+}
+
+export type Scale = {
+  method?: ScaleMethod;
   min?: number;
   max?: number;
   tickFormat?: string;
   title?: string;
 };
 
-export type Scale = CommonScaleArgs &
-  (
-    | {
-        type: "linear";
-      }
-    | {
-        type: "date";
-      }
-    | {
-        type: "log";
-      }
-    | {
-        type: "symlog";
-        constant?: number;
-      }
-    | {
-        type: "power";
-        exponent?: number;
-      }
-  );
-
-export type ScaleAttributes = CommonScaleArgs &
-  (
-    | {
-        type: "linear";
-      }
-    | {
-        type: "date";
-      }
-    | {
-        type: "log";
-      }
-    | {
-        type: "symlog";
-        constant?: number;
-      }
-    | {
-        type: "power";
-        exponent?: number;
-      }
-    | {
-        type: "unknown";
-      }
-  );
-
-function scaleIsEqual(valueA: Scale, valueB: Scale) {
-  if (
-    valueA.type !== valueB.type ||
-    valueA.min !== valueB.min ||
-    valueA.max !== valueB.max ||
-    valueA.tickFormat !== valueB.tickFormat
-  ) {
+function methodIsEqual(valueA: ScaleMethod, valueB: ScaleMethod) {
+  if (valueA.type !== valueB.type) {
     return false;
   }
-
   switch (valueA.type) {
     case "symlog":
       return (
@@ -394,18 +380,19 @@ function scaleIsEqual(valueA: Scale, valueB: Scale) {
   }
 }
 
-export function mergeScaleWithDefaults(
-  scale: Scale,
-  params: CommonScaleArgs
-): Scale {
-  return Object.assign({}, params, scale);
-}
-
-export function mergeScaleWithDefaults2(
-  scale: ScaleAttributes,
-  params: CommonScaleArgs
-): ScaleAttributes {
-  return Object.assign({}, params, scale);
+function scaleIsEqual(valueA: Scale, valueB: Scale) {
+  if (
+    valueA.method?.type !== valueB.method?.type ||
+    valueA.min !== valueB.min ||
+    valueA.max !== valueB.max ||
+    valueA.tickFormat !== valueB.tickFormat
+  ) {
+    return false;
+  }
+  if (valueA.method && valueB.method) {
+    return methodIsEqual(valueA.method, valueB.method);
+  }
+  return true;
 }
 
 export const SCALE_SYMLOG_DEFAULT_CONSTANT = 0.0001;
@@ -419,21 +406,23 @@ class VScale extends BaseValue {
   }
 
   valueToString(): string {
-    switch (this.value.type) {
+    switch (this.value.method?.type) {
       case "linear":
         return "Linear scale"; // TODO - mix in min/max if specified
       case "log":
         return "Logarithmic scale";
       case "symlog":
         return `Symlog scale ({constant: ${
-          this.value.constant || SCALE_SYMLOG_DEFAULT_CONSTANT
+          this.value.method.constant || SCALE_SYMLOG_DEFAULT_CONSTANT
         }})`;
       case "power":
         return `Power scale ({exponent: ${
-          this.value.exponent || SCALE_POWER_DEFAULT_CONSTANT
+          this.value.method.exponent || SCALE_POWER_DEFAULT_CONSTANT
         }})`;
       case "date":
         return "Date scale";
+      default:
+        return "Unspecified scale";
     }
   }
 

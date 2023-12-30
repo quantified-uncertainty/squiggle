@@ -1,19 +1,11 @@
 import { result } from "../index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, fmap, mergeMany, Ok } from "../utility/result.js";
-import {
-  mergeScaleWithDefaults2,
-  Scale,
-  ScaleAttributes,
-  Value,
-  vBool,
-  vScale,
-  vString,
-} from "./index.js";
+import { Scale, Value, vBool, vScale, vString } from "./index.js";
 
 export type ValueTagsType = {
   name?: string;
-  description?: string;
+  doc?: string;
   showAs?: Value;
   numberFormat?: string;
   dateFormat?: string;
@@ -26,7 +18,7 @@ type ValueTagsTypeName = keyof ValueTagsType;
 
 const valueTagsTypeNames: ValueTagsTypeName[] = [
   "name",
-  "description",
+  "doc",
   "showAs",
   "numberFormat",
   "dateFormat",
@@ -61,8 +53,8 @@ export class ValueTags {
     if (value.name) {
       result.push(["name", vString(value.name)]);
     }
-    if (value.description) {
-      result.push(["description", vString(value.description)]);
+    if (value.doc) {
+      result.push(["doc", vString(value.doc)]);
     }
     if (value.showAs) {
       result.push(["showAs", value.showAs]);
@@ -118,8 +110,8 @@ export class ValueTags {
     return this.value.name;
   }
 
-  description() {
-    return this.value.description;
+  doc() {
+    return this.value.doc;
   }
 
   showAs() {
@@ -140,13 +132,13 @@ export class ValueTags {
     return this.value.hidden;
   }
 
-  xScale(): ScaleAttributes | undefined {
+  xScale(): Scale | undefined {
     const format = this.value.numberFormat || this.value.dateFormat;
     const xScale = this.value.xScale;
-    return mergeScaleWithDefaults2(xScale || {}, { tickFormat: format });
+    return { ...xScale, tickFormat: format };
   }
 
-  yScale(): ScaleAttributes | undefined {
+  yScale(): Scale | undefined {
     return this.value.xScale;
   }
 }

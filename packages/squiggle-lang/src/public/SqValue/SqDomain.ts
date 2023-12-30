@@ -4,7 +4,7 @@ import {
   NumericRangeDomain,
 } from "../../value/domain.js";
 import { SqDateValue, SqNumberValue } from "./index.js";
-import { SqDateScale, SqLinearScale } from "./SqScale.js";
+import { SqScale } from "./SqScale.js";
 
 export function wrapDomain(value: Domain) {
   switch (value.type) {
@@ -51,7 +51,7 @@ export class SqNumericRangeDomain extends SqAbstractDomain<"NumericRange"> {
   }
 
   toDefaultScale() {
-    return SqLinearScale.create(this._value.toDefaultScale());
+    return new SqScale(this._value.toDefaultScale());
   }
 }
 export class SqDateRangeDomain extends SqAbstractDomain<"DateRange"> {
@@ -78,7 +78,7 @@ export class SqDateRangeDomain extends SqAbstractDomain<"DateRange"> {
   }
 
   toDefaultScale() {
-    return SqDateScale.create(this._value.toDefaultScale());
+    return new SqScale(this._value.toDefaultScale());
   }
 }
 

@@ -1,4 +1,4 @@
-import { SqDistributionsPlot, SqLinearScale } from "@quri/squiggle-lang";
+import { SqDistributionsPlot, SqScale } from "@quri/squiggle-lang";
 
 import { NumberShower } from "../../components/NumberShower.js";
 import { generateDistributionPlotSettings } from "../../components/PlaygroundSettings.js";
@@ -32,8 +32,8 @@ widgetRegistry.register("Dist", {
     const oneValue = p05 === p95;
 
     const plot = value.defaultPlot({
-      defaultXScale: SqLinearScale.create(),
-      defaultYScale: SqLinearScale.create(),
+      defaultXScale: SqScale.linearDefault(),
+      defaultYScale: SqScale.linearDefault(),
       showSummary: false,
     });
     return oneValue ? (
@@ -74,9 +74,7 @@ widgetRegistry.register("Dist", {
       distribution: value.value,
       ...generateDistributionPlotSettings(
         settings.distributionChartSettings,
-        numberFormat,
-        value.tags.xScale(),
-        value.tags.yScale()
+        numberFormat
       ),
     });
 

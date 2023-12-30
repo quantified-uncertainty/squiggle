@@ -13,8 +13,8 @@ export class SqTags {
     return this.tags.name();
   }
 
-  description(): string | undefined {
-    return this.tags.description();
+  doc(): string | undefined {
+    return this.tags.doc();
   }
 
   showAs(): SqValue | undefined {

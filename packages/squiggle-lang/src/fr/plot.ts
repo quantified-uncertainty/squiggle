@@ -33,7 +33,7 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
-const defaultScale = { type: "linear" } satisfies Scale;
+const defaultScale = { method: { type: "linear" } } satisfies Scale;
 
 const defaultScaleWithName = (name: string | undefined): Scale => {
   if (name) {
