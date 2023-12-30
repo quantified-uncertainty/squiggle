@@ -246,13 +246,18 @@ export function valueToSimpleValue(value: Value): SimpleValue {
   }
 }
 
+function isSimpleValueMap(value: SimpleValue): value is SimpleValueMap {
+  return value instanceof ImmutableMap;
+}
+
 export function toValue(value: SimpleValue): Value {
   if (Array.isArray(value)) {
     return vArray(value.map(toValue));
-  } else if (value instanceof Map) {
+  } else if (isSimpleValueMap(value)) {
     return vDict(
       ImmutableMap([...value.entries()].map(([k, v]) => [k, toValue(v)]))
     );
+    return vString("");
   } else if (typeof value === "boolean") {
     return vBool(value);
   } else if (typeof value === "number") {
@@ -266,6 +271,7 @@ export function toValue(value: SimpleValue): Value {
   } else if (value instanceof BaseLambda) {
     return vLambda(value);
   } else {
+    console.log("Couldn't find value for", value);
     return vVoid();
   }
 }
