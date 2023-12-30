@@ -1,7 +1,15 @@
 import { result } from "../index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, fmap, mergeMany, Ok } from "../utility/result.js";
-import { Scale, Value, vBool, vScale, vString } from "./index.js";
+import {
+  mergeScaleWithDefaults2,
+  Scale,
+  ScaleAttributes,
+  Value,
+  vBool,
+  vScale,
+  vString,
+} from "./index.js";
 
 export type ValueTagsType = {
   name?: string;
@@ -119,22 +127,26 @@ export class ValueTags {
   }
 
   numberFormat() {
-    return this.value.numberFormat;
+    const tickFormat = this.value.xScale?.tickFormat;
+    return tickFormat ?? this.value.numberFormat;
   }
 
   dateFormat() {
-    return this.value.dateFormat;
+    const tickFormat = this.value.xScale?.tickFormat;
+    return tickFormat ?? this.value.dateFormat;
   }
 
   hidden() {
     return this.value.hidden;
   }
 
-  xScale() {
-    return this.value.xScale;
+  xScale(): ScaleAttributes | undefined {
+    const format = this.value.numberFormat || this.value.dateFormat;
+    const xScale = this.value.xScale;
+    return mergeScaleWithDefaults2(xScale || {}, { tickFormat: format });
   }
 
-  yScale() {
+  yScale(): ScaleAttributes | undefined {
     return this.value.xScale;
   }
 }

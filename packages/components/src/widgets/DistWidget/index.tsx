@@ -31,12 +31,10 @@ widgetRegistry.register("Dist", {
     const p95 = unwrapOrFailure(dist.inv(environment, 0.95));
     const oneValue = p05 === p95;
 
-    const distPlot = value.showAsPlot();
-    const plot = SqDistributionsPlot.create({
-      distribution: value.value,
+    const plot = value.defaultPlot({
+      defaultXScale: SqLinearScale.create(),
+      defaultYScale: SqLinearScale.create(),
       showSummary: false,
-      xScale: distPlot?.xScale ?? SqLinearScale.create(),
-      yScale: distPlot?.yScale ?? SqLinearScale.create(),
     });
     return oneValue ? (
       showNumber(p05)
@@ -76,7 +74,9 @@ widgetRegistry.register("Dist", {
       distribution: value.value,
       ...generateDistributionPlotSettings(
         settings.distributionChartSettings,
-        numberFormat
+        numberFormat,
+        value.tags.xScale(),
+        value.tags.yScale()
       ),
     });
 

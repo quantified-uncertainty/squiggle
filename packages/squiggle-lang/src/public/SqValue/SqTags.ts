@@ -1,6 +1,7 @@
 import { ValueTags } from "../../value/valueTags.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValue, wrapValue } from "./index.js";
+import { SqScale, wrapScale } from "./SqScale.js";
 
 export class SqTags {
   constructor(
@@ -31,5 +32,15 @@ export class SqTags {
 
   hidden(): boolean | undefined {
     return this.tags.hidden();
+  }
+
+  xScale(): SqScale | undefined {
+    const xScale = this.tags.xScale();
+    return xScale ? wrapScale(xScale) : undefined;
+  }
+
+  yScale(): SqScale | undefined {
+    const yScale = this.tags.yScale();
+    return yScale ? wrapScale(yScale) : undefined;
   }
 }

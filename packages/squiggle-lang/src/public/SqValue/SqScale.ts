@@ -4,11 +4,12 @@ import {
   Scale,
   SCALE_POWER_DEFAULT_CONSTANT,
   SCALE_SYMLOG_DEFAULT_CONSTANT,
+  ScaleAttributes,
   vScale,
 } from "../../value/index.js";
 import { SqDateValue, SqNumberValue, SqValue } from "./index.js";
 
-export const wrapScale = (value: Scale): SqScale => {
+export const wrapScale = (value: ScaleAttributes): SqScale => {
   switch (value.type) {
     case "linear":
       return SqLinearScale.create(value);
@@ -20,10 +21,12 @@ export const wrapScale = (value: Scale): SqScale => {
       return SqSymlogScale.create(value);
     case "power":
       return SqPowerScale.create(value);
+    case "unknown":
+      return SqLinearScale.create(value);
   }
 };
 
-abstract class SqAbstractScale<T extends Scale["type"]> {
+abstract class SqAbstractScale<T extends ScaleAttributes["type"]> {
   abstract tag: T;
 
   constructor(

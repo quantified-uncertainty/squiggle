@@ -152,6 +152,43 @@ export class SqDistributionValue extends SqAbstractValue<
       : undefined;
   }
 
+  xScale(): SqScale | undefined {
+    return this.tags.xScale();
+  }
+
+  yScale(): SqScale | undefined {
+    return this.tags.yScale();
+  }
+
+  defaultPlot({
+    defaultXScale,
+    defaultYScale,
+    showSummary,
+  }: {
+    defaultXScale: SqScale;
+    defaultYScale: SqScale;
+    showSummary: boolean;
+  }): SqDistributionsPlot {
+    const showAsPlot = this.showAsPlot();
+    if (showAsPlot) {
+      return SqDistributionsPlot.create({
+        xScale: showAsPlot.xScale,
+        yScale: showAsPlot.yScale,
+        showSummary,
+        distribution: this.value,
+      });
+    } else {
+      const xScale = this.xScale() || defaultXScale;
+      const yScale = this.yScale() || defaultYScale;
+      return SqDistributionsPlot.create({
+        xScale,
+        yScale,
+        showSummary,
+        distribution: this.value,
+      });
+    }
+  }
+
   asJS() {
     return this.value; // should we return BaseDist instead?
   }

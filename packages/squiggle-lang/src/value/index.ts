@@ -344,6 +344,30 @@ export type Scale = CommonScaleArgs &
       }
   );
 
+export type ScaleAttributes = CommonScaleArgs &
+  (
+    | {
+        type: "linear";
+      }
+    | {
+        type: "date";
+      }
+    | {
+        type: "log";
+      }
+    | {
+        type: "symlog";
+        constant?: number;
+      }
+    | {
+        type: "power";
+        exponent?: number;
+      }
+    | {
+        type: "unknown";
+      }
+  );
+
 function scaleIsEqual(valueA: Scale, valueB: Scale) {
   if (
     valueA.type !== valueB.type ||
@@ -368,6 +392,20 @@ function scaleIsEqual(valueA: Scale, valueB: Scale) {
     default:
       return true;
   }
+}
+
+export function mergeScaleWithDefaults(
+  scale: Scale,
+  params: CommonScaleArgs
+): Scale {
+  return Object.assign({}, params, scale);
+}
+
+export function mergeScaleWithDefaults2(
+  scale: ScaleAttributes,
+  params: CommonScaleArgs
+): ScaleAttributes {
+  return Object.assign({}, params, scale);
 }
 
 export const SCALE_SYMLOG_DEFAULT_CONSTANT = 0.0001;
