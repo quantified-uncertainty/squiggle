@@ -41,9 +41,9 @@ function scaleTypeToSqScale(
     case "linear":
     case "log":
     case "symlog":
-      return new SqScale({ scaleShift: { type: scaleType }, ...args });
+      return new SqScale({ method: { type: scaleType }, ...args });
     case "exp":
-      return new SqScale({ scaleShift: { type: "power" }, ...args });
+      return new SqScale({ method: { type: "power" }, ...args });
     default:
       // should never happen, just a precaution
       throw new Error("Internal error");

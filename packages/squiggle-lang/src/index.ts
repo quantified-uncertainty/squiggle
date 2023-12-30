@@ -125,3 +125,8 @@ export function getAllFunctionNamesWithNamespace(name: string) {
     .allFunctionsWithNamespace(name)
     .map((fn) => `${name}.${fn.name}`);
 }
+
+export {
+  SCALE_POWER_DEFAULT_CONSTANT,
+  SCALE_SYMLOG_DEFAULT_CONSTANT,
+} from "./value/index.js";

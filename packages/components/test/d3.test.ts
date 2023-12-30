@@ -3,10 +3,10 @@ import { SqScale } from "@quri/squiggle-lang";
 import { sqScaleToD3 } from "../src/lib/d3/index.js";
 
 describe.each([
-  SqScale.linearDefault(),
-  new SqScale({ scaleShift: { type: "log" } }),
-  new SqScale({ scaleShift: { type: "symlog" } }),
-  new SqScale({ scaleShift: { type: "power" } }),
+  new SqScale({ method: { type: "linear" } }),
+  new SqScale({ method: { type: "log" } }),
+  new SqScale({ method: { type: "symlog" } }),
+  new SqScale({ method: { type: "power" } }),
 ])("%s", (sqScale) => {
   const scale = sqScaleToD3(sqScale);
 
@@ -26,14 +26,14 @@ describe.each([
     [5_000_000_000_000, "5T"],
     [5_000_000_000_000_000, "5e+15"],
   ])("%f -> %s", (num, result) => {
-    if (num === 0 && sqScale.scaleShift?.type === "log") {
+    if (num === 0 && sqScale.method?.type === "log") {
       return;
     }
     test("positive", () => {
       expect(format(num)).toEqual(result);
     });
 
-    if (num !== 0 && !(sqScale.scaleShift?.type === "log")) {
+    if (num !== 0 && !(sqScale.method?.type === "log")) {
       test("negative", () => {
         expect(format(-num)).toEqual(result === "0" ? result : "-" + result);
       });

@@ -9,24 +9,24 @@ import { SqScale, SqShape } from "@quri/squiggle-lang";
 function pdfScaleHeightAdjustment(
   scale: SqScale
 ): (x: number, y: number) => number {
-  const scaleShift = scale.scaleShift;
-  if (!scaleShift) {
+  const method = scale.method;
+  if (!method) {
     throw new Error("Scale shift is undefined");
   }
-  switch (scaleShift.type) {
+  switch (method.type) {
     case "linear":
       return (_, y) => y;
     case "date":
       return (_, y) => y;
     case "symlog":
-      return (x, y) => y * (Math.abs(x) + (scaleShift.constant || 1));
+      return (x, y) => y * (Math.abs(x) + (method.constant || 1));
     case "log":
       // Technically, we should also muliply by the log of the base of the log scale.
       // However, this is a constant, and we don't show the y-axis anyway.
       // Also, the value for symlog should be slightly different from log, but we ignore that for now.
       return (x, y) => y * Math.abs(x);
     case "power":
-      return (x, y) => y * Math.pow(x, 1 - (scaleShift.exponent || 0.5));
+      return (x, y) => y * Math.pow(x, 1 - (method.exponent || 0.5));
   }
 }
 
@@ -41,7 +41,7 @@ export function adjustPdfHeightToScale(
   scale: SqScale
 ): SqShape {
   //There's no change for linear scales
-  if (scale.scaleShift?.type === "linear") {
+  if (scale.method?.type === "linear") {
     return { continuous, discrete };
   } else {
     const adjustment = pdfScaleHeightAdjustment(scale);

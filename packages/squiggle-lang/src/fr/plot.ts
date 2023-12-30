@@ -32,7 +32,7 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
-const defaultScale = { scaleShift: { type: "linear" } } satisfies Scale;
+const defaultScale = { method: { type: "linear" } } satisfies Scale;
 
 const defaultScaleWithName = (name: string | undefined): Scale => {
   if (name) {
@@ -107,7 +107,7 @@ function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
 }
 
 const _assertYScaleNotDateScale = (yScale: Scale | null) => {
-  if (yScale && yScale.scaleShift?.type === "date") {
+  if (yScale && yScale.method?.type === "date") {
     throw new REArgumentError(
       "Using a date scale as the plot yScale is not yet supported."
     );

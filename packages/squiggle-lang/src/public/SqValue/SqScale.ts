@@ -1,9 +1,5 @@
 import { SDate } from "../../utility/SDate.js";
-import {
-  Scale,
-  scaleShiftWithDefaultParams,
-  vScale,
-} from "../../value/index.js";
+import { methodWithDefaultParams, Scale, vScale } from "../../value/index.js";
 import { SqDateValue, SqNumberValue, SqValue } from "./index.js";
 
 export const wrapScale = (value: Scale): SqScale => {
@@ -15,14 +11,12 @@ export class SqScale {
   constructor(scale: Scale) {
     this._value = {
       ...scale,
-      scaleShift: scale.scaleShift
-        ? scaleShiftWithDefaultParams(scale.scaleShift)
-        : undefined,
+      method: scale.method ? methodWithDefaultParams(scale.method) : undefined,
     };
   }
 
   static linearDefault() {
-    return new SqScale({ scaleShift: { type: "linear" } });
+    return new SqScale({ method: { type: "linear" } });
   }
 
   toString() {
@@ -45,12 +39,12 @@ export class SqScale {
     return this._value.title;
   }
 
-  get scaleShift() {
-    return this._value.scaleShift;
+  get method() {
+    return this._value.method;
   }
 
   numberToValue(v: number): SqValue {
-    return this._value.scaleShift?.type === "date"
+    return this._value.method?.type === "date"
       ? SqDateValue.create(SDate.fromMs(v))
       : SqNumberValue.create(v);
   }

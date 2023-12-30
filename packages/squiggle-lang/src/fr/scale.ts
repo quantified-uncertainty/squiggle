@@ -71,7 +71,7 @@ export const library = [
         }
       ),
       makeDefinition([], frScale, () => {
-        return { scaleShift: { type: "linear" } };
+        return { method: { type: "linear" } };
       }),
     ],
   }),
@@ -99,7 +99,7 @@ export const library = [
         }
       ),
       makeDefinition([], frScale, () => {
-        return { scaleShift: { type: "log" } };
+        return { method: { type: "log" } };
       }),
     ],
   }),
@@ -127,7 +127,7 @@ export const library = [
           }
 
           return {
-            scaleShift: { type: "symlog", constant: constant ?? undefined },
+            method: { type: "symlog", constant: constant ?? undefined },
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
@@ -136,7 +136,7 @@ export const library = [
         }
       ),
       makeDefinition([], frScale, () => {
-        return { scaleShift: { type: "symlog" } };
+        return { method: { type: "symlog" } };
       }),
     ],
   }),
@@ -164,7 +164,7 @@ export const library = [
           }
 
           return {
-            scaleShift: { type: "power", exponent: exponent ?? undefined },
+            method: { type: "power", exponent: exponent ?? undefined },
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
@@ -173,7 +173,7 @@ export const library = [
         }
       ),
       makeDefinition([], frScale, () => {
-        return { scaleShift: { type: "power" } };
+        return { method: { type: "power" } };
       }),
     ],
   }),
@@ -198,7 +198,7 @@ export const library = [
         }
       ),
       makeDefinition([], frScale, () => {
-        return { scaleShift: { type: "date" } };
+        return { method: { type: "date" } };
       }),
     ],
   }),
