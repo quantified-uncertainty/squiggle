@@ -15,14 +15,15 @@ function pdfScaleHeightAdjustment(
   scale: SqScale
 ): (x: number, y: number) => number {
   const method = scale.method;
+  const linearTransform = (_: number, y: number) => y;
   if (!method) {
-    throw new Error("Scale shift is undefined");
+    return linearTransform;
   }
   switch (method.type) {
     case "linear":
-      return (_, y) => y;
+      return linearTransform;
     case "date":
-      return (_, y) => y;
+      return linearTransform;
     case "symlog":
       return (x, y) =>
         y * (Math.abs(x) + (method.constant || SCALE_SYMLOG_DEFAULT_CONSTANT));
