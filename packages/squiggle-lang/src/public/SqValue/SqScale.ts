@@ -19,6 +19,13 @@ export class SqScale {
     return new SqScale({ method: { type: "linear" } });
   }
 
+  merge(other: SqScale) {
+    return wrapScale({
+      ...this._value,
+      ...other._value,
+    });
+  }
+
   toString() {
     return vScale(this._value).toString();
   }

@@ -170,16 +170,16 @@ export class SqDistributionValue extends SqAbstractValue<
     showSummary: boolean;
   }): SqDistributionsPlot {
     const showAsPlot = this.showAsPlot();
+    const xScale = this.xScale() || defaultXScale;
+    const yScale = this.yScale() || defaultYScale;
     if (showAsPlot) {
       return SqDistributionsPlot.create({
-        xScale: showAsPlot.xScale,
-        yScale: showAsPlot.yScale,
+        xScale: xScale ? showAsPlot.xScale.merge(xScale) : showAsPlot.xScale,
+        yScale: yScale ? showAsPlot.yScale.merge(yScale) : showAsPlot.yScale,
         showSummary,
         distribution: this.value,
       });
     } else {
-      const xScale = this.xScale() || defaultXScale;
-      const yScale = this.yScale() || defaultYScale;
       return SqDistributionsPlot.create({
         xScale,
         yScale,

@@ -31,25 +31,6 @@ const scaleSchema = z.union([
   z.literal("exp"),
 ]);
 
-type ScaleType = z.infer<typeof scaleSchema>;
-
-function scaleTypeToSqScale(
-  scaleType: ScaleType,
-  args: { min?: number; max?: number; tickFormat?: string } = {}
-) {
-  switch (scaleType) {
-    case "linear":
-    case "log":
-    case "symlog":
-      return new SqScale({ method: { type: scaleType }, ...args });
-    case "exp":
-      return new SqScale({ method: { type: "power" }, ...args });
-    default:
-      // should never happen, just a precaution
-      throw new Error("Internal error");
-  }
-}
-
 export const distributionSettingsSchema = z.object({
   xScale: scaleSchema,
   yScale: scaleSchema,
@@ -102,17 +83,29 @@ export type PartialPlaygroundSettings = DeepPartial<PlaygroundSettings>;
 // partial params for SqDistributionsPlot.create; TODO - infer explicit type?
 export function generateDistributionPlotSettings(
   settings: z.infer<typeof distributionSettingsSchema>,
-  xTickFormat?: string
+  xTickFormat?: string,
+  xScale = new SqScale({}),
+  yScale = new SqScale({})
 ) {
-  const xScale = scaleTypeToSqScale(settings.xScale, {
-    min: settings.minX,
-    max: settings.maxX,
-    tickFormat: xTickFormat,
-  });
-  const yScale = scaleTypeToSqScale(settings.yScale);
+  function convertScaleType(
+    scaleType: "linear" | "log" | "symlog" | "exp"
+  ): "linear" | "log" | "symlog" | "power" {
+    return scaleType === "exp" ? "power" : scaleType;
+  }
+  const _xScale = xScale.merge(
+    new SqScale({
+      method: { type: convertScaleType(settings.xScale) },
+      min: settings.minX,
+      max: settings.maxX,
+      tickFormat: xTickFormat,
+    })
+  );
+  const _yScale = yScale.merge(
+    new SqScale({ method: { type: convertScaleType(settings.yScale) } })
+  );
   return {
-    xScale,
-    yScale,
+    xScale: _xScale,
+    yScale: _yScale,
     showSummary: settings.showSummary,
     title: settings.title,
   };

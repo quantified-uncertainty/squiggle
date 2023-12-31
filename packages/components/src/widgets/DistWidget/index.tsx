@@ -70,12 +70,15 @@ widgetRegistry.register("Dist", {
   },
   Chart(value, settings) {
     const numberFormat = value.tags.numberFormat();
+    const defaults = generateDistributionPlotSettings(
+      settings.distributionChartSettings,
+      numberFormat,
+      value.xScale(),
+      value.yScale()
+    );
     const plot = SqDistributionsPlot.create({
       distribution: value.value,
-      ...generateDistributionPlotSettings(
-        settings.distributionChartSettings,
-        numberFormat
-      ),
+      ...defaults,
     });
 
     return (

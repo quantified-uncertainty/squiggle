@@ -120,8 +120,8 @@ const numericFnDef = () => {
           const { xScale, yScale, title, xPoints } = params ?? {};
           return toPlot(
             value,
-            xScale || tags.xScale() || null,
-            yScale || tags.yScale() || null,
+            xScale || null,
+            yScale || null,
             title || tags.name() || null,
             formatXPoints(xPoints || null, xScale || null)
           );
@@ -265,7 +265,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frNamed("dist", frWithTags(frDist)),
+          frNamed("dist", frDist),
           frNamed(
             "params",
             frOptional(
@@ -279,17 +279,15 @@ export const library = [
           ),
         ],
         frPlot,
-        ([{ value, tags }, params]) => {
+        ([value, params]) => {
           const { xScale, yScale, title, showSummary } = params ?? {};
-          const _yScale = yScale ?? tags.yScale();
-          _yScale && assertScaleNotDateScale(_yScale);
-          const _xScale = xScale ?? tags.xScale();
-          _xScale && assertScaleNotDateScale(_xScale);
+          yScale && assertScaleNotDateScale(yScale);
+          xScale && assertScaleNotDateScale(xScale);
           return {
             type: "distributions",
             distributions: [{ distribution: value }],
-            xScale: _xScale ?? defaultScale,
-            yScale: _yScale ?? defaultScale,
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
             title: title ?? undefined,
             showSummary: showSummary ?? true,
           };
@@ -349,12 +347,8 @@ export const library = [
         ([{ value, tags }, params]) => {
           const domain = extractDomainFromOneArgFunction(value);
           const { xScale, yScale, distXScale, title, xPoints } = params ?? {};
-          const _yScale = yScale || tags.yScale();
-          _yScale && assertScaleNotDateScale(_yScale);
-          const _xScale = createScaleUsingDomain(
-            xScale || tags.xScale() || null,
-            domain
-          );
+          yScale && assertScaleNotDateScale(yScale);
+          const _xScale = createScaleUsingDomain(xScale || null, domain);
           return {
             fn: value,
             type: "distFn",

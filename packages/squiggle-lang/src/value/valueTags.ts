@@ -118,24 +118,24 @@ export class ValueTags {
     return this.value.showAs;
   }
 
+  //Here, numberFormat overrides xScale.tickFormat
   numberFormat() {
-    const tickFormat = this.value.xScale?.tickFormat;
-    return tickFormat ?? this.value.numberFormat;
+    return this.value.numberFormat ?? this.value.xScale?.tickFormat;
   }
 
   dateFormat() {
-    const tickFormat = this.value.xScale?.tickFormat;
-    return tickFormat ?? this.value.dateFormat;
+    return this.value.dateFormat ?? this.value.xScale?.tickFormat;
   }
 
   hidden() {
     return this.value.hidden;
   }
 
+  //Here, xScale.tickFormat overrides numberFormat/dateFormat
   xScale(): Scale | undefined {
-    const format = this.value.numberFormat || this.value.dateFormat;
-    const xScale = this.value.xScale;
-    return { ...xScale, tickFormat: format };
+    const format = this.value.numberFormat ?? this.value.dateFormat;
+    const xScale = this.value.xScale ?? {};
+    return { ...xScale, tickFormat: xScale.tickFormat ?? format };
   }
 
   yScale(): Scale | undefined {
