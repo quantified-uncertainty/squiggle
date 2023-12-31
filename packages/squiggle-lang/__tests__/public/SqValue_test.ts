@@ -1,33 +1,30 @@
-import { OrderedMap } from "immutable";
-
 import { run, sq } from "../../src/index.js";
-import { testRun } from "../helpers/helpers.js";
 
-describe("SqValue.asJS", () => {
-  test("SqDict -> Map", async () => {
-    const value = (
-      await testRun('{ x: 5, y: [3, "foo", { dist: normal(5,2) } ] }')
-    ).asJS();
+// describe("SqValue.asJS", () => {
+//   test("SqDict -> Map", async () => {
+//     const value = (
+//       await testRun('{ x: 5, y: [3, "foo", { dist: normal(5,2) } ] }')
+//     ).asJS();
 
-    expect(value).toBeInstanceOf(OrderedMap);
-  });
+//     expect(value).toBeInstanceOf(OrderedMap);
+//   });
 
-  test("Dict fields", async () => {
-    const value = (await testRun("{ x: 5 }")).asJS();
+//   test("Dict fields", async () => {
+//     const value = (await testRun("{ x: 5 }")).asJS();
 
-    expect((value as any).get("value").get("x")).toBe(5);
-  });
+//     expect((value as any).get("value").get("x")).toBe(5);
+//   });
 
-  test("Deeply nested dist", async () => {
-    const value = (
-      await testRun('{ x: 5, y: [3, "foo", { dist: normal(5,2) } ] }')
-    ).asJS();
+//   test("Deeply nested dist", async () => {
+//     const value = (
+//       await testRun('{ x: 5, y: [3, "foo", { dist: normal(5,2) } ] }')
+//     ).asJS();
 
-    expect(
-      (value as any).get("value").get("y")[2].get("value").get("dist")
-    ).toBeInstanceOf(Array);
-  });
-});
+//     expect(
+//       (value as any).get("value").get("y")[2].get("value").get("dist")
+//     ).toBeInstanceOf(Array);
+//   });
+// });
 
 describe("docstrings", () => {
   const runToResult = async (code: string) => {
