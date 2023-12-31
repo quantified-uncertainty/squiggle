@@ -1,0 +1,75 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Squiggle Code Processing API",
+    "version": "0.0.1"
+  },
+  "servers": [
+    {
+      "url": "https://squigglehub.org/api"
+    }
+  ],
+  "paths": {
+    "/runSquiggle": {
+      "post": {
+        "summary": "Run the given Squiggle code string.",
+        "operationId": "runSquiggle",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "description": "The code to be processed."
+                  }
+                },
+                "required": ["code"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Code processed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "string",
+                      "description": "The result of the code processing."
+                    },
+                    "bindings": {
+                      "type": "string",
+                      "description": "Additional bindings from the code processing."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error in processing or no code provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message explaining the failure."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

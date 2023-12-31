@@ -1,16 +1,7 @@
 import { Prisma } from "@prisma/client";
 import crypto from "crypto";
 
-import {
-  SqAbstractDistribution,
-  SqLambda,
-  SqDistribution,
-  SqProject,
-  SqValue,
-  SqPointSetDistribution,
-  SqSampleSetDistribution,
-  SqCalculator,
-} from "@quri/squiggle-lang";
+import { SqProject, SqValue } from "@quri/squiggle-lang";
 
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
@@ -20,40 +11,7 @@ function getKey(code: string): string {
 }
 
 export const squiggleValueToJSON = (value: SqValue) => {
-  // this is a lazy shortcut to traverse the value tree; should be reimplemented without parse/stringify
-  return JSON.parse(
-    JSON.stringify(value.asJS(), (key, value) => {
-      if (value instanceof Map) {
-        return Object.fromEntries(value.entries());
-      }
-      if (value instanceof SqLambda) {
-        return value.toString();
-      }
-      if (value instanceof SqSampleSetDistribution) {
-        return {
-          type: "SampleSetDistribution",
-          first100Samples: value._value.samples.slice(0, 100),
-          sampleCount: value._value.samples.length,
-          mean: value._value.mean(),
-          stdev: value._value.stdev(),
-          p5: value._value.cdf(0.05),
-          p95: value._value.cdf(0.95),
-        };
-      }
-      if (value instanceof SqCalculator) {
-        return {
-          type: "Calculator",
-          title: value.title,
-          description: value.description,
-          inputs: value.inputs,
-        };
-      }
-      if (value instanceof SqAbstractDistribution) {
-        return value.toString();
-      }
-      return value;
-    })
-  );
+  return JSON.parse(JSON.stringify(value.asJS()));
 };
 
 type SquiggleOutput = {
