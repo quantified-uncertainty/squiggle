@@ -3,11 +3,17 @@ import toPlainObject from "lodash/toPlainObject.js";
 import { SampleSetDist } from "../dist/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
 import { SDate } from "../index.js";
-const TYPE_KEY = "vType";
+const V_TYPE = "vType";
 const LAMBDA_TYPE = "Lambda";
 const TO_STRING_KEY = "toString";
 const PARAMETER_STRING_KEY = "paramenterString";
 const CALCULATOR_TYPE = "Calculator";
+const FUNCTION_KEY = "fn";
+const INPUTS_KEY = "inputs";
+const AUTORUN_KEY = "autorun";
+const DESCRIPTION_KEY = "description";
+const TITLE_KEY = "title";
+const SAMPLE_COUNT_KEY = "sampleCount";
 const PLOT_TYPE = "Plot";
 const TABLE_CHART_TYPE = "TableChart";
 const SCALE_TYPE = "Scale";
@@ -139,22 +145,20 @@ export function simpleValueFromValue(value: Value): SimpleValue {
     }
     case "Calculator": {
       const fields: [string, SimpleValue][] = [
-        [TYPE_KEY, CALCULATOR_TYPE],
-        ["fn", value.value.fn],
-        [
-          "inputs",
+        [V_TYPE, CALCULATOR_TYPE],
+        [INPUTS_KEY,
           value.value.inputs.map((x) => simpleValueFromValue(vInput(x))),
         ],
-        ["autorun", value.value.autorun],
-        ["description", value.value.description || ""],
-        ["title", value.value.title || ""],
-        ["sampleCount", value.value.sampleCount || 100],
+        [AUTORUN_KEY, value.value.autorun],
+    [DESCRIPTION_KEY, value.value.description || ""],
+        [TITLE_KEY, value.value.title || ""],
+    [SAMPLE_COUNT_KEY, value.value.sampleCount || 100],
       ];
       return ImmutableMap(fields);
     }
     case "Plot": {
       const fields: [string, SimpleValue][] = [
-        [TYPE_KEY, PLOT_TYPE],
+        [V_TYPE, PLOT_TYPE],
         ["type", value.value.type],
         ["title", value.value.title || ""],
       ];
@@ -180,7 +184,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           fields.push(["showSummary", value.value.showSummary]);
           break;
         case "numericFn":
-          fields.push(["fn", value.value.fn]);
+          fields.push([FUNCTION_KEY, value.value.fn]);
           fields.push([
             "xScale",
             simpleValueFromValue(vScale(value.value.xScale)),
@@ -194,7 +198,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           }
           break;
         case "distFn":
-          fields.push(["fn", value.value.fn]);
+          fields.push([FUNCTION_KEY, value.value.fn]);
           fields.push([
             "xScale",
             simpleValueFromValue(vScale(value.value.xScale)),
@@ -230,7 +234,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           ]);
           break;
         case "relativeValues":
-          fields.push(["fn", value.value.fn]);
+          fields.push([FUNCTION_KEY, value.value.fn]);
           fields.push(["ids", [...value.value.ids]]);
           break;
       }
@@ -244,7 +248,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           "columns",
           value.value.columns.map((column) => {
             const data: [string, SimpleValue][] = [
-              ["fn", column.fn],
+              [FUNCTION_KEY, column.fn],
               ["name", column.name || ""],
             ];
             return ImmutableMap(data);
@@ -256,7 +260,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
     case "Scale": {
       const method = value.value.method;
       const fields: [string, SimpleValue][] = [
-        [TYPE_KEY, SCALE_TYPE],
+        [V_TYPE, SCALE_TYPE],
         ["type", method?.type || ""],
         ["tickFormat", value.value.tickFormat || ""],
         ["title", value.value.title || ""],
