@@ -21,6 +21,7 @@ import {
   frDistPointset,
   frLambda,
   frNumber,
+  frString,
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
@@ -32,6 +33,12 @@ import { ReducerContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
 import { vArray, vNumber } from "../value/index.js";
+import {
+  removeLambdas,
+  simpleValueFromValue,
+  simpleValueToJson,
+  simpleValueToValue,
+} from "../value/simpleValue.js";
 
 const { factorial } = jstat;
 
@@ -449,6 +456,24 @@ const mapYLibrary: FRFunction[] = [
         (lambda) => SymbolicDist.Poisson.make(lambda),
         "rate"
       ),
+    ],
+  }),
+  maker.make({
+    name: "json",
+    definitions: [
+      makeDefinition([frAny()], frAny(), ([v]) => {
+        return simpleValueToValue(simpleValueFromValue(v));
+      }),
+    ],
+  }),
+  maker.make({
+    name: "jsonString",
+    definitions: [
+      makeDefinition([frAny()], frString, ([v]) => {
+        return JSON.stringify(
+          simpleValueToJson(removeLambdas(simpleValueFromValue(v)))
+        );
+      }),
     ],
   }),
 ];

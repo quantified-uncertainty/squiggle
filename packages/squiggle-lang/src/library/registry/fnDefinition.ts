@@ -1,6 +1,6 @@
 import { REAmbiguous } from "../../errors/messages.js";
 import { ReducerContext } from "../../reducer/context.js";
-import { Value, VBoxed } from "../../value/index.js";
+import { Value } from "../../value/index.js";
 import { frAny, FRType, isOptional } from "./frTypes.js";
 
 // Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `FRType` unpack logic.
@@ -92,13 +92,7 @@ export function tryCallFnDefinition(
   }
   const unpackedArgs: any = []; // any, but that's ok, type safety is guaranteed by FnDefinition type
   for (let i = 0; i < args.length; i++) {
-    let arg = args[i];
-
-    const { keepBoxes } = fn.inputs[i];
-
-    if (arg.type === "Boxed" && !keepBoxes) {
-      arg = (arg as VBoxed).value.value;
-    }
+    const arg = args[i];
 
     const unpackedArg = fn.inputs[i].unpack(arg);
     if (unpackedArg === undefined) {
@@ -119,8 +113,8 @@ export function tryCallFnDefinition(
 
 export function fnDefinitionToString(fn: FnDefinition): string {
   const inputs = fn.inputs
-    .map((t) => t.getName() + (isOptional(t) && t.tag !== "named" ? "?" : ""))
+    .map((t) => t.display() + (isOptional(t) && t.tag !== "named" ? "?" : ""))
     .join(", ");
-  const output = fn.output.getName();
+  const output = fn.output.display();
   return `(${inputs})${output ? ` => ${output}` : ""}`;
 }

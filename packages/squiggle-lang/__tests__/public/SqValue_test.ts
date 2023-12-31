@@ -1,5 +1,6 @@
+import { OrderedMap } from "immutable";
+
 import { run, sq } from "../../src/index.js";
-import { SqSampleSetDistribution } from "../../src/public/SqValue/SqDistribution/index.js";
 import { testRun } from "../helpers/helpers.js";
 
 describe("SqValue.asJS", () => {
@@ -8,13 +9,13 @@ describe("SqValue.asJS", () => {
       await testRun('{ x: 5, y: [3, "foo", { dist: normal(5,2) } ] }')
     ).asJS();
 
-    expect(value).toBeInstanceOf(Map);
+    expect(value).toBeInstanceOf(OrderedMap);
   });
 
   test("Dict fields", async () => {
     const value = (await testRun("{ x: 5 }")).asJS();
 
-    expect((value as any).get("x")).toBe(5);
+    expect((value as any).get("value").get("x")).toBe(5);
   });
 
   test("Deeply nested dist", async () => {
@@ -22,9 +23,9 @@ describe("SqValue.asJS", () => {
       await testRun('{ x: 5, y: [3, "foo", { dist: normal(5,2) } ] }')
     ).asJS();
 
-    expect((value as any).get("y")[2].get("dist")).toBeInstanceOf(
-      SqSampleSetDistribution
-    );
+    expect(
+      (value as any).get("value").get("y")[2].get("value").get("dist")
+    ).toBeInstanceOf(Array);
   });
 });
 

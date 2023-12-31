@@ -20,6 +20,7 @@ import { PointSetDist } from "../PointSetDist.js";
 import { samplesToPointSetDist } from "./samplesToPointSetDist.js";
 
 export class SampleSetDist extends BaseDist {
+  type = "SampleSetDist";
   samples: readonly number[];
   private constructor(samples: readonly number[]) {
     super();

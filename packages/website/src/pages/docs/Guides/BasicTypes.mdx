@@ -53,9 +53,9 @@ s2 = 'Single-quoted'`} />
 Distributions are first-class citizens. Use the syntax `a to b` to create a quick lognormal distribution, or write out the whole distribution name.
 
 <SquiggleEditor
-  defaultCode={`a = 30 to 50
+  defaultCode={`a = 10 to 20
 b = normal(4, 2)
-c = lognormal({ mean: 90, stdev: 7 })
+c = lognormal({ mean: 50, stdev: 10 })
 d = mixture(a, b, c, [.3, .3, .4])
 d`}
 />

@@ -1,6 +1,6 @@
 {
   "name": "@quri/ui",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -77,7 +77,7 @@
     "react-dom": "^18.2.0",
     "rollup-plugin-node-builtins": "^2.1.2",
     "storybook": "^7.6.3",
-    "tailwindcss": "^3.3.5",
+    "tailwindcss": "^3.4.0",
     "typescript": "^5.3.2",
     "vite": "^5.0.5"
   },

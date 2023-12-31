@@ -23,4 +23,17 @@ describe("Danger functions", () => {
     testEvalToBe("Danger.allCombinations([3])", "[[3]]");
     testEvalToBe("Danger.allCombinations([])", "[]");
   });
+  describe("json", () => {
+    testEvalToBe("Danger.json(1)", "1");
+    testEvalToBe("Danger.json([1,2,3])", "[1,2,3]");
+    testEvalToBe(
+      "Danger.json({foo: 'bar'})",
+      '{vtype: "Dict",value: {foo: "bar"}}'
+    );
+    testEvalToBe("Danger.jsonString([1,2,3])", '"[1,2,3]"');
+    testEvalToBe(
+      "Danger.jsonString(Scale.log({min:10, max: 20}))",
+      '"{\\"vType\\":\\"Scale\\",\\"type\\":\\"log\\",\\"tickFormat\\":\\"\\",\\"title\\":\\"\\",\\"min\\":10,\\"max\\":20}"'
+    );
+  });
 });

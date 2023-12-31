@@ -101,23 +101,18 @@ export async function insertVersionToVersionedComponents(version: string) {
               }
               switch (path.node.id.name) {
                 case "squiggleVersions":
-                  const elements = path.get("init.expression.elements");
-                  if (!Array.isArray(elements)) {
-                    throw new Error("Expected an array");
+                  const container = path.get("init.expression");
+                  if (
+                    Array.isArray(container) ||
+                    !container.isArrayExpression()
+                  ) {
+                    throw new Error("Expected an element");
                   }
-                  const lastElement = elements.at(-1);
-                  if (!lastElement) {
-                    throw new Error("Expected to find some elements");
-                  }
-                  if (lastElement.toString() !== '"dev"') {
-                    throw new Error("Expected 'dev' version to be last");
-                  }
-                  // Undocumented method, but more common `insertBefore` or `replaceWithMultiple` add extra parentheses.
-                  // See also: https://stackoverflow.com/questions/55648184/babels-replacewithmultiple-adds-unnecessary-parentheses
-                  lastElement.replaceInline([
-                    t.stringLiteral(version),
-                    t.stringLiteral("dev"),
-                  ]);
+
+                  container.unshiftContainer(
+                    "elements",
+                    t.stringLiteral(version)
+                  );
                   patchedVersions = true;
                   break;
                 case "defaultSquiggleVersion":

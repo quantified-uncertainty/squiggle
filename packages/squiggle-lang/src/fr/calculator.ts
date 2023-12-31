@@ -4,13 +4,13 @@ import {
   frBool,
   frCalculator,
   frDict,
-  frForceBoxed,
   frInput,
   frLambda,
   frNamed,
   frNumber,
   frOptional,
   frString,
+  frWithTags,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { Calculator, vCalculator } from "../value/index.js";
@@ -62,7 +62,7 @@ export const library = [
       ),
       makeDefinition(
         [
-          frForceBoxed(frLambda),
+          frWithTags(frLambda),
           frNamed(
             "params",
             frOptional(
@@ -77,14 +77,14 @@ export const library = [
           ),
         ],
         frCalculator,
-        ([{ args, value }, params]) => {
+        ([{ value, tags }, params]) => {
           const { title, description, inputs, autorun, sampleCount } =
             params ?? {};
           return validateCalculator({
             fn: value,
-            title: title || args.value.name || undefined,
-            description: description || args.value.description || undefined,
-            inputs: inputs || [],
+            title: title || tags.value.name || undefined,
+            description: description || tags.value.doc || undefined,
+            inputs: inputs || value.defaultInputs(),
             autorun: autorun === null || autorun === undefined ? true : autorun,
             sampleCount: sampleCount || undefined,
           });

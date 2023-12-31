@@ -6,6 +6,7 @@ import { Env } from "./env.js";
 import { PointSetDist } from "./PointSetDist.js";
 
 export abstract class BaseDist {
+  abstract type: string;
   abstract min(): number;
   abstract max(): number;
   abstract mean(): number;

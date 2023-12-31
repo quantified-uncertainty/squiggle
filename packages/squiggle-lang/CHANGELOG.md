@@ -1,8 +1,50 @@
 # @quri/squiggle-lang
 
-## 0.8.6
+## 0.9.0
 
-### Patch Changes
+- Support for tags (`Tag.*` functions) and decorators (`@decoratorName`) that can be used to affect how the value is displayed. ([`b5d1394`](https://github.com/quantified-uncertainty/squiggle/commit/b5d139465c72a742b0ac319068d4acc1d7ab0e4d))
+  Tags can be attached to any value, and decorators can be attached to any variable or function definition.
+  Decorators are proxied to Tag functions, e.g. `@name("X var") x = 5` is the same as `x = 5 -> Tag.name("X var")`.
+  Builtin tags: `@name`, `@description`, `@format`, `@showAs`, `@hide`.
+
+* Dates and Durations improvements ([#2572](https://github.com/quantified-uncertainty/squiggle/pull/2572))
+  You can now type `Date(2023)` to represent Jan 1 2023.
+  Added date domains (`f(x: [Date(1980), Date(2050)])`) that's used in function plots for the x axis.
+  Minor changes to the Date library.
+
+* Added `Calculator.make(fn)` shorthand ([#2660](https://github.com/quantified-uncertainty/squiggle/pull/2660))
+
+* Updated distribution charts to be prettier and better support different sizes ([#2782](https://github.com/quantified-uncertainty/squiggle/pull/2782))
+
+* Tag percentage values with percentage format, so that they're rendered as percentages in viewer ([#2759](https://github.com/quantified-uncertainty/squiggle/pull/2759))
+
+* Added `List.sortBy`, `List.maxBy`, `List.minBy`, `Dict.has`, `Dict.size`, `Dict.delete`, and added definitions to `Number.min` and `Number.max` that support two number params ([#2551](https://github.com/quantified-uncertainty/squiggle/pull/2551))
+
+* Removed `title` attribute from `Table.make()`; you can use `@name` and `@description` tags instead ([#2718](https://github.com/quantified-uncertainty/squiggle/pull/2718))
+
+* `Calculator.make(fn)` works for functions with n>0 params ([#2694](https://github.com/quantified-uncertainty/squiggle/pull/2694))
+
+* Expose `getFunctionDocumentation` function to render documentatiton in the playground ([#2583](https://github.com/quantified-uncertainty/squiggle/pull/2583))
+
+* Breaking: Change `Number.rangeDomain({min, max})` to be `rangeDomain(min, max)` ([#2692](https://github.com/quantified-uncertainty/squiggle/pull/2692))
+
+* Alias `Module.make()` methods to `Module()` ([#2681](https://github.com/quantified-uncertainty/squiggle/pull/2681))
+
+* Breaking: Removed `points(number)` from `Plot.distFn` and `Plot.numericFn` plots, replaced with`xPoints(number[])`. ([#2768](https://github.com/quantified-uncertainty/squiggle/pull/2768))
+
+* Added `Dist.median`, `Number.quantile`, `Number.median` ([#2577](https://github.com/quantified-uncertainty/squiggle/pull/2577))
+
+* Added data-first definitions for `Plot.dist`, `Plot.dists`, `Plot.numericFn`, `Plot.distFn`, `Table.make`, `Calculator.make`. Deprecate old versions. ([#2676](https://github.com/quantified-uncertainty/squiggle/pull/2676))
+
+* Breaking: `Plot.scatter` now only accepts sampleset distributions. ([#2655](https://github.com/quantified-uncertainty/squiggle/pull/2655))
+
+* Calculator result functions no longer re-run on input changes. Calculator inputs can be empty, if the function doesn't take any arguments ([#2525](https://github.com/quantified-uncertainty/squiggle/pull/2525))
+
+* Fix `!` operator: `!0` now evaluates to `true`, and `!1` to `false` ([#2658](https://github.com/quantified-uncertainty/squiggle/pull/2658))
+
+* Fix pointwise combination precision issues on discrete PointSet dists. This was affecting `mixture` and pointwise operators. ([#2514](https://github.com/quantified-uncertainty/squiggle/pull/2514))
+
+## 0.8.6
 
 - Added [Calculators](https://www.squiggle-language.com/docs/Api/Calculator), useful for presenting functions to end-users ([#2265](https://github.com/quantified-uncertainty/squiggle/pull/2265), [#2343](https://github.com/quantified-uncertainty/squiggle/pull/2343))
 
@@ -23,8 +65,6 @@
 - Expanded equality comparisons to include all distributions, dates, time durations, scales, domains, arrays, and dictionaries.
 
 ## 0.8.5
-
-### Patch Changes
 
 - Downgrade Typescript target to ES2021. This should help with loading Squiggle components on Observable through unpkg.com. ([#2269](https://github.com/quantified-uncertainty/squiggle/pull/2269))
 
