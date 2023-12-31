@@ -7,13 +7,13 @@ import {
   useState,
 } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import ReactMarkdown from "react-markdown";
 
 import { Env, SqCalculator, SqInput, SqProject } from "@quri/squiggle-lang";
 
 import { ErrorAlert } from "../../components/Alert.js";
 import { PlaygroundSettings } from "../../components/PlaygroundSettings.js";
 import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../../lib/constants.js";
+import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { CalculatorInput } from "./CalculatorInput.js";
 import { CalculatorResult } from "./CalculatorResult.js";
 import {
@@ -253,9 +253,11 @@ export const Calculator: FC<Props> = ({ settings, valueWithContext }) => {
               </div>
             )}
             {calculator.description && (
-              <ReactMarkdown className="prose text-sm text-slate-700">
-                {calculator.description}
-              </ReactMarkdown>
+              <MarkdownViewer
+                md={calculator.description}
+                textSize="sm"
+                textColor="prose-slate"
+              />
             )}
           </div>
         )}

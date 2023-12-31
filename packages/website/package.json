@@ -5,13 +5,17 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
-    "compileDocsForLLM": "node scripts/compileDocs.js"
+    "gen:docsForLLM": "node scripts/compileDocsForLLM.js",
+    "gen:modulePages": "node scripts/generateModulePages.mjs",
+    "gen": "pnpm run gen:docsForLLM && pnpm run gen:modulePages",
+    "build": "pnpm run gen && next build"
   },
   "dependencies": {
     "@quri/squiggle-components": "workspace:*",
+    "@quri/squiggle-lang": "workspace:*",
+    "remark-gfm": "^4.0.0",
     "@quri/ui": "workspace:*",
     "@quri/versioned-squiggle-components": "workspace:*",
     "base64-js": "^1.5.1",
@@ -35,7 +39,7 @@
     "glob": "^10.3.10",
     "postcss": "^8.4.31",
     "prettier": "^3.0.3",
-    "tailwindcss": "^3.3.5",
+    "tailwindcss": "^3.4.0",
     "typescript": "^5.3.2"
   }
 }

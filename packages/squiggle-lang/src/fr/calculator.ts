@@ -83,7 +83,7 @@ export const library = [
           return validateCalculator({
             fn: value,
             title: title || tags.value.name || undefined,
-            description: description || tags.value.description || undefined,
+            description: description || tags.value.doc || undefined,
             inputs: inputs || value.defaultInputs(),
             autorun: autorun === null || autorun === undefined ? true : autorun,
             sampleCount: sampleCount || undefined,

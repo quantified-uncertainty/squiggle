@@ -12,6 +12,7 @@
     "sourceMap": true,
     "removeComments": true,
     "preserveConstEnums": true,
+    "resolveJsonModule": true,
     // type check settings
     "strict": true,
     "skipLibCheck": true,

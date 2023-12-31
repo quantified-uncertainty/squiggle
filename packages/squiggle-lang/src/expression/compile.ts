@@ -105,12 +105,18 @@ function compileToContent(
           currentContext
         );
         statements.push(statement);
-        if (
-          (astStatement.type === "LetStatement" ||
-            astStatement.type === "DefunStatement") &&
-          astStatement.exported
-        ) {
-          exports.push(astStatement.variable.value);
+        {
+          let maybeExportedStatement = astStatement;
+          while (maybeExportedStatement.type === "DecoratedStatement") {
+            maybeExportedStatement = maybeExportedStatement.statement;
+          }
+          if (
+            (maybeExportedStatement.type === "LetStatement" ||
+              maybeExportedStatement.type === "DefunStatement") &&
+            maybeExportedStatement.exported
+          ) {
+            exports.push(maybeExportedStatement.variable.value);
+          }
         }
         currentContext = newContext;
       }
