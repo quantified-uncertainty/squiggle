@@ -47,6 +47,7 @@ e = [1,2,3,4,5,6,7,8,9,10,11]
 b = a + 4
 c = a + 2
 nested = {e: {f: {g1: a, g2: b, g3: {h: {i: a}}}}}
+notNested = {a: 1, b:1, c: [1,2,3,4]}
 e = 6
 t = 7
 y = 7
@@ -186,6 +187,7 @@ varTable = Table.make(
 )
 
 varDist = SampleSet.fromDist(2 to 5)
+varDist2 = SampleSet.fromDist(10E20 to 20E20)
 
 varScatter = Plot.scatter({
   xDist: varDist,
@@ -258,19 +260,20 @@ Calculator.make(
   },
 };
 
-export const Boxed: Story = {
-  name: "Boxed values",
+export const Tagged: Story = {
+  name: "Tagged values",
   args: {
-    defaultCode: `
-z = 34 -> Tag.format(".1f")
-x = Tag.name(5 to 10, "My favorite Dist")
-    -> Tag.description(
-      "This is a long description"
-    )
-    -> Tag.format(
-      "$.1f"
-    )
-  y = x -> Tag.all
-   `,
+    defaultCode: `z = 34 -> Tag.format(".1f")
+
+    @name("My favorite Dist")
+    @doc("This is a long description")
+    @format("$.2")
+    x = 5 to 10
+    
+    @showAs(Plot.numericFn)
+    @name("My favorite Fn")
+    fn = {|e| e}
+    
+    y = x -> Tag.all`,
   },
 };

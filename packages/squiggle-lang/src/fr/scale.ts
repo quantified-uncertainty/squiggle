@@ -62,7 +62,7 @@ export const library = [
           checkMinMax(min, max);
           checkNumericTickFormat(tickFormat);
           return {
-            type: "linear",
+            method: { type: "linear" },
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
@@ -71,7 +71,7 @@ export const library = [
         }
       ),
       makeDefinition([], frScale, () => {
-        return { type: "linear" };
+        return { method: { type: "linear" } };
       }),
     ],
   }),
@@ -90,7 +90,7 @@ export const library = [
           checkMinMax(min, max);
           checkNumericTickFormat(tickFormat);
           return {
-            type: "log",
+            method: { type: "log" },
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
@@ -99,7 +99,7 @@ export const library = [
         }
       ),
       makeDefinition([], frScale, () => {
-        return { type: "log" };
+        return { method: { type: "log" } };
       }),
     ],
   }),
@@ -127,19 +127,16 @@ export const library = [
           }
 
           return {
-            type: "symlog",
+            method: { type: "symlog", constant: constant ?? undefined },
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
-            constant: constant ?? undefined,
             title: title ?? undefined,
           };
         }
       ),
       makeDefinition([], frScale, () => {
-        return {
-          type: "symlog",
-        };
+        return { method: { type: "symlog" } };
       }),
     ],
   }),
@@ -167,19 +164,16 @@ export const library = [
           }
 
           return {
-            type: "power",
+            method: { type: "power", exponent: exponent ?? undefined },
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
-            exponent: exponent ?? undefined,
             title: title ?? undefined,
           };
         }
       ),
       makeDefinition([], frScale, () => {
-        return {
-          type: "power",
-        };
+        return { method: { type: "power" } };
       }),
     ],
   }),
@@ -195,7 +189,7 @@ export const library = [
           checkMinMaxDates(min, max);
           // We don't check the tick format, because the format is much more complicated for dates.
           return {
-            type: "date",
+            format: { type: "date" },
             min: min ? min.toMs() : undefined,
             max: max ? max.toMs() : undefined,
             tickFormat: tickFormat ?? undefined,
@@ -204,7 +198,7 @@ export const library = [
         }
       ),
       makeDefinition([], frScale, () => {
-        return { type: "date" };
+        return { method: { type: "date" } };
       }),
     ],
   }),

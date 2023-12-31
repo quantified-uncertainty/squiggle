@@ -7,9 +7,9 @@ import {
   SqDomain,
   SqError,
   SqLambda,
-  SqLinearScale,
   SqNumericFnPlot,
   SqNumericRangeDomain,
+  SqScale,
 } from "@quri/squiggle-lang";
 
 import { MessageAlert } from "../../../components/Alert.js";
@@ -84,6 +84,7 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
 
   const min: number = settings.functionChartSettings.start;
   const max: number = settings.functionChartSettings.stop;
+  const xCount: number = settings.functionChartSettings.count;
 
   const includedDomain = fn.signatures().find((s) => s.length === 1)?.[0]
     ?.domain;
@@ -98,7 +99,7 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
     return <FunctionCallErrorAlert error={inferredOutputType.value} />;
   }
 
-  const yScale = SqLinearScale.create({});
+  const yScale = SqScale.linearDefault();
   const xScale = xDomain.toDefaultScale();
 
   switch (inferredOutputType.value) {
@@ -107,7 +108,6 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
         fn,
         xScale,
         yScale,
-        points: settings.functionChartSettings.count,
         distXScale: generateDistributionPlotSettings(
           settings.distributionChartSettings
         ).xScale,
@@ -118,6 +118,7 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
           plot={plot}
           environment={environment}
           height={height}
+          xCount={xCount}
         />
       );
     }
@@ -125,8 +126,7 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
       const plot = SqNumericFnPlot.create({
         fn,
         xScale,
-        points: settings.functionChartSettings.count,
-        yScale: SqLinearScale.create(),
+        yScale: SqScale.linearDefault(),
       });
 
       return (
@@ -135,6 +135,7 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
             plot={plot}
             environment={environment}
             height={height}
+            xCount={xCount}
           />
         </ErrorBoundary>
       );

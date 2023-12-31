@@ -8,6 +8,7 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
+  DropdownMenuHeader,
   FocusIcon,
   TextTooltip,
   useCloseDropdown,
@@ -15,6 +16,7 @@ import {
 
 import { SqValueWithContext } from "../../lib/utility.js";
 import { widgetRegistry } from "../../widgets/registry.js";
+import { valueToHeadingString } from "../../widgets/utils.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { getChildrenValues, pathAsString } from "./utils.js";
 import {
@@ -105,7 +107,7 @@ const SetChildrenCollapsedStateItem: FC<{
   const setCollapsed = useSetCollapsed();
   const closeDropdown = useCloseDropdown();
 
-  const { getLocalItemState } = useViewerContext();
+  const { itemStore } = useViewerContext();
 
   if (value.tag !== "Array" && value.tag !== "Dict") {
     return null;
@@ -115,10 +117,7 @@ const SetChildrenCollapsedStateItem: FC<{
 
   const allChildrenInRequiredState = childrenValues.every((childValue) => {
     const childPath = childValue.context?.path;
-    return (
-      childPath &&
-      getLocalItemState({ path: childPath }).collapsed === collapsed
-    );
+    return childPath && itemStore.getState(childPath).collapsed === collapsed;
   });
   if (allChildrenInRequiredState) {
     return null; // action won't do anything useful
@@ -144,6 +143,7 @@ export const SquiggleValueMenu: FC<{
   value: SqValueWithContext;
 }> = ({ value }) => {
   const widget = widgetRegistry.widgets.get(value.tag);
+  const widgetHeading = valueToHeadingString(value);
 
   const hasLocalSettings = useHasLocalSettings(value.context.path);
 
@@ -152,6 +152,9 @@ export const SquiggleValueMenu: FC<{
       <Dropdown
         render={() => (
           <DropdownMenu>
+            {widgetHeading && (
+              <DropdownMenuHeader>{widgetHeading}</DropdownMenuHeader>
+            )}
             <FindInEditorItem value={value} />
             <FocusItem value={value} />
             <SetChildrenCollapsedStateItem
@@ -175,7 +178,7 @@ export const SquiggleValueMenu: FC<{
             "cursor-pointer transition",
             hasLocalSettings
               ? "text-indigo-300 hover:!text-indigo-500 group-hover:text-indigo-400"
-              : "text-stone-100 hover:!text-stone-500 group-hover:text-stone-400"
+              : "opacity-0 hover:!text-stone-500 group-hover:text-stone-400 group-hover:opacity-100"
           )}
         />
       </Dropdown>

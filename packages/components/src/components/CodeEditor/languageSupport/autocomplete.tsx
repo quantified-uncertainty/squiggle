@@ -7,9 +7,9 @@ import { syntaxTree } from "@codemirror/language";
 import { SyntaxNode, Tree } from "@lezer/common";
 import { createRoot } from "react-dom/client";
 
-import { getFunctionDocumentation, SqProject } from "@quri/squiggle-lang";
+import { SqProject } from "@quri/squiggle-lang";
 
-import { FnDocumentation } from "../../ui/FnDocumentation.js";
+import { FnDocumentationFromName } from "../../ui/FnDocumentation.js";
 
 type NameNode = {
   node: SyntaxNode;
@@ -79,13 +79,9 @@ export function makeCompletionSource(project: SqProject) {
 
   const getInfoFunction = (name: string): Completion["info"] => {
     return () => {
-      const documentation = getFunctionDocumentation(name);
-      if (!documentation) {
-        return null;
-      }
       const dom = document.createElement("div");
       const root = createRoot(dom);
-      root.render(<FnDocumentation documentation={documentation} />);
+      root.render(<FnDocumentationFromName functionName={name} />);
       return { dom };
     };
   };

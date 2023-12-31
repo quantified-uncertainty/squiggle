@@ -92,9 +92,9 @@ export const NumberShower: React.FC<NumberShowerProps> = ({
       {numberWithPresentation.power ? (
         <span>
           {"\u00b7" /* dot symbol */}10
-          <span style={{ fontSize: "0.6em", verticalAlign: "super" }}>
+          <sup style={{ fontSize: "0.7em" }}>
             {numberWithPresentation.power}
-          </span>
+          </sup>
         </span>
       ) : null}
       {unitName && <span> {durationUnits[unitName].plural}</span>}

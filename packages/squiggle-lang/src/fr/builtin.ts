@@ -103,10 +103,7 @@ export const library = [
     name: "inspect",
     definitions: [
       makeDefinition(
-        [
-          frAny({ genericName: "A", keepBoxes: true }),
-          frNamed("message", frOptional(frString)),
-        ],
+        [frAny({ genericName: "A" }), frNamed("message", frOptional(frString))],
         frAny({ genericName: "A" }),
         ([value, message]) => {
           message ? console.log(message, value) : console.log(value);

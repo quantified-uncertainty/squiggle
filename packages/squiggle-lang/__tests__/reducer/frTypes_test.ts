@@ -14,7 +14,6 @@ import {
   frDistSymbolic,
   frDomain,
   frDuration,
-  frForceBoxed,
   frInput,
   frNamed,
   frNumber,
@@ -26,6 +25,7 @@ import {
   frString,
   frTableChart,
   frTuple,
+  frWithTags,
 } from "../../src/library/registry/frTypes.js";
 import { ContinuousShape } from "../../src/PointSet/Continuous.js";
 import { DiscreteShape } from "../../src/PointSet/Discrete.js";
@@ -33,7 +33,6 @@ import { MixedShape } from "../../src/PointSet/Mixed.js";
 import { ImmutableMap } from "../../src/utility/immutableMap.js";
 import { SDate } from "../../src/utility/SDate.js";
 import { SDuration } from "../../src/utility/SDuration.js";
-import { Boxed, BoxedArgs } from "../../src/value/boxed.js";
 import { NumericRangeDomain } from "../../src/value/domain.js";
 import {
   Input,
@@ -42,7 +41,6 @@ import {
   Value,
   vArray,
   vBool,
-  vBoxed,
   vDate,
   vDict,
   vDist,
@@ -55,6 +53,7 @@ import {
   vString,
   vTableChart,
 } from "../../src/value/index.js";
+import { ValueTags } from "../../src/value/valueTags.js";
 
 test("frNumber", () => {
   const value = vNumber(5);
@@ -163,7 +162,7 @@ test("frTableChart", () => {
 });
 
 test("frScale", () => {
-  const scale: Scale = { type: "linear" };
+  const scale: Scale = { method: { type: "linear" } };
   const value = vScale(scale);
   expect(frScale.unpack(value)).toBe(scale);
   expect(frScale.pack(scale)).toEqual(value);
@@ -180,8 +179,8 @@ test("frPlot", () => {
   const plot: Plot = {
     type: "distributions",
     distributions: [],
-    xScale: { type: "linear" },
-    yScale: { type: "linear" },
+    xScale: { method: { type: "linear" } },
+    yScale: { method: { type: "linear" } },
     showSummary: false,
   };
   const value = vPlot(plot);
@@ -330,9 +329,9 @@ describe("frOr", () => {
     });
   });
 
-  describe("getName", () => {
+  describe("display", () => {
     test("should return the correct name", () => {
-      expect(frNumberOrString.getName()).toBe("Number|String");
+      expect(frNumberOrString.display()).toBe("Number|String");
     });
   });
 });
@@ -350,55 +349,51 @@ describe("frNamed", () => {
     expect(namedNumberType.pack(testNumber)).toEqual(testValue);
   });
 
-  test("getName", () => {
+  test("display", () => {
     expect(namedNumberType).toBeDefined();
-    expect(namedNumberType.getName()).toBe("TestNumber: Number");
+    expect(namedNumberType.display()).toBe("TestNumber: Number");
   });
 
-  test("getName with Optional Type", () => {
+  test("display with Optional Type", () => {
     const optionalNumberType = frOptional(frNumber);
     const namedOptionalNumberType = frNamed(
       "OptionalTestNumber",
       optionalNumberType
     );
-    expect(namedOptionalNumberType.getName()).toBe(
+    expect(namedOptionalNumberType.display()).toBe(
       "OptionalTestNumber?: Number"
     );
   });
 });
 
-describe("frForceBoxed", () => {
+describe("frWithTags", () => {
   const itemType = frNumber;
-  const frBoxedNumber = frForceBoxed(itemType);
+  const frTaggedNumber = frWithTags(itemType);
 
-  test("Unpack Non-Boxed Item", () => {
+  test("Unpack Non-Tagged Item", () => {
     const value = vNumber(10);
-    const unpacked = frBoxedNumber.unpack(value);
-    expect(unpacked).toEqual({ value: 10, args: new BoxedArgs({}) });
+    const unpacked = frTaggedNumber.unpack(value);
+    expect(unpacked).toEqual({ value: 10, tags: new ValueTags({}) });
   });
 
-  test("Unpack Boxed Item", () => {
-    const boxedValue = vBoxed(
-      new Boxed(vNumber(10), new BoxedArgs({ name: "test" }))
-    );
-    const unpacked = frBoxedNumber.unpack(boxedValue);
+  test("Unpack Tagged Item", () => {
+    const taggedValue = vNumber(10).mergeTags({ name: "test" });
+    const unpacked = frTaggedNumber.unpack(taggedValue);
     expect(unpacked).toEqual({
       value: 10,
-      args: new BoxedArgs({ name: "test" }),
+      tags: new ValueTags({ name: "test" }),
     });
   });
 
   test("Pack", () => {
-    const packed = frBoxedNumber.pack({
+    const packed = frTaggedNumber.pack({
       value: 10,
-      args: new BoxedArgs({ name: "myName" }),
+      tags: new ValueTags({ name: "myName" }),
     });
-    expect(packed).toEqual(
-      vBoxed(new Boxed(vNumber(10), new BoxedArgs({ name: "myName" })))
-    );
+    expect(packed).toEqual(vNumber(10).mergeTags({ name: "myName" }));
   });
 
-  test("GetName", () => {
-    expect(frBoxedNumber.getName()).toBe("Number");
+  test("Display", () => {
+    expect(frTaggedNumber.display()).toBe("Number");
   });
 });

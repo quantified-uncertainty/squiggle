@@ -2,7 +2,6 @@ import { type Env } from "./dist/env.js";
 import { registry } from "./library/registry/index.js";
 import { SqProject } from "./public/SqProject/index.js";
 import {
-  SqBoxedValue,
   SqDateValue,
   SqDurationValue,
   SqLambdaValue,
@@ -60,14 +59,7 @@ export {
 export { SqTableChart } from "./public/SqValue/SqTableChart.js";
 export { SqCalculator } from "./public/SqValue/SqCalculator.js";
 export { SqDict } from "./public/SqValue/SqDict.js";
-export {
-  SqDateScale,
-  SqLinearScale,
-  SqLogScale,
-  SqPowerScale,
-  type SqScale,
-  SqSymlogScale,
-} from "./public/SqValue/SqScale.js";
+export { SqScale } from "./public/SqValue/SqScale.js";
 export { type PathItem, SqValuePath } from "./public/SqValuePath.js";
 export { parse } from "./public/parse.js";
 export { fmap as resultMap, type result } from "./utility/result.js";
@@ -84,7 +76,6 @@ export { type LocationRange as SqLocation } from "peggy";
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";
 export {
   type Env,
-  SqBoxedValue,
   SqDateValue,
   SqDurationValue,
   SqLambdaValue,
@@ -128,3 +119,14 @@ export function getFunctionDocumentation(name: string) {
 export function getAllFunctionNames() {
   return registry.allNames();
 }
+
+export function getAllFunctionNamesWithNamespace(name: string) {
+  return registry
+    .allFunctionsWithNamespace(name)
+    .map((fn) => `${name}.${fn.name}`);
+}
+
+export {
+  SCALE_POWER_DEFAULT_CONSTANT,
+  SCALE_SYMLOG_DEFAULT_CONSTANT,
+} from "./value/index.js";

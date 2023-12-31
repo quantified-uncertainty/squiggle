@@ -37,6 +37,7 @@ const parserWithMetadata = parser.configure({
       Escape: t.escape,
 
       DecoratorName: t.variableName,
+      "Decorator/*/String": t.comment,
       At: t.keyword,
 
       VariableName: t.constant(t.variableName),

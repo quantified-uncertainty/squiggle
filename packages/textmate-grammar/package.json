@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-textmate-grammar",
-  "private": true,
+  "version": "0.9.1-0",
   "scripts": {
     "build": "mkdir -p dist && js-yaml src/squiggle.tmLanguage.yaml >dist/squiggle.tmLanguage.json && js-yaml src/squiggle.js.yaml >dist/squiggle.js.json",
     "lint": "prettier --check .",

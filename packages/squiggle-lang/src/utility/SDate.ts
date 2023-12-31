@@ -43,6 +43,9 @@ export class SDate {
   static fromMs(ms: number): SDate {
     return new SDate(new Date(ms));
   }
+  static fromDate(date: Date): SDate {
+    return new SDate(date);
+  }
 
   static fromYearMonthDay(year: number, month: number, day: number): SDate {
     if (month < 1 || month > 12) {
@@ -76,7 +79,6 @@ export class SDate {
   toDate(): Date {
     return this.value;
   }
-
   isEqual(other: SDate): boolean {
     return this.value.getTime() === other.value.getTime();
   }
