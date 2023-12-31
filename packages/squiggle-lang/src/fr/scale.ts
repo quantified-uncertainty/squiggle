@@ -62,7 +62,7 @@ export const library = [
           checkMinMax(min, max);
           checkNumericTickFormat(tickFormat);
           return {
-            type: "linear",
+            method: { type: "linear" },
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
@@ -90,7 +90,7 @@ export const library = [
           checkMinMax(min, max);
           checkNumericTickFormat(tickFormat);
           return {
-            type: "log",
+            method: { type: "log" },
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
@@ -189,7 +189,7 @@ export const library = [
           checkMinMaxDates(min, max);
           // We don't check the tick format, because the format is much more complicated for dates.
           return {
-            type: "date",
+            format: { type: "date" },
             min: min ? min.toMs() : undefined,
             max: max ? max.toMs() : undefined,
             tickFormat: tickFormat ?? undefined,
