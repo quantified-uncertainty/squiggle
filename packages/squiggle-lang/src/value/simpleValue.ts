@@ -4,6 +4,12 @@ import { SampleSetDist } from "../dist/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
 import { SDate } from "../index.js";
 const V_TYPE = "vType";
+// Constants for avoiding hard-coded strings
+const SCALE_TYPE = "Scale";
+const TYPE_KEY = "type";
+const TICK_FORMAT_KEY = "tickFormat";
+const TITLE_KEY = "title";
+
 const DATA_KEY = "data";
 const TYPE_KEY = "type";
 const DISTRIBUTIONS_KEY = "distributions";
@@ -276,7 +282,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
       const fields: [string, SimpleValue][] = [
         [V_TYPE, SCALE_TYPE],
         ["type", method?.type || ""],
-        ["tickFormat", value.value.tickFormat || ""],
+        [TICK_FORMAT_KEY, value.value.tickFormat || ""],
         ["title", value.value.title || ""],
       ];
       value.value.min && fields.push(["min", value.value.min]);
