@@ -1,5 +1,6 @@
-import { expectErrorToBeBounded, testRun } from "../helpers/helpers.js";
 import * as fc from "fast-check";
+
+import { expectErrorToBeBounded, testRun } from "../helpers/helpers.js";
 import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("Various SampleSet functions", () => {
@@ -71,7 +72,7 @@ const arrayGen = () =>
       noNaN: true,
     })
     .filter(
-      (xs_) => Math.min(...Array.from(xs_)) != Math.max(...Array.from(xs_))
+      (xs_) => Math.min(...Array.from(xs_)) !== Math.max(...Array.from(xs_))
     );
 
 async function makeSampleSet(samples: number[]) {
@@ -159,7 +160,7 @@ describe("cumulative density function", () => {
         if (x > max) {
           const epsilon = (x - max) / x;
           expect(cdfValue).toBeGreaterThan(1 * (1 - epsilon));
-        } else if (typeof cdfValue == "number") {
+        } else if (typeof cdfValue === "number") {
           expect(Math.round(1e5 * cdfValue) / 1e5).toBeLessThanOrEqual(1);
         } else {
           throw new Error();
@@ -194,7 +195,10 @@ describe("probability density function", () => {
         const dist = await makeSampleSet(xs);
         const pdfValueMean = dist.pdf(env, mean).value;
         const pdfValueMax = dist.pdf(env, max).value;
-        if (typeof pdfValueMean == "number" && typeof pdfValueMax == "number") {
+        if (
+          typeof pdfValueMean === "number" &&
+          typeof pdfValueMax === "number"
+        ) {
           expect(pdfValueMax).toBeLessThanOrEqual(pdfValueMean);
         } else {
           expect(pdfValueMax).toEqual(pdfValueMean);

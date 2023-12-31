@@ -1,5 +1,8 @@
 import isInteger from "lodash/isInteger.js";
+import _uniq from "lodash/uniq.js";
+
 import * as E_A from "./E_A.js";
+import * as E_A_Sorted from "./E_A_Sorted.js";
 
 class RangeError extends Error {}
 
@@ -81,6 +84,10 @@ export const sort = (t: readonly number[]): number[] => {
   return Array.from(new Float64Array(t).sort());
 };
 
+export const uniq = (t: readonly number[]): number[] => {
+  return _uniq(t);
+};
+
 export const variance = (xs: readonly number[]) => {
   // Variance is shift-invariant; subtract the middle of the range for precision
   // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Computing_shifted_data
@@ -111,4 +118,24 @@ export const cumProd = (t: readonly number[]): number[] => {
 // diff([1,5,3,7]) = [4,-2,4]
 export const diff = (t: readonly number[]): number[] => {
   return E_A.pairwise(t, (left, right) => right - left);
+};
+
+export const quantile = (samples: readonly number[], point: number): number => {
+  const sorted = sort(samples);
+  return E_A_Sorted.quantile(sorted, point);
+};
+
+export const clamp = (
+  samples: readonly number[],
+  { min, max }: { min: number | undefined; max: number | undefined }
+): number[] => {
+  return samples.filter((x) => {
+    if (min !== undefined && x < min) {
+      return false;
+    }
+    if (max !== undefined && x > max) {
+      return false;
+    }
+    return true;
+  });
 };

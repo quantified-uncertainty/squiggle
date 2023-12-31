@@ -1,6 +1,6 @@
 import {
-  ReactNode,
   forwardRef,
+  ReactNode,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -25,10 +25,10 @@ import {
   useUncontrolledCode,
 } from "../../../lib/hooks/index.js";
 import { altKey, getErrors } from "../../../lib/utility.js";
-import { CodeEditor, CodeEditorHandle } from "../../CodeEditor.js";
+import { CodeEditor, CodeEditorHandle } from "../../CodeEditor/index.js";
 import { PlaygroundSettings } from "../../PlaygroundSettings.js";
-import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 import { PanelWithToolbar } from "../../ui/PanelWithToolbar/index.js";
+import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 import { AutorunnerMenuItem } from "./AutorunnerMenuItem.js";
 import { DependencyGraphModal } from "./DependencyGraphModal.js";
 import { GlobalSettingsModal } from "./GlobalSettingsModal.js";
@@ -131,15 +131,6 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
                 icon={AdjustmentsVerticalIcon}
                 onClick={() => openModal("settings")}
               />
-
-              {
-                // experimental, won't always work, so disabled for now
-                /* <DropdownMenuActionItem
-                title="Find in Viewer"
-                icon={AdjustmentsVerticalIcon}
-                onClick={() => editorRef.current?.viewCurrentPosition()}
-              /> */
-              }
               <DropdownMenuActionItem
                 title="Dependency Graph"
                 icon={PuzzleIcon}

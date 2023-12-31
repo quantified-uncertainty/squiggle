@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from "react";
+import { BaseSyntheticEvent, FC, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
@@ -14,18 +14,16 @@ import {
   TextTooltip,
 } from "@quri/ui";
 import {
-  SquigglePlaygroundVersionPicker,
-  SquiggleVersionShower,
-  VersionedSquigglePlayground,
   checkSquiggleVersion,
+  SquigglePlaygroundVersionPicker,
   type SquiggleVersion,
-} from "@quri/versioned-playground";
+  SquiggleVersionShower,
+  useAdjustSquiggleVersion,
+  VersionedSquigglePlayground,
+  versionSupportsDropdownMenu,
+  versionSupportsExports,
+} from "@quri/versioned-squiggle-components";
 
-import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
-import {
-  EditSquiggleSnippetModelMutation,
-  RelativeValuesExportInput,
-} from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 import { EditModelExports } from "@/components/exports/EditModelExports";
 import { FormModal } from "@/components/ui/FormModal";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
@@ -35,19 +33,31 @@ import {
   serializeSourceId,
   squiggleHubLinker,
 } from "@/squiggle/components/linker";
+
 import {
   Draft,
-  SquiggleSnippetDraftDialog,
   draftUtils,
+  SquiggleSnippetDraftDialog,
   useDraftLocator,
 } from "./SquiggleSnippetDraftDialog";
+
+import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
+import {
+  EditSquiggleSnippetModelMutation,
+  RelativeValuesExportInput,
+  SquiggleModelExportInput,
+} from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 
 export type SquiggleSnippetFormShape = {
   code: string;
   relativeValuesExports: RelativeValuesExportInput[];
+  exports: SquiggleModelExportInput[];
 };
 
-type OnSubmit = (extraData?: { comment: string }) => Promise<void>;
+type OnSubmit = (
+  event?: BaseSyntheticEvent,
+  extraData?: { comment: string }
+) => Promise<void>;
 
 const SaveDialog: FC<{ onSubmit: OnSubmit; close: () => void }> = ({
   onSubmit,
@@ -58,8 +68,8 @@ const SaveDialog: FC<{ onSubmit: OnSubmit; close: () => void }> = ({
   };
   const form = useForm<SaveFormShape>();
 
-  const handleSubmit = form.handleSubmit(async ({ comment }) => {
-    await onSubmit({ comment });
+  const handleSubmit = form.handleSubmit(async ({ comment }, event) => {
+    await onSubmit(event, { comment });
     close();
   });
 
@@ -133,6 +143,13 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
               version
             }
           }
+          exports {
+            id
+            variableName
+            variableType
+            title
+            docstring
+          }
           relativeValuesExports {
             id
             variableName
@@ -165,8 +182,14 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           slug: item.definition.slug,
         },
       })),
+      exports: revision.exports.map((item) => ({
+        title: item.title,
+        variableName: item.variableName,
+        variableType: item.variableType,
+        docstring: item.docstring,
+      })),
     };
-  }, [content, revision.relativeValuesExports]);
+  }, [content, revision.relativeValuesExports, revision.exports]);
 
   const { form, onSubmit, inFlight } = useMutationForm<
     SquiggleSnippetFormShape,
@@ -200,6 +223,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           version,
         },
         relativeValuesExports: formData.relativeValuesExports,
+        exports: formData.exports,
         comment: extraData?.comment,
         slug: model.slug,
         owner: model.owner.slug,
@@ -262,6 +286,95 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
 
   const { height, ref } = useAvailableHeight();
 
+  const checkedVersion = useAdjustSquiggleVersion(version);
+
+  // Build props for VersionedSquigglePlayground first, since they might depend on the version we use,
+  // and we want to populate them incrementally.
+  const playgroundProps: Parameters<typeof VersionedSquigglePlayground>[0] = {
+    version: checkedVersion,
+    defaultCode,
+    sourceId: serializeSourceId({
+      owner: model.owner.slug,
+      slug: model.slug,
+    }),
+    linker: squiggleHubLinker,
+    height: height ?? "100vh",
+    onCodeChange,
+    renderExtraControls: () => (
+      <div className="h-full flex items-center justify-end gap-2">
+        {model.isEditable || forceVersionPicker ? (
+          <SquigglePlaygroundVersionPicker
+            version={version}
+            onChange={handleVersionChange}
+            size="small"
+            showUpdatePolicy
+          />
+        ) : (
+          <TextTooltip
+            text="Squiggle Version" // FIXME - positioning is bad for some reason
+            placement="bottom"
+            offset={5}
+          >
+            {/* div wrapper is required because TextTooltip clones its children and SquiggleVersionShower doesn't forwardRef */}
+            <div>
+              <SquiggleVersionShower version={version} />
+            </div>
+          </TextTooltip>
+        )}
+        {model.isEditable && (
+          <SaveButton onSubmit={onSubmit} disabled={inFlight} />
+        )}
+      </div>
+    ),
+    renderExtraModal: (name) => {
+      if (name === "exports") {
+        return {
+          body: (
+            <div className="px-6 py-2">
+              <EditModelExports
+                append={(item) => {
+                  appendVariableWithDefinition(item);
+                  onSubmit();
+                }}
+                remove={(id) => {
+                  removeVariableWithDefinition(id);
+                  onSubmit();
+                }}
+                items={variablesWithDefinitionsFields}
+                modelRef={model}
+              />
+            </div>
+          ),
+          title: "Exported Variables",
+        };
+      }
+    },
+  };
+
+  /* This is an example of how we could narrow versions to inject props conditionally.
+   * (In this simple case, we could always set `renderExtraDropdownItems` prop since it'd be ignored by older playground versions.)
+   * It relies on `versionSupportsDropdownMenu` type predicate which narrows down `playgroundProps` type.
+   */
+  if (versionSupportsDropdownMenu(playgroundProps)) {
+    playgroundProps.renderExtraDropdownItems = ({ openModal }) =>
+      model.isEditable ? (
+        <>
+          <DropdownMenuHeader>Experimental</DropdownMenuHeader>
+          <DropdownMenuActionItem
+            title="Exported Variables"
+            icon={LinkIcon}
+            onClick={() => openModal("exports")}
+          />
+        </>
+      ) : null;
+  }
+
+  if (versionSupportsExports(playgroundProps)) {
+    playgroundProps.onExportsChange = (exports) => {
+      form.setValue("exports", exports);
+    };
+  }
+
   return (
     <FormProvider {...form}>
       <form onSubmit={() => onSubmit()}>
@@ -272,76 +385,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           />
           <VersionedSquigglePlayground
             key={playgroundKey}
-            version={version}
-            sourceId={serializeSourceId({
-              owner: model.owner.slug,
-              slug: model.slug,
-            })}
-            linker={squiggleHubLinker}
-            height={height ?? "100vh"}
-            onCodeChange={onCodeChange}
-            defaultCode={defaultCode}
-            renderExtraDropdownItems={({ openModal }) =>
-              model.isEditable ? (
-                <>
-                  <DropdownMenuHeader>Experimental</DropdownMenuHeader>
-                  <DropdownMenuActionItem
-                    title="Exported Variables"
-                    icon={LinkIcon}
-                    onClick={() => openModal("exports")}
-                  />
-                </>
-              ) : null
-            }
-            renderExtraControls={() => (
-              <div className="h-full flex items-center justify-end gap-2">
-                {model.isEditable || forceVersionPicker ? (
-                  <SquigglePlaygroundVersionPicker
-                    version={version}
-                    onChange={handleVersionChange}
-                    size="small"
-                    showUpdatePolicy
-                  />
-                ) : (
-                  <TextTooltip
-                    text="Squiggle Version" // FIXME - positioning is bad for some reason
-                    placement="bottom"
-                    offset={5}
-                  >
-                    {/* div wrapper is required because TextTooltip clones its children and SquiggleVersionShower doesn't forwardRef */}
-                    <div>
-                      <SquiggleVersionShower version={version} />
-                    </div>
-                  </TextTooltip>
-                )}
-                {model.isEditable && (
-                  <SaveButton onSubmit={onSubmit} disabled={inFlight} />
-                )}
-              </div>
-            )}
-            renderExtraModal={(name) => {
-              if (name === "exports") {
-                return {
-                  body: (
-                    <div className="px-6 py-2">
-                      <EditModelExports
-                        append={(item) => {
-                          appendVariableWithDefinition(item);
-                          onSubmit();
-                        }}
-                        remove={(id) => {
-                          removeVariableWithDefinition(id);
-                          onSubmit();
-                        }}
-                        items={variablesWithDefinitionsFields}
-                        modelRef={model}
-                      />
-                    </div>
-                  ),
-                  title: "Exported Variables",
-                };
-              }
-            }}
+            {...playgroundProps}
           />
         </div>
       </form>

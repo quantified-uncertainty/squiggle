@@ -1,8 +1,10 @@
+import { loadPageQuery } from "@/relay/loadPageQuery";
+
+import { GroupMembersPage } from "./GroupMembersPage";
+
 import QueryNode, {
   GroupMembersPageQuery,
 } from "@/__generated__/GroupMembersPageQuery.graphql";
-import { loadPageQuery } from "@/relay/loadPageQuery";
-import { GroupMembersPage } from "./GroupMembersPage";
 
 type Props = {
   params: { slug: string };

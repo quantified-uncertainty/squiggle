@@ -1,10 +1,13 @@
 import { Set } from "immutable";
 import { FC, PropsWithChildren, Reducer } from "react";
 
-import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
-import { generateProvider } from "@/relative-values/components/generateProvider";
+import { generateProvider } from "@quri/ui";
+
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
+
 import { Filter } from "./types";
+
+import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 
 export type Axis = "rows" | "columns";
 

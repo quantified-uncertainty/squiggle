@@ -6,8 +6,8 @@ import { RelayEnvironmentProvider } from "react-relay";
 
 import { WithToasts } from "@quri/ui";
 
-import { getCurrentEnvironment } from "@/relay/environment";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { getCurrentEnvironment } from "@/relay/environment";
 
 export const ClientApp: FC<PropsWithChildren<{ session: Session | null }>> = ({
   session,

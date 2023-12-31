@@ -1,13 +1,15 @@
-import { Button, Dropdown, DropdownMenu } from "@quri/ui";
 import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
+
+import { Button, Dropdown, DropdownMenu } from "@quri/ui";
+
+import { SetInviteRoleButton } from "./SetInviteRoleAction";
 
 import {
   InviteRoleButton$key,
   MembershipRole,
 } from "@/__generated__/InviteRoleButton.graphql";
-import { SetInviteRoleButton } from "./SetInviteRoleAction";
 
 const Fragment = graphql`
   fragment InviteRoleButton on GroupInvite {

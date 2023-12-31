@@ -3,6 +3,7 @@ export { ButtonWithDropdown } from "./components/ButtonWithDropdown.js";
 export { Modal } from "./components/Modal.js";
 export { StyledTab } from "./components/StyledTab.js";
 
+export { useCloseDropdown } from "./components/Dropdown/DropdownContext.js";
 export { DropdownMenu } from "./components/Dropdown/DropdownMenu.js";
 export { DropdownMenuActionItem } from "./components/Dropdown/DropdownMenuActionItem.js";
 export { DropdownMenuAsyncActionItem } from "./components/Dropdown/DropdownMenuAsyncActionItem.js";
@@ -47,14 +48,13 @@ export {
   AdjustmentsHorizontalIcon,
   AdjustmentsVerticalIcon,
   ArchiveBoxIcon,
-  ArrowUturnLeftIcon,
   BackwardIcon,
   BarChartIcon,
   Bars3CenterLeftIcon,
   Bars4Icon,
   BoltIcon,
   BookOpenIcon,
-  CommentIcon,
+  CalculatorIcon,
   CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -62,10 +62,14 @@ export {
   CodeBracketIcon,
   CodeBracketSquareIcon,
   Cog8ToothIcon,
+  CommandLineIcon,
+  CommentIcon,
+  CurlyBracketsIcon,
   DocumentTextIcon,
   FireIcon,
   GlobeIcon,
   GroupIcon,
+  HashIcon,
   HelpIcon,
   LinkIcon,
   ListBulletIcon,
@@ -74,12 +78,17 @@ export {
   PlayIcon,
   PuzzleIcon,
   RectangleStackIcon,
+  ResetIcon,
   RightArrowIcon,
   ScaleIcon,
   ScatterPlotIcon,
+  SearchIcon,
+  ShareIcon,
+  SquareBracketIcon,
   TableCellsIcon,
   UserCircleIcon,
   UserIcon,
+  VariableIcon,
   WrenchIcon,
 } from "./icons/HeroIcons.js";
 export type { IconProps } from "./icons/Icon.js";
@@ -89,10 +98,13 @@ export { SignOutIcon } from "./icons/SignOutIcon.js";
 export { TrashIcon } from "./icons/TrashIcon.js";
 export { TriangleIcon } from "./icons/TriangleIcon.js";
 export { XIcon } from "./icons/XIcon.js";
+export { ErrorIcon } from "./icons/ErrorIcon.js";
 
-export { WithToasts, useToast } from "./components/WithToasts/index.js";
+export { useToast, WithToasts } from "./components/WithToasts/index.js";
 
 export {
   TailwindContext,
   TailwindProvider,
 } from "./components/TailwindProvider.js";
+
+export { generateProvider } from "./generateProvider.js";

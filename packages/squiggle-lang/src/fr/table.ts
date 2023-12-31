@@ -3,12 +3,13 @@ import {
   frAny,
   frArray,
   frDict,
-  frLambda,
+  frLambdaTyped,
+  frNamed,
   frOptional,
   frString,
+  frTableChart,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { vTableChart } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Table",
@@ -23,25 +24,58 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["data", frArray(frAny)],
-            ["title", frOptional(frString)],
-            [
+          frNamed("data", frArray(frAny({ genericName: "A" }))),
+          frNamed(
+            "params",
+            frDict([
               "columns",
-              frArray(frDict(["fn", frLambda], ["name", frOptional(frString)])),
-            ]
+              frArray(
+                frDict(
+                  ["fn", frLambdaTyped([frAny({ genericName: "A" })], frAny())],
+                  ["name", frOptional(frString)]
+                )
+              ),
+            ])
           ),
         ],
-        ([{ data, title, columns }]) => {
-          return vTableChart({
+        frTableChart,
+        ([data, params]) => {
+          const { columns } = params ?? {};
+          return {
             data,
-            title: title || undefined,
             columns: columns.map(({ fn, name }) => ({
               fn,
               name: name ?? undefined,
             })),
-          });
+          };
         }
+      ),
+      makeDefinition(
+        [
+          frDict(
+            ["data", frArray(frAny({ genericName: "A" }))],
+            [
+              "columns",
+              frArray(
+                frDict(
+                  ["fn", frLambdaTyped([frAny({ genericName: "A" })], frAny())],
+                  ["name", frOptional(frString)]
+                )
+              ),
+            ]
+          ),
+        ],
+        frTableChart,
+        ([{ data, columns }]) => {
+          return {
+            data,
+            columns: columns.map(({ fn, name }) => ({
+              fn,
+              name: name ?? undefined,
+            })),
+          };
+        },
+        { deprecated: "0.8.7" }
       ),
     ],
   }),

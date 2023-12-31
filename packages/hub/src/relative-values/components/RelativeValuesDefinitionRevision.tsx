@@ -2,10 +2,13 @@ import { FC, Fragment } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
+import { StyledTab, StyledTextArea } from "@quri/ui";
+
 import { H2 } from "@/components/ui/Headers";
+
 import { ClusterInfo } from "./common/ClusterInfo";
-import { StyledTextArea, StyledTab } from "@quri/ui";
+
+import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 
 export const RelativeValuesDefinitionRevisionFragment = graphql`
   fragment RelativeValuesDefinitionRevision on RelativeValuesDefinitionRevision {

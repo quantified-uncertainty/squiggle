@@ -1,26 +1,32 @@
-import { forwardRef, memo, useImperativeHandle } from "react";
+import { forwardRef, Fragment, memo, useImperativeHandle } from "react";
 
 import {
+  result,
   SqDictValue,
   SqError,
   SqValue,
   SqValuePath,
-  result,
 } from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 
+import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
 import { MessageAlert } from "../Alert.js";
-import { CodeEditorHandle } from "../CodeEditor.js";
+import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
+import {
+  nonHiddenDictEntries,
+  pathIsEqual,
+  pathItemFormat,
+  useGetSubvalueByPath,
+} from "./utils.js";
 import { ValueViewer } from "./ValueViewer.js";
 import {
-  ViewerProvider,
   useFocus,
   useUnfocus,
   useViewerContext,
+  ViewerProvider,
 } from "./ViewerProvider.js";
-import { extractSubvalueByPath, pathItemFormat } from "./utils.js";
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
@@ -30,79 +36,90 @@ export type SquiggleViewerProps = {
   /** The output of squiggle's run */
   resultVariables: result<SqDictValue, SqError>;
   resultItem: result<SqValue, SqError> | undefined;
-  localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
+  rootPathOverride?: SqValuePath;
 } & PartialPlaygroundSettings;
 
 const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,
   SquiggleViewerProps
->(function SquiggleViewerOuter({ resultVariables, resultItem }, ref) {
-  const { focused, dispatch, getCalculator } = useViewerContext();
+>(function SquiggleViewerOuter(
+  { resultVariables, resultItem, rootPathOverride },
+  ref
+) {
+  const { focused, itemStore } = useViewerContext();
   const unfocus = useUnfocus();
   const focus = useFocus();
 
   const navLinkStyle =
-    "text-sm text-slate-500 hover:text-slate-900 hover:underline font-mono cursor-pointer";
+    "text-sm text-stone-500 hover:text-stone-900 hover:underline font-mono cursor-pointer";
 
-  const focusedNavigation = focused && (
-    <div className="flex items-center mb-3 pl-1">
-      <span onClick={unfocus} className={navLinkStyle}>
-        {focused.root === "bindings" ? "Variables" : focused.root}
-      </span>
+  const isFocusedOnRootPathOverride =
+    focused && rootPathOverride && pathIsEqual(focused, rootPathOverride);
+
+  // If we're focused on the root path override, we need to adjust the focused path accordingly when presenting the navigation, so that it begins with the root path intead. This is a bit confusing.
+  const rootPathFocusedAdjustment: number = rootPathOverride
+    ? rootPathOverride.items.length - 1
+    : 0;
+
+  const focusedNavigation = focused && !isFocusedOnRootPathOverride && (
+    <div className="flex items-center mb-3 pl-3">
+      {!rootPathOverride && (
+        <>
+          <span onClick={unfocus} className={navLinkStyle}>
+            {focused.root === "bindings" ? "Variables" : focused.root}
+          </span>
+
+          <ChevronRightIcon className="text-slate-300" size={24} />
+        </>
+      )}
 
       {focused
         .itemsAsValuePaths({ includeRoot: false })
-        .slice(0, -1)
+        .slice(rootPathFocusedAdjustment, -1)
         .map((path, i) => (
-          <div key={i} className="flex items-center">
-            <ChevronRightIcon className="text-slate-300" size={24} />
+          <Fragment key={i}>
             <div onClick={() => focus(path)} className={navLinkStyle}>
-              {pathItemFormat(path.items[i])}
+              {pathItemFormat(path.items[i + rootPathFocusedAdjustment])}
             </div>
-          </div>
+            <ChevronRightIcon className="text-slate-300" size={24} />
+          </Fragment>
         ))}
-      <ChevronRightIcon className="text-slate-300" size={24} />
     </div>
   );
 
   useImperativeHandle(ref, () => ({
     viewValuePath(path: SqValuePath) {
-      dispatch({
-        type: "SCROLL_TO_PATH",
-        payload: { path },
-      });
+      itemStore.scrollToPath(path);
     },
   }));
 
   const resultVariableLength = resultVariables.ok
-    ? resultVariables.value.value.entries().length
+    ? nonHiddenDictEntries(resultVariables.value.value).length
     : 0;
+
+  const getSubvalueByPath = useGetSubvalueByPath();
 
   let focusedItem: SqValue | undefined;
   if (focused && resultVariables.ok && focused.root === "bindings") {
-    focusedItem = extractSubvalueByPath(
-      resultVariables.value,
-      focused,
-      getCalculator
-    );
+    focusedItem = getSubvalueByPath(resultVariables.value, focused);
   } else if (focused && resultItem?.ok && focused.root === "result") {
-    focusedItem = extractSubvalueByPath(
-      resultItem.value,
-      focused,
-      getCalculator
-    );
+    focusedItem = getSubvalueByPath(resultItem.value, focused);
   }
 
   const body = () => {
-    if (focused) {
+    if (!resultVariables.ok) {
+      return (
+        <div className="px-1">
+          <SquiggleErrorAlert error={resultVariables.value} />
+        </div>
+      );
+    } else if (focused) {
       if (focusedItem) {
         return <ValueViewer value={focusedItem} />;
       } else {
         return <MessageAlert heading="Focused variable is not defined" />;
       }
-    } else if (!resultVariables.ok) {
-      return <SquiggleErrorAlert error={resultVariables.value} />;
     } else {
       return (
         <div className="space-y-2">
@@ -130,22 +147,34 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
     {
       resultVariables,
       resultItem,
-      localSettingsEnabled = false,
       editor,
+      rootPathOverride,
       ...partialPlaygroundSettings
     },
     ref
   ) {
+    /**
+     * Because we obtain `partialPlaygroundSettings` with spread syntax, its identity changes on each render, which could
+     * cause extra unnecessary re-renders of widgets, in some cases.
+     * Related discussion: https://github.com/quantified-uncertainty/squiggle/pull/2525#discussion_r1393398447
+     */
+    const stablePartialPlaygroundSettings = useStabilizeObjectIdentity(
+      partialPlaygroundSettings
+    );
+    const hasResultVariables =
+      resultVariables.ok &&
+      nonHiddenDictEntries(resultVariables.value.value).length > 0;
     return (
       <ViewerProvider
-        partialPlaygroundSettings={partialPlaygroundSettings}
-        localSettingsEnabled={localSettingsEnabled}
+        partialPlaygroundSettings={stablePartialPlaygroundSettings}
         editor={editor}
-        beginWithVariablesCollapsed={resultItem !== undefined && resultItem.ok}
+        beginWithVariablesCollapsed={resultItem?.ok && hasResultVariables}
+        rootPathOverride={rootPathOverride}
       >
         <SquiggleViewerOuter
           resultVariables={resultVariables}
           resultItem={resultItem}
+          rootPathOverride={rootPathOverride}
           ref={ref}
         />
       </ViewerProvider>

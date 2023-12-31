@@ -5,11 +5,10 @@ import { createContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
-
 import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
-import { SqDomain, wrapDomain } from "./SqDomain.js";
 import { SqValue, wrapValue } from "./index.js";
+import { SqDomain, wrapDomain } from "./SqDomain.js";
 
 export type SqLambdaParameter = {
   name: string;
@@ -35,7 +34,7 @@ function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
         def.map((p, index) => ({
           name: index.toString(),
           domain: undefined,
-          typeName: p.getName(),
+          typeName: p.display(),
         }))
       );
   }
@@ -56,6 +55,10 @@ export class SqLambda {
       throw new Error(`Stdlib value ${name} is not a function`);
     }
     return new SqLambda(value.value);
+  }
+
+  get type() {
+    return this._value.type;
   }
 
   parameterCounts() {

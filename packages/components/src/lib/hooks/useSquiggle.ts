@@ -2,12 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   Env,
+  result,
+  SqDict,
   SqError,
   SqProject,
-  SqDict,
   SqValue,
-  result,
 } from "@quri/squiggle-lang";
+
+import { WINDOW_VARIABLE_NAME } from "../constants.js";
 
 // Props needed for a standalone execution.
 export type StandaloneExecutionProps = {
@@ -34,6 +36,7 @@ export type SquiggleArgs = {
 export type SquiggleOutput = {
   output: result<
     {
+      exports: SqDict;
       result: SqValue;
       bindings: SqDict;
     },
@@ -99,13 +102,30 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
         project.setContinues(sourceId, continues);
         await project.run(sourceId);
         const output = project.getOutput(sourceId);
+        const executionTime = Date.now() - startTime;
+
         setSquiggleOutput({
           output,
           code: args.code,
           executionId,
-          executionTime: Date.now() - startTime,
+          executionTime,
         });
         setIsRunning(false);
+
+        //Set the output to the window so that it can be accessed by users/developers there
+        //This is useful for debugging
+        if (typeof window !== "undefined") {
+          if (!window[WINDOW_VARIABLE_NAME]) {
+            window[WINDOW_VARIABLE_NAME] = {};
+          }
+          window[WINDOW_VARIABLE_NAME][sourceId] = {
+            output,
+            code: args.code,
+            executionId,
+            executionTime,
+            startTime,
+          };
+        }
       };
 
       if (typeof MessageChannel === "undefined") {

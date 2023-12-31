@@ -1,11 +1,12 @@
-import fs from "fs";
-import util from "util";
-import { OutputMode, run } from "./utils.js";
-
 import { Command } from "@commander-js/extra-typings";
+import fs from "fs";
 import open from "open";
+import util from "util";
+
+import { nodeResultToString } from "../ast/parse.js";
 import { parse } from "../public/parse.js";
 import { red } from "./colors.js";
+import { OutputMode, run } from "./utils.js";
 
 export function makeProgram() {
   const program = new Command();
@@ -69,14 +70,19 @@ export function makeProgram() {
       "-e, --eval <code>",
       "parse a given squiggle code string instead of a file"
     )
+    .option("-s, --short", "output as an S-expression")
     .action((filename, options) => {
       const src = loadSrc({ filename, inline: options.eval });
 
       const parseResult = parse(src);
       if (parseResult.ok) {
-        console.log(
-          util.inspect(parseResult.value, { depth: Infinity, colors: true })
-        );
+        if (options.short) {
+          console.log(nodeResultToString(parseResult));
+        } else {
+          console.log(
+            util.inspect(parseResult.value, { depth: Infinity, colors: true })
+          );
+        }
       } else {
         console.log(red(parseResult.value.toString()));
       }

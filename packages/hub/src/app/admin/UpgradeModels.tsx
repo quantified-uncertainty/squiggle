@@ -2,16 +2,19 @@ import { FC, useState } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { UpgradeModels_updateMutation } from "@/__generated__/UpgradeModels_updateMutation.graphql";
+import { Button } from "@quri/ui";
+import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
+
 import { H2 } from "@/components/ui/Headers";
 import { MutationButton } from "@/components/ui/MutationButton";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { modelRoute } from "@/routes";
-import { defaultSquiggleVersion } from "@quri/versioned-playground";
+
 import { EditSquiggleSnippetModel } from "../models/[owner]/[slug]/EditSquiggleSnippetModel";
+
 import { UpgradeModels$key } from "@/__generated__/UpgradeModels.graphql";
 import { UpgradeModels_List$key } from "@/__generated__/UpgradeModels_List.graphql";
-import { Button } from "@quri/ui";
+import { UpgradeModels_updateMutation } from "@/__generated__/UpgradeModels_updateMutation.graphql";
 
 const ModelList: FC<{ modelsRef: UpgradeModels_List$key }> = ({
   modelsRef,
@@ -133,7 +136,7 @@ export const UpgradeModels: FC<{
       </p>
       <p>
         <strong>
-          {`Code edits won't be saved, "Upgrade" buttton bumps only the model's version.`}
+          {`Code edits won't be saved, "Upgrade" button bumps only the model's version.`}
         </strong>
       </p>
       <div className="space-y-8">

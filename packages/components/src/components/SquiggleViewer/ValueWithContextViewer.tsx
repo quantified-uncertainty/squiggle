@@ -1,215 +1,62 @@
+// make sure all widgets are in registry
+import "../../widgets/index.js";
+
 import { clsx } from "clsx";
-import { FC, ReactNode, useState } from "react";
-import ReactMarkdown from "react-markdown";
+import { FC, PropsWithChildren, useMemo } from "react";
 
-import { SqValuePath } from "@quri/squiggle-lang";
-import {
-  CommentIcon,
-  CodeBracketIcon,
-  TextTooltip,
-  TriangleIcon,
-} from "@quri/ui";
+import { SqValue } from "@quri/squiggle-lang";
+import { CommentIcon, TextTooltip } from "@quri/ui";
 
-import { useEffectRef, useForceUpdate } from "../../lib/hooks/index.js";
+import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
+import { leftWidgetMargin } from "../../widgets/utils.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
+import { CollapsedIcon, ExpandedIcon } from "./icons.js";
+import { SquiggleValueChart } from "./SquiggleValueChart.js";
+import { SquiggleValueMenu } from "./SquiggleValueMenu.js";
+import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
 import {
-  useCollapseChildren,
+  getValueComment,
+  hasExtraContentToShow,
+  pathToShortName,
+} from "./utils.js";
+import {
   useFocus,
   useIsFocused,
-  useSetCollapsed,
+  useMergedSettings,
+  useRegisterAsItemViewer,
   useToggleCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { getSqValueWidget } from "./getSqValueWidget.js";
-import {
-  MergedItemSettings,
-  getChildrenValues,
-  pathToShortName,
-} from "./utils.js";
 
-export type SettingsMenuParams = {
-  // Used to notify this component that settings have changed, so that it could re-render itself.
-  onChange: () => void;
-};
+const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
+  const comment = getValueComment(value);
 
-type Props = {
-  value: SqValueWithContext;
-};
-
-export const ValueWithContextViewer: FC<Props> = ({ value }) => {
-  const { tag } = value;
-  const { path } = value.context;
-
-  const widget = getSqValueWidget(value);
-  const heading = widget.heading || value.publicName();
-  const hasChildren = () => !!getChildrenValues(value);
-  const render: (settings: MergedItemSettings) => ReactNode =
-    (value.tag === "Dict" || value.tag === "Array") && hasChildren()
-      ? (settings) => (
-          <div className="space-y-2 pt-1 mt-1">{widget.render(settings)}</div>
-        )
-      : widget.render;
-
-  const toggleCollapsed_ = useToggleCollapsed();
-  const setCollapsed = useSetCollapsed();
-  const collapseChildren = useCollapseChildren();
-  const focus = useFocus();
-  const { editor, getLocalItemState, getMergedSettings, dispatch } =
-    useViewerContext();
-  const isFocused = useIsFocused(path);
-
-  const findInEditor = () => {
-    const location = value.context.findLocation();
-    editor?.scrollTo(location.start.offset);
-  };
-
-  // Since `ViewerContext` doesn't store settings, this component won't rerender when `setSettings` is called.
-  // So we use `forceUpdate` to force rerendering.
-  const forceUpdate = useForceUpdate();
-
-  const isRoot = path.isRoot();
-
-  // Collapse children and element if desired. Uses crude heuristics.
-  useState(() => {
-    const tagsDefaultCollapsed = new Set(["Bool", "Number", "Void", "Input"]);
-    // TODO - value.size() could be faster.
-    const childrenCount = getChildrenValues(value).length;
-
-    const shouldCollapseChildren = childrenCount > 10;
-
-    function shouldCollapseElement() {
-      if (isRoot) {
-        return childrenCount > 30;
-      } else {
-        return childrenCount > 5 || tagsDefaultCollapsed.has(tag);
-      }
-    }
-
-    if (shouldCollapseChildren) {
-      collapseChildren(value);
-    }
-    if (shouldCollapseElement()) {
-      setCollapsed(path, true);
-    }
-  });
-
-  const settings = getLocalItemState({ path });
-
-  const getAdjustedMergedSettings = (path: SqValuePath) => {
-    const mergedSettings = getMergedSettings({ path });
-    const { chartHeight } = mergedSettings;
-    return {
-      ...mergedSettings,
-      chartHeight: isFocused || isRoot ? chartHeight * 4 : chartHeight,
-    };
-  };
-
-  const toggleCollapsed = () => {
-    toggleCollapsed_(path);
-    forceUpdate();
-  };
-
-  const name = pathToShortName(path);
-
-  // We should switch to ref cleanups after https://github.com/facebook/react/pull/25686 is released.
-  const saveRef = useEffectRef((element: HTMLDivElement) => {
-    dispatch({
-      type: "REGISTER_ITEM_HANDLE",
-      payload: { path, element },
-    });
-
-    return () => {
-      dispatch({
-        type: "UNREGISTER_ITEM_HANDLE",
-        payload: { path },
-      });
-    };
-  });
-
-  const isOpen = isFocused || !settings.collapsed;
-  const _focus = () => !isFocused && !isRoot && focus(path);
-
-  const triangleToggle = () => (
-    <div
-      className="w-4 mr-1.5 flex justify-center cursor-pointer text-stone-300 hover:text-slate-700"
-      onClick={toggleCollapsed}
-    >
-      <TriangleIcon size={12} className={isOpen ? "rotate-180" : "rotate-90"} />
-    </div>
-  );
-
-  const headerClasses = () => {
-    if (isFocused) {
-      return "text-md text-black font-bold ml-1";
-    } else if (isRoot) {
-      return "text-sm text-stone-600 font-semibold";
-    } else {
-      return "text-sm text-stone-800 cursor-pointer hover:underline";
-    }
-  };
-
-  const headerName = (
-    <div className={clsx("font-mono", headerClasses())} onClick={_focus}>
-      {name}
-    </div>
-  );
-  const headerPreview = () =>
-    !!widget.renderPreview && (
-      <div
-        className={clsx(
-          "ml-3 text-sm text-blue-800",
-          isOpen ? "opacity-40" : "opacity-60"
-        )}
-      >
-        {widget.renderPreview()}
-      </div>
-    );
-  const headerFindInEditorButton = () => (
+  return comment ? (
     <div className="ml-3">
-      <TextTooltip text="Show in Editor" placement="bottom">
+      <TextTooltip text={comment} placement="bottom">
         <span>
-          <CodeBracketIcon
-            className={`items-center h-4 w-4 cursor-pointer text-stone-400 opacity-0 group-hover:opacity-100 hover:!text-stone-800 transition`}
-            onClick={() => findInEditor()}
+          <CommentIcon
+            size={13}
+            className="text-purple-100 group-hover:text-purple-300"
           />
         </span>
       </TextTooltip>
     </div>
-  );
-  const headerString = () => (
-    <div className="text-stone-400 group-hover:text-stone-600 text-sm transition">
-      {heading}
-    </div>
-  );
-  const headerSettingsButton = () =>
-    widget.renderSettingsMenu?.({ onChange: forceUpdate });
+  ) : null;
+};
 
-  const leftCollapseBorder = () => (
-    <div
-      className="group w-4 shrink-0 flex justify-center cursor-pointer"
-      onClick={toggleCollapsed}
-    >
-      <div className="w-px bg-stone-200 group-hover:bg-stone-500" />
-    </div>
-  );
+type Props = {
+  value: SqValueWithContext;
+  parentValue?: SqValue;
+};
 
-  const comment = value.context.docstring();
-  const hasComment = comment && comment !== "";
+const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
+  const comment = getValueComment(value);
 
-  const commentIcon = () =>
-    comment && (
-      <div className="ml-3">
-        <TextTooltip text={comment} placement="bottom">
-          <span>
-            <CommentIcon
-              size={13}
-              className="text-purple-100 group-hover:text-purple-300"
-            />
-          </span>
-        </TextTooltip>
-      </div>
-    );
+  if (!comment) {
+    return children;
+  }
 
   const tagsWithTopPosition = new Set([
     "Dict",
@@ -218,55 +65,192 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
     "Plot",
     "String",
   ]);
-  const commentPosition = tagsWithTopPosition.has(tag) ? "top" : "bottom";
+  const commentPosition = tagsWithTopPosition.has(value.tag) ? "top" : "bottom";
 
-  const isDictOrList = tag === "Dict" || tag === "Array";
+  const commentEl = (
+    <div
+      className={clsx(
+        "max-w-4xl",
+        leftWidgetMargin,
+        commentPosition === "bottom" ? "mt-1" : "mb-1"
+      )}
+    >
+      <MarkdownViewer md={comment} textSize="sm" />
+    </div>
+  );
 
-  const showComment = () =>
-    comment && (
-      <ReactMarkdown
-        className={clsx(
-          "prose max-w-4xl text-sm text-slate-800 bg-purple-50 bg-opacity-60 py-2 px-3 mb-2 rounded-md",
-          commentPosition === "bottom" && "mt-2"
-        )}
+  return (
+    // TODO - can be simplified with flex-col-reverse
+    <div>
+      {commentPosition === "top" && commentEl}
+      {children}
+      {commentPosition === "bottom" && commentEl}
+    </div>
+  );
+};
+
+const ValueViewerBody: FC<Props> = ({ value }) => {
+  const { path } = value.context;
+  const isFocused = useIsFocused(path);
+  const isRoot = path.isRoot();
+
+  const mergedSettings = useMergedSettings(path);
+  const adjustedMergedSettings = useMemo(() => {
+    const { chartHeight } = mergedSettings;
+    return {
+      ...mergedSettings,
+      chartHeight: isFocused || isRoot ? chartHeight * 4 : chartHeight,
+    };
+  }, [isFocused, isRoot, mergedSettings]);
+
+  return (
+    <WithComment value={value}>
+      <SquiggleValueChart value={value} settings={adjustedMergedSettings} />
+    </WithComment>
+  );
+};
+
+export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
+  const { tag } = value;
+  const { path } = value.context;
+
+  const toggleCollapsed_ = useToggleCollapsed();
+  const focus = useFocus();
+
+  const { itemStore } = useViewerContext();
+  const itemState = itemStore.getStateOrInitialize(value);
+
+  const isFocused = useIsFocused(path);
+
+  const isRoot = path.isRoot();
+  const taggedName = value.tags.name();
+
+  const toggleCollapsed = () => {
+    toggleCollapsed_(path);
+  };
+
+  const ref = useRegisterAsItemViewer(path);
+
+  const isOpen = isFocused || !itemState.collapsed;
+  const _focus = () => !isFocused && !isRoot && focus(path);
+
+  const triangleToggle = () => {
+    const Icon = isOpen ? ExpandedIcon : CollapsedIcon;
+    const _hasExtraContentToShow = hasExtraContentToShow(value);
+    //Only show triangle if there is content to show, that's not in the header.
+    if (_hasExtraContentToShow) {
+      return (
+        <div
+          className={clsx(
+            "w-4 mr-1.5 flex justify-center cursor-pointer hover:!text-stone-600",
+            isOpen ? "text-stone-300" : "text-stone-400"
+          )}
+          onClick={toggleCollapsed}
+        >
+          <Icon size={13} />
+        </div>
+      );
+    } else {
+      return <div className="w-4 mr-1.5" />;
+    }
+  };
+
+  const getHeaderColor = () => {
+    let color = "text-orange-900";
+    const parentTag = parentValue?.tag;
+    if (parentTag === "Array") {
+      color = "text-stone-400";
+    } else if (path.items.length > 1) {
+      color = "text-teal-700";
+    }
+    return color;
+  };
+
+  const headerColor = getHeaderColor();
+
+  const headerClasses = () => {
+    if (isFocused) {
+      return clsx("text-md font-bold ml-1", headerColor);
+    } else if (isRoot) {
+      return "text-sm text-stone-600 font-semibold";
+    } else {
+      return clsx("text-sm cursor-pointer hover:underline", headerColor);
+    }
+  };
+
+  //We want to show colons after the keys, for dicts/arrays.
+  const showColon = !isFocused && path.items.length > 1;
+  const name = pathToShortName(path);
+  const headerName = (
+    <div className="leading-3">
+      <span
+        className={clsx(!taggedName && "font-mono", headerClasses())}
+        onClick={_focus}
       >
-        {comment}
-      </ReactMarkdown>
-    );
+        {taggedName ? taggedName : name}
+      </span>
+      {showColon && <span className={"text-gray-400 font-mono"}>:</span>}
+    </div>
+  );
+
+  const leftCollapseBorder = () => {
+    if (isRoot) {
+      return null;
+    }
+    const isDictOrList = tag === "Dict" || tag === "Array";
+    if (isDictOrList) {
+      return (
+        <div
+          className="group w-4 shrink-0 flex justify-center cursor-pointer"
+          onClick={toggleCollapsed}
+        >
+          <div className="w-px bg-stone-100 group-hover:bg-stone-400" />
+        </div>
+      );
+    } else {
+      // non-root leaf elements have unclickable padding to align with dict/list elements
+      return <div className="flex w-4 min-w-[1rem]" />; // min-w-1rem = w-4
+    }
+  };
 
   return (
     <ErrorBoundary>
-      <div ref={saveRef}>
-        {(name !== undefined || isRoot) && (
-          <header
+      <div ref={ref} className={clsx(isFocused && "px-2")}>
+        <header
+          className={clsx(
+            "flex justify-between group pr-0.5",
+            isFocused ? "mb-2" : "hover:bg-stone-100 rounded-sm"
+          )}
+        >
+          <div className="inline-flex items-center">
+            {!isFocused && triangleToggle()}
+            {headerName}
+            {!isFocused && !isOpen && (
+              <div
+                className={clsx(
+                  "text-sm text-blue-800",
+                  showColon ? "ml-2" : "ml-5"
+                )}
+              >
+                <SquiggleValuePreview value={value} />
+              </div>
+            )}
+            {!isFocused && !isOpen && <CommentIconForValue value={value} />}
+          </div>
+          <div className="inline-flex space-x-1 items-center">
+            <SquiggleValueMenu value={value} />
+          </div>
+        </header>
+        {isOpen && (
+          <div
             className={clsx(
-              "flex justify-between group",
-              isFocused ? "mb-2" : "hover:bg-stone-100 rounded-md"
+              "flex w-full",
+              Boolean(getValueComment(value)) && "py-2"
             )}
           >
-            <div className="inline-flex items-center">
-              {!isFocused && triangleToggle()}
-              {headerName}
-              {!isFocused && headerPreview()}
-              {!isFocused && !isOpen && commentIcon()}
-              {!isRoot && editor && headerFindInEditorButton()}
-            </div>
-            <div className="inline-flex space-x-1">
-              {isOpen && headerString()}
-              {isOpen && headerSettingsButton()}
-            </div>
-          </header>
-        )}
-        {isOpen && (
-          <div className="flex w-full pt-1">
-            {!isFocused && isDictOrList && leftCollapseBorder()}
-            {!isFocused && !isDictOrList && !isRoot && (
-              <div className="flex w-4 min-w-[1rem]" /> // min-w-1rem = w-4
-            )}
+            {!isFocused && leftCollapseBorder()}
             <div className="grow">
-              {commentPosition === "top" && hasComment && showComment()}
-              {render(getAdjustedMergedSettings(path))}
-              {commentPosition === "bottom" && hasComment && showComment()}
+              <ValueViewerBody value={value} />
             </div>
           </div>
         )}

@@ -47,6 +47,7 @@ e = [1,2,3,4,5,6,7,8,9,10,11]
 b = a + 4
 c = a + 2
 nested = {e: {f: {g1: a, g2: b, g3: {h: {i: a}}}}}
+notNested = {a: 1, b:1, c: [1,2,3,4]}
 e = 6
 t = 7
 y = 7
@@ -186,6 +187,7 @@ varTable = Table.make(
 )
 
 varDist = SampleSet.fromDist(2 to 5)
+varDist2 = SampleSet.fromDist(10E20 to 20E20)
 
 varScatter = Plot.scatter({
   xDist: varDist,
@@ -227,14 +229,16 @@ bar = 123
 \`\`test123\`\`
 "
 `,
-    height: 800,
+    height: 1200,
   },
 };
 
 export const Calculator: Story = {
   name: "Calculator",
   args: {
-    defaultCode: `f(a, b, c, d) = [a,b,c,d]
+    defaultCode: `calculatorCorrectlyUpdatesTest = 343 //changing this should propery update the calculator
+    
+    f(a, b, c, d) =  [a,b,c,d,{|f| normal(f*b, f*b)}]
 a = "A longer description of the calculator goes here...\n"
 Calculator.make(
   {
@@ -247,10 +251,29 @@ Calculator.make(
       Input.text({name: "Variable1", description: "This is a very long description This is a very long description This is a very long description This is a very long description This is a very long description", default: 1}),
       Input.select({name: "Variable3", default: "alice", options: ["alice", "charles", "bob", "bill", "maven", "billy", "samantha", "becky"]})
     ],
-    sampleCount: 1000
+    sampleCount: 1000,
+    autorun: false,
   }
 )
   `,
     height: 800,
+  },
+};
+
+export const Tagged: Story = {
+  name: "Tagged values",
+  args: {
+    defaultCode: `z = 34 -> Tag.format(".1f")
+
+    @name("My favorite Dist")
+    @doc("This is a long description")
+    @format("$.2")
+    x = 5 to 10
+    
+    @showAs(Plot.numericFn)
+    @name("My favorite Fn")
+    fn = {|e| e}
+    
+    y = x -> Tag.all`,
   },
 };

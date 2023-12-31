@@ -1,11 +1,12 @@
 import { BaseDist } from "../../dist/BaseDist.js";
-import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
 import { Env } from "../../dist/env.js";
+import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
+import { clamp, sort, uniq } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
 import { Plot, vPlot } from "../../value/index.js";
-
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
+import { SqPlotValue } from "./index.js";
 import {
   SqDistribution,
   SqSampleSetDistribution,
@@ -13,7 +14,6 @@ import {
 } from "./SqDistribution/index.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqScale, wrapScale } from "./SqScale.js";
-import { SqPlotValue } from "./index.js";
 
 type LabeledSqDistribution = {
   name?: string;
@@ -54,6 +54,23 @@ abstract class SqAbstractPlot<T extends Plot["type"]> {
   get title(): string | undefined {
     return this._value.title;
   }
+}
+
+function getXPointsWithParams(
+  points: number[] | undefined,
+  {
+    min,
+    max,
+    requestedXPoints,
+  }: {
+    min?: number;
+    max?: number;
+    requestedXPoints?: number[];
+  }
+) {
+  const combinedPoints = [...(requestedXPoints || []), ...(points || [])];
+  //Technically, we don't need sort(uniq()) if it's just ``points``, but it's not worth the extra logic to avoid it.
+  return sort(uniq(clamp(combinedPoints, { min, max })));
 }
 
 export class SqDistributionsPlot extends SqAbstractPlot<"distributions"> {
@@ -112,13 +129,13 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
     fn,
     xScale,
     yScale,
-    points,
+    xPoints,
     title,
   }: {
     fn: SqLambda;
     xScale: SqScale;
     yScale: SqScale;
-    points?: number;
+    xPoints?: number[];
     title?: string;
   }) {
     const result = new SqNumericFnPlot(
@@ -128,7 +145,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
         xScale: xScale._value,
         yScale: yScale._value,
         title: title,
-        points,
+        xPoints,
       },
       fn.context
     );
@@ -155,8 +172,12 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
     return wrapScale(this._value.yScale);
   }
 
-  get points(): number | undefined {
-    return this._value.points;
+  xPoints(params: {
+    min?: number;
+    max?: number;
+    requestedXPoints?: number[];
+  }): number[] {
+    return getXPointsWithParams(this._value.xPoints, params);
   }
 
   override toString() {
@@ -175,14 +196,14 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
     yScale,
     distXScale,
     title,
-    points,
+    xPoints,
   }: {
     fn: SqLambda;
     xScale: SqScale;
     yScale: SqScale;
     distXScale: SqScale;
     title?: string;
-    points?: number;
+    xPoints?: number[];
   }) {
     const result = new SqDistFnPlot(
       {
@@ -192,7 +213,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
         yScale: yScale._value,
         distXScale: distXScale._value,
         title: title,
-        points,
+        xPoints,
       },
       fn.context
     );
@@ -223,8 +244,12 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
     return wrapScale(this._value.distXScale);
   }
 
-  get points(): number | undefined {
-    return this._value.points;
+  xPoints(params: {
+    min?: number;
+    max?: number;
+    requestedXPoints?: number[];
+  }): number[] {
+    return getXPointsWithParams(this._value.xPoints, params);
   }
 
   override toString() {
@@ -282,7 +307,7 @@ export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
 export class SqRelativeValuesPlot extends SqAbstractPlot<"relativeValues"> {
   tag = "relativeValues" as const;
 
-  get ids(): string[] {
+  get ids(): readonly string[] {
     return this._value.ids;
   }
 

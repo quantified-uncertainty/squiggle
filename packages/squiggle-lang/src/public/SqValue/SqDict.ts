@@ -1,5 +1,4 @@
 import { ValueMap, vDict } from "../../value/index.js";
-
 import { SqValueContext } from "../SqValueContext.js";
 import { SqDictValue, SqValue, wrapValue } from "./index.js";
 
@@ -9,7 +8,7 @@ export class SqDict {
     public context?: SqValueContext
   ) {}
 
-  entries() {
+  entries(): [string, SqValue][] {
     return [...this._value.entries()].map(
       ([k, v]) =>
         [

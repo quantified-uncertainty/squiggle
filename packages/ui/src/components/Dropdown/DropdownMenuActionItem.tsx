@@ -1,10 +1,12 @@
 import { FC } from "react";
+
 import {
   DropdownMenuItemLayout,
   ItemLayoutProps,
 } from "./DropdownMenuItemLayout.js";
 
 type ActionItemProps = ItemLayoutProps & {
+  // If you want to close the dropdown on action, obtain the close function through `useCloseDropdown()` and call it in `onClick`.
   onClick(): void;
 };
 

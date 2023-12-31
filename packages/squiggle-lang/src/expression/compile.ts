@@ -37,15 +37,21 @@ function resolveName(
   context: CompileContext,
   ast: ASTNode,
   name: string
-): expression.ExpressionContent {
+): expression.Expression {
   const offset = context.nameToPos.get(name);
   if (offset !== undefined) {
-    return expression.eResolvedSymbol(name, context.size - 1 - offset);
+    return {
+      ast,
+      ...expression.eResolvedSymbol(name, context.size - 1 - offset),
+    };
   }
 
   const value = context.externals.get(name);
   if (value !== undefined) {
-    return expression.eValue(value);
+    return {
+      ast,
+      ...expression.eValue(value),
+    };
   }
 
   throw new ICompileError(`${name} is not defined`, ast.location);
@@ -99,12 +105,18 @@ function compileToContent(
           currentContext
         );
         statements.push(statement);
-        if (
-          (astStatement.type === "LetStatement" ||
-            astStatement.type === "DefunStatement") &&
-          astStatement.exported
-        ) {
-          exports.push(astStatement.variable.value);
+        {
+          let maybeExportedStatement = astStatement;
+          while (maybeExportedStatement.type === "DecoratedStatement") {
+            maybeExportedStatement = maybeExportedStatement.statement;
+          }
+          if (
+            (maybeExportedStatement.type === "LetStatement" ||
+              maybeExportedStatement.type === "DefunStatement") &&
+            maybeExportedStatement.exported
+          ) {
+            exports.push(maybeExportedStatement.variable.value);
+          }
         }
         currentContext = newContext;
       }
@@ -126,6 +138,45 @@ function compileToContent(
         newContext,
       ];
     }
+    case "DecoratedStatement": {
+      // First, compile the inner statement.
+      // `newContext` includes the new binding.
+      const [innerExpression, newContext] = innerCompileAst(
+        ast.statement,
+        context
+      );
+      if (innerExpression.type !== "Assign") {
+        // Shouldn't happen, `ast.statement` is always compiled to `Assign`
+        throw new ICompileError(
+          "Can't apply a decorator to non-Assign expression",
+          ast.location
+        );
+      }
+      // Then wrap it in a function call.
+      const decoratorFn = resolveName(
+        context,
+        ast,
+        `Tag.${ast.decorator.name.value}`
+      );
+      return [
+        expression.eLetStatement(innerExpression.value.left, {
+          ast: ast.statement,
+          ...expression.eCall(
+            decoratorFn,
+            [
+              innerExpression.value.right,
+              ...ast.decorator.args.map(
+                (arg) => innerCompileAst(arg, context)[0]
+              ),
+            ],
+            "decorate"
+          ),
+        }),
+        newContext,
+      ];
+    }
+    case "Decorator":
+      throw new ICompileError("Can't compile Decorator node", ast.location);
     case "Call": {
       return [
         expression.eCall(
@@ -138,7 +189,7 @@ function compileToContent(
     case "InfixCall": {
       return [
         expression.eCall(
-          { ast, ...resolveName(context, ast, infixFunctions[ast.op]) },
+          resolveName(context, ast, infixFunctions[ast.op]),
           ast.args.map((arg) => innerCompileAst(arg, context)[0])
         ),
         context,
@@ -146,10 +197,9 @@ function compileToContent(
     }
     case "UnaryCall":
       return [
-        expression.eCall(
-          { ast, ...resolveName(context, ast, unaryFunctions[ast.op]) },
-          [innerCompileAst(ast.arg, context)[0]]
-        ),
+        expression.eCall(resolveName(context, ast, unaryFunctions[ast.op]), [
+          innerCompileAst(ast.arg, context)[0],
+        ]),
         context,
       ];
     case "Pipe":
@@ -162,24 +212,18 @@ function compileToContent(
       ];
     case "DotLookup":
       return [
-        expression.eCall(
-          { ast, ...resolveName(context, ast, INDEX_LOOKUP_FUNCTION) },
-          [
-            innerCompileAst(ast.arg, context)[0],
-            { ast, ...expression.eValue(vString(ast.key)) },
-          ]
-        ),
+        expression.eCall(resolveName(context, ast, INDEX_LOOKUP_FUNCTION), [
+          innerCompileAst(ast.arg, context)[0],
+          { ast, ...expression.eValue(vString(ast.key)) },
+        ]),
         context,
       ];
     case "BracketLookup":
       return [
-        expression.eCall(
-          { ast, ...resolveName(context, ast, INDEX_LOOKUP_FUNCTION) },
-          [
-            innerCompileAst(ast.arg, context)[0],
-            innerCompileAst(ast.key, context)[0],
-          ]
-        ),
+        expression.eCall(resolveName(context, ast, INDEX_LOOKUP_FUNCTION), [
+          innerCompileAst(ast.arg, context)[0],
+          innerCompileAst(ast.key, context)[0],
+        ]),
         context,
       ];
     case "Lambda": {
@@ -259,10 +303,7 @@ function compileToContent(
             } else if (kv.type === "Identifier") {
               // shorthand
               const key = { ast: kv, ...expression.eValue(vString(kv.value)) };
-              const value = {
-                ast: kv,
-                ...resolveName(context, kv, kv.value),
-              };
+              const value = resolveName(context, kv, kv.value);
               return [key, value];
             } else {
               throw new Error(
@@ -305,9 +346,7 @@ function compileToContent(
     case "UnitValue": {
       const fromUnitFn = resolveName(context, ast, `fromUnit_${ast.unit}`);
       return [
-        expression.eCall({ ast, ...fromUnitFn }, [
-          innerCompileAst(ast.value, context)[0],
-        ]),
+        expression.eCall(fromUnitFn, [innerCompileAst(ast.value, context)[0]]),
         context,
       ];
     }
@@ -317,8 +356,10 @@ function compileToContent(
         "Can't compile IdentifierWithAnnotation outside of lambda declaration",
         ast.location
       );
-    default:
-      throw new Error(`Unsupported AST value ${ast satisfies never}`);
+    default: {
+      const badAst = ast satisfies never;
+      throw new Error(`Unsupported AST value ${JSON.stringify(badAst)}`);
+    }
   }
 }
 

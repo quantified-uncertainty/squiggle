@@ -2,9 +2,11 @@
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 
-import { ModelList$key } from "@/__generated__/ModelList.graphql";
 import { LoadMore } from "@/components/LoadMore";
+
 import { ModelCard } from "./ModelCard";
+
+import { ModelList$key } from "@/__generated__/ModelList.graphql";
 
 const Fragment = graphql`
   fragment ModelList on ModelConnection {

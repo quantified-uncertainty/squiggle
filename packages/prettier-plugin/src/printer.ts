@@ -143,6 +143,28 @@ export function createSquigglePrinter(
             ? content
             : group(["{", indent([line, content]), line, "}"]);
         }
+        case "DecoratedStatement":
+          return [
+            typedPath(node).call(print, "decorator"),
+            hardline,
+            typedPath(node).call(print, "statement"),
+          ];
+        case "Decorator":
+          return group([
+            "@",
+            typedPath(node).call(print, "name"),
+            node.args.length
+              ? [
+                  "(",
+                  indent([
+                    softline,
+                    join([",", line], typedPath(node).map(print, "args")),
+                  ]),
+                  softline,
+                  ")",
+                ]
+              : [],
+          ]);
         case "LetStatement":
           return group([
             node.exported ? "export " : "",
@@ -231,10 +253,12 @@ export function createSquigglePrinter(
               node,
               node.leftArg
             ),
-            " ->",
-            line,
-            printChild(typedPath(node).call(print, "fn"), node, node.fn),
-            args,
+            indent([
+              line,
+              "-> ",
+              printChild(typedPath(node).call(print, "fn"), node, node.fn),
+              args,
+            ]),
           ]);
         }
         case "DotLookup":
@@ -285,7 +309,7 @@ export function createSquigglePrinter(
                   join([",", line], typedPath(node).map(print, "args")),
                 ]),
                 softline,
-                "|",
+                "| ",
               ]),
               softline,
               path.call(print, "body"),
@@ -326,8 +350,6 @@ export function createSquigglePrinter(
         case "lineComment":
         case "blockComment":
           throw new Error("Didn't expect comment node in print()");
-        default:
-          throw new Error(`Unsupported node type ${node satisfies never}`);
       }
     },
     printComment: (path: AstPath<ASTCommentNode>) => {

@@ -1,11 +1,14 @@
+import { InputObjectRef } from "@pothos/core";
+import { ZodError } from "zod";
+
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
-import { InputObjectRef } from "@pothos/core";
+
 import { rethrowOnConstraint } from "../errors/common";
-import { getWriteableOwner, getWriteableOwnerBySlug } from "../types/Owner";
+import { getWriteableOwner } from "../helpers/ownerHelpers";
+import { indexDefinitionId } from "../helpers/searchHelpers";
 import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
 import { validateSlug } from "../utils";
-import { ZodError } from "zod";
 
 const validateColor = { regex: /^#[0-9a-fA-F]{6}$/ };
 
@@ -171,6 +174,8 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
 
         return definition;
       });
+
+      await indexDefinitionId(definition.id);
 
       return { definition };
     },

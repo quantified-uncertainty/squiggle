@@ -10,6 +10,7 @@ import {
   scaleMultiply,
   scalePower,
 } from "../dist/distOperations/scaleOperations.js";
+import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
@@ -17,21 +18,20 @@ import {
   frAny,
   frArray,
   frDist,
+  frDistPointset,
   frLambda,
   frNumber,
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
-  unpackDistResult,
-  distResultToValue,
-  makeTwoArgsDist,
-  makeOneArgDist,
+  makeOneArgSamplesetDist,
+  makeTwoArgsSamplesetDist,
+  unwrapDistResult,
 } from "../library/registry/helpers.js";
 import { ReducerContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
-import { Value, vArray, vNumber } from "../value/index.js";
-import * as SymbolicDist from "../dist/SymbolicDist.js";
+import { vArray, vNumber } from "../value/index.js";
 
 const { factorial } = jstat;
 
@@ -40,21 +40,20 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
-function combinations<T>(arr: T[], k: number): T[][] {
+function combinations<T>(arr: readonly T[], k: number): (readonly T[])[] {
   if (k === 0) return [[]];
   if (k === arr.length) return [arr];
 
   const withoutFirst = combinations(arr.slice(1), k);
-  const withFirst = combinations(arr.slice(1), k - 1).map((comb) => [
-    arr[0],
-    ...comb,
-  ]);
+  const withFirst: (readonly T[])[] = combinations(arr.slice(1), k - 1).map(
+    (comb) => [arr[0], ...comb]
+  );
 
   return withFirst.concat(withoutFirst);
 }
 
-function allCombinations<T>(arr: T[]): T[][] {
-  let allCombs: T[][] = [];
+function allCombinations<T>(arr: readonly T[]): (readonly T[])[] {
+  let allCombs: (readonly T[])[] = [];
   for (let k = 1; k <= arr.length; k++) {
     allCombs = allCombs.concat(combinations(arr, k));
   }
@@ -85,8 +84,10 @@ const combinatoricsLibrary: FRFunction[] = [
     output: "Number",
     examples: [`Danger.binomial(1, 20, 0.5)`],
     definitions: [
-      makeDefinition([frNumber, frNumber, frNumber], ([n, k, p]) =>
-        vNumber(choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k))
+      makeDefinition(
+        [frNumber, frNumber, frNumber],
+        frNumber,
+        ([n, k, p]) => choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k)
       ),
     ],
   }),
@@ -98,7 +99,7 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
   max: number,
   numIntegrationPoints: number,
   context: ReducerContext
-): Value => {
+): number => {
   const applyFunctionAtFloatToFloatOption = (point: number) => {
     // Defined here so that it has access to context, reducer
     const result = lambda.call([vNumber(point)], context);
@@ -158,7 +159,7 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
   const result =
     (yMin + yMax) * weightForAnOuterPoint +
     innerPointsSum * weightForAnInnerPoint;
-  return vNumber(result);
+  return result;
 };
 const integrationLibrary: FRFunction[] = [
   // Integral in terms of function, min, max, num points
@@ -178,6 +179,7 @@ const integrationLibrary: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frLambda, frNumber, frNumber, frNumber],
+        frNumber,
         ([lambda, min, max, numIntegrationPoints], context) => {
           if (numIntegrationPoints === 0) {
             throw new REOther(
@@ -209,6 +211,8 @@ const integrationLibrary: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frLambda, frNumber, frNumber, frNumber],
+
+        frNumber,
         ([lambda, min, max, epsilon], context) => {
           if (epsilon === 0) {
             throw new REOther(
@@ -248,6 +252,7 @@ const diminishingReturnsLibrary = [
     definitions: [
       makeDefinition(
         [frArray(frLambda), frNumber, frNumber],
+        frAny(),
         ([lambdas, funds, approximateIncrement], context) => {
           // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/context.
           /*
@@ -356,23 +361,24 @@ const diminishingReturnsLibrary = [
 const mapYLibrary: FRFunction[] = [
   maker.d2d({
     name: "mapYLog",
-    fn: (dist, env) => unpackDistResult(scaleLog(dist, Math.E, { env })),
+    fn: (dist, env) => unwrapDistResult(scaleLog(dist, Math.E, { env })),
   }),
   maker.d2d({
     name: "mapYLog10",
-    fn: (dist, env) => unpackDistResult(scaleLog(dist, 10, { env })),
+    fn: (dist, env) => unwrapDistResult(scaleLog(dist, 10, { env })),
   }),
   maker.dn2d({
     name: "mapYLog",
-    fn: (dist, x, env) => unpackDistResult(scaleLog(dist, x, { env })),
+    fn: (dist, x, env) => unwrapDistResult(scaleLog(dist, x, { env })),
   }),
   maker.make({
     name: "mapYLogWithThreshold",
     definitions: [
       makeDefinition(
         [frDist, frNumber, frNumber],
+        frDistPointset,
         ([dist, base, eps], { environment }) =>
-          distResultToValue(
+          unwrapDistResult(
             scaleLogWithThreshold(dist, {
               env: environment,
               eps,
@@ -385,47 +391,64 @@ const mapYLibrary: FRFunction[] = [
   maker.make({
     name: "combinations",
     definitions: [
-      makeDefinition([frArray(frAny), frNumber], ([elements, n]) => {
-        if (n > elements.length) {
-          throw new REArgumentError(
-            `Combinations of length ${n} were requested, but full list is only ${elements.length} long.`
-          );
+      makeDefinition(
+        [frArray(frAny({ genericName: "A" })), frNumber],
+        frArray(frArray(frAny({ genericName: "A" }))),
+        ([elements, n]) => {
+          if (n > elements.length) {
+            throw new REArgumentError(
+              `Combinations of length ${n} were requested, but full list is only ${elements.length} long.`
+            );
+          }
+          return combinations(elements, n);
         }
-        return vArray(combinations(elements, n).map((v) => vArray(v)));
-      }),
+      ),
     ],
   }),
   maker.make({
     name: "allCombinations",
     definitions: [
-      makeDefinition([frArray(frAny)], ([elements]) => {
-        return vArray(allCombinations(elements).map((v) => vArray(v)));
-      }),
+      makeDefinition(
+        [frArray(frAny({ genericName: "A" }))],
+        frArray(frArray(frAny({ genericName: "A" }))),
+        ([elements]) => {
+          return allCombinations(elements);
+        }
+      ),
     ],
   }),
   maker.dn2d({
     name: "mapYMultiply",
-    fn: (dist, f, env) => unpackDistResult(scaleMultiply(dist, f, { env })),
+    fn: (dist, f, env) => unwrapDistResult(scaleMultiply(dist, f, { env })),
   }),
   maker.dn2d({
     name: "mapYPow",
-    fn: (dist, f, env) => unpackDistResult(scalePower(dist, f, { env })),
+    fn: (dist, f, env) => unwrapDistResult(scalePower(dist, f, { env })),
   }),
   maker.d2d({
     name: "mapYExp",
     // TODO - shouldn't it be other way around, e^value?
-    fn: (dist, env) => unpackDistResult(scalePower(dist, Math.E, { env })),
+    fn: (dist, env) => unwrapDistResult(scalePower(dist, Math.E, { env })),
   }),
   maker.make({
     name: "binomialDist",
     examples: ["Danger.binomialDist(8, 0.5)"],
-    definitions: [makeTwoArgsDist((n, p) => SymbolicDist.Binomial.make(n, p))],
+    definitions: [
+      makeTwoArgsSamplesetDist(
+        (n, p) => SymbolicDist.Binomial.make(n, p),
+        "numberOfTrials",
+        "probabilityOfSuccess"
+      ),
+    ],
   }),
   maker.make({
     name: "poissonDist",
     examples: ["Danger.poissonDist(10)"],
     definitions: [
-      makeOneArgDist((lambda) => SymbolicDist.Poisson.make(lambda)),
+      makeOneArgSamplesetDist(
+        (lambda) => SymbolicDist.Poisson.make(lambda),
+        "rate"
+      ),
     ],
   }),
 ];

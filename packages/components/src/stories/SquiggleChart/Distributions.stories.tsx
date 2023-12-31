@@ -90,6 +90,17 @@ export const CustomTickFormat: Story = {
   },
 };
 
+export const DateTickFormat: Story = {
+  name: "Date tick format",
+  args: {
+    code: `Plot.dist({
+  dist: normal(50000000000,20000000000),
+  title: "Beta(3, 5)",
+  xScale: Scale.date({ tickFormat: "%Y-%m-%d" , title: "X Scale"}),
+})`,
+  },
+};
+
 export const Mixed: Story = {
   name: "Mixed",
   args: {

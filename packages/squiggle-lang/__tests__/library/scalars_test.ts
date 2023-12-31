@@ -1,5 +1,6 @@
-import { testRun } from "../helpers/helpers.js";
 import * as fc from "fast-check";
+
+import { testRun } from "../helpers/helpers.js";
 
 describe("Scalar manipulation is well-modeled by javascript math", () => {
   test("in the case of natural logarithms", () => {

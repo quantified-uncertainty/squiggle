@@ -1,19 +1,21 @@
 import SchemaBuilder from "@pothos/core";
-
 import ErrorsPlugin from "@pothos/plugin-errors";
 import PrismaPlugin from "@pothos/plugin-prisma";
+import type PrismaTypes from "@pothos/plugin-prisma/generated";
 import RelayPlugin from "@pothos/plugin-relay";
 import ScopeAuthPlugin from "@pothos/plugin-scope-auth";
 import SimpleObjectsPlugin from "@pothos/plugin-simple-objects";
 import ValidationPlugin from "@pothos/plugin-validation";
 import WithInputPlugin from "@pothos/plugin-with-input";
-
-import type PrismaTypes from "@pothos/plugin-prisma/generated";
-
 import { Session } from "next-auth";
 import { NextRequest } from "next/server";
 
 import { prisma } from "@/prisma";
+
+import {
+  getMyMembershipById,
+  getMyMembershipBySlug,
+} from "./helpers/groupHelpers";
 
 type Context = {
   session: Session | null;
@@ -31,7 +33,9 @@ export type HubSchemaTypes = {
   AuthScopes: {
     signedIn: boolean;
     isRootUser: boolean;
-    controlsOwnerId: string | null;
+    isGroupAdmin: string;
+    isGroupAdminBySlug: string;
+    controlsOwnerId: string;
   };
   AuthContexts: {
     // https://pothos-graphql.dev/docs/plugins/scope-auth#change-context-types-based-on-scopes
@@ -76,12 +80,20 @@ export const builder = new SchemaBuilder<HubSchemaTypes>({
       // See also: `isRootUser` function in `types/User.ts`.
       return !!(email && process.env.ROOT_EMAILS?.includes(email));
     },
+    isGroupAdmin: async (groupId) => {
+      const myMembership = await getMyMembershipById(groupId, context.session);
+      return myMembership?.role === "Admin";
+    },
+    isGroupAdminBySlug: async (groupSlug) => {
+      const myMembership = await getMyMembershipBySlug(
+        groupSlug,
+        context.session
+      );
+      return myMembership?.role === "Admin";
+    },
     controlsOwnerId: async (ownerId) => {
       if (!context.session) {
         return false;
-      }
-      if (!ownerId) {
-        return false; // we're migrating to new ownerIds and ownerIds are nullable for now
       }
       return Boolean(
         await prisma.owner.count({

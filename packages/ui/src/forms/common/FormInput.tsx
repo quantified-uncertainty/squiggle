@@ -4,8 +4,8 @@ import {
   FieldPath,
   FieldValues,
   RegisterOptions,
-  UseFormRegisterReturn,
   useFormContext,
+  UseFormRegisterReturn,
 } from "react-hook-form";
 
 import { WithRHFError } from "./WithRHFError.js";

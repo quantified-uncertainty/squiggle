@@ -1,36 +1,40 @@
+import intersection from "lodash/intersection.js";
+import last from "lodash/last.js";
+
 import { BaseDist } from "../../dist/BaseDist.js";
 import { DistError } from "../../dist/DistError.js";
-import { PointMass } from "../../dist/SymbolicDist.js";
 import { Env } from "../../dist/env.js";
+import * as SampleSetDist from "../../dist/SampleSetDist/index.js";
+import * as SymbolicDist from "../../dist/SymbolicDist.js";
+import { PointMass } from "../../dist/SymbolicDist.js";
 import {
+  REArgumentError,
   REDistributionError,
   REOperationError,
   REOther,
 } from "../../errors/messages.js";
-import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
+import {
+  OtherOperationError,
+  SampleMapNeedsNtoNFunction,
+} from "../../operationError.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
+import { upTo } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
-import {
-  Value,
-  vArray,
-  vBool,
-  vDist,
-  vNumber,
-  vString,
-} from "../../value/index.js";
+import { Input, Value } from "../../value/index.js";
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
 import {
   frBool,
   frDist,
   frDistOrNumber,
+  frNamed,
   frNumber,
+  frSampleSetDist,
   frString,
+  FRType,
+  isOptional,
 } from "./frTypes.js";
-import * as SampleSetDist from "../../dist/SampleSetDist/index.js";
-import * as SymbolicDist from "../../dist/SymbolicDist.js";
-import { OtherOperationError } from "../../operationError.js";
 
 type SimplifiedArgs = Omit<FRFunction, "nameSpace" | "requiresNamespace"> &
   Partial<Pick<FRFunction, "nameSpace" | "requiresNamespace">>;
@@ -51,6 +55,7 @@ export class FnFactory {
       nameSpace: this.nameSpace,
       requiresNamespace: this.requiresNamespace,
       ...args,
+      isUnit: args.isUnit ?? false,
     };
   }
 
@@ -61,7 +66,7 @@ export class FnFactory {
     return this.make({
       ...args,
       output: "Number",
-      definitions: [makeDefinition([frNumber], ([x]) => vNumber(fn(x)))],
+      definitions: [makeDefinition([frNumber], frNumber, ([x]) => fn(x))],
     });
   }
 
@@ -75,7 +80,7 @@ export class FnFactory {
       ...args,
       output: "Number",
       definitions: [
-        makeDefinition([frNumber, frNumber], ([x, y]) => vNumber(fn(x, y))),
+        makeDefinition([frNumber, frNumber], frNumber, ([x, y]) => fn(x, y)),
       ],
     });
   }
@@ -90,7 +95,7 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition([frNumber, frNumber], ([x, y]) => vBool(fn(x, y))),
+        makeDefinition([frNumber, frNumber], frBool, ([x, y]) => fn(x, y)),
       ],
     });
   }
@@ -105,7 +110,7 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition([frBool, frBool], ([x, y]) => vBool(fn(x, y))),
+        makeDefinition([frBool, frBool], frBool, ([x, y]) => fn(x, y)),
       ],
     });
   }
@@ -120,7 +125,7 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition([frString, frString], ([x, y]) => vBool(fn(x, y))),
+        makeDefinition([frString, frString], frBool, ([x, y]) => fn(x, y)),
       ],
     });
   }
@@ -135,7 +140,7 @@ export class FnFactory {
       ...args,
       output: "String",
       definitions: [
-        makeDefinition([frString, frString], ([x, y]) => vString(fn(x, y))),
+        makeDefinition([frString, frString], frString, ([x, y]) => fn(x, y)),
       ],
     });
   }
@@ -150,8 +155,8 @@ export class FnFactory {
       ...args,
       output: "String",
       definitions: [
-        makeDefinition([frDist], ([dist], { environment }) =>
-          vString(fn(dist, environment))
+        makeDefinition([frDist], frString, ([dist], { environment }) =>
+          fn(dist, environment)
         ),
       ],
     });
@@ -167,8 +172,10 @@ export class FnFactory {
       ...args,
       output: "String",
       definitions: [
-        makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
-          vString(fn(dist, n, environment))
+        makeDefinition(
+          [frDist, frNumber],
+          frString,
+          ([dist, n], { environment }) => fn(dist, n, environment)
         ),
       ],
     });
@@ -184,8 +191,8 @@ export class FnFactory {
       ...args,
       output: "Number",
       definitions: [
-        makeDefinition([frDist], ([x], { environment }) =>
-          vNumber(fn(x, environment))
+        makeDefinition([frDist], frNumber, ([x], { environment }) =>
+          fn(x, environment)
         ),
       ],
     });
@@ -201,8 +208,8 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition([frDist], ([x], { environment }) =>
-          vBool(fn(x, environment))
+        makeDefinition([frDist], frBool, ([x], { environment }) =>
+          fn(x, environment)
         ),
       ],
     });
@@ -218,8 +225,8 @@ export class FnFactory {
       ...args,
       output: "Dist",
       definitions: [
-        makeDefinition([frDist], ([dist], { environment }) =>
-          vDist(fn(dist, environment))
+        makeDefinition([frDist], frDist, ([dist], { environment }) =>
+          fn(dist, environment)
         ),
       ],
     });
@@ -235,8 +242,10 @@ export class FnFactory {
       ...args,
       output: "Dist",
       definitions: [
-        makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
-          vDist(fn(dist, n, environment))
+        makeDefinition(
+          [frDist, frNumber],
+          frDist,
+          ([dist, n], { environment }) => fn(dist, n, environment)
         ),
       ],
     });
@@ -252,8 +261,10 @@ export class FnFactory {
       ...args,
       output: "Number",
       definitions: [
-        makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
-          vNumber(fn(dist, n, environment))
+        makeDefinition(
+          [frDist, frNumber],
+          frNumber,
+          ([dist, n], { environment }) => fn(dist, n, environment)
         ),
       ],
     });
@@ -267,18 +278,11 @@ export class FnFactory {
   }
 }
 
-export function unpackDistResult<T>(result: Result.result<T, DistError>): T {
+export function unwrapDistResult<T>(result: Result.result<T, DistError>): T {
   if (!result.ok) {
     throw new REDistributionError(result.value);
   }
   return result.value;
-}
-
-export function repackDistResult(
-  result: Result.result<BaseDist, DistError>
-): Value {
-  const dist = unpackDistResult(result);
-  return vDist(dist);
 }
 
 export function doNumberLambdaCall(
@@ -306,25 +310,7 @@ export function doBinaryLambdaCall(
 }
 
 export const parseDistFromDistOrNumber = (d: number | BaseDist): BaseDist =>
-  typeof d == "number" ? Result.getExt(PointMass.make(d)) : d;
-
-export function distResultToValue(
-  result: Result.result<BaseDist, DistError>
-): Value {
-  if (!result.ok) {
-    throw new REDistributionError(result.value);
-  }
-  return vDist(result.value);
-}
-
-export function distsResultToValue(
-  result: Result.result<BaseDist[], DistError>
-): Value {
-  if (!result.ok) {
-    throw new REDistributionError(result.value);
-  }
-  return vArray(result.value.map((r) => vDist(r)));
-}
+  typeof d === "number" ? Result.getExt(PointMass.make(d)) : d;
 
 export function makeSampleSet(d: BaseDist, env: Env) {
   const result = SampleSetDist.SampleSetDist.fromDist(d, env);
@@ -342,7 +328,7 @@ export function twoVarSample(
     v1: number,
     v2: number
   ) => Result.result<SymbolicDist.SymbolicDist, string>
-): Value {
+): SampleSetDist.SampleSetDist {
   const sampleFn = (a: number, b: number) =>
     Result.fmap2(
       fn(a, b),
@@ -353,7 +339,7 @@ export function twoVarSample(
   if (v1 instanceof BaseDist && v2 instanceof BaseDist) {
     const s1 = makeSampleSet(v1, env);
     const s2 = makeSampleSet(v2, env);
-    return distResultToValue(
+    return unwrapDistResult(
       SampleSetDist.map2({
         fn: sampleFn,
         t1: s1,
@@ -362,53 +348,171 @@ export function twoVarSample(
     );
   } else if (v1 instanceof BaseDist && typeof v2 === "number") {
     const s1 = makeSampleSet(v1, env);
-    return distResultToValue(s1.samplesMap((a) => sampleFn(a, v2)));
+    return unwrapDistResult(s1.samplesMap((a) => sampleFn(a, v2)));
   } else if (typeof v1 === "number" && v2 instanceof BaseDist) {
     const s2 = makeSampleSet(v2, env);
-    return distResultToValue(s2.samplesMap((a) => sampleFn(v1, a)));
+    return unwrapDistResult(s2.samplesMap((a) => sampleFn(v1, a)));
   } else if (typeof v1 === "number" && typeof v2 === "number") {
     const result = fn(v1, v2);
     if (!result.ok) {
       throw new REOther(result.value);
     }
-    return vDist(makeSampleSet(result.value, env));
+    return makeSampleSet(result.value, env);
   }
   throw new REOther("Impossible branch");
 }
 
-export function makeTwoArgsDist(
+export function makeTwoArgsSamplesetDist(
   fn: (
     v1: number,
     v2: number
-  ) => Result.result<SymbolicDist.SymbolicDist, string>
+  ) => Result.result<SymbolicDist.SymbolicDist, string>,
+  name1: string,
+  name2: string
 ) {
   return makeDefinition(
-    [frDistOrNumber, frDistOrNumber],
+    [frNamed(name1, frDistOrNumber), frNamed(name2, frDistOrNumber)],
+    frSampleSetDist,
     ([v1, v2], { environment }) => twoVarSample(v1, v2, environment, fn)
   );
 }
 
-export function makeOneArgDist(
-  fn: (v: number) => Result.result<SymbolicDist.SymbolicDist, string>
+export function makeOneArgSamplesetDist(
+  fn: (v: number) => Result.result<SymbolicDist.SymbolicDist, string>,
+  name: string
 ) {
-  return makeDefinition([frDistOrNumber], ([v], { environment }) => {
-    const sampleFn = (a: number) =>
-      Result.fmap2(
-        fn(a),
-        (d) => d.sample(),
-        (e) => new OtherOperationError(e)
-      );
+  return makeDefinition(
+    [frNamed(name, frDistOrNumber)],
+    frSampleSetDist,
+    ([v], { environment }) => {
+      const sampleFn = (a: number) =>
+        Result.fmap2(
+          fn(a),
+          (d) => d.sample(),
+          (e) => new OtherOperationError(e)
+        );
 
-    if (v instanceof BaseDist) {
-      const s = makeSampleSet(v, environment);
-      return distResultToValue(s.samplesMap(sampleFn));
-    } else if (typeof v === "number") {
-      const result = fn(v);
-      if (!result.ok) {
-        throw new REOther(result.value);
+      if (v instanceof BaseDist) {
+        const s = makeSampleSet(v, environment);
+        return unwrapDistResult(s.samplesMap(sampleFn));
+      } else if (typeof v === "number") {
+        const result = fn(v);
+        if (!result.ok) {
+          throw new REOther(result.value);
+        }
+        return makeSampleSet(result.value, environment);
       }
-      return vDist(makeSampleSet(result.value, environment));
+      throw new REOther("Impossible branch");
     }
-    throw new REOther("Impossible branch");
+  );
+}
+
+function createComparisonDefinition<T>(
+  fnFactory: FnFactory,
+  opName: string,
+  comparisonFunction: (d1: T, d2: T) => boolean,
+  frType: FRType<T>
+): FRFunction {
+  return fnFactory.make({
+    name: opName,
+    definitions: [
+      makeDefinition([frType, frType], frBool, ([d1, d2]) =>
+        comparisonFunction(d1, d2)
+      ),
+    ],
   });
+}
+
+export function makeNumericComparisons<T>(
+  fnFactory: FnFactory,
+  smaller: (d1: T, d2: T) => boolean,
+  larger: (d1: T, d2: T) => boolean,
+  isEqual: (d1: T, d2: T) => boolean,
+  frType: FRType<T>
+): FRFunction[] {
+  return [
+    createComparisonDefinition(fnFactory, "smaller", smaller, frType),
+    createComparisonDefinition(fnFactory, "larger", larger, frType),
+    createComparisonDefinition(
+      fnFactory,
+      "smallerEq",
+      (d1, d2) => smaller(d1, d2) || isEqual(d1, d2),
+      frType
+    ),
+    createComparisonDefinition(
+      fnFactory,
+      "largerEq",
+      (d1, d2) => larger(d1, d2) || isEqual(d1, d2),
+      frType
+    ),
+  ];
+}
+
+// In cases where we have a function that takes a lambda as an argument, and it's possible we could use n to m arguments, we want to choose the largest number of arguments that matches the lambda.
+export const chooseLambdaParamLength = (
+  inputOptions: number[],
+  lambda: Lambda
+): number | undefined => {
+  const _overlap = intersection(inputOptions, lambda.parameterCounts());
+  return last(_overlap);
+};
+
+// A helper to check if a list of frTypes would match inputs of a given length.
+// Non-trivial because of optional arguments.
+export const frTypesMatchesLengths = (
+  inputs: FRType<any>[],
+  lengths: number[]
+): boolean => {
+  const min = inputs.filter((i) => !isOptional(i)).length;
+  const max = inputs.length;
+  return intersection(upTo(min, max), lengths).length > 0;
+};
+
+export const frTypeToInput = (
+  frType: FRType<any>,
+  i: number,
+  name: string
+): Input => {
+  const type = frType.fieldType || "text";
+  switch (type) {
+    case "text":
+      return {
+        name,
+        type,
+        typeName: frType.display(),
+        default: frType.default || "",
+      };
+    case "textArea":
+      return {
+        name,
+        type,
+        typeName: frType.display(),
+        default: frType.default || "",
+      };
+    case "checkbox":
+      return {
+        name,
+        type,
+        typeName: frType.display(),
+        default: frType.default === "true" ? true : false,
+      };
+    case "select":
+      return {
+        name,
+        type,
+        typeName: frType.display(),
+        default: frType.default || "",
+        options: [],
+      };
+  }
+};
+// Regex taken from d3-format.
+// https://github.com/d3/d3-format/blob/f3cb31091df80a08f25afd4a7af2dcb3a6cd5eef/src/formatSpecifier.js#L1C65-L2C85
+const d3TickFormatRegex =
+  /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
+
+export function checkNumericTickFormat(tickFormat: string | null) {
+  if (tickFormat && !d3TickFormatRegex.test(tickFormat)) {
+    throw new REArgumentError(`Tick format [${tickFormat}] is invalid.`);
+  }
 }

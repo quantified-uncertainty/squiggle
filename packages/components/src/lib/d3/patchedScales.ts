@@ -1,13 +1,16 @@
 import * as d3 from "d3";
 
-type CustomFormat = "squiggle-default" | undefined;
+import { DEFAULT_DATE_FORMAT } from "../constants.js";
+
+type SquiggleDefaultFormat = "squiggle-default" | undefined;
 
 // see lib/d3/index.ts
-export const defaultTickFormatSpecifier: CustomFormat = "squiggle-default";
+export const defaultTickFormatSpecifier: SquiggleDefaultFormat =
+  "squiggle-default";
 
-function isCustomFormat(
+function shouldUseSquiggleDefaultFormat(
   specifier: string | undefined
-): specifier is CustomFormat {
+): specifier is SquiggleDefaultFormat {
   return specifier === "squiggle-default" || specifier === undefined;
 }
 
@@ -49,7 +52,7 @@ function tickFormatWithCustom(
   count: number,
   specifier: string | undefined
 ): ReturnType<typeof d3.tickFormat> {
-  if (isCustomFormat(specifier)) {
+  if (shouldUseSquiggleDefaultFormat(specifier)) {
     return squiggleDefaultFormat();
   }
   return d3.tickFormat(start, stop, count, specifier);
@@ -69,6 +72,33 @@ function patchLinearishTickFormat<
     return tickFormatWithCustom(d[0], d[d.length - 1], count ?? 10, specifier);
   };
 
+  return scale;
+}
+
+function patchDateTickFormat<T extends ScaleLinear>(scale: T): T {
+  scale.tickFormat = (_, specifier) => {
+    // Format the date as desired, here using a simple format
+    const format = shouldUseSquiggleDefaultFormat(specifier)
+      ? DEFAULT_DATE_FORMAT
+      : specifier;
+    const formatter = d3.timeFormat(format);
+
+    return (num: d3.NumberValue) => {
+      const date = new Date(num as number);
+      return formatter(date);
+    };
+  };
+
+  scale.ticks = (count?: number) => {
+    if (count === 0) return [];
+
+    const [lower, upper] = scale.domain();
+    return d3
+      .scaleTime()
+      .domain([new Date(lower), new Date(upper)])
+      .ticks(count ?? 10)
+      .map((d) => d.getTime());
+  };
   return scale;
 }
 
@@ -175,7 +205,7 @@ function patchLogarithmicTickFormat(scale: ScaleLogarithmic): ScaleLogarithmic {
   scale.tickFormat = (count, specifier) => {
     return logScaleTickFormat(
       count,
-      isCustomFormat(specifier)
+      shouldUseSquiggleDefaultFormat(specifier)
         ? // Log scale tickFormat method supports functions, but @types/d3 is not aware of that:
           // https://github.com/d3/d3-scale/blob/83555bd759c7314420bd4240642beda5e258db9e/src/log.js#L109
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -202,4 +232,8 @@ export function scalePow() {
 
 export function scaleLog() {
   return patchLogarithmicTickFormat(d3.scaleLog());
+}
+
+export function scaleDate() {
+  return patchDateTickFormat(d3.scaleLinear());
 }

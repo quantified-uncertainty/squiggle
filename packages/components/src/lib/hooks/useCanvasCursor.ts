@@ -1,7 +1,8 @@
 import * as d3 from "d3";
 import { useCallback, useState } from "react";
-import { DrawContext } from "./useCanvas.js";
+
 import { Point } from "../draw/types.js";
+import { DrawContext } from "./useCanvas.js";
 
 export function useCanvasCursor() {
   const [cursor, setCursor] = useState<Point | undefined>();

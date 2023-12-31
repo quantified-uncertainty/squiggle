@@ -1,4 +1,6 @@
+import lodashIsEqual from "lodash/isEqual.js";
 import isInteger from "lodash/isInteger.js";
+
 import { BaseDist } from "../dist/BaseDist.js";
 import {
   REArrayIndexNotFound,
@@ -6,11 +8,11 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
-import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { Domain } from "./domain.js";
-import { shuffle } from "../utility/E_A.js";
-import lodashIsEqual from "lodash/isEqual.js";
+import { SDate } from "../utility/SDate.js";
+import { SDuration } from "../utility/SDuration.js";
+import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
+import { ValueTags, ValueTagsType } from "./valueTags.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -21,13 +23,42 @@ type Indexable = {
 
 abstract class BaseValue {
   abstract type: string;
-  abstract publicName: string;
+  readonly tags: ValueTags | undefined;
 
-  clone() {
-    return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+  // This is a getter, not a field, for performance reasons.
+  get publicName() {
+    return this.type;
   }
 
-  abstract toString(): string;
+  getTags() {
+    return this.tags ?? new ValueTags({});
+  }
+
+  copyWithTags(tags: ValueTags) {
+    return Object.assign(Object.create(Object.getPrototypeOf(this)), {
+      ...this,
+      tags,
+    });
+  }
+
+  mergeTags(args: ValueTagsType) {
+    return this.copyWithTags(this.tags?.merge(args) ?? new ValueTags(args));
+  }
+
+  abstract valueToString(): string;
+
+  toString() {
+    const valueString = this.valueToString();
+    if (!this.tags) {
+      return valueString;
+    }
+    const argsStr = this.tags.toString();
+    if (argsStr !== "") {
+      return `${valueString}, with params ${argsStr}`;
+    } else {
+      return valueString;
+    }
+  }
 }
 
 /*
@@ -44,12 +75,15 @@ If you add a new value class, don't forget to add it to the "Value" union type b
 
 class VArray extends BaseValue implements Indexable {
   readonly type = "Array";
-  readonly publicName = "List";
 
-  constructor(public value: Value[]) {
+  override get publicName() {
+    return "List";
+  }
+
+  constructor(public value: readonly Value[]) {
     super();
   }
-  toString(): string {
+  valueToString() {
     return "[" + this.value.map((v) => v.toString()).join(",") + "]";
   }
 
@@ -72,20 +106,6 @@ class VArray extends BaseValue implements Indexable {
     throw new REOther("Can't access non-numerical key on an array");
   }
 
-  flatten() {
-    return new VArray(
-      this.value.reduce(
-        (acc: Value[], v) =>
-          acc.concat(v.type === "Array" ? v.value : ([v] as Value[])),
-        []
-      )
-    );
-  }
-
-  shuffle() {
-    return new VArray(shuffle(this.value));
-  }
-
   isEqual(other: VArray) {
     if (this.value.length !== other.value.length) {
       return false;
@@ -97,16 +117,19 @@ class VArray extends BaseValue implements Indexable {
     return true;
   }
 }
-export const vArray = (v: Value[]) => new VArray(v);
+export const vArray = (v: readonly Value[]) => new VArray(v);
 
 class VBool extends BaseValue {
   readonly type = "Bool";
-  readonly publicName = "Boolean";
+
+  override get publicName() {
+    return "Boolean";
+  }
 
   constructor(public value: boolean) {
     super();
   }
-  toString() {
+  valueToString() {
     return String(this.value);
   }
   isEqual(other: VBool) {
@@ -115,30 +138,32 @@ class VBool extends BaseValue {
 }
 export const vBool = (v: boolean) => new VBool(v);
 
-class VDate extends BaseValue {
+export class VDate extends BaseValue {
   readonly type = "Date";
-  readonly publicName = "Date";
 
-  constructor(public value: Date) {
+  constructor(public value: SDate) {
     super();
   }
-  toString() {
-    return DateTime.Date.toString(this.value);
+  valueToString() {
+    return this.value.toString();
   }
   isEqual(other: VDate) {
-    return this.value === other.value;
+    return this.value.isEqual(other.value);
   }
 }
-export const vDate = (v: Date) => new VDate(v);
+export const vDate = (v: SDate) => new VDate(v);
 
 class VDist extends BaseValue {
   readonly type = "Dist";
-  readonly publicName = "Distribution";
+
+  override get publicName() {
+    return "Distribution";
+  }
 
   constructor(public value: BaseDist) {
     super();
   }
-  toString() {
+  valueToString() {
     return this.value.toString();
   }
   isEqual(other: VDist) {
@@ -149,12 +174,15 @@ export const vDist = (v: BaseDist) => new VDist(v);
 
 class VLambda extends BaseValue implements Indexable {
   readonly type = "Lambda";
-  readonly publicName = "Function";
+
+  override get publicName() {
+    return "Function";
+  }
 
   constructor(public value: Lambda) {
     super();
   }
-  toString() {
+  valueToString() {
     return this.value.toString();
   }
 
@@ -182,14 +210,13 @@ class VLambda extends BaseValue implements Indexable {
 }
 export const vLambda = (v: Lambda) => new VLambda(v);
 
-class VNumber extends BaseValue {
+export class VNumber extends BaseValue {
   readonly type = "Number";
-  readonly publicName = "Number";
 
   constructor(public value: number) {
     super();
   }
-  toString() {
+  valueToString() {
     return String(this.value);
   }
   isEqual(other: VNumber) {
@@ -200,12 +227,11 @@ export const vNumber = (v: number) => new VNumber(v);
 
 class VString extends BaseValue {
   readonly type = "String";
-  readonly publicName = "String";
 
   constructor(public value: string) {
     super();
   }
-  toString() {
+  valueToString() {
     return JSON.stringify(this.value);
   }
   isEqual(other: VString) {
@@ -216,12 +242,15 @@ export const vString = (v: string) => new VString(v);
 
 class VDict extends BaseValue implements Indexable {
   readonly type = "Dict";
-  readonly publicName = "Dictionary";
+
+  override get publicName() {
+    return "Dictionary";
+  }
 
   constructor(public value: ValueMap) {
     super();
   }
-  toString(): string {
+  valueToString() {
     return (
       "{" +
       [...this.value.entries()]
@@ -267,57 +296,74 @@ class VDict extends BaseValue implements Indexable {
 }
 export const vDict = (v: ValueMap) => new VDict(v);
 
-class VTimeDuration extends BaseValue {
-  readonly type = "TimeDuration";
-  readonly publicName = "Time Duration";
+class VDuration extends BaseValue {
+  readonly type = "Duration";
 
-  constructor(public value: number) {
+  override get publicName() {
+    return "Time Duration";
+  }
+
+  constructor(public value: SDuration) {
     super();
   }
-  toString() {
-    return DateTime.Duration.toString(this.value);
+
+  valueToString() {
+    return this.value.toString();
   }
-  isEqual(other: VTimeDuration) {
-    return this.value === other.value;
+  isEqual(other: VDuration) {
+    return this.value.toMs() === other.value.toMs();
   }
 }
-export const vTimeDuration = (v: number) => new VTimeDuration(v);
+export const vDuration = (v: SDuration) => new VDuration(v);
 
-export type CommonScaleArgs = {
+export type ScaleMethod =
+  | {
+      type: "linear";
+    }
+  | {
+      type: "date";
+    }
+  | {
+      type: "log";
+    }
+  | {
+      type: "symlog";
+      constant?: number;
+    }
+  | {
+      type: "power";
+      exponent?: number;
+    };
+
+export function methodWithDefaultParams(shift: ScaleMethod) {
+  switch (shift.type) {
+    case "symlog":
+      return {
+        ...shift,
+        constant: shift.constant ?? SCALE_SYMLOG_DEFAULT_CONSTANT,
+      };
+    case "power":
+      return {
+        ...shift,
+        exponent: shift.exponent ?? SCALE_POWER_DEFAULT_CONSTANT,
+      };
+    default:
+      return shift;
+  }
+}
+
+export type Scale = {
+  method?: ScaleMethod;
   min?: number;
   max?: number;
   tickFormat?: string;
   title?: string;
 };
 
-export type Scale = CommonScaleArgs &
-  (
-    | {
-        type: "linear";
-      }
-    | {
-        type: "log";
-      }
-    | {
-        type: "symlog";
-        constant?: number;
-      }
-    | {
-        type: "power";
-        exponent?: number;
-      }
-  );
-
-function scaleIsEqual(valueA: Scale, valueB: Scale) {
-  if (
-    valueA.type !== valueB.type ||
-    valueA.min !== valueB.min ||
-    valueA.max !== valueB.max ||
-    valueA.tickFormat !== valueB.tickFormat
-  ) {
+function methodIsEqual(valueA: ScaleMethod, valueB: ScaleMethod) {
+  if (valueA.type !== valueB.type) {
     return false;
   }
-
   switch (valueA.type) {
     case "symlog":
       return (
@@ -334,31 +380,49 @@ function scaleIsEqual(valueA: Scale, valueB: Scale) {
   }
 }
 
+function scaleIsEqual(valueA: Scale, valueB: Scale) {
+  if (
+    valueA.method?.type !== valueB.method?.type ||
+    valueA.min !== valueB.min ||
+    valueA.max !== valueB.max ||
+    valueA.tickFormat !== valueB.tickFormat
+  ) {
+    return false;
+  }
+  if (valueA.method && valueB.method) {
+    return methodIsEqual(valueA.method, valueB.method);
+  }
+  return true;
+}
+
 export const SCALE_SYMLOG_DEFAULT_CONSTANT = 0.0001;
 export const SCALE_POWER_DEFAULT_CONSTANT = 0.1;
 
 class VScale extends BaseValue {
   readonly type = "Scale";
-  readonly publicName = "Scale";
 
   constructor(public value: Scale) {
     super();
   }
 
-  toString(): string {
-    switch (this.value.type) {
+  valueToString(): string {
+    switch (this.value.method?.type) {
       case "linear":
         return "Linear scale"; // TODO - mix in min/max if specified
       case "log":
         return "Logarithmic scale";
       case "symlog":
         return `Symlog scale ({constant: ${
-          this.value.constant || SCALE_SYMLOG_DEFAULT_CONSTANT
+          this.value.method.constant || SCALE_SYMLOG_DEFAULT_CONSTANT
         }})`;
       case "power":
         return `Power scale ({exponent: ${
-          this.value.exponent || SCALE_POWER_DEFAULT_CONSTANT
+          this.value.method.exponent || SCALE_POWER_DEFAULT_CONSTANT
         }})`;
+      case "date":
+        return "Date scale";
+      default:
+        return "Unspecified scale";
     }
   }
 
@@ -371,6 +435,7 @@ export const vScale = (scale: Scale) => new VScale(scale);
 
 export type CommonInputArgs = {
   name: string;
+  typeName?: string;
   description?: string;
 };
 
@@ -391,19 +456,19 @@ export type Input = CommonInputArgs &
     | {
         type: "select";
         default?: string;
-        options: string[];
+        options: readonly string[];
       }
   );
 
+export type InputType = "text" | "textArea" | "checkbox" | "select";
 class VInput extends BaseValue {
   readonly type = "Input";
-  readonly publicName = "Input";
 
   constructor(public value: Input) {
     super();
   }
 
-  toString(): string {
+  valueToString(): string {
     switch (this.value.type) {
       case "text":
         return "Text input";
@@ -436,7 +501,7 @@ export type Plot = CommonPlotArgs &
   (
     | {
         type: "distributions";
-        distributions: LabeledDistribution[];
+        distributions: readonly LabeledDistribution[];
         xScale: Scale;
         yScale: Scale;
         showSummary: boolean;
@@ -446,7 +511,7 @@ export type Plot = CommonPlotArgs &
         fn: Lambda;
         xScale: Scale;
         yScale: Scale;
-        points?: number;
+        xPoints?: number[];
       }
     | {
         type: "distFn";
@@ -454,7 +519,7 @@ export type Plot = CommonPlotArgs &
         xScale: Scale;
         yScale: Scale;
         distXScale: Scale;
-        points?: number;
+        xPoints?: number[];
       }
     | {
         type: "scatter";
@@ -466,23 +531,25 @@ export type Plot = CommonPlotArgs &
     | {
         type: "relativeValues";
         fn: Lambda;
-        ids: string[];
+        ids: readonly string[];
       }
   );
 
 export type TableChart = {
-  data: Value[];
-  title?: string;
-  columns: { fn: Lambda; name: string | undefined }[];
+  data: readonly Value[];
+  columns: readonly { fn: Lambda; name: string | undefined }[];
 };
 class VTableChart extends BaseValue {
   readonly type = "TableChart";
-  readonly publicName = "Table Chart";
+
+  override get publicName() {
+    return "Table Chart";
+  }
 
   constructor(public value: TableChart) {
     super();
   }
-  toString() {
+  valueToString() {
     return `Table with ${this.value.columns.length}x${this.value.data.length} elements`;
   }
 }
@@ -491,7 +558,7 @@ export const vTableChart = (v: TableChart) => new VTableChart(v);
 
 export type Calculator = {
   fn: Lambda;
-  inputs: Input[];
+  inputs: readonly Input[];
   autorun: boolean;
   description?: string;
   title?: string;
@@ -500,7 +567,6 @@ export type Calculator = {
 
 class VCalculator extends BaseValue {
   readonly type = "Calculator";
-  readonly publicName = "Calculator";
 
   private error: REOther | null = null;
 
@@ -533,7 +599,7 @@ class VCalculator extends BaseValue {
     return this.error;
   }
 
-  toString() {
+  valueToString() {
     return `Calculator`;
   }
 }
@@ -542,13 +608,12 @@ export const vCalculator = (v: Calculator) => new VCalculator(v);
 
 class VPlot extends BaseValue implements Indexable {
   readonly type = "Plot";
-  readonly publicName = "Plot";
 
   constructor(public value: Plot) {
     super();
   }
 
-  toString(): string {
+  valueToString(): string {
     switch (this.value.type) {
       case "distributions":
         return `Plot containing ${this.value.distributions
@@ -582,25 +647,47 @@ class VPlot extends BaseValue implements Indexable {
 
 export const vPlot = (plot: Plot) => new VPlot(plot);
 
+function domainIsEqual(valueA: Domain, valueB: Domain) {
+  if (valueA.type !== valueB.type) {
+    return false;
+  }
+  switch (valueA.type) {
+    case "DateRange":
+      return (valueA as DateRangeDomain).isEqual(valueB as DateRangeDomain);
+    case "NumericRange":
+      return (valueA as NumericRangeDomain).isEqual(
+        valueB as NumericRangeDomain
+      );
+    default:
+      return false;
+  }
+}
+
 export class VDomain extends BaseValue implements Indexable {
   readonly type = "Domain";
-  readonly publicName = "Domain";
 
   constructor(public value: Domain) {
     super();
   }
 
-  toString(): string {
+  valueToString(): string {
     return this.value.toString();
   }
 
-  get(key: Value) {
-    if (key.type === "String" && this.value.type === "NumericRange") {
+  get domainType(): "NumericRange" | "DateRange" {
+    return this.value.type;
+  }
+
+  get(key: Value): VNumber | VDate {
+    const mapValue = (value: number | SDate) =>
+      typeof value === "number" ? vNumber(value) : vDate(value);
+
+    if (key.type === "String") {
       if (key.value === "min") {
-        return vNumber(this.value.min);
+        return mapValue(this.value.min);
       }
       if (key.value === "max") {
-        return vNumber(this.value.max);
+        return mapValue(this.value.max);
       }
     }
 
@@ -608,7 +695,7 @@ export class VDomain extends BaseValue implements Indexable {
   }
 
   isEqual(other: VDomain) {
-    return this.value.isEqual(other.value);
+    return domainIsEqual(this.value, other.value);
   }
 }
 
@@ -616,12 +703,11 @@ export const vDomain = (domain: Domain) => new VDomain(domain);
 
 class VVoid extends BaseValue {
   readonly type = "Void";
-  readonly publicName = "Void";
 
   constructor() {
     super();
   }
-  toString() {
+  valueToString() {
     return "()";
   }
 }
@@ -636,7 +722,7 @@ export type Value =
   | VNumber
   | VString
   | VDict
-  | VTimeDuration
+  | VDuration
   | VPlot
   | VTableChart
   | VCalculator
@@ -655,7 +741,7 @@ export function isEqual(a: Value, b: Value): boolean {
     case "String":
     case "Dist":
     case "Date":
-    case "TimeDuration":
+    case "Duration":
     case "Scale":
     case "Domain":
     case "Array":
@@ -673,7 +759,7 @@ export function isEqual(a: Value, b: Value): boolean {
 
 const _isUniqableType = (t: Value) => "isEqual" in t;
 
-export function uniq(array: Value[]): Value[] {
+export function uniq(array: readonly Value[]): Value[] {
   const uniqueArray: Value[] = [];
 
   for (const item of array) {
@@ -688,7 +774,10 @@ export function uniq(array: Value[]): Value[] {
   return uniqueArray;
 }
 
-export function uniqBy(array: Value[], fn: (e: Value) => Value): Value[] {
+export function uniqBy(
+  array: readonly Value[],
+  fn: (e: Value) => Value
+): Value[] {
   const seen: Value[] = [];
   const uniqueArray: Value[] = [];
 

@@ -10,7 +10,7 @@ import {
   ScaleIcon,
 } from "@quri/ui";
 
-import { DefinitionLayoutQuery } from "@/__generated__/DefinitionLayoutQuery.graphql";
+import { EntityInfo } from "@/components/EntityInfo";
 import { EntityLayout, EntityNode } from "@/components/EntityLayout";
 import { EntityTab } from "@/components/ui/EntityTab";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
@@ -21,7 +21,10 @@ import {
   relativeValuesEditRoute,
   relativeValuesRoute,
 } from "@/routes";
+
 import { DeleteDefinitionAction } from "./DeleteRelativeValuesDefinitionAction";
+
+import { DefinitionLayoutQuery } from "@/__generated__/DefinitionLayoutQuery.graphql";
 
 type Props = PropsWithChildren<{
   queryRef: SerializablePreloadedQuery<DefinitionLayoutQuery>;
@@ -71,7 +74,7 @@ export const DefinitionLayout: FC<Props> = ({ queryRef, children }) => {
 
   return (
     <EntityLayout
-      nodes={nodes}
+      nodes={<EntityInfo nodes={nodes} />}
       headerRight={
         definition.isEditable ? (
           <EntityTab.List>

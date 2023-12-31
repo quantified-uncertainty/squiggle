@@ -1,14 +1,14 @@
 import { nodeResultToString, parse } from "../../src/ast/parse.js";
+import { ICompileError, IRuntimeError } from "../../src/errors/IError.js";
 import { compileAst } from "../../src/expression/compile.js";
 import { expressionToString } from "../../src/expression/index.js";
+import { getStdLib } from "../../src/library/index.js";
 import {
   evaluateExpressionToResult,
   evaluateStringToResult,
 } from "../../src/reducer/index.js";
 import * as Result from "../../src/utility/result.js";
-import { ICompileError, IRuntimeError } from "../../src/errors/IError.js";
 import { Value } from "../../src/value/index.js";
-import { getStdLib } from "../../src/library/index.js";
 
 const expectParseToBe = (expr: string, answer: string) => {
   expect(nodeResultToString(parse(expr, "test"))).toBe(answer);
@@ -72,8 +72,13 @@ export function testEvalToBe(expr: string, answer: string, only = false) {
     : test(expr, async () => await expectEvalToBe(expr, answer));
 }
 
-export function testEvalToMatch(expr: string, expected: string | RegExp) {
-  test(expr, async () => await expectEvalToMatch(expr, expected));
+export function testEvalToMatch(
+  expr: string,
+  expected: string | RegExp,
+  only = false
+) {
+  const fn = only ? test.only : test;
+  fn(expr, async () => await expectEvalToMatch(expr, expected));
 }
 
 export const MySkip = {

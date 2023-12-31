@@ -1,3 +1,11 @@
+type AcceptReusableGroupInviteTokenResult {
+  membership: UserGroupMembership!
+}
+
+type AdminRebuildSearchIndexResult {
+  ok: Boolean!
+}
+
 type AdminUpdateModelVersionResult {
   model: Model!
 }
@@ -26,6 +34,10 @@ type CreateRelativeValuesDefinitionResult {
   definition: RelativeValuesDefinition!
 }
 
+type CreateReusableGroupInviteTokenResult {
+  group: Group!
+}
+
 type CreateSquiggleSnippetModelResult {
   model: Model!
 }
@@ -45,6 +57,10 @@ type DeleteModelResult {
 
 type DeleteRelativeValuesDefinitionResult {
   ok: Boolean!
+}
+
+type DeleteReusableGroupInviteTokenResult {
+  group: Group!
 }
 
 type EmailGroupInvite implements GroupInvite & Node {
@@ -72,6 +88,7 @@ type Group implements Node & Owner {
   memberships(after: String, before: String, first: Int, last: Int): UserGroupMembershipConnection!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   myMembership: UserGroupMembership
+  reusableInviteToken: String
   slug: String!
   updatedAtTimestamp: Float!
 }
@@ -153,11 +170,21 @@ type ModelEdge {
   node: Model!
 }
 
+type ModelExport implements Node {
+  docstring: String!
+  id: ID!
+  modelRevision: ModelRevision!
+  title: String
+  variableName: String!
+  variableType: String!
+}
+
 type ModelRevision implements Node {
   author: User
   comment: String!
   content: ModelContent!
   createdAtTimestamp: Float!
+  exports: [ModelExport!]!
   forRelativeValues(input: ModelRevisionForRelativeValuesInput): RelativeValuesExport
   id: ID!
   model: Model!
@@ -196,6 +223,11 @@ type MoveModelResult {
 }
 
 type Mutation {
+  acceptReusableGroupInviteToken(input: MutationAcceptReusableGroupInviteTokenInput!): MutationAcceptReusableGroupInviteTokenResult!
+
+  """Admin-only query for rebuilding the search index"""
+  adminRebuildSearchIndex: MutationAdminRebuildSearchIndexResult!
+
   """Admin-only query for upgrading model versions"""
   adminUpdateModelVersion(input: MutationAdminUpdateModelVersionInput!): MutationAdminUpdateModelVersionResult!
   buildRelativeValuesCache(input: MutationBuildRelativeValuesCacheInput!): MutationBuildRelativeValuesCacheResult!
@@ -203,10 +235,20 @@ type Mutation {
   clearRelativeValuesCache(input: MutationClearRelativeValuesCacheInput!): MutationClearRelativeValuesCacheResult!
   createGroup(input: MutationCreateGroupInput!): MutationCreateGroupResult!
   createRelativeValuesDefinition(input: MutationCreateRelativeValuesDefinitionInput!): MutationCreateRelativeValuesDefinitionResult!
+
+  """
+  Create or replace a reusable invite token for a group, available as `reusableInviteToken` field on group object.
+  
+  You must be an admin of the group to call this mutation. Previous invite token, if it existed, will stop working.
+  """
+  createReusableGroupInviteToken(input: MutationCreateReusableGroupInviteTokenInput!): MutationCreateReusableGroupInviteTokenResult!
   createSquiggleSnippetModel(input: MutationCreateSquiggleSnippetModelInput!): MutationCreateSquiggleSnippetModelResult!
   deleteMembership(input: MutationDeleteMembershipInput!): MutationDeleteMembershipResult!
   deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
   deleteRelativeValuesDefinition(input: MutationDeleteRelativeValuesDefinitionInput!): MutationDeleteRelativeValuesDefinitionResult!
+
+  """Disable a reusable invite token for a group."""
+  deleteReusableGroupInviteToken(input: MutationDeleteReusableGroupInviteTokenInput!): MutationDeleteReusableGroupInviteTokenResult!
   inviteUserToGroup(input: MutationInviteUserToGroupInput!): MutationInviteUserToGroupResult!
   moveModel(input: MutationMoveModelInput!): MutationMoveModelResult!
   reactToGroupInvite(input: MutationReactToGroupInviteInput!): MutationReactToGroupInviteResult!
@@ -217,7 +259,17 @@ type Mutation {
   updateModelSlug(input: MutationUpdateModelSlugInput!): MutationUpdateModelSlugResult!
   updateRelativeValuesDefinition(input: MutationUpdateRelativeValuesDefinitionInput!): MutationUpdateRelativeValuesDefinitionResult!
   updateSquiggleSnippetModel(input: MutationUpdateSquiggleSnippetModelInput!): MutationUpdateSquiggleSnippetModelResult!
+  validateReusableGroupInviteToken(input: MutationValidateReusableGroupInviteTokenInput!): MutationValidateReusableGroupInviteTokenResult!
 }
+
+input MutationAcceptReusableGroupInviteTokenInput {
+  groupSlug: String!
+  inviteToken: String!
+}
+
+union MutationAcceptReusableGroupInviteTokenResult = AcceptReusableGroupInviteTokenResult | BaseError
+
+union MutationAdminRebuildSearchIndexResult = AdminRebuildSearchIndexResult | BaseError
 
 input MutationAdminUpdateModelVersionInput {
   modelId: String!
@@ -265,6 +317,12 @@ input MutationCreateRelativeValuesDefinitionInput {
 
 union MutationCreateRelativeValuesDefinitionResult = BaseError | CreateRelativeValuesDefinitionResult | ValidationError
 
+input MutationCreateReusableGroupInviteTokenInput {
+  slug: String!
+}
+
+union MutationCreateReusableGroupInviteTokenResult = BaseError | CreateReusableGroupInviteTokenResult
+
 input MutationCreateSquiggleSnippetModelInput {
   """Squiggle source code"""
   code: String!
@@ -300,6 +358,12 @@ input MutationDeleteRelativeValuesDefinitionInput {
 }
 
 union MutationDeleteRelativeValuesDefinitionResult = BaseError | DeleteRelativeValuesDefinitionResult
+
+input MutationDeleteReusableGroupInviteTokenInput {
+  slug: String!
+}
+
+union MutationDeleteReusableGroupInviteTokenResult = BaseError | DeleteReusableGroupInviteTokenResult
 
 input MutationInviteUserToGroupInput {
   group: String!
@@ -371,12 +435,20 @@ union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeV
 input MutationUpdateSquiggleSnippetModelInput {
   comment: String
   content: SquiggleSnippetContentInput!
+  exports: [SquiggleModelExportInput!]
   owner: String!
   relativeValuesExports: [RelativeValuesExportInput!]
   slug: String!
 }
 
 union MutationUpdateSquiggleSnippetModelResult = BaseError | UpdateSquiggleSnippetResult
+
+input MutationValidateReusableGroupInviteTokenInput {
+  groupSlug: String!
+  inviteToken: String!
+}
+
+union MutationValidateReusableGroupInviteTokenResult = BaseError | ValidateReusableGroupInviteTokenResult
 
 interface Node {
   id: ID!
@@ -413,6 +485,7 @@ type Query {
   relativeValuesDefinition(input: QueryRelativeValuesDefinitionInput!): QueryRelativeValuesDefinitionResult!
   relativeValuesDefinitions(after: String, before: String, first: Int, input: RelativeValuesDefinitionsQueryInput, last: Int): RelativeValuesDefinitionConnection!
   runSquiggle(code: String!): SquiggleOutput!
+  search(after: String, before: String, first: Int, last: Int, text: String!): QuerySearchResult!
   userByUsername(username: String!): QueryUserByUsernameResult!
   users(after: String, before: String, first: Int, input: UsersQueryInput, last: Int): QueryUsersConnection!
 }
@@ -432,6 +505,13 @@ input QueryRelativeValuesDefinitionInput {
 }
 
 union QueryRelativeValuesDefinitionResult = BaseError | NotFoundError | RelativeValuesDefinition
+
+type QuerySearchConnection {
+  edges: [SearchEdge!]!
+  pageInfo: PageInfo!
+}
+
+union QuerySearchResult = BaseError | QuerySearchConnection
 
 union QueryUserByUsernameResult = BaseError | NotFoundError | User
 
@@ -531,9 +611,32 @@ type RelativeValuesPairCache implements Node {
   secondItem: String!
 }
 
+type SearchEdge {
+  cursor: String!
+  node: Searchable!
+  rank: Float!
+  slugSnippet: String!
+  textSnippet: String!
+}
+
+type Searchable implements Node {
+  id: ID!
+  link: String!
+  object: SearchableObject!
+}
+
+union SearchableObject = Group | Model | RelativeValuesDefinition | User
+
 type SquiggleErrorOutput implements SquiggleOutput {
   errorString: String!
   isCached: Boolean!
+}
+
+input SquiggleModelExportInput {
+  docstring: String
+  title: String
+  variableName: String!
+  variableType: String!
 }
 
 type SquiggleOkOutput implements SquiggleOutput {
@@ -599,6 +702,7 @@ type UserGroupInvite implements GroupInvite & Node {
 }
 
 type UserGroupMembership implements Node {
+  group: Group!
   id: ID!
   role: MembershipRole!
   user: User!
@@ -616,6 +720,10 @@ type UserGroupMembershipEdge {
 
 input UsersQueryInput {
   usernameContains: String
+}
+
+type ValidateReusableGroupInviteTokenResult {
+  ok: Boolean!
 }
 
 type ValidationError implements Error {

@@ -1,13 +1,14 @@
 import * as d3 from "d3";
+
+import { defaultTickFormatSpecifier } from "../d3/patchedScales.js";
 import { CartesianFrame } from "./CartesianFrame.js";
 import { Padding, Point } from "./types.js";
-import { defaultTickFormatSpecifier } from "../d3/patchedScales.js";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
-export const cursorLineColor = "#888";
+export const cursorLineColor = "rgba(114, 125, 147, 0.4)";
 export const primaryColor = "#4c78a8"; // for lines and areas
-export const distributionColor = "#6d9bce"; // for distributions. Slightly lighter than primaryColor
+export const distributionColor = "#649ece"; // for distributions. Slightly lighter than primaryColor
 export const axisTitleColor = "rgb(100 116 139)";
 export const axisTitleFont = "bold 12px ui-sans-serif, system-ui";
 const labelFont = "10px sans-serif";
@@ -27,8 +28,9 @@ interface DrawAxesParams {
   suggestedPadding: Padding;
   width: number;
   height: number;
-  hideYAxis?: boolean;
-  drawTicks?: boolean;
+  showXAxis?: boolean;
+  showYAxis?: boolean;
+  showAxisLines?: boolean;
   xTickCount?: number;
   yTickCount?: number;
   xTickFormat?: string;
@@ -37,6 +39,12 @@ interface DrawAxesParams {
   yAxisTitle?: string;
 }
 
+const _tickCountInterpolator = d3
+  .scaleLinear()
+  .domain([40000, 1000000]) // The potential height of the chart
+  .range([3, 16]) // The range of circle radiuses
+  .clamp(true);
+
 export function drawAxes({
   context,
   xScale, // will be mutated with the correct range
@@ -44,20 +52,24 @@ export function drawAxes({
   suggestedPadding,
   width,
   height,
-  hideYAxis = false,
-  drawTicks = true,
-  xTickCount = Math.max(Math.min(Math.floor(width / 100), 12), 3),
-  yTickCount = Math.max(Math.min(Math.floor(height / 100), 12), 3),
+  showYAxis = true,
+  showXAxis = true,
+  showAxisLines = height > 150 && width > 150,
+  xTickCount,
+  yTickCount,
   xTickFormat: xTickFormatSpecifier = defaultTickFormatSpecifier,
   yTickFormat: yTickFormatSpecifier = defaultTickFormatSpecifier,
   xAxisTitle,
   yAxisTitle,
 }: DrawAxesParams) {
-  const xTicks = xScale.ticks(xTickCount);
-  const xTickFormat = xScale.tickFormat(xTickCount, xTickFormatSpecifier);
+  const _xTickCount = xTickCount || _tickCountInterpolator(width * height);
+  const _yTickCount = yTickCount || _tickCountInterpolator(height * width);
 
-  const yTicks = yScale.ticks(yTickCount);
-  const yTickFormat = yScale.tickFormat(yTickCount, yTickFormatSpecifier);
+  const xTicks = xScale.ticks(_xTickCount);
+  const xTickFormat = xScale.tickFormat(_xTickCount, xTickFormatSpecifier);
+
+  const yTicks = yScale.ticks(_yTickCount);
+  const yTickFormat = yScale.tickFormat(_yTickCount, yTickFormatSpecifier);
 
   const tickSize = 2;
 
@@ -70,7 +82,7 @@ export function drawAxes({
   }
 
   // measure tick sizes for dynamic padding
-  if (!hideYAxis) {
+  if (showYAxis) {
     yTicks.forEach((d) => {
       const measured = context.measureText(yTickFormat(d));
       padding.left = Math.max(
@@ -93,14 +105,16 @@ export function drawAxes({
   yScale.range([0, frame.height]);
 
   // x axis
-  {
+  if (showXAxis) {
     frame.enter();
-    context.beginPath();
-    context.strokeStyle = axisColor;
-    context.lineWidth = 1;
-    context.moveTo(0, 0);
-    context.lineTo(frame.width, 0);
-    context.stroke();
+    if (showAxisLines) {
+      context.beginPath();
+      context.strokeStyle = axisColor;
+      context.lineWidth = 1;
+      context.moveTo(0, 0);
+      context.lineTo(frame.width, 0);
+      context.stroke();
+    }
 
     context.fillStyle = labelColor;
     context.font = labelFont;
@@ -111,14 +125,12 @@ export function drawAxes({
       const x = xScale(xTick);
       const y = 0;
 
-      if (drawTicks) {
-        context.beginPath();
-        context.strokeStyle = labelColor;
-        context.lineWidth = 1;
-        context.moveTo(x, y);
-        context.lineTo(x, y - tickSize);
-        context.stroke();
-      }
+      context.beginPath();
+      context.strokeStyle = labelColor;
+      context.lineWidth = 1;
+      context.moveTo(x, y);
+      context.lineTo(x, y - tickSize);
+      context.stroke();
 
       const text = xTickFormat(xTick);
       if (text === "") {
@@ -146,14 +158,16 @@ export function drawAxes({
   }
 
   // y axis
-  if (!hideYAxis) {
+  if (showYAxis) {
     frame.enter();
-    context.beginPath();
-    context.strokeStyle = axisColor;
-    context.lineWidth = 1;
-    context.moveTo(0, 0);
-    context.lineTo(0, frame.height);
-    context.stroke();
+    if (showAxisLines) {
+      context.beginPath();
+      context.strokeStyle = axisColor;
+      context.lineWidth = 1;
+      context.moveTo(0, 0);
+      context.lineTo(0, frame.height);
+      context.stroke();
+    }
 
     let prevBoundary = -padding.bottom;
     const x = 0;
@@ -166,14 +180,12 @@ export function drawAxes({
       context.textBaseline = "bottom";
       const { actualBoundingBoxAscent: textHeight } = context.measureText(text);
 
-      if (drawTicks) {
-        context.beginPath();
-        context.strokeStyle = labelColor;
-        context.lineWidth = 1;
-        context.moveTo(x, y);
-        context.lineTo(x - tickSize, y);
-        context.stroke();
-      }
+      context.beginPath();
+      context.strokeStyle = labelColor;
+      context.lineWidth = 1;
+      context.moveTo(x, y);
+      context.lineTo(x - tickSize, y);
+      context.stroke();
 
       let startY = 0;
       if (i === 0) {
@@ -232,6 +244,141 @@ export function drawAxes({
   };
 }
 
+const TOOLTIP_OFFSETS = {
+  px: 4,
+  py: 2,
+  mx: 4,
+  my: 4,
+};
+
+export function drawVerticalLine({
+  scale,
+  format,
+  x,
+  frame,
+}: {
+  scale: d3.ScaleContinuousNumeric<number, number, never>;
+  format?: string | undefined;
+  x: number;
+  frame: CartesianFrame;
+}) {
+  const context = frame.context;
+  frame.enter();
+
+  context.beginPath();
+  context.strokeStyle = cursorLineColor;
+  context.lineWidth = 1;
+  context.setLineDash([5, 5]); // setting the dashed line pattern
+  context.moveTo(x, 0);
+  context.lineTo(x, frame.height);
+  context.stroke();
+  context.setLineDash([]); // resetting the dashed line pattern so it doesn't affect other lines
+
+  context.textAlign = "left";
+  context.textBaseline = "bottom";
+  const text = scale.tickFormat(
+    Infinity, // important for scaleLog; https://github.com/d3/d3-scale/tree/main#log_tickFormat
+    format
+  )(scale.invert(x));
+  const measured = context.measureText(text);
+
+  let boxWidth = measured.width + TOOLTIP_OFFSETS.px * 2;
+  const boxHeight = measured.actualBoundingBoxAscent + TOOLTIP_OFFSETS.py * 2;
+  const boxOrigin: Point = {
+    x: x + TOOLTIP_OFFSETS.mx,
+    y: TOOLTIP_OFFSETS.my,
+  };
+  const flip =
+    boxOrigin.x + boxWidth > frame.width &&
+    // In pathological cases, we can't fit the box on either side because the text is too long.
+    // In this case, we don't flip because first digits are more significant.
+    boxWidth <= x;
+
+  if (flip) {
+    boxOrigin.x = x - TOOLTIP_OFFSETS.mx;
+    boxWidth = -boxWidth;
+    context.textAlign = "right";
+  }
+
+  context.globalAlpha = 0.7;
+  context.fillStyle = "white";
+  context.fillRect(boxOrigin.x, boxOrigin.y, boxWidth, boxHeight);
+  context.globalAlpha = 1;
+  context.fillStyle = labelColor;
+  frame.fillText(
+    text,
+    boxOrigin.x + TOOLTIP_OFFSETS.px * (flip ? -1 : 1),
+    // unsure why "-1" is needed, probably related to measureText result and could be fixed
+    TOOLTIP_OFFSETS.my + TOOLTIP_OFFSETS.py - 1,
+    {
+      fillStyle: labelColor,
+    }
+  );
+  frame.exit();
+}
+
+export function drawHorizontalLine({
+  scale,
+  format,
+  y,
+  frame,
+}: {
+  scale: d3.ScaleContinuousNumeric<number, number, never>;
+  format?: string | undefined;
+  y: number;
+  frame: CartesianFrame;
+}) {
+  // TODO - copy-pasted from drawVerticalLine
+  const context = frame.context;
+  frame.enter();
+
+  context.beginPath();
+  context.strokeStyle = cursorLineColor;
+  context.lineWidth = 1;
+  context.setLineDash([5, 5]); // setting the dashed line pattern
+  context.moveTo(0, y);
+  context.lineTo(frame.width, y);
+  context.stroke();
+  context.setLineDash([]); // resetting the dashed line pattern so it doesn't affect other lines
+
+  context.textAlign = "left";
+  context.textBaseline = "bottom";
+  const text = scale.tickFormat(
+    Infinity, // important for scaleLog; https://github.com/d3/d3-scale/tree/main#log_tickFormat
+    format
+  )(scale.invert(y));
+  const measured = context.measureText(text);
+
+  const boxWidth = measured.width + TOOLTIP_OFFSETS.px * 2;
+  let boxHeight = measured.actualBoundingBoxAscent + TOOLTIP_OFFSETS.py * 2;
+  const boxOrigin: Point = {
+    x: TOOLTIP_OFFSETS.mx,
+    y: TOOLTIP_OFFSETS.my + y,
+  };
+  const flip = boxOrigin.y + boxHeight > frame.height;
+
+  if (flip) {
+    boxOrigin.y = y - TOOLTIP_OFFSETS.mx;
+    boxHeight = -boxHeight;
+    context.textBaseline = "top";
+  }
+
+  context.globalAlpha = 0.7;
+  context.fillStyle = "white";
+  context.fillRect(boxOrigin.x, boxOrigin.y, boxWidth, boxHeight);
+  context.globalAlpha = 1;
+  context.fillStyle = labelColor;
+  frame.fillText(
+    text,
+    TOOLTIP_OFFSETS.mx + TOOLTIP_OFFSETS.px,
+    boxOrigin.y + TOOLTIP_OFFSETS.py * (flip ? -1 : 1) - 1,
+    {
+      fillStyle: labelColor,
+    }
+  );
+  frame.exit();
+}
+
 export function drawCursorLines({
   cursor,
   frame,
@@ -255,110 +402,25 @@ export function drawCursorLines({
     return;
   }
 
-  const context = frame.context;
-  frame.enter();
   const point = frame.translatedPoint(cursor);
 
-  const px = 4,
-    py = 2,
-    mx = 4,
-    my = 4;
-
   if (xLine) {
-    context.beginPath();
-    context.strokeStyle = cursorLineColor;
-    context.lineWidth = 1;
-    context.setLineDash([5, 5]); // setting the dashed line pattern
-    context.moveTo(point.x, 0);
-    context.lineTo(point.x, frame.height);
-    context.stroke();
-    context.setLineDash([]); // resetting the dashed line pattern so it doesn't affect other lines
-
-    context.textAlign = "left";
-    context.textBaseline = "bottom";
-    const text = xLine.scale.tickFormat(
-      Infinity, // important for scaleLog; https://github.com/d3/d3-scale/tree/main#log_tickFormat
-      xLine.format
-    )(xLine.scale.invert(point.x));
-    const measured = context.measureText(text);
-
-    let boxWidth = measured.width + px * 2;
-    const boxHeight = measured.actualBoundingBoxAscent + py * 2;
-    const boxOrigin: Point = {
-      x: point.x + mx,
-      y: my,
-    };
-    const flip =
-      boxOrigin.x + boxWidth > frame.width &&
-      // In pathological cases, we can't fit the box on either side because the text is too long.
-      // In this case, we don't flip because first digits are more significant.
-      boxWidth <= point.x;
-
-    if (flip) {
-      boxOrigin.x = point.x - mx;
-      boxWidth = -boxWidth;
-      context.textAlign = "right";
-    }
-
-    context.globalAlpha = 0.7;
-    context.fillStyle = "white";
-    context.fillRect(boxOrigin.x, boxOrigin.y, boxWidth, boxHeight);
-    context.globalAlpha = 1;
-    context.fillStyle = labelColor;
-    frame.fillText(
-      text,
-      boxOrigin.x + px * (flip ? -1 : 1),
-      // unsure why "-1" is needed, probably related to measureText result and could be fixed
-      my + py - 1,
-      {
-        fillStyle: labelColor,
-      }
-    );
-  }
-
-  // TODO - simplify / remove copy-paste
-  if (yLine) {
-    context.beginPath();
-    context.strokeStyle = cursorLineColor;
-    context.lineWidth = 1;
-    context.setLineDash([5, 5]); // setting the dashed line pattern
-    context.moveTo(0, point.y);
-    context.lineTo(frame.width, point.y);
-    context.stroke();
-    context.setLineDash([]); // resetting the dashed line pattern so it doesn't affect other lines
-
-    context.textAlign = "left";
-    context.textBaseline = "bottom";
-    const text = yLine.scale.tickFormat(
-      Infinity, // important for scaleLog; https://github.com/d3/d3-scale/tree/main#log_tickFormat
-      yLine.format
-    )(yLine.scale.invert(point.y));
-    const measured = context.measureText(text);
-
-    const boxWidth = measured.width + px * 2;
-    let boxHeight = measured.actualBoundingBoxAscent + py * 2;
-    const boxOrigin: Point = {
-      x: mx,
-      y: my + point.y,
-    };
-    const flip = boxOrigin.y + boxHeight > frame.height;
-
-    if (flip) {
-      boxOrigin.y = point.y - mx;
-      boxHeight = -boxHeight;
-      context.textBaseline = "top";
-    }
-
-    context.globalAlpha = 0.7;
-    context.fillStyle = "white";
-    context.fillRect(boxOrigin.x, boxOrigin.y, boxWidth, boxHeight);
-    context.globalAlpha = 1;
-    context.fillStyle = labelColor;
-    frame.fillText(text, mx + px, boxOrigin.y + py * (flip ? -1 : 1) - 1, {
-      fillStyle: labelColor,
+    drawVerticalLine({
+      frame,
+      scale: xLine.scale,
+      format: xLine.format,
+      x: point.x,
     });
   }
-  frame.exit();
+
+  if (yLine) {
+    drawHorizontalLine({
+      frame,
+      scale: yLine.scale,
+      format: yLine.format,
+      y: point.y,
+    });
+  }
 }
 
 export function drawCircle({

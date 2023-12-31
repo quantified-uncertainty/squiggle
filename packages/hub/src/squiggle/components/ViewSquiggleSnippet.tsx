@@ -3,6 +3,7 @@ import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { SquiggleChart } from "@quri/squiggle-components";
+
 import { ViewSquiggleSnippet$key } from "@/__generated__/ViewSquiggleSnippet.graphql";
 
 type Props = {

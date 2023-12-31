@@ -1,5 +1,5 @@
-import { FC, useEffect, useRef } from "react";
 import mermaid from "mermaid";
+import { FC, useEffect, useRef } from "react";
 
 type Props = {
   children: string;

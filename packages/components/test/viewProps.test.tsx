@@ -1,6 +1,8 @@
-import * as React from "react";
-import { render, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
+
+import { render, waitFor } from "@testing-library/react";
+import * as React from "react";
+
 import { SquiggleChart } from "../src/index.js";
 
 test("showSummary prop shows table", async () => {

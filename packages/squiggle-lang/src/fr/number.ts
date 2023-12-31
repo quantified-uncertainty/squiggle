@@ -1,84 +1,94 @@
 import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frArray, frNumber, frDict } from "../library/registry/frTypes.js";
+import {
+  frArray,
+  frDomain,
+  frNamed,
+  frNumber,
+} from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { NumericRangeDomain } from "../value/domain.js";
-import { vArray, vDomain, vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Number",
   requiresNamespace: false,
 });
 
-const throwEmptyList = (): never => {
-  throw new REArgumentError("List is empty");
+const assertIsNotEmpty = (arr: readonly number[]) => {
+  if (arr.length === 0) {
+    throw new REArgumentError("List is empty");
+  }
 };
 
 function makeNumberArrayToNumberDefinition(
-  fn: (arr: number[]) => number,
+  fn: (arr: readonly number[]) => number,
   throwIfEmpty = true
 ) {
-  return makeDefinition([frArray(frNumber)], ([arr]) => {
-    if (arr.length === 0 && throwIfEmpty) {
-      return throwEmptyList();
-    }
-    return vNumber(fn(arr));
+  return makeDefinition([frArray(frNumber)], frNumber, ([arr]) => {
+    throwIfEmpty && assertIsNotEmpty(arr);
+    return fn(arr);
   });
 }
 
 function makeNumberArrayToNumberArrayDefinition(
-  fn: (arr: number[]) => number[],
+  fn: (arr: readonly number[]) => number[],
   throwIfEmpty = true
 ) {
-  return makeDefinition([frArray(frNumber)], ([arr]) => {
-    if (arr.length === 0 && throwIfEmpty) {
-      return throwEmptyList();
-    }
-    return vArray(fn(arr).map(vNumber));
+  return makeDefinition([frArray(frNumber)], frArray(frNumber), ([arr]) => {
+    throwIfEmpty && assertIsNotEmpty(arr);
+    return fn(arr);
   });
 }
 
 export const library = [
   maker.n2n({
     name: "floor",
+    output: "Number",
     examples: [`floor(3.5)`],
     fn: Math.floor,
   }),
   maker.n2n({
     name: "ceil",
+    output: "Number",
     examples: ["ceil(3.5)"],
     fn: Math.ceil,
   }),
   maker.n2n({
     name: "abs",
+    output: "Number",
     description: "absolute value",
     examples: [`abs(3.5)`],
     fn: Math.abs,
   }),
   maker.n2n({
     name: "exp",
+    output: "Number",
     description: "exponent",
     examples: [`exp(3.5)`],
     fn: Math.exp,
   }),
   maker.n2n({
     name: "log",
+    output: "Number",
     examples: [`log(3.5)`],
     fn: Math.log,
   }),
   maker.n2n({
     name: "log10",
+    output: "Number",
     examples: [`log10(3.5)`],
     fn: Math.log10,
   }),
   maker.n2n({
     name: "log2",
+    output: "Number",
     examples: [`log2(3.5)`],
     fn: Math.log2,
   }),
   maker.n2n({
     name: "round",
+    output: "Number",
     examples: [`round(3.5)`],
     fn: Math.round,
   }),
@@ -105,13 +115,23 @@ export const library = [
     name: "min",
     output: "Number",
     examples: [`min([3,5,2])`],
-    definitions: [makeNumberArrayToNumberDefinition((arr) => Math.min(...arr))],
+    definitions: [
+      makeNumberArrayToNumberDefinition((arr) => Math.min(...arr)),
+      makeDefinition([frNumber, frNumber], frNumber, ([a, b]) => {
+        return Math.min(a, b);
+      }),
+    ],
   }),
   maker.make({
     name: "max",
     output: "Number",
     examples: [`max([3,5,2])`],
-    definitions: [makeNumberArrayToNumberDefinition((arr) => Math.max(...arr))],
+    definitions: [
+      makeNumberArrayToNumberDefinition((arr) => Math.max(...arr)),
+      makeDefinition([frNumber, frNumber], frNumber, ([a, b]) => {
+        return Math.max(a, b);
+      }),
+    ],
   }),
   maker.make({
     name: "mean",
@@ -119,6 +139,28 @@ export const library = [
     examples: [`mean([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => E_A_Floats.mean(arr)),
+    ],
+  }),
+  maker.make({
+    name: "quantile",
+    output: "Number",
+    examples: [`quantile([1,5,10,40,2,4], 0.3)`],
+    definitions: [
+      makeDefinition([frArray(frNumber), frNumber], frNumber, ([arr, i]) => {
+        assertIsNotEmpty(arr);
+        return E_A_Floats.quantile(arr, i);
+      }),
+    ],
+  }),
+  maker.make({
+    name: "median",
+    output: "Number",
+    examples: [`median([1,5,10,40,2,4])`],
+    definitions: [
+      makeDefinition([frArray(frNumber)], frNumber, ([arr]) => {
+        assertIsNotEmpty(arr);
+        return E_A_Floats.quantile(arr, 0.5);
+      }),
     ],
   }),
   maker.make({
@@ -186,12 +228,13 @@ export const library = [
     name: "rangeDomain",
     requiresNamespace: true,
     output: "Domain",
-    examples: ["Number.rangeDomain({ min: 5, max: 10 })"],
+    examples: ["Number.rangeDomain(5, 10)"],
     definitions: [
       makeDefinition(
-        [frDict(["min", frNumber], ["max", frNumber])],
-        ([{ min, max }]) => {
-          return vDomain(new NumericRangeDomain(min, max));
+        [frNamed("min", frNumber), frNamed("max", frNumber)],
+        frDomain,
+        ([min, max]) => {
+          return new NumericRangeDomain(min, max);
         }
       ),
     ],

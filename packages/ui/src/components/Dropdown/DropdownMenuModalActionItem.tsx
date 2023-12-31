@@ -1,7 +1,8 @@
 "use client";
 import { FC, ReactNode, useState } from "react";
-import { ItemLayoutProps } from "./DropdownMenuItemLayout.js";
+
 import { DropdownMenuActionItem } from "./DropdownMenuActionItem.js";
+import { ItemLayoutProps } from "./DropdownMenuItemLayout.js";
 
 type Props = ItemLayoutProps & {
   render(): ReactNode;
@@ -9,7 +10,7 @@ type Props = ItemLayoutProps & {
 
 /*
  * This component doesn't close the dropdown when modal is displayed.
- * Instead, should close the dropdown manually by passing Dropdown's `close()` to Modal's `close` prop.
+ * Instead, you should close the dropdown manually by passing `useCloseDropdown()` result to Modal's `close` prop.
  */
 export const DropdownMenuModalActionItem: FC<Props> = ({
   title,

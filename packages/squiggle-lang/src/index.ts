@@ -1,25 +1,32 @@
 import { type Env } from "./dist/env.js";
+import { registry } from "./library/registry/index.js";
 import { SqProject } from "./public/SqProject/index.js";
-export {
-  type SqInput,
-  SqTextAreaInput,
-  SqCheckboxInput,
-  SqSelectInput,
-  SqTextInput,
-} from "./public/SqValue/SqInput.js";
 import {
+  SqDateValue,
+  SqDurationValue,
   SqLambdaValue,
   SqNumberValue,
   SqStringValue,
   type SqValue,
 } from "./public/SqValue/index.js"; // TODO - reexport other values too
 
+export { type FnDefinition } from "./library/registry/fnDefinition.js";
+
+export { type FnDocumentation } from "./library/registry/core.js";
+export {
+  SqCheckboxInput,
+  type SqInput,
+  SqSelectInput,
+  SqTextAreaInput,
+  SqTextInput,
+} from "./public/SqValue/SqInput.js";
+
 export {
   SqCompileError,
+  type SqError,
   SqFrame,
   SqOtherError,
   SqRuntimeError,
-  type SqError,
 } from "./public/SqError.js";
 export { SqDistributionError } from "./public/SqValue/SqDistribution/SqDistributionError.js";
 export {
@@ -28,45 +35,53 @@ export {
 } from "./public/SqValue/SqDistribution/SqPointSet.js";
 export {
   SqAbstractDistribution,
+  type SqDistribution,
   SqDistributionTag,
   SqPointSetDistribution,
   SqSampleSetDistribution,
   SqSymbolicDistribution,
-  type SqDistribution,
 } from "./public/SqValue/SqDistribution/index.js";
-export { type SqDomain } from "./public/SqValue/SqDomain.js";
+export {
+  SqDateRangeDomain,
+  type SqDomain,
+  SqNumericRangeDomain,
+} from "./public/SqValue/SqDomain.js";
 export { SqLambda, type SqLambdaParameter } from "./public/SqValue/SqLambda.js";
 export { SqDictValue } from "./public/SqValue/index.js";
 export {
   SqDistFnPlot,
   SqDistributionsPlot,
   SqNumericFnPlot,
+  type SqPlot,
   SqRelativeValuesPlot,
   SqScatterPlot,
-  type SqPlot,
 } from "./public/SqValue/SqPlot.js";
 export { SqTableChart } from "./public/SqValue/SqTableChart.js";
 export { SqCalculator } from "./public/SqValue/SqCalculator.js";
 export { SqDict } from "./public/SqValue/SqDict.js";
-export {
-  SqLinearScale,
-  SqLogScale,
-  SqPowerScale,
-  SqSymlogScale,
-  type SqScale,
-} from "./public/SqValue/SqScale.js";
+export { SqScale } from "./public/SqValue/SqScale.js";
 export { type PathItem, SqValuePath } from "./public/SqValuePath.js";
 export { parse } from "./public/parse.js";
 export { fmap as resultMap, type result } from "./utility/result.js";
 
+export { SDate } from "./utility/SDate.js";
+
+export {
+  type DurationUnitName,
+  durationUnits,
+  SDuration,
+} from "./utility/SDuration.js";
+
 export { type LocationRange as SqLocation } from "peggy";
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";
 export {
+  type Env,
+  SqDateValue,
+  SqDurationValue,
   SqLambdaValue,
   SqNumberValue,
   SqProject,
   SqStringValue,
-  type Env,
   type SqValue,
 };
 
@@ -96,3 +111,22 @@ export function sq(strings: TemplateStringsArray, ...rest: unknown[]) {
   }
   return strings.join("");
 }
+
+export function getFunctionDocumentation(name: string) {
+  return registry.getFunctionDocumentation(name);
+}
+
+export function getAllFunctionNames() {
+  return registry.allNames();
+}
+
+export function getAllFunctionNamesWithNamespace(name: string) {
+  return registry
+    .allFunctionsWithNamespace(name)
+    .map((fn) => `${name}.${fn.name}`);
+}
+
+export {
+  SCALE_POWER_DEFAULT_CONSTANT,
+  SCALE_SYMLOG_DEFAULT_CONSTANT,
+} from "./value/index.js";

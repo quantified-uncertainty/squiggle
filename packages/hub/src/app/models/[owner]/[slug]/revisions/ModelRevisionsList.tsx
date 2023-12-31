@@ -1,21 +1,22 @@
 "use client";
+import { ModelRevisionsListQuery } from "@gen/ModelRevisionsListQuery.graphql";
 import { format } from "date-fns";
 import { FC } from "react";
 import { useFragment, usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { ModelRevisionsList$key } from "@/__generated__/ModelRevisionsList.graphql";
-import { ModelRevisionsList_model$key } from "@/__generated__/ModelRevisionsList_model.graphql";
-import { ModelRevisionsList_revision$key } from "@/__generated__/ModelRevisionsList_revision.graphql";
 import { LoadMore } from "@/components/LoadMore";
-import { UsernameLink } from "@/components/UsernameLink";
 import { StyledLink } from "@/components/ui/StyledLink";
+import { UsernameLink } from "@/components/UsernameLink";
 import { commonDateFormat } from "@/lib/common";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRevisionRoute } from "@/routes";
-import { ModelRevisionsListQuery } from "@gen/ModelRevisionsListQuery.graphql";
+
+import { ModelRevisionsList$key } from "@/__generated__/ModelRevisionsList.graphql";
+import { ModelRevisionsList_model$key } from "@/__generated__/ModelRevisionsList_model.graphql";
+import { ModelRevisionsList_revision$key } from "@/__generated__/ModelRevisionsList_revision.graphql";
 
 const ModelRevisionItem: FC<{
   modelRef: ModelRevisionsList_model$key;
@@ -30,6 +31,11 @@ const ModelRevisionItem: FC<{
           username
         }
         comment
+        exports {
+          id
+          variableName
+          title
+        }
       }
     `,
     revisionRef
@@ -69,6 +75,11 @@ const ModelRevisionItem: FC<{
       </div>
       {revision.comment ? (
         <div className="text-xs text-slate-700">{revision.comment}</div>
+      ) : null}
+      {revision.exports.length > 0 ? (
+        <div className="text-xs text-green-700">
+          {`${revision.exports.length} exports `}
+        </div>
       ) : null}
     </div>
   );
@@ -113,6 +124,11 @@ export const ModelRevisionsList: FC<{
               ...ModelRevisionsList_revision
               id
               createdAtTimestamp
+              exports {
+                id
+                title
+                variableName
+              }
             }
           }
           pageInfo {

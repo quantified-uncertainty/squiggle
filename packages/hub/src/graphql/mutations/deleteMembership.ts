@@ -1,10 +1,11 @@
 import { prisma } from "@/prisma";
+
 import { builder } from "../builder";
 import {
   getMembership,
   getMyMembership,
   groupHasAdminsBesidesUser,
-} from "../types/Group";
+} from "../helpers/groupHelpers";
 
 builder.mutationField("deleteMembership", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({

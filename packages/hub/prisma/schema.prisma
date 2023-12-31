@@ -3,7 +3,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
+  previewFeatures = ["postgresqlExtensions", "fullTextSearch"]
 }
 
 generator pothos {
@@ -73,6 +73,8 @@ model User {
   // Users don't initially have an Owner entry, but are prompted to pick a slug and create one.
   asOwner Owner?  @relation(fields: [ownerId], references: [id])
   ownerId String? @unique
+
+  searchable Searchable?
 }
 
 model VerificationToken {
@@ -94,6 +96,10 @@ model Group {
 
   asOwner Owner  @relation(fields: [ownerId], references: [id])
   ownerId String @unique
+
+  reusableInviteToken String?
+
+  searchable Searchable?
 }
 
 model Owner {
@@ -187,6 +193,8 @@ model Model {
   currentRevision   ModelRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
   currentRevisionId String?        @unique
 
+  searchable Searchable?
+
   @@unique([slug, ownerId])
   @@index([createdAt])
   @@index([ownerId])
@@ -212,6 +220,7 @@ model ModelRevision {
   contentId       String?          @unique
 
   relativeValuesExports RelativeValuesExport[]
+  exports               ModelExport[]
 
   // required by Prisma, but unused since `model` field should point at the same entity
   currentRevisionModel Model? @relation("CurrentRevision")
@@ -226,6 +235,18 @@ model SquiggleSnippet {
   version String
 
   revision ModelRevision?
+}
+
+model ModelExport {
+  id              String        @id @default(cuid())
+  modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
+  modelRevisionId String
+  variableName    String
+  title           String?
+  docstring       String        @default("")
+  variableType    String        @default("OTHER")
+
+  @@unique([modelRevisionId, variableName], name: "uniqueKey")
 }
 
 // Definitions are polymorphic, but organized differently from Models, without content types.
@@ -248,6 +269,7 @@ model RelativeValuesDefinition {
   revisions RelativeValuesDefinitionRevision[]
 
   modelExports RelativeValuesExport[]
+  searchable   Searchable?
 
   @@unique([slug, ownerId])
   @@index([createdAt])
@@ -309,4 +331,20 @@ model RelativeValuesPairCache {
   result Json?
 
   @@index([exportId])
+}
+
+model Searchable {
+  id String @id @default(cuid())
+
+  model   Model?  @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  modelId String? @unique
+
+  definition   RelativeValuesDefinition? @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  definitionId String?                   @unique
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String? @unique
+
+  group   Group?  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId String? @unique
 }

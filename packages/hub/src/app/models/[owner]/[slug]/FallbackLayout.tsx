@@ -1,9 +1,10 @@
 "use client";
 
-import { EntityLayout } from "@/components/EntityLayout";
-import { entityNodes } from "./utils";
 import { FC } from "react";
-import { useParams } from "next/navigation";
+
+import { EntityLayout } from "@/components/EntityLayout";
+
+import { ModelEntityNodes } from "./ModelEntityNodes";
 
 type Props = {
   username: string;
@@ -11,17 +12,11 @@ type Props = {
 };
 
 export const FallbackModelLayout: FC<Props> = ({ username, slug }) => {
-  const { variableName } = useParams<{ variableName: string }>();
-
   return (
     <EntityLayout
-      nodes={entityNodes(
-        // Note that we don't pass `__typename` here.
-        // This causes an entity node to not have an icon or a link until the owner type is known.
-        { slug: username },
-        slug,
-        variableName
-      )}
+      // Note that we don't pass `__typename` here.
+      // This causes an entity node to not have an icon or a link until the owner type is known.
+      nodes={<ModelEntityNodes owner={{ slug: username }} />}
       isFluid={true}
       headerRight={
         <div

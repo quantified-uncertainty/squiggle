@@ -1,13 +1,8 @@
-import * as Continuous from "../PointSet/Continuous.js";
 import { ContinuousShape } from "../PointSet/Continuous.js";
-
 import * as Mixed from "../PointSet/Mixed.js";
 import { MixedShape } from "../PointSet/Mixed.js";
-
-import * as Result from "../utility/result.js";
-
 import * as PointSet from "../PointSet/PointSet.js";
-
+import * as Result from "../utility/result.js";
 import { createSparkline } from "../utility/sparklines.js";
 import { BaseDist } from "./BaseDist.js";
 import { DistError, sparklineError } from "./DistError.js";

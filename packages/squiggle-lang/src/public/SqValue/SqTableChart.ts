@@ -1,12 +1,11 @@
 import { Env } from "../../dist/env.js";
+import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
 import { TableChart } from "../../value/index.js";
-
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
-import { SqLambda } from "./SqLambda.js";
 import { SqValue, wrapValue } from "./index.js";
-import { Lambda } from "../../reducer/lambda.js";
+import { SqLambda } from "./SqLambda.js";
 
 const wrapFn = ({ fn }: { fn: Lambda }): SqLambda => {
   return new SqLambda(fn, undefined);
@@ -77,9 +76,5 @@ export class SqTableChart {
 
   get columnNames(): (string | undefined)[] {
     return this._value.columns.map(({ name }) => name);
-  }
-
-  get title(): string | undefined {
-    return this._value.title;
   }
 }

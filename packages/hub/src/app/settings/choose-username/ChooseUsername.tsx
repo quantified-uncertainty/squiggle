@@ -1,4 +1,5 @@
 "use client";
+import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
@@ -9,7 +10,6 @@ import { Button } from "@quri/ui";
 
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useMutationForm } from "@/hooks/useMutationForm";
-import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
 
 export const ChooseUsername: FC = () => {
   const { data: session, update: updateSession } = useSession({
@@ -56,7 +56,7 @@ export const ChooseUsername: FC = () => {
   const disabled = inFlight || !form.formState.isValid;
 
   return (
-    <form onSubmit={() => onSubmit()}>
+    <form onSubmit={onSubmit}>
       <FormProvider {...form}>
         <div className="flex flex-col items-center mt-20">
           <div className="space-y-2">

@@ -4,11 +4,12 @@ import { ConnectionHandler, graphql } from "relay-runtime";
 
 import { PlusIcon, SelectStringFormField } from "@quri/ui";
 
-import { InviteUserToGroupActionMutation } from "@/__generated__/InviteUserToGroupActionMutation.graphql";
-import { InviteUserToGroupAction_group$key } from "@/__generated__/InviteUserToGroupAction_group.graphql";
-import { MembershipRole } from "@/__generated__/SetMembershipRoleActionMutation.graphql";
 import { SelectUser, SelectUserOption } from "@/components/SelectUser";
 import { MutationModalAction } from "@/components/ui/MutationModalAction";
+
+import { InviteUserToGroupAction_group$key } from "@/__generated__/InviteUserToGroupAction_group.graphql";
+import { InviteUserToGroupActionMutation } from "@/__generated__/InviteUserToGroupActionMutation.graphql";
+import { MembershipRole } from "@/__generated__/SetMembershipRoleActionMutation.graphql";
 
 const Mutation = graphql`
   mutation InviteUserToGroupActionMutation(

@@ -1,13 +1,13 @@
+import { OperationError } from "../../operationError.js";
+import { ContinuousShape } from "../../PointSet/Continuous.js";
 import * as Discrete from "../../PointSet/Discrete.js";
-import * as XYShape from "../../XYShape.js";
+import { DiscreteShape } from "../../PointSet/Discrete.js";
+import { buildMixedShape } from "../../PointSet/Mixed.js";
+import { isEqual } from "../../utility/E_A.js";
 import * as E_A_Floats from "../../utility/E_A_Floats.js";
 import * as E_A_Sorted from "../../utility/E_A_Sorted.js";
 import * as Result from "../../utility/result.js";
-
-import { ContinuousShape } from "../../PointSet/Continuous.js";
-import { DiscreteShape } from "../../PointSet/Discrete.js";
-import { buildMixedShape } from "../../PointSet/Mixed.js";
-import { OperationError } from "../../operationError.js";
+import * as XYShape from "../../XYShape.js";
 import { BaseDist } from "../BaseDist.js";
 import {
   DistError,
@@ -15,10 +15,9 @@ import {
   otherError,
   tooFewSamplesForConversionToPointSet,
 } from "../DistError.js";
-import { PointSetDist } from "../PointSetDist.js";
 import { Env } from "../env.js";
+import { PointSetDist } from "../PointSetDist.js";
 import { samplesToPointSetDist } from "./samplesToPointSetDist.js";
-import { isEqual } from "../../utility/E_A.js";
 
 export class SampleSetDist extends BaseDist {
   samples: readonly number[];
@@ -149,7 +148,7 @@ sample everything.
 
   inv(f: number): number {
     const sorted = E_A_Floats.sort(this.samples);
-    return E_A_Sorted.percentile(sorted, f);
+    return E_A_Sorted.quantile(sorted, f);
   }
 
   pdf(f: number, opts: { env: Env }) {

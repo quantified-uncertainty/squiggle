@@ -1,7 +1,11 @@
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frAny, frString } from "../library/registry/frTypes.js";
+import {
+  frAny,
+  frArray,
+  frNamed,
+  frString,
+} from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { vArray, vString } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "String",
@@ -12,19 +16,18 @@ export const library = [
   maker.make({
     name: "make",
     output: "String",
-    definitions: [
-      makeDefinition([frAny], ([x]) => {
-        return vString(x.toString());
-      }),
-    ],
+    definitions: [makeDefinition([frAny()], frString, ([x]) => x.toString())],
   }),
   maker.make({
     name: "split",
-    output: "String",
     definitions: [
-      makeDefinition([frString, frString], ([str, mark]) => {
-        return vArray(str.split(mark).map((r) => vString(r)));
-      }),
+      makeDefinition(
+        [frString, frNamed("separator", frString)],
+        frArray(frString),
+        ([str, mark]) => {
+          return str.split(mark);
+        }
+      ),
     ],
   }),
 ];

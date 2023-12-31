@@ -1,0 +1,53 @@
+{
+  "name": "@quri/versioned-squiggle-components",
+  "private": true,
+  "scripts": {
+    "build:ts": "tsc -b",
+    "build": "pnpm run build:ts",
+    "lint": "pnpm lint:prettier && pnpm eslint",
+    "lint:prettier": "prettier --check .",
+    "eslint": "eslint --ignore-path .gitignore .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@quri/squiggle-components": "workspace:*",
+    "@quri/ui": "workspace:*",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "glob": "^10.3.10",
+    "lodash": "^4.17.21",
+    "squiggle-components-0.8.5": "npm:@quri/squiggle-components@0.8.5",
+    "squiggle-components-0.8.6": "npm:@quri/squiggle-components@0.8.6",
+    "squiggle-components-0.9.0": "npm:@quri/squiggle-components@0.9.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "@types/react": "^18.2.41",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.3.2"
+  },
+  "peerDependencies": {
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./tailwind": {
+      "types": "./dist/src/tailwind.d.cts",
+      "default": "./dist/src/tailwind.cjs"
+    }
+  },
+  "module": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts"
+}

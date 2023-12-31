@@ -6,8 +6,9 @@ import { fetchQuery, graphql } from "relay-runtime";
 
 import { SelectFormField } from "@quri/ui";
 
-import { SelectOwnerQuery } from "@/__generated__/SelectOwnerQuery.graphql";
 import { ownerIcon } from "@/lib/ownerIcon";
+
+import { SelectOwnerQuery } from "@/__generated__/SelectOwnerQuery.graphql";
 
 const Query = graphql`
   query SelectOwnerQuery($search: String!, $myOnly: Boolean!) {

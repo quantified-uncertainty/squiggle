@@ -1,8 +1,8 @@
 // https://github.com/changesets/changesets/blob/main/docs/modifying-changelog-format.md
 // Fork of https://github.com/svitejs/changesets-changelog-github-compact/blob/b9afa3e4c42762e842a310813d42f99b0aee4b6f/packages/changesets-changelog-github-compact/src/index.ts
 
-import type { ChangelogFunctions } from "@changesets/types";
 import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
+import type { ChangelogFunctions } from "@changesets/types";
 
 // can't be moved to constants.ts because it's ESM and changesets requires this file to be CJS
 const REPO = "quantified-uncertainty/squiggle";
@@ -34,14 +34,16 @@ const changelogFunctions: ChangelogFunctions = {
       line.replace(
         /(?<=\( ?(?:fix|fixes|see) )(#\d+)(?= ?\))/g,
         (issueHash) => {
-          return `[${issueHash}](https://github.com/${REPO}/issues/${issueHash.substring(
-            1
-          )})`;
+          const issueId = issueHash.substring(1);
+          return `[${issueHash}](https://github.com/${REPO}/issues/${issueId})`;
         }
       );
+
+    if (replacedChangelog.trim() === "") return "";
+
     const [firstLine, ...futureLines] = replacedChangelog
       .split("\n")
-      .map((l) => linkifyIssueHints(l.trimRight()));
+      .map((l) => linkifyIssueHints(l.trimEnd()));
 
     const links = await (async () => {
       if (prFromSummary !== undefined) {

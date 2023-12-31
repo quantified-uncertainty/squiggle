@@ -1,5 +1,13 @@
 import { result } from "../../utility/result.js";
-import { Value, vLambda, vNumber, vString } from "../../value/index.js";
+import { SDate } from "../../utility/SDate.js";
+import {
+  Value,
+  vCalculator,
+  vDate,
+  vLambda,
+  vNumber,
+  vString,
+} from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
@@ -9,9 +17,10 @@ import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
 import { SqDomain, wrapDomain } from "./SqDomain.js";
 import { SqInput, wrapInput } from "./SqInput.js";
 import { SqLambda } from "./SqLambda.js";
-import { SqPlot, wrapPlot } from "./SqPlot.js";
+import { SqDistributionsPlot, SqPlot, wrapPlot } from "./SqPlot.js";
 import { SqScale, wrapScale } from "./SqScale.js";
 import { SqTableChart } from "./SqTableChart.js";
+import { SqTags } from "./SqTags.js";
 
 export function wrapValue(value: Value, context?: SqValueContext) {
   switch (value.type) {
@@ -39,8 +48,8 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqCalculatorValue(value, context);
     case "Scale":
       return new SqScaleValue(value, context);
-    case "TimeDuration":
-      return new SqTimeDurationValue(value, context);
+    case "Duration":
+      return new SqDurationValue(value, context);
     case "Void":
       return new SqVoidValue(value, context);
     case "Domain":
@@ -60,12 +69,20 @@ export abstract class SqAbstractValue<Type extends string, JSType> {
     public context?: SqValueContext
   ) {}
 
+  get tags() {
+    return new SqTags(this._value.getTags(), this.context);
+  }
+
   toString() {
     return this._value.toString();
   }
 
   publicName() {
     return this._value.publicName;
+  }
+
+  title(): string | undefined {
+    return undefined;
   }
 
   abstract asJS(): JSType;
@@ -98,12 +115,21 @@ export class SqBoolValue extends SqAbstractValue<"Bool", boolean> {
 export class SqDateValue extends SqAbstractValue<"Date", Date> {
   tag = "Date" as const;
 
-  get value(): Date {
+  static create(value: SDate) {
+    return new SqDateValue(vDate(value));
+  }
+
+  static fromNumber(value: number) {
+    return SqDateValue.create(SDate.fromMs(value));
+  }
+
+  get value(): SDate {
     return this._value.value;
   }
 
+  //Note: This reveals the underlying Date object, but we might prefer to keep it hidden
   asJS() {
-    return this.value;
+    return this.value.toDate();
   }
 }
 
@@ -115,6 +141,15 @@ export class SqDistributionValue extends SqAbstractValue<
 
   get value() {
     return wrapDistribution(this._value.value);
+  }
+
+  showAsPlot(): SqDistributionsPlot | undefined {
+    const showAs = this.tags.showAs();
+    return showAs &&
+      showAs.tag === "Plot" &&
+      showAs.value.tag === "distributions"
+      ? showAs.value
+      : undefined;
   }
 
   asJS() {
@@ -135,6 +170,13 @@ export class SqLambdaValue extends SqAbstractValue<"Lambda", SqLambda> {
 
   asJS() {
     return this.value; // SqLambda is nicer than internal Lambda, so we use that
+  }
+
+  toCalculator(): SqCalculatorValue | undefined {
+    const calc = this.value._value.toCalculator();
+    return calc
+      ? new SqCalculatorValue(vCalculator(calc), this.context)
+      : undefined;
   }
 }
 
@@ -182,18 +224,19 @@ export class SqStringValue extends SqAbstractValue<"String", string> {
   }
 }
 
-export class SqTimeDurationValue extends SqAbstractValue<
-  "TimeDuration",
-  number
-> {
-  tag = "TimeDuration" as const;
+export class SqDurationValue extends SqAbstractValue<"Duration", number> {
+  tag = "Duration" as const;
 
   get value() {
     return this._value.value;
   }
 
+  toUnitAndNumber() {
+    return this._value.value.toUnitAndNumber();
+  }
+
   asJS() {
-    return this._value.value;
+    return this._value.value.toMs();
   }
 }
 
@@ -202,6 +245,10 @@ export class SqPlotValue extends SqAbstractValue<"Plot", SqPlot> {
 
   get value() {
     return wrapPlot(this._value.value, this.context);
+  }
+
+  override title() {
+    return this.value.title;
   }
 
   asJS() {
@@ -234,6 +281,10 @@ export class SqCalculatorValue extends SqAbstractValue<
 
   asJS() {
     return this.value;
+  }
+
+  override title() {
+    return this.value.title;
   }
 }
 

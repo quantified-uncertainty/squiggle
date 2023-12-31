@@ -1,6 +1,5 @@
 import { DistError, distErrorToString } from "../dist/DistError.js";
 import { OperationError } from "../operationError.js";
-import { VDomain, Value } from "../value/index.js";
 
 // Common error types.
 
@@ -71,6 +70,16 @@ export class RENotAFunction extends ErrorMessage {
   }
 }
 
+export class RENotADecorator extends ErrorMessage {
+  constructor(public value: string) {
+    super();
+  }
+
+  toString() {
+    return `${this.value} is not a decorator`;
+  }
+}
+
 export class REOperationError extends ErrorMessage {
   constructor(public err: OperationError) {
     super();
@@ -125,15 +134,11 @@ export class RETodo extends ErrorMessage {
 }
 
 export class REDomainError extends ErrorMessage {
-  constructor(
-    public value: Value,
-    public domain: VDomain
-  ) {
-    super();
+  constructor(public msg: string) {
+    super(msg);
   }
-
   toString() {
-    return `Domain Error: Parameter ${this.value} must be in domain ${this.domain}`;
+    return `Domain Error: ${this.message}`;
   }
 }
 

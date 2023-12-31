@@ -1,4 +1,5 @@
 import sortBy from "lodash/sortBy.js";
+
 import { epsilon_float } from "./magicNumbers.js";
 import * as E_A from "./utility/E_A.js";
 import * as E_A_Floats from "./utility/E_A_Floats.js";
@@ -547,13 +548,13 @@ export const PointwiseCombination = {
     const ys: number[] = [];
     while (i1 < len1 || i2 < len2) {
       let x: number, y1: number, y2: number;
-      if (i2 == len2 || (i1 < len1 && xs1[i1] < xs2[i2])) {
+      if (i2 === len2 || (i1 < len1 && xs1[i1] < xs2[i2])) {
         // take from xs1
         x = xs1[i1];
         y1 = ys1[i1];
         y2 = 0;
         i1++;
-      } else if (i1 < len1 && xs1[i1] == xs2[i2]) {
+      } else if (i1 < len1 && xs1[i1] === xs2[i2]) {
         // combine
         x = xs1[i1];
         y1 = ys1[i1];

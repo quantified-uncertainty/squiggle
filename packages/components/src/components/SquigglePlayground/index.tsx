@@ -8,11 +8,12 @@ import React, {
 } from "react";
 
 import { SqLinker, SqProject } from "@quri/squiggle-lang";
+
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 import { DynamicSquiggleViewer } from "../DynamicSquiggleViewer.js";
 import {
-  PartialPlaygroundSettings,
   defaultPlaygroundSettings,
+  PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
@@ -22,12 +23,19 @@ import {
 } from "./LeftPlaygroundPanel/index.js";
 import { ResizableTwoPanelLayout } from "./ResizableTwoPanelLayout.js";
 
+export type ModelExport = {
+  variableName: string;
+  variableType: string;
+  title?: string;
+  docstring: string;
+};
+
 /*
  * We don't support `project` or `continues` in the playground.
  * First, because playground will support multi-file mode by itself.
  * Second, because environment is configurable through playground settings and it should match the project.getEnvironment(), so this component owns the project to guarantee that.
  */
-type PlaygroundProps = {
+export type SquigglePlaygroundProps = {
   /*
    * Playground code is not reactive, because Codemirror editor is stateful and it would be hard/impossible to support code updates.
    * For example, it's not clear what we could do with the cursor position or selection if this prop is changed.
@@ -37,6 +45,7 @@ type PlaygroundProps = {
   sourceId?: string;
   linker?: SqLinker;
   onCodeChange?(code: string): void;
+  onExportsChange?(exports: ModelExport[]): void;
   /* When settings change */
   onSettingsChange?(settings: PlaygroundSettings): void;
   /* Height of the playground */
@@ -55,11 +64,14 @@ export const PlaygroundContext = React.createContext<PlaygroundContextShape>({
   getLeftPanelElement: () => undefined,
 });
 
-export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
+export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
+  props
+) => {
   const {
     defaultCode,
     linker,
     onCodeChange,
+    onExportsChange,
     onSettingsChange,
     renderExtraControls,
     renderExtraDropdownItems,
@@ -105,6 +117,22 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     isRunning: boolean;
   }>({ output: undefined, isRunning: false });
 
+  useEffect(() => {
+    const _output = output.output?.output;
+    if (_output && _output.ok) {
+      const exports = _output.value.exports;
+      const _exports: ModelExport[] = exports.entries().map((e) => ({
+        variableName: e[0],
+        variableType: e[1].tag,
+        title: e[1].title(),
+        docstring: e[1].context?.docstring() || "",
+      }));
+      onExportsChange && onExportsChange(_exports);
+    } else {
+      onExportsChange && onExportsChange([]);
+    }
+  }, [output, onExportsChange]);
+
   const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
   const rightPanelRef = useRef<SquiggleViewerHandle>(null);
 
@@ -137,7 +165,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       // FIXME - this will cause viewer to be rendered twice on initial render
       editor={leftPanelRef.current?.getEditor() ?? undefined}
       ref={rightPanelRef}
-      localSettingsEnabled={true}
       {...settings}
     />
   );

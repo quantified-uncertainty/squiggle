@@ -1,18 +1,13 @@
 import React from "react";
 import { z } from "zod";
 
-import {
-  SqLinearScale,
-  SqLogScale,
-  SqPowerScale,
-  SqSymlogScale,
-} from "@quri/squiggle-lang";
+import { SqScale } from "@quri/squiggle-lang";
 import { CheckboxFormField, NumberFormField, RadioFormField } from "@quri/ui";
 
-import { functionChartDefaults } from "./FunctionChart/utils.js";
+import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../lib/constants.js";
+import { functionChartDefaults } from "../widgets/LambdaWidget/FunctionChart/utils.js";
 import { FormComment } from "./ui/FormComment.js";
 import { FormSection } from "./ui/FormSection.js";
-import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../lib/constants.js";
 
 export const environmentSchema = z.object({
   sampleCount: z.number().int().gte(SAMPLE_COUNT_MIN).lte(SAMPLE_COUNT_MAX),
@@ -40,17 +35,15 @@ type ScaleType = z.infer<typeof scaleSchema>;
 
 function scaleTypeToSqScale(
   scaleType: ScaleType,
-  args: { min?: number; max?: number } = {}
+  args: { min?: number; max?: number; tickFormat?: string } = {}
 ) {
   switch (scaleType) {
     case "linear":
-      return SqLinearScale.create(args);
     case "log":
-      return SqLogScale.create(args);
     case "symlog":
-      return SqSymlogScale.create(args);
+      return new SqScale({ method: { type: scaleType }, ...args });
     case "exp":
-      return SqPowerScale.create(args);
+      return new SqScale({ method: { type: "power" }, ...args });
     default:
       // should never happen, just a precaution
       throw new Error("Internal error");
@@ -108,11 +101,13 @@ export type PartialPlaygroundSettings = DeepPartial<PlaygroundSettings>;
 
 // partial params for SqDistributionsPlot.create; TODO - infer explicit type?
 export function generateDistributionPlotSettings(
-  settings: z.infer<typeof distributionSettingsSchema>
+  settings: z.infer<typeof distributionSettingsSchema>,
+  xTickFormat?: string
 ) {
   const xScale = scaleTypeToSqScale(settings.xScale, {
     min: settings.minX,
     max: settings.maxX,
+    tickFormat: xTickFormat,
   });
   const yScale = scaleTypeToSqScale(settings.yScale);
   return {

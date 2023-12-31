@@ -1,8 +1,8 @@
-import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
+import { prisma } from "@/prisma";
 
+import { getSelf } from "../helpers/userHelpers";
 import { Model } from "../types/Model";
-import { getSelf } from "../types/User";
 import { decodeGlobalIdWithTypename } from "../utils";
 
 builder.mutationField("adminUpdateModelVersion", (t) =>
@@ -33,6 +33,7 @@ builder.mutationField("adminUpdateModelVersion", (t) =>
               include: {
                 squiggleSnippet: true,
                 relativeValuesExports: true,
+                exports: true,
               },
             },
           },
@@ -71,6 +72,14 @@ builder.mutationField("adminUpdateModelVersion", (t) =>
                     definitionId: exp.definitionId,
                   })
                 ),
+              },
+            },
+            exports: {
+              createMany: {
+                data: model.currentRevision.exports.map((exp) => ({
+                  variableName: exp.variableName,
+                  title: exp.title,
+                })),
               },
             },
           },

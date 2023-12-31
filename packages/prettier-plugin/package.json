@@ -1,6 +1,6 @@
 {
   "name": "@quri/prettier-plugin-squiggle",
-  "version": "0.8.7-0",
+  "version": "0.9.1-0",
   "license": "MIT",
   "homepage": "https://squiggle-language.com",
   "author": "Quantified Uncertainty Research Institute",
@@ -18,10 +18,10 @@
     "prettier": "^3.0.3"
   },
   "devDependencies": {
-    "@babel/preset-typescript": "^7.23.2",
-    "@types/jest": "^29.5.7",
+    "@babel/preset-typescript": "^7.23.3",
+    "@types/jest": "^29.5.10",
     "jest": "^29.7.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.3.2"
   },
   "files": [
     "dist",

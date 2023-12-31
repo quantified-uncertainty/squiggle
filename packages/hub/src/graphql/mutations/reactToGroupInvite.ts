@@ -1,4 +1,5 @@
 import { prisma } from "@/prisma";
+
 import { builder } from "../builder";
 import { UserGroupMembership } from "../types/Group";
 import { GroupInvite } from "../types/GroupInvite";
@@ -35,8 +36,8 @@ builder.mutationField("reactToGroupInvite", (t) =>
           ? "Declined"
           : ("" as never);
 
-      const { membership, invite } = await prisma.$transaction(async (tx) => {
-        const invite = await prisma.groupInvite.update({
+      const { invite, membership } = await prisma.$transaction(async (tx) => {
+        const invite = await tx.groupInvite.update({
           where: {
             id: decodedInviteId,
             user: {
@@ -51,7 +52,7 @@ builder.mutationField("reactToGroupInvite", (t) =>
 
         const membership =
           invite.status === "Accepted"
-            ? await prisma.userGroupMembership.create({
+            ? await tx.userGroupMembership.create({
                 data: {
                   group: {
                     connect: {

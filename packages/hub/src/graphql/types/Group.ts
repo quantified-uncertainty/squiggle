@@ -1,17 +1,12 @@
+import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 import { MembershipRole } from "@prisma/client";
 
-import { prisma } from "@/prisma";
-import { Session } from "next-auth";
 import { builder } from "../builder";
+import { getMyMembershipById } from "../helpers/groupHelpers";
+import { modelWhereHasAccess } from "../helpers/modelHelpers";
 import { GroupInvite, GroupInviteConnection } from "./GroupInvite";
-import {
-  ModelConnection,
-  modelConnectionHelpers,
-  modelWhereHasAccess,
-} from "./Model";
+import { ModelConnection, modelConnectionHelpers } from "./Model";
 import { Owner } from "./Owner";
-import { getSelf, isSignedIn } from "./User";
-import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 
 export const MembershipRoleType = builder.enumType(MembershipRole, {
   name: "MembershipRole",
@@ -25,7 +20,7 @@ export const UserGroupMembership = builder.prismaNode("UserGroupMembership", {
       resolve: (t) => t.role,
     }),
     user: t.relation("user"),
-    // TODO - group relation
+    group: t.relation("group"),
   }),
 });
 
@@ -33,99 +28,6 @@ export const UserGroupMembershipConnection = builder.connectionObject({
   type: UserGroupMembership,
   name: "UserGroupMembershipConnection",
 });
-
-export async function getMembership({
-  groupSlug,
-  userSlug,
-}: {
-  groupSlug: string;
-  userSlug: string;
-}) {
-  const membership = await prisma.userGroupMembership.findFirst({
-    where: {
-      user: {
-        asOwner: {
-          slug: userSlug,
-        },
-      },
-      group: {
-        asOwner: {
-          slug: groupSlug,
-        },
-      },
-    },
-  });
-  return membership;
-}
-
-export async function getMyMembership({
-  groupSlug,
-  session,
-}: {
-  groupSlug: string;
-  session: Session | null;
-}) {
-  if (!isSignedIn(session)) {
-    return null;
-  }
-  const self = await getSelf(session);
-  const myMembership = await prisma.userGroupMembership.findFirst({
-    where: {
-      userId: self.id,
-      group: {
-        asOwner: {
-          slug: groupSlug,
-        },
-      },
-    },
-  });
-  return myMembership;
-}
-
-async function getMyMembershipById(groupId: string, session: Session | null) {
-  if (!isSignedIn(session)) {
-    return null;
-  }
-  const self = await getSelf(session);
-  const myMembership = await prisma.userGroupMembership.findUnique({
-    where: {
-      userId_groupId: {
-        groupId: groupId,
-        userId: self.id,
-      },
-    },
-  });
-  return myMembership;
-}
-
-// also returns true if user is not an admin
-export async function groupHasAdminsBesidesUser({
-  groupSlug,
-  userSlug,
-}: {
-  groupSlug: string;
-  userSlug: string;
-}) {
-  return Boolean(
-    await prisma.userGroupMembership.count({
-      where: {
-        group: {
-          asOwner: {
-            slug: groupSlug,
-          },
-        },
-        NOT: {
-          user: {
-            asOwner: {
-              slug: userSlug,
-            },
-          },
-        },
-        role: "Admin",
-      },
-    })
-  );
-}
 
 export const Group = builder.prismaNode("Group", {
   id: { field: "id" },
@@ -140,6 +42,13 @@ export const Group = builder.prismaNode("Group", {
     }),
     updatedAtTimestamp: t.float({
       resolve: (group) => group.updatedAt.getTime(),
+    }),
+    reusableInviteToken: t.exposeString("reusableInviteToken", {
+      nullable: true,
+      unauthorizedResolver: () => null,
+      authScopes: (group) => ({
+        isGroupAdmin: group.id,
+      }),
     }),
     myMembership: t.field({
       type: UserGroupMembership,
@@ -164,15 +73,14 @@ export const Group = builder.prismaNode("Group", {
       {
         cursor: "id",
         nullable: true, // "null" means "forbidden"
-        authScopes: async (group, _, { session }) => {
+        authScopes: (group) => ({
           // It would be nice to select membership at top level of Group object,
           // since this is also useful for `myMembership` field.
           // But unfortunately Prisma doesn't have select aliases:
           // https://github.com/prisma/prisma/discussions/14316
           // https://github.com/prisma/prisma/issues/8151
-          const myMembership = await getMyMembershipById(group.id, session);
-          return myMembership?.role === "Admin";
-        },
+          isGroupAdmin: group.id,
+        }),
         unauthorizedResolver: () => null,
         query: () => ({
           orderBy: {

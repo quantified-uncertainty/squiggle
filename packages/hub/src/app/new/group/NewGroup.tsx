@@ -7,11 +7,12 @@ import { graphql } from "relay-runtime";
 
 import { Button } from "@quri/ui";
 
-import { NewGroupMutation } from "@/__generated__/NewGroupMutation.graphql";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useMutationForm } from "@/hooks/useMutationForm";
 import { groupRoute } from "@/routes";
+
+import { NewGroupMutation } from "@/__generated__/NewGroupMutation.graphql";
 
 const Mutation = graphql`
   mutation NewGroupMutation($input: MutationCreateGroupInput!) {
@@ -60,7 +61,7 @@ export const NewGroup: FC = () => {
   });
 
   return (
-    <form onSubmit={() => onSubmit()}>
+    <form onSubmit={onSubmit}>
       <FormProvider {...form}>
         <H1>New Group</H1>
         <div className="mb-4">

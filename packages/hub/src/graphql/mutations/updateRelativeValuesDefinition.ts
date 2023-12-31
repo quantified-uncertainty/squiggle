@@ -1,15 +1,14 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
+import { getWriteableOwnerBySlug } from "../helpers/ownerHelpers";
 import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
-
-import { getWriteableOwnerBySlug } from "../types/Owner";
+import { validateSlug } from "../utils";
 import {
   RelativeValuesClusterInput,
   RelativeValuesItemInput,
   validateRelativeValuesDefinition,
 } from "./createRelativeValuesDefinition";
-import { validateSlug } from "../utils";
 
 builder.mutationField("updateRelativeValuesDefinition", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({

@@ -1,21 +1,24 @@
+import maxBy from "lodash/maxBy.js";
+import uniq from "lodash/uniq.js";
 import { LocationRange } from "peggy";
 
 import { ASTNode } from "../ast/parse.js";
 import * as IError from "../errors/IError.js";
-import { REArityError, REDomainError, REOther } from "../errors/messages.js";
+import { REArityError, REOther } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
-import { VDomain, Value } from "../value/index.js";
-import * as Context from "./context.js";
-import { ReducerContext } from "./context.js";
-import { Stack } from "./stack.js";
 import {
   FnDefinition,
   fnDefinitionToString,
+  showInDocumentation,
   tryCallFnDefinition,
 } from "../library/registry/fnDefinition.js";
-import uniq from "lodash/uniq.js";
-import { sort } from "../utility/E_A_Floats.js";
 import { FRType } from "../library/registry/frTypes.js";
+import { frTypeToInput } from "../library/registry/helpers.js";
+import { sort } from "../utility/E_A_Floats.js";
+import { Calculator, Input, Value, VDomain } from "../value/index.js";
+import * as Context from "./context.js";
+import { ReducerContext } from "./context.js";
+import { Stack } from "./stack.js";
 
 export type UserDefinedLambdaParameter = {
   name: string;
@@ -25,14 +28,18 @@ export type UserDefinedLambdaParameter = {
 type LambdaBody = (args: Value[], context: ReducerContext) => Value;
 
 export abstract class BaseLambda {
+  isDecorator: boolean = false;
+
   constructor(public body: LambdaBody) {}
 
   abstract readonly type: string;
-  abstract getName(): string;
+  abstract display(): string;
   abstract toString(): string;
   abstract parameterString(): string;
   abstract parameterCounts(): number[];
   abstract parameterCountString(): string;
+  abstract defaultInputs(): Input[];
+  abstract toCalculator(): Calculator;
 
   callFrom(
     args: Value[],
@@ -89,8 +96,8 @@ export class UserDefinedLambda extends BaseLambda {
       for (let i = 0; i < parametersLength; i++) {
         const parameter = parameters[i];
         localStack = localStack.push(parameter.name, args[i]);
-        if (parameter.domain && !parameter.domain.value.includes(args[i])) {
-          throw new REDomainError(args[i], parameter.domain);
+        if (parameter.domain) {
+          parameter.domain.value.validateValue(args[i]);
         }
       }
 
@@ -113,7 +120,7 @@ export class UserDefinedLambda extends BaseLambda {
     this.location = location;
   }
 
-  getName() {
+  display() {
     return this.name || "<anonymous>";
   }
 
@@ -126,7 +133,7 @@ export class UserDefinedLambda extends BaseLambda {
   }
 
   toString() {
-    return `lambda(${this._getParameterNames().join(",")}=>internal code)`;
+    return `(${this._getParameterNames().join(",")}) => internal code`;
   }
 
   parameterCounts() {
@@ -135,6 +142,22 @@ export class UserDefinedLambda extends BaseLambda {
 
   parameterCountString() {
     return this.parameters.length.toString();
+  }
+
+  defaultInputs(): Input[] {
+    return this._getParameterNames().map((name) => ({
+      name,
+      type: "text",
+    }));
+  }
+
+  toCalculator(): Calculator {
+    const only0Params = this.parameters.length === 0;
+    return {
+      fn: this,
+      inputs: this.defaultInputs(),
+      autorun: only0Params,
+    };
   }
 }
 
@@ -149,9 +172,13 @@ export class BuiltinLambda extends BaseLambda {
   ) {
     super((args, context) => this._call(args, context));
     this._definitions = signatures;
+
+    // TODO - this sets the flag that the function is a decorator, but later we don't check which signatures are decorators.
+    // For now, it doesn't matter because we don't allow user-defined decorators, and `Tag.*` decorators work as decorators on all possible definitions.
+    this.isDecorator = signatures.some((s) => s.isDecorator);
   }
 
-  getName() {
+  display() {
     return this.name;
   }
 
@@ -160,7 +187,10 @@ export class BuiltinLambda extends BaseLambda {
   }
 
   parameterString() {
-    return this._definitions.map(fnDefinitionToString).join(" | ");
+    return this._definitions
+      .filter(showInDocumentation)
+      .map(fnDefinitionToString)
+      .join(" | ");
   }
 
   parameterCounts() {
@@ -179,10 +209,15 @@ export class BuiltinLambda extends BaseLambda {
     const signatures = this._definitions;
     const showNameMatchDefinitions = () => {
       const defsString = signatures
+        .filter(showInDocumentation)
         .map(fnDefinitionToString)
         .map((def) => `  ${this.name}${def}\n`)
         .join("");
-      return `There are function matches for ${this.name}(), but with different arguments:\n${defsString}`;
+      return `There are function matches for ${
+        this.name
+      }(), but with different arguments:\n${defsString}Was given arguments: (${args.join(
+        ","
+      )})`;
     };
 
     for (const signature of signatures) {
@@ -192,6 +227,23 @@ export class BuiltinLambda extends BaseLambda {
       }
     }
     throw new REOther(showNameMatchDefinitions());
+  }
+
+  override defaultInputs(): Input[] {
+    const longestSignature = maxBy(this.signatures(), (s) => s.length) || [];
+    return longestSignature.map((sig, i) => {
+      const name = sig.varName ? sig.varName : `Input ${i + 1}`;
+      return frTypeToInput(sig, i, name);
+    });
+  }
+
+  toCalculator(): Calculator {
+    const inputs = this.defaultInputs();
+    return {
+      fn: this,
+      inputs: inputs,
+      autorun: inputs.length !== 0,
+    };
   }
 }
 

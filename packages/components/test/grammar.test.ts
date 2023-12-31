@@ -1,4 +1,4 @@
-import { parser } from "../src/languageSupport/generated/squiggle.js";
+import { parser } from "../src/components/CodeEditor/languageSupport/generated/squiggle.js";
 
 describe("Lezer grammar", () => {
   test("Basic", () => {
@@ -58,5 +58,19 @@ bar"
         )
         .toString()
     ).toBe("Program(Binding(VariableName,Equals,String))");
+  });
+
+  test("Decorators", () => {
+    expect(
+      parser
+        .parse(
+          `@name("X")
+x = 5
+`
+        )
+        .toString()
+    ).toBe(
+      'Program(Decorator(At,DecoratorName,"(",Argument(String),")"),Binding(VariableName,Equals,Number))'
+    );
   });
 });

@@ -5,12 +5,14 @@ import { graphql } from "relay-runtime";
 
 import { RightArrowIcon } from "@quri/ui";
 
-import { MoveModelActionMutation } from "@/__generated__/MoveModelActionMutation.graphql";
 import { SelectOwner, SelectOwnerOption } from "@/components/SelectOwner";
 import { MutationModalAction } from "@/components/ui/MutationModalAction";
 import { modelRoute } from "@/routes";
+
+import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
+
 import { MoveModelAction$key } from "@/__generated__/MoveModelAction.graphql";
-import { DefaultValues } from "react-hook-form";
+import { MoveModelActionMutation } from "@/__generated__/MoveModelActionMutation.graphql";
 
 const Mutation = graphql`
   mutation MoveModelActionMutation($input: MutationMoveModelInput!) {
@@ -47,7 +49,6 @@ export const MoveModelAction: FC<Props> = ({ model: modelKey, close }) => {
       fragment MoveModelAction on Model {
         slug
         owner {
-          # TODO - fragment?
           __typename
           id
           slug
@@ -81,8 +82,14 @@ export const MoveModelAction: FC<Props> = ({ model: modelKey, close }) => {
       title="Change Owner"
       icon={RightArrowIcon}
       modalTitle={`Change owner for ${model.owner.slug}/${model.slug}`}
-      onCompleted={({ model }) => {
-        router.push(modelRoute({ owner: model.owner.slug, slug: model.slug }));
+      onCompleted={({ model: newModel }) => {
+        draftUtils.rename(
+          modelToDraftLocator(model),
+          modelToDraftLocator(newModel)
+        );
+        router.push(
+          modelRoute({ owner: newModel.owner.slug, slug: newModel.slug })
+        );
       }}
     >
       {() => (

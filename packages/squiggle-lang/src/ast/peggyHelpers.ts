@@ -115,12 +115,25 @@ type NodeIdentifierWithAnnotation = N<
 
 type NodeIdentifier = N<"Identifier", { value: string }>;
 
-type NodeLetStatement = N<
-  "LetStatement",
+type NodeDecorator = N<"Decorator", { name: NodeIdentifier; args: ASTNode[] }>;
+
+type LetOrDefun = {
+  variable: NodeIdentifier;
+  exported: boolean;
+};
+
+type NodeLetStatement = N<"LetStatement", LetOrDefun & { value: ASTNode }>;
+
+type NodeDefunStatement = N<
+  "DefunStatement",
+  LetOrDefun & { value: NamedNodeLambda }
+>;
+
+type NodeDecoratedStatement = N<
+  "DecoratedStatement",
   {
-    variable: NodeIdentifier;
-    value: ASTNode;
-    exported: boolean;
+    decorator: NodeDecorator;
+    statement: NodeLetStatement | NodeDefunStatement | NodeDecoratedStatement;
   }
 >;
 
@@ -135,15 +148,6 @@ type NodeLambda = N<
 >;
 
 type NamedNodeLambda = NodeLambda & Required<Pick<NodeLambda, "name">>;
-
-type NodeDefunStatement = N<
-  "DefunStatement",
-  {
-    variable: NodeIdentifier;
-    value: NamedNodeLambda;
-    exported: boolean;
-  }
->;
 
 type NodeTernary = N<
   "Ternary",
@@ -176,6 +180,8 @@ export type ASTNode =
   | NodeFloat
   | NodeIdentifier
   | NodeIdentifierWithAnnotation
+  | NodeDecorator
+  | NodeDecoratedStatement
   | NodeLetStatement
   | NodeDefunStatement
   | NodeLambda
@@ -373,11 +379,50 @@ export function nodeDefunStatement(
   exported: boolean,
   location: LocationRange
 ): NodeDefunStatement {
-  return { type: "DefunStatement", variable, value, exported, location };
+  return {
+    type: "DefunStatement",
+    variable,
+    value,
+    exported,
+    location,
+  };
 }
+
+export function nodeDecorator(
+  name: NodeIdentifier,
+  args: ASTNode[],
+  location: LocationRange
+): NodeDecorator {
+  return { type: "Decorator", name, args, location };
+}
+
+export function nodeDecoratedStatement(
+  decorator: NodeDecorator,
+  statement: ASTNode,
+  location: LocationRange
+): ASTNode {
+  if (
+    statement.type !== "LetStatement" &&
+    statement.type !== "DefunStatement" &&
+    statement.type !== "DecoratedStatement"
+  ) {
+    // shouldn't happen after we remove support for voids
+    throw new Error(
+      `Can't add a decorator to a node of type ${statement.type}`
+    );
+  }
+  return {
+    type: "DecoratedStatement",
+    decorator,
+    statement,
+    location,
+  };
+}
+
 export function nodeString(value: string, location: LocationRange): NodeString {
   return { type: "String", value, location };
 }
+
 export function nodeTernary(
   condition: ASTNode,
   trueExpression: ASTNode,
@@ -432,7 +477,7 @@ export function parseEscapeSequence(
   location: LocationRange,
   error: (e: any, l: LocationRange) => void
 ) {
-  if (char[0] == "'") {
+  if (char[0] === "'") {
     return "'";
   } else {
     try {

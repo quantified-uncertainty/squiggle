@@ -1,12 +1,16 @@
 "use client";
-import { ModelSettingsButton$key } from "@/__generated__/ModelSettingsButton.graphql";
-import { EntityTab } from "@/components/ui/EntityTab";
-import { Cog8ToothIcon, Dropdown, DropdownMenu } from "@quri/ui";
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
+
+import { Cog8ToothIcon, Dropdown, DropdownMenu } from "@quri/ui";
+
+import { EntityTab } from "@/components/ui/EntityTab";
+
 import { DeleteModelAction } from "./DeleteModelAction";
 import { MoveModelAction } from "./MoveModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
+
+import { ModelSettingsButton$key } from "@/__generated__/ModelSettingsButton.graphql";
 
 export const ModelSettingsButton: FC<{
   model: ModelSettingsButton$key;
@@ -14,11 +18,9 @@ export const ModelSettingsButton: FC<{
   const model = useFragment(
     graphql`
       fragment ModelSettingsButton on Model {
-        slug
+        ...UpdateModelSlugAction
         ...MoveModelAction
-        owner {
-          slug
-        }
+        ...DeleteModelAction
       }
     `,
     modelKey
@@ -28,17 +30,9 @@ export const ModelSettingsButton: FC<{
     <Dropdown
       render={({ close }) => (
         <DropdownMenu>
-          <UpdateModelSlugAction
-            owner={model.owner.slug}
-            slug={model.slug}
-            close={close}
-          />
+          <UpdateModelSlugAction model={model} close={close} />
           <MoveModelAction model={model} close={close} />
-          <DeleteModelAction
-            owner={model.owner.slug}
-            slug={model.slug}
-            close={close}
-          />
+          <DeleteModelAction model={model} close={close} />
         </DropdownMenu>
       )}
     >

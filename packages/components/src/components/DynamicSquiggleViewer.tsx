@@ -1,19 +1,21 @@
 import { forwardRef } from "react";
 
+import { SqValuePath } from "@quri/squiggle-lang";
+
 import { SquiggleViewer } from "../index.js";
 import { SquiggleOutput } from "../lib/hooks/useSquiggle.js";
-import { getResultVariables, getResultValue } from "../lib/utility.js";
-import { CodeEditorHandle } from "./CodeEditor.js";
+import { getResultValue, getResultVariables } from "../lib/utility.js";
+import { CodeEditorHandle } from "./CodeEditor/index.js";
+import { ErrorBoundary } from "./ErrorBoundary.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "./SquiggleViewer/index.js";
-import { ErrorBoundary } from "./ErrorBoundary.js";
 
 type Props = {
   squiggleOutput: SquiggleOutput | undefined;
   isRunning: boolean;
   showHeader?: boolean;
-  localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
+  rootPathOverride?: SqValuePath;
 } & PartialPlaygroundSettings;
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
@@ -23,8 +25,8 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
       squiggleOutput,
       isRunning,
       showHeader = true,
-      localSettingsEnabled,
       editor,
+      rootPathOverride,
       ...settings
     },
     viewerRef
@@ -39,10 +41,10 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
           <SquiggleViewer
             {...settings}
             ref={viewerRef}
-            localSettingsEnabled={localSettingsEnabled}
             resultVariables={getResultVariables(squiggleOutput)}
             resultItem={getResultValue(squiggleOutput)}
             editor={editor}
+            rootPathOverride={rootPathOverride}
           />
         </ErrorBoundary>
       </div>
@@ -68,7 +70,7 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
           </div>
         )}
         <div
-          className="flex-1 overflow-auto p-2"
+          className="flex-1 overflow-auto px-2 pb-1"
           data-testid="dynamic-viewer-result"
         >
           {squiggleViewer}

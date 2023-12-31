@@ -1,12 +1,7 @@
-import type { Config } from "tailwindcss";
+import { getTailwindConfig } from "@quri/versioned-squiggle-components/tailwind";
 
-export default {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx,md,mdx}",
-    "../ui/src/**/*.{ts,tsx}",
-    "../components/src/**/*.{ts,tsx}",
-    "./theme.config.jsx",
-  ],
+export default getTailwindConfig({
+  content: ["./src/**/*.{js,jsx,ts,tsx,md,mdx}", "./theme.config.jsx"],
   theme: {
     extend: {
       fontFamily: {
@@ -15,11 +10,4 @@ export default {
       },
     },
   },
-  plugins: [
-    require("@quri/squiggle-components/tailwind-plugin"),
-    require("@tailwindcss/typography"),
-    require("@tailwindcss/forms")({
-      strategy: "class", // strategy: 'base' interferes with react-select styles
-    }),
-  ],
-} satisfies Config;
+});

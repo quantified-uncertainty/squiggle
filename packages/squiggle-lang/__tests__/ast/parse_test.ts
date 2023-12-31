@@ -48,7 +48,7 @@ describe("Peggy parse", () => {
   });
 
   describe("units", () => {
-    testEvalToBe("100%", "1");
+    testEvalToBe("100%", '1, with params numberFormat: ".2~p"');
     testEvalToBe("1-0%", "1");
   });
 
@@ -366,6 +366,8 @@ describe("Peggy parse", () => {
 
   describe("pipe", () => {
     testParse("1 -> add(2)", "(Program (Pipe 1 :add 2))");
+    testParse("1 \n -> add(2)", "(Program (Pipe 1 :add 2))");
+    testParse("1 \n\n -> add(2)", "(Program (Pipe 1 :add 2))");
     testParse("-1 -> add(2)", "(Program (Pipe (UnaryCall - 1) :add 2))");
     testParse(
       "-a[1] -> add(2)",
@@ -472,15 +474,34 @@ describe("Peggy parse", () => {
   describe("Module", () => {
     testParse("x", "(Program :x)");
     testParse("Math.pi", "(Program :Math.pi)");
+    testParse("Math.pi(3)", "(Program (Call :Math.pi 3))");
+    testParse("Math(3)", "(Program (Call :Math 3))");
   });
 
   describe("Exports", () => {
     testParse("export x = 5", "(Program (LetStatement export :x (Block 5)))");
     testParse("exportx = 5", "(Program (LetStatement :exportx (Block 5)))");
   });
+
+  describe("Decorators", () => {
+    testParse(
+      `
+@foo
+@bar(1, 2)
+@baz
+x = 5
+
+@foo
+@bar(1, 2)
+@baz
+f(x) = x
+`,
+      "(Program (DecoratedStatement (Decorator :foo) (DecoratedStatement (Decorator :bar 1 2) (DecoratedStatement (Decorator :baz) (LetStatement :x (Block 5))))) (DecoratedStatement (Decorator :foo) (DecoratedStatement (Decorator :bar 1 2) (DecoratedStatement (Decorator :baz) (DefunStatement :f (Lambda :x (Block :x)))))))"
+    );
+  });
 });
 
-describe("parsing new line", () => {
+describe("Parsing new line", () => {
   testParse(
     `
  a + 

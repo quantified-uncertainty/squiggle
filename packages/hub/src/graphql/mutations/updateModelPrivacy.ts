@@ -1,7 +1,8 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
-import { Model, getWriteableModel } from "../types/Model";
+import { getWriteableModel } from "../helpers/modelHelpers";
+import { Model } from "../types/Model";
 
 builder.mutationField("updateModelPrivacy", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({

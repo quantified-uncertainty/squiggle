@@ -1,5 +1,6 @@
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import Skeleton from "react-loading-skeleton";
+
+import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 
 export default function Loading() {
   return (

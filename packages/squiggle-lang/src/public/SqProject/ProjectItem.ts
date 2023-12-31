@@ -2,7 +2,7 @@ import { AST, parse } from "../../ast/parse.js";
 import { ICompileError, IRuntimeError } from "../../errors/IError.js";
 import { compileAst } from "../../expression/compile.js";
 import { ReducerContext } from "../../reducer/context.js";
-import { ReducerFn, evaluate } from "../../reducer/index.js";
+import { evaluate, ReducerFn } from "../../reducer/index.js";
 import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";

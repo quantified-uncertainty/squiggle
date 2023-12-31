@@ -1,6 +1,7 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
-import { getWriteableOwnerBySlug } from "../types/Owner";
+
+import { getWriteableOwnerBySlug } from "../helpers/ownerHelpers";
 
 builder.mutationField("deleteRelativeValuesDefinition", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({

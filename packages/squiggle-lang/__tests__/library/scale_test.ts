@@ -32,4 +32,9 @@ describe("Scales", () => {
     "Scale.power({ min: 10, max: 5, exponent: 2 })",
     "Max must be greater than min, got: min=10, max=5"
   );
+
+  testEvalToMatch(
+    "Scale.date({ min: Date(2023), max: Date(2021) })",
+    "Max must be greater than min, got: min=Sun Jan 01 2023, max=Fri Jan 01 2021"
+  );
 });

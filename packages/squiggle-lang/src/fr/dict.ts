@@ -1,17 +1,21 @@
 import { OrderedMap } from "immutable";
+
 import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
   frArray,
+  frBool,
   frDictWithArbitraryKeys,
-  frLambda,
+  frLambdaTyped,
+  frNamed,
+  frNumber,
   frString,
   frTuple,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { Value, vArray, vDict, vString } from "../value/index.js";
+import { Value, vString } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Dict",
@@ -25,8 +29,52 @@ export const library = [
     examples: [`Dict.set({a: 1, b: 2}, "c", 3)`],
     definitions: [
       makeDefinition(
-        [frDictWithArbitraryKeys(frAny), frString, frAny],
-        ([dict, key, value]) => vDict(dict.set(key, value))
+        [
+          frDictWithArbitraryKeys(frAny({ genericName: "A" })),
+          frNamed("key", frString),
+          frNamed("value", frAny({ genericName: "A" })),
+        ],
+        frDictWithArbitraryKeys(frAny({ genericName: "A" })),
+        ([dict, key, value]) => dict.set(key, value)
+      ),
+    ],
+  }),
+  maker.make({
+    name: "has",
+    output: "Bool",
+    examples: [`Dict.has({a: 1, b: 2}, "c")`],
+    definitions: [
+      makeDefinition(
+        [frDictWithArbitraryKeys(frAny()), frNamed("key", frString)],
+        frBool,
+        ([dict, key]) => dict.has(key)
+      ),
+    ],
+  }),
+  maker.make({
+    name: "size",
+    output: "Number",
+    examples: [`Dict.size({a: 1, b: 2})`],
+    definitions: [
+      makeDefinition(
+        [frDictWithArbitraryKeys(frAny())],
+        frNumber,
+        ([dict]) => dict.size
+      ),
+    ],
+  }),
+  maker.make({
+    name: "delete",
+    output: "Dict",
+    examples: [`Dict.delete({a: 1, b: 2}, "a")`],
+    definitions: [
+      makeDefinition(
+        [
+          frDictWithArbitraryKeys(frAny({ genericName: "A" })),
+          frNamed("key", frString),
+        ],
+        frDictWithArbitraryKeys(frAny({ genericName: "A" })),
+        ([dict, key]) => dict.delete(key)
       ),
     ],
   }),
@@ -36,8 +84,9 @@ export const library = [
     examples: [`Dict.merge({a: 1, b: 2}, {c: 3, d: 4})`],
     definitions: [
       makeDefinition(
-        [frDictWithArbitraryKeys(frAny), frDictWithArbitraryKeys(frAny)],
-        ([d1, d2]) => vDict(ImmutableMap([...d1.entries(), ...d2.entries()]))
+        [frDictWithArbitraryKeys(frAny()), frDictWithArbitraryKeys(frAny())],
+        frDictWithArbitraryKeys(frAny()),
+        ([d1, d2]) => ImmutableMap([...d1.entries(), ...d2.entries()])
       ),
     ],
   }),
@@ -46,8 +95,10 @@ export const library = [
     output: "Dict",
     examples: [`Dict.mergeMany([{a: 1, b: 2}, {c: 3, d: 4}])`],
     definitions: [
-      makeDefinition([frArray(frDictWithArbitraryKeys(frAny))], ([dicts]) =>
-        vDict(ImmutableMap(dicts.map((d) => [...d.entries()]).flat()))
+      makeDefinition(
+        [frArray(frDictWithArbitraryKeys(frAny()))],
+        frDictWithArbitraryKeys(frAny()),
+        ([dicts]) => ImmutableMap(dicts.map((d) => [...d.entries()]).flat())
       ),
     ],
   }),
@@ -56,8 +107,10 @@ export const library = [
     output: "Array",
     examples: [`Dict.keys({a: 1, b: 2})`],
     definitions: [
-      makeDefinition([frDictWithArbitraryKeys(frAny)], ([d1]) =>
-        vArray([...d1.keys()].map((k) => vString(k)))
+      makeDefinition(
+        [frDictWithArbitraryKeys(frAny())],
+        frArray(frString),
+        ([d1]) => [...d1.keys()]
       ),
     ],
   }),
@@ -66,8 +119,10 @@ export const library = [
     output: "Array",
     examples: [`Dict.values({a: 1, b: 2})`],
     definitions: [
-      makeDefinition([frDictWithArbitraryKeys(frAny)], ([d1]) =>
-        vArray([...d1.values()])
+      makeDefinition(
+        [frDictWithArbitraryKeys(frAny({ genericName: "A" }))],
+        frArray(frAny({ genericName: "A" })),
+        ([d1]) => [...d1.values()]
       ),
     ],
   }),
@@ -76,8 +131,10 @@ export const library = [
     output: "Array",
     examples: [`Dict.toList({a: 1, b: 2})`],
     definitions: [
-      makeDefinition([frDictWithArbitraryKeys(frAny)], ([dict]) =>
-        vArray([...dict.entries()].map(([k, v]) => vArray([vString(k), v])))
+      makeDefinition(
+        [frDictWithArbitraryKeys(frAny({ genericName: "A" }))],
+        frArray(frTuple(frString, frAny({ genericName: "A" }))),
+        ([dict]) => [...dict.entries()]
       ),
     ],
   }),
@@ -86,8 +143,10 @@ export const library = [
     output: "Dict",
     examples: [`Dict.fromList([["a", 1], ["b", 2]])`],
     definitions: [
-      makeDefinition([frArray(frTuple(frString, frAny))], ([items]) =>
-        vDict(ImmutableMap(items))
+      makeDefinition(
+        [frArray(frTuple(frString, frAny({ genericName: "A" })))],
+        frDictWithArbitraryKeys(frAny({ genericName: "A" })),
+        ([items]) => ImmutableMap(items)
       ),
     ],
   }),
@@ -97,15 +156,23 @@ export const library = [
     examples: [`Dict.map({a: 1, b: 2}, {|x| x + 1})`],
     definitions: [
       makeDefinition(
-        [frDictWithArbitraryKeys(frAny), frLambda],
-        ([dict, lambda], context) => {
-          return vDict(
-            ImmutableMap(
-              [...dict.entries()].map(([key, value]) => {
-                const mappedValue = lambda.call([value], context);
-                return [key, mappedValue];
-              })
+        [
+          frDictWithArbitraryKeys(frAny({ genericName: "A" })),
+          frNamed(
+            "fn",
+            frLambdaTyped(
+              [frAny({ genericName: "A" })],
+              frAny({ genericName: "B" })
             )
+          ),
+        ],
+        frDictWithArbitraryKeys(frAny({ genericName: "B" })),
+        ([dict, lambda], context) => {
+          return ImmutableMap(
+            [...dict.entries()].map(([key, value]) => {
+              const mappedValue = lambda.call([value], context);
+              return [key, mappedValue];
+            })
           );
         }
       ),
@@ -117,19 +184,23 @@ export const library = [
     examples: [`Dict.mapKeys({a: 1, b: 2}, {|x| concat(x, "-1")})`],
     definitions: [
       makeDefinition(
-        [frDictWithArbitraryKeys(frAny), frLambda],
+        [
+          frDictWithArbitraryKeys(frAny({ genericName: "A" })),
+          frNamed("fn", frLambdaTyped([frString], frString)),
+        ],
+        frDictWithArbitraryKeys(frAny({ genericName: "A" })),
         ([dict, lambda], context) => {
           const mappedEntries: [string, Value][] = [];
           for (const [key, value] of dict.entries()) {
             const mappedKey = lambda.call([vString(key)], context);
 
-            if (mappedKey.type == "String") {
+            if (mappedKey.type === "String") {
               mappedEntries.push([mappedKey.value, value]);
             } else {
               throw new REArgumentError("mapKeys: lambda must return a string");
             }
           }
-          return vDict(ImmutableMap(mappedEntries));
+          return ImmutableMap(mappedEntries);
         }
       ),
     ],
@@ -140,7 +211,11 @@ export const library = [
     examples: [`Dict.pick({a: 1, b: 2, c: 3}, ['a', 'c'])`],
     definitions: [
       makeDefinition(
-        [frDictWithArbitraryKeys(frAny), frArray(frString)],
+        [
+          frDictWithArbitraryKeys(frAny({ genericName: "A" })),
+          frNamed("keys", frArray(frString)),
+        ],
+        frDictWithArbitraryKeys(frAny({ genericName: "A" })),
         ([dict, keys]) => {
           const response: OrderedMap<string, Value> = OrderedMap<
             string,
@@ -153,7 +228,7 @@ export const library = [
               }
             });
           });
-          return vDict(response);
+          return response;
         }
       ),
     ],
@@ -164,7 +239,11 @@ export const library = [
     examples: [`Dict.omit({a: 1, b: 2, c: 3}, ['b'])`],
     definitions: [
       makeDefinition(
-        [frDictWithArbitraryKeys(frAny), frArray(frString)],
+        [
+          frDictWithArbitraryKeys(frAny({ genericName: "A" })),
+          frArray(frString),
+        ],
+        frNamed("keys", frDictWithArbitraryKeys(frAny({ genericName: "A" }))),
         ([dict, keys]) => {
           const response: OrderedMap<string, Value> = dict.withMutations(
             (result) => {
@@ -175,7 +254,7 @@ export const library = [
               });
             }
           );
-          return vDict(response);
+          return response;
         }
       ),
     ],

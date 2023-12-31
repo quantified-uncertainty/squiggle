@@ -3,11 +3,13 @@
 import { FC } from "react";
 import { graphql } from "react-relay";
 
-import { EditModelPageQuery } from "@/__generated__/EditModelPageQuery.graphql";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
+
 import { EditSquiggleSnippetModel } from "./EditSquiggleSnippetModel";
+
+import { EditModelPageQuery } from "@/__generated__/EditModelPageQuery.graphql";
 
 export const EditModelPage: FC<{
   query: SerializablePreloadedQuery<EditModelPageQuery>;

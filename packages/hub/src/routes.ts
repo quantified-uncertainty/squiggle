@@ -74,6 +74,23 @@ export function modelForRelativeValuesExportRoute({
   }
 }
 
+export function isModelRelativeValuesRoute(url: string) {
+  return url.match("^/models/[^/]+/[^/]+/relative-values/[^/]+$");
+}
+
+export function modelExportRoute({
+  owner,
+  slug,
+  variableName,
+}: {
+  owner: string;
+  slug: string;
+  variableName: string;
+}) {
+  const modelUrl = modelRoute({ owner, slug });
+  return `${modelUrl}/exports/${variableName}`;
+}
+
 export function modelViewRoute({
   username,
   slug,
@@ -178,4 +195,21 @@ export function privacyPolicyRoute() {
 
 export function termsOfServiceRoute() {
   return "/terms";
+}
+
+export function groupInviteLink(params: {
+  groupSlug: string;
+  inviteToken: string;
+  blur?: boolean;
+}) {
+  let token = params.inviteToken;
+  if (params.blur) {
+    const visibleLength = 4;
+    token =
+      token.substring(0, visibleLength) +
+      "•".repeat(token.length - visibleLength);
+  }
+  return `${groupRoute({
+    slug: params.groupSlug,
+  })}/invite-link?token=${token}`;
 }

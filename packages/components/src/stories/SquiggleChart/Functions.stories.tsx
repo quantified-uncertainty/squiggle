@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { SquiggleChart } from "../../components/SquiggleChart.js";
 import { sq } from "@quri/squiggle-lang";
+
+import { SquiggleChart } from "../../components/SquiggleChart.js";
 
 /**
  * There are two types of functions that we can render:
@@ -138,5 +139,19 @@ Plot.numericFn({
 export const Unrenderable: Story = {
   args: {
     code: "foo(x, y) = x + y; foo",
+  },
+};
+
+export const Date: Story = {
+  args: {
+    code: sq`
+  foo(t: [1500year, 3000year]) = {
+    yearDelta = toYears(t - 1480year)
+    normal(yearDelta,yearDelta/4)
+  }
+  Plot.distFn({
+    fn: foo
+  })
+  `,
   },
 };

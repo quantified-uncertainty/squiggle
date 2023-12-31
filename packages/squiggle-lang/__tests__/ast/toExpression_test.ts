@@ -41,6 +41,10 @@ describe("Peggy to Expression", () => {
       "f = {|x| {(larger)(x, 2) ? (0) : (1)}}; (f)(3)",
       "0"
     );
+    testToExpression("List.make(2,5)", "(List.make)(2, 5)", "[5,5]");
+    testToExpression("List(2,5)", "(List)(2, 5)", "[5,5]");
+    testToExpression("Dist.make(2)", "(Dist.make)(2)", "PointMass(2)");
+    testToExpression("Dist(2)", "(Dist)(2)", "PointMass(2)");
   });
 
   describe("arrays", () => {
@@ -134,7 +138,7 @@ describe("Peggy to Expression", () => {
   });
 
   describe("lambda", () => {
-    testToExpression("{|x| x}", "{|x| x}", "lambda(x=>internal code)");
+    testToExpression("{|x| x}", "{|x| x}", "(x) => internal code");
     testToExpression("f={|x| x}", "f = {|x| x}");
     testToExpression("f(x)=x", "f = {|x| {x}}"); // Function definitions are lambda assignments
     testToExpression("f(x)=x ? 1 : 0", "f = {|x| {x ? (1) : (0)}}");
