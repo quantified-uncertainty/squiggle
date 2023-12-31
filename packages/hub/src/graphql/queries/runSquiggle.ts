@@ -10,8 +10,8 @@ function getKey(code: string): string {
   return crypto.createHash("md5").update(code).digest("base64");
 }
 
-export const squiggleValueToJSON = (value: SqValue) => {
-  return JSON.parse(JSON.stringify(value.asJS()));
+export const squiggleValueToJSON = (value: SqValue): any => {
+  return value.asJS();
 };
 
 type SquiggleOutput = {
