@@ -3,6 +3,15 @@ import toPlainObject from "lodash/toPlainObject.js";
 import { SampleSetDist } from "../dist/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
 import { SDate } from "../index.js";
+const TYPE_KEY = "vType";
+const LAMBDA_TYPE = "Lambda";
+const TO_STRING_KEY = "toString";
+const PARAMETER_STRING_KEY = "paramenterString";
+const CALCULATOR_TYPE = "Calculator";
+const PLOT_TYPE = "Plot";
+const TABLE_CHART_TYPE = "TableChart";
+const SCALE_TYPE = "Scale";
+
 import { BaseLambda, Lambda } from "../reducer/lambda.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import {
@@ -51,9 +60,9 @@ export type SimpleValueWithoutLambda =
 export function removeLambdas(value: SimpleValue): SimpleValueWithoutLambda {
   if (value instanceof BaseLambda) {
     return ImmutableMap([
-      ["vType", "Lambda"],
-      ["toString", value.toString()],
-      ["paramenterString", value.parameterString()],
+      [TYPE_KEY, LAMBDA_TYPE],
+      [TO_STRING_KEY, value.toString()],
+      [PARAMETER_STRING_KEY, value.parameterString()]
     ]);
   } else if (Array.isArray(value)) {
     return value.map(removeLambdas);
@@ -109,7 +118,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
     case "Bool":
     case "Number":
     case "String":
-    case "Lambda":
+    case LAMBDA_TYPE:
       return value.value;
     case "Date":
       return value.value.toDate();
@@ -129,7 +138,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
     }
     case "Calculator": {
       const fields: [string, SimpleValue][] = [
-        ["vType", "Calculator"],
+        [TYPE_KEY, CALCULATOR_TYPE],
         ["fn", value.value.fn],
         [
           "inputs",
@@ -144,7 +153,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
     }
     case "Plot": {
       const fields: [string, SimpleValue][] = [
-        ["vType", "Plot"],
+        [TYPE_KEY, PLOT_TYPE],
         ["type", value.value.type],
         ["title", value.value.title || ""],
       ];
@@ -228,7 +237,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
     }
     case "TableChart": {
       const fields: [string, SimpleValue][] = [
-        ["vType", "TableChart"],
+        [TYPE_KEY, TABLE_CHART_TYPE],
         ["data", value.value.data.map(simpleValueFromValue)],
         [
           "columns",
@@ -246,7 +255,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
     case "Scale": {
       const method = value.value.method;
       const fields: [string, SimpleValue][] = [
-        ["vType", "Scale"],
+        [TYPE_KEY, SCALE_TYPE],
         ["type", method?.type || ""],
         ["tickFormat", value.value.tickFormat || ""],
         ["title", value.value.title || ""],
