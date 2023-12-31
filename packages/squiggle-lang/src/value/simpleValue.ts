@@ -4,6 +4,19 @@ import { SampleSetDist } from "../dist/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
 import { SDate } from "../index.js";
 const V_TYPE = "vType";
+const TYPE_KEY = "type";
+const DISTRIBUTIONS_KEY = "distributions";
+const NAME_KEY = "name";
+const DISTRIBUTION_KEY = "distribution";
+const X_SCALE_KEY = "xScale";
+const Y_SCALE_KEY = "yScale";
+const SHOW_SUMMARY_KEY = "showSummary";
+const POINTS_KEY = "points";
+const DIST_X_SCALE_KEY = "distXScale";
+const X_DIST_KEY = "xDist";
+const Y_DIST_KEY = "yDist";
+const IDS_KEY = "ids";
+const RELATIVE_VALUES_KEY = "relativeValues";
 const LAMBDA_TYPE = "Lambda";
 const TO_STRING_KEY = "toString";
 const PARAMETER_STRING_KEY = "paramenterString";
@@ -159,56 +172,56 @@ export function simpleValueFromValue(value: Value): SimpleValue {
     case "Plot": {
       const fields: [string, SimpleValue][] = [
         [V_TYPE, PLOT_TYPE],
-        ["type", value.value.type],
-        ["title", value.value.title || ""],
+        [TYPE_KEY, value.value.type],
+        [TITLE_KEY, value.value.title || ""],
       ];
       switch (value.value.type) {
         case "distributions":
           fields.push([
-            "distributions",
+            DISTRIBUTIONS_KEY,
             value.value.distributions.map((x) =>
               ImmutableMap([
-                ["name", x.name || ""],
-                ["distribution", simpleValueFromValue(vDist(x.distribution))],
+                [NAME_KEY, x.name || ""],
+                [DISTRIBUTION_KEY, simpleValueFromValue(vDist(x.distribution))],
               ])
             ),
           ]);
           fields.push([
-            "xScale",
+            X_SCALE_KEY,
             simpleValueFromValue(vScale(value.value.xScale)),
           ]);
           fields.push([
-            "yScale",
+            Y_SCALE_KEY,
             simpleValueFromValue(vScale(value.value.yScale)),
           ]);
-          fields.push(["showSummary", value.value.showSummary]);
+          fields.push([SHOW_SUMMARY_KEY, value.value.showSummary]);
           break;
         case "numericFn":
           fields.push([FUNCTION_KEY, value.value.fn]);
           fields.push([
-            "xScale",
+            X_SCALE_KEY,
             simpleValueFromValue(vScale(value.value.xScale)),
           ]);
           fields.push([
-            "yScale",
+            Y_SCALE_KEY,
             simpleValueFromValue(vScale(value.value.yScale)),
           ]);
           if (value.value.xPoints) {
-            fields.push(["points", value.value.xPoints]);
+            fields.push([POINTS_KEY, value.value.xPoints]);
           }
           break;
         case "distFn":
           fields.push([FUNCTION_KEY, value.value.fn]);
           fields.push([
-            "xScale",
+            X_SCALE_KEY,
             simpleValueFromValue(vScale(value.value.xScale)),
           ]);
           fields.push([
-            "yScale",
+            Y_SCALE_KEY,
             simpleValueFromValue(vScale(value.value.yScale)),
           ]);
           fields.push([
-            "distXScale",
+            DIST_X_SCALE_KEY,
             simpleValueFromValue(vScale(value.value.distXScale)),
           ]);
           if (value.value.xPoints) {
@@ -217,11 +230,11 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           break;
         case "scatter":
           fields.push([
-            "xDist",
+            X_DIST_KEY,
             simpleValueFromValue(vDist(value.value.xDist)),
           ]);
           fields.push([
-            "yDist",
+            Y_DIST_KEY,
             simpleValueFromValue(vDist(value.value.yDist)),
           ]);
           fields.push([
@@ -233,9 +246,9 @@ export function simpleValueFromValue(value: Value): SimpleValue {
             simpleValueFromValue(vScale(value.value.yScale)),
           ]);
           break;
-        case "relativeValues":
+        case RELATIVE_VALUES_KEY:
           fields.push([FUNCTION_KEY, value.value.fn]);
-          fields.push(["ids", [...value.value.ids]]);
+          fields.push([IDS_KEY, [...value.value.ids]]);
           break;
       }
       return ImmutableMap(fields);
@@ -249,7 +262,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           value.value.columns.map((column) => {
             const data: [string, SimpleValue][] = [
               [FUNCTION_KEY, column.fn],
-              ["name", column.name || ""],
+              [NAME_KEY, column.name || ""],
             ];
             return ImmutableMap(data);
           }),
