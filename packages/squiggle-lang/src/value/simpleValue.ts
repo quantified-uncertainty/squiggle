@@ -244,20 +244,21 @@ export function simpleValueFromValue(value: Value): SimpleValue {
       return ImmutableMap(fields);
     }
     case "Scale": {
+      const method = value.value.method;
       const fields: [string, SimpleValue][] = [
         ["vType", "Scale"],
-        ["type", value.value.type],
+        ["type", method?.type || ""],
         ["tickFormat", value.value.tickFormat || ""],
         ["title", value.value.title || ""],
       ];
       value.value.min && fields.push(["min", value.value.min]);
       value.value.max && fields.push(["max", value.value.max]);
-      switch (value.value.type) {
+      switch (method?.type) {
         case "symlog":
-          fields.push(["constant", value.value.constant || null]);
+          fields.push(["constant", method.constant || null]);
           break;
         case "power":
-          fields.push(["exponent", value.value.exponent || null]);
+          fields.push(["exponent", method.exponent || null]);
           break;
       }
       return ImmutableMap(fields);
