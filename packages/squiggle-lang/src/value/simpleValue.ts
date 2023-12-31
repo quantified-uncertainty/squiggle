@@ -66,13 +66,13 @@ export function removeLambdas(value: SimpleValue): SimpleValueWithoutLambda {
   }
 }
 
-export function toJson(value: SimpleValueWithoutLambda): any {
+export function simpleValueToJson(value: SimpleValueWithoutLambda): unknown {
   if (Array.isArray(value)) {
-    return value.map(toJson);
+    return value.map(simpleValueToJson);
   } else if (_isSimpleValueMap(value)) {
-    const obj: Record<string, any> = {};
+    const obj: Record<string, unknown> = {};
     value.forEach((value, key) => {
-      obj[key] = toJson(value);
+      obj[key] = simpleValueToJson(value);
     });
     return obj;
   } else {
@@ -83,15 +83,15 @@ export function toJson(value: SimpleValueWithoutLambda): any {
 }
 
 //This helps make sure that we can serialize everything, but it does a bad job at a lot of things. Useful as a quick fix.
-export function fromAny(data: any): SimpleValue {
+export function simpleValueFromAny(data: any): SimpleValue {
   if (Array.isArray(data)) {
-    return data.map(fromAny);
+    return data.map(simpleValueFromAny);
   } else if (data instanceof Map) {
     return Object.fromEntries(data);
   } else if (typeof data === "object") {
     let items: [string, SimpleValue][] = [];
     for (const key in data) {
-      items = [...items, [key, fromAny(data[key])]];
+      items = [...items, [key, simpleValueFromAny(data[key])]];
     }
     return ImmutableMap(items);
   } else if (
@@ -104,7 +104,7 @@ export function fromAny(data: any): SimpleValue {
   return toPlainObject(data);
 }
 
-export function fromValue(value: Value): SimpleValue {
+export function simpleValueFromValue(value: Value): SimpleValue {
   switch (value.type) {
     case "Bool":
     case "Number":
@@ -116,16 +116,25 @@ export function fromValue(value: Value): SimpleValue {
     case "Void":
       return null;
     case "Array":
-      return value.value.map(fromValue);
-    case "Dict":
-      return ImmutableMap(
-        [...value.value.entries()].map(([k, v]) => [k, fromValue(v)])
+      return value.value.map(simpleValueFromValue);
+    case "Dict": {
+      const v: SimpleValue = ImmutableMap(
+        [...value.value.entries()].map(([k, v]) => [k, simpleValueFromValue(v)])
       );
+      const fields: [string, SimpleValue][] = [
+        ["vtype", "Dict"],
+        ["value", v],
+      ];
+      return ImmutableMap(fields);
+    }
     case "Calculator": {
       const fields: [string, SimpleValue][] = [
         ["vType", "Calculator"],
         ["fn", value.value.fn],
-        ["inputs", value.value.inputs.map((x) => fromValue(vInput(x)))],
+        [
+          "inputs",
+          value.value.inputs.map((x) => simpleValueFromValue(vInput(x))),
+        ],
         ["autorun", value.value.autorun],
         ["description", value.value.description || ""],
         ["title", value.value.title || ""],
@@ -146,39 +155,69 @@ export function fromValue(value: Value): SimpleValue {
             value.value.distributions.map((x) =>
               ImmutableMap([
                 ["name", x.name || ""],
-                ["distribution", fromValue(vDist(x.distribution))],
+                ["distribution", simpleValueFromValue(vDist(x.distribution))],
               ])
             ),
           ]);
-          fields.push(["xScale", fromValue(vScale(value.value.xScale))]);
-          fields.push(["yScale", fromValue(vScale(value.value.yScale))]);
+          fields.push([
+            "xScale",
+            simpleValueFromValue(vScale(value.value.xScale)),
+          ]);
+          fields.push([
+            "yScale",
+            simpleValueFromValue(vScale(value.value.yScale)),
+          ]);
           fields.push(["showSummary", value.value.showSummary]);
           break;
         case "numericFn":
           fields.push(["fn", value.value.fn]);
-          fields.push(["xScale", fromValue(vScale(value.value.xScale))]);
-          fields.push(["yScale", fromValue(vScale(value.value.yScale))]);
+          fields.push([
+            "xScale",
+            simpleValueFromValue(vScale(value.value.xScale)),
+          ]);
+          fields.push([
+            "yScale",
+            simpleValueFromValue(vScale(value.value.yScale)),
+          ]);
           if (value.value.xPoints) {
             fields.push(["points", value.value.xPoints]);
           }
           break;
         case "distFn":
           fields.push(["fn", value.value.fn]);
-          fields.push(["xScale", fromValue(vScale(value.value.xScale))]);
-          fields.push(["yScale", fromValue(vScale(value.value.yScale))]);
+          fields.push([
+            "xScale",
+            simpleValueFromValue(vScale(value.value.xScale)),
+          ]);
+          fields.push([
+            "yScale",
+            simpleValueFromValue(vScale(value.value.yScale)),
+          ]);
           fields.push([
             "distXScale",
-            fromValue(vScale(value.value.distXScale)),
+            simpleValueFromValue(vScale(value.value.distXScale)),
           ]);
           if (value.value.xPoints) {
             fields.push(["points", value.value.xPoints]);
           }
           break;
         case "scatter":
-          fields.push(["xDist", fromValue(vDist(value.value.xDist))]);
-          fields.push(["yDist", fromValue(vDist(value.value.yDist))]);
-          fields.push(["xScale", fromValue(vScale(value.value.xScale))]);
-          fields.push(["yScale", fromValue(vScale(value.value.yScale))]);
+          fields.push([
+            "xDist",
+            simpleValueFromValue(vDist(value.value.xDist)),
+          ]);
+          fields.push([
+            "yDist",
+            simpleValueFromValue(vDist(value.value.yDist)),
+          ]);
+          fields.push([
+            "xScale",
+            simpleValueFromValue(vScale(value.value.xScale)),
+          ]);
+          fields.push([
+            "yScale",
+            simpleValueFromValue(vScale(value.value.yScale)),
+          ]);
           break;
         case "relativeValues":
           fields.push(["fn", value.value.fn]);
@@ -190,7 +229,7 @@ export function fromValue(value: Value): SimpleValue {
     case "TableChart": {
       const fields: [string, SimpleValue][] = [
         ["vType", "TableChart"],
-        ["data", value.value.data.map(fromValue)],
+        ["data", value.value.data.map(simpleValueFromValue)],
         [
           "columns",
           value.value.columns.map((column) => {
@@ -226,27 +265,29 @@ export function fromValue(value: Value): SimpleValue {
     case "Dist":
       switch (value.value.type) {
         case "PointSetDist":
-          return fromAny(value.value);
+          return simpleValueFromAny(value.value);
         case "SymbolicDist":
-          return fromAny(value.value);
+          return simpleValueFromAny(value.value);
         case "SampleSetDist": {
           const dist = value.value as SampleSetDist;
           return [...dist.samples];
         }
         default:
-          return fromAny(value.value);
+          return simpleValueFromAny(value.value);
       }
     default:
       throw new REOther(`Can't convert ${value.type} to simple value`);
   }
 }
 
-export function toValue(value: SimpleValue): Value {
+export function simpleValueToValue(value: SimpleValue): Value {
   if (Array.isArray(value)) {
-    return vArray(value.map(toValue));
+    return vArray(value.map(simpleValueToValue));
   } else if (_isSimpleValueMap(value)) {
     return vDict(
-      ImmutableMap([...value.entries()].map(([k, v]) => [k, toValue(v)]))
+      ImmutableMap(
+        [...value.entries()].map(([k, v]) => [k, simpleValueToValue(v)])
+      )
     );
   } else if (typeof value === "boolean") {
     return vBool(value);

@@ -34,10 +34,10 @@ import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
 import { vArray, vNumber } from "../value/index.js";
 import {
-  fromValue,
   removeLambdas,
-  toJson,
-  toValue,
+  simpleValueFromValue,
+  simpleValueToJson,
+  simpleValueToValue,
 } from "../value/simpleValue.js";
 
 const { factorial } = jstat;
@@ -462,7 +462,7 @@ const mapYLibrary: FRFunction[] = [
     name: "json",
     definitions: [
       makeDefinition([frAny()], frAny(), ([v]) => {
-        return toValue(fromValue(v));
+        return simpleValueToValue(simpleValueFromValue(v));
       }),
     ],
   }),
@@ -470,7 +470,9 @@ const mapYLibrary: FRFunction[] = [
     name: "jsonString",
     definitions: [
       makeDefinition([frAny()], frString, ([v]) => {
-        return JSON.stringify(toJson(removeLambdas(fromValue(v))));
+        return JSON.stringify(
+          simpleValueToJson(removeLambdas(simpleValueFromValue(v)))
+        );
       }),
     ],
   }),

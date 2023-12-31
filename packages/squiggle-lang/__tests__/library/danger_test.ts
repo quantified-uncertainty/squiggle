@@ -26,7 +26,10 @@ describe("Danger functions", () => {
   describe("json", () => {
     testEvalToBe("Danger.json(1)", "1");
     testEvalToBe("Danger.json([1,2,3])", "[1,2,3]");
-    testEvalToBe("Danger.json({foo: 'bar'})", '{foo: "bar"}');
+    testEvalToBe(
+      "Danger.json({foo: 'bar'})",
+      '{vtype: "Dict",value: {foo: "bar"}}'
+    );
     testEvalToBe("Danger.jsonString([1,2,3])", '"[1,2,3]"');
     testEvalToBe(
       "Danger.jsonString(Scale.log({min:10, max: 20}))",

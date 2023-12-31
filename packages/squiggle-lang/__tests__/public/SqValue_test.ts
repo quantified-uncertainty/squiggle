@@ -15,7 +15,7 @@ describe("SqValue.asJS", () => {
   test("Dict fields", async () => {
     const value = (await testRun("{ x: 5 }")).asJS();
 
-    expect((value as any).get("x")).toBe(5);
+    expect((value as any).get("value").get("x")).toBe(5);
   });
 
   test("Deeply nested dist", async () => {
@@ -23,7 +23,9 @@ describe("SqValue.asJS", () => {
       await testRun('{ x: 5, y: [3, "foo", { dist: normal(5,2) } ] }')
     ).asJS();
 
-    expect((value as any).get("y")[2].get("dist")).toBeInstanceOf(Array);
+    expect(
+      (value as any).get("value").get("y")[2].get("value").get("dist")
+    ).toBeInstanceOf(Array);
   });
 });
 
