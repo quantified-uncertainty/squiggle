@@ -8,6 +8,7 @@ import { BaseDist } from "./BaseDist.js";
 import { DistError, sparklineError } from "./DistError.js";
 
 export class PointSetDist extends BaseDist {
+  type = "PointSetDist";
   pointSet: MixedShape;
 
   constructor(pointSet: MixedShape) {
