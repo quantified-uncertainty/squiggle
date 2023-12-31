@@ -13,6 +13,7 @@ const TABLE_CHART_TYPE = "TableChart";
 const SCALE_TYPE = "Scale";
 
 import { BaseLambda, Lambda } from "../reducer/lambda.js";
+const DICT_TYPE = "Dict";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import {
   Value,
@@ -126,12 +127,12 @@ export function simpleValueFromValue(value: Value): SimpleValue {
       return null;
     case "Array":
       return value.value.map(simpleValueFromValue);
-    case "Dict": {
+    case DICT_TYPE: {
       const v: SimpleValue = ImmutableMap(
         [...value.value.entries()].map(([k, v]) => [k, simpleValueFromValue(v)])
       );
       const fields: [string, SimpleValue][] = [
-        ["vtype", "Dict"],
+        [TYPE_KEY, DICT_TYPE],
         ["value", v],
       ];
       return ImmutableMap(fields);
@@ -294,7 +295,7 @@ export function simpleValueToValue(value: SimpleValue): Value {
   if (Array.isArray(value)) {
     return vArray(value.map(simpleValueToValue));
   } else if (_isSimpleValueMap(value)) {
-    return vDict(
+    return vDict(DICT_TYPE,DICT_TYPE,
       ImmutableMap(
         [...value.entries()].map(([k, v]) => [k, simpleValueToValue(v)])
       )
