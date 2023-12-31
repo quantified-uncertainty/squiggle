@@ -4,6 +4,7 @@ import { SampleSetDist } from "../dist/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
 import { SDate } from "../index.js";
 const V_TYPE = "vType";
+const DATA_KEY = "data";
 const TYPE_KEY = "type";
 const DISTRIBUTIONS_KEY = "distributions";
 const NAME_KEY = "name";
