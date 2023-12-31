@@ -67,6 +67,22 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "A generic error message indicating a server problem."
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
