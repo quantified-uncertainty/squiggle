@@ -38,7 +38,6 @@ This file is auto-generated from the documentation files in the Squiggle reposit
       console.error(err);
       return;
     }
-    console.log("all documentation", documentationContent);
     console.log(`Content written to ${targetFilename}`);
   });
 };
@@ -61,17 +60,17 @@ You can read this document in plaintext [here](/llms/prompt.txt).
 
 `;
   const target = "./src/pages/docs/Ecosystem/LLMPrompt.md";
-  fs.writeFile(
-    target,
-    introduction + promptPage.replace(/\`squiggle/g, "`js"),
-    (err) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      console.log(`Content written to ${target}`);
-    }
-  );
+  // fs.writeFile(
+  //   target,
+  //   introduction + promptPage.replace(/\`squiggle/g, "`js"),
+  //   (err) => {
+  //     if (err) {
+  //       console.error(err);
+  //       return;
+  //     }
+  //     console.log(`Content written to ${target}`);
+  //   }
+  // );
 };
 
 async function main() {
