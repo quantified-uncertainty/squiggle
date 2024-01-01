@@ -73,6 +73,18 @@ const fromFnDefinition: FnDefinition = makeDefinition(
 
 const baseLibrary = [
   maker.make({
+    name: "make",
+    description:
+      "Calls the correct conversion constructor, based on the corresponding input type, to create a Sample Set distribution.",
+    output: "Dist",
+    examples: [
+      `SampleSet(5)`,
+      `SampleSet.make([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`,
+      `SampleSet.make({|i| sample(normal(5,2))})`,
+    ],
+    definitions: [fromDist, fromNumber, fromList, fromFnDefinition],
+  }),
+  maker.make({
     name: "fromDist",
     examples: [`SampleSet.fromDist(normal(5,2))`],
     definitions: [fromDist],
@@ -91,6 +103,8 @@ const baseLibrary = [
   maker.make({
     name: "toList",
     examples: [`SampleSet.toList(SampleSet.fromDist(normal(5,2)))`],
+    description:
+      "Gets the internal samples of a sampleSet distribution. This is separate from the sampleN() function, which would shuffle the samples. toList() maintains order and length.",
     output: "Array",
     definitions: [
       makeDefinition([frSampleSetDist], frArray(frNumber), ([dist]) => {
@@ -103,11 +117,6 @@ const baseLibrary = [
     examples: [`SampleSet.fromFn({|i| sample(normal(5,2))})`],
     output: "Dist",
     definitions: [fromFnDefinition],
-  }),
-  maker.make({
-    name: "make",
-    output: "Dist",
-    definitions: [fromDist, fromNumber, fromList, fromFnDefinition],
   }),
   maker.make({
     name: "map",

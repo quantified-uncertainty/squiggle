@@ -11,14 +11,21 @@ const targetFilename = (name) => `./src/pages/docs/Api/${name}.mdx`;
 const sections = [
   {
     name: "Tag",
-    intro: `---
-description: The Tag module handles tags, which allow the additions of metadata to Squiggle variables.
----
-import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
-
-# Tag
-Tags are metadata that can be added to Squiggle variables. They are used to add additional information to variables, such as names, descriptions, and visualization options. While tags can be accessed at runtime, they are primarily meant for use with the Squiggle Playground and other visualizations.
+    description:
+      "The Tag module handles tags, which allow the additions of metadata to Squiggle variables.",
+    imports: `import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";`,
+    intro: `Tags are metadata that can be added to Squiggle variables. They are used to add additional information to variables, such as names, descriptions, and visualization options. While tags can be accessed at runtime, they are primarily meant for use with the Squiggle Playground and other visualizations.
 Tags can be added to variables either by using their name \`Tag.[name]\` or by using decorators.
+
+## List of Tags
+| Tag Name    | Description |
+| --------- | ----------- |
+| \`name\` | Change the default display name for the variable, in the Playground.       |
+| \`doc\` | Adds documentation to the variable in the playground.       |
+| \`showAs\` | Change the default view for the value when displayed. |
+| \`format\` | Format a number, date, or duration when displayed. |
+| \`hide\` | Don't show the variable in the Playground |
+
 ## Examples
 <SquiggleEditor
 defaultCode={\`@name("My Great Function") // Decorator syntax to add a name tag
@@ -32,35 +39,22 @@ docs = Tag.getDoc(exampleFn)
   
 @hide // Hide this variable in the Playground
 helperFn(f) = f \`}/>
-## List of Tags
-| Tag Name    | Description |
-| --------- | ----------- |
-| \`name\` | Change the default display name for the variable, in the Playground.       |
-| \`doc\` | Adds documentation to the variable in the playground.       |
-| \`showAs\` | Change the default view for the value when displayed. |
-| \`format\` | Format a number, date, or duration when displayed. |
-| \`hide\` | Don't show the variable in the Playground |
+
 ## Definitions
 `,
   },
   {
+    description: "Dates are a simple date time type.",
+    imports: `import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";`,
     name: "Date",
-    intro: `---
-description: Dates are a simple date time type.
----
-import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
-
-# Date`,
+    intro: ``,
   },
   {
     name: "Duration",
-    intro: `---
-description: Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
----
-import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
-
-# Duration
-Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
+    description:
+      "Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.",
+    imports: `import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";`,
+    intro: `Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
 
 
 | **Unit Name** | **Example** | **Convert Number to Duration** | **Convert Duration to Number** |
@@ -75,14 +69,9 @@ This table now presents the information in a clear and concise manner, focusing 
   },
   {
     name: "Calculator",
-    intro: `---
-description: The Calculator module helps you create custom calculators
----
-
-import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
-
-# Calculator
-
+    description: "The Calculator module helps you create custom calculators",
+    imports: `import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";`,
+    intro: `
 The Calculator module allows you to make custom calculators for functions. This is a form that's tied to a specific Squiggle function, where the inputs to the form are passed to that function, and the output of the function gets shown on the bottom.
 
 Calculators can be useful for debugging functions or to present functions to end users.
@@ -90,25 +79,38 @@ Calculators can be useful for debugging functions or to present functions to end
   },
   {
     name: "Dict",
-    intro: `---
-description: Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.
----
-import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
-
-# Dict
+    description:
+      "Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.",
+    imports: `import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";`,
+    intro: `
 `,
   },
   {
     name: "Input",
-    intro: `
----
-description: Inputs are now only used for describing forms for calculators.
----
-import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
-    
-# Input
+    description:
+      "Inputs are now only used for describing forms for calculators.",
+    imports: `import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";`,
+    intro: `Inputs are now only used for describing forms for [calculators](./Calculator.mdx).`,
+  },
+  {
+    name: "SampleSet",
+    description:
+      "Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers.",
+    imports: `import { FnDocumentationFromName } from "@quri/squiggle-components";`,
+    intro: `Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers. It's useful to distinguish point set distributions from arbitrary lists of numbers to make it clear which functions are applicable.
 
-Inputs are now only used for describing forms for [calculators](./Calculator.mdx).`,
+Monte Carlo calculations typically result in sample set distributions.
+
+All regular distribution function work on sample set distributions. In addition, there are several functions that only work on sample set distributions..`,
+  },
+  {
+    name: "PointSet",
+    description:
+      "Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.",
+    imports: `import { FnDocumentationFromName } from "@quri/squiggle-components";`,
+    intro: `Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
+
+One complication is that it's possible to represent invalid probability distributions in the point set format. For example, you can represent shapes with negative values, or shapes that are not normalized.`,
   },
 ];
 
@@ -127,11 +129,17 @@ ${documentation.description || ""}
 `;
 }
 
-const main = async ({ name, intro }) => {
+const main = async ({ name, description, imports, intro }) => {
   const namespaceNames = getAllFunctionNamesWithNamespace(name);
   const content =
-    intro +
-    "\n" +
+    `---
+description: ${description}
+---
+${imports}
+
+# ${name}
+${intro}
+` +
     namespaceNames
       .map((name) => {
         return toMarkdown(getFunctionDocumentation(name));
