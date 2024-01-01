@@ -80,7 +80,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.4.31",
     "prettier": "^3.0.3",
-    "prisma": "^5.5.2",
+    "prisma": "^5.7.1",
     "relay-compiler": "^16.0.0",
     "tailwindcss": "^3.4.0",
     "tsx": "^4.7.0",
