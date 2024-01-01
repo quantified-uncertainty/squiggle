@@ -79,8 +79,9 @@ This table now presents the information in a clear and concise manner, focusing 
 description: The Calculator module helps you create custom calculators
 ---
 
-import { SquiggleEditor  } from "@quri/squiggle-components";
+import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
 
+# Calculator
 
 The Calculator module allows you to make custom calculators for functions. This is a form that's tied to a specific Squiggle function, where the inputs to the form are passed to that function, and the output of the function gets shown on the bottom.
 
@@ -91,13 +92,23 @@ Calculators can be useful for debugging functions or to present functions to end
     name: "Dict",
     intro: `---
 description: Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.
----`,
+---
+import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
+
+# Dict
+`,
   },
   {
     name: "Input",
-    intro: `# Input
+    intro: `
+---
+description: Inputs are now only used for describing forms for calculators.
+---
+import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
+    
+# Input
 
-    Inputs are now only used for describing forms for [calculators](./Calculator.mdx).`,
+Inputs are now only used for describing forms for [calculators](./Calculator.mdx).`,
   },
 ];
 

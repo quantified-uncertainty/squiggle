@@ -122,7 +122,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
       components={{
         pre({ children }) {
           return (
-            <pre className="rounded bg-slate-50 p-3 my-1 not-prose text-[.9em]">
+            <pre className="rounded bg-slate-50 p-2 my-1 not-prose text-[.9em]">
               {children}
             </pre>
           );

@@ -152,18 +152,14 @@ export const FnDocumentation: FC<{
           <header className={clsx("text-slate-600 font-medium mb-2", textSize)}>
             Examples
           </header>
-          <div
-            className={clsx(
-              "text-slate-600 font-mono p-2 bg-slate-100 rounded-md",
-              textSize
-            )}
-          >
-            {examples.map((example, i) => (
-              <div className="p-1" key={i}>
-                {example}
-              </div>
-            ))}
-          </div>
+
+          {examples.map((example, i) => (
+            <MarkdownViewer
+              key={i}
+              md={`\`\`\`squiggle \n ${example} \n \`\`\``}
+              textSize="sm"
+            />
+          ))}
         </Section>
       ) : null}
     </>
