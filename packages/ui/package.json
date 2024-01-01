@@ -53,7 +53,7 @@
     "react-use": "^17.4.2"
   },
   "devDependencies": {
-    "@storybook/addon-docs": "^7.5.2",
+    "@storybook/addon-docs": "^7.6.6",
     "@storybook/addon-essentials": "^7.6.6",
     "@storybook/addon-interactions": "^7.6.3",
     "@storybook/addon-links": "^7.6.3",
