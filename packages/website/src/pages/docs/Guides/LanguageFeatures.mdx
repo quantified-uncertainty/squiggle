@@ -95,7 +95,10 @@ foo = 5
 Squiggle features [data-first](https://www.javierchavarri.com/data-first-and-data-last-a-comparison/) pipes. Functions in the standard library are organized to make this convenient.
 
 <SquiggleEditor
-  defaultCode={`normal(5,2) -> truncateLeft(3) -> SampleSet.fromDist -> SampleSet.map({|r| r + 10})`}
+  defaultCode={`/**
+ * 'bar' variable here should define the transformation applied to a distribution.
+ */
+bar = normal(5,2) -> truncateLeft(3) -> SampleSet.fromDist -> SampleSet.map({|r| r + 10})`}
 />
 
 ## Standard Library
