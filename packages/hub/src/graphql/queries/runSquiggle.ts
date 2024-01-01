@@ -1,11 +1,7 @@
 import { Prisma } from "@prisma/client";
 import crypto from "crypto";
 
-import {
-  SqAbstractDistribution,
-  SqProject,
-  SqValue,
-} from "@quri/squiggle-lang";
+import { SqProject, SqValue } from "@quri/squiggle-lang";
 
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
@@ -14,19 +10,8 @@ function getKey(code: string): string {
   return crypto.createHash("md5").update(code).digest("base64");
 }
 
-export const squiggleValueToJSON = (value: SqValue) => {
-  // this is a lazy shortcut to traverse the value tree; should be reimplemented without parse/stringify
-  return JSON.parse(
-    JSON.stringify(value.asJS(), (key, value) => {
-      if (value instanceof Map) {
-        return Object.fromEntries(value.entries());
-      }
-      if (value instanceof SqAbstractDistribution) {
-        return value.toString();
-      }
-      return value;
-    })
-  );
+export const squiggleValueToJSON = (value: SqValue): any => {
+  return value.asJS();
 };
 
 type SquiggleOutput = {
@@ -91,10 +76,15 @@ builder.objectType(
   }
 );
 
-async function runSquiggle(code: string): Promise<SquiggleOutput> {
+export async function runSquiggle(code: string): Promise<SquiggleOutput> {
   const MAIN = "main";
 
-  const project = SqProject.create();
+  const env = {
+    sampleCount: 1000, // int
+    xyPointLength: 1000, // int
+  };
+
+  const project = SqProject.create({ environment: env });
 
   project.setSource(MAIN, code);
   await project.run(MAIN);
