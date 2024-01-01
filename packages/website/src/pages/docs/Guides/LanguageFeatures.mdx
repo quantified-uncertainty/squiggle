@@ -95,8 +95,15 @@ foo = 5
 Squiggle features [data-first](https://www.javierchavarri.com/data-first-and-data-last-a-comparison/) pipes. Functions in the standard library are organized to make this convenient.
 
 <SquiggleEditor
-  defaultCode={`normal(5,2) -> truncateLeft(3) -> SampleSet.fromDist -> SampleSet.map({|r| r + 10})`}
+  defaultCode={`normal(5,2) -> truncateLeft(3) -> SampleSet.fromDist -> SampleSet.map({|bar| bar + 10})`}
 />
+
+// `bar` is the temporary binding variable used in the SampleSet.map function. It
+// represents each element drawn from a SampleSet created by `SampleSet.fromDist` after
+// it has been truncated by `truncateLeft`. The `bar + 10` operation within the map
+// demonstrates how to perform a transformation on each element, in this case, adding 10.
+// Type: Element of the SampleSet after truncation
+// Usage: Within `SampleSet.map`, define a block with `bar` as the parameter to perform operations on each element.
 
 ## Standard Library
 
