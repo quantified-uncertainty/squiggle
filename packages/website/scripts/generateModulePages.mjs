@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 import fs from "fs";
+import { TARGET_FILENAME } from './config.mjs';
 
 import {
   getAllFunctionNamesWithNamespace,
   getFunctionDocumentation,
 } from "@quri/squiggle-lang";
 
-const targetFilename = (name) => `./src/pages/docs/Api/${name}.mdx`;
+const targetFilename = (name) => TARGET_FILENAME;
 
 const sections = [
   {
