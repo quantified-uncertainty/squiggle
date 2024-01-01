@@ -69,7 +69,7 @@
     "@types/react": "^18.2.41",
     "@types/react-dom": "^18.2.17",
     "@types/unist": "^3.0.2",
-    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
     "@typescript-eslint/parser": "^6.13.1",
     "@wogns3623/eslint-plugin-better-exhaustive-deps": "^1.1.0",
     "canvas": "^2.11.2",
