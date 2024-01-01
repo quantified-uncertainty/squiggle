@@ -3,3 +3,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Over-ride padding from Nextra for Components code renderer */
+.prose pre:not([data-theme]) {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.prose pre code .line,
+pre:not([data-theme]) {
+  padding-left: 0;
+  padding-right: 0;
+}
