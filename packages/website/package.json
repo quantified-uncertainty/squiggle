@@ -19,7 +19,7 @@
     "@quri/ui": "workspace:*",
     "@quri/versioned-squiggle-components": "workspace:*",
     "base64-js": "^1.5.1",
-    "clsx": "^2.0.0",
+    "clsx": "^2.1.0",
     "next": "^14.0.1",
     "nextra": "^2.13.2",
     "nextra-theme-docs": "^2.13.2",
