@@ -19,7 +19,7 @@
     "@quri/ui": "workspace:*",
     "@quri/versioned-squiggle-components": "workspace:*",
     "base64-js": "^1.5.1",
-    "clsx": "^2.0.0",
+    "clsx": "^2.1.0",
     "next": "^14.0.1",
     "nextra": "^2.13.2",
     "nextra-theme-docs": "^2.13.2",
@@ -27,14 +27,14 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.12.0",
-    "shiki": "^0.14.5"
+    "shiki": "^0.14.7"
   },
   "devDependencies": {
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@types/pako": "^2.0.3",
     "@types/react": "^18.2.41",
     "autoprefixer": "^10.4.16",
-    "eslint": "^8.55.0",
+    "eslint": "^8.56.0",
     "eslint-config-next": "^14.0.3",
     "glob": "^10.3.10",
     "postcss": "^8.4.31",
