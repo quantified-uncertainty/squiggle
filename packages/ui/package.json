@@ -44,7 +44,7 @@
   "dependencies": {
     "@floating-ui/react": "^0.26.3",
     "@headlessui/react": "^1.7.17",
-    "clsx": "^2.0.0",
+    "clsx": "^2.1.0",
     "framer-motion": "^10.16.12",
     "react-colorful": "^5.6.1",
     "react-hook-form": "^7.48.2",
@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "@storybook/addon-docs": "^7.5.2",
-    "@storybook/addon-essentials": "^7.6.3",
+    "@storybook/addon-essentials": "^7.6.6",
     "@storybook/addon-interactions": "^7.6.3",
     "@storybook/addon-links": "^7.6.3",
     "@storybook/blocks": "^7.6.3",
@@ -67,7 +67,7 @@
     "@typescript-eslint/eslint-plugin": "^6.13.1",
     "@typescript-eslint/parser": "^6.13.1",
     "autoprefixer": "^10.4.16",
-    "eslint": "^8.55.0",
+    "eslint": "^8.56.0",
     "eslint-plugin-react": "^7.33.2",
     "postcss": "^8.4.31",
     "postcss-cli": "^10.1.0",
