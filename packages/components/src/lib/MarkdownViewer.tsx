@@ -112,7 +112,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
   return (
     <ReactMarkdown
       className={clsx(
-        "prose prose-stone",
+        "prose",
         className,
         textColor || "prose-stone",
         textSize === "sm" ? "text-sm" : "text-xs"

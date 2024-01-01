@@ -86,8 +86,8 @@ export const library = [
     output: "Dict",
     examples: [
       `first = { a: 1, b: 2 }
-    snd = { b: 3, c: 5 }
-    Dict.merge(first, snd)`,
+snd = { b: 3, c: 5 }
+Dict.merge(first, snd)`,
     ],
     definitions: [
       makeDefinition(
@@ -102,8 +102,8 @@ export const library = [
     output: "Dict",
     examples: [
       `first = { a: 1, b: 2 }
-    snd = { b: 3, c: 5 }
-    Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`,
+snd = { b: 3, c: 5 }
+Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`,
     ],
     definitions: [
       makeDefinition(
@@ -226,7 +226,7 @@ export const library = [
     output: "Dict",
     examples: [
       `data = { a: 1, b: 2, c: 3, d: 4 }
-    Dict.pick(data, ["a", "c"]) // {a: 1, c: 3}`,
+Dict.pick(data, ["a", "c"]) // {a: 1, c: 3}`,
     ],
     description: "Creates a new dictionary that only includes the picked keys.",
     definitions: [
@@ -258,7 +258,7 @@ export const library = [
     output: "Dict",
     examples: [
       `data = { a: 1, b: 2, c: 3, d: 4 }
-    Dict.omit(data, ["b", "d"]) // {a: 1, c: 3}`,
+Dict.omit(data, ["b", "d"]) // {a: 1, c: 3}`,
     ],
     description: "Creates a new dictionary that excludes the omitted keys.",
     definitions: [

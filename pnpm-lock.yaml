@@ -893,6 +893,9 @@ importers:
       '@quri/versioned-squiggle-components':
         specifier: workspace:*
         version: link:../versioned-components
+      '@tailwindcss/typography':
+        specifier: ^0.5.10
+        version: 0.5.10(tailwindcss@3.4.0)
       base64-js:
         specifier: ^1.5.1
         version: 1.5.1

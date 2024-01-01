@@ -36,14 +36,14 @@ export const library = [
     output: "Calculator",
     examples: [
       `Calculator.make(
-        {|x| x * 5},
-        {
-          title: "My great calculator",
-          inputs: [Input.text({ name: "x", default: "20" })],
-          autorun: false,
-          sampleCount: 10k,
-        }
-      )`,
+  {|x| x * 5},
+  {
+    title: "My great calculator",
+    inputs: [Input.text({ name: "x", default: "20" })],
+    autorun: false,
+    sampleCount: 10k,
+  }
+)`,
       "({|x| x * 5}) -> Calculator",
     ],
     description: `

@@ -106,11 +106,11 @@ export const library = [
     name: "makeContinuous",
     examples: [
       `PointSet.makeContinuous([
-        {x: 0, y: 0.2},
-        {x: 1, y: 0.7},
-        {x: 2, y: 0.8},
-        {x: 3, y: 0.2}
-      ])`,
+  {x: 0, y: 0.2},
+  {x: 1, y: 0.7},
+  {x: 2, y: 0.8},
+  {x: 3, y: 0.2}
+])`,
     ],
     output: "Dist",
     definitions: [
@@ -131,11 +131,11 @@ export const library = [
     name: "makeDiscrete",
     examples: [
       `PointSet.makeDiscrete([
-        {x: 0, y: 0.2},
-        {x: 1, y: 0.7},
-        {x: 2, y: 0.8},
-        {x: 3, y: 0.2}
-      ])`,
+  {x: 0, y: 0.2},
+  {x: 1, y: 0.7},
+  {x: 2, y: 0.8},
+  {x: 3, y: 0.2}
+])`,
     ],
     output: "Dist",
     definitions: [

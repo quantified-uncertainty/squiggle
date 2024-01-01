@@ -130,7 +130,11 @@ const baseLibrary = [
   maker.make({
     name: "map2",
     examples: [
-      `SampleSet.map2(SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), {|x, y| x + y})`,
+      `SampleSet.map2(
+  SampleSet.fromDist(normal(5,2)),
+  SampleSet.fromDist(normal(5,2)),
+  {|x, y| x + y}
+)`,
     ],
     output: "Dist",
     definitions: [
@@ -159,7 +163,12 @@ const baseLibrary = [
   maker.make({
     name: "map3",
     examples: [
-      `SampleSet.map3(SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), {|x, y, z| max([x,y,z])})`,
+      `SampleSet.map3(
+  SampleSet.fromDist(normal(5,2)),
+  SampleSet.fromDist(normal(5,2)),
+  SampleSet.fromDist(normal(5,2)),
+  {|x, y, z| max([x,y,z])}
+)`,
     ],
     output: "Dist",
     definitions: [
@@ -197,7 +206,14 @@ const baseLibrary = [
   maker.make({
     name: "mapN",
     examples: [
-      `SampleSet.mapN([SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(5,2))], {|x| max(x)})`,
+      `SampleSet.mapN(
+  [
+    SampleSet.fromDist(normal(5,2)),
+    SampleSet.fromDist(normal(5,2)),
+    SampleSet.fromDist(normal(5,2))
+  ],
+  {|x| max(x)}
+)`,
     ],
     output: "Dist",
     definitions: [

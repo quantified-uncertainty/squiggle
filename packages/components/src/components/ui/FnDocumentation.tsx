@@ -113,7 +113,7 @@ export const FnDocumentation: FC<{
               </div>
             )}
             {!requiresNamespace && (
-              <div className={clsx("bg-purple-100 text-slate-800", tagCss)}>
+              <div className={clsx("bg-purple-50 text-slate-600", tagCss)}>
                 {`Namespace optional`}
               </div>
             )}
@@ -155,8 +155,9 @@ export const FnDocumentation: FC<{
 
           {examples.map((example, i) => (
             <MarkdownViewer
+              className="w-full"
               key={i}
-              md={`\`\`\`squiggle \n ${example} \n \`\`\``}
+              md={`\`\`\`js \n ${example} \n \`\`\``}
               textSize="sm"
             />
           ))}
