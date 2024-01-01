@@ -855,8 +855,8 @@ importers:
         specifier: ^1.57.4
         version: 1.57.4
       esbuild:
-        specifier: ^0.19.8
-        version: 0.19.8
+        specifier: ^0.19.11
+        version: 0.19.11
       eslint:
         specifier: ^8.56.0
         version: 8.56.0
