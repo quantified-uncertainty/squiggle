@@ -19,7 +19,7 @@
     "@codemirror/view": "^6.21.4",
     "@floating-ui/react": "^0.26.3",
     "@heroicons/react": "^1.0.6",
-    "@hookform/resolvers": "^3.3.2",
+    "@hookform/resolvers": "^3.3.3",
     "@lezer/common": "^1.1.1",
     "@quri/prettier-plugin-squiggle": "workspace:*",
     "@quri/squiggle-textmate-grammar": "workspace:*",
