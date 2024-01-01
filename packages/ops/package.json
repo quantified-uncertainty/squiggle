@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.23.3",
-    "@babel/parser": "^7.23.5",
+    "@babel/parser": "^7.23.6",
     "lodash": "^4.17.21",
     "mdast-util-to-string": "^4.0.0",
     "remark-parse": "^11.0.0",
