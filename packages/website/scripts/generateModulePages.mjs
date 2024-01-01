@@ -7,8 +7,8 @@ import {
 } from "@quri/squiggle-lang";
 
 const targetFilename = (name) => `./src/pages/docs/api/${name}.md`;
-const targetFilename2 = (name) => `./src/pages/${name}.md`;
-const targetFilename3 = (name) => `./src/pages/docs/${name}.md`;
+const targetFilename2 = (name) => `./src/pages/api/${name}.md`;
+const targetFilename3 = (name) => `./src/pages/docs/Ecosystems${name}.md`;
 
 const sections = [
   {
@@ -114,14 +114,14 @@ const main = async ({ name, intro }) => {
       console.error(err);
       return;
     }
-    console.log(`Content written to ${targetFilename(name)}`);
+    console.log(`Content written to ${targetFilename2(name)}`);
   });
   fs.writeFile(targetFilename3(name), content, (err) => {
     if (err) {
       console.error(err);
       return;
     }
-    console.log(`Content written to ${targetFilename(name)}`);
+    console.log(`Content written to ${targetFilename3(name)}`);
   });
   console.log("CONTENT TO WRITE", content);
 };
