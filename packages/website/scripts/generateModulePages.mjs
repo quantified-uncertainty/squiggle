@@ -6,9 +6,7 @@ import {
   getFunctionDocumentation,
 } from "@quri/squiggle-lang";
 
-const targetFilename = (name) => `./src/pages/docs/api/${name}.md`;
-const targetFilename2 = (name) => `./src/pages/api/${name}.md`;
-const targetFilename3 = (name) => `./src/pages/docs/Ecosystems${name}.md`;
+const targetFilename = (name) => `./src/pages/docs/Api/${name}.md`;
 
 const sections = [
   {
@@ -109,21 +107,6 @@ const main = async ({ name, intro }) => {
     }
     console.log(`Content written to ${targetFilename(name)}`);
   });
-  fs.writeFile(targetFilename2(name), content, (err) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    console.log(`Content written to ${targetFilename2(name)}`);
-  });
-  fs.writeFile(targetFilename3(name), content, (err) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    console.log(`Content written to ${targetFilename3(name)}`);
-  });
-  console.log("CONTENT TO WRITE", content);
 };
 
 //Remember to add any new Modules to .gitignore
