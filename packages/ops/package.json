@@ -13,14 +13,14 @@
     "@babel/plugin-syntax-typescript": "^7.23.3",
     "@changesets/get-github-info": "^0.6.0",
     "@changesets/types": "^6.0.0",
-    "@types/babel__core": "^7.20.4",
+    "@types/babel__core": "^7.20.5",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.10.6",
     "tsx": "^4.7.0",
     "typescript": "^5.3.2"
   },
   "dependencies": {
-    "@babel/core": "^7.23.3",
+    "@babel/core": "^7.23.7",
     "@babel/parser": "^7.23.6",
     "lodash": "^4.17.21",
     "mdast-util-to-string": "^4.0.0",

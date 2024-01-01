@@ -10,7 +10,7 @@
   "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
     "@codemirror/autocomplete": "^6.10.2",
-    "@codemirror/commands": "^6.3.2",
+    "@codemirror/commands": "^6.3.3",
     "@codemirror/language": "^6.9.3",
     "@codemirror/lint": "^6.4.2",
     "@codemirror/search": "^6.5.5",
@@ -36,7 +36,7 @@
     "prettier": "^3.1.1",
     "react": "^18.2.0",
     "react-draggable": "^4.4.6",
-    "react-hook-form": "^7.48.2",
+    "react-hook-form": "^7.49.2",
     "react-markdown": "^9.0.1",
     "remark-gfm": "^4.0.0",
     "shikiji": "^0.9.15",
@@ -53,7 +53,7 @@
     "@storybook/addon-actions": "^7.6.6",
     "@storybook/addon-docs": "^7.6.6",
     "@storybook/addon-essentials": "^7.6.6",
-    "@storybook/addon-links": "^7.6.3",
+    "@storybook/addon-links": "^7.6.7",
     "@storybook/blocks": "^7.6.7",
     "@storybook/node-logger": "^7.6.6",
     "@storybook/react": "^7.5.2",
@@ -89,7 +89,7 @@
     "tailwindcss": "^3.4.0",
     "ts-jest": "^29.1.1",
     "typescript": "^5.3.2",
-    "vite": "^5.0.5"
+    "vite": "^5.0.10"
   },
   "peerDependencies": {
     "react": "^16.8.0 || ^17 || ^18",
