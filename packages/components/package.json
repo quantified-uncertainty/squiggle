@@ -80,7 +80,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "jsdom": "^23.0.1",
     "postcss": "^8.4.31",
-    "postcss-cli": "^10.1.0",
+    "postcss-cli": "^11.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "resize-observer-polyfill": "^1.5.1",
