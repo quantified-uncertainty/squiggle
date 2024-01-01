@@ -42,8 +42,8 @@ export const Button: FC<ButtonProps> = ({
         disabled
           ? "opacity-60"
           : theme === "primary"
-          ? "hover:bg-green-800 hover:border-green-800 hover:text-white"
-          : "hover:bg-slate-200 hover:text-gray-900",
+            ? "hover:bg-green-800 hover:border-green-800 hover:text-white"
+            : "hover:bg-slate-200 hover:text-gray-900",
         wide && "w-full",
         size === "medium" && "h-8 rounded-md",
         size === "small" && "h-6 rounded-sm",

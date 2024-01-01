@@ -63,10 +63,10 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
             {isRunning
               ? "rendering..."
               : squiggleOutput
-              ? `render #${squiggleOutput.executionId} in ${showTime(
-                  squiggleOutput.executionTime
-                )}`
-              : null}
+                ? `render #${squiggleOutput.executionId} in ${showTime(
+                    squiggleOutput.executionTime
+                  )}`
+                : null}
           </div>
         )}
         <div
