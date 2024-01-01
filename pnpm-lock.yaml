@@ -185,8 +185,8 @@ importers:
         specifier: ^7.6.6
         version: 7.6.6
       '@storybook/react':
-        specifier: ^7.5.2
-        version: 7.5.2(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2)
+        specifier: ^7.6.6
+        version: 7.6.6(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2)
       '@storybook/react-vite':
         specifier: ^7.5.2
         version: 7.5.2(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2)(vite@5.0.7)
@@ -682,8 +682,8 @@ importers:
         specifier: ^7.6.3
         version: 7.6.4(@types/react-dom@18.2.18)(@types/react@18.2.42)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/react':
-        specifier: ^7.5.2
-        version: 7.5.2(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2)
+        specifier: ^7.6.6
+        version: 7.6.6(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2)
       '@storybook/react-vite':
         specifier: ^7.5.2
         version: 7.5.2(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2)(vite@5.0.7)
@@ -6968,6 +6968,13 @@ packages:
       '@storybook/preview-api': 7.5.2
     dev: true
 
+  /@storybook/core-client@7.6.6:
+    resolution: {integrity: sha512-P100aNf+WpvzlfULZp1NPd60/nxsppLmft2DdIyAx1j4QPMZvUJyJB+hdBMzTFiPEhIUncIMoIVf2R3UXC5DfA==}
+    dependencies:
+      '@storybook/client-logger': 7.6.6
+      '@storybook/preview-api': 7.6.6
+    dev: true
+
   /@storybook/core-common@7.5.2:
     resolution: {integrity: sha512-js7fIH4wHS08dBuIVsr3JnwMtKn5O1Izc/Zor4t6PntLWkGGX4X/GxbOkasGX5SkCT1qUtB9RpdPd1sUkLhIgw==}
     dependencies:
@@ -7196,12 +7203,6 @@ packages:
       - supports-color
     dev: true
 
-  /@storybook/csf@0.1.1:
-    resolution: {integrity: sha512-4hE3AlNVxR60Wc5KSC68ASYzUobjPqtSKyhV6G+ge0FIXU55N5nTY7dXGRZHQGDBPq+XqchMkIdlkHPRs8nTHg==}
-    dependencies:
-      type-fest: 2.19.0
-    dev: true
-
   /@storybook/csf@0.1.2:
     resolution: {integrity: sha512-ePrvE/pS1vsKR9Xr+o+YwdqNgHUyXvg+1Xjx0h9LrVx7Zq4zNe06pd63F5EvzTbCbJsHj7GHr9tkiaqm7U8WRA==}
     dependencies:
@@ -7336,7 +7337,7 @@ packages:
       '@storybook/channels': 7.5.2
       '@storybook/client-logger': 7.5.2
       '@storybook/core-events': 7.5.2
-      '@storybook/csf': 0.1.1
+      '@storybook/csf': 0.1.2
       '@storybook/global': 5.0.0
       '@storybook/types': 7.5.2
       '@types/qs': 6.9.8
@@ -7478,6 +7479,46 @@ packages:
       - supports-color
     dev: true
 
+  /@storybook/react@7.6.6(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2):
+    resolution: {integrity: sha512-pE6GJ4hPGJIsX6AREjW6HibshwZE6rFhWRtjeX5MV0eKMmQgoRWRgiRfg9/YB6Z0tRtuptI83Uaszimmif1BKg==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    dependencies:
+      '@storybook/client-logger': 7.6.6
+      '@storybook/core-client': 7.6.6
+      '@storybook/docs-tools': 7.6.6
+      '@storybook/global': 5.0.0
+      '@storybook/preview-api': 7.6.6
+      '@storybook/react-dom-shim': 7.6.6(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/types': 7.6.6
+      '@types/escodegen': 0.0.6
+      '@types/estree': 0.0.51
+      '@types/node': 18.18.8
+      acorn: 7.4.1
+      acorn-jsx: 5.3.2(acorn@7.4.1)
+      acorn-walk: 7.2.0
+      escodegen: 2.1.0
+      html-tags: 3.2.0
+      lodash: 4.17.21
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-element-to-jsx-string: 15.0.0(react-dom@18.2.0)(react@18.2.0)
+      ts-dedent: 2.2.0
+      type-fest: 2.19.0
+      typescript: 5.3.2
+      util-deprecate: 1.0.2
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+    dev: true
+
   /@storybook/router@7.6.4:
     resolution: {integrity: sha512-5MQ7Z4D7XNPN2yhFgjey7hXOYd6s8CggUqeAwhzGTex90SMCkKHSz1hfkcXn1ZqBPaall2b53uK553OvPLp9KQ==}
     dependencies:
@@ -7550,7 +7591,7 @@ packages:
     resolution: {integrity: sha512-RDKHo6WUES+4nt7uZMfankjxdpYX2EI2GpJ2n2RPcnhzmb/ub1huNTjbzDEYMqY24SppljZeIN57m3Ar6L6f9A==}
     dependencies:
       '@storybook/channels': 7.5.2
-      '@types/babel__core': 7.20.2
+      '@types/babel__core': 7.20.4
       '@types/express': 4.17.18
       file-system-cache: 2.3.0
     dev: true
@@ -7720,16 +7761,6 @@ packages:
 
   /@types/aria-query@5.0.2:
     resolution: {integrity: sha512-PHKZuMN+K5qgKIWhBodXzQslTo5P+K/6LqeKXS6O/4liIDdZqaX5RXrCK++LAw+y/nptN48YmUMFiQHRSWYwtQ==}
-    dev: true
-
-  /@types/babel__core@7.20.2:
-    resolution: {integrity: sha512-pNpr1T1xLUc2l3xJKuPtsEky3ybxN3m4fJkknfIpTCTfIZCDW57oAg+EfCgIIp2rvCe0Wn++/FfodDS4YXxBwA==}
-    dependencies:
-      '@babel/parser': 7.23.6
-      '@babel/types': 7.23.5
-      '@types/babel__generator': 7.6.5
-      '@types/babel__template': 7.4.2
-      '@types/babel__traverse': 7.20.2
     dev: true
 
   /@types/babel__core@7.20.4:
