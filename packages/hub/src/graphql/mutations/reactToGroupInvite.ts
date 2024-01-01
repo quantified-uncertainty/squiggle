@@ -33,8 +33,8 @@ builder.mutationField("reactToGroupInvite", (t) =>
         input.action === "Accept"
           ? "Accepted"
           : input.action === "Decline"
-          ? "Declined"
-          : ("" as never);
+            ? "Declined"
+            : ("" as never);
 
       const { invite, membership } = await prisma.$transaction(async (tx) => {
         const invite = await tx.groupInvite.update({
