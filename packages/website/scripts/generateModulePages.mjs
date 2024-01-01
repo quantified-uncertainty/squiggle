@@ -8,6 +8,7 @@ import {
 
 const targetFilename = (name) => `./src/pages/docs/api/${name}.md`;
 const targetFilename2 = (name) => `./src/pages/${name}.md`;
+const targetFilename3 = (name) => `./src/pages/docs/${name}.md`;
 
 const sections = [
   {
@@ -115,9 +116,18 @@ const main = async ({ name, intro }) => {
     }
     console.log(`Content written to ${targetFilename(name)}`);
   });
+  fs.writeFile(targetFilename3(name), content, (err) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(`Content written to ${targetFilename(name)}`);
+  });
+  console.log("CONTENT TO WRITE", content);
 };
 
 //Remember to add any new Modules to .gitignore
 for (const section of sections) {
+  console.log("Generating", section.name);
   await main(section);
 }
