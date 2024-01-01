@@ -6,7 +6,7 @@ import {
   getFunctionDocumentation,
 } from "@quri/squiggle-lang";
 
-const targetFilename = (name) => `./src/pages/docs/Api/${name}.mdx`;
+const apiPageFilename = (name) => `./src/pages/docs/Api/${name}.mdx`;
 
 const sections = [
   {
@@ -100,12 +100,12 @@ const main = async ({ name, intro }) => {
         return toMarkdown(getFunctionDocumentation(name));
       })
       .join("\n");
-  fs.writeFile(targetFilename(name), content, (err) => {
+  fs.writeFile(apiPageFilename(name), content, (err) => {
     if (err) {
       console.error(err);
       return;
     }
-    console.log(`Content written to ${targetFilename(name)}`);
+    console.log(`Content written to ${apiPageFilename(name)}`);
   });
 };
 
