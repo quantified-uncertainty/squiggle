@@ -112,6 +112,21 @@ All regular distribution function work on sample set distributions. In addition,
 
 One complication is that it's possible to represent invalid probability distributions in the point set format. For example, you can represent shapes with negative values, or shapes that are not normalized.`,
   },
+  {
+    name: "Sym",
+    description:
+      "The Sym module provides functions to create some common symbolic distributions.",
+    imports: `import { FnDocumentationFromName } from "@quri/squiggle-components";`,
+    intro: `Symbolic Distributions. All these functions match the functions for creating sample set distributions, but produce symbolic distributions instead. Symbolic distributions won't capture correlations, but are more performant than sample distributions.`,
+  },
+  {
+    name: "Scale",
+    description: "Scales for plots.",
+    imports: `import { FnDocumentationFromName } from "@quri/squiggle-components";`,
+    intro: `Chart axes in [plots](./Plot.mdx) can be scaled using the following functions. Each scale function accepts optional min and max value. Power scale accepts an extra exponent parameter.
+
+Squiggle uses D3 for the tick formats. You can read about d3 tick formats [here](https://github.com/d3/d3-format).`,
+  },
 ];
 
 function toMarkdownDefinitions(definitions) {

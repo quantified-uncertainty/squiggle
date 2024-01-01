@@ -107,6 +107,11 @@ export const library = [
     name: "symlog",
     output: "Scale",
     examples: [`Scale.symlog({ min: -10, max: 10 })`],
+    description: `Symmetric log scale. Useful for plotting data that includes zero or negative values.
+
+The function accepts an additional \`constant\` parameter, used as follows: \`Scale.symlog({constant: 0.1})\`. This parameter allows you to allocate more pixel space to data with lower or higher absolute values. By adjusting this constant, you effectively control the scale's focus, shifting it between smaller and larger values. For more detailed information on this parameter, refer to the [D3 Documentation](https://d3js.org/d3-scale/symlog).
+    
+The default value for \`constant\` is \`${0.0001}\`.`, // I tried to set this to the default value in the code, but this gave webpack in the Website.
     definitions: [
       makeDefinition(
         [
@@ -144,6 +149,9 @@ export const library = [
     name: "power",
     output: "Scale",
     examples: [`Scale.power({ min: 1, max: 100, exponent: 0.1 })`],
+    description: `Power scale. Accepts an extra \`exponent\` parameter, like, \`Scale.power({exponent: 2, min: 0, max: 100})\`.
+
+The default value for \`exponent\` is \`${0.1}\`.`,
     definitions: [
       makeDefinition(
         [
@@ -181,6 +189,8 @@ export const library = [
     name: "date",
     output: "Scale",
     examples: ["Scale.date({ min: Date(2022), max: Date(2025) })"],
+    description:
+      "Scale for dates. Only works on Date values. Is a linear scale under the hood.",
     definitions: [
       makeDefinition(
         [dateDict],
