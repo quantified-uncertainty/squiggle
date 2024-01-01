@@ -444,8 +444,8 @@ importers:
         specifier: ^14.1.19
         version: 14.1.19
       babel-plugin-relay:
-        specifier: ^16.0.0
-        version: 16.0.0
+        specifier: ^16.1.0
+        version: 16.1.0
       dotenv-cli:
         specifier: ^7.3.0
         version: 7.3.0
@@ -8567,8 +8567,8 @@ packages:
       - supports-color
     dev: true
 
-  /babel-plugin-relay@16.0.0:
-    resolution: {integrity: sha512-IF6wciLao6wmmc4+deLKHwoOpVU5YzG46xZ70UVafliD+cD46iP9qyXkMcOycNcPsXyvqB63/hz3KrH1ygwHFg==}
+  /babel-plugin-relay@16.1.0:
+    resolution: {integrity: sha512-DPHEcm/IS9xe7fAl/SGk9/cIcOys38Ou2TCnESsdEQtoHsoSY+4tTBRlMYnFw5iXlKKc1IMLSRgKdoVBPCtfTQ==}
     dependencies:
       babel-plugin-macros: 2.8.0
       cosmiconfig: 5.2.1
