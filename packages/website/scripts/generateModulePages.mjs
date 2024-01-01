@@ -6,7 +6,8 @@ import {
   getFunctionDocumentation,
 } from "@quri/squiggle-lang";
 
-const targetFilename = (name) => `./src/pages/docs/api/${name}.mdx`;
+const targetFilename = (name) => `./src/pages/docs/api/${name}.md`;
+const targetFilename2 = (name) => `./src/pages/${name}.md`;
 
 const sections = [
   {
@@ -101,6 +102,13 @@ const main = async ({ name, intro }) => {
       })
       .join("\n");
   fs.writeFile(targetFilename(name), content, (err) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(`Content written to ${targetFilename(name)}`);
+  });
+  fs.writeFile(targetFilename2(name), content, (err) => {
     if (err) {
       console.error(err);
       return;

@@ -38,6 +38,7 @@ This file is auto-generated from the documentation files in the Squiggle reposit
       console.error(err);
       return;
     }
+    console.log("all documentation", documentationContent);
     console.log(`Content written to ${targetFilename}`);
   });
 };
