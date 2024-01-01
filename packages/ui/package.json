@@ -79,7 +79,7 @@
     "storybook": "^7.6.3",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.3.2",
-    "vite": "^5.0.5"
+    "vite": "^5.0.10"
   },
   "eslintConfig": {
     "env": {
