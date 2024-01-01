@@ -35,7 +35,7 @@
     "immutable": "^4.3.4",
     "jstat": "^1.9.6",
     "lodash": "^4.17.21",
-    "open": "^9.1.0"
+    "open": "^10.0.2"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.23.3",
