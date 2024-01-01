@@ -673,8 +673,8 @@ importers:
         specifier: ^7.6.6
         version: 7.6.6(@types/react-dom@18.2.18)(@types/react@18.2.42)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/addon-interactions':
-        specifier: ^7.6.3
-        version: 7.6.4
+        specifier: ^7.6.6
+        version: 7.6.6
       '@storybook/addon-links':
         specifier: ^7.6.3
         version: 7.6.4(react@18.2.0)
@@ -6605,11 +6605,11 @@ packages:
       '@storybook/global': 5.0.0
     dev: true
 
-  /@storybook/addon-interactions@7.6.4:
-    resolution: {integrity: sha512-LjK9uhkgnbGyDwwa7pQhLptDEHeTIFmy+KurfJs9T08DpvRFfuuzyW4mj/hA63R1W5yjFSAhRiZj26+D7kBIyw==}
+  /@storybook/addon-interactions@7.6.6:
+    resolution: {integrity: sha512-EJWx6ciJPgv1c75tB/M4smWDpPDGM/L24v4DZxGpl1eV3oQOSQCKImG5btwoy6QcIi68ozroUHdUti/kzCKS1w==}
     dependencies:
       '@storybook/global': 5.0.0
-      '@storybook/types': 7.6.4
+      '@storybook/types': 7.6.6
       jest-mock: 27.5.1
       polished: 4.2.2
       ts-dedent: 2.2.0
@@ -7550,7 +7550,7 @@ packages:
     resolution: {integrity: sha512-RDKHo6WUES+4nt7uZMfankjxdpYX2EI2GpJ2n2RPcnhzmb/ub1huNTjbzDEYMqY24SppljZeIN57m3Ar6L6f9A==}
     dependencies:
       '@storybook/channels': 7.5.2
-      '@types/babel__core': 7.20.2
+      '@types/babel__core': 7.20.4
       '@types/express': 4.17.18
       file-system-cache: 2.3.0
     dev: true
@@ -7720,16 +7720,6 @@ packages:
 
   /@types/aria-query@5.0.2:
     resolution: {integrity: sha512-PHKZuMN+K5qgKIWhBodXzQslTo5P+K/6LqeKXS6O/4liIDdZqaX5RXrCK++LAw+y/nptN48YmUMFiQHRSWYwtQ==}
-    dev: true
-
-  /@types/babel__core@7.20.2:
-    resolution: {integrity: sha512-pNpr1T1xLUc2l3xJKuPtsEky3ybxN3m4fJkknfIpTCTfIZCDW57oAg+EfCgIIp2rvCe0Wn++/FfodDS4YXxBwA==}
-    dependencies:
-      '@babel/parser': 7.23.6
-      '@babel/types': 7.23.5
-      '@types/babel__generator': 7.6.5
-      '@types/babel__template': 7.4.2
-      '@types/babel__traverse': 7.20.2
     dev: true
 
   /@types/babel__core@7.20.4:
