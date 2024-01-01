@@ -52,8 +52,8 @@ importers:
         specifier: ^6.10.2
         version: 6.10.2(@codemirror/language@6.9.3)(@codemirror/state@6.4.0)(@codemirror/view@6.21.4)(@lezer/common@1.2.0)
       '@codemirror/commands':
-        specifier: ^6.3.2
-        version: 6.3.2
+        specifier: ^6.3.3
+        version: 6.3.3
       '@codemirror/language':
         specifier: ^6.9.3
         version: 6.9.3
@@ -2968,8 +2968,8 @@ packages:
       '@lezer/common': 1.2.0
     dev: false
 
-  /@codemirror/commands@6.3.2:
-    resolution: {integrity: sha512-tjoi4MCWDNxgIpoLZ7+tezdS9OEB6pkiDKhfKx9ReJ/XBcs2G2RXIu+/FxXBlWsPTsz6C9q/r4gjzrsxpcnqCQ==}
+  /@codemirror/commands@6.3.3:
+    resolution: {integrity: sha512-dO4hcF0fGT9tu1Pj1D2PvGvxjeGkbC6RGcZw6Qs74TH+Ed1gw98jmUgd2axWvIZEqTeTuFrg1lEB1KV6cK9h1A==}
     dependencies:
       '@codemirror/language': 6.9.3
       '@codemirror/state': 6.4.0
@@ -5535,7 +5535,7 @@ packages:
       react-dom: ^16.8.0 || ^17 || ^18
     dependencies:
       '@codemirror/autocomplete': 6.10.2(@codemirror/language@6.9.3)(@codemirror/state@6.4.0)(@codemirror/view@6.21.4)(@lezer/common@1.2.0)
-      '@codemirror/commands': 6.3.2
+      '@codemirror/commands': 6.3.3
       '@codemirror/language': 6.9.3
       '@codemirror/lint': 6.4.2
       '@codemirror/search': 6.5.5
@@ -5579,7 +5579,7 @@ packages:
       react-dom: ^16.8.0 || ^17 || ^18
     dependencies:
       '@codemirror/autocomplete': 6.10.2(@codemirror/language@6.9.3)(@codemirror/state@6.4.0)(@codemirror/view@6.21.4)(@lezer/common@1.2.0)
-      '@codemirror/commands': 6.3.2
+      '@codemirror/commands': 6.3.3
       '@codemirror/language': 6.9.3
       '@codemirror/lint': 6.4.2
       '@codemirror/search': 6.5.5
@@ -5624,7 +5624,7 @@ packages:
       react-dom: ^16.8.0 || ^17 || ^18
     dependencies:
       '@codemirror/autocomplete': 6.10.2(@codemirror/language@6.9.3)(@codemirror/state@6.4.0)(@codemirror/view@6.21.4)(@lezer/common@1.2.0)
-      '@codemirror/commands': 6.3.2
+      '@codemirror/commands': 6.3.3
       '@codemirror/language': 6.9.3
       '@codemirror/lint': 6.4.2
       '@codemirror/search': 6.5.5
@@ -9782,7 +9782,7 @@ packages:
     resolution: {integrity: sha512-J8j+nZ+CdWmIeFIGXEFbFPtpiYacFMDR8GlHK3IyHQJMCaVRfGx9NT+Hxivv1ckLWPvNdZqndbr/7lVhrf/Svg==}
     dependencies:
       '@codemirror/autocomplete': 6.10.2(@codemirror/language@6.9.3)(@codemirror/state@6.4.0)(@codemirror/view@6.21.4)(@lezer/common@1.2.0)
-      '@codemirror/commands': 6.3.2
+      '@codemirror/commands': 6.3.3
       '@codemirror/language': 6.9.3
       '@codemirror/lint': 6.4.2
       '@codemirror/search': 6.5.5
