@@ -176,8 +176,8 @@ importers:
         specifier: ^7.6.6
         version: 7.6.6(@types/react-dom@18.2.18)(@types/react@18.2.42)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/addon-links':
-        specifier: ^7.6.3
-        version: 7.6.4(react@18.2.0)
+        specifier: ^7.6.7
+        version: 7.6.7(react@18.2.0)
       '@storybook/blocks':
         specifier: ^7.6.3
         version: 7.6.4(@types/react-dom@18.2.18)(@types/react@18.2.42)(react-dom@18.2.0)(react@18.2.0)
@@ -676,8 +676,8 @@ importers:
         specifier: ^7.6.6
         version: 7.6.6
       '@storybook/addon-links':
-        specifier: ^7.6.3
-        version: 7.6.4(react@18.2.0)
+        specifier: ^7.6.7
+        version: 7.6.7(react@18.2.0)
       '@storybook/blocks':
         specifier: ^7.6.3
         version: 7.6.4(@types/react-dom@18.2.18)(@types/react@18.2.42)(react-dom@18.2.0)(react@18.2.0)
@@ -6139,8 +6139,8 @@ packages:
       ts-dedent: 2.2.0
     dev: true
 
-  /@storybook/addon-links@7.6.4(react@18.2.0):
-    resolution: {integrity: sha512-TEhxYdMhJO28gD84ej1FCwLv9oLuCPt77bRXip9ndaNPRTdHYdWv6IP94dhbuDi8eHux7Z4A/mllciFuDFrnCw==}
+  /@storybook/addon-links@7.6.7(react@18.2.0):
+    resolution: {integrity: sha512-O5LekPslkAIDtXC/TCIyg/3c0htBxDYwb/s+NrZUPTNWJsngxvTAwp6aIk6aVSeSCFUMWvBFcVsuV3hv+ndK6w==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     peerDependenciesMeta:
@@ -6774,12 +6774,6 @@ packages:
       - supports-color
     dev: true
 
-  /@storybook/csf@0.1.1:
-    resolution: {integrity: sha512-4hE3AlNVxR60Wc5KSC68ASYzUobjPqtSKyhV6G+ge0FIXU55N5nTY7dXGRZHQGDBPq+XqchMkIdlkHPRs8nTHg==}
-    dependencies:
-      type-fest: 2.19.0
-    dev: true
-
   /@storybook/csf@0.1.2:
     resolution: {integrity: sha512-ePrvE/pS1vsKR9Xr+o+YwdqNgHUyXvg+1Xjx0h9LrVx7Zq4zNe06pd63F5EvzTbCbJsHj7GHr9tkiaqm7U8WRA==}
     dependencies:
@@ -6918,7 +6912,7 @@ packages:
       '@storybook/channels': 7.5.2
       '@storybook/client-logger': 7.5.2
       '@storybook/core-events': 7.5.2
-      '@storybook/csf': 0.1.1
+      '@storybook/csf': 0.1.2
       '@storybook/global': 5.0.0
       '@storybook/types': 7.5.2
       '@types/qs': 6.9.8
