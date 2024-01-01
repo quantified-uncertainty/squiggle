@@ -15,7 +15,7 @@
     "@changesets/types": "^6.0.0",
     "@types/babel__core": "^7.20.4",
     "@types/lodash": "^4.14.202",
-    "@types/node": "^20.10.2",
+    "@types/node": "^20.10.6",
     "tsx": "^4.7.0",
     "typescript": "^5.3.2"
   },
