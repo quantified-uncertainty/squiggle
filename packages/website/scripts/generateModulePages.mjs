@@ -73,6 +73,32 @@ Durations are a simple time type, representing a length of time. They are intern
 This table now presents the information in a clear and concise manner, focusing only on the essential columns.
 `,
   },
+  {
+    name: "Calculator",
+    intro: `---
+description: The Calculator module helps you create custom calculators
+---
+
+import { SquiggleEditor  } from "@quri/squiggle-components";
+
+
+The Calculator module allows you to make custom calculators for functions. This is a form that's tied to a specific Squiggle function, where the inputs to the form are passed to that function, and the output of the function gets shown on the bottom.
+
+Calculators can be useful for debugging functions or to present functions to end users.
+`,
+  },
+  {
+    name: "Dict",
+    intro: `---
+description: Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.
+---`,
+  },
+  {
+    name: "Input",
+    intro: `# Input
+
+    Inputs are now only used for describing forms for [calculators](./Calculator.mdx).`,
+  },
 ];
 
 function toMarkdownDefinitions(definitions) {

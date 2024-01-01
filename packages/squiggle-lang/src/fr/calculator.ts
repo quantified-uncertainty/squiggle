@@ -35,8 +35,24 @@ export const library = [
     name: "make",
     output: "Calculator",
     examples: [
-      "Calculator.make({|x| x * 5}, {inputs: [Input.text({name: 'x'})]})",
+      `Calculator.make(
+        {|x| x * 5},
+        {
+          title: "My great calculator",
+          inputs: [Input.text({ name: "x", default: "20" })],
+          autorun: false,
+          sampleCount: 10k,
+        }
+      )`,
+      "({|x| x * 5}) -> Calculator",
     ],
+    description: `
+\`Calculator.make\` takes in a function, a description, and a list of fields. The function should take in the same number of arguments as the number of fields, and the arguments should be of the same type as the default value of the field.
+
+Calculators require a list of Inputs to be passed in. Inputs are created using the \`Input\` module. The Input module has a few different functions for creating different types of inputs.
+    
+For calculators that take a long time to run, we recommend setting \`autorun\` to \`false\`. This will create a button that the user can click to run the calculator.
+    `,
     definitions: [
       makeDefinition(
         [

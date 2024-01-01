@@ -35,6 +35,7 @@ export const library = [
       'Date.make("2020-05-12")',
       "Date.make(2020, 5, 10)",
       "Date.make(2020)",
+      "Date(2020.1)",
     ],
     output: "Date",
     definitions: [
