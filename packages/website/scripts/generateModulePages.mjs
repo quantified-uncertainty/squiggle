@@ -6,7 +6,7 @@ import {
   getFunctionDocumentation,
 } from "@quri/squiggle-lang";
 
-const targetFilename = (name) => `./src/pages/docs/api/${name}.mdx`;
+const targetFilename = (name) => `./src/pages/docs/Api/${name}.mdx`;
 
 const sections = [
   {

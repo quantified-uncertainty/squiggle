@@ -9,7 +9,7 @@
     "format": "prettier --write .",
     "gen:docsForLLM": "node scripts/compileDocsForLLM.js",
     "gen:modulePages": "node scripts/generateModulePages.mjs",
-    "gen": "pnpm run gen:docsForLLM && pnpm run gen:modulePages",
+    "gen": "pnpm run gen:modulePages && pnpm run gen:docsForLLM",
     "build": "pnpm run gen && next build"
   },
   "dependencies": {
