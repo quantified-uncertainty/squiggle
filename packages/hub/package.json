@@ -50,7 +50,7 @@
     "react-icons": "^4.12.0",
     "react-loading-skeleton": "^3.3.1",
     "react-markdown": "^9.0.1",
-    "react-relay": "^16.0.0",
+    "react-relay": "^16.1.0",
     "react-select": "^5.7.7",
     "relay-runtime": "^16.1.0",
     "remark-breaks": "^4.0.0",
