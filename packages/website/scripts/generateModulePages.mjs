@@ -36,7 +36,7 @@ helperFn(f) = f \`}/>
 | Tag Name    | Description |
 | --------- | ----------- |
 | \`name\` | Change the default display name for the variable, in the Playground.       |
-| \`description\` | Adds a description to the variable in the playground.       |
+| \`doc\` | Adds documentation to the variable in the playground.       |
 | \`showAs\` | Change the default view for the value when displayed. |
 | \`format\` | Format a number, date, or duration when displayed. |
 | \`hide\` | Don't show the variable in the Playground |
