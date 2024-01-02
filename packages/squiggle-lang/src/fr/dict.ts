@@ -27,6 +27,7 @@ export const library = [
     name: "set",
     output: "Dict",
     examples: [`Dict.set({a: 1, b: 2}, "c", 3)`],
+    displaySection: "Transformations",
     description:
       "Creates a new dictionary that includes the added element, while leaving the original dictionary unaltered.",
     definitions: [
@@ -45,6 +46,7 @@ export const library = [
     name: "has",
     output: "Bool",
     examples: [`Dict.has({a: 1, b: 2}, "c")`],
+    displaySection: "Queries",
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frAny()), frNamed("key", frString)],
@@ -56,6 +58,7 @@ export const library = [
   maker.make({
     name: "size",
     output: "Number",
+    displaySection: "Queries",
     examples: [`Dict.size({a: 1, b: 2})`],
     definitions: [
       makeDefinition(
@@ -70,6 +73,7 @@ export const library = [
     output: "Dict",
     examples: [`Dict.delete({a: 1, b: 2}, "a")`],
     description: "Creates a new dictionary that excludes the deleted element.",
+    displaySection: "Transformations",
     definitions: [
       makeDefinition(
         [
@@ -89,6 +93,7 @@ export const library = [
 snd = { b: 3, c: 5 }
 Dict.merge(first, snd)`,
     ],
+    displaySection: "Transformations",
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frAny()), frDictWithArbitraryKeys(frAny())],
@@ -105,6 +110,7 @@ Dict.merge(first, snd)`,
 snd = { b: 3, c: 5 }
 Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`,
     ],
+    displaySection: "Transformations",
     definitions: [
       makeDefinition(
         [frArray(frDictWithArbitraryKeys(frAny()))],
@@ -117,6 +123,7 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`,
     name: "keys",
     output: "Array",
     examples: [`Dict.keys({a: 1, b: 2})`],
+    displaySection: "Queries",
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frAny())],
@@ -129,6 +136,7 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`,
     name: "values",
     output: "Array",
     examples: [`Dict.values({ foo: 3, bar: 20 }) // [3, 20]`],
+    displaySection: "Queries",
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frAny({ genericName: "A" }))],
@@ -141,6 +149,7 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`,
     name: "toList",
     output: "Array",
     examples: [`Dict.toList({a: 1, b: 2})`],
+    displaySection: "Conversions",
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frAny({ genericName: "A" }))],
@@ -158,6 +167,7 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`,
       ["bar", 20],
     ]) // {foo: 3, bar: 20}`,
     ],
+    displaySection: "Conversions",
     definitions: [
       makeDefinition(
         [frArray(frTuple(frString, frAny({ genericName: "A" })))],
@@ -170,6 +180,7 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`,
     name: "map",
     output: "Dict",
     examples: [`Dict.map({a: 1, b: 2}, {|x| x + 1})`],
+    displaySection: "Transformations",
     definitions: [
       makeDefinition(
         [
@@ -198,6 +209,7 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`,
     name: "mapKeys",
     output: "Dict",
     examples: [`Dict.mapKeys({a: 1, b: 2}, {|x| concat(x, "-1")})`],
+    displaySection: "Transformations",
     definitions: [
       makeDefinition(
         [
@@ -229,6 +241,7 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`,
 Dict.pick(data, ["a", "c"]) // {a: 1, c: 3}`,
     ],
     description: "Creates a new dictionary that only includes the picked keys.",
+    displaySection: "Queries",
     definitions: [
       makeDefinition(
         [
@@ -261,6 +274,7 @@ Dict.pick(data, ["a", "c"]) // {a: 1, c: 3}`,
 Dict.omit(data, ["b", "d"]) // {a: 1, c: 3}`,
     ],
     description: "Creates a new dictionary that excludes the omitted keys.",
+    displaySection: "Transformations",
     definitions: [
       makeDefinition(
         [

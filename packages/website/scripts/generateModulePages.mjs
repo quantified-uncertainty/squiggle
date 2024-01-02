@@ -48,12 +48,24 @@ helperFn(f) = f \`}/>
     imports: `import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";`,
     name: "Date",
     intro: ``,
-    sections: ["Conversions", "Algebra", "Comparison", "Other"],
+    sections: [
+      { name: "Constructors" },
+      { name: "Conversions" },
+      { name: "Algebra" },
+      { name: "Comparison" },
+      { name: "Other" },
+    ],
   },
   {
     name: "Duration",
     description:
       "Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.",
+    sections: [
+      { name: "Constructors" },
+      { name: "Conversions" },
+      { name: "Algebra" },
+      { name: "Comparison" },
+    ],
     imports: `import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";`,
     intro: `Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
 
@@ -80,6 +92,11 @@ Calculators can be useful for debugging functions or to present functions to end
   },
   {
     name: "Dict",
+    sections: [
+      { name: "Conversions" },
+      { name: "Transformations" },
+      { name: "Queries" },
+    ],
     description:
       "Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.",
     imports: `import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";`,
@@ -95,6 +112,11 @@ Calculators can be useful for debugging functions or to present functions to end
   },
   {
     name: "SampleSet",
+    sections: [
+      { name: "Constructors" },
+      { name: "Conversions" },
+      { name: "Transformations" },
+    ],
     description:
       "Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers.",
     imports: `import { FnDocumentationFromName } from "@quri/squiggle-components";`,
@@ -106,6 +128,11 @@ All regular distribution function work on sample set distributions. In addition,
   },
   {
     name: "PointSet",
+    sections: [
+      { name: "Constructors" },
+      { name: "Conversions" },
+      { name: "Transformations" },
+    ],
     description:
       "Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.",
     imports: `import { FnDocumentationFromName } from "@quri/squiggle-components";`,
@@ -123,6 +150,7 @@ One complication is that it's possible to represent invalid probability distribu
   {
     name: "Scale",
     description: "Scales for plots.",
+    sections: [{ name: "Numeric Scales" }, { name: "Date Scales" }],
     imports: `import { FnDocumentationFromName } from "@quri/squiggle-components";`,
     intro: `Chart axes in [plots](./Plot.mdx) can be scaled using the following functions. Each scale function accepts optional min and max value. Power scale accepts an extra exponent parameter.
 
@@ -146,12 +174,12 @@ ${documentation.description || ""}
 }
 
 const main = async ({ name, description, imports, intro, sections }) => {
-  console.log(name);
   const namespaceNames = getAllFunctionNamesWithNamespace(name);
   let functionSection = namespaceNames.map(getFunctionDocumentation);
   if (sections && sections.length > 0) {
     functionSection = sections
-      .map((sectionName) => {
+      .map((section) => {
+        const sectionName = section.name;
         const functionsInSection = functionSection.filter(
           ({ displaySection }) => displaySection == sectionName
         );

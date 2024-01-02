@@ -38,7 +38,7 @@ export const library = [
       "Date.make(2020)",
       "Date(2020.1)",
     ],
-    displaySection: "Conversions",
+    displaySection: "Constructors",
     output: "Date",
     definitions: [
       makeDefinition([frString], frDate, ([str]) => {

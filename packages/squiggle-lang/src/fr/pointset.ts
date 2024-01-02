@@ -54,6 +54,7 @@ export const library = [
     name: "make",
     examples: [`PointSet.make(normal(5,10))`, `PointSet(3)`],
     output: "Dist",
+    displaySection: "Constructors",
     definitions: [fromDist, fromNumber],
   }),
   maker.make({
@@ -61,6 +62,7 @@ export const library = [
     description:
       "Converts the distribution in question into a point set distribution. If the distribution is symbolic, then it does this by taking the quantiles. If the distribution is a sample set, then it uses a version of kernel density estimation to approximate the point set format. One complication of this latter process is that if there is a high proportion of overlapping samples (samples that are exactly the same as each other), it will convert these samples into discrete point masses. Eventually we'd like to add further methods to help adjust this process.",
     examples: [`PointSet.fromDist(normal(5,2))`],
+    displaySection: "Conversions",
     output: "Dist",
     definitions: [fromDist],
   }),
@@ -68,12 +70,14 @@ export const library = [
     name: "fromNumber",
     examples: [`PointSet.fromNumber(3)`],
     output: "Dist",
+    displaySection: "Conversions",
     definitions: [fromNumber],
   }),
   maker.make({
     name: "downsample",
     examples: [`PointSet.downsample(PointSet.fromDist(normal(5,2)), 50)`],
     output: "Dist",
+    displaySection: "Conversions",
     definitions: [
       makeDefinition(
         [frDistPointset, frNamed("newLength", frNumber)],
@@ -95,6 +99,7 @@ export const library = [
 ])`,
     ],
     output: "Dist",
+    displaySection: "Constructors",
     definitions: [
       makeDefinition(
         [frArray(frDict(["x", frNumber], ["y", frNumber]))],
@@ -120,6 +125,7 @@ export const library = [
 ])`,
     ],
     output: "Dist",
+    displaySection: "Constructors",
     definitions: [
       makeDefinition(
         [frArray(frDict(["x", frNumber], ["y", frNumber]))],
@@ -138,6 +144,7 @@ export const library = [
     name: "mapY",
     examples: [`PointSet.mapY(mx(Sym.normal(5,2)), {|x| x + 1})`],
     output: "Dist",
+    displaySection: "Transformations",
     definitions: [
       makeDefinition(
         [frDistPointset, frNamed("fn", frLambdaTyped([frNumber], frNumber))],
