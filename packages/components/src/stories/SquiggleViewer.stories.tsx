@@ -19,8 +19,6 @@ if (!runResult.ok) {
   throw new Error("Expected an ok result");
 }
 
-const value = { ok: true, value: runResult.value.result } as const;
-
 export const Basic: Story = {
-  args: { value },
+  args: { value: runResult.value.result },
 };

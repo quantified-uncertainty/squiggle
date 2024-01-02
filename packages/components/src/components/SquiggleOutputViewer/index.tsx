@@ -16,6 +16,7 @@ import { getResultValue, getResultVariables } from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
+import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
 import { Indicator } from "./Indicator.js";
 import { Layout } from "./Layout.js";
@@ -60,32 +61,35 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
 
     let squiggleViewer: JSX.Element | null = null;
     if (squiggleOutput.code) {
-      let usedValue: result<SqValue, SqError> | undefined;
+      let usedResult: result<SqValue, SqError> | undefined;
       switch (mode) {
         case "result":
-          usedValue = resultItem;
+          usedResult = resultItem;
           break;
         case "variables":
-          usedValue = resultVariables;
+          usedResult = resultVariables;
       }
-      squiggleViewer = (
-        <div className="relative">
-          {isRunning && (
-            // `opacity-0 squiggle-semi-appear` would be better, but won't work reliably until we move Squiggle evaluation to Web Workers
-            <div className="absolute z-10 inset-0 bg-white opacity-50" />
-          )}
-          {usedValue ? (
+
+      if (usedResult) {
+        squiggleViewer = usedResult.ok ? (
+          <div className="relative">
+            {isRunning && (
+              // `opacity-0 squiggle-semi-appear` would be better, but won't work reliably until we move Squiggle evaluation to Web Workers
+              <div className="absolute z-10 inset-0 bg-white opacity-50" />
+            )}
             <ErrorBoundary>
               <SquiggleViewer
                 {...settings}
                 ref={viewerRef}
-                value={usedValue}
+                value={usedResult.value}
                 editor={editor}
               />
             </ErrorBoundary>
-          ) : null}
-        </div>
-      );
+          </div>
+        ) : (
+          <SquiggleErrorAlert error={usedResult.value} />
+        );
+      }
     }
 
     return (

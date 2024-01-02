@@ -68,7 +68,7 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
         return <MessageAlert heading="Value is not defined" />;
       }
 
-      return <SquiggleViewer value={{ ok: true, value }} />;
+      return <SquiggleViewer value={value} />;
     } else {
       return (
         <SquiggleOutputViewer

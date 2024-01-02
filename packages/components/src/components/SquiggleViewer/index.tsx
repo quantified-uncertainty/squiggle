@@ -1,13 +1,12 @@
 import { FC, forwardRef, memo } from "react";
 
-import { result, SqError, SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 
 import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
 import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
-import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { pathIsEqual, pathItemFormat, useGetSubvalueByPath } from "./utils.js";
 import { ValueViewer } from "./ValueViewer.js";
 import {
@@ -75,7 +74,7 @@ export type SquiggleViewerHandle = {
 };
 
 export type SquiggleViewerProps = {
-  value: result<SqValue, SqError>;
+  value: SqValue;
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
 
@@ -85,16 +84,8 @@ const SquiggleViewerWithoutProvider: FC<SquiggleViewerProps> = ({ value }) => {
   const getSubvalueByPath = useGetSubvalueByPath();
 
   let focusedItem: SqValue | undefined;
-  if (focused && value.ok) {
-    focusedItem = getSubvalueByPath(value.value, focused);
-  }
-
-  if (!value.ok) {
-    return (
-      <div className="px-1">
-        <SquiggleErrorAlert error={value.value} />
-      </div>
-    );
+  if (focused) {
+    focusedItem = getSubvalueByPath(value, focused);
   }
 
   const body = () => {
@@ -114,7 +105,7 @@ const SquiggleViewerWithoutProvider: FC<SquiggleViewerProps> = ({ value }) => {
         return <MessageAlert heading="Focused variable is not defined" />;
       }
     } else {
-      return <ValueViewer value={value.value} />;
+      return <ValueViewer value={value} />;
     }
   };
 
@@ -123,7 +114,7 @@ const SquiggleViewerWithoutProvider: FC<SquiggleViewerProps> = ({ value }) => {
       {focused && (
         <FocusedNavigation
           focusedPath={focused}
-          rootPath={value.value.context?.path}
+          rootPath={value.context?.path}
         />
       )}
       {body()}
