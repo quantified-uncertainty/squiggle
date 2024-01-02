@@ -156,6 +156,26 @@ One complication is that it's possible to represent invalid probability distribu
 
 Squiggle uses D3 for the tick formats. You can read about d3 tick formats [here](https://github.com/d3/d3-format).`,
   },
+  {
+    name: "List",
+    description:
+      "Lists are a simple data structure that can hold any type of value. They are similar to arrays in Javascript or lists in Python.",
+    sections: [
+      { name: "Constructors" },
+      { name: "Modifications" },
+      { name: "Filtering" },
+      { name: "Queries" },
+      { name: "Functional Transformations" },
+    ],
+    imports: `import { FnDocumentationFromName } from "@quri/squiggle-components";`,
+    intro: `Lists are a simple data structure that can hold any type of value. They are similar to arrays in Javascript or lists in Python.
+
+\`\`\`squiggle
+myList = [1, 2, 3, normal(5,2), "hello"]
+\`\`\`
+
+Lists are immutable, meaning that they cannot be modified. Instead, all list functions return a new list.`,
+  },
 ];
 
 function toMarkdownDefinitions(definitions) {
