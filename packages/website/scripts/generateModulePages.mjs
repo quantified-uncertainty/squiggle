@@ -48,6 +48,16 @@ helperFn(f) = f \`}/>
     imports: `import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";`,
     name: "Date",
     intro: ``,
+    sections: [
+      { name: "", items: ["make"] },
+      { name: "Algrebra", items: ["add", "subtract"] },
+      {
+        name: "Comparison",
+        items: ["smaller", "larger", "smallerEq", "largerEq"],
+      },
+      { name: "Conversion", items: ["fromUnixTime", "toUnixTime"] },
+      ,
+    ],
   },
   {
     name: "Duration",
@@ -144,8 +154,25 @@ ${documentation.description || ""}
 `;
 }
 
-const main = async ({ name, description, imports, intro }) => {
+const main = async ({ name, description, imports, intro, sections }) => {
+  console.log(name);
   const namespaceNames = getAllFunctionNamesWithNamespace(name);
+  let functionSection = namespaceNames
+    .map(getFunctionDocumentation)
+    .map(toMarkdown);
+  if (sections && sections.length > 0) {
+    functionSection = sections
+      .map(({ name: sectionName, items }) => {
+        const header = sectionName === "" ? "" : `## ${sectionName}\n\n`;
+        const _items = items
+          .map((item) => `${name}.${item}`)
+          .map(getFunctionDocumentation)
+          .map(toMarkdown)
+          .join("\n");
+        return header + _items;
+      })
+      .join("\n\n");
+  }
   const content =
     `---
 description: ${description}
@@ -154,12 +181,7 @@ ${imports}
 
 # ${name}
 ${intro}
-` +
-    namespaceNames
-      .map((name) => {
-        return toMarkdown(getFunctionDocumentation(name));
-      })
-      .join("\n");
+` + functionSection;
   fs.writeFile(targetFilename(name), content, (err) => {
     if (err) {
       console.error(err);
