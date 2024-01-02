@@ -53,7 +53,6 @@ const SquiggleModelExportPage: FC<{
     <VersionedSquiggleChart
       version={checkedVersion}
       code={content.code}
-      showHeader={false}
       rootPathOverride={rootPath}
       project={project}
     />
