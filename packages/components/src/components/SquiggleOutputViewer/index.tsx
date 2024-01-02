@@ -74,14 +74,16 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
             // `opacity-0 squiggle-semi-appear` would be better, but won't work reliably until we move Squiggle evaluation to Web Workers
             <div className="absolute z-10 inset-0 bg-white opacity-50" />
           )}
-          <ErrorBoundary>
-            <SquiggleViewer
-              {...settings}
-              ref={viewerRef}
-              value={usedValue}
-              editor={editor}
-            />
-          </ErrorBoundary>
+          {usedValue ? (
+            <ErrorBoundary>
+              <SquiggleViewer
+                {...settings}
+                ref={viewerRef}
+                value={usedValue}
+                editor={editor}
+              />
+            </ErrorBoundary>
+          ) : null}
         </div>
       );
     }

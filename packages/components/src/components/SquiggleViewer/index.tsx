@@ -75,7 +75,7 @@ export type SquiggleViewerHandle = {
 };
 
 export type SquiggleViewerProps = {
-  value: result<SqValue, SqError> | undefined; // "undefined" is an error, it means that we failed to provide the value
+  value: result<SqValue, SqError>;
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
 
@@ -85,13 +85,11 @@ const SquiggleViewerWithoutProvider: FC<SquiggleViewerProps> = ({ value }) => {
   const getSubvalueByPath = useGetSubvalueByPath();
 
   let focusedItem: SqValue | undefined;
-  if (focused && value?.ok) {
+  if (focused && value.ok) {
     focusedItem = getSubvalueByPath(value.value, focused);
   }
 
-  if (!value) {
-    return <MessageAlert heading="Value is not defined" />;
-  } else if (!value.ok) {
+  if (!value.ok) {
     return (
       <div className="px-1">
         <SquiggleErrorAlert error={value.value} />
