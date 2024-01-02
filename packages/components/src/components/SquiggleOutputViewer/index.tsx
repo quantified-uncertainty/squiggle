@@ -1,4 +1,5 @@
-import { FC, forwardRef, ReactNode, useState } from "react";
+import clsx from "clsx";
+import { FC, forwardRef, useState } from "react";
 
 import { result, SqError, SqValue } from "@quri/squiggle-lang";
 import {
@@ -9,50 +10,29 @@ import {
   DropdownMenuActionItem,
 } from "@quri/ui";
 
-import { SquiggleViewer } from "../index.js";
-import { SquiggleOutput } from "../lib/hooks/useSquiggle.js";
-import { getResultValue, getResultVariables } from "../lib/utility.js";
-import { CodeEditorHandle } from "./CodeEditor/index.js";
-import { ErrorBoundary } from "./ErrorBoundary.js";
-import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { SquiggleViewerHandle } from "./SquiggleViewer/index.js";
+import { SquiggleViewer } from "../../index.js";
+import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import { getResultValue, getResultVariables } from "../../lib/utility.js";
+import { CodeEditorHandle } from "../CodeEditor/index.js";
+import { ErrorBoundary } from "../ErrorBoundary.js";
+import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
+import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
+import { Indicator } from "./Indicator.js";
+import { Layout } from "./Layout.js";
 
-const DynamicSquiggleViewerLayout: FC<{
-  viewer: ReactNode;
-  menu: ReactNode;
-  indicator: ReactNode;
-}> = ({ viewer, menu, indicator }) => {
-  return (
-    // `flex flex-col` helps to fit this in playground right panel and doesn't hurt otherwise
-    <div className="flex flex-col overflow-y-auto">
-      <div className="flex justify-between items-center px-2 h-8 mb-1">
-        {menu}
-        {indicator}
-      </div>
-      <div
-        className="flex-1 overflow-auto px-2 pb-1"
-        data-testid="dynamic-viewer-result"
-      >
-        {viewer}
-      </div>
-    </div>
-  );
-};
-
-const Indicator: FC<{ output: SquiggleOutput; isRunning: boolean }> = ({
-  output,
-  isRunning,
+const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
+  title,
+  type,
 }) => {
-  const showTime = (executionTime: number) =>
-    executionTime > 1000
-      ? `${(executionTime / 1000).toFixed(2)}s`
-      : `${executionTime}ms`;
-
+  const isEmpty = type === null;
   return (
-    <div className="text-zinc-400 text-sm whitespace-nowrap">
-      {isRunning
-        ? "rendering..."
-        : `render #${output.executionId} in ${showTime(output.executionTime)}`}
+    <div className="flex justify-between">
+      <span className={clsx(isEmpty && "text-slate-400")}>{title}</span>
+      {isEmpty ? (
+        <span className="text-slate-300">Empty</span>
+      ) : (
+        <span className="text-blue-800">{type}</span>
+      )}
     </div>
   );
 };
@@ -64,12 +44,15 @@ type Props = {
 } & PartialPlaygroundSettings;
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
-export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
+export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
   ({ squiggleOutput, isRunning, editor, ...settings }, viewerRef) => {
     const resultItem = getResultValue(squiggleOutput);
     const resultVariables = getResultVariables(squiggleOutput);
 
     const hasResult = Boolean(resultItem?.ok);
+    const variablesCount = resultVariables?.ok
+      ? resultVariables.value.value.entries().length
+      : 0;
 
     const [mode, setMode] = useState<"variables" | "result">(
       hasResult ? "result" : "variables"
@@ -104,7 +87,7 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
     }
 
     return (
-      <DynamicSquiggleViewerLayout
+      <Layout
         menu={
           <Dropdown
             render={({ close }) => (
@@ -112,10 +95,10 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
                 <DropdownMenuActionItem
                   icon={CodeBracketIcon}
                   title={
-                    "Variables" +
-                    (resultVariables?.ok
-                      ? ` (${resultVariables.value.value.entries().length})`
-                      : "")
+                    <MenuItemTitle
+                      title="Variables"
+                      type={variablesCount ? `{}${variablesCount}` : null}
+                    />
                   }
                   onClick={() => {
                     setMode("variables");
@@ -124,7 +107,12 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
                 />
                 <DropdownMenuActionItem
                   icon={CodeBracketIcon}
-                  title={"Result" + (hasResult ? "" : " (empty)")}
+                  title={
+                    <MenuItemTitle
+                      title="Result"
+                      type={hasResult ? "" : null}
+                    />
+                  }
                   onClick={() => {
                     setMode("result");
                     close();
@@ -144,4 +132,4 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
     );
   }
 );
-DynamicSquiggleViewer.displayName = "DynamicSquiggleViewer";
+SquiggleOutputViewer.displayName = "DynamicSquiggleViewer";

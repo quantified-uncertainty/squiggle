@@ -52,7 +52,9 @@ const FocusedNavigation: FC<{
 
   return (
     <div className="flex items-center mb-3 pl-3">
-      {!rootPath && <FocusedNavigationItem onClick={unfocus} text="Home" />}
+      {!rootPath?.items.length && (
+        <FocusedNavigationItem onClick={unfocus} text="Home" />
+      )}
 
       {focusedPath
         .itemsAsValuePaths({ includeRoot: false })

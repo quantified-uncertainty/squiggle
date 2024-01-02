@@ -12,9 +12,9 @@ import {
 } from "../lib/hooks/useSquiggle.js";
 import { getResultValue, getResultVariables } from "../lib/utility.js";
 import { MessageAlert } from "./Alert.js";
-import { DynamicSquiggleViewer } from "./DynamicSquiggleViewer.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "./SquiggleErrorAlert.js";
+import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
 import { useGetSubvalueByPath } from "./SquiggleViewer/utils.js";
 
 export type SquiggleChartProps = {
@@ -71,7 +71,7 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
       return <SquiggleViewer value={{ ok: true, value }} />;
     } else {
       return (
-        <DynamicSquiggleViewer
+        <SquiggleOutputViewer
           squiggleOutput={squiggleOutput}
           isRunning={isRunning}
           environment={environment}

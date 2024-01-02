@@ -4,7 +4,7 @@ import { useReactiveExtension } from "./codemirrorHooks.js";
 
 export function useSubmitExtension(
   view: EditorView | undefined,
-  onSubmit: (() => void) | undefined
+  onSubmit: () => void
 ) {
   return useReactiveExtension(
     view,
