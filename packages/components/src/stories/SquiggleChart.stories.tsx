@@ -5,7 +5,7 @@ import { SqValuePath } from "@quri/squiggle-lang";
 import { SquiggleChart } from "../components/SquiggleChart.js";
 
 /**
- * Squiggle chart evaluates Squiggle code, and then displays the output.
+ * `<SquiggleChart>` evaluates Squiggle code, and then displays the output.
  *
  * By default, it will give access to both "Variables" and "Result", but this can be controlled with `rootPathOverride` parameter. Using it will limit the output to a single value.
  */

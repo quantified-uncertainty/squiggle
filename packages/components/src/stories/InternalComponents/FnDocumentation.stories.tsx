@@ -6,7 +6,7 @@ import {
   getFunctionDocumentation,
 } from "@quri/squiggle-lang";
 
-import { FnDocumentation as Component } from "../components/ui/FnDocumentation.js";
+import { FnDocumentation as Component } from "../../components/ui/FnDocumentation.js";
 
 /**
  * Internal UI component. Used in `SquigglePlayground`.

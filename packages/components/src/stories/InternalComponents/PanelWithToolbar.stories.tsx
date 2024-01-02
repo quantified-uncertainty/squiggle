@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { Button } from "@quri/ui";
 
-import { PanelWithToolbar } from "../components/ui/PanelWithToolbar/index.js";
-import { ToolbarItem } from "../components/ui/PanelWithToolbar/ToolbarItem.js";
+import { PanelWithToolbar } from "../../components/ui/PanelWithToolbar/index.js";
+import { ToolbarItem } from "../../components/ui/PanelWithToolbar/ToolbarItem.js";
 
 /**
  * Internal UI component. Used in `SquigglePlayground`.
