@@ -289,9 +289,10 @@ const diminishingReturnsLibrary = [
     output: "Array",
     requiresNamespace: false,
     examples: [
-      `Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions([
-  {|x| x+1},
-  {|y| 10}
+      `Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(
+  [
+    {|x| x+1},
+    {|y| 10}
   ],
   100,
   0.01
