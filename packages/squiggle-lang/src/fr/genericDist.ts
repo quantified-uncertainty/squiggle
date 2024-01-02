@@ -165,6 +165,20 @@ export const library: FRFunction[] = [
     name: "quantile",
     fn: (d, x) => d.inv(x),
   }),
+  maker.make({
+    name: "truncate",
+    description: `Truncates both the left side and the right side of a distribution.
+
+Sample set distributions are truncated by filtering samples, but point set distributions are truncated using direct geometric manipulation. Uniform distributions are truncated symbolically. Symbolic but non-uniform distributions get converted to Point Set distributions.`,
+    definitions: [
+      makeDefinition(
+        [frDist, frNamed("left", frNumber), frNamed("right", frNumber)],
+        frDist,
+        ([dist, left, right], { environment }) =>
+          unwrapDistResult(dist.truncate(left, right, { env: environment }))
+      ),
+    ],
+  }),
   maker.dn2d({
     name: "truncateLeft",
     fn: (dist, x, env) =>
@@ -175,15 +189,6 @@ export const library: FRFunction[] = [
     fn: (dist, x, env) =>
       unwrapDistResult(dist.truncate(undefined, x, { env })),
   }),
-  maker.fromDefinition(
-    "truncate",
-    makeDefinition(
-      [frDist, frNamed("left", frNumber), frNamed("right", frNumber)],
-      frDist,
-      ([dist, left, right], { environment }) =>
-        unwrapDistResult(dist.truncate(left, right, { env: environment }))
-    )
-  ),
   maker.make({
     name: "sum",
     definitions: [

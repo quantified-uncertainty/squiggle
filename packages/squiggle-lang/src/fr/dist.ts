@@ -71,13 +71,21 @@ export const library: FRFunction[] = [
     ],
   }),
   maker.make({
-    name: "mx",
-    examples: ["mx(1,normal(5,2))"],
+    name: "mixture",
+    examples: [
+      "mixture(1,normal(5,2))",
+      "mixture(normal(5,2), normal(10,2), normal(15,2), [0.3, 0.5, 0.2])",
+      "mixture([normal(5,2), normal(10,2), normal(15,2), normal(20,1)], [0.3, 0.5, 0.1, 0.1]",
+    ],
+    description: `The mixture function takes a list of distributions and a list of weights, and returns a new distribution that is a mixture of the distributions in the list. The weights should be positive numbers that sum to 1. If no weights are provided, the function will assume that all distributions have equal weight.
+    
+Note: If you want to pass in over 5 distributions, you must use the list syntax.`,
     definitions: mixtureDefinitions,
   }),
   maker.make({
-    name: "mixture",
-    examples: ["mixture(1,normal(5,2))"],
+    name: "mx",
+    examples: ["mx(1,normal(5,2))"],
+    description: "Alias for mixture()",
     definitions: mixtureDefinitions,
   }),
   maker.make({
@@ -199,6 +207,7 @@ export const library: FRFunction[] = [
   maker.make({
     name: "to",
     examples: ["5 to 10", "to(5,10)"],
+    description: `The "to" function is a shorthand for lognormal({p5:min, p95:max}). It does not accept values of 0 or less, as those are not valid for lognormal distributions.`,
     definitions: [
       makeTwoArgsSamplesetDist(
         (low, high) => {
