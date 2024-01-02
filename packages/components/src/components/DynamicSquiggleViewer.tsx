@@ -1,6 +1,6 @@
 import { FC, forwardRef, ReactNode, useState } from "react";
 
-import { result, SqError, SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { result, SqError, SqValue } from "@quri/squiggle-lang";
 import {
   Button,
   CodeBracketIcon,
@@ -20,16 +20,14 @@ import { SquiggleViewerHandle } from "./SquiggleViewer/index.js";
 const DynamicSquiggleViewerLayout: FC<{
   viewer: ReactNode;
   menu: ReactNode;
-  indicator: string;
+  indicator: ReactNode;
 }> = ({ viewer, menu, indicator }) => {
   return (
     // `flex flex-col` helps to fit this in playground right panel and doesn't hurt otherwise
     <div className="flex flex-col overflow-y-auto">
       <div className="flex justify-between items-center px-2 h-8 mb-1">
         {menu}
-        <div className="px-2 text-zinc-400 text-sm whitespace-nowrap">
-          {indicator}
-        </div>
+        {indicator}
       </div>
       <div
         className="flex-1 overflow-auto px-2 pb-1"
@@ -41,26 +39,37 @@ const DynamicSquiggleViewerLayout: FC<{
   );
 };
 
+const Indicator: FC<{ output: SquiggleOutput; isRunning: boolean }> = ({
+  output,
+  isRunning,
+}) => {
+  const showTime = (executionTime: number) =>
+    executionTime > 1000
+      ? `${(executionTime / 1000).toFixed(2)}s`
+      : `${executionTime}ms`;
+
+  return (
+    <div className="text-zinc-400 text-sm whitespace-nowrap">
+      {isRunning
+        ? "rendering..."
+        : `render #${output.executionId} in ${showTime(output.executionTime)}`}
+    </div>
+  );
+};
+
 type Props = {
   squiggleOutput: SquiggleOutput;
   isRunning: boolean;
   editor?: CodeEditorHandle;
-  rootPathOverride?: SqValuePath;
 } & PartialPlaygroundSettings;
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
 export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
-  (
-    { squiggleOutput, isRunning, editor, rootPathOverride, ...settings },
-    viewerRef
-  ) => {
+  ({ squiggleOutput, isRunning, editor, ...settings }, viewerRef) => {
     const resultItem = getResultValue(squiggleOutput);
     const resultVariables = getResultVariables(squiggleOutput);
 
     const hasResult = Boolean(resultItem?.ok);
-    // const hasVariables =
-    //   resultVariables.ok &&
-    //   nonHiddenDictEntries(resultVariables.value.value).length > 0;
 
     const [mode, setMode] = useState<"variables" | "result">(
       hasResult ? "result" : "variables"
@@ -88,17 +97,11 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
               ref={viewerRef}
               value={usedValue}
               editor={editor}
-              rootPathOverride={rootPathOverride}
             />
           </ErrorBoundary>
         </div>
       );
     }
-
-    const showTime = (executionTime: number) =>
-      executionTime > 1000
-        ? `${(executionTime / 1000).toFixed(2)}s`
-        : `${executionTime}ms`;
 
     return (
       <DynamicSquiggleViewerLayout
@@ -135,15 +138,7 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
             </Button>
           </Dropdown>
         }
-        indicator={
-          isRunning
-            ? "rendering..."
-            : squiggleOutput
-            ? `render #${squiggleOutput.executionId} in ${showTime(
-                squiggleOutput.executionTime
-              )}`
-            : ""
-        }
+        indicator={<Indicator isRunning={isRunning} output={squiggleOutput} />}
         viewer={squiggleViewer}
       />
     );

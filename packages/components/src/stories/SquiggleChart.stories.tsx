@@ -1,11 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
+import { SqValuePath } from "@quri/squiggle-lang";
+
 import { SquiggleChart } from "../components/SquiggleChart.js";
 
 /**
- * Squiggle chart evaluates squiggle expressions, and then displays the resulting squiggle value.
+ * Squiggle chart evaluates Squiggle code, and then displays the output.
  *
- * A squiggle value can be a nested tree of arrays and dicts. Possible leaf types are a distribution, a constant, and a function.
+ * By default, it will give access to both "Variables" and "Result", but this can be controlled with `rootPathOverride` parameter. Using it will limit the output to a single value.
  */
 const meta = {
   component: SquiggleChart,
@@ -25,13 +27,6 @@ export const Nested: Story = {
   },
 };
 
-export const WithHeader: Story = {
-  args: {
-    ...Nested.args,
-    showHeader: true,
-  },
-};
-
 export const Array: Story = {
   args: {
     code: "[normal(5,2), normal(10,1), normal(40,2), 400000]",
@@ -47,5 +42,15 @@ export const Error: Story = {
 export const Dict: Story = {
   args: {
     code: "{foo: 35 to 50, bar: [1,2,3]}",
+  },
+};
+
+export const RootPathOverride: Story = {
+  args: {
+    code: "{foo: 35 to 50, bar: [1,2,3]}",
+    rootPathOverride: new SqValuePath({
+      root: "result",
+      items: [{ type: "string", value: "bar" }],
+    }),
   },
 };

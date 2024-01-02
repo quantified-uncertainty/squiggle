@@ -112,9 +112,7 @@ const ValueViewerBody: FC<Props> = ({ value, size = "normal" }) => {
 export const ValueWithContextViewer: FC<Props> = ({
   value,
   parentValue,
-  collapsible = true,
-  header: propsHeader,
-  size = "normal",
+  ...props
 }) => {
   const { tag } = value;
   const { path } = value.context;
@@ -129,7 +127,9 @@ export const ValueWithContextViewer: FC<Props> = ({
   const taggedName = value.tags.name();
 
   // root header is always hidden (unless forced, but we probably won't need it)
-  const header = propsHeader ?? (isRoot ? "hide" : "show");
+  const header = props.header ?? (isRoot ? "hide" : "show");
+  const collapsible = header === "hide" ? false : props.collapsible ?? true;
+  const size = props.size ?? "normal";
 
   const toggleCollapsed = () => {
     toggleCollapsed_(path);
