@@ -534,6 +534,12 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
   maker.make({
     name: "json",
     displaySection: "JSON",
+    description:
+      "Converts a value to a simpler form, similar to JSON. This is useful for debugging. Keeps functions and dates, but converts objects like distributions, calculators, and plots to combinations of dictionaries and lists.",
+    examples: [
+      `Danger.json({a: 1, b: 2})`,
+      `Danger.json([2 to 5, Sym.normal(5, 2), Calculator({|x| x + 1})])`,
+    ],
     definitions: [
       makeDefinition([frAny()], frAny(), ([v]) => {
         return simpleValueToValue(simpleValueFromValue(v));
@@ -543,6 +549,12 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
   maker.make({
     name: "jsonString",
     displaySection: "JSON",
+    description:
+      "Converts a value to a stringified JSON, similar to JSON.stringify() in Javasript. Replaces functions with dict summaries.",
+    examples: [
+      `Danger.jsonString({a: 1, b: 2})`,
+      `Danger.jsonString([2 to 5, Sym.normal(5, 2), Calculator({|x| x + 1})])`,
+    ],
     definitions: [
       makeDefinition([frAny()], frString, ([v]) => {
         return JSON.stringify(
