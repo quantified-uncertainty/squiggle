@@ -14,6 +14,7 @@
     "build:peggy": "peggy --cache --format es ./src/ast/peggyParser.peggy",
     "build:ts": "tsc -b",
     "start": "tsc -b -w",
+    "dev": "pnpm run start",
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "pnpm run test --watchAll",

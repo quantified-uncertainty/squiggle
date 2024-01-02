@@ -64,10 +64,10 @@ export const library = [
     name: "textArea",
     output: "Input",
     examples: [
-      `Input.textArea({ name: "people", default: \`{
+      `Input.textArea({ name: "people", default: '{
   "John": 20 to 50, 
   "Mary": 30 to 90,
-}\` })`,
+}' })`,
     ],
     description:
       "Creates a multi-line input, sized with the provided input. This input can be used for all Squiggle types.",
