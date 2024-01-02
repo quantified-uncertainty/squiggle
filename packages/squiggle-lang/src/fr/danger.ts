@@ -20,6 +20,7 @@ import {
   frDist,
   frDistPointset,
   frLambda,
+  frNamed,
   frNumber,
   frString,
 } from "../library/registry/frTypes.js";
@@ -73,22 +74,33 @@ const choose = (n: number, k: number) =>
 const combinatoricsLibrary: FRFunction[] = [
   maker.nn2n({
     name: "laplace",
-    examples: [`Danger.laplace(1, 20)`],
+    description: `Calculates the probability implied by [Laplace's rule of succession](https://en.wikipedia.org/wiki/Rule_of_succession)`,
+    examples: [
+      `trials = 10
+successes = 1
+Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 = 0.1666`,
+    ],
+    displaySection: "Math",
     fn: (successes, trials) => (successes + 1) / (trials + 2),
   }),
   maker.n2n({
     name: "factorial",
+    displaySection: "Math",
     examples: [`Danger.factorial(20)`],
     fn: factorial,
   }),
   maker.nn2n({
     name: "choose",
+    displaySection: "Combinatorics",
+    description: `\`Danger.choose(n,k)\` returns \`factorial(n) / (factorial(n - k) *.factorial(k))\`, i.e., the number of ways you can choose k items from n choices, without repetition. This function is also known as the [binomial coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient).`,
     examples: [`Danger.choose(1, 20)`],
     fn: choose,
   }),
   maker.make({
     name: "binomial",
     output: "Number",
+    displaySection: "Combinatorics",
+    description: `\`Danger.binomial(n, k, p)\` returns \`choose((n, k)) * pow(p, k) * pow(1 - p, n - k)\`, i.e., the probability that an event of probability p will happen exactly k times in n draws.`,
     examples: [`Danger.binomial(1, 20, 0.5)`],
     definitions: [
       makeDefinition(
@@ -176,16 +188,31 @@ const integrationLibrary: FRFunction[] = [
     name: "integrateFunctionBetweenWithNumIntegrationPoints",
     requiresNamespace: false,
     output: "Number",
+    displaySection: "Integration",
     examples: [
       `Danger.integrateFunctionBetweenWithNumIntegrationPoints({|x| x+1}, 1, 10, 10)`,
     ],
+    description: `Integrates the function \`f\` between \`min\` and \`max\`, and computes \`numIntegrationPoints\` in between to do so.
+
+Note that the function \`f\` has to take in and return numbers. To integrate a function which returns distributios, use:
+
+\`\`\`squiggle
+auxiliaryF(x) = mean(f(x))
+
+Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, numIntegrationPoints)
+\`\`\``,
     // For the example of integrating x => x+1 between 1 and 10,
     // result should be close to 58.5
     // [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
     // https://www.wolframalpha.com/input?i=integrate+x%2B1+from+1+to+10
     definitions: [
       makeDefinition(
-        [frLambda, frNumber, frNumber, frNumber],
+        [
+          frNamed("f", frLambda),
+          frNamed("min", frNumber),
+          frNamed("max", frNumber),
+          frNamed("numIntegrationPoints", frNumber),
+        ],
         frNumber,
         ([lambda, min, max, numIntegrationPoints], context) => {
           if (numIntegrationPoints === 0) {
@@ -212,13 +239,21 @@ const integrationLibrary: FRFunction[] = [
     name: "integrateFunctionBetweenWithEpsilon",
     requiresNamespace: false,
     output: "Number",
+    displaySection: "Integration",
     examples: [
       `Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 0.1)`,
     ],
+    description: `Integrates the function \`f\` between \`min\` and \`max\`, and uses an interval of \`epsilon\` between integration points when doing so. This makes its runtime less predictable than \`integrateFunctionBetweenWithNumIntegrationPoints\`, because runtime will not only depend on \`epsilon\`, but also on \`min\` and \`max\`.
+
+Same caveats as \`integrateFunctionBetweenWithNumIntegrationPoints\` apply.`,
     definitions: [
       makeDefinition(
-        [frLambda, frNumber, frNumber, frNumber],
-
+        [
+          frNamed("f", frLambda),
+          frNamed("min", frNumber),
+          frNamed("max", frNumber),
+          frNamed("epsilon", frNumber),
+        ],
         frNumber,
         ([lambda, min, max, epsilon], context) => {
           if (epsilon === 0) {
@@ -254,11 +289,23 @@ const diminishingReturnsLibrary = [
     output: "Array",
     requiresNamespace: false,
     examples: [
-      `Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions([{|x| x+1}, {|y| 10}], 100, 0.01)`,
+      `Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions([
+  {|x| x+1},
+  {|y| 10}
+  ],
+  100,
+  0.01
+)`,
     ],
+    description: `Computes the optimal allocation of $\`funds\` between \`f1\` and \`f2\`. For the answer given to be correct, \`f1\` and \`f2\` will have to be decreasing, i.e., if \`x > y\`, then \`f_i(x) < f_i(y)\`.`,
+    displaySection: "Optimization",
     definitions: [
       makeDefinition(
-        [frArray(frLambda), frNumber, frNumber],
+        [
+          frNamed("fs", frArray(frLambda)),
+          frNamed("funds", frNumber),
+          frNamed("approximateIncrement", frNumber),
+        ],
         frAny(),
         ([lambdas, funds, approximateIncrement], context) => {
           // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/context.
@@ -368,18 +415,22 @@ const diminishingReturnsLibrary = [
 const mapYLibrary: FRFunction[] = [
   maker.d2d({
     name: "mapYLog",
+    displaySection: "Distribution Functions",
     fn: (dist, env) => unwrapDistResult(scaleLog(dist, Math.E, { env })),
   }),
   maker.d2d({
     name: "mapYLog10",
+    displaySection: "Distribution Functions",
     fn: (dist, env) => unwrapDistResult(scaleLog(dist, 10, { env })),
   }),
   maker.dn2d({
     name: "mapYLog",
+    displaySection: "Distribution Functions",
     fn: (dist, x, env) => unwrapDistResult(scaleLog(dist, x, { env })),
   }),
   maker.make({
     name: "mapYLogWithThreshold",
+    displaySection: "Distribution Functions",
     definitions: [
       makeDefinition(
         [frDist, frNumber, frNumber],
@@ -395,8 +446,59 @@ const mapYLibrary: FRFunction[] = [
       ),
     ],
   }),
+
+  maker.dn2d({
+    name: "mapYMultiply",
+    displaySection: "Distribution Functions",
+    fn: (dist, f, env) => unwrapDistResult(scaleMultiply(dist, f, { env })),
+  }),
+  maker.dn2d({
+    name: "mapYPow",
+    displaySection: "Distribution Functions",
+    fn: (dist, f, env) => unwrapDistResult(scalePower(dist, f, { env })),
+  }),
+  maker.d2d({
+    name: "mapYExp",
+    displaySection: "Distribution Functions",
+    // TODO - shouldn't it be other way around, e^value?
+    fn: (dist, env) => unwrapDistResult(scalePower(dist, Math.E, { env })),
+  }),
+  maker.make({
+    name: "binomialDist",
+    examples: ["Danger.binomialDist(8, 0.5)"],
+    displaySection: "Distributions",
+    description: `A binomial distribution.
+
+\`\`n\`\` must be above 0, and \`\`p\`\` must be between 0 and 1. 
+
+Note: The binomial distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as partially or fully continuous. This is a visual mistake; if you inspect the underlying data, it should be discrete.`,
+    definitions: [
+      makeTwoArgsSamplesetDist(
+        (n, p) => SymbolicDist.Binomial.make(n, p),
+        "numberOfTrials",
+        "probabilityOfSuccess"
+      ),
+    ],
+  }),
+  maker.make({
+    name: "poissonDist",
+    examples: ["Danger.poissonDist(10)"],
+    displaySection: "Distributions",
+    description: `A Poisson distribution.
+
+Note: The Poisson distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as partially or fully continuous.  This is a visual mistake; if you inspect the underlying data, it should be discrete.`,
+    definitions: [
+      makeOneArgSamplesetDist(
+        (lambda) => SymbolicDist.Poisson.make(lambda),
+        "rate"
+      ),
+    ],
+  }),
   maker.make({
     name: "combinations",
+    displaySection: "Combinatorics",
+    examples: [`Danger.combinations([1, 2, 3], 2) // [[1, 2], [1, 3], [2, 3]]`],
+    description: `Returns all combinations of the input list taken r elements at a time.`,
     definitions: [
       makeDefinition(
         [frArray(frAny({ genericName: "A" })), frNumber],
@@ -414,6 +516,11 @@ const mapYLibrary: FRFunction[] = [
   }),
   maker.make({
     name: "allCombinations",
+    displaySection: "Combinatorics",
+    description: `Returns all possible combinations of the elements in the input list.`,
+    examples: [
+      `Danger.allCombinations([1, 2, 3]) // [[1], [2], [3], [1, 2], [1, 3], [2, 3], [1, 2, 3]]`,
+    ],
     definitions: [
       makeDefinition(
         [frArray(frAny({ genericName: "A" }))],
@@ -424,42 +531,9 @@ const mapYLibrary: FRFunction[] = [
       ),
     ],
   }),
-  maker.dn2d({
-    name: "mapYMultiply",
-    fn: (dist, f, env) => unwrapDistResult(scaleMultiply(dist, f, { env })),
-  }),
-  maker.dn2d({
-    name: "mapYPow",
-    fn: (dist, f, env) => unwrapDistResult(scalePower(dist, f, { env })),
-  }),
-  maker.d2d({
-    name: "mapYExp",
-    // TODO - shouldn't it be other way around, e^value?
-    fn: (dist, env) => unwrapDistResult(scalePower(dist, Math.E, { env })),
-  }),
-  maker.make({
-    name: "binomialDist",
-    examples: ["Danger.binomialDist(8, 0.5)"],
-    definitions: [
-      makeTwoArgsSamplesetDist(
-        (n, p) => SymbolicDist.Binomial.make(n, p),
-        "numberOfTrials",
-        "probabilityOfSuccess"
-      ),
-    ],
-  }),
-  maker.make({
-    name: "poissonDist",
-    examples: ["Danger.poissonDist(10)"],
-    definitions: [
-      makeOneArgSamplesetDist(
-        (lambda) => SymbolicDist.Poisson.make(lambda),
-        "rate"
-      ),
-    ],
-  }),
   maker.make({
     name: "json",
+    displaySection: "JSON",
     definitions: [
       makeDefinition([frAny()], frAny(), ([v]) => {
         return simpleValueToValue(simpleValueFromValue(v));
@@ -468,6 +542,7 @@ const mapYLibrary: FRFunction[] = [
   }),
   maker.make({
     name: "jsonString",
+    displaySection: "JSON",
     definitions: [
       makeDefinition([frAny()], frString, ([v]) => {
         return JSON.stringify(

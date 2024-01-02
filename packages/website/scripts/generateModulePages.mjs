@@ -14,17 +14,18 @@ const sections = [
     description:
       "The Tag module handles tags, which allow the additions of metadata to Squiggle variables.",
     imports: `import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";`,
+    sections: [{ name: "Tags" }, { name: "Functions" }],
     intro: `Tags are metadata that can be added to Squiggle variables. They are used to add additional information to variables, such as names, descriptions, and visualization options. While tags can be accessed at runtime, they are primarily meant for use with the Squiggle Playground and other visualizations.
 Tags can be added to variables either by using their name \`Tag.[name]\` or by using decorators.
 
 ## List of Tags
 | Tag Name    | Description |
 | --------- | ----------- |
-| \`name\` | Change the default display name for the variable, in the Playground.       |
+| \`name\` | Change the default display name for the variable, in the playground.       |
 | \`doc\` | Adds documentation to the variable in the playground.       |
 | \`showAs\` | Change the default view for the value when displayed. |
 | \`format\` | Format a number, date, or duration when displayed. |
-| \`hide\` | Don't show the variable in the Playground |
+| \`hide\` | Don't show the variable in the playground |
 
 ## Examples
 <SquiggleEditor
@@ -39,8 +40,6 @@ docs = Tag.getDoc(exampleFn)
   
 @hide // Hide this variable in the Playground
 helperFn(f) = f \`}/>
-
-## Definitions
 `,
   },
   {
@@ -175,6 +174,23 @@ myList = [1, 2, 3, normal(5,2), "hello"]
 \`\`\`
 
 Lists are immutable, meaning that they cannot be modified. Instead, all list functions return a new list.`,
+  },
+  {
+    name: "Danger",
+    description:
+      "Newer experimental functions which are less stable than Squiggle as a whole",
+    sections: [
+      { name: "JSON" },
+      { name: "Math" },
+      { name: "Combinatorics" },
+      { name: "Distributions" },
+      { name: "Distribution Functions" },
+      { name: "Integration" },
+      { name: "Optimization" },
+    ],
+    imports: `import { FnDocumentationFromName } from "@quri/squiggle-components";`,
+    intro: `The Danger library contains newer experimental functions which are less stable than Squiggle as a whole. They are not recommended for production use, but are useful for testing out new ideas., 
+`,
   },
 ];
 
