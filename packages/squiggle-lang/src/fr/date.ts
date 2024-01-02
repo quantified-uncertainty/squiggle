@@ -26,7 +26,8 @@ export const library = [
     (d1, d2) => d1.smaller(d2),
     (d1, d2) => d1.larger(d2),
     (d1, d2) => d1.isEqual(d2),
-    frDate
+    frDate,
+    "Comparison"
   ),
   maker.make({
     name: "make",
@@ -37,6 +38,7 @@ export const library = [
       "Date.make(2020)",
       "Date(2020.1)",
     ],
+    displaySection: "Conversions",
     output: "Date",
     definitions: [
       makeDefinition([frString], frDate, ([str]) => {
@@ -73,6 +75,7 @@ export const library = [
     examples: ["Date.fromUnixTime(1589222400)"],
     requiresNamespace: true,
     output: "Date",
+    displaySection: "Conversions",
     definitions: [
       makeDefinition([frNumber], frDate, ([num]) => {
         return SDate.fromUnixS(num);
@@ -83,6 +86,7 @@ export const library = [
     name: "toUnixTime",
     examples: ["Date.toUnixTime(Date.make(2020, 5, 12))"],
     requiresNamespace: true,
+    displaySection: "Conversions",
     output: "Number",
     definitions: [
       makeDefinition([frDate], frNumber, ([date]) => {
@@ -94,6 +98,7 @@ export const library = [
     name: "subtract",
     examples: ["Date.make(2020, 5, 12) - Date.make(2000, 1, 1)"],
     output: "Duration",
+    displaySection: "Algebra",
     definitions: [
       makeDefinition([frDate, frDate], frDuration, ([d1, d2]) =>
         d1.subtract(d2)
@@ -104,6 +109,7 @@ export const library = [
     name: "subtract",
     examples: ["Date.make(2020, 5, 12) - 20years"],
     output: "Date",
+    displaySection: "Algebra",
     definitions: [
       makeDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
         d1.subtractDuration(d2)
@@ -117,6 +123,7 @@ export const library = [
       "20years + Date.make(2020, 5, 12)",
     ],
     output: "Date",
+    displaySection: "Algebra",
     definitions: [
       makeDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
         d1.addDuration(d2)
@@ -131,6 +138,7 @@ export const library = [
     requiresNamespace: true,
     output: "Domain",
     examples: ["Date.rangeDomain(Date(2000), Date(2010))"],
+    displaySection: "Other",
     definitions: [
       makeDefinition(
         [frNamed("min", frDate), frNamed("min", frDate)],

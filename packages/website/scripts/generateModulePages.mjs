@@ -48,16 +48,7 @@ helperFn(f) = f \`}/>
     imports: `import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";`,
     name: "Date",
     intro: ``,
-    sections: [
-      { name: "", items: ["make"] },
-      { name: "Algrebra", items: ["add", "subtract"] },
-      {
-        name: "Comparison",
-        items: ["smaller", "larger", "smallerEq", "largerEq"],
-      },
-      { name: "Conversion", items: ["fromUnixTime", "toUnixTime"] },
-      ,
-    ],
+    sections: ["Conversions", "Algebra", "Comparison", "Other"],
   },
   {
     name: "Duration",
@@ -157,21 +148,23 @@ ${documentation.description || ""}
 const main = async ({ name, description, imports, intro, sections }) => {
   console.log(name);
   const namespaceNames = getAllFunctionNamesWithNamespace(name);
-  let functionSection = namespaceNames
-    .map(getFunctionDocumentation)
-    .map(toMarkdown);
+  let functionSection = namespaceNames.map(getFunctionDocumentation);
   if (sections && sections.length > 0) {
     functionSection = sections
-      .map(({ name: sectionName, items }) => {
+      .map((sectionName) => {
+        const functionsInSection = functionSection.filter(
+          ({ displaySection }) => displaySection == sectionName
+        );
+        if (functionsInSection.length === 0) {
+          throw `Error: No functions in section: ${name} ${sectionName}}`;
+        }
         const header = sectionName === "" ? "" : `## ${sectionName}\n\n`;
-        const _items = items
-          .map((item) => `${name}.${item}`)
-          .map(getFunctionDocumentation)
-          .map(toMarkdown)
-          .join("\n");
+        const _items = functionsInSection.map(toMarkdown).join("\n");
         return header + _items;
       })
       .join("\n\n");
+  } else {
+    functionSection = functionSection.map(toMarkdown).join("\n\n");
   }
   const content =
     `---
