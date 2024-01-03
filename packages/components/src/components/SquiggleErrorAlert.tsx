@@ -1,3 +1,4 @@
+import { clsx } from "clsx";
 import { FC, PropsWithChildren } from "react";
 
 import {
@@ -25,8 +26,8 @@ const LocationLine: FC<{
 
   return (
     <span
-      className="cursor-pointer hover:underline text-blue-500"
-      onClick={findInEditor}
+      className={clsx(editor && "cursor-pointer hover:underline text-blue-500")}
+      onClick={editor ? findInEditor : undefined}
     >
       line {location.start.line}, column {location.start.column}
     </span>
