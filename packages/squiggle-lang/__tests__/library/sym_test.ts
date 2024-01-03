@@ -219,12 +219,12 @@ describe("distribution functions", () => {
     testEvalToBe("log10(Sym.uniform(5,8))", "Sample Set Distribution");
   });
 
-  describe("dotAdd", () => {
+  describe("Dist.dotAdd", () => {
     testEvalToBe(
-      "dotAdd(Sym.normal(5,2), Sym.lognormal(10,2))",
+      "Dist.dotAdd(Sym.normal(5,2), Sym.lognormal(10,2))",
       "Point Set Distribution"
     );
-    testEvalToBe("dotAdd(Sym.normal(5,2), 3)", "Point Set Distribution");
+    testEvalToBe("Dist.dotAdd(Sym.normal(5,2), 3)", "Point Set Distribution");
   });
 
   describe("equality", () => {

@@ -192,7 +192,8 @@ Lists are immutable, meaning that they cannot be modified. Instead, all list fun
 See a longer tutorial on creating distributions [here](/docs/Guides/DistributionCreation).`,
       },
       { name: "Basic Functions" },
-      { name: "Algebra" },
+      { name: "Algebra (Dist)" },
+      { name: "Algebra (List)" },
       {
         name: "Pointwise Algebra",
         description: `Pointwise arithmetic operations cover the standard arithmetic operations, but work in a different way than the regular operations. These operate on the y-values of the distributions instead of the x-values. A pointwise addition would add the y-values of two distributions.

@@ -53,10 +53,15 @@ const pointwiseOps: OpPair[] = [
 const makeOperationFns = (): FRFunction[] => {
   const fns: FRFunction[] = [];
 
-  function processPair([name, op]: OpPair, displaySection: string) {
+  function processPair(
+    [name, op]: OpPair,
+    displaySection: string,
+    requiresNamespace: boolean
+  ) {
     return maker.make({
       name,
       displaySection,
+      requiresNamespace,
       definitions: [
         makeDefinition(
           [frDist, frNumber],
@@ -85,11 +90,11 @@ const makeOperationFns = (): FRFunction[] => {
   }
 
   for (const pair of [...algebraicOps]) {
-    fns.push(processPair(pair, "Algebra"));
+    fns.push(processPair(pair, "Algebra (Dist)", false));
   }
 
   for (const pair of [...pointwiseOps]) {
-    fns.push(processPair(pair, "Pointwise Algebra"));
+    fns.push(processPair(pair, "Pointwise Algebra", true));
   }
 
   return fns;
@@ -249,9 +254,10 @@ Sample set distributions are truncated by filtering samples, but point set distr
     fn: (dist, x, env) =>
       unwrapDistResult(dist.truncate(undefined, x, { env })),
   }),
+  ...makeOperationFns(),
   maker.make({
     name: "sum",
-    displaySection: "Algebra",
+    displaySection: "Algebra (List)",
     definitions: [
       makeDefinition(
         [frArray(frDistOrNumber)],
@@ -265,7 +271,7 @@ Sample set distributions are truncated by filtering samples, but point set distr
   }),
   maker.make({
     name: "product",
-    displaySection: "Algebra",
+    displaySection: "Algebra (List)",
     definitions: [
       makeDefinition(
         [frArray(frDistOrNumber)],
@@ -279,7 +285,7 @@ Sample set distributions are truncated by filtering samples, but point set distr
   }),
   maker.make({
     name: "cumsum",
-    displaySection: "Algebra",
+    displaySection: "Algebra (List)",
     definitions: [
       makeDefinition(
         [frArray(frDistOrNumber)],
@@ -293,7 +299,7 @@ Sample set distributions are truncated by filtering samples, but point set distr
   }),
   maker.make({
     name: "cumprod",
-    displaySection: "Algebra",
+    displaySection: "Algebra (List)",
     definitions: [
       makeDefinition(
         [frArray(frDistOrNumber)],
@@ -305,23 +311,10 @@ Sample set distributions are truncated by filtering samples, but point set distr
       ),
     ],
   }),
-  maker.make({
-    name: "diff",
-    displaySection: "Algebra",
-    definitions: [
-      makeDefinition(
-        [frArray(frDistOrNumber)],
-        frArray(frDist),
-        ([dists], { environment }) =>
-          unwrapDistResult(
-            algebraicDiff(dists.map(parseDistFromDistOrNumber), environment)
-          )
-      ),
-    ],
-  }),
+
   maker.d2d({
     name: "log",
-    displaySection: "Algebra",
+    displaySection: "Algebra (Dist)",
     fn: (dist, env) =>
       unwrapDistResult(
         binaryOperations.algebraicLogarithm(
@@ -333,7 +326,7 @@ Sample set distributions are truncated by filtering samples, but point set distr
   }),
   maker.d2d({
     name: "log10",
-    displaySection: "Algebra",
+    displaySection: "Algebra (Dist)",
     fn: (dist, env) =>
       unwrapDistResult(
         binaryOperations.algebraicLogarithm(
@@ -347,7 +340,7 @@ Sample set distributions are truncated by filtering samples, but point set distr
   }),
   maker.d2d({
     name: "unaryMinus",
-    displaySection: "Algebra",
+    displaySection: "Algebra (Dist)",
     fn: (dist, env) =>
       unwrapDistResult(
         binaryOperations.algebraicMultiply(
@@ -372,5 +365,18 @@ Sample set distributions are truncated by filtering samples, but point set distr
         )
       ),
   }),
-  ...makeOperationFns(),
+  maker.make({
+    name: "diff",
+    displaySection: "Algebra (List)",
+    definitions: [
+      makeDefinition(
+        [frArray(frDistOrNumber)],
+        frArray(frDist),
+        ([dists], { environment }) =>
+          unwrapDistResult(
+            algebraicDiff(dists.map(parseDistFromDistOrNumber), environment)
+          )
+      ),
+    ],
+  }),
 ];
