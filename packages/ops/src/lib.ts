@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
+import { z } from "zod";
 
 export async function exec(command: string) {
   return new Promise<void>((resolve, reject) => {
@@ -27,9 +28,14 @@ export type PackageInfo = {
   name: string;
 };
 
+const packageJsonSchema = z.object({
+  name: z.string(),
+  version: z.string(),
+});
+
 export async function getPackageInfo(packageDir: string): Promise<PackageInfo> {
   const packageJson = JSON.parse(
     await fs.readFile(`${packageDir}/package.json`, "utf-8")
   );
-  return { version: packageJson.version, name: packageJson.name }; // TODO: zod
+  return packageJsonSchema.parse(packageJson);
 }
