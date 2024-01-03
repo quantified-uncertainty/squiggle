@@ -1,4 +1,7 @@
 import { EditorView, hoverTooltip, repositionTooltips } from "@codemirror/view";
+
+const MIN_WIDTH = '200px';
+const MAX_WIDTH = '600px';
 import { FC, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -18,7 +21,7 @@ const HoverTooltip: FC<{ hover: Hover; view: EditorView }> = ({
   });
 
   return (
-    <div className="border rounded-sm shadow-lg min-w-[200px] max-w-[600px] px-2">
+    <div className={`border rounded-sm shadow-lg min-w-[${MIN_WIDTH}] max-w-[${MAX_WIDTH}] px-2`}>
       <FnDocumentation documentation={hover} />
     </div>
   );
