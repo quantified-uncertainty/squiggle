@@ -127,12 +127,20 @@ const InnerDistributionsChart: FC<{
   );
 
   const legendItemHeight = 16;
+  const legendOffset = 2;
 
-  const legendHeight = isMulti ? legendItemHeight * shapes.length : 0;
+  const legendHeight = isMulti
+    ? legendItemHeight * shapes.length + legendOffset
+    : 0;
   const samplesFooterHeight = samplesBarSetting === "bottom" ? 20 : 0;
 
-  const height = innerHeight + legendHeight + samplesFooterHeight;
   const bottomPadding = (!showXAxis ? 0 : 14) + samplesFooterHeight;
+
+  // full height of canvas
+  const height = Math.max(
+    innerHeight + samplesFooterHeight,
+    legendHeight + bottomPadding
+  );
 
   const discreteRadius = distRadiusScalingFromHeight(height);
 
@@ -183,7 +191,7 @@ const InnerDistributionsChart: FC<{
         context,
         width,
         height,
-        suggestedPadding: suggestedPadding,
+        suggestedPadding,
         xScale,
         yScale,
         showYAxis: false,
@@ -192,28 +200,6 @@ const InnerDistributionsChart: FC<{
         xAxisTitle: plot.xScale.title,
         showAxisLines: false,
       });
-
-      if (isMulti) {
-        const radius = 5;
-        for (let i = 0; i < shapes.length; i++) {
-          context.save();
-          context.translate(padding.left, legendItemHeight * i);
-          context.fillStyle = getColor(i);
-          drawCircle({
-            context,
-            x: radius,
-            y: radius,
-            r: radius,
-          });
-
-          context.textAlign = "left";
-          context.textBaseline = "middle";
-          context.fillStyle = "black";
-          context.font = "12px sans-serif";
-          context.fillText(shapes[i].name, 16, radius);
-          context.restore();
-        }
-      }
 
       // samplesBar
       function samplesBarShowSettings(): { yOffset: number; color: string } {
@@ -354,6 +340,28 @@ const InnerDistributionsChart: FC<{
           setDiscreteTooltip(newDiscreteTooltip);
         }
         frame.exit();
+      }
+
+      if (isMulti) {
+        const radius = 5;
+        for (let i = 0; i < shapes.length; i++) {
+          context.save();
+          context.translate(padding.left, legendItemHeight * i + legendOffset);
+          context.fillStyle = getColor(i);
+          drawCircle({
+            context,
+            x: radius,
+            y: radius,
+            r: radius,
+          });
+
+          context.textAlign = "left";
+          context.textBaseline = "middle";
+          context.fillStyle = "black";
+          context.font = "12px sans-serif";
+          context.fillText(shapes[i].name, 16, radius);
+          context.restore();
+        }
       }
 
       {
@@ -573,7 +581,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
                 />
               </div>
             )}
-            {anyAreNonnormalized && (
+            {anyAreNonnormalized && height > 20 && (
               <div className="flex-1 pt-2"> {nonNormalizedError()}</div>
             )}
           </div>
