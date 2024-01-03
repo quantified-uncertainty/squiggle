@@ -13,7 +13,6 @@ function updateContent(text: string, settings: Env) {
   root.render(
     <SquiggleChart
       code={text}
-      showHeader
       environment={{
         sampleCount: settings.sampleCount,
         xyPointLength: settings.xyPointLength,
