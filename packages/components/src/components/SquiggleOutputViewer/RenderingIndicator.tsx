@@ -2,10 +2,10 @@ import { FC } from "react";
 
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 
-export const Indicator: FC<{ output: SquiggleOutput; isRunning: boolean }> = ({
-  output,
-  isRunning,
-}) => {
+export const RenderingIndicator: FC<{
+  output: SquiggleOutput;
+  isRunning: boolean;
+}> = ({ output, isRunning }) => {
   const showTime = (executionTime: number) =>
     executionTime > 1000
       ? `${(executionTime / 1000).toFixed(2)}s`

@@ -8,6 +8,7 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
+  TriangleIcon,
 } from "@quri/ui";
 
 import { SquiggleViewer } from "../../index.js";
@@ -18,8 +19,8 @@ import { ErrorBoundary } from "../ErrorBoundary.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
-import { Indicator } from "./Indicator.js";
 import { Layout } from "./Layout.js";
+import { RenderingIndicator } from "./RenderingIndicator.js";
 
 const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
   title,
@@ -128,11 +129,16 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
             )}
           >
             <Button size="small">
-              {mode === "variables" ? "Variables" : "Result"}
+              <div className="flex items-center space-x-1.5">
+                <span>{mode === "variables" ? "Variables" : "Result"}</span>
+                <TriangleIcon className="rotate-180 text-slate-400" size={10} />
+              </div>
             </Button>
           </Dropdown>
         }
-        indicator={<Indicator isRunning={isRunning} output={squiggleOutput} />}
+        indicator={
+          <RenderingIndicator isRunning={isRunning} output={squiggleOutput} />
+        }
         viewer={squiggleViewer}
       />
     );
