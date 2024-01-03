@@ -6,64 +6,63 @@ import {
   getFunctionDocumentation,
 } from "@quri/squiggle-lang";
 
-import { sections } from "../templates.mjs";
+import { modulePages } from "../templates.mjs";
 
 const targetFilename = (name) => `./src/pages/docs/Api/${name}.mdx`;
 
-function toMarkdownDefinitions(definitions) {
-  return `\`\`\`
-  ${definitions.join("\n")}
-  \`\`\``;
-}
-
+//We need to escape the curly braces in the markdown for .jsx files.
 function escapedStr(str) {
   return str.replace(/{/g, "\\{").replace(/}/g, "\\}");
 }
 
 function toMarkdown(documentation) {
+  const fullName = documentation.nameSpace + "." + documentation.name;
   return `### ${documentation.name}
 ${escapedStr(documentation.description || "")}
-<FnDocumentationFromName functionName="${
-    documentation.nameSpace + "." + documentation.name
-  }" showNameAndDescription={false} size="small" />
+<FnDocumentationFromName functionName="${fullName}" showNameAndDescription={false} size="small" />
 `;
 }
 
-const main = async ({ name, description, imports, intro, sections }) => {
+const generateModulePage = async ({ name, description, intro, sections }) => {
   const namespaceNames = getAllFunctionNamesWithNamespace(name);
-  let functionSection = namespaceNames
+  let fnDocumentationItems = namespaceNames
     .map(getFunctionDocumentation)
-    .filter(({ isUnit }) => isUnit == false);
-  if (sections && sections.length > 0) {
-    functionSection = sections
-      .map((section) => {
-        const sectionName = section.name;
-        const sectionDescription = section.description;
-        const functionsInSection = functionSection.filter(
-          ({ displaySection }) => displaySection == sectionName
-        );
-        if (functionsInSection.length === 0) {
-          throw `Error: No functions in section: ${name} ${sectionName}}`;
-        }
-        const header =
-          (sectionName === "" ? "" : `## ${sectionName}\n\n`) +
-          (!!sectionDescription ? `${sectionDescription}\n\n` : "");
-        const _items = functionsInSection.map(toMarkdown).join("\n");
-        return header + _items;
-      })
-      .join("\n\n");
+    .filter(({ isUnit }) => !isUnit);
+
+  const processSection = (section) => {
+    const sectionFnDocumentationItems = fnDocumentationItems.filter(
+      ({ displaySection }) => displaySection === section.name
+    );
+    if (sectionFnDocumentationItems.length === 0) {
+      throw new Error(
+        `Error: No functions in section: ${name} ${section.name}. You likely made an error in the section name.`
+      );
+    }
+
+    const sectionHeader = section.name && `## ${section.name}\n\n`;
+    const sectionDescription =
+      section.description && `${section.description}\n\n`;
+    const sectionItems = sectionFnDocumentationItems.map(toMarkdown).join("\n");
+    return `${sectionHeader || ""}${sectionDescription || ""}${sectionItems}`;
+  };
+
+  let functionSection;
+  if (sections?.length > 0) {
+    functionSection = sections.map(processSection).join("\n\n");
   } else {
-    functionSection = functionSection.map(toMarkdown).join("\n\n");
+    functionSection = fnDocumentationItems.map(toMarkdown).join("\n\n");
   }
-  const content =
-    `---
+
+  const content = `---
 description: ${description}
 ---
-${imports}
+import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
 
 # ${name}
 ${intro}
-` + functionSection;
+
+${functionSection}`;
+
   fs.writeFile(targetFilename(name), content, (err) => {
     if (err) {
       console.error(err);
@@ -74,6 +73,6 @@ ${intro}
 };
 
 //Remember to add any new Modules to .gitignore
-for (const section of sections) {
-  await main(section);
+for (const modulePage of modulePages) {
+  await generateModulePage(modulePage);
 }
