@@ -185,11 +185,28 @@ Lists are immutable, meaning that they cannot be modified. Instead, all list fun
   {
     name: "Dist",
     sections: [
-      { name: "Distributions" },
+      {
+        name: "Distributions",
+        description: `These are functions for creating primitive distributions. Many of these could optionally take in distributions as inputs. In these cases, Monte Carlo Sampling will be used to generate the greater distribution. This can be used for simple hierarchical models.
+
+See a longer tutorial on creating distributions [here](/docs/Guides/DistributionCreation).`,
+      },
       { name: "Basic Functions" },
       { name: "Algebra" },
-      { name: "Pointwise Algebra" },
-      { name: "Normalization" },
+      {
+        name: "Pointwise Algebra",
+        description: `Pointwise arithmetic operations cover the standard arithmetic operations, but work in a different way than the regular operations. These operate on the y-values of the distributions instead of the x-values. A pointwise addition would add the y-values of two distributions.
+
+The infixes \`.+\`,\`.-\`, \`.*\`, \`./\`, \`.^\` are supported for their respective operations. \`Mixture\` works using pointwise addition. 
+
+Pointwise operations work on Point Set distributions, so will convert other distributions to Point Set ones first. Pointwise arithmetic operations typically return unnormalized or completely invalid distributions. For example, the operation{" "} <code>normal(5,2) .- uniform(10,12)</code> results in a distribution-like object with negative probability mass.`,
+      },
+      {
+        name: "Normalization",
+        description: `There are some situations where computation will return unnormalized distributions. This means that their cumulative sums are not equal to 1.0. Unnormalized distributions are not valid for many relevant functions; for example, klDivergence and scoring.
+
+The only functions that do not return normalized distributions are the pointwise arithmetic operations and the scalewise arithmetic operations. If you use these functions, it is recommended that you consider normalizing the resulting distributions.`,
+      },
       { name: "Utility" },
       { name: "Scoring" },
     ],

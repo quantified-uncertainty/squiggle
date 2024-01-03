@@ -9,6 +9,10 @@ Point set distributions are one of the three distribution formats. They are stor
 One complication is that it's possible to represent invalid probability distributions in the point set format. For example, you can represent shapes with negative values, or shapes that are not normalized.
 ## Distributions
 
+These are functions for creating primitive distributions. Many of these could optionally take in distributions as inputs. In these cases, Monte Carlo Sampling will be used to generate the greater distribution. This can be used for simple hierarchical models.
+
+See a longer tutorial on creating distributions [here](/docs/Guides/DistributionCreation).
+
 ### make
 
 <FnDocumentationFromName functionName="Dist.make" showNameAndDescription={false} size="small" />
@@ -52,7 +56,7 @@ Alias for mixture()
 <FnDocumentationFromName functionName="Dist.logistic" showNameAndDescription={false} size="small" />
 
 ### to
-The "to" function is a shorthand for lognormal(`{p5:min, p95:max`}). It does not accept values of 0 or less, as those are not valid for lognormal distributions.
+The "to" function is a shorthand for lognormal(\{p5:min, p95:max\}). It does not accept values of 0 or less, as those are not valid for lognormal distributions.
 <FnDocumentationFromName functionName="Dist.to" showNameAndDescription={false} size="small" />
 
 ### exponential
@@ -210,6 +214,12 @@ Sample set distributions are truncated by filtering samples, but point set distr
 
 ## Pointwise Algebra
 
+Pointwise arithmetic operations cover the standard arithmetic operations, but work in a different way than the regular operations. These operate on the y-values of the distributions instead of the x-values. A pointwise addition would add the y-values of two distributions.
+
+The infixes `.+`,`.-`, `.*`, `./`, `.^` are supported for their respective operations. `Mixture` works using pointwise addition. 
+
+Pointwise operations work on Point Set distributions, so will convert other distributions to Point Set ones first. Pointwise arithmetic operations typically return unnormalized or completely invalid distributions. For example, the operation{" "} <code>normal(5,2) .- uniform(10,12)</code> results in a distribution-like object with negative probability mass.
+
 ### dotAdd
 
 <FnDocumentationFromName functionName="Dist.dotAdd" showNameAndDescription={false} size="small" />
@@ -232,6 +242,10 @@ Sample set distributions are truncated by filtering samples, but point set distr
 
 
 ## Normalization
+
+There are some situations where computation will return unnormalized distributions. This means that their cumulative sums are not equal to 1.0. Unnormalized distributions are not valid for many relevant functions; for example, klDivergence and scoring.
+
+The only functions that do not return normalized distributions are the pointwise arithmetic operations and the scalewise arithmetic operations. If you use these functions, it is recommended that you consider normalizing the resulting distributions.
 
 ### normalize
 Normalize a distribution. This means scaling it appropriately so that it's cumulative sum is equal to 1. This only impacts Point Set distributions, because those are the only ones that can be non-normlized.

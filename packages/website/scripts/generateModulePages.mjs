@@ -16,9 +16,13 @@ function toMarkdownDefinitions(definitions) {
   \`\`\``;
 }
 
+function escapedStr(str) {
+  return str.replace(/{/g, "\\{").replace(/}/g, "\\}");
+}
+
 function toMarkdown(documentation) {
   return `### ${documentation.name}
-${documentation.description || ""}
+${escapedStr(documentation.description || "")}
 <FnDocumentationFromName functionName="${
     documentation.nameSpace + "." + documentation.name
   }" showNameAndDescription={false} size="small" />
@@ -34,13 +38,16 @@ const main = async ({ name, description, imports, intro, sections }) => {
     functionSection = sections
       .map((section) => {
         const sectionName = section.name;
+        const sectionDescription = section.description;
         const functionsInSection = functionSection.filter(
           ({ displaySection }) => displaySection == sectionName
         );
         if (functionsInSection.length === 0) {
           throw `Error: No functions in section: ${name} ${sectionName}}`;
         }
-        const header = sectionName === "" ? "" : `## ${sectionName}\n\n`;
+        const header =
+          (sectionName === "" ? "" : `## ${sectionName}\n\n`) +
+          (!!sectionDescription ? `${sectionDescription}\n\n` : "");
         const _items = functionsInSection.map(toMarkdown).join("\n");
         return header + _items;
       })
