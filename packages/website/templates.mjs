@@ -59,7 +59,7 @@ helperFn(f) = f \`}/>
 | **Unit Name** | **Example** | **Convert Number to Duration** | **Convert Duration to Number** |
 |---------------|----------------------------|--------------------------------------------|--------------------------------------------|
 | Minute        | \`5minutes\`                   | \`fromMinutes(number)\`                      | \`toMinutes(duration)\`                      |
-| Hour          | \`5hour\`                     | \`romHours(number)\`                        | \`toHours(duration)\`                        |
+| Hour          | \`5hour\`                     | \`fromHours(number)\`                        | \`toHours(duration)\`                        |
 | Day           | \`5days\`                      | \`fromDays(number)\`                         | \`toDays(duration)\`                         |
 | Year          | \`5years\`                     | \`fromYears(number)\`                        | \`toYears(duration)\`                        |
 
