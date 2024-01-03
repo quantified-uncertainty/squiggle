@@ -157,7 +157,7 @@ export const FnDocumentation: FC<{
             <MarkdownViewer
               className="w-full"
               key={i}
-              md={`\`\`\`squiggle\n${example} \n \`\`\``}
+              md={`\`\`\`squiggle\n${example}\n\`\`\``}
               textSize="sm"
             />
           ))}
