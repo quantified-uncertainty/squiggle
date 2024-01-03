@@ -182,4 +182,22 @@ Lists are immutable, meaning that they cannot be modified. Instead, all list fun
     intro: `The Danger library contains newer experimental functions which are less stable than Squiggle as a whole. They are not recommended for production use, but are useful for testing out new ideas., 
 `,
   },
+  {
+    name: "Dist",
+    sections: [
+      { name: "Distributions" },
+      { name: "Basic Functions" },
+      { name: "Algebra" },
+      { name: "Pointwise Algebra" },
+      { name: "Normalization" },
+      { name: "Utility" },
+      { name: "Scoring" },
+    ],
+    description:
+      "Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.",
+    imports: `import { FnDocumentationFromName } from "@quri/squiggle-components";`,
+    intro: `Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
+
+One complication is that it's possible to represent invalid probability distributions in the point set format. For example, you can represent shapes with negative values, or shapes that are not normalized.`,
+  },
 ];

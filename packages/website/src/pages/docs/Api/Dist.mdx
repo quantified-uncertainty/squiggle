@@ -1,629 +1,265 @@
 ---
-description: Distributions are the flagship data type in Squiggle. The distribution type is a generic data type that contains one of three different formats of distributions.
+description: Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
 ---
+import { FnDocumentationFromName } from "@quri/squiggle-components";
 
-import { Callout } from "nextra/components";
+# Dist
+Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
 
-# Distribution
+One complication is that it's possible to represent invalid probability distributions in the point set format. For example, you can represent shapes with negative values, or shapes that are not normalized.
+## Distributions
 
-Distributions are the flagship data type in Squiggle. The distribution type is a generic data type that contains one of three different formats of distributions.
-These subtypes are [point set](/docs/Api/DistPointSet), [sample set](/docs/Api/DistSampleSet), and symbolic. The first two of these have a few custom functions that only work on them. You can read more about the differences between these formats [here](/docs/Discussions/Three-Formats-Of-Distributions).
+### make
 
-Several functions below only can work on particular distribution formats.
-For example, scoring and pointwise math requires the point set format. When this happens, the types are automatically converted to the correct format. These conversions are lossy.
+<FnDocumentationFromName functionName="Dist.make" showNameAndDescription={false} size="small" />
 
-Distributions are created as [sample sets](/Docs/Api/DistSampleSet) by default. To create a symbolic distribution, use `Sym.` namespace: `Sym.normal`, `Sym.beta` and so on.
+### mixture
+The mixture function takes a list of distributions and a list of weights, and returns a new distribution that is a mixture of the distributions in the list. The weights should be positive numbers that sum to 1. If no weights are provided, the function will assume that all distributions have equal weight.
+    
+Note: If you want to pass in over 5 distributions, you must use the list syntax.
+<FnDocumentationFromName functionName="Dist.mixture" showNameAndDescription={false} size="small" />
 
-## Distribution Creation
-
-These are functions for creating primitive distributions. Many of these could optionally take in distributions as inputs. In these cases, Monte Carlo Sampling will be used to generate the greater distribution. This can be used for simple hierarchical models.
-
-See a longer tutorial on creating distributions [here](/docs/Guides/DistributionCreation).
+### mx
+Alias for mixture()
+<FnDocumentationFromName functionName="Dist.mx" showNameAndDescription={false} size="small" />
 
 ### normal
 
-```
-normal: (distribution|number, distribution|number) => distribution
-normal: (dict<{p5: distribution|number, p95: distribution|number}>) => distribution
-normal: (dict<{p10: distribution|number, p90: distribution|number}>) => distribution
-normal: (dict<{p25: distribution|number, p75: distribution|number}>) => distribution
-normal: (dict<{mean: distribution|number, stdev: distribution|number}>) => distribution
-```
-
-**Examples**
-
-```squiggle
-normal(5, 1)
-normal({ p5: 4, p95: 10 })
-normal({ p10: 5, p95: 9 })
-normal({ p25: 5, p75: 9 })
-normal({ mean: 5, stdev: 2 })
-normal(5 to 10, normal(3, 2))
-normal({ mean: uniform(5, 9), stdev: 3 })
-```
+<FnDocumentationFromName functionName="Dist.normal" showNameAndDescription={false} size="small" />
 
 ### lognormal
 
-```
-lognormal: (distribution|number, distribution|number) => distribution
-lognormal: (dict<{p5: distribution|number, p95: distribution|number}>) => distribution
-lognormal: (dict<{p10: distribution|number, p90: distribution|number}>) => distribution
-lognormal: (dict<{p25: distribution|number, p75: distribution|number}>) => distribution
-lognormal: (dict<{mean: distribution|number, stdev: distribution|number}>) => distribution
-```
-
-**Examples**
-
-```squiggle
-lognormal(0.5, 0.8)
-lognormal({ p5: 4, p95: 10 })
-lognormal({ p10: 5, p95: 9 })
-lognormal({ p25: 5, p75: 9 })
-lognormal({ mean: 5, stdev: 2 })
-```
-
-### to
-
-The `to` function is an easy way to generate simple distributions using predicted _5th_ and _95th_ percentiles.
-
-`To` is simply an alias for `lognormal({p5:low, p95:high})`. It does not accept values of 0 or less, as those are not valid for lognormal distributions.
-
-```
-to: (distribution|number, distribution|number) => distribution
-```
-
-**Examples**
-
-```squiggle
-5 to 10
-to(5,10)
-```
-
+<FnDocumentationFromName functionName="Dist.lognormal" showNameAndDescription={false} size="small" />
 
 ### uniform
 
-```
-uniform: (distribution|number, distribution|number) => distribution
-```
-
-**Examples**
-
-```squiggle
-uniform(10, 12)
-```
+<FnDocumentationFromName functionName="Dist.uniform" showNameAndDescription={false} size="small" />
 
 ### beta
 
-```
-beta: (distribution|number, distribution|number) => distribution
-beta: (dict<{mean: distribution|number, stdev: distribution|number}>) => distribution
-```
-
-**Examples**
-
-```squiggle
-beta(20, 25)
-beta({ mean: 0.39, stdev: 0.1 })
-```
+<FnDocumentationFromName functionName="Dist.beta" showNameAndDescription={false} size="small" />
 
 ### cauchy
 
-```
-cauchy: (distribution|number, distribution|number) => distribution
-```
-
-**Examples**
-
-```squiggle
-cauchy(5, 1)
-```
+<FnDocumentationFromName functionName="Dist.cauchy" showNameAndDescription={false} size="small" />
 
 ### gamma
 
-```
-gamma: (distribution|number, distribution|number) => distribution
-```
-
-**Examples**
-
-```squiggle
-gamma(5, 1)
-```
+<FnDocumentationFromName functionName="Dist.gamma" showNameAndDescription={false} size="small" />
 
 ### logistic
 
-```
-logistic: (distribution|number, distribution|number) => distribution
-```
+<FnDocumentationFromName functionName="Dist.logistic" showNameAndDescription={false} size="small" />
 
-**Examples**
-
-```squiggle
-gamma(5, 1)
-```
+### to
+The "to" function is a shorthand for lognormal(`{p5:min, p95:max`}). It does not accept values of 0 or less, as those are not valid for lognormal distributions.
+<FnDocumentationFromName functionName="Dist.to" showNameAndDescription={false} size="small" />
 
 ### exponential
 
-```
-exponential: (distribution|number) => distribution
-```
-
-**Examples**
-
-```squiggle
-exponential(2)
-```
+<FnDocumentationFromName functionName="Dist.exponential" showNameAndDescription={false} size="small" />
 
 ### bernoulli
 
-```
-bernoulli: (distribution|number) => distribution
-```
-
-**Examples**
-
-```squiggle
-bernoulli(0.5)
-```
+<FnDocumentationFromName functionName="Dist.bernoulli" showNameAndDescription={false} size="small" />
 
 ### triangular
 
-```
-triangular: (number, number, number) => distribution;
-```
-
-**Examples**
-
-```squiggle
-triangular(5, 10, 20)
-```
-
-### mixture
-
-```
-mixture: (...distributionLike, weights?:list<float>) => distribution
-mixture: (list<distributionLike>, weights?:list<float>) => distribution
-```
-
-Note: If you want to pass in over 5 distributions, you must use the list syntax.
-
-**Examples**
-
-```squiggle
-mixture(normal(5, 1), normal(10, 1), 8)
-mx(normal(5, 1), normal(10, 1), [0.3, 0.7])
-mx([normal(5, 1), normal(10, 1)], [0.3, 0.7])
-```
-
-## Functions
-
-### make 
-
-Make a distribution, starting with either a number of a distribution.
-
-```
-make: (distribution|number) => distribution 
-```
+<FnDocumentationFromName functionName="Dist.triangular" showNameAndDescription={false} size="small" />
 
 
-### sample
-
-One random sample from the distribution
-
-```
-sample: (distribution) => number
-```
-
-**Examples**
-
-```squiggle
-sample(normal(5, 2))
-```
-
-### sampleN
-
-N random samples from the distribution
-
-```
-sampleN: (distribution, number) => list<number>
-```
-
-**Examples**
-
-```squiggle
-sampleN(normal(5, 2), 100)
-```
+## Basic Functions
 
 ### mean
 
-The distribution mean
+<FnDocumentationFromName functionName="Dist.mean" showNameAndDescription={false} size="small" />
 
-```
-mean: (distribution) => number
-```
+### median
 
-**Examples**
-
-```squiggle
-mean(normal(5, 2))
-```
+<FnDocumentationFromName functionName="Dist.median" showNameAndDescription={false} size="small" />
 
 ### stdev
 
-Standard deviation. Only works now on sample set distributions (so converts other distributions into sample set in order to calculate.)
-
-```
-stdev: (distribution) => number
-```
+<FnDocumentationFromName functionName="Dist.stdev" showNameAndDescription={false} size="small" />
 
 ### variance
 
-Variance. Similar to stdev, only works now on sample set distributions.
+<FnDocumentationFromName functionName="Dist.variance" showNameAndDescription={false} size="small" />
 
-```
-variance: (distribution) => number
-```
+### min
 
-### Median
+<FnDocumentationFromName functionName="Dist.min" showNameAndDescription={false} size="small" />
 
-Median. The quantile at 0.5.
+### max
 
-```
-median: (distribution) => number
-```
+<FnDocumentationFromName functionName="Dist.max" showNameAndDescription={false} size="small" />
 
+### mode
+
+<FnDocumentationFromName functionName="Dist.mode" showNameAndDescription={false} size="small" />
+
+### integralSum
+Get the sum of the integral of a distribution. If the distribution is normalized, this will be 1.0. This is useful for understanding unnormalized distributions.
+<FnDocumentationFromName functionName="Dist.integralSum" showNameAndDescription={false} size="small" />
+
+### sample
+
+<FnDocumentationFromName functionName="Dist.sample" showNameAndDescription={false} size="small" />
+
+### sampleN
+
+<FnDocumentationFromName functionName="Dist.sampleN" showNameAndDescription={false} size="small" />
+
+### exp
+
+<FnDocumentationFromName functionName="Dist.exp" showNameAndDescription={false} size="small" />
+
+### toPointSet
+
+<FnDocumentationFromName functionName="Dist.toPointSet" showNameAndDescription={false} size="small" />
 
 ### cdf
 
-```
-cdf: (distribution, number) => number
-```
-
-**Examples**
-
-```squiggle
-cdf(normal(5, 2), 3)
-```
+<FnDocumentationFromName functionName="Dist.cdf" showNameAndDescription={false} size="small" />
 
 ### pdf
 
-```
-pdf: (distribution, number) => number
-```
+<FnDocumentationFromName functionName="Dist.pdf" showNameAndDescription={false} size="small" />
 
-**Examples**
+### inv
 
-```squiggle
-pdf(normal(5, 2), 3)
-```
+<FnDocumentationFromName functionName="Dist.inv" showNameAndDescription={false} size="small" />
 
 ### quantile
 
-```
-quantile: (distribution, number) => number
-```
-
-**Examples**
-
-```squiggle
-quantile(normal(5, 2), 0.5)
-```
+<FnDocumentationFromName functionName="Dist.quantile" showNameAndDescription={false} size="small" />
 
 ### truncate
-
 Truncates both the left side and the right side of a distribution.
 
-```
-truncate: (distribution, left: number, right: number) => distribution
-```
-
-<Callout type="info">
-  **Implementation Details**  
-  Sample set distributions are truncated by filtering samples, but point set
-  distributions are truncated using direct geometric manipulation. Uniform
-  distributions are truncated symbolically. Symbolic but non-uniform
-  distributions get converted to Point Set distributions.
-</Callout>
+Sample set distributions are truncated by filtering samples, but point set distributions are truncated using direct geometric manipulation. Uniform distributions are truncated symbolically. Symbolic but non-uniform distributions get converted to Point Set distributions.
+<FnDocumentationFromName functionName="Dist.truncate" showNameAndDescription={false} size="small" />
 
 ### truncateLeft
 
-Truncates the left side of a distribution.
-
-```
-truncateLeft: (distribution, left: number) => distribution
-```
-
-**Examples**
-
-```squiggle
-truncateLeft(normal(5, 2), 3)
-```
+<FnDocumentationFromName functionName="Dist.truncateLeft" showNameAndDescription={false} size="small" />
 
 ### truncateRight
 
-Truncates the right side of a distribution.
+<FnDocumentationFromName functionName="Dist.truncateRight" showNameAndDescription={false} size="small" />
 
-```
-truncateRight: (distribution, right: number) => distribution
-```
 
-**Examples**
+## Algebra
 
-```squiggle
-truncateRight(normal(5, 2), 6)
-```
+### sum
 
-### klDivergence
+<FnDocumentationFromName functionName="Dist.sum" showNameAndDescription={false} size="small" />
 
-[Kullback–Leibler divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence) between two distributions.
+### product
 
-Note that this can be very brittle. If the second distribution has probability mass at areas where the first doesn't, then the result will be infinite. Due to numeric approximations, some probability mass in point set distributions is rounded to zero, leading to infinite results with klDivergence.
+<FnDocumentationFromName functionName="Dist.product" showNameAndDescription={false} size="small" />
 
-```
-klDivergence: (distribution, distribution) => number
-```
+### cumsum
 
-**Examples**
+<FnDocumentationFromName functionName="Dist.cumsum" showNameAndDescription={false} size="small" />
 
-```squiggle
-Dist.klDivergence(normal(5, 2), normal(5, 4)) // returns 0.57
-```
+### cumprod
 
-### logScore
+<FnDocumentationFromName functionName="Dist.cumprod" showNameAndDescription={false} size="small" />
 
-A log loss score. Often that often acts as a [scoring rule](https://en.wikipedia.org/wiki/Scoring_rule). Useful when evaluating the accuracy of a forecast.
+### diff
 
-Note that it is fairly slow.
+<FnDocumentationFromName functionName="Dist.diff" showNameAndDescription={false} size="small" />
 
-```
-Dist.logScore: ({estimate: distribution, ?prior: distribution, answer: distribution|number}) => number
-```
+### log
 
-**Examples**
+<FnDocumentationFromName functionName="Dist.log" showNameAndDescription={false} size="small" />
 
-```squiggle
-Dist.logScore({
-  estimate: normal(5, 2),
-  answer: normal(4.5, 1.2),
-  prior: normal(6, 4),
-}) // returns -0.597.57
-```
+### log10
 
-## Display
+<FnDocumentationFromName functionName="Dist.log10" showNameAndDescription={false} size="small" />
 
-### toString
+### unaryMinus
 
-```
-toString: (distribution) => string
-```
+<FnDocumentationFromName functionName="Dist.unaryMinus" showNameAndDescription={false} size="small" />
 
-**Examples**
+### add
 
-```squiggle
-toString(normal(5, 2))
-```
+<FnDocumentationFromName functionName="Dist.add" showNameAndDescription={false} size="small" />
+
+### multiply
+
+<FnDocumentationFromName functionName="Dist.multiply" showNameAndDescription={false} size="small" />
+
+### subtract
+
+<FnDocumentationFromName functionName="Dist.subtract" showNameAndDescription={false} size="small" />
+
+### divide
+
+<FnDocumentationFromName functionName="Dist.divide" showNameAndDescription={false} size="small" />
+
+### pow
+
+<FnDocumentationFromName functionName="Dist.pow" showNameAndDescription={false} size="small" />
+
+### log
+
+<FnDocumentationFromName functionName="Dist.log" showNameAndDescription={false} size="small" />
+
+
+## Pointwise Algebra
+
+### dotAdd
+
+<FnDocumentationFromName functionName="Dist.dotAdd" showNameAndDescription={false} size="small" />
+
+### dotMultiply
+
+<FnDocumentationFromName functionName="Dist.dotMultiply" showNameAndDescription={false} size="small" />
+
+### dotSubtract
+
+<FnDocumentationFromName functionName="Dist.dotSubtract" showNameAndDescription={false} size="small" />
+
+### dotDivide
+
+<FnDocumentationFromName functionName="Dist.dotDivide" showNameAndDescription={false} size="small" />
+
+### dotPow
+
+<FnDocumentationFromName functionName="Dist.dotPow" showNameAndDescription={false} size="small" />
+
+
+## Normalization
+
+### normalize
+Normalize a distribution. This means scaling it appropriately so that it's cumulative sum is equal to 1. This only impacts Point Set distributions, because those are the only ones that can be non-normlized.
+<FnDocumentationFromName functionName="Dist.normalize" showNameAndDescription={false} size="small" />
+
+### isNormalized
+Check if a distribution is normalized. This only impacts Point Set distributions, because those are the only ones that can be non-normlized. Most distributions are typically normalized, but there are some commands that could produce non-normalized distributions.
+<FnDocumentationFromName functionName="Dist.isNormalized" showNameAndDescription={false} size="small" />
+
+
+## Utility
 
 ### sparkline
 
 Produce a sparkline of length n. For example, `▁▁▁▁▁▂▄▆▇██▇▆▄▂▁▁▁▁▁`. These can be useful for testing or quick text visualizations.
+<FnDocumentationFromName functionName="Dist.sparkline" showNameAndDescription={false} size="small" />
 
-```
-sparkline: (distribution, n = 20) => string
-```
 
-**Examples**
+## Scoring
 
-```squiggle
-sparkline(truncateLeft(normal(5, 2), 3), 20) // produces ▁▇█████▇▅▄▃▂▂▁▁▁▁▁▁▁
-```
+### logScore
+A log loss score. Often that often acts as a [scoring rule](https://en.wikipedia.org/wiki/Scoring_rule). Useful when evaluating the accuracy of a forecast.
 
-## Normalization
+    Note that it is fairly slow.
+<FnDocumentationFromName functionName="Dist.logScore" showNameAndDescription={false} size="small" />
 
-There are some situations where computation will return unnormalized distributions. This means that their cumulative sums are not equal to 1.0. Unnormalized distributions are not valid for many relevant functions; for example, klDivergence and scoring.
+### klDivergence
+[Kullback–Leibler divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence) between two distributions.
 
-The only functions that do not return normalized distributions are the pointwise arithmetic operations and the scalewise arithmetic operations. If you use these functions, it is recommended that you consider normalizing the resulting distributions.
-
-### normalize
-
-Normalize a distribution. This means scaling it appropriately so that it's cumulative sum is equal to 1. This only impacts Point Set distributions, because those are the only ones that can be non-normlized.
-
-```
-normalize: (distribution) => distribution
-```
-
-**Examples**
-
-```squiggle
-normalize(normal(5, 2))
-```
-
-### isNormalized
-
-Check of a distribution is normalized. Most distributions are typically normalized, but there are some commands that could produce non-normalized distributions.
-
-```
-isNormalized: (distribution) => bool
-```
-
-**Examples**
-
-```squiggle
-isNormalized(normal(5, 2)) // returns true
-```
-
-### integralSum
-
-**Note: If you have suggestions for better names for this, please let us know.**
-
-Get the sum of the integral of a distribution. If the distribution is normalized, this will be 1.0. This is useful for understanding unnormalized distributions.
-
-```
-integralSum: (distribution) => number
-```
-
-**Examples**
-
-```squiggle
-integralSum(normal(5, 2))
-```
-
-## Regular Arithmetic Operations
-
-Regular arithmetic operations cover the basic mathematical operations on distributions. They work much like their equivalent operations on numbers.
-
-The infixes `+`,`-`, `*`, `/`, `^` are supported for addition, subtraction, multiplication, division, power, and unaryMinus.
-
-```squiggle
-pointMass(5 + 10) == pointMass(5) + pointMass(10);
-```
-
-### add
-
-```
-add: (distributionLike, distributionLike) => distribution
-```
-
-**Examples**
-
-```squiggle
-normal(0, 1) + normal(1, 3) // returns normal(1, 3.16...)
-add(normal(0, 1), normal(1, 3)) // returns normal(1, 3.16...)
-```
-
-### sum
-
-```
-sum: (list<distributionLike>) => distribution
-```
-
-### cumulative sum
-
-```
-cumsum: (list<distributionLike>) => distribution
-```
-
-### multiply
-
-```
-multiply: (distributionLike, distributionLike) => distribution
-```
-
-### product
-
-```
-product: (list<distributionLike>) => distribution
-```
-
-### cumulative product
-
-```
-cumprod: (list<distributionLike>) => list<distribution>
-```
-
-### diff
-
-```
-diff: (list<distributionLike>) => list<distribution>
-```
-
-
-### subtract
-
-```
-subtract: (distributionLike, distributionLike) => distribution
-```
-
-### divide
-
-```
-divide: (distributionLike, distributionLike) => distribution
-```
-
-### pow
-
-```
-pow: (distributionLike, distributionLike) => distribution
-```
-
-### exp
-
-```
-exp: (distributionLike, distributionLike) => distribution
-```
-
-### log
-
-```
-log: (distributionLike, distributionLike) => distribution
-```
-
-### log10
-
-```
-log10: (distributionLike, distributionLike) => distribution
-```
-
-### unaryMinus
-
-```
-unaryMinus: (distribution) => distribution
-```
-
-**Examples**
-
-```squiggle
--normal(5, 2) // same as normal(-5, 2)
-unaryMinus(normal(5, 2)) // same as normal(-5, 2)
-```
-
-## Pointwise Arithmetic Operations
-
-<Callout type="warning">
-  **Unnormalized Results**  
-  Pointwise arithmetic operations typically return unnormalized or completely
-  invalid distributions. For example, the operation{" "}
-  <code>normal(5,2) .- uniform(10,12)</code> results in a distribution-like
-  object with negative probability mass.
-</Callout>
-
-Pointwise arithmetic operations cover the standard arithmetic operations, but work in a different way than the regular operations. These operate on the y-values of the distributions instead of the x-values. A pointwise addition would add the y-values of two distributions.
-
-The infixes `.+`,`.-`, `.*`, `./`, `.^` are supported for their respective operations.
-
-The `mixture` methods works with pointwise addition.
-
-### dotAdd
-
-```
-dotAdd: (distributionLike, distributionLike) => distribution
-```
-
-### dotMultiply
-
-```
-dotMultiply: (distributionLike, distributionLike) => distribution
-```
-
-### dotSubtract
-
-```
-dotSubtract: (distributionLike, distributionLike) => distribution
-```
-
-### dotDivide
-
-```
-dotDivide: (distributionLike, distributionLike) => distribution
-```
-
-### dotPow
-
-```
-dotPow: (distributionLike, distributionLike) => distribution
-```
-
-### dotExp
-
-```
-dotExp: (distributionLike, distributionLike) => distribution
-```
+Note that this can be very brittle. If the second distribution has probability mass at areas where the first doesn't, then the result will be infinite. Due to numeric approximations, some probability mass in point set distributions is rounded to zero, leading to infinite results with klDivergence.
+<FnDocumentationFromName functionName="Dist.klDivergence" showNameAndDescription={false} size="small" />
