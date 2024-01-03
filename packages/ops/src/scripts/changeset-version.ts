@@ -30,8 +30,8 @@ async function getChangedPackages() {
   return packageDirs;
 }
 
-// based on https://github.com/changesets/action/blob/2bb9bcbd6bf4996a55ce459a630a0aa699457f59/src/utils.ts
-//  heavily modified
+// Based on https://github.com/changesets/action/blob/2bb9bcbd6bf4996a55ce459a630a0aa699457f59/src/utils.ts;
+// heavily modified.
 function getChangelogEntry(changelog: string, version: string) {
   const ast = unified().use(remarkParse).parse(changelog);
 
@@ -54,9 +54,6 @@ function getChangelogEntry(changelog: string, version: string) {
       if (!startedDepth) {
         continue;
       }
-      if (stringified.match(/(Major|Minor|Patch) Changes/) !== null) {
-        continue; // these headers are noise, skip
-      }
     }
 
     pickedNodes.push(node);
@@ -78,11 +75,23 @@ type PackageChangelog = {
   changes: string;
 };
 
+function changelogFile(packageDir: string) {
+  return `${packageDir}/CHANGELOG.md`;
+}
+
+async function getChangelogText(packageDir: string) {
+  return await readFile(changelogFile(packageDir), "utf-8");
+}
+
+async function updateChangelogText(packageDir: string, text: string) {
+  return await writeFile(changelogFile(packageDir), text, "utf-8");
+}
+
 async function generatePackageChanges(
   packageDir: string
 ): Promise<PackageChangelog> {
   const packageInfo = await getPackageInfo(packageDir);
-  const changelog = await readFile(`${packageDir}/CHANGELOG.md`, "utf-8");
+  const changelog = await getChangelogText(packageDir);
   const changelogEntry = getChangelogEntry(changelog, packageInfo.version);
   return { packageDir, packageInfo, changes: changelogEntry.content };
 }
@@ -156,9 +165,37 @@ async function generateWebsiteChangelog() {
   await updateChangelogMeta(fullChangelog.version);
 }
 
+async function cleanupUselessHeadersInPackage(packageDir: string) {
+  const changelog = await getChangelogText(packageDir);
+  const ast = unified().use(remarkParse).parse(changelog);
+
+  ast.children = ast.children.filter((node) => {
+    if (
+      node.type === "heading" &&
+      mdastToString(node).match(/(Major|Minor|Patch) Changes/) !== null
+    ) {
+      return false;
+    }
+    return true;
+  });
+
+  await updateChangelogText(
+    packageDir,
+    (unified().use(remarkStringify).stringify(ast) as string).trim()
+  );
+}
+
+async function cleanupUselessHeaders() {
+  const packageDirs = await getChangedPackages();
+  for (const packageDir of packageDirs) {
+    await cleanupUselessHeadersInPackage(packageDir);
+  }
+}
+
 async function main() {
   process.chdir("../.."); // repo root
   await exec("npx changeset version");
+  await cleanupUselessHeaders();
   await exec("cd packages/squiggle-lang && pnpm run update-system-version");
 
   await generateWebsiteChangelog();

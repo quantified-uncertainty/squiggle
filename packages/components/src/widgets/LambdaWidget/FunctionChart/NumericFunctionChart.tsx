@@ -23,19 +23,21 @@ type Props = {
   plot: SqNumericFnPlot;
   environment: Env;
   height: number;
+  xCount: number;
 };
 
 export const NumericFunctionChart: FC<Props> = ({
   plot,
   environment,
   height: innerHeight,
+  xCount,
 }) => {
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
   const { cursor, initCursor } = useCanvasCursor();
 
   const { functionImage, errors, xScale } = useMemo(
-    () => getFunctionImage(plot, environment),
-    [plot, environment]
+    () => getFunctionImage(plot, environment, xCount),
+    [plot, environment, xCount]
   );
 
   const draw = useCallback(
@@ -66,7 +68,7 @@ export const NumericFunctionChart: FC<Props> = ({
       });
 
       if (
-        plot.xScale.tag === "log" &&
+        plot.xScale.method?.type === "log" &&
         functionImage[0] &&
         functionImage[0].x <= 0
       ) {

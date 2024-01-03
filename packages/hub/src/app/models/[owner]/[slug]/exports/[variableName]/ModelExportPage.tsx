@@ -1,63 +1,14 @@
 "use client";
-import { FC, useState } from "react";
-import { graphql, useFragment } from "react-relay";
-
-import { SqProject, SqValuePath } from "@quri/squiggle-lang";
-import {
-  useAdjustSquiggleVersion,
-  VersionedSquiggleChart,
-} from "@quri/versioned-squiggle-components";
+import { FC } from "react";
+import { graphql } from "react-relay";
 
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
-import { squiggleHubLinker } from "@/squiggle/components/linker";
 
-import { ModelExportPage_SquiggleContent$key } from "@/__generated__/ModelExportPage_SquiggleContent.graphql";
+import { SquiggleModelExportPage } from "./SquiggleModelExportPage";
+
 import { ModelExportPageQuery } from "@/__generated__/ModelExportPageQuery.graphql";
-
-const SquiggleModelExportPage: FC<{
-  variableName: string;
-  contentRef: ModelExportPage_SquiggleContent$key;
-}> = ({ variableName, contentRef }) => {
-  const content = useFragment(
-    graphql`
-      fragment ModelExportPage_SquiggleContent on SquiggleSnippet {
-        id
-        code
-        version
-      }
-    `,
-    contentRef
-  );
-
-  const checkedVersion = useAdjustSquiggleVersion(content.version);
-
-  const [project] = useState(() => {
-    return new SqProject({ linker: squiggleHubLinker });
-  });
-
-  if (checkedVersion === "0.8.5" || checkedVersion === "0.8.6") {
-    return (
-      <div className="p-4 bg-red-100 text-red-900">
-        Export view pages don&apos;t support Squiggle {checkedVersion}.
-      </div>
-    );
-  }
-
-  const rootPath = new SqValuePath({
-    root: "bindings",
-    items: [{ type: "string", value: variableName }],
-  });
-  return (
-    <VersionedSquiggleChart
-      version={checkedVersion}
-      code={content.code}
-      rootPathOverride={rootPath}
-      project={project}
-    />
-  );
-};
 
 export const ModelExportPage: FC<{
   params: {
@@ -79,7 +30,7 @@ export const ModelExportPage: FC<{
               id
               content {
                 __typename
-                ...ModelExportPage_SquiggleContent
+                ...SquiggleModelExportPage
               }
             }
           }

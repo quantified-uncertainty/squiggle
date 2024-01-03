@@ -3,4 +3,4 @@
 "@quri/squiggle-components": patch
 ---
 
-Adds Tag.hide() to hide variables in View
+Breaking: Changed Tag.description to Tag.doc

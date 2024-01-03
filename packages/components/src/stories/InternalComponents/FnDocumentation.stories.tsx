@@ -26,7 +26,7 @@ export const FnStory = () => {
       {fnDocumentation.map((e, i) =>
         e ? (
           <div className="pb-2" key={i}>
-            <Component documentation={e} />
+            <Component documentation={e} showNameAndDescription={true} />
           </div>
         ) : (
           ""
@@ -58,5 +58,6 @@ export const Simple: Story = {
   name: "Normal",
   args: {
     documentation,
+    showNameAndDescription: true,
   },
 };

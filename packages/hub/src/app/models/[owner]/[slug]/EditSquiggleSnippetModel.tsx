@@ -21,6 +21,7 @@ import {
   useAdjustSquiggleVersion,
   VersionedSquigglePlayground,
   versionSupportsDropdownMenu,
+  versionSupportsExports,
 } from "@quri/versioned-squiggle-components";
 
 import { EditModelExports } from "@/components/exports/EditModelExports";
@@ -368,7 +369,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       ) : null;
   }
 
-  if (playgroundProps.version === "dev") {
+  if (versionSupportsExports(playgroundProps)) {
     playgroundProps.onExportsChange = (exports) => {
       form.setValue("exports", exports);
     };

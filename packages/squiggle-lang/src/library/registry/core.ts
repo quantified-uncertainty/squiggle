@@ -90,6 +90,10 @@ export class Registry {
     return [...this.fnNameDict.keys()];
   }
 
+  allFunctionsWithNamespace(nameSpace: string): FRFunction[] {
+    return this.functions.filter((fn) => fn.nameSpace === nameSpace);
+  }
+
   getFunctionDocumentation(fnName: string): FnDocumentation | undefined {
     // Find the first function with a given name; there could be duplicates with different descriptions etc.
     // FIXME - store `this.functions` as a `Map`.

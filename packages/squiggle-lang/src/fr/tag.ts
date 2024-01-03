@@ -95,7 +95,9 @@ function showAsDef<T>(inputType: FRType<any>, outputType: FRType<T>) {
 export const library = [
   maker.make({
     name: "name",
-    examples: [],
+    description: `Adds a user-facing name to a value. This is useful for documenting what a value represents, or how it was calculated.
+
+*Note: While names are shown in the sidebar, you still need to call variables by their regular variable names in code.*`,
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
@@ -107,7 +109,6 @@ export const library = [
   }),
   maker.make({
     name: "getName",
-    examples: [],
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
         return value.tags?.value.name || "";
@@ -115,29 +116,44 @@ export const library = [
     ],
   }),
   maker.make({
-    name: "description",
-    examples: [],
+    name: "doc",
+    description: `Adds text documentation to a value. This is useful for documenting what a value represents or how it was calculated.`,
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
         frAny({ genericName: "A" }),
-        ([value, description]) => value.mergeTags({ description }),
+        ([value, doc]) => value.mergeTags({ doc }),
         { isDecorator: true }
       ),
     ],
   }),
   maker.make({
-    name: "getDescription",
-    examples: [],
+    name: "getDoc",
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
-        return value.tags?.value.description || "";
+        return value.tags?.value.doc || "";
       }),
     ],
   }),
   maker.make({
     name: "showAs",
-    examples: [],
+    description: `Overrides the default visualization for a value.
+\`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization. You can use it like,  
+\`\`\`js
+example1 = {|x| x + 1} -> Tag.showAs(Calculator)
+//...
+@showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
+example2 = {|x| x + 1}
+\`\`\`
+Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, \`Number\` can be used with Dates and Durations as well.  
+| **Input Type**                      | **Visualization Types**               |
+| ----------------------------------- | ------------------------------------- |
+| **Distribution**                    | \`Plot.dist\`                         |
+| **List**                            | \`Table\`                             |
+| **\`(Number -> Number)\` Function** | \`Plot.numericFn\`, \`Calculator\`    |
+| **\`(Number -> Dist)\` Function**   | \`Plot.distFn\`, \`Calculator\`       |
+| **Function**                        | \`Calculator\`                        |
+`,
     definitions: [
       showAsDef(frWithTags(frDist), frPlot),
       showAsDef(frArray(frAny()), frTableChart),
@@ -159,7 +175,6 @@ export const library = [
   }),
   maker.make({
     name: "getShowAs",
-    examples: [],
     definitions: [
       makeDefinition([frAny()], frAny(), ([value]) => {
         return value.tags?.value.showAs || vString("None"); // Not sure what to use when blank.
@@ -168,7 +183,7 @@ export const library = [
   }),
   maker.make({
     name: "format",
-    examples: [],
+    description: `Set the display format for a number, distribution, duration, or date. Uses the [d3-format](https://d3js.org/d3-format) syntax on numbers and distributions, and the [d3-time-format](https://d3js.org/d3-time-format) syntax for dates.`,
     definitions: [
       makeDefinition(
         [frWithTags(frDistOrNumber), frNamed("numberFormat", frString)],
@@ -215,7 +230,7 @@ export const library = [
   }),
   maker.make({
     name: "all",
-    examples: [],
+    description: "Returns a dictionary of all tags on a value.",
     definitions: [
       makeDefinition([frAny()], frDictWithArbitraryKeys(frAny()), ([value]) => {
         return value.getTags().toMap();
@@ -224,7 +239,7 @@ export const library = [
   }),
   maker.make({
     name: "hide",
-    examples: [],
+    description: `Hides a value when displayed under Variables. This is useful for hiding intermediate values or helper functions that are used in calculations, but are not directly relevant to the user. Only hides top-level variables.`,
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frBool],
@@ -242,7 +257,6 @@ export const library = [
   }),
   maker.make({
     name: "getHide",
-    examples: [],
     definitions: [
       makeDefinition([frAny()], frBool, ([value]) => {
         return value.tags?.value.hidden || false;
@@ -251,7 +265,7 @@ export const library = [
   }),
   maker.make({
     name: "omit",
-    examples: [],
+    description: "Returns a copy of the value with the specified tags removed.",
     definitions: [
       makeDefinition(
         [frWithTags(frAny({ genericName: "A" })), frArray(frString)],
@@ -266,7 +280,7 @@ export const library = [
   }),
   maker.make({
     name: "clear",
-    examples: [],
+    description: "Returns a copy of the value with all tags removed.",
     definitions: [
       makeDefinition(
         [frWithTags(frAny({ genericName: "A" }))],

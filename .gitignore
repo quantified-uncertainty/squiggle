@@ -6,7 +6,7 @@ yarn-error.log
 .direnv
 .log
 
-/.vscode/squiggle.code-workspace
+/.vscode/*.code-workspace
 /.vscode/settings.json
 todo.txt
 result

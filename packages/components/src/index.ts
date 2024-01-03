@@ -19,6 +19,7 @@ export {
 } from "./components/SquigglePlayground/index.js";
 export { SquiggleViewer } from "./components/SquiggleViewer/index.js";
 export { ToolbarItem as PlaygroundToolbarItem } from "./components/ui/PanelWithToolbar/ToolbarItem.js";
+export { FnDocumentationFromName } from "./components/ui/FnDocumentation.js";
 
 export { SquiggleErrorAlert } from "./components/SquiggleErrorAlert.js";
 
