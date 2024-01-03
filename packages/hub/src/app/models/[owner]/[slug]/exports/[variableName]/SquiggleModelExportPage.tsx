@@ -37,7 +37,6 @@ const SquiggleModelExportPage_9_0_0: FC<SquiggleProps> = ({
     <VersionedSquiggleChart
       version="0.9.0"
       code={code}
-      showHeader={false}
       rootPathOverride={rootPath}
       project={project}
     />
@@ -63,7 +62,6 @@ const SquiggleModelExportPage_dev: FC<SquiggleProps> = ({
     <VersionedSquiggleChart
       version="dev"
       code={code}
-      showHeader={false}
       rootPathOverride={rootPath}
       project={project}
     />

@@ -5,8 +5,8 @@ import { useRunnerState } from "../lib/hooks/useRunnerState.js";
 import { useSquiggle } from "../lib/hooks/useSquiggle.js";
 import { getErrors } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
-import { DynamicSquiggleViewer } from "./DynamicSquiggleViewer.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
+import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
 import { SquiggleCodeProps } from "./types.js";
 
 export type SquiggleEditorProps = SquiggleCodeProps & {
@@ -62,7 +62,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
         />
       </div>
       {hideViewer || !squiggleOutput?.code ? null : (
-        <DynamicSquiggleViewer
+        <SquiggleOutputViewer
           squiggleOutput={squiggleOutput}
           isRunning={isRunning}
           editor={editorRef.current ?? undefined}
