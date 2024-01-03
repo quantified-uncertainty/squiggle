@@ -9,5 +9,5 @@
 @tailwind utilities;
 
 .cm-tooltip-autocomplete .cm-tooltip {
-    background:white
+  background: white;
 }
