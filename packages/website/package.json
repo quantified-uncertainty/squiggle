@@ -7,7 +7,7 @@
     "dev": "next dev",
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
-    "gen:docsForLLM": "node scripts/compileDocsForLLM.js",
+    "gen:docsForLLM": "node scripts/compileDocsForLLM.mjs",
     "gen:modulePages": "node scripts/generateModulePages.mjs",
     "gen": "pnpm run gen:modulePages && pnpm run gen:docsForLLM",
     "build": "pnpm run gen && next build"
