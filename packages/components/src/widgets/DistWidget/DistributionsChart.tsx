@@ -581,7 +581,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
                 />
               </div>
             )}
-            {anyAreNonnormalized && (
+            {anyAreNonnormalized && height > 20 && (
               <div className="flex-1 pt-2"> {nonNormalizedError()}</div>
             )}
           </div>
