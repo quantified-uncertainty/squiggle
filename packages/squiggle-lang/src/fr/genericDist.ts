@@ -202,11 +202,6 @@ Produce a sparkline of length n. For example, \`▁▁▁▁▁▂▄▆▇█�
     description: `Check if a distribution is normalized. This only impacts Point Set distributions, because those are the only ones that can be non-normlized. Most distributions are typically normalized, but there are some commands that could produce non-normalized distributions.`,
     fn: (d) => d.isNormalized(),
   }),
-  maker.d2d({
-    name: "toPointSet",
-    displaySection: "Basic Functions",
-    fn: (d, env) => unwrapDistResult(d.toPointSetDist(env)),
-  }),
   maker.dn2n({
     name: "cdf",
     displaySection: "Basic Functions",
