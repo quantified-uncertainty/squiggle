@@ -127,7 +127,7 @@ const InnerDistributionsChart: FC<{
   );
 
   const legendItemHeight = 16;
-  const legendOffset = 2;
+  const LEGEND_OFFSET = 2;
 
   const legendHeight = isMulti
     ? legendItemHeight * shapes.length + legendOffset
@@ -343,16 +343,16 @@ const InnerDistributionsChart: FC<{
       }
 
       if (isMulti) {
-        const radius = 5;
+        const RADIUS = 5;
         for (let i = 0; i < shapes.length; i++) {
           context.save();
-          context.translate(padding.left, legendItemHeight * i + legendOffset);
+          context.translate(padding.left, legendItemHeight * i + LEGEND_OFFSET);
           context.fillStyle = getColor(i);
           drawCircle({
             context,
-            x: radius,
-            y: radius,
-            r: radius,
+            x: RADIUS,
+            y: RADIUS,
+            r: RADIUS,
           });
 
           context.textAlign = "left";
