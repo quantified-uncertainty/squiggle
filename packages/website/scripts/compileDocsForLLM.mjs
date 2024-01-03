@@ -112,7 +112,7 @@ You can read this document in plaintext [here](/llms/prompt.txt).
 
 async function main() {
   await documentationBundlePage();
-  // await promptPage();
+  await promptPage();
 }
 
 main();
