@@ -92,7 +92,7 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
   maker.nn2n({
     name: "choose",
     displaySection: "Combinatorics",
-    description: `\`Danger.choose(n,k)\` returns \`factorial(n) / (factorial(n - k) *.factorial(k))\`, i.e., the number of ways you can choose k items from n choices, without repetition. This function is also known as the [binomial coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient).`,
+    description: `\`Danger.choose(n,k)\` returns \`factorial(n) / (factorial(n - k) * factorial(k))\`, i.e., the number of ways you can choose k items from n choices, without repetition. This function is also known as the [binomial coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient).`,
     examples: [`Danger.choose(1, 20)`],
     fn: choose,
   }),
