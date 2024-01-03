@@ -32,7 +32,8 @@ async function getChangedPackages() {
 
 // Based on https://github.com/changesets/action/blob/2bb9bcbd6bf4996a55ce459a630a0aa699457f59/src/utils.ts;
 // heavily modified.
-function getChangelogEntry(changelog: string, version: string) {
+function getChangelogEntry(changelog: string, version: string | null) {
+  if (version === null) return { content: 'No version provided', startedDepth: null };
   const ast = unified().use(remarkParse).parse(changelog);
 
   const nodes = ast.children;
@@ -92,7 +93,12 @@ async function generatePackageChanges(
 ): Promise<PackageChangelog> {
   const packageInfo = await getPackageInfo(packageDir);
   const changelog = await getChangelogText(packageDir);
-  const changelogEntry = getChangelogEntry(changelog, packageInfo.version);
+  const version = packageInfo.version;
+  if (!version) {
+    console.error(`No version found for package ${packageInfo.name}`);
+    return { packageDir, packageInfo, changes: 'No changes.' };
+  }
+  const changelogEntry = getChangelogEntry(changelog, version);
   return { packageDir, packageInfo, changes: changelogEntry.content };
 }
 
