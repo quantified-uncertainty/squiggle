@@ -13,10 +13,11 @@ function escapedStr(str) {
 
 function toMarkdown(documentation) {
   const fullName = documentation.nameSpace + "." + documentation.name;
-  return `### ${documentation.name}
-  ${escapedStr(documentation.description || "")}
-  <FnDocumentationFromName functionName="${fullName}" showNameAndDescription={false} size="small" />
-  `;
+  return `### ${documentation.name}${escapedStr(
+    documentation.description || ""
+  )}
+<FnDocumentationFromName functionName="${fullName}" showNameAndDescription={false} size="small" />
+`;
 }
 
 const generateModulePage = async (
