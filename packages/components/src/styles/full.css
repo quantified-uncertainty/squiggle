@@ -7,3 +7,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.cm-tooltip-autocomplete .cm-tooltip {
+  background: white;
+}
