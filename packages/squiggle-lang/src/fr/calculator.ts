@@ -47,9 +47,9 @@ export const library = [
       "({|x| x * 5}) -> Calculator",
     ],
     description: `
-\`Calculator.make\` takes in a function, a description, and a list of fields. The function should take in the same number of arguments as the number of fields, and the arguments should be of the same type as the default value of the field.
+\`Calculator.make\` takes in a function, a description, and a list of inputs. The function should take in the same number of arguments as the number of inputs, and the arguments should be of the same type as the default value of the input.
 
-Calculators require a list of Inputs to be passed in. Inputs are created using the \`Input\` module. The Input module has a few different functions for creating different types of inputs.
+Inputs are created using the \`Input\` module. The Input module has a few different functions for creating different types of inputs.
     
 For calculators that take a long time to run, we recommend setting \`autorun\` to \`false\`. This will create a button that the user can click to run the calculator.
     `,

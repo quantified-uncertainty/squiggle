@@ -143,12 +143,12 @@ export const library = [
     name: "showAs",
     description: `Overrides the default visualization for a value.
 \`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization. You can use it like,  
-\`\`\`js
+~~~squiggle
 example1 = {|x| x + 1} -> Tag.showAs(Calculator)
 //...
 @showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
 example2 = {|x| x + 1}
-\`\`\`
+~~~
 Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, \`Number\` can be used with Dates and Durations as well.  
 | **Input Type**                      | **Visualization Types**               |
 | ----------------------------------- | ------------------------------------- |
