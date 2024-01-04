@@ -88,6 +88,29 @@ Calculators can be useful for debugging functions or to present functions to end
 `,
   },
   {
+    name: "Number",
+    sections: [
+      { name: "Comparison" },
+      { name: "Algebra (Number)" },
+      { name: "Functions (Number)" },
+      { name: "Algebra (List)" },
+      { name: "Functions (List)" },
+      { name: "Utils" },
+    ],
+    description: "Squiggle numbers are Javascript floats.",
+    intro: "Squiggle numbers are Javascript floats.",
+  },
+  {
+    name: "String",
+    description: "Functions for working with strings in Squiggle",
+    intro: `Strings support all JSON escape sequences, with addition of escaped single-quotes (for single-quoted strings)
+
+~~~squiggle
+a = "'\" NUL:\u0000"
+b = '\'" NUL:\u0000'
+~~~`,
+  },
+  {
     name: "Input",
     description:
       "Inputs are now only used for describing forms for calculators.",

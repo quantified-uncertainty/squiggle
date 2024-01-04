@@ -273,7 +273,7 @@ export const library = [
 
   maker.make({
     name: "concat",
-    requiresNamespace: true,
+    requiresNamespace: false,
     examples: [`List.concat([1,2,3], [4, 5, 6])`],
     displaySection: "Modifications",
     definitions: [
@@ -678,6 +678,7 @@ List.reduceWhile([5, 6, 7], { x: 0 }, {|acc, curr| { x: acc.x + curr }}, {|acc| 
     name: "join",
     requiresNamespace: true,
     examples: [`List.join(["a", "b", "c"], ",") // "a,b,c"`],
+    displaySection: "Modifications",
     definitions: [
       makeDefinition(
         [frArray(frString), frNamed("separator", frOptional(frString))],
@@ -685,6 +686,19 @@ List.reduceWhile([5, 6, 7], { x: 0 }, {|acc, curr| { x: acc.x + curr }}, {|acc| 
         ([array, joinStr]) => array.join(joinStr ?? ",")
       ),
       makeDefinition([frArray(frString)], frString, ([array]) => array.join()),
+    ],
+  }),
+  maker.make({
+    name: "concat",
+    displaySection: "Modifications",
+    definitions: [
+      makeDefinition(
+        [frArray(frAny()), frArray(frAny())],
+        frArray(frAny()),
+        ([a, b]) => {
+          return [...a, ...b];
+        }
+      ),
     ],
   }),
   maker.make({
