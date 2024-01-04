@@ -98,6 +98,7 @@ export const library = [
     description: `Adds a user-facing name to a value. This is useful for documenting what a value represents, or how it was calculated.
 
 *Note: While names are shown in the sidebar, you still need to call variables by their regular variable names in code.*`,
+    displaySection: "Tags",
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
@@ -109,6 +110,7 @@ export const library = [
   }),
   maker.make({
     name: "getName",
+    displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
         return value.tags?.value.name || "";
@@ -118,6 +120,7 @@ export const library = [
   maker.make({
     name: "doc",
     description: `Adds text documentation to a value. This is useful for documenting what a value represents or how it was calculated.`,
+    displaySection: "Tags",
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
@@ -129,6 +132,7 @@ export const library = [
   }),
   maker.make({
     name: "getDoc",
+    displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
         return value.tags?.value.doc || "";
@@ -139,12 +143,12 @@ export const library = [
     name: "showAs",
     description: `Overrides the default visualization for a value.
 \`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization. You can use it like,  
-\`\`\`js
+~~~squiggle
 example1 = {|x| x + 1} -> Tag.showAs(Calculator)
 //...
 @showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
 example2 = {|x| x + 1}
-\`\`\`
+~~~
 Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, \`Number\` can be used with Dates and Durations as well.  
 | **Input Type**                      | **Visualization Types**               |
 | ----------------------------------- | ------------------------------------- |
@@ -154,6 +158,7 @@ Different types of values can be displayed in different ways. The following tabl
 | **\`(Number -> Dist)\` Function**   | \`Plot.distFn\`, \`Calculator\`       |
 | **Function**                        | \`Calculator\`                        |
 `,
+    displaySection: "Tags",
     definitions: [
       showAsDef(frWithTags(frDist), frPlot),
       showAsDef(frArray(frAny()), frTableChart),
@@ -175,6 +180,7 @@ Different types of values can be displayed in different ways. The following tabl
   }),
   maker.make({
     name: "getShowAs",
+    displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frAny(), ([value]) => {
         return value.tags?.value.showAs || vString("None"); // Not sure what to use when blank.
@@ -184,6 +190,7 @@ Different types of values can be displayed in different ways. The following tabl
   maker.make({
     name: "format",
     description: `Set the display format for a number, distribution, duration, or date. Uses the [d3-format](https://d3js.org/d3-format) syntax on numbers and distributions, and the [d3-time-format](https://d3js.org/d3-time-format) syntax for dates.`,
+    displaySection: "Tags",
     definitions: [
       makeDefinition(
         [frWithTags(frDistOrNumber), frNamed("numberFormat", frString)],
@@ -215,6 +222,7 @@ Different types of values can be displayed in different ways. The following tabl
   }),
   maker.make({
     name: "getFormat",
+    displaySection: "Tags",
     examples: [],
     definitions: [
       makeDefinition([frWithTags(frDistOrNumber)], frString, ([{ tags }]) => {
@@ -229,17 +237,9 @@ Different types of values can be displayed in different ways. The following tabl
     ],
   }),
   maker.make({
-    name: "all",
-    description: "Returns a dictionary of all tags on a value.",
-    definitions: [
-      makeDefinition([frAny()], frDictWithArbitraryKeys(frAny()), ([value]) => {
-        return value.getTags().toMap();
-      }),
-    ],
-  }),
-  maker.make({
     name: "hide",
     description: `Hides a value when displayed under Variables. This is useful for hiding intermediate values or helper functions that are used in calculations, but are not directly relevant to the user. Only hides top-level variables.`,
+    displaySection: "Tags",
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frBool],
@@ -257,6 +257,7 @@ Different types of values can be displayed in different ways. The following tabl
   }),
   maker.make({
     name: "getHide",
+    displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frBool, ([value]) => {
         return value.tags?.value.hidden || false;
@@ -264,8 +265,19 @@ Different types of values can be displayed in different ways. The following tabl
     ],
   }),
   maker.make({
+    name: "all",
+    displaySection: "Functions",
+    description: "Returns a dictionary of all tags on a value.",
+    definitions: [
+      makeDefinition([frAny()], frDictWithArbitraryKeys(frAny()), ([value]) => {
+        return value.getTags().toMap();
+      }),
+    ],
+  }),
+  maker.make({
     name: "omit",
     description: "Returns a copy of the value with the specified tags removed.",
+    displaySection: "Functions",
     definitions: [
       makeDefinition(
         [frWithTags(frAny({ genericName: "A" })), frArray(frString)],
@@ -280,6 +292,7 @@ Different types of values can be displayed in different ways. The following tabl
   }),
   maker.make({
     name: "clear",
+    displaySection: "Functions",
     description: "Returns a copy of the value with all tags removed.",
     definitions: [
       makeDefinition(

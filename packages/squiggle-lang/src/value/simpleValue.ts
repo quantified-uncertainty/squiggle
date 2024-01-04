@@ -243,6 +243,17 @@ export function simpleValueFromValue(value: Value): SimpleValue {
       ];
       return ImmutableMap(fields);
     }
+    case "Input": {
+      const fields: [string, SimpleValue][] = [
+        ["vType", "Input"],
+        ["type", value.value.type],
+        ["name", value.value.name || ""],
+        ["typeName", value.value.typeName || ""],
+        ["description", value.value.description || ""],
+        ["default", value.value.default || ""],
+      ];
+      return ImmutableMap(fields);
+    }
     case "Scale": {
       const method = value.value.method;
       const fields: [string, SimpleValue][] = [
