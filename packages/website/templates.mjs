@@ -88,6 +88,17 @@ Calculators can be useful for debugging functions or to present functions to end
 `,
   },
   {
+    name: "Boolean",
+    description: "",
+    intro: `
+`,
+  },
+  {
+    name: "Common",
+    description: "",
+    intro: `Functions that work on many different types of values.`,
+  },
+  {
     name: "Number",
     sections: [
       { name: "Comparison" },
@@ -99,6 +110,12 @@ Calculators can be useful for debugging functions or to present functions to end
     ],
     description: "Squiggle numbers are Javascript floats.",
     intro: "Squiggle numbers are Javascript floats.",
+  },
+  {
+    name: "RelativeValues",
+    description: "",
+    intro:
+      "*Warning: Relative value functions are particularly experimental and subject to change.*",
   },
   {
     name: "String",

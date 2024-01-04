@@ -1,5 +1,6 @@
 {
-  "BuiltIn": "Built In",
+  "Common": "Common",
+  "Boolean": "Boolean",
   "Date": "Date",
   "Dict": "Dictionary",
   "Dist": "Distribution",

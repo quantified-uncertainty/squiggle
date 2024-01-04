@@ -10,7 +10,7 @@ import { FnFactory } from "../library/registry/helpers.js";
 import { isEqual } from "../value/index.js";
 
 const maker = new FnFactory({
-  nameSpace: "", // no namespaced versions
+  nameSpace: "Common", // no namespaced versions
   requiresNamespace: false,
 });
 
@@ -33,6 +33,8 @@ export const library = [
   }),
   maker.make({
     name: "typeOf",
+    description:
+      "Returns the type of the value passed in as a string. This is useful when you want to treat a value differently depending on its type.",
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
         return value.publicName;
@@ -41,6 +43,7 @@ export const library = [
   }),
   maker.make({
     name: "inspect",
+    description: `Runs Console.log() in the [Javascript developer console](https://www.digitalocean.com/community/tutorials/how-to-use-the-javascript-developer-console) and returns the value passed in.`,
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frNamed("message", frOptional(frString))],

@@ -30,9 +30,9 @@ export const library = [
     output: "Plot",
     examples: [
       `RelativeValues.gridPlot({
-    ids: ["foo", "bar"],
-    fn: {|id1, id2| [SampleSet.fromDist(2 to 5), SampleSet.fromDist(3 to 6)]},
-  })`,
+  ids: ["foo", "bar"],
+  fn: {|id1, id2| [SampleSet.fromDist(2 to 5), SampleSet.fromDist(3 to 6)]},
+})`,
     ],
     definitions: [
       makeDefinition([relativeValuesShape], frPlot, ([{ ids, fn, title }]) => {

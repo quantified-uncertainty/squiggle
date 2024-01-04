@@ -24,6 +24,9 @@
         "/src/pages/docs/Api/Dist.mdx",
         "/src/pages/docs/Api/Number.mdx",
         "/src/pages/docs/Api/String.mdx",
+        "/src/pages/docs/Api/Common.mdx",
+        "/src/pages/docs/Api/Boolean.mdx",
+        "/src/pages/docs/Api/RelativeValues.mdx",
         "src/pages/docs/Ecosystem/LLMPrompt.md"
       ]
     },
