@@ -6,100 +6,63 @@ import {
   getFunctionDocumentation,
 } from "@quri/squiggle-lang";
 
+import { modulePages } from "../templates.mjs";
+
 const targetFilename = (name) => `./src/pages/docs/Api/${name}.mdx`;
 
-const sections = [
-  {
-    name: "Tag",
-    intro: `---
-description: The Tag module handles tags, which allow the additions of metadata to Squiggle variables.
----
-import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
-
-# Tag
-Tags are metadata that can be added to Squiggle variables. They are used to add additional information to variables, such as names, descriptions, and visualization options. While tags can be accessed at runtime, they are primarily meant for use with the Squiggle Playground and other visualizations.
-Tags can be added to variables either by using their name \`Tag.[name]\` or by using decorators.
-## Examples
-<SquiggleEditor
-defaultCode={\`@name("My Great Function") // Decorator syntax to add a name tag
-@doc("This is an example function.")
-@showAs(Calculator) // Show this as a simple calculator in the Playground
-exampleFn(f) = f^2
-  
-myVarTags = Tag.all(exampleFn)
-  
-docs = Tag.getDoc(exampleFn)
-  
-@hide // Hide this variable in the Playground
-helperFn(f) = f \`}/>
-## List of Tags
-| Tag Name    | Description |
-| --------- | ----------- |
-| \`name\` | Change the default display name for the variable, in the Playground.       |
-| \`doc\` | Adds documentation to the variable in the playground.       |
-| \`showAs\` | Change the default view for the value when displayed. |
-| \`format\` | Format a number, date, or duration when displayed. |
-| \`hide\` | Don't show the variable in the Playground |
-## Definitions
-`,
-  },
-  {
-    name: "Date",
-    intro: `---
-description: Dates are a simple date time type.
----
-import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
-
-# Date`,
-  },
-  {
-    name: "Duration",
-    intro: `---
-description: Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
----
-import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
-
-# Duration
-Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
-
-
-| **Unit Name** | **Example** | **Convert Number to Duration** | **Convert Duration to Number** |
-|---------------|----------------------------|--------------------------------------------|--------------------------------------------|
-| Minute        | \`5minutes\`                   | \`fromMinutes(number)\`                      | \`toMinutes(duration)\`                      |
-| Hour          | \`5hour\`                     | \`romHours(number)\`                        | \`toHours(duration)\`                        |
-| Day           | \`5days\`                      | \`fromDays(number)\`                         | \`toDays(duration)\`                         |
-| Year          | \`5years\`                     | \`fromYears(number)\`                        | \`toYears(duration)\`                        |
-
-This table now presents the information in a clear and concise manner, focusing only on the essential columns.
-`,
-  },
-];
-
-function toMarkdownDefinitions(definitions) {
-  return `\`\`\`
-  ${definitions.join("\n")}
-  \`\`\``;
+//We need to escape the curly braces in the markdown for .jsx files.
+function escapedStr(str) {
+  return str.replace(/{/g, "\\{").replace(/}/g, "\\}");
 }
 
 function toMarkdown(documentation) {
+  const fullName = documentation.nameSpace + "." + documentation.name;
   return `### ${documentation.name}
-${documentation.description || ""}
-<FnDocumentationFromName functionName="${
-    documentation.nameSpace + "." + documentation.name
-  }" showNameAndDescription={false} size="medium" />
+${escapedStr(documentation.description || "")}
+<FnDocumentationFromName functionName="${fullName}" showNameAndDescription={false} size="small" />
 `;
 }
 
-const main = async ({ name, intro }) => {
+const generateModulePage = async ({ name, description, intro, sections }) => {
   const namespaceNames = getAllFunctionNamesWithNamespace(name);
-  const content =
-    intro +
-    "\n" +
-    namespaceNames
-      .map((name) => {
-        return toMarkdown(getFunctionDocumentation(name));
-      })
-      .join("\n");
+  let fnDocumentationItems = namespaceNames
+    .map(getFunctionDocumentation)
+    .filter(({ isUnit }) => !isUnit);
+
+  const processSection = (section) => {
+    const sectionFnDocumentationItems = fnDocumentationItems.filter(
+      ({ displaySection }) => displaySection === section.name
+    );
+    if (sectionFnDocumentationItems.length === 0) {
+      throw new Error(
+        `Error: No functions in section: ${name} ${section.name}. You likely made an error in the section name.`
+      );
+    }
+
+    const sectionHeader = section.name && `## ${section.name}\n\n`;
+    const sectionDescription =
+      section.description && `${section.description}\n\n`;
+    const sectionItems = sectionFnDocumentationItems.map(toMarkdown).join("\n");
+    return `${sectionHeader || ""}${sectionDescription || ""}${sectionItems}`;
+  };
+
+  let functionSection;
+  if (sections?.length > 0) {
+    functionSection = sections.map(processSection).join("\n\n");
+  } else {
+    functionSection = fnDocumentationItems.map(toMarkdown).join("\n\n");
+  }
+
+  const content = `---
+description: ${description}
+---
+import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
+
+# ${name}
+${intro}
+
+${functionSection}`;
+
   fs.writeFile(targetFilename(name), content, (err) => {
     if (err) {
       console.error(err);
@@ -110,6 +73,6 @@ const main = async ({ name, intro }) => {
 };
 
 //Remember to add any new Modules to .gitignore
-for (const section of sections) {
-  await main(section);
+for (const modulePage of modulePages) {
+  await generateModulePage(modulePage);
 }
