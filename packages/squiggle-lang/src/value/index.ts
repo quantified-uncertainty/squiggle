@@ -112,7 +112,10 @@ class VArray extends BaseValue implements Indexable {
     }
 
     for (let i = 0; i < this.value.length; i++) {
-      isEqual(this.value[i], other.value[i]);
+      const _isEqual = isEqual(this.value[i], other.value[i]);
+      if (!_isEqual) {
+        return false;
+      }
     }
     return true;
   }
