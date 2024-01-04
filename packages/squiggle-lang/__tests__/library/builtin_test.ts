@@ -22,9 +22,9 @@ describe("Operators", () => {
     testEvalToBe("0 == true", "false");
     testEvalToBe("0 == false", "false");
     testEvalToBe('"" == false', "false");
-    testEvalToBe("[1,2,3,5] == [1,2,3,5]", "true");
-    testEvalToBe("[1,2,3] == [1,2,3,5]", "false");
-    testEvalToBe("[1,2,3,8] == [1,2,3,5]", "false", true);
+    testEvalToBe("ARRAY_1235 == ARRAY_1235", "true");
+    testEvalToBe("ARRAY_123 == ARRAY_1235", "false");
+    testEvalToBe("ARRAY_1238 == [1,2,3,5]", "false", true);
     testEvalToBe("normal(5,2) == normal(5,2)", "false");
     testEvalToBe("Sym.normal(5,2) == Sym.normal(5,2)", "true");
     testEvalToBe("Sym.uniform(10,12) == Sym.normal(5,2)", "false");
