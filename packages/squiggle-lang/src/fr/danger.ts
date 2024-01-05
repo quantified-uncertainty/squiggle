@@ -92,7 +92,7 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
   maker.nn2n({
     name: "choose",
     displaySection: "Combinatorics",
-    description: `\`Danger.choose(n,k)\` returns \`factorial(n) / (factorial(n - k) *.factorial(k))\`, i.e., the number of ways you can choose k items from n choices, without repetition. This function is also known as the [binomial coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient).`,
+    description: `\`Danger.choose(n,k)\` returns \`factorial(n) / (factorial(n - k) * factorial(k))\`, i.e., the number of ways you can choose k items from n choices, without repetition. This function is also known as the [binomial coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient).`,
     examples: [`Danger.choose(1, 20)`],
     fn: choose,
   }),
@@ -194,13 +194,14 @@ const integrationLibrary: FRFunction[] = [
     ],
     description: `Integrates the function \`f\` between \`min\` and \`max\`, and computes \`numIntegrationPoints\` in between to do so.
 
-Note that the function \`f\` has to take in and return numbers. To integrate a function which returns distributios, use:
+Note that the function \`f\` has to take in and return numbers. To integrate a function which returns distributions, use:
 
-\`\`\`squiggle
+~~~squiggle
 auxiliaryF(x) = mean(f(x))
 
 Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, numIntegrationPoints)
-\`\`\``,
+~~~
+`,
     // For the example of integrating x => x+1 between 1 and 10,
     // result should be close to 58.5
     // [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5

@@ -18,7 +18,7 @@ const HoverTooltip: FC<{ hover: Hover; view: EditorView }> = ({
   });
 
   return (
-    <div className="border bg-slate-50 rounded-sm shadow-lg min-w-[200px] max-w-[600px]">
+    <div className="border rounded-sm shadow-lg min-w-[200px] max-w-[600px] px-2">
       <FnDocumentation documentation={hover} />
     </div>
   );
