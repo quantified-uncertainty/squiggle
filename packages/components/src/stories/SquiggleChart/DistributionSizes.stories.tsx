@@ -31,6 +31,20 @@ export const Height40: Story = {
     code,
   },
 };
+export const Height40WithLabels: Story = {
+  name: "Height 40 with labels",
+  args: {
+    chartHeight: 50,
+    code: `Plot.dist(
+      normal(5, 2),
+      {
+        xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title" }),
+        title: "A Simple Normal Distribution",
+        showSummary: true,
+      }
+    )`,
+  },
+};
 
 export const Height100: Story = {
   name: "Height 100",

@@ -40,12 +40,43 @@ FnStory.story = {
   name: "All",
 };
 
-const documentation: FnDocumentationType = {
+const fnDocumentation = getFunctionDocumentation("Plot.dist");
+if (!fnDocumentation) {
+  throw new Error("fnDocumentation is undefined");
+}
+
+const exampleDocumentation: FnDocumentationType = {
   name: "add",
   nameSpace: "Number",
   requiresNamespace: false,
   signatures: ["(number, number) => number"],
-  examples: ["add(5,2)"],
+  examples: [
+    `xDist = SampleSet.fromDist(2 to 5)
+yDist = normal({p5:-3, p95:3}) * 5 - xDist ^ 2
+Plot.scatter({
+  xDist: xDist,
+  yDist: yDist,
+  xScale: Scale.log({min: 1.5}),
+})`,
+  ],
+  interactiveExamples: [
+    `xDist = SampleSet.fromDist(2 to 5)
+yDist = normal({p5:-3, p95:3}) * 5 - xDist ^ 2
+Plot.scatter({
+  xDist: xDist,
+  yDist: yDist,
+  xScale: Scale.log({min: 1.5}),
+})`,
+    `xDist = SampleSet.fromDist(normal({p5:-2, p95:5}))
+yDist = normal({p5:-3, p95:3}) * 5 - xDist
+Plot.scatter({
+  title: "A Scatterplot",
+  xDist: xDist,
+  yDist: yDist,
+  xScale: Scale.symlog({title: "X Axis Title"}),
+  yScale: Scale.symlog({title: "Y Axis Title"}),
+})`,
+  ],
   isExperimental: true,
   definitions: [],
   isUnit: true,
@@ -57,7 +88,17 @@ More content *here*`,
 export const Simple: Story = {
   name: "Normal",
   args: {
-    documentation,
+    documentation: exampleDocumentation,
     showNameAndDescription: true,
+    size: "normal",
+  },
+};
+
+export const Existing: Story = {
+  name: "Existing",
+  args: {
+    documentation: fnDocumentation,
+    showNameAndDescription: true,
+    size: "small",
   },
 };

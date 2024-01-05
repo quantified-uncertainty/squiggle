@@ -16,6 +16,7 @@ export type CodeEditorProps = {
   lineWrapping?: boolean;
   errors?: SqError[];
   sourceId?: string;
+  fontSize?: number;
   project: SqProject;
 };
 
@@ -42,6 +43,8 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       scrollTo,
     }));
 
-    return <div style={{ fontSize: "13px" }} ref={editorRef} />;
+    return (
+      <div style={{ fontSize: props.fontSize || "13px" }} ref={editorRef} />
+    );
   }
 );

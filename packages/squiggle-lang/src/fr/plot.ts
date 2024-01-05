@@ -490,8 +490,14 @@ export const library = [
     name: "scatter",
     output: "Plot",
     examples: [
-      `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(1 to 3) })`,
-      `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(1 to 3), xScale: Scale.symlog(), yScale: Scale.symlog() })`,
+      `Plot.scatter(
+  {
+    xDist: 2 to 5,
+    yDist: SampleSet.fromDist(1 to 3),
+    xScale: Scale.symlog(),
+    yScale: Scale.symlog(),
+  }
+)`,
     ],
     interactiveExamples: [
       `xDist = SampleSet.fromDist(2 to 5)
