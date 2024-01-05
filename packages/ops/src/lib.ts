@@ -1,7 +1,14 @@
-import { spawn } from "node:child_process";
+import { exec as originalExec, spawn } from "node:child_process";
 import fs from "node:fs/promises";
-import { z } from "zod";
+import util from "node:util";
 
+// This function runs the command and returns `{ stdout, stderr }`.
+export async function execWithCapture(command: string) {
+  const exec = util.promisify(originalExec);
+  return await exec(command);
+}
+
+// This function prints its stdout and stderr to terminal.
 export async function exec(command: string) {
   return new Promise<void>((resolve, reject) => {
     const process = spawn(command, [], { shell: true, stdio: "inherit" });
@@ -21,21 +28,4 @@ export async function exists(f: string): Promise<boolean> {
     if (err.code === "ENOENT") exists = false;
   });
   return exists;
-}
-
-export type PackageInfo = {
-  version: string;
-  name: string;
-};
-
-const packageJsonSchema = z.object({
-  name: z.string(),
-  version: z.string(),
-});
-
-export async function getPackageInfo(packageDir: string): Promise<PackageInfo> {
-  const packageJson = JSON.parse(
-    await fs.readFile(`${packageDir}/package.json`, "utf-8")
-  );
-  return packageJsonSchema.parse(packageJson);
 }

@@ -1,8 +1,9 @@
 import { writeFile } from "node:fs/promises";
 
-import { PRIMARY_SQUIGGLE_PACKAGE_DIRS } from "../constants.js";
+import { PRIMARY_SQUIGGLE_PACKAGE_DIRS } from "../constants.cjs";
 import { insertVersionToVersionedComponents } from "../insertVersionToVersionedComponents.js";
-import { exec, exists, getPackageInfo, PackageInfo } from "../lib.js";
+import { exec, exists } from "../lib.js";
+import { getPackageInfo, PackageInfo } from "../package-utils.js";
 
 async function bumpVersionsToDev() {
   for (const packageDir of PRIMARY_SQUIGGLE_PACKAGE_DIRS) {
