@@ -151,21 +151,43 @@ export async function insertVersionToVersionedComponents(version: string) {
 
 // Always updates to the current version from `package.json`.
 export async function updateSquiggleLangVersion() {
-  const oldCwd = process.cwd();
-  process.chdir(path.join(repoRoot, "packages/squiggle-lang"));
+  const packageRoot = path.join(repoRoot, "packages/squiggle-lang");
 
-  const packageJson = await readFile("package.json", "utf-8");
+  const packageJson = await readFile(
+    path.join(packageRoot, "package.json"),
+    "utf-8"
+  );
   const { version } = JSON.parse(packageJson);
 
-  const versionTsFile = "src/library/version.ts";
-  const versionTs = await readFile(versionTsFile, "utf-8");
-  const re = /(\["System\.version", vString\(")([^"]+)("\))/;
-  if (!versionTs.match(re)) {
-    throw new Error(`Can't find version in ${versionTsFile}`);
+  const filename = path.join(packageRoot, "src/library/version.ts");
+  let src = await readFile(filename, "utf-8");
+
+  let patchedVersion = false;
+
+  const output = babel.transformSync(src, {
+    parserOpts: { plugins: parserPlugins },
+    plugins: [
+      () => {
+        const visitor: babel.Visitor = {
+          VariableDeclarator(path) {
+            if (
+              path.node.id.type === "Identifier" &&
+              path.node.id.name === "VERSION"
+            ) {
+              path.node.init = t.stringLiteral(version);
+              patchedVersion = true;
+            }
+          },
+        };
+        return { visitor };
+      },
+    ],
+  });
+
+  if (!output?.code || !patchedVersion) {
+    throw new Error(`Failed to transform ${filename}`);
   }
 
-  const patchedVersionTs = versionTs.replace(re, `$1${version}$3`);
-  await writeFile(versionTsFile, patchedVersionTs, "utf-8");
-
-  process.chdir(oldCwd);
+  await writeFile(filename, output.code, "utf-8");
+  await exec(`cd ${packageRoot} && npx prettier --write ${filename}`);
 }
