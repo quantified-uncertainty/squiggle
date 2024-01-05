@@ -1,15 +1,18 @@
 #!/usr/bin/env node
 import {
+  FnDocumentation,
   getAllFunctionNamesWithNamespace,
   getFunctionDocumentation,
 } from "@quri/squiggle-lang";
 
+import { ModulePage, ModulePageSection } from "../templates.mjs";
+
 //We need to escape the curly braces in the markdown for .jsx files.
-function escapedStr(str) {
+function escapedStr(str: string) {
   return str.replace(/{/g, "\\{").replace(/}/g, "\\}");
 }
 
-function toMarkdown(documentation) {
+function toMarkdown(documentation: FnDocumentation) {
   const fullName = documentation.nameSpace + "." + documentation.name;
   return `### ${documentation.name}
   ${escapedStr(documentation.description || "")}
@@ -17,17 +20,17 @@ function toMarkdown(documentation) {
   `;
 }
 
-export const generateModuleContent = (
-  { name, description, intro, sections },
+export function generateModuleContent(
+  { name, description, intro, sections }: ModulePage,
   itemFn = toMarkdown
-) => {
+) {
   // const itemFn = toJSON;
   const namespaceNames = getAllFunctionNamesWithNamespace(name);
   let fnDocumentationItems = namespaceNames
     .map(getFunctionDocumentation)
-    .filter(({ isUnit }) => !isUnit);
+    .filter((fn): fn is FnDocumentation => Boolean(fn && !fn.isUnit));
 
-  const processSection = (section) => {
+  const processSection = (section: ModulePageSection) => {
     const sectionFnDocumentationItems = fnDocumentationItems.filter(
       ({ displaySection }) => displaySection === section.name
     );
@@ -45,7 +48,7 @@ export const generateModuleContent = (
   };
 
   let functionSection;
-  if (sections?.length > 0) {
+  if (sections && sections.length > 0) {
     functionSection = sections.map(processSection).join("\n\n");
   } else {
     functionSection = fnDocumentationItems.map(itemFn).join("\n\n");
@@ -61,4 +64,4 @@ ${intro}
 
 ${functionSection}`;
   return content;
-};
+}

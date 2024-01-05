@@ -2,10 +2,12 @@
 import fs from "fs";
 import { glob } from "glob";
 
+import { FnDocumentation } from "@quri/squiggle-lang";
+
 import { modulePages } from "../templates.mjs";
 import { generateModuleContent } from "./generateModuleContent.mjs";
 
-const readFile = (fileName) => {
+const readFile = (fileName: string) => {
   return fs.readFileSync(fileName, "utf-8");
 };
 
@@ -18,7 +20,7 @@ function moduleItemToJson({
   signatures,
   shorthand,
   isUnit,
-}) {
+}: FnDocumentation) {
   return JSON.stringify(
     {
       name,

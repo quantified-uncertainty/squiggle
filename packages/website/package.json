@@ -7,8 +7,8 @@
     "dev": "next dev",
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
-    "gen:docsForLLM": "node scripts/compileDocsForLLM.mjs",
-    "gen:modulePages": "node scripts/generateModulePages.mjs",
+    "gen:docsForLLM": "tsx scripts/compileDocsForLLM.mts",
+    "gen:modulePages": "tsx scripts/generateModulePages.mts",
     "gen": "pnpm run gen:modulePages && pnpm run gen:docsForLLM",
     "build": "pnpm run gen && next build"
   },
@@ -40,6 +40,7 @@
     "postcss": "^8.4.32",
     "prettier": "^3.1.1",
     "tailwindcss": "^3.4.0",
+    "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   }
 }

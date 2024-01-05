@@ -1,17 +1,19 @@
 #!/usr/bin/env node
 import fs from "fs";
 
-import { modulePages } from "../templates.mjs";
+import { FnDocumentation } from "@quri/squiggle-lang";
+
+import { ModulePage, modulePages } from "../templates.mjs";
 import { generateModuleContent } from "./generateModuleContent.mjs";
 
-const targetFilename = (name) => `./src/pages/docs/Api/${name}.mdx`;
+const targetFilename = (name: string) => `./src/pages/docs/Api/${name}.mdx`;
 
 //We need to escape the curly braces in the markdown for .jsx files.
-function escapedStr(str) {
+function escapedStr(str: string) {
   return str.replace(/{/g, "\\{").replace(/}/g, "\\}");
 }
 
-function toMarkdown(documentation) {
+function toMarkdown(documentation: FnDocumentation) {
   const fullName = documentation.nameSpace + "." + documentation.name;
   return `### ${documentation.name}${escapedStr(
     documentation.description || ""
@@ -21,7 +23,7 @@ function toMarkdown(documentation) {
 }
 
 const generateModulePage = async (
-  { name, description, intro, sections },
+  { name, description, intro, sections }: ModulePage,
   itemFn = toMarkdown
 ) => {
   const content = generateModuleContent(
