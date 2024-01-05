@@ -28,7 +28,7 @@ export const library = [
   maker.make({
     name: "gridPlot",
     output: "Plot",
-    examples: [
+    interactiveExamples: [
       `RelativeValues.gridPlot({
   ids: ["foo", "bar"],
   fn: {|id1, id2| [SampleSet.fromDist(2 to 5), SampleSet.fromDist(3 to 6)]},

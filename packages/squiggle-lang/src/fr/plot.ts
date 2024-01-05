@@ -167,8 +167,11 @@ const numericFnDef = () => {
   return maker.make({
     name: "numericFn",
     output: "Plot",
-    examples: [
-      `Plot.numericFn({|x|x*x}, {xScale: Scale.linear({ min: 3, max: 5 }), yScale: Scale.log({ tickFormat: ".2s" }) })`,
+    interactiveExamples: [
+      `Plot.numericFn(
+  {|t|t ^ 2},
+  { xScale: Scale.log({ min: 1, max: 100 }), points: 10 }
+)`,
     ],
     definitions: [
       makeDefinition(
@@ -228,11 +231,16 @@ export const library = [
   maker.make({
     name: "dists",
     output: "Plot",
-    examples: [
-      `Plot.dists({
-  dists: [{ name: "dist", value: normal(0, 1) }],
-  xScale: Scale.symlog()
-})`,
+    interactiveExamples: [
+      `Plot.distFn(
+  {|t|normal(t, 2) * normal(5, 3)},
+  {
+    title: "A Function of Value over Time",
+    xScale: Scale.log({ min: 3, max: 100, title: "Time (years)" }),
+    yScale: Scale.linear({ title: "Value" }),
+    distXScale: Scale.linear({ tickFormat: "#x" }),
+  }
+)`,
     ],
     definitions: [
       makeDefinition(
@@ -333,6 +341,17 @@ export const library = [
   xScale: Scale.symlog()
 })`,
     ],
+    interactiveExamples: [
+      `Plot.dist(
+  normal(5, 2),
+  {
+    xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title" }),
+    title: "A Simple Normal Distribution",
+    showSummary: true,
+  }
+)`,
+    ],
+
     definitions: [
       makeDefinition(
         [
@@ -392,8 +411,16 @@ export const library = [
   maker.make({
     name: "distFn",
     output: "Plot",
-    examples: [
-      `Plot.distFn({|x| uniform(x, x+1)}, {xScale: Scale.linear({ min: 3, max: 5}), yScale: Scale.log({ tickFormat: ".2s" })})`,
+    interactiveExamples: [
+      `Plot.distFn(
+  {|t|normal(t, 2) * normal(5, 3)},
+  {
+    title: "A Function of Value over Time",
+    xScale: Scale.log({ min: 3, max: 100, title: "Time (years)" }),
+    yScale: Scale.linear({ title: "Value" }),
+    distXScale: Scale.linear({ tickFormat: "#x" }),
+  }
+)`,
     ],
     definitions: [
       makeDefinition(
@@ -465,6 +492,24 @@ export const library = [
     examples: [
       `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(1 to 3) })`,
       `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(1 to 3), xScale: Scale.symlog(), yScale: Scale.symlog() })`,
+    ],
+    interactiveExamples: [
+      `xDist = SampleSet.fromDist(2 to 5)
+yDist = normal({p5:-3, p95:3}) * 5 - xDist ^ 2
+Plot.scatter({
+  xDist: xDist,
+  yDist: yDist,
+  xScale: Scale.log({min: 1.5}),
+})`,
+      `xDist = SampleSet.fromDist(normal({p5:-2, p95:5}))
+yDist = normal({p5:-3, p95:3}) * 5 - xDist
+Plot.scatter({
+  title: "A Scatterplot",
+  xDist: xDist,
+  yDist: yDist,
+  xScale: Scale.symlog({title: "X Axis Title"}),
+  yScale: Scale.symlog({title: "Y Axis Title"}),
+})`,
     ],
     definitions: [
       makeDefinition(
