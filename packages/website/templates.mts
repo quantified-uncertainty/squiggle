@@ -1,4 +1,13 @@
-export const modulePages = [
+export type ModulePageSection = { name: string; description?: string };
+
+export type ModulePage = {
+  name: string;
+  description: string;
+  sections?: ModulePageSection[];
+  intro: string;
+};
+
+export const modulePages: ModulePage[] = [
   {
     name: "Tag",
     description:
