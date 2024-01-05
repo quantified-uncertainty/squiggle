@@ -1,15 +1,25 @@
 import babel from "@babel/core";
 import babelParser from "@babel/parser";
 import { readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { exec } from "./lib.js";
+
+const repoRoot = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../../.."
+);
 
 const t = babel.types;
 
 const parserPlugins: babelParser.ParserPlugin[] = [["typescript", {}], "jsx"];
 
-// assumes that cwd is packages/versioned-components
 export async function insertVersionToVersionedComponents(version: string) {
+  // `using` (https://devblogs.microsoft.com/typescript/announcing-typescript-5-2/#using-declarations-and-explicit-resource-management) would be nice to back up cwd.
+  const oldCwd = process.cwd();
+  process.chdir(path.join(repoRoot, "packages/versioned-components"));
+
   const alias = `squiggle-components-${version}`;
   await exec(`pnpm add ${alias}@npm:@quri/squiggle-components@${version}`);
 
@@ -136,4 +146,26 @@ export async function insertVersionToVersionedComponents(version: string) {
   }
 
   await exec("pnpm format");
+  process.chdir(oldCwd);
+}
+
+// Always updates to the current version from `package.json`.
+export async function updateSquiggleLangVersion() {
+  const oldCwd = process.cwd();
+  process.chdir(path.join(repoRoot, "packages/squiggle-lang"));
+
+  const packageJson = await readFile("package.json", "utf-8");
+  const { version } = JSON.parse(packageJson);
+
+  const versionTsFile = "src/library/version.ts";
+  const versionTs = await readFile(versionTsFile, "utf-8");
+  const re = /(\["System\.version", vString\(")([^"]+)("\))/;
+  if (!versionTs.match(re)) {
+    throw new Error(`Can't find version in ${versionTsFile}`);
+  }
+
+  const patchedVersionTs = versionTs.replace(re, `$1${version}$3`);
+  await writeFile(versionTsFile, patchedVersionTs, "utf-8");
+
+  process.chdir(oldCwd);
 }

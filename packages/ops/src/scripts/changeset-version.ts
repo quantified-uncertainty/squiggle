@@ -1,5 +1,6 @@
 import { cleanupGeneratedChangelogs } from "../changelog-cleanup.js";
 import { exec } from "../lib.js";
+import { updateSquiggleLangVersion } from "../patch-js.js";
 import { generateWebsiteChangelog } from "../website.js";
 
 async function main() {
@@ -13,8 +14,8 @@ async function main() {
   // `changeset` changelog format can be modified only on the level of individual changesets, so we have to patch the generated files.
   await cleanupGeneratedChangelogs();
 
-  // Match `System.version` output in Squiggle.
-  await exec("cd packages/squiggle-lang && pnpm run update-system-version");
+  // Update `System.version` output in Squiggle.
+  await updateSquiggleLangVersion();
 
   // Generate MDX page for the upcoming release.
   await generateWebsiteChangelog();

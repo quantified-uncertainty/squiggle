@@ -26,8 +26,7 @@
     "format": "pnpm run format:prettier",
     "prepack": "pnpm run build && pnpm run test",
     "all": "pnpm run build && pnpm run test",
-    "cli": "node ./dist/cli/index.js",
-    "update-system-version": "node ./dist/scripts/update-system-version.js"
+    "cli": "node ./dist/cli/index.js"
   },
   "dependencies": {
     "@commander-js/extra-typings": "^11.1.0",
