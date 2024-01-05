@@ -1,35 +1,36 @@
 #!/usr/bin/env node
-import fs from "fs";
-
 import {
+  FnDocumentation,
   getAllFunctionNamesWithNamespace,
   getFunctionDocumentation,
 } from "@quri/squiggle-lang";
 
-import { modulePages } from "../templates.mjs";
-
-const targetFilename = (name) => `./src/pages/docs/Api/${name}.mdx`;
+import { ModulePage, ModulePageSection } from "../templates.mjs";
 
 //We need to escape the curly braces in the markdown for .jsx files.
-function escapedStr(str) {
+function escapedStr(str: string) {
   return str.replace(/{/g, "\\{").replace(/}/g, "\\}");
 }
 
-function toMarkdown(documentation) {
+function toMarkdown(documentation: FnDocumentation) {
   const fullName = documentation.nameSpace + "." + documentation.name;
   return `### ${documentation.name}
-${escapedStr(documentation.description || "")}
-<FnDocumentationFromName functionName="${fullName}" showNameAndDescription={false} size="small" />
-`;
+  ${escapedStr(documentation.description || "")}
+  <FnDocumentationFromName functionName="${fullName}" showNameAndDescription={false} size="small" />
+  `;
 }
 
-const generateModulePage = async ({ name, description, intro, sections }) => {
+export function generateModuleContent(
+  { name, description, intro, sections }: ModulePage,
+  itemFn = toMarkdown
+) {
+  // const itemFn = toJSON;
   const namespaceNames = getAllFunctionNamesWithNamespace(name);
   let fnDocumentationItems = namespaceNames
     .map(getFunctionDocumentation)
-    .filter(({ isUnit }) => !isUnit);
+    .filter((fn): fn is FnDocumentation => Boolean(fn && !fn.isUnit));
 
-  const processSection = (section) => {
+  const processSection = (section: ModulePageSection) => {
     const sectionFnDocumentationItems = fnDocumentationItems.filter(
       ({ displaySection }) => displaySection === section.name
     );
@@ -42,15 +43,15 @@ const generateModulePage = async ({ name, description, intro, sections }) => {
     const sectionHeader = section.name && `## ${section.name}\n\n`;
     const sectionDescription =
       section.description && `${section.description}\n\n`;
-    const sectionItems = sectionFnDocumentationItems.map(toMarkdown).join("\n");
+    const sectionItems = sectionFnDocumentationItems.map(itemFn).join("\n");
     return `${sectionHeader || ""}${sectionDescription || ""}${sectionItems}`;
   };
 
   let functionSection;
-  if (sections?.length > 0) {
+  if (sections && sections.length > 0) {
     functionSection = sections.map(processSection).join("\n\n");
   } else {
-    functionSection = fnDocumentationItems.map(toMarkdown).join("\n\n");
+    functionSection = fnDocumentationItems.map(itemFn).join("\n\n");
   }
 
   const content = `---
@@ -62,17 +63,5 @@ import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-componen
 ${intro}
 
 ${functionSection}`;
-
-  fs.writeFile(targetFilename(name), content, (err) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    console.log(`Content written to ${targetFilename(name)}`);
-  });
-};
-
-//Remember to add any new Modules to .gitignore
-for (const modulePage of modulePages) {
-  await generateModulePage(modulePage);
+  return content;
 }

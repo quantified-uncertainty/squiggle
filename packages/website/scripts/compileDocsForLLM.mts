@@ -1,9 +1,46 @@
 #!/usr/bin/env node
-const { glob } = require("glob");
-const fs = require("fs");
+import fs from "fs";
+import { glob } from "glob";
 
-const readFile = (fileName) => {
+import { FnDocumentation } from "@quri/squiggle-lang";
+
+import { modulePages } from "../templates.mjs";
+import { generateModuleContent } from "./generateModuleContent.mjs";
+
+const readFile = (fileName: string) => {
   return fs.readFileSync(fileName, "utf-8");
+};
+
+function moduleItemToJson({
+  name,
+  description,
+  nameSpace,
+  requiresNamespace,
+  examples,
+  signatures,
+  shorthand,
+  isUnit,
+}: FnDocumentation) {
+  return JSON.stringify(
+    {
+      name,
+      description,
+      nameSpace,
+      requiresNamespace,
+      examples,
+      signatures,
+      shorthand,
+      isUnit,
+    },
+    null,
+    2
+  );
+}
+
+const allDocumentationItems = () => {
+  return modulePages
+    .map((page) => generateModuleContent(page, moduleItemToJson))
+    .join("\n\n\n");
 };
 
 const documentationBundlePage = async () => {
@@ -19,20 +56,22 @@ This file is auto-generated from the documentation files in the Squiggle reposit
     return readFile(grammarFiles[0]);
   };
 
-  const getDocumentationContent = async () => {
+  const getGuideContent = async () => {
     const documentationFiles = await glob(
-      "./src/pages/docs/{Api,Guides}/*.{md,mdx}"
+      "./src/pages/docs/{Guides}/*.{md,mdx}"
     );
     return documentationFiles.map(readFile).join("\n\n\n");
   };
 
   console.log("Compiling documentation bundle page...");
   const grammarContent = await getGrammarContent();
-  const documentationContent = await getDocumentationContent();
+  const guideContent = await getGuideContent();
+  const apiContent = allDocumentationItems();
   const content =
     header +
     `## Peggy Grammar \n\n ${grammarContent} \n\n --- \n\n ` +
-    documentationContent;
+    guideContent +
+    apiContent;
   fs.writeFile(targetFilename, content, (err) => {
     if (err) {
       console.error(err);
