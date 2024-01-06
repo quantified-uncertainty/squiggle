@@ -551,7 +551,13 @@ export const library = [
 List.reduceWhile([5, 6, 7], 0, {|acc, curr| acc + curr}, {|acc| acc < 15})
 `,
       `// Adds first two elements, returns \`{ x: 11 }\`.
-List.reduceWhile([5, 6, 7], { x: 0 }, {|acc, curr| { x: acc.x + curr }}, {|acc| acc.x < 15})`,
+List.reduceWhile(
+  [5, 6, 7],
+  { x: 0 },
+  {|acc, curr| { x: acc.x + curr }},
+  {|acc| acc.x < 15}
+)
+`,
     ],
     description: `Works like \`reduce\`, but stops when the condition is no longer met. This is useful, in part, for simulating processes that need to stop based on the process state.
     `,

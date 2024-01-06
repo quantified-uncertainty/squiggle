@@ -15,7 +15,7 @@ function escapedStr(str: string) {
 
 function toMarkdown(documentation: FnDocumentation) {
   const fullName = documentation.nameSpace + "." + documentation.name;
-  return `### ${documentation.name}${escapedStr(
+  return `### ${documentation.name}\n${escapedStr(
     documentation.description || ""
   )}
 <FnDocumentationFromName functionName="${fullName}" showNameAndDescription={false} size="small" />
