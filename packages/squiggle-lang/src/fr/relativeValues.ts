@@ -2,6 +2,7 @@ import { sq } from "../index.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
+  frDeprecated,
   frDict,
   frLambdaTyped,
   frNumber,
@@ -21,7 +22,7 @@ const maker = new FnFactory({
 const relativeValuesShape = frDict(
   ["ids", frArray(frString)],
   ["fn", frLambdaTyped([frString, frString], frArray(frNumber))],
-  ["title", frOptional(frString)]
+  ["title", frDeprecated(frOptional(frString))]
 );
 
 export const library = [
