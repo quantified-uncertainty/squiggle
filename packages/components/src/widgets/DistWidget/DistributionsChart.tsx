@@ -136,7 +136,7 @@ const InnerDistributionsChart: FC<{
     : 0;
   const samplesFooterHeight = samplesBarSetting === "bottom" ? 20 : 0;
 
-  const bottomPadding = (showXAxis ? 16 : 0) + samplesFooterHeight;
+  const bottomPadding = (showXAxis ? 14 : 0) + samplesFooterHeight;
 
   const height = Math.max(
     innerHeight + bottomPadding,

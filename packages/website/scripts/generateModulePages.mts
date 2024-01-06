@@ -62,9 +62,8 @@ const generateMetaPage = async ({ pages }: { pages: ModulePage[] }) => {
   });
 };
 
-//Remember to add any new Modules to .gitignore
-// for (const modulePage of modulePages) {
-//   await generateModulePage(modulePage, toMarkdown);
-// }
+for (const modulePage of modulePages) {
+  await generateModulePage(modulePage, toMarkdown);
+}
 
 await generateMetaPage({ pages: modulePages });
