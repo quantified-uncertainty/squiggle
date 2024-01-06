@@ -336,11 +336,6 @@ export const library = [
   maker.make({
     name: "dist",
     output: "Plot",
-    examples: [
-      `Plot.dist(normal(0,1), {
-  xScale: Scale.symlog()
-})`,
-    ],
     interactiveExamples: [
       `Plot.dist(
   normal(5, 2),
@@ -489,16 +484,6 @@ export const library = [
   maker.make({
     name: "scatter",
     output: "Plot",
-    examples: [
-      `Plot.scatter(
-  {
-    xDist: 2 to 5,
-    yDist: SampleSet.fromDist(1 to 3),
-    xScale: Scale.symlog(),
-    yScale: Scale.symlog(),
-  }
-)`,
-    ],
     interactiveExamples: [
       `xDist = SampleSet.fromDist(2 to 5)
 yDist = normal({p5:-3, p95:3}) * 5 - xDist ^ 2

@@ -138,7 +138,6 @@ const InnerDistributionsChart: FC<{
 
   const bottomPadding = (showXAxis ? 16 : 0) + samplesFooterHeight;
 
-  // full height of canvas
   const height = Math.max(
     innerHeight + bottomPadding,
     legendHeight + bottomPadding
@@ -536,6 +535,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
 
   const size = nonTitleHeight > 150 ? "large" : "small";
 
+  //It probably would be nices to show samples behind, if its small and there's an xAxisTitle, but that would require messing more with the yPadding in the draw/index file.
   if (
     samples.length < 10 ||
     samples.length > CUTOFF_TO_SHOW_SAMPLES_BAR ||

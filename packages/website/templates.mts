@@ -53,6 +53,11 @@ helperFn(f) = f \`}/>
     ],
   },
   {
+    description: "Tables are a simple date time type.",
+    name: "Table",
+    intro: `The Table module allows you to make simple tables for displaying data.`,
+  },
+  {
     name: "Duration",
     description:
       "Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.",

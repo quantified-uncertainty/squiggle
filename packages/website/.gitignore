@@ -19,6 +19,8 @@
 /src/pages/docs/Api/String.mdx
 /src/pages/docs/Api/Common.mdx
 /src/pages/docs/Api/Boolean.mdx
+/src/pages/docs/Api/Table.mdx
+/src/pages/docs/Api/Plot.mdx
 /src/pages/docs/Api/RelativeValues.mdx
 /src/pages/docs/Ecosystem/LLMPrompt.md
 /public/llms/documentationBundle.txt
