@@ -199,26 +199,26 @@ varScatter = Plot.scatter({
 };
 
 export const SpecialList: Story = {
-  name: "Special List",
+  name: "List Notebook",
   args: {
-    defaultCode: `
-@notebook
-a = [
-" ### This is an opening section
+    defaultCode: `notNotebook = [
+  "### This is an opening section
 Here is more text.
 
 
 Here es more text.",
-Calculator({|f| f + 3}),
-"## Distributions",
-"### Distribution 1",
-normal(5,2),
-"### Distribution 1",
-normal(20,1),
-" ### This is an opening section
+  Calculator({|f| f + 3}),
+  "## Distributions",
+  "### Distribution 1",
+  normal(5, 2),
+  "### Distribution 1",
+  normal(20, 1),
+  " ### This is an opening section
 Here is more text.
-"
+",
 ]
+
+notebook = notNotebook -> Tag.notebook
 `,
     height: 800,
   },

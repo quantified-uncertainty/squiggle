@@ -3,23 +3,24 @@ import { useMemo } from "react";
 import { ValueViewer } from "../components/SquiggleViewer/ValueViewer.js";
 import { widgetRegistry } from "./registry.js";
 import { SqTypeWithCount } from "./SqTypeWithCount.js";
+import { SqValueWithContext } from "../lib/utility.js";
+import { DocumentTextIcon } from "@quri/ui";
+
+function isNotebook(value: SqValueWithContext) {
+  return Boolean(value.tags.notebook());
+}
 
 widgetRegistry.register("Array", {
-  heading: (value) => {
-    const isNotebook = Boolean(value.tags.notebook());
-    return !isNotebook ? `List(${value.value.getValues().length})` : "";
-  },
+  heading: (value) => `List(${value.value.getValues().length})`,
 
   Preview: (value) => {
-    const isNotebook = Boolean(value.tags.notebook());
-    return !isNotebook ? (
-      <SqTypeWithCount type="[]" count={value.value.getValues().length} />
+    return isNotebook(value) ? (
+      <DocumentTextIcon size={14} className="opacity-40" />
     ) : (
-      ""
+      <SqTypeWithCount type="[]" count={value.value.getValues().length} />
     );
   },
   Chart: (value) => {
-    const isNotebook = Boolean(value.tags.notebook());
     const values = useMemo(() => value.value.getValues(), [value]);
     return (
       <div className="space-y-1 pt-0.5 mt-0.5">
@@ -28,7 +29,7 @@ widgetRegistry.register("Array", {
             parentValue={value}
             key={i}
             value={r}
-            header={isNotebook ? "hide" : undefined}
+            header={isNotebook(value) ? "hide" : undefined}
           />
         ))}
       </div>
