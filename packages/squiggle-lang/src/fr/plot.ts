@@ -236,7 +236,6 @@ export const library = [
   normal(5, 2),
   {
     xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title" }),
-    title: "A Simple Normal Distribution",
     showSummary: true,
   }
 )`,
@@ -410,7 +409,6 @@ export const library = [
       `Plot.distFn(
   {|t|normal(t, 2) * normal(5, 3)},
   {
-    title: "A Function of Value over Time",
     xScale: Scale.log({ min: 3, max: 100, title: "Time (years)" }),
     yScale: Scale.linear({ title: "Value" }),
     distXScale: Scale.linear({ tickFormat: "#x" }),
@@ -495,7 +493,6 @@ Plot.scatter({
       `xDist = SampleSet.fromDist(normal({p5:-2, p95:5}))
 yDist = normal({p5:-3, p95:3}) * 5 - xDist
 Plot.scatter({
-  title: "A Scatterplot",
   xDist: xDist,
   yDist: yDist,
   xScale: Scale.symlog({title: "X Axis Title"}),
