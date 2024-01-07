@@ -35,8 +35,10 @@ export class SqCalculator {
     return this._value.title;
   }
 
-  get description(): string | undefined {
-    return this._value.description;
+  get description(): SqValue | undefined {
+    return this._value.description
+      ? wrapValue(this._value.description, this.context)
+      : undefined;
   }
 
   get autorun(): boolean {

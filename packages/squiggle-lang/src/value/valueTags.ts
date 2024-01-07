@@ -5,7 +5,7 @@ import { Value, vBool, vString } from "./index.js";
 
 export type ValueTagsType = {
   name?: string;
-  doc?: string;
+  doc?: Value;
   showAs?: Value;
   numberFormat?: string;
   dateFormat?: string;
@@ -52,7 +52,7 @@ export class ValueTags {
       result.push(["name", vString(value.name)]);
     }
     if (value.doc) {
-      result.push(["doc", vString(value.doc)]);
+      result.push(["doc", value.doc]);
     }
     if (value.showAs) {
       result.push(["showAs", value.showAs]);

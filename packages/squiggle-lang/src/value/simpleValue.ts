@@ -136,7 +136,12 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           value.value.inputs.map((x) => simpleValueFromValue(vInput(x))),
         ],
         ["autorun", value.value.autorun],
-        ["description", value.value.description || ""],
+        [
+          "description",
+          (value.value.description &&
+            simpleValueFromValue(value.value.description)) ||
+            "",
+        ],
         ["title", value.value.title || ""],
         ["sampleCount", value.value.sampleCount || 100],
       ];

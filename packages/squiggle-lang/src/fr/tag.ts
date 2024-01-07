@@ -28,7 +28,7 @@ import {
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { getOrThrow } from "../utility/result.js";
-import { Value, vString } from "../value/index.js";
+import { Value, vArray, vString } from "../value/index.js";
 import { ValueTags, ValueTagsType } from "../value/valueTags.js";
 
 const maker = new FnFactory({
@@ -125,7 +125,13 @@ export const library = [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
         frAny({ genericName: "A" }),
-        ([value, doc]) => value.mergeTags({ doc }),
+        ([value, doc]) => value.mergeTags({ doc: vString(doc) }),
+        { isDecorator: true }
+      ),
+      makeDefinition(
+        [frAny({ genericName: "A" }), frArray(frAny())],
+        frAny({ genericName: "A" }),
+        ([value, doc]) => value.mergeTags({ doc: vArray(doc) }),
         { isDecorator: true }
       ),
     ],
@@ -134,8 +140,8 @@ export const library = [
     name: "getDoc",
     displaySection: "Tags",
     definitions: [
-      makeDefinition([frAny()], frString, ([value]) => {
-        return value.tags?.value.doc || "";
+      makeDefinition([frAny()], frAny(), ([value]) => {
+        return value.tags?.value.doc || vString("None");
       }),
     ],
   }),

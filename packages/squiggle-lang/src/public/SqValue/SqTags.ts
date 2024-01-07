@@ -12,8 +12,9 @@ export class SqTags {
     return this.tags.name();
   }
 
-  doc(): string | undefined {
-    return this.tags.doc();
+  doc(): SqValue | undefined {
+    const doc = this.tags.doc();
+    return doc ? wrapValue(doc, this.context) : undefined;
   }
 
   showAs(): SqValue | undefined {
