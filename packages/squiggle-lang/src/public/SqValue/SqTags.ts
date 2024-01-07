@@ -15,7 +15,11 @@ export class SqTags {
 
   doc(): SqArrayValue | undefined {
     const doc = this.tags.doc();
-    return doc ? new SqArrayValue(vArray(doc), this.context) : undefined;
+    const arr = doc ? new SqArrayValue(vArray(doc), this.context) : undefined;
+    if (arr) {
+      arr._value = arr._value.mergeTags({ notebook: true });
+    }
+    return arr || undefined;
   }
 
   showAs(): SqValue | undefined {
