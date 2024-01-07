@@ -563,7 +563,7 @@ export type Calculator = {
   fn: Lambda;
   inputs: readonly Input[];
   autorun: boolean;
-  description?: Value;
+  description?: Value[];
   title?: string;
   sampleCount?: number;
 };

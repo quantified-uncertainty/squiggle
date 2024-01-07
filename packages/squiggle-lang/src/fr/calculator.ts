@@ -16,13 +16,7 @@ import {
   frWithTags,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import {
-  Calculator,
-  Value,
-  vArray,
-  vCalculator,
-  vString,
-} from "../value/index.js";
+import { Calculator, Value, vCalculator, vString } from "../value/index.js";
 import { ValueTags } from "../value/valueTags.js";
 
 const maker = new FnFactory({
@@ -43,13 +37,13 @@ const validateCalculator = (calc: Calculator): Calculator => {
 function getDescription(
   description: FrOrType<string, readonly Value[]> | undefined,
   tags: ValueTags | undefined
-) {
+): Value[] | undefined {
   if (!description) {
     return (tags && tags.value.doc) || undefined;
   } else {
     return description?.tag === "1"
-      ? vString(description.value)
-      : vArray(description.value);
+      ? [vString(description.value)]
+      : [...description.value];
   }
 }
 

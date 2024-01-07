@@ -139,7 +139,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
         [
           "description",
           (value.value.description &&
-            simpleValueFromValue(value.value.description)) ||
+            simpleValueFromValue(vArray(value.value.description))) ||
             "",
         ],
         ["title", value.value.title || ""],

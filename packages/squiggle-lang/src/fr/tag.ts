@@ -125,13 +125,13 @@ export const library = [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
         frAny({ genericName: "A" }),
-        ([value, doc]) => value.mergeTags({ doc: vString(doc) }),
+        ([value, doc]) => value.mergeTags({ doc: [vString(doc)] }),
         { isDecorator: true }
       ),
       makeDefinition(
         [frAny({ genericName: "A" }), frArray(frAny())],
         frAny({ genericName: "A" }),
-        ([value, doc]) => value.mergeTags({ doc: vArray(doc) }),
+        ([value, doc]) => value.mergeTags({ doc: [...doc] }),
         { isDecorator: true }
       ),
     ],
@@ -141,7 +141,10 @@ export const library = [
     displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frAny(), ([value]) => {
-        return value.tags?.value.doc || vString("None");
+        return (
+          (value.tags?.value.doc && vArray(value.tags?.value.doc)) ||
+          vString("None")
+        );
       }),
     ],
   }),

@@ -7,8 +7,7 @@ import { FC, PropsWithChildren, useMemo } from "react";
 import { SqValue } from "@quri/squiggle-lang";
 import { CommentIcon, TextTooltip } from "@quri/ui";
 
-import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
-import { SqValueWithContext } from "../../lib/utility.js";
+import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 import { leftWidgetMargin } from "../../widgets/utils.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
@@ -27,23 +26,24 @@ import {
   useToggleCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
+import { PlaygroundSettings } from "../PlaygroundSettings.js";
 
-const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
-  const comment = getValueComment(value);
+// const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
+//   const comment = getValueComment(value);
 
-  return comment ? (
-    <div className="ml-3">
-      <TextTooltip text={comment} placement="bottom">
-        <span>
-          <CommentIcon
-            size={13}
-            className="text-purple-100 group-hover:text-purple-300"
-          />
-        </span>
-      </TextTooltip>
-    </div>
-  ) : null;
-};
+//   return comment ? (
+//     <div className="ml-3">
+//       <TextTooltip text={comment} placement="bottom">
+//         <span>
+//           <CommentIcon
+//             size={13}
+//             className="text-purple-100 group-hover:text-purple-300"
+//           />
+//         </span>
+//       </TextTooltip>
+//     </div>
+//   ) : null;
+// };
 
 type Props = {
   value: SqValueWithContext;
@@ -53,11 +53,28 @@ type Props = {
   size?: "normal" | "large";
 };
 
-const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
+type Props2 = {
+  value: SqValueWithContext;
+  settings: PlaygroundSettings;
+  parentValue?: SqValue;
+  collapsible?: boolean;
+  header?: "normal" | "large" | "hide";
+  size?: "normal" | "large";
+};
+
+const WithComment: FC<PropsWithChildren<Props2>> = ({
+  value,
+  settings,
+  children,
+}) => {
   const comment = getValueComment(value);
 
   if (!comment) {
     return children;
+  }
+
+  if (!valueHasContext(comment)) {
+    return "";
   }
 
   const tagsWithTopPosition = new Set([
@@ -77,7 +94,7 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
         commentPosition === "bottom" ? "mt-1" : "mb-1"
       )}
     >
-      <MarkdownViewer md={comment} textSize="sm" />
+      <SquiggleValueChart value={comment} settings={settings} />
     </div>
   );
 
@@ -103,7 +120,7 @@ const ValueViewerBody: FC<Props> = ({ value, size = "normal" }) => {
   }, [size, mergedSettings]);
 
   return (
-    <WithComment value={value}>
+    <WithComment value={value} settings={adjustedMergedSettings}>
       <SquiggleValueChart value={value} settings={adjustedMergedSettings} />
     </WithComment>
   );
@@ -241,7 +258,7 @@ export const ValueWithContextViewer: FC<Props> = ({
                   <SquiggleValuePreview value={value} />
                 </div>
               )}
-              {!isOpen && <CommentIconForValue value={value} />}
+              {/* {!isOpen && <CommentIconForValue value={value} />} */}
             </div>
             <div className="inline-flex space-x-1 items-center">
               <SquiggleValueMenu value={value} />

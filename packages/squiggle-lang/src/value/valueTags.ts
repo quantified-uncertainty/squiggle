@@ -1,11 +1,11 @@
 import { result } from "../index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, fmap, mergeMany, Ok } from "../utility/result.js";
-import { Value, vBool, vString } from "./index.js";
+import { Value, vArray, vBool, vString } from "./index.js";
 
 export type ValueTagsType = {
   name?: string;
-  doc?: Value;
+  doc?: Value[];
   showAs?: Value;
   numberFormat?: string;
   dateFormat?: string;
@@ -52,7 +52,7 @@ export class ValueTags {
       result.push(["name", vString(value.name)]);
     }
     if (value.doc) {
-      result.push(["doc", value.doc]);
+      result.push(["doc", vArray(value.doc)]);
     }
     if (value.showAs) {
       result.push(["showAs", value.showAs]);
