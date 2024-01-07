@@ -206,7 +206,7 @@ export const SpecialList: Story = {
 Here is more text.
 
 
-Here es more text.",
+Here is more text.",
   Calculator({|f| f + 3}),
   "## Distributions",
   "### Distribution 1",
