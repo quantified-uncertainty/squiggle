@@ -265,6 +265,40 @@ Different types of values can be displayed in different ways. The following tabl
     ],
   }),
   maker.make({
+    name: "notebook",
+    description: `Converts a list to display as a notebook.`,
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frArray(frAny())), frBool],
+        frWithTags(frArray(frAny({ genericName: "A" }))),
+        ([{ value, tags }, notebook]) => ({
+          value,
+          tags: tags.merge({ notebook }),
+        }),
+        { isDecorator: true }
+      ),
+      makeDefinition(
+        [frWithTags(frArray(frAny({ genericName: "A" })))],
+        frWithTags(frArray(frAny({ genericName: "A" }))),
+        ([{ value, tags }]) => ({
+          value,
+          tags: tags.merge({ notebook: true }),
+        }),
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getNotebook",
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition([frAny()], frBool, ([value]) => {
+        return value.tags?.value.hidden || false;
+      }),
+    ],
+  }),
+  maker.make({
     name: "all",
     displaySection: "Functions",
     description: "Returns a dictionary of all tags on a value.",

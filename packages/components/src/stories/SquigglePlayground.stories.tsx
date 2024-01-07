@@ -202,6 +202,7 @@ export const SpecialList: Story = {
   name: "Special List",
   args: {
     defaultCode: `
+@notebook
 a = [
 " ### This is an opening section
 Here is more text.
