@@ -6,7 +6,12 @@ import { FnDocumentation } from "@quri/squiggle-lang";
 import { ModulePage, modulePages } from "../templates.mjs";
 import { generateModuleContent } from "./generateModuleContent.mjs";
 
-const targetFilename = (name: string) => `./src/pages/docs/Api/${name}.mdx`;
+const directoryPath = `./src/pages/docs/Api`;
+if (!fs.existsSync(directoryPath)) {
+  fs.mkdirSync(directoryPath, { recursive: true });
+}
+
+const targetFilename = (name: string) => `${directoryPath}/${name}.mdx`;
 
 //We need to escape the curly braces in the markdown for .jsx files.
 function escapedStr(str: string) {
@@ -50,7 +55,7 @@ const generateMetaPage = async ({ pages }: { pages: ModulePage[] }) => {
   }
 
   const names = pages.map((p) => p.name);
-  const fileName = `./src/pages/docs/Api/_meta.json`;
+  const fileName = `${directoryPath}/_meta.json`;
   const content = JSON.stringify(convertToKeyValuePairs(names), null, 2);
 
   fs.writeFile(fileName, content, (err) => {
