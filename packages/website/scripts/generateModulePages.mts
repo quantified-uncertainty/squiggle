@@ -15,7 +15,7 @@ function escapedStr(str: string) {
 
 function toMarkdown(documentation: FnDocumentation) {
   const fullName = documentation.nameSpace + "." + documentation.name;
-  return `### ${documentation.name}${escapedStr(
+  return `### ${documentation.name}\n${escapedStr(
     documentation.description || ""
   )}
 <FnDocumentationFromName functionName="${fullName}" showNameAndDescription={false} size="small" />
@@ -40,7 +40,30 @@ const generateModulePage = async (
   });
 };
 
-//Remember to add any new Modules to .gitignore
+const generateMetaPage = async ({ pages }: { pages: ModulePage[] }) => {
+  function convertToKeyValuePairs(names: string[]): { [key: string]: string } {
+    const keyValuePairs: { [key: string]: string } = {};
+    names.forEach((name) => {
+      keyValuePairs[name] = name;
+    });
+    return keyValuePairs;
+  }
+
+  const names = pages.map((p) => p.name);
+  const fileName = `./src/pages/docs/Api/_meta.json`;
+  const content = JSON.stringify(convertToKeyValuePairs(names), null, 2);
+
+  fs.writeFile(fileName, content, (err) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(`Content written to ${targetFilename(fileName)}`);
+  });
+};
+
 for (const modulePage of modulePages) {
   await generateModulePage(modulePage, toMarkdown);
 }
+
+await generateMetaPage({ pages: modulePages });

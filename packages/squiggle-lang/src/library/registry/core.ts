@@ -19,6 +19,7 @@ export type FRFunction = {
   definitions: FnDefinition[];
   output?: Value["type"];
   examples?: string[];
+  interactiveExamples?: string[];
   description?: string;
   isExperimental?: boolean;
   isUnit?: boolean;
@@ -36,6 +37,7 @@ export type FnDocumentation = Pick<
   | "definitions"
   | "name"
   | "examples"
+  | "interactiveExamples"
   | "isExperimental"
   | "isUnit"
   | "shorthand"
@@ -78,13 +80,16 @@ export class Registry {
 
   allExamplesWithFns(): { fn: FRFunction; example: string }[] {
     return this.functions
-      .map(
-        (fn) =>
+      .map((fn) => {
+        const regularExamples =
           fn.examples?.map((example) => ({
             fn,
             example,
-          })) ?? []
-      )
+          })) ?? [];
+        const interactiveExamples =
+          fn.interactiveExamples?.map((example) => ({ fn, example })) ?? [];
+        return [...regularExamples, ...interactiveExamples];
+      })
       .flat();
   }
 
@@ -134,6 +139,7 @@ export class Registry {
       description: fn.description,
       definitions: fn.definitions,
       examples: fn.examples,
+      interactiveExamples: fn.interactiveExamples,
       signatures: fn.definitions
         .filter((d) => showInDocumentation(d))
         .map(fnDefinitionToString),

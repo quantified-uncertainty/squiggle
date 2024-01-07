@@ -1,3 +1,4 @@
+import { library as booleanLibrary } from "../../fr/boolean.js";
 import { library as builtinLibrary } from "../../fr/builtin.js";
 import { library as calculatorLibrary } from "../../fr/calculator.js";
 import { library as dangerLibrary } from "../../fr/danger.js";
@@ -29,7 +30,7 @@ import { ImmutableMap } from "../../utility/immutableMap.js";
 import { FRFunction, Registry } from "./core.js";
 
 const fnList: FRFunction[] = [
-  ...builtinLibrary,
+  ...booleanLibrary,
   ...dangerLibrary,
   ...dateLibrary,
   ...dictLibrary,
@@ -53,6 +54,7 @@ const fnList: FRFunction[] = [
   ...unitsLibrary,
   ...calculatorLibrary,
   ...inputLibrary,
+  ...builtinLibrary, // should go last, because has some catch-all functions
 ];
 
 export const registry = Registry.make(fnList);

@@ -9,17 +9,19 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const code = "mx(5 to 100, uniform(100, 180), 30, 60, 80, [5,5,0.3,0.3,0.3])";
+const multiplier = 0.5;
+
 export const Height7: Story = {
   name: "Height14",
   args: {
-    chartHeight: 7,
+    chartHeight: 14 * multiplier,
     code,
   },
 };
 export const Height15: Story = {
   name: "Height20",
   args: {
-    chartHeight: 10,
+    chartHeight: 20 * multiplier,
     code,
   },
 };
@@ -27,15 +29,29 @@ export const Height15: Story = {
 export const Height40: Story = {
   name: "Height40",
   args: {
-    chartHeight: 20,
+    chartHeight: 40 * multiplier,
     code,
+  },
+};
+export const Height40WithLabels: Story = {
+  name: "Height 40 with labels",
+  args: {
+    chartHeight: 40 * multiplier,
+    code: `Plot.dist(
+      normal(5, 2),
+      {
+        xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title" }),
+        title: "A Simple Normal Distribution",
+        showSummary: true,
+      }
+    )`,
   },
 };
 
 export const Height100: Story = {
   name: "Height 100",
   args: {
-    chartHeight: 50,
+    chartHeight: 100 * multiplier,
     code,
   },
 };
@@ -43,7 +59,7 @@ export const Height100: Story = {
 export const ContinuousSampleSetBig: Story = {
   name: "Height 400",
   args: {
-    chartHeight: 200,
+    chartHeight: 400 * multiplier,
     code,
   },
 };
