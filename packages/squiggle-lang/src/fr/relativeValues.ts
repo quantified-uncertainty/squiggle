@@ -57,14 +57,14 @@ export function makeSquiggleDefinitions(builtins: Bindings) {
   {
     |x,y|
     findUncertainty(dist) = {
-      absDist = dist -> SampleSet.fromDist -> SampleSet.map(abs)
+      absDist = SampleSet(dist) -> SampleSet.map(abs)
       p5 = inv(absDist, 0.05)
       p95 = inv(absDist, 0.95)
       log10(p95 / p5)
     }
     dists = fn(x,y)
-    dist1 = dists[0] -> SampleSet.fromDist
-    dist2 = dists[1] -> SampleSet.fromDist
+    dist1 = SampleSet(dists[0])
+    dist2 = SampleSet(dists[1])
     dist = dists[0] / dists[1]
     {
       median: inv(dist, 0.5),

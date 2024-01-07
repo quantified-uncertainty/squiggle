@@ -63,16 +63,20 @@ const Cell: FC<{
     return <ErrorCell />;
   }
   const jsItem = itemResult.value.asJS();
-  if (!(jsItem instanceof Map)) {
+  if (!(jsItem instanceof Object)) {
     return <ErrorCell />;
   }
-  const item = rvSchema.parse(Object.fromEntries(jsItem.entries()));
 
-  return (
-    <CellBox>
-      <RelativeValueCell item={item} showMedian={true} />
-    </CellBox>
-  );
+  try {
+    const item = rvSchema.parse(jsItem["value"]);
+    return (
+      <CellBox>
+        <RelativeValueCell item={item} showMedian={true} />
+      </CellBox>
+    );
+  } catch (e) {
+    return <ErrorCell />;
+  }
 };
 
 type Props = {
