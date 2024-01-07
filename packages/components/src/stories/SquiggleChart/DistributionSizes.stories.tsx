@@ -9,7 +9,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const code = "mx(5 to 100, uniform(100, 180), 30, 60, 80, [5,5,0.3,0.3,0.3])";
-const multiplier = 2;
+const multiplier = 0.5;
 
 export const Height7: Story = {
   name: "Height14",

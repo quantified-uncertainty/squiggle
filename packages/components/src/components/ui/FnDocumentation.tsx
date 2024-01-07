@@ -104,7 +104,7 @@ export const FnDocumentation: FC<{
       )}
       {(isUnit || shorthand || isExperimental || !requiresNamespace) && (
         <Section>
-          <div className="flex space-x-3">
+          <div className="flex gap-3">
             {isUnit && (
               <div className={clsx("bg-yellow-100 text-yellow-800", tagCss)}>
                 Unit

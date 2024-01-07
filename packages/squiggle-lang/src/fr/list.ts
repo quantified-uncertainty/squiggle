@@ -695,19 +695,6 @@ List.reduceWhile(
     ],
   }),
   maker.make({
-    name: "concat",
-    displaySection: "Modifications",
-    definitions: [
-      makeDefinition(
-        [frArray(frAny()), frArray(frAny())],
-        frArray(frAny()),
-        ([a, b]) => {
-          return [...a, ...b];
-        }
-      ),
-    ],
-  }),
-  maker.make({
     name: "flatten",
     requiresNamespace: true,
     examples: [`List.flatten([[1,2], [3,4]])`],
