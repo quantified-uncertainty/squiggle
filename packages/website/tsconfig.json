@@ -14,10 +14,6 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "allowJs": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/components/*": ["src/components/*"]
-    }
   },
   "include": [
     "next-env.d.ts",
