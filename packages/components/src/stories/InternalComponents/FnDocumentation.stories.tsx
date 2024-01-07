@@ -40,7 +40,7 @@ FnStory.story = {
   name: "All",
 };
 
-const fnDocumentation = getFunctionDocumentation("Plot.dist");
+const fnDocumentation = getFunctionDocumentation("Plot.dists");
 if (!fnDocumentation) {
   throw new Error("fnDocumentation is undefined");
 }

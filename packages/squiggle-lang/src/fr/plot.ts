@@ -229,17 +229,86 @@ const numericFnDef = () => {
 
 export const library = [
   maker.make({
+    name: "dist",
+    output: "Plot",
+    interactiveExamples: [
+      `Plot.dist(
+  normal(5, 2),
+  {
+    xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title" }),
+    title: "A Simple Normal Distribution",
+    showSummary: true,
+  }
+)`,
+    ],
+
+    definitions: [
+      makeDefinition(
+        [
+          frNamed("dist", frDist),
+          frNamed(
+            "params",
+            frOptional(
+              frDict(
+                ["xScale", frOptional(frScale)],
+                ["yScale", frOptional(frScale)],
+                ["title", frOptional(frString)],
+                ["showSummary", frOptional(frBool)]
+              )
+            )
+          ),
+        ],
+        frPlot,
+        ([dist, params]) => {
+          const { xScale, yScale, title, showSummary } = params ?? {};
+          return {
+            type: "distributions",
+            distributions: [{ distribution: dist }],
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
+            title: title ?? undefined,
+            showSummary: showSummary ?? true,
+          };
+        }
+      ),
+      makeDefinition(
+        [
+          frDict(
+            ["dist", frDist],
+            ["xScale", frOptional(frScale)],
+            ["yScale", frOptional(frScale)],
+            ["title", frOptional(frString)],
+            ["showSummary", frOptional(frBool)]
+          ),
+        ],
+        frPlot,
+        ([{ dist, xScale, yScale, title, showSummary }]) => {
+          _assertYScaleNotDateScale(yScale);
+          return {
+            type: "distributions",
+            distributions: [{ distribution: dist }],
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
+            title: title ?? undefined,
+            showSummary: showSummary ?? true,
+          };
+        },
+        { deprecated: "0.8.7" }
+      ),
+    ],
+  }),
+  maker.make({
     name: "dists",
     output: "Plot",
     interactiveExamples: [
-      `Plot.distFn(
-  {|t|normal(t, 2) * normal(5, 3)},
-  {
-    title: "A Function of Value over Time",
-    xScale: Scale.log({ min: 3, max: 100, title: "Time (years)" }),
-    yScale: Scale.linear({ title: "Value" }),
-    distXScale: Scale.linear({ tickFormat: "#x" }),
-  }
+      `Plot.dists(
+{
+  dists: [
+    { name: "First Dist", value: normal(0, 1) },
+    { name: "Second Dist", value: uniform(2, 4) },
+  ],
+  xScale: Scale.symlog({ min: -2, max: 5 }),
+}
 )`,
     ],
     definitions: [
@@ -323,75 +392,6 @@ export const library = [
           return {
             type: "distributions",
             distributions,
-            xScale: xScale ?? defaultScale,
-            yScale: yScale ?? defaultScale,
-            title: title ?? undefined,
-            showSummary: showSummary ?? true,
-          };
-        },
-        { deprecated: "0.8.7" }
-      ),
-    ],
-  }),
-  maker.make({
-    name: "dist",
-    output: "Plot",
-    interactiveExamples: [
-      `Plot.dist(
-  normal(5, 2),
-  {
-    xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title" }),
-    title: "A Simple Normal Distribution",
-    showSummary: true,
-  }
-)`,
-    ],
-
-    definitions: [
-      makeDefinition(
-        [
-          frNamed("dist", frDist),
-          frNamed(
-            "params",
-            frOptional(
-              frDict(
-                ["xScale", frOptional(frScale)],
-                ["yScale", frOptional(frScale)],
-                ["title", frOptional(frString)],
-                ["showSummary", frOptional(frBool)]
-              )
-            )
-          ),
-        ],
-        frPlot,
-        ([dist, params]) => {
-          const { xScale, yScale, title, showSummary } = params ?? {};
-          return {
-            type: "distributions",
-            distributions: [{ distribution: dist }],
-            xScale: xScale ?? defaultScale,
-            yScale: yScale ?? defaultScale,
-            title: title ?? undefined,
-            showSummary: showSummary ?? true,
-          };
-        }
-      ),
-      makeDefinition(
-        [
-          frDict(
-            ["dist", frDist],
-            ["xScale", frOptional(frScale)],
-            ["yScale", frOptional(frScale)],
-            ["title", frOptional(frString)],
-            ["showSummary", frOptional(frBool)]
-          ),
-        ],
-        frPlot,
-        ([{ dist, xScale, yScale, title, showSummary }]) => {
-          _assertYScaleNotDateScale(yScale);
-          return {
-            type: "distributions",
-            distributions: [{ distribution: dist }],
             xScale: xScale ?? defaultScale,
             yScale: yScale ?? defaultScale,
             title: title ?? undefined,

@@ -178,6 +178,13 @@ Lists are immutable, meaning that they cannot be modified. Instead, all list fun
   `,
   },
   {
+    name: "Plot",
+    description: "",
+    intro: `The Plot module provides functions to create plots of distributions and functions.
+
+Raw functions and distributions are plotted with default parameters, while plot objects created by functions from this module give you more control over chart parameters and access to more complex charts.`,
+  },
+  {
     name: "Number",
     sections: [
       { name: "Comparison" },

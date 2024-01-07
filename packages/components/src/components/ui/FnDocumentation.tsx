@@ -152,9 +152,11 @@ export const FnDocumentation: FC<{
               textSize
             )}
           >
-            {definitions.map((def, id) => (
-              <StyleDefinition fullName={fullName} def={def} key={id} />
-            ))}
+            {definitions
+              .filter((def) => !def.deprecated)
+              .map((def, id) => (
+                <StyleDefinition fullName={fullName} def={def} key={id} />
+              ))}
           </div>
         </Section>
       ) : null}
