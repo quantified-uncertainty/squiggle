@@ -64,10 +64,13 @@ type PickByValue<T, ValueType> = NonNullable<
   >
 >;
 
-const booleanTagDefs = (tagName: PickByValue<ValueTagsType, boolean>) => [
+const booleanTagDefs = <T>(
+  tagName: PickByValue<ValueTagsType, boolean>,
+  frType: FRType<T>
+) => [
   makeDefinition(
-    [frWithTags(frArray(frAny())), frBool],
-    frWithTags(frArray(frAny({ genericName: "A" }))),
+    [frWithTags(frType), frBool],
+    frWithTags(frType),
     ([{ value, tags }, tagValue]) => ({
       value,
       tags: tags.merge({ [tagName]: tagValue }),
@@ -75,8 +78,8 @@ const booleanTagDefs = (tagName: PickByValue<ValueTagsType, boolean>) => [
     { isDecorator: true }
   ),
   makeDefinition(
-    [frWithTags(frArray(frAny({ genericName: "A" })))],
-    frWithTags(frArray(frAny({ genericName: "A" }))),
+    [frWithTags(frType)],
+    frWithTags(frType),
     ([{ value, tags }]) => ({
       value,
       tags: tags.merge({ [tagName]: true }),
@@ -271,7 +274,7 @@ Different types of values can be displayed in different ways. The following tabl
     name: "hide",
     description: `Hides a value when displayed under Variables. This is useful for hiding intermediate values or helper functions that are used in calculations, but are not directly relevant to the user. Only hides top-level variables.`,
     displaySection: "Tags",
-    definitions: booleanTagDefs("hidden"),
+    definitions: booleanTagDefs("hidden", frAny({ genericName: "A" })),
   }),
   maker.make({
     name: "getHide",
@@ -304,7 +307,10 @@ Here is more text.
 ] `,
     ],
     displaySection: "Tags",
-    definitions: booleanTagDefs("notebook"),
+    definitions: booleanTagDefs(
+      "notebook",
+      frArray(frAny({ genericName: "A" }))
+    ),
   }),
   maker.make({
     name: "getNotebook",

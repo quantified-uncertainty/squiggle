@@ -24,6 +24,10 @@ describe("Tags", () => {
     testEvalToBe("[123] -> Tag.notebook -> Tag.getNotebook", "true");
   });
 
+  describe("hide", () => {
+    testEvalToBe("3 -> Tag.hide -> Tag.getHide", "true");
+  });
+
   describe("omit", () => {
     testEvalToBe(
       "123 -> Tag.name('myName') -> Tag.doc('myDoc') -> Tag.format('.2%') -> Tag.omit(['name', 'doc']) -> Tag.getAll",
