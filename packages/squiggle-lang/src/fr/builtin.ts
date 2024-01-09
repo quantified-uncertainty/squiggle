@@ -1,80 +1,20 @@
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
-  frArray,
   frBool,
   frNamed,
-  frNumber,
   frOptional,
   frString,
 } from "../library/registry/frTypes.js";
-import {
-  FnFactory,
-  makeNumericComparisons,
-} from "../library/registry/helpers.js";
+import { FnFactory } from "../library/registry/helpers.js";
 import { isEqual } from "../value/index.js";
 
 const maker = new FnFactory({
-  nameSpace: "", // no namespaced versions
+  nameSpace: "Common", // no namespaced versions
   requiresNamespace: false,
 });
 
 export const library = [
-  maker.nn2n({ name: "add", fn: (x, y) => x + y }), // infix + (see Reducer/Reducer_Peggy/helpers.ts)
-  maker.ss2s({ name: "add", fn: (x, y) => x + y }), // infix + on strings
-  maker.nn2n({ name: "subtract", fn: (x, y) => x - y }), // infix -
-  maker.nn2n({ name: "multiply", fn: (x, y) => x * y }), // infix *
-  maker.nn2n({ name: "divide", fn: (x, y) => x / y }), // infix /
-  maker.nn2n({ name: "pow", fn: (x, y) => Math.pow(x, y) }), // infix ^
-  ...makeNumericComparisons(
-    maker,
-    (d1, d2) => d1 < d2,
-    (d1, d2) => d1 > d2,
-    (d1, d2) => d1 === d2,
-    frNumber
-  ),
-  maker.bb2b({ name: "or", fn: (x, y) => x || y }), // infix ||
-  maker.bb2b({ name: "and", fn: (x, y) => x && y }), // infix &&
-  maker.n2n({ name: "unaryMinus", fn: (x) => -x }), // unary prefix -
-  maker.make({
-    name: "not",
-    definitions: [
-      makeDefinition([frNumber], frBool, ([x]) => {
-        // unary prefix !
-        return x === 0;
-      }),
-      makeDefinition([frBool], frBool, ([x]) => {
-        // unary prefix !
-        return !x;
-      }),
-    ],
-  }),
-  maker.make({
-    name: "concat",
-    definitions: [
-      makeDefinition([frString, frString], frString, ([a, b]) => {
-        return a + b;
-      }),
-      makeDefinition(
-        [frArray(frAny()), frArray(frAny())],
-        frArray(frAny()),
-        ([a, b]) => {
-          return [...a, ...b];
-        }
-      ),
-      makeDefinition([frString, frAny()], frString, ([a, b]) => {
-        return a + b.toString();
-      }),
-    ],
-  }),
-  maker.make({
-    name: "add",
-    definitions: [
-      makeDefinition([frString, frAny()], frString, ([a, b]) => {
-        return a + b.toString();
-      }),
-    ],
-  }),
   maker.make({
     name: "equal",
     definitions: [
@@ -93,6 +33,8 @@ export const library = [
   }),
   maker.make({
     name: "typeOf",
+    description:
+      "Returns the type of the value passed in as a string. This is useful when you want to treat a value differently depending on its type.",
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
         return value.publicName;
@@ -101,6 +43,7 @@ export const library = [
   }),
   maker.make({
     name: "inspect",
+    description: `Runs Console.log() in the [Javascript developer console](https://www.digitalocean.com/community/tutorials/how-to-use-the-javascript-developer-console) and returns the value passed in.`,
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frNamed("message", frOptional(frString))],

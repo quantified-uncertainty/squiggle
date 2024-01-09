@@ -105,7 +105,7 @@ const SquiggleViewerWithoutProvider: FC<SquiggleViewerProps> = ({ value }) => {
         return <MessageAlert heading="Focused variable is not defined" />;
       }
     } else {
-      return <ValueViewer value={value} />;
+      return <ValueViewer value={value} size="large" />;
     }
   };
 

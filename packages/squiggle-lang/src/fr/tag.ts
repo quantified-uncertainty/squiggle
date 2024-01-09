@@ -306,7 +306,7 @@ Here is more text.
     ],
   }),
   maker.make({
-    name: "all",
+    name: "getAll",
     displaySection: "Functions",
     description: "Returns a dictionary of all tags on a value.",
     definitions: [
