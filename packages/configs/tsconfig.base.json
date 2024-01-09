@@ -4,7 +4,7 @@
  *
  * Things we intentionally don't set here:
  * - `outDir` and `rootDir` (because of https://github.com/microsoft/TypeScript/issues/29172)
- */ 
+ */
 {
   "compilerOptions": {
     // build settings
