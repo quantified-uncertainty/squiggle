@@ -66,7 +66,7 @@ export function makeSquiggleDefinitions(builtins: Bindings) {
     dists = fn(x,y)
     dist1 = SampleSet(dists[0])
     dist2 = SampleSet(dists[1])
-    dist = dists[0] / dists[1]
+    dist = Dist(dists[0] / dists[1])
     {
       median: inv(dist, 0.5),
       mean: mean(dist),
