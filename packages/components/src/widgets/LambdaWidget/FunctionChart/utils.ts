@@ -52,7 +52,7 @@ export type ImageError = {
 };
 
 export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot, X extends ScaleContinuousNumeric<number> = {}>(
-  plot: T,
+  plot: T, xScale: X,
   environment: Env,
   xPointCount: number
 ) {
@@ -99,7 +99,7 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot, X ext
           x,
           value: `This component expected outputs of type ${
             plot.tag === "numericFn" ? "Number" : "Dist"
-          }, got: ${result.value.toString}`,
+          }, got: ${result.value.toString()}`,
         });
       }
     } else {
