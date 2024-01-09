@@ -54,8 +54,8 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
   environment: Env,
   xPointCount: number
 ) {
-  const min = plot.xScale?.min ?? functionChartDefaults.min;
-  const max = plot.xScale?.max ?? functionChartDefaults.max;
+  const min = plot.xScale?.domain()[0] ?? functionChartDefaults.min;
+  const max = plot.xScale?.domain()[1] ?? functionChartDefaults.max;
 
   const scale = sqScaleToD3(plot.xScale);
   scale.domain([min, max]);
