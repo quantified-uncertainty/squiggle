@@ -5,6 +5,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frBool,
+  frDeprecated,
   frDict,
   frDist,
   frDistOrNumber,
@@ -183,7 +184,7 @@ const numericFnDef = () => {
               frDict(
                 ["xScale", frOptional(frScale)],
                 ["yScale", frOptional(frScale)],
-                ["title", frOptional(frString)],
+                ["title", frDeprecated(frOptional(frString))],
                 ["xPoints", frOptional(frArray(frNumber))]
               )
             )
@@ -207,7 +208,7 @@ const numericFnDef = () => {
             ["fn", fnType],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
-            ["title", frOptional(frString)],
+            ["title", frDeprecated(frOptional(frString))],
             ["xPoints", frOptional(frArray(frNumber))]
           ),
         ],
@@ -251,7 +252,7 @@ export const library = [
               frDict(
                 ["xScale", frOptional(frScale)],
                 ["yScale", frOptional(frScale)],
-                ["title", frOptional(frString)],
+                ["title", frDeprecated(frOptional(frString))],
                 ["showSummary", frOptional(frBool)]
               )
             )
@@ -276,7 +277,7 @@ export const library = [
             ["dist", frDist],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
-            ["title", frOptional(frString)],
+            ["title", frDeprecated(frOptional(frString))],
             ["showSummary", frOptional(frBool)]
           ),
         ],
@@ -329,7 +330,7 @@ export const library = [
             frDict(
               ["xScale", frOptional(frScale)],
               ["yScale", frOptional(frScale)],
-              ["title", frOptional(frString)],
+              ["title", frDeprecated(frOptional(frString))],
               ["showSummary", frOptional(frBool)]
             )
           ),
@@ -373,7 +374,7 @@ export const library = [
             ],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
-            ["title", frOptional(frString)],
+            ["title", frDeprecated(frOptional(frString))],
             ["showSummary", frOptional(frBool)]
           ),
         ],
@@ -426,7 +427,7 @@ export const library = [
                 ["xScale", frOptional(frScale)],
                 ["yScale", frOptional(frScale)],
                 ["distXScale", frOptional(frScale)],
-                ["title", frOptional(frString)],
+                ["title", frDeprecated(frOptional(frString))],
                 ["xPoints", frOptional(frArray(frNumber))]
               )
             )
@@ -456,7 +457,7 @@ export const library = [
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
             ["distXScale", frOptional(frScale)],
-            ["title", frOptional(frString)],
+            ["title", frDeprecated(frOptional(frString))],
             ["xPoints", frOptional(frArray(frNumber))]
           ),
         ],
@@ -507,7 +508,7 @@ Plot.scatter({
             ["yDist", frWithTags(frSampleSetDist)],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
-            ["title", frOptional(frString)]
+            ["title", frDeprecated(frOptional(frString))]
           ),
         ],
         frPlot,
