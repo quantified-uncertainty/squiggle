@@ -26,8 +26,12 @@ async function cleanupGeneratedChangelog(packageDir: string) {
   );
 }
 
-//**\n * Cleanup the generated changelog for a specific package.\n *\n * @param {string} packageDir - The directory of the package\n * @returns {Promise<void>}\n */
-// See: https://github.com/changesets/changesets/issues/995
+/**
+ * Cleans up the generated changelog for a specific package.
+ *
+ * @param packageDir - The directory of the package
+ * @returns A Promise that resolves when the changelog is cleaned up.
+ */
 export async function cleanupGeneratedChangelogs() {
   const packageDirs = await getChangedPackages();
   for (const packageDir of packageDirs) {
