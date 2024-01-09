@@ -51,7 +51,7 @@ export type ImageError = {
   value: string;
 };
 
-export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot, X extends ScaleContinuousNumeric<number, number, never> = {}>(
+export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot, X extends ScaleContinuousNumeric<number> = {}>(
   plot: T,
   environment: Env,
   xPointCount: number
