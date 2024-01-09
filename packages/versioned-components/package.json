@@ -1,6 +1,6 @@
 {
   "name": "@quri/versioned-squiggle-components",
-  "version": "0.9.1-0",
+  "version": "newVersion",
   "private": true,
   "scripts": {
     "build:ts": "tsc -b",
