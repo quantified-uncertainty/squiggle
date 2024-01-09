@@ -55,6 +55,20 @@ const runScoringDistAnswer = (
 
 export const library = [
   maker.make({
+    name: "klDivergence",
+    output: "Number",
+    examples: ["Dist.klDivergence(Sym.normal(5,2), Sym.normal(5,1.5))"],
+    displaySection: "Scoring",
+    description: `[Kullback–Leibler divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence) between two distributions.
+
+Note that this can be very brittle. If the second distribution has probability mass at areas where the first doesn't, then the result will be infinite. Due to numeric approximations, some probability mass in point set distributions is rounded to zero, leading to infinite results with klDivergence.`,
+    definitions: [
+      makeDefinition([frDist, frDist], frNumber, ([estimate, d], context) =>
+        runScoringDistAnswer(estimate, d, undefined, context.environment)
+      ),
+    ],
+  }),
+  maker.make({
     name: "logScore",
     output: "Number",
     displaySection: "Scoring",
@@ -113,20 +127,6 @@ export const library = [
           }
           throw new REArgumentError("Impossible type");
         }
-      ),
-    ],
-  }),
-  maker.make({
-    name: "klDivergence",
-    output: "Number",
-    examples: ["Dist.klDivergence(Sym.normal(5,2), Sym.normal(5,1.5))"],
-    displaySection: "Scoring",
-    description: `[Kullback–Leibler divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence) between two distributions.
-
-Note that this can be very brittle. If the second distribution has probability mass at areas where the first doesn't, then the result will be infinite. Due to numeric approximations, some probability mass in point set distributions is rounded to zero, leading to infinite results with klDivergence.`,
-    definitions: [
-      makeDefinition([frDist, frDist], frNumber, ([estimate, d], context) =>
-        runScoringDistAnswer(estimate, d, undefined, context.environment)
       ),
     ],
   }),

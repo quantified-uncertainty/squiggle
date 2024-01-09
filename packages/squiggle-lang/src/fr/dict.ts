@@ -208,7 +208,9 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`,
   maker.make({
     name: "mapKeys",
     output: "Dict",
-    examples: [`Dict.mapKeys({a: 1, b: 2}, {|x| concat(x, "-1")})`],
+    interactiveExamples: [
+      `Dict.mapKeys({a: 1, b: 2, c: 5}, {|x| concat(x, "-foobar")})`,
+    ],
     displaySection: "Transformations",
     definitions: [
       makeDefinition(

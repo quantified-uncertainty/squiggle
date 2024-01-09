@@ -85,7 +85,7 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
   }),
   maker.n2n({
     name: "factorial",
-    displaySection: "Math",
+    displaySection: "Combinatorics",
     examples: [`Danger.factorial(20)`],
     fn: factorial,
   }),
@@ -415,56 +415,6 @@ const diminishingReturnsLibrary = [
 ];
 
 const mapYLibrary: FRFunction[] = [
-  maker.d2d({
-    name: "mapYLog",
-    displaySection: "Distribution Functions",
-    fn: (dist, env) => unwrapDistResult(scaleLog(dist, Math.E, { env })),
-  }),
-  maker.d2d({
-    name: "mapYLog10",
-    displaySection: "Distribution Functions",
-    fn: (dist, env) => unwrapDistResult(scaleLog(dist, 10, { env })),
-  }),
-  maker.dn2d({
-    name: "mapYLog",
-    displaySection: "Distribution Functions",
-    fn: (dist, x, env) => unwrapDistResult(scaleLog(dist, x, { env })),
-  }),
-  maker.make({
-    name: "mapYLogWithThreshold",
-    displaySection: "Distribution Functions",
-    definitions: [
-      makeDefinition(
-        [frDist, frNumber, frNumber],
-        frDistPointset,
-        ([dist, base, eps], { environment }) =>
-          unwrapDistResult(
-            scaleLogWithThreshold(dist, {
-              env: environment,
-              eps,
-              base,
-            })
-          )
-      ),
-    ],
-  }),
-
-  maker.dn2d({
-    name: "mapYMultiply",
-    displaySection: "Distribution Functions",
-    fn: (dist, f, env) => unwrapDistResult(scaleMultiply(dist, f, { env })),
-  }),
-  maker.dn2d({
-    name: "mapYPow",
-    displaySection: "Distribution Functions",
-    fn: (dist, f, env) => unwrapDistResult(scalePower(dist, f, { env })),
-  }),
-  maker.d2d({
-    name: "mapYExp",
-    displaySection: "Distribution Functions",
-    // TODO - shouldn't it be other way around, e^value?
-    fn: (dist, env) => unwrapDistResult(scalePower(dist, Math.E, { env })),
-  }),
   maker.make({
     name: "binomialDist",
     examples: ["Danger.binomialDist(8, 0.5)"],

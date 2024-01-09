@@ -75,7 +75,7 @@ const baseLibrary = [
   maker.make({
     name: "make",
     description:
-      "Calls the correct conversion constructor, based on the corresponding input type, to create a Sample Set distribution.",
+      "Calls the correct conversion constructor, based on the corresponding input type, to create a sample set distribution",
     output: "Dist",
     examples: [
       `SampleSet(5)`,
@@ -87,19 +87,24 @@ const baseLibrary = [
   }),
   maker.make({
     name: "fromDist",
-    examples: [`SampleSet.fromDist(normal(5,2))`],
+    description:
+      "Converts any distribution type into a sample set distribution.",
+    examples: [`SampleSet.fromDist(Sym.normal(5,2))`],
     displaySection: "Conversions",
     definitions: [fromDist],
   }),
   maker.make({
     name: "fromNumber",
     displaySection: "Conversions",
+    description:
+      "Convert a number into a sample set distribution that contains ``n`` copies of that number. ``n`` refers to the model sample count.",
     examples: [`SampleSet.fromNumber(3)`],
     definitions: [fromNumber],
   }),
   maker.make({
     name: "fromList",
     displaySection: "Conversions",
+    description: "Convert a list of numbers into a sample set distribution.",
     examples: [`SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`],
     output: "Dist",
     definitions: [fromList],
@@ -109,7 +114,7 @@ const baseLibrary = [
     displaySection: "Conversions",
     examples: [`SampleSet.toList(SampleSet.fromDist(normal(5,2)))`],
     description:
-      "Gets the internal samples of a sampleSet distribution. This is separate from the sampleN() function, which would shuffle the samples. toList() maintains order and length.",
+      "Gets the internal samples of a sampleSet distribution. This is separate from the ``sampleN()`` function, which would shuffle the samples. ``toList()`` maintains order and length.",
     output: "Array",
     definitions: [
       makeDefinition([frSampleSetDist], frArray(frNumber), ([dist]) => {
@@ -120,6 +125,8 @@ const baseLibrary = [
   maker.make({
     name: "fromFn",
     displaySection: "Conversions",
+    description:
+      "Convert a function into a sample set distribution by calling it ``n`` times.",
     examples: [`SampleSet.fromFn({|i| sample(normal(5,2))})`],
     output: "Dist",
     definitions: [fromFnDefinition],
@@ -128,6 +135,7 @@ const baseLibrary = [
     name: "map",
     displaySection: "Transformations",
     examples: [`SampleSet.map(SampleSet.fromDist(normal(5,2)), {|x| x + 1})`],
+    description: `Transforms a sample set distribution by applying a function to each sample. Returns a new sample set distribution.`,
     output: "Dist",
     definitions: [
       makeDefinition(
@@ -145,6 +153,7 @@ const baseLibrary = [
   }),
   maker.make({
     name: "map2",
+    description: `Transforms two sample set distributions by applying a function to each pair of samples. Returns a new sample set distribution.`,
     examples: [
       `SampleSet.map2(
   SampleSet.fromDist(normal(5,2)),

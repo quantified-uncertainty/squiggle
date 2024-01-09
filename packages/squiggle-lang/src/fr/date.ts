@@ -32,11 +32,10 @@ export const library = [
   maker.make({
     name: "make",
     requiresNamespace: true,
-    examples: [
-      'Date.make("2020-05-12")',
-      "Date.make(2020, 5, 10)",
-      "Date.make(2020)",
-      "Date(2020.1)",
+    interactiveExamples: [
+      `d1 = Date.make("2020-05-12")
+d2 = Date.make(2020, 5, 10)
+d3 = Date.make(2020.5)`,
     ],
     displaySection: "Constructors",
     output: "Date",
@@ -96,7 +95,7 @@ export const library = [
   }),
   maker.make({
     name: "subtract",
-    examples: ["Date.make(2020, 5, 12) - Date.make(2000, 1, 1)"],
+    interactiveExamples: ["Date.make(2020, 5, 12) - Date.make(2000, 1, 1)"],
     output: "Duration",
     displaySection: "Algebra",
     definitions: [
@@ -107,7 +106,7 @@ export const library = [
   }),
   maker.make({
     name: "subtract",
-    examples: ["Date.make(2020, 5, 12) - 20years"],
+    interactiveExamples: ["Date.make(2020, 5, 12) - 20years"],
     output: "Date",
     displaySection: "Algebra",
     definitions: [
@@ -118,10 +117,8 @@ export const library = [
   }),
   maker.make({
     name: "add",
-    examples: [
-      "Date.make(2020, 5, 12) + 20years",
-      "20years + Date.make(2020, 5, 12)",
-    ],
+    examples: ["Date.make(2020, 5, 12) + 20years"],
+    interactiveExamples: ["20years + Date.make(2020, 5, 12)"],
     output: "Date",
     displaySection: "Algebra",
     definitions: [
