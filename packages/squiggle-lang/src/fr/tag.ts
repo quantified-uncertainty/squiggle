@@ -54,6 +54,37 @@ function _ensureTypeUsingLambda<T1>(
   }
 }
 
+//This helps ensure that the tag name is a valid key of ValueTagsType, with the required type.
+type PickByValue<T, ValueType> = NonNullable<
+  keyof Pick<
+    T,
+    {
+      [Key in keyof T]: T[Key] extends ValueType | undefined ? Key : never;
+    }[keyof T]
+  >
+>;
+
+const booleanTagDefs = (tagName: PickByValue<ValueTagsType, boolean>) => [
+  makeDefinition(
+    [frWithTags(frArray(frAny())), frBool],
+    frWithTags(frArray(frAny({ genericName: "A" }))),
+    ([{ value, tags }, tagValue]) => ({
+      value,
+      tags: tags.merge({ [tagName]: tagValue }),
+    }),
+    { isDecorator: true }
+  ),
+  makeDefinition(
+    [frWithTags(frArray(frAny({ genericName: "A" })))],
+    frWithTags(frArray(frAny({ genericName: "A" }))),
+    ([{ value, tags }]) => ({
+      value,
+      tags: tags.merge({ [tagName]: true }),
+    }),
+    { isDecorator: true }
+  ),
+];
+
 // This constructs definitions where the second argument is either a type T or a function that takes in the first argument and returns a type T.
 function decoratorWithInputOrFnInput<T>(
   inputType: FRType<any>,
@@ -240,20 +271,7 @@ Different types of values can be displayed in different ways. The following tabl
     name: "hide",
     description: `Hides a value when displayed under Variables. This is useful for hiding intermediate values or helper functions that are used in calculations, but are not directly relevant to the user. Only hides top-level variables.`,
     displaySection: "Tags",
-    definitions: [
-      makeDefinition(
-        [frAny({ genericName: "A" }), frBool],
-        frAny({ genericName: "A" }),
-        ([value, hidden]) => value.mergeTags({ hidden }),
-        { isDecorator: true }
-      ),
-      makeDefinition(
-        [frAny({ genericName: "A" })],
-        frAny({ genericName: "A" }),
-        ([value]) => value.mergeTags({ hidden: true }),
-        { isDecorator: true }
-      ),
-    ],
+    definitions: booleanTagDefs("hidden"),
   }),
   maker.make({
     name: "getHide",
@@ -261,6 +279,39 @@ Different types of values can be displayed in different ways. The following tabl
     definitions: [
       makeDefinition([frAny()], frBool, ([value]) => {
         return value.tags?.value.hidden || false;
+      }),
+    ],
+  }),
+  maker.make({
+    name: "notebook",
+    description: `Displays the list of values as a notebook. This means that element indices are hidden, and the values are displayed in a vertical list. Useful for displaying combinations of text and values.`,
+    examples: [
+      `@notebook
+showAsNotebook = [
+  "### This is an opening section
+Here is more text.
+
+Here is more text.",
+  Calculator({|f| f + 3}),
+  "## Distributions",
+  "### Distribution 1",
+  normal(5, 2),
+  "### Distribution 1",
+  normal(20, 1),
+  " ### This is an opening section
+Here is more text.
+",
+] `,
+    ],
+    displaySection: "Tags",
+    definitions: booleanTagDefs("notebook"),
+  }),
+  maker.make({
+    name: "getNotebook",
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition([frAny()], frBool, ([value]) => {
+        return value.tags?.value.notebook || false;
       }),
     ],
   }),
