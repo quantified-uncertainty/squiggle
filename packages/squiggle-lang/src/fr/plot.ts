@@ -168,8 +168,11 @@ const numericFnDef = () => {
   return maker.make({
     name: "numericFn",
     output: "Plot",
-    examples: [
-      `Plot.numericFn({|x|x*x}, {xScale: Scale.linear({ min: 3, max: 5 }), yScale: Scale.log({ tickFormat: ".2s" }) })`,
+    interactiveExamples: [
+      `Plot.numericFn(
+  {|t|t ^ 2},
+  { xScale: Scale.log({ min: 1, max: 100 }), points: 10 }
+)`,
     ],
     definitions: [
       makeDefinition(
@@ -227,13 +230,86 @@ const numericFnDef = () => {
 
 export const library = [
   maker.make({
+    name: "dist",
+    output: "Plot",
+    interactiveExamples: [
+      `Plot.dist(
+  normal(5, 2),
+  {
+    xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title" }),
+    showSummary: true,
+  }
+)`,
+    ],
+
+    definitions: [
+      makeDefinition(
+        [
+          frNamed("dist", frDist),
+          frNamed(
+            "params",
+            frOptional(
+              frDict(
+                ["xScale", frOptional(frScale)],
+                ["yScale", frOptional(frScale)],
+                ["title", frDeprecated(frOptional(frString))],
+                ["showSummary", frOptional(frBool)]
+              )
+            )
+          ),
+        ],
+        frPlot,
+        ([dist, params]) => {
+          const { xScale, yScale, title, showSummary } = params ?? {};
+          return {
+            type: "distributions",
+            distributions: [{ distribution: dist }],
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
+            title: title ?? undefined,
+            showSummary: showSummary ?? true,
+          };
+        }
+      ),
+      makeDefinition(
+        [
+          frDict(
+            ["dist", frDist],
+            ["xScale", frOptional(frScale)],
+            ["yScale", frOptional(frScale)],
+            ["title", frDeprecated(frOptional(frString))],
+            ["showSummary", frOptional(frBool)]
+          ),
+        ],
+        frPlot,
+        ([{ dist, xScale, yScale, title, showSummary }]) => {
+          _assertYScaleNotDateScale(yScale);
+          return {
+            type: "distributions",
+            distributions: [{ distribution: dist }],
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
+            title: title ?? undefined,
+            showSummary: showSummary ?? true,
+          };
+        },
+        { deprecated: "0.8.7" }
+      ),
+    ],
+  }),
+  maker.make({
     name: "dists",
     output: "Plot",
-    examples: [
-      `Plot.dists({
-  dists: [{ name: "dist", value: normal(0, 1) }],
-  xScale: Scale.symlog()
-})`,
+    interactiveExamples: [
+      `Plot.dists(
+{
+  dists: [
+    { name: "First Dist", value: normal(0, 1) },
+    { name: "Second Dist", value: uniform(2, 4) },
+  ],
+  xScale: Scale.symlog({ min: -2, max: 5 }),
+}
+)`,
     ],
     definitions: [
       makeDefinition(
@@ -326,75 +402,19 @@ export const library = [
       ),
     ],
   }),
-  maker.make({
-    name: "dist",
-    output: "Plot",
-    examples: [
-      `Plot.dist(normal(0,1), {
-  xScale: Scale.symlog()
-})`,
-    ],
-    definitions: [
-      makeDefinition(
-        [
-          frNamed("dist", frDist),
-          frNamed(
-            "params",
-            frOptional(
-              frDict(
-                ["xScale", frOptional(frScale)],
-                ["yScale", frOptional(frScale)],
-                ["title", frDeprecated(frOptional(frString))],
-                ["showSummary", frOptional(frBool)]
-              )
-            )
-          ),
-        ],
-        frPlot,
-        ([dist, params]) => {
-          const { xScale, yScale, title, showSummary } = params ?? {};
-          return {
-            type: "distributions",
-            distributions: [{ distribution: dist }],
-            xScale: xScale ?? defaultScale,
-            yScale: yScale ?? defaultScale,
-            title: title ?? undefined,
-            showSummary: showSummary ?? true,
-          };
-        }
-      ),
-      makeDefinition(
-        [
-          frDict(
-            ["dist", frDist],
-            ["xScale", frOptional(frScale)],
-            ["yScale", frOptional(frScale)],
-            ["title", frDeprecated(frOptional(frString))],
-            ["showSummary", frOptional(frBool)]
-          ),
-        ],
-        frPlot,
-        ([{ dist, xScale, yScale, title, showSummary }]) => {
-          _assertYScaleNotDateScale(yScale);
-          return {
-            type: "distributions",
-            distributions: [{ distribution: dist }],
-            xScale: xScale ?? defaultScale,
-            yScale: yScale ?? defaultScale,
-            title: title ?? undefined,
-            showSummary: showSummary ?? true,
-          };
-        },
-        { deprecated: "0.8.7" }
-      ),
-    ],
-  }),
   numericFnDef(),
   maker.make({
     name: "distFn",
     output: "Plot",
-    examples: [
-      `Plot.distFn({|x| uniform(x, x+1)}, {xScale: Scale.linear({ min: 3, max: 5}), yScale: Scale.log({ tickFormat: ".2s" })})`,
+    interactiveExamples: [
+      `Plot.distFn(
+  {|t|normal(t, 2) * normal(5, 3)},
+  {
+    xScale: Scale.log({ min: 3, max: 100, title: "Time (years)" }),
+    yScale: Scale.linear({ title: "Value" }),
+    distXScale: Scale.linear({ tickFormat: "#x" }),
+  }
+)`,
     ],
     definitions: [
       makeDefinition(
@@ -463,9 +483,22 @@ export const library = [
   maker.make({
     name: "scatter",
     output: "Plot",
-    examples: [
-      `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(1 to 3) })`,
-      `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(1 to 3), xScale: Scale.symlog(), yScale: Scale.symlog() })`,
+    interactiveExamples: [
+      `xDist = SampleSet.fromDist(2 to 5)
+yDist = normal({p5:-3, p95:3}) * 5 - xDist ^ 2
+Plot.scatter({
+  xDist: xDist,
+  yDist: yDist,
+  xScale: Scale.log({min: 1.5}),
+})`,
+      `xDist = SampleSet.fromDist(normal({p5:-2, p95:5}))
+yDist = normal({p5:-3, p95:3}) * 5 - xDist
+Plot.scatter({
+  xDist: xDist,
+  yDist: yDist,
+  xScale: Scale.symlog({title: "X Axis Title"}),
+  yScale: Scale.symlog({title: "Y Axis Title"}),
+})`,
     ],
     definitions: [
       makeDefinition(

@@ -62,8 +62,9 @@ function buildRelativeValue({
     return { ok: false, value: result.value.toString() };
   }
   const dict = result.value.asJS();
-  if (!(dict instanceof Map)) {
-    return { ok: false, value: "Expected dict" };
+
+  if (!dict || typeof dict !== "object" || !("value" in dict)) {
+    return { ok: false, value: "Expected dict with 'value'" };
   }
 
   const rvSchema = z.object({
@@ -74,7 +75,7 @@ function buildRelativeValue({
     uncertainty: z.number(),
   });
 
-  const itemResult = rvSchema.safeParse(Object.fromEntries(dict.entries()));
+  const itemResult = rvSchema.safeParse(dict["value"]);
   if (!itemResult.success) {
     return {
       ok: false,

@@ -94,6 +94,7 @@ const InnerDistributionsChart: FC<{
   samplesBarSetting: SampleBarSetting;
   showCursorLine: boolean;
   showPercentileLines: boolean;
+  showAxisTitles: boolean;
   showXAxis: boolean;
 }> = ({
   shapes: unAdjustedShapes,
@@ -102,6 +103,7 @@ const InnerDistributionsChart: FC<{
   height: innerHeight,
   isMulti,
   samplesBarSetting,
+  showAxisTitles,
   showCursorLine,
   showPercentileLines,
   showXAxis,
@@ -134,11 +136,10 @@ const InnerDistributionsChart: FC<{
     : 0;
   const samplesFooterHeight = samplesBarSetting === "bottom" ? 20 : 0;
 
-  const bottomPadding = (!showXAxis ? 0 : 14) + samplesFooterHeight;
+  const bottomPadding = (showXAxis ? 14 : 0) + samplesFooterHeight;
 
-  // full height of canvas
   const height = Math.max(
-    innerHeight + samplesFooterHeight,
+    innerHeight + bottomPadding,
     legendHeight + bottomPadding
   );
 
@@ -159,7 +160,7 @@ const InnerDistributionsChart: FC<{
 
     const yScale = sqScaleToD3(plot.yScale);
     yScale.domain([
-      Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
+      Math.max(Math.min(...domain.map((p) => p.y)), 0), // min value, but at least 0
       Math.max(...domain.map((p) => p.y)),
     ]);
 
@@ -197,7 +198,7 @@ const InnerDistributionsChart: FC<{
         showYAxis: false,
         showXAxis,
         xTickFormat: plot.xScale.tickFormat,
-        xAxisTitle: plot.xScale.title,
+        xAxisTitle: showAxisTitles ? plot.xScale.title : undefined,
         showAxisLines: false,
       });
 
@@ -403,6 +404,7 @@ const InnerDistributionsChart: FC<{
       showCursorLine,
       showPercentileLines,
       showXAxis,
+      showAxisTitles,
     ]
   );
 
@@ -497,6 +499,11 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     isNormalized: distribution.isNormalized(),
   }));
 
+  const showAxisTitles = height > 30;
+  const shownXAxisTitle = showAxisTitles && !!plot.xScale.title;
+  const showXAxis = height > 15;
+  const nonTitleHeight = Math.max(height - (showXAxis ? 20 : 0), 0);
+
   const anyAreNonnormalized = normalizedStatus.some(
     ({ isNormalized }) => !isNormalized
   );
@@ -526,16 +533,17 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
 
   let samplesState: SampleBarSetting = "none";
 
-  const size = height > 150 ? "large" : "small";
+  const size = nonTitleHeight > 150 ? "large" : "small";
 
+  //It probably would be nices to show samples behind, if its small and there's an xAxisTitle, but that would require messing more with the yPadding in the draw/index file.
   if (
     samples.length < 10 ||
     samples.length > CUTOFF_TO_SHOW_SAMPLES_BAR ||
     isMulti ||
-    height <= 30
+    nonTitleHeight <= 15
   ) {
     samplesState = "none";
-  } else if (size == "small") {
+  } else if (size == "small" && !shownXAxisTitle) {
     samplesState = "behind";
   } else {
     samplesState = "bottom";
@@ -564,23 +572,26 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
                 plot={plot}
                 height={height}
                 samplesBarSetting={samplesState}
-                showCursorLine={height > 30}
-                showPercentileLines={height > 30}
-                showXAxis={height > 20}
+                showCursorLine={nonTitleHeight > 30}
+                showPercentileLines={nonTitleHeight > 30}
+                showXAxis={showXAxis}
+                showAxisTitles={showAxisTitles}
               />
             </div>
 
-            {!anyAreNonnormalized && plot.showSummary && (
-              <div
-                className={clsx("mt-3 self-end", size === "large" && "pt-5")}
-              >
-                <SummaryTable
-                  plot={plot}
-                  environment={environment}
-                  size={size}
-                />
-              </div>
-            )}
+            {!anyAreNonnormalized &&
+              plot.showSummary &&
+              nonTitleHeight > 30 && (
+                <div
+                  className={clsx("mt-3 self-end", size === "large" && "pt-5")}
+                >
+                  <SummaryTable
+                    plot={plot}
+                    environment={environment}
+                    size={size}
+                  />
+                </div>
+              )}
             {anyAreNonnormalized && height > 20 && (
               <div className="flex-1 pt-2"> {nonNormalizedError()}</div>
             )}
