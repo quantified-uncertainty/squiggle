@@ -54,7 +54,17 @@ function _ensureTypeUsingLambda<T1>(
   }
 }
 
-const booleanTagDefs = (tagName: string) => [
+//This helps ensure that the tag name is a valid key of ValueTagsType, with the required type.
+type PickByValue<T, ValueType> = NonNullable<
+  keyof Pick<
+    T,
+    {
+      [Key in keyof T]: T[Key] extends ValueType | undefined ? Key : never;
+    }[keyof T]
+  >
+>;
+
+const booleanTagDefs = (tagName: PickByValue<ValueTagsType, boolean>) => [
   makeDefinition(
     [frWithTags(frArray(frAny())), frBool],
     frWithTags(frArray(frAny({ genericName: "A" }))),
