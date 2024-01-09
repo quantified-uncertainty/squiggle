@@ -26,7 +26,7 @@ async function cleanupGeneratedChangelog(packageDir: string) {
   );
 }
 
-// This can't be done in `changelog.cts` callbacks yet.
+/**\n * Cleanup the generated changelogs for each package.\n *\n * @returns {Promise<void>}\n */
 // See: https://github.com/changesets/changesets/issues/995
 export async function cleanupGeneratedChangelogs() {
   const packageDirs = await getChangedPackages();
