@@ -3,7 +3,7 @@
   "compilerOptions": {
     "noEmit": true,
     "rootDir": ".",
-    "tsBuildInfoFile": "tsconfig.test.tsbuildinfo",
+    "tsBuildInfoFile": "tsconfig.test.tsbuildinfo"
   },
   "include": ["__tests__/**/*", "src/custom-types/**/*"],
   "references": [{ "path": "./tsconfig.build.json" }]

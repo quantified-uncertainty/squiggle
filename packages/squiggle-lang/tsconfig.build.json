@@ -4,7 +4,7 @@
     "allowJs": true, // necessary for peggy parser
     "rootDir": "src",
     "outDir": "dist",
-    "tsBuildInfoFile": "dist/tsconfig.build.tsbuildinfo",
+    "tsBuildInfoFile": "dist/tsconfig.build.tsbuildinfo"
   },
   "include": ["src/**/*"]
 }

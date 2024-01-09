@@ -78,7 +78,7 @@ export const builder = new SchemaBuilder<HubSchemaTypes>({
       const email = context.session?.user.email;
       // Note: there's no emailVerified field in session, is this a problem? Probably not.
       // See also: `isRootUser` function in `types/User.ts`.
-      return !!(email && process.env['ROOT_EMAILS']?.includes(email));
+      return !!(email && process.env["ROOT_EMAILS"]?.includes(email));
     },
     isGroupAdmin: async (groupId) => {
       const myMembership = await getMyMembershipById(groupId, context.session);
