@@ -42,19 +42,6 @@ export const library = [
     ],
   }),
   maker.make({
-    name: "throw",
-    description: "Throws an error",
-    definitions: [
-      makeDefinition([frOptional(frString)], frAny(), ([value]) => {
-        if (value) {
-          throw new Error(value);
-        } else {
-          throw new Error("Common.throw() was called");
-        }
-      }),
-    ],
-  }),
-  maker.make({
     name: "inspect",
     description: `Runs Console.log() in the [Javascript developer console](https://www.digitalocean.com/community/tutorials/how-to-use-the-javascript-developer-console) and returns the value passed in.`,
     definitions: [
@@ -64,6 +51,24 @@ export const library = [
         ([value, message]) => {
           message ? console.log(message, value) : console.log(value);
           return value;
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "throw",
+    description:
+      "Throws a fatal error. There is no way in the language to catch this error.",
+    definitions: [
+      makeDefinition(
+        [frOptional(frNamed("message", frString))],
+        frAny(),
+        ([value]) => {
+          if (value) {
+            throw new Error(value);
+          } else {
+            throw new Error("Common.throw() was called");
+          }
         }
       ),
     ],
