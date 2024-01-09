@@ -1,3 +1,7 @@
+// This file is .cts because changeset changelog functions need to be in CJS.
+
+export const REPO = "quantified-uncertainty/squiggle";
+
 export const WEBSITE_CHANGELOG_ROOT =
   "packages/website/src/pages/docs/Changelog";
 

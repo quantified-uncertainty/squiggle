@@ -14,5 +14,5 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": ["squiggle-website", "@quri/hub", "@quri/ops"],
-  "changelog": "../packages/ops/dist/scripts/changelog.cjs"
+  "changelog": "../packages/ops/dist/changelog.cjs"
 }

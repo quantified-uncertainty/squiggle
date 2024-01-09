@@ -11,7 +11,7 @@ describe("Tags", () => {
 
   describe("all", () => {
     testEvalToBe(
-      "123 -> Tag.name('myName') -> Tag.doc('myDoc') -> Tag.all",
+      "123 -> Tag.name('myName') -> Tag.doc('myDoc') -> Tag.getAll",
       '{name: "myName",doc: "myDoc"}'
     );
   });
@@ -20,16 +20,24 @@ describe("Tags", () => {
     testEvalToBe("123 -> Tag.format('.2%') -> Tag.getFormat", '".2%"');
   });
 
+  describe("notebook", () => {
+    testEvalToBe("[123] -> Tag.notebook -> Tag.getNotebook", "true");
+  });
+
+  describe("hide", () => {
+    testEvalToBe("3 -> Tag.hide -> Tag.getHide", "true");
+  });
+
   describe("omit", () => {
     testEvalToBe(
-      "123 -> Tag.name('myName') -> Tag.doc('myDoc') -> Tag.format('.2%') -> Tag.omit(['name', 'doc']) -> Tag.all",
+      "123 -> Tag.name('myName') -> Tag.doc('myDoc') -> Tag.format('.2%') -> Tag.omit(['name', 'doc']) -> Tag.getAll",
       '{numberFormat: ".2%"}'
     );
   });
 
   describe("clear", () => {
     testEvalToBe(
-      "123 -> Tag.name('myName') -> Tag.doc('myDoc') -> Tag.format('.2%') -> Tag.clear -> Tag.all",
+      "123 -> Tag.name('myName') -> Tag.doc('myDoc') -> Tag.format('.2%') -> Tag.clear -> Tag.getAll",
       "{}"
     );
   });
