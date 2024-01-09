@@ -51,7 +51,7 @@ export type ImageError = {
   value: string;
 };
 
-export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
+export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot, X extends ScaleContinuousNumeric<number, number, never>>(
   plot: T,
   environment: Env,
   xPointCount: number
@@ -87,7 +87,7 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
            * https://stackoverflow.com/questions/72890232/how-do-i-link-join-relate-the-types-of-two-function-parameters-in-typescript
            * https://github.com/microsoft/TypeScript/issues/27808
            */
-          y: result.value.value as ImageValue<T>,
+          y: result.value.value as ImageValue<T> as ImageValue<T>,
         });
       } else if (result.value.tag === "Dist" && plot.tag === "distFn") {
         functionImage.push({
