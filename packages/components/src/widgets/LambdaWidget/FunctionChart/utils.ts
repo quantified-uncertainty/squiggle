@@ -19,7 +19,7 @@ function rangeByCount({
   scale,
   count,
 }: {
-  scale: ScaleContinuousNumeric<number, number, never>;
+  scale: ScaleContinuousNumeric<number>;
   count: number;
 }) {
   const backupRange = scale.range();
@@ -28,7 +28,7 @@ function rangeByCount({
   // Otherwise, precision issues can cause out-of-domain values.
   // That would be bad because annotated functions check their parameters strictly.
   const backupClamp = scale.clamp();
-  scale.clamp(true);
+  scale.clamp(backupClamp);
 
   const items: number[] = [];
   for (let i = 0; i < count; i++) {
@@ -36,6 +36,9 @@ function rangeByCount({
   }
 
   scale.range(backupRange);
+  scale.clamp(backupClamp);
+  
+  return items;
   scale.clamp(backupClamp);
   
   return items;
