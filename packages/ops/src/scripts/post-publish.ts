@@ -1,8 +1,12 @@
 import { writeFile } from "node:fs/promises";
 
-import { PRIMARY_SQUIGGLE_PACKAGE_DIRS } from "../constants.js";
-import { insertVersionToVersionedComponents } from "../insertVersionToVersionedComponents.js";
-import { exec, exists, getPackageInfo, PackageInfo } from "../lib.js";
+import { PRIMARY_SQUIGGLE_PACKAGE_DIRS } from "../constants.cjs";
+import { exec, exists } from "../lib.js";
+import { getPackageInfo, PackageInfo } from "../package-utils.js";
+import {
+  insertVersionToVersionedComponents,
+  updateSquiggleLangVersion,
+} from "../patch-js.js";
 
 async function bumpVersionsToDev() {
   for (const packageDir of PRIMARY_SQUIGGLE_PACKAGE_DIRS) {
@@ -41,13 +45,9 @@ async function main() {
   );
   await bumpVersionsToDev();
 
-  {
-    process.chdir("packages/versioned-components");
-    await insertVersionToVersionedComponents(releasedVersion);
-    process.chdir("../..");
-  }
+  await insertVersionToVersionedComponents(releasedVersion);
 
-  await exec("cd packages/squiggle-lang && pnpm run update-system-version");
+  await updateSquiggleLangVersion();
 
   await createEmptyChangeset();
 }
