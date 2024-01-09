@@ -5,12 +5,13 @@ import { useRunnerState } from "../lib/hooks/useRunnerState.js";
 import { useSquiggle } from "../lib/hooks/useSquiggle.js";
 import { getErrors } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
-import { DynamicSquiggleViewer } from "./DynamicSquiggleViewer.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
+import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
 import { SquiggleCodeProps } from "./types.js";
 
 export type SquiggleEditorProps = SquiggleCodeProps & {
   hideViewer?: boolean;
+  editorFontSize?: number;
   // environment comes from SquiggleCodeProps
 } & Omit<PartialPlaygroundSettings, "environment">;
 
@@ -21,6 +22,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   continues,
   environment,
   hideViewer,
+  editorFontSize,
   ...settings
 }) => {
   const { code, setCode, defaultCode } = useUncontrolledCode({
@@ -48,12 +50,13 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   return (
     <div>
       <div
-        className="border border-grey-200 p-2 m-4"
+        className="border border-slate-100 bg-slate-50 rounded-sm p-2"
         data-testid="squiggle-editor"
       >
         <CodeEditor
           defaultValue={defaultCode ?? ""}
           onChange={setCode}
+          fontSize={editorFontSize}
           showGutter={false}
           errors={errors}
           project={project}
@@ -63,7 +66,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
         />
       </div>
       {hideViewer || !squiggleOutput?.code ? null : (
-        <DynamicSquiggleViewer
+        <SquiggleOutputViewer
           squiggleOutput={squiggleOutput}
           isRunning={isRunning}
           editor={editorRef.current ?? undefined}

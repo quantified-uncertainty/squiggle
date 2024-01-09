@@ -1,11 +1,14 @@
-// https://github.com/changesets/changesets/blob/main/docs/modifying-changelog-format.md
-// Fork of https://github.com/svitejs/changesets-changelog-github-compact/blob/b9afa3e4c42762e842a310813d42f99b0aee4b6f/packages/changesets-changelog-github-compact/src/index.ts
+/**
+ * This file customizes the changeset output; it's configured in `/.changeset/config.json`.
+ * See https://github.com/changesets/changesets/blob/main/docs/modifying-changelog-format.md for details.
+ *
+ * The code is based on https://github.com/svitejs/changesets-changelog-github-compact/blob/b9afa3e4c42762e842a310813d42f99b0aee4b6f/packages/changesets-changelog-github-compact/src/index.ts
+ */
 
 import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
 import type { ChangelogFunctions } from "@changesets/types";
 
-// can't be moved to constants.ts because it's ESM and changesets requires this file to be CJS
-const REPO = "quantified-uncertainty/squiggle";
+import { REPO } from "./constants.cjs";
 
 const changelogFunctions: ChangelogFunctions = {
   getDependencyReleaseLine: async (changesets, dependenciesUpdated) => {
@@ -78,8 +81,8 @@ const changelogFunctions: ChangelogFunctions = {
     const suffix = links.pull
       ? ` (${links.pull})`
       : links.commit
-      ? ` (${links.commit})`
-      : "";
+        ? ` (${links.commit})`
+        : "";
 
     return `\n- ${firstLine}${suffix}\n${futureLines
       .map((l) => `  ${l}`)

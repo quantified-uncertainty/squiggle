@@ -34,8 +34,8 @@ const SortBy: FC<{
         ? ArrowUpIcon
         : ArrowDownIcon
       : iconDesc
-      ? ArrowLeftIcon
-      : ArrowRightIcon;
+        ? ArrowLeftIcon
+        : ArrowRightIcon;
 
   const setSort = () => {
     dispatch({

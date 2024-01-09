@@ -8,7 +8,11 @@ import {
   vNumber,
   vString,
 } from "../../value/index.js";
-import { SimpleValue, simpleValueFromValue } from "../../value/simpleValue.js";
+import {
+  removeLambdas,
+  simpleValueFromValue,
+  simpleValueToJson,
+} from "../../value/simpleValue.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
@@ -22,6 +26,10 @@ import { SqDistributionsPlot, wrapPlot } from "./SqPlot.js";
 import { wrapScale } from "./SqScale.js";
 import { SqTableChart } from "./SqTableChart.js";
 import { SqTags } from "./SqTags.js";
+
+function valueToJSON(value: Value): unknown {
+  return simpleValueToJson(removeLambdas(simpleValueFromValue(value)));
+}
 
 export function wrapValue(value: Value, context?: SqValueContext) {
   switch (value.type) {
@@ -89,15 +97,15 @@ export abstract class SqAbstractValue<Type extends string, JSType> {
   abstract asJS(): JSType;
 }
 
-export class SqArrayValue extends SqAbstractValue<"Array", SimpleValue[]> {
+export class SqArrayValue extends SqAbstractValue<"Array", unknown[]> {
   tag = "Array" as const;
 
   get value() {
     return new SqArray(this._value.value, this.context);
   }
 
-  asJS(): SimpleValue[] {
-    return this._value.value.map(simpleValueFromValue);
+  asJS(): unknown[] {
+    return this._value.value.map(valueToJSON);
   }
 }
 
@@ -113,7 +121,7 @@ export class SqBoolValue extends SqAbstractValue<"Bool", boolean> {
   }
 }
 
-export class SqDateValue extends SqAbstractValue<"Date", Date> {
+export class SqDateValue extends SqAbstractValue<"Date", unknown> {
   tag = "Date" as const;
 
   static create(value: SDate) {
@@ -128,13 +136,12 @@ export class SqDateValue extends SqAbstractValue<"Date", Date> {
     return this._value.value;
   }
 
-  //Note: This reveals the underlying Date object, but we might prefer to keep it hidden
   asJS() {
-    return this.value.toDate();
+    return valueToJSON(this._value);
   }
 }
 
-export class SqDistributionValue extends SqAbstractValue<"Dist", SimpleValue> {
+export class SqDistributionValue extends SqAbstractValue<"Dist", unknown> {
   tag = "Dist" as const;
 
   get value() {
@@ -151,11 +158,11 @@ export class SqDistributionValue extends SqAbstractValue<"Dist", SimpleValue> {
   }
 
   asJS() {
-    return simpleValueFromValue(this._value);
+    return valueToJSON(this._value);
   }
 }
 
-export class SqLambdaValue extends SqAbstractValue<"Lambda", SimpleValue> {
+export class SqLambdaValue extends SqAbstractValue<"Lambda", unknown> {
   tag = "Lambda" as const;
 
   static create(value: SqLambda) {
@@ -194,15 +201,15 @@ export class SqNumberValue extends SqAbstractValue<"Number", number> {
   }
 }
 
-export class SqDictValue extends SqAbstractValue<"Dict", SimpleValue> {
+export class SqDictValue extends SqAbstractValue<"Dict", unknown> {
   tag = "Dict" as const;
 
   get value() {
     return new SqDict(this._value.value, this.context);
   }
 
-  asJS(): SimpleValue {
-    return simpleValueFromValue(this._value);
+  asJS() {
+    return valueToJSON(this._value);
   }
 }
 
@@ -238,7 +245,7 @@ export class SqDurationValue extends SqAbstractValue<"Duration", number> {
   }
 }
 
-export class SqPlotValue extends SqAbstractValue<"Plot", SimpleValue> {
+export class SqPlotValue extends SqAbstractValue<"Plot", unknown> {
   tag = "Plot" as const;
 
   get value() {
@@ -250,13 +257,10 @@ export class SqPlotValue extends SqAbstractValue<"Plot", SimpleValue> {
   }
 
   asJS() {
-    return simpleValueFromValue(this._value);
+    return valueToJSON(this._value);
   }
 }
-export class SqTableChartValue extends SqAbstractValue<
-  "TableChart",
-  SimpleValue
-> {
+export class SqTableChartValue extends SqAbstractValue<"TableChart", unknown> {
   tag = "TableChart" as const;
 
   get value() {
@@ -264,13 +268,10 @@ export class SqTableChartValue extends SqAbstractValue<
   }
 
   asJS() {
-    return simpleValueFromValue(this._value);
+    return valueToJSON(this._value);
   }
 }
-export class SqCalculatorValue extends SqAbstractValue<
-  "Calculator",
-  SimpleValue
-> {
+export class SqCalculatorValue extends SqAbstractValue<"Calculator", unknown> {
   tag = "Calculator" as const;
 
   get value() {
@@ -286,7 +287,7 @@ export class SqCalculatorValue extends SqAbstractValue<
   }
 }
 
-export class SqScaleValue extends SqAbstractValue<"Scale", SimpleValue> {
+export class SqScaleValue extends SqAbstractValue<"Scale", unknown> {
   tag = "Scale" as const;
 
   get value() {
@@ -294,11 +295,11 @@ export class SqScaleValue extends SqAbstractValue<"Scale", SimpleValue> {
   }
 
   asJS() {
-    return simpleValueFromValue(this._value);
+    return valueToJSON(this._value);
   }
 }
 
-export class SqInputValue extends SqAbstractValue<"Input", SimpleValue> {
+export class SqInputValue extends SqAbstractValue<"Input", unknown> {
   tag = "Input" as const;
 
   get value() {
@@ -306,7 +307,7 @@ export class SqInputValue extends SqAbstractValue<"Input", SimpleValue> {
   }
 
   asJS() {
-    return simpleValueFromValue(this._value);
+    return valueToJSON(this._value);
   }
 }
 
@@ -322,7 +323,7 @@ export class SqVoidValue extends SqAbstractValue<"Void", null> {
   }
 }
 
-export class SqDomainValue extends SqAbstractValue<"Domain", SimpleValue> {
+export class SqDomainValue extends SqAbstractValue<"Domain", unknown> {
   tag = "Domain" as const;
 
   get value() {
@@ -330,7 +331,7 @@ export class SqDomainValue extends SqAbstractValue<"Domain", SimpleValue> {
   }
 
   asJS() {
-    return simpleValueFromValue(this._value);
+    return valueToJSON(this._value);
   }
 }
 

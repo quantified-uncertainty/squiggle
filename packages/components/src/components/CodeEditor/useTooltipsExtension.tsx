@@ -28,7 +28,7 @@ const TooltipBox: FC<PropsWithChildren<{ view: EditorView }>> = ({
   });
 
   return (
-    <div className="border bg-slate-50 rounded-sm shadow-lg min-w-[200px] max-w-[600px]">
+    <div className="border rounded-sm shadow-lg min-w-[200px] max-w-[600px] px-2">
       {children}
     </div>
   );

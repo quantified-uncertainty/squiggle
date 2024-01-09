@@ -33,7 +33,12 @@ export const library = [
   maker.make({
     name: "text",
     output: "Input",
-    examples: [`Input.text({ name: "First", default: "John" })`],
+    examples: [
+      `Input.text({ name: "First", default: "John" })`,
+      `Input.text({ name: "Number of X in Y", default: '20 to 300' })`,
+    ],
+    description:
+      "Creates a single-line input. This input can be used for all Squiggle types.",
     definitions: [
       makeDefinition(
         [
@@ -58,7 +63,14 @@ export const library = [
   maker.make({
     name: "textArea",
     output: "Input",
-    examples: [`Input.textArea({ name: "First", default: "John" })`],
+    examples: [
+      `Input.textArea({ name: "people", default: '{
+  "John": 20 to 50, 
+  "Mary": 30 to 90,
+}' })`,
+    ],
+    description:
+      "Creates a multi-line input, sized with the provided input. This input can be used for all Squiggle types.",
     definitions: [
       makeDefinition(
         [
@@ -83,7 +95,8 @@ export const library = [
   maker.make({
     name: "checkbox",
     output: "Input",
-    examples: [`Input.checkbox({ name: "First", default: true })`],
+    examples: [`Input.checkbox({ name: "IsTrue?", default: true })`],
+    description: "Creates a checkbox input. Used for Squiggle booleans.",
     definitions: [
       makeDefinition(
         [
@@ -109,8 +122,9 @@ export const library = [
     name: "select",
     output: "Input",
     examples: [
-      `Input.select({ name: "First", default: "John", options: ["John", "Mary", "Sue"] })`,
+      `Input.select({ name: "Name", default: "Sue", options: ["John", "Mary", "Sue"] })`,
     ],
+    description: "Creates a dropdown input. Used for Squiggle strings.",
     definitions: [
       makeDefinition(
         [

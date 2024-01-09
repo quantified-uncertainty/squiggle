@@ -1,6 +1,18 @@
 {
   "extends": ["//"],
   "pipeline": {
+    "build": {
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "*.tsbuildinfo",
+        "!.next/cache/**",
+        "public/llms/documentationBundle.txt",
+        "src/pages/docs/Ecosystem/LLMPrompt.md",
+        "src/pages/docs/Api/*",
+        "src/pages/docs/Ecosystem/LLMPrompt.md"
+      ]
+    },
     "lint": {
       "dependsOn": ["@quri/squiggle-textmate-grammar#build"]
     }

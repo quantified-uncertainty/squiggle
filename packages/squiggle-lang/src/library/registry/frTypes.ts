@@ -55,6 +55,10 @@ export const isOptional = <T>(frType: FRType<T>): boolean => {
   return frType.isOptional === undefined ? false : frType.isOptional;
 };
 
+export const isDeprecated = <T>(frType: FRType<T>): boolean => {
+  return frType.tag === "deprecated";
+};
+
 export const frNumber: FRType<number> = {
   unpack: (v: Value) => (v.type === "Number" ? v.value : undefined),
   pack: (v) => vNumber(v),
@@ -552,6 +556,7 @@ export function frDict<T extends object>(
     display: () =>
       "{" +
       allKvs
+        .filter(([_, frType]) => !isDeprecated(frType))
         .map(
           ([name, frType]) =>
             `${name}${isOptional(frType) ? "?" : ""}: ${frType.display()}`
@@ -596,3 +601,14 @@ export const frOptional = <T>(itemType: FRType<T>): FRType<T | null> => {
     fieldType: itemType.fieldType,
   };
 };
+
+export const frDeprecated = <T>(itemType: FRType<T>): FRType<T> => ({
+  unpack: itemType.unpack,
+  pack: (v) => itemType.pack(v),
+  display: () => ``,
+  isOptional: isOptional(itemType),
+  tag: "deprecated",
+  underlyingType: itemType,
+  default: itemType.default,
+  fieldType: itemType.fieldType,
+});

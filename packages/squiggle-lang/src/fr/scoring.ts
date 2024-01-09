@@ -57,6 +57,10 @@ export const library = [
   maker.make({
     name: "logScore",
     output: "Number",
+    displaySection: "Scoring",
+    description: `A log loss score. Often that often acts as a [scoring rule](https://en.wikipedia.org/wiki/Scoring_rule). Useful when evaluating the accuracy of a forecast.
+
+    Note that it is fairly slow.`,
     examples: [
       "Dist.logScore({estimate: Sym.normal(5,2), answer: Sym.normal(5.2,1), prior: Sym.normal(5.5,3)})",
       "Dist.logScore({estimate: Sym.normal(5,2), answer: Sym.normal(5.2,1)})",
@@ -116,6 +120,10 @@ export const library = [
     name: "klDivergence",
     output: "Number",
     examples: ["Dist.klDivergence(Sym.normal(5,2), Sym.normal(5,1.5))"],
+    displaySection: "Scoring",
+    description: `[Kullback–Leibler divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence) between two distributions.
+
+Note that this can be very brittle. If the second distribution has probability mass at areas where the first doesn't, then the result will be infinite. Due to numeric approximations, some probability mass in point set distributions is rounded to zero, leading to infinite results with klDivergence.`,
     definitions: [
       makeDefinition([frDist, frDist], frNumber, ([estimate, d], context) =>
         runScoringDistAnswer(estimate, d, undefined, context.environment)

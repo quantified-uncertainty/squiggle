@@ -9,6 +9,7 @@ import {
 
 import { SQUIGGLE_DOCS_URL } from "../../lib/constants.js";
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
+import { SquiggleEditor } from "../SquiggleEditor.js";
 
 type Size = "small" | "normal";
 
@@ -67,10 +68,15 @@ export const FnDocumentation: FC<{
     description,
     definitions,
     examples,
+    interactiveExamples,
   } = documentation;
-  const textSize = size === "small" ? "text-xs" : "text-md";
+  const textSize = size === "small" ? "text-xs" : "text-sm";
   const fullName = `${nameSpace ? nameSpace + "." : ""}${name}`;
-  const tagCss = "text-xs font-medium me-2 px-2.5 py-0.5 rounded";
+  const tagCss = clsx(
+    "font-medium py-0.5 rounded",
+    textSize,
+    size === "small" ? "px-1.5" : "px-2.5"
+  );
 
   return (
     <>
@@ -81,11 +87,16 @@ export const FnDocumentation: FC<{
               href={`${SQUIGGLE_DOCS_URL}/${nameSpace}#${name}`}
               target="_blank"
               rel="noreferrer"
-              className="text-blue-500 hover:underline text-sm leading-none"
+              className={clsx(
+                "text-blue-500 hover:underline leading-none",
+                size === "small" ? "text-sm" : "text-md"
+              )}
             >
               {fullName}
             </a>
-            <div className="italic text-xs leading-none text-slate-500">
+            <div
+              className={clsx("italic leading-none text-slate-500", textSize)}
+            >
               Stdlib
             </div>
           </div>
@@ -93,7 +104,7 @@ export const FnDocumentation: FC<{
       )}
       {(isUnit || shorthand || isExperimental || !requiresNamespace) && (
         <Section>
-          <div className="flex">
+          <div className="flex gap-3">
             {isUnit && (
               <div className={clsx("bg-yellow-100 text-yellow-800", tagCss)}>
                 Unit
@@ -113,7 +124,7 @@ export const FnDocumentation: FC<{
               </div>
             )}
             {!requiresNamespace && (
-              <div className={clsx("bg-purple-100 text-slate-800", tagCss)}>
+              <div className={clsx("bg-purple-50 text-slate-600", tagCss)}>
                 {`Namespace optional`}
               </div>
             )}
@@ -141,29 +152,39 @@ export const FnDocumentation: FC<{
               textSize
             )}
           >
-            {definitions.map((def, id) => (
-              <StyleDefinition fullName={fullName} def={def} key={id} />
-            ))}
+            {definitions
+              .filter((def) => !def.deprecated)
+              .map((def, id) => (
+                <StyleDefinition fullName={fullName} def={def} key={id} />
+              ))}
           </div>
         </Section>
       ) : null}
-      {examples?.length ? (
+      {examples?.length ?? interactiveExamples?.length ? (
         <Section>
           <header className={clsx("text-slate-600 font-medium mb-2", textSize)}>
             Examples
           </header>
-          <div
-            className={clsx(
-              "text-slate-600 font-mono p-2 bg-slate-100 rounded-md",
-              textSize
-            )}
-          >
-            {examples.map((example, i) => (
-              <div className="p-1" key={i}>
-                {example}
-              </div>
+
+          {examples &&
+            examples.map((example, i) => (
+              <MarkdownViewer
+                className="max-width-[200px]"
+                key={i}
+                md={`\`\`\`squiggle\n${example}\n\`\`\``}
+                textSize="sm"
+              />
             ))}
-          </div>
+          {(interactiveExamples ?? []).map((example, i) => (
+            <div className="pt-2 pb-4" key={i}>
+              <SquiggleEditor
+                defaultCode={example}
+                key={i}
+                chartHeight={size === "small" ? 80 : 120}
+                editorFontSize={size === "small" ? 12 : 13}
+              />
+            </div>
+          ))}
         </Section>
       ) : null}
     </>

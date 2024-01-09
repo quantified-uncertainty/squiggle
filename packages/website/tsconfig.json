@@ -15,6 +15,14 @@
     "jsx": "preserve",
     "allowJs": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "scripts/generateModulePages.mts",
+    "scripts/generateModuleContent.mts",
+    "scripts/compileDocsForLLM.mts",
+    "templates.mts"
+  ],
   "exclude": ["node_modules"]
 }

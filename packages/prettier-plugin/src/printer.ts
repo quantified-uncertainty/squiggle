@@ -317,7 +317,10 @@ export function createSquigglePrinter(
             softline,
             "}",
           ]);
-        case "Dict":
+        case "Dict": {
+          const isSingleKeyWithoutValue =
+            node.elements.length === 1 &&
+            node.elements[0].type === "Identifier";
           return group([
             "{",
             node.elements.length
@@ -326,12 +329,13 @@ export function createSquigglePrinter(
                     line,
                     join([",", line], path.map(print, "elements")),
                   ]),
-                  ifBreak(",", ""),
+                  isSingleKeyWithoutValue ? "," : ifBreak(",", ""),
                   line,
                 ]
               : [],
             "}",
           ]);
+        }
         case "String":
           return [JSON.stringify(node.value).replaceAll("\\n", "\n")];
         case "Ternary":

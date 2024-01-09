@@ -173,6 +173,8 @@ export const library: FRFunction[] = [
     name: "pointMass",
     requiresNamespace: false,
     examples: ["pointMass(0.5)"],
+    description:
+      "Point mass distributions are already symbolic, so you can use the regular `pointMass` function.",
     definitions: [
       makeDefinition([frNumber], frDistSymbolic, ([v]) => {
         const result = SymbolicDist.PointMass.make(v);

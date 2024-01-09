@@ -1,10 +1,11 @@
 import merge from "lodash/merge.js";
 import {
   createContext,
-  FC,
+  forwardRef,
   PropsWithChildren,
   useContext,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -21,11 +22,11 @@ import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
+import { SquiggleViewerHandle } from "./index.js";
 import {
   getChildrenValues,
   pathAsString,
   shouldBeginCollapsed,
-  topLevelBindingsName,
 } from "./utils.js";
 
 type ItemHandle = {
@@ -58,18 +59,6 @@ const defaultLocalItemState: LocalItemState = {
 class ItemStore {
   state: Record<string, LocalItemState> = {};
   handles: Record<string, ItemHandle> = {};
-
-  constructor({
-    beginWithVariablesCollapsed,
-  }: {
-    beginWithVariablesCollapsed?: boolean;
-  }) {
-    if (beginWithVariablesCollapsed) {
-      this.state = {
-        [topLevelBindingsName]: { collapsed: true, settings: {} },
-      };
-    }
-  }
 
   setState(
     path: SqValuePath,
@@ -179,7 +168,7 @@ export const ViewerContext = createContext<ViewerContextShape>({
   focused: undefined,
   setFocused: () => undefined,
   editor: undefined,
-  itemStore: new ItemStore({}),
+  itemStore: new ItemStore(),
 });
 
 export function useViewerContext() {
@@ -269,8 +258,17 @@ export function useHasLocalSettings(path: SqValuePath) {
 }
 
 export function useFocus() {
-  const { setFocused } = useViewerContext();
-  return (value: SqValuePath) => setFocused(value);
+  const { focused, setFocused } = useViewerContext();
+  return (path: SqValuePath) => {
+    if (focused && pathAsString(focused) === pathAsString(path)) {
+      return; // nothing to do
+    }
+    if (path.isRoot()) {
+      setFocused(undefined); // focusing on root nodes is not allowed
+    } else {
+      setFocused(path);
+    }
+  };
 }
 
 export function useUnfocus() {
@@ -295,27 +293,22 @@ export function useMergedSettings(path: SqValuePath) {
   return result;
 }
 
-export const ViewerProvider: FC<
+export const ViewerProvider = forwardRef<
+  SquiggleViewerHandle,
   PropsWithChildren<{
     partialPlaygroundSettings: PartialPlaygroundSettings;
     editor?: CodeEditorHandle;
-    beginWithVariablesCollapsed?: boolean;
-    rootPathOverride?: SqValuePath;
   }>
-> = ({
-  partialPlaygroundSettings,
-  editor,
-  beginWithVariablesCollapsed,
-  rootPathOverride,
-  children,
-}) => {
-  const [itemStore] = useState(
-    () => new ItemStore({ beginWithVariablesCollapsed })
-  );
+>(({ partialPlaygroundSettings, editor, children }, ref) => {
+  const [itemStore] = useState(() => new ItemStore());
 
-  const [focused, setFocused] = useState<SqValuePath | undefined>(
-    rootPathOverride
-  );
+  useImperativeHandle(ref, () => ({
+    viewValuePath(path: SqValuePath) {
+      itemStore.scrollToPath(path);
+    },
+  }));
+
+  const [focused, setFocused] = useState<SqValuePath | undefined>();
 
   const globalSettings = useMemo(() => {
     return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
@@ -334,4 +327,5 @@ export const ViewerProvider: FC<
       {children}
     </ViewerContext.Provider>
   );
-};
+});
+ViewerProvider.displayName = "ViewerProvider";
