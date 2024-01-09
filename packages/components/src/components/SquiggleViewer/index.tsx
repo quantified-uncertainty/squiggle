@@ -3,7 +3,6 @@ import { FC, forwardRef, memo } from "react";
 import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 
-import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
 import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
@@ -127,18 +126,9 @@ const component = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
     { value, editor, ...partialPlaygroundSettings },
     ref
   ) {
-    /**
-     * Because we obtain `partialPlaygroundSettings` with spread syntax, its identity changes on each render, which could
-     * cause extra unnecessary re-renders of widgets, in some cases.
-     * Related discussion: https://github.com/quantified-uncertainty/squiggle/pull/2525#discussion_r1393398447
-     */
-    const stablePartialPlaygroundSettings = useStabilizeObjectIdentity(
-      partialPlaygroundSettings
-    );
-
     return (
       <ViewerProvider
-        partialPlaygroundSettings={stablePartialPlaygroundSettings}
+        partialPlaygroundSettings={partialPlaygroundSettings}
         editor={editor}
         ref={ref}
       >
