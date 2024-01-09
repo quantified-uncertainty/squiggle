@@ -2,7 +2,7 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     // conservative settings, should we upgrade these?
-    "module": "es2020",
+    "module": "es2022",
     "target": "es2021",
     "moduleResolution": "bundler",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -10,7 +10,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "allowJs": true, // enforced by Next.js
+    "allowJs": true // enforced by Next.js
   },
   // otherwise `next dev` would enforce it
   "exclude": ["node_modules"]
