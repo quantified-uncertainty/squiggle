@@ -9,6 +9,22 @@ describe("dicts", () => {
     expect(await format("{foo: 5}")).toBe("{ foo: 5 }");
   });
 
+  test("one key with trailing comma", async () => {
+    expect(
+      await format(`foo=3
+{foo,}`)
+    ).toBe(`foo = 3
+{ foo, }`);
+  });
+
+  test("two keys with trailing comma", async () => {
+    expect(
+      await format(`foo=3
+{foo,foo,}`)
+    ).toBe(`foo = 3
+{ foo, foo }`);
+  });
+
   test("shorthand", async () => {
     expect(await format("{foo, bar: bar, baz}")).toBe("{ foo, bar: bar, baz }");
   });

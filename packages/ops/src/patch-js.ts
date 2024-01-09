@@ -1,15 +1,25 @@
 import babel from "@babel/core";
 import babelParser from "@babel/parser";
 import { readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { exec } from "./lib.js";
+
+const repoRoot = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../../.."
+);
 
 const t = babel.types;
 
 const parserPlugins: babelParser.ParserPlugin[] = [["typescript", {}], "jsx"];
 
-// assumes that cwd is packages/versioned-components
 export async function insertVersionToVersionedComponents(version: string) {
+  // `using` (https://devblogs.microsoft.com/typescript/announcing-typescript-5-2/#using-declarations-and-explicit-resource-management) would be nice to back up cwd.
+  const oldCwd = process.cwd();
+  process.chdir(path.join(repoRoot, "packages/versioned-components"));
+
   const alias = `squiggle-components-${version}`;
   await exec(`pnpm add ${alias}@npm:@quri/squiggle-components@${version}`);
 
@@ -136,4 +146,48 @@ export async function insertVersionToVersionedComponents(version: string) {
   }
 
   await exec("pnpm format");
+  process.chdir(oldCwd);
+}
+
+// Always updates to the current version from `package.json`.
+export async function updateSquiggleLangVersion() {
+  const packageRoot = path.join(repoRoot, "packages/squiggle-lang");
+
+  const packageJson = await readFile(
+    path.join(packageRoot, "package.json"),
+    "utf-8"
+  );
+  const { version } = JSON.parse(packageJson);
+
+  const filename = path.join(packageRoot, "src/library/version.ts");
+  let src = await readFile(filename, "utf-8");
+
+  let patchedVersion = false;
+
+  const output = babel.transformSync(src, {
+    parserOpts: { plugins: parserPlugins },
+    plugins: [
+      () => {
+        const visitor: babel.Visitor = {
+          VariableDeclarator(path) {
+            if (
+              path.node.id.type === "Identifier" &&
+              path.node.id.name === "VERSION"
+            ) {
+              path.node.init = t.stringLiteral(version);
+              patchedVersion = true;
+            }
+          },
+        };
+        return { visitor };
+      },
+    ],
+  });
+
+  if (!output?.code || !patchedVersion) {
+    throw new Error(`Failed to transform ${filename}`);
+  }
+
+  await writeFile(filename, output.code, "utf-8");
+  await exec(`cd ${packageRoot} && npx prettier --write ${filename}`);
 }

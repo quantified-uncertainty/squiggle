@@ -411,10 +411,12 @@ function createComparisonDefinition<T>(
   fnFactory: FnFactory,
   opName: string,
   comparisonFunction: (d1: T, d2: T) => boolean,
-  frType: FRType<T>
+  frType: FRType<T>,
+  displaySection?: string
 ): FRFunction {
   return fnFactory.make({
     name: opName,
+    displaySection,
     definitions: [
       makeDefinition([frType, frType], frBool, ([d1, d2]) =>
         comparisonFunction(d1, d2)
@@ -428,22 +430,37 @@ export function makeNumericComparisons<T>(
   smaller: (d1: T, d2: T) => boolean,
   larger: (d1: T, d2: T) => boolean,
   isEqual: (d1: T, d2: T) => boolean,
-  frType: FRType<T>
+  frType: FRType<T>,
+  displaySection?: string
 ): FRFunction[] {
   return [
-    createComparisonDefinition(fnFactory, "smaller", smaller, frType),
-    createComparisonDefinition(fnFactory, "larger", larger, frType),
+    createComparisonDefinition(
+      fnFactory,
+      "smaller",
+      smaller,
+      frType,
+      displaySection
+    ),
+    createComparisonDefinition(
+      fnFactory,
+      "larger",
+      larger,
+      frType,
+      displaySection
+    ),
     createComparisonDefinition(
       fnFactory,
       "smallerEq",
       (d1, d2) => smaller(d1, d2) || isEqual(d1, d2),
-      frType
+      frType,
+      displaySection
     ),
     createComparisonDefinition(
       fnFactory,
       "largerEq",
       (d1, d2) => larger(d1, d2) || isEqual(d1, d2),
-      frType
+      frType,
+      displaySection
     ),
   ];
 }

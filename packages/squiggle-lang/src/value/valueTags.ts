@@ -10,6 +10,7 @@ export type ValueTagsType = {
   numberFormat?: string;
   dateFormat?: string;
   hidden?: boolean;
+  notebook?: boolean;
 };
 
 type ValueTagsTypeName = keyof ValueTagsType;
@@ -21,6 +22,7 @@ const valueTagsTypeNames: ValueTagsTypeName[] = [
   "numberFormat",
   "dateFormat",
   "hidden",
+  "notebook",
 ];
 
 function convertToValueTagsTypeName(
@@ -63,6 +65,9 @@ export class ValueTags {
     }
     if (value.hidden) {
       result.push(["hidden", vBool(value.hidden)]);
+    }
+    if (value.notebook) {
+      result.push(["notebook", vBool(value.notebook)]);
     }
     return result;
   }
@@ -118,5 +123,9 @@ export class ValueTags {
 
   hidden() {
     return this.value.hidden;
+  }
+
+  notebook() {
+    return this.value.notebook;
   }
 }

@@ -1,4 +1,12 @@
 {
   "extends": "@quri/configs/tsconfig.nextjs.json",
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "scripts/generateModulePages.mts",
+    "scripts/generateModuleContent.mts",
+    "scripts/compileDocsForLLM.mts",
+    "templates.mts"
+  ]
 }

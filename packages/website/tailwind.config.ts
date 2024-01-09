@@ -8,6 +8,13 @@ export default getTailwindConfig({
         lato: '"Lato", sans-serif',
         lora: '"Lora"',
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: "100%",
+          },
+        },
+      },
     },
   },
 });

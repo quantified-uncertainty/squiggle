@@ -9,9 +9,7 @@
         "!.next/cache/**",
         "public/llms/documentationBundle.txt",
         "src/pages/docs/Ecosystem/LLMPrompt.md",
-        "src/pages/docs/Api/Date.mdx",
-        "src/pages/docs/Api/Duration.mdx",
-        "src/pages/docs/Api/Tag.mdx",
+        "src/pages/docs/Api/*",
         "src/pages/docs/Ecosystem/LLMPrompt.md"
       ]
     },
