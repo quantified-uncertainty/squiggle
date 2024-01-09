@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 
-// This config helps with connection leaks during hot reload
-// (which we don't have in server.ts yet, but might in the future.)
+// This config helps with connection leaks during hot reload and handles query logging.
 
 declare global {
   // allow global `var` declarations
