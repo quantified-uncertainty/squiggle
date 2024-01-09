@@ -265,7 +265,7 @@ Different types of values can be displayed in different ways. The following tabl
     ],
   }),
   maker.make({
-    name: "all",
+    name: "getAll",
     displaySection: "Functions",
     description: "Returns a dictionary of all tags on a value.",
     definitions: [
