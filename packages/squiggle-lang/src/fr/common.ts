@@ -1,3 +1,4 @@
+import { REThrow } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -65,9 +66,9 @@ export const library = [
         frAny(),
         ([value]) => {
           if (value) {
-            throw new Error(value);
+            throw new REThrow(value);
           } else {
-            throw new Error("Common.throw() was called");
+            throw new REThrow("Common.throw() was called");
           }
         }
       ),
