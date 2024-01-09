@@ -63,7 +63,7 @@ function rehypeInlineCodeProperty() {
         const lastParent = parents[parents.length - 1] as Element;
         if (!element.properties) element.properties = {};
         //It should be a string, because it can't be a boolean.
-        element.properties['inline'] = String(
+        element.properties["inline"] = String(
           !(lastParent && lastParent.tagName === "pre")
         );
       }
@@ -130,7 +130,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
         code(props) {
           const { node, children, className, ...rest } = props;
           const match = /language-(\w+)/.exec(className || "");
-          const isInline = node && node.properties['inline'];
+          const isInline = node && node.properties["inline"];
           if (isInline === "true") {
             return (
               <code
