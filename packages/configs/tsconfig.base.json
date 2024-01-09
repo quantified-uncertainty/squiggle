@@ -1,0 +1,27 @@
+/**
+ * For reference: https://www.typescriptlang.org/tsconfig
+ * This config is appropriate for NPM packages. For Next.js apps, use `tsconfig.nextjs.json` instead.
+ *
+ * Things we intentionally don't set here:
+ * - `outDir` and `rootDir` (because of https://github.com/microsoft/TypeScript/issues/29172)
+ */ 
+{
+  "compilerOptions": {
+    // build settings
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "es2021",
+    "esModuleInterop": true,
+    "composite": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "jsx": "react-jsx", // helpful in components/ and ui/ and doesn't hurt otherwise
+    // type check settings
+    "strict": true,
+    "skipLibCheck": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true
+  }
+}

@@ -30,6 +30,7 @@
     "shiki": "^0.14.7"
   },
   "devDependencies": {
+    "@quri/configs": "workspace:*",
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@types/pako": "^2.0.3",
     "@types/react": "^18.2.46",

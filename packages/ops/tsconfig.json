@@ -1,14 +1,8 @@
 {
+  "extends": "@quri/configs/tsconfig.base.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "target": "es2021",
-    "esModuleInterop": true,
     "rootDir": "src",
     "outDir": "dist",
-    // type check settings
-    "strict": true,
-    "skipLibCheck": true
   },
   "include": ["src/**/*.ts", "src/**/*.cts"]
 }

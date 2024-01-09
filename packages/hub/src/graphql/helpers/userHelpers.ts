@@ -18,7 +18,7 @@ export async function getSelf(session: SignedInSession) {
   return user;
 }
 
-const ROOT_EMAILS = (process.env.ROOT_EMAILS ?? "").split(",");
+const ROOT_EMAILS = (process.env['ROOT_EMAILS'] ?? "").split(",");
 
 export async function isRootUser(user: User) {
   // see also: `isRootUser` auth scope in builder.ts
