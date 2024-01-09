@@ -37,8 +37,8 @@ function rangeByCount({
 
   scale.range(backupRange);
   scale.clamp(backupClamp);
-  scale.range(backupRange);
-  scale.clamp(backupClamp);
+  
+  return items;
 
   return items;
 }
