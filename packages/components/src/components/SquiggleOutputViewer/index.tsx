@@ -19,6 +19,7 @@ import { ErrorBoundary } from "../ErrorBoundary.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
+import { ViewerProvider } from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
 import { RenderingIndicator } from "./RenderingIndicator.js";
 
@@ -79,12 +80,8 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
               <div className="absolute z-10 inset-0 bg-white opacity-50" />
             )}
             <ErrorBoundary>
-              <SquiggleViewer
-                {...settings}
-                ref={viewerRef}
-                value={usedResult.value}
-                editor={editor}
-              />
+              {/* we don't pass settings or editor here because they're already configured in `<ViewerProvider>`; hopefully `<SquiggleViewer>` itself won't need to rely on settings, otherwise things might break */}
+              <SquiggleViewer ref={viewerRef} value={usedResult.value} />
             </ErrorBoundary>
           </div>
         ) : (
@@ -94,53 +91,58 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
     }
 
     return (
-      <Layout
-        menu={
-          <Dropdown
-            render={({ close }) => (
-              <DropdownMenu>
-                <DropdownMenuActionItem
-                  icon={CodeBracketIcon}
-                  title={
-                    <MenuItemTitle
-                      title="Variables"
-                      type={variablesCount ? `{}${variablesCount}` : null}
-                    />
-                  }
-                  onClick={() => {
-                    setMode("variables");
-                    close();
-                  }}
-                />
-                <DropdownMenuActionItem
-                  icon={CodeBracketIcon}
-                  title={
-                    <MenuItemTitle
-                      title="Result"
-                      type={hasResult ? "" : null}
-                    />
-                  }
-                  onClick={() => {
-                    setMode("result");
-                    close();
-                  }}
-                />
-              </DropdownMenu>
-            )}
-          >
-            <Button size="small">
-              <div className="flex items-center space-x-1.5">
-                <span>{mode === "variables" ? "Variables" : "Result"}</span>
-                <TriangleIcon className="rotate-180 text-slate-400" size={10} />
-              </div>
-            </Button>
-          </Dropdown>
-        }
-        indicator={
-          <RenderingIndicator isRunning={isRunning} output={squiggleOutput} />
-        }
-        viewer={squiggleViewer}
-      />
+      <ViewerProvider partialPlaygroundSettings={settings} editor={editor}>
+        <Layout
+          menu={
+            <Dropdown
+              render={({ close }) => (
+                <DropdownMenu>
+                  <DropdownMenuActionItem
+                    icon={CodeBracketIcon}
+                    title={
+                      <MenuItemTitle
+                        title="Variables"
+                        type={variablesCount ? `{}${variablesCount}` : null}
+                      />
+                    }
+                    onClick={() => {
+                      setMode("variables");
+                      close();
+                    }}
+                  />
+                  <DropdownMenuActionItem
+                    icon={CodeBracketIcon}
+                    title={
+                      <MenuItemTitle
+                        title="Result"
+                        type={hasResult ? "" : null}
+                      />
+                    }
+                    onClick={() => {
+                      setMode("result");
+                      close();
+                    }}
+                  />
+                </DropdownMenu>
+              )}
+            >
+              <Button size="small">
+                <div className="flex items-center space-x-1.5">
+                  <span>{mode === "variables" ? "Variables" : "Result"}</span>
+                  <TriangleIcon
+                    className="rotate-180 text-slate-400"
+                    size={10}
+                  />
+                </div>
+              </Button>
+            </Dropdown>
+          }
+          indicator={
+            <RenderingIndicator isRunning={isRunning} output={squiggleOutput} />
+          }
+          viewer={squiggleViewer}
+        />
+      </ViewerProvider>
     );
   }
 );

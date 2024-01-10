@@ -53,6 +53,7 @@
     "react-use": "^17.4.2"
   },
   "devDependencies": {
+    "@quri/configs": "workspace:*",
     "@storybook/addon-docs": "^7.6.6",
     "@storybook/addon-essentials": "^7.6.6",
     "@storybook/addon-interactions": "^7.6.6",

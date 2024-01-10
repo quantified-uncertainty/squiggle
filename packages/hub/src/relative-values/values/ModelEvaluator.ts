@@ -7,6 +7,8 @@ import {
   SqStringValue,
 } from "@quri/squiggle-lang";
 
+import { squiggleHubLinker } from "@/squiggle/components/linker";
+
 import { cartesianProduct } from "../lib/utils";
 import {
   RelativeValue,
@@ -15,7 +17,7 @@ import {
   relativeValueSchema,
 } from "./types";
 
-import { RelativeValuesModelRevision$data } from "@/__generated__/RelativeValuesModelRevision.graphql";
+import { RelativeValuesExport$data } from "@/__generated__/RelativeValuesExport.graphql";
 
 export const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {
   return items
@@ -98,11 +100,12 @@ export class ModelEvaluator {
 
   static async create(
     modelCode: string,
-    cache?: NonNullable<
-      RelativeValuesModelRevision$data["forRelativeValues"]
-    >["cache"]
+    cache?: RelativeValuesExport$data["cache"]
   ): Promise<result<ModelEvaluator, string>> {
-    const project = SqProject.create();
+    // TODO - versioned SqProject
+    const project = SqProject.create({
+      linker: squiggleHubLinker,
+    });
     project.setSource("wrapper", "RelativeValues.wrap(fn)");
     project.setContinues("wrapper", ["model"]);
     project.setSource("model", modelCode);

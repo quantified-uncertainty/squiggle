@@ -23,8 +23,8 @@ export async function rethrowOnConstraint<T>(
       if (
         e instanceof Prisma.PrismaClientKnownRequestError &&
         e.code === "P2002" &&
-        Array.isArray(e.meta?.target) &&
-        e.meta?.target.join(",") === handler.target.join(",")
+        Array.isArray(e.meta?.["target"]) &&
+        e.meta?.["target"].join(",") === handler.target.join(",")
       ) {
         // TODO - throw more specific error
         throw new Error(handler.error);

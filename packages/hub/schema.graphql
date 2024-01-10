@@ -185,7 +185,7 @@ type ModelRevision implements Node {
   content: ModelContent!
   createdAtTimestamp: Float!
   exports: [ModelExport!]!
-  forRelativeValues(input: ModelRevisionForRelativeValuesInput): RelativeValuesExport
+  forRelativeValues(input: ModelRevisionForRelativeValuesInput!): ModelRevisionForRelativeValuesResult!
   id: ID!
   model: Model!
   relativeValuesExports: [RelativeValuesExport!]!
@@ -205,6 +205,8 @@ input ModelRevisionForRelativeValuesInput {
   for: ModelRevisionForRelativeValuesSlugOwnerInput
   variableName: String!
 }
+
+union ModelRevisionForRelativeValuesResult = BaseError | NotFoundError | RelativeValuesExport
 
 input ModelRevisionForRelativeValuesSlugOwnerInput {
   owner: String!

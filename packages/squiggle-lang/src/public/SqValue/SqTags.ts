@@ -32,4 +32,8 @@ export class SqTags {
   hidden(): boolean | undefined {
     return this.tags.hidden();
   }
+
+  notebook(): boolean | undefined {
+    return this.tags.notebook();
+  }
 }
