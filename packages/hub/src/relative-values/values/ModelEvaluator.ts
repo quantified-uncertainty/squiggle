@@ -7,6 +7,8 @@ import {
   SqStringValue,
 } from "@quri/squiggle-lang";
 
+import { squiggleHubLinker } from "@/squiggle/components/linker";
+
 import { cartesianProduct } from "../lib/utils";
 import {
   RelativeValue,
@@ -102,7 +104,10 @@ export class ModelEvaluator {
       RelativeValuesModelRevision$data["forRelativeValues"]
     >["cache"]
   ): Promise<result<ModelEvaluator, string>> {
-    const project = SqProject.create();
+    // TODO - versioned SqProject
+    const project = SqProject.create({
+      linker: squiggleHubLinker,
+    });
     project.setSource("wrapper", "RelativeValues.wrap(fn)");
     project.setContinues("wrapper", ["model"]);
     project.setSource("model", modelCode);
