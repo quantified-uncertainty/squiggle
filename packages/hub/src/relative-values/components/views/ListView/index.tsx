@@ -250,6 +250,7 @@ export const ListView: FC = () => {
             <div className="sticky top-4 bg-slate-50 px-2 py-4 ml-4 rounded-sm border-gray-200 border">
               <ItemSideBar
                 model={model}
+                variableName={model.variableName}
                 numeratorItem={sidebarItems[0]}
                 denominatorItem={sidebarItems[1]}
               />

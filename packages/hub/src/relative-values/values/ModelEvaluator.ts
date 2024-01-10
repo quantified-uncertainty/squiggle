@@ -94,6 +94,7 @@ function buildRelativeValue({
 export class ModelEvaluator {
   private constructor(
     public modelCode: string,
+    public variableName: string,
     private fn: SqLambda,
     private cache?: RelativeValuesCacheRecord
   ) {}
@@ -154,7 +155,12 @@ export class ModelEvaluator {
 
     return {
       ok: true,
-      value: new ModelEvaluator(modelCode, result.value.value, cacheRecord),
+      value: new ModelEvaluator(
+        modelCode,
+        variableName,
+        result.value.value,
+        cacheRecord
+      ),
     };
   }
 
