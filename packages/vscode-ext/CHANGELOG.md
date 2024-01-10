@@ -1,10 +1,12 @@
 # vscode-squiggle
 
+## 0.9.1
+
 ## 0.9.0
 
-- Use 0.9.0 Squiggle
+* Use 0.9.0 Squiggle
 
-- Convert webview implementation to TypeScript
+* Convert webview implementation to TypeScript
 
 ## 0.8.6
 
