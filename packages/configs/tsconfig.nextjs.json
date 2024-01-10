@@ -1,8 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    // conservative settings, should we upgrade these?
-    "module": "es2022",
+    "module": "esnext",
     "target": "es2021",
     "moduleResolution": "bundler",
     "lib": ["dom", "dom.iterable", "esnext"],
