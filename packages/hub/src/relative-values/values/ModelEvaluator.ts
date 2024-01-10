@@ -17,7 +17,7 @@ import {
   relativeValueSchema,
 } from "./types";
 
-import { RelativeValuesModelRevision$data } from "@/__generated__/RelativeValuesModelRevision.graphql";
+import { RelativeValuesExport$data } from "@/__generated__/RelativeValuesExport.graphql";
 
 export const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {
   return items
@@ -102,9 +102,7 @@ export class ModelEvaluator {
   static async create(
     modelCode: string,
     variableName: string,
-    cache?: NonNullable<
-      RelativeValuesModelRevision$data["forRelativeValues"]
-    >["cache"]
+    cache?: RelativeValuesExport$data["cache"]
   ): Promise<result<ModelEvaluator, string>> {
     // TODO - versioned SqProject
     const project = SqProject.create({

@@ -1,6 +1,5 @@
 "use client";
 
-import { notFound } from "next/navigation";
 import { FC, PropsWithChildren, useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { graphql, useFragment } from "react-relay";
@@ -28,11 +27,11 @@ import {
 } from "@/routes";
 
 import { CacheMenu } from "./CacheMenu";
-import { RelativeValuesModelRevisionFragment } from "./RelativeValuesModelRevision";
+import { RelativeValuesExport } from "./RelativeValuesExport";
 
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
+import { RelativeValuesExport$key } from "@/__generated__/RelativeValuesExport.graphql";
 import { RelativeValuesModelLayoutQuery } from "@/__generated__/RelativeValuesModelLayoutQuery.graphql";
-import { RelativeValuesModelRevision$key } from "@/__generated__/RelativeValuesModelRevision.graphql";
 
 export const RelativeValuesModelLayout: FC<
   PropsWithChildren<{
@@ -58,10 +57,25 @@ export const RelativeValuesModelLayout: FC<
               slug
             }
             currentRevision {
+              id
               content {
                 __typename
+                ... on SquiggleSnippet {
+                  id
+                  code
+                  version
+                }
               }
-              ...RelativeValuesModelRevision
+
+              forRelativeValues(input: $forRelativeValues) {
+                __typename
+                ... on BaseError {
+                  message
+                }
+                ... on RelativeValuesExport {
+                  ...RelativeValuesExport
+                }
+              }
             }
           }
         }
@@ -70,25 +84,28 @@ export const RelativeValuesModelLayout: FC<
     query
   );
   const model = extractFromGraphqlErrorUnion(result, "Model");
-  const revision = useFragment<RelativeValuesModelRevision$key>(
-    RelativeValuesModelRevisionFragment,
-    model.currentRevision
-  );
+  const revision = model.currentRevision;
 
   const content = extractFromGraphqlErrorUnion(
     revision.content,
     "SquiggleSnippet"
   );
 
-  if (!revision.forRelativeValues) {
-    notFound();
-  }
+  const forRelativeValuesKey = extractFromGraphqlErrorUnion(
+    revision.forRelativeValues,
+    "RelativeValuesExport"
+  );
 
-  const definition = revision.forRelativeValues.definition;
+  const forRelativeValues = useFragment<RelativeValuesExport$key>(
+    RelativeValuesExport,
+    forRelativeValuesKey
+  );
+
+  const definition = forRelativeValues.definition;
 
   const definitionRevision = useFragment<RelativeValuesDefinitionRevision$key>(
     RelativeValuesDefinitionRevisionFragment,
-    revision.forRelativeValues.definition.currentRevision
+    forRelativeValues.definition.currentRevision
   );
 
   const [evaluatorResult, setEvaluatorResult] = useState<
@@ -100,9 +117,9 @@ export const RelativeValuesModelLayout: FC<
     ModelEvaluator.create(
       content.code,
       variableName,
-      revision.forRelativeValues?.cache
+      forRelativeValues.cache
     ).then(setEvaluatorResult);
-  }, [content.code, revision.forRelativeValues, variableName]);
+  }, [content.code, variableName, forRelativeValues]);
 
   const body = evaluatorResult ? (
     evaluatorResult.ok ? (
@@ -143,7 +160,10 @@ export const RelativeValuesModelLayout: FC<
         </div>
         <div className="flex items-center gap-4">
           {definitionLink}
-          <CacheMenu revision={revision} isEditable={model.isEditable} />
+          <CacheMenu
+            relativeValuesExport={forRelativeValues}
+            isEditable={model.isEditable}
+          />
           <StyledTabLink.List>
             <StyledTabLink
               name="List"
