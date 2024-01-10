@@ -17,26 +17,22 @@ import { BuildRelativeValuesCacheAction } from "./BuildRelativeValuesCacheAction
 import { ClearRelativeValuesCacheAction } from "./ClearRelativeValuesCacheAction";
 
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
-import { RelativeValuesModelRevision$data } from "@/__generated__/RelativeValuesModelRevision.graphql";
+import { RelativeValuesExport$data } from "@/__generated__/RelativeValuesExport.graphql";
 
 export const CacheMenu: FC<{
-  revision: RelativeValuesModelRevision$data;
+  relativeValuesExport: RelativeValuesExport$data;
   isEditable: boolean;
-}> = ({ revision, isEditable }) => {
-  if (!revision.forRelativeValues) {
-    throw new Error("Not found");
-  }
-
+}> = ({ relativeValuesExport, isEditable }) => {
   const definition = useFragment<RelativeValuesDefinitionRevision$key>(
     RelativeValuesDefinitionRevisionFragment,
-    revision.forRelativeValues.definition.currentRevision
+    relativeValuesExport.definition.currentRevision
   );
 
-  const isEmpty = revision.forRelativeValues.cache.length === 0;
+  const isEmpty = relativeValuesExport.cache.length === 0;
 
   const fullyCached =
     !isEmpty &&
-    revision.forRelativeValues.cache.length >=
+    relativeValuesExport.cache.length >=
       definition.items.length * definition.items.length;
 
   const internals = (
@@ -63,27 +59,24 @@ export const CacheMenu: FC<{
   const withDropdown = (internals: ReactElement) => (
     <Dropdown
       render={({ close }) => {
-        if (!revision.forRelativeValues?.id) {
-          return null; // shouldn't happen, this is mostly for type safety
-        }
         return (
           <DropdownMenu>
             <DropdownMenuHeader>
               {isEmpty
                 ? "Not cached"
-                : `${revision.forRelativeValues.cache.length}/${
+                : `${relativeValuesExport.cache.length}/${
                     definition.items.length * definition.items.length
                   } pairs cached`}
             </DropdownMenuHeader>
             {!fullyCached && (
               <BuildRelativeValuesCacheAction
-                exportId={revision.forRelativeValues.id}
+                exportId={relativeValuesExport.id}
                 close={close}
               />
             )}
             {isEmpty ? null : (
               <ClearRelativeValuesCacheAction
-                exportId={revision.forRelativeValues?.id}
+                exportId={relativeValuesExport.id}
                 close={close}
               />
             )}
