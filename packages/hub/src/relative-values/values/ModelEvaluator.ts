@@ -98,12 +98,13 @@ export class ModelEvaluator {
 
   static async create(
     modelCode: string,
+    variableName: string,
     cache?: NonNullable<
       RelativeValuesModelRevision$data["forRelativeValues"]
     >["cache"]
   ): Promise<result<ModelEvaluator, string>> {
     const project = SqProject.create();
-    project.setSource("wrapper", "RelativeValues.wrap(fn)");
+    project.setSource("wrapper", `RelativeValues.wrap(${variableName})`);
     project.setContinues("wrapper", ["model"]);
     project.setSource("model", modelCode);
 
