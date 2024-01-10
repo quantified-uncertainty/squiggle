@@ -1,3 +1,4 @@
+import { REThrow } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -51,6 +52,24 @@ export const library = [
         ([value, message]) => {
           message ? console.log(message, value) : console.log(value);
           return value;
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "throw",
+    description:
+      "Throws a fatal error. There is no way in the language to catch this error.",
+    definitions: [
+      makeDefinition(
+        [frOptional(frNamed("message", frString))],
+        frAny(),
+        ([value]) => {
+          if (value) {
+            throw new REThrow(value);
+          } else {
+            throw new REThrow("Common.throw() was called");
+          }
         }
       ),
     ],

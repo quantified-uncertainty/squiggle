@@ -187,3 +187,14 @@ export class REAmbiguous extends ErrorMessage {
     return `Ambiguous Error: ${this.message}`;
   }
 }
+
+// Used for user-created throw() function calls
+export class REThrow extends ErrorMessage {
+  constructor(public msg: string) {
+    super(msg);
+  }
+
+  toString() {
+    return `${this.message}`;
+  }
+}

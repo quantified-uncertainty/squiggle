@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react";
+import { FC, Fragment, ReactNode } from "react";
 
 export const Snippet: FC<{ children: string }> = ({ children }) => {
   // 'foo<b>bar</b>baz' -> ['foo', '<b>bar', '</b>baz']
@@ -6,7 +6,7 @@ export const Snippet: FC<{ children: string }> = ({ children }) => {
 
   const nodes: ReactNode[] = [];
   let bold = false;
-  for (let part of parts) {
+  for (let [i, part] of parts.entries()) {
     if (part.startsWith("<b>")) {
       bold = true;
       part = part.replace(/^<b>/, "");
@@ -14,7 +14,13 @@ export const Snippet: FC<{ children: string }> = ({ children }) => {
       bold = false;
       part = part.replace(/^<\/b>/, "");
     }
-    nodes.push(bold ? <strong>{part}</strong> : part);
+    nodes.push(
+      bold ? (
+        <strong key={i}>{part}</strong>
+      ) : (
+        <Fragment key={i}>{part}</Fragment>
+      )
+    );
   }
 
   return nodes;

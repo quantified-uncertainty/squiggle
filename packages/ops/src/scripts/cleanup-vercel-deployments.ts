@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const VERCEL_API_TOKEN = process.env.VERCEL_API_TOKEN;
+const { VERCEL_API_TOKEN, DEBUG } = process.env;
 
 const teamId = "quantified-uncertainty";
 const project = "quri-hub";
@@ -26,7 +26,7 @@ async function apiCall(method: string, endpoint: string, params?: ApiParams) {
   if ("error" in json) {
     throw new Error(JSON.stringify(json));
   }
-  if (process.env.DEBUG) {
+  if (DEBUG) {
     console.log(json);
   }
   return json;
@@ -93,7 +93,7 @@ async function* fetchDeployments(params: Record<string, string>) {
       yield deployment;
     }
     if (response.pagination.next) {
-      pageParams.until = String(response.pagination.next);
+      pageParams['until'] = String(response.pagination.next);
     } else {
       break;
     }

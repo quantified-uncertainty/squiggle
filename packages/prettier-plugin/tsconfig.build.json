@@ -1,19 +1,8 @@
 {
+  "extends": "@quri/configs/tsconfig.base.json",
   "compilerOptions": {
-    // build settings
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "target": "es2021",
-    "esModuleInterop": true,
-    "composite": true,
     "outDir": "./dist/esm",
     "declarationDir": "./dist/types",
-    "declarationMap": true,
-    "sourceMap": true,
-    "removeComments": true,
-    // type check settings
-    "strict": true,
-    "skipLibCheck": true
   },
   "include": ["src/**/*"],
   "references": [{ "path": "../squiggle-lang" }]

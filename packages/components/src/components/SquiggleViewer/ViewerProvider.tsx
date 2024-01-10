@@ -14,6 +14,7 @@ import {
 import { SqValuePath } from "@quri/squiggle-lang";
 
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
+import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
@@ -153,14 +154,15 @@ class ItemStore {
 }
 
 type ViewerContextShape = {
-  // Note that we don't store localItemState themselves in the context (that would cause rerenders of the entire tree on each settings update).
-  // Instead, we keep localItemState in local state and notify the global context via setLocalItemState to pass them down the component tree again if it got rebuilt from scratch.
+  // Note that we don't store `localItemState` itself in the context (that would cause rerenders of the entire tree on each settings update).
+  // Instead, we keep `localItemState` in local state and notify the global context via `setLocalItemState` to pass them down the component tree again if it got rebuilt from scratch.
   // See ./SquiggleViewer.tsx and ./ValueWithContextViewer.tsx for other implementation details on this.
   globalSettings: PlaygroundSettings;
   focused: SqValuePath | undefined;
   setFocused: (value: SqValuePath | undefined) => void;
   editor?: CodeEditorHandle;
   itemStore: ItemStore;
+  initialized: boolean;
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
@@ -169,6 +171,7 @@ export const ViewerContext = createContext<ViewerContextShape>({
   setFocused: () => undefined,
   editor: undefined,
   itemStore: new ItemStore(),
+  initialized: false,
 });
 
 export function useViewerContext() {
@@ -293,39 +296,66 @@ export function useMergedSettings(path: SqValuePath) {
   return result;
 }
 
-export const ViewerProvider = forwardRef<
-  SquiggleViewerHandle,
-  PropsWithChildren<{
-    partialPlaygroundSettings: PartialPlaygroundSettings;
-    editor?: CodeEditorHandle;
-  }>
->(({ partialPlaygroundSettings, editor, children }, ref) => {
-  const [itemStore] = useState(() => new ItemStore());
+type Props = PropsWithChildren<{
+  partialPlaygroundSettings: PartialPlaygroundSettings;
+  editor?: CodeEditorHandle;
+}>;
 
-  useImperativeHandle(ref, () => ({
-    viewValuePath(path: SqValuePath) {
-      itemStore.scrollToPath(path);
-    },
-  }));
+export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
+  (
+    { partialPlaygroundSettings: unstablePlaygroundSettings, editor, children },
+    ref
+  ) => {
+    const [itemStore] = useState(() => new ItemStore());
 
-  const [focused, setFocused] = useState<SqValuePath | undefined>();
+    /**
+     * Because we often obtain `partialPlaygroundSettings` with spread syntax, its identity changes on each render, which could
+     * cause extra unnecessary re-renders of widgets, in some cases.
+     * Related discussion: https://github.com/quantified-uncertainty/squiggle/pull/2525#discussion_r1393398447
+     */
+    const playgroundSettings = useStabilizeObjectIdentity(
+      unstablePlaygroundSettings
+    );
 
-  const globalSettings = useMemo(() => {
-    return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
-  }, [partialPlaygroundSettings]);
+    useImperativeHandle(ref, () => ({
+      viewValuePath(path: SqValuePath) {
+        itemStore.scrollToPath(path);
+      },
+    }));
 
-  return (
-    <ViewerContext.Provider
-      value={{
-        globalSettings,
-        editor,
-        focused,
-        setFocused,
-        itemStore,
-      }}
-    >
-      {children}
-    </ViewerContext.Provider>
-  );
-});
+    const [focused, setFocused] = useState<SqValuePath | undefined>();
+
+    const globalSettings = useMemo(() => {
+      return merge({}, defaultPlaygroundSettings, playgroundSettings);
+    }, [playgroundSettings]);
+
+    return (
+      <ViewerContext.Provider
+        value={{
+          globalSettings,
+          editor,
+          focused,
+          setFocused,
+          itemStore,
+          initialized: true,
+        }}
+      >
+        {children}
+      </ViewerContext.Provider>
+    );
+  }
+);
+InnerViewerProvider.displayName = "InnerViewerProvider";
+
+export const ViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
+  (props, ref) => {
+    // `ViewerProvider` is a singleton, so if the context already exists, we don't initialize it again
+    const { initialized } = useContext(ViewerContext);
+    if (initialized) {
+      return props.children; // TODO: `ref` and settings will be ignored
+    }
+
+    return <InnerViewerProvider ref={ref} {...props} />;
+  }
+);
 ViewerProvider.displayName = "ViewerProvider";

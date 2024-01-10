@@ -136,6 +136,7 @@
     "package": "vsce package --no-dependencies"
   },
   "devDependencies": {
+    "@quri/configs": "workspace:*",
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
     "@quri/squiggle-textmate-grammar": "workspace:*",

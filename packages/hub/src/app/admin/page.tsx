@@ -27,7 +27,9 @@ export default async function OuterAdminPage() {
   const session = await getServerSession(authOptions);
 
   const email = session?.user.email;
-  if (!email || !process.env.ROOT_EMAILS?.includes(email)) {
+
+  const { ROOT_EMAILS } = process.env;
+  if (!email || !ROOT_EMAILS?.includes(email)) {
     return <NarrowPageLayout>Access denied.</NarrowPageLayout>;
   }
 

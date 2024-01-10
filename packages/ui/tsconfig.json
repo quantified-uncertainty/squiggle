@@ -1,22 +1,8 @@
 {
+  "extends": "@quri/configs/tsconfig.base.json",
   "compilerOptions": {
-    // build settings
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "target": "es2021",
-    "jsx": "react-jsx",
-    "esModuleInterop": true,
-    "composite": true,
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "declarationMap": true,
-    "sourceMap": true,
-    "removeComments": true,
-    "preserveConstEnums": true,
-    // type check settings
-    "strict": true,
-    "skipLibCheck": true
+    "rootDir": "src",
+    "outDir": "dist"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"]
 }

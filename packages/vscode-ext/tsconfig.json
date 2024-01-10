@@ -1,16 +1,12 @@
 {
+  "extends": "@quri/configs/tsconfig.base.json",
   "compilerOptions": {
-    // build settings
     "module": "commonjs",
+    "moduleResolution": "node",
     "target": "es2020",
     "lib": ["es2020", "dom"],
     "noEmit": true,
-    "composite": true,
-    "rootDir": "src",
-    "jsx": "react-jsx",
-    // type check settings
-    "strict": true,
-    "skipLibCheck": true
+    "rootDir": "src"
   },
   "include": ["src/**/*"],
   "references": [{ "path": "../squiggle-lang" }, { "path": "../components" }]
