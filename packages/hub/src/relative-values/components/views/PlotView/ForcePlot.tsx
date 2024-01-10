@@ -173,7 +173,7 @@ export const ForcePlot: FC<{
     simulation.nodes(nodes);
 
     return simulation;
-  }, [model, nodes]);
+  }, [model, nodes, forceFn]);
 
   useEffect(() => {
     return () => {

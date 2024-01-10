@@ -43,30 +43,57 @@ let buildurl = (
 dists = fn("${numeratorItem.id}", "${denominatorItem.id}")
 value_${numeratorItemName} = Dist(dists[0])
 value_${denominatorItemName} = Dist(dists[1])
-relativeValue = value_${numeratorItemName} / value_${denominatorItemName}
-median = abs(inv(value_${denominatorItemName}, 0.5))
+valueRatio = value_${numeratorItemName} / value_${denominatorItemName}
+medianDenominator = abs(median(value_${denominatorItemName}))
 tickFormat = '10'
 tickFormatObj = {tickFormat: tickFormat}
 
-{scatter:
-  Plot.scatter(
-    {
-      xDist: dists[1] / median,
-      yDist: dists[0] / median,
-      xScale: Scale.symlog({tickFormatObj, title: "${denominatorItem.name}"}),
-      yScale: Scale.symlog({tickFormatObj, title: "${numeratorItem.name}"}),
-    }
+@name("Normalized Scatter Plot")
+scatter = Plot.scatter(
+  {
+    xDist: SampleSet(dists[1] / medianDenominator),
+    yDist: SampleSet(dists[0] / medianDenominator),
+    xScale: Scale.symlog(
+      { tickFormatObj, title: "${numeratorItem.name}" }
+    ),
+    yScale: Scale.symlog(
+      { tickFormatObj, title: "${denominatorItem.name}" }
+    ),
+  }
+)
+
+@name("Debug")
+debug = [
+  scatter,
+  Tag.name(
+    [
+      Tag.name(
+        Plot.dist(dists[0], { xScale: Scale.symlog() }),
+        "${numeratorItem.name}"
+      ),
+      Tag.name(
+        Plot.dist(dists[1], { xScale: Scale.symlog() }),
+        "${denominatorItem.name}"
+      ),
+    ],
+    "Distributions"
   ),
-  ratio:
-  Plot.dist(
-    {
-      dist: relativeValue,
-      xScale: Scale.symlog({tickFormatObj}),
-      yScale: Scale.symlog(tickFormatObj),
-      showSummary: false,
-    }
-  ),
-  }`;
+]
+
+@name("Ratio Distribution")
+ratio = Plot.dist(
+  {
+    dist: valueRatio,
+    xScale: Scale.symlog(
+      { tickFormatObj }
+    ),
+    yScale: Scale.symlog(tickFormatObj),
+    showSummary: false,
+  }
+)
+
+ratio
+`;
 };
 
 type Props = {
