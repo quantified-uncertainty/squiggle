@@ -1,21 +1,7 @@
 {
+  "extends": "@quri/configs/tsconfig.base.json",
   "compilerOptions": {
-    // build settings
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "target": "es2021",
-    "jsx": "react-jsx",
-    "esModuleInterop": true,
-    "composite": true,
-    "outDir": "./dist",
-    "declarationMap": true,
-    "sourceMap": true,
-    "removeComments": true,
-    "preserveConstEnums": true,
-    "resolveJsonModule": true,
-    // type check settings
-    "strict": true,
-    "skipLibCheck": true,
+    "outDir": "dist",
     "noImplicitAny": false // waiting for https://github.com/lezer-parser/lezer/issues/41 to be fixed
   },
   "include": ["src/**/*"],

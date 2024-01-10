@@ -15,9 +15,10 @@ import { PatchedQueryResponseCache } from "./PatchedQueryResponseCache";
 
 const IS_SERVER = typeof window === typeof undefined;
 
+const { NEXT_PUBLIC_VERCEL_URL } = process.env;
 const HTTP_ENDPOINT = IS_SERVER
-  ? process.env.NEXT_PUBLIC_VERCEL_URL
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/graphql`
+  ? NEXT_PUBLIC_VERCEL_URL
+    ? `https://${NEXT_PUBLIC_VERCEL_URL}/api/graphql`
     : "http://localhost:3001/api/graphql"
   : "/api/graphql";
 

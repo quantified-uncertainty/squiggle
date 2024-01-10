@@ -10,20 +10,23 @@ import { prisma } from "@/prisma";
 function buildAuthOptions() {
   const providers: Provider[] = [];
 
-  if (process.env.SENDGRID_KEY && process.env.EMAIL_FROM) {
+  const { SENDGRID_KEY, EMAIL_FROM } = process.env;
+
+  if (SENDGRID_KEY && EMAIL_FROM) {
     providers.push(
       EmailProvider({
-        server: `smtp://apikey:${process.env.SENDGRID_KEY}@smtp.sendgrid.net:587`,
-        from: process.env.EMAIL_FROM,
+        server: `smtp://apikey:${SENDGRID_KEY}@smtp.sendgrid.net:587`,
+        from: EMAIL_FROM,
       })
     );
   }
 
-  if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+  const { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } = process.env;
+  if (GITHUB_CLIENT_ID && GITHUB_CLIENT_SECRET) {
     providers.push(
       GithubProvider({
-        clientId: process.env.GITHUB_CLIENT_ID,
-        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        clientId: GITHUB_CLIENT_ID,
+        clientSecret: GITHUB_CLIENT_SECRET,
       })
     );
   }
