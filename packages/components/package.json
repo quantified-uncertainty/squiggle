@@ -45,6 +45,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@quri/configs": "workspace:*",
     "@jest/globals": "^29.7.0",
     "@juggle/resize-observer": "^3.4.0",
     "@lezer/generator": "^1.5.1",

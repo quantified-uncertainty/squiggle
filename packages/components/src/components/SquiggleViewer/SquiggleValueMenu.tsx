@@ -10,7 +10,6 @@ import {
   DropdownMenuActionItem,
   DropdownMenuHeader,
   FocusIcon,
-  TextTooltip,
   useCloseDropdown,
 } from "@quri/ui";
 
@@ -148,40 +147,38 @@ export const SquiggleValueMenu: FC<{
   const hasLocalSettings = useHasLocalSettings(value.context.path);
 
   return (
-    <TextTooltip text="Settings" placement="bottom-end">
-      <Dropdown
-        render={() => (
-          <DropdownMenu>
-            {widgetHeading && (
-              <DropdownMenuHeader>{widgetHeading}</DropdownMenuHeader>
-            )}
-            <FindInEditorItem value={value} />
-            <FocusItem value={value} />
-            <SetChildrenCollapsedStateItem
-              value={value}
-              title="Collapse Children"
-              collapsed={true}
-            />
-            <SetChildrenCollapsedStateItem
-              value={value}
-              title="Expand Children"
-              collapsed={false}
-            />
-            {widget?.Menu && <widget.Menu value={value} />}
-            <LogToConsoleItem value={value} />
-          </DropdownMenu>
-        )}
-      >
-        <Cog8ToothIcon
-          size={16}
-          className={clsx(
-            "cursor-pointer transition",
-            hasLocalSettings
-              ? "text-indigo-300 hover:!text-indigo-500 group-hover:text-indigo-400"
-              : "opacity-0 hover:!text-stone-500 group-hover:text-stone-400 group-hover:opacity-100"
+    <Dropdown
+      render={() => (
+        <DropdownMenu>
+          {widgetHeading && (
+            <DropdownMenuHeader>{widgetHeading}</DropdownMenuHeader>
           )}
-        />
-      </Dropdown>
-    </TextTooltip>
+          <FindInEditorItem value={value} />
+          <FocusItem value={value} />
+          <SetChildrenCollapsedStateItem
+            value={value}
+            title="Collapse Children"
+            collapsed={true}
+          />
+          <SetChildrenCollapsedStateItem
+            value={value}
+            title="Expand Children"
+            collapsed={false}
+          />
+          {widget?.Menu && <widget.Menu value={value} />}
+          <LogToConsoleItem value={value} />
+        </DropdownMenu>
+      )}
+    >
+      <Cog8ToothIcon
+        size={16}
+        className={clsx(
+          "cursor-pointer transition",
+          hasLocalSettings
+            ? "text-indigo-300 hover:!text-indigo-500 group-hover:text-indigo-400"
+            : "opacity-0 hover:!text-stone-500 group-hover:text-stone-400 group-hover:opacity-100"
+        )}
+      />
+    </Dropdown>
   );
 };

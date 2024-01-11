@@ -31,7 +31,7 @@ export const registerPreviewCommand = (context: vscode.ExtensionContext) => {
         panel.webview.postMessage({
           type: "update",
           text: editor.document.getText(),
-          settings: vscode.workspace.getConfiguration("squiggle").preview,
+          settings: vscode.workspace.getConfiguration("squiggle")["preview"],
         });
       };
 

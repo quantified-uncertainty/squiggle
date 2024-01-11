@@ -7,15 +7,15 @@ type State = {
 };
 
 export class ErrorBoundary extends Component<PropsWithChildren, State> {
-  public state: State = {};
+  public override state: State = {};
 
   public static getDerivedStateFromError(error: Error): State {
     return { error };
   }
 
-  componentDidCatch() {}
+  override componentDidCatch() {}
 
-  public render() {
+  public override render() {
     if (this.state.error) {
       return (
         <div className="m-2 p-4 bg-red-300 rounded">

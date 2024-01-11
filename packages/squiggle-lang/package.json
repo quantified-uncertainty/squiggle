@@ -14,7 +14,7 @@
     "build:peggy": "peggy --cache --format es ./src/ast/peggyParser.peggy",
     "build:ts": "tsc -b",
     "dev": "tsc -b -w",
-    "clean": "rm -rf dist && rm -f src/ast/peggyParser.js",
+    "clean": "rm -rf dist && rm -f src/ast/peggyParser.js && rm *.tsbuildinfo",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "pnpm run test --watchAll",
     "coverage:local": "pnpm run test --coverage && echo && echo 'Open ./coverage/lcov-report/index.html to see the detailed report.'",
@@ -37,6 +37,7 @@
     "open": "^10.0.2"
   },
   "devDependencies": {
+    "@quri/configs": "workspace:*",
     "@babel/preset-typescript": "^7.23.3",
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.10",

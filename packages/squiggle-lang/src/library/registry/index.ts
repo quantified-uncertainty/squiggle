@@ -1,5 +1,5 @@
 import { library as booleanLibrary } from "../../fr/boolean.js";
-import { library as builtinLibrary } from "../../fr/builtin.js";
+import { library as commonLibrary } from "../../fr/common.js";
 import { library as calculatorLibrary } from "../../fr/calculator.js";
 import { library as dangerLibrary } from "../../fr/danger.js";
 import { library as dateLibrary } from "../../fr/date.js";
@@ -54,7 +54,7 @@ const fnList: FRFunction[] = [
   ...unitsLibrary,
   ...calculatorLibrary,
   ...inputLibrary,
-  ...builtinLibrary, // should go last, because has some catch-all functions
+  ...commonLibrary, // should go last, because has some catch-all functions
 ];
 
 export const registry = Registry.make(fnList);

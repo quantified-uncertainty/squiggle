@@ -1,25 +1,16 @@
 {
+  "extends": "@quri/configs/tsconfig.nextjs.json",
   "compilerOptions": {
-    "module": "es2020",
-    "moduleResolution": "bundler",
-    "target": "es2021",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "esModuleInterop": true,
-    "noEmit": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
     "paths": {
       "@/*": ["./src/*"],
       "@gen/*": ["./src/__generated__/*"]
     },
-    "allowJs": true,
     // type check settings
-    "plugins": [{ "name": "next" }],
-    "strict": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true // default forced by Next.js, https://github.com/vercel/next.js/pull/51564
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "next-env.d.ts",
@@ -27,6 +18,5 @@
     "src/**/*.tsx",
     ".next/types/**/*.ts",
     "test/**/*.ts"
-  ],
-  "exclude": ["node_modules"]
+  ]
 }
