@@ -114,10 +114,12 @@ export const RelativeValuesModelLayout: FC<
 
   useEffect(() => {
     // ModelEvaluator.create is async because SqProject.run is async
-    ModelEvaluator.create(content.code, forRelativeValues.cache).then(
-      setEvaluatorResult
-    );
-  }, [content.code, forRelativeValues]);
+    ModelEvaluator.create(
+      content.code,
+      variableName,
+      forRelativeValues.cache
+    ).then(setEvaluatorResult);
+  }, [content.code, variableName, forRelativeValues]);
 
   const body = evaluatorResult ? (
     evaluatorResult.ok ? (
