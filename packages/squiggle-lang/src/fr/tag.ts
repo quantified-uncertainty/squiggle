@@ -176,13 +176,8 @@ export const library = [
   maker.make({
     name: "showAs",
     description: `Overrides the default visualization for a value.
-\`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization. You can use it like,  
-~~~squiggle
-example1 = {|x| x + 1} -> Tag.showAs(Calculator)
-//...
-@showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
-example2 = {|x| x + 1}
-~~~
+\`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization.
+
 Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, \`Number\` can be used with Dates and Durations as well.  
 | **Input Type**                      | **Visualization Types**               |
 | ----------------------------------- | ------------------------------------- |
@@ -193,6 +188,12 @@ Different types of values can be displayed in different ways. The following tabl
 | **Function**                        | \`Calculator\`                        |
 `,
     displaySection: "Tags",
+    examples: [
+      `example1 = {|x| x + 1} -> Tag.showAs(Calculator)
+//...
+@showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
+example2 = {|x| x + 1}`,
+    ],
     definitions: [
       showAsDef(frWithTags(frDist), frPlot),
       showAsDef(frArray(frAny()), frTableChart),
@@ -288,23 +289,22 @@ Different types of values can be displayed in different ways. The following tabl
   maker.make({
     name: "notebook",
     description: `Displays the list of values as a notebook. This means that element indices are hidden, and the values are displayed in a vertical list. Useful for displaying combinations of text and values.`,
-    examples: [
-      `@notebook
-showAsNotebook = [
+    interactiveExamples: [
+      `[
   "### This is an opening section
 Here is more text.
 
 Here is more text.",
   Calculator({|f| f + 3}),
-  "## Distributions",
-  "### Distribution 1",
+  "### Distributions",
+  "#### Distribution 1",
   normal(5, 2),
-  "### Distribution 1",
+  "#### Distribution 1",
   normal(20, 1),
-  " ### This is an opening section
+  " #### This is an opening section
 Here is more text.
 ",
-] `,
+] -> Tag.notebook`,
     ],
     displaySection: "Tags",
     definitions: booleanTagDefs(
