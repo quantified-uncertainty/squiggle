@@ -2,43 +2,41 @@
 
 ### [@quri/squiggle-lang](https://www.npmjs.com/package/@quri/squiggle-lang)
 
-* Breaking: Deprecates Plot titles, changes Tag.all -> Tag.getAll ([#2925](https://github.com/quantified-uncertainty/squiggle/pull/2925))
+* Breaking: Deprecated `Plot` titles ([#2925](https://github.com/quantified-uncertainty/squiggle/pull/2925))
 
-* Refactored Squiggle-Lang to use Scale methods. Now, there is just SqScale, without subtypes. ([#2829](https://github.com/quantified-uncertainty/squiggle/pull/2829))
+* Breaking: Renamed `Tag.all` -> `Tag.getAll` ([#2925](https://github.com/quantified-uncertainty/squiggle/pull/2925))
 
-* Breaking: Changed Tag.description to Tag.doc ([#2827](https://github.com/quantified-uncertainty/squiggle/pull/2827))
+* Breaking: Renamed `Tag.description` to `Tag.doc` ([#2827](https://github.com/quantified-uncertainty/squiggle/pull/2827))
 
-* Fixed RelativeValues plot display ([#2927](https://github.com/quantified-uncertainty/squiggle/pull/2927))
+* Fix `isEqual` and `==` for Squiggle Lists ([#2920](https://github.com/quantified-uncertainty/squiggle/pull/2920))
 
-* Fix isEqual for Squiggle Lists ([#2920](https://github.com/quantified-uncertainty/squiggle/pull/2920))
+* Added `throw` function ([#2941](https://github.com/quantified-uncertainty/squiggle/pull/2941))
 
-* Added Common.throw ([#2941](https://github.com/quantified-uncertainty/squiggle/pull/2941))
-
-* Adds Tag.notebook view for Lists ([#2929](https://github.com/quantified-uncertainty/squiggle/pull/2929))
+* Adds `Tag.notebook` view for Lists ([#2929](https://github.com/quantified-uncertainty/squiggle/pull/2929))
 
 ### [@quri/squiggle-components](https://www.npmjs.com/package/@quri/squiggle-components)
 
-* Refactored Squiggle-Lang to use Scale methods. Now, there is just SqScale, without subtypes. ([#2829](https://github.com/quantified-uncertainty/squiggle/pull/2829))
+* Top level navigation in viewer (Result/Variables) is represented as a dropdown ([#2909](https://github.com/quantified-uncertainty/squiggle/pull/2909))
 
-* Breaking: Changed Tag.description to Tag.doc ([#2827](https://github.com/quantified-uncertainty/squiggle/pull/2827))
+* `<SquiggleViewer>` component takes a single `SqValue` instead of `resultVariables` and `resultItem` ([#2909](https://github.com/quantified-uncertainty/squiggle/pull/2909))
 
-* Fixed RelativeValues plot display ([#2927](https://github.com/quantified-uncertainty/squiggle/pull/2927))
+* Fixed `RelativeValues.gridPlot` display ([#2927](https://github.com/quantified-uncertainty/squiggle/pull/2927))
 
-* Fix dist chart legend positioning and how it affects the chart height ([#2911](https://github.com/quantified-uncertainty/squiggle/pull/2911))
+* Fixed dist chart legend positioning and how it affects the chart height ([#2911](https://github.com/quantified-uncertainty/squiggle/pull/2911))
 
-* "Fixed documention css quirks in editor" ([#2913](https://github.com/quantified-uncertainty/squiggle/pull/2913))
+* Fixed documention css quirks in editor ([#2913](https://github.com/quantified-uncertainty/squiggle/pull/2913))
 
-* Adds Tag.notebook view for Lists ([#2929](https://github.com/quantified-uncertainty/squiggle/pull/2929))
+* Added `Tag.notebook` view for Lists ([#2929](https://github.com/quantified-uncertainty/squiggle/pull/2929))
 
 ### [@quri/prettier-plugin-squiggle](https://www.npmjs.com/package/@quri/prettier-plugin-squiggle)
 
-* "Fixes Prettier bug where trailing comma after single-element dict key would be removed" ([#2946](https://github.com/quantified-uncertainty/squiggle/pull/2946))
+* Fixed Prettier bug where trailing comma after single-element dict key would be removed ([#2946](https://github.com/quantified-uncertainty/squiggle/pull/2946))
 
 ### [@quri/squiggle-textmate-grammar](https://www.npmjs.com/package/@quri/squiggle-textmate-grammar)
 
-_No changes._
+Initial public release. This package is used for highlighting Squiggle code in VS Code extension and in documentation.
 
 ### [vscode-squiggle](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle)
 
-_No changes._
+Use 0.9.1 Squiggle. No extension-specific changes.
 
