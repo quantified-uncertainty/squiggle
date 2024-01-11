@@ -173,7 +173,8 @@ export const ForcePlot: FC<{
     simulation.nodes(nodes);
 
     return simulation;
-  }, [model, nodes, forceFn]);
+    //Note: Don't add ``forceFn`` to the dependencies. ``forcefn`` is unstable, so this will cause unnecessary rerenders.
+  }, [model, nodes]);
 
   useEffect(() => {
     return () => {

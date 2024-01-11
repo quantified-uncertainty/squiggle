@@ -30,7 +30,7 @@ const TableRow: React.FC<TableRowProps> = ({ label, number }) => (
   </Fragment>
 );
 
-let buildurl = (
+let buildSquiggleCode = (
   model: ModelEvaluator,
   numeratorItem: Item,
   denominatorItem: Item,
@@ -113,7 +113,7 @@ export const ItemSideBar: FC<Props> = ({
     return <div>Result not found</div>;
   } else {
     let item = result.value;
-    const squggleCode = buildurl(
+    const squggleCode = buildSquiggleCode(
       model,
       numeratorItem,
       denominatorItem,
