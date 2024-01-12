@@ -1,3 +1,4 @@
+"use client";
 import { FC, useState } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
@@ -8,20 +9,22 @@ import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
 import { H2 } from "@/components/ui/Headers";
 import { MutationButton } from "@/components/ui/MutationButton";
 import { StyledLink } from "@/components/ui/StyledLink";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRoute } from "@/routes";
 
-import { EditSquiggleSnippetModel } from "../models/[owner]/[slug]/EditSquiggleSnippetModel";
+import { EditSquiggleSnippetModel } from "../../models/[owner]/[slug]/EditSquiggleSnippetModel";
 
-import { UpgradeModels$key } from "@/__generated__/UpgradeModels.graphql";
-import { UpgradeModels_List$key } from "@/__generated__/UpgradeModels_List.graphql";
-import { UpgradeModels_updateMutation } from "@/__generated__/UpgradeModels_updateMutation.graphql";
+import { UpgradeVersionsPage_List$key } from "@/__generated__/UpgradeVersionsPage_List.graphql";
+import { UpgradeVersionsPage_updateMutation } from "@/__generated__/UpgradeVersionsPage_updateMutation.graphql";
+import { UpgradeVersionsPageQuery } from "@/__generated__/UpgradeVersionsPageQuery.graphql";
 
-const ModelList: FC<{ modelsRef: UpgradeModels_List$key }> = ({
+const ModelList: FC<{ modelsRef: UpgradeVersionsPage_List$key }> = ({
   modelsRef,
 }) => {
   const models = useFragment(
     graphql`
-      fragment UpgradeModels_List on Model @relay(plural: true) {
+      fragment UpgradeVersionsPage_List on Model @relay(plural: true) {
         id
         slug
         owner {
@@ -55,12 +58,12 @@ const ModelList: FC<{ modelsRef: UpgradeModels_List$key }> = ({
           </StyledLink>
         </div>
         <MutationButton<
-          UpgradeModels_updateMutation,
+          UpgradeVersionsPage_updateMutation,
           "AdminUpdateModelVersionResult"
         >
           expectedTypename="AdminUpdateModelVersionResult"
           mutation={graphql`
-            mutation UpgradeModels_updateMutation(
+            mutation UpgradeVersionsPage_updateMutation(
               $input: MutationAdminUpdateModelVersionInput!
             ) {
               result: adminUpdateModelVersion(input: $input) {
@@ -108,23 +111,23 @@ const ModelList: FC<{ modelsRef: UpgradeModels_List$key }> = ({
   );
 };
 
-export const UpgradeModels: FC<{
-  queryRef: UpgradeModels$key;
-}> = ({ queryRef }) => {
-  const { modelsByVersion } = useFragment(
+export const UpgradeVersionsPage: FC<{
+  query: SerializablePreloadedQuery<UpgradeVersionsPageQuery>;
+}> = ({ query }) => {
+  const [{ modelsByVersion }] = usePageQuery(
     graphql`
-      fragment UpgradeModels on Query {
+      query UpgradeVersionsPageQuery {
         modelsByVersion {
           version
           count
           privateCount
           models {
-            ...UpgradeModels_List
+            ...UpgradeVersionsPage_List
           }
         }
       }
     `,
-    queryRef
+    query
   );
 
   return (
@@ -139,7 +142,7 @@ export const UpgradeModels: FC<{
           {`Code edits won't be saved, "Upgrade" button bumps only the model's version.`}
         </strong>
       </p>
-      <div className="space-y-8">
+      <div className="mt-8 space-y-8">
         {modelsByVersion.map((entry) => {
           if (
             entry.version === "dev" ||
