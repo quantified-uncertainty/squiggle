@@ -235,7 +235,7 @@ b = '\\'" NUL:\\u0000'
       "The Tag module handles tags, which allow the additions of metadata to Squiggle variables.",
     sections: [{ name: "Tags" }, { name: "Functions" }],
     intro: `Tags are metadata that can be added to Squiggle variables. They are used to add additional information to variables, such as names, descriptions, and visualization options. While tags can be accessed at runtime, they are primarily meant for use with the Squiggle Playground and other visualizations.
-Tags can be added to variables either by using their name \`Tag.[name]\` or by using decorators.
+Tags can be added to variables either by using their name \`Tag.get[Name]\` or by using decorators.
 
 ## List of Tags
 | Tag Name    | Description |
@@ -303,10 +303,17 @@ defaultCode={\`sampleSet = 30 to 50
 pointSet = Sym.normal(5, 2)
 plot = Plot.dists([sampleSet, pointSet])
 fn(e) = e
-{
-  json: Danger.json([sampleSet, pointSet, plot, fn]),
-  jsonString: Danger.jsonString([pointSet, fn]),
-}\`}/>`,
+
+@notebook
+result = [
+  "### Danger.json()",
+  Danger.json([sampleSet, pointSet, plot, fn]),
+  "### Danger.jsonString",
+  // We don't show sampleSet or plot below because they would be too large, but feel free to try that out
+  Danger.jsonString([pointSet, fn]),
+]
+result
+\`}/>`,
       },
       { name: "Math" },
       { name: "Combinatorics" },

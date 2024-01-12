@@ -38,20 +38,25 @@ export const library = [
     examples: [
       makeFnExample(
         `Calculator.make(
-  {|x, y| x * y},
-  {
-    title: "My great calculator",
-    inputs: [
-      Input.text({ name: "x", default: "20" }),
-      Input.textArea({ name: "y", default: "50 to 80" }),
-    ],
-    autorun: false,
-    sampleCount: 10k,
-  }
-)`,
+{|text, textArea, select, checkbox| text + textArea},
+{
+  title: "My example calculator",
+  inputs: [
+    Input.text({ name: "text", default: "20" }),
+    Input.textArea({ name: "textArea", default: "50 to 80" }),
+    Input.select({ name: "select", default: "second", options: ["first", "second", "third"] }),
+    Input.checkbox({ name: "checkbox", default: true }),
+  ],
+  sampleCount: 10k,
+})`,
         { isInteractive: true }
       ),
-      makeFnExample("({|x| x * 5}) -> Calculator", { isInteractive: true }),
+      makeFnExample(
+        `// When a calculator is created with only a function, it will guess the inputs based on the function's parameters. It won't provide default values if it's a user-written function.
+
+({|x| x * 5}) -> Calculator`,
+        { isInteractive: true }
+      ),
     ],
     description: `
 \`Calculator.make\` takes in a function, a description, and a list of inputs. The function should take in the same number of arguments as the number of inputs, and the arguments should be of the same type as the default value of the input.

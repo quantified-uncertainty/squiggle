@@ -250,7 +250,7 @@ const baseLibrary = [
     SampleSet.fromDist(normal(5,2)),
     SampleSet.fromDist(normal(5,2))
   ],
-  {|x| max(x)}
+  max
 )`),
     ],
     output: "Dist",
