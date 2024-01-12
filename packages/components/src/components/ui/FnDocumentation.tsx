@@ -68,7 +68,6 @@ export const FnDocumentation: FC<{
     description,
     definitions,
     examples,
-    interactiveExamples,
   } = documentation;
   const textSize = size === "small" ? "text-xs" : "text-sm";
   const fullName = `${nameSpace ? nameSpace + "." : ""}${name}`;
@@ -160,31 +159,35 @@ export const FnDocumentation: FC<{
           </div>
         </Section>
       ) : null}
-      {examples?.length ?? interactiveExamples?.length ? (
+      {examples?.length ? (
         <Section>
           <header className={clsx("text-slate-600 font-medium mb-2", textSize)}>
             Examples
           </header>
 
           {examples &&
-            examples.map((example, i) => (
-              <MarkdownViewer
-                className="max-width-[200px]"
-                key={i}
-                md={`\`\`\`squiggle\n${example}\n\`\`\``}
-                textSize="sm"
-              />
+            examples
+              .filter(({ isInteractive }) => !isInteractive)
+              .map((example, i) => (
+                <MarkdownViewer
+                  className="max-width-[200px]"
+                  key={i}
+                  md={`\`\`\`squiggle\n${example.text}\n\`\`\``}
+                  textSize="sm"
+                />
+              ))}
+          {examples
+            .filter(({ isInteractive }) => !!isInteractive)
+            .map((example, i) => (
+              <div className="pt-2 pb-4" key={i}>
+                <SquiggleEditor
+                  defaultCode={example.text}
+                  key={i}
+                  chartHeight={size === "small" ? 80 : 120}
+                  editorFontSize={size === "small" ? 12 : 13}
+                />
+              </div>
             ))}
-          {(interactiveExamples ?? []).map((example, i) => (
-            <div className="pt-2 pb-4" key={i}>
-              <SquiggleEditor
-                defaultCode={example}
-                key={i}
-                chartHeight={size === "small" ? 80 : 120}
-                editorFontSize={size === "small" ? 12 : 13}
-              />
-            </div>
-          ))}
         </Section>
       ) : null}
     </>
