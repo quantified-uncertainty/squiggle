@@ -168,26 +168,24 @@ export const FnDocumentation: FC<{
           {examples &&
             examples
               .filter(({ isInteractive }) => !isInteractive)
-              .map((example, i) => (
-                <MarkdownViewer
-                  className="max-width-[200px]"
-                  key={i}
-                  md={`\`\`\`squiggle\n${example.text}\n\`\`\``}
-                  textSize="sm"
-                />
-              ))}
-          {examples
-            .filter(({ isInteractive }) => !!isInteractive)
-            .map((example, i) => (
-              <div className="pt-2 pb-4" key={i}>
-                <SquiggleEditor
-                  defaultCode={example.text}
-                  key={i}
-                  chartHeight={size === "small" ? 80 : 120}
-                  editorFontSize={size === "small" ? 12 : 13}
-                />
-              </div>
-            ))}
+              .map(({ text, isInteractive }, i) =>
+                isInteractive ? (
+                  <div className="pt-2 pb-4" key={i}>
+                    <SquiggleEditor
+                      defaultCode={text}
+                      chartHeight={size === "small" ? 80 : 120}
+                      editorFontSize={size === "small" ? 12 : 13}
+                    />
+                  </div>
+                ) : (
+                  <MarkdownViewer
+                    className="max-width-[200px]"
+                    key={i}
+                    md={`\`\`\`squiggle\n${text}\n\`\`\``}
+                    textSize="sm"
+                  />
+                )
+              )}
         </Section>
       ) : null}
     </>
