@@ -25,6 +25,7 @@ export type FRFunction = {
   isUnit?: boolean;
   shorthand?: Shorthand;
   displaySection?: string;
+  versionAdded?: string;
 };
 
 type FnNameDict = Map<string, FnDefinition[]>;
@@ -42,6 +43,7 @@ export type FnDocumentation = Pick<
   | "isUnit"
   | "shorthand"
   | "displaySection"
+  | "versionAdded"
 > & { signatures: string[] };
 
 export class Registry {
