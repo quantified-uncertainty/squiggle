@@ -216,7 +216,9 @@ export const UpgradeVersionsPage: FC<{
 
   const upgradeableModelsByVersion = modelsByVersion.filter(
     (entry) =>
-      entry.version !== "dev" && entry.version !== defaultSquiggleVersion
+      entry.version !== "dev" &&
+      entry.version !== defaultSquiggleVersion &&
+      entry.count > 0
   );
 
   const [selectedVersion, setSelectedVersion] = useState(
