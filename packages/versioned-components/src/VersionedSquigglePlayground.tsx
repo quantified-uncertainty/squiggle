@@ -6,6 +6,7 @@ import { FC, lazy, Suspense } from "react";
  * It's edited with babel transformation in `publish-all.ts` script.
  */
 import { type SquigglePlaygroundProps as SquigglePlaygroundProps_0_9_0 } from "squiggle-components-0.9.0";
+import { type SquigglePlaygroundProps as SquigglePlaygroundProps_0_9_2 } from "squiggle-components-0.9.2";
 
 import { type SquigglePlaygroundProps as SquigglePlaygroundProps_dev } from "@quri/squiggle-components";
 
@@ -22,7 +23,7 @@ import {
 } from "./oldPlaygroundTypes.js";
 import { LazyVersionedComponents, VersionedComponentProps } from "./types.js";
 
-const componentByVersion = {
+export const componentByVersion = {
   "0.8.5": lazy(async () => ({
     default: (await import("squiggle-components-0.8.5")).SquigglePlayground,
   })) as FC<SquigglePlaygroundProps_0_8_5>,
@@ -32,10 +33,14 @@ const componentByVersion = {
   "0.9.0": lazy(async () => ({
     default: (await import("squiggle-components-0.9.0")).SquigglePlayground,
   })) as FC<SquigglePlaygroundProps_0_9_0>,
+  "0.9.2": lazy(async () => ({
+    default: (await import("squiggle-components-0.9.2")).SquigglePlayground,
+  })) as FC<SquigglePlaygroundProps_0_9_2>,
   dev: lazy(async () => ({
     default: (await import("@quri/squiggle-components")).SquigglePlayground,
   })) as FC<SquigglePlaygroundProps_dev>,
 } as const satisfies LazyVersionedComponents;
+
 type Props = VersionedComponentProps<typeof componentByVersion>;
 export const VersionedSquigglePlayground: FC<Props> = ({
   version,
