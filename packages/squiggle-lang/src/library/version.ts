@@ -2,7 +2,7 @@ import { ImmutableMap } from "../utility/immutableMap.js";
 import { Value, vString } from "../value/index.js";
 
 // automatically updated on release by ops/ patch-js utils
-const VERSION = "0.9.1-0";
+const VERSION = "0.9.2";
 export function makeVersionConstant(): ImmutableMap<string, Value> {
   return ImmutableMap([["System.version", vString(VERSION)]]);
 }

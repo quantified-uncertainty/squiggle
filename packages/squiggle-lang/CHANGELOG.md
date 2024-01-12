@@ -1,5 +1,19 @@
 # @quri/squiggle-lang
 
+## 0.9.2
+
+- Breaking: Deprecated `Plot` titles ([#2925](https://github.com/quantified-uncertainty/squiggle/pull/2925))
+
+- Breaking: Renamed `Tag.all` -> `Tag.getAll` ([#2925](https://github.com/quantified-uncertainty/squiggle/pull/2925))
+
+- Breaking: Renamed `Tag.description` to `Tag.doc` ([#2827](https://github.com/quantified-uncertainty/squiggle/pull/2827))
+
+- Fix `isEqual` and `==` for Squiggle Lists ([#2920](https://github.com/quantified-uncertainty/squiggle/pull/2920))
+
+- Added `throw` function ([#2941](https://github.com/quantified-uncertainty/squiggle/pull/2941))
+
+- Adds `Tag.notebook` view for Lists ([#2929](https://github.com/quantified-uncertainty/squiggle/pull/2929))
+
 ## 0.9.0
 
 - Support for tags (`Tag.*` functions) and decorators (`@decoratorName`) that can be used to affect how the value is displayed. ([`b5d1394`](https://github.com/quantified-uncertainty/squiggle/commit/b5d139465c72a742b0ac319068d4acc1d7ab0e4d))

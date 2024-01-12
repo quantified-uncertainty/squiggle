@@ -7,11 +7,7 @@ import {
   VSCODE_PACKAGE_NAME,
   WEBSITE_CHANGELOG_ROOT,
 } from "./constants.cjs";
-import {
-  getChangedPackages,
-  getPackageInfo,
-  PackageInfo,
-} from "./package-utils.js";
+import { getPackageInfo, PackageInfo } from "./package-utils.js";
 
 export type PackageChangelog = {
   packageDir: string;
@@ -72,9 +68,7 @@ async function updateChangelogMeta(version: string) {
     })
   );
 }
-export async function generateWebsiteChangelog() {
-  const packageDirs = await getChangedPackages();
-
+export async function generateWebsiteChangelog(packageDirs: string[]) {
   const allChangelogs: PackageChangelog[] = [];
 
   for (const packageDir of packageDirs) {

@@ -1,5 +1,6 @@
 import { cleanupGeneratedChangelogs } from "../changelog-cleanup.js";
 import { exec } from "../lib.js";
+import { getChangedPackages } from "../package-utils.js";
 import { updateSquiggleLangVersion } from "../patch-js.js";
 import { generateWebsiteChangelog } from "../website.js";
 
@@ -18,7 +19,7 @@ async function main() {
   await updateSquiggleLangVersion();
 
   // Generate MDX page for the upcoming release.
-  await generateWebsiteChangelog();
+  await generateWebsiteChangelog(await getChangedPackages());
 }
 
 main();
