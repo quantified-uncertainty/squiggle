@@ -83,7 +83,6 @@ export const library = [
     name: "unaryMinus",
     output: "Number",
     displaySection: "Functions (Number)",
-    description: "exponent",
     examples: [`exp(3.5)`],
     fn: (x) => -x,
   }),

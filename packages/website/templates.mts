@@ -11,7 +11,7 @@ export const modulePages: ModulePage[] = [
   {
     name: "Common",
     description: "",
-    intro: `Functions that work on many different types of values. Also see the experimental [Json functions](/docs/Api/Danger#json).`,
+    intro: `Functions that work on many different types of values. Also see the experimental [JSON functions](/docs/Api/Danger#json).`,
   },
   {
     name: "Boolean",

@@ -34,12 +34,15 @@ export const library = [
   maker.make({
     name: "make",
     output: "Calculator",
-    examples: [
+    interactiveExamples: [
       `Calculator.make(
-  {|x| x * 5},
+  {|x, y| x * y},
   {
     title: "My great calculator",
-    inputs: [Input.text({ name: "x", default: "20" })],
+    inputs: [
+      Input.text({ name: "x", default: "20" }),
+      Input.textArea({ name: "y", default: "50 to 80" }),
+    ],
     autorun: false,
     sampleCount: 10k,
   }
