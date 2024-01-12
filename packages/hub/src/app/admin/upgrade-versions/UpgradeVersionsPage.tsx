@@ -3,7 +3,12 @@ import { FC, useState } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { Button } from "@quri/ui";
+import {
+  Button,
+  Dropdown,
+  DropdownMenu,
+  DropdownMenuActionItem,
+} from "@quri/ui";
 import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
 
 import { H2 } from "@/components/ui/Headers";
@@ -114,6 +119,7 @@ const ModelList: FC<{ modelsRef: UpgradeVersionsPage_List$key }> = ({
 export const UpgradeVersionsPage: FC<{
   query: SerializablePreloadedQuery<UpgradeVersionsPageQuery>;
 }> = ({ query }) => {
+  // TODO - this fetches all models even if we show just one, can we optimize it?
   const [{ modelsByVersion }] = usePageQuery(
     graphql`
       query UpgradeVersionsPageQuery {
@@ -130,37 +136,76 @@ export const UpgradeVersionsPage: FC<{
     query
   );
 
+  type Entry = (typeof upgradeableModelsByVersion)[number];
+
+  const upgradeableModelsByVersion = modelsByVersion.filter(
+    (entry) =>
+      entry.version !== "dev" && entry.version !== defaultSquiggleVersion
+  );
+
+  const [selectedVersion, setSelectedVersion] = useState(
+    upgradeableModelsByVersion.at(0)?.version
+  );
+
+  const getEntryTitle = (entry: Entry) =>
+    `${entry.version} (${entry.count} models, ${entry.privateCount} private)`;
+
+  const getEntryByVersion = (version: string): Entry | undefined =>
+    modelsByVersion.find((entry) => entry.version === version);
+
+  const selectedEntry = selectedVersion
+    ? getEntryByVersion(selectedVersion)
+    : undefined;
+
+  const devCount = getEntryByVersion("dev")?.models.length ?? 0;
+  const latestCount =
+    getEntryByVersion(defaultSquiggleVersion)?.models.length ?? 0;
+
   return (
     <div>
       <H2>Upgrade model versions</H2>
-      <p>
-        Check models with their current version and the new version, then press
-        the upgrade button if everything is ok.
-      </p>
-      <p>
-        <strong>
-          {`Code edits won't be saved, "Upgrade" button bumps only the model's version.`}
-        </strong>
-      </p>
-      <div className="mt-8 space-y-8">
-        {modelsByVersion.map((entry) => {
-          if (
-            entry.version === "dev" ||
-            entry.version === defaultSquiggleVersion
-          ) {
-            return null;
-          }
-          return (
-            <section key={entry.version}>
-              <h3 className="font-medium text-lg text-slate-700">
-                {entry.version} ({entry.count} models, {entry.privateCount}{" "}
-                private models)
-              </h3>
-              <ModelList modelsRef={entry.models} />
-            </section>
-          );
-        })}
+      <div className="text-xs">
+        <p className="text-xs">
+          Check models with their current version and the new version, then
+          press the upgrade button if everything is ok.
+        </p>
+        <p>
+          <strong>
+            {`Code edits won't be saved, "Upgrade" button bumps only the model's version.`}
+          </strong>
+        </p>
       </div>
+      <div className="text-sm mt-2">
+        <div>Dev models: {devCount}</div>
+        <div>
+          {defaultSquiggleVersion} models: {latestCount}
+        </div>
+      </div>
+      <div className="flex py-4">
+        <Dropdown
+          render={({ close }) => (
+            <DropdownMenu>
+              {upgradeableModelsByVersion.map((entry) => {
+                return (
+                  <DropdownMenuActionItem
+                    key={entry.version}
+                    title={getEntryTitle(entry)}
+                    onClick={() => {
+                      setSelectedVersion(entry.version);
+                      close();
+                    }}
+                  />
+                );
+              })}
+            </DropdownMenu>
+          )}
+        >
+          <Button theme="primary">
+            {selectedEntry ? getEntryTitle(selectedEntry) : "Pick a version"}
+          </Button>
+        </Dropdown>
+      </div>
+      {selectedEntry ? <ModelList modelsRef={selectedEntry.models} /> : null}
     </div>
   );
 };
