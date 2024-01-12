@@ -2,11 +2,13 @@
 import { FC, useState } from "react";
 import { graphql, useFragment } from "react-relay";
 import * as squiggleLang_0_9_0 from "squiggle-lang-0.9.0";
+import * as squiggleLang_0_9_2 from "squiggle-lang-0.9.2";
 
 import * as squiggleLang_dev from "@quri/squiggle-lang";
 import {
   useAdjustSquiggleVersion,
   VersionedSquiggleChart,
+  versionSupportsExports,
 } from "@quri/versioned-squiggle-components";
 
 import { squiggleHubLinker } from "@/squiggle/components/linker";
@@ -18,7 +20,7 @@ type SquiggleProps = {
   code: string;
 };
 
-const SquiggleModelExportPage_9_0_0: FC<SquiggleProps> = ({
+const SquiggleModelExportPage_0_9_0: FC<SquiggleProps> = ({
   variableName,
   code,
 }) => {
@@ -36,6 +38,31 @@ const SquiggleModelExportPage_9_0_0: FC<SquiggleProps> = ({
   return (
     <VersionedSquiggleChart
       version="0.9.0"
+      code={code}
+      rootPathOverride={rootPath}
+      project={project}
+    />
+  );
+};
+
+const SquiggleModelExportPage_0_9_2: FC<SquiggleProps> = ({
+  variableName,
+  code,
+}) => {
+  const [{ project, rootPath }] = useState(() => {
+    const project = new squiggleLang_0_9_2.SqProject({
+      linker: squiggleHubLinker,
+    });
+    const rootPath = new squiggleLang_0_9_2.SqValuePath({
+      root: "bindings",
+      items: [{ type: "string", value: variableName }],
+    });
+    return { project, rootPath };
+  });
+
+  return (
+    <VersionedSquiggleChart
+      version="0.9.2"
       code={code}
       rootPathOverride={rootPath}
       project={project}
@@ -85,7 +112,7 @@ export const SquiggleModelExportPage: FC<{
 
   const checkedVersion = useAdjustSquiggleVersion(content.version);
 
-  if (checkedVersion === "0.8.5" || checkedVersion === "0.8.6") {
+  if (!versionSupportsExports.plain(checkedVersion)) {
     return (
       <div className="p-4 bg-red-100 text-red-900">
         Export view pages don&apos;t support Squiggle {checkedVersion}.
@@ -96,7 +123,14 @@ export const SquiggleModelExportPage: FC<{
   switch (checkedVersion) {
     case "0.9.0":
       return (
-        <SquiggleModelExportPage_9_0_0
+        <SquiggleModelExportPage_0_9_0
+          code={content.code}
+          variableName={variableName}
+        />
+      );
+    case "0.9.2":
+      return (
+        <SquiggleModelExportPage_0_9_2
           code={content.code}
           variableName={variableName}
         />

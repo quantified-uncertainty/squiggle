@@ -15,20 +15,46 @@ export function checkSquiggleVersion(
 ): version is SquiggleVersion {
   return (squiggleVersions as readonly string[]).includes(version);
 }
-function excludeVersions<T extends SquiggleVersion[]>(skipVersions: T) {
-  const guard = <
-    Arg extends {
-      version: SquiggleVersion;
-    },
-  >(
-    arg: Arg
-  ): arg is Extract<
-    Arg,
-    {
-      version: Exclude<SquiggleVersion, T[number]>;
-    }
-  > => !skipVersions.includes(arg.version);
-  return guard;
+
+// We need two kinds of guards:
+// 1) `guard.plain(version)`, to check the version string
+// 2) `guard.props({ version: ... })`, to check and narrow the props that we're going to use and incrementally update the props
+// The following code is a bit complicated, because it optimizes for easily adding new guards.
+
+type VersionGuard<AllowedSquiggleVersion extends SquiggleVersion> = (
+  version: SquiggleVersion
+) => version is AllowedSquiggleVersion;
+
+type VersionedPropsGuard<AllowedSquiggleVersion extends SquiggleVersion> = <
+  Arg extends { version: SquiggleVersion },
+>(
+  arg: Arg
+) => arg is Extract<Arg, { version: AllowedSquiggleVersion }>;
+
+type CompositeGuard<AllowedSquiggleVersion extends SquiggleVersion> = {
+  plain: VersionGuard<AllowedSquiggleVersion>;
+  props: VersionedPropsGuard<AllowedSquiggleVersion>;
+};
+
+function excludeVersions<
+  T extends SquiggleVersion[],
+  AllowedSquiggleVersion extends SquiggleVersion = Exclude<
+    SquiggleVersion,
+    T[number]
+  >,
+>(skipVersions: T): CompositeGuard<AllowedSquiggleVersion> {
+  const plainGuard = ((version) =>
+    !skipVersions.includes(version)) as VersionGuard<AllowedSquiggleVersion>;
+
+  const propsGuard = ((arg) =>
+    !skipVersions.includes(
+      arg.version
+    )) as VersionedPropsGuard<AllowedSquiggleVersion>;
+
+  return {
+    plain: plainGuard,
+    props: propsGuard,
+  };
 }
 
 /*
