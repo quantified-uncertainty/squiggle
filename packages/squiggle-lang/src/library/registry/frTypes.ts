@@ -174,7 +174,7 @@ export const frWithTags = <T>(
     unpack: (v) => {
       const unpackedItem = itemType.unpack(v);
       return (
-        (unpackedItem && {
+        (unpackedItem !== undefined && {
           value: unpackedItem,
           tags: v.tags ?? new ValueTags({}),
         }) ||
