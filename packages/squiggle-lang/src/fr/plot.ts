@@ -18,6 +18,7 @@ import {
   frString,
   frWithTags,
 } from "../library/registry/frTypes.js";
+
 import {
   assertScaleNotDateScale,
   createScaleUsingDomain,
@@ -212,7 +213,7 @@ export const library = [
         ],
         frPlot,
         ([{ dist, xScale, yScale, title, showSummary }]) => {
-          _assertYScaleNotDateScale(yScale);
+          assertScaleNotDateScale(yScale);
           return {
             type: "distributions",
             distributions: [{ distribution: dist }],

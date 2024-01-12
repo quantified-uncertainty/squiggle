@@ -50,36 +50,26 @@ export class ValueTags {
   constructor(public value: ValueTagsType) {}
 
   toList(): [string, Value][] {
-    const result: [string, Value][] = [];
-    const { value } = this;
-    if (value.name) {
-      result.push(["name", vString(value.name)]);
-    }
-    if (value.doc) {
-      result.push(["doc", vString(value.doc)]);
-    }
-    if (value.showAs) {
-      result.push(["showAs", value.showAs]);
-    }
-    if (value.numberFormat) {
-      result.push(["numberFormat", vString(value.numberFormat)]);
-    }
-    if (value.dateFormat) {
-      result.push(["dateFormat", vString(value.dateFormat)]);
-    }
-    if (value.hidden) {
-      result.push(["hidden", vBool(value.hidden)]);
-    }
-    if (value.xScale) {
-      result.push(["xScale", vScale(value.xScale)]);
-    }
-    if (value.yScale) {
-      result.push(["yScale", vScale(value.yScale)]);
-    }
-    if (value.notebook) {
-      result.push(["notebook", vBool(value.notebook)]);
-    }
-    return result;
+    return valueTagsTypeNames
+      .filter((key) => this.value[key] !== undefined)
+      .map((key) => {
+        const value = this.value[key];
+        switch (key) {
+          case "name":
+          case "doc":
+          case "numberFormat":
+          case "dateFormat":
+            return [key, vString(value as string)];
+          case "hidden":
+          case "notebook":
+            return [key, vBool(value as boolean)];
+          case "xScale":
+          case "yScale":
+            return [key, vScale(value as Scale)];
+          default:
+            return [key, value as Value];
+        }
+      });
   }
 
   omit(keys: ValueTagsTypeName[]) {
@@ -123,28 +113,24 @@ export class ValueTags {
     return this.value.showAs;
   }
 
-  //Here, numberFormat overrides xScale.tickFormat
   numberFormat() {
-    return this.value.numberFormat ?? this.value.xScale?.tickFormat;
+    return this.value.numberFormat;
   }
 
   dateFormat() {
-    return this.value.dateFormat ?? this.value.xScale?.tickFormat;
+    return this.value.dateFormat;
   }
 
   hidden() {
     return this.value.hidden;
   }
 
-  //Here, xScale.tickFormat overrides numberFormat/dateFormat
   xScale(): Scale | undefined {
-    const format = this.value.numberFormat ?? this.value.dateFormat;
-    const xScale = this.value.xScale ?? {};
-    return { ...xScale, tickFormat: xScale.tickFormat ?? format };
+    return this.value.xScale;
   }
 
   yScale(): Scale | undefined {
-    return this.value.xScale;
+    return this.value.yScale;
   }
 
   notebook() {
