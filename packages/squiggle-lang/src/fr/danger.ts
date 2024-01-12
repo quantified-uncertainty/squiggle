@@ -12,7 +12,7 @@ import {
 } from "../dist/distOperations/scaleOperations.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
-import { FRFunction } from "../library/registry/core.js";
+import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -76,9 +76,9 @@ const combinatoricsLibrary: FRFunction[] = [
     name: "laplace",
     description: `Calculates the probability implied by [Laplace's rule of succession](https://en.wikipedia.org/wiki/Rule_of_succession)`,
     examples: [
-      `trials = 10
+      makeFnExample(`trials = 10
 successes = 1
-Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 = 0.1666`,
+Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 = 0.1666`),
     ],
     displaySection: "Math",
     fn: (successes, trials) => (successes + 1) / (trials + 2),
@@ -86,14 +86,14 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
   maker.n2n({
     name: "factorial",
     displaySection: "Combinatorics",
-    examples: [`Danger.factorial(20)`],
+    examples: [makeFnExample(`Danger.factorial(20)`)],
     fn: factorial,
   }),
   maker.nn2n({
     name: "choose",
     displaySection: "Combinatorics",
     description: `\`Danger.choose(n,k)\` returns \`factorial(n) / (factorial(n - k) * factorial(k))\`, i.e., the number of ways you can choose k items from n choices, without repetition. This function is also known as the [binomial coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient).`,
-    examples: [`Danger.choose(1, 20)`],
+    examples: [makeFnExample(`Danger.choose(1, 20)`)],
     fn: choose,
   }),
   maker.make({
@@ -101,7 +101,7 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
     output: "Number",
     displaySection: "Combinatorics",
     description: `\`Danger.binomial(n, k, p)\` returns \`choose((n, k)) * pow(p, k) * pow(1 - p, n - k)\`, i.e., the probability that an event of probability p will happen exactly k times in n draws.`,
-    examples: [`Danger.binomial(1, 20, 0.5)`],
+    examples: [makeFnExample(`Danger.binomial(1, 20, 0.5)`)],
     definitions: [
       makeDefinition(
         [frNumber, frNumber, frNumber],
@@ -190,7 +190,9 @@ const integrationLibrary: FRFunction[] = [
     output: "Number",
     displaySection: "Integration",
     examples: [
-      `Danger.integrateFunctionBetweenWithNumIntegrationPoints({|x| x+1}, 1, 10, 10)`,
+      makeFnExample(
+        `Danger.integrateFunctionBetweenWithNumIntegrationPoints({|x| x+1}, 1, 10, 10)`
+      ),
     ],
     description: `Integrates the function \`f\` between \`min\` and \`max\`, and computes \`numIntegrationPoints\` in between to do so.
 
@@ -242,7 +244,9 @@ Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, nu
     output: "Number",
     displaySection: "Integration",
     examples: [
-      `Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 0.1)`,
+      makeFnExample(
+        `Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 0.1)`
+      ),
     ],
     description: `Integrates the function \`f\` between \`min\` and \`max\`, and uses an interval of \`epsilon\` between integration points when doing so. This makes its runtime less predictable than \`integrateFunctionBetweenWithNumIntegrationPoints\`, because runtime will not only depend on \`epsilon\`, but also on \`min\` and \`max\`.
 
@@ -290,14 +294,14 @@ const diminishingReturnsLibrary = [
     output: "Array",
     requiresNamespace: false,
     examples: [
-      `Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(
+      makeFnExample(`Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(
   [
     {|x| x+1},
     {|y| 10}
   ],
   100,
   0.01
-)`,
+)`),
     ],
     description: `Computes the optimal allocation of $\`funds\` between \`f1\` and \`f2\`. For the answer given to be correct, \`f1\` and \`f2\` will have to be decreasing, i.e., if \`x > y\`, then \`f_i(x) < f_i(y)\`.`,
     displaySection: "Optimization",
@@ -417,7 +421,7 @@ const diminishingReturnsLibrary = [
 const mapYLibrary: FRFunction[] = [
   maker.make({
     name: "binomialDist",
-    examples: ["Danger.binomialDist(8, 0.5)"],
+    examples: [makeFnExample("Danger.binomialDist(8, 0.5)")],
     displaySection: "Distributions",
     description: `A binomial distribution.
 
@@ -434,7 +438,7 @@ Note: The binomial distribution is a discrete distribution. When representing th
   }),
   maker.make({
     name: "poissonDist",
-    examples: ["Danger.poissonDist(10)"],
+    examples: [makeFnExample("Danger.poissonDist(10)")],
     displaySection: "Distributions",
     description: `A Poisson distribution.
 
@@ -449,7 +453,11 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
   maker.make({
     name: "combinations",
     displaySection: "Combinatorics",
-    examples: [`Danger.combinations([1, 2, 3], 2) // [[1, 2], [1, 3], [2, 3]]`],
+    examples: [
+      makeFnExample(
+        `Danger.combinations([1, 2, 3], 2) // [[1, 2], [1, 3], [2, 3]]`
+      ),
+    ],
     description: `Returns all combinations of the input list taken r elements at a time.`,
     definitions: [
       makeDefinition(
@@ -471,7 +479,9 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
     displaySection: "Combinatorics",
     description: `Returns all possible combinations of the elements in the input list.`,
     examples: [
-      `Danger.allCombinations([1, 2, 3]) // [[1], [2], [3], [1, 2], [1, 3], [2, 3], [1, 2, 3]]`,
+      makeFnExample(
+        `Danger.allCombinations([1, 2, 3]) // [[1], [2], [3], [1, 2], [1, 3], [2, 3], [1, 2, 3]]`
+      ),
     ],
     definitions: [
       makeDefinition(
@@ -489,8 +499,10 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
     description:
       "Converts a value to a simpler form, similar to JSON. This is useful for debugging. Keeps functions and dates, but converts objects like distributions, calculators, and plots to combinations of dictionaries and lists.",
     examples: [
-      `Danger.json({a: 1, b: 2})`,
-      `Danger.json([2 to 5, Sym.normal(5, 2), Calculator({|x| x + 1})])`,
+      makeFnExample(`Danger.json({a: 1, b: 2})`),
+      makeFnExample(
+        `Danger.json([2 to 5, Sym.normal(5, 2), Calculator({|x| x + 1})])`
+      ),
     ],
     definitions: [
       makeDefinition([frAny()], frAny(), ([v]) => {
@@ -504,8 +516,10 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
     description:
       "Converts a value to a stringified JSON, similar to JSON.stringify() in Javasript. Replaces functions with dict summaries.",
     examples: [
-      `Danger.jsonString({a: 1, b: 2})`,
-      `Danger.jsonString([2 to 5, Sym.normal(5, 2), Calculator({|x| x + 1})])`,
+      makeFnExample(`Danger.jsonString({a: 1, b: 2})`),
+      makeFnExample(
+        `Danger.jsonString([2 to 5, Sym.normal(5, 2), Calculator({|x| x + 1})])`
+      ),
     ],
     definitions: [
       makeDefinition([frAny()], frString, ([v]) => {

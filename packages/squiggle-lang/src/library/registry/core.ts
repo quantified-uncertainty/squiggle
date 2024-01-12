@@ -12,13 +12,27 @@ import {
 
 type Shorthand = { type: "infix" | "unary"; symbol: string };
 
+type example = {
+  text: string;
+  isInteractive: boolean;
+  useForTests: boolean;
+};
+
+export function makeFnExample(
+  text: string,
+  isInteractive = false,
+  useForTests = true
+): example {
+  return { text, isInteractive, useForTests };
+}
+
 export type FRFunction = {
   name: string;
   nameSpace: string;
   requiresNamespace: boolean;
   definitions: FnDefinition[];
   output?: Value["type"];
-  examples?: string[];
+  examples?: example[];
   interactiveExamples?: string[];
   description?: string;
   isExperimental?: boolean;
@@ -26,6 +40,17 @@ export type FRFunction = {
   shorthand?: Shorthand;
   displaySection?: string;
 };
+
+function organizedExamples(f: FRFunction) {
+  return [
+    ...(f.examples ?? []),
+    ...(f.interactiveExamples?.map((e) => ({
+      text: e,
+      isInteractive: true,
+      useForTests: false,
+    })) ?? []),
+  ];
+}
 
 type FnNameDict = Map<string, FnDefinition[]>;
 
@@ -78,17 +103,10 @@ export class Registry {
     return new Registry(fns, dict);
   }
 
-  allExamplesWithFns(): { fn: FRFunction; example: string }[] {
+  allExamplesWithFns(): { fn: FRFunction; example: example }[] {
     return this.functions
       .map((fn) => {
-        const regularExamples =
-          fn.examples?.map((example) => ({
-            fn,
-            example,
-          })) ?? [];
-        const interactiveExamples =
-          fn.interactiveExamples?.map((example) => ({ fn, example })) ?? [];
-        return [...regularExamples, ...interactiveExamples];
+        return organizedExamples(fn).map((example) => ({ fn, example }));
       })
       .flat();
   }

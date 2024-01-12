@@ -1,7 +1,7 @@
 import { argumentError, otherError } from "../dist/DistError.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { REDistributionError } from "../errors/messages.js";
-import { FRFunction } from "../library/registry/core.js";
+import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDict,
@@ -63,7 +63,10 @@ export const library: FRFunction[] = [
     name: "make",
     requiresNamespace: true,
     displaySection: "Distributions",
-    examples: ["Dist.make(5)", "Dist.make(normal({p5: 4, p95: 10}))"],
+    examples: [
+      makeFnExample("Dist.make(5)"),
+      makeFnExample("Dist.make(normal({p5: 4, p95: 10}))"),
+    ],
     definitions: [
       makeDefinition([frDist], frDist, ([dist]) => dist),
       makeDefinition([frNumber], frDistSymbolic, ([v]) =>
@@ -75,9 +78,13 @@ export const library: FRFunction[] = [
     name: "mixture",
     displaySection: "Distributions",
     examples: [
-      "mixture(1,normal(5,2))",
-      "mixture(normal(5,2), normal(10,2), normal(15,2), [0.3, 0.5, 0.2])",
-      "mixture([normal(5,2), normal(10,2), normal(15,2), normal(20,1)], [0.3, 0.5, 0.1, 0.1])",
+      makeFnExample("mixture(1,normal(5,2))"),
+      makeFnExample(
+        "mixture(normal(5,2), normal(10,2), normal(15,2), [0.3, 0.5, 0.2])"
+      ),
+      makeFnExample(
+        "mixture([normal(5,2), normal(10,2), normal(15,2), normal(20,1)], [0.3, 0.5, 0.1, 0.1])"
+      ),
     ],
     description: `The \`\`mixture\`\` function takes a list of distributions and a list of weights, and returns a new distribution that is a mixture of the distributions in the list. The weights should be positive numbers that sum to 1. If no weights are provided, the function will assume that all distributions have equal weight.
     
@@ -87,7 +94,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
   maker.make({
     name: "mx",
     displaySection: "Distributions",
-    examples: ["mx(1,normal(5,2))"],
+    examples: [makeFnExample("mx(1,normal(5,2))")],
     description: "Alias for mixture()",
     definitions: mixtureDefinitions,
   }),
@@ -95,11 +102,11 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
     name: "normal",
     displaySection: "Distributions",
     examples: [
-      "normal(5,1)",
-      "normal({p5: 4, p95: 10})",
-      "normal({p10: 4, p90: 10})",
-      "normal({p25: 4, p75: 10})",
-      "normal({mean: 5, stdev: 2})",
+      makeFnExample("normal(5,1)"),
+      makeFnExample("normal({p5: 4, p95: 10})"),
+      makeFnExample("normal({p10: 4, p90: 10})"),
+      makeFnExample("normal({p25: 4, p75: 10})"),
+      makeFnExample("normal({mean: 5, stdev: 2})"),
     ],
     definitions: [
       makeTwoArgsSamplesetDist(
@@ -124,11 +131,11 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
   maker.make({
     name: "lognormal",
     examples: [
-      "lognormal(0.5, 0.8)",
-      "lognormal({p5: 4, p95: 10})",
-      "lognormal({p10: 4, p90: 10})",
-      "lognormal({p25: 4, p75: 10})",
-      "lognormal({mean: 5, stdev: 2})",
+      makeFnExample("lognormal(0.5, 0.8)"),
+      makeFnExample("lognormal({p5: 4, p95: 10})"),
+      makeFnExample("lognormal({p10: 4, p90: 10})"),
+      makeFnExample("lognormal({p25: 4, p75: 10})"),
+      makeFnExample("lognormal({mean: 5, stdev: 2})"),
     ],
     displaySection: "Distributions",
     definitions: [
@@ -153,7 +160,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
   }),
   maker.make({
     name: "uniform",
-    examples: ["uniform(10, 12)"],
+    examples: [makeFnExample("uniform(10, 12)")],
     displaySection: "Distributions",
     definitions: [
       makeTwoArgsSamplesetDist(
@@ -165,7 +172,10 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
   }),
   maker.make({
     name: "beta",
-    examples: ["beta(20, 25)", "beta({mean: 0.39, stdev: 0.1})"],
+    examples: [
+      makeFnExample("beta(20, 25)"),
+      makeFnExample("beta({mean: 0.39, stdev: 0.1})"),
+    ],
     displaySection: "Distributions",
     definitions: [
       makeTwoArgsSamplesetDist(
@@ -180,7 +190,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
   }),
   maker.make({
     name: "cauchy",
-    examples: ["cauchy(5, 1)"],
+    examples: [makeFnExample("cauchy(5, 1)")],
     displaySection: "Distributions",
     definitions: [
       makeTwoArgsSamplesetDist(
@@ -192,7 +202,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
   }),
   maker.make({
     name: "gamma",
-    examples: ["gamma(5, 1)"],
+    examples: [makeFnExample("gamma(5, 1)")],
     displaySection: "Distributions",
     definitions: [
       makeTwoArgsSamplesetDist(
@@ -204,7 +214,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
   }),
   maker.make({
     name: "logistic",
-    examples: ["logistic(5, 1)"],
+    examples: [makeFnExample("logistic(5, 1)")],
     displaySection: "Distributions",
     definitions: [
       makeTwoArgsSamplesetDist(
@@ -216,7 +226,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
   }),
   maker.make({
     name: "to",
-    examples: ["5 to 10", "to(5,10)"],
+    examples: [makeFnExample("5 to 10"), makeFnExample("to(5,10)")],
     description: `The "to" function is a shorthand for lognormal({p5:min, p95:max}). It does not accept values of 0 or less, as those are not valid for lognormal distributions.`,
     displaySection: "Distributions",
     definitions: [
@@ -246,7 +256,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
   }),
   maker.make({
     name: "exponential",
-    examples: ["exponential(2)"],
+    examples: [makeFnExample("exponential(2)")],
     displaySection: "Distributions",
     definitions: [
       makeOneArgSamplesetDist(
@@ -257,7 +267,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
   }),
   maker.make({
     name: "bernoulli",
-    examples: ["bernoulli(0.5)"],
+    examples: [makeFnExample("bernoulli(0.5)")],
     displaySection: "Distributions",
     definitions: [
       makeOneArgSamplesetDist((p) => SymbolicDist.Bernoulli.make(p), "p"),
@@ -265,7 +275,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
   }),
   maker.make({
     name: "triangular",
-    examples: ["triangular(3, 5, 10)"],
+    examples: [makeFnExample("triangular(3, 5, 10)")],
     displaySection: "Distributions",
     definitions: [
       makeDefinition(
