@@ -43,11 +43,6 @@ jobs:
         working-directory: packages/ops
         run: pnpm turbo build
 
-      # important so that we could bump System.version
-      - name: Build squiggle-lang
-        working-directory: packages/squiggle-lang
-        run: pnpm turbo build
-
       # if there are existing changesets, PR will be created.
       # Otherwise, `publish` command will be invoked.
       - name: Create Release Pull Request or Publish to npm
