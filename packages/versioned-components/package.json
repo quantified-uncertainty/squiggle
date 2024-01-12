@@ -19,8 +19,7 @@
     "lodash": "^4.17.21",
     "squiggle-components-0.8.5": "npm:@quri/squiggle-components@0.8.5",
     "squiggle-components-0.8.6": "npm:@quri/squiggle-components@0.8.6",
-    "squiggle-components-0.9.0": "npm:@quri/squiggle-components@0.9.0",
-    "squiggle-components-0.9.1": "npm:@quri/squiggle-components@0.9.1"
+    "squiggle-components-0.9.0": "npm:@quri/squiggle-components@0.9.0"
   },
   "devDependencies": {
     "@quri/configs": "workspace:*",
