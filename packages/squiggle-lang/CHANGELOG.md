@@ -1,6 +1,6 @@
 # @quri/squiggle-lang
 
-## 0.9.1
+## 0.9.2
 
 - Breaking: Deprecated `Plot` titles ([#2925](https://github.com/quantified-uncertainty/squiggle/pull/2925))
 
