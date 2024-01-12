@@ -94,19 +94,21 @@ function buildRelativeValue({
 export class ModelEvaluator {
   private constructor(
     public modelCode: string,
+    public variableName: string,
     private fn: SqLambda,
     private cache?: RelativeValuesCacheRecord
   ) {}
 
   static async create(
     modelCode: string,
+    variableName: string,
     cache?: RelativeValuesExport$data["cache"]
   ): Promise<result<ModelEvaluator, string>> {
     // TODO - versioned SqProject
     const project = SqProject.create({
       linker: squiggleHubLinker,
     });
-    project.setSource("wrapper", "RelativeValues.wrap(fn)");
+    project.setSource("wrapper", `RelativeValues.wrap(${variableName})`);
     project.setContinues("wrapper", ["model"]);
     project.setSource("model", modelCode);
 
@@ -151,7 +153,12 @@ export class ModelEvaluator {
 
     return {
       ok: true,
-      value: new ModelEvaluator(modelCode, result.value.value, cacheRecord),
+      value: new ModelEvaluator(
+        modelCode,
+        variableName,
+        result.value.value,
+        cacheRecord
+      ),
     };
   }
 
