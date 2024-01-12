@@ -1,3 +1,4 @@
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
@@ -34,8 +35,9 @@ export const library = [
   maker.make({
     name: "make",
     output: "Calculator",
-    interactiveExamples: [
-      `Calculator.make(
+    examples: [
+      makeFnExample(
+        `Calculator.make(
   {|x, y| x * y},
   {
     title: "My great calculator",
@@ -47,7 +49,9 @@ export const library = [
     sampleCount: 10k,
   }
 )`,
-      "({|x| x * 5}) -> Calculator",
+        { isInteractive: true }
+      ),
+      makeFnExample("({|x| x * 5}) -> Calculator", { isInteractive: true }),
     ],
     description: `
 \`Calculator.make\` takes in a function, a description, and a list of inputs. The function should take in the same number of arguments as the number of inputs, and the arguments should be of the same type as the default value of the input.

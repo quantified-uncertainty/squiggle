@@ -1,4 +1,5 @@
 import { REThrow } from "../errors/messages.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -37,11 +38,14 @@ export const library = [
     name: "typeOf",
     description:
       "Returns the type of the value passed in as a string. This is useful when you want to treat a value differently depending on its type.",
-    interactiveExamples: [
-      `myString = typeOf("foo")
+    examples: [
+      makeFnExample(
+        `myString = typeOf("foo")
 myBool = typeOf(true)
 myDist = typeOf(5 to 10)
 myFn = typeOf({|e| e})`,
+        { isInteractive: true }
+      ),
     ],
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {

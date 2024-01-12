@@ -38,8 +38,7 @@ export const library = [
         `d1 = Date.make("2020-05-12")
 d2 = Date.make(2020, 5, 10)
 d3 = Date.make(2020.5)`,
-        true,
-        false
+        { useForTests: false }
       ),
     ],
     displaySection: "Constructors",
@@ -100,7 +99,11 @@ d3 = Date.make(2020.5)`,
   }),
   maker.make({
     name: "subtract",
-    interactiveExamples: ["Date.make(2020, 5, 12) - Date.make(2000, 1, 1)"],
+    examples: [
+      makeFnExample("Date.make(2020, 5, 12) - Date.make(2000, 1, 1)", {
+        isInteractive: true,
+      }),
+    ],
     output: "Duration",
     displaySection: "Algebra",
     definitions: [
@@ -111,7 +114,11 @@ d3 = Date.make(2020.5)`,
   }),
   maker.make({
     name: "subtract",
-    interactiveExamples: ["Date.make(2020, 5, 12) - 20years"],
+    examples: [
+      makeFnExample("Date.make(2020, 5, 12) - 20years", {
+        isInteractive: true,
+      }),
+    ],
     output: "Date",
     displaySection: "Algebra",
     definitions: [
@@ -122,8 +129,12 @@ d3 = Date.make(2020.5)`,
   }),
   maker.make({
     name: "add",
-    examples: [makeFnExample("Date.make(2020, 5, 12) + 20years")],
-    interactiveExamples: ["20years + Date.make(2020, 5, 12)"],
+    examples: [
+      makeFnExample("Date.make(2020, 5, 12) + 20years"),
+      makeFnExample("20years + Date.make(2020, 5, 12)", {
+        isInteractive: true,
+      }),
+    ],
     output: "Date",
     displaySection: "Algebra",
     definitions: [

@@ -215,8 +215,11 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
   maker.make({
     name: "mapKeys",
     output: "Dict",
-    interactiveExamples: [
-      `Dict.mapKeys({a: 1, b: 2, c: 5}, {|x| concat(x, "-foobar")})`,
+    examples: [
+      makeFnExample(
+        `Dict.mapKeys({a: 1, b: 2, c: 5}, {|x| concat(x, "-foobar")})`,
+        { isInteractive: true }
+      ),
     ],
     displaySection: "Transformations",
     definitions: [

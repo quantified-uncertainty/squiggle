@@ -2,14 +2,6 @@
 
 import jstat from "jstat";
 
-import {
-  scaleLog,
-  scaleLogWithThreshold,
-} from "../dist/distOperations/index.js";
-import {
-  scaleMultiply,
-  scalePower,
-} from "../dist/distOperations/scaleOperations.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
@@ -17,8 +9,6 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
   frArray,
-  frDist,
-  frDistPointset,
   frLambda,
   frNamed,
   frNumber,
@@ -28,7 +18,6 @@ import {
   FnFactory,
   makeOneArgSamplesetDist,
   makeTwoArgsSamplesetDist,
-  unwrapDistResult,
 } from "../library/registry/helpers.js";
 import { ReducerContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";

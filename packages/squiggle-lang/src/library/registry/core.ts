@@ -20,9 +20,9 @@ type example = {
 
 export function makeFnExample(
   text: string,
-  isInteractive = false,
-  useForTests = true
+  params: { isInteractive?: boolean; useForTests?: boolean } = {}
 ): example {
+  const { isInteractive = false, useForTests = true } = params;
   return { text, isInteractive, useForTests };
 }
 
@@ -33,7 +33,6 @@ export type FRFunction = {
   definitions: FnDefinition[];
   output?: Value["type"];
   examples?: example[];
-  interactiveExamples?: string[];
   description?: string;
   isExperimental?: boolean;
   isUnit?: boolean;
@@ -42,14 +41,7 @@ export type FRFunction = {
 };
 
 function organizedExamples(f: FRFunction) {
-  return [
-    ...(f.examples ?? []),
-    ...(f.interactiveExamples?.map((e) => ({
-      text: e,
-      isInteractive: true,
-      useForTests: false,
-    })) ?? []),
-  ];
+  return [...(f.examples ?? [])];
 }
 
 type FnNameDict = Map<string, FnDefinition[]>;
@@ -62,7 +54,6 @@ export type FnDocumentation = Pick<
   | "definitions"
   | "name"
   | "examples"
-  | "interactiveExamples"
   | "isExperimental"
   | "isUnit"
   | "shorthand"
@@ -157,7 +148,6 @@ export class Registry {
       description: fn.description,
       definitions: fn.definitions,
       examples: fn.examples,
-      interactiveExamples: fn.interactiveExamples,
       signatures: fn.definitions
         .filter((d) => showInDocumentation(d))
         .map(fnDefinitionToString),

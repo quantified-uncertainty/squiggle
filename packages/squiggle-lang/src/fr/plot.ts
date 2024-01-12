@@ -27,6 +27,7 @@ import {
 import { Lambda } from "../reducer/lambda.js";
 import { clamp, sort, uniq } from "../utility/E_A_Floats.js";
 import { LabeledDistribution, Plot, Scale, VDomain } from "../value/index.js";
+import { makeFnExample } from "../library/registry/core.js";
 
 const maker = new FnFactory({
   nameSpace: "Plot",
@@ -168,11 +169,14 @@ const numericFnDef = () => {
   return maker.make({
     name: "numericFn",
     output: "Plot",
-    interactiveExamples: [
-      `Plot.numericFn(
+    examples: [
+      makeFnExample(
+        `Plot.numericFn(
   {|t|t ^ 2},
   { xScale: Scale.log({ min: 1, max: 100 }), points: 10 }
 )`,
+        { isInteractive: true }
+      ),
     ],
     definitions: [
       makeDefinition(
@@ -232,14 +236,17 @@ export const library = [
   maker.make({
     name: "dist",
     output: "Plot",
-    interactiveExamples: [
-      `Plot.dist(
+    examples: [
+      makeFnExample(
+        `Plot.dist(
   normal(5, 2),
   {
     xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title" }),
     showSummary: true,
   }
 )`,
+        { isInteractive: true }
+      ),
     ],
 
     definitions: [
@@ -300,8 +307,9 @@ export const library = [
   maker.make({
     name: "dists",
     output: "Plot",
-    interactiveExamples: [
-      `Plot.dists(
+    examples: [
+      makeFnExample(
+        `Plot.dists(
 {
   dists: [
     { name: "First Dist", value: normal(0, 1) },
@@ -310,6 +318,8 @@ export const library = [
   xScale: Scale.symlog({ min: -2, max: 5 }),
 }
 )`,
+        { isInteractive: true }
+      ),
     ],
     definitions: [
       makeDefinition(
@@ -406,8 +416,9 @@ export const library = [
   maker.make({
     name: "distFn",
     output: "Plot",
-    interactiveExamples: [
-      `Plot.distFn(
+    examples: [
+      makeFnExample(
+        `Plot.distFn(
   {|t|normal(t, 2) * normal(5, 3)},
   {
     xScale: Scale.log({ min: 3, max: 100, title: "Time (years)" }),
@@ -415,6 +426,8 @@ export const library = [
     distXScale: Scale.linear({ tickFormat: "#x" }),
   }
 )`,
+        { isInteractive: true }
+      ),
     ],
     definitions: [
       makeDefinition(
@@ -483,15 +496,19 @@ export const library = [
   maker.make({
     name: "scatter",
     output: "Plot",
-    interactiveExamples: [
-      `xDist = SampleSet.fromDist(2 to 5)
+    examples: [
+      makeFnExample(
+        `xDist = SampleSet.fromDist(2 to 5)
 yDist = normal({p5:-3, p95:3}) * 5 - xDist ^ 2
 Plot.scatter({
   xDist: xDist,
   yDist: yDist,
   xScale: Scale.log({min: 1.5}),
 })`,
-      `xDist = SampleSet.fromDist(normal({p5:-2, p95:5}))
+        { isInteractive: true }
+      ),
+      makeFnExample(
+        `xDist = SampleSet.fromDist(normal({p5:-2, p95:5}))
 yDist = normal({p5:-3, p95:3}) * 5 - xDist
 Plot.scatter({
   xDist: xDist,
@@ -499,6 +516,8 @@ Plot.scatter({
   xScale: Scale.symlog({title: "X Axis Title"}),
   yScale: Scale.symlog({title: "Y Axis Title"}),
 })`,
+        { isInteractive: true }
+      ),
     ],
     definitions: [
       makeDefinition(

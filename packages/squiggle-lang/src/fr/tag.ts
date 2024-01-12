@@ -1,4 +1,5 @@
 import { REArgumentError } from "../errors/messages.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -189,10 +190,13 @@ Different types of values can be displayed in different ways. The following tabl
 `,
     displaySection: "Tags",
     examples: [
-      `example1 = {|x| x + 1} -> Tag.showAs(Calculator)
+      makeFnExample(
+        `example1 = {|x| x + 1} -> Tag.showAs(Calculator)
 //...
 @showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
 example2 = {|x| x + 1}`,
+        { isInteractive: true, useForTests: false }
+      ),
     ],
     definitions: [
       showAsDef(frWithTags(frDist), frPlot),
@@ -289,8 +293,9 @@ example2 = {|x| x + 1}`,
   maker.make({
     name: "notebook",
     description: `Displays the list of values as a notebook. This means that element indices are hidden, and the values are displayed in a vertical list. Useful for displaying combinations of text and values.`,
-    interactiveExamples: [
-      `[
+    examples: [
+      makeFnExample(
+        `[
   "### This is an opening section
 Here is more text.
 
@@ -305,6 +310,8 @@ Here is more text.",
 Here is more text.
 ",
 ] -> Tag.notebook`,
+        { isInteractive: true }
+      ),
     ],
     displaySection: "Tags",
     definitions: booleanTagDefs(
