@@ -405,12 +405,6 @@ importers:
       remark-gfm:
         specifier: ^4.0.0
         version: 4.0.0
-      squiggle-lang-0.9.0:
-        specifier: npm:@quri/squiggle-lang@0.9.0
-        version: /@quri/squiggle-lang@0.9.0
-      squiggle-lang-0.9.2:
-        specifier: npm:@quri/squiggle-lang@0.9.2
-        version: /@quri/squiggle-lang@0.9.2
       zod:
         specifier: ^3.22.4
         version: 3.22.4
