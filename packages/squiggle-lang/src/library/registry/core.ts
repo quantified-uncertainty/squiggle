@@ -38,6 +38,7 @@ export type FRFunction = {
   isUnit?: boolean;
   shorthand?: Shorthand;
   displaySection?: string;
+  versionAdded?: string;
 };
 
 function organizedExamples(f: FRFunction) {
@@ -58,6 +59,7 @@ export type FnDocumentation = Pick<
   | "isUnit"
   | "shorthand"
   | "displaySection"
+  | "versionAdded"
 > & { signatures: string[] };
 
 export class Registry {

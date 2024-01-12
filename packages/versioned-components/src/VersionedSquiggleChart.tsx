@@ -6,6 +6,7 @@ import { FC, lazy, Suspense } from "react";
  * It's edited with babel transformation in `publish-all.ts` script.
  */
 import { type SquiggleChartProps as SquiggleChartProps_0_9_0 } from "squiggle-components-0.9.0";
+import { type SquiggleChartProps as SquiggleChartProps_0_9_2 } from "squiggle-components-0.9.2";
 
 import { type SquiggleChartProps as SquiggleChartProps_dev } from "@quri/squiggle-components";
 
@@ -17,6 +18,9 @@ const componentByVersion = {
   "0.9.0": lazy(async () => ({
     default: (await import("squiggle-components-0.9.0")).SquiggleChart,
   })) as FC<SquiggleChartProps_0_9_0>,
+  "0.9.2": lazy(async () => ({
+    default: (await import("squiggle-components-0.9.2")).SquiggleChart,
+  })) as FC<SquiggleChartProps_0_9_2>,
   dev: lazy(async () => ({
     default: (await import("@quri/squiggle-components")).SquiggleChart,
   })) as FC<SquiggleChartProps_dev>,
@@ -25,6 +29,7 @@ type VersionedSquiggleChartProps = VersionedComponentProps<
   typeof componentByVersion,
   SquiggleChartVersion
 >;
+
 export const VersionedSquiggleChart: FC<VersionedSquiggleChartProps> = ({
   version,
   ...props

@@ -355,7 +355,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
    * (In this simple case, we could always set `renderExtraDropdownItems` prop since it'd be ignored by older playground versions.)
    * It relies on `versionSupportsDropdownMenu` type predicate which narrows down `playgroundProps` type.
    */
-  if (versionSupportsDropdownMenu(playgroundProps)) {
+  if (versionSupportsDropdownMenu.props(playgroundProps)) {
     playgroundProps.renderExtraDropdownItems = ({ openModal }) =>
       model.isEditable ? (
         <>
@@ -369,7 +369,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       ) : null;
   }
 
-  if (versionSupportsExports(playgroundProps)) {
+  if (versionSupportsExports.props(playgroundProps)) {
     playgroundProps.onExportsChange = (exports) => {
       form.setValue("exports", exports);
     };

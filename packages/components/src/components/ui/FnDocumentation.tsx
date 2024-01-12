@@ -68,6 +68,8 @@ export const FnDocumentation: FC<{
     description,
     definitions,
     examples,
+    interactiveExamples,
+    versionAdded,
   } = documentation;
   const textSize = size === "small" ? "text-xs" : "text-sm";
   const fullName = `${nameSpace ? nameSpace + "." : ""}${name}`;
@@ -101,7 +103,11 @@ export const FnDocumentation: FC<{
           </div>
         </Section>
       )}
-      {(isUnit || shorthand || isExperimental || !requiresNamespace) && (
+      {(isUnit ||
+        shorthand ||
+        isExperimental ||
+        !requiresNamespace ||
+        versionAdded) && (
         <Section>
           <div className="flex gap-3">
             {isUnit && (
@@ -125,6 +131,11 @@ export const FnDocumentation: FC<{
             {!requiresNamespace && (
               <div className={clsx("bg-purple-50 text-slate-600", tagCss)}>
                 {`Namespace optional`}
+              </div>
+            )}
+            {versionAdded && (
+              <div className={clsx("bg-purple-50 text-slate-600", tagCss)}>
+                v{versionAdded}
               </div>
             )}
           </div>

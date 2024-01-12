@@ -93,6 +93,7 @@ Plot.scatter({
   shorthand: { type: "unary", symbol: "-" },
   description: `**Lorem Ipsum**
 More content *here*`,
+  versionAdded: "0.9.0",
 };
 
 export const Simple: Story = {

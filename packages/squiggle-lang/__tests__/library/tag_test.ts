@@ -18,6 +18,7 @@ describe("Tags", () => {
 
   describe("format", () => {
     testEvalToBe("123 -> Tag.format('.2%') -> Tag.getFormat", '".2%"');
+    testEvalToBe("0 -> Tag.format('.2%') -> Tag.getFormat", '".2%"');
   });
 
   describe("notebook", () => {
