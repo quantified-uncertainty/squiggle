@@ -1,6 +1,6 @@
 # @quri/squiggle-components
 
-## 0.9.1
+## 0.9.2
 
 - Top level navigation in viewer (Result/Variables) is represented as a dropdown ([#2909](https://github.com/quantified-uncertainty/squiggle/pull/2909))
 

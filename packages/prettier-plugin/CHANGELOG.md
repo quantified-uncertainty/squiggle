@@ -1,6 +1,6 @@
 # @quri/prettier-plugin-squiggle
 
-## 0.9.1
+## 0.9.2
 
 - Fixed Prettier bug where trailing comma after single-element dict key would be removed ([#2946](https://github.com/quantified-uncertainty/squiggle/pull/2946))
 
