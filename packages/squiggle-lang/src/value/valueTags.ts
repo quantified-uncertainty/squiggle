@@ -12,6 +12,7 @@ export type ValueTagsType = {
   hidden?: boolean;
   xScale?: Scale;
   yScale?: Scale;
+  notebook?: boolean;
 };
 
 type ValueTagsTypeName = keyof ValueTagsType;
@@ -25,6 +26,7 @@ const valueTagsTypeNames: ValueTagsTypeName[] = [
   "hidden",
   "xScale",
   "yScale",
+  "notebook",
 ];
 
 function convertToValueTagsTypeName(
@@ -73,6 +75,9 @@ export class ValueTags {
     }
     if (value.yScale) {
       result.push(["yScale", vScale(value.yScale)]);
+    }
+    if (value.notebook) {
+      result.push(["notebook", vBool(value.notebook)]);
     }
     return result;
   }
@@ -140,5 +145,9 @@ export class ValueTags {
 
   yScale(): Scale | undefined {
     return this.value.xScale;
+  }
+
+  notebook() {
+    return this.value.notebook;
   }
 }

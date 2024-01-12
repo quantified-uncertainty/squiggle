@@ -26,13 +26,10 @@ export const PlotView: FC = () => {
     <div
       className="grid gap-2"
       style={{
-        gridTemplateColumns: "1fr 1fr minmax(120px, max-content)",
+        gridTemplateColumns: "1fr minmax(120px, max-content)",
       }}
     >
-      <Section title="Value and Uncertainty" border>
-        <ValueAndUncertaintyPlot model={model} />
-      </Section>
-      <Section title="Force" border>
+      <Section title="Similarity Cluster Map" border>
         <ForcePlot model={model} />
       </Section>
       <Section title="Clusters">

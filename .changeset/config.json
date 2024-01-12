@@ -5,6 +5,7 @@
       "@quri/squiggle-lang",
       "@quri/squiggle-components",
       "@quri/prettier-plugin-squiggle",
+      "@quri/squiggle-textmate-grammar",
       "vscode-squiggle"
     ]
   ],
@@ -13,5 +14,5 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": ["squiggle-website", "@quri/hub", "@quri/ops"],
-  "changelog": "../packages/ops/dist/scripts/changelog.cjs"
+  "changelog": "../packages/ops/dist/changelog.cjs"
 }

@@ -1,37 +1,16 @@
 import { Metadata } from "next";
-import { getServerSession } from "next-auth";
-import { FC } from "react";
 
-import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding";
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { loadPageQuery } from "@/relay/loadPageQuery";
-
-import { authOptions } from "../api/auth/[...nextauth]/authOptions";
-import { AdminPage } from "./AdminPage";
-
-import QueryNode, {
-  AdminPageQuery,
-} from "@/__generated__/AdminPageQuery.graphql";
-
-const OuterAdminPageAuthenticated: FC = async () => {
-  const query = await loadPageQuery<AdminPageQuery>(QueryNode, {});
-
-  return (
-    <FullLayoutWithPadding>
-      <AdminPage query={query} />
-    </FullLayoutWithPadding>
-  );
-};
+import { StyledLink } from "@/components/ui/StyledLink";
 
 export default async function OuterAdminPage() {
-  const session = await getServerSession(authOptions);
+  // permissions are checked in ./layout.tsx
 
-  const email = session?.user.email;
-  if (!email || !process.env.ROOT_EMAILS?.includes(email)) {
-    return <NarrowPageLayout>Access denied.</NarrowPageLayout>;
-  }
-
-  return <OuterAdminPageAuthenticated />;
+  return (
+    <div className="flex flex-col gap-2">
+      <StyledLink href="/admin/search">Search</StyledLink>
+      <StyledLink href="/admin/upgrade-versions">Upgrade versions</StyledLink>
+    </div>
+  );
 }
 
 export const metadata: Metadata = {

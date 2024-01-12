@@ -148,8 +148,10 @@ export const library = [
     examples: [
       `List.make(2, 3)`,
       `List.make(2, {|| 3})`,
-      `List.make(2, {|f| f+1})`,
+      `List.make(2, {|index| index+1})`,
     ],
+    displaySection: "Constructors",
+    description: `Creates an array of length \`count\`, with each element being \`value\`. If \`value\` is a function, it will be called \`count\` times, with the index as the argument.`,
     definitions: [
       makeAssertDefinition(
         [frNumber, frLambdaNand([0, 1])],
@@ -196,6 +198,7 @@ export const library = [
     name: "upTo",
     output: "Array",
     examples: [`List.upTo(1,4)`],
+    displaySection: "Constructors",
     definitions: [
       makeDefinition(
         [frNamed("low", frNumber), frNamed("high", frNumber)],
@@ -216,6 +219,7 @@ export const library = [
     requiresNamespace: true,
     output: "Number",
     examples: [`List.length([1,4,5])`],
+    displaySection: "Queries",
     definitions: [
       makeDefinition([frArray(frAny())], frNumber, ([values]) => values.length),
     ],
@@ -224,6 +228,7 @@ export const library = [
     name: "first",
     requiresNamespace: true,
     examples: [`List.first([1,4,5])`],
+    displaySection: "Queries",
     definitions: [
       makeDefinition(
         [frArray(frAny({ genericName: "A" }))],
@@ -239,6 +244,7 @@ export const library = [
     name: "last",
     requiresNamespace: true,
     examples: [`List.last([1,4,5])`],
+    displaySection: "Queries",
     definitions: [
       makeDefinition(
         [frArray(frAny({ genericName: "A" }))],
@@ -255,6 +261,7 @@ export const library = [
     output: "Array",
     requiresNamespace: false,
     examples: [`List.reverse([1,4,5]) // [5,4,1]`],
+    displaySection: "Modifications",
     definitions: [
       makeDefinition(
         [frArray(frAny({ genericName: "A" }))],
@@ -263,10 +270,177 @@ export const library = [
       ),
     ],
   }),
+
+  maker.make({
+    name: "concat",
+    requiresNamespace: false,
+    examples: [`List.concat([1,2,3], [4, 5, 6])`],
+    displaySection: "Modifications",
+    definitions: [
+      makeDefinition(
+        [
+          frArray(frAny({ genericName: "A" })),
+          frArray(frAny({ genericName: "A" })),
+        ],
+        frArray(frAny({ genericName: "A" })),
+        ([array1, array2]) => [...array1].concat(array2)
+      ),
+    ],
+  }),
+  maker.make({
+    name: "sortBy",
+    requiresNamespace: true,
+    examples: [`List.sortBy([{a:3}, {a:1}], {|f| f.a})`],
+    displaySection: "Modifications",
+    definitions: [
+      makeDefinition(
+        [
+          frArray(frAny({ genericName: "A" })),
+          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
+        ],
+        frArray(frAny({ genericName: "A" })),
+        ([array, lambda], context) => {
+          return sortBy(array, (e) =>
+            applyLambdaAndCheckNumber(e, lambda, context)
+          );
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "minBy",
+    requiresNamespace: true,
+    examples: [`List.minBy([{a:3}, {a:1}], {|f| f.a})`],
+    displaySection: "Queries",
+    definitions: [
+      makeDefinition(
+        [
+          frArray(frAny({ genericName: "A" })),
+          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
+        ],
+        frAny({ genericName: "A" }),
+        ([array, lambda], context) => {
+          _assertUnemptyArray(array);
+          const el = minBy(array, (e) =>
+            applyLambdaAndCheckNumber(e, lambda, context)
+          );
+          if (!el) {
+            //This should never be reached, because we checked that the array is not empty
+            throw new REOther("No element found");
+          }
+          return el;
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "maxBy",
+    requiresNamespace: true,
+    examples: [`List.maxBy([{a:3}, {a:1}], {|f| f.a})`],
+    displaySection: "Queries",
+    definitions: [
+      makeDefinition(
+        [
+          frArray(frAny({ genericName: "A" })),
+          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
+        ],
+        frAny({ genericName: "A" }),
+        ([array, lambda], context) => {
+          _assertUnemptyArray(array);
+          const el = maxBy(array, (e) =>
+            applyLambdaAndCheckNumber(e, lambda, context)
+          );
+          if (!el) {
+            //This should never be reached, because we checked that the array is not empty
+            throw new REOther("No element found");
+          }
+          return el;
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "append",
+    requiresNamespace: true,
+    examples: [`List.append([1,4],5)`],
+    displaySection: "Modifications",
+    definitions: [
+      makeDefinition(
+        [frArray(frAny({ genericName: "A" })), frAny({ genericName: "A" })],
+        frArray(frAny({ genericName: "A" })),
+        ([array, el]) => [...array, el]
+      ),
+    ],
+  }),
+  maker.make({
+    name: "slice",
+    description:
+      "Returns a copy of the list, between the selected ``start`` and ``end``, end not included. Directly uses the [Javascript implementation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice) underneath.",
+    requiresNamespace: true,
+    examples: [`List.slice([1,2,5,10],1,3)`],
+    displaySection: "Filtering",
+    definitions: [
+      makeDefinition(
+        [
+          frArray(frAny({ genericName: "A" })),
+          frNamed("startIndex", frNumber),
+          frNamed("endIndex", frOptional(frNumber)),
+        ],
+        frArray(frAny({ genericName: "A" })),
+        ([array, start, end]) => {
+          _assertInteger(start);
+          if (end !== null) {
+            _assertInteger(end);
+            return array.slice(start, end);
+          } else {
+            return array.slice(start);
+          }
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "uniq",
+    description:
+      "Filters the list for unique elements. Works on select Squiggle types.",
+    requiresNamespace: true,
+    examples: [`List.uniq([1,2,3,"hi",false,"hi"])`],
+    displaySection: "Filtering",
+    definitions: [
+      makeDefinition(
+        [frArray(frAny({ genericName: "A" }))],
+        frArray(frAny({ genericName: "A" })),
+        ([arr]) => uniq(arr)
+      ),
+    ],
+  }),
+  maker.make({
+    name: "uniqBy",
+    description:
+      "Filters the list for unique elements. Works on select Squiggle types.",
+    requiresNamespace: true,
+    examples: [`List.uniqBy([[1,5], [3,5], [5,7]], {|x| x[1]})`],
+    displaySection: "Filtering",
+    definitions: [
+      makeDefinition(
+        [
+          frArray(frAny({ genericName: "A" })),
+          frLambdaTyped(
+            [frAny({ genericName: "A" })],
+            frAny({ genericName: "B" })
+          ),
+        ],
+        frArray(frAny({ genericName: "A" })),
+        ([arr, lambda], context) =>
+          uniqBy(arr, (e) => lambda.call([e], context))
+      ),
+    ],
+  }),
   maker.make({
     name: "map",
     output: "Array",
     requiresNamespace: false,
+    displaySection: "Functional Transformations",
     examples: [
       "List.map([1,4,5], {|x| x+1})",
       "List.map([1,4,5], {|x,i| x+i+1})",
@@ -296,165 +470,9 @@ export const library = [
     ],
   }),
   maker.make({
-    name: "concat",
-    requiresNamespace: true,
-    examples: [`List.concat([1,2,3], [4, 5, 6])`],
-    definitions: [
-      makeDefinition(
-        [
-          frArray(frAny({ genericName: "A" })),
-          frArray(frAny({ genericName: "A" })),
-        ],
-        frArray(frAny({ genericName: "A" })),
-        ([array1, array2]) => [...array1].concat(array2)
-      ),
-    ],
-  }),
-  maker.make({
-    name: "sortBy",
-    requiresNamespace: true,
-    examples: [`List.sortBy([{a:3}, {a:1}], {|f| f.a})`],
-    definitions: [
-      makeDefinition(
-        [
-          frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
-        ],
-        frArray(frAny({ genericName: "A" })),
-        ([array, lambda], context) => {
-          return sortBy(array, (e) =>
-            applyLambdaAndCheckNumber(e, lambda, context)
-          );
-        }
-      ),
-    ],
-  }),
-  maker.make({
-    name: "minBy",
-    requiresNamespace: true,
-    examples: [`List.minBy([{a:3}, {a:1}], {|f| f.a})`],
-    definitions: [
-      makeDefinition(
-        [
-          frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
-        ],
-        frAny({ genericName: "A" }),
-        ([array, lambda], context) => {
-          _assertUnemptyArray(array);
-          const el = minBy(array, (e) =>
-            applyLambdaAndCheckNumber(e, lambda, context)
-          );
-          if (!el) {
-            //This should never be reached, because we checked that the array is not empty
-            throw new REOther("No element found");
-          }
-          return el;
-        }
-      ),
-    ],
-  }),
-  maker.make({
-    name: "maxBy",
-    requiresNamespace: true,
-    examples: [`List.maxBy([{a:3}, {a:1}], {|f| f.a})`],
-    definitions: [
-      makeDefinition(
-        [
-          frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
-        ],
-        frAny({ genericName: "A" }),
-        ([array, lambda], context) => {
-          _assertUnemptyArray(array);
-          const el = maxBy(array, (e) =>
-            applyLambdaAndCheckNumber(e, lambda, context)
-          );
-          if (!el) {
-            //This should never be reached, because we checked that the array is not empty
-            throw new REOther("No element found");
-          }
-          return el;
-        }
-      ),
-    ],
-  }),
-  maker.make({
-    name: "append",
-    requiresNamespace: true,
-    examples: [`List.append([1,4],5)`],
-    definitions: [
-      makeDefinition(
-        [frArray(frAny({ genericName: "A" })), frAny({ genericName: "A" })],
-        frArray(frAny({ genericName: "A" })),
-        ([array, el]) => [...array, el]
-      ),
-    ],
-  }),
-  maker.make({
-    name: "slice",
-    description:
-      "Returns a copy of the list, between the selected ``start`` and ``end``, end not included. Directly uses the [Javascript implementation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice) underneath.",
-    requiresNamespace: true,
-    examples: [`List.slice([1,2,5,10],1,3)`],
-    definitions: [
-      makeDefinition(
-        [
-          frArray(frAny({ genericName: "A" })),
-          frNamed("startIndex", frNumber),
-          frNamed("endIndex", frOptional(frNumber)),
-        ],
-        frArray(frAny({ genericName: "A" })),
-        ([array, start, end]) => {
-          _assertInteger(start);
-          if (end !== null) {
-            _assertInteger(end);
-            return array.slice(start, end);
-          } else {
-            return array.slice(start);
-          }
-        }
-      ),
-    ],
-  }),
-  maker.make({
-    name: "uniq",
-    description:
-      "Filters the list for unique elements. Works on select Squiggle types.",
-    requiresNamespace: true,
-    examples: [`List.uniq([1,2,3,"hi",false,"hi"])`],
-    definitions: [
-      makeDefinition(
-        [frArray(frAny({ genericName: "A" }))],
-        frArray(frAny({ genericName: "A" })),
-        ([arr]) => uniq(arr)
-      ),
-    ],
-  }),
-  maker.make({
-    name: "uniqBy",
-    description:
-      "Filters the list for unique elements. Works on select Squiggle types.",
-    requiresNamespace: true,
-    examples: [`List.uniqBy([[1,5], [3,5], [5,7]], {|x| x[1]})`],
-    definitions: [
-      makeDefinition(
-        [
-          frArray(frAny({ genericName: "A" })),
-          frLambdaTyped(
-            [frAny({ genericName: "A" })],
-            frAny({ genericName: "B" })
-          ),
-        ],
-        frArray(frAny({ genericName: "A" })),
-        ([arr, lambda], context) =>
-          uniqBy(arr, (e) => lambda.call([e], context))
-      ),
-    ],
-  }),
-  maker.make({
     name: "reduce",
     requiresNamespace: false,
+    displaySection: "Functional Transformations",
     description:
       "Applies `f` to each element of `arr`. The function `f` has two main paramaters, an accumulator and the next value from the array. It can also accept an optional third `index` parameter.",
     examples: [`List.reduce([1,4,5], 2, {|acc, el| acc+el})`],
@@ -496,7 +514,9 @@ export const library = [
   maker.make({
     name: "reduceReverse",
     requiresNamespace: false,
+    displaySection: "Functional Transformations",
     examples: [`List.reduceReverse([1,4,5], 2, {|acc, el| acc-el})`],
+    description: `Works like \`reduce\`, but the function is applied to each item from the last back to the first.`,
     definitions: [
       makeDefinition(
         [
@@ -527,8 +547,21 @@ export const library = [
       // Returns the last value that fits the condition.
       // If even initial value doesn't fit the condition, it will be returned anyway;
       // So the result isn't guaranteed to fit the condition.
-      `List.reduceWhile([1,4,5], 0, {|acc, curr| acc + curr }, {|acc| acc < 5})`,
+      `// Adds first two elements, returns \`11\`.
+List.reduceWhile([5, 6, 7], 0, {|acc, curr| acc + curr}, {|acc| acc < 15})
+`,
+      `// Adds first two elements, returns \`{ x: 11 }\`.
+List.reduceWhile(
+  [5, 6, 7],
+  { x: 0 },
+  {|acc, curr| { x: acc.x + curr }},
+  {|acc| acc.x < 15}
+)
+`,
     ],
+    description: `Works like \`reduce\`, but stops when the condition is no longer met. This is useful, in part, for simulating processes that need to stop based on the process state.
+    `,
+    displaySection: "Functional Transformations",
     definitions: [
       makeDefinition(
         [
@@ -559,6 +592,7 @@ export const library = [
     name: "filter",
     requiresNamespace: false,
     examples: [`List.filter([1,4,5], {|x| x>3})`],
+    displaySection: "Filtering",
     definitions: [
       makeDefinition(
         [
@@ -575,6 +609,7 @@ export const library = [
     name: "every",
     requiresNamespace: true,
     examples: [`List.every([1,4,5], {|el| el>3 })`],
+    displaySection: "Queries",
     definitions: [
       makeDefinition(
         [
@@ -591,6 +626,7 @@ export const library = [
     name: "some",
     requiresNamespace: true,
     examples: [`List.some([1,4,5], {|el| el>3 })`],
+    displaySection: "Queries",
     definitions: [
       makeDefinition(
         [
@@ -608,6 +644,7 @@ export const library = [
     description: "Returns an error if there is no value found",
     requiresNamespace: true,
     examples: [`List.find([1,4,5], {|el| el>3 })`],
+    displaySection: "Queries",
     definitions: [
       makeDefinition(
         [
@@ -630,6 +667,7 @@ export const library = [
     description: "Returns `-1` if there is no value found",
     requiresNamespace: true,
     examples: [`List.findIndex([1,4,5], {|el| el>3 })`],
+    displaySection: "Queries",
     definitions: [
       makeDefinition(
         [
@@ -645,7 +683,8 @@ export const library = [
   maker.make({
     name: "join",
     requiresNamespace: true,
-    examples: [`List.join(["a", "b", "c"], ",")`],
+    examples: [`List.join(["a", "b", "c"], ",") // "a,b,c"`],
+    displaySection: "Modifications",
     definitions: [
       makeDefinition(
         [frArray(frString), frNamed("separator", frOptional(frString))],
@@ -659,6 +698,7 @@ export const library = [
     name: "flatten",
     requiresNamespace: true,
     examples: [`List.flatten([[1,2], [3,4]])`],
+    displaySection: "Modifications",
     definitions: [
       makeDefinition([frArray(frAny())], frArray(frAny()), ([arr]) =>
         arr.reduce(
@@ -673,6 +713,7 @@ export const library = [
     name: "shuffle",
     requiresNamespace: true,
     examples: [`List.shuffle([1,3,4,20])`],
+    displaySection: "Modifications",
     definitions: [
       makeDefinition(
         [frArray(frAny({ genericName: "A" }))],
@@ -685,6 +726,7 @@ export const library = [
     name: "zip",
     requiresNamespace: true,
     examples: [`List.zip([1,3,4,20], [2,4,5,6])`],
+    displaySection: "Modifications",
     definitions: [
       makeDefinition(
         [
@@ -707,6 +749,7 @@ export const library = [
     name: "unzip",
     requiresNamespace: true,
     examples: [`List.unzip([[1,2], [2,3], [4,5]])`],
+    displaySection: "Modifications",
     definitions: [
       makeDefinition(
         [

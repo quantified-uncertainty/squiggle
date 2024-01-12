@@ -1,5 +1,19 @@
 # @quri/squiggle-components
 
+## 0.9.2
+
+- Top level navigation in viewer (Result/Variables) is represented as a dropdown ([#2909](https://github.com/quantified-uncertainty/squiggle/pull/2909))
+
+- `<SquiggleViewer>` component takes a single `SqValue` instead of `resultVariables` and `resultItem` ([#2909](https://github.com/quantified-uncertainty/squiggle/pull/2909))
+
+- Fixed `RelativeValues.gridPlot` display ([#2927](https://github.com/quantified-uncertainty/squiggle/pull/2927))
+
+- Fixed dist chart legend positioning and how it affects the chart height ([#2911](https://github.com/quantified-uncertainty/squiggle/pull/2911))
+
+- Fixed documention css quirks in editor ([#2913](https://github.com/quantified-uncertainty/squiggle/pull/2913))
+
+- Added `Tag.notebook` view for Lists ([#2929](https://github.com/quantified-uncertainty/squiggle/pull/2929))
+
 ## 0.9.0
 
 - Dates and Durations improvements ([#2572](https://github.com/quantified-uncertainty/squiggle/pull/2572))

@@ -1,6 +1,7 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
+import { NotFoundError } from "../errors/NotFoundError";
 import { RelativeValuesExport } from "./RelativeValuesExport";
 
 export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
@@ -53,12 +54,13 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     }),
     forRelativeValues: t.fieldWithInput({
       type: RelativeValuesExport,
-      nullable: true,
+      errors: {
+        types: [NotFoundError],
+      },
       input: {
         variableName: t.input.string({ required: true }),
         // optional, necessary if the variable is associated with multiple definitions
         for: t.input.field({
-          required: false,
           type: builder.inputType(
             "ModelRevisionForRelativeValuesSlugOwnerInput",
             {
@@ -70,12 +72,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
           ),
         }),
       },
-      argOptions: { required: false },
       async resolve(revision, { input }) {
-        if (!input) {
-          return null;
-        }
-
         const exports = await prisma.relativeValuesExport.findMany({
           where: {
             modelRevisionId: revision.id,
@@ -99,7 +96,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
         }
 
         if (exports.length === 0) {
-          return null; // not found
+          throw new NotFoundError();
         }
 
         return exports[0];

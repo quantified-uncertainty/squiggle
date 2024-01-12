@@ -43,4 +43,8 @@ export class SqTags {
     const yScale = this.tags.yScale();
     return yScale ? wrapScale(yScale) : undefined;
   }
+
+  notebook(): boolean | undefined {
+    return this.tags.notebook();
+  }
 }

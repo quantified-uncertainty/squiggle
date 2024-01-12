@@ -58,6 +58,40 @@ function _ensureTypeUsingLambda<T1>(
   }
 }
 
+//This helps ensure that the tag name is a valid key of ValueTagsType, with the required type.
+type PickByValue<T, ValueType> = NonNullable<
+  keyof Pick<
+    T,
+    {
+      [Key in keyof T]: T[Key] extends ValueType | undefined ? Key : never;
+    }[keyof T]
+  >
+>;
+
+const booleanTagDefs = <T>(
+  tagName: PickByValue<ValueTagsType, boolean>,
+  frType: FRType<T>
+) => [
+  makeDefinition(
+    [frWithTags(frType), frBool],
+    frWithTags(frType),
+    ([{ value, tags }, tagValue]) => ({
+      value,
+      tags: tags.merge({ [tagName]: tagValue }),
+    }),
+    { isDecorator: true }
+  ),
+  makeDefinition(
+    [frWithTags(frType)],
+    frWithTags(frType),
+    ([{ value, tags }]) => ({
+      value,
+      tags: tags.merge({ [tagName]: true }),
+    }),
+    { isDecorator: true }
+  ),
+];
+
 // This constructs definitions where the second argument is either a type T or a function that takes in the first argument and returns a type T.
 function decoratorWithInputOrFnInput<T>(
   inputType: FRType<any>,
@@ -102,6 +136,7 @@ export const library = [
     description: `Adds a user-facing name to a value. This is useful for documenting what a value represents, or how it was calculated.
 
 *Note: While names are shown in the sidebar, you still need to call variables by their regular variable names in code.*`,
+    displaySection: "Tags",
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
@@ -113,6 +148,7 @@ export const library = [
   }),
   maker.make({
     name: "getName",
+    displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
         return value.tags?.value.name || "";
@@ -122,6 +158,7 @@ export const library = [
   maker.make({
     name: "doc",
     description: `Adds text documentation to a value. This is useful for documenting what a value represents or how it was calculated.`,
+    displaySection: "Tags",
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
@@ -133,6 +170,7 @@ export const library = [
   }),
   maker.make({
     name: "getDoc",
+    displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
         return value.tags?.value.doc || "";
@@ -233,12 +271,12 @@ export const library = [
     name: "showAs",
     description: `Overrides the default visualization for a value.
 \`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization. You can use it like,  
-\`\`\`js
+~~~squiggle
 example1 = {|x| x + 1} -> Tag.showAs(Calculator)
 //...
 @showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
 example2 = {|x| x + 1}
-\`\`\`
+~~~
 Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, \`Number\` can be used with Dates and Durations as well.  
 | **Input Type**                      | **Visualization Types**               |
 | ----------------------------------- | ------------------------------------- |
@@ -248,6 +286,7 @@ Different types of values can be displayed in different ways. The following tabl
 | **\`(Number -> Dist)\` Function**   | \`Plot.distFn\`, \`Calculator\`       |
 | **Function**                        | \`Calculator\`                        |
 `,
+    displaySection: "Tags",
     definitions: [
       showAsDef(frWithTags(frDist), frPlot),
       showAsDef(frArray(frAny()), frTableChart),
@@ -269,6 +308,7 @@ Different types of values can be displayed in different ways. The following tabl
   }),
   maker.make({
     name: "getShowAs",
+    displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frAny(), ([value]) => {
         return value.tags?.value.showAs || vString("None"); // Not sure what to use when blank.
@@ -278,6 +318,7 @@ Different types of values can be displayed in different ways. The following tabl
   maker.make({
     name: "format",
     description: `Set the display format for a number, distribution, duration, or date. Uses the [d3-format](https://d3js.org/d3-format) syntax on numbers and distributions, and the [d3-time-format](https://d3js.org/d3-time-format) syntax for dates.`,
+    displaySection: "Tags",
     definitions: [
       makeDefinition(
         [frWithTags(frDistOrNumber), frNamed("numberFormat", frString)],
@@ -309,6 +350,7 @@ Different types of values can be displayed in different ways. The following tabl
   }),
   maker.make({
     name: "getFormat",
+    displaySection: "Tags",
     examples: [],
     definitions: [
       makeDefinition([frWithTags(frDistOrNumber)], frString, ([{ tags }]) => {
@@ -323,7 +365,59 @@ Different types of values can be displayed in different ways. The following tabl
     ],
   }),
   maker.make({
-    name: "all",
+    name: "hide",
+    description: `Hides a value when displayed under Variables. This is useful for hiding intermediate values or helper functions that are used in calculations, but are not directly relevant to the user. Only hides top-level variables.`,
+    displaySection: "Tags",
+    definitions: booleanTagDefs("hidden", frAny({ genericName: "A" })),
+  }),
+  maker.make({
+    name: "getHide",
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition([frAny()], frBool, ([value]) => {
+        return value.tags?.value.hidden || false;
+      }),
+    ],
+  }),
+  maker.make({
+    name: "notebook",
+    description: `Displays the list of values as a notebook. This means that element indices are hidden, and the values are displayed in a vertical list. Useful for displaying combinations of text and values.`,
+    examples: [
+      `@notebook
+showAsNotebook = [
+  "### This is an opening section
+Here is more text.
+
+Here is more text.",
+  Calculator({|f| f + 3}),
+  "## Distributions",
+  "### Distribution 1",
+  normal(5, 2),
+  "### Distribution 1",
+  normal(20, 1),
+  " ### This is an opening section
+Here is more text.
+",
+] `,
+    ],
+    displaySection: "Tags",
+    definitions: booleanTagDefs(
+      "notebook",
+      frArray(frAny({ genericName: "A" }))
+    ),
+  }),
+  maker.make({
+    name: "getNotebook",
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition([frAny()], frBool, ([value]) => {
+        return value.tags?.value.notebook || false;
+      }),
+    ],
+  }),
+  maker.make({
+    name: "getAll",
+    displaySection: "Functions",
     description: "Returns a dictionary of all tags on a value.",
     definitions: [
       makeDefinition([frAny()], frDictWithArbitraryKeys(frAny()), ([value]) => {
@@ -332,34 +426,9 @@ Different types of values can be displayed in different ways. The following tabl
     ],
   }),
   maker.make({
-    name: "hide",
-    description: `Hides a value when displayed under Variables. This is useful for hiding intermediate values or helper functions that are used in calculations, but are not directly relevant to the user. Only hides top-level variables.`,
-    definitions: [
-      makeDefinition(
-        [frAny({ genericName: "A" }), frBool],
-        frAny({ genericName: "A" }),
-        ([value, hidden]) => value.mergeTags({ hidden }),
-        { isDecorator: true }
-      ),
-      makeDefinition(
-        [frAny({ genericName: "A" })],
-        frAny({ genericName: "A" }),
-        ([value]) => value.mergeTags({ hidden: true }),
-        { isDecorator: true }
-      ),
-    ],
-  }),
-  maker.make({
-    name: "getHide",
-    definitions: [
-      makeDefinition([frAny()], frBool, ([value]) => {
-        return value.tags?.value.hidden || false;
-      }),
-    ],
-  }),
-  maker.make({
     name: "omit",
     description: "Returns a copy of the value with the specified tags removed.",
+    displaySection: "Functions",
     definitions: [
       makeDefinition(
         [frWithTags(frAny({ genericName: "A" })), frArray(frString)],
@@ -374,6 +443,7 @@ Different types of values can be displayed in different ways. The following tabl
   }),
   maker.make({
     name: "clear",
+    displaySection: "Functions",
     description: "Returns a copy of the value with all tags removed.",
     definitions: [
       makeDefinition(

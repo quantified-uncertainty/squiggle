@@ -8,14 +8,15 @@ import React, {
 } from "react";
 
 import { SqLinker, SqProject } from "@quri/squiggle-lang";
+import { RefreshIcon } from "@quri/ui";
 
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
-import { DynamicSquiggleViewer } from "../DynamicSquiggleViewer.js";
 import {
   defaultPlaygroundSettings,
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
+import { SquiggleOutputViewer } from "../SquiggleOutputViewer/index.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
 import {
   LeftPlaygroundPanel,
@@ -158,16 +159,21 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     />
   );
 
-  const renderRight = () => (
-    <DynamicSquiggleViewer
-      squiggleOutput={output.output}
-      isRunning={output.isRunning}
-      // FIXME - this will cause viewer to be rendered twice on initial render
-      editor={leftPanelRef.current?.getEditor() ?? undefined}
-      ref={rightPanelRef}
-      {...settings}
-    />
-  );
+  const renderRight = () =>
+    output.output ? (
+      <SquiggleOutputViewer
+        squiggleOutput={output.output}
+        isRunning={output.isRunning}
+        // FIXME - this will cause viewer to be rendered twice on initial render
+        editor={leftPanelRef.current?.getEditor() ?? undefined}
+        ref={rightPanelRef}
+        {...settings}
+      />
+    ) : (
+      <div className="grid place-items-center h-full">
+        <RefreshIcon className="animate-spin text-slate-400" size={24} />
+      </div>
+    );
 
   return (
     <PlaygroundContext.Provider value={{ getLeftPanelElement }}>

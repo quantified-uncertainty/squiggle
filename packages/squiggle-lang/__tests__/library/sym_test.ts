@@ -142,8 +142,8 @@ describe("distribution functions", () => {
   describe("subtract", () => {
     testEvalToBe("10 - Sym.normal(5, 1)", "Normal(5,1)");
     testEvalToBe("Sym.normal(5, 1) - 10", "Normal(-5,1)");
-    test("mean(1 - toPointSet(Sym.normal(5, 2)))", async () => {
-      const result = await testRun("mean(1 - toPointSet(Sym.normal(5, 2)))");
+    test("mean(1 - PointSet(Sym.normal(5, 2)))", async () => {
+      const result = await testRun("mean(1 - PointSet(Sym.normal(5, 2)))");
       if (result.tag !== "Number") {
         throw new Error();
       }
@@ -219,12 +219,12 @@ describe("distribution functions", () => {
     testEvalToBe("log10(Sym.uniform(5,8))", "Sample Set Distribution");
   });
 
-  describe("dotAdd", () => {
+  describe("Dist.dotAdd", () => {
     testEvalToBe(
-      "dotAdd(Sym.normal(5,2), Sym.lognormal(10,2))",
+      "Dist.dotAdd(Sym.normal(5,2), Sym.lognormal(10,2))",
       "Point Set Distribution"
     );
-    testEvalToBe("dotAdd(Sym.normal(5,2), 3)", "Point Set Distribution");
+    testEvalToBe("Dist.dotAdd(Sym.normal(5,2), 3)", "Point Set Distribution");
   });
 
   describe("equality", () => {

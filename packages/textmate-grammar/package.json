@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-textmate-grammar",
-  "private": true,
+  "version": "0.9.3-0",
   "scripts": {
     "build": "mkdir -p dist && js-yaml src/squiggle.tmLanguage.yaml >dist/squiggle.tmLanguage.json && js-yaml src/squiggle.js.yaml >dist/squiggle.js.json",
     "lint": "prettier --check .",
@@ -9,9 +9,12 @@
   },
   "devDependencies": {
     "js-yaml": "^4.1.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.1.1",
     "vscode-tmgrammar-test": "^0.1.2"
   },
+  "files": [
+    "dist"
+  ],
   "contributes": {
     "languages": [
       {

@@ -1,4 +1,5 @@
 import type { StorybookConfig } from "@storybook/react-vite";
+import { mergeConfig } from "vite";
 
 const config: StorybookConfig = {
   stories: [
@@ -36,6 +37,15 @@ const config: StorybookConfig = {
   },
   docs: {
     autodocs: true,
+  },
+  async viteFinal(config) {
+    // Merge custom configuration into the default config
+    return mergeConfig(config, {
+      // https://github.com/storybookjs/storybook/issues/22223
+      build: {
+        target: "esnext",
+      },
+    });
   },
 };
 

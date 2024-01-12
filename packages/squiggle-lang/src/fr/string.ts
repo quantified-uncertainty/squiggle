@@ -16,7 +16,31 @@ export const library = [
   maker.make({
     name: "make",
     output: "String",
+    description:
+      "Converts any value to a string. Some information is often lost.",
     definitions: [makeDefinition([frAny()], frString, ([x]) => x.toString())],
+  }),
+  maker.ss2s({ name: "add", requiresNamespace: false, fn: (x, y) => x + y }), // infix + on strings
+  maker.make({
+    name: "concat",
+    requiresNamespace: false,
+    definitions: [
+      makeDefinition([frString, frString], frString, ([a, b]) => {
+        return a + b;
+      }),
+      makeDefinition([frString, frAny()], frString, ([a, b]) => {
+        return a + b.toString();
+      }),
+    ],
+  }),
+  maker.make({
+    name: "add",
+    requiresNamespace: false,
+    definitions: [
+      makeDefinition([frString, frAny()], frString, ([a, b]) => {
+        return a + b.toString();
+      }),
+    ],
   }),
   maker.make({
     name: "split",

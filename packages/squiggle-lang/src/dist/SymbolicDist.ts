@@ -22,6 +22,7 @@ const square = (n: number): number => {
 type PointsetXSelection = "Linear" | "ByWeight";
 
 export abstract class SymbolicDist extends BaseDist {
+  type = "SymbolicDist";
   private static minCdfValue = 0.0001;
   private static maxCdfValue = 0.9999;
 

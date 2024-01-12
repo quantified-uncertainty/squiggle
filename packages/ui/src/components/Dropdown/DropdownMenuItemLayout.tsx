@@ -1,12 +1,12 @@
 import { clsx } from "clsx";
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 
 import { IconProps } from "../../icons/Icon.js";
 import { RefreshIcon } from "../../icons/RefreshIcon.js";
 
 export type ItemLayoutProps = {
   icon?: FC<IconProps>;
-  title: string;
+  title: string | ReactNode; // if title is JSX, you should consider text color in normal and hovered state
   acting?: boolean;
 };
 
@@ -32,7 +32,7 @@ export const DropdownMenuItemLayout: FC<ItemLayoutProps> = ({
   return (
     <div className="m-1 rounded px-2 py-1.5 flex items-center gap-2 group hover:bg-blue-100 transition-colors duration-75 cursor-pointer">
       {iconDisplay(icon, acting)}
-      <div className="text-slate-700 group-hover:text-slate-900 text-sm font-medium">
+      <div className="text-slate-700 group-hover:text-slate-900 text-sm font-medium flex-1">
         {title}
       </div>
     </div>

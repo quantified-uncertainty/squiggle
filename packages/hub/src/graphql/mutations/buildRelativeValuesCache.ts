@@ -44,7 +44,10 @@ builder.mutationField("buildRelativeValuesCache", (t) =>
         throw new Error("Model content not found");
       }
 
-      const evaluatorResult = await ModelEvaluator.create(squiggleSnippet.code);
+      const evaluatorResult = await ModelEvaluator.create(
+        squiggleSnippet.code,
+        relativeValuesExport.variableName
+      );
       if (!evaluatorResult.ok) {
         throw new Error(
           `Failed to create evaluator: ${evaluatorResult.value.toString()}`

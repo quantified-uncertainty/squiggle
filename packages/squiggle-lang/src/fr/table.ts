@@ -19,8 +19,49 @@ const maker = new FnFactory({
 export const library = [
   maker.make({
     name: "make",
-    output: "Plot",
-    examples: [],
+    output: "TableChart",
+    interactiveExamples: [
+      `Table.make(
+  [
+    { name: "First Dist", value: normal(0, 1) },
+    { name: "Second Dist", value: uniform(2, 4) },
+    { name: "Third Dist", value: uniform(5, 6) },
+  ],
+  {
+    columns: [
+      { name: "Name", fn: {|d|d.name} },
+      { name: "Mean", fn: {|d|mean(d.value)} },
+      { name: "Std Dev", fn: {|d|variance(d.value)} },
+      { name: "Dist", fn: {|d|d.value} },
+    ],
+  }
+)`,
+      `Table.make(
+  [
+    { name: "First Dist", value: Sym.lognormal({ p5: 1, p95: 10 }) },
+    { name: "Second Dist", value: Sym.lognormal({ p5: 5, p95: 30 }) },
+    { name: "Third Dist", value: Sym.lognormal({ p5: 50, p95: 90 }) },
+  ],
+  {
+    columns: [
+      { name: "Name", fn: {|d|d.name} },
+      {
+        name: "Plot",
+        fn: {
+          |d|
+          Plot.dist(
+            {
+              dist: d.value,
+              xScale: Scale.log({ min: 0.5, max: 100 }),
+              showSummary: false,
+            }
+          )
+        },
+      },
+    ],
+  }
+)`,
+    ],
     definitions: [
       makeDefinition(
         [

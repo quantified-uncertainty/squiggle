@@ -3,11 +3,11 @@ import "../../widgets/index.js";
 
 import { clsx } from "clsx";
 import { FC, PropsWithChildren, useMemo } from "react";
-import ReactMarkdown from "react-markdown";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { CommentIcon, TextTooltip } from "@quri/ui";
 
+import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { leftWidgetMargin } from "../../widgets/utils.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
@@ -22,7 +22,6 @@ import {
 } from "./utils.js";
 import {
   useFocus,
-  useIsFocused,
   useMergedSettings,
   useRegisterAsItemViewer,
   useToggleCollapsed,
@@ -49,6 +48,9 @@ const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
 type Props = {
   value: SqValueWithContext;
   parentValue?: SqValue;
+  collapsible?: boolean;
+  header?: "normal" | "large" | "hide";
+  size?: "normal" | "large";
 };
 
 const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
@@ -68,15 +70,15 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
   const commentPosition = tagsWithTopPosition.has(value.tag) ? "top" : "bottom";
 
   const commentEl = (
-    <ReactMarkdown
+    <div
       className={clsx(
-        "prose max-w-4xl text-sm text-stone-600",
+        "max-w-4xl",
         leftWidgetMargin,
         commentPosition === "bottom" ? "mt-1" : "mb-1"
       )}
     >
-      {comment}
-    </ReactMarkdown>
+      <MarkdownViewer md={comment} textSize="sm" />
+    </div>
   );
 
   return (
@@ -89,19 +91,16 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
   );
 };
 
-const ValueViewerBody: FC<Props> = ({ value }) => {
+const ValueViewerBody: FC<Props> = ({ value, size = "normal" }) => {
   const { path } = value.context;
-  const isFocused = useIsFocused(path);
-  const isRoot = path.isRoot();
-
   const mergedSettings = useMergedSettings(path);
   const adjustedMergedSettings = useMemo(() => {
     const { chartHeight } = mergedSettings;
     return {
       ...mergedSettings,
-      chartHeight: isFocused || isRoot ? chartHeight * 4 : chartHeight,
+      chartHeight: size === "large" ? chartHeight * 4 : chartHeight,
     };
-  }, [isFocused, isRoot, mergedSettings]);
+  }, [size, mergedSettings]);
 
   return (
     <WithComment value={value}>
@@ -110,7 +109,11 @@ const ValueViewerBody: FC<Props> = ({ value }) => {
   );
 };
 
-export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
+export const ValueWithContextViewer: FC<Props> = ({
+  value,
+  parentValue,
+  ...props
+}) => {
   const { tag } = value;
   const { path } = value.context;
 
@@ -120,10 +123,13 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
   const { itemStore } = useViewerContext();
   const itemState = itemStore.getStateOrInitialize(value);
 
-  const isFocused = useIsFocused(path);
-
   const isRoot = path.isRoot();
   const taggedName = value.tags.name();
+
+  // root header is always hidden (unless forced, but we probably won't need it)
+  const header = props.header ?? (isRoot ? "hide" : "show");
+  const collapsible = header === "hide" ? false : props.collapsible ?? true;
+  const size = props.size ?? "normal";
 
   const toggleCollapsed = () => {
     toggleCollapsed_(path);
@@ -131,13 +137,16 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
 
   const ref = useRegisterAsItemViewer(path);
 
-  const isOpen = isFocused || !itemState.collapsed;
-  const _focus = () => !isFocused && !isRoot && focus(path);
+  // TODO - check that we're not in a situation where `isOpen` is false and `header` is hidden?
+  // In that case, the output would look broken (empty).
+  const isOpen = !collapsible || !itemState.collapsed;
+
+  const _focus = () => focus(path);
 
   const triangleToggle = () => {
-    const Icon = isOpen ? ExpandedIcon : CollapsedIcon;
+    const Icon = itemState.collapsed ? CollapsedIcon : ExpandedIcon;
     const _hasExtraContentToShow = hasExtraContentToShow(value);
-    //Only show triangle if there is content to show, that's not in the header.
+    // Only show triangle if there is content to show, that's not in the header.
     if (_hasExtraContentToShow) {
       return (
         <div
@@ -155,48 +164,49 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
     }
   };
 
-  const getHeaderColor = () => {
-    let color = "text-orange-900";
-    const parentTag = parentValue?.tag;
-    if (parentTag === "Array") {
-      color = "text-stone-400";
-    } else if (path.items.length > 1) {
-      color = "text-teal-700";
-    }
-    return color;
+  const headerName = () => {
+    const name = pathToShortName(path);
+
+    // We want to show colons after the keys, for dicts/arrays.
+    const showColon = header !== "large" && path.items.length > 1;
+
+    const getHeaderColor = () => {
+      let color = "text-orange-900";
+      const parentTag = parentValue?.tag;
+      if (parentTag === "Array") {
+        color = "text-stone-400";
+      } else if (path.items.length > 1) {
+        color = "text-teal-700";
+      }
+      return color;
+    };
+
+    const headerColor = getHeaderColor();
+
+    const headerClasses = () => {
+      if (header === "large") {
+        return clsx("text-md font-bold ml-1", headerColor);
+      } else if (isRoot) {
+        return "text-sm text-stone-600 font-semibold";
+      } else {
+        return clsx("text-sm cursor-pointer hover:underline", headerColor);
+      }
+    };
+
+    return (
+      <div className={clsx("leading-3", showColon || "mr-3")}>
+        <span
+          className={clsx(!taggedName && "font-mono", headerClasses())}
+          onClick={_focus}
+        >
+          {taggedName || name}
+        </span>
+        {showColon && <span className="text-gray-400 font-mono">:</span>}
+      </div>
+    );
   };
-
-  const headerColor = getHeaderColor();
-
-  const headerClasses = () => {
-    if (isFocused) {
-      return clsx("text-md font-bold ml-1", headerColor);
-    } else if (isRoot) {
-      return "text-sm text-stone-600 font-semibold";
-    } else {
-      return clsx("text-sm cursor-pointer hover:underline", headerColor);
-    }
-  };
-
-  //We want to show colons after the keys, for dicts/arrays.
-  const showColon = !isFocused && path.items.length > 1;
-  const name = pathToShortName(path);
-  const headerName = (
-    <div className="leading-3">
-      <span
-        className={clsx(!taggedName && "font-mono", headerClasses())}
-        onClick={_focus}
-      >
-        {taggedName ? taggedName : name}
-      </span>
-      {showColon && <span className={"text-gray-400 font-mono"}>:</span>}
-    </div>
-  );
 
   const leftCollapseBorder = () => {
-    if (isRoot) {
-      return null;
-    }
     const isDictOrList = tag === "Dict" || tag === "Array";
     if (isDictOrList) {
       return (
@@ -208,39 +218,36 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
         </div>
       );
     } else {
-      // non-root leaf elements have unclickable padding to align with dict/list elements
+      // Non-root leaf elements have unclickable padding to align with dict/list elements.
       return <div className="flex w-4 min-w-[1rem]" />; // min-w-1rem = w-4
     }
   };
 
   return (
     <ErrorBoundary>
-      <div ref={ref} className={clsx(isFocused && "px-2")}>
-        <header
-          className={clsx(
-            "flex justify-between group pr-0.5",
-            isFocused ? "mb-2" : "hover:bg-stone-100 rounded-sm"
-          )}
-        >
-          <div className="inline-flex items-center">
-            {!isFocused && triangleToggle()}
-            {headerName}
-            {!isFocused && !isOpen && (
-              <div
-                className={clsx(
-                  "text-sm text-blue-800",
-                  showColon ? "ml-2" : "ml-5"
-                )}
-              >
-                <SquiggleValuePreview value={value} />
-              </div>
+      <div ref={ref}>
+        {header !== "hide" && (
+          <header
+            className={clsx(
+              "flex justify-between group pr-0.5",
+              header === "large" ? "mb-2" : "hover:bg-stone-100 rounded-sm"
             )}
-            {!isFocused && !isOpen && <CommentIconForValue value={value} />}
-          </div>
-          <div className="inline-flex space-x-1 items-center">
-            <SquiggleValueMenu value={value} />
-          </div>
-        </header>
+          >
+            <div className="inline-flex items-center">
+              {collapsible && triangleToggle()}
+              {headerName()}
+              {!isOpen && (
+                <div className="text-sm text-blue-800 ml-2">
+                  <SquiggleValuePreview value={value} />
+                </div>
+              )}
+              {!isOpen && <CommentIconForValue value={value} />}
+            </div>
+            <div className="inline-flex space-x-1 items-center">
+              <SquiggleValueMenu value={value} />
+            </div>
+          </header>
+        )}
         {isOpen && (
           <div
             className={clsx(
@@ -248,9 +255,9 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
               Boolean(getValueComment(value)) && "py-2"
             )}
           >
-            {!isFocused && leftCollapseBorder()}
+            {collapsible && leftCollapseBorder()}
             <div className="grow">
-              <ValueViewerBody value={value} />
+              <ValueViewerBody value={value} size={size} />
             </div>
           </div>
         )}

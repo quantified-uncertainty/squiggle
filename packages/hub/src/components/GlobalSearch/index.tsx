@@ -115,6 +115,7 @@ export const GlobalSearch: FC = () => {
     <AsyncSelect<SearchOption>
       ref={ref}
       unstyled
+      instanceId="GlobalSearch"
       loadOptions={loadOptions}
       components={{
         Option: SearchResult,
