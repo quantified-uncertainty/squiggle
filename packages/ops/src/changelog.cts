@@ -11,11 +11,11 @@ import type { ChangelogFunctions } from "@changesets/types";
 import { REPO } from "./constants.cjs";
 
 const changelogFunctions: ChangelogFunctions = {
-  getDependencyReleaseLine: async (changesets, dependenciesUpdated) => {
+  getDependencyReleaseLine: async () => {
     // Listing dependency updates adds too much noise.
     return "";
   },
-  getReleaseLine: async (changeset, type) => {
+  getReleaseLine: async (changeset) => {
     let prFromSummary: number | undefined;
     let commitFromSummary: string | undefined;
 

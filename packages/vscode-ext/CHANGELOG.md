@@ -1,5 +1,9 @@
 # vscode-squiggle
 
+## 0.9.1
+
+Use 0.9.1 Squiggle. No extension-specific changes.
+
 ## 0.9.0
 
 - Use 0.9.0 Squiggle
