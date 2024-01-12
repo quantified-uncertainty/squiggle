@@ -1,5 +1,5 @@
 "use client";
-import { FC, useState } from "react";
+import { FC, use, useState } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
@@ -9,20 +9,100 @@ import {
   DropdownMenu,
   DropdownMenuActionItem,
 } from "@quri/ui";
-import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
+import {
+  defaultSquiggleVersion,
+  squiggleLangByVersion,
+  useAdjustSquiggleVersion,
+  VersionedSquiggleChart,
+  versionSupportsSquiggleChart,
+} from "@quri/versioned-squiggle-components";
 
+import { EditSquiggleSnippetModel } from "@/app/models/[owner]/[slug]/EditSquiggleSnippetModel";
 import { H2 } from "@/components/ui/Headers";
 import { MutationButton } from "@/components/ui/MutationButton";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRoute } from "@/routes";
-
-import { EditSquiggleSnippetModel } from "../../models/[owner]/[slug]/EditSquiggleSnippetModel";
+import { squiggleHubLinker } from "@/squiggle/components/linker";
 
 import { UpgradeVersionsPage_List$key } from "@/__generated__/UpgradeVersionsPage_List.graphql";
+import { UpgradeVersionsPage_Model$key } from "@/__generated__/UpgradeVersionsPage_Model.graphql";
 import { UpgradeVersionsPage_updateMutation } from "@/__generated__/UpgradeVersionsPage_updateMutation.graphql";
 import { UpgradeVersionsPageQuery } from "@/__generated__/UpgradeVersionsPageQuery.graphql";
+
+const UpgradeableModel: FC<{ modelRef: UpgradeVersionsPage_Model$key }> = ({
+  modelRef,
+}) => {
+  const model = useFragment(
+    graphql`
+      fragment UpgradeVersionsPage_Model on Model {
+        id
+        currentRevision {
+          content {
+            __typename
+            ... on SquiggleSnippet {
+              id
+              code
+              version
+            }
+          }
+        }
+        ...EditSquiggleSnippetModel
+      }
+    `,
+    modelRef
+  );
+
+  const currentRevision = model.currentRevision;
+
+  if (currentRevision.content.__typename !== "SquiggleSnippet") {
+    throw new Error("Wrong content type");
+  }
+
+  const version = useAdjustSquiggleVersion(currentRevision.content.version);
+  const updatedVersion = defaultSquiggleVersion;
+
+  const squiggleLang = use(squiggleLangByVersion(version));
+  const updatedSquiggleLang = use(squiggleLangByVersion(updatedVersion));
+
+  const project = new squiggleLang.SqProject({
+    linker: squiggleHubLinker,
+  });
+  const updatedProject = new updatedSquiggleLang.SqProject({
+    linker: squiggleHubLinker,
+  });
+
+  if (versionSupportsSquiggleChart.plain(version)) {
+    const headerClasses = "py-1 px-2 m-1 bg-slate-200 font-medium";
+    return (
+      <div className="grid grid-cols-2">
+        <div className={headerClasses}>{version}</div>
+        <div className={headerClasses}>{updatedVersion}</div>
+        <VersionedSquiggleChart
+          // FIXME - `VersionedSquiggleChart` doesn't do prop limiting correctly
+          version={version as any}
+          code={currentRevision.content.code}
+          project={project as any}
+        />
+        <VersionedSquiggleChart
+          // `defaultSquiggleVersion` is not marked as const
+          version={updatedVersion as any}
+          code={currentRevision.content.code}
+          project={updatedProject as any}
+        />
+      </div>
+    );
+  } else {
+    return (
+      <EditSquiggleSnippetModel
+        key={model.id}
+        modelRef={model}
+        forceVersionPicker
+      />
+    );
+  }
+};
 
 const ModelList: FC<{ modelsRef: UpgradeVersionsPage_List$key }> = ({
   modelsRef,
@@ -36,7 +116,7 @@ const ModelList: FC<{ modelsRef: UpgradeVersionsPage_List$key }> = ({
           id
           slug
         }
-        ...EditSquiggleSnippetModel
+        ...UpgradeVersionsPage_Model
       }
     `,
     modelsRef
@@ -107,11 +187,7 @@ const ModelList: FC<{ modelsRef: UpgradeVersionsPage_List$key }> = ({
           Next &rarr;
         </Button>
       </div>
-      <EditSquiggleSnippetModel
-        key={model.id}
-        modelRef={model}
-        forceVersionPicker
-      />
+      <UpgradeableModel modelRef={model} />
     </div>
   );
 };

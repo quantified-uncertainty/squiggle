@@ -1,11 +1,9 @@
 "use client";
-import { FC, useState } from "react";
+import { FC, use, useState } from "react";
 import { graphql, useFragment } from "react-relay";
-import * as squiggleLang_0_9_0 from "squiggle-lang-0.9.0";
-import * as squiggleLang_0_9_2 from "squiggle-lang-0.9.2";
 
-import * as squiggleLang_dev from "@quri/squiggle-lang";
 import {
+  squiggleLangByVersion,
   useAdjustSquiggleVersion,
   VersionedSquiggleChart,
   versionSupportsExports,
@@ -20,15 +18,24 @@ type SquiggleProps = {
   code: string;
 };
 
-const SquiggleModelExportPage_0_9_0: FC<SquiggleProps> = ({
-  variableName,
-  code,
-}) => {
+// via https://github.com/microsoft/TypeScript/issues/30542#issuecomment-475646727
+type GuardedType<T> = T extends (x: any) => x is infer T ? T : never;
+
+type SupportedVersion = GuardedType<(typeof versionSupportsExports)["plain"]>;
+
+const VersionedSquiggleModelExportPage: FC<
+  SquiggleProps & {
+    version: SupportedVersion;
+  }
+> = ({ variableName, code, version }) => {
+  // `use` is still experimental in React, but this is Squiggle Hub which uses Next.js which uses canary React releases, so it's fine
+  const squiggleLang = use(squiggleLangByVersion(version));
+
   const [{ project, rootPath }] = useState(() => {
-    const project = new squiggleLang_0_9_0.SqProject({
+    const project = new squiggleLang.SqProject({
       linker: squiggleHubLinker,
     });
-    const rootPath = new squiggleLang_0_9_0.SqValuePath({
+    const rootPath = new squiggleLang.SqValuePath({
       root: "bindings",
       items: [{ type: "string", value: variableName }],
     });
@@ -37,60 +44,11 @@ const SquiggleModelExportPage_0_9_0: FC<SquiggleProps> = ({
 
   return (
     <VersionedSquiggleChart
-      version="0.9.0"
+      version={version}
       code={code}
       rootPathOverride={rootPath}
-      project={project}
-    />
-  );
-};
-
-const SquiggleModelExportPage_0_9_2: FC<SquiggleProps> = ({
-  variableName,
-  code,
-}) => {
-  const [{ project, rootPath }] = useState(() => {
-    const project = new squiggleLang_0_9_2.SqProject({
-      linker: squiggleHubLinker,
-    });
-    const rootPath = new squiggleLang_0_9_2.SqValuePath({
-      root: "bindings",
-      items: [{ type: "string", value: variableName }],
-    });
-    return { project, rootPath };
-  });
-
-  return (
-    <VersionedSquiggleChart
-      version="0.9.2"
-      code={code}
-      rootPathOverride={rootPath}
-      project={project}
-    />
-  );
-};
-
-const SquiggleModelExportPage_dev: FC<SquiggleProps> = ({
-  variableName,
-  code,
-}) => {
-  const [{ project, rootPath }] = useState(() => {
-    const project = new squiggleLang_dev.SqProject({
-      linker: squiggleHubLinker,
-    });
-    const rootPath = new squiggleLang_dev.SqValuePath({
-      root: "bindings",
-      items: [{ type: "string", value: variableName }],
-    });
-    return { project, rootPath };
-  });
-
-  return (
-    <VersionedSquiggleChart
-      version="dev"
-      code={code}
-      rootPathOverride={rootPath}
-      project={project}
+      // TODO - we still don't have a good way to sync up squiggle-lang and versioned squiggle-components types
+      project={project as any}
     />
   );
 };
@@ -120,29 +78,11 @@ export const SquiggleModelExportPage: FC<{
     );
   }
 
-  switch (checkedVersion) {
-    case "0.9.0":
-      return (
-        <SquiggleModelExportPage_0_9_0
-          code={content.code}
-          variableName={variableName}
-        />
-      );
-    case "0.9.2":
-      return (
-        <SquiggleModelExportPage_0_9_2
-          code={content.code}
-          variableName={variableName}
-        />
-      );
-    case "dev":
-      return (
-        <SquiggleModelExportPage_dev
-          code={content.code}
-          variableName={variableName}
-        />
-      );
-    default:
-      throw new Error(`Wrong version ${checkedVersion satisfies never}`);
-  }
+  return (
+    <VersionedSquiggleModelExportPage
+      code={content.code}
+      variableName={variableName}
+      version={checkedVersion}
+    />
+  );
 };

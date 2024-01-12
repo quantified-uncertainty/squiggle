@@ -7,6 +7,7 @@ import { FC, lazy, Suspense } from "react";
  */
 import { type SquigglePlaygroundProps as SquigglePlaygroundProps_0_9_0 } from "squiggle-components-0.9.0";
 import { type SquigglePlaygroundProps as SquigglePlaygroundProps_0_9_2 } from "squiggle-components-0.9.2";
+
 import { type SquigglePlaygroundProps as SquigglePlaygroundProps_dev } from "@quri/squiggle-components";
 
 /*
@@ -21,7 +22,8 @@ import {
   SquigglePlaygroundProps_0_8_6,
 } from "./oldPlaygroundTypes.js";
 import { LazyVersionedComponents, VersionedComponentProps } from "./types.js";
-const componentByVersion = {
+
+export const componentByVersion = {
   "0.8.5": lazy(async () => ({
     default: (await import("squiggle-components-0.8.5")).SquigglePlayground,
   })) as FC<SquigglePlaygroundProps_0_8_5>,
@@ -38,6 +40,7 @@ const componentByVersion = {
     default: (await import("@quri/squiggle-components")).SquigglePlayground,
   })) as FC<SquigglePlaygroundProps_dev>,
 } as const satisfies LazyVersionedComponents;
+
 type Props = VersionedComponentProps<typeof componentByVersion>;
 export const VersionedSquigglePlayground: FC<Props> = ({
   version,

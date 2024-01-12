@@ -7,9 +7,12 @@ import { FC, lazy, Suspense } from "react";
  */
 import { type SquiggleChartProps as SquiggleChartProps_0_9_0 } from "squiggle-components-0.9.0";
 import { type SquiggleChartProps as SquiggleChartProps_0_9_2 } from "squiggle-components-0.9.2";
+
 import { type SquiggleChartProps as SquiggleChartProps_dev } from "@quri/squiggle-components";
+
 import { LazyVersionedComponents, VersionedComponentProps } from "./types.js";
 import { SquiggleVersion } from "./versions.js";
+
 type SquiggleChartVersion = Exclude<SquiggleVersion, "0.8.5" | "0.8.6">;
 const componentByVersion = {
   "0.9.0": lazy(async () => ({
@@ -26,6 +29,7 @@ type VersionedSquiggleChartProps = VersionedComponentProps<
   typeof componentByVersion,
   SquiggleChartVersion
 >;
+
 export const VersionedSquiggleChart: FC<VersionedSquiggleChartProps> = ({
   version,
   ...props

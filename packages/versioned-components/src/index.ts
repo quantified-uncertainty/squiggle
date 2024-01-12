@@ -10,6 +10,9 @@ export {
   squiggleVersions,
   versionSupportsDropdownMenu,
   versionSupportsExports,
+  versionSupportsSquiggleChart,
 } from "./versions.js";
 
 export { useAdjustSquiggleVersion } from "./hooks.js";
+
+export { squiggleLangByVersion } from "./squiggleLangByVersion.js";
