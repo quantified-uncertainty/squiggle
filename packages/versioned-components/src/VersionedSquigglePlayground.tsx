@@ -7,6 +7,7 @@ import { FC, lazy, Suspense } from "react";
  * It's edited with babel transformation in `publish-all.ts` script.
  */
 import { type SquigglePlaygroundProps as SquigglePlaygroundProps_0_9_0 } from "squiggle-components-0.9.0";
+import { type SquigglePlaygroundProps as SquigglePlaygroundProps_0_9_1 } from "squiggle-components-0.9.1";
 import { type SquigglePlaygroundProps as SquigglePlaygroundProps_dev } from "@quri/squiggle-components";
 
 /*
@@ -31,6 +32,9 @@ const componentByVersion = {
   "0.9.0": lazy(async () => ({
     default: (await import("squiggle-components-0.9.0")).SquigglePlayground,
   })) as FC<SquigglePlaygroundProps_0_9_0>,
+  "0.9.1": lazy(async () => ({
+    default: (await import("squiggle-components-0.9.1")).SquigglePlayground,
+  })) as FC<SquigglePlaygroundProps_0_9_1>,
   dev: lazy(async () => ({
     default: (await import("@quri/squiggle-components")).SquigglePlayground,
   })) as FC<SquigglePlaygroundProps_dev>,
