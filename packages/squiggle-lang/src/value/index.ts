@@ -368,6 +368,16 @@ export type Scale = {
   title?: string;
 };
 
+export function mergeScale(a: Scale, b: Scale): Scale {
+  return {
+    method: b.method ?? a.method,
+    min: b.min ?? a.min,
+    max: b.max ?? a.max,
+    tickFormat: b.tickFormat ?? a.tickFormat,
+    title: b.title ?? a.title,
+  };
+}
+
 function methodIsEqual(valueA: ScaleMethod, valueB: ScaleMethod) {
   if (valueA.type !== valueB.type) {
     return false;

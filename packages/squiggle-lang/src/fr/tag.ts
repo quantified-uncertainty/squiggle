@@ -40,14 +40,6 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
-export const assertTagsNoConflict = (tags: ValueTags) => {
-  const error = tags.verifyNoConflicts();
-
-  if (error) {
-    throw new REArgumentError("Multiple conflicting tags supplied: " + error);
-  }
-};
-
 //I could also see inlining this into the next function, either way is fine.
 function _ensureTypeUsingLambda<T1>(
   outputType: FRType<T1>,

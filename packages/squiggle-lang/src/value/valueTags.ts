@@ -52,14 +52,14 @@ export function verifyNoConflicts(_value: ValueTagsType): string | undefined {
     ["xScale", "numberFormat", "dateFormat"],
   ];
 
-  if (
-    conflictingKeys.some(
-      (keys) => keys.filter((key) => _value[key] !== undefined).length > 1
-    )
-  ) {
-    return `Conflicting tags: ${conflictingKeys
-      .map((keys) => keys.join(", "))
-      .join(", ")}`;
+  const conflicts = conflictingKeys
+    .map((keys) => keys.filter((key) => _value[key] !== undefined))
+    .filter((keys) => keys.length > 1);
+
+  if (conflicts.length > 0) {
+    return `Conflicting tags: ${conflicts
+      .map((k) => k.join(", "))
+      .join(", ")}. These tags cannot be used together.`;
   } else {
     return undefined;
   }

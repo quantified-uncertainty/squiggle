@@ -2,7 +2,7 @@ import React from "react";
 import { z } from "zod";
 
 import { SqScale } from "@quri/squiggle-lang";
-import { CheckboxFormField, NumberFormField, RadioFormField } from "@quri/ui";
+import { CheckboxFormField, NumberFormField } from "@quri/ui";
 
 import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../lib/constants.js";
 import { functionChartDefaults } from "../widgets/LambdaWidget/FunctionChart/utils.js";
@@ -33,8 +33,8 @@ const scaleSchema = z.union([
 ]);
 
 export const distributionSettingsSchema = z.object({
-  xScale: scaleSchema,
-  yScale: scaleSchema,
+  xScale: scaleSchema.optional(),
+  yScale: scaleSchema.optional(),
   minX: z.number().optional(),
   maxX: z.number().optional(),
   title: z.string().optional(),
@@ -64,8 +64,6 @@ export const defaultPlaygroundSettings: PlaygroundSettings = {
     count: functionChartDefaults.points,
   },
   distributionChartSettings: {
-    xScale: "linear",
-    yScale: "linear",
     showSummary: true,
   },
   editorSettings: {
@@ -92,15 +90,22 @@ export function generateDistributionPlotSettings(
   ): "linear" | "log" | "symlog" | "power" {
     return scaleType === "exp" ? "power" : scaleType;
   }
+
   const _xScale = defaultDist.xScale.merge(
     new SqScale({
-      method: { type: convertScaleType(settings.xScale) },
+      method: settings.xScale
+        ? { type: convertScaleType(settings.xScale) }
+        : undefined,
       min: settings.minX,
       max: settings.maxX,
     })
   );
   const _yScale = defaultDist.yScale.merge(
-    new SqScale({ method: { type: convertScaleType(settings.yScale) } })
+    new SqScale({
+      method: settings.yScale
+        ? { type: convertScaleType(settings.yScale) }
+        : undefined,
+    })
   );
   return {
     xScale: _xScale,
@@ -130,61 +135,13 @@ export const EnvironmentForm: React.FC = () => (
   </div>
 );
 
-export const DistributionSettingsForm: React.FC<{
-  metaSettings?: MetaSettings;
-}> = ({ metaSettings }) => {
+export const DistributionSettingsForm: React.FC = () => {
   return (
     <FormSection title="Distribution Display Settings">
       <div className="space-y-4">
         <CheckboxFormField<PlaygroundSettings>
           name="distributionChartSettings.showSummary"
           label="Show summary statistics"
-        />
-        <RadioFormField<PlaygroundSettings>
-          name="distributionChartSettings.xScale"
-          label="X Scale"
-          options={[
-            {
-              id: "linear",
-              name: "Linear",
-            },
-            {
-              id: "log",
-              name: "Logarithmic",
-              ...(metaSettings?.disableLogX
-                ? {
-                    disabled: true,
-                    tooltip:
-                      "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
-                  }
-                : null),
-            },
-            {
-              id: "symlog",
-              name: "Symlog",
-              tooltip:
-                "Almost logarithmic scale that supports negative values.",
-            },
-            {
-              id: "exp",
-              name: "Exponential",
-            },
-          ]}
-        />
-        <RadioFormField<PlaygroundSettings>
-          name="distributionChartSettings.yScale"
-          label="Y Scale"
-          options={[
-            {
-              id: "linear",
-              name: "Linear",
-            },
-            // log Y is hidden because it almost always causes an empty chart
-            {
-              id: "exp",
-              name: "Exponential",
-            },
-          ]}
         />
         <NumberFormField<PlaygroundSettings>
           name="distributionChartSettings.minX"
@@ -242,12 +199,7 @@ export const EditorSettingsForm: React.FC = () => {
 export const PlaygroundSettingsForm: React.FC<{
   withFunctionSettings?: boolean;
   withGlobalSettings?: boolean;
-  metaSettings?: MetaSettings;
-}> = ({
-  withGlobalSettings = true,
-  withFunctionSettings = true,
-  metaSettings,
-}) => {
+}> = ({ withGlobalSettings = true, withFunctionSettings = true }) => {
   return (
     <div className="divide-y divide-gray-200 max-w-2xl">
       {withGlobalSettings && (
@@ -270,7 +222,7 @@ export const PlaygroundSettingsForm: React.FC<{
       )}
 
       <div className="pt-6 mb-6">
-        <DistributionSettingsForm metaSettings={metaSettings} />
+        <DistributionSettingsForm />
       </div>
 
       {withFunctionSettings ? (

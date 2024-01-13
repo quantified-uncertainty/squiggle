@@ -1,5 +1,10 @@
 import { SDate } from "../../utility/SDate.js";
-import { methodWithDefaultParams, Scale, vScale } from "../../value/index.js";
+import {
+  mergeScale,
+  methodWithDefaultParams,
+  Scale,
+  vScale,
+} from "../../value/index.js";
 import { SqDateValue, SqNumberValue, SqValue } from "./index.js";
 
 export const wrapScale = (value: Scale): SqScale => {
@@ -20,10 +25,7 @@ export class SqScale {
   }
 
   merge(other: SqScale) {
-    return wrapScale({
-      ...this._value,
-      ...other._value,
-    });
+    return wrapScale(mergeScale(this._value, other._value));
   }
 
   toString() {

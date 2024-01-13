@@ -33,11 +33,7 @@ type Props = {
   withFunctionSettings: boolean;
 };
 
-const ItemSettingsModal: FC<Props> = ({
-  value,
-  metaSettings,
-  withFunctionSettings,
-}) => {
+const ItemSettingsModal: FC<Props> = ({ value, withFunctionSettings }) => {
   const close = useCloseDropdown();
   const setLocalItemState = useSetLocalItemState();
 
@@ -94,7 +90,6 @@ const ItemSettingsModal: FC<Props> = ({
           <PlaygroundSettingsForm
             withGlobalSettings={false}
             withFunctionSettings={withFunctionSettings}
-            metaSettings={metaSettings}
           />
         </FormProvider>
       </Modal.Body>

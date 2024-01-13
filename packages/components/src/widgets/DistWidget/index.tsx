@@ -31,8 +31,7 @@ widgetRegistry.register("Dist", {
     const p95 = unwrapOrFailure(dist.inv(environment, 0.95));
     const oneValue = p05 === p95;
 
-    const plot = value.defaultPlot();
-    //TODO: Make sure showSummary is false
+    const plot = value.defaultPlot().setShowSummary(false);
     return oneValue ? (
       showNumber(p05)
     ) : (

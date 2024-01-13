@@ -110,6 +110,11 @@ export class SqDistributionsPlot extends SqAbstractPlot<"distributions"> {
     return this._value.showSummary;
   }
 
+  //I'm unsure if this is the right way to do this, but it's the best I can think of now.
+  setShowSummary(showSummary: boolean): SqDistributionsPlot {
+    return new SqDistributionsPlot({ ...this._value, showSummary });
+  }
+
   get xScale(): SqScale {
     return wrapScale(this._value.xScale);
   }
