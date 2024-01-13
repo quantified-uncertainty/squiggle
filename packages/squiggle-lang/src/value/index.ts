@@ -13,6 +13,7 @@ import { SDate } from "../utility/SDate.js";
 import { SDuration } from "../utility/SDuration.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 import { ValueTags, ValueTagsType } from "./valueTags.js";
+import { getExt } from "../utility/result.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -42,7 +43,11 @@ abstract class BaseValue {
   }
 
   mergeTags(args: ValueTagsType) {
-    return this.copyWithTags(this.tags?.merge(args) ?? new ValueTags(args));
+    if (this.tags) {
+      return this.copyWithTags(getExt(this.tags.merge(args)));
+    } else {
+      return this.copyWithTags(new ValueTags(args));
+    }
   }
 
   abstract valueToString(): string;

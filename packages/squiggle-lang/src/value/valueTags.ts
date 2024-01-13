@@ -132,7 +132,7 @@ export class ValueTags {
   }
 
   merge(other: ValueTagsType) {
-    return new ValueTags({
+    return ValueTags.make({
       ...this.value,
       ...other,
     });
