@@ -5,8 +5,7 @@ import { createContext } from "../../reducer/context.js";
 import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
-import { Value, VDict, vDict } from "../../value/index.js";
-import { ValueTags } from "../../value/valueTags.js";
+import { Value, vDict } from "../../value/index.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
@@ -251,9 +250,9 @@ export class SqProject {
       (field) => {
         const innerDict = vDict(internalOutputR.value[field]);
         const dict = new SqDict(
-          field === "exports"
-            ? innerDict.mergeTags({ name: sourceId })
-            : innerDict,
+          // field === "exports"
+          innerDict, //.mergeTags({ name: sourceId }),
+          // : innerDict,
           new SqValueContext({
             project: this,
             sourceId,
@@ -282,81 +281,85 @@ export class SqProject {
     return Result.fmap(this.getOutput(sourceId), ({ bindings }) => bindings);
   }
 
-  // Brings in standard library getStdlib
+  private async importToBindingResult(
+    importBinding: Import,
+    pendingIds: Set<string>
+  ): Promise<Result.result<Bindings, SqError>> {
+    if (!this.items.has(importBinding.sourceId)) {
+      if (!this.linker) {
+        throw new Error(
+          `Can't load source for ${importBinding.sourceId}, linker is missing`
+        );
+      }
+
+      // We have got one of the new imports.
+      // Let's load it and add it to the project.
+      let newSource: string;
+      try {
+        newSource = await this.linker.loadSource(importBinding.sourceId);
+      } catch (e) {
+        return Result.Err(
+          new SqOtherError(`Failed to load import ${importBinding.sourceId}`)
+        );
+      }
+      this.setSource(importBinding.sourceId, newSource);
+    }
+
+    if (pendingIds.has(importBinding.sourceId)) {
+      // Oh we have already visited this source. There is an import cycle.
+      return Result.Err(
+        new SqOtherError(`Cyclic import ${importBinding.sourceId}`)
+      );
+    }
+
+    await this.innerRun(importBinding.sourceId, pendingIds);
+    const outputR = this.getInternalOutput(importBinding.sourceId);
+    if (!outputR.ok) {
+      return outputR;
+    }
+
+    // TODO - check for name collisions?
+    switch (importBinding.type) {
+      case "flat":
+        return Result.Ok(outputR.value.bindings);
+      case "named":
+        return Result.Ok(
+          ImmutableMap({
+            [importBinding.variable]: vDict(outputR.value.exports),
+          })
+        );
+      default:
+        throw new Error(`Internal error, ${importBinding satisfies never}`);
+    }
+  }
+
+  // Includes implicit imports ("continues"), explicit imports, and StdLib.
   private async buildExternals(
     sourceId: string,
     pendingIds: Set<string>
   ): Promise<Result.result<Bindings, SqError>> {
     this.parseImports(sourceId);
+
     const rImports = this.getImports(sourceId);
-    if (!rImports) {
-      // Shouldn't happen, we just called parseImports.
-      throw new Error("Internal logic error");
-    }
+    if (!rImports) throw new Error("Internal logic error"); // Shouldn't happen, we just called parseImports.
+    if (!rImports.ok) return rImports; // There's something wrong with imports, that's fatal.
 
-    if (!rImports.ok) {
-      // There's something wrong with imports, that's fatal.
-      return rImports;
-    }
+    let externals: Bindings = ImmutableMap<string, Value>();
+    externals = externals.merge(this.getStdLib()); // We start from stdLib and add imports on top of it.
 
-    // We start from stdLib and add imports on top of it.
-    let externals: Bindings = ImmutableMap<string, Value>().merge(
-      this.getStdLib()
-    );
+    const allImports = [
+      ...this.getItem(sourceId).getImplicitImports(),
+      ...rImports.value,
+    ];
 
-    // Now, let's process everything and populate our externals bindings.
-    for (const importBinding of [
-      ...this.getItem(sourceId).getImplicitImports(), // first, inject all variables from `continues`
-      ...rImports.value, // then bind all explicit imports
-    ]) {
-      if (!this.items.has(importBinding.sourceId)) {
-        if (!this.linker) {
-          throw new Error(
-            `Can't load source for ${importBinding.sourceId}, linker is missing`
-          );
-        }
+    for (const importBinding of allImports) {
+      const loadResult = await this.importToBindingResult(
+        importBinding,
+        pendingIds
+      );
+      if (!loadResult.ok) return loadResult; // Early return for load/validation errors
 
-        // We have got one of the new imports.
-        // Let's load it and add it to the project.
-        let newSource: string;
-        try {
-          newSource = await this.linker.loadSource(importBinding.sourceId);
-        } catch (e) {
-          return Result.Err(
-            new SqOtherError(`Failed to load import ${importBinding.sourceId}`)
-          );
-        }
-        this.setSource(importBinding.sourceId, newSource);
-      }
-
-      if (pendingIds.has(importBinding.sourceId)) {
-        // Oh we have already visited this source. There is an import cycle.
-        return Result.Err(
-          new SqOtherError(`Cyclic import ${importBinding.sourceId}`)
-        );
-      }
-
-      await this.innerRun(importBinding.sourceId, pendingIds);
-      const outputR = this.getInternalOutput(importBinding.sourceId);
-      if (!outputR.ok) {
-        return outputR;
-      }
-
-      // TODO - check for name collisions?
-      switch (importBinding.type) {
-        case "flat":
-          externals = externals.merge(outputR.value.bindings);
-          break;
-        case "named":
-          externals = externals.set(
-            importBinding.variable,
-            vDict(outputR.value.exports)
-          );
-          break;
-        // exhaustiveness check for TypeScript
-        default:
-          throw new Error(`Internal error, ${importBinding satisfies never}`);
-      }
+      externals = externals.merge(loadResult.value);
     }
 
     return Result.Ok(externals);

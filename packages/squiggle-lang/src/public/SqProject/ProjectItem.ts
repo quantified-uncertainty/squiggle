@@ -17,6 +17,7 @@ export type RunOutput = {
   result: Value;
   bindings: Bindings;
   exports: Bindings;
+  imports: Bindings;
 };
 
 export type Import =
@@ -232,6 +233,7 @@ export class ProjectItem {
         result,
         bindings,
         exports,
+        imports: externals,
       });
     } catch (e: unknown) {
       this.failRun(new SqRuntimeError(IRuntimeError.fromException(e)));
