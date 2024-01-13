@@ -68,7 +68,6 @@ export const FnDocumentation: FC<{
     description,
     definitions,
     examples,
-    interactiveExamples,
     versionAdded,
   } = documentation;
   const textSize = size === "small" ? "text-xs" : "text-sm";
