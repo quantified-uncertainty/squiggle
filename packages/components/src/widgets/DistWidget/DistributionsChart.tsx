@@ -555,7 +555,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
   return (
     <DistProvider generateInitialValue={() => ({})}>
       {plot.title && <PlotTitle title={plot.title} />}
-      {hasLogError && (
+      {hasLogError && nonTitleHeight > 30 && (
         <ErrorAlert heading="Log Domain Error">
           Cannot graph distribution with negative values on logarithmic scale.
         </ErrorAlert>

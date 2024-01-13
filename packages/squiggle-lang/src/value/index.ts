@@ -13,6 +13,7 @@ import { SDate } from "../utility/SDate.js";
 import { SDuration } from "../utility/SDuration.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 import { ValueTags, ValueTagsType } from "./valueTags.js";
+import { getExt } from "../utility/result.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -42,7 +43,11 @@ abstract class BaseValue {
   }
 
   mergeTags(args: ValueTagsType) {
-    return this.copyWithTags(this.tags?.merge(args) ?? new ValueTags(args));
+    if (this.tags) {
+      return this.copyWithTags(getExt(this.tags.merge(args)));
+    } else {
+      return this.copyWithTags(new ValueTags(args));
+    }
   }
 
   abstract valueToString(): string;
@@ -362,6 +367,16 @@ export type Scale = {
   tickFormat?: string;
   title?: string;
 };
+
+export function mergeScale(a: Scale, b: Scale): Scale {
+  return {
+    method: b.method ?? a.method,
+    min: b.min ?? a.min,
+    max: b.max ?? a.max,
+    tickFormat: b.tickFormat ?? a.tickFormat,
+    title: b.title ?? a.title,
+  };
+}
 
 function methodIsEqual(valueA: ScaleMethod, valueB: ScaleMethod) {
   if (valueA.type !== valueB.type) {

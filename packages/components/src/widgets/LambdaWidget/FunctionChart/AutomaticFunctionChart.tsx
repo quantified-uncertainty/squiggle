@@ -7,23 +7,20 @@ import {
   SqDomain,
   SqError,
   SqLambda,
+  SqLambdaValue,
   SqNumericFnPlot,
   SqNumericRangeDomain,
-  SqScale,
 } from "@quri/squiggle-lang";
 
 import { MessageAlert } from "../../../components/Alert.js";
 import { ErrorBoundary } from "../../../components/ErrorBoundary.js";
-import {
-  generateDistributionPlotSettings,
-  PlaygroundSettings,
-} from "../../../components/PlaygroundSettings.js";
+import { PlaygroundSettings } from "../../../components/PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../../../components/SquiggleErrorAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
 
 type AutomaticFunctionChartProps = {
-  fn: SqLambda;
+  fn: SqLambdaValue;
   settings: PlaygroundSettings;
   environment: Env;
   height: number;
@@ -73,7 +70,7 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
   environment,
   height,
 }) => {
-  const parameters = fn.parameterCounts();
+  const parameters = fn.value.parameterCounts();
   if (!parameters.includes(1)) {
     return (
       <MessageAlert heading="Function Display Not Supported">
@@ -86,31 +83,33 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
   const max: number = settings.functionChartSettings.stop;
   const xCount: number = settings.functionChartSettings.count;
 
-  const includedDomain = fn.signatures().find((s) => s.length === 1)?.[0]
+  const includedDomain = fn.value.signatures().find((s) => s.length === 1)?.[0]
     ?.domain;
 
   const xDomain = includedDomain
     ? includedDomain
     : SqNumericRangeDomain.fromMinMax(min, max);
 
-  const inferredOutputType = getInferredFnOutputType(xDomain, fn, environment);
+  const inferredOutputType = getInferredFnOutputType(
+    xDomain,
+    fn.value,
+    environment
+  );
 
   if (!inferredOutputType.ok) {
     return <FunctionCallErrorAlert error={inferredOutputType.value} />;
   }
 
-  const yScale = SqScale.linearDefault();
-  const xScale = xDomain.toDefaultScale();
+  const yScale = fn.defaultYScale();
+  const xScale = fn.defaultXScale();
 
   switch (inferredOutputType.value) {
     case "Dist": {
       const plot = SqDistFnPlot.create({
-        fn,
+        fn: fn.value,
         xScale,
         yScale,
-        distXScale: generateDistributionPlotSettings(
-          settings.distributionChartSettings
-        ).xScale,
+        distXScale: yScale,
       });
 
       return (
@@ -124,9 +123,9 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
     }
     case "Number": {
       const plot = SqNumericFnPlot.create({
-        fn,
+        fn: fn.value,
         xScale,
-        yScale: SqScale.linearDefault(),
+        yScale,
       });
 
       return (

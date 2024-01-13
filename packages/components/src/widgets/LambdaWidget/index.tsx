@@ -31,7 +31,7 @@ widgetRegistry.register("Lambda", {
     }
     return (
       <AutomaticFunctionChart
-        fn={value.value}
+        fn={value}
         settings={settings}
         height={settings.chartHeight}
         environment={{

@@ -291,15 +291,21 @@ export const Tagged: Story = {
   args: {
     defaultCode: `z = 34 -> Tag.format(".1f")
 
-    @name("My favorite Dist")
-    @doc("This is a long description")
-    @format("$.2")
-    x = 5 to 10
-    
-    @showAs(Plot.numericFn)
-    @name("My favorite Fn")
-    fn = {|e| e}
-    
-    y = x -> Tag.all`,
+@name("My favorite Dist")
+@doc("This is a long description")
+@format("$.2")
+x = 5 to 10
+
+@showAs(Plot.numericFn)
+@name("My favorite Fn")
+fn = {|e| e}
+
+@format("$.2f")
+withFormat = 4 to 100
+
+@xScale(Scale.log())
+withXScale = 4 to 100
+
+y = x -> Tag.getAll`,
   },
 };

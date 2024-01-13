@@ -1,7 +1,7 @@
 import { result } from "../index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, fmap, mergeMany, Ok } from "../utility/result.js";
-import { Value, vBool, vString } from "./index.js";
+import { Scale, Value, vBool, vScale, vString } from "./index.js";
 
 export type ValueTagsType = {
   name?: string;
@@ -10,6 +10,8 @@ export type ValueTagsType = {
   numberFormat?: string;
   dateFormat?: string;
   hidden?: boolean;
+  xScale?: Scale;
+  yScale?: Scale;
   notebook?: boolean;
 };
 
@@ -22,6 +24,8 @@ const valueTagsTypeNames: ValueTagsTypeName[] = [
   "numberFormat",
   "dateFormat",
   "hidden",
+  "xScale",
+  "yScale",
   "notebook",
 ];
 
@@ -41,35 +45,68 @@ function convertToValueTagsTypeName(
   }
 }
 
+export function verifyNoConflicts(_value: ValueTagsType): string | undefined {
+  const conflictingKeys: ValueTagsTypeName[][] = [
+    ["showAs", "xScale"],
+    ["showAs", "yScale"],
+    ["xScale", "numberFormat", "dateFormat"],
+  ];
+
+  const conflicts = conflictingKeys
+    .map((keys) => keys.filter((key) => _value[key] !== undefined))
+    .filter((keys) => keys.length > 1);
+
+  if (conflicts.length > 0) {
+    return `Conflicting tags: ${conflicts
+      .map((k) => k.join(", "))
+      .join(", ")}. These tags cannot be used together.`;
+  } else {
+    return undefined;
+  }
+}
+
 // I expect these to get much more complicated later, so it seemed prudent to make a class now.
 export class ValueTags {
-  constructor(public value: ValueTagsType) {}
+  public value: ValueTagsType;
+
+  constructor(_value: ValueTagsType) {
+    this.value = _value;
+  }
+
+  static make(_value: ValueTagsType): result<ValueTags, string> {
+    const conflict = verifyNoConflicts(_value);
+    if (conflict) {
+      return Err(conflict);
+    } else {
+      return Ok(new ValueTags(_value));
+    }
+  }
+
+  verifyNoConflicts(): string | undefined {
+    return verifyNoConflicts(this.value);
+  }
 
   toList(): [string, Value][] {
-    const result: [string, Value][] = [];
-    const { value } = this;
-    if (value.name) {
-      result.push(["name", vString(value.name)]);
-    }
-    if (value.doc) {
-      result.push(["doc", vString(value.doc)]);
-    }
-    if (value.showAs) {
-      result.push(["showAs", value.showAs]);
-    }
-    if (value.numberFormat) {
-      result.push(["numberFormat", vString(value.numberFormat)]);
-    }
-    if (value.dateFormat) {
-      result.push(["dateFormat", vString(value.dateFormat)]);
-    }
-    if (value.hidden) {
-      result.push(["hidden", vBool(value.hidden)]);
-    }
-    if (value.notebook) {
-      result.push(["notebook", vBool(value.notebook)]);
-    }
-    return result;
+    return valueTagsTypeNames
+      .filter((key) => this.value[key] !== undefined)
+      .map((key) => {
+        const value = this.value[key];
+        switch (key) {
+          case "name":
+          case "doc":
+          case "numberFormat":
+          case "dateFormat":
+            return [key, vString(value as string)];
+          case "hidden":
+          case "notebook":
+            return [key, vBool(value as boolean)];
+          case "xScale":
+          case "yScale":
+            return [key, vScale(value as Scale)];
+          default:
+            return [key, value as Value];
+        }
+      });
   }
 
   omit(keys: ValueTagsTypeName[]) {
@@ -95,7 +132,7 @@ export class ValueTags {
   }
 
   merge(other: ValueTagsType) {
-    return new ValueTags({
+    return ValueTags.make({
       ...this.value,
       ...other,
     });
@@ -123,6 +160,14 @@ export class ValueTags {
 
   hidden() {
     return this.value.hidden;
+  }
+
+  xScale(): Scale | undefined {
+    return this.value.xScale;
+  }
+
+  yScale(): Scale | undefined {
+    return this.value.yScale;
   }
 
   notebook() {

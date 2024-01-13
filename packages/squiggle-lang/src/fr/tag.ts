@@ -17,13 +17,17 @@ import {
   frOr,
   FrOrType,
   frPlot,
+  frScale,
   frString,
   frTableChart,
   FRType,
   frWithTags,
 } from "../library/registry/frTypes.js";
 import {
+  assertScaleMatchesDomain,
+  assertScaleNotDateScale,
   checkNumericTickFormat,
+  extractDomainFromOneArgFunction,
   FnFactory,
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
@@ -64,6 +68,15 @@ type PickByValue<T, ValueType> = NonNullable<
   >
 >;
 
+const mergeTagsOrRaise = <T>(
+  value: T,
+  tags: ValueTags,
+  updated: ValueTagsType
+): { value: T; tags: ValueTags } => ({
+  value,
+  tags: getOrThrow(tags.merge(updated), (e) => new REArgumentError(e)),
+});
+
 const booleanTagDefs = <T>(
   tagName: PickByValue<ValueTagsType, boolean>,
   frType: FRType<T>
@@ -71,19 +84,14 @@ const booleanTagDefs = <T>(
   makeDefinition(
     [frWithTags(frType), frBool],
     frWithTags(frType),
-    ([{ value, tags }, tagValue]) => ({
-      value,
-      tags: tags.merge({ [tagName]: tagValue }),
-    }),
+    ([{ value, tags }, tagValue]) =>
+      mergeTagsOrRaise(value, tags, { [tagName]: tagValue }),
     { isDecorator: true }
   ),
   makeDefinition(
     [frWithTags(frType)],
     frWithTags(frType),
-    ([{ value, tags }]) => ({
-      value,
-      tags: tags.merge({ [tagName]: true }),
-    }),
+    ([{ value, tags }]) => mergeTagsOrRaise(value, tags, { [tagName]: true }),
     { isDecorator: true }
   ),
 ];
@@ -111,10 +119,11 @@ function decoratorWithInputOrFnInput<T>(
         newInput,
         runLambdaToGetType
       );
-      return {
+      return mergeTagsOrRaise(
         value,
-        tags: tags.merge(toValueTagsFn(correctTypedInputValue)),
-      };
+        tags,
+        toValueTagsFn(correctTypedInputValue)
+      );
     },
     { isDecorator: true }
   );
@@ -174,6 +183,84 @@ export const library = [
     ],
   }),
   maker.make({
+    name: "xScale",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frDist), frScale],
+        frWithTags(frDist),
+        ([{ value, tags }, xScale]) => {
+          assertScaleNotDateScale(xScale);
+          return mergeTagsOrRaise(value, tags, { xScale });
+        },
+        { isDecorator: true }
+      ),
+      makeDefinition(
+        [frWithTags(frLambdaTyped([frNumber], frDistOrNumber)), frScale],
+        frWithTags(frLambdaTyped([frNumber], frDistOrNumber)),
+        ([{ value, tags }, xScale]) => {
+          const domain = extractDomainFromOneArgFunction(value);
+          assertScaleMatchesDomain(xScale, domain);
+          return mergeTagsOrRaise(value, tags, { xScale });
+        },
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getXScale",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frOr(frDist, frLambdaTyped([frNumber], frDistOrNumber)))],
+        frOr(frScale, frString),
+        ([{ tags }]) => {
+          const _xScale = tags.xScale();
+          return _xScale
+            ? { tag: "1", value: _xScale }
+            : { tag: "2", value: "None" };
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "yScale",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frDist), frScale],
+        frWithTags(frDist),
+        ([{ value, tags }, yScale]) => {
+          assertScaleNotDateScale(yScale);
+          return mergeTagsOrRaise(value, tags, { yScale });
+        },
+        { isDecorator: true }
+      ),
+      makeDefinition(
+        [frWithTags(frLambdaTyped([frNumber], frDistOrNumber)), frScale],
+        frWithTags(frLambdaTyped([frNumber], frDistOrNumber)),
+        ([{ value, tags }, yScale]) => {
+          assertScaleNotDateScale(yScale);
+          return mergeTagsOrRaise(value, tags, { yScale });
+        },
+        { isDecorator: true }
+      ),
+    ],
+  }),
+
+  maker.make({
+    name: "getYScale",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frOr(frDist, frLambdaTyped([frNumber], frDistOrNumber)))],
+        frOr(frScale, frString),
+        ([{ tags }]) => {
+          const _yScale = tags.yScale();
+          return _yScale
+            ? { tag: "1", value: _yScale }
+            : { tag: "2", value: "None" };
+        }
+      ),
+    ],
+  }),
+  maker.make({
     name: "showAs",
     description: `Overrides the default visualization for a value.
 \`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization. You can use it like,  
@@ -229,27 +316,26 @@ Different types of values can be displayed in different ways. The following tabl
       makeDefinition(
         [frWithTags(frDistOrNumber), frNamed("numberFormat", frString)],
         frWithTags(frDistOrNumber),
-        ([{ value, tags }, format]) => {
-          checkNumericTickFormat(format);
-          return { value, tags: tags.merge({ numberFormat: format }) };
+        ([{ value, tags }, numberFormat]) => {
+          checkNumericTickFormat(numberFormat);
+          return mergeTagsOrRaise(value, tags, { numberFormat });
         },
         { isDecorator: true }
       ),
       makeDefinition(
         [frWithTags(frDuration), frNamed("numberFormat", frString)],
         frWithTags(frDuration),
-        ([{ value, tags }, format]) => {
-          checkNumericTickFormat(format);
-          return { value, tags: tags.merge({ numberFormat: format }) };
+        ([{ value, tags }, numberFormat]) => {
+          checkNumericTickFormat(numberFormat);
+          return mergeTagsOrRaise(value, tags, { numberFormat });
         },
         { isDecorator: true }
       ),
       makeDefinition(
         [frWithTags(frDate), frNamed("timeFormat", frString)],
         frWithTags(frDate),
-        ([{ value, tags }, format]) => {
-          return { value, tags: tags.merge({ dateFormat: format }) };
-        },
+        ([{ value, tags }, dateFormat]) =>
+          mergeTagsOrRaise(value, tags, { dateFormat }),
         { isDecorator: true }
       ),
     ],
