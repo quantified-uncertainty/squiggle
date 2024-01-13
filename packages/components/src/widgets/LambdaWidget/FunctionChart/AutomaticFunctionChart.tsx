@@ -10,15 +10,11 @@ import {
   SqLambdaValue,
   SqNumericFnPlot,
   SqNumericRangeDomain,
-  SqScale,
 } from "@quri/squiggle-lang";
 
 import { MessageAlert } from "../../../components/Alert.js";
 import { ErrorBoundary } from "../../../components/ErrorBoundary.js";
-import {
-  generateDistributionPlotSettings,
-  PlaygroundSettings,
-} from "../../../components/PlaygroundSettings.js";
+import { PlaygroundSettings } from "../../../components/PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../../../components/SquiggleErrorAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
@@ -104,8 +100,8 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
     return <FunctionCallErrorAlert error={inferredOutputType.value} />;
   }
 
-  const yScale = fn.tags.yScale() ?? SqScale.linearDefault();
-  const xScale = fn.tags.xScale() ?? xDomain.toDefaultScale();
+  const yScale = fn.defaultYScale();
+  const xScale = fn.defaultXScale();
 
   switch (inferredOutputType.value) {
     case "Dist": {
@@ -113,9 +109,7 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
         fn: fn.value,
         xScale,
         yScale,
-        distXScale: generateDistributionPlotSettings(
-          settings.distributionChartSettings
-        ).xScale,
+        distXScale: yScale,
       });
 
       return (

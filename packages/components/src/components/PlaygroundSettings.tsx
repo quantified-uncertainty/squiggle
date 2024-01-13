@@ -8,6 +8,7 @@ import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../lib/constants.js";
 import { functionChartDefaults } from "../widgets/LambdaWidget/FunctionChart/utils.js";
 import { FormComment } from "./ui/FormComment.js";
 import { FormSection } from "./ui/FormSection.js";
+import { SqDistributionValue } from "../../../squiggle-lang/src/public/SqValue/index.js";
 
 export const environmentSchema = z.object({
   sampleCount: z.number().int().gte(SAMPLE_COUNT_MIN).lte(SAMPLE_COUNT_MAX),
@@ -82,25 +83,23 @@ export type PartialPlaygroundSettings = DeepPartial<PlaygroundSettings>;
 
 // partial params for SqDistributionsPlot.create; TODO - infer explicit type?
 export function generateDistributionPlotSettings(
-  settings: z.infer<typeof distributionSettingsSchema>,
-  xTickFormat?: string,
-  xScale = new SqScale({}),
-  yScale = new SqScale({})
+  dist: SqDistributionValue,
+  settings: z.infer<typeof distributionSettingsSchema>
 ) {
+  const defaultDist = dist.defaultPlot();
   function convertScaleType(
     scaleType: "linear" | "log" | "symlog" | "exp"
   ): "linear" | "log" | "symlog" | "power" {
     return scaleType === "exp" ? "power" : scaleType;
   }
-  const _xScale = xScale.merge(
+  const _xScale = defaultDist.xScale.merge(
     new SqScale({
       method: { type: convertScaleType(settings.xScale) },
       min: settings.minX,
       max: settings.maxX,
-      tickFormat: xTickFormat,
     })
   );
-  const _yScale = yScale.merge(
+  const _yScale = defaultDist.yScale.merge(
     new SqScale({ method: { type: convertScaleType(settings.yScale) } })
   );
   return {

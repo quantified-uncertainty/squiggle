@@ -1,4 +1,4 @@
-import { SqDistributionsPlot, SqScale } from "@quri/squiggle-lang";
+import { SqDistributionsPlot } from "@quri/squiggle-lang";
 
 import { NumberShower } from "../../components/NumberShower.js";
 import { generateDistributionPlotSettings } from "../../components/PlaygroundSettings.js";
@@ -31,11 +31,8 @@ widgetRegistry.register("Dist", {
     const p95 = unwrapOrFailure(dist.inv(environment, 0.95));
     const oneValue = p05 === p95;
 
-    const plot = value.defaultPlot({
-      defaultXScale: SqScale.linearDefault(),
-      defaultYScale: SqScale.linearDefault(),
-      showSummary: false,
-    });
+    const plot = value.defaultPlot();
+    //TODO: Make sure showSummary is false
     return oneValue ? (
       showNumber(p05)
     ) : (
@@ -69,12 +66,9 @@ widgetRegistry.register("Dist", {
     );
   },
   Chart(value, settings) {
-    const numberFormat = value.tags.numberFormat();
     const defaults = generateDistributionPlotSettings(
-      settings.distributionChartSettings,
-      numberFormat,
-      value.xScale(),
-      value.yScale()
+      value,
+      settings.distributionChartSettings
     );
     const plot = SqDistributionsPlot.create({
       distribution: value.value,

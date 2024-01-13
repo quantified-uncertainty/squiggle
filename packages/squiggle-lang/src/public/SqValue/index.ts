@@ -22,7 +22,12 @@ import { wrapDistribution } from "./SqDistribution/index.js";
 import { wrapDomain } from "./SqDomain.js";
 import { wrapInput } from "./SqInput.js";
 import { SqLambda } from "./SqLambda.js";
-import { SqDistributionsPlot, wrapPlot } from "./SqPlot.js";
+import {
+  SqDistFnPlot,
+  SqDistributionsPlot,
+  SqNumericFnPlot,
+  wrapPlot,
+} from "./SqPlot.js";
 import { SqScale, wrapScale } from "./SqScale.js";
 import { SqTableChart } from "./SqTableChart.js";
 import { SqTags } from "./SqTags.js";
@@ -141,6 +146,21 @@ export class SqDateValue extends SqAbstractValue<"Date", unknown> {
   }
 }
 
+function tagCommonXScale(tags: SqTags) {
+  const tickFormat = tags.numberFormat() || tags.dateFormat();
+  const xScaleTag = tags.xScale();
+
+  let xScale: SqScale;
+  if (xScaleTag) {
+    xScale = xScaleTag;
+  } else if (tickFormat) {
+    xScale = SqScale.linearDefault().merge(new SqScale({ tickFormat }));
+  } else {
+    xScale = SqScale.linearDefault();
+  }
+  return xScale;
+}
+
 export class SqDistributionValue extends SqAbstractValue<"Dist", unknown> {
   tag = "Dist" as const;
 
@@ -157,41 +177,28 @@ export class SqDistributionValue extends SqAbstractValue<"Dist", unknown> {
       : undefined;
   }
 
-  xScale(): SqScale | undefined {
-    return this.tags.xScale();
+  defaultXScale(): SqScale {
+    return this.showAsPlot()?.xScale || tagCommonXScale(this.tags);
   }
 
-  yScale(): SqScale | undefined {
-    return this.tags.yScale();
+  defaultYScale(): SqScale {
+    return (
+      this.showAsPlot()?.xScale || this.tags.yScale() || SqScale.linearDefault()
+    );
   }
 
-  defaultPlot({
-    defaultXScale,
-    defaultYScale,
-    showSummary,
-  }: {
-    defaultXScale: SqScale;
-    defaultYScale: SqScale;
-    showSummary: boolean;
-  }): SqDistributionsPlot {
+  defaultPlot(): SqDistributionsPlot {
     const showAsPlot = this.showAsPlot();
-    const xScale = this.xScale() || defaultXScale;
-    const yScale = this.yScale() || defaultYScale;
     if (showAsPlot) {
-      return SqDistributionsPlot.create({
-        xScale: xScale ? showAsPlot.xScale.merge(xScale) : showAsPlot.xScale,
-        yScale: yScale ? showAsPlot.yScale.merge(yScale) : showAsPlot.yScale,
-        showSummary,
-        distribution: this.value,
-      });
-    } else {
-      return SqDistributionsPlot.create({
-        xScale,
-        yScale,
-        showSummary,
-        distribution: this.value,
-      });
+      return showAsPlot;
     }
+
+    return SqDistributionsPlot.create({
+      xScale: this.defaultXScale(),
+      yScale: this.defaultYScale(),
+      showSummary: true,
+      distribution: this.value,
+    });
   }
 
   asJS() {
@@ -212,6 +219,26 @@ export class SqLambdaValue extends SqAbstractValue<"Lambda", unknown> {
 
   asJS() {
     return simpleValueFromValue(this._value);
+  }
+
+  // Returns plot if showAs returns plot. Note that fns can also be shown as calculators.
+  showAsPlot(): SqNumericFnPlot | SqDistFnPlot | undefined {
+    const showAs = this.tags.showAs();
+    return showAs &&
+      showAs.tag === "Plot" &&
+      (showAs.value.tag === "numericFn" || showAs.value.tag === "distFn")
+      ? showAs.value
+      : undefined;
+  }
+
+  defaultXScale(): SqScale {
+    return this.showAsPlot()?.xScale || tagCommonXScale(this.tags);
+  }
+
+  defaultYScale(): SqScale {
+    return (
+      this.showAsPlot()?.xScale || this.tags.yScale() || SqScale.linearDefault()
+    );
   }
 
   toCalculator(): SqCalculatorValue | undefined {
