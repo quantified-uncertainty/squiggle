@@ -17,6 +17,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
   frArray,
+  frDict,
   frDist,
   frDistPointset,
   frLambda,
@@ -566,12 +567,51 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
     ],
   }),
 ];
+const otherLibrary: FRFunction[] = [
+  maker.make({
+    name: "location",
+    displaySection: "Other",
+    description:
+      "Returns a dictionary describing the location in source code where this function was called.",
+    definitions: [
+      makeDefinition(
+        [],
+        frDict(
+          ["source", frString],
+          [
+            "start",
+            frDict(
+              ["line", frNumber],
+              ["column", frNumber],
+              ["offset", frNumber]
+            ),
+          ],
+          [
+            "end",
+            frDict(
+              ["line", frNumber],
+              ["column", frNumber],
+              ["offset", frNumber]
+            ),
+          ]
+        ),
+        (_, { frameStack }) => {
+          const location = frameStack.getTopFrame()?.location;
+          if (!location) {
+            throw new REOther("Location is missing in call stack");
+          }
+          return location;
+        }
+      ),
+    ],
+  }),
+];
 
 export const library = [
   // Combinatorics
   ...combinatoricsLibrary,
 
-  //   // Integration
+  // Integration
   ...integrationLibrary,
 
   // Diminishing marginal return functions
@@ -579,4 +619,6 @@ export const library = [
 
   // previously called `scaleLog`/`scaleExp`/...
   ...mapYLibrary,
+
+  ...otherLibrary,
 ];
