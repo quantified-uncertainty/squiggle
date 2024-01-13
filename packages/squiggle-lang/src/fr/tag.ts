@@ -40,6 +40,14 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
+export const assertTagsNoConflict = (tags: ValueTags) => {
+  const error = tags.verifyNoConflicts();
+
+  if (error) {
+    throw new REArgumentError("Multiple conflicting tags supplied: " + error);
+  }
+};
+
 //I could also see inlining this into the next function, either way is fine.
 function _ensureTypeUsingLambda<T1>(
   outputType: FRType<T1>,
@@ -325,7 +333,9 @@ Different types of values can be displayed in different ways. The following tabl
         frWithTags(frDistOrNumber),
         ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
-          return { value, tags: tags.merge({ numberFormat: format }) };
+          const newTags = tags.merge({ numberFormat: format });
+          assertTagsNoConflict(newTags);
+          return { value, tags: newTags };
         },
         { isDecorator: true }
       ),
@@ -334,7 +344,9 @@ Different types of values can be displayed in different ways. The following tabl
         frWithTags(frDuration),
         ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
-          return { value, tags: tags.merge({ numberFormat: format }) };
+          const newTags = tags.merge({ numberFormat: format });
+          assertTagsNoConflict(newTags);
+          return { value, tags: newTags };
         },
         { isDecorator: true }
       ),
@@ -342,7 +354,9 @@ Different types of values can be displayed in different ways. The following tabl
         [frWithTags(frDate), frNamed("timeFormat", frString)],
         frWithTags(frDate),
         ([{ value, tags }, format]) => {
-          return { value, tags: tags.merge({ dateFormat: format }) };
+          const newTags = tags.merge({ dateFormat: format });
+          assertTagsNoConflict(newTags);
+          return { value, tags: newTags };
         },
         { isDecorator: true }
       ),

@@ -45,9 +45,46 @@ function convertToValueTagsTypeName(
   }
 }
 
+export function verifyNoConflicts(_value: ValueTagsType): string | undefined {
+  const conflictingKeys: ValueTagsTypeName[][] = [
+    ["showAs", "xScale"],
+    ["showAs", "yScale"],
+    ["xScale", "numberFormat", "dateFormat"],
+  ];
+
+  if (
+    conflictingKeys.some(
+      (keys) => keys.filter((key) => _value[key] !== undefined).length > 1
+    )
+  ) {
+    return `Conflicting tags: ${conflictingKeys
+      .map((keys) => keys.join(", "))
+      .join(", ")}`;
+  } else {
+    return undefined;
+  }
+}
+
 // I expect these to get much more complicated later, so it seemed prudent to make a class now.
 export class ValueTags {
-  constructor(public value: ValueTagsType) {}
+  public value: ValueTagsType;
+
+  constructor(_value: ValueTagsType) {
+    this.value = _value;
+  }
+
+  static make(_value: ValueTagsType): result<ValueTags, string> {
+    const conflict = verifyNoConflicts(_value);
+    if (conflict) {
+      return Err(conflict);
+    } else {
+      return Ok(new ValueTags(_value));
+    }
+  }
+
+  verifyNoConflicts(): string | undefined {
+    return verifyNoConflicts(this.value);
+  }
 
   toList(): [string, Value][] {
     return valueTagsTypeNames

@@ -23,7 +23,7 @@ import { wrapDomain } from "./SqDomain.js";
 import { wrapInput } from "./SqInput.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqDistributionsPlot, wrapPlot } from "./SqPlot.js";
-import { wrapScale } from "./SqScale.js";
+import { SqScale, wrapScale } from "./SqScale.js";
 import { SqTableChart } from "./SqTableChart.js";
 import { SqTags } from "./SqTags.js";
 
