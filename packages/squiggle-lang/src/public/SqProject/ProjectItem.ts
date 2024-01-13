@@ -13,11 +13,17 @@ import { SqLinker } from "../SqLinker.js";
 
 // source -> ast -> imports -> result/bindings/exports
 
+export type Externals = {
+  stdlib: Bindings;
+  implicitImports: Bindings;
+  explicitExports: Bindings;
+};
+
 export type RunOutput = {
   result: Value;
   bindings: Bindings;
   exports: Bindings;
-  imports: Bindings;
+  explicitImports: Bindings;
 };
 
 export type Import =
@@ -182,7 +188,10 @@ export class ProjectItem {
     this.output = Result.Err(e);
   }
 
-  async run(context: ReducerContext, externals: ImmutableMap<string, Value>) {
+  async run(context: ReducerContext, externals: Externals) {
+    const _externals = externals.stdlib
+      .merge(externals.implicitImports)
+      .merge(externals.explicitExports);
     if (this.output) {
       return;
     }
@@ -199,7 +208,7 @@ export class ProjectItem {
     }
 
     const expression = Result.errMap(
-      compileAst(this.ast.value, externals),
+      compileAst(this.ast.value, _externals),
       (e) => new SqCompileError(e)
     );
 
@@ -233,7 +242,7 @@ export class ProjectItem {
         result,
         bindings,
         exports,
-        imports: externals,
+        explicitImports: externals.explicitExports,
       });
     } catch (e: unknown) {
       this.failRun(new SqRuntimeError(IRuntimeError.fromException(e)));

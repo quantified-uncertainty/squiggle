@@ -13,7 +13,12 @@ import { SqDict } from "../SqValue/SqDict.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValuePath } from "../SqValuePath.js";
 import { SqOutputResult } from "../types.js";
-import { Import, ProjectItem, RunOutput } from "./ProjectItem.js";
+import {
+  Import,
+  ProjectItem,
+  RunOutput,
+  type Externals,
+} from "./ProjectItem.js";
 
 function getNeedToRunError() {
   return new SqOtherError("Need to run");
@@ -250,9 +255,9 @@ export class SqProject {
       (field) => {
         const innerDict = vDict(internalOutputR.value[field]);
         const dict = new SqDict(
-          // field === "exports"
-          innerDict, //.mergeTags({ name: sourceId }),
-          // : innerDict,
+          field === "exports"
+            ? innerDict.mergeTags({ name: sourceId })
+            : innerDict,
           new SqValueContext({
             project: this,
             sourceId,
@@ -326,18 +331,36 @@ export class SqProject {
         return Result.Ok(
           ImmutableMap({
             [importBinding.variable]: vDict(outputR.value.exports),
-          })
+          }) // Add tags
         );
       default:
         throw new Error(`Internal error, ${importBinding satisfies never}`);
     }
   }
 
+  private async importsToBindings(
+    pendingIds: Set<string>,
+    imports: Import[]
+  ): Promise<Result.result<Bindings, SqError>> {
+    let exports = ImmutableMap<string, Value>();
+
+    for (const importBinding of imports) {
+      const loadResult = await this.importToBindingResult(
+        importBinding,
+        pendingIds
+      );
+      if (!loadResult.ok) return loadResult; // Early return for load/validation errors
+
+      exports = exports.merge(loadResult.value);
+    }
+    return Result.Ok(exports);
+  }
+
   // Includes implicit imports ("continues"), explicit imports, and StdLib.
   private async buildExternals(
     sourceId: string,
     pendingIds: Set<string>
-  ): Promise<Result.result<Bindings, SqError>> {
+  ): Promise<Result.result<Externals, SqError>> {
     this.parseImports(sourceId);
 
     const rImports = this.getImports(sourceId);
@@ -346,23 +369,25 @@ export class SqProject {
 
     let externals: Bindings = ImmutableMap<string, Value>();
     externals = externals.merge(this.getStdLib()); // We start from stdLib and add imports on top of it.
+    const stdlibExternals = externals;
 
-    const allImports = [
-      ...this.getItem(sourceId).getImplicitImports(),
-      ...rImports.value,
-    ];
+    const implicitImports = await this.importsToBindings(
+      pendingIds,
+      this.getItem(sourceId).getImplicitImports()
+    );
 
-    for (const importBinding of allImports) {
-      const loadResult = await this.importToBindingResult(
-        importBinding,
-        pendingIds
-      );
-      if (!loadResult.ok) return loadResult; // Early return for load/validation errors
+    if (!implicitImports.ok) return implicitImports;
+    const explicitImports = await this.importsToBindings(
+      pendingIds,
+      rImports.value
+    );
+    if (!explicitImports.ok) return explicitImports;
 
-      externals = externals.merge(loadResult.value);
-    }
-
-    return Result.Ok(externals);
+    return Result.Ok({
+      stdlib: stdlibExternals,
+      implicitImports: implicitImports.value,
+      explicitExports: explicitImports.value,
+    });
   }
 
   private async innerRun(sourceId: string, pendingIds: Set<string>) {
