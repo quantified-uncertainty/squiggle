@@ -243,7 +243,7 @@ class VString extends BaseValue {
 }
 export const vString = (v: string) => new VString(v);
 
-class VDict extends BaseValue implements Indexable {
+export class VDict extends BaseValue implements Indexable {
   readonly type = "Dict";
 
   override get publicName() {

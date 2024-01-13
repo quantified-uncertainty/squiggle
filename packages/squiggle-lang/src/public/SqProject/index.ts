@@ -5,7 +5,8 @@ import { createContext } from "../../reducer/context.js";
 import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
-import { Value, vDict } from "../../value/index.js";
+import { Value, VDict, vDict } from "../../value/index.js";
+import { ValueTags } from "../../value/valueTags.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
@@ -247,9 +248,12 @@ export class SqProject {
     );
 
     const [bindings, exports] = (["bindings", "exports"] as const).map(
-      (field) =>
-        new SqDict(
-          internalOutputR.value[field],
+      (field) => {
+        const innerDict = vDict(internalOutputR.value[field]);
+        const dict = new SqDict(
+          field === "exports"
+            ? innerDict.mergeTags({ name: sourceId })
+            : innerDict,
           new SqValueContext({
             project: this,
             sourceId,
@@ -262,7 +266,9 @@ export class SqProject {
               items: [],
             }),
           })
-        )
+        );
+        return dict;
+      }
     );
 
     return Result.Ok({ result, bindings, exports });
@@ -276,6 +282,7 @@ export class SqProject {
     return Result.fmap(this.getOutput(sourceId), ({ bindings }) => bindings);
   }
 
+  // Brings in standard library getStdlib
   private async buildExternals(
     sourceId: string,
     pendingIds: Set<string>
