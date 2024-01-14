@@ -267,7 +267,7 @@ export class VDict extends BaseValue implements Indexable {
       "{" +
       [...this.value.entries()]
         .map(([k, v]) => `${k}: ${v.toString()}`)
-        .join(",") +
+        .join(", ") +
       "}"
     );
   }

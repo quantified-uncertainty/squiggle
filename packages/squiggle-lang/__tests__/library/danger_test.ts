@@ -28,7 +28,7 @@ describe("Danger functions", () => {
     testEvalToBe("Danger.json([1,2,3])", "[1,2,3]");
     testEvalToBe(
       "Danger.json({foo: 'bar'})",
-      '{vtype: "Dict",value: {foo: "bar"}}'
+      '{vtype: "Dict", value: {foo: "bar"}}'
     );
     testEvalToBe("Danger.jsonString([1,2,3])", '"[1,2,3]"');
     testEvalToBe(

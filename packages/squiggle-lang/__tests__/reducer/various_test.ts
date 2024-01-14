@@ -55,7 +55,7 @@ describe("eval", () => {
   describe("dicts", () => {
     test("empty", async () => await expectEvalToBe("{}", "{}"));
     test("define", async () =>
-      await expectEvalToBe("{a: 1, b: 2}", "{a: 1,b: 2}"));
+      await expectEvalToBe("{a: 1, b: 2}", "{a: 1, b: 2}"));
     test("index", async () => await expectEvalToBe("r = {a: 1}; r.a", "1"));
     test("index", async () =>
       await expectEvalToBe(
@@ -69,10 +69,10 @@ describe("eval", () => {
       a: 1, 
       b: 2,
     }`,
-        "{a: 1,b: 2}"
+        "{a: 1, b: 2}"
       ));
     test("shorthand", async () => {
-      await expectEvalToBe("a=1; {a, b: a }", "{a: 1,b: 1}");
+      await expectEvalToBe("a=1; {a, b: a }", "{a: 1, b: 1}");
     });
   });
 

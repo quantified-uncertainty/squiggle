@@ -111,7 +111,7 @@ describe("SqProject with imports", () => {
 
     const output = project.getOutput("main");
 
-    expect(output).toBeOkOutput("6", "{a: 6,b: 2}");
+    expect(output).toBeOkOutput("6", "{a: 6, b: 2}");
 
     /* `getDependencies` returns the list of all dependency ids for a given source id, both continues and imports. */
     expect(project.getDependencies("main")).toEqual([

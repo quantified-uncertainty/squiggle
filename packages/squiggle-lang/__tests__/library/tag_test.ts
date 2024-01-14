@@ -12,7 +12,7 @@ describe("Tags", () => {
   describe("all", () => {
     testEvalToBe(
       "123 -> Tag.name('myName') -> Tag.doc('myDoc') -> Tag.getAll",
-      '{name: "myName",doc: "myDoc"}'
+      '{name: "myName", doc: "myDoc"}'
     );
   });
 
