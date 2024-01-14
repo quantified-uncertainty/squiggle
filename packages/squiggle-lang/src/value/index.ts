@@ -253,6 +253,15 @@ export class VDict extends BaseValue implements Indexable {
   constructor(public value: ValueMap) {
     super();
   }
+
+  static empty() {
+    return new VDict(ImmutableMap([]));
+  }
+
+  merge(other: VDict) {
+    return new VDict(this.value.merge(other.value));
+  }
+
   valueToString() {
     return (
       "{" +

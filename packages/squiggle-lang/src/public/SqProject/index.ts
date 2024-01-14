@@ -5,7 +5,7 @@ import { createContext } from "../../reducer/context.js";
 import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
-import { Value, vDict } from "../../value/index.js";
+import { Value, VDict, vDict } from "../../value/index.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
@@ -253,11 +253,11 @@ export class SqProject {
 
     const [bindings, exports] = (["bindings", "exports"] as const).map(
       (field) => {
-        const innerDict = vDict(internalOutputR.value[field]);
+        const innerDict = internalOutputR.value[field];
         const dict = new SqDict(
           field === "exports"
             ? innerDict.mergeTags({ name: sourceId })
-            : innerDict,
+            : innerDict.mergeTags({ name: "foobar" }),
           new SqValueContext({
             project: this,
             sourceId,
@@ -289,7 +289,7 @@ export class SqProject {
   private async importToBindingResult(
     importBinding: Import,
     pendingIds: Set<string>
-  ): Promise<Result.result<Bindings, SqError>> {
+  ): Promise<Result.result<VDict, SqError>> {
     if (!this.items.has(importBinding.sourceId)) {
       if (!this.linker) {
         throw new Error(
@@ -329,9 +329,13 @@ export class SqProject {
         return Result.Ok(outputR.value.bindings);
       case "named":
         return Result.Ok(
-          ImmutableMap({
-            [importBinding.variable]: vDict(outputR.value.exports),
-          }) // Add tags
+          vDict(
+            ImmutableMap({
+              [importBinding.variable]: outputR.value.exports.mergeTags({
+                name: "rtsrt",
+              }),
+            })
+          )
         );
       default:
         throw new Error(`Internal error, ${importBinding satisfies never}`);
@@ -341,8 +345,8 @@ export class SqProject {
   private async importsToBindings(
     pendingIds: Set<string>,
     imports: Import[]
-  ): Promise<Result.result<Bindings, SqError>> {
-    let exports = ImmutableMap<string, Value>();
+  ): Promise<Result.result<VDict, SqError>> {
+    let exports = VDict.empty();
 
     for (const importBinding of imports) {
       const loadResult = await this.importToBindingResult(
@@ -367,9 +371,7 @@ export class SqProject {
     if (!rImports) throw new Error("Internal logic error"); // Shouldn't happen, we just called parseImports.
     if (!rImports.ok) return rImports; // There's something wrong with imports, that's fatal.
 
-    let externals: Bindings = ImmutableMap<string, Value>();
-    externals = externals.merge(this.getStdLib()); // We start from stdLib and add imports on top of it.
-    const stdlibExternals = externals;
+    const stdlibExternals = vDict(this.getStdLib());
 
     const implicitImports = await this.importsToBindings(
       pendingIds,

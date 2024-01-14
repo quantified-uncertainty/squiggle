@@ -4,26 +4,25 @@ import { compileAst } from "../../expression/compile.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { evaluate, ReducerFn } from "../../reducer/index.js";
 import { Bindings } from "../../reducer/stack.js";
-import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
-import { Value } from "../../value/index.js";
+import { VDict, Value, vDict } from "../../value/index.js";
 import { SqCompileError, SqError, SqRuntimeError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 
 // source -> ast -> imports -> result/bindings/exports
 
 export type Externals = {
-  stdlib: Bindings;
-  implicitImports: Bindings;
-  explicitExports: Bindings;
+  stdlib: VDict;
+  implicitImports: VDict;
+  explicitExports: VDict;
 };
 
 export type RunOutput = {
   result: Value;
-  bindings: Bindings;
-  exports: Bindings;
-  explicitImports: Bindings;
+  bindings: VDict;
+  exports: VDict;
+  externals: Externals;
 };
 
 export type Import =
@@ -192,6 +191,7 @@ export class ProjectItem {
     const _externals = externals.stdlib
       .merge(externals.implicitImports)
       .merge(externals.explicitExports);
+
     if (this.output) {
       return;
     }
@@ -208,7 +208,7 @@ export class ProjectItem {
     }
 
     const expression = Result.errMap(
-      compileAst(this.ast.value, _externals),
+      compileAst(this.ast.value, _externals.value),
       (e) => new SqCompileError(e)
     );
 
@@ -237,12 +237,12 @@ export class ProjectItem {
 
       const bindings = contextAfterEvaluation.stack.asBindings();
       const exportNames = new Set(expression.value.value.exports);
-      const exports = bindings.filter((_, key) => exportNames.has(key));
+      const exports = vDict(bindings.filter((_, key) => exportNames.has(key)));
       this.output = Ok({
         result,
-        bindings,
+        bindings: vDict(bindings),
         exports,
-        explicitImports: externals.explicitExports,
+        externals: externals,
       });
     } catch (e: unknown) {
       this.failRun(new SqRuntimeError(IRuntimeError.fromException(e)));
