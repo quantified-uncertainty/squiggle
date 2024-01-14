@@ -235,13 +235,27 @@ export class ProjectItem {
         evaluate: asyncEvaluate,
       });
 
-      const bindings = contextAfterEvaluation.stack.asBindings();
+      const bindings = contextAfterEvaluation.stack
+        .asBindings()
+        .mapEntries(([key, value]) => {
+          let _value = value;
+          if (exportNames.has(key)) {
+            _value = value.mergeTags({
+              isExported: true,
+              sourceId: this.sourceId,
+              variableName: key,
+            });
+          }
+          return [key, _value];
+        });
       const exportNames = new Set(expression.value.value.exports);
-      const exports = vDict(bindings.filter((_, key) => exportNames.has(key)));
+      const exports = bindings.filter((value, key) =>
+        Boolean(value.tags?.isExported)
+      );
       this.output = Ok({
         result,
         bindings: vDict(bindings),
-        exports,
+        exports: vDict(exports),
         externals: externals,
       });
     } catch (e: unknown) {

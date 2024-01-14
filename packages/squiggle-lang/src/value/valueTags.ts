@@ -11,6 +11,9 @@ export type ValueTagsType = {
   dateFormat?: string;
   hidden?: boolean;
   notebook?: boolean;
+  variableName?: string;
+  sourceId?: string;
+  isExported?: boolean;
 };
 
 type ValueTagsTypeName = keyof ValueTagsType;
@@ -23,6 +26,9 @@ const valueTagsTypeNames: ValueTagsTypeName[] = [
   "dateFormat",
   "hidden",
   "notebook",
+  "variableName",
+  "sourceId",
+  "isExported",
 ];
 
 function convertToValueTagsTypeName(
@@ -68,6 +74,15 @@ export class ValueTags {
     }
     if (value.notebook) {
       result.push(["notebook", vBool(value.notebook)]);
+    }
+    if (value.variableName) {
+      result.push(["variableName", vString(value.variableName)]);
+    }
+    if (value.sourceId) {
+      result.push(["sourceId", vString(value.sourceId)]);
+    }
+    if (value.isExported) {
+      result.push(["isExported", vBool(value.isExported)]);
     }
     return result;
   }
@@ -127,5 +142,9 @@ export class ValueTags {
 
   notebook() {
     return this.value.notebook;
+  }
+
+  isExported() {
+    return this.value.isExported;
   }
 }
