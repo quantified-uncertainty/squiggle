@@ -1,4 +1,5 @@
 import * as SampleSetDist from "../dist/SampleSetDist/index.js";
+import { makeFnExample } from "../library/registry/core.js";
 import {
   FnDefinition,
   makeDefinition,
@@ -75,41 +76,52 @@ const baseLibrary = [
   maker.make({
     name: "make",
     description:
-      "Calls the correct conversion constructor, based on the corresponding input type, to create a Sample Set distribution.",
+      "Calls the correct conversion constructor, based on the corresponding input type, to create a sample set distribution",
     output: "Dist",
     examples: [
-      `SampleSet(5)`,
-      `SampleSet.make([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`,
-      `SampleSet.make({|i| sample(normal(5,2))})`,
+      makeFnExample(`SampleSet(5)`),
+      makeFnExample(`SampleSet.make([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`),
+      makeFnExample(`SampleSet.make({|i| sample(normal(5,2))})`),
     ],
     displaySection: "Constructors",
     definitions: [fromDist, fromNumber, fromList, fromFnDefinition],
   }),
   maker.make({
     name: "fromDist",
-    examples: [`SampleSet.fromDist(normal(5,2))`],
+    description:
+      "Converts any distribution type into a sample set distribution.",
+    examples: [makeFnExample(`SampleSet.fromDist(Sym.normal(5,2))`)],
     displaySection: "Conversions",
     definitions: [fromDist],
   }),
   maker.make({
     name: "fromNumber",
     displaySection: "Conversions",
-    examples: [`SampleSet.fromNumber(3)`],
+    description:
+      "Convert a number into a sample set distribution that contains ``n`` copies of that number. ``n`` refers to the model sample count.",
+    examples: [makeFnExample(`SampleSet.fromNumber(3)`)],
     definitions: [fromNumber],
   }),
   maker.make({
     name: "fromList",
     displaySection: "Conversions",
-    examples: [`SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`],
+    description: "Convert a list of numbers into a sample set distribution.",
+    examples: [
+      makeFnExample(
+        `SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`
+      ),
+    ],
     output: "Dist",
     definitions: [fromList],
   }),
   maker.make({
     name: "toList",
     displaySection: "Conversions",
-    examples: [`SampleSet.toList(SampleSet.fromDist(normal(5,2)))`],
+    examples: [
+      makeFnExample(`SampleSet.toList(SampleSet.fromDist(normal(5,2)))`),
+    ],
     description:
-      "Gets the internal samples of a sampleSet distribution. This is separate from the sampleN() function, which would shuffle the samples. toList() maintains order and length.",
+      "Gets the internal samples of a sampleSet distribution. This is separate from the ``sampleN()`` function, which would shuffle the samples. ``toList()`` maintains order and length.",
     output: "Array",
     definitions: [
       makeDefinition([frSampleSetDist], frArray(frNumber), ([dist]) => {
@@ -120,14 +132,21 @@ const baseLibrary = [
   maker.make({
     name: "fromFn",
     displaySection: "Conversions",
-    examples: [`SampleSet.fromFn({|i| sample(normal(5,2))})`],
+    description:
+      "Convert a function into a sample set distribution by calling it ``n`` times.",
+    examples: [makeFnExample(`SampleSet.fromFn({|i| sample(normal(5,2))})`)],
     output: "Dist",
     definitions: [fromFnDefinition],
   }),
   maker.make({
     name: "map",
     displaySection: "Transformations",
-    examples: [`SampleSet.map(SampleSet.fromDist(normal(5,2)), {|x| x + 1})`],
+    examples: [
+      makeFnExample(
+        `SampleSet.map(SampleSet.fromDist(normal(5,2)), {|x| x + 1})`
+      ),
+    ],
+    description: `Transforms a sample set distribution by applying a function to each sample. Returns a new sample set distribution.`,
     output: "Dist",
     definitions: [
       makeDefinition(
@@ -145,12 +164,13 @@ const baseLibrary = [
   }),
   maker.make({
     name: "map2",
+    description: `Transforms two sample set distributions by applying a function to each pair of samples. Returns a new sample set distribution.`,
     examples: [
-      `SampleSet.map2(
+      makeFnExample(`SampleSet.map2(
   SampleSet.fromDist(normal(5,2)),
   SampleSet.fromDist(normal(5,2)),
   {|x, y| x + y}
-)`,
+)`),
     ],
     output: "Dist",
     displaySection: "Transformations",
@@ -180,12 +200,12 @@ const baseLibrary = [
   maker.make({
     name: "map3",
     examples: [
-      `SampleSet.map3(
+      makeFnExample(`SampleSet.map3(
   SampleSet.fromDist(normal(5,2)),
   SampleSet.fromDist(normal(5,2)),
   SampleSet.fromDist(normal(5,2)),
   {|x, y, z| max([x,y,z])}
-)`,
+)`),
     ],
     output: "Dist",
     displaySection: "Transformations",
@@ -224,14 +244,14 @@ const baseLibrary = [
   maker.make({
     name: "mapN",
     examples: [
-      `SampleSet.mapN(
+      makeFnExample(`SampleSet.mapN(
   [
     SampleSet.fromDist(normal(5,2)),
     SampleSet.fromDist(normal(5,2)),
     SampleSet.fromDist(normal(5,2))
   ],
-  {|x| max(x)}
-)`,
+  max
+)`),
     ],
     output: "Dist",
     displaySection: "Transformations",
@@ -270,9 +290,11 @@ const mkComparison = (
     name,
     requiresNamespace: false,
     examples: [
-      `SampleSet.${name}(SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(6,2)))`,
-      `SampleSet.${name}(SampleSet.fromDist(normal(5,2)), 3.0)`,
-      `SampleSet.${name}(4.0, SampleSet.fromDist(normal(6,2)))`,
+      makeFnExample(
+        `SampleSet.${name}(SampleSet.fromDist(normal(5,2)), SampleSet.fromDist(normal(6,2)))`
+      ),
+      makeFnExample(`SampleSet.${name}(SampleSet.fromDist(normal(5,2)), 3.0)`),
+      makeFnExample(`SampleSet.${name}(4.0, SampleSet.fromDist(normal(6,2)))`),
     ],
     output: "Dist",
     definitions: [

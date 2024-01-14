@@ -2,6 +2,7 @@ import { xyShapeDistError } from "../dist/DistError.js";
 import { PointSetDist } from "../dist/PointSetDist.js";
 import { PointMass } from "../dist/SymbolicDist.js";
 import { REDistributionError } from "../errors/messages.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
@@ -52,7 +53,10 @@ const fromNumber = makeDefinition([frNumber], frDistPointset, ([num], _) => {
 export const library = [
   maker.make({
     name: "make",
-    examples: [`PointSet.make(normal(5,10))`, `PointSet(3)`],
+    examples: [
+      makeFnExample(`PointSet.make(normal(5,10))`),
+      makeFnExample(`PointSet(3)`),
+    ],
     output: "Dist",
     displaySection: "Constructors",
     definitions: [fromDist, fromNumber],
@@ -61,21 +65,23 @@ export const library = [
     name: "fromDist",
     description:
       "Converts the distribution in question into a point set distribution. If the distribution is symbolic, then it does this by taking the quantiles. If the distribution is a sample set, then it uses a version of kernel density estimation to approximate the point set format. One complication of this latter process is that if there is a high proportion of overlapping samples (samples that are exactly the same as each other), it will convert these samples into discrete point masses. Eventually we'd like to add further methods to help adjust this process.",
-    examples: [`PointSet.fromDist(normal(5,2))`],
+    examples: [makeFnExample(`PointSet.fromDist(normal(5,2))`)],
     displaySection: "Conversions",
     output: "Dist",
     definitions: [fromDist],
   }),
   maker.make({
     name: "fromNumber",
-    examples: [`PointSet.fromNumber(3)`],
+    examples: [makeFnExample(`PointSet.fromNumber(3)`)],
     output: "Dist",
     displaySection: "Conversions",
     definitions: [fromNumber],
   }),
   maker.make({
     name: "downsample",
-    examples: [`PointSet.downsample(PointSet.fromDist(normal(5,2)), 50)`],
+    examples: [
+      makeFnExample(`PointSet.downsample(PointSet.fromDist(normal(5,2)), 50)`),
+    ],
     output: "Dist",
     displaySection: "Conversions",
     definitions: [
@@ -91,12 +97,12 @@ export const library = [
   maker.make({
     name: "makeContinuous",
     examples: [
-      `PointSet.makeContinuous([
+      makeFnExample(`PointSet.makeContinuous([
   {x: 0, y: 0.2},
   {x: 1, y: 0.7},
   {x: 2, y: 0.8},
   {x: 3, y: 0.2}
-])`,
+])`),
     ],
     output: "Dist",
     displaySection: "Constructors",
@@ -117,12 +123,12 @@ export const library = [
   maker.make({
     name: "makeDiscrete",
     examples: [
-      `PointSet.makeDiscrete([
+      makeFnExample(`PointSet.makeDiscrete([
   {x: 0, y: 0.2},
   {x: 1, y: 0.7},
   {x: 2, y: 0.8},
   {x: 3, y: 0.2}
-])`,
+])`),
     ],
     output: "Dist",
     displaySection: "Constructors",
@@ -142,7 +148,9 @@ export const library = [
   }),
   maker.make({
     name: "mapY",
-    examples: [`PointSet.mapY(mx(Sym.normal(5,2)), {|x| x + 1})`],
+    examples: [
+      makeFnExample(`PointSet.mapY(mx(Sym.normal(5,2)), {|x| x + 1})`),
+    ],
     output: "Dist",
     displaySection: "Transformations",
     definitions: [

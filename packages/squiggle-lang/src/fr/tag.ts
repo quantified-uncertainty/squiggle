@@ -1,4 +1,5 @@
 import { REArgumentError } from "../errors/messages.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -176,13 +177,8 @@ export const library = [
   maker.make({
     name: "showAs",
     description: `Overrides the default visualization for a value.
-\`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization. You can use it like,  
-~~~squiggle
-example1 = {|x| x + 1} -> Tag.showAs(Calculator)
-//...
-@showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
-example2 = {|x| x + 1}
-~~~
+\`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization.
+
 Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, \`Number\` can be used with Dates and Durations as well.  
 | **Input Type**                      | **Visualization Types**               |
 | ----------------------------------- | ------------------------------------- |
@@ -193,6 +189,14 @@ Different types of values can be displayed in different ways. The following tabl
 | **Function**                        | \`Calculator\`                        |
 `,
     displaySection: "Tags",
+    examples: [
+      makeFnExample(
+        `example1 = ({|x| x + 1}) -> Tag.showAs(Calculator)
+@showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
+example2 = {|x| x + 1}`,
+        { isInteractive: true, useForTests: false }
+      ),
+    ],
     definitions: [
       showAsDef(frWithTags(frDist), frPlot),
       showAsDef(frArray(frAny()), frTableChart),
@@ -289,22 +293,31 @@ Different types of values can be displayed in different ways. The following tabl
     name: "notebook",
     description: `Displays the list of values as a notebook. This means that element indices are hidden, and the values are displayed in a vertical list. Useful for displaying combinations of text and values.`,
     examples: [
-      `@notebook
-showAsNotebook = [
-  "### This is an opening section
-Here is more text.
-
-Here is more text.",
-  Calculator({|f| f + 3}),
-  "## Distributions",
-  "### Distribution 1",
+      makeFnExample(
+        `Calculator.make(
+  {|f, contents| f ? Tag.notebook(contents) : contents},
+  {
+    description: "Shows the contents as a notebook if the checkbox is checked.",
+    inputs: [
+      Input.checkbox({ name: "Show as Notebook", default: true }),
+      Input.textArea(
+        {
+          name: "Contents to show",
+          default: "[
+  \\"## Distribution 1\\",
   normal(5, 2),
-  "### Distribution 1",
+  \\"## Distribution 1\\",
   normal(20, 1),
-  " ### This is an opening section
-Here is more text.
-",
-] `,
+  \\"This is an opening section. Here is more text.
+\\",
+]",
+        }
+      ),
+    ],
+  }
+)`,
+        { isInteractive: true }
+      ),
     ],
     displaySection: "Tags",
     definitions: booleanTagDefs(

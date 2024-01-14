@@ -8,13 +8,13 @@ Squiggle is still young. The main first goal is to become stable (to reach versi
 
 If you have preferences or suggestions for our roadmap, please say so! Post your thoughts in the Github discussion or in the Discord.
 
+Note that our short-term roadmap changes frequently, and is not captured here.
+
 ## Programming Language Features
 
 - A simple type system
 - Optional and default paramaters for functions
-- Some testing
 - Much better code editor integration
-- DateTime support
 
 ## Distribution Features
 
@@ -41,9 +41,6 @@ Workflows/functionality to declare the importance and coveredness of each part o
 
 **Static / sensitivity analysis**  
 Guesstimate has Sensitivity analysis that's pretty useful. This could be quite feasible to add, though it will likely require some thinking.
-
-**Annotation**  
-It might be useful to allow people to annotate functions and variables with longer descriptions, maybe Markdown. This could very much help interpretation/analysis of these items.
 
 **Randomness seeds**  
 Right now, Monte Carlo simulations are totally random. It would be nicer to be able to enter a seed somehow in order to control the randomness. Or, with the same seed, the function should always return the same values. This would make debugging and similar easier.

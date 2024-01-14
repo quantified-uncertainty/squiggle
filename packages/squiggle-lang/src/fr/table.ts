@@ -1,3 +1,4 @@
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -20,8 +21,9 @@ export const library = [
   maker.make({
     name: "make",
     output: "TableChart",
-    interactiveExamples: [
-      `Table.make(
+    examples: [
+      makeFnExample(
+        `Table.make(
   [
     { name: "First Dist", value: normal(0, 1) },
     { name: "Second Dist", value: uniform(2, 4) },
@@ -36,7 +38,10 @@ export const library = [
     ],
   }
 )`,
-      `Table.make(
+        { isInteractive: true }
+      ),
+      makeFnExample(
+        `Table.make(
   [
     { name: "First Dist", value: Sym.lognormal({ p5: 1, p95: 10 }) },
     { name: "Second Dist", value: Sym.lognormal({ p5: 5, p95: 30 }) },
@@ -61,6 +66,8 @@ export const library = [
     ],
   }
 )`,
+        { isInteractive: true }
+      ),
     ],
     definitions: [
       makeDefinition(

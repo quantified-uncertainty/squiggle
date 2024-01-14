@@ -68,7 +68,6 @@ export const FnDocumentation: FC<{
     description,
     definitions,
     examples,
-    interactiveExamples,
     versionAdded,
   } = documentation;
   const textSize = size === "small" ? "text-xs" : "text-sm";
@@ -170,31 +169,31 @@ export const FnDocumentation: FC<{
           </div>
         </Section>
       ) : null}
-      {examples?.length ?? interactiveExamples?.length ? (
+      {examples?.length ? (
         <Section>
           <header className={clsx("text-slate-600 font-medium mb-2", textSize)}>
             Examples
           </header>
 
           {examples &&
-            examples.map((example, i) => (
-              <MarkdownViewer
-                className="max-width-[200px]"
-                key={i}
-                md={`\`\`\`squiggle\n${example}\n\`\`\``}
-                textSize="sm"
-              />
-            ))}
-          {(interactiveExamples ?? []).map((example, i) => (
-            <div className="pt-2 pb-4" key={i}>
-              <SquiggleEditor
-                defaultCode={example}
-                key={i}
-                chartHeight={size === "small" ? 80 : 120}
-                editorFontSize={size === "small" ? 12 : 13}
-              />
-            </div>
-          ))}
+            examples.map(({ text, isInteractive }, i) =>
+              isInteractive ? (
+                <div className="pt-2 pb-4" key={i}>
+                  <SquiggleEditor
+                    defaultCode={text}
+                    chartHeight={size === "small" ? 30 : 40}
+                    editorFontSize={size === "small" ? 12 : 13}
+                  />
+                </div>
+              ) : (
+                <MarkdownViewer
+                  className="max-width-[200px]"
+                  key={i}
+                  md={`\`\`\`squiggle\n${text}\n\`\`\``}
+                  textSize="sm"
+                />
+              )
+            )}
         </Section>
       ) : null}
     </>
