@@ -257,7 +257,7 @@ export class SqProject {
         const dict = new SqDict(
           field === "exports"
             ? innerDict.mergeTags({ name: sourceId })
-            : innerDict.mergeTags({ name: "foobar" }),
+            : innerDict,
           new SqValueContext({
             project: this,
             sourceId,
@@ -331,9 +331,7 @@ export class SqProject {
         return Result.Ok(
           vDict(
             ImmutableMap({
-              [importBinding.variable]: outputR.value.exports.mergeTags({
-                name: "rtsrt",
-              }),
+              [importBinding.variable]: outputR.value.exports,
             })
           )
         );

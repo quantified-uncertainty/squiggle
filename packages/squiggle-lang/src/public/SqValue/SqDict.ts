@@ -30,7 +30,7 @@ export class SqDict {
   }
 
   toString() {
-    return this._value.toString();
+    return this._value.valueToString();
   }
 
   asValue() {

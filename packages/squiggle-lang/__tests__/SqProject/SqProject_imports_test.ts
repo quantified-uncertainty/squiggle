@@ -94,13 +94,15 @@ lib.x`
       "main",
       `
 import './lib' as lib
-lib -> Tag.getName`
+lib.x`
     );
 
     await project.run("main");
 
     expect(project.getResult("main").ok).toEqual(true);
-    expect(project.getResult("main").value.toString()).toEqual("5");
+    expect(project.getResult("main").value.toString()).toEqual(
+      '5, with tags {variableName: "x", sourceId: "./lib", isExported: true}'
+    );
   });
 
   describe("Mix imports and continues", () => {

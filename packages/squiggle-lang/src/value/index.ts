@@ -52,9 +52,9 @@ abstract class BaseValue {
     if (!this.tags) {
       return valueString;
     }
-    const argsStr = this.tags.toString();
+    const argsStr = `{${this.tags.toString()}}`;
     if (argsStr !== "") {
-      return `${valueString}, with params ${argsStr}`;
+      return `${valueString}, with tags ${argsStr}`;
     } else {
       return valueString;
     }

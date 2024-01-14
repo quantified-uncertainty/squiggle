@@ -50,7 +50,7 @@ x = 5
 
 x
 `,
-    '5, with params name: "five"'
+    '5, with tags {name: "five"}'
   );
 
   testEvalToBe(
@@ -61,7 +61,7 @@ x = 5
 
 x
 `,
-    '5, with params name: "five", doc: "This is five"'
+    '5, with tags {name: "five", doc: "This is five"}'
   );
 
   testEvalToBe(

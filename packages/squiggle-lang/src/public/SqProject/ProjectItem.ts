@@ -235,6 +235,7 @@ export class ProjectItem {
         evaluate: asyncEvaluate,
       });
 
+      const exportNames = new Set(expression.value.value.exports);
       const bindings = contextAfterEvaluation.stack
         .asBindings()
         .mapEntries(([key, value]) => {
@@ -248,7 +249,6 @@ export class ProjectItem {
           }
           return [key, _value];
         });
-      const exportNames = new Set(expression.value.value.exports);
       const exports = bindings.filter((value, key) =>
         Boolean(value.tags?.isExported)
       );
