@@ -10,11 +10,14 @@ export class VBool extends BaseValue {
   constructor(public value: boolean) {
     super();
   }
+
   valueToString() {
     return String(this.value);
   }
+
   isEqual(other: VBool) {
     return this.value === other.value;
   }
 }
+
 export const vBool = (v: boolean) => new VBool(v);

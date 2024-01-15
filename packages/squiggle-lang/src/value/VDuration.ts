@@ -15,8 +15,10 @@ export class VDuration extends BaseValue {
   valueToString() {
     return this.value.toString();
   }
+
   isEqual(other: VDuration) {
     return this.value.toMs() === other.value.toMs();
   }
 }
+
 export const vDuration = (v: SDuration) => new VDuration(v);

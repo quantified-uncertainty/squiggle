@@ -6,11 +6,14 @@ export class VNumber extends BaseValue {
   constructor(public value: number) {
     super();
   }
+
   valueToString() {
     return String(this.value);
   }
+
   isEqual(other: VNumber) {
     return this.value === other.value;
   }
 }
+
 export const vNumber = (v: number) => new VNumber(v);

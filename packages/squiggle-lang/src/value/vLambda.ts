@@ -17,6 +17,7 @@ export class VLambda extends BaseValue implements Indexable {
   constructor(public value: Lambda) {
     super();
   }
+
   valueToString() {
     return this.value.toString();
   }
@@ -43,4 +44,5 @@ export class VLambda extends BaseValue implements Indexable {
     throw new REOther("No such field");
   }
 }
+
 export const vLambda = (v: Lambda) => new VLambda(v);

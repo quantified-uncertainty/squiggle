@@ -37,7 +37,7 @@ export class VInput extends BaseValue {
     super();
   }
 
-  valueToString(): string {
+  valueToString() {
     switch (this.value.type) {
       case "text":
         return "Text input";

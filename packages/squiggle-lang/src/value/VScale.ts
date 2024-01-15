@@ -43,6 +43,7 @@ export type Scale = {
   tickFormat?: string;
   title?: string;
 };
+
 function methodIsEqual(valueA: ScaleMethod, valueB: ScaleMethod) {
   if (valueA.type !== valueB.type) {
     return false;
@@ -62,6 +63,7 @@ function methodIsEqual(valueA: ScaleMethod, valueB: ScaleMethod) {
       return true;
   }
 }
+
 function scaleIsEqual(valueA: Scale, valueB: Scale) {
   if (
     valueA.method?.type !== valueB.method?.type ||
@@ -79,6 +81,7 @@ function scaleIsEqual(valueA: Scale, valueB: Scale) {
 
 export const SCALE_SYMLOG_DEFAULT_CONSTANT = 0.0001;
 export const SCALE_POWER_DEFAULT_CONSTANT = 0.1;
+
 export class VScale extends BaseValue {
   readonly type = "Scale";
 
@@ -86,7 +89,7 @@ export class VScale extends BaseValue {
     super();
   }
 
-  valueToString(): string {
+  valueToString() {
     switch (this.value.method?.type) {
       case "linear":
         return "Linear scale"; // TODO - mix in min/max if specified

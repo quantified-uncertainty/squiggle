@@ -14,6 +14,7 @@ export class VArray extends BaseValue implements Indexable {
   constructor(public value: readonly Value[]) {
     super();
   }
+
   valueToString() {
     return "[" + this.value.map((v) => v.toString()).join(",") + "]";
   }

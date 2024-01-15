@@ -5,6 +5,7 @@ export type TableChart = {
   data: readonly Value[];
   columns: readonly { fn: Lambda; name: string | undefined }[];
 };
+
 export class VTableChart extends BaseValue {
   readonly type = "TableChart";
 
@@ -15,6 +16,7 @@ export class VTableChart extends BaseValue {
   constructor(public value: TableChart) {
     super();
   }
+
   valueToString() {
     return `Table with ${this.value.columns.length}x${this.value.data.length} elements`;
   }

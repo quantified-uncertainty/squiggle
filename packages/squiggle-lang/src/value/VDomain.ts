@@ -33,7 +33,7 @@ export class VDomain extends BaseValue implements Indexable {
     return this.value.toString();
   }
 
-  get domainType(): "NumericRange" | "DateRange" {
+  get domainType() {
     return this.value.type;
   }
 

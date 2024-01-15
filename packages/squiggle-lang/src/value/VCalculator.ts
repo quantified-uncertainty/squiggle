@@ -11,6 +11,7 @@ export type Calculator = {
   title?: string;
   sampleCount?: number;
 };
+
 export class VCalculator extends BaseValue {
   readonly type = "Calculator";
 

@@ -6,8 +6,10 @@ export class VVoid extends BaseValue {
   constructor() {
     super();
   }
+
   valueToString() {
     return "()";
   }
 }
+
 export const vVoid = () => new VVoid();

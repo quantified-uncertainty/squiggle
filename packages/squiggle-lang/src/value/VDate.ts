@@ -7,11 +7,14 @@ export class VDate extends BaseValue {
   constructor(public value: SDate) {
     super();
   }
+
   valueToString() {
     return this.value.toString();
   }
+
   isEqual(other: VDate) {
     return this.value.isEqual(other.value);
   }
 }
+
 export const vDate = (v: SDate) => new VDate(v);

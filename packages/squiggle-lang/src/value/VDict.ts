@@ -68,4 +68,5 @@ export class VDict extends BaseValue implements Indexable {
     return true;
   }
 }
+
 export const vDict = (v: ValueMap) => new VDict(v);

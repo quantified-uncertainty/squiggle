@@ -52,6 +52,7 @@ export type Plot = CommonPlotArgs &
         ids: readonly string[];
       }
   );
+
 export class VPlot extends BaseValue implements Indexable {
   readonly type = "Plot";
 
@@ -59,7 +60,7 @@ export class VPlot extends BaseValue implements Indexable {
     super();
   }
 
-  valueToString(): string {
+  valueToString() {
     switch (this.value.type) {
       case "distributions":
         return `Plot containing ${this.value.distributions
