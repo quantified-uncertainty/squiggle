@@ -52,6 +52,19 @@ function convertToValueTagsTypeName(
 export class ValueTags {
   constructor(public value: ValueTagsType) {}
 
+  exportData() {
+    const { exportData } = this.value;
+    if (!exportData) {
+      return undefined;
+    }
+    return vDict(
+      ImmutableMap({
+        sourceId: vString(exportData.sourceId),
+        path: vArray(exportData.path.map(vString)),
+      })
+    );
+  }
+
   toList(): [string, Value][] {
     const result: [string, Value][] = [];
     const { value } = this;
@@ -76,16 +89,10 @@ export class ValueTags {
     if (value.notebook) {
       result.push(["notebook", vBool(value.notebook)]);
     }
-    if (value.exportData) {
-      result.push([
-        "exportData",
-        vDict(
-          ImmutableMap({
-            sourceId: vString(value.exportData.sourceId),
-            path: vArray(value.exportData.path.map(vString)),
-          })
-        ),
-      ]);
+
+    const _exportData = this.exportData();
+    if (_exportData) {
+      result.push(["exportData", _exportData]);
     }
     return result;
   }
@@ -145,9 +152,5 @@ export class ValueTags {
 
   notebook() {
     return this.value.notebook;
-  }
-
-  exportData() {
-    return this.value.exportData;
   }
 }

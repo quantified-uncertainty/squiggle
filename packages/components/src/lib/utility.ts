@@ -48,6 +48,18 @@ export function getResultVariables({
   return resultMap(output, (value) => value.bindings.asValue());
 }
 
+export function getResultImports({
+  output,
+}: SquiggleOutput): result<SqDictValue, SqError> {
+  return resultMap(output, (value) => value.imports.asValue());
+}
+
+export function getResultExports({
+  output,
+}: SquiggleOutput): result<SqDictValue, SqError> {
+  return resultMap(output, (value) => value.exports.asValue());
+}
+
 export function getResultValue({
   output,
 }: SquiggleOutput): result<SqValue, SqError> | undefined {

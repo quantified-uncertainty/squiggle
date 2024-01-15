@@ -226,6 +226,15 @@ example2 = {|x| x + 1}`,
     ],
   }),
   maker.make({
+    name: "getExportData",
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition([frAny()], frAny(), ([value]) => {
+        return value.tags?.exportData() || vString("None"); // Not sure what to use when blank.
+      }),
+    ],
+  }),
+  maker.make({
     name: "format",
     description: `Set the display format for a number, distribution, duration, or date. Uses the [d3-format](https://d3js.org/d3-format) syntax on numbers and distributions, and the [d3-time-format](https://d3js.org/d3-time-format) syntax for dates.`,
     displaySection: "Tags",
