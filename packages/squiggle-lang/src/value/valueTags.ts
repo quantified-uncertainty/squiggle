@@ -1,7 +1,12 @@
 import { result } from "../index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, fmap, mergeMany, Ok } from "../utility/result.js";
-import { Value, vBool, vString } from "./index.js";
+import { Value, vArray, vBool, vDict, vString } from "./index.js";
+
+export type ExportData = {
+  sourceId: string;
+  path: string[];
+};
 
 export type ValueTagsType = {
   name?: string;
@@ -11,9 +16,7 @@ export type ValueTagsType = {
   dateFormat?: string;
   hidden?: boolean;
   notebook?: boolean;
-  variableName?: string;
-  sourceId?: string;
-  isExported?: boolean;
+  exportData?: ExportData;
 };
 
 type ValueTagsTypeName = keyof ValueTagsType;
@@ -26,9 +29,7 @@ const valueTagsTypeNames: ValueTagsTypeName[] = [
   "dateFormat",
   "hidden",
   "notebook",
-  "variableName",
-  "sourceId",
-  "isExported",
+  "exportData",
 ];
 
 function convertToValueTagsTypeName(
@@ -75,14 +76,16 @@ export class ValueTags {
     if (value.notebook) {
       result.push(["notebook", vBool(value.notebook)]);
     }
-    if (value.variableName) {
-      result.push(["variableName", vString(value.variableName)]);
-    }
-    if (value.sourceId) {
-      result.push(["sourceId", vString(value.sourceId)]);
-    }
-    if (value.isExported) {
-      result.push(["isExported", vBool(value.isExported)]);
+    if (value.exportData) {
+      result.push([
+        "exportData",
+        vDict(
+          ImmutableMap({
+            sourceId: vString(value.exportData.sourceId),
+            path: vArray(value.exportData.path.map(vString)),
+          })
+        ),
+      ]);
     }
     return result;
   }
@@ -144,7 +147,7 @@ export class ValueTags {
     return this.value.notebook;
   }
 
-  isExported() {
-    return this.value.isExported;
+  exportData() {
+    return this.value.exportData;
   }
 }

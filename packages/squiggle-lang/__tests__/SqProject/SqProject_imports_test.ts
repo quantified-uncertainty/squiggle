@@ -105,6 +105,27 @@ lib.x`
     );
   });
 
+  test.only("Import tag", async () => {
+    const project = SqProject.create({
+      linker: buildNaiveLinker({
+        "./lib": "export x = 5",
+      }),
+    });
+    project.setSource(
+      "main",
+      `
+import './lib' as lib
+lib`
+    );
+
+    await project.run("main");
+
+    expect(project.getResult("main").ok).toEqual(true);
+    expect(project.getResult("main").value.toString()).toEqual(
+      '5, with tags {variableName: "x", sourceId: "./lib", isExported: true}'
+    );
+  });
+
   describe("Mix imports and continues", () => {
     const project = SqProject.create({
       linker: buildNaiveLinker(),

@@ -251,31 +251,34 @@ export class SqProject {
       })
     );
 
-    const [bindings, exports] = (["bindings", "exports"] as const).map(
-      (field) => {
-        const innerDict = internalOutputR.value[field];
-        const dict = new SqDict(
-          field === "exports"
-            ? innerDict.mergeTags({ name: sourceId })
-            : innerDict,
-          new SqValueContext({
-            project: this,
-            sourceId,
-            source,
-            ast: astR.value,
-            valueAst: astR.value,
-            valueAstIsPrecise: true,
-            path: new SqValuePath({
-              root: "bindings",
-              items: [],
-            }),
-          })
-        );
-        return dict;
-      }
-    );
+    const [bindings, exports, imports] = (
+      ["bindings", "exports", "imports"] as const
+    ).map((field) => {
+      const innerDict =
+        field === "imports"
+          ? internalOutputR.value.externals.explicitImports
+          : internalOutputR.value[field];
+      const dict = new SqDict(
+        field === "exports"
+          ? innerDict.mergeTags({ name: sourceId })
+          : innerDict,
+        new SqValueContext({
+          project: this,
+          sourceId,
+          source,
+          ast: astR.value,
+          valueAst: astR.value,
+          valueAstIsPrecise: true,
+          path: new SqValuePath({
+            root: "bindings",
+            items: [],
+          }),
+        })
+      );
+      return dict;
+    });
 
-    return Result.Ok({ result, bindings, exports });
+    return Result.Ok({ result, bindings, exports, imports });
   }
 
   getResult(sourceId: string): Result.result<SqValue, SqError> {
@@ -283,6 +286,10 @@ export class SqProject {
   }
 
   getBindings(sourceId: string): Result.result<SqDict, SqError> {
+    return Result.fmap(this.getOutput(sourceId), ({ bindings }) => bindings);
+  }
+
+  getImportBindings(sourceId: string): Result.result<SqDict, SqError> {
     return Result.fmap(this.getOutput(sourceId), ({ bindings }) => bindings);
   }
 
@@ -386,7 +393,7 @@ export class SqProject {
     return Result.Ok({
       stdlib: stdlibExternals,
       implicitImports: implicitImports.value,
-      explicitExports: explicitImports.value,
+      explicitImports: explicitImports.value,
     });
   }
 

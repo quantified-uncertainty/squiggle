@@ -14,7 +14,7 @@ import { SqLinker } from "../SqLinker.js";
 export type Externals = {
   stdlib: VDict;
   implicitImports: VDict;
-  explicitExports: VDict;
+  explicitImports: VDict;
 };
 
 export type RunOutput = {
@@ -189,7 +189,7 @@ export class ProjectItem {
   async run(context: ReducerContext, externals: Externals) {
     const _externals = externals.stdlib
       .merge(externals.implicitImports)
-      .merge(externals.explicitExports);
+      .merge(externals.explicitImports);
 
     if (this.output) {
       return;
@@ -241,20 +241,20 @@ export class ProjectItem {
           let _value = value;
           if (exportNames.has(key)) {
             _value = value.mergeTags({
-              isExported: true,
-              sourceId: this.sourceId,
-              variableName: key,
+              exportData: { sourceId: this.sourceId, path: [key] },
             });
           }
           return [key, _value];
         });
-      const exports = bindings.filter((value, key) =>
-        Boolean(value.tags?.isExported)
+      const exports = bindings.filter(
+        (value, key) => value.tags?.exportData !== undefined
       );
       this.output = Ok({
         result,
         bindings: vDict(bindings),
-        exports: vDict(exports),
+        exports: vDict(exports).mergeTags({
+          exportData: { sourceId: this.sourceId, path: [] },
+        }),
         externals: externals,
       });
     } catch (e: unknown) {
