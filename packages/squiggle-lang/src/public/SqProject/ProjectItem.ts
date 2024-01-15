@@ -3,7 +3,6 @@ import { ICompileError, IRuntimeError } from "../../errors/IError.js";
 import { compileAst } from "../../expression/compile.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { evaluate, ReducerFn } from "../../reducer/index.js";
-import { Bindings } from "../../reducer/stack.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
 import { VDict, Value, vDict } from "../../value/index.js";
