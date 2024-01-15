@@ -1,4 +1,5 @@
 import { REArgumentError } from "../errors/messages.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
@@ -83,8 +84,7 @@ export const library = [
     name: "unaryMinus",
     output: "Number",
     displaySection: "Functions (Number)",
-    description: "exponent",
-    examples: [`exp(3.5)`],
+    examples: [makeFnExample(`exp(3.5)`)],
     fn: (x) => -x,
   }),
   maker.n2n({
@@ -92,42 +92,42 @@ export const library = [
     output: "Number",
     displaySection: "Functions (Number)",
     description: "exponent",
-    examples: [`exp(3.5)`],
+    examples: [makeFnExample(`exp(3.5)`)],
     fn: Math.exp,
   }),
   maker.n2n({
     name: "log",
     output: "Number",
     displaySection: "Functions (Number)",
-    examples: [`log(3.5)`],
+    examples: [makeFnExample(`log(3.5)`)],
     fn: Math.log,
   }),
   maker.n2n({
     name: "log10",
     output: "Number",
     displaySection: "Functions (Number)",
-    examples: [`log10(3.5)`],
+    examples: [makeFnExample(`log10(3.5)`)],
     fn: Math.log10,
   }),
   maker.n2n({
     name: "log2",
     output: "Number",
     displaySection: "Functions (Number)",
-    examples: [`log2(3.5)`],
+    examples: [makeFnExample(`log2(3.5)`)],
     fn: Math.log2,
   }),
   maker.n2n({
     name: "floor",
     output: "Number",
     displaySection: "Functions (Number)",
-    examples: [`floor(3.5)`],
+    examples: [makeFnExample(`floor(3.5)`)],
     fn: Math.floor,
   }),
   maker.n2n({
     name: "ceil",
     output: "Number",
     displaySection: "Functions (Number)",
-    examples: ["ceil(3.5)"],
+    examples: [makeFnExample("ceil(3.5)")],
     fn: Math.ceil,
   }),
   maker.n2n({
@@ -135,21 +135,21 @@ export const library = [
     output: "Number",
     displaySection: "Functions (Number)",
     description: "absolute value",
-    examples: [`abs(3.5)`],
+    examples: [makeFnExample(`abs(3.5)`)],
     fn: Math.abs,
   }),
   maker.n2n({
     name: "round",
     output: "Number",
     displaySection: "Functions (Number)",
-    examples: [`round(3.5)`],
+    examples: [makeFnExample(`round(3.5)`)],
     fn: Math.round,
   }),
   maker.make({
     name: "not",
     output: "Bool",
     displaySection: "Function (Number)",
-    examples: [`not(3.5)`],
+    examples: [makeFnExample(`not(3.5)`)],
     definitions: [
       makeDefinition([frNumber], frBool, ([x]) => {
         // unary prefix !
@@ -161,7 +161,7 @@ export const library = [
     name: "sum",
     output: "Number",
     displaySection: "Algebra (List)",
-    examples: [`sum([3,5,2])`],
+    examples: [makeFnExample(`sum([3,5,2])`)],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => E_A_Floats.sum(arr), false),
     ],
@@ -170,7 +170,7 @@ export const library = [
     name: "product",
     output: "Number",
     displaySection: "Algebra (List)",
-    examples: [`product([3,5,2])`],
+    examples: [makeFnExample(`product([3,5,2])`)],
     definitions: [
       makeNumberArrayToNumberDefinition(
         (arr) => E_A_Floats.product(arr),
@@ -182,7 +182,7 @@ export const library = [
     name: "min",
     output: "Number",
     displaySection: "Functions (List)",
-    examples: [`min([3,5,2])`],
+    examples: [makeFnExample(`min([3,5,2])`)],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => Math.min(...arr)),
       makeDefinition([frNumber, frNumber], frNumber, ([a, b]) => {
@@ -194,7 +194,7 @@ export const library = [
     name: "max",
     output: "Number",
     displaySection: "Functions (List)",
-    examples: [`max([3,5,2])`],
+    examples: [makeFnExample(`max([3,5,2])`)],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => Math.max(...arr)),
       makeDefinition([frNumber, frNumber], frNumber, ([a, b]) => {
@@ -206,7 +206,7 @@ export const library = [
     name: "mean",
     output: "Number",
     displaySection: "Functions (List)",
-    examples: [`mean([3,5,2])`],
+    examples: [makeFnExample(`mean([3,5,2])`)],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => E_A_Floats.mean(arr)),
     ],
@@ -214,7 +214,7 @@ export const library = [
   maker.make({
     name: "quantile",
     output: "Number",
-    examples: [`quantile([1,5,10,40,2,4], 0.3)`],
+    examples: [makeFnExample(`quantile([1,5,10,40,2,4], 0.3)`)],
     displaySection: "Functions (List)",
     definitions: [
       makeDefinition([frArray(frNumber), frNumber], frNumber, ([arr, i]) => {
@@ -226,7 +226,7 @@ export const library = [
   maker.make({
     name: "median",
     output: "Number",
-    examples: [`median([1,5,10,40,2,4])`],
+    examples: [makeFnExample(`median([1,5,10,40,2,4])`)],
     displaySection: "Functions (List)",
     definitions: [
       makeDefinition([frArray(frNumber)], frNumber, ([arr]) => {
@@ -239,7 +239,7 @@ export const library = [
     name: "geomean",
     description: "geometric mean",
     output: "Number",
-    examples: [`geomean([3,5,2])`],
+    examples: [makeFnExample(`geomean([3,5,2])`)],
     displaySection: "Functions (List)",
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => E_A_Floats.geomean(arr)),
@@ -249,7 +249,7 @@ export const library = [
     name: "stdev",
     description: "standard deviation",
     output: "Number",
-    examples: [`stdev([3,5,2,3,5])`],
+    examples: [makeFnExample(`stdev([3,5,2,3,5])`)],
     displaySection: "Functions (List)",
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => E_A_Floats.stdev(arr)),
@@ -258,7 +258,7 @@ export const library = [
   maker.make({
     name: "variance",
     output: "Number",
-    examples: [`variance([3,5,2,3,5])`],
+    examples: [makeFnExample(`variance([3,5,2,3,5])`)],
     displaySection: "Functions (List)",
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => E_A_Floats.variance(arr)),
@@ -267,7 +267,7 @@ export const library = [
   maker.make({
     name: "sort",
     output: "Array",
-    examples: [`sort([3,5,2,3,5])`],
+    examples: [makeFnExample(`sort([3,5,2,3,5])`)],
     displaySection: "Functions (List)",
     definitions: [
       makeNumberArrayToNumberArrayDefinition(
@@ -281,7 +281,7 @@ export const library = [
     output: "Array",
     description: "cumulative sum",
     displaySection: "Algegra (List)",
-    examples: [`cumsum([3,5,2,3,5])`],
+    examples: [makeFnExample(`cumsum([3,5,2,3,5])`)],
     definitions: [
       makeNumberArrayToNumberArrayDefinition(E_A_Floats.cumSum, false),
     ],
@@ -291,7 +291,7 @@ export const library = [
     description: "cumulative product",
     output: "Array",
     displaySection: "Algebra (List)",
-    examples: [`cumprod([3,5,2,3,5])`],
+    examples: [makeFnExample(`cumprod([3,5,2,3,5])`)],
     definitions: [
       makeNumberArrayToNumberArrayDefinition(E_A_Floats.cumProd, false),
     ],
@@ -300,7 +300,7 @@ export const library = [
     name: "diff",
     output: "Array",
     displaySection: "Algebra (List)",
-    examples: [`diff([3,5,2,3,5])`],
+    examples: [makeFnExample(`diff([3,5,2,3,5])`)],
     definitions: [makeNumberArrayToNumberArrayDefinition(E_A_Floats.diff)],
   }),
   maker.make({
@@ -308,7 +308,7 @@ export const library = [
     requiresNamespace: true,
     output: "Domain",
     displaySection: "Utils",
-    examples: ["Number.rangeDomain(5, 10)"],
+    examples: [makeFnExample("Number.rangeDomain(5, 10)")],
     definitions: [
       makeDefinition(
         [frNamed("min", frNumber), frNamed("max", frNumber)],

@@ -20,7 +20,6 @@ export const library = [
       "Converts any value to a string. Some information is often lost.",
     definitions: [makeDefinition([frAny()], frString, ([x]) => x.toString())],
   }),
-  maker.ss2s({ name: "add", requiresNamespace: false, fn: (x, y) => x + y }), // infix + on strings
   maker.make({
     name: "concat",
     requiresNamespace: false,
@@ -37,6 +36,9 @@ export const library = [
     name: "add",
     requiresNamespace: false,
     definitions: [
+      makeDefinition([frString, frString], frString, ([a, b]) => {
+        return a + b;
+      }),
       makeDefinition([frString, frAny()], frString, ([a, b]) => {
         return a + b.toString();
       }),
