@@ -1,6 +1,8 @@
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
+  FrOrType,
+  frAny,
   frArray,
   frBool,
   frCalculator,
@@ -10,11 +12,13 @@ import {
   frNamed,
   frNumber,
   frOptional,
+  frOr,
   frString,
   frWithTags,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { Calculator, vCalculator } from "../value/index.js";
+import { Calculator, Value, vCalculator, vString } from "../value/index.js";
+import { ValueTags } from "../value/valueTags.js";
 
 const maker = new FnFactory({
   nameSpace: "Calculator",
@@ -30,6 +34,19 @@ const validateCalculator = (calc: Calculator): Calculator => {
     return _calc.value;
   }
 };
+
+function getDescription(
+  description: FrOrType<string, readonly Value[]> | undefined,
+  tags: ValueTags | undefined
+): Value[] | undefined {
+  if (!description) {
+    return (tags && tags.value.doc) || undefined;
+  } else {
+    return description?.tag === "1"
+      ? [vString(description.value)]
+      : [...description.value];
+  }
+}
 
 export const library = [
   maker.make({
@@ -71,7 +88,7 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
           frDict(
             ["fn", frLambda],
             ["title", frOptional(frString)],
-            ["description", frOptional(frString)],
+            ["description", frOptional(frOr(frString, frArray(frAny())))],
             ["inputs", frOptional(frArray(frInput))],
             ["autorun", frOptional(frBool)],
             ["sampleCount", frOptional(frNumber)]
@@ -82,7 +99,7 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
           validateCalculator({
             fn,
             title: title || undefined,
-            description: description || undefined,
+            description: getDescription(description || undefined, undefined),
             inputs: inputs || [],
             autorun: autorun === null ? true : autorun,
             sampleCount: sampleCount || undefined,
@@ -96,7 +113,7 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
             frOptional(
               frDict(
                 ["title", frOptional(frString)],
-                ["description", frOptional(frString)],
+                ["description", frOptional(frOr(frString, frArray(frAny())))],
                 ["inputs", frOptional(frArray(frInput))],
                 ["autorun", frOptional(frBool)],
                 ["sampleCount", frOptional(frNumber)]
@@ -111,7 +128,7 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
           return validateCalculator({
             fn: value,
             title: title || tags.value.name || undefined,
-            description: description || tags.value.doc || undefined,
+            description: getDescription(description || undefined, tags),
             inputs: inputs || value.defaultInputs(),
             autorun: autorun === null || autorun === undefined ? true : autorun,
             sampleCount: sampleCount || undefined,

@@ -5,6 +5,7 @@ import { PathItem, SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
 import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { useViewerContext } from "./ViewerProvider.js";
+import { SqArrayValue } from "../../../../squiggle-lang/src/public/SqValue/index.js";
 
 export const pathItemFormat = (item: PathItem): string => {
   if (item.type === "cellAddress") {
@@ -139,9 +140,10 @@ export function useGetSubvalueByPath() {
   };
 }
 
-export function getValueComment(value: SqValueWithContext): string | undefined {
-  const _value = value.context.docstring() || value.tags.doc();
-  return _value && _value.length > 0 ? _value : undefined;
+export function getValueComment(
+  value: SqValueWithContext
+): SqArrayValue | undefined {
+  return value.tags.doc();
 }
 
 const tagsDefaultCollapsed = new Set(["Bool", "Number", "Void", "Input"]);
@@ -151,8 +153,7 @@ export function hasExtraContentToShow(v: SqValueWithContext): boolean {
     tagsDefaultCollapsed.has(v.tag) ||
     (v.tag === "String" && v.value.length <= SHORT_STRING_LENGTH);
   const comment = getValueComment(v);
-  const hasLongComment = Boolean(comment && comment.length > 15);
-  return !contentIsVeryShort || hasLongComment;
+  return !contentIsVeryShort || Boolean(comment);
 }
 
 // Collapse children and element if desired. Uses crude heuristics.

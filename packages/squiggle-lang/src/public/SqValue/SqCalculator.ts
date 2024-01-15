@@ -4,6 +4,7 @@ import { Calculator } from "../../value/index.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValue, wrapValue } from "./index.js";
+import { SqArray } from "./SqArray.js";
 import { SqInput, wrapInput } from "./SqInput.js";
 import { SqLambda } from "./SqLambda.js";
 
@@ -35,8 +36,10 @@ export class SqCalculator {
     return this._value.title;
   }
 
-  get description(): string | undefined {
-    return this._value.description;
+  get description(): SqArray | undefined {
+    return this._value.description
+      ? new SqArray(this._value.description, this.context)
+      : undefined;
   }
 
   get autorun(): boolean {

@@ -1,6 +1,7 @@
+import { vArray } from "../../value/index.js";
 import { ValueTags } from "../../value/valueTags.js";
 import { SqValueContext } from "../SqValueContext.js";
-import { SqValue, wrapValue } from "./index.js";
+import { SqArrayValue, SqValue, wrapValue } from "./index.js";
 
 export class SqTags {
   constructor(
@@ -12,8 +13,13 @@ export class SqTags {
     return this.tags.name();
   }
 
-  doc(): string | undefined {
-    return this.tags.doc();
+  doc(): SqArrayValue | undefined {
+    const doc = this.tags.doc();
+    const arr = doc ? new SqArrayValue(vArray(doc), this.context) : undefined;
+    if (arr) {
+      arr._value = arr._value.mergeTags({ notebook: true });
+    }
+    return arr || undefined;
   }
 
   showAs(): SqValue | undefined {

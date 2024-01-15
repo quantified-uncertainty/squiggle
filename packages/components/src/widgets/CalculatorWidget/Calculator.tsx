@@ -252,13 +252,13 @@ export const Calculator: FC<Props> = ({ settings, valueWithContext }) => {
                 {calculator.title}
               </div>
             )}
-            {calculator.description && (
+            {/* {calculator.description && (
               <MarkdownViewer
                 md={calculator.description}
                 textSize="sm"
                 textColor="prose-slate"
               />
-            )}
+            )} */}
           </div>
         )}
 
