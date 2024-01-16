@@ -84,7 +84,7 @@ lib.x`
     );
   });
 
-  test.only("Known import", async () => {
+  test("Known import", async () => {
     const project = SqProject.create({
       linker: buildNaiveLinker({
         "./lib": "export x = 5",
