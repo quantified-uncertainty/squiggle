@@ -299,7 +299,9 @@ export const Tagged: Story = {
     @showAs(Plot.numericFn)
     @name("My favorite Fn")
     fn = {|e| e}
+
+    bar =  [x, fn]
     
-    y = x -> Tag.all`,
+    y = x -> Tag.getAll`,
   },
 };
