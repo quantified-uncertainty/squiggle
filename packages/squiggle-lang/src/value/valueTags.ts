@@ -1,7 +1,7 @@
 import { result } from "../index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, fmap, mergeMany, Ok } from "../utility/result.js";
-import { Value, vArray, vBool, vDict, vString } from "./index.js";
+import { Value, vArray, vBool, VDict, vDict, vString } from "./index.js";
 
 export type ExportData = {
   sourceId: string;
@@ -52,7 +52,7 @@ function convertToValueTagsTypeName(
 export class ValueTags {
   constructor(public value: ValueTagsType) {}
 
-  exportData() {
+  exportData(): VDict | undefined {
     const { exportData } = this.value;
     if (!exportData) {
       return undefined;

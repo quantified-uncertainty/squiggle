@@ -230,7 +230,7 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frAny(), ([value]) => {
-        return value.tags?.exportData() || vString("None"); // Not sure what to use when blank.
+        return value.tags?.exportData() || vString("None");
       }),
     ],
   }),
