@@ -4,14 +4,17 @@ import jstat from "jstat";
 
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
+import { SDate } from "../index.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
   frArray,
+  frDate,
   frLambda,
   frNamed,
   frNumber,
+  frOr,
   frString,
 } from "../library/registry/frTypes.js";
 import {
@@ -71,6 +74,37 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
     ],
     displaySection: "Math",
     fn: (successes, trials) => (successes + 1) / (trials + 2),
+  }),
+  maker.make({
+    name: "parseFloat",
+    examples: [makeFnExample("Danger.parseFloat('10.3')")],
+    displaySection: "Javascript",
+    description: `Converts a string to a number. If the string can't be converted, returns \`Parse Failed\`. Calls Javascript \`parseFloat\` under the hood.`,
+    definitions: [
+      makeDefinition([frString], frOr(frNumber, frString), ([str]) => {
+        const result = parseFloat(str);
+        if (isNaN(result)) {
+          return { tag: "2", value: "Parse Failed" };
+        } else {
+          return { tag: "1", value: result };
+        }
+      }),
+    ],
+  }),
+  maker.make({
+    name: "now",
+    description: `Returns the current date. Internally calls \`\`Date.now()\`\` in JavaScript.  
+
+*Caution: This function, which returns the current date, produces varying outputs with each call. As a result, accurately estimating the value of functions that incorporate \`\`Danger.now()\`\` at past time points is challenging. In the future, we intend to implement a feature allowing the input of a simulated time via an environment variable to address this issue.*`,
+    examples: [makeFnExample("Danger.now()")],
+    requiresNamespace: true,
+    displaySection: "Javascript",
+    output: "Date",
+    definitions: [
+      makeDefinition([], frDate, () => {
+        return SDate.now();
+      }),
+    ],
   }),
   maker.n2n({
     name: "factorial",

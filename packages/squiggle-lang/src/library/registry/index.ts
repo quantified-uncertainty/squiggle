@@ -25,6 +25,7 @@ import { library as symLibrary } from "../../fr/sym.js";
 import { library as tableLibrary } from "../../fr/table.js";
 import { library as tagLibrary } from "../../fr/tag.js";
 import { library as unitsLibrary } from "../../fr/units.js";
+import { library as systemLibrary } from "../../fr/system.js";
 import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import { FRFunction, Registry } from "./core.js";
@@ -54,6 +55,7 @@ const fnList: FRFunction[] = [
   ...unitsLibrary,
   ...calculatorLibrary,
   ...inputLibrary,
+  ...systemLibrary,
   ...commonLibrary, // should go last, because has some catch-all functions
 ];
 
