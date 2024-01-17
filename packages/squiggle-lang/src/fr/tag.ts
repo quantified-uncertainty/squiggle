@@ -291,7 +291,7 @@ example2 = {|x| x + 1}`,
   }),
   maker.make({
     name: "startOpen",
-    description: `When the value is first displayed, it will be shown as open.`,
+    description: `When the value is first displayed, it will begin open in the viewer. Refresh the page to reset.`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
@@ -307,7 +307,7 @@ example2 = {|x| x + 1}`,
   }),
   maker.make({
     name: "startClosed",
-    description: `When the value is first displayed, it will be shown as collapsed.`,
+    description: `When the value is first displayed, it will begin collapsed in the viewer. Refresh the page to reset.`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
@@ -324,6 +324,7 @@ example2 = {|x| x + 1}`,
   maker.make({
     name: "getStartOpenState",
     displaySection: "Tags",
+    description: `Returns the startOpenState of a value, which can be "open", "closed", or "" if no startOpenState is set. Set using \`Tag.startOpen\` and \`Tag.startClosed\`.`,
     definitions: [
       makeDefinition(
         [frWithTags(frAny())],
