@@ -330,7 +330,6 @@ example2 = {|x| x + 1}`,
         [frWithTags(frAny())],
         frString,
         ([{ tags }]) => tags?.value.startOpenState || "",
-        { isDecorator: true }
       ),
     ],
   }),
