@@ -1,6 +1,5 @@
 import { REOther } from "../errors/messages.js";
 import { INDEX_LOOKUP_FUNCTION } from "../expression/constants.js";
-import { makeSystemConstants } from "../fr/system.js";
 import { BuiltinLambda, Lambda } from "../reducer/lambda.js";
 import { Bindings } from "../reducer/stack.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
@@ -9,6 +8,7 @@ import { makeMathConstants } from "./math.js";
 import { makeDefinition } from "./registry/fnDefinition.js";
 import { frAny } from "./registry/frTypes.js";
 import { makeSquiggleBindings, registry } from "./registry/index.js";
+import { makeVersionConstant } from "./version.js";
 
 const definitions = [
   makeDefinition([frAny(), frAny()], frAny(), ([obj, key]) => {
@@ -29,7 +29,7 @@ function makeStdLib(): Bindings {
 
   // constants
   res = res.merge(makeMathConstants());
-  res = res.merge(makeSystemConstants());
+  res = res.merge(makeVersionConstant());
 
   // field lookups
   res = res.set(INDEX_LOOKUP_FUNCTION, vLambda(makeLookupLambda()));
