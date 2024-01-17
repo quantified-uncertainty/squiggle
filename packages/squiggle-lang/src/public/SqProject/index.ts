@@ -1,5 +1,6 @@
 import { isBindingStatement } from "../../ast/utils.js";
 import { defaultEnv, Env } from "../../dist/env.js";
+import { AST } from "../../index.js";
 import * as Library from "../../library/index.js";
 import { createContext } from "../../reducer/context.js";
 import { Bindings } from "../../reducer/stack.js";
@@ -11,7 +12,7 @@ import { SqLinker } from "../SqLinker.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqDict } from "../SqValue/SqDict.js";
 import { SqValueContext } from "../SqValueContext.js";
-import { SqValuePath } from "../SqValuePath.js";
+import { Root, SqValuePath } from "../SqValuePath.js";
 import { SqOutputResult } from "../types.js";
 import {
   type Externals,
@@ -228,57 +229,43 @@ export class SqProject {
     if (!astR.ok) {
       return astR; // impossible because output is valid
     }
-    const ast = astR.value;
+    const ast: AST = astR.value;
 
     const lastStatement = ast.statements.at(-1);
 
     const hasEndExpression =
       !!lastStatement && !isBindingStatement(lastStatement);
 
-    const result = wrapValue(
-      internalOutputR.value.result,
-      new SqValueContext({
-        project: this,
+    const _this = this;
+
+    function newContext(root: Root) {
+      const isResult = root === "result";
+      return new SqValueContext({
+        project: _this,
         sourceId,
-        source,
+        source: source!,
         ast,
-        valueAst: hasEndExpression ? lastStatement : ast,
-        valueAstIsPrecise: hasEndExpression,
+        valueAst: isResult && hasEndExpression ? lastStatement : ast,
+        valueAstIsPrecise: isResult ? hasEndExpression : true,
         path: new SqValuePath({
-          root: "result",
+          root: root,
           items: [],
         }),
-      })
-    );
+      });
+    }
 
-    const [bindings, exports, imports] = (
-      ["bindings", "exports", "imports"] as const
-    ).map((field) => {
-      const innerDict =
-        field === "imports"
-          ? internalOutputR.value.externals.explicitImports
-          : internalOutputR.value[field];
-      const dict = new SqDict(
-        field === "exports"
-          ? innerDict.mergeTags({ name: sourceId })
-          : innerDict,
-        new SqValueContext({
-          project: this,
-          sourceId,
-          source,
-          ast: astR.value,
-          valueAst: astR.value,
-          valueAstIsPrecise: true,
-          path: new SqValuePath({
-            root: field,
-            items: [],
-          }),
-        })
-      );
-      return dict;
+    function wrapSqDict(innerDict: VDict, root: Root): SqDict {
+      return new SqDict(innerDict, newContext(root));
+    }
+
+    const { result, bindings, exports, externals } = internalOutputR.value;
+
+    return Result.Ok({
+      result: wrapValue(result, newContext("result")),
+      bindings: wrapSqDict(bindings, "bindings"),
+      exports: wrapSqDict(exports.mergeTags({ name: sourceId }), "exports"),
+      imports: wrapSqDict(externals.explicitImports, "imports"),
     });
-
-    return Result.Ok({ result, bindings, exports, imports });
   }
 
   getResult(sourceId: string): Result.result<SqValue, SqError> {
