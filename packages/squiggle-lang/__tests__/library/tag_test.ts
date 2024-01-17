@@ -30,6 +30,15 @@ describe("Tags", () => {
     testEvalToBe("3 -> Tag.hide -> Tag.getHide", "true");
   });
 
+  describe("startOpenToggle", () => {
+    testEvalToBe("3 -> Tag.startOpen -> Tag.getStartOpenState", '"open"');
+    testEvalToBe("3 -> Tag.startClosed -> Tag.getStartOpenState", '"closed"');
+    testEvalToBe(
+      "3 -> Tag.startClosed -> Tag.startOpen -> Tag.getStartOpenState",
+      '"open"'
+    );
+  });
+
   describe("omit", () => {
     testEvalToBe(
       "123 -> Tag.name('myName') -> Tag.doc('myDoc') -> Tag.format('.2%') -> Tag.omit(['name', 'doc']) -> Tag.getAll",

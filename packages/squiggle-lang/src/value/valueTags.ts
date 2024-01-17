@@ -17,6 +17,7 @@ export type ValueTagsType = {
   hidden?: boolean;
   notebook?: boolean;
   exportData?: ExportData;
+  startOpenState?: "open" | "closed";
 };
 
 type ValueTagsTypeName = keyof ValueTagsType;
@@ -30,6 +31,7 @@ const valueTagsTypeNames: ValueTagsTypeName[] = [
   "hidden",
   "notebook",
   "exportData",
+  "startOpenState",
 ];
 
 function convertToValueTagsTypeName(
@@ -89,10 +91,13 @@ export class ValueTags {
     if (value.notebook) {
       result.push(["notebook", vBool(value.notebook)]);
     }
-
     const _exportData = this.exportData();
     if (_exportData) {
       result.push(["exportData", _exportData]);
+    }
+
+    if (value.startOpenState) {
+      result.push(["startOpenState", vString(value.startOpenState)]);
     }
     return result;
   }
@@ -156,5 +161,9 @@ export class ValueTags {
 
   notebook() {
     return this.value.notebook;
+  }
+
+  startOpenState() {
+    return this.value.startOpenState;
   }
 }
