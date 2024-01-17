@@ -290,6 +290,50 @@ example2 = {|x| x + 1}`,
     ],
   }),
   maker.make({
+    name: "startOpen",
+    description: `When the value is first displayed, it will be shown as open.`,
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frAny({ genericName: "A" }))],
+        frWithTags(frAny({ genericName: "A" })),
+        ([{ value, tags }]) => ({
+          value,
+          tags: tags.merge({ startOpenToggle: "open" }),
+        }),
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "startClosed",
+    description: `When the value is first displayed, it will be shown as collapsed.`,
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frAny({ genericName: "A" }))],
+        frWithTags(frAny({ genericName: "A" })),
+        ([{ value, tags }]) => ({
+          value,
+          tags: tags.merge({ startOpenToggle: "closed" }),
+        }),
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getStartOpenState",
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frAny())],
+        frString,
+        ([{ tags }]) => tags?.value.startOpenToggle || "",
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
     name: "notebook",
     description: `Displays the list of values as a notebook. This means that element indices are hidden, and the values are displayed in a vertical list. Useful for displaying combinations of text and values.`,
     examples: [

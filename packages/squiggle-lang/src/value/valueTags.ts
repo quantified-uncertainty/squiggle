@@ -11,6 +11,7 @@ export type ValueTagsType = {
   dateFormat?: string;
   hidden?: boolean;
   notebook?: boolean;
+  startOpenToggle?: "open" | "closed";
 };
 
 type ValueTagsTypeName = keyof ValueTagsType;
@@ -23,6 +24,7 @@ const valueTagsTypeNames: ValueTagsTypeName[] = [
   "dateFormat",
   "hidden",
   "notebook",
+  "startOpenToggle",
 ];
 
 function convertToValueTagsTypeName(
@@ -68,6 +70,9 @@ export class ValueTags {
     }
     if (value.notebook) {
       result.push(["notebook", vBool(value.notebook)]);
+    }
+    if (value.startOpenToggle) {
+      result.push(["startOpenToggle", vString(value.startOpenToggle)]);
     }
     return result;
   }
@@ -127,5 +132,9 @@ export class ValueTags {
 
   notebook() {
     return this.value.notebook;
+  }
+
+  startOpenToggle() {
+    return this.value.startOpenToggle;
   }
 }
