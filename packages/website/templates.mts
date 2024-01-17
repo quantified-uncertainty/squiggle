@@ -230,6 +230,17 @@ b = '\\'" NUL:\\u0000'
     intro: `The Table module allows you to make simple tables for displaying data.`,
   },
   {
+    name: "System",
+    description: "",
+    intro: `## Constants
+
+### System.version
+Returns the current version of Squiggle.
+
+## Functions
+`,
+  },
+  {
     name: "Tag",
     description:
       "The Tag module handles tags, which allow the additions of metadata to Squiggle variables.",
