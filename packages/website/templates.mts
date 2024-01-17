@@ -326,6 +326,10 @@ result = [
 result
 \`}/>`,
       },
+      {
+        name: "Javascript",
+        description: `Near 1-1 matches of Javascript functions.`,
+      },
       { name: "Math" },
       { name: "Combinatorics" },
       { name: "Distributions" },
