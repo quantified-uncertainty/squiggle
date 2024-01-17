@@ -13,7 +13,12 @@ import {
 
 import { SquiggleViewer } from "../../index.js";
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
-import { getResultValue, getResultVariables } from "../../lib/utility.js";
+import {
+  getResultExports,
+  getResultImports,
+  getResultValue,
+  getResultVariables,
+} from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
@@ -51,25 +56,39 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
   ({ squiggleOutput, isRunning, editor, ...settings }, viewerRef) => {
     const resultItem = getResultValue(squiggleOutput);
     const resultVariables = getResultVariables(squiggleOutput);
+    const resultImports = getResultImports(squiggleOutput);
+    const resultExports = getResultExports(squiggleOutput);
 
     const hasResult = Boolean(resultItem?.ok);
     const variablesCount = resultVariables?.ok
       ? resultVariables.value.value.entries().length
       : 0;
+    const importsCount = resultImports?.ok
+      ? resultImports.value.value.entries().length
+      : 0;
+    const exportsCount = resultExports?.ok
+      ? resultExports.value.value.entries().length
+      : 0;
 
-    const [mode, setMode] = useState<"variables" | "result">(
-      hasResult ? "result" : "variables"
-    );
+    const [mode, setMode] = useState<
+      "Imports" | "Exports" | "Variables" | "Result"
+    >(hasResult ? "Result" : exportsCount > 0 ? "Exports" : "Variables");
 
     let squiggleViewer: JSX.Element | null = null;
     if (squiggleOutput.code) {
       let usedResult: result<SqValue, SqError> | undefined;
       switch (mode) {
-        case "result":
+        case "Result":
           usedResult = resultItem;
           break;
-        case "variables":
+        case "Variables":
           usedResult = resultVariables;
+          break;
+        case "Imports":
+          usedResult = resultImports;
+          break;
+        case "Exports":
+          usedResult = resultExports;
       }
 
       if (usedResult) {
@@ -97,19 +116,51 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
             <Dropdown
               render={({ close }) => (
                 <DropdownMenu>
-                  <DropdownMenuActionItem
-                    icon={CodeBracketIcon}
-                    title={
-                      <MenuItemTitle
-                        title="Variables"
-                        type={variablesCount ? `{}${variablesCount}` : null}
-                      />
-                    }
-                    onClick={() => {
-                      setMode("variables");
-                      close();
-                    }}
-                  />
+                  {Boolean(importsCount) && (
+                    <DropdownMenuActionItem
+                      icon={CodeBracketIcon}
+                      title={
+                        <MenuItemTitle
+                          title="Imports"
+                          type={importsCount ? `{}${importsCount}` : null}
+                        />
+                      }
+                      onClick={() => {
+                        setMode("Imports");
+                        close();
+                      }}
+                    />
+                  )}
+                  {Boolean(variablesCount) && (
+                    <DropdownMenuActionItem
+                      icon={CodeBracketIcon}
+                      title={
+                        <MenuItemTitle
+                          title="Variables"
+                          type={variablesCount ? `{}${variablesCount}` : null}
+                        />
+                      }
+                      onClick={() => {
+                        setMode("Variables");
+                        close();
+                      }}
+                    />
+                  )}
+                  {Boolean(exportsCount) && (
+                    <DropdownMenuActionItem
+                      icon={CodeBracketIcon}
+                      title={
+                        <MenuItemTitle
+                          title="Exports"
+                          type={exportsCount ? `{}${exportsCount}` : null}
+                        />
+                      }
+                      onClick={() => {
+                        setMode("Exports");
+                        close();
+                      }}
+                    />
+                  )}
                   <DropdownMenuActionItem
                     icon={CodeBracketIcon}
                     title={
@@ -119,7 +170,7 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
                       />
                     }
                     onClick={() => {
-                      setMode("result");
+                      setMode("Result");
                       close();
                     }}
                   />
@@ -128,7 +179,7 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
             >
               <Button size="small">
                 <div className="flex items-center space-x-1.5">
-                  <span>{mode === "variables" ? "Variables" : "Result"}</span>
+                  <span>{mode}</span>
                   <TriangleIcon
                     className="rotate-180 text-slate-400"
                     size={10}

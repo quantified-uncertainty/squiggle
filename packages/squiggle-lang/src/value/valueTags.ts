@@ -1,7 +1,12 @@
 import { result } from "../index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, fmap, mergeMany, Ok } from "../utility/result.js";
-import { Value, vBool, vString } from "./index.js";
+import { Value, vArray, vBool, vDict, VDict, vString } from "./index.js";
+
+export type ExportData = {
+  sourceId: string;
+  path: string[];
+};
 
 export type ValueTagsType = {
   name?: string;
@@ -11,6 +16,7 @@ export type ValueTagsType = {
   dateFormat?: string;
   hidden?: boolean;
   notebook?: boolean;
+  exportData?: ExportData;
   startOpenState?: "open" | "closed";
 };
 
@@ -24,6 +30,7 @@ const valueTagsTypeNames: ValueTagsTypeName[] = [
   "dateFormat",
   "hidden",
   "notebook",
+  "exportData",
   "startOpenState",
 ];
 
@@ -46,6 +53,19 @@ function convertToValueTagsTypeName(
 // I expect these to get much more complicated later, so it seemed prudent to make a class now.
 export class ValueTags {
   constructor(public value: ValueTagsType) {}
+
+  exportData(): VDict | undefined {
+    const { exportData } = this.value;
+    if (!exportData) {
+      return undefined;
+    }
+    return vDict(
+      ImmutableMap({
+        sourceId: vString(exportData.sourceId),
+        path: vArray(exportData.path.map(vString)),
+      })
+    );
+  }
 
   toList(): [string, Value][] {
     const result: [string, Value][] = [];
@@ -71,10 +91,19 @@ export class ValueTags {
     if (value.notebook) {
       result.push(["notebook", vBool(value.notebook)]);
     }
+    const _exportData = this.exportData();
+    if (_exportData) {
+      result.push(["exportData", _exportData]);
+    }
+
     if (value.startOpenState) {
       result.push(["startOpenState", vString(value.startOpenState)]);
     }
     return result;
+  }
+
+  isEmpty() {
+    return this.toList().length === 0;
   }
 
   omit(keys: ValueTagsTypeName[]) {

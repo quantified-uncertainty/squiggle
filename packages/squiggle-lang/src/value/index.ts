@@ -45,19 +45,15 @@ abstract class BaseValue {
     return this.copyWithTags(this.tags?.merge(args) ?? new ValueTags(args));
   }
 
-  abstract valueToString(): string;
+  protected abstract valueToString(): string;
 
   toString() {
     const valueString = this.valueToString();
-    if (!this.tags) {
+    if (!this.tags || this.tags.isEmpty()) {
       return valueString;
     }
-    const argsStr = this.tags.toString();
-    if (argsStr !== "") {
-      return `${valueString}, with params ${argsStr}`;
-    } else {
-      return valueString;
-    }
+    const argsStr = `{${this.tags.toString()}}`;
+    return `${valueString}, with tags ${argsStr}`;
   }
 }
 
@@ -83,7 +79,7 @@ class VArray extends BaseValue implements Indexable {
   constructor(public value: readonly Value[]) {
     super();
   }
-  valueToString() {
+  protected valueToString() {
     return "[" + this.value.map((v) => v.toString()).join(",") + "]";
   }
 
@@ -243,7 +239,7 @@ class VString extends BaseValue {
 }
 export const vString = (v: string) => new VString(v);
 
-class VDict extends BaseValue implements Indexable {
+export class VDict extends BaseValue implements Indexable {
   readonly type = "Dict";
 
   override get publicName() {
@@ -253,12 +249,21 @@ class VDict extends BaseValue implements Indexable {
   constructor(public value: ValueMap) {
     super();
   }
+
+  static empty() {
+    return new VDict(ImmutableMap([]));
+  }
+
+  merge(other: VDict) {
+    return new VDict(this.value.merge(other.value));
+  }
+
   valueToString() {
     return (
       "{" +
       [...this.value.entries()]
         .map(([k, v]) => `${k}: ${v.toString()}`)
-        .join(",") +
+        .join(", ") +
       "}"
     );
   }
@@ -310,7 +315,7 @@ class VDuration extends BaseValue {
     super();
   }
 
-  valueToString() {
+  protected valueToString() {
     return this.value.toString();
   }
   isEqual(other: VDuration) {
@@ -408,7 +413,7 @@ class VScale extends BaseValue {
     super();
   }
 
-  valueToString(): string {
+  protected valueToString(): string {
     switch (this.value.method?.type) {
       case "linear":
         return "Linear scale"; // TODO - mix in min/max if specified
@@ -471,7 +476,7 @@ class VInput extends BaseValue {
     super();
   }
 
-  valueToString(): string {
+  protected valueToString(): string {
     switch (this.value.type) {
       case "text":
         return "Text input";
@@ -552,7 +557,7 @@ class VTableChart extends BaseValue {
   constructor(public value: TableChart) {
     super();
   }
-  valueToString() {
+  protected valueToString() {
     return `Table with ${this.value.columns.length}x${this.value.data.length} elements`;
   }
 }

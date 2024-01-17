@@ -1,6 +1,7 @@
 import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("Tags", () => {
+  testEvalToBe("123 -> Tag.name('')", "123");
   describe("name", () => {
     testEvalToBe("123 -> Tag.name('myNumber') -> Tag.getName", '"myNumber"');
   });
@@ -12,7 +13,7 @@ describe("Tags", () => {
   describe("all", () => {
     testEvalToBe(
       "123 -> Tag.name('myName') -> Tag.doc('myDoc') -> Tag.getAll",
-      '{name: "myName",doc: "myDoc"}'
+      '{name: "myName", doc: "myDoc"}'
     );
   });
 
@@ -59,7 +60,7 @@ x = 5
 
 x
 `,
-    '5, with params name: "five"'
+    '5, with tags {name: "five"}'
   );
 
   testEvalToBe(
@@ -70,7 +71,7 @@ x = 5
 
 x
 `,
-    '5, with params name: "five", doc: "This is five"'
+    '5, with tags {name: "five", doc: "This is five"}'
   );
 
   testEvalToBe(

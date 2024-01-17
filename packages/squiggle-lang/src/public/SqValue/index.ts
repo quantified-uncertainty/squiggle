@@ -205,7 +205,7 @@ export class SqDictValue extends SqAbstractValue<"Dict", unknown> {
   tag = "Dict" as const;
 
   get value() {
-    return new SqDict(this._value.value, this.context);
+    return new SqDict(this._value, this.context);
   }
 
   asJS() {
