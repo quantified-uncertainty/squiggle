@@ -46,8 +46,8 @@ const VersionedSquiggleModelExportPage: FC<
     <VersionedSquiggleChart
       version={version}
       code={code}
-      rootPathOverride={rootPath}
       // TODO - we still don't have a good way to sync up squiggle-lang and versioned squiggle-components types
+      rootPathOverride={rootPath as any}
       project={project as any}
     />
   );
