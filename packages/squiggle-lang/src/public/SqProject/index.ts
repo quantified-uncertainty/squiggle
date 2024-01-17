@@ -5,7 +5,7 @@ import { createContext } from "../../reducer/context.js";
 import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
-import { VDict, vDict } from "../../value/index.js";
+import { vDict, VDict } from "../../value/index.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
@@ -14,10 +14,10 @@ import { SqValueContext } from "../SqValueContext.js";
 import { SqValuePath } from "../SqValuePath.js";
 import { SqOutputResult } from "../types.js";
 import {
+  type Externals,
   Import,
   ProjectItem,
   RunOutput,
-  type Externals,
 } from "./ProjectItem.js";
 
 function getNeedToRunError() {
@@ -270,7 +270,7 @@ export class SqProject {
           valueAst: astR.value,
           valueAstIsPrecise: true,
           path: new SqValuePath({
-            root: "bindings",
+            root: field,
             items: [],
           }),
         })
@@ -286,10 +286,6 @@ export class SqProject {
   }
 
   getBindings(sourceId: string): Result.result<SqDict, SqError> {
-    return Result.fmap(this.getOutput(sourceId), ({ bindings }) => bindings);
-  }
-
-  getImportBindings(sourceId: string): Result.result<SqDict, SqError> {
     return Result.fmap(this.getOutput(sourceId), ({ bindings }) => bindings);
   }
 
