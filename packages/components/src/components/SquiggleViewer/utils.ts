@@ -20,23 +20,13 @@ function isTopLevel(path: SqValuePath): boolean {
   return path.items.length === 0;
 }
 
-const topLevelResultName = "Result";
-export const topLevelBindingsName = "Variables";
-export const topLevelImportsName = "Imports";
-export const topLevelExportsName = "Exports";
-
 function topLevelName(path: SqValuePath): string {
-  if (path.root === "result") {
-    return topLevelResultName;
-  } else if (path.root === "bindings") {
-    return topLevelBindingsName;
-  } else if (path.root === "exports") {
-    return topLevelExportsName;
-  } else if (path.root === "imports") {
-    return topLevelImportsName;
-  } else {
-    return path.root;
-  }
+  return {
+    result: "Result",
+    bindings: "Variables",
+    imports: "Imports",
+    exports: "Exports",
+  }[path.root];
 }
 
 export function pathAsString(path: SqValuePath) {

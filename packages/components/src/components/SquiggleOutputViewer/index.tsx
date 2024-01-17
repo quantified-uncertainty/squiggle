@@ -14,8 +14,8 @@ import {
 import { SquiggleViewer } from "../../index.js";
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 import {
-  getResultImports,
   getResultExports,
+  getResultImports,
   getResultValue,
   getResultVariables,
 } from "../../lib/utility.js";
@@ -71,28 +71,27 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
       : 0;
 
     const [mode, setMode] = useState<
-      "imports" | "exports" | "variables" | "result"
-    >(hasResult ? "result" : exportsCount > 0 ? "exports" : "variables");
+      "Imports" | "Exports" | "Variables" | "Result"
+    >(hasResult ? "Result" : exportsCount > 0 ? "Exports" : "Variables");
 
     let squiggleViewer: JSX.Element | null = null;
     if (squiggleOutput.code) {
       let usedResult: result<SqValue, SqError> | undefined;
       switch (mode) {
-        case "result":
+        case "Result":
           usedResult = resultItem;
           break;
-        case "variables":
+        case "Variables":
           usedResult = resultVariables;
           break;
-        case "imports":
+        case "Imports":
           usedResult = resultImports;
           break;
-        case "exports":
+        case "Exports":
           usedResult = resultExports;
       }
 
       if (usedResult) {
-        // Only fails when mode = result and resultItem is undefined
         squiggleViewer = usedResult.ok ? (
           <div className="relative">
             {isRunning && (
@@ -127,7 +126,7 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
                         />
                       }
                       onClick={() => {
-                        setMode("imports");
+                        setMode("Imports");
                         close();
                       }}
                     />
@@ -142,7 +141,7 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
                         />
                       }
                       onClick={() => {
-                        setMode("variables");
+                        setMode("Variables");
                         close();
                       }}
                     />
@@ -157,7 +156,7 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
                         />
                       }
                       onClick={() => {
-                        setMode("exports");
+                        setMode("Exports");
                         close();
                       }}
                     />
@@ -171,7 +170,7 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
                       />
                     }
                     onClick={() => {
-                      setMode("result");
+                      setMode("Result");
                       close();
                     }}
                   />
@@ -180,16 +179,7 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
             >
               <Button size="small">
                 <div className="flex items-center space-x-1.5">
-                  <span>
-                    {
-                      {
-                        imports: "Imports",
-                        exports: "Exports",
-                        variables: "Variables",
-                        result: "Result",
-                      }[mode]
-                    }
-                  </span>
+                  <span>{mode}</span>
                   <TriangleIcon
                     className="rotate-180 text-slate-400"
                     size={10}

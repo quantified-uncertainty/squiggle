@@ -4,7 +4,6 @@ import {
   Value,
   vCalculator,
   vDate,
-  vDict,
   vLambda,
   vNumber,
   vString,
@@ -206,7 +205,7 @@ export class SqDictValue extends SqAbstractValue<"Dict", unknown> {
   tag = "Dict" as const;
 
   get value() {
-    return new SqDict(vDict(this._value.value), this.context);
+    return new SqDict(this._value, this.context);
   }
 
   asJS() {

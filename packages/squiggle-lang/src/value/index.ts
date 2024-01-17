@@ -45,19 +45,15 @@ abstract class BaseValue {
     return this.copyWithTags(this.tags?.merge(args) ?? new ValueTags(args));
   }
 
-  abstract valueToString(): string;
+  protected abstract valueToString(): string;
 
   toString() {
     const valueString = this.valueToString();
-    if (!this.tags) {
+    if (!this.tags || this.tags.isEmpty()) {
       return valueString;
     }
     const argsStr = `{${this.tags.toString()}}`;
-    if (argsStr !== "") {
-      return `${valueString}, with tags ${argsStr}`;
-    } else {
-      return valueString;
-    }
+    return `${valueString}, with tags ${argsStr}`;
   }
 }
 
@@ -83,7 +79,7 @@ class VArray extends BaseValue implements Indexable {
   constructor(public value: readonly Value[]) {
     super();
   }
-  valueToString() {
+  protected valueToString() {
     return "[" + this.value.map((v) => v.toString()).join(",") + "]";
   }
 
@@ -319,7 +315,7 @@ class VDuration extends BaseValue {
     super();
   }
 
-  valueToString() {
+  protected valueToString() {
     return this.value.toString();
   }
   isEqual(other: VDuration) {
@@ -417,7 +413,7 @@ class VScale extends BaseValue {
     super();
   }
 
-  valueToString(): string {
+  protected valueToString(): string {
     switch (this.value.method?.type) {
       case "linear":
         return "Linear scale"; // TODO - mix in min/max if specified
@@ -480,7 +476,7 @@ class VInput extends BaseValue {
     super();
   }
 
-  valueToString(): string {
+  protected valueToString(): string {
     switch (this.value.type) {
       case "text":
         return "Text input";
@@ -561,7 +557,7 @@ class VTableChart extends BaseValue {
   constructor(public value: TableChart) {
     super();
   }
-  valueToString() {
+  protected valueToString() {
     return `Table with ${this.value.columns.length}x${this.value.data.length} elements`;
   }
 }

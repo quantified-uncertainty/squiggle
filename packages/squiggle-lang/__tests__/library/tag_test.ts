@@ -1,6 +1,7 @@
 import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("Tags", () => {
+  testEvalToBe("123 -> Tag.name('')", "123");
   describe("name", () => {
     testEvalToBe("123 -> Tag.name('myNumber') -> Tag.getName", '"myNumber"');
   });
