@@ -3,4 +3,4 @@
 "@quri/squiggle-components": patch
 ---
 
-Added Tag.startOpen and Tag.startClosed
+Added Tag.startOpen, Tag.startClosed, and Tag.getStartOpenState
