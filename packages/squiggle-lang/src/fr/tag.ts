@@ -299,7 +299,7 @@ example2 = {|x| x + 1}`,
         frWithTags(frAny({ genericName: "A" })),
         ([{ value, tags }]) => ({
           value,
-          tags: tags.merge({ startOpenToggle: "open" }),
+          tags: tags.merge({ startOpenState: "open" }),
         }),
         { isDecorator: true }
       ),
@@ -315,7 +315,7 @@ example2 = {|x| x + 1}`,
         frWithTags(frAny({ genericName: "A" })),
         ([{ value, tags }]) => ({
           value,
-          tags: tags.merge({ startOpenToggle: "closed" }),
+          tags: tags.merge({ startOpenState: "closed" }),
         }),
         { isDecorator: true }
       ),
@@ -328,7 +328,7 @@ example2 = {|x| x + 1}`,
       makeDefinition(
         [frWithTags(frAny())],
         frString,
-        ([{ tags }]) => tags?.value.startOpenToggle || "",
+        ([{ tags }]) => tags?.value.startOpenState || "",
         { isDecorator: true }
       ),
     ],

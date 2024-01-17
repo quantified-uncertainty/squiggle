@@ -160,6 +160,12 @@ export const shouldBeginCollapsed = (
   value: SqValueWithContext,
   path: SqValuePath
 ): boolean => {
+  const startOpenState = value.tags.startOpenState();
+  if (startOpenState === "open") {
+    return false;
+  } else if (startOpenState === "closed") {
+    return true;
+  }
   const childrenValues = getChildrenValues(value);
   if (path.isRoot()) {
     return childrenValues.length > 30;
