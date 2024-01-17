@@ -5,7 +5,7 @@ import { ReducerContext } from "../../reducer/context.js";
 import { evaluate, ReducerFn } from "../../reducer/index.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
-import { VDict, Value, vDict } from "../../value/index.js";
+import { Value, vDict, VDict } from "../../value/index.js";
 import { SqCompileError, SqError, SqRuntimeError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 
@@ -247,7 +247,7 @@ export class ProjectItem {
           return [key, _value];
         });
       const exports = bindings.filter(
-        (value, key) => value.tags?.exportData !== undefined
+        (value, _) => value.tags?.exportData() !== undefined
       );
       this.output = Ok({
         result,
