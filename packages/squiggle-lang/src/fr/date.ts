@@ -74,8 +74,9 @@ d3 = Date.make(2020.5)`,
   }),
   maker.make({
     name: "now",
-    description: `Returns the current date. Internally calls \`\`Date.now()\`\` in JavaScript.
-**Warning: Because this function returns the current date, it will return different values each time it is called. This means that estimation functions that contain \`\`Date.now()\`\` are currently difficult to formally estimate the value of at previous points in time. Later we plan to have a way to pass a mock time in as an environment variable to deal with this.**`,
+    description: `Returns the current date. Internally calls \`\`Date.now()\`\` in JavaScript.  
+
+*Caution: This function, which returns the current date, produces varying outputs with each call. As a result, accurately estimating the value of functions that incorporate \`\`Date.now()\`\` at past time points is challenging. In the future, we intend to implement a feature allowing the input of a simulated time via an environment variable to address this issue.*`,
     examples: [makeFnExample("Date.now()")],
     requiresNamespace: true,
     displaySection: "Constructors",

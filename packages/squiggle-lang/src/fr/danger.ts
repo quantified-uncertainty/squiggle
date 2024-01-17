@@ -77,7 +77,7 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
     name: "parseFloat",
     examples: [makeFnExample("Danger.parseFloat('10.3')")],
     displaySection: "Javascript",
-    description: `Converts a string to a number. If the string can't be converted, returns \`null\`. Calls Javascript \`parseFloat\` under the hood.`,
+    description: `Converts a string to a number. If the string can't be converted, returns \`Parse Failed\`. Calls Javascript \`parseFloat\` under the hood.`,
     definitions: [
       makeDefinition([frString], frOr(frNumber, frString), ([str]) => {
         const result = parseFloat(str);
