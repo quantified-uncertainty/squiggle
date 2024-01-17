@@ -329,7 +329,7 @@ example2 = {|x| x + 1}`,
       makeDefinition(
         [frWithTags(frAny())],
         frString,
-        ([{ tags }]) => tags?.value.startOpenState || "",
+        ([{ tags }]) => tags?.value.startOpenState || ""
       ),
     ],
   }),
