@@ -290,6 +290,50 @@ example2 = {|x| x + 1}`,
     ],
   }),
   maker.make({
+    name: "startOpen",
+    description: `When the value is first displayed, it will begin open in the viewer. Refresh the page to reset.`,
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frAny({ genericName: "A" }))],
+        frWithTags(frAny({ genericName: "A" })),
+        ([{ value, tags }]) => ({
+          value,
+          tags: tags.merge({ startOpenState: "open" }),
+        }),
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "startClosed",
+    description: `When the value is first displayed, it will begin collapsed in the viewer. Refresh the page to reset.`,
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frAny({ genericName: "A" }))],
+        frWithTags(frAny({ genericName: "A" })),
+        ([{ value, tags }]) => ({
+          value,
+          tags: tags.merge({ startOpenState: "closed" }),
+        }),
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getStartOpenState",
+    displaySection: "Tags",
+    description: `Returns the startOpenState of a value, which can be "open", "closed", or "" if no startOpenState is set. Set using \`Tag.startOpen\` and \`Tag.startClosed\`.`,
+    definitions: [
+      makeDefinition(
+        [frWithTags(frAny())],
+        frString,
+        ([{ tags }]) => tags?.value.startOpenState || "",
+      ),
+    ],
+  }),
+  maker.make({
     name: "notebook",
     description: `Displays the list of values as a notebook. This means that element indices are hidden, and the values are displayed in a vertical list. Useful for displaying combinations of text and values.`,
     examples: [
