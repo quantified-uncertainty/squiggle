@@ -109,15 +109,10 @@ function buildWordHoverExtension({
       };
     };
 
-    const createTopLevelVariableNameTooltip = (node: SyntaxNode) => {
-      const name = getText(node);
-
-      const bindings = project.getBindings(sourceId);
-      if (!bindings.ok) return null;
-
-      const value = bindings.value.get(name);
-      if (!value) return null;
-
+    const createTopLevelVariableNameTooltip = (
+      node: SyntaxNode,
+      value: SqValue
+    ) => {
       return {
         pos: node.from,
         end: node.to,
@@ -156,8 +151,32 @@ function buildWordHoverExtension({
         while (cursor.type.is("Statement") && cursor.parent());
 
         // Is this a top-level variable?
-        if (cursor.type.is("Program")) {
-          return createTopLevelVariableNameTooltip(node);
+        if (!cursor.type.is("Program")) {
+          return null;
+        }
+
+        const name = getText(node);
+
+        const bindings = project.getBindings(sourceId);
+        if (!bindings.ok) return null;
+
+        const value = bindings.value.get(name);
+        if (!value) return null;
+
+        // Should be LetStatement or DefunStatement
+        const valueAst = value.context?.valueAst;
+
+        if (
+          valueAst &&
+          (valueAst.type === "LetStatement" ||
+            valueAst.type === "DefunStatement") &&
+          // If these don't match then variable was probably shadowed by a later statement and we can't show its value.
+          // Or it could be caused by code rot, if we change the logic of how `valueAst` is computed, or add another statement type in AST.
+          // TODO - if we can prove that the variable was shadowed, show the tooltip pointing to the latest assignment.
+          valueAst.variable.location.start.offset === node.from &&
+          valueAst.variable.location.end.offset === node.to
+        ) {
+          return createTopLevelVariableNameTooltip(node, value);
         }
       }
     }
