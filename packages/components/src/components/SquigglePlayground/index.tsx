@@ -156,7 +156,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       renderExtraModal={renderExtraModal}
       ref={leftPanelRef}
       onViewValuePath={(path) => {
-        console.log(path, rightPanelRef);
         rightPanelRef.current?.viewValuePath(path);
       }}
     />

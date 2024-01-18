@@ -79,7 +79,7 @@ export function useShowGutterExtension(
                     builder.add(
                       line.from,
                       line.to,
-                      new StarMarker(i + 1, () => onClickLine(i))
+                      new StarMarker(i + 1, () => onClickLine(i + 1))
                     );
                   }
                 }

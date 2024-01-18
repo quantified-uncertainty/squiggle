@@ -321,9 +321,8 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
 
     useImperativeHandle(ref, () => ({
       viewValuePath(path: SqValuePath) {
-        console.log("Trying to change path");
         itemStore.scrollToPath(path);
-        setFocused(path);
+        // setFocused(path);
       },
     }));
 
