@@ -23,8 +23,10 @@ import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
-import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
-import { ViewerProvider } from "../SquiggleViewer/ViewerProvider.js";
+import {
+  SquiggleViewerHandle,
+  ViewerProvider,
+} from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
 import { RenderingIndicator } from "./RenderingIndicator.js";
 
@@ -110,7 +112,11 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
     }
 
     return (
-      <ViewerProvider partialPlaygroundSettings={settings} editor={editor}>
+      <ViewerProvider
+        partialPlaygroundSettings={settings}
+        editor={editor}
+        ref={viewerRef}
+      >
         <Layout
           menu={
             <Dropdown
