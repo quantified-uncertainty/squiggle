@@ -97,7 +97,7 @@ export function useSquiggleEditorExtensions(
       if (params.sourceId) {
         const valuePath = params.project.findValuePathByLine(
           params.sourceId,
-          line + 1
+          line
         );
         if (valuePath && params.onViewValuePath) {
           params.onViewValuePath(valuePath);

@@ -450,8 +450,8 @@ export class SqProject {
           .map(([k, v]) => {
             return v.context?.findLocation()?.start.line;
           })
-          .filter((v) => v !== undefined) as number[];
-        return lines;
+          .filter((v) => v !== undefined && v) as number[];
+        return lines.map((r) => r - 1);
       } else {
         return [];
       }
