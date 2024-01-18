@@ -177,11 +177,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 
   useEffect(() => {
     const handleKeyUp = (event) => {
-      // Check if 'up' key is pressed and the active element is not the text editor
-      if (event.key === "ArrowUp") {
-        console.log("'Up' key pressed outside the text editor");
-        // Execute your action here
-      }
       rightPanelRef.current?.onKeyPress(event.key as string);
     };
 

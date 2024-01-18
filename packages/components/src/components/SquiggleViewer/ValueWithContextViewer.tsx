@@ -139,7 +139,7 @@ export const ValueWithContextViewer: FC<Props> = ({
     toggleCollapsed_(path);
   };
 
-  const ref = useRegisterAsItemViewer(path);
+  const ref = useRegisterAsItemViewer(path, value, parentValue);
 
   // TODO - check that we're not in a situation where `isOpen` is false and `header` is hidden?
   // In that case, the output would look broken (empty).

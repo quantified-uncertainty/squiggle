@@ -11,11 +11,11 @@ import {
   useState,
 } from "react";
 
-import { SqValuePath } from "@quri/squiggle-lang";
+import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
-import { SqValueWithContext } from "../../lib/utility.js";
+import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import {
@@ -52,6 +52,141 @@ const defaultLocalItemState: LocalItemState = {
   collapsed: false,
   settings: {},
 };
+
+class PathTreeNode {
+  value: SqValueWithContext;
+  tree: PathTree;
+  parent: PathTreeNode | undefined;
+  children: PathTreeNode[] = [];
+
+  constructor(
+    value: SqValueWithContext,
+    parent: PathTreeNode | undefined,
+    tree: PathTree
+  ) {
+    this.value = value;
+    this.parent = parent;
+    this.tree = tree;
+  }
+
+  addChild(value: SqValueWithContext): PathTreeNode {
+    const node = new PathTreeNode(value, this, this.tree);
+    this.children.push(node);
+    return node;
+  }
+
+  pathName() {
+    return pathAsString(this.value.context.path);
+  }
+
+  siblings() {
+    return this.parent?.children.map((r) => r.pathName()) || [];
+  }
+
+  prevSibling() {
+    const siblings = this.siblings();
+    const index = siblings.indexOf(this.pathName());
+    if (index === -1) {
+      return undefined;
+    } else if (index === 0) {
+      return undefined;
+    }
+    return siblings[index - 1];
+  }
+
+  nextSibling() {
+    const siblings = this.siblings();
+    const index = siblings.indexOf(this.pathName());
+    if (index === -1) {
+      return undefined;
+    } else if (index === siblings.length - 1) {
+      return undefined;
+    }
+    return siblings[index + 1];
+  }
+
+  next(): PathTreeNode | undefined {
+    if (this.children.length > 0) {
+      return this.children[0];
+    } else {
+      const _nextSibling = this.nextSibling();
+      if (!_nextSibling) {
+        const parentSibling = this.parent?.nextSibling();
+        return parentSibling
+          ? this.tree.findFromPathName(parentSibling)
+          : undefined;
+      } else {
+        return this.tree.findFromPathName(_nextSibling);
+      }
+    }
+  }
+
+  prev(): PathTreeNode | undefined {
+    const _prevSibling = this.prevSibling();
+    if (!_prevSibling) {
+      return this.parent;
+    } else {
+      const prev = this.tree.findFromPathName(_prevSibling);
+      if (prev && prev.children.length > 0) {
+        return prev.children[prev.children.length - 1];
+      } else {
+        return prev;
+      }
+    }
+  }
+
+  toJS() {
+    return {
+      value: this.value,
+      children: this.children.map((child) => child.toJS()),
+    };
+  }
+}
+
+class PathTree {
+  root: PathTreeNode;
+  nodes: Map<string, PathTreeNode> = new Map();
+
+  constructor(rootNote: SqValueWithContext) {
+    this.root = new PathTreeNode(rootNote, undefined, this);
+    this._addNode(this.root);
+  }
+
+  _addNode(value: PathTreeNode) {
+    const pathName = value.pathName();
+    this.nodes.set(pathName, value);
+  }
+
+  _removeNode(value: PathTreeNode) {
+    this.nodes.delete(value.pathName());
+    value.children.forEach((child) => this._removeNode(child));
+  }
+
+  removeNode(value: SqValueWithContext) {
+    const node = this.nodes[pathAsString(value.context.path)];
+    if (node) {
+      this._removeNode(node);
+    }
+  }
+
+  toJS() {
+    return this.root.toJS();
+  }
+
+  addFromSqValue(child: SqValueWithContext, parent: SqValueWithContext) {
+    const path = pathAsString(child.context.path);
+    if (!this.nodes.has(path)) {
+      const parentNode = this.nodes.get(pathAsString(parent.context.path));
+      if (parentNode) {
+        this._addNode(parentNode.addChild(child));
+      }
+    }
+  }
+
+  findFromPathName(pathName: string): PathTreeNode | undefined {
+    return this.nodes.get(pathName);
+  }
+}
 
 /**
  * `ItemStore` is used for caching and for passing settings down the tree.
@@ -162,6 +297,8 @@ type ViewerContextShape = {
   // Instead, we keep `localItemState` in local state and notify the global context via `setLocalItemState` to pass them down the component tree again if it got rebuilt from scratch.
   // See ./SquiggleViewer.tsx and ./ValueWithContextViewer.tsx for other implementation details on this.
   globalSettings: PlaygroundSettings;
+  pathTree: PathTree | undefined;
+  setPathTree: (value: PathTree | undefined) => void;
   focused: SqValuePath | undefined;
   setFocused: (value: SqValuePath | undefined) => void;
   selected: SqValuePath | undefined;
@@ -174,6 +311,8 @@ type ViewerContextShape = {
 
 export const ViewerContext = createContext<ViewerContextShape>({
   globalSettings: defaultPlaygroundSettings,
+  pathTree: undefined,
+  setPathTree: () => undefined,
   focused: undefined,
   setFocused: () => undefined,
   selected: undefined,
@@ -195,9 +334,13 @@ export function useViewerContext() {
 // This allows us to do two things later:
 // 1. Implement `store.scrollToPath`.
 // 2. Re-render individual item viewers on demand, for example on "Collapse Children" menu action.
-export function useRegisterAsItemViewer(path: SqValuePath) {
+export function useRegisterAsItemViewer(
+  path: SqValuePath,
+  value: SqValueWithContext,
+  parent: SqValue | undefined
+) {
   const ref = useRef<HTMLDivElement | null>(null);
-  const { itemStore } = useViewerContext();
+  const { itemStore, pathTree, setPathTree } = useViewerContext();
 
   /**
    * Since `ViewerContext` doesn't store settings, this component won't rerender when `setSettings` is called.
@@ -213,7 +356,22 @@ export function useRegisterAsItemViewer(path: SqValuePath) {
     }
 
     itemStore.registerItemHandle(path, { element, forceUpdate });
-    return () => itemStore.unregisterItemHandle(path);
+
+    if (!pathTree) {
+      if (!parent) {
+        const newPathTree = new PathTree(value);
+        setPathTree(newPathTree);
+      }
+    } else if (parent) {
+      if (valueHasContext(parent)) {
+        pathTree.addFromSqValue(value, parent);
+      }
+    }
+
+    return () => {
+      itemStore.unregisterItemHandle(path);
+      pathTree?.removeNode(value);
+    };
   });
 
   return ref;
@@ -351,6 +509,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
 
     const [focused, setFocused] = useState<SqValuePath | undefined>();
     const [selected, setSelected] = useState<SqValuePath | undefined>();
+    const [pathTree, setPathTree] = useState<PathTree | undefined>();
 
     const globalSettings = useMemo(() => {
       return merge({}, defaultPlaygroundSettings, playgroundSettings);
@@ -361,10 +520,39 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
         itemStore.scrollToPath(path);
       },
       onKeyPress(stroke: string) {
-        console.log("Keystroke", stroke);
         if (stroke === "Enter") {
-          console.log("Enter pressed");
-          setFocused(selected);
+          if (selected) {
+            if (selected === focused) {
+              setFocused(undefined);
+            } else {
+              setFocused(selected);
+            }
+          }
+        }
+        if (stroke === "ArrowDown") {
+          if (selected) {
+            const next = pathTree?.nodes.get(pathAsString(selected))?.next();
+            if (next) {
+              setSelected(next.value.context.path);
+            }
+          }
+        }
+        if (stroke === "ArrowUp") {
+          if (selected) {
+            const prev = pathTree?.nodes.get(pathAsString(selected))?.prev();
+            if (prev) {
+              setSelected(prev.value.context.path);
+            }
+          }
+        }
+        if (stroke === "ArrowLeft" || stroke === "ArrowRight") {
+          if (selected) {
+            itemStore.setState(selected, (state) => ({
+              ...state,
+              collapsed: !state?.collapsed,
+            }));
+            itemStore.forceUpdate(selected);
+          }
         }
       },
     };
@@ -380,6 +568,8 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
           setFocused,
           selected,
           setSelected,
+          pathTree,
+          setPathTree,
           itemStore,
           handle,
           initialized: true,
