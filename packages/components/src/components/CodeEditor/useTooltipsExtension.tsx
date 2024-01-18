@@ -30,7 +30,11 @@ const TooltipBox: FC<PropsWithChildren<{ view: EditorView }>> = ({
     repositionTooltips(view);
   });
 
-  return <div className="border rounded-sm shadow-lg">{children}</div>;
+  return (
+    <div className="border rounded-sm shadow-lg h-full overflow-y-auto">
+      {children}
+    </div>
+  );
 };
 
 const ValueTooltip: FC<{ value: SqValue; view: EditorView }> = ({
@@ -166,6 +170,9 @@ const tooltipTheme = EditorView.baseTheme({
   ".cm-tooltip-hover": {
     backgroundColor: "white !important",
     border: "0 !important",
+  },
+  ".cm-tooltip-section": {
+    height: "100%", // necessary for scrolling, see also: "h-full" in `TooltipBox`
   },
 });
 
