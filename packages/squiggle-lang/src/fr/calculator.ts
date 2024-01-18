@@ -14,7 +14,7 @@ import {
   frWithTags,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { Calculator, vCalculator } from "../value/index.js";
+import { Calculator, vCalculator } from "../value/VCalculator.js";
 
 const maker = new FnFactory({
   nameSpace: "Calculator",

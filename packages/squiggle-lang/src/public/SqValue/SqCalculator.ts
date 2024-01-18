@@ -1,6 +1,6 @@
 import { Env } from "../../dist/env.js";
 import * as Result from "../../utility/result.js";
-import { Calculator } from "../../value/index.js";
+import { Calculator } from "../../value/VCalculator.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValue, wrapValue } from "./index.js";

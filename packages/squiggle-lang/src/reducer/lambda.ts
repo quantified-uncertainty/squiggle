@@ -15,7 +15,10 @@ import {
 import { FRType } from "../library/registry/frTypes.js";
 import { frTypeToInput } from "../library/registry/helpers.js";
 import { sort } from "../utility/E_A_Floats.js";
-import { Calculator, Input, Value, VDomain } from "../value/index.js";
+import { Value } from "../value/index.js";
+import { Calculator } from "../value/VCalculator.js";
+import { VDomain } from "../value/VDomain.js";
+import { Input } from "../value/VInput.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
 import { Stack } from "./stack.js";

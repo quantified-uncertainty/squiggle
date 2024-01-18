@@ -29,8 +29,9 @@ import {
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { getOrThrow } from "../utility/result.js";
-import { Value, vString } from "../value/index.js";
+import { Value } from "../value/index.js";
 import { ValueTags, ValueTagsType } from "../value/valueTags.js";
+import { vString } from "../value/VString.js";
 
 const maker = new FnFactory({
   nameSpace: "Tag",

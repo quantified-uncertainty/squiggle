@@ -1,7 +1,11 @@
 import { result } from "../index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, fmap, mergeMany, Ok } from "../utility/result.js";
-import { Value, vArray, vBool, vDict, VDict, vString } from "./index.js";
+import { Value } from "./index.js";
+import { vArray } from "./VArray.js";
+import { vBool } from "./VBool.js";
+import { vDict, VDict } from "./VDict.js";
+import { vString } from "./VString.js";
 
 export type ExportData = {
   sourceId: string;

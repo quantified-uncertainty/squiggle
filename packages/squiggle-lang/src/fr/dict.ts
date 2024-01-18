@@ -1,6 +1,7 @@
 import { OrderedMap } from "immutable";
 
 import { REArgumentError } from "../errors/messages.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -15,8 +16,8 @@ import {
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { Value, vString } from "../value/index.js";
-import { makeFnExample } from "../library/registry/core.js";
+import { Value } from "../value/index.js";
+import { vString } from "../value/VString.js";
 
 const maker = new FnFactory({
   nameSpace: "Dict",

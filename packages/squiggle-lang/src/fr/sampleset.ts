@@ -21,7 +21,9 @@ import {
   unwrapDistResult,
 } from "../library/registry/helpers.js";
 import { Ok } from "../utility/result.js";
-import { Value, vArray, vNumber } from "../value/index.js";
+import { Value } from "../value/index.js";
+import { vArray } from "../value/VArray.js";
+import { vNumber } from "../value/VNumber.js";
 
 const maker = new FnFactory({
   nameSpace: "SampleSet",

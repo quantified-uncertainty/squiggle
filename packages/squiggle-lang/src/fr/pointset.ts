@@ -21,7 +21,7 @@ import {
 import * as Continuous from "../PointSet/Continuous.js";
 import * as Discrete from "../PointSet/Discrete.js";
 import { Ok } from "../utility/result.js";
-import { vNumber } from "../value/index.js";
+import { vNumber } from "../value/VNumber.js";
 import * as XYShape from "../XYShape.js";
 
 const maker = new FnFactory({

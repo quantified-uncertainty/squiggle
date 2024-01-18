@@ -35,9 +35,6 @@ import { SDate } from "../../src/utility/SDate.js";
 import { SDuration } from "../../src/utility/SDuration.js";
 import { NumericRangeDomain } from "../../src/value/domain.js";
 import {
-  Input,
-  Plot,
-  Scale,
   Value,
   vArray,
   vBool,
@@ -54,6 +51,9 @@ import {
   vTableChart,
 } from "../../src/value/index.js";
 import { ValueTags } from "../../src/value/valueTags.js";
+import { Input } from "../../src/value/VInput.js";
+import { Plot } from "../../src/value/VPlot.js";
+import { Scale } from "../../src/value/VScale.js";
 
 test("frNumber", () => {
   const value = vNumber(5);

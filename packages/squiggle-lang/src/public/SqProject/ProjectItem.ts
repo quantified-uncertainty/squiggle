@@ -5,7 +5,8 @@ import { ReducerContext } from "../../reducer/context.js";
 import { evaluate, ReducerFn } from "../../reducer/index.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
-import { Value, vDict, VDict } from "../../value/index.js";
+import { Value } from "../../value/index.js";
+import { vDict, VDict } from "../../value/VDict.js";
 import { SqCompileError, SqError, SqRuntimeError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 
