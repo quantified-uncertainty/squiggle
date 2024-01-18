@@ -31,6 +31,7 @@ import {
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
+  onKeyPress(stroke: string): void;
 };
 
 type ItemHandle = {
@@ -181,6 +182,7 @@ export const ViewerContext = createContext<ViewerContextShape>({
   itemStore: new ItemStore(),
   handle: {
     viewValuePath: () => {},
+    onKeyPress: () => {},
   },
   initialized: false,
 });
@@ -347,24 +349,27 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       unstablePlaygroundSettings
     );
 
-    const handle: SquiggleViewerHandle = {
-      viewValuePath(path: SqValuePath) {
-        itemStore.scrollToPath(path);
-      },
-    };
-
-    useImperativeHandle(ref, () => handle);
-    //   onKeyPress(stroke: string) {
-    //     console.log("Keystroke", stroke);
-    //   },
-    // }));
-
     const [focused, setFocused] = useState<SqValuePath | undefined>();
     const [selected, setSelected] = useState<SqValuePath | undefined>();
 
     const globalSettings = useMemo(() => {
       return merge({}, defaultPlaygroundSettings, playgroundSettings);
     }, [playgroundSettings]);
+
+    const handle: SquiggleViewerHandle = {
+      viewValuePath(path: SqValuePath) {
+        itemStore.scrollToPath(path);
+      },
+      onKeyPress(stroke: string) {
+        console.log("Keystroke", stroke);
+        if (stroke === "Enter") {
+          console.log("Enter pressed");
+          setFocused(selected);
+        }
+      },
+    };
+
+    useImperativeHandle(ref, () => handle);
 
     return (
       <ViewerContext.Provider

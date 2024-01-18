@@ -175,12 +175,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       </div>
     );
 
-  console.log(rightPanelRef);
-  function foo() {
-    console.log(rightPanelRef);
-    rightPanelRef.current?.onKeyPress("HERE" as string);
-  }
-
   useEffect(() => {
     const handleKeyUp = (event) => {
       // Check if 'up' key is pressed and the active element is not the text editor
@@ -188,7 +182,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         console.log("'Up' key pressed outside the text editor");
         // Execute your action here
       }
-      foo();
+      rightPanelRef.current?.onKeyPress(event.key as string);
     };
 
     // Attach the event listener
@@ -198,7 +192,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     return () => {
       window.removeEventListener("keydown", handleKeyUp);
     };
-  }, [rightPanelRef.current]); // Empty dependency array ensures this runs once on mount and on unmount
+  }, []); // Empty dependency array ensures this runs once on mount and on unmount
 
   return (
     <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
