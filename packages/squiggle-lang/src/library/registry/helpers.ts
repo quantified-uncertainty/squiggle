@@ -21,7 +21,8 @@ import { ReducerContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
 import { upTo } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
-import { Input, Value } from "../../value/index.js";
+import { Value } from "../../value/index.js";
+import { Input } from "../../value/VInput.js";
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
 import {

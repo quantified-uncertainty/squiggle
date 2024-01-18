@@ -6,7 +6,9 @@ import { ICompileError } from "../errors/IError.js";
 import { Bindings } from "../reducer/stack.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import * as Result from "../utility/result.js";
-import { vBool, vNumber, vString } from "../value/index.js";
+import { vBool } from "../value/VBool.js";
+import { vNumber } from "../value/VNumber.js";
+import { vString } from "../value/VString.js";
 import { INDEX_LOOKUP_FUNCTION } from "./constants.js";
 import * as expression from "./index.js";
 

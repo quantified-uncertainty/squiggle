@@ -1,18 +1,16 @@
 import { result } from "../../utility/result.js";
 import { SDate } from "../../utility/SDate.js";
-import {
-  Value,
-  vCalculator,
-  vDate,
-  vLambda,
-  vNumber,
-  vString,
-} from "../../value/index.js";
+import { Value } from "../../value/index.js";
 import {
   removeLambdas,
   simpleValueFromValue,
   simpleValueToJson,
 } from "../../value/simpleValue.js";
+import { vCalculator } from "../../value/VCalculator.js";
+import { vDate } from "../../value/VDate.js";
+import { vLambda } from "../../value/vLambda.js";
+import { vNumber } from "../../value/VNumber.js";
+import { vString } from "../../value/VString.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";

@@ -3,6 +3,7 @@ import minBy from "lodash/minBy.js";
 import sortBy from "lodash/sortBy.js";
 
 import { REArgumentError, REOther } from "../errors/messages.js";
+import { makeFnExample } from "../library/registry/core.js";
 import {
   makeAssertDefinition,
   makeDefinition,
@@ -29,8 +30,8 @@ import { ReducerContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
 import { shuffle, unzip, zip } from "../utility/E_A.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
-import { uniq, uniqBy, Value, vNumber } from "../value/index.js";
-import { makeFnExample } from "../library/registry/core.js";
+import { uniq, uniqBy, Value } from "../value/index.js";
+import { vNumber } from "../value/VNumber.js";
 
 export function _map(
   array: readonly Value[],

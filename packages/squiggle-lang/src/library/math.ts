@@ -1,5 +1,6 @@
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { Value, vNumber } from "../value/index.js";
+import { Value } from "../value/index.js";
+import { vNumber } from "../value/VNumber.js";
 
 const availableNumbers: [string, number][] = [
   ["Math.pi", Math.PI],

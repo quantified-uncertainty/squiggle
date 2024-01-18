@@ -25,13 +25,14 @@ import {
 import { ReducerContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
-import { vArray, vNumber } from "../value/index.js";
 import {
   removeLambdas,
   simpleValueFromValue,
   simpleValueToJson,
   simpleValueToValue,
 } from "../value/simpleValue.js";
+import { vArray } from "../value/VArray.js";
+import { vNumber } from "../value/VNumber.js";
 
 const { factorial } = jstat;
 

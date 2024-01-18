@@ -14,7 +14,7 @@ import {
   frWithTags,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { Calculator, vCalculator } from "../value/index.js";
+import { Calculator, vCalculator } from "../value/VCalculator.js";
 
 const maker = new FnFactory({
   nameSpace: "Calculator",
@@ -110,8 +110,8 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
             params ?? {};
           return validateCalculator({
             fn: value,
-            title: title || tags.value.name || undefined,
-            description: description || tags.value.doc || undefined,
+            title: title || tags.name() || undefined,
+            description: description || tags.doc() || undefined,
             inputs: inputs || value.defaultInputs(),
             autorun: autorun === null || autorun === undefined ? true : autorun,
             sampleCount: sampleCount || undefined,
