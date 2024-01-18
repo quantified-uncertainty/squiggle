@@ -2,18 +2,21 @@ import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, fmap, mergeMany, Ok, result } from "../utility/result.js";
 import { Value } from "./index.js";
 import { type VBool } from "./VBool.js";
-import { VDict } from "./VDict.js";
+import { type VDict } from "./VDict.js";
 import { type VString } from "./VString.js";
 
+// Note: this file can't call any `vType` constructors; it would cause a circular dependency because of `BaseValue` -> `ValueTags`.
+
+// Some of these tags are value-type-specific, but we store everything in a single Dict, for now.
 export type ValueTagsType = {
   name?: VString;
   doc?: VString;
   showAs?: Value;
-  numberFormat?: VString;
-  dateFormat?: VString;
+  numberFormat?: VString; // can be set on numbers, dists and durations
+  dateFormat?: VString; // can be set on dates
   hidden?: VBool;
-  notebook?: VBool;
-  exportData?: VDict; // { sourceId: String, path: List(String) }
+  notebook?: VBool; // can be set on arrays
+  exportData?: VDict; // should be { sourceId: String, path: List(String) }
   startOpenState?: VString;
 };
 
@@ -150,7 +153,7 @@ export class ValueTags {
   startOpenState(): "open" | "closed" | undefined {
     const { value } = this.value.startOpenState ?? {};
     if (!value) {
-      return;
+      return undefined;
     }
     if (["open", "closed"].includes(value)) {
       return value as "open" | "closed";
