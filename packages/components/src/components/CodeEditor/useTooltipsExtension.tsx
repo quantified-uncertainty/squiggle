@@ -11,8 +11,11 @@ import {
 } from "@quri/squiggle-lang";
 
 import { valueHasContext } from "../../lib/utility.js";
-import { defaultPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleValueChart } from "../SquiggleViewer/SquiggleValueChart.js";
+import {
+  InnerViewerProvider,
+  useViewerContext,
+} from "../SquiggleViewer/ViewerProvider.js";
 import { FnDocumentation } from "../ui/FnDocumentation.js";
 import { useReactiveExtension } from "./codemirrorHooks.js";
 
@@ -27,24 +30,27 @@ const TooltipBox: FC<PropsWithChildren<{ view: EditorView }>> = ({
     repositionTooltips(view);
   });
 
-  return (
-    <div className="border rounded-sm shadow-lg min-w-[200px] max-w-[600px] px-2">
-      {children}
-    </div>
-  );
+  return <div className="border rounded-sm shadow-lg">{children}</div>;
 };
 
 const ValueTooltip: FC<{ value: SqValue; view: EditorView }> = ({
   value,
   view,
 }) => {
+  const { globalSettings } = useViewerContext();
+
   if (valueHasContext(value)) {
     return (
       <TooltipBox view={view}>
-        <SquiggleValueChart
-          value={value}
-          settings={defaultPlaygroundSettings} // FIXME - should be passed through <CodeEditor>
-        />
+        <div className="px-4 py-1">
+          {/* Force a standalone ephermeral ViewerProvider, so that we won't sync up collapsed state with the top-level viewer */}
+          <InnerViewerProvider
+            partialPlaygroundSettings={globalSettings}
+            viewerType="tooltip"
+          >
+            <SquiggleValueChart value={value} settings={globalSettings} />
+          </InnerViewerProvider>
+        </div>
       </TooltipBox>
     );
   } else {
@@ -57,7 +63,9 @@ const HoverTooltip: FC<{ hover: Hover; view: EditorView }> = ({
   view,
 }) => (
   <TooltipBox view={view}>
-    <FnDocumentation documentation={hover} />
+    <div className="min-w-[200px] max-w-[600px] px-2">
+      <FnDocumentation documentation={hover} />
+    </div>
   </TooltipBox>
 );
 

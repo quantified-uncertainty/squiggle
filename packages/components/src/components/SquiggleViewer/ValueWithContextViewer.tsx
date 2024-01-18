@@ -25,6 +25,7 @@ import {
   useRegisterAsItemViewer,
   useToggleCollapsed,
   useViewerContext,
+  useViewerType,
 } from "./ViewerProvider.js";
 
 const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
@@ -117,6 +118,7 @@ export const ValueWithContextViewer: FC<Props> = ({
 
   const toggleCollapsed_ = useToggleCollapsed();
   const focus = useFocus();
+  const viewerType = useViewerType();
 
   const { itemStore } = useViewerContext();
   const itemState = itemStore.getStateOrInitialize(value);
@@ -128,6 +130,8 @@ export const ValueWithContextViewer: FC<Props> = ({
   const header = props.header ?? (isRoot ? "hide" : "show");
   const collapsible = header === "hide" ? false : props.collapsible ?? true;
   const size = props.size ?? "normal";
+  const enableDropdownMenu = viewerType !== "tooltip";
+  const enableFocus = viewerType !== "tooltip";
 
   const toggleCollapsed = () => {
     toggleCollapsed_(path);
@@ -139,7 +143,12 @@ export const ValueWithContextViewer: FC<Props> = ({
   // In that case, the output would look broken (empty).
   const isOpen = !collapsible || !itemState.collapsed;
 
-  const _focus = () => focus(path);
+  const _focus = () => {
+    if (!enableFocus) {
+      return;
+    }
+    focus(path);
+  };
 
   const triangleToggle = () => {
     const Icon = itemState.collapsed ? CollapsedIcon : ExpandedIcon;
@@ -187,7 +196,11 @@ export const ValueWithContextViewer: FC<Props> = ({
       } else if (isRoot) {
         return "text-sm text-stone-600 font-semibold";
       } else {
-        return clsx("text-sm cursor-pointer hover:underline", headerColor);
+        return clsx(
+          "text-sm",
+          enableFocus && "cursor-pointer hover:underline",
+          headerColor
+        );
       }
     };
 
@@ -241,9 +254,11 @@ export const ValueWithContextViewer: FC<Props> = ({
               )}
               {!isOpen && <CommentIconForValue value={value} />}
             </div>
-            <div className="inline-flex space-x-1 items-center">
-              <SquiggleValueMenu value={value} />
-            </div>
+            {enableDropdownMenu && (
+              <div className="inline-flex space-x-1 items-center">
+                <SquiggleValueMenu value={value} />
+              </div>
+            )}
           </header>
         )}
         {isOpen && (
