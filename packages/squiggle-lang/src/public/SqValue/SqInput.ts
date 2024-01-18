@@ -1,4 +1,4 @@
-import { Input, vInput } from "../../value/index.js";
+import { Input, vInput } from "../../value/VInput.js";
 
 export const wrapInput = (value: Input): SqInput => {
   switch (value.type) {

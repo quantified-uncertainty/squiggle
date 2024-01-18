@@ -36,4 +36,8 @@ export class SqTags {
   notebook(): boolean | undefined {
     return this.tags.notebook();
   }
+
+  startOpenState(): "open" | "closed" | undefined {
+    return this.tags.startOpenState();
+  }
 }

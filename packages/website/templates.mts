@@ -11,7 +11,7 @@ export const modulePages: ModulePage[] = [
   {
     name: "Common",
     description: "",
-    intro: `Functions that work on many different types of values.`,
+    intro: `Functions that work on many different types of values. Also see the experimental [JSON functions](/docs/Api/Danger#json).`,
   },
   {
     name: "Boolean",
@@ -22,7 +22,15 @@ export const modulePages: ModulePage[] = [
   {
     description: "Dates are a simple date time type.",
     name: "Date",
-    intro: ``,
+    intro: `A simple date type. Dates are stored as milliseconds since the epoch. They are immutable, and all functions that modify dates return a new date. Used with [Duration](./Duration) values.
+
+    Dates can be useful for modeling values that change over time. Below is a simple example of a function that returns a normal distribution that changes over time, based on the number of years passed since 2020.
+<SquiggleEditor
+defaultCode={\`f(t: [Date(2020), Date(2040)]) = {
+  yearsPassed = toYears(t - Date(2020))
+  normal({mean: yearsPassed ^ 2, stdev: yearsPassed^1.3+1})
+}\`}/>
+    `,
     sections: [
       { name: "Constructors" },
       { name: "Conversions" },
@@ -40,11 +48,19 @@ export const modulePages: ModulePage[] = [
     ],
     description:
       "Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.",
-    intro: `
-`,
+    intro: `Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.`,
   },
   {
     name: "Dist",
+    description:
+      "Distributions are the flagship data type in Squiggle. The distribution type is a generic data type that contains one of three different formats of distributions.",
+    intro: `Distributions are the flagship data type in Squiggle. The distribution type is a generic data type that contains one of three different formats of distributions.
+
+These subtypes are [point set](/docs/api/DistPointSet), [sample set](/docs/api/DistSampleSet), and [symbolic](/docs/api/Sym). The first two of these have a few custom functions that only work on them. You can read more about the differences between these formats [here](/docs/Discussions/Three-Formats-Of-Distributions).
+
+Several functions below only can work on particular distribution formats. For example, scoring and pointwise math requires the point set format. When this happens, the types are automatically converted to the correct format. These conversions are lossy.
+    
+Distributions are created as [sample sets](/DistSampleSet) by default. To create a symbolic distribution, use \`Sym.\` namespace: \`Sym.normal\`, \`Sym.beta\` and so on.`,
     sections: [
       {
         name: "Distributions",
@@ -72,11 +88,6 @@ The only functions that do not return normalized distributions are the pointwise
       { name: "Utility" },
       { name: "Scoring" },
     ],
-    description:
-      "Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.",
-    intro: `Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
-
-One complication is that it's possible to represent invalid probability distributions in the point set format. For example, you can represent shapes with negative values, or shapes that are not normalized.`,
   },
   {
     name: "Sym",
@@ -97,7 +108,7 @@ One complication is that it's possible to represent invalid probability distribu
 
 Monte Carlo calculations typically result in sample set distributions.
 
-All regular distribution function work on sample set distributions. In addition, there are several functions that only work on sample set distributions..`,
+All regular distribution function work on sample set distributions. In addition, there are several functions that only work on sample set distributions.`,
   },
   {
     name: "PointSet",
@@ -122,7 +133,7 @@ One complication is that it's possible to represent invalid probability distribu
       { name: "Algebra" },
       { name: "Comparison" },
     ],
-    intro: `Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
+    intro: `Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc. Durations are typically used with [Date](./Date) values.
 
 
 | **Unit Name** | **Example** | **Convert Number to Duration** | **Convert Duration to Number** |
@@ -131,8 +142,6 @@ One complication is that it's possible to represent invalid probability distribu
 | Hour          | \`5hour\`                     | \`fromHours(number)\`                        | \`toHours(duration)\`                        |
 | Day           | \`5days\`                      | \`fromDays(number)\`                         | \`toDays(duration)\`                         |
 | Year          | \`5years\`                     | \`fromYears(number)\`                        | \`toYears(duration)\`                        |
-
-This table now presents the information in a clear and concise manner, focusing only on the essential columns.
 `,
   },
   {
@@ -221,12 +230,23 @@ b = '\\'" NUL:\\u0000'
     intro: `The Table module allows you to make simple tables for displaying data.`,
   },
   {
+    name: "System",
+    description: "",
+    intro: `## Constants
+
+### System.version
+Returns the current version of Squiggle.
+
+## Functions
+`,
+  },
+  {
     name: "Tag",
     description:
       "The Tag module handles tags, which allow the additions of metadata to Squiggle variables.",
     sections: [{ name: "Tags" }, { name: "Functions" }],
     intro: `Tags are metadata that can be added to Squiggle variables. They are used to add additional information to variables, such as names, descriptions, and visualization options. While tags can be accessed at runtime, they are primarily meant for use with the Squiggle Playground and other visualizations.
-Tags can be added to variables either by using their name \`Tag.[name]\` or by using decorators.
+Tags can be added to variables either by using their name \`Tag.get[Name]\` or by using decorators.
 
 ## List of Tags
 | Tag Name    | Description |
@@ -235,16 +255,17 @@ Tags can be added to variables either by using their name \`Tag.[name]\` or by u
 | \`doc\` | Adds documentation to the variable in the playground.       |
 | \`showAs\` | Change the default view for the value when displayed. |
 | \`format\` | Format a number, date, or duration when displayed. |
+| \`notebook\` | Formats lists as notebooks. |
 | \`hide\` | Don't show the variable in the playground |
 
-## Examples
+## Example
 <SquiggleEditor
 defaultCode={\`@name("My Great Function") // Decorator syntax to add a name tag
 @doc("This is an example function.")
 @showAs(Calculator) // Show this as a simple calculator in the Playground
 exampleFn(f) = f^2
   
-myVarTags = Tag.all(exampleFn)
+myVarTags = Tag.getAll(exampleFn)
   
 docs = Tag.getDoc(exampleFn)
   
@@ -281,11 +302,37 @@ Calculators can be useful for debugging functions or to present functions to end
     description:
       "Newer experimental functions which are less stable than Squiggle as a whole",
     sections: [
-      { name: "JSON" },
+      {
+        name: "JSON",
+        description: `
+The JSON module provides JSON-like objects in Squiggle. \`\`Danger.json\`\`\ is mainly useful for debugging, and \`\`Danger.jsonString\`\`\ is useful for sending data to other systems. A simple example is shown below.
+
+We have custom serializers for different Squiggle objects. Note that this API is unstable and might change over time.
+
+<SquiggleEditor
+defaultCode={\`sampleSet = 30 to 50
+pointSet = Sym.normal(5, 2)
+plot = Plot.dists([sampleSet, pointSet])
+fn(e) = e
+
+@notebook
+result = [
+  "### Danger.json()",
+  Danger.json([sampleSet, pointSet, plot, fn]),
+  "### Danger.jsonString",
+  // We don't show sampleSet or plot below because they would be too large, but feel free to try that out
+  Danger.jsonString([pointSet, fn]),
+]
+result
+\`}/>`,
+      },
+      {
+        name: "Javascript",
+        description: `Near 1-1 matches of Javascript functions.`,
+      },
       { name: "Math" },
       { name: "Combinatorics" },
       { name: "Distributions" },
-      { name: "Distribution Functions" },
       { name: "Integration" },
       { name: "Optimization" },
     ],

@@ -1,4 +1,5 @@
 import { REArgumentError, REOther } from "../errors/messages.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDate,
@@ -53,7 +54,7 @@ export const library = [
   maker.make({
     name: "linear",
     output: "Scale",
-    examples: [`Scale.linear({ min: 3, max: 10 })`],
+    examples: [makeFnExample(`Scale.linear({ min: 3, max: 10 })`)],
     displaySection: "Numeric Scales",
     definitions: [
       makeDefinition(
@@ -79,7 +80,7 @@ export const library = [
   maker.make({
     name: "log",
     output: "Scale",
-    examples: [`Scale.log({ min: 1, max: 100 })`],
+    examples: [makeFnExample(`Scale.log({ min: 1, max: 100 })`)],
     displaySection: "Numeric Scales",
     definitions: [
       makeDefinition(
@@ -108,7 +109,7 @@ export const library = [
   maker.make({
     name: "symlog",
     output: "Scale",
-    examples: [`Scale.symlog({ min: -10, max: 10 })`],
+    examples: [makeFnExample(`Scale.symlog({ min: -10, max: 10 })`)],
     displaySection: "Numeric Scales",
     description: `Symmetric log scale. Useful for plotting data that includes zero or negative values.
 
@@ -151,7 +152,9 @@ The default value for \`constant\` is \`${0.0001}\`.`, // I tried to set this to
   maker.make({
     name: "power",
     output: "Scale",
-    examples: [`Scale.power({ min: 1, max: 100, exponent: 0.1 })`],
+    examples: [
+      makeFnExample(`Scale.power({ min: 1, max: 100, exponent: 0.1 })`),
+    ],
     displaySection: "Numeric Scales",
     description: `Power scale. Accepts an extra \`exponent\` parameter, like, \`Scale.power({exponent: 2, min: 0, max: 100})\`.
 
@@ -193,7 +196,9 @@ The default value for \`exponent\` is \`${0.1}\`.`,
     name: "date",
     output: "Scale",
     displaySection: "Date Scales",
-    examples: ["Scale.date({ min: Date(2022), max: Date(2025) })"],
+    examples: [
+      makeFnExample("Scale.date({ min: Date(2022), max: Date(2025) })"),
+    ],
     description: "Only works on Date values. Is a linear scale under the hood.",
     definitions: [
       makeDefinition(

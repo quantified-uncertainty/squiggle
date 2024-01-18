@@ -43,6 +43,7 @@ export class SDate {
   static fromMs(ms: number): SDate {
     return new SDate(new Date(ms));
   }
+
   static fromDate(date: Date): SDate {
     return new SDate(date);
   }

@@ -1,5 +1,5 @@
 import { evaluateStringToResult } from "../../src/reducer/index.js";
-import { Plot } from "../../src/value/index.js";
+import { Plot } from "../../src/value/VPlot.js";
 import { testEvalToBe, testEvalToMatch } from "../helpers/reducerHelpers.js";
 
 async function testPlotResult<T extends Plot["type"]>(

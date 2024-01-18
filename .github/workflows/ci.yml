@@ -35,26 +35,3 @@ jobs:
         run: pnpm install
       - name: Turbo run
         run: npx turbo run build test lint
-
-  coverage:
-    name: Coverage
-    runs-on: ubuntu-latest
-    concurrency:
-      group: ci-coverage-${{ github.ref }}
-      cancel-in-progress: true
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm install
-      - name: Coverage
-        run: npx turbo run coverage

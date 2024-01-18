@@ -1,4 +1,5 @@
 import { REThrow } from "../errors/messages.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -18,6 +19,7 @@ const maker = new FnFactory({
 export const library = [
   maker.make({
     name: "equal",
+    description: `Returns true if the two values passed in are equal, false otherwise. Does not work for Squiggle functions, but works for most other types.`,
     definitions: [
       makeDefinition([frAny(), frAny()], frBool, ([a, b]) => {
         return isEqual(a, b);
@@ -36,6 +38,15 @@ export const library = [
     name: "typeOf",
     description:
       "Returns the type of the value passed in as a string. This is useful when you want to treat a value differently depending on its type.",
+    examples: [
+      makeFnExample(
+        `myString = typeOf("foo")
+myBool = typeOf(true)
+myDist = typeOf(5 to 10)
+myFn = typeOf({|e| e})`,
+        { isInteractive: true }
+      ),
+    ],
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
         return value.publicName;

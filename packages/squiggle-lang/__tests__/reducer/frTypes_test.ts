@@ -35,9 +35,6 @@ import { SDate } from "../../src/utility/SDate.js";
 import { SDuration } from "../../src/utility/SDuration.js";
 import { NumericRangeDomain } from "../../src/value/domain.js";
 import {
-  Input,
-  Plot,
-  Scale,
   Value,
   vArray,
   vBool,
@@ -54,6 +51,9 @@ import {
   vTableChart,
 } from "../../src/value/index.js";
 import { ValueTags } from "../../src/value/valueTags.js";
+import { Input } from "../../src/value/VInput.js";
+import { Plot } from "../../src/value/VPlot.js";
+import { Scale } from "../../src/value/VScale.js";
 
 test("frNumber", () => {
   const value = vNumber(5);
@@ -377,20 +377,20 @@ describe("frWithTags", () => {
   });
 
   test("Unpack Tagged Item", () => {
-    const taggedValue = vNumber(10).mergeTags({ name: "test" });
+    const taggedValue = vNumber(10).mergeTags({ name: vString("test") });
     const unpacked = frTaggedNumber.unpack(taggedValue);
     expect(unpacked).toEqual({
       value: 10,
-      tags: new ValueTags({ name: "test" }),
+      tags: new ValueTags({ name: vString("test") }),
     });
   });
 
   test("Pack", () => {
     const packed = frTaggedNumber.pack({
       value: 10,
-      tags: new ValueTags({ name: "myName" }),
+      tags: new ValueTags({ name: vString("myName") }),
     });
-    expect(packed).toEqual(vNumber(10).mergeTags({ name: "myName" }));
+    expect(packed).toEqual(vNumber(10).mergeTags({ name: vString("myName") }));
   });
 
   test("Display", () => {

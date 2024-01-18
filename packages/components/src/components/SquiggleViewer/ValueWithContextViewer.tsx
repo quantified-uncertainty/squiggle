@@ -180,7 +180,7 @@ export const ValueWithContextViewer: FC<Props> = ({
     const getHeaderColor = () => {
       let color = "text-orange-900";
       const parentTag = parentValue?.tag;
-      if (parentTag === "Array") {
+      if (parentTag === "Array" && !taggedName) {
         color = "text-stone-400";
       } else if (path.items.length > 1) {
         color = "text-teal-700";

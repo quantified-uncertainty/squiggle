@@ -20,17 +20,13 @@ function isTopLevel(path: SqValuePath): boolean {
   return path.items.length === 0;
 }
 
-const topLevelResultName = "Result";
-export const topLevelBindingsName = "Variables";
-
 function topLevelName(path: SqValuePath): string {
-  if (path.root === "result") {
-    return topLevelResultName;
-  } else if (path.root === "bindings") {
-    return topLevelBindingsName;
-  } else {
-    return path.root;
-  }
+  return {
+    result: "Result",
+    bindings: "Variables",
+    imports: "Imports",
+    exports: "Exports",
+  }[path.root];
 }
 
 export function pathAsString(path: SqValuePath) {
@@ -160,6 +156,12 @@ export const shouldBeginCollapsed = (
   value: SqValueWithContext,
   path: SqValuePath
 ): boolean => {
+  const startOpenState = value.tags.startOpenState();
+  if (startOpenState === "open") {
+    return false;
+  } else if (startOpenState === "closed") {
+    return true;
+  }
   const childrenValues = getChildrenValues(value);
   if (path.isRoot()) {
     return childrenValues.length > 30;

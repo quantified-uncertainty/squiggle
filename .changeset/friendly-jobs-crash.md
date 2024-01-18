@@ -3,4 +3,4 @@
 "@quri/squiggle-components": patch
 ---
 
-Fixed RelativeValues plot display
+Added Tag.startOpen, Tag.startClosed, and Tag.getStartOpenState

@@ -1,4 +1,5 @@
 import { REArgumentError } from "../errors/messages.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -28,8 +29,10 @@ import {
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { getOrThrow } from "../utility/result.js";
-import { Value, vString } from "../value/index.js";
+import { Value } from "../value/index.js";
 import { ValueTags, ValueTagsType } from "../value/valueTags.js";
+import { vBool, VBool } from "../value/VBool.js";
+import { vString } from "../value/VString.js";
 
 const maker = new FnFactory({
   nameSpace: "Tag",
@@ -65,7 +68,7 @@ type PickByValue<T, ValueType> = NonNullable<
 >;
 
 const booleanTagDefs = <T>(
-  tagName: PickByValue<ValueTagsType, boolean>,
+  tagName: PickByValue<ValueTagsType, VBool>,
   frType: FRType<T>
 ) => [
   makeDefinition(
@@ -73,7 +76,7 @@ const booleanTagDefs = <T>(
     frWithTags(frType),
     ([{ value, tags }, tagValue]) => ({
       value,
-      tags: tags.merge({ [tagName]: tagValue }),
+      tags: tags.merge({ [tagName]: vBool(tagValue) }),
     }),
     { isDecorator: true }
   ),
@@ -82,7 +85,7 @@ const booleanTagDefs = <T>(
     frWithTags(frType),
     ([{ value, tags }]) => ({
       value,
-      tags: tags.merge({ [tagName]: true }),
+      tags: tags.merge({ [tagName]: vBool(true) }),
     }),
     { isDecorator: true }
   ),
@@ -137,7 +140,7 @@ export const library = [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
         frAny({ genericName: "A" }),
-        ([value, name]) => value.mergeTags({ name }),
+        ([value, name]) => value.mergeTags({ name: vString(name) }),
         { isDecorator: true }
       ),
     ],
@@ -147,7 +150,7 @@ export const library = [
     displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
-        return value.tags?.value.name || "";
+        return value.tags?.name() || "";
       }),
     ],
   }),
@@ -159,7 +162,7 @@ export const library = [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
         frAny({ genericName: "A" }),
-        ([value, doc]) => value.mergeTags({ doc }),
+        ([value, doc]) => value.mergeTags({ doc: vString(doc) }),
         { isDecorator: true }
       ),
     ],
@@ -169,20 +172,15 @@ export const library = [
     displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
-        return value.tags?.value.doc || "";
+        return value.tags?.doc() || "";
       }),
     ],
   }),
   maker.make({
     name: "showAs",
     description: `Overrides the default visualization for a value.
-\`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization. You can use it like,  
-~~~squiggle
-example1 = {|x| x + 1} -> Tag.showAs(Calculator)
-//...
-@showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
-example2 = {|x| x + 1}
-~~~
+\`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization.
+
 Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, \`Number\` can be used with Dates and Durations as well.  
 | **Input Type**                      | **Visualization Types**               |
 | ----------------------------------- | ------------------------------------- |
@@ -193,6 +191,14 @@ Different types of values can be displayed in different ways. The following tabl
 | **Function**                        | \`Calculator\`                        |
 `,
     displaySection: "Tags",
+    examples: [
+      makeFnExample(
+        `example1 = ({|x| x + 1}) -> Tag.showAs(Calculator)
+@showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
+example2 = {|x| x + 1}`,
+        { isInteractive: true, useForTests: false }
+      ),
+    ],
     definitions: [
       showAsDef(frWithTags(frDist), frPlot),
       showAsDef(frArray(frAny()), frTableChart),
@@ -222,6 +228,15 @@ Different types of values can be displayed in different ways. The following tabl
     ],
   }),
   maker.make({
+    name: "getExportData",
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition([frAny()], frAny(), ([value]) => {
+        return value.tags?.exportData() || vString("None");
+      }),
+    ],
+  }),
+  maker.make({
     name: "format",
     description: `Set the display format for a number, distribution, duration, or date. Uses the [d3-format](https://d3js.org/d3-format) syntax on numbers and distributions, and the [d3-time-format](https://d3js.org/d3-time-format) syntax for dates.`,
     displaySection: "Tags",
@@ -231,7 +246,7 @@ Different types of values can be displayed in different ways. The following tabl
         frWithTags(frDistOrNumber),
         ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
-          return { value, tags: tags.merge({ numberFormat: format }) };
+          return { value, tags: tags.merge({ numberFormat: vString(format) }) };
         },
         { isDecorator: true }
       ),
@@ -240,7 +255,7 @@ Different types of values can be displayed in different ways. The following tabl
         frWithTags(frDuration),
         ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
-          return { value, tags: tags.merge({ numberFormat: format }) };
+          return { value, tags: tags.merge({ numberFormat: vString(format) }) };
         },
         { isDecorator: true }
       ),
@@ -248,7 +263,7 @@ Different types of values can be displayed in different ways. The following tabl
         [frWithTags(frDate), frNamed("timeFormat", frString)],
         frWithTags(frDate),
         ([{ value, tags }, format]) => {
-          return { value, tags: tags.merge({ dateFormat: format }) };
+          return { value, tags: tags.merge({ dateFormat: vString(format) }) };
         },
         { isDecorator: true }
       ),
@@ -281,30 +296,83 @@ Different types of values can be displayed in different ways. The following tabl
     displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frBool, ([value]) => {
-        return value.tags?.value.hidden || false;
+        return value.getTags().hidden() ?? false;
       }),
+    ],
+  }),
+  maker.make({
+    name: "startOpen",
+    description: `When the value is first displayed, it will begin open in the viewer. Refresh the page to reset.`,
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frAny({ genericName: "A" }))],
+        frWithTags(frAny({ genericName: "A" })),
+        ([{ value, tags }]) => ({
+          value,
+          tags: tags.merge({ startOpenState: vString("open") }),
+        }),
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "startClosed",
+    description: `When the value is first displayed, it will begin collapsed in the viewer. Refresh the page to reset.`,
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frAny({ genericName: "A" }))],
+        frWithTags(frAny({ genericName: "A" })),
+        ([{ value, tags }]) => ({
+          value,
+          tags: tags.merge({ startOpenState: vString("closed") }),
+        }),
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getStartOpenState",
+    displaySection: "Tags",
+    description: `Returns the startOpenState of a value, which can be "open", "closed", or "" if no startOpenState is set. Set using \`Tag.startOpen\` and \`Tag.startClosed\`.`,
+    definitions: [
+      makeDefinition(
+        [frWithTags(frAny())],
+        frString,
+        ([{ tags }]) => tags?.value.startOpenState?.value ?? ""
+      ),
     ],
   }),
   maker.make({
     name: "notebook",
     description: `Displays the list of values as a notebook. This means that element indices are hidden, and the values are displayed in a vertical list. Useful for displaying combinations of text and values.`,
     examples: [
-      `@notebook
-showAsNotebook = [
-  "### This is an opening section
-Here is more text.
-
-Here is more text.",
-  Calculator({|f| f + 3}),
-  "## Distributions",
-  "### Distribution 1",
+      makeFnExample(
+        `Calculator.make(
+  {|f, contents| f ? Tag.notebook(contents) : contents},
+  {
+    description: "Shows the contents as a notebook if the checkbox is checked.",
+    inputs: [
+      Input.checkbox({ name: "Show as Notebook", default: true }),
+      Input.textArea(
+        {
+          name: "Contents to show",
+          default: "[
+  \\"## Distribution 1\\",
   normal(5, 2),
-  "### Distribution 1",
+  \\"## Distribution 1\\",
   normal(20, 1),
-  " ### This is an opening section
-Here is more text.
-",
-] `,
+  \\"This is an opening section. Here is more text.
+\\",
+]",
+        }
+      ),
+    ],
+  }
+)`,
+        { isInteractive: true }
+      ),
     ],
     displaySection: "Tags",
     definitions: booleanTagDefs(
@@ -317,7 +385,7 @@ Here is more text.
     displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frBool, ([value]) => {
-        return value.tags?.value.notebook || false;
+        return value.tags?.notebook() ?? false;
       }),
     ],
   }),

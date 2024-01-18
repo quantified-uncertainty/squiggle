@@ -94,13 +94,15 @@ lib.x`
       "main",
       `
 import './lib' as lib
-lib.x`
+lib`
     );
 
     await project.run("main");
 
     expect(project.getResult("main").ok).toEqual(true);
-    expect(project.getResult("main").value.toString()).toEqual("5");
+    expect(project.getResult("main").value.toString()).toEqual(
+      '{x: 5, with tags {exportData: {sourceId: "./lib", path: ["x"]}}}, with tags {exportData: {sourceId: "./lib", path: []}}'
+    );
   });
 
   describe("Mix imports and continues", () => {

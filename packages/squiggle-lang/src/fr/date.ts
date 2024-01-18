@@ -1,4 +1,5 @@
 import { REOther } from "../errors/messages.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDate,
@@ -33,10 +34,12 @@ export const library = [
     name: "make",
     requiresNamespace: true,
     examples: [
-      'Date.make("2020-05-12")',
-      "Date.make(2020, 5, 10)",
-      "Date.make(2020)",
-      "Date(2020.1)",
+      makeFnExample(
+        `d1 = Date.make("2020-05-12")
+d2 = Date.make(2020, 5, 10)
+d3 = Date.make(2020.5)`,
+        { useForTests: false }
+      ),
     ],
     displaySection: "Constructors",
     output: "Date",
@@ -72,7 +75,7 @@ export const library = [
   // same name as used in date-fns
   maker.make({
     name: "fromUnixTime",
-    examples: ["Date.fromUnixTime(1589222400)"],
+    examples: [makeFnExample("Date.fromUnixTime(1589222400)")],
     requiresNamespace: true,
     output: "Date",
     displaySection: "Conversions",
@@ -84,7 +87,7 @@ export const library = [
   }),
   maker.make({
     name: "toUnixTime",
-    examples: ["Date.toUnixTime(Date.make(2020, 5, 12))"],
+    examples: [makeFnExample("Date.toUnixTime(Date.make(2020, 5, 12))")],
     requiresNamespace: true,
     displaySection: "Conversions",
     output: "Number",
@@ -96,7 +99,11 @@ export const library = [
   }),
   maker.make({
     name: "subtract",
-    examples: ["Date.make(2020, 5, 12) - Date.make(2000, 1, 1)"],
+    examples: [
+      makeFnExample("Date.make(2020, 5, 12) - Date.make(2000, 1, 1)", {
+        isInteractive: true,
+      }),
+    ],
     output: "Duration",
     displaySection: "Algebra",
     definitions: [
@@ -107,7 +114,11 @@ export const library = [
   }),
   maker.make({
     name: "subtract",
-    examples: ["Date.make(2020, 5, 12) - 20years"],
+    examples: [
+      makeFnExample("Date.make(2020, 5, 12) - 20years", {
+        isInteractive: true,
+      }),
+    ],
     output: "Date",
     displaySection: "Algebra",
     definitions: [
@@ -119,8 +130,10 @@ export const library = [
   maker.make({
     name: "add",
     examples: [
-      "Date.make(2020, 5, 12) + 20years",
-      "20years + Date.make(2020, 5, 12)",
+      makeFnExample("Date.make(2020, 5, 12) + 20years"),
+      makeFnExample("20years + Date.make(2020, 5, 12)", {
+        isInteractive: true,
+      }),
     ],
     output: "Date",
     displaySection: "Algebra",
@@ -137,7 +150,7 @@ export const library = [
     name: "rangeDomain",
     requiresNamespace: true,
     output: "Domain",
-    examples: ["Date.rangeDomain(Date(2000), Date(2010))"],
+    examples: [makeFnExample("Date.rangeDomain(Date(2000), Date(2010))")],
     displaySection: "Other",
     definitions: [
       makeDefinition(

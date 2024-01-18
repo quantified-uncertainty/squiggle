@@ -41,7 +41,7 @@ describe("Debugging", () => {
   test("tagged inspect", async () => {
     await expectEvalToBe(
       "inspect(1->Tag.name('foo'))",
-      `1, with params name: "foo"`
+      `1, with tags {name: "foo"}`
     );
   });
 });

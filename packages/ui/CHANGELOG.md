@@ -1,5 +1,11 @@
 # @quri/ui
 
+## 0.2.1
+
+- Support JSX titles in dropdown items
+
+- Update `DocumentTextIcon` icon
+
 ## 0.2.0
 
 - Support `placement` prop in `<Dropdown>` component ([#2498](https://github.com/quantified-uncertainty/squiggle/pull/2498))

@@ -5,20 +5,18 @@ import { REOther } from "../errors/messages.js";
 import { SDate } from "../index.js";
 import { BaseLambda, Lambda } from "../reducer/lambda.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import {
-  Value,
-  vArray,
-  vBool,
-  vDate,
-  vDict,
-  vDist,
-  vInput,
-  vLambda,
-  vNumber,
-  vScale,
-  vString,
-  vVoid,
-} from "./index.js";
+import { Value } from "./index.js";
+import { vArray } from "./VArray.js";
+import { vBool } from "./VBool.js";
+import { vDate } from "./VDate.js";
+import { vDict } from "./VDict.js";
+import { vDist } from "./VDist.js";
+import { vInput } from "./VInput.js";
+import { vLambda } from "./vLambda.js";
+import { vNumber } from "./VNumber.js";
+import { vScale } from "./VScale.js";
+import { vString } from "./VString.js";
+import { vVoid } from "./VVoid.js";
 
 export type SimpleValueMap = ImmutableMap<string, SimpleValue>;
 export type SimpleValue =

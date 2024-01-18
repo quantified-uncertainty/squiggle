@@ -3,7 +3,7 @@ import { Env } from "../../dist/env.js";
 import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
 import { clamp, sort, uniq } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
-import { Plot, vPlot } from "../../value/index.js";
+import { Plot, vPlot } from "../../value/VPlot.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqPlotValue } from "./index.js";

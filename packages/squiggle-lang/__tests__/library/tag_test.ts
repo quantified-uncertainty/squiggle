@@ -1,6 +1,7 @@
 import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("Tags", () => {
+  testEvalToBe("123 -> Tag.name('')", "123");
   describe("name", () => {
     testEvalToBe("123 -> Tag.name('myNumber') -> Tag.getName", '"myNumber"');
   });
@@ -12,12 +13,13 @@ describe("Tags", () => {
   describe("all", () => {
     testEvalToBe(
       "123 -> Tag.name('myName') -> Tag.doc('myDoc') -> Tag.getAll",
-      '{name: "myName",doc: "myDoc"}'
+      '{name: "myName", doc: "myDoc"}'
     );
   });
 
   describe("format", () => {
     testEvalToBe("123 -> Tag.format('.2%') -> Tag.getFormat", '".2%"');
+    testEvalToBe("0 -> Tag.format('.2%') -> Tag.getFormat", '".2%"');
   });
 
   describe("notebook", () => {
@@ -26,6 +28,15 @@ describe("Tags", () => {
 
   describe("hide", () => {
     testEvalToBe("3 -> Tag.hide -> Tag.getHide", "true");
+  });
+
+  describe("startOpenToggle", () => {
+    testEvalToBe("3 -> Tag.startOpen -> Tag.getStartOpenState", '"open"');
+    testEvalToBe("3 -> Tag.startClosed -> Tag.getStartOpenState", '"closed"');
+    testEvalToBe(
+      "3 -> Tag.startClosed -> Tag.startOpen -> Tag.getStartOpenState",
+      '"open"'
+    );
   });
 
   describe("omit", () => {
@@ -49,7 +60,7 @@ x = 5
 
 x
 `,
-    '5, with params name: "five"'
+    '5, with tags {name: "five"}'
   );
 
   testEvalToBe(
@@ -60,7 +71,7 @@ x = 5
 
 x
 `,
-    '5, with params name: "five", doc: "This is five"'
+    '5, with tags {name: "five", doc: "This is five"}'
   );
 
   testEvalToBe(

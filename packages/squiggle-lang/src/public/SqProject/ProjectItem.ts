@@ -3,20 +3,27 @@ import { ICompileError, IRuntimeError } from "../../errors/IError.js";
 import { compileAst } from "../../expression/compile.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { evaluate, ReducerFn } from "../../reducer/index.js";
-import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
-import { Value } from "../../value/index.js";
+import { Value, vArray, vString } from "../../value/index.js";
+import { vDict, VDict } from "../../value/VDict.js";
 import { SqCompileError, SqError, SqRuntimeError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 
 // source -> ast -> imports -> result/bindings/exports
 
+export type Externals = {
+  stdlib: VDict;
+  implicitImports: VDict;
+  explicitImports: VDict;
+};
+
 export type RunOutput = {
   result: Value;
-  bindings: Bindings;
-  exports: Bindings;
+  bindings: VDict;
+  exports: VDict;
+  externals: Externals;
 };
 
 export type Import =
@@ -181,7 +188,11 @@ export class ProjectItem {
     this.output = Result.Err(e);
   }
 
-  async run(context: ReducerContext, externals: ImmutableMap<string, Value>) {
+  async run(context: ReducerContext, externals: Externals) {
+    const _externals = externals.stdlib
+      .merge(externals.implicitImports)
+      .merge(externals.explicitImports);
+
     if (this.output) {
       return;
     }
@@ -198,7 +209,7 @@ export class ProjectItem {
     }
 
     const expression = Result.errMap(
-      compileAst(this.ast.value, externals),
+      compileAst(this.ast.value, _externals.value),
       (e) => new SqCompileError(e)
     );
 
@@ -225,13 +236,38 @@ export class ProjectItem {
         evaluate: asyncEvaluate,
       });
 
-      const bindings = contextAfterEvaluation.stack.asBindings();
       const exportNames = new Set(expression.value.value.exports);
-      const exports = bindings.filter((_, key) => exportNames.has(key));
+      const bindings = contextAfterEvaluation.stack
+        .asBindings()
+        .mapEntries(([key, value]) => {
+          let _value = value;
+          if (exportNames.has(key)) {
+            _value = value.mergeTags({
+              exportData: vDict(
+                ImmutableMap<string, Value>([
+                  ["sourceId", vString(this.sourceId)],
+                  ["path", vArray([vString(key)])],
+                ])
+              ),
+            });
+          }
+          return [key, _value];
+        });
+      const exports = bindings.filter(
+        (value, _) => value.tags?.exportData() !== undefined
+      );
       this.output = Ok({
         result,
-        bindings,
-        exports,
+        bindings: vDict(bindings),
+        exports: vDict(exports).mergeTags({
+          exportData: vDict(
+            ImmutableMap<string, Value>([
+              ["sourceId", vString(this.sourceId)],
+              ["path", vArray([])],
+            ])
+          ),
+        }),
+        externals: externals,
       });
     } catch (e: unknown) {
       this.failRun(new SqRuntimeError(IRuntimeError.fromException(e)));

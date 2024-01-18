@@ -12,20 +12,38 @@ import {
 
 type Shorthand = { type: "infix" | "unary"; symbol: string };
 
+type example = {
+  text: string;
+  isInteractive: boolean;
+  useForTests: boolean;
+};
+
+export function makeFnExample(
+  text: string,
+  params: { isInteractive?: boolean; useForTests?: boolean } = {}
+): example {
+  const { isInteractive = false, useForTests = true } = params;
+  return { text, isInteractive, useForTests };
+}
+
 export type FRFunction = {
   name: string;
   nameSpace: string;
   requiresNamespace: boolean;
   definitions: FnDefinition[];
   output?: Value["type"];
-  examples?: string[];
-  interactiveExamples?: string[];
+  examples?: example[];
   description?: string;
   isExperimental?: boolean;
   isUnit?: boolean;
   shorthand?: Shorthand;
   displaySection?: string;
+  versionAdded?: string;
 };
+
+function organizedExamples(f: FRFunction) {
+  return [...(f.examples ?? [])];
+}
 
 type FnNameDict = Map<string, FnDefinition[]>;
 
@@ -37,11 +55,11 @@ export type FnDocumentation = Pick<
   | "definitions"
   | "name"
   | "examples"
-  | "interactiveExamples"
   | "isExperimental"
   | "isUnit"
   | "shorthand"
   | "displaySection"
+  | "versionAdded"
 > & { signatures: string[] };
 
 export class Registry {
@@ -78,17 +96,10 @@ export class Registry {
     return new Registry(fns, dict);
   }
 
-  allExamplesWithFns(): { fn: FRFunction; example: string }[] {
+  allExamplesWithFns(): { fn: FRFunction; example: example }[] {
     return this.functions
       .map((fn) => {
-        const regularExamples =
-          fn.examples?.map((example) => ({
-            fn,
-            example,
-          })) ?? [];
-        const interactiveExamples =
-          fn.interactiveExamples?.map((example) => ({ fn, example })) ?? [];
-        return [...regularExamples, ...interactiveExamples];
+        return organizedExamples(fn).map((example) => ({ fn, example }));
       })
       .flat();
   }
@@ -139,7 +150,6 @@ export class Registry {
       description: fn.description,
       definitions: fn.definitions,
       examples: fn.examples,
-      interactiveExamples: fn.interactiveExamples,
       signatures: fn.definitions
         .filter((d) => showInDocumentation(d))
         .map(fnDefinitionToString),
