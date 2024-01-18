@@ -1,4 +1,4 @@
-import { BaseValue } from "./index.js";
+import { BaseValue } from "./BaseValue.js";
 
 export class VVoid extends BaseValue {
   readonly type = "Void";

@@ -377,20 +377,20 @@ describe("frWithTags", () => {
   });
 
   test("Unpack Tagged Item", () => {
-    const taggedValue = vNumber(10).mergeTags({ name: "test" });
+    const taggedValue = vNumber(10).mergeTags({ name: vString("test") });
     const unpacked = frTaggedNumber.unpack(taggedValue);
     expect(unpacked).toEqual({
       value: 10,
-      tags: new ValueTags({ name: "test" }),
+      tags: new ValueTags({ name: vString("test") }),
     });
   });
 
   test("Pack", () => {
     const packed = frTaggedNumber.pack({
       value: 10,
-      tags: new ValueTags({ name: "myName" }),
+      tags: new ValueTags({ name: vString("myName") }),
     });
-    expect(packed).toEqual(vNumber(10).mergeTags({ name: "myName" }));
+    expect(packed).toEqual(vNumber(10).mergeTags({ name: vString("myName") }));
   });
 
   test("Display", () => {

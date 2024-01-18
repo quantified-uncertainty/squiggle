@@ -7,6 +7,7 @@ import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { vDict, VDict } from "../../value/VDict.js";
+import { vString } from "../../value/VString.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
@@ -263,7 +264,10 @@ export class SqProject {
     return Result.Ok({
       result: wrapValue(result, newContext("result")),
       bindings: wrapSqDict(bindings, "bindings"),
-      exports: wrapSqDict(exports.mergeTags({ name: sourceId }), "exports"),
+      exports: wrapSqDict(
+        exports.mergeTags({ name: vString(sourceId) }),
+        "exports"
+      ),
       imports: wrapSqDict(externals.explicitImports, "imports"),
     });
   }

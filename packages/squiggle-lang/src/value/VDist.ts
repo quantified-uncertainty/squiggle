@@ -1,5 +1,5 @@
 import { BaseDist } from "../dist/BaseDist.js";
-import { BaseValue } from "./index.js";
+import { BaseValue } from "./BaseValue.js";
 
 export class VDist extends BaseValue {
   readonly type = "Dist";

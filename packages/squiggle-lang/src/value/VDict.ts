@@ -1,6 +1,7 @@
 import { REDictPropertyNotFound, REOther } from "../errors/messages.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { BaseValue, isEqual, Value } from "./index.js";
+import { BaseValue } from "./BaseValue.js";
+import { isEqual, Value } from "./index.js";
 import { Indexable } from "./mixins.js";
 
 type ValueMap = ImmutableMap<string, Value>;

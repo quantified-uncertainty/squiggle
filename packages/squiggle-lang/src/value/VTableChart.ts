@@ -1,5 +1,6 @@
 import { Lambda } from "../reducer/lambda.js";
-import { BaseValue, Value } from "./index.js";
+import { BaseValue } from "./BaseValue.js";
+import { Value } from "./index.js";
 
 export type TableChart = {
   data: readonly Value[];

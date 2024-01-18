@@ -110,8 +110,8 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
             params ?? {};
           return validateCalculator({
             fn: value,
-            title: title || tags.value.name || undefined,
-            description: description || tags.value.doc || undefined,
+            title: title || tags.name() || undefined,
+            description: description || tags.doc() || undefined,
             inputs: inputs || value.defaultInputs(),
             autorun: autorun === null || autorun === undefined ? true : autorun,
             sampleCount: sampleCount || undefined,

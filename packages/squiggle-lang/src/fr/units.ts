@@ -3,6 +3,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { frNumber, frWithTags } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { ValueTags } from "../value/valueTags.js";
+import { vString } from "../value/VString.js";
 
 const maker = new FnFactory({
   nameSpace: "",
@@ -26,7 +27,7 @@ const makeUnitFn = (
         ? makeDefinition([frNumber], frWithTags(frNumber), ([x]) => {
             return {
               value: x * multiplier,
-              tags: new ValueTags({ numberFormat: format }),
+              tags: new ValueTags({ numberFormat: vString(format) }),
             };
           })
         : makeDefinition([frNumber], frNumber, ([x]) => x * multiplier),

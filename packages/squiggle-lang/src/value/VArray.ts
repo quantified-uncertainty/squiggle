@@ -1,7 +1,8 @@
 import isInteger from "lodash/isInteger.js";
 
 import { REArrayIndexNotFound, REOther } from "../errors/messages.js";
-import { BaseValue, isEqual, Value } from "./index.js";
+import { BaseValue } from "./BaseValue.js";
+import { isEqual, Value } from "./index.js";
 import { Indexable } from "./mixins.js";
 
 export class VArray extends BaseValue implements Indexable {

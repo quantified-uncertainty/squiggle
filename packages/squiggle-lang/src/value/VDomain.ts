@@ -1,7 +1,8 @@
 import { REOther } from "../errors/messages.js";
 import { SDate } from "../utility/SDate.js";
+import { BaseValue } from "./BaseValue.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
-import { BaseValue, Value } from "./index.js";
+import { Value } from "./index.js";
 import { Indexable } from "./mixins.js";
 import { vDate, VDate } from "./VDate.js";
 import { vNumber, VNumber } from "./VNumber.js";

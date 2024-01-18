@@ -1,5 +1,5 @@
 import { SDuration } from "../utility/SDuration.js";
-import { BaseValue } from "./index.js";
+import { BaseValue } from "./BaseValue.js";
 
 export class VDuration extends BaseValue {
   readonly type = "Duration";

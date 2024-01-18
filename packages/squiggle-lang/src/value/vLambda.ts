@@ -1,7 +1,8 @@
 import { REOther } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { BaseValue, Value } from "./index.js";
+import { BaseValue } from "./BaseValue.js";
+import { Value } from "./index.js";
 import { Indexable } from "./mixins.js";
 import { vArray } from "./VArray.js";
 import { vDict } from "./VDict.js";

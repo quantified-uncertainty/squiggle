@@ -1,6 +1,6 @@
 import { REOther } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
-import { BaseValue } from "./index.js";
+import { BaseValue } from "./BaseValue.js";
 import { Input } from "./VInput.js";
 
 export type Calculator = {

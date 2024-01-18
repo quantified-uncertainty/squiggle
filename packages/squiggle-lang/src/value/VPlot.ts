@@ -1,7 +1,8 @@
 import { BaseDist } from "../dist/BaseDist.js";
 import { REOther } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
-import { BaseValue, Value } from "./index.js";
+import { BaseValue } from "./BaseValue.js";
+import { Value } from "./index.js";
 import { Indexable } from "./mixins.js";
 import { vLambda } from "./vLambda.js";
 import { Scale } from "./VScale.js";

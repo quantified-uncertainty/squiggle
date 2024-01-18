@@ -1,5 +1,5 @@
 import { SDate } from "../utility/SDate.js";
-import { BaseValue } from "./index.js";
+import { BaseValue } from "./BaseValue.js";
 
 export class VDate extends BaseValue {
   readonly type = "Date";

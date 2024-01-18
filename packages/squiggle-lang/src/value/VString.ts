@@ -1,4 +1,4 @@
-import { BaseValue } from "./index.js";
+import { BaseValue } from "./BaseValue.js";
 
 export class VString extends BaseValue {
   readonly type = "String";

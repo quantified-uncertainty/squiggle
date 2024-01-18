@@ -1,6 +1,6 @@
 import lodashIsEqual from "lodash/isEqual.js";
 
-import { BaseValue } from "./index.js";
+import { BaseValue } from "./BaseValue.js";
 
 export type CommonInputArgs = {
   name: string;
