@@ -11,8 +11,16 @@ import {
 
 import { useReactiveExtension } from "./codemirrorHooks.js";
 
-// Define a custom GutterMarker class
 class StarMarker extends GutterMarker {
+  lineNumber: number;
+  onClickLine: () => void;
+
+  constructor(lineNumber: number, onClickLine: () => void) {
+    super();
+    this.lineNumber = lineNumber;
+    this.onClickLine = onClickLine;
+  }
+
   override toDOM() {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("width", "10");
@@ -33,17 +41,20 @@ class StarMarker extends GutterMarker {
 
     svg.appendChild(path);
 
+    svg.addEventListener("click", (e) => {
+      e.stopPropagation();
+      this.onClickLine();
+    });
+
     return svg;
   }
 }
 
-function makeMarker() {
-  return new StarMarker();
-}
-
 export function useShowGutterExtension(
   view: EditorView | undefined,
-  showGutter: boolean
+  showGutter: boolean,
+  onClickLine: (lineNumber: number) => void,
+  activeLines: number[]
 ) {
   return useReactiveExtension(
     view,
@@ -59,14 +70,19 @@ export function useShowGutterExtension(
               markers: (view) => {
                 // Explicitly create a RangeSetBuilder for GutterMarker
                 const builder = new RangeSetBuilder<GutterMarker>();
-                // for (let i = 0; i < view.state.doc.lines; i++) {
-                for (let i = 0; i < 1099; i++) {
-                  builder.add(i, i + 1, makeMarker());
+                for (let i = 0; i < 10; i++) {
+                  // for (const i of activeLines) {
+                  const line = view.state.doc.line(i + 1);
+                  builder.add(
+                    line.from,
+                    line.to,
+                    new StarMarker(i + 1, () => onClickLine(i))
+                  );
                 }
                 return builder.finish();
               },
-              initialSpacer: () => new StarMarker(),
-              updateSpacer: () => new StarMarker(),
+              initialSpacer: () => new StarMarker(0, () => onClickLine(0)),
+              updateSpacer: () => new StarMarker(0, () => onClickLine(0)),
             }),
           ]
         : [],

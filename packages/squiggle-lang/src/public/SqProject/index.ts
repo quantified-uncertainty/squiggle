@@ -423,4 +423,40 @@ export class SqProject {
     }
     return Result.Ok(found);
   }
+
+  findValuePathByLine(sourceId: string, line: number): SqValuePath | undefined {
+    try {
+      const items = this.getBindings(sourceId);
+      if (items.ok) {
+        const el = items.value.entries().find(([k, v]) => {
+          const _line = v.context?.findLocation()?.start.line;
+          return line === _line;
+        });
+        if (el) {
+          return el[1].context?.path;
+        }
+      }
+    } catch (e) {
+      return undefined;
+    }
+  }
+
+  getActiveLineNumbers(sourceId: string): number[] {
+    try {
+      const items = this.getBindings(sourceId);
+      if (items.ok) {
+        const lines = items.value
+          .entries()
+          .map(([k, v]) => {
+            return v.context?.findLocation()?.start.line;
+          })
+          .filter((v) => v !== undefined) as number[];
+        return lines;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
+    }
+  }
 }

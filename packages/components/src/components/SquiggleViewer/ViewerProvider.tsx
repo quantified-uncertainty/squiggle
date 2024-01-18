@@ -317,13 +317,15 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       unstablePlaygroundSettings
     );
 
+    const [focused, setFocused] = useState<SqValuePath | undefined>();
+
     useImperativeHandle(ref, () => ({
       viewValuePath(path: SqValuePath) {
+        console.log("Trying to change path");
         itemStore.scrollToPath(path);
+        setFocused(path);
       },
     }));
-
-    const [focused, setFocused] = useState<SqValuePath | undefined>();
 
     const globalSettings = useMemo(() => {
       return merge({}, defaultPlaygroundSettings, playgroundSettings);

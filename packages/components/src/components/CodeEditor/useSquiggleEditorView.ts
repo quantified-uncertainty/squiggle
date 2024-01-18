@@ -87,9 +87,24 @@ export function useSquiggleEditorExtensions(
     view,
     params.project
   );
+  const activeLineNumbers = params.sourceId
+    ? params.project.getActiveLineNumbers(params.sourceId)
+    : [];
   const showGutterExtension = useShowGutterExtension(
     view,
-    params.showGutter ?? false
+    params.showGutter ?? false,
+    (line) => {
+      if (params.sourceId) {
+        const valuePath = params.project.findValuePathByLine(
+          params.sourceId,
+          line + 1
+        );
+        if (valuePath && params.onViewValuePath) {
+          params.onViewValuePath(valuePath);
+        }
+      }
+    },
+    activeLineNumbers
   );
   const lineWrappingExtension = useLineWrappingExtension(
     view,
