@@ -88,7 +88,7 @@ const SquiggleViewerWithoutProvider: FC<SquiggleViewerProps> = ({ value }) => {
   }
 
   return focused ? (
-    <div className="space-y-3">
+    <div className="space-y-3 pl-3">
       <FocusedNavigation focusedPath={focused} rootPath={value.context?.path} />
       {focusedItem ? (
         <ValueViewer
