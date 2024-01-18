@@ -163,6 +163,8 @@ type ViewerContextShape = {
   globalSettings: PlaygroundSettings;
   focused: SqValuePath | undefined;
   setFocused: (value: SqValuePath | undefined) => void;
+  selected: SqValuePath | undefined;
+  setSelected: (value: SqValuePath | undefined) => void;
   editor?: CodeEditorHandle;
   itemStore: ItemStore;
   initialized: boolean;
@@ -173,6 +175,8 @@ export const ViewerContext = createContext<ViewerContextShape>({
   globalSettings: defaultPlaygroundSettings,
   focused: undefined,
   setFocused: () => undefined,
+  selected: undefined,
+  setSelected: () => undefined,
   editor: undefined,
   itemStore: new ItemStore(),
   handle: {
@@ -281,6 +285,20 @@ export function useFocus() {
   };
 }
 
+export function useSelect() {
+  const { selected, setSelected } = useViewerContext();
+  return (path: SqValuePath) => {
+    if (selected && pathAsString(selected) === pathAsString(path)) {
+      return; // nothing to do
+    }
+    if (path.isRoot()) {
+      setSelected(undefined); // selecting root nodes is not allowed
+    } else {
+      setSelected(path);
+    }
+  };
+}
+
 export function useUnfocus() {
   const { setFocused } = useViewerContext();
   return () => setFocused(undefined);
@@ -289,6 +307,11 @@ export function useUnfocus() {
 export function useIsFocused(path: SqValuePath) {
   const { focused } = useViewerContext();
   return focused && pathAsString(focused) === pathAsString(path);
+}
+
+export function useIsSelected(path: SqValuePath) {
+  const { selected } = useViewerContext();
+  return selected && pathAsString(selected) === pathAsString(path);
 }
 
 export function useMergedSettings(path: SqValuePath) {
@@ -331,8 +354,13 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
     };
 
     useImperativeHandle(ref, () => handle);
+    //   onKeyPress(stroke: string) {
+    //     console.log("Keystroke", stroke);
+    //   },
+    // }));
 
     const [focused, setFocused] = useState<SqValuePath | undefined>();
+    const [selected, setSelected] = useState<SqValuePath | undefined>();
 
     const globalSettings = useMemo(() => {
       return merge({}, defaultPlaygroundSettings, playgroundSettings);
@@ -345,6 +373,8 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
           editor,
           focused,
           setFocused,
+          selected,
+          setSelected,
           itemStore,
           handle,
           initialized: true,

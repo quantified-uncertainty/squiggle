@@ -22,8 +22,10 @@ import {
 } from "./utils.js";
 import {
   useFocus,
+  useIsSelected,
   useMergedSettings,
   useRegisterAsItemViewer,
+  useSelect,
   useToggleCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
@@ -119,6 +121,8 @@ export const ValueWithContextViewer: FC<Props> = ({
 
   const toggleCollapsed_ = useToggleCollapsed();
   const focus = useFocus();
+  const select = useSelect();
+  const isSelected = useIsSelected(path);
 
   const { itemStore } = useViewerContext();
   const itemState = itemStore.getStateOrInitialize(value);
@@ -230,8 +234,10 @@ export const ValueWithContextViewer: FC<Props> = ({
           <header
             className={clsx(
               "flex justify-between group pr-0.5",
-              header === "large" ? "mb-2" : "hover:bg-stone-100 rounded-sm"
+              header === "large" ? "mb-2" : "hover:bg-stone-100 rounded-sm",
+              isSelected && "bg-blue-100 hover:bg-slate-200"
             )}
+            onClick={() => select(path)}
           >
             <div className="inline-flex items-center">
               {collapsible && triangleToggle()}
