@@ -23,12 +23,15 @@ import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { SquiggleViewerHandle } from "./index.js";
 import {
   getChildrenValues,
   pathAsString,
   shouldBeginCollapsed,
 } from "./utils.js";
+
+export type SquiggleViewerHandle = {
+  viewValuePath(path: SqValuePath): void;
+};
 
 type ItemHandle = {
   element: HTMLDivElement;
@@ -163,6 +166,7 @@ type ViewerContextShape = {
   editor?: CodeEditorHandle;
   itemStore: ItemStore;
   initialized: boolean;
+  handle: SquiggleViewerHandle;
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
@@ -171,6 +175,9 @@ export const ViewerContext = createContext<ViewerContextShape>({
   setFocused: () => undefined,
   editor: undefined,
   itemStore: new ItemStore(),
+  handle: {
+    viewValuePath: () => {},
+  },
   initialized: false,
 });
 
@@ -317,11 +324,13 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       unstablePlaygroundSettings
     );
 
-    useImperativeHandle(ref, () => ({
+    const handle: SquiggleViewerHandle = {
       viewValuePath(path: SqValuePath) {
         itemStore.scrollToPath(path);
       },
-    }));
+    };
+
+    useImperativeHandle(ref, () => handle);
 
     const [focused, setFocused] = useState<SqValuePath | undefined>();
 
@@ -337,6 +346,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
           focused,
           setFocused,
           itemStore,
+          handle,
           initialized: true,
         }}
       >
@@ -347,15 +357,24 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
 );
 InnerViewerProvider.displayName = "InnerViewerProvider";
 
+const ProxyViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
+  (props, ref) => {
+    const { handle } = useViewerContext();
+    useImperativeHandle(ref, () => handle);
+    return props.children; // TODO - props.settings will be ignored, what should we do?
+  }
+);
+ProxyViewerProvider.displayName = "ProxyViewerProvider";
+
 export const ViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
   (props, ref) => {
     // `ViewerProvider` is a singleton, so if the context already exists, we don't initialize it again
     const { initialized } = useContext(ViewerContext);
     if (initialized) {
-      return props.children; // TODO: `ref` and settings will be ignored
+      return <ProxyViewerProvider ref={ref} {...props} />;
+    } else {
+      return <InnerViewerProvider ref={ref} {...props} />;
     }
-
-    return <InnerViewerProvider ref={ref} {...props} />;
   }
 );
 ViewerProvider.displayName = "ViewerProvider";
