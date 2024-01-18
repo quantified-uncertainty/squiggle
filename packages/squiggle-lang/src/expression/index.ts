@@ -3,7 +3,8 @@
  * Expressions are evaluated by reducer's `evaluate` function.
  */
 import { ASTNode } from "../ast/parse.js";
-import { Value, vVoid } from "../value/index.js";
+import { Value } from "../value/index.js";
+import { vVoid } from "../value/VVoid.js";
 
 export type LambdaExpressionParameter = {
   name: string;

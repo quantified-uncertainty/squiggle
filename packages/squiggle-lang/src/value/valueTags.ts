@@ -1,23 +1,23 @@
-import { result } from "../index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { Err, fmap, mergeMany, Ok } from "../utility/result.js";
-import { Value, vArray, vBool, vDict, VDict, vString } from "./index.js";
+import { Err, fmap, mergeMany, Ok, result } from "../utility/result.js";
+import { Value } from "./index.js";
+import { type VBool } from "./VBool.js";
+import { type VDict } from "./VDict.js";
+import { type VString } from "./VString.js";
 
-export type ExportData = {
-  sourceId: string;
-  path: string[];
-};
+// Note: this file can't call any `vType` constructors; it would cause a circular dependency because of `BaseValue` -> `ValueTags`.
 
+// Some of these tags are value-type-specific, but we store everything in a single Dict, for now.
 export type ValueTagsType = {
-  name?: string;
-  doc?: string;
+  name?: VString;
+  doc?: VString;
   showAs?: Value;
-  numberFormat?: string;
-  dateFormat?: string;
-  hidden?: boolean;
-  notebook?: boolean;
-  exportData?: ExportData;
-  startOpenState?: "open" | "closed";
+  numberFormat?: VString; // can be set on numbers, dists and durations
+  dateFormat?: VString; // can be set on dates
+  hidden?: VBool;
+  notebook?: VBool; // can be set on arrays
+  exportData?: VDict; // should be { sourceId: String, path: List(String) }
+  startOpenState?: VString;
 };
 
 type ValueTagsTypeName = keyof ValueTagsType;
@@ -54,42 +54,29 @@ function convertToValueTagsTypeName(
 export class ValueTags {
   constructor(public value: ValueTagsType) {}
 
-  exportData(): VDict | undefined {
-    const { exportData } = this.value;
-    if (!exportData) {
-      return undefined;
-    }
-    return vDict(
-      ImmutableMap({
-        sourceId: vString(exportData.sourceId),
-        path: vArray(exportData.path.map(vString)),
-      })
-    );
-  }
-
   toList(): [string, Value][] {
     const result: [string, Value][] = [];
     const { value } = this;
-    if (value.name) {
-      result.push(["name", vString(value.name)]);
+    if (value.name?.value) {
+      result.push(["name", value.name]);
     }
-    if (value.doc) {
-      result.push(["doc", vString(value.doc)]);
+    if (value.doc?.value) {
+      result.push(["doc", value.doc]);
     }
     if (value.showAs) {
       result.push(["showAs", value.showAs]);
     }
     if (value.numberFormat) {
-      result.push(["numberFormat", vString(value.numberFormat)]);
+      result.push(["numberFormat", value.numberFormat]);
     }
     if (value.dateFormat) {
-      result.push(["dateFormat", vString(value.dateFormat)]);
+      result.push(["dateFormat", value.dateFormat]);
     }
     if (value.hidden) {
-      result.push(["hidden", vBool(value.hidden)]);
+      result.push(["hidden", value.hidden]);
     }
     if (value.notebook) {
-      result.push(["notebook", vBool(value.notebook)]);
+      result.push(["notebook", value.notebook]);
     }
     const _exportData = this.exportData();
     if (_exportData) {
@@ -97,7 +84,7 @@ export class ValueTags {
     }
 
     if (value.startOpenState) {
-      result.push(["startOpenState", vString(value.startOpenState)]);
+      result.push(["startOpenState", value.startOpenState]);
     }
     return result;
   }
@@ -136,11 +123,11 @@ export class ValueTags {
   }
 
   name() {
-    return this.value.name;
+    return this.value.name?.value;
   }
 
   doc() {
-    return this.value.doc;
+    return this.value.doc?.value;
   }
 
   showAs() {
@@ -148,22 +135,37 @@ export class ValueTags {
   }
 
   numberFormat() {
-    return this.value.numberFormat;
+    return this.value.numberFormat?.value;
   }
 
   dateFormat() {
-    return this.value.dateFormat;
+    return this.value.dateFormat?.value;
   }
 
   hidden() {
-    return this.value.hidden;
+    return this.value.hidden?.value;
   }
 
   notebook() {
-    return this.value.notebook;
+    return this.value.notebook?.value;
   }
 
-  startOpenState() {
-    return this.value.startOpenState;
+  startOpenState(): "open" | "closed" | undefined {
+    const { value } = this.value.startOpenState ?? {};
+    if (!value) {
+      return undefined;
+    }
+    if (["open", "closed"].includes(value)) {
+      return value as "open" | "closed";
+    }
+
+    // Shouldn't happen in `fr/tags.ts` is coded correctly, but we don't have a way to validate `VString` values yet.
+    // I guess ignoring the value instead of failing here is a better choice,
+    // wrong open/closed state is not important enough for a fatal error.
+    return undefined;
+  }
+
+  exportData() {
+    return this.value.exportData;
   }
 }

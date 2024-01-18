@@ -19,15 +19,12 @@ import { ImmutableMap } from "../utility/immutableMap.js";
 import * as Result from "../utility/result.js";
 import { Ok, result } from "../utility/result.js";
 import { annotationToDomain } from "../value/domain.js";
-import {
-  Value,
-  vArray,
-  vDict,
-  vDomain,
-  VDomain,
-  vLambda,
-  vVoid,
-} from "../value/index.js";
+import { Value } from "../value/index.js";
+import { vArray } from "../value/VArray.js";
+import { vDict } from "../value/VDict.js";
+import { vDomain, VDomain } from "../value/VDomain.js";
+import { vLambda } from "../value/vLambda.js";
+import { vVoid } from "../value/VVoid.js";
 import * as Context from "./context.js";
 import { UserDefinedLambda, UserDefinedLambdaParameter } from "./lambda.js";
 

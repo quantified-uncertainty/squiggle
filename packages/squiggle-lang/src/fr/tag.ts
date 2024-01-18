@@ -29,8 +29,10 @@ import {
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { getOrThrow } from "../utility/result.js";
-import { Value, vString } from "../value/index.js";
+import { Value } from "../value/index.js";
 import { ValueTags, ValueTagsType } from "../value/valueTags.js";
+import { vBool, VBool } from "../value/VBool.js";
+import { vString } from "../value/VString.js";
 
 const maker = new FnFactory({
   nameSpace: "Tag",
@@ -66,7 +68,7 @@ type PickByValue<T, ValueType> = NonNullable<
 >;
 
 const booleanTagDefs = <T>(
-  tagName: PickByValue<ValueTagsType, boolean>,
+  tagName: PickByValue<ValueTagsType, VBool>,
   frType: FRType<T>
 ) => [
   makeDefinition(
@@ -74,7 +76,7 @@ const booleanTagDefs = <T>(
     frWithTags(frType),
     ([{ value, tags }, tagValue]) => ({
       value,
-      tags: tags.merge({ [tagName]: tagValue }),
+      tags: tags.merge({ [tagName]: vBool(tagValue) }),
     }),
     { isDecorator: true }
   ),
@@ -83,7 +85,7 @@ const booleanTagDefs = <T>(
     frWithTags(frType),
     ([{ value, tags }]) => ({
       value,
-      tags: tags.merge({ [tagName]: true }),
+      tags: tags.merge({ [tagName]: vBool(true) }),
     }),
     { isDecorator: true }
   ),
@@ -138,7 +140,7 @@ export const library = [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
         frAny({ genericName: "A" }),
-        ([value, name]) => value.mergeTags({ name }),
+        ([value, name]) => value.mergeTags({ name: vString(name) }),
         { isDecorator: true }
       ),
     ],
@@ -148,7 +150,7 @@ export const library = [
     displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
-        return value.tags?.value.name || "";
+        return value.tags?.name() || "";
       }),
     ],
   }),
@@ -160,7 +162,7 @@ export const library = [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
         frAny({ genericName: "A" }),
-        ([value, doc]) => value.mergeTags({ doc }),
+        ([value, doc]) => value.mergeTags({ doc: vString(doc) }),
         { isDecorator: true }
       ),
     ],
@@ -170,7 +172,7 @@ export const library = [
     displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
-        return value.tags?.value.doc || "";
+        return value.tags?.doc() || "";
       }),
     ],
   }),
@@ -244,7 +246,7 @@ example2 = {|x| x + 1}`,
         frWithTags(frDistOrNumber),
         ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
-          return { value, tags: tags.merge({ numberFormat: format }) };
+          return { value, tags: tags.merge({ numberFormat: vString(format) }) };
         },
         { isDecorator: true }
       ),
@@ -253,7 +255,7 @@ example2 = {|x| x + 1}`,
         frWithTags(frDuration),
         ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
-          return { value, tags: tags.merge({ numberFormat: format }) };
+          return { value, tags: tags.merge({ numberFormat: vString(format) }) };
         },
         { isDecorator: true }
       ),
@@ -261,7 +263,7 @@ example2 = {|x| x + 1}`,
         [frWithTags(frDate), frNamed("timeFormat", frString)],
         frWithTags(frDate),
         ([{ value, tags }, format]) => {
-          return { value, tags: tags.merge({ dateFormat: format }) };
+          return { value, tags: tags.merge({ dateFormat: vString(format) }) };
         },
         { isDecorator: true }
       ),
@@ -294,7 +296,7 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frBool, ([value]) => {
-        return value.tags?.value.hidden || false;
+        return value.getTags().hidden() ?? false;
       }),
     ],
   }),
@@ -308,7 +310,7 @@ example2 = {|x| x + 1}`,
         frWithTags(frAny({ genericName: "A" })),
         ([{ value, tags }]) => ({
           value,
-          tags: tags.merge({ startOpenState: "open" }),
+          tags: tags.merge({ startOpenState: vString("open") }),
         }),
         { isDecorator: true }
       ),
@@ -324,7 +326,7 @@ example2 = {|x| x + 1}`,
         frWithTags(frAny({ genericName: "A" })),
         ([{ value, tags }]) => ({
           value,
-          tags: tags.merge({ startOpenState: "closed" }),
+          tags: tags.merge({ startOpenState: vString("closed") }),
         }),
         { isDecorator: true }
       ),
@@ -338,7 +340,7 @@ example2 = {|x| x + 1}`,
       makeDefinition(
         [frWithTags(frAny())],
         frString,
-        ([{ tags }]) => tags?.value.startOpenState || ""
+        ([{ tags }]) => tags?.value.startOpenState?.value ?? ""
       ),
     ],
   }),
@@ -383,7 +385,7 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition([frAny()], frBool, ([value]) => {
-        return value.tags?.value.notebook || false;
+        return value.tags?.notebook() ?? false;
       }),
     ],
   }),

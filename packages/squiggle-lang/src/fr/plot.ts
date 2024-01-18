@@ -1,6 +1,7 @@
 import mergeWith from "lodash/mergeWith.js";
 
 import { REArgumentError, REOther } from "../errors/messages.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
@@ -26,8 +27,9 @@ import {
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { clamp, sort, uniq } from "../utility/E_A_Floats.js";
-import { LabeledDistribution, Plot, Scale, VDomain } from "../value/index.js";
-import { makeFnExample } from "../library/registry/core.js";
+import { VDomain } from "../value/VDomain.js";
+import { LabeledDistribution, Plot } from "../value/VPlot.js";
+import { Scale } from "../value/VScale.js";
 
 const maker = new FnFactory({
   nameSpace: "Plot",

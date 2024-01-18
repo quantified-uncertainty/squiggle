@@ -1,4 +1,5 @@
-import { VDict, vString } from "../../value/index.js";
+import { VDict } from "../../value/VDict.js";
+import { vString } from "../../value/VString.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqDictValue, SqValue, wrapValue } from "./index.js";
 

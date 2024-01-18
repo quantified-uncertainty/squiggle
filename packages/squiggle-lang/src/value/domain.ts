@@ -1,6 +1,9 @@
 import { REArgumentError, REDomainError } from "../errors/messages.js";
 import { SDate } from "../utility/SDate.js";
-import { Scale, Value, VDate, VNumber } from "./index.js";
+import { Value } from "./index.js";
+import { VDate } from "./VDate.js";
+import { VNumber } from "./VNumber.js";
+import { Scale } from "./VScale.js";
 
 function _assertCorrectType(value: Value, expectedType: string) {
   if (value.type !== expectedType) {
