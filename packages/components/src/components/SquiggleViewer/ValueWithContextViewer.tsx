@@ -9,7 +9,6 @@ import { CommentIcon, TextTooltip } from "@quri/ui";
 
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
-import { leftWidgetMargin } from "../../widgets/utils.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
@@ -73,7 +72,6 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
     <div
       className={clsx(
         "max-w-4xl",
-        leftWidgetMargin,
         commentPosition === "bottom" ? "mt-1" : "mb-1"
       )}
     >
@@ -185,7 +183,7 @@ export const ValueWithContextViewer: FC<Props> = ({
 
     const headerClasses = () => {
       if (header === "large") {
-        return clsx("text-md font-bold ml-1", headerColor);
+        return clsx("text-md font-bold", headerColor);
       } else if (isRoot) {
         return "text-sm text-stone-600 font-semibold";
       } else {
