@@ -110,7 +110,11 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
     }
 
     return (
-      <ViewerProvider partialPlaygroundSettings={settings} editor={editor}>
+      <ViewerProvider
+        partialPlaygroundSettings={settings}
+        editor={editor}
+        ref={viewerRef}
+      >
         <Layout
           menu={
             <Dropdown
