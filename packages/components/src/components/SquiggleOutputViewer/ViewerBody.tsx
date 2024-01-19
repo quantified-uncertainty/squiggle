@@ -29,8 +29,7 @@ export const ViewerBody: FC<Props> = ({ squiggleOutput, mode, isRunning }) => {
   let usedValue: SqValue | undefined;
   switch (mode) {
     case "Result":
-      usedValue =
-        sqOutput.result.tag === "Void" ? undefined : output.value.result;
+      usedValue = output.value.result;
       break;
     case "Variables":
       usedValue = sqOutput.bindings.asValue();

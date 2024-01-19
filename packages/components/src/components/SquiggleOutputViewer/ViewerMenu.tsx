@@ -11,12 +11,6 @@ import {
 } from "@quri/ui";
 
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
-import {
-  getResultExports,
-  getResultImports,
-  getResultValue,
-  getResultVariables,
-} from "../../lib/utility.js";
 import { ViewerMode } from "./index.js";
 
 const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
@@ -42,22 +36,15 @@ type Props = {
   output: SquiggleOutput;
 };
 
-export const ViewerMenu: FC<Props> = ({ mode, setMode, output }) => {
-  const resultItem = getResultValue(output);
-  const resultExports = getResultExports(output);
-  const resultVariables = getResultVariables(output);
-  const resultImports = getResultImports(output);
-
-  const hasResult = Boolean(resultItem?.ok);
-  const variablesCount = resultVariables?.ok
-    ? resultVariables.value.value.entries().length
-    : 0;
-  const importsCount = resultImports?.ok
-    ? resultImports.value.value.entries().length
-    : 0;
-  const exportsCount = resultExports?.ok
-    ? resultExports.value.value.entries().length
-    : 0;
+export const ViewerMenu: FC<Props> = ({
+  mode,
+  setMode,
+  output: { output },
+}) => {
+  const hasResult = output.ok && output.value.result.tag !== "Void";
+  const variablesCount = output.ok ? output.value.bindings.size() : 0;
+  const importsCount = output.ok ? output.value.imports.size() : 0;
+  const exportsCount = output.ok ? output.value.exports.size() : 0;
 
   return (
     <Dropdown

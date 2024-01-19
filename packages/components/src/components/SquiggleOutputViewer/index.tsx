@@ -1,7 +1,7 @@
 import { forwardRef, useState } from "react";
 
+import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
-import { getResultExports, getResultValue } from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
@@ -19,20 +19,29 @@ type Props = {
 
 export type ViewerMode = "Imports" | "Exports" | "Variables" | "Result";
 
+function useMode(outputResult: SqOutputResult) {
+  return useState<ViewerMode>(() => {
+    // Pick the initial mode value
+
+    if (!outputResult.ok) {
+      return "Variables";
+    }
+
+    const output = outputResult.value;
+    if (output.result.tag !== "Void") {
+      return "Result";
+    }
+    if (!output.exports.isEmpty()) {
+      return "Exports";
+    }
+    return "Variables";
+  });
+}
+
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
 export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
   ({ squiggleOutput, isRunning, editor, ...settings }, viewerRef) => {
-    const resultItem = getResultValue(squiggleOutput);
-    const resultExports = getResultExports(squiggleOutput);
-
-    const hasResult = Boolean(resultItem?.ok);
-    const exportsCount = resultExports?.ok
-      ? resultExports.value.value.entries().length
-      : 0;
-
-    const [mode, setMode] = useState<ViewerMode>(
-      hasResult ? "Result" : exportsCount > 0 ? "Exports" : "Variables"
-    );
+    const [mode, setMode] = useMode(squiggleOutput.output);
 
     return (
       <ViewerProvider
