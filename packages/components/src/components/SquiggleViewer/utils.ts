@@ -1,5 +1,3 @@
-import isEqual from "lodash/isEqual.js";
-
 import { SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
@@ -49,75 +47,64 @@ export function useGetSubvalueByPath() {
 
   return (
     topValue: SqValue,
-    pathToSubvalue: SqValuePath
+    subValuePath: SqValuePath
   ): SqValue | undefined => {
     const { context } = topValue;
     if (!context) {
       return;
     }
 
-    if (!pathToSubvalue.contains(context.path)) {
+    if (!subValuePath.contains(context.path)) {
       return;
     }
 
     let currentValue = topValue;
-    for (let i = 0; i < pathToSubvalue.items.length; i++) {
-      if (i < context.path.items.length) {
-        // check that `path` is a subpath of `context.path`
-        if (!isEqual(context.path.items[i], pathToSubvalue.items[i])) {
+    for (let i = 0; i < subValuePath.items.length; i++) {
+      const pathItem = subValuePath.items[i];
+      let nextValue: SqValue | undefined;
+
+      if (currentValue.tag === "Array" && pathItem.value.type === "number") {
+        nextValue = currentValue.value.getValues()[pathItem.value.value];
+      } else if (
+        currentValue.tag === "Dict" &&
+        pathItem.value.type === "string"
+      ) {
+        nextValue = currentValue.value.get(pathItem.value.value);
+      } else if (
+        currentValue.tag === "TableChart" &&
+        pathItem.value.type === "cellAddress"
+      ) {
+        // Maybe it would be better to get the environment in a different way.
+        const environment = context.project.getEnvironment();
+        const item = currentValue.value.item(
+          pathItem.value.value.row,
+          pathItem.value.value.column,
+          environment
+        );
+        if (item.ok) {
+          nextValue = item.value;
+        } else {
           return;
         }
-        continue;
-      }
-
-      const pathItem = pathToSubvalue.items[i];
-
-      {
-        let nextValue: SqValue | undefined;
-
-        if (currentValue.tag === "Array" && pathItem.value.type === "number") {
-          nextValue = currentValue.value.getValues()[pathItem.value.value];
-        } else if (
-          currentValue.tag === "Dict" &&
-          pathItem.value.type === "string"
-        ) {
-          nextValue = currentValue.value.get(pathItem.value.value);
-        } else if (
-          currentValue.tag === "TableChart" &&
-          pathItem.value.type === "cellAddress"
-        ) {
-          // Maybe it would be better to get the environment in a different way.
-          const environment = context.project.getEnvironment();
-          const item = currentValue.value.item(
-            pathItem.value.value.row,
-            pathItem.value.value.column,
-            environment
-          );
-          if (item.ok) {
-            nextValue = item.value;
-          } else {
-            return;
-          }
-        } else if (pathItem.type === "calculator") {
-          // The previous path item is the one that is the parent of the calculator result.
-          // This is the one that we use in the ViewerContext to store information about the calculator.
-          const calculatorPath = new SqValuePath({
-            root: pathToSubvalue.root,
-            items: pathToSubvalue.items.slice(0, i),
-          });
-          const calculatorState = itemStore.getCalculator(calculatorPath);
-          const result = calculatorState?.calculatorResult;
-          if (!result?.ok) {
-            return;
-          }
-          nextValue = result.value;
-        }
-
-        if (!nextValue) {
+      } else if (pathItem.type === "calculator") {
+        // The previous path item is the one that is the parent of the calculator result.
+        // This is the one that we use in the ViewerContext to store information about the calculator.
+        const calculatorPath = new SqValuePath({
+          root: subValuePath.root,
+          items: subValuePath.items.slice(0, i),
+        });
+        const calculatorState = itemStore.getCalculator(calculatorPath);
+        const result = calculatorState?.calculatorResult;
+        if (!result?.ok) {
           return;
         }
-        currentValue = nextValue;
+        nextValue = result.value;
       }
+
+      if (!nextValue) {
+        return;
+      }
+      currentValue = nextValue;
     }
     return currentValue;
   };
