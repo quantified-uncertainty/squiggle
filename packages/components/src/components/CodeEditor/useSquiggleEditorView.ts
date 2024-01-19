@@ -104,7 +104,8 @@ export function useSquiggleEditorExtensions(
         }
       }
     },
-    activeLineNumbers
+    activeLineNumbers,
+    undefined
   );
   const lineWrappingExtension = useLineWrappingExtension(
     view,

@@ -59,7 +59,8 @@ export function useShowGutterExtension(
   view: EditorView | undefined,
   showGutter: boolean,
   onClickLine: (lineNumber: number) => void,
-  activeLines: number[]
+  activeLines: number[],
+  selectedLine: number | undefined
 ) {
   return useReactiveExtension(
     view,

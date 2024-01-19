@@ -158,6 +158,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       onViewValuePath={(path) => {
         rightPanelRef.current?.viewValuePath(path);
       }}
+      getViewState={rightPanelRef.current?.getState}
     />
   );
 

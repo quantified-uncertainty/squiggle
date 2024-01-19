@@ -10,6 +10,7 @@ export type CodeEditorProps = {
   onChange: (value: string) => void;
   onSubmit?: () => void;
   onViewValuePath?: (path: SqValuePath) => void;
+  getViewState?: () => { selected: SqValuePath | undefined };
   width?: number;
   height?: number | string;
   showGutter?: boolean;

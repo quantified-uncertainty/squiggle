@@ -445,6 +445,25 @@ export class SqProject {
     }
   }
 
+  findValueLineBySqValuePath(
+    sourceId: string,
+    path: SqValuePath
+  ): number | undefined {
+    try {
+      // const items = this.getBindings(sourceId);
+      // if (items.ok) {
+      //   const el = items.value.entries().find(([k, v]) => {
+      //     const _path: SqValuePath | undefined = v.context?.path;
+      //     return _path && path === _path;
+      //   });
+      //   const val: SqValue | undefined = el?[1]
+      // }
+      return undefined;
+    } catch (e) {
+      return undefined;
+    }
+  }
+
   getActiveLineNumbers(sourceId: string): number[] {
     try {
       const items = this.getBindings(sourceId);

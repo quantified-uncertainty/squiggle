@@ -32,6 +32,7 @@ import {
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
   onKeyPress(stroke: string): void;
+  getState(): { selected: SqValuePath | undefined };
 };
 
 type ItemHandle = {
@@ -376,6 +377,9 @@ export const ViewerContext = createContext<ViewerContextShape>({
   handle: {
     viewValuePath: () => {},
     onKeyPress: () => {},
+    getState: () => ({
+      selected: undefined,
+    }),
   },
   initialized: false,
 });
@@ -700,8 +704,12 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
 
     const handle: SquiggleViewerHandle = {
       viewValuePath(path: SqValuePath) {
+        if (selected && selected === path) {
+          setFocused(path);
+        }
         setSelected(path);
         itemStore.scrollToPath(path);
+        scrollToPath(path);
       },
       onKeyPress(stroke: string) {
         const arrowEvent = isArrowEvent(stroke) ? stroke : undefined;
@@ -713,6 +721,9 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
             selectedUnfocusedArrowEvent(arrowEvent, pathTree, selected);
           }
         }
+      },
+      getState() {
+        return { selected };
       },
     };
 

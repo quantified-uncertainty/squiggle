@@ -55,6 +55,7 @@ type Props = {
   renderExtraDropdownItems?: RenderExtraControls;
   renderExtraModal?: Parameters<typeof PanelWithToolbar>[0]["renderModal"];
   onViewValuePath?: (path: SqValuePath) => void;
+  getViewState?(): { selected: SqValuePath | undefined };
 };
 
 // for interactions with this component from outside
@@ -165,6 +166,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           lineWrapping={props.settings.editorSettings.lineWrapping}
           onChange={setCode}
           onViewValuePath={props.onViewValuePath}
+          getViewState={props.getViewState}
           onSubmit={runnerState.run}
         />
       </div>

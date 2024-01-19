@@ -9,6 +9,29 @@ export type PathItem =
       type: "calculator";
     };
 
+function pathItemIsEqual(a: PathItem, b: PathItem): boolean {
+  if (a.type !== b.type) {
+    return false;
+  }
+  switch (a.type) {
+    case "string":
+      return a.value === (b as { type: "string"; value: string }).value;
+    case "number":
+      return a.value === (b as { type: "number"; value: number }).value;
+    case "cellAddress":
+      return (
+        a.value.row ===
+          (b as { type: "cellAddress"; value: { row: number; column: number } })
+            .value.row &&
+        a.value.column ===
+          (b as { type: "cellAddress"; value: { row: number; column: number } })
+            .value.column
+      );
+    case "calculator":
+      return true;
+  }
+}
+
 export type Root = "result" | "bindings" | "imports" | "exports";
 
 export class SqValuePath {
@@ -25,6 +48,18 @@ export class SqValuePath {
       root: this.root,
       items: [...this.items, item],
     });
+  }
+
+  isEqual(other: SqValuePath) {
+    if (this.items.length !== other.items.length) {
+      return false;
+    }
+    for (let i = 0; i < this.items.length; i++) {
+      if (pathItemIsEqual(this.items[i], other.items[i]) === false) {
+        return false;
+      }
+    }
+    return true;
   }
 
   static findByOffset({
