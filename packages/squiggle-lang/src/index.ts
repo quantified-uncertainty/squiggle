@@ -60,7 +60,11 @@ export { SqTableChart } from "./public/SqValue/SqTableChart.js";
 export { SqCalculator } from "./public/SqValue/SqCalculator.js";
 export { SqDict } from "./public/SqValue/SqDict.js";
 export { SqScale } from "./public/SqValue/SqScale.js";
-export { type PathItem, SqValuePath } from "./public/SqValuePath.js";
+export {
+  type PathItem,
+  SqPathItem,
+  SqValuePath,
+} from "./public/SqValuePath.js";
 export { parse } from "./public/parse.js";
 export { fmap as resultMap, type result } from "./utility/result.js";
 

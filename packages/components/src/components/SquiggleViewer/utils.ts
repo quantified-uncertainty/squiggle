@@ -1,24 +1,10 @@
 import isEqual from "lodash/isEqual.js";
 
-import { PathItem, SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { useViewerContext } from "./ViewerProvider.js";
-
-export const pathItemFormat = (item: PathItem): string => {
-  if (item.type === "cellAddress") {
-    return `Cell (${item.value.row},${item.value.column})`;
-  } else if (item.type === "calculator") {
-    return `calculator`;
-  } else {
-    return String(item.value);
-  }
-};
-
-function isTopLevel(path: SqValuePath): boolean {
-  return path.items.length === 0;
-}
 
 function topLevelName(path: SqValuePath): string {
   return {
@@ -30,23 +16,15 @@ function topLevelName(path: SqValuePath): string {
 }
 
 export function pathAsString(path: SqValuePath) {
-  if (isTopLevel(path)) {
-    return topLevelName(path);
-  } else {
-    return [topLevelName(path), ...path.items.map(pathItemFormat)].join(".");
-  }
-}
-
-export function pathIsEqual(path1: SqValuePath, path2: SqValuePath) {
-  return pathAsString(path1) === pathAsString(path2);
+  return [topLevelName(path), ...path.items.map((p) => p.toString())].join(".");
 }
 
 export function pathToShortName(path: SqValuePath): string {
-  if (isTopLevel(path)) {
+  if (path.isRoot()) {
     return topLevelName(path);
   } else {
     const lastPathItem = path.items[path.items.length - 1];
-    return pathItemFormat(lastPathItem);
+    return lastPathItem.toString();
   }
 }
 
@@ -66,43 +44,50 @@ export function getChildrenValues(value: SqValue): SqValue[] {
 export function useGetSubvalueByPath() {
   const { itemStore } = useViewerContext();
 
-  return (value: SqValue, path: SqValuePath): SqValue | undefined => {
-    const { context } = value;
+  return (
+    topValue: SqValue,
+    pathToSubvalue: SqValuePath
+  ): SqValue | undefined => {
+    const { context } = topValue;
     if (!context) {
       return;
     }
-    if (context.path.root !== path.root) {
-      return;
-    }
-    if (context.path.items.length > path.items.length) {
+
+    if (!pathToSubvalue.contains(context.path)) {
       return;
     }
 
-    for (let i = 0; i < path.items.length; i++) {
+    let currentValue = topValue;
+    for (let i = 0; i < pathToSubvalue.items.length; i++) {
       if (i < context.path.items.length) {
         // check that `path` is a subpath of `context.path`
-        if (!isEqual(context.path.items[i], path.items[i])) {
+        if (!isEqual(context.path.items[i], pathToSubvalue.items[i])) {
           return;
         }
         continue;
       }
 
-      const pathItem = path.items[i];
+      const pathItem = pathToSubvalue.items[i];
+
       {
         let nextValue: SqValue | undefined;
-        if (pathItem.type === "number" && value.tag === "Array") {
-          nextValue = value.value.getValues()[pathItem.value];
-        } else if (pathItem.type === "string" && value.tag === "Dict") {
-          nextValue = value.value.get(pathItem.value);
+
+        if (currentValue.tag === "Array" && pathItem.value.type === "number") {
+          nextValue = currentValue.value.getValues()[pathItem.value.value];
         } else if (
-          pathItem.type === "cellAddress" &&
-          value.tag === "TableChart"
+          currentValue.tag === "Dict" &&
+          pathItem.value.type === "string"
+        ) {
+          nextValue = currentValue.value.get(pathItem.value.value);
+        } else if (
+          currentValue.tag === "TableChart" &&
+          pathItem.value.type === "cellAddress"
         ) {
           // Maybe it would be better to get the environment in a different way.
           const environment = context.project.getEnvironment();
-          const item = value.value.item(
-            pathItem.value.row,
-            pathItem.value.column,
+          const item = currentValue.value.item(
+            pathItem.value.value.row,
+            pathItem.value.value.column,
             environment
           );
           if (item.ok) {
@@ -114,8 +99,8 @@ export function useGetSubvalueByPath() {
           // The previous path item is the one that is the parent of the calculator result.
           // This is the one that we use in the ViewerContext to store information about the calculator.
           const calculatorPath = new SqValuePath({
-            root: path.root,
-            items: path.items.slice(0, i),
+            root: pathToSubvalue.root,
+            items: pathToSubvalue.items.slice(0, i),
           });
           const calculatorState = itemStore.getCalculator(calculatorPath);
           const result = calculatorState?.calculatorResult;
@@ -128,10 +113,10 @@ export function useGetSubvalueByPath() {
         if (!nextValue) {
           return;
         }
-        value = nextValue;
+        currentValue = nextValue;
       }
     }
-    return value;
+    return currentValue;
   };
 }
 

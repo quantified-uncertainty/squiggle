@@ -6,7 +6,7 @@ import { ChevronRightIcon } from "@quri/ui";
 import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
-import { pathIsEqual, pathItemFormat, useGetSubvalueByPath } from "./utils.js";
+import { useGetSubvalueByPath } from "./utils.js";
 import { ValueViewer } from "./ValueViewer.js";
 import {
   SquiggleViewerHandle,
@@ -38,7 +38,7 @@ const FocusedNavigation: FC<{
   const unfocus = useUnfocus();
   const focus = useFocus();
 
-  const isFocusedOnRootPath = rootPath && pathIsEqual(focusedPath, rootPath);
+  const isFocusedOnRootPath = rootPath && rootPath.isEqual(focusedPath);
 
   if (isFocusedOnRootPath) {
     return null;
@@ -62,7 +62,7 @@ const FocusedNavigation: FC<{
           <FocusedNavigationItem
             key={i}
             onClick={() => focus(path)}
-            text={pathItemFormat(path.items[i + rootPathFocusedAdjustment])}
+            text={path.items[i + rootPathFocusedAdjustment].toString()}
           />
         ))}
     </div>

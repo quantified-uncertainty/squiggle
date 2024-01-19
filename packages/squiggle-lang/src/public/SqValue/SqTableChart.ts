@@ -4,6 +4,7 @@ import * as Result from "../../utility/result.js";
 import { TableChart } from "../../value/VTableChart.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
+import { SqPathItem } from "../SqValuePath.js";
 import { SqValue, wrapValue } from "./index.js";
 import { SqLambda } from "./SqLambda.js";
 
@@ -20,8 +21,9 @@ const getItem = (
   context?: SqValueContext
 ): Result.result<SqValue, SqError> => {
   const response = fn.call([element], env);
-  const newContext: SqValueContext | undefined =
-    context && context.extend({ type: "cellAddress", value: { row, column } });
+  const newContext: SqValueContext | undefined = context?.extend(
+    SqPathItem.fromCellAddress(row, column)
+  );
 
   if (response.ok && context) {
     return Result.Ok(wrapValue(response.value._value, newContext));
