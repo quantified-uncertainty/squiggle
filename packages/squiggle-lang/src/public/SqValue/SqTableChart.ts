@@ -1,7 +1,7 @@
 import { Env } from "../../dist/env.js";
 import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
-import { TableChart } from "../../value/index.js";
+import { TableChart } from "../../value/VTableChart.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValue, wrapValue } from "./index.js";

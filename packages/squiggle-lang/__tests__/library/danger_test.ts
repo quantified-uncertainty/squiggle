@@ -23,12 +23,16 @@ describe("Danger functions", () => {
     testEvalToBe("Danger.allCombinations([3])", "[[3]]");
     testEvalToBe("Danger.allCombinations([])", "[]");
   });
+  describe("javascript", () => {
+    testEvalToBe("Danger.parseFloat('10.0') + 1", "11");
+    testEvalToBe("Danger.parseFloat('foo')", '"Parse Failed"');
+  });
   describe("json", () => {
     testEvalToBe("Danger.json(1)", "1");
     testEvalToBe("Danger.json([1,2,3])", "[1,2,3]");
     testEvalToBe(
       "Danger.json({foo: 'bar'})",
-      '{vtype: "Dict",value: {foo: "bar"}}'
+      '{vtype: "Dict", value: {foo: "bar"}}'
     );
     testEvalToBe("Danger.jsonString([1,2,3])", '"[1,2,3]"');
     testEvalToBe(

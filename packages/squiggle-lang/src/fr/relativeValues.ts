@@ -1,4 +1,5 @@
 import { sq } from "../index.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
@@ -29,11 +30,14 @@ export const library = [
   maker.make({
     name: "gridPlot",
     output: "Plot",
-    interactiveExamples: [
-      `RelativeValues.gridPlot({
+    examples: [
+      makeFnExample(
+        `RelativeValues.gridPlot({
   ids: ["foo", "bar"],
   fn: {|id1, id2| [SampleSet.fromDist(2 to 5), SampleSet.fromDist(3 to 6)]},
 })`,
+        { isInteractive: true }
+      ),
     ],
     definitions: [
       makeDefinition([relativeValuesShape], frPlot, ([{ ids, fn, title }]) => {

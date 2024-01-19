@@ -129,4 +129,4 @@ export function getAllFunctionNamesWithNamespace(name: string) {
 export {
   SCALE_POWER_DEFAULT_CONSTANT,
   SCALE_SYMLOG_DEFAULT_CONSTANT,
-} from "./value/index.js";
+} from "./value/VScale.js";

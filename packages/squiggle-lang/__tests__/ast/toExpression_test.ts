@@ -59,7 +59,7 @@ describe("Peggy to Expression", () => {
   });
 
   describe("dicts", () => {
-    testToExpression("{a: 1, b: 2}", '{"a": 1, "b": 2}', "{a: 1,b: 2}");
+    testToExpression("{a: 1, b: 2}", '{"a": 1, "b": 2}', "{a: 1, b: 2}");
     testToExpression("{1+0: 1, 2+0: 2}", "{(add)(1, 0): 1, (add)(2, 0): 2}"); // key can be any expression
     testToExpression("dict.property", "Error(dict is not defined)");
     testToExpression(

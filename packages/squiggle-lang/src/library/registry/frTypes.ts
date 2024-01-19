@@ -7,31 +7,23 @@ import { ImmutableMap } from "../../utility/immutableMap.js";
 import { SDate } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
 import { Domain } from "../../value/domain.js";
-import {
-  Calculator,
-  Input,
-  InputType,
-  Plot,
-  Scale,
-  TableChart,
-  Value,
-  vArray,
-  vBool,
-  vCalculator,
-  vDate,
-  vDict,
-  vDist,
-  vDomain,
-  vDuration,
-  vInput,
-  vLambda,
-  vNumber,
-  vPlot,
-  vScale,
-  vString,
-  vTableChart,
-} from "../../value/index.js";
+import { Value } from "../../value/index.js";
 import { ValueTags } from "../../value/valueTags.js";
+import { vArray } from "../../value/VArray.js";
+import { vBool } from "../../value/VBool.js";
+import { Calculator, vCalculator } from "../../value/VCalculator.js";
+import { vDate } from "../../value/VDate.js";
+import { vDict } from "../../value/VDict.js";
+import { vDist } from "../../value/VDist.js";
+import { vDomain } from "../../value/VDomain.js";
+import { vDuration } from "../../value/VDuration.js";
+import { Input, InputType, vInput } from "../../value/VInput.js";
+import { vLambda } from "../../value/vLambda.js";
+import { vNumber } from "../../value/VNumber.js";
+import { Plot, vPlot } from "../../value/VPlot.js";
+import { Scale, vScale } from "../../value/VScale.js";
+import { vString } from "../../value/VString.js";
+import { TableChart, vTableChart } from "../../value/VTableChart.js";
 import { frTypesMatchesLengths } from "./helpers.js";
 
 /*

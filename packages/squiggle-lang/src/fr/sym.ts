@@ -1,5 +1,5 @@
 import * as SymbolicDist from "../dist/SymbolicDist.js";
-import { FRFunction } from "../library/registry/core.js";
+import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDict,
@@ -58,11 +58,11 @@ export const library: FRFunction[] = [
   maker.make({
     name: "normal",
     examples: [
-      "Sym.normal(5, 1)",
-      "Sym.normal({ p5: 4, p95: 10 })",
-      "Sym.normal({ p10: 4, p90: 10 })",
-      "Sym.normal({ p25: 4, p75: 10 })",
-      "Sym.normal({ mean: 5, stdev: 2 })",
+      makeFnExample("Sym.normal(5, 1)"),
+      makeFnExample("Sym.normal({ p5: 4, p95: 10 })"),
+      makeFnExample("Sym.normal({ p10: 4, p90: 10 })"),
+      makeFnExample("Sym.normal({ p25: 4, p75: 10 })"),
+      makeFnExample("Sym.normal({ mean: 5, stdev: 2 })"),
     ],
     definitions: [
       makeTwoArgsSymDist((mean, stdev) =>
@@ -85,11 +85,11 @@ export const library: FRFunction[] = [
   maker.make({
     name: "lognormal",
     examples: [
-      "Sym.lognormal(0.5, 0.8)",
-      "Sym.lognormal({ p5: 4, p95: 10 })",
-      "Sym.lognormal({ p10: 4, p90: 10 })",
-      "Sym.lognormal({ p25: 4, p75: 10 })",
-      "Sym.lognormal({ mean: 5, stdev: 2 })",
+      makeFnExample("Sym.lognormal(0.5, 0.8)"),
+      makeFnExample("Sym.lognormal({ p5: 4, p95: 10 })"),
+      makeFnExample("Sym.lognormal({ p10: 4, p90: 10 })"),
+      makeFnExample("Sym.lognormal({ p25: 4, p75: 10 })"),
+      makeFnExample("Sym.lognormal({ mean: 5, stdev: 2 })"),
     ],
     definitions: [
       makeTwoArgsSymDist((mu, sigma) =>
@@ -111,7 +111,7 @@ export const library: FRFunction[] = [
   }),
   maker.make({
     name: "uniform",
-    examples: ["Sym.uniform(10, 12)"],
+    examples: [makeFnExample("Sym.uniform(10, 12)")],
     definitions: [
       makeTwoArgsSymDist((low, high) =>
         SymbolicDist.Uniform.make({ low, high })
@@ -120,7 +120,10 @@ export const library: FRFunction[] = [
   }),
   maker.make({
     name: "beta",
-    examples: ["Sym.beta(20, 25)", "Sym.beta({ mean: 0.39, stdev: 0.1 })"],
+    examples: [
+      makeFnExample("Sym.beta(20, 25)"),
+      makeFnExample("Sym.beta({ mean: 0.39, stdev: 0.1 })"),
+    ],
     definitions: [
       makeTwoArgsSymDist((alpha, beta) =>
         SymbolicDist.Beta.make({ alpha, beta })
@@ -132,7 +135,7 @@ export const library: FRFunction[] = [
   }),
   maker.make({
     name: "cauchy",
-    examples: ["Sym.cauchy(5, 1)"],
+    examples: [makeFnExample("Sym.cauchy(5, 1)")],
     definitions: [
       makeTwoArgsSymDist((local, scale) =>
         SymbolicDist.Cauchy.make({ local, scale })
@@ -141,7 +144,7 @@ export const library: FRFunction[] = [
   }),
   maker.make({
     name: "gamma",
-    examples: ["Sym.gamma(5, 1)"],
+    examples: [makeFnExample("Sym.gamma(5, 1)")],
     definitions: [
       makeTwoArgsSymDist((shape, scale) =>
         SymbolicDist.Gamma.make({ shape, scale })
@@ -150,7 +153,7 @@ export const library: FRFunction[] = [
   }),
   maker.make({
     name: "logistic",
-    examples: ["Sym.logistic(5, 1)"],
+    examples: [makeFnExample("Sym.logistic(5, 1)")],
     definitions: [
       makeTwoArgsSymDist((location, scale) =>
         SymbolicDist.Logistic.make({ location, scale })
@@ -159,20 +162,20 @@ export const library: FRFunction[] = [
   }),
   maker.make({
     name: "exponential",
-    examples: ["Sym.exponential(2)"],
+    examples: [makeFnExample("Sym.exponential(2)")],
     definitions: [
       makeOneArgSymDist((rate) => SymbolicDist.Exponential.make(rate)),
     ],
   }),
   maker.make({
     name: "bernoulli",
-    examples: ["Sym.bernoulli(0.5)"],
+    examples: [makeFnExample("Sym.bernoulli(0.5)")],
     definitions: [makeOneArgSymDist((p) => SymbolicDist.Bernoulli.make(p))],
   }),
   maker.make({
     name: "pointMass",
     requiresNamespace: false,
-    examples: ["pointMass(0.5)"],
+    examples: [makeFnExample("pointMass(0.5)")],
     description:
       "Point mass distributions are already symbolic, so you can use the regular `pointMass` function.",
     definitions: [
@@ -184,7 +187,7 @@ export const library: FRFunction[] = [
   }),
   maker.make({
     name: "triangular",
-    examples: ["Sym.triangular(3, 5, 10)"],
+    examples: [makeFnExample("Sym.triangular(3, 5, 10)")],
     definitions: [
       makeDefinition(
         [frNumber, frNumber, frNumber],

@@ -1,15 +1,16 @@
-import { ValueMap, vDict } from "../../value/index.js";
+import { VDict } from "../../value/VDict.js";
+import { vString } from "../../value/VString.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqDictValue, SqValue, wrapValue } from "./index.js";
 
 export class SqDict {
   constructor(
-    private _value: ValueMap,
+    private _value: VDict,
     public context?: SqValueContext
   ) {}
 
   entries(): [string, SqValue][] {
-    return [...this._value.entries()].map(
+    return [...this._value.value.entries()].map(
       ([k, v]) =>
         [
           k,
@@ -19,7 +20,7 @@ export class SqDict {
   }
 
   get(key: string): SqValue | undefined {
-    const value = this._value.get(key);
+    const value = this._value.get(vString(key));
     if (value === undefined) {
       return undefined;
     }
@@ -30,10 +31,10 @@ export class SqDict {
   }
 
   toString() {
-    return vDict(this._value).toString();
+    return this._value.toString();
   }
 
   asValue() {
-    return new SqDictValue(vDict(this._value), this.context);
+    return new SqDictValue(this._value, this.context);
   }
 }

@@ -9,11 +9,13 @@ export type PathItem =
       type: "calculator";
     };
 
+export type Root = "result" | "bindings" | "imports" | "exports";
+
 export class SqValuePath {
-  public root: "result" | "bindings";
+  public root: Root;
   public items: PathItem[];
 
-  constructor(props: { root: "result" | "bindings"; items: PathItem[] }) {
+  constructor(props: { root: Root; items: PathItem[] }) {
     this.root = props.root;
     this.items = props.items;
   }

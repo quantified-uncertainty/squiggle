@@ -51,23 +51,30 @@ const exampleDocumentation: FnDocumentationType = {
   requiresNamespace: false,
   signatures: ["(number, number) => number"],
   examples: [
-    `xDist = SampleSet.fromDist(2 to 5)
+    {
+      text: `xDist = SampleSet.fromDist(2 to 5)
 yDist = normal({p5:-3, p95:3}) * 5 - xDist ^ 2
 Plot.scatter({
   xDist: xDist,
   yDist: yDist,
   xScale: Scale.log({min: 1.5}),
 })`,
-  ],
-  interactiveExamples: [
-    `xDist = SampleSet.fromDist(2 to 5)
+      isInteractive: false,
+      useForTests: false,
+    },
+    {
+      text: `xDist = SampleSet.fromDist(2 to 5)
 yDist = normal({p5:-3, p95:3}) * 5 - xDist ^ 2
 Plot.scatter({
   xDist: xDist,
   yDist: yDist,
   xScale: Scale.log({min: 1.5}),
 })`,
-    `xDist = SampleSet.fromDist(normal({p5:-2, p95:5}))
+      isInteractive: false,
+      useForTests: false,
+    },
+    {
+      text: `xDist = SampleSet.fromDist(normal({p5:-2, p95:5}))
 yDist = normal({p5:-3, p95:3}) * 5 - xDist
 Plot.scatter({
   title: "A Scatterplot",
@@ -76,6 +83,9 @@ Plot.scatter({
   xScale: Scale.symlog({title: "X Axis Title"}),
   yScale: Scale.symlog({title: "Y Axis Title"}),
 })`,
+      isInteractive: false,
+      useForTests: false,
+    },
   ],
   isExperimental: true,
   definitions: [],

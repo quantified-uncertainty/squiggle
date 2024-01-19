@@ -1,5 +1,5 @@
 import { SDate } from "../../utility/SDate.js";
-import { methodWithDefaultParams, Scale, vScale } from "../../value/index.js";
+import { methodWithDefaultParams, Scale, vScale } from "../../value/VScale.js";
 import { SqDateValue, SqNumberValue, SqValue } from "./index.js";
 
 export const wrapScale = (value: Scale): SqScale => {

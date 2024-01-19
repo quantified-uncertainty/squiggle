@@ -1,19 +1,26 @@
 import { isBindingStatement } from "../../ast/utils.js";
 import { defaultEnv, Env } from "../../dist/env.js";
+import { AST } from "../../index.js";
 import * as Library from "../../library/index.js";
 import { createContext } from "../../reducer/context.js";
 import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
-import { Value, vDict } from "../../value/index.js";
+import { vDict, VDict } from "../../value/VDict.js";
+import { vString } from "../../value/VString.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqDict } from "../SqValue/SqDict.js";
 import { SqValueContext } from "../SqValueContext.js";
-import { SqValuePath } from "../SqValuePath.js";
+import { Root, SqValuePath } from "../SqValuePath.js";
 import { SqOutputResult } from "../types.js";
-import { Import, ProjectItem, RunOutput } from "./ProjectItem.js";
+import {
+  type Externals,
+  Import,
+  ProjectItem,
+  RunOutput,
+} from "./ProjectItem.js";
 
 function getNeedToRunError() {
   return new SqOtherError("Need to run");
@@ -223,49 +230,46 @@ export class SqProject {
     if (!astR.ok) {
       return astR; // impossible because output is valid
     }
-    const ast = astR.value;
+    const ast: AST = astR.value;
 
     const lastStatement = ast.statements.at(-1);
 
     const hasEndExpression =
       !!lastStatement && !isBindingStatement(lastStatement);
 
-    const result = wrapValue(
-      internalOutputR.value.result,
-      new SqValueContext({
-        project: this,
+    const _this = this;
+
+    function newContext(root: Root) {
+      const isResult = root === "result";
+      return new SqValueContext({
+        project: _this,
         sourceId,
-        source,
+        source: source!,
         ast,
-        valueAst: hasEndExpression ? lastStatement : ast,
-        valueAstIsPrecise: hasEndExpression,
+        valueAst: isResult && hasEndExpression ? lastStatement : ast,
+        valueAstIsPrecise: isResult ? hasEndExpression : true,
         path: new SqValuePath({
-          root: "result",
+          root: root,
           items: [],
         }),
-      })
-    );
+      });
+    }
 
-    const [bindings, exports] = (["bindings", "exports"] as const).map(
-      (field) =>
-        new SqDict(
-          internalOutputR.value[field],
-          new SqValueContext({
-            project: this,
-            sourceId,
-            source,
-            ast: astR.value,
-            valueAst: astR.value,
-            valueAstIsPrecise: true,
-            path: new SqValuePath({
-              root: "bindings",
-              items: [],
-            }),
-          })
-        )
-    );
+    function wrapSqDict(innerDict: VDict, root: Root): SqDict {
+      return new SqDict(innerDict, newContext(root));
+    }
 
-    return Result.Ok({ result, bindings, exports });
+    const { result, bindings, exports, externals } = internalOutputR.value;
+
+    return Result.Ok({
+      result: wrapValue(result, newContext("result")),
+      bindings: wrapSqDict(bindings, "bindings"),
+      exports: wrapSqDict(
+        exports.mergeTags({ name: vString(sourceId) }),
+        "exports"
+      ),
+      imports: wrapSqDict(externals.explicitImports, "imports"),
+    });
   }
 
   getResult(sourceId: string): Result.result<SqValue, SqError> {
@@ -276,83 +280,108 @@ export class SqProject {
     return Result.fmap(this.getOutput(sourceId), ({ bindings }) => bindings);
   }
 
-  private async buildExternals(
-    sourceId: string,
+  private async importToBindingResult(
+    importBinding: Import,
     pendingIds: Set<string>
-  ): Promise<Result.result<Bindings, SqError>> {
-    this.parseImports(sourceId);
-    const rImports = this.getImports(sourceId);
-    if (!rImports) {
-      // Shouldn't happen, we just called parseImports.
-      throw new Error("Internal logic error");
-    }
-
-    if (!rImports.ok) {
-      // There's something wrong with imports, that's fatal.
-      return rImports;
-    }
-
-    // We start from stdLib and add imports on top of it.
-    let externals: Bindings = ImmutableMap<string, Value>().merge(
-      this.getStdLib()
-    );
-
-    // Now, let's process everything and populate our externals bindings.
-    for (const importBinding of [
-      ...this.getItem(sourceId).getImplicitImports(), // first, inject all variables from `continues`
-      ...rImports.value, // then bind all explicit imports
-    ]) {
-      if (!this.items.has(importBinding.sourceId)) {
-        if (!this.linker) {
-          throw new Error(
-            `Can't load source for ${importBinding.sourceId}, linker is missing`
-          );
-        }
-
-        // We have got one of the new imports.
-        // Let's load it and add it to the project.
-        let newSource: string;
-        try {
-          newSource = await this.linker.loadSource(importBinding.sourceId);
-        } catch (e) {
-          return Result.Err(
-            new SqOtherError(`Failed to load import ${importBinding.sourceId}`)
-          );
-        }
-        this.setSource(importBinding.sourceId, newSource);
-      }
-
-      if (pendingIds.has(importBinding.sourceId)) {
-        // Oh we have already visited this source. There is an import cycle.
-        return Result.Err(
-          new SqOtherError(`Cyclic import ${importBinding.sourceId}`)
+  ): Promise<Result.result<VDict, SqError>> {
+    if (!this.items.has(importBinding.sourceId)) {
+      if (!this.linker) {
+        throw new Error(
+          `Can't load source for ${importBinding.sourceId}, linker is missing`
         );
       }
 
-      await this.innerRun(importBinding.sourceId, pendingIds);
-      const outputR = this.getInternalOutput(importBinding.sourceId);
-      if (!outputR.ok) {
-        return outputR;
+      // We have got one of the new imports.
+      // Let's load it and add it to the project.
+      let newSource: string;
+      try {
+        newSource = await this.linker.loadSource(importBinding.sourceId);
+      } catch (e) {
+        return Result.Err(
+          new SqOtherError(`Failed to load import ${importBinding.sourceId}`)
+        );
       }
-
-      // TODO - check for name collisions?
-      switch (importBinding.type) {
-        case "flat":
-          externals = externals.merge(outputR.value.bindings);
-          break;
-        case "named":
-          externals = externals.set(
-            importBinding.variable,
-            vDict(outputR.value.exports)
-          );
-          break;
-        // exhaustiveness check for TypeScript
-        default:
-          throw new Error(`Internal error, ${importBinding satisfies never}`);
-      }
+      this.setSource(importBinding.sourceId, newSource);
     }
 
-    return Result.Ok(externals);
+    if (pendingIds.has(importBinding.sourceId)) {
+      // Oh we have already visited this source. There is an import cycle.
+      return Result.Err(
+        new SqOtherError(`Cyclic import ${importBinding.sourceId}`)
+      );
+    }
+
+    await this.innerRun(importBinding.sourceId, pendingIds);
+    const outputR = this.getInternalOutput(importBinding.sourceId);
+    if (!outputR.ok) {
+      return outputR;
+    }
+
+    // TODO - check for name collisions?
+    switch (importBinding.type) {
+      case "flat":
+        return Result.Ok(outputR.value.bindings);
+      case "named":
+        return Result.Ok(
+          vDict(
+            ImmutableMap({
+              [importBinding.variable]: outputR.value.exports,
+            })
+          )
+        );
+      default:
+        throw new Error(`Internal error, ${importBinding satisfies never}`);
+    }
+  }
+
+  private async importsToBindings(
+    pendingIds: Set<string>,
+    imports: Import[]
+  ): Promise<Result.result<VDict, SqError>> {
+    let exports = VDict.empty();
+
+    for (const importBinding of imports) {
+      const loadResult = await this.importToBindingResult(
+        importBinding,
+        pendingIds
+      );
+      if (!loadResult.ok) return loadResult; // Early return for load/validation errors
+
+      exports = exports.merge(loadResult.value);
+    }
+    return Result.Ok(exports);
+  }
+
+  // Includes implicit imports ("continues"), explicit imports, and StdLib.
+  private async buildExternals(
+    sourceId: string,
+    pendingIds: Set<string>
+  ): Promise<Result.result<Externals, SqError>> {
+    this.parseImports(sourceId);
+
+    const rImports = this.getImports(sourceId);
+    if (!rImports) throw new Error("Internal logic error"); // Shouldn't happen, we just called parseImports.
+    if (!rImports.ok) return rImports; // There's something wrong with imports, that's fatal.
+
+    const stdlibExternals = vDict(this.getStdLib());
+
+    const implicitImports = await this.importsToBindings(
+      pendingIds,
+      this.getItem(sourceId).getImplicitImports()
+    );
+
+    if (!implicitImports.ok) return implicitImports;
+    const explicitImports = await this.importsToBindings(
+      pendingIds,
+      rImports.value
+    );
+    if (!explicitImports.ok) return explicitImports;
+
+    return Result.Ok({
+      stdlib: stdlibExternals,
+      implicitImports: implicitImports.value,
+      explicitImports: explicitImports.value,
+    });
   }
 
   private async innerRun(sourceId: string, pendingIds: Set<string>) {

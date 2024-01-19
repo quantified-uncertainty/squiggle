@@ -165,15 +165,15 @@ describe("List functions", () => {
     );
     testEvalToBe(
       "arr=[{a: 1, b: 2}, {a: 1, b: 3}, {a:2, b:5}]; List.uniqBy(arr, {|e| e.a})",
-      "[{a: 1,b: 2},{a: 2,b: 5}]"
+      "[{a: 1, b: 2},{a: 2, b: 5}]"
     );
     testEvalToBe(
       "arr=[{a: normal(5,2), b: 2}, {a: 1, b: 3}, {a:2, b:5}]; List.uniqBy(arr, {|e| e.a})",
-      "[{a: Sample Set Distribution,b: 2},{a: 1,b: 3},{a: 2,b: 5}]"
+      "[{a: Sample Set Distribution, b: 2},{a: 1, b: 3},{a: 2, b: 5}]"
     );
     testEvalToBe(
       "arr=[{a: normal(5,2), b: 2}, {a: 1, b: 3}, {a:2, b:3}]; List.uniqBy(arr, {|e| e.b})",
-      "[{a: Sample Set Distribution,b: 2},{a: 1,b: 3}]"
+      "[{a: Sample Set Distribution, b: 2},{a: 1, b: 3}]"
     );
   });
 
