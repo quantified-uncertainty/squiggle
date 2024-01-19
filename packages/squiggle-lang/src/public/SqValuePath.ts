@@ -1,6 +1,8 @@
 import { ASTNode } from "../ast/parse.js";
 import { locationContains } from "../ast/utils.js";
 
+export type RootPathItem = "result" | "bindings" | "imports" | "exports";
+
 export type PathItem =
   | { type: "string"; value: string }
   | { type: "number"; value: number }
@@ -32,19 +34,6 @@ function pathItemIsEqual(a: PathItem, b: PathItem): boolean {
   }
 }
 
-function pathItemToString(item: PathItem): string {
-  switch (item.type) {
-    case "string":
-      return item.value;
-    case "number":
-      return String(item.value);
-    case "cellAddress":
-      return `Cell (${item.value.row},${item.value.column})`;
-    case "calculator":
-      return "calculator";
-  }
-}
-
 export class SqPathItem {
   private constructor(public value: PathItem) {}
   static fromString(str: string): SqPathItem {
@@ -59,24 +48,44 @@ export class SqPathItem {
   static fromCellAddress(row: number, column: number): SqPathItem {
     return new SqPathItem({ type: "cellAddress", value: { row, column } });
   }
-  toString() {
-    return pathItemToString(this.value);
-  }
-  isEqual(other: SqPathItem) {
-    return pathItemIsEqual(this.value, other.value);
-  }
+
   get type() {
     return this.value.type;
   }
+
+  isEqual(other: SqPathItem) {
+    return pathItemIsEqual(this.value, other.value);
+  }
+
+  toDisplayString(): string {
+    const item = this.value;
+    switch (item.type) {
+      case "string":
+        return item.value;
+      case "number":
+        return String(item.value);
+      case "cellAddress":
+        return `Cell (${item.value.row},${item.value.column})`;
+      case "calculator":
+        return "calculator";
+    }
+  }
+
+  serialize(): string {
+    return JSON.stringify(this.value);
+  }
+
+  static deserialize(str: string): SqPathItem {
+    const value = JSON.parse(str) as PathItem;
+    return new SqPathItem(value);
+  }
 }
 
-export type Root = "result" | "bindings" | "imports" | "exports";
-
 export class SqValuePath {
-  public root: Root;
+  public root: RootPathItem;
   public items: SqPathItem[];
 
-  constructor(props: { root: Root; items: SqPathItem[] }) {
+  constructor(props: { root: RootPathItem; items: SqPathItem[] }) {
     this.root = props.root;
     this.items = props.items;
   }
@@ -88,12 +97,12 @@ export class SqValuePath {
     });
   }
 
-  contains(other: SqValuePath) {
-    if (this.items.length > other.items.length) {
+  contains(smallerItem: SqValuePath) {
+    if (this.items.length < smallerItem.items.length) {
       return false;
     }
-    for (let i = 0; i < this.items.length; i++) {
-      if (!this.items[i].isEqual(other.items[i])) {
+    for (let i = 0; i < smallerItem.items.length; i++) {
+      if (!this.items[i].isEqual(smallerItem.items[i])) {
         return false;
       }
     }
@@ -112,8 +121,37 @@ export class SqValuePath {
     return true;
   }
 
-  toString() {
-    return [this.root, ...this.items.map((f) => f.toString())].join(".");
+  serializeToString(): string {
+    const pathObject = {
+      root: this.root,
+      items: this.items.map((item) => item.serialize()),
+    };
+    return JSON.stringify(pathObject);
+  }
+
+  static deserialize(str: string): SqValuePath {
+    const parsed = JSON.parse(str);
+    const items = parsed.items.map(SqPathItem.deserialize);
+    return new SqValuePath({ root: parsed.root, items });
+  }
+
+  itemsAsValuePaths({ includeRoot = false }) {
+    const root = new SqValuePath({
+      root: this.root,
+      items: [],
+    });
+    const leafs = this.items.map(
+      (_, index) =>
+        new SqValuePath({
+          root: this.root,
+          items: this.items.slice(0, index + 1),
+        })
+    );
+    return includeRoot ? [root, ...leafs] : leafs;
+  }
+
+  isRoot() {
+    return this.items.length === 0;
   }
 
   static findByOffset({
@@ -199,24 +237,5 @@ export class SqValuePath {
       root: "bindings", // not important, will probably be removed soon
       items: findLoop(ast),
     });
-  }
-
-  itemsAsValuePaths({ includeRoot = false }) {
-    const root = new SqValuePath({
-      root: this.root,
-      items: [],
-    });
-    const leafs = this.items.map(
-      (_, index) =>
-        new SqValuePath({
-          root: this.root,
-          items: this.items.slice(0, index + 1),
-        })
-    );
-    return includeRoot ? [root, ...leafs] : leafs;
-  }
-
-  isRoot() {
-    return this.items.length === 0;
   }
 }

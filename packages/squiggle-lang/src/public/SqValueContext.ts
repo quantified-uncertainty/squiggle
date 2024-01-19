@@ -77,7 +77,7 @@ export class SqValueContext {
           break;
         case "Array":
           if (pathItem.type === "number") {
-            const element = ast.elements[pathItem.value]; // Seems like this was broken before.
+            const element = ast.elements[pathItem.value];
             if (element) {
               newAst = element;
             }

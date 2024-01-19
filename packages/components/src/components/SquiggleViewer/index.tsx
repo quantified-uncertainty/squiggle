@@ -62,7 +62,7 @@ const FocusedNavigation: FC<{
           <FocusedNavigationItem
             key={i}
             onClick={() => focus(path)}
-            text={path.items[i + rootPathFocusedAdjustment].toString()}
+            text={path.items[i + rootPathFocusedAdjustment].toDisplayString()}
           />
         ))}
     </div>

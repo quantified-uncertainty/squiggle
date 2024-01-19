@@ -13,7 +13,7 @@ import { SqLinker } from "../SqLinker.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqDict } from "../SqValue/SqDict.js";
 import { SqValueContext } from "../SqValueContext.js";
-import { Root, SqValuePath } from "../SqValuePath.js";
+import { RootPathItem, SqValuePath } from "../SqValuePath.js";
 import { SqOutputResult } from "../types.js";
 import {
   type Externals,
@@ -237,7 +237,7 @@ export class SqProject {
     const hasEndExpression =
       !!lastStatement && !isBindingStatement(lastStatement);
 
-    const newContext = (root: Root) => {
+    const newContext = (root: RootPathItem) => {
       const isResult = root === "result";
       return new SqValueContext({
         project: this,
@@ -253,7 +253,7 @@ export class SqProject {
       });
     };
 
-    const wrapSqDict = (innerDict: VDict, root: Root): SqDict => {
+    const wrapSqDict = (innerDict: VDict, root: RootPathItem): SqDict => {
       return new SqDict(innerDict, newContext(root));
     };
 

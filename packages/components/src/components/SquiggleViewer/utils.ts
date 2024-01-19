@@ -16,7 +16,10 @@ function topLevelName(path: SqValuePath): string {
 }
 
 export function pathAsString(path: SqValuePath) {
-  return [topLevelName(path), ...path.items.map((p) => p.toString())].join(".");
+  return [
+    topLevelName(path),
+    ...path.items.map((p) => p.toDisplayString()),
+  ].join(".");
 }
 
 export function pathToShortName(path: SqValuePath): string {
@@ -24,7 +27,7 @@ export function pathToShortName(path: SqValuePath): string {
     return topLevelName(path);
   } else {
     const lastPathItem = path.items[path.items.length - 1];
-    return lastPathItem.toString();
+    return lastPathItem.toDisplayString();
   }
 }
 
