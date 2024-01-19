@@ -237,12 +237,10 @@ export class SqProject {
     const hasEndExpression =
       !!lastStatement && !isBindingStatement(lastStatement);
 
-    const _this = this;
-
-    function newContext(root: Root) {
+    const newContext = (root: Root) => {
       const isResult = root === "result";
       return new SqValueContext({
-        project: _this,
+        project: this,
         sourceId,
         source: source!,
         ast,
@@ -253,11 +251,11 @@ export class SqProject {
           items: [],
         }),
       });
-    }
+    };
 
-    function wrapSqDict(innerDict: VDict, root: Root): SqDict {
+    const wrapSqDict = (innerDict: VDict, root: Root): SqDict => {
       return new SqDict(innerDict, newContext(root));
-    }
+    };
 
     const { result, bindings, exports, externals } = internalOutputR.value;
 
