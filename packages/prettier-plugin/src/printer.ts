@@ -347,8 +347,6 @@ export function createSquigglePrinter(
             node.kind === "C" ? " : " : " else ",
             path.call(print, "falseExpression"),
           ];
-        case "Void":
-          return "()";
         case "UnitValue":
           return [typedPath(node).call(print, "value"), node.unit];
         case "lineComment":
