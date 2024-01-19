@@ -22,8 +22,10 @@ import {
 } from "./utils.js";
 import {
   useFocus,
+  useIsSelected,
   useMergedSettings,
   useRegisterAsItemViewer,
+  useSelect,
   useToggleCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
@@ -119,6 +121,8 @@ export const ValueWithContextViewer: FC<Props> = ({
 
   const toggleCollapsed_ = useToggleCollapsed();
   const focus = useFocus();
+  const select = useSelect();
+  const isSelected = useIsSelected(path);
 
   const { itemStore } = useViewerContext();
   const itemState = itemStore.getStateOrInitialize(value);
@@ -135,7 +139,7 @@ export const ValueWithContextViewer: FC<Props> = ({
     toggleCollapsed_(path);
   };
 
-  const ref = useRegisterAsItemViewer(path);
+  const ref = useRegisterAsItemViewer(path, value, parentValue);
 
   // TODO - check that we're not in a situation where `isOpen` is false and `header` is hidden?
   // In that case, the output would look broken (empty).
@@ -223,6 +227,17 @@ export const ValueWithContextViewer: FC<Props> = ({
     }
   };
 
+  const extraHeaderClasses = () => {
+    if (header === "large") {
+      return "mb-2";
+    } else {
+      if (isSelected) {
+        return "bg-blue-100 hover:bg-blue-200";
+      }
+      return "hover:bg-stone-100 rounded-sm";
+    }
+  };
+
   return (
     <ErrorBoundary>
       <div ref={ref}>
@@ -230,8 +245,9 @@ export const ValueWithContextViewer: FC<Props> = ({
           <header
             className={clsx(
               "flex justify-between group pr-0.5",
-              header === "large" ? "mb-2" : "hover:bg-stone-100 rounded-sm"
+              extraHeaderClasses()
             )}
+            onClick={() => select(path)}
           >
             <div className="inline-flex items-center">
               {collapsible && triangleToggle()}

@@ -35,7 +35,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         selection: { anchor: position },
         scrollIntoView: true,
       });
-      view.focus();
+      // view.focus();
     };
 
     useImperativeHandle(ref, () => ({

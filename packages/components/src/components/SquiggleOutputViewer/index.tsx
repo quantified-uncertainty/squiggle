@@ -23,8 +23,10 @@ import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
-import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
-import { ViewerProvider } from "../SquiggleViewer/ViewerProvider.js";
+import {
+  SquiggleViewerHandle,
+  ViewerProvider,
+} from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
 import { RenderingIndicator } from "./RenderingIndicator.js";
 
