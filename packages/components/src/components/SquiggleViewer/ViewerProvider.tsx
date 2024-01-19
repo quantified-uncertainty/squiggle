@@ -56,6 +56,7 @@ const defaultLocalItemState: LocalItemState = {
 class PathTreeNode {
   value: SqValueWithContext;
   tree: PathTree;
+  path: string;
   parent: PathTreeNode | undefined;
   children: PathTreeNode[] = [];
 
@@ -67,12 +68,17 @@ class PathTreeNode {
     this.value = value;
     this.parent = parent;
     this.tree = tree;
+    this.path = pathAsString(value.context.path);
   }
 
   addChild(value: SqValueWithContext): PathTreeNode {
     const node = new PathTreeNode(value, this, this.tree);
     this.children.push(node);
     return node;
+  }
+
+  removeChild(node: PathTreeNode) {
+    this.children = this.children.filter((child) => child.path !== node.path);
   }
 
   pathName() {
@@ -163,8 +169,11 @@ class PathTree {
   }
 
   removeNode(value: SqValueWithContext) {
-    const node = this.nodes[pathAsString(value.context.path)];
+    const node: PathTreeNode | undefined = this.nodes.get(
+      pathAsString(value.context.path)
+    );
     if (node) {
+      node.parent?.removeChild(node);
       this._removeNode(node);
     }
   }
@@ -188,6 +197,22 @@ class PathTree {
   }
 }
 
+function isElementInView(element: HTMLElement) {
+  const elementRect = element.getBoundingClientRect();
+  const container = document.querySelector(
+    '[data-testid="dynamic-viewer-result"]'
+  );
+  if (!container) {
+    return false;
+  }
+
+  const containerRect = container.getBoundingClientRect();
+
+  return (
+    elementRect.top >= containerRect.top &&
+    elementRect.top + 20 <= containerRect.bottom
+  );
+}
 /**
  * `ItemStore` is used for caching and for passing settings down the tree.
  * It allows us to avoid React tree rerenders on settings changes; instead, we can rerender individual item viewers on demand.
@@ -287,8 +312,12 @@ class ItemStore {
 
   scrollToPath(path: SqValuePath) {
     this.handles[pathAsString(path)]?.element.scrollIntoView({
-      behavior: "smooth",
+      behavior: "instant",
     });
+  }
+
+  isInView(path: SqValuePath) {
+    return isElementInView(this.handles[pathAsString(path)]?.element);
   }
 }
 
@@ -369,8 +398,8 @@ export function useRegisterAsItemViewer(
     }
 
     return () => {
-      itemStore.unregisterItemHandle(path);
-      pathTree?.removeNode(value);
+      itemStore.unregisterItemHandle(path); // TODO: Seems to happen way too often
+      // pathTree?.removeNode(value);
     };
   });
 
@@ -534,6 +563,9 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
             const next = pathTree?.nodes.get(pathAsString(selected))?.next();
             if (next) {
               setSelected(next.value.context.path);
+              if (!itemStore.isInView(next.value.context.path)) {
+                itemStore.scrollToPath(next.value.context.path);
+              }
             }
           }
         }
@@ -542,6 +574,9 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
             const prev = pathTree?.nodes.get(pathAsString(selected))?.prev();
             if (prev) {
               setSelected(prev.value.context.path);
+              if (!itemStore.isInView(prev.value.context.path)) {
+                itemStore.scrollToPath(prev.value.context.path);
+              }
             }
           }
         }
@@ -551,6 +586,9 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
               ...state,
               collapsed: !state?.collapsed,
             }));
+            if (!itemStore.isInView(selected)) {
+              itemStore.scrollToPath(selected);
+            }
             itemStore.forceUpdate(selected);
           }
         }

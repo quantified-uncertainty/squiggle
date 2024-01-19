@@ -176,7 +176,8 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     );
 
   useEffect(() => {
-    const handleKeyUp = (event) => {
+    const handleKeyUp = (event: KeyboardEvent) => {
+      event.preventDefault();
       rightPanelRef.current?.onKeyPress(event.key as string);
     };
 
