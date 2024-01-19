@@ -4,8 +4,10 @@ import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
-import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
-import { ViewerProvider } from "../SquiggleViewer/ViewerProvider.js";
+import {
+  SquiggleViewerHandle,
+  ViewerProvider,
+} from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
 import { RenderingIndicator } from "./RenderingIndicator.js";
 import { ViewerBody } from "./ViewerBody.js";

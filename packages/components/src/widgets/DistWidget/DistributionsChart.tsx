@@ -159,10 +159,7 @@ const InnerDistributionsChart: FC<{
     ]);
 
     const yScale = sqScaleToD3(plot.yScale);
-    yScale.domain([
-      Math.max(Math.min(...domain.map((p) => p.y)), 0), // min value, but at least 0
-      Math.max(...domain.map((p) => p.y)),
-    ]);
+    yScale.domain([0, Math.max(...domain.map((p) => p.y))]);
 
     return { xScale, yScale };
   }, [domain, plot.xScale, plot.yScale]);

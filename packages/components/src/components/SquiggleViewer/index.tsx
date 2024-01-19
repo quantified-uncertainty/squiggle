@@ -9,6 +9,7 @@ import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { pathIsEqual, pathItemFormat, useGetSubvalueByPath } from "./utils.js";
 import { ValueViewer } from "./ValueViewer.js";
 import {
+  SquiggleViewerHandle,
   useFocus,
   useUnfocus,
   useViewerContext,
@@ -66,10 +67,6 @@ const FocusedNavigation: FC<{
         ))}
     </div>
   );
-};
-
-export type SquiggleViewerHandle = {
-  viewValuePath(path: SqValuePath): void;
 };
 
 export type SquiggleViewerProps = {
