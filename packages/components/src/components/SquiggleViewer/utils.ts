@@ -24,8 +24,7 @@ export function pathToShortName(path: SqValuePath): string {
   if (path.isRoot()) {
     return topLevelName(path);
   } else {
-    const lastPathItem = path.items[path.items.length - 1];
-    return lastPathItem.toDisplayString();
+    return path.lastItem().toDisplayString();
   }
 }
 
@@ -50,17 +49,19 @@ export function useGetSubvalueByPath() {
     subValuePath: SqValuePath
   ): SqValue | undefined => {
     const { context } = topValue;
-    if (!context) {
-      return;
-    }
 
-    if (!subValuePath.contains(context.path)) {
+    if (!context || !subValuePath.contains(context.path)) {
       return;
     }
 
     let currentValue = topValue;
-    for (let i = 0; i < subValuePath.items.length; i++) {
-      const pathItem = subValuePath.items[i];
+    const subValuePaths = subValuePath.itemsAsValuePaths({
+      includeRoot: false,
+    });
+
+    for (const subValuePath of subValuePaths) {
+      const pathItem = subValuePath.lastItem();
+
       let nextValue: SqValue | undefined;
 
       if (currentValue.tag === "Array" && pathItem.value.type === "number") {
@@ -89,10 +90,7 @@ export function useGetSubvalueByPath() {
       } else if (pathItem.type === "calculator") {
         // The previous path item is the one that is the parent of the calculator result.
         // This is the one that we use in the ViewerContext to store information about the calculator.
-        const calculatorPath = new SqValuePath({
-          root: subValuePath.root,
-          items: subValuePath.items.slice(0, i),
-        });
+        const calculatorPath = subValuePath;
         const calculatorState = itemStore.getCalculator(calculatorPath);
         const result = calculatorState?.calculatorResult;
         if (!result?.ok) {

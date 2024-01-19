@@ -90,6 +90,10 @@ export class SqValuePath {
     this.items = props.items;
   }
 
+  lastItem() {
+    return this.items[this.items.length - 1];
+  }
+
   extend(item: SqPathItem) {
     return new SqValuePath({
       root: this.root,
