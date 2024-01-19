@@ -153,11 +153,15 @@ function buildWordHoverExtension({
         const value = bindings.value.get(name);
         if (!value) return null;
 
-        // Should be LetStatement or DefunStatement
+        // Should be a statement
         const valueAst = value.context?.valueAst;
 
+        if (!valueAst) {
+          return null;
+        }
+
         if (
-          valueAst &&
+          // Note that `valueAst` can't be "DecoratedStatement", we skip those in `SqValueContext` and AST symbols
           (valueAst.type === "LetStatement" ||
             valueAst.type === "DefunStatement") &&
           // If these don't match then variable was probably shadowed by a later statement and we can't show its value.

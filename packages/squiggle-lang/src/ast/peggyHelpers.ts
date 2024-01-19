@@ -1,5 +1,7 @@
 import { LocationRange } from "peggy";
 
+import { undecorated } from "./utils.js";
+
 export const infixFunctions = {
   "+": "add",
   "-": "subtract",
@@ -50,6 +52,7 @@ type NodeProgram = N<
     statements: ASTNode[];
     // Var name -> statement node, for faster path resolution.
     // Not used for evaluation.
+    // Note: symbols point to undecorated statements.
     symbols: { [k in string]: ASTNode };
   }
 >;
@@ -295,11 +298,12 @@ export function nodeProgram(
 ): NodeProgram {
   const symbols: NodeProgram["symbols"] = {};
   for (const statement of statements) {
+    const _undecorated = undecorated(statement);
     if (
-      statement.type === "LetStatement" ||
-      statement.type === "DefunStatement"
+      _undecorated.type === "LetStatement" ||
+      _undecorated.type === "DefunStatement"
     ) {
-      symbols[statement.variable.value] = statement;
+      symbols[_undecorated.variable.value] = _undecorated;
     }
   }
   return { type: "Program", imports, statements, symbols, location };

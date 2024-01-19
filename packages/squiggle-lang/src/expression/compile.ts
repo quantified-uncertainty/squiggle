@@ -2,6 +2,7 @@ import { List as ImmutableList } from "immutable";
 
 import { ASTNode } from "../ast/parse.js";
 import { infixFunctions, unaryFunctions } from "../ast/peggyHelpers.js";
+import { undecorated } from "../ast/utils.js";
 import { ICompileError } from "../errors/IError.js";
 import { Bindings } from "../reducer/stack.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
@@ -108,10 +109,7 @@ function compileToContent(
         );
         statements.push(statement);
         {
-          let maybeExportedStatement = astStatement;
-          while (maybeExportedStatement.type === "DecoratedStatement") {
-            maybeExportedStatement = maybeExportedStatement.statement;
-          }
+          const maybeExportedStatement = undecorated(astStatement);
           if (
             (maybeExportedStatement.type === "LetStatement" ||
               maybeExportedStatement.type === "DefunStatement") &&
