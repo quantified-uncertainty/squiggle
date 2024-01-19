@@ -57,6 +57,7 @@ class PathTreeNode {
   value: SqValueWithContext;
   tree: PathTree;
   path: string;
+  fullPath: SqValuePath;
   parent: PathTreeNode | undefined;
   children: PathTreeNode[] = [];
 
@@ -69,6 +70,7 @@ class PathTreeNode {
     this.parent = parent;
     this.tree = tree;
     this.path = pathAsString(value.context.path);
+    this.fullPath = value.context.path;
     this.isEqual = this.isEqual.bind(this);
   }
 
@@ -76,14 +78,12 @@ class PathTreeNode {
     return this.path === other.path;
   }
 
-  isCollapsed() {
-    return this.tree.itemStore.getState(this.value.context.path).collapsed;
+  isRoot() {
+    return this.isEqual(this.tree.root);
   }
 
-  isVisible() {
-    const _isVisible =
-      !this.parent || !this.tree.itemStore.state[this.parent.path].collapsed;
-    return _isVisible;
+  isCollapsed() {
+    return this.tree.itemStore.getState(this.value.context.path).collapsed;
   }
 
   addChild(value: SqValueWithContext): PathTreeNode {
@@ -100,70 +100,64 @@ class PathTreeNode {
     return pathAsString(this.value.context.path);
   }
 
-  siblingsValues(): PathTreeNode[] {
+  siblings(): PathTreeNode[] {
     return this.parent?.children || [];
   }
 
-  siblings(): string[] {
-    return this.parent?.children.map((r) => r.pathName()) || [];
+  getParentIndex() {
+    const siblings = this.siblings();
+    return siblings.findIndex(this.isEqual);
   }
 
   prevSibling() {
-    const siblings = this.siblingsValues();
-    const index = siblings.findIndex(this.isEqual);
+    const index = this.getParentIndex();
     if (index === -1) {
       return undefined;
     } else if (index === 0) {
       return undefined;
     }
-    return siblings[index - 1];
+    return this.siblings()[index - 1];
   }
 
   nextSibling() {
-    const siblings = this.siblingsValues();
-    const index = siblings.findIndex(this.isEqual);
+    const index = this.getParentIndex();
     if (index === -1) {
       return undefined;
-    } else if (index === siblings.length - 1) {
+    } else if (index === this.siblings().length - 1) {
       return undefined;
     }
-    return siblings[index + 1];
+    return this.siblings()[index + 1];
+  }
+
+  hasVisibleChildren() {
+    return this.children.length > 0 && !this.isCollapsed();
+  }
+
+  findLastVisibleChild(): PathTreeNode | undefined {
+    if (this.hasVisibleChildren()) {
+      const lastChild = this.children[this.children.length - 1];
+      return lastChild.findLastVisibleChild() || lastChild;
+    } else {
+      return this;
+    }
+  }
+
+  nextAvailableSibling(): PathTreeNode | undefined {
+    return this.nextSibling() || this.parent?.nextAvailableSibling();
   }
 
   next(): PathTreeNode | undefined {
-    if (this.children.length > 0 && !this.isCollapsed()) {
-      return this.children[0];
-    } else {
-      const _nextSibling = this.nextSibling();
-      if (!_nextSibling) {
-        const parentSibling = this.parent?.nextSibling();
-        if (parentSibling) {
-          return parentSibling;
-        } else {
-          const grantparentSibling = this.parent?.parent?.nextSibling();
-          if (grantparentSibling) {
-            return grantparentSibling;
-          }
-        }
-        return undefined;
-      } else {
-        return _nextSibling;
-      }
-    }
+    return this.children.length > 0 && !this.isCollapsed()
+      ? this.children[0]
+      : this.nextAvailableSibling();
   }
 
   prev(): PathTreeNode | undefined {
-    const _prevSibling = this.prevSibling();
-    if (!_prevSibling) {
+    const prevSibling = this.prevSibling();
+    if (!prevSibling) {
       return this.parent;
-    } else {
-      const prev = _prevSibling;
-      if (prev && prev.children.length > 0 && !prev.isCollapsed()) {
-        return prev.children[prev.children.length - 1];
-      } else {
-        return prev;
-      }
     }
+    return prevSibling.findLastVisibleChild();
   }
 
   toJS() {
@@ -195,14 +189,17 @@ class PathTree {
     value.children.forEach((child) => this._removeNode(child));
   }
 
-  removeNode(value: SqValueWithContext) {
-    const node: PathTreeNode | undefined = this.nodes.get(
-      pathAsString(value.context.path)
-    );
+  removeNode(value: SqValueWithContext): void {
+    const node = this.nodes.get(pathAsString(value.context.path));
     if (node) {
       node.parent?.removeChild(node);
-      this._removeNode(node);
+      this.recursivelyRemoveNode(node);
     }
+  }
+
+  recursivelyRemoveNode(node: PathTreeNode): void {
+    this.nodes.delete(node.pathName());
+    node.children.forEach((child) => this.recursivelyRemoveNode(child));
   }
 
   toJS() {
@@ -338,6 +335,7 @@ class ItemStore {
   }
 
   scrollToPath(path: SqValuePath) {
+    // setFocused(path);
     this.handles[pathAsString(path)]?.element.scrollIntoView({
       behavior: "instant",
     });
@@ -547,6 +545,19 @@ type Props = PropsWithChildren<{
   editor?: CodeEditorHandle;
 }>;
 
+type ArrowEvent =
+  | "ArrowDown"
+  | "ArrowUp"
+  | "ArrowLeft"
+  | "ArrowRight"
+  | "Enter";
+
+function isArrowEvent(str: string): str is ArrowEvent {
+  return ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Enter"].includes(
+    str
+  );
+}
+
 export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
   (
     { partialPlaygroundSettings: unstablePlaygroundSettings, editor, children },
@@ -581,61 +592,125 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       }
     }
 
+    function focusArrowEvent(
+      event: ArrowEvent,
+      pathTree: PathTree,
+      focused: SqValuePath
+    ) {
+      const node = pathTree.nodes.get(pathAsString(focused));
+      switch (event) {
+        case "ArrowDown": {
+          const newItem = node?.children[0];
+          if (newItem) {
+            setSelected(newItem.fullPath);
+          }
+          break;
+        }
+        case "ArrowUp": {
+          const newItem = node?.parent;
+          if (newItem) {
+            if (newItem.isRoot()) {
+              setFocused(undefined);
+            } else {
+              setFocused(newItem.fullPath);
+              setSelected(newItem.fullPath);
+              scrollToPath(newItem.fullPath);
+            }
+          }
+          break;
+        }
+        case "ArrowLeft": {
+          const newItem = node?.prevSibling();
+          if (newItem) {
+            setFocused(newItem.fullPath);
+            setSelected(newItem.fullPath);
+            scrollToPath(newItem.fullPath);
+          }
+          break;
+        }
+        case "ArrowRight": {
+          const newItem = node?.nextSibling();
+          if (newItem) {
+            setFocused(newItem.fullPath);
+            setSelected(newItem.fullPath);
+            scrollToPath(newItem.fullPath);
+          }
+          break;
+        }
+        case "Enter": {
+          setFocused(undefined);
+          break;
+        }
+      }
+    }
+
+    function selectedUnfocusedArrowEvent(
+      event: ArrowEvent,
+      pathTree: PathTree,
+      selected: SqValuePath
+    ) {
+      const node = pathTree.nodes.get(pathAsString(selected));
+      switch (event) {
+        case "ArrowDown": {
+          const newItem = node?.next();
+          if (newItem) {
+            const newPath = newItem.value.context.path;
+            setSelected(newPath);
+            scrollToPath(newPath);
+            if (!itemStore.isInView(newPath)) {
+              itemStore.scrollToPath(newPath);
+            }
+          }
+          break;
+        }
+        case "ArrowUp": {
+          const newItem = node?.prev();
+          if (newItem) {
+            const newPath = newItem.value.context.path;
+            setSelected(newPath);
+            scrollToPath(newPath);
+            if (!itemStore.isInView(newPath)) {
+              itemStore.scrollToPath(newPath);
+            }
+          }
+          break;
+        }
+        case "ArrowLeft": {
+          const newItem = node?.parent;
+          newItem && !newItem.isRoot() && setSelected(newItem.fullPath);
+          break;
+        }
+        case "ArrowRight": {
+          itemStore.setState(selected, (state) => ({
+            ...state,
+            collapsed: !state?.collapsed,
+          }));
+          if (!itemStore.isInView(selected)) {
+            itemStore.scrollToPath(selected);
+          }
+          itemStore.forceUpdate(selected);
+          break;
+        }
+        case "Enter": {
+          setFocused(selected);
+          break;
+        }
+      }
+    }
+
     const handle: SquiggleViewerHandle = {
       viewValuePath(path: SqValuePath) {
+        setSelected(path);
         itemStore.scrollToPath(path);
       },
       onKeyPress(stroke: string) {
-        if (stroke === "Enter") {
-          if (selected) {
-            if (selected === focused) {
-              setFocused(undefined);
-            } else {
-              setFocused(selected);
-            }
-          }
-        }
-        if (stroke === "ArrowDown") {
-          if (selected) {
-            const next = pathTree?.nodes.get(pathAsString(selected))?.next();
-            if (next) {
-              const newPath = next.value.context.path;
-              setSelected(newPath);
-              scrollToPath(newPath);
-              if (!itemStore.isInView(newPath)) {
-                itemStore.scrollToPath(newPath);
-              }
-            }
-          }
-        }
-        if (stroke === "ArrowUp") {
-          if (selected) {
-            const prev = pathTree?.nodes.get(pathAsString(selected))?.prev();
-            if (prev) {
-              const newPath = prev.value.context.path;
-              setSelected(newPath);
-              scrollToPath(newPath);
-              if (!itemStore.isInView(newPath)) {
-                itemStore.scrollToPath(newPath);
-              }
-            }
-          }
-        }
-        if (stroke === "ArrowLeft" || stroke === "ArrowRight") {
-          if (selected) {
-            itemStore.setState(selected, (state) => ({
-              ...state,
-              collapsed: !state?.collapsed,
-            }));
-            // if (!itemStore.isInView(selected)) {
-            //   itemStore.scrollToPath(selected);
-            // }
-            itemStore.forceUpdate(selected);
-          }
-        }
-        if (stroke === "e") {
-          if (selected) {
-            scrollToPath(selected);
+        const arrowEvent = isArrowEvent(stroke) ? stroke : undefined;
+
+        if (arrowEvent && pathTree) {
+          if (focused && selected && focused === selected) {
+            focusArrowEvent(arrowEvent, pathTree, focused);
+          } else if (selected) {
+            selectedUnfocusedArrowEvent(arrowEvent, pathTree, selected);
           }
         }
       },
