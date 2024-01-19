@@ -2,7 +2,6 @@ import { syntaxTree } from "@codemirror/language";
 import { EditorView, hoverTooltip, repositionTooltips } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
 import { FC, PropsWithChildren, useEffect } from "react";
-import { createRoot } from "react-dom/client";
 
 import {
   getFunctionDocumentation,
@@ -18,6 +17,7 @@ import {
 } from "../SquiggleViewer/ViewerProvider.js";
 import { FnDocumentation } from "../ui/FnDocumentation.js";
 import { useReactiveExtension } from "./codemirrorHooks.js";
+import { reactAsDom } from "./utils.js";
 
 type Hover = NonNullable<ReturnType<typeof getFunctionDocumentation>>;
 
@@ -100,12 +100,7 @@ function buildWordHoverExtension({
         pos: node.from,
         end: node.to,
         above: true,
-        create() {
-          const dom = document.createElement("div");
-          const root = createRoot(dom);
-          root.render(<HoverTooltip hover={hover} view={view} />);
-          return { dom };
-        },
+        create: () => reactAsDom(<HoverTooltip hover={hover} view={view} />),
       };
     };
 
@@ -117,12 +112,7 @@ function buildWordHoverExtension({
         pos: node.from,
         end: node.to,
         above: true,
-        create() {
-          const dom = document.createElement("div");
-          const root = createRoot(dom);
-          root.render(<ValueTooltip value={value} view={view} />);
-          return { dom };
-        },
+        create: () => reactAsDom(<ValueTooltip value={value} view={view} />),
       };
     };
 
