@@ -90,8 +90,7 @@ export function useGetSubvalueByPath() {
       } else if (pathItem.type === "calculator") {
         // The previous path item is the one that is the parent of the calculator result.
         // This is the one that we use in the ViewerContext to store information about the calculator.
-        const calculatorPath = subValuePath;
-        const calculatorState = itemStore.getCalculator(calculatorPath);
+        const calculatorState = itemStore.getCalculator(subValuePath);
         const result = calculatorState?.calculatorResult;
         if (!result?.ok) {
           return;
