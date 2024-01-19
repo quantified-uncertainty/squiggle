@@ -7,11 +7,11 @@ describe("Scalar manipulation is well-modeled by javascript math", () => {
     fc.assert(
       fc.asyncProperty(fc.nat(), async (x) => {
         const squiggleString = `log(${x})`;
-        const squiggleResult = await testRun(squiggleString);
+        const { result } = await testRun(squiggleString);
         if (x === 0) {
-          expect(squiggleResult.value).toEqual(-Infinity);
+          expect(result.value).toEqual(-Infinity);
         } else {
-          expect(squiggleResult.value).toEqual(Math.log(x));
+          expect(result.value).toEqual(Math.log(x));
         }
       })
     );
@@ -25,8 +25,8 @@ describe("Scalar manipulation is well-modeled by javascript math", () => {
         fc.integer(),
         async (x, y, z) => {
           const squiggleString = `x = ${x}; y = ${y}; z = ${z}; x + y + z`;
-          const squiggleResult = await testRun(squiggleString);
-          expect(squiggleResult.value).toBeCloseTo(x + y + z);
+          const { result } = await testRun(squiggleString);
+          expect(result.value).toBeCloseTo(x + y + z);
         }
       )
     );
