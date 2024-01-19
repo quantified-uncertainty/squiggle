@@ -53,7 +53,7 @@ export type UseSquiggleOutput = [
   {
     project: SqProject;
     isRunning: boolean;
-    sourceId: string;
+    sourceId: string; // if you don't provide `sourceId` in `SquiggleArgs` then it will be picked randomly
   },
 ];
 

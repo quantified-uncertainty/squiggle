@@ -15,11 +15,7 @@ type Props = {
 };
 
 export const ViewerBody: FC<Props> = ({ squiggleOutput, mode, isRunning }) => {
-  const { output, code } = squiggleOutput;
-
-  if (!code) {
-    return null;
-  }
+  const { output } = squiggleOutput;
 
   if (!output.ok) {
     return <SquiggleErrorAlert error={output.value} />;
