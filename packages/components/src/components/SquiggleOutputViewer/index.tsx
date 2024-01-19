@@ -19,7 +19,7 @@ type Props = {
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
 
-export type ViewerMode = "Imports" | "Exports" | "Variables" | "Result";
+export type ViewerMode = "Imports" | "Exports" | "Variables" | "Result" | "AST";
 
 function useMode(outputResult: SqOutputResult) {
   return useState<ViewerMode>(() => {
