@@ -69,6 +69,21 @@ class PathTreeNode {
     this.parent = parent;
     this.tree = tree;
     this.path = pathAsString(value.context.path);
+    this.isEqual = this.isEqual.bind(this);
+  }
+
+  isEqual(other: PathTreeNode) {
+    return this.path === other.path;
+  }
+
+  isCollapsed() {
+    return this.tree.itemStore.getState(this.value.context.path).collapsed;
+  }
+
+  isVisible() {
+    const _isVisible =
+      !this.parent || !this.tree.itemStore.state[this.parent.path].collapsed;
+    return _isVisible;
   }
 
   addChild(value: SqValueWithContext): PathTreeNode {
@@ -85,13 +100,17 @@ class PathTreeNode {
     return pathAsString(this.value.context.path);
   }
 
-  siblings() {
+  siblingsValues(): PathTreeNode[] {
+    return this.parent?.children || [];
+  }
+
+  siblings(): string[] {
     return this.parent?.children.map((r) => r.pathName()) || [];
   }
 
   prevSibling() {
-    const siblings = this.siblings();
-    const index = siblings.indexOf(this.pathName());
+    const siblings = this.siblingsValues();
+    const index = siblings.findIndex(this.isEqual);
     if (index === -1) {
       return undefined;
     } else if (index === 0) {
@@ -101,8 +120,8 @@ class PathTreeNode {
   }
 
   nextSibling() {
-    const siblings = this.siblings();
-    const index = siblings.indexOf(this.pathName());
+    const siblings = this.siblingsValues();
+    const index = siblings.findIndex(this.isEqual);
     if (index === -1) {
       return undefined;
     } else if (index === siblings.length - 1) {
@@ -112,17 +131,23 @@ class PathTreeNode {
   }
 
   next(): PathTreeNode | undefined {
-    if (this.children.length > 0) {
+    if (this.children.length > 0 && !this.isCollapsed()) {
       return this.children[0];
     } else {
       const _nextSibling = this.nextSibling();
       if (!_nextSibling) {
         const parentSibling = this.parent?.nextSibling();
-        return parentSibling
-          ? this.tree.findFromPathName(parentSibling)
-          : undefined;
+        if (parentSibling) {
+          return parentSibling;
+        } else {
+          const grantparentSibling = this.parent?.parent?.nextSibling();
+          if (grantparentSibling) {
+            return grantparentSibling;
+          }
+        }
+        return undefined;
       } else {
-        return this.tree.findFromPathName(_nextSibling);
+        return _nextSibling;
       }
     }
   }
@@ -132,8 +157,8 @@ class PathTreeNode {
     if (!_prevSibling) {
       return this.parent;
     } else {
-      const prev = this.tree.findFromPathName(_prevSibling);
-      if (prev && prev.children.length > 0) {
+      const prev = _prevSibling;
+      if (prev && prev.children.length > 0 && !prev.isCollapsed()) {
         return prev.children[prev.children.length - 1];
       } else {
         return prev;
@@ -152,10 +177,12 @@ class PathTreeNode {
 class PathTree {
   root: PathTreeNode;
   nodes: Map<string, PathTreeNode> = new Map();
+  itemStore: ItemStore;
 
-  constructor(rootNote: SqValueWithContext) {
+  constructor(rootNote: SqValueWithContext, itemStore) {
     this.root = new PathTreeNode(rootNote, undefined, this);
     this._addNode(this.root);
+    this.itemStore = itemStore;
   }
 
   _addNode(value: PathTreeNode) {
@@ -388,7 +415,7 @@ export function useRegisterAsItemViewer(
 
     if (!pathTree) {
       if (!parent) {
-        const newPathTree = new PathTree(value);
+        const newPathTree = new PathTree(value, itemStore);
         setPathTree(newPathTree);
       }
     } else if (parent) {
@@ -600,9 +627,9 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
               ...state,
               collapsed: !state?.collapsed,
             }));
-            if (!itemStore.isInView(selected)) {
-              itemStore.scrollToPath(selected);
-            }
+            // if (!itemStore.isInView(selected)) {
+            //   itemStore.scrollToPath(selected);
+            // }
             itemStore.forceUpdate(selected);
           }
         }
