@@ -64,7 +64,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           onSubmit={() => runnerState.run()}
         />
       </div>
-      {hideViewer || !squiggleOutput?.code ? null : (
+      {hideViewer || !squiggleOutput ? null : (
         <SquiggleOutputViewer
           squiggleOutput={squiggleOutput}
           isRunning={isRunning}

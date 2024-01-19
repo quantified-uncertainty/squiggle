@@ -37,4 +37,12 @@ export class SqDict {
   asValue() {
     return new SqDictValue(this._value, this.context);
   }
+
+  isEmpty() {
+    return this._value.isEmpty();
+  }
+
+  size() {
+    return this._value.size();
+  }
 }

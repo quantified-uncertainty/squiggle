@@ -10,7 +10,6 @@ import {
   StandaloneExecutionProps,
   useSquiggle,
 } from "../lib/hooks/useSquiggle.js";
-import { getResultValue, getResultVariables } from "../lib/utility.js";
 import { MessageAlert } from "./Alert.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "./SquiggleErrorAlert.js";
@@ -52,23 +51,21 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     }
 
     if (rootPathOverride) {
+      const { output } = squiggleOutput;
+      if (!output.ok) {
+        return <SquiggleErrorAlert error={output.value} />;
+      }
       const rootValue =
         rootPathOverride.root === "result"
-          ? getResultValue(squiggleOutput)
-          : getResultVariables(squiggleOutput);
-      if (!rootValue) {
+          ? output.value.result
+          : output.value.bindings.asValue();
+
+      const value = getSubvalueByPath(rootValue, rootPathOverride);
+      if (value) {
+        return <SquiggleViewer value={value} />;
+      } else {
         return <MessageAlert heading="Value is not defined" />;
       }
-      if (!rootValue.ok) {
-        return <SquiggleErrorAlert error={rootValue.value} />;
-      }
-
-      const value = getSubvalueByPath(rootValue.value, rootPathOverride);
-      if (!value) {
-        return <MessageAlert heading="Value is not defined" />;
-      }
-
-      return <SquiggleViewer value={value} />;
     } else {
       return (
         <SquiggleOutputViewer

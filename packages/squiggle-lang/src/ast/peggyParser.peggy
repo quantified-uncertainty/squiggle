@@ -23,6 +23,8 @@ outerBlock
   / imports:importStatementsList
     finalExpression:expression
     { return h.nodeProgram(imports, [finalExpression], location()); }
+  / imports:importStatementsList
+    { return h.nodeProgram(imports, [], location()); }
 
 importStatementsList = (@importStatement __nl)*
 
