@@ -47,7 +47,7 @@ const ValueTooltip: FC<{ value: SqValue; view: EditorView }> = ({
     return (
       <TooltipBox view={view}>
         <div className="px-4 py-1">
-          {/* Force a standalone ephermeral ViewerProvider, so that we won't sync up collapsed state with the top-level viewer */}
+          {/* Force a standalone ephemeral ViewerProvider, so that we won't sync up collapsed state with the top-level viewer */}
           <InnerViewerProvider
             partialPlaygroundSettings={globalSettings}
             viewerType="tooltip"
