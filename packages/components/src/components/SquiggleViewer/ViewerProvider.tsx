@@ -544,6 +544,16 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       return merge({}, defaultPlaygroundSettings, playgroundSettings);
     }, [playgroundSettings]);
 
+    function scrollToPath(path: SqValuePath) {
+      const location = pathTree?.nodes
+        .get(pathAsString(path))
+        ?.value?.context?.findLocation();
+
+      if (location) {
+        editor?.scrollTo(location.start.offset);
+      }
+    }
+
     const handle: SquiggleViewerHandle = {
       viewValuePath(path: SqValuePath) {
         itemStore.scrollToPath(path);
@@ -562,9 +572,11 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
           if (selected) {
             const next = pathTree?.nodes.get(pathAsString(selected))?.next();
             if (next) {
-              setSelected(next.value.context.path);
-              if (!itemStore.isInView(next.value.context.path)) {
-                itemStore.scrollToPath(next.value.context.path);
+              const newPath = next.value.context.path;
+              setSelected(newPath);
+              scrollToPath(newPath);
+              if (!itemStore.isInView(newPath)) {
+                itemStore.scrollToPath(newPath);
               }
             }
           }
@@ -573,9 +585,11 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
           if (selected) {
             const prev = pathTree?.nodes.get(pathAsString(selected))?.prev();
             if (prev) {
-              setSelected(prev.value.context.path);
-              if (!itemStore.isInView(prev.value.context.path)) {
-                itemStore.scrollToPath(prev.value.context.path);
+              const newPath = prev.value.context.path;
+              setSelected(newPath);
+              scrollToPath(newPath);
+              if (!itemStore.isInView(newPath)) {
+                itemStore.scrollToPath(newPath);
               }
             }
           }
@@ -590,6 +604,11 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
               itemStore.scrollToPath(selected);
             }
             itemStore.forceUpdate(selected);
+          }
+        }
+        if (stroke === "e") {
+          if (selected) {
+            scrollToPath(selected);
           }
         }
       },
