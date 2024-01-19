@@ -17,7 +17,7 @@ import {
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import { SquiggleOutputViewer } from "../SquiggleOutputViewer/index.js";
-import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
+import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 import {
   LeftPlaygroundPanel,
   LeftPlaygroundPanelHandle,
