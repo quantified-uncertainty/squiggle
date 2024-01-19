@@ -10,7 +10,7 @@ import {
   TriangleIcon,
 } from "@quri/ui";
 
-import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { ViewerMode } from "./index.js";
 
 const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
@@ -33,14 +33,10 @@ const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
 type Props = {
   mode: ViewerMode;
   setMode: (mode: ViewerMode) => void;
-  output: SquiggleOutput;
+  output: SqOutputResult;
 };
 
-export const ViewerMenu: FC<Props> = ({
-  mode,
-  setMode,
-  output: { output },
-}) => {
+export const ViewerMenu: FC<Props> = ({ mode, setMode, output }) => {
   const hasResult = output.ok && output.value.result.tag !== "Void";
   const variablesCount = output.ok ? output.value.bindings.size() : 0;
   const importsCount = output.ok ? output.value.imports.size() : 0;

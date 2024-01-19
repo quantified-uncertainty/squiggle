@@ -1,14 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 
-import {
-  Env,
-  result,
-  SqDict,
-  SqError,
-  SqProject,
-  SqValue,
-} from "@quri/squiggle-lang";
+import { Env, SqProject } from "@quri/squiggle-lang";
 
+import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { WINDOW_VARIABLE_NAME } from "../constants.js";
 
 // Props needed for a standalone execution.
@@ -33,16 +27,9 @@ export type SquiggleArgs = {
   executionId?: number;
 } & (StandaloneExecutionProps | ProjectExecutionProps);
 
+// TODO - think of a better name, `SquiggleOutput` is too similar to `SqOutput`
 export type SquiggleOutput = {
-  output: result<
-    {
-      exports: SqDict;
-      result: SqValue;
-      imports: SqDict;
-      bindings: SqDict;
-    },
-    SqError
-  >;
+  output: SqOutputResult;
   code: string;
   executionId: number;
   executionTime: number;

@@ -41,7 +41,8 @@ function useMode(outputResult: SqOutputResult) {
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
 export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
   ({ squiggleOutput, isRunning, editor, ...settings }, viewerRef) => {
-    const [mode, setMode] = useMode(squiggleOutput.output);
+    const { output } = squiggleOutput;
+    const [mode, setMode] = useMode(output);
 
     return (
       <ViewerProvider
@@ -50,18 +51,12 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
         ref={viewerRef}
       >
         <Layout
-          menu={
-            <ViewerMenu mode={mode} setMode={setMode} output={squiggleOutput} />
-          }
+          menu={<ViewerMenu mode={mode} setMode={setMode} output={output} />}
           indicator={
             <RenderingIndicator isRunning={isRunning} output={squiggleOutput} />
           }
           viewer={
-            <ViewerBody
-              mode={mode}
-              squiggleOutput={squiggleOutput}
-              isRunning={isRunning}
-            />
+            <ViewerBody mode={mode} output={output} isRunning={isRunning} />
           }
         />
       </ViewerProvider>
