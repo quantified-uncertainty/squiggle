@@ -44,7 +44,7 @@ describe("SqValuePath", () => {
     });
   });
 
-  describe("contains()", () => {
+  describe("hasPrefix()", () => {
     test("path fully contains a shorter path", () => {
       const basePath = new SqValuePath({
         root: "bindings",
@@ -54,7 +54,7 @@ describe("SqValuePath", () => {
         root: "bindings",
         edges: [SqValuePathEdge.fromKey("foo")],
       });
-      expect(basePath.contains(subPath)).toBe(true);
+      expect(basePath.hasPrefix(subPath)).toBe(true);
     });
 
     test("path does not contain longer path", () => {
@@ -63,7 +63,7 @@ describe("SqValuePath", () => {
         edges: [SqValuePathEdge.fromKey("foo")],
       });
       const longerPath = basePath.extend(SqValuePathEdge.fromIndex(2));
-      expect(basePath.contains(longerPath)).toBe(false);
+      expect(basePath.hasPrefix(longerPath)).toBe(false);
     });
 
     test("path does not contain different path", () => {
@@ -75,7 +75,7 @@ describe("SqValuePath", () => {
         root: "imports",
         edges: [SqValuePathEdge.fromKey("bar")],
       });
-      expect(path1.contains(path2)).toBe(false);
+      expect(path1.hasPrefix(path2)).toBe(false);
     });
 
     test("path contains empty path (with same root)", () => {
@@ -87,7 +87,7 @@ describe("SqValuePath", () => {
         root: "exports",
         edges: [],
       });
-      expect(nonEmptyPath.contains(emptyPath)).toBe(true);
+      expect(nonEmptyPath.hasPrefix(emptyPath)).toBe(true);
     });
 
     test("equal paths contain each other", () => {
@@ -99,8 +99,8 @@ describe("SqValuePath", () => {
         root: "bindings",
         edges: [SqValuePathEdge.fromKey("test")],
       });
-      expect(path1.contains(path2)).toBe(true);
-      expect(path2.contains(path1)).toBe(true);
+      expect(path1.hasPrefix(path2)).toBe(true);
+      expect(path2.hasPrefix(path1)).toBe(true);
     });
   });
 });

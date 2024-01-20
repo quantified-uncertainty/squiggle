@@ -56,7 +56,7 @@ const FocusedNavigation: FC<{
       )}
 
       {focusedPath
-        .allSqValuePathSubsets({ includeRoot: false })
+        .allPrefixPaths({ includeRoot: false })
         .slice(rootPathFocusedAdjustment, -1)
         .map((path, i) => (
           <FocusedNavigationItem

@@ -21,11 +21,8 @@ export function pathToDisplayString(path: SqValuePath) {
 }
 
 export function pathToShortName(path: SqValuePath): string {
-  if (path.isRoot()) {
-    return topLevelName(path);
-  } else {
-    return path.lastItem()!.toDisplayString();
-  }
+  //topLevelName is used if its the root path
+  return path.lastItem()?.toDisplayString() || topLevelName(path);
 }
 
 export function getChildrenValues(value: SqValue): SqValue[] {
@@ -50,12 +47,12 @@ export function useGetSubvalueByPath() {
   ): SqValue | undefined => {
     const { context } = topValue;
 
-    if (!context || !subValuePath.contains(context.path)) {
+    if (!context || !subValuePath.hasPrefix(context.path)) {
       return;
     }
 
     let currentValue = topValue;
-    const subValuePaths = subValuePath.allSqValuePathSubsets({
+    const subValuePaths = subValuePath.allPrefixPaths({
       includeRoot: false,
     });
 

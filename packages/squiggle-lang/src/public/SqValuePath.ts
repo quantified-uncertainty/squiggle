@@ -11,30 +11,22 @@ export type ValuePathEdge =
       type: "calculator";
     };
 
-function isCellAddressEdge(
-  edge: ValuePathEdge
-): edge is { type: "cellAddress"; value: { row: number; column: number } } {
-  return edge.type === "cellAddress";
-}
-
 function valuePathEdgeIsEqual(a: ValuePathEdge, b: ValuePathEdge): boolean {
-  if (a.type !== b.type) {
+  if (a.type === "key" && b.type === "key") {
+    return a.value === b.value;
+  } else if (a.type === "index" && b.type === "index") {
+    return a.value === b.value;
+  } else if (a.type === "cellAddress" && b.type === "cellAddress") {
+    return a.value.row === b.value.row && a.value.column === b.value.column;
+  } else if (a.type === "calculator" && b.type === "calculator") {
+    return true;
+  } else {
     return false;
   }
-  switch (a.type) {
-    case "key":
-      return a.value === (b as { type: "key"; value: string }).value;
-    case "index":
-      return a.value === (b as { type: "index"; value: number }).value;
-    case "cellAddress":
-      return (
-        isCellAddressEdge(b) &&
-        a.value.row === b.value.row &&
-        a.value.column === b.value.column
-      );
-    case "calculator":
-      return true;
-  }
+}
+
+function escapeParentheses(str: string): string {
+  return str.replace(/[()]/g, (match) => `\\${match}`);
 }
 
 export class SqValuePathEdge {
@@ -78,14 +70,18 @@ export class SqValuePathEdge {
     const edge = this.value;
     switch (edge.type) {
       case "key":
-        return `DictKey:(${edge.value})`;
+        return `Key:(${escapeParentheses(edge.value)})`;
       case "index":
-        return `ArrayIndex:(${edge.value})`;
+        return `Index:(${edge.value})`;
       case "cellAddress":
         return `CellAddress:(${edge.value.row}:${edge.value.column})`;
       case "calculator":
         return "Calculator";
     }
+  }
+
+  toString(): string {
+    return this.toDisplayString();
   }
 }
 
@@ -185,7 +181,7 @@ export class SqValuePath {
     offset: number;
   }): SqValuePath | undefined {
     return new SqValuePath({
-      root: "bindings", // not important, will probably be removed soon
+      root: "bindings",
       edges: astOffsetToPathEdges(ast, offset),
     });
   }
@@ -194,8 +190,8 @@ export class SqValuePath {
     return this.edges.length === 0;
   }
 
-  lastItem(): SqValuePathEdge | undefined {
-    return this.edges[this.edges.length - 1];
+  lastItem() {
+    return this.edges.at(-1);
   }
 
   extend(edge: SqValuePathEdge) {
@@ -206,19 +202,25 @@ export class SqValuePath {
   }
 
   uid(): string {
-    return `${this.root}--${this.edges.map((edge) => edge.uid()).join("--")}`;
+    return `${this.root}/${this.edges.map((edge) => edge.uid()).join("/")}`;
+  }
+
+  toString(): string {
+    return `${this.root}/${this.edges
+      .map((edge) => edge.toDisplayString())
+      .join("/")}`;
   }
 
   // Checks if this SqValuePath completely contains all of the nodes in this other one.
-  contains(smallerItem: SqValuePath) {
-    if (this.root !== smallerItem.root) {
+  hasPrefix(prefix: SqValuePath) {
+    if (this.root !== prefix.root) {
       return false;
     }
-    if (this.edges.length < smallerItem.edges.length) {
+    if (this.edges.length < prefix.edges.length) {
       return false;
     }
-    for (let i = 0; i < smallerItem.edges.length; i++) {
-      if (!this.edges[i].isEqual(smallerItem.edges[i])) {
+    for (let i = 0; i < prefix.edges.length; i++) {
+      if (!this.edges[i].isEqual(prefix.edges[i])) {
         return false;
       }
     }
@@ -240,7 +242,7 @@ export class SqValuePath {
     return true;
   }
 
-  allSqValuePathSubsets({ includeRoot = false }) {
+  allPrefixPaths({ includeRoot = false }) {
     const root = new SqValuePath({
       root: this.root,
       edges: [],
