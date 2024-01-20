@@ -54,6 +54,8 @@ export class SqValueContext {
           ast = ast.statements[ast.statements.length - 1];
         } else if (ast.type === "KeyValue") {
           ast = ast.value;
+        } else if (ast.type === "DecoratedStatement") {
+          ast = ast.statement;
         } else if (isBindingStatement(ast)) {
           ast = ast.value;
         } else {

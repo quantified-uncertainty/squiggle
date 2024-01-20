@@ -29,6 +29,8 @@ import {
   shouldBeginCollapsed,
 } from "./utils.js";
 
+type ViewerType = "normal" | "tooltip";
+
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
 };
@@ -165,6 +167,7 @@ type ViewerContextShape = {
   setFocused: (value: SqValuePath | undefined) => void;
   editor?: CodeEditorHandle;
   itemStore: ItemStore;
+  viewerType: ViewerType;
   initialized: boolean;
   handle: SquiggleViewerHandle;
 };
@@ -175,6 +178,7 @@ export const ViewerContext = createContext<ViewerContextShape>({
   setFocused: () => undefined,
   editor: undefined,
   itemStore: new ItemStore(),
+  viewerType: "normal",
   handle: {
     viewValuePath: () => {},
   },
@@ -303,14 +307,25 @@ export function useMergedSettings(path: SqValuePath) {
   return result;
 }
 
+export function useViewerType() {
+  const { viewerType } = useViewerContext();
+  return viewerType;
+}
+
 type Props = PropsWithChildren<{
   partialPlaygroundSettings: PartialPlaygroundSettings;
   editor?: CodeEditorHandle;
+  viewerType?: ViewerType;
 }>;
 
 export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
   (
-    { partialPlaygroundSettings: unstablePlaygroundSettings, editor, children },
+    {
+      partialPlaygroundSettings: unstablePlaygroundSettings,
+      editor,
+      viewerType = "normal",
+      children,
+    },
     ref
   ) => {
     const [itemStore] = useState(() => new ItemStore());
@@ -346,6 +361,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
           focused,
           setFocused,
           itemStore,
+          viewerType,
           handle,
           initialized: true,
         }}

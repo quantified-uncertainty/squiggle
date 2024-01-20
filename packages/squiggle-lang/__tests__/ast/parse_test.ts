@@ -155,6 +155,8 @@ describe("Peggy parse", () => {
     testParse("x = 1", "(Program (LetStatement :x (Block 1)))");
     testParse("x", "(Program :x)");
     testParse("x = 1; x", "(Program (LetStatement :x (Block 1)) :x)");
+    testEvalError("X = 1");
+    testEvalError("Foo.bar = 1");
   });
 
   describe("functions", () => {
