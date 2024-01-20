@@ -2,7 +2,7 @@
 import "../../widgets/index.js";
 
 import { clsx } from "clsx";
-import { FC, PropsWithChildren, useMemo } from "react";
+import { FC, PropsWithChildren, useEffect, useMemo } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { CommentIcon, TextTooltip } from "@quri/ui";
@@ -26,6 +26,7 @@ import {
   useItemEvent,
   useMergedSettings,
   useRegisterAsItemViewer,
+  useScrollToEditorPath,
   useToggleCollapsed,
   useViewerContext,
   useViewerType,
@@ -124,8 +125,10 @@ export const ValueWithContextViewer: FC<Props> = ({
   const itemEvent = useItemEvent(path);
   const focusedItemEvent = useFocusedItemEvent(path);
   const viewerType = useViewerType();
+  const scrollEditorToPath = useScrollToEditorPath(path);
 
-  const { itemStore } = useViewerContext();
+  const { itemStore, focused } = useViewerContext();
+  const isFocused = focused?.isEqual(path);
   const itemState = itemStore.getStateOrInitialize(value);
 
   const isRoot = path.isRoot();
@@ -248,30 +251,27 @@ export const ValueWithContextViewer: FC<Props> = ({
     );
   };
 
-  const headerId = `header-${pathToShortName(path)}-${size}`;
-
-  // useEffect(() => {
-  //   if (size === "large") {
-  //     const headerElement = ref.current?.querySelector(`#${headerId}`);
-  //     if (headerElement instanceof HTMLElement) {
-  //       headerElement.focus();
-  //     }
-  //   }
-  // }, [size, headerId, ref]);
+  useEffect(() => {
+    const header = ref.current?.querySelector("header");
+    if (isFocused && !isRoot) {
+      header?.focus();
+    }
+  }, []);
 
   return (
     <ErrorBoundary>
       <div ref={ref}>
         {header !== "hide" && (
           <header
-            id={headerId}
             tabIndex={0}
             className={clsx(
               "flex justify-between group pr-0.5",
               extraHeaderClasses()
             )}
+            onFocus={(_) => {
+              scrollEditorToPath();
+            }}
             onKeyDown={(event) => {
-              // console.log("event.key", event.key);
               if (isArrowEvent(event.key)) {
                 event.preventDefault();
                 size === "large"

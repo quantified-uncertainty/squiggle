@@ -451,14 +451,18 @@ export function useSetLocalItemState() {
   };
 }
 
+function toggleCollapsed(itemStore: ItemStore, path: SqValuePath) {
+  itemStore.setState(path, (state) => ({
+    ...state,
+    collapsed: !state?.collapsed,
+  }));
+  itemStore.forceUpdate(path);
+}
+
 export function useToggleCollapsed() {
   const { itemStore } = useViewerContext();
   return (path: SqValuePath) => {
-    itemStore.setState(path, (state) => ({
-      ...state,
-      collapsed: !state?.collapsed,
-    }));
-    itemStore.forceUpdate(path);
+    toggleCollapsed(itemStore, path);
   };
 }
 
@@ -516,17 +520,18 @@ export function useUnfocus() {
   return () => setFocused(undefined);
 }
 
-function scrollEditorToPath(
-  path: SqValuePath,
-  pathTree: PathTree,
-  editor?: CodeEditorHandle
-) {
-  const value = pathTree.getValue(path);
-  const location = value?.context?.findLocation();
+export function useScrollToEditorPath(path: SqValuePath) {
+  const { pathTree, editor } = useViewerContext();
+  return () => {
+    if (pathTree && editor) {
+      const value = pathTree.getValue(path);
+      const location = value?.context?.findLocation();
 
-  if (location) {
-    editor?.scrollTo(location.start.offset);
-  }
+      if (location) {
+        editor?.scrollTo(location.start.offset);
+      }
+    }
+  };
 }
 
 const focusHeader = (path: SqValuePath, itemStore: ItemStore) => {
@@ -536,14 +541,8 @@ const focusHeader = (path: SqValuePath, itemStore: ItemStore) => {
   }
 };
 
-const scrollViewerToPath = (path: SqValuePath, itemStore: ItemStore) => {
-  if (!itemStore.isInView(path)) {
-    itemStore.scrollViewerToPath(path);
-  }
-};
-
 export function useItemEvent(selected: SqValuePath) {
-  const { setFocused, itemStore, editor, pathTree } = useViewerContext();
+  const { setFocused, itemStore, pathTree } = useViewerContext();
   const getNode = (path: SqValuePath) => pathTree?.getNode(path);
 
   return (event: string) => {
@@ -551,23 +550,13 @@ export function useItemEvent(selected: SqValuePath) {
       const node = getNode(selected);
       switch (event) {
         case "ArrowDown": {
-          const newItem = node?.next();
-          if (newItem) {
-            const newPath = newItem.path;
-            focusHeader(newPath, itemStore);
-            scrollViewerToPath(newPath, itemStore);
-            scrollEditorToPath(newPath, pathTree, editor);
-          }
+          const newPath = node?.next()?.path;
+          newPath && focusHeader(newPath, itemStore);
           break;
         }
         case "ArrowUp": {
-          const newItem = node?.prev();
-          if (newItem) {
-            const newPath = newItem.path;
-            focusHeader(newPath, itemStore);
-            scrollViewerToPath(newPath, itemStore);
-            scrollEditorToPath(newPath, pathTree, editor);
-          }
+          const newPath = node?.prev()?.path;
+          newPath && focusHeader(newPath, itemStore);
           break;
         }
         case "ArrowLeft": {
@@ -576,19 +565,11 @@ export function useItemEvent(selected: SqValuePath) {
           break;
         }
         case "ArrowRight": {
-          itemStore.setState(selected, (state) => ({
-            ...state,
-            collapsed: !state?.collapsed,
-          }));
-          itemStore.forceUpdate(selected);
-          scrollViewerToPath(selected, itemStore);
+          toggleCollapsed(itemStore, selected);
           break;
         }
         case "Enter": {
           setFocused(selected);
-          setTimeout(() => {
-            focusHeader(selected, itemStore);
-          }, 1);
           break;
         }
       }
@@ -596,8 +577,15 @@ export function useItemEvent(selected: SqValuePath) {
   };
 }
 export function useFocusedItemEvent(selected: SqValuePath) {
-  const { setFocused, itemStore, editor, pathTree } = useViewerContext();
+  const { setFocused, itemStore, pathTree } = useViewerContext();
   const getNode = (path: SqValuePath) => pathTree?.getNode(path);
+
+  function resetToRoot() {
+    setFocused(undefined);
+    setTimeout(() => {
+      focusHeader(selected, itemStore);
+    }, 1);
+  }
 
   return (event: string) => {
     if (isArrowEvent(event) && pathTree) {
@@ -614,17 +602,9 @@ export function useFocusedItemEvent(selected: SqValuePath) {
           const newItem = node?.parent;
           if (newItem) {
             if (newItem.isRoot()) {
-              setFocused(undefined);
-              setTimeout(() => {
-                focusHeader(selected, itemStore);
-              }, 1);
+              resetToRoot();
             } else {
-              const newPath = newItem.path;
-              setFocused(newPath);
-              setTimeout(() => {
-                focusHeader(newPath, itemStore);
-                scrollEditorToPath(newPath, pathTree, editor);
-              }, 1);
+              setFocused(newItem.path);
             }
           }
           break;
@@ -633,8 +613,6 @@ export function useFocusedItemEvent(selected: SqValuePath) {
           const newPath = node?.prevSibling()?.path;
           if (newPath) {
             setFocused(newPath);
-            focusHeader(newPath, itemStore);
-            scrollEditorToPath(newPath, pathTree, editor);
           }
           break;
         }
@@ -642,16 +620,11 @@ export function useFocusedItemEvent(selected: SqValuePath) {
           const newPath = node?.nextSibling()?.path;
           if (newPath) {
             setFocused(newPath);
-            focusHeader(newPath, itemStore);
-            scrollEditorToPath(newPath, pathTree, editor);
           }
           break;
         }
         case "Enter": {
-          setFocused(undefined);
-          setTimeout(() => {
-            focusHeader(selected, itemStore);
-          }, 1);
+          resetToRoot();
           break;
         }
       }

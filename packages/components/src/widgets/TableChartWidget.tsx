@@ -86,9 +86,11 @@ widgetRegistry.register("TableChart", {
                   {row.map((item, k) => (
                     <td
                       key={k}
+                      tabIndex={0}
                       className={clsx(
                         "px-1 overflow-hidden",
-                        k !== 0 && "border-stone-100 border-l"
+                        k !== 0 && "border-stone-100 border-l",
+                        "focus:bg-blue-50"
                       )}
                     >
                       {showItem(item, adjustedSettings)}

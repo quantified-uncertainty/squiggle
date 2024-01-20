@@ -16,5 +16,11 @@ export const ValueViewer: React.FC<Props> = ({ value, ...rest }) => {
     return <MessageAlert heading="Can't display pathless value" />;
   }
 
-  return <ValueWithContextViewer value={value} {...rest} />;
+  return (
+    <ValueWithContextViewer
+      value={value}
+      {...rest}
+      key={value.context.path.uid()}
+    />
+  );
 };
