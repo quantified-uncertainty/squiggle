@@ -60,25 +60,25 @@ export function useGetSubvalueByPath() {
     });
 
     for (const subValuePath of subValuePaths) {
-      const pathItem = subValuePath.lastItem()!; // We know it's not empty, because includeRoot is false.
+      const pathEdge = subValuePath.lastItem()!; // We know it's not empty, because includeRoot is false.
       const currentTag = currentValue.tag;
-      const pathItemType = pathItem.value.type;
+      const pathEdgeType = pathEdge.value.type;
 
       let nextValue: SqValue | undefined;
 
-      if (currentTag === "Array" && pathItemType === "arrayIndex") {
-        nextValue = currentValue.value.getValues()[pathItem.value.value];
-      } else if (currentTag === "Dict" && pathItemType === "dictKey") {
-        nextValue = currentValue.value.get(pathItem.value.value);
+      if (currentTag === "Array" && pathEdgeType === "arrayIndex") {
+        nextValue = currentValue.value.getValues()[pathEdge.value.value];
+      } else if (currentTag === "Dict" && pathEdgeType === "dictKey") {
+        nextValue = currentValue.value.get(pathEdge.value.value);
       } else if (
         currentTag === "TableChart" &&
-        pathItemType === "cellAddress"
+        pathEdgeType === "cellAddress"
       ) {
         // Maybe it would be better to get the environment in a different way.
         const environment = context.project.getEnvironment();
         const item = currentValue.value.item(
-          pathItem.value.value.row,
-          pathItem.value.value.column,
+          pathEdge.value.value.row,
+          pathEdge.value.value.column,
           environment
         );
         if (item.ok) {
@@ -86,7 +86,7 @@ export function useGetSubvalueByPath() {
         } else {
           return;
         }
-      } else if (pathItem.type === "calculator") {
+      } else if (pathEdge.type === "calculator") {
         // The previous path item is the one that is the parent of the calculator result.
         // This is the one that we use in the ViewerContext to store information about the calculator.
         const calculatorState = itemStore.getCalculator(subValuePath);

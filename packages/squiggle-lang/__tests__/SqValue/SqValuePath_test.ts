@@ -1,8 +1,8 @@
-import { SqPathItem, SqValuePath } from "../../src/index.js";
+import { SqValuePath, SqValuePathEdge } from "../../src/index.js";
 
-describe("SqPathItem", () => {
+describe("SqValuePathEdge", () => {
   test("fromDictKey creates a string item", () => {
-    const item = SqPathItem.fromDictKey("test");
+    const item = SqValuePathEdge.fromDictKey("test");
     expect(item.value).toEqual({ type: "dictKey", value: "test" });
   });
 });
@@ -11,10 +11,10 @@ describe("SqValuePath", () => {
   const path = new SqValuePath({
     root: "bindings",
     items: [
-      SqPathItem.fromDictKey("foo"),
-      SqPathItem.fromArrayIndex(2),
-      SqPathItem.fromCalculator(),
-      SqPathItem.fromCellAddress(1, 2),
+      SqValuePathEdge.fromDictKey("foo"),
+      SqValuePathEdge.fromArrayIndex(2),
+      SqValuePathEdge.fromCalculator(),
+      SqValuePathEdge.fromCellAddress(1, 2),
     ],
   });
 
@@ -22,10 +22,10 @@ describe("SqValuePath", () => {
     const path2 = new SqValuePath({
       root: "bindings",
       items: [
-        SqPathItem.fromDictKey("foo"),
-        SqPathItem.fromArrayIndex(2),
-        SqPathItem.fromCalculator(),
-        SqPathItem.fromCellAddress(1, 2),
+        SqValuePathEdge.fromDictKey("foo"),
+        SqValuePathEdge.fromArrayIndex(2),
+        SqValuePathEdge.fromCalculator(),
+        SqValuePathEdge.fromCellAddress(1, 2),
       ],
     });
     expect(path.isEqual(path2)).toBe(true);
@@ -34,9 +34,9 @@ describe("SqValuePath", () => {
   test("extend()", () => {
     const path = new SqValuePath({
       root: "bindings",
-      items: [SqPathItem.fromDictKey("foo")],
+      items: [SqValuePathEdge.fromDictKey("foo")],
     });
-    const extendedPath = path.extend(SqPathItem.fromArrayIndex(2));
+    const extendedPath = path.extend(SqValuePathEdge.fromArrayIndex(2));
     expect(extendedPath.items.length).toBe(2);
     expect(extendedPath.items[1].value).toEqual({
       type: "arrayIndex",
@@ -48,11 +48,14 @@ describe("SqValuePath", () => {
     test("path fully contains a shorter path", () => {
       const basePath = new SqValuePath({
         root: "bindings",
-        items: [SqPathItem.fromDictKey("foo"), SqPathItem.fromArrayIndex(2)],
+        items: [
+          SqValuePathEdge.fromDictKey("foo"),
+          SqValuePathEdge.fromArrayIndex(2),
+        ],
       });
       const subPath = new SqValuePath({
         root: "bindings",
-        items: [SqPathItem.fromDictKey("foo")],
+        items: [SqValuePathEdge.fromDictKey("foo")],
       });
       expect(basePath.contains(subPath)).toBe(true);
     });
@@ -60,20 +63,20 @@ describe("SqValuePath", () => {
     test("path does not contain longer path", () => {
       const basePath = new SqValuePath({
         root: "bindings",
-        items: [SqPathItem.fromDictKey("foo")],
+        items: [SqValuePathEdge.fromDictKey("foo")],
       });
-      const longerPath = basePath.extend(SqPathItem.fromArrayIndex(2));
+      const longerPath = basePath.extend(SqValuePathEdge.fromArrayIndex(2));
       expect(basePath.contains(longerPath)).toBe(false);
     });
 
     test("path does not contain different path", () => {
       const path1 = new SqValuePath({
         root: "bindings",
-        items: [SqPathItem.fromDictKey("foo")],
+        items: [SqValuePathEdge.fromDictKey("foo")],
       });
       const path2 = new SqValuePath({
         root: "imports",
-        items: [SqPathItem.fromDictKey("bar")],
+        items: [SqValuePathEdge.fromDictKey("bar")],
       });
       expect(path1.contains(path2)).toBe(false);
     });
@@ -81,7 +84,7 @@ describe("SqValuePath", () => {
     test("path contains empty path (with same root)", () => {
       const nonEmptyPath = new SqValuePath({
         root: "exports",
-        items: [SqPathItem.fromCalculator()],
+        items: [SqValuePathEdge.fromCalculator()],
       });
       const emptyPath = new SqValuePath({
         root: "exports",
@@ -93,11 +96,11 @@ describe("SqValuePath", () => {
     test("equal paths contain each other", () => {
       const path1 = new SqValuePath({
         root: "bindings",
-        items: [SqPathItem.fromDictKey("test")],
+        items: [SqValuePathEdge.fromDictKey("test")],
       });
       const path2 = new SqValuePath({
         root: "bindings",
-        items: [SqPathItem.fromDictKey("test")],
+        items: [SqValuePathEdge.fromDictKey("test")],
       });
       expect(path1.contains(path2)).toBe(true);
       expect(path2.contains(path1)).toBe(true);

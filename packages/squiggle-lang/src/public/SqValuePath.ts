@@ -3,7 +3,7 @@ import { locationContains } from "../ast/utils.js";
 
 export type RootPathItem = "result" | "bindings" | "imports" | "exports";
 
-export type PathItem =
+export type ValuePathEdge =
   | { type: "dictKey"; value: string }
   | { type: "arrayIndex"; value: number }
   | { type: "cellAddress"; value: { row: number; column: number } }
@@ -12,12 +12,12 @@ export type PathItem =
     };
 
 function isCellAddressPathItem(
-  item: PathItem
+  item: ValuePathEdge
 ): item is { type: "cellAddress"; value: { row: number; column: number } } {
   return item.type === "cellAddress";
 }
 
-function pathItemIsEqual(a: PathItem, b: PathItem): boolean {
+function pathItemIsEqual(a: ValuePathEdge, b: ValuePathEdge): boolean {
   if (a.type !== b.type) {
     return false;
   }
@@ -37,26 +37,26 @@ function pathItemIsEqual(a: PathItem, b: PathItem): boolean {
   }
 }
 
-export class SqPathItem {
-  private constructor(public value: PathItem) {}
-  static fromDictKey(str: string): SqPathItem {
-    return new SqPathItem({ type: "dictKey", value: str });
+export class SqValuePathEdge {
+  private constructor(public value: ValuePathEdge) {}
+  static fromDictKey(str: string): SqValuePathEdge {
+    return new SqValuePathEdge({ type: "dictKey", value: str });
   }
-  static fromArrayIndex(num: number): SqPathItem {
-    return new SqPathItem({ type: "arrayIndex", value: num });
+  static fromArrayIndex(num: number): SqValuePathEdge {
+    return new SqValuePathEdge({ type: "arrayIndex", value: num });
   }
-  static fromCalculator(): SqPathItem {
-    return new SqPathItem({ type: "calculator" });
+  static fromCalculator(): SqValuePathEdge {
+    return new SqValuePathEdge({ type: "calculator" });
   }
-  static fromCellAddress(row: number, column: number): SqPathItem {
-    return new SqPathItem({ type: "cellAddress", value: { row, column } });
+  static fromCellAddress(row: number, column: number): SqValuePathEdge {
+    return new SqValuePathEdge({ type: "cellAddress", value: { row, column } });
   }
 
   get type() {
     return this.value.type;
   }
 
-  isEqual(other: SqPathItem) {
+  isEqual(other: SqValuePathEdge) {
     return pathItemIsEqual(this.value, other.value);
   }
 
@@ -90,8 +90,8 @@ export class SqPathItem {
 }
 
 // There might be a better place for this to go, nearer to the ASTNode type.
-function astOffsetToPathItems(ast: ASTNode, offset: number): SqPathItem[] {
-  function buildRemainingPathItems(ast: ASTNode): SqPathItem[] {
+function astOffsetToPathItems(ast: ASTNode, offset: number): SqValuePathEdge[] {
+  function buildRemainingPathItems(ast: ASTNode): SqValuePathEdge[] {
     switch (ast.type) {
       case "Program": {
         for (const statement of ast.statements) {
@@ -121,11 +121,11 @@ function astOffsetToPathItems(ast: ASTNode, offset: number): SqPathItem[] {
             pair.key.type === "String" // only string keys are supported
           ) {
             return [
-              SqPathItem.fromDictKey(pair.key.value),
+              SqValuePathEdge.fromDictKey(pair.key.value),
               ...buildRemainingPathItems(pair.value),
             ];
           } else if (pair.type === "Identifier") {
-            return [SqPathItem.fromDictKey(pair.value)]; // this is a final node, no need to buildRemainingPathItems recursively
+            return [SqValuePathEdge.fromDictKey(pair.value)]; // this is a final node, no need to buildRemainingPathItems recursively
           }
         }
         return [];
@@ -135,7 +135,7 @@ function astOffsetToPathItems(ast: ASTNode, offset: number): SqPathItem[] {
           const element = ast.elements[i];
           if (locationContains(element.location, offset)) {
             return [
-              SqPathItem.fromArrayIndex(i),
+              SqValuePathEdge.fromArrayIndex(i),
               ...buildRemainingPathItems(element),
             ];
           }
@@ -144,13 +144,13 @@ function astOffsetToPathItems(ast: ASTNode, offset: number): SqPathItem[] {
       }
       case "LetStatement": {
         return [
-          SqPathItem.fromDictKey(ast.variable.value),
+          SqValuePathEdge.fromDictKey(ast.variable.value),
           ...buildRemainingPathItems(ast.value),
         ];
       }
       case "DefunStatement": {
         return [
-          SqPathItem.fromDictKey(ast.variable.value),
+          SqValuePathEdge.fromDictKey(ast.variable.value),
           ...buildRemainingPathItems(ast.value),
         ];
       }
@@ -170,9 +170,9 @@ function astOffsetToPathItems(ast: ASTNode, offset: number): SqPathItem[] {
 
 export class SqValuePath {
   public root: RootPathItem;
-  public items: SqPathItem[];
+  public items: SqValuePathEdge[];
 
-  constructor(props: { root: RootPathItem; items: SqPathItem[] }) {
+  constructor(props: { root: RootPathItem; items: SqValuePathEdge[] }) {
     this.root = props.root;
     this.items = props.items;
   }
@@ -194,11 +194,11 @@ export class SqValuePath {
     return this.items.length === 0;
   }
 
-  lastItem(): SqPathItem | undefined {
+  lastItem(): SqValuePathEdge | undefined {
     return this.items[this.items.length - 1];
   }
 
-  extend(item: SqPathItem) {
+  extend(item: SqValuePathEdge) {
     return new SqValuePath({
       root: this.root,
       items: [...this.items, item],
