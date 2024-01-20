@@ -3,11 +3,7 @@ import { EditorView, hoverTooltip, repositionTooltips } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
 import { FC, PropsWithChildren, ReactNode, useEffect } from "react";
 
-import {
-  getFunctionDocumentation,
-  SqProject,
-  SqValue,
-} from "@quri/squiggle-lang";
+import { getFunctionDocumentation, SqValue } from "@quri/squiggle-lang";
 
 import { valueHasContext } from "../../lib/utility.js";
 import { SquiggleValueChart } from "../SquiggleViewer/SquiggleValueChart.js";
@@ -17,6 +13,7 @@ import {
 } from "../SquiggleViewer/ViewerProvider.js";
 import { FnDocumentation } from "../ui/FnDocumentation.js";
 import { useReactiveExtension } from "./codemirrorHooks.js";
+import { CodeEditorProps } from "./index.js";
 import { reactAsDom } from "./utils.js";
 
 type Hover = NonNullable<ReturnType<typeof getFunctionDocumentation>>;
@@ -84,13 +81,11 @@ function nodeTooltip(syntaxNode: SyntaxNode, reactNode: ReactNode) {
 
 // Based on https://codemirror.net/examples/tooltip/#hover-tooltips
 // See also: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_hover
-function buildWordHoverExtension({
+function buildTooltipExtension({
   project,
   sourceId,
-}: {
-  project: SqProject;
-  sourceId: string;
-}) {
+  renderImportTooltip,
+}: Pick<CodeEditorProps, "project" | "sourceId" | "renderImportTooltip">) {
   return hoverTooltip((view, pos, side) => {
     const { doc } = view.state;
 
@@ -109,6 +104,23 @@ function buildWordHoverExtension({
     };
 
     switch (cursor.name) {
+      case "String": {
+        // Is this an import?
+        const stringNode = cursor.node;
+        if (!cursor.parent()) {
+          return null;
+        }
+        if (cursor.type.is("Import") && renderImportTooltip) {
+          const importId = getText(stringNode).slice(1, -1);
+          return nodeTooltip(
+            stringNode,
+            <TooltipBox view={view}>
+              {renderImportTooltip({ project, importId })}
+            </TooltipBox>
+          );
+        }
+        break;
+      }
       case "Identifier":
         if (getText(cursor.node).match(/^[A-Z]/)) {
           // TODO - expand the namespace to the identifier, or just show the namespace documentation
@@ -186,14 +198,15 @@ export function useTooltipsExtension(
   {
     project,
     sourceId,
-  }: {
-    project: SqProject;
-    sourceId: string;
-  }
+    renderImportTooltip,
+  }: Pick<CodeEditorProps, "project" | "sourceId" | "renderImportTooltip">
 ) {
   return useReactiveExtension(
     view,
-    () => [buildWordHoverExtension({ project, sourceId }), tooltipTheme],
-    [project, sourceId]
+    () => [
+      buildTooltipExtension({ project, sourceId, renderImportTooltip }),
+      tooltipTheme,
+    ],
+    [project, sourceId, renderImportTooltip]
   );
 }
