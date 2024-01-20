@@ -9,7 +9,6 @@ import { CommentIcon, TextTooltip } from "@quri/ui";
 
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
-import { leftWidgetMargin } from "../../widgets/utils.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
@@ -28,6 +27,7 @@ import {
   useSelect,
   useToggleCollapsed,
   useViewerContext,
+  useViewerType,
 } from "./ViewerProvider.js";
 
 const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
@@ -75,7 +75,6 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
     <div
       className={clsx(
         "max-w-4xl",
-        leftWidgetMargin,
         commentPosition === "bottom" ? "mt-1" : "mb-1"
       )}
     >
@@ -123,6 +122,7 @@ export const ValueWithContextViewer: FC<Props> = ({
   const focus = useFocus();
   const select = useSelect();
   const isSelected = useIsSelected(path);
+  const viewerType = useViewerType();
 
   const { itemStore } = useViewerContext();
   const itemState = itemStore.getStateOrInitialize(value);
@@ -134,6 +134,8 @@ export const ValueWithContextViewer: FC<Props> = ({
   const header = props.header ?? (isRoot ? "hide" : "show");
   const collapsible = header === "hide" ? false : props.collapsible ?? true;
   const size = props.size ?? "normal";
+  const enableDropdownMenu = viewerType !== "tooltip";
+  const enableFocus = viewerType !== "tooltip";
 
   const toggleCollapsed = () => {
     toggleCollapsed_(path);
@@ -145,7 +147,12 @@ export const ValueWithContextViewer: FC<Props> = ({
   // In that case, the output would look broken (empty).
   const isOpen = !collapsible || !itemState.collapsed;
 
-  const _focus = () => focus(path);
+  const _focus = () => {
+    if (!enableFocus) {
+      return;
+    }
+    focus(path);
+  };
 
   const triangleToggle = () => {
     const Icon = itemState.collapsed ? CollapsedIcon : ExpandedIcon;
@@ -189,11 +196,15 @@ export const ValueWithContextViewer: FC<Props> = ({
 
     const headerClasses = () => {
       if (header === "large") {
-        return clsx("text-md font-bold ml-1", headerColor);
+        return clsx("text-md font-bold", headerColor);
       } else if (isRoot) {
         return "text-sm text-stone-600 font-semibold";
       } else {
-        return clsx("text-sm cursor-pointer hover:underline", headerColor);
+        return clsx(
+          "text-sm",
+          enableFocus && "cursor-pointer hover:underline",
+          headerColor
+        );
       }
     };
 
@@ -259,9 +270,11 @@ export const ValueWithContextViewer: FC<Props> = ({
               )}
               {!isOpen && <CommentIconForValue value={value} />}
             </div>
-            <div className="inline-flex space-x-1 items-center">
-              <SquiggleValueMenu value={value} />
-            </div>
+            {enableDropdownMenu && (
+              <div className="inline-flex space-x-1 items-center">
+                <SquiggleValueMenu value={value} />
+              </div>
+            )}
           </header>
         )}
         {isOpen && (

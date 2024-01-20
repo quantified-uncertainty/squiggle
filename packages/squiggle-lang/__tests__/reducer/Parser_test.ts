@@ -19,7 +19,7 @@ describe("Squiggle's parser is whitespace insensitive", () => {
     ): string => {
       return `theDist${a}=${b}beta(${c}4${d},${e}5e1)${f};${g}theDist${h}`;
     };
-    const squiggleOutput = await testRun(
+    const { result } = await testRun(
       squiggleString("", "", "", "", "", "", "", "")
     );
 
@@ -40,8 +40,8 @@ describe("Squiggle's parser is whitespace insensitive", () => {
         whitespaceGen(),
         async (a, b, c, d, e, f, g, h) => {
           expect(
-            await testRun(squiggleString(a, b, c, d, e, f, g, h))
-          ).toEqualSqValue(squiggleOutput);
+            (await testRun(squiggleString(a, b, c, d, e, f, g, h))).result
+          ).toEqualSqValue(result);
         }
       )
     );

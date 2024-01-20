@@ -1,4 +1,4 @@
-import { run } from "../../src/index.js";
+import { run, SqValue } from "../../src/index.js";
 
 export async function testRun(x: string) {
   const outputR = await run(x, {
@@ -9,7 +9,7 @@ export async function testRun(x: string) {
   });
 
   if (outputR.ok) {
-    return outputR.value.result;
+    return outputR.value;
   } else {
     throw new Error(
       `Expected squiggle expression to evaluate but got error: ${outputR.value}`
@@ -38,4 +38,16 @@ export function expectErrorToBeBounded(
   const normalizingDenom = Math.max(expectedAbs, 1);
   const error = distance / normalizingDenom;
   expect(error).toBeLessThanOrEqual(epsilon);
+}
+
+export function assertTag<T extends SqValue["tag"]>(
+  value: SqValue | undefined,
+  tag: T
+): asserts value is Extract<SqValue, { tag: T }> {
+  if (!value) {
+    throw new Error("Undefined value");
+  }
+  if (value.tag !== tag) {
+    throw new Error(`Expected ${tag} value, got ${value.tag}`);
+  }
 }

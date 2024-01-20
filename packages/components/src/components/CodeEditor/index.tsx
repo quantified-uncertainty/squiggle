@@ -15,7 +15,7 @@ export type CodeEditorProps = {
   showGutter?: boolean;
   lineWrapping?: boolean;
   errors?: SqError[];
-  sourceId?: string;
+  sourceId: string;
   fontSize?: number;
   project: SqProject;
 };

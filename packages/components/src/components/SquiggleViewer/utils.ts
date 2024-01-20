@@ -1,24 +1,8 @@
-import isEqual from "lodash/isEqual.js";
-
-import { PathItem, SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { useViewerContext } from "./ViewerProvider.js";
-
-export const pathItemFormat = (item: PathItem): string => {
-  if (item.type === "cellAddress") {
-    return `Cell (${item.value.row},${item.value.column})`;
-  } else if (item.type === "calculator") {
-    return `calculator`;
-  } else {
-    return String(item.value);
-  }
-};
-
-function isTopLevel(path: SqValuePath): boolean {
-  return path.items.length === 0;
-}
 
 function topLevelName(path: SqValuePath): string {
   return {
@@ -30,23 +14,17 @@ function topLevelName(path: SqValuePath): string {
 }
 
 export function pathAsString(path: SqValuePath) {
-  if (isTopLevel(path)) {
-    return topLevelName(path);
-  } else {
-    return [topLevelName(path), ...path.items.map(pathItemFormat)].join(".");
-  }
-}
-
-export function pathIsEqual(path1: SqValuePath, path2: SqValuePath) {
-  return pathAsString(path1) === pathAsString(path2);
+  return [
+    topLevelName(path),
+    ...path.items.map((p) => p.toDisplayString()),
+  ].join(".");
 }
 
 export function pathToShortName(path: SqValuePath): string {
-  if (isTopLevel(path)) {
+  if (path.isRoot()) {
     return topLevelName(path);
   } else {
-    const lastPathItem = path.items[path.items.length - 1];
-    return pathItemFormat(lastPathItem);
+    return path.lastItem()!.toDisplayString();
   }
 }
 
@@ -66,72 +44,65 @@ export function getChildrenValues(value: SqValue): SqValue[] {
 export function useGetSubvalueByPath() {
   const { itemStore } = useViewerContext();
 
-  return (value: SqValue, path: SqValuePath): SqValue | undefined => {
-    const { context } = value;
-    if (!context) {
-      return;
-    }
-    if (context.path.root !== path.root) {
-      return;
-    }
-    if (context.path.items.length > path.items.length) {
+  return (
+    topValue: SqValue,
+    subValuePath: SqValuePath
+  ): SqValue | undefined => {
+    const { context } = topValue;
+
+    if (!context || !subValuePath.contains(context.path)) {
       return;
     }
 
-    for (let i = 0; i < path.items.length; i++) {
-      if (i < context.path.items.length) {
-        // check that `path` is a subpath of `context.path`
-        if (!isEqual(context.path.items[i], path.items[i])) {
+    let currentValue = topValue;
+    const subValuePaths = subValuePath.allSqValuePathSubsets({
+      includeRoot: false,
+    });
+
+    for (const subValuePath of subValuePaths) {
+      const pathItem = subValuePath.lastItem()!; // We know it's not empty, because includeRoot is false.
+      const currentTag = currentValue.tag;
+      const pathItemType = pathItem.value.type;
+
+      let nextValue: SqValue | undefined;
+
+      if (currentTag === "Array" && pathItemType === "arrayIndex") {
+        nextValue = currentValue.value.getValues()[pathItem.value.value];
+      } else if (currentTag === "Dict" && pathItemType === "dictKey") {
+        nextValue = currentValue.value.get(pathItem.value.value);
+      } else if (
+        currentTag === "TableChart" &&
+        pathItemType === "cellAddress"
+      ) {
+        // Maybe it would be better to get the environment in a different way.
+        const environment = context.project.getEnvironment();
+        const item = currentValue.value.item(
+          pathItem.value.value.row,
+          pathItem.value.value.column,
+          environment
+        );
+        if (item.ok) {
+          nextValue = item.value;
+        } else {
           return;
         }
-        continue;
-      }
-
-      const pathItem = path.items[i];
-      {
-        let nextValue: SqValue | undefined;
-        if (pathItem.type === "number" && value.tag === "Array") {
-          nextValue = value.value.getValues()[pathItem.value];
-        } else if (pathItem.type === "string" && value.tag === "Dict") {
-          nextValue = value.value.get(pathItem.value);
-        } else if (
-          pathItem.type === "cellAddress" &&
-          value.tag === "TableChart"
-        ) {
-          // Maybe it would be better to get the environment in a different way.
-          const environment = context.project.getEnvironment();
-          const item = value.value.item(
-            pathItem.value.row,
-            pathItem.value.column,
-            environment
-          );
-          if (item.ok) {
-            nextValue = item.value;
-          } else {
-            return;
-          }
-        } else if (pathItem.type === "calculator") {
-          // The previous path item is the one that is the parent of the calculator result.
-          // This is the one that we use in the ViewerContext to store information about the calculator.
-          const calculatorPath = new SqValuePath({
-            root: path.root,
-            items: path.items.slice(0, i),
-          });
-          const calculatorState = itemStore.getCalculator(calculatorPath);
-          const result = calculatorState?.calculatorResult;
-          if (!result?.ok) {
-            return;
-          }
-          nextValue = result.value;
-        }
-
-        if (!nextValue) {
+      } else if (pathItem.type === "calculator") {
+        // The previous path item is the one that is the parent of the calculator result.
+        // This is the one that we use in the ViewerContext to store information about the calculator.
+        const calculatorState = itemStore.getCalculator(subValuePath);
+        const result = calculatorState?.calculatorResult;
+        if (!result?.ok) {
           return;
         }
-        value = nextValue;
+        nextValue = result.value;
       }
+
+      if (!nextValue) {
+        return;
+      }
+      currentValue = nextValue;
     }
-    return value;
+    return currentValue;
   };
 }
 

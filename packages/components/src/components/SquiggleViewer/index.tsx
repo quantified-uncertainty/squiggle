@@ -6,7 +6,7 @@ import { ChevronRightIcon } from "@quri/ui";
 import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
-import { pathIsEqual, pathItemFormat, useGetSubvalueByPath } from "./utils.js";
+import { useGetSubvalueByPath } from "./utils.js";
 import { ValueViewer } from "./ValueViewer.js";
 import {
   SquiggleViewerHandle,
@@ -38,7 +38,7 @@ const FocusedNavigation: FC<{
   const unfocus = useUnfocus();
   const focus = useFocus();
 
-  const isFocusedOnRootPath = rootPath && pathIsEqual(focusedPath, rootPath);
+  const isFocusedOnRootPath = rootPath && rootPath.isEqual(focusedPath);
 
   if (isFocusedOnRootPath) {
     return null;
@@ -50,19 +50,19 @@ const FocusedNavigation: FC<{
     : 0;
 
   return (
-    <div className="flex items-center mb-3 pl-3">
+    <div className="flex items-center">
       {!rootPath?.items.length && (
         <FocusedNavigationItem onClick={unfocus} text="Home" />
       )}
 
       {focusedPath
-        .itemsAsValuePaths({ includeRoot: false })
+        .allSqValuePathSubsets({ includeRoot: false })
         .slice(rootPathFocusedAdjustment, -1)
         .map((path, i) => (
           <FocusedNavigationItem
             key={i}
             onClick={() => focus(path)}
-            text={pathItemFormat(path.items[i + rootPathFocusedAdjustment])}
+            text={path.items[i + rootPathFocusedAdjustment].toDisplayString()}
           />
         ))}
     </div>
@@ -84,37 +84,22 @@ const SquiggleViewerWithoutProvider: FC<SquiggleViewerProps> = ({ value }) => {
     focusedItem = getSubvalueByPath(value, focused);
   }
 
-  const body = () => {
-    if (focused) {
-      if (focusedItem) {
-        return (
-          <div className="px-2">
-            <ValueViewer
-              value={focusedItem}
-              collapsible={false}
-              header="large"
-              size="large"
-            />
-          </div>
-        );
-      } else {
-        return <MessageAlert heading="Focused variable is not defined" />;
-      }
-    } else {
-      return <ValueViewer value={value} size="large" />;
-    }
-  };
-
-  return (
-    <div>
-      {focused && (
-        <FocusedNavigation
-          focusedPath={focused}
-          rootPath={value.context?.path}
+  return focused ? (
+    <div className="space-y-3 pl-3">
+      <FocusedNavigation focusedPath={focused} rootPath={value.context?.path} />
+      {focusedItem ? (
+        <ValueViewer
+          value={focusedItem}
+          collapsible={false}
+          header="large"
+          size="large"
         />
+      ) : (
+        <MessageAlert heading="Focused variable is not defined" />
       )}
-      {body()}
     </div>
+  ) : (
+    <ValueViewer value={value} size="large" />
   );
 };
 

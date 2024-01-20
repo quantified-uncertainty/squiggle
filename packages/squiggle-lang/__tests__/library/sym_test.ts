@@ -20,10 +20,12 @@ describe("Symbolic constructors", () => {
 
     test("5% inv", async () => {
       expect(
-        (await testRun("Sym.normal({p5: -2, p95: 4}) -> inv(0.05)")).value
+        (await testRun("Sym.normal({p5: -2, p95: 4}) -> inv(0.05)")).result
+          .value
       ).toBeCloseTo(-2);
       expect(
-        (await testRun("Sym.normal({p5: -2, p95: 4}) -> inv(0.95)")).value
+        (await testRun("Sym.normal({p5: -2, p95: 4}) -> inv(0.95)")).result
+          .value
       ).toBeCloseTo(4);
     });
 
@@ -33,10 +35,12 @@ describe("Symbolic constructors", () => {
     );
     test("10% inv", async () => {
       expect(
-        (await testRun("Sym.normal({p10: -2, p90: 4}) -> inv(0.1)")).value
+        (await testRun("Sym.normal({p10: -2, p90: 4}) -> inv(0.1)")).result
+          .value
       ).toBeCloseTo(-2);
       expect(
-        (await testRun("Sym.normal({p10: -2, p90: 4}) -> inv(0.9)")).value
+        (await testRun("Sym.normal({p10: -2, p90: 4}) -> inv(0.9)")).result
+          .value
       ).toBeCloseTo(4);
     });
 
@@ -46,10 +50,12 @@ describe("Symbolic constructors", () => {
     );
     test("25% inv", async () => {
       expect(
-        (await testRun("Sym.normal({p25: -2, p75: 4}) -> inv(0.25)")).value
+        (await testRun("Sym.normal({p25: -2, p75: 4}) -> inv(0.25)")).result
+          .value
       ).toBeCloseTo(-2);
       expect(
-        (await testRun("Sym.normal({p25: -2, p75: 4}) -> inv(0.75)")).value
+        (await testRun("Sym.normal({p25: -2, p75: 4}) -> inv(0.75)")).result
+          .value
       ).toBeCloseTo(4);
     });
   });
@@ -63,10 +69,12 @@ describe("Symbolic constructors", () => {
     );
     test("5% inv", async () => {
       expect(
-        (await testRun("Sym.lognormal({p5: 2, p95: 5}) -> inv(0.05)")).value
+        (await testRun("Sym.lognormal({p5: 2, p95: 5}) -> inv(0.05)")).result
+          .value
       ).toBeCloseTo(2);
       expect(
-        (await testRun("Sym.lognormal({p5: 2, p95: 5}) -> inv(0.95)")).value
+        (await testRun("Sym.lognormal({p5: 2, p95: 5}) -> inv(0.95)")).result
+          .value
       ).toBeCloseTo(5);
     });
 
@@ -76,10 +84,12 @@ describe("Symbolic constructors", () => {
     );
     test("10% inv", async () => {
       expect(
-        (await testRun("Sym.lognormal({p10: 2, p90: 5}) -> inv(0.1)")).value
+        (await testRun("Sym.lognormal({p10: 2, p90: 5}) -> inv(0.1)")).result
+          .value
       ).toBeCloseTo(2);
       expect(
-        (await testRun("Sym.lognormal({p10: 2, p90: 5}) -> inv(0.9)")).value
+        (await testRun("Sym.lognormal({p10: 2, p90: 5}) -> inv(0.9)")).result
+          .value
       ).toBeCloseTo(5);
     });
 
@@ -89,10 +99,12 @@ describe("Symbolic constructors", () => {
     );
     test("25% inv", async () => {
       expect(
-        (await testRun("Sym.lognormal({p25: 2, p75: 5}) -> inv(0.25)")).value
+        (await testRun("Sym.lognormal({p25: 2, p75: 5}) -> inv(0.25)")).result
+          .value
       ).toBeCloseTo(2);
       expect(
-        (await testRun("Sym.lognormal({p25: 2, p75: 5}) -> inv(0.75)")).value
+        (await testRun("Sym.lognormal({p25: 2, p75: 5}) -> inv(0.75)")).result
+          .value
       ).toBeCloseTo(5);
     });
   });
@@ -143,7 +155,7 @@ describe("distribution functions", () => {
     testEvalToBe("10 - Sym.normal(5, 1)", "Normal(5,1)");
     testEvalToBe("Sym.normal(5, 1) - 10", "Normal(-5,1)");
     test("mean(1 - PointSet(Sym.normal(5, 2)))", async () => {
-      const result = await testRun("mean(1 - PointSet(Sym.normal(5, 2)))");
+      const { result } = await testRun("mean(1 - PointSet(Sym.normal(5, 2)))");
       if (result.tag !== "Number") {
         throw new Error();
       }
@@ -249,10 +261,10 @@ describe("Symbolic mean", () => {
         async (x, y, z) => {
           if (!(x < y && y < z)) {
             try {
-              const squiggleResult = await testRun(
+              const { result } = await testRun(
                 `mean(triangular(${x},${y},${z}))`
               );
-              expect(squiggleResult.value).toBeCloseTo((x + y + z) / 3);
+              expect(result.value).toBeCloseTo((x + y + z) / 3);
             } catch (err) {
               expect((err as Error).message).toEqual(
                 "Expected squiggle expression to evaluate but got error: Distribution Math Error: Triangular values must be increasing order."

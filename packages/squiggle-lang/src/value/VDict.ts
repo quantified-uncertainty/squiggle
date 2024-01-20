@@ -68,6 +68,14 @@ export class VDict extends BaseValue implements Indexable {
 
     return true;
   }
+
+  isEmpty(): boolean {
+    return this.value.isEmpty();
+  }
+
+  size(): number {
+    return this.value.size;
+  }
 }
 
 export const vDict = (v: ValueMap) => new VDict(v);

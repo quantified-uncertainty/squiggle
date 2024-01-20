@@ -48,7 +48,7 @@ export function parse(expr: string, source: string): ParseResult {
 
 // This function is just for the sake of tests.
 // For real generation of Squiggle code from AST try our prettier plugin.
-function nodeToString(node: ASTNode): string {
+export function nodeToString(node: ASTNode): string {
   const sExpr = (components: (ASTNode | string)[]) =>
     "(" +
     node.type +
@@ -109,8 +109,6 @@ function nodeToString(node: ASTNode): string {
       return `'${node.value}'`; // TODO - quote?
     case "Ternary":
       return sExpr([node.condition, node.trueExpression, node.falseExpression]);
-    case "Void":
-      return "()";
     case "UnitValue":
       // S-expression; we should migrate to S-expressions for other branches too, for easier testing.
       return sExpr([node.value, node.unit]);

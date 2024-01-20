@@ -23,6 +23,8 @@ outerBlock
   / imports:importStatementsList
     finalExpression:expression
     { return h.nodeProgram(imports, [finalExpression], location()); }
+  / imports:importStatementsList
+    { return h.nodeProgram(imports, [], location()); }
 
 importStatementsList = (@importStatement __nl)*
 
@@ -73,11 +75,11 @@ statement
   / defunStatement
 
 letStatement
-  = exported:("export" __nl)? variable:variable _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
+  = exported:("export" __nl)? variable:dollarIdentifier _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
     { return h.nodeLetStatement(variable, value, Boolean(exported), location()); }
 
 defunStatement
-  = exported:("export" __nl)? variable:variable '(' _nl args:functionParameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
+  = exported:("export" __nl)? variable:dollarIdentifier '(' _nl args:functionParameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
     {
       const value = h.nodeLambda(args, body, location(), variable);
       return h.nodeDefunStatement(variable, value, Boolean(exported), location());
@@ -251,10 +253,6 @@ basicLiteral
   / number
   / boolean
   / variable
-  / voidLiteral
-
-voidLiteral 'void'
-  = "()" {return h.nodeVoid(location());}
 
 variable = dollarIdentifierWithModule / dollarIdentifier
 
