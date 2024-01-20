@@ -17,7 +17,7 @@ import { SqValueWithContext } from "../../lib/utility.js";
 import { widgetRegistry } from "../../widgets/registry.js";
 import { valueToHeadingString } from "../../widgets/utils.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
-import { getChildrenValues, pathAsString } from "./utils.js";
+import { getChildrenValues } from "./utils.js";
 import {
   useFocus,
   useHasLocalSettings,
@@ -88,7 +88,7 @@ const LogToConsoleItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
       onClick={() => {
         // eslint-disable-next-line no-console
         console.log({
-          variable: pathAsString(value.context.path),
+          variable: value.context.path.uid(),
           value: value._value,
           context: value.context,
         });
