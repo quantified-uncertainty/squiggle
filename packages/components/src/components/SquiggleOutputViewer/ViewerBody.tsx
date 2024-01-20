@@ -20,6 +20,14 @@ export const ViewerBody: FC<Props> = ({ output, mode, isRunning }) => {
   }
 
   const sqOutput = output.value;
+
+  if (mode === "AST") {
+    return (
+      <pre className="text-xs">
+        {JSON.stringify(sqOutput.bindings.asValue().context?.ast, null, 2)}
+      </pre>
+    );
+  }
   let usedValue: SqValue | undefined;
   switch (mode) {
     case "Result":
