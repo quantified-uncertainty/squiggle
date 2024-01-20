@@ -5,11 +5,11 @@ import {
 } from "@codemirror/autocomplete";
 import { syntaxTree } from "@codemirror/language";
 import { SyntaxNode, Tree } from "@lezer/common";
-import { createRoot } from "react-dom/client";
 
 import { SqProject } from "@quri/squiggle-lang";
 
 import { FnDocumentationFromName } from "../../ui/FnDocumentation.js";
+import { reactAsDom } from "../utils.js";
 
 type NameNode = {
   node: SyntaxNode;
@@ -78,12 +78,7 @@ export function makeCompletionSource(project: SqProject) {
   const decoratorCompletions: Completion[] = [];
 
   const getInfoFunction = (name: string): Completion["info"] => {
-    return () => {
-      const dom = document.createElement("div");
-      const root = createRoot(dom);
-      root.render(<FnDocumentationFromName functionName={name} />);
-      return { dom };
-    };
+    return () => reactAsDom(<FnDocumentationFromName functionName={name} />);
   };
 
   for (const [name, value] of project.getStdLib().entrySeq()) {

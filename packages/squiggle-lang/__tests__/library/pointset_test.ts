@@ -35,16 +35,16 @@ describe("Mean of mixture is weighted average of means", () => {
         async (normalMean, normalStdev, betaA, betaB, x, y) => {
           // normaalize is due to https://github.com/quantified-uncertainty/squiggle/issues/1400 bug
           const squiggleString = `mean(mixture(Sym.normal(${normalMean},${normalStdev}), Sym.beta(${betaA},${betaB}), [${x}, ${y}])->normalize)`;
-          const res = await testRun(squiggleString);
+          const { result } = await testRun(squiggleString);
           const weightDenom = x + y;
           const normalWeight = x / weightDenom;
           const betaWeight = y / weightDenom;
           const betaMean = betaA / (betaA + betaB);
-          if (res.tag !== "Number") {
-            throw new Error(`Expected number result, got: ${res.tag}`);
+          if (result.tag !== "Number") {
+            throw new Error(`Expected number result, got: ${result.tag}`);
           }
           expectErrorToBeBounded(
-            res.value,
+            result.value,
             normalWeight * normalMean + betaWeight * betaMean,
             // this is a huge allowed error, but it's the highest precision we can achieve because of this bug: https://github.com/quantified-uncertainty/squiggle/issues/1414, even on relatively high \alpha and \beta values
             { epsilon: 0.7 }
@@ -65,11 +65,11 @@ describe("Discrete", () => {
 
   test("sample", async () => {
     for (let i = 0; i < 100; i++) {
-      const res = await testRun("mx(3,5) -> sample");
-      if (res.tag !== "Number") {
-        throw new Error(`Expected number result, got: ${res.tag}`);
+      const { result } = await testRun("mx(3,5) -> sample");
+      if (result.tag !== "Number") {
+        throw new Error(`Expected number result, got: ${result.tag}`);
       }
-      expect(res.value === 5 || res.value === 3).toBe(true);
+      expect(result.value === 5 || result.value === 3).toBe(true);
     }
   });
 });

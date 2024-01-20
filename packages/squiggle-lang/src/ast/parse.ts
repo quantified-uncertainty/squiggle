@@ -48,7 +48,7 @@ export function parse(expr: string, source: string): ParseResult {
 
 // This function is just for the sake of tests.
 // For real generation of Squiggle code from AST try our prettier plugin.
-function nodeToString(node: ASTNode): string {
+export function nodeToString(node: ASTNode): string {
   const sExpr = (components: (ASTNode | string)[]) =>
     "(" +
     node.type +

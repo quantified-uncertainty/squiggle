@@ -35,14 +35,14 @@ describe("mixture", () => {
         await testRun(
           "a = Sym.normal(0,1); m = mx(a, 3, [.999999,.00001]); stdev(a - m)"
         )
-      ).value
+      ).result.value
     ).toBeGreaterThan(1);
     expect(
       (
         await testRun(
           "a = normal(0,1); m = mx(a, 3, [.999999,.00001]); stdev(a - m)"
         )
-      ).value
+      ).result.value
     ).toBeCloseTo(0);
   });
 });

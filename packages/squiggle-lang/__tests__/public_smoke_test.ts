@@ -3,30 +3,30 @@ import { testRun } from "./helpers/helpers.js";
 
 describe("Simple calculations and results", () => {
   test("mean(Sym.normal(5,2))", async () => {
-    const result = await testRun("mean(Sym.normal(5,2))"); // FIXME
+    const { result } = await testRun("mean(Sym.normal(5,2))"); // FIXME
     expect(result.toString()).toEqual("5");
   });
   test("10+10", async () => {
-    const result = await testRun("10 + 10");
+    const { result } = await testRun("10 + 10");
     expect(result.toString()).toEqual("20");
   });
 });
 describe("Log function", () => {
   test("log(1) = 0", async () => {
-    const foo = await testRun("log(1)");
-    expect(foo.toString()).toEqual("0");
+    const { result } = await testRun("log(1)");
+    expect(result.toString()).toEqual("0");
   });
 });
 
 describe("Array", () => {
   test("nested Array", async () => {
-    expect((await testRun("[[ 1 ]]")).toString()).toEqual("[[1]]");
+    expect((await testRun("[[ 1 ]]")).result.toString()).toEqual("[[1]]");
   });
 });
 
 describe("Dict", () => {
   test("Return dict", async () => {
-    expect((await testRun("{a:1}")).toString()).toEqual("{a: 1}");
+    expect((await testRun("{a:1}")).result.toString()).toEqual("{a: 1}");
   });
 });
 
