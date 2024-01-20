@@ -334,7 +334,7 @@ class ItemStore {
     }));
   }
 
-  scrollToPath(path: SqValuePath) {
+  scrollViewerToPath(path: SqValuePath) {
     // setFocused(path);
     this.handles[path.uid()]?.element.scrollIntoView({
       behavior: "instant",
@@ -388,7 +388,7 @@ export function useViewerContext() {
 
 // `<ValueWithContextViewer>` calls this hook to register its handle in `<ViewerProvider>`.
 // This allows us to do two things later:
-// 1. Implement `store.scrollToPath`.
+// 1. Implement `store.scrollViewerToPath`.
 // 2. Re-render individual item viewers on demand, for example on "Collapse Children" menu action.
 export function useRegisterAsItemViewer(
   path: SqValuePath,
@@ -569,6 +569,141 @@ function isArrowEvent(str: string): str is ArrowEvent {
   );
 }
 
+function arrowActions({
+  getNode,
+  setFocused,
+  setSelected,
+  scrollEditorToPath,
+  scrollViewerToPath,
+  itemStore,
+}: {
+  getNode: (path: SqValuePath) => PathTreeNode | undefined;
+  setFocused: (value: SqValuePath | undefined) => void;
+  setSelected: (value: SqValuePath | undefined) => void;
+  scrollEditorToPath: (path: SqValuePath) => void;
+  scrollViewerToPath: (path: SqValuePath) => void;
+  itemStore: ItemStore;
+}): ({
+  event,
+  focused,
+  selected,
+}: {
+  event: ArrowEvent;
+  focused?: SqValuePath;
+  selected?: SqValuePath;
+}) => void {
+  function focusArrowEvent(event: ArrowEvent, focused: SqValuePath) {
+    const node = getNode(focused);
+    switch (event) {
+      case "ArrowDown": {
+        const newItem = node?.children[0];
+        if (newItem) {
+          setSelected(newItem.path);
+        }
+        break;
+      }
+      case "ArrowUp": {
+        const newItem = node?.parent;
+        if (newItem) {
+          if (newItem.isRoot()) {
+            setFocused(undefined);
+          } else {
+            setFocused(newItem.path);
+            setSelected(newItem.path);
+            scrollEditorToPath(newItem.path);
+          }
+        }
+        break;
+      }
+      case "ArrowLeft": {
+        const newItem = node?.prevSibling();
+        if (newItem) {
+          setFocused(newItem.path);
+          setSelected(newItem.path);
+          scrollEditorToPath(newItem.path);
+        }
+        break;
+      }
+      case "ArrowRight": {
+        const newItem = node?.nextSibling();
+        if (newItem) {
+          setFocused(newItem.path);
+          setSelected(newItem.path);
+          scrollEditorToPath(newItem.path);
+        }
+        break;
+      }
+      case "Enter": {
+        setFocused(undefined);
+        break;
+      }
+    }
+  }
+
+  function selectedUnfocusedArrowEvent(
+    event: ArrowEvent,
+    selected: SqValuePath
+  ) {
+    const node = getNode(selected);
+    switch (event) {
+      case "ArrowDown": {
+        const newItem = node?.next();
+        if (newItem) {
+          const newPath = newItem.path;
+          setSelected(newPath);
+          scrollEditorToPath(newPath);
+          scrollViewerToPath(newPath);
+        }
+        break;
+      }
+      case "ArrowUp": {
+        const newItem = node?.prev();
+        if (newItem) {
+          const newPath = newItem.path;
+          setSelected(newPath);
+          scrollEditorToPath(newPath);
+          scrollViewerToPath(newPath);
+        }
+        break;
+      }
+      case "ArrowLeft": {
+        const newItem = node?.parent;
+        newItem && !newItem.isRoot() && setSelected(newItem.path);
+        break;
+      }
+      case "ArrowRight": {
+        itemStore.setState(selected, (state) => ({
+          ...state,
+          collapsed: !state?.collapsed,
+        }));
+        scrollViewerToPath(selected);
+        itemStore.forceUpdate(selected);
+        break;
+      }
+      case "Enter": {
+        setFocused(selected);
+        break;
+      }
+    }
+  }
+
+  return ({
+    event,
+    focused,
+    selected,
+  }: {
+    event: ArrowEvent;
+    focused?: SqValuePath;
+    selected?: SqValuePath;
+  }) => {
+    if (focused && selected && focused === selected) {
+      focusArrowEvent(event, focused);
+    } else if (selected) {
+      selectedUnfocusedArrowEvent(event, selected);
+    }
+  };
+}
+
 export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
   (
     {
@@ -598,7 +733,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       return merge({}, defaultPlaygroundSettings, playgroundSettings);
     }, [playgroundSettings]);
 
-    function scrollToPath(path: SqValuePath) {
+    function scrollEditorToPath(path: SqValuePath) {
       const value = pathTree?.getValue(path);
       const location = value?.context?.findLocation();
 
@@ -607,126 +742,29 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       }
     }
 
-    function focusArrowEvent(
-      event: ArrowEvent,
-      pathTree: PathTree,
-      focused: SqValuePath
-    ) {
-      const node = pathTree.getNode(focused);
-      switch (event) {
-        case "ArrowDown": {
-          const newItem = node?.children[0];
-          if (newItem) {
-            setSelected(newItem.path);
-          }
-          break;
+    const arrowActionFn = arrowActions({
+      setFocused,
+      setSelected,
+      getNode: (path) => pathTree?.getNode(path),
+      scrollEditorToPath,
+      scrollViewerToPath: (path) => {
+        if (!itemStore.isInView(path)) {
+          itemStore.scrollViewerToPath(path);
         }
-        case "ArrowUp": {
-          const newItem = node?.parent;
-          if (newItem) {
-            if (newItem.isRoot()) {
-              setFocused(undefined);
-            } else {
-              setFocused(newItem.path);
-              setSelected(newItem.path);
-              scrollToPath(newItem.path);
-            }
-          }
-          break;
-        }
-        case "ArrowLeft": {
-          const newItem = node?.prevSibling();
-          if (newItem) {
-            setFocused(newItem.path);
-            setSelected(newItem.path);
-            scrollToPath(newItem.path);
-          }
-          break;
-        }
-        case "ArrowRight": {
-          const newItem = node?.nextSibling();
-          if (newItem) {
-            setFocused(newItem.path);
-            setSelected(newItem.path);
-            scrollToPath(newItem.path);
-          }
-          break;
-        }
-        case "Enter": {
-          setFocused(undefined);
-          break;
-        }
-      }
-    }
-
-    function selectedUnfocusedArrowEvent(
-      event: ArrowEvent,
-      pathTree: PathTree,
-      selected: SqValuePath
-    ) {
-      const node = pathTree.getNode(selected);
-      switch (event) {
-        case "ArrowDown": {
-          const newItem = node?.next();
-          if (newItem) {
-            const newPath = newItem.path;
-            setSelected(newPath);
-            scrollToPath(newPath);
-            if (!itemStore.isInView(newPath)) {
-              itemStore.scrollToPath(newPath);
-            }
-          }
-          break;
-        }
-        case "ArrowUp": {
-          const newItem = node?.prev();
-          if (newItem) {
-            const newPath = newItem.path;
-            setSelected(newPath);
-            scrollToPath(newPath);
-            if (!itemStore.isInView(newPath)) {
-              itemStore.scrollToPath(newPath);
-            }
-          }
-          break;
-        }
-        case "ArrowLeft": {
-          const newItem = node?.parent;
-          newItem && !newItem.isRoot() && setSelected(newItem.path);
-          break;
-        }
-        case "ArrowRight": {
-          itemStore.setState(selected, (state) => ({
-            ...state,
-            collapsed: !state?.collapsed,
-          }));
-          if (!itemStore.isInView(selected)) {
-            itemStore.scrollToPath(selected);
-          }
-          itemStore.forceUpdate(selected);
-          break;
-        }
-        case "Enter": {
-          setFocused(selected);
-          break;
-        }
-      }
-    }
+      },
+      itemStore,
+    });
 
     const handle: SquiggleViewerHandle = {
       viewValuePath(path: SqValuePath) {
         setSelected(path);
-        itemStore.scrollToPath(path);
+        itemStore.scrollViewerToPath(path);
       },
       onKeyPress(stroke: string) {
         const arrowEvent = isArrowEvent(stroke) ? stroke : undefined;
 
         if (arrowEvent && pathTree) {
-          if (focused && selected && focused === selected) {
-            focusArrowEvent(arrowEvent, pathTree, focused);
-          } else if (selected) {
-            selectedUnfocusedArrowEvent(arrowEvent, pathTree, selected);
-          }
+          arrowActionFn({ focused, selected, event: arrowEvent });
         }
       },
     };
