@@ -43,10 +43,7 @@ export const WithPathOverride: Story = {
   `,
     rootPathOverride: new SqValuePath({
       root: "bindings",
-      items: [
-        SqValuePathEdge.fromDictKey("foo"),
-        SqValuePathEdge.fromDictKey("bar"),
-      ],
+      items: [SqValuePathEdge.fromKey("foo"), SqValuePathEdge.fromKey("bar")],
     }),
   },
 };

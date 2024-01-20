@@ -4,8 +4,8 @@ import { locationContains } from "../ast/utils.js";
 export type RootPathItem = "result" | "bindings" | "imports" | "exports";
 
 export type ValuePathEdge =
-  | { type: "dictKey"; value: string }
-  | { type: "arrayIndex"; value: number }
+  | { type: "key"; value: string }
+  | { type: "index"; value: number }
   | { type: "cellAddress"; value: { row: number; column: number } }
   | {
       type: "calculator";
@@ -22,10 +22,10 @@ function pathItemIsEqual(a: ValuePathEdge, b: ValuePathEdge): boolean {
     return false;
   }
   switch (a.type) {
-    case "dictKey":
-      return a.value === (b as { type: "dictKey"; value: string }).value;
-    case "arrayIndex":
-      return a.value === (b as { type: "arrayIndex"; value: number }).value;
+    case "key":
+      return a.value === (b as { type: "key"; value: string }).value;
+    case "index":
+      return a.value === (b as { type: "index"; value: number }).value;
     case "cellAddress":
       return (
         isCellAddressPathItem(b) &&
@@ -39,11 +39,11 @@ function pathItemIsEqual(a: ValuePathEdge, b: ValuePathEdge): boolean {
 
 export class SqValuePathEdge {
   private constructor(public value: ValuePathEdge) {}
-  static fromDictKey(str: string): SqValuePathEdge {
-    return new SqValuePathEdge({ type: "dictKey", value: str });
+  static fromKey(str: string): SqValuePathEdge {
+    return new SqValuePathEdge({ type: "key", value: str });
   }
-  static fromArrayIndex(num: number): SqValuePathEdge {
-    return new SqValuePathEdge({ type: "arrayIndex", value: num });
+  static fromIndex(num: number): SqValuePathEdge {
+    return new SqValuePathEdge({ type: "index", value: num });
   }
   static fromCalculator(): SqValuePathEdge {
     return new SqValuePathEdge({ type: "calculator" });
@@ -63,9 +63,9 @@ export class SqValuePathEdge {
   toDisplayString(): string {
     const item = this.value;
     switch (item.type) {
-      case "dictKey":
+      case "key":
         return item.value;
-      case "arrayIndex":
+      case "index":
         return String(item.value);
       case "cellAddress":
         return `Cell(${item.value.row},${item.value.column})`;
@@ -77,9 +77,9 @@ export class SqValuePathEdge {
   uid(): string {
     const item = this.value;
     switch (item.type) {
-      case "dictKey":
+      case "key":
         return `DictKey:(${item.value})`;
-      case "arrayIndex":
+      case "index":
         return `ArrayIndex:(${item.value})`;
       case "cellAddress":
         return `CellAddress:(${item.value.row}:${item.value.column})`;
@@ -121,11 +121,11 @@ function astOffsetToPathItems(ast: ASTNode, offset: number): SqValuePathEdge[] {
             pair.key.type === "String" // only string keys are supported
           ) {
             return [
-              SqValuePathEdge.fromDictKey(pair.key.value),
+              SqValuePathEdge.fromKey(pair.key.value),
               ...buildRemainingPathItems(pair.value),
             ];
           } else if (pair.type === "Identifier") {
-            return [SqValuePathEdge.fromDictKey(pair.value)]; // this is a final node, no need to buildRemainingPathItems recursively
+            return [SqValuePathEdge.fromKey(pair.value)]; // this is a final node, no need to buildRemainingPathItems recursively
           }
         }
         return [];
@@ -135,7 +135,7 @@ function astOffsetToPathItems(ast: ASTNode, offset: number): SqValuePathEdge[] {
           const element = ast.elements[i];
           if (locationContains(element.location, offset)) {
             return [
-              SqValuePathEdge.fromArrayIndex(i),
+              SqValuePathEdge.fromIndex(i),
               ...buildRemainingPathItems(element),
             ];
           }
@@ -144,13 +144,13 @@ function astOffsetToPathItems(ast: ASTNode, offset: number): SqValuePathEdge[] {
       }
       case "LetStatement": {
         return [
-          SqValuePathEdge.fromDictKey(ast.variable.value),
+          SqValuePathEdge.fromKey(ast.variable.value),
           ...buildRemainingPathItems(ast.value),
         ];
       }
       case "DefunStatement": {
         return [
-          SqValuePathEdge.fromDictKey(ast.variable.value),
+          SqValuePathEdge.fromKey(ast.variable.value),
           ...buildRemainingPathItems(ast.value),
         ];
       }
