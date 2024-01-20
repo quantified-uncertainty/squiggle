@@ -1,9 +1,9 @@
 import { SqPathItem, SqValuePath } from "../../src/index.js";
 
 describe("SqPathItem", () => {
-  test("fromString creates a string item", () => {
+  test("fromDictKey creates a string item", () => {
     const item = SqPathItem.fromDictKey("test");
-    expect(item.value).toEqual({ type: "string", value: "test" });
+    expect(item.value).toEqual({ type: "dictKey", value: "test" });
   });
 });
 
@@ -38,7 +38,10 @@ describe("SqValuePath", () => {
     });
     const extendedPath = path.extend(SqPathItem.fromArrayIndex(2));
     expect(extendedPath.items.length).toBe(2);
-    expect(extendedPath.items[1].value).toEqual({ type: "number", value: 2 });
+    expect(extendedPath.items[1].value).toEqual({
+      type: "arrayIndex",
+      value: 2,
+    });
   });
 
   describe("contains()", () => {
