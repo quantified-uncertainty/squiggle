@@ -51,10 +51,12 @@ const defaultLocalItemState: LocalItemState = {
   settings: {},
 };
 
+type ValuePathUID = string;
+
 class PathTreeNode {
   readonly tree: PathTree;
-  readonly fullPath: SqValuePath;
-  parent: PathTreeNode | undefined;
+  readonly path: SqValuePath;
+  readonly parent: PathTreeNode | undefined;
   children: PathTreeNode[] = [];
 
   constructor(
@@ -64,24 +66,23 @@ class PathTreeNode {
   ) {
     this.parent = parent;
     this.tree = tree;
-    this.fullPath = path;
+    this.path = path;
     this.isEqual = this.isEqual.bind(this);
   }
 
   uid() {
-    return this.fullPath.uid();
+    return this.path.uid();
+  }
+  isRoot() {
+    return this.path.isRoot();
   }
 
   private isEqual(other: PathTreeNode) {
-    return this.fullPath.isEqual(other.fullPath);
-  }
-
-  isRoot() {
-    return this.fullPath.isRoot();
+    return this.path.isEqual(other.path);
   }
 
   private isCollapsed() {
-    return this.tree.itemStore.getState(this.fullPath).collapsed;
+    return this.tree.isPathCollapsed(this.path); // This seems awkward, should find another way to deal with it.
   }
 
   private childrenAreVisible() {
@@ -95,7 +96,7 @@ class PathTreeNode {
   addChild(path: SqValuePath): PathTreeNode | undefined {
     //We don't really need this alreadyExists check, as this normally is just called by PathTree.addNode, which already checks for existence, but seems safe.
     const alreadyExists = this.children.some((child) =>
-      child.fullPath.isEqual(path)
+      child.path.isEqual(path)
     );
     if (!alreadyExists) {
       const node = new PathTreeNode(path, this, this.tree);
@@ -106,7 +107,7 @@ class PathTreeNode {
 
   removeChild(node: PathTreeNode) {
     this.children = this.children.filter(
-      (child) => !child.fullPath.isEqual(node.fullPath)
+      (child) => !child.path.isEqual(node.path)
     );
   }
 
@@ -115,6 +116,7 @@ class PathTreeNode {
   }
 
   private getParentIndex() {
+    //We could later optimize this by using the listIndex of arrayIndex nodes and the fact that dictKeys are sorted.
     const siblings = this.siblings();
     return siblings.findIndex(this.isEqual);
   }
@@ -169,14 +171,17 @@ class PathTreeNode {
 
 class PathTree {
   readonly root: PathTreeNode;
-  nodes: Map<string, PathTreeNode> = new Map();
-  values: Map<string, SqValueWithContext> = new Map(); // Maybe there's a better place this could go?
-  itemStore: ItemStore;
+  readonly nodes: Map<ValuePathUID, PathTreeNode> = new Map();
+  readonly values: Map<ValuePathUID, SqValueWithContext> = new Map(); // This could probably go to a better place
+  readonly isPathCollapsed: (path: SqValuePath) => boolean;
 
-  constructor(rootNote: SqValueWithContext, itemStore) {
-    this.root = new PathTreeNode(rootNote.context.path, undefined, this);
-    this._addNode(this.root, rootNote);
-    this.itemStore = itemStore;
+  constructor(
+    rootNode: SqValueWithContext,
+    getIsCollapsed: (path: SqValuePath) => boolean
+  ) {
+    this.root = new PathTreeNode(rootNode.context.path, undefined, this);
+    this._addNode(this.root, rootNode);
+    this.isPathCollapsed = getIsCollapsed;
   }
 
   private _addNode(node: PathTreeNode, value: SqValueWithContext) {
@@ -242,16 +247,15 @@ function isElementInView(element: HTMLElement) {
  * Then we won't have to rely on `forceUpdate` for rerenders.
  */
 class ItemStore {
-  state: Record<string, LocalItemState> = {};
-  handles: Record<string, ItemHandle> = {};
+  state: Record<ValuePathUID, LocalItemState> = {};
+  handles: Record<ValuePathUID, ItemHandle> = {};
 
   setState(
     path: SqValuePath,
     fn: (localItemState: LocalItemState) => LocalItemState
   ): void {
-    const pathString = path.uid();
-    const newSettings = fn(this.state[pathString] || defaultLocalItemState);
-    this.state[pathString] = newSettings;
+    const newSettings = fn(this.state[path.uid()] || defaultLocalItemState);
+    this.state[path.uid()] = newSettings;
   }
 
   getState(path: SqValuePath): LocalItemState {
@@ -411,7 +415,10 @@ export function useRegisterAsItemViewer(
 
     if (!pathTree) {
       if (!parent) {
-        const newPathTree = new PathTree(value, itemStore);
+        const newPathTree = new PathTree(
+          value,
+          (path) => itemStore.getState(path).collapsed
+        );
         setPathTree(newPathTree);
       }
     } else if (parent) {
@@ -610,7 +617,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
         case "ArrowDown": {
           const newItem = node?.children[0];
           if (newItem) {
-            setSelected(newItem.fullPath);
+            setSelected(newItem.path);
           }
           break;
         }
@@ -620,9 +627,9 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
             if (newItem.isRoot()) {
               setFocused(undefined);
             } else {
-              setFocused(newItem.fullPath);
-              setSelected(newItem.fullPath);
-              scrollToPath(newItem.fullPath);
+              setFocused(newItem.path);
+              setSelected(newItem.path);
+              scrollToPath(newItem.path);
             }
           }
           break;
@@ -630,18 +637,18 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
         case "ArrowLeft": {
           const newItem = node?.prevSibling();
           if (newItem) {
-            setFocused(newItem.fullPath);
-            setSelected(newItem.fullPath);
-            scrollToPath(newItem.fullPath);
+            setFocused(newItem.path);
+            setSelected(newItem.path);
+            scrollToPath(newItem.path);
           }
           break;
         }
         case "ArrowRight": {
           const newItem = node?.nextSibling();
           if (newItem) {
-            setFocused(newItem.fullPath);
-            setSelected(newItem.fullPath);
-            scrollToPath(newItem.fullPath);
+            setFocused(newItem.path);
+            setSelected(newItem.path);
+            scrollToPath(newItem.path);
           }
           break;
         }
@@ -662,7 +669,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
         case "ArrowDown": {
           const newItem = node?.next();
           if (newItem) {
-            const newPath = newItem.fullPath;
+            const newPath = newItem.path;
             setSelected(newPath);
             scrollToPath(newPath);
             if (!itemStore.isInView(newPath)) {
@@ -674,7 +681,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
         case "ArrowUp": {
           const newItem = node?.prev();
           if (newItem) {
-            const newPath = newItem.fullPath;
+            const newPath = newItem.path;
             setSelected(newPath);
             scrollToPath(newPath);
             if (!itemStore.isInView(newPath)) {
@@ -685,7 +692,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
         }
         case "ArrowLeft": {
           const newItem = node?.parent;
-          newItem && !newItem.isRoot() && setSelected(newItem.fullPath);
+          newItem && !newItem.isRoot() && setSelected(newItem.path);
           break;
         }
         case "ArrowRight": {
