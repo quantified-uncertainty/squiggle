@@ -18,32 +18,32 @@ describe("SqValuePath", () => {
     ],
   });
 
-  test("Serializes and deserializes complex paths correctly", () => {
-    const complexPath = new SqValuePath({
-      root: "exports",
-      items: [
-        SqPathItem.fromString("nested"),
-        SqPathItem.fromNumber(42),
-        SqPathItem.fromCellAddress(5, 10),
-      ],
+  describe("serializeToString() and deserialize()", () => {
+    test("Works on complex paths", () => {
+      const complexPath = new SqValuePath({
+        root: "exports",
+        items: [
+          SqPathItem.fromString("nested"),
+          SqPathItem.fromNumber(42),
+          SqPathItem.fromCellAddress(5, 10),
+        ],
+      });
+      const serialized = complexPath.serializeToString();
+      const deserialized = SqValuePath.deserialize(serialized);
+      expect(deserialized).toEqual(complexPath);
     });
-    const serialized = complexPath.serializeToString();
-    const deserialized = SqValuePath.deserialize(serialized);
-    expect(deserialized).toEqual(complexPath);
+    test("works on empty path", () => {
+      const emptyPath = new SqValuePath({ root: "imports", items: [] });
+      const serialized = emptyPath.serializeToString();
+      const deserialized = SqValuePath.deserialize(serialized);
+      expect(deserialized.items.length).toBe(0);
+    });
+    test("throws error on invalid input", () => {
+      expect(() => SqValuePath.deserialize("invalid")).toThrow(Error);
+    });
   });
 
-  test("Handles empty paths", () => {
-    const emptyPath = new SqValuePath({ root: "imports", items: [] });
-    const serialized = emptyPath.serializeToString();
-    const deserialized = SqValuePath.deserialize(serialized);
-    expect(deserialized.items.length).toBe(0);
-  });
-
-  test("deserialize throws error on invalid input", () => {
-    expect(() => SqValuePath.deserialize("invalid")).toThrow(Error);
-  });
-
-  test("Equality", () => {
+  test("isEqual()", () => {
     const path2 = new SqValuePath({
       root: "bindings",
       items: [
@@ -56,7 +56,7 @@ describe("SqValuePath", () => {
     expect(path.isEqual(path2)).toBe(true);
   });
 
-  test("extends path correctly", () => {
+  test("extend()", () => {
     const path = new SqValuePath({
       root: "bindings",
       items: [SqPathItem.fromString("foo")],
@@ -66,8 +66,8 @@ describe("SqValuePath", () => {
     expect(extendedPath.items[1].value).toEqual({ type: "number", value: 2 });
   });
 
-  describe("SqValuePath contains()", () => {
-    test("path fully contains another path", () => {
+  describe("contains()", () => {
+    test("path fully contains a shorter path", () => {
       const basePath = new SqValuePath({
         root: "bindings",
         items: [SqPathItem.fromString("foo"), SqPathItem.fromNumber(2)],
@@ -79,16 +79,16 @@ describe("SqValuePath", () => {
       expect(basePath.contains(subPath)).toBe(true);
     });
 
-    test("path partially contains another path", () => {
+    test("path does not contain longer path", () => {
       const basePath = new SqValuePath({
         root: "bindings",
         items: [SqPathItem.fromString("foo")],
       });
-      const extendedPath = basePath.extend(SqPathItem.fromNumber(2));
-      expect(basePath.contains(extendedPath)).toBe(false);
+      const longerPath = basePath.extend(SqPathItem.fromNumber(2));
+      expect(basePath.contains(longerPath)).toBe(false);
     });
 
-    test("path does not contain another path", () => {
+    test("path does not contain different path", () => {
       const path1 = new SqValuePath({
         root: "bindings",
         items: [SqPathItem.fromString("foo")],
@@ -100,7 +100,7 @@ describe("SqValuePath", () => {
       expect(path1.contains(path2)).toBe(false);
     });
 
-    test("empty path is contained in any path", () => {
+    test("path contains empty path (with same root)", () => {
       const nonEmptyPath = new SqValuePath({
         root: "exports",
         items: [SqPathItem.fromCalculator()],
