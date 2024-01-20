@@ -11,6 +11,12 @@ export type PathItem =
       type: "calculator";
     };
 
+function isCellAddressPathItem(
+  item: PathItem
+): item is { type: "cellAddress"; value: { row: number; column: number } } {
+  return item.type === "cellAddress";
+}
+
 function pathItemIsEqual(a: PathItem, b: PathItem): boolean {
   if (a.type !== b.type) {
     return false;
@@ -22,12 +28,9 @@ function pathItemIsEqual(a: PathItem, b: PathItem): boolean {
       return a.value === (b as { type: "number"; value: number }).value;
     case "cellAddress":
       return (
-        a.value.row ===
-          (b as { type: "cellAddress"; value: { row: number; column: number } })
-            .value.row &&
-        a.value.column ===
-          (b as { type: "cellAddress"; value: { row: number; column: number } })
-            .value.column
+        isCellAddressPathItem(b) &&
+        a.value.row === b.value.row &&
+        a.value.column === b.value.column
       );
     case "calculator":
       return true;
@@ -65,9 +68,9 @@ export class SqPathItem {
       case "number":
         return String(item.value);
       case "cellAddress":
-        return `Cell (${item.value.row},${item.value.column})`;
+        return `Cell(${item.value.row},${item.value.column})`;
       case "calculator":
-        return "calculator";
+        return "Calculator";
     }
   }
 }
