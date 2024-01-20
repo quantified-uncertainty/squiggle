@@ -113,6 +113,7 @@ export function useSquiggleEditorExtensions(
   const tooltipsExtension = useTooltipsExtension(view, {
     project: params.project,
     sourceId: params.sourceId,
+    renderImportTooltip: params.renderImportTooltip,
   });
 
   const highPrioritySquiggleExtensions = [
