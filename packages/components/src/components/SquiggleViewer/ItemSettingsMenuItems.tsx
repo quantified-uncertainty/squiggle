@@ -18,7 +18,7 @@ import {
   viewSettingsSchema,
 } from "../PlaygroundSettings.js";
 import { PlaygroundContext } from "../SquigglePlayground/index.js";
-import { pathAsString } from "./utils.js";
+import { pathToDisplayString } from "./utils.js";
 import {
   useHasLocalSettings,
   useMergedSettings,
@@ -82,7 +82,7 @@ const ItemSettingsModal: FC<Props> = ({
               className="cursor-pointer"
               onClick={resetScroll}
             >
-              {pathAsString(path)}
+              {pathToDisplayString(path)}
             </span>
           </>
         ) : (

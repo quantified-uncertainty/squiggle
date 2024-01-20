@@ -13,7 +13,7 @@ function topLevelName(path: SqValuePath): string {
   }[path.root];
 }
 
-export function pathAsString(path: SqValuePath) {
+export function pathToDisplayString(path: SqValuePath) {
   return [
     topLevelName(path),
     ...path.items.map((p) => p.toDisplayString()),

@@ -23,11 +23,7 @@ import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import {
-  getChildrenValues,
-  pathAsString,
-  shouldBeginCollapsed,
-} from "./utils.js";
+import { getChildrenValues, shouldBeginCollapsed } from "./utils.js";
 
 type ViewerType = "normal" | "tooltip";
 
@@ -72,8 +68,8 @@ class PathTreeNode {
     this.isEqual = this.isEqual.bind(this);
   }
 
-  toString() {
-    return pathAsString(this.fullPath);
+  uid() {
+    return this.fullPath.uid();
   }
 
   private isEqual(other: PathTreeNode) {
@@ -196,11 +192,11 @@ class PathTree {
   }
 
   getNode(path: SqValuePath): PathTreeNode | undefined {
-    return this.nodes.get(pathAsString(path));
+    return this.nodes.get(path.uid());
   }
 
   getValue(path: SqValuePath): SqValueWithContext | undefined {
-    return this.values.get(pathAsString(path));
+    return this.values.get(path.uid());
   }
 
   removeNode(value: SqValueWithContext): void {
@@ -253,19 +249,19 @@ class ItemStore {
     path: SqValuePath,
     fn: (localItemState: LocalItemState) => LocalItemState
   ): void {
-    const pathString = pathAsString(path);
+    const pathString = path.uid();
     const newSettings = fn(this.state[pathString] || defaultLocalItemState);
     this.state[pathString] = newSettings;
   }
 
   getState(path: SqValuePath): LocalItemState {
-    return this.state[pathAsString(path)] || defaultLocalItemState;
+    return this.state[path.uid()] || defaultLocalItemState;
   }
 
   getStateOrInitialize(value: SqValueWithContext): LocalItemState {
     const path = value.context.path;
-    const pathString = pathAsString(path);
-    const existingState = this.state[pathString];
+    const pathString = path.uid();
+    const existingState = this.state[path.uid()];
     if (existingState) {
       return existingState;
     }
@@ -279,7 +275,7 @@ class ItemStore {
         if (!child.context) {
           continue; // shouldn't happen
         }
-        const childPathString = pathAsString(child.context.path);
+        const childPathString = child.context.path.uid();
         if (this.state[childPathString]) {
           continue; // shouldn't happen, if parent state is not initialized, child state won't be initialized either
         }
@@ -309,15 +305,15 @@ class ItemStore {
   }
 
   forceUpdate(path: SqValuePath) {
-    this.handles[pathAsString(path)]?.forceUpdate();
+    this.handles[path.uid()]?.forceUpdate();
   }
 
   registerItemHandle(path: SqValuePath, handle: ItemHandle) {
-    this.handles[pathAsString(path)] = handle;
+    this.handles[path.uid()] = handle;
   }
 
   unregisterItemHandle(path: SqValuePath) {
-    delete this.handles[pathAsString(path)];
+    delete this.handles[path.uid()];
   }
 
   updateCalculatorState(path: SqValuePath, calculator: CalculatorState) {
@@ -336,13 +332,13 @@ class ItemStore {
 
   scrollToPath(path: SqValuePath) {
     // setFocused(path);
-    this.handles[pathAsString(path)]?.element.scrollIntoView({
+    this.handles[path.uid()]?.element.scrollIntoView({
       behavior: "instant",
     });
   }
 
   isInView(path: SqValuePath) {
-    return isElementInView(this.handles[pathAsString(path)]?.element);
+    return isElementInView(this.handles[path.uid()]?.element);
   }
 }
 
@@ -490,7 +486,7 @@ export function useHasLocalSettings(path: SqValuePath) {
 export function useFocus() {
   const { focused, setFocused } = useViewerContext();
   return (path: SqValuePath) => {
-    if (focused && pathAsString(focused) === pathAsString(path)) {
+    if (focused?.isEqual(path)) {
       return; // nothing to do
     }
     if (path.isRoot()) {
@@ -504,7 +500,7 @@ export function useFocus() {
 export function useSelect() {
   const { selected, setSelected } = useViewerContext();
   return (path: SqValuePath) => {
-    if (selected && pathAsString(selected) === pathAsString(path)) {
+    if (selected?.isEqual(path)) {
       return; // nothing to do
     }
     if (path.isRoot()) {
@@ -522,12 +518,12 @@ export function useUnfocus() {
 
 export function useIsFocused(path: SqValuePath) {
   const { focused } = useViewerContext();
-  return focused && pathAsString(focused) === pathAsString(path);
+  return focused?.isEqual(path);
 }
 
 export function useIsSelected(path: SqValuePath) {
   const { selected } = useViewerContext();
-  return selected && pathAsString(selected) === pathAsString(path);
+  return selected?.isEqual(path);
 }
 
 export function useMergedSettings(path: SqValuePath) {
