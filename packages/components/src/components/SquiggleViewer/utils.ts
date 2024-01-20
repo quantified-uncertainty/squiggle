@@ -16,7 +16,7 @@ function topLevelName(path: SqValuePath): string {
 export function pathToDisplayString(path: SqValuePath) {
   return [
     topLevelName(path),
-    ...path.items.map((p) => p.toDisplayString()),
+    ...path.edges.map((p) => p.toDisplayString()),
   ].join(".");
 }
 
@@ -147,7 +147,7 @@ export const shouldBeginCollapsed = (
 function isHidden(value: SqValue): boolean {
   const isHidden = value.tags.hidden();
   const path = value.context?.path;
-  return Boolean(isHidden === true && path && path.items.length === 1);
+  return Boolean(isHidden === true && path && path.edges.length === 1);
 }
 
 export function nonHiddenDictEntries(value: SqDict): [string, SqValue][] {

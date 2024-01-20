@@ -74,7 +74,7 @@ const ItemSettingsModal: FC<Props> = ({
     <Modal container={getLeftPanelElement()} close={close}>
       <Modal.Header>
         Chart settings
-        {path.items.length ? (
+        {path.edges.length ? (
           <>
             {" for "}
             <span

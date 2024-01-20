@@ -10,7 +10,7 @@ describe("SqValuePathEdge", () => {
 describe("SqValuePath", () => {
   const path = new SqValuePath({
     root: "bindings",
-    items: [
+    edges: [
       SqValuePathEdge.fromKey("foo"),
       SqValuePathEdge.fromIndex(2),
       SqValuePathEdge.fromCalculator(),
@@ -21,7 +21,7 @@ describe("SqValuePath", () => {
   test("isEqual()", () => {
     const path2 = new SqValuePath({
       root: "bindings",
-      items: [
+      edges: [
         SqValuePathEdge.fromKey("foo"),
         SqValuePathEdge.fromIndex(2),
         SqValuePathEdge.fromCalculator(),
@@ -34,11 +34,11 @@ describe("SqValuePath", () => {
   test("extend()", () => {
     const path = new SqValuePath({
       root: "bindings",
-      items: [SqValuePathEdge.fromKey("foo")],
+      edges: [SqValuePathEdge.fromKey("foo")],
     });
     const extendedPath = path.extend(SqValuePathEdge.fromIndex(2));
-    expect(extendedPath.items.length).toBe(2);
-    expect(extendedPath.items[1].value).toEqual({
+    expect(extendedPath.edges.length).toBe(2);
+    expect(extendedPath.edges[1].value).toEqual({
       type: "index",
       value: 2,
     });
@@ -48,11 +48,11 @@ describe("SqValuePath", () => {
     test("path fully contains a shorter path", () => {
       const basePath = new SqValuePath({
         root: "bindings",
-        items: [SqValuePathEdge.fromKey("foo"), SqValuePathEdge.fromIndex(2)],
+        edges: [SqValuePathEdge.fromKey("foo"), SqValuePathEdge.fromIndex(2)],
       });
       const subPath = new SqValuePath({
         root: "bindings",
-        items: [SqValuePathEdge.fromKey("foo")],
+        edges: [SqValuePathEdge.fromKey("foo")],
       });
       expect(basePath.contains(subPath)).toBe(true);
     });
@@ -60,7 +60,7 @@ describe("SqValuePath", () => {
     test("path does not contain longer path", () => {
       const basePath = new SqValuePath({
         root: "bindings",
-        items: [SqValuePathEdge.fromKey("foo")],
+        edges: [SqValuePathEdge.fromKey("foo")],
       });
       const longerPath = basePath.extend(SqValuePathEdge.fromIndex(2));
       expect(basePath.contains(longerPath)).toBe(false);
@@ -69,11 +69,11 @@ describe("SqValuePath", () => {
     test("path does not contain different path", () => {
       const path1 = new SqValuePath({
         root: "bindings",
-        items: [SqValuePathEdge.fromKey("foo")],
+        edges: [SqValuePathEdge.fromKey("foo")],
       });
       const path2 = new SqValuePath({
         root: "imports",
-        items: [SqValuePathEdge.fromKey("bar")],
+        edges: [SqValuePathEdge.fromKey("bar")],
       });
       expect(path1.contains(path2)).toBe(false);
     });
@@ -81,11 +81,11 @@ describe("SqValuePath", () => {
     test("path contains empty path (with same root)", () => {
       const nonEmptyPath = new SqValuePath({
         root: "exports",
-        items: [SqValuePathEdge.fromCalculator()],
+        edges: [SqValuePathEdge.fromCalculator()],
       });
       const emptyPath = new SqValuePath({
         root: "exports",
-        items: [],
+        edges: [],
       });
       expect(nonEmptyPath.contains(emptyPath)).toBe(true);
     });
@@ -93,11 +93,11 @@ describe("SqValuePath", () => {
     test("equal paths contain each other", () => {
       const path1 = new SqValuePath({
         root: "bindings",
-        items: [SqValuePathEdge.fromKey("test")],
+        edges: [SqValuePathEdge.fromKey("test")],
       });
       const path2 = new SqValuePath({
         root: "bindings",
-        items: [SqValuePathEdge.fromKey("test")],
+        edges: [SqValuePathEdge.fromKey("test")],
       });
       expect(path1.contains(path2)).toBe(true);
       expect(path2.contains(path1)).toBe(true);

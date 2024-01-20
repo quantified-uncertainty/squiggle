@@ -1,7 +1,7 @@
 import { ASTNode } from "../ast/parse.js";
 import { locationContains } from "../ast/utils.js";
 
-export type RootPathItem = "result" | "bindings" | "imports" | "exports";
+export type ValuePathRoot = "result" | "bindings" | "imports" | "exports";
 
 export type ValuePathEdge =
   | { type: "key"; value: string }
@@ -11,13 +11,13 @@ export type ValuePathEdge =
       type: "calculator";
     };
 
-function isCellAddressPathItem(
-  item: ValuePathEdge
-): item is { type: "cellAddress"; value: { row: number; column: number } } {
-  return item.type === "cellAddress";
+function isCellAddressEdge(
+  edge: ValuePathEdge
+): edge is { type: "cellAddress"; value: { row: number; column: number } } {
+  return edge.type === "cellAddress";
 }
 
-function pathItemIsEqual(a: ValuePathEdge, b: ValuePathEdge): boolean {
+function valuePathEdgeIsEqual(a: ValuePathEdge, b: ValuePathEdge): boolean {
   if (a.type !== b.type) {
     return false;
   }
@@ -28,7 +28,7 @@ function pathItemIsEqual(a: ValuePathEdge, b: ValuePathEdge): boolean {
       return a.value === (b as { type: "index"; value: number }).value;
     case "cellAddress":
       return (
-        isCellAddressPathItem(b) &&
+        isCellAddressEdge(b) &&
         a.value.row === b.value.row &&
         a.value.column === b.value.column
       );
@@ -57,32 +57,32 @@ export class SqValuePathEdge {
   }
 
   isEqual(other: SqValuePathEdge) {
-    return pathItemIsEqual(this.value, other.value);
+    return valuePathEdgeIsEqual(this.value, other.value);
   }
 
   toDisplayString(): string {
-    const item = this.value;
-    switch (item.type) {
+    const edge = this.value;
+    switch (edge.type) {
       case "key":
-        return item.value;
+        return edge.value;
       case "index":
-        return String(item.value);
+        return String(edge.value);
       case "cellAddress":
-        return `Cell(${item.value.row},${item.value.column})`;
+        return `Cell(${edge.value.row},${edge.value.column})`;
       case "calculator":
         return "Calculator";
     }
   }
 
   uid(): string {
-    const item = this.value;
-    switch (item.type) {
+    const edge = this.value;
+    switch (edge.type) {
       case "key":
-        return `DictKey:(${item.value})`;
+        return `DictKey:(${edge.value})`;
       case "index":
-        return `ArrayIndex:(${item.value})`;
+        return `ArrayIndex:(${edge.value})`;
       case "cellAddress":
-        return `CellAddress:(${item.value.row}:${item.value.column})`;
+        return `CellAddress:(${edge.value.row}:${edge.value.column})`;
       case "calculator":
         return "Calculator";
     }
@@ -90,13 +90,13 @@ export class SqValuePathEdge {
 }
 
 // There might be a better place for this to go, nearer to the ASTNode type.
-function astOffsetToPathItems(ast: ASTNode, offset: number): SqValuePathEdge[] {
-  function buildRemainingPathItems(ast: ASTNode): SqValuePathEdge[] {
+function astOffsetToPathEdges(ast: ASTNode, offset: number): SqValuePathEdge[] {
+  function buildRemainingPathEdges(ast: ASTNode): SqValuePathEdge[] {
     switch (ast.type) {
       case "Program": {
         for (const statement of ast.statements) {
           if (locationContains(statement.location, offset)) {
-            return buildRemainingPathItems(statement);
+            return buildRemainingPathEdges(statement);
           }
         }
         return [];
@@ -122,10 +122,10 @@ function astOffsetToPathItems(ast: ASTNode, offset: number): SqValuePathEdge[] {
           ) {
             return [
               SqValuePathEdge.fromKey(pair.key.value),
-              ...buildRemainingPathItems(pair.value),
+              ...buildRemainingPathEdges(pair.value),
             ];
           } else if (pair.type === "Identifier") {
-            return [SqValuePathEdge.fromKey(pair.value)]; // this is a final node, no need to buildRemainingPathItems recursively
+            return [SqValuePathEdge.fromKey(pair.value)]; // this is a final node, no need to buildRemainingPathEdges recursively
           }
         }
         return [];
@@ -136,7 +136,7 @@ function astOffsetToPathItems(ast: ASTNode, offset: number): SqValuePathEdge[] {
           if (locationContains(element.location, offset)) {
             return [
               SqValuePathEdge.fromIndex(i),
-              ...buildRemainingPathItems(element),
+              ...buildRemainingPathEdges(element),
             ];
           }
         }
@@ -145,13 +145,13 @@ function astOffsetToPathItems(ast: ASTNode, offset: number): SqValuePathEdge[] {
       case "LetStatement": {
         return [
           SqValuePathEdge.fromKey(ast.variable.value),
-          ...buildRemainingPathItems(ast.value),
+          ...buildRemainingPathEdges(ast.value),
         ];
       }
       case "DefunStatement": {
         return [
           SqValuePathEdge.fromKey(ast.variable.value),
-          ...buildRemainingPathItems(ast.value),
+          ...buildRemainingPathEdges(ast.value),
         ];
       }
       case "Block": {
@@ -159,22 +159,22 @@ function astOffsetToPathItems(ast: ASTNode, offset: number): SqValuePathEdge[] {
           ast.statements.length === 1 &&
           ["Array", "Dict"].includes(ast.statements[0].type)
         ) {
-          return buildRemainingPathItems(ast.statements[0]);
+          return buildRemainingPathEdges(ast.statements[0]);
         }
       }
     }
     return [];
   }
-  return buildRemainingPathItems(ast);
+  return buildRemainingPathEdges(ast);
 }
 
 export class SqValuePath {
-  public root: RootPathItem;
-  public items: SqValuePathEdge[];
+  public root: ValuePathRoot;
+  public edges: SqValuePathEdge[];
 
-  constructor(props: { root: RootPathItem; items: SqValuePathEdge[] }) {
+  constructor(props: { root: ValuePathRoot; edges: SqValuePathEdge[] }) {
     this.root = props.root;
-    this.items = props.items;
+    this.edges = props.edges;
   }
 
   static findByAstOffset({
@@ -186,27 +186,27 @@ export class SqValuePath {
   }): SqValuePath | undefined {
     return new SqValuePath({
       root: "bindings", // not important, will probably be removed soon
-      items: astOffsetToPathItems(ast, offset),
+      edges: astOffsetToPathEdges(ast, offset),
     });
   }
 
   isRoot() {
-    return this.items.length === 0;
+    return this.edges.length === 0;
   }
 
   lastItem(): SqValuePathEdge | undefined {
-    return this.items[this.items.length - 1];
+    return this.edges[this.edges.length - 1];
   }
 
-  extend(item: SqValuePathEdge) {
+  extend(edge: SqValuePathEdge) {
     return new SqValuePath({
       root: this.root,
-      items: [...this.items, item],
+      edges: [...this.edges, edge],
     });
   }
 
   uid(): string {
-    return `${this.root}--${this.items.map((item) => item.uid()).join("--")}`;
+    return `${this.root}--${this.edges.map((edge) => edge.uid()).join("--")}`;
   }
 
   // Checks if this SqValuePath completely contains all of the nodes in this other one.
@@ -214,11 +214,11 @@ export class SqValuePath {
     if (this.root !== smallerItem.root) {
       return false;
     }
-    if (this.items.length < smallerItem.items.length) {
+    if (this.edges.length < smallerItem.edges.length) {
       return false;
     }
-    for (let i = 0; i < smallerItem.items.length; i++) {
-      if (!this.items[i].isEqual(smallerItem.items[i])) {
+    for (let i = 0; i < smallerItem.edges.length; i++) {
+      if (!this.edges[i].isEqual(smallerItem.edges[i])) {
         return false;
       }
     }
@@ -229,11 +229,11 @@ export class SqValuePath {
     if (this.root !== other.root) {
       return false;
     }
-    if (this.items.length !== other.items.length) {
+    if (this.edges.length !== other.edges.length) {
       return false;
     }
-    for (let i = 0; i < this.items.length; i++) {
-      if (!this.items[i].isEqual(other.items[i])) {
+    for (let i = 0; i < this.edges.length; i++) {
+      if (!this.edges[i].isEqual(other.edges[i])) {
         return false;
       }
     }
@@ -243,13 +243,13 @@ export class SqValuePath {
   allSqValuePathSubsets({ includeRoot = false }) {
     const root = new SqValuePath({
       root: this.root,
-      items: [],
+      edges: [],
     });
-    const leafs = this.items.map(
+    const leafs = this.edges.map(
       (_, index) =>
         new SqValuePath({
           root: this.root,
-          items: this.items.slice(0, index + 1),
+          edges: this.edges.slice(0, index + 1),
         })
     );
     return includeRoot ? [root, ...leafs] : leafs;
