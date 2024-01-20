@@ -56,66 +56,78 @@ const defaultLocalItemState: LocalItemState = {
 };
 
 class PathTreeNode {
-  value: SqValueWithContext;
-  tree: PathTree;
-  path: string;
-  fullPath: SqValuePath;
+  readonly tree: PathTree;
+  readonly fullPath: SqValuePath;
   parent: PathTreeNode | undefined;
   children: PathTreeNode[] = [];
 
   constructor(
-    value: SqValueWithContext,
+    path: SqValuePath,
     parent: PathTreeNode | undefined,
     tree: PathTree
   ) {
-    this.value = value;
     this.parent = parent;
     this.tree = tree;
-    this.path = pathAsString(value.context.path);
-    this.fullPath = value.context.path;
+    this.fullPath = path;
     this.isEqual = this.isEqual.bind(this);
   }
 
-  isEqual(other: PathTreeNode) {
-    return this.path === other.path;
+  toString() {
+    return pathAsString(this.fullPath);
+  }
+
+  private isEqual(other: PathTreeNode) {
+    return this.fullPath.isEqual(other.fullPath);
   }
 
   isRoot() {
-    return this.isEqual(this.tree.root);
+    return this.fullPath.isRoot();
   }
 
-  isCollapsed() {
-    return this.tree.itemStore.getState(this.value.context.path).collapsed;
+  private isCollapsed() {
+    return this.tree.itemStore.getState(this.fullPath).collapsed;
   }
 
-  addChild(value: SqValueWithContext): PathTreeNode {
-    const node = new PathTreeNode(value, this, this.tree);
-    this.children.push(node);
-    return node;
+  private childrenAreVisible() {
+    return !this.isCollapsed();
+  }
+
+  lastChild(): PathTreeNode | undefined {
+    return this.children[this.children.length - 1];
+  }
+
+  addChild(path: SqValuePath): PathTreeNode | undefined {
+    //We don't really need this alreadyExists check, as this normally is just called by PathTree.addNode, which already checks for existence, but seems safe.
+    const alreadyExists = this.children.some((child) =>
+      child.fullPath.isEqual(path)
+    );
+    if (!alreadyExists) {
+      const node = new PathTreeNode(path, this, this.tree);
+      this.children.push(node);
+      return node;
+    }
   }
 
   removeChild(node: PathTreeNode) {
-    this.children = this.children.filter((child) => child.path !== node.path);
-  }
-
-  pathName() {
-    return pathAsString(this.value.context.path);
+    this.children = this.children.filter(
+      (child) => !child.fullPath.isEqual(node.fullPath)
+    );
   }
 
   siblings(): PathTreeNode[] {
     return this.parent?.children || [];
   }
 
-  getParentIndex() {
+  private getParentIndex() {
     const siblings = this.siblings();
     return siblings.findIndex(this.isEqual);
   }
 
   prevSibling() {
     const index = this.getParentIndex();
-    if (index === -1) {
-      return undefined;
-    } else if (index === 0) {
+    const isRootOrError = index === -1;
+    const isFirstSibling = index === 0;
+    if (isRootOrError || isFirstSibling) {
       return undefined;
     }
     return this.siblings()[index - 1];
@@ -123,28 +135,24 @@ class PathTreeNode {
 
   nextSibling() {
     const index = this.getParentIndex();
-    if (index === -1) {
-      return undefined;
-    } else if (index === this.siblings().length - 1) {
+    const isRootOrError = index === -1;
+    const isLastSibling = index === this.siblings().length - 1;
+    if (isRootOrError || isLastSibling) {
       return undefined;
     }
     return this.siblings()[index + 1];
   }
 
-  hasVisibleChildren() {
-    return this.children.length > 0 && !this.isCollapsed();
-  }
-
-  findLastVisibleChild(): PathTreeNode | undefined {
-    if (this.hasVisibleChildren()) {
-      const lastChild = this.children[this.children.length - 1];
-      return lastChild.findLastVisibleChild() || lastChild;
+  private lastVisibleSubChild(): PathTreeNode | undefined {
+    if (this.children.length > 0 && this.childrenAreVisible()) {
+      const lastChild = this.lastChild();
+      return lastChild?.lastVisibleSubChild() || lastChild;
     } else {
       return this;
     }
   }
 
-  nextAvailableSibling(): PathTreeNode | undefined {
+  private nextAvailableSibling(): PathTreeNode | undefined {
     return this.nextSibling() || this.parent?.nextAvailableSibling();
   }
 
@@ -159,67 +167,57 @@ class PathTreeNode {
     if (!prevSibling) {
       return this.parent;
     }
-    return prevSibling.findLastVisibleChild();
-  }
-
-  toJS() {
-    return {
-      value: this.value,
-      children: this.children.map((child) => child.toJS()),
-    };
+    return prevSibling.lastVisibleSubChild();
   }
 }
 
 class PathTree {
-  root: PathTreeNode;
+  readonly root: PathTreeNode;
   nodes: Map<string, PathTreeNode> = new Map();
+  values: Map<string, SqValueWithContext> = new Map(); // Maybe there's a better place this could go?
   itemStore: ItemStore;
 
   constructor(rootNote: SqValueWithContext, itemStore) {
-    this.root = new PathTreeNode(rootNote, undefined, this);
-    this._addNode(this.root);
+    this.root = new PathTreeNode(rootNote.context.path, undefined, this);
+    this._addNode(this.root, rootNote);
     this.itemStore = itemStore;
   }
 
-  _addNode(value: PathTreeNode) {
-    const pathName = value.pathName();
-    this.nodes.set(pathName, value);
+  private _addNode(node: PathTreeNode, value: SqValueWithContext) {
+    this.nodes.set(node.toString(), node);
+    this.values.set(node.toString(), value);
   }
 
-  _removeNode(value: PathTreeNode) {
-    this.nodes.delete(value.pathName());
-    value.children.forEach((child) => this._removeNode(child));
+  private _removeNode(node: PathTreeNode) {
+    this.nodes.delete(node.toString());
+    this.values.delete(node.toString());
+    node.parent?.removeChild(node);
+    node.children.forEach((child) => this._removeNode(child));
+  }
+
+  getNode(path: SqValuePath): PathTreeNode | undefined {
+    return this.nodes.get(pathAsString(path));
+  }
+
+  getValue(path: SqValuePath): SqValueWithContext | undefined {
+    return this.values.get(pathAsString(path));
   }
 
   removeNode(value: SqValueWithContext): void {
-    const node = this.nodes.get(pathAsString(value.context.path));
+    const node = this.getNode(value.context.path);
     if (node) {
-      node.parent?.removeChild(node);
-      this.recursivelyRemoveNode(node);
+      this._removeNode(node);
     }
   }
 
-  recursivelyRemoveNode(node: PathTreeNode): void {
-    this.nodes.delete(node.pathName());
-    node.children.forEach((child) => this.recursivelyRemoveNode(child));
-  }
-
-  toJS() {
-    return this.root.toJS();
-  }
-
-  addFromSqValue(child: SqValueWithContext, parent: SqValueWithContext) {
-    const path = pathAsString(child.context.path);
-    if (!this.nodes.has(path)) {
-      const parentNode = this.nodes.get(pathAsString(parent.context.path));
+  addNode(child: SqValueWithContext, parent: SqValueWithContext) {
+    if (!this.getNode(child.context.path)) {
+      const parentNode = this.getNode(parent.context.path);
       if (parentNode) {
-        this._addNode(parentNode.addChild(child));
+        const newNode = parentNode.addChild(child.context.path);
+        newNode && this._addNode(newNode, child);
       }
     }
-  }
-
-  findFromPathName(pathName: string): PathTreeNode | undefined {
-    return this.nodes.get(pathName);
   }
 }
 
@@ -422,7 +420,7 @@ export function useRegisterAsItemViewer(
       }
     } else if (parent) {
       if (valueHasContext(parent)) {
-        pathTree.addFromSqValue(value, parent);
+        pathTree.addNode(value, parent);
       }
     }
 
@@ -598,9 +596,8 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
     }, [playgroundSettings]);
 
     function scrollToPath(path: SqValuePath) {
-      const location = pathTree?.nodes
-        .get(pathAsString(path))
-        ?.value?.context?.findLocation();
+      const value = pathTree?.getValue(path);
+      const location = value?.context?.findLocation();
 
       if (location) {
         editor?.scrollTo(location.start.offset);
@@ -612,7 +609,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       pathTree: PathTree,
       focused: SqValuePath
     ) {
-      const node = pathTree.nodes.get(pathAsString(focused));
+      const node = pathTree.getNode(focused);
       switch (event) {
         case "ArrowDown": {
           const newItem = node?.children[0];
@@ -664,12 +661,12 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       pathTree: PathTree,
       selected: SqValuePath
     ) {
-      const node = pathTree.nodes.get(pathAsString(selected));
+      const node = pathTree.getNode(selected);
       switch (event) {
         case "ArrowDown": {
           const newItem = node?.next();
           if (newItem) {
-            const newPath = newItem.value.context.path;
+            const newPath = newItem.fullPath;
             setSelected(newPath);
             scrollToPath(newPath);
             if (!itemStore.isInView(newPath)) {
@@ -681,7 +678,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
         case "ArrowUp": {
           const newItem = node?.prev();
           if (newItem) {
-            const newPath = newItem.value.context.path;
+            const newPath = newItem.fullPath;
             setSelected(newPath);
             scrollToPath(newPath);
             if (!itemStore.isInView(newPath)) {

@@ -73,6 +73,20 @@ export class SqPathItem {
         return "Calculator";
     }
   }
+
+  uid(): string {
+    const item = this.value;
+    switch (item.type) {
+      case "dictKey":
+        return `DictKey:(${item.value})`;
+      case "arrayIndex":
+        return `ArrayIndex:(${item.value})`;
+      case "cellAddress":
+        return `CellAddress:(${item.value.row}:${item.value.column})`;
+      case "calculator":
+        return "Calculator";
+    }
+  }
 }
 
 // There might be a better place for this to go, nearer to the ASTNode type.
@@ -189,6 +203,10 @@ export class SqValuePath {
       root: this.root,
       items: [...this.items, item],
     });
+  }
+
+  uid(): string {
+    return `${this.root}--${this.items.map((item) => item.uid()).join("--")}`;
   }
 
   // Checks if this SqValuePath completely contains all of the nodes in this other one.
