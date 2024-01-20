@@ -29,7 +29,6 @@ type ViewerType = "normal" | "tooltip";
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
-  onKeyPress(stroke: string): void;
 };
 
 type ItemHandle = {
@@ -346,6 +345,19 @@ class ItemStore {
   }
 }
 
+type ArrowEvent =
+  | "ArrowDown"
+  | "ArrowUp"
+  | "ArrowLeft"
+  | "ArrowRight"
+  | "Enter";
+
+export function isArrowEvent(str: string): str is ArrowEvent {
+  return ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Enter"].includes(
+    str
+  );
+}
+
 type ViewerContextShape = {
   // Note that we don't store `localItemState` itself in the context (that would cause rerenders of the entire tree on each settings update).
   // Instead, we keep `localItemState` in local state and notify the global context via `setLocalItemState` to pass them down the component tree again if it got rebuilt from scratch.
@@ -355,8 +367,6 @@ type ViewerContextShape = {
   setPathTree: (value: PathTree | undefined) => void;
   focused: SqValuePath | undefined;
   setFocused: (value: SqValuePath | undefined) => void;
-  selected: SqValuePath | undefined;
-  setSelected: (value: SqValuePath | undefined) => void;
   editor?: CodeEditorHandle;
   itemStore: ItemStore;
   viewerType: ViewerType;
@@ -370,14 +380,11 @@ export const ViewerContext = createContext<ViewerContextShape>({
   setPathTree: () => undefined,
   focused: undefined,
   setFocused: () => undefined,
-  selected: undefined,
-  setSelected: () => undefined,
   editor: undefined,
   itemStore: new ItemStore(),
   viewerType: "normal",
   handle: {
     viewValuePath: () => {},
-    onKeyPress: () => {},
   },
   initialized: false,
 });
@@ -504,33 +511,157 @@ export function useFocus() {
   };
 }
 
-export function useSelect() {
-  const { selected, setSelected } = useViewerContext();
-  return (path: SqValuePath) => {
-    if (selected?.isEqual(path)) {
-      return; // nothing to do
-    }
-    if (path.isRoot()) {
-      setSelected(undefined); // selecting root nodes is not allowed
-    } else {
-      setSelected(path);
-    }
-  };
-}
-
 export function useUnfocus() {
   const { setFocused } = useViewerContext();
   return () => setFocused(undefined);
 }
 
+function scrollEditorToPath(
+  path: SqValuePath,
+  pathTree: PathTree,
+  editor?: CodeEditorHandle
+) {
+  const value = pathTree.getValue(path);
+  const location = value?.context?.findLocation();
+
+  if (location) {
+    editor?.scrollTo(location.start.offset);
+  }
+}
+
+const focusHeader = (path: SqValuePath, itemStore: ItemStore) => {
+  const header = itemStore.handles[path.uid()]?.element.querySelector("header");
+  if (header) {
+    header.focus();
+  }
+};
+
+const scrollViewerToPath = (path: SqValuePath, itemStore: ItemStore) => {
+  if (!itemStore.isInView(path)) {
+    itemStore.scrollViewerToPath(path);
+  }
+};
+
+export function useItemEvent(selected: SqValuePath) {
+  const { setFocused, itemStore, editor, pathTree } = useViewerContext();
+  const getNode = (path: SqValuePath) => pathTree?.getNode(path);
+
+  return (event: string) => {
+    if (isArrowEvent(event) && pathTree) {
+      const node = getNode(selected);
+      switch (event) {
+        case "ArrowDown": {
+          const newItem = node?.next();
+          if (newItem) {
+            const newPath = newItem.path;
+            focusHeader(newPath, itemStore);
+            scrollViewerToPath(newPath, itemStore);
+            scrollEditorToPath(newPath, pathTree, editor);
+          }
+          break;
+        }
+        case "ArrowUp": {
+          const newItem = node?.prev();
+          if (newItem) {
+            const newPath = newItem.path;
+            focusHeader(newPath, itemStore);
+            scrollViewerToPath(newPath, itemStore);
+            scrollEditorToPath(newPath, pathTree, editor);
+          }
+          break;
+        }
+        case "ArrowLeft": {
+          const newItem = node?.parent;
+          newItem && !newItem.isRoot() && focusHeader(newItem.path, itemStore);
+          break;
+        }
+        case "ArrowRight": {
+          itemStore.setState(selected, (state) => ({
+            ...state,
+            collapsed: !state?.collapsed,
+          }));
+          itemStore.forceUpdate(selected);
+          scrollViewerToPath(selected, itemStore);
+          break;
+        }
+        case "Enter": {
+          setFocused(selected);
+          setTimeout(() => {
+            focusHeader(selected, itemStore);
+          }, 1);
+          break;
+        }
+      }
+    }
+  };
+}
+export function useFocusedItemEvent(selected: SqValuePath) {
+  const { setFocused, itemStore, editor, pathTree } = useViewerContext();
+  const getNode = (path: SqValuePath) => pathTree?.getNode(path);
+
+  return (event: string) => {
+    if (isArrowEvent(event) && pathTree) {
+      const node = getNode(selected);
+      switch (event) {
+        case "ArrowDown": {
+          const newItem = node?.children[0];
+          if (newItem) {
+            focusHeader(newItem.path, itemStore);
+          }
+          break;
+        }
+        case "ArrowUp": {
+          const newItem = node?.parent;
+          if (newItem) {
+            if (newItem.isRoot()) {
+              setFocused(undefined);
+              setTimeout(() => {
+                focusHeader(selected, itemStore);
+              }, 1);
+            } else {
+              const newPath = newItem.path;
+              setFocused(newPath);
+              setTimeout(() => {
+                focusHeader(newPath, itemStore);
+                scrollEditorToPath(newPath, pathTree, editor);
+              }, 1);
+            }
+          }
+          break;
+        }
+        case "ArrowLeft": {
+          const newPath = node?.prevSibling()?.path;
+          if (newPath) {
+            setFocused(newPath);
+            focusHeader(newPath, itemStore);
+            scrollEditorToPath(newPath, pathTree, editor);
+          }
+          break;
+        }
+        case "ArrowRight": {
+          const newPath = node?.nextSibling()?.path;
+          if (newPath) {
+            setFocused(newPath);
+            focusHeader(newPath, itemStore);
+            scrollEditorToPath(newPath, pathTree, editor);
+          }
+          break;
+        }
+        case "Enter": {
+          setFocused(undefined);
+          setTimeout(() => {
+            focusHeader(selected, itemStore);
+          }, 1);
+          break;
+        }
+      }
+    }
+  };
+}
+
 export function useIsFocused(path: SqValuePath) {
   const { focused } = useViewerContext();
   return focused?.isEqual(path);
-}
-
-export function useIsSelected(path: SqValuePath) {
-  const { selected } = useViewerContext();
-  return selected?.isEqual(path);
 }
 
 export function useMergedSettings(path: SqValuePath) {
@@ -556,154 +687,6 @@ type Props = PropsWithChildren<{
   viewerType?: ViewerType;
 }>;
 
-type ArrowEvent =
-  | "ArrowDown"
-  | "ArrowUp"
-  | "ArrowLeft"
-  | "ArrowRight"
-  | "Enter";
-
-function isArrowEvent(str: string): str is ArrowEvent {
-  return ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Enter"].includes(
-    str
-  );
-}
-
-function arrowActions({
-  getNode,
-  setFocused,
-  setSelected,
-  scrollEditorToPath,
-  scrollViewerToPath,
-  itemStore,
-}: {
-  getNode: (path: SqValuePath) => PathTreeNode | undefined;
-  setFocused: (value: SqValuePath | undefined) => void;
-  setSelected: (value: SqValuePath | undefined) => void;
-  scrollEditorToPath: (path: SqValuePath) => void;
-  scrollViewerToPath: (path: SqValuePath) => void;
-  itemStore: ItemStore;
-}): ({
-  event,
-  focused,
-  selected,
-}: {
-  event: ArrowEvent;
-  focused?: SqValuePath;
-  selected?: SqValuePath;
-}) => void {
-  function focusArrowEvent(event: ArrowEvent, focused: SqValuePath) {
-    const node = getNode(focused);
-    switch (event) {
-      case "ArrowDown": {
-        const newItem = node?.children[0];
-        if (newItem) {
-          setSelected(newItem.path);
-        }
-        break;
-      }
-      case "ArrowUp": {
-        const newItem = node?.parent;
-        if (newItem) {
-          if (newItem.isRoot()) {
-            setFocused(undefined);
-          } else {
-            setFocused(newItem.path);
-            setSelected(newItem.path);
-            scrollEditorToPath(newItem.path);
-          }
-        }
-        break;
-      }
-      case "ArrowLeft": {
-        const newItem = node?.prevSibling();
-        if (newItem) {
-          setFocused(newItem.path);
-          setSelected(newItem.path);
-          scrollEditorToPath(newItem.path);
-        }
-        break;
-      }
-      case "ArrowRight": {
-        const newItem = node?.nextSibling();
-        if (newItem) {
-          setFocused(newItem.path);
-          setSelected(newItem.path);
-          scrollEditorToPath(newItem.path);
-        }
-        break;
-      }
-      case "Enter": {
-        setFocused(undefined);
-        break;
-      }
-    }
-  }
-
-  function selectedUnfocusedArrowEvent(
-    event: ArrowEvent,
-    selected: SqValuePath
-  ) {
-    const node = getNode(selected);
-    switch (event) {
-      case "ArrowDown": {
-        const newItem = node?.next();
-        if (newItem) {
-          const newPath = newItem.path;
-          setSelected(newPath);
-          scrollEditorToPath(newPath);
-          scrollViewerToPath(newPath);
-        }
-        break;
-      }
-      case "ArrowUp": {
-        const newItem = node?.prev();
-        if (newItem) {
-          const newPath = newItem.path;
-          setSelected(newPath);
-          scrollEditorToPath(newPath);
-          scrollViewerToPath(newPath);
-        }
-        break;
-      }
-      case "ArrowLeft": {
-        const newItem = node?.parent;
-        newItem && !newItem.isRoot() && setSelected(newItem.path);
-        break;
-      }
-      case "ArrowRight": {
-        itemStore.setState(selected, (state) => ({
-          ...state,
-          collapsed: !state?.collapsed,
-        }));
-        scrollViewerToPath(selected);
-        itemStore.forceUpdate(selected);
-        break;
-      }
-      case "Enter": {
-        setFocused(selected);
-        break;
-      }
-    }
-  }
-
-  return ({
-    event,
-    focused,
-    selected,
-  }: {
-    event: ArrowEvent;
-    focused?: SqValuePath;
-    selected?: SqValuePath;
-  }) => {
-    if (focused && selected && focused === selected) {
-      focusArrowEvent(event, focused);
-    } else if (selected) {
-      selectedUnfocusedArrowEvent(event, selected);
-    }
-  };
-}
-
 export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
   (
     {
@@ -726,46 +709,15 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
     );
 
     const [focused, setFocused] = useState<SqValuePath | undefined>();
-    const [selected, setSelected] = useState<SqValuePath | undefined>();
     const [pathTree, setPathTree] = useState<PathTree | undefined>();
 
     const globalSettings = useMemo(() => {
       return merge({}, defaultPlaygroundSettings, playgroundSettings);
     }, [playgroundSettings]);
 
-    function scrollEditorToPath(path: SqValuePath) {
-      const value = pathTree?.getValue(path);
-      const location = value?.context?.findLocation();
-
-      if (location) {
-        editor?.scrollTo(location.start.offset);
-      }
-    }
-
-    const arrowActionFn = arrowActions({
-      setFocused,
-      setSelected,
-      getNode: (path) => pathTree?.getNode(path),
-      scrollEditorToPath,
-      scrollViewerToPath: (path) => {
-        if (!itemStore.isInView(path)) {
-          itemStore.scrollViewerToPath(path);
-        }
-      },
-      itemStore,
-    });
-
     const handle: SquiggleViewerHandle = {
       viewValuePath(path: SqValuePath) {
-        setSelected(path);
         itemStore.scrollViewerToPath(path);
-      },
-      onKeyPress(stroke: string) {
-        const arrowEvent = isArrowEvent(stroke) ? stroke : undefined;
-
-        if (arrowEvent && pathTree) {
-          arrowActionFn({ focused, selected, event: arrowEvent });
-        }
       },
     };
 
@@ -778,8 +730,6 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
           editor,
           focused,
           setFocused,
-          selected,
-          setSelected,
           pathTree,
           setPathTree,
           itemStore,

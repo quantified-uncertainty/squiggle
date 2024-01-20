@@ -175,21 +175,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       </div>
     );
 
-  useEffect(() => {
-    const handleKeyUp = (event: KeyboardEvent) => {
-      event.preventDefault();
-      rightPanelRef.current?.onKeyPress(event.key as string);
-    };
-
-    // Attach the event listener
-    window.addEventListener("keydown", handleKeyUp);
-
-    // Clean up the event listener
-    return () => {
-      window.removeEventListener("keydown", handleKeyUp);
-    };
-  }, []); // Empty dependency array ensures this runs once on mount and on unmount
-
   return (
     <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
       <ResizableTwoPanelLayout

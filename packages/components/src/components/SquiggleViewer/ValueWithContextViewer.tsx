@@ -20,11 +20,12 @@ import {
   pathToShortName,
 } from "./utils.js";
 import {
+  isArrowEvent,
   useFocus,
-  useIsSelected,
+  useFocusedItemEvent,
+  useItemEvent,
   useMergedSettings,
   useRegisterAsItemViewer,
-  useSelect,
   useToggleCollapsed,
   useViewerContext,
   useViewerType,
@@ -120,8 +121,8 @@ export const ValueWithContextViewer: FC<Props> = ({
 
   const toggleCollapsed_ = useToggleCollapsed();
   const focus = useFocus();
-  const select = useSelect();
-  const isSelected = useIsSelected(path);
+  const itemEvent = useItemEvent(path);
+  const focusedItemEvent = useFocusedItemEvent(path);
   const viewerType = useViewerType();
 
   const { itemStore } = useViewerContext();
@@ -239,26 +240,45 @@ export const ValueWithContextViewer: FC<Props> = ({
   };
 
   const extraHeaderClasses = () => {
-    if (header === "large") {
-      return "mb-2";
-    } else {
-      if (isSelected) {
-        return "bg-blue-100 hover:bg-blue-200";
-      }
-      return "hover:bg-stone-100 rounded-sm";
-    }
+    return (
+      "hover:bg-stone-100 rounded-sm focus-visible:outline-none " +
+      (header === "large"
+        ? "focus:bg-blue-100 mb-2 px-0.5 py-1"
+        : "focus:bg-blue-200")
+    );
   };
+
+  const headerId = `header-${pathToShortName(path)}-${size}`;
+
+  // useEffect(() => {
+  //   if (size === "large") {
+  //     const headerElement = ref.current?.querySelector(`#${headerId}`);
+  //     if (headerElement instanceof HTMLElement) {
+  //       headerElement.focus();
+  //     }
+  //   }
+  // }, [size, headerId, ref]);
 
   return (
     <ErrorBoundary>
       <div ref={ref}>
         {header !== "hide" && (
           <header
+            id={headerId}
+            tabIndex={0}
             className={clsx(
               "flex justify-between group pr-0.5",
               extraHeaderClasses()
             )}
-            onClick={() => select(path)}
+            onKeyDown={(event) => {
+              // console.log("event.key", event.key);
+              if (isArrowEvent(event.key)) {
+                event.preventDefault();
+                size === "large"
+                  ? focusedItemEvent(event.key as string)
+                  : itemEvent(event.key as string);
+              }
+            }}
           >
             <div className="inline-flex items-center">
               {collapsible && triangleToggle()}
