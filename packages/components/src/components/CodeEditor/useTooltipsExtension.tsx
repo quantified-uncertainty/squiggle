@@ -1,7 +1,7 @@
 import { syntaxTree } from "@codemirror/language";
 import { EditorView, hoverTooltip, repositionTooltips } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
-import { FC, PropsWithChildren, useEffect } from "react";
+import { FC, PropsWithChildren, ReactNode, useEffect } from "react";
 
 import {
   getFunctionDocumentation,
@@ -73,6 +73,15 @@ const HoverTooltip: FC<{ hover: Hover; view: EditorView }> = ({
   </TooltipBox>
 );
 
+function nodeTooltip(syntaxNode: SyntaxNode, reactNode: ReactNode) {
+  return {
+    pos: syntaxNode.from,
+    end: syntaxNode.to,
+    above: true,
+    create: () => reactAsDom(reactNode),
+  };
+}
+
 // Based on https://codemirror.net/examples/tooltip/#hover-tooltips
 // See also: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_hover
 function buildWordHoverExtension({
@@ -96,24 +105,7 @@ function buildWordHoverExtension({
         return null;
       }
 
-      return {
-        pos: node.from,
-        end: node.to,
-        above: true,
-        create: () => reactAsDom(<HoverTooltip hover={hover} view={view} />),
-      };
-    };
-
-    const createTopLevelVariableNameTooltip = (
-      node: SyntaxNode,
-      value: SqValue
-    ) => {
-      return {
-        pos: node.from,
-        end: node.to,
-        above: true,
-        create: () => reactAsDom(<ValueTooltip value={value} view={view} />),
-      };
+      return nodeTooltip(node, <HoverTooltip hover={hover} view={view} />);
     };
 
     switch (cursor.name) {
@@ -170,7 +162,7 @@ function buildWordHoverExtension({
           valueAst.variable.location.start.offset === node.from &&
           valueAst.variable.location.end.offset === node.to
         ) {
-          return createTopLevelVariableNameTooltip(node, value);
+          return nodeTooltip(node, <ValueTooltip value={value} view={view} />);
         }
       }
     }
