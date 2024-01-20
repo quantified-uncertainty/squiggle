@@ -160,7 +160,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
       this.context
         ? this.createdProgrammatically
           ? this.context
-          : this.context.extend(SqPathItem.fromString("fn"))
+          : this.context.extend(SqPathItem.fromDictKey("fn"))
         : undefined
     );
   }
@@ -228,7 +228,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
       this.context
         ? this.createdProgrammatically
           ? this.context
-          : this.context.extend(SqPathItem.fromString("fn"))
+          : this.context.extend(SqPathItem.fromDictKey("fn"))
         : undefined
     );
   }
@@ -315,7 +315,7 @@ export class SqRelativeValuesPlot extends SqAbstractPlot<"relativeValues"> {
   get fn(): SqLambda {
     return new SqLambda(
       this._value.fn,
-      this.context?.extend(SqPathItem.fromString("fn"))
+      this.context?.extend(SqPathItem.fromDictKey("fn"))
     );
   }
 }

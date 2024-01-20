@@ -4,8 +4,8 @@ import { locationContains } from "../ast/utils.js";
 export type RootPathItem = "result" | "bindings" | "imports" | "exports";
 
 export type PathItem =
-  | { type: "string"; value: string }
-  | { type: "number"; value: number }
+  | { type: "dictKey"; value: string }
+  | { type: "arrayIndex"; value: number }
   | { type: "cellAddress"; value: { row: number; column: number } }
   | {
       type: "calculator";
@@ -22,10 +22,10 @@ function pathItemIsEqual(a: PathItem, b: PathItem): boolean {
     return false;
   }
   switch (a.type) {
-    case "string":
-      return a.value === (b as { type: "string"; value: string }).value;
-    case "number":
-      return a.value === (b as { type: "number"; value: number }).value;
+    case "dictKey":
+      return a.value === (b as { type: "dictKey"; value: string }).value;
+    case "arrayIndex":
+      return a.value === (b as { type: "arrayIndex"; value: number }).value;
     case "cellAddress":
       return (
         isCellAddressPathItem(b) &&
@@ -39,11 +39,11 @@ function pathItemIsEqual(a: PathItem, b: PathItem): boolean {
 
 export class SqPathItem {
   private constructor(public value: PathItem) {}
-  static fromString(str: string): SqPathItem {
-    return new SqPathItem({ type: "string", value: str });
+  static fromDictKey(str: string): SqPathItem {
+    return new SqPathItem({ type: "dictKey", value: str });
   }
-  static fromNumber(num: number): SqPathItem {
-    return new SqPathItem({ type: "number", value: num });
+  static fromArrayIndex(num: number): SqPathItem {
+    return new SqPathItem({ type: "arrayIndex", value: num });
   }
   static fromCalculator(): SqPathItem {
     return new SqPathItem({ type: "calculator" });
@@ -63,9 +63,9 @@ export class SqPathItem {
   toDisplayString(): string {
     const item = this.value;
     switch (item.type) {
-      case "string":
+      case "dictKey":
         return item.value;
-      case "number":
+      case "arrayIndex":
         return String(item.value);
       case "cellAddress":
         return `Cell(${item.value.row},${item.value.column})`;
@@ -107,11 +107,11 @@ function astOffsetToPathItems(ast: ASTNode, offset: number): SqPathItem[] {
             pair.key.type === "String" // only string keys are supported
           ) {
             return [
-              SqPathItem.fromString(pair.key.value),
+              SqPathItem.fromDictKey(pair.key.value),
               ...buildRemainingPathItems(pair.value),
             ];
           } else if (pair.type === "Identifier") {
-            return [SqPathItem.fromString(pair.value)]; // this is a final node, no need to buildRemainingPathItems recursively
+            return [SqPathItem.fromDictKey(pair.value)]; // this is a final node, no need to buildRemainingPathItems recursively
           }
         }
         return [];
@@ -121,7 +121,7 @@ function astOffsetToPathItems(ast: ASTNode, offset: number): SqPathItem[] {
           const element = ast.elements[i];
           if (locationContains(element.location, offset)) {
             return [
-              SqPathItem.fromNumber(i),
+              SqPathItem.fromArrayIndex(i),
               ...buildRemainingPathItems(element),
             ];
           }
@@ -130,13 +130,13 @@ function astOffsetToPathItems(ast: ASTNode, offset: number): SqPathItem[] {
       }
       case "LetStatement": {
         return [
-          SqPathItem.fromString(ast.variable.value),
+          SqPathItem.fromDictKey(ast.variable.value),
           ...buildRemainingPathItems(ast.value),
         ];
       }
       case "DefunStatement": {
         return [
-          SqPathItem.fromString(ast.variable.value),
+          SqPathItem.fromDictKey(ast.variable.value),
           ...buildRemainingPathItems(ast.value),
         ];
       }

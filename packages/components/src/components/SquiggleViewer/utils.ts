@@ -66,9 +66,9 @@ export function useGetSubvalueByPath() {
 
       let nextValue: SqValue | undefined;
 
-      if (currentTag === "Array" && pathItemType === "number") {
+      if (currentTag === "Array" && pathItemType === "arrayIndex") {
         nextValue = currentValue.value.getValues()[pathItem.value.value];
-      } else if (currentTag === "Dict" && pathItemType === "string") {
+      } else if (currentTag === "Dict" && pathItemType === "dictKey") {
         nextValue = currentValue.value.get(pathItem.value.value);
       } else if (
         currentTag === "TableChart" &&

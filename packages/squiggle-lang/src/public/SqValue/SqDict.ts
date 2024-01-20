@@ -15,7 +15,7 @@ export class SqDict {
       ([key, v]) =>
         [
           key,
-          wrapValue(v, this.context?.extend(SqPathItem.fromString(key))),
+          wrapValue(v, this.context?.extend(SqPathItem.fromDictKey(key))),
         ] as const
     );
   }
@@ -25,7 +25,7 @@ export class SqDict {
     if (value === undefined) {
       return undefined;
     }
-    return wrapValue(value, this.context?.extend(SqPathItem.fromString(key)));
+    return wrapValue(value, this.context?.extend(SqPathItem.fromDictKey(key)));
   }
 
   toString() {

@@ -66,19 +66,19 @@ export class SqValueContext {
 
       switch (ast.type) {
         case "Program": {
-          if (this.path.root === "bindings" && pathItem.type === "string") {
+          if (this.path.root === "bindings" && pathItem.type === "dictKey") {
             newAst = ast.symbols[pathItem.value];
             break;
           }
           break;
         }
         case "Dict":
-          if (pathItem.type === "string") {
+          if (pathItem.type === "dictKey") {
             newAst = ast.symbols[pathItem.value];
           }
           break;
         case "Array":
-          if (pathItem.type === "number") {
+          if (pathItem.type === "arrayIndex") {
             const element = ast.elements[pathItem.value];
             if (element) {
               newAst = element;

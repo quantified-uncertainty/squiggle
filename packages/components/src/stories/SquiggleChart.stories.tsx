@@ -50,7 +50,7 @@ export const RootPathOverride: Story = {
     code: "{foo: 35 to 50, bar: [1,2,3]}",
     rootPathOverride: new SqValuePath({
       root: "result",
-      items: [SqPathItem.fromString("bar")],
+      items: [SqPathItem.fromDictKey("bar")],
     }),
   },
 };

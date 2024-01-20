@@ -2,7 +2,7 @@ import { SqPathItem, SqValuePath } from "../../src/index.js";
 
 describe("SqPathItem", () => {
   test("fromString creates a string item", () => {
-    const item = SqPathItem.fromString("test");
+    const item = SqPathItem.fromDictKey("test");
     expect(item.value).toEqual({ type: "string", value: "test" });
   });
 });
@@ -11,8 +11,8 @@ describe("SqValuePath", () => {
   const path = new SqValuePath({
     root: "bindings",
     items: [
-      SqPathItem.fromString("foo"),
-      SqPathItem.fromNumber(2),
+      SqPathItem.fromDictKey("foo"),
+      SqPathItem.fromArrayIndex(2),
       SqPathItem.fromCalculator(),
       SqPathItem.fromCellAddress(1, 2),
     ],
@@ -22,8 +22,8 @@ describe("SqValuePath", () => {
     const path2 = new SqValuePath({
       root: "bindings",
       items: [
-        SqPathItem.fromString("foo"),
-        SqPathItem.fromNumber(2),
+        SqPathItem.fromDictKey("foo"),
+        SqPathItem.fromArrayIndex(2),
         SqPathItem.fromCalculator(),
         SqPathItem.fromCellAddress(1, 2),
       ],
@@ -34,9 +34,9 @@ describe("SqValuePath", () => {
   test("extend()", () => {
     const path = new SqValuePath({
       root: "bindings",
-      items: [SqPathItem.fromString("foo")],
+      items: [SqPathItem.fromDictKey("foo")],
     });
-    const extendedPath = path.extend(SqPathItem.fromNumber(2));
+    const extendedPath = path.extend(SqPathItem.fromArrayIndex(2));
     expect(extendedPath.items.length).toBe(2);
     expect(extendedPath.items[1].value).toEqual({ type: "number", value: 2 });
   });
@@ -45,11 +45,11 @@ describe("SqValuePath", () => {
     test("path fully contains a shorter path", () => {
       const basePath = new SqValuePath({
         root: "bindings",
-        items: [SqPathItem.fromString("foo"), SqPathItem.fromNumber(2)],
+        items: [SqPathItem.fromDictKey("foo"), SqPathItem.fromArrayIndex(2)],
       });
       const subPath = new SqValuePath({
         root: "bindings",
-        items: [SqPathItem.fromString("foo")],
+        items: [SqPathItem.fromDictKey("foo")],
       });
       expect(basePath.contains(subPath)).toBe(true);
     });
@@ -57,20 +57,20 @@ describe("SqValuePath", () => {
     test("path does not contain longer path", () => {
       const basePath = new SqValuePath({
         root: "bindings",
-        items: [SqPathItem.fromString("foo")],
+        items: [SqPathItem.fromDictKey("foo")],
       });
-      const longerPath = basePath.extend(SqPathItem.fromNumber(2));
+      const longerPath = basePath.extend(SqPathItem.fromArrayIndex(2));
       expect(basePath.contains(longerPath)).toBe(false);
     });
 
     test("path does not contain different path", () => {
       const path1 = new SqValuePath({
         root: "bindings",
-        items: [SqPathItem.fromString("foo")],
+        items: [SqPathItem.fromDictKey("foo")],
       });
       const path2 = new SqValuePath({
         root: "imports",
-        items: [SqPathItem.fromString("bar")],
+        items: [SqPathItem.fromDictKey("bar")],
       });
       expect(path1.contains(path2)).toBe(false);
     });
@@ -90,11 +90,11 @@ describe("SqValuePath", () => {
     test("equal paths contain each other", () => {
       const path1 = new SqValuePath({
         root: "bindings",
-        items: [SqPathItem.fromString("test")],
+        items: [SqPathItem.fromDictKey("test")],
       });
       const path2 = new SqValuePath({
         root: "bindings",
-        items: [SqPathItem.fromString("test")],
+        items: [SqPathItem.fromDictKey("test")],
       });
       expect(path1.contains(path2)).toBe(true);
       expect(path2.contains(path1)).toBe(true);

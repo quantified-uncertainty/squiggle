@@ -11,7 +11,7 @@ export class SqArray {
 
   getValues() {
     return this._value.map((v, i) =>
-      wrapValue(v, this.context?.extend(SqPathItem.fromNumber(i)))
+      wrapValue(v, this.context?.extend(SqPathItem.fromArrayIndex(i)))
     );
   }
 }
