@@ -18,31 +18,6 @@ describe("SqValuePath", () => {
     ],
   });
 
-  describe("serializeToString() and deserialize()", () => {
-    test("Works on complex paths", () => {
-      const complexPath = new SqValuePath({
-        root: "exports",
-        items: [
-          SqPathItem.fromString("nested"),
-          SqPathItem.fromNumber(42),
-          SqPathItem.fromCellAddress(5, 10),
-        ],
-      });
-      const serialized = complexPath.serializeToString();
-      const deserialized = SqValuePath.deserialize(serialized);
-      expect(deserialized).toEqual(complexPath);
-    });
-    test("works on empty path", () => {
-      const emptyPath = new SqValuePath({ root: "imports", items: [] });
-      const serialized = emptyPath.serializeToString();
-      const deserialized = SqValuePath.deserialize(serialized);
-      expect(deserialized.items.length).toBe(0);
-    });
-    test("throws error on invalid input", () => {
-      expect(() => SqValuePath.deserialize("invalid")).toThrow(Error);
-    });
-  });
-
   test("isEqual()", () => {
     const path2 = new SqValuePath({
       root: "bindings",

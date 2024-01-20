@@ -416,7 +416,7 @@ export class SqProject {
     if (!ast.ok) {
       return ast;
     }
-    const found = SqValuePath.findByOffset({
+    const found = SqValuePath.findByAstOffset({
       ast: ast.value,
       offset,
     });

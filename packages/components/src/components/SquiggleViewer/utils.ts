@@ -24,7 +24,7 @@ export function pathToShortName(path: SqValuePath): string {
   if (path.isRoot()) {
     return topLevelName(path);
   } else {
-    return path.lastItem().toDisplayString();
+    return path.lastItem()!.toDisplayString();
   }
 }
 
@@ -55,25 +55,24 @@ export function useGetSubvalueByPath() {
     }
 
     let currentValue = topValue;
-    const subValuePaths = subValuePath.itemsAsValuePaths({
+    const subValuePaths = subValuePath.allSqValuePathSubsets({
       includeRoot: false,
     });
 
     for (const subValuePath of subValuePaths) {
-      const pathItem = subValuePath.lastItem();
+      const pathItem = subValuePath.lastItem()!; // We know it's not empty, because includeRoot is false.
+      const currentTag = currentValue.tag;
+      const pathItemType = pathItem.value.type;
 
       let nextValue: SqValue | undefined;
 
-      if (currentValue.tag === "Array" && pathItem.value.type === "number") {
+      if (currentTag === "Array" && pathItemType === "number") {
         nextValue = currentValue.value.getValues()[pathItem.value.value];
-      } else if (
-        currentValue.tag === "Dict" &&
-        pathItem.value.type === "string"
-      ) {
+      } else if (currentTag === "Dict" && pathItemType === "string") {
         nextValue = currentValue.value.get(pathItem.value.value);
       } else if (
-        currentValue.tag === "TableChart" &&
-        pathItem.value.type === "cellAddress"
+        currentTag === "TableChart" &&
+        pathItemType === "cellAddress"
       ) {
         // Maybe it would be better to get the environment in a different way.
         const environment = context.project.getEnvironment();

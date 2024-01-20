@@ -70,15 +70,85 @@ export class SqPathItem {
         return "calculator";
     }
   }
+}
 
-  serialize(): string {
-    return JSON.stringify(this.value);
-  }
+// There might be a better place for this to go, nearer to the ASTNode type.
+function astOffsetToPathItems(ast: ASTNode, offset: number): SqPathItem[] {
+  function buildRemainingPathItems(ast: ASTNode): SqPathItem[] {
+    switch (ast.type) {
+      case "Program": {
+        for (const statement of ast.statements) {
+          if (locationContains(statement.location, offset)) {
+            return buildRemainingPathItems(statement);
+          }
+        }
+        return [];
+      }
+      case "Dict": {
+        for (const pair of ast.elements) {
+          if (
+            !locationContains(
+              {
+                source: ast.location.source,
+                start: pair.location.start,
+                end: pair.location.end,
+              },
+              offset
+            )
+          ) {
+            continue;
+          }
 
-  static deserialize(str: string): SqPathItem {
-    const value = JSON.parse(str) as PathItem;
-    return new SqPathItem(value);
+          if (
+            pair.type === "KeyValue" &&
+            pair.key.type === "String" // only string keys are supported
+          ) {
+            return [
+              SqPathItem.fromString(pair.key.value),
+              ...buildRemainingPathItems(pair.value),
+            ];
+          } else if (pair.type === "Identifier") {
+            return [SqPathItem.fromString(pair.value)]; // this is a final node, no need to buildRemainingPathItems recursively
+          }
+        }
+        return [];
+      }
+      case "Array": {
+        for (let i = 0; i < ast.elements.length; i++) {
+          const element = ast.elements[i];
+          if (locationContains(element.location, offset)) {
+            return [
+              SqPathItem.fromNumber(i),
+              ...buildRemainingPathItems(element),
+            ];
+          }
+        }
+        return [];
+      }
+      case "LetStatement": {
+        return [
+          SqPathItem.fromString(ast.variable.value),
+          ...buildRemainingPathItems(ast.value),
+        ];
+      }
+      case "DefunStatement": {
+        return [
+          SqPathItem.fromString(ast.variable.value),
+          ...buildRemainingPathItems(ast.value),
+        ];
+      }
+      case "Block": {
+        if (
+          ast.statements.length === 1 &&
+          ["Array", "Dict"].includes(ast.statements[0].type)
+        ) {
+          return buildRemainingPathItems(ast.statements[0]);
+        }
+      }
+    }
+    return [];
   }
+  return buildRemainingPathItems(ast);
 }
 
 export class SqValuePath {
@@ -90,7 +160,24 @@ export class SqValuePath {
     this.items = props.items;
   }
 
-  lastItem() {
+  static findByAstOffset({
+    ast,
+    offset,
+  }: {
+    ast: ASTNode;
+    offset: number;
+  }): SqValuePath | undefined {
+    return new SqValuePath({
+      root: "bindings", // not important, will probably be removed soon
+      items: astOffsetToPathItems(ast, offset),
+    });
+  }
+
+  isRoot() {
+    return this.items.length === 0;
+  }
+
+  lastItem(): SqPathItem | undefined {
     return this.items[this.items.length - 1];
   }
 
@@ -101,7 +188,11 @@ export class SqValuePath {
     });
   }
 
+  // Checks if this SqValuePath completely contains all of the nodes in this other one.
   contains(smallerItem: SqValuePath) {
+    if (this.root !== smallerItem.root) {
+      return false;
+    }
     if (this.items.length < smallerItem.items.length) {
       return false;
     }
@@ -114,6 +205,9 @@ export class SqValuePath {
   }
 
   isEqual(other: SqValuePath) {
+    if (this.root !== other.root) {
+      return false;
+    }
     if (this.items.length !== other.items.length) {
       return false;
     }
@@ -125,21 +219,7 @@ export class SqValuePath {
     return true;
   }
 
-  serializeToString(): string {
-    const pathObject = {
-      root: this.root,
-      items: this.items.map((item) => item.serialize()),
-    };
-    return JSON.stringify(pathObject);
-  }
-
-  static deserialize(str: string): SqValuePath {
-    const parsed = JSON.parse(str);
-    const items = parsed.items.map(SqPathItem.deserialize);
-    return new SqValuePath({ root: parsed.root, items });
-  }
-
-  itemsAsValuePaths({ includeRoot = false }) {
+  allSqValuePathSubsets({ includeRoot = false }) {
     const root = new SqValuePath({
       root: this.root,
       items: [],
@@ -152,94 +232,5 @@ export class SqValuePath {
         })
     );
     return includeRoot ? [root, ...leafs] : leafs;
-  }
-
-  isRoot() {
-    return this.items.length === 0;
-  }
-
-  static findByOffset({
-    ast,
-    offset,
-  }: {
-    ast: ASTNode;
-    offset: number;
-  }): SqValuePath | undefined {
-    const findLoop = (ast: ASTNode): SqPathItem[] => {
-      switch (ast.type) {
-        case "Program": {
-          for (const statement of ast.statements) {
-            if (locationContains(statement.location, offset)) {
-              return findLoop(statement);
-            }
-          }
-          return [];
-        }
-        case "Dict": {
-          for (const pair of ast.elements) {
-            if (
-              !locationContains(
-                {
-                  source: ast.location.source,
-                  start: pair.location.start,
-                  end: pair.location.end,
-                },
-                offset
-              )
-            ) {
-              continue;
-            }
-
-            if (
-              pair.type === "KeyValue" &&
-              pair.key.type === "String" // only string keys are supported
-            ) {
-              return [
-                SqPathItem.fromString(pair.key.value),
-                ...findLoop(pair.value),
-              ];
-            } else if (pair.type === "Identifier") {
-              return [SqPathItem.fromString(pair.value)]; // this is a final node, no need to findLoop recursively
-            }
-          }
-          return [];
-        }
-        case "Array": {
-          for (let i = 0; i < ast.elements.length; i++) {
-            const element = ast.elements[i];
-            if (locationContains(element.location, offset)) {
-              return [SqPathItem.fromNumber(i), ...findLoop(element)];
-            }
-          }
-          return [];
-        }
-        case "LetStatement": {
-          return [
-            SqPathItem.fromString(ast.variable.value),
-            ...findLoop(ast.value),
-          ];
-        }
-        case "DefunStatement": {
-          return [
-            SqPathItem.fromString(ast.variable.value),
-            ...findLoop(ast.value),
-          ];
-        }
-        case "Block": {
-          if (
-            ast.statements.length === 1 &&
-            ["Array", "Dict"].includes(ast.statements[0].type)
-          ) {
-            return findLoop(ast.statements[0]);
-          }
-        }
-      }
-      return [];
-    };
-
-    return new SqValuePath({
-      root: "bindings", // not important, will probably be removed soon
-      items: findLoop(ast),
-    });
   }
 }
