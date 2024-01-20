@@ -185,13 +185,13 @@ class PathTree {
   }
 
   private _addNode(node: PathTreeNode, value: SqValueWithContext) {
-    this.nodes.set(node.toString(), node);
-    this.values.set(node.toString(), value);
+    this.nodes.set(node.uid(), node);
+    this.values.set(node.uid(), value);
   }
 
   private _removeNode(node: PathTreeNode) {
-    this.nodes.delete(node.toString());
-    this.values.delete(node.toString());
+    this.nodes.delete(node.uid());
+    this.values.delete(node.uid());
     node.parent?.removeChild(node);
     node.children.forEach((child) => this._removeNode(child));
   }
