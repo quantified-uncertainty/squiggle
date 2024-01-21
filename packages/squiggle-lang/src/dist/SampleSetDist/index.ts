@@ -1,3 +1,5 @@
+import { PRNG } from "seedrandom";
+
 import { OperationError } from "../../operationError.js";
 import { ContinuousShape } from "../../PointSet/Continuous.js";
 import * as Discrete from "../../PointSet/Discrete.js";
@@ -71,9 +73,10 @@ export class SampleSetDist extends BaseDist {
 
   static fromDist(
     d: BaseDist,
-    env: Env
+    env: Env,
+    rng: PRNG
   ): Result.result<SampleSetDist, DistError> {
-    return SampleSetDist.make(d.sampleN(env.sampleCount));
+    return SampleSetDist.make(d.sampleN(env.sampleCount, rng));
   }
 
   integralSum() {
@@ -99,7 +102,11 @@ export class SampleSetDist extends BaseDist {
     return new SampleSetDist(this.samples.map(Math.abs));
   }
 
-  truncate(leftCutoff: number | undefined, rightCutoff: number | undefined) {
+  truncate(
+    leftCutoff: number | undefined,
+    rightCutoff: number | undefined,
+    { rng }: { rng: PRNG }
+  ) {
     let truncated = this.samples;
     if (leftCutoff !== undefined) {
       truncated = truncated.filter((x) => x >= leftCutoff);
@@ -109,13 +116,13 @@ export class SampleSetDist extends BaseDist {
     }
     return Result.bind(
       SampleSetDist.make(truncated),
-      (dist) => SampleSetDist.make(dist.sampleN(this.samples.length)) // resample to original length
+      (dist) => SampleSetDist.make(dist.sampleN(this.samples.length, rng)) // resample to original length
     );
   }
 
   // Randomly get one sample from the distribution
-  sample() {
-    const index = Math.floor(Math.random() * this.samples.length);
+  sample(rng: PRNG) {
+    const index = Math.floor(rng() * this.samples.length);
     return this.samples[index];
   }
 
@@ -127,13 +134,13 @@ The former helps in cases where multiple distributions are correlated.
 However, if n > length(t), then there's no clear right answer, so we just randomly
 sample everything.
 */
-  sampleN(n: number): number[] {
+  sampleN(n: number, rng: PRNG): number[] {
     if (n <= this.samples.length) {
       return this.samples.slice(0, n);
     } else {
       const result: number[] = [];
       for (let i = 1; i <= n; i++) {
-        result.push(this.sample());
+        result.push(this.sample(rng));
       }
       return result;
     }
@@ -287,7 +294,8 @@ export const mapN = ({
 
 export const mixture = (
   values: [SampleSetDist, number][],
-  intendedLength: number
+  intendedLength: number,
+  rng: PRNG
 ): Result.result<SampleSetDist, DistError> => {
   const dists = values.map((pair) => pair[0]);
   const totalWeight = values.reduce((acc, v) => acc + v[1], 0);
@@ -298,7 +306,8 @@ export const mixture = (
         values.map(([, weight], i) => [i, weight / totalWeight])
       ),
     }),
-    intendedLength
+    intendedLength,
+    rng
   );
 
   const samples = discreteSamples.map((distIndexToChoose, index) => {

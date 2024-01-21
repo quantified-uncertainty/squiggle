@@ -1,4 +1,5 @@
 import * as fc from "fast-check";
+import seedrandom from "seedrandom";
 
 import { binaryOperations } from "../../src/dist/distOperations/index.js";
 import { DivisionByZeroError } from "../../src/operationError.js";
@@ -9,6 +10,8 @@ import {
   unpackResult,
 } from "../helpers/distHelpers.js";
 
+const rng = seedrandom();
+
 describe("dotSubtract", () => {
   test("mean of normal minus exponential (unit)", () => {
     const mean = 0;
@@ -17,7 +20,7 @@ describe("dotSubtract", () => {
       binaryOperations.pointwiseSubtract(
         mkNormal(mean, 1.0),
         mkExponential(rate),
-        { env }
+        { env, rng }
       )
     );
     const meanValue = dotDifference.mean();
@@ -38,7 +41,7 @@ describe("dotSubtract", () => {
           const dotDifferenceR = binaryOperations.pointwiseSubtract(
             mkNormal(mean, 1.0),
             mkExponential(rate),
-            { env }
+            { env, rng }
           );
           if (!dotDifferenceR.ok) {
             const err = dotDifferenceR.value;

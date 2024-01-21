@@ -1,3 +1,5 @@
+import { PRNG } from "seedrandom";
+
 import { AlgebraicOperation } from "../../operation.js";
 import { accumulateWithError, pairwiseWithError } from "../../utility/E_A.js";
 import { bind, Ok, result } from "../../utility/result.js";
@@ -10,20 +12,28 @@ import { pointwiseCombination } from "./pointwiseCombination.js";
 
 type DistResult = result<BaseDist, DistError>;
 
+type Opts = { env: Env; rng: PRNG };
+
 export type BinaryOperation = (
   t1: BaseDist,
   t2: BaseDist,
-  opts: { env: Env }
+  opts: Opts
 ) => DistResult;
 
 // private helpers
 function algebraic(
   t1: BaseDist,
   t2: BaseDist,
-  env: Env,
+  opts: Opts,
   operation: AlgebraicOperation
 ) {
-  return algebraicCombination({ t1, t2, arithmeticOperation: operation, env });
+  return algebraicCombination({
+    t1,
+    t2,
+    arithmeticOperation: operation,
+    env: opts.env,
+    rng: opts.rng,
+  });
 }
 
 function pointwise(
@@ -41,12 +51,12 @@ function pointwise(
 }
 
 export const binaryOperations = {
-  algebraicAdd: (t1, t2, { env }) => algebraic(t1, t2, env, "Add"),
-  algebraicMultiply: (t1, t2, { env }) => algebraic(t1, t2, env, "Multiply"),
-  algebraicDivide: (t1, t2, { env }) => algebraic(t1, t2, env, "Divide"),
-  algebraicSubtract: (t1, t2, { env }) => algebraic(t1, t2, env, "Subtract"),
-  algebraicLogarithm: (t1, t2, { env }) => algebraic(t1, t2, env, "Logarithm"),
-  algebraicPower: (t1, t2, { env }) => algebraic(t1, t2, env, "Power"),
+  algebraicAdd: (t1, t2, opts) => algebraic(t1, t2, opts, "Add"),
+  algebraicMultiply: (t1, t2, opts) => algebraic(t1, t2, opts, "Multiply"),
+  algebraicDivide: (t1, t2, opts) => algebraic(t1, t2, opts, "Divide"),
+  algebraicSubtract: (t1, t2, opts) => algebraic(t1, t2, opts, "Subtract"),
+  algebraicLogarithm: (t1, t2, opts) => algebraic(t1, t2, opts, "Logarithm"),
+  algebraicPower: (t1, t2, opts) => algebraic(t1, t2, opts, "Power"),
 
   pointwiseAdd: (t1, t2, { env }) => pointwise(t1, t2, env, "Add"),
   pointwiseMultiply: (t1, t2, { env }) => pointwise(t1, t2, env, "Multiply"),
@@ -56,38 +66,41 @@ export const binaryOperations = {
   pointwisePower: (t1, t2, { env }) => pointwise(t1, t2, env, "Power"),
 } satisfies { [k: string]: BinaryOperation };
 
-type DistsResult = result<BaseDist[], DistError>;
-export const algebraicSum = (dists: BaseDist[], env: Env): DistResult =>
+type AlgebraicFn = (dists: BaseDist[], opts: Opts) => DistResult;
+type AlgebraicCumFn = (
+  dists: BaseDist[],
+  opts: Opts
+) => result<BaseDist[], DistError>;
+
+export const algebraicSum: AlgebraicFn = (dists, opts) =>
   dists.reduce<DistResult>(
     (accumulatedDist, currentDist) =>
       bind(accumulatedDist, (aVal) =>
-        binaryOperations.algebraicAdd(aVal, currentDist, { env })
+        binaryOperations.algebraicAdd(aVal, currentDist, opts)
       ),
     Ok(new PointMass(0))
   );
 
-export const algebraicProduct = (dists: BaseDist[], env: Env): DistResult =>
+export const algebraicProduct: AlgebraicFn = (dists, opts) =>
   dists.reduce<DistResult>(
     (accumulatedDist, currentDist) =>
       bind(accumulatedDist, (aVal) =>
-        binaryOperations.algebraicMultiply(aVal, currentDist, { env })
+        binaryOperations.algebraicMultiply(aVal, currentDist, opts)
       ),
     Ok(new PointMass(1))
   );
 
-export const algebraicCumSum = (dists: BaseDist[], env: Env): DistsResult =>
+export const algebraicCumSum: AlgebraicCumFn = (dists, opts) =>
   accumulateWithError(dists, (a, b) =>
-    binaryOperations.algebraicAdd(a, b, { env })
+    binaryOperations.algebraicAdd(a, b, opts)
   );
 
-export const algebraicCumProd = (dists: BaseDist[], env: Env): DistsResult =>
+export const algebraicCumProd: AlgebraicCumFn = (dists, opts) =>
   accumulateWithError(dists, (a, b) =>
-    binaryOperations.algebraicMultiply(a, b, { env })
+    binaryOperations.algebraicMultiply(a, b, opts)
   );
 
-export const algebraicDiff = (dists: BaseDist[], env: Env): DistsResult =>
+export const algebraicDiff: AlgebraicCumFn = (dists, opts) =>
   pairwiseWithError(dists, (a, b) =>
-    binaryOperations.algebraicSubtract(b, a, {
-      env,
-    })
+    binaryOperations.algebraicSubtract(b, a, opts)
   );

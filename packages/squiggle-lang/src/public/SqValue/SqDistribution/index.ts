@@ -40,15 +40,6 @@ export abstract class SqAbstractDistribution<T extends BaseDist> {
     );
   }
 
-  asSampleSetDist(env: Env) {
-    const innerResult = SampleSetDist.fromDist(this._value, env);
-    return Result.fmap2(
-      innerResult,
-      (dist) => new SqSampleSetDistribution(dist),
-      (e: DistError) => new SqDistributionError(e)
-    );
-  }
-
   toString() {
     return this._value.toString();
   }

@@ -1,3 +1,5 @@
+import seedrandom from "seedrandom";
+
 import { mixture } from "../../src/dist/distOperations/index.js";
 import {
   env,
@@ -8,6 +10,8 @@ import {
   mkUniform,
   unpackResult,
 } from "../helpers/distHelpers.js";
+
+const rng = seedrandom();
 
 describe("mixture", () => {
   test.each([
@@ -23,7 +27,7 @@ describe("mixture", () => {
           [mkNormal(mean1, 9e-1), 0.5],
           [mkNormal(mean2, 9e-1), 0.5],
         ],
-        { env }
+        { env, rng }
       )
     ).mean();
     expect(meanValue).toBeCloseTo((mean1 + mean2) / 2, -1);
@@ -45,7 +49,7 @@ describe("mixture", () => {
           [mkBeta(alpha, beta), betaWeight],
           [mkExponential(rate), exponentialWeight],
         ],
-        { env }
+        { env, rng }
       )
     ).mean();
     const betaMean = 1 / (1 + beta / alpha);
@@ -81,7 +85,7 @@ describe("mixture", () => {
             [mkUniform(low, high), uniformWeight],
             [mkLognormal(mu, sigma), lognormalWeight],
           ],
-          { env }
+          { env, rng }
         )
       ).mean();
       const uniformMean = (low + high) / 2;
