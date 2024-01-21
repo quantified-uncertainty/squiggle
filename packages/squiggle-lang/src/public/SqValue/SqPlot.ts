@@ -1,8 +1,5 @@
-import { Env } from "../../dist/env.js";
 import { clamp, sort, uniq } from "../../utility/E_A_Floats.js";
-import * as Result from "../../utility/result.js";
 import { Plot, vPlot } from "../../value/VPlot.js";
-import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqPlotValue } from "./index.js";
 import {
@@ -258,11 +255,11 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
 export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
   tag = "scatter" as const;
 
-  xDist(env: Env): Result.result<SqSampleSetDistribution, SqError> {
-    return Result.Ok(new SqSampleSetDistribution(this._value.xDist));
+  xDist(): SqSampleSetDistribution {
+    return new SqSampleSetDistribution(this._value.xDist);
   }
-  yDist(env: Env): Result.result<SqSampleSetDistribution, SqError> {
-    return Result.Ok(new SqSampleSetDistribution(this._value.yDist));
+  yDist(): SqSampleSetDistribution {
+    return new SqSampleSetDistribution(this._value.yDist);
   }
 
   get xScale(): SqScale | undefined {
