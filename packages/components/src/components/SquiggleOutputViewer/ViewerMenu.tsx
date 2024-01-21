@@ -7,6 +7,7 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
+  DropdownMenuHeader,
   TriangleIcon,
 } from "@quri/ui";
 
@@ -98,6 +99,15 @@ export const ViewerMenu: FC<Props> = ({ mode, setMode, output }) => {
             }
             onClick={() => {
               setMode("Result");
+              close();
+            }}
+          />
+          <DropdownMenuHeader>Debugging</DropdownMenuHeader>
+          <DropdownMenuActionItem
+            icon={CodeBracketIcon}
+            title={<MenuItemTitle title="AST" type="" />}
+            onClick={() => {
+              setMode("AST");
               close();
             }}
           />

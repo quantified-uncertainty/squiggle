@@ -10,6 +10,7 @@ export {
   squiggleVersions,
   versionSupportsDropdownMenu,
   versionSupportsExports,
+  versionSupportsImportTooltip,
   versionSupportsSquiggleChart,
 } from "./versions.js";
 

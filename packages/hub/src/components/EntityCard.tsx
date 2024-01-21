@@ -36,7 +36,7 @@ export const EntityCard: FC<Props> = ({
         <div className="w-full">
           <Link className="group" href={href}>
             <div className="flex items-center gap-1 mb-1">
-              <div className="text-md font-semibold text-blue-500 group-hover:underline">
+              <div className="font-semibold text-blue-500 group-hover:underline">
                 {showOwner ? ownerName + "/" : ""}
                 {slug}
               </div>

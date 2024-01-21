@@ -35,6 +35,7 @@ const VersionedSquiggleModelExportPage: FC<
     const project = new squiggleLang.SqProject({
       linker: squiggleHubLinker,
     });
+
     const rootPath = new squiggleLang.SqValuePath({
       root: "bindings",
       items: [{ type: "string", value: variableName }],
