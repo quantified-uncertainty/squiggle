@@ -154,7 +154,7 @@ export const RelativeValuesModelLayout: FC<
       <div className="mb-6 py-2 px-2 flex justify-between">
         <div className="flex items-center">
           <ScaleIcon className="text-gray-700 mr-2 opacity-40" size={22} />
-          <div className="flex text-md font-mono font-bold text-gray-700">
+          <div className="flex font-mono font-bold text-gray-700">
             {variableName}
           </div>
         </div>

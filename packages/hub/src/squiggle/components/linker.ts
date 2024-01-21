@@ -13,7 +13,7 @@ type ParsedSourceId = {
 
 const PREFIX = "hub";
 
-function parseSourceId(sourceId: string): ParsedSourceId {
+export function parseSourceId(sourceId: string): ParsedSourceId {
   const match = sourceId.match(/^(\w+):([\w-]+)\/([\w-]+)$/);
 
   if (!match) {
