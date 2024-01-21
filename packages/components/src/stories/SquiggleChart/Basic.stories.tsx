@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { SqPathItem, SqValuePath } from "@quri/squiggle-lang";
+import { SqValuePath, SqValuePathEdge } from "@quri/squiggle-lang";
 
 import { SquiggleChart } from "../../components/SquiggleChart.js";
 
@@ -43,7 +43,7 @@ export const WithPathOverride: Story = {
   `,
     rootPathOverride: new SqValuePath({
       root: "bindings",
-      items: [SqPathItem.fromDictKey("foo"), SqPathItem.fromDictKey("bar")],
+      edges: [SqValuePathEdge.fromKey("foo"), SqValuePathEdge.fromKey("bar")],
     }),
   },
 };

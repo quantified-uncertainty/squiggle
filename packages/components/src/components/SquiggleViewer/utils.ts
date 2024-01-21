@@ -16,16 +16,13 @@ function topLevelName(path: SqValuePath): string {
 export function pathToDisplayString(path: SqValuePath) {
   return [
     topLevelName(path),
-    ...path.items.map((p) => p.toDisplayString()),
+    ...path.edges.map((p) => p.toDisplayString()),
   ].join(".");
 }
 
 export function pathToShortName(path: SqValuePath): string {
-  if (path.isRoot()) {
-    return topLevelName(path);
-  } else {
-    return path.lastItem()!.toDisplayString();
-  }
+  //topLevelName is used if its the root path
+  return path.lastItem()?.toDisplayString() || topLevelName(path);
 }
 
 export function getChildrenValues(value: SqValue): SqValue[] {
@@ -44,66 +41,17 @@ export function getChildrenValues(value: SqValue): SqValue[] {
 export function useGetSubvalueByPath() {
   const { itemStore } = useViewerContext();
 
-  return (
-    topValue: SqValue,
-    subValuePath: SqValuePath
-  ): SqValue | undefined => {
-    const { context } = topValue;
-
-    if (!context || !subValuePath.contains(context.path)) {
-      return;
-    }
-
-    let currentValue = topValue;
-    const subValuePaths = subValuePath.allSqValuePathSubsets({
-      includeRoot: false,
-    });
-
-    for (const subValuePath of subValuePaths) {
-      const pathItem = subValuePath.lastItem()!; // We know it's not empty, because includeRoot is false.
-      const currentTag = currentValue.tag;
-      const pathItemType = pathItem.value.type;
-
-      let nextValue: SqValue | undefined;
-
-      if (currentTag === "Array" && pathItemType === "arrayIndex") {
-        nextValue = currentValue.value.getValues()[pathItem.value.value];
-      } else if (currentTag === "Dict" && pathItemType === "dictKey") {
-        nextValue = currentValue.value.get(pathItem.value.value);
-      } else if (
-        currentTag === "TableChart" &&
-        pathItemType === "cellAddress"
-      ) {
-        // Maybe it would be better to get the environment in a different way.
-        const environment = context.project.getEnvironment();
-        const item = currentValue.value.item(
-          pathItem.value.value.row,
-          pathItem.value.value.column,
-          environment
-        );
-        if (item.ok) {
-          nextValue = item.value;
-        } else {
-          return;
-        }
-      } else if (pathItem.type === "calculator") {
+  return (topValue: SqValue, subValuePath: SqValuePath): SqValue | undefined =>
+    topValue.getSubvalueByPath(
+      subValuePath,
+      (calculatorSubPath: SqValuePath) => {
         // The previous path item is the one that is the parent of the calculator result.
         // This is the one that we use in the ViewerContext to store information about the calculator.
-        const calculatorState = itemStore.getCalculator(subValuePath);
+        const calculatorState = itemStore.getCalculator(calculatorSubPath);
         const result = calculatorState?.calculatorResult;
-        if (!result?.ok) {
-          return;
-        }
-        nextValue = result.value;
+        return result?.ok ? result.value : undefined;
       }
-
-      if (!nextValue) {
-        return;
-      }
-      currentValue = nextValue;
-    }
-    return currentValue;
-  };
+    );
 }
 
 export function getValueComment(value: SqValueWithContext): string | undefined {
@@ -147,7 +95,7 @@ export const shouldBeginCollapsed = (
 function isHidden(value: SqValue): boolean {
   const isHidden = value.tags.hidden();
   const path = value.context?.path;
-  return Boolean(isHidden === true && path && path.items.length === 1);
+  return Boolean(isHidden === true && path && path.edges.length === 1);
 }
 
 export function nonHiddenDictEntries(value: SqDict): [string, SqValue][] {

@@ -6,7 +6,7 @@ import * as Result from "../../utility/result.js";
 import { Plot, vPlot } from "../../value/VPlot.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
-import { SqPathItem } from "../SqValuePath.js";
+import { SqValuePathEdge } from "../SqValuePath.js";
 import { SqPlotValue } from "./index.js";
 import {
   SqDistribution,
@@ -160,7 +160,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
       this.context
         ? this.createdProgrammatically
           ? this.context
-          : this.context.extend(SqPathItem.fromDictKey("fn"))
+          : this.context.extend(SqValuePathEdge.fromKey("fn"))
         : undefined
     );
   }
@@ -228,7 +228,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
       this.context
         ? this.createdProgrammatically
           ? this.context
-          : this.context.extend(SqPathItem.fromDictKey("fn"))
+          : this.context.extend(SqValuePathEdge.fromKey("fn"))
         : undefined
     );
   }
@@ -315,7 +315,7 @@ export class SqRelativeValuesPlot extends SqAbstractPlot<"relativeValues"> {
   get fn(): SqLambda {
     return new SqLambda(
       this._value.fn,
-      this.context?.extend(SqPathItem.fromDictKey("fn"))
+      this.context?.extend(SqValuePathEdge.fromKey("fn"))
     );
   }
 }

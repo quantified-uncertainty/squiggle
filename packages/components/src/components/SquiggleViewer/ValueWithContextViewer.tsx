@@ -183,14 +183,14 @@ export const ValueWithContextViewer: FC<Props> = ({
     const name = pathToShortName(path);
 
     // We want to show colons after the keys, for dicts/arrays.
-    const showColon = header !== "large" && path.items.length > 1;
+    const showColon = header !== "large" && path.edges.length > 1;
 
     const getHeaderColor = () => {
       let color = "text-orange-900";
       const parentTag = parentValue?.tag;
       if (parentTag === "Array" && !taggedName) {
         color = "text-stone-400";
-      } else if (path.items.length > 1) {
+      } else if (path.edges.length > 1) {
         color = "text-teal-700";
       }
       return color;
