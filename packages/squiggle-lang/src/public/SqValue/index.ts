@@ -102,63 +102,59 @@ export abstract class SqAbstractValue<Type extends string, JSType, ValueType> {
 
   abstract get value(): ValueType;
 
+  private walkLastEdge(
+    path: SqValuePath,
+    traverseCalculatorEdge: (path: SqValuePath) => SqValue | undefined
+  ): SqValue | undefined {
+    const { context } = this;
+    if (!context) {
+      return;
+    }
+    const pathEdge = path.lastItem()!; // We know it's not empty, because includeRoot is false.
+
+    const pathEdgeType = pathEdge.value.type;
+
+    if (this.tag === "Array" && pathEdgeType === "index") {
+      return (this as SqArrayValue).value.getValues()[pathEdge.value.value];
+    } else if (this.tag === "Dict" && pathEdgeType === "key") {
+      return (this as SqDictValue).value.get(pathEdge.value.value);
+    } else if (this.tag === "TableChart" && pathEdgeType === "cellAddress") {
+      // Maybe it would be better to get the environment in a different way.
+      const environment = context.project.getEnvironment();
+      const item = (this as SqTableChartValue).value.item(
+        pathEdge.value.value.row,
+        pathEdge.value.value.column,
+        environment
+      );
+      return item.ok ? item.value : undefined;
+    } else if (pathEdge.type === "calculator") {
+      return traverseCalculatorEdge(path);
+    }
+    return;
+  }
+
   getSubvalueByPath(
     subValuePath: SqValuePath,
     traverseCalculatorEdge: (path: SqValuePath) => SqValue | undefined
   ) {
     {
-      const { context } = this;
-
-      if (!context || !subValuePath.hasPrefix(context.path)) {
-        return;
-      }
-
-      let currentValue = this as SqValue;
+      let currentNodeValue = this as SqValue;
       const subValuePaths = subValuePath.allPrefixPaths({
         includeRoot: false,
       });
 
       for (const subValuePath of subValuePaths) {
-        const pathEdge = subValuePath.lastItem()!; // We know it's not empty, because includeRoot is false.
-        const currentTag = currentValue.tag;
-        const pathEdgeType = pathEdge.value.type;
-
-        let nextValue: SqValue | undefined;
-
-        if (currentTag === "Array" && pathEdgeType === "index") {
-          nextValue = currentValue.value.getValues()[pathEdge.value.value];
-        } else if (currentTag === "Dict" && pathEdgeType === "key") {
-          nextValue = currentValue.value.get(pathEdge.value.value);
-        } else if (
-          currentTag === "TableChart" &&
-          pathEdgeType === "cellAddress"
-        ) {
-          // Maybe it would be better to get the environment in a different way.
-          const environment = context.project.getEnvironment();
-          const item = currentValue.value.item(
-            pathEdge.value.value.row,
-            pathEdge.value.value.column,
-            environment
-          );
-          if (item.ok) {
-            nextValue = item.value;
-          } else {
-            return;
-          }
-        } else if (pathEdge.type === "calculator") {
-          const value = traverseCalculatorEdge(subValuePath);
-          if (!value) {
-            return;
-          }
-          currentValue = value;
-        }
-
+        const nextValue = currentNodeValue.walkLastEdge(
+          subValuePath,
+          traverseCalculatorEdge
+        );
         if (!nextValue) {
           return;
+        } else {
+          currentNodeValue = nextValue;
         }
-        currentValue = nextValue;
       }
-      return currentValue;
+      return currentNodeValue;
     }
   }
 }

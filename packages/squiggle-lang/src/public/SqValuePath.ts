@@ -247,13 +247,19 @@ export class SqValuePath {
       root: this.root,
       edges: [],
     });
-    const leafs = this.edges.map(
-      (_, index) =>
+
+    const leafs = [];
+    const currentEdges = [];
+    for (const edge of this.edges) {
+      currentEdges.push(edge);
+      leafs.push(
         new SqValuePath({
           root: this.root,
-          edges: this.edges.slice(0, index + 1),
+          edges: [...currentEdges],
         })
-    );
+      );
+    }
+
     return includeRoot ? [root, ...leafs] : leafs;
   }
 }
