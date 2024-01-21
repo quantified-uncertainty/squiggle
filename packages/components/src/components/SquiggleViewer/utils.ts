@@ -41,66 +41,17 @@ export function getChildrenValues(value: SqValue): SqValue[] {
 export function useGetSubvalueByPath() {
   const { itemStore } = useViewerContext();
 
-  return (
-    topValue: SqValue,
-    subValuePath: SqValuePath
-  ): SqValue | undefined => {
-    const { context } = topValue;
-
-    if (!context || !subValuePath.hasPrefix(context.path)) {
-      return;
-    }
-
-    let currentValue = topValue;
-    const subValuePaths = subValuePath.allPrefixPaths({
-      includeRoot: false,
-    });
-
-    for (const subValuePath of subValuePaths) {
-      const pathEdge = subValuePath.lastItem()!; // We know it's not empty, because includeRoot is false.
-      const currentTag = currentValue.tag;
-      const pathEdgeType = pathEdge.value.type;
-
-      let nextValue: SqValue | undefined;
-
-      if (currentTag === "Array" && pathEdgeType === "index") {
-        nextValue = currentValue.value.getValues()[pathEdge.value.value];
-      } else if (currentTag === "Dict" && pathEdgeType === "key") {
-        nextValue = currentValue.value.get(pathEdge.value.value);
-      } else if (
-        currentTag === "TableChart" &&
-        pathEdgeType === "cellAddress"
-      ) {
-        // Maybe it would be better to get the environment in a different way.
-        const environment = context.project.getEnvironment();
-        const item = currentValue.value.item(
-          pathEdge.value.value.row,
-          pathEdge.value.value.column,
-          environment
-        );
-        if (item.ok) {
-          nextValue = item.value;
-        } else {
-          return;
-        }
-      } else if (pathEdge.type === "calculator") {
+  return (topValue: SqValue, subValuePath: SqValuePath): SqValue | undefined =>
+    topValue.getSubvalueByPath(
+      subValuePath,
+      (calculatorSubPath: SqValuePath) => {
         // The previous path item is the one that is the parent of the calculator result.
         // This is the one that we use in the ViewerContext to store information about the calculator.
-        const calculatorState = itemStore.getCalculator(subValuePath);
+        const calculatorState = itemStore.getCalculator(calculatorSubPath);
         const result = calculatorState?.calculatorResult;
-        if (!result?.ok) {
-          return;
-        }
-        nextValue = result.value;
+        return result?.ok ? result.value : undefined;
       }
-
-      if (!nextValue) {
-        return;
-      }
-      currentValue = nextValue;
-    }
-    return currentValue;
-  };
+    );
 }
 
 export function getValueComment(value: SqValueWithContext): string | undefined {

@@ -1,3 +1,4 @@
+import { SDuration } from "../../index.js";
 import { result } from "../../utility/result.js";
 import { SDate } from "../../utility/SDate.js";
 import { Value } from "../../value/index.js";
@@ -13,15 +14,20 @@ import { vNumber } from "../../value/VNumber.js";
 import { vString } from "../../value/VString.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
+import { SqValuePath } from "../SqValuePath.js";
 import { SqArray } from "./SqArray.js";
 import { SqCalculator } from "./SqCalculator.js";
 import { SqDict } from "./SqDict.js";
-import { wrapDistribution } from "./SqDistribution/index.js";
-import { wrapDomain } from "./SqDomain.js";
-import { wrapInput } from "./SqInput.js";
+import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
+import {
+  SqDateRangeDomain,
+  SqNumericRangeDomain,
+  wrapDomain,
+} from "./SqDomain.js";
+import { SqInput, wrapInput } from "./SqInput.js";
 import { SqLambda } from "./SqLambda.js";
-import { SqDistributionsPlot, wrapPlot } from "./SqPlot.js";
-import { wrapScale } from "./SqScale.js";
+import { SqDistributionsPlot, SqPlot, wrapPlot } from "./SqPlot.js";
+import { SqScale, wrapScale } from "./SqScale.js";
 import { SqTableChart } from "./SqTableChart.js";
 import { SqTags } from "./SqTags.js";
 
@@ -68,7 +74,7 @@ export function wrapValue(value: Value, context?: SqValueContext) {
   }
 }
 
-export abstract class SqAbstractValue<Type extends string, JSType> {
+export abstract class SqAbstractValue<Type extends string, JSType, ValueType> {
   abstract tag: Type;
 
   constructor(
@@ -93,9 +99,71 @@ export abstract class SqAbstractValue<Type extends string, JSType> {
   }
 
   abstract asJS(): JSType;
+
+  abstract get value(): ValueType;
+
+  getSubvalueByPath(
+    subValuePath: SqValuePath,
+    traverseCalculatorEdge: (path: SqValuePath) => SqValue | undefined
+  ) {
+    {
+      const { context } = this;
+
+      if (!context || !subValuePath.hasPrefix(context.path)) {
+        return;
+      }
+
+      let currentValue = this as SqValue;
+      const subValuePaths = subValuePath.allPrefixPaths({
+        includeRoot: false,
+      });
+
+      for (const subValuePath of subValuePaths) {
+        const pathEdge = subValuePath.lastItem()!; // We know it's not empty, because includeRoot is false.
+        const currentTag = currentValue.tag;
+        const pathEdgeType = pathEdge.value.type;
+
+        let nextValue: SqValue | undefined;
+
+        if (currentTag === "Array" && pathEdgeType === "index") {
+          nextValue = currentValue.value.getValues()[pathEdge.value.value];
+        } else if (currentTag === "Dict" && pathEdgeType === "key") {
+          nextValue = currentValue.value.get(pathEdge.value.value);
+        } else if (
+          currentTag === "TableChart" &&
+          pathEdgeType === "cellAddress"
+        ) {
+          // Maybe it would be better to get the environment in a different way.
+          const environment = context.project.getEnvironment();
+          const item = currentValue.value.item(
+            pathEdge.value.value.row,
+            pathEdge.value.value.column,
+            environment
+          );
+          if (item.ok) {
+            nextValue = item.value;
+          } else {
+            return;
+          }
+        } else if (pathEdge.type === "calculator") {
+          const value = traverseCalculatorEdge(subValuePath);
+          if (!value) {
+            return;
+          }
+          currentValue = value;
+        }
+
+        if (!nextValue) {
+          return;
+        }
+        currentValue = nextValue;
+      }
+      return currentValue;
+    }
+  }
 }
 
-export class SqArrayValue extends SqAbstractValue<"Array", unknown[]> {
+export class SqArrayValue extends SqAbstractValue<"Array", unknown[], SqArray> {
   tag = "Array" as const;
 
   get value() {
@@ -107,7 +175,7 @@ export class SqArrayValue extends SqAbstractValue<"Array", unknown[]> {
   }
 }
 
-export class SqBoolValue extends SqAbstractValue<"Bool", boolean> {
+export class SqBoolValue extends SqAbstractValue<"Bool", boolean, boolean> {
   tag = "Bool" as const;
 
   get value(): boolean {
@@ -119,7 +187,7 @@ export class SqBoolValue extends SqAbstractValue<"Bool", boolean> {
   }
 }
 
-export class SqDateValue extends SqAbstractValue<"Date", unknown> {
+export class SqDateValue extends SqAbstractValue<"Date", unknown, SDate> {
   tag = "Date" as const;
 
   static create(value: SDate) {
@@ -139,7 +207,11 @@ export class SqDateValue extends SqAbstractValue<"Date", unknown> {
   }
 }
 
-export class SqDistributionValue extends SqAbstractValue<"Dist", unknown> {
+export class SqDistributionValue extends SqAbstractValue<
+  "Dist",
+  unknown,
+  SqDistribution
+> {
   tag = "Dist" as const;
 
   get value() {
@@ -160,7 +232,11 @@ export class SqDistributionValue extends SqAbstractValue<"Dist", unknown> {
   }
 }
 
-export class SqLambdaValue extends SqAbstractValue<"Lambda", unknown> {
+export class SqLambdaValue extends SqAbstractValue<
+  "Lambda",
+  unknown,
+  SqLambda
+> {
   tag = "Lambda" as const;
 
   static create(value: SqLambda) {
@@ -183,7 +259,7 @@ export class SqLambdaValue extends SqAbstractValue<"Lambda", unknown> {
   }
 }
 
-export class SqNumberValue extends SqAbstractValue<"Number", number> {
+export class SqNumberValue extends SqAbstractValue<"Number", number, number> {
   tag = "Number" as const;
 
   static create(value: number) {
@@ -199,7 +275,7 @@ export class SqNumberValue extends SqAbstractValue<"Number", number> {
   }
 }
 
-export class SqDictValue extends SqAbstractValue<"Dict", unknown> {
+export class SqDictValue extends SqAbstractValue<"Dict", unknown, SqDict> {
   tag = "Dict" as const;
 
   get value() {
@@ -211,7 +287,7 @@ export class SqDictValue extends SqAbstractValue<"Dict", unknown> {
   }
 }
 
-export class SqStringValue extends SqAbstractValue<"String", string> {
+export class SqStringValue extends SqAbstractValue<"String", string, string> {
   tag = "String" as const;
 
   static create(value: string) {
@@ -227,7 +303,11 @@ export class SqStringValue extends SqAbstractValue<"String", string> {
   }
 }
 
-export class SqDurationValue extends SqAbstractValue<"Duration", number> {
+export class SqDurationValue extends SqAbstractValue<
+  "Duration",
+  number,
+  SDuration
+> {
   tag = "Duration" as const;
 
   get value() {
@@ -243,7 +323,7 @@ export class SqDurationValue extends SqAbstractValue<"Duration", number> {
   }
 }
 
-export class SqPlotValue extends SqAbstractValue<"Plot", unknown> {
+export class SqPlotValue extends SqAbstractValue<"Plot", unknown, SqPlot> {
   tag = "Plot" as const;
 
   get value() {
@@ -258,7 +338,11 @@ export class SqPlotValue extends SqAbstractValue<"Plot", unknown> {
     return valueToJSON(this._value);
   }
 }
-export class SqTableChartValue extends SqAbstractValue<"TableChart", unknown> {
+export class SqTableChartValue extends SqAbstractValue<
+  "TableChart",
+  unknown,
+  SqTableChart
+> {
   tag = "TableChart" as const;
 
   get value() {
@@ -269,7 +353,11 @@ export class SqTableChartValue extends SqAbstractValue<"TableChart", unknown> {
     return valueToJSON(this._value);
   }
 }
-export class SqCalculatorValue extends SqAbstractValue<"Calculator", unknown> {
+export class SqCalculatorValue extends SqAbstractValue<
+  "Calculator",
+  unknown,
+  SqCalculator
+> {
   tag = "Calculator" as const;
 
   get value() {
@@ -285,7 +373,7 @@ export class SqCalculatorValue extends SqAbstractValue<"Calculator", unknown> {
   }
 }
 
-export class SqScaleValue extends SqAbstractValue<"Scale", unknown> {
+export class SqScaleValue extends SqAbstractValue<"Scale", unknown, SqScale> {
   tag = "Scale" as const;
 
   get value() {
@@ -297,7 +385,7 @@ export class SqScaleValue extends SqAbstractValue<"Scale", unknown> {
   }
 }
 
-export class SqInputValue extends SqAbstractValue<"Input", unknown> {
+export class SqInputValue extends SqAbstractValue<"Input", unknown, SqInput> {
   tag = "Input" as const;
 
   get value() {
@@ -309,7 +397,7 @@ export class SqInputValue extends SqAbstractValue<"Input", unknown> {
   }
 }
 
-export class SqVoidValue extends SqAbstractValue<"Void", null> {
+export class SqVoidValue extends SqAbstractValue<"Void", null, null> {
   tag = "Void" as const;
 
   get value() {
@@ -321,7 +409,11 @@ export class SqVoidValue extends SqAbstractValue<"Void", null> {
   }
 }
 
-export class SqDomainValue extends SqAbstractValue<"Domain", unknown> {
+export class SqDomainValue extends SqAbstractValue<
+  "Domain",
+  unknown,
+  SqNumericRangeDomain | SqDateRangeDomain
+> {
   tag = "Domain" as const;
 
   get value() {
