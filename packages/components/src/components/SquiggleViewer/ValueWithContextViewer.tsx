@@ -167,7 +167,7 @@ export const ValueWithContextViewer: FC<Props> = ({
         <div
           className={clsx(
             "w-4 mr-1.5 flex justify-center cursor-pointer hover:!text-stone-600",
-            isOpen ? "text-stone-300" : "text-stone-400"
+            isOpen ? "text-stone-600 opacity-40" : "text-stone-800 opacity-40"
           )}
           onClick={toggleCollapsed}
         >
@@ -246,8 +246,8 @@ export const ValueWithContextViewer: FC<Props> = ({
     return (
       "hover:bg-stone-100 rounded-sm focus-visible:outline-none " +
       (header === "large"
-        ? "focus:bg-blue-100 mb-2 px-0.5 py-1"
-        : "focus:bg-blue-200")
+        ? "focus:bg-indigo-50 mb-2 px-0.5 py-1"
+        : "focus:bg-indigo-100")
     );
   };
 
