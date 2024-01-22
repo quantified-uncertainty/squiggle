@@ -263,7 +263,7 @@ export const ValueWithContextViewer: FC<Props> = ({
       <div ref={ref}>
         {header !== "hide" && (
           <header
-            tabIndex={0}
+            tabIndex={viewerType === "tooltip" ? undefined : 0}
             className={clsx(
               "flex justify-between group pr-0.5",
               extraHeaderClasses()
