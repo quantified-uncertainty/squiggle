@@ -23,11 +23,7 @@ import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import {
-  getChildrenValues,
-  pathAsString,
-  shouldBeginCollapsed,
-} from "./utils.js";
+import { getChildrenValues, shouldBeginCollapsed } from "./utils.js";
 
 type ViewerType = "normal" | "tooltip";
 
@@ -70,19 +66,19 @@ class ItemStore {
     path: SqValuePath,
     fn: (localItemState: LocalItemState) => LocalItemState
   ): void {
-    const pathString = pathAsString(path);
+    const pathString = path.uid();
     const newSettings = fn(this.state[pathString] || defaultLocalItemState);
     this.state[pathString] = newSettings;
   }
 
   getState(path: SqValuePath): LocalItemState {
-    return this.state[pathAsString(path)] || defaultLocalItemState;
+    return this.state[path.uid()] || defaultLocalItemState;
   }
 
   getStateOrInitialize(value: SqValueWithContext): LocalItemState {
     const path = value.context.path;
-    const pathString = pathAsString(path);
-    const existingState = this.state[pathString];
+    const pathString = path.uid();
+    const existingState = this.state[path.uid()];
     if (existingState) {
       return existingState;
     }
@@ -96,7 +92,7 @@ class ItemStore {
         if (!child.context) {
           continue; // shouldn't happen
         }
-        const childPathString = pathAsString(child.context.path);
+        const childPathString = child.context.path.uid();
         if (this.state[childPathString]) {
           continue; // shouldn't happen, if parent state is not initialized, child state won't be initialized either
         }
@@ -126,15 +122,15 @@ class ItemStore {
   }
 
   forceUpdate(path: SqValuePath) {
-    this.handles[pathAsString(path)]?.forceUpdate();
+    this.handles[path.uid()]?.forceUpdate();
   }
 
   registerItemHandle(path: SqValuePath, handle: ItemHandle) {
-    this.handles[pathAsString(path)] = handle;
+    this.handles[path.uid()] = handle;
   }
 
   unregisterItemHandle(path: SqValuePath) {
-    delete this.handles[pathAsString(path)];
+    delete this.handles[path.uid()];
   }
 
   updateCalculatorState(path: SqValuePath, calculator: CalculatorState) {
@@ -152,7 +148,7 @@ class ItemStore {
   }
 
   scrollToPath(path: SqValuePath) {
-    this.handles[pathAsString(path)]?.element.scrollIntoView({
+    this.handles[path.uid()]?.element.scrollIntoView({
       behavior: "smooth",
     });
   }
@@ -274,7 +270,7 @@ export function useHasLocalSettings(path: SqValuePath) {
 export function useFocus() {
   const { focused, setFocused } = useViewerContext();
   return (path: SqValuePath) => {
-    if (focused && pathAsString(focused) === pathAsString(path)) {
+    if (focused && focused.isEqual(path)) {
       return; // nothing to do
     }
     if (path.isRoot()) {
@@ -292,7 +288,7 @@ export function useUnfocus() {
 
 export function useIsFocused(path: SqValuePath) {
   const { focused } = useViewerContext();
-  return focused && pathAsString(focused) === pathAsString(path);
+  return focused && focused.isEqual(path);
 }
 
 export function useMergedSettings(path: SqValuePath) {

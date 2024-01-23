@@ -6,7 +6,7 @@ import { ChevronRightIcon } from "@quri/ui";
 import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
-import { pathIsEqual, pathItemFormat, useGetSubvalueByPath } from "./utils.js";
+import { useGetSubvalueByPath } from "./utils.js";
 import { ValueViewer } from "./ValueViewer.js";
 import {
   SquiggleViewerHandle,
@@ -38,31 +38,31 @@ const FocusedNavigation: FC<{
   const unfocus = useUnfocus();
   const focus = useFocus();
 
-  const isFocusedOnRootPath = rootPath && pathIsEqual(focusedPath, rootPath);
+  const isFocusedOnRootPath = rootPath && rootPath.isEqual(focusedPath);
 
   if (isFocusedOnRootPath) {
     return null;
   }
 
   // If we're focused on the root path override, we need to adjust the focused path accordingly when presenting the navigation, so that it begins with the root path intead. This is a bit confusing.
-  const rootPathFocusedAdjustment = rootPath?.items.length
-    ? rootPath.items.length - 1
+  const rootPathFocusedAdjustment = rootPath?.edges.length
+    ? rootPath.edges.length - 1
     : 0;
 
   return (
     <div className="flex items-center">
-      {!rootPath?.items.length && (
+      {!rootPath?.edges.length && (
         <FocusedNavigationItem onClick={unfocus} text="Home" />
       )}
 
       {focusedPath
-        .itemsAsValuePaths({ includeRoot: false })
+        .allPrefixPaths({ includeRoot: false })
         .slice(rootPathFocusedAdjustment, -1)
         .map((path, i) => (
           <FocusedNavigationItem
             key={i}
             onClick={() => focus(path)}
-            text={pathItemFormat(path.items[i + rootPathFocusedAdjustment])}
+            text={path.edges[i + rootPathFocusedAdjustment].toDisplayString()}
           />
         ))}
     </div>
