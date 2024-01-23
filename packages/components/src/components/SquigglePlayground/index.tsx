@@ -10,7 +10,9 @@ import React, {
 import { SqLinker, SqProject } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
+import { useRunnerState } from "../../lib/hooks/useRunnerState.js";
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import { useUncontrolledCode } from "../../lib/hooks/useUncontrolledCode.js";
 import {
   defaultPlaygroundSettings,
   PartialPlaygroundSettings,
@@ -138,6 +140,13 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     }
   }, [output, onExportsChange]);
 
+  const { code, setCode } = useUncontrolledCode({
+    defaultCode: props.defaultCode,
+    onCodeChange: props.onCodeChange,
+  });
+
+  const runnerState = useRunnerState(code);
+
   const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
   const rightPanelRef = useRef<SquiggleViewerHandle>(null);
 
@@ -161,6 +170,9 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       onViewValuePath={(path) => rightPanelRef.current?.viewValuePath(path)}
       renderImportTooltip={renderImportTooltip}
       ref={leftPanelRef}
+      runnerState={runnerState}
+      code={code}
+      setCode={setCode}
     />
   );
 
@@ -172,6 +184,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         // FIXME - this will cause viewer to be rendered twice on initial render
         editor={leftPanelRef.current?.getEditor() ?? undefined}
         ref={rightPanelRef}
+        runnerState={runnerState}
         {...settings}
       />
     ) : (
