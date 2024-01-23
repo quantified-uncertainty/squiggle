@@ -23,7 +23,7 @@ import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { SqViewNode } from "./SqViewNode.js";
+import { SqListViewNode } from "./SqViewNode.js";
 import {
   getChildrenValues,
   shouldBeginCollapsed,
@@ -40,7 +40,7 @@ function findNode(
   if (!root || !path) {
     return;
   }
-  return SqViewNode.make(
+  return SqListViewNode.make(
     root,
     path,
     traverseCalculatorEdge(itemStore),
@@ -73,22 +73,6 @@ const defaultLocalItemState: LocalItemState = {
 
 type ValuePathUID = string;
 
-function isElementInView(element: HTMLElement) {
-  const elementRect = element.getBoundingClientRect();
-  const container = document.querySelector(
-    '[data-testid="dynamic-viewer-result"]'
-  );
-  if (!container) {
-    return false;
-  }
-
-  const containerRect = container.getBoundingClientRect();
-
-  return (
-    elementRect.top >= containerRect.top &&
-    elementRect.top + 20 <= containerRect.bottom
-  );
-}
 /**
  * `ItemStore` is used for caching and for passing settings down the tree.
  * It allows us to avoid React tree rerenders on settings changes; instead, we can rerender individual item viewers on demand.
@@ -188,12 +172,8 @@ export class ItemStore {
   scrollViewerToPath(path: SqValuePath) {
     // setFocused(path);
     this.handles[path.uid()]?.element.scrollIntoView({
-      behavior: "instant",
+      behavior: "smooth",
     });
-  }
-
-  isInView(path: SqValuePath) {
-    return isElementInView(this.handles[path.uid()]?.element);
   }
 }
 
@@ -210,7 +190,7 @@ type ViewerContextShape = {
   initialized: boolean;
   handle: SquiggleViewerHandle;
   rootValue?: SqValueWithContext;
-  findNode: (path: SqValuePath) => SqViewNode | undefined;
+  findNode: (path: SqValuePath) => SqListViewNode | undefined;
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
@@ -255,9 +235,7 @@ export function useRegisterAsItemViewer(path: SqValuePath) {
 
     itemStore.registerItemHandle(path, { element, forceUpdate });
 
-    return () => {
-      itemStore.unregisterItemHandle(path); // TODO: Seems to happen way too often
-    };
+    return () => itemStore.unregisterItemHandle(path); // TODO: Seems to happen way too often
   });
 
   return ref;
@@ -380,7 +358,7 @@ type Props = PropsWithChildren<{
   partialPlaygroundSettings: PartialPlaygroundSettings;
   editor?: CodeEditorHandle;
   viewerType?: ViewerType;
-  value: SqValue | undefined;
+  rootValue: SqValue | undefined;
 }>;
 
 export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
@@ -389,7 +367,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       partialPlaygroundSettings: unstablePlaygroundSettings,
       editor,
       viewerType = "normal",
-      value,
+      rootValue,
       children,
     },
     ref
@@ -419,16 +397,16 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
 
     useImperativeHandle(ref, () => handle);
 
-    const _value = value
-      ? valueHasContext(value)
-        ? value
+    const _rootValue = rootValue
+      ? valueHasContext(rootValue)
+        ? rootValue
         : undefined
       : undefined;
 
     return (
       <ViewerContext.Provider
         value={{
-          rootValue: _value,
+          rootValue: _rootValue,
           globalSettings,
           editor,
           focused,
@@ -437,7 +415,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
           viewerType,
           handle,
           initialized: true,
-          findNode: (path) => findNode(_value, path, itemStore),
+          findNode: (path) => findNode(_rootValue, path, itemStore),
         }}
       >
         {children}

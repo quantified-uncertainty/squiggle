@@ -11,6 +11,8 @@ import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
+import { useFocusedSqValueKeyEvent } from "./keyboardNav/focusedSqValue.js";
+import { useUnfocusedSqValueKeyEvent } from "./keyboardNav/unfocusedSqValue.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
 import { SquiggleValueMenu } from "./SquiggleValueMenu.js";
 import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
@@ -19,11 +21,6 @@ import {
   hasExtraContentToShow,
   pathToShortName,
 } from "./utils.js";
-import {
-  isArrowEvent,
-  useFocusedItemEvent,
-  useItemEvent,
-} from "./viewerKeyboardEvents.js";
 import {
   useFocus,
   useMergedSettings,
@@ -124,8 +121,9 @@ export const ValueWithContextViewer: FC<Props> = ({
 
   const toggleCollapsed_ = useToggleCollapsed();
   const focus = useFocus();
-  const itemEvent = useItemEvent(path);
-  const focusedItemEvent = useFocusedItemEvent(path);
+  const focusedKeyEvent = useFocusedSqValueKeyEvent(path);
+  const unfocusedKeyEvent = useUnfocusedSqValueKeyEvent(path);
+
   const viewerType = useViewerType();
   const scrollEditorToPath = useScrollToEditorPath(path);
 
@@ -274,12 +272,9 @@ export const ValueWithContextViewer: FC<Props> = ({
               scrollEditorToPath();
             }}
             onKeyDown={(event) => {
-              if (isArrowEvent(event.key)) {
-                event.preventDefault();
-                size === "large"
-                  ? focusedItemEvent(event.key as string)
-                  : itemEvent(event.key as string);
-              }
+              size === "large"
+                ? focusedKeyEvent(event)
+                : unfocusedKeyEvent(event);
             }}
           >
             <div className="inline-flex items-center">

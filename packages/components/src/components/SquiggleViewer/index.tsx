@@ -113,7 +113,7 @@ const component = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
         partialPlaygroundSettings={partialPlaygroundSettings}
         editor={editor}
         ref={ref}
-        value={value}
+        rootValue={value}
       >
         <SquiggleViewerWithoutProvider value={value} />
       </ViewerProvider>

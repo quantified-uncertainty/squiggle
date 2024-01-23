@@ -48,7 +48,7 @@ const ValueTooltip: FC<{ value: SqValue; view: EditorView }> = ({
           <InnerViewerProvider
             partialPlaygroundSettings={globalSettings}
             viewerType="tooltip"
-            value={value}
+            rootValue={value}
           >
             <SquiggleValueChart value={value} settings={globalSettings} />
           </InnerViewerProvider>

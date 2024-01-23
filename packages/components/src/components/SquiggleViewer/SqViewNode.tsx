@@ -2,6 +2,7 @@ import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import { getChildrenValues, TraverseCalculatorEdge } from "./utils.js";
 
+//We might want to bring this into the SquiggleLang library. The ``traverseCalculatorEdge`` part is awkward though.
 class SqValueNode {
   constructor(
     public root: SqValue,
@@ -79,7 +80,8 @@ class SqValueNode {
 type GetIsCollapsed = (path: SqValuePath) => boolean;
 type Params = { getIsCollapsed: GetIsCollapsed };
 
-export class SqViewNode {
+//This is split from SqValueNode because it handles more specialized logic for viewing open/closed nodes in the Viewer. It works for lists of nodes - we'll need new logic for tabular data.
+export class SqListViewNode {
   constructor(
     public node: SqValueNode,
     public params: Params
@@ -94,16 +96,16 @@ export class SqViewNode {
     getIsCollapsed: GetIsCollapsed
   ) {
     const node = new SqValueNode(root, path, traverseCalculatorEdge);
-    return new SqViewNode(node, { getIsCollapsed });
+    return new SqListViewNode(node, { getIsCollapsed });
   }
 
   make(node: SqValueNode) {
-    return new SqViewNode(node, this.params);
+    return new SqListViewNode(node, this.params);
   }
 
   // A helper function to make a node or undefined
   makeU(node: SqValueNode | undefined) {
-    return node ? new SqViewNode(node, this.params) : undefined;
+    return node ? new SqListViewNode(node, this.params) : undefined;
   }
 
   value(): SqValue | undefined {
@@ -134,12 +136,12 @@ export class SqViewNode {
     return this.params.getIsCollapsed(this.node.path);
   }
 
-  private childrenAreVisible() {
-    return !this.isCollapsed();
+  private hasVisibleChildren() {
+    return !this.isCollapsed() && this.children().length > 0;
   }
 
-  private lastVisibleSubChild(): SqViewNode | undefined {
-    if (this.children.length > 0 && this.childrenAreVisible()) {
+  private lastVisibleSubChild(): SqListViewNode | undefined {
+    if (this.hasVisibleChildren()) {
       const lastChild = this.lastChild();
       return lastChild?.lastVisibleSubChild() || lastChild;
     } else {
@@ -147,21 +149,18 @@ export class SqViewNode {
     }
   }
 
-  private nextAvailableSibling(): SqViewNode | undefined {
-    return this.nextSibling() || this.parent();
+  private nextAvailableSibling(): SqListViewNode | undefined {
+    return this.nextSibling() || this.parent()?.nextAvailableSibling();
   }
 
-  next(): SqViewNode | undefined {
-    return this.children().length > 0 && !this.isCollapsed()
+  next(): SqListViewNode | undefined {
+    return this.hasVisibleChildren()
       ? this.children()[0]
       : this.nextAvailableSibling();
   }
 
-  prev(): SqViewNode | undefined {
+  prev(): SqListViewNode | undefined {
     const prevSibling = this.prevSibling();
-    if (!prevSibling) {
-      return this.parent();
-    }
-    return prevSibling.lastVisibleSubChild();
+    return prevSibling ? prevSibling.lastVisibleSubChild() : this.parent();
   }
 }

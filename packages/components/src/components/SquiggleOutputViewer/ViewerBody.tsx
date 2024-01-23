@@ -14,6 +14,28 @@ type Props = {
   isRunning: boolean;
 };
 
+export function modeToValue(
+  mode: ViewerMode,
+  output: SqOutputResult
+): SqValue | undefined {
+  if (!output.ok) {
+    return;
+  }
+  const sqOutput = output.value;
+  switch (mode) {
+    case "Result":
+      return sqOutput.result;
+    case "Variables":
+      return sqOutput.bindings.asValue();
+    case "Imports":
+      return sqOutput.imports.asValue();
+    case "Exports":
+      return sqOutput.exports.asValue();
+    case "AST":
+      return;
+  }
+}
+
 export const ViewerBody: FC<Props> = ({ output, mode, isRunning }) => {
   if (!output.ok) {
     return <SquiggleErrorAlert error={output.value} />;
@@ -28,20 +50,8 @@ export const ViewerBody: FC<Props> = ({ output, mode, isRunning }) => {
       </pre>
     );
   }
-  let usedValue: SqValue | undefined;
-  switch (mode) {
-    case "Result":
-      usedValue = output.value.result;
-      break;
-    case "Variables":
-      usedValue = sqOutput.bindings.asValue();
-      break;
-    case "Imports":
-      usedValue = sqOutput.imports.asValue();
-      break;
-    case "Exports":
-      usedValue = sqOutput.exports.asValue();
-  }
+
+  const usedValue = modeToValue(mode, output);
 
   if (!usedValue) {
     return null;
