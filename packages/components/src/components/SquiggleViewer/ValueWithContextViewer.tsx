@@ -21,9 +21,11 @@ import {
 } from "./utils.js";
 import {
   isArrowEvent,
-  useFocus,
   useFocusedItemEvent,
   useItemEvent,
+} from "./viewerKeyboardEvents.js";
+import {
+  useFocus,
   useMergedSettings,
   useRegisterAsItemViewer,
   useScrollToEditorPath,

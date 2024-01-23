@@ -37,9 +37,11 @@ export function getChildrenValues(value: SqValue): SqValue[] {
   }
 }
 
+export type TraverseCalculatorEdge = (path: SqValuePath) => SqValue | undefined;
+
 export function traverseCalculatorEdge(
   itemStore: ItemStore
-): (SqValuePath) => SqValue | undefined {
+): TraverseCalculatorEdge {
   return (calculatorSubPath: SqValuePath) => {
     const calculatorState = itemStore.getCalculator(calculatorSubPath);
     const result = calculatorState?.calculatorResult;
