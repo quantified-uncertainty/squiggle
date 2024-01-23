@@ -16,15 +16,17 @@ export type ReducerContext = Readonly<{
 }>;
 
 export function createContext(environment: Env): ReducerContext {
+  const seed = environment.seed
+    ? String(environment.seed)
+    : String(seedrandom()());
+
   return {
     stack: Stack.make(),
     environment,
     frameStack: FrameStack.make(),
     evaluate,
     inFunction: undefined,
-    rng: seedrandom.alea(
-      environment.seed === undefined ? undefined : String(environment.seed)
-    ),
+    rng: seedrandom.alea(seed),
   };
 }
 
