@@ -23,9 +23,30 @@ import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { getChildrenValues, shouldBeginCollapsed } from "./utils.js";
+import { SqViewNode } from "./SqViewNode.js";
+import {
+  getChildrenValues,
+  shouldBeginCollapsed,
+  traverseCalculatorEdge,
+} from "./utils.js";
 
 type ViewerType = "normal" | "tooltip";
+
+function findNode(
+  root: SqValue | undefined,
+  path: SqValuePath,
+  itemStore: ItemStore
+) {
+  if (!root || !path) {
+    return;
+  }
+  return SqViewNode.make(
+    root,
+    path,
+    traverseCalculatorEdge(itemStore),
+    (path) => itemStore.getState(path).collapsed
+  );
+}
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
@@ -52,175 +73,6 @@ const defaultLocalItemState: LocalItemState = {
 
 type ValuePathUID = string;
 
-class PathTreeNode {
-  readonly tree: PathTree;
-  readonly path: SqValuePath;
-  readonly parent: PathTreeNode | undefined;
-  children: PathTreeNode[] = [];
-
-  constructor(
-    path: SqValuePath,
-    parent: PathTreeNode | undefined,
-    tree: PathTree
-  ) {
-    this.parent = parent;
-    this.tree = tree;
-    this.path = path;
-    this.isEqual = this.isEqual.bind(this);
-  }
-
-  uid() {
-    return this.path.uid();
-  }
-  isRoot() {
-    return this.path.isRoot();
-  }
-
-  private isEqual(other: PathTreeNode) {
-    return this.path.isEqual(other.path);
-  }
-
-  private isCollapsed() {
-    return this.tree.isPathCollapsed(this.path); // This seems awkward, should find another way to deal with it.
-  }
-
-  private childrenAreVisible() {
-    return !this.isCollapsed();
-  }
-
-  lastChild(): PathTreeNode | undefined {
-    return this.children[this.children.length - 1];
-  }
-
-  addChild(path: SqValuePath): PathTreeNode | undefined {
-    //We don't really need this alreadyExists check, as this normally is just called by PathTree.addNode, which already checks for existence, but seems safe.
-    const alreadyExists = this.children.some((child) =>
-      child.path.isEqual(path)
-    );
-    if (!alreadyExists) {
-      const node = new PathTreeNode(path, this, this.tree);
-      this.children.push(node);
-      return node;
-    }
-  }
-
-  removeChild(node: PathTreeNode) {
-    this.children = this.children.filter(
-      (child) => !child.path.isEqual(node.path)
-    );
-  }
-
-  siblings(): PathTreeNode[] {
-    return this.parent?.children || [];
-  }
-
-  private getParentIndex() {
-    //We could later optimize this by using the listIndex of arrayIndex nodes and the fact that dictKeys are sorted.
-    const siblings = this.siblings();
-    return siblings.findIndex(this.isEqual);
-  }
-
-  prevSibling() {
-    const index = this.getParentIndex();
-    const isRootOrError = index === -1;
-    const isFirstSibling = index === 0;
-    if (isRootOrError || isFirstSibling) {
-      return undefined;
-    }
-    return this.siblings()[index - 1];
-  }
-
-  nextSibling() {
-    const index = this.getParentIndex();
-    const isRootOrError = index === -1;
-    const isLastSibling = index === this.siblings().length - 1;
-    if (isRootOrError || isLastSibling) {
-      return undefined;
-    }
-    return this.siblings()[index + 1];
-  }
-
-  private lastVisibleSubChild(): PathTreeNode | undefined {
-    if (this.children.length > 0 && this.childrenAreVisible()) {
-      const lastChild = this.lastChild();
-      return lastChild?.lastVisibleSubChild() || lastChild;
-    } else {
-      return this;
-    }
-  }
-
-  private nextAvailableSibling(): PathTreeNode | undefined {
-    return this.nextSibling() || this.parent?.nextAvailableSibling();
-  }
-
-  next(): PathTreeNode | undefined {
-    return this.children.length > 0 && !this.isCollapsed()
-      ? this.children[0]
-      : this.nextAvailableSibling();
-  }
-
-  prev(): PathTreeNode | undefined {
-    const prevSibling = this.prevSibling();
-    if (!prevSibling) {
-      return this.parent;
-    }
-    return prevSibling.lastVisibleSubChild();
-  }
-}
-
-class PathTree {
-  readonly root: PathTreeNode;
-  readonly nodes: Map<ValuePathUID, PathTreeNode> = new Map();
-  readonly values: Map<ValuePathUID, SqValueWithContext> = new Map(); // This could probably go to a better place
-  readonly isPathCollapsed: (path: SqValuePath) => boolean;
-
-  constructor(
-    rootNode: SqValueWithContext,
-    getIsCollapsed: (path: SqValuePath) => boolean
-  ) {
-    this.root = new PathTreeNode(rootNode.context.path, undefined, this);
-    this._addNode(this.root, rootNode);
-    this.isPathCollapsed = getIsCollapsed;
-  }
-
-  private _addNode(node: PathTreeNode, value: SqValueWithContext) {
-    this.nodes.set(node.uid(), node);
-    this.values.set(node.uid(), value);
-  }
-
-  private _removeNode(node: PathTreeNode) {
-    this.nodes.delete(node.uid());
-    this.values.delete(node.uid());
-    node.parent?.removeChild(node);
-    node.children.forEach((child) => this._removeNode(child));
-  }
-
-  getNode(path: SqValuePath): PathTreeNode | undefined {
-    return this.nodes.get(path.uid());
-  }
-
-  getValue(path: SqValuePath): SqValueWithContext | undefined {
-    return this.values.get(path.uid());
-  }
-
-  removeNode(value: SqValueWithContext): void {
-    const node = this.getNode(value.context.path);
-    if (node) {
-      this._removeNode(node);
-    }
-  }
-
-  addNode(child: SqValueWithContext, parent: SqValueWithContext) {
-    if (!this.getNode(child.context.path)) {
-      const parentNode = this.getNode(parent.context.path);
-      if (parentNode) {
-        const newNode = parentNode.addChild(child.context.path);
-        newNode && this._addNode(newNode, child);
-      }
-    }
-  }
-}
-
 function isElementInView(element: HTMLElement) {
   const elementRect = element.getBoundingClientRect();
   const container = document.querySelector(
@@ -245,7 +97,7 @@ function isElementInView(element: HTMLElement) {
  * Note: this class is currently used as a primary source of truth. Should we use it as cache only, and store the state in React state instead?
  * Then we won't have to rely on `forceUpdate` for rerenders.
  */
-class ItemStore {
+export class ItemStore {
   state: Record<ValuePathUID, LocalItemState> = {};
   handles: Record<ValuePathUID, ItemHandle> = {};
 
@@ -363,8 +215,6 @@ type ViewerContextShape = {
   // Instead, we keep `localItemState` in local state and notify the global context via `setLocalItemState` to pass them down the component tree again if it got rebuilt from scratch.
   // See ./SquiggleViewer.tsx and ./ValueWithContextViewer.tsx for other implementation details on this.
   globalSettings: PlaygroundSettings;
-  pathTree: PathTree | undefined;
-  setPathTree: (value: PathTree | undefined) => void;
   focused: SqValuePath | undefined;
   setFocused: (value: SqValuePath | undefined) => void;
   editor?: CodeEditorHandle;
@@ -372,12 +222,12 @@ type ViewerContextShape = {
   viewerType: ViewerType;
   initialized: boolean;
   handle: SquiggleViewerHandle;
+  rootValue?: SqValueWithContext;
+  findNode: (path: SqValuePath) => SqViewNode | undefined;
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
   globalSettings: defaultPlaygroundSettings,
-  pathTree: undefined,
-  setPathTree: () => undefined,
   focused: undefined,
   setFocused: () => undefined,
   editor: undefined,
@@ -387,6 +237,8 @@ export const ViewerContext = createContext<ViewerContextShape>({
     viewValuePath: () => {},
   },
   initialized: false,
+  rootValue: undefined,
+  findNode: () => undefined,
 });
 
 export function useViewerContext() {
@@ -397,13 +249,9 @@ export function useViewerContext() {
 // This allows us to do two things later:
 // 1. Implement `store.scrollViewerToPath`.
 // 2. Re-render individual item viewers on demand, for example on "Collapse Children" menu action.
-export function useRegisterAsItemViewer(
-  path: SqValuePath,
-  value: SqValueWithContext,
-  parent: SqValue | undefined
-) {
+export function useRegisterAsItemViewer(path: SqValuePath) {
   const ref = useRef<HTMLDivElement | null>(null);
-  const { itemStore, pathTree, setPathTree } = useViewerContext();
+  const { itemStore } = useViewerContext();
 
   /**
    * Since `ViewerContext` doesn't store settings, this component won't rerender when `setSettings` is called.
@@ -420,23 +268,8 @@ export function useRegisterAsItemViewer(
 
     itemStore.registerItemHandle(path, { element, forceUpdate });
 
-    if (!pathTree) {
-      if (!parent) {
-        const newPathTree = new PathTree(
-          value,
-          (path) => itemStore.getState(path).collapsed
-        );
-        setPathTree(newPathTree);
-      }
-    } else if (parent) {
-      if (valueHasContext(parent)) {
-        pathTree.addNode(value, parent);
-      }
-    }
-
     return () => {
       itemStore.unregisterItemHandle(path); // TODO: Seems to happen way too often
-      // pathTree?.removeNode(value);
     };
   });
 
@@ -521,10 +354,10 @@ export function useUnfocus() {
 }
 
 export function useScrollToEditorPath(path: SqValuePath) {
-  const { pathTree, editor } = useViewerContext();
+  const { editor, findNode } = useViewerContext();
   return () => {
-    if (pathTree && editor) {
-      const value = pathTree.getValue(path);
+    if (editor) {
+      const value = findNode(path)?.value();
       const location = value?.context?.findLocation();
 
       if (location) {
@@ -542,26 +375,31 @@ const focusHeader = (path: SqValuePath, itemStore: ItemStore) => {
 };
 
 export function useItemEvent(selected: SqValuePath) {
-  const { setFocused, itemStore, pathTree } = useViewerContext();
-  const getNode = (path: SqValuePath) => pathTree?.getNode(path);
+  const { setFocused, itemStore, findNode } = useViewerContext();
 
   return (event: string) => {
-    if (isArrowEvent(event) && pathTree) {
-      const node = getNode(selected);
+    if (isArrowEvent(event)) {
+      const myNode = findNode(selected);
+      if (!myNode) {
+        return;
+      }
+
       switch (event) {
         case "ArrowDown": {
-          const newPath = node?.next()?.path;
+          const newPath = myNode.next()?.node.path;
           newPath && focusHeader(newPath, itemStore);
           break;
         }
         case "ArrowUp": {
-          const newPath = node?.prev()?.path;
+          const newPath = myNode.prev()?.node.path;
           newPath && focusHeader(newPath, itemStore);
           break;
         }
         case "ArrowLeft": {
-          const newItem = node?.parent;
-          newItem && !newItem.isRoot() && focusHeader(newItem.path, itemStore);
+          const newItem = myNode.parent();
+          newItem &&
+            !newItem.isRoot() &&
+            focusHeader(newItem.node.path, itemStore);
           break;
         }
         case "ArrowRight": {
@@ -576,9 +414,9 @@ export function useItemEvent(selected: SqValuePath) {
     }
   };
 }
+
 export function useFocusedItemEvent(selected: SqValuePath) {
-  const { setFocused, itemStore, pathTree } = useViewerContext();
-  const getNode = (path: SqValuePath) => pathTree?.getNode(path);
+  const { setFocused, itemStore, findNode } = useViewerContext();
 
   function resetToRoot() {
     setFocused(undefined);
@@ -588,36 +426,40 @@ export function useFocusedItemEvent(selected: SqValuePath) {
   }
 
   return (event: string) => {
-    if (isArrowEvent(event) && pathTree) {
-      const node = getNode(selected);
+    const myNode = findNode(selected);
+    if (!myNode) {
+      return;
+    }
+
+    if (isArrowEvent(event)) {
       switch (event) {
         case "ArrowDown": {
-          const newItem = node?.children[0];
+          const newItem = myNode.children()[0];
           if (newItem) {
-            focusHeader(newItem.path, itemStore);
+            focusHeader(newItem.node.path, itemStore);
           }
           break;
         }
         case "ArrowUp": {
-          const newItem = node?.parent;
+          const newItem = myNode.parent();
           if (newItem) {
             if (newItem.isRoot()) {
               resetToRoot();
             } else {
-              setFocused(newItem.path);
+              setFocused(newItem.node.path);
             }
           }
           break;
         }
         case "ArrowLeft": {
-          const newPath = node?.prevSibling()?.path;
+          const newPath = myNode.prevSibling()?.node.path;
           if (newPath) {
             setFocused(newPath);
           }
           break;
         }
         case "ArrowRight": {
-          const newPath = node?.nextSibling()?.path;
+          const newPath = myNode.nextSibling()?.node.path;
           if (newPath) {
             setFocused(newPath);
           }
@@ -658,6 +500,7 @@ type Props = PropsWithChildren<{
   partialPlaygroundSettings: PartialPlaygroundSettings;
   editor?: CodeEditorHandle;
   viewerType?: ViewerType;
+  value: SqValue | undefined;
 }>;
 
 export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
@@ -666,6 +509,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       partialPlaygroundSettings: unstablePlaygroundSettings,
       editor,
       viewerType = "normal",
+      value,
       children,
     },
     ref
@@ -682,7 +526,6 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
     );
 
     const [focused, setFocused] = useState<SqValuePath | undefined>();
-    const [pathTree, setPathTree] = useState<PathTree | undefined>();
 
     const globalSettings = useMemo(() => {
       return merge({}, defaultPlaygroundSettings, playgroundSettings);
@@ -696,19 +539,25 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
 
     useImperativeHandle(ref, () => handle);
 
+    const _value = value
+      ? valueHasContext(value)
+        ? value
+        : undefined
+      : undefined;
+
     return (
       <ViewerContext.Provider
         value={{
+          rootValue: _value,
           globalSettings,
           editor,
           focused,
           setFocused,
-          pathTree,
-          setPathTree,
           itemStore,
           viewerType,
           handle,
           initialized: true,
+          findNode: (path) => findNode(_value, path, itemStore),
         }}
       >
         {children}

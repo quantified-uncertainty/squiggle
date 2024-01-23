@@ -2,7 +2,7 @@ import { SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
 import { SqValueWithContext } from "../../lib/utility.js";
-import { useViewerContext } from "./ViewerProvider.js";
+import { ItemStore, useViewerContext } from "./ViewerProvider.js";
 
 function topLevelName(path: SqValuePath): string {
   return {
@@ -37,21 +37,22 @@ export function getChildrenValues(value: SqValue): SqValue[] {
   }
 }
 
+export function traverseCalculatorEdge(
+  itemStore: ItemStore
+): (SqValuePath) => SqValue | undefined {
+  return (calculatorSubPath: SqValuePath) => {
+    const calculatorState = itemStore.getCalculator(calculatorSubPath);
+    const result = calculatorState?.calculatorResult;
+    return result?.ok ? result.value : undefined;
+  };
+}
+
 // This needs to be a hook because it relies on ItemStore to traverse calculator nodes in path.
 export function useGetSubvalueByPath() {
   const { itemStore } = useViewerContext();
 
   return (topValue: SqValue, subValuePath: SqValuePath): SqValue | undefined =>
-    topValue.getSubvalueByPath(
-      subValuePath,
-      (calculatorSubPath: SqValuePath) => {
-        // The previous path item is the one that is the parent of the calculator result.
-        // This is the one that we use in the ViewerContext to store information about the calculator.
-        const calculatorState = itemStore.getCalculator(calculatorSubPath);
-        const result = calculatorState?.calculatorResult;
-        return result?.ok ? result.value : undefined;
-      }
-    );
+    topValue.getSubvalueByPath(subValuePath, traverseCalculatorEdge(itemStore));
 }
 
 export function getValueComment(value: SqValueWithContext): string | undefined {

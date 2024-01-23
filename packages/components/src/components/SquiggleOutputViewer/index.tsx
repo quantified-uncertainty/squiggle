@@ -51,6 +51,7 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
         partialPlaygroundSettings={settings}
         editor={editor}
         ref={viewerRef}
+        value={(output.ok && output.value.bindings.asValue()) || undefined}
       >
         <Layout
           menu={<ViewerMenu mode={mode} setMode={setMode} output={output} />}
