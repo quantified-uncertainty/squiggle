@@ -119,7 +119,9 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
       openModal: (name: string) => void;
     }) => (
       <div className="flex">
-        <RunMenuItem {...runnerState} isRunning={isRunning} />
+        {!runnerState.autorunMode && (
+          <RunMenuItem {...runnerState} isRunning={isRunning} />
+        )}
         <AutorunnerMenuItem {...runnerState} />
         <ToolbarItem
           tooltipText={`Format Code (${altKey()}+Shift+f)`}

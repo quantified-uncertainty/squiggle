@@ -16,9 +16,10 @@ export type ReducerContext = Readonly<{
 }>;
 
 export function createContext(environment: Env): ReducerContext {
-  const seed = environment.seed
-    ? String(environment.seed)
-    : String(seedrandom()());
+  // const seed = environment.seed
+  //   ? String(environment.seed)
+  //   : String(seedrandom()());
+  const seed = "123";
 
   return {
     stack: Stack.make(),
