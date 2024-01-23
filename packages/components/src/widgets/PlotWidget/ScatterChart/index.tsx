@@ -3,7 +3,6 @@ import { FC, useCallback, useMemo } from "react";
 
 import { Env, SqScale, SqScatterPlot } from "@quri/squiggle-lang";
 
-import { ErrorAlert } from "../../../components/Alert.js";
 import { sqScaleToD3 } from "../../../lib/d3/index.js";
 import {
   drawAxes,
@@ -25,36 +24,32 @@ type Props = {
   environment: Env;
 };
 
-export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
+export const ScatterChart: FC<Props> = ({ plot, height }) => {
   const { cursor, initCursor } = useCanvasCursor();
 
   const { xDist, yDist } = useMemo(
     () => ({
-      xDist: plot.xDist(environment),
-      yDist: plot.yDist(environment),
+      xDist: plot.xDist(),
+      yDist: plot.yDist(),
     }),
-    [plot, environment]
+    [plot]
   );
   const draw = useCallback(
     ({ context, width }: DrawContext) => {
-      if (!xDist.ok || !yDist.ok) {
-        return;
-      }
-
-      const points = SqScatterPlot.zipToPoints(xDist.value, yDist.value);
+      const points = SqScatterPlot.zipToPoints(xDist, yDist);
 
       const xSqScale = plot.xScale ?? SqScale.linearDefault();
       const xScale = sqScaleToD3(xSqScale);
       xScale.domain([
-        xSqScale.min ?? d3.min(xDist.value.getSamples()) ?? 0,
-        xSqScale.max ?? d3.max(xDist.value.getSamples()) ?? 0,
+        xSqScale.min ?? d3.min(xDist.getSamples()) ?? 0,
+        xSqScale.max ?? d3.max(xDist.getSamples()) ?? 0,
       ]);
 
       const ySqScale = plot.yScale ?? SqScale.linearDefault();
       const yScale = sqScaleToD3(ySqScale);
       yScale.domain([
-        ySqScale.min ?? d3.min(yDist.value.getSamples()) ?? 0,
-        ySqScale.max ?? d3.max(yDist.value.getSamples()) ?? 0,
+        ySqScale.min ?? d3.min(yDist.getSamples()) ?? 0,
+        ySqScale.max ?? d3.max(yDist.getSamples()) ?? 0,
       ]);
 
       const { frame } = drawAxes({
@@ -112,13 +107,6 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
       <canvas ref={ref} className={canvasClasses}>
         Chart for {plot.toString()}
       </canvas>
-      {[xDist, yDist].map((dist, i) =>
-        dist.ok ? null : (
-          <ErrorAlert key={i} heading="Conversion error">
-            {dist.value.toString()}
-          </ErrorAlert>
-        )
-      )}
     </div>
   );
 };

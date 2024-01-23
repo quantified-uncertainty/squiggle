@@ -1,3 +1,5 @@
+import jstat from "jstat";
+
 import { ASTNode, parse } from "../ast/parse.js";
 import { defaultEnv } from "../dist/env.js";
 import {
@@ -59,6 +61,7 @@ function throwFrom(
  * `context.evaluate` can inject additional behaviors, e.g. delay for pseudo-async evaluation.
  */
 export const evaluate: ReducerFn = (expression, context) => {
+  jstat.setRandom(context.rng);
   const ast = expression.ast;
   switch (expression.type) {
     case "Block":
@@ -160,6 +163,7 @@ const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
       frameStack: context.frameStack,
       evaluate: context.evaluate,
       inFunction: context.inFunction,
+      rng: context.rng,
     },
   ];
 };

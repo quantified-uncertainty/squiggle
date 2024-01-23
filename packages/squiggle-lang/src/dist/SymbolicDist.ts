@@ -1,5 +1,6 @@
 import jstat from "jstat";
 import sum from "lodash/sum.js";
+import { PRNG } from "seedrandom";
 
 import * as magicNumbers from "../magicNumbers.js";
 import * as Operation from "../operation.js";
@@ -134,10 +135,10 @@ export abstract class SymbolicDist extends BaseDist {
     return this.inv(SymbolicDist.maxCdfValue);
   }
 
-  sampleN(n: number) {
+  sampleN(n: number, rng: PRNG) {
     const result: number[] = new Array(n);
     for (let i = 0; i < n; i++) {
-      result[i] = this.sample();
+      result[i] = this.sample(rng);
     }
     return result;
   }
@@ -875,8 +876,8 @@ export class Logistic extends SymbolicDist {
     if (this.scale === 0) return this.location;
     return this.location + this.scale * Math.log(p / (1 - p));
   }
-  sample() {
-    const s = Math.random();
+  sample(rng: PRNG) {
+    const s = rng();
     return this.inv(s);
   }
   mean() {
@@ -927,8 +928,8 @@ export class Bernoulli extends SymbolicDist {
   mean() {
     return this.p;
   }
-  sample() {
-    const s = Math.random();
+  sample(rng: PRNG) {
+    const s = rng();
     return this.inv(s);
   }
   _isEqual(other: Bernoulli) {
@@ -1116,12 +1117,12 @@ export class Binomial extends SymbolicDist {
     return Ok(this.n * this.p * (1 - this.p));
   }
 
-  sample() {
+  sample(rng: PRNG) {
     const bernoulli = Bernoulli.make(this.p);
     if (bernoulli.ok) {
       // less space efficient than adding a bunch of draws, but cleaner. Taken from Guesstimate.
       return sum(
-        Array.from({ length: this.n }, () => bernoulli.value.sample())
+        Array.from({ length: this.n }, () => bernoulli.value.sample(rng))
       );
     } else {
       throw new Error("Binomial sampling failed");

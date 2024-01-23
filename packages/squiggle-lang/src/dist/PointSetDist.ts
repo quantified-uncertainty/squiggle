@@ -1,3 +1,5 @@
+import { PRNG } from "seedrandom";
+
 import { ContinuousShape } from "../PointSet/Continuous.js";
 import * as Mixed from "../PointSet/Mixed.js";
 import { MixedShape } from "../PointSet/Mixed.js";
@@ -36,14 +38,14 @@ export class PointSetDist extends BaseDist {
     return new PointSetDist(this.pointSet.downsample(n));
   }
 
-  sample() {
-    const randomItem = Math.random();
+  sample(rng: PRNG) {
+    const randomItem = rng();
     return this.pointSet.integralYtoX(randomItem);
   }
-  sampleN(n: number) {
+  sampleN(n: number, rng: PRNG) {
     const items: number[] = new Array(n).fill(0);
     for (let i = 0; i < n; i++) {
-      items[i] = this.sample();
+      items[i] = this.sample(rng);
     }
     return items;
   }

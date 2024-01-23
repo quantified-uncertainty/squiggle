@@ -1,3 +1,5 @@
+import seedrandom from "seedrandom";
+
 import { BaseDist } from "../../src/dist/BaseDist.js";
 import { DistError } from "../../src/dist/DistError.js";
 import { SampleSetDist } from "../../src/dist/SampleSetDist/index.js";
@@ -22,6 +24,7 @@ const env: Env = {
   sampleCount: 100,
   xyPointLength: 100,
 };
+const rng = seedrandom();
 
 describe("toPointSet", () => {
   test("on symbolic normal distribution", () => {
@@ -35,7 +38,7 @@ describe("toPointSet", () => {
   const pointSet = unpackResult(
     Result.bind(
       Result.bind(normalDist5.toPointSetDist(env), (pointSet) =>
-        SampleSetDist.fromDist(pointSet, env)
+        SampleSetDist.fromDist(pointSet, env, rng)
       ),
       (sampleSet) => sampleSet.toPointSetDist(env)
     )

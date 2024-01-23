@@ -3,6 +3,7 @@ import * as magicNumbers from "../magicNumbers.js";
 export type Env = {
   sampleCount: number; // int
   xyPointLength: number; // int
+  seed?: string; // for seedrandom
 };
 
 export const defaultEnv: Env = {
