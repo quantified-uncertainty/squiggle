@@ -243,18 +243,15 @@ export const ValueWithContextViewer: FC<Props> = ({
   };
 
   const extraHeaderClasses = () => {
-    return (
-      "hover:bg-stone-100 rounded-sm focus-visible:outline-none " +
-      (header === "large"
-        ? "focus:bg-indigo-50 mb-2 px-0.5 py-1"
-        : "focus:bg-indigo-100")
-    );
+    return focused
+      ? "focus:bg-indigo-50 mb-2 px-0.5 py-1"
+      : "focus:bg-indigo-100";
   };
 
   useEffect(() => {
     const header = ref.current?.querySelector("header");
-    if (isFocused && !isRoot) {
-      header?.focus();
+    if (isFocused && !isRoot && header) {
+      header.focus();
     }
   }, []);
 
@@ -265,16 +262,14 @@ export const ValueWithContextViewer: FC<Props> = ({
           <header
             tabIndex={viewerType === "tooltip" ? undefined : 0}
             className={clsx(
-              "flex justify-between group pr-0.5",
+              "flex justify-between group pr-0.5 hover:bg-stone-100 rounded-sm focus-visible:outline-none",
               extraHeaderClasses()
             )}
             onFocus={(_) => {
               scrollEditorToPath();
             }}
             onKeyDown={(event) => {
-              size === "large"
-                ? focusedKeyEvent(event)
-                : unfocusedKeyEvent(event);
+              isFocused ? focusedKeyEvent(event) : unfocusedKeyEvent(event);
             }}
           >
             <div className="inline-flex items-center">
