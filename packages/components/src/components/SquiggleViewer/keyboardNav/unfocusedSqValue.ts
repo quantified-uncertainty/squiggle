@@ -9,10 +9,11 @@ const validKeys = [
   "ArrowLeft",
   "ArrowRight",
   "Enter",
+  "e",
 ] as const;
 
 export function useUnfocusedSqValueKeyEvent(selected: SqValuePath) {
-  const { setFocused, itemStore, findNode } = useViewerContext();
+  const { setFocused, itemStore, editor, findNode } = useViewerContext();
 
   return keyboardEventHandler(validKeys, {
     ArrowDown: () => {
@@ -32,6 +33,14 @@ export function useUnfocusedSqValueKeyEvent(selected: SqValuePath) {
     },
     Enter: () => {
       setFocused(selected);
+    },
+    e: () => {
+      const value = findNode(selected)?.value();
+      const location = value?.context?.findLocation();
+
+      if (location) {
+        editor?.scrollTo(location.start.offset, true);
+      }
     },
   });
 }

@@ -326,7 +326,7 @@ export function useScrollToEditorPath(path: SqValuePath) {
       const location = value?.context?.findLocation();
 
       if (location) {
-        editor?.scrollTo(location.start.offset);
+        editor?.scrollTo(location.start.offset, false);
       }
     }
   };

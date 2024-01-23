@@ -27,6 +27,7 @@ export function keyboardEventHandler<T extends readonly string[]>(
     ((eventKey: string): boolean => {
       if (isValidKey(eventKey, validKeys)) {
         const handler = handlers[eventKey];
+        event.preventDefault();
         if (handler) {
           handler(eventKey);
         }

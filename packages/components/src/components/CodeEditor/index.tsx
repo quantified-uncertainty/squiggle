@@ -26,20 +26,20 @@ export type CodeEditorProps = {
 
 export type CodeEditorHandle = {
   format(): void;
-  scrollTo(position: number): void;
+  scrollTo(position: number, focus: boolean): void;
 };
 
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   function CodeEditor(props, ref) {
     const { view, ref: editorRef } = useSquiggleEditorView(props);
 
-    const scrollTo = (position: number) => {
+    const scrollTo = (position: number, focus) => {
       if (!view) return;
       view.dispatch({
         selection: { anchor: position },
         scrollIntoView: true,
       });
-      // view.focus();
+      focus && view.focus();
     };
 
     useImperativeHandle(ref, () => ({
