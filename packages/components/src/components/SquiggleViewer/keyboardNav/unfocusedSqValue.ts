@@ -1,7 +1,7 @@
 import { SqValuePath } from "@quri/squiggle-lang";
 
 import { toggleCollapsed, useViewerContext } from "../ViewerProvider.js";
-import { focusHeader, keyboardEventHandler } from "./utils.js";
+import { focusSqValueHeader, keyboardEventHandler } from "./utils.js";
 
 const validKeys = [
   "ArrowDown",
@@ -18,15 +18,17 @@ export function useUnfocusedSqValueKeyEvent(selected: SqValuePath) {
   return keyboardEventHandler(validKeys, {
     ArrowDown: () => {
       const newPath = findNode(selected)?.next()?.node.path;
-      newPath && focusHeader(newPath, itemStore);
+      newPath && focusSqValueHeader(newPath, itemStore);
     },
     ArrowUp: () => {
       const newPath = findNode(selected)?.prev()?.node.path;
-      newPath && focusHeader(newPath, itemStore);
+      newPath && focusSqValueHeader(newPath, itemStore);
     },
     ArrowLeft: () => {
       const newItem = findNode(selected)?.parent();
-      newItem && !newItem.isRoot() && focusHeader(newItem.node.path, itemStore);
+      newItem &&
+        !newItem.isRoot() &&
+        focusSqValueHeader(newItem.node.path, itemStore);
     },
     ArrowRight: () => {
       toggleCollapsed(itemStore, selected);
@@ -34,6 +36,7 @@ export function useUnfocusedSqValueKeyEvent(selected: SqValuePath) {
     Enter: () => {
       setFocused(selected);
     },
+    //e for "edit." Focuses the line and focuses it.
     e: () => {
       const value = findNode(selected)?.value();
       const location = value?.context?.findLocation();

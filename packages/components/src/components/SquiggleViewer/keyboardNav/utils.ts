@@ -2,7 +2,7 @@ import { SqValuePath } from "@quri/squiggle-lang";
 
 import { ItemStore } from "../ViewerProvider.js";
 
-export const focusHeader = (path: SqValuePath, itemStore: ItemStore) => {
+export const focusSqValueHeader = (path: SqValuePath, itemStore: ItemStore) => {
   const header = itemStore.handles[path.uid()]?.element.querySelector("header");
   if (header) {
     header.focus();

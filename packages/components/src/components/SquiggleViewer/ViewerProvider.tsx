@@ -170,7 +170,6 @@ export class ItemStore {
   }
 
   scrollViewerToPath(path: SqValuePath) {
-    // setFocused(path);
     this.handles[path.uid()]?.element.scrollIntoView({
       behavior: "smooth",
     });
