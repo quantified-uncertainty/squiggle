@@ -1,12 +1,10 @@
 import { SqValuePath } from "@quri/squiggle-lang";
 
+import { focusOnHeader } from "../ValueWithContextViewer.js";
 import { ItemStore } from "../ViewerProvider.js";
 
 export const focusSqValueHeader = (path: SqValuePath, itemStore: ItemStore) => {
-  const header = itemStore.handles[path.uid()]?.element.querySelector("header");
-  if (header) {
-    header.focus();
-  }
+  focusOnHeader(itemStore.handles[path.uid()].element);
 };
 
 export function isValidKey<T extends readonly string[]>(

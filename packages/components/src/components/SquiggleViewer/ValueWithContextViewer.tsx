@@ -111,6 +111,10 @@ const ValueViewerBody: FC<Props> = ({ value, size = "normal" }) => {
   );
 };
 
+export function focusOnHeader(element: HTMLDivElement) {
+  element.querySelector("header")?.focus();
+}
+
 export const ValueWithContextViewer: FC<Props> = ({
   value,
   parentValue,
@@ -150,6 +154,12 @@ export const ValueWithContextViewer: FC<Props> = ({
   // TODO - check that we're not in a situation where `isOpen` is false and `header` is hidden?
   // In that case, the output would look broken (empty).
   const isOpen = !collapsible || !itemState.collapsed;
+
+  useEffect(() => {
+    if (isFocused && !isRoot && ref.current) {
+      focusOnHeader(ref.current);
+    }
+  }, []);
 
   const _focus = () => {
     if (!enableFocus) {
@@ -242,19 +252,6 @@ export const ValueWithContextViewer: FC<Props> = ({
     }
   };
 
-  const extraHeaderClasses = () => {
-    return focused
-      ? "focus:bg-indigo-50 mb-2 px-0.5 py-1"
-      : "focus:bg-indigo-100";
-  };
-
-  useEffect(() => {
-    const header = ref.current?.querySelector("header");
-    if (isFocused && !isRoot && header) {
-      header.focus();
-    }
-  }, []);
-
   return (
     <ErrorBoundary>
       <div ref={ref}>
@@ -263,7 +260,9 @@ export const ValueWithContextViewer: FC<Props> = ({
             tabIndex={viewerType === "tooltip" ? undefined : 0}
             className={clsx(
               "flex justify-between group pr-0.5 hover:bg-stone-100 rounded-sm focus-visible:outline-none",
-              extraHeaderClasses()
+              focused
+                ? "focus:bg-indigo-50 mb-2 px-0.5 py-1"
+                : "focus:bg-indigo-1V00"
             )}
             onFocus={(_) => {
               scrollEditorToPath();
