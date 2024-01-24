@@ -23,6 +23,7 @@ import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
+import { focusSqValueHeader } from "./keyboardNav/utils.js";
 import { SqListViewNode } from "./SqViewNode.js";
 import {
   getChildrenValues,
@@ -50,8 +51,6 @@ function findNode(
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
-  onKeyPress(stroke: string): void;
-  getState(): { selected: SqValuePath | undefined };
 };
 
 type ItemHandle = {
@@ -203,10 +202,6 @@ export const ViewerContext = createContext<ViewerContextShape>({
   viewerType: "normal",
   handle: {
     viewValuePath: () => {},
-    onKeyPress: () => {},
-    getState: () => ({
-      selected: undefined,
-    }),
   },
   initialized: false,
   rootValue: undefined,
@@ -396,13 +391,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
 
     const handle: SquiggleViewerHandle = {
       viewValuePath(path: SqValuePath) {
-        // setSelected(path);
-        // itemStore.scrollToPath(path);
-        // scrollToPath(path);
-      },
-      onKeyPress(stroke: string) {},
-      getState() {
-        return { selected: undefined };
+        focusSqValueHeader(path, itemStore);
       },
     };
 

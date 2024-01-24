@@ -11,3 +11,23 @@
 .cm-tooltip-autocomplete .cm-tooltip {
   background: white;
 }
+
+/* Base state */
+.cm-lineNumberDot .cm-gutterElement .focusable-marker .focusable-marker-inner {
+  @apply rounded-sm bg-violet-50 transition duration-100 ease-in-out;
+}
+
+/* Hover state */
+.cm-lineNumberDot .cm-gutterElement .focusable-marker:hover .focusable-marker-inner {
+  @apply bg-violet-200;
+}
+
+/* Active line gutter state */
+.cm-lineNumberDot .cm-gutterElement.cm-activeLineGutter .focusable-marker .focusable-marker-inner {
+  @apply bg-violet-200;
+}
+
+/* Active line gutter hover state */
+.cm-lineNumberDot .cm-gutterElement.cm-activeLineGutter .focusable-marker:hover .focusable-marker-inner {
+  @apply bg-violet-400;
+}

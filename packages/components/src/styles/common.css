@@ -26,8 +26,12 @@
   margin-right: 0.25em;
 }
 
-.cm-lineNumbers .cm-gutterElement.cm-activeLineGutter {
+.cm-lineNumberDot .cm-gutterElement.cm-activeLineGutter {
   border-radius: 3px 0 0 3px;
+}
+
+.ͼ1 .cm-lineNumbers .cm-gutterElement {
+  padding-left: 0;
 }
 
 .cm-foldGutter .cm-gutterElement span[title="Fold line"] {

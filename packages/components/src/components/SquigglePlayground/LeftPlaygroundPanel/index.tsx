@@ -7,7 +7,7 @@ import {
   useRef,
 } from "react";
 
-import { SqProject, SqValuePath } from "@quri/squiggle-lang";
+import { SqProject } from "@quri/squiggle-lang";
 import {
   AdjustmentsVerticalIcon,
   Bars3CenterLeftIcon,
@@ -58,7 +58,6 @@ type Props = {
   /* Allows to inject extra items to the left panel's dropdown menu. */
   renderExtraDropdownItems?: RenderExtraControls;
   renderExtraModal?: Parameters<typeof PanelWithToolbar>[0]["renderModal"];
-  getViewState?(): { selected: SqValuePath | undefined };
 } & Pick<CodeEditorProps, "onViewValuePath" | "renderImportTooltip">;
 
 // for interactions with this component from outside
@@ -169,7 +168,6 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           lineWrapping={props.settings.editorSettings.lineWrapping}
           onChange={setCode}
           onViewValuePath={props.onViewValuePath}
-          getViewState={props.getViewState}
           onSubmit={runnerState.run}
           renderImportTooltip={props.renderImportTooltip}
         />
