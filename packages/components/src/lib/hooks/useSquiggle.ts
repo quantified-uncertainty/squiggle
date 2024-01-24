@@ -55,7 +55,7 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
   }, [args.sourceId]);
 
   const projectArg = "project" in args ? args.project : undefined;
-  const environment = "environment" in args ? args.environment : undefined;
+  const environment = args.environment || undefined;
   const continues =
     "continues" in args ? args.continues ?? defaultContinues : defaultContinues;
 

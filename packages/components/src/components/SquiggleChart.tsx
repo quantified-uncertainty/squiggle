@@ -1,9 +1,13 @@
-import { FC, memo, useState } from "react";
+import { FC, memo, useMemo, useState } from "react";
 
 import { SqValuePath } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { SquiggleViewer } from "../index.js";
+import {
+  DEFAULT_SAMPLE_COUNT,
+  DEFAULT_XY_POINT_LENGTH,
+} from "../lib/constants.js";
 import { useRunnerState } from "../lib/hooks/useRunnerState.js";
 import {
   ProjectExecutionProps,
@@ -35,13 +39,24 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     // We go through runnerState to bump executionId on code changes;
     // This is important, for example, in VS Code extension.
     // TODO: maybe `useRunnerState` could be merged with `useSquiggle`, but it does some extra stuff (autorun mode).
-    const [seed, setSeed] = useState<string>("0");
+    const [seed, setSeed] = useState<string>("starting-seed");
+
     const runnerState = useRunnerState(code, seed);
+
+    const _env = useMemo(() => {
+      return {
+        ...(environment ?? {
+          sampleCount: DEFAULT_SAMPLE_COUNT,
+          xyPointLength: DEFAULT_XY_POINT_LENGTH,
+        }),
+        seed,
+      };
+    }, [environment, seed]);
 
     const [squiggleOutput, { isRunning }] = useSquiggle({
       code: runnerState.renderedCode,
       executionId: runnerState.executionId,
-      ...(project ? { project, continues } : { environment }),
+      ...(project ? { project, continues } : { environment: _env }),
     });
 
     // TODO - if `<ViewerProvider>` is not set up (which is very possible) then calculator paths won't be resolved.
