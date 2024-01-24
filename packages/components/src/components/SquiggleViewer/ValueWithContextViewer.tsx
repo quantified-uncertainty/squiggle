@@ -131,8 +131,8 @@ export const ValueWithContextViewer: FC<Props> = ({
   const viewerType = useViewerType();
   const scrollEditorToPath = useScrollToEditorPath(path);
 
-  const { itemStore, focused } = useViewerContext();
-  const isFocused = focused?.isEqual(path);
+  const { itemStore, focused: _focused } = useViewerContext();
+  const isFocused = _focused?.isEqual(path);
   const itemState = itemStore.getStateOrInitialize(value);
 
   const isRoot = path.isRoot();
@@ -260,7 +260,7 @@ export const ValueWithContextViewer: FC<Props> = ({
             tabIndex={viewerType === "tooltip" ? undefined : 0}
             className={clsx(
               "flex justify-between group pr-0.5 hover:bg-stone-100 rounded-sm focus-visible:outline-none",
-              focused
+              isFocused
                 ? "focus:bg-indigo-50 mb-2 px-0.5 py-1"
                 : "focus:bg-indigo-100"
             )}
