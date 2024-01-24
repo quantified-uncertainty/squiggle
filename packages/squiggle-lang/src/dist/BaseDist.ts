@@ -1,3 +1,5 @@
+import { PRNG } from "seedrandom";
+
 import * as magicNumbers from "../magicNumbers.js";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
@@ -11,8 +13,8 @@ export abstract class BaseDist {
   abstract max(): number;
   abstract mean(): number;
 
-  abstract sample(): number;
-  abstract sampleN(n: number): number[];
+  abstract sample(rng: PRNG): number;
+  abstract sampleN(n: number, rng: PRNG): number[];
 
   abstract normalize(): BaseDist;
   isNormalized(): boolean {
@@ -22,7 +24,7 @@ export abstract class BaseDist {
   abstract truncate(
     left: number | undefined,
     right: number | undefined,
-    opts?: { env: Env } // needed for SymbolicDists
+    opts: { env: Env; rng: PRNG } // `env` is needed for symbolic dists, and `rng` for sample set dists
   ): result<BaseDist, DistError>;
 
   abstract integralSum(): number;

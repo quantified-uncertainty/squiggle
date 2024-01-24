@@ -1,11 +1,8 @@
-import { clsx } from "clsx";
-
 import { SqDurationValue } from "@quri/squiggle-lang";
 
 import { NumberShower } from "../components/NumberShower.js";
 import { formatNumber } from "../lib/d3/index.js";
 import { widgetRegistry } from "./registry.js";
-import { leftWidgetMargin } from "./utils.js";
 
 const showDuration = (duration: SqDurationValue) => {
   const numberFormat = duration.tags.numberFormat();
@@ -21,9 +18,7 @@ widgetRegistry.register("Duration", {
   Preview: (value) => showDuration(value),
   Chart: (value) => {
     return (
-      <div className={clsx("font-semibold text-indigo-800", leftWidgetMargin)}>
-        {showDuration(value)}
-      </div>
+      <div className="font-semibold text-indigo-800">{showDuration(value)}</div>
     );
   },
 });

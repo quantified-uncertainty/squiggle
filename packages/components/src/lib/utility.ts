@@ -1,10 +1,4 @@
-import {
-  result,
-  resultMap,
-  SqDictValue,
-  SqError,
-  SqValue,
-} from "@quri/squiggle-lang";
+import { result, SqValue } from "@quri/squiggle-lang";
 
 import { SquiggleOutput } from "./hooks/useSquiggle.js";
 
@@ -40,35 +34,6 @@ export function all(arr: boolean[]): boolean {
 
 export function some(arr: boolean[]): boolean {
   return arr.reduce((x, y) => x || y, false);
-}
-
-export function getResultVariables({
-  output,
-}: SquiggleOutput): result<SqDictValue, SqError> {
-  return resultMap(output, (value) => value.bindings.asValue());
-}
-
-export function getResultImports({
-  output,
-}: SquiggleOutput): result<SqDictValue, SqError> {
-  return resultMap(output, (value) => value.imports.asValue());
-}
-
-export function getResultExports({
-  output,
-}: SquiggleOutput): result<SqDictValue, SqError> {
-  return resultMap(output, (value) => value.exports.asValue());
-}
-
-export function getResultValue({
-  output,
-}: SquiggleOutput): result<SqValue, SqError> | undefined {
-  if (output.ok) {
-    const isResult = output.value.result.tag !== "Void";
-    return isResult ? { ok: true, value: output.value.result } : undefined;
-  } else {
-    return output;
-  }
 }
 
 export function getErrors(result: SquiggleOutput["output"]) {

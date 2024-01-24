@@ -77,7 +77,7 @@ const arrayGen = () =>
 
 async function makeSampleSet(samples: number[]) {
   const sampleList = samples.map((x) => x.toFixed(20)).join(",");
-  const result = await testRun(`SampleSet.fromList([${sampleList}])`);
+  const { result } = await testRun(`SampleSet.fromList([${sampleList}])`);
   if (result.tag === "Dist") {
     return result.value;
   } else {
@@ -267,7 +267,7 @@ describe("fromSamples function", () => {
         const squiggleString = `x = fromSamples([${xsString}]); mean(x)`;
         const squiggleResult = await testRun(squiggleString);
         const mean = xs.reduce((a, b) => a + b, 0.0) / xs.length;
-        expect(squiggleResult.value).toBeCloseTo(mean, 4);
+        expect(squiggleResult.result.value).toBeCloseTo(mean, 4);
       })
     );
   });

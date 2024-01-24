@@ -1,3 +1,5 @@
+import { PRNG } from "seedrandom";
+
 import { epsilon_float } from "../magicNumbers.js";
 import { random_sample } from "../utility/math.js";
 import * as Result from "../utility/result.js";
@@ -300,7 +302,7 @@ export const combineAlgebraically = (
   });
 };
 
-export const sampleN = (t: DiscreteShape, n: number): number[] => {
+export const sampleN = (t: DiscreteShape, n: number, rng: PRNG): number[] => {
   const normalized = t.normalize().xyShape;
-  return random_sample(normalized.xs, { probs: normalized.ys, size: n });
+  return random_sample(normalized.xs, { probs: normalized.ys, size: n, rng });
 };

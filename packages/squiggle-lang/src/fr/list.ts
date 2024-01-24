@@ -722,7 +722,7 @@ List.reduceWhile(
       makeDefinition(
         [frArray(frAny({ genericName: "A" }))],
         frArray(frAny({ genericName: "A" })),
-        ([arr]) => shuffle(arr)
+        ([arr], context) => shuffle(arr, context.rng)
       ),
     ],
   }),

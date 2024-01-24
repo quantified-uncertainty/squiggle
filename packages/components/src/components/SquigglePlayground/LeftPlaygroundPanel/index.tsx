@@ -25,7 +25,11 @@ import {
   useUncontrolledCode,
 } from "../../../lib/hooks/index.js";
 import { altKey, getErrors } from "../../../lib/utility.js";
-import { CodeEditor, CodeEditorHandle } from "../../CodeEditor/index.js";
+import {
+  CodeEditor,
+  CodeEditorHandle,
+  CodeEditorProps,
+} from "../../CodeEditor/index.js";
 import { PlaygroundSettings } from "../../PlaygroundSettings.js";
 import { PanelWithToolbar } from "../../ui/PanelWithToolbar/index.js";
 import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
@@ -54,9 +58,8 @@ type Props = {
   /* Allows to inject extra items to the left panel's dropdown menu. */
   renderExtraDropdownItems?: RenderExtraControls;
   renderExtraModal?: Parameters<typeof PanelWithToolbar>[0]["renderModal"];
-  onViewValuePath?: (path: SqValuePath) => void;
   getViewState?(): { selected: SqValuePath | undefined };
-};
+} & Pick<CodeEditorProps, "onViewValuePath" | "renderImportTooltip">;
 
 // for interactions with this component from outside
 export type LeftPlaygroundPanelHandle = {
@@ -168,6 +171,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           onViewValuePath={props.onViewValuePath}
           getViewState={props.getViewState}
           onSubmit={runnerState.run}
+          renderImportTooltip={props.renderImportTooltip}
         />
       </div>
     );

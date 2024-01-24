@@ -1,3 +1,5 @@
+import { PRNG } from "seedrandom";
+
 import * as magicNumbers from "../../magicNumbers.js";
 import * as Operation from "../../operation.js";
 import { AlgebraicOperation } from "../../operation.js";
@@ -55,6 +57,7 @@ type CombinationArgs = {
   t1: BaseDist;
   t2: BaseDist;
   env: Env;
+  rng: PRNG;
   arithmeticOperation: AlgebraicOperation;
 };
 
@@ -110,13 +113,14 @@ const convolutionStrategy: StrategyImplementation = ({
 
 const monteCarloStrategy: StrategyImplementation = ({
   env,
+  rng,
   arithmeticOperation,
   t1,
   t2,
 }) => {
   const fn = Operation.Algebraic.toFn(arithmeticOperation);
-  const s1r = SampleSetDist.SampleSetDist.fromDist(t1, env);
-  const s2r = SampleSetDist.SampleSetDist.fromDist(t2, env);
+  const s1r = SampleSetDist.SampleSetDist.fromDist(t1, env, rng);
+  const s2r = SampleSetDist.SampleSetDist.fromDist(t2, env, rng);
   if (!s1r.ok) {
     return s1r;
   }

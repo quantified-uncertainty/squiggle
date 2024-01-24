@@ -60,6 +60,7 @@ export abstract class BaseLambda {
       ),
       evaluate: context.evaluate,
       inFunction: this,
+      rng: context.rng,
     };
 
     try {
@@ -111,6 +112,7 @@ export class UserDefinedLambda extends BaseLambda {
         frameStack: context.frameStack,
         evaluate: context.evaluate,
         inFunction: context.inFunction,
+        rng: context.rng,
       };
 
       const [value] = context.evaluate(body, lambdaContext);

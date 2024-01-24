@@ -1,4 +1,5 @@
 declare module "jstat" {
+  export function setRandom(rng: () => number): void;
   export namespace normal {
     export function pdf(x: number, mu: number, sigma: number): number;
     export function cdf(x: number, mu: number, sigma: number): number;

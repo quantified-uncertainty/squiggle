@@ -2,11 +2,13 @@
 import { FC, use, useState } from "react";
 import { graphql, useFragment } from "react-relay";
 
+import { SqValuePathEdge } from "@quri/squiggle-lang";
 import {
   squiggleLangByVersion,
   useAdjustSquiggleVersion,
   VersionedSquiggleChart,
   versionSupportsExports,
+  versionSupportsSqPathV2,
 } from "@quri/versioned-squiggle-components";
 
 import { squiggleHubLinker } from "@/squiggle/components/linker";
@@ -35,10 +37,17 @@ const VersionedSquiggleModelExportPage: FC<
     const project = new squiggleLang.SqProject({
       linker: squiggleHubLinker,
     });
-    const rootPath = new squiggleLang.SqValuePath({
-      root: "bindings",
-      items: [{ type: "string", value: variableName }],
-    });
+
+    const rootPath = versionSupportsSqPathV2.props(squiggleLang)
+      ? new squiggleLang.SqValuePath({
+          root: "bindings",
+          edges: [SqValuePathEdge.fromKey(variableName)],
+        })
+      : new squiggleLang.SqValuePath({
+          root: "bindings",
+          items: [{ type: "string", value: variableName }],
+        });
+
     return { project, rootPath };
   });
 

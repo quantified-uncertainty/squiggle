@@ -1,7 +1,6 @@
 import { BaseDist } from "../dist/BaseDist.js";
 import { argumentError } from "../dist/DistError.js";
 import * as distOperations from "../dist/distOperations/index.js";
-import { Env } from "../dist/env.js";
 import { REDistributionError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -17,28 +16,35 @@ import {
   parseDistFromDistOrNumber,
   unwrapDistResult,
 } from "../library/registry/helpers.js";
+import { ReducerContext } from "../reducer/context.js";
 import * as E_A from "../utility/E_A.js";
 
 function mixtureWithGivenWeights(
   distributions: BaseDist[],
   weights: readonly number[],
-  env: Env
+  context: ReducerContext
 ): BaseDist {
   return unwrapDistResult(
-    distOperations.mixture(E_A.zip(distributions, weights), { env })
+    distOperations.mixture(E_A.zip(distributions, weights), {
+      env: context.environment,
+      rng: context.rng,
+    })
   );
 }
 
-function mixtureWithDefaultWeights(distributions: BaseDist[], env: Env) {
+function mixtureWithDefaultWeights(
+  distributions: BaseDist[],
+  context: ReducerContext
+) {
   const length = distributions.length;
   const weights = new Array(length).fill(1 / length);
-  return mixtureWithGivenWeights(distributions, weights, env);
+  return mixtureWithGivenWeights(distributions, weights, context);
 }
 
 const asArrays = makeDefinition(
   [frArray(frDistOrNumber), frNamed("weights", frOptional(frArray(frNumber)))],
   frDist,
-  ([dists, weights], { environment }) => {
+  ([dists, weights], context) => {
     if (weights) {
       if (dists.length !== weights.length) {
         throw new REDistributionError(
@@ -50,23 +56,20 @@ const asArrays = makeDefinition(
       return mixtureWithGivenWeights(
         dists.map(parseDistFromDistOrNumber),
         weights,
-        environment
+        context
       );
     } else {
       return mixtureWithDefaultWeights(
         dists.map(parseDistFromDistOrNumber),
-        environment
+        context
       );
     }
   }
 );
 
 const asArguments = [
-  makeDefinition([frDistOrNumber], frDist, ([dist1], { environment }) =>
-    mixtureWithDefaultWeights(
-      [dist1].map(parseDistFromDistOrNumber),
-      environment
-    )
+  makeDefinition([frDistOrNumber], frDist, ([dist1], context) =>
+    mixtureWithDefaultWeights([dist1].map(parseDistFromDistOrNumber), context)
   ),
   makeDefinition(
     [
@@ -75,16 +78,16 @@ const asArguments = [
       frNamed("weights", frOptional(frTuple(frNumber, frNumber))),
     ],
     frDist,
-    ([dist1, dist2, weights], { environment }) =>
+    ([dist1, dist2, weights], context) =>
       weights
         ? mixtureWithGivenWeights(
             [dist1, dist2].map(parseDistFromDistOrNumber),
             weights,
-            environment
+            context
           )
         : mixtureWithDefaultWeights(
             [dist1, dist2].map(parseDistFromDistOrNumber),
-            environment
+            context
           )
   ),
   makeDefinition(
@@ -95,16 +98,16 @@ const asArguments = [
       frNamed("weights", frOptional(frTuple(frNumber, frNumber, frNumber))),
     ],
     frDist,
-    ([dist1, dist2, dist3, weights], { environment }) =>
+    ([dist1, dist2, dist3, weights], context) =>
       weights
         ? mixtureWithGivenWeights(
             [dist1, dist2, dist3].map(parseDistFromDistOrNumber),
             weights,
-            environment
+            context
           )
         : mixtureWithDefaultWeights(
             [dist1, dist2, dist3].map(parseDistFromDistOrNumber),
-            environment
+            context
           )
   ),
   makeDefinition(
@@ -119,16 +122,16 @@ const asArguments = [
       ),
     ],
     frDist,
-    ([dist1, dist2, dist3, dist4, weights], { environment }) =>
+    ([dist1, dist2, dist3, dist4, weights], context) =>
       weights
         ? mixtureWithGivenWeights(
             [dist1, dist2, dist3, dist4].map(parseDistFromDistOrNumber),
             weights,
-            environment
+            context
           )
         : mixtureWithDefaultWeights(
             [dist1, dist2, dist3, dist4].map(parseDistFromDistOrNumber),
-            environment
+            context
           )
   ),
   makeDefinition(
@@ -144,16 +147,16 @@ const asArguments = [
       ),
     ],
     frDist,
-    ([dist1, dist2, dist3, dist4, dist5, weights], { environment }) =>
+    ([dist1, dist2, dist3, dist4, dist5, weights], context) =>
       weights
         ? mixtureWithGivenWeights(
             [dist1, dist2, dist3, dist4, dist5].map(parseDistFromDistOrNumber),
             weights,
-            environment
+            context
           )
         : mixtureWithDefaultWeights(
             [dist1, dist2, dist3, dist4, dist5].map(parseDistFromDistOrNumber),
-            environment
+            context
           )
   ),
 ];

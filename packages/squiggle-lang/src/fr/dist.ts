@@ -38,8 +38,7 @@ function makeCIDist<K1 extends string, K2 extends string>(
   return makeDefinition(
     [frDict([lowKey, frNumber], [highKey, frNumber])],
     frSampleSetDist,
-    ([dict], { environment }) =>
-      twoVarSample(dict[lowKey], dict[highKey], environment, fn)
+    ([dict], context) => twoVarSample(dict[lowKey], dict[highKey], context, fn)
   );
 }
 
@@ -52,8 +51,7 @@ function makeMeanStdevDist(
   return makeDefinition(
     [frDict(["mean", frNumber], ["stdev", frNumber])],
     frSampleSetDist,
-    ([{ mean, stdev }], { environment }) =>
-      twoVarSample(mean, stdev, environment, fn)
+    ([{ mean, stdev }], context) => twoVarSample(mean, stdev, context, fn)
   );
 }
 
@@ -285,12 +283,12 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
           frNamed("max", frNumber),
         ],
         frSampleSetDist,
-        ([low, medium, high], { environment }) => {
+        ([low, medium, high], context) => {
           const result = SymbolicDist.Triangular.make({ low, medium, high });
           if (!result.ok) {
             throw new REDistributionError(otherError(result.value));
           }
-          return makeSampleSet(result.value, environment);
+          return makeSampleSet(result.value, context);
         }
       ),
     ],

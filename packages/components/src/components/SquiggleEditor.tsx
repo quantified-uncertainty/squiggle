@@ -32,7 +32,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
 
   const runnerState = useRunnerState(code);
 
-  const [squiggleOutput, { project, isRunning }] = useSquiggle({
+  const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
     code: runnerState.renderedCode,
     executionId: runnerState.executionId,
     ...(propsProject ? { project: propsProject, continues } : { environment }),
@@ -60,11 +60,12 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           showGutter={false}
           errors={errors}
           project={project}
+          sourceId={sourceId}
           ref={editorRef}
           onSubmit={() => runnerState.run()}
         />
       </div>
-      {hideViewer || !squiggleOutput?.code ? null : (
+      {hideViewer || !squiggleOutput ? null : (
         <SquiggleOutputViewer
           squiggleOutput={squiggleOutput}
           isRunning={isRunning}

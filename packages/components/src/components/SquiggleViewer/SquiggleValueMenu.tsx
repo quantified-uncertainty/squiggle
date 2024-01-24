@@ -2,7 +2,6 @@ import { clsx } from "clsx";
 import { FC } from "react";
 
 import {
-  CodeBracketIcon,
   Cog8ToothIcon,
   CommandLineIcon,
   Dropdown,
@@ -17,7 +16,7 @@ import { SqValueWithContext } from "../../lib/utility.js";
 import { widgetRegistry } from "../../widgets/registry.js";
 import { valueToHeadingString } from "../../widgets/utils.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
-import { getChildrenValues, pathAsString } from "./utils.js";
+import { getChildrenValues } from "./utils.js";
 import {
   useFocus,
   useHasLocalSettings,
@@ -26,29 +25,6 @@ import {
   useUnfocus,
   useViewerContext,
 } from "./ViewerProvider.js";
-
-const FindInEditorItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
-  const { editor } = useViewerContext();
-  const closeDropdown = useCloseDropdown();
-
-  if (!editor || value.context.path.isRoot()) {
-    return null;
-  }
-
-  const findInEditor = () => {
-    const location = value.context.findLocation();
-    editor?.scrollTo(location.start.offset);
-    closeDropdown();
-  };
-
-  return (
-    <DropdownMenuActionItem
-      title="Show in Editor"
-      icon={CodeBracketIcon}
-      onClick={findInEditor}
-    />
-  );
-};
 
 const FocusItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
   const { path } = value.context;
@@ -88,7 +64,7 @@ const LogToConsoleItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
       onClick={() => {
         // eslint-disable-next-line no-console
         console.log({
-          variable: pathAsString(value.context.path),
+          variable: value.context.path.uid(),
           value: value._value,
           context: value.context,
         });
@@ -153,7 +129,6 @@ export const SquiggleValueMenu: FC<{
           {widgetHeading && (
             <DropdownMenuHeader>{widgetHeading}</DropdownMenuHeader>
           )}
-          <FindInEditorItem value={value} />
           <FocusItem value={value} />
           <SetChildrenCollapsedStateItem
             value={value}

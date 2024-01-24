@@ -126,7 +126,11 @@ export function useSquiggleEditorExtensions(
   const formatExtension = useFormatSquiggleExtension();
   const errorsExtension = useErrorsExtension(view, params.errors);
 
-  const tooltipsExtension = useTooltipsExtension();
+  const tooltipsExtension = useTooltipsExtension(view, {
+    project: params.project,
+    sourceId: params.sourceId,
+    renderImportTooltip: params.renderImportTooltip,
+  });
 
   const highPrioritySquiggleExtensions = [
     submitExtension, // works only if listed before `builtinExtensions`

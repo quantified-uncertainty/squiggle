@@ -53,7 +53,10 @@ export type SquigglePlaygroundProps = {
   height?: CSSProperties["height"];
 } & Pick<
   Parameters<typeof LeftPlaygroundPanel>[0],
-  "renderExtraControls" | "renderExtraDropdownItems" | "renderExtraModal"
+  | "renderExtraControls"
+  | "renderExtraDropdownItems"
+  | "renderExtraModal"
+  | "renderImportTooltip"
 > &
   PartialPlaygroundSettings;
 
@@ -77,6 +80,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     renderExtraControls,
     renderExtraDropdownItems,
     renderExtraModal,
+    renderImportTooltip,
     height = 500,
     sourceId,
     ...defaultSettings
@@ -154,6 +158,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       renderExtraControls={renderExtraControls}
       renderExtraDropdownItems={renderExtraDropdownItems}
       renderExtraModal={renderExtraModal}
+      renderImportTooltip={renderImportTooltip}
       ref={leftPanelRef}
       onViewValuePath={(path) => {
         rightPanelRef.current?.viewValuePath(path);
@@ -177,21 +182,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         <RefreshIcon className="animate-spin text-slate-400" size={24} />
       </div>
     );
-
-  useEffect(() => {
-    const handleKeyUp = (event: KeyboardEvent) => {
-      event.preventDefault();
-      rightPanelRef.current?.onKeyPress(event.key as string);
-    };
-
-    // Attach the event listener
-    window.addEventListener("keydown", handleKeyUp);
-
-    // Clean up the event listener
-    return () => {
-      window.removeEventListener("keydown", handleKeyUp);
-    };
-  }, []); // Empty dependency array ensures this runs once on mount and on unmount
 
   return (
     <PlaygroundContext.Provider value={{ getLeftPanelElement }}>

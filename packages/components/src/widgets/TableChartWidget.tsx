@@ -5,6 +5,7 @@ import { TableCellsIcon } from "@quri/ui";
 
 import { PlaygroundSettings } from "../components/PlaygroundSettings.js";
 import { SquiggleValueChart } from "../components/SquiggleViewer/SquiggleValueChart.js";
+import { useFocus } from "../components/SquiggleViewer/ViewerProvider.js";
 import { valueHasContext } from "../lib/utility.js";
 import { widgetRegistry } from "./registry.js";
 
@@ -22,7 +23,7 @@ widgetRegistry.register("TableChart", {
   Chart: (valueWithContext, settings) => {
     const environment = valueWithContext.context.project.getEnvironment();
     const value = valueWithContext.value;
-
+    const focus = useFocus();
     const rowsAndColumns = value.items(environment);
     const columnNames = value.columnNames;
     const hasColumnNames = columnNames.filter((name) => !!name).length > 0;
@@ -60,7 +61,7 @@ widgetRegistry.register("TableChart", {
 
     return (
       <div>
-        <div className="relative rounded-md overflow-hidden border border-stone-200">
+        <div className="relative rounded-md overflow-hidden border border-stone-200 mt-0.5">
           <table
             className="table-fixed w-full"
             style={{ minWidth: columnLength * 100 }}
@@ -86,9 +87,18 @@ widgetRegistry.register("TableChart", {
                   {row.map((item, k) => (
                     <td
                       key={k}
+                      tabIndex={1}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && item.ok) {
+                          event.preventDefault();
+                          const path = item.value.context?.path;
+                          path && focus(path);
+                        }
+                      }}
                       className={clsx(
                         "px-1 overflow-hidden",
-                        k !== 0 && "border-stone-100 border-l"
+                        k !== 0 && "border-stone-100 border-l",
+                        "focus:bg-blue-50"
                       )}
                     >
                       {showItem(item, adjustedSettings)}

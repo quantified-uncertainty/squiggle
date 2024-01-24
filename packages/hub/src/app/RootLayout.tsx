@@ -11,7 +11,7 @@ import { isModelRoute, isModelSubroute } from "@/routes";
 
 import { PageFooter } from "../components/layout/RootLayout/PageFooter";
 import { PageMenu } from "../components/layout/RootLayout/PageMenu";
-import { ClientApp } from "./ClientApp";
+import { ReactRoot } from "../components/ReactRoot";
 
 import { RootLayoutQuery } from "@/__generated__/RootLayoutQuery.graphql";
 
@@ -53,8 +53,8 @@ export const RootLayout: FC<
   }>
 > = ({ session, children }) => {
   return (
-    <ClientApp session={session}>
+    <ReactRoot session={session}>
       <InnerRootLayout>{children}</InnerRootLayout>
-    </ClientApp>
+    </ReactRoot>
   );
 };

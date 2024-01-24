@@ -8,6 +8,8 @@ Details in https://squiggle-language.com/docs/internal/invariants/
 Note: epsilon of 1e3 means the invariants are, in general, not being satisfied. 
 */
 
+import seedrandom from "seedrandom";
+
 import { BaseDist } from "../../../src/dist/BaseDist.js";
 import {
   BinaryOperation,
@@ -28,6 +30,7 @@ import {
 import { expectErrorToBeBounded } from "../../helpers/helpers.js";
 
 const epsilon = 5e1;
+const rng = seedrandom();
 
 const distributions = [
   mkNormal(4, 1),
@@ -58,7 +61,7 @@ const testOperationMean = (
   dist2: BaseDist,
   { epsilon, env }: { epsilon: number; env: Env }
 ) => {
-  const received = unpackResult(distOp(dist1, dist2, { env })).mean();
+  const received = unpackResult(distOp(dist1, dist2, { env, rng })).mean();
 
   const expected = floatOp(dist1.mean(), dist2.mean());
 
