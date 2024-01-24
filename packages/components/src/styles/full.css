@@ -17,17 +17,21 @@
   @apply rounded-sm bg-violet-50 transition duration-100 ease-in-out;
 }
 
+.cm-lineNumberDot:hover .cm-gutterElement .focusable-marker .focusable-marker-inner {
+  @apply bg-violet-200
+}
+
 /* Hover state */
-.cm-lineNumberDot .cm-gutterElement .focusable-marker:hover .focusable-marker-inner {
-  @apply bg-violet-200;
+.cm-lineNumberDot:hover .cm-gutterElement .focusable-marker:hover .focusable-marker-inner {
+  @apply bg-violet-400;
 }
 
 /* Active line gutter state */
 .cm-lineNumberDot .cm-gutterElement.cm-activeLineGutter .focusable-marker .focusable-marker-inner {
-  @apply bg-violet-200;
+  @apply bg-violet-300;
 }
 
 /* Active line gutter hover state */
 .cm-lineNumberDot .cm-gutterElement.cm-activeLineGutter .focusable-marker:hover .focusable-marker-inner {
-  @apply bg-violet-400;
+  @apply bg-violet-500;
 }

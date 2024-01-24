@@ -391,7 +391,10 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
 
     const handle: SquiggleViewerHandle = {
       viewValuePath(path: SqValuePath) {
-        focusSqValueHeader(path, itemStore);
+        setFocused(undefined);
+        setTimeout(() => {
+          focusSqValueHeader(path, itemStore);
+        }, 1);
       },
     };
 
