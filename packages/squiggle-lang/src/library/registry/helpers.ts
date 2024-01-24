@@ -186,15 +186,13 @@ export class FnFactory {
     fn,
     ...args
   }: ArgsWithoutDefinitions & {
-    fn: (x: BaseDist, env: Env) => number;
+    fn: (x: BaseDist, context: ReducerContext) => number;
   }): FRFunction {
     return this.make({
       ...args,
       output: "Number",
       definitions: [
-        makeDefinition([frDist], frNumber, ([x], { environment }) =>
-          fn(x, environment)
-        ),
+        makeDefinition([frDist], frNumber, ([x], context) => fn(x, context)),
       ],
     });
   }
@@ -220,14 +218,14 @@ export class FnFactory {
     fn,
     ...args
   }: ArgsWithoutDefinitions & {
-    fn: (dist: BaseDist, env: Env) => BaseDist;
+    fn: (dist: BaseDist, context: ReducerContext) => BaseDist;
   }): FRFunction {
     return this.make({
       ...args,
       output: "Dist",
       definitions: [
-        makeDefinition([frDist], frDist, ([dist], { environment }) =>
-          fn(dist, environment)
+        makeDefinition([frDist], frDist, ([dist], context) =>
+          fn(dist, context)
         ),
       ],
     });
@@ -237,16 +235,14 @@ export class FnFactory {
     fn,
     ...args
   }: ArgsWithoutDefinitions & {
-    fn: (dist: BaseDist, n: number, env: Env) => BaseDist;
+    fn: (dist: BaseDist, n: number, context: ReducerContext) => BaseDist;
   }): FRFunction {
     return this.make({
       ...args,
       output: "Dist",
       definitions: [
-        makeDefinition(
-          [frDist, frNumber],
-          frDist,
-          ([dist, n], { environment }) => fn(dist, n, environment)
+        makeDefinition([frDist, frNumber], frDist, ([dist, n], context) =>
+          fn(dist, n, context)
         ),
       ],
     });
@@ -313,8 +309,12 @@ export function doBinaryLambdaCall(
 export const parseDistFromDistOrNumber = (d: number | BaseDist): BaseDist =>
   typeof d === "number" ? Result.getExt(PointMass.make(d)) : d;
 
-export function makeSampleSet(d: BaseDist, env: Env) {
-  const result = SampleSetDist.SampleSetDist.fromDist(d, env);
+export function makeSampleSet(d: BaseDist, context: ReducerContext) {
+  const result = SampleSetDist.SampleSetDist.fromDist(
+    d,
+    context.environment,
+    context.rng
+  );
   if (!result.ok) {
     throw new REDistributionError(result.value);
   }
@@ -324,7 +324,7 @@ export function makeSampleSet(d: BaseDist, env: Env) {
 export function twoVarSample(
   v1: BaseDist | number,
   v2: BaseDist | number,
-  env: Env,
+  context: ReducerContext,
   fn: (
     v1: number,
     v2: number
@@ -333,13 +333,13 @@ export function twoVarSample(
   const sampleFn = (a: number, b: number) =>
     Result.fmap2(
       fn(a, b),
-      (d) => d.sample(),
+      (d) => d.sample(context.rng),
       (e) => new OtherOperationError(e)
     );
 
   if (v1 instanceof BaseDist && v2 instanceof BaseDist) {
-    const s1 = makeSampleSet(v1, env);
-    const s2 = makeSampleSet(v2, env);
+    const s1 = makeSampleSet(v1, context);
+    const s2 = makeSampleSet(v2, context);
     return unwrapDistResult(
       SampleSetDist.map2({
         fn: sampleFn,
@@ -348,17 +348,17 @@ export function twoVarSample(
       })
     );
   } else if (v1 instanceof BaseDist && typeof v2 === "number") {
-    const s1 = makeSampleSet(v1, env);
+    const s1 = makeSampleSet(v1, context);
     return unwrapDistResult(s1.samplesMap((a) => sampleFn(a, v2)));
   } else if (typeof v1 === "number" && v2 instanceof BaseDist) {
-    const s2 = makeSampleSet(v2, env);
+    const s2 = makeSampleSet(v2, context);
     return unwrapDistResult(s2.samplesMap((a) => sampleFn(v1, a)));
   } else if (typeof v1 === "number" && typeof v2 === "number") {
     const result = fn(v1, v2);
     if (!result.ok) {
       throw new REOther(result.value);
     }
-    return makeSampleSet(result.value, env);
+    return makeSampleSet(result.value, context);
   }
   throw new REOther("Impossible branch");
 }
@@ -374,7 +374,7 @@ export function makeTwoArgsSamplesetDist(
   return makeDefinition(
     [frNamed(name1, frDistOrNumber), frNamed(name2, frDistOrNumber)],
     frSampleSetDist,
-    ([v1, v2], { environment }) => twoVarSample(v1, v2, environment, fn)
+    ([v1, v2], context) => twoVarSample(v1, v2, context, fn)
   );
 }
 
@@ -385,23 +385,23 @@ export function makeOneArgSamplesetDist(
   return makeDefinition(
     [frNamed(name, frDistOrNumber)],
     frSampleSetDist,
-    ([v], { environment }) => {
+    ([v], context) => {
       const sampleFn = (a: number) =>
         Result.fmap2(
           fn(a),
-          (d) => d.sample(),
+          (d) => d.sample(context.rng),
           (e) => new OtherOperationError(e)
         );
 
       if (v instanceof BaseDist) {
-        const s = makeSampleSet(v, environment);
+        const s = makeSampleSet(v, context);
         return unwrapDistResult(s.samplesMap(sampleFn));
       } else if (typeof v === "number") {
         const result = fn(v);
         if (!result.ok) {
           throw new REOther(result.value);
         }
-        return makeSampleSet(result.value, environment);
+        return makeSampleSet(result.value, context);
       }
       throw new REOther("Impossible branch");
     }

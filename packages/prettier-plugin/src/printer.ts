@@ -203,9 +203,16 @@ export function createSquigglePrinter(
         case "Array":
           return group([
             "[",
-            indent([softline, join([",", line], path.map(print, "elements"))]),
-            ifBreak(",", ""), // trailing comma
-            softline,
+            node.elements.length
+              ? [
+                  indent([
+                    softline,
+                    join([",", line], path.map(print, "elements")),
+                  ]),
+                  ifBreak(",", ""), // trailing comma is there's at least one element
+                  softline,
+                ]
+              : "",
             "]",
           ]);
         case "Call":

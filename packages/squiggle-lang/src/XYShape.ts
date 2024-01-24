@@ -81,6 +81,9 @@ const interpolate = (
   yMax: number,
   xIntended: number
 ): number => {
+  if (yMin === yMax) {
+    return yMin;
+  }
   const minProportion = (xMax - xIntended) / (xMax - xMin);
   const maxProportion = (xIntended - xMin) / (xMax - xMin);
   return yMin * minProportion + yMax * maxProportion;

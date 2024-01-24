@@ -8,7 +8,7 @@ type PackageTypes = {
   dev: Awaited<typeof import("@quri/squiggle-lang")>;
 };
 
-export async function squiggleLangByVersion<T extends SquiggleVersion>(
+async function squiggleLangPackageByVersion<T extends SquiggleVersion>(
   version: T
 ): Promise<PackageTypes[T]> {
   // We do explicit casting of imports, but it shouldn't matter.
@@ -26,4 +26,18 @@ export async function squiggleLangByVersion<T extends SquiggleVersion>(
     default:
       throw new Error(`Unkonwn version ${version satisfies never}`);
   }
+}
+
+// Conditional is a trick from https://stackoverflow.com/a/51691257
+type VersionedSquiggleLang<T extends SquiggleVersion = SquiggleVersion> =
+  T extends string ? PackageTypes[T] & { version: T } : never;
+
+export async function squiggleLangByVersion<T extends SquiggleVersion>(
+  version: T
+): Promise<VersionedSquiggleLang<T>> {
+  const squiggleLang = await squiggleLangPackageByVersion(version);
+  return {
+    ...squiggleLang,
+    version,
+  } as VersionedSquiggleLang<T>;
 }
