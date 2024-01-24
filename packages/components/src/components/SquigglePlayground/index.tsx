@@ -114,10 +114,12 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     return new SqProject({ linker });
   });
 
+  const [seed, setSeed] = useState<string>("0");
+
   useEffect(() => {
-    project.setEnvironment(settings.environment);
+    project.setEnvironment({ ...settings.environment, seed });
     leftPanelRef.current?.invalidate();
-  }, [project, settings.environment]);
+  }, [project, settings.environment, seed]);
 
   const [output, setOutput] = useState<{
     output: SquiggleOutput | undefined;
@@ -145,7 +147,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     onCodeChange: props.onCodeChange,
   });
 
-  const runnerState = useRunnerState(code);
+  const runnerState = useRunnerState(code, seed);
 
   const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
   const rightPanelRef = useRef<SquiggleViewerHandle>(null);
@@ -158,6 +160,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   const renderLeft = () => (
     <LeftPlaygroundPanel
       project={project}
+      seed={seed}
       defaultCode={defaultCode}
       sourceId={sourceId}
       onCodeChange={onCodeChange}
@@ -184,7 +187,8 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         // FIXME - this will cause viewer to be rendered twice on initial render
         editor={leftPanelRef.current?.getEditor() ?? undefined}
         ref={rightPanelRef}
-        runnerState={runnerState}
+        seed={seed}
+        setSeed={setSeed}
         {...settings}
       />
     ) : (

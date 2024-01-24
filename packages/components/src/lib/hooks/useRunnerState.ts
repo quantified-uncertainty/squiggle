@@ -46,12 +46,13 @@ export type RunnerState = {
   run: () => void;
   autorunMode: boolean;
   code: string;
+  seed: string;
   renderedCode: string;
   executionId: number;
   setAutorunMode: (newValue: boolean) => void;
 };
 
-export function useRunnerState(code: string): RunnerState {
+export function useRunnerState(code: string, seed: string): RunnerState {
   const [state, dispatch] = useReducer(reducer, undefined, buildInitialState);
 
   const run = () => {
@@ -66,6 +67,7 @@ export function useRunnerState(code: string): RunnerState {
     run,
     autorunMode: state.autorunMode,
     code,
+    seed,
     renderedCode: state.renderedCode,
     executionId: state.executionId,
     setAutorunMode: (newValue: boolean) => {

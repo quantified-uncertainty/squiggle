@@ -1,4 +1,4 @@
-import { FC, memo } from "react";
+import { FC, memo, useState } from "react";
 
 import { SqValuePath } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
@@ -35,7 +35,8 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     // We go through runnerState to bump executionId on code changes;
     // This is important, for example, in VS Code extension.
     // TODO: maybe `useRunnerState` could be merged with `useSquiggle`, but it does some extra stuff (autorun mode).
-    const runnerState = useRunnerState(code);
+    const [seed, setSeed] = useState<string>("0");
+    const runnerState = useRunnerState(code, seed);
 
     const [squiggleOutput, { isRunning }] = useSquiggle({
       code: runnerState.renderedCode,
@@ -72,6 +73,8 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
           squiggleOutput={squiggleOutput}
           isRunning={isRunning}
           environment={environment}
+          seed={seed}
+          setSeed={setSeed}
           {...settings}
         />
       );

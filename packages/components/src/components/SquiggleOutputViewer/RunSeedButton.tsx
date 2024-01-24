@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { FC } from "react";
+import { FC, useState } from "react";
 
 import {
   Die1Icon,
@@ -11,18 +11,12 @@ import {
   TextTooltip,
 } from "@quri/ui";
 
-import { RunnerState } from "../../lib/hooks/useRunnerState.js";
-
-function deterministicRandom(n: number): number {
-  // A more complex hash function
-  let hash = n;
-  hash = ((hash >> 16) ^ hash) * 0x45d9f3b;
-  hash = ((hash >> 16) ^ hash) * 0x45d9f3b;
-  hash = (hash >> 16) ^ hash;
-
-  // Using modulus to ensure the result is in the range 1-6
-  const result = (Math.abs(hash) % 6) + 1;
-  return result;
+function stringToRandomNumber(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash += str.charCodeAt(i);
+  }
+  return (hash % 6) + 1;
 }
 
 const DiceIcon: FC<{ side: number; isRunning: boolean }> = ({
@@ -33,8 +27,8 @@ const DiceIcon: FC<{ side: number; isRunning: boolean }> = ({
     size: 16,
     className: clsx(
       isRunning
-        ? "animate-spin text-violet-200 group-hover:text-violet-500"
-        : "text-violet-300 group-hover:text-violet-800"
+        ? "animate-spin text-violet-400 group-hover:text-violet-900"
+        : "text-violet-200 group-hover:text-violet-500"
     ),
   };
   switch (side) {
@@ -57,19 +51,30 @@ const DiceIcon: FC<{ side: number; isRunning: boolean }> = ({
 };
 
 export const RunSeedButton: FC<{
-  runnerState: RunnerState;
   isRunning: boolean;
-}> = ({ runnerState, isRunning }) => {
+  seed: string;
+  setSeed: (seed: string) => void;
+}> = ({ isRunning, setSeed, seed }) => {
+  const [lastValidSeed, setLastValidSeed] = useState<string>(seed);
+
   return (
     <TextTooltip
-      text={"Re-run calculations with a random seed"}
+      text={`Re-run calculations with a random seed. Current seed: ${seed}`}
       placement="bottom"
       offset={5}
     >
-      <div className="ml-1 px-1 cursor-pointer group" onClick={runnerState.run}>
+      <div
+        className="ml-1 px-1 cursor-pointer group"
+        onClick={() => {
+          const newVal = String(Math.random() * 100000);
+          setSeed(newVal);
+          setLastValidSeed(newVal);
+        }}
+      >
         <DiceIcon
-          side={deterministicRandom(runnerState.executionId)}
-          isRunning={isRunning}
+          //We want to wait until the animation is done before we change the icon. Like the dice was rolled, and was decided at the end. It represents the result of the seed - not the seed itself.
+          side={stringToRandomNumber(seed)}
+          isRunning={isRunning && seed !== lastValidSeed}
         />
       </div>
     </TextTooltip>

@@ -57,6 +57,7 @@ type Props = {
   code: string;
   setCode: (code: string) => void;
   runnerState: RunnerState;
+  seed: string;
 } & Pick<CodeEditorProps, "onViewValuePath" | "renderImportTooltip">;
 
 // for interactions with this component from outside
@@ -74,6 +75,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
       project: props.project,
       sourceId: props.sourceId,
       executionId: props.runnerState.executionId,
+      environment: { ...props.settings.environment, seed: props.seed },
     });
 
     const { onOutputChange } = props;

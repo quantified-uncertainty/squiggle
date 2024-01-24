@@ -1,7 +1,6 @@
 import { forwardRef, useState } from "react";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
-import { RunnerState } from "../../lib/hooks/useRunnerState.js";
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
@@ -19,7 +18,8 @@ type Props = {
   squiggleOutput: SquiggleOutput;
   isRunning: boolean;
   editor?: CodeEditorHandle;
-  runnerState: RunnerState;
+  seed: string;
+  setSeed: (seed: string) => void;
 } & PartialPlaygroundSettings;
 
 export type ViewerMode = "Imports" | "Exports" | "Variables" | "Result" | "AST";
@@ -46,7 +46,7 @@ function useMode(outputResult: SqOutputResult) {
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
 export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
   (
-    { squiggleOutput, isRunning, editor, runnerState, ...settings },
+    { squiggleOutput, isRunning, editor, seed, setSeed, ...settings },
     viewerRef
   ) => {
     const { output } = squiggleOutput;
@@ -64,7 +64,11 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
             <RenderingIndicator isRunning={isRunning} output={squiggleOutput} />
           }
           changeSeedAndRunButton={
-            <RunSeedButton runnerState={runnerState} isRunning={isRunning} />
+            <RunSeedButton
+              isRunning={isRunning}
+              seed={seed}
+              setSeed={setSeed}
+            />
           }
           viewer={
             <ViewerBody mode={mode} output={output} isRunning={isRunning} />

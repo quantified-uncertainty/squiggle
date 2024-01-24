@@ -1,4 +1,4 @@
-import { FC, useMemo, useRef } from "react";
+import { FC, useMemo, useRef, useState } from "react";
 
 import { useUncontrolledCode } from "../lib/hooks/index.js";
 import { useRunnerState } from "../lib/hooks/useRunnerState.js";
@@ -12,6 +12,7 @@ import { SquiggleCodeProps } from "./types.js";
 export type SquiggleEditorProps = SquiggleCodeProps & {
   hideViewer?: boolean;
   editorFontSize?: number;
+  seed?: string;
   // environment comes from SquiggleCodeProps
 } & Omit<PartialPlaygroundSettings, "environment">;
 
@@ -30,7 +31,9 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     onCodeChange,
   });
 
-  const runnerState = useRunnerState(code);
+  const [seed, setSeed] = useState<string>("0");
+
+  const runnerState = useRunnerState(code, seed);
 
   const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
     code: runnerState.renderedCode,
@@ -71,6 +74,8 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           isRunning={isRunning}
           editor={editorRef.current ?? undefined}
           environment={environment}
+          seed={seed}
+          setSeed={setSeed}
           {...settings}
         />
       )}

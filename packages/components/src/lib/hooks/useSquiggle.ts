@@ -16,7 +16,7 @@ export type StandaloneExecutionProps = {
 export type ProjectExecutionProps = {
   /** The project that this execution is part of */
   project: SqProject;
-  environment?: undefined;
+  environment?: Env;
   /** What other squiggle sources from the project to continue. Default [] */
   continues?: string[];
 };
@@ -131,7 +131,8 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
     // This is on purpose, as executionId simply allows you to run the squiggle
     // code again
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [args.code, executionId, sourceId, continues, project]
+    // Note that seed should be here, as even though it's updated in "project", that doesn't trigger this itself
+    [args.code, executionId, sourceId, continues, project, environment?.seed]
   );
 
   useEffect(() => {
