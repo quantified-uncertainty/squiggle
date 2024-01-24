@@ -53,6 +53,8 @@ type Props = {
     output: SquiggleOutput | undefined;
     isRunning: boolean;
   }): void;
+  activeLineNumbers: number[];
+  onViewValueLine(line: number): void;
   /* Allows to inject extra buttons to the left panel's menu, e.g. share button on the website, or save button in Squiggle Hub. */
   renderExtraControls?: RenderExtraControls;
   /* Allows to inject extra items to the left panel's dropdown menu. */
@@ -169,7 +171,9 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           onChange={setCode}
           onViewValuePath={props.onViewValuePath}
           onSubmit={runnerState.run}
+          activeLineNumbers={props.activeLineNumbers}
           renderImportTooltip={props.renderImportTooltip}
+          onViewValueLine={props.onViewValueLine}
         />
       </div>
     );

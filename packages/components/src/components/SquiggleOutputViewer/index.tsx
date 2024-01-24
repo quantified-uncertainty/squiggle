@@ -4,13 +4,14 @@ import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
+import { modeToValue } from "../SquiggleViewer/utils.js";
 import {
   SquiggleViewerHandle,
   ViewerProvider,
 } from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
 import { RenderingIndicator } from "./RenderingIndicator.js";
-import { modeToValue, ViewerBody } from "./ViewerBody.js";
+import { ViewerBody } from "./ViewerBody.js";
 import { ViewerMenu } from "./ViewerMenu.js";
 
 type Props = {

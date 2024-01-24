@@ -18,6 +18,8 @@ export type CodeEditorProps = {
   errors?: SqError[];
   sourceId: string;
   fontSize?: number;
+  activeLineNumbers: number[];
+  onViewValueLine(line: number): void;
   project: SqProject;
   renderImportTooltip?: (params: {
     project: SqProject;

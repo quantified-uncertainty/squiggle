@@ -163,6 +163,10 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       onViewValuePath={(path) => {
         rightPanelRef.current?.viewValuePath(path);
       }}
+      activeLineNumbers={[0, 1, 2]}
+      onViewValueLine={(line) => {
+        console.log(line);
+      }}
     />
   );
 

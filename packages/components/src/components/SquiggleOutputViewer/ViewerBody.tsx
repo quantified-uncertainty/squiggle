@@ -1,11 +1,10 @@
 import { FC } from "react";
 
-import { SqValue } from "@quri/squiggle-lang";
-
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { SquiggleViewer } from "../SquiggleViewer/index.js";
+import { modeToValue } from "../SquiggleViewer/utils.js";
 import { ViewerMode } from "./index.js";
 
 type Props = {
@@ -13,28 +12,6 @@ type Props = {
   output: SqOutputResult;
   isRunning: boolean;
 };
-
-export function modeToValue(
-  mode: ViewerMode,
-  output: SqOutputResult
-): SqValue | undefined {
-  if (!output.ok) {
-    return;
-  }
-  const sqOutput = output.value;
-  switch (mode) {
-    case "Result":
-      return sqOutput.result;
-    case "Variables":
-      return sqOutput.bindings.asValue();
-    case "Imports":
-      return sqOutput.imports.asValue();
-    case "Exports":
-      return sqOutput.exports.asValue();
-    case "AST":
-      return;
-  }
-}
 
 export const ViewerBody: FC<Props> = ({ output, mode, isRunning }) => {
   if (!output.ok) {

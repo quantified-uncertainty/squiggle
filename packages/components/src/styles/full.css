@@ -12,6 +12,10 @@
   background: white;
 }
 
+.cm-gutter.cm-lineNumberDot {
+  min-width: 12px;
+}
+
 /* Base state */
 .cm-lineNumberDot .cm-gutterElement .focusable-marker .focusable-marker-inner {
   @apply rounded-sm bg-violet-50 transition duration-100 ease-in-out;
