@@ -3,14 +3,6 @@ import { SqValuePath } from "@quri/squiggle-lang";
 import { useViewerContext } from "../ViewerProvider.js";
 import { focusSqValueHeader, keyboardEventHandler } from "./utils.js";
 
-const validKeys = [
-  "ArrowDown",
-  "ArrowUp",
-  "ArrowLeft",
-  "ArrowRight",
-  "Enter",
-] as const;
-
 export function useFocusedSqValueKeyEvent(selected: SqValuePath) {
   const { setFocused, itemStore, findNode } = useViewerContext();
 
@@ -23,7 +15,7 @@ export function useFocusedSqValueKeyEvent(selected: SqValuePath) {
     }, 1);
   }
 
-  return keyboardEventHandler(validKeys, {
+  return keyboardEventHandler({
     ArrowDown: () => {
       const newItem = findNode(selected)?.children()[0];
       if (newItem) {

@@ -221,7 +221,7 @@ export function useRegisterAsItemViewer(
 
   useEffect(() => {
     itemStore.registerItemHandle(path, ref);
-    return () => itemStore.unregisterItemHandle(path); // TODO: Seems to happen way too often
+    return () => itemStore.unregisterItemHandle(path);
   });
 }
 
@@ -381,11 +381,8 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
 
     useImperativeHandle(ref, () => handle);
 
-    const _rootValue = rootValue
-      ? valueHasContext(rootValue)
-        ? rootValue
-        : undefined
-      : undefined;
+    const _rootValue =
+      rootValue && valueHasContext(rootValue) ? rootValue : undefined;
 
     return (
       <ViewerContext.Provider

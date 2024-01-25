@@ -116,6 +116,7 @@ export type ValueWithContextViewerHandle = {
   forceUpdate: () => void;
   scrollIntoView: () => void;
   focusOnHeader: () => void;
+  toggleCollapsed: () => void;
 };
 
 export const ValueWithContextViewer: FC<Props> = ({
@@ -129,7 +130,9 @@ export const ValueWithContextViewer: FC<Props> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
 
-  const handle = {
+  const toggleCollapsed_ = useToggleCollapsed();
+
+  const handle: ValueWithContextViewerHandle = {
     scrollIntoView: () => {
       containerRef?.current?.scrollIntoView({
         behavior: "smooth",
@@ -139,11 +142,11 @@ export const ValueWithContextViewer: FC<Props> = ({
     focusOnHeader: () => {
       headerRef.current?.focus();
     },
+    toggleCollapsed: () => toggleCollapsed_(path),
   };
 
   useRegisterAsItemViewer(path, handle);
 
-  const toggleCollapsed_ = useToggleCollapsed();
   const _focus = useFocus();
   const focus = () => enableFocus && _focus(path);
   const focusedKeyEvent = useFocusedSqValueKeyEvent(path);
@@ -167,10 +170,6 @@ export const ValueWithContextViewer: FC<Props> = ({
   const enableDropdownMenu = viewerType !== "tooltip";
   const enableFocus = viewerType !== "tooltip";
 
-  const toggleCollapsed = () => {
-    toggleCollapsed_(path);
-  };
-
   // TODO - check that we're not in a situation where `isOpen` is false and `header` is hidden?
   // In that case, the output would look broken (empty).
   const isOpen = !collapsible || !itemState.collapsed;
@@ -192,7 +191,7 @@ export const ValueWithContextViewer: FC<Props> = ({
             "w-4 mr-1.5 flex justify-center cursor-pointer hover:!text-stone-600",
             isOpen ? "text-stone-600 opacity-40" : "text-stone-800 opacity-40"
           )}
-          onClick={toggleCollapsed}
+          onClick={handle.toggleCollapsed}
         >
           <Icon size={13} />
         </div>
@@ -254,7 +253,7 @@ export const ValueWithContextViewer: FC<Props> = ({
       return (
         <div
           className="group w-4 shrink-0 flex justify-center cursor-pointer"
-          onClick={toggleCollapsed}
+          onClick={handle.toggleCollapsed}
         >
           <div className="w-px bg-stone-100 group-hover:bg-stone-400" />
         </div>
@@ -265,6 +264,7 @@ export const ValueWithContextViewer: FC<Props> = ({
     }
   };
 
+  //Focus on the header on mount if focused
   useEffect(() => {
     if (isFocused && !isRoot && headerRef && headerVisibility !== "hide") {
       handle.focusOnHeader();

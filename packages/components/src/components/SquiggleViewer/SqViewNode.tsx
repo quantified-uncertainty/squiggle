@@ -14,9 +14,9 @@ class SqValueNode {
     return this.path.uid();
   }
 
-  isEqual = (other: SqValueNode): boolean => {
+  isEqual(other: SqValueNode): boolean {
     return this.uid() === other.uid();
-  };
+  }
 
   sqValue(): SqValue | undefined {
     return this.root.getSubvalueByPath(this.path, this.traverseCalculatorEdge);
