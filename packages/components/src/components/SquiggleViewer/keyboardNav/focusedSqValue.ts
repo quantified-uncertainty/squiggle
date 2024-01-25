@@ -45,5 +45,6 @@ export function useFocusedSqValueKeyEvent(selected: SqValuePath) {
       }
     },
     Enter: resetToRoot,
+    " ": () => {},
   });
 }

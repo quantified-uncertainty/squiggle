@@ -166,3 +166,62 @@ export class SqListViewNode {
     return prevSibling ? prevSibling.lastVisibleSubChild() : this.parent();
   }
 }
+
+//This is split from SqValueNode because it handles more specialized logic for viewing open/closed nodes in the Viewer. It works for lists of nodes - we'll need new logic for tabular data.
+export class SqCellViewNode {
+  constructor(
+    public node: SqValueNode,
+    public params: Params
+  ) {
+    this.make = this.make.bind(this);
+  }
+
+  static make(
+    root: SqValue,
+    path: SqValuePath,
+    traverseCalculatorEdge: TraverseCalculatorEdge,
+    getIsCollapsed: GetIsCollapsed
+  ) {
+    const node = new SqValueNode(root, path, traverseCalculatorEdge);
+    return new SqCellViewNode(node, { getIsCollapsed });
+  }
+
+  make(node: SqValueNode) {
+    return new SqCellViewNode(node, this.params);
+  }
+
+  // A helper function to make a node or undefined
+  makeU(node: SqValueNode | undefined) {
+    return node ? new SqCellViewNode(node, this.params) : undefined;
+  }
+
+  value(): SqValue | undefined {
+    return this.node.sqValue();
+  }
+  isRoot() {
+    return this.node.path.isRoot();
+  }
+  parent() {
+    return this.makeU(this.node.parent());
+  }
+  children() {
+    return this.node.children().map(this.make);
+  }
+  lastChild() {
+    return this.makeU(this.node.lastChild());
+  }
+  siblings() {
+    return this.node.siblings().map(this.make);
+  }
+  prevSibling() {
+    return this.makeU(this.node.prevSibling());
+  }
+  nextSibling() {
+    return this.makeU(this.node.nextSibling());
+  }
+
+  up(): SqCellViewNode | undefined {
+    console.log("HI", this.node.path);
+    return this;
+  }
+}

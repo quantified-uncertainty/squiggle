@@ -21,7 +21,7 @@ import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { SqListViewNode } from "./SqViewNode.js";
+import { SqCellViewNode, SqListViewNode } from "./SqViewNode.js";
 import {
   getChildrenValues,
   shouldBeginCollapsed,
@@ -40,6 +40,22 @@ function findNode(
     return;
   }
   return SqListViewNode.make(
+    root,
+    path,
+    traverseCalculatorEdge(itemStore),
+    (path) => itemStore.getState(path).collapsed
+  );
+}
+
+function findTableNode(
+  root: SqValue | undefined,
+  path: SqValuePath,
+  itemStore: ItemStore
+) {
+  if (!root || !path) {
+    return;
+  }
+  return SqCellViewNode.make(
     root,
     path,
     traverseCalculatorEdge(itemStore),
@@ -182,6 +198,7 @@ type ViewerContextShape = {
   handle: SquiggleViewerHandle;
   rootValue?: SqValueWithContext;
   findNode: (path: SqValuePath) => SqListViewNode | undefined;
+  findTableNode: (path: SqValuePath) => SqCellViewNode | undefined;
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
@@ -197,6 +214,7 @@ export const ViewerContext = createContext<ViewerContextShape>({
   initialized: false,
   rootValue: undefined,
   findNode: () => undefined,
+  findTableNode: () => undefined,
 });
 
 export function useViewerContext() {
@@ -397,6 +415,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
           handle,
           initialized: true,
           findNode: (path) => findNode(_rootValue, path, itemStore),
+          findTableNode: (path) => findTableNode(_rootValue, path, itemStore),
         }}
       >
         {children}
