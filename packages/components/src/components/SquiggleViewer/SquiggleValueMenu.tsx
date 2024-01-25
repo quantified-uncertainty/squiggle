@@ -2,7 +2,6 @@ import { clsx } from "clsx";
 import { FC } from "react";
 
 import {
-  CodeBracketIcon,
   Cog8ToothIcon,
   CommandLineIcon,
   Dropdown,
@@ -19,42 +18,19 @@ import { valueToHeadingString } from "../../widgets/utils.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { getChildrenValues } from "./utils.js";
 import {
-  useFocus,
   useHasLocalSettings,
-  useIsFocused,
+  useIsZoomedIn,
   useSetCollapsed,
-  useUnfocus,
   useViewerContext,
+  useZoomIn,
+  useZoomOut,
 } from "./ViewerProvider.js";
-
-const FindInEditorItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
-  const { editor } = useViewerContext();
-  const closeDropdown = useCloseDropdown();
-
-  if (!editor || value.context.path.isRoot()) {
-    return null;
-  }
-
-  const findInEditor = () => {
-    const location = value.context.findLocation();
-    editor?.scrollTo(location.start.offset);
-    closeDropdown();
-  };
-
-  return (
-    <DropdownMenuActionItem
-      title="Show in Editor"
-      icon={CodeBracketIcon}
-      onClick={findInEditor}
-    />
-  );
-};
 
 const FocusItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
   const { path } = value.context;
-  const isFocused = useIsFocused(path);
-  const focus = useFocus();
-  const unfocus = useUnfocus();
+  const isFocused = useIsZoomedIn(path);
+  const zoomIn = useZoomIn();
+  const zoomOut = useZoomOut();
   if (path.isRoot()) {
     return null;
   }
@@ -62,17 +38,17 @@ const FocusItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
   if (isFocused) {
     return (
       <DropdownMenuActionItem
-        title="Unfocus"
+        title="Zoom Out"
         icon={FocusIcon}
-        onClick={unfocus}
+        onClick={zoomOut}
       />
     );
   } else {
     return (
       <DropdownMenuActionItem
-        title="Focus"
+        title="Zoom In"
         icon={FocusIcon}
-        onClick={() => focus(path)}
+        onClick={() => zoomIn(path)}
       />
     );
   }
@@ -153,7 +129,6 @@ export const SquiggleValueMenu: FC<{
           {widgetHeading && (
             <DropdownMenuHeader>{widgetHeading}</DropdownMenuHeader>
           )}
-          <FindInEditorItem value={value} />
           <FocusItem value={value} />
           <SetChildrenCollapsedStateItem
             value={value}

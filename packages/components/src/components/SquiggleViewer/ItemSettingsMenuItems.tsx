@@ -67,7 +67,7 @@ const ItemSettingsModal: FC<Props> = ({
 
   const { itemStore } = useContext(ViewerContext);
   const resetScroll = () => {
-    itemStore.scrollToPath(path);
+    itemStore.scrollViewerToPath(path);
   };
 
   return (

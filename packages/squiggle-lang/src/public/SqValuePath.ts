@@ -194,6 +194,17 @@ export class SqValuePath {
     return this.edges.at(-1);
   }
 
+  parent() {
+    if (this.edges.length === 0) {
+      return undefined;
+    } else {
+      return new SqValuePath({
+        root: this.root,
+        edges: this.edges.slice(0, -1),
+      });
+    }
+  }
+
   extend(edge: SqValuePathEdge) {
     return new SqValuePath({
       root: this.root,

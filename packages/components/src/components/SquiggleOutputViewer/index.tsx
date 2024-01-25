@@ -10,7 +10,7 @@ import {
 } from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
 import { RenderingIndicator } from "./RenderingIndicator.js";
-import { ViewerBody } from "./ViewerBody.js";
+import { modeToValue, ViewerBody } from "./ViewerBody.js";
 import { ViewerMenu } from "./ViewerMenu.js";
 
 type Props = {
@@ -51,6 +51,7 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
         partialPlaygroundSettings={settings}
         editor={editor}
         ref={viewerRef}
+        rootValue={modeToValue(mode, output) || undefined}
       >
         <Layout
           menu={<ViewerMenu mode={mode} setMode={setMode} output={output} />}
