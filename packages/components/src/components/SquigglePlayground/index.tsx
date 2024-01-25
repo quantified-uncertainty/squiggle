@@ -11,6 +11,7 @@ import { SqLinker, SqProject } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import { useMode } from "../../lib/utility.js";
 import {
   defaultPlaygroundSettings,
   PartialPlaygroundSettings,
@@ -122,6 +123,8 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     isRunning: boolean;
   }>({ output: undefined, isRunning: false });
 
+  const [mode, setMode] = useMode(output?.output?.output);
+
   useEffect(() => {
     const _output = output.output?.output;
     if (_output && _output.ok) {
@@ -172,6 +175,8 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         // FIXME - this will cause viewer to be rendered twice on initial render
         editor={leftPanelRef.current?.getEditor() ?? undefined}
         ref={rightPanelRef}
+        mode={mode}
+        setMode={setMode}
         {...settings}
       />
     ) : (

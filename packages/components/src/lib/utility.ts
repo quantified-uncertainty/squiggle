@@ -1,5 +1,8 @@
+import { useState } from "react";
+
 import { result, SqValue } from "@quri/squiggle-lang";
 
+import { SqOutputResult } from "../../../squiggle-lang/src/public/types.js";
 import { SquiggleOutput } from "./hooks/useSquiggle.js";
 
 export function flattenResult<a, b>(x: result<a, b>[]): result<a[], b> {
@@ -97,4 +100,25 @@ export type SqValueWithContext = SqValue & Required<Pick<SqValue, "context">>;
 
 export function valueHasContext(value: SqValue): value is SqValueWithContext {
   return !!value.context;
+}
+
+export type ViewerMode = "Imports" | "Exports" | "Variables" | "Result" | "AST";
+
+export function useMode(outputResult: SqOutputResult | undefined) {
+  return useState<ViewerMode>(() => {
+    // Pick the initial mode value
+
+    if (!outputResult || !outputResult.ok) {
+      return "Variables";
+    }
+
+    const output = outputResult.value;
+    if (output.result.tag !== "Void") {
+      return "Result";
+    }
+    if (!output.exports.isEmpty()) {
+      return "Exports";
+    }
+    return "Variables";
+  });
 }

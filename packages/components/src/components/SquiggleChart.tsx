@@ -10,6 +10,7 @@ import {
   StandaloneExecutionProps,
   useSquiggle,
 } from "../lib/hooks/useSquiggle.js";
+import { useMode } from "../lib/utility.js";
 import { MessageAlert } from "./Alert.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "./SquiggleErrorAlert.js";
@@ -42,6 +43,7 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
       executionId: runnerState.executionId,
       ...(project ? { project, continues } : { environment }),
     });
+    const [mode, setMode] = useMode(squiggleOutput?.output);
 
     // TODO - if `<ViewerProvider>` is not set up (which is very possible) then calculator paths won't be resolved.
     const getSubvalueByPath = useGetSubvalueByPath();
@@ -72,6 +74,8 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
           squiggleOutput={squiggleOutput}
           isRunning={isRunning}
           environment={environment}
+          mode={mode}
+          setMode={setMode}
           {...settings}
         />
       );

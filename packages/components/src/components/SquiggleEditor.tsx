@@ -3,7 +3,7 @@ import { FC, useMemo, useRef } from "react";
 import { useUncontrolledCode } from "../lib/hooks/index.js";
 import { useRunnerState } from "../lib/hooks/useRunnerState.js";
 import { useSquiggle } from "../lib/hooks/useSquiggle.js";
-import { getErrors } from "../lib/utility.js";
+import { getErrors, useMode } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
@@ -38,6 +38,8 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     ...(propsProject ? { project: propsProject, continues } : { environment }),
   });
 
+  const [mode, setMode] = useMode(squiggleOutput?.output);
+
   const errors = useMemo(() => {
     if (!squiggleOutput) {
       return [];
@@ -71,6 +73,8 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           isRunning={isRunning}
           editor={editorRef.current ?? undefined}
           environment={environment}
+          mode={mode}
+          setMode={setMode}
           {...settings}
         />
       )}
