@@ -3,13 +3,17 @@ import { SqValuePath } from "@quri/squiggle-lang";
 import { useViewerContext } from "../ViewerProvider.js";
 import { focusSqValueHeader, keyboardEventHandler } from "./utils.js";
 
-export function useFocusedSqValueKeyEvent(selected: SqValuePath) {
-  const { setFocused, itemStore, findNode } = useViewerContext();
+export function useZoomedInSqValueKeyEvent(selected: SqValuePath) {
+  const {
+    setZoomedInPath: setZoomedInPath,
+    itemStore,
+    findNode,
+  } = useViewerContext();
 
   function resetToRoot() {
-    setFocused(undefined);
+    setZoomedInPath(undefined);
 
-    // This timeout is a hack to make sure the header is focused after the reset
+    // This timeout is a hack to make sure the header is zoomedIn after the reset
     setTimeout(() => {
       focusSqValueHeader(selected, itemStore);
     }, 1);
@@ -19,13 +23,13 @@ export function useFocusedSqValueKeyEvent(selected: SqValuePath) {
     ArrowDown: () => {
       const newPath = findNode(selected)?.nextSibling()?.node.path;
       if (newPath) {
-        setFocused(newPath);
+        setZoomedInPath(newPath);
       }
     },
     ArrowUp: () => {
       const newPath = findNode(selected)?.prevSibling()?.node.path;
       if (newPath) {
-        setFocused(newPath);
+        setZoomedInPath(newPath);
       }
     },
     ArrowLeft: () => {
@@ -34,7 +38,7 @@ export function useFocusedSqValueKeyEvent(selected: SqValuePath) {
         if (newItem.isRoot()) {
           resetToRoot();
         } else {
-          setFocused(newItem.node.path);
+          setZoomedInPath(newItem.node.path);
         }
       }
     },

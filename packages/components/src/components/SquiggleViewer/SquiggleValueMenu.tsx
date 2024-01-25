@@ -18,19 +18,19 @@ import { valueToHeadingString } from "../../widgets/utils.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { getChildrenValues } from "./utils.js";
 import {
-  useFocus,
   useHasLocalSettings,
-  useIsFocused,
+  useIsZoomedIn,
   useSetCollapsed,
-  useUnfocus,
   useViewerContext,
+  useZoomIn,
+  useZoomOut,
 } from "./ViewerProvider.js";
 
 const FocusItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
   const { path } = value.context;
-  const isFocused = useIsFocused(path);
-  const focus = useFocus();
-  const unfocus = useUnfocus();
+  const isFocused = useIsZoomedIn(path);
+  const zoomIn = useZoomIn();
+  const zoomOut = useZoomOut();
   if (path.isRoot()) {
     return null;
   }
@@ -38,17 +38,17 @@ const FocusItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
   if (isFocused) {
     return (
       <DropdownMenuActionItem
-        title="Unfocus"
+        title="Zoom Out"
         icon={FocusIcon}
-        onClick={unfocus}
+        onClick={zoomOut}
       />
     );
   } else {
     return (
       <DropdownMenuActionItem
-        title="Focus"
+        title="Zoom In"
         icon={FocusIcon}
-        onClick={() => focus(path)}
+        onClick={() => zoomIn(path)}
       />
     );
   }

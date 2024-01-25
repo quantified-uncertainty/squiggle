@@ -3,8 +3,13 @@ import { SqValuePath } from "@quri/squiggle-lang";
 import { toggleCollapsed, useViewerContext } from "../ViewerProvider.js";
 import { focusSqValueHeader, keyboardEventHandler } from "./utils.js";
 
-export function useUnfocusedSqValueKeyEvent(selected: SqValuePath) {
-  const { setFocused, itemStore, editor, findNode } = useViewerContext();
+export function useZoomedOutSqValueKeyEvent(selected: SqValuePath) {
+  const {
+    setZoomedInPath: setZoomedInPath,
+    itemStore,
+    editor,
+    findNode,
+  } = useViewerContext();
 
   return keyboardEventHandler({
     ArrowDown: () => {
@@ -37,7 +42,7 @@ export function useUnfocusedSqValueKeyEvent(selected: SqValuePath) {
       }
     },
     Enter: () => {
-      setFocused(selected);
+      setZoomedInPath(selected);
     },
     " ": () => {
       toggleCollapsed(itemStore, selected);
