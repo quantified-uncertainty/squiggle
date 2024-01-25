@@ -1,7 +1,7 @@
 import { SqValuePath } from "@quri/squiggle-lang";
 
 import { useViewerContext } from "../ViewerProvider.js";
-import { focusSqValueHeader, keyboardEventHandler } from "./utils.js";
+import { keyboardEventHandler } from "./utils.js";
 
 export function useZoomedInSqValueKeyEvent(selected: SqValuePath) {
   const {
@@ -15,7 +15,7 @@ export function useZoomedInSqValueKeyEvent(selected: SqValuePath) {
 
     // This timeout is a hack to make sure the header is zoomedIn after the reset
     setTimeout(() => {
-      focusSqValueHeader(selected, itemStore);
+      itemStore.focusOnPath(selected);
     }, 1);
   }
 
@@ -45,7 +45,7 @@ export function useZoomedInSqValueKeyEvent(selected: SqValuePath) {
     ArrowRight: () => {
       const newItem = findNode(selected)?.children()[0];
       if (newItem) {
-        focusSqValueHeader(newItem.node.path, itemStore);
+        itemStore.focusOnPath(newItem.node.path);
       }
     },
     Enter: resetToRoot,

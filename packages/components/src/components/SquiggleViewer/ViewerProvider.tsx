@@ -166,6 +166,10 @@ export class ItemStore {
   scrollViewerToPath(path: SqValuePath) {
     this.handles[path.uid()]?.scrollIntoView();
   }
+
+  focusOnPath(path: SqValuePath) {
+    this.handles[path.uid()]?.focusOnHeader();
+  }
 }
 
 type ViewerContextShape = {
