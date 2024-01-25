@@ -21,12 +21,12 @@ pre:not([data-theme]) {
 }
 
 /* These styles were getting in the way of the playground focus elements. */
-[tabindex]:not([tabindex="-1"]):focus-visible
+[tabindex]:not([tabindex="-1"]):focus-visible:focus
 {
-  --tw-ring-offset-shadow: none !important;
+  @apply ring-0 ring-offset-0 
 }
 
-button:focus-visible
+button:focus-visible:focus
 {
-  --tw-ring-offset-shadow: none !important;
+  @apply ring-0 ring-offset-0
 }
