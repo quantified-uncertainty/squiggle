@@ -7,7 +7,10 @@ import { TableCellsIcon } from "@quri/ui";
 import { PlaygroundSettings } from "../components/PlaygroundSettings.js";
 import { useTableCellKeyEvent } from "../components/SquiggleViewer/keyboardNav/tableCell.js";
 import { SquiggleValueChart } from "../components/SquiggleViewer/SquiggleValueChart.js";
-import { useRegisterAsItemViewer } from "../components/SquiggleViewer/ViewerProvider.js";
+import {
+  useRegisterAsItemViewer,
+  useZoomIn,
+} from "../components/SquiggleViewer/ViewerProvider.js";
 import { valueHasContext } from "../lib/utility.js";
 import { widgetRegistry } from "./registry.js";
 
@@ -73,7 +76,7 @@ widgetRegistry.register("TableChart", {
     const environment = valueWithContext.context.project.getEnvironment();
     const value = valueWithContext.value;
     const rowsAndColumns = value.itemsAndCache(environment);
-    console.log("Added to cache", value);
+    const zoomedIn = useZoomIn();
     const columnNames = value.columnNames;
     const hasColumnNames = columnNames.filter((name) => !!name).length > 0;
     const columnLength = Math.max(
