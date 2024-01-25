@@ -3,14 +3,6 @@ import { SqValuePath } from "@quri/squiggle-lang";
 import { useViewerContext } from "../ViewerProvider.js";
 import { focusSqValueHeader, keyboardEventHandler } from "./utils.js";
 
-const validKeys = [
-  "ArrowDown",
-  "ArrowUp",
-  "ArrowLeft",
-  "ArrowRight",
-  "Enter",
-] as const;
-
 export function useFocusedSqValueKeyEvent(selected: SqValuePath) {
   const { setFocused, itemStore, findNode } = useViewerContext();
 
@@ -23,14 +15,20 @@ export function useFocusedSqValueKeyEvent(selected: SqValuePath) {
     }, 1);
   }
 
-  return keyboardEventHandler(validKeys, {
+  return keyboardEventHandler({
     ArrowDown: () => {
-      const newItem = findNode(selected)?.children()[0];
-      if (newItem) {
-        focusSqValueHeader(newItem.node.path, itemStore);
+      const newPath = findNode(selected)?.nextSibling()?.node.path;
+      if (newPath) {
+        setFocused(newPath);
       }
     },
     ArrowUp: () => {
+      const newPath = findNode(selected)?.prevSibling()?.node.path;
+      if (newPath) {
+        setFocused(newPath);
+      }
+    },
+    ArrowLeft: () => {
       const newItem = findNode(selected)?.parent();
       if (newItem) {
         if (newItem.isRoot()) {
@@ -40,16 +38,10 @@ export function useFocusedSqValueKeyEvent(selected: SqValuePath) {
         }
       }
     },
-    ArrowLeft: () => {
-      const newPath = findNode(selected)?.prevSibling()?.node.path;
-      if (newPath) {
-        setFocused(newPath);
-      }
-    },
     ArrowRight: () => {
-      const newPath = findNode(selected)?.nextSibling()?.node.path;
-      if (newPath) {
-        setFocused(newPath);
+      const newItem = findNode(selected)?.children()[0];
+      if (newItem) {
+        focusSqValueHeader(newItem.node.path, itemStore);
       }
     },
     Enter: resetToRoot,

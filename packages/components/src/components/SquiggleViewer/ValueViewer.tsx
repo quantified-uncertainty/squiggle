@@ -16,5 +16,12 @@ export const ValueViewer: React.FC<Props> = ({ value, ...rest }) => {
     return <MessageAlert heading="Can't display pathless value" />;
   }
 
-  return <ValueWithContextViewer value={value} {...rest} />;
+  // The key ID is needed to make sure that when open a nested value as Focused, it will get focused.
+  return (
+    <ValueWithContextViewer
+      value={value}
+      key={value.context.path.uid()}
+      {...rest}
+    />
+  );
 };

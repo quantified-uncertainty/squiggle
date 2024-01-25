@@ -7,13 +7,11 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
-  useRef,
   useState,
 } from "react";
 
 import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 
-import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
 import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
@@ -30,6 +28,7 @@ import {
   shouldBeginCollapsed,
   traverseCalculatorEdge,
 } from "./utils.js";
+import { ValueWithContextViewerHandle } from "./ValueWithContextViewer.js";
 
 type ViewerType = "normal" | "tooltip";
 
@@ -51,11 +50,6 @@ function findNode(
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
-};
-
-type ItemHandle = {
-  element: HTMLDivElement;
-  forceUpdate: () => void;
 };
 
 type LocalItemState = Readonly<{
@@ -84,7 +78,7 @@ type ValuePathUID = string;
  */
 export class ItemStore {
   state: Record<ValuePathUID, LocalItemState> = {};
-  handles: Record<ValuePathUID, ItemHandle> = {};
+  handles: Record<ValuePathUID, ValueWithContextViewerHandle> = {};
 
   setState(
     path: SqValuePath,
@@ -148,7 +142,7 @@ export class ItemStore {
     this.handles[path.uid()]?.forceUpdate();
   }
 
-  registerItemHandle(path: SqValuePath, handle: ItemHandle) {
+  registerItemHandle(path: SqValuePath, handle: ValueWithContextViewerHandle) {
     this.handles[path.uid()] = handle;
   }
 
@@ -171,9 +165,7 @@ export class ItemStore {
   }
 
   scrollViewerToPath(path: SqValuePath) {
-    this.handles[path.uid()]?.element.scrollIntoView({
-      behavior: "smooth",
-    });
+    this.handles[path.uid()]?.scrollIntoView();
   }
 }
 
@@ -216,8 +208,10 @@ export function useViewerContext() {
 // This allows us to do two things later:
 // 1. Implement `store.scrollViewerToPath`.
 // 2. Re-render individual item viewers on demand, for example on "Collapse Children" menu action.
-export function useRegisterAsItemViewer(path: SqValuePath) {
-  const ref = useRef<HTMLDivElement | null>(null);
+export function useRegisterAsItemViewer(
+  path: SqValuePath,
+  ref: ValueWithContextViewerHandle
+) {
   const { itemStore } = useViewerContext();
 
   /**
@@ -225,20 +219,11 @@ export function useRegisterAsItemViewer(path: SqValuePath) {
    * So we use `forceUpdate` to force rerendering.
    * (This function is not used directly in this component. Instead, it's passed to `<ViewerProvider>` to be called when necessary, sometimes from other components.)
    */
-  const forceUpdate = useForceUpdate();
 
   useEffect(() => {
-    const element = ref.current;
-    if (!element) {
-      return;
-    }
-
-    itemStore.registerItemHandle(path, { element, forceUpdate });
-
-    return () => itemStore.unregisterItemHandle(path); // TODO: Seems to happen way too often
+    itemStore.registerItemHandle(path, ref);
+    return () => itemStore.unregisterItemHandle(path);
   });
-
-  return ref;
 }
 
 export function useSetLocalItemState() {
@@ -400,11 +385,8 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
 
     useImperativeHandle(ref, () => handle);
 
-    const _rootValue = rootValue
-      ? valueHasContext(rootValue)
-        ? rootValue
-        : undefined
-      : undefined;
+    const _rootValue =
+      rootValue && valueHasContext(rootValue) ? rootValue : undefined;
 
     return (
       <ViewerContext.Provider

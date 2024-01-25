@@ -2,11 +2,12 @@
 import "../../widgets/index.js";
 
 import { clsx } from "clsx";
-import { FC, PropsWithChildren, useEffect, useMemo } from "react";
+import { FC, PropsWithChildren, useEffect, useMemo, useRef } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { CommentIcon, TextTooltip } from "@quri/ui";
 
+import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
@@ -111,10 +112,14 @@ const ValueViewerBody: FC<Props> = ({ value, size = "normal" }) => {
   );
 };
 
-export function focusOnHeader(element: HTMLDivElement) {
-  element.querySelector("header")?.focus();
-}
+export type ValueWithContextViewerHandle = {
+  forceUpdate: () => void;
+  scrollIntoView: () => void;
+  focusOnHeader: () => void;
+  toggleCollapsed: () => void;
+};
 
+// Note: When called, use a unique ``key``. Otherwise, the initial focus will not always work.
 export const ValueWithContextViewer: FC<Props> = ({
   value,
   parentValue,
@@ -123,50 +128,58 @@ export const ValueWithContextViewer: FC<Props> = ({
   const { tag } = value;
   const { path } = value.context;
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+
   const toggleCollapsed_ = useToggleCollapsed();
-  const focus = useFocus();
+
+  const handle: ValueWithContextViewerHandle = {
+    scrollIntoView: () => {
+      containerRef?.current?.scrollIntoView({
+        behavior: "smooth",
+      });
+    },
+    forceUpdate: useForceUpdate(),
+    focusOnHeader: () => {
+      headerRef.current?.focus();
+    },
+    toggleCollapsed: () => toggleCollapsed_(path),
+  };
+
+  useRegisterAsItemViewer(path, handle);
+
+  const _focus = useFocus();
+  const focus = () => enableFocus && _focus(path);
   const focusedKeyEvent = useFocusedSqValueKeyEvent(path);
   const unfocusedKeyEvent = useUnfocusedSqValueKeyEvent(path);
 
   const viewerType = useViewerType();
   const scrollEditorToPath = useScrollToEditorPath(path);
 
-  const { itemStore, focused } = useViewerContext();
-  const isFocused = focused?.isEqual(path);
+  const { itemStore, focused: _focused } = useViewerContext();
+  const isFocused = _focused?.isEqual(path);
   const itemState = itemStore.getStateOrInitialize(value);
 
   const isRoot = path.isRoot();
   const taggedName = value.tags.name();
 
   // root header is always hidden (unless forced, but we probably won't need it)
-  const header = props.header ?? (isRoot ? "hide" : "show");
-  const collapsible = header === "hide" ? false : props.collapsible ?? true;
+  const headerVisibility = props.header ?? (isRoot ? "hide" : "show");
+  const collapsible =
+    headerVisibility === "hide" ? false : props.collapsible ?? true;
   const size = props.size ?? "normal";
   const enableDropdownMenu = viewerType !== "tooltip";
   const enableFocus = viewerType !== "tooltip";
-
-  const toggleCollapsed = () => {
-    toggleCollapsed_(path);
-  };
-
-  const ref = useRegisterAsItemViewer(path);
 
   // TODO - check that we're not in a situation where `isOpen` is false and `header` is hidden?
   // In that case, the output would look broken (empty).
   const isOpen = !collapsible || !itemState.collapsed;
 
   useEffect(() => {
-    if (isFocused && !isRoot && ref.current) {
-      focusOnHeader(ref.current);
+    if (isFocused && !isRoot) {
+      handle.focusOnHeader();
     }
   }, []);
-
-  const _focus = () => {
-    if (!enableFocus) {
-      return;
-    }
-    focus(path);
-  };
 
   const triangleToggle = () => {
     const Icon = itemState.collapsed ? CollapsedIcon : ExpandedIcon;
@@ -179,7 +192,7 @@ export const ValueWithContextViewer: FC<Props> = ({
             "w-4 mr-1.5 flex justify-center cursor-pointer hover:!text-stone-600",
             isOpen ? "text-stone-600 opacity-40" : "text-stone-800 opacity-40"
           )}
-          onClick={toggleCollapsed}
+          onClick={handle.toggleCollapsed}
         >
           <Icon size={13} />
         </div>
@@ -193,7 +206,7 @@ export const ValueWithContextViewer: FC<Props> = ({
     const name = pathToShortName(path);
 
     // We want to show colons after the keys, for dicts/arrays.
-    const showColon = header !== "large" && path.edges.length > 1;
+    const showColon = headerVisibility !== "large" && path.edges.length > 1;
 
     const getHeaderColor = () => {
       let color = "text-orange-900";
@@ -209,7 +222,7 @@ export const ValueWithContextViewer: FC<Props> = ({
     const headerColor = getHeaderColor();
 
     const headerClasses = () => {
-      if (header === "large") {
+      if (headerVisibility === "large") {
         return clsx("text-md font-bold", headerColor);
       } else if (isRoot) {
         return "text-sm text-stone-600 font-semibold";
@@ -226,7 +239,7 @@ export const ValueWithContextViewer: FC<Props> = ({
       <div className={clsx("leading-3", showColon || "mr-3")}>
         <span
           className={clsx(!taggedName && "font-mono", headerClasses())}
-          onClick={_focus}
+          onClick={focus}
         >
           {taggedName || name}
         </span>
@@ -241,7 +254,7 @@ export const ValueWithContextViewer: FC<Props> = ({
       return (
         <div
           className="group w-4 shrink-0 flex justify-center cursor-pointer"
-          onClick={toggleCollapsed}
+          onClick={handle.toggleCollapsed}
         >
           <div className="w-px bg-stone-100 group-hover:bg-stone-400" />
         </div>
@@ -252,15 +265,23 @@ export const ValueWithContextViewer: FC<Props> = ({
     }
   };
 
+  //Focus on the header on mount if focused
+  useEffect(() => {
+    if (isFocused && !isRoot && headerRef && headerVisibility !== "hide") {
+      handle.focusOnHeader();
+    }
+  }, []);
+
   return (
     <ErrorBoundary>
-      <div ref={ref}>
-        {header !== "hide" && (
+      <div ref={containerRef}>
+        {headerVisibility !== "hide" && (
           <header
+            ref={headerRef}
             tabIndex={viewerType === "tooltip" ? undefined : 0}
             className={clsx(
               "flex justify-between group pr-0.5 hover:bg-stone-100 rounded-sm focus-visible:outline-none",
-              focused
+              isFocused
                 ? "focus:bg-indigo-50 mb-2 px-0.5 py-1"
                 : "focus:bg-indigo-100"
             )}

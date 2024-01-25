@@ -8,15 +8,17 @@ class SqValueNode {
     public root: SqValue,
     public path: SqValuePath,
     public traverseCalculatorEdge: TraverseCalculatorEdge
-  ) {}
+  ) {
+    this.isEqual = this.isEqual.bind(this);
+  }
 
   uid() {
     return this.path.uid();
   }
 
-  isEqual = (other: SqValueNode): boolean => {
+  isEqual(other: SqValueNode): boolean {
     return this.uid() === other.uid();
-  };
+  }
 
   sqValue(): SqValue | undefined {
     return this.root.getSubvalueByPath(this.path, this.traverseCalculatorEdge);
@@ -41,7 +43,7 @@ class SqValueNode {
           ? new SqValueNode(this.root, path, this.traverseCalculatorEdge)
           : undefined;
       })
-      .filter((a) => a !== undefined) as SqValueNode[];
+      .filter((a): a is NonNullable<typeof a> => a !== undefined);
   }
 
   lastChild(): SqValueNode | undefined {
