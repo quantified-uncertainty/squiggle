@@ -2,7 +2,7 @@
 import "../../widgets/index.js";
 
 import { clsx } from "clsx";
-import { FC, PropsWithChildren, useEffect, useMemo, useRef } from "react";
+import { FC, PropsWithChildren, useCallback, useMemo, useRef } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { CommentIcon, TextTooltip } from "@quri/ui";
@@ -129,9 +129,14 @@ export const ValueWithContextViewer: FC<Props> = ({
   const { path } = value.context;
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement | null>(null);
 
   const toggleCollapsed_ = useToggleCollapsed();
+
+  // Identity must be stable for the sake of `setHeaderRef` callback
+  const focusOnHeader = useCallback(() => {
+    headerRef.current?.focus();
+  }, []);
 
   const handle: ValueWithContextViewerHandle = {
     scrollIntoView: () => {
@@ -140,9 +145,7 @@ export const ValueWithContextViewer: FC<Props> = ({
       });
     },
     forceUpdate: useForceUpdate(),
-    focusOnHeader: () => {
-      headerRef.current?.focus();
-    },
+    focusOnHeader,
     toggleCollapsed: () => toggleCollapsed_(path),
   };
 
@@ -174,12 +177,6 @@ export const ValueWithContextViewer: FC<Props> = ({
   // TODO - check that we're not in a situation where `isOpen` is false and `header` is hidden?
   // In that case, the output would look broken (empty).
   const isOpen = !collapsible || !itemState.collapsed;
-
-  useEffect(() => {
-    if (isZoomedIn && !isRoot) {
-      handle.focusOnHeader();
-    }
-  }, []);
 
   const triangleToggle = () => {
     const Icon = itemState.collapsed ? CollapsedIcon : ExpandedIcon;
@@ -265,19 +262,25 @@ export const ValueWithContextViewer: FC<Props> = ({
     }
   };
 
-  //Focus on the header on mount if focused
-  useEffect(() => {
-    if (isZoomedIn && !isRoot && headerRef && headerVisibility !== "hide") {
-      handle.focusOnHeader();
-    }
-  }, []);
+  // Store the header reference for the future `focusOnHeader()` handle, and auto-focus zoomed in values on mount.
+  const setHeaderRef = useCallback(
+    (el: HTMLElement | null) => {
+      headerRef.current = el;
+
+      // If `isZoomedIn` toggles from `false` to `true`, this callback identity will change and it will update the focus.
+      if (isZoomedIn) {
+        focusOnHeader();
+      }
+    },
+    [isZoomedIn, focusOnHeader]
+  );
 
   return (
     <ErrorBoundary>
       <div ref={containerRef}>
         {headerVisibility !== "hide" && (
           <header
-            ref={headerRef}
+            ref={setHeaderRef}
             tabIndex={viewerType === "tooltip" ? undefined : 0}
             className={clsx(
               "flex justify-between group pr-0.5 hover:bg-stone-100 rounded-sm focus-visible:outline-none",
