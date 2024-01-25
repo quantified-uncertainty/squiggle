@@ -41,7 +41,7 @@ class SqValueNode {
           ? new SqValueNode(this.root, path, this.traverseCalculatorEdge)
           : undefined;
       })
-      .filter((a) => a !== undefined) as SqValueNode[];
+      .filter((a): a is NonNullable<typeof a> => a !== undefined);
   }
 
   lastChild(): SqValueNode | undefined {
