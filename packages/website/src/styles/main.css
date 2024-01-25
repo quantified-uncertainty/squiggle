@@ -19,3 +19,14 @@ pre:not([data-theme]) {
 .prose pre:not([data-theme]) code {
   font-size: 0.85rem;
 }
+
+/* These styles were getting in the way of the playground focus elements. */
+[tabindex]:not([tabindex="-1"]):focus-visible
+{
+  --tw-ring-offset-shadow: none !important;
+}
+
+button:focus-visible
+{
+  --tw-ring-offset-shadow: none !important;
+}
