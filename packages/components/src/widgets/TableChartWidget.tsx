@@ -5,7 +5,7 @@ import { TableCellsIcon } from "@quri/ui";
 
 import { PlaygroundSettings } from "../components/PlaygroundSettings.js";
 import { SquiggleValueChart } from "../components/SquiggleViewer/SquiggleValueChart.js";
-import { useFocus } from "../components/SquiggleViewer/ViewerProvider.js";
+import { useZoomIn } from "../components/SquiggleViewer/ViewerProvider.js";
 import { valueHasContext } from "../lib/utility.js";
 import { widgetRegistry } from "./registry.js";
 
@@ -23,7 +23,7 @@ widgetRegistry.register("TableChart", {
   Chart: (valueWithContext, settings) => {
     const environment = valueWithContext.context.project.getEnvironment();
     const value = valueWithContext.value;
-    const focus = useFocus();
+    const zoomedIn = useZoomIn();
     const rowsAndColumns = value.items(environment);
     const columnNames = value.columnNames;
     const hasColumnNames = columnNames.filter((name) => !!name).length > 0;
@@ -92,7 +92,7 @@ widgetRegistry.register("TableChart", {
                         if (event.key === "Enter" && item.ok) {
                           event.preventDefault();
                           const path = item.value.context?.path;
-                          path && focus(path);
+                          path && zoomedIn(path);
                         }
                       }}
                       className={clsx(

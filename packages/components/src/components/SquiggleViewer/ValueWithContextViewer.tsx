@@ -12,8 +12,8 @@ import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
-import { useFocusedSqValueKeyEvent } from "./keyboardNav/focusedSqValue.js";
-import { useUnfocusedSqValueKeyEvent } from "./keyboardNav/unfocusedSqValue.js";
+import { useZoomedInSqValueKeyEvent } from "./keyboardNav/zoomedInSqValue.js";
+import { useZoomedOutSqValueKeyEvent } from "./keyboardNav/zoomedOutSqValue.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
 import { SquiggleValueMenu } from "./SquiggleValueMenu.js";
 import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
@@ -23,13 +23,13 @@ import {
   pathToShortName,
 } from "./utils.js";
 import {
-  useFocus,
   useMergedSettings,
   useRegisterAsItemViewer,
   useScrollToEditorPath,
   useToggleCollapsed,
   useViewerContext,
   useViewerType,
+  useZoomIn,
 } from "./ViewerProvider.js";
 
 const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
@@ -148,16 +148,16 @@ export const ValueWithContextViewer: FC<Props> = ({
 
   useRegisterAsItemViewer(path, handle);
 
-  const _focus = useFocus();
-  const focus = () => enableFocus && _focus(path);
-  const focusedKeyEvent = useFocusedSqValueKeyEvent(path);
-  const unfocusedKeyEvent = useUnfocusedSqValueKeyEvent(path);
+  const zoomIn = useZoomIn();
+  const focus = () => enableFocus && zoomIn(path);
+  const focusedKeyEvent = useZoomedInSqValueKeyEvent(path);
+  const unfocusedKeyEvent = useZoomedOutSqValueKeyEvent(path);
 
   const viewerType = useViewerType();
   const scrollEditorToPath = useScrollToEditorPath(path);
 
-  const { itemStore, focused: _focused } = useViewerContext();
-  const isFocused = _focused?.isEqual(path);
+  const { itemStore, zoomedInPath } = useViewerContext();
+  const isZoomedIn = zoomedInPath?.isEqual(path);
   const itemState = itemStore.getStateOrInitialize(value);
 
   const isRoot = path.isRoot();
@@ -176,7 +176,7 @@ export const ValueWithContextViewer: FC<Props> = ({
   const isOpen = !collapsible || !itemState.collapsed;
 
   useEffect(() => {
-    if (isFocused && !isRoot) {
+    if (isZoomedIn && !isRoot) {
       handle.focusOnHeader();
     }
   }, []);
@@ -267,7 +267,7 @@ export const ValueWithContextViewer: FC<Props> = ({
 
   //Focus on the header on mount if focused
   useEffect(() => {
-    if (isFocused && !isRoot && headerRef && headerVisibility !== "hide") {
+    if (isZoomedIn && !isRoot && headerRef && headerVisibility !== "hide") {
       handle.focusOnHeader();
     }
   }, []);
@@ -281,7 +281,7 @@ export const ValueWithContextViewer: FC<Props> = ({
             tabIndex={viewerType === "tooltip" ? undefined : 0}
             className={clsx(
               "flex justify-between group pr-0.5 hover:bg-stone-100 rounded-sm focus-visible:outline-none",
-              isFocused
+              isZoomedIn
                 ? "focus:bg-indigo-50 mb-2 px-0.5 py-1"
                 : "focus:bg-indigo-100"
             )}
@@ -289,7 +289,7 @@ export const ValueWithContextViewer: FC<Props> = ({
               scrollEditorToPath();
             }}
             onKeyDown={(event) => {
-              isFocused ? focusedKeyEvent(event) : unfocusedKeyEvent(event);
+              isZoomedIn ? focusedKeyEvent(event) : unfocusedKeyEvent(event);
             }}
           >
             <div className="inline-flex items-center">
