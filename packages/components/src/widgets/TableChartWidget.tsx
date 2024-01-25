@@ -1,13 +1,45 @@
-import { clsx } from "clsx";
+import clsx from "clsx";
 
-import { result, SqError, SqValue } from "@quri/squiggle-lang";
+import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 import { TableCellsIcon } from "@quri/ui";
 
 import { PlaygroundSettings } from "../components/PlaygroundSettings.js";
+import { useTableCellKeyEvent } from "../components/SquiggleViewer/keyboardNav/tableCell.js";
 import { SquiggleValueChart } from "../components/SquiggleViewer/SquiggleValueChart.js";
-import { useFocus } from "../components/SquiggleViewer/ViewerProvider.js";
 import { valueHasContext } from "../lib/utility.js";
 import { widgetRegistry } from "./registry.js";
+
+interface ValidTableCellProps {
+  value: SqValue;
+  settings: PlaygroundSettings;
+  path: SqValuePath;
+}
+
+const ValidTableCell: React.FC<ValidTableCellProps> = ({
+  value,
+  path,
+  settings,
+}) => {
+  const cellNav = useTableCellKeyEvent(path);
+
+  return (
+    <td
+      tabIndex={1}
+      onKeyDown={cellNav}
+      className={clsx(
+        "px-1 overflow-hidden",
+        "border-stone-100 border-l",
+        "focus:bg-blue-50"
+      )}
+    >
+      {valueHasContext(value) ? (
+        <SquiggleValueChart value={value} settings={settings} />
+      ) : (
+        value.toString()
+      )}
+    </td>
+  );
+};
 
 widgetRegistry.register("TableChart", {
   Preview: (value) => (
@@ -23,7 +55,6 @@ widgetRegistry.register("TableChart", {
   Chart: (valueWithContext, settings) => {
     const environment = valueWithContext.context.project.getEnvironment();
     const value = valueWithContext.value;
-    const focus = useFocus();
     const rowsAndColumns = value.items(environment);
     const columnNames = value.columnNames;
     const hasColumnNames = columnNames.filter((name) => !!name).length > 0;
@@ -41,22 +72,6 @@ widgetRegistry.register("TableChart", {
       ...settings,
       distributionChartSettings,
       chartHeight,
-    };
-
-    const showItem = (
-      item: result<SqValue, SqError>,
-      settings: PlaygroundSettings
-    ) => {
-      if (item.ok) {
-        const value = item.value;
-        if (valueHasContext(value)) {
-          return <SquiggleValueChart value={value} settings={settings} />;
-        } else {
-          return value.toString();
-        }
-      } else {
-        return item.value.toString();
-      }
     };
 
     return (
@@ -84,26 +99,20 @@ widgetRegistry.register("TableChart", {
             <tbody>
               {rowsAndColumns.map((row, i) => (
                 <tr key={i} className="border-b border-stone-100">
-                  {row.map((item, k) => (
-                    <td
-                      key={k}
-                      tabIndex={1}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" && item.ok) {
-                          event.preventDefault();
-                          const path = item.value.context?.path;
-                          path && focus(path);
-                        }
-                      }}
-                      className={clsx(
-                        "px-1 overflow-hidden",
-                        k !== 0 && "border-stone-100 border-l",
-                        "focus:bg-blue-50"
-                      )}
-                    >
-                      {showItem(item, adjustedSettings)}
-                    </td>
-                  ))}
+                  {row.map((item, k) => {
+                    if (item.ok && item.value.context) {
+                      return (
+                        <ValidTableCell
+                          key={k}
+                          value={item.value}
+                          path={item.value.context.path}
+                          settings={adjustedSettings}
+                        />
+                      );
+                    } else {
+                      return null;
+                    }
+                  })}
                 </tr>
               ))}
             </tbody>

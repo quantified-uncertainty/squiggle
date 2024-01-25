@@ -4,7 +4,7 @@ import { useViewerContext } from "../ViewerProvider.js";
 import { keyboardEventHandler } from "./utils.js";
 
 export function useTableCellKeyEvent(selected: SqValuePath) {
-  const { setFocused, itemStore, findTableNode } = useViewerContext();
+  const { setFocused, findTableNode } = useViewerContext();
 
   return keyboardEventHandler({
     ArrowUp: () => {
@@ -12,6 +12,9 @@ export function useTableCellKeyEvent(selected: SqValuePath) {
       if (newPath) {
         setFocused(newPath);
       }
+    },
+    Focus: () => {
+      setFocused(selected);
     },
   });
 }

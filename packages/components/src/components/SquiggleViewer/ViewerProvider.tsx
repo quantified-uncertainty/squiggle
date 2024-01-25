@@ -91,9 +91,12 @@ type ValuePathUID = string;
  * Note: this class is currently used as a primary source of truth. Should we use it as cache only, and store the state in React state instead?
  * Then we won't have to rely on `forceUpdate` for rerenders.
  */
+
+type ItemHandle = { type: "listItem"; value: ValueWithContextViewerHandle };
+
 export class ItemStore {
   state: Record<ValuePathUID, LocalItemState> = {};
-  handles: Record<ValuePathUID, ValueWithContextViewerHandle> = {};
+  handles: Record<ValuePathUID, ItemHandle> = {};
 
   setState(
     path: SqValuePath,
@@ -154,10 +157,13 @@ export class ItemStore {
   }
 
   forceUpdate(path: SqValuePath) {
-    this.handles[path.uid()]?.forceUpdate();
+    const handle = this.handles[path.uid()];
+    if (handle && handle.type === "listItem") {
+      handle.value.forceUpdate();
+    }
   }
 
-  registerItemHandle(path: SqValuePath, handle: ValueWithContextViewerHandle) {
+  registerItemHandle(path: SqValuePath, handle: ItemHandle) {
     this.handles[path.uid()] = handle;
   }
 
@@ -180,7 +186,10 @@ export class ItemStore {
   }
 
   scrollViewerToPath(path: SqValuePath) {
-    this.handles[path.uid()]?.scrollIntoView();
+    const handle = this.handles[path.uid()];
+    if (handle && handle.type === "listItem") {
+      handle.value.scrollIntoView();
+    }
   }
 }
 
@@ -225,10 +234,7 @@ export function useViewerContext() {
 // This allows us to do two things later:
 // 1. Implement `store.scrollViewerToPath`.
 // 2. Re-render individual item viewers on demand, for example on "Collapse Children" menu action.
-export function useRegisterAsItemViewer(
-  path: SqValuePath,
-  ref: ValueWithContextViewerHandle
-) {
+export function useRegisterAsItemViewer(path: SqValuePath, ref: ItemHandle) {
   const { itemStore } = useViewerContext();
 
   /**

@@ -146,7 +146,7 @@ export const ValueWithContextViewer: FC<Props> = ({
     toggleCollapsed: () => toggleCollapsed_(path),
   };
 
-  useRegisterAsItemViewer(path, handle);
+  useRegisterAsItemViewer(path, { type: "listItem", value: handle });
 
   const _focus = useFocus();
   const focus = () => enableFocus && _focus(path);
