@@ -1,7 +1,7 @@
 import { SqValuePath } from "@quri/squiggle-lang";
 
 import { useViewerContext } from "../ViewerProvider.js";
-import { focusSqValueHeader, keyboardEventHandler } from "./utils.js";
+import { focusSqValue, keyboardEventHandler } from "./utils.js";
 
 export function useFocusedSqValueKeyEvent(selected: SqValuePath) {
   const { setFocused, itemStore, findNode } = useViewerContext();
@@ -11,7 +11,7 @@ export function useFocusedSqValueKeyEvent(selected: SqValuePath) {
 
     // This timeout is a hack to make sure the header is focused after the reset
     setTimeout(() => {
-      focusSqValueHeader(selected, itemStore);
+      focusSqValue(selected, itemStore);
     }, 1);
   }
 
@@ -41,7 +41,7 @@ export function useFocusedSqValueKeyEvent(selected: SqValuePath) {
     ArrowRight: () => {
       const newItem = findNode(selected)?.children()[0];
       if (newItem) {
-        focusSqValueHeader(newItem.node.path, itemStore);
+        focusSqValue(newItem.node.path, itemStore);
       }
     },
     Enter: resetToRoot,

@@ -1,7 +1,7 @@
 import { SqValuePath } from "@quri/squiggle-lang";
 
 import { toggleCollapsed, useViewerContext } from "../ViewerProvider.js";
-import { focusSqValueHeader, keyboardEventHandler } from "./utils.js";
+import { focusSqValue, keyboardEventHandler } from "./utils.js";
 
 export function useUnfocusedSqValueKeyEvent(selected: SqValuePath) {
   const { setFocused, itemStore, editor, findNode } = useViewerContext();
@@ -9,17 +9,17 @@ export function useUnfocusedSqValueKeyEvent(selected: SqValuePath) {
   return keyboardEventHandler({
     ArrowDown: () => {
       const newPath = findNode(selected)?.next()?.node.path;
-      newPath && focusSqValueHeader(newPath, itemStore);
+      newPath && focusSqValue(newPath, itemStore);
     },
     ArrowUp: () => {
       const newPath = findNode(selected)?.prev()?.node.path;
-      newPath && focusSqValueHeader(newPath, itemStore);
+      newPath && focusSqValue(newPath, itemStore);
     },
     ArrowLeft: () => {
       const newItem = findNode(selected)?.parent();
       newItem &&
         !newItem.isRoot() &&
-        focusSqValueHeader(newItem.node.path, itemStore);
+        focusSqValue(newItem.node.path, itemStore);
     },
     ArrowRight: () => {
       const newItem = findNode(selected)?.children().at(0);
@@ -29,10 +29,10 @@ export function useUnfocusedSqValueKeyEvent(selected: SqValuePath) {
         if (isCollapsed) {
           toggleCollapsed(itemStore, selected);
           setTimeout(() => {
-            focusSqValueHeader(newItem.node.path, itemStore);
+            focusSqValue(newItem.node.path, itemStore);
           }, 1);
         } else {
-          focusSqValueHeader(newItem.node.path, itemStore);
+          focusSqValue(newItem.node.path, itemStore);
         }
       }
     },

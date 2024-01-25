@@ -3,10 +3,12 @@ import { locationContains } from "../ast/utils.js";
 
 export type ValuePathRoot = "result" | "bindings" | "imports" | "exports";
 
+type Coords = { row: number; column: number };
+
 export type ValuePathEdge =
   | { type: "key"; value: string }
   | { type: "index"; value: number }
-  | { type: "cellAddress"; value: { row: number; column: number } }
+  | { type: "cellAddress"; value: Coords }
   | {
       type: "calculator";
     };
@@ -82,6 +84,21 @@ export class SqValuePathEdge {
 
   toString(): string {
     return this.toDisplayString();
+  }
+
+  adjustCoords(adjustment: {
+    row: (n: number) => number;
+    column: (n: number) => number;
+  }): SqValuePathEdge {
+    const edge = this.value;
+    if (edge.type === "cellAddress") {
+      return SqValuePathEdge.fromCellAddress(
+        Math.max(adjustment.row(edge.value.row), 0),
+        Math.max(adjustment.column(edge.value.column), 0)
+      );
+    } else {
+      return this;
+    }
   }
 }
 
@@ -272,5 +289,17 @@ export class SqValuePath {
     }
 
     return includeRoot ? [root, ...leafs] : leafs;
+  }
+
+  adjustCoords(adjustments: {
+    row: (n: number) => number;
+    column: (n: number) => number;
+  }): SqValuePath | undefined {
+    const lastEdge = this.lastItem();
+    if (!lastEdge) {
+      return;
+    }
+    const newEdge = lastEdge.adjustCoords(adjustments);
+    return this.parent()?.extend(newEdge);
   }
 }

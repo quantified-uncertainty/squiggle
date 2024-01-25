@@ -15,6 +15,7 @@ import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
 import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
+import { TableCellHandle } from "../../widgets/TableChartWidget.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import {
   defaultPlaygroundSettings,
@@ -92,7 +93,9 @@ type ValuePathUID = string;
  * Then we won't have to rely on `forceUpdate` for rerenders.
  */
 
-type ItemHandle = { type: "listItem"; value: ValueWithContextViewerHandle };
+type ItemHandle =
+  | { type: "listItem"; value: ValueWithContextViewerHandle }
+  | { type: "cellItem"; value: TableCellHandle };
 
 export class ItemStore {
   state: Record<ValuePathUID, LocalItemState> = {};

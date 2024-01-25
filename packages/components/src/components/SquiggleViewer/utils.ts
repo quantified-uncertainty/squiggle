@@ -31,6 +31,18 @@ export function getChildrenValues(value: SqValue): SqValue[] {
       return value.value.getValues();
     case "Dict":
       return value.value.entries().map((a) => a[1]);
+    case "TableChart": {
+      const env = value.context?.project.getEnvironment();
+      if (!env) {
+        return [];
+      }
+      const items = value.value.items(env);
+      const _cache = items
+        ?.flat()
+        .map((a) => (a.ok && a.value) || undefined)
+        .filter((a): a is NonNullable<typeof a> => a !== undefined);
+      return _cache || [];
+    }
     default: {
       return [];
     }

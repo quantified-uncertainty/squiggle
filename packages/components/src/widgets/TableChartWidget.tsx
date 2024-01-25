@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { useRef } from "react";
 
 import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 import { TableCellsIcon } from "@quri/ui";
@@ -6,6 +7,7 @@ import { TableCellsIcon } from "@quri/ui";
 import { PlaygroundSettings } from "../components/PlaygroundSettings.js";
 import { useTableCellKeyEvent } from "../components/SquiggleViewer/keyboardNav/tableCell.js";
 import { SquiggleValueChart } from "../components/SquiggleViewer/SquiggleValueChart.js";
+import { useRegisterAsItemViewer } from "../components/SquiggleViewer/ViewerProvider.js";
 import { valueHasContext } from "../lib/utility.js";
 import { widgetRegistry } from "./registry.js";
 
@@ -15,6 +17,10 @@ interface ValidTableCellProps {
   path: SqValuePath;
 }
 
+export type TableCellHandle = {
+  focus: () => void;
+};
+
 const ValidTableCell: React.FC<ValidTableCellProps> = ({
   value,
   path,
@@ -22,8 +28,19 @@ const ValidTableCell: React.FC<ValidTableCellProps> = ({
 }) => {
   const cellNav = useTableCellKeyEvent(path);
 
+  const ref = useRef<HTMLTableDataCellElement>(null);
+
+  const handle: TableCellHandle = {
+    focus: () => {
+      ref.current?.focus();
+    },
+  };
+
+  useRegisterAsItemViewer(path, { type: "cellItem", value: handle });
+
   return (
     <td
+      ref={ref}
       tabIndex={1}
       onKeyDown={cellNav}
       className={clsx(
@@ -55,7 +72,8 @@ widgetRegistry.register("TableChart", {
   Chart: (valueWithContext, settings) => {
     const environment = valueWithContext.context.project.getEnvironment();
     const value = valueWithContext.value;
-    const rowsAndColumns = value.items(environment);
+    const rowsAndColumns = value.itemsAndCache(environment);
+    console.log("Added to cache", value);
     const columnNames = value.columnNames;
     const hasColumnNames = columnNames.filter((name) => !!name).length > 0;
     const columnLength = Math.max(

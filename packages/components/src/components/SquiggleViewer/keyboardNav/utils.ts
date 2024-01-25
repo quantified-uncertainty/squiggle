@@ -2,10 +2,14 @@ import { SqValuePath } from "@quri/squiggle-lang";
 
 import { ItemStore } from "../ViewerProvider.js";
 
-export const focusSqValueHeader = (path: SqValuePath, itemStore: ItemStore) => {
+export const focusSqValue = (path: SqValuePath, itemStore: ItemStore) => {
   const handle = itemStore.handles[path.uid()];
-  if (handle && handle.type === "listItem") {
-    handle.value.focusOnHeader();
+  if (handle) {
+    if (handle.type === "listItem") {
+      handle.value.focusOnHeader();
+    } else if (handle.type === "cellItem") {
+      handle.value.focus();
+    }
   }
 };
 

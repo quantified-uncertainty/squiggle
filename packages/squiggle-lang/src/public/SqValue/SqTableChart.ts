@@ -34,10 +34,13 @@ const getItem = (
   }
 };
 
+type TableItems = Result.result<SqValue, SqError>[][];
+
 export class SqTableChart {
   constructor(
     private _value: TableChart,
-    public context?: SqValueContext
+    public context?: SqValueContext,
+    public cache?: TableItems
   ) {}
 
   item(
@@ -55,7 +58,7 @@ export class SqTableChart {
     );
   }
 
-  items(env: Env): Result.result<SqValue, SqError>[][] {
+  items(env: Env): TableItems {
     const wrappedDataItems = this._value.data.map((r) =>
       wrapValue(r, this.context)
     );
@@ -66,6 +69,11 @@ export class SqTableChart {
         getItem(rowI, columnI, item, fn, env, this.context)
       )
     );
+  }
+
+  itemsAndCache(env: Env): TableItems {
+    this.cache = this.items(env);
+    return this.cache;
   }
 
   get rowCount(): number {

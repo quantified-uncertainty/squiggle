@@ -12,6 +12,10 @@ class SqValueNode {
     this.isEqual = this.isEqual.bind(this);
   }
 
+  nodeFromPath(path: SqValuePath) {
+    return new SqValueNode(this.root, path, this.traverseCalculatorEdge);
+  }
+
   uid() {
     return this.path.uid();
   }
@@ -220,8 +224,13 @@ export class SqCellViewNode {
     return this.makeU(this.node.nextSibling());
   }
 
-  up(): SqCellViewNode | undefined {
-    console.log("HI", this.node.path);
-    return this;
+  adjustCoords(adjust: {
+    row: (n: number) => number;
+    column: (n: number) => number;
+  }): SqCellViewNode | undefined {
+    const newPath = this.node.path.adjustCoords(adjust);
+    if (newPath) {
+      return this.makeU(this.node.nodeFromPath(newPath));
+    }
   }
 }
