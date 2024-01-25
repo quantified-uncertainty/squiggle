@@ -8,7 +8,9 @@ class SqValueNode {
     public root: SqValue,
     public path: SqValuePath,
     public traverseCalculatorEdge: TraverseCalculatorEdge
-  ) {}
+  ) {
+    this.isEqual = this.isEqual.bind(this);
+  }
 
   uid() {
     return this.path.uid();

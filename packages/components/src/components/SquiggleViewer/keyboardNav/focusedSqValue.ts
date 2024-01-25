@@ -17,12 +17,18 @@ export function useFocusedSqValueKeyEvent(selected: SqValuePath) {
 
   return keyboardEventHandler({
     ArrowDown: () => {
-      const newItem = findNode(selected)?.children()[0];
-      if (newItem) {
-        focusSqValueHeader(newItem.node.path, itemStore);
+      const newPath = findNode(selected)?.nextSibling()?.node.path;
+      if (newPath) {
+        setFocused(newPath);
       }
     },
     ArrowUp: () => {
+      const newPath = findNode(selected)?.prevSibling()?.node.path;
+      if (newPath) {
+        setFocused(newPath);
+      }
+    },
+    ArrowLeft: () => {
       const newItem = findNode(selected)?.parent();
       if (newItem) {
         if (newItem.isRoot()) {
@@ -32,16 +38,10 @@ export function useFocusedSqValueKeyEvent(selected: SqValuePath) {
         }
       }
     },
-    ArrowLeft: () => {
-      const newPath = findNode(selected)?.prevSibling()?.node.path;
-      if (newPath) {
-        setFocused(newPath);
-      }
-    },
     ArrowRight: () => {
-      const newPath = findNode(selected)?.nextSibling()?.node.path;
-      if (newPath) {
-        setFocused(newPath);
+      const newItem = findNode(selected)?.children()[0];
+      if (newItem) {
+        focusSqValueHeader(newItem.node.path, itemStore);
       }
     },
     Enter: resetToRoot,

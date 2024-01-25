@@ -119,6 +119,7 @@ export type ValueWithContextViewerHandle = {
   toggleCollapsed: () => void;
 };
 
+// Note: When called, use a unique ``key``. Otherwise, the initial focus will not always work.
 export const ValueWithContextViewer: FC<Props> = ({
   value,
   parentValue,
