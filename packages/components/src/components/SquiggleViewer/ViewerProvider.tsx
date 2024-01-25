@@ -196,7 +196,15 @@ export class ItemStore {
   }
 
   focusOnPath(path: SqValuePath) {
-    this.handles[path.uid()]?.focusOnHeader();
+    const handle = this.handles[path.uid()];
+    if (!handle) {
+      return;
+    }
+    if (handle.type === "listItem") {
+      handle.value.focusOnHeader();
+    } else if (handle.type === "cellItem") {
+      handle.value.focus();
+    }
   }
 }
 

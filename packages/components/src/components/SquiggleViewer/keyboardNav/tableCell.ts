@@ -35,7 +35,7 @@ const movement: { [key: string]: Adjustment } = {
 };
 
 export function useTableCellKeyEvent(selected: SqValuePath) {
-  const { setFocused, itemStore, findTableNode } = useViewerContext();
+  const { setZoomedInPath, itemStore, findTableNode } = useViewerContext();
 
   const move = (adjustment: string) => {
     const newPath = findTableNode(selected)?.adjustCoords(movement[adjustment])
@@ -51,7 +51,7 @@ export function useTableCellKeyEvent(selected: SqValuePath) {
     ArrowLeft: () => move("left"),
     ArrowRight: () => move("right"),
     Enter: () => {
-      setFocused(selected);
+      setZoomedInPath(selected);
     },
   });
 }
