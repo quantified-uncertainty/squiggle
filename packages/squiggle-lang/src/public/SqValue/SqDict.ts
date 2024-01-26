@@ -1,5 +1,4 @@
 import { VDict } from "../../value/VDict.js";
-import { vString } from "../../value/VString.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValuePathEdge } from "../SqValuePath.js";
 import { SqDictValue, SqValue, wrapValue } from "./index.js";
@@ -21,9 +20,9 @@ export class SqDict {
   }
 
   get(key: string): SqValue | undefined {
-    const value = this._value.get(vString(key));
+    const value = this._value.safeGet(key);
     if (value === undefined) {
-      return undefined;
+      return;
     }
     return wrapValue(value, this.context?.extend(SqValuePathEdge.fromKey(key)));
   }
