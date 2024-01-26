@@ -1,9 +1,8 @@
-import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useMemo, useRef } from "react";
 
 import { useUncontrolledCode } from "../lib/hooks/index.js";
-import { useRunnerState } from "../lib/hooks/useRunnerState.js";
-import { useSquiggle } from "../lib/hooks/useSquiggle.js";
-import { defaultMode, getErrors, ViewerMode } from "../lib/utility.js";
+import { useSquiggleRunner } from "../lib/hooks/useSquiggleRunner.js";
+import { getErrors } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
@@ -30,26 +29,18 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     onCodeChange,
   });
 
-  const isModeSet = useRef(false);
-
-  const [mode, setMode] = useState<ViewerMode>(() => {
-    return defaultMode(undefined);
-  });
-
-  const runnerState = useRunnerState(code);
-
-  const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
-    code: runnerState.renderedCode,
-    executionId: runnerState.executionId,
+  const {
+    squiggleOutput,
+    mode,
+    setMode,
+    isRunning,
+    project,
+    sourceId,
+    runnerState,
+  } = useSquiggleRunner({
+    code,
     ...(propsProject ? { project: propsProject, continues } : { environment }),
   });
-
-  useEffect(() => {
-    if (!isModeSet.current && squiggleOutput?.output) {
-      setMode(defaultMode(squiggleOutput.output));
-      isModeSet.current = true; // Mark that mode is set
-    }
-  }, [squiggleOutput?.output]);
 
   const errors = useMemo(() => {
     if (!squiggleOutput) {

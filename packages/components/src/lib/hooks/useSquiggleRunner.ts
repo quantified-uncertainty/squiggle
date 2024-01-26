@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
+import { SqProject } from "@quri/squiggle-lang";
+
 import { defaultMode, ViewerMode } from "../utility.js";
 import { RunnerState, useRunnerState } from "./useRunnerState.js";
 import {
@@ -19,12 +21,14 @@ export type SquiggleRunnerOutput = {
   mode: string;
   setMode: (newValue: string) => void;
   isRunning: boolean;
+  project: SqProject;
+  sourceId: string;
 };
 
 export function useSquiggleRunner(args: SquiggleRunnerArgs) {
   const runnerState = useRunnerState(args.code);
 
-  const [squiggleOutput, { isRunning }] = useSquiggle({
+  const [squiggleOutput, { isRunning, sourceId, project }] = useSquiggle({
     code: runnerState.renderedCode,
     executionId: runnerState.executionId,
     ...(args.project
@@ -49,6 +53,8 @@ export function useSquiggleRunner(args: SquiggleRunnerArgs) {
     squiggleOutput,
     runnerState,
     mode,
+    sourceId,
+    project,
     setMode,
     isRunning,
   };

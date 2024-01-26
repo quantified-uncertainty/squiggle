@@ -10,10 +10,8 @@ import React, {
 import { SqLinker, SqProject } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
-import { useRunnerState } from "../../lib/hooks/useRunnerState.js";
-import { useSquiggle } from "../../lib/hooks/useSquiggle.js";
+import { useSquiggleRunner } from "../../lib/hooks/useSquiggleRunner.js";
 import { useUncontrolledCode } from "../../lib/hooks/useUncontrolledCode.js";
-import { defaultMode, ViewerMode } from "../../lib/utility.js";
 import {
   defaultPlaygroundSettings,
   PartialPlaygroundSettings,
@@ -85,7 +83,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     renderExtraModal,
     renderImportTooltip,
     height = 500,
-    sourceId,
     ...defaultSettings
   } = props;
 
@@ -120,27 +117,14 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     onCodeChange: onCodeChange,
   });
 
-  const runnerState = useRunnerState(code);
-
-  const [squiggleOutput, { isRunning, sourceId: _sourceId }] = useSquiggle({
-    code: runnerState.renderedCode,
-    project: project,
-    sourceId: sourceId,
-    executionId: runnerState.executionId,
-  });
-
-  const isModeSet = useRef(false);
-
-  const [mode, setMode] = useState<ViewerMode>(() => {
-    return defaultMode(undefined);
-  });
-
-  useEffect(() => {
-    if (!isModeSet.current && squiggleOutput?.output) {
-      setMode(defaultMode(squiggleOutput.output));
-      isModeSet.current = true; // Mark that mode is set
-    }
-  }, [squiggleOutput?.output]);
+  const {
+    squiggleOutput,
+    runnerState,
+    mode,
+    setMode,
+    isRunning,
+    sourceId: _sourceId,
+  } = useSquiggleRunner({ project, code });
 
   useEffect(() => {
     project.setEnvironment(settings.environment);
