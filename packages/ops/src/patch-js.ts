@@ -11,74 +11,117 @@ const repoRoot = path.join(
   "../../.."
 );
 
-const t = babel.types;
+// From https://github.com/babel/babel/blob/0e5ae8de66d5c1e9ecc3f94daa5bd5d3a920e5a4/packages/babel-plugin-proposal-import-defer/src/index.ts#L14; helps with assertions.
+const t: typeof babel.types = babel.types;
 
-const parserPlugins: babelParser.ParserPlugin[] = [["typescript", {}], "jsx"];
+const parserPlugins: babelParser.ParserPlugin[] = [
+  ["typescript", {}],
+  "topLevelAwait",
+  "jsx",
+];
 
-export async function insertVersionToVersionedComponents(version: string) {
+export async function insertVersionToVersionedComponents(
+  version: string,
+  opts: {
+    // for debugging
+    skipInstall?: boolean;
+  } = {}
+) {
   // `using` (https://devblogs.microsoft.com/typescript/announcing-typescript-5-2/#using-declarations-and-explicit-resource-management) would be nice to back up cwd.
   const oldCwd = process.cwd();
   process.chdir(path.join(repoRoot, "packages/versioned-components"));
 
-  const alias = `squiggle-components-${version}`;
-  await exec(`pnpm add ${alias}@npm:@quri/squiggle-components@${version}`);
+  if (!opts.skipInstall) {
+    for (const name of ["lang", "components"]) {
+      const alias = `squiggle-${name}-${version}`;
+      await exec(`pnpm add ${alias}@npm:@quri/squiggle-${name}@${version}`);
+    }
+  }
 
-  for (const componentName of ["SquigglePlayground", "SquiggleChart"]) {
-    const filename = `src/Versioned${componentName}.tsx`;
+  for (const name of ["lang", "components"]) {
+    const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
+
+    const filename = `src/versionedSquiggle${capitalizedName}.ts`;
     let src = await readFile(filename, "utf-8");
 
-    const propsIdentifier = `${componentName}Props_${version
-      .split(".")
-      .join("_")}`;
-
-    let patchedImports = false,
-      patchedComponents = false;
+    let patchedImportTypes = false,
+      patchedImports = false;
 
     const output = babel.transformSync(src, {
       parserOpts: { plugins: parserPlugins },
       plugins: [
         () => {
           const visitor: babel.Visitor = {
-            ImportDeclaration(path) {
-              if (path.node.source.value === "@quri/squiggle-components") {
-                const specifier = t.importSpecifier(
-                  t.identifier(propsIdentifier),
-                  t.identifier(`${componentName}Props`)
-                );
-                specifier.importKind = "type";
-                path.insertBefore(
-                  t.importDeclaration([specifier], t.stringLiteral(alias))
-                );
-                patchedImports = true;
-              }
-            },
-            VariableDeclarator(path) {
+            TSTypeAliasDeclaration(path) {
               if (
-                path.node.id.type === "Identifier" &&
-                path.node.id.name === "componentByVersion"
+                path.get("id").node.name !==
+                `Squiggle${capitalizedName}PackageTypes`
               ) {
-                const entries = path.get(
-                  "init.expression.expression.properties"
-                );
-                if (!Array.isArray(entries)) {
-                  throw new Error("Expected an array");
-                }
-                const lastEntry = entries.at(-1); // dev: lazy(...)
-                if (!lastEntry) {
-                  throw new Error("Expected to find some entries");
-                }
-
-                const lazyImport = babelParser.parseExpression(
-                  `(lazy(async () => ({
-                    default: (await import("${alias}")).${componentName}
-                  })) as FC<${propsIdentifier}>)`,
-                  { plugins: parserPlugins }
-                );
-                lastEntry.insertBefore(
-                  t.objectProperty(t.stringLiteral(version), lazyImport)
-                );
-                patchedComponents = true;
+                return;
               }
+              const members = path.get("typeAnnotation.members");
+              if (!Array.isArray(members)) {
+                throw new Error("Expected an array");
+              }
+
+              const tmpExpression = babelParser.parseExpression(
+                `undefined as GetImportType<typeof import("squiggle-${name}-${version}")>`,
+                { plugins: parserPlugins }
+              );
+              t.assertTSAsExpression(tmpExpression);
+              t.assertTSType(tmpExpression.typeAnnotation);
+
+              members
+                .at(-1)
+                ?.insertBefore(
+                  t.tsPropertySignature(
+                    t.stringLiteral(version),
+                    t.tSTypeAnnotation(tmpExpression.typeAnnotation)
+                  )
+                );
+              patchedImportTypes = true;
+            },
+            FunctionDeclaration(path) {
+              if (
+                path.get("id").node?.name !==
+                `squiggle${capitalizedName}ByVersion`
+              ) {
+                return;
+              }
+
+              path.traverse({
+                SwitchStatement(path) {
+                  const cases = path.get("cases");
+
+                  const devCase = cases.at(-2);
+                  if (!devCase) {
+                    throw new Error("Expected to find at least two cases");
+                  }
+                  const devCaseTest = devCase.get("test").node;
+                  t.assertStringLiteral(devCaseTest);
+                  if (devCaseTest.value !== "dev") {
+                    throw new Error(
+                      `Expected dev case, got: ${devCaseTest.value}`
+                    );
+                  }
+
+                  const newReturn = babelParser.parseExpression(
+                    `(await import("squiggle-${name}-${version}")) as unknown as Squiggle${capitalizedName}PackageTypes[T]`,
+                    { plugins: parserPlugins, allowAwaitOutsideFunction: true }
+                  );
+                  if (!newReturn) {
+                    throw new Error("Failed to parse new case code");
+                  }
+
+                  devCase.insertBefore(
+                    t.switchCase(t.stringLiteral(version), [
+                      t.returnStatement(newReturn),
+                    ])
+                  );
+
+                  patchedImports = true;
+                },
+              });
             },
           };
           return { visitor };
@@ -86,7 +129,9 @@ export async function insertVersionToVersionedComponents(version: string) {
       ],
     });
 
-    if (!output?.code || !patchedImports || !patchedComponents) {
+    console.log(output?.code);
+
+    if (!output?.code || !patchedImportTypes || !patchedImports) {
       throw new Error(`Failed to transform ${filename}`);
     }
 
