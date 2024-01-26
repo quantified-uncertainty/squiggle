@@ -89,6 +89,6 @@ if (
 
 Note that it's possible to lie to TypeScript with this checker. You could pass an incorrect `version` unrelated to `props` that you're constructing. But if everything comes from a single `squiggle` object that you obtained with `versionedSquigglePackages`, then your code will be safe.
 
-## Writing new feature checkers
+## Adding new feature checkers
 
-See `src/predicates.ts`
+See `src/predicates.ts`; when you add a new feature to squiggle-lang or components, add another checker at the end of this file.
