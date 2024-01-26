@@ -3,10 +3,10 @@ import { FC } from "react";
 import { SqValue } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
+import { ViewerMode } from "../../lib/utility.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { SquiggleViewer } from "../SquiggleViewer/index.js";
-import { ViewerMode } from "./index.js";
 
 type Props = {
   mode: ViewerMode;

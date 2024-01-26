@@ -12,7 +12,7 @@ import {
 } from "@quri/ui";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
-import { ViewerMode } from "./index.js";
+import { ViewerMode } from "../../lib/utility.js";
 
 const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
   title,

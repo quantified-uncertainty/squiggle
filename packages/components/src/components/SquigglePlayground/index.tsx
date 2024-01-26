@@ -10,7 +10,9 @@ import React, {
 import { SqLinker, SqProject } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
-import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import { useRunnerState } from "../../lib/hooks/useRunnerState.js";
+import { SquiggleOutput, useSquiggle } from "../../lib/hooks/useSquiggle.js";
+import { useUncontrolledCode } from "../../lib/hooks/useUncontrolledCode.js";
 import { useMode } from "../../lib/utility.js";
 import {
   defaultPlaygroundSettings,
@@ -113,17 +115,30 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     return new SqProject({ linker });
   });
 
-  useEffect(() => {
-    project.setEnvironment(settings.environment);
-    leftPanelRef.current?.invalidate();
-  }, [project, settings.environment]);
-
   const [output, setOutput] = useState<{
     output: SquiggleOutput | undefined;
     isRunning: boolean;
   }>({ output: undefined, isRunning: false });
 
   const [mode, setMode] = useMode(output?.output?.output);
+
+  const { code, setCode } = useUncontrolledCode({
+    defaultCode: defaultCode,
+    onCodeChange: onCodeChange,
+  });
+
+  const runnerState = useRunnerState(code);
+
+  useEffect(() => {
+    project.setEnvironment(settings.environment);
+
+    function invalidate() {
+      if (runnerState.autorunMode) {
+        runnerState.run(); // mark output as stale but don't re-run if autorun is disabled; useful on environment changes, triggered in <SquigglePlayground> code
+      }
+    }
+    invalidate();
+  }, [project, settings.environment, runnerState]);
 
   useEffect(() => {
     const _output = output.output?.output;
@@ -148,16 +163,31 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     () => leftPanelRef.current?.getLeftPanelElement() ?? undefined,
     []
   );
+  const [squiggleOutput, { isRunning, sourceId: _sourceId }] = useSquiggle({
+    code: runnerState.renderedCode,
+    project: project,
+    sourceId: sourceId,
+    executionId: runnerState.executionId,
+  });
+
+  useEffect(() => {
+    setOutput({
+      output: squiggleOutput,
+      isRunning,
+    });
+  }, [setOutput, squiggleOutput, isRunning]);
 
   const renderLeft = () => (
     <LeftPlaygroundPanel
       project={project}
-      defaultCode={defaultCode}
-      sourceId={sourceId}
-      onCodeChange={onCodeChange}
+      code={code}
+      setCode={setCode}
+      sourceId={_sourceId}
+      isRunning={isRunning}
+      runnerState={runnerState}
+      squiggleOutput={squiggleOutput}
       settings={settings}
       onSettingsChange={handleSettingsChange}
-      onOutputChange={setOutput}
       renderExtraControls={renderExtraControls}
       renderExtraDropdownItems={renderExtraDropdownItems}
       renderExtraModal={renderExtraModal}
