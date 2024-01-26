@@ -7,11 +7,14 @@ export {
   defaultSquiggleVersion,
   type SquiggleVersion,
   squiggleVersions,
+} from "./versions.js";
+
+export {
   versionSupportsDropdownMenu,
   versionSupportsExports,
   versionSupportsImportTooltip,
   versionSupportsSqPathV2,
   versionSupportsSquiggleChart,
-} from "./versions.js";
+} from "./predicates.js";
 
 export { useAdjustSquiggleVersion } from "./hooks.js";

@@ -28,24 +28,24 @@ const VersionedSquiggleModelExportPage: FC<
     version: SupportedVersion;
   }
 > = ({ variableName, code, version }) => {
-  const props = use(versionedSquigglePackages(version));
+  const squiggle = use(versionedSquigglePackages(version));
 
-  const project = new props.lang.SqProject({
+  const project = new squiggle.lang.SqProject({
     linker: squiggleHubLinker,
   });
 
-  const rootPathOverride = versionSupportsSqPathV2.props(props)
-    ? new props.lang.SqValuePath({
+  const rootPathOverride = versionSupportsSqPathV2.object(squiggle)
+    ? new squiggle.lang.SqValuePath({
         root: "bindings",
-        edges: [props.lang.SqValuePathEdge.fromKey(variableName)],
+        edges: [squiggle.lang.SqValuePathEdge.fromKey(variableName)],
       })
-    : new props.lang.SqValuePath({
+    : new squiggle.lang.SqValuePath({
         root: "bindings",
         items: [{ type: "string", value: variableName }],
       });
 
   return (
-    <props.components.SquiggleChart
+    <squiggle.components.SquiggleChart
       code={code}
       project={project}
       rootPathOverride={rootPathOverride}

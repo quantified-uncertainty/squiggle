@@ -1,5 +1,6 @@
 import { SquiggleVersion } from "./versions.js";
 
+// Auto-generated, don't touch.
 export type SquiggleLangPackageTypes = {
   "0.8.5": Awaited<typeof import("squiggle-lang-0.8.5")>;
   "0.8.6": Awaited<typeof import("squiggle-lang-0.8.6")>;
@@ -8,9 +9,10 @@ export type SquiggleLangPackageTypes = {
   dev: Awaited<typeof import("@quri/squiggle-lang")>;
 };
 
-async function squiggleLangPackageByVersion<T extends SquiggleVersion>(
+export async function squiggleLangByVersion<T extends SquiggleVersion>(
   version: T
 ): Promise<SquiggleLangPackageTypes[T]> {
+  // Auto-generated, don't touch.
   // Enumerating all imports is necessary; `await import(version)` won't be enough.
   switch (version) {
     case "0.8.5":
@@ -36,18 +38,4 @@ async function squiggleLangPackageByVersion<T extends SquiggleVersion>(
     default:
       throw new Error(`Unkonwn version ${version satisfies never}`);
   }
-}
-
-// Conditional is a trick from https://stackoverflow.com/a/51691257
-type VersionedSquiggleLang<T extends SquiggleVersion = SquiggleVersion> =
-  T extends string ? SquiggleLangPackageTypes[T] & { version: T } : never;
-
-export async function squiggleLangByVersion<T extends SquiggleVersion>(
-  version: T
-): Promise<VersionedSquiggleLang<T>> {
-  const squiggleLang = await squiggleLangPackageByVersion(version);
-  return {
-    ...squiggleLang,
-    version,
-  } as VersionedSquiggleLang<T>;
 }

@@ -149,6 +149,7 @@ export async function insertVersionToVersionedComponents(version: string) {
   process.chdir(oldCwd);
 }
 
+// Update `System.version` value in squiggle-lang.
 // Always updates to the current version from `package.json`.
 export async function updateSquiggleLangVersion() {
   const packageRoot = path.join(repoRoot, "packages/squiggle-lang");

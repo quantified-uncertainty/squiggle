@@ -37,6 +37,7 @@ type PatchSqTypes<Exports extends Record<string, unknown>> = {
   [k in keyof Exports]: PatchSqTypesInFC<Exports[k]>;
 };
 
+// Auto-generated, don't touch.
 export type SquiggleComponentsPackageTypes = {
   "0.8.5": PatchSqTypes<Awaited<typeof import("squiggle-components-0.8.5")>>;
   "0.8.6": PatchSqTypes<Awaited<typeof import("squiggle-components-0.8.6")>>;
@@ -48,6 +49,7 @@ export type SquiggleComponentsPackageTypes = {
 export async function squiggleComponentsByVersion<T extends SquiggleVersion>(
   version: T
 ): Promise<SquiggleComponentsPackageTypes[T]> {
+  // Auto-generated, don't touch.
   // Enumerating all imports is necessary; `await import(version)` won't be enough.
   switch (version) {
     case "0.8.5":
