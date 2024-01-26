@@ -1,12 +1,16 @@
 import { SquiggleVersion } from "./versions.js";
 
+// This type helper is named identically here and in `versionedSquiggleComponents.ts`.
+// This allows us to use the same code in `patch-js.ts` to update the list for both files.
+type GetImportType<T> = Awaited<T>;
+
 // Auto-generated, don't touch.
 export type SquiggleLangPackageTypes = {
-  "0.8.5": Awaited<typeof import("squiggle-lang-0.8.5")>;
-  "0.8.6": Awaited<typeof import("squiggle-lang-0.8.6")>;
-  "0.9.0": Awaited<typeof import("squiggle-lang-0.9.0")>;
-  "0.9.2": Awaited<typeof import("squiggle-lang-0.9.2")>;
-  dev: Awaited<typeof import("@quri/squiggle-lang")>;
+  "0.8.5": GetImportType<typeof import("squiggle-lang-0.8.5")>;
+  "0.8.6": GetImportType<typeof import("squiggle-lang-0.8.6")>;
+  "0.9.0": GetImportType<typeof import("squiggle-lang-0.9.0")>;
+  "0.9.2": GetImportType<typeof import("squiggle-lang-0.9.2")>;
+  dev: GetImportType<typeof import("@quri/squiggle-lang")>;
 };
 
 export async function squiggleLangByVersion<T extends SquiggleVersion>(

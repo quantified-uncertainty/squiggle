@@ -37,13 +37,19 @@ type PatchSqTypes<Exports extends Record<string, unknown>> = {
   [k in keyof Exports]: PatchSqTypesInFC<Exports[k]>;
 };
 
+// This type helper is named identically here and in `versionedSquiggleLang.ts`.
+// This allows us to use the same code in `patch-js.ts` to update the list for both files.
+type GetImportType<T extends Record<string, unknown>> = PatchSqTypes<
+  Awaited<T>
+>;
+
 // Auto-generated, don't touch.
 export type SquiggleComponentsPackageTypes = {
-  "0.8.5": PatchSqTypes<Awaited<typeof import("squiggle-components-0.8.5")>>;
-  "0.8.6": PatchSqTypes<Awaited<typeof import("squiggle-components-0.8.6")>>;
-  "0.9.0": PatchSqTypes<Awaited<typeof import("squiggle-components-0.9.0")>>;
-  "0.9.2": PatchSqTypes<Awaited<typeof import("squiggle-components-0.9.2")>>;
-  dev: PatchSqTypes<Awaited<typeof import("@quri/squiggle-components")>>;
+  "0.8.5": GetImportType<typeof import("squiggle-components-0.8.5")>;
+  "0.8.6": GetImportType<typeof import("squiggle-components-0.8.6")>;
+  "0.9.0": GetImportType<typeof import("squiggle-components-0.9.0")>;
+  "0.9.2": GetImportType<typeof import("squiggle-components-0.9.2")>;
+  dev: GetImportType<typeof import("@quri/squiggle-components")>;
 };
 
 export async function squiggleComponentsByVersion<T extends SquiggleVersion>(
