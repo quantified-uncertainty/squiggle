@@ -6,7 +6,6 @@ import { SquiggleVersion } from "./versions.js";
 
 export type LazyVersionedComponents<
   // Version type parameter is optional; it's useful if we don't want to support some older versions for this component.
-  // See `./VersionedSquiggleChart.tsx` for an example.
   Version extends SquiggleVersion = SquiggleVersion,
 > = {
   // `FC<unknown>` or `FC<never>` won't work. `any` here is not a big deal because we only use this type for `satisfies` check.
