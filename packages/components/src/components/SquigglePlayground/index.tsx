@@ -119,19 +119,21 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 
   const {
     squiggleOutput,
-    runnerState,
     mode,
     setMode,
     isRunning,
     sourceId: _sourceId,
+    autorunMode,
+    setAutorunMode,
+    run,
   } = useSquiggleRunner({ project, code });
 
   useEffect(() => {
     project.setEnvironment(settings.environment);
 
     function invalidate() {
-      if (runnerState.autorunMode) {
-        runnerState.run(); // mark output as stale but don't re-run if autorun is disabled; useful on environment changes, triggered in <SquigglePlayground> code
+      if (autorunMode) {
+        run(); // mark output as stale but don't re-run if autorun is disabled; useful on environment changes, triggered in <SquigglePlayground> code
       }
     }
     invalidate();
@@ -167,7 +169,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       setCode={setCode}
       sourceId={_sourceId}
       isRunning={isRunning}
-      runnerState={runnerState}
       squiggleOutput={squiggleOutput}
       settings={settings}
       onSettingsChange={handleSettingsChange}
@@ -177,6 +178,9 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       onViewValuePath={(path) => rightPanelRef.current?.viewValuePath(path)}
       renderImportTooltip={renderImportTooltip}
       ref={leftPanelRef}
+      autorunMode={autorunMode}
+      setAutorunMode={setAutorunMode}
+      run={run}
     />
   );
 

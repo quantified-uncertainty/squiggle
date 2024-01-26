@@ -43,11 +43,11 @@ const reducer = (state: InternalState, action: Action): InternalState => {
 // 1. Contains all necessary data for the playground;
 // 2. Matches the Props shape of RunControls component.
 export type RunnerState = {
-  run: () => void;
+  _run: () => void;
   autorunMode: boolean;
-  code: string;
-  renderedCode: string;
-  executionId: number;
+  // code: string;
+  _renderedCode: string;
+  _executionId: number;
   setAutorunMode: (newValue: boolean) => void;
 };
 
@@ -63,11 +63,11 @@ export function useRunnerState(code: string): RunnerState {
   }
 
   return {
-    run,
+    _run: run,
     autorunMode: state.autorunMode,
-    code,
-    renderedCode: state.renderedCode,
-    executionId: state.executionId,
+    // code,
+    _renderedCode: state.renderedCode,
+    _executionId: state.executionId,
     setAutorunMode: (newValue: boolean) => {
       dispatch({ type: "SET_AUTORUN_MODE", value: newValue, code });
     },

@@ -18,7 +18,6 @@ import {
 } from "@quri/ui";
 
 import { SquiggleOutput } from "../../../lib/hooks/index.js";
-import { RunnerState } from "../../../lib/hooks/useRunnerState.js";
 import { altKey, getErrors } from "../../../lib/utility.js";
 import {
   CodeEditor,
@@ -48,7 +47,9 @@ type Props = {
   renderExtraDropdownItems?: RenderExtraControls;
   renderExtraModal?: Parameters<typeof PanelWithToolbar>[0]["renderModal"];
   squiggleOutput: SquiggleOutput | undefined;
-  runnerState: RunnerState;
+  autorunMode: boolean;
+  setAutorunMode: (autorunMode: boolean) => void;
+  run: () => void;
   isRunning: boolean;
   code: string;
   setCode: (code: string) => void;
@@ -83,8 +84,15 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
       openModal: (name: string) => void;
     }) => (
       <div className="flex">
-        <RunMenuItem {...props.runnerState} isRunning={props.isRunning} />
-        <AutorunnerMenuItem {...props.runnerState} />
+        <RunMenuItem
+          run={props.run}
+          autorunMode={props.autorunMode}
+          isRunning={props.isRunning}
+        />
+        <AutorunnerMenuItem
+          setAutorunMode={props.setAutorunMode}
+          autorunMode={props.autorunMode}
+        />
         <ToolbarItem
           tooltipText={`Format Code (${altKey()}+Shift+f)`}
           icon={Bars3CenterLeftIcon}
@@ -131,7 +139,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           showGutter={true}
           lineWrapping={props.settings.editorSettings.lineWrapping}
           onChange={props.setCode}
-          onSubmit={props.runnerState.run}
+          onSubmit={props.run}
           onViewValuePath={props.onViewValuePath}
           renderImportTooltip={props.renderImportTooltip}
         />

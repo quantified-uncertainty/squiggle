@@ -29,18 +29,13 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     onCodeChange,
   });
 
-  const {
-    squiggleOutput,
-    mode,
-    setMode,
-    isRunning,
-    project,
-    sourceId,
-    runnerState,
-  } = useSquiggleRunner({
-    code,
-    ...(propsProject ? { project: propsProject, continues } : { environment }),
-  });
+  const { squiggleOutput, mode, setMode, isRunning, project, sourceId, run } =
+    useSquiggleRunner({
+      code,
+      ...(propsProject
+        ? { project: propsProject, continues }
+        : { environment }),
+    });
 
   const errors = useMemo(() => {
     if (!squiggleOutput) {
@@ -66,7 +61,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           project={project}
           sourceId={sourceId}
           ref={editorRef}
-          onSubmit={() => runnerState.run()}
+          onSubmit={run}
         />
       </div>
       {hideViewer || !squiggleOutput ? null : (

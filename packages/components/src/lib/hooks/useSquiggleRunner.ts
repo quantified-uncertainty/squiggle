@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { SqProject } from "@quri/squiggle-lang";
 
 import { defaultMode, ViewerMode } from "../utility.js";
-import { RunnerState, useRunnerState } from "./useRunnerState.js";
+import { useRunnerState } from "./useRunnerState.js";
 import {
   ProjectExecutionProps,
   SquiggleOutput,
@@ -17,20 +17,22 @@ export type SquiggleRunnerArgs = {
 
 export type SquiggleRunnerOutput = {
   squiggleOutput?: SquiggleOutput;
-  runnerState: RunnerState;
   mode: string;
   setMode: (newValue: string) => void;
   isRunning: boolean;
   project: SqProject;
   sourceId: string;
+  run: () => void;
+  setAutorunMode: (newValue: boolean) => void;
+  autorunMode: boolean;
 };
 
 export function useSquiggleRunner(args: SquiggleRunnerArgs) {
   const runnerState = useRunnerState(args.code);
 
   const [squiggleOutput, { isRunning, sourceId, project }] = useSquiggle({
-    code: runnerState.renderedCode,
-    executionId: runnerState.executionId,
+    code: runnerState._renderedCode,
+    executionId: runnerState._executionId,
     ...(args.project
       ? { project: args.project, continues: args.continues }
       : { environment: args.environment }),
@@ -51,11 +53,13 @@ export function useSquiggleRunner(args: SquiggleRunnerArgs) {
 
   return {
     squiggleOutput,
-    runnerState,
     mode,
     sourceId,
     project,
     setMode,
     isRunning,
+    autorunMode: runnerState.autorunMode,
+    run: runnerState._run,
+    setAutorunMode: runnerState.setAutorunMode,
   };
 }
