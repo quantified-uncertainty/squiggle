@@ -1,35 +1,22 @@
 import { useReducer } from "react";
 
 type InternalState = {
-  autorunMode: boolean;
   renderedCode: string;
   executionId: number;
 };
 
 const buildInitialState = (): InternalState => ({
-  autorunMode: true,
   renderedCode: "",
   executionId: 0,
 });
 
-type Action =
-  | {
-      type: "SET_AUTORUN_MODE";
-      value: boolean;
-      code: string;
-    }
-  | {
-      type: "RUN";
-      code: string;
-    };
+type Action = {
+  type: "RUN";
+  code: string;
+};
 
 const reducer = (state: InternalState, action: Action): InternalState => {
   switch (action.type) {
-    case "SET_AUTORUN_MODE":
-      return {
-        ...state,
-        autorunMode: action.value,
-      };
     case "RUN":
       return {
         ...state,
@@ -43,33 +30,29 @@ const reducer = (state: InternalState, action: Action): InternalState => {
 // 1. Contains all necessary data for the playground;
 // 2. Matches the Props shape of RunControls component.
 export type RunnerState = {
-  _run: () => void;
-  autorunMode: boolean;
+  run: () => void;
   // code: string;
-  _renderedCode: string;
-  _executionId: number;
-  setAutorunMode: (newValue: boolean) => void;
+  renderedCode: string;
+  executionId: number;
 };
 
-export function useRunnerState(code: string): RunnerState {
+export function useRunnerState(
+  code: string,
+  autorunMode: boolean
+): RunnerState {
   const [state, dispatch] = useReducer(reducer, undefined, buildInitialState);
 
   const run = () => {
     dispatch({ type: "RUN", code });
   };
 
-  if (state.autorunMode && state.renderedCode !== code) {
+  if (autorunMode && state.renderedCode !== code) {
     run();
   }
 
   return {
-    _run: run,
-    autorunMode: state.autorunMode,
-    // code,
-    _renderedCode: state.renderedCode,
-    _executionId: state.executionId,
-    setAutorunMode: (newValue: boolean) => {
-      dispatch({ type: "SET_AUTORUN_MODE", value: newValue, code });
-    },
+    run: run,
+    renderedCode: state.renderedCode,
+    executionId: state.executionId,
   };
 }

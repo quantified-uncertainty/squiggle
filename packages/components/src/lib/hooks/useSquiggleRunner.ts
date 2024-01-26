@@ -28,11 +28,13 @@ export type SquiggleRunnerOutput = {
 };
 
 export function useSquiggleRunner(args: SquiggleRunnerArgs) {
-  const runnerState = useRunnerState(args.code);
+  const [autorunMode, setAutorunMode] = useState(true);
+
+  const runnerState = useRunnerState(args.code, autorunMode);
 
   const [squiggleOutput, { isRunning, sourceId, project }] = useSquiggle({
-    code: runnerState._renderedCode,
-    executionId: runnerState._executionId,
+    code: runnerState.renderedCode,
+    executionId: runnerState.executionId,
     ...(args.project
       ? { project: args.project, continues: args.continues }
       : { environment: args.environment }),
@@ -52,14 +54,15 @@ export function useSquiggleRunner(args: SquiggleRunnerArgs) {
   }, [squiggleOutput?.output]);
 
   return {
-    squiggleOutput,
-    mode,
     sourceId,
+    squiggleOutput,
     project,
-    setMode,
     isRunning,
-    autorunMode: runnerState.autorunMode,
-    run: runnerState._run,
-    setAutorunMode: runnerState.setAutorunMode,
+    run: runnerState.run,
+
+    mode,
+    setMode,
+    autorunMode,
+    setAutorunMode: setAutorunMode,
   };
 }
