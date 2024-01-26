@@ -1,31 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Env, SqProject } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
-import { WINDOW_VARIABLE_NAME } from "../constants.js";
-
-// Props needed for a standalone execution.
-export type StandaloneExecutionProps = {
-  project?: undefined;
-  environment?: Env;
-  continues?: undefined;
-};
-
-// Props needed when executing inside a project.
-export type ProjectExecutionProps = {
-  /** The project that this execution is part of */
-  project: SqProject;
-  environment?: undefined;
-  /** What other squiggle sources from the project to continue. Default [] */
-  continues?: string[];
-};
+import { useForceUpdate } from "./useForceUpdate.js";
 
 export type SquiggleArgs = {
   code: string;
-  sourceId?: string;
+  sourceId: string;
   executionId?: number;
-} & (StandaloneExecutionProps | ProjectExecutionProps);
+  project: SqProject;
+  continues: string[];
+  environment?: Env;
+};
+
+export type UpcomingSquiggleOutput = {
+  code: string;
+  executionId: number;
+};
 
 // TODO - think of a better name, `SquiggleOutput` is too similar to `SqOutput`
 export type SquiggleOutput = {
@@ -33,87 +25,55 @@ export type SquiggleOutput = {
   code: string;
   executionId: number;
   executionTime: number;
+  isStale?: boolean;
 };
 
 export type UseSquiggleOutput = [
   SquiggleOutput | undefined,
-  {
-    project: SqProject;
-    isRunning: boolean;
-    sourceId: string; // if you don't provide `sourceId` in `SquiggleArgs` then it will be picked randomly
-  },
+  UpcomingSquiggleOutput | undefined,
+  { reRun: () => void },
 ];
-
-// this array's identity must be constant because it's used in useEffect below
-const defaultContinues: string[] = [];
 
 export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
   // random; https://stackoverflow.com/a/12502559
-  // TODO - React.useId?
-  const sourceId = useMemo(() => {
-    return args.sourceId ?? Math.random().toString(36).slice(2);
-  }, [args.sourceId]);
 
-  const projectArg = "project" in args ? args.project : undefined;
-  const environment = "environment" in args ? args.environment : undefined;
-  const continues =
-    "continues" in args ? args.continues ?? defaultContinues : defaultContinues;
+  const squiggleOutputRef = useRef<SquiggleOutput | undefined>(undefined);
+  const executionIdRef = useRef<number>(0);
 
-  const project = useMemo(() => {
-    if (projectArg) {
-      return projectArg;
-    } else {
-      const p = SqProject.create();
-      if (environment) {
-        p.setEnvironment(environment);
-      }
-      return p;
-    }
-  }, [projectArg, environment]);
-
-  const [isRunning, setIsRunning] = useState(false);
-
-  const [squiggleOutput, setSquiggleOutput] = useState<
-    SquiggleOutput | undefined
+  const forceUpdate = useForceUpdate();
+  const [upcomingSquiggleOutput, setUpcomingSquiggleOutput] = useState<
+    UpcomingSquiggleOutput | undefined
   >(undefined);
 
-  const { executionId = 1 } = args;
-
-  useEffect(
-    () => {
-      // TODO - cancel previous run if already running
-      setIsRunning(true);
-
+  const runSquiggle = useCallback(
+    async () => {
       const act = async () => {
         const startTime = Date.now();
-        project.setSource(sourceId, args.code);
-        project.setContinues(sourceId, continues);
-        await project.run(sourceId);
-        const output = project.getOutput(sourceId);
-        const executionTime = Date.now() - startTime;
+        args.project.setSource(args.sourceId, args.code);
+        args.project.setContinues(args.sourceId, args.continues);
 
-        setSquiggleOutput({
-          output,
-          code: args.code,
-          executionId,
-          executionTime,
-        });
-        setIsRunning(false);
-
-        //Set the output to the window so that it can be accessed by users/developers there
-        //This is useful for debugging
-        if (typeof window !== "undefined") {
-          if (!window[WINDOW_VARIABLE_NAME]) {
-            window[WINDOW_VARIABLE_NAME] = {};
-          }
-          window[WINDOW_VARIABLE_NAME][sourceId] = {
-            output,
-            code: args.code,
-            executionId,
-            executionTime,
-            startTime,
+        if (squiggleOutputRef.current) {
+          squiggleOutputRef.current = {
+            ...squiggleOutputRef.current,
+            isStale: true,
           };
         }
+
+        await args.project.run(args.sourceId);
+        const output = args.project.getOutput(args.sourceId);
+        const executionTime = Date.now() - startTime;
+
+        forceUpdate();
+
+        squiggleOutputRef.current = {
+          output,
+          code: args.code,
+          executionId: executionIdRef.current++,
+          executionTime,
+          isStale: false,
+        };
+
+        setUpcomingSquiggleOutput(undefined);
       };
 
       if (typeof MessageChannel === "undefined") {
@@ -127,25 +87,35 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
         });
       }
     },
+
     // This complains about executionId not being used inside the function body.
     // This is on purpose, as executionId simply allows you to run the squiggle
     // code again
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [args.code, executionId, sourceId, continues, project]
+    [
+      args.code,
+      args.continues,
+      args.project,
+      args.sourceId,
+      setUpcomingSquiggleOutput,
+      forceUpdate,
+    ]
   );
 
   useEffect(() => {
+    // TODO - cancel previous run if already running
+    runSquiggle();
+  }, [runSquiggle]);
+
+  useEffect(() => {
     return () => {
-      project.removeSource(sourceId);
+      args.project.removeSource(args.sourceId);
     };
-  }, [project, sourceId]);
+  }, [args.project, args.sourceId]);
 
   return [
-    squiggleOutput,
-    {
-      project,
-      isRunning,
-      sourceId,
-    },
+    squiggleOutputRef.current,
+    upcomingSquiggleOutput,
+    { reRun: runSquiggle },
   ];
 }

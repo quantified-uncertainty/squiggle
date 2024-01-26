@@ -7,8 +7,8 @@ import { SquiggleViewer } from "../index.js";
 import {
   ProjectExecutionProps,
   StandaloneExecutionProps,
-} from "../lib/hooks/useSquiggle.js";
-import { useSquiggleRunner } from "../lib/hooks/useSquiggleRunner.js";
+  useSquiggleRunner,
+} from "../lib/hooks/useSquiggleRunner.js";
 import { MessageAlert } from "./Alert.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "./SquiggleErrorAlert.js";

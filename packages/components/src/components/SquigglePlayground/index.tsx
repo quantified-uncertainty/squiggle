@@ -137,7 +137,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       }
     }
     invalidate();
-  }, [project, settings.environment]); //Don't add runnerState here, it will cause infinite loop
+  }, [project, settings.environment, autorunMode]); //Don't add runnerState here, it will cause infinite loop
 
   useEffect(() => {
     const _output = squiggleOutput?.output;

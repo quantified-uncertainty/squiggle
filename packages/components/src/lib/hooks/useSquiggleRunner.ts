@@ -1,18 +1,29 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { SqProject } from "@quri/squiggle-lang";
+import { Env, SqProject } from "@quri/squiggle-lang";
 
 import { defaultMode, ViewerMode } from "../utility.js";
-import { useRunnerState } from "./useRunnerState.js";
-import {
-  ProjectExecutionProps,
-  SquiggleOutput,
-  StandaloneExecutionProps,
-  useSquiggle,
-} from "./useSquiggle.js";
+import { SquiggleOutput, useSquiggle } from "./useSquiggle.js";
+
+// Props needed for a standalone execution.
+export type StandaloneExecutionProps = {
+  project?: undefined;
+  environment?: Env;
+  continues?: undefined;
+};
+
+// Props needed when executing inside a project.
+export type ProjectExecutionProps = {
+  /** The project that this execution is part of */
+  project: SqProject;
+  environment?: undefined;
+  /** What other squiggle sources from the project to continue. Default [] */
+  continues?: string[];
+};
 
 export type SquiggleRunnerArgs = {
   code: string;
+  sourceId?: string;
 } & (StandaloneExecutionProps | ProjectExecutionProps);
 
 export type SquiggleRunnerOutput = {
@@ -27,17 +38,39 @@ export type SquiggleRunnerOutput = {
   autorunMode: boolean;
 };
 
+const defaultContinues: string[] = [];
+
 export function useSquiggleRunner(args: SquiggleRunnerArgs) {
   const [autorunMode, setAutorunMode] = useState(true);
 
-  const runnerState = useRunnerState(args.code, autorunMode);
+  const sourceId = useMemo(() => {
+    return args.sourceId ?? Math.random().toString(36).slice(2);
+  }, [args.sourceId]);
 
-  const [squiggleOutput, { isRunning, sourceId, project }] = useSquiggle({
-    code: runnerState.renderedCode,
-    executionId: runnerState.executionId,
-    ...(args.project
-      ? { project: args.project, continues: args.continues }
-      : { environment: args.environment }),
+  const projectArg = "project" in args ? args.project : undefined;
+  const environment = "environment" in args ? args.environment : undefined;
+
+  const continues =
+    "continues" in args ? args.continues ?? defaultContinues : defaultContinues;
+
+  const project = useMemo(() => {
+    if (projectArg) {
+      return projectArg;
+    } else {
+      const p = SqProject.create();
+      if (environment) {
+        p.setEnvironment(environment);
+      }
+      return p;
+    }
+  }, [projectArg, environment]);
+
+  const [squiggleOutput, _, { reRun }] = useSquiggle({
+    sourceId,
+    code: args.code,
+    project,
+    environment,
+    continues,
   });
 
   const isModeSet = useRef(false);
@@ -57,8 +90,8 @@ export function useSquiggleRunner(args: SquiggleRunnerArgs) {
     sourceId,
     squiggleOutput,
     project,
-    isRunning,
-    run: runnerState.run,
+    isRunning: false,
+    run: reRun,
 
     mode,
     setMode,
