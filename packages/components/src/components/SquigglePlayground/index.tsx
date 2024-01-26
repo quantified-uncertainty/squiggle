@@ -11,7 +11,7 @@ import { SqLinker, SqProject } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { useRunnerState } from "../../lib/hooks/useRunnerState.js";
-import { SquiggleOutput, useSquiggle } from "../../lib/hooks/useSquiggle.js";
+import { useSquiggle } from "../../lib/hooks/useSquiggle.js";
 import { useUncontrolledCode } from "../../lib/hooks/useUncontrolledCode.js";
 import { useMode } from "../../lib/utility.js";
 import {
@@ -115,19 +115,21 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     return new SqProject({ linker });
   });
 
-  const [output, setOutput] = useState<{
-    output: SquiggleOutput | undefined;
-    isRunning: boolean;
-  }>({ output: undefined, isRunning: false });
-
-  const [mode, setMode] = useMode(output?.output?.output);
-
   const { code, setCode } = useUncontrolledCode({
     defaultCode: defaultCode,
     onCodeChange: onCodeChange,
   });
 
   const runnerState = useRunnerState(code);
+
+  const [squiggleOutput, { isRunning, sourceId: _sourceId }] = useSquiggle({
+    code: runnerState.renderedCode,
+    project: project,
+    sourceId: sourceId,
+    executionId: runnerState.executionId,
+  });
+
+  const [mode, setMode] = useMode(squiggleOutput?.output);
 
   useEffect(() => {
     project.setEnvironment(settings.environment);
@@ -141,7 +143,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   }, [project, settings.environment, runnerState]);
 
   useEffect(() => {
-    const _output = output.output?.output;
+    const _output = squiggleOutput?.output;
     if (_output && _output.ok) {
       const exports = _output.value.exports;
       const _exports: ModelExport[] = exports.entries().map((e) => ({
@@ -154,7 +156,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     } else {
       onExportsChange && onExportsChange([]);
     }
-  }, [output, onExportsChange]);
+  }, [squiggleOutput, onExportsChange]);
 
   const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
   const rightPanelRef = useRef<SquiggleViewerHandle>(null);
@@ -163,20 +165,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     () => leftPanelRef.current?.getLeftPanelElement() ?? undefined,
     []
   );
-  const [squiggleOutput, { isRunning, sourceId: _sourceId }] = useSquiggle({
-    code: runnerState.renderedCode,
-    project: project,
-    sourceId: sourceId,
-    executionId: runnerState.executionId,
-  });
-
-  useEffect(() => {
-    setOutput({
-      output: squiggleOutput,
-      isRunning,
-    });
-  }, [setOutput, squiggleOutput, isRunning]);
-
   const renderLeft = () => (
     <LeftPlaygroundPanel
       project={project}
@@ -198,10 +186,10 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   );
 
   const renderRight = () =>
-    output.output ? (
+    squiggleOutput ? (
       <SquiggleOutputViewer
-        squiggleOutput={output.output}
-        isRunning={output.isRunning}
+        squiggleOutput={squiggleOutput}
+        isRunning={isRunning}
         // FIXME - this will cause viewer to be rendered twice on initial render
         editor={leftPanelRef.current?.getEditor() ?? undefined}
         ref={rightPanelRef}
