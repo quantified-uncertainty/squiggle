@@ -1,4 +1,4 @@
-import { FC, memo } from "react";
+import { FC, memo, useEffect, useRef, useState } from "react";
 
 import { SqValuePath } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
@@ -10,7 +10,7 @@ import {
   StandaloneExecutionProps,
   useSquiggle,
 } from "../lib/hooks/useSquiggle.js";
-import { useMode } from "../lib/utility.js";
+import { defaultMode, ViewerMode } from "../lib/utility.js";
 import { MessageAlert } from "./Alert.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "./SquiggleErrorAlert.js";
@@ -37,13 +37,24 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     // This is important, for example, in VS Code extension.
     // TODO: maybe `useRunnerState` could be merged with `useSquiggle`, but it does some extra stuff (autorun mode).
     const runnerState = useRunnerState(code);
+    const isModeSet = useRef(false);
+
+    const [mode, setMode] = useState<ViewerMode>(() => {
+      return defaultMode(undefined);
+    });
 
     const [squiggleOutput, { isRunning }] = useSquiggle({
       code: runnerState.renderedCode,
       executionId: runnerState.executionId,
       ...(project ? { project, continues } : { environment }),
     });
-    const [mode, setMode] = useMode(squiggleOutput?.output);
+
+    useEffect(() => {
+      if (!isModeSet.current && squiggleOutput?.output) {
+        setMode(defaultMode(squiggleOutput.output));
+        isModeSet.current = true; // Mark that mode is set
+      }
+    }, [squiggleOutput?.output]);
 
     // TODO - if `<ViewerProvider>` is not set up (which is very possible) then calculator paths won't be resolved.
     const getSubvalueByPath = useGetSubvalueByPath();

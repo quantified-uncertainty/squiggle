@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import { result, SqValue } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../squiggle-lang/src/public/types.js";
@@ -104,21 +102,17 @@ export function valueHasContext(value: SqValue): value is SqValueWithContext {
 
 export type ViewerMode = "Imports" | "Exports" | "Variables" | "Result" | "AST";
 
-export function useMode(outputResult: SqOutputResult | undefined) {
-  return useState<ViewerMode>(() => {
-    // Pick the initial mode value
-
-    if (!outputResult || !outputResult.ok) {
-      return "Variables";
-    }
-
-    const output = outputResult.value;
-    if (output.result.tag !== "Void") {
-      return "Result";
-    }
-    if (!output.exports.isEmpty()) {
-      return "Exports";
-    }
+export function defaultMode(outputResult: SqOutputResult | undefined) {
+  if (!outputResult || !outputResult.ok) {
     return "Variables";
-  });
+  }
+
+  const output = outputResult.value;
+  if (output.result.tag !== "Void") {
+    return "Result";
+  }
+  if (!output.exports.isEmpty()) {
+    return "Exports";
+  }
+  return "Variables";
 }

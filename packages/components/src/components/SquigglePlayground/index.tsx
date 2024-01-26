@@ -13,7 +13,7 @@ import { RefreshIcon } from "@quri/ui";
 import { useRunnerState } from "../../lib/hooks/useRunnerState.js";
 import { useSquiggle } from "../../lib/hooks/useSquiggle.js";
 import { useUncontrolledCode } from "../../lib/hooks/useUncontrolledCode.js";
-import { useMode } from "../../lib/utility.js";
+import { defaultMode, ViewerMode } from "../../lib/utility.js";
 import {
   defaultPlaygroundSettings,
   PartialPlaygroundSettings,
@@ -129,7 +129,18 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     executionId: runnerState.executionId,
   });
 
-  const [mode, setMode] = useMode(squiggleOutput?.output);
+  const isModeSet = useRef(false);
+
+  const [mode, setMode] = useState<ViewerMode>(() => {
+    return defaultMode(undefined);
+  });
+
+  useEffect(() => {
+    if (!isModeSet.current && squiggleOutput?.output) {
+      setMode(defaultMode(squiggleOutput.output));
+      isModeSet.current = true; // Mark that mode is set
+    }
+  }, [squiggleOutput?.output]);
 
   useEffect(() => {
     project.setEnvironment(settings.environment);
@@ -140,7 +151,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       }
     }
     invalidate();
-  }, [project, settings.environment, runnerState]);
+  }, [project, settings.environment]); //Don't add runnerState here, it will cause infinite loop
 
   useEffect(() => {
     const _output = squiggleOutput?.output;
