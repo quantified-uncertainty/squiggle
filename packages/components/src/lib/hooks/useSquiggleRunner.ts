@@ -39,6 +39,9 @@ export type SquiggleRunnerOutput = {
 
   setProjectEnvironment: (newEnv: Env) => void;
   rerunSquiggleCode: () => void;
+
+  seed: string;
+  setSeed: (newValue: string) => void;
 };
 
 export function getIsRunning(squiggleOutput: SquiggleOutput): boolean {
@@ -51,6 +54,7 @@ export function useSquiggleRunner(
   args: SquiggleRunnerArgs
 ): SquiggleRunnerOutput {
   const [autorunMode, setAutorunMode] = useState(true);
+  const [seed, setSeed] = useState<string>("starting-seed");
   const isViewerTabSet = useRef(false);
 
   const [viewerTab, setViewerTab] = useState<ViewerTab>(() => {
@@ -117,5 +121,8 @@ export function useSquiggleRunner(
 
     setProjectEnvironment: updateEnvironment,
     rerunSquiggleCode: rerunSquiggleCode,
+
+    seed,
+    setSeed,
   };
 }

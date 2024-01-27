@@ -84,7 +84,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     ...defaultSettings
   } = props;
 
-  const [seed, setSeed] = useState<string>("starting-seed");
   // `settings` are owned by SquigglePlayground.
   // This can cause some unnecessary renders (e.g. settings form), but most heavy playground subcomponents
   // should rerender on settings changes (e.g. right panel), so that's fine.
@@ -125,6 +124,8 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     setAutorunMode,
     rerunSquiggleCode,
     setProjectEnvironment,
+    seed,
+    setSeed,
   } = useSquiggleRunner({ project, code });
 
   useEffect(() => {

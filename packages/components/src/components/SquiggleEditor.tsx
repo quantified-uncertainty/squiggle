@@ -1,4 +1,4 @@
-import { FC, useMemo, useRef, useState } from "react";
+import { FC, useMemo, useRef } from "react";
 
 import { useUncontrolledCode } from "../lib/hooks/index.js";
 import {
@@ -36,8 +36,6 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     onCodeChange,
   });
 
-  const [seed, setSeed] = useState<string>("0");
-
   const {
     squiggleOutput,
     viewerTab,
@@ -45,6 +43,8 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     project,
     sourceId,
     rerunSquiggleCode,
+    seed,
+    setSeed,
   } = useSquiggleRunner({
     code,
     ...(propsProject ? { project: propsProject, continues } : { environment }),
