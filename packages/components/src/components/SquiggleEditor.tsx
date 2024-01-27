@@ -15,9 +15,9 @@ export type SquiggleEditorProps = {
   defaultCode?: string;
   onCodeChange?(code: string): void;
   editorFontSize?: number;
-  settings?: Omit<PartialPlaygroundSettings, "environment">;
   // environment comes from SquiggleCodeProps
-} & (StandaloneExecutionProps | ProjectExecutionProps);
+} & (StandaloneExecutionProps | ProjectExecutionProps) &
+  Omit<PartialPlaygroundSettings, "environment">;
 
 export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   defaultCode: propsDefaultCode,
@@ -26,7 +26,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   continues,
   environment,
   editorFontSize,
-  settings,
+  ...settings
 }) => {
   const { code, setCode, defaultCode } = useUncontrolledCode({
     defaultCode: propsDefaultCode,
