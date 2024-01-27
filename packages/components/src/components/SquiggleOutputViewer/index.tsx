@@ -24,19 +24,7 @@ type Props = {
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
 export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
   (
-<<<<<<< HEAD
-    { squiggleOutput, editor, viewerTab, setViewerTab, ...settings },
-=======
-    {
-      squiggleProjectRun,
-      editor,
-      viewerTab,
-      seed,
-      setSeed,
-      setViewerTab,
-      ...settings
-    },
->>>>>>> 2abd1c6f0 (SquiggleOutput -> SquiggleProjectRun)
+    { squiggleProjectRun, editor, viewerTab, setViewerTab, ...settings },
     viewerRef
   ) => {
     const { output } = squiggleProjectRun;
@@ -57,18 +45,7 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
               output={output}
             />
           }
-<<<<<<< HEAD
-          indicator={<RenderingIndicator output={squiggleOutput} />}
-=======
-          changeSeedAndRunButton={
-            <RunSeedButton
-              isRunning={isRunning}
-              seed={seed}
-              setSeed={setSeed}
-            />
-          }
           indicator={<RenderingIndicator output={squiggleProjectRun} />}
->>>>>>> 2abd1c6f0 (SquiggleOutput -> SquiggleProjectRun)
           viewer={
             <ViewerBody
               viewerTab={viewerTab}
