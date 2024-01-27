@@ -1,12 +1,13 @@
 import { useCallback, useState } from "react";
 
-import { SquiggleCodeProps } from "../../components/types.js";
-
 // common helper for SquiggleEditor and SquigglePlayground
 export function useUncontrolledCode({
   defaultCode = "",
   onCodeChange,
-}: SquiggleCodeProps) {
+}: {
+  defaultCode?: string;
+  onCodeChange?: (code: string) => void;
+}) {
   const [code, setCode] = useState(defaultCode);
 
   const onChange = useCallback(

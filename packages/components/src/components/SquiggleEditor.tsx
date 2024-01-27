@@ -1,18 +1,24 @@
 import { FC, useMemo, useRef } from "react";
 
 import { useUncontrolledCode } from "../lib/hooks/index.js";
-import { useSquiggleRunner } from "../lib/hooks/useSquiggleRunner.js";
+import {
+  ProjectExecutionProps,
+  StandaloneExecutionProps,
+  useSquiggleRunner,
+} from "../lib/hooks/useSquiggleRunner.js";
 import { getErrors } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
-import { SquiggleCodeProps } from "./types.js";
 
-export type SquiggleEditorProps = SquiggleCodeProps & {
+export type SquiggleEditorProps = {
+  defaultCode?: string;
+  onCodeChange?(code: string): void;
   hideViewer?: boolean;
   editorFontSize?: number;
   // environment comes from SquiggleCodeProps
-} & Omit<PartialPlaygroundSettings, "environment">;
+} & (StandaloneExecutionProps | ProjectExecutionProps) &
+  Omit<PartialPlaygroundSettings, "environment">;
 
 export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   defaultCode: propsDefaultCode,

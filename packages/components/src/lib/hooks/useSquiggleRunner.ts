@@ -21,6 +21,12 @@ export type ProjectExecutionProps = {
   continues?: string[];
 };
 
+// common props for SquigglePlayground and SquiggleEditor
+export type SquiggleCodeProps = {
+  defaultCode?: string;
+  onCodeChange?(code: string): void;
+} & (StandaloneExecutionProps | ProjectExecutionProps);
+
 export type SquiggleRunnerArgs = {
   code: string;
   sourceId?: string;
