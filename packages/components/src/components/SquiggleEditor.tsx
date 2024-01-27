@@ -1,20 +1,25 @@
 import { FC, useMemo, useRef, useState } from "react";
 
 import { useUncontrolledCode } from "../lib/hooks/index.js";
-import { useRunnerState } from "../lib/hooks/useRunnerState.js";
-import { useSquiggle } from "../lib/hooks/useSquiggle.js";
+import {
+  ProjectExecutionProps,
+  StandaloneExecutionProps,
+  useSquiggleRunner,
+} from "../lib/hooks/useSquiggleRunner.js";
 import { getErrors } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
-import { SquiggleCodeProps } from "./types.js";
 
-export type SquiggleEditorProps = SquiggleCodeProps & {
+export type SquiggleEditorProps = {
+  defaultCode?: string;
+  onCodeChange?(code: string): void;
   hideViewer?: boolean;
   editorFontSize?: number;
   seed?: string;
   // environment comes from SquiggleCodeProps
-} & Omit<PartialPlaygroundSettings, "environment">;
+} & (StandaloneExecutionProps | ProjectExecutionProps) &
+  Omit<PartialPlaygroundSettings, "environment">;
 
 export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   defaultCode: propsDefaultCode,
@@ -33,11 +38,15 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
 
   const [seed, setSeed] = useState<string>("0");
 
-  const runnerState = useRunnerState(code, seed);
-
-  const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
-    code: runnerState.renderedCode,
-    executionId: runnerState.executionId,
+  const {
+    squiggleOutput,
+    viewerTab,
+    setViewerTab,
+    project,
+    sourceId,
+    rerunSquiggleCode,
+  } = useSquiggleRunner({
+    code,
     ...(propsProject ? { project: propsProject, continues } : { environment }),
   });
 
@@ -65,17 +74,18 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           project={project}
           sourceId={sourceId}
           ref={editorRef}
-          onSubmit={() => runnerState.run()}
+          onSubmit={rerunSquiggleCode}
         />
       </div>
       {hideViewer || !squiggleOutput ? null : (
         <SquiggleOutputViewer
           squiggleOutput={squiggleOutput}
-          isRunning={isRunning}
           editor={editorRef.current ?? undefined}
           environment={environment}
           seed={seed}
           setSeed={setSeed}
+          viewerTab={viewerTab}
+          setViewerTab={setViewerTab}
           {...settings}
         />
       )}

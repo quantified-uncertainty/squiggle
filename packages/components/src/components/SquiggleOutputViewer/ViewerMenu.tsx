@@ -12,7 +12,7 @@ import {
 } from "@quri/ui";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
-import { ViewerMode } from "./index.js";
+import { ViewerTab } from "../../lib/utility.js";
 
 const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
   title,
@@ -32,12 +32,12 @@ const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
 };
 
 type Props = {
-  mode: ViewerMode;
-  setMode: (mode: ViewerMode) => void;
+  viewerTab: ViewerTab;
+  setViewerTab: (viewerTab: ViewerTab) => void;
   output: SqOutputResult;
 };
 
-export const ViewerMenu: FC<Props> = ({ mode, setMode, output }) => {
+export const ViewerMenu: FC<Props> = ({ viewerTab, setViewerTab, output }) => {
   const hasResult = output.ok && output.value.result.tag !== "Void";
   const variablesCount = output.ok ? output.value.bindings.size() : 0;
   const importsCount = output.ok ? output.value.imports.size() : 0;
@@ -57,7 +57,7 @@ export const ViewerMenu: FC<Props> = ({ mode, setMode, output }) => {
                 />
               }
               onClick={() => {
-                setMode("Imports");
+                setViewerTab("Imports");
                 close();
               }}
             />
@@ -72,7 +72,7 @@ export const ViewerMenu: FC<Props> = ({ mode, setMode, output }) => {
                 />
               }
               onClick={() => {
-                setMode("Variables");
+                setViewerTab("Variables");
                 close();
               }}
             />
@@ -87,7 +87,7 @@ export const ViewerMenu: FC<Props> = ({ mode, setMode, output }) => {
                 />
               }
               onClick={() => {
-                setMode("Exports");
+                setViewerTab("Exports");
                 close();
               }}
             />
@@ -98,7 +98,7 @@ export const ViewerMenu: FC<Props> = ({ mode, setMode, output }) => {
               <MenuItemTitle title="Result" type={hasResult ? "" : null} />
             }
             onClick={() => {
-              setMode("Result");
+              setViewerTab("Result");
               close();
             }}
           />
@@ -107,7 +107,7 @@ export const ViewerMenu: FC<Props> = ({ mode, setMode, output }) => {
             icon={CodeBracketIcon}
             title={<MenuItemTitle title="AST" type="" />}
             onClick={() => {
-              setMode("AST");
+              setViewerTab("AST");
               close();
             }}
           />
@@ -116,7 +116,7 @@ export const ViewerMenu: FC<Props> = ({ mode, setMode, output }) => {
     >
       <Button size="small">
         <div className="flex items-center space-x-1.5">
-          <span>{mode}</span>
+          <span>{viewerTab}</span>
           <TriangleIcon className="rotate-180 text-slate-400" size={10} />
         </div>
       </Button>

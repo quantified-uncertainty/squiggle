@@ -8,12 +8,11 @@ import {
   DEFAULT_SAMPLE_COUNT,
   DEFAULT_XY_POINT_LENGTH,
 } from "../lib/constants.js";
-import { useRunnerState } from "../lib/hooks/useRunnerState.js";
 import {
   ProjectExecutionProps,
   StandaloneExecutionProps,
-  useSquiggle,
-} from "../lib/hooks/useSquiggle.js";
+  useSquiggleRunner,
+} from "../lib/hooks/useSquiggleRunner.js";
 import { MessageAlert } from "./Alert.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "./SquiggleErrorAlert.js";
@@ -41,8 +40,6 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     // TODO: maybe `useRunnerState` could be merged with `useSquiggle`, but it does some extra stuff (autorun mode).
     const [seed, setSeed] = useState<string>("starting-seed");
 
-    const runnerState = useRunnerState(code, seed);
-
     const _env = useMemo(() => {
       return {
         ...(environment ?? {
@@ -53,10 +50,9 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
       };
     }, [environment, seed]);
 
-    const [squiggleOutput, { isRunning }] = useSquiggle({
-      code: runnerState.renderedCode,
-      executionId: runnerState.executionId,
-      ...(project ? { project, continues } : { environment: _env }),
+    const { squiggleOutput, viewerTab, setViewerTab } = useSquiggleRunner({
+      code,
+      ...(project ? { project, continues } : { environment }),
     });
 
     // TODO - if `<ViewerProvider>` is not set up (which is very possible) then calculator paths won't be resolved.
@@ -86,10 +82,11 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
       return (
         <SquiggleOutputViewer
           squiggleOutput={squiggleOutput}
-          isRunning={isRunning}
           environment={environment}
           seed={seed}
           setSeed={setSeed}
+          viewerTab={viewerTab}
+          setViewerTab={setViewerTab}
           {...settings}
         />
       );

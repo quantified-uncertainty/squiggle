@@ -6,17 +6,17 @@ import { ChevronRightIcon } from "@quri/ui";
 import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
-import { pathIsEqual, pathItemFormat, useGetSubvalueByPath } from "./utils.js";
+import { useGetSubvalueByPath } from "./utils.js";
 import { ValueViewer } from "./ValueViewer.js";
 import {
   SquiggleViewerHandle,
-  useFocus,
-  useUnfocus,
   useViewerContext,
+  useZoomIn,
+  useZoomOut,
   ViewerProvider,
 } from "./ViewerProvider.js";
 
-const FocusedNavigationItem: FC<{
+const ZoomedInNavigationItem: FC<{
   text: string;
   onClick: () => void;
 }> = ({ text, onClick }) => (
@@ -31,38 +31,38 @@ const FocusedNavigationItem: FC<{
   </div>
 );
 
-const FocusedNavigation: FC<{
-  focusedPath: SqValuePath;
+const ZoomedInNavigation: FC<{
+  zoomedInPath: SqValuePath;
   rootPath?: SqValuePath | undefined;
-}> = ({ focusedPath, rootPath }) => {
-  const unfocus = useUnfocus();
-  const focus = useFocus();
+}> = ({ zoomedInPath, rootPath }) => {
+  const zoomOut = useZoomOut();
+  const zoomIn = useZoomIn();
 
-  const isFocusedOnRootPath = rootPath && pathIsEqual(focusedPath, rootPath);
+  const isZoomedInOnRootPath = rootPath && rootPath.isEqual(zoomedInPath);
 
-  if (isFocusedOnRootPath) {
+  if (isZoomedInOnRootPath) {
     return null;
   }
 
-  // If we're focused on the root path override, we need to adjust the focused path accordingly when presenting the navigation, so that it begins with the root path intead. This is a bit confusing.
-  const rootPathFocusedAdjustment = rootPath?.items.length
-    ? rootPath.items.length - 1
+  // If we're zoomedIn on the root path override, we need to adjust the zoomedIn path accordingly when presenting the navigation, so that it begins with the root path intead. This is a bit confusing.
+  const rootPathZoomedInAdjustment = rootPath?.edges.length
+    ? rootPath.edges.length - 1
     : 0;
 
   return (
     <div className="flex items-center">
-      {!rootPath?.items.length && (
-        <FocusedNavigationItem onClick={unfocus} text="Home" />
+      {!rootPath?.edges.length && (
+        <ZoomedInNavigationItem onClick={zoomOut} text="Home" />
       )}
 
-      {focusedPath
-        .itemsAsValuePaths({ includeRoot: false })
-        .slice(rootPathFocusedAdjustment, -1)
+      {zoomedInPath
+        .allPrefixPaths({ includeRoot: false })
+        .slice(rootPathZoomedInAdjustment, -1)
         .map((path, i) => (
-          <FocusedNavigationItem
+          <ZoomedInNavigationItem
             key={i}
-            onClick={() => focus(path)}
-            text={pathItemFormat(path.items[i + rootPathFocusedAdjustment])}
+            onClick={() => zoomIn(path)}
+            text={path.edges[i + rootPathZoomedInAdjustment].toDisplayString()}
           />
         ))}
     </div>
@@ -75,27 +75,30 @@ export type SquiggleViewerProps = {
 } & PartialPlaygroundSettings;
 
 const SquiggleViewerWithoutProvider: FC<SquiggleViewerProps> = ({ value }) => {
-  const { focused } = useViewerContext();
+  const { zoomedInPath } = useViewerContext();
 
   const getSubvalueByPath = useGetSubvalueByPath();
 
-  let focusedItem: SqValue | undefined;
-  if (focused) {
-    focusedItem = getSubvalueByPath(value, focused);
+  let zoomedInItem: SqValue | undefined;
+  if (zoomedInPath) {
+    zoomedInItem = getSubvalueByPath(value, zoomedInPath);
   }
 
-  return focused ? (
+  return zoomedInPath ? (
     <div className="space-y-3 pl-3">
-      <FocusedNavigation focusedPath={focused} rootPath={value.context?.path} />
-      {focusedItem ? (
+      <ZoomedInNavigation
+        zoomedInPath={zoomedInPath}
+        rootPath={value.context?.path}
+      />
+      {zoomedInItem ? (
         <ValueViewer
-          value={focusedItem}
+          value={zoomedInItem}
           collapsible={false}
           header="large"
           size="large"
         />
       ) : (
-        <MessageAlert heading="Focused variable is not defined" />
+        <MessageAlert heading="ZoomedIn variable is not defined" />
       )}
     </div>
   ) : (
@@ -113,6 +116,7 @@ const component = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
         partialPlaygroundSettings={partialPlaygroundSettings}
         editor={editor}
         ref={ref}
+        rootValue={value}
       >
         <SquiggleViewerWithoutProvider value={value} />
       </ViewerProvider>

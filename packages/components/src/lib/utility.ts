@@ -1,5 +1,6 @@
-import { result, SqValue } from "@quri/squiggle-lang";
+import { result, SqError, SqValue } from "@quri/squiggle-lang";
 
+import { SqOutputResult } from "../../../squiggle-lang/src/public/types.js";
 import { SquiggleOutput } from "./hooks/useSquiggle.js";
 
 export function flattenResult<a, b>(x: result<a, b>[]): result<a[], b> {
@@ -36,7 +37,7 @@ export function some(arr: boolean[]): boolean {
   return arr.reduce((x, y) => x || y, false);
 }
 
-export function getErrors(result: SquiggleOutput["output"]) {
+export function getErrors(result: SquiggleOutput["output"]): SqError[] {
   if (!result.ok) {
     return [result.value];
   } else {
@@ -97,4 +98,45 @@ export type SqValueWithContext = SqValue & Required<Pick<SqValue, "context">>;
 
 export function valueHasContext(value: SqValue): value is SqValueWithContext {
   return !!value.context;
+}
+
+export type ViewerTab = "Imports" | "Exports" | "Variables" | "Result" | "AST";
+
+export function defaultViewerTab(
+  outputResult: SqOutputResult | undefined
+): ViewerTab {
+  if (!outputResult || !outputResult.ok) {
+    return "Variables";
+  }
+
+  const output = outputResult.value;
+  if (output.result.tag !== "Void") {
+    return "Result";
+  }
+  if (!output.exports.isEmpty()) {
+    return "Exports";
+  }
+  return "Variables";
+}
+
+export function viewerTabToValue(
+  viewerTab: ViewerTab,
+  output: SqOutputResult
+): SqValue | undefined {
+  if (!output.ok) {
+    return;
+  }
+  const sqOutput = output.value;
+  switch (viewerTab) {
+    case "Result":
+      return sqOutput.result;
+    case "Variables":
+      return sqOutput.bindings.asValue();
+    case "Imports":
+      return sqOutput.imports.asValue();
+    case "Exports":
+      return sqOutput.exports.asValue();
+    case "AST":
+      return;
+  }
 }

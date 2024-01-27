@@ -166,7 +166,6 @@ export const ManyTypes: Story = {
     defaultCode: `varNum = 3333
 varBool = true
 varString = "This is a long string"
-varVoid = ()
 
 varArray = [1,2,3]
 varLambda = {|e| "Test"}

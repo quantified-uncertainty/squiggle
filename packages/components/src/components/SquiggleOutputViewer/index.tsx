@@ -1,7 +1,8 @@
-import { forwardRef, useState } from "react";
+import { forwardRef } from "react";
 
-import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import { getIsRunning } from "../../lib/hooks/useSquiggleRunner.js";
+import { ViewerTab, viewerTabToValue } from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import {
@@ -16,52 +17,44 @@ import { ViewerMenu } from "./ViewerMenu.js";
 
 type Props = {
   squiggleOutput: SquiggleOutput;
-  isRunning: boolean;
   editor?: CodeEditorHandle;
   seed: string;
   setSeed: (seed: string) => void;
+  setViewerTab: (viewerTab: ViewerTab) => void;
+  viewerTab: ViewerTab;
 } & PartialPlaygroundSettings;
-
-export type ViewerMode = "Imports" | "Exports" | "Variables" | "Result" | "AST";
-
-function useMode(outputResult: SqOutputResult) {
-  return useState<ViewerMode>(() => {
-    // Pick the initial mode value
-
-    if (!outputResult.ok) {
-      return "Variables";
-    }
-
-    const output = outputResult.value;
-    if (output.result.tag !== "Void") {
-      return "Result";
-    }
-    if (!output.exports.isEmpty()) {
-      return "Exports";
-    }
-    return "Variables";
-  });
-}
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
 export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
   (
-    { squiggleOutput, isRunning, editor, seed, setSeed, ...settings },
+    {
+      squiggleOutput,
+      editor,
+      viewerTab,
+      seed,
+      setSeed,
+      setViewerTab,
+      ...settings
+    },
     viewerRef
   ) => {
     const { output } = squiggleOutput;
-    const [mode, setMode] = useMode(output);
+    const isRunning = getIsRunning(squiggleOutput);
 
     return (
       <ViewerProvider
         partialPlaygroundSettings={settings}
         editor={editor}
         ref={viewerRef}
+        rootValue={viewerTabToValue(viewerTab, output) || undefined}
       >
         <Layout
-          menu={<ViewerMenu mode={mode} setMode={setMode} output={output} />}
-          indicator={
-            <RenderingIndicator isRunning={isRunning} output={squiggleOutput} />
+          menu={
+            <ViewerMenu
+              viewerTab={viewerTab}
+              setViewerTab={setViewerTab}
+              output={output}
+            />
           }
           changeSeedAndRunButton={
             <RunSeedButton
@@ -70,8 +63,13 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
               setSeed={setSeed}
             />
           }
+          indicator={<RenderingIndicator output={squiggleOutput} />}
           viewer={
-            <ViewerBody mode={mode} output={output} isRunning={isRunning} />
+            <ViewerBody
+              viewerTab={viewerTab}
+              output={output}
+              isRunning={isRunning}
+            />
           }
         />
       </ViewerProvider>

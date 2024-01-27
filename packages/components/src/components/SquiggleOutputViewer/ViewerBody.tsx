@@ -1,47 +1,33 @@
 import { FC } from "react";
 
-import { SqValue } from "@quri/squiggle-lang";
-
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
+import { ViewerTab, viewerTabToValue } from "../../lib/utility.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { SquiggleViewer } from "../SquiggleViewer/index.js";
-import { ViewerMode } from "./index.js";
 
 type Props = {
-  mode: ViewerMode;
+  viewerTab: ViewerTab;
   output: SqOutputResult;
   isRunning: boolean;
 };
 
-export const ViewerBody: FC<Props> = ({ output, mode, isRunning }) => {
+export const ViewerBody: FC<Props> = ({ output, viewerTab, isRunning }) => {
   if (!output.ok) {
     return <SquiggleErrorAlert error={output.value} />;
   }
 
   const sqOutput = output.value;
 
-  if (mode === "AST") {
+  if (viewerTab === "AST") {
     return (
       <pre className="text-xs">
         {JSON.stringify(sqOutput.bindings.asValue().context?.ast, null, 2)}
       </pre>
     );
   }
-  let usedValue: SqValue | undefined;
-  switch (mode) {
-    case "Result":
-      usedValue = output.value.result;
-      break;
-    case "Variables":
-      usedValue = sqOutput.bindings.asValue();
-      break;
-    case "Imports":
-      usedValue = sqOutput.imports.asValue();
-      break;
-    case "Exports":
-      usedValue = sqOutput.exports.asValue();
-  }
+
+  const usedValue = viewerTabToValue(viewerTab, output);
 
   if (!usedValue) {
     return null;

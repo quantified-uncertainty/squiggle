@@ -1,7 +1,7 @@
 import { AST, ASTNode } from "../ast/parse.js";
 import { isBindingStatement } from "../ast/utils.js";
 import { SqProject } from "./SqProject/index.js";
-import { PathItem, SqValuePath } from "./SqValuePath.js";
+import { SqValuePath, SqValuePathEdge } from "./SqValuePath.js";
 
 export class SqValueContext {
   public project: SqProject;
@@ -37,12 +37,13 @@ export class SqValueContext {
     this.path = props.path;
   }
 
-  extend(item: PathItem): SqValueContext {
+  extend(item: SqValuePathEdge): SqValueContext {
     let ast = this.valueAst;
+    const pathEdge = item.value;
 
     let newAst: ASTNode | undefined;
     const itemisNotTableIndexOrCalculator =
-      item.type !== "cellAddress" && item.type !== "calculator";
+      pathEdge.type !== "cellAddress" && pathEdge.type !== "calculator";
 
     if (this.valueAstIsPrecise && itemisNotTableIndexOrCalculator) {
       // now we can try to look for the next nested valueAst
@@ -65,18 +66,20 @@ export class SqValueContext {
 
       switch (ast.type) {
         case "Program": {
-          if (this.path.root === "bindings") {
-            newAst = ast.symbols[item.value];
+          if (this.path.root === "bindings" && pathEdge.type === "key") {
+            newAst = ast.symbols[pathEdge.value];
             break;
           }
           break;
         }
         case "Dict":
-          newAst = ast.symbols[item.value];
+          if (pathEdge.type === "key") {
+            newAst = ast.symbols[pathEdge.value];
+          }
           break;
         case "Array":
-          if (typeof item === "number") {
-            const element = ast.elements[item];
+          if (pathEdge.type === "index") {
+            const element = ast.elements[pathEdge.value];
             if (element) {
               newAst = element;
             }

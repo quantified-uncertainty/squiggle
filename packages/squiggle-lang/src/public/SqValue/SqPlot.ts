@@ -1,6 +1,7 @@
 import { clamp, sort, uniq } from "../../utility/E_A_Floats.js";
 import { Plot, vPlot } from "../../value/VPlot.js";
 import { SqValueContext } from "../SqValueContext.js";
+import { SqValuePathEdge } from "../SqValuePath.js";
 import { SqPlotValue } from "./index.js";
 import {
   SqDistribution,
@@ -154,7 +155,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
       this.context
         ? this.createdProgrammatically
           ? this.context
-          : this.context.extend({ type: "string", value: "fn" })
+          : this.context.extend(SqValuePathEdge.fromKey("fn"))
         : undefined
     );
   }
@@ -222,7 +223,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
       this.context
         ? this.createdProgrammatically
           ? this.context
-          : this.context.extend({ type: "string", value: "fn" })
+          : this.context.extend(SqValuePathEdge.fromKey("fn"))
         : undefined
     );
   }
@@ -298,9 +299,7 @@ export class SqRelativeValuesPlot extends SqAbstractPlot<"relativeValues"> {
   get fn(): SqLambda {
     return new SqLambda(
       this._value.fn,
-      this.context
-        ? this.context.extend({ type: "string", value: "fn" })
-        : undefined
+      this.context?.extend(SqValuePathEdge.fromKey("fn"))
     );
   }
 }

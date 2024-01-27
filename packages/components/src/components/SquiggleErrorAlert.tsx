@@ -21,7 +21,7 @@ const LocationLine: FC<{
   const { editor } = useViewerContext();
 
   const findInEditor = () => {
-    editor?.scrollTo(location.start.offset);
+    editor?.scrollTo(location.start.offset, true);
   };
 
   return (

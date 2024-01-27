@@ -10,8 +10,7 @@ import React, {
 import { SqLinker, SqProject } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
-import { useRunnerState } from "../../lib/hooks/useRunnerState.js";
-import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import { useSquiggleRunner } from "../../lib/hooks/useSquiggleRunner.js";
 import { useUncontrolledCode } from "../../lib/hooks/useUncontrolledCode.js";
 import {
   defaultPlaygroundSettings,
@@ -74,9 +73,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   props
 ) => {
   const {
-    defaultCode,
     linker,
-    onCodeChange,
     onExportsChange,
     onSettingsChange,
     renderExtraControls,
@@ -84,10 +81,10 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     renderExtraModal,
     renderImportTooltip,
     height = 500,
-    sourceId,
     ...defaultSettings
   } = props;
 
+  const [seed, setSeed] = useState<string>("starting-seed");
   // `settings` are owned by SquigglePlayground.
   // This can cause some unnecessary renders (e.g. settings form), but most heavy playground subcomponents
   // should rerender on settings changes (e.g. right panel), so that's fine.
@@ -114,20 +111,28 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     return new SqProject({ linker });
   });
 
-  const [seed, setSeed] = useState<string>("0");
+  const { code, setCode } = useUncontrolledCode({
+    defaultCode: props.defaultCode,
+    onCodeChange: props.onCodeChange,
+  });
+
+  const {
+    squiggleOutput,
+    setViewerTab,
+    viewerTab,
+    sourceId,
+    autorunMode,
+    setAutorunMode,
+    rerunSquiggleCode,
+    setProjectEnvironment,
+  } = useSquiggleRunner({ project, code });
 
   useEffect(() => {
-    project.setEnvironment({ ...settings.environment, seed });
-    leftPanelRef.current?.invalidate();
-  }, [project, settings.environment, seed]);
-
-  const [output, setOutput] = useState<{
-    output: SquiggleOutput | undefined;
-    isRunning: boolean;
-  }>({ output: undefined, isRunning: false });
+    setProjectEnvironment(settings.environment);
+  }, [settings.environment, setProjectEnvironment]);
 
   useEffect(() => {
-    const _output = output.output?.output;
+    const _output = squiggleOutput?.output;
     if (_output && _output.ok) {
       const exports = _output.value.exports;
       const _exports: ModelExport[] = exports.entries().map((e) => ({
@@ -140,14 +145,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     } else {
       onExportsChange && onExportsChange([]);
     }
-  }, [output, onExportsChange]);
-
-  const { code, setCode } = useUncontrolledCode({
-    defaultCode: props.defaultCode,
-    onCodeChange: props.onCodeChange,
-  });
-
-  const runnerState = useRunnerState(code, seed);
+  }, [squiggleOutput, onExportsChange]);
 
   const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
   const rightPanelRef = useRef<SquiggleViewerHandle>(null);
@@ -156,39 +154,39 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     () => leftPanelRef.current?.getLeftPanelElement() ?? undefined,
     []
   );
-
   const renderLeft = () => (
     <LeftPlaygroundPanel
       project={project}
       seed={seed}
-      defaultCode={defaultCode}
       sourceId={sourceId}
-      onCodeChange={onCodeChange}
+      squiggleOutput={squiggleOutput}
       settings={settings}
       onSettingsChange={handleSettingsChange}
-      onOutputChange={setOutput}
       renderExtraControls={renderExtraControls}
       renderExtraDropdownItems={renderExtraDropdownItems}
       renderExtraModal={renderExtraModal}
       onViewValuePath={(path) => rightPanelRef.current?.viewValuePath(path)}
       renderImportTooltip={renderImportTooltip}
       ref={leftPanelRef}
-      runnerState={runnerState}
       code={code}
       setCode={setCode}
+      autorunMode={autorunMode}
+      setAutorunMode={setAutorunMode}
+      rerunSquiggleCode={rerunSquiggleCode}
     />
   );
 
   const renderRight = () =>
-    output.output ? (
+    squiggleOutput ? (
       <SquiggleOutputViewer
-        squiggleOutput={output.output}
-        isRunning={output.isRunning}
+        squiggleOutput={squiggleOutput}
         // FIXME - this will cause viewer to be rendered twice on initial render
         editor={leftPanelRef.current?.getEditor() ?? undefined}
         ref={rightPanelRef}
         seed={seed}
         setSeed={setSeed}
+        viewerTab={viewerTab}
+        setViewerTab={setViewerTab}
         {...settings}
       />
     ) : (
