@@ -17,7 +17,7 @@ import {
   TriangleIcon,
 } from "@quri/ui";
 
-import { SquiggleOutput } from "../../../lib/hooks/index.js";
+import { SquiggleProjectRun } from "../../../lib/hooks/index.js";
 import { getIsRunning } from "../../../lib/hooks/useSquiggleRunner.js";
 import { altKey, getSquiggleOutputErrors } from "../../../lib/utility.js";
 import {
@@ -47,7 +47,7 @@ type Props = {
   /* Allows to inject extra items to the left panel's dropdown menu. */
   renderExtraDropdownItems?: RenderExtraControls;
   renderExtraModal?: Parameters<typeof PanelWithToolbar>[0]["renderModal"];
-  squiggleOutput: SquiggleOutput | undefined;
+  squiggleProjectRun: SquiggleProjectRun | undefined;
   autorunMode: boolean;
   setAutorunMode: (autorunMode: boolean) => void;
   rerunSquiggleCode: () => void;
@@ -64,8 +64,8 @@ export type LeftPlaygroundPanelHandle = {
 export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
   function LeftPlaygroundPanel(props, ref) {
     const errors = useMemo(
-      () => getSquiggleOutputErrors(props.squiggleOutput),
-      [props.squiggleOutput]
+      () => getSquiggleOutputErrors(props.squiggleProjectRun),
+      [props.squiggleProjectRun]
     );
 
     const editorRef = useRef<CodeEditorHandle>(null);
@@ -86,7 +86,9 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           rerunSquiggleCode={props.rerunSquiggleCode}
           autorunMode={props.autorunMode}
           isRunning={
-            props.squiggleOutput ? getIsRunning(props.squiggleOutput) : false
+            props.squiggleProjectRun
+              ? getIsRunning(props.squiggleProjectRun)
+              : false
           }
         />
         <AutorunnerMenuItem

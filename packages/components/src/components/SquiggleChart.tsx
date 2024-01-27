@@ -4,11 +4,11 @@ import { SqValuePath } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { SquiggleViewer } from "../index.js";
+import { useSquiggleRunner } from "../lib/hooks/useSquiggleRunner.js";
 import {
   ProjectExecutionProps,
   StandaloneExecutionProps,
-  useSquiggleRunner,
-} from "../lib/hooks/useSquiggleRunner.js";
+} from "../lib/utility.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
 import { useGetSubvalueByPath } from "./SquiggleViewer/utils.js";
@@ -21,17 +21,6 @@ export type SquiggleChartProps = {
 } & (StandaloneExecutionProps | ProjectExecutionProps) &
   // `environment` is passed through StandaloneExecutionProps; this way we guarantee that it's not compatible with `project` prop
   Omit<PartialPlaygroundSettings, "environment">;
-
-// type RunSetup =
-//   | { type: "standalone"; environment?: Env } // For standalone execution
-//   | { type: "project"; project: SqProject; continues?: string[] }; // Project for the parent execution. Continues is what other squiggle sources to continue. Default []
-// export type SquiggleChartPropsAlternate = {
-//   code: string;
-//   rootPathOverride?: SqValuePath; // Note: This should be static. We don't support rootPathOverride to change once set.
-//   settings: Omit<PartialPlaygroundSettings, "environment">;
-//   setup: RunSetup;
-// };
-// `environment` is passed through StandaloneExecutionProps; this way we guarantee that it's not compatible with `project` prop
 
 export const SquiggleChart: FC<SquiggleChartProps> = memo(
   function SquiggleChart({
@@ -46,7 +35,7 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     // This is important, for example, in VS Code extension.
     // TODO: maybe `useRunnerState` could be merged with `useSquiggle`, but it does some extra stuff (autorun mode).
 
-    const { squiggleOutput, viewerTab, setViewerTab } = useSquiggleRunner({
+    const { squiggleProjectRun, viewerTab, setViewerTab } = useSquiggleRunner({
       code,
       setup: project
         ? { type: "project", project, continues }
@@ -56,12 +45,12 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     // TODO - if `<ViewerProvider>` is not set up (which is very possible) then calculator paths won't be resolved.
     const getSubvalueByPath = useGetSubvalueByPath();
 
-    if (!squiggleOutput) {
+    if (!squiggleProjectRun) {
       return <RefreshIcon className="animate-spin" />;
     }
 
     if (rootPathOverride) {
-      const { output } = squiggleOutput;
+      const { output } = squiggleProjectRun;
       if (!output.ok) {
         return <SqErrorAlert error={output.value} />;
       }
@@ -79,7 +68,7 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     } else {
       return (
         <SquiggleOutputViewer
-          squiggleOutput={squiggleOutput}
+          squiggleProjectRun={squiggleProjectRun}
           environment={environment}
           viewerTab={viewerTab}
           setViewerTab={setViewerTab}

@@ -4,7 +4,7 @@ export { useEffectRef } from "./useEffectRef.js";
 export { useForceUpdate } from "./useForceUpdate.js";
 export { useInitialWidth } from "./useInitialWidth.js";
 export {
-  type SquiggleOutput,
+  type SquiggleProjectRun,
   useSquiggleProjectRun as useSquiggle,
 } from "./useSquiggleProjectRun.js";
 export { useUncontrolledCode } from "./useUncontrolledCode.js";

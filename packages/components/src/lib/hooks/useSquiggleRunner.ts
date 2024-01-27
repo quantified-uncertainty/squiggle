@@ -4,39 +4,23 @@ import { Env, SqProject } from "@quri/squiggle-lang";
 
 import { defaultViewerTab, ViewerTab } from "../utility.js";
 import {
-  SquiggleOutput,
+  SquiggleProjectRun,
   useSquiggleProjectRun,
 } from "./useSquiggleProjectRun.js";
 
-// Props needed for a standalone execution.
-export type StandaloneExecutionProps = {
-  project?: undefined;
-  environment?: Env;
-  continues?: undefined;
-};
-
-// Props needed when executing inside a project.
-export type ProjectExecutionProps = {
-  /** The project that this execution is part of */
-  project: SqProject;
-  environment?: undefined;
-  /** What other squiggle sources from the project to continue. Default [] */
-  continues?: string[];
-};
-
-type RunSetup =
+type SetupSettings =
   | { type: "standalone"; environment?: Env } // For standalone execution
   | { type: "project"; project: SqProject; continues?: string[] }; // Project for the parent execution. Continues is what other squiggle sources to continue. Default []
 
 export type SquiggleRunnerArgs = {
   code: string;
   sourceId?: string;
-  setup: RunSetup;
+  setup: SetupSettings;
 };
 
 export type SquiggleRunnerOutput = {
   sourceId: string;
-  squiggleOutput?: SquiggleOutput;
+  squiggleProjectRun?: SquiggleProjectRun;
   project: SqProject;
 
   viewerTab: ViewerTab;
@@ -49,13 +33,13 @@ export type SquiggleRunnerOutput = {
   rerunSquiggleCode: () => void;
 };
 
-export function getIsRunning(squiggleOutput: SquiggleOutput): boolean {
-  return squiggleOutput.isStale ?? false;
+export function getIsRunning(squiggleProjectRun: SquiggleProjectRun): boolean {
+  return squiggleProjectRun.isStale ?? false;
 }
 
 const defaultContinues: string[] = [];
 
-function useRunnerSetup(sourceId: string | undefined, setup: RunSetup) {
+function useSetup(sourceId: string | undefined, setup: SetupSettings) {
   const _sourceId = useMemo(() => {
     // random; https://stackoverflow.com/a/12502559
     return sourceId ?? Math.random().toString(36).slice(2);
@@ -89,12 +73,9 @@ export function useSquiggleRunner(
   // const isViewerTabSet = useRef(false);
   const [viewerTab, setViewerTab] = useState<ViewerTab | undefined>(undefined);
 
-  const { sourceId, project, continues } = useRunnerSetup(
-    args.sourceId,
-    args.setup
-  );
+  const { sourceId, project, continues } = useSetup(args.sourceId, args.setup);
 
-  const [squiggleOutput, { rerunSquiggleCode }] = useSquiggleProjectRun({
+  const [squiggleProjectRun, { rerunSquiggleCode }] = useSquiggleProjectRun({
     sourceId,
     code: args.code,
     project,
@@ -104,12 +85,13 @@ export function useSquiggleRunner(
 
   // Set viewerTab the first time that SqOutputResult is not undefined.
   useEffect(() => {
-    if (!viewerTab && squiggleOutput?.output) {
-      setViewerTab(defaultViewerTab(squiggleOutput.output));
+    if (!viewerTab && squiggleProjectRun?.output) {
+      setViewerTab(defaultViewerTab(squiggleProjectRun.output));
     }
-  }, [squiggleOutput?.output, viewerTab]);
+  }, [squiggleProjectRun?.output, viewerTab]);
 
   // Allow callers to update the environment, outside of the normal SquiggleRunnerArgs setup.
+  // It could be nice in the future to have ``environment`` be passed in only as a regular prop, but this would complicate the SetupSettings input.
   const updateEnvironment = useMemo(
     () => (newEnv: Env) => {
       project.setEnvironment(newEnv);
@@ -122,7 +104,7 @@ export function useSquiggleRunner(
 
   return {
     sourceId,
-    squiggleOutput,
+    squiggleProjectRun,
     project,
 
     viewerTab: viewerTab ?? defaultViewerTab(undefined),

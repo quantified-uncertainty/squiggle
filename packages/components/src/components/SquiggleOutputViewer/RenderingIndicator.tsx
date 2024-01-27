@@ -1,10 +1,10 @@
 import { FC } from "react";
 
-import { SquiggleOutput } from "../../lib/hooks/useSquiggleProjectRun.js";
+import { SquiggleProjectRun } from "../../lib/hooks/useSquiggleProjectRun.js";
 import { getIsRunning } from "../../lib/hooks/useSquiggleRunner.js";
 
 export const RenderingIndicator: FC<{
-  output: SquiggleOutput;
+  output: SquiggleProjectRun;
 }> = ({ output }) => {
   const isRunning = getIsRunning(output);
 

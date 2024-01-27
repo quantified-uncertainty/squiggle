@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 
-import { SquiggleOutput } from "../../lib/hooks/useSquiggleProjectRun.js";
+import { SquiggleProjectRun } from "../../lib/hooks/useSquiggleProjectRun.js";
 import { getIsRunning } from "../../lib/hooks/useSquiggleRunner.js";
 import { ViewerTab, viewerTabToValue } from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
@@ -15,7 +15,7 @@ import { ViewerBody } from "./ViewerBody.js";
 import { ViewerMenu } from "./ViewerMenu.js";
 
 type Props = {
-  squiggleOutput: SquiggleOutput;
+  squiggleProjectRun: SquiggleProjectRun;
   editor?: CodeEditorHandle;
   setViewerTab: (viewerTab: ViewerTab) => void;
   viewerTab: ViewerTab;
@@ -24,11 +24,23 @@ type Props = {
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
 export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
   (
+<<<<<<< HEAD
     { squiggleOutput, editor, viewerTab, setViewerTab, ...settings },
+=======
+    {
+      squiggleProjectRun,
+      editor,
+      viewerTab,
+      seed,
+      setSeed,
+      setViewerTab,
+      ...settings
+    },
+>>>>>>> 2abd1c6f0 (SquiggleOutput -> SquiggleProjectRun)
     viewerRef
   ) => {
-    const { output } = squiggleOutput;
-    const isRunning = getIsRunning(squiggleOutput);
+    const { output } = squiggleProjectRun;
+    const isRunning = getIsRunning(squiggleProjectRun);
 
     return (
       <ViewerProvider
@@ -45,7 +57,18 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
               output={output}
             />
           }
+<<<<<<< HEAD
           indicator={<RenderingIndicator output={squiggleOutput} />}
+=======
+          changeSeedAndRunButton={
+            <RunSeedButton
+              isRunning={isRunning}
+              seed={seed}
+              setSeed={setSeed}
+            />
+          }
+          indicator={<RenderingIndicator output={squiggleProjectRun} />}
+>>>>>>> 2abd1c6f0 (SquiggleOutput -> SquiggleProjectRun)
           viewer={
             <ViewerBody
               viewerTab={viewerTab}
