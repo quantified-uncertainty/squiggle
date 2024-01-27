@@ -1,24 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { Env, SqProject } from "@quri/squiggle-lang";
+import { SqProject } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
-
-// Props needed for a standalone execution.
-export type StandaloneExecutionProps = {
-  project?: undefined;
-  environment?: Env;
-  continues?: undefined;
-};
-
-// Props needed when executing inside a project.
-export type ProjectExecutionProps = {
-  /** The project that this execution is part of */
-  project: SqProject;
-  environment?: Env;
-  /** What other squiggle sources from the project to continue. Default [] */
-  continues?: string[];
-};
 
 export type SquiggleArgs = {
   code: string;
