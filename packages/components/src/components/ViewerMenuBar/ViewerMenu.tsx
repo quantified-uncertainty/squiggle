@@ -31,6 +31,14 @@ const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
   );
 };
 
+function modeTitle(mode: ViewerMode): string {
+  if (typeof mode === "object" && mode.tag === "CustomResultPath") {
+    return "Custom Path"; // Not used yet, as header is not shown yet when this mode is used.
+  } else {
+    return mode as string;
+  }
+}
+
 type Props = {
   mode: ViewerMode;
   setMode: (mode: ViewerMode) => void;
@@ -116,7 +124,7 @@ export const ViewerMenu: FC<Props> = ({ mode, setMode, output }) => {
     >
       <Button size="small">
         <div className="flex items-center space-x-1.5">
-          <span>{mode}</span>
+          <span>{modeTitle(mode)}</span>
           <TriangleIcon className="rotate-180 text-slate-400" size={10} />
         </div>
       </Button>
