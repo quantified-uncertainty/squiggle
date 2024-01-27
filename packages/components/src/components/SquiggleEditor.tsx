@@ -1,13 +1,16 @@
 import { FC, useMemo, useRef } from "react";
 
+import { SqValue } from "@quri/squiggle-lang";
+
+import { SquiggleViewer } from "../index.js";
 import { useUncontrolledCode } from "../lib/hooks/index.js";
 import { useRunnerState } from "../lib/hooks/useRunnerState.js";
 import { useSquiggle } from "../lib/hooks/useSquiggle.js";
 import { getErrors } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
 import { SquiggleCodeProps } from "./types.js";
+import { ViewerMenuBar } from "./ViewerMenuBar/index.js";
 
 export type SquiggleEditorProps = SquiggleCodeProps & {
   hideViewer?: boolean;
@@ -66,12 +69,17 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
         />
       </div>
       {hideViewer || !squiggleOutput ? null : (
-        <SquiggleOutputViewer
+        <ViewerMenuBar
           squiggleOutput={squiggleOutput}
           isRunning={isRunning}
-          editor={editorRef.current ?? undefined}
-          environment={environment}
-          {...settings}
+          viewer={(output: SqValue) => (
+            <SquiggleViewer
+              value={output}
+              editor={editorRef.current ?? undefined}
+              environment={environment}
+              {...settings}
+            />
+          )}
         />
       )}
     </div>

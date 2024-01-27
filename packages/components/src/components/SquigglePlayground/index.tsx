@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 
-import { SqLinker, SqProject } from "@quri/squiggle-lang";
+import { SqLinker, SqProject, SqValue } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
@@ -16,8 +16,9 @@ import {
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { SquiggleOutputViewer } from "../SquiggleOutputViewer/index.js";
+import { SquiggleViewer } from "../SquiggleViewer/index.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
+import { ViewerMenuBar } from "../ViewerMenuBar/index.js";
 import {
   LeftPlaygroundPanel,
   LeftPlaygroundPanelHandle,
@@ -166,12 +167,17 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 
   const renderRight = () =>
     output.output ? (
-      <SquiggleOutputViewer
+      <ViewerMenuBar
         squiggleOutput={output.output}
         isRunning={output.isRunning}
-        // FIXME - this will cause viewer to be rendered twice on initial render
-        editor={leftPanelRef.current?.getEditor() ?? undefined}
-        ref={rightPanelRef}
+        viewer={(output: SqValue) => (
+          <SquiggleViewer
+            value={output}
+            ref={rightPanelRef}
+            // FIXME - this will cause viewer to be rendered twice on initial render
+            editor={leftPanelRef.current?.getEditor() ?? undefined}
+          />
+        )}
         {...settings}
       />
     ) : (
