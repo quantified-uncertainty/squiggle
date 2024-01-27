@@ -18,8 +18,7 @@ export type UpcomingSquiggleOutput = {
   executionId: number;
 };
 
-// TODO - think of a better name, `SquiggleOutput` is too similar to `SqOutput`
-export type SquiggleOutput = {
+export type SquiggleProjectRun = {
   output: SqOutputResult;
   code: string;
   executionId: number;
@@ -27,14 +26,16 @@ export type SquiggleOutput = {
   isStale?: boolean;
 };
 
-export type UseSquiggleOutput = [
-  SquiggleOutput | undefined,
+export type UseSquiggleProjectRun = [
+  SquiggleProjectRun | undefined,
   { rerunSquiggleCode: () => void },
 ];
 
-export function useSquiggleProjectRun(args: SquiggleArgs): UseSquiggleOutput {
-  const [squiggleOutput, setSquiggleOutput] = useState<
-    SquiggleOutput | undefined
+export function useSquiggleProjectRun(
+  args: SquiggleArgs
+): UseSquiggleProjectRun {
+  const [squiggleProjectRun, setSquiggleOutput] = useState<
+    SquiggleProjectRun | undefined
   >(undefined);
 
   const runSquiggle = useCallback(
@@ -100,5 +101,5 @@ export function useSquiggleProjectRun(args: SquiggleArgs): UseSquiggleOutput {
     };
   }, [args.project, args.sourceId]);
 
-  return [squiggleOutput, { rerunSquiggleCode: runSquiggle }];
+  return [squiggleProjectRun, { rerunSquiggleCode: runSquiggle }];
 }

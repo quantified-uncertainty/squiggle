@@ -108,7 +108,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   const [project] = useState(() => {
     // not reactive on `linker` changes; TODO?
     return new SqProject({ linker });
-  });
+  }); // TODO: Maybe this could go into useSquiggleRunner?
 
   const { code, setCode } = useUncontrolledCode({
     defaultCode: props.defaultCode,
@@ -116,7 +116,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   });
 
   const {
-    squiggleOutput,
+    squiggleProjectRun,
     setViewerTab,
     viewerTab,
     sourceId,
@@ -133,7 +133,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   }, [settings.environment, setProjectEnvironment]);
 
   useEffect(() => {
-    const _output = squiggleOutput?.output;
+    const _output = squiggleProjectRun?.output;
     if (_output && _output.ok) {
       const exports = _output.value.exports;
       const _exports: ModelExport[] = exports.entries().map((e) => ({
@@ -146,7 +146,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     } else {
       onExportsChange && onExportsChange([]);
     }
-  }, [squiggleOutput, onExportsChange]);
+  }, [squiggleProjectRun, onExportsChange]);
 
   const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
   const rightPanelRef = useRef<SquiggleViewerHandle>(null);
@@ -160,7 +160,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       project={project}
       seed={seed}
       sourceId={sourceId}
-      squiggleOutput={squiggleOutput}
+      squiggleProjectRun={squiggleProjectRun}
       settings={settings}
       onSettingsChange={handleSettingsChange}
       renderExtraControls={renderExtraControls}
@@ -178,9 +178,9 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   );
 
   const renderRight = () =>
-    squiggleOutput ? (
+    squiggleProjectRun ? (
       <SquiggleOutputViewer
-        squiggleOutput={squiggleOutput}
+        squiggleProjectRun={squiggleProjectRun}
         // FIXME - this will cause viewer to be rendered twice on initial render
         editor={leftPanelRef.current?.getEditor() ?? undefined}
         ref={rightPanelRef}

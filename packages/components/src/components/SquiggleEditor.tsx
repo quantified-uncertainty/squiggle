@@ -1,12 +1,12 @@
 import { FC, useMemo, useRef } from "react";
 
 import { useUncontrolledCode } from "../lib/hooks/index.js";
+import { useSquiggleRunner } from "../lib/hooks/useSquiggleRunner.js";
 import {
+  getSquiggleOutputErrors,
   ProjectExecutionProps,
   StandaloneExecutionProps,
-  useSquiggleRunner,
-} from "../lib/hooks/useSquiggleRunner.js";
-import { getSquiggleOutputErrors } from "../lib/utility.js";
+} from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
@@ -35,7 +35,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   });
 
   const {
-    squiggleOutput,
+    squiggleProjectRun,
     viewerTab,
     setViewerTab,
     project,
@@ -51,8 +51,8 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   });
 
   const errors = useMemo(
-    () => getSquiggleOutputErrors(squiggleOutput),
-    [squiggleOutput]
+    () => getSquiggleOutputErrors(squiggleProjectRun),
+    [squiggleProjectRun]
   );
 
   const editorRef = useRef<CodeEditorHandle>(null);
@@ -75,9 +75,9 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           onSubmit={rerunSquiggleCode}
         />
       </div>
-      {!squiggleOutput ? null : (
+      {!squiggleProjectRun ? null : (
         <SquiggleOutputViewer
-          squiggleOutput={squiggleOutput}
+          squiggleProjectRun={squiggleProjectRun}
           editor={editorRef.current ?? undefined}
           environment={environment}
           seed={seed}

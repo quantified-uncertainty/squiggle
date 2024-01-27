@@ -1,7 +1,7 @@
-import { result, SqError, SqValue } from "@quri/squiggle-lang";
+import { Env, result, SqError, SqProject, SqValue } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../squiggle-lang/src/public/types.js";
-import { SquiggleOutput } from "./hooks/useSquiggleProjectRun.js";
+import { SquiggleProjectRun } from "./hooks/useSquiggleProjectRun.js";
 
 export function flattenResult<a, b>(x: result<a, b>[]): result<a[], b> {
   if (x.length === 0) {
@@ -37,7 +37,9 @@ export function some(arr: boolean[]): boolean {
   return arr.reduce((x, y) => x || y, false);
 }
 
-export function getSquiggleOutputErrors(output?: SquiggleOutput): SqError[] {
+export function getSquiggleOutputErrors(
+  output?: SquiggleProjectRun
+): SqError[] {
   if (!output) {
     return [];
   } else if (output.output.ok) {
@@ -142,3 +144,20 @@ export function viewerTabToValue(
       return;
   }
 }
+
+//These two are being phased out, in favor of RunSetup
+// Props needed for a standalone execution.
+export type StandaloneExecutionProps = {
+  project?: undefined;
+  environment?: Env;
+  continues?: undefined;
+};
+
+// Props needed when executing inside a project.
+export type ProjectExecutionProps = {
+  /** The project that this execution is part of */
+  project: SqProject;
+  environment?: undefined;
+  /** What other squiggle sources from the project to continue. Default [] */
+  continues?: string[];
+};

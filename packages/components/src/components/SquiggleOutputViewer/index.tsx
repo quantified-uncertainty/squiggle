@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 
-import { SquiggleOutput } from "../../lib/hooks/useSquiggleProjectRun.js";
+import { SquiggleProjectRun } from "../../lib/hooks/useSquiggleProjectRun.js";
 import { getIsRunning } from "../../lib/hooks/useSquiggleRunner.js";
 import { ViewerTab, viewerTabToValue } from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
@@ -16,7 +16,7 @@ import { ViewerBody } from "./ViewerBody.js";
 import { ViewerMenu } from "./ViewerMenu.js";
 
 type Props = {
-  squiggleOutput: SquiggleOutput;
+  squiggleProjectRun: SquiggleProjectRun;
   editor?: CodeEditorHandle;
   seed: string;
   setSeed: (seed: string) => void;
@@ -28,7 +28,7 @@ type Props = {
 export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
   (
     {
-      squiggleOutput,
+      squiggleProjectRun,
       editor,
       viewerTab,
       seed,
@@ -38,8 +38,8 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
     },
     viewerRef
   ) => {
-    const { output } = squiggleOutput;
-    const isRunning = getIsRunning(squiggleOutput);
+    const { output } = squiggleProjectRun;
+    const isRunning = getIsRunning(squiggleProjectRun);
 
     return (
       <ViewerProvider
@@ -63,7 +63,7 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
               setSeed={setSeed}
             />
           }
-          indicator={<RenderingIndicator output={squiggleOutput} />}
+          indicator={<RenderingIndicator output={squiggleProjectRun} />}
           viewer={
             <ViewerBody
               viewerTab={viewerTab}

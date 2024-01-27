@@ -4,11 +4,11 @@ import { SqValuePath } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { SquiggleViewer } from "../index.js";
+import { useSquiggleRunner } from "../lib/hooks/useSquiggleRunner.js";
 import {
   ProjectExecutionProps,
   StandaloneExecutionProps,
-  useSquiggleRunner,
-} from "../lib/hooks/useSquiggleRunner.js";
+} from "../lib/utility.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
 import { useGetSubvalueByPath } from "./SquiggleViewer/utils.js";
@@ -55,7 +55,7 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     //     seed,
     //   };
     // }, [environment, seed]);
-    const { squiggleOutput, viewerTab, setViewerTab, seed, setSeed } =
+    const { squiggleProjectRun, viewerTab, setViewerTab, seed, setSeed } =
       useSquiggleRunner({
         code,
         setup: project
@@ -66,12 +66,12 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     // TODO - if `<ViewerProvider>` is not set up (which is very possible) then calculator paths won't be resolved.
     const getSubvalueByPath = useGetSubvalueByPath();
 
-    if (!squiggleOutput) {
+    if (!squiggleProjectRun) {
       return <RefreshIcon className="animate-spin" />;
     }
 
     if (rootPathOverride) {
-      const { output } = squiggleOutput;
+      const { output } = squiggleProjectRun;
       if (!output.ok) {
         return <SqErrorAlert error={output.value} />;
       }
@@ -89,7 +89,7 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     } else {
       return (
         <SquiggleOutputViewer
-          squiggleOutput={squiggleOutput}
+          squiggleProjectRun={squiggleProjectRun}
           environment={environment}
           seed={seed}
           setSeed={setSeed}
