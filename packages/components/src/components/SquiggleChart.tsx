@@ -11,12 +11,17 @@ import {
   useSquiggle,
 } from "../lib/hooks/useSquiggle.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { ViewerMenuBar } from "./ViewerMenuBar/index.js";
+import {
+  defaultMode,
+  ViewerMenuBar,
+  ViewerMode,
+} from "./ViewerMenuBar/index.js";
 import { ViewerBody } from "./ViewerMenuBar/ViewerBody.js";
 
 export type SquiggleChartProps = {
   code: string;
   rootPathOverride?: SqValuePath; // Note: This should be static. We don't support rootPathOverride to change once set. Used for Export pages on Squiggle Hub.
+  showHeader?: boolean;
 } & (StandaloneExecutionProps | ProjectExecutionProps) &
   // `environment` is passed through StandaloneExecutionProps; this way we guarantee that it's not compatible with `project` prop
   Omit<PartialPlaygroundSettings, "environment">;
@@ -28,6 +33,7 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     continues,
     environment,
     rootPathOverride,
+    showHeader = true,
     ...settings
   }) {
     // We go through runnerState to bump executionId on code changes;
@@ -42,40 +48,33 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     });
 
     // TODO - if `<ViewerProvider>` is not set up (which is very possible) then calculator paths won't be resolved.
-
     if (!squiggleOutput) {
       return <RefreshIcon className="animate-spin" />;
     }
 
-    if (rootPathOverride) {
-      // TODO: It's awkward how this toggle both changes the UI and the data flow. Maybe we should have a separate component for this?
+    //For now, we don't support the case of rootPathOverride and showHeader both being true.
+    const _showHeader = rootPathOverride ? false : showHeader;
+    const viewer = (output: SqValue) => (
+      <SquiggleViewer value={output} environment={environment} {...settings} />
+    );
+
+    if (_showHeader) {
+      <ViewerMenuBar
+        viewer={viewer}
+        squiggleOutput={squiggleOutput}
+        isRunning={isRunning}
+      />;
+    } else {
+      const mode: ViewerMode = rootPathOverride
+        ? { tag: "CustomResultPath", value: rootPathOverride }
+        : defaultMode(squiggleOutput.output);
 
       return (
         <ViewerBody
+          viewer={viewer}
           output={squiggleOutput.output}
-          mode={{ tag: "CustomResultPath", value: rootPathOverride }}
+          mode={mode}
           isRunning={isRunning}
-          viewer={(output) => (
-            <SquiggleViewer
-              value={output}
-              environment={environment}
-              {...settings}
-            />
-          )}
-        />
-      );
-    } else {
-      return (
-        <ViewerMenuBar
-          squiggleOutput={squiggleOutput}
-          isRunning={isRunning}
-          viewer={(output: SqValue) => (
-            <SquiggleViewer
-              value={output}
-              environment={environment}
-              {...settings}
-            />
-          )}
         />
       );
     }

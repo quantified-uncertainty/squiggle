@@ -27,23 +27,23 @@ export type ViewerMode =
   | "AST"
   | { tag: "CustomResultPath"; value: SqValuePath };
 
-function useMode(outputResult: SqOutputResult) {
-  return useState<ViewerMode>(() => {
-    // Pick the initial mode value
-
-    if (!outputResult.ok) {
-      return "Variables";
-    }
-
-    const output = outputResult.value;
-    if (output.result.tag !== "Void") {
-      return "Result";
-    }
-    if (!output.exports.isEmpty()) {
-      return "Exports";
-    }
+export function defaultMode(output: SqOutputResult): ViewerMode {
+  if (!output.ok) {
     return "Variables";
-  });
+  }
+
+  const sqOutput = output.value;
+  if (sqOutput.result.tag !== "Void") {
+    return "Result";
+  }
+  if (!sqOutput.exports.isEmpty()) {
+    return "Exports";
+  }
+  return "Variables";
+}
+
+function useMode(outputResult: SqOutputResult) {
+  return useState<ViewerMode>(() => defaultMode(outputResult));
 }
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
