@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import { getIsRunning } from "../../lib/hooks/useSquiggleRunner.js";
 import { ViewerMode } from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
@@ -15,7 +16,6 @@ import { ViewerMenu } from "./ViewerMenu.js";
 
 type Props = {
   squiggleOutput: SquiggleOutput;
-  isRunning: boolean;
   editor?: CodeEditorHandle;
   setMode: (mode: ViewerMode) => void;
   mode: ViewerMode;
@@ -23,11 +23,9 @@ type Props = {
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
 export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
-  (
-    { squiggleOutput, isRunning, editor, mode, setMode, ...settings },
-    viewerRef
-  ) => {
+  ({ squiggleOutput, editor, mode, setMode, ...settings }, viewerRef) => {
     const { output } = squiggleOutput;
+    const isRunning = getIsRunning(squiggleOutput);
 
     return (
       <ViewerProvider
@@ -38,9 +36,7 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
       >
         <Layout
           menu={<ViewerMenu mode={mode} setMode={setMode} output={output} />}
-          indicator={
-            <RenderingIndicator isRunning={isRunning} output={squiggleOutput} />
-          }
+          indicator={<RenderingIndicator output={squiggleOutput} />}
           viewer={
             <ViewerBody mode={mode} output={output} isRunning={isRunning} />
           }

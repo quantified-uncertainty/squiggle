@@ -30,13 +30,17 @@ export type SquiggleRunnerOutput = {
   squiggleOutput?: SquiggleOutput;
   mode: string;
   setMode: (newValue: string) => void;
-  isRunning: boolean;
   project: SqProject;
   sourceId: string;
   run: () => void;
   setAutorunMode: (newValue: boolean) => void;
   autorunMode: boolean;
+  setEnvironment: (newEnv: Env) => void;
 };
+
+export function getIsRunning(squiggleOutput: SquiggleOutput): boolean {
+  return squiggleOutput.isStale ?? false;
+}
 
 const defaultContinues: string[] = [];
 
@@ -65,7 +69,7 @@ export function useSquiggleRunner(args: SquiggleRunnerArgs) {
     }
   }, [projectArg, environment]);
 
-  const [squiggleOutput, _, { reRun }] = useSquiggle({
+  const [squiggleOutput, { reRun }] = useSquiggle({
     sourceId,
     code: args.code,
     project,
@@ -90,12 +94,17 @@ export function useSquiggleRunner(args: SquiggleRunnerArgs) {
     sourceId,
     squiggleOutput,
     project,
-    isRunning: false,
-    run: reRun,
+    rerunSquiggleCode: reRun,
 
     mode,
     setMode,
     autorunMode,
     setAutorunMode: setAutorunMode,
+    setEnvironment: (newEnv: Env) => {
+      project.setEnvironment(newEnv);
+      if (autorunMode) {
+        reRun();
+      }
+    },
   };
 }

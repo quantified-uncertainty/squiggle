@@ -1,4 +1,4 @@
-import { result, SqValue } from "@quri/squiggle-lang";
+import { result, SqError, SqValue } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../squiggle-lang/src/public/types.js";
 import { SquiggleOutput } from "./hooks/useSquiggle.js";
@@ -37,7 +37,7 @@ export function some(arr: boolean[]): boolean {
   return arr.reduce((x, y) => x || y, false);
 }
 
-export function getErrors(result: SquiggleOutput["output"]) {
+export function getErrors(result: SquiggleOutput["output"]): SqError[] {
   if (!result.ok) {
     return [result.value];
   } else {

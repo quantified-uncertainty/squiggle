@@ -121,11 +121,10 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     squiggleOutput,
     mode,
     setMode,
-    isRunning,
     sourceId: _sourceId,
     autorunMode,
     setAutorunMode,
-    run,
+    rerunSquiggleCode,
   } = useSquiggleRunner({ project, code });
 
   useEffect(() => {
@@ -133,11 +132,11 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 
     function invalidate() {
       if (autorunMode) {
-        run(); // mark output as stale but don't re-run if autorun is disabled; useful on environment changes, triggered in <SquigglePlayground> code
+        rerunSquiggleCode(); // mark output as stale but don't re-run if autorun is disabled; useful on environment changes, triggered in <SquigglePlayground> code
       }
     }
     invalidate();
-  }, [project, settings.environment, autorunMode]); //Don't add runnerState here, it will cause infinite loop
+  }, [project, settings.environment, autorunMode]);
 
   useEffect(() => {
     const _output = squiggleOutput?.output;
@@ -168,7 +167,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       code={code}
       setCode={setCode}
       sourceId={_sourceId}
-      isRunning={isRunning}
       squiggleOutput={squiggleOutput}
       settings={settings}
       onSettingsChange={handleSettingsChange}
@@ -180,7 +178,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       ref={leftPanelRef}
       autorunMode={autorunMode}
       setAutorunMode={setAutorunMode}
-      run={run}
+      rerunSquiggleCode={rerunSquiggleCode}
     />
   );
 
@@ -188,7 +186,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     squiggleOutput ? (
       <SquiggleOutputViewer
         squiggleOutput={squiggleOutput}
-        isRunning={isRunning}
         // FIXME - this will cause viewer to be rendered twice on initial render
         editor={leftPanelRef.current?.getEditor() ?? undefined}
         ref={rightPanelRef}

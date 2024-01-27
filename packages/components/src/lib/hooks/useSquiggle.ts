@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Env, SqProject } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
-import { useForceUpdate } from "./useForceUpdate.js";
 
 export type SquiggleArgs = {
   code: string;
@@ -30,19 +29,14 @@ export type SquiggleOutput = {
 
 export type UseSquiggleOutput = [
   SquiggleOutput | undefined,
-  UpcomingSquiggleOutput | undefined,
   { reRun: () => void },
 ];
 
 export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
   // random; https://stackoverflow.com/a/12502559
 
-  const squiggleOutputRef = useRef<SquiggleOutput | undefined>(undefined);
-  const executionIdRef = useRef<number>(0);
-
-  const forceUpdate = useForceUpdate();
-  const [upcomingSquiggleOutput, setUpcomingSquiggleOutput] = useState<
-    UpcomingSquiggleOutput | undefined
+  const [squiggleOutput, setSquiggleOutput] = useState<
+    SquiggleOutput | undefined
   >(undefined);
 
   const runSquiggle = useCallback(
@@ -52,28 +46,29 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
         args.project.setSource(args.sourceId, args.code);
         args.project.setContinues(args.sourceId, args.continues);
 
-        if (squiggleOutputRef.current) {
-          squiggleOutputRef.current = {
-            ...squiggleOutputRef.current,
-            isStale: true,
-          };
-        }
+        setSquiggleOutput((prevOutput) => {
+          return prevOutput
+            ? {
+                isStale: true,
+                ...(prevOutput || {}),
+              }
+            : undefined;
+        });
 
         await args.project.run(args.sourceId);
         const output = args.project.getOutput(args.sourceId);
         const executionTime = Date.now() - startTime;
 
-        forceUpdate();
-
-        squiggleOutputRef.current = {
-          output,
-          code: args.code,
-          executionId: executionIdRef.current++,
-          executionTime,
-          isStale: false,
-        };
-
-        setUpcomingSquiggleOutput(undefined);
+        setSquiggleOutput((previousOutput) => {
+          const previousExecutionId = previousOutput?.executionId || 0;
+          return {
+            executionId: previousExecutionId + 1,
+            isStale: false,
+            code: args.code,
+            output,
+            executionTime,
+          };
+        });
       };
 
       if (typeof MessageChannel === "undefined") {
@@ -92,14 +87,7 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
     // This is on purpose, as executionId simply allows you to run the squiggle
     // code again
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      args.code,
-      args.continues,
-      args.project,
-      args.sourceId,
-      setUpcomingSquiggleOutput,
-      forceUpdate,
-    ]
+    [args.code, args.continues, args.project, args.sourceId]
   );
 
   useEffect(() => {
@@ -113,9 +101,5 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
     };
   }, [args.project, args.sourceId]);
 
-  return [
-    squiggleOutputRef.current,
-    upcomingSquiggleOutput,
-    { reRun: runSquiggle },
-  ];
+  return [squiggleOutput, { reRun: runSquiggle }];
 }

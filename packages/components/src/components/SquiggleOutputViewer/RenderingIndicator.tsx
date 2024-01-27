@@ -1,11 +1,13 @@
 import { FC } from "react";
 
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import { getIsRunning } from "../../lib/hooks/useSquiggleRunner.js";
 
 export const RenderingIndicator: FC<{
   output: SquiggleOutput;
-  isRunning: boolean;
-}> = ({ output, isRunning }) => {
+}> = ({ output }) => {
+  const isRunning = getIsRunning(output);
+
   const showTime = (executionTime: number) =>
     executionTime > 1000
       ? `${(executionTime / 1000).toFixed(2)}s`

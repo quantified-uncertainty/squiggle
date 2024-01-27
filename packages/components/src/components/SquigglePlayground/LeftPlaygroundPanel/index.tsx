@@ -18,6 +18,7 @@ import {
 } from "@quri/ui";
 
 import { SquiggleOutput } from "../../../lib/hooks/index.js";
+import { getIsRunning } from "../../../lib/hooks/useSquiggleRunner.js";
 import { altKey, getErrors } from "../../../lib/utility.js";
 import {
   CodeEditor,
@@ -49,8 +50,7 @@ type Props = {
   squiggleOutput: SquiggleOutput | undefined;
   autorunMode: boolean;
   setAutorunMode: (autorunMode: boolean) => void;
-  run: () => void;
-  isRunning: boolean;
+  rerunSquiggleCode: () => void;
   code: string;
   setCode: (code: string) => void;
 } & Pick<CodeEditorProps, "onViewValuePath" | "renderImportTooltip">;
@@ -85,9 +85,11 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
     }) => (
       <div className="flex">
         <RunMenuItem
-          run={props.run}
+          rerunSquiggleCode={props.rerunSquiggleCode}
           autorunMode={props.autorunMode}
-          isRunning={props.isRunning}
+          isRunning={
+            props.squiggleOutput ? getIsRunning(props.squiggleOutput) : false
+          }
         />
         <AutorunnerMenuItem
           setAutorunMode={props.setAutorunMode}
@@ -139,7 +141,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           showGutter={true}
           lineWrapping={props.settings.editorSettings.lineWrapping}
           onChange={props.setCode}
-          onSubmit={props.run}
+          onSubmit={props.rerunSquiggleCode}
           onViewValuePath={props.onViewValuePath}
           renderImportTooltip={props.renderImportTooltip}
         />

@@ -1,7 +1,7 @@
 import {
   ProjectExecutionProps,
   StandaloneExecutionProps,
-} from "../lib/hooks/useSquiggle.js";
+} from "../lib/hooks/useSquiggleRunner.js";
 
 // common props for SquigglePlayground and SquiggleEditor
 export type SquiggleCodeProps = {
