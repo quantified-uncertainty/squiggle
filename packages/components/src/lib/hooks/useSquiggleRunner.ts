@@ -27,15 +27,18 @@ export type SquiggleRunnerArgs = {
 } & (StandaloneExecutionProps | ProjectExecutionProps);
 
 export type SquiggleRunnerOutput = {
-  squiggleOutput?: SquiggleOutput;
-  vieweTab: ViewerTab;
-  setViewerTab: (newValue: string) => void;
-  project: SqProject;
   sourceId: string;
-  run: () => void;
-  setAutorunMode: (newValue: boolean) => void;
+  squiggleOutput?: SquiggleOutput;
+  project: SqProject;
+
+  viewerTab: ViewerTab;
+  setViewerTab: (newValue: ViewerTab) => void;
+
   autorunMode: boolean;
-  setEnvironment: (newEnv: Env) => void;
+  setAutorunMode: (newValue: boolean) => void;
+
+  setProjectEnvironment: (newEnv: Env) => void;
+  rerunSquiggleCode: () => void;
 };
 
 export function getIsRunning(squiggleOutput: SquiggleOutput): boolean {
@@ -44,7 +47,9 @@ export function getIsRunning(squiggleOutput: SquiggleOutput): boolean {
 
 const defaultContinues: string[] = [];
 
-export function useSquiggleRunner(args: SquiggleRunnerArgs) {
+export function useSquiggleRunner(
+  args: SquiggleRunnerArgs
+): SquiggleRunnerOutput {
   const [autorunMode, setAutorunMode] = useState(true);
   const isViewerTabSet = useRef(false);
 
