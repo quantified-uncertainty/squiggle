@@ -1,12 +1,11 @@
-import { ReactComponentElement, useState } from "react";
+import { useState } from "react";
 
-import { SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { SqValuePath } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
-import { SquiggleViewer } from "../SquiggleViewer/index.js";
 import { Layout } from "./Layout.js";
 import { RenderingIndicator } from "./RenderingIndicator.js";
 import { ViewerBody } from "./ViewerBody.js";
@@ -16,7 +15,6 @@ type Props = {
   squiggleOutput: SquiggleOutput;
   isRunning: boolean;
   editor?: CodeEditorHandle;
-  viewer: (output: SqValue) => ReactComponentElement<typeof SquiggleViewer>;
 } & PartialPlaygroundSettings;
 
 export type ViewerMode =
@@ -42,7 +40,7 @@ export function defaultMode(output: SqOutputResult): ViewerMode {
   return "Variables";
 }
 
-function useMode(outputResult: SqOutputResult) {
+export function useMode(outputResult: SqOutputResult) {
   return useState<ViewerMode>(() => defaultMode(outputResult));
 }
 
@@ -50,7 +48,6 @@ function useMode(outputResult: SqOutputResult) {
 export const ViewerMenuBar: React.FC<Props> = ({
   squiggleOutput,
   isRunning,
-  viewer,
 }) => {
   const { output } = squiggleOutput;
   const [mode, setMode] = useMode(output);
@@ -61,14 +58,7 @@ export const ViewerMenuBar: React.FC<Props> = ({
       indicator={
         <RenderingIndicator isRunning={isRunning} output={squiggleOutput} />
       }
-      viewer={
-        <ViewerBody
-          mode={mode}
-          output={output}
-          isRunning={isRunning}
-          viewer={viewer}
-        />
-      }
+      viewer={<ViewerBody mode={mode} output={output} isRunning={isRunning} />}
     />
   );
 };

@@ -1,16 +1,15 @@
 import { FC, useMemo, useRef } from "react";
 
-import { SqValue } from "@quri/squiggle-lang";
-
-import { SquiggleViewer } from "../index.js";
 import { useUncontrolledCode } from "../lib/hooks/index.js";
 import { useRunnerState } from "../lib/hooks/useRunnerState.js";
 import { useSquiggle } from "../lib/hooks/useSquiggle.js";
 import { getErrors } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
+import { ViewerProvider } from "./SquiggleViewer/ViewerProvider.js";
 import { SquiggleCodeProps } from "./types.js";
 import { ViewerMenuBar } from "./ViewerMenuBar/index.js";
+import { modeToValue } from "./ViewerMenuBar/ViewerBody.js";
 
 export type SquiggleEditorProps = SquiggleCodeProps & {
   hideViewer?: boolean;
@@ -51,7 +50,15 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   const editorRef = useRef<CodeEditorHandle>(null);
 
   return (
-    <div>
+    <ViewerProvider
+      rootValue={
+        squiggleOutput?.output.ok
+          ? modeToValue("Result", squiggleOutput.output)
+          : undefined
+      } // TODO: Change once other refactor branch, with mode as a state, is merged.
+      editor={editorRef.current ?? undefined}
+      partialPlaygroundSettings={settings}
+    >
       <div
         className="border border-slate-300 bg-slate-50 rounded-sm p-2"
         data-testid="squiggle-editor"
@@ -69,19 +76,8 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
         />
       </div>
       {hideViewer || !squiggleOutput ? null : (
-        <ViewerMenuBar
-          squiggleOutput={squiggleOutput}
-          isRunning={isRunning}
-          viewer={(output: SqValue) => (
-            <SquiggleViewer
-              value={output}
-              editor={editorRef.current ?? undefined}
-              environment={environment}
-              {...settings}
-            />
-          )}
-        />
+        <ViewerMenuBar squiggleOutput={squiggleOutput} isRunning={isRunning} />
       )}
-    </div>
+    </ViewerProvider>
   );
 };

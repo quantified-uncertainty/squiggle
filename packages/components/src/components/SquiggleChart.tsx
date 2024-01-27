@@ -1,9 +1,8 @@
 import { FC, memo } from "react";
 
-import { SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { SqValuePath } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
-import { SquiggleViewer } from "../index.js";
 import { useRunnerState } from "../lib/hooks/useRunnerState.js";
 import {
   ProjectExecutionProps,
@@ -11,12 +10,9 @@ import {
   useSquiggle,
 } from "../lib/hooks/useSquiggle.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import {
-  defaultMode,
-  ViewerMenuBar,
-  ViewerMode,
-} from "./ViewerMenuBar/index.js";
-import { ViewerBody } from "./ViewerMenuBar/ViewerBody.js";
+import { ViewerProvider } from "./SquiggleViewer/ViewerProvider.js";
+import { defaultMode, ViewerMenuBar } from "./ViewerMenuBar/index.js";
+import { modeToValue, ViewerBody } from "./ViewerMenuBar/ViewerBody.js";
 
 export type SquiggleChartProps = {
   code: string;
@@ -54,29 +50,32 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
 
     //For now, we don't support the case of rootPathOverride and showHeader both being true.
     const _showHeader = rootPathOverride ? false : showHeader;
-    const viewer = (output: SqValue) => (
-      <SquiggleViewer value={output} environment={environment} {...settings} />
+
+    const viewerSection = _showHeader ? (
+      <ViewerMenuBar squiggleOutput={squiggleOutput} isRunning={isRunning} />
+    ) : (
+      <ViewerBody
+        output={squiggleOutput.output}
+        mode={
+          rootPathOverride
+            ? { tag: "CustomResultPath", value: rootPathOverride }
+            : defaultMode(squiggleOutput.output)
+        }
+        isRunning={isRunning}
+      />
     );
 
-    if (_showHeader) {
-      <ViewerMenuBar
-        viewer={viewer}
-        squiggleOutput={squiggleOutput}
-        isRunning={isRunning}
-      />;
-    } else {
-      const mode: ViewerMode = rootPathOverride
-        ? { tag: "CustomResultPath", value: rootPathOverride }
-        : defaultMode(squiggleOutput.output);
-
-      return (
-        <ViewerBody
-          viewer={viewer}
-          output={squiggleOutput.output}
-          mode={mode}
-          isRunning={isRunning}
-        />
-      );
-    }
+    return (
+      <ViewerProvider
+        rootValue={
+          squiggleOutput?.output.ok
+            ? modeToValue("Result", squiggleOutput.output)
+            : undefined
+        } // TODO: Change once other refactor branch, with mode as a state, is merged.
+        partialPlaygroundSettings={settings}
+      >
+        {viewerSection}
+      </ViewerProvider>
+    );
   }
 );

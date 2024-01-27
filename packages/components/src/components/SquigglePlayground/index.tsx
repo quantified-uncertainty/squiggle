@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 
-import { SqLinker, SqProject, SqValue } from "@quri/squiggle-lang";
+import { SqLinker, SqProject } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
@@ -16,9 +16,12 @@ import {
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { SquiggleViewer } from "../SquiggleViewer/index.js";
-import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
+import {
+  SquiggleViewerHandle,
+  ViewerProvider,
+} from "../SquiggleViewer/ViewerProvider.js";
 import { ViewerMenuBar } from "../ViewerMenuBar/index.js";
+import { modeToValue } from "../ViewerMenuBar/ViewerBody.js";
 import {
   LeftPlaygroundPanel,
   LeftPlaygroundPanelHandle,
@@ -170,15 +173,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       <ViewerMenuBar
         squiggleOutput={output.output}
         isRunning={output.isRunning}
-        viewer={(output: SqValue) => (
-          <SquiggleViewer
-            value={output}
-            ref={rightPanelRef}
-            // FIXME - this will cause viewer to be rendered twice on initial render
-            editor={leftPanelRef.current?.getEditor() ?? undefined}
-          />
-        )}
-        {...settings}
       />
     ) : (
       <div className="grid place-items-center h-full">
@@ -188,11 +182,23 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 
   return (
     <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
-      <ResizableTwoPanelLayout
-        height={height}
-        renderLeft={renderLeft}
-        renderRight={renderRight}
-      />
+      <ViewerProvider
+        rootValue={
+          output?.output
+            ? modeToValue("Result", output.output.output)
+            : undefined
+        } // TODO: Change once other refactor branch, with mode as a state, is merged.
+        partialPlaygroundSettings={settings}
+        viewerType="normal"
+        ref={rightPanelRef}
+        editor={leftPanelRef.current?.getEditor() ?? undefined}
+      >
+        <ResizableTwoPanelLayout
+          height={height}
+          renderLeft={renderLeft}
+          renderRight={renderRight}
+        />
+      </ViewerProvider>
     </PlaygroundContext.Provider>
   );
 };

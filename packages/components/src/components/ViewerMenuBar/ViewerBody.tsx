@@ -1,17 +1,16 @@
-import { FC, ReactComponentElement } from "react";
+import { FC } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
-import { SquiggleViewer } from "../SquiggleViewer/index.js";
+import { SquiggleViewerWithoutProvider } from "../SquiggleViewer/index.js";
 import { ViewerMode } from "./index.js";
 
 type Props = {
   mode: ViewerMode;
   output: SqOutputResult;
   isRunning: boolean;
-  viewer: (output: SqValue) => ReactComponentElement<typeof SquiggleViewer>;
 };
 
 export function modeToValue(
@@ -43,7 +42,7 @@ export function modeToValue(
   }
 }
 
-export const ViewerBody: FC<Props> = ({ output, mode, isRunning, viewer }) => {
+export const ViewerBody: FC<Props> = ({ output, mode, isRunning }) => {
   if (!output.ok) {
     return <SquiggleErrorAlert error={output.value} />;
   }
@@ -70,7 +69,7 @@ export const ViewerBody: FC<Props> = ({ output, mode, isRunning, viewer }) => {
         // `opacity-0 squiggle-semi-appear` would be better, but won't work reliably until we move Squiggle evaluation to Web Workers
         <div className="absolute z-10 inset-0 bg-white opacity-50" />
       )}
-      {viewer(usedValue)}
+      <SquiggleViewerWithoutProvider value={usedValue} />
     </div>
   );
 };
