@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 
-import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import { SquiggleOutput } from "../../lib/hooks/useSquiggleProjectRun.js";
 import { getIsRunning } from "../../lib/hooks/useSquiggleRunner.js";
 import { ViewerTab, viewerTabToValue } from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";

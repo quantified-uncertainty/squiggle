@@ -2,9 +2,9 @@ import { FC } from "react";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { ViewerTab, viewerTabToValue } from "../../lib/utility.js";
-import { ErrorBoundary } from "../ErrorBoundary.js";
-import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { SquiggleViewer } from "../SquiggleViewer/index.js";
+import { ErrorBoundary } from "../ui/ErrorBoundary.js";
+import { SqErrorAlert } from "../ui/SqErrorAlert.js";
 
 type Props = {
   viewerTab: ViewerTab;
@@ -14,7 +14,7 @@ type Props = {
 
 export const ViewerBody: FC<Props> = ({ output, viewerTab, isRunning }) => {
   if (!output.ok) {
-    return <SquiggleErrorAlert error={output.value} />;
+    return <SqErrorAlert error={output.value} />;
   }
 
   const sqOutput = output.value;

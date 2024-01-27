@@ -12,13 +12,13 @@ import {
   SqScale,
 } from "@quri/squiggle-lang";
 
-import { MessageAlert } from "../../../components/Alert.js";
-import { ErrorBoundary } from "../../../components/ErrorBoundary.js";
 import {
   generateDistributionPlotSettings,
   PlaygroundSettings,
 } from "../../../components/PlaygroundSettings.js";
-import { SquiggleErrorAlert } from "../../../components/SquiggleErrorAlert.js";
+import { MessageAlert } from "../../../components/ui/Alert.js";
+import { ErrorBoundary } from "../../../components/ui/ErrorBoundary.js";
+import { SqErrorAlert } from "../../../components/ui/SqErrorAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
 
@@ -42,7 +42,7 @@ const FunctionCallErrorAlert: FC<{ error: SqError }> = ({ error }) => {
         >
           {expanded ? "Hide" : "Show"} error details
         </span>
-        {expanded ? <SquiggleErrorAlert error={error} /> : null}
+        {expanded ? <SqErrorAlert error={error} /> : null}
       </div>
     </MessageAlert>
   );

@@ -9,11 +9,11 @@ import {
   StandaloneExecutionProps,
   useSquiggleRunner,
 } from "../lib/hooks/useSquiggleRunner.js";
-import { MessageAlert } from "./Alert.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { SquiggleErrorAlert } from "./SquiggleErrorAlert.js";
 import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
 import { useGetSubvalueByPath } from "./SquiggleViewer/utils.js";
+import { MessageAlert } from "./ui/Alert.js";
+import { SqErrorAlert } from "./ui/SqErrorAlert.js";
 
 export type SquiggleChartProps = {
   code: string;
@@ -21,6 +21,17 @@ export type SquiggleChartProps = {
 } & (StandaloneExecutionProps | ProjectExecutionProps) &
   // `environment` is passed through StandaloneExecutionProps; this way we guarantee that it's not compatible with `project` prop
   Omit<PartialPlaygroundSettings, "environment">;
+
+// type RunSetup =
+//   | { type: "standalone"; environment?: Env } // For standalone execution
+//   | { type: "project"; project: SqProject; continues?: string[] }; // Project for the parent execution. Continues is what other squiggle sources to continue. Default []
+// export type SquiggleChartPropsAlternate = {
+//   code: string;
+//   rootPathOverride?: SqValuePath; // Note: This should be static. We don't support rootPathOverride to change once set.
+//   settings: Omit<PartialPlaygroundSettings, "environment">;
+//   setup: RunSetup;
+// };
+// `environment` is passed through StandaloneExecutionProps; this way we guarantee that it's not compatible with `project` prop
 
 export const SquiggleChart: FC<SquiggleChartProps> = memo(
   function SquiggleChart({
@@ -37,7 +48,9 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
 
     const { squiggleOutput, viewerTab, setViewerTab } = useSquiggleRunner({
       code,
-      ...(project ? { project, continues } : { environment }),
+      setup: project
+        ? { type: "project", project, continues }
+        : { type: "standalone", environment },
     });
 
     // TODO - if `<ViewerProvider>` is not set up (which is very possible) then calculator paths won't be resolved.
@@ -50,7 +63,7 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     if (rootPathOverride) {
       const { output } = squiggleOutput;
       if (!output.ok) {
-        return <SquiggleErrorAlert error={output.value} />;
+        return <SqErrorAlert error={output.value} />;
       }
       const rootValue =
         rootPathOverride.root === "result"

@@ -7,7 +7,7 @@ import {
 
 export { SqProject } from "@quri/squiggle-lang";
 
-export { NumberShower } from "./components/NumberShower.js";
+export { NumberShower } from "./components/ui/NumberShower.js";
 export {
   SquiggleChart,
   type SquiggleChartProps,
@@ -21,7 +21,7 @@ export { SquiggleViewer } from "./components/SquiggleViewer/index.js";
 export { ToolbarItem as PlaygroundToolbarItem } from "./components/ui/PanelWithToolbar/ToolbarItem.js";
 export { FnDocumentationFromName } from "./components/ui/FnDocumentation.js";
 
-export { SquiggleErrorAlert } from "./components/SquiggleErrorAlert.js";
+export { SqErrorAlert as SquiggleErrorAlert } from "./components/ui/SqErrorAlert.js";
 
 export { RelativeValueCell } from "./widgets/PlotWidget/RelativeValuesGridChart/RelativeValueCell.js";
 

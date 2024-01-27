@@ -1,8 +1,8 @@
 import groupBy from "lodash/groupBy.js";
 import { FC } from "react";
 
-import { ErrorAlert } from "../../../components/Alert.js";
-import { NumberShower } from "../../../components/NumberShower.js";
+import { ErrorAlert } from "../../../components/ui/Alert.js";
+import { NumberShower } from "../../../components/ui/NumberShower.js";
 import { ImageError } from "./utils.js";
 
 type GroupedImageErrors = {

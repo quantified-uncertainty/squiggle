@@ -6,7 +6,7 @@ import {
   StandaloneExecutionProps,
   useSquiggleRunner,
 } from "../lib/hooks/useSquiggleRunner.js";
-import { getErrors } from "../lib/utility.js";
+import { getSquiggleOutputErrors } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
@@ -14,11 +14,10 @@ import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
 export type SquiggleEditorProps = {
   defaultCode?: string;
   onCodeChange?(code: string): void;
-  hideViewer?: boolean;
   editorFontSize?: number;
+  settings?: Omit<PartialPlaygroundSettings, "environment">;
   // environment comes from SquiggleCodeProps
-} & (StandaloneExecutionProps | ProjectExecutionProps) &
-  Omit<PartialPlaygroundSettings, "environment">;
+} & (StandaloneExecutionProps | ProjectExecutionProps);
 
 export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   defaultCode: propsDefaultCode,
@@ -26,9 +25,8 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   project: propsProject,
   continues,
   environment,
-  hideViewer,
   editorFontSize,
-  ...settings
+  settings,
 }) => {
   const { code, setCode, defaultCode } = useUncontrolledCode({
     defaultCode: propsDefaultCode,
@@ -44,15 +42,15 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     rerunSquiggleCode,
   } = useSquiggleRunner({
     code,
-    ...(propsProject ? { project: propsProject, continues } : { environment }),
+    setup: propsProject
+      ? { type: "project", project: propsProject, continues }
+      : { type: "standalone", environment },
   });
 
-  const errors = useMemo(() => {
-    if (!squiggleOutput) {
-      return [];
-    }
-    return getErrors(squiggleOutput.output);
-  }, [squiggleOutput]);
+  const errors = useMemo(
+    () => getSquiggleOutputErrors(squiggleOutput),
+    [squiggleOutput]
+  );
 
   const editorRef = useRef<CodeEditorHandle>(null);
 
@@ -74,7 +72,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           onSubmit={rerunSquiggleCode}
         />
       </div>
-      {hideViewer || !squiggleOutput ? null : (
+      {!squiggleOutput ? null : (
         <SquiggleOutputViewer
           squiggleOutput={squiggleOutput}
           editor={editorRef.current ?? undefined}

@@ -10,7 +10,7 @@ import {
   SqStringValue,
 } from "@quri/squiggle-lang";
 
-import { ErrorAlert } from "../../../components/Alert.js";
+import { ErrorAlert } from "../../../components/ui/Alert.js";
 import { PlotTitle } from "../PlotTitle.js";
 import { RelativeValueCell } from "./RelativeValueCell.js";
 

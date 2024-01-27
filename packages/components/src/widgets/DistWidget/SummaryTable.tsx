@@ -15,7 +15,7 @@ import {
 } from "@quri/squiggle-lang";
 import { TextTooltip } from "@quri/ui";
 
-import { NumberShower } from "../../components/NumberShower.js";
+import { NumberShower } from "../../components/ui/NumberShower.js";
 import { formatDate } from "../../lib/d3/index.js";
 import { useSetSelectedVerticalLine } from "./DistProvider.js";
 
