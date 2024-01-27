@@ -35,7 +35,7 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     // This is important, for example, in VS Code extension.
     // TODO: maybe `useRunnerState` could be merged with `useSquiggle`, but it does some extra stuff (autorun mode).
 
-    const { squiggleOutput, mode, setMode } = useSquiggleRunner({
+    const { squiggleOutput, viewerTab, setViewerTab } = useSquiggleRunner({
       code,
       ...(project ? { project, continues } : { environment }),
     });
@@ -68,8 +68,8 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
         <SquiggleOutputViewer
           squiggleOutput={squiggleOutput}
           environment={environment}
-          mode={mode}
-          setMode={setMode}
+          viewerTab={viewerTab}
+          setViewerTab={setViewerTab}
           {...settings}
         />
       );

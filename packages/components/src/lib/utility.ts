@@ -100,9 +100,11 @@ export function valueHasContext(value: SqValue): value is SqValueWithContext {
   return !!value.context;
 }
 
-export type ViewerMode = "Imports" | "Exports" | "Variables" | "Result" | "AST";
+export type ViewerTab = "Imports" | "Exports" | "Variables" | "Result" | "AST";
 
-export function defaultMode(outputResult: SqOutputResult | undefined) {
+export function defaultViewerTab(
+  outputResult: SqOutputResult | undefined
+): ViewerTab {
   if (!outputResult || !outputResult.ok) {
     return "Variables";
   }
@@ -115,4 +117,26 @@ export function defaultMode(outputResult: SqOutputResult | undefined) {
     return "Exports";
   }
   return "Variables";
+}
+
+export function viewerTabToValue(
+  viewerTab: ViewerTab,
+  output: SqOutputResult
+): SqValue | undefined {
+  if (!output.ok) {
+    return;
+  }
+  const sqOutput = output.value;
+  switch (viewerTab) {
+    case "Result":
+      return sqOutput.result;
+    case "Variables":
+      return sqOutput.bindings.asValue();
+    case "Imports":
+      return sqOutput.imports.asValue();
+    case "Exports":
+      return sqOutput.exports.asValue();
+    case "AST":
+      return;
+  }
 }

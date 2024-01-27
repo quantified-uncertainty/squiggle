@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { Env, SqProject } from "@quri/squiggle-lang";
+import { SqProject } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 
@@ -10,7 +10,7 @@ export type SquiggleArgs = {
   executionId?: number;
   project: SqProject;
   continues: string[];
-  environment?: Env;
+  autorunMode: boolean;
 };
 
 export type UpcomingSquiggleOutput = {
@@ -29,7 +29,7 @@ export type SquiggleOutput = {
 
 export type UseSquiggleOutput = [
   SquiggleOutput | undefined,
-  { reRun: () => void },
+  { rerunSquiggleCode: () => void },
 ];
 
 export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
@@ -42,10 +42,6 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
   const runSquiggle = useCallback(
     async () => {
       const act = async () => {
-        const startTime = Date.now();
-        args.project.setSource(args.sourceId, args.code);
-        args.project.setContinues(args.sourceId, args.continues);
-
         setSquiggleOutput((prevOutput) => {
           return prevOutput
             ? {
@@ -55,6 +51,9 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
             : undefined;
         });
 
+        const startTime = Date.now();
+        args.project.setSource(args.sourceId, args.code);
+        args.project.setContinues(args.sourceId, args.continues);
         await args.project.run(args.sourceId);
         const output = args.project.getOutput(args.sourceId);
         const executionTime = Date.now() - startTime;
@@ -92,7 +91,9 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
 
   useEffect(() => {
     // TODO - cancel previous run if already running
-    runSquiggle();
+    if (args.autorunMode) {
+      runSquiggle();
+    }
   }, [runSquiggle]);
 
   useEffect(() => {
@@ -101,5 +102,5 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
     };
   }, [args.project, args.sourceId]);
 
-  return [squiggleOutput, { reRun: runSquiggle }];
+  return [squiggleOutput, { rerunSquiggleCode: runSquiggle }];
 }

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Env, SqProject } from "@quri/squiggle-lang";
 
-import { defaultMode, ViewerMode } from "../utility.js";
+import { defaultViewerTab, ViewerTab } from "../utility.js";
 import { SquiggleOutput, useSquiggle } from "./useSquiggle.js";
 
 // Props needed for a standalone execution.
@@ -21,12 +21,6 @@ export type ProjectExecutionProps = {
   continues?: string[];
 };
 
-// common props for SquigglePlayground and SquiggleEditor
-export type SquiggleCodeProps = {
-  defaultCode?: string;
-  onCodeChange?(code: string): void;
-} & (StandaloneExecutionProps | ProjectExecutionProps);
-
 export type SquiggleRunnerArgs = {
   code: string;
   sourceId?: string;
@@ -34,8 +28,8 @@ export type SquiggleRunnerArgs = {
 
 export type SquiggleRunnerOutput = {
   squiggleOutput?: SquiggleOutput;
-  mode: string;
-  setMode: (newValue: string) => void;
+  vieweTab: ViewerTab;
+  setViewerTab: (newValue: string) => void;
   project: SqProject;
   sourceId: string;
   run: () => void;
@@ -52,6 +46,11 @@ const defaultContinues: string[] = [];
 
 export function useSquiggleRunner(args: SquiggleRunnerArgs) {
   const [autorunMode, setAutorunMode] = useState(true);
+  const isViewerTabSet = useRef(false);
+
+  const [viewerTab, setViewerTab] = useState<ViewerTab>(() => {
+    return defaultViewerTab(undefined);
+  });
 
   const sourceId = useMemo(() => {
     return args.sourceId ?? Math.random().toString(36).slice(2);
@@ -75,42 +74,43 @@ export function useSquiggleRunner(args: SquiggleRunnerArgs) {
     }
   }, [projectArg, environment]);
 
-  const [squiggleOutput, { reRun }] = useSquiggle({
+  const [squiggleOutput, { rerunSquiggleCode }] = useSquiggle({
     sourceId,
     code: args.code,
     project,
-    environment,
     continues,
-  });
-
-  const isModeSet = useRef(false);
-
-  const [mode, setMode] = useState<ViewerMode>(() => {
-    return defaultMode(undefined);
+    autorunMode,
   });
 
   useEffect(() => {
-    if (!isModeSet.current && squiggleOutput?.output) {
-      setMode(defaultMode(squiggleOutput.output));
-      isModeSet.current = true; // Mark that mode is set
+    if (!isViewerTabSet.current && squiggleOutput?.output) {
+      setViewerTab(defaultViewerTab(squiggleOutput.output));
+      isViewerTabSet.current = true; // Mark that mode is set
     }
   }, [squiggleOutput?.output]);
+
+  const updateEnvironment = useMemo(
+    () => (newEnv: Env) => {
+      project.setEnvironment(newEnv);
+      if (autorunMode) {
+        rerunSquiggleCode();
+      }
+    },
+    [autorunMode, project, rerunSquiggleCode]
+  );
 
   return {
     sourceId,
     squiggleOutput,
     project,
-    rerunSquiggleCode: reRun,
 
-    mode,
-    setMode,
+    viewerTab,
+    setViewerTab,
+
     autorunMode,
     setAutorunMode: setAutorunMode,
-    setEnvironment: (newEnv: Env) => {
-      project.setEnvironment(newEnv);
-      if (autorunMode) {
-        reRun();
-      }
-    },
+
+    setProjectEnvironment: updateEnvironment,
+    rerunSquiggleCode: rerunSquiggleCode,
   };
 }

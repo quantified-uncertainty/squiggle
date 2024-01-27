@@ -37,11 +37,11 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
 
   const {
     squiggleOutput,
-    mode,
-    setMode,
+    viewerTab,
+    setViewerTab,
     project,
     sourceId,
-    rerunSquiggleCode: run,
+    rerunSquiggleCode,
   } = useSquiggleRunner({
     code,
     ...(propsProject ? { project: propsProject, continues } : { environment }),
@@ -71,7 +71,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           project={project}
           sourceId={sourceId}
           ref={editorRef}
-          onSubmit={run}
+          onSubmit={rerunSquiggleCode}
         />
       </div>
       {hideViewer || !squiggleOutput ? null : (
@@ -79,8 +79,8 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           squiggleOutput={squiggleOutput}
           editor={editorRef.current ?? undefined}
           environment={environment}
-          mode={mode}
-          setMode={setMode}
+          viewerTab={viewerTab}
+          setViewerTab={setViewerTab}
           {...settings}
         />
       )}

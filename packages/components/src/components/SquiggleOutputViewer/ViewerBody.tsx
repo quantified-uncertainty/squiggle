@@ -1,49 +1,25 @@
 import { FC } from "react";
 
-import { SqValue } from "@quri/squiggle-lang";
-
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
-import { ViewerMode } from "../../lib/utility.js";
+import { ViewerTab, viewerTabToValue } from "../../lib/utility.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { SquiggleViewer } from "../SquiggleViewer/index.js";
 
 type Props = {
-  mode: ViewerMode;
+  viewerTab: ViewerTab;
   output: SqOutputResult;
   isRunning: boolean;
 };
 
-export function modeToValue(
-  mode: ViewerMode,
-  output: SqOutputResult
-): SqValue | undefined {
-  if (!output.ok) {
-    return;
-  }
-  const sqOutput = output.value;
-  switch (mode) {
-    case "Result":
-      return sqOutput.result;
-    case "Variables":
-      return sqOutput.bindings.asValue();
-    case "Imports":
-      return sqOutput.imports.asValue();
-    case "Exports":
-      return sqOutput.exports.asValue();
-    case "AST":
-      return;
-  }
-}
-
-export const ViewerBody: FC<Props> = ({ output, mode, isRunning }) => {
+export const ViewerBody: FC<Props> = ({ output, viewerTab, isRunning }) => {
   if (!output.ok) {
     return <SquiggleErrorAlert error={output.value} />;
   }
 
   const sqOutput = output.value;
 
-  if (mode === "AST") {
+  if (viewerTab === "AST") {
     return (
       <pre className="text-xs">
         {JSON.stringify(sqOutput.bindings.asValue().context?.ast, null, 2)}
@@ -51,7 +27,7 @@ export const ViewerBody: FC<Props> = ({ output, mode, isRunning }) => {
     );
   }
 
-  const usedValue = modeToValue(mode, output);
+  const usedValue = viewerTabToValue(viewerTab, output);
 
   if (!usedValue) {
     return null;
