@@ -32,9 +32,7 @@ export type UseSquiggleOutput = [
   { rerunSquiggleCode: () => void },
 ];
 
-export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
-  // random; https://stackoverflow.com/a/12502559
-
+export function useSquiggleProjectRun(args: SquiggleArgs): UseSquiggleOutput {
   const [squiggleOutput, setSquiggleOutput] = useState<
     SquiggleOutput | undefined
   >(undefined);
@@ -94,7 +92,7 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
     if (args.autorunMode) {
       runSquiggle();
     }
-  }, [runSquiggle]);
+  }, [runSquiggle]); // Don't pass in ``autorunMode`` here, as we don't want to rerun when it changes
 
   useEffect(() => {
     return () => {

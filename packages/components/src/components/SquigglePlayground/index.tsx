@@ -126,7 +126,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     setProjectEnvironment,
     seed,
     setSeed,
-  } = useSquiggleRunner({ project, code });
+  } = useSquiggleRunner({ code, setup: { type: "project", project } });
 
   useEffect(() => {
     setProjectEnvironment(settings.environment);

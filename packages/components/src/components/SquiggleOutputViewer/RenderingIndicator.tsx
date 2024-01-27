@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import { SquiggleOutput } from "../../lib/hooks/useSquiggleProjectRun.js";
 import { getIsRunning } from "../../lib/hooks/useSquiggleRunner.js";
 
 export const RenderingIndicator: FC<{

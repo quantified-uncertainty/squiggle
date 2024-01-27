@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Env, SqProject } from "@quri/squiggle-lang";
 
 import { defaultViewerTab, ViewerTab } from "../utility.js";
-import { SquiggleOutput, useSquiggle } from "./useSquiggle.js";
+import {
+  SquiggleOutput,
+  useSquiggleProjectRun,
+} from "./useSquiggleProjectRun.js";
 
 // Props needed for a standalone execution.
 export type StandaloneExecutionProps = {
@@ -21,10 +24,15 @@ export type ProjectExecutionProps = {
   continues?: string[];
 };
 
+type RunSetup =
+  | { type: "standalone"; environment?: Env } // For standalone execution
+  | { type: "project"; project: SqProject; continues?: string[] }; // Project for the parent execution. Continues is what other squiggle sources to continue. Default []
+
 export type SquiggleRunnerArgs = {
   code: string;
   sourceId?: string;
-} & (StandaloneExecutionProps | ProjectExecutionProps);
+  setup: RunSetup;
+};
 
 export type SquiggleRunnerOutput = {
   sourceId: string;
@@ -50,40 +58,46 @@ export function getIsRunning(squiggleOutput: SquiggleOutput): boolean {
 
 const defaultContinues: string[] = [];
 
+function useRunnerSetup(sourceId: string | undefined, setup: RunSetup) {
+  const _sourceId = useMemo(() => {
+    // random; https://stackoverflow.com/a/12502559
+    return sourceId ?? Math.random().toString(36).slice(2);
+  }, [sourceId]);
+
+  const continues =
+    setup.type === "standalone"
+      ? defaultContinues
+      : setup.continues ?? defaultContinues;
+
+  const project = useMemo(() => {
+    if (setup.type === "project") {
+      return setup.project;
+    } else {
+      const _project = SqProject.create();
+      if (setup.environment) {
+        _project.setEnvironment(setup.environment);
+      }
+      return _project;
+    }
+  }, [setup]);
+
+  return { sourceId: _sourceId, project, continues };
+}
+
 export function useSquiggleRunner(
   args: SquiggleRunnerArgs
 ): SquiggleRunnerOutput {
   const [autorunMode, setAutorunMode] = useState(true);
   const [seed, setSeed] = useState<string>("starting-seed");
-  const isViewerTabSet = useRef(false);
 
-  const [viewerTab, setViewerTab] = useState<ViewerTab>(() => {
-    return defaultViewerTab(undefined);
-  });
+  const [viewerTab, setViewerTab] = useState<ViewerTab | undefined>(undefined);
 
-  const sourceId = useMemo(() => {
-    return args.sourceId ?? Math.random().toString(36).slice(2);
-  }, [args.sourceId]);
+  const { sourceId, project, continues } = useRunnerSetup(
+    args.sourceId,
+    args.setup
+  );
 
-  const projectArg = "project" in args ? args.project : undefined;
-  const environment = "environment" in args ? args.environment : undefined;
-
-  const continues =
-    "continues" in args ? args.continues ?? defaultContinues : defaultContinues;
-
-  const project = useMemo(() => {
-    if (projectArg) {
-      return projectArg;
-    } else {
-      const p = SqProject.create();
-      if (environment) {
-        p.setEnvironment(environment);
-      }
-      return p;
-    }
-  }, [projectArg, environment]);
-
-  const [squiggleOutput, { rerunSquiggleCode }] = useSquiggle({
+  const [squiggleOutput, { rerunSquiggleCode }] = useSquiggleProjectRun({
     sourceId,
     code: args.code,
     project,
@@ -91,13 +105,14 @@ export function useSquiggleRunner(
     autorunMode,
   });
 
+  // Set viewerTab the first time that SqOutputResult is not undefined.
   useEffect(() => {
-    if (!isViewerTabSet.current && squiggleOutput?.output) {
+    if (!viewerTab && squiggleOutput?.output) {
       setViewerTab(defaultViewerTab(squiggleOutput.output));
-      isViewerTabSet.current = true; // Mark that mode is set
     }
-  }, [squiggleOutput?.output]);
+  }, [squiggleOutput?.output, viewerTab]);
 
+  // Allow callers to update the environment, outside of the normal SquiggleRunnerArgs setup.
   const updateEnvironment = useMemo(
     () => (newEnv: Env) => {
       project.setEnvironment(newEnv);
@@ -113,7 +128,7 @@ export function useSquiggleRunner(
     squiggleOutput,
     project,
 
-    viewerTab,
+    viewerTab: viewerTab ?? defaultViewerTab(undefined),
     setViewerTab,
 
     autorunMode,

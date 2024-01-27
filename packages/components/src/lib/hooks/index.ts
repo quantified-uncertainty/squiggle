@@ -3,5 +3,8 @@ export { useCanvasCursor } from "./useCanvasCursor.js";
 export { useEffectRef } from "./useEffectRef.js";
 export { useForceUpdate } from "./useForceUpdate.js";
 export { useInitialWidth } from "./useInitialWidth.js";
-export { type SquiggleOutput, useSquiggle } from "./useSquiggle.js";
+export {
+  type SquiggleOutput,
+  useSquiggleProjectRun as useSquiggle,
+} from "./useSquiggleProjectRun.js";
 export { useUncontrolledCode } from "./useUncontrolledCode.js";

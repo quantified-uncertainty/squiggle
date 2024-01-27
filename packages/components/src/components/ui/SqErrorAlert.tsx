@@ -8,8 +8,8 @@ import {
   SqRuntimeError,
 } from "@quri/squiggle-lang";
 
+import { useViewerContext } from "../SquiggleViewer/ViewerProvider.js";
 import { ErrorAlert } from "./Alert.js";
-import { useViewerContext } from "./SquiggleViewer/ViewerProvider.js";
 
 type Props = {
   error: SqError;
@@ -68,7 +68,7 @@ const StackTrace: FC<{ error: SqRuntimeError }> = ({ error }) => {
   ) : null;
 };
 
-export const SquiggleErrorAlert: FC<Props> = ({ error }) => {
+export const SqErrorAlert: FC<Props> = ({ error }) => {
   function errorName(): string {
     if (error instanceof SqCompileError) {
       return "Compile Error";

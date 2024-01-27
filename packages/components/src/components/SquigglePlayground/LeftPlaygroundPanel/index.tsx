@@ -19,7 +19,7 @@ import {
 
 import { SquiggleOutput } from "../../../lib/hooks/index.js";
 import { getIsRunning } from "../../../lib/hooks/useSquiggleRunner.js";
-import { altKey, getErrors } from "../../../lib/utility.js";
+import { altKey, getSquiggleOutputErrors } from "../../../lib/utility.js";
 import {
   CodeEditor,
   CodeEditorHandle,
@@ -64,12 +64,10 @@ export type LeftPlaygroundPanelHandle = {
 
 export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
   function LeftPlaygroundPanel(props, ref) {
-    const errors = useMemo(() => {
-      if (!props.squiggleOutput) {
-        return [];
-      }
-      return getErrors(props.squiggleOutput.output);
-    }, [props.squiggleOutput]);
+    const errors = useMemo(
+      () => getSquiggleOutputErrors(props.squiggleOutput),
+      [props.squiggleOutput]
+    );
 
     const editorRef = useRef<CodeEditorHandle>(null);
     const containerRef = useRef<HTMLDivElement>(null);

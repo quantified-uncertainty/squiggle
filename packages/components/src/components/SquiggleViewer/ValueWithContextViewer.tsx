@@ -10,7 +10,7 @@ import { CommentIcon, TextTooltip } from "@quri/ui";
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
-import { ErrorBoundary } from "../ErrorBoundary.js";
+import { ErrorBoundary } from "../ui/ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { useZoomedInSqValueKeyEvent } from "./keyboardNav/zoomedInSqValue.js";
 import { useZoomedOutSqValueKeyEvent } from "./keyboardNav/zoomedOutSqValue.js";

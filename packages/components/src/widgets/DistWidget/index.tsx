@@ -1,8 +1,8 @@
 import { SqDistributionsPlot, SqScale } from "@quri/squiggle-lang";
 
-import { NumberShower } from "../../components/NumberShower.js";
 import { generateDistributionPlotSettings } from "../../components/PlaygroundSettings.js";
 import { ItemSettingsMenuItems } from "../../components/SquiggleViewer/ItemSettingsMenuItems.js";
+import { NumberShower } from "../../components/ui/NumberShower.js";
 import { formatNumber } from "../../lib/d3/index.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import { unwrapOrFailure } from "../../lib/utility.js";
