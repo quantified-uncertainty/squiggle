@@ -18,7 +18,7 @@ import {
 } from "@quri/ui";
 
 import { SquiggleProjectRun } from "../../../lib/hooks/index.js";
-import { getIsRunning } from "../../../lib/hooks/useSquiggleRunner.js";
+import { isRunning } from "../../../lib/hooks/useSquiggleProjectRun.js";
 import { altKey, getSquiggleOutputErrors } from "../../../lib/utility.js";
 import {
   CodeEditor,
@@ -87,7 +87,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           autorunMode={props.autorunMode}
           isRunning={
             props.squiggleProjectRun
-              ? getIsRunning(props.squiggleProjectRun)
+              ? isRunning(props.squiggleProjectRun)
               : false
           }
         />

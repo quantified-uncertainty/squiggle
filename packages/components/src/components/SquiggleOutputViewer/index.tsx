@@ -1,7 +1,9 @@
 import { forwardRef } from "react";
 
-import { SquiggleProjectRun } from "../../lib/hooks/useSquiggleProjectRun.js";
-import { getIsRunning } from "../../lib/hooks/useSquiggleRunner.js";
+import {
+  isRunning,
+  SquiggleProjectRun,
+} from "../../lib/hooks/useSquiggleProjectRun.js";
 import { ViewerTab, viewerTabToValue } from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
@@ -28,7 +30,7 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
     viewerRef
   ) => {
     const { output } = squiggleProjectRun;
-    const isRunning = getIsRunning(squiggleProjectRun);
+    const _isRunning = isRunning(squiggleProjectRun);
 
     return (
       <ViewerProvider
@@ -50,7 +52,7 @@ export const SquiggleOutputViewer = forwardRef<SquiggleViewerHandle, Props>(
             <ViewerBody
               viewerTab={viewerTab}
               output={output}
-              isRunning={isRunning}
+              isRunning={_isRunning}
             />
           }
         />

@@ -16,6 +16,7 @@ export type SquiggleRunnerArgs = {
   code: string;
   sourceId?: string;
   setup: SetupSettings;
+  initialAutorunMode?: boolean;
 };
 
 export type SquiggleRunnerOutput = {
@@ -33,10 +34,7 @@ export type SquiggleRunnerOutput = {
   rerunSquiggleCode: () => void;
 };
 
-export function getIsRunning(squiggleProjectRun: SquiggleProjectRun): boolean {
-  return squiggleProjectRun.isStale ?? false;
-}
-
+// defaultContinues needs to have a stable identity.
 const defaultContinues: string[] = [];
 
 function useSetup(sourceId: string | undefined, setup: SetupSettings) {
@@ -50,17 +48,13 @@ function useSetup(sourceId: string | undefined, setup: SetupSettings) {
       ? defaultContinues
       : setup.continues ?? defaultContinues;
 
-  const project = useMemo(() => {
-    if (setup.type === "project") {
-      return setup.project;
-    } else {
-      const _project = SqProject.create();
-      if (setup.environment) {
-        _project.setEnvironment(setup.environment);
-      }
-      return _project;
-    }
-  }, [setup]);
+  const project = useMemo(
+    () =>
+      setup.type === "project"
+        ? setup.project
+        : SqProject.create({ environment: setup.environment }),
+    [setup]
+  );
 
   return { sourceId: _sourceId, project, continues };
 }
@@ -68,9 +62,9 @@ function useSetup(sourceId: string | undefined, setup: SetupSettings) {
 export function useSquiggleRunner(
   args: SquiggleRunnerArgs
 ): SquiggleRunnerOutput {
-  const [autorunMode, setAutorunMode] = useState(true);
-
-  // const isViewerTabSet = useRef(false);
+  const [autorunMode, setAutorunMode] = useState(
+    args.initialAutorunMode ?? true
+  );
   const [viewerTab, setViewerTab] = useState<ViewerTab | undefined>(undefined);
 
   const { sourceId, project, continues } = useSetup(args.sourceId, args.setup);
