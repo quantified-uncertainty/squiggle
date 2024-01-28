@@ -25,6 +25,7 @@ function locationRangeToValue(locationRange: LocationRange) {
   return vDict(ImmutableMap(items));
 }
 
+// This class is meant for functions that depend on Value. BaseValue depends on ValueTags, so we can't call many functions there. Instead, we call them here.
 export class ValueTagsContainer {
   constructor(public value: ValueTags) {}
 
