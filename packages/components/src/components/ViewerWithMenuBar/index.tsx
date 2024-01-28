@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 
 import { SqValuePath } from "@quri/squiggle-lang";
 
@@ -17,7 +17,6 @@ type Props = {
   isRunning: boolean;
   editor?: CodeEditorHandle;
   playgroundSettings: PartialPlaygroundSettings;
-  viewerRef?: React.ForwardedRef<SquiggleViewerHandle>;
 };
 
 export type ViewerMode =
@@ -48,30 +47,31 @@ export function useMode(outputResult: SqOutputResult) {
 }
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
-export const ViewerWithMenuBar: React.FC<Props> = ({
-  squiggleOutput,
-  isRunning,
-  playgroundSettings,
-  viewerRef,
-}) => {
-  const { output } = squiggleOutput;
-  const [mode, setMode] = useMode(output);
+export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
+  function ViewerWithMenuBar(
+    { squiggleOutput, isRunning, editor, playgroundSettings },
+    viewerRef
+  ) {
+    const { output } = squiggleOutput;
+    const [mode, setMode] = useMode(output);
 
-  return (
-    <Layout
-      menu={<ViewerMenu mode={mode} setMode={setMode} output={output} />}
-      indicator={
-        <RenderingIndicator isRunning={isRunning} output={squiggleOutput} />
-      }
-      viewer={
-        <ViewerBody
-          mode={mode}
-          output={output}
-          isRunning={isRunning}
-          playgroundSettings={playgroundSettings}
-          viewerRef={viewerRef}
-        />
-      }
-    />
-  );
-};
+    return (
+      <Layout
+        menu={<ViewerMenu mode={mode} setMode={setMode} output={output} />}
+        indicator={
+          <RenderingIndicator isRunning={isRunning} output={squiggleOutput} />
+        }
+        viewer={
+          <ViewerBody
+            mode={mode}
+            output={output}
+            isRunning={isRunning}
+            playgroundSettings={playgroundSettings}
+            ref={viewerRef}
+            editor={editor}
+          />
+        }
+      />
+    );
+  }
+);
