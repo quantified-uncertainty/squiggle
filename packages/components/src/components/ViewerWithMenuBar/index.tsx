@@ -48,7 +48,7 @@ export function useMode(outputResult: SqOutputResult) {
 }
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
-export const ViewerMenuBar: React.FC<Props> = ({
+export const ViewerWithMenuBar: React.FC<Props> = ({
   squiggleOutput,
   isRunning,
   playgroundSettings,

@@ -17,7 +17,7 @@ import {
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
-import { ViewerMenuBar } from "../ViewerMenuBar/index.js";
+import { ViewerWithMenuBar } from "../ViewerWithMenuBar/index.js";
 import {
   LeftPlaygroundPanel,
   LeftPlaygroundPanelHandle,
@@ -166,7 +166,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 
   const renderRight = () =>
     output.output ? (
-      <ViewerMenuBar
+      <ViewerWithMenuBar
         squiggleOutput={output.output}
         isRunning={output.isRunning}
         playgroundSettings={settings}

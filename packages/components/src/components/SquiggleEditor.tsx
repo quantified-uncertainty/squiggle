@@ -7,7 +7,7 @@ import { getErrors } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleCodeProps } from "./types.js";
-import { ViewerMenuBar } from "./ViewerMenuBar/index.js";
+import { ViewerWithMenuBar } from "./ViewerWithMenuBar/index.js";
 
 export type SquiggleEditorProps = SquiggleCodeProps & {
   hideViewer?: boolean;
@@ -48,7 +48,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   const editorRef = useRef<CodeEditorHandle>(null);
 
   return (
-    <>
+    <div>
       <div
         className="border border-slate-300 bg-slate-50 rounded-sm p-2"
         data-testid="squiggle-editor"
@@ -66,13 +66,13 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
         />
       </div>
       {hideViewer || !squiggleOutput ? null : (
-        <ViewerMenuBar
+        <ViewerWithMenuBar
           squiggleOutput={squiggleOutput}
           isRunning={isRunning}
           editor={editorRef.current ?? undefined}
           playgroundSettings={settings}
         />
       )}
-    </>
+    </div>
   );
 };

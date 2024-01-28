@@ -10,8 +10,8 @@ import {
   useSquiggle,
 } from "../lib/hooks/useSquiggle.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { defaultMode, ViewerMenuBar } from "./ViewerMenuBar/index.js";
-import { ViewerBody } from "./ViewerMenuBar/ViewerBody.js";
+import { defaultMode, ViewerWithMenuBar } from "./ViewerWithMenuBar/index.js";
+import { ViewerBody } from "./ViewerWithMenuBar/ViewerBody.js";
 
 export type SquiggleChartProps = {
   code: string;
@@ -51,7 +51,7 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     const _showHeader = rootPathOverride ? false : showHeader;
 
     return _showHeader ? (
-      <ViewerMenuBar
+      <ViewerWithMenuBar
         squiggleOutput={squiggleOutput}
         isRunning={isRunning}
         playgroundSettings={settings}

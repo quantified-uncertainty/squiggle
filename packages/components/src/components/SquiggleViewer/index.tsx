@@ -75,9 +75,7 @@ export type SquiggleViewerProps = {
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
 
-export const SquiggleViewerWithoutProvider: FC<SquiggleViewerProps> = ({
-  value,
-}) => {
+const SquiggleViewerWithoutProvider: FC<SquiggleViewerProps> = ({ value }) => {
   const { zoomedInPath } = useViewerContext();
 
   const getSubvalueByPath = useGetSubvalueByPath();
