@@ -1,13 +1,34 @@
-import { LocationRange } from "peggy";
+import { Location, LocationRange } from "peggy";
 
+import { FrameStack } from "../reducer/frameStack.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, fmap, mergeMany, Ok, result } from "../utility/result.js";
-import { Value } from "./index.js";
+import { Value, vNumber } from "./index.js";
 import { type VBool } from "./VBool.js";
-import { type VDict } from "./VDict.js";
-import { type VString } from "./VString.js";
+import { vDict, VDict } from "./VDict.js";
+import { vString, type VString } from "./VString.js";
 
 // Note: this file can't call any `vType` constructors; it would cause a circular dependency because of `BaseValue` -> `ValueTags`.
+
+function locationRangeToValue(locationRange: LocationRange): Value {
+  function locationToDict(location: Location): VDict {
+    return vDict(
+      ImmutableMap([
+        ["line", vNumber(location.line)],
+        ["column", vNumber(location.column)],
+        ["offset", vNumber(location.offset)],
+      ])
+    );
+  }
+  let items: [string, Value][] = [
+    ["start", locationToDict(locationRange.start)],
+    ["end", locationToDict(locationRange.end)],
+  ];
+  if (typeof locationRange.source === "string") {
+    items = [["source", vString(locationRange.source)], ...items];
+  }
+  return vDict(ImmutableMap(items));
+}
 
 // Some of these tags are value-type-specific, but we store everything in a single Dict, for now.
 export type ValueTagsType = {
@@ -90,6 +111,9 @@ export class ValueTags {
     if (value.startOpenState) {
       result.push(["startOpenState", value.startOpenState]);
     }
+    if (value.location) {
+      result.push(["location", locationRangeToValue(value.location)]);
+    }
     return result;
   }
 
@@ -126,6 +150,15 @@ export class ValueTags {
     });
   }
 
+  mergeLocation(frameStack: FrameStack) {
+    if (!this.location()) {
+      const location = frameStack.getTopFrame()?.location;
+      return this.merge({ location });
+    } else {
+      return this;
+    }
+  }
+
   name() {
     return this.value.name?.value;
   }
@@ -155,6 +188,10 @@ export class ValueTags {
   }
 
   location() {
+    return this.value.location && locationRangeToValue(this.value.location);
+  }
+
+  locationAsLocationRange() {
     return this.value.location;
   }
 

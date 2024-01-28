@@ -312,7 +312,8 @@ export function useScrollToEditorPath(path: SqValuePath) {
   return () => {
     if (editor) {
       const value = findNode(path)?.value();
-      const location = value?.context?.findLocation();
+      const taggedLocation = value?.tags.location();
+      const location = taggedLocation || value?.context?.findLocation();
 
       if (location) {
         editor?.scrollTo(location.start.offset, false);

@@ -1,3 +1,4 @@
+import { FrameStack } from "../reducer/frameStack.js";
 import { ValueTags, ValueTagsType } from "./valueTags.js";
 
 /*
@@ -33,6 +34,17 @@ export abstract class BaseValue {
 
   mergeTags(args: ValueTagsType) {
     return this.copyWithTags(this.tags?.merge(args) ?? new ValueTags(args));
+  }
+
+  mergeLocation(frameStack: FrameStack) {
+    if (!this.tags?.location()) {
+      const location = frameStack.getTopFrame()?.location;
+      return this.copyWithTags(
+        this.tags?.merge({ location }) ?? new ValueTags({ location })
+      );
+    } else {
+      return this;
+    }
   }
 
   protected abstract valueToString(): string;

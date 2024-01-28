@@ -44,6 +44,6 @@ export class SqTags {
   }
 
   location(): LocationRange | undefined {
-    return this.tags.location();
+    return this.tags.locationAsLocationRange();
   }
 }

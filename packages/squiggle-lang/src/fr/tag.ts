@@ -391,7 +391,7 @@ example2 = {|x| x + 1}`,
   }),
   maker.make({
     name: "location",
-    description: `Hides a value when displayed under Variables. This is useful for hiding intermediate values or helper functions that are used in calculations, but are not directly relevant to the user. Only hides top-level variables.`,
+    description: `Saves the location of a value. Note that this must be called at the point where the location is to be saved. If you use it in a helper function, it will save the location of the helper function, not the location where the helper function is called.`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
@@ -409,6 +409,15 @@ example2 = {|x| x + 1}`,
         },
         { isDecorator: true }
       ),
+    ],
+  }),
+  maker.make({
+    name: "getLocation",
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition([frAny()], frAny(), ([value]) => {
+        return value.tags?.location() || vString("None");
+      }),
     ],
   }),
   maker.make({
