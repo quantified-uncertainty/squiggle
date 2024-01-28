@@ -30,6 +30,7 @@ import {
 import { Lambda } from "../reducer/lambda.js";
 import { getOrThrow } from "../utility/result.js";
 import { Value } from "../value/index.js";
+import { ValueTagsContainer } from "../value/ValueTagContainer.js";
 import { ValueTags, ValueTagsType } from "../value/valueTags.js";
 import { vBool, VBool } from "../value/VBool.js";
 import { vString } from "../value/VString.js";
@@ -415,8 +416,8 @@ example2 = {|x| x + 1}`,
     name: "getLocation",
     displaySection: "Tags",
     definitions: [
-      makeDefinition([frAny()], frAny(), ([value]) => {
-        return value.tags?.location() || vString("None");
+      makeDefinition([frWithTags(frAny())], frAny(), ([{ tags }]) => {
+        return new ValueTagsContainer(tags).location() || vString("None");
       }),
     ],
   }),
@@ -426,7 +427,7 @@ example2 = {|x| x + 1}`,
     description: "Returns a dictionary of all tags on a value.",
     definitions: [
       makeDefinition([frAny()], frDictWithArbitraryKeys(frAny()), ([value]) => {
-        return value.getTags().toMap();
+        return new ValueTagsContainer(value.getTags()).toMap();
       }),
     ],
   }),

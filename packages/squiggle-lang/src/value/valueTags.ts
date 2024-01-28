@@ -1,34 +1,13 @@
-import { Location, LocationRange } from "peggy";
+import { LocationRange } from "peggy";
 
 import { FrameStack } from "../reducer/frameStack.js";
-import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, fmap, mergeMany, Ok, result } from "../utility/result.js";
-import { Value, vNumber } from "./index.js";
+import { Value } from "./index.js";
 import { type VBool } from "./VBool.js";
-import { vDict, VDict } from "./VDict.js";
-import { vString, type VString } from "./VString.js";
+import { VDict } from "./VDict.js";
+import { type VString } from "./VString.js";
 
 // Note: this file can't call any `vType` constructors; it would cause a circular dependency because of `BaseValue` -> `ValueTags`.
-
-function locationRangeToValue(locationRange: LocationRange): Value {
-  function locationToDict(location: Location): VDict {
-    return vDict(
-      ImmutableMap([
-        ["line", vNumber(location.line)],
-        ["column", vNumber(location.column)],
-        ["offset", vNumber(location.offset)],
-      ])
-    );
-  }
-  let items: [string, Value][] = [
-    ["start", locationToDict(locationRange.start)],
-    ["end", locationToDict(locationRange.end)],
-  ];
-  if (typeof locationRange.source === "string") {
-    items = [["source", vString(locationRange.source)], ...items];
-  }
-  return vDict(ImmutableMap(items));
-}
 
 // Some of these tags are value-type-specific, but we store everything in a single Dict, for now.
 export type ValueTagsType = {
@@ -79,46 +58,25 @@ function convertToValueTagsTypeName(
 export class ValueTags {
   constructor(public value: ValueTagsType) {}
 
-  toList(): [string, Value][] {
-    const result: [string, Value][] = [];
-    const { value } = this;
-    if (value.name?.value) {
-      result.push(["name", value.name]);
-    }
-    if (value.doc?.value) {
-      result.push(["doc", value.doc]);
-    }
-    if (value.showAs) {
-      result.push(["showAs", value.showAs]);
-    }
-    if (value.numberFormat) {
-      result.push(["numberFormat", value.numberFormat]);
-    }
-    if (value.dateFormat) {
-      result.push(["dateFormat", value.dateFormat]);
-    }
-    if (value.hidden) {
-      result.push(["hidden", value.hidden]);
-    }
-    if (value.notebook) {
-      result.push(["notebook", value.notebook]);
-    }
-    const _exportData = this.exportData();
-    if (_exportData) {
-      result.push(["exportData", _exportData]);
-    }
-
-    if (value.startOpenState) {
-      result.push(["startOpenState", value.startOpenState]);
-    }
-    if (value.location) {
-      result.push(["location", locationRangeToValue(value.location)]);
-    }
-    return result;
+  isEmpty() {
+    return (
+      this.value.name === undefined &&
+      this.value.doc === undefined &&
+      this.value.showAs === undefined &&
+      this.value.numberFormat === undefined &&
+      this.value.dateFormat === undefined &&
+      this.value.hidden === undefined &&
+      this.value.notebook === undefined &&
+      this.value.exportData === undefined &&
+      this.value.startOpenState === undefined &&
+      this.value.location === undefined
+    );
   }
 
-  isEmpty() {
-    return this.toList().length === 0;
+  toString(): string {
+    return Object.entries(this.value)
+      .map(([key, value]) => `${key}: ${value?.toString()}`)
+      .join(", ");
   }
 
   omit(keys: ValueTagsTypeName[]) {
@@ -131,16 +89,6 @@ export class ValueTags {
     const params = mergeMany(keys.map(convertToValueTagsTypeName));
     //Don't simplify the omit call, as we need to ensure "this" is carried.
     return fmap(params, (args) => this.omit(args));
-  }
-
-  toMap(): ImmutableMap<string, Value> {
-    return ImmutableMap(this.toList());
-  }
-
-  toString(): string {
-    return this.toList()
-      .map(([key, value]) => `${key}: ${value.toString()}`)
-      .join(", ");
   }
 
   merge(other: ValueTagsType) {
@@ -188,10 +136,6 @@ export class ValueTags {
   }
 
   location() {
-    return this.value.location && locationRangeToValue(this.value.location);
-  }
-
-  locationAsLocationRange() {
     return this.value.location;
   }
 
