@@ -130,7 +130,8 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 
   useEffect(() => {
     setProjectEnvironment(settings.environment);
-  }, [settings.environment, setProjectEnvironment]);
+    // eslint-disable-next-line @wogns3623/better-exhaustive-deps/exhaustive-deps
+  }, [settings.environment]);
 
   useEffect(() => {
     const _output = squiggleProjectRun?.output;
