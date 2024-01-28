@@ -27,6 +27,7 @@ import {
   unwrapDistResult,
 } from "../library/registry/helpers.js";
 import * as magicNumbers from "../magicNumbers.js";
+import { ReducerContext } from "../reducer/context.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",
@@ -50,6 +51,15 @@ const pointwiseOps: OpPair[] = [
   ["dotPow", binaryOperations.pointwisePower],
 ];
 
+function contextToOpts(
+  context: ReducerContext
+): Parameters<BinaryOperation>[2] {
+  return {
+    env: context.environment,
+    rng: context.rng,
+  };
+}
+
 const makeOperationFns = (): FRFunction[] => {
   const fns: FRFunction[] = [];
 
@@ -63,27 +73,18 @@ const makeOperationFns = (): FRFunction[] => {
       displaySection,
       requiresNamespace,
       definitions: [
-        makeDefinition(
-          [frDist, frNumber],
-          frDist,
-          ([dist, n], { environment }) =>
-            unwrapDistResult(
-              op(dist, new SymbolicDist.PointMass(n), { env: environment })
-            )
+        makeDefinition([frDist, frNumber], frDist, ([dist, n], context) =>
+          unwrapDistResult(
+            op(dist, new SymbolicDist.PointMass(n), contextToOpts(context))
+          )
         ),
-        makeDefinition(
-          [frNumber, frDist],
-          frDist,
-          ([n, dist], { environment }) =>
-            unwrapDistResult(
-              op(new SymbolicDist.PointMass(n), dist, { env: environment })
-            )
+        makeDefinition([frNumber, frDist], frDist, ([n, dist], context) =>
+          unwrapDistResult(
+            op(new SymbolicDist.PointMass(n), dist, contextToOpts(context))
+          )
         ),
-        makeDefinition(
-          [frDist, frDist],
-          frDist,
-          ([dist1, dist2], { environment }) =>
-            unwrapDistResult(op(dist1, dist2, { env: environment }))
+        makeDefinition([frDist, frDist], frDist, ([dist1, dist2], context) =>
+          unwrapDistResult(op(dist1, dist2, contextToOpts(context)))
         ),
       ],
     });
@@ -160,7 +161,7 @@ Produce a sparkline of length \`\`n\`\`. For example, \`▁▁▁▁▁▂▄▆
   maker.d2n({
     name: "sample",
     displaySection: "Basic Functions",
-    fn: (d) => d.sample(),
+    fn: (d, { rng }) => d.sample(rng),
   }),
   maker.make({
     name: "sampleN",
@@ -169,8 +170,8 @@ Produce a sparkline of length \`\`n\`\`. For example, \`▁▁▁▁▁▂▄▆
       makeDefinition(
         [frDist, frNamed("n", frNumber)],
         frArray(frNumber),
-        ([dist, n]) => {
-          return dist.sampleN(n | 0);
+        ([dist, n], { rng }) => {
+          return dist.sampleN(n | 0, rng);
         }
       ),
     ],
@@ -178,14 +179,12 @@ Produce a sparkline of length \`\`n\`\`. For example, \`▁▁▁▁▁▂▄▆
   maker.d2d({
     name: "exp",
     displaySection: "Basic Functions",
-    fn: (dist, env) => {
+    fn: (dist, context) => {
       return unwrapDistResult(
         binaryOperations.algebraicPower(
           new SymbolicDist.PointMass(Math.E),
           dist,
-          {
-            env,
-          }
+          contextToOpts(context)
         )
       );
     },
@@ -238,35 +237,47 @@ Sample set distributions are truncated by filtering samples, but point set distr
       makeDefinition(
         [frDist, frNamed("left", frNumber), frNamed("right", frNumber)],
         frDist,
-        ([dist, left, right], { environment }) =>
-          unwrapDistResult(dist.truncate(left, right, { env: environment }))
+        ([dist, left, right], { environment, rng }) =>
+          unwrapDistResult(
+            dist.truncate(left, right, { env: environment, rng })
+          )
       ),
     ],
   }),
   maker.dn2d({
     name: "truncateLeft",
     displaySection: "Basic Functions",
-    fn: (dist, x, env) =>
-      unwrapDistResult(dist.truncate(x, undefined, { env })),
+    fn: (dist, x, context) =>
+      unwrapDistResult(
+        dist.truncate(x, undefined, {
+          env: context.environment,
+          rng: context.rng,
+        })
+      ),
   }),
   maker.dn2d({
     name: "truncateRight",
     displaySection: "Basic Functions",
-    fn: (dist, x, env) =>
-      unwrapDistResult(dist.truncate(undefined, x, { env })),
+    fn: (dist, x, context) =>
+      unwrapDistResult(
+        dist.truncate(undefined, x, {
+          env: context.environment,
+          rng: context.rng,
+        })
+      ),
   }),
   ...makeOperationFns(),
   maker.make({
     name: "sum",
     displaySection: "Algebra (List)",
     definitions: [
-      makeDefinition(
-        [frArray(frDistOrNumber)],
-        frDist,
-        ([dists], { environment }) =>
-          unwrapDistResult(
-            algebraicSum(dists.map(parseDistFromDistOrNumber), environment)
+      makeDefinition([frArray(frDistOrNumber)], frDist, ([dists], context) =>
+        unwrapDistResult(
+          algebraicSum(
+            dists.map(parseDistFromDistOrNumber),
+            contextToOpts(context)
           )
+        )
       ),
     ],
   }),
@@ -274,13 +285,13 @@ Sample set distributions are truncated by filtering samples, but point set distr
     name: "product",
     displaySection: "Algebra (List)",
     definitions: [
-      makeDefinition(
-        [frArray(frDistOrNumber)],
-        frDist,
-        ([dists], { environment }) =>
-          unwrapDistResult(
-            algebraicProduct(dists.map(parseDistFromDistOrNumber), environment)
+      makeDefinition([frArray(frDistOrNumber)], frDist, ([dists], context) =>
+        unwrapDistResult(
+          algebraicProduct(
+            dists.map(parseDistFromDistOrNumber),
+            contextToOpts(context)
           )
+        )
       ),
     ],
   }),
@@ -291,9 +302,12 @@ Sample set distributions are truncated by filtering samples, but point set distr
       makeDefinition(
         [frArray(frDistOrNumber)],
         frArray(frDist),
-        ([dists], { environment }) =>
+        ([dists], context) =>
           unwrapDistResult(
-            algebraicCumSum(dists.map(parseDistFromDistOrNumber), environment)
+            algebraicCumSum(
+              dists.map(parseDistFromDistOrNumber),
+              contextToOpts(context)
+            )
           )
       ),
     ],
@@ -305,9 +319,12 @@ Sample set distributions are truncated by filtering samples, but point set distr
       makeDefinition(
         [frArray(frDistOrNumber)],
         frArray(frDist),
-        ([dists], { environment }) =>
+        ([dists], context) =>
           unwrapDistResult(
-            algebraicCumProd(dists.map(parseDistFromDistOrNumber), environment)
+            algebraicCumProd(
+              dists.map(parseDistFromDistOrNumber),
+              contextToOpts(context)
+            )
           )
       ),
     ],
@@ -316,53 +333,47 @@ Sample set distributions are truncated by filtering samples, but point set distr
   maker.d2d({
     name: "log",
     displaySection: "Algebra (Dist)",
-    fn: (dist, env) =>
+    fn: (dist, context) =>
       unwrapDistResult(
         binaryOperations.algebraicLogarithm(
           dist,
           new SymbolicDist.PointMass(Math.E),
-          { env }
+          contextToOpts(context)
         )
       ),
   }),
   maker.d2d({
     name: "log10",
     displaySection: "Algebra (Dist)",
-    fn: (dist, env) =>
+    fn: (dist, context) =>
       unwrapDistResult(
         binaryOperations.algebraicLogarithm(
           dist,
           new SymbolicDist.PointMass(10),
-          {
-            env,
-          }
+          contextToOpts(context)
         )
       ),
   }),
   maker.d2d({
     name: "unaryMinus",
     displaySection: "Algebra (Dist)",
-    fn: (dist, env) =>
+    fn: (dist, context) =>
       unwrapDistResult(
         binaryOperations.algebraicMultiply(
           dist,
           new SymbolicDist.PointMass(-1),
-          {
-            env,
-          }
+          contextToOpts(context)
         )
       ),
   }),
   maker.d2d({
     name: "dotExp",
-    fn: (dist, env) =>
+    fn: (dist, context) =>
       unwrapDistResult(
         binaryOperations.pointwisePower(
           new SymbolicDist.PointMass(Math.E),
           dist,
-          {
-            env,
-          }
+          contextToOpts(context)
         )
       ),
   }),
@@ -373,9 +384,12 @@ Sample set distributions are truncated by filtering samples, but point set distr
       makeDefinition(
         [frArray(frDistOrNumber)],
         frArray(frDist),
-        ([dists], { environment }) =>
+        ([dists], context) =>
           unwrapDistResult(
-            algebraicDiff(dists.map(parseDistFromDistOrNumber), environment)
+            algebraicDiff(
+              dists.map(parseDistFromDistOrNumber),
+              contextToOpts(context)
+            )
           )
       ),
     ],

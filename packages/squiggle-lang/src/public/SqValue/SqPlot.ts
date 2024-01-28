@@ -1,11 +1,7 @@
-import { BaseDist } from "../../dist/BaseDist.js";
-import { Env } from "../../dist/env.js";
-import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
 import { clamp, sort, uniq } from "../../utility/E_A_Floats.js";
-import * as Result from "../../utility/result.js";
 import { Plot, vPlot } from "../../value/VPlot.js";
-import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
+import { SqValuePathEdge } from "../SqValuePath.js";
 import { SqPlotValue } from "./index.js";
 import {
   SqDistribution,
@@ -159,7 +155,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
       this.context
         ? this.createdProgrammatically
           ? this.context
-          : this.context.extend({ type: "string", value: "fn" })
+          : this.context.extend(SqValuePathEdge.fromKey("fn"))
         : undefined
     );
   }
@@ -227,7 +223,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
       this.context
         ? this.createdProgrammatically
           ? this.context
-          : this.context.extend({ type: "string", value: "fn" })
+          : this.context.extend(SqValuePathEdge.fromKey("fn"))
         : undefined
     );
   }
@@ -260,22 +256,11 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
 export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
   tag = "scatter" as const;
 
-  private buildSampleSetDist(
-    dist: BaseDist,
-    env: Env
-  ): Result.result<SqSampleSetDistribution, SqError> {
-    const sampleSetResult = SampleSetDist.fromDist(dist, env);
-    if (!sampleSetResult.ok) {
-      return Result.Err(new SqOtherError("Conversion to SampleSet failed"));
-    }
-    return Result.Ok(new SqSampleSetDistribution(sampleSetResult.value));
+  xDist(): SqSampleSetDistribution {
+    return new SqSampleSetDistribution(this._value.xDist);
   }
-
-  xDist(env: Env): Result.result<SqSampleSetDistribution, SqError> {
-    return this.buildSampleSetDist(this._value.xDist, env);
-  }
-  yDist(env: Env): Result.result<SqSampleSetDistribution, SqError> {
-    return this.buildSampleSetDist(this._value.yDist, env);
+  yDist(): SqSampleSetDistribution {
+    return new SqSampleSetDistribution(this._value.yDist);
   }
 
   get xScale(): SqScale | undefined {
@@ -314,9 +299,7 @@ export class SqRelativeValuesPlot extends SqAbstractPlot<"relativeValues"> {
   get fn(): SqLambda {
     return new SqLambda(
       this._value.fn,
-      this.context
-        ? this.context.extend({ type: "string", value: "fn" })
-        : undefined
+      this.context?.extend(SqValuePathEdge.fromKey("fn"))
     );
   }
 }

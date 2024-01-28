@@ -5,6 +5,8 @@ when things substantially change.
 Also, there are some open comments in https://github.com/quantified-uncertainty/squiggle/pull/232 that haven't been addressed.
 */
 
+import seedrandom from "seedrandom";
+
 import { binaryOperations } from "../../../src/dist/distOperations/index.js";
 import * as Result from "../../../src/utility/result.js";
 import {
@@ -16,19 +18,22 @@ import {
 } from "../../fixtures/distFixtures.js";
 import { env, unpackResult } from "../../helpers/distHelpers.js";
 
+const rng = seedrandom();
 const { algebraicAdd } = binaryOperations;
 
 describe("(Algebraic) addition of distributions", () => {
   describe("mean", () => {
     test("normal(mean=5) + normal(mean=20)", () => {
       expect(
-        unpackResult(algebraicAdd(normalDist5, normalDist20, { env })).mean()
+        unpackResult(
+          algebraicAdd(normalDist5, normalDist20, { env, rng })
+        ).mean()
       ).toBe(2.5e1);
     });
 
     test("uniform(low=9, high=10) + beta(alpha=2, beta=5)", () => {
       const received = unpackResult(
-        algebraicAdd(uniformDist, betaDist, { env })
+        algebraicAdd(uniformDist, betaDist, { env, rng })
       ).mean();
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
       // sometimes it works with ~digits=2.
@@ -36,7 +41,7 @@ describe("(Algebraic) addition of distributions", () => {
     });
     test("beta(alpha=2, beta=5) + uniform(low=9, high=10)", () => {
       const received = unpackResult(
-        algebraicAdd(betaDist, uniformDist, { env })
+        algebraicAdd(betaDist, uniformDist, { env, rng })
       ).mean();
 
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
@@ -51,8 +56,9 @@ describe("(Algebraic) addition of distributions", () => {
       (x) => {
         const received = unpackResult(normalDist10.pdf(x)); // this should be normal(10, sqrt(8))
         const calculated: number = unpackResult(
-          Result.bind(algebraicAdd(normalDist5, normalDist5, { env }), (d) =>
-            d.pdf(x, { env })
+          Result.bind(
+            algebraicAdd(normalDist5, normalDist5, { env, rng }),
+            (d) => d.pdf(x, { env })
           )
         );
 
@@ -63,8 +69,9 @@ describe("(Algebraic) addition of distributions", () => {
     test("(normal(mean=10) + normal(mean=10)).pdf(1.9e1)", () => {
       const received = unpackResult(normalDist20.pdf(1.9e1));
       const calculated: number = unpackResult(
-        Result.bind(algebraicAdd(normalDist10, normalDist10, { env }), (d) =>
-          d.pdf(1.9e1, { env })
+        Result.bind(
+          algebraicAdd(normalDist10, normalDist10, { env, rng }),
+          (d) => d.pdf(1.9e1, { env })
         )
       );
 
@@ -72,7 +79,7 @@ describe("(Algebraic) addition of distributions", () => {
     });
     test("(uniform(low=9, high=10) + beta(alpha=2, beta=5)).pdf(10)", () => {
       const received: number = unpackResult(
-        Result.bind(algebraicAdd(uniformDist, betaDist, { env }), (d) =>
+        Result.bind(algebraicAdd(uniformDist, betaDist, { env, rng }), (d) =>
           d.pdf(1e1, { env })
         )
       );
@@ -84,7 +91,7 @@ describe("(Algebraic) addition of distributions", () => {
     });
     test("(beta(alpha=2, beta=5) + uniform(low=9, high=10)).pdf(10)", () => {
       const received = unpackResult(
-        Result.bind(algebraicAdd(betaDist, uniformDist, { env }), (d) =>
+        Result.bind(algebraicAdd(betaDist, uniformDist, { env, rng }), (d) =>
           d.pdf(1e1, { env })
         )
       );
@@ -99,7 +106,7 @@ describe("(Algebraic) addition of distributions", () => {
       (x) => {
         const received = normalDist10.cdf(x);
         const calculated = unpackResult(
-          algebraicAdd(normalDist5, normalDist5, { env })
+          algebraicAdd(normalDist5, normalDist5, { env, rng })
         ).cdf(x);
 
         expect(received).toBeCloseTo(calculated, 0);
@@ -110,14 +117,14 @@ describe("(Algebraic) addition of distributions", () => {
       const received = normalDist20.cdf(1.25e1);
 
       const calculated = unpackResult(
-        algebraicAdd(normalDist10, normalDist10, { env })
+        algebraicAdd(normalDist10, normalDist10, { env, rng })
       ).cdf(1.25e1);
 
       expect(received).toBeCloseTo(calculated, 2);
     });
     test("(uniform(low=9, high=10) + beta(alpha=2, beta=5)).cdf(10)", () => {
       const received = unpackResult(
-        algebraicAdd(uniformDist, betaDist, { env })
+        algebraicAdd(uniformDist, betaDist, { env, rng })
       ).cdf(1e1);
 
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
@@ -126,7 +133,7 @@ describe("(Algebraic) addition of distributions", () => {
     });
     test("(beta(alpha=2, beta=5) + uniform(low=9, high=10)).cdf(10)", () => {
       const received = unpackResult(
-        algebraicAdd(betaDist, uniformDist, { env })
+        algebraicAdd(betaDist, uniformDist, { env, rng })
       ).cdf(1e1);
 
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
@@ -142,7 +149,7 @@ describe("(Algebraic) addition of distributions", () => {
         const received = normalDist10.inv(x);
 
         const calculated = unpackResult(
-          algebraicAdd(normalDist5, normalDist5, { env })
+          algebraicAdd(normalDist5, normalDist5, { env, rng })
         ).inv(x);
 
         expect(received).toBeCloseTo(calculated, -1);
@@ -152,14 +159,14 @@ describe("(Algebraic) addition of distributions", () => {
       const received = normalDist20.inv(1e-1);
 
       const calculated = unpackResult(
-        algebraicAdd(normalDist10, normalDist10, { env })
+        algebraicAdd(normalDist10, normalDist10, { env, rng })
       ).inv(1e-1);
 
       expect(received).toBeCloseTo(calculated, -1);
     });
     test("(uniform(low=9, high=10) + beta(alpha=2, beta=5)).inv(2e-2)", () => {
       const received = unpackResult(
-        algebraicAdd(uniformDist, betaDist, { env })
+        algebraicAdd(uniformDist, betaDist, { env, rng })
       ).inv(2e-2);
 
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.
@@ -168,7 +175,7 @@ describe("(Algebraic) addition of distributions", () => {
     });
     test("(beta(alpha=2, beta=5) + uniform(low=9, high=10)).inv(2e-2)", () => {
       const received = unpackResult(
-        algebraicAdd(betaDist, uniformDist, { env })
+        algebraicAdd(betaDist, uniformDist, { env, rng })
       ).inv(2e-2);
 
       // This is nondeterministic, we could be in a situation where ci fails but you click rerun and it passes, which is bad.

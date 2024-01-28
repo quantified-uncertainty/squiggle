@@ -1,3 +1,5 @@
+import { PRNG } from "seedrandom";
+
 /**
  * Searches for a first element in `arr` greater than `value`
  * For more info:
@@ -14,9 +16,9 @@ function binsearchFirstGreater(arr: number[], value: number): number {
 
 export function random_sample(
   dist: number[],
-  args: { probs: number[]; size: number }
+  args: { probs: number[]; size: number; rng: PRNG }
 ): number[] {
-  const { probs, size } = args;
+  const { probs, size, rng } = args;
   const sample: number[] = Array(size);
 
   let accum = 0;
@@ -27,10 +29,7 @@ export function random_sample(
   const sum = probPrefixSums[probPrefixSums.length - 1];
 
   for (let index = 0; index < size; index++) {
-    const selection = binsearchFirstGreater(
-      probPrefixSums,
-      Math.random() * sum
-    );
+    const selection = binsearchFirstGreater(probPrefixSums, rng() * sum);
     sample[index] = dist[selection];
   }
   return sample;

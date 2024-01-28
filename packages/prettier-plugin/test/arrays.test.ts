@@ -34,4 +34,15 @@ describe("arrays", () => {
 ]`
     );
   });
+
+  test("don't break empty arrays", async () => {
+    expect(
+      await format(
+        "asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdf = []"
+      )
+    ).toBe(
+      `asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdf = []
+`
+    );
+  });
 });

@@ -4,7 +4,6 @@
  */
 import { ASTNode } from "../ast/parse.js";
 import { Value } from "../value/index.js";
-import { vVoid } from "../value/VVoid.js";
 
 export type LambdaExpressionParameter = {
   name: string;
@@ -171,11 +170,6 @@ export const eTernary = (
     ifTrue,
     ifFalse,
   },
-});
-
-export const eVoid = (): ExpressionContent => ({
-  type: "Value",
-  value: vVoid(),
 });
 
 // Converts the expression to String. Useful for tests.

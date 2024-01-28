@@ -13,7 +13,7 @@ import { SqLinker } from "../SqLinker.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqDict } from "../SqValue/SqDict.js";
 import { SqValueContext } from "../SqValueContext.js";
-import { Root, SqValuePath } from "../SqValuePath.js";
+import { SqValuePath, ValuePathRoot } from "../SqValuePath.js";
 import { SqOutputResult } from "../types.js";
 import {
   type Externals,
@@ -237,12 +237,10 @@ export class SqProject {
     const hasEndExpression =
       !!lastStatement && !isBindingStatement(lastStatement);
 
-    const _this = this;
-
-    function newContext(root: Root) {
+    const newContext = (root: ValuePathRoot) => {
       const isResult = root === "result";
       return new SqValueContext({
-        project: _this,
+        project: this,
         sourceId,
         source: source!,
         ast,
@@ -250,14 +248,14 @@ export class SqProject {
         valueAstIsPrecise: isResult ? hasEndExpression : true,
         path: new SqValuePath({
           root: root,
-          items: [],
+          edges: [],
         }),
       });
-    }
+    };
 
-    function wrapSqDict(innerDict: VDict, root: Root): SqDict {
+    const wrapSqDict = (innerDict: VDict, root: ValuePathRoot): SqDict => {
       return new SqDict(innerDict, newContext(root));
-    }
+    };
 
     const { result, bindings, exports, externals } = internalOutputR.value;
 
@@ -418,7 +416,7 @@ export class SqProject {
     if (!ast.ok) {
       return ast;
     }
-    const found = SqValuePath.findByOffset({
+    const found = SqValuePath.findByAstOffset({
       ast: ast.value,
       offset,
     });

@@ -17,8 +17,8 @@ bar = 6
 
     const nodes = getNameNodes(tree, code.length);
     expect(nodes.length).toBe(2);
-    expect(getText(code, nodes[0])).toBe("bar"); // code is traversed backwards
-    expect(getText(code, nodes[1])).toBe("foo");
+    expect(getText(code, nodes[0].node)).toBe("bar"); // code is traversed backwards
+    expect(getText(code, nodes[1].node)).toBe("foo");
   });
 
   test("Parameter names", () => {
@@ -28,8 +28,8 @@ myFun(arg1, arg2) = 1+`;
 
     const nodes = getNameNodes(tree, code.length);
     expect(nodes.length).toBe(2);
-    expect(getText(code, nodes[0])).toBe("arg1");
-    expect(getText(code, nodes[1])).toBe("arg2");
+    expect(getText(code, nodes[0].node)).toBe("arg1");
+    expect(getText(code, nodes[1].node)).toBe("arg2");
   });
 
   test("Parameter names at the start of function body", () => {
@@ -39,8 +39,8 @@ myFun(arg1, arg2) = `;
 
     const nodes = getNameNodes(tree, code.length);
     expect(nodes.length).toBe(2);
-    expect(getText(code, nodes[0])).toBe("arg1");
-    expect(getText(code, nodes[1])).toBe("arg2");
+    expect(getText(code, nodes[0].node)).toBe("arg1");
+    expect(getText(code, nodes[1].node)).toBe("arg2");
   });
 
   test("Don't suggest current binding", () => {
@@ -51,7 +51,7 @@ bar = {`;
 
     const nodes = getNameNodes(tree, code.length);
     expect(nodes.length).toBe(1);
-    expect(getText(code, nodes[0])).toBe("foo");
+    expect(getText(code, nodes[0].node)).toBe("foo");
   });
 
   test("Don't suggest parameters of sibling functions", () => {
@@ -62,8 +62,8 @@ fun2(arg2) =`;
 
     const nodes = getNameNodes(tree, code.length);
     expect(nodes.length).toBe(2);
-    expect(getText(code, nodes[0])).toBe("arg2");
-    expect(getText(code, nodes[1])).toBe("fun1");
+    expect(getText(code, nodes[0].node)).toBe("arg2");
+    expect(getText(code, nodes[1].node)).toBe("fun1");
   });
 
   test("Don't suggest bindings declared later", () => {
@@ -78,6 +78,6 @@ bar = 2
 
     const nodes = getNameNodes(tree, code1.length);
     expect(nodes.length).toBe(1);
-    expect(getText(code, nodes[0])).toBe("foo");
+    expect(getText(code, nodes[0].node)).toBe("foo");
   });
 });

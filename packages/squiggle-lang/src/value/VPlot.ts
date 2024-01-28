@@ -1,4 +1,5 @@
 import { BaseDist } from "../dist/BaseDist.js";
+import { SampleSetDist } from "../dist/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
 import { BaseValue } from "./BaseValue.js";
@@ -42,8 +43,8 @@ export type Plot = CommonPlotArgs &
       }
     | {
         type: "scatter";
-        xDist: BaseDist;
-        yDist: BaseDist;
+        xDist: SampleSetDist;
+        yDist: SampleSetDist;
         xScale: Scale;
         yScale: Scale;
       }

@@ -1,8 +1,12 @@
+import seedrandom from "seedrandom";
+
 import {
   logScoreScalarAnswer,
   mixture,
 } from "../../../src/dist/distOperations/index.js";
 import { env, mkPointMass, unpackResult } from "../../helpers/distHelpers.js";
+
+const rng = seedrandom();
 
 describe("WithScalarAnswer: discrete -> scalar -> score", () => {
   const pointA = mkPointMass(3.0);
@@ -19,7 +23,7 @@ describe("WithScalarAnswer: discrete -> scalar -> score", () => {
           [pointC, 0.25],
           [pointD, 0.25],
         ],
-        { env }
+        { env, rng }
       )
     );
 
@@ -42,7 +46,7 @@ describe("WithScalarAnswer: discrete -> scalar -> score", () => {
           [pointA, 0.75],
           [pointB, 0.25],
         ],
-        { env }
+        { env, rng }
       )
     );
 
@@ -65,7 +69,7 @@ describe("WithScalarAnswer: discrete -> scalar -> score", () => {
           [pointA, 0.5],
           [pointB, 0.5],
         ],
-        { env }
+        { env, rng }
       )
     );
     const prediction = unpackResult(
@@ -74,7 +78,7 @@ describe("WithScalarAnswer: discrete -> scalar -> score", () => {
           [pointA, 0.75],
           [pointB, 0.25],
         ],
-        { env }
+        { env, rng }
       )
     );
 

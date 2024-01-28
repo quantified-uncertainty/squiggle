@@ -6,6 +6,11 @@ import {
 } from "../helpers/reducerHelpers.js";
 
 describe("Peggy parse", () => {
+  describe("empty", () => {
+    testParse("", "(Program)");
+    testParse("// comment", "(Program)");
+  });
+
   describe("float", () => {
     test.each([
       ["1.", { integer: 1, fractional: null, exponent: null }],
@@ -150,6 +155,8 @@ describe("Peggy parse", () => {
     testParse("x = 1", "(Program (LetStatement :x (Block 1)))");
     testParse("x", "(Program :x)");
     testParse("x = 1; x", "(Program (LetStatement :x (Block 1)) :x)");
+    testEvalError("X = 1");
+    testEvalError("Foo.bar = 1");
   });
 
   describe("functions", () => {

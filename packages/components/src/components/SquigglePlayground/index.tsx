@@ -16,8 +16,8 @@ import {
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { SquiggleOutputViewer } from "../SquiggleOutputViewer/index.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
+import { ViewerWithMenuBar } from "../ViewerWithMenuBar/index.js";
 import {
   LeftPlaygroundPanel,
   LeftPlaygroundPanelHandle,
@@ -53,7 +53,10 @@ export type SquigglePlaygroundProps = {
   height?: CSSProperties["height"];
 } & Pick<
   Parameters<typeof LeftPlaygroundPanel>[0],
-  "renderExtraControls" | "renderExtraDropdownItems" | "renderExtraModal"
+  | "renderExtraControls"
+  | "renderExtraDropdownItems"
+  | "renderExtraModal"
+  | "renderImportTooltip"
 > &
   PartialPlaygroundSettings;
 
@@ -77,6 +80,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     renderExtraControls,
     renderExtraDropdownItems,
     renderExtraModal,
+    renderImportTooltip,
     height = 500,
     sourceId,
     ...defaultSettings
@@ -155,19 +159,19 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       renderExtraDropdownItems={renderExtraDropdownItems}
       renderExtraModal={renderExtraModal}
       onViewValuePath={(path) => rightPanelRef.current?.viewValuePath(path)}
+      renderImportTooltip={renderImportTooltip}
       ref={leftPanelRef}
     />
   );
 
   const renderRight = () =>
     output.output ? (
-      <SquiggleOutputViewer
+      <ViewerWithMenuBar
         squiggleOutput={output.output}
         isRunning={output.isRunning}
-        // FIXME - this will cause viewer to be rendered twice on initial render
+        playgroundSettings={settings}
         editor={leftPanelRef.current?.getEditor() ?? undefined}
-        ref={rightPanelRef}
-        {...settings}
+        viewerRef={rightPanelRef}
       />
     ) : (
       <div className="grid place-items-center h-full">

@@ -6,8 +6,8 @@ import { useSquiggle } from "../lib/hooks/useSquiggle.js";
 import { getErrors } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
 import { SquiggleCodeProps } from "./types.js";
+import { ViewerWithMenuBar } from "./ViewerWithMenuBar/index.js";
 
 export type SquiggleEditorProps = SquiggleCodeProps & {
   hideViewer?: boolean;
@@ -32,7 +32,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
 
   const runnerState = useRunnerState(code);
 
-  const [squiggleOutput, { project, isRunning }] = useSquiggle({
+  const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
     code: runnerState.renderedCode,
     executionId: runnerState.executionId,
     ...(propsProject ? { project: propsProject, continues } : { environment }),
@@ -60,17 +60,17 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           showGutter={false}
           errors={errors}
           project={project}
+          sourceId={sourceId}
           ref={editorRef}
           onSubmit={() => runnerState.run()}
         />
       </div>
-      {hideViewer || !squiggleOutput?.code ? null : (
-        <SquiggleOutputViewer
+      {hideViewer || !squiggleOutput ? null : (
+        <ViewerWithMenuBar
           squiggleOutput={squiggleOutput}
           isRunning={isRunning}
           editor={editorRef.current ?? undefined}
-          environment={environment}
-          {...settings}
+          playgroundSettings={settings}
         />
       )}
     </div>

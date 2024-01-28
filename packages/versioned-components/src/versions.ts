@@ -65,3 +65,16 @@ function excludeVersions<
 export const versionSupportsDropdownMenu = excludeVersions(["0.8.5"]);
 export const versionSupportsExports = excludeVersions(["0.8.5", "0.8.6"]);
 export const versionSupportsSquiggleChart = excludeVersions(["0.8.5", "0.8.6"]);
+export const versionSupportsImportTooltip = excludeVersions([
+  "0.8.5",
+  "0.8.6",
+  "0.9.0",
+  "0.9.2",
+]);
+
+export const versionSupportsSqPathV2 = excludeVersions([
+  "0.8.5",
+  "0.8.6",
+  "0.9.0",
+  "0.9.2",
+]);

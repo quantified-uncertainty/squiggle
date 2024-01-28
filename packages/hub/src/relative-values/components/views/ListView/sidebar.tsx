@@ -24,7 +24,7 @@ const TableRow: React.FC<TableRowProps> = ({ label, number }) => (
     <div className="text-slate-400 py-1 mt-1 font-normal text-left text-xs col-span-1">
       {label}
     </div>
-    <div className="py-1 pl-2 text-left text-slate-600 text-md col-span-2">
+    <div className="py-1 pl-2 text-left text-slate-600 col-span-2">
       <NumberShower number={number} precision={2} />
     </div>
   </Fragment>
@@ -124,9 +124,7 @@ export const ItemSideBar: FC<Props> = ({
     return (
       <div>
         <div className="mt-2 mb-6 flex overflow-x-auto items-center p-1">
-          <span className="text-slate-500 text-md whitespace-nowrap mr-1">
-            value
-          </span>
+          <span className="text-slate-500 whitespace-nowrap mr-1">value</span>
           <span className="text-slate-300 text-xl whitespace-nowrap">(</span>
           <span className="text-sm bg-slate-200 font-semibold bg-opacity-80 rounded-sm text-slate-900 px-1 text-center whitespace-pre-wrap mr-2 ml-2">
             {numeratorItem.name}

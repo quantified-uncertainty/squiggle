@@ -1,3 +1,4 @@
+import { useSession } from "next-auth/react";
 import { BaseSyntheticEvent, FC, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
@@ -22,13 +23,16 @@ import {
   VersionedSquigglePlayground,
   versionSupportsDropdownMenu,
   versionSupportsExports,
+  versionSupportsImportTooltip,
 } from "@quri/versioned-squiggle-components";
 
 import { EditModelExports } from "@/components/exports/EditModelExports";
+import { ReactRoot } from "@/components/ReactRoot";
 import { FormModal } from "@/components/ui/FormModal";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { useMutationForm } from "@/hooks/useMutationForm";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import { ImportTooltip } from "@/squiggle/components/ImportTooltip";
 import {
   serializeSourceId,
   squiggleHubLinker,
@@ -122,6 +126,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
   modelRef,
   forceVersionPicker,
 }) => {
+  const { data: session } = useSession();
+
   const model = useFragment(
     graphql`
       fragment EditSquiggleSnippetModel on Model {
@@ -373,6 +379,14 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     playgroundProps.onExportsChange = (exports) => {
       form.setValue("exports", exports);
     };
+  }
+
+  if (versionSupportsImportTooltip.props(playgroundProps)) {
+    playgroundProps.renderImportTooltip = ({ importId }) => (
+      <ReactRoot session={session}>
+        <ImportTooltip importId={importId} />
+      </ReactRoot>
+    );
   }
 
   return (

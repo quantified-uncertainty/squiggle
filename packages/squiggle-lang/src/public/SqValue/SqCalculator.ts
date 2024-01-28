@@ -3,6 +3,7 @@ import * as Result from "../../utility/result.js";
 import { Calculator } from "../../value/VCalculator.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
+import { SqValuePathEdge } from "../SqValuePath.js";
 import { SqValue, wrapValue } from "./index.js";
 import { SqInput, wrapInput } from "./SqInput.js";
 import { SqLambda } from "./SqLambda.js";
@@ -17,8 +18,7 @@ export class SqCalculator {
     const sqLambda = new SqLambda(this._value.fn, undefined);
     const response = sqLambda.call(_arguments, env);
 
-    const newContext =
-      this.context && this.context.extend({ type: "calculator" });
+    const newContext = this.context?.extend(SqValuePathEdge.fromCalculator());
 
     if (!newContext) {
       return Result.Err(

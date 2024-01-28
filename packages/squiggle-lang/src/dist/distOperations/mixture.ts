@@ -1,3 +1,5 @@
+import { PRNG } from "seedrandom";
+
 import * as E_A_Floats from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
@@ -12,7 +14,7 @@ import { scaleMultiply } from "./scaleOperations.js";
 //TODO: If the inputs are not normalized, this will return poor results. The weights probably refer to the post-normalized forms. It would be good to apply a catch to this.
 export function mixture(
   values: [BaseDist, number][],
-  { env }: { env: Env }
+  { env, rng }: { env: Env; rng: PRNG }
 ): result<BaseDist, DistError> {
   if (values.length < 1) {
     return Result.Err(
@@ -30,14 +32,18 @@ export function mixture(
       if (dist instanceof SampleSetDist.SampleSetDist) {
         sampleSetValues.push([dist, weight]);
       } else {
-        const sampleSetResult = SampleSetDist.SampleSetDist.fromDist(dist, env);
+        const sampleSetResult = SampleSetDist.SampleSetDist.fromDist(
+          dist,
+          env,
+          rng
+        );
         if (!sampleSetResult.ok) {
           return sampleSetResult;
         }
         sampleSetValues.push([sampleSetResult.value, weight]);
       }
     }
-    return SampleSetDist.mixture(sampleSetValues, env.sampleCount);
+    return SampleSetDist.mixture(sampleSetValues, env.sampleCount, rng);
   }
 
   const totalWeight = E_A_Floats.sum(values.map(([, w]) => w));
@@ -52,7 +58,7 @@ export function mixture(
 
   let answer = properlyWeightedValues[0];
   for (const dist of properlyWeightedValues.slice(1)) {
-    const r = binaryOperations.pointwiseAdd(answer, dist, { env });
+    const r = binaryOperations.pointwiseAdd(answer, dist, { env, rng });
     if (!r.ok) {
       return r;
     }

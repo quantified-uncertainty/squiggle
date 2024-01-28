@@ -33,8 +33,10 @@ const maker = new FnFactory({
 const fromDist = makeDefinition(
   [frDist],
   frSampleSetDist,
-  ([dist], { environment }) =>
-    unwrapDistResult(SampleSetDist.SampleSetDist.fromDist(dist, environment))
+  ([dist], { environment, rng }) =>
+    unwrapDistResult(
+      SampleSetDist.SampleSetDist.fromDist(dist, environment, rng)
+    )
 );
 
 const fromNumber = makeDefinition(

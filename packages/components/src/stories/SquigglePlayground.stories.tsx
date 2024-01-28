@@ -166,7 +166,6 @@ export const ManyTypes: Story = {
     defaultCode: `varNum = 3333
 varBool = true
 varString = "This is a long string"
-varVoid = ()
 
 varArray = [1,2,3]
 varLambda = {|e| "Test"}
@@ -187,9 +186,9 @@ varTable = Table.make(
 )
 
 varDist = SampleSet.fromDist(2 to 5)
-varDist2 = SampleSet.fromDist(10E20 to 20E20)
+export varDist2 = SampleSet.fromDist(10E20 to 20E20)
 
-varScatter = Plot.scatter({
+export varScatter = Plot.scatter({
   xDist: varDist,
   yDist: (1 to 3) * 5 - varDist ^ 2
 })

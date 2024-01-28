@@ -1,3 +1,4 @@
+import seedrandom from "seedrandom";
 import { BaseDist } from "../../../src/dist/BaseDist.js";
 import { distErrorToString } from "../../../src/dist/DistError.js";
 import {
@@ -19,6 +20,8 @@ import {
   mkUniform,
   unpackResult,
 } from "../../helpers/distHelpers.js";
+
+const rng = seedrandom();
 
 const klDivergence = (prediction: BaseDist, answer: BaseDist): number => {
   const result = logScoreDistAnswer({
@@ -106,7 +109,7 @@ describe("klDivergence: discrete -> discrete -> float", () => {
         [point1, 1],
         [point2, 1],
       ],
-      { env }
+      { env, rng }
     )
   );
   const b = unpackResult(
@@ -116,7 +119,7 @@ describe("klDivergence: discrete -> discrete -> float", () => {
         [point2, 1],
         [point3, 1],
       ],
-      { env }
+      { env, rng }
     )
   );
 
@@ -143,7 +146,7 @@ describe("klDivergence: mixed -> mixed -> float", () => {
         [point1, 1.0],
         [uniformDist, 1.0],
       ],
-      { env }
+      { env, rng }
     )
   );
   const b = unpackResult(
@@ -153,7 +156,7 @@ describe("klDivergence: mixed -> mixed -> float", () => {
         [floatDist, 1.0],
         [normalDist10, 1.0],
       ],
-      { env }
+      { env, rng }
     )
   );
   const c = unpackResult(
@@ -164,7 +167,7 @@ describe("klDivergence: mixed -> mixed -> float", () => {
         [point3, 1.0],
         [uniformDist, 1.0],
       ],
-      { env }
+      { env, rng }
     )
   );
   const d = unpackResult(
@@ -176,7 +179,7 @@ describe("klDivergence: mixed -> mixed -> float", () => {
         [floatDist, 1.0],
         [uniformDist2, 1.0],
       ],
-      { env }
+      { env, rng }
     )
   );
 

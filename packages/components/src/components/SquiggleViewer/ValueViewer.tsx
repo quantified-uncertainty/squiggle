@@ -16,5 +16,12 @@ export const ValueViewer: React.FC<Props> = ({ value, ...rest }) => {
     return <MessageAlert heading="Can't display pathless value" />;
   }
 
-  return <ValueWithContextViewer value={value} {...rest} />;
+  // This key is important, so that scrollEditorToPath() will work correctly when zoomed in.
+  return (
+    <ValueWithContextViewer
+      value={value}
+      key={value.context.path.uid()}
+      {...rest}
+    />
+  );
 };

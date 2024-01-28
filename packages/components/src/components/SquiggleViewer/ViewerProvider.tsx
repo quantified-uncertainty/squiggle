@@ -7,15 +7,13 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
-  useRef,
   useState,
 } from "react";
 
-import { SqValuePath } from "@quri/squiggle-lang";
+import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 
-import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
-import { SqValueWithContext } from "../../lib/utility.js";
+import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import {
@@ -23,19 +21,34 @@ import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
+import { SqListViewNode } from "./SqViewNode.js";
 import {
   getChildrenValues,
-  pathAsString,
   shouldBeginCollapsed,
+  traverseCalculatorEdge,
 } from "./utils.js";
+import { ValueWithContextViewerHandle } from "./ValueWithContextViewer.js";
+
+type ViewerType = "normal" | "tooltip";
+
+function findNode(
+  root: SqValue | undefined,
+  path: SqValuePath,
+  itemStore: ItemStore
+) {
+  if (!root || !path) {
+    return;
+  }
+  return SqListViewNode.make(
+    root,
+    path,
+    traverseCalculatorEdge(itemStore),
+    (path) => itemStore.getState(path).collapsed
+  );
+}
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
-};
-
-type ItemHandle = {
-  element: HTMLDivElement;
-  forceUpdate: () => void;
 };
 
 type LocalItemState = Readonly<{
@@ -52,6 +65,8 @@ const defaultLocalItemState: LocalItemState = {
   settings: {},
 };
 
+type ValuePathUID = string;
+
 /**
  * `ItemStore` is used for caching and for passing settings down the tree.
  * It allows us to avoid React tree rerenders on settings changes; instead, we can rerender individual item viewers on demand.
@@ -60,27 +75,26 @@ const defaultLocalItemState: LocalItemState = {
  * Note: this class is currently used as a primary source of truth. Should we use it as cache only, and store the state in React state instead?
  * Then we won't have to rely on `forceUpdate` for rerenders.
  */
-class ItemStore {
-  state: Record<string, LocalItemState> = {};
-  handles: Record<string, ItemHandle> = {};
+export class ItemStore {
+  state: Record<ValuePathUID, LocalItemState> = {};
+  handles: Record<ValuePathUID, ValueWithContextViewerHandle> = {};
 
   setState(
     path: SqValuePath,
     fn: (localItemState: LocalItemState) => LocalItemState
   ): void {
-    const pathString = pathAsString(path);
-    const newSettings = fn(this.state[pathString] || defaultLocalItemState);
-    this.state[pathString] = newSettings;
+    const newSettings = fn(this.state[path.uid()] || defaultLocalItemState);
+    this.state[path.uid()] = newSettings;
   }
 
   getState(path: SqValuePath): LocalItemState {
-    return this.state[pathAsString(path)] || defaultLocalItemState;
+    return this.state[path.uid()] || defaultLocalItemState;
   }
 
   getStateOrInitialize(value: SqValueWithContext): LocalItemState {
     const path = value.context.path;
-    const pathString = pathAsString(path);
-    const existingState = this.state[pathString];
+    const pathString = path.uid();
+    const existingState = this.state[path.uid()];
     if (existingState) {
       return existingState;
     }
@@ -94,7 +108,7 @@ class ItemStore {
         if (!child.context) {
           continue; // shouldn't happen
         }
-        const childPathString = pathAsString(child.context.path);
+        const childPathString = child.context.path.uid();
         if (this.state[childPathString]) {
           continue; // shouldn't happen, if parent state is not initialized, child state won't be initialized either
         }
@@ -124,15 +138,15 @@ class ItemStore {
   }
 
   forceUpdate(path: SqValuePath) {
-    this.handles[pathAsString(path)]?.forceUpdate();
+    this.handles[path.uid()]?.forceUpdate();
   }
 
-  registerItemHandle(path: SqValuePath, handle: ItemHandle) {
-    this.handles[pathAsString(path)] = handle;
+  registerItemHandle(path: SqValuePath, handle: ValueWithContextViewerHandle) {
+    this.handles[path.uid()] = handle;
   }
 
   unregisterItemHandle(path: SqValuePath) {
-    delete this.handles[pathAsString(path)];
+    delete this.handles[path.uid()];
   }
 
   updateCalculatorState(path: SqValuePath, calculator: CalculatorState) {
@@ -149,10 +163,12 @@ class ItemStore {
     }));
   }
 
-  scrollToPath(path: SqValuePath) {
-    this.handles[pathAsString(path)]?.element.scrollIntoView({
-      behavior: "smooth",
-    });
+  scrollViewerToPath(path: SqValuePath) {
+    this.handles[path.uid()]?.scrollIntoView();
+  }
+
+  focusOnPath(path: SqValuePath) {
+    this.handles[path.uid()]?.focusOnHeader();
   }
 }
 
@@ -161,24 +177,30 @@ type ViewerContextShape = {
   // Instead, we keep `localItemState` in local state and notify the global context via `setLocalItemState` to pass them down the component tree again if it got rebuilt from scratch.
   // See ./SquiggleViewer.tsx and ./ValueWithContextViewer.tsx for other implementation details on this.
   globalSettings: PlaygroundSettings;
-  focused: SqValuePath | undefined;
-  setFocused: (value: SqValuePath | undefined) => void;
+  zoomedInPath: SqValuePath | undefined;
+  setZoomedInPath: (value: SqValuePath | undefined) => void;
   editor?: CodeEditorHandle;
   itemStore: ItemStore;
+  viewerType: ViewerType;
   initialized: boolean;
   handle: SquiggleViewerHandle;
+  rootValue?: SqValueWithContext;
+  findNode: (path: SqValuePath) => SqListViewNode | undefined;
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
   globalSettings: defaultPlaygroundSettings,
-  focused: undefined,
-  setFocused: () => undefined,
+  zoomedInPath: undefined,
+  setZoomedInPath: () => undefined,
   editor: undefined,
   itemStore: new ItemStore(),
+  viewerType: "normal",
   handle: {
     viewValuePath: () => {},
   },
   initialized: false,
+  rootValue: undefined,
+  findNode: () => undefined,
 });
 
 export function useViewerContext() {
@@ -187,10 +209,12 @@ export function useViewerContext() {
 
 // `<ValueWithContextViewer>` calls this hook to register its handle in `<ViewerProvider>`.
 // This allows us to do two things later:
-// 1. Implement `store.scrollToPath`.
+// 1. Implement `store.scrollViewerToPath`.
 // 2. Re-render individual item viewers on demand, for example on "Collapse Children" menu action.
-export function useRegisterAsItemViewer(path: SqValuePath) {
-  const ref = useRef<HTMLDivElement | null>(null);
+export function useRegisterAsItemViewer(
+  path: SqValuePath,
+  ref: ValueWithContextViewerHandle
+) {
   const { itemStore } = useViewerContext();
 
   /**
@@ -198,19 +222,11 @@ export function useRegisterAsItemViewer(path: SqValuePath) {
    * So we use `forceUpdate` to force rerendering.
    * (This function is not used directly in this component. Instead, it's passed to `<ViewerProvider>` to be called when necessary, sometimes from other components.)
    */
-  const forceUpdate = useForceUpdate();
 
   useEffect(() => {
-    const element = ref.current;
-    if (!element) {
-      return;
-    }
-
-    itemStore.registerItemHandle(path, { element, forceUpdate });
+    itemStore.registerItemHandle(path, ref);
     return () => itemStore.unregisterItemHandle(path);
   });
-
-  return ref;
 }
 
 export function useSetLocalItemState() {
@@ -221,14 +237,18 @@ export function useSetLocalItemState() {
   };
 }
 
+export function toggleCollapsed(itemStore: ItemStore, path: SqValuePath) {
+  itemStore.setState(path, (state) => ({
+    ...state,
+    collapsed: !state?.collapsed,
+  }));
+  itemStore.forceUpdate(path);
+}
+
 export function useToggleCollapsed() {
   const { itemStore } = useViewerContext();
   return (path: SqValuePath) => {
-    itemStore.setState(path, (state) => ({
-      ...state,
-      collapsed: !state?.collapsed,
-    }));
-    itemStore.forceUpdate(path);
+    toggleCollapsed(itemStore, path);
   };
 }
 
@@ -267,28 +287,43 @@ export function useHasLocalSettings(path: SqValuePath) {
   );
 }
 
-export function useFocus() {
-  const { focused, setFocused } = useViewerContext();
+export function useZoomIn() {
+  const { zoomedInPath: zoomedInPath, setZoomedInPath: setZoomedInPath } =
+    useViewerContext();
   return (path: SqValuePath) => {
-    if (focused && pathAsString(focused) === pathAsString(path)) {
+    if (zoomedInPath?.isEqual(path)) {
       return; // nothing to do
     }
     if (path.isRoot()) {
-      setFocused(undefined); // focusing on root nodes is not allowed
+      setZoomedInPath(undefined); // full screening on root nodes is not allowed
     } else {
-      setFocused(path);
+      setZoomedInPath(path);
     }
   };
 }
 
-export function useUnfocus() {
-  const { setFocused } = useViewerContext();
-  return () => setFocused(undefined);
+export function useZoomOut() {
+  const { setZoomedInPath: setZoomedInPath } = useViewerContext();
+  return () => setZoomedInPath(undefined);
 }
 
-export function useIsFocused(path: SqValuePath) {
-  const { focused } = useViewerContext();
-  return focused && pathAsString(focused) === pathAsString(path);
+export function useScrollToEditorPath(path: SqValuePath) {
+  const { editor, findNode } = useViewerContext();
+  return () => {
+    if (editor) {
+      const value = findNode(path)?.value();
+      const location = value?.context?.findLocation();
+
+      if (location) {
+        editor?.scrollTo(location.start.offset, false);
+      }
+    }
+  };
+}
+
+export function useIsZoomedIn(path: SqValuePath) {
+  const { zoomedInPath: zoomedInPath } = useViewerContext();
+  return zoomedInPath?.isEqual(path);
 }
 
 export function useMergedSettings(path: SqValuePath) {
@@ -303,14 +338,27 @@ export function useMergedSettings(path: SqValuePath) {
   return result;
 }
 
+export function useViewerType() {
+  const { viewerType } = useViewerContext();
+  return viewerType;
+}
+
 type Props = PropsWithChildren<{
   partialPlaygroundSettings: PartialPlaygroundSettings;
   editor?: CodeEditorHandle;
+  viewerType?: ViewerType;
+  rootValue: SqValue | undefined;
 }>;
 
 export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
   (
-    { partialPlaygroundSettings: unstablePlaygroundSettings, editor, children },
+    {
+      partialPlaygroundSettings: unstablePlaygroundSettings,
+      editor,
+      viewerType = "normal",
+      rootValue,
+      children,
+    },
     ref
   ) => {
     const [itemStore] = useState(() => new ItemStore());
@@ -324,30 +372,38 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       unstablePlaygroundSettings
     );
 
-    const handle: SquiggleViewerHandle = {
-      viewValuePath(path: SqValuePath) {
-        itemStore.scrollToPath(path);
-      },
-    };
-
-    useImperativeHandle(ref, () => handle);
-
-    const [focused, setFocused] = useState<SqValuePath | undefined>();
+    const [zoomedInPath, setZoomedInPathPath] = useState<
+      SqValuePath | undefined
+    >();
 
     const globalSettings = useMemo(() => {
       return merge({}, defaultPlaygroundSettings, playgroundSettings);
     }, [playgroundSettings]);
 
+    const handle: SquiggleViewerHandle = {
+      viewValuePath(path: SqValuePath) {
+        itemStore.scrollViewerToPath(path);
+      },
+    };
+
+    useImperativeHandle(ref, () => handle);
+
+    const _rootValue =
+      rootValue && valueHasContext(rootValue) ? rootValue : undefined;
+
     return (
       <ViewerContext.Provider
         value={{
+          rootValue: _rootValue,
           globalSettings,
           editor,
-          focused,
-          setFocused,
+          zoomedInPath,
+          setZoomedInPath: setZoomedInPathPath,
           itemStore,
+          viewerType,
           handle,
           initialized: true,
+          findNode: (path) => findNode(_rootValue, path, itemStore),
         }}
       >
         {children}

@@ -5,33 +5,44 @@ import {
 } from "@codemirror/autocomplete";
 import { syntaxTree } from "@codemirror/language";
 import { SyntaxNode, Tree } from "@lezer/common";
-import { createRoot } from "react-dom/client";
 
 import { SqProject } from "@quri/squiggle-lang";
 
 import { FnDocumentationFromName } from "../../ui/FnDocumentation.js";
+import { reactAsDom } from "../utils.js";
 
-export function getNameNodes(tree: Tree, from: number) {
+type NameNode = {
+  node: SyntaxNode;
+  type: "function" | "variable";
+};
+
+export function getNameNodes(tree: Tree, from: number): NameNode[] {
   const cursor = tree.cursorAt(from, -1);
-  const nameNodes: SyntaxNode[] = [];
+  const nameNodes: NameNode[] = [];
 
   // We walk up and backwards through the tree, looking for nodes that have names.
 
   let direction: "start" | "sibling" | "parent" | undefined = "start";
   while (1) {
-    // Only for sibling nodes; `foo = { <cursor> }` shouldn't autocomplete `foo`.
-    if (cursor.type.is("Binding") && direction === "sibling") {
-      const nameNode = cursor.node.getChild("VariableName");
-      if (nameNode) {
-        nameNodes.push(nameNode);
+    if (cursor.type.is("Statement") && direction === "sibling") {
+      // Only for sibling nodes; `foo = { <cursor> }` shouldn't autocomplete `foo`.
+
+      // Unwrap decorated statements.
+      let node: SyntaxNode | null = cursor.node;
+      while (node && node.type.is("DecoratedStatement")) {
+        node = node.getChild("Statement");
       }
-      // Only for sibling nodes; Squiggle doesn't support recursive calls.
-    } else if (cursor.type.is("FunDeclaration") && direction === "sibling") {
-      const nameNode = cursor.node.getChild("FunctionName");
-      if (nameNode) {
-        nameNodes.push(nameNode);
+
+      const nameNode = node?.getChild("VariableName");
+      if (node && nameNode) {
+        nameNodes.push({
+          node: nameNode,
+          type: node?.type.is("DefunStatement") ? "function" : "variable",
+        });
       }
-    } else if (cursor.type.is("FunDeclaration") && direction !== "sibling") {
+    } else if (cursor.type.is("DefunStatement") && direction !== "sibling") {
+      // Function declaration that's a parent, let's autocomplete its parameter names.
+      // Note that we also allow `direction === "start"`, to handle `f(foo) = foo` correctly.
       const parameterNodes =
         cursor.node.getChild("LambdaArgs")?.getChildren("LambdaParameter") ??
         [];
@@ -39,11 +50,14 @@ export function getNameNodes(tree: Tree, from: number) {
       for (const parameter of parameterNodes) {
         const nameNode = parameter.getChild("LambdaParameterName");
         if (nameNode) {
-          nameNodes.push(nameNode);
+          nameNodes.push({
+            node: nameNode,
+            // Is there a more specific type? There's no "parameter" type in CodeMirror.
+            // https://codemirror.net/docs/ref/#autocomplete.Completion.type
+            type: "variable",
+          });
         }
       }
-    } else if (cursor.type.is("Decorator") && direction !== "sibling") {
-      // TODO
     }
 
     // Move to the next node and store the direction that we used.
@@ -64,12 +78,7 @@ export function makeCompletionSource(project: SqProject) {
   const decoratorCompletions: Completion[] = [];
 
   const getInfoFunction = (name: string): Completion["info"] => {
-    return () => {
-      const dom = document.createElement("div");
-      const root = createRoot(dom);
-      root.render(<FnDocumentationFromName functionName={name} />);
-      return { dom };
-    };
+    return () => reactAsDom(<FnDocumentationFromName functionName={name} />);
   };
 
   for (const [name, value] of project.getStdLib().entrySeq()) {
@@ -106,7 +115,7 @@ export function makeCompletionSource(project: SqProject) {
             snippetCompletion("|${args}| ${body}", {
               label: "|",
               detail: "lambda function",
-              type: "syntax",
+              type: "text",
             }),
           ],
         };
@@ -114,16 +123,18 @@ export function makeCompletionSource(project: SqProject) {
     }
 
     {
-      const identifier = cmpl.tokenBefore(["AccessExpr", "IdentifierExpr"]);
+      const identifier = cmpl.tokenBefore(["AccessExpr", "Identifier"]);
       if (identifier) {
         const { from } = identifier;
         const nameNodes = getNameNodes(tree, from);
-        const localCompletions = nameNodes.map((node): Completion => {
-          const name = cmpl.state.doc.sliceString(node.from, node.to);
-          const type = node.type.is("FunctionName") ? "function" : "variable";
+        const localCompletions = nameNodes.map((nameNode): Completion => {
+          const name = cmpl.state.doc.sliceString(
+            nameNode.node.from,
+            nameNode.node.to
+          );
           return {
             label: name,
-            type,
+            type: nameNode.type,
           };
         });
 
