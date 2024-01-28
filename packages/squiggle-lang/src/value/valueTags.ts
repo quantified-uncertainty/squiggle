@@ -1,3 +1,5 @@
+import { LocationRange } from "peggy";
+
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, fmap, mergeMany, Ok, result } from "../utility/result.js";
 import { Value } from "./index.js";
@@ -18,6 +20,7 @@ export type ValueTagsType = {
   notebook?: VBool; // can be set on arrays
   exportData?: VDict; // should be { sourceId: String, path: List(String) }
   startOpenState?: VString;
+  location?: LocationRange;
 };
 
 type ValueTagsTypeName = keyof ValueTagsType;
@@ -32,6 +35,7 @@ const valueTagsTypeNames: ValueTagsTypeName[] = [
   "notebook",
   "exportData",
   "startOpenState",
+  "location",
 ];
 
 function convertToValueTagsTypeName(
@@ -148,6 +152,10 @@ export class ValueTags {
 
   notebook() {
     return this.value.notebook?.value;
+  }
+
+  location() {
+    return this.value.location;
   }
 
   startOpenState(): "open" | "closed" | undefined {

@@ -1,4 +1,4 @@
-import { REArgumentError } from "../errors/messages.js";
+import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -387,6 +387,28 @@ example2 = {|x| x + 1}`,
       makeDefinition([frAny()], frBool, ([value]) => {
         return value.tags?.notebook() ?? false;
       }),
+    ],
+  }),
+  maker.make({
+    name: "location",
+    description: `Hides a value when displayed under Variables. This is useful for hiding intermediate values or helper functions that are used in calculations, but are not directly relevant to the user. Only hides top-level variables.`,
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frAny({ genericName: "A" }))],
+        frWithTags(frAny({ genericName: "A" })),
+        ([{ value, tags }], { frameStack }) => {
+          const location = frameStack.getTopFrame()?.location;
+          if (!location) {
+            throw new REOther("Location is missing in call stack");
+          }
+          return {
+            value,
+            tags: tags.merge({ location: location }),
+          };
+        },
+        { isDecorator: true }
+      ),
     ],
   }),
   maker.make({

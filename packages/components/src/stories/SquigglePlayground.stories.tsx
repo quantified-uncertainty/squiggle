@@ -303,6 +303,7 @@ fn = {|e| e}
 bar =  [x, fn]
 
 @startOpen
+@location
 s = 4 to 10
 
 @startClosed
