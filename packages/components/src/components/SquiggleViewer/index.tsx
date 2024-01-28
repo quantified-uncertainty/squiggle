@@ -5,6 +5,7 @@ import { ChevronRightIcon } from "@quri/ui";
 
 import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
+import { ErrorBoundary } from "../ErrorBoundary.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { useGetSubvalueByPath } from "./utils.js";
 import { ValueViewer } from "./ValueViewer.js";
@@ -112,14 +113,16 @@ const component = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
     ref
   ) {
     return (
-      <ViewerProvider
-        partialPlaygroundSettings={partialPlaygroundSettings}
-        editor={editor}
-        ref={ref}
-        rootValue={value}
-      >
-        <SquiggleViewerWithoutProvider value={value} />
-      </ViewerProvider>
+      <ErrorBoundary>
+        <ViewerProvider
+          partialPlaygroundSettings={partialPlaygroundSettings}
+          editor={editor}
+          ref={ref}
+          rootValue={value}
+        >
+          <SquiggleViewerWithoutProvider value={value} />
+        </ViewerProvider>
+      </ErrorBoundary>
     );
   }
 );

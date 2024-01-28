@@ -6,8 +6,8 @@ import { useSquiggle } from "../lib/hooks/useSquiggle.js";
 import { getErrors } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
 import { SquiggleCodeProps } from "./types.js";
+import { ViewerWithMenuBar } from "./ViewerWithMenuBar/index.js";
 
 export type SquiggleEditorProps = SquiggleCodeProps & {
   hideViewer?: boolean;
@@ -66,12 +66,11 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
         />
       </div>
       {hideViewer || !squiggleOutput ? null : (
-        <SquiggleOutputViewer
+        <ViewerWithMenuBar
           squiggleOutput={squiggleOutput}
           isRunning={isRunning}
           editor={editorRef.current ?? undefined}
-          environment={environment}
-          {...settings}
+          playgroundSettings={settings}
         />
       )}
     </div>
