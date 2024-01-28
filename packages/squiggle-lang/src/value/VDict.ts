@@ -47,6 +47,11 @@ export class VDict extends BaseValue implements Indexable {
     }
   }
 
+  //Can't change ``get`` directly, because it's needed for the ``Indexable`` mixin
+  safeGet(key: string): Value | undefined {
+    return this.value.get(key);
+  }
+
   isEqual(other: VDict): boolean {
     if (this.value.size !== other.value.size) {
       return false;

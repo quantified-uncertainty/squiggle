@@ -9,7 +9,7 @@ import {
 } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
+import { ViewerWithMenuBar } from "./ViewerWithMenuBar/index.js";
 
 export type SquiggleEditorProps = {
   defaultCode?: string;
@@ -72,14 +72,14 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           onSubmit={rerunSquiggleCode}
         />
       </div>
+
       {!squiggleProjectRun ? null : (
-        <SquiggleOutputViewer
+        <ViewerWithMenuBar
           squiggleProjectRun={squiggleProjectRun}
           editor={editorRef.current ?? undefined}
-          environment={environment}
           viewerTab={viewerTab}
           setViewerTab={setViewerTab}
-          {...settings}
+          playgroundSettings={settings}
         />
       )}
     </div>

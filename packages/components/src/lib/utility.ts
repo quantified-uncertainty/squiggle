@@ -1,4 +1,11 @@
-import { Env, result, SqError, SqProject, SqValue } from "@quri/squiggle-lang";
+import {
+  Env,
+  result,
+  SqError,
+  SqProject,
+  SqValue,
+  SqValuePath,
+} from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../squiggle-lang/src/public/types.js";
 import { SquiggleProjectRun } from "./hooks/useSquiggleProjectRun.js";
@@ -104,7 +111,13 @@ export function valueHasContext(value: SqValue): value is SqValueWithContext {
   return !!value.context;
 }
 
-export type ViewerTab = "Imports" | "Exports" | "Variables" | "Result" | "AST";
+export type ViewerTab =
+  | "Imports"
+  | "Exports"
+  | "Variables"
+  | "Result"
+  | "AST"
+  | { tag: "CustomResultPath"; value: SqValuePath };
 
 export function defaultViewerTab(
   outputResult: SqOutputResult | undefined
@@ -142,6 +155,14 @@ export function viewerTabToValue(
       return sqOutput.exports.asValue();
     case "AST":
       return;
+  }
+
+  if (viewerTab.tag === "CustomResultPath") {
+    const rootValue =
+      viewerTab.value.root === "result"
+        ? output.value.result
+        : output.value.bindings.asValue();
+    return rootValue.getSubvalueByPath(viewerTab.value, () => undefined);
   }
 }
 

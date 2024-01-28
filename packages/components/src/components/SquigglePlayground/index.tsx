@@ -17,8 +17,8 @@ import {
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { SquiggleOutputViewer } from "../SquiggleOutputViewer/index.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
+import { ViewerWithMenuBar } from "../ViewerWithMenuBar/index.js";
 import {
   LeftPlaygroundPanel,
   LeftPlaygroundPanelHandle,
@@ -179,14 +179,14 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 
   const renderRight = () =>
     squiggleProjectRun ? (
-      <SquiggleOutputViewer
+      <ViewerWithMenuBar
         squiggleProjectRun={squiggleProjectRun}
         // FIXME - this will cause viewer to be rendered twice on initial render
         editor={leftPanelRef.current?.getEditor() ?? undefined}
-        ref={rightPanelRef}
+        viewerRef={rightPanelRef}
         viewerTab={viewerTab}
         setViewerTab={setViewerTab}
-        {...settings}
+        playgroundSettings={settings}
       />
     ) : (
       <div className="grid place-items-center h-full">
