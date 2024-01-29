@@ -3,6 +3,7 @@ import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 import { getChildrenValues, TraverseCalculatorEdge } from "./utils.js";
 
 //We might want to bring this into the SquiggleLang library. The ``traverseCalculatorEdge`` part is awkward though.
+//Note that this ignores children+siblings with ``hidden`` tags.
 class SqValueNode {
   constructor(
     public root: SqValue,
@@ -24,6 +25,10 @@ class SqValueNode {
     return this.root.getSubvalueByPath(this.path, this.traverseCalculatorEdge);
   }
 
+  hasHiddenTag(): boolean {
+    return this.sqValue()?.tags.hidden() || false;
+  }
+
   parent() {
     const parentPath = this.path.parent();
     return parentPath
@@ -43,7 +48,8 @@ class SqValueNode {
           ? new SqValueNode(this.root, path, this.traverseCalculatorEdge)
           : undefined;
       })
-      .filter((a): a is NonNullable<typeof a> => a !== undefined);
+      .filter((a): a is NonNullable<typeof a> => a !== undefined)
+      .filter((a) => !a.hasHiddenTag());
   }
 
   lastChild(): SqValueNode | undefined {

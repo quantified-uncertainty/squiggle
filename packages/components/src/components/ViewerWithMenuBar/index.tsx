@@ -1,3 +1,5 @@
+import { forwardRef } from "react";
+
 import {
   isRunning,
   SquiggleProjectRun,
@@ -25,34 +27,34 @@ type Props = {
 // }
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
-export const ViewerWithMenuBar: React.FC<Props> = ({
-  squiggleProjectRun,
-  playgroundSettings,
-  viewerRef,
-  viewerTab,
-  setViewerTab,
-}) => {
-  const { output } = squiggleProjectRun;
+export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
+  function ViewerWithMenuBar(
+    { squiggleProjectRun, playgroundSettings, viewerTab, setViewerTab, editor },
+    viewerRef
+  ) {
+    const { output } = squiggleProjectRun;
 
-  return (
-    <Layout
-      menu={
-        <ViewerMenu
-          viewerTab={viewerTab}
-          setViewerTab={setViewerTab}
-          output={output}
-        />
-      }
-      indicator={<RenderingIndicator output={squiggleProjectRun} />}
-      viewer={
-        <ViewerBody
-          viewerTab={viewerTab}
-          output={output}
-          isRunning={isRunning(squiggleProjectRun)}
-          playgroundSettings={playgroundSettings}
-          viewerRef={viewerRef}
-        />
-      }
-    />
-  );
-};
+    return (
+      <Layout
+        menu={
+          <ViewerMenu
+            viewerTab={viewerTab}
+            setViewerTab={setViewerTab}
+            output={output}
+          />
+        }
+        indicator={<RenderingIndicator output={squiggleProjectRun} />}
+        viewer={
+          <ViewerBody
+            viewerTab={viewerTab}
+            output={output}
+            isRunning={isRunning(squiggleProjectRun)}
+            playgroundSettings={playgroundSettings}
+            ref={viewerRef}
+            editor={editor}
+          />
+        }
+      />
+    );
+  }
+);
