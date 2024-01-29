@@ -106,7 +106,10 @@ export function useSquiggleRunner(
   }, [args.environment]);
 
   useEffect(() => {
-    project.removeSource(sourceId); // This is old code brought in from ``useSquiggleRun``, now ``useSquiggleProjectRun``. I'm not sure if this is necessary.
+    // This removes the source from the project when the component unmounts.
+    return () => {
+      project.removeSource(sourceId);
+    };
   }, [project, sourceId]);
 
   return {
