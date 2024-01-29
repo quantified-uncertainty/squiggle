@@ -6,6 +6,7 @@ import {
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../../components/PlaygroundSettings.js";
+import { randomSeed } from "../seedGenerator.js";
 
 export type Args = {
   defaultSettings: PartialPlaygroundSettings;
@@ -40,7 +41,7 @@ export function usePlaygroundSettings({
       ...settings,
       environment: {
         ...settings.environment,
-        seed: String(Math.random() * 100000),
+        seed: randomSeed(),
       },
     });
   };
