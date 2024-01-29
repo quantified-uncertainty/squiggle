@@ -85,6 +85,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
         <RunMenuItem
           runSquiggleProject={props.runSquiggleProject}
           autorunMode={props.autorunMode}
+          codeHasChanged={props.code !== props.squiggleProjectRun?.code}
           isRunning={
             props.squiggleProjectRun
               ? isRunning(props.squiggleProjectRun)

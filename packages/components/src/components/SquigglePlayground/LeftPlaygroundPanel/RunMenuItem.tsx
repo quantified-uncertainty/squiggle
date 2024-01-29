@@ -1,4 +1,5 @@
 import { RefreshIcon } from "@heroicons/react/solid/esm/index.js";
+import clsx from "clsx";
 import React from "react";
 
 import { PlayIcon } from "@quri/ui";
@@ -10,7 +11,8 @@ export const RunMenuItem: React.FC<{
   runSquiggleProject: () => void;
   autorunMode: boolean;
   isRunning: boolean;
-}> = ({ runSquiggleProject, autorunMode, isRunning }) => {
+  codeHasChanged: boolean;
+}> = ({ runSquiggleProject, autorunMode, isRunning, codeHasChanged }) => {
   const showAsRunning = !autorunMode && isRunning;
   const text = `Run (${modKey()}+Enter)`;
 
@@ -19,6 +21,7 @@ export const RunMenuItem: React.FC<{
       tooltipText={text}
       icon={showAsRunning ? RefreshIcon : PlayIcon}
       iconSpin={showAsRunning}
+      className={clsx(!codeHasChanged && "opacity-40")}
       onClick={runSquiggleProject}
     >
       Run
