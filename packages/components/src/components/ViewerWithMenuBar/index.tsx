@@ -30,11 +30,11 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
     {
       squiggleProjectRun,
       playgroundSettings,
-      showMenu,
-      editor,
-      defaultTab,
       seed,
       setSeed,
+      showMenu = true,
+      editor,
+      defaultTab,
     },
     viewerRef
   ) {
@@ -54,7 +54,9 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
               setViewerTab={setViewerTab}
               outputResult={output}
             />
-          ) : null
+          ) : (
+            <div />
+          ) // Important not to be null, so that it stays on the right.
         }
         indicator={<RenderingIndicator projectRun={squiggleProjectRun} />}
         changeSeedAndRunButton={
