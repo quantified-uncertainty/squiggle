@@ -27,6 +27,7 @@ export const ViewSquiggleSnippet: FC<Props> = ({ dataRef }) => {
       environment={{
         sampleCount: 1000,
         xyPointLength: 1000,
+        seed: "default_seed",
       }}
     />
   );

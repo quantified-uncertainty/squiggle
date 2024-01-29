@@ -102,8 +102,9 @@ export const PlaygroundPage: FC<{ version: string | null }> = (props) => {
           </div>
         )}
         onCodeChange={(code) => updateUrl({ defaultCode: code }, version)}
-        onSettingsChange={(settings) => {
-          const showSummary = settings.distributionChartSettings?.showSummary;
+        //It would be nice to type ``settings``, but that would get in the way of Versioned Components
+        onSettingsChange={(settings: any) => {
+          const showSummary = settings?.distributionChartSettings?.showSummary;
           updateUrl({ showSummary }, version);
         }}
       />
