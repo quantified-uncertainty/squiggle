@@ -3,7 +3,7 @@ import React from "react";
 import { SqValue } from "@quri/squiggle-lang";
 
 import { valueHasContext } from "../../lib/utility.js";
-import { MessageAlert } from "../Alert.js";
+import { MessageAlert } from "../ui/Alert.js";
 import { ValueWithContextViewer } from "./ValueWithContextViewer.js";
 
 // Same props as in `ValueWithContextViewer`, but no guarantee that value has context.
@@ -16,7 +16,7 @@ export const ValueViewer: React.FC<Props> = ({ value, ...rest }) => {
     return <MessageAlert heading="Can't display pathless value" />;
   }
 
-  // The key ID is needed to make sure that when open a nested value as Focused, it will get focused.
+  // This key is important, so that scrollEditorToPath() will work correctly when zoomed in.
   return (
     <ValueWithContextViewer
       value={value}

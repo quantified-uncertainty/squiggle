@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import { FC, memo } from "react";
 
-import { NumberShower } from "../../../components/NumberShower.js";
+import { NumberShower } from "../../../components/ui/NumberShower.js";
 import { RelativeValue } from "./types.js";
 
 function hasInvalid(obj: RelativeValue): boolean {

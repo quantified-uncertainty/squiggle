@@ -14,7 +14,7 @@ import {
 } from "@quri/squiggle-lang";
 import { MouseTooltip, TextTooltip } from "@quri/ui";
 
-import { ErrorAlert } from "../../components/Alert.js";
+import { ErrorAlert } from "../../components/ui/Alert.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import {

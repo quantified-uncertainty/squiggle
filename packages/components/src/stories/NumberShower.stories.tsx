@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { NumberShower } from "../components/NumberShower.js";
+import { NumberShower } from "../components/ui/NumberShower.js";
 
 /**
  * The number shower is a simple component to display a number.

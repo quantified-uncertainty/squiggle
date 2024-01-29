@@ -2,8 +2,7 @@ import { SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
-import { SqValueWithContext } from "../../lib/utility.js";
-import { ViewerMode } from "../SquiggleOutputViewer/index.js";
+import { SqValueWithContext, ViewerTab } from "../../lib/utility.js";
 import { ItemStore, useViewerContext } from "./ViewerProvider.js";
 
 function topLevelName(path: SqValuePath): string {
@@ -107,10 +106,14 @@ export function nonHiddenDictEntries(value: SqDict): [string, SqValue][] {
   return value.entries().filter(([_, v]) => !isHidden(v));
 }
 
-function findValuePathByLine(
-  bindings: SqDict,
-  line: number
+export function findValuePathByLine(
+  line: number,
+  result?: SqOutputResult
 ): SqValuePath | undefined {
+  if (!result?.ok) {
+    return undefined;
+  }
+  const bindings = result.value.bindings;
   const items = bindings;
   const el = items.entries().find(([_, v]) => {
     const _line = v.context?.findLocation()?.start.line;
@@ -121,7 +124,12 @@ function findValuePathByLine(
   }
 }
 
-function getActiveLineNumbers(bindings: SqDict): number[] {
+export function getActiveLineNumbers(result?: SqOutputResult): number[] {
+  if (!result?.ok) {
+    return [];
+  }
+  const bindings = result.value.bindings;
+
   const lines = bindings
     .entries()
     .map(([_, v]) => {
@@ -132,7 +140,7 @@ function getActiveLineNumbers(bindings: SqDict): number[] {
 }
 
 export function modeToValue(
-  mode: ViewerMode,
+  mode: ViewerTab,
   output: SqOutputResult
 ): SqValue | undefined {
   if (!output.ok) {

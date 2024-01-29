@@ -7,17 +7,22 @@ import React, {
   useState,
 } from "react";
 
-import { SqLinker, SqProject } from "@quri/squiggle-lang";
+import { SqLinker } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
-import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import { useSquiggleRunner } from "../../lib/hooks/useSquiggleRunner.js";
+import { useUncontrolledCode } from "../../lib/hooks/useUncontrolledCode.js";
 import {
   defaultPlaygroundSettings,
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { SquiggleOutputViewer } from "../SquiggleOutputViewer/index.js";
+import {
+  findValuePathByLine,
+  getActiveLineNumbers,
+} from "../SquiggleViewer/utils.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
+import { ViewerWithMenuBar } from "../ViewerWithMenuBar/index.js";
 import {
   LeftPlaygroundPanel,
   LeftPlaygroundPanelHandle,
@@ -82,7 +87,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     renderExtraModal,
     renderImportTooltip,
     height = 500,
-    sourceId,
     ...defaultSettings
   } = props;
 
@@ -107,23 +111,26 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     [onSettingsChange]
   );
 
-  const [project] = useState(() => {
-    // not reactive on `linker` changes; TODO?
-    return new SqProject({ linker });
+  const { code, setCode } = useUncontrolledCode({
+    defaultCode: defaultCode,
+    onCodeChange: onCodeChange,
+  });
+
+  const {
+    project,
+    squiggleProjectRun,
+    sourceId,
+    autorunMode,
+    setAutorunMode,
+    runSquiggleProject,
+  } = useSquiggleRunner({
+    code,
+    setup: { type: "projectFromLinker", linker },
+    environment: settings.environment,
   });
 
   useEffect(() => {
-    project.setEnvironment(settings.environment);
-    leftPanelRef.current?.invalidate();
-  }, [project, settings.environment]);
-
-  const [output, setOutput] = useState<{
-    output: SquiggleOutput | undefined;
-    isRunning: boolean;
-  }>({ output: undefined, isRunning: false });
-
-  useEffect(() => {
-    const _output = output.output?.output;
+    const _output = squiggleProjectRun?.output;
     if (_output && _output.ok) {
       const exports = _output.value.exports;
       const _exports: ModelExport[] = exports.entries().map((e) => ({
@@ -136,7 +143,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     } else {
       onExportsChange && onExportsChange([]);
     }
-  }, [output, onExportsChange]);
+  }, [squiggleProjectRun, onExportsChange]);
 
   const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
   const rightPanelRef = useRef<SquiggleViewerHandle>(null);
@@ -146,39 +153,47 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     []
   );
 
-  const renderLeft = () => (
-    <LeftPlaygroundPanel
-      project={project}
-      defaultCode={defaultCode}
-      sourceId={sourceId}
-      onCodeChange={onCodeChange}
-      settings={settings}
-      onSettingsChange={handleSettingsChange}
-      onOutputChange={setOutput}
-      renderExtraControls={renderExtraControls}
-      renderExtraDropdownItems={renderExtraDropdownItems}
-      renderExtraModal={renderExtraModal}
-      renderImportTooltip={renderImportTooltip}
-      ref={leftPanelRef}
-      onViewValuePath={(path) => {
-        rightPanelRef.current?.viewValuePath(path);
-      }}
-      activeLineNumbers={[0, 1, 2]}
-      onViewValueLine={(line) => {
-        console.log(line);
-      }}
-    />
-  );
+  const renderLeft = () => {
+    const lineNumbers = getActiveLineNumbers(squiggleProjectRun?.output);
+    return (
+      <LeftPlaygroundPanel
+        project={project}
+        code={code}
+        setCode={setCode}
+        sourceId={sourceId}
+        squiggleProjectRun={squiggleProjectRun}
+        settings={settings}
+        onSettingsChange={handleSettingsChange}
+        renderExtraControls={renderExtraControls}
+        renderExtraDropdownItems={renderExtraDropdownItems}
+        renderExtraModal={renderExtraModal}
+        renderImportTooltip={renderImportTooltip}
+        ref={leftPanelRef}
+        onViewValuePath={(path) => {
+          rightPanelRef.current?.viewValuePath(path);
+        }}
+        activeLineNumbers={lineNumbers}
+        onViewValueLine={(line) => {
+          const path = findValuePathByLine(line, squiggleProjectRun?.output);
+          if (path) {
+            rightPanelRef.current?.viewValuePath(path);
+          }
+        }}
+        autorunMode={autorunMode}
+        setAutorunMode={setAutorunMode}
+        runSquiggleProject={runSquiggleProject}
+      />
+    );
+  };
 
   const renderRight = () =>
-    output.output ? (
-      <SquiggleOutputViewer
-        squiggleOutput={output.output}
-        isRunning={output.isRunning}
+    squiggleProjectRun ? (
+      <ViewerWithMenuBar
+        squiggleProjectRun={squiggleProjectRun}
         // FIXME - this will cause viewer to be rendered twice on initial render
         editor={leftPanelRef.current?.getEditor() ?? undefined}
+        playgroundSettings={settings}
         ref={rightPanelRef}
-        {...settings}
       />
     ) : (
       <div className="grid place-items-center h-full">

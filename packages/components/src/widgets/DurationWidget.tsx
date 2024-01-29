@@ -1,6 +1,6 @@
 import { SqDurationValue } from "@quri/squiggle-lang";
 
-import { NumberShower } from "../components/NumberShower.js";
+import { NumberShower } from "../components/ui/NumberShower.js";
 import { formatNumber } from "../lib/d3/index.js";
 import { widgetRegistry } from "./registry.js";
 

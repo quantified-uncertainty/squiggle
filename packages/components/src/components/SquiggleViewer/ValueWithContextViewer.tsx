@@ -2,7 +2,7 @@
 import "../../widgets/index.js";
 
 import { clsx } from "clsx";
-import { FC, PropsWithChildren, useEffect, useMemo, useRef } from "react";
+import { FC, PropsWithChildren, useCallback, useMemo, useRef } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { CommentIcon, TextTooltip } from "@quri/ui";
@@ -10,10 +10,10 @@ import { CommentIcon, TextTooltip } from "@quri/ui";
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
-import { ErrorBoundary } from "../ErrorBoundary.js";
+import { ErrorBoundary } from "../ui/ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
-import { useFocusedSqValueKeyEvent } from "./keyboardNav/focusedSqValue.js";
-import { useUnfocusedSqValueKeyEvent } from "./keyboardNav/unfocusedSqValue.js";
+import { useZoomedInSqValueKeyEvent } from "./keyboardNav/zoomedInSqValue.js";
+import { useZoomedOutSqValueKeyEvent } from "./keyboardNav/zoomedOutSqValue.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
 import { SquiggleValueMenu } from "./SquiggleValueMenu.js";
 import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
@@ -23,13 +23,13 @@ import {
   pathToShortName,
 } from "./utils.js";
 import {
-  useFocus,
   useMergedSettings,
   useRegisterAsItemViewer,
   useScrollToEditorPath,
   useToggleCollapsed,
   useViewerContext,
   useViewerType,
+  useZoomIn,
 } from "./ViewerProvider.js";
 
 const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
@@ -129,9 +129,14 @@ export const ValueWithContextViewer: FC<Props> = ({
   const { path } = value.context;
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement | null>(null);
 
   const toggleCollapsed_ = useToggleCollapsed();
+
+  // Identity must be stable for the sake of `setHeaderRef` callback
+  const focusOnHeader = useCallback(() => {
+    headerRef.current?.focus();
+  }, []);
 
   const handle: ValueWithContextViewerHandle = {
     scrollIntoView: () => {
@@ -140,24 +145,22 @@ export const ValueWithContextViewer: FC<Props> = ({
       });
     },
     forceUpdate: useForceUpdate(),
-    focusOnHeader: () => {
-      headerRef.current?.focus();
-    },
+    focusOnHeader,
     toggleCollapsed: () => toggleCollapsed_(path),
   };
 
   useRegisterAsItemViewer(path, handle);
 
-  const _focus = useFocus();
-  const focus = () => enableFocus && _focus(path);
-  const focusedKeyEvent = useFocusedSqValueKeyEvent(path);
-  const unfocusedKeyEvent = useUnfocusedSqValueKeyEvent(path);
+  const zoomIn = useZoomIn();
+  const focus = () => enableFocus && zoomIn(path);
+  const focusedKeyEvent = useZoomedInSqValueKeyEvent(path);
+  const unfocusedKeyEvent = useZoomedOutSqValueKeyEvent(path);
 
   const viewerType = useViewerType();
   const scrollEditorToPath = useScrollToEditorPath(path);
 
-  const { itemStore, focused: _focused } = useViewerContext();
-  const isFocused = _focused?.isEqual(path);
+  const { itemStore, zoomedInPath } = useViewerContext();
+  const isZoomedIn = zoomedInPath?.isEqual(path);
   const itemState = itemStore.getStateOrInitialize(value);
 
   const isRoot = path.isRoot();
@@ -174,12 +177,6 @@ export const ValueWithContextViewer: FC<Props> = ({
   // TODO - check that we're not in a situation where `isOpen` is false and `header` is hidden?
   // In that case, the output would look broken (empty).
   const isOpen = !collapsible || !itemState.collapsed;
-
-  useEffect(() => {
-    if (isFocused && !isRoot) {
-      handle.focusOnHeader();
-    }
-  }, []);
 
   const triangleToggle = () => {
     const Icon = itemState.collapsed ? CollapsedIcon : ExpandedIcon;
@@ -265,23 +262,29 @@ export const ValueWithContextViewer: FC<Props> = ({
     }
   };
 
-  //Focus on the header on mount if focused
-  useEffect(() => {
-    if (isFocused && !isRoot && headerRef && headerVisibility !== "hide") {
-      handle.focusOnHeader();
-    }
-  }, []);
+  // Store the header reference for the future `focusOnHeader()` handle, and auto-focus zoomed in values on mount.
+  const setHeaderRef = useCallback(
+    (el: HTMLElement | null) => {
+      headerRef.current = el;
+
+      // If `isZoomedIn` toggles from `false` to `true`, this callback identity will change and it will update the focus.
+      if (isZoomedIn) {
+        focusOnHeader();
+      }
+    },
+    [isZoomedIn, focusOnHeader]
+  );
 
   return (
     <ErrorBoundary>
       <div ref={containerRef}>
         {headerVisibility !== "hide" && (
           <header
-            ref={headerRef}
+            ref={setHeaderRef}
             tabIndex={viewerType === "tooltip" ? undefined : 0}
             className={clsx(
               "flex justify-between group pr-0.5 hover:bg-stone-100 rounded-sm focus-visible:outline-none",
-              isFocused
+              isZoomedIn
                 ? "focus:bg-indigo-50 mb-2 px-0.5 py-1"
                 : "focus:bg-indigo-100"
             )}
@@ -289,7 +292,7 @@ export const ValueWithContextViewer: FC<Props> = ({
               scrollEditorToPath();
             }}
             onKeyDown={(event) => {
-              isFocused ? focusedKeyEvent(event) : unfocusedKeyEvent(event);
+              isZoomedIn ? focusedKeyEvent(event) : unfocusedKeyEvent(event);
             }}
           >
             <div className="inline-flex items-center">

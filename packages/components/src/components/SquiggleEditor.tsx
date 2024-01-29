@@ -1,19 +1,23 @@
 import { FC, useMemo, useRef } from "react";
 
 import { useUncontrolledCode } from "../lib/hooks/index.js";
-import { useRunnerState } from "../lib/hooks/useRunnerState.js";
-import { useSquiggle } from "../lib/hooks/useSquiggle.js";
-import { getErrors } from "../lib/utility.js";
+import { useSquiggleRunner } from "../lib/hooks/useSquiggleRunner.js";
+import {
+  getSquiggleOutputErrors,
+  ProjectExecutionProps,
+  StandaloneExecutionProps,
+} from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
-import { SquiggleCodeProps } from "./types.js";
+import { ViewerWithMenuBar } from "./ViewerWithMenuBar/index.js";
 
-export type SquiggleEditorProps = SquiggleCodeProps & {
-  hideViewer?: boolean;
+export type SquiggleEditorProps = {
+  defaultCode?: string;
+  onCodeChange?(code: string): void;
   editorFontSize?: number;
   // environment comes from SquiggleCodeProps
-} & Omit<PartialPlaygroundSettings, "environment">;
+} & (StandaloneExecutionProps | ProjectExecutionProps) &
+  Omit<PartialPlaygroundSettings, "environment">;
 
 export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   defaultCode: propsDefaultCode,
@@ -21,7 +25,6 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   project: propsProject,
   continues,
   environment,
-  hideViewer,
   editorFontSize,
   ...settings
 }) => {
@@ -30,20 +33,19 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     onCodeChange,
   });
 
-  const runnerState = useRunnerState(code);
+  const { squiggleProjectRun, project, sourceId, runSquiggleProject } =
+    useSquiggleRunner({
+      code,
+      setup: propsProject
+        ? { type: "project", project: propsProject, continues }
+        : { type: "standalone" },
+      environment,
+    });
 
-  const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
-    code: runnerState.renderedCode,
-    executionId: runnerState.executionId,
-    ...(propsProject ? { project: propsProject, continues } : { environment }),
-  });
-
-  const errors = useMemo(() => {
-    if (!squiggleOutput) {
-      return [];
-    }
-    return getErrors(squiggleOutput.output);
-  }, [squiggleOutput]);
+  const errors = useMemo(
+    () => getSquiggleOutputErrors(squiggleProjectRun),
+    [squiggleProjectRun]
+  );
 
   const editorRef = useRef<CodeEditorHandle>(null);
 
@@ -62,16 +64,17 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           project={project}
           sourceId={sourceId}
           ref={editorRef}
-          onSubmit={() => runnerState.run()}
+          onSubmit={runSquiggleProject}
+          activeLineNumbers={[]}
+          onViewValueLine={() => {}}
         />
       </div>
-      {hideViewer || !squiggleOutput ? null : (
-        <SquiggleOutputViewer
-          squiggleOutput={squiggleOutput}
-          isRunning={isRunning}
+
+      {!squiggleProjectRun ? null : (
+        <ViewerWithMenuBar
+          squiggleProjectRun={squiggleProjectRun}
           editor={editorRef.current ?? undefined}
-          environment={environment}
-          {...settings}
+          playgroundSettings={settings}
         />
       )}
     </div>

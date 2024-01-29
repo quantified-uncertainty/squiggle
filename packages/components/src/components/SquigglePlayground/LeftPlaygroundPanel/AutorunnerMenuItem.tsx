@@ -3,13 +3,12 @@ import React from "react";
 
 import { BoltIcon, PauseIcon } from "@quri/ui";
 
-import { RunnerState } from "../../../lib/hooks/useRunnerState.js";
 import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 
-export const AutorunnerMenuItem: React.FC<RunnerState> = ({
-  setAutorunMode,
-  autorunMode,
-}) => (
+export const AutorunnerMenuItem: React.FC<{
+  setAutorunMode: (b: boolean) => void;
+  autorunMode: boolean;
+}> = ({ setAutorunMode, autorunMode }) => (
   <div
     data-testid="autorun-controls"
     className="h-full"

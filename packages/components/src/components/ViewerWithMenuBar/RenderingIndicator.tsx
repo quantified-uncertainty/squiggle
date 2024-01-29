@@ -1,11 +1,15 @@
 import { FC } from "react";
 
-import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import {
+  isRunning,
+  SquiggleProjectRun,
+} from "../../lib/hooks/useSquiggleProjectRun.js";
 
 export const RenderingIndicator: FC<{
-  output: SquiggleOutput;
-  isRunning: boolean;
-}> = ({ output, isRunning }) => {
+  projectRun: SquiggleProjectRun;
+}> = ({ projectRun }) => {
+  const _isRunning = isRunning(projectRun);
+
   const showTime = (executionTime: number) =>
     executionTime > 1000
       ? `${(executionTime / 1000).toFixed(2)}s`
@@ -13,9 +17,11 @@ export const RenderingIndicator: FC<{
 
   return (
     <div className="text-zinc-400 text-sm whitespace-nowrap">
-      {isRunning
+      {_isRunning
         ? "rendering..."
-        : `render #${output.executionId} in ${showTime(output.executionTime)}`}
+        : `render #${projectRun.executionId} in ${showTime(
+            projectRun.executionTime
+          )}`}
     </div>
   );
 };

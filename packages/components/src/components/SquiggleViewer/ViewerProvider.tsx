@@ -21,7 +21,6 @@ import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { focusSqValueHeader } from "./keyboardNav/utils.js";
 import { SqListViewNode } from "./SqViewNode.js";
 import {
   getChildrenValues,
@@ -167,6 +166,10 @@ export class ItemStore {
   scrollViewerToPath(path: SqValuePath) {
     this.handles[path.uid()]?.scrollIntoView();
   }
+
+  focusOnPath(path: SqValuePath) {
+    this.handles[path.uid()]?.focusOnHeader();
+  }
 }
 
 type ViewerContextShape = {
@@ -174,8 +177,8 @@ type ViewerContextShape = {
   // Instead, we keep `localItemState` in local state and notify the global context via `setLocalItemState` to pass them down the component tree again if it got rebuilt from scratch.
   // See ./SquiggleViewer.tsx and ./ValueWithContextViewer.tsx for other implementation details on this.
   globalSettings: PlaygroundSettings;
-  focused: SqValuePath | undefined;
-  setFocused: (value: SqValuePath | undefined) => void;
+  zoomedInPath: SqValuePath | undefined;
+  setZoomedInPath: (value: SqValuePath | undefined) => void;
   editor?: CodeEditorHandle;
   itemStore: ItemStore;
   viewerType: ViewerType;
@@ -187,8 +190,8 @@ type ViewerContextShape = {
 
 export const ViewerContext = createContext<ViewerContextShape>({
   globalSettings: defaultPlaygroundSettings,
-  focused: undefined,
-  setFocused: () => undefined,
+  zoomedInPath: undefined,
+  setZoomedInPath: () => undefined,
   editor: undefined,
   itemStore: new ItemStore(),
   viewerType: "normal",
@@ -284,23 +287,24 @@ export function useHasLocalSettings(path: SqValuePath) {
   );
 }
 
-export function useFocus() {
-  const { focused, setFocused } = useViewerContext();
+export function useZoomIn() {
+  const { zoomedInPath: zoomedInPath, setZoomedInPath: setZoomedInPath } =
+    useViewerContext();
   return (path: SqValuePath) => {
-    if (focused?.isEqual(path)) {
+    if (zoomedInPath?.isEqual(path)) {
       return; // nothing to do
     }
     if (path.isRoot()) {
-      setFocused(undefined); // focusing on root nodes is not allowed
+      setZoomedInPath(undefined); // full screening on root nodes is not allowed
     } else {
-      setFocused(path);
+      setZoomedInPath(path);
     }
   };
 }
 
-export function useUnfocus() {
-  const { setFocused } = useViewerContext();
-  return () => setFocused(undefined);
+export function useZoomOut() {
+  const { setZoomedInPath: setZoomedInPath } = useViewerContext();
+  return () => setZoomedInPath(undefined);
 }
 
 export function useScrollToEditorPath(path: SqValuePath) {
@@ -317,9 +321,9 @@ export function useScrollToEditorPath(path: SqValuePath) {
   };
 }
 
-export function useIsFocused(path: SqValuePath) {
-  const { focused } = useViewerContext();
-  return focused?.isEqual(path);
+export function useIsZoomedIn(path: SqValuePath) {
+  const { zoomedInPath: zoomedInPath } = useViewerContext();
+  return zoomedInPath?.isEqual(path);
 }
 
 export function useMergedSettings(path: SqValuePath) {
@@ -368,7 +372,9 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       unstablePlaygroundSettings
     );
 
-    const [focused, setFocused] = useState<SqValuePath | undefined>();
+    const [zoomedInPath, setZoomedInPathPath] = useState<
+      SqValuePath | undefined
+    >();
 
     const globalSettings = useMemo(() => {
       return merge({}, defaultPlaygroundSettings, playgroundSettings);
@@ -376,9 +382,9 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
 
     const handle: SquiggleViewerHandle = {
       viewValuePath(path: SqValuePath) {
-        setFocused(undefined);
+        setZoomedInPathPath(undefined);
         setTimeout(() => {
-          focusSqValueHeader(path, itemStore);
+          itemStore.focusOnPath(path);
         }, 1);
       },
     };
@@ -394,8 +400,8 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
           rootValue: _rootValue,
           globalSettings,
           editor,
-          focused,
-          setFocused,
+          zoomedInPath,
+          setZoomedInPath: setZoomedInPathPath,
           itemStore,
           viewerType,
           handle,

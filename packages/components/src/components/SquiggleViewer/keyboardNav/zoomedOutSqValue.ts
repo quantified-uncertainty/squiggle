@@ -1,25 +1,28 @@
 import { SqValuePath } from "@quri/squiggle-lang";
 
 import { toggleCollapsed, useViewerContext } from "../ViewerProvider.js";
-import { focusSqValueHeader, keyboardEventHandler } from "./utils.js";
+import { keyboardEventHandler } from "./utils.js";
 
-export function useUnfocusedSqValueKeyEvent(selected: SqValuePath) {
-  const { setFocused, itemStore, editor, findNode } = useViewerContext();
+export function useZoomedOutSqValueKeyEvent(selected: SqValuePath) {
+  const {
+    setZoomedInPath: setZoomedInPath,
+    itemStore,
+    editor,
+    findNode,
+  } = useViewerContext();
 
   return keyboardEventHandler({
     ArrowDown: () => {
       const newPath = findNode(selected)?.next()?.node.path;
-      newPath && focusSqValueHeader(newPath, itemStore);
+      newPath && itemStore.focusOnPath(newPath);
     },
     ArrowUp: () => {
       const newPath = findNode(selected)?.prev()?.node.path;
-      newPath && focusSqValueHeader(newPath, itemStore);
+      newPath && itemStore.focusOnPath(newPath);
     },
     ArrowLeft: () => {
       const newItem = findNode(selected)?.parent();
-      newItem &&
-        !newItem.isRoot() &&
-        focusSqValueHeader(newItem.node.path, itemStore);
+      newItem && !newItem.isRoot() && itemStore.focusOnPath(newItem.node.path);
     },
     ArrowRight: () => {
       const newItem = findNode(selected)?.children().at(0);
@@ -29,15 +32,15 @@ export function useUnfocusedSqValueKeyEvent(selected: SqValuePath) {
         if (isCollapsed) {
           toggleCollapsed(itemStore, selected);
           setTimeout(() => {
-            focusSqValueHeader(newItem.node.path, itemStore);
+            itemStore.focusOnPath(newItem.node.path);
           }, 1);
         } else {
-          focusSqValueHeader(newItem.node.path, itemStore);
+          itemStore.focusOnPath(newItem.node.path);
         }
       }
     },
     Enter: () => {
-      setFocused(selected);
+      setZoomedInPath(selected);
     },
     " ": () => {
       toggleCollapsed(itemStore, selected);
