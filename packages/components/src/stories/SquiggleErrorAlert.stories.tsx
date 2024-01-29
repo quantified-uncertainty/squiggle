@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { run } from "@quri/squiggle-lang";
 
-import { SqErrorAlert as Component } from "../components/ui/SqErrorAlert.js";
+import { SquiggleErrorAlert as Component } from "../components/ui/SquiggleErrorAlert.js";
 
 /**
  * `<SquiggleErrorAlert>` displays an `SqError` value.

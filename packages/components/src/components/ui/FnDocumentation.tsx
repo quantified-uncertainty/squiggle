@@ -182,7 +182,7 @@ export const FnDocumentation: FC<{
                   <SquiggleEditor
                     defaultCode={text}
                     editorFontSize={size === "small" ? 12 : 13}
-                    settings={{ chartHeight: size === "small" ? 30 : 40 }}
+                    chartHeight={size === "small" ? 30 : 40}
                   />
                 </div>
               ) : (

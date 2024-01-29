@@ -9,16 +9,17 @@ import {
 } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { SquiggleOutputViewer } from "./SquiggleOutputViewer/index.js";
+import { ViewerWithMenuBar } from "./ViewerWithMenuBar/index.js";
 
 export type SquiggleEditorProps = {
   defaultCode?: string;
   onCodeChange?(code: string): void;
   editorFontSize?: number;
   seed?: string;
-  settings?: Omit<PartialPlaygroundSettings, "environment">;
+  setSeed?(seed: string): void;
   // environment comes from SquiggleCodeProps
-} & (StandaloneExecutionProps | ProjectExecutionProps);
+} & (StandaloneExecutionProps | ProjectExecutionProps) &
+  Omit<PartialPlaygroundSettings, "environment">;
 
 export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   defaultCode: propsDefaultCode,
@@ -27,7 +28,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   continues,
   environment,
   editorFontSize,
-  settings,
+  ...settings
 }) => {
   const { code, setCode, defaultCode } = useUncontrolledCode({
     defaultCode: propsDefaultCode,
@@ -36,18 +37,17 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
 
   const {
     squiggleProjectRun,
-    viewerTab,
-    setViewerTab,
     project,
     sourceId,
-    rerunSquiggleCode,
+    runSquiggleProject,
     seed,
     setSeed,
   } = useSquiggleRunner({
     code,
     setup: propsProject
       ? { type: "project", project: propsProject, continues }
-      : { type: "standalone", environment },
+      : { type: "standalone" },
+    environment,
   });
 
   const errors = useMemo(
@@ -72,19 +72,16 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           project={project}
           sourceId={sourceId}
           ref={editorRef}
-          onSubmit={rerunSquiggleCode}
+          onSubmit={runSquiggleProject}
         />
       </div>
       {!squiggleProjectRun ? null : (
-        <SquiggleOutputViewer
+        <ViewerWithMenuBar
           squiggleProjectRun={squiggleProjectRun}
           editor={editorRef.current ?? undefined}
-          environment={environment}
+          playgroundSettings={settings}
           seed={seed}
           setSeed={setSeed}
-          viewerTab={viewerTab}
-          setViewerTab={setViewerTab}
-          {...settings}
         />
       )}
     </div>

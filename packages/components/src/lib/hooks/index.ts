@@ -5,6 +5,6 @@ export { useForceUpdate } from "./useForceUpdate.js";
 export { useInitialWidth } from "./useInitialWidth.js";
 export {
   type SquiggleProjectRun,
-  useSquiggleProjectRun as useSquiggle,
+  useSquiggleProjectRun,
 } from "./useSquiggleProjectRun.js";
 export { useUncontrolledCode } from "./useUncontrolledCode.js";

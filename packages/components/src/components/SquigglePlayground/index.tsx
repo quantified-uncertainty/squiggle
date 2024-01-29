@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 
-import { SqLinker, SqProject } from "@quri/squiggle-lang";
+import { SqLinker } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { useSquiggleRunner } from "../../lib/hooks/useSquiggleRunner.js";
@@ -17,8 +17,8 @@ import {
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { SquiggleOutputViewer } from "../SquiggleOutputViewer/index.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
+import { ViewerWithMenuBar } from "../ViewerWithMenuBar/index.js";
 import {
   LeftPlaygroundPanel,
   LeftPlaygroundPanelHandle,
@@ -105,32 +105,25 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     [onSettingsChange]
   );
 
-  const [project] = useState(() => {
-    // not reactive on `linker` changes; TODO?
-    return new SqProject({ linker });
-  }); // TODO: Maybe this could go into useSquiggleRunner?
-
   const { code, setCode } = useUncontrolledCode({
     defaultCode: props.defaultCode,
     onCodeChange: props.onCodeChange,
   });
 
   const {
+    project,
     squiggleProjectRun,
-    setViewerTab,
-    viewerTab,
     sourceId,
     autorunMode,
     setAutorunMode,
-    rerunSquiggleCode,
-    setProjectEnvironment,
     seed,
     setSeed,
-  } = useSquiggleRunner({ code, setup: { type: "project", project } });
-
-  useEffect(() => {
-    setProjectEnvironment(settings.environment);
-  }, [settings.environment, setProjectEnvironment]);
+    runSquiggleProject,
+  } = useSquiggleRunner({
+    code,
+    setup: { type: "projectFromLinker", linker },
+    environment: settings.environment,
+  });
 
   useEffect(() => {
     const _output = squiggleProjectRun?.output;
@@ -155,6 +148,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     () => leftPanelRef.current?.getLeftPanelElement() ?? undefined,
     []
   );
+
   const renderLeft = () => (
     <LeftPlaygroundPanel
       project={project}
@@ -173,22 +167,20 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       setCode={setCode}
       autorunMode={autorunMode}
       setAutorunMode={setAutorunMode}
-      rerunSquiggleCode={rerunSquiggleCode}
+      runSquiggleProject={runSquiggleProject}
     />
   );
 
   const renderRight = () =>
     squiggleProjectRun ? (
-      <SquiggleOutputViewer
+      <ViewerWithMenuBar
         squiggleProjectRun={squiggleProjectRun}
         // FIXME - this will cause viewer to be rendered twice on initial render
         editor={leftPanelRef.current?.getEditor() ?? undefined}
+        playgroundSettings={settings}
         ref={rightPanelRef}
         seed={seed}
         setSeed={setSeed}
-        viewerTab={viewerTab}
-        setViewerTab={setViewerTab}
-        {...settings}
       />
     ) : (
       <div className="grid place-items-center h-full">
