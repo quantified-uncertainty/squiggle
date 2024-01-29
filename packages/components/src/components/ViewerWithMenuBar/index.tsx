@@ -24,7 +24,13 @@ type Props = {
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
 export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
   function ViewerWithMenuBar(
-    { squiggleProjectRun, playgroundSettings, showMenu, editor, defaultTab },
+    {
+      squiggleProjectRun,
+      playgroundSettings,
+      showMenu = true,
+      editor,
+      defaultTab,
+    },
     viewerRef
   ) {
     const [viewerTab, setViewerTab] = useState<ViewerTab>(
@@ -42,7 +48,9 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
               setViewerTab={setViewerTab}
               outputResult={output}
             />
-          ) : null
+          ) : (
+            <div />
+          ) // Important not to be null, so that it stays on the right.
         }
         indicator={<RenderingIndicator projectRun={squiggleProjectRun} />}
         viewer={
