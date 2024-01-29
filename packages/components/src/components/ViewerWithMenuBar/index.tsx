@@ -10,6 +10,7 @@ import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
 import { RenderingIndicator } from "./RenderingIndicator.js";
+import { RunSeedButton } from "./RunSeedButton.js";
 import { ViewerBody } from "./ViewerBody.js";
 import { ViewerMenu } from "./ViewerMenu.js";
 
@@ -19,12 +20,22 @@ type Props = {
   playgroundSettings: PartialPlaygroundSettings;
   showMenu?: boolean;
   defaultTab?: ViewerTab;
+  seed: string;
+  setSeed: (seed: string) => void;
 };
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
 export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
   function ViewerWithMenuBar(
-    { squiggleProjectRun, playgroundSettings, showMenu, editor, defaultTab },
+    {
+      squiggleProjectRun,
+      playgroundSettings,
+      showMenu,
+      editor,
+      defaultTab,
+      seed,
+      setSeed,
+    },
     viewerRef
   ) {
     const [viewerTab, setViewerTab] = useState<ViewerTab>(
@@ -32,6 +43,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
     );
 
     const { output } = squiggleProjectRun;
+    const _isRunning = isRunning(squiggleProjectRun);
 
     return (
       <Layout
@@ -45,11 +57,14 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
           ) : null
         }
         indicator={<RenderingIndicator projectRun={squiggleProjectRun} />}
+        changeSeedAndRunButton={
+          <RunSeedButton isRunning={_isRunning} seed={seed} setSeed={setSeed} />
+        }
         viewer={
           <ViewerBody
             viewerTab={viewerTab}
             outputResult={output}
-            isRunning={isRunning(squiggleProjectRun)}
+            isRunning={_isRunning}
             playgroundSettings={playgroundSettings}
             ref={viewerRef}
             editor={editor}

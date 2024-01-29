@@ -29,6 +29,9 @@ export type SquiggleRunnerOutput = {
   setAutorunMode: (newValue: boolean) => void;
 
   runSquiggleProject: () => void;
+
+  seed: string;
+  setSeed: (newValue: string) => void;
 };
 
 // defaultContinues needs to have a stable identity.
