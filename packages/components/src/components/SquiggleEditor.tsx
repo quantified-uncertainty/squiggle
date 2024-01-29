@@ -35,20 +35,14 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     onCodeChange,
   });
 
-  const {
-    squiggleProjectRun,
-    project,
-    sourceId,
-    runSquiggleProject,
-    seed,
-    setSeed,
-  } = useSquiggleRunner({
-    code,
-    setup: propsProject
-      ? { type: "project", project: propsProject, continues }
-      : { type: "standalone" },
-    environment,
-  });
+  const { squiggleProjectRun, project, sourceId, runSquiggleProject } =
+    useSquiggleRunner({
+      code,
+      setup: propsProject
+        ? { type: "project", project: propsProject, continues }
+        : { type: "standalone" },
+      environment,
+    });
 
   const errors = useMemo(
     () => getSquiggleOutputErrors(squiggleProjectRun),
@@ -80,8 +74,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           squiggleProjectRun={squiggleProjectRun}
           editor={editorRef.current ?? undefined}
           playgroundSettings={settings}
-          seed={seed}
-          setSeed={setSeed}
+          randomizeSeed={undefined}
         />
       )}
     </div>

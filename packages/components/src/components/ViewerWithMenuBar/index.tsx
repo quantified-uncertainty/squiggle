@@ -20,8 +20,7 @@ type Props = {
   playgroundSettings: PartialPlaygroundSettings;
   showMenu?: boolean;
   defaultTab?: ViewerTab;
-  seed: string;
-  setSeed: (seed: string) => void;
+  randomizeSeed: (() => void) | undefined;
 };
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
@@ -30,8 +29,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
     {
       squiggleProjectRun,
       playgroundSettings,
-      seed,
-      setSeed,
+      randomizeSeed,
       showMenu = true,
       editor,
       defaultTab,
@@ -60,7 +58,13 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
         }
         indicator={<RenderingIndicator projectRun={squiggleProjectRun} />}
         changeSeedAndRunButton={
-          <RunSeedButton isRunning={_isRunning} seed={seed} setSeed={setSeed} />
+          randomizeSeed ? (
+            <RunSeedButton
+              isRunning={_isRunning}
+              seed={squiggleProjectRun.environment.seed || "default-seed"}
+              randomizeSeed={randomizeSeed}
+            />
+          ) : null
         }
         viewer={
           <ViewerBody

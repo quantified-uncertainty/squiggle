@@ -2,7 +2,12 @@ import React from "react";
 import { z } from "zod";
 
 import { SqScale } from "@quri/squiggle-lang";
-import { CheckboxFormField, NumberFormField, RadioFormField } from "@quri/ui";
+import {
+  CheckboxFormField,
+  NumberFormField,
+  RadioFormField,
+  TextFormField,
+} from "@quri/ui";
 
 import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../lib/constants.js";
 import { functionChartDefaults } from "../widgets/LambdaWidget/FunctionChart/utils.js";
@@ -12,6 +17,7 @@ import { FormSection } from "./ui/FormSection.js";
 export const environmentSchema = z.object({
   sampleCount: z.number().int().gte(SAMPLE_COUNT_MIN).lte(SAMPLE_COUNT_MAX),
   xyPointLength: z.number().int().gte(10).lte(10000),
+  seed: z.string(),
 });
 
 export const functionSettingsSchema = z.object({
@@ -75,6 +81,7 @@ export const defaultPlaygroundSettings: PlaygroundSettings = {
   environment: {
     sampleCount: 1000,
     xyPointLength: 1000,
+    seed: "testSeed",
   },
   functionChartSettings: {
     start: functionChartDefaults.min,
@@ -125,6 +132,11 @@ export type MetaSettings = {
 
 export const EnvironmentForm: React.FC = () => (
   <div className="space-y-4">
+    <TextFormField<PlaygroundSettings>
+      name="environment.seed"
+      label="Random Seed"
+      description="Seed for random number generation. Change this to get a different set of random numbers."
+    />
     <NumberFormField<PlaygroundSettings>
       name="environment.sampleCount"
       label="Sample Count"

@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { SqProject } from "@quri/squiggle-lang";
+import { Env, SqProject } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 
@@ -23,6 +23,7 @@ export type SquiggleProjectRun = {
   executionId: number;
   executionTime: number;
   isStale?: boolean;
+  environment: Env;
 };
 
 export type UseSquiggleProjectRun = [
@@ -51,6 +52,7 @@ export function useSquiggleProjectRun(
       const startTime = Date.now();
       args.project.setSource(args.sourceId, args.code);
       args.project.setContinues(args.sourceId, args.continues);
+      const _environment = args.project.getEnvironment(); // Get it here, just in case it changes during the run
       await args.project.run(args.sourceId);
       const output = args.project.getOutput(args.sourceId);
       const executionTime = Date.now() - startTime;
@@ -63,6 +65,7 @@ export function useSquiggleProjectRun(
           code: args.code,
           output,
           executionTime,
+          environment: _environment,
         };
       });
     };

@@ -29,9 +29,6 @@ export type SquiggleRunnerOutput = {
   setAutorunMode: (newValue: boolean) => void;
 
   runSquiggleProject: () => void;
-
-  seed: string;
-  setSeed: (newValue: string) => void;
 };
 
 // defaultContinues needs to have a stable identity.
@@ -72,7 +69,6 @@ function useSetup(
 export function useSquiggleRunner(
   args: SquiggleRunnerArgs
 ): SquiggleRunnerOutput {
-  const [seed, setSeed] = useState<string>("starting-seed");
   const [autorunMode, setAutorunMode] = useState(
     args.initialAutorunMode ?? true
   );
@@ -121,8 +117,6 @@ export function useSquiggleRunner(
     autorunMode,
     setAutorunMode: setAutorunMode,
 
-    seed,
-    setSeed,
     runSquiggleProject: runSquiggleProject,
   };
 }

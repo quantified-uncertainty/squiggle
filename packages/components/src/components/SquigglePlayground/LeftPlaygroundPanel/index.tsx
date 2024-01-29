@@ -53,7 +53,6 @@ type Props = {
   runSquiggleProject: () => void;
   code: string;
   setCode: (code: string) => void;
-  seed: string;
 } & Pick<CodeEditorProps, "onViewValuePath" | "renderImportTooltip">;
 
 // for interactions with this component from outside

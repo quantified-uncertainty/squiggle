@@ -1,19 +1,12 @@
-import merge from "lodash/merge.js";
-import React, {
-  CSSProperties,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { CSSProperties, useCallback, useEffect, useRef } from "react";
 
 import { SqLinker } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
+import { usePlaygroundSettings } from "../../lib/hooks/usePlaygroundSettings.js";
 import { useSquiggleRunner } from "../../lib/hooks/useSquiggleRunner.js";
 import { useUncontrolledCode } from "../../lib/hooks/useUncontrolledCode.js";
 import {
-  defaultPlaygroundSettings,
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
@@ -87,23 +80,10 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   // `settings` are owned by SquigglePlayground.
   // This can cause some unnecessary renders (e.g. settings form), but most heavy playground subcomponents
   // should rerender on settings changes (e.g. right panel), so that's fine.
-  const [settings, setSettings] = useState(
-    () =>
-      merge(
-        {},
-        defaultPlaygroundSettings,
-        Object.fromEntries(
-          Object.entries(defaultSettings).filter(([, v]) => v !== undefined)
-        )
-      ) as PlaygroundSettings
-  );
-  const handleSettingsChange = useCallback(
-    (newSettings: PlaygroundSettings) => {
-      setSettings(newSettings);
-      onSettingsChange?.(newSettings);
-    },
-    [onSettingsChange]
-  );
+  const { settings, setSettings, randomizeSeed } = usePlaygroundSettings({
+    defaultSettings,
+    onSettingsChange,
+  });
 
   const { code, setCode } = useUncontrolledCode({
     defaultCode: props.defaultCode,
@@ -116,8 +96,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     sourceId,
     autorunMode,
     setAutorunMode,
-    seed,
-    setSeed,
     runSquiggleProject,
   } = useSquiggleRunner({
     code,
@@ -152,11 +130,10 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   const renderLeft = () => (
     <LeftPlaygroundPanel
       project={project}
-      seed={seed}
       sourceId={sourceId}
       squiggleProjectRun={squiggleProjectRun}
       settings={settings}
-      onSettingsChange={handleSettingsChange}
+      onSettingsChange={setSettings}
       renderExtraControls={renderExtraControls}
       renderExtraDropdownItems={renderExtraDropdownItems}
       renderExtraModal={renderExtraModal}
@@ -179,8 +156,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         editor={leftPanelRef.current?.getEditor() ?? undefined}
         playgroundSettings={settings}
         ref={rightPanelRef}
-        seed={seed}
-        setSeed={setSeed}
+        randomizeSeed={randomizeSeed}
       />
     ) : (
       <div className="grid place-items-center h-full">

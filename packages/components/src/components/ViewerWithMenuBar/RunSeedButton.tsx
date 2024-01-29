@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { FC, useState } from "react";
+import { FC } from "react";
 
 import {
   Die1Icon,
@@ -53,28 +53,19 @@ const DiceIcon: FC<{ side: number; isRunning: boolean }> = ({
 export const RunSeedButton: FC<{
   isRunning: boolean;
   seed: string;
-  setSeed: (seed: string) => void;
-}> = ({ isRunning, setSeed, seed }) => {
-  const [lastValidSeed, setLastValidSeed] = useState<string>(seed);
-
+  randomizeSeed: () => void;
+}> = ({ isRunning, randomizeSeed, seed }) => {
   return (
     <TextTooltip
       text={`Re-run calculations with a random seed. Current seed: ${seed}`}
       placement="bottom"
       offset={5}
     >
-      <div
-        className="ml-1 px-1 cursor-pointer group"
-        onClick={() => {
-          const newVal = String(Math.random() * 100000);
-          setSeed(newVal);
-          setLastValidSeed(newVal);
-        }}
-      >
+      <div className="ml-1 px-1 cursor-pointer group" onClick={randomizeSeed}>
         <DiceIcon
           //We want to wait until the animation is done before we change the icon. Like the dice was rolled, and was decided at the end. It represents the result of the seed - not the seed itself.
           side={stringToRandomNumber(seed)}
-          isRunning={isRunning && seed !== lastValidSeed}
+          isRunning={isRunning}
         />
       </div>
     </TextTooltip>
