@@ -50,7 +50,7 @@ type Props = {
   squiggleProjectRun: SquiggleProjectRun | undefined;
   autorunMode: boolean;
   setAutorunMode: (autorunMode: boolean) => void;
-  rerunSquiggleCode: () => void;
+  runSquiggleProject: () => void;
   code: string;
   setCode: (code: string) => void;
 } & Pick<CodeEditorProps, "onViewValuePath" | "renderImportTooltip">;
@@ -83,7 +83,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
     }) => (
       <div className="flex">
         <RunMenuItem
-          rerunSquiggleCode={props.rerunSquiggleCode}
+          runSquiggleProject={props.runSquiggleProject}
           autorunMode={props.autorunMode}
           isRunning={
             props.squiggleProjectRun
@@ -141,7 +141,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           showGutter={true}
           lineWrapping={props.settings.editorSettings.lineWrapping}
           onChange={props.setCode}
-          onSubmit={props.rerunSquiggleCode}
+          onSubmit={props.runSquiggleProject}
           onViewValuePath={props.onViewValuePath}
           renderImportTooltip={props.renderImportTooltip}
         />

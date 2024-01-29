@@ -28,7 +28,7 @@ export type SquiggleRunnerOutput = {
   autorunMode: boolean;
   setAutorunMode: (newValue: boolean) => void;
 
-  rerunSquiggleCode: () => void;
+  runSquiggleProject: () => void;
 };
 
 // defaultContinues needs to have a stable identity.
@@ -78,7 +78,7 @@ export function useSquiggleRunner(
     args.environment
   );
 
-  const [squiggleProjectRun, { rerunSquiggleCode }] = useSquiggleProjectRun({
+  const [squiggleProjectRun, { runSquiggleProject }] = useSquiggleProjectRun({
     sourceId,
     code: args.code,
     project,
@@ -86,12 +86,12 @@ export function useSquiggleRunner(
     autorunMode,
   });
 
-  // rerunSquiggleCode changes every time the code changes. That then triggers this, which would call rerunSquiggleCode to actually run that updated function.
+  // runSquiggleProject changes every time the code changes. That then triggers this, which would call runSquiggleProject to actually run that updated function.
   useEffect(() => {
     if (autorunMode) {
-      rerunSquiggleCode();
+      runSquiggleProject();
     }
-  }, [rerunSquiggleCode]);
+  }, [runSquiggleProject]);
 
   //We only want this to run when the environment changes.
   useEffect(() => {
@@ -99,7 +99,7 @@ export function useSquiggleRunner(
       project.setEnvironment(args.environment);
     }
     if (autorunMode) {
-      rerunSquiggleCode();
+      runSquiggleProject();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [args.environment]);
@@ -116,6 +116,6 @@ export function useSquiggleRunner(
     autorunMode,
     setAutorunMode: setAutorunMode,
 
-    rerunSquiggleCode: rerunSquiggleCode,
+    runSquiggleProject: runSquiggleProject,
   };
 }

@@ -118,7 +118,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     sourceId,
     autorunMode,
     setAutorunMode,
-    rerunSquiggleCode,
+    runSquiggleProject,
   } = useSquiggleRunner({
     code,
     setup: { type: "projectFromLinker", linker },
@@ -166,7 +166,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       ref={leftPanelRef}
       autorunMode={autorunMode}
       setAutorunMode={setAutorunMode}
-      rerunSquiggleCode={rerunSquiggleCode}
+      runSquiggleProject={runSquiggleProject}
     />
   );
 

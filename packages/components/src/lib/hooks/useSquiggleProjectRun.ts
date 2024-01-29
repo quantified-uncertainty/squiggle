@@ -27,7 +27,7 @@ export type SquiggleProjectRun = {
 
 export type UseSquiggleProjectRun = [
   SquiggleProjectRun | undefined,
-  { rerunSquiggleCode: () => void },
+  { runSquiggleProject: () => void },
 ];
 
 export function useSquiggleProjectRun(
@@ -79,7 +79,7 @@ export function useSquiggleProjectRun(
     }
   }, [args.code, args.continues, args.project, args.sourceId]);
 
-  return [squiggleProjectRun, { rerunSquiggleCode: runSquiggle }];
+  return [squiggleProjectRun, { runSquiggleProject: runSquiggle }];
 }
 
 export function isRunning(squiggleProjectRun: SquiggleProjectRun): boolean {

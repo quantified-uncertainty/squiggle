@@ -33,7 +33,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     onCodeChange,
   });
 
-  const { squiggleProjectRun, project, sourceId, rerunSquiggleCode } =
+  const { squiggleProjectRun, project, sourceId, runSquiggleProject } =
     useSquiggleRunner({
       code,
       setup: propsProject
@@ -64,7 +64,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           project={project}
           sourceId={sourceId}
           ref={editorRef}
-          onSubmit={rerunSquiggleCode}
+          onSubmit={runSquiggleProject}
         />
       </div>
 
