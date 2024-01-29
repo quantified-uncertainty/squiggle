@@ -85,7 +85,7 @@ async function makeSampleSet(samples: number[]) {
   }
 }
 
-const env = { sampleCount: 10000, xyPointLength: 100 };
+const env = { sampleCount: 10000, xyPointLength: 100, seed: "default" };
 
 describe("cumulative density function", () => {
   // We should fix this.
@@ -183,7 +183,7 @@ describe("cumulative density function", () => {
 
 // I no longer believe this is true.
 describe("probability density function", () => {
-  const env = { sampleCount: 1000, xyPointLength: 100 };
+  const env = { sampleCount: 1000, xyPointLength: 100, seed: "default" };
 
   test.skip("assigns to the max at most the weight of the mean", () => {
     fc.assert(
@@ -218,7 +218,11 @@ describe("mean is mean", () => {
           const xs = Array.from(xs_);
           const n = xs.length;
           const dist = await makeSampleSet(xs);
-          const myEnv = { sampleCount: 2 * n, xyPointLength: 4 * n };
+          const myEnv = {
+            sampleCount: 2 * n,
+            xyPointLength: 4 * n,
+            seed: "default",
+          };
           const mean = dist.mean(myEnv);
           if (typeof mean === "number") {
             expectErrorToBeBounded(mean, xs.reduce((a, b) => a + b, 0.0) / n, {
@@ -243,6 +247,7 @@ describe("mean is mean", () => {
           const myEnv = {
             sampleCount: Math.floor(n / 2),
             xyPointLength: 4 * n,
+            seed: "default",
           };
           const mean = dist.mean(myEnv);
           if (typeof mean === "number") {

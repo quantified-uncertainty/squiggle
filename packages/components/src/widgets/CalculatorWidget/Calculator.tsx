@@ -30,6 +30,7 @@ const getEnvironment = (
 ): Env => ({
   sampleCount: calculator.sampleCount || modelEnvironment.sampleCount,
   xyPointLength: modelEnvironment.xyPointLength,
+  seed: modelEnvironment.seed,
 });
 
 async function runSquiggleProject(

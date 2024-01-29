@@ -1,5 +1,6 @@
 import { PRNG } from "seedrandom";
 
+import * as magicNumbers from "../../magicNumbers.js";
 import { OperationError } from "../../operationError.js";
 import { ContinuousShape } from "../../PointSet/Continuous.js";
 import * as Discrete from "../../PointSet/Discrete.js";
@@ -66,6 +67,7 @@ export class SampleSetDist extends BaseDist {
         // In this process we want the xyPointLength to be a bit longer than the eventual toSparkline downsampling. 3 is fairly arbitrarily.
         xyPointLength: bucketCount * 3,
         sampleCount: env.sampleCount,
+        seed: magicNumbers.Environment.defaultSeed,
       }),
       (r) => r.toSparkline(bucketCount)
     );

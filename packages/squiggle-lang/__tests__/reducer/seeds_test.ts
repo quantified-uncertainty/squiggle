@@ -7,7 +7,7 @@ async function getSamplesForSeed(seed?: string | undefined) {
     environment: {
       sampleCount: SAMPLE_COUNT,
       xyPointLength: 100,
-      seed,
+      seed: seed || "default",
     },
   });
   project.setSource("main", "2 to 3");
@@ -37,14 +37,6 @@ describe("seeds", () => {
     expect(samples.length).toEqual(SAMPLE_COUNT);
 
     const samples2 = await getSamplesForSeed("test2");
-    expect(samples).not.toEqual(samples2);
-  });
-
-  test("Sample sets without explcit seeds are different", async () => {
-    const samples = await getSamplesForSeed();
-    expect(samples.length).toEqual(SAMPLE_COUNT);
-
-    const samples2 = await getSamplesForSeed();
     expect(samples).not.toEqual(samples2);
   });
 });

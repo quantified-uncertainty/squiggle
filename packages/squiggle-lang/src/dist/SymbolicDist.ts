@@ -38,6 +38,7 @@ export abstract class SymbolicDist extends BaseDist {
           // In this process we want the xyPointLength to be a bit longer than the eventual toSparkline downsampling. 3 is fairly arbitrarily.
           xyPointLength: bucketCount * 3,
           sampleCount: env.sampleCount,
+          seed: env.seed,
         },
         "Linear" // this makes this method slightly different from SampleSetDist version
       ),
