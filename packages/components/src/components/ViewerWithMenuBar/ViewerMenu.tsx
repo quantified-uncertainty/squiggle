@@ -42,14 +42,20 @@ function viewerTabTitle(mode: ViewerTab): string {
 type Props = {
   viewerTab: ViewerTab;
   setViewerTab: (viewerTab: ViewerTab) => void;
-  output: SqOutputResult;
+  outputResult: SqOutputResult;
 };
 
-export const ViewerMenu: FC<Props> = ({ viewerTab, setViewerTab, output }) => {
-  const hasResult = output.ok && output.value.result.tag !== "Void";
-  const variablesCount = output.ok ? output.value.bindings.size() : 0;
-  const importsCount = output.ok ? output.value.imports.size() : 0;
-  const exportsCount = output.ok ? output.value.exports.size() : 0;
+export const ViewerMenu: FC<Props> = ({
+  viewerTab,
+  setViewerTab,
+  outputResult,
+}) => {
+  const hasResult = outputResult.ok && outputResult.value.result.tag !== "Void";
+  const variablesCount = outputResult.ok
+    ? outputResult.value.bindings.size()
+    : 0;
+  const importsCount = outputResult.ok ? outputResult.value.imports.size() : 0;
+  const exportsCount = outputResult.ok ? outputResult.value.exports.size() : 0;
 
   return (
     <Dropdown

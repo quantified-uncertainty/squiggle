@@ -10,7 +10,7 @@ import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 
 type Props = {
   viewerTab: ViewerTab;
-  output: SqOutputResult;
+  outputResult: SqOutputResult;
   isRunning: boolean;
   editor?: CodeEditorHandle;
   playgroundSettings: PartialPlaygroundSettings;
@@ -18,14 +18,14 @@ type Props = {
 
 export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
   function ViewerBody(
-    { output, viewerTab, isRunning, editor, playgroundSettings },
+    { outputResult, viewerTab, isRunning, editor, playgroundSettings },
     viewerRef
   ) {
-    if (!output.ok) {
-      return <SquiggleErrorAlert error={output.value} />;
+    if (!outputResult.ok) {
+      return <SquiggleErrorAlert error={outputResult.value} />;
     }
 
-    const sqOutput = output.value;
+    const sqOutput = outputResult.value;
 
     if (viewerTab === "AST") {
       return (
@@ -35,7 +35,7 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
       );
     }
 
-    const usedValue = viewerTabToValue(viewerTab, output);
+    const usedValue = viewerTabToValue(viewerTab, outputResult);
 
     if (!usedValue) {
       return null;

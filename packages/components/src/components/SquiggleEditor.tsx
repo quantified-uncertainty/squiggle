@@ -33,19 +33,14 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     onCodeChange,
   });
 
-  const {
-    squiggleProjectRun,
-    viewerTab,
-    setViewerTab,
-    project,
-    sourceId,
-    rerunSquiggleCode,
-  } = useSquiggleRunner({
-    code,
-    setup: propsProject
-      ? { type: "project", project: propsProject, continues }
-      : { type: "standalone", environment },
-  });
+  const { squiggleProjectRun, project, sourceId, rerunSquiggleCode } =
+    useSquiggleRunner({
+      code,
+      setup: propsProject
+        ? { type: "project", project: propsProject, continues }
+        : { type: "standalone" },
+      environment,
+    });
 
   const errors = useMemo(
     () => getSquiggleOutputErrors(squiggleProjectRun),
@@ -77,8 +72,6 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
         <ViewerWithMenuBar
           squiggleProjectRun={squiggleProjectRun}
           editor={editorRef.current ?? undefined}
-          viewerTab={viewerTab}
-          setViewerTab={setViewerTab}
           playgroundSettings={settings}
         />
       )}

@@ -1,10 +1,10 @@
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
 
 import {
   isRunning,
   SquiggleProjectRun,
 } from "../../lib/hooks/useSquiggleProjectRun.js";
-import { ViewerTab } from "../../lib/utility.js";
+import { defaultViewerTab, ViewerTab } from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
@@ -17,37 +17,38 @@ type Props = {
   squiggleProjectRun: SquiggleProjectRun;
   editor?: CodeEditorHandle;
   playgroundSettings: PartialPlaygroundSettings;
-  viewerRef?: React.ForwardedRef<SquiggleViewerHandle>;
-  viewerTab: ViewerTab;
-  setViewerTab: (viewerTab: ViewerTab) => void;
+  showMenu?: boolean;
+  defaultTab?: ViewerTab;
 };
-
-// export function useMode(outputResult: SqOutputResult) {
-//   return useState<ViewerMode>(() => defaultMode(outputResult));
-// }
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
 export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
   function ViewerWithMenuBar(
-    { squiggleProjectRun, playgroundSettings, viewerTab, setViewerTab, editor },
+    { squiggleProjectRun, playgroundSettings, showMenu, editor, defaultTab },
     viewerRef
   ) {
+    const [viewerTab, setViewerTab] = useState<ViewerTab>(
+      defaultTab ?? defaultViewerTab(squiggleProjectRun.output)
+    );
+
     const { output } = squiggleProjectRun;
 
     return (
       <Layout
         menu={
-          <ViewerMenu
-            viewerTab={viewerTab}
-            setViewerTab={setViewerTab}
-            output={output}
-          />
+          showMenu ? (
+            <ViewerMenu
+              viewerTab={viewerTab}
+              setViewerTab={setViewerTab}
+              outputResult={output}
+            />
+          ) : null
         }
-        indicator={<RenderingIndicator output={squiggleProjectRun} />}
+        indicator={<RenderingIndicator projectRun={squiggleProjectRun} />}
         viewer={
           <ViewerBody
             viewerTab={viewerTab}
-            output={output}
+            outputResult={output}
             isRunning={isRunning(squiggleProjectRun)}
             playgroundSettings={playgroundSettings}
             ref={viewerRef}

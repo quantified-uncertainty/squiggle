@@ -6,9 +6,9 @@ import {
 } from "../../lib/hooks/useSquiggleProjectRun.js";
 
 export const RenderingIndicator: FC<{
-  output: SquiggleProjectRun;
-}> = ({ output }) => {
-  const _isRunning = isRunning(output);
+  projectRun: SquiggleProjectRun;
+}> = ({ projectRun }) => {
+  const _isRunning = isRunning(projectRun);
 
   const showTime = (executionTime: number) =>
     executionTime > 1000
@@ -19,7 +19,9 @@ export const RenderingIndicator: FC<{
     <div className="text-zinc-400 text-sm whitespace-nowrap">
       {_isRunning
         ? "rendering..."
-        : `render #${output.executionId} in ${showTime(output.executionTime)}`}
+        : `render #${projectRun.executionId} in ${showTime(
+            projectRun.executionTime
+          )}`}
     </div>
   );
 };

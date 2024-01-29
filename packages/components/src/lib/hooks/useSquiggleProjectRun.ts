@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { SqProject } from "@quri/squiggle-lang";
 
@@ -78,19 +78,6 @@ export function useSquiggleProjectRun(
       });
     }
   }, [args.code, args.continues, args.project, args.sourceId]);
-
-  useEffect(() => {
-    // TODO - cancel previous run if already running
-    if (args.autorunMode) {
-      runSquiggle();
-    }
-  }, [runSquiggle]); // Don't pass in ``autorunMode`` here, as we don't want to rerun when it changes
-
-  useEffect(() => {
-    return () => {
-      args.project.removeSource(args.sourceId);
-    };
-  }, [args.project, args.sourceId]);
 
   return [squiggleProjectRun, { rerunSquiggleCode: runSquiggle }];
 }

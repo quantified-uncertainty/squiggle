@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 
-import { SqLinker, SqProject } from "@quri/squiggle-lang";
+import { SqLinker } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { useSquiggleRunner } from "../../lib/hooks/useSquiggleRunner.js";
@@ -107,31 +107,23 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     [onSettingsChange]
   );
 
-  const [project] = useState(() => {
-    // not reactive on `linker` changes; TODO?
-    return new SqProject({ linker });
-  }); // TODO: Maybe this could go into useSquiggleRunner?
-
   const { code, setCode } = useUncontrolledCode({
     defaultCode: defaultCode,
     onCodeChange: onCodeChange,
   });
 
   const {
+    project,
     squiggleProjectRun,
-    setViewerTab,
-    viewerTab,
     sourceId,
     autorunMode,
     setAutorunMode,
     rerunSquiggleCode,
-    setProjectEnvironment,
-  } = useSquiggleRunner({ code, setup: { type: "project", project } });
-
-  useEffect(() => {
-    setProjectEnvironment(settings.environment);
-    // eslint-disable-next-line @wogns3623/better-exhaustive-deps/exhaustive-deps
-  }, [settings.environment]);
+  } = useSquiggleRunner({
+    code,
+    setup: { type: "projectFromLinker", linker },
+    environment: settings.environment,
+  });
 
   useEffect(() => {
     const _output = squiggleProjectRun?.output;
@@ -156,6 +148,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     () => leftPanelRef.current?.getLeftPanelElement() ?? undefined,
     []
   );
+
   const renderLeft = () => (
     <LeftPlaygroundPanel
       project={project}
@@ -183,10 +176,8 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         squiggleProjectRun={squiggleProjectRun}
         // FIXME - this will cause viewer to be rendered twice on initial render
         editor={leftPanelRef.current?.getEditor() ?? undefined}
-        viewerRef={rightPanelRef}
-        viewerTab={viewerTab}
-        setViewerTab={setViewerTab}
         playgroundSettings={settings}
+        ref={rightPanelRef}
       />
     ) : (
       <div className="grid place-items-center h-full">
