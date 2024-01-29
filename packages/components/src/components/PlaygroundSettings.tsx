@@ -81,7 +81,7 @@ export const defaultPlaygroundSettings: PlaygroundSettings = {
   environment: {
     sampleCount: 1000,
     xyPointLength: 1000,
-    seed: "testSeed",
+    seed: "default_seed",
   },
   functionChartSettings: {
     start: functionChartDefaults.min,
@@ -135,7 +135,7 @@ export const EnvironmentForm: React.FC = () => (
     <TextFormField<PlaygroundSettings>
       name="environment.seed"
       label="Random Seed"
-      description="Seed for random number generation. Change this to get a different set of random numbers."
+      description="Seed for random number generation. All random functions ultimately are dependent on this value."
     />
     <NumberFormField<PlaygroundSettings>
       name="environment.sampleCount"

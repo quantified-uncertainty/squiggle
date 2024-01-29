@@ -157,6 +157,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         playgroundSettings={settings}
         ref={rightPanelRef}
         randomizeSeed={randomizeSeed}
+        autorunMode={autorunMode}
       />
     ) : (
       <div className="grid place-items-center h-full">

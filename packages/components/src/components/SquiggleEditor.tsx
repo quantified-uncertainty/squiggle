@@ -75,6 +75,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           editor={editorRef.current ?? undefined}
           playgroundSettings={settings}
           randomizeSeed={undefined}
+          autorunMode={true}
         />
       )}
     </div>
