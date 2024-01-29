@@ -36,6 +36,10 @@ export function some(arr: boolean[]): boolean {
   return arr.reduce((x, y) => x || y, false);
 }
 
+export function filterUndefined<A>(arr: (A | undefined)[]): A[] {
+  return arr.filter((a): a is NonNullable<typeof a> => a !== undefined);
+}
+
 export function getErrors(result: SquiggleOutput["output"]) {
   if (!result.ok) {
     return [result.value];

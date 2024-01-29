@@ -15,13 +15,14 @@ import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
 import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
+import { TableCellHandle } from "../../widgets/TableChartWidget.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import {
   defaultPlaygroundSettings,
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { SqListViewNode } from "./SqViewNode.js";
+import { SqCellViewNode, SqListViewNode } from "./SqViewNode.js";
 import {
   getChildrenValues,
   shouldBeginCollapsed,
@@ -40,6 +41,22 @@ function findNode(
     return;
   }
   return SqListViewNode.make(
+    root,
+    path,
+    traverseCalculatorEdge(itemStore),
+    (path) => itemStore.getState(path).collapsed
+  );
+}
+
+function findTableNode(
+  root: SqValue | undefined,
+  path: SqValuePath,
+  itemStore: ItemStore
+) {
+  if (!root || !path) {
+    return;
+  }
+  return SqCellViewNode.make(
     root,
     path,
     traverseCalculatorEdge(itemStore),
@@ -75,9 +92,14 @@ type ValuePathUID = string;
  * Note: this class is currently used as a primary source of truth. Should we use it as cache only, and store the state in React state instead?
  * Then we won't have to rely on `forceUpdate` for rerenders.
  */
+
+type ItemHandle =
+  | { type: "listItem"; value: ValueWithContextViewerHandle }
+  | { type: "cellItem"; value: TableCellHandle };
+
 export class ItemStore {
   state: Record<ValuePathUID, LocalItemState> = {};
-  handles: Record<ValuePathUID, ValueWithContextViewerHandle> = {};
+  handles: Record<ValuePathUID, ItemHandle> = {};
 
   setState(
     path: SqValuePath,
@@ -138,10 +160,13 @@ export class ItemStore {
   }
 
   forceUpdate(path: SqValuePath) {
-    this.handles[path.uid()]?.forceUpdate();
+    const handle = this.handles[path.uid()];
+    if (handle && handle.type === "listItem") {
+      handle.value.forceUpdate();
+    }
   }
 
-  registerItemHandle(path: SqValuePath, handle: ValueWithContextViewerHandle) {
+  registerItemHandle(path: SqValuePath, handle: ItemHandle) {
     this.handles[path.uid()] = handle;
   }
 
@@ -164,11 +189,22 @@ export class ItemStore {
   }
 
   scrollViewerToPath(path: SqValuePath) {
-    this.handles[path.uid()]?.scrollIntoView();
+    const handle = this.handles[path.uid()];
+    if (handle && handle.type === "listItem") {
+      handle.value.scrollIntoView();
+    }
   }
 
   focusOnPath(path: SqValuePath) {
-    this.handles[path.uid()]?.focusOnHeader();
+    const handle = this.handles[path.uid()];
+    if (!handle) {
+      return;
+    }
+    if (handle.type === "listItem") {
+      handle.value.focusOnHeader();
+    } else if (handle.type === "cellItem") {
+      handle.value.focus();
+    }
   }
 }
 
@@ -186,6 +222,7 @@ type ViewerContextShape = {
   handle: SquiggleViewerHandle;
   rootValue?: SqValueWithContext;
   findNode: (path: SqValuePath) => SqListViewNode | undefined;
+  findTableNode: (path: SqValuePath) => SqCellViewNode | undefined;
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
@@ -201,6 +238,7 @@ export const ViewerContext = createContext<ViewerContextShape>({
   initialized: false,
   rootValue: undefined,
   findNode: () => undefined,
+  findTableNode: () => undefined,
 });
 
 export function useViewerContext() {
@@ -211,10 +249,7 @@ export function useViewerContext() {
 // This allows us to do two things later:
 // 1. Implement `store.scrollViewerToPath`.
 // 2. Re-render individual item viewers on demand, for example on "Collapse Children" menu action.
-export function useRegisterAsItemViewer(
-  path: SqValuePath,
-  ref: ValueWithContextViewerHandle
-) {
+export function useRegisterAsItemViewer(path: SqValuePath, ref: ItemHandle) {
   const { itemStore } = useViewerContext();
 
   /**
@@ -404,6 +439,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
           handle,
           initialized: true,
           findNode: (path) => findNode(_rootValue, path, itemStore),
+          findTableNode: (path) => findTableNode(_rootValue, path, itemStore),
         }}
       >
         {children}

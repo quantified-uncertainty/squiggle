@@ -49,5 +49,6 @@ export function useZoomedInSqValueKeyEvent(selected: SqValuePath) {
       }
     },
     Enter: resetToRoot,
+    " ": () => {},
   });
 }
