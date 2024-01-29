@@ -21,7 +21,7 @@ export { SquiggleViewer } from "./components/SquiggleViewer/index.js";
 export { ToolbarItem as PlaygroundToolbarItem } from "./components/ui/PanelWithToolbar/ToolbarItem.js";
 export { FnDocumentationFromName } from "./components/ui/FnDocumentation.js";
 
-export { SqErrorAlert as SquiggleErrorAlert } from "./components/ui/SqErrorAlert.js";
+export { SquiggleErrorAlert } from "./components/ui/SquiggleErrorAlert.js";
 
 export { RelativeValueCell } from "./widgets/PlotWidget/RelativeValuesGridChart/RelativeValueCell.js";
 

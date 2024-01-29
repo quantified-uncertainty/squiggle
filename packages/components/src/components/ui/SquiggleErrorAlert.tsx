@@ -68,7 +68,7 @@ const StackTrace: FC<{ error: SqRuntimeError }> = ({ error }) => {
   ) : null;
 };
 
-export const SqErrorAlert: FC<Props> = ({ error }) => {
+export const SquiggleErrorAlert: FC<Props> = ({ error }) => {
   function errorName(): string {
     if (error instanceof SqCompileError) {
       return "Compile Error";
