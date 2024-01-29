@@ -30,6 +30,16 @@ describe("Tags", () => {
     testEvalToBe("3 -> Tag.hide -> Tag.getHide", "true");
   });
 
+  describe("location", () => {
+    testEvalToBe(
+      `@location
+a = 3
+Tag.getLocation(a)
+`,
+      '{source: "main", start: {line: 2, column: 1, offset: 10}, end: {line: 2, column: 6, offset: 15}}'
+    );
+  });
+
   describe("startOpenToggle", () => {
     testEvalToBe("3 -> Tag.startOpen -> Tag.getStartOpenState", '"open"');
     testEvalToBe("3 -> Tag.startClosed -> Tag.getStartOpenState", '"closed"');

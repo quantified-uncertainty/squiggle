@@ -1,6 +1,5 @@
 import { LocationRange } from "peggy";
 
-import { FrameStack } from "../reducer/frameStack.js";
 import { Err, fmap, mergeMany, Ok, result } from "../utility/result.js";
 import { Value } from "./index.js";
 import { type VBool } from "./VBool.js";
@@ -96,15 +95,6 @@ export class ValueTags {
       ...this.value,
       ...other,
     });
-  }
-
-  mergeLocation(frameStack: FrameStack) {
-    if (!this.location()) {
-      const location = frameStack.getTopFrame()?.location;
-      return this.merge({ location });
-    } else {
-      return this;
-    }
   }
 
   name() {

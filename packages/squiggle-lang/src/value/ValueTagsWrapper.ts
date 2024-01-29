@@ -77,6 +77,7 @@ export class ValueTagsWrapper {
       .map(([key, value]) => `${key}: ${value.toString()}`)
       .join(", ");
   }
+
   location(): VDict | undefined {
     const _location = this.value.location();
     return _location ? locationRangeToValue(_location) : undefined;

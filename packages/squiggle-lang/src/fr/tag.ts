@@ -31,7 +31,7 @@ import { Lambda } from "../reducer/lambda.js";
 import { getOrThrow } from "../utility/result.js";
 import { Value } from "../value/index.js";
 import { ValueTags, ValueTagsType } from "../value/valueTags.js";
-import { ValueTagsWrapper } from "../value/ValueTagsContainer.js";
+import { ValueTagsWrapper } from "../value/ValueTagsWrapper.js";
 import { vBool, VBool } from "../value/VBool.js";
 import { vString } from "../value/VString.js";
 
