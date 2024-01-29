@@ -60,7 +60,8 @@ function useSetup(
       default:
         throw new Error("Invalid setup type");
     }
-  }, [setup, environment]); // Updated dependencies here
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // The project should not change.
 
   return { sourceId: _sourceId, project, continues };
 }
