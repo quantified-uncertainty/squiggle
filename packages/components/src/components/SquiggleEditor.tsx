@@ -1,10 +1,10 @@
 import { FC, useMemo, useRef } from "react";
 
 import { useUncontrolledCode } from "../lib/hooks/index.js";
-import { useSquiggleRunner } from "../lib/hooks/useSquiggleRunner.js";
+import { useSimulatorManager } from "../lib/hooks/useSimulatorManager.js";
 import {
-  getSquiggleOutputErrors,
   ProjectExecutionProps,
+  simulationErrors,
   StandaloneExecutionProps,
 } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
@@ -33,19 +33,15 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     onCodeChange,
   });
 
-  const { squiggleProjectRun, project, sourceId, runSquiggleProject } =
-    useSquiggleRunner({
-      code,
-      setup: propsProject
-        ? { type: "project", project: propsProject, continues }
-        : { type: "standalone" },
-      environment,
-    });
+  const { simulation, project, sourceId, runSimulation } = useSimulatorManager({
+    code,
+    setup: propsProject
+      ? { type: "project", project: propsProject, continues }
+      : { type: "standalone" },
+    environment,
+  });
 
-  const errors = useMemo(
-    () => getSquiggleOutputErrors(squiggleProjectRun),
-    [squiggleProjectRun]
-  );
+  const errors = useMemo(() => simulationErrors(simulation), [simulation]);
 
   const editorRef = useRef<CodeEditorHandle>(null);
 
@@ -64,13 +60,13 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           project={project}
           sourceId={sourceId}
           ref={editorRef}
-          onSubmit={runSquiggleProject}
+          onSubmit={runSimulation}
         />
       </div>
 
-      {!squiggleProjectRun ? null : (
+      {!simulation ? null : (
         <ViewerWithMenuBar
-          squiggleProjectRun={squiggleProjectRun}
+          simulation={simulation}
           editor={editorRef.current ?? undefined}
           playgroundSettings={settings}
         />

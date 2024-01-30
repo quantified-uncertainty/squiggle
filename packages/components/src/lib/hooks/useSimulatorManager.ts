@@ -2,17 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Env, SqLinker, SqProject } from "@quri/squiggle-lang";
 
-import {
-  SquiggleProjectRun,
-  useSquiggleProjectRun,
-} from "./useSquiggleProjectRun.js";
+import { Simulation, useSimulator } from "./useSimulator.js";
 
 type SetupSettings =
   | { type: "standalone" } // For standalone execution
   | { type: "project"; project: SqProject; continues?: string[] } // Project for the parent execution. Continues is what other squiggle sources to continue. Default []
   | { type: "projectFromLinker"; linker?: SqLinker; continues?: string[] };
 
-export type SquiggleRunnerArgs = {
+export type SimulatorManagerArgs = {
   code: string;
   sourceId?: string;
   setup: SetupSettings;
@@ -20,15 +17,15 @@ export type SquiggleRunnerArgs = {
   initialAutorunMode?: boolean;
 };
 
-export type SquiggleRunnerOutput = {
+export type UseSimulatorManager = {
   sourceId: string;
-  squiggleProjectRun?: SquiggleProjectRun;
+  simulation?: Simulation;
   project: SqProject;
 
   autorunMode: boolean;
   setAutorunMode: (newValue: boolean) => void;
 
-  runSquiggleProject: () => void;
+  runSimulation: () => void;
 };
 
 // defaultContinues needs to have a stable identity.
@@ -66,9 +63,9 @@ function useSetup(
   return { sourceId: _sourceId, project, continues };
 }
 
-export function useSquiggleRunner(
-  args: SquiggleRunnerArgs
-): SquiggleRunnerOutput {
+export function useSimulatorManager(
+  args: SimulatorManagerArgs
+): UseSimulatorManager {
   const [autorunMode, setAutorunMode] = useState(
     args.initialAutorunMode ?? true
   );
@@ -79,7 +76,7 @@ export function useSquiggleRunner(
     args.environment
   );
 
-  const [squiggleProjectRun, { runSquiggleProject }] = useSquiggleProjectRun({
+  const [simulation, { runSimulation }] = useSimulator({
     sourceId,
     code: args.code,
     project,
@@ -87,12 +84,12 @@ export function useSquiggleRunner(
     autorunMode,
   });
 
-  // runSquiggleProject changes every time the code changes. That then triggers this, which would call runSquiggleProject to actually run that updated function.
+  // runSimulation changes every time the code changes. That then triggers this, which would call runSimulation to actually run that updated function.
   useEffect(() => {
     if (autorunMode) {
-      runSquiggleProject();
+      runSimulation();
     }
-  }, [runSquiggleProject]);
+  }, [runSimulation]);
 
   //We only want this to run when the environment changes.
   useEffect(() => {
@@ -100,7 +97,7 @@ export function useSquiggleRunner(
       project.setEnvironment(args.environment);
     }
     if (autorunMode) {
-      runSquiggleProject();
+      runSimulation();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [args.environment]);
@@ -114,12 +111,12 @@ export function useSquiggleRunner(
 
   return {
     sourceId,
-    squiggleProjectRun,
+    simulation,
     project,
 
     autorunMode,
-    setAutorunMode: setAutorunMode,
+    setAutorunMode,
 
-    runSquiggleProject: runSquiggleProject,
+    runSimulation: runSimulation,
   };
 }
