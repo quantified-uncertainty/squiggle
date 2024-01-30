@@ -4,7 +4,7 @@ import { SqLinker } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { usePlaygroundSettings } from "../../lib/hooks/usePlaygroundSettings.js";
-import { useSquiggleRunner } from "../../lib/hooks/useSquiggleRunner.js";
+import { useSimulatorManager } from "../../lib/hooks/useSimulatorManager.js";
 import { useUncontrolledCode } from "../../lib/hooks/useUncontrolledCode.js";
 import {
   PartialPlaygroundSettings,
@@ -92,19 +92,19 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 
   const {
     project,
-    squiggleProjectRun,
+    simulation,
     sourceId,
     autorunMode,
     setAutorunMode,
-    runSquiggleProject,
-  } = useSquiggleRunner({
+    runSimulation,
+  } = useSimulatorManager({
     code,
     setup: { type: "projectFromLinker", linker },
     environment: settings.environment,
   });
 
   useEffect(() => {
-    const _output = squiggleProjectRun?.output;
+    const _output = simulation?.output;
     if (_output && _output.ok) {
       const exports = _output.value.exports;
       const _exports: ModelExport[] = exports.entries().map((e) => ({
@@ -117,7 +117,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     } else {
       onExportsChange && onExportsChange([]);
     }
-  }, [squiggleProjectRun, onExportsChange]);
+  }, [simulation, onExportsChange]);
 
   const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
   const rightPanelRef = useRef<SquiggleViewerHandle>(null);
@@ -131,7 +131,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     <LeftPlaygroundPanel
       project={project}
       sourceId={sourceId}
-      squiggleProjectRun={squiggleProjectRun}
+      simulation={simulation}
       settings={settings}
       onSettingsChange={setSettings}
       renderExtraControls={renderExtraControls}
@@ -144,14 +144,14 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       setCode={setCode}
       autorunMode={autorunMode}
       setAutorunMode={setAutorunMode}
-      runSquiggleProject={runSquiggleProject}
+      runSimulation={runSimulation}
     />
   );
 
   const renderRight = () =>
-    squiggleProjectRun ? (
+    simulation ? (
       <ViewerWithMenuBar
-        squiggleProjectRun={squiggleProjectRun}
+        simulation={simulation}
         // FIXME - this will cause viewer to be rendered twice on initial render
         editor={leftPanelRef.current?.getEditor() ?? undefined}
         playgroundSettings={settings}

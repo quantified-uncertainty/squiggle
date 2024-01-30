@@ -33,7 +33,7 @@ const getEnvironment = (
   seed: modelEnvironment.seed,
 });
 
-async function runSquiggleProject(
+async function runSimulation(
   code: string,
   environment: Env
 ): Promise<SqValueResult | undefined> {
@@ -105,7 +105,7 @@ function useCalculator(
     for (const [i, input] of calculator.inputs.entries()) {
       const fieldValue = formValues.inputs?.at(i);
       if (fieldValue === undefined) continue; // shouldn't happen if we set the form correctly
-      const inputResult = await runSquiggleProject(
+      const inputResult = await runSimulation(
         fieldValueToCode(input, fieldValue),
         environment
       );
@@ -148,7 +148,7 @@ function useCalculator(
 
       const input = calculator.inputs[id];
 
-      const inputResult = await runSquiggleProject(
+      const inputResult = await runSimulation(
         fieldValueToCode(input, fieldValue),
         environment
       );

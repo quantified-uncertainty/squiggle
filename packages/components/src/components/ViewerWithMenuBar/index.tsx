@@ -1,21 +1,18 @@
 import { forwardRef, useState } from "react";
 
-import {
-  isRunning,
-  SquiggleProjectRun,
-} from "../../lib/hooks/useSquiggleProjectRun.js";
+import { isSimulating, Simulation } from "../../lib/hooks/useSimulator.js";
 import { defaultViewerTab, ViewerTab } from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
-import { RenderingIndicator } from "./RenderingIndicator.js";
 import { RunSeedButton } from "./RunSeedButton.js";
+import { SimulatingIndicator } from "./SimulatingIndicator.js";
 import { ViewerBody } from "./ViewerBody.js";
 import { ViewerMenu } from "./ViewerMenu.js";
 
 type Props = {
-  squiggleProjectRun: SquiggleProjectRun;
+  simulation: Simulation;
   editor?: CodeEditorHandle;
   playgroundSettings: PartialPlaygroundSettings;
   showMenu?: boolean;
@@ -24,11 +21,11 @@ type Props = {
   autorunMode?: boolean;
 };
 
-/* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
+/* Wrapper for SquiggleViewer that shows the rendering stats and isSimulating state. */
 export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
   function ViewerWithMenuBar(
     {
-      squiggleProjectRun,
+      simulation: simulation,
       playgroundSettings,
       randomizeSeed,
       showMenu = true,
@@ -39,11 +36,11 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
     viewerRef
   ) {
     const [viewerTab, setViewerTab] = useState<ViewerTab>(
-      defaultTab ?? defaultViewerTab(squiggleProjectRun.output)
+      defaultTab ?? defaultViewerTab(simulation.output)
     );
 
-    const { output } = squiggleProjectRun;
-    const _isRunning = isRunning(squiggleProjectRun);
+    const _isSimulating = isSimulating(simulation);
+    const { output } = simulation;
 
     return (
       <Layout
@@ -58,12 +55,12 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
             <div />
           ) // Important not to be null, so that it stays on the right.
         }
-        indicator={<RenderingIndicator projectRun={squiggleProjectRun} />}
+        indicator={<SimulatingIndicator simulation={simulation} />}
         changeSeedAndRunButton={
           randomizeSeed && autorunMode ? (
             <RunSeedButton
-              isRunning={_isRunning}
-              seed={squiggleProjectRun.environment.seed || "default-seed"}
+              isSimulating={_isSimulating}
+              seed={simulation.environment.seed || "default-seed"}
               randomizeSeed={randomizeSeed}
             />
           ) : null
@@ -72,7 +69,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
           <ViewerBody
             viewerTab={viewerTab}
             outputResult={output}
-            isRunning={_isRunning}
+            isSimulating={isSimulating(simulation)}
             playgroundSettings={playgroundSettings}
             ref={viewerRef}
             editor={editor}

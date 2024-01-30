@@ -8,7 +8,7 @@ import {
 } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../squiggle-lang/src/public/types.js";
-import { SquiggleProjectRun } from "./hooks/useSquiggleProjectRun.js";
+import { Simulation } from "./hooks/useSimulator.js";
 
 export function flattenResult<a, b>(x: result<a, b>[]): result<a[], b> {
   if (x.length === 0) {
@@ -44,15 +44,13 @@ export function some(arr: boolean[]): boolean {
   return arr.reduce((x, y) => x || y, false);
 }
 
-export function getSquiggleOutputErrors(
-  output?: SquiggleProjectRun
-): SqError[] {
-  if (!output) {
+export function simulationErrors(simulation?: Simulation): SqError[] {
+  if (!simulation) {
     return [];
-  } else if (output.output.ok) {
+  } else if (simulation.output.ok) {
     return [];
   } else {
-    return [output.output.value];
+    return [simulation.output.value];
   }
 }
 

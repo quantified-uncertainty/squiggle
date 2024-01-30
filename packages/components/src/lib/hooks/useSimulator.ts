@@ -4,7 +4,7 @@ import { Env, SqProject } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 
-export type SquiggleArgs = {
+export type SimulatorArgs = {
   code: string;
   sourceId: string;
   project: SqProject;
@@ -12,12 +12,7 @@ export type SquiggleArgs = {
   autorunMode: boolean;
 };
 
-export type UpcomingSquiggleOutput = {
-  code: string;
-  executionId: number;
-};
-
-export type SquiggleProjectRun = {
+export type Simulation = {
   output: SqOutputResult;
   code: string;
   executionId: number;
@@ -26,21 +21,19 @@ export type SquiggleProjectRun = {
   environment: Env;
 };
 
-export type UseSquiggleProjectRun = [
-  SquiggleProjectRun | undefined,
-  { runSquiggleProject: () => void },
+export type UseSimulator = [
+  Simulation | undefined,
+  { runSimulation: () => void },
 ];
 
-export function useSquiggleProjectRun(
-  args: SquiggleArgs
-): UseSquiggleProjectRun {
-  const [squiggleProjectRun, setSquiggleProjectRun] = useState<
-    SquiggleProjectRun | undefined
-  >(undefined);
+export function useSimulator(args: SimulatorArgs): UseSimulator {
+  const [simulation, setSimulation] = useState<Simulation | undefined>(
+    undefined
+  );
 
-  const runSquiggle = useCallback(async () => {
+  const simulate = useCallback(async () => {
     const act = async () => {
-      setSquiggleProjectRun((prevOutput) => {
+      setSimulation((prevOutput) => {
         return prevOutput
           ? {
               isStale: true,
@@ -57,7 +50,7 @@ export function useSquiggleProjectRun(
       const output = args.project.getOutput(args.sourceId);
       const executionTime = Date.now() - startTime;
 
-      setSquiggleProjectRun((previousOutput) => {
+      setSimulation((previousOutput) => {
         const previousExecutionId = previousOutput?.executionId || 0;
         return {
           executionId: previousExecutionId + 1,
@@ -82,9 +75,9 @@ export function useSquiggleProjectRun(
     }
   }, [args.code, args.continues, args.project, args.sourceId]);
 
-  return [squiggleProjectRun, { runSquiggleProject: runSquiggle }];
+  return [simulation, { runSimulation: simulate }];
 }
 
-export function isRunning(squiggleProjectRun: SquiggleProjectRun): boolean {
-  return squiggleProjectRun.isStale ?? false;
+export function isSimulating(simulation: Simulation): boolean {
+  return simulation.isStale ?? false;
 }

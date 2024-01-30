@@ -11,9 +11,8 @@ import {
 } from "@quri/ui";
 import {
   defaultSquiggleVersion,
-  squiggleLangByVersion,
   useAdjustSquiggleVersion,
-  VersionedSquiggleChart,
+  versionedSquigglePackages,
   versionSupportsSquiggleChart,
 } from "@quri/versioned-squiggle-components";
 
@@ -63,13 +62,13 @@ const UpgradeableModel: FC<{ modelRef: UpgradeVersionsPage_Model$key }> = ({
   const version = useAdjustSquiggleVersion(currentRevision.content.version);
   const updatedVersion = defaultSquiggleVersion;
 
-  const squiggleLang = use(squiggleLangByVersion(version));
-  const updatedSquiggleLang = use(squiggleLangByVersion(updatedVersion));
+  const squiggle = use(versionedSquigglePackages(version));
+  const updatedSquiggle = use(versionedSquigglePackages(updatedVersion));
 
-  const project = new squiggleLang.SqProject({
+  const project = new squiggle.lang.SqProject({
     linker: squiggleHubLinker,
   });
-  const updatedProject = new updatedSquiggleLang.SqProject({
+  const updatedProject = new updatedSquiggle.lang.SqProject({
     linker: squiggleHubLinker,
   });
 
@@ -79,17 +78,13 @@ const UpgradeableModel: FC<{ modelRef: UpgradeVersionsPage_Model$key }> = ({
       <div className="grid grid-cols-2">
         <div className={headerClasses}>{version}</div>
         <div className={headerClasses}>{updatedVersion}</div>
-        <VersionedSquiggleChart
-          // FIXME - `VersionedSquiggleChart` doesn't do prop limiting correctly
-          version={version as any}
+        <squiggle.components.SquiggleChart
           code={currentRevision.content.code}
-          project={project as any}
+          project={project}
         />
-        <VersionedSquiggleChart
-          // `defaultSquiggleVersion` is not marked as const
-          version={updatedVersion as any}
+        <updatedSquiggle.components.SquiggleChart
           code={currentRevision.content.code}
-          project={updatedProject as any}
+          project={updatedProject}
         />
       </div>
     );
