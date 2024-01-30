@@ -2,13 +2,13 @@
 
 import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
 import { format } from "date-fns";
-import { FC } from "react";
+import { FC, use } from "react";
 import { graphql } from "relay-runtime";
 
 import { CommentIcon } from "@quri/ui";
 import {
   useAdjustSquiggleVersion,
-  VersionedSquigglePlayground,
+  versionedSquigglePackages,
 } from "@quri/versioned-squiggle-components";
 
 import { StyledLink } from "@/components/ui/StyledLink";
@@ -17,6 +17,7 @@ import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRoute } from "@/routes";
+import { squiggleHubLinker } from "@/squiggle/components/linker";
 
 const Query = graphql`
   query ModelRevisionViewQuery($input: QueryModelInput!, $revisionId: ID!) {
@@ -70,6 +71,8 @@ export const ModelRevisionView: FC<{
     model.revision.content.version
   );
 
+  const squiggle = use(versionedSquigglePackages(checkedVersion));
+
   return (
     <div>
       <div className="border-b border-gray-300">
@@ -91,9 +94,9 @@ export const ModelRevisionView: FC<{
           ) : null}
         </div>
       </div>
-      <VersionedSquigglePlayground
-        version={checkedVersion}
+      <squiggle.components.SquigglePlayground
         defaultCode={model.revision.content.code}
+        linker={squiggleHubLinker}
       />
     </div>
   );

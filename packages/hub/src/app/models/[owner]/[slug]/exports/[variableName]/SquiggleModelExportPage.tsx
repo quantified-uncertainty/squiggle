@@ -1,12 +1,10 @@
 "use client";
-import { FC, use, useState } from "react";
+import { FC, use } from "react";
 import { graphql, useFragment } from "react-relay";
 
-import { SqValuePathEdge } from "@quri/squiggle-lang";
 import {
-  squiggleLangByVersion,
   useAdjustSquiggleVersion,
-  VersionedSquiggleChart,
+  versionedSquigglePackages,
   versionSupportsExports,
   versionSupportsSqPathV2,
 } from "@quri/versioned-squiggle-components";
@@ -30,34 +28,27 @@ const VersionedSquiggleModelExportPage: FC<
     version: SupportedVersion;
   }
 > = ({ variableName, code, version }) => {
-  // `use` is still experimental in React, but this is Squiggle Hub which uses Next.js which uses canary React releases, so it's fine
-  const squiggleLang = use(squiggleLangByVersion(version));
+  const squiggle = use(versionedSquigglePackages(version));
 
-  const [{ project, rootPath }] = useState(() => {
-    const project = new squiggleLang.SqProject({
-      linker: squiggleHubLinker,
-    });
-
-    const rootPath = versionSupportsSqPathV2.props(squiggleLang)
-      ? new squiggleLang.SqValuePath({
-          root: "bindings",
-          edges: [SqValuePathEdge.fromKey(variableName)],
-        })
-      : new squiggleLang.SqValuePath({
-          root: "bindings",
-          items: [{ type: "string", value: variableName }],
-        });
-
-    return { project, rootPath };
+  const project = new squiggle.lang.SqProject({
+    linker: squiggleHubLinker,
   });
 
+  const rootPathOverride = versionSupportsSqPathV2.object(squiggle)
+    ? new squiggle.lang.SqValuePath({
+        root: "bindings",
+        edges: [squiggle.lang.SqValuePathEdge.fromKey(variableName)],
+      })
+    : new squiggle.lang.SqValuePath({
+        root: "bindings",
+        items: [{ type: "string", value: variableName }],
+      });
+
   return (
-    <VersionedSquiggleChart
-      version={version}
+    <squiggle.components.SquiggleChart
       code={code}
-      // TODO - we still don't have a good way to sync up squiggle-lang and versioned squiggle-components types
-      rootPathOverride={rootPath as any}
-      project={project as any}
+      project={project}
+      rootPathOverride={rootPathOverride}
     />
   );
 };

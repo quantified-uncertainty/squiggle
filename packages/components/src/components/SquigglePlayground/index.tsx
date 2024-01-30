@@ -10,7 +10,7 @@ import React, {
 import { SqLinker } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
-import { useSquiggleRunner } from "../../lib/hooks/useSquiggleRunner.js";
+import { useSimulatorManager } from "../../lib/hooks/useSimulatorManager.js";
 import { useUncontrolledCode } from "../../lib/hooks/useUncontrolledCode.js";
 import {
   defaultPlaygroundSettings,
@@ -118,19 +118,19 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 
   const {
     project,
-    squiggleProjectRun,
+    simulation,
     sourceId,
     autorunMode,
     setAutorunMode,
-    runSquiggleProject,
-  } = useSquiggleRunner({
+    runSimulation,
+  } = useSimulatorManager({
     code,
     setup: { type: "projectFromLinker", linker },
     environment: settings.environment,
   });
 
   useEffect(() => {
-    const _output = squiggleProjectRun?.output;
+    const _output = simulation?.output;
     if (_output && _output.ok) {
       const exports = _output.value.exports;
       const _exports: ModelExport[] = exports.entries().map((e) => ({
@@ -143,7 +143,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     } else {
       onExportsChange && onExportsChange([]);
     }
-  }, [squiggleProjectRun, onExportsChange]);
+  }, [simulation, onExportsChange]);
 
   const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
   const rightPanelRef = useRef<SquiggleViewerHandle>(null);
@@ -154,14 +154,14 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   );
 
   const renderLeft = () => {
-    const lineNumbers = getActiveLineNumbers(squiggleProjectRun?.output);
+    const lineNumbers = getActiveLineNumbers(simulation?.output);
     return (
       <LeftPlaygroundPanel
+        simulation={simulation}
         project={project}
         code={code}
         setCode={setCode}
         sourceId={sourceId}
-        squiggleProjectRun={squiggleProjectRun}
         settings={settings}
         onSettingsChange={handleSettingsChange}
         renderExtraControls={renderExtraControls}
@@ -174,22 +174,22 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         }}
         activeLineNumbers={lineNumbers}
         onViewValueLine={(line) => {
-          const path = findValuePathByLine(line, squiggleProjectRun?.output);
+          const path = findValuePathByLine(line, simulation?.output);
           if (path) {
             rightPanelRef.current?.viewValuePath(path);
           }
         }}
         autorunMode={autorunMode}
         setAutorunMode={setAutorunMode}
-        runSquiggleProject={runSquiggleProject}
+        runSimulation={runSimulation}
       />
     );
   };
 
   const renderRight = () =>
-    squiggleProjectRun ? (
+    simulation ? (
       <ViewerWithMenuBar
-        squiggleProjectRun={squiggleProjectRun}
+        simulation={simulation}
         // FIXME - this will cause viewer to be rendered twice on initial render
         editor={leftPanelRef.current?.getEditor() ?? undefined}
         playgroundSettings={settings}

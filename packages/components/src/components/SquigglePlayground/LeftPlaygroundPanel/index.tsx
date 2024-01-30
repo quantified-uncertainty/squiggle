@@ -17,9 +17,8 @@ import {
   TriangleIcon,
 } from "@quri/ui";
 
-import { SquiggleProjectRun } from "../../../lib/hooks/index.js";
-import { isRunning } from "../../../lib/hooks/useSquiggleProjectRun.js";
-import { altKey, getSquiggleOutputErrors } from "../../../lib/utility.js";
+import { isSimulating, Simulation } from "../../../lib/hooks/useSimulator.js";
+import { altKey, simulationErrors } from "../../../lib/utility.js";
 import {
   CodeEditor,
   CodeEditorHandle,
@@ -49,10 +48,10 @@ type Props = {
   /* Allows to inject extra items to the left panel's dropdown menu. */
   renderExtraDropdownItems?: RenderExtraControls;
   renderExtraModal?: Parameters<typeof PanelWithToolbar>[0]["renderModal"];
-  squiggleProjectRun: SquiggleProjectRun | undefined;
+  simulation: Simulation | undefined;
   autorunMode: boolean;
   setAutorunMode: (autorunMode: boolean) => void;
-  runSquiggleProject: () => void;
+  runSimulation: () => void;
   code: string;
   setCode: (code: string) => void;
 } & Pick<CodeEditorProps, "onViewValuePath" | "renderImportTooltip">;
@@ -66,8 +65,8 @@ export type LeftPlaygroundPanelHandle = {
 export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
   function LeftPlaygroundPanel(props, ref) {
     const errors = useMemo(
-      () => getSquiggleOutputErrors(props.squiggleProjectRun),
-      [props.squiggleProjectRun]
+      () => simulationErrors(props.simulation),
+      [props.simulation]
     );
 
     const editorRef = useRef<CodeEditorHandle>(null);
@@ -85,12 +84,10 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
     }) => (
       <div className="flex">
         <RunMenuItem
-          runSquiggleProject={props.runSquiggleProject}
+          runSimulation={props.runSimulation}
           autorunMode={props.autorunMode}
-          isRunning={
-            props.squiggleProjectRun
-              ? isRunning(props.squiggleProjectRun)
-              : false
+          isSimulating={
+            props.simulation ? isSimulating(props.simulation) : false
           }
         />
         <AutorunnerMenuItem
@@ -143,7 +140,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           showGutter={true}
           lineWrapping={props.settings.editorSettings.lineWrapping}
           onChange={props.setCode}
-          onSubmit={props.runSquiggleProject}
+          onSubmit={props.runSimulation}
           onViewValuePath={props.onViewValuePath}
           activeLineNumbers={props.activeLineNumbers}
           renderImportTooltip={props.renderImportTooltip}
