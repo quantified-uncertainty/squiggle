@@ -3,10 +3,10 @@ import { FC, forwardRef, memo } from "react";
 import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 
-import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
-import { ErrorBoundary } from "../ErrorBoundary.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
+import { MessageAlert } from "../ui/Alert.js";
+import { ErrorBoundary } from "../ui/ErrorBoundary.js";
 import { useGetSubvalueByPath } from "./utils.js";
 import { ValueViewer } from "./ValueViewer.js";
 import {

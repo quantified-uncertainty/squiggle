@@ -2,8 +2,8 @@ import { clsx } from "clsx";
 
 import { SqNumberValue } from "@quri/squiggle-lang";
 
-import { NumberShower } from "../components/NumberShower.js";
 import { useViewerType } from "../components/SquiggleViewer/ViewerProvider.js";
+import { NumberShower } from "../components/ui/NumberShower.js";
 import { formatNumber } from "../lib/d3/index.js";
 import { widgetRegistry } from "./registry.js";
 

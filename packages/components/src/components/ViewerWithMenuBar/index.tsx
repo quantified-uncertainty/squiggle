@@ -1,71 +1,60 @@
 import { forwardRef, useState } from "react";
 
-import { SqValuePath } from "@quri/squiggle-lang";
-
-import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
-import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import { isSimulating, Simulation } from "../../lib/hooks/useSimulator.js";
+import { defaultViewerTab, ViewerTab } from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
-import { RenderingIndicator } from "./RenderingIndicator.js";
+import { SimulatingIndicator } from "./SimulatingIndicator.js";
 import { ViewerBody } from "./ViewerBody.js";
 import { ViewerMenu } from "./ViewerMenu.js";
 
 type Props = {
-  squiggleOutput: SquiggleOutput;
-  isRunning: boolean;
+  simulation: Simulation;
   editor?: CodeEditorHandle;
   playgroundSettings: PartialPlaygroundSettings;
+  showMenu?: boolean;
+  defaultTab?: ViewerTab;
 };
 
-export type ViewerMode =
-  | "Imports"
-  | "Exports"
-  | "Variables"
-  | "Result"
-  | "AST"
-  | { tag: "CustomResultPath"; value: SqValuePath };
-
-export function defaultMode(output: SqOutputResult): ViewerMode {
-  if (!output.ok) {
-    return "Variables";
-  }
-
-  const sqOutput = output.value;
-  if (sqOutput.result.tag !== "Void") {
-    return "Result";
-  }
-  if (!sqOutput.exports.isEmpty()) {
-    return "Exports";
-  }
-  return "Variables";
-}
-
-export function useMode(outputResult: SqOutputResult) {
-  return useState<ViewerMode>(() => defaultMode(outputResult));
-}
-
-/* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
+/* Wrapper for SquiggleViewer that shows the rendering stats and isSimulating state. */
 export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
   function ViewerWithMenuBar(
-    { squiggleOutput, isRunning, editor, playgroundSettings },
+    {
+      simulation: simulation,
+      playgroundSettings,
+      showMenu = true,
+      editor,
+      defaultTab,
+    },
     viewerRef
   ) {
-    const { output } = squiggleOutput;
-    const [mode, setMode] = useMode(output);
+    const [viewerTab, setViewerTab] = useState<ViewerTab>(
+      defaultTab ?? defaultViewerTab(simulation.output)
+    );
+
+    const { output } = simulation;
 
     return (
       <Layout
-        menu={<ViewerMenu mode={mode} setMode={setMode} output={output} />}
-        indicator={
-          <RenderingIndicator isRunning={isRunning} output={squiggleOutput} />
+        menu={
+          showMenu ? (
+            <ViewerMenu
+              viewerTab={viewerTab}
+              setViewerTab={setViewerTab}
+              outputResult={output}
+            />
+          ) : (
+            <div />
+          ) // Important not to be null, so that it stays on the right.
         }
+        indicator={<SimulatingIndicator simulation={simulation} />}
         viewer={
           <ViewerBody
-            mode={mode}
-            output={output}
-            isRunning={isRunning}
+            viewerTab={viewerTab}
+            outputResult={output}
+            isSimulating={isSimulating(simulation)}
             playgroundSettings={playgroundSettings}
             ref={viewerRef}
             editor={editor}

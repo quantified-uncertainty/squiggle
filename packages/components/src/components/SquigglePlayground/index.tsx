@@ -7,10 +7,11 @@ import React, {
   useState,
 } from "react";
 
-import { SqLinker, SqProject } from "@quri/squiggle-lang";
+import { SqLinker } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
-import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
+import { useSimulatorManager } from "../../lib/hooks/useSimulatorManager.js";
+import { useUncontrolledCode } from "../../lib/hooks/useUncontrolledCode.js";
 import {
   defaultPlaygroundSettings,
   PartialPlaygroundSettings,
@@ -82,7 +83,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     renderExtraModal,
     renderImportTooltip,
     height = 500,
-    sourceId,
     ...defaultSettings
   } = props;
 
@@ -107,23 +107,26 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     [onSettingsChange]
   );
 
-  const [project] = useState(() => {
-    // not reactive on `linker` changes; TODO?
-    return new SqProject({ linker });
+  const { code, setCode } = useUncontrolledCode({
+    defaultCode: defaultCode,
+    onCodeChange: onCodeChange,
+  });
+
+  const {
+    project,
+    simulation,
+    sourceId,
+    autorunMode,
+    setAutorunMode,
+    runSimulation,
+  } = useSimulatorManager({
+    code,
+    setup: { type: "projectFromLinker", linker },
+    environment: settings.environment,
   });
 
   useEffect(() => {
-    project.setEnvironment(settings.environment);
-    leftPanelRef.current?.invalidate();
-  }, [project, settings.environment]);
-
-  const [output, setOutput] = useState<{
-    output: SquiggleOutput | undefined;
-    isRunning: boolean;
-  }>({ output: undefined, isRunning: false });
-
-  useEffect(() => {
-    const _output = output.output?.output;
+    const _output = simulation?.output;
     if (_output && _output.ok) {
       const exports = _output.value.exports;
       const _exports: ModelExport[] = exports.entries().map((e) => ({
@@ -136,7 +139,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     } else {
       onExportsChange && onExportsChange([]);
     }
-  }, [output, onExportsChange]);
+  }, [simulation, onExportsChange]);
 
   const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
   const rightPanelRef = useRef<SquiggleViewerHandle>(null);
@@ -149,28 +152,31 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   const renderLeft = () => (
     <LeftPlaygroundPanel
       project={project}
-      defaultCode={defaultCode}
+      code={code}
+      setCode={setCode}
       sourceId={sourceId}
-      onCodeChange={onCodeChange}
+      simulation={simulation}
       settings={settings}
       onSettingsChange={handleSettingsChange}
-      onOutputChange={setOutput}
       renderExtraControls={renderExtraControls}
       renderExtraDropdownItems={renderExtraDropdownItems}
       renderExtraModal={renderExtraModal}
       onViewValuePath={(path) => rightPanelRef.current?.viewValuePath(path)}
       renderImportTooltip={renderImportTooltip}
       ref={leftPanelRef}
+      autorunMode={autorunMode}
+      setAutorunMode={setAutorunMode}
+      runSimulation={runSimulation}
     />
   );
 
   const renderRight = () =>
-    output.output ? (
+    simulation ? (
       <ViewerWithMenuBar
-        squiggleOutput={output.output}
-        isRunning={output.isRunning}
-        playgroundSettings={settings}
+        simulation={simulation}
+        // FIXME - this will cause viewer to be rendered twice on initial render
         editor={leftPanelRef.current?.getEditor() ?? undefined}
+        playgroundSettings={settings}
         ref={rightPanelRef}
       />
     ) : (

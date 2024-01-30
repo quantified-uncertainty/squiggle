@@ -12,13 +12,13 @@ import {
   SqScale,
 } from "@quri/squiggle-lang";
 
-import { MessageAlert } from "../../../components/Alert.js";
-import { ErrorBoundary } from "../../../components/ErrorBoundary.js";
 import {
   generateDistributionPlotSettings,
   PlaygroundSettings,
 } from "../../../components/PlaygroundSettings.js";
-import { SquiggleErrorAlert } from "../../../components/SquiggleErrorAlert.js";
+import { MessageAlert } from "../../../components/ui/Alert.js";
+import { ErrorBoundary } from "../../../components/ui/ErrorBoundary.js";
+import { SquiggleErrorAlert } from "../../../components/ui/SquiggleErrorAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
 

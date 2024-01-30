@@ -1,7 +1,6 @@
 import {
   forwardRef,
   ReactNode,
-  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -18,13 +17,8 @@ import {
   TriangleIcon,
 } from "@quri/ui";
 
-import {
-  SquiggleOutput,
-  useRunnerState,
-  useSquiggle,
-  useUncontrolledCode,
-} from "../../../lib/hooks/index.js";
-import { altKey, getErrors } from "../../../lib/utility.js";
+import { isSimulating, Simulation } from "../../../lib/hooks/useSimulator.js";
+import { altKey, simulationErrors } from "../../../lib/utility.js";
 import {
   CodeEditor,
   CodeEditorHandle,
@@ -44,60 +38,34 @@ export type RenderExtraControls = (props: {
 
 type Props = {
   project: SqProject;
-  defaultCode?: string;
-  sourceId?: string;
-  onCodeChange?(code: string): void;
+  sourceId: string;
   settings: PlaygroundSettings;
   onSettingsChange(settings: PlaygroundSettings): void;
-  onOutputChange(output: {
-    output: SquiggleOutput | undefined;
-    isRunning: boolean;
-  }): void;
   /* Allows to inject extra buttons to the left panel's menu, e.g. share button on the website, or save button in Squiggle Hub. */
   renderExtraControls?: RenderExtraControls;
   /* Allows to inject extra items to the left panel's dropdown menu. */
   renderExtraDropdownItems?: RenderExtraControls;
   renderExtraModal?: Parameters<typeof PanelWithToolbar>[0]["renderModal"];
+  simulation: Simulation | undefined;
+  autorunMode: boolean;
+  setAutorunMode: (autorunMode: boolean) => void;
+  runSimulation: () => void;
+  code: string;
+  setCode: (code: string) => void;
 } & Pick<CodeEditorProps, "onViewValuePath" | "renderImportTooltip">;
 
 // for interactions with this component from outside
 export type LeftPlaygroundPanelHandle = {
   getEditor(): CodeEditorHandle | null; // used by "find in editor" feature
   getLeftPanelElement(): HTMLDivElement | null; // used by local settings modal window positioning
-  run(): void; // force re-run
-  invalidate(): void; // mark output as stale but don't re-run if autorun is disabled; useful on environment changes, triggered in <SquigglePlayground> code
 };
 
 export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
   function LeftPlaygroundPanel(props, ref) {
-    const { code, setCode } = useUncontrolledCode({
-      defaultCode: props.defaultCode,
-      onCodeChange: props.onCodeChange,
-    });
-
-    const runnerState = useRunnerState(code);
-
-    const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
-      code: runnerState.renderedCode,
-      project: props.project,
-      sourceId: props.sourceId,
-      executionId: runnerState.executionId,
-    });
-
-    const { onOutputChange } = props;
-    useEffect(() => {
-      onOutputChange({
-        output: squiggleOutput,
-        isRunning,
-      });
-    }, [onOutputChange, squiggleOutput, isRunning]);
-
-    const errors = useMemo(() => {
-      if (!squiggleOutput) {
-        return [];
-      }
-      return getErrors(squiggleOutput.output);
-    }, [squiggleOutput]);
+    const errors = useMemo(
+      () => simulationErrors(props.simulation),
+      [props.simulation]
+    );
 
     const editorRef = useRef<CodeEditorHandle>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -105,12 +73,6 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
     useImperativeHandle(ref, () => ({
       getEditor: () => editorRef.current,
       getLeftPanelElement: () => containerRef.current,
-      run: () => runnerState.run(),
-      invalidate: () => {
-        if (runnerState.autorunMode) {
-          runnerState.run();
-        }
-      },
     }));
 
     const renderToolbar = ({
@@ -119,8 +81,17 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
       openModal: (name: string) => void;
     }) => (
       <div className="flex">
-        <RunMenuItem {...runnerState} isRunning={isRunning} />
-        <AutorunnerMenuItem {...runnerState} />
+        <RunMenuItem
+          runSimulation={props.runSimulation}
+          autorunMode={props.autorunMode}
+          isSimulating={
+            props.simulation ? isSimulating(props.simulation) : false
+          }
+        />
+        <AutorunnerMenuItem
+          setAutorunMode={props.setAutorunMode}
+          autorunMode={props.autorunMode}
+        />
         <ToolbarItem
           tooltipText={`Format Code (${altKey()}+Shift+f)`}
           icon={Bars3CenterLeftIcon}
@@ -159,15 +130,15 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           ref={editorRef}
           // it's important to pass `code` and not `defaultCode` here;
           // see https://github.com/quantified-uncertainty/squiggle/issues/1952
-          defaultValue={code}
+          defaultValue={props.code}
           errors={errors}
           height="100%"
-          project={project}
-          sourceId={sourceId}
+          project={props.project}
+          sourceId={props.sourceId}
           showGutter={true}
           lineWrapping={props.settings.editorSettings.lineWrapping}
-          onChange={setCode}
-          onSubmit={runnerState.run}
+          onChange={props.setCode}
+          onSubmit={props.runSimulation}
           onViewValuePath={props.onViewValuePath}
           renderImportTooltip={props.renderImportTooltip}
         />
@@ -189,7 +160,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
         case "dependency-graph":
           return {
             title: "Dependency Graph",
-            body: <DependencyGraphModal project={project} />,
+            body: <DependencyGraphModal project={props.project} />,
           };
         default:
           return props.renderExtraModal?.(modalName);

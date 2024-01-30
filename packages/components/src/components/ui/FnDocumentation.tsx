@@ -181,8 +181,8 @@ export const FnDocumentation: FC<{
                 <div className="pt-2 pb-4" key={i}>
                   <SquiggleEditor
                     defaultCode={text}
-                    chartHeight={size === "small" ? 30 : 40}
                     editorFontSize={size === "small" ? 12 : 13}
+                    chartHeight={size === "small" ? 30 : 40}
                   />
                 </div>
               ) : (

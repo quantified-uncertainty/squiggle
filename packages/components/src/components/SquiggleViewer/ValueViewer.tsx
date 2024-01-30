@@ -3,7 +3,7 @@ import React from "react";
 import { SqValue } from "@quri/squiggle-lang";
 
 import { valueHasContext } from "../../lib/utility.js";
-import { MessageAlert } from "../Alert.js";
+import { MessageAlert } from "../ui/Alert.js";
 import { ValueWithContextViewer } from "./ValueWithContextViewer.js";
 
 // Same props as in `ValueWithContextViewer`, but no guarantee that value has context.

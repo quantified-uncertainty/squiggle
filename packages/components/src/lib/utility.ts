@@ -1,6 +1,14 @@
-import { result, SqValue } from "@quri/squiggle-lang";
+import {
+  Env,
+  result,
+  SqError,
+  SqProject,
+  SqValue,
+  SqValuePath,
+} from "@quri/squiggle-lang";
 
-import { SquiggleOutput } from "./hooks/useSquiggle.js";
+import { SqOutputResult } from "../../../squiggle-lang/src/public/types.js";
+import { Simulation } from "./hooks/useSimulator.js";
 
 export function flattenResult<a, b>(x: result<a, b>[]): result<a[], b> {
   if (x.length === 0) {
@@ -36,11 +44,13 @@ export function some(arr: boolean[]): boolean {
   return arr.reduce((x, y) => x || y, false);
 }
 
-export function getErrors(result: SquiggleOutput["output"]) {
-  if (!result.ok) {
-    return [result.value];
-  } else {
+export function simulationErrors(simulation?: Simulation): SqError[] {
+  if (!simulation) {
     return [];
+  } else if (simulation.output.ok) {
+    return [];
+  } else {
+    return [simulation.output.value];
   }
 }
 
@@ -98,3 +108,75 @@ export type SqValueWithContext = SqValue & Required<Pick<SqValue, "context">>;
 export function valueHasContext(value: SqValue): value is SqValueWithContext {
   return !!value.context;
 }
+
+export type ViewerTab =
+  | "Imports"
+  | "Exports"
+  | "Variables"
+  | "Result"
+  | "AST"
+  | { tag: "CustomResultPath"; value: SqValuePath };
+
+export function defaultViewerTab(
+  outputResult: SqOutputResult | undefined
+): ViewerTab {
+  if (!outputResult || !outputResult.ok) {
+    return "Variables";
+  }
+
+  const output = outputResult.value;
+  if (output.result.tag !== "Void") {
+    return "Result";
+  }
+  if (!output.exports.isEmpty()) {
+    return "Exports";
+  }
+  return "Variables";
+}
+
+export function viewerTabToValue(
+  viewerTab: ViewerTab,
+  output: SqOutputResult
+): SqValue | undefined {
+  if (!output.ok) {
+    return;
+  }
+  const sqOutput = output.value;
+  switch (viewerTab) {
+    case "Result":
+      return sqOutput.result;
+    case "Variables":
+      return sqOutput.bindings.asValue();
+    case "Imports":
+      return sqOutput.imports.asValue();
+    case "Exports":
+      return sqOutput.exports.asValue();
+    case "AST":
+      return;
+  }
+
+  if (viewerTab.tag === "CustomResultPath") {
+    const rootValue =
+      viewerTab.value.root === "result"
+        ? output.value.result
+        : output.value.bindings.asValue();
+    return rootValue.getSubvalueByPath(viewerTab.value, () => undefined);
+  }
+}
+
+//These two are being phased out, in favor of RunSetup
+// Props needed for a standalone execution.
+export type StandaloneExecutionProps = {
+  project?: undefined;
+  environment?: Env;
+  continues?: undefined;
+};
+
+// Props needed when executing inside a project.
+export type ProjectExecutionProps = {
+  /** The project that this execution is part of */
+  project: SqProject;
+  environment?: undefined;
+  /** What other squiggle sources from the project to continue. Default [] */
+  continues?: string[];
+};

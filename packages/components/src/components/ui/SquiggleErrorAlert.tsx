@@ -8,8 +8,8 @@ import {
   SqRuntimeError,
 } from "@quri/squiggle-lang";
 
+import { useViewerContext } from "../SquiggleViewer/ViewerProvider.js";
 import { ErrorAlert } from "./Alert.js";
-import { useViewerContext } from "./SquiggleViewer/ViewerProvider.js";
 
 type Props = {
   error: SqError;
