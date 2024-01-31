@@ -2,7 +2,7 @@ import { SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
-import { SqValueWithContext, ViewerTab } from "../../lib/utility.js";
+import { SqValueWithContext } from "../../lib/utility.js";
 import { ItemStore, useViewerContext } from "./ViewerProvider.js";
 
 function topLevelName(path: SqValuePath): string {
@@ -106,57 +106,47 @@ export function nonHiddenDictEntries(value: SqDict): [string, SqValue][] {
   return value.entries().filter(([_, v]) => !isHidden(v));
 }
 
+function valueToLine(value: SqValue): number | undefined {
+  return value.context?.findLocation()?.start.line;
+}
+
 export function findValuePathByLine(
   line: number,
-  result?: SqOutputResult
-): SqValuePath | undefined {
-  if (!result?.ok) {
+  sqResult?: SqOutputResult
+): { type: "Variables" | "Result"; path: SqValuePath } | undefined {
+  if (!sqResult?.ok) {
     return undefined;
   }
-  const bindings = result.value.bindings;
-  const items = bindings;
-  const el = items.entries().find(([_, v]) => {
-    const _line = v.context?.findLocation()?.start.line;
-    return line === _line;
-  });
-  if (el) {
-    return el[1].context?.path;
+  const { bindings, result } = sqResult.value;
+
+  // Search in bindings
+  for (const value of bindings.values()) {
+    if (line === valueToLine(value) && value.context?.path) {
+      return { type: "Variables", path: value.context.path };
+    }
+  }
+
+  // Check in result
+  const resultLine = valueToLine(result);
+  if (line === resultLine && result.context?.path) {
+    return { type: "Result", path: result.context.path };
   }
 }
 
-export function getActiveLineNumbers(result?: SqOutputResult): number[] {
-  if (!result?.ok) {
+export function getActiveLineNumbers(sqResult?: SqOutputResult): number[] {
+  if (!sqResult?.ok) {
     return [];
   }
-  const bindings = result.value.bindings;
+  const { bindings, result } = sqResult.value;
 
-  const lines = bindings
-    .entries()
-    .map(([_, v]) => {
-      return v.context?.findLocation()?.start.line;
-    })
-    .filter((v) => v !== undefined && v) as number[];
-  return lines.map((r) => r - 1);
-}
+  // Aggregate lines from bindings and result
+  const lines = [
+    ...Array.from(bindings.values(), valueToLine),
+    valueToLine(result),
+  ];
 
-export function modeToValue(
-  mode: ViewerTab,
-  output: SqOutputResult
-): SqValue | undefined {
-  if (!output.ok) {
-    return;
-  }
-  const sqOutput = output.value;
-  switch (mode) {
-    case "Result":
-      return sqOutput.result;
-    case "Variables":
-      return sqOutput.bindings.asValue();
-    case "Imports":
-      return sqOutput.imports.asValue();
-    case "Exports":
-      return sqOutput.exports.asValue();
-    case "AST":
-      return;
-  }
+  // Filter out undefined lines and adjust line numbers
+  return lines
+    .filter((line): line is number => line !== undefined)
+    .map((line) => line - 1);
 }

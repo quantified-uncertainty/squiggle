@@ -176,12 +176,13 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         }}
         activeLineNumbers={lineNumbers}
         onViewValueLine={(line) => {
-          const path = findValuePathByLine(line, simulation?.output);
-          if (path) {
-            rightPanelRef.current?.setViewerTab("Variables");
+          const lineValue = findValuePathByLine(line, simulation?.output);
+          const ref = rightPanelRef.current;
+          if (lineValue && ref) {
+            ref.setViewerTab(lineValue.type);
             setTimeout(() => {
-              rightPanelRef.current?.squiggleViewerHandle?.viewValuePath(path);
-            }, 1);
+              ref.squiggleViewerHandle?.viewValuePath(lineValue.path);
+            }, 0);
           }
         }}
         autorunMode={autorunMode}

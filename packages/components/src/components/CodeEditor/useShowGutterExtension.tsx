@@ -29,7 +29,7 @@ class FocusableMarker extends GutterMarker {
 
     // Create the marker div
     const marker = document.createElement("div");
-    marker.className = "focusable-marker-inner w-1 h-4 br-1 mt-[1px]";
+    marker.className = "focusable-marker-inner w-[2px] h-4 br-1 mt-[1px]";
 
     outerDiv.addEventListener("click", (e) => {
       e.preventDefault(); // Prevents default behavior
