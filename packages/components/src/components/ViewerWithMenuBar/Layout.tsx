@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { FC, ReactNode } from "react";
 
 export const Layout: FC<{
@@ -5,11 +6,17 @@ export const Layout: FC<{
   menu: ReactNode;
   changeSeedAndRunButton: ReactNode;
   indicator: ReactNode;
-}> = ({ viewer, menu, indicator, changeSeedAndRunButton }) => {
+  xPadding: number;
+}> = ({ viewer, menu, indicator, changeSeedAndRunButton, xPadding }) => {
   return (
     // `flex flex-col` helps to fit this in playground right panel and doesn't hurt otherwise
     <div className="flex flex-col overflow-y-auto">
-      <div className="flex justify-between items-center px-2 h-8 mb-1">
+      <div
+        className={clsx(
+          `flex justify-between items-center h-8 mb-1`,
+          `px-${xPadding}`
+        )}
+      >
         {menu}
         <div className="flex items-center">
           {indicator}

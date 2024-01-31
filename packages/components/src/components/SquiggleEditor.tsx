@@ -1,6 +1,7 @@
 import { FC, useMemo, useRef } from "react";
 
 import { useUncontrolledCode } from "../lib/hooks/index.js";
+import { usePlaygroundSettings } from "../lib/hooks/usePlaygroundSettings.js";
 import { useSimulatorManager } from "../lib/hooks/useSimulatorManager.js";
 import {
   ProjectExecutionProps,
@@ -15,7 +16,7 @@ export type SquiggleEditorProps = {
   defaultCode?: string;
   onCodeChange?(code: string): void;
   editorFontSize?: number;
-  // environment comes from SquiggleCodeProps
+  // environment comes from StandaloneExecutionProps
 } & (StandaloneExecutionProps | ProjectExecutionProps) &
   Omit<PartialPlaygroundSettings, "environment">;
 
@@ -23,11 +24,18 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   defaultCode: propsDefaultCode,
   onCodeChange,
   project: propsProject,
-  continues,
   environment,
+  continues,
   editorFontSize,
-  ...settings
+  ...defaultSettings
 }) => {
+  const { settings, randomizeSeed } = usePlaygroundSettings({
+    defaultSettings: {
+      ...defaultSettings,
+      ...{ environment },
+    },
+  });
+
   const { code, setCode, defaultCode } = useUncontrolledCode({
     defaultCode: propsDefaultCode,
     onCodeChange,
@@ -38,7 +46,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     setup: propsProject
       ? { type: "project", project: propsProject, continues }
       : { type: "standalone" },
-    environment,
+    environment: settings.environment,
   });
 
   const errors = useMemo(() => simulationErrors(simulation), [simulation]);
@@ -68,7 +76,8 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           simulation={simulation}
           editor={editorRef.current ?? undefined}
           playgroundSettings={settings}
-          randomizeSeed={undefined}
+          xPadding={0}
+          randomizeSeed={randomizeSeed}
         />
       )}
     </div>

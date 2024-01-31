@@ -18,6 +18,7 @@ type Props = {
   showMenu?: boolean;
   defaultTab?: ViewerTab;
   randomizeSeed: (() => void) | undefined;
+  xPadding?: number;
 };
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isSimulating state. */
@@ -30,6 +31,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
       showMenu = true,
       editor,
       defaultTab,
+      xPadding = 2,
     },
     viewerRef
   ) {
@@ -73,6 +75,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
             editor={editor}
           />
         }
+        xPadding={xPadding}
       />
     );
   }
