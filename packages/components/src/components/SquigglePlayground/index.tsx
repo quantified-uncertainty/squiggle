@@ -21,8 +21,10 @@ import {
   findValuePathByLine,
   getActiveLineNumbers,
 } from "../SquiggleViewer/utils.js";
-import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
-import { ViewerWithMenuBar } from "../ViewerWithMenuBar/index.js";
+import {
+  ViewerWithMenuBar,
+  ViewerWithMenuBarHandle,
+} from "../ViewerWithMenuBar/index.js";
 import {
   LeftPlaygroundPanel,
   LeftPlaygroundPanelHandle,
@@ -146,7 +148,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   }, [simulation, onExportsChange]);
 
   const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
-  const rightPanelRef = useRef<SquiggleViewerHandle>(null);
+  const rightPanelRef = useRef<ViewerWithMenuBarHandle>(null);
 
   const getLeftPanelElement = useCallback(
     () => leftPanelRef.current?.getLeftPanelElement() ?? undefined,
@@ -170,13 +172,16 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         renderImportTooltip={renderImportTooltip}
         ref={leftPanelRef}
         onViewValuePath={(path) => {
-          rightPanelRef.current?.viewValuePath(path);
+          rightPanelRef.current?.squiggleViewerHandle?.viewValuePath(path);
         }}
         activeLineNumbers={lineNumbers}
         onViewValueLine={(line) => {
           const path = findValuePathByLine(line, simulation?.output);
           if (path) {
-            rightPanelRef.current?.viewValuePath(path);
+            rightPanelRef.current?.setViewerTab("Variables");
+            setTimeout(() => {
+              rightPanelRef.current?.squiggleViewerHandle?.viewValuePath(path);
+            }, 1);
           }
         }}
         autorunMode={autorunMode}

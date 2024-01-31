@@ -1,4 +1,4 @@
-import { forwardRef, useState } from "react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
 import { isSimulating, Simulation } from "../../lib/hooks/useSimulator.js";
 import { defaultViewerTab, ViewerTab } from "../../lib/utility.js";
@@ -18,8 +18,12 @@ type Props = {
   defaultTab?: ViewerTab;
 };
 
+export type ViewerWithMenuBarHandle = {
+  squiggleViewerHandle: SquiggleViewerHandle | null;
+  setViewerTab: (tab: ViewerTab) => void;
+};
 /* Wrapper for SquiggleViewer that shows the rendering stats and isSimulating state. */
-export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
+export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
   function ViewerWithMenuBar(
     {
       simulation: simulation,
@@ -28,39 +32,46 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
       editor,
       defaultTab,
     },
-    viewerRef
+    viewerWithMenuBarRef
   ) {
     const [viewerTab, setViewerTab] = useState<ViewerTab>(
       defaultTab ?? defaultViewerTab(simulation.output)
     );
 
+    const viewerRef = useRef<SquiggleViewerHandle>(null);
     const { output } = simulation;
 
+    useImperativeHandle(viewerWithMenuBarRef, () => ({
+      squiggleViewerHandle: viewerRef.current,
+      setViewerTab,
+    }));
     return (
-      <Layout
-        menu={
-          showMenu ? (
-            <ViewerMenu
+      <div>
+        <Layout
+          menu={
+            showMenu ? (
+              <ViewerMenu
+                viewerTab={viewerTab}
+                setViewerTab={setViewerTab}
+                outputResult={output}
+              />
+            ) : (
+              <div />
+            ) // Important not to be null, so that it stays on the right.
+          }
+          indicator={<SimulatingIndicator simulation={simulation} />}
+          viewer={
+            <ViewerBody
               viewerTab={viewerTab}
-              setViewerTab={setViewerTab}
               outputResult={output}
+              isSimulating={isSimulating(simulation)}
+              playgroundSettings={playgroundSettings}
+              ref={viewerRef}
+              editor={editor}
             />
-          ) : (
-            <div />
-          ) // Important not to be null, so that it stays on the right.
-        }
-        indicator={<SimulatingIndicator simulation={simulation} />}
-        viewer={
-          <ViewerBody
-            viewerTab={viewerTab}
-            outputResult={output}
-            isSimulating={isSimulating(simulation)}
-            playgroundSettings={playgroundSettings}
-            ref={viewerRef}
-            editor={editor}
-          />
-        }
-      />
+          }
+        />
+      </div>
     );
   }
 );
