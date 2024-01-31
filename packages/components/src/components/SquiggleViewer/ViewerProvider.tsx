@@ -48,7 +48,7 @@ function findNode(
 }
 
 export type SquiggleViewerHandle = {
-  viewValuePath(path: SqValuePath): void;
+  focusFromPath(path: SqValuePath): void;
 };
 
 type LocalItemState = Readonly<{
@@ -167,7 +167,7 @@ export class ItemStore {
     this.handles[path.uid()]?.scrollIntoView();
   }
 
-  focusOnPath(path: SqValuePath) {
+  focusFromPath(path: SqValuePath) {
     this.handles[path.uid()]?.focusOnHeader();
   }
 }
@@ -196,7 +196,7 @@ export const ViewerContext = createContext<ViewerContextShape>({
   itemStore: new ItemStore(),
   viewerType: "normal",
   handle: {
-    viewValuePath: () => {},
+    focusFromPath: () => {},
   },
   initialized: false,
   rootValue: undefined,
@@ -381,10 +381,10 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
     }, [playgroundSettings]);
 
     const handle: SquiggleViewerHandle = {
-      viewValuePath(path: SqValuePath) {
+      focusFromPath(path: SqValuePath) {
         setZoomedInPathPath(undefined);
         setTimeout(() => {
-          itemStore.focusOnPath(path);
+          itemStore.focusFromPath(path);
         }, 1);
       },
     };

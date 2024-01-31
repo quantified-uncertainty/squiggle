@@ -15,7 +15,7 @@ export function useZoomedInSqValueKeyEvent(selected: SqValuePath) {
 
     // This timeout is a hack to make sure the header is zoomedIn after the reset
     setTimeout(() => {
-      itemStore.focusOnPath(selected);
+      itemStore.focusFromPath(selected);
     }, 1);
   }
 
@@ -45,7 +45,7 @@ export function useZoomedInSqValueKeyEvent(selected: SqValuePath) {
     ArrowRight: () => {
       const newItem = findNode(selected)?.children()[0];
       if (newItem) {
-        itemStore.focusOnPath(newItem.node.path);
+        itemStore.focusFromPath(newItem.node.path);
       }
     },
     Enter: resetToRoot,

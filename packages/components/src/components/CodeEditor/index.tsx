@@ -9,8 +9,7 @@ export type CodeEditorProps = {
   defaultValue: string;
   onChange: (value: string) => void;
   onSubmit?: () => void;
-  onViewValuePath?: (path: SqValuePath) => void;
-  getViewState?: () => { selected: SqValuePath | undefined };
+  onFocusFromPath?: (path: SqValuePath) => void;
   width?: number;
   height?: number | string;
   showGutter?: boolean;
@@ -19,7 +18,7 @@ export type CodeEditorProps = {
   sourceId: string;
   fontSize?: number;
   activeLineNumbers: number[];
-  onViewValueLine(line: number): void;
+  onFocusFromEditorLine(line: number): void;
   project: SqProject;
   renderImportTooltip?: (params: {
     project: SqProject;

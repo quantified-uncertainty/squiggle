@@ -90,7 +90,7 @@ export function useSquiggleEditorExtensions(
   const showGutterExtension = useShowGutterExtension(
     view,
     params.showGutter ?? false,
-    params.onViewValueLine,
+    params.onFocusFromEditorLine,
     params.activeLineNumbers
   );
   const lineWrappingExtension = useLineWrappingExtension(
@@ -105,7 +105,7 @@ export function useSquiggleEditorExtensions(
   });
   const viewNodeExtension = useViewNodeExtension(view, {
     project: params.project,
-    onViewValuePath: params.onViewValuePath,
+    onFocusFromPath: params.onFocusFromPath,
     sourceId: params.sourceId,
   });
 

@@ -61,7 +61,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           sourceId={sourceId}
           ref={editorRef}
           activeLineNumbers={[]}
-          onViewValueLine={() => {}}
+          onFocusFromEditorLine={() => {}}
           onSubmit={runSimulation}
         />
       </div>

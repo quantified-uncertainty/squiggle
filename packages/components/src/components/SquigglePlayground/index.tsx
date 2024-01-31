@@ -171,17 +171,17 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         renderExtraModal={renderExtraModal}
         renderImportTooltip={renderImportTooltip}
         ref={leftPanelRef}
-        onViewValuePath={(path) => {
-          rightPanelRef.current?.squiggleViewerHandle?.viewValuePath(path);
-        }}
         activeLineNumbers={lineNumbers}
-        onViewValueLine={(line) => {
+        onFocusFromPath={(path) => {
+          rightPanelRef.current?.squiggleViewerHandle?.focusFromPath(path);
+        }}
+        onFocusFromEditorLine={(line) => {
           const lineValue = findValuePathByLine(line, simulation?.output);
           const ref = rightPanelRef.current;
           if (lineValue && ref) {
             ref.setViewerTab(lineValue.type);
             setTimeout(() => {
-              ref.squiggleViewerHandle?.viewValuePath(lineValue.path);
+              ref.squiggleViewerHandle?.focusFromPath(lineValue.path);
             }, 0);
           }
         }}
