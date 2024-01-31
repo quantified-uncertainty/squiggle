@@ -1,8 +1,9 @@
-import { ImmutableMap } from "../utility/immutableMap.js";
+import { LocationRange } from "peggy";
+
 import { Err, fmap, mergeMany, Ok, result } from "../utility/result.js";
 import { Value } from "./index.js";
 import { type VBool } from "./VBool.js";
-import { type VDict } from "./VDict.js";
+import { VDict } from "./VDict.js";
 import { type VString } from "./VString.js";
 
 // Note: this file can't call any `vType` constructors; it would cause a circular dependency because of `BaseValue` -> `ValueTags`.
@@ -18,6 +19,7 @@ export type ValueTagsType = {
   notebook?: VBool; // can be set on arrays
   exportData?: VDict; // should be { sourceId: String, path: List(String) }
   startOpenState?: VString;
+  location?: LocationRange;
 };
 
 type ValueTagsTypeName = keyof ValueTagsType;
@@ -32,6 +34,7 @@ const valueTagsTypeNames: ValueTagsTypeName[] = [
   "notebook",
   "exportData",
   "startOpenState",
+  "location",
 ];
 
 function convertToValueTagsTypeName(
@@ -54,43 +57,25 @@ function convertToValueTagsTypeName(
 export class ValueTags {
   constructor(public value: ValueTagsType) {}
 
-  toList(): [string, Value][] {
-    const result: [string, Value][] = [];
-    const { value } = this;
-    if (value.name?.value) {
-      result.push(["name", value.name]);
-    }
-    if (value.doc?.value) {
-      result.push(["doc", value.doc]);
-    }
-    if (value.showAs) {
-      result.push(["showAs", value.showAs]);
-    }
-    if (value.numberFormat) {
-      result.push(["numberFormat", value.numberFormat]);
-    }
-    if (value.dateFormat) {
-      result.push(["dateFormat", value.dateFormat]);
-    }
-    if (value.hidden) {
-      result.push(["hidden", value.hidden]);
-    }
-    if (value.notebook) {
-      result.push(["notebook", value.notebook]);
-    }
-    const _exportData = this.exportData();
-    if (_exportData) {
-      result.push(["exportData", _exportData]);
-    }
-
-    if (value.startOpenState) {
-      result.push(["startOpenState", value.startOpenState]);
-    }
-    return result;
+  isEmpty() {
+    return (
+      this.value.name === undefined &&
+      this.value.doc === undefined &&
+      this.value.showAs === undefined &&
+      this.value.numberFormat === undefined &&
+      this.value.dateFormat === undefined &&
+      this.value.hidden === undefined &&
+      this.value.notebook === undefined &&
+      this.value.exportData === undefined &&
+      this.value.startOpenState === undefined &&
+      this.value.location === undefined
+    );
   }
 
-  isEmpty() {
-    return this.toList().length === 0;
+  toString(): string {
+    return Object.entries(this.value)
+      .map(([key, value]) => `${key}: ${value?.toString()}`)
+      .join(", ");
   }
 
   omit(keys: ValueTagsTypeName[]) {
@@ -103,16 +88,6 @@ export class ValueTags {
     const params = mergeMany(keys.map(convertToValueTagsTypeName));
     //Don't simplify the omit call, as we need to ensure "this" is carried.
     return fmap(params, (args) => this.omit(args));
-  }
-
-  toMap(): ImmutableMap<string, Value> {
-    return ImmutableMap(this.toList());
-  }
-
-  toString(): string {
-    return this.toList()
-      .map(([key, value]) => `${key}: ${value.toString()}`)
-      .join(", ");
   }
 
   merge(other: ValueTagsType) {
@@ -148,6 +123,10 @@ export class ValueTags {
 
   notebook() {
     return this.value.notebook?.value;
+  }
+
+  location() {
+    return this.value.location;
   }
 
   startOpenState(): "open" | "closed" | undefined {

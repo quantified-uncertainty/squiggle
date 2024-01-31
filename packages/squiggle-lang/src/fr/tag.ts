@@ -1,4 +1,4 @@
-import { REArgumentError } from "../errors/messages.js";
+import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -31,6 +31,7 @@ import { Lambda } from "../reducer/lambda.js";
 import { getOrThrow } from "../utility/result.js";
 import { Value } from "../value/index.js";
 import { ValueTags, ValueTagsType } from "../value/valueTags.js";
+import { location, toMap } from "../value/valueTagsUtils.js";
 import { vBool, VBool } from "../value/VBool.js";
 import { vString } from "../value/VString.js";
 
@@ -390,12 +391,43 @@ example2 = {|x| x + 1}`,
     ],
   }),
   maker.make({
+    name: "location",
+    description: `Saves the location of a value. Note that this must be called at the point where the location is to be saved. If you use it in a helper function, it will save the location of the helper function, not the location where the helper function is called.`,
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition(
+        [frWithTags(frAny({ genericName: "A" }))],
+        frWithTags(frAny({ genericName: "A" })),
+        ([{ value, tags }], { frameStack }) => {
+          const location = frameStack.getTopFrame()?.location;
+          if (!location) {
+            throw new REOther("Location is missing in call stack");
+          }
+          return {
+            value,
+            tags: tags.merge({ location: location }),
+          };
+        },
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getLocation",
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition([frWithTags(frAny())], frAny(), ([{ tags }]) => {
+        return location(tags) || vString("None");
+      }),
+    ],
+  }),
+  maker.make({
     name: "getAll",
     displaySection: "Functions",
     description: "Returns a dictionary of all tags on a value.",
     definitions: [
       makeDefinition([frAny()], frDictWithArbitraryKeys(frAny()), ([value]) => {
-        return value.getTags().toMap();
+        return toMap(value.getTags());
       }),
     ],
   }),
