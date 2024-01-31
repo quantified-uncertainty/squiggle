@@ -23,7 +23,7 @@ import { unpackResult } from "../helpers/distHelpers.js";
 const env: Env = {
   sampleCount: 100,
   xyPointLength: 100,
-  seed: "default",
+  seed: "TEST_SEED",
 };
 const rng = seedrandom();
 

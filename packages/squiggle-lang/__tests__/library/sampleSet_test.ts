@@ -85,7 +85,7 @@ async function makeSampleSet(samples: number[]) {
   }
 }
 
-const env = { sampleCount: 10000, xyPointLength: 100, seed: "default" };
+const env = { sampleCount: 10000, xyPointLength: 100, seed: "TEST_SEED" };
 
 describe("cumulative density function", () => {
   // We should fix this.
@@ -183,7 +183,7 @@ describe("cumulative density function", () => {
 
 // I no longer believe this is true.
 describe("probability density function", () => {
-  const env = { sampleCount: 1000, xyPointLength: 100, seed: "default" };
+  const env = { sampleCount: 1000, xyPointLength: 100, seed: "TEST_SEED" };
 
   test.skip("assigns to the max at most the weight of the mean", () => {
     fc.assert(
@@ -221,7 +221,7 @@ describe("mean is mean", () => {
           const myEnv = {
             sampleCount: 2 * n,
             xyPointLength: 4 * n,
-            seed: "default",
+            seed: "TEST_SEED",
           };
           const mean = dist.mean(myEnv);
           if (typeof mean === "number") {
@@ -247,7 +247,7 @@ describe("mean is mean", () => {
           const myEnv = {
             sampleCount: Math.floor(n / 2),
             xyPointLength: 4 * n,
-            seed: "default",
+            seed: "TEST_SEED",
           };
           const mean = dist.mean(myEnv);
           if (typeof mean === "number") {

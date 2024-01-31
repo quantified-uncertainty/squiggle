@@ -19,14 +19,14 @@ function stringToRandomNumber(str: string): number {
   return (hash % 6) + 1;
 }
 
-const DiceIcon: FC<{ side: number; isRunning: boolean }> = ({
+const DiceIcon: FC<{ side: number; isSimulating: boolean }> = ({
   side,
-  isRunning,
+  isSimulating,
 }) => {
   const props = {
     size: 16,
     className: clsx(
-      isRunning
+      isSimulating
         ? "animate-spin text-violet-400 group-hover:text-violet-900"
         : "text-violet-200 group-hover:text-violet-500"
     ),
@@ -65,7 +65,7 @@ export const RunSeedButton: FC<{
         <DiceIcon
           //We want to wait until the animation is done before we change the icon. Like the dice was rolled, and was decided at the end. It represents the result of the seed - not the seed itself.
           side={stringToRandomNumber(seed)}
-          isRunning={isSimulating}
+          isSimulating={isSimulating}
         />
       </div>
     </TextTooltip>

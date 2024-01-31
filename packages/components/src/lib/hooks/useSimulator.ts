@@ -36,16 +36,21 @@ export function useSimulator(args: SimulatorArgs): UseSimulator {
       setSimulation((prevOutput) => {
         return prevOutput
           ? {
-              isStale: true,
               ...(prevOutput || {}),
+              isStale: true,
             }
           : undefined;
       });
+
+      //We have two of these, because sometimes 1 doesn't seem like enough
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      await new Promise((resolve) => requestAnimationFrame(resolve));
 
       const startTime = Date.now();
       args.project.setSource(args.sourceId, args.code);
       args.project.setContinues(args.sourceId, args.continues);
       const _environment = args.project.getEnvironment(); // Get it here, just in case it changes during the run
+      await new Promise((resolve) => requestAnimationFrame(resolve));
       await args.project.run(args.sourceId);
       const output = args.project.getOutput(args.sourceId);
       const executionTime = Date.now() - startTime;
