@@ -80,11 +80,11 @@ describe("SqValuePath", () => {
 
     test("path contains empty path (with same root)", () => {
       const nonEmptyPath = new SqValuePath({
-        root: "exports",
+        root: "bindings",
         edges: [SqValuePathEdge.fromCalculator()],
       });
       const emptyPath = new SqValuePath({
-        root: "exports",
+        root: "bindings",
         edges: [],
       });
       expect(nonEmptyPath.hasPrefix(emptyPath)).toBe(true);
