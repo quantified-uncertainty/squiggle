@@ -31,7 +31,7 @@ import { Lambda } from "../reducer/lambda.js";
 import { getOrThrow } from "../utility/result.js";
 import { Value } from "../value/index.js";
 import { ValueTags, ValueTagsType } from "../value/valueTags.js";
-import { ValueTagsWrapper } from "../value/ValueTagsWrapper.js";
+import { location, toMap } from "../value/valueTagsUtils.js";
 import { vBool, VBool } from "../value/VBool.js";
 import { vString } from "../value/VString.js";
 
@@ -417,7 +417,7 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition([frWithTags(frAny())], frAny(), ([{ tags }]) => {
-        return new ValueTagsWrapper(tags).location() || vString("None");
+        return location(tags) || vString("None");
       }),
     ],
   }),
@@ -427,7 +427,7 @@ example2 = {|x| x + 1}`,
     description: "Returns a dictionary of all tags on a value.",
     definitions: [
       makeDefinition([frAny()], frDictWithArbitraryKeys(frAny()), ([value]) => {
-        return new ValueTagsWrapper(value.getTags()).toMap();
+        return toMap(value.getTags());
       }),
     ],
   }),
