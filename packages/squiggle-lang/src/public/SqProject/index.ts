@@ -264,7 +264,8 @@ export class SqProject {
       bindings: wrapSqDict(bindings, "bindings"),
       exports: wrapSqDict(
         exports.mergeTags({ name: vString(sourceId) }),
-        "exports"
+        // In terms of context, exports are the same as bindings.
+        "bindings"
       ),
       imports: wrapSqDict(externals.explicitImports, "imports"),
     });

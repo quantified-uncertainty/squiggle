@@ -105,7 +105,7 @@ export const PlaygroundPage: FC<{ version: string | null }> = (props) => {
         squiggle ? (
           <squiggle.components.SquigglePlayground
             height={height}
-            defaultCode={hashData.defaultCode ?? "normal(0, 1)"}
+            defaultCode={hashData.defaultCode ?? "a = normal(0, 1)"}
             distributionChartSettings={{
               showSummary: hashData.showSummary ?? true,
             }}
