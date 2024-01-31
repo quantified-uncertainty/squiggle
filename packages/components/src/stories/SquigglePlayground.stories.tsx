@@ -17,7 +17,7 @@ type Story = StoryObj<typeof meta>;
 export const Normal: Story = {
   name: "Normal",
   args: {
-    defaultCode: "normal(5,2)",
+    defaultCode: "a = normal(5,2)",
     height: 800,
   },
 };
