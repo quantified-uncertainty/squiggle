@@ -137,13 +137,15 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           height="100%"
           project={props.project}
           sourceId={props.sourceId}
-          showGutter={true}
+          gutter={{
+            type: "shown",
+            activeLineNumbers: props.activeLineNumbers,
+            onFocusFromEditorLine: props.onFocusFromEditorLine,
+          }}
           lineWrapping={props.settings.editorSettings.lineWrapping}
           onChange={props.setCode}
           onSubmit={props.runSimulation}
-          activeLineNumbers={props.activeLineNumbers}
           onFocusFromPath={props.onFocusFromPath}
-          onFocusFromEditorLine={props.onFocusFromEditorLine}
           renderImportTooltip={props.renderImportTooltip}
         />
       </div>

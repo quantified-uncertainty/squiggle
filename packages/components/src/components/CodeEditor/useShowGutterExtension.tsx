@@ -12,6 +12,14 @@ import { useMemo } from "react";
 
 import { useReactiveExtension } from "./codemirrorHooks.js";
 
+export type EditorGutterState =
+  | {
+      type: "shown";
+      activeLineNumbers: number[];
+      onFocusFromEditorLine: (line: number) => void;
+    }
+  | { type: "hidden" };
+
 class FocusableMarker extends GutterMarker {
   lineNumber: number;
   onClickLine: () => void;
@@ -46,31 +54,32 @@ class FocusableMarker extends GutterMarker {
 
 export function useShowGutterExtension(
   view: EditorView | undefined,
-  showGutter: boolean,
-  onClickLine: (lineNumber: number) => void,
-  activeLines: number[]
+  gutterProps: EditorGutterState
 ) {
   const markers = useMemo(() => {
+    if (gutterProps.type === "hidden") return [];
     const builder = new RangeSetBuilder<GutterMarker>();
     if (view == null) return builder.finish();
-    for (const i of activeLines.sort((a, b) => a - b)) {
+    for (const i of gutterProps.activeLineNumbers.sort((a, b) => a - b)) {
       if (i >= 0 && i < view?.state.doc.lines) {
         const line = view.state.doc.line(i + 1);
         builder.add(
           line.from,
           line.to,
-          new FocusableMarker(i + 1, () => onClickLine(i + 1))
+          new FocusableMarker(i + 1, () =>
+            gutterProps.onFocusFromEditorLine(i + 1)
+          )
         );
       }
     }
     return builder.finish();
-  }, [activeLines, view, onClickLine]);
+  }, [view, gutterProps]);
 
   return useReactiveExtension(
     view,
     () => {
       if (!view) return [];
-      return showGutter
+      return gutterProps.type === "shown"
         ? [
             highlightActiveLine(),
             highlightActiveLineGutter(),
@@ -85,6 +94,6 @@ export function useShowGutterExtension(
           ]
         : [];
     },
-    [showGutter, activeLines]
+    [gutterProps]
   );
 }

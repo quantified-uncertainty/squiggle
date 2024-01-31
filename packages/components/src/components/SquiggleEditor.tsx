@@ -52,16 +52,14 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
         data-testid="squiggle-editor"
       >
         <CodeEditor
+          ref={editorRef}
           defaultValue={defaultCode ?? ""}
           onChange={setCode}
           fontSize={editorFontSize}
-          showGutter={false}
+          gutter={{ type: "hidden" }}
           errors={errors}
           project={project}
           sourceId={sourceId}
-          ref={editorRef}
-          activeLineNumbers={[]}
-          onFocusFromEditorLine={() => {}}
           onSubmit={runSimulation}
         />
       </div>

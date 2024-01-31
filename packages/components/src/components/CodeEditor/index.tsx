@@ -3,6 +3,7 @@ import { forwardRef, ReactNode, useImperativeHandle } from "react";
 import { SqError, SqProject, SqValuePath } from "@quri/squiggle-lang";
 
 import { formatSquiggle } from "./useFormatSquiggleExtension.js";
+import { EditorGutterState } from "./useShowGutterExtension.js";
 import { useSquiggleEditorView } from "./useSquiggleEditorView.js";
 
 export type CodeEditorProps = {
@@ -12,13 +13,11 @@ export type CodeEditorProps = {
   onFocusFromPath?: (path: SqValuePath) => void;
   width?: number;
   height?: number | string;
-  showGutter?: boolean;
   lineWrapping?: boolean;
   errors?: SqError[];
   sourceId: string;
   fontSize?: number;
-  activeLineNumbers: number[];
-  onFocusFromEditorLine(line: number): void;
+  gutter: EditorGutterState;
   project: SqProject;
   renderImportTooltip?: (params: {
     project: SqProject;
