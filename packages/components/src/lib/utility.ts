@@ -128,9 +128,6 @@ export function defaultViewerTab(
   if (output.result.tag !== "Void") {
     return "Result";
   }
-  if (!output.exports.isEmpty()) {
-    return "Exports";
-  }
   return "Variables";
 }
 
