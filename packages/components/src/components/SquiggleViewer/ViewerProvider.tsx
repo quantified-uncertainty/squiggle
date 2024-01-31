@@ -385,7 +385,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
         setZoomedInPathPath(undefined);
         setTimeout(() => {
           itemStore.focusFromPath(path);
-        }, 1);
+        }, 0);
       },
     };
 

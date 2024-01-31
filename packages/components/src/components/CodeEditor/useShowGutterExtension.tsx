@@ -31,21 +31,18 @@ class FocusableMarker extends GutterMarker {
   }
 
   override toDOM() {
-    // Create the outer div with the class 'px-1'
     const outerDiv = document.createElement("div");
-    outerDiv.className = "pr-1 cursor-pointer focusable-marker"; // Tailwind padding class
+    outerDiv.className = "pr-1 cursor-pointer focusable-marker";
 
-    // Create the marker div
     const marker = document.createElement("div");
     marker.className = "focusable-marker-inner w-[2px] h-4 br-1 mt-[1px]";
 
     outerDiv.addEventListener("click", (e) => {
-      e.preventDefault(); // Prevents default behavior
-      e.stopPropagation(); // Stops the event from propagating further
-      this.onClickLine(); // Call the onClickLine function
+      e.preventDefault();
+      e.stopPropagation();
+      this.onClickLine();
     });
 
-    // Append the marker div to the outer div
     outerDiv.appendChild(marker);
 
     return outerDiv;

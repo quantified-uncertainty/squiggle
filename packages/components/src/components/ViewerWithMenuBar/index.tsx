@@ -45,33 +45,32 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
       squiggleViewerHandle: viewerRef.current,
       setViewerTab,
     }));
+
     return (
-      <div>
-        <Layout
-          menu={
-            showMenu ? (
-              <ViewerMenu
-                viewerTab={viewerTab}
-                setViewerTab={setViewerTab}
-                outputResult={output}
-              />
-            ) : (
-              <div />
-            ) // Important not to be null, so that it stays on the right.
-          }
-          indicator={<SimulatingIndicator simulation={simulation} />}
-          viewer={
-            <ViewerBody
+      <Layout
+        menu={
+          showMenu ? (
+            <ViewerMenu
               viewerTab={viewerTab}
+              setViewerTab={setViewerTab}
               outputResult={output}
-              isSimulating={isSimulating(simulation)}
-              playgroundSettings={playgroundSettings}
-              ref={viewerRef}
-              editor={editor}
             />
-          }
-        />
-      </div>
+          ) : (
+            <div />
+          ) // Important not to be null, so that it stays on the right.
+        }
+        indicator={<SimulatingIndicator simulation={simulation} />}
+        viewer={
+          <ViewerBody
+            viewerTab={viewerTab}
+            outputResult={output}
+            isSimulating={isSimulating(simulation)}
+            playgroundSettings={playgroundSettings}
+            ref={viewerRef}
+            editor={editor}
+          />
+        }
+      />
     );
   }
 );
