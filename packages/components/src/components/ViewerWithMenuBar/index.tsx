@@ -57,7 +57,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
         }
         indicator={<SimulatingIndicator simulation={simulation} />}
         changeSeedAndRunButton={
-          randomizeSeed && autorunMode ? (
+          randomizeSeed ? (
             <RunSeedButton
               isSimulating={_isSimulating}
               seed={simulation.environment.seed || "default-seed"}

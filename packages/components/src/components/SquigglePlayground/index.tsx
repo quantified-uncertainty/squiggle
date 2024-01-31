@@ -156,7 +156,12 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         editor={leftPanelRef.current?.getEditor() ?? undefined}
         playgroundSettings={settings}
         ref={rightPanelRef}
-        randomizeSeed={randomizeSeed}
+        randomizeSeed={() => {
+          randomizeSeed();
+          if (!autorunMode) {
+            runSimulation();
+          }
+        }}
         autorunMode={autorunMode}
       />
     ) : (
