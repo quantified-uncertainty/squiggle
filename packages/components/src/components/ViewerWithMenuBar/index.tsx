@@ -6,7 +6,7 @@ import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
-import { RunSeedButton } from "./RunSeedButton.js";
+import { RandomizeSeedButton } from "./RandomizeSeedButton.js";
 import { SimulatingIndicator } from "./SimulatingIndicator.js";
 import { ViewerBody } from "./ViewerBody.js";
 import { ViewerMenu } from "./ViewerMenu.js";
@@ -18,7 +18,6 @@ type Props = {
   showMenu?: boolean;
   defaultTab?: ViewerTab;
   randomizeSeed: (() => void) | undefined;
-  autorunMode?: boolean;
 };
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isSimulating state. */
@@ -31,7 +30,6 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
       showMenu = true,
       editor,
       defaultTab,
-      autorunMode,
     },
     viewerRef
   ) {
@@ -58,7 +56,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
         indicator={<SimulatingIndicator simulation={simulation} />}
         changeSeedAndRunButton={
           randomizeSeed ? (
-            <RunSeedButton
+            <RandomizeSeedButton
               isSimulating={_isSimulating}
               seed={simulation.environment.seed || "default-seed"}
               randomizeSeed={randomizeSeed}

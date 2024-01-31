@@ -15,8 +15,6 @@ export type SquiggleEditorProps = {
   defaultCode?: string;
   onCodeChange?(code: string): void;
   editorFontSize?: number;
-  seed?: string;
-  setSeed?(seed: string): void;
   // environment comes from SquiggleCodeProps
 } & (StandaloneExecutionProps | ProjectExecutionProps) &
   Omit<PartialPlaygroundSettings, "environment">;
@@ -71,7 +69,6 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           editor={editorRef.current ?? undefined}
           playgroundSettings={settings}
           randomizeSeed={undefined}
-          autorunMode={true}
         />
       )}
     </div>

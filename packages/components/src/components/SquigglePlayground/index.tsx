@@ -162,7 +162,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
             runSimulation();
           }
         }}
-        autorunMode={autorunMode}
       />
     ) : (
       <div className="grid place-items-center h-full">

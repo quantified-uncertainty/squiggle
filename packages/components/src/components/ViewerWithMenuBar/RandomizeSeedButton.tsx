@@ -50,7 +50,7 @@ const DiceIcon: FC<{ side: number; isSimulating: boolean }> = ({
   }
 };
 
-export const RunSeedButton: FC<{
+export const RandomizeSeedButton: FC<{
   isSimulating: boolean;
   seed: string;
   randomizeSeed: () => void;
@@ -63,7 +63,6 @@ export const RunSeedButton: FC<{
     >
       <div className="ml-1 px-1 cursor-pointer group" onClick={randomizeSeed}>
         <DiceIcon
-          //We want to wait until the animation is done before we change the icon. Like the dice was rolled, and was decided at the end. It represents the result of the seed - not the seed itself.
           side={stringToRandomNumber(seed)}
           isSimulating={isSimulating}
         />
