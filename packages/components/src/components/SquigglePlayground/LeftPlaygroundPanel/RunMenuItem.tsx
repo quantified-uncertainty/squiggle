@@ -8,12 +8,12 @@ import { modKey } from "../../../lib/utility.js";
 import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 
 export const RunMenuItem: React.FC<{
-  runSquiggleProject: () => void;
+  runSimulation: () => void;
   autorunMode: boolean;
-  isRunning: boolean;
+  isSimulating: boolean;
   codeHasChanged: boolean;
-}> = ({ runSquiggleProject, autorunMode, isRunning, codeHasChanged }) => {
-  const showAsRunning = !autorunMode && isRunning;
+}> = ({ runSimulation, autorunMode, isSimulating, codeHasChanged }) => {
+  const showAsRunning = !autorunMode && isSimulating;
   const text = `Run (${modKey()}+Enter)`;
 
   return (
@@ -22,7 +22,7 @@ export const RunMenuItem: React.FC<{
       icon={showAsRunning ? RefreshIcon : PlayIcon}
       iconSpin={showAsRunning}
       className={clsx(!codeHasChanged && "opacity-40")}
-      onClick={runSquiggleProject}
+      onClick={runSimulation}
     >
       Run
     </ToolbarItem>

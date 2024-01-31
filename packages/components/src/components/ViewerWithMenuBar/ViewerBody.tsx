@@ -11,14 +11,14 @@ import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 type Props = {
   viewerTab: ViewerTab;
   outputResult: SqOutputResult;
-  isRunning: boolean;
+  isSimulating: boolean;
   editor?: CodeEditorHandle;
   playgroundSettings: PartialPlaygroundSettings;
 };
 
 export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
   function ViewerBody(
-    { outputResult, viewerTab, isRunning, editor, playgroundSettings },
+    { outputResult, viewerTab, isSimulating, editor, playgroundSettings },
     viewerRef
   ) {
     if (!outputResult.ok) {
@@ -43,7 +43,7 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
 
     return (
       <div className="relative">
-        {isRunning && (
+        {isSimulating && (
           // `opacity-0 squiggle-semi-appear` would be better, but won't work reliably until we move Squiggle evaluation to Web Workers
           <div className="absolute z-10 inset-0 bg-white opacity-50" />
         )}

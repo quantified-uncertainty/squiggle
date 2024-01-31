@@ -1,5 +1,5 @@
 import { useSession } from "next-auth/react";
-import { BaseSyntheticEvent, FC, useMemo, useState } from "react";
+import { BaseSyntheticEvent, FC, use, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
@@ -20,7 +20,7 @@ import {
   type SquiggleVersion,
   SquiggleVersionShower,
   useAdjustSquiggleVersion,
-  VersionedSquigglePlayground,
+  versionedSquigglePackages,
   versionSupportsDropdownMenu,
   versionSupportsExports,
   versionSupportsImportTooltip,
@@ -294,10 +294,13 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
 
   const checkedVersion = useAdjustSquiggleVersion(version);
 
-  // Build props for VersionedSquigglePlayground first, since they might depend on the version we use,
+  const squiggle = use(versionedSquigglePackages(checkedVersion));
+
+  // Build props for versioned SquigglePlayground first, since they might depend on the version we use,
   // and we want to populate them incrementally.
-  const playgroundProps: Parameters<typeof VersionedSquigglePlayground>[0] = {
-    version: checkedVersion,
+  const playgroundProps: Parameters<
+    typeof squiggle.components.SquigglePlayground
+  >[0] = {
     defaultCode,
     sourceId: serializeSourceId({
       owner: model.owner.slug,
@@ -361,7 +364,12 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
    * (In this simple case, we could always set `renderExtraDropdownItems` prop since it'd be ignored by older playground versions.)
    * It relies on `versionSupportsDropdownMenu` type predicate which narrows down `playgroundProps` type.
    */
-  if (versionSupportsDropdownMenu.props(playgroundProps)) {
+  if (
+    versionSupportsDropdownMenu.propsByVersion<"SquigglePlayground">(
+      squiggle.version,
+      playgroundProps
+    )
+  ) {
     playgroundProps.renderExtraDropdownItems = ({ openModal }) =>
       model.isEditable ? (
         <>
@@ -375,13 +383,23 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       ) : null;
   }
 
-  if (versionSupportsExports.props(playgroundProps)) {
+  if (
+    versionSupportsExports.propsByVersion<"SquigglePlayground">(
+      squiggle.version,
+      playgroundProps
+    )
+  ) {
     playgroundProps.onExportsChange = (exports) => {
       form.setValue("exports", exports);
     };
   }
 
-  if (versionSupportsImportTooltip.props(playgroundProps)) {
+  if (
+    versionSupportsImportTooltip.propsByVersion<"SquigglePlayground">(
+      squiggle.version,
+      playgroundProps
+    )
+  ) {
     playgroundProps.renderImportTooltip = ({ importId }) => (
       <ReactRoot session={session}>
         <ImportTooltip importId={importId} />
@@ -397,7 +415,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
             draftLocator={draftLocator}
             restore={restoreDraft}
           />
-          <VersionedSquigglePlayground
+          <squiggle.components.SquigglePlayground
             key={playgroundKey}
             {...playgroundProps}
           />
