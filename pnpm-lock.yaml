@@ -865,8 +865,8 @@ importers:
   packages/vscode-ext:
     dependencies:
       '@vscode/vsce':
-        specifier: ^2.22.0
-        version: 2.22.0
+        specifier: ^2.23.0
+        version: 2.23.0
       vscode-languageclient:
         specifier: ^9.0.1
         version: 9.0.1
@@ -8074,8 +8074,8 @@ packages:
       - supports-color
     dev: true
 
-  /@vscode/vsce@2.22.0:
-    resolution: {integrity: sha512-8df4uJiM3C6GZ2Sx/KilSKVxsetrTBBIUb3c0W4B1EWHcddioVs5mkyDKtMNP0khP/xBILVSzlXxhV+nm2rC9A==}
+  /@vscode/vsce@2.23.0:
+    resolution: {integrity: sha512-Wf9yN8feZf4XmUW/erXyKQvCL577u72AQv4AI4Cwt5o5NyE49C5mpfw3pN78BJYYG3qnSIxwRo7JPvEurkQuNA==}
     engines: {node: '>= 14'}
     hasBin: true
     dependencies:
@@ -8083,6 +8083,7 @@ packages:
       chalk: 2.4.2
       cheerio: 1.0.0-rc.12
       commander: 6.2.1
+      find-yarn-workspace-root: 2.0.0
       glob: 7.2.3
       hosted-git-info: 4.1.0
       jsonc-parser: 3.2.0
@@ -11645,6 +11646,12 @@ packages:
       micromatch: 4.0.5
       pkg-dir: 4.2.0
     dev: true
+
+  /find-yarn-workspace-root@2.0.0:
+    resolution: {integrity: sha512-1IMnbjt4KzsQfnhnzNd8wUEgXZ44IzZaZmnLYx7D5FZlaHt2gW20Cri8Q+E/t5tIj4+epTBub+2Zxu/vNILzqQ==}
+    dependencies:
+      micromatch: 4.0.5
+    dev: false
 
   /flat-cache@3.1.0:
     resolution: {integrity: sha512-OHx4Qwrrt0E4jEIcI5/Xb+f+QmJYNj2rrK8wiIdQOIrB9WrrJL8cjZvXdXuBTkkEwEqLycb5BeZDV1o2i9bTew==}
