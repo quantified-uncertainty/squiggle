@@ -1,6 +1,5 @@
 import jstat from "jstat";
 import sum from "lodash/sum.js";
-import { PRNG } from "seedrandom";
 
 import * as magicNumbers from "../magicNumbers.js";
 import * as Operation from "../operation.js";
@@ -10,6 +9,7 @@ import { DiscreteShape } from "../PointSet/Discrete.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import * as Result from "../utility/result.js";
 import { Ok, result } from "../utility/result.js";
+import { PRNG } from "../utility/rng.js";
 import * as XYShape from "../XYShape.js";
 import { BaseDist } from "./BaseDist.js";
 import { DistError, notYetImplemented, xyShapeDistError } from "./DistError.js";

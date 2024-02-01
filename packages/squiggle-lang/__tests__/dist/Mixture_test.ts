@@ -1,6 +1,5 @@
-import seedrandom from "seedrandom";
-
 import { mixture } from "../../src/dist/distOperations/index.js";
+import { getRng } from "../../src/utility/rng.js";
 import {
   env,
   mkBeta,
@@ -11,7 +10,7 @@ import {
   unpackResult,
 } from "../helpers/distHelpers.js";
 
-const rng = seedrandom();
+const rng = getRng();
 
 describe("mixture", () => {
   test.each([

@@ -1,11 +1,10 @@
-import seedrandom from "seedrandom";
-
 import { BaseDist } from "../../src/dist/BaseDist.js";
 import { DistError } from "../../src/dist/DistError.js";
 import { SampleSetDist } from "../../src/dist/SampleSetDist/index.js";
 import { Env } from "../../src/index.js";
 import * as Result from "../../src/utility/result.js";
 import { Ok } from "../../src/utility/result.js";
+import { getRng } from "../../src/utility/rng.js";
 import {
   betaDist,
   cauchyDist,
@@ -24,7 +23,7 @@ const env: Env = {
   sampleCount: 100,
   xyPointLength: 100,
 };
-const rng = seedrandom();
+const rng = getRng();
 
 describe("toPointSet", () => {
   test("on symbolic normal distribution", () => {

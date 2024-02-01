@@ -62,6 +62,7 @@ export async function run(args: RunArgs) {
     environment = {
       sampleCount: Number(args.sampleCount),
       xyPointLength: Number(args.sampleCount),
+      seed: "fixed",
     };
   }
 

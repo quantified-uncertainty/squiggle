@@ -1,6 +1,5 @@
-import seedrandom from "seedrandom";
-
 import { Env } from "../dist/env.js";
+import { getRng, PRNG } from "../utility/rng.js";
 import { FrameStack, topFrameName } from "./frameStack.js";
 import { evaluate, ReducerFn } from "./index.js";
 import { BaseLambda } from "./lambda.js";
@@ -12,13 +11,13 @@ export type ReducerContext = Readonly<{
   frameStack: FrameStack;
   evaluate: ReducerFn;
   inFunction: BaseLambda | undefined;
-  rng: seedrandom.PRNG;
+  rng: PRNG;
 }>;
 
 export function createContext(environment: Env): ReducerContext {
   const seed = environment.seed
     ? String(environment.seed)
-    : String(seedrandom()());
+    : String(Math.random());
 
   return {
     stack: Stack.make(),
@@ -26,7 +25,7 @@ export function createContext(environment: Env): ReducerContext {
     frameStack: FrameStack.make(),
     evaluate,
     inFunction: undefined,
-    rng: seedrandom.alea(seed),
+    rng: getRng(seed),
   };
 }
 

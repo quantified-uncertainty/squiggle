@@ -1,12 +1,11 @@
-import seedrandom from "seedrandom";
-
 import {
   logScoreScalarAnswer,
   mixture,
 } from "../../../src/dist/distOperations/index.js";
+import { getRng } from "../../../src/utility/rng.js";
 import { env, mkPointMass, unpackResult } from "../../helpers/distHelpers.js";
 
-const rng = seedrandom();
+const rng = getRng();
 
 describe("WithScalarAnswer: discrete -> scalar -> score", () => {
   const pointA = mkPointMass(3.0);

@@ -1,8 +1,8 @@
 import * as fc from "fast-check";
-import seedrandom from "seedrandom";
 
 import { binaryOperations } from "../../src/dist/distOperations/index.js";
 import { DivisionByZeroError } from "../../src/operationError.js";
+import { getRng } from "../../src/utility/rng.js";
 import {
   env,
   mkExponential,
@@ -10,7 +10,7 @@ import {
   unpackResult,
 } from "../helpers/distHelpers.js";
 
-const rng = seedrandom();
+const rng = getRng();
 
 describe("dotSubtract", () => {
   test("mean of normal minus exponential (unit)", () => {

@@ -1,10 +1,10 @@
-import seedrandom from "seedrandom";
 import { BaseDist } from "../../../src/dist/BaseDist.js";
 import { distErrorToString } from "../../../src/dist/DistError.js";
 import {
   logScoreDistAnswer,
   mixture,
 } from "../../../src/dist/distOperations/index.js";
+import { getRng } from "../../../src/utility/rng.js";
 import {
   floatDist,
   normalDist10,
@@ -21,7 +21,7 @@ import {
   unpackResult,
 } from "../../helpers/distHelpers.js";
 
-const rng = seedrandom();
+const rng = getRng();
 
 const klDivergence = (prediction: BaseDist, answer: BaseDist): number => {
   const result = logScoreDistAnswer({

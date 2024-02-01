@@ -1,6 +1,5 @@
-import { type PRNG } from "seedrandom";
-
 import { Ok, result } from "./result.js";
+import { PRNG } from "./rng.js";
 
 export const zip = <A, B>(xs: readonly A[], ys: readonly B[]): [A, B][] => {
   // based on Belt.Array.zip

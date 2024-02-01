@@ -1,9 +1,9 @@
 import uniq from "lodash/uniq.js";
-import seedrandom from "seedrandom";
 
 import { random_sample } from "../../src/utility/math.js";
+import { getRng } from "../../src/utility/rng.js";
 
-const rng = seedrandom();
+const rng = getRng();
 
 describe("random_sample", () => {
   test("Length of random_sample", () => {
