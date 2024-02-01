@@ -57,7 +57,7 @@
     "@storybook/addon-docs": "^7.6.6",
     "@storybook/addon-essentials": "^7.6.6",
     "@storybook/addon-interactions": "^7.6.6",
-    "@storybook/addon-links": "^7.6.7",
+    "@storybook/addon-links": "^7.6.12",
     "@storybook/blocks": "^7.6.7",
     "@storybook/react": "^7.5.2",
     "@storybook/react-vite": "^7.5.2",
