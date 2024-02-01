@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.23.7",
-    "@babel/parser": "^7.23.6",
+    "@babel/parser": "^7.23.9",
     "lodash": "^4.17.21",
     "mdast-util-to-string": "^4.0.0",
     "remark-parse": "^11.0.0",
