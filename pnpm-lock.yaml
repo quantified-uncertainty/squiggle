@@ -689,8 +689,8 @@ importers:
         specifier: 8.5.3
         version: 8.5.3(@types/react@18.2.46)(react@18.2.0)
       react-use:
-        specifier: ^17.4.2
-        version: 17.4.2(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^17.5.0
+        version: 17.5.0(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@quri/configs':
         specifier: workspace:*
@@ -5304,7 +5304,7 @@ packages:
       react-hook-form: 7.50.0(react@18.2.0)
       react-select: 5.8.0(@types/react@18.2.46)(react-dom@18.2.0)(react@18.2.0)
       react-textarea-autosize: 8.5.2(@types/react@18.2.46)(react@18.2.0)
-      react-use: 17.4.2(react-dom@18.2.0)(react@18.2.0)
+      react-use: 17.5.0(react-dom@18.2.0)(react@18.2.0)
     transitivePeerDependencies:
       - '@types/react'
     dev: false
@@ -5325,7 +5325,7 @@ packages:
       react-hook-form: 7.50.0(react@18.2.0)
       react-select: 5.8.0(@types/react@18.2.46)(react-dom@18.2.0)(react@18.2.0)
       react-textarea-autosize: 8.5.3(@types/react@18.2.46)(react@18.2.0)
-      react-use: 17.4.2(react-dom@18.2.0)(react@18.2.0)
+      react-use: 17.5.0(react-dom@18.2.0)(react@18.2.0)
     transitivePeerDependencies:
       - '@types/react'
     dev: false
@@ -5346,7 +5346,7 @@ packages:
       react-hook-form: 7.50.0(react@18.2.0)
       react-select: 5.8.0(@types/react@18.2.46)(react-dom@18.2.0)(react@18.2.0)
       react-textarea-autosize: 8.5.3(@types/react@18.2.46)(react@18.2.0)
-      react-use: 17.4.2(react-dom@18.2.0)(react@18.2.0)
+      react-use: 17.5.0(react-dom@18.2.0)(react@18.2.0)
     transitivePeerDependencies:
       - '@types/react'
     dev: false
@@ -5367,7 +5367,7 @@ packages:
       react-hook-form: 7.50.0(react@18.2.0)
       react-select: 5.8.0(@types/react@18.2.46)(react-dom@18.2.0)(react@18.2.0)
       react-textarea-autosize: 8.5.3(@types/react@18.2.46)(react@18.2.0)
-      react-use: 17.4.2(react-dom@18.2.0)(react@18.2.0)
+      react-use: 17.5.0(react-dom@18.2.0)(react@18.2.0)
     transitivePeerDependencies:
       - '@types/react'
     dev: false
@@ -17383,8 +17383,8 @@ packages:
       tslib: 2.6.2
     dev: false
 
-  /react-use@17.4.2(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-1jPtmWLD8OJJNYCdYLJEH/HM+bPDfJuyGwCYeJFgPmWY8ttwpgZnW5QnzgM55CYUByUiTjHxsGOnEpLl6yQaoQ==}
+  /react-use@17.5.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-PbfwSPMwp/hoL847rLnm/qkjg3sTRCvn6YhUZiHaUa3FA6/aNoFX79ul5Xt70O1rK+9GxSVqkY0eTwMdsR/bWg==}
     peerDependencies:
       react: '*'
       react-dom: '*'
