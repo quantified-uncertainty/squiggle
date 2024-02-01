@@ -139,8 +139,8 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0
       shikiji:
-        specifier: ^0.9.15
-        version: 0.9.15
+        specifier: ^0.10.2
+        version: 0.10.2
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -18193,8 +18193,18 @@ packages:
       vscode-textmate: 8.0.0
     dev: false
 
+  /shikiji-core@0.10.2:
+    resolution: {integrity: sha512-9Of8HMlF96usXJHmCL3Gd0Fcf0EcyJUF9m8EoAKKd98mHXi0La2AZl1h6PegSFGtiYcBDK/fLuKbDa1l16r1fA==}
+    dev: false
+
   /shikiji-core@0.9.15:
     resolution: {integrity: sha512-7hqIcUKS15OMs/61Qp2GvO1fSajBB36bDqi8vexIg5kp80V6v6SGtBrlq+nLlo7erMG2d1kvIuTIq1bwKI6fEg==}
+    dev: false
+
+  /shikiji@0.10.2:
+    resolution: {integrity: sha512-wtZg3T0vtYV2PnqusWQs3mDaJBdCPWxFDrBM/SE5LfrX92gjUvfEMlc+vJnoKY6Z/S44OWaCRzNIsdBRWcTAiw==}
+    dependencies:
+      shikiji-core: 0.10.2
     dev: false
 
   /shikiji@0.9.15:
