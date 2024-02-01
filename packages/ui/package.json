@@ -42,7 +42,7 @@
     "react-dom": "^17 || ^18"
   },
   "dependencies": {
-    "@floating-ui/react": "^0.26.3",
+    "@floating-ui/react": "^0.26.8",
     "@headlessui/react": "^1.7.17",
     "clsx": "^2.1.0",
     "framer-motion": "^10.16.12",

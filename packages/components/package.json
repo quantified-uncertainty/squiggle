@@ -17,7 +17,7 @@
     "@codemirror/state": "^6.4.0",
     "@codemirror/theme-one-dark": "^6.1.2",
     "@codemirror/view": "^6.23.0",
-    "@floating-ui/react": "^0.26.3",
+    "@floating-ui/react": "^0.26.8",
     "@heroicons/react": "^1.0.6",
     "@hookform/resolvers": "^3.3.3",
     "@lezer/common": "^1.2.0",
