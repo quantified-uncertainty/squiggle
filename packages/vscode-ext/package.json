@@ -141,7 +141,7 @@
     "@quri/squiggle-lang": "workspace:*",
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@quri/versioned-squiggle-components": "workspace:*",
-    "@types/node": "^20.10.6",
+    "@types/node": "^20.11.15",
     "@types/react": "^18.2.46",
     "@types/react-dom": "^18.2.18",
     "@types/vscode": "^1.83.2",
