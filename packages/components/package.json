@@ -39,7 +39,7 @@
     "react-hook-form": "^7.50.0",
     "react-markdown": "^9.0.1",
     "remark-gfm": "^4.0.0",
-    "shikiji": "^0.9.15",
+    "shikiji": "^0.10.2",
     "unist-util-visit": "^5.0.0",
     "unist-util-visit-parents": "^6.0.1",
     "zod": "^3.22.4"
