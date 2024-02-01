@@ -905,8 +905,8 @@ importers:
         specifier: ^1.83.2
         version: 1.83.2
       '@types/vscode-webview':
-        specifier: ^1.57.4
-        version: 1.57.4
+        specifier: ^1.57.5
+        version: 1.57.5
       esbuild:
         specifier: ^0.19.11
         version: 0.19.11
@@ -7850,8 +7850,8 @@ packages:
     resolution: {integrity: sha512-WUtIVRUZ9i5dYXefDEAI7sh9/O7jGvHg7Df/5O/gtH3Yabe5odI3UWopVR1qbPXQtvOxWu3mM4XxlYeZtMWF4g==}
     dev: true
 
-  /@types/vscode-webview@1.57.4:
-    resolution: {integrity: sha512-RrVw9s6gBJuY1IkUHMNznWgj/ktjwLpATyOTcKxUDIbbp7AQeK7S0E1+P/8Z75OgAW13OMqSAmaiuWw25dh59Q==}
+  /@types/vscode-webview@1.57.5:
+    resolution: {integrity: sha512-iBAUYNYkz+uk1kdsq05fEcoh8gJmwT3lqqFPN7MGyjQ3HVloViMdo7ZJ8DFIP8WOK74PjOEilosqAyxV2iUFUw==}
     dev: true
 
   /@types/vscode@1.83.2:
