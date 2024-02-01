@@ -52,7 +52,7 @@
     "react-markdown": "^9.0.1",
     "react-relay": "^16.1.0",
     "react-select": "^5.7.7",
-    "relay-runtime": "^16.1.0",
+    "relay-runtime": "^16.2.0",
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.0",
     "zod": "^3.22.4"
