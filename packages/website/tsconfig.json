@@ -7,6 +7,6 @@
     "scripts/generateModulePages.mts",
     "scripts/generateModuleContent.mts",
     "scripts/compileDocsForLLM.mts",
-    "templates.mts"
-  ]
+    "templates.mts",
+  ],
 }
