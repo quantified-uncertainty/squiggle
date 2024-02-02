@@ -1,8 +1,8 @@
 {
   "extends": "@quri/configs/tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
   },
   "references": [{ "path": "../components" }],
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
 }

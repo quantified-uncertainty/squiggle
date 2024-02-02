@@ -26,12 +26,10 @@ type OptionValueCodec<TValue, TOption> = {
  * `SelectStringFormField` component uses these.
  * We allow these two props to be optional if and only if TOption and TValue have the same shape.
  */
-type OptionValueCodecProps<TValue, TOption> = Equal<
-  TOption,
-  NonNullable<TValue>
-> extends true
-  ? Partial<OptionValueCodec<TValue, TOption>>
-  : OptionValueCodec<TValue, TOption>;
+type OptionValueCodecProps<TValue, TOption> =
+  Equal<TOption, NonNullable<TValue>> extends true
+    ? Partial<OptionValueCodec<TValue, TOption>>
+    : OptionValueCodec<TValue, TOption>;
 
 type SelectFormFieldContextShape<TOption> = {
   renderOption?: (option: TOption) => ReactNode;

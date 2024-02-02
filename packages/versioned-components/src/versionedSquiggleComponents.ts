@@ -23,15 +23,15 @@ type PatchSqType<Prop> = Prop extends AnySqProject
     ? AnySqValuePath
     : Prop;
 
-type PatchSqTypesInProps<Props> = Props extends Record<string, unknown>
-  ? {
-      [k in keyof Props]: PatchSqType<Props[k]>;
-    }
-  : Props;
+type PatchSqTypesInProps<Props> =
+  Props extends Record<string, unknown>
+    ? {
+        [k in keyof Props]: PatchSqType<Props[k]>;
+      }
+    : Props;
 
-type PatchSqTypesInFC<T> = T extends FC<infer Props>
-  ? FC<PatchSqTypesInProps<Props>>
-  : T;
+type PatchSqTypesInFC<T> =
+  T extends FC<infer Props> ? FC<PatchSqTypesInProps<Props>> : T;
 
 type PatchSqTypes<Exports extends Record<string, unknown>> = {
   [k in keyof Exports]: PatchSqTypesInFC<Exports[k]>;
