@@ -1,8 +1,7 @@
-import { PRNG } from "seedrandom";
-
 import * as magicNumbers from "../../magicNumbers.js";
 import * as Operation from "../../operation.js";
 import { AlgebraicOperation } from "../../operation.js";
+import { PRNG } from "../../rng/index.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
 import { BaseDist } from "../BaseDist.js";

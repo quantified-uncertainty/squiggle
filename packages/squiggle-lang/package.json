@@ -34,8 +34,7 @@
     "immutable": "^4.3.4",
     "jstat": "^1.9.6",
     "lodash": "^4.17.21",
-    "open": "^10.0.2",
-    "seedrandom": "^3.0.5"
+    "open": "^10.0.2"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.23.3",
@@ -44,7 +43,6 @@
     "@types/jest": "^29.5.10",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.15",
-    "@types/seedrandom": "^3.0.8",
     "@typescript-eslint/eslint-plugin": "^6.16.0",
     "@typescript-eslint/parser": "^6.20.0",
     "codecov": "^3.8.3",

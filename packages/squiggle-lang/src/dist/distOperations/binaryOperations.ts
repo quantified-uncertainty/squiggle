@@ -1,6 +1,5 @@
-import { PRNG } from "seedrandom";
-
 import { AlgebraicOperation } from "../../operation.js";
+import { PRNG } from "../../rng/index.js";
 import { accumulateWithError, pairwiseWithError } from "../../utility/E_A.js";
 import { bind, Ok, result } from "../../utility/result.js";
 import { BaseDist } from "../BaseDist.js";

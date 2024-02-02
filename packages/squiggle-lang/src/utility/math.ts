@@ -1,4 +1,4 @@
-import { PRNG } from "seedrandom";
+import { PRNG } from "../rng/index.js";
 
 /**
  * Searches for a first element in `arr` greater than `value`

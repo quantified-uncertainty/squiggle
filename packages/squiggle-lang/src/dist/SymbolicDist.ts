@@ -1,12 +1,12 @@
 import jstat from "jstat";
 import sum from "lodash/sum.js";
-import { PRNG } from "seedrandom";
 
 import * as magicNumbers from "../magicNumbers.js";
 import * as Operation from "../operation.js";
 import { OperationError } from "../operationError.js";
 import { ContinuousShape } from "../PointSet/Continuous.js";
 import { DiscreteShape } from "../PointSet/Discrete.js";
+import { PRNG } from "../rng/index.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import * as Result from "../utility/result.js";
 import { Ok, result } from "../utility/result.js";
