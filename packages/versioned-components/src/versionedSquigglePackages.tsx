@@ -18,12 +18,20 @@ export type SquigglePackages<
     }
   : never;
 
-export async function versionedSquigglePackages<
-  Version extends SquiggleVersion,
->(version: Version): Promise<SquigglePackages<Version>> {
-  return {
-    lang: await squiggleLangByVersion(version),
-    components: await squiggleComponentsByVersion(version),
-    version,
-  } as unknown as SquigglePackages<Version>;
+const promiseCache: {
+  [k in SquiggleVersion]?: Promise<SquigglePackages<k>>;
+} = {};
+
+export function versionedSquigglePackages<Version extends SquiggleVersion>(
+  version: Version
+): Promise<SquigglePackages<Version>> {
+  if (!promiseCache[version]) {
+    promiseCache[version] = new Promise((resolve) => {
+      Promise.all([
+        squiggleLangByVersion(version),
+        squiggleComponentsByVersion(version),
+      ]).then(([lang, components]) => resolve({ lang, components, version }));
+    }) as Promise<SquigglePackages<any>>;
+  }
+  return promiseCache[version]!;
 }
