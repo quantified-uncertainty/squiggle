@@ -1,5 +1,5 @@
 import { mixture } from "../../src/dist/distOperations/index.js";
-import { getRng } from "../../src/utility/rng.js";
+import { getDefaultRng } from "../../src/rng/index.js";
 import {
   env,
   mkBeta,
@@ -10,7 +10,7 @@ import {
   unpackResult,
 } from "../helpers/distHelpers.js";
 
-const rng = getRng();
+const rng = getDefaultRng();
 
 describe("mixture", () => {
   test.each([

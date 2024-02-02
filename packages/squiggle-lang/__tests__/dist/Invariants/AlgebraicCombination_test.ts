@@ -6,8 +6,8 @@ Also, there are some open comments in https://github.com/quantified-uncertainty/
 */
 
 import { binaryOperations } from "../../../src/dist/distOperations/index.js";
+import { getDefaultRng } from "../../../src/rng/index.js";
 import * as Result from "../../../src/utility/result.js";
-import { getRng } from "../../../src/utility/rng.js";
 import {
   betaDist,
   normalDist10,
@@ -17,7 +17,7 @@ import {
 } from "../../fixtures/distFixtures.js";
 import { env, unpackResult } from "../../helpers/distHelpers.js";
 
-const rng = getRng();
+const rng = getDefaultRng();
 const { algebraicAdd } = binaryOperations;
 
 describe("(Algebraic) addition of distributions", () => {

@@ -1,7 +1,7 @@
+import { PRNG } from "../../rng/index.js";
 import * as E_A_Floats from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
-import { PRNG } from "../../utility/rng.js";
 import { BaseDist } from "../BaseDist.js";
 import { DistError, otherError } from "../DistError.js";
 import { Env } from "../env.js";

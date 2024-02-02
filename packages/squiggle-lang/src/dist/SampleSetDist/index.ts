@@ -3,11 +3,11 @@ import { ContinuousShape } from "../../PointSet/Continuous.js";
 import * as Discrete from "../../PointSet/Discrete.js";
 import { DiscreteShape } from "../../PointSet/Discrete.js";
 import { buildMixedShape } from "../../PointSet/Mixed.js";
+import { PRNG } from "../../rng/index.js";
 import { isEqual } from "../../utility/E_A.js";
 import * as E_A_Floats from "../../utility/E_A_Floats.js";
 import * as E_A_Sorted from "../../utility/E_A_Sorted.js";
 import * as Result from "../../utility/result.js";
-import { PRNG } from "../../utility/rng.js";
 import * as XYShape from "../../XYShape.js";
 import { BaseDist } from "../BaseDist.js";
 import {

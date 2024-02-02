@@ -1,7 +1,7 @@
 import { AlgebraicOperation } from "../../operation.js";
+import { PRNG } from "../../rng/index.js";
 import { accumulateWithError, pairwiseWithError } from "../../utility/E_A.js";
 import { bind, Ok, result } from "../../utility/result.js";
-import { PRNG } from "../../utility/rng.js";
 import { BaseDist } from "../BaseDist.js";
 import { DistError } from "../DistError.js";
 import { Env } from "../env.js";

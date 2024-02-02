@@ -1,5 +1,7 @@
 // Code adapted from https://github.com/macmcmeans/aleaPRNG
 
+import { type PRNG } from "./types.js";
+
 // A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
 // http://baagoe.com/en/RandomMusings/javascript/
 // https://github.com/nquinlan/better-random-numbers-for-javascript-mirror
@@ -24,8 +26,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
-export type PRNG = () => number;
 
 function getMash() {
   let n = 0xefc8249d;
@@ -75,7 +75,7 @@ function getInitialState(seed: string): State {
   return { s0, s1, s2, c: 1 };
 }
 
-export function getRng(seed?: string) {
+export function getAleaRng(seed?: string): PRNG {
   const state = getInitialState(seed ?? "undefined");
 
   return () => {

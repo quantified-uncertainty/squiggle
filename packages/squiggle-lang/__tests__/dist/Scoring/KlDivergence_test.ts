@@ -4,7 +4,7 @@ import {
   logScoreDistAnswer,
   mixture,
 } from "../../../src/dist/distOperations/index.js";
-import { getRng } from "../../../src/utility/rng.js";
+import { getDefaultRng } from "../../../src/rng/index.js";
 import {
   floatDist,
   normalDist10,
@@ -21,7 +21,7 @@ import {
   unpackResult,
 } from "../../helpers/distHelpers.js";
 
-const rng = getRng();
+const rng = getDefaultRng();
 
 const klDivergence = (prediction: BaseDist, answer: BaseDist): number => {
   const result = logScoreDistAnswer({

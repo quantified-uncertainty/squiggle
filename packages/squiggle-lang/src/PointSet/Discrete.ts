@@ -1,7 +1,7 @@
 import { epsilon_float } from "../magicNumbers.js";
+import { PRNG } from "../rng/index.js";
 import { random_sample } from "../utility/math.js";
 import * as Result from "../utility/result.js";
-import { PRNG } from "../utility/rng.js";
 import * as XYShape from "../XYShape.js";
 import * as Common from "./Common.js";
 import * as Continuous from "./Continuous.js";

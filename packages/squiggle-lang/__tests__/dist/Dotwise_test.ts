@@ -2,7 +2,7 @@ import * as fc from "fast-check";
 
 import { binaryOperations } from "../../src/dist/distOperations/index.js";
 import { DivisionByZeroError } from "../../src/operationError.js";
-import { getRng } from "../../src/utility/rng.js";
+import { getDefaultRng } from "../../src/rng/index.js";
 import {
   env,
   mkExponential,
@@ -10,7 +10,7 @@ import {
   unpackResult,
 } from "../helpers/distHelpers.js";
 
-const rng = getRng();
+const rng = getDefaultRng();
 
 describe("dotSubtract", () => {
   test("mean of normal minus exponential (unit)", () => {

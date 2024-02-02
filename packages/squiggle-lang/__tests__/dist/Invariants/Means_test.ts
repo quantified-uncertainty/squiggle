@@ -14,7 +14,7 @@ import {
   binaryOperations,
 } from "../../../src/dist/distOperations/index.js";
 import { Env } from "../../../src/dist/env.js";
-import { getRng } from "../../../src/utility/rng.js";
+import { getDefaultRng } from "../../../src/rng/index.js";
 import {
   env,
   mkBeta,
@@ -29,7 +29,7 @@ import {
 import { expectErrorToBeBounded } from "../../helpers/helpers.js";
 
 const epsilon = 5e1;
-const rng = getRng();
+const rng = getDefaultRng();
 
 const distributions = [
   mkNormal(4, 1),

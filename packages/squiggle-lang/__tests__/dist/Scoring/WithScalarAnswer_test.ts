@@ -2,10 +2,10 @@ import {
   logScoreScalarAnswer,
   mixture,
 } from "../../../src/dist/distOperations/index.js";
-import { getRng } from "../../../src/utility/rng.js";
+import { getDefaultRng } from "../../../src/rng/index.js";
 import { env, mkPointMass, unpackResult } from "../../helpers/distHelpers.js";
 
-const rng = getRng();
+const rng = getDefaultRng();
 
 describe("WithScalarAnswer: discrete -> scalar -> score", () => {
   const pointA = mkPointMass(3.0);
