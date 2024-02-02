@@ -86,8 +86,9 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
   const max: number = settings.functionChartSettings.stop;
   const xCount: number = settings.functionChartSettings.count;
 
-  const includedDomain = fn.signatures().find((s) => s.length === 1)?.[0]
-    ?.domain;
+  const includedDomain = fn
+    .signatures()
+    .find((s) => s.length === 1)?.[0]?.domain;
 
   const xDomain = includedDomain
     ? includedDomain
