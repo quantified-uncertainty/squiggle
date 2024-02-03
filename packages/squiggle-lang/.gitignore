@@ -1,11 +1,7 @@
 .DS_Store
 .cpuprofile
 npm-debug.log
-/node_modules/
-lib/*
 *.cache
-build
-yarn-error.log
 .idea
 /dist
 *.coverage
