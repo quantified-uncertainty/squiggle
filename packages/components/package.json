@@ -25,7 +25,6 @@
     "@quri/squiggle-lang": "workspace:*",
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@quri/ui": "workspace:*",
-    "@react-hook/size": "^2.1.2",
     "@tailwindcss/typography": "^0.5.10",
     "clsx": "^2.1.0",
     "codemirror": "^6.0.1",
@@ -86,7 +85,6 @@
     "postcss-cli": "^11.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "resize-observer-polyfill": "^1.5.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "storybook": "^7.6.12",
     "tailwindcss": "^3.4.1",
@@ -94,8 +92,8 @@
     "vite": "^5.0.12"
   },
   "peerDependencies": {
-    "react": "^16.8.0 || ^17 || ^18",
-    "react-dom": "^16.8.0 || ^17 || ^18"
+    "react": "^18",
+    "react-dom": "^18"
   },
   "scripts": {
     "start": "pnpm dev",

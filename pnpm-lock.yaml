@@ -96,9 +96,6 @@ importers:
       '@quri/ui':
         specifier: workspace:*
         version: link:../ui
-      '@react-hook/size':
-        specifier: ^2.1.2
-        version: 2.1.2(react@18.2.0)
       '@tailwindcss/typography':
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@3.4.1)
@@ -271,9 +268,6 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
-      resize-observer-polyfill:
-        specifier: ^1.5.1
-        version: 1.5.1
       rollup-plugin-node-builtins:
         specifier: ^2.1.2
         version: 2.1.2
@@ -17531,6 +17525,7 @@ packages:
 
   /resize-observer-polyfill@1.5.1:
     resolution: {integrity: sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==}
+    dev: false
 
   /resolve-cwd@3.0.0:
     resolution: {integrity: sha512-OrZaX2Mb+rJCpH/6CpSqt9xFVpN++x01XnN2ie9g6P5/3xelLAkXWVADpdz1IHD/KFfEXyE6V0U01OQ3UO2rEg==}
