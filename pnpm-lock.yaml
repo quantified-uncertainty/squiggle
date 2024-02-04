@@ -797,6 +797,9 @@ importers:
       squiggle-components-0.9.2:
         specifier: npm:@quri/squiggle-components@0.9.2
         version: /@quri/squiggle-components@0.9.2(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.4.1)
+      squiggle-components-0.9.3:
+        specifier: npm:@quri/squiggle-components@0.9.3
+        version: /@quri/squiggle-components@0.9.3(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.4.1)
       squiggle-lang-0.8.5:
         specifier: npm:@quri/squiggle-lang@0.8.5
         version: /@quri/squiggle-lang@0.8.5
@@ -809,6 +812,9 @@ importers:
       squiggle-lang-0.9.2:
         specifier: npm:@quri/squiggle-lang@0.9.2
         version: /@quri/squiggle-lang@0.9.2
+      squiggle-lang-0.9.3:
+        specifier: npm:@quri/squiggle-lang@0.9.3
+        version: /@quri/squiggle-lang@0.9.3
     devDependencies:
       '@quri/configs':
         specifier: workspace:*
@@ -5202,6 +5208,13 @@ packages:
       prettier: 3.2.4
     dev: false
 
+  /@quri/prettier-plugin-squiggle@0.9.3:
+    resolution: {integrity: sha512-6/xWgjl/65DuDt2d3nuIrrxT+B6Kfnme8Jfx0HVCsXSyY86I/N4HK6C30mqVURgVBInUfnk7Ho9smFL1OqUMFA==}
+    dependencies:
+      '@quri/squiggle-lang': 0.9.3
+      prettier: 3.2.4
+    dev: false
+
   /@quri/squiggle-components@0.8.5(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.4.1):
     resolution: {integrity: sha512-X7GYjZoLtITgUcoFx8isfHZhzK0f6b6Gks0TfGLwQ1BnJvP5OtOI0r+lj+mYjS38Z12M3KjX6VuWX6hgCsJskQ==}
     peerDependencies:
@@ -5381,6 +5394,53 @@ packages:
       - tailwindcss
     dev: false
 
+  /@quri/squiggle-components@0.9.3(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.4.1):
+    resolution: {integrity: sha512-lCSqLdPglQbN5JQE89zQzD5fkKhK0XiKy75zDQearjsoUCYrV4XSbfrdk9lVPlOQs51Y42aJskEjov+2MDnbFw==}
+    peerDependencies:
+      react: ^16.8.0 || ^17 || ^18
+      react-dom: ^16.8.0 || ^17 || ^18
+    dependencies:
+      '@codemirror/autocomplete': 6.12.0(@codemirror/language@6.10.1)(@codemirror/state@6.4.0)(@codemirror/view@6.23.1)(@lezer/common@1.2.1)
+      '@codemirror/commands': 6.3.3
+      '@codemirror/language': 6.10.1
+      '@codemirror/lint': 6.5.0
+      '@codemirror/search': 6.5.5
+      '@codemirror/state': 6.4.0
+      '@codemirror/theme-one-dark': 6.1.2
+      '@codemirror/view': 6.23.1
+      '@floating-ui/react': 0.26.9(react-dom@18.2.0)(react@18.2.0)
+      '@heroicons/react': 1.0.6(react@18.2.0)
+      '@hookform/resolvers': 3.3.4(react-hook-form@7.50.0)
+      '@lezer/common': 1.2.1
+      '@quri/prettier-plugin-squiggle': 0.9.3
+      '@quri/squiggle-lang': 0.9.3
+      '@quri/squiggle-textmate-grammar': 0.9.3
+      '@quri/ui': 0.2.1(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
+      '@react-hook/size': 2.1.2(react@18.2.0)
+      '@tailwindcss/typography': 0.5.10(tailwindcss@3.4.1)
+      clsx: 2.1.0
+      codemirror: 6.0.1(@lezer/common@1.2.1)
+      d3: 7.8.5
+      framer-motion: 10.18.0(react-dom@18.2.0)(react@18.2.0)
+      lodash: 4.17.21
+      mermaid: 10.8.0
+      prettier: 3.2.4
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-draggable: 4.4.6(react-dom@18.2.0)(react@18.2.0)
+      react-hook-form: 7.50.0(react@18.2.0)
+      react-markdown: 9.0.1(@types/react@18.2.52)(react@18.2.0)
+      remark-gfm: 4.0.0
+      shikiji: 0.10.2
+      unist-util-visit: 5.0.0
+      unist-util-visit-parents: 6.0.1
+      zod: 3.22.4
+    transitivePeerDependencies:
+      - '@types/react'
+      - supports-color
+      - tailwindcss
+    dev: false
+
   /@quri/squiggle-lang@0.8.5:
     resolution: {integrity: sha512-ymA/Y/3C8pppvYFy9RhpJyCjjttJPm+pWu1gWpaOFOs53qP61+GpGw0qtkduO0t2wYdj/3GDlQC/JyyxZMAOGw==}
     hasBin: true
@@ -5429,8 +5489,24 @@ packages:
       open: 10.0.3
     dev: false
 
+  /@quri/squiggle-lang@0.9.3:
+    resolution: {integrity: sha512-c8oxHHjzbddy3Z4mCn+CF/FMXCmWPQr/axtT3VMBEyVImZFInwROw7JPv2YdRegs4qQHBu5XkfPJ1AFtYzNQzw==}
+    hasBin: true
+    dependencies:
+      '@commander-js/extra-typings': 11.1.0(commander@11.1.0)
+      commander: 11.1.0
+      immutable: 4.3.5
+      jstat: 1.9.6
+      lodash: 4.17.21
+      open: 10.0.3
+    dev: false
+
   /@quri/squiggle-textmate-grammar@0.9.2:
     resolution: {integrity: sha512-wY9f4AOM1QP2FN81LDirgohVPjtcjyDGVivB3SbVCwYTL3bjDqBMPAGyZlmLM6z53jMBAMPf3GixKJ+ldEUHlQ==}
+    dev: false
+
+  /@quri/squiggle-textmate-grammar@0.9.3:
+    resolution: {integrity: sha512-e4FFi/KVBqiEih9t1Ma2mpePZhKblZlom+4wCqukbGvpmUWNswIKdT5K8dgmizFvfBaDedg3U+tsyRyVuujcjQ==}
     dev: false
 
   /@quri/ui@0.1.4(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0):

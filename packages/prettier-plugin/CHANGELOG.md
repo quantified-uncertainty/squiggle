@@ -1,5 +1,9 @@
 # @quri/prettier-plugin-squiggle
 
+## 0.9.3
+
+- Fixed incorrect extra commas on empty lists ([#2997](https://github.com/quantified-uncertainty/squiggle/pull/2997))
+
 ## 0.9.2
 
 - Fixed Prettier bug where trailing comma after single-element dict key would be removed ([#2946](https://github.com/quantified-uncertainty/squiggle/pull/2946))

@@ -1,5 +1,25 @@
 # @quri/squiggle-lang
 
+## 0.9.3
+
+- Breaking: disallow capitalized variable names that we allowed by accident in 0.9.0 release ([#2987](https://github.com/quantified-uncertainty/squiggle/pull/2987))
+
+- Added `@location` tag and `Tag.getLocation` ([#3011](https://github.com/quantified-uncertainty/squiggle/pull/3011))
+
+- Added `@startOpen`, `@startClosed`, and `Tag.getStartOpenState` ([#2975](https://github.com/quantified-uncertainty/squiggle/pull/2975))
+
+- Added `Danger.parseFloat`, `System.sampleCount` and `Danger.now` ([#2974](https://github.com/quantified-uncertainty/squiggle/pull/2974))
+
+- `SqOutput` includes a separate `imports` dictionary; all exports are tagged with `exportData` tag. ([#2969](https://github.com/quantified-uncertainty/squiggle/pull/2969))
+
+- Bug fix: `@format` tag now works on 0 values ([#2961](https://github.com/quantified-uncertainty/squiggle/pull/2961))
+
+Internals:
+
+- Added `versionAdded` flag for built-in functions, for documenting the version when the function became available ([#2965](https://github.com/quantified-uncertainty/squiggle/pull/2965))
+
+- Infrastructure for custom seedable PRNGs ([#2992](https://github.com/quantified-uncertainty/squiggle/pull/2992))
+
 ## 0.9.2
 
 - Breaking: Deprecated `Plot` titles ([#2925](https://github.com/quantified-uncertainty/squiggle/pull/2925))
