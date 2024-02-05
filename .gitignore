@@ -1,5 +1,4 @@
 node_modules
-yarn-error.log
 .cache
 .DS_Store
 **/.sync.ffs_db
@@ -8,16 +7,5 @@ yarn-error.log
 
 /.vscode/*.code-workspace
 /.vscode/settings.json
-todo.txt
-result
-shell.nix
 .turbo
 *.tsbuildinfo
-
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
