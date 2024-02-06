@@ -287,7 +287,7 @@ export function doNumberLambdaCall(
   args: Value[],
   context: Interpreter
 ): number {
-  const value = lambda.call(args, context);
+  const value = context.call(lambda, args);
   if (value.type === "Number") {
     return value.value;
   }
@@ -299,7 +299,7 @@ export function doBinaryLambdaCall(
   lambda: Lambda,
   context: Interpreter
 ): boolean {
-  const value = lambda.call(args, context);
+  const value = context.call(lambda, args);
   if (value.type === "Bool") {
     return value.value;
   }

@@ -2,7 +2,6 @@ import maxBy from "lodash/maxBy.js";
 import uniq from "lodash/uniq.js";
 import { LocationRange } from "peggy";
 
-import { ASTNode } from "../ast/parse.js";
 import { REArityError, REOther } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
 import {
@@ -18,7 +17,6 @@ import { Value } from "../value/index.js";
 import { Calculator } from "../value/VCalculator.js";
 import { VDomain } from "../value/VDomain.js";
 import { Input } from "../value/VInput.js";
-import { Frame } from "./frameStack.js";
 import { Interpreter } from "./interpreter.js";
 
 export type UserDefinedLambdaParameter = {
@@ -39,31 +37,6 @@ export abstract class BaseLambda {
   abstract toCalculator(): Calculator;
 
   protected abstract body(args: Value[], context: Interpreter): Value;
-
-  callFrom(
-    args: Value[],
-    context: Interpreter,
-    ast: ASTNode | undefined
-  ): Value {
-    const initialStackSize = context.stack.size();
-    const initialCaptures = context.captures;
-
-    context.captures = [];
-    context.frameStack.extend(new Frame(this.display(), ast?.location));
-
-    try {
-      const result = this.body(args, context);
-      context.frameStack.pop();
-      return result;
-    } finally {
-      context.stack.shrink(initialStackSize);
-      context.captures = initialCaptures;
-    }
-  }
-
-  call(args: Value[], context: Interpreter): Value {
-    return this.callFrom(args, context, undefined);
-  }
 }
 
 // User-defined functions, e.g. `add2 = {|x, y| x + y}`, are instances of this class.

@@ -43,11 +43,11 @@ export function _map(
   // this code is intentionally duplicated for performance reasons
   if (!useIndex) {
     for (let i = 0; i < array.length; i++) {
-      mapped[i] = lambda.call([array[i]], context);
+      mapped[i] = context.call(lambda, [array[i]]);
     }
   } else {
     for (let i = 0; i < array.length; i++) {
-      mapped[i] = lambda.call([array[i], vNumber(i)], context);
+      mapped[i] = context.call(lambda, [array[i], vNumber(i)]);
     }
   }
 
@@ -63,12 +63,12 @@ export function _reduce(
 ): Value {
   if (!useIndex) {
     return array.reduce(
-      (acc, elem) => lambda.call([acc, elem], context),
+      (acc, elem) => context.call(lambda, [acc, elem]),
       initialValue
     );
   } else {
     return array.reduce(
-      (acc, elem, index) => lambda.call([acc, elem, vNumber(index)], context),
+      (acc, elem, index) => context.call(lambda, [acc, elem, vNumber(index)]),
       initialValue
     );
   }
@@ -83,9 +83,9 @@ export function _reduceWhile(
 ): Value {
   let acc = initialValue;
   for (let i = 0; i < array.length; i++) {
-    const newAcc = step.call([acc, array[i]], context);
+    const newAcc = context.call(step, [acc, array[i]]);
 
-    const checkResult = condition.call([newAcc], context);
+    const checkResult = context.call(condition, [newAcc]);
     if (checkResult.type !== "Bool") {
       throw new REArgumentError(
         `Condition should return a boolean value, got: ${checkResult.type}`
@@ -131,7 +131,7 @@ function applyLambdaAndCheckNumber(
   lambda: Lambda,
   context: Interpreter
 ): number {
-  const item = lambda.call([element], context);
+  const item = context.call(lambda, [element]);
   if (item.type !== "Number") {
     throw new REArgumentError("Function must return a number");
   }
@@ -175,8 +175,8 @@ export const library = [
           _assertValidArrayLength(num);
           const usedOptional = chooseLambdaParamLength([0, 1], lambda) === 1;
           const fnCall = usedOptional
-            ? (_: any, i: number) => lambda.call([vNumber(i)], context)
-            : () => lambda.call([], context);
+            ? (_: any, i: number) => context.call(lambda, [vNumber(i)])
+            : () => context.call(lambda, []);
           return Array.from({ length: num }, fnCall);
         }
       ),
@@ -434,7 +434,7 @@ export const library = [
         ],
         frArray(frAny({ genericName: "A" })),
         ([arr, lambda], context) =>
-          uniqBy(arr, (e) => lambda.call([e], context))
+          uniqBy(arr, (e) => context.call(lambda, [e]))
       ),
     ],
   }),

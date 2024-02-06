@@ -5,7 +5,7 @@ import { Value } from "../value/index.js";
 export type Bindings = ImmutableMap<string, Value>;
 
 /*
- * Offsets on stack are resolved in `expression/fromAst.ts`, except for stdLib symbols, which are resolved in runtime.
+ * Offsets on stack are resolved in `expression/compile.ts`, except for stdLib symbols, which are resolved in runtime.
  */
 export class Stack {
   private constructor(private stack: Value[] = []) {}

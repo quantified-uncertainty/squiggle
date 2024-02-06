@@ -145,7 +145,7 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
 ): number => {
   const applyFunctionAtFloatToFloatOption = (point: number) => {
     // Defined here so that it has access to context, reducer
-    const result = lambda.call([vNumber(point)], context);
+    const result = context.call(lambda, [vNumber(point)]);
     if (result.type === "Number") {
       return result.value;
     }
@@ -379,7 +379,7 @@ const diminishingReturnsLibrary = [
           }
           const applyFunctionAtPoint = (lambda: Lambda, point: number) => {
             // Defined here so that it has access to context, reducer
-            const lambdaResult = lambda.call([vNumber(point)], context);
+            const lambdaResult = context.call(lambda, [vNumber(point)]);
             if (lambdaResult.type === "Number") {
               return lambdaResult.value;
             }

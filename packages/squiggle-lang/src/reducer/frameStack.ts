@@ -4,6 +4,8 @@
 
 import { LocationRange } from "peggy";
 
+import { Lambda } from "./lambda.js";
+
 export class Frame {
   // Weird hack: without this, Frame class won't be a separate type from the plain JS Object type, since it doesn't have any meaningful methods.
   // This could lead to bugs.
@@ -12,13 +14,13 @@ export class Frame {
   }
 
   constructor(
-    public name: string,
-    public location?: LocationRange // can be empty for calls from builtin functions, or for the top frame
+    public lambda: Lambda,
+    public location?: LocationRange // can be empty for calls from builtin functions
   ) {}
 
   toString() {
     return (
-      this.name +
+      this.lambda.display() +
       (this.location
         ? ` at line ${this.location.start.line}, column ${this.location.start.column}, file ${this.location.source}`
         : "")

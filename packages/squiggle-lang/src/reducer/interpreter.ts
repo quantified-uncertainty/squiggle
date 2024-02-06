@@ -17,14 +17,25 @@ import { ImmutableMap } from "../utility/immutableMap.js";
 import { annotationToDomain } from "../value/domain.js";
 import { Value, vArray, vDict, vLambda, vVoid } from "../value/index.js";
 import { vDomain, VDomain } from "../value/VDomain.js";
-import { FrameStack } from "./frameStack.js";
-import { UserDefinedLambda, UserDefinedLambdaParameter } from "./lambda.js";
+import { Frame, FrameStack } from "./frameStack.js";
+import {
+  Lambda,
+  UserDefinedLambda,
+  UserDefinedLambdaParameter,
+} from "./lambda.js";
 import { Stack } from "./stack.js";
 import { StackTrace } from "./stackTrace.js";
 
 type ExpressionValue<Kind extends Expression["kind"]> =
   ExpressionByKind<Kind>["value"];
 
+/**
+ * Checks that all `evaluateFoo` methods follow the same the convention.
+ *
+ * Note: unfortunately, it's not possible to reuse method signatures. Don't try
+ * `evaluateFoo: EvalutateAllKinds["Foo"] = () => ...`, it's a bad idea because
+ * arrow functions shouldn't be used as methods.
+ */
 type EvaluateAllKinds = {
   [Kind in Expression["kind"] as `evaluate${Kind}`]: (
     expressionValue: ExpressionValue<Kind>,
@@ -54,9 +65,8 @@ export class Interpreter implements EvaluateAllKinds {
     this.rng = getNativeRng();
   }
 
-  /*
-   * Recursively evaluate the expression.
-   */
+  // Recursively evaluate the expression.
+  // TODO - separate "internal loop evaluate" and "public entrypoint evaluate" methods?
   evaluate(expression: Expression): Value {
     jstat.setRandom(this.rng); // TODO - roll back at the end
     const ast = expression.ast;
@@ -264,10 +274,25 @@ export class Interpreter implements EvaluateAllKinds {
       const argValue = this.evaluate(arg);
       return argValue;
     });
-    return lambda.value.callFrom(
-      argValues,
-      this,
-      ast // we pass the ast of a current expression here, to put it on frameStack
-    );
+
+    // we pass the ast of a current expression here, to put it on frameStack
+    return this.call(lambda.value, argValues, ast);
+  }
+
+  call(lambda: Lambda, args: Value[], ast?: ASTNode | undefined) {
+    const initialStackSize = this.stack.size();
+    const initialCaptures = this.captures;
+
+    this.captures = [];
+    this.frameStack.extend(new Frame(lambda, ast?.location));
+
+    try {
+      const result = lambda.body(args, this);
+      this.frameStack.pop();
+      return result;
+    } finally {
+      this.stack.shrink(initialStackSize);
+      this.captures = initialCaptures;
+    }
   }
 }

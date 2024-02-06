@@ -205,7 +205,7 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
         ([dict, lambda], context) => {
           return ImmutableMap(
             [...dict.entries()].map(([key, value]) => {
-              const mappedValue = lambda.call([value], context);
+              const mappedValue = context.call(lambda, [value]);
               return [key, mappedValue];
             })
           );
@@ -233,7 +233,7 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
         ([dict, lambda], context) => {
           const mappedEntries: [string, Value][] = [];
           for (const [key, value] of dict.entries()) {
-            const mappedKey = lambda.call([vString(key)], context);
+            const mappedKey = context.call(lambda, [vString(key)]);
 
             if (mappedKey.type === "String") {
               mappedEntries.push([mappedKey.value, value]);

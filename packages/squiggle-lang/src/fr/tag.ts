@@ -108,7 +108,7 @@ function decoratorWithInputOrFnInput<T>(
       const runLambdaToGetType = (fn: Lambda) => {
         //When we call the function, we pass in the tags as well, just in case they are asked for in the call.
         const val = frWithTags(inputType).pack({ value: value, tags });
-        return fn.call([val], context);
+        return context.call(fn, [val]);
       };
       const correctTypedInputValue: T = _ensureTypeUsingLambda(
         outputType,

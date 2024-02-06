@@ -40,7 +40,7 @@ export class StackTrace {
      * - <top> at location 1
      */
     for (let i = frames.length; i >= 0; i--) {
-      const name = i ? frames[i - 1].name : "<top>";
+      const name = i ? frames[i - 1].lambda.display() : "<top>";
       const location = i === frames.length ? this.location : frames[i].location;
       stackTraceFrames.push(new StackTraceFrame(name, location));
     }

@@ -86,7 +86,7 @@ export class SqLambda {
     const interpreter = new Interpreter(env);
 
     try {
-      const value = this._value.call(rawArgs, interpreter);
+      const value = interpreter.call(this._value, rawArgs);
       return Result.Ok(wrapValue(value));
     } catch (e) {
       return Result.Err(new SqRuntimeError(interpreter.errorFromException(e)));
