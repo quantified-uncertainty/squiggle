@@ -28,12 +28,8 @@ export type UserDefinedLambdaParameter = {
   domain?: VDomain; // should this be Domain instead of VDomain?
 };
 
-type LambdaBody = (args: Value[], context: ReducerContext) => Value;
-
 export abstract class BaseLambda {
   isDecorator: boolean = false;
-
-  constructor(public body: LambdaBody) {}
 
   abstract readonly type: string;
   abstract display(): string;
@@ -43,6 +39,8 @@ export abstract class BaseLambda {
   abstract parameterCountString(): string;
   abstract defaultInputs(): Input[];
   abstract toCalculator(): Calculator;
+
+  abstract body(args: Value[], context: ReducerContext): Value;
 
   callFrom(
     args: Value[],
@@ -77,42 +75,46 @@ export abstract class BaseLambda {
 
 // User-defined functions, e.g. `add2 = {|x, y| x + y}`, are instances of this class.
 export class UserDefinedLambda extends BaseLambda {
+  readonly type = "UserDefinedLambda";
   parameters: UserDefinedLambdaParameter[];
   location: LocationRange;
   name?: string;
-  readonly type = "UserDefinedLambda";
+  private expression: Expression;
+  private captures: Value[];
 
   constructor(
     name: string | undefined,
     captures: Value[],
     parameters: UserDefinedLambdaParameter[],
-    body: Expression,
+    expression: Expression,
     location: LocationRange
   ) {
-    const lambda: LambdaBody = (args: Value[], context: ReducerContext) => {
-      const argsLength = args.length;
-      const parametersLength = parameters.length;
-      if (argsLength !== parametersLength) {
-        throw new REArityError(undefined, parametersLength, argsLength);
-      }
-
-      for (let i = 0; i < parametersLength; i++) {
-        const parameter = parameters[i];
-        context.stack.push(args[i]);
-        if (parameter.domain) {
-          parameter.domain.value.validateValue(args[i]);
-        }
-      }
-
-      context.captures = captures;
-
-      return context.evaluate(body, context);
-    };
-
-    super(lambda);
+    super();
+    this.expression = expression;
+    this.captures = captures;
     this.name = name;
     this.parameters = parameters;
     this.location = location;
+  }
+
+  body(args: Value[], context: ReducerContext) {
+    const argsLength = args.length;
+    const parametersLength = this.parameters.length;
+    if (argsLength !== parametersLength) {
+      throw new REArityError(undefined, parametersLength, argsLength);
+    }
+
+    for (let i = 0; i < parametersLength; i++) {
+      const parameter = this.parameters[i];
+      context.stack.push(args[i]);
+      if (parameter.domain) {
+        parameter.domain.value.validateValue(args[i]);
+      }
+    }
+
+    context.captures = this.captures;
+
+    return context.evaluate(this.expression, context);
   }
 
   display() {
@@ -165,7 +167,7 @@ export class BuiltinLambda extends BaseLambda {
     public name: string,
     signatures: FnDefinition[]
   ) {
-    super((args, context) => this._call(args, context));
+    super();
     this._definitions = signatures;
 
     // TODO - this sets the flag that the function is a decorator, but later we don't check which signatures are decorators.
@@ -200,7 +202,7 @@ export class BuiltinLambda extends BaseLambda {
     return this._definitions.map((d) => d.inputs);
   }
 
-  _call(args: Value[], context: ReducerContext): Value {
+  body(args: Value[], context: ReducerContext): Value {
     const signatures = this._definitions;
     const showNameMatchDefinitions = () => {
       const defsString = signatures
