@@ -22,7 +22,7 @@ type Props = {
 
 const tabs = ["Imports", "Variables", "Exports", "Result", "AST"] as const;
 
-function nextTab(
+function incrementViewerTab(
   tab: ViewerTab,
   direction: "backwards" | "forwards"
 ): ViewerTab {
@@ -62,14 +62,14 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
         metaKey: true,
         key: "PageDown",
       },
-      () => setViewerTab(nextTab(viewerTab, "forwards"))
+      () => setViewerTab(incrementViewerTab(viewerTab, "forwards"))
     );
     useGlobalShortcut(
       {
         metaKey: true,
         key: "PageUp",
       },
-      () => setViewerTab(nextTab(viewerTab, "backwards"))
+      () => setViewerTab(incrementViewerTab(viewerTab, "backwards"))
     );
 
     return (
