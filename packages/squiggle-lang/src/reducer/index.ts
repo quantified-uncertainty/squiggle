@@ -15,7 +15,7 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { compileAst } from "../expression/compile.js";
-import { Expression } from "../expression/index.js";
+import { Expression, ExpressionByKind } from "../expression/index.js";
 import { getStdLib } from "../library/index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import * as Result from "../utility/result.js";
@@ -36,8 +36,8 @@ export type ReducerFn = (
   context: Context.ReducerContext
 ) => Value;
 
-type SubReducerFn<T extends Expression["type"] = Expression["type"]> = (
-  expressionValue: Extract<Expression, { type: T }>["value"],
+type SubReducerFn<T extends Expression["kind"] = Expression["kind"]> = (
+  expressionValue: ExpressionByKind<T>["value"],
   context: Context.ReducerContext,
   ast: ASTNode
 ) => Value;
@@ -61,7 +61,7 @@ function throwFrom(
 export const evaluate: ReducerFn = (expression, context) => {
   jstat.setRandom(context.rng);
   const ast = expression.ast;
-  switch (expression.type) {
+  switch (expression.kind) {
     case "Call":
       return evaluateCall(expression.value, context, ast);
     case "StackRef":
@@ -225,7 +225,7 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
   const capturedValues: Value[] = [];
   for (const capture of expressionValue.captures) {
     // duplicates `evaluateStackRef` and `evaluateCaptureRef`
-    switch (capture.type) {
+    switch (capture.kind) {
       case "StackRef": {
         capturedValues.push(context.stack.get(capture.value));
         break;
@@ -256,11 +256,7 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
   );
 };
 
-const evaluateCall: SubReducerFn<"Call"> = (
-  expressionValue: Extract<Expression, { type: "Call" | "Decorate" }>["value"],
-  context: Context.ReducerContext,
-  ast: ASTNode
-) => {
+const evaluateCall: SubReducerFn<"Call"> = (expressionValue, context, ast) => {
   const lambda = context.evaluate(expressionValue.fn, context);
   if (lambda.type !== "Lambda") {
     throwFrom(new RENotAFunction(lambda.toString()), context, ast);

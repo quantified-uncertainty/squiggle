@@ -230,7 +230,7 @@ export class ProjectItem {
       };
       context.evaluate = asyncEvaluate;
 
-      if (expression.value.type !== "Program") {
+      if (expression.value.kind !== "Program") {
         // mostly for TypeScript, so that we could access `expression.value.exports`
         throw new Error("Expected Program expression");
       }

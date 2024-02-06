@@ -9,14 +9,16 @@ import { vNumber } from "../value/VNumber.js";
 import { vString } from "../value/VString.js";
 import { INDEX_LOOKUP_FUNCTION } from "./constants.js";
 import * as expression from "./index.js";
+import { Expression } from "./index.js";
 
 type Scope = {
-  // Position on stack is counted from the first element on stack, unlike in StackRef's offset.
-  // See switch branch for "Identifier" AST type below.
+  // Position on stack is counted from the first element on stack, unlike in
+  // StackRef's offset.  See switch branch for "Identifier" AST type below.
   stack: Record<string, number>;
   size: number;
 } & (
   | {
+      // It's possible to have multiple block scopes; example: `x = 5; { y = 6; z = 7; {{{ x + y + z }}} }`.
       type: "block";
     }
   | {
@@ -27,6 +29,17 @@ type Scope = {
     }
 );
 
+/**
+ * This class is mutable; its methods often have side effects, and the correct
+ * state is guaranteed by the compilation loop.  For example, when the
+ * compilation loop calls `startScope()`, it should later call `finishScope()`.
+ * If you forget to do that, bad things will happen.
+ *
+ * Immutable context would be easier to code without bugs, and the performance
+ * isn't a big issue here.  But the problem is that name lookups in closures are
+ * actions-at-distance; we should register each lookup in captures, sometimes
+ * for enclosing functions, which would be hard to implement with immutability.
+ */
 class CompileContext {
   // Externals will include:
   // 1. stdLib symbols
@@ -83,18 +96,25 @@ class CompileContext {
     ast: ASTNode,
     name: string,
     fromDepth: number
-  ): expression.TypedExpression<"StackRef" | "CaptureRef" | "Value"> {
+  ): expression.ExpressionByKind<"StackRef" | "CaptureRef" | "Value"> {
     let offset = 0;
+
+    // Unwind the scopes upwards.
     for (let i = fromDepth; i >= 0; i--) {
       const scope = this.scopes[i];
       if (name in scope.stack) {
         return {
           ast,
-          ...expression.eStackRef(offset + scope.size - 1 - scope.stack[name]),
+          ...expression.make(
+            "StackRef",
+            offset + scope.size - 1 - scope.stack[name]
+          ),
         };
       }
       offset += scope.size;
+
       if (scope.type === "function") {
+        // Have we already captured this name?
         if (name in scope.captureIndex) {
           return {
             ast,
@@ -102,34 +122,48 @@ class CompileContext {
           };
         }
 
-        // So this is either an external or a capture.
+        // This is either an external or a capture. Let's look for the
+        // reference in the outer scopes, and then convert it to a capture if
+        // necessary.
         const resolved = this.resolveNameFromDepth(ast, name, i - 1);
-        if (resolved.type === "Value") {
+
+        if (resolved.kind === "Value") {
+          // Inlined, so it's probably an external. Nothing more to do.
           return resolved;
         }
+
+        /**
+         * `resolved` is a reference. From the outer scope POV, it could be:
+         * 1. A stack reference: `x = 5; f() = x`.
+         * 2. A reference to another capture: `x = 5; f() = { g() = x; g }`
+         * In the latter case, `x` is a capture from stack for `f`, and a capture from `f`'s captures for `g`.
+         *
+         * Either way, we're going to convert it to a capture from the current function's POV.
+         */
         const newIndex = scope.captures.length;
         const newCapture = resolved;
         scope.captures.push(newCapture);
         scope.captureIndex[name] = newIndex;
         return {
           ast,
-          ...expression.eCaptureRef(newIndex),
+          ...expression.make("CaptureRef", newIndex),
         };
       }
     }
 
+    // `name` not found in scopes. So it must come from externals.
     const value = this.externals.get(name);
     if (value !== undefined) {
       return {
         ast,
-        ...expression.eValue(value),
+        ...expression.make("Value", value),
       };
     }
 
     throw new ICompileError(`${name} is not defined`, ast.location);
   }
 
-  resolveName(ast: ASTNode, name: string): expression.Expression {
+  resolveName(ast: ASTNode, name: string): Expression {
     return this.resolveNameFromDepth(ast, name, this.scopes.length - 1);
   }
 
@@ -153,7 +187,7 @@ function compileToContent(
   switch (ast.type) {
     case "Block": {
       context.startScope();
-      const statements: expression.Expression[] = [];
+      const statements: Expression[] = [];
       for (const astStatement of ast.statements) {
         if (
           (astStatement.type === "LetStatement" ||
@@ -169,11 +203,11 @@ function compileToContent(
         statements.push(statement);
       }
       context.finishScope();
-      return expression.eBlock(statements);
+      return expression.make("Block", statements);
     }
     case "Program": {
-      // no need to start a top-level scope, it already exists
-      const statements: expression.Expression[] = [];
+      // No need to start a top-level scope, it already exists.
+      const statements: Expression[] = [];
       const exports: string[] = [];
       for (const astStatement of ast.statements) {
         const statement = innerCompileAst(astStatement, context);
@@ -191,14 +225,18 @@ function compileToContent(
           }
         }
       }
-      return expression.eProgram(statements, exports, context.localsOffsets());
+      return expression.make("Program", {
+        statements,
+        exports,
+        bindings: context.localsOffsets(),
+      });
     }
     case "DefunStatement":
     case "LetStatement": {
       const name = ast.variable.value;
       const value = innerCompileAst(ast.value, context);
       context.defineLocal(name);
-      return expression.eLetStatement(name, value);
+      return expression.make("Assign", { left: name, right: value });
     }
     case "DecoratedStatement": {
       // First, compile the inner statement.
@@ -264,7 +302,7 @@ function compileToContent(
     case "DotLookup":
       return expression.eCall(context.resolveName(ast, INDEX_LOOKUP_FUNCTION), [
         innerCompileAst(ast.arg, context),
-        { ast, ...expression.eValue(vString(ast.key)) },
+        { ast, ...expression.make("Value", vString(ast.key)) },
       ]);
     case "BracketLookup":
       return expression.eCall(context.resolveName(ast, INDEX_LOOKUP_FUNCTION), [
@@ -298,36 +336,46 @@ function compileToContent(
       const body = innerCompileAst(ast.body, context);
       const captures = context.currentScopeCaptures();
       context.finishScope();
-      return expression.eLambda(ast.name, captures, args, body);
+      return expression.make("Lambda", {
+        name: ast.name,
+        captures,
+        parameters: args,
+        body,
+      });
     }
     case "KeyValue":
-      return expression.eArray([
+      return expression.make("Array", [
         innerCompileAst(ast.key, context),
         innerCompileAst(ast.value, context),
       ]);
     case "Ternary":
-      return expression.eTernary(
-        innerCompileAst(ast.condition, context),
-        innerCompileAst(ast.trueExpression, context),
-        innerCompileAst(ast.falseExpression, context)
-      );
+      return expression.make("Ternary", {
+        condition: innerCompileAst(ast.condition, context),
+        ifTrue: innerCompileAst(ast.trueExpression, context),
+        ifFalse: innerCompileAst(ast.falseExpression, context),
+      });
     case "Array":
-      return expression.eArray(
+      return expression.make(
+        "Array",
         ast.elements.map((statement) => innerCompileAst(statement, context))
       );
     case "Dict":
-      return expression.eDict(
+      return expression.make(
+        "Dict",
         ast.elements.map((kv) => {
           if (kv.type === "KeyValue") {
             return [
               innerCompileAst(kv.key, context),
               innerCompileAst(kv.value, context),
-            ];
+            ] as [Expression, Expression];
           } else if (kv.type === "Identifier") {
             // shorthand
-            const key = { ast: kv, ...expression.eValue(vString(kv.value)) };
+            const key = {
+              ast: kv,
+              ...expression.make("Value", vString(kv.value)),
+            };
             const value = context.resolveName(kv, kv.value);
-            return [key, value];
+            return [key, value] as [Expression, Expression];
           } else {
             throw new Error(
               `Internal AST error: unexpected kv ${kv satisfies never}`
@@ -336,7 +384,7 @@ function compileToContent(
         })
       );
     case "Boolean":
-      return expression.eValue(vBool(ast.value));
+      return expression.make("Value", vBool(ast.value));
     case "Float": {
       const value = parseFloat(
         `${ast.integer}${ast.fractional === null ? "" : `.${ast.fractional}`}${
@@ -346,10 +394,10 @@ function compileToContent(
       if (Number.isNaN(value)) {
         throw new ICompileError("Failed to compile a number", ast.location);
       }
-      return expression.eValue(vNumber(value));
+      return expression.make("Value", vNumber(value));
     }
     case "String":
-      return expression.eValue(vString(ast.value));
+      return expression.make("Value", vString(ast.value));
     case "Identifier": {
       return context.resolveName(ast, ast.value);
     }

@@ -1,6 +1,14 @@
-/*
- * An expression is an intermediate representation of a Squiggle code.
- * Expressions are evaluated by reducer's `evaluate` function.
+/**
+ * An "Expression" is an intermediate representation of a Squiggle code.
+ *
+ * Note that expressions are not "things that evaluate to values"! The entire
+ * Squiggle program is also an expression. (Maybe we should rename this to
+ * "IR".) Expressions are evaluated by reducer's `evaluate` function.
+ *
+ * Also, our IR is not flattened, so we can't call it a "bytecode" yet.
+ *
+ * The main difference between our IR and AST is that in IR, variable names are
+ * resolved to stack and capture references.
  */
 import { ASTNode } from "../ast/parse.js";
 import { Value } from "../value/index.js";
@@ -10,112 +18,114 @@ export type LambdaExpressionParameter = {
   annotation?: Expression;
 };
 
-// All shapes are type+value, to help with V8 monomorphism.
+// All shapes are kind+value, to help with V8 monomorphism.
+// **Don't** inject any more fields on this or try to flatten `value` props, it will only make things slower.
+type MakeExpressionContent<Kind extends string, Value> = {
+  kind: Kind;
+  value: Value;
+};
+
 export type ExpressionContent =
-  | {
-      type: "Block";
-      value: Expression[];
-    }
-  | {
-      // Programs are similar to blocks, but they can export things for other modules to use.
-      // There can be only one program at the top level of the expression.
-      type: "Program";
-      value: {
+  // Programs are similar to blocks, but they can export things for other modules to use.
+  // There can be only one program at the top level of the expression.
+  | MakeExpressionContent<
+      "Program",
+      {
         statements: Expression[];
-        exports: string[];
-        bindings: Record<string, number>; // numbers are stack references
-      };
-    }
-  | {
-      type: "Array";
-      value: Expression[];
-    }
-  | {
-      type: "Dict";
-      value: [Expression, Expression][];
-    }
-  | {
-      type: "StackRef";
-      // Position on stack, counting backwards (so last variable on stack has offset=0).
-      // It's important to count backwards, because we want to store imports and continues on top of the stack.
-      // (And maybe stdLib too, in the future.)
-      value: number;
-    }
-  | {
-      // Captures are stored separately from values on stack, because we store captures once when the lambda is created, and copying captures to stack on every call would be more expensive.
-      type: "CaptureRef";
-      value: number; // Position in captures
-    }
-  | {
-      type: "Ternary";
-      value: {
+        exports: string[]; // all exported names
+        bindings: Record<string, number>; // variable name -> stack offset mapping
+      }
+    >
+  | MakeExpressionContent<"Block", Expression[]>
+  | MakeExpressionContent<
+      "StackRef",
+      /**
+       * Position on stack, counting backwards (so last variable on stack has
+       * offset=0).  It's important to count backwards, because we want to store
+       * imports and continues on top of the stack.  (And maybe stdLib too, in
+       * the future.)
+       *
+       * Important: a function should never reference values on stack beyond its
+       * locals. Captures are referenced through `CaptureRef`s.  This is
+       * guaranteed by the compiler.
+       */
+      number
+    >
+  // Captures are stored separately from values on stack, because we store
+  // captures once when the lambda is created.  We could copy those stored
+  // captures to stack on every call, but that would be more expensive.  See
+  // also: https://en.wikipedia.org/wiki/Funarg_problem; supporting closures
+  // mean that Squiggle can't be entirely stack-based.
+  | MakeExpressionContent<
+      "CaptureRef",
+      number // Position in captures
+    >
+  // Ternaries can't be simplified to calls, because they're lazy.
+  // (In a way, ternaries is the only way to do control flow in Squiggle.)
+  | MakeExpressionContent<
+      "Ternary",
+      {
         condition: Expression;
         ifTrue: Expression;
         ifFalse: Expression;
-      };
-    }
-  | {
-      type: "Assign";
-      value: {
+      }
+    >
+  // Both variable definitions (`x = 5`) and function definitions (`f(x) = x`) compile to this.
+  | MakeExpressionContent<
+      "Assign",
+      {
         left: string;
         right: Expression;
-      };
-    }
-  | {
-      type: "Call";
-      value: {
+      }
+    >
+  | MakeExpressionContent<
+      "Call",
+      {
         fn: Expression;
         args: Expression[];
-        // Note that `Decorate` is applied to values, not to statements; decorated statements get rewritten in `./compile.ts`.
-        // If "decorate" is set, the call will work only on lambdas marked with `isDecorator: true`.
+        // Note that `Decorate` is applied to values, not to statements;
+        // decorated statements get rewritten in `./compile.ts`. If "decorate"
+        // is set, the call will work only on lambdas marked with `isDecorator:
+        // true`.
         as: "call" | "decorate";
-      };
-    }
-  | {
-      type: "Lambda";
-      value: {
+      }
+    >
+  | MakeExpressionContent<
+      "Lambda",
+      {
         name?: string;
-        // Lambda values produced by lambda expressions carry captured values with them.
-        // `captures` are references to values that should be stored in lambda.
-        // Captures can come either from the stack, or from captures of the enclosing function.
+        // Lambda values produced by lambda expressions carry captured values
+        // with them. `captures` are references to values that should be stored
+        // in lambda. Captures can come either from the stack, or from captures
+        // of the enclosing function.
         captures: Ref[];
         parameters: LambdaExpressionParameter[];
         body: Expression;
-      };
-    }
-  | {
-      type: "Value";
-      value: Value;
-    };
+      }
+    >
+  | MakeExpressionContent<"Array", Expression[]>
+  | MakeExpressionContent<"Dict", [Expression, Expression][]>
+  // Constants or external references that were inlined during compilation.
+  | MakeExpressionContent<"Value", Value>;
 
-export type TypedExpressionContent<T extends ExpressionContent["type"]> =
-  Extract<ExpressionContent, { type: T }>;
+export type ExpressionContentByKind<T extends ExpressionContent["kind"]> =
+  Extract<ExpressionContent, { kind: T }>;
 
-export type Ref = TypedExpressionContent<"StackRef" | "CaptureRef">;
+export type Ref = ExpressionContentByKind<"StackRef" | "CaptureRef">;
 
 export type Expression = ExpressionContent & { ast: ASTNode };
 
-export type TypedExpression<T extends ExpressionContent["type"]> =
-  TypedExpressionContent<T> & { ast: ASTNode };
-
-export const eArray = (
-  anArray: Expression[]
-): TypedExpressionContent<"Array"> => ({
-  type: "Array",
-  value: anArray,
-});
-
-export const eValue = (value: Value): TypedExpressionContent<"Value"> => ({
-  type: "Value",
-  value,
-});
+export type ExpressionByKind<T extends ExpressionContent["kind"]> = Extract<
+  Expression,
+  { kind: T }
+>;
 
 export const eCall = (
   fn: Expression,
   args: Expression[],
   as: "call" | "decorate" = "call"
-): TypedExpressionContent<"Call"> => ({
-  type: "Call",
+): ExpressionContentByKind<"Call"> => ({
+  kind: "Call",
   value: {
     fn,
     args,
@@ -123,89 +133,20 @@ export const eCall = (
   },
 });
 
-export const eLambda = (
-  name: string | undefined,
-  captures: Ref[],
-  parameters: LambdaExpressionParameter[],
-  body: Expression
-): TypedExpressionContent<"Lambda"> => ({
-  type: "Lambda",
-  value: {
-    name,
-    captures,
-    parameters,
-    body,
-  },
-});
-
-export const eDict = (
-  value: [Expression, Expression][]
-): TypedExpressionContent<"Dict"> => ({
-  type: "Dict",
-  value,
-});
-
-export const eStackRef = (
-  value: number
-): TypedExpressionContent<"StackRef"> => ({
-  type: "StackRef",
-  value,
-});
-
-export const eCaptureRef = (
-  value: number
-): TypedExpressionContent<"CaptureRef"> => ({
-  type: "CaptureRef",
-  value,
-});
-
-export const eBlock = (
-  exprs: Expression[]
-): TypedExpressionContent<"Block"> => ({
-  type: "Block",
-  value: exprs,
-});
-
-export const eProgram = (
-  statements: Expression[],
-  exports: string[],
-  bindings: Record<string, number>
-): TypedExpressionContent<"Program"> => ({
-  type: "Program",
-  value: {
-    statements,
-    exports,
-    bindings,
-  },
-});
-
-export const eLetStatement = (
-  left: string,
-  right: Expression
-): TypedExpressionContent<"Assign"> => ({
-  type: "Assign",
-  value: {
-    left,
-    right,
-  },
-});
-
-export const eTernary = (
-  condition: Expression,
-  ifTrue: Expression,
-  ifFalse: Expression
-): TypedExpressionContent<"Ternary"> => ({
-  type: "Ternary",
-  value: {
-    condition,
-    ifTrue,
-    ifFalse,
-  },
-});
+export function make<Kind extends ExpressionContent["kind"]>(
+  kind: Kind,
+  value: ExpressionContentByKind<Kind>["value"]
+): ExpressionContentByKind<Kind> {
+  return {
+    kind,
+    value,
+    // Need to cast explicitly because TypeScript doesn't support `oneof` yet; `Kind` type parameter could be a union.
+  } as ExpressionContentByKind<Kind>;
+}
 
 // Converts the expression to String. Useful for tests.
 export function expressionToString(expression: ExpressionContent): string {
-  switch (expression.type) {
+  switch (expression.kind) {
     case "Block":
       return `{${expression.value.map(expressionToString).join("; ")}}`;
     case "Program": {
@@ -213,7 +154,7 @@ export function expressionToString(expression: ExpressionContent): string {
       return expression.value.statements
         .map((statement) => {
           const statementString = expressionToString(statement);
-          return statement.type === "Assign" &&
+          return statement.kind === "Assign" &&
             exports.has(statement.value.left)
             ? `export ${statementString}`
             : statementString;
