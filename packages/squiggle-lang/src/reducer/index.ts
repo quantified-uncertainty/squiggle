@@ -29,6 +29,7 @@ import { vLambda } from "../value/vLambda.js";
 import { vVoid } from "../value/VVoid.js";
 import * as Context from "./context.js";
 import { UserDefinedLambda, UserDefinedLambdaParameter } from "./lambda.js";
+import { StackTrace } from "./stackTrace.js";
 
 export type ReducerFn = (
   expression: Expression,
@@ -46,12 +47,9 @@ function throwFrom(
   context: Context.ReducerContext,
   ast: ASTNode
 ): never {
-  throw IRuntimeError.fromMessageWithFrameStack(
+  throw IRuntimeError.fromMessageWithStackTrace(
     error,
-    context.frameStack.extend(
-      Context.currentFunctionName(context),
-      ast.location
-    )
+    new StackTrace(context.frameStack, ast.location)
   );
 }
 
@@ -92,36 +90,25 @@ export const evaluate: ReducerFn = (expression, context) => {
 };
 
 const evaluateBlock: SubReducerFn<"Block"> = (statements, context) => {
-  /*
-   * We could call `bindings.extend()` here, but we don't, since scopes are costly and bindings are immutable anyway.
-   * So we just have to be careful to throw away block's bindings at the end of a block scope and return the original context.
-   * Note: We'll have to remove this optimization if we add any kind of `locals()` (like in Python) function or debugging utilities.
-   * See also: similar note in `UserDefinedLambda` constructor.
-   */
-  let currentContext = context;
   let currentValue: Value = vVoid();
 
+  const initialStackSize = context.stack.size();
   for (const statement of statements) {
-    [currentValue, currentContext] = context.evaluate(
-      statement,
-      currentContext
-    );
+    [currentValue] = context.evaluate(statement, context);
   }
-  return [currentValue, context]; // throw away block's context
+  context.stack.shrink(initialStackSize);
+
+  return [currentValue, context];
 };
 
 const evaluateProgram: SubReducerFn<"Program"> = (expressionValue, context) => {
-  // Same as Block, but doesn't drop the context, so that we could return bindings and exports from it.
-  let currentContext = context;
+  // Same as Block, but doesn't shrink back the stack, so that we could return bindings and exports from it.
   let currentValue: Value = vVoid();
 
   for (const statement of expressionValue.statements) {
-    [currentValue, currentContext] = context.evaluate(
-      statement,
-      currentContext
-    );
+    [currentValue] = context.evaluate(statement, context);
   }
-  return [currentValue, currentContext];
+  return [currentValue, context];
 };
 
 const evaluateArray: SubReducerFn<"Array"> = (expressionValue, context) => {
@@ -156,19 +143,8 @@ const evaluateDict: SubReducerFn<"Dict"> = (expressionValue, context, ast) => {
 
 const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
   const [result] = context.evaluate(expressionValue.right, context);
-  return [
-    vVoid(),
-    {
-      // no spread is intentional - helps with monomorphism
-      stack: context.stack.push(expressionValue.left, result),
-      captures: context.captures,
-      environment: context.environment,
-      frameStack: context.frameStack,
-      evaluate: context.evaluate,
-      inFunction: context.inFunction,
-      rng: context.rng,
-    },
-  ];
+  context.stack.push(expressionValue.left, result);
+  return [vVoid(), context];
 };
 
 const evaluateStackRef: SubReducerFn<"StackRef"> = (
@@ -241,8 +217,8 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
         // see also: `Lambda.callFrom`
         rethrowWithFrameStack(
           e,
-          context.frameStack.extend(
-            Context.currentFunctionName(context),
+          new StackTrace(
+            context.frameStack,
             parameterExpression.annotation.ast.location
           )
         );

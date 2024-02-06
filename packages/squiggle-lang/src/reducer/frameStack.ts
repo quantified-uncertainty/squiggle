@@ -29,42 +29,35 @@ export class Frame {
 }
 
 export class FrameStack {
-  constructor(
-    public frame: Frame,
-    public parent?: FrameStack
-  ) {}
+  private frames: Frame[] = [];
 
   static make(): FrameStack {
-    return new FrameStack(new Frame("<root>")); // this top frame is always invisible
+    return new FrameStack(); // this top frame is always invisible
   }
 
-  extend(name: string, location?: LocationRange): FrameStack {
-    return new FrameStack(new Frame(name, location), this);
+  extend(name: string, location?: LocationRange): void {
+    this.frames.push(new Frame(name, location));
   }
 
-  // this includes the left offset because it's mostly used in SqError.toStringWithStackTrace
+  pop() {
+    this.frames.pop();
+  }
+
   toString(): string {
     return this.toFrameArray()
-      .map((f) => "  " + f.toString())
+      .map((f) => f.toString())
       .join("\n");
   }
 
   toFrameArray(): Frame[] {
-    const result: Frame[] = [];
-    let t: FrameStack = this;
-    while (t && t.frame) {
-      if (!t.parent) break; // top level frame is fake and should be skipped
-      result.push(t.frame);
-      t = t.parent;
-    }
-    return result;
+    return this.frames;
   }
 
   getTopFrame(): Frame | undefined {
-    return this.parent ? this.frame : undefined; // top level frame is always invisible
+    return this.frames.at(-1);
   }
 
   isEmpty(): boolean {
-    return this.parent === undefined;
+    return !this.frames.length;
   }
 }

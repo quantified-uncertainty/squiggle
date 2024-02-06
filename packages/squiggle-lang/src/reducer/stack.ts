@@ -36,8 +36,19 @@ export class Stack {
     return result.value;
   }
 
-  push(name: string, value: Value): Stack {
-    return new Stack([...this.stack, { name, value }]);
+  push(name: string, value: Value) {
+    this.stack.push({ name, value });
+  }
+
+  size() {
+    return this.stack.length;
+  }
+
+  shrink(newSize: number) {
+    if (newSize > this.stack.length) {
+      throw new Error("Internal error: can't expand a stack with .shrink()");
+    }
+    this.stack.length = newSize;
   }
 
   asBindings(): Bindings {

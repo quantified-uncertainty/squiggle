@@ -19,9 +19,8 @@ import { Value } from "../value/index.js";
 import { Calculator } from "../value/VCalculator.js";
 import { VDomain } from "../value/VDomain.js";
 import { Input } from "../value/VInput.js";
-import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
-import { Stack } from "./stack.js";
+import { StackTrace } from "./stackTrace.js";
 
 export type UserDefinedLambdaParameter = {
   name: string;
@@ -49,25 +48,24 @@ export abstract class BaseLambda {
     context: ReducerContext,
     ast: ASTNode | undefined
   ): Value {
-    const newContext: ReducerContext = {
-      // Be careful! the order here must match the order of props in ReducerContext.
-      // Also, we intentionally don't use object spread syntax because of monomorphism.
-      stack: context.stack,
-      captures: [],
-      environment: context.environment,
-      frameStack: context.frameStack.extend(
-        Context.currentFunctionName(context),
-        ast?.location
-      ),
-      evaluate: context.evaluate,
-      inFunction: this,
-      rng: context.rng,
-    };
+    const initialStackSize = context.stack.size();
+    const initialCaptures = context.captures;
+
+    context.captures = [];
+    context.frameStack.extend(this.display(), ast?.location);
 
     try {
-      return this.body(args, newContext);
+      const result = this.body(args, context);
+      context.frameStack.pop();
+      return result;
     } catch (e) {
-      IError.rethrowWithFrameStack(e, newContext.frameStack);
+      IError.rethrowWithFrameStack(
+        e,
+        new StackTrace(context.frameStack, ast?.location)
+      );
+    } finally {
+      context.stack.shrink(initialStackSize);
+      context.captures = initialCaptures;
     }
   }
 
@@ -97,28 +95,18 @@ export class UserDefinedLambda extends BaseLambda {
         throw new REArityError(undefined, parametersLength, argsLength);
       }
 
-      // Every lambda gets its own private stack.
-      let stack = Stack.make();
       for (let i = 0; i < parametersLength; i++) {
         const parameter = parameters[i];
-        stack = stack.push(parameter.name, args[i]);
+        context.stack.push(parameter.name, args[i]);
         if (parameter.domain) {
           parameter.domain.value.validateValue(args[i]);
         }
       }
 
-      const lambdaContext: ReducerContext = {
-        stack,
-        captures,
-        // no spread is intentional - helps with monomorphism
-        environment: context.environment,
-        frameStack: context.frameStack,
-        evaluate: context.evaluate,
-        inFunction: context.inFunction,
-        rng: context.rng,
-      };
+      context.captures = captures;
 
-      const [value] = context.evaluate(body, lambdaContext);
+      const [value] = context.evaluate(body, context);
+
       return value;
     };
 

@@ -1,5 +1,5 @@
 import { ICompileError, IRuntimeError } from "../errors/IError.js";
-import { Frame } from "../reducer/frameStack.js";
+import { StackTraceFrame } from "../reducer/stackTrace.js";
 
 abstract class SqAbstractError<T extends string> {
   abstract tag: T;
@@ -9,7 +9,7 @@ abstract class SqAbstractError<T extends string> {
 }
 
 export class SqFrame {
-  constructor(private _value: Frame) {}
+  constructor(private _value: StackTraceFrame) {}
 
   name(): string {
     return this._value.name;

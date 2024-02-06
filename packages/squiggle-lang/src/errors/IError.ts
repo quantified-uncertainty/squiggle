@@ -1,6 +1,7 @@
 import { LocationRange } from "peggy";
 
-import { Frame, FrameStack } from "../reducer/frameStack.js";
+import { FrameStack } from "../reducer/frameStack.js";
+import { StackTrace, StackTraceFrame } from "../reducer/stackTrace.js";
 import { ErrorMessage, REJavaScriptExn, REOther } from "./messages.js";
 
 // "I" stands for "Internal", since we also have a more public SqError proxy
@@ -8,7 +9,7 @@ export class IRuntimeError extends Error {
   // TODO - it would be better to store `m` in `cause`, to like native Error objects do.
   private constructor(
     public m: ErrorMessage,
-    public frameStack: FrameStack
+    public stackTrace: StackTrace
   ) {
     // Should we pass `m.toString()`?
     // It'd be a bit costly and we override `IError.toString()` anyway.
@@ -18,14 +19,14 @@ export class IRuntimeError extends Error {
   // This shouldn't be used much, since frame stack will be empty.
   // But it's useful for global errors, e.g. in SqProject or somethere in the frontend.
   static fromMessage(message: ErrorMessage) {
-    return new IRuntimeError(message, FrameStack.make());
+    return new IRuntimeError(message, new StackTrace(FrameStack.make()));
   }
 
-  static fromMessageWithFrameStack(
+  static fromMessageWithStackTrace(
     message: ErrorMessage,
-    frameStack: FrameStack
+    stackTrace: StackTrace
   ): IRuntimeError {
-    return new IRuntimeError(message, frameStack);
+    return new IRuntimeError(message, stackTrace);
   }
 
   // This shouldn't be used for most runtime errors - the resulting error would have an empty framestack.
@@ -50,18 +51,18 @@ export class IRuntimeError extends Error {
   toStringWithDetails() {
     return (
       this.toString() +
-      (this.frameStack.isEmpty()
+      (this.stackTrace.isEmpty()
         ? ""
-        : "\nStack trace:\n" + this.frameStack.toString())
+        : "\nStack trace:\n" + this.stackTrace.toString())
     );
   }
 
-  getTopFrame(): Frame | undefined {
-    return this.frameStack.getTopFrame();
+  getTopFrame(): StackTraceFrame | undefined {
+    return this.stackTrace.frames().at(-1);
   }
 
-  getFrameArray(): Frame[] {
-    return this.frameStack.toFrameArray();
+  getFrameArray(): StackTraceFrame[] {
+    return this.stackTrace.frames();
   }
 }
 
@@ -69,21 +70,21 @@ export class IRuntimeError extends Error {
 // already converted exceptions won't be affected
 export function rethrowWithFrameStack(
   err: unknown,
-  frameStack: FrameStack
+  stackTrace: StackTrace
 ): never {
   if (err instanceof IRuntimeError) {
     throw err; // exception already has a framestack
   } else if (err instanceof ErrorMessage) {
-    throw IRuntimeError.fromMessageWithFrameStack(err, frameStack); // probably comes from FunctionRegistry, adding framestack
+    throw IRuntimeError.fromMessageWithStackTrace(err, stackTrace); // probably comes from FunctionRegistry, adding stacktrace
   } else if (err instanceof Error) {
-    throw IRuntimeError.fromMessageWithFrameStack(
+    throw IRuntimeError.fromMessageWithStackTrace(
       new REJavaScriptExn(err.message, err.name),
-      frameStack
+      stackTrace
     );
   } else {
-    throw IRuntimeError.fromMessageWithFrameStack(
+    throw IRuntimeError.fromMessageWithStackTrace(
       new REOther("Unknown exception"),
-      frameStack
+      stackTrace
     );
   }
 }
