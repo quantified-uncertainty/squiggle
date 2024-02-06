@@ -20,6 +20,7 @@ import { Calculator } from "../value/VCalculator.js";
 import { VDomain } from "../value/VDomain.js";
 import { Input } from "../value/VInput.js";
 import { ReducerContext } from "./context.js";
+import { Frame } from "./frameStack.js";
 import { StackTrace } from "./stackTrace.js";
 
 export type UserDefinedLambdaParameter = {
@@ -52,7 +53,7 @@ export abstract class BaseLambda {
     const initialCaptures = context.captures;
 
     context.captures = [];
-    context.frameStack.extend(this.display(), ast?.location);
+    context.frameStack.extend(new Frame(this.display(), ast?.location));
 
     try {
       const result = this.body(args, context);
@@ -105,8 +106,7 @@ export class UserDefinedLambda extends BaseLambda {
 
       context.captures = captures;
 
-      const [value] = context.evaluate(body, context);
-
+      const value = context.evaluate(body, context);
       return value;
     };
 

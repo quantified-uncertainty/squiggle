@@ -10,7 +10,7 @@ export type ReducerContext = {
   captures: Value[];
   readonly environment: Readonly<Env>;
   readonly frameStack: FrameStack;
-  readonly evaluate: ReducerFn;
+  evaluate: ReducerFn;
   readonly rng: PRNG;
 };
 

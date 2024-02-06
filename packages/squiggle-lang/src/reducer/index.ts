@@ -34,13 +34,13 @@ import { StackTrace } from "./stackTrace.js";
 export type ReducerFn = (
   expression: Expression,
   context: Context.ReducerContext
-) => [Value, Context.ReducerContext];
+) => Value;
 
 type SubReducerFn<T extends Expression["type"] = Expression["type"]> = (
   expressionValue: Extract<Expression, { type: T }>["value"],
   context: Context.ReducerContext,
   ast: ASTNode
-) => [Value, Context.ReducerContext];
+) => Value;
 
 function throwFrom(
   error: ErrorMessage,
@@ -62,28 +62,28 @@ export const evaluate: ReducerFn = (expression, context) => {
   jstat.setRandom(context.rng);
   const ast = expression.ast;
   switch (expression.type) {
-    case "Block":
-      return evaluateBlock(expression.value, context, ast);
-    case "Program":
-      return evaluateProgram(expression.value, context, ast);
-    case "Array":
-      return evaluateArray(expression.value, context, ast);
-    case "Dict":
-      return evaluateDict(expression.value, context, ast);
-    case "Assign":
-      return evaluateAssign(expression.value, context, ast);
+    case "Call":
+      return evaluateCall(expression.value, context, ast);
     case "StackRef":
       return evaluateStackRef(expression.value, context, ast);
     case "CaptureRef":
       return evaluateCaptureRef(expression.value, context, ast);
+    case "Block":
+      return evaluateBlock(expression.value, context, ast);
+    case "Assign":
+      return evaluateAssign(expression.value, context, ast);
+    case "Array":
+      return evaluateArray(expression.value, context, ast);
+    case "Dict":
+      return evaluateDict(expression.value, context, ast);
     case "Value":
       return evaluateValue(expression.value, context, ast);
     case "Ternary":
       return evaluateTernary(expression.value, context, ast);
     case "Lambda":
       return evaluateLambda(expression.value, context, ast);
-    case "Call":
-      return evaluateCall(expression.value, context, ast);
+    case "Program":
+      return evaluateProgram(expression.value, context, ast);
     default:
       throw new Error(`Unreachable: ${expression satisfies never}`);
   }
@@ -94,11 +94,11 @@ const evaluateBlock: SubReducerFn<"Block"> = (statements, context) => {
 
   const initialStackSize = context.stack.size();
   for (const statement of statements) {
-    [currentValue] = context.evaluate(statement, context);
+    currentValue = context.evaluate(statement, context);
   }
   context.stack.shrink(initialStackSize);
 
-  return [currentValue, context];
+  return currentValue;
 };
 
 const evaluateProgram: SubReducerFn<"Program"> = (expressionValue, context) => {
@@ -106,25 +106,24 @@ const evaluateProgram: SubReducerFn<"Program"> = (expressionValue, context) => {
   let currentValue: Value = vVoid();
 
   for (const statement of expressionValue.statements) {
-    [currentValue] = context.evaluate(statement, context);
+    currentValue = context.evaluate(statement, context);
   }
-  return [currentValue, context];
+  return currentValue;
 };
 
 const evaluateArray: SubReducerFn<"Array"> = (expressionValue, context) => {
   const values = expressionValue.map((element) => {
-    const [value] = context.evaluate(element, context);
-    return value;
+    return context.evaluate(element, context);
   });
   const value = vArray(values);
-  return [value, context];
+  return value;
 };
 
 const evaluateDict: SubReducerFn<"Dict"> = (expressionValue, context, ast) => {
   const value = vDict(
     ImmutableMap(
       expressionValue.map(([eKey, eValue]) => {
-        const [key] = context.evaluate(eKey, context);
+        const key = context.evaluate(eKey, context);
         if (key.type !== "String") {
           return throwFrom(
             new REOther("Dict keys must be strings"),
@@ -133,26 +132,25 @@ const evaluateDict: SubReducerFn<"Dict"> = (expressionValue, context, ast) => {
           );
         }
         const keyString: string = key.value;
-        const [value] = context.evaluate(eValue, context);
+        const value = context.evaluate(eValue, context);
         return [keyString, value];
       })
     )
   );
-  return [value, context];
+  return value;
 };
 
 const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
-  const [result] = context.evaluate(expressionValue.right, context);
+  const result = context.evaluate(expressionValue.right, context);
   context.stack.push(expressionValue.left, result);
-  return [vVoid(), context];
+  return vVoid();
 };
 
 const evaluateStackRef: SubReducerFn<"StackRef"> = (
   expressionValue,
   context
 ) => {
-  const value = context.stack.get(expressionValue.offset);
-  return [value, context];
+  return context.stack.get(expressionValue.offset);
 };
 
 const evaluateCaptureRef: SubReducerFn<"CaptureRef"> = (
@@ -163,11 +161,11 @@ const evaluateCaptureRef: SubReducerFn<"CaptureRef"> = (
   if (!value) {
     throw new Error(`Internal error: invalid capture id ${expressionValue.id}`);
   }
-  return [value, context];
+  return value;
 };
 
-const evaluateValue: SubReducerFn<"Value"> = (expressionValue, context) => {
-  return [expressionValue, context];
+const evaluateValue: SubReducerFn<"Value"> = (expressionValue) => {
+  return expressionValue;
 };
 
 const evaluateTernary: SubReducerFn<"Ternary"> = (
@@ -175,10 +173,7 @@ const evaluateTernary: SubReducerFn<"Ternary"> = (
   context,
   ast
 ) => {
-  const [predicateResult] = context.evaluate(
-    expressionValue.condition,
-    context
-  );
+  const predicateResult = context.evaluate(expressionValue.condition, context);
   if (predicateResult.type !== "Bool") {
     return throwFrom(
       new REExpectedType("Boolean", predicateResult.type),
@@ -187,11 +182,11 @@ const evaluateTernary: SubReducerFn<"Ternary"> = (
     );
   }
 
-  const [value] = context.evaluate(
+  const value = context.evaluate(
     predicateResult.value ? expressionValue.ifTrue : expressionValue.ifFalse,
     context
   );
-  return [value, context];
+  return value;
 };
 
 const evaluateLambda: SubReducerFn<"Lambda"> = (
@@ -205,7 +200,7 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
     // Processing annotations, e.g. f(x: [3, 5]) = { ... }
     if (parameterExpression.annotation) {
       // First, we evaluate `[3, 5]` expression.
-      const [annotationValue] = context.evaluate(
+      const annotationValue = context.evaluate(
         parameterExpression.annotation,
         context
       );
@@ -262,7 +257,7 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
       ast.location
     )
   );
-  return [value, context];
+  return value;
 };
 
 const evaluateCall: SubReducerFn<"Call"> = (
@@ -270,7 +265,7 @@ const evaluateCall: SubReducerFn<"Call"> = (
   context: Context.ReducerContext,
   ast: ASTNode
 ) => {
-  const [lambda] = context.evaluate(expressionValue.fn, context);
+  const lambda = context.evaluate(expressionValue.fn, context);
   if (lambda.type !== "Lambda") {
     throwFrom(new RENotAFunction(lambda.toString()), context, ast);
   }
@@ -279,7 +274,7 @@ const evaluateCall: SubReducerFn<"Call"> = (
   }
 
   const argValues = expressionValue.args.map((arg) => {
-    const [argValue] = context.evaluate(arg, context);
+    const argValue = context.evaluate(arg, context);
     return argValue;
   });
   const result = lambda.value.callFrom(
@@ -287,7 +282,7 @@ const evaluateCall: SubReducerFn<"Call"> = (
     context,
     ast // we pass the ast of a current expression here, to put it on frameStack and in the resulting value
   );
-  return [result, context];
+  return result;
 };
 
 function createDefaultContext() {
@@ -299,7 +294,7 @@ export async function evaluateExpressionToResult(
 ): Promise<result<Value, IRuntimeError>> {
   const context = createDefaultContext();
   try {
-    const [value] = context.evaluate(expression, context);
+    const value = context.evaluate(expression, context);
     return Ok(value);
   } catch (e) {
     return Result.Err(IRuntimeError.fromException(e));

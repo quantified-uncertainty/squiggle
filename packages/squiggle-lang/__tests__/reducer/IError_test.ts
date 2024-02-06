@@ -1,6 +1,7 @@
 import { IRuntimeError } from "../../src/errors/IError.js";
 import { REOther } from "../../src/errors/messages.js";
-import { FrameStack } from "../../src/reducer/frameStack.js";
+import { Frame, FrameStack } from "../../src/reducer/frameStack.js";
+import { StackTrace } from "../../src/reducer/stackTrace.js";
 
 describe("ErrorMessage", () => {
   test("toString", () => {
@@ -20,14 +21,14 @@ describe("IError", () => {
     ).toBe("Error: test error"));
 
   test("toStringWithStackTrace", () => {
-    const frameStack = FrameStack.make()
-      .extend("frame1", undefined)
-      .extend("frame2", undefined);
+    const frameStack = FrameStack.make();
+    frameStack.extend(new Frame("frame1", undefined));
+    frameStack.extend(new Frame("frame2", undefined));
 
     expect(
-      IRuntimeError.fromMessageWithFrameStack(
+      IRuntimeError.fromMessageWithStackTrace(
         new REOther("test error"),
-        frameStack
+        new StackTrace(frameStack)
       ).toStringWithDetails()
     ).toBe(`Error: test error
 Stack trace:

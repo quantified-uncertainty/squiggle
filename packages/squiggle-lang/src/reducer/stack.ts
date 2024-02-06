@@ -24,12 +24,7 @@ export class Stack {
   }
 
   get(offset: number): Value {
-    const size = this.stack.length;
-    const pos = size - 1 - offset;
-    if (pos < 0) {
-      this.outOfBounds();
-    }
-    const result = this.stack.at(pos);
+    const result = this.stack.at(-offset - 1);
     if (!result) {
       this.outOfBounds();
     }

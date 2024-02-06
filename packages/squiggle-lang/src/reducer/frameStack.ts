@@ -35,8 +35,8 @@ export class FrameStack {
     return new FrameStack(); // this top frame is always invisible
   }
 
-  extend(name: string, location?: LocationRange): void {
-    this.frames.push(new Frame(name, location));
+  extend(frame: Frame): void {
+    this.frames.push(frame);
   }
 
   pop() {

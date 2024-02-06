@@ -1,7 +1,8 @@
 import { AST, parse } from "../../ast/parse.js";
 import { ICompileError, IRuntimeError } from "../../errors/IError.js";
 import { compileAst } from "../../expression/compile.js";
-import { ReducerContext } from "../../reducer/context.js";
+import { Env } from "../../index.js";
+import { createContext } from "../../reducer/context.js";
 import { evaluate, ReducerFn } from "../../reducer/index.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
@@ -188,7 +189,7 @@ export class ProjectItem {
     this.output = Result.Err(e);
   }
 
-  async run(context: ReducerContext, externals: Externals) {
+  async run(environment: Env, externals: Externals) {
     const _externals = externals.stdlib
       .merge(externals.implicitImports)
       .merge(externals.explicitImports);
@@ -219,40 +220,41 @@ export class ProjectItem {
     }
 
     try {
+      const context = createContext(environment);
+
       const wrappedEvaluate = context.evaluate;
       const asyncEvaluate: ReducerFn = (expression, context) => {
         // For now, runs are sync, so this doesn't do anything, but this might change in the future.
         // For example, if we decide to yield after each statement.
         return wrappedEvaluate(expression, context);
       };
+      context.evaluate = asyncEvaluate;
 
       if (expression.value.type !== "Program") {
         // mostly for TypeScript, so that we could access `expression.value.exports`
         throw new Error("Expected Program expression");
       }
 
-      const [result, contextAfterEvaluation] = evaluate(expression.value, {
+      const result = evaluate(expression.value, {
         ...context,
         evaluate: asyncEvaluate,
       });
 
       const exportNames = new Set(expression.value.value.exports);
-      const bindings = contextAfterEvaluation.stack
-        .asBindings()
-        .mapEntries(([key, value]) => {
-          let _value = value;
-          if (exportNames.has(key)) {
-            _value = value.mergeTags({
-              exportData: vDict(
-                ImmutableMap<string, Value>([
-                  ["sourceId", vString(this.sourceId)],
-                  ["path", vArray([vString(key)])],
-                ])
-              ),
-            });
-          }
-          return [key, _value];
-        });
+      const bindings = context.stack.asBindings().mapEntries(([key, value]) => {
+        let _value = value;
+        if (exportNames.has(key)) {
+          _value = value.mergeTags({
+            exportData: vDict(
+              ImmutableMap<string, Value>([
+                ["sourceId", vString(this.sourceId)],
+                ["path", vArray([vString(key)])],
+              ])
+            ),
+          });
+        }
+        return [key, _value];
+      });
       const exports = bindings.filter(
         (value, _) => value.tags?.exportData() !== undefined
       );
@@ -267,7 +269,7 @@ export class ProjectItem {
             ])
           ),
         }),
-        externals: externals,
+        externals,
       });
     } catch (e: unknown) {
       this.failRun(new SqRuntimeError(IRuntimeError.fromException(e)));
