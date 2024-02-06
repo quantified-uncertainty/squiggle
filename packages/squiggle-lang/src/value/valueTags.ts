@@ -3,7 +3,6 @@ import { LocationRange } from "peggy";
 import { Err, fmap, mergeMany, Ok, result } from "../utility/result.js";
 import { Value } from "./index.js";
 import { type VBool } from "./VBool.js";
-import { VDict } from "./VDict.js";
 import { type VString } from "./VString.js";
 
 // Note: this file can't call any `vType` constructors; it would cause a circular dependency because of `BaseValue` -> `ValueTags`.
@@ -17,7 +16,7 @@ export type ValueTagsType = {
   dateFormat?: VString; // can be set on dates
   hidden?: VBool;
   notebook?: VBool; // can be set on arrays
-  exportData?: VDict; // should be { sourceId: String, path: List(String) }
+  exportData?: { sourceId: string; path: string[] };
   startOpenState?: VString;
   location?: LocationRange;
 };
