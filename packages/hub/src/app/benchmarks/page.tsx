@@ -156,11 +156,12 @@ const BenchmarkTable: FC<{ code: string }> = ({ code }) => {
  * - save results in the database
  * - run multiple times and average the results
  * - more benchmarks
+ * - allow separate runs for each benchmark
  */
 export default function BenchmarksPage() {
   const codes = [
     "List.upTo(1, 10000) -> map({ |i| i to i + 1 }) -> List.length",
-    "List.upTo(1, 1e7) -> map({ |i| i })",
+    "List.upTo(1, 1e6) -> map({ |i| i })",
     "List.upTo(1, 1e4) -> map({|x| List.upTo(1, 100) -> reduce(0, {|a,b|a+b})})",
   ];
   return (
