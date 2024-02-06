@@ -34,7 +34,7 @@ export type ExpressionContent =
       value: [Expression, Expression][];
     }
   | {
-      type: "ResolvedSymbol";
+      type: "StackRef";
       value: {
         name: string;
         // Position on stack, counting backwards (so last variable on stack has offset=0).
@@ -124,11 +124,8 @@ export const eDict = (aMap: [Expression, Expression][]): ExpressionContent => ({
   value: aMap,
 });
 
-export const eResolvedSymbol = (
-  name: string,
-  offset: number
-): ExpressionContent => ({
-  type: "ResolvedSymbol",
+export const eStackRef = (name: string, offset: number): ExpressionContent => ({
+  type: "StackRef",
   value: { name, offset },
 });
 
@@ -198,7 +195,7 @@ export function expressionToString(expression: Expression): string {
             `${expressionToString(key)}: ${expressionToString(value)}`
         )
         .join(", ")}}`;
-    case "ResolvedSymbol":
+    case "StackRef":
       // it would be useful to output the offset here, but we need to update tests accordingly
       return expression.value.name;
     case "Ternary":

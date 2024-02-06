@@ -1,5 +1,3 @@
-import { List as ImmutableList } from "immutable";
-
 import { ASTNode } from "../ast/parse.js";
 import { infixFunctions, unaryFunctions } from "../ast/peggyHelpers.js";
 import { undecorated } from "../ast/utils.js";
@@ -20,10 +18,9 @@ type CompileContext = Readonly<{
   // 3. imports
   // Externals will be inlined in the resulting expression.
   externals: Bindings;
-  // `pos` here is counted from the first element on stack, unlike in ResolvedSymbol's offset.
+  // `pos` here is counted from the first element on stack, unlike in StackRef's offset.
   // See switch branch for "Identifier" AST type below.
   nameToPos: ImmutableMap<string, number>;
-  locals: ImmutableList<string>;
   size: number;
 }>;
 
@@ -31,7 +28,6 @@ function createInitialCompileContext(externals: Bindings): CompileContext {
   return {
     externals,
     nameToPos: ImmutableMap(),
-    locals: ImmutableList(),
     size: 0,
   };
 }
@@ -45,7 +41,7 @@ function resolveName(
   if (offset !== undefined) {
     return {
       ast,
-      ...expression.eResolvedSymbol(name, context.size - 1 - offset),
+      ...expression.eStackRef(name, context.size - 1 - offset),
     };
   }
 
@@ -69,7 +65,6 @@ function compileToContent(
       let currentContext: CompileContext = {
         externals: context.externals,
         nameToPos: context.nameToPos,
-        locals: ImmutableList(),
         size: context.size,
       };
       const statements: expression.Expression[] = [];
@@ -97,7 +92,6 @@ function compileToContent(
       let currentContext: CompileContext = {
         externals: context.externals,
         nameToPos: context.nameToPos,
-        locals: ImmutableList(),
         size: context.size,
       };
       const statements: expression.Expression[] = [];
@@ -124,19 +118,14 @@ function compileToContent(
     }
     case "DefunStatement":
     case "LetStatement": {
+      const name = ast.variable.value;
+      const value = innerCompileAst(ast.value, context)[0];
       const newContext: CompileContext = {
         externals: context.externals,
-        nameToPos: context.nameToPos.set(ast.variable.value, context.size),
-        locals: context.locals.push(ast.variable.value),
+        nameToPos: context.nameToPos.set(name, context.size),
         size: context.size + 1,
       };
-      return [
-        expression.eLetStatement(
-          ast.variable.value,
-          innerCompileAst(ast.value, context)[0]
-        ),
-        newContext,
-      ];
+      return [expression.eLetStatement(name, value), newContext];
     }
     case "DecoratedStatement": {
       // First, compile the inner statement.
@@ -253,7 +242,6 @@ function compileToContent(
       const innerContext: CompileContext = {
         externals: context.externals,
         nameToPos: newNameToPos,
-        locals: ImmutableList(),
         size: context.size + ast.args.length,
       };
       return [
@@ -334,7 +322,7 @@ function compileToContent(
       if (offset === undefined) {
         return [resolveName(context, ast, ast.value), context];
       } else {
-        const result = expression.eResolvedSymbol(
+        const result = expression.eStackRef(
           ast.value,
           context.size - 1 - offset
         );

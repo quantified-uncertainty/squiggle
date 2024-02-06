@@ -74,8 +74,8 @@ export const evaluate: ReducerFn = (expression, context) => {
       return evaluateDict(expression.value, context, ast);
     case "Assign":
       return evaluateAssign(expression.value, context, ast);
-    case "ResolvedSymbol":
-      return evaluateResolvedSymbol(expression.value, context, ast);
+    case "StackRef":
+      return evaluateStackRef(expression.value, context, ast);
     case "Value":
       return evaluateValue(expression.value, context, ast);
     case "Ternary":
@@ -168,7 +168,7 @@ const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
   ];
 };
 
-const evaluateResolvedSymbol: SubReducerFn<"ResolvedSymbol"> = (
+const evaluateStackRef: SubReducerFn<"StackRef"> = (
   expressionValue,
   context
 ) => {
