@@ -16,6 +16,7 @@ type Props = {
   playgroundSettings: PartialPlaygroundSettings;
   showMenu?: boolean;
   defaultTab?: ViewerTab;
+  sourceId: string;
 };
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isSimulating state. */
@@ -27,6 +28,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
       showMenu = true,
       editor,
       defaultTab,
+      sourceId,
     },
     viewerRef
   ) {
@@ -55,6 +57,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
             viewerTab={viewerTab}
             outputResult={output}
             isSimulating={isSimulating(simulation)}
+            sourceId={sourceId}
             playgroundSettings={playgroundSettings}
             ref={viewerRef}
             editor={editor}

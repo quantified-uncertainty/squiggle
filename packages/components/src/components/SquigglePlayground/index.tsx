@@ -178,6 +178,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         editor={leftPanelRef.current?.getEditor() ?? undefined}
         playgroundSettings={settings}
         ref={rightPanelRef}
+        sourceId={sourceId}
       />
     ) : (
       <div className="grid place-items-center h-full">

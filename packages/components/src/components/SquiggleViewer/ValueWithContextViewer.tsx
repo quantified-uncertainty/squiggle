@@ -5,7 +5,7 @@ import { clsx } from "clsx";
 import { FC, PropsWithChildren, useCallback, useMemo, useRef } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { CommentIcon, TextTooltip } from "@quri/ui";
+import { CommentIcon, LinkIcon, TextTooltip } from "@quri/ui";
 
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
@@ -26,6 +26,7 @@ import {
   useMergedSettings,
   useRegisterAsItemViewer,
   useScrollToEditorPath,
+  useSourceId,
   useToggleCollapsed,
   useViewerContext,
   useViewerType,
@@ -166,6 +167,12 @@ export const ValueWithContextViewer: FC<Props> = ({
   const isRoot = path.isRoot();
   const taggedName = value.tags.name();
 
+  const exportData = value.tags.exportData();
+  const exportName =
+    exportData && exportData.path.length === 0 ? `${exportData.sourceId}` : "";
+
+  const sourceId = useSourceId();
+
   // root header is always hidden (unless forced, but we probably won't need it)
   const headerVisibility = props.header ?? (isRoot ? "hide" : "show");
   const collapsible =
@@ -233,14 +240,33 @@ export const ValueWithContextViewer: FC<Props> = ({
     };
 
     return (
-      <div className={clsx("leading-3", showColon || "mr-3")}>
-        <span
+      <div
+        className={clsx(
+          "leading-3 flex flex-row items-center",
+          showColon || "mr-3"
+        )}
+      >
+        <div
           className={clsx(!taggedName && "font-mono", headerClasses())}
           onClick={focus}
         >
-          {taggedName || name}
-        </span>
-        {showColon && <span className="text-gray-400 font-mono">:</span>}
+          {exportName || taggedName || name}
+        </div>
+        {exportData && (
+          <TextTooltip
+            text={`${exportData.sourceId}/${exportData.path.join("/")}`}
+            placement="bottom"
+            offset={5}
+          >
+            <a
+              href="/foobar"
+              className="group px-1 ml-0.5 text-slate-400 hover:text-slate-800 transition"
+            >
+              <LinkIcon size={14} className="" />
+            </a>
+          </TextTooltip>
+        )}
+        {showColon && <div className="text-gray-400 font-mono">:</div>}
       </div>
     );
   };

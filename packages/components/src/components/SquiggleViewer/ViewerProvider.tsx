@@ -12,6 +12,7 @@ import {
 
 import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 
+import { SqOutput } from "../../../../squiggle-lang/src/public/types.js";
 import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
 import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
@@ -185,7 +186,9 @@ type ViewerContextShape = {
   initialized: boolean;
   handle: SquiggleViewerHandle;
   rootValue?: SqValueWithContext;
+  sqOutput?: SqOutput;
   findNode: (path: SqValuePath) => SqListViewNode | undefined;
+  sourceId: string;
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
@@ -201,6 +204,8 @@ export const ViewerContext = createContext<ViewerContextShape>({
   initialized: false,
   rootValue: undefined,
   findNode: () => undefined,
+  sqOutput: undefined,
+  sourceId: "",
 });
 
 export function useViewerContext() {
@@ -307,6 +312,16 @@ export function useZoomOut() {
   return () => setZoomedInPath(undefined);
 }
 
+export function useSqOutput() {
+  const { sqOutput } = useViewerContext();
+  return sqOutput;
+}
+
+export function useSourceId() {
+  const { sourceId } = useViewerContext();
+  return sourceId;
+}
+
 export function useScrollToEditorPath(path: SqValuePath) {
   const { editor, findNode } = useViewerContext();
   return () => {
@@ -349,6 +364,8 @@ type Props = PropsWithChildren<{
   editor?: CodeEditorHandle;
   viewerType?: ViewerType;
   rootValue: SqValue | undefined;
+  sqOutput: SqOutput | undefined;
+  sourceId: string;
 }>;
 
 export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
@@ -358,6 +375,8 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       editor,
       viewerType = "normal",
       rootValue,
+      sqOutput,
+      sourceId,
       children,
     },
     ref
@@ -396,6 +415,8 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       <ViewerContext.Provider
         value={{
           rootValue: _rootValue,
+          sqOutput,
+          sourceId,
           globalSettings,
           editor,
           zoomedInPath,
