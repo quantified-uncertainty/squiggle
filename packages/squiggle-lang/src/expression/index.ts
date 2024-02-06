@@ -44,6 +44,13 @@ export type ExpressionContent =
       };
     }
   | {
+      type: "CaptureRef";
+      value: {
+        name: string;
+        id: number; // Position in captures.
+      };
+    }
+  | {
       type: "Ternary";
       value: {
         condition: Expression;
@@ -72,6 +79,7 @@ export type ExpressionContent =
       type: "Lambda";
       value: {
         name?: string;
+        captures: Ref[];
         parameters: LambdaExpressionParameter[];
         body: Expression;
       };
@@ -81,14 +89,24 @@ export type ExpressionContent =
       value: Value;
     };
 
+export type TypedExpressionContent<T extends ExpressionContent["type"]> =
+  Extract<ExpressionContent, { type: T }>;
+
+export type Ref = TypedExpressionContent<"StackRef" | "CaptureRef">;
+
 export type Expression = ExpressionContent & { ast: ASTNode };
 
-export const eArray = (anArray: Expression[]): ExpressionContent => ({
+export type TypedExpression<T extends ExpressionContent["type"]> =
+  TypedExpressionContent<T> & { ast: ASTNode };
+
+export const eArray = (
+  anArray: Expression[]
+): TypedExpressionContent<"Array"> => ({
   type: "Array",
   value: anArray,
 });
 
-export const eValue = (value: Value): ExpressionContent => ({
+export const eValue = (value: Value): TypedExpressionContent<"Value"> => ({
   type: "Value",
   value,
 });
@@ -97,7 +115,7 @@ export const eCall = (
   fn: Expression,
   args: Expression[],
   as: "call" | "decorate" = "call"
-): ExpressionContent => ({
+): TypedExpressionContent<"Call"> => ({
   type: "Call",
   value: {
     fn,
@@ -108,28 +126,45 @@ export const eCall = (
 
 export const eLambda = (
   name: string | undefined,
+  captures: Ref[],
   parameters: LambdaExpressionParameter[],
   body: Expression
-): ExpressionContent => ({
+): TypedExpressionContent<"Lambda"> => ({
   type: "Lambda",
   value: {
     name,
+    captures,
     parameters,
     body,
   },
 });
 
-export const eDict = (aMap: [Expression, Expression][]): ExpressionContent => ({
+export const eDict = (
+  aMap: [Expression, Expression][]
+): TypedExpressionContent<"Dict"> => ({
   type: "Dict",
   value: aMap,
 });
 
-export const eStackRef = (name: string, offset: number): ExpressionContent => ({
+export const eStackRef = (
+  name: string,
+  offset: number
+): TypedExpressionContent<"StackRef"> => ({
   type: "StackRef",
   value: { name, offset },
 });
 
-export const eBlock = (exprs: Expression[]): ExpressionContent => ({
+export const eCaptureRef = (
+  name: string,
+  id: number
+): TypedExpressionContent<"CaptureRef"> => ({
+  type: "CaptureRef",
+  value: { name, id },
+});
+
+export const eBlock = (
+  exprs: Expression[]
+): TypedExpressionContent<"Block"> => ({
   type: "Block",
   value: exprs,
 });
@@ -137,7 +172,7 @@ export const eBlock = (exprs: Expression[]): ExpressionContent => ({
 export const eProgram = (
   statements: Expression[],
   exports: string[]
-): ExpressionContent => ({
+): TypedExpressionContent<"Program"> => ({
   type: "Program",
   value: {
     statements,
@@ -148,7 +183,7 @@ export const eProgram = (
 export const eLetStatement = (
   left: string,
   right: Expression
-): ExpressionContent => ({
+): TypedExpressionContent<"Assign"> => ({
   type: "Assign",
   value: {
     left,
@@ -160,7 +195,7 @@ export const eTernary = (
   condition: Expression,
   ifTrue: Expression,
   ifFalse: Expression
-): ExpressionContent => ({
+): TypedExpressionContent<"Ternary"> => ({
   type: "Ternary",
   value: {
     condition,
@@ -170,7 +205,7 @@ export const eTernary = (
 });
 
 // Converts the expression to String. Useful for tests.
-export function expressionToString(expression: Expression): string {
+export function expressionToString(expression: ExpressionContent): string {
   switch (expression.type) {
     case "Block":
       return `{${expression.value.map(expressionToString).join("; ")}}`;
@@ -196,8 +231,9 @@ export function expressionToString(expression: Expression): string {
         )
         .join(", ")}}`;
     case "StackRef":
-      // it would be useful to output the offset here, but we need to update tests accordingly
-      return expression.value.name;
+      return `S[${expression.value.offset}, ${expression.value.name}]`;
+    case "CaptureRef":
+      return `C[${expression.value.id}, ${expression.value.name}]`;
     case "Ternary":
       return `${expressionToString(
         expression.value.condition
@@ -212,10 +248,14 @@ export function expressionToString(expression: Expression): string {
       return `(${expressionToString(
         expression.value.fn
       )})(${expression.value.args.map(expressionToString).join(", ")})`;
-    case "Lambda":
-      return `{|${expression.value.parameters
+    case "Lambda": {
+      const captures = expression.value.captures
+        .map(expressionToString)
+        .join(", ");
+      return `{[${captures}]|${expression.value.parameters
         .map((parameter) => parameter.name)
         .join(", ")}| ${expressionToString(expression.value.body)}}`;
+    }
     case "Value":
       return expression.value.toString();
     default:

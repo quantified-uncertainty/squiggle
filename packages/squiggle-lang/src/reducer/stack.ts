@@ -1,5 +1,3 @@
-import { List } from "immutable";
-
 import { REOther } from "../errors/messages.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Value } from "../value/index.js";
@@ -12,11 +10,10 @@ type StackEntry = {
 export type Bindings = ImmutableMap<string, Value>;
 
 /*
- * We use one global stack instance for each Squiggle run (stored in ReducerContext).
  * Offsets on stack are resolved in `expression/fromAst.ts`, except for stdLib symbols, which are resolved in runtime.
  */
 export class Stack {
-  private constructor(private stack: List<StackEntry> = List()) {}
+  private constructor(private stack: StackEntry[] = []) {}
 
   static make(): Stack {
     return new Stack();
@@ -27,12 +24,12 @@ export class Stack {
   }
 
   get(offset: number): Value {
-    const size = this.stack.size;
+    const size = this.stack.length;
     const pos = size - 1 - offset;
     if (pos < 0) {
       this.outOfBounds();
     }
-    const result = this.stack.get(pos);
+    const result = this.stack.at(pos);
     if (!result) {
       this.outOfBounds();
     }
@@ -40,7 +37,7 @@ export class Stack {
   }
 
   push(name: string, value: Value): Stack {
-    return new Stack(this.stack.push({ name, value }));
+    return new Stack([...this.stack, { name, value }]);
   }
 
   asBindings(): Bindings {

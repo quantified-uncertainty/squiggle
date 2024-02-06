@@ -76,6 +76,8 @@ export const evaluate: ReducerFn = (expression, context) => {
       return evaluateAssign(expression.value, context, ast);
     case "StackRef":
       return evaluateStackRef(expression.value, context, ast);
+    case "CaptureRef":
+      return evaluateCaptureRef(expression.value, context, ast);
     case "Value":
       return evaluateValue(expression.value, context, ast);
     case "Ternary":
@@ -159,6 +161,7 @@ const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
     {
       // no spread is intentional - helps with monomorphism
       stack: context.stack.push(expressionValue.left, result),
+      captures: context.captures,
       environment: context.environment,
       frameStack: context.frameStack,
       evaluate: context.evaluate,
@@ -173,6 +176,17 @@ const evaluateStackRef: SubReducerFn<"StackRef"> = (
   context
 ) => {
   const value = context.stack.get(expressionValue.offset);
+  return [value, context];
+};
+
+const evaluateCaptureRef: SubReducerFn<"CaptureRef"> = (
+  expressionValue,
+  context
+) => {
+  const value = context.captures.at(expressionValue.id);
+  if (!value) {
+    throw new Error(`Internal error: invalid capture id ${expressionValue.id}`);
+  }
   return [value, context];
 };
 
@@ -239,11 +253,35 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
       domain,
     });
   }
+
+  const capturedValues: Value[] = [];
+  for (const capture of expressionValue.captures) {
+    // duplicates `evaluateStackRef` and `evaluateCaptureRef`
+    switch (capture.type) {
+      case "StackRef": {
+        capturedValues.push(context.stack.get(capture.value.offset));
+        break;
+      }
+      case "CaptureRef": {
+        const value = context.captures.at(capture.value.id);
+        if (!value) {
+          throw new Error(
+            `Internal error: invalid capture id ${capture.value.id}`
+          );
+        }
+        capturedValues.push(value);
+        break;
+      }
+      default:
+        throw new Error(`Impossible capture ${capture satisfies never}`);
+    }
+  }
+
   const value = vLambda(
     new UserDefinedLambda(
       expressionValue.name,
+      capturedValues,
       parameters,
-      context.stack,
       expressionValue.body,
       ast.location
     )

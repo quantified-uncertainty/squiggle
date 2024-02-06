@@ -1,5 +1,6 @@
 import { Env } from "../dist/env.js";
 import { getNativeRng, PRNG } from "../rng/index.js";
+import { Value } from "../value/index.js";
 import { FrameStack, topFrameName } from "./frameStack.js";
 import { evaluate, ReducerFn } from "./index.js";
 import { BaseLambda } from "./lambda.js";
@@ -7,6 +8,7 @@ import { Stack } from "./stack.js";
 
 export type ReducerContext = Readonly<{
   stack: Stack;
+  captures: Value[];
   environment: Env;
   frameStack: FrameStack;
   evaluate: ReducerFn;
@@ -21,6 +23,7 @@ export function createContext(environment: Env): ReducerContext {
 
   return {
     stack: Stack.make(),
+    captures: [],
     environment,
     frameStack: FrameStack.make(),
     evaluate,

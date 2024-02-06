@@ -53,6 +53,7 @@ export abstract class BaseLambda {
       // Be careful! the order here must match the order of props in ReducerContext.
       // Also, we intentionally don't use object spread syntax because of monomorphism.
       stack: context.stack,
+      captures: [],
       environment: context.environment,
       frameStack: context.frameStack.extend(
         Context.currentFunctionName(context),
@@ -84,8 +85,8 @@ export class UserDefinedLambda extends BaseLambda {
 
   constructor(
     name: string | undefined,
+    captures: Value[],
     parameters: UserDefinedLambdaParameter[],
-    stack: Stack,
     body: Expression,
     location: LocationRange
   ) {
@@ -96,17 +97,19 @@ export class UserDefinedLambda extends BaseLambda {
         throw new REArityError(undefined, parametersLength, argsLength);
       }
 
-      let localStack = stack;
+      // Every lambda gets its own private stack.
+      let stack = Stack.make();
       for (let i = 0; i < parametersLength; i++) {
         const parameter = parameters[i];
-        localStack = localStack.push(parameter.name, args[i]);
+        stack = stack.push(parameter.name, args[i]);
         if (parameter.domain) {
           parameter.domain.value.validateValue(args[i]);
         }
       }
 
       const lambdaContext: ReducerContext = {
-        stack: localStack,
+        stack,
+        captures,
         // no spread is intentional - helps with monomorphism
         environment: context.environment,
         frameStack: context.frameStack,
