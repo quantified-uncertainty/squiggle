@@ -4,8 +4,6 @@
 
 import { LocationRange } from "peggy";
 
-export const topFrameName = "<top>";
-
 export class Frame {
   // Weird hack: without this, Frame class won't be a separate type from the plain JS Object type, since it doesn't have any meaningful methods.
   // This could lead to bugs.
@@ -32,7 +30,7 @@ export class FrameStack {
   private frames: Frame[] = [];
 
   static make(): FrameStack {
-    return new FrameStack(); // this top frame is always invisible
+    return new FrameStack();
   }
 
   extend(frame: Frame): void {

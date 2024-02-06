@@ -28,6 +28,17 @@ export class StackTrace {
     const frames = this.frameStack.toFrameArray();
 
     const stackTraceFrames = [];
+    /**
+     * Stack trace frames are shifted diagonally by one compared to the call stack frames.
+     * For example, if we had these call stack frames:
+     * - f() was called from location 1 (on top level)
+     * - g() was called from location 2 (inside f())
+     *
+     * Then in the stack trace, it's going to be:
+     * - g() at location 3
+     * - f() at location 2
+     * - <top> at location 1
+     */
     for (let i = frames.length; i >= 0; i--) {
       const name = i ? frames[i - 1].name : "<top>";
       const location = i === frames.length ? this.location : frames[i].location;
@@ -38,7 +49,7 @@ export class StackTrace {
   }
 
   toString() {
-    // this includes the left offset because it's mostly used in SqError.toStringWithStackTrace
+    // This includes the left offset because it's mostly used in `SqError.toStringWithStackTrace`.
     return this.frames()
       .map((frame) => "  " + frame.toString())
       .join("\n");
