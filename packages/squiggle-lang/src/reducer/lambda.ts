@@ -18,8 +18,8 @@ import { Value } from "../value/index.js";
 import { Calculator } from "../value/VCalculator.js";
 import { VDomain } from "../value/VDomain.js";
 import { Input } from "../value/VInput.js";
-import { ReducerContext } from "./context.js";
 import { Frame } from "./frameStack.js";
+import { Interpreter } from "./interpreter.js";
 
 export type UserDefinedLambdaParameter = {
   name: string;
@@ -38,11 +38,11 @@ export abstract class BaseLambda {
   abstract defaultInputs(): Input[];
   abstract toCalculator(): Calculator;
 
-  abstract body(args: Value[], context: ReducerContext): Value;
+  protected abstract body(args: Value[], context: Interpreter): Value;
 
   callFrom(
     args: Value[],
-    context: ReducerContext,
+    context: Interpreter,
     ast: ASTNode | undefined
   ): Value {
     const initialStackSize = context.stack.size();
@@ -61,7 +61,7 @@ export abstract class BaseLambda {
     }
   }
 
-  call(args: Value[], context: ReducerContext): Value {
+  call(args: Value[], context: Interpreter): Value {
     return this.callFrom(args, context, undefined);
   }
 }
@@ -90,7 +90,7 @@ export class UserDefinedLambda extends BaseLambda {
     this.location = location;
   }
 
-  body(args: Value[], context: ReducerContext) {
+  body(args: Value[], context: Interpreter) {
     const argsLength = args.length;
     const parametersLength = this.parameters.length;
     if (argsLength !== parametersLength) {
@@ -107,7 +107,7 @@ export class UserDefinedLambda extends BaseLambda {
 
     context.captures = this.captures;
 
-    return context.evaluate(this.expression, context);
+    return context.evaluate(this.expression);
   }
 
   display() {
@@ -195,7 +195,7 @@ export class BuiltinLambda extends BaseLambda {
     return this._definitions.map((d) => d.inputs);
   }
 
-  body(args: Value[], context: ReducerContext): Value {
+  body(args: Value[], context: Interpreter): Value {
     const signatures = this._definitions;
     const showNameMatchDefinitions = () => {
       const defsString = signatures

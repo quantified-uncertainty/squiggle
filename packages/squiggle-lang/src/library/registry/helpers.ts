@@ -17,7 +17,7 @@ import {
   OtherOperationError,
   SampleMapNeedsNtoNFunction,
 } from "../../operationError.js";
-import { ReducerContext } from "../../reducer/context.js";
+import { Interpreter } from "../../reducer/interpreter.js";
 import { Lambda } from "../../reducer/lambda.js";
 import { upTo } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
@@ -186,7 +186,7 @@ export class FnFactory {
     fn,
     ...args
   }: ArgsWithoutDefinitions & {
-    fn: (x: BaseDist, context: ReducerContext) => number;
+    fn: (x: BaseDist, context: Interpreter) => number;
   }): FRFunction {
     return this.make({
       ...args,
@@ -218,7 +218,7 @@ export class FnFactory {
     fn,
     ...args
   }: ArgsWithoutDefinitions & {
-    fn: (dist: BaseDist, context: ReducerContext) => BaseDist;
+    fn: (dist: BaseDist, context: Interpreter) => BaseDist;
   }): FRFunction {
     return this.make({
       ...args,
@@ -235,7 +235,7 @@ export class FnFactory {
     fn,
     ...args
   }: ArgsWithoutDefinitions & {
-    fn: (dist: BaseDist, n: number, context: ReducerContext) => BaseDist;
+    fn: (dist: BaseDist, n: number, context: Interpreter) => BaseDist;
   }): FRFunction {
     return this.make({
       ...args,
@@ -285,7 +285,7 @@ export function unwrapDistResult<T>(result: Result.result<T, DistError>): T {
 export function doNumberLambdaCall(
   lambda: Lambda,
   args: Value[],
-  context: ReducerContext
+  context: Interpreter
 ): number {
   const value = lambda.call(args, context);
   if (value.type === "Number") {
@@ -297,7 +297,7 @@ export function doNumberLambdaCall(
 export function doBinaryLambdaCall(
   args: Value[],
   lambda: Lambda,
-  context: ReducerContext
+  context: Interpreter
 ): boolean {
   const value = lambda.call(args, context);
   if (value.type === "Bool") {
@@ -309,7 +309,7 @@ export function doBinaryLambdaCall(
 export const parseDistFromDistOrNumber = (d: number | BaseDist): BaseDist =>
   typeof d === "number" ? Result.getExt(PointMass.make(d)) : d;
 
-export function makeSampleSet(d: BaseDist, context: ReducerContext) {
+export function makeSampleSet(d: BaseDist, context: Interpreter) {
   const result = SampleSetDist.SampleSetDist.fromDist(
     d,
     context.environment,
@@ -324,7 +324,7 @@ export function makeSampleSet(d: BaseDist, context: ReducerContext) {
 export function twoVarSample(
   v1: BaseDist | number,
   v2: BaseDist | number,
-  context: ReducerContext,
+  context: Interpreter,
   fn: (
     v1: number,
     v2: number

@@ -12,12 +12,18 @@ describe("ErrorMessage", () => {
 describe("IError", () => {
   test("toString", () =>
     expect(
-      IRuntimeError.fromMessage(new REOther("test error")).toString()
+      IRuntimeError.fromMessage(
+        new REOther("test error"),
+        new StackTrace(FrameStack.make())
+      ).toString()
     ).toBe("Error: test error"));
 
   test("toStringWithStacktrace with empty stacktrace", () =>
     expect(
-      IRuntimeError.fromMessage(new REOther("test error")).toStringWithDetails()
+      IRuntimeError.fromMessage(
+        new REOther("test error"),
+        new StackTrace(FrameStack.make())
+      ).toStringWithDetails()
     ).toBe("Error: test error"));
 
   test("toStringWithStackTrace", () => {
@@ -26,13 +32,14 @@ describe("IError", () => {
     frameStack.extend(new Frame("frame2", undefined));
 
     expect(
-      IRuntimeError.fromMessageWithStackTrace(
+      IRuntimeError.fromMessage(
         new REOther("test error"),
         new StackTrace(frameStack)
       ).toStringWithDetails()
     ).toBe(`Error: test error
 Stack trace:
   frame2
-  frame1`);
+  frame1
+  <top>`);
   });
 });

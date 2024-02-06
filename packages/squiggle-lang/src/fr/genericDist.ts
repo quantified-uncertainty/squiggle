@@ -27,7 +27,7 @@ import {
   unwrapDistResult,
 } from "../library/registry/helpers.js";
 import * as magicNumbers from "../magicNumbers.js";
-import { ReducerContext } from "../reducer/context.js";
+import { Interpreter } from "../reducer/interpreter.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",
@@ -51,9 +51,7 @@ const pointwiseOps: OpPair[] = [
   ["dotPow", binaryOperations.pointwisePower],
 ];
 
-function contextToOpts(
-  context: ReducerContext
-): Parameters<BinaryOperation>[2] {
+function contextToOpts(context: Interpreter): Parameters<BinaryOperation>[2] {
   return {
     env: context.environment,
     rng: context.rng,

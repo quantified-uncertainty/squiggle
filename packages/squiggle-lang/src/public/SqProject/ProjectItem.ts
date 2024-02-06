@@ -1,10 +1,8 @@
 import { AST, parse } from "../../ast/parse.js";
-import { ICompileError, IRuntimeError } from "../../errors/IError.js";
+import { ICompileError } from "../../errors/IError.js";
 import { compileAst } from "../../expression/compile.js";
 import { Env } from "../../index.js";
-import { createContext } from "../../reducer/context.js";
-import { evaluate, ReducerFn } from "../../reducer/index.js";
-import { StackTrace } from "../../reducer/stackTrace.js";
+import { Interpreter } from "../../reducer/interpreter.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
@@ -220,32 +218,21 @@ export class ProjectItem {
       return;
     }
 
-    const context = createContext(environment);
+    const interpreter = new Interpreter(environment);
 
     try {
-      const wrappedEvaluate = context.evaluate;
-      const asyncEvaluate: ReducerFn = (expression, context) => {
-        // For now, runs are sync, so this doesn't do anything, but this might change in the future.
-        // For example, if we decide to yield after each statement.
-        return wrappedEvaluate(expression, context);
-      };
-      context.evaluate = asyncEvaluate;
-
       if (expression.value.kind !== "Program") {
         // mostly for TypeScript, so that we could access `expression.value.exports`
         throw new Error("Expected Program expression");
       }
 
-      const result = evaluate(expression.value, {
-        ...context,
-        evaluate: asyncEvaluate,
-      });
+      const result = interpreter.evaluate(expression.value);
 
       const exportNames = new Set(expression.value.value.exports);
       const bindings = ImmutableMap<string, Value>(
         Object.entries(expression.value.value.bindings).map(
           ([name, offset]) => {
-            let value = context.stack.get(offset);
+            let value = interpreter.stack.get(offset);
             if (exportNames.has(name)) {
               value = value.mergeTags({
                 exportData: vDict(
@@ -277,14 +264,7 @@ export class ProjectItem {
         externals,
       });
     } catch (e: unknown) {
-      this.failRun(
-        new SqRuntimeError(
-          IRuntimeError.fromExceptionWithStackTrace(
-            e,
-            new StackTrace(context.frameStack)
-          )
-        )
-      );
+      this.failRun(new SqRuntimeError(interpreter.errorFromException(e)));
     }
   }
 }
