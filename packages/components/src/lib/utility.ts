@@ -109,6 +109,16 @@ export function valueHasContext(value: SqValue): value is SqValueWithContext {
   return !!value.context;
 }
 
+export function undefinedUnlessContext(
+  value: SqValue
+): SqValueWithContext | undefined {
+  if (valueHasContext(value)) {
+    return value;
+  } else {
+    return undefined;
+  }
+}
+
 export type ViewerTab =
   | "Imports"
   | "Exports"
@@ -116,6 +126,31 @@ export type ViewerTab =
   | "Result"
   | "AST"
   | { tag: "CustomResultPath"; value: SqValuePath };
+
+const tabs = ["Imports", "Exports", "Variables", "Result", "AST"] as const;
+
+function nextTab(tab: ViewerTab, isNext: boolean): ViewerTab {
+  if (typeof tab === "object" && tab.tag === "CustomResultPath") {
+    return "Variables";
+  }
+
+  if (typeof tab === "string") {
+    const index = tabs.indexOf(tab as (typeof tabs)[number]);
+    if (isNext) {
+      if (index >= 0 && index < tabs.length - 1) {
+        return tabs[index + 1];
+      } else {
+        if (index === tabs.length - 1) {
+          return tabs[index];
+        } else {
+          return tabs[index + 1];
+        }
+      }
+    }
+  }
+
+  return tabs[0];
+}
 
 export function defaultViewerTab(
   outputResult: SqOutputResult | undefined

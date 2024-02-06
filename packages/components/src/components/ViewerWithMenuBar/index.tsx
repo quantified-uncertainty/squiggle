@@ -7,6 +7,7 @@ import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
 import { SimulatingIndicator } from "./SimulatingIndicator.js";
+import { TabContext } from "./TabProvider.js";
 import { ViewerBody } from "./ViewerBody.js";
 import { ViewerMenu } from "./ViewerMenu.js";
 
@@ -37,30 +38,32 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
     const { output } = simulation;
 
     return (
-      <Layout
-        menu={
-          showMenu ? (
-            <ViewerMenu
+      <TabContext.Provider value={{ tab: viewerTab, setViewerTab }}>
+        <Layout
+          menu={
+            showMenu ? (
+              <ViewerMenu
+                viewerTab={viewerTab}
+                setViewerTab={setViewerTab}
+                outputResult={output}
+              />
+            ) : (
+              <div />
+            ) // Important not to be null, so that it stays on the right.
+          }
+          indicator={<SimulatingIndicator simulation={simulation} />}
+          viewer={
+            <ViewerBody
               viewerTab={viewerTab}
-              setViewerTab={setViewerTab}
               outputResult={output}
+              isSimulating={isSimulating(simulation)}
+              playgroundSettings={playgroundSettings}
+              ref={viewerRef}
+              editor={editor}
             />
-          ) : (
-            <div />
-          ) // Important not to be null, so that it stays on the right.
-        }
-        indicator={<SimulatingIndicator simulation={simulation} />}
-        viewer={
-          <ViewerBody
-            viewerTab={viewerTab}
-            outputResult={output}
-            isSimulating={isSimulating(simulation)}
-            playgroundSettings={playgroundSettings}
-            ref={viewerRef}
-            editor={editor}
-          />
-        }
-      />
+          }
+        />
+      </TabContext.Provider>
     );
   }
 );
