@@ -5,7 +5,7 @@ import { defaultEnv } from "../dist/env.js";
 import {
   ICompileError,
   IRuntimeError,
-  rethrowWithFrameStack,
+  rethrowWithStackTrace,
 } from "../errors/IError.js";
 import {
   ErrorMessage,
@@ -207,7 +207,7 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
         domain = vDomain(annotationToDomain(annotationValue));
       } catch (e) {
         // see also: `Lambda.callFrom`
-        rethrowWithFrameStack(
+        rethrowWithStackTrace(
           e,
           new StackTrace(
             context.frameStack,
@@ -288,7 +288,12 @@ export async function evaluateExpressionToResult(
     const value = context.evaluate(expression, context);
     return Ok(value);
   } catch (e) {
-    return Result.Err(IRuntimeError.fromException(e));
+    return Result.Err(
+      IRuntimeError.fromExceptionWithStackTrace(
+        e,
+        new StackTrace(context.frameStack)
+      )
+    );
   }
 }
 

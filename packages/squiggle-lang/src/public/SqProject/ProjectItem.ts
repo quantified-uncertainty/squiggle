@@ -4,6 +4,7 @@ import { compileAst } from "../../expression/compile.js";
 import { Env } from "../../index.js";
 import { createContext } from "../../reducer/context.js";
 import { evaluate, ReducerFn } from "../../reducer/index.js";
+import { StackTrace } from "../../reducer/stackTrace.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
@@ -219,9 +220,9 @@ export class ProjectItem {
       return;
     }
 
-    try {
-      const context = createContext(environment);
+    const context = createContext(environment);
 
+    try {
       const wrappedEvaluate = context.evaluate;
       const asyncEvaluate: ReducerFn = (expression, context) => {
         // For now, runs are sync, so this doesn't do anything, but this might change in the future.
@@ -276,7 +277,14 @@ export class ProjectItem {
         externals,
       });
     } catch (e: unknown) {
-      this.failRun(new SqRuntimeError(IRuntimeError.fromException(e)));
+      this.failRun(
+        new SqRuntimeError(
+          IRuntimeError.fromExceptionWithStackTrace(
+            e,
+            new StackTrace(context.frameStack)
+          )
+        )
+      );
     }
   }
 }

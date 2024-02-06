@@ -44,6 +44,28 @@ export class IRuntimeError extends Error {
     }
   }
 
+  static fromExceptionWithStackTrace(
+    err: unknown,
+    stackTrace: StackTrace
+  ): IRuntimeError {
+    if (err instanceof IRuntimeError) {
+      return err;
+    } else if (err instanceof ErrorMessage) {
+      // probably comes from FunctionRegistry, adding stacktrace
+      return IRuntimeError.fromMessageWithStackTrace(err, stackTrace);
+    } else if (err instanceof Error) {
+      return IRuntimeError.fromMessageWithStackTrace(
+        new REJavaScriptExn(err.message, err.name),
+        stackTrace
+      );
+    } else {
+      return IRuntimeError.fromMessageWithStackTrace(
+        new REOther("Unknown exception"),
+        stackTrace
+      );
+    }
+  }
+
   override toString() {
     return this.m.toString();
   }
@@ -66,27 +88,13 @@ export class IRuntimeError extends Error {
   }
 }
 
-// converts raw exceptions into exceptions with framestack attached
+// converts raw exceptions into exceptions with stacktrace attached
 // already converted exceptions won't be affected
-export function rethrowWithFrameStack(
+export function rethrowWithStackTrace(
   err: unknown,
   stackTrace: StackTrace
 ): never {
-  if (err instanceof IRuntimeError) {
-    throw err; // exception already has a framestack
-  } else if (err instanceof ErrorMessage) {
-    throw IRuntimeError.fromMessageWithStackTrace(err, stackTrace); // probably comes from FunctionRegistry, adding stacktrace
-  } else if (err instanceof Error) {
-    throw IRuntimeError.fromMessageWithStackTrace(
-      new REJavaScriptExn(err.message, err.name),
-      stackTrace
-    );
-  } else {
-    throw IRuntimeError.fromMessageWithStackTrace(
-      new REOther("Unknown exception"),
-      stackTrace
-    );
-  }
+  throw IRuntimeError.fromExceptionWithStackTrace(err, stackTrace);
 }
 
 export class ICompileError extends Error {

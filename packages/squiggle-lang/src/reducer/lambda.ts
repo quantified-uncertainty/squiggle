@@ -3,7 +3,6 @@ import uniq from "lodash/uniq.js";
 import { LocationRange } from "peggy";
 
 import { ASTNode } from "../ast/parse.js";
-import * as IError from "../errors/IError.js";
 import { REArityError, REOther } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
 import {
@@ -21,7 +20,6 @@ import { VDomain } from "../value/VDomain.js";
 import { Input } from "../value/VInput.js";
 import { ReducerContext } from "./context.js";
 import { Frame } from "./frameStack.js";
-import { StackTrace } from "./stackTrace.js";
 
 export type UserDefinedLambdaParameter = {
   name: string;
@@ -57,11 +55,6 @@ export abstract class BaseLambda {
       const result = this.body(args, context);
       context.frameStack.pop();
       return result;
-    } catch (e) {
-      IError.rethrowWithFrameStack(
-        e,
-        new StackTrace(context.frameStack, ast?.location)
-      );
     } finally {
       context.stack.shrink(initialStackSize);
       context.captures = initialCaptures;
