@@ -16,7 +16,6 @@ export function useZoomedOutSqValueKeyEvent(selected: SqValuePath) {
       const newPath = findNode(selected)?.next()?.node.path;
       newPath && itemStore.focusOnPath(newPath);
     },
-
     ArrowUp: () => {
       const newPath = findNode(selected)?.prev()?.node.path;
       newPath && itemStore.focusOnPath(newPath);
