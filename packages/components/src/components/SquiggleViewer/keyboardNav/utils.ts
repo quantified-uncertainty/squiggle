@@ -3,9 +3,7 @@ export function keyboardEventHandler(
   handlers: Partial<Record<string, () => void>>
 ) {
   return (event: React.KeyboardEvent<HTMLElement>): boolean => {
-    const shift = event.shiftKey;
-    const key = shift ? `Shift+${event.key}` : event.key;
-    const handler = handlers[key];
+    const handler = handlers[event.key];
     if (handler) {
       event.preventDefault();
       handler();
