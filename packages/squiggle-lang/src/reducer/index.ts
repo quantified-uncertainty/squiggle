@@ -115,12 +115,11 @@ const evaluateArray: SubReducerFn<"Array"> = (expressionValue, context) => {
   const values = expressionValue.map((element) => {
     return context.evaluate(element, context);
   });
-  const value = vArray(values);
-  return value;
+  return vArray(values);
 };
 
 const evaluateDict: SubReducerFn<"Dict"> = (expressionValue, context, ast) => {
-  const value = vDict(
+  return vDict(
     ImmutableMap(
       expressionValue.map(([eKey, eValue]) => {
         const key = context.evaluate(eKey, context);
@@ -137,12 +136,11 @@ const evaluateDict: SubReducerFn<"Dict"> = (expressionValue, context, ast) => {
       })
     )
   );
-  return value;
 };
 
 const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
   const result = context.evaluate(expressionValue.right, context);
-  context.stack.push(expressionValue.left, result);
+  context.stack.push(result);
   return vVoid();
 };
 
@@ -150,16 +148,16 @@ const evaluateStackRef: SubReducerFn<"StackRef"> = (
   expressionValue,
   context
 ) => {
-  return context.stack.get(expressionValue.offset);
+  return context.stack.get(expressionValue);
 };
 
 const evaluateCaptureRef: SubReducerFn<"CaptureRef"> = (
   expressionValue,
   context
 ) => {
-  const value = context.captures.at(expressionValue.id);
+  const value = context.captures.at(expressionValue);
   if (!value) {
-    throw new Error(`Internal error: invalid capture id ${expressionValue.id}`);
+    throw new Error(`Internal error: invalid capture id ${expressionValue}`);
   }
   return value;
 };
@@ -182,11 +180,10 @@ const evaluateTernary: SubReducerFn<"Ternary"> = (
     );
   }
 
-  const value = context.evaluate(
+  return context.evaluate(
     predicateResult.value ? expressionValue.ifTrue : expressionValue.ifFalse,
     context
   );
-  return value;
 };
 
 const evaluateLambda: SubReducerFn<"Lambda"> = (
@@ -230,14 +227,14 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
     // duplicates `evaluateStackRef` and `evaluateCaptureRef`
     switch (capture.type) {
       case "StackRef": {
-        capturedValues.push(context.stack.get(capture.value.offset));
+        capturedValues.push(context.stack.get(capture.value));
         break;
       }
       case "CaptureRef": {
-        const value = context.captures.at(capture.value.id);
+        const value = context.captures.at(capture.value);
         if (!value) {
           throw new Error(
-            `Internal error: invalid capture id ${capture.value.id}`
+            `Internal error: invalid capture id ${capture.value}`
           );
         }
         capturedValues.push(value);
@@ -248,7 +245,7 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
     }
   }
 
-  const value = vLambda(
+  return vLambda(
     new UserDefinedLambda(
       expressionValue.name,
       capturedValues,
@@ -257,7 +254,6 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
       ast.location
     )
   );
-  return value;
 };
 
 const evaluateCall: SubReducerFn<"Call"> = (
@@ -277,12 +273,11 @@ const evaluateCall: SubReducerFn<"Call"> = (
     const argValue = context.evaluate(arg, context);
     return argValue;
   });
-  const result = lambda.value.callFrom(
+  return lambda.value.callFrom(
     argValues,
     context,
-    ast // we pass the ast of a current expression here, to put it on frameStack and in the resulting value
+    ast // we pass the ast of a current expression here, to put it on frameStack
   );
-  return result;
 };
 
 function createDefaultContext() {

@@ -23,6 +23,7 @@ export type ExpressionContent =
       value: {
         statements: Expression[];
         exports: string[];
+        bindings: Record<string, number>; // numbers are stack references
       };
     }
   | {
@@ -35,20 +36,15 @@ export type ExpressionContent =
     }
   | {
       type: "StackRef";
-      value: {
-        name: string;
-        // Position on stack, counting backwards (so last variable on stack has offset=0).
-        // It's important to count backwards, because we want to store imports and continues on top of the stack.
-        // (And maybe stdLib too, in the future.)
-        offset: number;
-      };
+      // Position on stack, counting backwards (so last variable on stack has offset=0).
+      // It's important to count backwards, because we want to store imports and continues on top of the stack.
+      // (And maybe stdLib too, in the future.)
+      value: number;
     }
   | {
+      // Captures are stored separately from values on stack, because we store captures once when the lambda is created, and copying captures to stack on every call would be more expensive.
       type: "CaptureRef";
-      value: {
-        name: string;
-        id: number; // Position in captures.
-      };
+      value: number; // Position in captures
     }
   | {
       type: "Ternary";
@@ -79,6 +75,9 @@ export type ExpressionContent =
       type: "Lambda";
       value: {
         name?: string;
+        // Lambda values produced by lambda expressions carry captured values with them.
+        // `captures` are references to values that should be stored in lambda.
+        // Captures can come either from the stack, or from captures of the enclosing function.
         captures: Ref[];
         parameters: LambdaExpressionParameter[];
         body: Expression;
@@ -140,26 +139,24 @@ export const eLambda = (
 });
 
 export const eDict = (
-  aMap: [Expression, Expression][]
+  value: [Expression, Expression][]
 ): TypedExpressionContent<"Dict"> => ({
   type: "Dict",
-  value: aMap,
+  value,
 });
 
 export const eStackRef = (
-  name: string,
-  offset: number
+  value: number
 ): TypedExpressionContent<"StackRef"> => ({
   type: "StackRef",
-  value: { name, offset },
+  value,
 });
 
 export const eCaptureRef = (
-  name: string,
-  id: number
+  value: number
 ): TypedExpressionContent<"CaptureRef"> => ({
   type: "CaptureRef",
-  value: { name, id },
+  value,
 });
 
 export const eBlock = (
@@ -171,12 +168,14 @@ export const eBlock = (
 
 export const eProgram = (
   statements: Expression[],
-  exports: string[]
+  exports: string[],
+  bindings: Record<string, number>
 ): TypedExpressionContent<"Program"> => ({
   type: "Program",
   value: {
     statements,
     exports,
+    bindings,
   },
 });
 
@@ -231,9 +230,9 @@ export function expressionToString(expression: ExpressionContent): string {
         )
         .join(", ")}}`;
     case "StackRef":
-      return `S[${expression.value.offset}, ${expression.value.name}]`;
+      return `S[${expression.value}]`;
     case "CaptureRef":
-      return `C[${expression.value.id}, ${expression.value.name}]`;
+      return `C[${expression.value}]`;
     case "Ternary":
       return `${expressionToString(
         expression.value.condition

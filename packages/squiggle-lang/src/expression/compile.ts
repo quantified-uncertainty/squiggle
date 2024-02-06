@@ -90,10 +90,7 @@ class CompileContext {
       if (name in scope.stack) {
         return {
           ast,
-          ...expression.eStackRef(
-            name,
-            offset + scope.size - 1 - scope.stack[name]
-          ),
+          ...expression.eStackRef(offset + scope.size - 1 - scope.stack[name]),
         };
       }
       offset += scope.size;
@@ -116,7 +113,7 @@ class CompileContext {
         scope.captureIndex[name] = newIndex;
         return {
           ast,
-          ...expression.eCaptureRef(name, newIndex),
+          ...expression.eCaptureRef(newIndex),
         };
       }
     }
@@ -134,6 +131,18 @@ class CompileContext {
 
   resolveName(ast: ASTNode, name: string): expression.Expression {
     return this.resolveNameFromDepth(ast, name, this.scopes.length - 1);
+  }
+
+  localsOffsets() {
+    const currentScope = this.scopes.at(-1);
+    if (!currentScope) {
+      throw new Error("Compiler error, out of scopes");
+    }
+    const result: Record<string, number> = {};
+    for (const [name, offset] of Object.entries(currentScope.stack)) {
+      result[name] = currentScope.size - 1 - offset;
+    }
+    return result;
   }
 }
 
@@ -172,15 +181,17 @@ function compileToContent(
         {
           const maybeExportedStatement = undecorated(astStatement);
           if (
-            (maybeExportedStatement.type === "LetStatement" ||
-              maybeExportedStatement.type === "DefunStatement") &&
-            maybeExportedStatement.exported
+            maybeExportedStatement.type === "LetStatement" ||
+            maybeExportedStatement.type === "DefunStatement"
           ) {
-            exports.push(maybeExportedStatement.variable.value);
+            if (maybeExportedStatement.exported) {
+              const name = maybeExportedStatement.variable.value;
+              exports.push(name);
+            }
           }
         }
       }
-      return expression.eProgram(statements, exports);
+      return expression.eProgram(statements, exports, context.localsOffsets());
     }
     case "DefunStatement":
     case "LetStatement": {

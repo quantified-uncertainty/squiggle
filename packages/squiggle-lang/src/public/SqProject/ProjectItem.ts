@@ -241,20 +241,24 @@ export class ProjectItem {
       });
 
       const exportNames = new Set(expression.value.value.exports);
-      const bindings = context.stack.asBindings().mapEntries(([key, value]) => {
-        let _value = value;
-        if (exportNames.has(key)) {
-          _value = value.mergeTags({
-            exportData: vDict(
-              ImmutableMap<string, Value>([
-                ["sourceId", vString(this.sourceId)],
-                ["path", vArray([vString(key)])],
-              ])
-            ),
-          });
-        }
-        return [key, _value];
-      });
+      const bindings = ImmutableMap<string, Value>(
+        Object.entries(expression.value.value.bindings).map(
+          ([name, offset]) => {
+            let value = context.stack.get(offset);
+            if (exportNames.has(name)) {
+              value = value.mergeTags({
+                exportData: vDict(
+                  ImmutableMap<string, Value>([
+                    ["sourceId", vString(this.sourceId)],
+                    ["path", vArray([vString(name)])],
+                  ])
+                ),
+              });
+            }
+            return [name, value];
+          }
+        )
+      );
       const exports = bindings.filter(
         (value, _) => value.tags?.exportData() !== undefined
       );

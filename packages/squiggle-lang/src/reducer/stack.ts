@@ -2,18 +2,13 @@ import { REOther } from "../errors/messages.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Value } from "../value/index.js";
 
-type StackEntry = {
-  name: string;
-  value: Value;
-};
-
 export type Bindings = ImmutableMap<string, Value>;
 
 /*
  * Offsets on stack are resolved in `expression/fromAst.ts`, except for stdLib symbols, which are resolved in runtime.
  */
 export class Stack {
-  private constructor(private stack: StackEntry[] = []) {}
+  private constructor(private stack: Value[] = []) {}
 
   static make(): Stack {
     return new Stack();
@@ -24,15 +19,18 @@ export class Stack {
   }
 
   get(offset: number): Value {
+    if (offset < 0) {
+      this.outOfBounds();
+    }
     const result = this.stack.at(-offset - 1);
     if (!result) {
       this.outOfBounds();
     }
-    return result.value;
+    return result;
   }
 
-  push(name: string, value: Value) {
-    this.stack.push({ name, value });
+  push(value: Value) {
+    this.stack.push(value);
   }
 
   size() {
@@ -44,9 +42,5 @@ export class Stack {
       throw new Error("Internal error: can't expand a stack with .shrink()");
     }
     this.stack.length = newSize;
-  }
-
-  asBindings(): Bindings {
-    return ImmutableMap(this.stack.map((entry) => [entry.name, entry.value]));
   }
 }

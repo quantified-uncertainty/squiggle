@@ -98,7 +98,7 @@ export class UserDefinedLambda extends BaseLambda {
 
       for (let i = 0; i < parametersLength; i++) {
         const parameter = parameters[i];
-        context.stack.push(parameter.name, args[i]);
+        context.stack.push(args[i]);
         if (parameter.domain) {
           parameter.domain.value.validateValue(args[i]);
         }
@@ -106,8 +106,7 @@ export class UserDefinedLambda extends BaseLambda {
 
       context.captures = captures;
 
-      const value = context.evaluate(body, context);
-      return value;
+      return context.evaluate(body, context);
     };
 
     super(lambda);
