@@ -100,7 +100,7 @@ export function useSquiggleEditorExtensions(
   });
   const viewNodeExtension = useViewNodeExtension(view, {
     project: params.project,
-    onFocusFromPath: params.onFocusFromPath,
+    onFocusByPath: params.onFocusByPath,
     sourceId: params.sourceId,
   });
 

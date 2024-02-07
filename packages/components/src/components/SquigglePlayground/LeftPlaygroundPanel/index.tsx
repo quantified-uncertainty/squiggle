@@ -42,7 +42,7 @@ type Props = {
   settings: PlaygroundSettings;
   onSettingsChange(settings: PlaygroundSettings): void;
   activeLineNumbers: number[];
-  onFocusFromEditorLine(line: number): void;
+  onFocusByEditorLine(line: number): void;
   /* Allows to inject extra buttons to the left panel's menu, e.g. share button on the website, or save button in Squiggle Hub. */
   renderExtraControls?: RenderExtraControls;
   /* Allows to inject extra items to the left panel's dropdown menu. */
@@ -54,7 +54,7 @@ type Props = {
   runSimulation: () => void;
   code: string;
   setCode: (code: string) => void;
-} & Pick<CodeEditorProps, "onFocusFromPath" | "renderImportTooltip">;
+} & Pick<CodeEditorProps, "onFocusByPath" | "renderImportTooltip">;
 
 // for interactions with this component from outside
 export type LeftPlaygroundPanelHandle = {
@@ -141,12 +141,12 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           gutter={{
             type: "shown",
             activeLineNumbers: props.activeLineNumbers,
-            onFocusFromEditorLine: props.onFocusFromEditorLine,
+            onFocusByEditorLine: props.onFocusByEditorLine,
           }}
           lineWrapping={props.settings.editorSettings.lineWrapping}
           onChange={props.setCode}
           onSubmit={props.runSimulation}
-          onFocusFromPath={props.onFocusFromPath}
+          onFocusByPath={props.onFocusByPath}
           renderImportTooltip={props.renderImportTooltip}
         />
       </div>

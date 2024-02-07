@@ -10,15 +10,15 @@ export function useViewNodeExtension(
   {
     project,
     sourceId,
-    onFocusFromPath,
+    onFocusByPath,
   }: {
     project: SqProject;
     sourceId: string;
-    onFocusFromPath?: (path: SqValuePath) => void;
+    onFocusByPath?: (path: SqValuePath) => void;
   }
 ) {
   const viewCurrentPosition = useCallback(() => {
-    if (!onFocusFromPath || !view || !sourceId) {
+    if (!onFocusByPath || !view || !sourceId) {
       return;
     }
     const offset = view.state.selection.main.to;
@@ -27,9 +27,9 @@ export function useViewNodeExtension(
     }
     const valuePathResult = project.findValuePathByOffset(sourceId, offset);
     if (valuePathResult.ok) {
-      onFocusFromPath(valuePathResult.value);
+      onFocusByPath(valuePathResult.value);
     }
-  }, [onFocusFromPath, project, sourceId, view]);
+  }, [onFocusByPath, project, sourceId, view]);
 
   return useReactiveExtension(
     view,

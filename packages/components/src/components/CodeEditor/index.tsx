@@ -10,7 +10,7 @@ export type CodeEditorProps = {
   defaultValue: string;
   onChange: (value: string) => void;
   onSubmit?: () => void;
-  onFocusFromPath?: (path: SqValuePath) => void;
+  onFocusByPath?: (path: SqValuePath) => void;
   width?: number;
   height?: number | string;
   lineWrapping?: boolean;

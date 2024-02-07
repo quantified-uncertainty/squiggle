@@ -172,16 +172,16 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         renderImportTooltip={renderImportTooltip}
         ref={leftPanelRef}
         activeLineNumbers={lineNumbers}
-        onFocusFromPath={(path) => {
-          rightPanelRef.current?.squiggleViewerHandle?.focusFromPath(path);
+        onFocusByPath={(path) => {
+          rightPanelRef.current?.squiggleViewerHandle?.focusByPath(path);
         }}
-        onFocusFromEditorLine={(line) => {
+        onFocusByEditorLine={(line) => {
           const lineValue = findValuePathByLine(line, simulation?.output);
           const ref = rightPanelRef.current;
           if (lineValue && ref) {
             ref.setViewerTab(lineValue.type);
             setTimeout(() => {
-              ref.squiggleViewerHandle?.focusFromPath(lineValue.path);
+              ref.squiggleViewerHandle?.focusByPath(lineValue.path);
             }, 0);
           }
         }}

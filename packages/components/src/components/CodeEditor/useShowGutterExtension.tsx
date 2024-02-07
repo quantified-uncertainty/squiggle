@@ -16,7 +16,7 @@ export type EditorGutterState =
   | {
       type: "shown";
       activeLineNumbers: number[];
-      onFocusFromEditorLine: (line: number) => void;
+      onFocusByEditorLine: (line: number) => void;
     }
   | { type: "hidden" };
 
@@ -64,7 +64,7 @@ export function useShowGutterExtension(
           line.from,
           line.to,
           new FocusableMarker(i + 1, () =>
-            gutterProps.onFocusFromEditorLine(i + 1)
+            gutterProps.onFocusByEditorLine(i + 1)
           )
         );
       }
