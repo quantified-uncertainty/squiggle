@@ -48,10 +48,14 @@ b = a + 4
 c = a + 2
 nested = {e: {f: {g1: a, g2: b, g3: {h: {i: a}}}}}
 notNested = {a: 1, b:1, c: [1,2,3,4]}
-e = 6
-t = 7
-y = 7
-u = 1
+longVar = {
+  thisIsAVeryLongVariable: 3000000 to 50000000,
+  thisIsAnotherLongVariable: 5000000 to 20000000,
+  longer: {
+    thisIsAVeryLongVariable: 355555555555555,
+    thisIsAVeryLongVariable2: 300000 to 2000000000,
+  }
+}
 g = 1
 e = 3
 q = 5

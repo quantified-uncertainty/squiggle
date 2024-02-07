@@ -1,4 +1,7 @@
-import { SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { includes, uniqBy } from "lodash";
+import uniq from "lodash/uniq.js";
+
+import { ASTNode, SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
@@ -113,16 +116,26 @@ function valueToLine(value: SqValue): number | undefined {
 export function findValuePathByLine(
   line: number,
   sqResult?: SqOutputResult
-): { type: "Variables" | "Result"; path: SqValuePath } | undefined {
+): { type: "Imports" | "Variables" | "Result"; path: SqValuePath } | undefined {
   if (!sqResult?.ok) {
     return undefined;
   }
-  const { bindings, result } = sqResult.value;
+  const { imports, bindings, result } = sqResult.value;
+
+  function allChildren(value: SqValue): SqValue[] {
+    return getChildrenValues(value).flatMap((v) => [v, ...allChildren(v)]);
+  }
 
   // Search in bindings
-  for (const value of bindings.values()) {
+  for (const value of allChildren(bindings.asValue())) {
     if (line === valueToLine(value) && value.context?.path) {
       return { type: "Variables", path: value.context.path };
+    }
+  }
+
+  for (const value of allChildren(imports.asValue())) {
+    if (line === valueToLine(value) && value.context?.path) {
+      return { type: "Imports", path: value.context.path };
     }
   }
 
@@ -133,20 +146,66 @@ export function findValuePathByLine(
   }
 }
 
+function lastUniqBy<A, B>(arr: A[], fn: (a: A) => B): A[] {
+  return uniqBy(arr.reverse(), fn).reverse();
+}
+
+function astChildren(node: ASTNode): ASTNode[] {
+  switch (node.type) {
+    case "Dict":
+      // Assuming 'elements' is an array of { key: ASTNode, value: ASTNode | string }
+      // and we only want to include ASTNode values
+      return node.elements.flatMap((e) =>
+        typeof e.value === "string" ? [] : [e.value]
+      );
+    case "Array":
+      return node.elements;
+    case "Block": {
+      const lastNode = node.statements.at(-1);
+      return lastNode ? [lastNode] : [];
+    }
+    case "LetStatement":
+      return [node.value];
+    case "Program": {
+      return lastUniqBy(
+        [...node.imports.map((i) => i[1]), ...node.statements],
+        (s) => {
+          switch (s.type) {
+            case "LetStatement":
+              return s.variable.value;
+            case "Identifier":
+              return s.value;
+            default:
+              return s;
+          }
+        }
+      );
+    }
+    default:
+      return [];
+  }
+}
+
+//Check for Defun and Decorator statements
+
+function astAllChildren(node: ASTNode): ASTNode[] {
+  return [node, ...astChildren(node).flatMap(astAllChildren)];
+}
+
 export function getActiveLineNumbers(sqResult?: SqOutputResult): number[] {
   if (!sqResult?.ok) {
     return [];
   }
-  const { bindings, result } = sqResult.value;
-
-  // Aggregate lines from bindings and result
-  const lines = [
-    ...Array.from(bindings.values(), valueToLine),
-    valueToLine(result),
-  ];
-
-  // Filter out undefined lines and adjust line numbers
-  return lines
-    .filter((line): line is number => line !== undefined)
-    .map((line) => line - 1);
+  const ast = sqResult.value.bindings.context?.ast;
+  if (!ast) {
+    return [];
+  }
+  const values = uniq(
+    astAllChildren(ast)
+      .filter((p) =>
+        includes(["LetStatement", "Block", "Dict", "Identifier"], p.type)
+      )
+      .map((s) => s.location.start.line - 1)
+  );
+  return values;
 }

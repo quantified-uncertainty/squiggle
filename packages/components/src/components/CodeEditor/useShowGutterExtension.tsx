@@ -32,7 +32,7 @@ class FocusableMarker extends GutterMarker {
   override toDOM() {
     return reactAsDom(
       <div
-        className="pr-1 cursor-pointer group gutterMarker"
+        className="pr-1 pl-0.5 cursor-pointer group gutterMarker"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
