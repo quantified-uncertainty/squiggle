@@ -11,6 +11,7 @@ import {
 import { useMemo } from "react";
 
 import { useReactiveExtension } from "./codemirrorHooks.js";
+import { reactAsDom } from "./utils.js";
 
 export type EditorGutterState =
   | {
@@ -21,31 +22,26 @@ export type EditorGutterState =
   | { type: "hidden" };
 
 class FocusableMarker extends GutterMarker {
-  lineNumber: number;
   onClickLine: () => void;
 
-  constructor(lineNumber: number, onClickLine: () => void) {
+  constructor(onClickLine: () => void) {
     super();
-    this.lineNumber = lineNumber;
     this.onClickLine = onClickLine;
   }
 
   override toDOM() {
-    const outerDiv = document.createElement("div");
-    outerDiv.className = "pr-1 cursor-pointer focusable-marker";
-
-    const marker = document.createElement("div");
-    marker.className = "focusable-marker-inner w-[2px] h-4 br-1 mt-[1px]";
-
-    outerDiv.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.onClickLine();
-    });
-
-    outerDiv.appendChild(marker);
-
-    return outerDiv;
+    return reactAsDom(
+      <div
+        className="pr-1 cursor-pointer group gutterMarker"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.onClickLine();
+        }}
+      >
+        <div className="rounded-sm w-[2px] h-4 br-1 mt-[1px] bg-violet-50 group-hover:bg-violet-200 transition duration-75 gutterMarker-inner" />
+      </div>
+    ).dom;
   }
 }
 
@@ -63,9 +59,7 @@ export function useShowGutterExtension(
         builder.add(
           line.from,
           line.to,
-          new FocusableMarker(i + 1, () =>
-            gutterProps.onFocusByEditorLine(i + 1)
-          )
+          new FocusableMarker(() => gutterProps.onFocusByEditorLine(i + 1))
         );
       }
     }
