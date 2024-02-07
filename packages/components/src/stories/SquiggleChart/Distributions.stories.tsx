@@ -47,6 +47,7 @@ export const ContinuousSampleSet1MSamples: Story = {
     environment: {
       sampleCount: 1000000,
       xyPointLength: 1000,
+      seed: "default-seed",
     },
   },
 };

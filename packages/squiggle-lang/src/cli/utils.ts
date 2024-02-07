@@ -23,6 +23,7 @@ export type RunArgs = {
   output: OutputMode;
   measure?: boolean;
   sampleCount?: string | number;
+  seed?: string;
 };
 
 const linker: SqLinker = {
@@ -62,6 +63,7 @@ export async function run(args: RunArgs) {
     environment = {
       sampleCount: Number(args.sampleCount),
       xyPointLength: Number(args.sampleCount),
+      seed: args.seed || "default-seed",
     };
   }
 

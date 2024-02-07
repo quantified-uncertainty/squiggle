@@ -5,6 +5,7 @@ export async function testRun(x: string) {
     environment: {
       sampleCount: 1000,
       xyPointLength: 100,
+      seed: "TEST_SEED",
     },
   });
 

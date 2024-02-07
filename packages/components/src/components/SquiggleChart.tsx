@@ -50,6 +50,7 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
         simulation={simulation}
         playgroundSettings={settings}
         showMenu={!rootPathOverride}
+        randomizeSeed={undefined}
         defaultTab={
           rootPathOverride
             ? {
