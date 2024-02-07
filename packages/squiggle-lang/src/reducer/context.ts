@@ -1,5 +1,5 @@
 import { Env } from "../dist/env.js";
-import { getNativeRng, PRNG } from "../rng/index.js";
+import { getAleaRng, PRNG } from "../rng/index.js";
 import { FrameStack, topFrameName } from "./frameStack.js";
 import { evaluate, ReducerFn } from "./index.js";
 import { BaseLambda } from "./lambda.js";
@@ -15,9 +15,9 @@ export type ReducerContext = Readonly<{
 }>;
 
 export function createContext(environment: Env): ReducerContext {
-  // const seed = environment.seed
-  //   ? String(environment.seed)
-  //   : String(Math.random());
+  const seed = environment.seed
+    ? String(environment.seed)
+    : String(Math.random());
 
   return {
     stack: Stack.make(),
@@ -25,7 +25,7 @@ export function createContext(environment: Env): ReducerContext {
     frameStack: FrameStack.make(),
     evaluate,
     inFunction: undefined,
-    rng: getNativeRng(),
+    rng: getAleaRng(seed),
   };
 }
 

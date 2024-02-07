@@ -3,7 +3,7 @@ import { run } from "../../index.js";
 
 const testRun = async (x: string) => {
   const outputR = await run(x, {
-    environment: { sampleCount: 100, xyPointLength: 100 },
+    environment: { sampleCount: 100, xyPointLength: 100, seed: "default-seed" },
   });
   if (outputR.ok) {
     return outputR.value.result;

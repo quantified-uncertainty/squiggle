@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { SqProject } from "@quri/squiggle-lang";
+import { Env, SqProject } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 
@@ -18,6 +18,7 @@ export type Simulation = {
   executionId: number;
   executionTime: number;
   isStale?: boolean;
+  environment: Env;
 };
 
 export type UseSimulator = [
@@ -35,15 +36,21 @@ export function useSimulator(args: SimulatorArgs): UseSimulator {
       setSimulation((prevOutput) => {
         return prevOutput
           ? {
-              isStale: true,
               ...(prevOutput || {}),
+              isStale: true,
             }
           : undefined;
       });
 
+      //We have two of these, because sometimes 1 doesn't seem like enough
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+
       const startTime = Date.now();
       args.project.setSource(args.sourceId, args.code);
       args.project.setContinues(args.sourceId, args.continues);
+      const _environment = args.project.getEnvironment(); // Get it here, just in case it changes during the run
+      await new Promise((resolve) => requestAnimationFrame(resolve));
       await args.project.run(args.sourceId);
       const output = args.project.getOutput(args.sourceId);
       const executionTime = Date.now() - startTime;
@@ -56,6 +63,7 @@ export function useSimulator(args: SimulatorArgs): UseSimulator {
           code: args.code,
           output,
           executionTime,
+          environment: _environment,
         };
       });
     };

@@ -60,7 +60,7 @@ describe("Continues", () => {
 describe("Distribution", () => {
   //It's important that sampleCount is less than 9. If it's more, than that will create randomness
   //Also, note, the value should be created using makeSampleSetDist() later on.
-  const env = { sampleCount: 8, xyPointLength: 100 };
+  const env = { sampleCount: 8, xyPointLength: 100, seed: "TEST_SEED" };
   const dist1Samples = [3, 4, 5, 6, 6, 7, 10, 15, 30];
   const dist1SampleCount = dist1Samples.length;
 
