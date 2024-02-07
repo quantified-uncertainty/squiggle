@@ -89,7 +89,6 @@ export class ValueTags {
           // Fallback for simple types
           return `${key}: ${value}`;
         }
-        return `${key}: ${value?.toString()}`;
       })
       .join(", ");
   }
