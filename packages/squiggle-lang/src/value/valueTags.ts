@@ -73,7 +73,24 @@ export class ValueTags {
 
   toString(): string {
     return Object.entries(this.value)
-      .map(([key, value]) => `${key}: ${value?.toString()}`)
+      .map(([key, value]) => {
+        if (
+          value &&
+          typeof value.toString === "function" &&
+          value.constructor.name !== "Object"
+        ) {
+          return `${key}: ${value.toString()}`;
+        }
+        // Special handling for objects to prevent "[object Object]" output
+        else if (typeof value === "object" && value !== null) {
+          // See this for the regex: https://stackoverflow.com/questions/11233498/json-stringify-without-quotes-on-properties
+          return `${key}: ${JSON.stringify(value).replace(/"([^"]+)":/g, "$1:")}`;
+        } else {
+          // Fallback for simple types
+          return `${key}: ${value}`;
+        }
+        return `${key}: ${value?.toString()}`;
+      })
       .join(", ");
   }
 
