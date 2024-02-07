@@ -1,6 +1,6 @@
-import { forwardRef, useState } from "react";
+import { forwardRef, useMemo, useState } from "react";
 
-import { useGlobalShortcut } from "@quri/ui";
+import { Shortcut, useGlobalShortcuts } from "@quri/ui";
 
 import { isSimulating, Simulation } from "../../lib/hooks/useSimulator.js";
 import { defaultViewerTab, ViewerTab } from "../../lib/utility.js";
@@ -57,20 +57,26 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
 
     const { output } = simulation;
 
-    useGlobalShortcut(
-      {
-        metaKey: true,
-        key: "PageDown",
-      },
-      () => setViewerTab(incrementViewerTab(viewerTab, "forwards"))
-    );
-    useGlobalShortcut(
-      {
-        metaKey: true,
-        key: "PageUp",
-      },
-      () => setViewerTab(incrementViewerTab(viewerTab, "backwards"))
-    );
+    const shortCuts: [Shortcut, () => void][] = useMemo(() => {
+      return [
+        [
+          {
+            metaKey: true,
+            key: "PageDown",
+          },
+          () => setViewerTab(incrementViewerTab(viewerTab, "forwards")),
+        ],
+        [
+          {
+            metaKey: true,
+            key: "PageUp",
+          },
+          () => setViewerTab(incrementViewerTab(viewerTab, "backwards")),
+        ],
+      ];
+    }, [viewerTab]);
+
+    useGlobalShortcuts(shortCuts);
 
     return (
       <Layout

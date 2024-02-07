@@ -102,7 +102,11 @@ export { ErrorIcon } from "./icons/ErrorIcon.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";
 
-export { useGlobalShortcut } from "./hooks/useGlobalShortcut.js";
+export {
+  type Shortcut,
+  useGlobalShortcut,
+  useGlobalShortcuts,
+} from "./hooks/useGlobalShortcut.js";
 
 export {
   TailwindContext,
