@@ -81,14 +81,17 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
       openModal: (name: string) => void;
     }) => (
       <div className="flex">
-        <RunMenuItem
-          runSimulation={props.runSimulation}
-          autorunMode={props.autorunMode}
-          codeHasChanged={props.code !== props.simulation?.code}
-          isSimulating={
-            props.simulation ? isSimulating(props.simulation) : false
-          }
-        />
+        {!props.autorunMode && (
+          <RunMenuItem
+            runSimulation={props.runSimulation}
+            autorunMode={props.autorunMode}
+            codeHasChanged={props.code !== props.simulation?.code}
+            isSimulating={
+              props.simulation ? isSimulating(props.simulation) : false
+            }
+          />
+        )}
+
         <AutorunnerMenuItem
           setAutorunMode={props.setAutorunMode}
           autorunMode={props.autorunMode}

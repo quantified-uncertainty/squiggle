@@ -1,19 +1,12 @@
-import merge from "lodash/merge.js";
-import React, {
-  CSSProperties,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { CSSProperties, useCallback, useEffect, useRef } from "react";
 
 import { SqLinker } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
+import { usePlaygroundSettings } from "../../lib/hooks/usePlaygroundSettings.js";
 import { useSimulatorManager } from "../../lib/hooks/useSimulatorManager.js";
 import { useUncontrolledCode } from "../../lib/hooks/useUncontrolledCode.js";
 import {
-  defaultPlaygroundSettings,
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
@@ -73,9 +66,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   props
 ) => {
   const {
-    defaultCode,
     linker,
-    onCodeChange,
     onExportsChange,
     onSettingsChange,
     renderExtraControls,
@@ -89,27 +80,14 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   // `settings` are owned by SquigglePlayground.
   // This can cause some unnecessary renders (e.g. settings form), but most heavy playground subcomponents
   // should rerender on settings changes (e.g. right panel), so that's fine.
-  const [settings, setSettings] = useState(
-    () =>
-      merge(
-        {},
-        defaultPlaygroundSettings,
-        Object.fromEntries(
-          Object.entries(defaultSettings).filter(([, v]) => v !== undefined)
-        )
-      ) as PlaygroundSettings
-  );
-  const handleSettingsChange = useCallback(
-    (newSettings: PlaygroundSettings) => {
-      setSettings(newSettings);
-      onSettingsChange?.(newSettings);
-    },
-    [onSettingsChange]
-  );
+  const { settings, setSettings, randomizeSeed } = usePlaygroundSettings({
+    defaultSettings,
+    onSettingsChange,
+  });
 
   const { code, setCode } = useUncontrolledCode({
-    defaultCode: defaultCode,
-    onCodeChange: onCodeChange,
+    defaultCode: props.defaultCode,
+    onCodeChange: props.onCodeChange,
   });
 
   const {
@@ -152,18 +130,18 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   const renderLeft = () => (
     <LeftPlaygroundPanel
       project={project}
-      code={code}
-      setCode={setCode}
       sourceId={sourceId}
       simulation={simulation}
       settings={settings}
-      onSettingsChange={handleSettingsChange}
+      onSettingsChange={setSettings}
       renderExtraControls={renderExtraControls}
       renderExtraDropdownItems={renderExtraDropdownItems}
       renderExtraModal={renderExtraModal}
       onViewValuePath={(path) => rightPanelRef.current?.viewValuePath(path)}
       renderImportTooltip={renderImportTooltip}
       ref={leftPanelRef}
+      code={code}
+      setCode={setCode}
       autorunMode={autorunMode}
       setAutorunMode={setAutorunMode}
       runSimulation={runSimulation}
@@ -178,6 +156,13 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         editor={leftPanelRef.current?.getEditor() ?? undefined}
         playgroundSettings={settings}
         ref={rightPanelRef}
+        xPadding={2}
+        randomizeSeed={() => {
+          randomizeSeed();
+          if (!autorunMode) {
+            runSimulation();
+          }
+        }}
       />
     ) : (
       <div className="grid place-items-center h-full">
