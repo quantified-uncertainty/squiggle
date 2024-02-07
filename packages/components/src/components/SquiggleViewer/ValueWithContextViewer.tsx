@@ -5,7 +5,7 @@ import { clsx } from "clsx";
 import { FC, PropsWithChildren, useCallback, useMemo, useRef } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { CommentIcon, LinkIcon, TextTooltip } from "@quri/ui";
+import { CommentIcon, DocumentTextIcon, LinkIcon, TextTooltip } from "@quri/ui";
 
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
@@ -172,6 +172,10 @@ export const ValueWithContextViewer: FC<Props> = ({
     exportData && exportData.path.length === 0 ? `${exportData.sourceId}` : "";
 
   const sourceId = useSourceId();
+  const isExternalSource =
+    exportData &&
+    exportData.sourceId !== sourceId &&
+    exportData.path.length === 0;
 
   // root header is always hidden (unless forced, but we probably won't need it)
   const headerVisibility = props.header ?? (isRoot ? "hide" : "show");
@@ -210,12 +214,17 @@ export const ValueWithContextViewer: FC<Props> = ({
     const name = pathToShortName(path);
 
     // We want to show colons after the keys, for dicts/arrays.
-    const showColon = headerVisibility !== "large" && path.edges.length > 1;
+    const showColon =
+      headerVisibility !== "large" &&
+      path.edges.length > 1 &&
+      !isExternalSource;
 
     const getHeaderColor = () => {
       let color = "text-orange-900";
       const parentTag = parentValue?.tag;
-      if (parentTag === "Array" && !taggedName) {
+      if (isExternalSource) {
+        color = "text-violet-900";
+      } else if (parentTag === "Array" && !taggedName) {
         color = "text-stone-400";
       } else if (path.edges.length > 1) {
         color = "text-teal-700";
@@ -246,26 +255,15 @@ export const ValueWithContextViewer: FC<Props> = ({
           showColon || "mr-3"
         )}
       >
+        {isExternalSource && (
+          <DocumentTextIcon size={12} className="mr-1 text-violet-900" />
+        )}
         <div
           className={clsx(!taggedName && "font-mono", headerClasses())}
           onClick={focus}
         >
           {exportName || taggedName || name}
         </div>
-        {exportData && (
-          <TextTooltip
-            text={`${exportData.sourceId}/${exportData.path.join("/")}`}
-            placement="bottom"
-            offset={5}
-          >
-            <a
-              href="/foobar"
-              className="group px-1 ml-0.5 text-slate-400 hover:text-slate-800 transition"
-            >
-              <LinkIcon size={14} className="" />
-            </a>
-          </TextTooltip>
-        )}
         {showColon && <div className="text-gray-400 font-mono">:</div>}
       </div>
     );
@@ -331,11 +329,33 @@ export const ValueWithContextViewer: FC<Props> = ({
               )}
               {!isOpen && <CommentIconForValue value={value} />}
             </div>
-            {enableDropdownMenu && (
-              <div className="inline-flex space-x-1 items-center">
-                <SquiggleValueMenu value={value} />
-              </div>
-            )}
+            <div className="inline-flex space-x-2 items-center">
+              {enableDropdownMenu && <SquiggleValueMenu value={value} />}
+              {exportData && (
+                <TextTooltip
+                  text={
+                    `Go to model ${exportData.sourceId} ` +
+                    (!exportData.path.length
+                      ? "page"
+                      : "export " + exportData.path.join("/") + " page")
+                  }
+                  placement="bottom"
+                  offset={5}
+                >
+                  <a
+                    href="asd"
+                    className={clsx(
+                      "transition",
+                      isExternalSource
+                        ? "text-violet-400 hover:!text-violet-900 group-hover:text-violet-500"
+                        : "text-slate-200 hover:!text-slate-900 group-hover:text-slate-400"
+                    )}
+                  >
+                    <LinkIcon size={14} />
+                  </a>
+                </TextTooltip>
+              )}
+            </div>
           </header>
         )}
         {isOpen && (

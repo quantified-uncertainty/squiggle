@@ -172,6 +172,7 @@ export x=1`;
         return `
           import "hub:source1" as s1
           export y=2
+          export foo = {a: s1}
         `;
       case "source3":
         return `
