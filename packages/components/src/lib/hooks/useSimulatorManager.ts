@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Env, SqLinker, SqProject } from "@quri/squiggle-lang";
 
-import { Simulation, useSimulator } from "./useSimulator.js";
+import { isSimulating, Simulation, useSimulator } from "./useSimulator.js";
 
 type SetupSettings =
   | { type: "standalone" } // For standalone execution
@@ -96,7 +96,8 @@ export function useSimulatorManager(
 
   // runSimulation changes every time the code changes. That then triggers this, which would call runSimulation to actually run that updated function.
   useEffect(() => {
-    if (autorunMode) {
+    const _isSimulating = simulation && isSimulating(simulation); // We don't want to run the simulation if it's already running.
+    if (autorunMode && !_isSimulating) {
       runSimulation();
     }
   }, [runSimulation]);

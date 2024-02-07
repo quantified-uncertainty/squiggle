@@ -7,7 +7,7 @@ async function getSamplesForSeed(seed?: string | undefined) {
     environment: {
       sampleCount: SAMPLE_COUNT,
       xyPointLength: 100,
-      seed,
+      seed: seed || "default",
     },
   });
   project.setSource("main", "2 to 3");
@@ -25,7 +25,7 @@ async function getSamplesForSeed(seed?: string | undefined) {
 
 describe("seeds", () => {
   // we use Math.random() for now, so this should fail
-  test.failing("Sample sets with identical seeds are identical", async () => {
+  test("Sample sets with identical seeds are identical", async () => {
     const samples = await getSamplesForSeed("test");
     expect(samples.length).toEqual(SAMPLE_COUNT);
 
@@ -38,14 +38,6 @@ describe("seeds", () => {
     expect(samples.length).toEqual(SAMPLE_COUNT);
 
     const samples2 = await getSamplesForSeed("test2");
-    expect(samples).not.toEqual(samples2);
-  });
-
-  test("Sample sets without explcit seeds are different", async () => {
-    const samples = await getSamplesForSeed();
-    expect(samples.length).toEqual(SAMPLE_COUNT);
-
-    const samples2 = await getSamplesForSeed();
     expect(samples).not.toEqual(samples2);
   });
 });

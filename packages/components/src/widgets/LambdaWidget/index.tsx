@@ -37,6 +37,7 @@ widgetRegistry.register("Lambda", {
         environment={{
           sampleCount: environment.sampleCount / 10,
           xyPointLength: environment.xyPointLength / 10,
+          seed: environment.seed,
         }}
       />
     );

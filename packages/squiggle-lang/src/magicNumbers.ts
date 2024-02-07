@@ -4,6 +4,7 @@ export const Environment = {
   defaultXYPointLength: 1000,
   defaultSampleCount: 1000,
   sparklineLength: 20,
+  defaultSeed: "default-seed",
 };
 
 export const OpCost = {

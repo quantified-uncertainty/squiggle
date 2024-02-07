@@ -82,6 +82,7 @@ export async function runSquiggle(code: string): Promise<SquiggleOutput> {
   const env = {
     sampleCount: 1000, // int
     xyPointLength: 1000, // int
+    seed: "default_seed",
   };
 
   const project = SqProject.create({ environment: env });

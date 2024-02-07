@@ -6,6 +6,7 @@ import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
+import { RandomizeSeedButton } from "./RandomizeSeedButton.js";
 import { SimulatingIndicator } from "./SimulatingIndicator.js";
 import { ViewerBody } from "./ViewerBody.js";
 import { ViewerMenu } from "./ViewerMenu.js";
@@ -16,6 +17,8 @@ type Props = {
   playgroundSettings: PartialPlaygroundSettings;
   showMenu?: boolean;
   defaultTab?: ViewerTab;
+  randomizeSeed: (() => void) | undefined;
+  xPadding?: number;
 };
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isSimulating state. */
@@ -24,9 +27,11 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
     {
       simulation: simulation,
       playgroundSettings,
+      randomizeSeed,
       showMenu = true,
       editor,
       defaultTab,
+      xPadding = 2,
     },
     viewerRef
   ) {
@@ -34,6 +39,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
       defaultTab ?? defaultViewerTab(simulation.output)
     );
 
+    const _isSimulating = isSimulating(simulation);
     const { output } = simulation;
 
     return (
@@ -50,6 +56,15 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
           ) // Important not to be null, so that it stays on the right.
         }
         indicator={<SimulatingIndicator simulation={simulation} />}
+        changeSeedAndRunButton={
+          randomizeSeed ? (
+            <RandomizeSeedButton
+              isSimulating={_isSimulating}
+              seed={simulation.environment.seed || "default-seed"}
+              randomizeSeed={randomizeSeed}
+            />
+          ) : null
+        }
         viewer={
           <ViewerBody
             viewerTab={viewerTab}
@@ -60,6 +75,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
             editor={editor}
           />
         }
+        xPadding={xPadding}
       />
     );
   }
