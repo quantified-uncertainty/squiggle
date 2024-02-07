@@ -94,6 +94,9 @@ export function useAsyncMutation<
           }
         },
         updater(store, response) {
+          if (!response) {
+            return;
+          }
           if (response.result.__typename !== expectedTypename) {
             return;
           }

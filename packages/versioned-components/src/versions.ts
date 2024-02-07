@@ -1,5 +1,6 @@
 // Auto-generated, don't touch.
 export const squiggleVersions = [
+  "0.9.3",
   "0.9.2",
   "0.9.0",
   "0.8.6",
@@ -9,8 +10,7 @@ export const squiggleVersions = [
 export type SquiggleVersion = (typeof squiggleVersions)[number];
 
 // Auto-generated, don't touch.
-export const defaultSquiggleVersion: SquiggleVersion = "0.9.2";
-
+export const defaultSquiggleVersion: SquiggleVersion = "0.9.3";
 export function checkSquiggleVersion(
   version: string
 ): version is SquiggleVersion {

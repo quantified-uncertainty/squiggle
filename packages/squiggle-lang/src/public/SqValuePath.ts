@@ -1,7 +1,8 @@
 import { ASTNode } from "../ast/parse.js";
 import { locationContains } from "../ast/utils.js";
 
-export type ValuePathRoot = "result" | "bindings" | "imports" | "exports";
+// Note that 'exports' is shown separately, but is not a valid path root.
+export type ValuePathRoot = "result" | "bindings" | "imports";
 
 export type ValuePathEdge =
   | { type: "key"; value: string }

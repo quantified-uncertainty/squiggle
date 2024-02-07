@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { sq } from "@quri/squiggle-lang";
+import { sq, SqLinker } from "@quri/squiggle-lang";
 import { Button } from "@quri/ui";
 
 import { SquigglePlayground as Component } from "../components/SquigglePlayground/index.js";
@@ -17,7 +17,7 @@ type Story = StoryObj<typeof meta>;
 export const Normal: Story = {
   name: "Normal",
   args: {
-    defaultCode: "normal(5,2)",
+    defaultCode: "a = normal(5,2)",
     height: 800,
   },
 };
@@ -160,10 +160,38 @@ r = {
   },
 };
 
+const linker: SqLinker = {
+  resolve: (name) => name,
+  loadSource: async (sourceName) => {
+    // Note how this function is async and can load sources remotely on demand.
+    switch (sourceName) {
+      case "hub:source1":
+        return `@name("my Import")
+export x=1`;
+      case "source2":
+        return `
+          import "hub:source1" as s1
+          export y=2
+        `;
+      case "source3":
+        return `
+          import "source2" as s2
+          export z=3
+        `;
+      default:
+        throw new Error(`source ${sourceName} not found`);
+    }
+  },
+};
+
 export const ManyTypes: Story = {
   name: "Many types",
   args: {
-    defaultCode: `varNum = 3333
+    linker: linker,
+    defaultCode: `import "hub:source1" as s1  
+import "source2" as s2
+
+varNum = 3333
 varBool = true
 varString = "This is a long string"
 
@@ -303,6 +331,7 @@ fn = {|e| e}
 bar =  [x, fn]
 
 @startOpen
+@location
 s = 4 to 10
 
 @startClosed

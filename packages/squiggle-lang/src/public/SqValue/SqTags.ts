@@ -1,3 +1,5 @@
+import { LocationRange } from "peggy";
+
 import { ValueTags } from "../../value/valueTags.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValue, wrapValue } from "./index.js";
@@ -39,5 +41,9 @@ export class SqTags {
 
   startOpenState(): "open" | "closed" | undefined {
     return this.tags.startOpenState();
+  }
+
+  location(): LocationRange | undefined {
+    return this.tags.location();
   }
 }

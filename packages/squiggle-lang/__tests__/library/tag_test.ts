@@ -1,7 +1,7 @@
 import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("Tags", () => {
-  testEvalToBe("123 -> Tag.name('')", "123");
+  testEvalToBe("123 -> Tag.name('')", '123, with tags {name: ""}');
   describe("name", () => {
     testEvalToBe("123 -> Tag.name('myNumber') -> Tag.getName", '"myNumber"');
   });
@@ -28,6 +28,16 @@ describe("Tags", () => {
 
   describe("hide", () => {
     testEvalToBe("3 -> Tag.hide -> Tag.getHide", "true");
+  });
+
+  describe("location", () => {
+    testEvalToBe(
+      `@location
+a = 3
+Tag.getLocation(a)
+`,
+      '{source: "main", start: {line: 2, column: 1, offset: 10}, end: {line: 2, column: 6, offset: 15}}'
+    );
   });
 
   describe("startOpenToggle", () => {
@@ -71,7 +81,7 @@ x = 5
 
 x
 `,
-    '5, with tags {name: "five", doc: "This is five"}'
+    '5, with tags {doc: "This is five", name: "five"}'
   );
 
   testEvalToBe(

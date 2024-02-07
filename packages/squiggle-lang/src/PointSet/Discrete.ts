@@ -1,6 +1,5 @@
-import { PRNG } from "seedrandom";
-
 import { epsilon_float } from "../magicNumbers.js";
+import { PRNG } from "../rng/index.js";
 import { random_sample } from "../utility/math.js";
 import * as Result from "../utility/result.js";
 import * as XYShape from "../XYShape.js";

@@ -14,6 +14,7 @@ import {
 } from "@quri/squiggle-lang";
 import { MouseTooltip, TextTooltip } from "@quri/ui";
 
+import { useViewerType } from "../../components/SquiggleViewer/ViewerProvider.js";
 import { ErrorAlert } from "../../components/ui/Alert.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
@@ -455,6 +456,8 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
   environment,
   height,
 }) => {
+  const viewerType = useViewerType();
+
   const CUTOFF_TO_SHOW_SAMPLES_BAR = 100000; // Default to stop showing bottom samples bar if there are more than 100k samples
   const distributions = plot.distributions;
 
@@ -561,7 +564,13 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
       {!hasLogError && (
         <>
           <div className="flex flex-col items-stretch">
-            <div className="flex-1">
+            <div
+              className="flex-1"
+              // In tooltips, dist widgets are setting their own size, so without max width there's a risk that the canvas would expand incrementally because of its ResizeObserver.
+              // See also: https://github.com/quantified-uncertainty/squiggle/issues/3013
+              // Note that 300px is the default width in HTML5 Canvas standard, so it's the safest default. So any larger `maxWidth` could still cause incremental expanding up to that value.
+              style={viewerType === "tooltip" ? { maxWidth: 300 } : undefined}
+            >
               <InnerDistributionsChart
                 isMulti={isMulti}
                 samples={samples}

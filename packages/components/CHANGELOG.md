@@ -1,5 +1,21 @@
 # @quri/squiggle-components
 
+## 0.9.3
+
+- Tooltips for top-level variables ([#2776](https://github.com/quantified-uncertainty/squiggle/pull/2776))
+
+- Tooltips for import strings can be injected with `renderImportTooltip` prop; used on Squiggle Hub to show imported model cards ([#2990](https://github.com/quantified-uncertainty/squiggle/pull/2990))
+
+- Added simple keyboard navigation for the Viewer ([#2983](https://github.com/quantified-uncertainty/squiggle/pull/2983))
+
+- Show "Imports" and "Exports" tabs in the Viewer ([#2969](https://github.com/quantified-uncertainty/squiggle/pull/2969))
+
+- Grey out the Run button when code hasn't been changed ([#3012](https://github.com/quantified-uncertainty/squiggle/pull/3012))
+
+- Fixed an error with "Find in editor" and tooltips not working for decorated values ([#2988](https://github.com/quantified-uncertainty/squiggle/pull/2988))
+
+- Critical bug fix: always start dist y scale from 0 ([#2982](https://github.com/quantified-uncertainty/squiggle/pull/2982))
+
 ## 0.9.2
 
 - Top level navigation in viewer (Result/Variables) is represented as a dropdown ([#2909](https://github.com/quantified-uncertainty/squiggle/pull/2909))

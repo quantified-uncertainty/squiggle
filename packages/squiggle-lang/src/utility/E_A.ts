@@ -1,5 +1,4 @@
-import { type PRNG } from "seedrandom";
-
+import { PRNG } from "../rng/index.js";
 import { Ok, result } from "./result.js";
 
 export const zip = <A, B>(xs: readonly A[], ys: readonly B[]): [A, B][] => {

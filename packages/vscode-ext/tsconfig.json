@@ -6,8 +6,8 @@
     "target": "es2020",
     "lib": ["es2020", "dom"],
     "noEmit": true,
-    "rootDir": "src"
+    "rootDir": "src",
   },
   "include": ["src/**/*"],
-  "references": [{ "path": "../squiggle-lang" }, { "path": "../components" }]
+  "references": [{ "path": "../squiggle-lang" }, { "path": "../components" }],
 }

@@ -1,9 +1,8 @@
-import { PRNG } from "seedrandom";
-
 import { ContinuousShape } from "../PointSet/Continuous.js";
 import * as Mixed from "../PointSet/Mixed.js";
 import { MixedShape } from "../PointSet/Mixed.js";
 import * as PointSet from "../PointSet/PointSet.js";
+import { PRNG } from "../rng/index.js";
 import * as Result from "../utility/result.js";
 import { createSparkline } from "../utility/sparklines.js";
 import { BaseDist } from "./BaseDist.js";
