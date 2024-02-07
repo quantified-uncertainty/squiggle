@@ -18,6 +18,7 @@ type Props = {
   playgroundSettings: PartialPlaygroundSettings;
   showMenu?: boolean;
   defaultTab?: ViewerTab;
+  useGlobalShortcuts?: boolean;
 };
 
 const tabs = ["Imports", "Variables", "Exports", "Result", "AST"] as const;
@@ -48,6 +49,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
       showMenu = true,
       editor,
       defaultTab,
+      useGlobalShortcuts: shouldUseGlobalShortcuts = false,
     },
     viewerRef
   ) {
@@ -76,7 +78,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
       ];
     }, [viewerTab]);
 
-    useGlobalShortcuts(shortCuts);
+    useGlobalShortcuts(shouldUseGlobalShortcuts ? shortCuts : []);
 
     return (
       <Layout
