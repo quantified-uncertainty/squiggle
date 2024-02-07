@@ -1,6 +1,4 @@
-import { forwardRef, useMemo, useState } from "react";
-
-import { Shortcut, useGlobalShortcuts } from "@quri/ui";
+import { forwardRef, useState } from "react";
 
 import { isSimulating, Simulation } from "../../lib/hooks/useSimulator.js";
 import { defaultViewerTab, ViewerTab } from "../../lib/utility.js";
@@ -9,6 +7,7 @@ import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
 import { SimulatingIndicator } from "./SimulatingIndicator.js";
+import { useViewerTabShortcuts } from "./useViewerTabShortcuts.js";
 import { ViewerBody } from "./ViewerBody.js";
 import { ViewerMenu } from "./ViewerMenu.js";
 
@@ -20,25 +19,6 @@ type Props = {
   defaultTab?: ViewerTab;
   useGlobalShortcuts?: boolean;
 };
-
-const tabs = ["Imports", "Variables", "Exports", "Result", "AST"] as const;
-
-function incrementViewerTab(
-  tab: ViewerTab,
-  direction: "backwards" | "forwards"
-): ViewerTab {
-  if (typeof tab === "object" && tab.tag === "CustomResultPath") {
-    return "Variables";
-  }
-  const index = tabs.indexOf(tab as (typeof tabs)[number]);
-  if (direction === "forwards" && index >= 0 && index < tabs.length - 1) {
-    return tabs[index + 1];
-  } else if (direction === "backwards" && index > 0) {
-    return tabs[index - 1];
-  } else {
-    return tab;
-  }
-}
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isSimulating state. */
 export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
@@ -59,26 +39,11 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
 
     const { output } = simulation;
 
-    const shortCuts: [Shortcut, () => void][] = useMemo(() => {
-      return [
-        [
-          {
-            metaKey: true,
-            key: "PageDown",
-          },
-          () => setViewerTab(incrementViewerTab(viewerTab, "forwards")),
-        ],
-        [
-          {
-            metaKey: true,
-            key: "PageUp",
-          },
-          () => setViewerTab(incrementViewerTab(viewerTab, "backwards")),
-        ],
-      ];
-    }, [viewerTab]);
-
-    useGlobalShortcuts(shouldUseGlobalShortcuts ? shortCuts : []);
+    useViewerTabShortcuts({
+      shouldUseGlobalShortcuts,
+      viewerTab,
+      setViewerTab,
+    });
 
     return (
       <Layout
