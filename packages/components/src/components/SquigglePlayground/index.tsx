@@ -17,10 +17,7 @@ import {
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import {
-  findValuePathByLine,
-  getActiveLineNumbers,
-} from "../SquiggleViewer/utils.js";
+import { getActiveLineNumbers } from "../SquiggleViewer/utils.js";
 import {
   ViewerWithMenuBar,
   ViewerWithMenuBarHandle,
@@ -175,16 +172,9 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         onFocusByPath={(path) => {
           rightPanelRef.current?.squiggleViewerHandle?.focusByPath(path);
         }}
-        onFocusByEditorLine={(line) => {
-          const lineValue = findValuePathByLine(line, simulation?.output);
-          const ref = rightPanelRef.current;
-          if (lineValue && ref) {
-            ref.setViewerTab(lineValue.type);
-            setTimeout(() => {
-              ref.squiggleViewerHandle?.focusByPath(lineValue.path);
-            }, 0);
-          }
-        }}
+        onFocusByEditorLine={(line) =>
+          rightPanelRef.current?.focusByEditorLine(line)
+        }
         autorunMode={autorunMode}
         setAutorunMode={setAutorunMode}
         runSimulation={runSimulation}

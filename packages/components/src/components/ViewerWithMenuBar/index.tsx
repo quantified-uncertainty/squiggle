@@ -4,6 +4,7 @@ import { isSimulating, Simulation } from "../../lib/hooks/useSimulator.js";
 import { defaultViewerTab, ViewerTab } from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
+import { findValuePathByLine } from "../SquiggleViewer/utils.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
 import { SimulatingIndicator } from "./SimulatingIndicator.js";
@@ -20,7 +21,7 @@ type Props = {
 
 export type ViewerWithMenuBarHandle = {
   squiggleViewerHandle: SquiggleViewerHandle | null;
-  setViewerTab: (tab: ViewerTab) => void;
+  focusByEditorLine: (line: number) => void;
 };
 /* Wrapper for SquiggleViewer that shows the rendering stats and isSimulating state. */
 export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
@@ -43,7 +44,16 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
 
     useImperativeHandle(viewerWithMenuBarRef, () => ({
       squiggleViewerHandle: viewerRef.current,
-      setViewerTab,
+      focusByEditorLine: (line: number) => {
+        const lineValue = findValuePathByLine(line, simulation.output);
+        const ref = viewerRef.current;
+        if (lineValue && ref) {
+          setViewerTab(lineValue.type);
+          setTimeout(() => {
+            ref.focusByPath(lineValue.path);
+          }, 0);
+        }
+      },
     }));
 
     return (
