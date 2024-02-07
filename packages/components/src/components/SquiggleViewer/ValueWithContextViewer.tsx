@@ -10,6 +10,7 @@ import { CommentIcon, DocumentTextIcon, LinkIcon, TextTooltip } from "@quri/ui";
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
+import { useProjectContext } from "../ProjectProvider.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { useZoomedInSqValueKeyEvent } from "./keyboardNav/zoomedInSqValue.js";
@@ -26,7 +27,6 @@ import {
   useMergedSettings,
   useRegisterAsItemViewer,
   useScrollToEditorPath,
-  useSourceId,
   useToggleCollapsed,
   useViewerContext,
   useViewerType,
@@ -131,6 +131,7 @@ export const ValueWithContextViewer: FC<Props> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement | null>(null);
+  const { sourceId, getUrl } = useProjectContext();
 
   const toggleCollapsed_ = useToggleCollapsed();
 
@@ -171,7 +172,6 @@ export const ValueWithContextViewer: FC<Props> = ({
   const exportName =
     exportData && exportData.path.length === 0 ? `${exportData.sourceId}` : "";
 
-  const sourceId = useSourceId();
   const isExternalSource =
     exportData &&
     exportData.sourceId !== sourceId &&
@@ -331,7 +331,7 @@ export const ValueWithContextViewer: FC<Props> = ({
             </div>
             <div className="inline-flex space-x-2 items-center">
               {enableDropdownMenu && <SquiggleValueMenu value={value} />}
-              {exportData && (
+              {exportData && getUrl && (
                 <TextTooltip
                   text={
                     `Go to model ${exportData.sourceId} ` +
@@ -343,7 +343,7 @@ export const ValueWithContextViewer: FC<Props> = ({
                   offset={5}
                 >
                   <a
-                    href="asd"
+                    href={getUrl(exportData.sourceId, exportData.path[0])}
                     className={clsx(
                       "transition",
                       isExternalSource

@@ -17,6 +17,7 @@ import {
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
+import { ProjectContext } from "../ProjectProvider.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 import { ViewerWithMenuBar } from "../ViewerWithMenuBar/index.js";
 import {
@@ -172,14 +173,15 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 
   const renderRight = () =>
     simulation ? (
-      <ViewerWithMenuBar
-        simulation={simulation}
-        // FIXME - this will cause viewer to be rendered twice on initial render
-        editor={leftPanelRef.current?.getEditor() ?? undefined}
-        playgroundSettings={settings}
-        ref={rightPanelRef}
-        sourceId={sourceId}
-      />
+      <ProjectContext.Provider value={{ sourceId, getUrl: linker?.getUrl }}>
+        <ViewerWithMenuBar
+          simulation={simulation}
+          // FIXME - this will cause viewer to be rendered twice on initial render
+          editor={leftPanelRef.current?.getEditor() ?? undefined}
+          playgroundSettings={settings}
+          ref={rightPanelRef}
+        />
+      </ProjectContext.Provider>
     ) : (
       <div className="grid place-items-center h-full">
         <RefreshIcon className="animate-spin text-slate-400" size={24} />

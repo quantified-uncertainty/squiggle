@@ -3,7 +3,6 @@ import { FC, forwardRef, memo } from "react";
 import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 
-import { SqOutput } from "../../../../squiggle-lang/src/public/types.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { MessageAlert } from "../ui/Alert.js";
@@ -73,8 +72,6 @@ const ZoomedInNavigation: FC<{
 
 export type SquiggleViewerProps = {
   value: SqValue;
-  sqOutput: SqOutput;
-  sourceId: string;
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
 
@@ -114,7 +111,7 @@ const SquiggleViewerWithoutProvider: FC<
 
 const component = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
   function SquiggleViewer(
-    { value, sqOutput, sourceId, editor, ...partialPlaygroundSettings },
+    { value, editor, ...partialPlaygroundSettings },
     ref
   ) {
     return (
@@ -122,10 +119,8 @@ const component = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
         <ViewerProvider
           partialPlaygroundSettings={partialPlaygroundSettings}
           editor={editor}
-          sourceId={sourceId}
           ref={ref}
           rootValue={value}
-          sqOutput={sqOutput}
         >
           <SquiggleViewerWithoutProvider value={value} />
         </ViewerProvider>

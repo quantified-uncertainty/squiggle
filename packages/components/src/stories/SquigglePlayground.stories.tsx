@@ -183,6 +183,8 @@ export x=1`;
         throw new Error(`source ${sourceName} not found`);
     }
   },
+  getUrl: (sourceName, varName) =>
+    `https://example.com/${sourceName}` + (varName ? `/${varName}` : ""),
 };
 
 export const ManyTypes: Story = {

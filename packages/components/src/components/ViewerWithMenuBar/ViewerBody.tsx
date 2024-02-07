@@ -14,19 +14,11 @@ type Props = {
   isSimulating: boolean;
   editor?: CodeEditorHandle;
   playgroundSettings: PartialPlaygroundSettings;
-  sourceId: string;
 };
 
 export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
   function ViewerBody(
-    {
-      outputResult,
-      viewerTab,
-      isSimulating,
-      editor,
-      playgroundSettings,
-      sourceId,
-    },
+    { outputResult, viewerTab, isSimulating, editor, playgroundSettings },
     viewerRef
   ) {
     if (!outputResult.ok) {
@@ -57,8 +49,6 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
         )}
         <SquiggleViewer
           ref={viewerRef}
-          sqOutput={sqOutput}
-          sourceId={sourceId}
           value={usedValue}
           editor={editor}
           {...playgroundSettings}
