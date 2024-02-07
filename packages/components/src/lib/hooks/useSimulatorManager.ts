@@ -50,7 +50,7 @@ function useSetup(setup: SetupSettings, environment?: Env) {
       // random; https://stackoverflow.com/a/12502559
       return Math.random().toString(36).slice(2);
     }
-  }, [setup]);
+  }, []); //SourceId should not change.
 
   const continues =
     setup.type === "standalone"

@@ -169,10 +169,8 @@ export const ValueWithContextViewer: FC<Props> = ({
   const taggedName = value.tags.name();
 
   const exportData = value.tags.exportData();
-  const exportName =
-    exportData && exportData.path.length === 0 ? `${exportData.sourceId}` : "";
 
-  const isExternalSource =
+  const isRootImport =
     exportData &&
     exportData.sourceId !== sourceId &&
     exportData.path.length === 0;
@@ -215,14 +213,12 @@ export const ValueWithContextViewer: FC<Props> = ({
 
     // We want to show colons after the keys, for dicts/arrays.
     const showColon =
-      headerVisibility !== "large" &&
-      path.edges.length > 1 &&
-      !isExternalSource;
+      headerVisibility !== "large" && path.edges.length > 1 && !isRootImport;
 
     const getHeaderColor = () => {
       let color = "text-orange-900";
       const parentTag = parentValue?.tag;
-      if (isExternalSource) {
+      if (isRootImport) {
         color = "text-violet-900";
       } else if (parentTag === "Array" && !taggedName) {
         color = "text-stone-400";
@@ -255,14 +251,14 @@ export const ValueWithContextViewer: FC<Props> = ({
           showColon || "mr-3"
         )}
       >
-        {isExternalSource && (
+        {isRootImport && (
           <DocumentTextIcon size={12} className="mr-1 text-violet-900" />
         )}
         <div
           className={clsx(!taggedName && "font-mono", headerClasses())}
           onClick={focus}
         >
-          {exportName || taggedName || name}
+          {(isRootImport && exportData?.sourceId) || taggedName || name}
         </div>
         {showColon && <div className="text-gray-400 font-mono">:</div>}
       </div>
@@ -346,7 +342,7 @@ export const ValueWithContextViewer: FC<Props> = ({
                     href={getUrl(exportData.sourceId, exportData.path[0])}
                     className={clsx(
                       "transition",
-                      isExternalSource
+                      isRootImport
                         ? "text-violet-400 hover:!text-violet-900 group-hover:text-violet-500"
                         : "text-slate-200 hover:!text-slate-900 group-hover:text-slate-400"
                     )}
