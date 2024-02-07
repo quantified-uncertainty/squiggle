@@ -1,6 +1,5 @@
-import { PRNG } from "seedrandom";
-
 import * as magicNumbers from "../magicNumbers.js";
+import { PRNG } from "../rng/index.js";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
 import { DistError, notYetImplemented } from "./DistError.js";

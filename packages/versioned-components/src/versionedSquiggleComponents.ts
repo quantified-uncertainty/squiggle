@@ -1,7 +1,7 @@
-"use client"; // squiggle-components are not RSC-friendly
+"use client";
 
+// squiggle-components are not RSC-friendly
 import { FC } from "react";
-
 import { SquiggleLangPackageTypes } from "./versionedSquiggleLang.js";
 import { SquiggleVersion } from "./versions.js";
 
@@ -16,23 +16,17 @@ type AnySqProject = InstanceType<
 type AnySqValuePath = InstanceType<
   SquiggleLangPackageTypes[SquiggleVersion]["SqValuePath"]
 >;
-
 type PatchSqType<Prop> = Prop extends AnySqProject
   ? AnySqProject
   : Prop extends AnySqValuePath
     ? AnySqValuePath
     : Prop;
-
-type PatchSqTypesInProps<Props> = Props extends Record<string, unknown>
-  ? {
-      [k in keyof Props]: PatchSqType<Props[k]>;
-    }
-  : Props;
-
-type PatchSqTypesInFC<T> = T extends FC<infer Props>
-  ? FC<PatchSqTypesInProps<Props>>
-  : T;
-
+type PatchSqTypesInProps<Props> =
+  Props extends Record<string, unknown>
+    ? { [k in keyof Props]: PatchSqType<Props[k]> }
+    : Props;
+type PatchSqTypesInFC<T> =
+  T extends FC<infer Props> ? FC<PatchSqTypesInProps<Props>> : T;
 type PatchSqTypes<Exports extends Record<string, unknown>> = {
   [k in keyof Exports]: PatchSqTypesInFC<Exports[k]>;
 };
@@ -49,9 +43,9 @@ export type SquiggleComponentsPackageTypes = {
   "0.8.6": GetImportType<typeof import("squiggle-components-0.8.6")>;
   "0.9.0": GetImportType<typeof import("squiggle-components-0.9.0")>;
   "0.9.2": GetImportType<typeof import("squiggle-components-0.9.2")>;
+  "0.9.3": GetImportType<typeof import("squiggle-components-0.9.3")>;
   dev: GetImportType<typeof import("@quri/squiggle-components")>;
 };
-
 export async function squiggleComponentsByVersion<T extends SquiggleVersion>(
   version: T
 ): Promise<SquiggleComponentsPackageTypes[T]> {
@@ -73,6 +67,10 @@ export async function squiggleComponentsByVersion<T extends SquiggleVersion>(
     case "0.9.2":
       return (await import(
         "squiggle-components-0.9.2"
+      )) as unknown as SquiggleComponentsPackageTypes[T];
+    case "0.9.3":
+      return (await import(
+        "squiggle-components-0.9.3"
       )) as unknown as SquiggleComponentsPackageTypes[T];
     case "dev":
       return (await import(

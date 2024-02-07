@@ -1,0 +1,50 @@
+## 0.9.3
+
+### [@quri/squiggle-lang](https://www.npmjs.com/package/@quri/squiggle-lang)
+
+* **Breaking**: disallow capitalized variable names that we allowed by accident in 0.9.0 release ([#2987](https://github.com/quantified-uncertainty/squiggle/pull/2987))
+
+* Added `@location` tag and `Tag.getLocation` ([#3011](https://github.com/quantified-uncertainty/squiggle/pull/3011))
+
+* Added `@startOpen`, `@startClosed`, and `Tag.getStartOpenState` ([#2975](https://github.com/quantified-uncertainty/squiggle/pull/2975))
+
+* Added `Danger.parseFloat`, `System.sampleCount` and `Danger.now` ([#2974](https://github.com/quantified-uncertainty/squiggle/pull/2974))
+
+* `SqOutput` includes a separate `imports` dictionary; all exports are tagged with `exportData` tag. ([#2969](https://github.com/quantified-uncertainty/squiggle/pull/2969))
+
+* Bug fix: `@format` tag now works on 0 values ([#2961](https://github.com/quantified-uncertainty/squiggle/pull/2961))
+
+Internals:
+
+* Added `versionAdded` flag for built-in functions, for documenting the version when the function became available ([#2965](https://github.com/quantified-uncertainty/squiggle/pull/2965))
+
+* Infrastructure for custom seedable PRNGs ([#2992](https://github.com/quantified-uncertainty/squiggle/pull/2992))
+
+### [@quri/squiggle-components](https://www.npmjs.com/package/@quri/squiggle-components)
+
+* Tooltips for top-level variables ([#2776](https://github.com/quantified-uncertainty/squiggle/pull/2776))
+
+* Tooltips for import strings can be injected with `renderImportTooltip` prop; used on Squiggle Hub to show imported model cards ([#2990](https://github.com/quantified-uncertainty/squiggle/pull/2990))
+
+* Added simple keyboard navigation for the Viewer ([#2983](https://github.com/quantified-uncertainty/squiggle/pull/2983))
+
+* Show "Imports" and "Exports" tabs in the Viewer ([#2969](https://github.com/quantified-uncertainty/squiggle/pull/2969))
+
+* Grey out the Run button when code hasn't been changed ([#3012](https://github.com/quantified-uncertainty/squiggle/pull/3012))
+
+* Fixed an error with "Find in editor" and tooltips not working for decorated values ([#2988](https://github.com/quantified-uncertainty/squiggle/pull/2988))
+
+* **Critical bug fix**: always start dist y scale from 0 ([#2982](https://github.com/quantified-uncertainty/squiggle/pull/2982))
+
+### [@quri/prettier-plugin-squiggle](https://www.npmjs.com/package/@quri/prettier-plugin-squiggle)
+
+* Fixed incorrect extra commas on empty lists ([#2997](https://github.com/quantified-uncertainty/squiggle/pull/2997))
+
+### [@quri/squiggle-textmate-grammar](https://www.npmjs.com/package/@quri/squiggle-textmate-grammar)
+
+Use 0.9.3 Squiggle. No extension-specific changes.
+
+### [vscode-squiggle](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle)
+
+Use 0.9.3 Squiggle. No extension-specific changes.
+

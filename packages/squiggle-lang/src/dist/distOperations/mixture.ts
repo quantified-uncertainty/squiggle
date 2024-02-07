@@ -1,5 +1,4 @@
-import { PRNG } from "seedrandom";
-
+import { PRNG } from "../../rng/index.js";
 import * as E_A_Floats from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";

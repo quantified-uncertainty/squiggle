@@ -400,7 +400,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       playgroundProps
     )
   ) {
-    playgroundProps.renderImportTooltip = ({ importId }) => (
+    playgroundProps.renderImportTooltip = ({
+      importId,
+    }: {
+      importId: string;
+    }) => (
       <ReactRoot session={session}>
         <ImportTooltip importId={importId} />
       </ReactRoot>
@@ -417,7 +421,10 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           />
           <squiggle.components.SquigglePlayground
             key={playgroundKey}
-            {...playgroundProps}
+            {
+              /* we have issues with renderImportTooltip prop compatibility, but `playgroundProps` should be correctly typed by this point */
+              ...(playgroundProps as any)
+            }
           />
         </div>
       </form>
