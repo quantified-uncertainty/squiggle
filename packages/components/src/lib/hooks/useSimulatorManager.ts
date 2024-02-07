@@ -6,12 +6,21 @@ import { Simulation, useSimulator } from "./useSimulator.js";
 
 type SetupSettings =
   | { type: "standalone" } // For standalone execution
-  | { type: "project"; project: SqProject; continues?: string[] } // Project for the parent execution. Continues is what other squiggle sources to continue. Default []
-  | { type: "projectFromLinker"; linker?: SqLinker; continues?: string[] };
+  | {
+      type: "project";
+      project: SqProject;
+      continues?: string[];
+      sourceId?: string;
+    } // Project for the parent execution. Continues is what other squiggle sources to continue. Default []
+  | {
+      type: "projectFromLinker";
+      linker?: SqLinker;
+      continues?: string[];
+      sourceId?: string;
+    };
 
 export type SimulatorManagerArgs = {
   code: string;
-  sourceId?: string;
   setup: SetupSettings;
   environment?: Env;
   initialAutorunMode?: boolean;
@@ -31,15 +40,17 @@ export type UseSimulatorManager = {
 // defaultContinues needs to have a stable identity.
 const defaultContinues: string[] = [];
 
-function useSetup(
-  sourceId: string | undefined,
-  setup: SetupSettings,
-  environment?: Env
-) {
-  const _sourceId = useMemo(() => {
-    // random; https://stackoverflow.com/a/12502559
-    return sourceId ?? Math.random().toString(36).slice(2);
-  }, [sourceId]);
+function useSetup(setup: SetupSettings, environment?: Env) {
+  const sourceId = useMemo(() => {
+    if (setup.type === "project" && setup.sourceId) {
+      return setup.sourceId;
+    } else if (setup.type === "projectFromLinker" && setup.sourceId) {
+      return setup.sourceId;
+    } else {
+      // random; https://stackoverflow.com/a/12502559
+      return Math.random().toString(36).slice(2);
+    }
+  }, [setup]);
 
   const continues =
     setup.type === "standalone"
@@ -60,7 +71,7 @@ function useSetup(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // The project should not change.
 
-  return { sourceId: _sourceId, project, continues };
+  return { sourceId, project, continues };
 }
 
 export function useSimulatorManager(
@@ -71,7 +82,6 @@ export function useSimulatorManager(
   );
 
   const { sourceId, project, continues } = useSetup(
-    args.sourceId,
     args.setup,
     args.environment
   );
