@@ -41,6 +41,7 @@ export type SquigglePlaygroundProps = {
   sourceId?: string;
   linker?: SqLinker;
   onCodeChange?(code: string): void;
+  onClickExport?: (sourceId: string, varName?: string) => void;
   onExportsChange?(exports: ModelExport[]): void;
   /* When settings change */
   onSettingsChange?(settings: PlaygroundSettings): void;
@@ -152,7 +153,9 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 
   const renderRight = () =>
     simulation ? (
-      <ProjectContext.Provider value={{ sourceId, getUrl: linker?.getUrl }}>
+      <ProjectContext.Provider
+        value={{ sourceId, onClickExport: props.onClickExport }}
+      >
         <ViewerWithMenuBar
           simulation={simulation}
           // FIXME - this will cause viewer to be rendered twice on initial render

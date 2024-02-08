@@ -3,7 +3,6 @@ import { fetchQuery, graphql } from "relay-runtime";
 import { SqLinker } from "@quri/squiggle-lang";
 
 import { getCurrentEnvironment } from "@/relay/environment";
-import { modelExportRoute, userModelRoute } from "@/routes";
 
 import { linkerQuery } from "@/__generated__/linkerQuery.graphql";
 
@@ -81,13 +80,5 @@ export const squiggleHubLinker: SqLinker = {
     }
 
     return content.code;
-  },
-  getUrl(sourceId: string, varName?: string) {
-    const { owner, slug } = parseSourceId(sourceId);
-    if (varName) {
-      return modelExportRoute({ owner, slug, variableName: varName });
-    } else {
-      return userModelRoute({ username: owner, slug });
-    }
   },
 };

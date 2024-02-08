@@ -183,14 +183,15 @@ export x=1`;
         throw new Error(`source ${sourceName} not found`);
     }
   },
-  getUrl: (sourceName, varName) =>
-    `https://example.com/${sourceName}` + (varName ? `/${varName}` : ""),
 };
 
 export const ManyTypes: Story = {
   name: "Many types",
   args: {
     linker: linker,
+    onClickExport: (sourceId, varName) => {
+      console.log("Clicked Export with params", sourceId, varName);
+    },
     defaultCode: `import "hub:source1" as s1  
 import "source2" as s2
 

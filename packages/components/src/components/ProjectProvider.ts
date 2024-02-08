@@ -2,12 +2,12 @@ import { createContext, useContext } from "react";
 
 type ProjectContextShape = {
   sourceId: string;
-  getUrl?: (sourceId: string, varName?: string) => string;
+  onClickExport?: (sourceId: string, varName?: string) => void;
 };
 
 export const ProjectContext = createContext<ProjectContextShape>({
   sourceId: "",
-  getUrl: undefined,
+  onClickExport: undefined,
 });
 
 export function useProjectContext() {

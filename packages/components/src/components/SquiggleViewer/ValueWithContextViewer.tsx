@@ -131,7 +131,7 @@ export const ValueWithContextViewer: FC<Props> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement | null>(null);
-  const { sourceId, getUrl } = useProjectContext();
+  const { sourceId, onClickExport } = useProjectContext();
 
   const toggleCollapsed_ = useToggleCollapsed();
 
@@ -327,7 +327,7 @@ export const ValueWithContextViewer: FC<Props> = ({
             </div>
             <div className="inline-flex space-x-2 items-center">
               {enableDropdownMenu && <SquiggleValueMenu value={value} />}
-              {exportData && getUrl && (
+              {exportData && exportData.path.length < 2 && onClickExport && (
                 <TextTooltip
                   text={
                     `Go to model ${exportData.sourceId} ` +
@@ -338,17 +338,23 @@ export const ValueWithContextViewer: FC<Props> = ({
                   placement="bottom"
                   offset={5}
                 >
-                  <a
-                    href={getUrl(exportData.sourceId, exportData.path[0])}
-                    className={clsx(
-                      "transition",
-                      isRootImport
-                        ? "text-violet-400 hover:!text-violet-900 group-hover:text-violet-500"
-                        : "text-slate-200 hover:!text-slate-900 group-hover:text-slate-400"
-                    )}
-                  >
-                    <LinkIcon size={14} />
-                  </a>
+                  <div>
+                    <LinkIcon
+                      size={14}
+                      onClick={() =>
+                        onClickExport(
+                          exportData.sourceId,
+                          exportData.path[0] || undefined
+                        )
+                      }
+                      className={clsx(
+                        "transition cursor-pointer",
+                        isRootImport
+                          ? "text-violet-400 hover:!text-violet-900 group-hover:text-violet-500"
+                          : "text-slate-200 hover:!text-slate-900 group-hover:text-slate-400"
+                      )}
+                    />
+                  </div>
                 </TextTooltip>
               )}
             </div>

@@ -1,4 +1,5 @@
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import { BaseSyntheticEvent, FC, use, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
@@ -32,12 +33,15 @@ import { FormModal } from "@/components/ui/FormModal";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { useMutationForm } from "@/hooks/useMutationForm";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import { modelExportRoute, userModelRoute } from "@/routes";
 import { ImportTooltip } from "@/squiggle/components/ImportTooltip";
 import {
+  parseSourceId,
   serializeSourceId,
   squiggleHubLinker,
 } from "@/squiggle/components/linker";
 
+import { versionSupportsOnClickExport } from "../../../../../../versioned-components/dist/src/predicates";
 import {
   Draft,
   draftUtils,
@@ -172,6 +176,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     modelRef
   );
   const revision = model.currentRevision;
+  const router = useRouter();
 
   const content = extractFromGraphqlErrorUnion(
     revision.content,
@@ -391,6 +396,22 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
   ) {
     playgroundProps.onExportsChange = (exports) => {
       form.setValue("exports", exports);
+    };
+  }
+
+  if (
+    versionSupportsOnClickExport.propsByVersion<"SquigglePlayground">(
+      squiggle.version,
+      playgroundProps
+    )
+  ) {
+    playgroundProps.onClickExport = (sourceId: string, varName?: string) => {
+      const { owner, slug } = parseSourceId(sourceId);
+      if (varName) {
+        router.push(modelExportRoute({ owner, slug, variableName: varName }));
+      } else {
+        router.push(userModelRoute({ username: owner, slug }));
+      }
     };
   }
 
