@@ -203,7 +203,11 @@ varArray = [1,2,3]
 varLambda = {|e| "Test"}
 varScale = Scale.symlog({ min: -2, max: 5})
 
+@name("My favorite Dict")
+@doc("This is a long description")
 varDict = {fir: 1, secon: 2}
+
+foo(t) = t
 
 varTable = Table.make(
   {

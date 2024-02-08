@@ -168,7 +168,18 @@ export class ItemStore {
   }
 
   focusByPath(path: SqValuePath) {
-    this.handles[path.uid()]?.focusOnHeader();
+    const pathPrefixes = path.allPrefixPaths({ includeRoot: false });
+    pathPrefixes.pop(); // We allow the focusedPath to be collapsed, just not its parents.
+    for (const prefix of pathPrefixes) {
+      this.setState(prefix, (state) => ({
+        ...state,
+        collapsed: false,
+      }));
+      this.forceUpdate(prefix);
+    }
+    setTimeout(() => {
+      this.handles[path.uid()]?.focusOnHeader();
+    }, 0);
   }
 }
 

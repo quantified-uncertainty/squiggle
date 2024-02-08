@@ -1,5 +1,6 @@
-import { includes, uniqBy } from "lodash";
+import includes from "lodash/includes.js";
 import uniq from "lodash/uniq.js";
+import uniqBy from "lodash/uniqBy.js";
 
 import { ASTNode, SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
 
@@ -166,20 +167,19 @@ function astChildren(node: ASTNode): ASTNode[] {
     }
     case "LetStatement":
       return [node.value];
+    case "DecoratedStatement":
+      return [node.statement];
     case "Program": {
-      return lastUniqBy(
-        [...node.imports.map((i) => i[1]), ...node.statements],
-        (s) => {
-          switch (s.type) {
-            case "LetStatement":
-              return s.variable.value;
-            case "Identifier":
-              return s.value;
-            default:
-              return s;
-          }
+      return lastUniqBy(node.statements, (s) => {
+        switch (s.type) {
+          case "LetStatement":
+            return s.variable.value;
+          case "Identifier":
+            return s.value;
+          default:
+            return s;
         }
-      );
+      });
     }
     default:
       return [];
@@ -203,7 +203,10 @@ export function getActiveLineNumbers(sqResult?: SqOutputResult): number[] {
   const values = uniq(
     astAllChildren(ast)
       .filter((p) =>
-        includes(["LetStatement", "Block", "Dict", "Identifier"], p.type)
+        includes(
+          ["LetStatement", "DefunStatement", "Block", "Dict", "Identifier"],
+          p.type
+        )
       )
       .map((s) => s.location.start.line - 1)
   );
