@@ -39,7 +39,7 @@ class FocusableMarker extends GutterMarker {
           this.onClickLine();
         }}
       >
-        <div className="rounded-sm w-[2px] h-4 br-1 mt-[1px] bg-violet-50 group-hover:bg-violet-200 transition duration-75 gutterMarker-inner" />
+        <div className="rounded-sm w-[3px] h-4 br-1 mt-[1px] bg-violet-50 group-hover:bg-violet-200 transition duration-75 gutterMarker-inner" />
       </div>
     ).dom;
   }

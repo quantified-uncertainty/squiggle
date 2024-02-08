@@ -76,7 +76,7 @@
   .cm-gutterElement.cm-activeLineGutter
   .gutterMarker
   .gutterMarker-inner {
-  @apply opacity-0;
+  @apply bg-white;
 }
 
 /* Active line gutter hover state */
@@ -84,5 +84,5 @@
   .cm-gutterElement.cm-activeLineGutter
   .gutterMarker:hover
   .gutterMarker-inner {
-  @apply opacity-100;
+  @apply bg-violet-400;
 }
