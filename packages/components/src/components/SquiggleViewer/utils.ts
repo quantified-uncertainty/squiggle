@@ -114,6 +114,7 @@ function valueToLine(value: SqValue): number | undefined {
   return value.context?.findLocation()?.start.line;
 }
 
+//This doesn't get imports, because their contexts are wrong.
 export function findValuePathByLine(
   line: number,
   sqResult?: SqOutputResult
@@ -121,7 +122,7 @@ export function findValuePathByLine(
   if (!sqResult?.ok) {
     return undefined;
   }
-  const { imports, bindings, result } = sqResult.value;
+  const { bindings, result } = sqResult.value;
 
   function allChildren(value: SqValue): SqValue[] {
     return getChildrenValues(value).flatMap((v) => [v, ...allChildren(v)]);
@@ -131,12 +132,6 @@ export function findValuePathByLine(
   for (const value of allChildren(bindings.asValue())) {
     if (line === valueToLine(value) && value.context?.path) {
       return { type: "Variables", path: value.context.path };
-    }
-  }
-
-  for (const value of allChildren(imports.asValue())) {
-    if (line === valueToLine(value) && value.context?.path) {
-      return { type: "Imports", path: value.context.path };
     }
   }
 
@@ -193,6 +188,7 @@ function visibleAstLeaves(node: ASTNode): ASTNode[] {
   return [node, ...visibleAstChildren(node).flatMap(visibleAstLeaves)];
 }
 
+//This doesn't get imports, because their contexts are wrong.
 export function getActiveLineNumbers(sqResult?: SqOutputResult): number[] {
   if (!sqResult?.ok) {
     return [];
