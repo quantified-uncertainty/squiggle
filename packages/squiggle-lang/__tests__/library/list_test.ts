@@ -14,6 +14,7 @@ describe("List functions", () => {
   });
 
   describe("make", () => {
+    testEvalToBe("List(2, 5)", "[5,5]");
     testEvalToBe("List.make(3, 'HI')", '["HI","HI","HI"]');
     testEvalToBe("List.make(3, {|e| e})", "[0,1,2]");
     testEvalToBe("List.make(3, {|| 1})", "[1,1,1]");

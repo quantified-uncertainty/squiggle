@@ -11,6 +11,7 @@
  * resolved to stack and capture references.
  */
 import { ASTNode } from "../ast/parse.js";
+import { sExpr, SExpr, sExprToString } from "../utility/sExpr.js";
 import { Value } from "../value/index.js";
 
 export type LambdaExpressionParameter = {
@@ -144,61 +145,119 @@ export function make<Kind extends ExpressionContent["kind"]>(
   } as ExpressionContentByKind<Kind>;
 }
 
-// Converts the expression to String. Useful for tests.
-export function expressionToString(expression: ExpressionContent): string {
-  switch (expression.kind) {
-    case "Block":
-      return `{${expression.value.map(expressionToString).join("; ")}}`;
-    case "Program": {
-      const exports = new Set<string>(expression.value.exports);
-      return expression.value.statements
-        .map((statement) => {
-          const statementString = expressionToString(statement);
-          return statement.kind === "Assign" &&
-            exports.has(statement.value.left)
-            ? `export ${statementString}`
-            : statementString;
-        })
-        .join("; ");
-    }
-    case "Array":
-      return `[${expression.value.map(expressionToString).join(", ")}]`;
-    case "Dict":
-      return `{${expression.value
-        .map(
-          ([key, value]) =>
-            `${expressionToString(key)}: ${expressionToString(value)}`
+/**
+ * Converts the expression to string. Useful for tests.
+ * Example:
+
+(Program
+  (.statements
+    (Assign
+      f
+      (Block 99)
+    )
+    (Assign
+      g
+      (Lambda
+        (.captures
+          (StackRef 0)
         )
-        .join(", ")}}`;
-    case "StackRef":
-      return `S[${expression.value}]`;
-    case "CaptureRef":
-      return `C[${expression.value}]`;
-    case "Ternary":
-      return `${expressionToString(
-        expression.value.condition
-      )} ? (${expressionToString(
-        expression.value.ifTrue
-      )}) : (${expressionToString(expression.value.ifFalse)})`;
-    case "Assign":
-      return `${expression.value.left} = ${expressionToString(
-        expression.value.right
-      )}`;
-    case "Call":
-      return `(${expressionToString(
-        expression.value.fn
-      )})(${expression.value.args.map(expressionToString).join(", ")})`;
-    case "Lambda": {
-      const captures = expression.value.captures
-        .map(expressionToString)
-        .join(", ");
-      return `{[${captures}]|${expression.value.parameters
-        .map((parameter) => parameter.name)
-        .join(", ")}| ${expressionToString(expression.value.body)}}`;
+        (.parameters x)
+        (Block
+          (CaptureRef 0)
+        )
+      )
+    )
+    (Call
+      (StackRef 0)
+      2
+    )
+  )
+  (.bindings
+    (f 1)
+    (g 0)
+  )
+)
+
+ */
+export function expressionToString(
+  expression: ExpressionContent,
+  { pretty = true }: { pretty?: boolean } = {}
+): string {
+  const toSExpr = (expression: ExpressionContent): SExpr => {
+    const selfExpr = (args: (SExpr | undefined)[]): SExpr => ({
+      name: expression.kind,
+      args,
+    });
+
+    switch (expression.kind) {
+      case "Block":
+        return selfExpr(expression.value.map(toSExpr));
+      case "Program":
+        return selfExpr([
+          sExpr(".statements", expression.value.statements.map(toSExpr)),
+          Object.keys(expression.value.bindings).length
+            ? sExpr(
+                ".bindings",
+                Object.entries(expression.value.bindings).map(
+                  ([name, offset]) => sExpr(name, [offset])
+                )
+              )
+            : undefined,
+          expression.value.exports.length
+            ? sExpr(".exports", expression.value.exports)
+            : undefined,
+        ]);
+      case "Array":
+        return selfExpr(expression.value.map(toSExpr));
+      case "Dict":
+        return selfExpr(
+          expression.value.map((pair) => sExpr("kv", pair.map(toSExpr)))
+        );
+      case "StackRef":
+        return selfExpr([expression.value]);
+      case "CaptureRef":
+        return selfExpr([expression.value]);
+      case "Ternary":
+        return selfExpr(
+          [
+            expression.value.condition,
+            expression.value.ifTrue,
+            expression.value.ifFalse,
+          ].map(toSExpr)
+        );
+      case "Assign":
+        return selfExpr([
+          expression.value.left,
+          toSExpr(expression.value.right),
+        ]);
+      case "Call":
+        return selfExpr(
+          [expression.value.fn, ...expression.value.args].map(toSExpr)
+        );
+      case "Lambda":
+        return selfExpr([
+          expression.value.captures.length
+            ? sExpr(".captures", expression.value.captures.map(toSExpr))
+            : undefined,
+          sExpr(
+            ".parameters",
+            expression.value.parameters.map((parameter) =>
+              parameter.annotation
+                ? sExpr(".annotated", [
+                    parameter.name,
+                    toSExpr(parameter.annotation),
+                  ])
+                : parameter.name
+            )
+          ),
+          toSExpr(expression.value.body),
+        ]);
+      case "Value":
+        return expression.value.toString();
+      default:
+        return `Unknown expression ${expression satisfies never}`;
     }
-    case "Value":
-      return expression.value.toString();
-    default:
-      return `Unknown expression ${expression satisfies never}`;
-  }
+  };
+
+  return sExprToString(toSExpr(expression), { pretty });
 }

@@ -3,6 +3,7 @@ import { LocationRange } from "peggy";
 import { ICompileError } from "../errors/IError.js";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
+import { SExpr, sExprToString } from "../utility/sExpr.js";
 import { type ASTCommentNode, type ASTNode } from "./peggyHelpers.js";
 import {
   parse as peggyParse,
@@ -48,74 +49,84 @@ export function parse(expr: string, source: string): ParseResult {
 
 // This function is just for the sake of tests.
 // For real generation of Squiggle code from AST try our prettier plugin.
-export function nodeToString(node: ASTNode): string {
-  const sExpr = (components: (ASTNode | string)[]) =>
-    "(" +
-    node.type +
-    (components.length ? " " : "") +
-    components
-      .map((component) =>
-        typeof component === "string" ? component : nodeToString(component)
-      )
-      .join(" ") +
-    ")";
+export function nodeToString(
+  node: ASTNode,
+  { pretty = true }: { pretty?: boolean } = {}
+): string {
+  const toSExpr = (node: ASTNode): SExpr => {
+    const sExpr = (components: (ASTNode | string)[]) =>
+      "(" +
+      node.type +
+      (components.length ? " " : "") +
+      components
+        .map((component) =>
+          typeof component === "string" ? component : nodeToString(component)
+        )
+        .join(" ") +
+      ")";
 
-  switch (node.type) {
-    case "Block":
-    case "Program":
-      return sExpr(node.statements);
-    case "Array":
-      return sExpr(node.elements);
-    case "Dict":
-      return sExpr(node.elements);
-    case "Boolean":
-      return String(node.value);
-    case "Call":
-      return sExpr([node.fn, ...node.args]);
-    case "InfixCall":
-      return sExpr([node.op, ...node.args]);
-    case "Pipe":
-      return sExpr([node.leftArg, node.fn, ...node.rightArgs]);
-    case "DotLookup":
-      return sExpr([node.arg, node.key]);
-    case "BracketLookup":
-      return sExpr([node.arg, node.key]);
-    case "UnaryCall":
-      return sExpr([node.op, node.arg]);
-    case "Float":
-      // see also: "Float" branch in expression/compile.ts
-      return `${node.integer}${
-        node.fractional === null ? "" : `.${node.fractional}`
-      }${node.exponent === null ? "" : `e${node.exponent}`}`;
-    case "Identifier":
-      return `:${node.value}`;
-    case "IdentifierWithAnnotation":
-      return sExpr([node.variable, node.annotation]);
-    case "KeyValue":
-      return sExpr([node.key, node.value]);
-    case "Lambda":
-      return sExpr([...node.args, node.body]);
-    case "Decorator":
-      return sExpr([node.name, ...node.args]);
-    case "DecoratedStatement":
-      return sExpr([node.decorator, node.statement]);
-    case "LetStatement":
-      return node.exported
-        ? sExpr(["export", node.variable, node.value])
-        : sExpr([node.variable, node.value]);
-    case "DefunStatement":
-      return sExpr([node.variable, node.value]);
-    case "String":
-      return `'${node.value}'`; // TODO - quote?
-    case "Ternary":
-      return sExpr([node.condition, node.trueExpression, node.falseExpression]);
-    case "UnitValue":
-      // S-expression; we should migrate to S-expressions for other branches too, for easier testing.
-      return sExpr([node.value, node.unit]);
+    switch (node.type) {
+      case "Block":
+      case "Program":
+        return sExpr(node.statements);
+      case "Array":
+        return sExpr(node.elements);
+      case "Dict":
+        return sExpr(node.elements);
+      case "Boolean":
+        return String(node.value);
+      case "Call":
+        return sExpr([node.fn, ...node.args]);
+      case "InfixCall":
+        return sExpr([node.op, ...node.args]);
+      case "Pipe":
+        return sExpr([node.leftArg, node.fn, ...node.rightArgs]);
+      case "DotLookup":
+        return sExpr([node.arg, node.key]);
+      case "BracketLookup":
+        return sExpr([node.arg, node.key]);
+      case "UnaryCall":
+        return sExpr([node.op, node.arg]);
+      case "Float":
+        // see also: "Float" branch in expression/compile.ts
+        return `${node.integer}${
+          node.fractional === null ? "" : `.${node.fractional}`
+        }${node.exponent === null ? "" : `e${node.exponent}`}`;
+      case "Identifier":
+        return `:${node.value}`;
+      case "IdentifierWithAnnotation":
+        return sExpr([node.variable, node.annotation]);
+      case "KeyValue":
+        return sExpr([node.key, node.value]);
+      case "Lambda":
+        return sExpr([...node.args, node.body]);
+      case "Decorator":
+        return sExpr([node.name, ...node.args]);
+      case "DecoratedStatement":
+        return sExpr([node.decorator, node.statement]);
+      case "LetStatement":
+        return node.exported
+          ? sExpr(["export", node.variable, node.value])
+          : sExpr([node.variable, node.value]);
+      case "DefunStatement":
+        return sExpr([node.variable, node.value]);
+      case "String":
+        return `'${node.value}'`; // TODO - quote?
+      case "Ternary":
+        return sExpr([
+          node.condition,
+          node.trueExpression,
+          node.falseExpression,
+        ]);
+      case "UnitValue":
+        return sExpr([node.value, node.unit]);
 
-    default:
-      throw new Error(`Unknown node: ${node satisfies never}`);
-  }
+      default:
+        throw new Error(`Unknown node: ${node satisfies never}`);
+    }
+  };
+
+  return sExprToString(toSExpr(node), { pretty });
 }
 
 export function nodeResultToString(r: ParseResult): string {

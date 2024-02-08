@@ -7,13 +7,20 @@ import {
 } from "../helpers/reducerHelpers.js";
 
 describe("eval", () => {
-  describe("expressions", () => {
+  describe("bais sanity checks", () => {
     testEvalToBe("1", "1");
+    testEvalToBe("(((1)))", "1");
+    testEvalToBe("((1+2))", "3");
     testEvalToBe("-1", "-1");
     testEvalToBe("1-1", "0");
     testEvalToBe("1+2", "3");
+    testEvalToBe("add(1,2)", "3");
     testEvalToBe("(1+2)*3", "9");
     testEvalToBe("2>1", "true");
+    testEvalToBe("true", "true");
+    testEvalToBe("!true", "false");
+    testEvalToBe("1 + -1", "0");
+    testEvalToBe('"hello"', '"hello"');
     testEvalToBe("concat([3,4], [5,6,7])", "[3,4,5,6,7]");
     testEvalToBe("log(10)", "2.302585092994046");
     testEvalToBe("Math.cos(10)", "-0.8390715290764524");
@@ -52,6 +59,7 @@ describe("eval", () => {
       );
     });
   });
+
   describe("dicts", () => {
     test("empty", async () => await expectEvalToBe("{}", "{}"));
     test("define", async () =>
@@ -82,6 +90,8 @@ describe("eval", () => {
   });
   describe("assignment", () => {
     testEvalToBe("x=1; x", "1");
+    testEvalToBe("x=1; 2", "2");
+    testEvalToBe("x=1", "()");
     testEvalToBe("x=1+1; x+1", "3");
     testEvalToBe("x=1; y=x+1; y+1", "3");
     testEvalError("1; x=1");
@@ -97,6 +107,9 @@ describe("eval", () => {
     describe("to function", () => {
       testEvalToBe("f(x)=x; 1->f", "1");
       testEvalToBe("f(x,y)=x+y; 1->f(2)", "3");
+      testEvalToBe("1 -> add(2)", "3");
+      testEvalToBe("-1 -> add(2)", "1");
+      testEvalToBe("-1 -> add(2) * 3", "9");
     });
     describe("to block", () => {
       testEvalToBe("1->{|x| x}", "1");

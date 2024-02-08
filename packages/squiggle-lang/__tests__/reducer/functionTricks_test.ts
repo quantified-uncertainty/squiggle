@@ -2,7 +2,6 @@ import {
   MySkip,
   testEvalError,
   testEvalToBe,
-  testToExpression,
 } from "../helpers/reducerHelpers.js";
 
 describe("Arity check", () => {
@@ -51,7 +50,6 @@ describe("call and bindings", () => {
   testEvalToBe("f(x)=x+1; y=f(1); f(1)", "2");
   testEvalToBe("f(x)=x+1; y=f(1); z=f(1); z", "2");
   testEvalToBe("f(x)=x+1; g(x)=f(x)+1; g(0)", "2");
-  testToExpression("f=99; g(x)=f; g(2)", "f = {99}; g = {|x| {f}}; (g)(2)");
   testEvalToBe("f=99; g(x)=f; g(2)", "99");
   testEvalToBe("f(x)=x; g(x)=f(x); g(2)", "2");
   testEvalToBe("f(x)=x+1; g(x)=f(x)+1; y=g(2); y", "4");
@@ -83,4 +81,26 @@ describe("lambda in structures", () => {
 describe("ternary and bindings", () => {
   testEvalToBe("f(x)=x ? 1 : 0; f(true)", "1");
   testEvalToBe("f(x)=x>2 ? 1 : 0; f(3)", "1");
+});
+
+describe("simulated recursion", () => {
+  testEvalToBe(
+    `
+  innerRecurse(state, halt, process, tail) = {
+    newState = process(state)
+    if halt(newState) then newState else tail(newState, halt, process, tail)
+  }
+  
+  recurse(state, halt, process) = innerRecurse(state, halt, process, innerRecurse)
+  
+  repeat(initialValue, n, step) = recurse(
+    { value: initialValue, n },
+    {|state| state.n == 0},
+    {|state| { value: step(state.value), n: state.n - 1 }}
+  ).value
+
+  repeat(1, 5, {|x| x * 2})
+  `,
+    "32"
+  );
 });

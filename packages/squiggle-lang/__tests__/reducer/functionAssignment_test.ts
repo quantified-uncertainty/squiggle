@@ -1,12 +1,8 @@
-import {
-  MySkip,
-  testEvalToBe,
-  testToExpression,
-} from "../helpers/reducerHelpers.js";
+import { MySkip, testEvalToBe } from "../helpers/reducerHelpers.js";
 
-describe("Parse function assignment", () => {
-  testToExpression("f(x)=x", "f = {|x| {x}}");
-  testToExpression("f(x)=2*x", "f = {|x| {(multiply)(2, x)}}");
+describe("Basic declarations", () => {
+  testEvalToBe("f(x)=x; f", "(x) => internal code");
+  testEvalToBe("f(x)=2*x; f", "(x) => internal code");
 });
 
 describe("Evaluate function assignment", () => {

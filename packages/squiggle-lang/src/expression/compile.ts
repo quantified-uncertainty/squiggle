@@ -118,7 +118,7 @@ class CompileContext {
         if (name in scope.captureIndex) {
           return {
             ast,
-            ...scope.captures[scope.captureIndex[name]],
+            ...expression.make("CaptureRef", scope.captureIndex[name]),
           };
         }
 

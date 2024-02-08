@@ -48,7 +48,6 @@ export class Interpreter implements EvaluateAllKinds {
 
   readonly stack: Stack;
   readonly frameStack: FrameStack;
-  captures: Value[];
 
   readonly rng: PRNG;
 
@@ -57,7 +56,6 @@ export class Interpreter implements EvaluateAllKinds {
 
     this.stack = Stack.make();
     this.frameStack = FrameStack.make();
-    this.captures = [];
 
     // const seed = environment.seed
     //   ? String(environment.seed)
@@ -84,11 +82,11 @@ export class Interpreter implements EvaluateAllKinds {
       case "Array":
         return this.evaluateArray(expression.value);
       case "Dict":
-        return this.evaluateDict(expression.value, ast);
+        return this.evaluateDict(expression.value);
       case "Value":
         return this.evaluateValue(expression.value);
       case "Ternary":
-        return this.evaluateTernary(expression.value, ast);
+        return this.evaluateTernary(expression.value);
       case "Lambda":
         return this.evaluateLambda(expression.value, ast);
       case "Program":
@@ -146,7 +144,7 @@ export class Interpreter implements EvaluateAllKinds {
     return vArray(values);
   }
 
-  evaluateDict(expressionValue: ExpressionValue<"Dict">, ast: ASTNode) {
+  evaluateDict(expressionValue: ExpressionValue<"Dict">) {
     return vDict(
       ImmutableMap(
         expressionValue.map(([eKey, eValue]) => {
@@ -154,7 +152,7 @@ export class Interpreter implements EvaluateAllKinds {
           if (key.type !== "String") {
             throw this.runtimeError(
               new REOther("Dict keys must be strings"),
-              ast
+              eKey.ast
             );
           }
           const keyString: string = key.value;
@@ -175,24 +173,35 @@ export class Interpreter implements EvaluateAllKinds {
     return this.stack.get(expressionValue);
   }
 
-  evaluateCaptureRef(expressionValue: ExpressionValue<"CaptureRef">) {
-    const value = this.captures.at(expressionValue);
+  private getCapture(id: number) {
+    // This might seem relatively slow, but it works faster than when we stored captures in the Interpreter object.
+    const topFrame = this.frameStack.getTopFrame();
+    if (!topFrame) {
+      throw new Error(
+        `Internal error: can't reference a capture when not in a function`
+      );
+    }
+    const value = topFrame.lambda.captures.at(id);
     if (!value) {
-      throw new Error(`Internal error: invalid capture id ${expressionValue}`);
+      throw new Error(`Internal error: invalid capture id ${id}`);
     }
     return value;
+  }
+
+  evaluateCaptureRef(id: ExpressionValue<"CaptureRef">) {
+    return this.getCapture(id);
   }
 
   evaluateValue(value: Value) {
     return value;
   }
 
-  evaluateTernary(expressionValue: ExpressionValue<"Ternary">, ast: ASTNode) {
+  evaluateTernary(expressionValue: ExpressionValue<"Ternary">) {
     const predicateResult = this.evaluate(expressionValue.condition);
     if (predicateResult.type !== "Bool") {
       throw this.runtimeError(
         new REExpectedType("Boolean", predicateResult.type),
-        ast
+        expressionValue.condition.ast
       );
     }
 
@@ -229,20 +238,14 @@ export class Interpreter implements EvaluateAllKinds {
 
     const capturedValues: Value[] = [];
     for (const capture of expressionValue.captures) {
-      // duplicates `evaluateStackRef` and `evaluateCaptureRef`
+      // identical to `evaluateStackRef` and `evaluateCaptureRef`
       switch (capture.kind) {
         case "StackRef": {
           capturedValues.push(this.stack.get(capture.value));
           break;
         }
         case "CaptureRef": {
-          const value = this.captures.at(capture.value);
-          if (!value) {
-            throw new Error(
-              `Internal error: invalid capture id ${capture.value}`
-            );
-          }
-          capturedValues.push(value);
+          capturedValues.push(this.getCapture(capture.value));
           break;
         }
         default:
@@ -279,11 +282,10 @@ export class Interpreter implements EvaluateAllKinds {
     return this.call(lambda.value, argValues, ast);
   }
 
+  // Prepare a new frame and call the lambda's body with given args.
   call(lambda: Lambda, args: Value[], ast?: ASTNode | undefined) {
     const initialStackSize = this.stack.size();
-    const initialCaptures = this.captures;
 
-    this.captures = [];
     this.frameStack.extend(new Frame(lambda, ast?.location));
 
     try {
@@ -292,7 +294,6 @@ export class Interpreter implements EvaluateAllKinds {
       return result;
     } finally {
       this.stack.shrink(initialStackSize);
-      this.captures = initialCaptures;
     }
   }
 }

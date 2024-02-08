@@ -1,6 +1,8 @@
 import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("Dist", () => {
+  testEvalToBe("Dist(2)", "PointMass(2)");
+  testEvalToBe("Dist.make(2)", "PointMass(2)");
   testEvalToBe("sum([2,Dist.make(2),Dist.make(4)])", "PointMass(8)");
   testEvalToBe("sum([2,Dist.make(2),2 to 10])", "Sample Set Distribution");
   testEvalToBe(

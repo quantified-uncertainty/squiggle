@@ -1,5 +1,6 @@
 import { IRuntimeError } from "../../src/errors/IError.js";
 import { REOther } from "../../src/errors/messages.js";
+import { getStdLib } from "../../src/library/index.js";
 import { Frame, FrameStack } from "../../src/reducer/frameStack.js";
 import { StackTrace } from "../../src/reducer/stackTrace.js";
 
@@ -27,9 +28,25 @@ describe("IError", () => {
     ).toBe("Error: test error"));
 
   test("toStringWithStackTrace", () => {
+    const stdlib = getStdLib();
+
+    const [lambda1, lambda2] = ["add", "normal"].map((name) => {
+      const value = stdlib.get(name);
+      if (!value || value.type !== "Lambda") {
+        throw new Error("Expected a lambda");
+      }
+      return value.value;
+    });
+
     const frameStack = FrameStack.make();
-    frameStack.extend(new Frame("frame1", undefined));
-    frameStack.extend(new Frame("frame2", undefined));
+    frameStack.extend(new Frame(lambda1, undefined));
+    frameStack.extend(
+      new Frame(lambda2, {
+        source: "test",
+        start: { line: 3, column: 4, offset: 5 },
+        end: { line: 3, column: 5, offset: 6 },
+      })
+    );
 
     expect(
       IRuntimeError.fromMessage(
@@ -38,8 +55,8 @@ describe("IError", () => {
       ).toStringWithDetails()
     ).toBe(`Error: test error
 Stack trace:
-  frame2
-  frame1
+  normal
+  add at line 3, column 4, file test
   <top>`);
   });
 });

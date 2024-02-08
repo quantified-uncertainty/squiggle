@@ -26,6 +26,7 @@ export type UserDefinedLambdaParameter = {
 
 export abstract class BaseLambda {
   isDecorator: boolean = false;
+  captures: Value[] = []; // used only on user-defined lambdas, but useful for all lambdas for faster lookups
 
   abstract readonly type: string;
   abstract display(): string;
@@ -46,7 +47,6 @@ export class UserDefinedLambda extends BaseLambda {
   location: LocationRange;
   name?: string;
   private expression: Expression;
-  private captures: Value[];
 
   constructor(
     name: string | undefined,
@@ -67,7 +67,7 @@ export class UserDefinedLambda extends BaseLambda {
     const argsLength = args.length;
     const parametersLength = this.parameters.length;
     if (argsLength !== parametersLength) {
-      throw new REArityError(undefined, parametersLength, argsLength);
+      throw new REArityError(this.display(), parametersLength, argsLength);
     }
 
     for (let i = 0; i < parametersLength; i++) {
@@ -77,8 +77,6 @@ export class UserDefinedLambda extends BaseLambda {
         parameter.domain.value.validateValue(args[i]);
       }
     }
-
-    context.captures = this.captures;
 
     return context.evaluate(this.expression);
   }
