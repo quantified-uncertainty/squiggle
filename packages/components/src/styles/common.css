@@ -56,7 +56,7 @@
 }
 
 .cm-gutter.cm-lineNumberDot {
-  min-width: 6px;
+  min-width: 9px;
 }
 
 .cm-lineNumberDot:hover .cm-gutterElement .gutterMarker .gutterMarker-inner {
