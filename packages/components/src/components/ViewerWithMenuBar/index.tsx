@@ -1,7 +1,11 @@
 import { forwardRef, useState } from "react";
 
 import { isSimulating, Simulation } from "../../lib/hooks/useSimulator.js";
-import { defaultViewerTab, ViewerTab } from "../../lib/utility.js";
+import {
+  defaultViewerTab,
+  ViewerTab,
+  viewerTabsToShow,
+} from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
@@ -33,7 +37,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
       showMenu = true,
       editor,
       defaultTab,
-      useGlobalShortcuts: shouldUseGlobalShortcuts = false,
+      useGlobalShortcuts: enableGlobalShortcuts = false,
       xPadding = 2,
     },
     viewerRef
@@ -42,13 +46,16 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
       defaultTab ?? defaultViewerTab(simulation.output)
     );
 
+    const shownTabs = viewerTabsToShow(simulation.output);
+
     const _isSimulating = isSimulating(simulation);
     const { output } = simulation;
 
     useViewerTabShortcuts({
-      shouldUseGlobalShortcuts,
+      enableGlobalShortcuts,
       viewerTab,
       setViewerTab,
+      shownTabs,
     });
 
     return (
@@ -59,6 +66,7 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
               viewerTab={viewerTab}
               setViewerTab={setViewerTab}
               outputResult={output}
+              shownTabs={shownTabs}
             />
           ) : (
             <div />

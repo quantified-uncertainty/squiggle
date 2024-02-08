@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 export type Shortcut = {
   metaKey?: boolean;
@@ -8,6 +8,7 @@ export type Shortcut = {
   key: string;
 };
 
+//TODO: Make sure that keyboard shortcut only works when exact modifiers are pressed. This means checking for altKey and controlKey as well.
 function eventMatchesShortcut(event: KeyboardEvent, shortcut: Shortcut) {
   if (
     (shortcut.shiftKey && !event.shiftKey) ||
@@ -17,24 +18,6 @@ function eventMatchesShortcut(event: KeyboardEvent, shortcut: Shortcut) {
     return false;
   }
   return true;
-}
-
-export function useGlobalShortcut(shortcut: Shortcut, act: () => void) {
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (eventMatchesShortcut(event, shortcut)) {
-        event.preventDefault();
-        event.stopPropagation();
-        act();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyPress);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyPress);
-    };
-  }, [shortcut, act]);
 }
 
 export function useGlobalShortcuts(shortcuts: [Shortcut, () => void][]) {
@@ -55,7 +38,14 @@ export function useGlobalShortcuts(shortcuts: [Shortcut, () => void][]) {
       document.removeEventListener("keydown", handleKeyPress);
     };
     // Since `shortcuts` is an array and could be a new array on every render,
-    // it's important to ensure that it's memoized or stable to prevent unnecessary effect executions.
-    // If it's not stable, consider using a state management solution or memoizing the input.
+    // memoize it to prevent unnecessary effect executions. That said, this should run quickly anyway.
   }, [shortcuts]);
+}
+
+export function useGlobalShortcut(shortcut: Shortcut, act: () => void) {
+  const shortCut: [Shortcut, () => void] = useMemo(
+    () => [shortcut, act],
+    [shortcut, act]
+  );
+  useGlobalShortcuts([shortCut]);
 }

@@ -2,37 +2,42 @@ import { useMemo } from "react";
 
 import { Shortcut, useGlobalShortcuts } from "@quri/ui";
 
-import { ViewerTab } from "../../lib/utility.js";
-
-const tabs = ["Imports", "Variables", "Exports", "Result", "AST"] as const;
+import {
+  isCustomResultPath,
+  SelectableViewerTab,
+  ViewerTab,
+} from "../../lib/utility.js";
 
 function incrementViewerTab(
+  shownTabs: SelectableViewerTab[],
   tab: ViewerTab,
   direction: "backwards" | "forwards"
-): ViewerTab {
-  if (typeof tab === "object" && tab.tag === "CustomResultPath") {
+): SelectableViewerTab {
+  if (isCustomResultPath(tab)) {
     return "Variables";
   }
-  const index = tabs.indexOf(tab as (typeof tabs)[number]);
-  if (direction === "forwards" && index >= 0 && index < tabs.length - 1) {
-    return tabs[index + 1];
+  const index = shownTabs.indexOf(tab as SelectableViewerTab);
+  if (direction === "forwards" && index >= 0 && index < shownTabs.length - 1) {
+    return shownTabs[index + 1];
   } else if (direction === "backwards" && index > 0) {
-    return tabs[index - 1];
+    return shownTabs[index - 1];
   } else {
     return tab;
   }
 }
 
 type UseViewerTabShortcutsProps = {
-  shouldUseGlobalShortcuts: boolean;
+  enableGlobalShortcuts: boolean;
   viewerTab: ViewerTab;
   setViewerTab: (tab: ViewerTab) => void;
+  shownTabs: SelectableViewerTab[];
 };
 
 export function useViewerTabShortcuts({
-  shouldUseGlobalShortcuts,
+  enableGlobalShortcuts,
   viewerTab,
   setViewerTab,
+  shownTabs,
 }: UseViewerTabShortcutsProps) {
   const shortCuts: [Shortcut, () => void][] = useMemo(() => {
     return [
@@ -41,17 +46,19 @@ export function useViewerTabShortcuts({
           metaKey: true,
           key: "PageDown",
         },
-        () => setViewerTab(incrementViewerTab(viewerTab, "forwards")),
+        () =>
+          setViewerTab(incrementViewerTab(shownTabs, viewerTab, "forwards")),
       ],
       [
         {
           metaKey: true,
           key: "PageUp",
         },
-        () => setViewerTab(incrementViewerTab(viewerTab, "backwards")),
+        () =>
+          setViewerTab(incrementViewerTab(shownTabs, viewerTab, "backwards")),
       ],
     ];
-  }, [viewerTab, setViewerTab]);
+  }, [shownTabs, viewerTab, setViewerTab]);
 
-  useGlobalShortcuts(shouldUseGlobalShortcuts ? shortCuts : []);
+  useGlobalShortcuts(enableGlobalShortcuts ? shortCuts : []);
 }
