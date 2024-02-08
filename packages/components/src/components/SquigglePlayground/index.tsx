@@ -41,7 +41,7 @@ export type SquigglePlaygroundProps = {
   sourceId?: string;
   linker?: SqLinker;
   onCodeChange?(code: string): void;
-  onClickExport?: (sourceId: string, varName?: string) => void;
+  onOpenExport?: (sourceId: string, varName?: string) => void;
   onExportsChange?(exports: ModelExport[]): void;
   /* When settings change */
   onSettingsChange?(settings: PlaygroundSettings): void;
@@ -154,7 +154,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   const renderRight = () =>
     simulation ? (
       <ProjectContext.Provider
-        value={{ sourceId, onClickExport: props.onClickExport }}
+        value={{ sourceId, onOpenExport: props.onOpenExport }}
       >
         <ViewerWithMenuBar
           simulation={simulation}

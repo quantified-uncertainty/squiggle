@@ -25,6 +25,7 @@ import {
   versionSupportsDropdownMenu,
   versionSupportsExports,
   versionSupportsImportTooltip,
+  versionSupportsOnOpenExport,
 } from "@quri/versioned-squiggle-components";
 
 import { EditModelExports } from "@/components/exports/EditModelExports";
@@ -41,7 +42,6 @@ import {
   squiggleHubLinker,
 } from "@/squiggle/components/linker";
 
-import { versionSupportsOnClickExport } from "../../../../../../versioned-components/dist/src/predicates";
 import {
   Draft,
   draftUtils,
@@ -400,12 +400,12 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
   }
 
   if (
-    versionSupportsOnClickExport.propsByVersion<"SquigglePlayground">(
+    versionSupportsOnOpenExport.propsByVersion<"SquigglePlayground">(
       squiggle.version,
       playgroundProps
     )
   ) {
-    playgroundProps.onClickExport = (sourceId: string, varName?: string) => {
+    playgroundProps.onOpenExport = (sourceId: string, varName?: string) => {
       const { owner, slug } = parseSourceId(sourceId);
       if (varName) {
         router.push(modelExportRoute({ owner, slug, variableName: varName }));

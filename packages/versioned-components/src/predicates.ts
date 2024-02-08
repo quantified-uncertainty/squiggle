@@ -81,7 +81,7 @@ export function excludeVersions<
  * See `EditSquiggleSnippetModel` in the Squiggle Hub source code for an example how it's used.
  */
 
-export const versionSupportsOnClickExport = excludeVersions([
+export const versionSupportsOnOpenExport = excludeVersions([
   "0.8.5",
   "0.8.6",
   "0.9.0",

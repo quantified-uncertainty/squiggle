@@ -131,7 +131,7 @@ export const ValueWithContextViewer: FC<Props> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement | null>(null);
-  const { sourceId, onClickExport } = useProjectContext();
+  const { sourceId, onOpenExport } = useProjectContext();
 
   const toggleCollapsed_ = useToggleCollapsed();
 
@@ -327,7 +327,7 @@ export const ValueWithContextViewer: FC<Props> = ({
             </div>
             <div className="inline-flex space-x-2 items-center">
               {enableDropdownMenu && <SquiggleValueMenu value={value} />}
-              {exportData && exportData.path.length < 2 && onClickExport && (
+              {exportData && exportData.path.length < 2 && onOpenExport && (
                 <TextTooltip
                   text={
                     `Go to model ${exportData.sourceId} ` +
@@ -342,7 +342,7 @@ export const ValueWithContextViewer: FC<Props> = ({
                     <LinkIcon
                       size={14}
                       onClick={() =>
-                        onClickExport(
+                        onOpenExport(
                           exportData.sourceId,
                           exportData.path[0] || undefined
                         )

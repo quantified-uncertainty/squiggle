@@ -13,6 +13,7 @@ export {
   versionSupportsDropdownMenu,
   versionSupportsExports,
   versionSupportsImportTooltip,
+  versionSupportsOnOpenExport,
   versionSupportsSqPathV2,
   versionSupportsSquiggleChart,
 } from "./predicates.js";

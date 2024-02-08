@@ -189,7 +189,7 @@ export const ManyTypes: Story = {
   name: "Many types",
   args: {
     linker: linker,
-    onClickExport: (sourceId, varName) => {
+    onOpenExport: (sourceId, varName) => {
       console.log("Clicked Export with params", sourceId, varName);
     },
     defaultCode: `import "hub:source1" as s1  
