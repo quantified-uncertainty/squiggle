@@ -151,7 +151,7 @@ function lastUniqBy<A, B>(arr: A[], fn: (a: A) => B): A[] {
   return uniqBy(arr.reverse(), fn).reverse();
 }
 
-function astChildren(node: ASTNode): ASTNode[] {
+function visibleAstChildren(node: ASTNode): ASTNode[] {
   switch (node.type) {
     case "Dict":
       // Assuming 'elements' is an array of { key: ASTNode, value: ASTNode | string }
@@ -168,7 +168,10 @@ function astChildren(node: ASTNode): ASTNode[] {
     case "LetStatement":
       return [node.value];
     case "DecoratedStatement":
-      return [node.statement];
+      return node.decorator.type === "Decorator" &&
+        node.decorator.name.value !== "hide"
+        ? [node.statement]
+        : [];
     case "Program": {
       return lastUniqBy(node.statements, (s) => {
         switch (s.type) {
@@ -186,10 +189,8 @@ function astChildren(node: ASTNode): ASTNode[] {
   }
 }
 
-//Check for Defun and Decorator statements
-
-function astAllChildren(node: ASTNode): ASTNode[] {
-  return [node, ...astChildren(node).flatMap(astAllChildren)];
+function visibleAstLeaves(node: ASTNode): ASTNode[] {
+  return [node, ...visibleAstChildren(node).flatMap(visibleAstLeaves)];
 }
 
 export function getActiveLineNumbers(sqResult?: SqOutputResult): number[] {
@@ -201,7 +202,7 @@ export function getActiveLineNumbers(sqResult?: SqOutputResult): number[] {
     return [];
   }
   const values = uniq(
-    astAllChildren(ast)
+    visibleAstLeaves(ast)
       .filter((p) =>
         includes(
           ["LetStatement", "DefunStatement", "Block", "Dict", "Identifier"],
