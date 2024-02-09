@@ -41,11 +41,12 @@ export function useGlobalShortcuts(shortcuts: [Shortcut, () => void][]) {
     // memoize it to prevent unnecessary effect executions. That said, this should run quickly anyway.
   }, [shortcuts]);
 }
-
 export function useGlobalShortcut(shortcut: Shortcut, act: () => void) {
-  const shortCut: [Shortcut, () => void] = useMemo(
-    () => [shortcut, act],
+  // Explicitly type the memoized value to ensure it's recognized as an array of [Shortcut, () => void] tuples
+  const shortcuts = useMemo<[Shortcut, () => void][]>(
+    () => [[shortcut, act]], // This creates an array of one tuple, ensuring the correct type structure
     [shortcut, act]
   );
-  useGlobalShortcuts([shortCut]);
+
+  useGlobalShortcuts(shortcuts);
 }
