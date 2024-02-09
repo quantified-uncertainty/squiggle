@@ -102,7 +102,8 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     runSimulation,
   } = useSimulatorManager({
     code,
-    setup: { type: "projectFromLinker", linker, sourceId: _sourceId },
+    sourceId: _sourceId,
+    setup: { type: "projectFromLinker", linker },
     environment: settings.environment,
   });
 

@@ -10,18 +10,17 @@ type SetupSettings =
       type: "project";
       project: SqProject;
       continues?: string[];
-      sourceId?: string;
     } // Project for the parent execution. Continues is what other squiggle sources to continue. Default []
   | {
       type: "projectFromLinker";
       linker?: SqLinker;
       continues?: string[];
-      sourceId?: string;
     };
 
 export type SimulatorManagerArgs = {
   code: string;
   setup: SetupSettings;
+  sourceId?: string;
   environment?: Env;
   initialAutorunMode?: boolean;
 };
@@ -40,17 +39,11 @@ export type UseSimulatorManager = {
 // defaultContinues needs to have a stable identity.
 const defaultContinues: string[] = [];
 
-function useSetup(setup: SetupSettings, environment?: Env) {
-  const sourceId = useMemo(() => {
-    if (setup.type === "project" && setup.sourceId) {
-      return setup.sourceId;
-    } else if (setup.type === "projectFromLinker" && setup.sourceId) {
-      return setup.sourceId;
-    } else {
-      // random; https://stackoverflow.com/a/12502559
-      return Math.random().toString(36).slice(2);
-    }
-  }, []); //SourceId should not change.
+function useSetup(setup: SetupSettings, sourceId?: string, environment?: Env) {
+  const _sourceId = useMemo(() => {
+    // random; https://stackoverflow.com/a/12502559
+    return sourceId || Math.random().toString(36).slice(2);
+  }, [sourceId]);
 
   const continues =
     setup.type === "standalone"
@@ -71,7 +64,7 @@ function useSetup(setup: SetupSettings, environment?: Env) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // The project should not change.
 
-  return { sourceId, project, continues };
+  return { sourceId: _sourceId, project, continues };
 }
 
 export function useSimulatorManager(
@@ -83,6 +76,7 @@ export function useSimulatorManager(
 
   const { sourceId, project, continues } = useSetup(
     args.setup,
+    args.sourceId,
     args.environment
   );
 

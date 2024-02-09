@@ -5,7 +5,7 @@ import { clsx } from "clsx";
 import { FC, PropsWithChildren, useCallback, useMemo, useRef } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { CommentIcon, DocumentTextIcon, LinkIcon, TextTooltip } from "@quri/ui";
+import { CodeBracketIcon, CommentIcon, LinkIcon, TextTooltip } from "@quri/ui";
 
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
@@ -26,6 +26,7 @@ import {
 import {
   useMergedSettings,
   useRegisterAsItemViewer,
+  useRootValueSourceId,
   useScrollToEditorPath,
   useToggleCollapsed,
   useViewerContext,
@@ -131,7 +132,8 @@ export const ValueWithContextViewer: FC<Props> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement | null>(null);
-  const { sourceId, onOpenExport } = useProjectContext();
+  const { onOpenExport } = useProjectContext();
+  const sourceId = useRootValueSourceId();
 
   const toggleCollapsed_ = useToggleCollapsed();
 
@@ -252,7 +254,7 @@ export const ValueWithContextViewer: FC<Props> = ({
         )}
       >
         {isRootImport && (
-          <DocumentTextIcon size={12} className="mr-1 text-violet-900" />
+          <CodeBracketIcon size={12} className="mr-1 text-violet-900" />
         )}
         <div
           className={clsx(!taggedName && "font-mono", headerClasses())}
@@ -330,10 +332,10 @@ export const ValueWithContextViewer: FC<Props> = ({
               {exportData && exportData.path.length < 2 && onOpenExport && (
                 <TextTooltip
                   text={
-                    `Go to model ${exportData.sourceId} ` +
+                    `Go to model ${exportData.sourceId}, ` +
                     (!exportData.path.length
                       ? "page"
-                      : "export " + exportData.path.join("/") + " page")
+                      : "export " + exportData.path.join("/"))
                   }
                   placement="bottom"
                   offset={5}
@@ -350,8 +352,8 @@ export const ValueWithContextViewer: FC<Props> = ({
                       className={clsx(
                         "transition cursor-pointer",
                         isRootImport
-                          ? "text-violet-400 hover:!text-violet-900 group-hover:text-violet-500"
-                          : "text-slate-200 hover:!text-slate-900 group-hover:text-slate-400"
+                          ? "text-violet-400 hover:!text-violet-900 group-hover:text-violet-500 group-focus:text-violet-600"
+                          : "text-slate-200 hover:!text-slate-900 group-hover:text-slate-400 group-focus:text-slate-400"
                       )}
                     />
                   </div>
