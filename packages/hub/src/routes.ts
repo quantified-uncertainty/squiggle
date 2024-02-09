@@ -6,16 +6,6 @@ export function modelRoute({ owner, slug }: { owner: string; slug: string }) {
   return `/models/${owner}/${slug}`;
 }
 
-export function userModelRoute({
-  username,
-  slug,
-}: {
-  username: string;
-  slug: string;
-}) {
-  return `/models/${username}/${slug}`;
-}
-
 export function ownerRoute(owner: { __typename: string; slug: string }) {
   switch (owner.__typename) {
     case "User":
