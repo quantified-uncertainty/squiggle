@@ -1,5 +1,5 @@
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { BaseSyntheticEvent, FC, use, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
@@ -34,7 +34,7 @@ import { FormModal } from "@/components/ui/FormModal";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { useMutationForm } from "@/hooks/useMutationForm";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { modelExportRoute, userModelRoute } from "@/routes";
+import { modelExportRoute, modelRoute } from "@/routes";
 import { ImportTooltip } from "@/squiggle/components/ImportTooltip";
 import {
   parseSourceId,
@@ -410,7 +410,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       if (varName) {
         router.push(modelExportRoute({ owner, slug, variableName: varName }));
       } else {
-        router.push(userModelRoute({ username: owner, slug }));
+        router.push(modelRoute({ owner, slug }));
       }
     };
   }
