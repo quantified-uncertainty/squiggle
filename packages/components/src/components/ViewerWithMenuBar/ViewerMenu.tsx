@@ -12,7 +12,7 @@ import {
 } from "@quri/ui";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
-import { ViewerTab } from "../../lib/utility.js";
+import { SelectableViewerTab, ViewerTab } from "../../lib/utility.js";
 
 const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
   title,
@@ -43,12 +43,14 @@ type Props = {
   viewerTab: ViewerTab;
   setViewerTab: (viewerTab: ViewerTab) => void;
   outputResult: SqOutputResult;
+  shownTabs: SelectableViewerTab[];
 };
 
 export const ViewerMenu: FC<Props> = ({
   viewerTab,
   setViewerTab,
   outputResult,
+  shownTabs,
 }) => {
   const hasResult = outputResult.ok && outputResult.value.result.tag !== "Void";
   const variablesCount = outputResult.ok
@@ -61,61 +63,35 @@ export const ViewerMenu: FC<Props> = ({
     <Dropdown
       render={({ close }) => (
         <DropdownMenu>
-          {Boolean(importsCount) && (
-            <DropdownMenuActionItem
-              icon={CodeBracketIcon}
-              title={
-                <MenuItemTitle
-                  title="Imports"
-                  type={importsCount ? `{}${importsCount}` : null}
-                />
+          {shownTabs.map((tab) => {
+            const getType = () => {
+              switch (tab) {
+                case "Imports":
+                  return importsCount ? `{}${importsCount}` : null;
+                case "Variables":
+                  return variablesCount ? `{}${variablesCount}` : null;
+                case "Exports":
+                  return exportsCount ? `{}${exportsCount}` : null;
+                case "Result":
+                  return hasResult ? "" : null;
+                default:
+                  return null;
               }
-              onClick={() => {
-                setViewerTab("Imports");
-                close();
-              }}
-            />
-          )}
-          {Boolean(variablesCount) && (
-            <DropdownMenuActionItem
-              icon={CodeBracketIcon}
-              title={
-                <MenuItemTitle
-                  title="Variables"
-                  type={variablesCount ? `{}${variablesCount}` : null}
+            };
+            return (
+              tab !== "AST" && (
+                <DropdownMenuActionItem
+                  key={tab}
+                  icon={CodeBracketIcon}
+                  title={<MenuItemTitle title={tab} type={getType()} />}
+                  onClick={() => {
+                    setViewerTab(tab);
+                    close();
+                  }}
                 />
-              }
-              onClick={() => {
-                setViewerTab("Variables");
-                close();
-              }}
-            />
-          )}
-          {Boolean(exportsCount) && (
-            <DropdownMenuActionItem
-              icon={CodeBracketIcon}
-              title={
-                <MenuItemTitle
-                  title="Exports"
-                  type={exportsCount ? `{}${exportsCount}` : null}
-                />
-              }
-              onClick={() => {
-                setViewerTab("Exports");
-                close();
-              }}
-            />
-          )}
-          <DropdownMenuActionItem
-            icon={CodeBracketIcon}
-            title={
-              <MenuItemTitle title="Result" type={hasResult ? "" : null} />
-            }
-            onClick={() => {
-              setViewerTab("Result");
-              close();
-            }}
-          />
+              )
+            );
+          })}
           <DropdownMenuHeader>Debugging</DropdownMenuHeader>
           <DropdownMenuActionItem
             icon={CodeBracketIcon}

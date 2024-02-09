@@ -156,6 +156,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         editor={leftPanelRef.current?.getEditor() ?? undefined}
         playgroundSettings={settings}
         ref={rightPanelRef}
+        useGlobalShortcuts={true}
         xPadding={2}
         randomizeSeed={() => {
           randomizeSeed();
