@@ -8,7 +8,7 @@ import {
   highlightActiveLineGutter,
   lineNumbers,
 } from "@codemirror/view";
-import { useMemo } from "react";
+import { clsx } from "clsx";
 
 import { useReactiveExtension } from "./codemirrorHooks.js";
 import { reactAsDom } from "./utils.js";
@@ -32,14 +32,23 @@ class FocusableMarker extends GutterMarker {
   override toDOM() {
     return reactAsDom(
       <div
-        className="pr-1 pl-0.5 cursor-pointer group gutterMarker"
+        className="pr-1 pl-0.5 cursor-pointer group/marker"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           this.onClickLine();
         }}
       >
-        <div className="rounded-sm w-[3px] h-4 br-1 mt-[1px] bg-violet-50 group-hover:bg-violet-200 transition duration-75 gutterMarker-inner" />
+        <div
+          className={clsx(
+            // initial color, specialized for active lines
+            "bg-violet-50 [.cm-activeLineGutter_&]:bg-white",
+            // highlight all markers on gutter hover; highlight the hovered markers even more
+            "group-hover/gutter:bg-violet-200 group-hover/marker:!bg-violet-400",
+            "rounded-sm w-[3px] h-4 br-1 mt-[1px]",
+            "transition duration-75"
+          )}
+        />
       </div>
     ).dom;
   }
@@ -49,41 +58,34 @@ export function useShowGutterExtension(
   view: EditorView | undefined,
   gutterProps: EditorGutterState
 ) {
-  const markers = useMemo(() => {
-    if (gutterProps.type === "hidden") return [];
-    const builder = new RangeSetBuilder<GutterMarker>();
-    if (view == null) return builder.finish();
-    for (const i of gutterProps.activeLineNumbers.sort((a, b) => a - b)) {
-      if (i >= 0 && i < view?.state.doc.lines) {
-        const line = view.state.doc.line(i + 1);
-        builder.add(
-          line.from,
-          line.to,
-          new FocusableMarker(() => gutterProps.onFocusByEditorLine(i + 1))
-        );
-      }
-    }
-    return builder.finish();
-  }, [view, gutterProps]);
-
   return useReactiveExtension(
     view,
     () => {
-      if (!view) return [];
-      return gutterProps.type === "shown"
-        ? [
-            highlightActiveLine(),
-            highlightActiveLineGutter(),
-            gutter({
-              class: "cm-lineNumberDot",
-              markers: () => markers,
-              initialSpacer: null,
-              updateSpacer: (spacer, _) => spacer,
-            }),
-            lineNumbers(),
-            foldGutter(),
-          ]
-        : [];
+      if (!view || gutterProps.type === "hidden") return [];
+
+      const builder = new RangeSetBuilder<GutterMarker>();
+      for (const i of gutterProps.activeLineNumbers.sort((a, b) => a - b)) {
+        if (i >= 0 && i < view?.state.doc.lines) {
+          const line = view.state.doc.line(i + 1);
+          builder.add(
+            line.from,
+            line.to,
+            new FocusableMarker(() => gutterProps.onFocusByEditorLine(i + 1))
+          );
+        }
+      }
+      const markers = builder.finish();
+
+      return [
+        highlightActiveLine(),
+        highlightActiveLineGutter(),
+        gutter({
+          class: "min-w-[9px] group/gutter",
+          markers: () => markers,
+        }),
+        lineNumbers(),
+        foldGutter(),
+      ];
     },
     [gutterProps]
   );
