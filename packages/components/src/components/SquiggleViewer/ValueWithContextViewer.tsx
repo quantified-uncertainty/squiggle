@@ -332,17 +332,17 @@ export const ValueWithContextViewer: FC<Props> = ({
               {exportData && exportData.path.length < 2 && onOpenExport && (
                 <TextTooltip
                   text={
-                    `Go to model ${exportData.sourceId}, ` +
+                    `Go to model ${exportData.sourceId}` +
                     (!exportData.path.length
-                      ? "page"
-                      : "export " + exportData.path.join("/"))
+                      ? " page"
+                      : ", export " + exportData.path.join("/"))
                   }
                   placement="bottom"
                   offset={5}
                 >
                   <div>
                     <LinkIcon
-                      size={14}
+                      size={16}
                       onClick={() =>
                         onOpenExport(
                           exportData.sourceId,
