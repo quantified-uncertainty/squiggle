@@ -5,11 +5,12 @@ import { clsx } from "clsx";
 import { FC, PropsWithChildren, useCallback, useMemo, useRef } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { CommentIcon, TextTooltip } from "@quri/ui";
+import { CodeBracketIcon, CommentIcon, LinkIcon, TextTooltip } from "@quri/ui";
 
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
+import { useProjectContext } from "../ProjectProvider.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { useZoomedInSqValueKeyEvent } from "./keyboardNav/zoomedInSqValue.js";
@@ -25,6 +26,7 @@ import {
 import {
   useMergedSettings,
   useRegisterAsItemViewer,
+  useRootValueSourceId,
   useScrollToEditorPath,
   useToggleCollapsed,
   useViewerContext,
@@ -130,6 +132,8 @@ export const ValueWithContextViewer: FC<Props> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement | null>(null);
+  const { onOpenExport } = useProjectContext();
+  const sourceId = useRootValueSourceId();
 
   const toggleCollapsed_ = useToggleCollapsed();
 
@@ -165,6 +169,13 @@ export const ValueWithContextViewer: FC<Props> = ({
 
   const isRoot = path.isRoot();
   const taggedName = value.tags.name();
+
+  const exportData = value.tags.exportData();
+
+  const isRootImport =
+    exportData &&
+    exportData.sourceId !== sourceId &&
+    exportData.path.length === 0;
 
   // root header is always hidden (unless forced, but we probably won't need it)
   const headerVisibility = props.header ?? (isRoot ? "hide" : "show");
@@ -203,12 +214,15 @@ export const ValueWithContextViewer: FC<Props> = ({
     const name = pathToShortName(path);
 
     // We want to show colons after the keys, for dicts/arrays.
-    const showColon = headerVisibility !== "large" && path.edges.length > 1;
+    const showColon =
+      headerVisibility !== "large" && path.edges.length > 1 && !isRootImport;
 
     const getHeaderColor = () => {
       let color = "text-orange-900";
       const parentTag = parentValue?.tag;
-      if (parentTag === "Array" && !taggedName) {
+      if (isRootImport) {
+        color = "text-violet-900";
+      } else if (parentTag === "Array" && !taggedName) {
         color = "text-stone-400";
       } else if (path.edges.length > 1) {
         color = "text-teal-700";
@@ -233,14 +247,22 @@ export const ValueWithContextViewer: FC<Props> = ({
     };
 
     return (
-      <div className={clsx("leading-3", showColon || "mr-3")}>
-        <span
+      <div
+        className={clsx(
+          "leading-3 flex flex-row items-center",
+          showColon || "mr-3"
+        )}
+      >
+        {isRootImport && (
+          <CodeBracketIcon size={12} className="mr-1 text-violet-900" />
+        )}
+        <div
           className={clsx(!taggedName && "font-mono", headerClasses())}
           onClick={focus}
         >
-          {taggedName || name}
-        </span>
-        {showColon && <span className="text-gray-400 font-mono">:</span>}
+          {(isRootImport && exportData?.sourceId) || taggedName || name}
+        </div>
+        {showColon && <div className="text-gray-400 font-mono">:</div>}
       </div>
     );
   };
@@ -305,11 +327,39 @@ export const ValueWithContextViewer: FC<Props> = ({
               )}
               {!isOpen && <CommentIconForValue value={value} />}
             </div>
-            {enableDropdownMenu && (
-              <div className="inline-flex space-x-1 items-center">
-                <SquiggleValueMenu value={value} />
-              </div>
-            )}
+            <div className="inline-flex space-x-2 items-center">
+              {enableDropdownMenu && <SquiggleValueMenu value={value} />}
+              {exportData && exportData.path.length < 2 && onOpenExport && (
+                <TextTooltip
+                  text={
+                    `Go to model ${exportData.sourceId}` +
+                    (!exportData.path.length
+                      ? " page"
+                      : ", export " + exportData.path.join("/"))
+                  }
+                  placement="bottom"
+                  offset={5}
+                >
+                  <div>
+                    <LinkIcon
+                      size={16}
+                      onClick={() =>
+                        onOpenExport(
+                          exportData.sourceId,
+                          exportData.path[0] || undefined
+                        )
+                      }
+                      className={clsx(
+                        "transition cursor-pointer",
+                        isRootImport
+                          ? "text-violet-400 hover:!text-violet-900 group-hover:text-violet-500 group-focus:text-violet-600"
+                          : "text-slate-200 hover:!text-slate-900 group-hover:text-slate-400 group-focus:text-slate-400"
+                      )}
+                    />
+                  </div>
+                </TextTooltip>
+              )}
+            </div>
           </header>
         )}
         {isOpen && (

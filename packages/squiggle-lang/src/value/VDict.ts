@@ -84,3 +84,4 @@ export class VDict extends BaseValue implements Indexable {
 }
 
 export const vDict = (v: ValueMap) => new VDict(v);
+export const vDictFromArray = (v: [string, Value][]) => vDict(ImmutableMap(v));

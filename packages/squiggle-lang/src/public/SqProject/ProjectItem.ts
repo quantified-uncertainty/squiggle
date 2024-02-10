@@ -3,10 +3,9 @@ import { ICompileError, IRuntimeError } from "../../errors/IError.js";
 import { compileAst } from "../../expression/compile.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { evaluate, ReducerFn } from "../../reducer/index.js";
-import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
-import { Value, vArray, vString } from "../../value/index.js";
+import { Value } from "../../value/index.js";
 import { vDict, VDict } from "../../value/VDict.js";
 import { SqCompileError, SqError, SqRuntimeError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
@@ -243,12 +242,10 @@ export class ProjectItem {
           let _value = value;
           if (exportNames.has(key)) {
             _value = value.mergeTags({
-              exportData: vDict(
-                ImmutableMap<string, Value>([
-                  ["sourceId", vString(this.sourceId)],
-                  ["path", vArray([vString(key)])],
-                ])
-              ),
+              exportData: {
+                sourceId: this.sourceId,
+                path: [key],
+              },
             });
           }
           return [key, _value];
@@ -260,12 +257,10 @@ export class ProjectItem {
         result,
         bindings: vDict(bindings),
         exports: vDict(exports).mergeTags({
-          exportData: vDict(
-            ImmutableMap<string, Value>([
-              ["sourceId", vString(this.sourceId)],
-              ["path", vArray([])],
-            ])
-          ),
+          exportData: {
+            sourceId: this.sourceId,
+            path: [],
+          },
         }),
         externals: externals,
       });

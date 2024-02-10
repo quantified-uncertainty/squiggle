@@ -1,7 +1,11 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
 import { isSimulating, Simulation } from "../../lib/hooks/useSimulator.js";
-import { defaultViewerTab, ViewerTab } from "../../lib/utility.js";
+import {
+  defaultViewerTab,
+  ViewerTab,
+  viewerTabsToShow,
+} from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { findValuePathByLine } from "../SquiggleViewer/utils.js";
@@ -9,6 +13,7 @@ import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
 import { RandomizeSeedButton } from "./RandomizeSeedButton.js";
 import { SimulatingIndicator } from "./SimulatingIndicator.js";
+import { useViewerTabShortcuts } from "./useViewerTabShortcuts.js";
 import { ViewerBody } from "./ViewerBody.js";
 import { ViewerMenu } from "./ViewerMenu.js";
 
@@ -18,6 +23,7 @@ type Props = {
   playgroundSettings: PartialPlaygroundSettings;
   showMenu?: boolean;
   defaultTab?: ViewerTab;
+  useGlobalShortcuts?: boolean;
   randomizeSeed: (() => void) | undefined;
   xPadding?: number;
 };
@@ -36,6 +42,7 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
       showMenu = true,
       editor,
       defaultTab,
+      useGlobalShortcuts: enableGlobalShortcuts = false,
       xPadding = 2,
     },
     viewerWithMenuBarRef
@@ -47,6 +54,14 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
     const viewerRef = useRef<SquiggleViewerHandle>(null);
     const _isSimulating = isSimulating(simulation);
     const { output } = simulation;
+    const shownTabs = viewerTabsToShow(simulation.output);
+
+    useViewerTabShortcuts({
+      enableGlobalShortcuts,
+      viewerTab,
+      setViewerTab,
+      shownTabs,
+    });
 
     useImperativeHandle(viewerWithMenuBarRef, () => ({
       squiggleViewerHandle: viewerRef.current,
@@ -70,6 +85,7 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
               viewerTab={viewerTab}
               setViewerTab={setViewerTab}
               outputResult={output}
+              shownTabs={shownTabs}
             />
           ) : (
             <div />
