@@ -3,7 +3,6 @@ import { LocationRange } from "peggy";
 import { Err, fmap, mergeMany, Ok, result } from "../utility/result.js";
 import { Value } from "./index.js";
 import { type VBool } from "./VBool.js";
-import { VDict } from "./VDict.js";
 import { type VString } from "./VString.js";
 
 // Note: this file can't call any `vType` constructors; it would cause a circular dependency because of `BaseValue` -> `ValueTags`.
@@ -17,7 +16,7 @@ export type ValueTagsType = {
   dateFormat?: VString; // can be set on dates
   hidden?: VBool;
   notebook?: VBool; // can be set on arrays
-  exportData?: VDict; // should be { sourceId: String, path: List(String) }
+  exportData?: { sourceId: string; path: string[] };
   startOpenState?: VString;
   location?: LocationRange;
 };
@@ -74,7 +73,23 @@ export class ValueTags {
 
   toString(): string {
     return Object.entries(this.value)
-      .map(([key, value]) => `${key}: ${value?.toString()}`)
+      .map(([key, value]) => {
+        if (
+          value &&
+          typeof value.toString === "function" &&
+          value.constructor.name !== "Object"
+        ) {
+          return `${key}: ${value.toString()}`;
+        }
+        // Special handling for objects to prevent "[object Object]" output
+        else if (typeof value === "object" && value !== null) {
+          // See this for the regex: https://stackoverflow.com/questions/11233498/json-stringify-without-quotes-on-properties
+          return `${key}: ${JSON.stringify(value).replace(/"([^"]+)":/g, "$1:")}`;
+        } else {
+          // Fallback for simple types
+          return `${key}: ${value}`;
+        }
+      })
       .join(", ");
   }
 

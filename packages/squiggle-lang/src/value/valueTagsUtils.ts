@@ -1,9 +1,9 @@
 import { Location, LocationRange } from "peggy";
 
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { Value, vNumber, vString } from "./index.js";
+import { Value, vArray, vNumber, vString } from "./index.js";
 import { ValueTags } from "./valueTags.js";
-import { vDict, type VDict } from "./VDict.js";
+import { vDict, type VDict, vDictFromArray } from "./VDict.js";
 
 // There are several value tags functions we can't add to ValueTags because Value is dependent on ValueTags, and that would create a circular dependency.
 
@@ -25,6 +25,16 @@ function locationRangeToValue(locationRange: LocationRange) {
     items = [["source", vString(locationRange.source)], ...items];
   }
   return vDict(ImmutableMap(items));
+}
+
+export function exportDataToValue(exportData: {
+  sourceId: string;
+  path: string[];
+}): VDict {
+  return vDictFromArray([
+    ["sourceId", vString(exportData.sourceId)],
+    ["path", vArray(exportData.path.map(vString))],
+  ]);
 }
 
 export const toList = (tags: ValueTags): [string, Value][] => {
@@ -53,7 +63,7 @@ export const toList = (tags: ValueTags): [string, Value][] => {
   }
   const _exportData = tags.exportData();
   if (_exportData !== undefined) {
-    result.push(["exportData", _exportData]);
+    result.push(["exportData", exportDataToValue(_exportData)]);
   }
 
   if (value.startOpenState !== undefined) {
@@ -79,4 +89,9 @@ export const toString = (tags: ValueTags): string => {
 export const location = (tags: ValueTags): VDict | undefined => {
   const _location = tags.location();
   return _location ? locationRangeToValue(_location) : undefined;
+};
+
+export const exportData = (tags: ValueTags): VDict | undefined => {
+  const _exportData = tags.exportData();
+  return _exportData ? exportDataToValue(_exportData) : undefined;
 };

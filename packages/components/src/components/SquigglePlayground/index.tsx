@@ -10,6 +10,7 @@ import {
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
+import { ProjectContext } from "../ProjectProvider.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 import { ViewerWithMenuBar } from "../ViewerWithMenuBar/index.js";
 import {
@@ -40,6 +41,7 @@ export type SquigglePlaygroundProps = {
   sourceId?: string;
   linker?: SqLinker;
   onCodeChange?(code: string): void;
+  onOpenExport?: (sourceId: string, varName?: string) => void;
   onExportsChange?(exports: ModelExport[]): void;
   /* When settings change */
   onSettingsChange?(settings: PlaygroundSettings): void;
@@ -67,6 +69,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 ) => {
   const {
     linker,
+    sourceId: _sourceId,
     onExportsChange,
     onSettingsChange,
     renderExtraControls,
@@ -93,12 +96,13 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   const {
     project,
     simulation,
-    sourceId,
     autorunMode,
+    sourceId,
     setAutorunMode,
     runSimulation,
   } = useSimulatorManager({
     code,
+    sourceId: _sourceId,
     setup: { type: "projectFromLinker", linker },
     environment: settings.environment,
   });
@@ -150,21 +154,25 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 
   const renderRight = () =>
     simulation ? (
-      <ViewerWithMenuBar
-        simulation={simulation}
-        // FIXME - this will cause viewer to be rendered twice on initial render
-        editor={leftPanelRef.current?.getEditor() ?? undefined}
-        playgroundSettings={settings}
-        ref={rightPanelRef}
-        useGlobalShortcuts={true}
-        xPadding={2}
-        randomizeSeed={() => {
-          randomizeSeed();
-          if (!autorunMode) {
-            runSimulation();
-          }
-        }}
-      />
+      <ProjectContext.Provider
+        value={{ sourceId, onOpenExport: props.onOpenExport }}
+      >
+        <ViewerWithMenuBar
+          simulation={simulation}
+          // FIXME - this will cause viewer to be rendered twice on initial render
+          editor={leftPanelRef.current?.getEditor() ?? undefined}
+          playgroundSettings={settings}
+          ref={rightPanelRef}
+          useGlobalShortcuts={true}
+          xPadding={2}
+          randomizeSeed={() => {
+            randomizeSeed();
+            if (!autorunMode) {
+              runSimulation();
+            }
+          }}
+        />
+      </ProjectContext.Provider>
     ) : (
       <div className="grid place-items-center h-full">
         <RefreshIcon className="animate-spin text-slate-400" size={24} />

@@ -172,6 +172,7 @@ export x=1`;
         return `
           import "hub:source1" as s1
           export y=2
+          export foo = {a: s1}
         `;
       case "source3":
         return `
@@ -188,6 +189,9 @@ export const ManyTypes: Story = {
   name: "Many types",
   args: {
     linker: linker,
+    onOpenExport: (sourceId, varName) => {
+      console.log("Clicked Export with params", sourceId, varName);
+    },
     defaultCode: `import "hub:source1" as s1  
 import "source2" as s2
 

@@ -6,13 +6,21 @@ import { isSimulating, Simulation, useSimulator } from "./useSimulator.js";
 
 type SetupSettings =
   | { type: "standalone" } // For standalone execution
-  | { type: "project"; project: SqProject; continues?: string[] } // Project for the parent execution. Continues is what other squiggle sources to continue. Default []
-  | { type: "projectFromLinker"; linker?: SqLinker; continues?: string[] };
+  | {
+      type: "project";
+      project: SqProject;
+      continues?: string[];
+    } // Project for the parent execution. Continues is what other squiggle sources to continue. Default []
+  | {
+      type: "projectFromLinker";
+      linker?: SqLinker;
+      continues?: string[];
+    };
 
 export type SimulatorManagerArgs = {
   code: string;
-  sourceId?: string;
   setup: SetupSettings;
+  sourceId?: string;
   environment?: Env;
   initialAutorunMode?: boolean;
 };
@@ -31,14 +39,10 @@ export type UseSimulatorManager = {
 // defaultContinues needs to have a stable identity.
 const defaultContinues: string[] = [];
 
-function useSetup(
-  sourceId: string | undefined,
-  setup: SetupSettings,
-  environment?: Env
-) {
+function useSetup(setup: SetupSettings, sourceId?: string, environment?: Env) {
   const _sourceId = useMemo(() => {
     // random; https://stackoverflow.com/a/12502559
-    return sourceId ?? Math.random().toString(36).slice(2);
+    return sourceId || Math.random().toString(36).slice(2);
   }, [sourceId]);
 
   const continues =
@@ -71,8 +75,8 @@ export function useSimulatorManager(
   );
 
   const { sourceId, project, continues } = useSetup(
-    args.sourceId,
     args.setup,
+    args.sourceId,
     args.environment
   );
 
