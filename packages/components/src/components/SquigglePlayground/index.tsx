@@ -11,7 +11,6 @@ import {
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import { ProjectContext } from "../ProjectProvider.js";
-import { getActiveLineNumbers } from "../SquiggleViewer/utils.js";
 import {
   ViewerWithMenuBar,
   ViewerWithMenuBarHandle,
@@ -135,7 +134,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   );
 
   const renderLeft = () => {
-    const lineNumbers = getActiveLineNumbers(simulation?.output);
     return (
       <LeftPlaygroundPanel
         project={project}
@@ -147,19 +145,13 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         renderExtraDropdownItems={renderExtraDropdownItems}
         renderExtraModal={renderExtraModal}
         renderImportTooltip={renderImportTooltip}
-        onFocusByPath={(path) => {
-          rightPanelRef.current?.squiggleViewerHandle?.focusByPath(path);
-        }}
-        onFocusByEditorLine={(line) =>
-          rightPanelRef.current?.focusByEditorLine(line)
-        }
+        onFocusByPath={(path) => rightPanelRef.current?.focusByPath(path)}
         ref={leftPanelRef}
         code={code}
         setCode={setCode}
         autorunMode={autorunMode}
         setAutorunMode={setAutorunMode}
         runSimulation={runSimulation}
-        activeLineNumbers={lineNumbers}
       />
     );
   };

@@ -1,5 +1,7 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
+import { SqValuePath } from "@quri/squiggle-lang";
+
 import { isSimulating, Simulation } from "../../lib/hooks/useSimulator.js";
 import {
   defaultViewerTab,
@@ -8,7 +10,6 @@ import {
 } from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
-import { findValuePathByLine } from "../SquiggleViewer/utils.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
 import { RandomizeSeedButton } from "./RandomizeSeedButton.js";
@@ -29,8 +30,7 @@ type Props = {
 };
 
 export type ViewerWithMenuBarHandle = {
-  squiggleViewerHandle: SquiggleViewerHandle | null;
-  focusByEditorLine: (line: number) => void;
+  focusByPath: (path: SqValuePath) => void;
 };
 /* Wrapper for SquiggleViewer that shows the rendering stats and isSimulating state. */
 export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
@@ -64,14 +64,17 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
     });
 
     useImperativeHandle(viewerWithMenuBarRef, () => ({
-      squiggleViewerHandle: viewerRef.current,
-      focusByEditorLine: (line: number) => {
-        const lineValue = findValuePathByLine(line, simulation.output);
-        const ref = viewerRef.current;
-        if (lineValue && ref) {
-          setViewerTab(lineValue.type);
+      focusByPath: (path) => {
+        const viewer = viewerRef.current;
+        if (viewer) {
+          if (path.root === "bindings") {
+            setViewerTab("Variables");
+          } else if (path.root === "result") {
+            setViewerTab("Result");
+          }
+
           setTimeout(() => {
-            ref.focusByPath(lineValue.path);
+            viewer.focusByPath(path);
           }, 0);
         }
       },
@@ -88,8 +91,9 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
               shownTabs={shownTabs}
             />
           ) : (
+            // Important not to be null, so that it stays on the right.
             <div />
-          ) // Important not to be null, so that it stays on the right.
+          )
         }
         indicator={<SimulatingIndicator simulation={simulation} />}
         changeSeedAndRunButton={

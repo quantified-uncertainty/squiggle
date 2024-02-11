@@ -1,8 +1,4 @@
-import includes from "lodash/includes.js";
-import uniq from "lodash/uniq.js";
-import uniqBy from "lodash/uniqBy.js";
-
-import { ASTNode, SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
@@ -140,72 +136,4 @@ export function findValuePathByLine(
   if (line === resultLine && result.context?.path) {
     return { type: "Result", path: result.context.path };
   }
-}
-
-function lastUniqBy<A, B>(arr: A[], fn: (a: A) => B): A[] {
-  return uniqBy(arr.reverse(), fn).reverse();
-}
-
-function visibleAstChildren(node: ASTNode): ASTNode[] {
-  switch (node.type) {
-    case "Dict":
-      // Assuming 'elements' is an array of { key: ASTNode, value: ASTNode | string }
-      // and we only want to include ASTNode values
-      return node.elements.flatMap((e) =>
-        typeof e.value === "string" ? [] : [e.value]
-      );
-    case "Array":
-      return node.elements;
-    case "Block": {
-      const lastNode = node.statements.at(-1);
-      return lastNode ? [lastNode] : [];
-    }
-    case "LetStatement":
-      return [node.value];
-    case "DecoratedStatement":
-      return node.decorator.type === "Decorator" &&
-        node.decorator.name.value !== "hide"
-        ? [node.statement]
-        : [];
-    case "Program": {
-      return lastUniqBy(node.statements, (s) => {
-        switch (s.type) {
-          case "LetStatement":
-            return s.variable.value;
-          case "Identifier":
-            return s.value;
-          default:
-            return s;
-        }
-      });
-    }
-    default:
-      return [];
-  }
-}
-
-function visibleAstLeaves(node: ASTNode): ASTNode[] {
-  return [node, ...visibleAstChildren(node).flatMap(visibleAstLeaves)];
-}
-
-//This doesn't get imports, because their contexts are wrong.
-export function getActiveLineNumbers(sqResult?: SqOutputResult): number[] {
-  if (!sqResult?.ok) {
-    return [];
-  }
-  const ast = sqResult.value.bindings.context?.ast;
-  if (!ast) {
-    return [];
-  }
-  const values = uniq(
-    visibleAstLeaves(ast)
-      .filter((p) =>
-        includes(
-          ["LetStatement", "DefunStatement", "Block", "Dict", "Identifier"],
-          p.type
-        )
-      )
-      .map((s) => s.location.start.line - 1)
-  );
-  return values;
 }
