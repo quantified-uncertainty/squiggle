@@ -6,19 +6,12 @@ import {
   lineNumbers,
 } from "@codemirror/view";
 
-import { SqValuePath } from "@quri/squiggle-lang";
-
 import { useReactiveExtension } from "./codemirrorHooks.js";
-import { getFocusGutterExtension } from "./getFocusGutterExtension.js";
+import { focusGutterExtension } from "./focusGutterExtension.js";
 
 export function useGutterExtension(
   view: EditorView | undefined,
-  showGutter: boolean,
-  {
-    onFocusByPath,
-  }: {
-    onFocusByPath?: (path: SqValuePath) => void;
-  }
+  showGutter: boolean
 ) {
   return useReactiveExtension(
     view,
@@ -28,11 +21,11 @@ export function useGutterExtension(
       return [
         highlightActiveLine(),
         highlightActiveLineGutter(),
-        onFocusByPath ? getFocusGutterExtension(view, onFocusByPath) : [],
+        focusGutterExtension(),
         lineNumbers(),
         foldGutter(),
       ];
     },
-    [showGutter, onFocusByPath]
+    [showGutter]
   );
 }

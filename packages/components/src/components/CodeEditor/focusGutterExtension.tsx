@@ -4,7 +4,7 @@ import { clsx } from "clsx";
 
 import { ASTNode, SqValuePath, SqValuePathEdge } from "@quri/squiggle-lang";
 
-import { simulationField } from "./fields.js";
+import { onFocusByPathField, simulationField } from "./fields.js";
 import { reactAsDom } from "./utils.js";
 
 type MarkerProps = {
@@ -104,19 +104,23 @@ function visiblePathsWithUniqueLines(node: ASTNode): MarkerProps[] {
 
 // This doesn't get imports, because their contexts are wrong.
 export function getMarkers(
-  view: EditorView,
-  onFocusByPath: (path: SqValuePath) => void
-): RangeSet<GutterMarker> {
+  view: EditorView
+): RangeSet<GutterMarker> | undefined {
+  const onFocusByPath = view.state.field(onFocusByPathField.field);
+  if (!onFocusByPath) {
+    return;
+  }
   const simulation = view.state.field(simulationField.field);
+
   const sqResult = simulation?.output;
   if (!sqResult?.ok) {
-    return RangeSet.of([]);
+    return;
   }
 
   // TODO - use AST for the current code state, and `sqResult` only for filtering
   const ast = sqResult.value.bindings.context?.ast;
   if (!ast) {
-    return RangeSet.of([]);
+    return;
   }
 
   const props: MarkerProps[] = visiblePathsWithUniqueLines(ast);
@@ -168,12 +172,9 @@ class FocusableMarker extends GutterMarker {
   }
 }
 
-export function getFocusGutterExtension(
-  view: EditorView,
-  onFocusByPath: (path: SqValuePath) => void
-) {
+export function focusGutterExtension() {
   return gutter({
     class: "min-w-[9px] group/gutter",
-    markers: () => getMarkers(view, onFocusByPath),
+    markers: (view) => getMarkers(view) ?? RangeSet.of([]),
   });
 }

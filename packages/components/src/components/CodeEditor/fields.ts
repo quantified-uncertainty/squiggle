@@ -2,6 +2,8 @@ import { StateEffect, StateEffectType, StateField } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { useEffect } from "react";
 
+import { SqValuePath } from "@quri/squiggle-lang";
+
 import { Simulation } from "../../lib/hooks/useSimulator.js";
 
 // Helper class for turning any React prop into a CodeMirror field.
@@ -24,7 +26,11 @@ class ReactiveStateField<Value> {
     });
   }
 
-  static define<Value>(initialValue: Value) {
+  // `Value` can't include undefined; see
+  // https://codemirror.net/docs/ref/#state.StateEffect^define (We don't use
+  // position mapping so maybe it's not important right now, but might be useful
+  // in the future somehow.)
+  static define<Value>(initialValue: Value extends undefined ? never : Value) {
     return new ReactiveStateField<Value>(initialValue);
   }
 
@@ -38,6 +44,10 @@ class ReactiveStateField<Value> {
   }
 }
 
-export const simulationField = ReactiveStateField.define<
-  Simulation | undefined
->(undefined);
+export const simulationField = ReactiveStateField.define<Simulation | null>(
+  null
+);
+
+export const onFocusByPathField = ReactiveStateField.define<
+  ((path: SqValuePath) => void) | null
+>(null);
