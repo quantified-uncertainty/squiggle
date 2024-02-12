@@ -20,7 +20,8 @@ export type CodeEditorProps = {
   fontSize?: number;
   showGutter?: boolean;
   project: SqProject;
-  // useful when we want to render values that were computed by some external component (e.g. the playground)
+  // `simulation` is useful when we want to render values that were computed by some external component (e.g. the playground).
+  // Note that this can come from some previous version of the code; code execution is async.
   simulation?: Simulation;
   renderImportTooltip?: (params: {
     project: SqProject;
@@ -37,7 +38,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   function CodeEditor(props, ref) {
     const { view, ref: editorRef } = useSquiggleEditorView(props);
 
-    const scrollTo = (position: number, focus) => {
+    const scrollTo = (position: number, focus: boolean) => {
       if (!view) return;
       view.dispatch({
         selection: { anchor: position },

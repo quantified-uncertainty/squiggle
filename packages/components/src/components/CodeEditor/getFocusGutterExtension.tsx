@@ -4,7 +4,7 @@ import { clsx } from "clsx";
 
 import { ASTNode, SqValuePath, SqValuePathEdge } from "@quri/squiggle-lang";
 
-import { Simulation } from "../../lib/hooks/useSimulator.js";
+import { simulationField } from "./fields.js";
 import { reactAsDom } from "./utils.js";
 
 type MarkerProps = {
@@ -105,9 +105,9 @@ function visiblePathsWithUniqueLines(node: ASTNode): MarkerProps[] {
 // This doesn't get imports, because their contexts are wrong.
 export function getMarkers(
   view: EditorView,
-  simulation: Simulation | undefined,
   onFocusByPath: (path: SqValuePath) => void
 ): RangeSet<GutterMarker> {
+  const simulation = view.state.field(simulationField.field);
   const sqResult = simulation?.output;
   if (!sqResult?.ok) {
     return RangeSet.of([]);
@@ -170,11 +170,10 @@ class FocusableMarker extends GutterMarker {
 
 export function getFocusGutterExtension(
   view: EditorView,
-  simulation: Simulation | undefined,
   onFocusByPath: (path: SqValuePath) => void
 ) {
   return gutter({
     class: "min-w-[9px] group/gutter",
-    markers: () => getMarkers(view, simulation, onFocusByPath),
+    markers: () => getMarkers(view, onFocusByPath),
   });
 }

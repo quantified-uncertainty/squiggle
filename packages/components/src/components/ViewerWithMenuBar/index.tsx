@@ -1,4 +1,10 @@
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import { SqValuePath } from "@quri/squiggle-lang";
 
@@ -63,21 +69,23 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
       shownTabs,
     });
 
-    useImperativeHandle(viewerWithMenuBarRef, () => ({
-      focusByPath: (path) => {
-        const viewer = viewerRef.current;
-        if (viewer) {
-          if (path.root === "bindings") {
-            setViewerTab("Variables");
-          } else if (path.root === "result") {
-            setViewerTab("Result");
-          }
-
-          setTimeout(() => {
-            viewer.focusByPath(path);
-          }, 0);
+    const focusByPath = useCallback((path: SqValuePath) => {
+      const viewer = viewerRef.current;
+      if (viewer) {
+        if (path.root === "bindings") {
+          setViewerTab("Variables");
+        } else if (path.root === "result") {
+          setViewerTab("Result");
         }
-      },
+
+        setTimeout(() => {
+          viewer.focusByPath(path);
+        }, 0);
+      }
+    }, []);
+
+    useImperativeHandle(viewerWithMenuBarRef, () => ({
+      focusByPath,
     }));
 
     return (

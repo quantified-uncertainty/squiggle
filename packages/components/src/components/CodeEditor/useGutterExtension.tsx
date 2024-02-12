@@ -8,7 +8,6 @@ import {
 
 import { SqValuePath } from "@quri/squiggle-lang";
 
-import { Simulation } from "../../lib/hooks/useSimulator.js";
 import { useReactiveExtension } from "./codemirrorHooks.js";
 import { getFocusGutterExtension } from "./getFocusGutterExtension.js";
 
@@ -17,10 +16,8 @@ export function useGutterExtension(
   showGutter: boolean,
   {
     onFocusByPath,
-    simulation,
   }: {
     onFocusByPath?: (path: SqValuePath) => void;
-    simulation?: Simulation;
   }
 ) {
   return useReactiveExtension(
@@ -31,13 +28,11 @@ export function useGutterExtension(
       return [
         highlightActiveLine(),
         highlightActiveLineGutter(),
-        onFocusByPath
-          ? getFocusGutterExtension(view, simulation, onFocusByPath)
-          : [],
+        onFocusByPath ? getFocusGutterExtension(view, onFocusByPath) : [],
         lineNumbers(),
         foldGutter(),
       ];
     },
-    [showGutter, simulation, onFocusByPath]
+    [showGutter, onFocusByPath]
   );
 }

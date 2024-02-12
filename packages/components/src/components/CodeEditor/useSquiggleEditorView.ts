@@ -31,6 +31,7 @@ import {
   useCodemirrorView,
   useConfigureCodemirrorView,
 } from "./codemirrorHooks.js";
+import { simulationField } from "./fields.js";
 import { CodeEditorProps } from "./index.js";
 import { lightThemeHighlightingStyle } from "./languageSupport/highlightingStyle.js";
 import { useErrorsExtension } from "./useErrorsExtension.js";
@@ -53,6 +54,9 @@ export function useSquiggleEditorExtensions(
    * We still have to run all `use.*Extension` hooks every time, because they set up `useEffect` hooks.
    * After the initial render, the extensions are re-configured through `useEffect` on props changes.
    */
+
+  simulationField.use(view, params.simulation);
+  const fieldExtensions = [simulationField.field];
 
   const builtinExtensions = useMemo(
     () => [
@@ -90,10 +94,7 @@ export function useSquiggleEditorExtensions(
   const showGutterExtension = useGutterExtension(
     view,
     params.showGutter ?? false,
-    {
-      onFocusByPath: params.onFocusByPath,
-      simulation: params.simulation,
-    }
+    { onFocusByPath: params.onFocusByPath }
   );
   const lineWrappingExtension = useLineWrappingExtension(
     view,
@@ -138,6 +139,7 @@ export function useSquiggleEditorExtensions(
   return [
     highPrioritySquiggleExtensions,
     builtinExtensions,
+    fieldExtensions,
     squiggleExtensions,
   ];
 }
