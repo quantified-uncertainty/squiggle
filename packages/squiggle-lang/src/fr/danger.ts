@@ -22,7 +22,7 @@ import {
   makeOneArgSamplesetDist,
   makeTwoArgsSamplesetDist,
 } from "../library/registry/helpers.js";
-import { Interpreter } from "../reducer/interpreter.js";
+import { Interpreter } from "../reducer/Interpreter.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
 import {

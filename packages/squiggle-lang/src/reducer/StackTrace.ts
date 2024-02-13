@@ -1,6 +1,6 @@
 import { LocationRange } from "peggy";
 
-import { FrameStack } from "./frameStack.js";
+import { FrameStack } from "./FrameStack.js";
 
 export class StackTraceFrame {
   constructor(

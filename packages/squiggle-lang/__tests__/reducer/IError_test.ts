@@ -1,8 +1,8 @@
 import { IRuntimeError } from "../../src/errors/IError.js";
 import { REOther } from "../../src/errors/messages.js";
 import { getStdLib } from "../../src/library/index.js";
-import { Frame, FrameStack } from "../../src/reducer/frameStack.js";
-import { StackTrace } from "../../src/reducer/stackTrace.js";
+import { Frame, FrameStack } from "../../src/reducer/FrameStack.js";
+import { StackTrace } from "../../src/reducer/StackTrace.js";
 
 describe("ErrorMessage", () => {
   test("toString", () => {

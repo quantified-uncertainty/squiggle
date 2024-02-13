@@ -1,5 +1,5 @@
 import { ICompileError, IRuntimeError } from "../errors/IError.js";
-import { StackTraceFrame } from "../reducer/stackTrace.js";
+import { StackTraceFrame } from "../reducer/StackTrace.js";
 
 abstract class SqAbstractError<T extends string> {
   abstract tag: T;

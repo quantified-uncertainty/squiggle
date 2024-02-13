@@ -27,7 +27,7 @@ import {
   unwrapDistResult,
 } from "../library/registry/helpers.js";
 import * as magicNumbers from "../magicNumbers.js";
-import { Interpreter } from "../reducer/interpreter.js";
+import { Interpreter } from "../reducer/Interpreter.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",

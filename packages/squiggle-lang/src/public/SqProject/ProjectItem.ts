@@ -2,7 +2,7 @@ import { AST, parse } from "../../ast/parse.js";
 import { ICompileError } from "../../errors/IError.js";
 import { compileAst } from "../../expression/compile.js";
 import { Env } from "../../index.js";
-import { Interpreter } from "../../reducer/interpreter.js";
+import { Interpreter } from "../../reducer/Interpreter.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";

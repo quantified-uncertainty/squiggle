@@ -1,6 +1,6 @@
 import { LocationRange } from "peggy";
 
-import { StackTrace, StackTraceFrame } from "../reducer/stackTrace.js";
+import { StackTrace, StackTraceFrame } from "../reducer/StackTrace.js";
 import { ErrorMessage, REJavaScriptExn, REOther } from "./messages.js";
 
 // "I" stands for "Internal", since we also have a more public SqError proxy

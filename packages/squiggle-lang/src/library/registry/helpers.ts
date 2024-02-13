@@ -17,7 +17,7 @@ import {
   OtherOperationError,
   SampleMapNeedsNtoNFunction,
 } from "../../operationError.js";
-import { Interpreter } from "../../reducer/interpreter.js";
+import { Interpreter } from "../../reducer/Interpreter.js";
 import { Lambda } from "../../reducer/lambda.js";
 import { upTo } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";

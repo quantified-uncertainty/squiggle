@@ -7,7 +7,7 @@ import { getStdLib } from "../library/index.js";
 import * as Result from "../utility/result.js";
 import { Ok, result } from "../utility/result.js";
 import { Value } from "../value/index.js";
-import { Interpreter } from "./interpreter.js";
+import { Interpreter } from "./Interpreter.js";
 
 export async function evaluateExpressionToResult(
   expression: Expression

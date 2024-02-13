@@ -1,4 +1,4 @@
-import { Stack } from "../../src/reducer/stack.js";
+import { Stack } from "../../src/reducer/Stack.js";
 import { vNumber } from "../../src/value/index.js";
 
 describe("Stack", () => {

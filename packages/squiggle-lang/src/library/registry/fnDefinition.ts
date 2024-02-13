@@ -1,5 +1,5 @@
 import { REAmbiguous } from "../../errors/messages.js";
-import { Interpreter } from "../../reducer/interpreter.js";
+import { Interpreter } from "../../reducer/Interpreter.js";
 import { Value } from "../../value/index.js";
 import { frAny, FRType, isOptional } from "./frTypes.js";
 

@@ -1,8 +1,8 @@
 import { parse } from "../../ast/parse.js";
 import { defaultEnv } from "../../dist/env.js";
 import { compileAst } from "../../expression/compile.js";
-import { Interpreter } from "../../reducer/interpreter.js";
-import { Bindings } from "../../reducer/stack.js";
+import { Interpreter } from "../../reducer/Interpreter.js";
+import { Bindings } from "../../reducer/Stack.js";
 import { Value } from "../../value/index.js";
 
 export type SquiggleDefinition = {

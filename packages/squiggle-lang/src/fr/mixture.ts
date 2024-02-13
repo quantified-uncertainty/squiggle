@@ -16,7 +16,7 @@ import {
   parseDistFromDistOrNumber,
   unwrapDistResult,
 } from "../library/registry/helpers.js";
-import { Interpreter } from "../reducer/interpreter.js";
+import { Interpreter } from "../reducer/Interpreter.js";
 import * as E_A from "../utility/E_A.js";
 
 function mixtureWithGivenWeights(

@@ -17,7 +17,7 @@ import { Value } from "../value/index.js";
 import { Calculator } from "../value/VCalculator.js";
 import { VDomain } from "../value/VDomain.js";
 import { Input } from "../value/VInput.js";
-import { Interpreter } from "./interpreter.js";
+import { Interpreter } from "./Interpreter.js";
 
 export type UserDefinedLambdaParameter = {
   name: string;

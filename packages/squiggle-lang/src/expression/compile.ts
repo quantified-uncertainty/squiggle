@@ -2,7 +2,7 @@ import { ASTNode } from "../ast/parse.js";
 import { infixFunctions, unaryFunctions } from "../ast/peggyHelpers.js";
 import { undecorated } from "../ast/utils.js";
 import { ICompileError } from "../errors/IError.js";
-import { Bindings } from "../reducer/stack.js";
+import { Bindings } from "../reducer/Stack.js";
 import * as Result from "../utility/result.js";
 import { vBool } from "../value/VBool.js";
 import { vNumber } from "../value/VNumber.js";

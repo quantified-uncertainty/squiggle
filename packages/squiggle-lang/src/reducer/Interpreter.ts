@@ -17,14 +17,14 @@ import { ImmutableMap } from "../utility/immutableMap.js";
 import { annotationToDomain } from "../value/domain.js";
 import { Value, vArray, vDict, vLambda, vVoid } from "../value/index.js";
 import { vDomain, VDomain } from "../value/VDomain.js";
-import { Frame, FrameStack } from "./frameStack.js";
+import { Frame, FrameStack } from "./FrameStack.js";
 import {
   Lambda,
   UserDefinedLambda,
   UserDefinedLambdaParameter,
 } from "./lambda.js";
-import { Stack } from "./stack.js";
-import { StackTrace } from "./stackTrace.js";
+import { Stack } from "./Stack.js";
+import { StackTrace } from "./StackTrace.js";
 
 type ExpressionValue<Kind extends Expression["kind"]> =
   ExpressionByKind<Kind>["value"];
