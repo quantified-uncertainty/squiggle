@@ -7,27 +7,27 @@ import { PlusIcon, SelectStringFormField } from "@quri/ui";
 import { SelectUser, SelectUserOption } from "@/components/SelectUser";
 import { MutationModalAction } from "@/components/ui/MutationModalAction";
 
-import { InviteUserToGroupAction_group$key } from "@/__generated__/InviteUserToGroupAction_group.graphql";
-import { InviteUserToGroupActionMutation } from "@/__generated__/InviteUserToGroupActionMutation.graphql";
+import { AddUserToGroupAction_group$key } from "@/__generated__/AddUserToGroupAction_group.graphql";
+import { AddUserToGroupActionMutation } from "@/__generated__/AddUserToGroupActionMutation.graphql";
 import { MembershipRole } from "@/__generated__/SetMembershipRoleActionMutation.graphql";
 
 const Mutation = graphql`
-  mutation InviteUserToGroupActionMutation(
-    $input: MutationInviteUserToGroupInput!
+  mutation AddUserToGroupActionMutation(
+    $input: MutationAddUserToGroupInput!
     $connections: [ID!]!
   ) {
-    result: inviteUserToGroup(input: $input) {
+    result: addUserToGroup(input: $input) {
       __typename
       ... on BaseError {
         message
       }
-      ... on InviteUserToGroupResult {
-        invite
-          @prependNode(
+      ... on AddUserToGroupResult {
+        membership
+          @appendNode(
             connections: $connections
-            edgeTypeName: "GroupInviteEdge"
+            edgeTypeName: "UserGroupMembershipEdge"
           ) {
-          ...GroupInviteCard
+          ...GroupMemberCard
         }
       }
     }
@@ -35,16 +35,16 @@ const Mutation = graphql`
 `;
 
 type Props = {
-  groupRef: InviteUserToGroupAction_group$key;
+  groupRef: AddUserToGroupAction_group$key;
   close: () => void;
 };
 
 type FormShape = { user: SelectUserOption; role: MembershipRole };
 
-export const InviteUserToGroupAction: FC<Props> = ({ groupRef, close }) => {
+export const AddUserToGroupAction: FC<Props> = ({ groupRef, close }) => {
   const group = useFragment(
     graphql`
-      fragment InviteUserToGroupAction_group on Group {
+      fragment AddUserToGroupAction_group on Group {
         id
         slug
       }
@@ -53,12 +53,12 @@ export const InviteUserToGroupAction: FC<Props> = ({ groupRef, close }) => {
   );
 
   return (
-    <MutationModalAction<InviteUserToGroupActionMutation, FormShape>
-      title="Invite"
+    <MutationModalAction<AddUserToGroupActionMutation, FormShape>
+      title="Add"
       icon={PlusIcon}
       close={close}
       mutation={Mutation}
-      expectedTypename="InviteUserToGroupResult"
+      expectedTypename="AddUserToGroupResult"
       defaultValues={{ role: "Member" }}
       formDataToVariables={(data) => ({
         input: {
@@ -69,12 +69,12 @@ export const InviteUserToGroupAction: FC<Props> = ({ groupRef, close }) => {
         connections: [
           ConnectionHandler.getConnectionID(
             group.id,
-            "GroupInviteList_invites"
+            "GroupMemberList_memberships"
           ),
         ],
       })}
-      submitText="Invite"
-      modalTitle={`Invite to group ${group.slug}`}
+      submitText="Add"
+      modalTitle={`Add to group ${group.slug}`}
     >
       {() => (
         <div className="space-y-2">
