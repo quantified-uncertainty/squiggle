@@ -239,41 +239,47 @@ function compileToContent(
       return expression.make("Assign", { left: name, right: value });
     }
     case "DecoratedStatement": {
-      // First, compile the inner statement.
-      // FIXME - `context` will include the new binding after this call!
-      const innerExpression = innerCompileAst(ast.statement, context);
+      const decoratedStatements: Extract<
+        ASTNode,
+        { type: "DecoratedStatement" }
+      >[] = [];
+      let unwrappedAst: (typeof ast)["statement"] = ast;
+      while (unwrappedAst.type === "DecoratedStatement") {
+        decoratedStatements.push(unwrappedAst);
+        unwrappedAst = unwrappedAst.statement;
+      }
+      const innerExpression = innerCompileAst(unwrappedAst, context);
 
-      throw new Error("TODO - implement decorators");
+      if (innerExpression.kind !== "Assign") {
+        // Shouldn't happen, `ast.statement` is always compiled to `Assign`
+        throw new ICompileError(
+          "Can't apply a decorator to non-Assign expression",
+          ast.location
+        );
+      }
 
-      // if (innerExpression.type !== "Assign") {
-      //   // Shouldn't happen, `ast.statement` is always compiled to `Assign`
-      //   throw new ICompileError(
-      //     "Can't apply a decorator to non-Assign expression",
-      //     ast.location
-      //   );
-      // }
-      // // Then wrap it in a function call.
-      // const decoratorFn = resolveName(
-      //   context,
-      //   ast,
-      //   `Tag.${ast.decorator.name.value}`
-      // );
-      // return [
-      //   expression.eLetStatement(innerExpression.value.left, {
-      //     ast: ast.statement,
-      //     ...expression.eCall(
-      //       decoratorFn,
-      //       [
-      //         innerExpression.value.right,
-      //         ...ast.decorator.args.map(
-      //           (arg) => innerCompileAst(arg, context)[0]
-      //         ),
-      //       ],
-      //       "decorate"
-      //     ),
-      //   }),
-      //   newContext,
-      // ];
+      decoratedStatements.reverse();
+      for (const decoratedStatement of decoratedStatements) {
+        const decoratorFn = context.resolveName(
+          ast,
+          `Tag.${decoratedStatement.decorator.name.value}`
+        );
+        innerExpression.value.right = {
+          ast: decoratedStatement.statement,
+          ...expression.eCall(
+            decoratorFn,
+            [
+              innerExpression.value.right,
+              ...decoratedStatement.decorator.args.map((arg) =>
+                innerCompileAst(arg, context)
+              ),
+            ],
+            "decorate"
+          ),
+        };
+      }
+
+      return innerExpression;
     }
     case "Decorator":
       throw new ICompileError("Can't compile Decorator node", ast.location);

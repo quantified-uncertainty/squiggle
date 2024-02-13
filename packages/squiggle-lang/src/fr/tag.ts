@@ -405,7 +405,7 @@ example2 = {|x| x + 1}`,
           }
           return {
             value,
-            tags: tags.merge({ location: location }),
+            tags: tags.merge({ location }),
           };
         },
         { isDecorator: true }

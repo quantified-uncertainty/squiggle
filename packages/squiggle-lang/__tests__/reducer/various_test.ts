@@ -109,7 +109,7 @@ describe("eval", () => {
       testEvalToBe("f(x,y)=x+y; 1->f(2)", "3");
       testEvalToBe("1 -> add(2)", "3");
       testEvalToBe("-1 -> add(2)", "1");
-      testEvalToBe("-1 -> add(2) * 3", "9");
+      testEvalToBe("1 -> add(2) * 3", "9");
     });
     describe("to block", () => {
       testEvalToBe("1->{|x| x}", "1");
