@@ -12,7 +12,7 @@ describe("Compile dicts", () => {
   testCompileEnd("dict.property", "Error(dict is not defined)");
 
   testCompile("dict={property: 1}; dict.property", [
-    '(Assign dict (Block (Dict (kv "property" 1))))',
+    '(Assign dict (Dict (kv "property" 1)))',
     '(Call $_atIndex_$ (StackRef 0) "property")',
   ]);
 });

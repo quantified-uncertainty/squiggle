@@ -41,13 +41,13 @@ type Scope = {
  * for enclosing functions, which would be hard to implement with immutability.
  */
 class CompileContext {
+  scopes: Scope[] = [];
+
   // Externals will include:
   // 1. stdLib symbols
   // 2. "continues"
   // 3. imports
   // Externals will be inlined in the resulting expression.
-  scopes: Scope[] = [];
-
   constructor(public externals: Bindings) {
     // top-level scope
     this.startScope();
@@ -186,6 +186,10 @@ function compileToContent(
 ): expression.ExpressionContent {
   switch (ast.type) {
     case "Block": {
+      if (ast.statements.length === 1) {
+        // unwrap blocks; no need for extra scopes or Block expressions
+        return compileToContent(ast.statements[0], context);
+      }
       context.startScope();
       const statements: Expression[] = [];
       for (const astStatement of ast.statements) {

@@ -68,10 +68,9 @@ export class Interpreter implements EvaluateAllKinds {
   // TODO - separate "internal loop evaluate" and "public entrypoint evaluate" methods?
   evaluate(expression: Expression): Value {
     jstat.setRandom(this.rng); // TODO - roll back at the end
-    const ast = expression.ast;
     switch (expression.kind) {
       case "Call":
-        return this.evaluateCall(expression.value, ast);
+        return this.evaluateCall(expression.value, expression.ast);
       case "StackRef":
         return this.evaluateStackRef(expression.value);
       case "CaptureRef":
@@ -89,7 +88,7 @@ export class Interpreter implements EvaluateAllKinds {
       case "Ternary":
         return this.evaluateTernary(expression.value);
       case "Lambda":
-        return this.evaluateLambda(expression.value, ast);
+        return this.evaluateLambda(expression.value);
       case "Program":
         return this.evaluateProgram(expression.value);
       default:
@@ -211,7 +210,7 @@ export class Interpreter implements EvaluateAllKinds {
     );
   }
 
-  evaluateLambda(expressionValue: ExpressionValue<"Lambda">, ast: ASTNode) {
+  evaluateLambda(expressionValue: ExpressionValue<"Lambda">) {
     const parameters: UserDefinedLambdaParameter[] = [];
     for (const parameterExpression of expressionValue.parameters) {
       let domain: VDomain | undefined;

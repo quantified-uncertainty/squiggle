@@ -7,7 +7,7 @@ describe("Compile tags operator", () => {
     @hide
     x=5
     `,
-    "(Assign x (Call Tag.hide (Block 5)))"
+    "(Assign x (Call Tag.hide 5))"
   );
 
   // multiple tags and application order
@@ -17,7 +17,7 @@ describe("Compile tags operator", () => {
     @location
     x=5
     `,
-    "(Assign x (Call Tag.hide (Call Tag.location (Block 5))))"
+    "(Assign x (Call Tag.hide (Call Tag.location 5)))"
   );
 
   // with parameters
@@ -27,6 +27,6 @@ describe("Compile tags operator", () => {
     @doc("Doc")
     x=5
     `,
-    '(Assign x (Call Tag.name (Call Tag.doc (Block 5) "Doc") "X"))'
+    '(Assign x (Call Tag.name (Call Tag.doc 5 "Doc") "X"))'
   );
 });

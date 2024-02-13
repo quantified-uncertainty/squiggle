@@ -11,7 +11,7 @@ describe("Compile functions", () => {
   testCompileEnd(
     "f(x)=x",
     // TODO - this contains an extra block, can we remove it?
-    "(Assign f (Lambda (.parameters x) (Block (StackRef 0))))"
+    "(Assign f (Lambda (.parameters x) (StackRef 0)))"
   );
 
   testCompile("identity(x)", "Error(identity is not defined)"); // Note value returns error properly
@@ -20,10 +20,7 @@ describe("Compile functions", () => {
     "f=99; g(x)=f; g(2)",
     `(Program
   (.statements
-    (Assign
-      f
-      (Block 99)
-    )
+    (Assign f 99)
     (Assign
       g
       (Lambda
@@ -31,9 +28,7 @@ describe("Compile functions", () => {
           (StackRef 0)
         )
         (.parameters x)
-        (Block
-          (CaptureRef 0)
-        )
+        (CaptureRef 0)
       )
     )
     (Call

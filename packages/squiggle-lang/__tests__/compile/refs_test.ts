@@ -4,7 +4,7 @@ describe("References in compiled expressions", () => {
   // inner blocks are 0 argument lambdas. They can be used whenever a value is required.
   // Like lambdas they have a local scope.
   testCompile("y=99; x={y=1; y}", [
-    "(Assign y (Block 99))",
-    "(Assign x (Block (Assign y (Block 1)) (StackRef 0)))",
+    "(Assign y 99)",
+    "(Assign x (Block (Assign y 1) (StackRef 0)))",
   ]);
 });
