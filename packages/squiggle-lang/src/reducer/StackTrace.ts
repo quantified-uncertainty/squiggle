@@ -19,15 +19,18 @@ export class StackTraceFrame {
 }
 
 export class StackTrace {
+  frames: StackTraceFrame[];
+  location?: LocationRange;
+
   constructor(
-    public frameStack: FrameStack,
-    public location?: LocationRange
-  ) {}
+    frameStack: FrameStack,
+    location?: LocationRange // location where the error has happened; not necessarily a function call
+  ) {
+    this.location = location;
 
-  frames() {
-    const frames = this.frameStack.toFrameArray();
+    const callFrames = frameStack.frames;
+    this.frames = [];
 
-    const stackTraceFrames: StackTraceFrame[] = [];
     /**
      * Stack trace frames are shifted diagonally by one compared to the call stack frames.
      * For example, if we had these call stack frames:
@@ -39,23 +42,23 @@ export class StackTrace {
      * - f() at location 2
      * - <top> at location 1
      */
-    for (let i = frames.length; i >= 0; i--) {
-      const name = i ? frames[i - 1].lambda.display() : "<top>";
-      const location = i === frames.length ? this.location : frames[i].location;
-      stackTraceFrames.push(new StackTraceFrame(name, location));
+    for (let i = callFrames.length; i >= 0; i--) {
+      const name = i ? callFrames[i - 1].lambda.display() : "<top>";
+      const callLocation =
+        i === callFrames.length ? this.location : callFrames[i].location;
+      this.frames.push(new StackTraceFrame(name, callLocation));
     }
-
-    return stackTraceFrames;
   }
 
   toString() {
     // This includes the left offset because it's mostly used in `SqError.toStringWithStackTrace`.
-    return this.frames()
-      .map((frame) => "  " + frame.toString())
-      .join("\n");
+    return this.frames.map((frame) => "  " + frame.toString()).join("\n");
   }
 
   isEmpty() {
-    return this.frameStack.isEmpty() && !this.location;
+    return (
+      this.frames.length === 0 ||
+      (this.frames.length === 1 && !this.frames[0].location)
+    );
   }
 }

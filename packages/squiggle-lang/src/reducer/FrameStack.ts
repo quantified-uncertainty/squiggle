@@ -29,7 +29,7 @@ export class Frame {
 }
 
 export class FrameStack {
-  private frames: Frame[] = [];
+  frames: Frame[] = [];
 
   static make(): FrameStack {
     return new FrameStack();
@@ -44,13 +44,7 @@ export class FrameStack {
   }
 
   toString(): string {
-    return this.toFrameArray()
-      .map((f) => f.toString())
-      .join("\n");
-  }
-
-  toFrameArray(): Frame[] {
-    return this.frames;
+    return this.frames.map((f) => f.toString()).join("\n");
   }
 
   getTopFrame(): Frame | undefined {
