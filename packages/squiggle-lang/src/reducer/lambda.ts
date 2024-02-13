@@ -23,7 +23,7 @@ import { Calculator } from "../value/VCalculator.js";
 import { VDomain } from "../value/VDomain.js";
 import { Input } from "../value/VInput.js";
 import { Frame } from "./FrameStack.js";
-import { Interpreter } from "./Interpreter.js";
+import { Reducer } from "./Reducer.js";
 
 export type UserDefinedLambdaParameter = {
   name: string;
@@ -43,23 +43,23 @@ export abstract class BaseLambda {
   abstract defaultInputs(): Input[];
   abstract toCalculator(): Calculator;
 
-  protected abstract body(args: Value[], context: Interpreter): Value;
+  protected abstract body(args: Value[], context: Reducer): Value;
 
   // Prepare a new frame and call the lambda's body with given args.
-  call(args: Value[], interpreter: Interpreter, location?: LocationRange) {
-    const initialStackSize = interpreter.stack.size();
+  call(args: Value[], reducer: Reducer, location?: LocationRange) {
+    const initialStackSize = reducer.stack.size();
 
-    interpreter.frameStack.extend(new Frame(this, location));
+    reducer.frameStack.extend(new Frame(this, location));
 
     try {
-      const result = this.body(args, interpreter);
+      const result = this.body(args, reducer);
       // If lambda throws an exception, this won't happen.  This is intentional;
       // it allows us to build the correct stacktrace with `.errorFromException`
       // method later.
-      interpreter.frameStack.pop();
+      reducer.frameStack.pop();
       return result;
     } finally {
-      interpreter.stack.shrink(initialStackSize);
+      reducer.stack.shrink(initialStackSize);
     }
   }
 }
@@ -84,7 +84,7 @@ export class UserDefinedLambda extends BaseLambda {
     this.parameters = parameters;
   }
 
-  body(args: Value[], context: Interpreter) {
+  body(args: Value[], context: Reducer) {
     const argsLength = args.length;
     const parametersLength = this.parameters.length;
     if (argsLength !== parametersLength) {
@@ -98,8 +98,8 @@ export class UserDefinedLambda extends BaseLambda {
           parameter.domain.value.validateValue(args[i]);
         } catch (e) {
           // Attach the position of an invalid parameter.  Later, in the
-          // Interpreter, this error will be upgraded once more with the proper
-          // AST, based on the position.
+          // Reducer, this error will be upgraded once more with the proper AST,
+          // based on the position.
           throw e instanceof REDomainError
             ? new REArgumentDomainError(i, e)
             : e;
@@ -196,7 +196,7 @@ export class BuiltinLambda extends BaseLambda {
     return this.definitions.map((d) => d.inputs);
   }
 
-  body(args: Value[], context: Interpreter): Value {
+  body(args: Value[], context: Reducer): Value {
     for (const definition of this.definitions) {
       const callResult = tryCallFnDefinition(definition, args, context);
       if (callResult !== undefined) {

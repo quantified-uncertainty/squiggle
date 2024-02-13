@@ -17,7 +17,9 @@ function makeWithYearInt(y: number): result<Date, string> {
   }
 }
 
-//This is our own internal date class, which is a wrapper around the built-in Date class. It's used by the interpreter, but meant to act like a simple date library.
+//This is our own internal date class, which is a wrapper around the built-in
+//Date class. It's used by the reducer, but meant to act like a simple date
+//library.
 export class SDate {
   private constructor(private value: Date) {}
 

@@ -22,8 +22,8 @@ import {
   makeOneArgSamplesetDist,
   makeTwoArgsSamplesetDist,
 } from "../library/registry/helpers.js";
-import { Interpreter } from "../reducer/Interpreter.js";
 import { Lambda } from "../reducer/lambda.js";
+import { Reducer } from "../reducer/Reducer.js";
 import * as E_A from "../utility/E_A.js";
 import {
   removeLambdas,
@@ -141,7 +141,7 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
   min: number,
   max: number,
   numIntegrationPoints: number,
-  context: Interpreter
+  context: Reducer
 ): number => {
   const applyFunctionAtFloatToFloatOption = (point: number) => {
     // Defined here so that it has access to context, reducer

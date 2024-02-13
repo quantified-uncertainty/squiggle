@@ -2,7 +2,7 @@ import { AST, parse } from "../../ast/parse.js";
 import { ICompileError } from "../../errors/IError.js";
 import { compileAst } from "../../expression/compile.js";
 import { Env, SqProject } from "../../index.js";
-import { Interpreter } from "../../reducer/Interpreter.js";
+import { Reducer } from "../../reducer/Reducer.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
@@ -218,7 +218,7 @@ export class ProjectItem {
       return;
     }
 
-    const interpreter = new Interpreter(environment);
+    const reducer = new Reducer(environment);
 
     try {
       if (expression.value.kind !== "Program") {
@@ -226,13 +226,13 @@ export class ProjectItem {
         throw new Error("Expected Program expression");
       }
 
-      const result = interpreter.evaluate(expression.value);
+      const result = reducer.evaluate(expression.value);
 
       const exportNames = new Set(expression.value.value.exports);
       const bindings = ImmutableMap<string, Value>(
         Object.entries(expression.value.value.bindings).map(
           ([name, offset]) => {
-            let value = interpreter.stack.get(offset);
+            let value = reducer.stack.get(offset);
             if (exportNames.has(name)) {
               value = value.mergeTags({
                 exportData: vDict(
@@ -264,9 +264,7 @@ export class ProjectItem {
         externals,
       });
     } catch (e: unknown) {
-      this.failRun(
-        new SqRuntimeError(interpreter.errorFromException(e), project)
-      );
+      this.failRun(new SqRuntimeError(reducer.errorFromException(e), project));
     }
   }
 }

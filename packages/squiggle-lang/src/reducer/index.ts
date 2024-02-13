@@ -7,12 +7,12 @@ import { getStdLib } from "../library/index.js";
 import * as Result from "../utility/result.js";
 import { Ok, result } from "../utility/result.js";
 import { Value } from "../value/index.js";
-import { Interpreter } from "./Interpreter.js";
+import { Reducer } from "./Reducer.js";
 
 export async function evaluateExpressionToResult(
   expression: Expression
 ): Promise<result<Value, IRuntimeError>> {
-  const context = new Interpreter(defaultEnv);
+  const context = new Reducer(defaultEnv);
   try {
     const value = context.evaluate(expression);
     return Ok(value);

@@ -44,7 +44,7 @@ type EvaluateAllKinds = {
   ) => Value;
 };
 
-export class Interpreter implements EvaluateAllKinds {
+export class Reducer implements EvaluateAllKinds {
   readonly environment: Readonly<Env>;
 
   readonly stack: Stack;
@@ -96,7 +96,7 @@ export class Interpreter implements EvaluateAllKinds {
     }
   }
 
-  // This method is mostly useful in the interpreter code.
+  // This method is mostly useful in the reducer code.
   // In Stdlib, it's fine to throw ErrorMessage instances, they'll be upgraded to errors with stack traces automatically.
   private runtimeError(error: ErrorMessage, ast: ASTNode) {
     return IRuntimeError.fromMessage(
@@ -105,7 +105,7 @@ export class Interpreter implements EvaluateAllKinds {
     );
   }
 
-  // This method is useful if you called `interpreter.evaluate` and got an exception.
+  // This method is useful if you called `reducer.evaluate` and got an exception.
   // The exception will be annotated with the current frameStack, even if it occured somewhere in JS.
   // You can also attach an optional location to the stacktrace.
   errorFromException(e: unknown, location?: LocationRange) {
@@ -174,7 +174,7 @@ export class Interpreter implements EvaluateAllKinds {
   }
 
   private getCapture(id: number) {
-    // This might seem relatively slow, but it works faster than when we stored captures in the Interpreter object.
+    // This might seem relatively slow, but it works faster than when we stored captures in the Reducer object.
     const topFrame = this.frameStack.getTopFrame();
     if (!topFrame) {
       throw new Error(

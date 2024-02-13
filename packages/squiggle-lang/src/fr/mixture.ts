@@ -16,13 +16,13 @@ import {
   parseDistFromDistOrNumber,
   unwrapDistResult,
 } from "../library/registry/helpers.js";
-import { Interpreter } from "../reducer/Interpreter.js";
+import { Reducer } from "../reducer/Reducer.js";
 import * as E_A from "../utility/E_A.js";
 
 function mixtureWithGivenWeights(
   distributions: BaseDist[],
   weights: readonly number[],
-  context: Interpreter
+  context: Reducer
 ): BaseDist {
   return unwrapDistResult(
     distOperations.mixture(E_A.zip(distributions, weights), {
@@ -34,7 +34,7 @@ function mixtureWithGivenWeights(
 
 function mixtureWithDefaultWeights(
   distributions: BaseDist[],
-  context: Interpreter
+  context: Reducer
 ) {
   const length = distributions.length;
   const weights = new Array(length).fill(1 / length);

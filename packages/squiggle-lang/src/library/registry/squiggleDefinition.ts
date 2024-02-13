@@ -1,7 +1,7 @@
 import { parse } from "../../ast/parse.js";
 import { defaultEnv } from "../../dist/env.js";
 import { compileAst } from "../../expression/compile.js";
-import { Interpreter } from "../../reducer/Interpreter.js";
+import { Reducer } from "../../reducer/Reducer.js";
 import { Bindings } from "../../reducer/Stack.js";
 import { Value } from "../../value/index.js";
 
@@ -33,8 +33,8 @@ export function makeSquiggleDefinition({
   }
 
   // TODO - do we need runtime env? That would mean that we'd have to build stdlib for each env separately.
-  const interpreter = new Interpreter(defaultEnv);
-  const value = interpreter.evaluate(expressionResult.value);
+  const reducer = new Reducer(defaultEnv);
+  const value = reducer.evaluate(expressionResult.value);
 
   return { name, value };
 }

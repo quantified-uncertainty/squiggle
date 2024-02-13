@@ -1,7 +1,7 @@
 import { Env } from "../../dist/env.js";
 import { getStdLib } from "../../library/index.js";
-import { Interpreter } from "../../reducer/Interpreter.js";
 import { Lambda } from "../../reducer/lambda.js";
+import { Reducer } from "../../reducer/Reducer.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
 import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
@@ -82,18 +82,15 @@ export class SqLambda {
     }
     const rawArgs = args.map((arg) => arg._value);
 
-    // TODO - reuse more parts of the project's primary interpreter?
-    const interpreter = new Interpreter(env);
+    // TODO - reuse more parts of the project's primary reducer?
+    const reducer = new Reducer(env);
 
     try {
-      const value = interpreter.call(this._value, rawArgs);
+      const value = reducer.call(this._value, rawArgs);
       return Result.Ok(wrapValue(value));
     } catch (e) {
       return Result.Err(
-        new SqRuntimeError(
-          interpreter.errorFromException(e),
-          this.context?.project
-        )
+        new SqRuntimeError(reducer.errorFromException(e), this.context?.project)
       );
     }
   }

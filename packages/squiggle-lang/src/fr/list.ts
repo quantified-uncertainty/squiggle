@@ -26,8 +26,8 @@ import {
   doBinaryLambdaCall,
   FnFactory,
 } from "../library/registry/helpers.js";
-import { Interpreter } from "../reducer/Interpreter.js";
 import { Lambda } from "../reducer/lambda.js";
+import { Reducer } from "../reducer/Reducer.js";
 import { shuffle, unzip, zip } from "../utility/E_A.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { uniq, uniqBy, Value } from "../value/index.js";
@@ -36,7 +36,7 @@ import { vNumber } from "../value/VNumber.js";
 export function _map(
   array: readonly Value[],
   lambda: Lambda,
-  context: Interpreter,
+  context: Reducer,
   useIndex: boolean
 ): Value[] {
   const mapped: Value[] = new Array(array.length);
@@ -58,7 +58,7 @@ export function _reduce(
   array: readonly Value[],
   initialValue: Value,
   lambda: Lambda,
-  context: Interpreter,
+  context: Reducer,
   useIndex: boolean
 ): Value {
   if (!useIndex) {
@@ -79,7 +79,7 @@ export function _reduceWhile(
   initialValue: Value,
   step: Lambda,
   condition: Lambda,
-  context: Interpreter
+  context: Reducer
 ): Value {
   let acc = initialValue;
   for (let i = 0; i < array.length; i++) {
@@ -121,7 +121,7 @@ const _assertUnemptyArray = (array: readonly Value[]) => {
 
 function _binaryLambdaCheck1(
   lambda: Lambda,
-  context: Interpreter
+  context: Reducer
 ): (e: Value) => boolean {
   return (el: Value) => doBinaryLambdaCall([el], lambda, context);
 }
@@ -129,7 +129,7 @@ function _binaryLambdaCheck1(
 function applyLambdaAndCheckNumber(
   element: Value,
   lambda: Lambda,
-  context: Interpreter
+  context: Reducer
 ): number {
   const item = context.call(lambda, [element]);
   if (item.type !== "Number") {
