@@ -12,12 +12,12 @@ import { Reducer } from "./Reducer.js";
 export async function evaluateExpressionToResult(
   expression: Expression
 ): Promise<result<Value, IRuntimeError>> {
-  const context = new Reducer(defaultEnv);
+  const reducer = new Reducer(defaultEnv);
   try {
-    const value = context.evaluate(expression);
+    const value = reducer.evaluate(expression);
     return Ok(value);
   } catch (e) {
-    return Result.Err(context.errorFromException(e));
+    return Result.Err(reducer.errorFromException(e));
   }
 }
 

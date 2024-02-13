@@ -141,11 +141,11 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
   min: number,
   max: number,
   numIntegrationPoints: number,
-  context: Reducer
+  reducer: Reducer
 ): number => {
   const applyFunctionAtFloatToFloatOption = (point: number) => {
-    // Defined here so that it has access to context, reducer
-    const result = context.call(lambda, [vNumber(point)]);
+    // Defined here so that it has access to reducer
+    const result = reducer.call(lambda, [vNumber(point)]);
     if (result.type === "Number") {
       return result.value;
     }
@@ -241,7 +241,7 @@ Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, nu
           frNamed("numIntegrationPoints", frNumber),
         ],
         frNumber,
-        ([lambda, min, max, numIntegrationPoints], context) => {
+        ([lambda, min, max, numIntegrationPoints], reducer) => {
           if (numIntegrationPoints === 0) {
             throw new REOther(
               "Integration error 4 in Danger.integrate: Increment can't be 0."
@@ -252,7 +252,7 @@ Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, nu
             min,
             max,
             numIntegrationPoints,
-            context
+            reducer
           );
         }
       ),
@@ -284,7 +284,7 @@ Same caveats as \`integrateFunctionBetweenWithNumIntegrationPoints\` apply.`,
           frNamed("epsilon", frNumber),
         ],
         frNumber,
-        ([lambda, min, max, epsilon], context) => {
+        ([lambda, min, max, epsilon], reducer) => {
           if (epsilon === 0) {
             throw new REOther(
               "Integration error in Danger.integrate: Increment can't be 0."
@@ -295,7 +295,7 @@ Same caveats as \`integrateFunctionBetweenWithNumIntegrationPoints\` apply.`,
             min,
             max,
             (max - min) / epsilon,
-            context
+            reducer
           );
         }
       ),
@@ -337,8 +337,8 @@ const diminishingReturnsLibrary = [
           frNamed("approximateIncrement", frNumber),
         ],
         frAny(),
-        ([lambdas, funds, approximateIncrement], context) => {
-          // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/context.
+        ([lambdas, funds, approximateIncrement], reducer) => {
+          // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas.
           /*
     The key idea for this function is that
     1. we keep track of past spending and current marginal returns for each function
@@ -378,8 +378,8 @@ const diminishingReturnsLibrary = [
             );
           }
           const applyFunctionAtPoint = (lambda: Lambda, point: number) => {
-            // Defined here so that it has access to context, reducer
-            const lambdaResult = context.call(lambda, [vNumber(point)]);
+            // Defined here so that it has access to reducer
+            const lambdaResult = reducer.call(lambda, [vNumber(point)]);
             if (lambdaResult.type === "Number") {
               return lambdaResult.value;
             }

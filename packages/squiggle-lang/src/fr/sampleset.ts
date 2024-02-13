@@ -20,6 +20,8 @@ import {
   FnFactory,
   unwrapDistResult,
 } from "../library/registry/helpers.js";
+import { Lambda } from "../reducer/lambda.js";
+import { Reducer } from "../reducer/Reducer.js";
 import { Ok } from "../utility/result.js";
 import { Value } from "../value/index.js";
 import { vArray } from "../value/VArray.js";
@@ -42,10 +44,10 @@ const fromDist = makeDefinition(
 const fromNumber = makeDefinition(
   [frNumber],
   frSampleSetDist,
-  ([number], context) =>
+  ([number], reducer) =>
     unwrapDistResult(
       SampleSetDist.SampleSetDist.make(
-        new Array(context.environment.sampleCount).fill(number)
+        new Array(reducer.environment.sampleCount).fill(number)
       )
     )
 );
@@ -56,21 +58,21 @@ const fromList = makeDefinition(
   ([numbers]) => unwrapDistResult(SampleSetDist.SampleSetDist.make(numbers))
 );
 
-const fromFn = (lambda: any, context: any, fn: (i: number) => Value[]) =>
+const fromFn = (lambda: Lambda, reducer: Reducer, fn: (i: number) => Value[]) =>
   unwrapDistResult(
     SampleSetDist.SampleSetDist.fromFn((index) => {
-      return doNumberLambdaCall(lambda, fn(index), context);
-    }, context.environment)
+      return doNumberLambdaCall(lambda, fn(index), reducer);
+    }, reducer.environment)
   );
 
 const fromFnDefinition: FnDefinition = makeDefinition(
   [frLambdaTyped([frNamed("index", frOptional(frNumber))], frNumber)],
   frSampleSetDist,
-  ([lambda], context) => {
+  ([lambda], reducer) => {
     const usedOptional = chooseLambdaParamLength([0, 1], lambda) === 1;
     return fromFn(
       lambda,
-      context,
+      reducer,
       usedOptional ? (index) => [vNumber(index)] : () => []
     );
   }
@@ -156,10 +158,10 @@ const baseLibrary = [
       makeDefinition(
         [frSampleSetDist, frNamed("fn", frLambdaTyped([frNumber], frNumber))],
         frSampleSetDist,
-        ([dist, lambda], context) => {
+        ([dist, lambda], reducer) => {
           return unwrapDistResult(
             dist.samplesMap((r) =>
-              Ok(doNumberLambdaCall(lambda, [vNumber(r)], context))
+              Ok(doNumberLambdaCall(lambda, [vNumber(r)], reducer))
             )
           );
         }
@@ -186,12 +188,12 @@ const baseLibrary = [
           frNamed("fn", frLambdaTyped([frNumber, frNumber], frNumber)),
         ],
         frSampleSetDist,
-        ([dist1, dist2, lambda], context) => {
+        ([dist1, dist2, lambda], reducer) => {
           return unwrapDistResult(
             SampleSetDist.map2({
               fn: (a, b) =>
                 Ok(
-                  doNumberLambdaCall(lambda, [vNumber(a), vNumber(b)], context)
+                  doNumberLambdaCall(lambda, [vNumber(a), vNumber(b)], reducer)
                 ),
               t1: dist1,
               t2: dist2,
@@ -225,7 +227,7 @@ const baseLibrary = [
           ),
         ],
         frSampleSetDist,
-        ([dist1, dist2, dist3, lambda], context) => {
+        ([dist1, dist2, dist3, lambda], reducer) => {
           return unwrapDistResult(
             SampleSetDist.map3({
               fn: (a, b, c) =>
@@ -233,7 +235,7 @@ const baseLibrary = [
                   doNumberLambdaCall(
                     lambda,
                     [vNumber(a), vNumber(b), vNumber(c)],
-                    context
+                    reducer
                   )
                 ),
               t1: dist1,
@@ -266,7 +268,7 @@ const baseLibrary = [
           frNamed("fn", frLambdaTyped([frArray(frNumber)], frNumber)),
         ],
         frSampleSetDist,
-        ([dists, lambda], context) => {
+        ([dists, lambda], reducer) => {
           const sampleSetDists = dists.map((d) => {
             return d;
           });
@@ -274,7 +276,7 @@ const baseLibrary = [
             SampleSetDist.mapN({
               fn: (a) =>
                 Ok(
-                  doNumberLambdaCall(lambda, [vArray(a.map(vNumber))], context)
+                  doNumberLambdaCall(lambda, [vArray(a.map(vNumber))], reducer)
                 ),
               t1: sampleSetDists,
             })

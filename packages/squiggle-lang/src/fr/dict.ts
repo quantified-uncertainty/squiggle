@@ -202,10 +202,10 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
           ),
         ],
         frDictWithArbitraryKeys(frAny({ genericName: "B" })),
-        ([dict, lambda], context) => {
+        ([dict, lambda], reducer) => {
           return ImmutableMap(
             [...dict.entries()].map(([key, value]) => {
-              const mappedValue = context.call(lambda, [value]);
+              const mappedValue = reducer.call(lambda, [value]);
               return [key, mappedValue];
             })
           );
@@ -230,10 +230,10 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
           frNamed("fn", frLambdaTyped([frString], frString)),
         ],
         frDictWithArbitraryKeys(frAny({ genericName: "A" })),
-        ([dict, lambda], context) => {
+        ([dict, lambda], reducer) => {
           const mappedEntries: [string, Value][] = [];
           for (const [key, value] of dict.entries()) {
-            const mappedKey = context.call(lambda, [vString(key)]);
+            const mappedKey = reducer.call(lambda, [vString(key)]);
 
             if (mappedKey.type === "String") {
               mappedEntries.push([mappedKey.value, value]);

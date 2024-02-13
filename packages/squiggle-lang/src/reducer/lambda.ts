@@ -43,7 +43,7 @@ export abstract class BaseLambda {
   abstract defaultInputs(): Input[];
   abstract toCalculator(): Calculator;
 
-  protected abstract body(args: Value[], context: Reducer): Value;
+  protected abstract body(args: Value[], reducer: Reducer): Value;
 
   // Prepare a new frame and call the lambda's body with given args.
   call(args: Value[], reducer: Reducer, location?: LocationRange) {
@@ -84,7 +84,7 @@ export class UserDefinedLambda extends BaseLambda {
     this.parameters = parameters;
   }
 
-  body(args: Value[], context: Reducer) {
+  body(args: Value[], reducer: Reducer) {
     const argsLength = args.length;
     const parametersLength = this.parameters.length;
     if (argsLength !== parametersLength) {
@@ -105,10 +105,10 @@ export class UserDefinedLambda extends BaseLambda {
             : e;
         }
       }
-      context.stack.push(args[i]);
+      reducer.stack.push(args[i]);
     }
 
-    return context.evaluate(this.expression);
+    return reducer.evaluate(this.expression);
   }
 
   display() {
@@ -196,9 +196,9 @@ export class BuiltinLambda extends BaseLambda {
     return this.definitions.map((d) => d.inputs);
   }
 
-  body(args: Value[], context: Reducer): Value {
+  body(args: Value[], reducer: Reducer): Value {
     for (const definition of this.definitions) {
-      const callResult = tryCallFnDefinition(definition, args, context);
+      const callResult = tryCallFnDefinition(definition, args, reducer);
       if (callResult !== undefined) {
         return callResult;
       }
