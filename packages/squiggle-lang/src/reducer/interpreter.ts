@@ -290,6 +290,9 @@ export class Interpreter implements EvaluateAllKinds {
 
     try {
       const result = lambda.body(args, this);
+      // If lambda throws an exception, this won't happen.  This is intentional;
+      // it allows us to build the correct stacktrace with `.errorFromException`
+      // method later.
       this.frameStack.pop();
       return result;
     } finally {

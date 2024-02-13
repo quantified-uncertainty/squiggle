@@ -27,12 +27,12 @@ export class StackTrace {
   frames() {
     const frames = this.frameStack.toFrameArray();
 
-    const stackTraceFrames = [];
+    const stackTraceFrames: StackTraceFrame[] = [];
     /**
      * Stack trace frames are shifted diagonally by one compared to the call stack frames.
      * For example, if we had these call stack frames:
-     * - f() was called from location 1 (on top level)
-     * - g() was called from location 2 (inside f())
+     * - g(), called from location 2 (inside f())
+     * - f(), called from location 1 (on top level)
      *
      * Then in the stack trace, it's going to be:
      * - g() at location 3
