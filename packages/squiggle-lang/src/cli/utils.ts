@@ -25,12 +25,16 @@ export type RunArgs = {
   sampleCount?: string | number;
 };
 
+const EVAL_SOURCE_ID = "[eval]";
+
 const linker: SqLinker = {
   resolve: (name, fromId) => {
     if (!name.startsWith("./") && !name.startsWith("../")) {
       throw new Error("Only relative paths in imports are allowed");
     }
-    return path.resolve(path.dirname(fromId), name);
+    const dir =
+      fromId === EVAL_SOURCE_ID ? process.cwd() : path.dirname(fromId);
+    return path.resolve(dir, name);
   },
   loadSource: async (importId: string) => {
     return await fs.readFile(importId, "utf-8");
@@ -46,7 +50,7 @@ async function _run(args: {
   if (args.environment) {
     project.setEnvironment(args.environment);
   }
-  const filename = path.resolve(args.filename || "./__anonymous__");
+  const filename = args.filename ? path.resolve(args.filename) : EVAL_SOURCE_ID;
 
   project.setSource(filename, args.src);
 

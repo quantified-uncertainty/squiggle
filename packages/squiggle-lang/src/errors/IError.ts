@@ -41,17 +41,78 @@ export class IRuntimeError extends Error {
     }
   }
 
-  override toString() {
-    return this.m.toString();
-  }
+  override toString({
+    withStackTrace = false,
+    resolveSource,
+  }: {
+    withStackTrace?: boolean;
+    resolveSource?: (sourceId: string) => string | undefined;
+  } = {}) {
+    let result = this.m.toString();
 
-  toStringWithDetails() {
+    if (!withStackTrace) {
+      return result;
+    }
+
+    if (resolveSource) {
+      const location = this.stackTrace.getTopLocation();
+      if (location) {
+        const source = resolveSource(location.source);
+        if (source) {
+          // 1-based numbers
+          const firstLineNumber = location.start.line;
+          const lastLineNumber = location.end.line;
+
+          const header = `--> ${location.source}:${firstLineNumber}:${location.start.column}`;
+          const gutterWidth = String(lastLineNumber).length + 1;
+          const emptyGutter = " ".repeat(gutterWidth);
+
+          const allLines = source.split("\n");
+          let snippet = "";
+          for (
+            let lineNumber = firstLineNumber;
+            lineNumber <= lastLineNumber;
+            lineNumber++
+          ) {
+            if (snippet) snippet += "\n";
+            snippet += `${lineNumber} | ${allLines[lineNumber - 1]}`;
+          }
+
+          const singleLine = firstLineNumber === lastLineNumber;
+
+          const topMarker = singleLine
+            ? ""
+            : " ".repeat(location.start.column - 1) +
+              "v" +
+              "~".repeat(
+                allLines[firstLineNumber - 1].length - location.start.column
+              );
+
+          const bottomMarker = singleLine
+            ? `${" ".repeat(location.start.column - 1)}${"_".repeat(location.end.column - location.start.column)}`
+            : "~".repeat(location.end.column - 2) + "^";
+
+          result += `
+
+${header}
+${emptyGutter}| ${topMarker}
+${snippet}
+${emptyGutter}| ${bottomMarker}
+`;
+        }
+      }
+    }
+
     return (
-      this.toString() +
+      result +
       (this.stackTrace.isEmpty()
         ? ""
         : "\nStack trace:\n" + this.stackTrace.toString())
     );
+  }
+
+  toStringWithDetails() {
+    return this.toString({ withStackTrace: true });
   }
 
   getTopFrame(): StackTraceFrame | undefined {

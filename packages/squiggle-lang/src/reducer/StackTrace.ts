@@ -55,6 +55,18 @@ export class StackTrace {
     return this.frames.map((frame) => "  " + frame.toString()).join("\n");
   }
 
+  getTopFrame() {
+    return this.frames.at(0);
+  }
+
+  getTopLocation() {
+    for (const frame of this.frames) {
+      if (frame.location) {
+        return frame.location;
+      }
+    }
+  }
+
   isEmpty() {
     return (
       this.frames.length === 0 ||

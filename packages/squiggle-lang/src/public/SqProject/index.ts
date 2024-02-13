@@ -394,7 +394,8 @@ export class SqProject {
       } else {
         await this.getItem(sourceId).run(
           this.getEnvironment(),
-          rExternals.value
+          rExternals.value,
+          this
         );
       }
     }

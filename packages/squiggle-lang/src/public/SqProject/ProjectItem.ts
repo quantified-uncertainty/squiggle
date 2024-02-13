@@ -1,7 +1,7 @@
 import { AST, parse } from "../../ast/parse.js";
 import { ICompileError } from "../../errors/IError.js";
 import { compileAst } from "../../expression/compile.js";
-import { Env } from "../../index.js";
+import { Env, SqProject } from "../../index.js";
 import { Interpreter } from "../../reducer/Interpreter.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
@@ -188,7 +188,7 @@ export class ProjectItem {
     this.output = Result.Err(e);
   }
 
-  async run(environment: Env, externals: Externals) {
+  async run(environment: Env, externals: Externals, project: SqProject) {
     const _externals = externals.stdlib
       .merge(externals.implicitImports)
       .merge(externals.explicitImports);
@@ -264,7 +264,9 @@ export class ProjectItem {
         externals,
       });
     } catch (e: unknown) {
-      this.failRun(new SqRuntimeError(interpreter.errorFromException(e)));
+      this.failRun(
+        new SqRuntimeError(interpreter.errorFromException(e), project)
+      );
     }
   }
 }

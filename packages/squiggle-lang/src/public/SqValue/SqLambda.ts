@@ -89,7 +89,12 @@ export class SqLambda {
       const value = interpreter.call(this._value, rawArgs);
       return Result.Ok(wrapValue(value));
     } catch (e) {
-      return Result.Err(new SqRuntimeError(interpreter.errorFromException(e)));
+      return Result.Err(
+        new SqRuntimeError(
+          interpreter.errorFromException(e),
+          this.context?.project
+        )
+      );
     }
   }
 
