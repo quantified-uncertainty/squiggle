@@ -11,7 +11,12 @@
  * resolved to stack and capture references.
  */
 import { ASTNode } from "../ast/parse.js";
-import { sExpr, SExpr, sExprToString } from "../utility/sExpr.js";
+import {
+  sExpr,
+  SExpr,
+  SExprPrintOptions,
+  sExprToString,
+} from "../utility/sExpr.js";
 import { Value } from "../value/index.js";
 
 export type LambdaExpressionParameter = {
@@ -181,7 +186,7 @@ export function make<Kind extends ExpressionContent["kind"]>(
  */
 export function expressionToString(
   expression: ExpressionContent,
-  { pretty = true }: { pretty?: boolean } = {}
+  printOptions: SExprPrintOptions = {}
 ): string {
   const toSExpr = (expression: ExpressionContent): SExpr => {
     const selfExpr = (args: (SExpr | undefined)[]): SExpr => ({
@@ -259,5 +264,5 @@ export function expressionToString(
     }
   };
 
-  return sExprToString(toSExpr(expression), { pretty });
+  return sExprToString(toSExpr(expression), printOptions);
 }

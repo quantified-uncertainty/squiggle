@@ -5,7 +5,9 @@ import * as Result from "../../src/utility/result.js";
 import { Value } from "../../src/value/index.js";
 
 const expectParseToBe = (expr: string, answer: string) => {
-  expect(nodeResultToString(parse(expr, "test"))).toBe(answer);
+  expect(nodeResultToString(parse(expr, "test"), { pretty: false })).toBe(
+    answer
+  );
 };
 
 const resultToString = (

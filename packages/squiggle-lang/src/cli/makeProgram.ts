@@ -73,18 +73,18 @@ export function makeProgram() {
       "-e, --eval <code>",
       "parse a given squiggle code string instead of a file"
     )
-    .option("-s, --short", "output as an S-expression")
+    .option("-r, --raw", "output as JSON")
     .action((filename, options) => {
       const src = loadSrc({ filename, inline: options.eval });
 
       const parseResult = parse(src);
       if (parseResult.ok) {
-        if (options.short) {
-          console.log(nodeResultToString(parseResult));
-        } else {
+        if (options.raw) {
           console.log(
             util.inspect(parseResult.value, { depth: Infinity, colors: true })
           );
+        } else {
+          console.log(nodeResultToString(parseResult, { colored: true }));
         }
       } else {
         console.log(red(parseResult.value.toString()));
@@ -106,7 +106,7 @@ export function makeProgram() {
         const expression = compileAst(parseResult.value, getStdLib());
 
         if (expression.ok) {
-          console.log(expressionToString(expression.value));
+          console.log(expressionToString(expression.value, { colored: true }));
         } else {
           console.log(red(expression.value.toString()));
         }

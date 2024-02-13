@@ -1,3 +1,5 @@
+import { blue } from "../cli/colors.js";
+
 export type SExpr =
   | {
       name: string;
@@ -17,11 +19,17 @@ function space(n: number) {
   return " ".repeat(n * 2);
 }
 
+export type SExprPrintOptions = {
+  depth?: number;
+  pretty?: boolean;
+  colored?: boolean;
+};
+
 export function sExprToString(
   expr: SExpr,
-  opts: { depth?: number; pretty?: boolean } = {}
+  opts: { depth?: number } & SExprPrintOptions = {}
 ) {
-  const { depth = 0, pretty = true } = opts;
+  const { depth = 0, pretty = true, colored = false } = opts;
 
   if (typeof expr === "string" || typeof expr === "number") {
     return String(expr);
@@ -37,7 +45,7 @@ export function sExprToString(
 
   return (
     "(" +
-    expr.name +
+    (colored ? blue(expr.name) : expr.name) +
     (nested && pretty
       ? "\n" +
         stringifiedArgs.map((str) => space(depth + 1) + str + "\n").join("") +

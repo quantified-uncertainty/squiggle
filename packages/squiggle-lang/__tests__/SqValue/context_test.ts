@@ -11,19 +11,21 @@ y = 6
 
     const x = bindings.get("x");
     assertTag(x, "Dict");
-    expect(nodeToString(x.context!.valueAst)).toBe(
+    expect(nodeToString(x.context!.valueAst, { pretty: false })).toBe(
       "(LetStatement :x (Block (Dict (KeyValue 'foo' 5))))"
     );
     expect(x.context?.valueAstIsPrecise).toBe(true);
 
     const foo = x.value.get("foo");
-    expect(nodeToString(foo!.context!.valueAst)).toBe("(KeyValue 'foo' 5)");
+    expect(nodeToString(foo!.context!.valueAst, { pretty: false })).toBe(
+      "(KeyValue 'foo' 5)"
+    );
     expect(foo!.context!.valueAstIsPrecise).toBe(true);
 
     const y = bindings.get("y");
     assertTag(y, "Number");
 
-    expect(nodeToString(y.context!.valueAst)).toBe(
+    expect(nodeToString(y.context!.valueAst, { pretty: false })).toBe(
       "(LetStatement :y (Block 6))"
     );
     expect(y!.context!.valueAstIsPrecise).toBe(true);
@@ -38,7 +40,7 @@ z = 5
     const z = bindings.get("z");
     assertTag(z, "Number");
 
-    expect(nodeToString(z.context!.valueAst)).toBe(
+    expect(nodeToString(z.context!.valueAst, { pretty: false })).toBe(
       "(LetStatement :z (Block 5))"
     );
   });
