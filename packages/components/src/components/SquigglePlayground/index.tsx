@@ -1,22 +1,16 @@
-import merge from "lodash/merge.js";
-import React, {
-  CSSProperties,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { CSSProperties, useCallback, useEffect, useRef } from "react";
 
 import { SqLinker } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
+import { usePlaygroundSettings } from "../../lib/hooks/usePlaygroundSettings.js";
 import { useSimulatorManager } from "../../lib/hooks/useSimulatorManager.js";
 import { useUncontrolledCode } from "../../lib/hooks/useUncontrolledCode.js";
 import {
-  defaultPlaygroundSettings,
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
+import { ProjectContext } from "../ProjectProvider.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
 import { ViewerWithMenuBar } from "../ViewerWithMenuBar/index.js";
 import {
@@ -47,6 +41,7 @@ export type SquigglePlaygroundProps = {
   sourceId?: string;
   linker?: SqLinker;
   onCodeChange?(code: string): void;
+  onOpenExport?: (sourceId: string, varName?: string) => void;
   onExportsChange?(exports: ModelExport[]): void;
   /* When settings change */
   onSettingsChange?(settings: PlaygroundSettings): void;
@@ -73,9 +68,8 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   props
 ) => {
   const {
-    defaultCode,
     linker,
-    onCodeChange,
+    sourceId: _sourceId,
     onExportsChange,
     onSettingsChange,
     renderExtraControls,
@@ -89,38 +83,26 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   // `settings` are owned by SquigglePlayground.
   // This can cause some unnecessary renders (e.g. settings form), but most heavy playground subcomponents
   // should rerender on settings changes (e.g. right panel), so that's fine.
-  const [settings, setSettings] = useState(
-    () =>
-      merge(
-        {},
-        defaultPlaygroundSettings,
-        Object.fromEntries(
-          Object.entries(defaultSettings).filter(([, v]) => v !== undefined)
-        )
-      ) as PlaygroundSettings
-  );
-  const handleSettingsChange = useCallback(
-    (newSettings: PlaygroundSettings) => {
-      setSettings(newSettings);
-      onSettingsChange?.(newSettings);
-    },
-    [onSettingsChange]
-  );
+  const { settings, setSettings, randomizeSeed } = usePlaygroundSettings({
+    defaultSettings,
+    onSettingsChange,
+  });
 
   const { code, setCode } = useUncontrolledCode({
-    defaultCode: defaultCode,
-    onCodeChange: onCodeChange,
+    defaultCode: props.defaultCode,
+    onCodeChange: props.onCodeChange,
   });
 
   const {
     project,
     simulation,
-    sourceId,
     autorunMode,
+    sourceId,
     setAutorunMode,
     runSimulation,
   } = useSimulatorManager({
     code,
+    sourceId: _sourceId,
     setup: { type: "projectFromLinker", linker },
     environment: settings.environment,
   });
@@ -152,18 +134,18 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   const renderLeft = () => (
     <LeftPlaygroundPanel
       project={project}
-      code={code}
-      setCode={setCode}
       sourceId={sourceId}
       simulation={simulation}
       settings={settings}
-      onSettingsChange={handleSettingsChange}
+      onSettingsChange={setSettings}
       renderExtraControls={renderExtraControls}
       renderExtraDropdownItems={renderExtraDropdownItems}
       renderExtraModal={renderExtraModal}
       onViewValuePath={(path) => rightPanelRef.current?.viewValuePath(path)}
       renderImportTooltip={renderImportTooltip}
       ref={leftPanelRef}
+      code={code}
+      setCode={setCode}
       autorunMode={autorunMode}
       setAutorunMode={setAutorunMode}
       runSimulation={runSimulation}
@@ -172,13 +154,25 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
 
   const renderRight = () =>
     simulation ? (
-      <ViewerWithMenuBar
-        simulation={simulation}
-        // FIXME - this will cause viewer to be rendered twice on initial render
-        editor={leftPanelRef.current?.getEditor() ?? undefined}
-        playgroundSettings={settings}
-        ref={rightPanelRef}
-      />
+      <ProjectContext.Provider
+        value={{ sourceId, onOpenExport: props.onOpenExport }}
+      >
+        <ViewerWithMenuBar
+          simulation={simulation}
+          // FIXME - this will cause viewer to be rendered twice on initial render
+          editor={leftPanelRef.current?.getEditor() ?? undefined}
+          playgroundSettings={settings}
+          ref={rightPanelRef}
+          useGlobalShortcuts={true}
+          xPadding={2}
+          randomizeSeed={() => {
+            randomizeSeed();
+            if (!autorunMode) {
+              runSimulation();
+            }
+          }}
+        />
+      </ProjectContext.Provider>
     ) : (
       <div className="grid place-items-center h-full">
         <RefreshIcon className="animate-spin text-slate-400" size={24} />

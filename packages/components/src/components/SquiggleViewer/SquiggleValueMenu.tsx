@@ -146,12 +146,12 @@ export const SquiggleValueMenu: FC<{
       )}
     >
       <Cog8ToothIcon
-        size={16}
+        size={14}
         className={clsx(
           "cursor-pointer transition",
           hasLocalSettings
             ? "text-indigo-300 hover:!text-indigo-500 group-hover:text-indigo-400"
-            : "opacity-0 hover:!text-stone-500 group-hover:text-stone-400 group-hover:opacity-100"
+            : "opacity-0 hover:!text-slate-500 group-hover:text-slate-400 group-hover:opacity-100"
         )}
       />
     </Dropdown>

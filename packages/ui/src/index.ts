@@ -98,9 +98,23 @@ export { SignOutIcon } from "./icons/SignOutIcon.js";
 export { TrashIcon } from "./icons/TrashIcon.js";
 export { TriangleIcon } from "./icons/TriangleIcon.js";
 export { XIcon } from "./icons/XIcon.js";
+export {
+  Die1Icon,
+  Die2Icon,
+  Die3Icon,
+  Die4Icon,
+  Die5Icon,
+  Die6Icon,
+} from "./icons/DieIcons.js";
 export { ErrorIcon } from "./icons/ErrorIcon.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";
+
+export {
+  type Shortcut,
+  useGlobalShortcut,
+  useGlobalShortcuts,
+} from "./hooks/useGlobalShortcut.js";
 
 export {
   TailwindContext,

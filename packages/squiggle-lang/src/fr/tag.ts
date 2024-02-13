@@ -31,7 +31,7 @@ import { Lambda } from "../reducer/lambda.js";
 import { getOrThrow } from "../utility/result.js";
 import { Value } from "../value/index.js";
 import { ValueTags, ValueTagsType } from "../value/valueTags.js";
-import { location, toMap } from "../value/valueTagsUtils.js";
+import { exportData, location, toMap } from "../value/valueTagsUtils.js";
 import { vBool, VBool } from "../value/VBool.js";
 import { vString } from "../value/VString.js";
 
@@ -232,8 +232,8 @@ example2 = {|x| x + 1}`,
     name: "getExportData",
     displaySection: "Tags",
     definitions: [
-      makeDefinition([frAny()], frAny(), ([value]) => {
-        return value.tags?.exportData() || vString("None");
+      makeDefinition([frWithTags(frAny())], frAny(), ([{ tags }]) => {
+        return exportData(tags) || vString("None");
       }),
     ],
   }),

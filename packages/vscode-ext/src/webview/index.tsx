@@ -16,6 +16,7 @@ function updateContent(text: string, settings: Env) {
       environment={{
         sampleCount: settings.sampleCount,
         xyPointLength: settings.xyPointLength,
+        seed: settings.seed,
       }}
     />
   );

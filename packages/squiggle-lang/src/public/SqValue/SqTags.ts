@@ -46,4 +46,13 @@ export class SqTags {
   location(): LocationRange | undefined {
     return this.tags.location();
   }
+
+  exportData():
+    | {
+        sourceId: string;
+        path: string[];
+      }
+    | undefined {
+    return this.tags.exportData();
+  }
 }

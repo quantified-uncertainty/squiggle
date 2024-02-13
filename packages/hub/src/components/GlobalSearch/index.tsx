@@ -10,9 +10,7 @@ import {
 } from "react-select";
 import AsyncSelect from "react-select/async";
 
-import { SearchIcon } from "@quri/ui";
-
-import { useGlobalShortcut } from "@/hooks/useGlobalShortcut";
+import { SearchIcon, useGlobalShortcut } from "@quri/ui";
 
 import { SearchResult } from "./SearchResult";
 

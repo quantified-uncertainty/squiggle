@@ -5,6 +5,7 @@ import { SqProject } from "../index.js";
 const maxP = 4;
 
 const sampleCount = process.env["SAMPLE_COUNT"];
+const seed = process.env["SEED"];
 
 async function main() {
   for (let p = 0; p <= maxP; p++) {
@@ -14,6 +15,7 @@ async function main() {
       project.setEnvironment({
         sampleCount: Number(sampleCount),
         xyPointLength: Number(sampleCount),
+        seed: seed || "default-seed",
       });
     }
     project.setSource(

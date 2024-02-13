@@ -13,7 +13,7 @@ import {
 } from "../errors/messages.js";
 import { Expression, ExpressionByKind } from "../expression/index.js";
 import { ASTNode } from "../index.js";
-import { getNativeRng, PRNG } from "../rng/index.js";
+import { getAleaRng, PRNG } from "../rng/index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { annotationToDomain } from "../value/annotations.js";
 import { Value, vArray, vDict, vLambda, vVoid } from "../value/index.js";
@@ -58,10 +58,11 @@ export class Reducer implements EvaluateAllKinds {
     this.stack = Stack.make();
     this.frameStack = FrameStack.make();
 
-    // const seed = environment.seed
-    //   ? String(environment.seed)
-    //   : String(Math.random());
-    this.rng = getNativeRng();
+    const seed = environment.seed
+      ? String(environment.seed)
+      : String(Math.random());
+
+    this.rng = getAleaRng(seed);
   }
 
   // Recursively evaluate the expression.

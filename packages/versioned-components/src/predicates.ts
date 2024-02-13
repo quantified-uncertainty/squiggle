@@ -81,6 +81,14 @@ export function excludeVersions<
  * See `EditSquiggleSnippetModel` in the Squiggle Hub source code for an example how it's used.
  */
 
+export const versionSupportsOnOpenExport = excludeVersions([
+  "0.8.5",
+  "0.8.6",
+  "0.9.0",
+  "0.9.2",
+  "0.9.3",
+]);
+
 export const versionSupportsDropdownMenu = excludeVersions(["0.8.5"]);
 export const versionSupportsExports = excludeVersions(["0.8.5", "0.8.6"]);
 export const versionSupportsSquiggleChart = excludeVersions(["0.8.5", "0.8.6"]);

@@ -6,7 +6,7 @@ import { Reducer } from "../../reducer/Reducer.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
-import { Value, vArray, vString } from "../../value/index.js";
+import { Value } from "../../value/index.js";
 import { vDict, VDict } from "../../value/VDict.js";
 import { SqCompileError, SqError, SqRuntimeError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
@@ -235,12 +235,10 @@ export class ProjectItem {
             let value = reducer.stack.get(offset);
             if (exportNames.has(name)) {
               value = value.mergeTags({
-                exportData: vDict(
-                  ImmutableMap<string, Value>([
-                    ["sourceId", vString(this.sourceId)],
-                    ["path", vArray([vString(name)])],
-                  ])
-                ),
+                exportData: {
+                  sourceId: this.sourceId,
+                  path: [name],
+                },
               });
             }
             return [name, value];
@@ -254,12 +252,10 @@ export class ProjectItem {
         result,
         bindings: vDict(bindings),
         exports: vDict(exports).mergeTags({
-          exportData: vDict(
-            ImmutableMap<string, Value>([
-              ["sourceId", vString(this.sourceId)],
-              ["path", vArray([])],
-            ])
-          ),
+          exportData: {
+            sourceId: this.sourceId,
+            path: [],
+          },
         }),
         externals,
       });

@@ -117,18 +117,19 @@ export type ViewerTab =
   | "AST"
   | { tag: "CustomResultPath"; value: SqValuePath };
 
+export const isCustomResultPath = (
+  tab: ViewerTab
+): tab is { tag: "CustomResultPath"; value: SqValuePath } =>
+  typeof tab === "object" && tab.tag === "CustomResultPath";
+
 export function defaultViewerTab(
   outputResult: SqOutputResult | undefined
 ): ViewerTab {
-  if (!outputResult || !outputResult.ok) {
+  if (!outputResult?.ok) {
     return "Variables";
   }
 
-  const output = outputResult.value;
-  if (output.result.tag !== "Void") {
-    return "Result";
-  }
-  return "Variables";
+  return outputResult.value.result.tag !== "Void" ? "Result" : "Variables";
 }
 
 export function viewerTabToValue(
@@ -149,16 +150,43 @@ export function viewerTabToValue(
     case "Exports":
       return sqOutput.exports.asValue();
     case "AST":
-      return;
+      return undefined;
+    default:
+      if (isCustomResultPath(viewerTab)) {
+        const rootValue =
+          viewerTab.value.root === "result"
+            ? output.value.result
+            : output.value.bindings.asValue();
+        return rootValue.getSubvalueByPath(viewerTab.value, () => undefined);
+      }
   }
+}
 
-  if (viewerTab.tag === "CustomResultPath") {
-    const rootValue =
-      viewerTab.value.root === "result"
-        ? output.value.result
-        : output.value.bindings.asValue();
-    return rootValue.getSubvalueByPath(viewerTab.value, () => undefined);
-  }
+const selectableViewerTabs = [
+  "Imports",
+  "Variables",
+  "Exports",
+  "Result",
+  "AST",
+] as const;
+
+export type SelectableViewerTab = (typeof selectableViewerTabs)[number];
+
+export function viewerTabsToShow(
+  outputResult: SqOutputResult
+): SelectableViewerTab[] {
+  if (!outputResult.ok) return ["Variables", "AST"]; // Default tabs if outputResult is not OK
+
+  const tabs: SelectableViewerTab[] = []; // Always show AST
+  const { bindings, imports, exports, result } = outputResult.value;
+
+  if (imports.size()) tabs.push("Imports");
+  if (bindings.size()) tabs.push("Variables");
+  if (exports.size()) tabs.push("Exports");
+  if (result.tag !== "Void") tabs.push("Result");
+  tabs.push("AST");
+
+  return tabs;
 }
 
 //These two are being phased out, in favor of RunSetup

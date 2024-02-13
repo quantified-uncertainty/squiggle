@@ -23,6 +23,7 @@ export type RunArgs = {
   output: OutputMode;
   measure?: boolean;
   sampleCount?: string | number;
+  seed?: string;
 };
 
 const EVAL_SOURCE_ID = "[eval]";
@@ -66,6 +67,7 @@ export async function run(args: RunArgs) {
     environment = {
       sampleCount: Number(args.sampleCount),
       xyPointLength: Number(args.sampleCount),
+      seed: args.seed || "default-seed",
     };
   }
 
