@@ -95,7 +95,7 @@ Stack trace:
       expect(result.value.toStringWithDetails())
         .toEqual(`Domain Error: Parameter 6 must be in domain Number.rangeDomain(3, 5)
 Stack trace:
-  g at line 1, column 24, file main
+  g at line 1, column 26, file main
   <top> at line 1, column 30, file main`);
     });
   });

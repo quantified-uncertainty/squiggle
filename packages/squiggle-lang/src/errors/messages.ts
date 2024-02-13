@@ -168,6 +168,15 @@ export class REArgumentError extends ErrorMessage {
   }
 }
 
+export class REArgumentDomainError extends REDomainError {
+  constructor(
+    public idx: number,
+    public error: REDomainError
+  ) {
+    super(error.msg);
+  }
+}
+
 export class REOther extends ErrorMessage {
   constructor(public msg: string) {
     super(msg);

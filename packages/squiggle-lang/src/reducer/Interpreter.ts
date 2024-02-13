@@ -5,6 +5,7 @@ import { Env } from "../dist/env.js";
 import { IRuntimeError } from "../errors/IError.js";
 import {
   ErrorMessage,
+  REArgumentDomainError,
   REExpectedType,
   RENotADecorator,
   RENotAFunction,
@@ -14,10 +15,10 @@ import { Expression, ExpressionByKind } from "../expression/index.js";
 import { ASTNode } from "../index.js";
 import { getNativeRng, PRNG } from "../rng/index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { annotationToDomain } from "../value/domain.js";
+import { annotationToDomain } from "../value/annotations.js";
 import { Value, vArray, vDict, vLambda, vVoid } from "../value/index.js";
 import { vDomain, VDomain } from "../value/VDomain.js";
-import { Frame, FrameStack } from "./FrameStack.js";
+import { FrameStack } from "./FrameStack.js";
 import {
   Lambda,
   UserDefinedLambda,
@@ -116,14 +117,14 @@ export class Interpreter implements EvaluateAllKinds {
   }
 
   evaluateBlock(statements: Expression[]) {
-    let currentValue: Value = vVoid();
-
     const initialStackSize = this.stack.size();
+
+    let currentValue: Value = vVoid();
     for (const statement of statements) {
       currentValue = this.evaluate(statement);
     }
-    this.stack.shrink(initialStackSize);
 
+    this.stack.shrink(initialStackSize);
     return currentValue;
   }
 
@@ -258,8 +259,7 @@ export class Interpreter implements EvaluateAllKinds {
         expressionValue.name,
         capturedValues,
         parameters,
-        expressionValue.body,
-        ast.location
+        expressionValue.body
       )
     );
   }
@@ -267,36 +267,36 @@ export class Interpreter implements EvaluateAllKinds {
   evaluateCall(expressionValue: ExpressionValue<"Call">, ast: ASTNode) {
     const lambda = this.evaluate(expressionValue.fn);
     if (lambda.type !== "Lambda") {
-      throw this.runtimeError(new RENotAFunction(lambda.toString()), ast);
+      throw this.runtimeError(
+        new RENotAFunction(lambda.toString()),
+        expressionValue.fn.ast
+      );
     }
     if (expressionValue.as === "decorate" && !lambda.value.isDecorator) {
-      throw this.runtimeError(new RENotADecorator(lambda.toString()), ast);
+      throw this.runtimeError(
+        new RENotADecorator(lambda.toString()),
+        expressionValue.fn.ast
+      );
     }
 
-    const argValues = expressionValue.args.map((arg) => {
-      const argValue = this.evaluate(arg);
-      return argValue;
-    });
+    const argValues = expressionValue.args.map((arg) => this.evaluate(arg));
 
     // we pass the ast of a current expression here, to put it on frameStack
-    return this.call(lambda.value, argValues, ast);
+    try {
+      return this.call(lambda.value, argValues, ast);
+    } catch (e) {
+      if (e instanceof REArgumentDomainError) {
+        // Function is still on frame stack, remove it.
+        // (This is tightly coupled with lambda implementations.)
+        this.frameStack.pop();
+        throw this.runtimeError(e, expressionValue.args.at(e.idx)?.ast ?? ast);
+      } else {
+        throw e;
+      }
+    }
   }
 
-  // Prepare a new frame and call the lambda's body with given args.
-  call(lambda: Lambda, args: Value[], ast?: ASTNode | undefined) {
-    const initialStackSize = this.stack.size();
-
-    this.frameStack.extend(new Frame(lambda, ast?.location));
-
-    try {
-      const result = lambda.body(args, this);
-      // If lambda throws an exception, this won't happen.  This is intentional;
-      // it allows us to build the correct stacktrace with `.errorFromException`
-      // method later.
-      this.frameStack.pop();
-      return result;
-    } finally {
-      this.stack.shrink(initialStackSize);
-    }
+  call(lambda: Lambda, args: Value[], ast?: ASTNode) {
+    return lambda.call(args, this, ast?.location);
   }
 }

@@ -1,4 +1,4 @@
-import { annotationToDomain } from "../../src/value/domain.js";
+import { annotationToDomain } from "../../src/value/annotations.js";
 import { vArray, vNumber } from "../../src/value/index.js";
 
 describe("valueToDomain", () => {

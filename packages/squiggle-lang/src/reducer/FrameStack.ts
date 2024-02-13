@@ -4,7 +4,7 @@
 
 import { LocationRange } from "peggy";
 
-import { Lambda } from "./lambda.js";
+import { BaseLambda } from "./lambda.js";
 
 export class Frame {
   // Weird hack: without this, Frame class won't be a separate type from the plain JS Object type, since it doesn't have any meaningful methods.
@@ -14,7 +14,7 @@ export class Frame {
   }
 
   constructor(
-    public lambda: Lambda,
+    public lambda: BaseLambda,
     public location?: LocationRange // can be empty for calls from builtin functions
   ) {}
 
