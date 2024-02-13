@@ -1,5 +1,10 @@
-import { RangeSet, RangeSetBuilder } from "@codemirror/state";
-import { EditorView, gutter, GutterMarker } from "@codemirror/view";
+import {
+  EditorState,
+  Facet,
+  RangeSet,
+  RangeSetBuilder,
+} from "@codemirror/state";
+import { gutter, GutterMarker } from "@codemirror/view";
 import { clsx } from "clsx";
 
 import { ASTNode, SqValuePath, SqValuePathEdge } from "@quri/squiggle-lang";
@@ -102,46 +107,6 @@ function visiblePathsWithUniqueLines(node: ASTNode): MarkerProps[] {
   return result;
 }
 
-// This doesn't get imports, because their contexts are wrong.
-export function getMarkers(
-  view: EditorView
-): RangeSet<GutterMarker> | undefined {
-  const onFocusByPath = view.state.field(onFocusByPathField.field);
-  if (!onFocusByPath) {
-    return;
-  }
-  const simulation = view.state.field(simulationField.field);
-
-  const sqResult = simulation?.output;
-  if (!sqResult?.ok) {
-    return;
-  }
-
-  // TODO - use AST for the current code state, and `sqResult` only for filtering
-  const ast = sqResult.value.bindings.context?.ast;
-  if (!ast) {
-    return;
-  }
-
-  const props: MarkerProps[] = visiblePathsWithUniqueLines(ast);
-
-  const builder = new RangeSetBuilder<GutterMarker>();
-  for (const path of props) {
-    const i = path.ast.location.start.line;
-    if (i >= 0 && i < view?.state.doc.lines) {
-      const line = view.state.doc.line(i);
-      builder.add(
-        line.from,
-        line.to,
-        new FocusableMarker(() => onFocusByPath(path.path))
-      );
-    }
-  }
-
-  const markers = builder.finish();
-  return markers;
-}
-
 class FocusableMarker extends GutterMarker {
   constructor(private onClickLine: () => void) {
     super();
@@ -172,9 +137,68 @@ class FocusableMarker extends GutterMarker {
   }
 }
 
+// This doesn't get imports, because their contexts are wrong.
+export function getMarkers(
+  state: EditorState
+): RangeSet<GutterMarker> | undefined {
+  const onFocusByPath = state.field(onFocusByPathField.field);
+  if (!onFocusByPath) {
+    return;
+  }
+  const simulation = state.field(simulationField.field);
+
+  const sqResult = simulation?.output;
+  if (!sqResult?.ok) {
+    return;
+  }
+
+  if (sqResult.value.result.context?.source !== state.doc.toString()) {
+    return; // autorun is off or the result is still rendering, can't show markers yet
+  }
+
+  // TODO - use AST for the current code state, and `sqResult` only for filtering
+  const ast = sqResult.value.bindings.context?.ast;
+  if (!ast) {
+    return;
+  }
+
+  const props: MarkerProps[] = visiblePathsWithUniqueLines(ast);
+
+  const builder = new RangeSetBuilder<GutterMarker>();
+  for (const path of props) {
+    const i = path.ast.location.start.line;
+    if (i >= 0 && i < state.doc.lines) {
+      const line = state.doc.line(i);
+      builder.add(
+        line.from,
+        line.to,
+        new FocusableMarker(() => onFocusByPath(path.path))
+      );
+    }
+  }
+
+  const markers = builder.finish();
+  return markers;
+}
+
 export function focusGutterExtension() {
-  return gutter({
-    class: "min-w-[9px] group/gutter",
-    markers: (view) => getMarkers(view) ?? RangeSet.of([]),
+  const markersFacet = Facet.define<
+    RangeSet<GutterMarker>,
+    RangeSet<GutterMarker>
+  >({
+    combine: (value) => value[0] ?? RangeSet.of([]),
   });
+
+  const computedMarkers = markersFacet.compute(
+    ["doc", simulationField.field, onFocusByPathField.field],
+    (state) => getMarkers(state) ?? RangeSet.of([])
+  );
+
+  return [
+    computedMarkers,
+    gutter({
+      class: "min-w-[9px] group/gutter",
+      markers: (view) => view.state.facet(markersFacet),
+    }),
+  ];
 }
