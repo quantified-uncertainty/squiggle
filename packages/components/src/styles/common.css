@@ -54,35 +54,3 @@
 .cm-tooltip-autocomplete .cm-tooltip {
   background: white;
 }
-
-.cm-gutter.cm-lineNumberDot {
-  min-width: 9px;
-}
-
-.cm-lineNumberDot:hover .cm-gutterElement .gutterMarker .gutterMarker-inner {
-  @apply bg-violet-200;
-}
-
-/* Hover state */
-.cm-lineNumberDot:hover
-  .cm-gutterElement
-  .gutterMarker:hover
-  .gutterMarker-inner {
-  @apply bg-violet-400;
-}
-
-/* Active line gutter state */
-.cm-lineNumberDot
-  .cm-gutterElement.cm-activeLineGutter
-  .gutterMarker
-  .gutterMarker-inner {
-  @apply bg-white;
-}
-
-/* Active line gutter hover state */
-.cm-lineNumberDot
-  .cm-gutterElement.cm-activeLineGutter
-  .gutterMarker:hover
-  .gutterMarker-inner {
-  @apply bg-violet-400;
-}

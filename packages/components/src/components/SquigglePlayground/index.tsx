@@ -1,6 +1,6 @@
 import React, { CSSProperties, useCallback, useEffect, useRef } from "react";
 
-import { SqLinker } from "@quri/squiggle-lang";
+import { SqLinker, SqValuePath } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { usePlaygroundSettings } from "../../lib/hooks/usePlaygroundSettings.js";
@@ -11,7 +11,6 @@ import {
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import { ProjectContext } from "../ProjectProvider.js";
-import { getActiveLineNumbers } from "../SquiggleViewer/utils.js";
 import {
   ViewerWithMenuBar,
   ViewerWithMenuBarHandle,
@@ -134,8 +133,11 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     []
   );
 
+  const focusByPath = useCallback((path: SqValuePath) => {
+    rightPanelRef.current?.focusByPath(path);
+  }, []);
+
   const renderLeft = () => {
-    const lineNumbers = getActiveLineNumbers(simulation?.output);
     return (
       <LeftPlaygroundPanel
         project={project}
@@ -147,19 +149,13 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         renderExtraDropdownItems={renderExtraDropdownItems}
         renderExtraModal={renderExtraModal}
         renderImportTooltip={renderImportTooltip}
-        onFocusByPath={(path) => {
-          rightPanelRef.current?.squiggleViewerHandle?.focusByPath(path);
-        }}
-        onFocusByEditorLine={(line) =>
-          rightPanelRef.current?.focusByEditorLine(line)
-        }
+        onFocusByPath={focusByPath}
         ref={leftPanelRef}
         code={code}
         setCode={setCode}
         autorunMode={autorunMode}
         setAutorunMode={setAutorunMode}
         runSimulation={runSimulation}
-        activeLineNumbers={lineNumbers}
       />
     );
   };

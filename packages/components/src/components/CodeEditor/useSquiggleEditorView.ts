@@ -31,13 +31,14 @@ import {
   useCodemirrorView,
   useConfigureCodemirrorView,
 } from "./codemirrorHooks.js";
+import { onFocusByPathField, simulationField } from "./fields.js";
 import { CodeEditorProps } from "./index.js";
 import { lightThemeHighlightingStyle } from "./languageSupport/highlightingStyle.js";
 import { useErrorsExtension } from "./useErrorsExtension.js";
 import { useFormatSquiggleExtension } from "./useFormatSquiggleExtension.js";
+import { useGutterExtension } from "./useGutterExtension.js";
 import { useLineWrappingExtension } from "./useLineWrappingExtension.js";
 import { useOnChangeExtension } from "./useOnChangeExtension.js";
-import { useShowGutterExtension } from "./useShowGutterExtension.js";
 import { useSquiggleLanguageExtension } from "./useSquiggleLanguageExtension.js";
 import { useSubmitExtension } from "./useSubmitExtension.js";
 import { useTooltipsExtension } from "./useTooltipsExtension.js";
@@ -53,6 +54,13 @@ export function useSquiggleEditorExtensions(
    * We still have to run all `use.*Extension` hooks every time, because they set up `useEffect` hooks.
    * After the initial render, the extensions are re-configured through `useEffect` on props changes.
    */
+
+  simulationField.use(view, params.simulation ?? null);
+  onFocusByPathField.use(view, params.onFocusByPath ?? null);
+  const fieldExtensions = [
+    simulationField.field.init(() => params.simulation ?? null),
+    onFocusByPathField.field.init(() => params.onFocusByPath ?? null),
+  ];
 
   const builtinExtensions = useMemo(
     () => [
@@ -87,7 +95,10 @@ export function useSquiggleEditorExtensions(
     view,
     params.project
   );
-  const showGutterExtension = useShowGutterExtension(view, params.gutter);
+  const showGutterExtension = useGutterExtension(
+    view,
+    params.showGutter ?? false
+  );
   const lineWrappingExtension = useLineWrappingExtension(
     view,
     params.lineWrapping ?? true
@@ -131,6 +142,7 @@ export function useSquiggleEditorExtensions(
   return [
     highPrioritySquiggleExtensions,
     builtinExtensions,
+    fieldExtensions,
     squiggleExtensions,
   ];
 }
