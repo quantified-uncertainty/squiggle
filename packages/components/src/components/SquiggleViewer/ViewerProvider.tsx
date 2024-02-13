@@ -48,7 +48,7 @@ function findNode(
 }
 
 export type SquiggleViewerHandle = {
-  viewValuePath(path: SqValuePath): void;
+  focusByPath(path: SqValuePath): void;
 };
 
 type LocalItemState = Readonly<{
@@ -167,8 +167,19 @@ export class ItemStore {
     this.handles[path.uid()]?.scrollIntoView();
   }
 
-  focusOnPath(path: SqValuePath) {
-    this.handles[path.uid()]?.focusOnHeader();
+  focusByPath(path: SqValuePath) {
+    const pathPrefixes = path.allPrefixPaths({ includeRoot: false });
+    pathPrefixes.pop(); // We allow the focusedPath to be collapsed, just not its parents.
+    for (const prefix of pathPrefixes) {
+      this.setState(prefix, (state) => ({
+        ...state,
+        collapsed: false,
+      }));
+      this.forceUpdate(prefix);
+    }
+    setTimeout(() => {
+      this.handles[path.uid()]?.focusOnHeader();
+    }, 0);
   }
 }
 
@@ -196,7 +207,7 @@ export const ViewerContext = createContext<ViewerContextShape>({
   itemStore: new ItemStore(),
   viewerType: "normal",
   handle: {
-    viewValuePath: () => {},
+    focusByPath: () => {},
   },
   initialized: false,
   rootValue: undefined,
@@ -387,8 +398,11 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
     }, [playgroundSettings]);
 
     const handle: SquiggleViewerHandle = {
-      viewValuePath(path: SqValuePath) {
-        itemStore.scrollViewerToPath(path);
+      focusByPath(path: SqValuePath) {
+        setZoomedInPathPath(undefined);
+        setTimeout(() => {
+          itemStore.focusByPath(path);
+        }, 0);
       },
     };
 

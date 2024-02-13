@@ -1,4 +1,12 @@
-import { forwardRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+
+import { SqValuePath } from "@quri/squiggle-lang";
 
 import { isSimulating, Simulation } from "../../lib/hooks/useSimulator.js";
 import {
@@ -27,8 +35,11 @@ type Props = {
   xPadding?: number;
 };
 
+export type ViewerWithMenuBarHandle = {
+  focusByPath: (path: SqValuePath) => void;
+};
 /* Wrapper for SquiggleViewer that shows the rendering stats and isSimulating state. */
-export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
+export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
   function ViewerWithMenuBar(
     {
       simulation: simulation,
@@ -40,16 +51,16 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
       useGlobalShortcuts: enableGlobalShortcuts = false,
       xPadding = 2,
     },
-    viewerRef
+    viewerWithMenuBarRef
   ) {
     const [viewerTab, setViewerTab] = useState<ViewerTab>(
       defaultTab ?? defaultViewerTab(simulation.output)
     );
 
-    const shownTabs = viewerTabsToShow(simulation.output);
-
+    const viewerRef = useRef<SquiggleViewerHandle>(null);
     const _isSimulating = isSimulating(simulation);
     const { output } = simulation;
+    const shownTabs = viewerTabsToShow(simulation.output);
 
     useViewerTabShortcuts({
       enableGlobalShortcuts,
@@ -57,6 +68,25 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
       setViewerTab,
       shownTabs,
     });
+
+    const focusByPath = useCallback((path: SqValuePath) => {
+      const viewer = viewerRef.current;
+      if (viewer) {
+        if (path.root === "bindings") {
+          setViewerTab("Variables");
+        } else if (path.root === "result") {
+          setViewerTab("Result");
+        }
+
+        setTimeout(() => {
+          viewer.focusByPath(path);
+        }, 0);
+      }
+    }, []);
+
+    useImperativeHandle(viewerWithMenuBarRef, () => ({
+      focusByPath,
+    }));
 
     return (
       <Layout
@@ -69,8 +99,9 @@ export const ViewerWithMenuBar = forwardRef<SquiggleViewerHandle, Props>(
               shownTabs={shownTabs}
             />
           ) : (
+            // Important not to be null, so that it stays on the right.
             <div />
-          ) // Important not to be null, so that it stays on the right.
+          )
         }
         indicator={<SimulatingIndicator simulation={simulation} />}
         changeSeedAndRunButton={

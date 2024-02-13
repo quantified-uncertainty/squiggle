@@ -14,15 +14,15 @@ export function useZoomedOutSqValueKeyEvent(selected: SqValuePath) {
   return keyboardEventHandler({
     ArrowDown: () => {
       const newPath = findNode(selected)?.next()?.node.path;
-      newPath && itemStore.focusOnPath(newPath);
+      newPath && itemStore.focusByPath(newPath);
     },
     ArrowUp: () => {
       const newPath = findNode(selected)?.prev()?.node.path;
-      newPath && itemStore.focusOnPath(newPath);
+      newPath && itemStore.focusByPath(newPath);
     },
     ArrowLeft: () => {
       const newItem = findNode(selected)?.parent();
-      newItem && !newItem.isRoot() && itemStore.focusOnPath(newItem.node.path);
+      newItem && !newItem.isRoot() && itemStore.focusByPath(newItem.node.path);
     },
     ArrowRight: () => {
       const newItem = findNode(selected)?.children().at(0);
@@ -32,10 +32,10 @@ export function useZoomedOutSqValueKeyEvent(selected: SqValuePath) {
         if (isCollapsed) {
           toggleCollapsed(itemStore, selected);
           setTimeout(() => {
-            itemStore.focusOnPath(newItem.node.path);
+            itemStore.focusByPath(newItem.node.path);
           }, 1);
         } else {
-          itemStore.focusOnPath(newItem.node.path);
+          itemStore.focusByPath(newItem.node.path);
         }
       }
     },

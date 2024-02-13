@@ -52,7 +52,7 @@ type Props = {
   runSimulation: () => void;
   code: string;
   setCode: (code: string) => void;
-} & Pick<CodeEditorProps, "onViewValuePath" | "renderImportTooltip">;
+} & Pick<CodeEditorProps, "onFocusByPath" | "renderImportTooltip">;
 
 // for interactions with this component from outside
 export type LeftPlaygroundPanelHandle = {
@@ -138,12 +138,13 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           errors={errors}
           height="100%"
           project={props.project}
+          simulation={props.simulation}
           sourceId={props.sourceId}
-          showGutter={true}
+          showGutter
+          onFocusByPath={props.onFocusByPath}
           lineWrapping={props.settings.editorSettings.lineWrapping}
           onChange={props.setCode}
           onSubmit={props.runSimulation}
-          onViewValuePath={props.onViewValuePath}
           renderImportTooltip={props.renderImportTooltip}
         />
       </div>

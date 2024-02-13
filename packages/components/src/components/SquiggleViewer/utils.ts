@@ -1,5 +1,6 @@
 import { SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
 
+import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { ItemStore, useViewerContext } from "./ViewerProvider.js";
@@ -103,4 +104,36 @@ function isHidden(value: SqValue): boolean {
 
 export function nonHiddenDictEntries(value: SqDict): [string, SqValue][] {
   return value.entries().filter(([_, v]) => !isHidden(v));
+}
+
+function valueToLine(value: SqValue): number | undefined {
+  return value.context?.findLocation()?.start.line;
+}
+
+//This doesn't get imports, because their contexts are wrong.
+export function findValuePathByLine(
+  line: number,
+  sqResult?: SqOutputResult
+): { type: "Imports" | "Variables" | "Result"; path: SqValuePath } | undefined {
+  if (!sqResult?.ok) {
+    return undefined;
+  }
+  const { bindings, result } = sqResult.value;
+
+  function allChildren(value: SqValue): SqValue[] {
+    return getChildrenValues(value).flatMap((v) => [v, ...allChildren(v)]);
+  }
+
+  // Search in bindings
+  for (const value of allChildren(bindings.asValue())) {
+    if (line === valueToLine(value) && value.context?.path) {
+      return { type: "Variables", path: value.context.path };
+    }
+  }
+
+  // Check in result
+  const resultLine = valueToLine(result);
+  if (line === resultLine && result.context?.path) {
+    return { type: "Result", path: result.context.path };
+  }
 }

@@ -19,6 +19,10 @@ export class SqDict {
     );
   }
 
+  values(): SqValue[] {
+    return this.entries().map(([, v]) => v);
+  }
+
   get(key: string): SqValue | undefined {
     const value = this._value.safeGet(key);
     if (value === undefined) {

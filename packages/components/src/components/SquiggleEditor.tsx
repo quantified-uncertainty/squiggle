@@ -60,6 +60,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
         data-testid="squiggle-editor"
       >
         <CodeEditor
+          ref={editorRef}
           defaultValue={defaultCode ?? ""}
           onChange={setCode}
           fontSize={editorFontSize}
@@ -67,7 +68,6 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           errors={errors}
           project={project}
           sourceId={sourceId}
-          ref={editorRef}
           onSubmit={runSimulation}
         />
       </div>

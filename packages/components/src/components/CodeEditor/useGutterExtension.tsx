@@ -7,22 +7,25 @@ import {
 } from "@codemirror/view";
 
 import { useReactiveExtension } from "./codemirrorHooks.js";
+import { focusGutterExtension } from "./focusGutterExtension.js";
 
-export function useShowGutterExtension(
+export function useGutterExtension(
   view: EditorView | undefined,
   showGutter: boolean
 ) {
   return useReactiveExtension(
     view,
-    () =>
-      showGutter
-        ? [
-            lineNumbers(),
-            highlightActiveLine(),
-            highlightActiveLineGutter(),
-            foldGutter(),
-          ]
-        : [],
+    () => {
+      if (!view || !showGutter) return [];
+
+      return [
+        highlightActiveLine(),
+        highlightActiveLineGutter(),
+        focusGutterExtension(),
+        lineNumbers(),
+        foldGutter(),
+      ];
+    },
     [showGutter]
   );
 }

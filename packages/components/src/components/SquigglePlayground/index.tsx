@@ -1,6 +1,6 @@
 import React, { CSSProperties, useCallback, useEffect, useRef } from "react";
 
-import { SqLinker } from "@quri/squiggle-lang";
+import { SqLinker, SqValuePath } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { usePlaygroundSettings } from "../../lib/hooks/usePlaygroundSettings.js";
@@ -11,8 +11,10 @@ import {
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import { ProjectContext } from "../ProjectProvider.js";
-import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
-import { ViewerWithMenuBar } from "../ViewerWithMenuBar/index.js";
+import {
+  ViewerWithMenuBar,
+  ViewerWithMenuBarHandle,
+} from "../ViewerWithMenuBar/index.js";
 import {
   LeftPlaygroundPanel,
   LeftPlaygroundPanelHandle,
@@ -124,33 +126,39 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   }, [simulation, onExportsChange]);
 
   const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
-  const rightPanelRef = useRef<SquiggleViewerHandle>(null);
+  const rightPanelRef = useRef<ViewerWithMenuBarHandle>(null);
 
   const getLeftPanelElement = useCallback(
     () => leftPanelRef.current?.getLeftPanelElement() ?? undefined,
     []
   );
 
-  const renderLeft = () => (
-    <LeftPlaygroundPanel
-      project={project}
-      sourceId={sourceId}
-      simulation={simulation}
-      settings={settings}
-      onSettingsChange={setSettings}
-      renderExtraControls={renderExtraControls}
-      renderExtraDropdownItems={renderExtraDropdownItems}
-      renderExtraModal={renderExtraModal}
-      onViewValuePath={(path) => rightPanelRef.current?.viewValuePath(path)}
-      renderImportTooltip={renderImportTooltip}
-      ref={leftPanelRef}
-      code={code}
-      setCode={setCode}
-      autorunMode={autorunMode}
-      setAutorunMode={setAutorunMode}
-      runSimulation={runSimulation}
-    />
-  );
+  const focusByPath = useCallback((path: SqValuePath) => {
+    rightPanelRef.current?.focusByPath(path);
+  }, []);
+
+  const renderLeft = () => {
+    return (
+      <LeftPlaygroundPanel
+        project={project}
+        sourceId={sourceId}
+        simulation={simulation}
+        settings={settings}
+        onSettingsChange={setSettings}
+        renderExtraControls={renderExtraControls}
+        renderExtraDropdownItems={renderExtraDropdownItems}
+        renderExtraModal={renderExtraModal}
+        renderImportTooltip={renderImportTooltip}
+        onFocusByPath={focusByPath}
+        ref={leftPanelRef}
+        code={code}
+        setCode={setCode}
+        autorunMode={autorunMode}
+        setAutorunMode={setAutorunMode}
+        runSimulation={runSimulation}
+      />
+    );
+  };
 
   const renderRight = () =>
     simulation ? (
