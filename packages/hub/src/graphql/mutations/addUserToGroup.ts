@@ -3,15 +3,15 @@ import { ZodError } from "zod";
 import { prisma } from "@/prisma";
 
 import { builder } from "../builder";
-import { MembershipRoleType } from "../types/Group";
-import { GroupInvite } from "../types/GroupInvite";
+import { MembershipRoleType, UserGroupMembership } from "../types/Group";
 import { validateSlug } from "../utils";
 
-builder.mutationField("inviteUserToGroup", (t) =>
+// Adapted from `inviteUserToGroup`.
+builder.mutationField("addUserToGroup", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
-    type: builder.simpleObject("InviteUserToGroupResult", {
+    type: builder.simpleObject("AddUserToGroupResult", {
       fields: (t) => ({
-        invite: t.field({ type: GroupInvite }),
+        membership: t.field({ type: UserGroupMembership }),
       }),
     }),
     errors: { types: [ZodError] },
@@ -24,7 +24,7 @@ builder.mutationField("inviteUserToGroup", (t) =>
       }),
     },
     resolve: async (_, { input }, { session }) => {
-      const invite = await prisma.$transaction(async (tx) => {
+      const membership = await prisma.$transaction(async (tx) => {
         const groupOwner = await tx.owner.findUnique({
           where: {
             slug: input.group,
@@ -34,7 +34,7 @@ builder.mutationField("inviteUserToGroup", (t) =>
           throw new Error(`Group ${input.group} not found`);
         }
 
-        const invitedUser = await tx.user.findFirst({
+        const requestedUser = await tx.user.findFirst({
           where: {
             asOwner: {
               slug: input.username,
@@ -42,8 +42,8 @@ builder.mutationField("inviteUserToGroup", (t) =>
           },
         });
 
-        if (!invitedUser) {
-          throw new Error(`Invited user ${input.username} not found`);
+        if (!requestedUser) {
+          throw new Error(`User ${input.username} not found`);
         }
 
         // We perform all checks one by one because that allows more precise error reporting.
@@ -67,7 +67,7 @@ builder.mutationField("inviteUserToGroup", (t) =>
           where: {
             ownerId: groupOwner.id,
             memberships: {
-              some: { userId: invitedUser.id },
+              some: { userId: requestedUser.id },
             },
           },
         });
@@ -77,27 +77,22 @@ builder.mutationField("inviteUserToGroup", (t) =>
           );
         }
 
-        const hasPendingInvite = await tx.group.count({
+        // Cancel all pending invites
+        await tx.groupInvite.updateMany({
           where: {
-            ownerId: groupOwner.id,
-            invites: {
-              some: {
-                userId: invitedUser.id,
-                status: "Pending",
-              },
-            },
+            userId: requestedUser.id,
+            groupId: groupOwner.id,
+            status: "Pending",
+          },
+          data: {
+            status: "Canceled",
           },
         });
-        if (hasPendingInvite) {
-          throw new Error(
-            `There's already a pending invite for ${input.username} to join ${input.group}`
-          );
-        }
 
-        return await tx.groupInvite.create({
+        return await tx.userGroupMembership.create({
           data: {
             user: {
-              connect: { id: invitedUser.id },
+              connect: { id: requestedUser.id },
             },
             group: {
               connect: { ownerId: groupOwner.id },
@@ -107,7 +102,7 @@ builder.mutationField("inviteUserToGroup", (t) =>
         });
       });
 
-      return { invite };
+      return { membership };
     },
   })
 );

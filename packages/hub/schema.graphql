@@ -2,6 +2,10 @@ type AcceptReusableGroupInviteTokenResult {
   membership: UserGroupMembership!
 }
 
+type AddUserToGroupResult {
+  membership: UserGroupMembership!
+}
+
 type AdminRebuildSearchIndexResult {
   ok: Boolean!
 }
@@ -226,6 +230,7 @@ type MoveModelResult {
 
 type Mutation {
   acceptReusableGroupInviteToken(input: MutationAcceptReusableGroupInviteTokenInput!): MutationAcceptReusableGroupInviteTokenResult!
+  addUserToGroup(input: MutationAddUserToGroupInput!): MutationAddUserToGroupResult!
 
   """Admin-only query for rebuilding the search index"""
   adminRebuildSearchIndex: MutationAdminRebuildSearchIndexResult!
@@ -270,6 +275,14 @@ input MutationAcceptReusableGroupInviteTokenInput {
 }
 
 union MutationAcceptReusableGroupInviteTokenResult = AcceptReusableGroupInviteTokenResult | BaseError
+
+input MutationAddUserToGroupInput {
+  group: String!
+  role: MembershipRole!
+  username: String!
+}
+
+union MutationAddUserToGroupResult = AddUserToGroupResult | BaseError | ValidationError
 
 union MutationAdminRebuildSearchIndexResult = AdminRebuildSearchIndexResult | BaseError
 

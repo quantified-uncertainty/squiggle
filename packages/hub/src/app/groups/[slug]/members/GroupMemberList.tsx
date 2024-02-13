@@ -9,8 +9,8 @@ import { DotsDropdown } from "@/components/ui/DotsDropdown";
 import { H2 } from "@/components/ui/Headers";
 
 import { useIsGroupAdmin } from "../hooks";
+import { AddUserToGroupAction } from "./AddUserToGroupAction";
 import { GroupMemberCard } from "./GroupMemberCard";
-import { InviteUserToGroupAction } from "./InviteUserToGroupAction";
 
 import { GroupMemberList$key } from "@/__generated__/GroupMemberList.graphql";
 import { GroupMemberListPaginationQuery } from "@/__generated__/GroupMemberListPaginationQuery.graphql";
@@ -23,7 +23,7 @@ const fragment = graphql`
   )
   @refetchable(queryName: "GroupMemberListPaginationQuery") {
     ...hooks_useIsGroupAdmin
-    ...InviteUserToGroupAction_group
+    ...AddUserToGroupAction_group
     ...GroupMemberCard_group
 
     memberships(first: $count, after: $cursor)
@@ -61,7 +61,7 @@ export const GroupMemberList: FC<Props> = ({ groupRef }) => {
           <DotsDropdown>
             {({ close }) => (
               <DropdownMenu>
-                <InviteUserToGroupAction groupRef={group} close={close} />
+                <AddUserToGroupAction groupRef={group} close={close} />
               </DropdownMenu>
             )}
           </DotsDropdown>
