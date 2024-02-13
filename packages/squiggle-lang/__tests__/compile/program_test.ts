@@ -28,6 +28,11 @@ describe("Compiling simple programs", () => {
     "(Program (.statements (Assign x 5) (StackRef 0)) (.bindings (x 0)))",
     { mode: "full" }
   );
+  testCompile(
+    "x=5; y=6; x+y",
+    "(Program (.statements (Assign x 5) (Assign y 6) (Call add (StackRef 1) (StackRef 0))) (.bindings (x 1) (y 0)))",
+    { mode: "full" }
+  );
 
   // Stack refs in assignments
   testCompile(

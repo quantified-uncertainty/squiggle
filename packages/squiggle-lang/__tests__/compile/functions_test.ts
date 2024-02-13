@@ -8,14 +8,11 @@ describe("Compile functions", () => {
   );
 
   // Function definitions are lambda assignments
-  testCompileEnd(
-    "f(x)=x",
-    // TODO - this contains an extra block, can we remove it?
-    "(Assign f (Lambda (.parameters x) (StackRef 0)))"
-  );
+  testCompileEnd("f(x)=x", "(Assign f (Lambda (.parameters x) (StackRef 0)))");
 
   testCompile("identity(x)", "Error(identity is not defined)"); // Note value returns error properly
 
+  // Captures
   testCompile(
     "f=99; g(x)=f; g(2)",
     `(Program
