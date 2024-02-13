@@ -12,17 +12,17 @@ import { ASTNode, SqValuePath, SqValuePathEdge } from "@quri/squiggle-lang";
 import { onFocusByPathField, simulationField } from "./fields.js";
 import { reactAsDom } from "./utils.js";
 
-type MarkerProps = {
+type MarkerDatum = {
   path: SqValuePath;
   // For assignments and dict keys, AST contains the variable name node or dict key node.
   // For arrays, it contains the value.
   ast: ASTNode;
 };
 
-function* getMarkerSubProps(
+function* getMarkerSubData(
   ast: ASTNode,
   path: SqValuePath
-): Generator<MarkerProps, void> {
+): Generator<MarkerDatum, void> {
   switch (ast.type) {
     case "Dict":
       // Assuming 'elements' is an array of { key: ASTNode, value: ASTNode | string }
@@ -32,52 +32,52 @@ function* getMarkerSubProps(
         if (element.key.type !== "String") continue;
         const subPath = path.extend(SqValuePathEdge.fromKey(element.key.value));
         yield { ast: element.key, path: subPath };
-        yield* getMarkerSubProps(element.value, subPath);
+        yield* getMarkerSubData(element.value, subPath);
       }
       break;
     case "Array":
       for (const [i, element] of ast.elements.entries()) {
         const subPath = path.extend(SqValuePathEdge.fromIndex(i));
         yield { ast: element, path: subPath };
-        yield* getMarkerSubProps(element, subPath);
+        yield* getMarkerSubData(element, subPath);
       }
       break;
     case "Block": {
       const lastNode = ast.statements.at(-1);
       if (lastNode) {
-        yield* getMarkerSubProps(lastNode, path);
+        yield* getMarkerSubData(lastNode, path);
       }
       break;
     }
   }
 }
 
-function* getMarkerProps(ast: ASTNode): Generator<MarkerProps, void> {
+function* getMarkerData(ast: ASTNode): Generator<MarkerDatum, void> {
   if (ast.type !== "Program") {
     return; // unexpected
   }
 
-  nextStatement: for (let s of ast.statements) {
-    while (s.type === "DecoratedStatement") {
-      if (s.decorator.name.value === "hide") {
+  nextStatement: for (let statement of ast.statements) {
+    while (statement.type === "DecoratedStatement") {
+      if (statement.decorator.name.value === "hide") {
         break nextStatement;
       }
-      s = s.statement;
+      statement = statement.statement;
     }
 
-    switch (s.type) {
+    switch (statement.type) {
       case "DefunStatement":
       case "LetStatement": {
-        const name = s.variable.value;
-        if (ast.symbols[name] !== s) {
+        const name = statement.variable.value;
+        if (ast.symbols[name] !== statement) {
           break; // skip, probably redefined later
         }
         const path = new SqValuePath({
           root: "bindings",
           edges: [SqValuePathEdge.fromKey(name)],
         });
-        yield { ast: s.variable, path };
-        yield* getMarkerSubProps(s.value, path);
+        yield { ast: statement.variable, path };
+        yield* getMarkerSubData(statement.value, path);
         break;
       }
       default: {
@@ -86,23 +86,23 @@ function* getMarkerProps(ast: ASTNode): Generator<MarkerProps, void> {
           root: "result",
           edges: [],
         });
-        yield { ast: s, path };
-        yield* getMarkerSubProps(s, path);
+        yield { ast: statement, path };
+        yield* getMarkerSubData(statement, path);
       }
     }
   }
 }
 
-function visiblePathsWithUniqueLines(node: ASTNode): MarkerProps[] {
-  const result: MarkerProps[] = [];
+function visiblePathsWithUniqueLines(node: ASTNode): MarkerDatum[] {
+  const result: MarkerDatum[] = [];
   const seenLines = new Set<number>();
-  for (const props of getMarkerProps(node)) {
+  for (const datum of getMarkerData(node)) {
     // filter out duplicate lines
-    const line = props.ast.location.start.line;
+    const line = datum.ast.location.start.line;
     if (seenLines.has(line)) continue;
     seenLines.add(line);
 
-    result.push(props);
+    result.push(datum);
   }
   return result;
 }
@@ -162,17 +162,17 @@ export function getMarkers(
     return;
   }
 
-  const props: MarkerProps[] = visiblePathsWithUniqueLines(ast);
+  const markerData: MarkerDatum[] = visiblePathsWithUniqueLines(ast);
 
   const builder = new RangeSetBuilder<GutterMarker>();
-  for (const path of props) {
-    const i = path.ast.location.start.line;
+  for (const datum of markerData) {
+    const i = datum.ast.location.start.line;
     if (i >= 0 && i < state.doc.lines) {
       const line = state.doc.line(i);
       builder.add(
         line.from,
         line.to,
-        new FocusableMarker(() => onFocusByPath(path.path))
+        new FocusableMarker(() => onFocusByPath(datum.path))
       );
     }
   }
