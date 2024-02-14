@@ -2,6 +2,7 @@ import "@quri/squiggle-components/common.css";
 import "react-loading-skeleton/dist/skeleton.css";
 import "@/styles/main.css";
 
+import { Analytics } from "@vercel/analytics/react";
 import { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { PropsWithChildren } from "react";
@@ -18,6 +19,7 @@ export default async function ServerRootLayout({
     <html>
       <body>
         <RootLayout session={session}>{children}</RootLayout>
+        <Analytics />
       </body>
     </html>
   );
