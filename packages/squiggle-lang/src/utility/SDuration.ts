@@ -26,7 +26,8 @@ export function msToGreatestUnit(msTotal: number): {
   return { unitName: "Millisecond", value: msTotal };
 }
 
-//This is our own internal date duration class. It's used by the interpreter, but meant to act like a simple date library.
+// This is our own internal date duration class. It's used by the reducer, but
+// meant to act like a simple date library.
 export class SDuration {
   constructor(private ms: number) {
     this.ms = ms;

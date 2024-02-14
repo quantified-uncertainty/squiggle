@@ -13,7 +13,7 @@ import {
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeSquiggleDefinition } from "../library/registry/squiggleDefinition.js";
-import { Bindings } from "../reducer/stack.js";
+import { Bindings } from "../reducer/Stack.js";
 
 const maker = new FnFactory({
   nameSpace: "RelativeValues",

@@ -1,4 +1,3 @@
-import { evaluateStringToResult } from "../../src/reducer/index.js";
 import {
   expectEvalToBe,
   testDescriptionEvalToBe,
@@ -7,13 +6,20 @@ import {
 } from "../helpers/reducerHelpers.js";
 
 describe("eval", () => {
-  describe("expressions", () => {
+  describe("bais sanity checks", () => {
     testEvalToBe("1", "1");
+    testEvalToBe("(((1)))", "1");
+    testEvalToBe("((1+2))", "3");
     testEvalToBe("-1", "-1");
     testEvalToBe("1-1", "0");
     testEvalToBe("1+2", "3");
+    testEvalToBe("add(1,2)", "3");
     testEvalToBe("(1+2)*3", "9");
     testEvalToBe("2>1", "true");
+    testEvalToBe("true", "true");
+    testEvalToBe("!true", "false");
+    testEvalToBe("1 + -1", "0");
+    testEvalToBe('"hello"', '"hello"');
     testEvalToBe("concat([3,4], [5,6,7])", "[3,4,5,6,7]");
     testEvalToBe("log(10)", "2.302585092994046");
     testEvalToBe("Math.cos(10)", "-0.8390715290764524");
@@ -52,6 +58,7 @@ describe("eval", () => {
       );
     });
   });
+
   describe("dicts", () => {
     test("empty", async () => await expectEvalToBe("{}", "{}"));
     test("define", async () =>
@@ -82,6 +89,8 @@ describe("eval", () => {
   });
   describe("assignment", () => {
     testEvalToBe("x=1; x", "1");
+    testEvalToBe("x=1; 2", "2");
+    testEvalToBe("x=1", "()");
     testEvalToBe("x=1+1; x+1", "3");
     testEvalToBe("x=1; y=x+1; y+1", "3");
     testEvalError("1; x=1");
@@ -97,6 +106,9 @@ describe("eval", () => {
     describe("to function", () => {
       testEvalToBe("f(x)=x; 1->f", "1");
       testEvalToBe("f(x,y)=x+y; 1->f(2)", "3");
+      testEvalToBe("1 -> add(2)", "3");
+      testEvalToBe("-1 -> add(2)", "1");
+      testEvalToBe("1 -> add(2) * 3", "9");
     });
     describe("to block", () => {
       testEvalToBe("1->{|x| x}", "1");
@@ -106,42 +118,5 @@ describe("eval", () => {
       testEvalToBe("1->{f:{|x|x+2}}.f", "3");
       testEvalToBe("1->{f:{|x|x+2}}['f']", "3");
     });
-  });
-});
-
-describe("stacktraces", () => {
-  test("nested calls", async () => {
-    const result = await evaluateStringToResult(`
-  f(x) = {
-    y = "a"
-    x + y
-  }
-  g = {|x| f(x)}
-  h(x) = g(x)
-  h(5)
-`);
-    if (result.ok) {
-      throw new Error("Expected code to fail");
-    }
-    const error = result.value.toStringWithDetails();
-
-    expect(error).toBe(
-      `Error: There are function matches for add(), but with different arguments:
-  add(Date, Duration) => Date
-  add(Duration, Date) => Date
-  add(Duration, Duration) => Duration
-  add(Number, Number) => Number
-  add(Dist, Number) => Dist
-  add(Number, Dist) => Dist
-  add(Dist, Dist) => Dist
-  add(String, String) => String
-  add(String, any) => String
-Was given arguments: (5,"a")
-Stack trace:
-  f at line 4, column 5, file main
-  g at line 6, column 12, file main
-  h at line 7, column 10, file main
-  <top> at line 8, column 3, file main`
-    );
   });
 });

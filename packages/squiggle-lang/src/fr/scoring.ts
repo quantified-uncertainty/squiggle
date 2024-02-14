@@ -66,8 +66,8 @@ export const library = [
 
 Note that this can be very brittle. If the second distribution has probability mass at areas where the first doesn't, then the result will be infinite. Due to numeric approximations, some probability mass in point set distributions is rounded to zero, leading to infinite results with klDivergence.`,
     definitions: [
-      makeDefinition([frDist, frDist], frNumber, ([estimate, d], context) =>
-        runScoringDistAnswer(estimate, d, undefined, context.environment)
+      makeDefinition([frDist, frDist], frNumber, ([estimate, d], reducer) =>
+        runScoringDistAnswer(estimate, d, undefined, reducer.environment)
       ),
     ],
   }),
@@ -97,21 +97,21 @@ Note that this can be very brittle. If the second distribution has probability m
           ),
         ],
         frNumber,
-        ([{ estimate, answer, prior }], context) => {
+        ([{ estimate, answer, prior }], reducer) => {
           if (prior !== null) {
             if (answer instanceof BaseDist) {
               return runScoringDistAnswer(
                 estimate,
                 answer,
                 prior,
-                context.environment
+                reducer.environment
               );
             } else if (typeof answer === "number") {
               return runScoringScalarAnswer(
                 estimate,
                 answer,
                 prior,
-                context.environment
+                reducer.environment
               );
             }
           }
@@ -121,14 +121,14 @@ Note that this can be very brittle. If the second distribution has probability m
                 estimate,
                 answer,
                 undefined,
-                context.environment
+                reducer.environment
               );
             } else if (typeof answer === "number") {
               return runScoringScalarAnswer(
                 estimate,
                 answer,
                 undefined,
-                context.environment
+                reducer.environment
               );
             }
           }

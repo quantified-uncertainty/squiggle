@@ -17,8 +17,8 @@ import {
   OtherOperationError,
   SampleMapNeedsNtoNFunction,
 } from "../../operationError.js";
-import { ReducerContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
+import { Reducer } from "../../reducer/Reducer.js";
 import { upTo } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
 import { Value } from "../../value/index.js";
@@ -186,13 +186,13 @@ export class FnFactory {
     fn,
     ...args
   }: ArgsWithoutDefinitions & {
-    fn: (x: BaseDist, context: ReducerContext) => number;
+    fn: (x: BaseDist, reducer: Reducer) => number;
   }): FRFunction {
     return this.make({
       ...args,
       output: "Number",
       definitions: [
-        makeDefinition([frDist], frNumber, ([x], context) => fn(x, context)),
+        makeDefinition([frDist], frNumber, ([x], reducer) => fn(x, reducer)),
       ],
     });
   }
@@ -218,14 +218,14 @@ export class FnFactory {
     fn,
     ...args
   }: ArgsWithoutDefinitions & {
-    fn: (dist: BaseDist, context: ReducerContext) => BaseDist;
+    fn: (dist: BaseDist, reducer: Reducer) => BaseDist;
   }): FRFunction {
     return this.make({
       ...args,
       output: "Dist",
       definitions: [
-        makeDefinition([frDist], frDist, ([dist], context) =>
-          fn(dist, context)
+        makeDefinition([frDist], frDist, ([dist], reducer) =>
+          fn(dist, reducer)
         ),
       ],
     });
@@ -235,14 +235,14 @@ export class FnFactory {
     fn,
     ...args
   }: ArgsWithoutDefinitions & {
-    fn: (dist: BaseDist, n: number, context: ReducerContext) => BaseDist;
+    fn: (dist: BaseDist, n: number, reducer: Reducer) => BaseDist;
   }): FRFunction {
     return this.make({
       ...args,
       output: "Dist",
       definitions: [
-        makeDefinition([frDist, frNumber], frDist, ([dist, n], context) =>
-          fn(dist, n, context)
+        makeDefinition([frDist, frNumber], frDist, ([dist, n], reducer) =>
+          fn(dist, n, reducer)
         ),
       ],
     });
@@ -285,9 +285,9 @@ export function unwrapDistResult<T>(result: Result.result<T, DistError>): T {
 export function doNumberLambdaCall(
   lambda: Lambda,
   args: Value[],
-  context: ReducerContext
+  reducer: Reducer
 ): number {
-  const value = lambda.call(args, context);
+  const value = reducer.call(lambda, args);
   if (value.type === "Number") {
     return value.value;
   }
@@ -297,9 +297,9 @@ export function doNumberLambdaCall(
 export function doBinaryLambdaCall(
   args: Value[],
   lambda: Lambda,
-  context: ReducerContext
+  reducer: Reducer
 ): boolean {
-  const value = lambda.call(args, context);
+  const value = reducer.call(lambda, args);
   if (value.type === "Bool") {
     return value.value;
   }
@@ -309,11 +309,11 @@ export function doBinaryLambdaCall(
 export const parseDistFromDistOrNumber = (d: number | BaseDist): BaseDist =>
   typeof d === "number" ? Result.getExt(PointMass.make(d)) : d;
 
-export function makeSampleSet(d: BaseDist, context: ReducerContext) {
+export function makeSampleSet(d: BaseDist, reducer: Reducer) {
   const result = SampleSetDist.SampleSetDist.fromDist(
     d,
-    context.environment,
-    context.rng
+    reducer.environment,
+    reducer.rng
   );
   if (!result.ok) {
     throw new REDistributionError(result.value);
@@ -324,7 +324,7 @@ export function makeSampleSet(d: BaseDist, context: ReducerContext) {
 export function twoVarSample(
   v1: BaseDist | number,
   v2: BaseDist | number,
-  context: ReducerContext,
+  reducer: Reducer,
   fn: (
     v1: number,
     v2: number
@@ -333,13 +333,13 @@ export function twoVarSample(
   const sampleFn = (a: number, b: number) =>
     Result.fmap2(
       fn(a, b),
-      (d) => d.sample(context.rng),
+      (d) => d.sample(reducer.rng),
       (e) => new OtherOperationError(e)
     );
 
   if (v1 instanceof BaseDist && v2 instanceof BaseDist) {
-    const s1 = makeSampleSet(v1, context);
-    const s2 = makeSampleSet(v2, context);
+    const s1 = makeSampleSet(v1, reducer);
+    const s2 = makeSampleSet(v2, reducer);
     return unwrapDistResult(
       SampleSetDist.map2({
         fn: sampleFn,
@@ -348,17 +348,17 @@ export function twoVarSample(
       })
     );
   } else if (v1 instanceof BaseDist && typeof v2 === "number") {
-    const s1 = makeSampleSet(v1, context);
+    const s1 = makeSampleSet(v1, reducer);
     return unwrapDistResult(s1.samplesMap((a) => sampleFn(a, v2)));
   } else if (typeof v1 === "number" && v2 instanceof BaseDist) {
-    const s2 = makeSampleSet(v2, context);
+    const s2 = makeSampleSet(v2, reducer);
     return unwrapDistResult(s2.samplesMap((a) => sampleFn(v1, a)));
   } else if (typeof v1 === "number" && typeof v2 === "number") {
     const result = fn(v1, v2);
     if (!result.ok) {
       throw new REOther(result.value);
     }
-    return makeSampleSet(result.value, context);
+    return makeSampleSet(result.value, reducer);
   }
   throw new REOther("Impossible branch");
 }
@@ -374,7 +374,7 @@ export function makeTwoArgsSamplesetDist(
   return makeDefinition(
     [frNamed(name1, frDistOrNumber), frNamed(name2, frDistOrNumber)],
     frSampleSetDist,
-    ([v1, v2], context) => twoVarSample(v1, v2, context, fn)
+    ([v1, v2], reducer) => twoVarSample(v1, v2, reducer, fn)
   );
 }
 
@@ -385,23 +385,23 @@ export function makeOneArgSamplesetDist(
   return makeDefinition(
     [frNamed(name, frDistOrNumber)],
     frSampleSetDist,
-    ([v], context) => {
+    ([v], reducer) => {
       const sampleFn = (a: number) =>
         Result.fmap2(
           fn(a),
-          (d) => d.sample(context.rng),
+          (d) => d.sample(reducer.rng),
           (e) => new OtherOperationError(e)
         );
 
       if (v instanceof BaseDist) {
-        const s = makeSampleSet(v, context);
+        const s = makeSampleSet(v, reducer);
         return unwrapDistResult(s.samplesMap(sampleFn));
       } else if (typeof v === "number") {
         const result = fn(v);
         if (!result.ok) {
           throw new REOther(result.value);
         }
-        return makeSampleSet(result.value, context);
+        return makeSampleSet(result.value, reducer);
       }
       throw new REOther("Impossible branch");
     }

@@ -1,7 +1,7 @@
 import { REOther } from "../errors/messages.js";
 import { INDEX_LOOKUP_FUNCTION } from "../expression/constants.js";
 import { BuiltinLambda, Lambda } from "../reducer/lambda.js";
-import { Bindings } from "../reducer/stack.js";
+import { Bindings } from "../reducer/Stack.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { vLambda } from "../value/vLambda.js";
 import { makeMathConstants } from "./math.js";

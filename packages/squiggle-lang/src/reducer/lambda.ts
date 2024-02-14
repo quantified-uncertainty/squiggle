@@ -2,9 +2,12 @@ import maxBy from "lodash/maxBy.js";
 import uniq from "lodash/uniq.js";
 import { LocationRange } from "peggy";
 
-import { ASTNode } from "../ast/parse.js";
-import * as IError from "../errors/IError.js";
-import { REArityError, REOther } from "../errors/messages.js";
+import {
+  REArgumentDomainError,
+  REArityError,
+  REDomainError,
+  REOther,
+} from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
 import {
   FnDefinition,
@@ -19,21 +22,17 @@ import { Value } from "../value/index.js";
 import { Calculator } from "../value/VCalculator.js";
 import { VDomain } from "../value/VDomain.js";
 import { Input } from "../value/VInput.js";
-import * as Context from "./context.js";
-import { ReducerContext } from "./context.js";
-import { Stack } from "./stack.js";
+import { Frame } from "./FrameStack.js";
+import { Reducer } from "./Reducer.js";
 
 export type UserDefinedLambdaParameter = {
   name: string;
   domain?: VDomain; // should this be Domain instead of VDomain?
 };
 
-type LambdaBody = (args: Value[], context: ReducerContext) => Value;
-
 export abstract class BaseLambda {
   isDecorator: boolean = false;
-
-  constructor(public body: LambdaBody) {}
+  captures: Value[] = []; // used only on user-defined lambdas, but useful for all lambdas for faster lookups
 
   abstract readonly type: string;
   abstract display(): string;
@@ -44,101 +43,88 @@ export abstract class BaseLambda {
   abstract defaultInputs(): Input[];
   abstract toCalculator(): Calculator;
 
-  callFrom(
-    args: Value[],
-    context: ReducerContext,
-    ast: ASTNode | undefined
-  ): Value {
-    const newContext: ReducerContext = {
-      // Be careful! the order here must match the order of props in ReducerContext.
-      // Also, we intentionally don't use object spread syntax because of monomorphism.
-      stack: context.stack,
-      environment: context.environment,
-      frameStack: context.frameStack.extend(
-        Context.currentFunctionName(context),
-        ast?.location
-      ),
-      evaluate: context.evaluate,
-      inFunction: this,
-      rng: context.rng,
-    };
+  protected abstract body(args: Value[], reducer: Reducer): Value;
+
+  // Prepare a new frame and call the lambda's body with given args.
+  call(args: Value[], reducer: Reducer, location?: LocationRange) {
+    const initialStackSize = reducer.stack.size();
+
+    reducer.frameStack.extend(new Frame(this, location));
 
     try {
-      return this.body(args, newContext);
-    } catch (e) {
-      IError.rethrowWithFrameStack(e, newContext.frameStack);
+      const result = this.body(args, reducer);
+      // If lambda throws an exception, this won't happen.  This is intentional;
+      // it allows us to build the correct stacktrace with `.errorFromException`
+      // method later.
+      reducer.frameStack.pop();
+      return result;
+    } finally {
+      reducer.stack.shrink(initialStackSize);
     }
-  }
-
-  call(args: Value[], context: ReducerContext): Value {
-    return this.callFrom(args, context, undefined);
   }
 }
 
 // User-defined functions, e.g. `add2 = {|x, y| x + y}`, are instances of this class.
 export class UserDefinedLambda extends BaseLambda {
-  parameters: UserDefinedLambdaParameter[];
-  location: LocationRange;
-  name?: string;
   readonly type = "UserDefinedLambda";
+  parameters: UserDefinedLambdaParameter[];
+  name?: string;
+  private expression: Expression;
 
   constructor(
     name: string | undefined,
+    captures: Value[],
     parameters: UserDefinedLambdaParameter[],
-    stack: Stack,
-    body: Expression,
-    location: LocationRange
+    expression: Expression
   ) {
-    const lambda: LambdaBody = (args: Value[], context: ReducerContext) => {
-      const argsLength = args.length;
-      const parametersLength = parameters.length;
-      if (argsLength !== parametersLength) {
-        throw new REArityError(undefined, parametersLength, argsLength);
-      }
+    super();
+    this.name = name;
+    this.captures = captures;
+    this.expression = expression;
+    this.parameters = parameters;
+  }
 
-      let localStack = stack;
-      for (let i = 0; i < parametersLength; i++) {
-        const parameter = parameters[i];
-        localStack = localStack.push(parameter.name, args[i]);
-        if (parameter.domain) {
+  body(args: Value[], reducer: Reducer) {
+    const argsLength = args.length;
+    const parametersLength = this.parameters.length;
+    if (argsLength !== parametersLength) {
+      throw new REArityError(this.display(), parametersLength, argsLength);
+    }
+
+    for (let i = 0; i < parametersLength; i++) {
+      const parameter = this.parameters[i];
+      if (parameter.domain) {
+        try {
           parameter.domain.value.validateValue(args[i]);
+        } catch (e) {
+          // Attach the position of an invalid parameter.  Later, in the
+          // Reducer, this error will be upgraded once more with the proper AST,
+          // based on the position.
+          throw e instanceof REDomainError
+            ? new REArgumentDomainError(i, e)
+            : e;
         }
       }
+      reducer.stack.push(args[i]);
+    }
 
-      const lambdaContext: ReducerContext = {
-        stack: localStack,
-        // no spread is intentional - helps with monomorphism
-        environment: context.environment,
-        frameStack: context.frameStack,
-        evaluate: context.evaluate,
-        inFunction: context.inFunction,
-        rng: context.rng,
-      };
-
-      const [value] = context.evaluate(body, lambdaContext);
-      return value;
-    };
-
-    super(lambda);
-    this.name = name;
-    this.parameters = parameters;
-    this.location = location;
+    return reducer.evaluate(this.expression);
   }
 
   display() {
     return this.name || "<anonymous>";
   }
 
-  _getParameterNames() {
+  private getParameterNames() {
     return this.parameters.map((parameter) => parameter.name);
   }
 
   parameterString() {
-    return this._getParameterNames().join(",");
+    return this.getParameterNames().join(",");
   }
 
   toString() {
-    return `(${this._getParameterNames().join(",")}) => internal code`;
+    return `(${this.getParameterNames().join(",")}) => internal code`;
   }
 
   parameterCounts() {
@@ -150,7 +136,7 @@ export class UserDefinedLambda extends BaseLambda {
   }
 
   defaultInputs(): Input[] {
-    return this._getParameterNames().map((name) => ({
+    return this.getParameterNames().map((name) => ({
       name,
       type: "text",
     }));
@@ -169,14 +155,14 @@ export class UserDefinedLambda extends BaseLambda {
 // Stdlib functions (everything in FunctionRegistry) are instances of this class.
 export class BuiltinLambda extends BaseLambda {
   readonly type = "BuiltinLambda";
-  _definitions: FnDefinition[];
+  private definitions: FnDefinition[];
 
   constructor(
     public name: string,
     signatures: FnDefinition[]
   ) {
-    super((args, context) => this._call(args, context));
-    this._definitions = signatures;
+    super();
+    this.definitions = signatures;
 
     // TODO - this sets the flag that the function is a decorator, but later we don't check which signatures are decorators.
     // For now, it doesn't matter because we don't allow user-defined decorators, and `Tag.*` decorators work as decorators on all possible definitions.
@@ -192,14 +178,14 @@ export class BuiltinLambda extends BaseLambda {
   }
 
   parameterString() {
-    return this._definitions
+    return this.definitions
       .filter(showInDocumentation)
       .map(fnDefinitionToString)
       .join(" | ");
   }
 
   parameterCounts() {
-    return sort(uniq(this._definitions.map((d) => d.inputs.length)));
+    return sort(uniq(this.definitions.map((d) => d.inputs.length)));
   }
 
   parameterCountString() {
@@ -207,13 +193,19 @@ export class BuiltinLambda extends BaseLambda {
   }
 
   signatures(): FRType<unknown>[][] {
-    return this._definitions.map((d) => d.inputs);
+    return this.definitions.map((d) => d.inputs);
   }
 
-  _call(args: Value[], context: ReducerContext): Value {
-    const signatures = this._definitions;
+  body(args: Value[], reducer: Reducer): Value {
+    for (const definition of this.definitions) {
+      const callResult = tryCallFnDefinition(definition, args, reducer);
+      if (callResult !== undefined) {
+        return callResult;
+      }
+    }
+
     const showNameMatchDefinitions = () => {
-      const defsString = signatures
+      const defsString = this.definitions
         .filter(showInDocumentation)
         .map(fnDefinitionToString)
         .map((def) => `  ${this.name}${def}\n`)
@@ -225,16 +217,10 @@ export class BuiltinLambda extends BaseLambda {
       )})`;
     };
 
-    for (const signature of signatures) {
-      const callResult = tryCallFnDefinition(signature, args, context);
-      if (callResult !== undefined) {
-        return callResult;
-      }
-    }
     throw new REOther(showNameMatchDefinitions());
   }
 
-  override defaultInputs(): Input[] {
+  defaultInputs(): Input[] {
     const longestSignature = maxBy(this.signatures(), (s) => s.length) || [];
     return longestSignature.map((sig, i) => {
       const name = sig.varName ? sig.varName : `Input ${i + 1}`;

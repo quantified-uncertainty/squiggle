@@ -1,6 +1,6 @@
 import { library as booleanLibrary } from "../../fr/boolean.js";
-import { library as commonLibrary } from "../../fr/common.js";
 import { library as calculatorLibrary } from "../../fr/calculator.js";
+import { library as commonLibrary } from "../../fr/common.js";
 import { library as dangerLibrary } from "../../fr/danger.js";
 import { library as dateLibrary } from "../../fr/date.js";
 import { library as dictLibrary } from "../../fr/dict.js";
@@ -22,11 +22,11 @@ import { library as scaleLibrary } from "../../fr/scale.js";
 import { library as scoringLibrary } from "../../fr/scoring.js";
 import { library as stringLibrary } from "../../fr/string.js";
 import { library as symLibrary } from "../../fr/sym.js";
+import { library as systemLibrary } from "../../fr/system.js";
 import { library as tableLibrary } from "../../fr/table.js";
 import { library as tagLibrary } from "../../fr/tag.js";
 import { library as unitsLibrary } from "../../fr/units.js";
-import { library as systemLibrary } from "../../fr/system.js";
-import { Bindings } from "../../reducer/stack.js";
+import { Bindings } from "../../reducer/Stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import { FRFunction, Registry } from "./core.js";
 

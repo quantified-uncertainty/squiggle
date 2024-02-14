@@ -1,8 +1,7 @@
 import { Env } from "../../dist/env.js";
-import { IRuntimeError } from "../../errors/IError.js";
 import { getStdLib } from "../../library/index.js";
-import { createContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
+import { Reducer } from "../../reducer/Reducer.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
 import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
@@ -82,12 +81,17 @@ export class SqLambda {
       env = this.context.project.getEnvironment();
     }
     const rawArgs = args.map((arg) => arg._value);
+
+    // TODO - reuse more parts of the project's primary reducer?
+    const reducer = new Reducer(env);
+
     try {
-      // TODO - obtain correct context from project
-      const value = this._value.call(rawArgs, createContext(env));
+      const value = reducer.call(this._value, rawArgs);
       return Result.Ok(wrapValue(value));
     } catch (e) {
-      return Result.Err(new SqRuntimeError(IRuntimeError.fromException(e)));
+      return Result.Err(
+        new SqRuntimeError(reducer.errorFromException(e), this.context?.project)
+      );
     }
   }
 

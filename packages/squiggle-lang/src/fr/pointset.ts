@@ -41,8 +41,8 @@ const argsToXYShape = (
   return result.value;
 };
 
-const fromDist = makeDefinition([frDist], frDistPointset, ([dist], context) =>
-  unwrapDistResult(dist.toPointSetDist(context.environment))
+const fromDist = makeDefinition([frDist], frDistPointset, ([dist], reducer) =>
+  unwrapDistResult(dist.toPointSetDist(reducer.environment))
 );
 
 const fromNumber = makeDefinition([frNumber], frDistPointset, ([num], _) => {
@@ -157,10 +157,10 @@ export const library = [
       makeDefinition(
         [frDistPointset, frNamed("fn", frLambdaTyped([frNumber], frNumber))],
         frDistPointset,
-        ([dist, lambda], context) => {
+        ([dist, lambda], reducer) => {
           return unwrapDistResult(
             dist.mapYResult(
-              (y) => Ok(doNumberLambdaCall(lambda, [vNumber(y)], context)),
+              (y) => Ok(doNumberLambdaCall(lambda, [vNumber(y)], reducer)),
               undefined,
               undefined
             )

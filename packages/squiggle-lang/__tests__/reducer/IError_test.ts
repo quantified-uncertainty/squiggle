@@ -1,6 +1,8 @@
 import { IRuntimeError } from "../../src/errors/IError.js";
 import { REOther } from "../../src/errors/messages.js";
-import { FrameStack } from "../../src/reducer/frameStack.js";
+import { getStdLib } from "../../src/library/index.js";
+import { Frame, FrameStack } from "../../src/reducer/FrameStack.js";
+import { StackTrace } from "../../src/reducer/StackTrace.js";
 
 describe("ErrorMessage", () => {
   test("toString", () => {
@@ -11,27 +13,50 @@ describe("ErrorMessage", () => {
 describe("IError", () => {
   test("toString", () =>
     expect(
-      IRuntimeError.fromMessage(new REOther("test error")).toString()
+      IRuntimeError.fromMessage(
+        new REOther("test error"),
+        new StackTrace(FrameStack.make())
+      ).toString()
     ).toBe("Error: test error"));
 
   test("toStringWithStacktrace with empty stacktrace", () =>
     expect(
-      IRuntimeError.fromMessage(new REOther("test error")).toStringWithDetails()
+      IRuntimeError.fromMessage(
+        new REOther("test error"),
+        new StackTrace(FrameStack.make())
+      ).toStringWithDetails()
     ).toBe("Error: test error"));
 
   test("toStringWithStackTrace", () => {
-    const frameStack = FrameStack.make()
-      .extend("frame1", undefined)
-      .extend("frame2", undefined);
+    const stdlib = getStdLib();
+
+    const [lambda1, lambda2] = ["add", "normal"].map((name) => {
+      const value = stdlib.get(name);
+      if (!value || value.type !== "Lambda") {
+        throw new Error("Expected a lambda");
+      }
+      return value.value;
+    });
+
+    const frameStack = FrameStack.make();
+    frameStack.extend(new Frame(lambda1, undefined));
+    frameStack.extend(
+      new Frame(lambda2, {
+        source: "test",
+        start: { line: 3, column: 4, offset: 5 },
+        end: { line: 3, column: 5, offset: 6 },
+      })
+    );
 
     expect(
-      IRuntimeError.fromMessageWithFrameStack(
+      IRuntimeError.fromMessage(
         new REOther("test error"),
-        frameStack
+        new StackTrace(frameStack)
       ).toStringWithDetails()
     ).toBe(`Error: test error
 Stack trace:
-  frame2
-  frame1`);
+  normal
+  add at line 3, column 4, file test
+  <top>`);
   });
 });

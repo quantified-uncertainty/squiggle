@@ -1,5 +1,5 @@
 import { REAmbiguous } from "../../errors/messages.js";
-import { ReducerContext } from "../../reducer/context.js";
+import { Reducer } from "../../reducer/Reducer.js";
 import { Value } from "../../value/index.js";
 import { frAny, FRType, isOptional } from "./frTypes.js";
 
@@ -8,7 +8,7 @@ import { frAny, FRType, isOptional } from "./frTypes.js";
 // because of contravariance (we need to store all FnDefinitions in a generic array later on).
 export type FnDefinition<OutputType = any> = {
   inputs: FRType<any>[];
-  run: (args: any[], context: ReducerContext) => OutputType;
+  run: (args: any[], reducer: Reducer) => OutputType;
   output: FRType<OutputType>;
   minInputs: number;
   maxInputs: number;
@@ -45,7 +45,7 @@ export function makeDefinition<
   // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
   inputs: [...{ [K in keyof InputTypes]: FRType<InputTypes[K]> }],
   output: FRType<OutputType>,
-  run: (args: InputTypes, context: ReducerContext) => OutputType,
+  run: (args: InputTypes, reducer: Reducer) => OutputType,
   params?: { deprecated?: string; isDecorator?: boolean }
 ): FnDefinition {
   assertOptionalsAreAtEnd(inputs);
@@ -85,7 +85,7 @@ export function makeAssertDefinition<const T extends any[]>(
 export function tryCallFnDefinition(
   fn: FnDefinition,
   args: Value[],
-  context: ReducerContext
+  reducer: Reducer
 ): Value | undefined {
   if (args.length < fn.minInputs || args.length > fn.maxInputs) {
     return; // args length mismatch
@@ -108,7 +108,7 @@ export function tryCallFnDefinition(
     unpackedArgs.push(...Array(fn.maxInputs - unpackedArgs.length).fill(null));
   }
 
-  return fn.output.pack(fn.run(unpackedArgs, context));
+  return fn.output.pack(fn.run(unpackedArgs, reducer));
 }
 
 export function fnDefinitionToString(fn: FnDefinition): string {

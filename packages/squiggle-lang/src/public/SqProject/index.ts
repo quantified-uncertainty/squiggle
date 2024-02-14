@@ -2,8 +2,7 @@ import { isBindingStatement } from "../../ast/utils.js";
 import { defaultEnv, Env } from "../../dist/env.js";
 import { AST } from "../../index.js";
 import * as Library from "../../library/index.js";
-import { createContext } from "../../reducer/context.js";
-import { Bindings } from "../../reducer/stack.js";
+import { Bindings } from "../../reducer/Stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { vDict, VDict } from "../../value/VDict.js";
@@ -393,8 +392,11 @@ export class SqProject {
       if (!rExternals.ok) {
         this.getItem(sourceId).failRun(rExternals.value);
       } else {
-        const context = createContext(this.getEnvironment());
-        await this.getItem(sourceId).run(context, rExternals.value);
+        await this.getItem(sourceId).run(
+          this.getEnvironment(),
+          rExternals.value,
+          this
+        );
       }
     }
 

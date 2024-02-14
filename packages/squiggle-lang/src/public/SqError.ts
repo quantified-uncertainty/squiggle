@@ -1,5 +1,6 @@
 import { ICompileError, IRuntimeError } from "../errors/IError.js";
-import { Frame } from "../reducer/frameStack.js";
+import { SqProject } from "../index.js";
+import { StackTraceFrame } from "../reducer/StackTrace.js";
 
 abstract class SqAbstractError<T extends string> {
   abstract tag: T;
@@ -9,7 +10,7 @@ abstract class SqAbstractError<T extends string> {
 }
 
 export class SqFrame {
-  constructor(private _value: Frame) {}
+  constructor(private _value: StackTraceFrame) {}
 
   name(): string {
     return this._value.name;
@@ -23,7 +24,10 @@ export class SqFrame {
 export class SqRuntimeError extends SqAbstractError<"runtime"> {
   tag = "runtime" as const;
 
-  constructor(private _value: IRuntimeError) {
+  constructor(
+    private _value: IRuntimeError,
+    private project?: SqProject
+  ) {
     super();
   }
 
@@ -32,7 +36,11 @@ export class SqRuntimeError extends SqAbstractError<"runtime"> {
   }
 
   toStringWithDetails() {
-    return this._value.toStringWithDetails();
+    const { project } = this;
+    return this._value.toString({
+      withStackTrace: true,
+      resolveSource: project ? (id) => project.getSource(id) : undefined,
+    });
   }
 
   private getTopFrame(): SqFrame | undefined {

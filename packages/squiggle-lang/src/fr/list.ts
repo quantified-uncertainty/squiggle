@@ -26,8 +26,8 @@ import {
   doBinaryLambdaCall,
   FnFactory,
 } from "../library/registry/helpers.js";
-import { ReducerContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
+import { Reducer } from "../reducer/Reducer.js";
 import { shuffle, unzip, zip } from "../utility/E_A.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { uniq, uniqBy, Value } from "../value/index.js";
@@ -36,18 +36,18 @@ import { vNumber } from "../value/VNumber.js";
 export function _map(
   array: readonly Value[],
   lambda: Lambda,
-  context: ReducerContext,
+  reducer: Reducer,
   useIndex: boolean
 ): Value[] {
   const mapped: Value[] = new Array(array.length);
   // this code is intentionally duplicated for performance reasons
   if (!useIndex) {
     for (let i = 0; i < array.length; i++) {
-      mapped[i] = lambda.call([array[i]], context);
+      mapped[i] = reducer.call(lambda, [array[i]]);
     }
   } else {
     for (let i = 0; i < array.length; i++) {
-      mapped[i] = lambda.call([array[i], vNumber(i)], context);
+      mapped[i] = reducer.call(lambda, [array[i], vNumber(i)]);
     }
   }
 
@@ -58,17 +58,17 @@ export function _reduce(
   array: readonly Value[],
   initialValue: Value,
   lambda: Lambda,
-  context: ReducerContext,
+  reducer: Reducer,
   useIndex: boolean
 ): Value {
   if (!useIndex) {
     return array.reduce(
-      (acc, elem) => lambda.call([acc, elem], context),
+      (acc, elem) => reducer.call(lambda, [acc, elem]),
       initialValue
     );
   } else {
     return array.reduce(
-      (acc, elem, index) => lambda.call([acc, elem, vNumber(index)], context),
+      (acc, elem, index) => reducer.call(lambda, [acc, elem, vNumber(index)]),
       initialValue
     );
   }
@@ -79,13 +79,13 @@ export function _reduceWhile(
   initialValue: Value,
   step: Lambda,
   condition: Lambda,
-  context: ReducerContext
+  reducer: Reducer
 ): Value {
   let acc = initialValue;
   for (let i = 0; i < array.length; i++) {
-    const newAcc = step.call([acc, array[i]], context);
+    const newAcc = reducer.call(step, [acc, array[i]]);
 
-    const checkResult = condition.call([newAcc], context);
+    const checkResult = reducer.call(condition, [newAcc]);
     if (checkResult.type !== "Bool") {
       throw new REArgumentError(
         `Condition should return a boolean value, got: ${checkResult.type}`
@@ -121,17 +121,17 @@ const _assertUnemptyArray = (array: readonly Value[]) => {
 
 function _binaryLambdaCheck1(
   lambda: Lambda,
-  context: ReducerContext
+  reducer: Reducer
 ): (e: Value) => boolean {
-  return (el: Value) => doBinaryLambdaCall([el], lambda, context);
+  return (el: Value) => doBinaryLambdaCall([el], lambda, reducer);
 }
 
 function applyLambdaAndCheckNumber(
   element: Value,
   lambda: Lambda,
-  context: ReducerContext
+  reducer: Reducer
 ): number {
-  const item = lambda.call([element], context);
+  const item = reducer.call(lambda, [element]);
   if (item.type !== "Number") {
     throw new REArgumentError("Function must return a number");
   }
@@ -171,12 +171,12 @@ export const library = [
           ),
         ],
         frArray(frAny({ genericName: "A" })),
-        ([num, lambda], context) => {
+        ([num, lambda], reducer) => {
           _assertValidArrayLength(num);
           const usedOptional = chooseLambdaParamLength([0, 1], lambda) === 1;
           const fnCall = usedOptional
-            ? (_: any, i: number) => lambda.call([vNumber(i)], context)
-            : () => lambda.call([], context);
+            ? (_: any, i: number) => reducer.call(lambda, [vNumber(i)])
+            : () => reducer.call(lambda, []);
           return Array.from({ length: num }, fnCall);
         }
       ),
@@ -301,9 +301,9 @@ export const library = [
           frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
         ],
         frArray(frAny({ genericName: "A" })),
-        ([array, lambda], context) => {
+        ([array, lambda], reducer) => {
           return sortBy(array, (e) =>
-            applyLambdaAndCheckNumber(e, lambda, context)
+            applyLambdaAndCheckNumber(e, lambda, reducer)
           );
         }
       ),
@@ -321,10 +321,10 @@ export const library = [
           frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
         ],
         frAny({ genericName: "A" }),
-        ([array, lambda], context) => {
+        ([array, lambda], reducer) => {
           _assertUnemptyArray(array);
           const el = minBy(array, (e) =>
-            applyLambdaAndCheckNumber(e, lambda, context)
+            applyLambdaAndCheckNumber(e, lambda, reducer)
           );
           if (!el) {
             //This should never be reached, because we checked that the array is not empty
@@ -347,10 +347,10 @@ export const library = [
           frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
         ],
         frAny({ genericName: "A" }),
-        ([array, lambda], context) => {
+        ([array, lambda], reducer) => {
           _assertUnemptyArray(array);
           const el = maxBy(array, (e) =>
-            applyLambdaAndCheckNumber(e, lambda, context)
+            applyLambdaAndCheckNumber(e, lambda, reducer)
           );
           if (!el) {
             //This should never be reached, because we checked that the array is not empty
@@ -433,8 +433,8 @@ export const library = [
           ),
         ],
         frArray(frAny({ genericName: "A" })),
-        ([arr, lambda], context) =>
-          uniqBy(arr, (e) => lambda.call([e], context))
+        ([arr, lambda], reducer) =>
+          uniqBy(arr, (e) => reducer.call(lambda, [e]))
       ),
     ],
   }),
@@ -464,9 +464,9 @@ export const library = [
           ),
         ],
         frArray(frAny({ genericName: "B" })),
-        ([array, lambda], context) => {
+        ([array, lambda], reducer) => {
           const usedOptional = chooseLambdaParamLength([1, 2], lambda) === 2;
-          return _map(array, lambda, context, usedOptional ? true : false);
+          return _map(array, lambda, reducer, usedOptional ? true : false);
         }
       ),
     ],
@@ -500,13 +500,13 @@ export const library = [
           ),
         ],
         frAny({ genericName: "A" }),
-        ([array, initialValue, lambda], context) => {
+        ([array, initialValue, lambda], reducer) => {
           const usedOptional = chooseLambdaParamLength([2, 3], lambda) === 3;
           return _reduce(
             array,
             initialValue,
             lambda,
-            context,
+            reducer,
             usedOptional ? true : false
           );
         }
@@ -538,8 +538,8 @@ export const library = [
           ),
         ],
         frAny({ genericName: "A" }),
-        ([array, initialValue, lambda], context) =>
-          _reduce([...array].reverse(), initialValue, lambda, context, false)
+        ([array, initialValue, lambda], reducer) =>
+          _reduce([...array].reverse(), initialValue, lambda, reducer, false)
       ),
     ],
   }),
@@ -587,8 +587,8 @@ List.reduceWhile(
           ),
         ],
         frAny({ genericName: "A" }),
-        ([array, initialValue, step, condition], context) =>
-          _reduceWhile(array, initialValue, step, condition, context)
+        ([array, initialValue, step, condition], reducer) =>
+          _reduceWhile(array, initialValue, step, condition, reducer)
       ),
     ],
   }),
@@ -604,8 +604,8 @@ List.reduceWhile(
           frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
         ],
         frArray(frAny({ genericName: "A" })),
-        ([array, lambda], context) =>
-          array.filter(_binaryLambdaCheck1(lambda, context))
+        ([array, lambda], reducer) =>
+          array.filter(_binaryLambdaCheck1(lambda, reducer))
       ),
     ],
   }),
@@ -621,8 +621,8 @@ List.reduceWhile(
           frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
         ],
         frBool,
-        ([array, lambda], context) =>
-          array.every(_binaryLambdaCheck1(lambda, context))
+        ([array, lambda], reducer) =>
+          array.every(_binaryLambdaCheck1(lambda, reducer))
       ),
     ],
   }),
@@ -638,8 +638,8 @@ List.reduceWhile(
           frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
         ],
         frBool,
-        ([array, lambda], context) =>
-          array.some(_binaryLambdaCheck1(lambda, context))
+        ([array, lambda], reducer) =>
+          array.some(_binaryLambdaCheck1(lambda, reducer))
       ),
     ],
   }),
@@ -656,8 +656,8 @@ List.reduceWhile(
           frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
         ],
         frAny({ genericName: "A" }),
-        ([array, lambda], context) => {
-          const result = array.find(_binaryLambdaCheck1(lambda, context));
+        ([array, lambda], reducer) => {
+          const result = array.find(_binaryLambdaCheck1(lambda, reducer));
           if (!result) {
             throw new REOther("No element found");
           }
@@ -679,8 +679,8 @@ List.reduceWhile(
           frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
         ],
         frNumber,
-        ([array, lambda], context) =>
-          array.findIndex(_binaryLambdaCheck1(lambda, context))
+        ([array, lambda], reducer) =>
+          array.findIndex(_binaryLambdaCheck1(lambda, reducer))
       ),
     ],
   }),
@@ -722,7 +722,7 @@ List.reduceWhile(
       makeDefinition(
         [frArray(frAny({ genericName: "A" }))],
         frArray(frAny({ genericName: "A" })),
-        ([arr], context) => shuffle(arr, context.rng)
+        ([arr], reducer) => shuffle(arr, reducer.rng)
       ),
     ],
   }),

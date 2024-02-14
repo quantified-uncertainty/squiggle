@@ -1,8 +1,9 @@
 import { AST, parse } from "../../ast/parse.js";
-import { ICompileError, IRuntimeError } from "../../errors/IError.js";
+import { ICompileError } from "../../errors/IError.js";
 import { compileAst } from "../../expression/compile.js";
-import { ReducerContext } from "../../reducer/context.js";
-import { evaluate, ReducerFn } from "../../reducer/index.js";
+import { Env, SqProject } from "../../index.js";
+import { Reducer } from "../../reducer/Reducer.js";
+import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
@@ -187,7 +188,7 @@ export class ProjectItem {
     this.output = Result.Err(e);
   }
 
-  async run(context: ReducerContext, externals: Externals) {
+  async run(environment: Env, externals: Externals, project: SqProject) {
     const _externals = externals.stdlib
       .merge(externals.implicitImports)
       .merge(externals.explicitImports);
@@ -217,39 +218,33 @@ export class ProjectItem {
       return;
     }
 
-    try {
-      const wrappedEvaluate = context.evaluate;
-      const asyncEvaluate: ReducerFn = (expression, context) => {
-        // For now, runs are sync, so this doesn't do anything, but this might change in the future.
-        // For example, if we decide to yield after each statement.
-        return wrappedEvaluate(expression, context);
-      };
+    const reducer = new Reducer(environment);
 
-      if (expression.value.type !== "Program") {
+    try {
+      if (expression.value.kind !== "Program") {
         // mostly for TypeScript, so that we could access `expression.value.exports`
         throw new Error("Expected Program expression");
       }
 
-      const [result, contextAfterEvaluation] = evaluate(expression.value, {
-        ...context,
-        evaluate: asyncEvaluate,
-      });
+      const result = reducer.evaluate(expression.value);
 
       const exportNames = new Set(expression.value.value.exports);
-      const bindings = contextAfterEvaluation.stack
-        .asBindings()
-        .mapEntries(([key, value]) => {
-          let _value = value;
-          if (exportNames.has(key)) {
-            _value = value.mergeTags({
-              exportData: {
-                sourceId: this.sourceId,
-                path: [key],
-              },
-            });
+      const bindings = ImmutableMap<string, Value>(
+        Object.entries(expression.value.value.bindings).map(
+          ([name, offset]) => {
+            let value = reducer.stack.get(offset);
+            if (exportNames.has(name)) {
+              value = value.mergeTags({
+                exportData: {
+                  sourceId: this.sourceId,
+                  path: [name],
+                },
+              });
+            }
+            return [name, value];
           }
-          return [key, _value];
-        });
+        )
+      );
       const exports = bindings.filter(
         (value, _) => value.tags?.exportData() !== undefined
       );
@@ -262,10 +257,10 @@ export class ProjectItem {
             path: [],
           },
         }),
-        externals: externals,
+        externals,
       });
     } catch (e: unknown) {
-      this.failRun(new SqRuntimeError(IRuntimeError.fromException(e)));
+      this.failRun(new SqRuntimeError(reducer.errorFromException(e), project));
     }
   }
 }

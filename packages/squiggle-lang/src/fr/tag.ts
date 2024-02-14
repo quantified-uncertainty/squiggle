@@ -104,11 +104,11 @@ function decoratorWithInputOrFnInput<T>(
       frOr(outputType, frLambdaTyped([inputType], outputType)),
     ],
     frWithTags(inputType),
-    ([{ value, tags }, newInput], context) => {
+    ([{ value, tags }, newInput], reducer) => {
       const runLambdaToGetType = (fn: Lambda) => {
         //When we call the function, we pass in the tags as well, just in case they are asked for in the call.
         const val = frWithTags(inputType).pack({ value: value, tags });
-        return fn.call([val], context);
+        return reducer.call(fn, [val]);
       };
       const correctTypedInputValue: T = _ensureTypeUsingLambda(
         outputType,
@@ -405,7 +405,7 @@ example2 = {|x| x + 1}`,
           }
           return {
             value,
-            tags: tags.merge({ location: location }),
+            tags: tags.merge({ location }),
           };
         },
         { isDecorator: true }

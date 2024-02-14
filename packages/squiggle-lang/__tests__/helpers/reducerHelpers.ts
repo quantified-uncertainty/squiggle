@@ -1,51 +1,21 @@
 import { nodeResultToString, parse } from "../../src/ast/parse.js";
 import { ICompileError, IRuntimeError } from "../../src/errors/IError.js";
-import { compileAst } from "../../src/expression/compile.js";
-import { expressionToString } from "../../src/expression/index.js";
-import { getStdLib } from "../../src/library/index.js";
-import {
-  evaluateExpressionToResult,
-  evaluateStringToResult,
-} from "../../src/reducer/index.js";
+import { evaluateStringToResult } from "../../src/reducer/index.js";
 import * as Result from "../../src/utility/result.js";
 import { Value } from "../../src/value/index.js";
 
 const expectParseToBe = (expr: string, answer: string) => {
-  expect(nodeResultToString(parse(expr, "test"))).toBe(answer);
+  expect(nodeResultToString(parse(expr, "test"), { pretty: false })).toBe(
+    answer
+  );
 };
 
 const resultToString = (
   r: Result.result<Value, ICompileError | IRuntimeError>
 ) => (r.ok ? r.value.toString() : `Error(${r.value.toString()})`);
 
-export const testParse = (expr: string, answer: string) =>
-  test(expr, () => expectParseToBe(expr, answer));
-
-async function expectExpressionToBe(expr: string, answer: string, v?: string) {
-  const rExpr = Result.bind(parse(expr, "test"), (ast) =>
-    compileAst(ast, getStdLib())
-  );
-  const a1 = rExpr.ok
-    ? expressionToString(rExpr.value)
-    : `Error(${rExpr.value.toString()})`;
-
-  expect(a1).toBe(answer);
-
-  if (v === undefined) {
-    return;
-  }
-
-  const a2r: Result.result<Value, ICompileError | IRuntimeError> = rExpr.ok
-    ? await evaluateExpressionToResult(rExpr.value)
-    : Result.Err(rExpr.value);
-
-  const a2 = resultToString(a2r);
-  expect(a2).toBe(v);
-}
-
-export function testToExpression(expr: string, answer: string, v?: string) {
-  test(expr, async () => await expectExpressionToBe(expr, answer, v));
-}
+export const testParse = (code: string, answer: string) =>
+  test(code, () => expectParseToBe(code, answer));
 
 async function expectEvalError(code: string) {
   expect(resultToString(await evaluateStringToResult(code))).toMatch(/Error\(/);
