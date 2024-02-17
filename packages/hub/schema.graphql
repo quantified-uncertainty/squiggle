@@ -193,6 +193,7 @@ type ModelRevision implements Node {
   id: ID!
   model: Model!
   relativeValuesExports: [RelativeValuesExport!]!
+  seed: String!
 }
 
 type ModelRevisionConnection {

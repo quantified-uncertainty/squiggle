@@ -1,0 +1,3 @@
+ALTER TABLE "ModelRevision" ADD COLUMN     "seed" TEXT DEFAULT 'DEFAULT_SEED';
+UPDATE "ModelRevision" SET "seed" = 'DEFAULT_SEED' WHERE "seed" IS NULL;
+ALTER TABLE "ModelRevision" ALTER COLUMN "seed" SET NOT NULL;

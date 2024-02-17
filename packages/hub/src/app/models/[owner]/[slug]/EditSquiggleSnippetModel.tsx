@@ -145,6 +145,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
         }
         currentRevision {
           id
+          seed
           content {
             __typename
             ... on SquiggleSnippet {
@@ -398,6 +399,12 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       form.setValue("exports", exports);
     };
   }
+
+  console.log(model);
+  playgroundProps.environment = {
+    sampleCount: 1000,
+    seed: model.currentRevision.seed,
+  };
 
   if (
     versionSupportsOnOpenExport.propsByVersion<"SquigglePlayground">(

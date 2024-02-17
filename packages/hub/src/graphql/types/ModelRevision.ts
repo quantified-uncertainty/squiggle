@@ -42,6 +42,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     model: t.relation("model"),
     author: t.relation("author", { nullable: true }),
     comment: t.exposeString("comment"),
+    seed: t.exposeString("seed", { nullable: false }),
     content: t.field({
       type: ModelContent,
       select: { squiggleSnippet: true },

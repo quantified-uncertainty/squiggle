@@ -211,7 +211,6 @@ model ModelRevision {
   // optional until we populate old rows after migration
   author   User?   @relation(fields: [authorId], references: [id])
   authorId String?
-
   comment String @default("")
 
   contentType ModelType
@@ -224,6 +223,8 @@ model ModelRevision {
 
   // required by Prisma, but unused since `model` field should point at the same entity
   currentRevisionModel Model? @relation("CurrentRevision")
+
+  seed String @default("DEFAULT_SEED")
 
   @@index([modelId])
 }
