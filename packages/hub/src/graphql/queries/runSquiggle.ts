@@ -3,7 +3,7 @@ import crypto from "crypto";
 
 import { SqProject, SqValue } from "@quri/squiggle-lang";
 
-import { SAMPLE_COUNT_DEFAULT } from "@/constants";
+import { DEFAULT_SEED, SAMPLE_COUNT_DEFAULT } from "@/constants";
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
@@ -83,7 +83,7 @@ export async function runSquiggle(code: string): Promise<SquiggleOutput> {
   const env = {
     sampleCount: SAMPLE_COUNT_DEFAULT, // int
     xyPointLength: 1000, // int
-    seed: "DEFAULT_SEED",
+    seed: DEFAULT_SEED,
   };
 
   const project = SqProject.create({ environment: env });
