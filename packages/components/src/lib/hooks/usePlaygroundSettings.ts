@@ -1,12 +1,13 @@
 import merge from "lodash/merge.js";
 import { useCallback, useState } from "react";
 
+import { generateSeed } from "@quri/squiggle-lang";
+
 import {
   defaultPlaygroundSettings,
   PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../../components/PlaygroundSettings.js";
-import { randomSeed } from "../seedGenerator.js";
 
 export type Args = {
   defaultSettings: PartialPlaygroundSettings;
@@ -41,7 +42,7 @@ export function usePlaygroundSettings({
       ...settings,
       environment: {
         ...settings.environment,
-        seed: randomSeed(),
+        seed: generateSeed(),
       },
     });
   };

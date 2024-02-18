@@ -1,5 +1,7 @@
 import { ZodError } from "zod";
 
+import { generateSeed } from "@quri/squiggle-lang";
+
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
@@ -78,7 +80,7 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
                 id: model.id,
               },
             },
-            seed: "MY_TEST_SEED",
+            seed: generateSeed(),
           },
         });
 
