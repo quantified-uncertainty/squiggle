@@ -239,6 +239,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
         comment: extraData?.comment,
         slug: model.slug,
         owner: model.owner.slug,
+        seed: revision.seed,
       },
     }),
     confirmation: "Saved",

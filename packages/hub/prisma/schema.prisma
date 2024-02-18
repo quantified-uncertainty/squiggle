@@ -224,7 +224,7 @@ model ModelRevision {
   // required by Prisma, but unused since `model` field should point at the same entity
   currentRevisionModel Model? @relation("CurrentRevision")
 
-  seed String @default("DEFAULT_SEED")
+  seed String
 
   @@index([modelId])
 }

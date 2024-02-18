@@ -454,6 +454,7 @@ input MutationUpdateSquiggleSnippetModelInput {
   exports: [SquiggleModelExportInput!]
   owner: String!
   relativeValuesExports: [RelativeValuesExportInput!]
+  seed: String
   slug: String!
 }
 

@@ -78,6 +78,7 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
                 id: model.id,
               },
             },
+            seed: "MY_TEST_SEED",
           },
         });
 
