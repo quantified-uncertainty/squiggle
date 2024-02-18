@@ -31,6 +31,7 @@ import {
 import { EditModelExports } from "@/components/exports/EditModelExports";
 import { ReactRoot } from "@/components/ReactRoot";
 import { FormModal } from "@/components/ui/FormModal";
+import { SAMPLE_COUNT_DEFAULT } from "@/constants";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { useMutationForm } from "@/hooks/useMutationForm";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
@@ -401,9 +402,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     };
   }
 
-  console.log(model);
   playgroundProps.environment = {
-    sampleCount: 1000,
+    sampleCount: SAMPLE_COUNT_DEFAULT,
     seed: model.currentRevision.seed,
   };
 
