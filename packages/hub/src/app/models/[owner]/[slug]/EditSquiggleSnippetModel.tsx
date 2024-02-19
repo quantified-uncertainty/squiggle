@@ -146,13 +146,13 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
         }
         currentRevision {
           id
-          seed
           content {
             __typename
             ... on SquiggleSnippet {
               id
               code
               version
+              seed
             }
           }
           exports {
@@ -184,6 +184,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     revision.content,
     "SquiggleSnippet"
   );
+
+  const seed = content.seed;
 
   const initialFormValues: SquiggleSnippetFormShape = useMemo(() => {
     return {
@@ -234,13 +236,13 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
         content: {
           code: formData.code,
           version,
+          seed: seed,
         },
         relativeValuesExports: formData.relativeValuesExports,
         exports: formData.exports,
         comment: extraData?.comment,
         slug: model.slug,
         owner: model.owner.slug,
-        seed: revision.seed,
       },
     }),
     confirmation: "Saved",
@@ -404,7 +406,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
 
   playgroundProps.environment = {
     sampleCount: SAMPLE_COUNT_DEFAULT,
-    seed: model.currentRevision.seed,
+    seed: seed,
   };
 
   if (

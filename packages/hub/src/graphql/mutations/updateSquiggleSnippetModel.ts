@@ -35,6 +35,7 @@ const SquiggleSnippetContentInput = builder.inputType(
     fields: (t) => ({
       code: t.string({ required: true }),
       version: t.string({ required: true }),
+      seed: t.string({ required: true }),
     }),
   }
 );
@@ -70,7 +71,6 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
         required: true,
       }),
       comment: t.input.string(),
-      seed: t.input.string({ required: true }),
     },
     resolve: async (_, { input }, { session }) => {
       const existingModel = await getWriteableModel({
@@ -145,11 +145,11 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
               create: {
                 code: input.content.code,
                 version: input.content.version,
+                seed: input.content.seed,
               },
             },
             contentType: "SquiggleSnippet",
             comment: input.comment ?? "",
-            seed: input.seed,
             model: {
               connect: { id: existingModel.id },
             },

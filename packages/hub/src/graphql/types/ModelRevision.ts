@@ -1,3 +1,5 @@
+import { UnionRef } from "@pothos/core";
+
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
@@ -9,11 +11,25 @@ export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
   fields: (t) => ({
     code: t.exposeString("code"),
     version: t.exposeString("version"),
+    seed: t.exposeString("seed"),
   }),
 });
 
 // TODO - turn into interface?
-export const ModelContent = builder.unionType("ModelContent", {
+export const ModelContent: UnionRef<
+  {
+    id: string;
+    code: string;
+    version: string;
+    seed: string;
+  },
+  {
+    id: string;
+    code: string;
+    version: string;
+    seed: string;
+  }
+> = builder.unionType("ModelContent", {
   types: [SquiggleSnippet],
   resolveType: () => SquiggleSnippet,
 });
@@ -42,7 +58,6 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     model: t.relation("model"),
     author: t.relation("author", { nullable: true }),
     comment: t.exposeString("comment"),
-    seed: t.exposeString("seed"),
     content: t.field({
       type: ModelContent,
       select: { squiggleSnippet: true },

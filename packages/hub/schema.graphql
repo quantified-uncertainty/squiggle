@@ -193,7 +193,6 @@ type ModelRevision implements Node {
   id: ID!
   model: Model!
   relativeValuesExports: [RelativeValuesExport!]!
-  seed: String!
 }
 
 type ModelRevisionConnection {
@@ -350,7 +349,7 @@ input MutationCreateSquiggleSnippetModelInput {
   isPrivate: Boolean
 
   """A unique seed, used for calculation"""
-  seed: String
+  seed: String!
   slug: String!
   version: String!
 }
@@ -457,7 +456,6 @@ input MutationUpdateSquiggleSnippetModelInput {
   exports: [SquiggleModelExportInput!]
   owner: String!
   relativeValuesExports: [RelativeValuesExportInput!]
-  seed: String!
   slug: String!
 }
 
@@ -672,11 +670,13 @@ interface SquiggleOutput {
 type SquiggleSnippet implements Node {
   code: String!
   id: ID!
+  seed: String!
   version: String!
 }
 
 input SquiggleSnippetContentInput {
   code: String!
+  seed: String!
   version: String!
 }
 

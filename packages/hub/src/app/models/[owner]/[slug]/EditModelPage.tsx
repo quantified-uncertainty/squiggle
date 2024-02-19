@@ -22,7 +22,6 @@ export const EditModelPage: FC<{
           ... on Model {
             id
             currentRevision {
-              seed
               content {
                 __typename
               }

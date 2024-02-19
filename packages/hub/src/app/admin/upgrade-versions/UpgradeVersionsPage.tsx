@@ -44,6 +44,7 @@ const UpgradeableModel: FC<{ modelRef: UpgradeVersionsPage_Model$key }> = ({
               id
               code
               version
+              seed
             }
           }
         }
