@@ -75,20 +75,46 @@ export type SquiggleViewerProps = {
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
 
+//This needs to be inside the ViewerProvider. This is why it's separated from the component.
+const SquiggleViewerWithoutProvider: FC<
+  Omit<SquiggleViewerProps, "sourceId" | "sqOutput">
+> = ({ value }) => {
+  const { zoomedInPath } = useViewerContext();
+
+  const getSubvalueByPath = useGetSubvalueByPath();
+
+  let zoomedInItem: SqValue | undefined;
+  if (zoomedInPath) {
+    zoomedInItem = getSubvalueByPath(value, zoomedInPath);
+  }
+
+  return zoomedInPath ? (
+    <div className="space-y-3 pl-3">
+      <ZoomedInNavigation
+        zoomedInPath={zoomedInPath}
+        rootPath={value.context?.path}
+      />
+      {zoomedInItem ? (
+        <ValueViewer
+          value={zoomedInItem}
+          collapsible={false}
+          header="large"
+          size="large"
+        />
+      ) : (
+        <MessageAlert heading="ZoomedIn variable is not defined" />
+      )}
+    </div>
+  ) : (
+    <ValueViewer value={value} size="large" />
+  );
+};
+
 const component = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
   function SquiggleViewer(
     { value, editor, ...partialPlaygroundSettings },
     ref
   ) {
-    const { zoomedInPath } = useViewerContext();
-
-    const getSubvalueByPath = useGetSubvalueByPath();
-
-    let zoomedInItem: SqValue | undefined;
-    if (zoomedInPath) {
-      zoomedInItem = getSubvalueByPath(value, zoomedInPath);
-    }
-
     return (
       <ErrorBoundary>
         <ViewerProvider
@@ -97,26 +123,7 @@ const component = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
           ref={ref}
           rootValue={value}
         >
-          {zoomedInPath ? (
-            <div className="space-y-3 pl-3">
-              <ZoomedInNavigation
-                zoomedInPath={zoomedInPath}
-                rootPath={value.context?.path}
-              />
-              {zoomedInItem ? (
-                <ValueViewer
-                  value={zoomedInItem}
-                  collapsible={false}
-                  header="large"
-                  size="large"
-                />
-              ) : (
-                <MessageAlert heading="ZoomedIn variable is not defined" />
-              )}
-            </div>
-          ) : (
-            <ValueViewer value={value} size="large" />
-          )}
+          <SquiggleViewerWithoutProvider value={value} />
         </ViewerProvider>
       </ErrorBoundary>
     );
