@@ -6,6 +6,7 @@ import { LockIcon } from "@quri/ui";
 import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { H1 } from "@/components/ui/Headers";
+import { isRootEmail } from "@/graphql/helpers/userHelpers";
 
 import { authOptions } from "../api/auth/[...nextauth]/authOptions";
 
@@ -14,8 +15,7 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 
   const email = session?.user.email;
 
-  const { ROOT_EMAILS } = process.env;
-  if (!email || !ROOT_EMAILS?.includes(email)) {
+  if (!email || !isRootEmail(email)) {
     return <NarrowPageLayout>Access denied.</NarrowPageLayout>;
   }
 

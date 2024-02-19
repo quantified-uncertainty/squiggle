@@ -20,9 +20,11 @@ export async function getSelf(session: SignedInSession) {
 
 const ROOT_EMAILS = (process.env["ROOT_EMAILS"] ?? "").split(",");
 
+export function isRootEmail(email: string) {
+  return ROOT_EMAILS.includes(email);
+}
+
 export async function isRootUser(user: User) {
   // see also: `isRootUser` auth scope in builder.ts
-  return Boolean(
-    user.email && user.emailVerified && ROOT_EMAILS.includes(user.email)
-  );
+  return Boolean(user.email && user.emailVerified && isRootEmail(user.email));
 }
