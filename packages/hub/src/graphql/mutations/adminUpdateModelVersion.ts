@@ -54,6 +54,7 @@ builder.mutationField("adminUpdateModelVersion", (t) =>
               create: {
                 code: model.currentRevision.squiggleSnippet.code,
                 version: input.version,
+                seed: model.currentRevision.squiggleSnippet.seed,
               },
             },
             contentType: "SquiggleSnippet",
@@ -64,7 +65,6 @@ builder.mutationField("adminUpdateModelVersion", (t) =>
               connect: { email: self.email! },
             },
             comment: `Automated upgrade from ${model.currentRevision.squiggleSnippet.version} to ${input.version}`,
-            seed: model.currentRevision.seed,
             relativeValuesExports: {
               createMany: {
                 data: model.currentRevision.relativeValuesExports.map(

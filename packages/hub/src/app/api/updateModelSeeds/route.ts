@@ -3,19 +3,20 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { generateSeed } from "@quri/squiggle-lang";
 
-import { DEFAULT_SEED } from "@/constants";
-
 const prisma = new PrismaClient();
 
-async function generateAndSetNewSeedForModels() {
-  // Find all models
+async function updateSquiggleSnippetsSeedForModels() {
+  // Retrieve all models
   const models = await prisma.model.findMany({
     include: {
       revisions: {
+        include: {
+          squiggleSnippet: true,
+        },
         orderBy: {
           createdAt: "desc",
         },
-        take: 1, // Only include the last revision
+        take: 1,
       },
     },
   });
@@ -23,16 +24,26 @@ async function generateAndSetNewSeedForModels() {
   for (const model of models) {
     const lastRevision = model.revisions[0];
 
-    // Check if the last revision has the DEFAULT_SEED
-    if (lastRevision && lastRevision.seed === DEFAULT_SEED) {
-      // Generate a random seed for the model
+    // Check if the last revision's SquiggleSnippet has the DEFAULT_SEED
+    if (
+      lastRevision.squiggleSnippet &&
+      lastRevision.squiggleSnippet.seed === "DEFAULT_SEED"
+    ) {
       const newSeed = generateSeed();
 
-      // Update seed for all revisions of the current model
-      await prisma.modelRevision.updateMany({
-        where: { modelId: model.id },
-        data: { seed: newSeed },
-      });
+      // Update all SquiggleSnippets for all revisions of the current model
+      for (const revision of model.revisions) {
+        if (revision.squiggleSnippet) {
+          await prisma.squiggleSnippet.update({
+            where: {
+              id: revision.squiggleSnippet.id,
+            },
+            data: {
+              seed: newSeed,
+            },
+          });
+        }
+      }
     }
   }
 }
@@ -49,7 +60,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await generateAndSetNewSeedForModels();
+    await updateSquiggleSnippetsSeedForModels();
     return new NextResponse(
       JSON.stringify({
         message:
