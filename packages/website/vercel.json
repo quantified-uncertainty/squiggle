@@ -1,5 +1,17 @@
 {
   "buildCommand": "PLATFORM=vercel npx turbo build",
   "framework": "nextjs",
-  "ignoreCommand": "npx turbo-ignore || ../../skip-dependabot.sh"
+  "ignoreCommand": "npx turbo-ignore || ../../skip-dependabot.sh",
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "playground.squiggle-language.com"
+        }
+      ],
+      "destination": "https://www.squiggle-language.com/playground"
+    }
+  ]
 }
