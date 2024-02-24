@@ -1,8 +1,10 @@
 import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 
 import { builder } from "@/graphql/builder";
+import { prisma } from "@/prisma";
 
 import { decodeGlobalIdWithTypename } from "../utils";
+import { ModelExport } from "./ModelExport";
 import { ModelRevision, ModelRevisionConnection } from "./ModelRevision";
 import { Owner } from "./Owner";
 
@@ -94,6 +96,29 @@ export const Model = builder.prismaNode("Model", {
       },
       ModelRevisionConnection
     ),
+    exportRevisions: t.field({
+      type: [ModelExport],
+      args: {
+        variableId: t.arg.string({ required: true }),
+      },
+      resolve: async (model, args) => {
+        const modelRevisions = await prisma.modelRevision.findMany({
+          where: { modelId: model.id },
+          include: {
+            exports: {
+              where: {
+                variableName: args.variableId,
+              },
+            },
+          },
+        });
+
+        const modelExports = modelRevisions.flatMap(
+          (revision) => revision.exports
+        );
+        return modelExports;
+      },
+    }),
   }),
 });
 

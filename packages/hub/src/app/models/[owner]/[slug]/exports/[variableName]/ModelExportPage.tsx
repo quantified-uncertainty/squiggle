@@ -20,7 +20,10 @@ export const ModelExportPage: FC<{
 }> = ({ query, params }) => {
   const [{ model: result }] = usePageQuery(
     graphql`
-      query ModelExportPageQuery($input: QueryModelInput!) {
+      query ModelExportPageQuery(
+        $input: QueryModelInput!
+        $variableName: String!
+      ) {
         model(input: $input) {
           __typename
           ... on Model {
@@ -31,6 +34,18 @@ export const ModelExportPage: FC<{
               content {
                 __typename
                 ...SquiggleModelExportPage
+              }
+            }
+            exportRevisions(variableId: $variableName) {
+              id
+              variableName
+              modelRevision {
+                id
+                createdAtTimestamp
+                content {
+                  __typename
+                  ...SquiggleModelExportPage
+                }
               }
             }
           }

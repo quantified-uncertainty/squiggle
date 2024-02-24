@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "db:migrate": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate deploy",
+    "db:reset": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate reset",
     "dev": "next dev -p 3001",
     "start": "__NEXT_PRIVATE_PREBUNDLED_REACT=next next start",
     "gen:prisma": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma generate",

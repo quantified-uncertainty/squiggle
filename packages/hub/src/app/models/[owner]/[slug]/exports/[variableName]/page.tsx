@@ -13,6 +13,7 @@ type Props = {
 export default async function OuterModelExportPage({ params }: Props) {
   const query = await loadPageQuery<ModelExportPageQuery>(QueryNode, {
     input: { owner: params.owner, slug: params.slug },
+    variableName: params.variableName,
   });
 
   return (
