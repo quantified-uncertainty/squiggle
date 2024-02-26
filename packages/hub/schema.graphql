@@ -152,6 +152,7 @@ enum MembershipRole {
 type Model implements Node {
   createdAtTimestamp: Float!
   currentRevision: ModelRevision!
+  exportRevisions(variableId: String!): [ModelExport!]!
   id: ID!
   isEditable: Boolean!
   isPrivate: Boolean!
@@ -181,6 +182,16 @@ type ModelExport implements Node {
   title: String
   variableName: String!
   variableType: String!
+}
+
+type ModelExportConnection {
+  edges: [ModelExportEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ModelExportEdge {
+  cursor: String!
+  node: ModelExport!
 }
 
 type ModelRevision implements Node {
