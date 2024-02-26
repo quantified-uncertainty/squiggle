@@ -1,5 +1,3 @@
-import { UnionRef } from "@pothos/core";
-
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
@@ -16,20 +14,7 @@ export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
 });
 
 // TODO - turn into interface?
-export const ModelContent: UnionRef<
-  {
-    id: string;
-    code: string;
-    version: string;
-    seed: string;
-  },
-  {
-    id: string;
-    code: string;
-    version: string;
-    seed: string;
-  }
-> = builder.unionType("ModelContent", {
+export const ModelContent = builder.unionType("ModelContent", {
   types: [SquiggleSnippet],
   resolveType: () => SquiggleSnippet,
 });
