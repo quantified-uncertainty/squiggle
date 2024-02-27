@@ -6,6 +6,7 @@ import { FormProvider } from "react-hook-form";
 import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
+import { generateSeed } from "@quri/squiggle-lang";
 import { Button, CheckboxFormField } from "@quri/ui";
 import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
 
@@ -102,6 +103,7 @@ export const NewModel: FC = () => {
         isPrivate: data.isPrivate,
         code: defaultCode,
         version: defaultSquiggleVersion,
+        seed: generateSeed(),
       },
     }),
     onCompleted: (result) => {

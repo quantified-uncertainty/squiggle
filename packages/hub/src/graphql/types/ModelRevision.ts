@@ -9,6 +9,7 @@ export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
   fields: (t) => ({
     code: t.exposeString("code"),
     version: t.exposeString("version"),
+    seed: t.exposeString("seed"),
   }),
 });
 

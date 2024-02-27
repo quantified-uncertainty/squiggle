@@ -54,6 +54,7 @@ builder.mutationField("adminUpdateModelVersion", (t) =>
               create: {
                 code: model.currentRevision.squiggleSnippet.code,
                 version: input.version,
+                seed: model.currentRevision.squiggleSnippet.seed,
               },
             },
             contentType: "SquiggleSnippet",

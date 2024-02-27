@@ -347,6 +347,9 @@ input MutationCreateSquiggleSnippetModelInput {
 
   """Defaults to false"""
   isPrivate: Boolean
+
+  """A unique seed, used for calculation"""
+  seed: String!
   slug: String!
   version: String!
 }
@@ -667,11 +670,13 @@ interface SquiggleOutput {
 type SquiggleSnippet implements Node {
   code: String!
   id: ID!
+  seed: String!
   version: String!
 }
 
 input SquiggleSnippetContentInput {
   code: String!
+  seed: String!
   version: String!
 }
 

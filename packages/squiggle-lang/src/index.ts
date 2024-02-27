@@ -130,3 +130,5 @@ export {
   SCALE_POWER_DEFAULT_CONSTANT,
   SCALE_SYMLOG_DEFAULT_CONSTANT,
 } from "./value/VScale.js";
+
+export { generateSeed } from "./utility/seedGenerator.js";
