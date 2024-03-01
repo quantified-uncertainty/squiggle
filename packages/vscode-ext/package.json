@@ -143,7 +143,7 @@
     "@quri/versioned-squiggle-components": "workspace:*",
     "@types/node": "^20.11.24",
     "@types/react": "^18.2.52",
-    "@types/react-dom": "^18.2.18",
+    "@types/react-dom": "^18.2.19",
     "@types/vscode": "^1.86.0",
     "@types/vscode-webview": "^1.57.5",
     "esbuild": "^0.20.0",
