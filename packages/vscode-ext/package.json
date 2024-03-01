@@ -147,7 +147,7 @@
     "@types/vscode": "^1.86.0",
     "@types/vscode-webview": "^1.57.5",
     "esbuild": "^0.20.0",
-    "eslint": "^8.56.0",
+    "eslint": "^8.57.0",
     "js-yaml": "^4.1.0",
     "prettier": "^3.2.4",
     "react": "^18.2.0",
