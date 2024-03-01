@@ -571,8 +571,8 @@ importers:
   packages/squiggle-lang:
     dependencies:
       '@commander-js/extra-typings':
-        specifier: ^11.1.0
-        version: 11.1.0(commander@11.1.0)
+        specifier: ^12.0.1
+        version: 12.0.1(commander@11.1.0)
       commander:
         specifier: ^11.1.0
         version: 11.1.0
@@ -2723,6 +2723,14 @@ packages:
     resolution: {integrity: sha512-GuvZ38d23H+7Tz2C9DhzCepivsOsky03s5NI+KCy7ke1FNUvsJ2oO47scQ9YaGGhgjgNW5OYYNSADmbjcSoIhw==}
     peerDependencies:
       commander: 11.1.x
+    dependencies:
+      commander: 11.1.0
+    dev: false
+
+  /@commander-js/extra-typings@12.0.1(commander@11.1.0):
+    resolution: {integrity: sha512-OvkMobb1eMqOCuJdbuSin/KJkkZr7n24/UNV+Lcz/0Dhepf3r2p9PaGwpRpAWej7A+gQnny4h8mGhpFl4giKkg==}
+    peerDependencies:
+      commander: ~12.0.0
     dependencies:
       commander: 11.1.0
     dev: false
