@@ -28,7 +28,7 @@
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
     "remark-gfm": "^4.0.0",
-    "shiki": "^0.14.7"
+    "shiki": "^1.1.7"
   },
   "devDependencies": {
     "@quri/configs": "workspace:*",
