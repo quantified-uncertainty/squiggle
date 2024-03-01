@@ -63,7 +63,7 @@
     "@graphql-codegen/cli": "^5.0.2",
     "@graphql-codegen/client-preset": "^4.1.0",
     "@graphql-typed-document-node/core": "^3.2.0",
-    "@parcel/watcher": "^2.4.0",
+    "@parcel/watcher": "^2.4.1",
     "@quri/configs": "workspace:*",
     "@types/d3": "^7.4.3",
     "@types/invariant": "^2.2.37",
