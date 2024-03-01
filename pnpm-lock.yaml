@@ -173,8 +173,8 @@ importers:
         specifier: ^7.6.17
         version: 7.6.17
       '@storybook/addon-docs':
-        specifier: ^7.6.12
-        version: 7.6.12(@types/react-dom@18.2.19)(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^7.6.17
+        version: 7.6.17(@types/react-dom@18.2.19)(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/addon-essentials':
         specifier: ^7.6.17
         version: 7.6.17(@types/react-dom@18.2.19)(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
@@ -684,8 +684,8 @@ importers:
         specifier: workspace:*
         version: link:../configs
       '@storybook/addon-docs':
-        specifier: ^7.6.12
-        version: 7.6.12(@types/react-dom@18.2.19)(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^7.6.17
+        version: 7.6.17(@types/react-dom@18.2.19)(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/addon-essentials':
         specifier: ^7.6.17
         version: 7.6.17(@types/react-dom@18.2.19)(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
@@ -6518,40 +6518,6 @@ packages:
       - supports-color
     dev: true
 
-  /@storybook/addon-docs@7.6.12(@types/react-dom@18.2.19)(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-AzMgnGYfEg+Z1ycJh8MEp44x1DfjRijKCVYNaPFT6o+TjN/9GBaAkV4ydxmQzMEMnnnh/0E9YeHO+ivBVSkNog==}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-    dependencies:
-      '@jest/transform': 29.7.0
-      '@mdx-js/react': 2.3.0(react@18.2.0)
-      '@storybook/blocks': 7.6.12(@types/react-dom@18.2.19)(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
-      '@storybook/client-logger': 7.6.12
-      '@storybook/components': 7.6.12(@types/react-dom@18.2.19)(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
-      '@storybook/csf-plugin': 7.6.12
-      '@storybook/csf-tools': 7.6.12
-      '@storybook/global': 5.0.0
-      '@storybook/mdx2-csf': 1.1.0
-      '@storybook/node-logger': 7.6.12
-      '@storybook/postinstall': 7.6.12
-      '@storybook/preview-api': 7.6.12
-      '@storybook/react-dom-shim': 7.6.12(react-dom@18.2.0)(react@18.2.0)
-      '@storybook/theming': 7.6.12(react-dom@18.2.0)(react@18.2.0)
-      '@storybook/types': 7.6.12
-      fs-extra: 11.2.0
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      remark-external-links: 8.0.0
-      remark-slug: 6.1.0
-      ts-dedent: 2.2.0
-    transitivePeerDependencies:
-      - '@types/react'
-      - '@types/react-dom'
-      - encoding
-      - supports-color
-    dev: true
-
   /@storybook/addon-docs@7.6.17(@types/react-dom@18.2.19)(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-FKa4Mdy7nhgvEVZJHpMkHriDzpVHbohn87zv9NCL+Ctjs1iAmzGwxEm0culszyDS1HN2ToVoY0h8CSi2RSSZqA==}
     peerDependencies:
@@ -7243,10 +7209,6 @@ packages:
 
   /@storybook/node-logger@7.6.17:
     resolution: {integrity: sha512-w59MQuXhhUNrUVmVkXhMwIg2nvFWjdDczLTwYLorhfsE36CWeUOY5QCZWQy0Qf/h+jz8Uo7Evy64qn18v9C4wA==}
-    dev: true
-
-  /@storybook/postinstall@7.6.12:
-    resolution: {integrity: sha512-uR0mDPxLzPaouCNrLp8vID8lATVTOtG7HB6lfjjzMdE3sN6MLmK9n2z2nXjb5DRRxOFWMeE1/4Age1/Ml2tnmA==}
     dev: true
 
   /@storybook/postinstall@7.6.17:
