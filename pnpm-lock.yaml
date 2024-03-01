@@ -30,8 +30,8 @@ importers:
         specifier: ^3.5.3
         version: 3.5.3
       commander:
-        specifier: ^11.1.0
-        version: 11.1.0
+        specifier: ^12.0.0
+        version: 12.0.0
       fs:
         specifier: ^0.0.1-security
         version: 0.0.1-security
@@ -572,10 +572,10 @@ importers:
     dependencies:
       '@commander-js/extra-typings':
         specifier: ^12.0.1
-        version: 12.0.1(commander@11.1.0)
+        version: 12.0.1(commander@12.0.0)
       commander:
-        specifier: ^11.1.0
-        version: 11.1.0
+        specifier: ^12.0.0
+        version: 12.0.0
       immutable:
         specifier: ^4.3.5
         version: 4.3.5
@@ -2744,12 +2744,12 @@ packages:
       commander: 11.1.0
     dev: false
 
-  /@commander-js/extra-typings@12.0.1(commander@11.1.0):
+  /@commander-js/extra-typings@12.0.1(commander@12.0.0):
     resolution: {integrity: sha512-OvkMobb1eMqOCuJdbuSin/KJkkZr7n24/UNV+Lcz/0Dhepf3r2p9PaGwpRpAWej7A+gQnny4h8mGhpFl4giKkg==}
     peerDependencies:
       commander: ~12.0.0
     dependencies:
-      commander: 11.1.0
+      commander: 12.0.0
     dev: false
 
   /@cspotcode/source-map-support@0.8.1:
@@ -7147,7 +7147,7 @@ packages:
     dependencies:
       '@babel/generator': 7.23.6
       '@babel/parser': 7.24.0
-      '@babel/traverse': 7.23.9
+      '@babel/traverse': 7.24.0
       '@babel/types': 7.23.9
       '@storybook/csf': 0.1.2
       '@storybook/types': 7.6.17
@@ -9837,6 +9837,11 @@ packages:
   /commander@11.1.0:
     resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
     engines: {node: '>=16'}
+    dev: false
+
+  /commander@12.0.0:
+    resolution: {integrity: sha512-MwVNWlYjDTtOjX5PiD7o5pK0UrFU/OYgcJfjjK4RaHZETNtjJqrZa9Y9ds88+A+f+d5lv+561eZ+yCKoS3gbAA==}
+    engines: {node: '>=18'}
     dev: false
 
   /commander@4.1.1:
