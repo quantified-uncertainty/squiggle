@@ -194,8 +194,8 @@ importers:
         specifier: ^7.6.12
         version: 7.6.12(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.3)(vite@5.0.12)
       '@testing-library/jest-dom':
-        specifier: ^6.4.1
-        version: 6.4.1(@jest/globals@29.7.0)(@types/jest@29.5.12)(jest@29.7.0)
+        specifier: ^6.4.2
+        version: 6.4.2(@jest/globals@29.7.0)(@types/jest@29.5.12)(jest@29.7.0)
       '@testing-library/react':
         specifier: ^14.2.1
         version: 14.2.1(react-dom@18.2.0)(react@18.2.0)
@@ -7102,8 +7102,8 @@ packages:
       pretty-format: 27.5.1
     dev: true
 
-  /@testing-library/jest-dom@6.4.1(@jest/globals@29.7.0)(@types/jest@29.5.12)(jest@29.7.0):
-    resolution: {integrity: sha512-Z7qMM3J2Zw5H/nC2/5CYx5YcuaD56JmDFKNIozZ89VIo6o6Y9FMhssics4e2madEKYDNEpZz3+glPGz0yWMOag==}
+  /@testing-library/jest-dom@6.4.2(@jest/globals@29.7.0)(@types/jest@29.5.12)(jest@29.7.0):
+    resolution: {integrity: sha512-CzqH0AFymEMG48CpzXFriYYkOjk6ZGPCLMhW9e9jg3KMCn5OfJecF8GtGW7yGfR/IgCe3SX8BSwjdzI6BBbZLw==}
     engines: {node: '>=14', npm: '>=6', yarn: '>=1'}
     peerDependencies:
       '@jest/globals': '>= 28'
