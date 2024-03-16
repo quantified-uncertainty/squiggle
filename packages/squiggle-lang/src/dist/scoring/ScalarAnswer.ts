@@ -1,6 +1,6 @@
 import { OperationError, PdfInvalidError } from "../../operationError.js";
 import * as Mixed from "../../PointSet/Mixed.js";
-import { Result } from "../../utility/result.js";
+import { ResultC } from "../../utility/ResultC.js";
 import { BaseDist } from "../BaseDist.js";
 import { DistError, operationDistError } from "../DistError.js";
 import { Env } from "../env.js";
@@ -64,25 +64,25 @@ export function logScoreScalarAnswer({
   prior,
   answer,
   env,
-}: LogScoreScalarAnswerParams): Result<number, DistError> {
+}: LogScoreScalarAnswerParams): ResultC<number, DistError> {
   const estimateR = estimate.toPointSetDist(env);
   if (!estimateR.ok) {
-    return Result.err(estimateR.value);
+    return ResultC.err(estimateR.value);
   }
 
   if (!prior) {
     try {
-      return Result.ok(
+      return ResultC.ok(
         scoreWithoutPrior({ estimate: estimateR.value.pointSet, answer })
       );
     } catch (error) {
-      return Result.err(operationDistError(error as OperationError));
+      return ResultC.err(operationDistError(error as OperationError));
     }
   }
 
   const priorR = prior.toPointSetDist(env);
   if (!priorR.ok) {
-    return Result.err(priorR.value);
+    return ResultC.err(priorR.value);
   }
 
   try {
@@ -91,8 +91,8 @@ export function logScoreScalarAnswer({
       answer,
     });
     const s2 = scoreWithoutPrior({ estimate: priorR.value.pointSet, answer });
-    return Result.ok(s1 - s2);
+    return ResultC.ok(s1 - s2);
   } catch (error) {
-    return Result.err(operationDistError(error as OperationError));
+    return ResultC.err(operationDistError(error as OperationError));
   }
 }

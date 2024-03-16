@@ -1,6 +1,7 @@
 import { ComplexNumberError, OperationError } from "../../operationError.js";
 import * as Mixed from "../../PointSet/Mixed.js";
 import * as Result from "../../utility/result.js";
+import { ResultC } from "../../utility/ResultC.js";
 import { BaseDist } from "../BaseDist.js";
 import { DistError, operationDistError } from "../DistError.js";
 import { Env } from "../env.js";
@@ -43,16 +44,16 @@ const pdfPointScore = (
 export const integralSumWithoutPrior = ({
   estimate,
   answer,
-}: SumParams): Result.Result<number, OperationError> => {
+}: SumParams): ResultC<number, OperationError> => {
   try {
     const combinedResult = Mixed.combinePointwise(
       estimate.toMixed(),
       answer.toMixed(),
       pdfPointScore
     );
-    return Result.Result.fromType(combinedResult).fmap((t) => t.integralSum());
+    return ResultC.fromType(combinedResult).fmap((t) => t.integralSum());
   } catch (error) {
-    return Result.Result.err(error as OperationError);
+    return ResultC.err(error as OperationError);
   }
 };
 
@@ -61,9 +62,9 @@ export function logScoreDistAnswer({
   answer,
   prior,
   env,
-}: LogScoreDistAnswerParams): Result.Result<number, DistError> {
-  const estimateR = Result.Result.fromType(estimate.toPointSetDist(env));
-  const answerR = Result.Result.fromType(answer.toPointSetDist(env));
+}: LogScoreDistAnswerParams): ResultC<number, DistError> {
+  const estimateR = ResultC.fromType(estimate.toPointSetDist(env));
+  const answerR = ResultC.fromType(answer.toPointSetDist(env));
 
   const estimateKullbackLeiberDivergence = estimateR.flatMap((estimateValue) =>
     answerR.flatMap((answerValue) =>
@@ -78,7 +79,7 @@ export function logScoreDistAnswer({
     return estimateKullbackLeiberDivergence;
   }
 
-  const priorR = Result.Result.fromType(prior.toPointSetDist(env));
+  const priorR = ResultC.fromType(prior.toPointSetDist(env));
 
   const priorKullbackLeiberDivergence = priorR.flatMap((priorValue) =>
     answerR.flatMap((answerValue) =>
