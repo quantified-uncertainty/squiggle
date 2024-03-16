@@ -1,10 +1,10 @@
-import { BaseDist } from "../dist/BaseDist.js";
-import { DistError, operationDistError } from "../dist/DistError.js";
-import { Env } from "../dist/env.js";
-import { ComplexNumberError, OperationError } from "../operationError.js";
-import * as Result from "../utility/result.js";
-import { result } from "../utility/result.js";
-import * as Mixed from "./Mixed.js";
+import { ComplexNumberError, OperationError } from "../../operationError.js";
+import * as Mixed from "../../PointSet/Mixed.js";
+import * as Result from "../../utility/result.js";
+import { result } from "../../utility/result.js";
+import { BaseDist } from "../BaseDist.js";
+import { DistError, operationDistError } from "../DistError.js";
+import { Env } from "../env.js";
 
 const logFn = Math.log; // base e
 
