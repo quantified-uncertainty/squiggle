@@ -1,5 +1,4 @@
 import { BaseDist } from "../dist/BaseDist.js";
-import { DistError } from "../dist/DistError.js";
 import * as distOperations from "../dist/distOperations/index.js";
 import { Env } from "../dist/env.js";
 import { REArgumentError, REDistributionError } from "../errors/messages.js";
@@ -13,7 +12,6 @@ import {
   frOptional,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { result } from "../utility/result.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",
@@ -25,18 +23,15 @@ const runScoringDistAnswer = (
   answer: BaseDist,
   prior: BaseDist | undefined,
   env: Env
-) => {
-  const result = distOperations.logScoreDistAnswer({
-    estimate,
-    answer,
-    prior,
-    env,
-  });
-  if (!result.ok) {
-    throw new REDistributionError(result.value);
-  }
-  return result.value;
-};
+) =>
+  distOperations
+    .logScoreDistAnswer({
+      estimate,
+      answer,
+      prior,
+      env,
+    })
+    .getOrThrow((e) => new REDistributionError(e));
 
 export const library = [
   maker.make({
@@ -83,28 +78,27 @@ Note that this can be very brittle. If the second distribution has probability m
         frNumber,
         ([{ estimate, answer, prior }], reducer) => {
           const _prior = prior === null ? undefined : prior;
-          let _result: result<number, DistError>;
           if (answer instanceof BaseDist) {
-            _result = distOperations.logScoreDistAnswer({
-              estimate,
-              answer,
-              prior: _prior,
-              env: reducer.environment,
-            });
+            return distOperations
+              .logScoreDistAnswer({
+                estimate,
+                answer,
+                prior: _prior,
+                env: reducer.environment,
+              })
+              .getOrThrow((e) => new REDistributionError(e));
           } else if (typeof answer === "number") {
-            _result = distOperations.logScoreScalarAnswer({
-              estimate,
-              answer,
-              prior: _prior,
-              env: reducer.environment,
-            });
+            return distOperations
+              .logScoreScalarAnswer({
+                estimate,
+                answer,
+                prior: _prior,
+                env: reducer.environment,
+              })
+              .getOrThrow((e) => new REDistributionError(e));
           } else {
             throw new REArgumentError("Impossible type");
           }
-          if (!_result.ok) {
-            throw new REDistributionError(_result.value);
-          }
-          return _result.value;
         }
       ),
     ],

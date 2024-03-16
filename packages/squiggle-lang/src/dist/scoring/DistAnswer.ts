@@ -1,7 +1,6 @@
 import { ComplexNumberError, OperationError } from "../../operationError.js";
 import * as Mixed from "../../PointSet/Mixed.js";
 import * as Result from "../../utility/result.js";
-import { result } from "../../utility/result.js";
 import { BaseDist } from "../BaseDist.js";
 import { DistError, operationDistError } from "../DistError.js";
 import { Env } from "../env.js";
@@ -44,16 +43,16 @@ const pdfPointScore = (
 export const integralSumWithoutPrior = ({
   estimate,
   answer,
-}: SumParams): Result.result<number, OperationError> => {
+}: SumParams): Result.Result<number, OperationError> => {
   try {
     const combinedResult = Mixed.combinePointwise(
       estimate.toMixed(),
       answer.toMixed(),
       pdfPointScore
     );
-    return Result.fmap(combinedResult, (t) => t.integralSum());
+    return Result.Result.fromType(combinedResult).fmap((t) => t.integralSum());
   } catch (error) {
-    return Result.Err(error as OperationError);
+    return Result.Result.err(error as OperationError);
   }
 };
 
@@ -62,42 +61,37 @@ export function logScoreDistAnswer({
   answer,
   prior,
   env,
-}: LogScoreDistAnswerParams): result<number, DistError> {
-  const estimateR = estimate.toPointSetDist(env);
-  if (!estimateR.ok) {
-    return estimateR;
-  }
+}: LogScoreDistAnswerParams): Result.Result<number, DistError> {
+  const estimateR = Result.Result.fromType(estimate.toPointSetDist(env));
+  const answerR = Result.Result.fromType(answer.toPointSetDist(env));
 
-  const answerR = answer.toPointSetDist(env);
-  if (!answerR.ok) {
-    return answerR;
-  }
+  const estimateKullbackLeiberDivergence = estimateR.flatMap((estimateValue) =>
+    answerR.flatMap((answerValue) =>
+      integralSumWithoutPrior({
+        estimate: estimateValue.pointSet,
+        answer: answerValue.pointSet,
+      }).errMap(operationDistError)
+    )
+  );
 
   if (!prior) {
-    return Result.errMap(
+    return estimateKullbackLeiberDivergence;
+  }
+
+  const priorR = Result.Result.fromType(prior.toPointSetDist(env));
+
+  const priorKullbackLeiberDivergence = priorR.flatMap((priorValue) =>
+    answerR.flatMap((answerValue) =>
       integralSumWithoutPrior({
-        estimate: estimateR.value.pointSet,
-        answer: answerR.value.pointSet,
-      }),
-      operationDistError
-    );
-  }
+        estimate: priorValue.pointSet,
+        answer: answerValue.pointSet,
+      }).errMap((error) => error as DistError)
+    )
+  );
 
-  const priorR = prior.toPointSetDist(env);
-  if (!priorR.ok) {
-    return priorR;
-  }
-
-  const kl1 = integralSumWithoutPrior({
-    estimate: estimateR.value.pointSet,
-    answer: answerR.value.pointSet,
-  });
-  const kl2 = integralSumWithoutPrior({
-    estimate: priorR.value.pointSet,
-    answer: answerR.value.pointSet,
-  });
-  return Result.errMap(
-    Result.fmap(Result.merge(kl1, kl2), ([v1, v2]) => v1 - v2),
-    operationDistError
+  return estimateKullbackLeiberDivergence.flatMap((v1) =>
+    priorKullbackLeiberDivergence
+      .fmap((v2) => v1 - v2)
+      .errMap(operationDistError)
   );
 }

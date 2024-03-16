@@ -23,19 +23,13 @@ import {
 
 const rng = getDefaultRng();
 
-const klDivergence = (prediction: BaseDist, answer: BaseDist): number => {
-  const result = logScoreDistAnswer({
+const klDivergence = (prediction: BaseDist, answer: BaseDist): number =>
+  logScoreDistAnswer({
     estimate: prediction,
     answer,
     prior: undefined,
     env,
-  });
-  if (!result.ok) {
-    console.log(distErrorToString(result.value));
-    throw new Error("logScore failed");
-  }
-  return result.value;
-};
+  }).getOrThrow((e) => new Error(distErrorToString(e)));
 
 // integral from low to high of 1 / (high - low) log(normal(mean, stdev)(x) / (1 / (high - low))) dx
 const klNormalUniform = (
