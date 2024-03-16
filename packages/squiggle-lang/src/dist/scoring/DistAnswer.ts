@@ -8,20 +8,9 @@ import { Env } from "../env.js";
 
 const logFn = Math.log; // base e
 
-type MinusScaledLogOfQuotientParams = {
-  esti: number;
-  answ: number;
-};
-
 type SumParams = {
   estimate: Mixed.MixedShape;
   answer: Mixed.MixedShape;
-};
-
-type SumWithPriorParams = {
-  estimate: Mixed.MixedShape;
-  answer: Mixed.MixedShape;
-  prior: Mixed.MixedShape;
 };
 
 type LogScoreDistAnswerParams = {
@@ -31,32 +20,7 @@ type LogScoreDistAnswerParams = {
   env: Env;
 };
 
-/**
- * Calculates the minus scaled log of the quotient.
- * @param {MinusScaledLogOfQuotientParams} params - The minus scaled log of quotient parameters.
- * @returns {Result.result<number, OperationError>} The calculated result.
- */
-function minusScaledLogOfQuotient({
-  esti,
-  answ,
-}: MinusScaledLogOfQuotientParams): Result.result<number, OperationError> {
-  const quot = esti / answ;
-
-  if (quot < 0.0) {
-    //THis should not be possible. All distributions should have positive mass.
-    return Result.Err(new ComplexNumberError());
-  }
-
-  return Result.Ok(-answ * logFn(quot));
-}
-
-/**
- * Calculates the Kullback-Leibler divergence integrand.
- * @param {number} estimateElement - The estimate element.
- * @param {number} answerElement - The answer element.
- * @returns {Result.result<number, OperationError>} The calculated integrand result.
- */
-const integrand = (
+const pdfPointScore = (
   estimateElement: number,
   answerElement: number
 ): Result.result<number, OperationError> => {
@@ -64,22 +28,20 @@ const integrand = (
     return Result.Ok(0);
   }
 
+  //TODO: Might want to raise here or return an error, to halt the code immediately.
   if (estimateElement === 0) {
     return Result.Ok(Infinity);
   }
 
-  return minusScaledLogOfQuotient({
-    esti: estimateElement,
-    answ: answerElement,
-  });
+  if (estimateElement < 0 || answerElement < 0) {
+    return Result.Err(new ComplexNumberError());
+  }
+
+  const quot = estimateElement / answerElement;
+  return Result.Ok(-answerElement * logFn(quot));
 };
 
-/**
- * Calculates the sum of the estimate and answer point sets.
- * @param {SumParams} params - The sum parameters.
- * @returns {Result.result<number, OperationError>} The calculated sum result.
- */
-export const sum = ({
+export const integralSumWithoutPrior = ({
   estimate,
   answer,
 }: SumParams): Result.result<number, OperationError> => {
@@ -87,7 +49,7 @@ export const sum = ({
     const combinedResult = Mixed.combinePointwise(
       estimate.toMixed(),
       answer.toMixed(),
-      integrand
+      pdfPointScore
     );
     return Result.fmap(combinedResult, (t) => t.integralSum());
   } catch (error) {
@@ -95,63 +57,47 @@ export const sum = ({
   }
 };
 
-/**
- * Calculates the sum with prior of the estimate, answer, and prior point sets.
- * @param {SumWithPriorParams} params - The sum with prior parameters.
- * @returns {Result.result<number, OperationError>} The calculated sum with prior result.
- */
-export const sumWithPrior = ({
-  estimate,
-  answer,
-  prior,
-}: SumWithPriorParams): Result.result<number, OperationError> => {
-  const kl1 = sum({ estimate, answer });
-  const kl2 = sum({ estimate: prior, answer });
-  return Result.fmap(Result.merge(kl1, kl2), ([v1, v2]) => v1 - v2);
-};
-
-/**
- * Calculates the log score for a distribution answer.
- * @param {LogScoreDistAnswerParams} params - The log score distribution answer parameters.
- * @returns {result<number, DistError>} The calculated log score result.
- */
 export function logScoreDistAnswer({
   estimate,
   answer,
   prior,
   env,
 }: LogScoreDistAnswerParams): result<number, DistError> {
-  const estimateResult = estimate.toPointSetDist(env);
-  if (!estimateResult.ok) {
-    return estimateResult;
+  const estimateR = estimate.toPointSetDist(env);
+  if (!estimateR.ok) {
+    return estimateR;
   }
 
-  const answerResult = answer.toPointSetDist(env);
-  if (!answerResult.ok) {
-    return answerResult;
+  const answerR = answer.toPointSetDist(env);
+  if (!answerR.ok) {
+    return answerR;
   }
 
   if (!prior) {
     return Result.errMap(
-      sum({
-        estimate: estimateResult.value.pointSet,
-        answer: answerResult.value.pointSet,
+      integralSumWithoutPrior({
+        estimate: estimateR.value.pointSet,
+        answer: answerR.value.pointSet,
       }),
       operationDistError
     );
   }
 
-  const priorResult = prior.toPointSetDist(env);
-  if (!priorResult.ok) {
-    return priorResult;
+  const priorR = prior.toPointSetDist(env);
+  if (!priorR.ok) {
+    return priorR;
   }
 
+  const kl1 = integralSumWithoutPrior({
+    estimate: estimateR.value.pointSet,
+    answer: answerR.value.pointSet,
+  });
+  const kl2 = integralSumWithoutPrior({
+    estimate: priorR.value.pointSet,
+    answer: answerR.value.pointSet,
+  });
   return Result.errMap(
-    sumWithPrior({
-      estimate: estimateResult.value.pointSet,
-      answer: answerResult.value.pointSet,
-      prior: priorResult.value.pointSet,
-    }),
+    Result.fmap(Result.merge(kl1, kl2), ([v1, v2]) => v1 - v2),
     operationDistError
   );
 }

@@ -12,12 +12,6 @@ type ScoreParams = {
   answer: number;
 };
 
-type ScoreWithPriorParams = {
-  estimate: Mixed.MixedShape;
-  answer: number;
-  prior: Mixed.MixedShape;
-};
-
 type LogScoreScalarAnswerParams = {
   estimate: BaseDist;
   prior: BaseDist | undefined;
@@ -25,12 +19,10 @@ type LogScoreScalarAnswerParams = {
   env: Env;
 };
 
-/**
- * Calculates the score for the given estimate and answer.
- * @param {ScoreParams} params - The score parameters.
- * @returns {number} The calculated score.
- */
-export const score = ({ estimate, answer }: ScoreParams): number => {
+export const scoreWithoutPrior = ({
+  estimate,
+  answer,
+}: ScoreParams): number => {
   const calculateScore = (
     estimatePdf: (x: number) => number | undefined,
     answer: number
@@ -67,26 +59,6 @@ export const score = ({ estimate, answer }: ScoreParams): number => {
   return calculateScore(getEstimatePdf, answer);
 };
 
-/**
- * Calculates the score with prior for the given estimate, answer, and prior.
- * @param {ScoreWithPriorParams} params - The score with prior parameters.
- * @returns {number} The calculated score with prior.
- */
-export const scoreWithPrior = ({
-  estimate,
-  answer,
-  prior,
-}: ScoreWithPriorParams): number => {
-  const s1 = score({ estimate, answer });
-  const s2 = score({ estimate: prior, answer });
-  return s1 - s2;
-};
-
-/**
- * Calculates the log score for a scalar answer.
- * @param {LogScoreScalarAnswerParams} params - The log score scalar answer parameters.
- * @returns {result<number, DistError>} The calculated log score.
- */
 export function logScoreScalarAnswer({
   estimate,
   prior,
@@ -100,7 +72,9 @@ export function logScoreScalarAnswer({
 
   if (!prior) {
     try {
-      return Ok(score({ estimate: estimateR.value.pointSet, answer }));
+      return Ok(
+        scoreWithoutPrior({ estimate: estimateR.value.pointSet, answer })
+      );
     } catch (error) {
       return Err(operationDistError(error as OperationError));
     }
@@ -112,13 +86,12 @@ export function logScoreScalarAnswer({
   }
 
   try {
-    return Ok(
-      scoreWithPrior({
-        estimate: estimateR.value.pointSet,
-        answer,
-        prior: priorR.value.pointSet,
-      })
-    );
+    const s1 = scoreWithoutPrior({
+      estimate: estimateR.value.pointSet,
+      answer,
+    });
+    const s2 = scoreWithoutPrior({ estimate: priorR.value.pointSet, answer });
+    return Ok(s1 - s2);
   } catch (error) {
     return Err(operationDistError(error as OperationError));
   }
