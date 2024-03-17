@@ -251,6 +251,28 @@ export const T = {
     const [xs, ys] = E_A.unzip(values);
     return T.make(xs, ys);
   },
+
+  removeConsecutiveDuplicates(shape: XYShape): XYShape {
+    const uniqueXs: number[] = [];
+    const uniqueYs: number[] = [];
+
+    let prevX: number | null = null;
+    let prevY: number | null = null;
+
+    for (let i = 0; i < shape.xs.length; i++) {
+      const currentX = shape.xs[i];
+      const currentY = shape.ys[i];
+
+      if (currentX !== prevX || currentY !== prevY) {
+        uniqueXs.push(currentX);
+        uniqueYs.push(currentY);
+        prevX = currentX;
+        prevY = currentY;
+      }
+    }
+
+    return { xs: uniqueXs, ys: uniqueYs };
+  },
 };
 
 const Pairs = {
@@ -639,4 +661,113 @@ export const Analysis = {
     const meanOfSquares = getMeanOfSquares(t);
     return meanOfSquares - meanSquared;
   },
+};
+
+type CrossoverArea = {
+  points: [number, number][];
+  segments: XYShape[];
+};
+
+type ComparisonType =
+  | "greaterThan"
+  | "lesserThan"
+  | "equals"
+  | "greaterThanOrEqual"
+  | "lessThanOrEqual";
+
+export const extractSegments = (
+  shape: XYShape,
+  comparisonType: ComparisonType,
+  threshold: number
+): CrossoverArea => {
+  const { xs, ys } = shape;
+  const segments: XYShape[] = [];
+  const points: [number, number][] = [];
+  let currentSegment: XYShape | null = null;
+
+  const comparisonFn = (y: number, t: number): boolean => {
+    switch (comparisonType) {
+      case "greaterThan":
+        return y > t;
+      case "lesserThan":
+        return y < t;
+      case "equals":
+        return Math.abs(y - t) < Number.EPSILON;
+      case "greaterThanOrEqual":
+        return y >= t;
+      case "lessThanOrEqual":
+        return y <= t;
+    }
+  };
+
+  function addPotentialSegment(shape: XYShape) {
+    const _shape = T.removeConsecutiveDuplicates(shape);
+    if (_shape.xs.length === 1) {
+      points.push([_shape.xs[0], _shape.ys[0]]);
+    } else {
+      segments.push(_shape);
+    }
+  }
+
+  for (let i = 0; i < xs.length - 1; i++) {
+    const x1 = xs[i];
+    const x2 = xs[i + 1];
+    const y1 = ys[i];
+    const y2 = ys[i + 1];
+
+    if (comparisonFn(y1, threshold) && comparisonFn(y2, threshold)) {
+      // Both points satisfy the comparison condition
+      if (!currentSegment) {
+        currentSegment = { xs: [x1], ys: [y1] };
+      }
+      currentSegment.xs.push(x2);
+      currentSegment.ys.push(y2);
+    } else if (!comparisonFn(y1, threshold) && comparisonFn(y2, threshold)) {
+      // Line segment crosses the threshold from outside to inside
+      const x = x1 + ((threshold - y1) * (x2 - x1)) / (y2 - y1);
+      if (!currentSegment) {
+        currentSegment = { xs: [x], ys: [threshold] };
+      }
+      currentSegment.xs.push(x2);
+      currentSegment.ys.push(y2);
+    } else if (comparisonFn(y1, threshold) && !comparisonFn(y2, threshold)) {
+      // Line segment crosses the threshold from inside to outside
+      const x = x1 + ((threshold - y1) * (x2 - x1)) / (y2 - y1);
+      if (currentSegment) {
+        currentSegment.xs.push(x);
+        currentSegment.ys.push(threshold);
+        addPotentialSegment(currentSegment);
+        currentSegment = null;
+      }
+    } else if (currentSegment) {
+      // Both points are outside the threshold, but we have an ongoing segment
+      addPotentialSegment(currentSegment);
+      currentSegment = null;
+    }
+  }
+
+  // Handle the case where the last point satisfies the comparison condition
+  if (currentSegment) {
+    addPotentialSegment(currentSegment);
+  }
+
+  // Handle the case for "equals" comparison when interpolation is needed
+  if (comparisonType === "equals") {
+    for (let i = 0; i < xs.length - 1; i++) {
+      const x1 = xs[i];
+      const x2 = xs[i + 1];
+      const y1 = ys[i];
+      const y2 = ys[i + 1];
+
+      if (
+        (y1 < threshold && y2 > threshold) ||
+        (y1 > threshold && y2 < threshold)
+      ) {
+        const x = x1 + ((threshold - y1) * (x2 - x1)) / (y2 - y1);
+        points.push([x, threshold]);
+      }
+    }
+  }
+
+  return { points, segments };
 };
