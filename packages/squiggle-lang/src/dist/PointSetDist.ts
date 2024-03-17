@@ -114,6 +114,20 @@ export class PointSetDist extends BaseDist {
       (pointSet) => new PointSetDist(pointSet)
     );
   }
+
+  mapY2Result<E>(
+    fn: (x: number, y: number) => Result.result<number, E>,
+    dist: PointSetDist
+  ): Result.result<PointSetDist, E> {
+    return Result.fmap(
+      Mixed.combinePointwise(
+        this.pointSet.toMixed(),
+        dist.pointSet.toMixed(),
+        fn
+      ),
+      (pointSet) => new PointSetDist(pointSet)
+    );
+  }
 }
 
 //TODO WARNING: The combineAlgebraicallyWithDiscrete will break for subtraction and division, like, discrete - continous
