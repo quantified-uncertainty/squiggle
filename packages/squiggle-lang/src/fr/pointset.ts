@@ -169,4 +169,39 @@ export const library = [
       ),
     ],
   }),
+  maker.make({
+    name: "mapY2",
+    examples: [
+      makeFnExample(
+        `PointSet.mapY2(PointSet.fromDist(normal(5,2)), PointSet.fromDist(normal(10,3)), {|x, y| x + y})`
+      ),
+    ],
+    output: "Dist",
+    displaySection: "Transformations",
+    definitions: [
+      makeDefinition(
+        [
+          frDistPointset,
+          frDistPointset,
+          frNamed("fn", frLambdaTyped([frNumber, frNumber], frNumber)),
+        ],
+        frDistPointset,
+        ([dist1, dist2, lambda], reducer) => {
+          return unwrapDistResult(
+            dist1.mapY2Result(
+              (y1, y2) =>
+                Ok(
+                  doNumberLambdaCall(
+                    lambda,
+                    [vNumber(y1), vNumber(y2)],
+                    reducer
+                  )
+                ),
+              dist2
+            )
+          );
+        }
+      ),
+    ],
+  }),
 ];
