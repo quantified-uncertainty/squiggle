@@ -1,16 +1,16 @@
-import { PointSetDomain } from "../../src/PointSet/PointSetDomain.js";
+import { PointSetSupport } from "../../src/PointSet/PointSetSupport.js";
 import { XYShape } from "../../src/XYShape.js";
 
-describe("PointSetDomain", () => {
+describe("PointSetSupport", () => {
   describe("fromContinuousShape", () => {
-    test("creates a PointSetDomain with segments from a continuous shape", () => {
+    test("creates a PointSetSupport with segments from a continuous shape", () => {
       const continuousShape: XYShape = {
         xs: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         ys: [0, 3, 8, 0, 0, 0, 1, 0, 0, 1, 0],
       };
-      const domain = PointSetDomain.fromContinuousShape(continuousShape);
-      expect(domain.points).toEqual([]);
-      expect(domain.segments).toEqual([
+      const support = PointSetSupport.fromContinuousShape(continuousShape);
+      expect(support.points).toEqual([]);
+      expect(support.segments).toEqual([
         [0, 3],
         [5, 7],
         [8, 10],
@@ -19,22 +19,22 @@ describe("PointSetDomain", () => {
   });
 
   describe("difference", () => {
-    test("returns the difference between two PointSetDomains", () => {
-      const domain1 = new PointSetDomain(
+    test("returns the difference between two PointSetSupports", () => {
+      const support1 = new PointSetSupport(
         [1, 2, 3],
         [
           [0, 1],
           [3, 5],
         ]
       );
-      const domain2 = new PointSetDomain(
+      const support2 = new PointSetSupport(
         [2, 4],
         [
           [1, 2],
           [3, 4],
         ]
       );
-      const difference = domain1.difference(domain2);
+      const difference = support1.difference(support2);
       expect(difference.points).toEqual([1, 3]);
       expect(difference.segments).toEqual([
         [0, 1],
@@ -44,49 +44,49 @@ describe("PointSetDomain", () => {
   });
 
   describe("empty", () => {
-    test("returns true for an empty PointSetDomain", () => {
-      const emptyDomain = new PointSetDomain([], []);
+    test("returns true for an empty PointSetSupport", () => {
+      const emptyDomain = new PointSetSupport([], []);
       expect(emptyDomain.empty()).toBe(true);
     });
 
-    test("returns false for a non-empty PointSetDomain", () => {
-      const nonEmptyDomain = new PointSetDomain([1], []);
+    test("returns false for a non-empty PointSetSupport", () => {
+      const nonEmptyDomain = new PointSetSupport([1], []);
       expect(nonEmptyDomain.empty()).toBe(false);
     });
   });
 
   describe("minX", () => {
     test("returns the minimum x-value from points and segments", () => {
-      const domain = new PointSetDomain(
+      const support = new PointSetSupport(
         [1, 2],
         [
           [0, 1],
           [3, 4],
         ]
       );
-      expect(domain.minX()).toBe(0);
+      expect(support.minX()).toBe(0);
     });
 
-    test("returns undefined for an empty PointSetDomain", () => {
-      const emptyDomain = new PointSetDomain([], []);
+    test("returns undefined for an empty PointSetSupport", () => {
+      const emptyDomain = new PointSetSupport([], []);
       expect(emptyDomain.minX()).toBeUndefined();
     });
   });
 
   describe("maxX", () => {
     test("returns the maximum x-value from points and segments", () => {
-      const domain = new PointSetDomain(
+      const support = new PointSetSupport(
         [1, 2],
         [
           [0, 1],
           [3, 4],
         ]
       );
-      expect(domain.maxX()).toBe(4);
+      expect(support.maxX()).toBe(4);
     });
 
-    test("returns undefined for an empty PointSetDomain", () => {
-      const emptyDomain = new PointSetDomain([], []);
+    test("returns undefined for an empty PointSetSupport", () => {
+      const emptyDomain = new PointSetSupport([], []);
       expect(emptyDomain.maxX()).toBeUndefined();
     });
   });

@@ -7,7 +7,7 @@ import * as Discrete from "./Discrete.js";
 import { DiscreteShape } from "./Discrete.js";
 import * as MixedPoint from "./MixedPoint.js";
 import { ConvolutionOperation, PointSet } from "./PointSet.js";
-import { PointSetDomain } from "./PointSetDomain.js";
+import { PointSetSupport } from "./PointSetSupport.js";
 
 export class MixedShape implements PointSet<MixedShape> {
   readonly continuous: ContinuousShape;
@@ -173,7 +173,7 @@ export class MixedShape implements PointSet<MixedShape> {
   }
 
   domain() {
-    return new PointSetDomain(
+    return new PointSetSupport(
       this.discrete.domain().points,
       this.continuous.domain().segments
     );
