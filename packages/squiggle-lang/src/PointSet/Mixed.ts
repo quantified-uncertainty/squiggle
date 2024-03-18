@@ -7,6 +7,7 @@ import * as Discrete from "./Discrete.js";
 import { DiscreteShape } from "./Discrete.js";
 import * as MixedPoint from "./MixedPoint.js";
 import { ConvolutionOperation, PointSet } from "./PointSet.js";
+import { PointSetDomain } from "./PointSetDomain.js";
 
 export class MixedShape implements PointSet<MixedShape> {
   readonly continuous: ContinuousShape;
@@ -169,6 +170,13 @@ export class MixedShape implements PointSet<MixedShape> {
   }
   integralYtoX(f: number) {
     return XYShape.YtoX.linear(this.integral().xyShape, f);
+  }
+
+  domain() {
+    return new PointSetDomain(
+      this.discrete.domain().points,
+      this.continuous.domain().segments
+    );
   }
 
   // This pipes all ys (continuous and discrete) through fn.

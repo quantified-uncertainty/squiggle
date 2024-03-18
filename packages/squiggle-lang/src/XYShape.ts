@@ -663,7 +663,7 @@ export const Analysis = {
   },
 };
 
-type CrossoverArea = {
+type Domain = {
   points: [number, number][];
   segments: XYShape[];
 };
@@ -679,7 +679,7 @@ export const extractSegments = (
   shape: XYShape,
   comparisonType: ComparisonType,
   threshold: number
-): CrossoverArea => {
+): Domain => {
   const { xs, ys } = shape;
   const segments: XYShape[] = [];
   const points: [number, number][] = [];
