@@ -13,7 +13,7 @@ import {
   convolutionOperationToFn,
   PointSet,
 } from "./PointSet.js";
-import { PointSetDomain } from "./PointSetDomain.js";
+import { PointSetSupport } from "./PointSetSupport.js";
 
 export class DiscreteShape implements PointSet<DiscreteShape> {
   readonly xyShape: XYShape.XYShape;
@@ -235,7 +235,7 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
   }
 
   domain() {
-    return PointSetDomain.fromDiscreteShape(this.xyShape);
+    return PointSetSupport.fromDiscreteShape(this.xyShape);
   }
 }
 

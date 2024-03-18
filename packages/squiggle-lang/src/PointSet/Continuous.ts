@@ -12,7 +12,7 @@ import {
   DistributionType,
   PointSet,
 } from "./PointSet.js";
-import { PointSetDomain } from "./PointSetDomain.js";
+import { PointSetSupport } from "./PointSetSupport.js";
 
 export class ContinuousShape implements PointSet<ContinuousShape> {
   readonly xyShape: XYShape.XYShape;
@@ -299,7 +299,7 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
   }
 
   domain() {
-    return PointSetDomain.fromContinuousShape(this.xyShape);
+    return PointSetSupport.fromContinuousShape(this.xyShape);
   }
 }
 
