@@ -66,6 +66,7 @@ describe("Single source SqProject", () => {
     expect(outputR.ok).toBe(true);
 
     if (!outputR.ok) {
+      console.log(outputR.value);
       throw new Error("failed");
     }
 

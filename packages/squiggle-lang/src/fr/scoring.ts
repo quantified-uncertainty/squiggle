@@ -69,20 +69,11 @@ Note that this can be very brittle. If the second distribution has probability m
   }),
   maker.make({
     name: "logScoreNumericAnswer",
-    output: "Dict",
     displaySection: "Scoring",
     description: `A log loss score. Often that often acts as a [scoring rule](https://en.wikipedia.org/wiki/Scoring_rule). Useful when evaluating the accuracy of a forecast.
 
     Note that it is fairly slow.`,
-    examples: [
-      makeFnExample(
-        "Dist.logScore({estimate: Sym.normal(5,2), answer: Sym.normal(5.2,1))"
-      ),
-      makeFnExample(
-        "Dist.logScore({estimate: Sym.normal(5,2), answer: Sym.normal(5.2,1)})"
-      ),
-      makeFnExample("Dist.logScore({estimate: Sym.normal(5,2), answer: 4.5})"),
-    ],
+    examples: [makeFnExample("Dist.logScoreNumericAnswer(Sym.normal(5,2), 3)")],
     definitions: [
       makeDefinition(
         [frDist, frNumber],
@@ -106,19 +97,17 @@ Note that this can be very brittle. If the second distribution has probability m
   }),
   maker.make({
     name: "logScoreDistAnswer",
-    output: "Dict",
     displaySection: "Scoring",
     description: `A log loss score. Often that often acts as a [scoring rule](https://en.wikipedia.org/wiki/Scoring_rule). Useful when evaluating the accuracy of a forecast.
 
     Note that it is fairly slow.`,
     examples: [
       makeFnExample(
-        "Dist.logScore({estimate: Sym.normal(5,2), answer: Sym.normal(5.2,1))"
+        "Dist.logScoreDistAnswer(Sym.normal(5,2), Sym.normal(5.2,1))"
       ),
       makeFnExample(
-        "Dist.logScore({estimate: Sym.normal(5,2), answer: Sym.normal(5.2,1)})"
+        "Dist.logScoreDistAnswer(Sym.normal(5,2), Sym.normal(5.2,1))"
       ),
-      makeFnExample("Dist.logScore({estimate: Sym.normal(5,2), answer: 4.5})"),
     ],
     definitions: [
       makeDefinition(

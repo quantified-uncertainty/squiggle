@@ -6,6 +6,7 @@ export const env: Env = defaultEnv;
 
 export const unpackResult = <T>(x: Result.result<T, unknown>): T => {
   if (!x.ok) {
+    console.log(x.value);
     throw new Error("failed");
   }
   return x.value;
