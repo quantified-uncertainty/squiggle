@@ -18,6 +18,7 @@ import {
   frOr,
   FrOrType,
   frPlot,
+  frSpecification,
   frString,
   frTableChart,
   FRType,
@@ -33,6 +34,7 @@ import { Value } from "../value/index.js";
 import { ValueTags, ValueTagsType } from "../value/valueTags.js";
 import { exportData, location, toMap } from "../value/valueTagsUtils.js";
 import { vBool, VBool } from "../value/VBool.js";
+import { vSpecification } from "../value/VSpecification.js";
 import { vString } from "../value/VString.js";
 
 const maker = new FnFactory({
@@ -234,6 +236,29 @@ example2 = {|x| x + 1}`,
     definitions: [
       makeDefinition([frWithTags(frAny())], frAny(), ([{ tags }]) => {
         return exportData(tags) || vString("None");
+      }),
+    ],
+  }),
+  maker.make({
+    name: "specification",
+    description: `Adds a specification to a value. This is useful for documenting how a value was calculated, or what it represents.`,
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition(
+        [frAny({ genericName: "A" }), frSpecification],
+        frAny({ genericName: "A" }),
+        ([value, spec]) =>
+          value.mergeTags({ specification: vSpecification(spec) }),
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getSpecification",
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition([frWithTags(frAny())], frAny(), ([value]) => {
+        return value.tags?.value.specification || vString("None"); // Not sure what to use when blank.
       }),
     ],
   }),

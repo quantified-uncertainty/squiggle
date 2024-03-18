@@ -28,6 +28,7 @@ import { SqInput, wrapInput } from "./SqInput.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqDistributionsPlot, SqPlot, wrapPlot } from "./SqPlot.js";
 import { SqScale, wrapScale } from "./SqScale.js";
+import { SqSpecification } from "./SqSpecification.js";
 import { SqTableChart } from "./SqTableChart.js";
 import { SqTags } from "./SqTags.js";
 
@@ -69,6 +70,8 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqDomainValue(value, context);
     case "Input":
       return new SqInputValue(value, context);
+    case "Specification":
+      return new SqSpecificationValue(value, context);
     default:
       throw new Error(`Unknown value ${JSON.stringify(value satisfies never)}`);
   }
@@ -418,6 +421,26 @@ export class SqDomainValue extends SqAbstractValue<
 
   asJS() {
     return valueToJSON(this._value);
+  }
+}
+
+export class SqSpecificationValue extends SqAbstractValue<
+  "Specification",
+  unknown,
+  SqSpecification
+> {
+  tag = "Specification" as const;
+
+  get value() {
+    return new SqSpecification(this._value.value, this.context);
+  }
+
+  asJS() {
+    return simpleValueFromValue(this._value);
+  }
+
+  override title() {
+    return this.value.title;
   }
 }
 
