@@ -70,9 +70,7 @@ Note that this can be very brittle. If the second distribution has probability m
   maker.make({
     name: "logScoreNumericAnswer",
     displaySection: "Scoring",
-    description: `A log loss score. Often that often acts as a [scoring rule](https://en.wikipedia.org/wiki/Scoring_rule). Useful when evaluating the accuracy of a forecast.
-
-    Note that it is fairly slow.`,
+    description: `A log loss score. Often that often acts as a [scoring rule](https://en.wikipedia.org/wiki/Scoring_rule). Useful when evaluating the accuracy of a forecast.`,
     examples: [makeFnExample("Dist.logScoreNumericAnswer(Sym.normal(5,2), 3)")],
     definitions: [
       makeDefinition(

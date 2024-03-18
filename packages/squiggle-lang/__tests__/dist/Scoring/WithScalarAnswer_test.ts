@@ -11,7 +11,7 @@ describe("WithScalarAnswer: discrete -> scalar -> score", () => {
   const pointC = mkPointMass(1.0);
   const pointD = mkPointMass(0.0);
 
-  test.only("score: agrees with analytical answer when finite", () => {
+  test("score: agrees with analytical answer when finite", () => {
     const prediction = unpackResult(
       mixture(
         [
@@ -29,8 +29,9 @@ describe("WithScalarAnswer: discrete -> scalar -> score", () => {
       estimate: prediction,
       answer,
       env,
-    }).getOrThrow().discrete;
-    expect(x).toEqual(-Math.log(0.25 / 1.0));
+    }).getOrThrow();
+    expect(x.discrete).toEqual(-Math.log(0.25 / 1.0));
+    expect(x.continuous).toEqual(-Infinity);
   });
 
   test("score: agrees with analytical answer when finite", () => {
@@ -45,13 +46,12 @@ describe("WithScalarAnswer: discrete -> scalar -> score", () => {
     );
 
     const answer = 3.0; // So this is: assigning 100% probability to 2.0
-    const x = unpackResult(
-      logScoreScalarAnswer({
-        estimate: prediction,
-        answer,
-        env,
-      })
-    );
-    expect(x).toEqual(-Math.log(0.75 / 1.0));
+    const x = logScoreScalarAnswer({
+      estimate: prediction,
+      answer,
+      env,
+    }).getOrThrow();
+    expect(x.discrete).toEqual(-Math.log(0.75 / 1.0));
+    expect(x.continuous).toEqual(-Infinity);
   });
 });

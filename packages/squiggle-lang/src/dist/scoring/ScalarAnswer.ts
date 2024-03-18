@@ -21,7 +21,7 @@ const pointValueToScore = (pointValue: number): number => {
   }
 
   if (pointValue === 0) {
-    return Infinity;
+    return -Infinity;
   }
 
   return -logFn(pointValue);
