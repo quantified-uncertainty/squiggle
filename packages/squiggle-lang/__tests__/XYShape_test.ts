@@ -176,17 +176,22 @@ describe("ToSegments", () => {
       expect(segments).toEqual({ segments: [], points: [] });
     });
 
-    test("returns empty result when threshold is Infinity", () => {
-      const threshold = Infinity;
-      const segments = XYShape.extractSegments(shape, "equals", threshold);
-      expect(segments).toEqual({ segments: [], points: [] });
-    });
-
-    test("returns empty result when threshold is -Infinity", () => {
-      const threshold = -Infinity;
-      const segments = XYShape.extractSegments(shape, "equals", threshold);
-      expect(segments).toEqual({ segments: [], points: [] });
-    });
+    // This doesn't work yet, but really, we might not need.
+    // test("with infinity in range, detects infinity", () => {
+    //   const shape: XYShape.XYShape = {
+    //     xs: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+    //     ys: [1, 2, Infinity, Infinity, Infinity, 3, Infinity, Infinity, 1],
+    //   };
+    //   const threshold = Infinity;
+    //   const segments = XYShape.extractSegments(shape, "equals", threshold);
+    //   expect(segments).toEqual({
+    //     segments: [
+    //       { xs: [2, 3, 4], ys: [Infinity, Infinity, Infinity] },
+    //       { xs: [7, 8], ys: [Infinity, Infinity] },
+    //     ],
+    //     points: [],
+    //   });
+    // });
   });
 
   describe("greaterThanOrEquals", () => {

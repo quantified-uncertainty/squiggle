@@ -7,6 +7,7 @@ import { ContinuousShape } from "./Continuous.js";
 import { DiscreteShape } from "./Discrete.js";
 import { MixedShape } from "./Mixed.js";
 import { MixedPoint } from "./MixedPoint.js";
+import { PointSetDomain } from "./PointSetDomain.js";
 
 export type ConvolutionOperation = "Add" | "Multiply" | "Subtract";
 export type DistributionType = "PDF" | "CDF";
@@ -57,6 +58,7 @@ export interface PointSet<T> {
 
   mean(): number;
   variance(): number;
+  domain(): PointSetDomain;
 }
 
 export const combinePointwise = <E>(
