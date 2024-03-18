@@ -64,9 +64,11 @@ export class ResultC<T, E> {
     }
   }
 
-  getOrThrow(errMap: (value: E) => ErrorMessage): T {
+  getOrThrow(errMap?: (value: E) => ErrorMessage): T {
     if (this.ok) {
       return this.value as T;
+    } else if (errMap === undefined) {
+      throw this.value;
     } else {
       throw errMap(this.value as E);
     }

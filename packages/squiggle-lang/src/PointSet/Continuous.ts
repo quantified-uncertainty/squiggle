@@ -121,13 +121,19 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
   }
 
   xToY(f: number) {
-    switch (this.interpolation) {
-      case "Stepwise":
-        return MixedPoint.makeContinuous(
-          XYShape.XtoY.stepwiseIncremental(this.xyShape, f) ?? 0
-        );
-      case "Linear":
-        return MixedPoint.makeContinuous(XYShape.XtoY.linear(this.xyShape, f));
+    if (this.xyShape.xs.length === 0) {
+      return MixedPoint.makeContinuous(0);
+    } else {
+      switch (this.interpolation) {
+        case "Stepwise":
+          return MixedPoint.makeContinuous(
+            XYShape.XtoY.stepwiseIncremental(this.xyShape, f) ?? 0
+          );
+        case "Linear":
+          return MixedPoint.makeContinuous(
+            XYShape.XtoY.linear(this.xyShape, f)
+          );
+      }
     }
   }
 

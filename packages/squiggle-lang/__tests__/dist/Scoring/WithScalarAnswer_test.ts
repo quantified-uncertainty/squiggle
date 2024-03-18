@@ -25,13 +25,11 @@ describe("WithScalarAnswer: discrete -> scalar -> score", () => {
     );
 
     const answer = 2.0; // So this is: assigning 100% probability to 2.0
-    const x = unpackResult(
-      logScoreScalarAnswer({
-        estimate: prediction,
-        answer,
-        env,
-      })
-    );
+    const x = logScoreScalarAnswer({
+      estimate: prediction,
+      answer,
+      env,
+    }).getOrThrow().discrete;
     expect(x).toEqual(-Math.log(0.25 / 1.0));
   });
 
