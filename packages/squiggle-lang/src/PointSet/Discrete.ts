@@ -1,6 +1,7 @@
 import { epsilon_float } from "../magicNumbers.js";
 import { PRNG } from "../rng/index.js";
 import { random_sample } from "../utility/math.js";
+import { MixedSet } from "../utility/MixedSet.js";
 import * as Result from "../utility/result.js";
 import * as XYShape from "../XYShape.js";
 import * as Common from "./Common.js";
@@ -13,7 +14,6 @@ import {
   convolutionOperationToFn,
   PointSet,
 } from "./PointSet.js";
-import { PointSetSupport } from "./PointSetSupport.js";
 
 export class DiscreteShape implements PointSet<DiscreteShape> {
   readonly xyShape: XYShape.XYShape;
@@ -234,8 +234,8 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
     );
   }
 
-  domain() {
-    return PointSetSupport.fromDiscreteShape(this.xyShape);
+  support() {
+    return MixedSet.fromDiscreteDistShape(this.xyShape);
   }
 }
 

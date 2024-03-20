@@ -1,13 +1,13 @@
 import * as Continuous from "../PointSet/Continuous.js";
 import * as Discrete from "../PointSet/Discrete.js";
 import * as Mixed from "../PointSet/Mixed.js";
+import { MixedSet } from "../utility/MixedSet.js";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
 import { ContinuousShape } from "./Continuous.js";
 import { DiscreteShape } from "./Discrete.js";
 import { MixedShape } from "./Mixed.js";
 import { MixedPoint } from "./MixedPoint.js";
-import { PointSetSupport } from "./PointSetSupport.js";
 
 export type ConvolutionOperation = "Add" | "Multiply" | "Subtract";
 export type DistributionType = "PDF" | "CDF";
@@ -58,7 +58,7 @@ export interface PointSet<T> {
 
   mean(): number;
   variance(): number;
-  domain(): PointSetSupport;
+  support(): MixedSet;
 }
 
 export const combinePointwise = <E>(

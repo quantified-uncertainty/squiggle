@@ -1,3 +1,4 @@
+import { MixedSet } from "../utility/MixedSet.js";
 import * as Result from "../utility/result.js";
 import * as XYShape from "../XYShape.js";
 import * as Common from "./Common.js";
@@ -7,7 +8,6 @@ import * as Discrete from "./Discrete.js";
 import { DiscreteShape } from "./Discrete.js";
 import * as MixedPoint from "./MixedPoint.js";
 import { ConvolutionOperation, PointSet } from "./PointSet.js";
-import { PointSetSupport } from "./PointSetSupport.js";
 
 export class MixedShape implements PointSet<MixedShape> {
   readonly continuous: ContinuousShape;
@@ -172,10 +172,10 @@ export class MixedShape implements PointSet<MixedShape> {
     return XYShape.YtoX.linear(this.integral().xyShape, f);
   }
 
-  domain() {
-    return new PointSetSupport(
-      this.discrete.domain().points,
-      this.continuous.domain().segments
+  support() {
+    return new MixedSet(
+      this.discrete.support().points,
+      this.continuous.support().segments
     );
   }
 

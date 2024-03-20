@@ -1,4 +1,5 @@
 import { epsilon_float } from "../magicNumbers.js";
+import { MixedSet } from "../utility/MixedSet.js";
 import * as Result from "../utility/result.js";
 import * as XYShape from "../XYShape.js";
 import * as AlgebraicShapeCombination from "./AlgebraicShapeCombination.js";
@@ -12,7 +13,6 @@ import {
   DistributionType,
   PointSet,
 } from "./PointSet.js";
-import { PointSetSupport } from "./PointSetSupport.js";
 
 export class ContinuousShape implements PointSet<ContinuousShape> {
   readonly xyShape: XYShape.XYShape;
@@ -298,8 +298,8 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
     );
   }
 
-  domain() {
-    return PointSetSupport.fromContinuousShape(this.xyShape);
+  support() {
+    return MixedSet.fromContinuousDistShape(this.xyShape);
   }
 }
 
