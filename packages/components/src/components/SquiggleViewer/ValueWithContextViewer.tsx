@@ -4,24 +4,25 @@ import "../../widgets/index.js";
 import { clsx } from "clsx";
 import { FC, PropsWithChildren, useCallback, useMemo, useRef } from "react";
 
-import { SqError, SqValue } from "@quri/squiggle-lang";
+import { SqValue } from "@quri/squiggle-lang";
 import {
-  BookOpenIcon,
-  CheckIcon,
   CodeBracketIcon,
   CommentIcon,
   Dropdown,
   LinkIcon,
   TextTooltip,
-  XIcon,
 } from "@quri/ui";
 
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
+import {
+  getSpecificationStatus,
+  specificationStatusPreview,
+  specificationView,
+} from "../../widgets/SpecificationWidget.js";
 import { useProjectContext } from "../ProjectProvider.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
-import { SquiggleErrorAlert } from "../ui/SquiggleErrorAlert.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { useZoomedInSqValueKeyEvent } from "./keyboardNav/zoomedInSqValue.js";
 import { useZoomedOutSqValueKeyEvent } from "./keyboardNav/zoomedOutSqValue.js";
@@ -130,40 +131,6 @@ export type ValueWithContextViewerHandle = {
   focusOnHeader: () => void;
   toggleCollapsed: () => void;
 };
-
-type SpecificationStatus =
-  | { type: "no-specification" }
-  | { type: "load-error"; error: SqError }
-  | { type: "loaded"; error?: string };
-
-function specificationHasError(status: SpecificationStatus) {
-  return (
-    status.type === "load-error" ||
-    (status.type === "loaded" && Boolean(status.error?.length))
-  );
-}
-
-function getSpecificationStatus(
-  value: SqValueWithContext
-): SpecificationStatus {
-  const specification = value.tags.specification();
-  if (!specification) {
-    return { type: "no-specification" };
-  }
-  const verifyValue = specification!.verify(value, {
-    sampleCount: 1000,
-    xyPointLength: 1000,
-    seed: "test-seed",
-  });
-  if (!verifyValue.ok) {
-    return { type: "load-error", error: verifyValue.value };
-  }
-  const possibleErrorMessage =
-    verifyValue?.ok && verifyValue.value.tag === "String"
-      ? verifyValue.value.value
-      : undefined;
-  return { type: "loaded", error: possibleErrorMessage };
-}
 
 // Note: When called, use a unique ``key``. Otherwise, the initial focus will not always work.
 export const ValueWithContextViewer: FC<Props> = ({
@@ -313,8 +280,7 @@ export const ValueWithContextViewer: FC<Props> = ({
     );
   };
 
-  const specificationPart = () => {
-    const hasError = specificationHasError(specificationStatus);
+  const specificationDropdown = () => {
     const specification = value.tags.specification();
     if (specificationStatus.type === "no-specification" || !specification) {
       return null;
@@ -324,53 +290,11 @@ export const ValueWithContextViewer: FC<Props> = ({
       <Dropdown
         render={() => (
           <div className="px-3 py-2">
-            <div className="font-medium text-green-700 mb-1">
-              {specification.title}
-            </div>
-            {specification.description && (
-              <p className="text-sm">{specification.description}</p>
-            )}
-            <div className="mt-4 mb-2">
-              <div
-                className={clsx(
-                  "rounded-sm px-3 py-0.5 inline-flex",
-                  hasError ? "bg-red-100" : "bg-green-100"
-                )}
-              >
-                {hasError ? "Checks Failed" : "Checks Passed"}
-              </div>
-            </div>
-            {specificationStatus.type === "load-error" && (
-              <SquiggleErrorAlert error={specificationStatus.error} />
-            )}
-            {specificationStatus.type === "loaded" &&
-              Boolean(specificationStatus.error?.length) && (
-                <div className="text-red-800">{specificationStatus.error}</div>
-              )}
+            {specificationView(specification, specificationStatus)}
           </div>
         )}
       >
-        <div
-          className={clsx(
-            "rounded-sm cursor-pointer transition px-0.5 flex flex-row items-center space-x-0.5",
-            hasError
-              ? "bg-red-100 hover:bg-red-300 "
-              : "bg-green-100 hover:bg-green-300 "
-          )}
-        >
-          <BookOpenIcon
-            size={16}
-            className={clsx(
-              "opacity-30",
-              hasError ? "text-red-800" : "text-green-800"
-            )}
-          />
-          {hasError ? (
-            <XIcon size={12} className="text-red-800" />
-          ) : (
-            <CheckIcon size={12} className="text-green-800" />
-          )}
-        </div>
+        {specificationStatusPreview(specificationStatus)}
       </Dropdown>
     );
   };
@@ -436,7 +360,7 @@ export const ValueWithContextViewer: FC<Props> = ({
               {!isOpen && <CommentIconForValue value={value} />}
             </div>
             <div className="inline-flex space-x-2 items-center">
-              {specificationPart()}
+              {specificationDropdown()}
               {enableDropdownMenu && <SquiggleValueMenu value={value} />}
               {exportData && exportData.path.length < 2 && onOpenExport && (
                 <TextTooltip

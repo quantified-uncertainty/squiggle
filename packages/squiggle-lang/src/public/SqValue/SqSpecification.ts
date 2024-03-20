@@ -42,12 +42,12 @@ export class SqSpecification {
     }
   }
 
-  verify(subvalue: SqValue, env: Env): result<SqValue, SqError> {
+  validate(subvalue: SqValue, env: Env): result<SqValue, SqError> {
     const reducer = new Reducer(env);
     const newContext = this.context?.extend(SqValuePathEdge.fromCalculator());
 
     try {
-      const value = reducer.call(this._value.verify, [subvalue._value]);
+      const value = reducer.call(this._value.validate, [subvalue._value]);
       return Result.Ok(wrapValue(value, newContext));
     } catch (e) {
       return Result.Err(

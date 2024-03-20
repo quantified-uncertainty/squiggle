@@ -3,7 +3,7 @@ import { BaseValue } from "./BaseValue.js";
 
 export type Specification = {
   title: string;
-  verify: Lambda;
+  validate: Lambda;
   description?: string;
   showAs?: Lambda;
 };

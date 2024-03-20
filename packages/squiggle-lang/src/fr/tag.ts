@@ -245,10 +245,12 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [frAny({ genericName: "A" }), frSpecification],
-        frAny({ genericName: "A" }),
-        ([value, spec]) =>
-          value.mergeTags({ specification: vSpecification(spec) }),
+        [frWithTags(frAny({ genericName: "A" })), frSpecification],
+        frWithTags(frAny({ genericName: "A" })),
+        ([{ value, tags }, spec]) => ({
+          value,
+          tags: tags.merge({ specification: vSpecification(spec) }),
+        }),
         { isDecorator: true }
       ),
     ],

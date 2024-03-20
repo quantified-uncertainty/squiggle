@@ -29,16 +29,16 @@ export const library = [
           frDict(
             ["title", frString],
             ["description", frOptional(frString)],
-            ["verify", frLambda],
+            ["validate", frLambda],
             ["showAs", frOptional(frLambda)]
           ),
         ],
         frSpecification,
-        ([{ title, description, verify, showAs }]) =>
+        ([{ title, description, validate, showAs }]) =>
           vSpecification({
             title,
             description: description || undefined,
-            verify,
+            validate,
             showAs: showAs || undefined,
           }).value
       ),

@@ -358,7 +358,7 @@ y = x -> Tag.getAll`,
 export const Specification: Story = {
   name: "Specification",
   args: {
-    defaultCode: `verify(fn) = {
+    defaultCode: `validate(fn) = {
       errors = List.upTo(2020, 2030)
         -> List.map(
           {|e| [Date(e), typeOf(fn(Date(e))) == "Distribution"]}
@@ -373,7 +373,7 @@ export const Specification: Story = {
       {
         title: "Stock market over time",
         description: "The S&P500 stock market price, over time.",
-        verify: verify,
+        validate: validate,
         showAs: {|e| e(Date(2024))},
       }
     )

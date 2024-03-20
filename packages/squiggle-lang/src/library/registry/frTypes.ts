@@ -76,7 +76,6 @@ export const frSpecification: FRType<Specification> = {
   unpack: (v: Value) => (v.type === "Specification" ? v.value : undefined),
   pack: (v) => vSpecification(v),
   display: () => "Specification",
-  fieldType: "textArea",
 };
 export const frString: FRType<string> = {
   unpack: (v: Value) => (v.type === "String" ? v.value : undefined),
