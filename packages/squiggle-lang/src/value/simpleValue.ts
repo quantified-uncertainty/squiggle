@@ -140,6 +140,9 @@ export function simpleValueFromValue(value: Value): SimpleValue {
       ];
       return ImmutableMap(fields);
     }
+    case "Specification": {
+      return ImmutableMap([["title", "Test Name"]]);
+    }
     case "Plot": {
       const fields: [string, SimpleValue][] = [
         ["vType", "Plot"],

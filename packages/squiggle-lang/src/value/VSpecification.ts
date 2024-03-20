@@ -3,8 +3,9 @@ import { BaseValue } from "./BaseValue.js";
 
 export type Specification = {
   title: string;
+  verify: Lambda;
   description?: string;
-  process: Lambda;
+  showAs?: Lambda;
 };
 
 export class VSpecification extends BaseValue {
@@ -19,7 +20,10 @@ export class VSpecification extends BaseValue {
   }
 
   isEqual(other: VSpecification) {
-    return this.value === other.value;
+    return (
+      this.value.title === other.value.title &&
+      this.value.description === other.value.description
+    );
   }
 }
 

@@ -20,6 +20,7 @@ import {
 import { library as samplesetLibrary } from "../../fr/sampleset.js";
 import { library as scaleLibrary } from "../../fr/scale.js";
 import { library as scoringLibrary } from "../../fr/scoring.js";
+import { library as specificationLibrary } from "../../fr/specification.js";
 import { library as stringLibrary } from "../../fr/string.js";
 import { library as symLibrary } from "../../fr/sym.js";
 import { library as systemLibrary } from "../../fr/system.js";
@@ -55,6 +56,7 @@ const fnList: FRFunction[] = [
   ...unitsLibrary,
   ...calculatorLibrary,
   ...inputLibrary,
+  ...specificationLibrary,
   ...systemLibrary,
   ...commonLibrary, // should go last, because has some catch-all functions
 ];

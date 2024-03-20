@@ -354,3 +354,36 @@ fn2 = {|e| e}
 y = x -> Tag.getAll`,
   },
 };
+
+export const Specification: Story = {
+  name: "Specification",
+  args: {
+    defaultCode: `verify(fn) = {
+      errors = List.upTo(2020, 2030)
+        -> List.map(
+          {|e| [Date(e), typeOf(fn(Date(e))) == "Distribution"]}
+        )
+        -> List.filter(
+          {|e| true}
+        )
+      "Has errors!"
+    }
+    
+    spec = Specification.make(
+      {
+        title: "Stock market over time",
+        description: "The S&P500 stock market price, over time.",
+        verify: verify,
+        showAs: {|e| e(Date(2024))},
+      }
+    )
+    
+    fn(t: [Date(2020), Date(2030)]) = {
+      yearsDiff = toYears(t - Date(2020))
+      normal(yearsDiff, yearsDiff + 0.1)
+    }
+    
+    withSpec = fn -> Tag.specification(spec)
+  `,
+  },
+};
