@@ -267,7 +267,7 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition([frWithTags(frAny())], frAny(), ([value]) => {
-        return value.tags?.value.specification || vString("None"); // Not sure what to use when blank.
+        return value.tags?.value.specification || vString("None");
       }),
     ],
   }),

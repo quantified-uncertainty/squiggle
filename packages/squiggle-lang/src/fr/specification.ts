@@ -10,15 +10,12 @@ import {
 import { FnFactory } from "../library/registry/helpers.js";
 import { vSpecification } from "../value/VSpecification.js";
 
-// Also, see version.ts for System.version.
-
 const maker = new FnFactory({
   nameSpace: "Specification",
   requiresNamespace: true,
 });
 
 export const library = [
-  // It might make sense to later make this a constant, as this number shouldn't change at runtime.
   maker.make({
     name: "make",
     output: "Specification",
