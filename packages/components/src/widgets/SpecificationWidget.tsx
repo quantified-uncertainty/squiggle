@@ -11,8 +11,8 @@ import { widgetRegistry } from "./registry.js";
 export type SpecificationStatus =
   | { type: "no-specification" }
   | { type: "load-error"; error: SqError }
-  | { type: "loaded-success" }
-  | { type: "loaded-error"; error: string };
+  | { type: "validation-success" }
+  | { type: "validation-failure"; error: string };
 
 export function getSpecificationStatus(
   value: SqValueWithContext
@@ -35,9 +35,9 @@ export function getSpecificationStatus(
       : undefined;
 
   if (possibleErrorMessage) {
-    return { type: "loaded-error", error: possibleErrorMessage };
+    return { type: "validation-failure", error: possibleErrorMessage };
   } else {
-    return { type: "loaded-success" };
+    return { type: "validation-success" };
   }
 }
 
@@ -46,7 +46,8 @@ export const specificationView = (
   specificationStatus?: SpecificationStatus
 ) => {
   const hasError =
-    (specificationStatus && specificationStatus.type === "loaded-error") ||
+    (specificationStatus &&
+      specificationStatus.type === "validation-failure") ||
     specificationStatus?.type === "load-error";
   return (
     <div>
@@ -80,7 +81,7 @@ export const specificationView = (
               <SquiggleErrorAlert error={specificationStatus.error} />
             </div>
           )}
-          {specificationStatus.type === "loaded-error" && (
+          {specificationStatus.type === "validation-failure" && (
             <div className="text-red-700 text-xs">
               {specificationStatus.error}
             </div>
@@ -95,7 +96,7 @@ export const specificationStatusPreview = (
   specificationStatus: SpecificationStatus
 ) => {
   const hasError =
-    specificationStatus.type === "loaded-error" ||
+    specificationStatus.type === "validation-failure" ||
     specificationStatus.type === "load-error";
   return (
     <div

@@ -279,19 +279,15 @@ export class Reducer implements EvaluateAllKinds {
       );
     }
 
-    console.log(282, console.log(expressionValue, ast));
     const argValues = expressionValue.args.map((arg) => this.evaluate(arg));
 
-    console.log(285);
     // we pass the ast of a current expression here, to put it on frameStack
     try {
-      console.log(288);
       return this.call(lambda.value, argValues, ast);
     } catch (e) {
       if (e instanceof REArgumentDomainError) {
         // Function is still on frame stack, remove it.
         // (This is tightly coupled with lambda implementations.)
-        console.log(294);
         this.frameStack.pop();
         throw this.runtimeError(e, expressionValue.args.at(e.idx)?.ast ?? ast);
       } else {

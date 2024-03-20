@@ -1,3 +1,4 @@
+import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDict,
@@ -21,8 +22,31 @@ export const library = [
   maker.make({
     name: "make",
     output: "Specification",
-    description:
-      "The number of samples set in the current environment. This variable can be modified in the Squiggle playground settings.",
+    description: "Create a specification.",
+    examples: [
+      makeFnExample(
+        `validate(fn) = {
+  errors = List.upTo(2020, 2030)
+    -> List.map(
+      {|e| [Date(e), typeOf(fn(Date(e))) == "Distribution"]}
+    )
+    -> List.filter(
+      {|e| true}
+    )
+  "Has errors!"
+}
+
+spec = Specification.make(
+  {
+    title: "Stock market over time",
+    description: "The S&P500 stock market price, over time.",
+    validate: validate,
+    showAs: {|e| e(Date(2024))},
+  }
+)`,
+        { isInteractive: false, useForTests: false }
+      ),
+    ],
     definitions: [
       makeDefinition(
         [
