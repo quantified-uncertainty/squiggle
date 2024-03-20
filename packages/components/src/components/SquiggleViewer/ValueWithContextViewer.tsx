@@ -179,7 +179,7 @@ export const ValueWithContextViewer: FC<Props> = ({
   const itemState = itemStore.getStateOrInitialize(value);
 
   const isRoot = path.isRoot();
-  const taggedName = value.tags.name() || value.tags.specification()?.title;
+  const taggedName = value.tags.name();
 
   const exportData = value.tags.exportData();
 

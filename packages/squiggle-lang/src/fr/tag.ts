@@ -247,10 +247,17 @@ example2 = {|x| x + 1}`,
       makeDefinition(
         [frWithTags(frAny({ genericName: "A" })), frSpecification],
         frWithTags(frAny({ genericName: "A" })),
-        ([{ value, tags }, spec]) => ({
-          value,
-          tags: tags.merge({ specification: vSpecification(spec) }),
-        }),
+        ([{ value, tags }, spec], reducer) => {
+          const showAs = spec.showAs && reducer.call(spec.showAs, [value]);
+          return {
+            value,
+            tags: tags.merge({
+              specification: vSpecification(spec),
+              name: vString(spec.title),
+              ...(showAs ? { showAs } : {}),
+            }),
+          };
+        },
         { isDecorator: true }
       ),
     ],
