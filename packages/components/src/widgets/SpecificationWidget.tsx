@@ -14,6 +14,7 @@ export type SpecificationStatus =
   | { type: "validation-success" }
   | { type: "validation-failure"; error: string };
 
+// Note that this can be slow to run, if ``validate`` is too slow.
 export function getSpecificationStatus(
   value: SqValueWithContext
 ): SpecificationStatus {
@@ -21,11 +22,7 @@ export function getSpecificationStatus(
   if (!specification) {
     return { type: "no-specification" };
   }
-  const validateValue = specification!.validate(value, {
-    sampleCount: 1000,
-    xyPointLength: 1000,
-    seed: "test-seed",
-  });
+  const validateValue = specification!.validate(value);
   if (!validateValue.ok) {
     return { type: "load-error", error: validateValue.value };
   }
@@ -33,7 +30,6 @@ export function getSpecificationStatus(
     validateValue?.ok && validateValue.value.tag === "String"
       ? validateValue.value.value
       : undefined;
-
   if (possibleErrorMessage) {
     return { type: "validation-failure", error: possibleErrorMessage };
   } else {

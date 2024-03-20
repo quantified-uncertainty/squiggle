@@ -1,12 +1,10 @@
-import { Env } from "../../dist/env.js";
-import { Reducer } from "../../reducer/Reducer.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
 import { Specification } from "../../value/VSpecification.js";
-import { SqError, SqRuntimeError } from "../SqError.js";
+import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
-import { SqValuePathEdge } from "../SqValuePath.js";
-import { SqValue, wrapValue } from "./index.js";
+import { SqValue } from "./index.js";
+import { runLambda } from "./SqLambda.js";
 
 export class SqSpecification {
   constructor(
@@ -22,17 +20,18 @@ export class SqSpecification {
     return this._value.description;
   }
 
-  validate(subvalue: SqValue, env: Env): result<SqValue, SqError> {
-    const reducer = new Reducer(env);
-    const newContext = this.context?.extend(SqValuePathEdge.fromCalculator());
-
-    try {
-      const value = reducer.call(this._value.validate, [subvalue._value]);
-      return Result.Ok(wrapValue(value, newContext));
-    } catch (e) {
-      return Result.Err(
-        new SqRuntimeError(reducer.errorFromException(e), this.context?.project)
-      );
+  // TODO: We might want to allow this to optionally take in a custom environment.
+  // This code was mostly taken from SqLambda.ts.
+  validate(subvalue: SqValue): result<SqValue, SqError> {
+    if (!this.context) {
+      return Result.Err(new SqOtherError("No context for specification"));
     }
+    const env = this.context.project.getEnvironment();
+    return runLambda(
+      this._value.validate,
+      [subvalue._value],
+      env,
+      this.context.project
+    );
   }
 }
