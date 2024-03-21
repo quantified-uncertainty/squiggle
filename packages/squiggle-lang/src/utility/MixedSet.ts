@@ -7,25 +7,41 @@ type Range = [number, number];
 // Gets all the parts of the set of the first set that are not covered by the support of the second set
 const rangesDifference = (range1: Range[], range2: Range[]): Range[] => {
   const result: Range[] = [];
+
   for (const [start1, end1] of range1) {
-    let segmentStart = start1;
+    const segments: Range[] = [[start1, end1]];
+
     for (const [start2, end2] of range2) {
-      if (start2 <= segmentStart && end2 >= segmentStart) {
-        // Overlap found, adjust the segment start
-        segmentStart = Math.max(segmentStart, end2);
+      const newSegments: Range[] = [];
+
+      for (const [segmentStart, segmentEnd] of segments) {
+        if (start2 > segmentEnd || end2 < segmentStart) {
+          // No overlap, keep the segment as is
+          newSegments.push([segmentStart, segmentEnd]);
+        } else {
+          // Overlap found, split the segment
+          if (segmentStart < start2) {
+            newSegments.push([segmentStart, start2]);
+          }
+          if (segmentEnd > end2) {
+            newSegments.push([end2, segmentEnd]);
+          }
+        }
       }
+
+      segments.length = 0;
+      segments.push(...newSegments);
     }
-    if (segmentStart <= end1) {
-      // Non-overlapping segment found
-      result.push([segmentStart, end1]);
-    }
+
+    result.push(...segments);
   }
+
   return result;
 };
 
 export class MixedSet {
-  points: number[];
-  segments: Range[];
+  public points: number[];
+  public segments: Range[];
 
   constructor(points: number[], segments: Range[]) {
     this.points = points;

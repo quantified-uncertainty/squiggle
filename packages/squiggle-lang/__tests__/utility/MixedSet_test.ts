@@ -19,27 +19,92 @@ describe("MixedSet", () => {
   });
 
   describe("subtract", () => {
-    test("returns the difference between two MixedSets", () => {
-      const support1 = new MixedSet(
-        [1, 2, 3],
-        [
-          [0, 1],
-          [3, 5],
-        ]
-      );
-      const support2 = new MixedSet(
-        [2, 4],
-        [
-          [1, 2],
-          [3, 4],
-        ]
-      );
-      const difference = support1.subtract(support2);
-      expect(difference.points).toEqual([1, 3]);
-      expect(difference.segments).toEqual([
-        [0, 1],
-        [4, 5],
-      ]);
+    const testCases = [
+      {
+        set1: new MixedSet([1, 2, 3], [[0, 10]]),
+        set2: new MixedSet([2, 4], [[5, 6]]),
+        expected: {
+          points: [1, 3],
+          segments: [
+            [0, 5],
+            [6, 10],
+          ],
+        },
+      },
+      {
+        set1: new MixedSet([], []),
+        set2: new MixedSet([1, 2], [[3, 4]]),
+        expected: { points: [], segments: [] },
+      },
+      {
+        set1: new MixedSet([1, 2], [[3, 4]]),
+        set2: new MixedSet([], []),
+        expected: { points: [1, 2], segments: [[3, 4]] },
+      },
+      {
+        set1: new MixedSet([1, 2, 3, 4], []),
+        set2: new MixedSet([2, 4], []),
+        expected: { points: [1, 3], segments: [] },
+      },
+      {
+        set1: new MixedSet(
+          [],
+          [
+            [0, 5],
+            [7, 10],
+          ]
+        ),
+        set2: new MixedSet(
+          [],
+          [
+            [2, 4],
+            [8, 9],
+          ]
+        ),
+        expected: {
+          points: [],
+          segments: [
+            [0, 2],
+            [4, 5],
+            [7, 8],
+            [9, 10],
+          ],
+        },
+      },
+      {
+        set1: new MixedSet(
+          [1, 3, 5],
+          [
+            [0, 2],
+            [4, 6],
+            [8, 10],
+          ]
+        ),
+        set2: new MixedSet(
+          [3],
+          [
+            [1, 5],
+            [9, 10],
+          ]
+        ),
+        expected: {
+          points: [1, 5],
+          segments: [
+            [0, 1],
+            [5, 6],
+            [8, 9],
+          ],
+        },
+      },
+    ];
+
+    testCases.forEach(({ set1, set2, expected }) => {
+      test(`returns the difference between ${JSON.stringify(set1)} and ${JSON.stringify(set2)}`, () => {
+        const difference = set1.subtract(set2);
+
+        expect(difference.points).toEqual(expected.points);
+        expect(difference.segments).toEqual(expected.segments);
+      });
     });
   });
 

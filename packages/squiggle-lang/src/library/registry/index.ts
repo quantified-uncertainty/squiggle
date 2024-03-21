@@ -10,6 +10,7 @@ import { library as genericDistLibrary } from "../../fr/genericDist.js";
 import { library as inputLibrary } from "../../fr/input.js";
 import { library as listLibrary } from "../../fr/list.js";
 import { library as mathLibrary } from "../../fr/math.js";
+import { library as mixedSetLibrary } from "../../fr/mixedSet.js";
 import { library as numberLibrary } from "../../fr/number.js";
 import { library as plotLibrary } from "../../fr/plot.js";
 import { library as pointsetLibrary } from "../../fr/pointset.js";
@@ -51,6 +52,7 @@ const fnList: FRFunction[] = [
   ...samplesetLibrary,
   ...scaleLibrary,
   ...scoringLibrary,
+  ...mixedSetLibrary,
   ...symLibrary,
   ...unitsLibrary,
   ...calculatorLibrary,
