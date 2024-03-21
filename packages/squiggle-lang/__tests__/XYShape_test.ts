@@ -64,7 +64,11 @@ describe("ToSegments", () => {
   describe("greaterThan", () => {
     test("returns segments above the threshold", () => {
       const threshold = 2.5;
-      const segments = XYShape.extractSegments(shape, "greaterThan", threshold);
+      const segments = XYShape.extractSubsetThatSatisfiesThreshold(
+        shape,
+        "greaterThan",
+        threshold
+      );
 
       expect(segments).toEqual({
         segments: [
@@ -83,7 +87,11 @@ describe("ToSegments", () => {
 
     test("returns empty array when no segments above the threshold", () => {
       const threshold = 10;
-      const segments = XYShape.extractSegments(shape, "greaterThan", threshold);
+      const segments = XYShape.extractSubsetThatSatisfiesThreshold(
+        shape,
+        "greaterThan",
+        threshold
+      );
 
       expect(segments).toEqual({ segments: [], points: [] });
     });
@@ -92,7 +100,11 @@ describe("ToSegments", () => {
   describe("lesserThan", () => {
     test("returns segments below the threshold", () => {
       const threshold = 2.5;
-      const segments = XYShape.extractSegments(shape, "lesserThan", threshold);
+      const segments = XYShape.extractSubsetThatSatisfiesThreshold(
+        shape,
+        "lesserThan",
+        threshold
+      );
 
       expect(segments).toEqual({
         segments: [
@@ -115,7 +127,11 @@ describe("ToSegments", () => {
 
     test("returns empty array when no segments below the threshold", () => {
       const threshold = 0;
-      const segments = XYShape.extractSegments(shape, "lesserThan", threshold);
+      const segments = XYShape.extractSubsetThatSatisfiesThreshold(
+        shape,
+        "lesserThan",
+        threshold
+      );
 
       expect(segments).toEqual({ segments: [], points: [] });
     });
@@ -124,7 +140,11 @@ describe("ToSegments", () => {
   describe("equals", () => {
     test("returns segments equal to the threshold", () => {
       const threshold = 4;
-      const segments = XYShape.extractSegments(shape, "equals", threshold);
+      const segments = XYShape.extractSubsetThatSatisfiesThreshold(
+        shape,
+        "equals",
+        threshold
+      );
 
       expect(segments).toEqual({
         points: [
@@ -138,7 +158,11 @@ describe("ToSegments", () => {
 
     test("returns segments equal to the threshold, when interpolation is needed", () => {
       const threshold = 2.5;
-      const segments = XYShape.extractSegments(shape, "equals", threshold);
+      const segments = XYShape.extractSubsetThatSatisfiesThreshold(
+        shape,
+        "equals",
+        threshold
+      );
 
       expect(segments).toEqual({
         segments: [],
@@ -156,7 +180,11 @@ describe("ToSegments", () => {
         xs: [0, 1, 2, 3, 8, 9],
         ys: [0, 0, 0, 3, 3, 0],
       };
-      const segments = XYShape.extractSegments(shape, "equals", threshold);
+      const segments = XYShape.extractSubsetThatSatisfiesThreshold(
+        shape,
+        "equals",
+        threshold
+      );
 
       expect(segments).toEqual({
         points: [],
@@ -171,33 +199,20 @@ describe("ToSegments", () => {
 
     test("returns empty array when no segments equal to the threshold", () => {
       const threshold = 10;
-      const segments = XYShape.extractSegments(shape, "equals", threshold);
+      const segments = XYShape.extractSubsetThatSatisfiesThreshold(
+        shape,
+        "equals",
+        threshold
+      );
 
       expect(segments).toEqual({ segments: [], points: [] });
     });
-
-    // This doesn't work yet, but really, we might not need.
-    // test("with infinity in range, detects infinity", () => {
-    //   const shape: XYShape.XYShape = {
-    //     xs: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    //     ys: [1, 2, Infinity, Infinity, Infinity, 3, Infinity, Infinity, 1],
-    //   };
-    //   const threshold = Infinity;
-    //   const segments = XYShape.extractSegments(shape, "equals", threshold);
-    //   expect(segments).toEqual({
-    //     segments: [
-    //       { xs: [2, 3, 4], ys: [Infinity, Infinity, Infinity] },
-    //       { xs: [7, 8], ys: [Infinity, Infinity] },
-    //     ],
-    //     points: [],
-    //   });
-    // });
   });
 
   describe("greaterThanOrEquals", () => {
     test("returns segments greater than or equal to the threshold", () => {
       const threshold = 3;
-      const segments = XYShape.extractSegments(
+      const segments = XYShape.extractSubsetThatSatisfiesThreshold(
         shape,
         "greaterThanOrEqual",
         threshold
@@ -221,7 +236,7 @@ describe("ToSegments", () => {
   describe("lessThanOrEquals", () => {
     test("returns segments less than or equal to the threshold", () => {
       const threshold = 2;
-      const segments = XYShape.extractSegments(
+      const segments = XYShape.extractSubsetThatSatisfiesThreshold(
         shape,
         "lessThanOrEqual",
         threshold

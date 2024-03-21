@@ -299,6 +299,11 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
   }
 
   support() {
+    if (this.interpolation === "Stepwise") {
+      throw new Error(
+        "support() is not supported for continuous distributions with Stepwise interpolation"
+      );
+    }
     return MixedSet.fromContinuousDistShape(this.xyShape);
   }
 }

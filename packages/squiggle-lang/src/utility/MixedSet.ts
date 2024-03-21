@@ -1,6 +1,6 @@
 import sortBy from "lodash/sortBy.js";
 
-import { extractSegments, XYShape } from "../XYShape.js";
+import { extractSubsetThatSatisfiesThreshold, XYShape } from "../XYShape.js";
 
 type Range = [number, number];
 
@@ -61,7 +61,11 @@ export class MixedSet {
     return new MixedSet(
       [],
       sortBy(
-        extractSegments(shape, "greaterThan", 0).segments.map(
+        extractSubsetThatSatisfiesThreshold(
+          shape,
+          "greaterThan",
+          0
+        ).segments.map(
           (xyShape) =>
             [xyShape.xs[0], xyShape.xs[xyShape.xs.length - 1]] as [
               number,
