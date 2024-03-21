@@ -7,33 +7,38 @@ type Range = [number, number];
 // Gets all the parts of the set of the first set that are not covered by the support of the second set
 const rangesDifference = (range1: Range[], range2: Range[]): Range[] => {
   const result: Range[] = [];
+  let i = 0;
+  let j = 0;
 
-  for (const [start1, end1] of range1) {
-    const segments: Range[] = [[start1, end1]];
+  while (i < range1.length && j < range2.length) {
+    const [start1, end1] = range1[i];
+    const [start2, end2] = range2[j];
 
-    for (const [start2, end2] of range2) {
-      const newSegments: Range[] = [];
-
-      for (const [segmentStart, segmentEnd] of segments) {
-        if (start2 > segmentEnd || end2 < segmentStart) {
-          // No overlap, keep the segment as is
-          newSegments.push([segmentStart, segmentEnd]);
-        } else {
-          // Overlap found, split the segment
-          if (segmentStart < start2) {
-            newSegments.push([segmentStart, start2]);
-          }
-          if (segmentEnd > end2) {
-            newSegments.push([end2, segmentEnd]);
-          }
-        }
+    if (start2 > end1) {
+      // No overlap, add the entire range from range1
+      result.push([start1, end1]);
+      i++;
+    } else if (end2 < start1) {
+      // No overlap, move to the next range in range2
+      j++;
+    } else {
+      // Overlap found, split the range from range1
+      if (start1 < start2) {
+        result.push([start1, start2]);
       }
-
-      segments.length = 0;
-      segments.push(...newSegments);
+      if (end1 > end2) {
+        range1[i][0] = end2; // Update the start of the current range in range1
+        j++;
+      } else {
+        i++;
+      }
     }
+  }
 
-    result.push(...segments);
+  // Add any remaining ranges from range1
+  while (i < range1.length) {
+    result.push(range1[i]);
+    i++;
   }
 
   return result;
