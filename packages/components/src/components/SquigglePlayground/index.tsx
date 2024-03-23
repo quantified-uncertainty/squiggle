@@ -40,6 +40,7 @@ export type SquigglePlaygroundProps = {
    * So updates to it are completely ignored.
    */
   defaultCode?: string;
+  defaultAutorunMode?: boolean;
   sourceId?: string;
   linker?: SqLinker;
   onCodeChange?(code: string): void;
@@ -78,6 +79,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     renderExtraDropdownItems,
     renderExtraModal,
     renderImportTooltip,
+    defaultAutorunMode,
     height = 500,
     ...defaultSettings
   } = props;
@@ -107,6 +109,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     sourceId: _sourceId,
     setup: { type: "projectFromLinker", linker },
     environment: settings.environment,
+    initialAutorunMode: defaultAutorunMode,
   });
 
   useEffect(() => {
