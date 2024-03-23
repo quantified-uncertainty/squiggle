@@ -163,32 +163,43 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     );
   };
 
-  const renderRight = () =>
-    simulation ? (
-      <ProjectContext.Provider
-        value={{ sourceId, onOpenExport: props.onOpenExport }}
-      >
-        <ViewerWithMenuBar
-          simulation={simulation}
-          // FIXME - this will cause viewer to be rendered twice on initial render
-          editor={leftPanelRef.current?.getEditor() ?? undefined}
-          playgroundSettings={settings}
-          ref={rightPanelRef}
-          useGlobalShortcuts={true}
-          xPadding={2}
-          randomizeSeed={() => {
-            randomizeSeed();
-            if (!autorunMode) {
-              runSimulation();
-            }
-          }}
-        />
-      </ProjectContext.Provider>
-    ) : (
-      <div className="grid place-items-center h-full">
-        <RefreshIcon className="animate-spin text-slate-400" size={24} />
-      </div>
-    );
+  const renderRight = () => {
+    if (simulation) {
+      return (
+        <ProjectContext.Provider
+          value={{ sourceId, onOpenExport: props.onOpenExport }}
+        >
+          <ViewerWithMenuBar
+            simulation={simulation}
+            // FIXME - this will cause viewer to be rendered twice on initial render
+            editor={leftPanelRef.current?.getEditor() ?? undefined}
+            playgroundSettings={settings}
+            ref={rightPanelRef}
+            useGlobalShortcuts={true}
+            xPadding={2}
+            randomizeSeed={() => {
+              randomizeSeed();
+              if (!autorunMode) {
+                runSimulation();
+              }
+            }}
+          />
+        </ProjectContext.Provider>
+      );
+    } else if (defaultAutorunMode === false) {
+      return (
+        <div className="grid place-items-center h-full">
+          <div className="text-gray-500 text-sm">{`Press the "Run" button (top left) to simulate`}</div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="grid place-items-center h-full">
+          <RefreshIcon className="animate-spin text-slate-400" size={24} />
+        </div>
+      );
+    }
+  };
 
   return (
     <PlaygroundContext.Provider value={{ getLeftPanelElement }}>

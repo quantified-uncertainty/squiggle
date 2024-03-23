@@ -318,7 +318,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     typeof squiggle.components.SquigglePlayground
   >[0] = {
     defaultCode,
-    autorunMode: content.autorunMode || true,
+    autorunMode: content.autorunMode ?? true,
     sourceId: serializeSourceId({
       owner: model.owner.slug,
       slug: model.slug,
