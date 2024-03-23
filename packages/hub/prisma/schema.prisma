@@ -230,9 +230,12 @@ model ModelRevision {
 model SquiggleSnippet {
   id String @id @default(cuid())
 
-  code    String
-  version String
-  seed    String
+  code          String
+  version       String
+  seed          String
+  autorunMode   Boolean?
+  sampleCount   Int?
+  xyPointLength Int?
 
   revision ModelRevision?
 }

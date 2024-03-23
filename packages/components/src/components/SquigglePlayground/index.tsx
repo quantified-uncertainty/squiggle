@@ -40,7 +40,7 @@ export type SquigglePlaygroundProps = {
    * So updates to it are completely ignored.
    */
   defaultCode?: string;
-  defaultAutorunMode?: boolean;
+  autorunMode?: boolean;
   sourceId?: string;
   linker?: SqLinker;
   onCodeChange?(code: string): void;
@@ -79,7 +79,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     renderExtraDropdownItems,
     renderExtraModal,
     renderImportTooltip,
-    defaultAutorunMode,
+    autorunMode: defaultAutorunMode = true,
     height = 500,
     ...defaultSettings
   } = props;
