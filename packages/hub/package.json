@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "db:migrate:dev": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate dev",
     "db:migrate": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate deploy",
     "db:reset": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate reset",
     "dev": "next dev -p 3001",
