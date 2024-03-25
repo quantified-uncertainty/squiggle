@@ -5,5 +5,6 @@
 export const VERCEL_URL = process.env["NEXT_PUBLIC_VERCEL_URL"];
 
 export const SAMPLE_COUNT_DEFAULT = 1000;
+export const XY_POINT_LENGTH_DEFAULT = 1000;
 
 export const DEFAULT_SEED = "DEFAULT_SEED";
