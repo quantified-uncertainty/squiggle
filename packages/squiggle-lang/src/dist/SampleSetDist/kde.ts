@@ -96,7 +96,8 @@ export const kde = ({
     const ddy = ysum[i] - 2 * ysum[i + width] + ysum[i + 2 * width];
     dy += ddy;
     y += dy;
-    return normalizer * y;
+    // Sometimes the KDE can be very slightly negative due to floating point errors
+    return Math.max(normalizer * y, 0);
   });
 
   return { usedWidth: xWidth, xs, ys };
