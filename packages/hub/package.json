@@ -2,6 +2,9 @@
   "name": "@quri/hub",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "db:migrate:dev": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate dev",
     "db:migrate": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate deploy",
