@@ -22,9 +22,9 @@ export const Basic: Story = {
         "Has errors!"
       }
       
-      Specification.make(
+      Spec.make(
         {
-          title: "Stock market over time",
+          name: "Stock market over time",
           documentation: "The S&P500 stock market price, over time.",
           validate: validate,
           showAs: {|e| e(Date(2024))},
