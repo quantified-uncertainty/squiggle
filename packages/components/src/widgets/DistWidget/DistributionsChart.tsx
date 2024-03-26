@@ -162,7 +162,6 @@ const InnerDistributionsChart: FC<{
     ]);
 
     const yScale = sqScaleToD3(plot.yScale);
-    // yScale.domain([0, Math.max(...domain.map((p) => p.y))]);
 
     yScale.domain([
       Math.min(0, ...domain.map((p) => p.y)),
@@ -215,7 +214,6 @@ const InnerDistributionsChart: FC<{
           return { yOffset: 0, color: getColor(0) };
         }
       }
-
       if (samplesBarSetting !== "none") {
         context.save();
         const { yOffset, color } = samplesBarShowSettings();
@@ -232,8 +230,6 @@ const InnerDistributionsChart: FC<{
         context.restore();
       }
 
-      context.globalCompositeOperation = "source-over";
-
       // shapes
       {
         frame.enter();
@@ -249,8 +245,8 @@ const InnerDistributionsChart: FC<{
 
           // continuous fill
           //In the case of one distribution, we don't want it to be transparent, so that we can show the samples lines. In the case of multiple distributions, we want them to be transparent so that we can see the other distributions.
-          context.fillStyle = isMulti ? getColor(i, 0.5) : getColor(i, 0.7);
-          context.globalAlpha = isMulti ? 0.4 : 0.9;
+          context.fillStyle = isMulti ? getColor(i, 0) : getColor(i, 0.7);
+          context.globalAlpha = isMulti ? 0.4 : 1;
           context.beginPath();
           d3
             .area<SqShape["continuous"][number]>()
@@ -405,7 +401,6 @@ const InnerDistributionsChart: FC<{
         });
       }
     },
-
     [
       height,
       discreteRadius,
@@ -601,6 +596,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
                 height={height}
                 samplesBarSetting={samplesState}
                 showCursorLine={nonTitleHeight > 30}
+                // We don't want to show percentile lines if it's not normalized, as they wouldn't make sense.
                 showPercentileLines={
                   !anyAreNonnormalized && nonTitleHeight > 30
                 }
