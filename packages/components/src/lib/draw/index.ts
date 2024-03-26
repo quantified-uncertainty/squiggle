@@ -37,6 +37,7 @@ interface DrawAxesParams {
   yTickFormat?: string;
   xAxisTitle?: string;
   yAxisTitle?: string;
+  frame?: CartesianFrame;
 }
 
 const _tickCountInterpolator = d3
@@ -61,6 +62,7 @@ export function drawAxes({
   yTickFormat: yTickFormatSpecifier = defaultTickFormatSpecifier,
   xAxisTitle,
   yAxisTitle,
+  frame: _frame,
 }: DrawAxesParams) {
   const _xTickCount = xTickCount || _tickCountInterpolator(width * height);
   const _yTickCount = yTickCount || _tickCountInterpolator(height * width);
@@ -75,7 +77,7 @@ export function drawAxes({
 
   const padding: Padding = { ...suggestedPadding };
   if (xAxisTitle) {
-    padding.bottom = padding.bottom + 20;
+    padding.bottom = padding.bottom + 30;
   }
   if (yAxisTitle) {
     padding.left = padding.left + 35;
@@ -94,13 +96,15 @@ export function drawAxes({
     });
   }
 
-  const frame = new CartesianFrame({
-    context,
-    x0: padding.left,
-    y0: height - padding.bottom,
-    width: width - padding.left - padding.right,
-    height: height - padding.top - padding.bottom,
-  });
+  const frame =
+    _frame ||
+    new CartesianFrame({
+      context,
+      x0: padding.left,
+      y0: height - padding.bottom,
+      width: width - padding.left - padding.right,
+      height: height - padding.top - padding.bottom,
+    });
   xScale.range([0, frame.width]);
   yScale.range([0, frame.height]);
 
@@ -111,8 +115,8 @@ export function drawAxes({
       context.beginPath();
       context.strokeStyle = axisColor;
       context.lineWidth = 1;
-      context.moveTo(0, 0);
-      context.lineTo(frame.width, 0);
+      context.moveTo(0, yScale(0));
+      context.lineTo(frame.width, yScale(0));
       context.stroke();
     }
 
@@ -123,7 +127,7 @@ export function drawAxes({
     for (let i = 0; i < xTicks.length; i++) {
       const xTick = xTicks[i];
       const x = xScale(xTick);
-      const y = 0;
+      const y = yScale(0);
 
       context.beginPath();
       context.strokeStyle = labelColor;

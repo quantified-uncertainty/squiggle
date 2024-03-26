@@ -18,6 +18,7 @@ import { useViewerType } from "../../components/SquiggleViewer/ViewerProvider.js
 import { ErrorAlert } from "../../components/ui/Alert.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
+import { CartesianFrame } from "../../lib/draw/CartesianFrame.js";
 import {
   distance,
   distributionColor,
@@ -160,7 +161,12 @@ const InnerDistributionsChart: FC<{
     ]);
 
     const yScale = sqScaleToD3(plot.yScale);
-    yScale.domain([0, Math.max(...domain.map((p) => p.y))]);
+    // yScale.domain([0, Math.max(...domain.map((p) => p.y))]);
+
+    yScale.domain([
+      Math.min(0, ...domain.map((p) => p.y)),
+      Math.max(0, ...domain.map((p) => p.y)),
+    ]);
 
     return { xScale, yScale };
   }, [domain, plot.xScale, plot.yScale]);
@@ -186,7 +192,16 @@ const InnerDistributionsChart: FC<{
         top: discreteRadius,
         bottom: bottomPadding,
       };
-      const { padding, frame } = drawAxes({
+      const padding = suggestedPadding;
+      const frame = new CartesianFrame({
+        context,
+        x0: padding.left,
+        y0: height - padding.bottom,
+        width: width - padding.left - padding.right,
+        height: height - padding.top - padding.bottom,
+      });
+
+      drawAxes({
         context,
         width,
         height,
@@ -197,7 +212,7 @@ const InnerDistributionsChart: FC<{
         showXAxis,
         xTickFormat: plot.xScale.tickFormat,
         xAxisTitle: showAxisTitles ? plot.xScale.title : undefined,
-        showAxisLines: false,
+        showAxisLines: true, // Set this to true to show the axis lines
       });
 
       // samplesBar
@@ -211,6 +226,7 @@ const InnerDistributionsChart: FC<{
           return { yOffset: 0, color: getColor(0) };
         }
       }
+
       if (samplesBarSetting !== "none") {
         context.save();
         const { yOffset, color } = samplesBarShowSettings();
@@ -227,6 +243,8 @@ const InnerDistributionsChart: FC<{
         context.restore();
       }
 
+      context.globalCompositeOperation = "source-over";
+
       // shapes
       {
         frame.enter();
@@ -242,14 +260,14 @@ const InnerDistributionsChart: FC<{
 
           // continuous fill
           //In the case of one distribution, we don't want it to be transparent, so that we can show the samples lines. In the case of multiple distributions, we want them to be transparent so that we can see the other distributions.
-          context.fillStyle = isMulti ? getColor(i, 0) : getColor(i, 0.7);
-          context.globalAlpha = isMulti ? 0.4 : 1;
+          context.fillStyle = isMulti ? getColor(i, 0.5) : getColor(i, 0.7);
+          context.globalAlpha = isMulti ? 0.4 : 0.9;
           context.beginPath();
           d3
             .area<SqShape["continuous"][number]>()
             .x((d) => xScale(d.x))
             .y0((d) => yScale(d.y))
-            .y1(0)
+            .y1(yScale(0))
             .context(context)(shape.continuous);
           context.fill();
           context.globalAlpha = 1;
@@ -341,6 +359,20 @@ const InnerDistributionsChart: FC<{
         frame.exit();
       }
 
+      drawAxes({
+        context,
+        width,
+        height,
+        suggestedPadding,
+        xScale,
+        yScale,
+        showYAxis: false,
+        showXAxis,
+        xTickFormat: plot.xScale.tickFormat,
+        xAxisTitle: showAxisTitles ? plot.xScale.title : undefined,
+        showAxisLines: true, // Set this to true to show the axis lines
+      });
+
       if (isMulti) {
         const radius = 5;
         for (let i = 0; i < shapes.length; i++) {
@@ -384,6 +416,7 @@ const InnerDistributionsChart: FC<{
         });
       }
     },
+
     [
       height,
       discreteRadius,
