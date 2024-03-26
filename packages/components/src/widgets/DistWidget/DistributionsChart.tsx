@@ -18,14 +18,15 @@ import { useViewerType } from "../../components/SquiggleViewer/ViewerProvider.js
 import { ErrorAlert } from "../../components/ui/Alert.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
-import { CartesianFrame } from "../../lib/draw/CartesianFrame.js";
 import {
+  calculatePadding,
   distance,
   distributionColor,
   drawAxes,
   drawCircle,
   drawCursorLines,
   drawVerticalLine,
+  makeCartesianFrame,
 } from "../../lib/draw/index.js";
 import { Point } from "../../lib/draw/types.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
@@ -192,29 +193,17 @@ const InnerDistributionsChart: FC<{
         top: discreteRadius,
         bottom: bottomPadding,
       };
-      const padding = suggestedPadding;
-      const frame = new CartesianFrame({
-        context,
-        x0: padding.left,
-        y0: height - padding.bottom,
-        width: width - padding.left - padding.right,
-        height: height - padding.top - padding.bottom,
-      });
 
-      drawAxes({
-        context,
-        width,
-        height,
+      const padding = calculatePadding({
         suggestedPadding,
-        xScale,
-        yScale,
-        showYAxis: false,
-        showXAxis,
-        xTickFormat: plot.xScale.tickFormat,
-        xAxisTitle: showAxisTitles ? plot.xScale.title : undefined,
-        showAxisLines: true, // Set this to true to show the axis lines
+        hasXAxisTitle: showAxisTitles && !!plot.xScale.title,
+        hasYAxisTitle: false,
       });
 
+      const frame = makeCartesianFrame({ context, padding, width, height });
+
+      xScale.range([0, frame.width]);
+      yScale.range([0, frame.height]);
       // samplesBar
       function samplesBarShowSettings(): { yOffset: number; color: string } {
         if (samplesBarSetting === "behind") {
@@ -612,7 +601,9 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
                 height={height}
                 samplesBarSetting={samplesState}
                 showCursorLine={nonTitleHeight > 30}
-                showPercentileLines={nonTitleHeight > 30}
+                showPercentileLines={
+                  !anyAreNonnormalized && nonTitleHeight > 30
+                }
                 showXAxis={showXAxis}
                 showAxisTitles={showAxisTitles}
               />

@@ -46,6 +46,45 @@ const _tickCountInterpolator = d3
   .range([3, 16]) // The range of circle radiuses
   .clamp(true);
 
+export function calculatePadding({
+  suggestedPadding,
+  hasXAxisTitle,
+  hasYAxisTitle,
+}: {
+  suggestedPadding: Padding;
+  hasXAxisTitle: boolean;
+  hasYAxisTitle: boolean;
+}): Padding {
+  const padding: Padding = { ...suggestedPadding };
+  if (hasXAxisTitle) {
+    padding.bottom = padding.bottom + 20;
+  }
+  if (hasYAxisTitle) {
+    padding.left = padding.left + 35;
+  }
+  return padding;
+}
+
+export function makeCartesianFrame({
+  context,
+  padding,
+  width,
+  height,
+}: {
+  context: CanvasRenderingContext2D;
+  padding: Padding;
+  width: number;
+  height: number;
+}) {
+  return new CartesianFrame({
+    context,
+    x0: padding.left,
+    y0: height - padding.bottom,
+    width: width - padding.left - padding.right,
+    height: height - padding.top - padding.bottom,
+  });
+}
+
 export function drawAxes({
   context,
   xScale, // will be mutated with the correct range
@@ -75,13 +114,11 @@ export function drawAxes({
 
   const tickSize = 2;
 
-  const padding: Padding = { ...suggestedPadding };
-  if (xAxisTitle) {
-    padding.bottom = padding.bottom + 30;
-  }
-  if (yAxisTitle) {
-    padding.left = padding.left + 35;
-  }
+  const padding: Padding = calculatePadding({
+    suggestedPadding,
+    hasXAxisTitle: !!xAxisTitle,
+    hasYAxisTitle: !!yAxisTitle,
+  });
 
   // measure tick sizes for dynamic padding
   if (showYAxis) {
@@ -97,14 +134,8 @@ export function drawAxes({
   }
 
   const frame =
-    _frame ||
-    new CartesianFrame({
-      context,
-      x0: padding.left,
-      y0: height - padding.bottom,
-      width: width - padding.left - padding.right,
-      height: height - padding.top - padding.bottom,
-    });
+    _frame || makeCartesianFrame({ context, padding, width, height });
+
   xScale.range([0, frame.width]);
   yScale.range([0, frame.height]);
 
