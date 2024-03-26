@@ -2,10 +2,9 @@ import { Lambda } from "../reducer/lambda.js";
 import { BaseValue } from "./BaseValue.js";
 
 export type Specification = {
-  title: string;
+  name: string;
+  documentation: string;
   validate: Lambda;
-  description?: string;
-  showAs?: Lambda;
 };
 
 export class VSpecification extends BaseValue {
@@ -20,10 +19,7 @@ export class VSpecification extends BaseValue {
   }
 
   isEqual(other: VSpecification) {
-    return (
-      this.value.title === other.value.title &&
-      this.value.description === other.value.description
-    );
+    return this.value === other.value;
   }
 }
 

@@ -108,10 +108,10 @@ const SpecificationView: FC<{ specification: SqSpecification }> = ({
         <span className="flex text-xs">Specification</span>
       </div>
       <div className="font-medium text-green-900 mb-1">
-        {specification.title}
+        {specification.name}
       </div>
-      {specification.description && (
-        <p className="text-sm text-gray-500">{specification.description}</p>
+      {specification.documentation && (
+        <p className="text-sm text-gray-500">{specification.documentation}</p>
       )}
     </div>
   );

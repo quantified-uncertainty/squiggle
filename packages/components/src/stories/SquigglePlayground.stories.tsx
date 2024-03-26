@@ -369,12 +369,11 @@ export const Specification: Story = {
       "Has errors!"
     }
     
-    spec = Specification.make(
+    spec = Spec.make(
       {
-        title: "Stock market over time",
-        description: "The S&P500 stock market price, over time.",
+        name: "Stock market over time",
+        documentation: "Stock market over time",
         validate: validate,
-        showAs: {|e| e(Date(2024))},
       }
     )
     
@@ -383,7 +382,7 @@ export const Specification: Story = {
       normal(yearsDiff, yearsDiff + 0.1)
     }
     
-    withSpec = fn -> Tag.specification(spec)
+    withSpec = fn -> Tag.spec(spec)
   `,
   },
 };

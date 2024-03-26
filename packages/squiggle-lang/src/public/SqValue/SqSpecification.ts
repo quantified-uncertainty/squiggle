@@ -12,12 +12,12 @@ export class SqSpecification {
     public context?: SqValueContext
   ) {}
 
-  get title(): string | undefined {
-    return this._value.title;
+  get name(): string | undefined {
+    return this._value.name;
   }
 
-  get description(): string | undefined {
-    return this._value.description;
+  get documentation(): string | undefined {
+    return this._value.documentation;
   }
 
   // TODO: We might want to allow this to optionally take in a custom environment.

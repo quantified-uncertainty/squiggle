@@ -240,7 +240,7 @@ example2 = {|x| x + 1}`,
     ],
   }),
   maker.make({
-    name: "specification",
+    name: "spec",
     description: `Adds a specification to a value. This is useful for documenting how a value was calculated, or what it represents.`,
     displaySection: "Tags",
     definitions: [
@@ -248,13 +248,17 @@ example2 = {|x| x + 1}`,
         [frWithTags(frAny({ genericName: "A" })), frSpecification],
         frWithTags(frAny({ genericName: "A" })),
         ([{ value, tags }, spec], reducer) => {
-          const showAs = spec.showAs && reducer.call(spec.showAs, [value]);
+          if (tags.specification()) {
+            throw new REArgumentError(
+              "Specification already exists. Be sure to use Tag.omit() first."
+            );
+          }
           return {
             value,
             tags: tags.merge({
               specification: vSpecification(spec),
-              name: vString(spec.title),
-              ...(showAs ? { showAs } : {}),
+              name: vString(spec.name),
+              doc: vString(spec.documentation),
             }),
           };
         },
@@ -263,7 +267,7 @@ example2 = {|x| x + 1}`,
     ],
   }),
   maker.make({
-    name: "getSpecification",
+    name: "getSpec",
     displaySection: "Tags",
     definitions: [
       makeDefinition([frWithTags(frAny())], frAny(), ([value]) => {

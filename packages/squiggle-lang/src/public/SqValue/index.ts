@@ -440,7 +440,7 @@ export class SqSpecificationValue extends SqAbstractValue<
   }
 
   override title() {
-    return this.value.title;
+    return this.value.name;
   }
 }
 

@@ -142,13 +142,10 @@ export function simpleValueFromValue(value: Value): SimpleValue {
     }
     case "Specification": {
       const fields: [string, SimpleValue][] = [
-        ["title", value.value.title],
+        ["name", value.value.name],
+        ["documentation", value.value.documentation],
         ["validate", value.value.validate],
-        ["description", value.value.description || ""],
       ];
-      if (value.value.showAs) {
-        fields.push(["showAs", value.value.showAs]);
-      }
       return ImmutableMap(fields);
     }
     case "Plot": {

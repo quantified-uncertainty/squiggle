@@ -3,15 +3,13 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDict,
   frLambda,
-  frOptional,
   frSpecification,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { vSpecification } from "../value/VSpecification.js";
 
 const maker = new FnFactory({
-  nameSpace: "Specification",
+  nameSpace: "Spec",
   requiresNamespace: true,
 });
 
@@ -33,12 +31,11 @@ export const library = [
   "Has errors!"
 }
 
-spec = Specification.make(
+spec = Spec.make(
   {
     title: "Stock market over time",
-    description: "The S&P500 stock market price, over time.",
-    validate: validate,
-    showAs: {|e| e(Date(2024))},
+    documentation: "A distribution of stock market values over time.",
+    validate: validate
   }
 )`,
         { isInteractive: false, useForTests: false }
@@ -48,20 +45,17 @@ spec = Specification.make(
       makeDefinition(
         [
           frDict(
-            ["title", frString],
-            ["description", frOptional(frString)],
-            ["validate", frLambda],
-            ["showAs", frOptional(frLambda)]
+            ["name", frString],
+            ["documentation", frString],
+            ["validate", frLambda]
           ),
         ],
         frSpecification,
-        ([{ title, description, validate, showAs }]) =>
-          vSpecification({
-            title,
-            description: description || undefined,
-            validate,
-            showAs: showAs || undefined,
-          }).value
+        ([{ name, documentation, validate }]) => ({
+          name,
+          documentation,
+          validate,
+        })
       ),
     ],
   }),

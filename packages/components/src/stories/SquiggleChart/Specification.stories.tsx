@@ -25,7 +25,7 @@ export const Basic: Story = {
       Specification.make(
         {
           title: "Stock market over time",
-          description: "The S&P500 stock market price, over time.",
+          documentation: "The S&P500 stock market price, over time.",
           validate: validate,
           showAs: {|e| e(Date(2024))},
         }
