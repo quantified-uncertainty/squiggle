@@ -5,22 +5,12 @@ import { clsx } from "clsx";
 import { FC, PropsWithChildren, useCallback, useMemo, useRef } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import {
-  CodeBracketIcon,
-  CommentIcon,
-  Dropdown,
-  LinkIcon,
-  TextTooltip,
-} from "@quri/ui";
+import { CodeBracketIcon, CommentIcon, LinkIcon, TextTooltip } from "@quri/ui";
 
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
-import {
-  getSpecificationStatus,
-  specificationStatusPreview,
-  specificationView,
-} from "../../widgets/SpecificationWidget.js";
+import { SpecificationDropdown } from "../../widgets/SpecificationWidget.js";
 import { useProjectContext } from "../ProjectProvider.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
@@ -196,8 +186,6 @@ export const ValueWithContextViewer: FC<Props> = ({
   const enableDropdownMenu = viewerType !== "tooltip";
   const enableFocus = viewerType !== "tooltip";
 
-  const specificationStatus = getSpecificationStatus(value);
-
   // TODO - check that we're not in a situation where `isOpen` is false and `header` is hidden?
   // In that case, the output would look broken (empty).
   const isOpen = !collapsible || !itemState.collapsed;
@@ -280,25 +268,6 @@ export const ValueWithContextViewer: FC<Props> = ({
     );
   };
 
-  const specificationDropdown = () => {
-    const specification = value.tags.specification();
-    if (specificationStatus.type === "no-specification" || !specification) {
-      return null;
-    }
-
-    return (
-      <Dropdown
-        render={() => (
-          <div className="px-3 py-2">
-            {specificationView(specification, specificationStatus)}
-          </div>
-        )}
-      >
-        {specificationStatusPreview(specificationStatus)}
-      </Dropdown>
-    );
-  };
-
   const leftCollapseBorder = () => {
     const isDictOrList = tag === "Dict" || tag === "Array";
     if (isDictOrList) {
@@ -360,7 +329,7 @@ export const ValueWithContextViewer: FC<Props> = ({
               {!isOpen && <CommentIconForValue value={value} />}
             </div>
             <div className="inline-flex space-x-2 items-center">
-              {specificationDropdown()}
+              <SpecificationDropdown value={value} />
               {enableDropdownMenu && <SquiggleValueMenu value={value} />}
               {exportData && exportData.path.length < 2 && onOpenExport && (
                 <TextTooltip

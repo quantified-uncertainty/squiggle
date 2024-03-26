@@ -1,28 +1,24 @@
 import clsx from "clsx";
+import { FC } from "react";
 
-import { SqError } from "@quri/squiggle-lang";
-import { CheckIcon, CubeTransparentIcon, XIcon } from "@quri/ui";
+import { SqError, SqSpecification } from "@quri/squiggle-lang";
+import { CheckIcon, CubeTransparentIcon, Dropdown, XIcon } from "@quri/ui";
 
-import { SqSpecification } from "../../../squiggle-lang/src/public/SqValue/SqSpecification.js";
 import { SquiggleErrorAlert } from "../index.js";
 import { SqValueWithContext } from "../lib/utility.js";
 import { widgetRegistry } from "./registry.js";
 
 export type SpecificationStatus =
-  | { type: "no-specification" }
   | { type: "load-error"; error: SqError }
   | { type: "validation-success" }
   | { type: "validation-failure"; error: string };
 
 // Note that this can be slow to run, if ``validate`` is too slow.
-export function getSpecificationStatus(
+function getSpecificationStatus(
+  specification: SqSpecification,
   value: SqValueWithContext
 ): SpecificationStatus {
-  const specification = value.tags.specification();
-  if (!specification) {
-    return { type: "no-specification" };
-  }
-  const validateValue = specification!.validate(value);
+  const validateValue = specification.validate(value);
   if (!validateValue.ok) {
     return { type: "load-error", error: validateValue.value };
   }
@@ -37,14 +33,74 @@ export function getSpecificationStatus(
   }
 }
 
-export const specificationView = (
-  specification: SqSpecification,
-  specificationStatus?: SpecificationStatus
-) => {
+const SpecificationDropdownContent: FC<{
+  specification: SqSpecification;
+  specificationStatus: SpecificationStatus;
+}> = ({ specification, specificationStatus }) => {
   const hasError =
     (specificationStatus &&
       specificationStatus.type === "validation-failure") ||
     specificationStatus?.type === "load-error";
+  return (
+    <div className="px-3 py-2">
+      <SpecificationView specification={specification} />
+      <div>
+        <div className="mt-5 mb-2">
+          <div
+            className={clsx(
+              "rounded-sm px-2 py-0.5 inline-flex font-medium text-sm items-center space-x-2",
+              hasError
+                ? "bg-red-100 text-red-900"
+                : "bg-green-100 text-green-900"
+            )}
+          >
+            {hasError ? <XIcon size={12} /> : <CheckIcon size={16} />}
+            <div>{hasError ? "Checks Failed" : "Checks Passed"}</div>
+          </div>
+        </div>
+        {specificationStatus.type === "load-error" && (
+          <div className="text-red-700 text-xs">
+            <SquiggleErrorAlert error={specificationStatus.error} />
+          </div>
+        )}
+        {specificationStatus.type === "validation-failure" && (
+          <div className="text-red-700 text-xs">
+            {specificationStatus.error}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const SpecificationDropdown: FC<{ value: SqValueWithContext }> = ({
+  value,
+}) => {
+  const specification = value.tags.specification();
+  if (!specification) {
+    return null;
+  }
+
+  // TODO - memoize
+  const specificationStatus = getSpecificationStatus(specification, value);
+
+  return (
+    <Dropdown
+      render={() => (
+        <SpecificationDropdownContent
+          specification={specification}
+          specificationStatus={specificationStatus}
+        />
+      )}
+    >
+      <SpecificationStatusPreview specificationStatus={specificationStatus} />
+    </Dropdown>
+  );
+};
+
+const SpecificationView: FC<{ specification: SqSpecification }> = ({
+  specification,
+}) => {
   return (
     <div>
       <div className="flex space-x-1.5 items-center text-green-800 opacity-80 mb-3">
@@ -57,40 +113,13 @@ export const specificationView = (
       {specification.description && (
         <p className="text-sm text-gray-500">{specification.description}</p>
       )}
-      {specificationStatus && (
-        <>
-          <div className="mt-5 mb-2">
-            <div
-              className={clsx(
-                "rounded-sm px-2 py-0.5 inline-flex font-medium text-sm items-center space-x-2",
-                hasError
-                  ? "bg-red-100 text-red-900"
-                  : "bg-green-100 text-green-900"
-              )}
-            >
-              {hasError ? <XIcon size={12} /> : <CheckIcon size={16} />}
-              <div>{hasError ? "Checks Failed" : "Checks Passed"}</div>
-            </div>
-          </div>
-          {specificationStatus.type === "load-error" && (
-            <div className="text-red-700 text-xs">
-              <SquiggleErrorAlert error={specificationStatus.error} />
-            </div>
-          )}
-          {specificationStatus.type === "validation-failure" && (
-            <div className="text-red-700 text-xs">
-              {specificationStatus.error}
-            </div>
-          )}
-        </>
-      )}
     </div>
   );
 };
 
-export const specificationStatusPreview = (
-  specificationStatus: SpecificationStatus
-) => {
+const SpecificationStatusPreview: FC<{
+  specificationStatus: SpecificationStatus;
+}> = ({ specificationStatus }) => {
   const hasError =
     specificationStatus.type === "validation-failure" ||
     specificationStatus.type === "load-error";
@@ -122,6 +151,8 @@ export const specificationStatusPreview = (
 widgetRegistry.register("Specification", {
   Preview: () => <CubeTransparentIcon className="text-green-700" size={14} />,
   Chart: (value) => (
-    <div className="py-3 px-2">{specificationView(value.value)}</div>
+    <div className="py-3 px-2">
+      <SpecificationView specification={value.value} />
+    </div>
   ),
 });
