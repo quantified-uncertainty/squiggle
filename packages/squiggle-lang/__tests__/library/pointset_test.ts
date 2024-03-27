@@ -76,7 +76,7 @@ describe("Discrete", () => {
 
 describe("MixedSet", () => {
   testEvalToBe(
-    "MixedSet.subtract(PointSet.support(mx(Sym.uniform(1, 5), Sym.uniform(10, 30))), PointSet.support(mx(Sym.uniform(3, 8), Sym.uniform(20, 22))))",
+    "MixedSet.difference(PointSet.support(mx(Sym.uniform(1, 5), Sym.uniform(10, 30))), PointSet.support(mx(Sym.uniform(3, 8), Sym.uniform(20, 22))))",
     "{points: [], segments: [[0.9999999996,2.9999999995],[9.999999998,19.9999999998],[22.0000000002,30.000000002]]}"
   );
 });
