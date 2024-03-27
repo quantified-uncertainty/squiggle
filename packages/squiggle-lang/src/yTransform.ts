@@ -36,12 +36,22 @@ export function convertToRectangles(shape: XYShape): {
   return { continuous: rectangles, discrete };
 }
 
-export function yTransformDiscrete(shape: XYShape): XYShape {
+export function mergeDiscrete(shape: XYShape): XYShape {
   const points = T.zip(shape).filter((p) => p[0] !== 0);
   const xs = _.uniq(points.map((p) => p[0]));
   const newPoints: [number, number][] = xs.map((x) => [
     x,
     _.sum(points.filter((p) => p[0] === x).map((p) => p[1])) * x,
+  ]);
+  return T.fromZippedArray(newPoints);
+}
+
+export function yTransformDiscrete(shape: XYShape): XYShape {
+  const points = T.zip(shape).filter((p) => p[1] !== 0);
+  const ys = _.uniq(points.map((p) => p[1])).sort((a, b) => a - b);
+  const newPoints: [number, number][] = ys.map((y) => [
+    y,
+    _.sum(points.filter((p) => p[1] === y).map((p) => p[1])),
   ]);
   return T.fromZippedArray(newPoints);
 }
@@ -129,7 +139,7 @@ export function yTransformContinuous(shape: XYShape): {
   // Step 4: Convert discrete points into coordinates
   const discrete =
     (rectangles.discrete &&
-      yTransformDiscrete(T.fromZippedArray(rectangles.discrete))) ||
+      mergeDiscrete(T.fromZippedArray(rectangles.discrete))) ||
     T.empty;
   return { continuous, discrete };
 }

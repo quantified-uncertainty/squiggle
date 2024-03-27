@@ -3,6 +3,7 @@ import {
   convertToRectangles,
   Rectangle,
   yTransformContinuous,
+  yTransformDiscrete,
 } from "../../src/yTransform.js";
 
 describe("convertToRectangles", () => {
@@ -179,5 +180,22 @@ describe("yTransformContinuous", () => {
     const result = yTransformContinuous(shape);
     expect(result.continuous).toEqual(expected.continuous);
     expect(result.discrete).toEqual(expected.discrete);
+  });
+});
+
+describe("yTransformDiscrete", () => {
+  it("should handle discrete points correctly", () => {
+    const shape: XYShape = {
+      xs: [0, 1, 2, 3, 4, 5, 6, 7],
+      ys: [1, 1, 2, 2, 1, 3, 0.1, 0.1],
+    };
+
+    const expected = {
+      xs: [0.1, 1, 2, 3],
+      ys: [0.2, 3, 4, 3],
+    };
+
+    const result = yTransformDiscrete(shape);
+    expect(result).toEqual(expected);
   });
 });
