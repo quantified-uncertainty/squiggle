@@ -54,3 +54,7 @@
 .cm-tooltip-autocomplete .cm-tooltip {
   background: white;
 }
+
+.vega-embed {
+  width: 100%;
+}
