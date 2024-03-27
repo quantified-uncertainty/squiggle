@@ -49,7 +49,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
       async resolve(revision) {
         switch (revision.contentType) {
           case "SquiggleSnippet":
-            return revision.squiggleSnippet;
+            return revision.squiggleSnippet!;
         }
       },
     }),
