@@ -163,9 +163,6 @@ export const T = {
     const cys = [...t1.ys, ...t2.ys];
     return { xs: cxs, ys: cys };
   },
-  append(t: XYShape, x: number, y: number): XYShape {
-    return { xs: [...t.xs, x], ys: [...t.ys, y] };
-  },
   isEqual(t1: XYShape, t2: XYShape): boolean {
     return E_A.isEqual(t1.xs, t2.xs) && E_A.isEqual(t1.ys, t2.ys);
   },
@@ -682,7 +679,7 @@ type ComparisonType =
   This function extracts a subset of the input shape that satisfies the comparison condition with the threshold.
   It uses linear interpolation to find the exact points where the condition is satisfied.
   Right now, we only use the `greaterThan` comparison type, for getting the Support of continuous distributions, but we can improve this in the future.
-  It assumes that the input shape is sorted, has no duplicate x values, and uses linear interpolation.
+  It assumes the shape uses linear interpolation.
   Note that if you want to use the result as a distribution, you will have to combine the segments somehow. They don't have surrounding points at 0 yet, so you can't just add them together.
 */
 export const extractSubsetThatSatisfiesThreshold = (
@@ -690,18 +687,18 @@ export const extractSubsetThatSatisfiesThreshold = (
   comparisonType: ComparisonType,
   threshold: number
 ): XYShapeSubset => {
-  const comparisonIsSatisfied = (y: number, _threshold: number): boolean => {
+  const comparisonIsSatisfied = (y: number, threshold: number): boolean => {
     switch (comparisonType) {
       case "greaterThan":
-        return y > _threshold;
+        return y > threshold;
       case "lesserThan":
-        return y < _threshold;
+        return y < threshold;
       case "equals":
-        return Math.abs(y - _threshold) < Number.EPSILON;
+        return Math.abs(y - threshold) < Number.EPSILON;
       case "greaterThanOrEqual":
-        return y >= _threshold;
+        return y >= threshold;
       case "lessThanOrEqual":
-        return y <= _threshold;
+        return y <= threshold;
     }
   };
 

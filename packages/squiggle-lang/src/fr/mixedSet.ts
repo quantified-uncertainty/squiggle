@@ -8,24 +8,25 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
+function toDict(mixedShape: MixedSet) {
+  return {
+    points: mixedShape.points,
+    segments: mixedShape.segments as [number, number][],
+  };
+}
+
 export const library = [
   maker.make({
-    name: "subtract",
+    name: "difference",
     requiresNamespace: true,
     definitions: [
       makeDefinition(
         [frMixedSet, frMixedSet],
         frMixedSet,
         ([first, second]) => {
-          const _first = new MixedSet(
-            first.points as number[],
-            first.segments as [number, number][]
-          );
-          const _second = new MixedSet(
-            second.points as number[],
-            second.segments as [number, number][]
-          );
-          return _first.subtract(_second);
+          const _first = new MixedSet(first.points, first.segments);
+          const _second = new MixedSet(second.points, second.segments);
+          return toDict(_first.difference(_second));
         }
       ),
     ],

@@ -100,7 +100,7 @@ describe("MixedSet", () => {
 
     testCases.forEach(({ set1, set2, expected }) => {
       test(`returns the difference between ${JSON.stringify(set1)} and ${JSON.stringify(set2)}`, () => {
-        const difference = set1.subtract(set2);
+        const difference = set1.difference(set2);
 
         expect(difference.points).toEqual(expected.points);
         expect(difference.segments).toEqual(expected.segments);
