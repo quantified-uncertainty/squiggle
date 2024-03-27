@@ -1,10 +1,18 @@
-import { XYShape } from "../../src/XYShape.js";
+import { Range, XYShape } from "../../src/XYShape.js";
 import {
   convertToRectangles,
   Rectangle,
   yTransformContinuous,
   yTransformDiscrete,
 } from "../../src/yTransform.js";
+
+//The area of a shape should barely change after transformation
+function getContinuousArea(shape: XYShape) {
+  return Range.integrateWithTriangles(shape).ys.at(-1)!;
+}
+function getDiscreteArea(shape: XYShape) {
+  return shape.ys.reduce((a, b) => a + b, 0);
+}
 
 describe("convertToRectangles", () => {
   const testCases: Array<{
@@ -92,6 +100,9 @@ describe("yTransformContinuous", () => {
     const result = yTransformContinuous(shape);
     expect(result.continuous).toEqual(expected.continuous);
     expect(result.discrete).toEqual(expected.discrete);
+    expect(getContinuousArea(shape)).toBeCloseTo(
+      getContinuousArea(result.continuous)
+    );
   });
 
   it("should handle discrete points correctly", () => {
@@ -114,6 +125,9 @@ describe("yTransformContinuous", () => {
     const result = yTransformContinuous(shape);
     expect(result.continuous).toEqual(expected.continuous);
     expect(result.discrete).toEqual(expected.discrete);
+    expect(getContinuousArea(shape)).toBeCloseTo(
+      getDiscreteArea(result.discrete) + getContinuousArea(result.continuous)
+    );
   });
 
   it("should handle a shape with only discrete points", () => {
@@ -136,6 +150,9 @@ describe("yTransformContinuous", () => {
     const result = yTransformContinuous(shape);
     expect(result.continuous).toEqual(expected.continuous);
     expect(result.discrete).toEqual(expected.discrete);
+    expect(getContinuousArea(shape)).toBeCloseTo(
+      getDiscreteArea(result.discrete)
+    );
   });
 
   it("should handle a complicated shape", () => {
@@ -158,6 +175,9 @@ describe("yTransformContinuous", () => {
     const result = yTransformContinuous(shape);
     expect(result.continuous).toEqual(expected.continuous);
     expect(result.discrete).toEqual(expected.discrete);
+    expect(getContinuousArea(shape)).toBeCloseTo(
+      getContinuousArea(result.continuous)
+    );
   });
 
   it("should handle an empty shape", () => {
@@ -197,5 +217,6 @@ describe("yTransformDiscrete", () => {
 
     const result = yTransformDiscrete(shape);
     expect(result).toEqual(expected);
+    expect(getDiscreteArea(shape)).toBeCloseTo(getDiscreteArea(result));
   });
 });

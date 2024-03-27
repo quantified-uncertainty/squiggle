@@ -286,13 +286,9 @@ export class MixedShape implements PointSet<MixedShape> {
   yTransform(): MixedShape {
     const continuous = this.continuous.yTransform();
     const discrete = this.discrete.yTransform();
-    const sum = combinePointwise(continuous, discrete, (v1, v2) =>
-      Result.Ok(v1 + v2)
+    return Result.getExt(
+      combinePointwise(continuous, discrete, (v1, v2) => Result.Ok(v1 + v2))
     );
-    if (!sum.ok) throw new Error("yTransform failed");
-    else {
-      return sum.value;
-    }
   }
 }
 

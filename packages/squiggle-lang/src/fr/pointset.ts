@@ -78,17 +78,6 @@ export const library = [
     definitions: [fromNumber],
   }),
   maker.make({
-    name: "yTransform",
-    examples: [makeFnExample(`PointSet.yTransform(PointSet(Sym.normal(5,2)))`)],
-    output: "Dist",
-    displaySection: "Conversions",
-    definitions: [
-      makeDefinition([frDistPointset], frDistPointset, ([dist]) => {
-        return dist.yTransform();
-      }),
-    ],
-  }),
-  maker.make({
     name: "downsample",
     examples: [
       makeFnExample(`PointSet.downsample(PointSet.fromDist(normal(5,2)), 50)`),

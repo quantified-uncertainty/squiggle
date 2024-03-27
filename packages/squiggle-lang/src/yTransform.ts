@@ -5,8 +5,8 @@ import { T, XYShape } from "./XYShape.js";
 export type Rectangle = { x1: number; x2: number; y: number };
 
 export function convertToRectangles(shape: XYShape): {
-  continuous: Rectangle[];
-  discrete: [number, number][];
+  continuous: readonly Rectangle[];
+  discrete: readonly [number, number][];
 } {
   const rectangles: Rectangle[] = [];
   const discrete: [number, number][] = [];
@@ -57,16 +57,17 @@ export function yTransformDiscrete(shape: XYShape): XYShape {
 }
 
 export function mergeRectanglesWithoutOverlap(
-  rectangles: Rectangle[]
-): Rectangle[] {
+  rectangles: readonly Rectangle[]
+): readonly Rectangle[] {
   if (rectangles.length === 0) {
     return [];
   }
+  const sortedRectangles = [...rectangles].sort((a, b) => a.x1 - b.x1);
+
   const xPoints = _.uniq(
     rectangles.flatMap((r) => [r.x1, r.x2]).sort((a, b) => a - b)
   );
 
-  const sortedRectangles = rectangles.sort((a, b) => a.x1 - b.x1);
   const mergedRectangles: Rectangle[] = [];
 
   let currentIndex = 0;
@@ -87,8 +88,8 @@ export function mergeRectanglesWithoutOverlap(
 }
 
 export function mergeRectanglesToCoordinates(
-  rectangles: Rectangle[]
-): [number, number][] {
+  rectangles: readonly Rectangle[]
+): readonly [number, number][] {
   type Point = [number, number];
   const points: Point[] = []; // [x,y][]
 
