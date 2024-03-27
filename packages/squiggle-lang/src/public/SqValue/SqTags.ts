@@ -3,6 +3,7 @@ import { LocationRange } from "peggy";
 import { ValueTags } from "../../value/valueTags.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValue, wrapValue } from "./index.js";
+import { SqSpecification } from "./SqSpecification.js";
 
 export class SqTags {
   constructor(
@@ -21,6 +22,13 @@ export class SqTags {
   showAs(): SqValue | undefined {
     const showAs = this.tags.showAs();
     return showAs ? wrapValue(showAs, this.context) : undefined;
+  }
+
+  specification(): SqSpecification | undefined {
+    const specification = this.tags.specification();
+    return specification
+      ? new SqSpecification(specification.value, this.context)
+      : undefined;
   }
 
   numberFormat(): string | undefined {

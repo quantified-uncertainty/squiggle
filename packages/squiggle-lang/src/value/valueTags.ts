@@ -3,6 +3,7 @@ import { LocationRange } from "peggy";
 import { Err, fmap, mergeMany, Ok, result } from "../utility/result.js";
 import { Value } from "./index.js";
 import { type VBool } from "./VBool.js";
+import { VSpecification } from "./VSpecification.js";
 import { type VString } from "./VString.js";
 
 // Note: this file can't call any `vType` constructors; it would cause a circular dependency because of `BaseValue` -> `ValueTags`.
@@ -19,6 +20,7 @@ export type ValueTagsType = {
   exportData?: { sourceId: string; path: string[] };
   startOpenState?: VString;
   location?: LocationRange;
+  specification?: VSpecification;
 };
 
 type ValueTagsTypeName = keyof ValueTagsType;
@@ -34,6 +36,7 @@ const valueTagsTypeNames: ValueTagsTypeName[] = [
   "exportData",
   "startOpenState",
   "location",
+  "specification",
 ];
 
 function convertToValueTagsTypeName(
@@ -67,7 +70,8 @@ export class ValueTags {
       this.value.notebook === undefined &&
       this.value.exportData === undefined &&
       this.value.startOpenState === undefined &&
-      this.value.location === undefined
+      this.value.location === undefined &&
+      this.value.specification === undefined
     );
   }
 
@@ -142,6 +146,10 @@ export class ValueTags {
 
   location() {
     return this.value.location;
+  }
+
+  specification() {
+    return this.value.specification;
   }
 
   startOpenState(): "open" | "closed" | undefined {
