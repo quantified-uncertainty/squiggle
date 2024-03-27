@@ -47,6 +47,7 @@ export type HubSchemaTypes = {
       session: SignedInSession;
     };
   };
+  DefaultAuthStrategy: "all";
 };
 
 export const builder = new SchemaBuilder<HubSchemaTypes>({
