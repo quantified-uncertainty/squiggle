@@ -114,6 +114,10 @@ export class PointSetDist extends BaseDist {
       (pointSet) => new PointSetDist(pointSet)
     );
   }
+
+  yTransform(): PointSetDist {
+    return new PointSetDist(this.pointSet.yTransform());
+  }
 }
 
 //TODO WARNING: The combineAlgebraicallyWithDiscrete will break for subtraction and division, like, discrete - continous

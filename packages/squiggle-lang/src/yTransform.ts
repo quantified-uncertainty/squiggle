@@ -36,7 +36,7 @@ export function convertToRectangles(shape: XYShape): {
   return { continuous: rectangles, discrete };
 }
 
-export function convertDiscretePoints(shape: XYShape): XYShape {
+export function yTransformDiscrete(shape: XYShape): XYShape {
   const points = T.zip(shape).filter((p) => p[0] !== 0);
   const xs = _.uniq(points.map((p) => p[0]));
   const newPoints: [number, number][] = xs.map((x) => [
@@ -109,7 +109,7 @@ export function mergeRectanglesToCoordinates(
   return points;
 }
 
-export function yTransform(shape: XYShape): {
+export function yTransformContinuous(shape: XYShape): {
   continuous: XYShape;
   discrete: XYShape;
 } {
@@ -129,7 +129,7 @@ export function yTransform(shape: XYShape): {
   // Step 4: Convert discrete points into coordinates
   const discrete =
     (rectangles.discrete &&
-      convertDiscretePoints(T.fromZippedArray(rectangles.discrete))) ||
+      yTransformDiscrete(T.fromZippedArray(rectangles.discrete))) ||
     T.empty;
   return { continuous, discrete };
 }

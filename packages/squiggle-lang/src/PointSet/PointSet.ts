@@ -57,6 +57,8 @@ export interface PointSet<T> {
 
   mean(): number;
   variance(): number;
+
+  yTransform(): MixedShape;
 }
 
 export const combinePointwise = <E>(
