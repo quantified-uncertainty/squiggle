@@ -2,7 +2,7 @@ import { XYShape } from "../../src/XYShape.js";
 import {
   convertToRectangles,
   Rectangle,
-  yTransform,
+  yTransformContinuous,
 } from "../../src/yTransform.js";
 
 describe("convertToRectangles", () => {
@@ -70,7 +70,7 @@ describe("convertToRectangles", () => {
   });
 });
 
-describe("yTransform", () => {
+describe("yTransformContinuous", () => {
   it("should transform a simple shape correctly", () => {
     const shape: XYShape = {
       xs: [0, 1, 2],
@@ -88,7 +88,7 @@ describe("yTransform", () => {
       },
     };
 
-    const result = yTransform(shape);
+    const result = yTransformContinuous(shape);
     expect(result.continuous).toEqual(expected.continuous);
     expect(result.discrete).toEqual(expected.discrete);
   });
@@ -110,7 +110,7 @@ describe("yTransform", () => {
       },
     };
 
-    const result = yTransform(shape);
+    const result = yTransformContinuous(shape);
     expect(result.continuous).toEqual(expected.continuous);
     expect(result.discrete).toEqual(expected.discrete);
   });
@@ -132,7 +132,7 @@ describe("yTransform", () => {
       },
     };
 
-    const result = yTransform(shape);
+    const result = yTransformContinuous(shape);
     expect(result.continuous).toEqual(expected.continuous);
     expect(result.discrete).toEqual(expected.discrete);
   });
@@ -154,7 +154,7 @@ describe("yTransform", () => {
       },
     };
 
-    const result = yTransform(shape);
+    const result = yTransformContinuous(shape);
     expect(result.continuous).toEqual(expected.continuous);
     expect(result.discrete).toEqual(expected.discrete);
   });
@@ -176,7 +176,7 @@ describe("yTransform", () => {
       },
     };
 
-    const result = yTransform(shape);
+    const result = yTransformContinuous(shape);
     expect(result.continuous).toEqual(expected.continuous);
     expect(result.discrete).toEqual(expected.discrete);
   });
