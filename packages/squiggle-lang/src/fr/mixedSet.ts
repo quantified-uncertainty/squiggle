@@ -11,7 +11,7 @@ const maker = new FnFactory({
 export const library = [
   maker.make({
     name: "subtract",
-    requiresNamespace: false,
+    requiresNamespace: true,
     definitions: [
       makeDefinition(
         [frMixedSet, frMixedSet],
