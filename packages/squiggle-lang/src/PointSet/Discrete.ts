@@ -1,6 +1,7 @@
 import { epsilon_float } from "../magicNumbers.js";
 import { PRNG } from "../rng/index.js";
 import { random_sample } from "../utility/math.js";
+import { MixedSet } from "../utility/MixedSet.js";
 import * as Result from "../utility/result.js";
 import * as XYShape from "../XYShape.js";
 import * as Common from "./Common.js";
@@ -231,6 +232,10 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
       (t) => t.mean(),
       (t) => t.shapeMap(XYShape.T.square).mean()
     );
+  }
+
+  support() {
+    return MixedSet.fromDiscreteDistShape(this.xyShape);
   }
 }
 
