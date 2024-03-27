@@ -28,31 +28,37 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
     const body = () => {
       if (!outputResult.ok) {
         return <SquiggleErrorAlert error={outputResult.value} />;
-      } else if (viewerTab === "AST") {
+      }
+
+      const sqOutput = outputResult.value;
+
+      if (viewerTab === "AST") {
         return (
           <pre className="text-xs">
-            {JSON.stringify(
-              outputResult.value.bindings.asValue().context?.ast,
-              null,
-              2
-            )}
+            {JSON.stringify(sqOutput.bindings.asValue().context?.ast, null, 2)}
           </pre>
         );
-      } else {
-        return (
-          <div className="relative">
-            {isSimulating && (
-              <div className="absolute z-10 inset-0 bg-white opacity-50" />
-            )}
-            {
-              <SquiggleViewerWithoutProvider
-                value={viewerTabToValue(viewerTab, outputResult)!}
-              />
-            }
-          </div>
-        );
       }
+
+      const usedValue = viewerTabToValue(viewerTab, outputResult);
+      if (!usedValue) {
+        return null;
+      }
+
+      return (
+        <div className="relative">
+          {isSimulating && (
+            <div className="absolute z-10 inset-0 bg-white opacity-50" />
+          )}
+          {
+            <SquiggleViewerWithoutProvider
+              value={viewerTabToValue(viewerTab, outputResult)!}
+            />
+          }
+        </div>
+      );
     };
+
     return (
       <ViewerProvider
         partialPlaygroundSettings={playgroundSettings}
