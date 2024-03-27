@@ -49,7 +49,7 @@ export const User = builder.prismaNode("User", {
           },
         }),
         resolve: (user, args, ctx) =>
-          modelConnectionHelpers.resolve(user.asOwner.models, args, ctx),
+          modelConnectionHelpers.resolve(user.asOwner?.models ?? [], args, ctx),
       },
       ModelConnection
     ),
@@ -72,7 +72,7 @@ export const User = builder.prismaNode("User", {
         }),
         resolve: (user, args, ctx) =>
           relativeValuesDefinitionConnectionHelpers.resolve(
-            user.asOwner.relativeValuesDefinitions,
+            user.asOwner?.relativeValuesDefinitions ?? [],
             args,
             ctx
           ),

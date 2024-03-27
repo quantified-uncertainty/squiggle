@@ -19,6 +19,9 @@ export const EditModelPage: FC<{
       query EditModelPageQuery($input: QueryModelInput!) {
         model(input: $input) {
           __typename
+          ... on BaseError {
+            message
+          }
           ... on Model {
             id
             currentRevision {

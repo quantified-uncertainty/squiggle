@@ -4,6 +4,7 @@ import {
   relativeValuesRoute,
   userRoute,
 } from "@/routes";
+
 import { builder } from "../builder";
 import { Group } from "./Group";
 import { Model } from "./Model";
@@ -65,14 +66,14 @@ export const Searchable = builder.prismaNode("Searchable", {
               owner: object.model.owner.slug,
               slug: object.model.slug,
             });
-          case !!object.definitionId:
+          case !!object.definition:
             return relativeValuesRoute({
               owner: object.definition.owner.slug,
               slug: object.definition.slug,
             });
-          case !!object.userId:
+          case !!object.user?.asOwner:
             return userRoute({ username: object.user.asOwner.slug });
-          case !!object.groupId:
+          case !!object.group:
             return groupRoute({ slug: object.group.asOwner.slug });
           default:
             throw new Error("Invalid Searchable record");
