@@ -10,6 +10,10 @@ export class VVoid extends BaseValue {
   valueToString() {
     return "()";
   }
+
+  isEqual(other: VVoid) {
+    return true;
+  }
 }
 
 export const vVoid = () => new VVoid();

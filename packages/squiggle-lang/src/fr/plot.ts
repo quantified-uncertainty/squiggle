@@ -4,6 +4,7 @@ import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
+  frAny,
   frArray,
   frBool,
   frDeprecated,
@@ -27,6 +28,7 @@ import {
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { clamp, sort, uniq } from "../utility/E_A_Floats.js";
+import { simpleValueFromValue } from "../value/simpleValue.js";
 import { VDomain } from "../value/VDomain.js";
 import { LabeledDistribution, Plot } from "../value/VPlot.js";
 import { Scale } from "../value/VScale.js";
@@ -544,6 +546,57 @@ Plot.scatter({
             xScale: xScale ?? defaultScaleWithName(xTitle),
             yScale: yScale ?? defaultScaleWithName(yTitle),
             title: title ?? undefined,
+          };
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "vega",
+    output: "Plot",
+    examples: [
+      makeFnExample(
+        `xDist = SampleSet.fromDist(2 to 5)
+yDist = normal({p5:-3, p95:3}) * 5 - xDist ^ 2
+Plot.scatter({
+  xDist: xDist,
+  yDist: yDist,
+  xScale: Scale.log({min: 1.5}),
+})`,
+        { isInteractive: true }
+      ),
+      makeFnExample(
+        `xDist = SampleSet.fromDist(normal({p5:-2, p95:5}))
+yDist = normal({p5:-3, p95:3}) * 5 - xDist
+Plot.scatter({
+  xDist: xDist,
+  yDist: yDist,
+  xScale: Scale.symlog({title: "X Axis Title"}),
+  yScale: Scale.symlog({title: "Y Axis Title"}),
+})`,
+        { isInteractive: true }
+      ),
+    ],
+    definitions: [
+      makeDefinition(
+        [
+          frDict(
+            ["spec", frAny()],
+            ["data", frAny()],
+            ["config", frOptional(frAny())],
+            ["mark", frOptional(frAny())],
+            ["encoding", frOptional(frAny())],
+            ["height", frOptional(frAny())],
+            ["view", frOptional(frAny())],
+            ["projection", frOptional(frAny())]
+          ),
+        ],
+        frPlot,
+        ([{ spec, data }]) => {
+          return {
+            type: "vega",
+            spec: simpleValueFromValue(spec, true),
+            data: simpleValueFromValue(data, true),
           };
         }
       ),

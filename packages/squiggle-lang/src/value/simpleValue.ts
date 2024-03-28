@@ -102,7 +102,10 @@ export function simpleValueFromAny(data: any): SimpleValue {
   return toPlainObject(data);
 }
 
-export function simpleValueFromValue(value: Value): SimpleValue {
+export function simpleValueFromValue(
+  value: Value,
+  jsonMode?: boolean
+): SimpleValue {
   switch (value.type) {
     case "Bool":
     case "Number":
@@ -114,16 +117,23 @@ export function simpleValueFromValue(value: Value): SimpleValue {
     case "Void":
       return null;
     case "Array":
-      return value.value.map(simpleValueFromValue);
+      return value.value.map((e) => simpleValueFromValue(e, jsonMode));
     case "Dict": {
       const v: SimpleValue = ImmutableMap(
-        [...value.value.entries()].map(([k, v]) => [k, simpleValueFromValue(v)])
+        [...value.value.entries()].map(([k, v]) => [
+          k,
+          simpleValueFromValue(v, jsonMode),
+        ])
       );
-      const fields: [string, SimpleValue][] = [
-        ["vtype", "Dict"],
-        ["value", v],
-      ];
-      return ImmutableMap(fields);
+      if (jsonMode) {
+        return v;
+      } else {
+        const fields: [string, SimpleValue][] = [
+          ["vtype", "Dict"],
+          ["value", v],
+        ];
+        return ImmutableMap(fields);
+      }
     }
     case "Calculator": {
       const fields: [string, SimpleValue][] = [
@@ -131,7 +141,9 @@ export function simpleValueFromValue(value: Value): SimpleValue {
         ["fn", value.value.fn],
         [
           "inputs",
-          value.value.inputs.map((x) => simpleValueFromValue(vInput(x))),
+          value.value.inputs.map((x) =>
+            simpleValueFromValue(vInput(x), jsonMode)
+          ),
         ],
         ["autorun", value.value.autorun],
         ["description", value.value.description || ""],
@@ -161,17 +173,20 @@ export function simpleValueFromValue(value: Value): SimpleValue {
             value.value.distributions.map((x) =>
               ImmutableMap([
                 ["name", x.name || ""],
-                ["distribution", simpleValueFromValue(vDist(x.distribution))],
+                [
+                  "distribution",
+                  simpleValueFromValue(vDist(x.distribution), jsonMode),
+                ],
               ])
             ),
           ]);
           fields.push([
             "xScale",
-            simpleValueFromValue(vScale(value.value.xScale)),
+            simpleValueFromValue(vScale(value.value.xScale), jsonMode),
           ]);
           fields.push([
             "yScale",
-            simpleValueFromValue(vScale(value.value.yScale)),
+            simpleValueFromValue(vScale(value.value.yScale), jsonMode),
           ]);
           fields.push(["showSummary", value.value.showSummary]);
           break;
@@ -179,11 +194,11 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           fields.push(["fn", value.value.fn]);
           fields.push([
             "xScale",
-            simpleValueFromValue(vScale(value.value.xScale)),
+            simpleValueFromValue(vScale(value.value.xScale), jsonMode),
           ]);
           fields.push([
             "yScale",
-            simpleValueFromValue(vScale(value.value.yScale)),
+            simpleValueFromValue(vScale(value.value.yScale), jsonMode),
           ]);
           if (value.value.xPoints) {
             fields.push(["points", value.value.xPoints]);
@@ -193,15 +208,15 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           fields.push(["fn", value.value.fn]);
           fields.push([
             "xScale",
-            simpleValueFromValue(vScale(value.value.xScale)),
+            simpleValueFromValue(vScale(value.value.xScale), jsonMode),
           ]);
           fields.push([
             "yScale",
-            simpleValueFromValue(vScale(value.value.yScale)),
+            simpleValueFromValue(vScale(value.value.yScale), jsonMode),
           ]);
           fields.push([
             "distXScale",
-            simpleValueFromValue(vScale(value.value.distXScale)),
+            simpleValueFromValue(vScale(value.value.distXScale), jsonMode),
           ]);
           if (value.value.xPoints) {
             fields.push(["points", value.value.xPoints]);
@@ -210,19 +225,19 @@ export function simpleValueFromValue(value: Value): SimpleValue {
         case "scatter":
           fields.push([
             "xDist",
-            simpleValueFromValue(vDist(value.value.xDist)),
+            simpleValueFromValue(vDist(value.value.xDist), jsonMode),
           ]);
           fields.push([
             "yDist",
-            simpleValueFromValue(vDist(value.value.yDist)),
+            simpleValueFromValue(vDist(value.value.yDist), jsonMode),
           ]);
           fields.push([
             "xScale",
-            simpleValueFromValue(vScale(value.value.xScale)),
+            simpleValueFromValue(vScale(value.value.xScale), jsonMode),
           ]);
           fields.push([
             "yScale",
-            simpleValueFromValue(vScale(value.value.yScale)),
+            simpleValueFromValue(vScale(value.value.yScale), jsonMode),
           ]);
           break;
         case "relativeValues":
@@ -235,7 +250,10 @@ export function simpleValueFromValue(value: Value): SimpleValue {
     case "TableChart": {
       const fields: [string, SimpleValue][] = [
         ["vType", "TableChart"],
-        ["data", value.value.data.map(simpleValueFromValue)],
+        [
+          "data",
+          value.value.data.map((e) => simpleValueFromValue(e, jsonMode)),
+        ],
         [
           "columns",
           value.value.columns.map((column) => {
