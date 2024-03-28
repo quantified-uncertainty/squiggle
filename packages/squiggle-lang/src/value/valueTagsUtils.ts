@@ -72,6 +72,9 @@ export const toList = (tags: ValueTags): [string, Value][] => {
   if (value.location !== undefined) {
     result.push(["location", locationRangeToValue(value.location)]);
   }
+  if (value.specification !== undefined) {
+    result.push(["specification", value.specification]);
+  }
 
   return result;
 };

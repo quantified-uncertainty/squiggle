@@ -2,6 +2,9 @@
   "name": "@quri/hub",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "db:migrate:dev": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate dev",
     "db:migrate": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate deploy",
@@ -24,7 +27,7 @@
     "@pothos/plugin-errors": "^3.11.1",
     "@pothos/plugin-prisma": "^3.63.1",
     "@pothos/plugin-relay": "^3.46.0",
-    "@pothos/plugin-scope-auth": "^3.20.0",
+    "@pothos/plugin-scope-auth": "^3.21.1",
     "@pothos/plugin-simple-objects": "^3.7.0",
     "@pothos/plugin-validation": "^3.10.1",
     "@pothos/plugin-with-input": "^3.10.1",
