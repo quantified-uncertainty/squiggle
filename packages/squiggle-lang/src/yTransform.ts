@@ -1,4 +1,5 @@
-import _ from "lodash";
+import sum from "lodash/sum.js";
+import uniq from "lodash/uniq.js";
 
 import { T, XYShape } from "./XYShape.js";
 
@@ -38,22 +39,67 @@ export function convertToRectangles(shape: XYShape): {
 
 export function mergeDiscrete(shape: XYShape): XYShape {
   const points = T.zip(shape).filter((p) => p[0] !== 0);
-  const xs = _.uniq(points.map((p) => p[0]));
+  const xs = uniq(points.map((p) => p[0]));
   const newPoints: [number, number][] = xs.map((x) => [
     x,
-    _.sum(points.filter((p) => p[0] === x).map((p) => p[1])) * x,
+    sum(points.filter((p) => p[0] === x).map((p) => p[1])) * x,
   ]);
   return T.fromZippedArray(newPoints);
 }
 
 export function yTransformDiscrete(shape: XYShape): XYShape {
   const points = T.zip(shape).filter((p) => p[1] !== 0);
-  const ys = _.uniq(points.map((p) => p[1])).sort((a, b) => a - b);
+  const ys = uniq(points.map((p) => p[1])).sort((a, b) => a - b);
   const newPoints: [number, number][] = ys.map((y) => [
     y,
-    _.sum(points.filter((p) => p[1] === y).map((p) => p[1])),
+    sum(points.filter((p) => p[1] === y).map((p) => p[1])),
   ]);
   return T.fromZippedArray(newPoints);
+}
+
+//Assumes that A is sorted by e[0]
+function findCoveringRangeIndices(
+  ranges: [number, number][],
+  points: number[]
+): number[][] {
+  const result: number[][] = Array.from({ length: points.length }, () => []);
+
+  for (let i = 0; i < points.length; i++) {
+    const point = points[i];
+
+    // Binary search to find the first range that starts after the point
+    let left = 0;
+    let right = ranges.length - 1;
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+      if (ranges[mid][0] > point) {
+        right = mid - 1;
+      } else {
+        left = mid + 1;
+      }
+    }
+
+    // Add the indices of all ranges that cover the point
+    let j = right;
+    while (j >= 0 && ranges[j][0] <= point) {
+      if (ranges[j][1] >= point) {
+        result[i].push(j);
+      }
+      j--;
+    }
+  }
+
+  return result;
+}
+
+function convertPointsToRanges(points: number[]): [number, number][] {
+  const ranges: [number, number][] = [];
+
+  for (let i = 0; i < points.length - 1; i++) {
+    ranges.push([points[i], points[i + 1]]);
+  }
+
+  return ranges;
 }
 
 export function mergeRectanglesWithoutOverlap(
@@ -62,29 +108,25 @@ export function mergeRectanglesWithoutOverlap(
   if (rectangles.length === 0) {
     return [];
   }
-  const sortedRectangles = [...rectangles].sort((a, b) => a.x1 - b.x1);
 
-  const xPoints = _.uniq(
-    rectangles.flatMap((r) => [r.x1, r.x2]).sort((a, b) => a - b)
+  const sortedRectangles = [...rectangles].sort((a, b) => a.x1 - b.x1);
+  const rectangleRanges: [number, number][] = sortedRectangles.map(
+    ({ x1, x2 }) => [x1, x2]
+  );
+  const xPoints = uniq(
+    rectangles.flatMap(({ x1, x2 }) => [x1, x2]).sort((a, b) => a - b)
+  );
+  const newRanges = convertPointsToRanges(xPoints);
+  const rangeMiddles = newRanges.map(([start, end]) => (start + end) / 2);
+  const coveredRangeIndices = findCoveringRangeIndices(
+    rectangleRanges,
+    rangeMiddles
+  );
+  const yTotalAtRange: number[] = newRanges.map((_, i) =>
+    sum(coveredRangeIndices[i].map((j) => sortedRectangles[j].y))
   );
 
-  const mergedRectangles: Rectangle[] = [];
-
-  let currentIndex = 0;
-
-  while (currentIndex < xPoints.length - 1) {
-    const lastXPoint = xPoints[currentIndex];
-    const nextXPoint = xPoints[currentIndex + 1];
-    const inBetweenPoint = (lastXPoint + nextXPoint) / 2;
-    const activeRectangles = sortedRectangles.filter(
-      (r) => r.x1 < inBetweenPoint && r.x2 > inBetweenPoint
-    );
-    const yVal = _.sum(activeRectangles.map((r) => r.y));
-    mergedRectangles.push({ x1: lastXPoint, x2: nextXPoint, y: yVal });
-    currentIndex++;
-  }
-
-  return mergedRectangles;
+  return newRanges.map(([x1, x2], i) => ({ x1, x2, y: yTotalAtRange[i] }));
 }
 
 export function mergeRectanglesToCoordinates(
