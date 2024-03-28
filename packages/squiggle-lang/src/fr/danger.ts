@@ -11,6 +11,7 @@ import {
   frAny,
   frArray,
   frDate,
+  frDistPointset,
   frLambda,
   frNamed,
   frNumber,
@@ -550,6 +551,17 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
         return JSON.stringify(
           simpleValueToJson(removeLambdas(simpleValueFromValue(v)))
         );
+      }),
+    ],
+  }),
+  maker.make({
+    name: "yTransform",
+    examples: [makeFnExample(`Danger.yTransform(PointSet(Sym.normal(5,2)))`)],
+    output: "Dist",
+    displaySection: "Math",
+    definitions: [
+      makeDefinition([frDistPointset], frDistPointset, ([dist]) => {
+        return dist.yTransform();
       }),
     ],
   }),

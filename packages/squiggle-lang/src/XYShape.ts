@@ -166,7 +166,7 @@ export const T = {
   isEqual(t1: XYShape, t2: XYShape): boolean {
     return E_A.isEqual(t1.xs, t2.xs) && E_A.isEqual(t1.ys, t2.ys);
   },
-  fromZippedArray(pairs: [number, number][]): XYShape {
+  fromZippedArray(pairs: readonly [number, number][]): XYShape {
     return T.fromArray(E_A.unzip(pairs));
   },
   equallyDividedXs(t: XYShape, newLength: number): number[] {

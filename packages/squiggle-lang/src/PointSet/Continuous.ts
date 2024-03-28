@@ -2,6 +2,7 @@ import { epsilon_float } from "../magicNumbers.js";
 import { MixedSet } from "../utility/MixedSet.js";
 import * as Result from "../utility/result.js";
 import * as XYShape from "../XYShape.js";
+import { yTransformContinuous } from "../yTransform.js";
 import * as AlgebraicShapeCombination from "./AlgebraicShapeCombination.js";
 import * as Common from "./Common.js";
 import * as Discrete from "./Discrete.js";
@@ -296,6 +297,14 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
     return this.shapeMap((shape) =>
       XYShape.XsConversion.proportionEquallyOverX(shape, length)
     );
+  }
+
+  yTransform(): MixedShape {
+    const { continuous, discrete } = yTransformContinuous(this.xyShape);
+    return new MixedShape({
+      continuous: new ContinuousShape({ xyShape: continuous }),
+      discrete: new DiscreteShape({ xyShape: discrete }),
+    });
   }
 
   support() {

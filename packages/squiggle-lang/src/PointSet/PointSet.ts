@@ -58,6 +58,7 @@ export interface PointSet<T> {
 
   mean(): number;
   variance(): number;
+  yTransform(): MixedShape;
   support(): MixedSet;
 }
 
