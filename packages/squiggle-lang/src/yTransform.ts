@@ -37,30 +37,39 @@ export function convertToRectangles(shape: XYShape): {
   return { continuous: rectangles, discrete };
 }
 
-export function mergeDiscrete(shape: XYShape): XYShape {
-  const points = T.zip(shape).filter((p) => p[0] !== 0);
-  const xs = uniq(points.map((p) => p[0]));
-  const newPoints: [number, number][] = xs.map((x) => [
-    x,
-    sum(points.filter((p) => p[0] === x).map((p) => p[1])) * x,
-  ]);
-  return T.fromZippedArray(newPoints);
+//[x,y] transformed discrete points
+function mergeDiscrete(shape: readonly [number, number][]): [number, number][] {
+  const pointMap = new Map<number, number>();
+
+  for (const [x, y] of shape) {
+    if (x !== 0 && y !== 0) {
+      pointMap.set(x, (pointMap.get(x) || 0) + y);
+    }
+  }
+
+  return Array.from(pointMap.entries(), ([x, y]) => [x, y * x]);
 }
 
 export function yTransformDiscrete(shape: XYShape): XYShape {
-  const points = T.zip(shape).filter((p) => p[1] !== 0);
-  const ys = uniq(points.map((p) => p[1])).sort((a, b) => a - b);
-  const newPoints: [number, number][] = ys.map((y) => [
-    y,
-    sum(points.filter((p) => p[1] === y).map((p) => p[1])),
-  ]);
-  return T.fromZippedArray(newPoints);
+  const pointMap = new Map<number, number>();
+
+  for (const [_, y] of T.zip(shape)) {
+    if (y !== 0) {
+      pointMap.set(y, (pointMap.get(y) || 0) + y);
+    }
+  }
+
+  const sortedPoints = Array.from(pointMap.entries()).sort(([a], [b]) => a - b);
+  return T.fromZippedArray(sortedPoints);
 }
 
-//Assumes that A is sorted by e[0]
-function findCoveringRangeIndices(
-  ranges: [number, number][],
-  points: number[]
+// Takes in a list of points and a list of ranges.
+// For each point, outputs a list of the indices of each range that covered it.
+// Example: ([2, 5, 5], [[1, 6], [3, 10]]) -> [[0], [0,1], [1]]
+// Assumes that A is sorted by e[0]
+function mapPointsToAllCoveringRanges(
+  points: readonly number[],
+  ranges: readonly [number, number][]
 ): number[][] {
   const result: number[][] = Array.from({ length: points.length }, () => []);
 
@@ -92,17 +101,15 @@ function findCoveringRangeIndices(
   return result;
 }
 
+// [1, 2, 3] -> [[1, 2], [2, 3]]
 function convertPointsToRanges(points: number[]): [number, number][] {
-  const ranges: [number, number][] = [];
-
-  for (let i = 0; i < points.length - 1; i++) {
-    ranges.push([points[i], points[i + 1]]);
-  }
-
-  return ranges;
+  return Array.from({ length: points.length - 1 }, (_, i) => [
+    points[i],
+    points[i + 1],
+  ]);
 }
 
-export function mergeRectanglesWithoutOverlap(
+function mergeRectanglesWithoutOverlap(
   rectangles: readonly Rectangle[]
 ): readonly Rectangle[] {
   if (rectangles.length === 0) {
@@ -110,26 +117,26 @@ export function mergeRectanglesWithoutOverlap(
   }
 
   const sortedRectangles = [...rectangles].sort((a, b) => a.x1 - b.x1);
-  const rectangleRanges: [number, number][] = sortedRectangles.map(
-    ({ x1, x2 }) => [x1, x2]
-  );
   const xPoints = uniq(
     rectangles.flatMap(({ x1, x2 }) => [x1, x2]).sort((a, b) => a - b)
   );
   const newRanges = convertPointsToRanges(xPoints);
-  const rangeMiddles = newRanges.map(([start, end]) => (start + end) / 2);
-  const coveredRangeIndices = findCoveringRangeIndices(
-    rectangleRanges,
-    rangeMiddles
+  const rangeMiddlePoints = newRanges.map(([start, end]) => (start + end) / 2);
+  const coveredRangeIndices = mapPointsToAllCoveringRanges(
+    rangeMiddlePoints,
+    sortedRectangles.map(({ x1, x2 }) => [x1, x2])
   );
-  const yTotalAtRange: number[] = newRanges.map((_, i) =>
-    sum(coveredRangeIndices[i].map((j) => sortedRectangles[j].y))
-  );
+  const indexY = (i: number) =>
+    sum(coveredRangeIndices[i].map((j) => sortedRectangles[j].y));
 
-  return newRanges.map(([x1, x2], i) => ({ x1, x2, y: yTotalAtRange[i] }));
+  return newRanges.map(([x1, x2], i) => ({
+    x1,
+    x2,
+    y: indexY(i),
+  }));
 }
 
-export function mergeRectanglesToCoordinates(
+function convertRectanglesToCoordinates(
   rectangles: readonly Rectangle[]
 ): readonly [number, number][] {
   type Point = [number, number];
@@ -166,23 +173,27 @@ export function yTransformContinuous(shape: XYShape): {
   continuous: XYShape;
   discrete: XYShape;
 } {
-  // Step 1: Convert each line segment into a small rectangle
-  const rectangles = convertToRectangles(shape);
+  // Step 1: Convert line segments into unordered small rectangles. Convert purely horizontal segments into discrete points.
+  const continuousRectanglesAndDiscretePoints = convertToRectangles(shape);
 
-  // Step 2: Merge rectangles into non-overlapping rectangles
+  // Step 2: Merge rectangles into non-overlapping rectangles of corresponding heights
   const mergedRectanglesWithoutOverlap = mergeRectanglesWithoutOverlap(
-    rectangles.continuous
+    continuousRectanglesAndDiscretePoints.continuous
   );
 
-  // Step 3: Merge overlapping rectangles into coordinates
-  const continuous = T.fromZippedArray(
-    mergeRectanglesToCoordinates(mergedRectanglesWithoutOverlap)
+  // Step 3: Convert non-overlapping rectangles into coordinates
+  const continuous = convertRectanglesToCoordinates(
+    mergedRectanglesWithoutOverlap
   );
 
-  // Step 4: Convert discrete points into coordinates
-  const discrete =
-    (rectangles.discrete &&
-      mergeDiscrete(T.fromZippedArray(rectangles.discrete))) ||
-    T.empty;
-  return { continuous, discrete };
+  // Step 4: Merge overlapping discrete points
+  const discrete = mergeDiscrete(
+    continuousRectanglesAndDiscretePoints.discrete
+  );
+
+  // Step 5: Convert into XYShapes
+  return {
+    continuous: T.fromZippedArray(continuous),
+    discrete: T.fromZippedArray(discrete),
+  };
 }
