@@ -610,3 +610,8 @@ export const frDeprecated = <T>(itemType: FRType<T>): FRType<T> => ({
   default: itemType.default,
   fieldType: itemType.fieldType,
 });
+
+export const frMixedSet = frDict(
+  ["points", frArray(frNumber)],
+  ["segments", frArray(frTuple(frNumber, frNumber))]
+);

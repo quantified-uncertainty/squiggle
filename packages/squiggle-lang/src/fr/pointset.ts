@@ -10,6 +10,7 @@ import {
   frDist,
   frDistPointset,
   frLambdaTyped,
+  frMixedSet,
   frNamed,
   frNumber,
 } from "../library/registry/frTypes.js";
@@ -92,6 +93,24 @@ export const library = [
           return dist.downsample(number);
         }
       ),
+    ],
+  }),
+  maker.make({
+    name: "support",
+    examples: [
+      makeFnExample(`PointSet.support(PointSet.fromDist(normal(5,2)))`),
+    ],
+    displaySection: "Conversions",
+    definitions: [
+      makeDefinition([frDistPointset], frMixedSet, ([dist]) => {
+        const support = dist.support();
+        return {
+          points: support.points,
+          segments: support.segments.map(
+            ([start, end]) => [start, end] as [number, number]
+          ),
+        };
+      }),
     ],
   }),
   maker.make({
