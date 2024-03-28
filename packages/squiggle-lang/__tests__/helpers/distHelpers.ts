@@ -6,7 +6,8 @@ export const env: Env = defaultEnv;
 
 export const unpackResult = <T>(x: Result.result<T, unknown>): T => {
   if (!x.ok) {
-    throw new Error("failed");
+    console.error(x.value);
+    throw new Error("unpacking failed");
   }
   return x.value;
 };

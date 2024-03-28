@@ -2,15 +2,11 @@ import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("Scoring", () => {
   testEvalToBe(
-    "Dist.logScore({estimate: Sym.normal(5,2), answer: Sym.normal(5.2,1), prior: Sym.normal(5.5,3)})",
-    "-0.33591375663884876"
-  );
-  testEvalToBe(
-    "Dist.logScore({estimate: Sym.normal(5,2), answer: Sym.normal(5.2,1)})",
+    "Dist.logScoreDistAnswer(Sym.normal(5,2), Sym.normal(5.2,1)).score",
     "0.32244107041564646"
   );
   testEvalToBe(
-    "Dist.logScore({estimate: Sym.normal(5,2), answer: 4.5})",
+    "Dist.logScoreNumericAnswer(Sym.normal(5,2), 4.5).continuous",
     "1.6433360626394853"
   );
   testEvalToBe(

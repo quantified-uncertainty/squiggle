@@ -1,7 +1,5 @@
-import {
-  logScoreScalarAnswer,
-  mixture,
-} from "../../../src/dist/distOperations/index.js";
+import { mixture } from "../../../src/dist/distOperations/index.js";
+import { logScoreScalarAnswer } from "../../../src/dist/scoring/ScalarAnswer.js";
 import { getDefaultRng } from "../../../src/rng/index.js";
 import { env, mkPointMass, unpackResult } from "../../helpers/distHelpers.js";
 
@@ -27,14 +25,11 @@ describe("WithScalarAnswer: discrete -> scalar -> score", () => {
     );
 
     const answer = 2.0; // So this is: assigning 100% probability to 2.0
-    const x = unpackResult(
-      logScoreScalarAnswer({
-        estimate: prediction,
-        answer,
-        prior: undefined,
-        env,
-      })
-    );
+    const x = logScoreScalarAnswer({
+      estimate: prediction,
+      answer,
+      env,
+    }).getOrThrow().discrete;
     expect(x).toEqual(-Math.log(0.25 / 1.0));
   });
 
@@ -54,42 +49,12 @@ describe("WithScalarAnswer: discrete -> scalar -> score", () => {
       logScoreScalarAnswer({
         estimate: prediction,
         answer,
-        prior: undefined,
         env,
       })
     );
-    expect(x).toEqual(-Math.log(0.75 / 1.0));
-  });
-
-  test("scoreWithPrior: agrees with analytical answer when finite", () => {
-    const prior = unpackResult(
-      mixture(
-        [
-          [pointA, 0.5],
-          [pointB, 0.5],
-        ],
-        { env, rng }
-      )
-    );
-    const prediction = unpackResult(
-      mixture(
-        [
-          [pointA, 0.75],
-          [pointB, 0.25],
-        ],
-        { env, rng }
-      )
-    );
-
-    const answer = 3.0; // So this is: assigning 100% probability to 2.0
-    const x = unpackResult(
-      logScoreScalarAnswer({
-        estimate: prediction,
-        answer,
-        prior,
-        env,
-      })
-    );
-    expect(x).toEqual(-Math.log(0.75 / 1.0) - -Math.log(0.5 / 1.0));
+    expect(x).toEqual({
+      continuous: Infinity,
+      discrete: -Math.log(0.75 / 1.0),
+    });
   });
 });
