@@ -1,5 +1,5 @@
 import { xyShapeDistError } from "../dist/DistError.js";
-import { PointSetDist } from "../dist/PointSetDist.js";
+import { combinePointwise, PointSetDist } from "../dist/PointSetDist.js";
 import { PointMass } from "../dist/SymbolicDist.js";
 import { REDistributionError } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
@@ -185,6 +185,34 @@ export const library = [
             )
           );
         }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "mapY2",
+    examples: [
+      makeFnExample(
+        `PointSet.mapY2(PointSet.fromDist(normal(5,2)), PointSet.fromDist(normal(10,3)), {|x, y| x + y})`
+      ),
+    ],
+    output: "Dist",
+    displaySection: "Transformations",
+    definitions: [
+      makeDefinition(
+        [
+          frDistPointset,
+          frDistPointset,
+          frNamed("fn", frLambdaTyped([frNumber, frNumber], frNumber)),
+        ],
+        frDistPointset,
+        ([dist1, dist2, lambda], reducer) =>
+          unwrapDistResult(
+            combinePointwise(dist1, dist2, (y1, y2) =>
+              Ok(
+                doNumberLambdaCall(lambda, [vNumber(y1), vNumber(y2)], reducer)
+              )
+            )
+          )
       ),
     ],
   }),

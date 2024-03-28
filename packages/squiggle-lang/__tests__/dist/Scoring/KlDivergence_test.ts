@@ -1,9 +1,6 @@
 import { BaseDist } from "../../../src/dist/BaseDist.js";
-import { distErrorToString } from "../../../src/dist/DistError.js";
-import {
-  logScoreDistAnswer,
-  mixture,
-} from "../../../src/dist/distOperations/index.js";
+import { mixture } from "../../../src/dist/distOperations/index.js";
+import { logScoreDistAnswer } from "../../../src/fr/scoring.js";
 import { getDefaultRng } from "../../../src/rng/index.js";
 import {
   floatDist,
@@ -23,19 +20,12 @@ import {
 
 const rng = getDefaultRng();
 
-const klDivergence = (prediction: BaseDist, answer: BaseDist): number => {
-  const result = logScoreDistAnswer({
+const klDivergence = (prediction: BaseDist, answer: BaseDist): number =>
+  logScoreDistAnswer({
     estimate: prediction,
     answer,
-    prior: undefined,
     env,
-  });
-  if (!result.ok) {
-    console.log(distErrorToString(result.value));
-    throw new Error("logScore failed");
-  }
-  return result.value;
-};
+  }).integralSum();
 
 // integral from low to high of 1 / (high - low) log(normal(mean, stdev)(x) / (1 / (high - low))) dx
 const klNormalUniform = (
