@@ -52,6 +52,9 @@ describe("WithScalarAnswer: discrete -> scalar -> score", () => {
         env,
       })
     );
-    expect(x).toEqual(-Math.log(0.75 / 1.0));
+    expect(x).toEqual({
+      continuous: Infinity,
+      discrete: -Math.log(0.75 / 1.0),
+    });
   });
 });

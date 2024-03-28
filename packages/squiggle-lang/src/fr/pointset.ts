@@ -1,5 +1,5 @@
 import { xyShapeDistError } from "../dist/DistError.js";
-import { PointSetDist } from "../dist/PointSetDist.js";
+import { combinePointwise, PointSetDist } from "../dist/PointSetDist.js";
 import { PointMass } from "../dist/SymbolicDist.js";
 import { REDistributionError } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
@@ -205,21 +205,14 @@ export const library = [
           frNamed("fn", frLambdaTyped([frNumber, frNumber], frNumber)),
         ],
         frDistPointset,
-        ([dist1, dist2, lambda], reducer) => {
-          return unwrapDistResult(
-            dist1.mapY2Result(
-              (y1, y2) =>
-                Ok(
-                  doNumberLambdaCall(
-                    lambda,
-                    [vNumber(y1), vNumber(y2)],
-                    reducer
-                  )
-                ),
-              dist2
+        ([dist1, dist2, lambda], reducer) =>
+          unwrapDistResult(
+            combinePointwise(dist1, dist2, (y1, y2) =>
+              Ok(
+                doNumberLambdaCall(lambda, [vNumber(y1), vNumber(y2)], reducer)
+              )
             )
-          );
-        }
+          )
       ),
     ],
   }),
