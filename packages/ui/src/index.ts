@@ -64,6 +64,7 @@ export {
   Cog8ToothIcon,
   CommandLineIcon,
   CommentIcon,
+  CubeTransparentIcon,
   CurlyBracketsIcon,
   DocumentTextIcon,
   FireIcon,

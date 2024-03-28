@@ -8,6 +8,7 @@ import "./LambdaWidget/index.js";
 import "./NumberWidget.js";
 import "./PlotWidget/index.js";
 import "./StringWidget.js";
+import "./SpecificationWidget.js";
 import "./TableChartWidget.js";
 import "./DurationWidget.js";
 import "./VoidWidget.js";

@@ -1,3 +1,4 @@
+import { MixedSet } from "../utility/MixedSet.js";
 import * as Result from "../utility/result.js";
 import * as XYShape from "../XYShape.js";
 import * as Common from "./Common.js";
@@ -169,6 +170,13 @@ export class MixedShape implements PointSet<MixedShape> {
   }
   integralYtoX(f: number) {
     return XYShape.YtoX.linear(this.integral().xyShape, f);
+  }
+
+  support() {
+    return new MixedSet(
+      this.discrete.support().points,
+      this.continuous.support().segments
+    );
   }
 
   // This pipes all ys (continuous and discrete) through fn.

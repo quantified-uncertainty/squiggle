@@ -4,7 +4,9 @@ import { Lambda } from "../../reducer/lambda.js";
 import { Reducer } from "../../reducer/Reducer.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
+import { Value } from "../../value/index.js";
 import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
+import { SqProject } from "../SqProject/index.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValue, wrapValue } from "./index.js";
 import { SqDomain, wrapDomain } from "./SqDomain.js";
@@ -36,6 +38,23 @@ function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
           typeName: p.display(),
         }))
       );
+  }
+}
+
+export function runLambda(
+  lambda: Lambda,
+  values: Value[],
+  env: Env,
+  project?: SqProject
+): result<SqValue, SqError> {
+  const reducer = new Reducer(env);
+  try {
+    const value = reducer.call(lambda, values);
+    return Result.Ok(wrapValue(value) as SqValue);
+  } catch (e) {
+    return Result.Err(
+      new SqRuntimeError(reducer.errorFromException(e), project)
+    );
   }
 }
 
@@ -83,16 +102,7 @@ export class SqLambda {
     const rawArgs = args.map((arg) => arg._value);
 
     // TODO - reuse more parts of the project's primary reducer?
-    const reducer = new Reducer(env);
-
-    try {
-      const value = reducer.call(this._value, rawArgs);
-      return Result.Ok(wrapValue(value));
-    } catch (e) {
-      return Result.Err(
-        new SqRuntimeError(reducer.errorFromException(e), this.context?.project)
-      );
-    }
+    return runLambda(this._value, rawArgs, env, this.context?.project);
   }
 
   toString() {

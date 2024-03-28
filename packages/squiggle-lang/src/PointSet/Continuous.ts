@@ -1,4 +1,5 @@
 import { epsilon_float } from "../magicNumbers.js";
+import { MixedSet } from "../utility/MixedSet.js";
 import * as Result from "../utility/result.js";
 import * as XYShape from "../XYShape.js";
 import { yTransformContinuous } from "../yTransform.js";
@@ -304,6 +305,15 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
       continuous: new ContinuousShape({ xyShape: continuous }),
       discrete: new DiscreteShape({ xyShape: discrete }),
     });
+  }
+
+  support() {
+    if (this.interpolation === "Stepwise") {
+      throw new Error(
+        "support() is not supported for continuous distributions with Stepwise interpolation"
+      );
+    }
+    return MixedSet.fromContinuousDistShape(this.xyShape);
   }
 }
 

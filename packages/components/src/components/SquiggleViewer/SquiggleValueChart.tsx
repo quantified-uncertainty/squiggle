@@ -10,7 +10,6 @@ export const SquiggleValueChart = memo<{
 }>(function SquiggleValueChart({ value, settings }) {
   const showAs = value.tags.showAs();
   const usedValue = showAs && valueHasContext(showAs) ? showAs : value;
-
   const widget = widgetRegistry.widgets.get(usedValue.tag);
   if (!widget) {
     return usedValue.toString();

@@ -678,9 +678,12 @@ type SquiggleSnippet implements Node {
 }
 
 input SquiggleSnippetContentInput {
+  autorunMode: Boolean
   code: String!
+  sampleCount: Int
   seed: String!
   version: String!
+  xyPointLength: Int
 }
 
 type UpdateGroupInviteRoleResult {
