@@ -21,4 +21,8 @@ describe("Dist", () => {
     "diff([Dist.make(1),Dist.make(5),Dist.make(3)])",
     "[PointMass(4),PointMass(-2)]"
   );
+  testEvalToBe(
+    "Dist.logScore({estimate: mx(Sym.normal(5,2), Sym.uniform(-1000, 1000), [.5, .5]), answer: Sym.normal(5.2,2.2)})",
+    "0.5787500741731704"
+  );
 });

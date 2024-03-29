@@ -10,6 +10,7 @@ import { CodeBracketIcon, CommentIcon, LinkIcon, TextTooltip } from "@quri/ui";
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
+import { SpecificationDropdown } from "../../widgets/SpecificationWidget.js";
 import { useProjectContext } from "../ProjectProvider.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
@@ -328,6 +329,7 @@ export const ValueWithContextViewer: FC<Props> = ({
               {!isOpen && <CommentIconForValue value={value} />}
             </div>
             <div className="inline-flex space-x-2 items-center">
+              <SpecificationDropdown value={value} />
               {enableDropdownMenu && <SquiggleValueMenu value={value} />}
               {exportData && exportData.path.length < 2 && onOpenExport && (
                 <TextTooltip

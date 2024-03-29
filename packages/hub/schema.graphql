@@ -668,16 +668,22 @@ interface SquiggleOutput {
 }
 
 type SquiggleSnippet implements Node {
+  autorunMode: Boolean
   code: String!
   id: ID!
+  sampleCount: Int
   seed: String!
   version: String!
+  xyPointLength: Int
 }
 
 input SquiggleSnippetContentInput {
+  autorunMode: Boolean
   code: String!
+  sampleCount: Int
   seed: String!
   version: String!
+  xyPointLength: Int
 }
 
 type UpdateGroupInviteRoleResult {

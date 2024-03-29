@@ -19,12 +19,14 @@ import { ErrorAlert } from "../../components/ui/Alert.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import {
+  calculatePadding,
   distance,
   distributionColor,
   drawAxes,
   drawCircle,
   drawCursorLines,
   drawVerticalLine,
+  makeCartesianFrame,
 } from "../../lib/draw/index.js";
 import { Point } from "../../lib/draw/types.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
@@ -160,7 +162,11 @@ const InnerDistributionsChart: FC<{
     ]);
 
     const yScale = sqScaleToD3(plot.yScale);
-    yScale.domain([0, Math.max(...domain.map((p) => p.y))]);
+
+    yScale.domain([
+      Math.min(0, ...domain.map((p) => p.y)),
+      Math.max(0, ...domain.map((p) => p.y)),
+    ]);
 
     return { xScale, yScale };
   }, [domain, plot.xScale, plot.yScale]);
@@ -186,20 +192,17 @@ const InnerDistributionsChart: FC<{
         top: discreteRadius,
         bottom: bottomPadding,
       };
-      const { padding, frame } = drawAxes({
-        context,
-        width,
-        height,
+
+      const padding = calculatePadding({
         suggestedPadding,
-        xScale,
-        yScale,
-        showYAxis: false,
-        showXAxis,
-        xTickFormat: plot.xScale.tickFormat,
-        xAxisTitle: showAxisTitles ? plot.xScale.title : undefined,
-        showAxisLines: false,
+        hasXAxisTitle: showAxisTitles && !!plot.xScale.title,
+        hasYAxisTitle: false,
       });
 
+      const frame = makeCartesianFrame({ context, padding, width, height });
+
+      xScale.range([0, frame.width]);
+      yScale.range([0, frame.height]);
       // samplesBar
       function samplesBarShowSettings(): { yOffset: number; color: string } {
         if (samplesBarSetting === "behind") {
@@ -249,7 +252,7 @@ const InnerDistributionsChart: FC<{
             .area<SqShape["continuous"][number]>()
             .x((d) => xScale(d.x))
             .y0((d) => yScale(d.y))
-            .y1(0)
+            .y1(yScale(0))
             .context(context)(shape.continuous);
           context.fill();
           context.globalAlpha = 1;
@@ -340,6 +343,20 @@ const InnerDistributionsChart: FC<{
         }
         frame.exit();
       }
+
+      drawAxes({
+        context,
+        width,
+        height,
+        suggestedPadding,
+        xScale,
+        yScale,
+        showYAxis: false,
+        showXAxis,
+        xTickFormat: plot.xScale.tickFormat,
+        xAxisTitle: showAxisTitles ? plot.xScale.title : undefined,
+        showAxisLines: true, // Set this to true to show the axis lines
+      });
 
       if (isMulti) {
         const radius = 5;
@@ -579,7 +596,10 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
                 height={height}
                 samplesBarSetting={samplesState}
                 showCursorLine={nonTitleHeight > 30}
-                showPercentileLines={nonTitleHeight > 30}
+                // We don't want to show percentile lines if it's not normalized, as they wouldn't make sense.
+                showPercentileLines={
+                  !anyAreNonnormalized && nonTitleHeight > 30
+                }
                 showXAxis={showXAxis}
                 showAxisTitles={showAxisTitles}
               />

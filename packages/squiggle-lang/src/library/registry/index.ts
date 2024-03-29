@@ -10,6 +10,7 @@ import { library as genericDistLibrary } from "../../fr/genericDist.js";
 import { library as inputLibrary } from "../../fr/input.js";
 import { library as listLibrary } from "../../fr/list.js";
 import { library as mathLibrary } from "../../fr/math.js";
+import { library as mixedSetLibrary } from "../../fr/mixedSet.js";
 import { library as numberLibrary } from "../../fr/number.js";
 import { library as plotLibrary } from "../../fr/plot.js";
 import { library as pointsetLibrary } from "../../fr/pointset.js";
@@ -20,6 +21,7 @@ import {
 import { library as samplesetLibrary } from "../../fr/sampleset.js";
 import { library as scaleLibrary } from "../../fr/scale.js";
 import { library as scoringLibrary } from "../../fr/scoring.js";
+import { library as specificationLibrary } from "../../fr/specification.js";
 import { library as stringLibrary } from "../../fr/string.js";
 import { library as symLibrary } from "../../fr/sym.js";
 import { library as systemLibrary } from "../../fr/system.js";
@@ -51,10 +53,12 @@ const fnList: FRFunction[] = [
   ...samplesetLibrary,
   ...scaleLibrary,
   ...scoringLibrary,
+  ...mixedSetLibrary,
   ...symLibrary,
   ...unitsLibrary,
   ...calculatorLibrary,
   ...inputLibrary,
+  ...specificationLibrary,
   ...systemLibrary,
   ...commonLibrary, // should go last, because has some catch-all functions
 ];
