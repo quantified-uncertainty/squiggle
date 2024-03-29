@@ -146,7 +146,6 @@ const maker = new FnFactory({
 export const library = [
   maker.make({
     name: "make",
-    output: "Array",
     examples: [
       makeFnExample(`List.make(2, 3)`),
       makeFnExample(`List.make(2, {|| 3})`),
@@ -198,7 +197,6 @@ export const library = [
   }),
   maker.make({
     name: "upTo",
-    output: "Array",
     examples: [makeFnExample(`List.upTo(1,4)`)],
     displaySection: "Constructors",
     definitions: [
@@ -219,7 +217,6 @@ export const library = [
   maker.make({
     name: "length",
     requiresNamespace: true,
-    output: "Number",
     examples: [makeFnExample(`List.length([1,4,5])`)],
     displaySection: "Queries",
     definitions: [
@@ -260,7 +257,6 @@ export const library = [
   }),
   maker.make({
     name: "reverse",
-    output: "Array",
     requiresNamespace: false,
     examples: [makeFnExample(`List.reverse([1,4,5]) // [5,4,1]`)],
     displaySection: "Modifications",
@@ -440,7 +436,6 @@ export const library = [
   }),
   maker.make({
     name: "map",
-    output: "Array",
     requiresNamespace: false,
     displaySection: "Functional Transformations",
     examples: [

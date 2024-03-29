@@ -170,7 +170,6 @@ const numericFnDef = () => {
 
   return maker.make({
     name: "numericFn",
-    output: "Plot",
     examples: [
       makeFnExample(
         `Plot.numericFn(
@@ -237,7 +236,6 @@ const numericFnDef = () => {
 export const library = [
   maker.make({
     name: "dist",
-    output: "Plot",
     examples: [
       makeFnExample(
         `Plot.dist(
@@ -308,7 +306,6 @@ export const library = [
   }),
   maker.make({
     name: "dists",
-    output: "Plot",
     examples: [
       makeFnExample(
         `Plot.dists(
@@ -417,7 +414,6 @@ export const library = [
   numericFnDef(),
   maker.make({
     name: "distFn",
-    output: "Plot",
     examples: [
       makeFnExample(
         `Plot.distFn(
@@ -497,7 +493,6 @@ export const library = [
   }),
   maker.make({
     name: "scatter",
-    output: "Plot",
     examples: [
       makeFnExample(
         `xDist = SampleSet.fromDist(2 to 5)

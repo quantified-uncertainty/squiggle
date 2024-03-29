@@ -57,7 +57,6 @@ const runScoringDistAnswer = (
 export const library = [
   maker.make({
     name: "klDivergence",
-    output: "Number",
     examples: [
       makeFnExample("Dist.klDivergence(Sym.normal(5,2), Sym.normal(5,1.5))"),
     ],
@@ -73,7 +72,6 @@ Note that this can be very brittle. If the second distribution has probability m
   }),
   maker.make({
     name: "logScore",
-    output: "Number",
     displaySection: "Scoring",
     description: `A log loss score. Often that often acts as a [scoring rule](https://en.wikipedia.org/wiki/Scoring_rule). Useful when evaluating the accuracy of a forecast.
 

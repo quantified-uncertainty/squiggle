@@ -33,7 +33,6 @@ const convertInputDefault = (
 export const library = [
   maker.make({
     name: "text",
-    output: "Input",
     examples: [
       makeFnExample(`Input.text({ name: "First", default: "John" })`),
       makeFnExample(
@@ -65,7 +64,6 @@ export const library = [
   }),
   maker.make({
     name: "textArea",
-    output: "Input",
     examples: [
       makeFnExample(`Input.textArea({ name: "people", default: '{
   "John": 20 to 50, 
@@ -97,7 +95,6 @@ export const library = [
   }),
   maker.make({
     name: "checkbox",
-    output: "Input",
     examples: [
       makeFnExample(`Input.checkbox({ name: "IsTrue?", default: true })`),
     ],
@@ -125,7 +122,6 @@ export const library = [
   }),
   maker.make({
     name: "select",
-    output: "Input",
     examples: [
       makeFnExample(
         `Input.select({ name: "Name", default: "Sue", options: ["John", "Mary", "Sue"] })`
