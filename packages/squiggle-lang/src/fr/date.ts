@@ -42,7 +42,6 @@ d3 = Date.make(2020.5)`,
       ),
     ],
     displaySection: "Constructors",
-    output: "Date",
     definitions: [
       makeDefinition([frString], frDate, ([str]) => {
         const result = SDate.fromString(str);
@@ -77,7 +76,6 @@ d3 = Date.make(2020.5)`,
     name: "fromUnixTime",
     examples: [makeFnExample("Date.fromUnixTime(1589222400)")],
     requiresNamespace: true,
-    output: "Date",
     displaySection: "Conversions",
     definitions: [
       makeDefinition([frNumber], frDate, ([num]) => {
@@ -90,7 +88,6 @@ d3 = Date.make(2020.5)`,
     examples: [makeFnExample("Date.toUnixTime(Date.make(2020, 5, 12))")],
     requiresNamespace: true,
     displaySection: "Conversions",
-    output: "Number",
     definitions: [
       makeDefinition([frDate], frNumber, ([date]) => {
         return date.toUnixS();
@@ -104,7 +101,6 @@ d3 = Date.make(2020.5)`,
         isInteractive: true,
       }),
     ],
-    output: "Duration",
     displaySection: "Algebra",
     definitions: [
       makeDefinition([frDate, frDate], frDuration, ([d1, d2]) =>
@@ -119,7 +115,6 @@ d3 = Date.make(2020.5)`,
         isInteractive: true,
       }),
     ],
-    output: "Date",
     displaySection: "Algebra",
     definitions: [
       makeDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
@@ -135,7 +130,6 @@ d3 = Date.make(2020.5)`,
         isInteractive: true,
       }),
     ],
-    output: "Date",
     displaySection: "Algebra",
     definitions: [
       makeDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
@@ -149,7 +143,6 @@ d3 = Date.make(2020.5)`,
   maker.make({
     name: "rangeDomain",
     requiresNamespace: true,
-    output: "Domain",
     examples: [makeFnExample("Date.rangeDomain(Date(2000), Date(2010))")],
     displaySection: "Other",
     definitions: [

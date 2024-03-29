@@ -10,9 +10,5 @@ test.each(
     throw new Error(`Can't test type, with error: ${result.value}`);
   }
 
-  if (fn.output !== undefined) {
-    expect(result.value.type).toEqual(fn.output);
-  }
-
   expect(result.ok).toBe(true);
 });

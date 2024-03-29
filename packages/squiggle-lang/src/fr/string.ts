@@ -15,7 +15,6 @@ const maker = new FnFactory({
 export const library = [
   maker.make({
     name: "make",
-    output: "String",
     description:
       "Converts any value to a string. Some information is often lost.",
     definitions: [makeDefinition([frAny()], frString, ([x]) => x.toString())],

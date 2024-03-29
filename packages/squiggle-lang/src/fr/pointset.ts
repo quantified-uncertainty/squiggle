@@ -58,7 +58,6 @@ export const library = [
       makeFnExample(`PointSet.make(normal(5,10))`),
       makeFnExample(`PointSet(3)`),
     ],
-    output: "Dist",
     displaySection: "Constructors",
     definitions: [fromDist, fromNumber],
   }),
@@ -68,13 +67,11 @@ export const library = [
       "Converts the distribution in question into a point set distribution. If the distribution is symbolic, then it does this by taking the quantiles. If the distribution is a sample set, then it uses a version of kernel density estimation to approximate the point set format. One complication of this latter process is that if there is a high proportion of overlapping samples (samples that are exactly the same as each other), it will convert these samples into discrete point masses. Eventually we'd like to add further methods to help adjust this process.",
     examples: [makeFnExample(`PointSet.fromDist(normal(5,2))`)],
     displaySection: "Conversions",
-    output: "Dist",
     definitions: [fromDist],
   }),
   maker.make({
     name: "fromNumber",
     examples: [makeFnExample(`PointSet.fromNumber(3)`)],
-    output: "Dist",
     displaySection: "Conversions",
     definitions: [fromNumber],
   }),
@@ -83,7 +80,6 @@ export const library = [
     examples: [
       makeFnExample(`PointSet.downsample(PointSet.fromDist(normal(5,2)), 50)`),
     ],
-    output: "Dist",
     displaySection: "Conversions",
     definitions: [
       makeDefinition(
@@ -123,7 +119,6 @@ export const library = [
   {x: 3, y: 0.2}
 ])`),
     ],
-    output: "Dist",
     displaySection: "Constructors",
     definitions: [
       makeDefinition(
@@ -149,7 +144,6 @@ export const library = [
   {x: 3, y: 0.2}
 ])`),
     ],
-    output: "Dist",
     displaySection: "Constructors",
     definitions: [
       makeDefinition(
@@ -170,7 +164,6 @@ export const library = [
     examples: [
       makeFnExample(`PointSet.mapY(mx(Sym.normal(5,2)), {|x| x + 1})`),
     ],
-    output: "Dist",
     displaySection: "Transformations",
     definitions: [
       makeDefinition(

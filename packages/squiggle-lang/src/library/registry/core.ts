@@ -3,7 +3,6 @@ import invert from "lodash/invert.js";
 
 import { infixFunctions, unaryFunctions } from "../../ast/peggyHelpers.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
-import { Value } from "../../value/index.js";
 import {
   FnDefinition,
   fnDefinitionToString,
@@ -31,7 +30,6 @@ export type FRFunction = {
   nameSpace: string;
   requiresNamespace: boolean;
   definitions: FnDefinition[];
-  output?: Value["type"];
   examples?: example[];
   description?: string;
   isExperimental?: boolean;

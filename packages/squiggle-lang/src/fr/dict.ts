@@ -27,7 +27,6 @@ const maker = new FnFactory({
 export const library = [
   maker.make({
     name: "set",
-    output: "Dict",
     examples: [makeFnExample(`Dict.set({a: 1, b: 2}, "c", 3)`)],
     displaySection: "Transformations",
     description:
@@ -46,7 +45,6 @@ export const library = [
   }),
   maker.make({
     name: "has",
-    output: "Bool",
     examples: [makeFnExample(`Dict.has({a: 1, b: 2}, "c")`)],
     displaySection: "Queries",
     definitions: [
@@ -59,7 +57,6 @@ export const library = [
   }),
   maker.make({
     name: "size",
-    output: "Number",
     displaySection: "Queries",
     examples: [makeFnExample(`Dict.size({a: 1, b: 2})`)],
     definitions: [
@@ -72,7 +69,6 @@ export const library = [
   }),
   maker.make({
     name: "delete",
-    output: "Dict",
     examples: [makeFnExample(`Dict.delete({a: 1, b: 2}, "a")`)],
     description: "Creates a new dictionary that excludes the deleted element.",
     displaySection: "Transformations",
@@ -89,7 +85,6 @@ export const library = [
   }),
   maker.make({
     name: "merge",
-    output: "Dict",
     examples: [
       makeFnExample(
         `first = { a: 1, b: 2 }
@@ -108,7 +103,6 @@ Dict.merge(first, snd)`
   }),
   maker.make({
     name: "mergeMany",
-    output: "Dict",
     examples: [
       makeFnExample(
         `first = { a: 1, b: 2 }
@@ -127,7 +121,6 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
   }),
   maker.make({
     name: "keys",
-    output: "Array",
     examples: [makeFnExample(`Dict.keys({a: 1, b: 2})`)],
     displaySection: "Queries",
     definitions: [
@@ -140,7 +133,6 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
   }),
   maker.make({
     name: "values",
-    output: "Array",
     examples: [makeFnExample(`Dict.values({ foo: 3, bar: 20 }) // [3, 20]`)],
     displaySection: "Queries",
     definitions: [
@@ -153,7 +145,6 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
   }),
   maker.make({
     name: "toList",
-    output: "Array",
     examples: [makeFnExample(`Dict.toList({a: 1, b: 2})`)],
     displaySection: "Conversions",
     definitions: [
@@ -166,7 +157,6 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
   }),
   maker.make({
     name: "fromList",
-    output: "Dict",
     examples: [
       makeFnExample(
         `Dict.fromList([
@@ -186,7 +176,6 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
   }),
   maker.make({
     name: "map",
-    output: "Dict",
     examples: [makeFnExample(`Dict.map({a: 1, b: 2}, {|x| x + 1})`)],
     displaySection: "Transformations",
     definitions: [
@@ -215,7 +204,6 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
   }),
   maker.make({
     name: "mapKeys",
-    output: "Dict",
     examples: [
       makeFnExample(
         `Dict.mapKeys({a: 1, b: 2, c: 5}, {|x| concat(x, "-foobar")})`,
@@ -248,7 +236,6 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
   }),
   maker.make({
     name: "pick",
-    output: "Dict",
     examples: [
       makeFnExample(
         `data = { a: 1, b: 2, c: 3, d: 4 }
@@ -283,7 +270,6 @@ Dict.pick(data, ["a", "c"]) // {a: 1, c: 3}`
   }),
   maker.make({
     name: "omit",
-    output: "Dict",
     examples: [
       makeFnExample(
         `data = { a: 1, b: 2, c: 3, d: 4 }
