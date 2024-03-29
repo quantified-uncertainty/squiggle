@@ -21,7 +21,7 @@ describe("Compiling calls", () => {
   });
 
   describe("Index lookups", () => {
-    testCompileEnd("([0,1,2])[1]", "(Call $_atIndex_$ (Array 0 1 2) 1)");
+    testCompileEnd("([0,1,2])[1]", "(Call #indexLookup (Array 0 1 2) 1)");
   });
 
   describe("Pipes", () => {

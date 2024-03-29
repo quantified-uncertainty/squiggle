@@ -13,6 +13,6 @@ describe("Compile dicts", () => {
 
   testCompile("dict={property: 1}; dict.property", [
     '(Assign dict (Dict (kv "property" 1)))',
-    '(Call $_atIndex_$ (StackRef 0) "property")',
+    '(Call #indexLookup (StackRef 0) "property")',
   ]);
 });
