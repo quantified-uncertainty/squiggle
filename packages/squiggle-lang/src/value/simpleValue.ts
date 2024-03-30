@@ -14,6 +14,7 @@ import { vDist } from "./VDist.js";
 import { vInput } from "./VInput.js";
 import { vLambda } from "./vLambda.js";
 import { vNumber } from "./VNumber.js";
+import { VegaPlot } from "./VPlot.js";
 import { vScale } from "./VScale.js";
 import { vString } from "./VString.js";
 import { vVoid } from "./VVoid.js";
@@ -100,6 +101,32 @@ export function simpleValueFromAny(data: any): SimpleValue {
     return data;
   }
   return toPlainObject(data);
+}
+
+export function vegaPlotToSimpleValues(
+  value: VegaPlot
+): [string, SimpleValue][] {
+  const fields: [string, SimpleValue][] = [["data", value.data]];
+  if (value.config) {
+    fields.push(["config", value.config]);
+  }
+  if (value.mark) {
+    fields.push(["mark", value.mark]);
+  }
+  if (value.encoding) {
+    fields.push(["encoding", value.encoding]);
+  }
+  if (value.height) {
+    fields.push(["height", value.height]);
+  }
+  if (value.view) {
+    fields.push(["view", value.view]);
+  }
+  if (value.projection) {
+    fields.push(["projection", value.projection]);
+  }
+  console.log("FIELDS", fields);
+  return fields;
 }
 
 export function simpleValueFromValue(
@@ -243,6 +270,9 @@ export function simpleValueFromValue(
         case "relativeValues":
           fields.push(["fn", value.value.fn]);
           fields.push(["ids", [...value.value.ids]]);
+          break;
+        case "vega":
+          fields.concat(vegaPlotToSimpleValues(value.value));
           break;
       }
       return ImmutableMap(fields);

@@ -581,22 +581,26 @@ Plot.scatter({
       makeDefinition(
         [
           frDict(
-            ["spec", frAny()],
             ["data", frAny()],
+            ["height", frOptional(frNumber)],
             ["config", frOptional(frAny())],
             ["mark", frOptional(frAny())],
             ["encoding", frOptional(frAny())],
-            ["height", frOptional(frAny())],
             ["view", frOptional(frAny())],
             ["projection", frOptional(frAny())]
           ),
         ],
         frPlot,
-        ([{ spec, data }]) => {
+        ([{ data, config, mark, encoding, height, view, projection }]) => {
           return {
             type: "vega",
-            spec: simpleValueFromValue(spec, true),
             data: simpleValueFromValue(data, true),
+            config: config && simpleValueFromValue(config, true),
+            mark: mark && simpleValueFromValue(mark, true),
+            encoding: encoding && simpleValueFromValue(encoding, true),
+            height: height || undefined,
+            view: view && simpleValueFromValue(view, true),
+            projection: projection && simpleValueFromValue(projection, true),
           };
         }
       ),

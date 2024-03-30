@@ -62,12 +62,7 @@ widgetRegistry.register("Plot", {
           <RelativeValuesGridChart plot={plot} environment={environment} />
         );
       case "vega": {
-        const data = {
-          width: "container",
-          height: 300,
-          data: JSON.parse(plot.data),
-          ...JSON.parse(plot.spec),
-        };
+        const data = JSON.parse(plot.spec);
         return vega(data);
       }
       default:
