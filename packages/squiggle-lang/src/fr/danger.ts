@@ -552,7 +552,6 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
   maker.make({
     name: "yTransform",
     examples: [makeFnExample(`Danger.yTransform(PointSet(Sym.normal(5,2)))`)],
-    output: "Dist",
     displaySection: "Math",
     definitions: [
       makeDefinition([frDistPointset], frDistPointset, ([dist]) => {
