@@ -291,6 +291,13 @@ export class MixedShape implements PointSet<MixedShape> {
         );
     }
   }
+  yTransform(): MixedShape {
+    const continuous = this.continuous.yTransform();
+    const discrete = this.discrete.yTransform();
+    return Result.getExt(
+      combinePointwise(continuous, discrete, (v1, v2) => Result.Ok(v1 + v2))
+    );
+  }
 }
 
 export const combineAlgebraically = (
