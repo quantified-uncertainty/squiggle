@@ -50,7 +50,7 @@ function mergeDiscrete(shape: readonly [number, number][]): [number, number][] {
 export function yTransformDiscrete(shape: XYShape): XYShape {
   const pointMap = new Map<number, number>();
 
-  for (const [_, y] of T.zip(shape)) {
+  for (const [, y] of T.zip(shape)) {
     if (y !== 0) {
       pointMap.set(y, (pointMap.get(y) || 0) + y);
     }
