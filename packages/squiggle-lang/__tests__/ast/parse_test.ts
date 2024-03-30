@@ -144,17 +144,14 @@ describe("Peggy parse", () => {
   });
 
   describe("multi-line", () => {
-    testParse("x=1; 2", "(Program (LetStatement :x (Block 1)) 2)");
-    testParse(
-      "x=1; y=2",
-      "(Program (LetStatement :x (Block 1)) (LetStatement :y (Block 2)))"
-    );
+    testParse("x=1; 2", "(Program (LetStatement :x 1) 2)");
+    testParse("x=1; y=2", "(Program (LetStatement :x 1) (LetStatement :y 2))");
   });
 
   describe("variables", () => {
-    testParse("x = 1", "(Program (LetStatement :x (Block 1)))");
+    testParse("x = 1", "(Program (LetStatement :x 1))");
     testParse("x", "(Program :x)");
-    testParse("x = 1; x", "(Program (LetStatement :x (Block 1)) :x)");
+    testParse("x = 1; x", "(Program (LetStatement :x 1) :x)");
     testEvalError("X = 1");
     testEvalError("Foo.bar = 1");
   });
@@ -162,13 +159,13 @@ describe("Peggy parse", () => {
   describe("functions", () => {
     testParse(
       "identity(x) = x",
-      "(Program (DefunStatement :identity (Lambda :x (Block :x))))"
+      "(Program (DefunStatement :identity (Lambda :x :x)))"
     ); // Function definitions become lambda assignments
     testParse("identity(x)", "(Program (Call :identity :x))");
 
     testParse(
       "annotated(x: [3,5]) = x",
-      "(Program (DefunStatement :annotated (Lambda (IdentifierWithAnnotation x (Array 3 5)) (Block :x))))"
+      "(Program (DefunStatement :annotated (Lambda (IdentifierWithAnnotation x (Array 3 5)) :x)))"
     );
   });
 
@@ -245,10 +242,7 @@ describe("Peggy parse", () => {
   });
 
   describe("if then else", () => {
-    testParse(
-      "if true then 2 else 3",
-      "(Program (Ternary true (Block 2) (Block 3)))"
-    );
+    testParse("if true then 2 else 3", "(Program (Ternary true 2 3))");
     testParse(
       "if false then {2} else {3}",
       "(Program (Ternary false (Block 2) (Block 3)))"
@@ -423,32 +417,32 @@ describe("Peggy parse", () => {
     // Like lambdas they have a local scope.
     testParse(
       "x={y=1; y}; x",
-      "(Program (LetStatement :x (Block (LetStatement :y (Block 1)) :y)) :x)"
+      "(Program (LetStatement :x (Block (LetStatement :y 1) :y)) :x)"
     );
   });
 
   describe("lambda", () => {
     testParse("{|x| x}", "(Program (Lambda :x :x))");
     testParse("f={|x| x}", "(Program (LetStatement :f (Lambda :x :x)))");
-    testParse("f(x)=x", "(Program (DefunStatement :f (Lambda :x (Block :x))))"); // Function definitions are lambda assignments
+    testParse("f(x)=x", "(Program (DefunStatement :f (Lambda :x :x)))"); // Function definitions are lambda assignments
     testParse(
       "f(x)=x ? 1 : 0",
-      "(Program (DefunStatement :f (Lambda :x (Block (Ternary :x 1 0)))))"
+      "(Program (DefunStatement :f (Lambda :x (Ternary :x 1 0))))"
     ); // Function definitions are lambda assignments
   });
 
   describe("Using lambda as value", () => {
     testParse(
       "myadd(x,y)=x+y; z=myadd; z",
-      "(Program (DefunStatement :myadd (Lambda :x :y (Block (InfixCall + :x :y)))) (LetStatement :z (Block :myadd)) :z)"
+      "(Program (DefunStatement :myadd (Lambda :x :y (InfixCall + :x :y))) (LetStatement :z :myadd) :z)"
     );
     testParse(
       "myadd(x,y)=x+y; z=[myadd]; z",
-      "(Program (DefunStatement :myadd (Lambda :x :y (Block (InfixCall + :x :y)))) (LetStatement :z (Block (Array :myadd))) :z)"
+      "(Program (DefunStatement :myadd (Lambda :x :y (InfixCall + :x :y))) (LetStatement :z (Array :myadd)) :z)"
     );
     testParse(
       "myaddd(x,y)=x+y; z={x: myaddd}; z",
-      "(Program (DefunStatement :myaddd (Lambda :x :y (Block (InfixCall + :x :y)))) (LetStatement :z (Block (Dict (KeyValue 'x' :myaddd)))) :z)"
+      "(Program (DefunStatement :myaddd (Lambda :x :y (InfixCall + :x :y))) (LetStatement :z (Dict (KeyValue 'x' :myaddd))) :z)"
     );
     testParse(
       "f({|x| x+1})",
@@ -486,8 +480,8 @@ describe("Peggy parse", () => {
   });
 
   describe("Exports", () => {
-    testParse("export x = 5", "(Program (LetStatement export :x (Block 5)))");
-    testParse("exportx = 5", "(Program (LetStatement :exportx (Block 5)))");
+    testParse("export x = 5", "(Program (LetStatement export :x 5))");
+    testParse("exportx = 5", "(Program (LetStatement :exportx 5))");
   });
 
   describe("Decorators", () => {
@@ -503,7 +497,7 @@ x = 5
 @baz
 f(x) = x
 `,
-      "(Program (DecoratedStatement (Decorator :foo) (DecoratedStatement (Decorator :bar 1 2) (DecoratedStatement (Decorator :baz) (LetStatement :x (Block 5))))) (DecoratedStatement (Decorator :foo) (DecoratedStatement (Decorator :bar 1 2) (DecoratedStatement (Decorator :baz) (DefunStatement :f (Lambda :x (Block :x)))))))"
+      "(Program (DecoratedStatement (Decorator :foo) (DecoratedStatement (Decorator :bar 1 2) (DecoratedStatement (Decorator :baz) (LetStatement :x 5)))) (DecoratedStatement (Decorator :foo) (DecoratedStatement (Decorator :bar 1 2) (DecoratedStatement (Decorator :baz) (DefunStatement :f (Lambda :x :x))))))"
     );
   });
 });
@@ -519,13 +513,13 @@ describe("Parsing new line", () => {
     `
  x=
  1`,
-    "(Program (LetStatement :x (Block 1)))"
+    "(Program (LetStatement :x 1))"
   );
   testParse(
     `
  x=1
  y=2`,
-    "(Program (LetStatement :x (Block 1)) (LetStatement :y (Block 2)))"
+    "(Program (LetStatement :x 1) (LetStatement :y 2))"
   );
   testParse(
     `
@@ -533,7 +527,7 @@ describe("Parsing new line", () => {
   y=2;
   y }
  x`,
-    "(Program (LetStatement :x (Block (LetStatement :y (Block 2)) :y)) :x)"
+    "(Program (LetStatement :x (Block (LetStatement :y 2) :y)) :x)"
   );
   testParse(
     `
@@ -541,7 +535,7 @@ describe("Parsing new line", () => {
   y=2
   y }
  x`,
-    "(Program (LetStatement :x (Block (LetStatement :y (Block 2)) :y)) :x)"
+    "(Program (LetStatement :x (Block (LetStatement :y 2) :y)) :x)"
   );
   testParse(
     `
@@ -550,7 +544,7 @@ describe("Parsing new line", () => {
   y 
   }
  x`,
-    "(Program (LetStatement :x (Block (LetStatement :y (Block 2)) :y)) :x)"
+    "(Program (LetStatement :x (Block (LetStatement :y 2) :y)) :x)"
   );
   testParse(
     `
@@ -558,7 +552,7 @@ describe("Parsing new line", () => {
  y=2
  z=3
  `,
-    "(Program (LetStatement :x (Block 1)) (LetStatement :y (Block 2)) (LetStatement :z (Block 3)))"
+    "(Program (LetStatement :x 1) (LetStatement :y 2) (LetStatement :z 3))"
   );
   testParse(
     `
@@ -569,7 +563,7 @@ describe("Parsing new line", () => {
   x+y+z
  }
  `,
-    "(Program (LetStatement :f (Block (LetStatement :x (Block 1)) (LetStatement :y (Block 2)) (LetStatement :z (Block 3)) (InfixCall + (InfixCall + :x :y) :z))))"
+    "(Program (LetStatement :f (Block (LetStatement :x 1) (LetStatement :y 2) (LetStatement :z 3) (InfixCall + (InfixCall + :x :y) :z))))"
   );
   testParse(
     `
@@ -582,7 +576,7 @@ describe("Parsing new line", () => {
  g=f+4
  g
  `,
-    "(Program (LetStatement :f (Block (LetStatement :x (Block 1)) (LetStatement :y (Block 2)) (LetStatement :z (Block 3)) (InfixCall + (InfixCall + :x :y) :z))) (LetStatement :g (Block (InfixCall + :f 4))) :g)"
+    "(Program (LetStatement :f (Block (LetStatement :x 1) (LetStatement :y 2) (LetStatement :z 3) (InfixCall + (InfixCall + :x :y) :z))) (LetStatement :g (InfixCall + :f 4)) :g)"
   );
   testParse(
     `
@@ -604,7 +598,7 @@ describe("Parsing new line", () => {
   p ->
   q 
  `,
-    "(Program (LetStatement :f (Block (LetStatement :x (Block 1)) (LetStatement :y (Block 2)) (LetStatement :z (Block 3)) (InfixCall + (InfixCall + :x :y) :z))) (LetStatement :g (Block (InfixCall + :f 4))) (Pipe (Pipe (Pipe :g :h) :p) :q))"
+    "(Program (LetStatement :f (Block (LetStatement :x 1) (LetStatement :y 2) (LetStatement :z 3) (InfixCall + (InfixCall + :x :y) :z))) (LetStatement :g (InfixCall + :f 4)) (Pipe (Pipe (Pipe :g :h) :p) :q))"
   );
   testParse(
     `

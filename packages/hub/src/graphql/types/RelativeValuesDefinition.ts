@@ -48,6 +48,9 @@ export const RelativeValuesDefinition = builder.prismaNode(
         },
         resolve: (model) => {
           const result = model.owner.user ?? model.owner.group;
+          if (!result) {
+            throw new Error("Invalid owner object, missing user or group");
+          }
           (result as any)["_owner"] = {
             type: model.owner.user ? "User" : "Group",
           };

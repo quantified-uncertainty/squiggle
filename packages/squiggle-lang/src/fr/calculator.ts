@@ -34,7 +34,6 @@ const validateCalculator = (calc: Calculator): Calculator => {
 export const library = [
   maker.make({
     name: "make",
-    output: "Calculator",
     examples: [
       makeFnExample(
         `Calculator.make(

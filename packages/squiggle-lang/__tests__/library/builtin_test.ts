@@ -24,7 +24,7 @@ describe("Operators", () => {
     testEvalToBe('"" == false', "false");
     testEvalToBe("[1,2,3,5] == [1,2,3,5]", "true");
     testEvalToBe("[1,2,3] == [1,2,3,5]", "false");
-    testEvalToBe("[1,2,3,8] == [1,2,3,5]", "false", true);
+    testEvalToBe("[1,2,3,8] == [1,2,3,5]", "false");
     testEvalToBe("normal(5,2) == normal(5,2)", "false");
     testEvalToBe("Sym.normal(5,2) == Sym.normal(5,2)", "true");
     testEvalToBe("Sym.uniform(10,12) == Sym.normal(5,2)", "false");
@@ -64,5 +64,10 @@ describe("Operators", () => {
     testEvalToBe("not(0)", "true");
     testEvalToBe("!(0)", "true");
     testEvalToBe("!(false)", "true");
+  });
+
+  describe("try", () => {
+    testEvalToBe("try({|| 2+2}, {||0})", "4");
+    testEvalToBe("try({|| 2+''}, {||3})", "3");
   });
 });

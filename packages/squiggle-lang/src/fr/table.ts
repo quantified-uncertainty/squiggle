@@ -20,7 +20,6 @@ const maker = new FnFactory({
 export const library = [
   maker.make({
     name: "make",
-    output: "TableChart",
     examples: [
       makeFnExample(
         `Table.make(

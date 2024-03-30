@@ -83,7 +83,6 @@ const baseLibrary = [
     name: "make",
     description:
       "Calls the correct conversion constructor, based on the corresponding input type, to create a sample set distribution",
-    output: "Dist",
     examples: [
       makeFnExample(`SampleSet(5)`),
       makeFnExample(`SampleSet.make([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`),
@@ -117,7 +116,6 @@ const baseLibrary = [
         `SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`
       ),
     ],
-    output: "Dist",
     definitions: [fromList],
   }),
   maker.make({
@@ -128,7 +126,6 @@ const baseLibrary = [
     ],
     description:
       "Gets the internal samples of a sampleSet distribution. This is separate from the ``sampleN()`` function, which would shuffle the samples. ``toList()`` maintains order and length.",
-    output: "Array",
     definitions: [
       makeDefinition([frSampleSetDist], frArray(frNumber), ([dist]) => {
         return dist.samples;
@@ -141,7 +138,6 @@ const baseLibrary = [
     description:
       "Convert a function into a sample set distribution by calling it ``n`` times.",
     examples: [makeFnExample(`SampleSet.fromFn({|i| sample(normal(5,2))})`)],
-    output: "Dist",
     definitions: [fromFnDefinition],
   }),
   maker.make({
@@ -153,7 +149,6 @@ const baseLibrary = [
       ),
     ],
     description: `Transforms a sample set distribution by applying a function to each sample. Returns a new sample set distribution.`,
-    output: "Dist",
     definitions: [
       makeDefinition(
         [frSampleSetDist, frNamed("fn", frLambdaTyped([frNumber], frNumber))],
@@ -178,7 +173,6 @@ const baseLibrary = [
   {|x, y| x + y}
 )`),
     ],
-    output: "Dist",
     displaySection: "Transformations",
     definitions: [
       makeDefinition(
@@ -213,7 +207,6 @@ const baseLibrary = [
   {|x, y, z| max([x,y,z])}
 )`),
     ],
-    output: "Dist",
     displaySection: "Transformations",
     definitions: [
       makeDefinition(
@@ -259,7 +252,6 @@ const baseLibrary = [
   max
 )`),
     ],
-    output: "Dist",
     displaySection: "Transformations",
     definitions: [
       makeDefinition(
@@ -302,7 +294,6 @@ const mkComparison = (
       makeFnExample(`SampleSet.${name}(SampleSet.fromDist(normal(5,2)), 3.0)`),
       makeFnExample(`SampleSet.${name}(4.0, SampleSet.fromDist(normal(6,2)))`),
     ],
-    output: "Dist",
     definitions: [
       makeDefinition(
         [frSampleSetDist, frOr(frNumber, frSampleSetDist)],

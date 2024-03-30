@@ -17,7 +17,6 @@ const makeUnitFn = (
   format?: string
 ) => {
   return maker.make({
-    output: "Number",
     name: "fromUnit_" + shortName,
     description: `Unit conversion from ${fullName}.`,
     examples: [makeFnExample(`3${shortName} // ${3 * multiplier}`)],
