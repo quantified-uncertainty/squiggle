@@ -1,9 +1,10 @@
-import { REThrow } from "../errors/messages.js";
+import { ErrorMessage, REThrow } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
   frBool,
+  frLambdaTyped,
   frNamed,
   frOptional,
   frString,
@@ -80,6 +81,32 @@ myFn = typeOf({|e| e})`,
             throw new REThrow(value);
           } else {
             throw new REThrow("Common.throw() was called");
+          }
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "try",
+    description:
+      "Try to run a function and return its result. If the function throws an error, return the result of the fallback function instead.",
+    definitions: [
+      makeDefinition(
+        [
+          frNamed("fn", frLambdaTyped([], frAny({ genericName: "A" }))),
+          // in the future, this function could be called with the error message
+          frNamed("fallbackFn", frLambdaTyped([], frAny({ genericName: "A" }))),
+        ],
+        frAny({ genericName: "A" }),
+        ([fn, fallbackFn], reducer) => {
+          try {
+            return reducer.call(fn, []);
+          } catch (e) {
+            if (!(e instanceof ErrorMessage)) {
+              // This doesn't looks like an error in user code, treat it as fatal
+              throw e;
+            }
+            return reducer.call(fallbackFn, []);
           }
         }
       ),

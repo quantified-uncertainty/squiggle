@@ -101,7 +101,6 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
     examples: [makeFnExample("Danger.now()")],
     requiresNamespace: true,
     displaySection: "Javascript",
-    output: "Date",
     definitions: [
       makeDefinition([], frDate, () => {
         return SDate.now();
@@ -123,7 +122,6 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
   }),
   maker.make({
     name: "binomial",
-    output: "Number",
     displaySection: "Combinatorics",
     description: `\`Danger.binomial(n, k, p)\` returns \`choose((n, k)) * pow(p, k) * pow(1 - p, n - k)\`, i.e., the probability that an event of probability p will happen exactly k times in n draws.`,
     examples: [makeFnExample(`Danger.binomial(1, 20, 0.5)`)],
@@ -212,7 +210,6 @@ const integrationLibrary: FRFunction[] = [
   maker.make({
     name: "integrateFunctionBetweenWithNumIntegrationPoints",
     requiresNamespace: false,
-    output: "Number",
     displaySection: "Integration",
     examples: [
       makeFnExample(
@@ -266,7 +263,6 @@ Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, nu
   maker.make({
     name: "integrateFunctionBetweenWithEpsilon",
     requiresNamespace: false,
-    output: "Number",
     displaySection: "Integration",
     examples: [
       makeFnExample(
@@ -316,7 +312,6 @@ const findBiggestElementIndex = (xs: number[]) =>
 const diminishingReturnsLibrary = [
   maker.make({
     name: "optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions",
-    output: "Array",
     requiresNamespace: false,
     examples: [
       makeFnExample(`Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(

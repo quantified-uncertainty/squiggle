@@ -101,6 +101,7 @@ expressionWithoutParens[@isGroup="Expression"] {
         | expression !rel    LogicOp<"<=">  expression
         | expression !rel    LogicOp<">=">  expression
         | expression !rel    LogicOp<"==">  expression
+        | expression !rel    LogicOp<"!=">  expression
         | expression !times  ( ArithOp<"*"> | DotArithOp<".*"> )                expression
         | expression !times  ( ArithOp<"/"> | DotArithOp<"./"> )                expression
         | expression !exp    ( ArithOp<"^"> | DotArithOp<".^"> )                expression

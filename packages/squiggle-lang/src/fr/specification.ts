@@ -16,7 +16,6 @@ const maker = new FnFactory({
 export const library = [
   maker.make({
     name: "make",
-    output: "Specification",
     description: "Create a specification.",
     examples: [
       makeFnExample(

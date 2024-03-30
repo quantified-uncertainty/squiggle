@@ -3,7 +3,6 @@ import invert from "lodash/invert.js";
 
 import { infixFunctions, unaryFunctions } from "../../ast/peggyHelpers.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
-import { Value } from "../../value/index.js";
 import {
   FnDefinition,
   fnDefinitionToString,
@@ -12,7 +11,7 @@ import {
 
 type Shorthand = { type: "infix" | "unary"; symbol: string };
 
-type example = {
+type Example = {
   text: string;
   isInteractive: boolean;
   useForTests: boolean;
@@ -21,7 +20,7 @@ type example = {
 export function makeFnExample(
   text: string,
   params: { isInteractive?: boolean; useForTests?: boolean } = {}
-): example {
+): Example {
   const { isInteractive = false, useForTests = true } = params;
   return { text, isInteractive, useForTests };
 }
@@ -31,8 +30,7 @@ export type FRFunction = {
   nameSpace: string;
   requiresNamespace: boolean;
   definitions: FnDefinition[];
-  output?: Value["type"];
-  examples?: example[];
+  examples?: Example[];
   description?: string;
   isExperimental?: boolean;
   isUnit?: boolean;
@@ -47,20 +45,7 @@ function organizedExamples(f: FRFunction) {
 
 type FnNameDict = Map<string, FnDefinition[]>;
 
-export type FnDocumentation = Pick<
-  FRFunction,
-  | "description"
-  | "requiresNamespace"
-  | "nameSpace"
-  | "definitions"
-  | "name"
-  | "examples"
-  | "isExperimental"
-  | "isUnit"
-  | "shorthand"
-  | "displaySection"
-  | "versionAdded"
-> & { signatures: string[] };
+export type FnDocumentation = FRFunction & { signatures: string[] };
 
 export class Registry {
   private constructor(
@@ -96,7 +81,7 @@ export class Registry {
     return new Registry(fns, dict);
   }
 
-  allExamplesWithFns(): { fn: FRFunction; example: example }[] {
+  allExamplesWithFns(): { fn: FRFunction; example: Example }[] {
     return this.functions
       .map((fn) => {
         return organizedExamples(fn).map((example) => ({ fn, example }));
