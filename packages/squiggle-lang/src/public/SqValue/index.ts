@@ -337,7 +337,6 @@ export class SqPlotValue extends SqAbstractValue<"Plot", unknown, SqPlot> {
     return valueToJSON(this._value);
   }
 }
-
 export class SqTableChartValue extends SqAbstractValue<
   "TableChart",
   unknown,

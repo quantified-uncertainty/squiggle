@@ -530,7 +530,7 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
     ],
     definitions: [
       makeDefinition([frAny()], frAny(), ([v]) => {
-        return simpleValueToValue(simpleValueFromValue(v));
+        return simpleValueToValue(simpleValueFromValue(v, false));
       }),
     ],
   }),
@@ -548,7 +548,7 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
     definitions: [
       makeDefinition([frAny()], frString, ([v]) => {
         return JSON.stringify(
-          simpleValueToJson(removeLambdas(simpleValueFromValue(v)))
+          simpleValueToJson(removeLambdas(simpleValueFromValue(v, false)))
         );
       }),
     ],

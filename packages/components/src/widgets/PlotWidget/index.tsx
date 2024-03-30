@@ -25,7 +25,7 @@ widgetRegistry.register("Plot", {
     const environment = value.context.project.getEnvironment();
 
     switch (plot.tag) {
-      case "distributions": {
+      case "distributions":
         return (
           <DistributionsChart
             plot={plot}
@@ -33,8 +33,7 @@ widgetRegistry.register("Plot", {
             height={settings.chartHeight * CHART_TO_DIST_HEIGHT_ADJUSTMENT}
           />
         );
-      }
-      case "numericFn": {
+      case "numericFn":
         return (
           <NumericFunctionChart
             plot={plot}
@@ -43,8 +42,7 @@ widgetRegistry.register("Plot", {
             xCount={settings.functionChartSettings.count}
           />
         );
-      }
-      case "distFn": {
+      case "distFn":
         return (
           <DistFunctionChart
             plot={plot}
@@ -57,7 +55,6 @@ widgetRegistry.register("Plot", {
             xCount={settings.functionChartSettings.count}
           />
         );
-      }
       case "scatter":
         return (
           <ScatterChart
@@ -70,9 +67,8 @@ widgetRegistry.register("Plot", {
         return (
           <RelativeValuesGridChart plot={plot} environment={environment} />
         );
-      case "vega": {
+      case "vega":
         return vega(JSON.parse(plot.spec));
-      }
       default:
         // can happen if squiggle-lang version is too fresh and we messed up the components -> squiggle-lang dependency
         return `Unsupported plot ${plot satisfies never}`;
