@@ -1,3 +1,4 @@
+import { epsilon_float } from "../../src/magicNumbers.js";
 import { Range, XYShape } from "../../src/XYShape.js";
 import {
   convertToRectangles,
@@ -88,7 +89,7 @@ describe("yTransformContinuous", () => {
 
     const expected = {
       continuous: {
-        xs: [1, 1, 2, 2],
+        xs: [1, 1 + epsilon_float, 2, 2 + epsilon_float],
         ys: [0, 3, 3, 0],
       },
       discrete: {
@@ -113,7 +114,7 @@ describe("yTransformContinuous", () => {
 
     const expected = {
       continuous: {
-        xs: [1, 1, 2, 2],
+        xs: [1, 1 + epsilon_float, 2, 2 + epsilon_float],
         ys: [0, 1.5, 1.5, 0],
       },
       discrete: {
@@ -163,7 +164,16 @@ describe("yTransformContinuous", () => {
 
     const expected = {
       continuous: {
-        xs: [0, 0, 1, 1, 5, 5, 8, 8],
+        xs: [
+          0,
+          0 + epsilon_float,
+          1,
+          1 + epsilon_float,
+          5,
+          5 + epsilon_float,
+          8,
+          8 + epsilon_float,
+        ],
         ys: [0, 1, 1, 2, 2, 0.5, 0.5, 0],
       },
       discrete: {

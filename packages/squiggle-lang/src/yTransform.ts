@@ -1,3 +1,5 @@
+import { epsilon_float } from "./magicNumbers.js";
+import { pairwise } from "./utility/E_A.js";
 import { T, XYShape } from "./XYShape.js";
 
 export type Rectangle = { x1: number; x2: number; y: number };
@@ -9,11 +11,7 @@ export function convertToRectangles(shape: XYShape): {
   const rectangles: Rectangle[] = [];
   const discrete: [number, number][] = [];
 
-  for (let i = 0; i < shape.xs.length - 1; i++) {
-    const x1 = shape.xs[i];
-    const x2 = shape.xs[i + 1];
-    const y1 = shape.ys[i];
-    const y2 = shape.ys[i + 1];
+  pairwise(T.zip(shape), ([x1, y1], [x2, y2]) => {
     if (y1 === y2) {
       discrete.push([y1, x2 - x1]);
     } else {
@@ -23,13 +21,17 @@ export function convertToRectangles(shape: XYShape): {
       const triangularArea = 0.5 * Math.abs(dx) * Math.abs(dy); //This part is often ~minisule.
       const mass = rectangularArea + triangularArea;
 
+      if (y1 > y2) {
+        // Ensure that y1 is the smaller value
+        [y1, y2] = [y2, y1];
+      }
       rectangles.push({
-        x1: Math.min(y1, y2),
-        x2: Math.max(y1, y2),
+        x1: y1,
+        x2: y2,
         y: mass / dy,
       });
     }
-  }
+  });
 
   return { continuous: rectangles, discrete };
 }
@@ -76,7 +78,7 @@ function mergeRectanglesWithoutOverlap(
   for (let i = 0; i < keys.length; i++) {
     result.push([keys[i], y]);
     y += map.get(keys[i])!;
-    result.push([keys[i], y]);
+    result.push([keys[i] + epsilon_float, y]); // Add epsilon float because XYShape does not allow duplicate x-values
   }
 
   if (result.length) {
