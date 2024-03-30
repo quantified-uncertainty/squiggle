@@ -548,7 +548,6 @@ Plot.scatter({
   }),
   maker.make({
     name: "vega",
-    output: "Plot",
     examples: [
       makeFnExample(
         `xDist = SampleSet.fromDist(2 to 5)
