@@ -1,4 +1,5 @@
-import { Vega, VisualizationSpec } from "react-vega";
+import { lazy, Suspense } from "react";
+import { VisualizationSpec } from "react-vega";
 
 import { DistributionsChart } from "../DistWidget/DistributionsChart.js";
 import { CHART_TO_DIST_HEIGHT_ADJUSTMENT } from "../DistWidget/index.js";
@@ -8,7 +9,15 @@ import { widgetRegistry } from "../registry.js";
 import { RelativeValuesGridChart } from "./RelativeValuesGridChart/index.js";
 import { ScatterChart } from "./ScatterChart/index.js";
 
-const vega = (spec: VisualizationSpec) => <Vega spec={spec} />;
+const VegaLazy = lazy(() =>
+  import("react-vega").then((module) => ({ default: module.Vega }))
+);
+
+const vega = (spec: VisualizationSpec) => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <VegaLazy spec={spec} />
+  </Suspense>
+);
 
 widgetRegistry.register("Plot", {
   Chart: (value, settings) => {
@@ -62,8 +71,7 @@ widgetRegistry.register("Plot", {
           <RelativeValuesGridChart plot={plot} environment={environment} />
         );
       case "vega": {
-        const data = JSON.parse(plot.spec);
-        return vega(data);
+        return vega(JSON.parse(plot.spec));
       }
       default:
         // can happen if squiggle-lang version is too fresh and we messed up the components -> squiggle-lang dependency
