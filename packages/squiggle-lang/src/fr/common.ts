@@ -71,7 +71,7 @@ myFn = typeOf({|e| e})`,
   maker.make({
     name: "throw",
     description:
-      "Throws a fatal error. There is no way in the language to catch this error.",
+      "Throws an error. You can use `try` to recover from this error.",
     definitions: [
       makeDefinition(
         [frOptional(frNamed("message", frString))],

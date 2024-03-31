@@ -257,6 +257,10 @@ Tags can be added to variables either by using their name \`Tag.get[Name]\` or b
 | \`format\` | Format a number, date, or duration when displayed. |
 | \`notebook\` | Formats lists as notebooks. |
 | \`hide\` | Don't show the variable in the playground |
+| \`startOpen\` | Start the variable open in the playground |
+| \`startClosed\` | Start the variable closed in the playground |
+| \`location\` | Store the proper location. Helps when you want to locate code corresponding to a variable. |
+| \`exportData\` | Metadata about exported variables. Cannot be added manually. |
 
 ## Example
 <SquiggleEditor
