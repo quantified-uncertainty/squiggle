@@ -7,6 +7,7 @@ import {
   frLambdaTyped,
   frNamed,
   frOptional,
+  frOr,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
@@ -95,18 +96,18 @@ myFn = typeOf({|e| e})`,
         [
           frNamed("fn", frLambdaTyped([], frAny({ genericName: "A" }))),
           // in the future, this function could be called with the error message
-          frNamed("fallbackFn", frLambdaTyped([], frAny({ genericName: "A" }))),
+          frNamed("fallbackFn", frLambdaTyped([], frAny({ genericName: "B" }))),
         ],
-        frAny({ genericName: "A" }),
+        frOr(frAny({ genericName: "A" }), frAny({ genericName: "B" })),
         ([fn, fallbackFn], reducer) => {
           try {
-            return reducer.call(fn, []);
+            return { tag: "1", value: reducer.call(fn, []) };
           } catch (e) {
             if (!(e instanceof ErrorMessage)) {
               // This doesn't looks like an error in user code, treat it as fatal
               throw e;
             }
-            return reducer.call(fallbackFn, []);
+            return { tag: "2", value: reducer.call(fallbackFn, []) };
           }
         }
       ),
