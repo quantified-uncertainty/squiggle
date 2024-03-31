@@ -41,6 +41,7 @@ export function useZoomedOutSqValueKeyEvent(selected: SqValuePath) {
     },
     Enter: () => {
       setZoomedInPath(selected);
+      itemStore.focusByPath(selected);
     },
     " ": () => {
       toggleCollapsed(itemStore, selected);

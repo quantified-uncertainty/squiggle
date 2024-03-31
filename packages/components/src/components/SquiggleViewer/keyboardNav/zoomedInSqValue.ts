@@ -24,12 +24,14 @@ export function useZoomedInSqValueKeyEvent(selected: SqValuePath) {
       const newPath = findNode(selected)?.nextSibling()?.node.path;
       if (newPath) {
         setZoomedInPath(newPath);
+        itemStore.focusByPath(newPath);
       }
     },
     ArrowUp: () => {
       const newPath = findNode(selected)?.prevSibling()?.node.path;
       if (newPath) {
         setZoomedInPath(newPath);
+        itemStore.focusByPath(newPath);
       }
     },
     ArrowLeft: () => {
