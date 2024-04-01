@@ -2,8 +2,6 @@ import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { CodeBracketIcon } from "@quri/ui";
-
 import { EntityCard } from "@/components/EntityCard";
 import { ExportsDropdown, totalImportLength } from "@/lib/ExportsDropdown";
 import { modelRoute } from "@/routes";
@@ -70,7 +68,6 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
 
   return (
     <EntityCard
-      icon={CodeBracketIcon}
       updatedAtTimestamp={model.updatedAtTimestamp}
       href={modelUrl}
       showOwner={showOwner}
@@ -78,23 +75,18 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
       ownerName={model.owner.slug}
       slug={model.slug}
     >
-      {_totalImportLength > 0 && (
+      {_totalImportLength > 0 ? (
         <ExportsDropdown
           modelExports={modelExports}
           relativeValuesExports={relativeValuesExports}
           owner={model.owner.slug}
           slug={model.slug}
         >
-          <div className="flex">
-            <div className="cursor-pointer group items-center flex hover:bg-slate-200 text-slate-500 rounded-md px-1 py-1 text-xs">
-              <span className="mr-1.5 text-xs text-slate-700 bg-slate-200 group-hover:bg-slate-300 px-1 py-0.25 text-center rounded-full">
-                {_totalImportLength}
-              </span>
-              Exports
-            </div>
+          <div className="cursor-pointer items-center flex text-xs text-gray-500 hover:text-gray-900 hover:underline">
+            {`${_totalImportLength} exports`}
           </div>
         </ExportsDropdown>
-      )}
+      ) : null}
     </EntityCard>
   );
 };
