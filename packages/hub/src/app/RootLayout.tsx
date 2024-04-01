@@ -7,7 +7,7 @@ import { FC, PropsWithChildren } from "react";
 import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { isModelRoute, isModelSubroute } from "@/routes";
+import { isModelRoute } from "@/routes";
 
 import { PageFooter } from "../components/layout/RootLayout/PageFooter";
 import { PageMenu } from "../components/layout/RootLayout/PageMenu";
@@ -29,7 +29,7 @@ const InnerRootLayout: FC<PropsWithChildren> = ({ children }) => {
   const pathname = usePathname();
 
   const showFooter = !isModelRoute(pathname);
-  const backgroundColor = isModelSubroute(pathname) ? "bg-white" : "bg-gray-50";
+  const backgroundColor = "bg-white";
 
   return (
     <div className={clsx("min-h-screen flex flex-col", backgroundColor)}>
