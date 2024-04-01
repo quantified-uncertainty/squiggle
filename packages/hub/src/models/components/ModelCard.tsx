@@ -75,7 +75,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
       ownerName={model.owner.slug}
       slug={model.slug}
     >
-      {_totalImportLength > 0 ? (
+      {_totalImportLength > 0 && (
         <ExportsDropdown
           modelExports={modelExports}
           relativeValuesExports={relativeValuesExports}
@@ -86,7 +86,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
             {`${_totalImportLength} exports`}
           </div>
         </ExportsDropdown>
-      ) : null}
+      )}
     </EntityCard>
   );
 };
