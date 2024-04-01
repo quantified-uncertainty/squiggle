@@ -36,6 +36,10 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
       isPrivate: t.input.boolean({
         description: "Defaults to false",
       }),
+      seed: t.input.string({
+        required: true,
+        description: "A unique seed, used for calculation",
+      }),
     },
     resolve: async (_, { input }, { session }) => {
       const model = await prisma.$transaction(async (tx) => {
@@ -67,6 +71,7 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
               create: {
                 code: input.code,
                 version: input.version,
+                seed: input.seed,
               },
             },
             author: {

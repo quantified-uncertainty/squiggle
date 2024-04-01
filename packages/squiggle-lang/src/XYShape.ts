@@ -166,7 +166,7 @@ export const T = {
   isEqual(t1: XYShape, t2: XYShape): boolean {
     return E_A.isEqual(t1.xs, t2.xs) && E_A.isEqual(t1.ys, t2.ys);
   },
-  fromZippedArray(pairs: [number, number][]): XYShape {
+  fromZippedArray(pairs: readonly [number, number][]): XYShape {
     return T.fromArray(E_A.unzip(pairs));
   },
   equallyDividedXs(t: XYShape, newLength: number): number[] {
@@ -250,6 +250,28 @@ export const T = {
   makeFromZipped(values: readonly (readonly [number, number])[]) {
     const [xs, ys] = E_A.unzip(values);
     return T.make(xs, ys);
+  },
+
+  removeConsecutiveDuplicates(shape: XYShape): XYShape {
+    const uniqueXs: number[] = [];
+    const uniqueYs: number[] = [];
+
+    let prevX: number | null = null;
+    let prevY: number | null = null;
+
+    for (let i = 0; i < shape.xs.length; i++) {
+      const currentX = shape.xs[i];
+      const currentY = shape.ys[i];
+
+      if (currentX !== prevX || currentY !== prevY) {
+        uniqueXs.push(currentX);
+        uniqueYs.push(currentY);
+        prevX = currentX;
+        prevY = currentY;
+      }
+    }
+
+    return { xs: uniqueXs, ys: uniqueYs };
   },
 };
 
@@ -639,4 +661,128 @@ export const Analysis = {
     const meanOfSquares = getMeanOfSquares(t);
     return meanOfSquares - meanSquared;
   },
+};
+
+type XYShapeSubset = {
+  points: [number, number][];
+  segments: XYShape[];
+};
+
+type ComparisonType =
+  | "greaterThan"
+  | "lesserThan"
+  | "equals"
+  | "greaterThanOrEqual"
+  | "lessThanOrEqual";
+
+/**
+  This function extracts a subset of the input shape that satisfies the comparison condition with the threshold.
+  It uses linear interpolation to find the exact points where the condition is satisfied.
+  Right now, we only use the `greaterThan` comparison type, for getting the Support of continuous distributions, but we can improve this in the future.
+  It assumes the shape uses linear interpolation.
+  Note that if you want to use the result as a distribution, you will have to combine the segments somehow. They don't have surrounding points at 0 yet, so you can't just add them together.
+*/
+export const extractSubsetThatSatisfiesThreshold = (
+  shape: XYShape,
+  comparisonType: ComparisonType,
+  threshold: number
+): XYShapeSubset => {
+  const comparisonIsSatisfied = (y: number, threshold: number): boolean => {
+    switch (comparisonType) {
+      case "greaterThan":
+        return y > threshold;
+      case "lesserThan":
+        return y < threshold;
+      case "equals":
+        return Math.abs(y - threshold) < Number.EPSILON;
+      case "greaterThanOrEqual":
+        return y >= threshold;
+      case "lessThanOrEqual":
+        return y <= threshold;
+    }
+  };
+
+  const points: [number, number][] = [];
+  let segments: XYShape[] = [];
+
+  let currentSegment: XYShape | null = null;
+
+  //Assumes linear interpolation
+  function interpolateXAtThreshold(
+    x1: number,
+    x2: number,
+    y1: number,
+    y2: number
+  ) {
+    return x1 + ((threshold - y1) * (x2 - x1)) / (y2 - y1);
+  }
+
+  T.zip(shape).forEach(([x1, y1], i) => {
+    if (i === shape.xs.length - 1) {
+      if (currentSegment) {
+        segments.push(currentSegment);
+      }
+      return;
+    }
+
+    const x2 = shape.xs[i + 1];
+    const y2 = shape.ys[i + 1];
+
+    if (
+      comparisonIsSatisfied(y1, threshold) &&
+      comparisonIsSatisfied(y2, threshold)
+    ) {
+      if (!currentSegment) {
+        currentSegment = { xs: [x1], ys: [y1] };
+      }
+      currentSegment.xs.push(x2);
+      currentSegment.ys.push(y2);
+    } else if (
+      !comparisonIsSatisfied(y1, threshold) &&
+      comparisonIsSatisfied(y2, threshold)
+    ) {
+      const x = interpolateXAtThreshold(x1, x2, y1, y2);
+      if (!currentSegment) {
+        currentSegment = { xs: [x], ys: [threshold] };
+      }
+      currentSegment.xs.push(x2);
+      currentSegment.ys.push(y2);
+    } else if (
+      comparisonIsSatisfied(y1, threshold) &&
+      !comparisonIsSatisfied(y2, threshold)
+    ) {
+      const x = interpolateXAtThreshold(x1, x2, y1, y2);
+      if (currentSegment) {
+        currentSegment.xs.push(x);
+        currentSegment.ys.push(threshold);
+        segments.push(currentSegment);
+        currentSegment = null;
+      }
+    } else if (currentSegment) {
+      segments.push(currentSegment);
+      currentSegment = null;
+    }
+
+    if (
+      comparisonType === "equals" &&
+      y1 !== y2 &&
+      ((y1 < threshold && y2 > threshold) || (y1 > threshold && y2 < threshold))
+    ) {
+      const x = interpolateXAtThreshold(x1, x2, y1, y2);
+      points.push([x, threshold]);
+    }
+  });
+
+  segments = segments.map(T.removeConsecutiveDuplicates);
+  segments.forEach((segment) => {
+    if (T.length(segment) === 1) {
+      points.push([segment.xs[0], segment.ys[0]]);
+    }
+  });
+  segments = segments.filter((segment) => T.length(segment) > 1);
+
+  return {
+    points: sortBy(points, ([x]) => x),
+    segments,
+  };
 };

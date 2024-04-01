@@ -43,6 +43,9 @@ export const Model = builder.prismaNode("Model", {
       },
       resolve: (model) => {
         const result = model.owner.user ?? model.owner.group;
+        if (!result) {
+          throw new Error("Invalid owner object, missing user or group");
+        }
         // necessary for Owner type
         (result as any)["_owner"] = {
           type: model.owner.user ? "User" : "Group",

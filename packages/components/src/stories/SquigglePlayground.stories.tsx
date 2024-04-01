@@ -31,6 +31,16 @@ export const HeightAndScroll: Story = {
   },
 };
 
+export const AutorunFalse: Story = {
+  name: "Autorun=false",
+  args: {
+    autorunMode: false,
+    defaultCode:
+      "List.upTo(1,10) -> map({|i| i to i + 1})" + new Array(100).join("\n"),
+    height: 400,
+  },
+};
+
 export const Slow: Story = {
   name: "Slow Code",
   args: {
@@ -352,5 +362,37 @@ s = 4 to 10
 fn2 = {|e| e} 
 
 y = x -> Tag.getAll`,
+  },
+};
+
+export const Specification: Story = {
+  name: "Specification",
+  args: {
+    defaultCode: `validate(fn) = {
+      errors = List.upTo(2020, 2030)
+        -> List.map(
+          {|e| [Date(e), typeOf(fn(Date(e))) == "Distribution"]}
+        )
+        -> List.filter(
+          {|e| true}
+        )
+      "Has errors!"
+    }
+    
+    spec = Spec.make(
+      {
+        name: "Stock market over time",
+        documentation: "Stock market over time",
+        validate: validate,
+      }
+    )
+    
+    fn(t: [Date(2020), Date(2030)]) = {
+      yearsDiff = toYears(t - Date(2020))
+      normal(yearsDiff, yearsDiff + 0.1)
+    }
+    
+    withSpec = fn -> Tag.spec(spec)
+  `,
   },
 };

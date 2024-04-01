@@ -35,6 +35,10 @@ const SquiggleSnippetContentInput = builder.inputType(
     fields: (t) => ({
       code: t.string({ required: true }),
       version: t.string({ required: true }),
+      seed: t.string({ required: true }),
+      autorunMode: t.boolean({ required: false }),
+      sampleCount: t.int({ required: false }),
+      xyPointLength: t.int({ required: false }),
     }),
   }
 );
@@ -144,6 +148,10 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
               create: {
                 code: input.content.code,
                 version: input.content.version,
+                seed: input.content.seed,
+                autorunMode: input.content.autorunMode ?? null,
+                sampleCount: input.content.sampleCount ?? null,
+                xyPointLength: input.content.xyPointLength ?? null,
               },
             },
             contentType: "SquiggleSnippet",

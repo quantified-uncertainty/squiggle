@@ -56,6 +56,7 @@ export {
   SqRelativeValuesPlot,
   SqScatterPlot,
 } from "./public/SqValue/SqPlot.js";
+export { SqSpecification } from "./public/SqValue/SqSpecification.js";
 export { SqTableChart } from "./public/SqValue/SqTableChart.js";
 export { SqCalculator } from "./public/SqValue/SqCalculator.js";
 export { SqDict } from "./public/SqValue/SqDict.js";
@@ -130,3 +131,5 @@ export {
   SCALE_POWER_DEFAULT_CONSTANT,
   SCALE_SYMLOG_DEFAULT_CONSTANT,
 } from "./value/VScale.js";
+
+export { generateSeed } from "./utility/seedGenerator.js";

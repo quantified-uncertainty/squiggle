@@ -8,8 +8,15 @@
     "noEmit": true,
     "isolatedModules": true,
     "jsx": "preserve",
+    // Next.js doesn't support project references, so composite is not useful, and enabling `composite`, won't allow us to disable `declaration`
+    "composite": false,
     "incremental": true,
-    "allowJs": true // enforced by Next.js
+    // Since noEmit is enabled, these two options won't affect anything, but they help with "likely not portable" errors in VS Code.
+    // https://github.com/microsoft/TypeScript/issues/42873#issuecomment-1766987305
+    "declaration": false,
+    "declarationMap": false,
+    // enforced by Next.js
+    "allowJs": true
   },
   // otherwise `next dev` would enforce it
   "exclude": ["node_modules"]

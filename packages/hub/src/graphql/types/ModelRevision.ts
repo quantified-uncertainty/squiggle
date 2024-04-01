@@ -23,6 +23,18 @@ import { SquiggleSnippet } from "./SquiggleSnippet";
 //   name: "ModelExportConnection",
 // });
 
+export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
+  id: { field: "id" },
+  fields: (t) => ({
+    code: t.exposeString("code"),
+    version: t.exposeString("version"),
+    seed: t.exposeString("seed"),
+    autorunMode: t.exposeBoolean("autorunMode", { nullable: true }),
+    sampleCount: t.exposeInt("sampleCount", { nullable: true }),
+    xyPointLength: t.exposeInt("xyPointLength", { nullable: true }),
+  }),
+});
+
 // TODO - turn into interface?
 const ModelContent: UnionRef<
   {
@@ -59,7 +71,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
       async resolve(revision) {
         switch (revision.contentType) {
           case "SquiggleSnippet":
-            return revision.squiggleSnippet;
+            return revision.squiggleSnippet!;
         }
       },
     }),

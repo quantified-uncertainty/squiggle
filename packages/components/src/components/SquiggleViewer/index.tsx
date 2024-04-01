@@ -76,7 +76,7 @@ export type SquiggleViewerProps = {
 } & PartialPlaygroundSettings;
 
 //This needs to be inside the ViewerProvider. This is why it's separated from the component.
-const SquiggleViewerWithoutProvider: FC<
+export const SquiggleViewerWithoutProvider: FC<
   Omit<SquiggleViewerProps, "sourceId" | "sqOutput">
 > = ({ value }) => {
   const { zoomedInPath } = useViewerContext();

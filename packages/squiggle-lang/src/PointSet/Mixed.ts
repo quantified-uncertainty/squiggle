@@ -1,3 +1,4 @@
+import { MixedSet } from "../utility/MixedSet.js";
 import * as Result from "../utility/result.js";
 import * as XYShape from "../XYShape.js";
 import * as Common from "./Common.js";
@@ -171,6 +172,13 @@ export class MixedShape implements PointSet<MixedShape> {
     return XYShape.YtoX.linear(this.integral().xyShape, f);
   }
 
+  support() {
+    return new MixedSet(
+      this.discrete.support().points,
+      this.continuous.support().segments
+    );
+  }
+
   // This pipes all ys (continuous and discrete) through fn.
   // If mapY is a linear operation, we might be able to update the integralSumCaches as well;
   // if not, they'll be set to None.
@@ -282,6 +290,13 @@ export class MixedShape implements PointSet<MixedShape> {
           (t) => getMeanOfSquares(t)
         );
     }
+  }
+  yTransform(): MixedShape {
+    const continuous = this.continuous.yTransform();
+    const discrete = this.discrete.yTransform();
+    return Result.getExt(
+      combinePointwise(continuous, discrete, (v1, v2) => Result.Ok(v1 + v2))
+    );
   }
 }
 

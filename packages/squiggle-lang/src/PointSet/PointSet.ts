@@ -1,6 +1,7 @@
 import * as Continuous from "../PointSet/Continuous.js";
 import * as Discrete from "../PointSet/Discrete.js";
 import * as Mixed from "../PointSet/Mixed.js";
+import { MixedSet } from "../utility/MixedSet.js";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
 import { ContinuousShape } from "./Continuous.js";
@@ -57,6 +58,8 @@ export interface PointSet<T> {
 
   mean(): number;
   variance(): number;
+  yTransform(): MixedShape;
+  support(): MixedSet;
 }
 
 export const combinePointwise = <E>(

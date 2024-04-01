@@ -83,6 +83,9 @@ export class PointSetDist extends BaseDist {
   cdf(f: number) {
     return this.pointSet.integralXtoY(f);
   }
+  support() {
+    return this.pointSet.support();
+  }
 
   toPointSetDist(): Result.result<PointSetDist, DistError> {
     // TODO: If env.xyPointLength is different from what it has, it should change.
@@ -113,6 +116,10 @@ export class PointSetDist extends BaseDist {
       this.pointSet.mapYResult(fn, integralSumCacheFn, integralCacheFn),
       (pointSet) => new PointSetDist(pointSet)
     );
+  }
+
+  yTransform(): PointSetDist {
+    return new PointSetDist(this.pointSet.yTransform());
   }
 }
 

@@ -13,6 +13,7 @@ import { VLambda } from "./vLambda.js";
 import { VNumber } from "./VNumber.js";
 import { VPlot } from "./VPlot.js";
 import { VScale } from "./VScale.js";
+import { VSpecification } from "./VSpecification.js";
 import { VString } from "./VString.js";
 import { VTableChart } from "./VTableChart.js";
 import { VVoid } from "./VVoid.js";
@@ -51,6 +52,7 @@ export type Value =
   | VScale
   | VInput
   | VDomain
+  | VSpecification
   | VVoid;
 
 export function isEqual(a: Value, b: Value): boolean {
@@ -67,6 +69,7 @@ export function isEqual(a: Value, b: Value): boolean {
     case "Scale":
     case "Domain":
     case "Array":
+    case "Specification":
     case "Dict":
       return a.isEqual(b as any);
     case "Void":

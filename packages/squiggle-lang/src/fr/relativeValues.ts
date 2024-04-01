@@ -29,7 +29,6 @@ const relativeValuesShape = frDict(
 export const library = [
   maker.make({
     name: "gridPlot",
-    output: "Plot",
     examples: [
       makeFnExample(
         `RelativeValues.gridPlot({

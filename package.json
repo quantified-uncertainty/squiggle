@@ -10,9 +10,9 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
-    "prettier": "^3.2.4",
-    "turbo": "^1.12.2",
-    "turbo-ignore": "^1.12.2"
+    "prettier": "^3.2.5",
+    "turbo": "^1.13.0",
+    "turbo-ignore": "^1.13.0"
   },
   "version": "0.0.1-0"
 }

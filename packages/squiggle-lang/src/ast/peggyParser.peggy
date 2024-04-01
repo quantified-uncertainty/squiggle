@@ -8,8 +8,6 @@ start
   = _nl start:outerBlock _nl finalComment?
     { return start; }
 
-zeroOMoreArgumentsBlockOrExpression = lambda / innerBlockOrExpression
-
 outerBlock
   = imports:importStatementsList
     statements:statementsList
@@ -35,7 +33,6 @@ importStatement
 innerBlockOrExpression
   = quotedInnerBlock
   / finalExpression:expression
-    { return h.nodeBlock([finalExpression], location()); }
 
 quotedInnerBlock
   = '{' _nl
@@ -75,7 +72,7 @@ statement
   / defunStatement
 
 letStatement
-  = exported:("export" __nl)? variable:dollarIdentifier _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
+  = exported:("export" __nl)? variable:dollarIdentifier _ assignmentOp _nl value:innerBlockOrExpression
     { return h.nodeLetStatement(variable, value, Boolean(exported), location()); }
 
 defunStatement

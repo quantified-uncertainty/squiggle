@@ -211,8 +211,7 @@ model ModelRevision {
   // optional until we populate old rows after migration
   author   User?   @relation(fields: [authorId], references: [id])
   authorId String?
-
-  comment String @default("")
+  comment  String  @default("")
 
   contentType ModelType
 
@@ -231,8 +230,12 @@ model ModelRevision {
 model SquiggleSnippet {
   id String @id @default(cuid())
 
-  code    String
-  version String
+  code          String
+  version       String
+  seed          String
+  autorunMode   Boolean?
+  sampleCount   Int?
+  xyPointLength Int?
 
   revision ModelRevision?
 }

@@ -10,6 +10,7 @@ import { CodeBracketIcon, CommentIcon, LinkIcon, TextTooltip } from "@quri/ui";
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
+import { SpecificationDropdown } from "../../widgets/SpecificationWidget.js";
 import { useProjectContext } from "../ProjectProvider.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
@@ -284,25 +285,15 @@ export const ValueWithContextViewer: FC<Props> = ({
     }
   };
 
-  // Store the header reference for the future `focusOnHeader()` handle, and auto-focus zoomed in values on mount.
-  const setHeaderRef = useCallback(
-    (el: HTMLElement | null) => {
-      headerRef.current = el;
-
-      // If `isZoomedIn` toggles from `false` to `true`, this callback identity will change and it will update the focus.
-      if (isZoomedIn) {
-        focusOnHeader();
-      }
-    },
-    [isZoomedIn, focusOnHeader]
-  );
-
   return (
     <ErrorBoundary>
       <div ref={containerRef}>
         {headerVisibility !== "hide" && (
           <header
-            ref={setHeaderRef}
+            ref={(el) => {
+              // Store the header reference for the future `focusOnHeader()` handle
+              headerRef.current = el;
+            }}
             tabIndex={viewerType === "tooltip" ? undefined : 0}
             className={clsx(
               "flex justify-between group pr-0.5 hover:bg-stone-100 rounded-sm focus-visible:outline-none",
@@ -328,6 +319,7 @@ export const ValueWithContextViewer: FC<Props> = ({
               {!isOpen && <CommentIconForValue value={value} />}
             </div>
             <div className="inline-flex space-x-2 items-center">
+              <SpecificationDropdown value={value} />
               {enableDropdownMenu && <SquiggleValueMenu value={value} />}
               {exportData && exportData.path.length < 2 && onOpenExport && (
                 <TextTooltip

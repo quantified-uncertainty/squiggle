@@ -31,6 +31,7 @@ import {
 import { EditModelExports } from "@/components/exports/EditModelExports";
 import { ReactRoot } from "@/components/ReactRoot";
 import { FormModal } from "@/components/ui/FormModal";
+import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/constants";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { useMutationForm } from "@/hooks/useMutationForm";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
@@ -151,6 +152,10 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
               id
               code
               version
+              seed
+              autorunMode
+              sampleCount
+              xyPointLength
             }
           }
           exports {
@@ -182,6 +187,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     revision.content,
     "SquiggleSnippet"
   );
+
+  const seed = content.seed;
 
   const initialFormValues: SquiggleSnippetFormShape = useMemo(() => {
     return {
@@ -232,6 +239,10 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
         content: {
           code: formData.code,
           version,
+          seed: seed,
+          autorunMode: content.autorunMode,
+          sampleCount: content.sampleCount,
+          xyPointLength: content.xyPointLength,
         },
         relativeValuesExports: formData.relativeValuesExports,
         exports: formData.exports,
@@ -307,6 +318,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     typeof squiggle.components.SquigglePlayground
   >[0] = {
     defaultCode,
+    autorunMode: content.autorunMode ?? true,
     sourceId: serializeSourceId({
       owner: model.owner.slug,
       slug: model.slug,
@@ -398,6 +410,12 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       form.setValue("exports", exports);
     };
   }
+
+  playgroundProps.environment = {
+    sampleCount: content.sampleCount || SAMPLE_COUNT_DEFAULT,
+    xyPointLength: content.xyPointLength || XY_POINT_LENGTH_DEFAULT,
+    seed: seed,
+  };
 
   if (
     versionSupportsOnOpenExport.propsByVersion<"SquigglePlayground">(

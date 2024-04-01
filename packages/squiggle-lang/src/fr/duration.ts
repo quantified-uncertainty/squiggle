@@ -21,7 +21,6 @@ const makeNumberToDurationFn = (
   maker.make({
     name,
     examples: [makeFnExample(`Duration.${name}(5)`)],
-    output: "Duration",
     definitions: [makeDefinition([frNumber], frDuration, ([t]) => fn(t))],
     isUnit,
     displaySection,
@@ -35,7 +34,6 @@ const makeDurationToNumberFn = (
   maker.make({
     name,
     examples: [makeFnExample(`Duration.${name}(5minutes)`)],
-    output: "Number",
     displaySection,
     definitions: [makeDefinition([frDuration], frNumber, ([t]) => fn(t))],
   });
@@ -70,7 +68,6 @@ export const library = [
   ),
   maker.make({
     name: "unaryMinus",
-    output: "Duration",
     examples: [makeFnExample("-5minutes")],
     displaySection: "Algebra",
     definitions: [
@@ -79,7 +76,6 @@ export const library = [
   }),
   maker.make({
     name: "add",
-    output: "Duration",
     examples: [makeFnExample("5minutes + 10minutes")],
     displaySection: "Algebra",
     definitions: [
@@ -90,7 +86,6 @@ export const library = [
   }),
   maker.make({
     name: "subtract",
-    output: "Duration",
     examples: [makeFnExample("5minutes - 10minutes")],
     displaySection: "Algebra",
     definitions: [
@@ -101,7 +96,6 @@ export const library = [
   }),
   maker.make({
     name: "multiply",
-    output: "Duration",
     examples: [makeFnExample("5minutes * 10"), makeFnExample("10 * 5minutes")],
     displaySection: "Algebra",
     definitions: [
@@ -115,7 +109,6 @@ export const library = [
   }),
   maker.make({
     name: "divide",
-    output: "Number",
     displaySection: "Algebra",
     examples: [makeFnExample("5minutes / 2minutes")],
     definitions: [
@@ -126,7 +119,6 @@ export const library = [
   }),
   maker.make({
     name: "divide",
-    output: "Duration",
     displaySection: "Algebra",
     examples: [makeFnExample("5minutes / 3")],
     definitions: [

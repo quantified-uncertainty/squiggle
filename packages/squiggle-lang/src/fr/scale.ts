@@ -53,7 +53,6 @@ function checkMinMaxDates(min: SDate | null, max: SDate | null) {
 export const library = [
   maker.make({
     name: "linear",
-    output: "Scale",
     examples: [makeFnExample(`Scale.linear({ min: 3, max: 10 })`)],
     displaySection: "Numeric Scales",
     definitions: [
@@ -79,7 +78,6 @@ export const library = [
   }),
   maker.make({
     name: "log",
-    output: "Scale",
     examples: [makeFnExample(`Scale.log({ min: 1, max: 100 })`)],
     displaySection: "Numeric Scales",
     definitions: [
@@ -108,7 +106,6 @@ export const library = [
   }),
   maker.make({
     name: "symlog",
-    output: "Scale",
     examples: [makeFnExample(`Scale.symlog({ min: -10, max: 10 })`)],
     displaySection: "Numeric Scales",
     description: `Symmetric log scale. Useful for plotting data that includes zero or negative values.
@@ -151,7 +148,6 @@ The default value for \`constant\` is \`${0.0001}\`.`, // I tried to set this to
   }),
   maker.make({
     name: "power",
-    output: "Scale",
     examples: [
       makeFnExample(`Scale.power({ min: 1, max: 100, exponent: 0.1 })`),
     ],
@@ -194,7 +190,6 @@ The default value for \`exponent\` is \`${0.1}\`.`,
   }),
   maker.make({
     name: "date",
-    output: "Scale",
     displaySection: "Date Scales",
     examples: [
       makeFnExample("Scale.date({ min: Date(2022), max: Date(2025) })"),

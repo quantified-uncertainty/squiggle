@@ -1,11 +1,13 @@
 import { epsilon_float } from "../magicNumbers.js";
 import { PRNG } from "../rng/index.js";
 import { random_sample } from "../utility/math.js";
+import { MixedSet } from "../utility/MixedSet.js";
 import * as Result from "../utility/result.js";
 import * as XYShape from "../XYShape.js";
+import { yTransformDiscrete } from "../yTransform.js";
 import * as Common from "./Common.js";
 import * as Continuous from "./Continuous.js";
-import { ContinuousShape } from "./Continuous.js";
+import { ContinuousShape, empty as continuousEmpty } from "./Continuous.js";
 import { MixedShape } from "./Mixed.js";
 import * as MixedPoint from "./MixedPoint.js";
 import {
@@ -231,6 +233,19 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
       (t) => t.mean(),
       (t) => t.shapeMap(XYShape.T.square).mean()
     );
+  }
+
+  yTransform(): MixedShape {
+    return new MixedShape({
+      discrete: new DiscreteShape({
+        xyShape: yTransformDiscrete(this.xyShape),
+      }),
+      continuous: continuousEmpty(),
+    });
+  }
+
+  support() {
+    return MixedSet.fromDiscreteDistShape(this.xyShape);
   }
 }
 
