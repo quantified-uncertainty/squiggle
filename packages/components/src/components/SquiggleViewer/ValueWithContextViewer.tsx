@@ -164,7 +164,7 @@ export const ValueWithContextViewer: FC<Props> = ({
   const viewerType = useViewerType();
   const scrollEditorToPath = useScrollToEditorPath(path);
 
-  const { itemStore, zoomedInPath } = useViewerContext();
+  const { itemStore, zoomedInPath, visibleRootPath } = useViewerContext();
   const isZoomedIn = zoomedInPath?.isEqual(path);
   const itemState = itemStore.getStateOrInitialize(value);
 
@@ -184,7 +184,8 @@ export const ValueWithContextViewer: FC<Props> = ({
     headerVisibility === "hide" ? false : props.collapsible ?? true;
   const size = props.size ?? "normal";
   const enableDropdownMenu = viewerType !== "tooltip";
-  const enableFocus = viewerType !== "tooltip";
+  const enableFocus =
+    viewerType !== "tooltip" && !visibleRootPath?.isEqual(path);
 
   // TODO - check that we're not in a situation where `isOpen` is false and `header` is hidden?
   // In that case, the output would look broken (empty).

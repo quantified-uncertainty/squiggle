@@ -32,7 +32,7 @@ const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
 };
 
 function viewerTabTitle(mode: ViewerTab): string {
-  if (typeof mode === "object" && mode.tag === "CustomResultPath") {
+  if (typeof mode === "object" && mode.tag === "CustomVisibleRootPath") {
     return "Custom Path"; // Not used yet, as header is not shown yet when this mode is used.
   } else {
     return mode as string;

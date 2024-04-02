@@ -283,9 +283,13 @@ export class SqValuePath {
     });
   }
 
+  rootPath() {
+    return this.slice(0);
+  }
+
   allPrefixPaths() {
     return new SqValuePathList([
-      this.slice(0),
+      this.rootPath(),
       ...this.edges.map((_, i) => this.slice(i + 1)),
     ]);
   }

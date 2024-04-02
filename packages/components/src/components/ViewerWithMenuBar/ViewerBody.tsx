@@ -5,7 +5,7 @@ import { SquiggleErrorAlert } from "../../index.js";
 import {
   ViewerTab,
   viewerTabToValue,
-  viewerTabToVisiblePath,
+  viewerTabToVisibleRootPath,
 } from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
@@ -68,12 +68,12 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
         partialPlaygroundSettings={playgroundSettings}
         editor={editor}
         ref={viewerRef}
+        visibleRootPath={viewerTabToVisibleRootPath(viewerTab)}
         rootValue={
           outputResult.ok
             ? viewerTabToValue(viewerTab, outputResult)
             : undefined
         }
-        visibleRootPath={viewerTabToVisiblePath(viewerTab)}
       >
         <ErrorBoundary>{body()}</ErrorBoundary>
       </ViewerProvider>

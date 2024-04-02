@@ -1,7 +1,6 @@
 import { FC, forwardRef, memo } from "react";
 
-import { SqValue, SqValuePath } from "@quri/squiggle-lang";
-import { ChevronRightIcon } from "@quri/ui";
+import { SqValue } from "@quri/squiggle-lang";
 
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
@@ -12,54 +11,9 @@ import { ValueViewer } from "./ValueViewer.js";
 import {
   SquiggleViewerHandle,
   useViewerContext,
-  useZoomIn,
-  useZoomOut,
   ViewerProvider,
 } from "./ViewerProvider.js";
-
-const ZoomedInNavigationItem: FC<{
-  text: string;
-  onClick: () => void;
-}> = ({ text, onClick }) => (
-  <div className="flex items-center">
-    <span
-      onClick={onClick}
-      className="text-sm text-stone-500 hover:text-stone-900 hover:underline font-mono cursor-pointer"
-    >
-      {text}
-    </span>
-    <ChevronRightIcon className="text-slate-300" size={24} />
-  </div>
-);
-
-const ZoomedInNavigation: FC<{
-  zoomedInPath: SqValuePath;
-  visibleRootPath?: SqValuePath | undefined;
-}> = ({ zoomedInPath, visibleRootPath }) => {
-  const zoomOut = useZoomOut();
-  const zoomIn = useZoomIn();
-
-  const paths = visibleRootPath
-    ? zoomedInPath
-        .allPrefixPaths()
-        .difference(visibleRootPath.allPrefixPaths())
-        .withoutRoot().paths
-    : zoomedInPath.allPrefixPaths().withoutRoot().paths;
-
-  return (
-    <div className="flex items-center">
-      <ZoomedInNavigationItem onClick={zoomOut} text="Home" />
-
-      {paths.slice(0, -1).map((path, i) => (
-        <ZoomedInNavigationItem
-          key={i}
-          onClick={() => zoomIn(path)}
-          text={path.lastItem()?.toDisplayString() || ""}
-        />
-      ))}
-    </div>
-  );
-};
+import { ZoomedInNavigation } from "./ZoomedInNavigation.js";
 
 export type SquiggleViewerProps = {
   value: SqValue;
