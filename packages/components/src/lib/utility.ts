@@ -132,6 +132,23 @@ export function defaultViewerTab(
   return outputResult.value.result.tag !== "Void" ? "Result" : "Variables";
 }
 
+export function viewerTabToVisiblePath(
+  viewerTab: ViewerTab
+): SqValuePath | undefined {
+  switch (viewerTab) {
+    case "Result":
+    case "Variables":
+    case "Imports":
+    case "Exports":
+    case "AST":
+      return undefined;
+    default:
+      if (isCustomResultPath(viewerTab)) {
+        return viewerTab.value;
+      }
+  }
+}
+
 export function viewerTabToValue(
   viewerTab: ViewerTab,
   output: SqOutputResult
@@ -153,11 +170,9 @@ export function viewerTabToValue(
       return undefined;
     default:
       if (isCustomResultPath(viewerTab)) {
-        const rootValue =
-          viewerTab.value.root === "result"
-            ? output.value.result
-            : output.value.bindings.asValue();
-        return rootValue.getSubvalueByPath(viewerTab.value, () => undefined);
+        return viewerTab.value.root === "result"
+          ? output.value.result
+          : output.value.bindings.asValue();
       }
   }
 }

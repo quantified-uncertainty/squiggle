@@ -165,6 +165,28 @@ function astOffsetToPathEdges(ast: ASTNode, offset: number): SqValuePathEdge[] {
   return buildRemainingPathEdges(ast);
 }
 
+export class SqValuePathList {
+  constructor(public paths: SqValuePath[]) {}
+
+  difference(other: SqValuePathList | undefined): SqValuePathList {
+    if (other) {
+      return new SqValuePathList(
+        this.paths.filter(
+          (path) => !other.paths.some((otherPath) => path.isEqual(otherPath))
+        )
+      );
+    } else {
+      return this;
+    }
+  }
+
+  withoutRoot(): SqValuePathList {
+    return new SqValuePathList(
+      this.paths.filter((path) => path.edges.length > 0)
+    );
+  }
+}
+
 export class SqValuePath {
   public root: ValuePathRoot;
   public edges: SqValuePathEdge[];
@@ -254,24 +276,17 @@ export class SqValuePath {
     return true;
   }
 
-  allPrefixPaths({ includeRoot = false }) {
-    const root = new SqValuePath({
+  slice(end: number): SqValuePath {
+    return new SqValuePath({
       root: this.root,
-      edges: [],
+      edges: this.edges.slice(0, end),
     });
+  }
 
-    const leafs = [];
-    const currentEdges = [];
-    for (const edge of this.edges) {
-      currentEdges.push(edge);
-      leafs.push(
-        new SqValuePath({
-          root: this.root,
-          edges: [...currentEdges],
-        })
-      );
-    }
-
-    return includeRoot ? [root, ...leafs] : leafs;
+  allPrefixPaths() {
+    return new SqValuePathList([
+      this.slice(0),
+      ...this.edges.map((_, i) => this.slice(i + 1)),
+    ]);
   }
 }

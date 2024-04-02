@@ -52,10 +52,17 @@ export function traverseCalculatorEdge(
 
 // This needs to be a hook because it relies on ItemStore to traverse calculator nodes in path.
 export function useGetSubvalueByPath() {
-  const { itemStore } = useViewerContext();
+  const { itemStore, rootValue } = useViewerContext();
 
-  return (topValue: SqValue, subValuePath: SqValuePath): SqValue | undefined =>
-    topValue.getSubvalueByPath(subValuePath, traverseCalculatorEdge(itemStore));
+  return (subValuePath: SqValuePath): SqValue | undefined => {
+    return (
+      rootValue &&
+      rootValue.getSubvalueByPath(
+        subValuePath,
+        traverseCalculatorEdge(itemStore)
+      )
+    );
+  };
 }
 
 export function getValueComment(value: SqValueWithContext): string | undefined {

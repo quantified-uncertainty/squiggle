@@ -168,7 +168,7 @@ export class ItemStore {
   }
 
   focusByPath(path: SqValuePath) {
-    const pathPrefixes = path.allPrefixPaths({ includeRoot: false });
+    const pathPrefixes = path.allPrefixPaths().withoutRoot().paths;
     pathPrefixes.pop(); // We allow the focusedPath to be collapsed, just not its parents.
     for (const prefix of pathPrefixes) {
       this.setState(prefix, (state) => ({
@@ -196,6 +196,7 @@ type ViewerContextShape = {
   initialized: boolean;
   handle: SquiggleViewerHandle;
   rootValue?: SqValueWithContext;
+  visibleRootPath?: SqValuePath;
   findNode: (path: SqValuePath) => SqListViewNode | undefined;
 };
 
@@ -211,6 +212,7 @@ export const ViewerContext = createContext<ViewerContextShape>({
   },
   initialized: false,
   rootValue: undefined,
+  visibleRootPath: undefined,
   findNode: () => undefined,
 });
 
@@ -365,6 +367,7 @@ type Props = PropsWithChildren<{
   editor?: CodeEditorHandle;
   viewerType?: ViewerType;
   rootValue: SqValue | undefined;
+  visibleRootPath?: SqValuePath;
 }>;
 
 export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
@@ -374,6 +377,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       editor,
       viewerType = "normal",
       rootValue,
+      visibleRootPath,
       children,
     },
     ref
@@ -415,6 +419,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       <ViewerContext.Provider
         value={{
           rootValue: _rootValue,
+          visibleRootPath,
           globalSettings,
           editor,
           zoomedInPath,

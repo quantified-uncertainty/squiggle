@@ -34,38 +34,29 @@ const ZoomedInNavigationItem: FC<{
 
 const ZoomedInNavigation: FC<{
   zoomedInPath: SqValuePath;
-  rootPath?: SqValuePath | undefined;
-}> = ({ zoomedInPath, rootPath }) => {
+  visibleRootPath?: SqValuePath | undefined;
+}> = ({ zoomedInPath, visibleRootPath }) => {
   const zoomOut = useZoomOut();
   const zoomIn = useZoomIn();
 
-  const isZoomedInOnRootPath = rootPath && rootPath.isEqual(zoomedInPath);
-
-  if (isZoomedInOnRootPath) {
-    return null;
-  }
-
-  // If we're zoomedIn on the root path override, we need to adjust the zoomedIn path accordingly when presenting the navigation, so that it begins with the root path intead. This is a bit confusing.
-  const rootPathZoomedInAdjustment = rootPath?.edges.length
-    ? rootPath.edges.length - 1
-    : 0;
+  const paths = visibleRootPath
+    ? zoomedInPath
+        .allPrefixPaths()
+        .difference(visibleRootPath.allPrefixPaths())
+        .withoutRoot().paths
+    : zoomedInPath.allPrefixPaths().withoutRoot().paths;
 
   return (
     <div className="flex items-center">
-      {!rootPath?.edges.length && (
-        <ZoomedInNavigationItem onClick={zoomOut} text="Home" />
-      )}
+      <ZoomedInNavigationItem onClick={zoomOut} text="Home" />
 
-      {zoomedInPath
-        .allPrefixPaths({ includeRoot: false })
-        .slice(rootPathZoomedInAdjustment, -1)
-        .map((path, i) => (
-          <ZoomedInNavigationItem
-            key={i}
-            onClick={() => zoomIn(path)}
-            text={path.edges[i + rootPathZoomedInAdjustment].toDisplayString()}
-          />
-        ))}
+      {paths.slice(0, -1).map((path, i) => (
+        <ZoomedInNavigationItem
+          key={i}
+          onClick={() => zoomIn(path)}
+          text={path.lastItem()?.toDisplayString() || ""}
+        />
+      ))}
     </div>
   );
 };
@@ -79,35 +70,43 @@ export type SquiggleViewerProps = {
 export const SquiggleViewerWithoutProvider: FC<
   Omit<SquiggleViewerProps, "sourceId" | "sqOutput">
 > = ({ value }) => {
-  const { zoomedInPath } = useViewerContext();
+  const { zoomedInPath, visibleRootPath } = useViewerContext();
 
   const getSubvalueByPath = useGetSubvalueByPath();
 
-  let zoomedInItem: SqValue | undefined;
   if (zoomedInPath) {
-    zoomedInItem = getSubvalueByPath(value, zoomedInPath);
-  }
-
-  return zoomedInPath ? (
-    <div className="space-y-3 pl-3">
-      <ZoomedInNavigation
-        zoomedInPath={zoomedInPath}
-        rootPath={value.context?.path}
-      />
-      {zoomedInItem ? (
-        <ValueViewer
-          value={zoomedInItem}
-          collapsible={false}
-          header="large"
-          size="large"
+    const zoomedInItem = getSubvalueByPath(zoomedInPath);
+    return (
+      <div className="space-y-3 pl-3">
+        <ZoomedInNavigation
+          zoomedInPath={zoomedInPath}
+          visibleRootPath={visibleRootPath}
         />
-      ) : (
-        <MessageAlert heading="ZoomedIn variable is not defined" />
-      )}
-    </div>
-  ) : (
-    <ValueViewer value={value} size="large" />
-  );
+        {zoomedInItem ? (
+          <ValueViewer
+            value={zoomedInItem}
+            collapsible={false}
+            header="large"
+            size="large"
+          />
+        ) : (
+          <MessageAlert heading="ZoomedIn variable is not defined" />
+        )}
+      </div>
+    );
+  } else if (visibleRootPath) {
+    const visibleValue = getSubvalueByPath(visibleRootPath);
+    return visibleValue ? (
+      <ValueViewer
+        value={visibleValue}
+        size="large"
+        header="large"
+        collapsible={false}
+      />
+    ) : null;
+  } else {
+    return <ValueViewer value={value} size="large" />;
+  }
 };
 
 const component = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
