@@ -89,6 +89,11 @@ export const SquiggleViewerWithoutProvider: FC<
     zoomedInItem = getRootSubvalueByPath(zoomedInPath);
   }
 
+  const showLarge = zoomedInItem || value.context?.path.edges.length || 0 > 0;
+  const size = showLarge ? "large" : "normal";
+  const collapsible = !showLarge;
+
+  //TODO: If pathOverride, then we want to show the path overridden item instead.
   return zoomedInPath ? (
     <div className="space-y-3 pl-3">
       <ZoomedInNavigation
@@ -99,7 +104,7 @@ export const SquiggleViewerWithoutProvider: FC<
         <ValueViewer
           value={zoomedInItem}
           collapsible={false}
-          header="large"
+          header="normal"
           size="large"
         />
       ) : (
@@ -107,7 +112,12 @@ export const SquiggleViewerWithoutProvider: FC<
       )}
     </div>
   ) : (
-    <ValueViewer value={value} size="large" />
+    <ValueViewer
+      value={value}
+      size={size}
+      header="large"
+      collapsible={collapsible}
+    />
   );
 };
 

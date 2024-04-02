@@ -31,13 +31,6 @@ export const ModelExportPage: FC<{
           ... on Model {
             id
             slug
-            currentRevision {
-              id
-              content {
-                __typename
-                ...SquiggleModelExportPage
-              }
-            }
             exportRevisions(variableId: $variableName) {
               id
               variableName
@@ -59,7 +52,9 @@ export const ModelExportPage: FC<{
 
   const model = extractFromGraphqlErrorUnion(result, "Model");
 
-  const [selected, changeId] = useState<string>(model.exportRevisions[0].id);
+  const [selected, changeId] = useState<string>(
+    model.exportRevisions.at(-1)!.id
+  );
 
   const content = model.exportRevisions.find(
     (revision) => revision.id === selected
@@ -83,7 +78,7 @@ export const ModelExportPage: FC<{
                   Revisions
                 </h3>
                 <ul>
-                  {model.exportRevisions.map((revision) => (
+                  {model.exportRevisions.toReversed().map((revision) => (
                     <li
                       key={revision.id}
                       onClick={() => changeId(revision.id)}
