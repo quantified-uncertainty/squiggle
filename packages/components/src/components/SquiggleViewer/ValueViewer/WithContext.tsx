@@ -1,31 +1,24 @@
 // make sure all widgets are in registry
-import "../../widgets/index.js";
+import "../../../widgets/index.js";
 
 import { clsx } from "clsx";
-import { FC, PropsWithChildren, useCallback, useMemo, useRef } from "react";
+import { FC, useCallback, useRef } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { CodeBracketIcon, CommentIcon, LinkIcon, TextTooltip } from "@quri/ui";
+import { CommentIcon, LinkIcon, TextTooltip } from "@quri/ui";
 
-import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
-import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
-import { SqValueWithContext } from "../../lib/utility.js";
-import { SpecificationDropdown } from "../../widgets/SpecificationWidget.js";
-import { useProjectContext } from "../ProjectProvider.js";
-import { ErrorBoundary } from "../ui/ErrorBoundary.js";
-import { CollapsedIcon, ExpandedIcon } from "./icons.js";
-import { useZoomedInSqValueKeyEvent } from "./keyboardNav/zoomedInSqValue.js";
-import { useZoomedOutSqValueKeyEvent } from "./keyboardNav/zoomedOutSqValue.js";
-import { SquiggleValueChart } from "./SquiggleValueChart.js";
-import { SquiggleValueMenu } from "./SquiggleValueMenu.js";
-import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
+import { useForceUpdate } from "../../../lib/hooks/useForceUpdate.js";
+import { SqValueWithContext } from "../../../lib/utility.js";
+import { SpecificationDropdown } from "../../../widgets/SpecificationWidget.js";
+import { useProjectContext } from "../../ProjectProvider.js";
+import { ErrorBoundary } from "../../ui/ErrorBoundary.js";
+import { CollapsedIcon, ExpandedIcon } from "../icons.js";
+import { useZoomedInSqValueKeyEvent } from "../keyboardNav/zoomedInSqValue.js";
+import { useZoomedOutSqValueKeyEvent } from "../keyboardNav/zoomedOutSqValue.js";
+import { SquiggleValueMenu } from "../SquiggleValueMenu.js";
+import { SquiggleValuePreview } from "../SquiggleValuePreview.js";
+import { getValueComment, hasExtraContentToShow } from "../utils.js";
 import {
-  getValueComment,
-  hasExtraContentToShow,
-  pathToShortName,
-} from "./utils.js";
-import {
-  useMergedSettings,
   useRegisterAsItemViewer,
   useRootValueSourceId,
   useScrollToEditorPath,
@@ -33,7 +26,9 @@ import {
   useViewerContext,
   useViewerType,
   useZoomIn,
-} from "./ViewerProvider.js";
+} from "../ViewerProvider.js";
+import { Body } from "./Body.js";
+import { Title } from "./Title.js";
 
 const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
   const comment = getValueComment(value);
@@ -60,61 +55,6 @@ type Props = {
   size?: "normal" | "large";
 };
 
-const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
-  const comment = getValueComment(value);
-
-  if (!comment) {
-    return children;
-  }
-
-  const tagsWithTopPosition = new Set([
-    "Dict",
-    "Array",
-    "TableChart",
-    "Plot",
-    "String",
-  ]);
-  const commentPosition = tagsWithTopPosition.has(value.tag) ? "top" : "bottom";
-
-  const commentEl = (
-    <div
-      className={clsx(
-        "max-w-4xl",
-        commentPosition === "bottom" ? "mt-1" : "mb-1"
-      )}
-    >
-      <MarkdownViewer md={comment} textSize="sm" />
-    </div>
-  );
-
-  return (
-    // TODO - can be simplified with flex-col-reverse
-    <div>
-      {commentPosition === "top" && commentEl}
-      {children}
-      {commentPosition === "bottom" && commentEl}
-    </div>
-  );
-};
-
-const ValueViewerBody: FC<Props> = ({ value, size = "normal" }) => {
-  const { path } = value.context;
-  const mergedSettings = useMergedSettings(path);
-  const adjustedMergedSettings = useMemo(() => {
-    const { chartHeight } = mergedSettings;
-    return {
-      ...mergedSettings,
-      chartHeight: size === "large" ? chartHeight * 4 : chartHeight,
-    };
-  }, [size, mergedSettings]);
-
-  return (
-    <WithComment value={value}>
-      <SquiggleValueChart value={value} settings={adjustedMergedSettings} />
-    </WithComment>
-  );
-};
-
 export type ValueWithContextViewerHandle = {
   forceUpdate: () => void;
   scrollIntoView: () => void;
@@ -129,7 +69,7 @@ export const ValueWithContextViewer: FC<Props> = ({
   ...props
 }) => {
   const { tag } = value;
-  const { path } = value.context;
+  const { path: valuePath } = value.context;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement | null>(null);
@@ -151,41 +91,39 @@ export const ValueWithContextViewer: FC<Props> = ({
     },
     forceUpdate: useForceUpdate(),
     focusOnHeader,
-    toggleCollapsed: () => toggleCollapsed_(path),
+    toggleCollapsed: () => toggleCollapsed_(valuePath),
   };
 
-  useRegisterAsItemViewer(path, handle);
+  useRegisterAsItemViewer(valuePath, handle);
 
   const zoomIn = useZoomIn();
-  const focus = () => enableFocus && zoomIn(path);
-  const focusedKeyEvent = useZoomedInSqValueKeyEvent(path);
-  const unfocusedKeyEvent = useZoomedOutSqValueKeyEvent(path);
+  const focusedKeyEvent = useZoomedInSqValueKeyEvent(valuePath);
+  const unfocusedKeyEvent = useZoomedOutSqValueKeyEvent(valuePath);
 
   const viewerType = useViewerType();
-  const scrollEditorToPath = useScrollToEditorPath(path);
+  const scrollEditorToPath = useScrollToEditorPath(valuePath);
 
-  const { itemStore, zoomedInPath, visibleRootPath } = useViewerContext();
-  const isZoomedIn = zoomedInPath?.isEqual(path);
+  const { itemStore, zoomedInPath } = useViewerContext();
+  const isZoomedIn = zoomedInPath?.isEqual(valuePath);
   const itemState = itemStore.getStateOrInitialize(value);
 
-  const isRoot = path.isRoot();
+  const isRoot = valuePath.isRoot();
   const taggedName = value.tags.name();
 
   const exportData = value.tags.exportData();
 
-  const isRootImport =
+  const isRootImport = Boolean(
     exportData &&
-    exportData.sourceId !== sourceId &&
-    exportData.path.length === 0;
+      exportData.sourceId !== sourceId &&
+      exportData.path.length === 0
+  );
 
   // root header is always hidden (unless forced, but we probably won't need it)
-  const headerVisibility = props.header ?? (isRoot ? "hide" : "show");
+  const headerVisibility = props.header ?? (isRoot ? "hide" : "normal");
   const collapsible =
     headerVisibility === "hide" ? false : props.collapsible ?? true;
   const size = props.size ?? "normal";
   const enableDropdownMenu = viewerType !== "tooltip";
-  const enableFocus =
-    viewerType !== "tooltip" && !visibleRootPath?.isEqual(path);
 
   // TODO - check that we're not in a situation where `isOpen` is false and `header` is hidden?
   // In that case, the output would look broken (empty).
@@ -210,63 +148,6 @@ export const ValueWithContextViewer: FC<Props> = ({
     } else {
       return <div className="w-4 mr-1.5" />;
     }
-  };
-
-  const headerName = () => {
-    const name = pathToShortName(path);
-
-    // We want to show colons after the keys, for dicts/arrays.
-    const showColon =
-      headerVisibility !== "large" && path.edges.length > 1 && !isRootImport;
-
-    const getHeaderColor = () => {
-      let color = "text-orange-900";
-      const parentTag = parentValue?.tag;
-      if (isRootImport) {
-        color = "text-violet-900";
-      } else if (parentTag === "Array" && !taggedName) {
-        color = "text-stone-400";
-      } else if (path.edges.length > 1) {
-        color = "text-teal-700";
-      }
-      return color;
-    };
-
-    const headerColor = getHeaderColor();
-
-    const headerClasses = () => {
-      if (headerVisibility === "large") {
-        return clsx("text-md font-bold", headerColor);
-      } else if (isRoot) {
-        return "text-sm text-stone-600 font-semibold";
-      } else {
-        return clsx(
-          "text-sm",
-          enableFocus && "cursor-pointer hover:underline",
-          headerColor
-        );
-      }
-    };
-
-    return (
-      <div
-        className={clsx(
-          "leading-3 flex flex-row items-center",
-          showColon || "mr-3"
-        )}
-      >
-        {isRootImport && (
-          <CodeBracketIcon size={12} className="mr-1 text-violet-900" />
-        )}
-        <div
-          className={clsx(!taggedName && "font-mono", headerClasses())}
-          onClick={focus}
-        >
-          {(isRootImport && exportData?.sourceId) || taggedName || name}
-        </div>
-        {showColon && <div className="text-gray-400 font-mono">:</div>}
-      </div>
-    );
   };
 
   const leftCollapseBorder = () => {
@@ -311,7 +192,20 @@ export const ValueWithContextViewer: FC<Props> = ({
           >
             <div className="inline-flex items-center">
               {collapsible && triangleToggle()}
-              {headerName()}
+              <Title
+                {...{
+                  valuePath,
+                  parentValue,
+                  isRootImport,
+                  taggedName,
+                  viewerType,
+                  headerVisibility,
+                  isRoot,
+                  zoomIn,
+                  exportData,
+                }}
+              />
+
               {!isOpen && (
                 <div className="text-sm text-blue-800 ml-2">
                   <SquiggleValuePreview value={value} />
@@ -364,7 +258,7 @@ export const ValueWithContextViewer: FC<Props> = ({
           >
             {collapsible && leftCollapseBorder()}
             <div className="grow">
-              <ValueViewerBody value={value} size={size} />
+              <Body value={value} size={size} />
             </div>
           </div>
         )}

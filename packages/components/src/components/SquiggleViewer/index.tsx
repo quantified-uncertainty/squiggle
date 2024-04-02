@@ -7,7 +7,7 @@ import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { MessageAlert } from "../ui/Alert.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
 import { useGetSubvalueByPath } from "./utils.js";
-import { ValueViewer } from "./ValueViewer.js";
+import { ValueViewer } from "./ValueViewer/index.js";
 import {
   SquiggleViewerHandle,
   useViewerContext,

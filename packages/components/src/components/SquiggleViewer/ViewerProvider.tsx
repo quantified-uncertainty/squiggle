@@ -27,9 +27,9 @@ import {
   shouldBeginCollapsed,
   traverseCalculatorEdge,
 } from "./utils.js";
-import { ValueWithContextViewerHandle } from "./ValueWithContextViewer.js";
+import { ValueWithContextViewerHandle } from "./ValueViewer/WithContext.js";
 
-type ViewerType = "normal" | "tooltip";
+export type ViewerType = "normal" | "tooltip";
 
 function findNode(
   root: SqValue | undefined,
