@@ -194,6 +194,11 @@ type ModelExportEdge {
   node: ModelExport!
 }
 
+input ModelExportQueryInput {
+  owner: String
+  slugContains: String
+}
+
 type ModelRevision implements Node {
   author: User
   comment: String!
@@ -505,6 +510,7 @@ type Query {
   groups(after: String, before: String, first: Int, input: GroupsQueryInput, last: Int): GroupConnection!
   me: Me!
   model(input: QueryModelInput!): QueryModelResult!
+  modelExports(after: String, before: String, first: Int, last: Int): ModelExportConnection!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
 
   """Admin-only query for listing models in /admin UI"""

@@ -7,34 +7,6 @@ import { NotFoundError } from "../errors/NotFoundError";
 import { RelativeValuesExport } from "./RelativeValuesExport";
 import { SquiggleSnippet } from "./SquiggleSnippet";
 
-// export const ModelExport = builder.prismaNode("ModelExport", {
-//   id: { field: "id" },
-//   fields: (t) => ({
-//     modelRevision: t.relation("modelRevision"),
-//     variableName: t.exposeString("variableName"),
-//     variableType: t.exposeString("variableType"),
-//     docstring: t.exposeString("docstring"),
-//     title: t.exposeString("title", { nullable: true }),
-//   }),
-// });
-
-// export const ModelExportConnection = builder.connectionObject({
-//   type: ModelExport,
-//   name: "ModelExportConnection",
-// });
-
-export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
-  id: { field: "id" },
-  fields: (t) => ({
-    code: t.exposeString("code"),
-    version: t.exposeString("version"),
-    seed: t.exposeString("seed"),
-    autorunMode: t.exposeBoolean("autorunMode", { nullable: true }),
-    sampleCount: t.exposeInt("sampleCount", { nullable: true }),
-    xyPointLength: t.exposeInt("xyPointLength", { nullable: true }),
-  }),
-});
-
 // TODO - turn into interface?
 const ModelContent: UnionRef<
   {
