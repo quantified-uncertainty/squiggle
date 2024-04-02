@@ -14,6 +14,7 @@ import { vDist } from "./VDist.js";
 import { vInput } from "./VInput.js";
 import { vLambda } from "./vLambda.js";
 import { vNumber } from "./VNumber.js";
+import { VegaPlot } from "./VPlot.js";
 import { vScale } from "./VScale.js";
 import { vString } from "./VString.js";
 import { vVoid } from "./VVoid.js";
@@ -102,7 +103,37 @@ export function simpleValueFromAny(data: any): SimpleValue {
   return toPlainObject(data);
 }
 
-export function simpleValueFromValue(value: Value): SimpleValue {
+export function vegaPlotToSimpleValues(
+  value: VegaPlot
+): [string, SimpleValue][] {
+  const fields: [string, SimpleValue][] = [["data", value.data]];
+  if (value.config) {
+    fields.push(["config", value.config]);
+  }
+  if (value.mark) {
+    fields.push(["mark", value.mark]);
+  }
+  if (value.encoding) {
+    fields.push(["encoding", value.encoding]);
+  }
+  if (value.height) {
+    fields.push(["height", value.height]);
+  }
+  if (value.view) {
+    fields.push(["view", value.view]);
+  }
+  if (value.projection) {
+    fields.push(["projection", value.projection]);
+  }
+  return fields;
+}
+
+// Normally this function adds "vtype" to dicts, to distinguish them from other types.
+// However, if `simplifyForJson` is true, it will not add "vtype" to dicts. This is useful for deserializing JSON into the direct Squiggle-like objects.
+export function simpleValueFromValue(
+  value: Value,
+  simplifyForJson?: boolean
+): SimpleValue {
   switch (value.type) {
     case "Bool":
     case "Number":
@@ -114,16 +145,23 @@ export function simpleValueFromValue(value: Value): SimpleValue {
     case "Void":
       return null;
     case "Array":
-      return value.value.map(simpleValueFromValue);
+      return value.value.map((e) => simpleValueFromValue(e, simplifyForJson));
     case "Dict": {
       const v: SimpleValue = ImmutableMap(
-        [...value.value.entries()].map(([k, v]) => [k, simpleValueFromValue(v)])
+        [...value.value.entries()].map(([k, v]) => [
+          k,
+          simpleValueFromValue(v, simplifyForJson),
+        ])
       );
-      const fields: [string, SimpleValue][] = [
-        ["vtype", "Dict"],
-        ["value", v],
-      ];
-      return ImmutableMap(fields);
+      if (simplifyForJson) {
+        return v;
+      } else {
+        const fields: [string, SimpleValue][] = [
+          ["vtype", "Dict"],
+          ["value", v],
+        ];
+        return ImmutableMap(fields);
+      }
     }
     case "Calculator": {
       const fields: [string, SimpleValue][] = [
@@ -131,7 +169,9 @@ export function simpleValueFromValue(value: Value): SimpleValue {
         ["fn", value.value.fn],
         [
           "inputs",
-          value.value.inputs.map((x) => simpleValueFromValue(vInput(x))),
+          value.value.inputs.map((x) =>
+            simpleValueFromValue(vInput(x), simplifyForJson)
+          ),
         ],
         ["autorun", value.value.autorun],
         ["description", value.value.description || ""],
@@ -161,17 +201,20 @@ export function simpleValueFromValue(value: Value): SimpleValue {
             value.value.distributions.map((x) =>
               ImmutableMap([
                 ["name", x.name || ""],
-                ["distribution", simpleValueFromValue(vDist(x.distribution))],
+                [
+                  "distribution",
+                  simpleValueFromValue(vDist(x.distribution), simplifyForJson),
+                ],
               ])
             ),
           ]);
           fields.push([
             "xScale",
-            simpleValueFromValue(vScale(value.value.xScale)),
+            simpleValueFromValue(vScale(value.value.xScale), simplifyForJson),
           ]);
           fields.push([
             "yScale",
-            simpleValueFromValue(vScale(value.value.yScale)),
+            simpleValueFromValue(vScale(value.value.yScale), simplifyForJson),
           ]);
           fields.push(["showSummary", value.value.showSummary]);
           break;
@@ -179,11 +222,11 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           fields.push(["fn", value.value.fn]);
           fields.push([
             "xScale",
-            simpleValueFromValue(vScale(value.value.xScale)),
+            simpleValueFromValue(vScale(value.value.xScale), simplifyForJson),
           ]);
           fields.push([
             "yScale",
-            simpleValueFromValue(vScale(value.value.yScale)),
+            simpleValueFromValue(vScale(value.value.yScale), simplifyForJson),
           ]);
           if (value.value.xPoints) {
             fields.push(["points", value.value.xPoints]);
@@ -193,15 +236,18 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           fields.push(["fn", value.value.fn]);
           fields.push([
             "xScale",
-            simpleValueFromValue(vScale(value.value.xScale)),
+            simpleValueFromValue(vScale(value.value.xScale), simplifyForJson),
           ]);
           fields.push([
             "yScale",
-            simpleValueFromValue(vScale(value.value.yScale)),
+            simpleValueFromValue(vScale(value.value.yScale), simplifyForJson),
           ]);
           fields.push([
             "distXScale",
-            simpleValueFromValue(vScale(value.value.distXScale)),
+            simpleValueFromValue(
+              vScale(value.value.distXScale),
+              simplifyForJson
+            ),
           ]);
           if (value.value.xPoints) {
             fields.push(["points", value.value.xPoints]);
@@ -210,24 +256,27 @@ export function simpleValueFromValue(value: Value): SimpleValue {
         case "scatter":
           fields.push([
             "xDist",
-            simpleValueFromValue(vDist(value.value.xDist)),
+            simpleValueFromValue(vDist(value.value.xDist), simplifyForJson),
           ]);
           fields.push([
             "yDist",
-            simpleValueFromValue(vDist(value.value.yDist)),
+            simpleValueFromValue(vDist(value.value.yDist), simplifyForJson),
           ]);
           fields.push([
             "xScale",
-            simpleValueFromValue(vScale(value.value.xScale)),
+            simpleValueFromValue(vScale(value.value.xScale), simplifyForJson),
           ]);
           fields.push([
             "yScale",
-            simpleValueFromValue(vScale(value.value.yScale)),
+            simpleValueFromValue(vScale(value.value.yScale), simplifyForJson),
           ]);
           break;
         case "relativeValues":
           fields.push(["fn", value.value.fn]);
           fields.push(["ids", [...value.value.ids]]);
+          break;
+        case "vega":
+          fields.concat(vegaPlotToSimpleValues(value.value));
           break;
       }
       return ImmutableMap(fields);
@@ -235,7 +284,10 @@ export function simpleValueFromValue(value: Value): SimpleValue {
     case "TableChart": {
       const fields: [string, SimpleValue][] = [
         ["vType", "TableChart"],
-        ["data", value.value.data.map(simpleValueFromValue)],
+        [
+          "data",
+          value.value.data.map((e) => simpleValueFromValue(e, simplifyForJson)),
+        ],
         [
           "columns",
           value.value.columns.map((column) => {

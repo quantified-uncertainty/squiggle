@@ -1,4 +1,7 @@
+import fromPairs from "lodash/fromPairs.js";
+
 import { clamp, sort, uniq } from "../../utility/E_A_Floats.js";
+import { vegaPlotToSimpleValues } from "../../value/simpleValue.js";
 import { Plot, vPlot } from "../../value/VPlot.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValuePathEdge } from "../SqValuePath.js";
@@ -28,6 +31,8 @@ export function wrapPlot(value: Plot, context?: SqValueContext): SqPlot {
       return new SqScatterPlot(value, context);
     case "relativeValues":
       return new SqRelativeValuesPlot(value, context);
+    case "vega":
+      return new SqVegaPlot(value, context);
   }
 }
 
@@ -304,9 +309,22 @@ export class SqRelativeValuesPlot extends SqAbstractPlot<"relativeValues"> {
   }
 }
 
+export class SqVegaPlot extends SqAbstractPlot<"vega"> {
+  tag = "vega" as const;
+
+  get spec(): any {
+    return JSON.stringify({
+      width: "container",
+      height: 300,
+      ...fromPairs(vegaPlotToSimpleValues(this._value)),
+    });
+  }
+}
+
 export type SqPlot =
   | SqDistributionsPlot
   | SqNumericFnPlot
   | SqDistFnPlot
   | SqScatterPlot
-  | SqRelativeValuesPlot;
+  | SqRelativeValuesPlot
+  | SqVegaPlot;

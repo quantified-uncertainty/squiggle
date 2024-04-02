@@ -508,6 +508,39 @@ export function frDict<
     [k in K4]: T4;
   } & { [k in K5]: T5 } & { [k in K6]: T6 } & { [k in K7]: T7 }
 >;
+export function frDict<
+  K1 extends string,
+  T1,
+  K2 extends string,
+  T2,
+  K3 extends string,
+  T3,
+  K4 extends string,
+  T4,
+  K5 extends string,
+  T5,
+  K6 extends string,
+  T6,
+  K7 extends string,
+  T7,
+  K8 extends string,
+  T8,
+>(
+  kv1: [K1, FRType<T1>],
+  kv2: [K2, FRType<T2>],
+  kv3: [K3, FRType<T3>],
+  kv4: [K4, FRType<T4>],
+  kv5: [K5, FRType<T5>],
+  kv6: [K6, FRType<T6>],
+  kv7: [K7, FRType<T7>],
+  kv8: [K8, FRType<T8>]
+): FRType<
+  { [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 } & {
+    [k in K4]: T4;
+  } & { [k in K5]: T5 } & { [k in K6]: T6 } & {
+    [k in K7]: T7 & { [k in K8]: T8 };
+  }
+>;
 
 export function frDict<T extends object>(
   ...allKvs: [string, FRType<unknown>][]

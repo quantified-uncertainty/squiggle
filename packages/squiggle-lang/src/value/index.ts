@@ -71,9 +71,8 @@ export function isEqual(a: Value, b: Value): boolean {
     case "Array":
     case "Specification":
     case "Dict":
-      return a.isEqual(b as any);
     case "Void":
-      return true;
+      return a.isEqual(b as any);
   }
 
   if (a.toString() !== b.toString()) {

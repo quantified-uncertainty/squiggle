@@ -17,6 +17,17 @@ export type CommonPlotArgs = {
   title?: string;
 };
 
+export type VegaPlot = {
+  type: "vega";
+  data: any;
+  config?: any;
+  mark?: any;
+  encoding?: any;
+  height?: number;
+  view?: any;
+  projection?: any;
+};
+
 export type Plot = CommonPlotArgs &
   (
     | {
@@ -53,6 +64,7 @@ export type Plot = CommonPlotArgs &
         fn: Lambda;
         ids: readonly string[];
       }
+    | VegaPlot
   );
 
 export class VPlot extends BaseValue implements Indexable {
@@ -76,6 +88,8 @@ export class VPlot extends BaseValue implements Indexable {
         return `Scatter plot for distributions ${this.value.xDist} and ${this.value.yDist}`;
       case "relativeValues":
         return `Plot for relative values ${this.value.ids.join(", ")}`;
+      case "vega":
+        return `Vega plot`;
     }
   }
 

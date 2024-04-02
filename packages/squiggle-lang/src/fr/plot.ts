@@ -4,6 +4,7 @@ import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
+  frAny,
   frArray,
   frBool,
   frDeprecated,
@@ -27,6 +28,7 @@ import {
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { clamp, sort, uniq } from "../utility/E_A_Floats.js";
+import { simpleValueFromValue } from "../value/simpleValue.js";
 import { VDomain } from "../value/VDomain.js";
 import { LabeledDistribution, Plot } from "../value/VPlot.js";
 import { Scale } from "../value/VScale.js";
@@ -539,6 +541,60 @@ Plot.scatter({
             xScale: xScale ?? defaultScaleWithName(xTitle),
             yScale: yScale ?? defaultScaleWithName(yTitle),
             title: title ?? undefined,
+          };
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "vega",
+    examples: [
+      makeFnExample(
+        `xDist = SampleSet.fromDist(2 to 5)
+yDist = normal({p5:-3, p95:3}) * 5 - xDist ^ 2
+Plot.scatter({
+  xDist: xDist,
+  yDist: yDist,
+  xScale: Scale.log({min: 1.5}),
+})`,
+        { isInteractive: true }
+      ),
+      makeFnExample(
+        `xDist = SampleSet.fromDist(normal({p5:-2, p95:5}))
+yDist = normal({p5:-3, p95:3}) * 5 - xDist
+Plot.scatter({
+  xDist: xDist,
+  yDist: yDist,
+  xScale: Scale.symlog({title: "X Axis Title"}),
+  yScale: Scale.symlog({title: "Y Axis Title"}),
+})`,
+        { isInteractive: true }
+      ),
+    ],
+    definitions: [
+      makeDefinition(
+        [
+          frDict(
+            ["data", frAny()],
+            ["height", frOptional(frNumber)],
+            ["config", frOptional(frAny())],
+            ["mark", frOptional(frAny())],
+            ["encoding", frOptional(frAny())],
+            ["view", frOptional(frAny())],
+            ["projection", frOptional(frAny())]
+          ),
+        ],
+        frPlot,
+        ([{ data, config, mark, encoding, height, view, projection }]) => {
+          return {
+            type: "vega",
+            data: simpleValueFromValue(data, true),
+            config: config && simpleValueFromValue(config, true),
+            mark: mark && simpleValueFromValue(mark, true),
+            encoding: encoding && simpleValueFromValue(encoding, true),
+            height: height || undefined,
+            view: view && simpleValueFromValue(view, true),
+            projection: projection && simpleValueFromValue(projection, true),
           };
         }
       ),

@@ -1,3 +1,6 @@
+import { lazy, Suspense } from "react";
+import { VisualizationSpec } from "react-vega";
+
 import { DistributionsChart } from "../DistWidget/DistributionsChart.js";
 import { CHART_TO_DIST_HEIGHT_ADJUSTMENT } from "../DistWidget/index.js";
 import { DistFunctionChart } from "../LambdaWidget/FunctionChart/DistFunctionChart.js";
@@ -5,6 +8,16 @@ import { NumericFunctionChart } from "../LambdaWidget/FunctionChart/NumericFunct
 import { widgetRegistry } from "../registry.js";
 import { RelativeValuesGridChart } from "./RelativeValuesGridChart/index.js";
 import { ScatterChart } from "./ScatterChart/index.js";
+
+const VegaLazy = lazy(() =>
+  import("react-vega").then((module) => ({ default: module.Vega }))
+);
+
+const vega = (spec: VisualizationSpec) => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <VegaLazy spec={spec} />
+  </Suspense>
+);
 
 widgetRegistry.register("Plot", {
   Chart: (value, settings) => {
@@ -20,7 +33,7 @@ widgetRegistry.register("Plot", {
             height={settings.chartHeight * CHART_TO_DIST_HEIGHT_ADJUSTMENT}
           />
         );
-      case "numericFn": {
+      case "numericFn":
         return (
           <NumericFunctionChart
             plot={plot}
@@ -29,8 +42,7 @@ widgetRegistry.register("Plot", {
             xCount={settings.functionChartSettings.count}
           />
         );
-      }
-      case "distFn": {
+      case "distFn":
         return (
           <DistFunctionChart
             plot={plot}
@@ -43,7 +55,6 @@ widgetRegistry.register("Plot", {
             xCount={settings.functionChartSettings.count}
           />
         );
-      }
       case "scatter":
         return (
           <ScatterChart
@@ -56,6 +67,8 @@ widgetRegistry.register("Plot", {
         return (
           <RelativeValuesGridChart plot={plot} environment={environment} />
         );
+      case "vega":
+        return vega(JSON.parse(plot.spec));
       default:
         // can happen if squiggle-lang version is too fresh and we messed up the components -> squiggle-lang dependency
         return `Unsupported plot ${plot satisfies never}`;

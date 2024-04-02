@@ -22,6 +22,7 @@
     "@quri/versioned-squiggle-components": "workspace:*",
     "@vercel/analytics": "^1.2.2",
     "base64-js": "^1.5.1",
+    "canvas": "^2.11.2",
     "clsx": "^2.1.0",
     "next": "^14.1.0",
     "nextra": "^2.13.3",
