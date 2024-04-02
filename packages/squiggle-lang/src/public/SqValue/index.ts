@@ -77,6 +77,26 @@ export function wrapValue(value: Value, context?: SqValueContext) {
   }
 }
 
+export function prefixPathDiff(
+  pathSet: SqValuePath[],
+  pathSetToRemove: SqValuePath[]
+): SqValuePath[] {
+  let result = [...pathSet];
+  // Go through each item of pathSetToRemove. If it's the first remaining item in result, remove it.
+
+  for (const pathToRemove of pathSetToRemove) {
+    if (result.length === 0) {
+      break;
+    }
+
+    if (result[0].isEqual(pathToRemove)) {
+      result = result.slice(1);
+    }
+  }
+
+  return result;
+}
+
 export abstract class SqAbstractValue<Type extends string, JSType, ValueType> {
   abstract tag: Type;
 
@@ -142,17 +162,19 @@ export abstract class SqAbstractValue<Type extends string, JSType, ValueType> {
   ) {
     {
       let currentNodeValue = this as SqValue;
-      // we need to subtract the paths from the paths this has.
 
       const subValuePaths = subValuePath.allPrefixPaths({
         includeRoot: false,
       });
 
-      console.log("GY", this.context?.path);
-      const diffPaths = subValuePaths.slice(
-        this.context?.path.edges.length || 0,
-        subValuePaths.length
-      );
+      const pathEdges = this.context?.path;
+
+      const diffPaths = pathEdges
+        ? prefixPathDiff(
+            subValuePaths,
+            pathEdges.allPrefixPaths({ includeRoot: false })
+          )
+        : subValuePaths;
 
       for (const subValuePath of diffPaths) {
         const nextValue = currentNodeValue.walkLastEdge(
