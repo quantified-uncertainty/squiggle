@@ -142,11 +142,18 @@ export abstract class SqAbstractValue<Type extends string, JSType, ValueType> {
   ) {
     {
       let currentNodeValue = this as SqValue;
+      // we need to subtract the paths from the paths this has.
+
       const subValuePaths = subValuePath.allPrefixPaths({
         includeRoot: false,
       });
 
-      for (const subValuePath of subValuePaths) {
+      const diffPaths = subValuePaths.slice(
+        this.context?.path.edges.length || 0,
+        subValuePaths.length
+      );
+
+      for (const subValuePath of diffPaths) {
         const nextValue = currentNodeValue.walkLastEdge(
           subValuePath,
           traverseCalculatorEdge

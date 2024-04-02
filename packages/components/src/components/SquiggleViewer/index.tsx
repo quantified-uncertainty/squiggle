@@ -7,7 +7,7 @@ import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { MessageAlert } from "../ui/Alert.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
-import { useGetSubvalueByPath } from "./utils.js";
+import { useGetRootSubvalueByPath } from "./utils.js";
 import { ValueViewer } from "./ValueViewer.js";
 import {
   SquiggleViewerHandle,
@@ -50,6 +50,7 @@ const ZoomedInNavigation: FC<{
     ? rootPath.edges.length - 1
     : 0;
 
+  //TODO: Change to use Path logic
   return (
     <div className="flex items-center">
       {!rootPath?.edges.length && (
@@ -81,11 +82,11 @@ export const SquiggleViewerWithoutProvider: FC<
 > = ({ value }) => {
   const { zoomedInPath } = useViewerContext();
 
-  const getSubvalueByPath = useGetSubvalueByPath();
+  const getRootSubvalueByPath = useGetRootSubvalueByPath();
 
   let zoomedInItem: SqValue | undefined;
   if (zoomedInPath) {
-    zoomedInItem = getSubvalueByPath(value, zoomedInPath);
+    zoomedInItem = getRootSubvalueByPath(zoomedInPath);
   }
 
   return zoomedInPath ? (
