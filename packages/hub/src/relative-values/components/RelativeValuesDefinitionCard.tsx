@@ -2,8 +2,6 @@ import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { ScaleIcon } from "@quri/ui";
-
 import { EntityCard } from "@/components/EntityCard";
 import { relativeValuesRoute } from "@/routes";
 
@@ -32,7 +30,6 @@ export const RelativeValuesDefinitionCard: FC<Props> = ({
 
   return (
     <EntityCard
-      icon={ScaleIcon}
       updatedAtTimestamp={definition.updatedAtTimestamp}
       href={relativeValuesRoute({
         owner: definition.owner.slug,

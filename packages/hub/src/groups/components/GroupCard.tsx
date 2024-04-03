@@ -2,8 +2,6 @@ import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { GroupIcon } from "@quri/ui";
-
 import { EntityCard } from "@/components/EntityCard";
 import { groupRoute } from "@/routes";
 
@@ -26,7 +24,6 @@ export const GroupCard: FC<Props> = ({ groupRef }) => {
 
   return (
     <EntityCard
-      icon={GroupIcon}
       updatedAtTimestamp={group.updatedAtTimestamp}
       href={groupRoute({
         slug: group.slug,
