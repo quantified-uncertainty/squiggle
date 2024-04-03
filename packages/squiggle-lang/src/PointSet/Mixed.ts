@@ -174,8 +174,8 @@ export class MixedShape implements PointSet<MixedShape> {
 
   support() {
     return new MixedSet(
-      this.discrete.support().points,
-      this.continuous.support().segments
+      this.discrete.support().numberSet.numbers,
+      this.continuous.support().rangeSet.ranges
     );
   }
 

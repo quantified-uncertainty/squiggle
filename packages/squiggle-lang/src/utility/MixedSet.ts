@@ -83,7 +83,7 @@ export class MixedSet {
     );
   }
 
-  minX(): number | undefined {
+  min(): number | undefined {
     if (this.isEmpty()) {
       return undefined;
     }
@@ -93,7 +93,7 @@ export class MixedSet {
     );
   }
 
-  maxX(): number | undefined {
+  max(): number | undefined {
     if (this.isEmpty()) {
       return undefined;
     }

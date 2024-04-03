@@ -2,6 +2,32 @@ import { pairwise } from "./E_A.js";
 
 export type Range = readonly [number, number];
 
+function mergeOverlappingRanges(ranges: Range[]): Range[] {
+  if (ranges.length <= 1) {
+    return ranges;
+  }
+
+  ranges.sort((a, b) => a[0] - b[0]);
+
+  const mergedRanges: Range[] = [];
+  let currentRange: Range = ranges[0];
+
+  for (let i = 1; i < ranges.length; i++) {
+    const [start, end] = ranges[i];
+
+    if (start <= currentRange[1]) {
+      currentRange = [currentRange[0], Math.max(currentRange[1], end)];
+    } else {
+      mergedRanges.push(currentRange);
+      currentRange = ranges[i];
+    }
+  }
+
+  mergedRanges.push(currentRange);
+
+  return mergedRanges;
+}
+
 export class RangeSet {
   public readonly ranges: Range[];
 
@@ -55,6 +81,12 @@ export class RangeSet {
     return new RangeSet(result);
   }
 
+  union(other: RangeSet): RangeSet {
+    const combinedRanges = [...this.ranges, ...other.ranges];
+    const mergedRanges = mergeOverlappingRanges(combinedRanges);
+    return new RangeSet(mergedRanges);
+  }
+
   intersection(other: RangeSet): RangeSet {
     const result: Range[] = [];
     let i = 0;
@@ -77,47 +109,6 @@ export class RangeSet {
       } else {
         j++;
       }
-    }
-
-    return new RangeSet(result);
-  }
-
-  union(other: RangeSet): RangeSet {
-    const result: Range[] = [];
-    let i = 0;
-    let j = 0;
-    let currentStart = Infinity;
-    let currentEnd = -Infinity;
-
-    while (i < this.ranges.length || j < other.ranges.length) {
-      const [start1, end1] = this.ranges[i] || [Infinity, -Infinity];
-      const [start2, end2] = other.ranges[j] || [Infinity, -Infinity];
-
-      const start = Math.min(start1, start2);
-      const end = Math.max(end1, end2);
-
-      if (start <= currentEnd) {
-        currentEnd = Math.max(currentEnd, end);
-      } else {
-        if (currentStart !== Infinity) {
-          result.push([currentStart, currentEnd]);
-        }
-        currentStart = start;
-        currentEnd = end;
-      }
-
-      if (end1 < end2) {
-        i++;
-      } else if (end2 < end1) {
-        j++;
-      } else {
-        i++;
-        j++;
-      }
-    }
-
-    if (currentStart !== Infinity) {
-      result.push([currentStart, currentEnd]);
     }
 
     return new RangeSet(result);

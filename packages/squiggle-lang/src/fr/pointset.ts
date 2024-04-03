@@ -101,8 +101,8 @@ export const library = [
       makeDefinition([frDistPointset], frMixedSet, ([dist]) => {
         const support = dist.support();
         return {
-          points: support.points,
-          segments: support.segments.map(
+          points: support.numberSet.numbers,
+          segments: support.rangeSet.ranges.map(
             ([start, end]) => [start, end] as [number, number]
           ),
         };

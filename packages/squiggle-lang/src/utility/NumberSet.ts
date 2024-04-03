@@ -12,7 +12,7 @@ export class NumberSet {
   }
 
   intersection(other: NumberSet): NumberSet {
-    return new NumberSet(this.numbers.filter(other.set.has));
+    return new NumberSet(this.numbers.filter((x) => other.set.has(x)));
   }
 
   union(other: NumberSet): NumberSet {
