@@ -18,7 +18,7 @@ describe("MixedSet", () => {
     });
   });
 
-  describe("subtract", () => {
+  describe("difference", () => {
     const testCases = [
       {
         set1: new MixedSet([1, 2, 3], [[0, 10]]),
@@ -104,6 +104,109 @@ describe("MixedSet", () => {
 
         expect(difference.points).toEqual(expected.points);
         expect(difference.segments).toEqual(expected.segments);
+      });
+    });
+  });
+
+  describe("intersection", () => {
+    const testCases = [
+      {
+        set1: new MixedSet([1, 2, 3], [[0, 10]]),
+        set2: new MixedSet([2, 4], [[5, 6]]),
+        expected: {
+          points: [2],
+          segments: [[5, 6]],
+        },
+      },
+      {
+        set1: new MixedSet([], []),
+        set2: new MixedSet([1, 2], [[3, 4]]),
+        expected: { points: [], segments: [] },
+      },
+      {
+        set1: new MixedSet([1, 2], [[3, 4]]),
+        set2: new MixedSet([], []),
+        expected: { points: [], segments: [] },
+      },
+      {
+        set1: new MixedSet([1, 2, 3, 4], []),
+        set2: new MixedSet([2, 4], []),
+        expected: { points: [2, 4], segments: [] },
+      },
+      {
+        set1: new MixedSet(
+          [],
+          [
+            [0, 5],
+            [7, 10],
+          ]
+        ),
+        set2: new MixedSet(
+          [],
+          [
+            [2, 4],
+            [8, 9],
+          ]
+        ),
+        expected: {
+          points: [],
+          segments: [
+            [2, 4],
+            [8, 9],
+          ],
+        },
+      },
+      {
+        set1: new MixedSet(
+          [1, 3, 5],
+          [
+            [0, 2],
+            [4, 6],
+            [8, 10],
+          ]
+        ),
+        set2: new MixedSet(
+          [3],
+          [
+            [1, 5],
+            [9, 10],
+          ]
+        ),
+        expected: {
+          points: [3],
+          segments: [
+            [1, 2],
+            [4, 5],
+            [9, 10],
+          ],
+        },
+      },
+      {
+        set1: new MixedSet([], [[0, 10]]),
+        set2: new MixedSet(
+          [],
+          [
+            [1, 2],
+            [3, 5],
+            [9, 10],
+          ]
+        ),
+        expected: {
+          points: [],
+          segments: [
+            [1, 2],
+            [3, 5],
+            [9, 10],
+          ],
+        },
+      },
+    ];
+
+    testCases.forEach(({ set1, set2, expected }) => {
+      test(`returns the intersection between ${JSON.stringify(set1)} and ${JSON.stringify(set2)}`, () => {
+        const intersection = set1.intersection(set2);
+        expect(intersection.points).toEqual(expected.points);
+        expect(intersection.segments).toEqual(expected.segments);
       });
     });
   });
