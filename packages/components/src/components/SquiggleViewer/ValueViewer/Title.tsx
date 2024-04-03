@@ -50,7 +50,7 @@ export const Title: FC<TitleProps> = ({
   const color = (): string => {
     const parentTag: string | undefined = parentValue?.tag;
     if (isRootImport) return "text-violet-900";
-    if (headerVisibility === "large") return "text-stone-800";
+    if (headerVisibility === "large") return "text-stone-700";
     if (isRoot) return "text-stone-500";
     if (parentTag === "Array" && !taggedName) return "text-stone-400";
     return "text-orange-900";
