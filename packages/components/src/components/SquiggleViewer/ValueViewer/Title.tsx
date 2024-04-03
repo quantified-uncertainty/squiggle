@@ -1,5 +1,6 @@
-import { clsx } from "clsx";
-import { FC } from "react";
+import clsx from "clsx";
+import compact from "lodash/compact.js";
+import { FC, useMemo } from "react";
 
 import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 import { CodeBracketIcon } from "@quri/ui";
@@ -24,83 +25,98 @@ type TitleProps = {
     | undefined;
 };
 
-export const Title: FC<TitleProps> = ({
-  valuePath,
-  parentValue,
-  isRootImport,
-  taggedName,
-  viewerType,
-  headerVisibility,
-  isRoot,
-  zoomIn,
-  exportData,
-}) => {
-  const title: string =
-    (isRootImport && exportData?.sourceId) ||
-    taggedName ||
-    pathToShortName(valuePath);
+type StandardProps = {
+  title?: string;
+  color?: string;
+  textSize?: string;
+  font?: string;
+  icon?: JSX.Element;
+  showColon?: boolean;
+  isFocusEnabled?: boolean;
+};
 
-  const isFocusEnabled: boolean = !(
-    headerVisibility === "large" ||
-    isRoot ||
-    viewerType === "tooltip"
-  );
+const getStandardProps = (props: TitleProps): StandardProps => {
+  const {
+    valuePath,
+    parentValue,
+    isRootImport,
+    taggedName,
+    viewerType,
+    headerVisibility,
+    isRoot,
+    exportData,
+  } = props;
 
-  // We want to show colons after the keys, for dicts/arrays.
-  const shouldShowColon: boolean = !(
-    headerVisibility === "large" ||
-    isRoot ||
-    isRootImport
-  );
+  const standardProps = compact([
+    viewerType === "tooltip" && { isFocusEnabled: false },
+    valuePath.edges.length > 1 && {
+      color: "text-teal-700",
+      showColon: true,
+    },
+    headerVisibility === "large" && {
+      color: "text-stone-700",
+      textSize: "text-md font-bold",
+      showColon: false,
+      isFocusEnabled: false,
+    },
+    isRoot && {
+      color: "text-stone-500",
+      textSize: "text-sm font-semibold",
+      showColon: false,
+      isFocusEnabled: false,
+    },
+    parentValue?.tag === "Array" &&
+      !taggedName && {
+        color: "text-stone-400",
+      },
+    taggedName && {
+      title: taggedName,
+      font: "font-sans",
+    },
+    isRootImport && {
+      title: exportData?.sourceId || undefined,
+      color: "text-violet-900",
+      icon: <CodeBracketIcon size={12} className="mr-1 text-violet-900" />,
+      showColon: false,
+    },
+  ]);
 
-  const getColor = (): string => {
-    const parentTag: string | undefined = parentValue?.tag;
-    switch (true) {
-      case isRootImport:
-        return "text-violet-900";
-      case headerVisibility === "large":
-        return "text-stone-700";
-      case isRoot:
-        return "text-stone-500";
-      case parentTag === "Array" && !taggedName:
-        return "text-stone-400";
-      default:
-        return "text-orange-900";
-    }
-  };
+  return standardProps.reduce((acc, prop) => ({ ...acc, ...prop }), {});
+};
+export const Title: FC<TitleProps> = (props) => {
+  const { valuePath, zoomIn } = props;
+  const standards = useMemo(() => getStandardProps(props), [props]);
 
-  const getTextSize = (): string => {
-    if (headerVisibility === "large") {
-      return "text-md font-bold";
-    } else if (isRoot) {
-      return "text-sm font-semibold";
-    } else {
-      return `text-sm`;
-    }
-  };
-
-  const getFocusClasses = (): string =>
-    isFocusEnabled ? "cursor-pointer hover:underline" : "";
-
-  const headerClasses = clsx(getColor(), getTextSize(), getFocusClasses());
+  const {
+    title = pathToShortName(valuePath),
+    color = "text-orange-900",
+    icon = undefined,
+    showColon = false,
+    isFocusEnabled = true,
+    textSize = "text-sm",
+    font = "font-mono",
+  } = standards;
 
   return (
     <div
       className={clsx(
         "leading-3 flex flex-row items-center",
-        shouldShowColon && "mr-3"
+        showColon && "mr-3"
       )}
     >
-      {isRootImport && (
-        <CodeBracketIcon size={12} className="mr-1 text-violet-900" />
-      )}
+      {icon}
       <div
-        className={clsx(!taggedName && "font-mono", headerClasses)}
+        className={clsx(
+          color,
+          textSize,
+          font,
+          isFocusEnabled && "cursor-pointer hover:underline"
+        )}
         onClick={() => isFocusEnabled && zoomIn(valuePath)}
       >
         {title}
       </div>
-      {shouldShowColon && <div className="text-gray-400 font-mono">:</div>}
+      {showColon && <div className="text-gray-400 font-mono">:</div>}
     </div>
   );
 };
