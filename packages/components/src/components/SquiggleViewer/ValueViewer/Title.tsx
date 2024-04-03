@@ -40,23 +40,36 @@ export const Title: FC<TitleProps> = ({
     taggedName ||
     pathToShortName(valuePath);
 
-  const disableFocus: boolean =
-    headerVisibility === "large" || isRoot || viewerType === "tooltip";
+  const isFocusEnabled: boolean = !(
+    headerVisibility === "large" ||
+    isRoot ||
+    viewerType === "tooltip"
+  );
 
   // We want to show colons after the keys, for dicts/arrays.
-  const hideColon: boolean =
-    headerVisibility === "large" || isRoot || isRootImport;
+  const shouldShowColon: boolean = !(
+    headerVisibility === "large" ||
+    isRoot ||
+    isRootImport
+  );
 
-  const color = (): string => {
+  const getColor = (): string => {
     const parentTag: string | undefined = parentValue?.tag;
-    if (isRootImport) return "text-violet-900";
-    if (headerVisibility === "large") return "text-stone-700";
-    if (isRoot) return "text-stone-500";
-    if (parentTag === "Array" && !taggedName) return "text-stone-400";
-    return "text-orange-900";
+    switch (true) {
+      case isRootImport:
+        return "text-violet-900";
+      case headerVisibility === "large":
+        return "text-stone-700";
+      case isRoot:
+        return "text-stone-500";
+      case parentTag === "Array" && !taggedName:
+        return "text-stone-400";
+      default:
+        return "text-orange-900";
+    }
   };
 
-  const textSize = (): string => {
+  const getTextSize = (): string => {
     if (headerVisibility === "large") {
       return "text-md font-bold";
     } else if (isRoot) {
@@ -66,26 +79,28 @@ export const Title: FC<TitleProps> = ({
     }
   };
 
-  const focusClasses = disableFocus ? "" : "cursor-pointer hover:underline";
+  const getFocusClasses = (): string =>
+    isFocusEnabled ? "cursor-pointer hover:underline" : "";
 
-  const headerClasses = (): string => {
-    return clsx(color(), textSize(), focusClasses);
-  };
+  const headerClasses = clsx(getColor(), getTextSize(), getFocusClasses());
 
   return (
     <div
-      className={`leading-3 flex flex-row items-center ${!hideColon || "mr-3"}`}
+      className={clsx(
+        "leading-3 flex flex-row items-center",
+        shouldShowColon && "mr-3"
+      )}
     >
       {isRootImport && (
         <CodeBracketIcon size={12} className="mr-1 text-violet-900" />
       )}
       <div
-        className={clsx(!taggedName && "font-mono", headerClasses())}
-        onClick={() => !disableFocus && zoomIn(valuePath)}
+        className={clsx(!taggedName && "font-mono", headerClasses)}
+        onClick={() => isFocusEnabled && zoomIn(valuePath)}
       >
         {title}
       </div>
-      {!hideColon && <div className="text-gray-400 font-mono">:</div>}
+      {shouldShowColon && <div className="text-gray-400 font-mono">:</div>}
     </div>
   );
 };
