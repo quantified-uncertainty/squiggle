@@ -20,20 +20,18 @@ builder.queryField("modelExports", (t) =>
       },
       resolve: (query, _, { input }, { session }) => {
         const modelId = input?.modelId;
-        if (!modelId) {
-          return [];
-        }
         return prisma.modelExport.findMany({
           ...query,
           where: {
-            ...(input.modelId && {
+            ...(modelId && {
               modelRevision: {
                 modelId: modelId,
               },
             }),
-            ...(input.variableName && {
-              variableName: input.variableName,
-            }),
+            ...(input &&
+              input.variableName && {
+                variableName: input.variableName,
+              }),
           },
           orderBy: {
             modelRevision: {
