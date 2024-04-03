@@ -64,6 +64,7 @@ export const Model = builder.prismaNode("Model", {
     currentRevision: t.relation("currentRevision", {
       nullable: false,
     }),
+
     revision: t.field({
       type: ModelRevision,
       args: {

@@ -5,8 +5,8 @@ import { ModelExport, ModelExportConnection } from "../types/ModelExport";
 
 const ModelExportQueryInput = builder.inputType("ModelExportQueryInput", {
   fields: (t) => ({
-    slugContains: t.string(),
-    owner: t.string(),
+    modelId: t.string(), // Add this field to filter by model ID
+    variableName: t.string(),
   }),
 });
 
@@ -15,9 +15,26 @@ builder.queryField("modelExports", (t) =>
     {
       type: ModelExport,
       cursor: "id",
-      resolve: (query, _, __, { session }) => {
+      args: {
+        input: t.arg({ type: ModelExportQueryInput }),
+      },
+      resolve: (query, _, { input }, { session }) => {
+        const modelId = input?.modelId;
+        if (!modelId) {
+          return [];
+        }
         return prisma.modelExport.findMany({
           ...query,
+          where: {
+            ...(input.modelId && {
+              modelRevision: {
+                modelId: modelId,
+              },
+            }),
+            ...(input.variableName && {
+              variableName: input.variableName,
+            }),
+          },
           orderBy: {
             modelRevision: {
               createdAt: "desc",

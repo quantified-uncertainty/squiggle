@@ -12,6 +12,46 @@ import { SquiggleModelExportPage } from "./SquiggleModelExportPage";
 
 import { ModelExportPageQuery } from "@/__generated__/ModelExportPageQuery.graphql";
 
+type ExportRevisions = ModelExportPageQuery["response"]["model"] extends infer T
+  ? T extends { exportRevisions: infer R }
+    ? R
+    : never
+  : never;
+
+const RevisionsPanel: FC<{
+  exportRevisions: ExportRevisions;
+  selected: string;
+  changeId: (id: string) => void;
+}> = ({ exportRevisions, selected, changeId }) => {
+  return (
+    <div className="w-[150px] ml-4 bg-gray-50 rounded-sm py-2 px-3 flex flex-col">
+      <h3 className="text-sm font-medium text-gray-700 border-b mb-1 pb-0.5">
+        Revisions
+      </h3>
+      <ul>
+        {exportRevisions
+          .toReversed()
+          .slice(0, 10)
+          .map((revision) => (
+            <li
+              key={revision.id}
+              onClick={() => changeId(revision.id)}
+              className={clsx(
+                "hover:text-gray-800 cursor-pointer hover:underline text-sm pt-0.5 pb-0.5",
+                revision.id === selected ? "text-blue-900" : "text-gray-400"
+              )}
+            >
+              {format(
+                new Date(revision.modelRevision.createdAtTimestamp),
+                "MMM dd, yyyy"
+              )}
+            </li>
+          ))}
+      </ul>
+    </div>
+  );
+};
+
 export const ModelExportPage: FC<{
   params: {
     owner: string;
@@ -59,7 +99,9 @@ export const ModelExportPage: FC<{
 
   const model = extractFromGraphqlErrorUnion(result, "Model");
 
-  const [selected, changeId] = useState<string>(model.exportRevisions[0].id);
+  const [selected, changeId] = useState<string>(
+    model.exportRevisions.at(-1)?.id || ""
+  );
 
   const content = model.exportRevisions.find(
     (revision) => revision.id === selected
@@ -77,32 +119,11 @@ export const ModelExportPage: FC<{
                 key={selected}
               />
             </div>
-            <div className="w-[200px] ml-4">
-              <div className="flex flex-col">
-                <h3 className="text-sm font-medium text-gray-700 border-b mb-1 pb-0.5">
-                  Revisions
-                </h3>
-                <ul>
-                  {model.exportRevisions.map((revision) => (
-                    <li
-                      key={revision.id}
-                      onClick={() => changeId(revision.id)}
-                      className={clsx(
-                        "hover:text-gray-900 cursor-pointer hover:underline text-sm pt-0.5 pb-0.5",
-                        revision.id === selected
-                          ? "text-blue-900"
-                          : "text-gray-400"
-                      )}
-                    >
-                      {format(
-                        new Date(revision.modelRevision.createdAtTimestamp),
-                        "MMM dd, yyyy"
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+            <RevisionsPanel
+              exportRevisions={model.exportRevisions}
+              selected={selected}
+              changeId={changeId}
+            />
           </div>
         );
       }
