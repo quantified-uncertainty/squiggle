@@ -1,5 +1,4 @@
 "use client";
-import { clsx } from "clsx";
 import { Session } from "next-auth";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
@@ -7,7 +6,7 @@ import { FC, PropsWithChildren } from "react";
 import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { isModelRoute, isModelSubroute } from "@/routes";
+import { isModelRoute } from "@/routes";
 
 import { PageFooter } from "../components/layout/RootLayout/PageFooter";
 import { PageMenu } from "../components/layout/RootLayout/PageMenu";
@@ -29,10 +28,9 @@ const InnerRootLayout: FC<PropsWithChildren> = ({ children }) => {
   const pathname = usePathname();
 
   const showFooter = !isModelRoute(pathname);
-  const backgroundColor = isModelSubroute(pathname) ? "bg-white" : "bg-gray-50";
 
   return (
-    <div className={clsx("min-h-screen flex flex-col", backgroundColor)}>
+    <div className={"min-h-screen flex flex-col bg-white"}>
       <PageMenu queryRef={queryData} />
       <div
         // This allows us to center children vertically if necessary, e.g. in `not-found.tsx`.
