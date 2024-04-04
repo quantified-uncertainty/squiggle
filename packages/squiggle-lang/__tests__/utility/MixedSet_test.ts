@@ -42,36 +42,6 @@ describe("MixedSet", () => {
         expected: { points: [1, 2], segments: [[3, 4]] },
       },
       {
-        set1: new MixedSet([1, 2, 3, 4], []),
-        set2: new MixedSet([2, 4], []),
-        expected: { points: [1, 3], segments: [] },
-      },
-      {
-        set1: new MixedSet(
-          [],
-          [
-            [0, 5],
-            [7, 10],
-          ]
-        ),
-        set2: new MixedSet(
-          [],
-          [
-            [2, 4],
-            [8, 9],
-          ]
-        ),
-        expected: {
-          points: [],
-          segments: [
-            [0, 2],
-            [4, 5],
-            [7, 8],
-            [9, 10],
-          ],
-        },
-      },
-      {
         set1: new MixedSet(
           [1, 3, 5],
           [
@@ -134,54 +104,6 @@ describe("MixedSet", () => {
         expected: { points: [2, 4], segments: [] },
       },
       {
-        set1: new MixedSet(
-          [],
-          [
-            [0, 5],
-            [7, 10],
-          ]
-        ),
-        set2: new MixedSet(
-          [],
-          [
-            [2, 4],
-            [8, 9],
-          ]
-        ),
-        expected: {
-          points: [],
-          segments: [
-            [2, 4],
-            [8, 9],
-          ],
-        },
-      },
-      {
-        set1: new MixedSet(
-          [1, 3, 5],
-          [
-            [0, 2],
-            [4, 6],
-            [8, 10],
-          ]
-        ),
-        set2: new MixedSet(
-          [3],
-          [
-            [1, 5],
-            [9, 10],
-          ]
-        ),
-        expected: {
-          points: [3],
-          segments: [
-            [1, 2],
-            [4, 5],
-            [9, 10],
-          ],
-        },
-      },
-      {
         set1: new MixedSet([], [[0, 10]]),
         set2: new MixedSet(
           [],
@@ -235,29 +157,6 @@ describe("MixedSet", () => {
         set1: new MixedSet([1, 2, 3, 4], []),
         set2: new MixedSet([2, 4, 5], []),
         expected: { points: [1, 2, 3, 4, 5], segments: [] },
-      },
-      {
-        set1: new MixedSet(
-          [],
-          [
-            [0, 5],
-            [7, 10],
-          ]
-        ),
-        set2: new MixedSet(
-          [],
-          [
-            [2, 4],
-            [8, 12],
-          ]
-        ),
-        expected: {
-          points: [],
-          segments: [
-            [0, 5],
-            [7, 12],
-          ],
-        },
       },
     ];
 

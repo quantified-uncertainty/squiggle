@@ -1,4 +1,4 @@
-import { pairwise } from "./E_A.js";
+import { pairwise, zip } from "./E_A.js";
 
 export type Range = readonly [number, number];
 
@@ -34,7 +34,8 @@ export class RangeSet {
   constructor(ranges: readonly Range[]) {
     if (!this.isValid(ranges)) {
       throw new Error(
-        "Invalid ranges: Ranges must be ordered and non-overlapping."
+        "Invalid ranges: Ranges must be ordered and non-overlapping. Ranges: " +
+          JSON.stringify(ranges)
       );
     }
 
@@ -87,6 +88,7 @@ export class RangeSet {
     return new RangeSet(mergedRanges);
   }
 
+  //Assumes ranges are ordered and non-overlapping
   intersection(other: RangeSet): RangeSet {
     const result: Range[] = [];
     let i = 0;
@@ -101,7 +103,10 @@ export class RangeSet {
       const end = Math.min(end1, end2);
 
       if (start <= end) {
-        result.push([start, end]);
+        if (start !== end) {
+          // Only add the range if it is not a single point
+          result.push([start, end]);
+        }
       }
 
       if (end1 < end2) {
@@ -131,11 +136,9 @@ export class RangeSet {
       return false;
     }
 
-    return this.ranges.every((range, index) => {
-      const [start1, end1] = range;
-      const [start2, end2] = other.ranges[index];
-      return start1 === start2 && end1 === end2;
-    });
+    return zip(this.ranges, other.ranges).every(
+      ([range1, range2]) => range1[0] === range2[0] && range1[1] === range2[1]
+    );
   }
 
   valid(): boolean {
@@ -151,12 +154,17 @@ export class RangeSet {
   }
 
   private isValid(ranges: readonly Range[]): boolean {
-    const isOrdered = (range1: Range, range2: Range): boolean => {
+    const isPairNonOverlapping = (range1: Range, range2: Range): boolean => {
       const [, prevEnd] = range1;
       const [currStart] = range2;
       return currStart > prevEnd;
     };
 
-    return pairwise(ranges, isOrdered).every(Boolean);
+    const eachRangeIsValid = ranges.every(([start, end]) => start < end);
+    const eachPairIsNonOverlapping = pairwise(
+      ranges,
+      isPairNonOverlapping
+    ).every(Boolean);
+    return eachRangeIsValid && eachPairIsNonOverlapping;
   }
 }

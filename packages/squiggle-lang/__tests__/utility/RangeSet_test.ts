@@ -65,6 +65,11 @@ describe("RangeSet", () => {
         expected: [],
       },
       {
+        set1: new RangeSet([[0, 5]]),
+        set2: new RangeSet([[6, 10]]),
+        expected: [],
+      },
+      {
         set1: new RangeSet([
           [0, 5],
           [7, 10],
@@ -77,6 +82,11 @@ describe("RangeSet", () => {
           [2, 4],
           [8, 9],
         ],
+      },
+      {
+        set1: new RangeSet([[0, 5]]),
+        set2: new RangeSet([[5, 10]]),
+        expected: [],
       },
     ];
 
@@ -109,14 +119,17 @@ describe("RangeSet", () => {
         set1: new RangeSet([
           [0, 5],
           [7, 10],
+          [12, 15],
+          [17, 20],
         ]),
         set2: new RangeSet([
-          [2, 4],
-          [8, 12],
+          [3, 11],
+          [13, 16],
         ]),
         expected: [
-          [0, 5],
-          [7, 12],
+          [0, 11],
+          [12, 16],
+          [17, 20],
         ],
       },
     ];
