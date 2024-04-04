@@ -70,14 +70,14 @@ export function isModelRelativeValuesRoute(url: string) {
 
 export function modelExportRoute({
   owner,
-  slug,
+  modelSlug,
   variableName,
 }: {
   owner: string;
-  slug: string;
+  modelSlug: string;
   variableName: string;
 }) {
-  const modelUrl = modelRoute({ owner, slug });
+  const modelUrl = modelRoute({ owner, slug: modelSlug });
   return `${modelUrl}/exports/${variableName}`;
 }
 

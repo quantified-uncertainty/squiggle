@@ -1,6 +1,7 @@
 import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 
 import { builder } from "@/graphql/builder";
+import { prisma } from "@/prisma";
 
 import { Owner } from "./Owner";
 
@@ -14,12 +15,13 @@ export const ModelExport = builder.prismaNode("ModelExport", {
     title: t.exposeString("title", { nullable: true }),
     owner: t.field({
       type: Owner,
-      // TODO - we need to extract fragment data from Owner query and call nestedSelection(...) for optimal performance.
-      select: {
-        modelRevision: {
-          select: {
+      resolve: async (modelExport, _, context) => {
+        //There might be a way to do this using "select" or "resolve", but I couldn't get those to work.
+        const modelRevision = await prisma.modelRevision.findUnique({
+          where: { id: modelExport.modelRevisionId },
+          include: {
             model: {
-              select: {
+              include: {
                 owner: {
                   include: {
                     user: true,
@@ -29,17 +31,23 @@ export const ModelExport = builder.prismaNode("ModelExport", {
               },
             },
           },
-        },
-      },
-      resolve: (modelExport) => {
-        const owner = modelExport.modelRevision.model.owner;
+        });
+
+        if (!modelRevision || !modelRevision.model) {
+          throw new Error("Invalid model revision or model");
+        }
+
+        const owner = modelRevision.model.owner;
         const result = owner.user ?? owner.group;
+
         if (!result) {
           throw new Error("Invalid owner object, missing user or group");
         }
+
         (result as any)["_owner"] = {
           type: owner.user ? "User" : "Group",
         };
+
         return result;
       },
     }),
