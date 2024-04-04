@@ -5,8 +5,9 @@ import { ModelExport, ModelExportConnection } from "../types/ModelExport";
 
 const ModelExportQueryInput = builder.inputType("ModelExportQueryInput", {
   fields: (t) => ({
-    modelId: t.string(), // Add this field to filter by model ID
+    modelId: t.string(),
     variableName: t.string(),
+    owner: t.string(),
   }),
 });
 
@@ -32,6 +33,9 @@ builder.queryField("modelExports", (t) =>
               input.variableName && {
                 variableName: input.variableName,
               }),
+            ...(input?.owner && {
+              modelRevision: { model: { owner: { slug: input.owner } } },
+            }),
           },
           orderBy: {
             modelRevision: {

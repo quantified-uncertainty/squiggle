@@ -6,6 +6,7 @@ import { getMyMembershipById } from "../helpers/groupHelpers";
 import { modelWhereHasAccess } from "../helpers/modelHelpers";
 import { GroupInvite, GroupInviteConnection } from "./GroupInvite";
 import { ModelConnection, modelConnectionHelpers } from "./Model";
+import { modelExportConnectionHelpers } from "./ModelExport";
 import { Owner } from "./Owner";
 
 export const MembershipRoleType = builder.enumType(MembershipRole, {
@@ -129,6 +130,40 @@ export const Group = builder.prismaNode("Group", {
           modelConnectionHelpers.resolve(user.asOwner.models, args, ctx),
       },
       ModelConnection
+    ),
+    modelExports: t.connection(
+      {
+        type: modelExportConnectionHelpers.ref,
+        select: (args, ctx, nestedSelection) => ({
+          asOwner: {
+            select: {
+              models: {
+                select: {
+                  currentRevision: {
+                    select: {
+                      exports: {
+                        ...modelExportConnectionHelpers.getQuery(
+                          args,
+                          ctx,
+                          nestedSelection
+                        ),
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }),
+        resolve: (user, args, ctx) => {
+          const exports =
+            user.asOwner?.models
+              .map((model) => model.currentRevision?.exports ?? [])
+              .flat() ?? [];
+          return modelExportConnectionHelpers.resolve(exports, args, ctx);
+        },
+      },
+      modelExportConnectionHelpers.ref
     ),
   }),
 });
