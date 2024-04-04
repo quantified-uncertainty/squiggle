@@ -252,15 +252,20 @@ function compileToContent(
         decoratedStatements.push(unwrappedAst);
         unwrappedAst = unwrappedAst.statement;
       }
-      const innerExpression = innerCompileAst(unwrappedAst, context);
 
-      if (innerExpression.kind !== "Assign") {
+      // duplicates cases for these types defined above - we have to do things
+      // in a different order here, can't `context.defineLocal` this var yet
+      if (
+        unwrappedAst.type !== "DefunStatement" &&
+        unwrappedAst.type !== "LetStatement"
+      ) {
         // Shouldn't happen, `ast.statement` is always compiled to `Assign`
         throw new ICompileError(
           "Can't apply a decorator to non-Assign expression",
           ast.location
         );
       }
+      let valueExpression = innerCompileAst(unwrappedAst.value, context);
 
       decoratedStatements.reverse();
       for (const decoratedStatement of decoratedStatements) {
@@ -268,12 +273,12 @@ function compileToContent(
           ast,
           `Tag.${decoratedStatement.decorator.name.value}`
         );
-        innerExpression.value.right = {
+        valueExpression = {
           ast: decoratedStatement.statement,
           ...expression.eCall(
             decoratorFn,
             [
-              innerExpression.value.right,
+              valueExpression,
               ...decoratedStatement.decorator.args.map((arg) =>
                 innerCompileAst(arg, context)
               ),
@@ -283,7 +288,12 @@ function compileToContent(
         };
       }
 
-      return innerExpression;
+      const name = unwrappedAst.variable.value;
+      context.defineLocal(name);
+      return expression.make("Assign", {
+        left: name,
+        right: valueExpression,
+      });
     }
     case "Decorator":
       throw new ICompileError("Can't compile Decorator node", ast.location);
