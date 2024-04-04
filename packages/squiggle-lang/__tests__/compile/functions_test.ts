@@ -40,4 +40,15 @@ describe("Compile functions", () => {
 )`,
     { pretty: true, mode: "full" }
   );
+
+  // https://github.com/quantified-uncertainty/squiggle/issues/3141;
+  // check that annotations are referenced by stack, not captured
+  testCompile(
+    "foo = [1,5]; fn(x:foo) = x",
+    [
+      "(Assign foo (Array 1 5))",
+      "(Assign fn (Lambda (.parameters (.annotated x (StackRef 0))) (StackRef 0)))",
+    ],
+    { mode: "statements" }
+  );
 });
