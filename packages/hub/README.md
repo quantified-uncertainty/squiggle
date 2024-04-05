@@ -79,3 +79,7 @@ Squiggle Hub is deployed on [Vercel](https://vercel.com/) automatically when the
 The production database is migrated by [this GitHub Action](https://github.com/quantified-uncertainty/squiggle/blob/main/.github/workflows/prisma-migrate-prod.yml).
 
 **Important: it should be invoked _before_ merging any PR that changes the schema.**
+
+# Dependencies
+
+https://github.com/nodejs/undici/issues/2954

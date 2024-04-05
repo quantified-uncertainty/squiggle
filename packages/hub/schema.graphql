@@ -67,6 +67,12 @@ type DeleteReusableGroupInviteTokenResult {
   group: Group!
 }
 
+type ElasticDocument {
+  id: ID!
+  title: String!
+  type: String!
+}
+
 type EmailGroupInvite implements GroupInvite & Node {
   email: String!
   group: Group!
@@ -489,6 +495,7 @@ type PageInfo {
 }
 
 type Query {
+  elasticSearch(query: String): [ElasticDocument!]!
   globalStatistics: GlobalStatistics!
   group(slug: String!): QueryGroupResult!
   groups(after: String, before: String, first: Int, input: GroupsQueryInput, last: Int): GroupConnection!
