@@ -179,6 +179,7 @@ type ModelEdge {
 type ModelExport implements Node {
   docstring: String!
   id: ID!
+  isCurrent: Boolean!
   modelRevision: ModelRevision!
   owner: Owner!
   title: String

@@ -248,6 +248,7 @@ model ModelExport {
   title           String?
   docstring       String        @default("")
   variableType    String        @default("OTHER")
+  isCurrent       Boolean       @default(false)
 
   @@unique([modelRevisionId, variableName], name: "uniqueKey")
 }

@@ -1,6 +1,7 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
+import { modelExportWhereHasAccess } from "../helpers/modelExportHelpers";
 import { ModelExport, ModelExportConnection } from "../types/ModelExport";
 
 const ModelExportQueryInput = builder.inputType("ModelExportQueryInput", {
@@ -24,6 +25,7 @@ builder.queryField("modelExports", (t) =>
         return prisma.modelExport.findMany({
           ...query,
           where: {
+            ...modelExportWhereHasAccess(session),
             ...(modelId && {
               modelRevision: {
                 modelId: modelId,
@@ -36,6 +38,7 @@ builder.queryField("modelExports", (t) =>
             ...(input?.owner && {
               modelRevision: { model: { owner: { slug: input.owner } } },
             }),
+            isCurrent: true,
           },
           orderBy: {
             modelRevision: {

@@ -142,6 +142,17 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       const self = await getSelf(session);
 
       const model = await prisma.$transaction(async (tx) => {
+        if (existingModel.currentRevisionId) {
+          await tx.modelExport.updateMany({
+            where: {
+              modelRevisionId: existingModel.currentRevisionId,
+            },
+            data: {
+              isCurrent: false,
+            },
+          });
+        }
+
         const revision = await tx.modelRevision.create({
           data: {
             squiggleSnippet: {
@@ -175,6 +186,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
                     variableType,
                     docstring: docstring ?? undefined,
                     title: title ?? null,
+                    isCurrent: true,
                   })
                 ),
               },
@@ -188,7 +200,6 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
             },
           },
         });
-
         const model = await tx.model.update({
           where: {
             id: revision.model.id,

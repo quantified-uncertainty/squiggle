@@ -12,6 +12,7 @@ export const ModelExport = builder.prismaNode("ModelExport", {
     variableName: t.exposeString("variableName"),
     variableType: t.exposeString("variableType"),
     docstring: t.exposeString("docstring"),
+    isCurrent: t.exposeBoolean("isCurrent"),
     title: t.exposeString("title", { nullable: true }),
     owner: t.field({
       type: Owner,
