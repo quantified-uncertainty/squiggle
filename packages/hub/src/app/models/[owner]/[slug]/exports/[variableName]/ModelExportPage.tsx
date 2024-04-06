@@ -12,11 +12,10 @@ import { SquiggleModelExportPage } from "./SquiggleModelExportPage";
 
 import { ModelExportPageQuery } from "@/__generated__/ModelExportPageQuery.graphql";
 
-type ExportRevisions = ModelExportPageQuery["response"]["model"] extends infer T
-  ? T extends { exportRevisions: infer R }
-    ? R
-    : never
-  : never;
+type ExportRevisions = Extract<
+  ModelExportPageQuery["response"]["model"],
+  { __typename: "Model" }
+>["exportRevisions"];
 
 const RevisionsPanel: FC<{
   exportRevisions: ExportRevisions;
@@ -68,13 +67,6 @@ export const ModelExportPage: FC<{
           ... on Model {
             id
             slug
-            currentRevision {
-              id
-              content {
-                __typename
-                ...SquiggleModelExportPage
-              }
-            }
             exportRevisions(variableId: $variableName) {
               id
               variableName
@@ -111,9 +103,9 @@ export const ModelExportPage: FC<{
           <div className="flex">
             <div className="flex-1 w-full">
               <SquiggleModelExportPage
+                key={selected}
                 variableName={params.variableName}
                 contentRef={content}
-                key={selected}
               />
             </div>
             <RevisionsPanel
