@@ -1,6 +1,6 @@
 import { BaseValue } from "./BaseValue.js";
 
-export class VString extends BaseValue {
+export class VString extends BaseValue<"String", string> {
   readonly type = "String";
 
   constructor(public value: string) {
@@ -13,6 +13,14 @@ export class VString extends BaseValue {
 
   isEqual(other: VString) {
     return this.value === other.value;
+  }
+
+  serialize() {
+    return this.value;
+  }
+
+  static deserialize(value: string) {
+    return new VString(value);
   }
 }
 

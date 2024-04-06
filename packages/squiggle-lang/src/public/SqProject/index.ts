@@ -1,8 +1,7 @@
 import { isBindingStatement } from "../../ast/utils.js";
 import { defaultEnv, Env } from "../../dist/env.js";
 import { AST } from "../../index.js";
-import * as Library from "../../library/index.js";
-import { Bindings } from "../../reducer/Stack.js";
+import { getStdLib } from "../../library/index.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { vDict, VDict } from "../../value/VDict.js";
@@ -27,13 +26,11 @@ function getNeedToRunError() {
 
 type Options = {
   linker?: SqLinker;
-  stdLib?: Bindings;
   environment?: Env;
 };
 
 export class SqProject {
   private readonly items: Map<string, ProjectItem>;
-  private stdLib: Bindings;
   private environment: Env;
   private linker?: SqLinker; // if not present, imports are forbidden
 
@@ -48,7 +45,6 @@ export class SqProject {
 
   constructor(options?: Options) {
     this.items = new Map();
-    this.stdLib = options?.stdLib ?? Library.getStdLib();
     this.environment = options?.environment ?? defaultEnv;
     this.linker = options?.linker;
   }
@@ -61,13 +57,13 @@ export class SqProject {
     return this.environment;
   }
 
+  getStdLib() {
+    return getStdLib();
+  }
+
   setEnvironment(environment: Env) {
     // TODO - should we invalidate all outputs?
     this.environment = environment;
-  }
-
-  getStdLib(): Bindings {
-    return this.stdLib;
   }
 
   getSourceIds(): string[] {
@@ -350,7 +346,7 @@ export class SqProject {
     return Result.Ok(exports);
   }
 
-  // Includes implicit imports ("continues"), explicit imports, and StdLib.
+  // Includes implicit imports ("continues") and explicit imports.
   private async buildExternals(
     sourceId: string,
     pendingIds: Set<string>
@@ -360,8 +356,6 @@ export class SqProject {
     const rImports = this.getImports(sourceId);
     if (!rImports) throw new Error("Internal logic error"); // Shouldn't happen, we just called parseImports.
     if (!rImports.ok) return rImports; // There's something wrong with imports, that's fatal.
-
-    const stdlibExternals = vDict(this.getStdLib());
 
     const implicitImports = await this.importsToBindings(
       pendingIds,
@@ -376,7 +370,6 @@ export class SqProject {
     if (!explicitImports.ok) return explicitImports;
 
     return Result.Ok({
-      stdlib: stdlibExternals,
       implicitImports: implicitImports.value,
       explicitImports: explicitImports.value,
     });

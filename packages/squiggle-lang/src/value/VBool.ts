@@ -1,6 +1,6 @@
 import { BaseValue } from "./BaseValue.js";
 
-export class VBool extends BaseValue {
+export class VBool extends BaseValue<"Bool", boolean> {
   readonly type = "Bool";
 
   override get publicName() {
@@ -17,6 +17,14 @@ export class VBool extends BaseValue {
 
   isEqual(other: VBool) {
     return this.value === other.value;
+  }
+
+  override serialize() {
+    return this.value;
+  }
+
+  static deserialize(value: boolean) {
+    return new VBool(value);
   }
 }
 

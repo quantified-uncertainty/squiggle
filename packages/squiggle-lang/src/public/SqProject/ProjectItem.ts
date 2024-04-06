@@ -1,20 +1,20 @@
+import Worker from "web-worker";
+
 import { AST, parse } from "../../ast/parse.js";
 import { ICompileError } from "../../errors/IError.js";
-import { compileAst } from "../../expression/compile.js";
 import { Env, SqProject } from "../../index.js";
-import { Reducer } from "../../reducer/Reducer.js";
-import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
-import { vDict, VDict } from "../../value/VDict.js";
-import { SqCompileError, SqError, SqRuntimeError } from "../SqError.js";
+import { deserializeValue, serializeValue } from "../../value/serialize.js";
+import { VDict, vDictFromArray } from "../../value/VDict.js";
+import { SqCompileError, SqError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
+import { SquiggleJobResult } from "./worker.js";
 
 // source -> ast -> imports -> result/bindings/exports
 
 export type Externals = {
-  stdlib: VDict;
   implicitImports: VDict;
   explicitImports: VDict;
 };
@@ -189,10 +189,6 @@ export class ProjectItem {
   }
 
   async run(environment: Env, externals: Externals, project: SqProject) {
-    const _externals = externals.stdlib
-      .merge(externals.implicitImports)
-      .merge(externals.explicitImports);
-
     if (this.output) {
       return;
     }
@@ -208,59 +204,36 @@ export class ProjectItem {
       return;
     }
 
-    const expression = Result.errMap(
-      compileAst(this.ast.value, _externals.value),
-      (e) => new SqCompileError(e)
-    );
+    const _externals = vDictFromArray([])
+      .merge(externals.implicitImports)
+      .merge(externals.explicitImports);
 
-    if (!expression.ok) {
-      this.failRun(expression.value);
-      return;
-    }
+    const workerUrl = new URL("./worker.js", import.meta.url);
+    const worker = new (Worker as any)(workerUrl, { type: "module" });
 
-    const reducer = new Reducer(environment);
+    worker.postMessage({
+      environment,
+      ast: this.ast.value,
+      externals: serializeValue(_externals),
+      sourceId: this.sourceId,
+    });
 
-    try {
-      if (expression.value.kind !== "Program") {
-        // mostly for TypeScript, so that we could access `expression.value.exports`
-        throw new Error("Expected Program expression");
-      }
-
-      const result = reducer.evaluate(expression.value);
-
-      const exportNames = new Set(expression.value.value.exports);
-      const bindings = ImmutableMap<string, Value>(
-        Object.entries(expression.value.value.bindings).map(
-          ([name, offset]) => {
-            let value = reducer.stack.get(offset);
-            if (exportNames.has(name)) {
-              value = value.mergeTags({
-                exportData: {
-                  sourceId: this.sourceId,
-                  path: [name],
-                },
-              });
-            }
-            return [name, value];
-          }
-        )
-      );
-      const exports = bindings.filter(
-        (value, _) => value.tags?.exportData() !== undefined
-      );
-      this.output = Ok({
-        result,
-        bindings: vDict(bindings),
-        exports: vDict(exports).mergeTags({
-          exportData: {
-            sourceId: this.sourceId,
-            path: [],
-          },
-        }),
-        externals,
+    return new Promise<void>((resolve) => {
+      worker.addEventListener("message", (e: any) => {
+        const data: SquiggleJobResult = e.data;
+        this.output = Ok({
+          result: deserializeValue(data.result),
+          bindings: deserializeValue(data.bindings) as VDict,
+          exports: deserializeValue(data.exports) as VDict,
+          externals,
+        });
+        worker.terminate();
+        resolve();
       });
-    } catch (e: unknown) {
-      this.failRun(new SqRuntimeError(reducer.errorFromException(e), project));
-    }
+    });
+
+    // } catch (e: unknown) {
+    //   this.failRun(new SqRuntimeError(reducer.errorFromException(e), project));
+    // }
   }
 }

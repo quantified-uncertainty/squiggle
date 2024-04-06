@@ -6,7 +6,12 @@ import { Indexable } from "./mixins.js";
 
 type ValueMap = ImmutableMap<string, Value>;
 
-export class VDict extends BaseValue implements Indexable {
+type SerializedDict = [string, number][];
+
+export class VDict
+  extends BaseValue<"Dict", SerializedDict>
+  implements Indexable
+{
   readonly type = "Dict";
 
   override get publicName() {
@@ -80,6 +85,14 @@ export class VDict extends BaseValue implements Indexable {
 
   size(): number {
     return this.value.size;
+  }
+
+  override serialize(traverse: (value: Value) => number): SerializedDict {
+    return [...this.value.entries()].map(([k, v]) => [k, traverse(v)]);
+  }
+
+  static deserialize(payload: SerializedDict, load: (id: number) => Value) {
+    return new VDict(ImmutableMap(payload.map(([k, v]) => [k, load(v)])));
   }
 }
 

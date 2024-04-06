@@ -1,5 +1,6 @@
 import { Lambda } from "../reducer/lambda.js";
 import { BaseValue } from "./BaseValue.js";
+import { Value, vLambda } from "./index.js";
 
 export type Specification = {
   name: string;
@@ -7,7 +8,16 @@ export type Specification = {
   validate: Lambda;
 };
 
-export class VSpecification extends BaseValue {
+type SerializedSpecification = {
+  name: string;
+  documentation: string;
+  validateId: number;
+};
+
+export class VSpecification extends BaseValue<
+  "Specification",
+  SerializedSpecification
+> {
   readonly type = "Specification";
 
   constructor(public value: Specification) {
@@ -20,6 +30,32 @@ export class VSpecification extends BaseValue {
 
   isEqual(other: VSpecification) {
     return this.value === other.value;
+  }
+
+  override serialize(
+    traverse: (value: Value) => number
+  ): SerializedSpecification {
+    return {
+      name: this.value.name,
+      documentation: this.value.documentation,
+      validateId: traverse(vLambda(this.value.validate)),
+    };
+  }
+
+  static deserialize(
+    payload: SerializedSpecification,
+    load: (id: number) => Value
+  ): VSpecification {
+    const validate = load(payload.validateId);
+    if (validate.type !== "Lambda") {
+      throw new Error("Expected lambda");
+    }
+
+    return new VSpecification({
+      name: payload.name,
+      documentation: payload.documentation,
+      validate: validate.value,
+    });
   }
 }
 

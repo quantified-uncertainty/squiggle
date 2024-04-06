@@ -1,13 +1,18 @@
 import { Lambda } from "../reducer/lambda.js";
 import { BaseValue } from "./BaseValue.js";
-import { Value } from "./index.js";
+import { Value, vLambda } from "./index.js";
 
 export type TableChart = {
   data: readonly Value[];
   columns: readonly { fn: Lambda; name: string | undefined }[];
 };
 
-export class VTableChart extends BaseValue {
+type SerializedTableChart = {
+  dataIds: number[];
+  columns: readonly { fnId: number; name: string | undefined }[];
+};
+
+export class VTableChart extends BaseValue<"TableChart", SerializedTableChart> {
   readonly type = "TableChart";
 
   override get publicName() {
@@ -20,6 +25,35 @@ export class VTableChart extends BaseValue {
 
   valueToString() {
     return `Table with ${this.value.columns.length}x${this.value.data.length} elements`;
+  }
+
+  override serialize(traverse: (value: Value) => number): SerializedTableChart {
+    return {
+      dataIds: this.value.data.map(traverse),
+      columns: this.value.columns.map(({ fn, name }) => ({
+        fnId: traverse(vLambda(fn)),
+        name,
+      })),
+    };
+  }
+
+  static deserialize(
+    _value: SerializedTableChart,
+    load: (id: number) => Value
+  ): VTableChart {
+    return new VTableChart({
+      data: _value.dataIds.map(load),
+      columns: _value.columns.map(({ fnId, name }) => {
+        const lambda = load(fnId);
+        if (lambda.type !== "Lambda") {
+          throw new Error("Expected lambda");
+        }
+        return {
+          fn: lambda.value,
+          name,
+        };
+      }),
+    });
   }
 }
 

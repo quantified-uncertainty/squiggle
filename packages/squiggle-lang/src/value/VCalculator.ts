@@ -1,6 +1,7 @@
 import { REOther } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
 import { BaseValue } from "./BaseValue.js";
+import { Value } from "./index.js";
 import { Input } from "./VInput.js";
 
 export type Calculator = {
@@ -12,7 +13,9 @@ export type Calculator = {
   sampleCount?: number;
 };
 
-export class VCalculator extends BaseValue {
+type SerializedCalculator = unknown;
+
+export class VCalculator extends BaseValue<"Calculator", SerializedCalculator> {
   readonly type = "Calculator";
 
   private error: REOther | null = null;
@@ -48,6 +51,17 @@ export class VCalculator extends BaseValue {
 
   valueToString() {
     return `Calculator`;
+  }
+
+  override serialize(): SerializedCalculator {
+    throw new Error("Method not implemented.");
+  }
+
+  static deserialize(
+    payload: SerializedCalculator,
+    visit: (id: number) => Value
+  ): VCalculator {
+    throw new Error("Method not implemented.");
   }
 }
 

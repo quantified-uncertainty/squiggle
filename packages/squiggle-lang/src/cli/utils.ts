@@ -5,6 +5,7 @@ import path from "path";
 import { Env } from "../dist/env.js";
 import { SqLinker } from "../public/SqLinker.js";
 import { SqProject } from "../public/SqProject/index.js";
+import { deserializeValue, serializeValue } from "../value/serialize.js";
 import { bold, red } from "./colors.js";
 
 export async function measure(callback: () => Promise<void>) {
@@ -95,6 +96,13 @@ export async function run(args: RunArgs) {
         if (output.value.result.tag === "Void") {
           printLines(output.value.bindings.toString());
         } else {
+          console.log(
+            JSON.stringify(serializeValue(output.value.result._value), null, 2)
+          );
+          output.value.result._value = deserializeValue(
+            serializeValue(output.value.result._value)
+          ) as any;
+
           printLines(output.value.result.toString());
         }
         break;

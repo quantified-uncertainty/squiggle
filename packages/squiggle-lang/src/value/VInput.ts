@@ -30,7 +30,7 @@ export type Input = CommonInputArgs &
   );
 
 export type InputType = "text" | "textArea" | "checkbox" | "select";
-export class VInput extends BaseValue {
+export class VInput extends BaseValue<"Input", Input> {
   readonly type = "Input";
 
   constructor(public value: Input) {
@@ -52,6 +52,14 @@ export class VInput extends BaseValue {
 
   isEqual(other: VInput) {
     return lodashIsEqual(this.value, other.value);
+  }
+
+  override serialize(): Input {
+    return this.value;
+  }
+
+  static deserialize(value: Input): VInput {
+    return vInput(value);
   }
 }
 

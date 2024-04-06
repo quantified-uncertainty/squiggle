@@ -5,7 +5,7 @@ import { BaseValue } from "./BaseValue.js";
 import { isEqual, Value } from "./index.js";
 import { Indexable } from "./mixins.js";
 
-export class VArray extends BaseValue implements Indexable {
+export class VArray extends BaseValue<"Array", number[]> implements Indexable {
   readonly type = "Array";
 
   override get publicName() {
@@ -51,6 +51,14 @@ export class VArray extends BaseValue implements Indexable {
       }
     }
     return true;
+  }
+
+  override serialize(traverse: (value: Value) => number): number[] {
+    return this.value.map(traverse);
+  }
+
+  static deserialize(valueIds: number[], load: (id: number) => Value): VArray {
+    return new VArray(valueIds.map(load));
   }
 }
 export const vArray = (v: readonly Value[]) => new VArray(v);

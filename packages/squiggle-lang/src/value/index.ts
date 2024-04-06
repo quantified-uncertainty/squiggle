@@ -1,4 +1,5 @@
 import { REOther } from "../errors/messages.js";
+import { BaseValue } from "./BaseValue.js";
 // Specific value classes
 import { VArray } from "./VArray.js";
 import { VBool } from "./VBool.js";
@@ -54,6 +55,15 @@ export type Value =
   | VDomain
   | VSpecification
   | VVoid;
+
+type SerializedPayload<V> = V extends BaseValue<string, infer B> ? B : never;
+
+export type SerializedNode = {
+  [k in Value["type"]]: {
+    type: k;
+    payload: SerializedPayload<Extract<Value, { type: k }>>;
+  };
+}[Value["type"]];
 
 export function isEqual(a: Value, b: Value): boolean {
   if (a.type !== b.type) {

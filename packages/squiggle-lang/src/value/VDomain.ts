@@ -23,7 +23,7 @@ function domainIsEqual(valueA: Domain, valueB: Domain) {
   }
 }
 
-export class VDomain extends BaseValue implements Indexable {
+export class VDomain extends BaseValue<"Domain", unknown> implements Indexable {
   readonly type = "Domain";
 
   constructor(public value: Domain) {
@@ -56,6 +56,14 @@ export class VDomain extends BaseValue implements Indexable {
 
   isEqual(other: VDomain) {
     return domainIsEqual(this.value, other.value);
+  }
+
+  override serialize(): unknown {
+    throw new Error("Method not implemented.");
+  }
+
+  static deserialize(payload: unknown): VDomain {
+    throw new Error("Method not implemented.");
   }
 }
 

@@ -69,7 +69,7 @@ export class UserDefinedLambda extends BaseLambda {
   readonly type = "UserDefinedLambda";
   parameters: UserDefinedLambdaParameter[];
   name?: string;
-  private expression: Expression;
+  expression: Expression;
 
   constructor(
     name: string | undefined,

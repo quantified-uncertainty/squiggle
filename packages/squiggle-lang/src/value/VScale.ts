@@ -82,7 +82,7 @@ function scaleIsEqual(valueA: Scale, valueB: Scale) {
 export const SCALE_SYMLOG_DEFAULT_CONSTANT = 0.0001;
 export const SCALE_POWER_DEFAULT_CONSTANT = 0.1;
 
-export class VScale extends BaseValue {
+export class VScale extends BaseValue<"Scale", Scale> {
   readonly type = "Scale";
 
   constructor(public value: Scale) {
@@ -112,6 +112,14 @@ export class VScale extends BaseValue {
 
   isEqual(other: VScale) {
     return scaleIsEqual(this.value, other.value);
+  }
+
+  override serialize(): Scale {
+    return this.value;
+  }
+
+  static deserialize(payload: Scale): VScale {
+    return new VScale(payload);
   }
 }
 

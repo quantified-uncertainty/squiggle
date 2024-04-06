@@ -1,3 +1,4 @@
+import { SerializedNode, type Value } from "./index.js";
 import { ValueTags, ValueTagsType } from "./valueTags.js";
 
 /*
@@ -11,12 +12,12 @@ If you add a new value class, don't forget to add it to the "Value" union type b
 
 "vBlah" functions are just for the sake of brevity, so that we don't have to prefix any value creation with "new".
 */
-export abstract class BaseValue {
-  abstract type: string;
+export abstract class BaseValue<Type extends string, SerializedPayload> {
+  abstract type: Type;
   readonly tags: ValueTags | undefined;
 
   // This is a getter, not a field, for performance reasons.
-  get publicName() {
+  get publicName(): string {
     return this.type;
   }
 
@@ -45,4 +46,15 @@ export abstract class BaseValue {
     const argsStr = `{${this.tags.toString()}}`;
     return `${valueString}, with tags ${argsStr}`;
   }
+
+  abstract serialize(traverse: (value: Value) => number): SerializedPayload;
+
+  serializeToNode(traverse: (value: Value) => number): SerializedNode {
+    return {
+      type: this.type,
+      payload: this.serialize(traverse),
+    } as SerializedNode;
+  }
+
+  // Deserialization is implemented outside of this class; abstract static methods are not supported in TypeScript.
 }
