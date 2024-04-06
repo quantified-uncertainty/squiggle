@@ -152,6 +152,7 @@ enum MembershipRole {
 type Model implements Node {
   createdAtTimestamp: Float!
   currentRevision: ModelRevision!
+  exportRevisions(after: String, before: String, first: Int, last: Int, variableId: String!): ModelExportRevisionsConnection!
   id: ID!
   isEditable: Boolean!
   isPrivate: Boolean!
@@ -181,6 +182,31 @@ type ModelExport implements Node {
   title: String
   variableName: String!
   variableType: String!
+}
+
+type ModelExportConnection {
+  edges: [ModelExportEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ModelExportEdge {
+  cursor: String!
+  node: ModelExport!
+}
+
+input ModelExportQueryInput {
+  modelId: String
+  variableName: String
+}
+
+type ModelExportRevisionsConnection {
+  edges: [ModelExportRevisionsConnectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ModelExportRevisionsConnectionEdge {
+  cursor: String!
+  node: ModelExport!
 }
 
 type ModelRevision implements Node {
@@ -494,6 +520,7 @@ type Query {
   groups(after: String, before: String, first: Int, input: GroupsQueryInput, last: Int): GroupConnection!
   me: Me!
   model(input: QueryModelInput!): QueryModelResult!
+  modelExports(after: String, before: String, first: Int, input: ModelExportQueryInput, last: Int): ModelExportConnection!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
 
   """Admin-only query for listing models in /admin UI"""

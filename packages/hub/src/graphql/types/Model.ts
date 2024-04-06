@@ -3,6 +3,7 @@ import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 import { builder } from "@/graphql/builder";
 
 import { decodeGlobalIdWithTypename } from "../utils";
+import { ModelExport } from "./ModelExport";
 import { ModelRevision, ModelRevisionConnection } from "./ModelRevision";
 import { Owner } from "./Owner";
 
@@ -62,6 +63,7 @@ export const Model = builder.prismaNode("Model", {
     currentRevision: t.relation("currentRevision", {
       nullable: false,
     }),
+
     revision: t.field({
       type: ModelRevision,
       args: {
@@ -97,6 +99,19 @@ export const Model = builder.prismaNode("Model", {
       },
       ModelRevisionConnection
     ),
+    exportRevisions: t.connection({
+      type: ModelExport,
+      args: exportRevisionConnectionHelpers.getArgs(),
+      select: (args, ctx, nestedSelection) => ({
+        revisions: exportRevisionConnectionHelpers.getQuery(
+          args,
+          ctx,
+          nestedSelection
+        ),
+      }),
+      resolve: (model, args, ctx) =>
+        exportRevisionConnectionHelpers.resolve(model.revisions, args, ctx),
+    }),
   }),
 });
 
@@ -109,4 +124,35 @@ export const modelConnectionHelpers = prismaConnectionHelpers(
   builder,
   "Model",
   { cursor: "id" }
+);
+
+const exportRevisionConnectionHelpers = prismaConnectionHelpers(
+  builder,
+  "ModelRevision",
+  {
+    cursor: "id",
+    args: (t) => ({
+      variableId: t.string({ required: true }),
+    }),
+    select: (nodeSelection, args) => ({
+      exports: nodeSelection({
+        where: {
+          variableName: args.variableId,
+        },
+      }),
+    }),
+    query: (args) => ({
+      where: {
+        exports: {
+          some: {
+            variableName: args.variableId,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc" as const,
+      },
+    }),
+    resolveNode: (revision) => revision.exports[0],
+  }
 );
