@@ -1,36 +1,27 @@
+import { UnionRef } from "@pothos/core";
+
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
 import { NotFoundError } from "../errors/NotFoundError";
 import { RelativeValuesExport } from "./RelativeValuesExport";
-
-export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
-  id: { field: "id" },
-  fields: (t) => ({
-    code: t.exposeString("code"),
-    version: t.exposeString("version"),
-    seed: t.exposeString("seed"),
-    autorunMode: t.exposeBoolean("autorunMode", { nullable: true }),
-    sampleCount: t.exposeInt("sampleCount", { nullable: true }),
-    xyPointLength: t.exposeInt("xyPointLength", { nullable: true }),
-  }),
-});
+import { SquiggleSnippet } from "./SquiggleSnippet";
 
 // TODO - turn into interface?
-export const ModelContent = builder.unionType("ModelContent", {
+const ModelContent: UnionRef<
+  {
+    id: string;
+    code: string;
+    version: string;
+  },
+  {
+    id: string;
+    code: string;
+    version: string;
+  }
+> = builder.unionType("ModelContent", {
   types: [SquiggleSnippet],
   resolveType: () => SquiggleSnippet,
-});
-
-builder.prismaNode("ModelExport", {
-  id: { field: "id" },
-  fields: (t) => ({
-    modelRevision: t.relation("modelRevision"),
-    variableName: t.exposeString("variableName"),
-    variableType: t.exposeString("variableType"),
-    docstring: t.exposeString("docstring"),
-    title: t.exposeString("title", { nullable: true }),
-  }),
 });
 
 export const ModelRevision = builder.prismaNode("ModelRevision", {
