@@ -29,24 +29,21 @@ const RevisionsPanel: FC<{
         Revisions
       </h3>
       <ul>
-        {exportRevisions
-          .toReversed()
-          .slice(0, 10)
-          .map((revision) => (
-            <li
-              key={revision.id}
-              onClick={() => changeId(revision.id)}
-              className={clsx(
-                "hover:text-gray-800 cursor-pointer hover:underline text-sm pt-0.5 pb-0.5",
-                revision.id === selected ? "text-blue-900" : "text-gray-400"
-              )}
-            >
-              {format(
-                new Date(revision.modelRevision.createdAtTimestamp),
-                "MMM dd, yyyy"
-              )}
-            </li>
-          ))}
+        {exportRevisions.map((revision) => (
+          <li
+            key={revision.id}
+            onClick={() => changeId(revision.id)}
+            className={clsx(
+              "hover:text-gray-800 cursor-pointer hover:underline text-sm pt-0.5 pb-0.5",
+              revision.id === selected ? "text-blue-900" : "text-gray-400"
+            )}
+          >
+            {format(
+              new Date(revision.modelRevision.createdAtTimestamp),
+              "MMM dd, yyyy"
+            )}
+          </li>
+        ))}
       </ul>
     </div>
   );

@@ -113,6 +113,11 @@ export const Model = builder.prismaNode("Model", {
             },
             variableName: args.variableId,
           },
+          orderBy: {
+            modelRevision: {
+              createdAt: "desc",
+            },
+          },
         });
 
         return modelExports;
