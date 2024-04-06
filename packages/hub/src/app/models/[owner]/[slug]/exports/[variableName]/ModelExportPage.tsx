@@ -2,33 +2,36 @@
 import clsx from "clsx";
 import { format } from "date-fns";
 import { FC, useState } from "react";
-import { graphql } from "react-relay";
+import { graphql, usePaginationFragment } from "react-relay";
 
+import { LoadMore } from "@/components/LoadMore";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 
 import { SquiggleModelExportPage } from "./SquiggleModelExportPage";
 
+import {
+  ModelExportPage$data,
+  ModelExportPage$key,
+} from "@/__generated__/ModelExportPage.graphql";
 import { ModelExportPageQuery } from "@/__generated__/ModelExportPageQuery.graphql";
 
-type ExportRevisions = Extract<
-  ModelExportPageQuery["response"]["model"],
-  { __typename: "Model" }
->["exportRevisions"];
+type ExportRevisions = ModelExportPage$data["exportRevisions"];
 
 const RevisionsPanel: FC<{
   exportRevisions: ExportRevisions;
   selected: string;
   changeId: (id: string) => void;
-}> = ({ exportRevisions, selected, changeId }) => {
+  loadNext?: (count: number) => void;
+}> = ({ exportRevisions, selected, changeId, loadNext }) => {
   return (
     <div className="w-[150px] ml-4 bg-gray-50 rounded-sm py-2 px-3 flex flex-col">
       <h3 className="text-sm font-medium text-gray-700 border-b mb-1 pb-0.5">
         Revisions
       </h3>
       <ul>
-        {exportRevisions.map((revision) => (
+        {exportRevisions.edges.map(({ node: revision }) => (
           <li
             key={revision.id}
             onClick={() => changeId(revision.id)}
@@ -44,6 +47,7 @@ const RevisionsPanel: FC<{
           </li>
         ))}
       </ul>
+      {loadNext && <LoadMore loadNext={loadNext} size="small" />}
     </div>
   );
 };
@@ -67,7 +71,35 @@ export const ModelExportPage: FC<{
           ... on Model {
             id
             slug
-            exportRevisions(variableId: $variableName) {
+            ...ModelExportPage @arguments(variableName: $variableName)
+          }
+        }
+      }
+    `,
+    query
+  );
+
+  const model = extractFromGraphqlErrorUnion(result, "Model");
+
+  const {
+    data: { exportRevisions },
+    loadNext,
+  } = usePaginationFragment<ModelExportPageQuery, ModelExportPage$key>(
+    graphql`
+      fragment ModelExportPage on Model
+      @argumentDefinitions(
+        cursor: { type: "String" }
+        count: { type: "Int", defaultValue: 20 }
+        variableName: { type: "String!" }
+      )
+      @refetchable(queryName: "ModelExportPagePaginationQuery") {
+        exportRevisions(
+          first: $count
+          after: $cursor
+          variableId: $variableName
+        ) @connection(key: "ModelExportPage_exportRevisions") {
+          edges {
+            node {
               id
               variableName
               modelRevision {
@@ -80,21 +112,22 @@ export const ModelExportPage: FC<{
               }
             }
           }
+          pageInfo {
+            hasNextPage
+          }
         }
       }
     `,
-    query
+    model
   );
-
-  const model = extractFromGraphqlErrorUnion(result, "Model");
 
   const [selected, changeId] = useState<string>(
-    model.exportRevisions.at(-1)?.id || ""
+    exportRevisions.edges.at(0)?.node.id || ""
   );
 
-  const content = model.exportRevisions.find(
-    (revision) => revision.id === selected
-  )?.modelRevision.content;
+  const content = exportRevisions.edges.find(
+    (edge) => edge.node.id === selected
+  )?.node.modelRevision.content;
 
   if (content) {
     switch (content.__typename) {
@@ -109,9 +142,12 @@ export const ModelExportPage: FC<{
               />
             </div>
             <RevisionsPanel
-              exportRevisions={model.exportRevisions}
+              exportRevisions={exportRevisions}
               selected={selected}
               changeId={changeId}
+              loadNext={
+                exportRevisions.pageInfo.hasNextPage ? loadNext : undefined
+              }
             />
           </div>
         );

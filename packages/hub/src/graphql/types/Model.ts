@@ -1,7 +1,6 @@
 import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 
 import { builder } from "@/graphql/builder";
-import { prisma } from "@/prisma";
 
 import { decodeGlobalIdWithTypename } from "../utils";
 import { ModelExport } from "./ModelExport";
@@ -100,28 +99,18 @@ export const Model = builder.prismaNode("Model", {
       },
       ModelRevisionConnection
     ),
-    exportRevisions: t.field({
-      type: [ModelExport],
-      args: {
-        variableId: t.arg.string({ required: true }),
-      },
-      resolve: async (model, args) => {
-        const modelExports = await prisma.modelExport.findMany({
-          where: {
-            modelRevision: {
-              model: { id: model.id },
-            },
-            variableName: args.variableId,
-          },
-          orderBy: {
-            modelRevision: {
-              createdAt: "desc",
-            },
-          },
-        });
-
-        return modelExports;
-      },
+    exportRevisions: t.connection({
+      type: ModelExport,
+      args: exportRevisionConnectionHelpers.getArgs(),
+      select: (args, ctx, nestedSelection) => ({
+        revisions: exportRevisionConnectionHelpers.getQuery(
+          args,
+          ctx,
+          nestedSelection
+        ),
+      }),
+      resolve: (model, args, ctx) =>
+        exportRevisionConnectionHelpers.resolve(model.revisions, args, ctx),
     }),
   }),
 });
@@ -135,4 +124,35 @@ export const modelConnectionHelpers = prismaConnectionHelpers(
   builder,
   "Model",
   { cursor: "id" }
+);
+
+const exportRevisionConnectionHelpers = prismaConnectionHelpers(
+  builder,
+  "ModelRevision",
+  {
+    cursor: "id",
+    args: (t) => ({
+      variableId: t.string({ required: true }),
+    }),
+    select: (nodeSelection, args) => ({
+      exports: nodeSelection({
+        where: {
+          variableName: args.variableId,
+        },
+      }),
+    }),
+    query: (args) => ({
+      where: {
+        exports: {
+          some: {
+            variableName: args.variableId,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc" as const,
+      },
+    }),
+    resolveNode: (revision) => revision.exports[0],
+  }
 );
