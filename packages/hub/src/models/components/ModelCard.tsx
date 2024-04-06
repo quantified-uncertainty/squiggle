@@ -46,7 +46,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
     slug: model.slug,
   });
 
-  const modelExports = model.currentRevision.exports.map(
+  const modelExports = model.currentRevision.exports?.map(
     ({ variableName, variableType, title }) => ({
       variableName,
       variableType,

@@ -1,11 +1,12 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
-import { SqProject, SqValue } from "@quri/squiggle-lang";
+import { SqLinker, SqProject, SqValue } from "@quri/squiggle-lang";
 
 import { DEFAULT_SEED } from "@/constants";
 
 import { ModelExport } from "../../components/dist/src/components/SquigglePlayground";
-import { squiggleHubLinker } from "./squiggle/components/linker";
+import { NotFoundError } from "./graphql/errors/NotFoundError";
+import { parseSourceId } from "./squiggle/components/linker";
 
 const prisma = new PrismaClient();
 
@@ -30,7 +31,45 @@ type SquiggleOutput = {
     }
 );
 
-export async function runSquiggle2(code: string): Promise<SquiggleOutput> {
+export const squiggleLinker: SqLinker = {
+  resolve(name) {
+    return name;
+  },
+  async loadSource(sourceId: string) {
+    const { owner, slug } = parseSourceId(sourceId);
+
+    const model = await prisma.model.findFirst({
+      where: {
+        slug,
+        owner: { slug: owner },
+      },
+      include: {
+        currentRevision: {
+          include: {
+            squiggleSnippet: true,
+          },
+        },
+      },
+    });
+
+    if (!model) {
+      throw new NotFoundError();
+    }
+
+    const content = model?.currentRevision?.squiggleSnippet;
+
+    if (content) {
+      return content.code;
+    } else {
+      throw new NotFoundError();
+    }
+  },
+};
+
+export async function runSquiggle2(
+  currentRevisionId: string,
+  code: string
+): Promise<SquiggleOutput> {
   const MAIN = "main";
 
   const env = {
@@ -40,7 +79,7 @@ export async function runSquiggle2(code: string): Promise<SquiggleOutput> {
   };
 
   const project = SqProject.create({
-    linker: squiggleHubLinker,
+    linker: squiggleLinker,
   });
 
   project.setSource(MAIN, code);
@@ -54,9 +93,32 @@ export async function runSquiggle2(code: string): Promise<SquiggleOutput> {
       .map((e) => ({
         variableName: e[0],
         variableType: e[1].tag,
-        title: e[1].title(),
-        docstring: e[1].context?.docstring() || "",
+        title: e[1].tags.name() ? e[1].tags.name() : e[1].title() || "",
+        docstring: e[1].tags.doc() || "",
       }));
+
+    for (const e of _exports) {
+      await prisma.modelExport.upsert({
+        where: {
+          uniqueKey: {
+            modelRevisionId: currentRevisionId,
+            variableName: e.variableName,
+          },
+        },
+        update: {
+          variableType: e.variableType,
+          title: e.title,
+          docstring: e.docstring,
+        },
+        create: {
+          modelRevision: { connect: { id: currentRevisionId } },
+          variableName: e.variableName,
+          variableType: e.variableType,
+          title: e.title,
+          docstring: e.docstring,
+        },
+      });
+    }
   }
 
   return outputR.ok
@@ -73,12 +135,11 @@ export async function runSquiggle2(code: string): Promise<SquiggleOutput> {
       };
 }
 
-async function main() {
+async function main(ownerSlug: string, slug: string) {
   const model = await prisma.model.findFirst({
     where: {
-      slug: "test-model",
-      owner: { slug: "QURI-main" },
-      // no need to check access - will be checked by Model authScopes
+      slug,
+      owner: { slug: ownerSlug },
     },
     include: {
       currentRevision: {
@@ -90,18 +151,19 @@ async function main() {
   });
 
   const firstCode = model?.currentRevision?.squiggleSnippet?.code;
-  if (!firstCode) {
-    throw new Error("No code found");
+  if (!model?.currentRevisionId || !firstCode) {
+    throw new Error(`No code found for model ${ownerSlug}/${slug}`);
   }
 
   const startTime = performance.now();
-  let response = await runSquiggle2(firstCode);
+  let response = await runSquiggle2(model?.currentRevisionId, firstCode);
   const endTime = performance.now();
   const diff = endTime - startTime;
 
   console.log(firstCode, diff, response);
 }
-main()
+
+main("ozzie", "test-model")
   .catch((error) => {
     console.error(error);
     process.exit(1);

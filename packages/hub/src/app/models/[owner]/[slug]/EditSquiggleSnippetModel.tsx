@@ -54,13 +54,11 @@ import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippe
 import {
   EditSquiggleSnippetModelMutation,
   RelativeValuesExportInput,
-  SquiggleModelExportInput,
 } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 
 export type SquiggleSnippetFormShape = {
   code: string;
   relativeValuesExports: RelativeValuesExportInput[];
-  exports: SquiggleModelExportInput[];
 };
 
 type OnSubmit = (
@@ -200,14 +198,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           slug: item.definition.slug,
         },
       })),
-      exports: revision.exports.map((item) => ({
-        title: item.title,
-        variableName: item.variableName,
-        variableType: item.variableType,
-        docstring: item.docstring,
-      })),
     };
-  }, [content, revision.relativeValuesExports, revision.exports]);
+  }, [content, revision.relativeValuesExports]);
 
   const { form, onSubmit, inFlight } = useMutationForm<
     SquiggleSnippetFormShape,
@@ -245,7 +237,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           xyPointLength: content.xyPointLength,
         },
         relativeValuesExports: formData.relativeValuesExports,
-        exports: formData.exports,
         comment: extraData?.comment,
         slug: model.slug,
         owner: model.owner.slug,
@@ -406,9 +397,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       playgroundProps
     )
   ) {
-    playgroundProps.onExportsChange = (exports) => {
-      form.setValue("exports", exports);
-    };
   }
 
   playgroundProps.environment = {

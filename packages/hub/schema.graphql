@@ -453,7 +453,6 @@ union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeV
 input MutationUpdateSquiggleSnippetModelInput {
   comment: String
   content: SquiggleSnippetContentInput!
-  exports: [SquiggleModelExportInput!]
   owner: String!
   relativeValuesExports: [RelativeValuesExportInput!]
   slug: String!
@@ -648,13 +647,6 @@ union SearchableObject = Group | Model | RelativeValuesDefinition | User
 type SquiggleErrorOutput implements SquiggleOutput {
   errorString: String!
   isCached: Boolean!
-}
-
-input SquiggleModelExportInput {
-  docstring: String
-  title: String
-  variableName: String!
-  variableType: String!
 }
 
 type SquiggleOkOutput implements SquiggleOutput {
