@@ -152,7 +152,7 @@ enum MembershipRole {
 type Model implements Node {
   createdAtTimestamp: Float!
   currentRevision: ModelRevision!
-  exportRevisions(variableId: String!): [ModelExport!]!
+  exportRevisions(after: String, before: String, first: Int, last: Int, variableId: String!): ModelExportRevisionsConnection!
   id: ID!
   isEditable: Boolean!
   isPrivate: Boolean!
@@ -197,6 +197,16 @@ type ModelExportEdge {
 input ModelExportQueryInput {
   modelId: String
   variableName: String
+}
+
+type ModelExportRevisionsConnection {
+  edges: [ModelExportRevisionsConnectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ModelExportRevisionsConnectionEdge {
+  cursor: String!
+  node: ModelExport!
 }
 
 type ModelRevision implements Node {
