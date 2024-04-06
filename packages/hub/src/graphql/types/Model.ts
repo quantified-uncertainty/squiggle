@@ -106,20 +106,15 @@ export const Model = builder.prismaNode("Model", {
         variableId: t.arg.string({ required: true }),
       },
       resolve: async (model, args) => {
-        const modelRevisions = await prisma.modelRevision.findMany({
-          where: { modelId: model.id },
-          include: {
-            exports: {
-              where: {
-                variableName: args.variableId,
-              },
+        const modelExports = await prisma.modelExport.findMany({
+          where: {
+            modelRevision: {
+              model: { id: model.id },
             },
+            variableName: args.variableId,
           },
         });
 
-        const modelExports = modelRevisions.flatMap(
-          (revision) => revision.exports
-        );
         return modelExports;
       },
     }),
