@@ -79,3 +79,13 @@ Squiggle Hub is deployed on [Vercel](https://vercel.com/) automatically when the
 The production database is migrated by [this GitHub Action](https://github.com/quantified-uncertainty/squiggle/blob/main/.github/workflows/prisma-migrate-prod.yml).
 
 **Important: it should be invoked _before_ merging any PR that changes the schema.**
+
+## Debugging
+
+If you get an error like:
+
+```
+PothosSchemaError [GraphQLError]: Ref ObjectRef<ModelRevisionRun> has not been implemented
+```
+
+Make sure that any new files in `src/graphql/types` have been added to `src/schema.ts`, or something that references that.

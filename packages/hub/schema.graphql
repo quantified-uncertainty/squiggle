@@ -193,6 +193,7 @@ type ModelRevision implements Node {
   id: ID!
   model: Model!
   relativeValuesExports: [RelativeValuesExport!]!
+  runs: [ModelRevisionRun!]!
 }
 
 type ModelRevisionConnection {
@@ -215,6 +216,24 @@ union ModelRevisionForRelativeValuesResult = BaseError | NotFoundError | Relativ
 input ModelRevisionForRelativeValuesSlugOwnerInput {
   owner: String!
   slug: String!
+}
+
+type ModelRevisionRun implements Node {
+  endedAtTimestamp: Float!
+  errors: [String!]!
+  id: ID!
+  modelRevision: ModelRevision!
+  startedAtTimestamp: Float!
+}
+
+type ModelRevisionRunConnection {
+  edges: [ModelRevisionRunEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ModelRevisionRunEdge {
+  cursor: String!
+  node: ModelRevisionRun!
 }
 
 type ModelsByVersion {

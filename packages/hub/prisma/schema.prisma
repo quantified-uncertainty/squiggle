@@ -222,9 +222,22 @@ model ModelRevision {
   exports               ModelExport[]
 
   // required by Prisma, but unused since `model` field should point at the same entity
-  currentRevisionModel Model? @relation("CurrentRevision")
+  currentRevisionModel Model?               @relation("CurrentRevision")
+  builds               ModelRevisionBuild[]
 
   @@index([modelId])
+}
+
+model ModelRevisionBuild {
+  id              String        @id @default(cuid())
+  createdAt       DateTime      @default(now())
+  modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
+  modelRevisionId String
+  runTime         Float
+  errors          String[]
+
+  @@unique([modelRevisionId], name: "uniqueKey")
+  @@index([modelRevisionId])
 }
 
 model SquiggleSnippet {

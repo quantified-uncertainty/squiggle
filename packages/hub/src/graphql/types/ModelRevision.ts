@@ -44,6 +44,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     relativeValuesExports: t.relation("relativeValuesExports"),
     exports: t.relation("exports"),
     model: t.relation("model"),
+    runs: t.relation("runs"),
     author: t.relation("author", { nullable: true }),
     comment: t.exposeString("comment"),
     content: t.field({
