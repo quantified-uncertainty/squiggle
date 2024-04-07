@@ -252,15 +252,20 @@ function compileToContent(
         decoratedStatements.push(unwrappedAst);
         unwrappedAst = unwrappedAst.statement;
       }
-      const innerExpression = innerCompileAst(unwrappedAst, context);
 
-      if (innerExpression.kind !== "Assign") {
+      // duplicates cases for these types defined above - we have to do things
+      // in a different order here, can't `context.defineLocal` this var yet
+      if (
+        unwrappedAst.type !== "DefunStatement" &&
+        unwrappedAst.type !== "LetStatement"
+      ) {
         // Shouldn't happen, `ast.statement` is always compiled to `Assign`
         throw new ICompileError(
           "Can't apply a decorator to non-Assign expression",
           ast.location
         );
       }
+      let valueExpression = innerCompileAst(unwrappedAst.value, context);
 
       decoratedStatements.reverse();
       for (const decoratedStatement of decoratedStatements) {
@@ -268,12 +273,12 @@ function compileToContent(
           ast,
           `Tag.${decoratedStatement.decorator.name.value}`
         );
-        innerExpression.value.right = {
+        valueExpression = {
           ast: decoratedStatement.statement,
           ...expression.eCall(
             decoratorFn,
             [
-              innerExpression.value.right,
+              valueExpression,
               ...decoratedStatement.decorator.args.map((arg) =>
                 innerCompileAst(arg, context)
               ),
@@ -283,7 +288,12 @@ function compileToContent(
         };
       }
 
-      return innerExpression;
+      const name = unwrappedAst.variable.value;
+      context.defineLocal(name);
+      return expression.make("Assign", {
+        left: name,
+        right: valueExpression,
+      });
     }
     case "Decorator":
       throw new ICompileError("Can't compile Decorator node", ast.location);
@@ -320,36 +330,43 @@ function compileToContent(
         innerCompileAst(ast.key, context),
       ]);
     case "Lambda": {
-      context.startFunctionScope();
-      const args: expression.LambdaExpressionParameter[] = [];
-      for (let i = 0; i < ast.args.length; i++) {
-        const astArg = ast.args[i];
-
-        let arg: expression.LambdaExpressionParameter;
-        if (astArg.type === "Identifier") {
-          arg = { name: astArg.value, annotation: undefined };
-        } else if (astArg.type === "IdentifierWithAnnotation") {
-          arg = {
-            name: astArg.variable,
-            annotation: innerCompileAst(astArg.annotation, context),
+      const parameters: expression.LambdaExpressionParameter[] = [];
+      for (const astParameter of ast.args) {
+        let parameter: expression.LambdaExpressionParameter;
+        if (astParameter.type === "Identifier") {
+          parameter = { name: astParameter.value, annotation: undefined };
+        } else if (astParameter.type === "IdentifierWithAnnotation") {
+          parameter = {
+            name: astParameter.variable,
+            annotation: innerCompileAst(astParameter.annotation, context),
           };
         } else {
           // should never happen
           throw new ICompileError(
-            `Internal error: argument ${astArg.type} is not an identifier`,
+            `Internal error: argument ${astParameter.type} is not an identifier`,
             ast.location
           );
         }
-        args.push(arg);
-        context.defineLocal(arg.name);
+        parameters.push(parameter);
       }
+
+      // It's important that we start function scope after we've collected all
+      // parameters. Parameter annotations can include expressions, and those
+      // should be compiled and evaluated in the outer scope, not when the
+      // function is called.
+      // See also: https://github.com/quantified-uncertainty/squiggle/issues/3141
+      context.startFunctionScope();
+      for (const parameter of parameters) {
+        context.defineLocal(parameter.name);
+      }
+
       const body = innerCompileAst(ast.body, context);
       const captures = context.currentScopeCaptures();
       context.finishScope();
       return expression.make("Lambda", {
         name: ast.name,
         captures,
-        parameters: args,
+        parameters,
         body,
       });
     }
