@@ -3,7 +3,7 @@ import { AST, Env, SqCompileError } from "../../index.js";
 import { getStdLib } from "../../library/index.js";
 import { Reducer } from "../../reducer/Reducer.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
-import { errMap } from "../../utility/result.js";
+import { errMap, result } from "../../utility/result.js";
 import { Value, vDict } from "../../value/index.js";
 import {
   deserializeValue,
@@ -24,8 +24,13 @@ export type SquiggleJobResult = {
   exports: SerializedBundle;
 };
 
-addEventListener("message", (e) => {
-  const { environment, ast, externals, sourceId }: SquiggleJob = e.data;
+export type SquiggleWorkerResponse = {
+  type: "result";
+  payload: result<SquiggleJobResult, string>;
+};
+
+function processJob(job: SquiggleJob): SquiggleJobResult {
+  const { environment, ast, externals, sourceId } = job;
 
   const externalsValue = deserializeValue(externals);
   if (externalsValue.type !== "Dict") {
@@ -38,7 +43,9 @@ addEventListener("message", (e) => {
   );
 
   if (!expressionResult.ok) {
-    throw new Error("Expected expression to be ok");
+    throw new Error(
+      `Expected expression to be ok, got: ${expressionResult.value}`
+    );
   }
   const expression = expressionResult.value;
 
@@ -70,7 +77,7 @@ addEventListener("message", (e) => {
     (value, _) => value.tags?.exportData() !== undefined
   );
 
-  const output = {
+  return {
     result: serializeValue(result),
     bindings: serializeValue(vDict(bindings)),
     exports: serializeValue(
@@ -82,6 +89,24 @@ addEventListener("message", (e) => {
       })
     ),
   };
+}
 
-  postMessage(output);
+function postTypedMessage(data: SquiggleWorkerResponse) {
+  postMessage(data);
+}
+
+addEventListener("message", (e) => {
+  // TODO - validate e.data?
+  try {
+    const jobResult = processJob(e.data);
+    postTypedMessage({
+      type: "result",
+      payload: { ok: true, value: jobResult },
+    } satisfies SquiggleWorkerResponse);
+  } catch (e: unknown) {
+    postTypedMessage({
+      type: "result",
+      payload: { ok: false, value: String(e) },
+    });
+  }
 });

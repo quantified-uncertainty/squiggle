@@ -4,13 +4,13 @@ import { AST, parse } from "../../ast/parse.js";
 import { ICompileError } from "../../errors/IError.js";
 import { Env, SqProject } from "../../index.js";
 import * as Result from "../../utility/result.js";
-import { Ok, result } from "../../utility/result.js";
+import { Err, Ok, result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
 import { deserializeValue, serializeValue } from "../../value/serialize.js";
 import { VDict, vDictFromArray } from "../../value/VDict.js";
-import { SqCompileError, SqError } from "../SqError.js";
+import { SqCompileError, SqError, SqOtherError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
-import { SquiggleJobResult } from "./worker.js";
+import { SquiggleWorkerResponse } from "./worker.js";
 
 // source -> ast -> imports -> result/bindings/exports
 
@@ -220,13 +220,20 @@ export class ProjectItem {
 
     return new Promise<void>((resolve) => {
       worker.addEventListener("message", (e: any) => {
-        const data: SquiggleJobResult = e.data;
-        this.output = Ok({
-          result: deserializeValue(data.result),
-          bindings: deserializeValue(data.bindings) as VDict,
-          exports: deserializeValue(data.exports) as VDict,
-          externals,
-        });
+        const data: SquiggleWorkerResponse = e.data;
+        if (data.type !== "result")
+          throw new Error("Expected result message from worker");
+
+        if (data.payload.ok) {
+          this.output = Ok({
+            result: deserializeValue(data.payload.value.result),
+            bindings: deserializeValue(data.payload.value.bindings) as VDict,
+            exports: deserializeValue(data.payload.value.exports) as VDict,
+            externals,
+          });
+        } else {
+          this.output = Err(new SqOtherError(data.payload.value));
+        }
         worker.terminate();
         resolve();
       });
