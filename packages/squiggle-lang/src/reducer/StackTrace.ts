@@ -1,5 +1,4 @@
-import { LocationRange } from "peggy";
-
+import { LocationRange } from "../ast/parse.js";
 import { FrameStack } from "./FrameStack.js";
 
 export class StackTraceFrame {

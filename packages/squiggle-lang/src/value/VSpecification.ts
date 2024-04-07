@@ -1,6 +1,7 @@
 import { Lambda } from "../reducer/lambda.js";
 import { BaseValue } from "./BaseValue.js";
 import { Value, vLambda } from "./index.js";
+import { SerializationStorage } from "./serialize.js";
 
 export type Specification = {
   name: string;
@@ -32,13 +33,13 @@ export class VSpecification extends BaseValue<
     return this.value === other.value;
   }
 
-  override serialize(
-    traverse: (value: Value) => number
+  override serializePayload(
+    storage: SerializationStorage
   ): SerializedSpecification {
     return {
       name: this.value.name,
       documentation: this.value.documentation,
-      validateId: traverse(vLambda(this.value.validate)),
+      validateId: storage.serializeValue(vLambda(this.value.validate)),
     };
   }
 

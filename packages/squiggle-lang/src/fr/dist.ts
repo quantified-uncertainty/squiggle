@@ -1,5 +1,15 @@
 import { argumentError, otherError } from "../dist/DistError.js";
-import * as SymbolicDist from "../dist/SymbolicDist.js";
+import * as BernoulliJs from "../dist/SymbolicDist/Bernoulli.js";
+import * as BetaJs from "../dist/SymbolicDist/Beta.js";
+import * as CauchyJs from "../dist/SymbolicDist/Cauchy.js";
+import * as ExponentialJs from "../dist/SymbolicDist/Exponential.js";
+import * as GammaJs from "../dist/SymbolicDist/Gamma.js";
+import * as SymbolicDist from "../dist/SymbolicDist/index.js";
+import * as LogisticJs from "../dist/SymbolicDist/Logistic.js";
+import * as LognormalJs from "../dist/SymbolicDist/Lognormal.js";
+import * as PointMassJs from "../dist/SymbolicDist/PointMass.js";
+import * as TriangularJs from "../dist/SymbolicDist/Triangular.js";
+import * as UniformJs from "../dist/SymbolicDist/Uniform.js";
 import { REDistributionError } from "../errors/messages.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
@@ -68,7 +78,7 @@ export const library: FRFunction[] = [
     definitions: [
       makeDefinition([frDist], frDist, ([dist]) => dist),
       makeDefinition([frNumber], frDistSymbolic, ([v]) =>
-        unwrapSymDistResult(SymbolicDist.PointMass.make(v))
+        unwrapSymDistResult(PointMassJs.PointMass.make(v))
       ),
     ],
   }),
@@ -138,13 +148,13 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
     displaySection: "Distributions",
     definitions: [
       makeTwoArgsSamplesetDist(
-        (mu, sigma) => SymbolicDist.Lognormal.make({ mu, sigma }),
+        (mu, sigma) => LognormalJs.Lognormal.make({ mu, sigma }),
         "mu",
         "sigma"
       ),
       ...CI_CONFIG.map((entry) =>
         makeCIDist(entry.lowKey, entry.highKey, (low, high) =>
-          SymbolicDist.Lognormal.fromCredibleInterval({
+          LognormalJs.Lognormal.fromCredibleInterval({
             low,
             high,
             probability: entry.probability,
@@ -152,7 +162,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
         )
       ),
       makeMeanStdevDist((mean, stdev) =>
-        SymbolicDist.Lognormal.fromMeanAndStdev({ mean, stdev })
+        LognormalJs.Lognormal.fromMeanAndStdev({ mean, stdev })
       ),
     ],
   }),
@@ -162,7 +172,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
     displaySection: "Distributions",
     definitions: [
       makeTwoArgsSamplesetDist(
-        (low, high) => SymbolicDist.Uniform.make({ low, high }),
+        (low, high) => UniformJs.Uniform.make({ low, high }),
         "low",
         "high"
       ),
@@ -177,12 +187,12 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
     displaySection: "Distributions",
     definitions: [
       makeTwoArgsSamplesetDist(
-        (alpha, beta) => SymbolicDist.Beta.make({ alpha, beta }),
+        (alpha, beta) => BetaJs.Beta.make({ alpha, beta }),
         "alpha",
         "beta"
       ),
       makeMeanStdevDist((mean, stdev) =>
-        SymbolicDist.Beta.fromMeanAndStdev({ mean, stdev })
+        BetaJs.Beta.fromMeanAndStdev({ mean, stdev })
       ),
     ],
   }),
@@ -192,7 +202,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
     displaySection: "Distributions",
     definitions: [
       makeTwoArgsSamplesetDist(
-        (local, scale) => SymbolicDist.Cauchy.make({ local, scale }),
+        (local, scale) => CauchyJs.Cauchy.make({ local, scale }),
         "location",
         "scale"
       ),
@@ -204,7 +214,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
     displaySection: "Distributions",
     definitions: [
       makeTwoArgsSamplesetDist(
-        (shape, scale) => SymbolicDist.Gamma.make({ shape, scale }),
+        (shape, scale) => GammaJs.Gamma.make({ shape, scale }),
         "shape",
         "scale"
       ),
@@ -216,7 +226,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
     displaySection: "Distributions",
     definitions: [
       makeTwoArgsSamplesetDist(
-        (location, scale) => SymbolicDist.Logistic.make({ location, scale }),
+        (location, scale) => LogisticJs.Logistic.make({ location, scale }),
         "location",
         "scale"
       ),
@@ -241,7 +251,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
               )
             );
           }
-          return SymbolicDist.Lognormal.fromCredibleInterval({
+          return LognormalJs.Lognormal.fromCredibleInterval({
             low,
             high,
             probability: 0.9,
@@ -258,7 +268,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
     displaySection: "Distributions",
     definitions: [
       makeOneArgSamplesetDist(
-        (rate) => SymbolicDist.Exponential.make(rate),
+        (rate) => ExponentialJs.Exponential.make(rate),
         "rate"
       ),
     ],
@@ -268,7 +278,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
     examples: [makeFnExample("bernoulli(0.5)")],
     displaySection: "Distributions",
     definitions: [
-      makeOneArgSamplesetDist((p) => SymbolicDist.Bernoulli.make(p), "p"),
+      makeOneArgSamplesetDist((p) => BernoulliJs.Bernoulli.make(p), "p"),
     ],
   }),
   maker.make({
@@ -284,7 +294,7 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
         ],
         frSampleSetDist,
         ([low, medium, high], reducer) => {
-          const result = SymbolicDist.Triangular.make({ low, medium, high });
+          const result = TriangularJs.Triangular.make({ low, medium, high });
           if (!result.ok) {
             throw new REDistributionError(otherError(result.value));
           }

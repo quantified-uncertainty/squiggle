@@ -14,7 +14,8 @@ import {
 import { Env } from "../env.js";
 import * as PointSetDist from "../PointSetDist.js";
 import * as SampleSetDist from "../SampleSetDist/index.js";
-import * as SymbolicDist from "../SymbolicDist.js";
+import * as BaseSymbolicDistJs from "../SymbolicDist/BaseSymbolicDist.js";
+import * as SymbolicDist from "../SymbolicDist/index.js";
 
 // Checks if operation is possible, returns undefined if everything is ok.
 const validateInputs = (
@@ -70,8 +71,8 @@ const symbolicStrategy: StrategyImplementation = ({
   arithmeticOperation,
 }) => {
   if (
-    t1 instanceof SymbolicDist.SymbolicDist &&
-    t2 instanceof SymbolicDist.SymbolicDist
+    t1 instanceof BaseSymbolicDistJs.BaseSymbolicDist &&
+    t2 instanceof BaseSymbolicDistJs.BaseSymbolicDist
   ) {
     const result = SymbolicDist.tryAnalyticalSimplification(
       t1,

@@ -55,7 +55,12 @@ export type Plot = CommonPlotArgs &
       }
   );
 
-export class VPlot extends BaseValue<"Plot", unknown> implements Indexable {
+type SerializedPlot = null;
+
+export class VPlot
+  extends BaseValue<"Plot", SerializedPlot>
+  implements Indexable
+{
   readonly type = "Plot";
 
   constructor(public value: Plot) {
@@ -93,11 +98,11 @@ export class VPlot extends BaseValue<"Plot", unknown> implements Indexable {
     throw new REOther("Trying to access non-existent field");
   }
 
-  override serialize(traverse: (value: Value) => number): unknown {
+  override serializePayload(): SerializedPlot {
     throw new Error("Method not implemented.");
   }
 
-  static deserialize(value: unknown): VPlot {
+  static deserialize(value: SerializedPlot): VPlot {
     throw new Error("Method not implemented.");
   }
 }

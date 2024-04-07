@@ -4,8 +4,15 @@ import { REArrayIndexNotFound, REOther } from "../errors/messages.js";
 import { BaseValue } from "./BaseValue.js";
 import { isEqual, Value } from "./index.js";
 import { Indexable } from "./mixins.js";
+import { SerializationStorage } from "./serialize.js";
 
-export class VArray extends BaseValue<"Array", number[]> implements Indexable {
+// list of value ids
+type SerializedArray = number[];
+
+export class VArray
+  extends BaseValue<"Array", SerializedArray>
+  implements Indexable
+{
   readonly type = "Array";
 
   override get publicName() {
@@ -53,12 +60,15 @@ export class VArray extends BaseValue<"Array", number[]> implements Indexable {
     return true;
   }
 
-  override serialize(traverse: (value: Value) => number): number[] {
-    return this.value.map(traverse);
+  override serializePayload(storage: SerializationStorage): SerializedArray {
+    return this.value.map((element) => storage.serializeValue(element));
   }
 
-  static deserialize(valueIds: number[], load: (id: number) => Value): VArray {
-    return new VArray(valueIds.map(load));
+  static deserialize(
+    serializedValue: SerializedArray,
+    load: (id: number) => Value
+  ): VArray {
+    return new VArray(serializedValue.map(load));
   }
 }
 export const vArray = (v: readonly Value[]) => new VArray(v);

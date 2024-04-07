@@ -1,4 +1,4 @@
-import { SerializedNode, Value } from "./index.js";
+import { SerializedValue, Value } from "./index.js";
 import { VArray } from "./VArray.js";
 import { VBool } from "./VBool.js";
 import { VCalculator } from "./VCalculator.js";
@@ -17,18 +17,18 @@ import { VString } from "./VString.js";
 import { VTableChart } from "./VTableChart.js";
 import { VVoid } from "./VVoid.js";
 
-export type SerializedValue = {
-  nodes: SerializedNode[];
+export type SerializedBundle = {
+  values: SerializedValue[];
   pos: number;
 };
 
-class Storage {
+export class SerializationStorage {
   index: Map<Value, number>;
-  nodes: SerializedNode[];
+  values: SerializedValue[];
 
   constructor() {
     this.index = new Map();
-    this.nodes = [];
+    this.values = [];
   }
 
   serializeValue(value: Value): number {
@@ -37,27 +37,27 @@ class Storage {
       return cachedId;
     }
 
-    const node = value.serializeToNode((v) => this.serializeValue(v));
+    const serializedValue = value.serialize(this);
 
-    const id = this.nodes.length;
+    const id = this.values.length;
     this.index.set(value, id);
-    this.nodes.push(node);
+    this.values.push(serializedValue);
     return id;
   }
 }
 
-export function serializeValue(value: Value): SerializedValue {
-  const storage = new Storage();
+export function serializeValue(value: Value): SerializedBundle {
+  const storage = new SerializationStorage();
   const id = storage.serializeValue(value);
 
   return {
-    nodes: storage.nodes,
+    values: storage.values,
     pos: id,
   };
 }
 
-export function deserializeValue(serializedValue: SerializedValue): Value {
-  const { nodes } = serializedValue;
+export function deserializeValue(serializedValue: SerializedBundle): Value {
+  const { values: nodes } = serializedValue;
 
   // sparse array
   const visited: Value[] = [];

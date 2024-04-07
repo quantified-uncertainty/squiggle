@@ -15,7 +15,7 @@ export class VString extends BaseValue<"String", string> {
     return this.value === other.value;
   }
 
-  serialize() {
+  serializePayload() {
     return this.value;
   }
 

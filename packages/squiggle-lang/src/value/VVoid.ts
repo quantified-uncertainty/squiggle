@@ -11,7 +11,7 @@ export class VVoid extends BaseValue<"Void", null> {
     return "()";
   }
 
-  override serialize() {
+  override serializePayload() {
     return null;
   }
 

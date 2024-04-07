@@ -3,7 +3,8 @@ import { DistError } from "../../../dist/DistError.js";
 import { Env } from "../../../dist/env.js";
 import { PointSetDist } from "../../../dist/PointSetDist.js";
 import { SampleSetDist } from "../../../dist/SampleSetDist/index.js";
-import { SymbolicDist } from "../../../dist/SymbolicDist.js";
+import { BaseSymbolicDist } from "../../../dist/SymbolicDist/BaseSymbolicDist.js";
+import { SymbolicDist } from "../../../dist/SymbolicDist/index.js";
 import * as Result from "../../../utility/result.js";
 import { Ok, result } from "../../../utility/result.js";
 import { SqDistributionError } from "./SqDistributionError.js";
@@ -16,7 +17,7 @@ export enum SqDistributionTag {
 }
 
 export function wrapDistribution(value: BaseDist): SqDistribution {
-  if (value instanceof SymbolicDist) {
+  if (value instanceof BaseSymbolicDist) {
     return new SqSymbolicDistribution(value);
   } else if (value instanceof SampleSetDist) {
     return new SqSampleSetDistribution(value);

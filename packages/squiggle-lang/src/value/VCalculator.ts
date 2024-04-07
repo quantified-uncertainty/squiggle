@@ -1,7 +1,8 @@
 import { REOther } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
 import { BaseValue } from "./BaseValue.js";
-import { Value } from "./index.js";
+import { Value, vLambda } from "./index.js";
+import { SerializationStorage } from "./serialize.js";
 import { Input } from "./VInput.js";
 
 export type Calculator = {
@@ -13,7 +14,9 @@ export type Calculator = {
   sampleCount?: number;
 };
 
-type SerializedCalculator = unknown;
+type SerializedCalculator = Omit<Calculator, "fn"> & {
+  fnId: number;
+};
 
 export class VCalculator extends BaseValue<"Calculator", SerializedCalculator> {
   readonly type = "Calculator";
@@ -53,15 +56,29 @@ export class VCalculator extends BaseValue<"Calculator", SerializedCalculator> {
     return `Calculator`;
   }
 
-  override serialize(): SerializedCalculator {
-    throw new Error("Method not implemented.");
+  override serializePayload(
+    storage: SerializationStorage
+  ): SerializedCalculator {
+    const { fn, ...valueWithoutFn } = { ...this.value };
+    return {
+      ...valueWithoutFn,
+      fnId: storage.serializeValue(vLambda(fn)),
+    };
   }
 
   static deserialize(
     payload: SerializedCalculator,
     visit: (id: number) => Value
   ): VCalculator {
-    throw new Error("Method not implemented.");
+    const { fnId, ...valueWithoutFn } = payload;
+    const fnValue = visit(fnId);
+    if (fnValue.type !== "Lambda") {
+      throw new Error("Expected lambda");
+    }
+    return new VCalculator({
+      ...valueWithoutFn,
+      fn: fnValue.value,
+    });
   }
 }
 

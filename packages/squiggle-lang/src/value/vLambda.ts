@@ -14,6 +14,7 @@ import { ImmutableMap } from "../utility/immutableMap.js";
 import { BaseValue } from "./BaseValue.js";
 import { Value } from "./index.js";
 import { Indexable } from "./mixins.js";
+import { SerializationStorage } from "./serialize.js";
 import { vArray } from "./VArray.js";
 import { vDict } from "./VDict.js";
 import { VDomain } from "./VDomain.js";
@@ -30,13 +31,16 @@ type SerializedLambda =
     }
   | {
       type: "UserDefined";
-      name: string | undefined;
+      name?: string;
       expression: SerializedExpression;
       parameters: SerializedParameter[];
       captureIds: number[];
     };
 
-export class VLambda extends BaseValue<"Lambda", unknown> implements Indexable {
+export class VLambda
+  extends BaseValue<"Lambda", SerializedLambda>
+  implements Indexable
+{
   readonly type = "Lambda";
 
   override get publicName() {
@@ -73,7 +77,7 @@ export class VLambda extends BaseValue<"Lambda", unknown> implements Indexable {
     throw new REOther("No such field");
   }
 
-  override serialize(traverse: (value: Value) => number): SerializedLambda {
+  override serializePayload(storage: SerializationStorage): SerializedLambda {
     switch (this.value.type) {
       case "BuiltinLambda":
         return {
@@ -84,12 +88,16 @@ export class VLambda extends BaseValue<"Lambda", unknown> implements Indexable {
         return {
           type: "UserDefined",
           name: this.value.name,
-          expression: serializeExpression(this.value.expression, traverse),
+          expression: serializeExpression(this.value.expression, storage),
           parameters: this.value.parameters.map((parameter) => ({
             ...parameter,
-            domainId: parameter.domain ? traverse(parameter.domain) : undefined,
+            domainId: parameter.domain
+              ? storage.serializeValue(parameter.domain)
+              : undefined,
           })),
-          captureIds: this.value.captures.map(traverse),
+          captureIds: this.value.captures.map((capture) =>
+            storage.serializeValue(capture)
+          ),
         };
     }
   }

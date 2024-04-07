@@ -1,4 +1,5 @@
 import { Value } from "../value/index.js";
+import { SerializationStorage } from "../value/serialize.js";
 import {
   Expression,
   ExpressionByKind,
@@ -98,13 +99,13 @@ export type SerializedExpression =
 
 export function serializeExpression(
   expression: Expression,
-  traverse: (value: Value) => number
+  storage: SerializationStorage
 ): SerializedExpression {
   switch (expression.kind) {
     case "Value":
       return {
         ...expression,
-        value: traverse(expression.value),
+        value: storage.serializeValue(expression.value),
       };
     case "Program":
       return {
@@ -112,7 +113,7 @@ export function serializeExpression(
         value: {
           ...expression.value,
           statements: expression.value.statements.map((statement) =>
-            serializeExpression(statement, traverse)
+            serializeExpression(statement, storage)
           ),
         },
       };
@@ -120,7 +121,7 @@ export function serializeExpression(
       return {
         ...expression,
         value: expression.value.map((statement) =>
-          serializeExpression(statement, traverse)
+          serializeExpression(statement, storage)
         ),
       };
     case "Ternary":
@@ -128,9 +129,9 @@ export function serializeExpression(
         ...expression,
         value: {
           ...expression.value,
-          condition: serializeExpression(expression.value.condition, traverse),
-          ifTrue: serializeExpression(expression.value.ifTrue, traverse),
-          ifFalse: serializeExpression(expression.value.ifFalse, traverse),
+          condition: serializeExpression(expression.value.condition, storage),
+          ifTrue: serializeExpression(expression.value.ifTrue, storage),
+          ifFalse: serializeExpression(expression.value.ifFalse, storage),
         },
       };
     case "Assign":
@@ -138,7 +139,7 @@ export function serializeExpression(
         ...expression,
         value: {
           ...expression.value,
-          right: serializeExpression(expression.value.right, traverse),
+          right: serializeExpression(expression.value.right, storage),
         },
       };
 
@@ -147,9 +148,9 @@ export function serializeExpression(
         ...expression,
         value: {
           ...expression.value,
-          fn: serializeExpression(expression.value.fn, traverse),
+          fn: serializeExpression(expression.value.fn, storage),
           args: expression.value.args.map((arg) =>
-            serializeExpression(arg, traverse)
+            serializeExpression(arg, storage)
           ),
         },
       };
@@ -161,17 +162,17 @@ export function serializeExpression(
           parameters: expression.value.parameters.map((parameter) => ({
             ...parameter,
             annotation: parameter.annotation
-              ? serializeExpression(parameter.annotation, traverse)
+              ? serializeExpression(parameter.annotation, storage)
               : undefined,
           })),
-          body: serializeExpression(expression.value.body, traverse),
+          body: serializeExpression(expression.value.body, storage),
         },
       };
     case "Array":
       return {
         ...expression,
         value: expression.value.map((value) =>
-          serializeExpression(value, traverse)
+          serializeExpression(value, storage)
         ),
       };
     case "Dict":
@@ -180,8 +181,8 @@ export function serializeExpression(
         value: expression.value.map(
           ([key, value]) =>
             [
-              serializeExpression(key, traverse),
-              serializeExpression(value, traverse),
+              serializeExpression(key, storage),
+              serializeExpression(value, storage),
             ] as [SerializedExpression, SerializedExpression]
         ),
       };

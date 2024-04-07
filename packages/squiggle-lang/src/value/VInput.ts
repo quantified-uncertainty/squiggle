@@ -54,7 +54,7 @@ export class VInput extends BaseValue<"Input", Input> {
     return lodashIsEqual(this.value, other.value);
   }
 
-  override serialize(): Input {
+  override serializePayload(): Input {
     return this.value;
   }
 

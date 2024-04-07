@@ -7,21 +7,21 @@ import { errMap } from "../../utility/result.js";
 import { Value, vDict } from "../../value/index.js";
 import {
   deserializeValue,
-  SerializedValue,
+  SerializedBundle,
   serializeValue,
 } from "../../value/serialize.js";
 
 type SquiggleJob = {
   environment: Env;
   ast: AST;
-  externals: SerializedValue;
+  externals: SerializedBundle;
   sourceId: string;
 };
 
 export type SquiggleJobResult = {
-  result: SerializedValue;
-  bindings: SerializedValue;
-  exports: SerializedValue;
+  result: SerializedBundle;
+  bindings: SerializedBundle;
+  exports: SerializedBundle;
 };
 
 addEventListener("message", (e) => {

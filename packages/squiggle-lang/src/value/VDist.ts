@@ -1,12 +1,29 @@
 import { BaseDist } from "../dist/BaseDist.js";
+import { PointSetDist } from "../dist/PointSetDist.js";
 import { SampleSetDist } from "../dist/SampleSetDist/index.js";
+import { BaseSymbolicDist } from "../dist/SymbolicDist/BaseSymbolicDist.js";
+import {
+  assertIsKnownSymbolicDist,
+  deserializeSymbolicDist,
+  SerializedSymbolicDist,
+  serializeSymbolicDist,
+} from "../dist/SymbolicDist/index.js";
+import { SerializedMixedShape } from "../PointSet/Mixed.js";
 import { BaseValue } from "./BaseValue.js";
-import { Value } from "./index.js";
 
-type SerializedDist = {
-  type: "SampleSet";
-  value: readonly number[];
-};
+type SerializedDist =
+  | {
+      type: "Symbolic";
+      value: SerializedSymbolicDist;
+    }
+  | {
+      type: "SampleSet";
+      value: readonly number[];
+    }
+  | {
+      type: "PointSet";
+      value: SerializedMixedShape;
+    };
 
 export class VDist extends BaseValue<"Dist", SerializedDist> {
   readonly type = "Dist";
@@ -27,26 +44,39 @@ export class VDist extends BaseValue<"Dist", SerializedDist> {
     return this.value.isEqual(other.value);
   }
 
-  override serialize(traverse: (value: Value) => number): SerializedDist {
-    if (this.value instanceof SampleSetDist) {
+  override serializePayload(): SerializedDist {
+    if (this.value instanceof PointSetDist) {
+      return {
+        type: "PointSet",
+        value: this.value.serialize(),
+      };
+    } else if (this.value instanceof SampleSetDist) {
       return {
         type: "SampleSet",
-        value: this.value.samples,
+        value: this.value.serialize(),
       };
+    } else if (this.value instanceof BaseSymbolicDist) {
+      assertIsKnownSymbolicDist(this.value);
+      return {
+        type: "Symbolic",
+        value: serializeSymbolicDist(this.value),
+      };
+    } else {
+      throw new Error(`Unknown dist type ${this.value.type}`);
     }
-    throw new Error("Not implemented");
   }
 
   static deserialize(value: SerializedDist): VDist {
-    if (value.type === "SampleSet") {
-      const dist = SampleSetDist.make(value.value);
-      if (!dist.ok) {
-        throw dist.value;
-      }
-      return new VDist(dist.value);
+    switch (value.type) {
+      case "Symbolic":
+        return new VDist(deserializeSymbolicDist(value.value));
+      case "SampleSet":
+        return new VDist(SampleSetDist.deserialize(value.value));
+      case "PointSet":
+        return new VDist(PointSetDist.deserialize(value.value));
+      default:
+        throw new Error(`Unknown dist ${value}`);
     }
-
-    throw new Error("Not implemented");
   }
 }
 

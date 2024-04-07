@@ -16,6 +16,12 @@ import {
   PointSet,
 } from "./PointSet.js";
 
+export type SerializedDiscreteShape = {
+  xyShape: XYShape.XYShape;
+  integralSumCache?: number;
+  integralCache?: Continuous.SerializedContinuousShape;
+};
+
 export class DiscreteShape implements PointSet<DiscreteShape> {
   readonly xyShape: XYShape.XYShape;
 
@@ -246,6 +252,24 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
 
   support() {
     return MixedSet.fromDiscreteDistShape(this.xyShape);
+  }
+
+  serialize(): SerializedDiscreteShape {
+    return {
+      xyShape: this.xyShape,
+      integralSumCache: this.integralSumCache,
+      integralCache: this.integralCache?.serialize(),
+    };
+  }
+
+  static deserialize(s: SerializedDiscreteShape): DiscreteShape {
+    return new DiscreteShape({
+      xyShape: s.xyShape,
+      integralSumCache: s.integralSumCache,
+      integralCache: s.integralCache
+        ? Continuous.ContinuousShape.deserialize(s.integralCache)
+        : undefined,
+    });
   }
 }
 

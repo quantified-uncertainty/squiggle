@@ -73,7 +73,11 @@ export {
   SDuration,
 } from "./utility/SDuration.js";
 
-export { type LocationRange as SqLocation } from "peggy";
+export {
+  type AST,
+  type ASTNode,
+  type LocationRange as SqLocation,
+} from "./ast/parse.js";
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";
 export {
   type Env,
@@ -86,7 +90,6 @@ export {
   type SqValue,
 };
 
-export { type AST, type ASTNode } from "./ast/parse.js";
 export { type ASTCommentNode } from "./ast/peggyHelpers.js";
 export { type SqLinker } from "./public/SqLinker.js";
 

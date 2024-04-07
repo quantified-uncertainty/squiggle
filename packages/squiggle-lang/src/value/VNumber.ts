@@ -15,7 +15,7 @@ export class VNumber extends BaseValue<"Number", number> {
     return this.value === other.value;
   }
 
-  override serialize(): number {
+  override serializePayload(): number {
     return this.value;
   }
 

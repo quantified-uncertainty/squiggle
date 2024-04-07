@@ -1,5 +1,4 @@
-import { Location, LocationRange } from "peggy";
-
+import { Location, LocationRange } from "../ast/parse.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Value, vArray, vNumber, vString } from "./index.js";
 import { ValueTags } from "./valueTags.js";

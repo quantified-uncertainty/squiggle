@@ -1,7 +1,7 @@
 import maxBy from "lodash/maxBy.js";
 import uniq from "lodash/uniq.js";
-import { LocationRange } from "peggy";
 
+import { LocationRange } from "../ast/parse.js";
 import {
   REArgumentDomainError,
   REArityError,

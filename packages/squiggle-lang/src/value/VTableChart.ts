@@ -1,6 +1,7 @@
 import { Lambda } from "../reducer/lambda.js";
 import { BaseValue } from "./BaseValue.js";
 import { Value, vLambda } from "./index.js";
+import { SerializationStorage } from "./serialize.js";
 
 export type TableChart = {
   data: readonly Value[];
@@ -9,7 +10,7 @@ export type TableChart = {
 
 type SerializedTableChart = {
   dataIds: number[];
-  columns: readonly { fnId: number; name: string | undefined }[];
+  columns: readonly { fnId: number; name?: string }[];
 };
 
 export class VTableChart extends BaseValue<"TableChart", SerializedTableChart> {
@@ -27,11 +28,13 @@ export class VTableChart extends BaseValue<"TableChart", SerializedTableChart> {
     return `Table with ${this.value.columns.length}x${this.value.data.length} elements`;
   }
 
-  override serialize(traverse: (value: Value) => number): SerializedTableChart {
+  override serializePayload(
+    storage: SerializationStorage
+  ): SerializedTableChart {
     return {
-      dataIds: this.value.data.map(traverse),
+      dataIds: this.value.data.map((item) => storage.serializeValue(item)),
       columns: this.value.columns.map(({ fn, name }) => ({
-        fnId: traverse(vLambda(fn)),
+        fnId: storage.serializeValue(vLambda(fn)),
         name,
       })),
     };

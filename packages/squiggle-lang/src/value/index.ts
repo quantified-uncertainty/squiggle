@@ -58,7 +58,7 @@ export type Value =
 
 type SerializedPayload<V> = V extends BaseValue<string, infer B> ? B : never;
 
-export type SerializedNode = {
+export type SerializedValue = {
   [k in Value["type"]]: {
     type: k;
     payload: SerializedPayload<Extract<Value, { type: k }>>;

@@ -1,5 +1,4 @@
-import { LocationRange } from "peggy";
-
+import { LocationRange } from "../ast/parse.js";
 import { StackTrace, StackTraceFrame } from "../reducer/StackTrace.js";
 import { ErrorMessage, REJavaScriptExn, REOther } from "./messages.js";
 

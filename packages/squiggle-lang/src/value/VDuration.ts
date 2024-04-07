@@ -20,7 +20,7 @@ export class VDuration extends BaseValue<"Duration", number> {
     return this.value.toMs() === other.value.toMs();
   }
 
-  override serialize(): number {
+  override serializePayload(): number {
     return this.value.toMs();
   }
 

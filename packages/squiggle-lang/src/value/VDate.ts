@@ -16,7 +16,7 @@ export class VDate extends BaseValue<"Date", number> {
     return this.value.isEqual(other.value);
   }
 
-  override serialize() {
+  override serializePayload() {
     return this.value.toMs();
   }
 

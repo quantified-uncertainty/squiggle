@@ -2,8 +2,7 @@
 // A "frame" is a pair of a scope (function or top-level scope, currently stored as a string) and a location inside it.
 // See this comment to deconfuse about what a frame is: https://github.com/quantified-uncertainty/squiggle/pull/1172#issuecomment-1264115038
 
-import { LocationRange } from "peggy";
-
+import { LocationRange } from "../ast/parse.js";
 import { BaseLambda } from "./lambda.js";
 
 export class Frame {

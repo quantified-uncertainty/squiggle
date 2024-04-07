@@ -114,7 +114,7 @@ export class VScale extends BaseValue<"Scale", Scale> {
     return scaleIsEqual(this.value, other.value);
   }
 
-  override serialize(): Scale {
+  override serializePayload(): Scale {
     return this.value;
   }
 

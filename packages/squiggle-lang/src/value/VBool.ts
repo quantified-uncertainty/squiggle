@@ -19,7 +19,7 @@ export class VBool extends BaseValue<"Bool", boolean> {
     return this.value === other.value;
   }
 
-  override serialize() {
+  override serializePayload() {
     return this.value;
   }
 

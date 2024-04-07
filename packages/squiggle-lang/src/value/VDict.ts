@@ -3,6 +3,7 @@ import { ImmutableMap } from "../utility/immutableMap.js";
 import { BaseValue } from "./BaseValue.js";
 import { isEqual, Value } from "./index.js";
 import { Indexable } from "./mixins.js";
+import { SerializationStorage } from "./serialize.js";
 
 type ValueMap = ImmutableMap<string, Value>;
 
@@ -87,8 +88,11 @@ export class VDict
     return this.value.size;
   }
 
-  override serialize(traverse: (value: Value) => number): SerializedDict {
-    return [...this.value.entries()].map(([k, v]) => [k, traverse(v)]);
+  override serializePayload(storage: SerializationStorage): SerializedDict {
+    return [...this.value.entries()].map(([k, v]) => [
+      k,
+      storage.serializeValue(v),
+    ]);
   }
 
   static deserialize(payload: SerializedDict, load: (id: number) => Value) {

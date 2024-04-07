@@ -1,5 +1,4 @@
-import { LocationRange } from "peggy";
-
+import { LocationRange } from "../../ast/parse.js";
 import { ValueTags } from "../../value/valueTags.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValue, wrapValue } from "./index.js";

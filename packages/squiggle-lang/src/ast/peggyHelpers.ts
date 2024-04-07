@@ -1,5 +1,4 @@
-import { LocationRange } from "peggy";
-
+import { type LocationRange } from "./parse.js";
 import { undecorated } from "./utils.js";
 
 export const infixFunctions = {

@@ -1,5 +1,4 @@
-import { LocationRange } from "peggy";
-
+import { LocationRange } from "../ast/parse.js";
 import { Err, fmap, mergeMany, Ok, result } from "../utility/result.js";
 import { Value } from "./index.js";
 import { type VBool } from "./VBool.js";

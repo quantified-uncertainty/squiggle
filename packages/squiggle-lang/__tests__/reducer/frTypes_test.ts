@@ -1,6 +1,6 @@
 import { PointSetDist } from "../../src/dist/PointSetDist.js";
 import { SampleSetDist } from "../../src/dist/SampleSetDist/index.js";
-import { Normal } from "../../src/dist/SymbolicDist.js";
+import { Normal } from "../../src/dist/SymbolicDist/index.js";
 import {
   frAny,
   frArray,

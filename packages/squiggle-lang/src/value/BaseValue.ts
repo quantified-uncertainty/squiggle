@@ -1,4 +1,6 @@
-import { SerializedNode, type Value } from "./index.js";
+import { JsonValue } from "../utility/typeHelpers.js";
+import { SerializedValue } from "./index.js";
+import { SerializationStorage } from "./serialize.js";
 import { ValueTags, ValueTagsType } from "./valueTags.js";
 
 /*
@@ -12,7 +14,10 @@ If you add a new value class, don't forget to add it to the "Value" union type b
 
 "vBlah" functions are just for the sake of brevity, so that we don't have to prefix any value creation with "new".
 */
-export abstract class BaseValue<Type extends string, SerializedPayload> {
+export abstract class BaseValue<
+  Type extends string,
+  SerializedPayload extends JsonValue,
+> {
   abstract type: Type;
   readonly tags: ValueTags | undefined;
 
@@ -47,13 +52,13 @@ export abstract class BaseValue<Type extends string, SerializedPayload> {
     return `${valueString}, with tags ${argsStr}`;
   }
 
-  abstract serialize(traverse: (value: Value) => number): SerializedPayload;
+  abstract serializePayload(storage: SerializationStorage): SerializedPayload;
 
-  serializeToNode(traverse: (value: Value) => number): SerializedNode {
+  serialize(storage: SerializationStorage): SerializedValue {
     return {
       type: this.type,
-      payload: this.serialize(traverse),
-    } as SerializedNode;
+      payload: this.serializePayload(storage),
+    } as SerializedValue;
   }
 
   // Deserialization is implemented outside of this class; abstract static methods are not supported in TypeScript.

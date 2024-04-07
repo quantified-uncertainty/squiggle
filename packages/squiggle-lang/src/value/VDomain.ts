@@ -1,7 +1,14 @@
 import { REOther } from "../errors/messages.js";
 import { SDate } from "../utility/SDate.js";
 import { BaseValue } from "./BaseValue.js";
-import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
+import {
+  DateRangeDomain,
+  deserializeDomain,
+  Domain,
+  NumericRangeDomain,
+  SerializedDomain,
+  serializeDomain,
+} from "./domain.js";
 import { Value } from "./index.js";
 import { Indexable } from "./mixins.js";
 import { vDate, VDate } from "./VDate.js";
@@ -23,7 +30,10 @@ function domainIsEqual(valueA: Domain, valueB: Domain) {
   }
 }
 
-export class VDomain extends BaseValue<"Domain", unknown> implements Indexable {
+export class VDomain
+  extends BaseValue<"Domain", SerializedDomain>
+  implements Indexable
+{
   readonly type = "Domain";
 
   constructor(public value: Domain) {
@@ -58,12 +68,12 @@ export class VDomain extends BaseValue<"Domain", unknown> implements Indexable {
     return domainIsEqual(this.value, other.value);
   }
 
-  override serialize(): unknown {
-    throw new Error("Method not implemented.");
+  override serializePayload(): SerializedDomain {
+    return serializeDomain(this.value);
   }
 
-  static deserialize(payload: unknown): VDomain {
-    throw new Error("Method not implemented.");
+  static deserialize(payload: SerializedDomain): VDomain {
+    return new VDomain(deserializeDomain(payload));
   }
 }
 
