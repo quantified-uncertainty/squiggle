@@ -211,6 +211,7 @@ type ModelExportRevisionsConnectionEdge {
 
 type ModelRevision implements Node {
   author: User
+  buildStatus: ModelRevisionBuildStatus!
   builds: [ModelRevisionBuild!]!
   comment: String!
   content: ModelContent!
@@ -238,6 +239,12 @@ type ModelRevisionBuildConnection {
 type ModelRevisionBuildEdge {
   cursor: String!
   node: ModelRevisionBuild!
+}
+
+enum ModelRevisionBuildStatus {
+  Failure
+  Pending
+  Success
 }
 
 type ModelRevisionConnection {

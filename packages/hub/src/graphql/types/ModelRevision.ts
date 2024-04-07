@@ -24,6 +24,10 @@ const ModelContent: UnionRef<
   resolveType: () => SquiggleSnippet,
 });
 
+const ModelRevisionBuildStatus = builder.enumType("ModelRevisionBuildStatus", {
+  values: ["Pending", "Success", "Failure"],
+});
+
 export const ModelRevision = builder.prismaNode("ModelRevision", {
   id: { field: "id" },
   fields: (t) => ({
@@ -38,6 +42,21 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     builds: t.relation("builds"),
     author: t.relation("author", { nullable: true }),
     comment: t.exposeString("comment"),
+    buildStatus: t.field({
+      type: ModelRevisionBuildStatus,
+      async resolve(revision) {
+        const lastBuild = await prisma.modelRevisionBuild.findFirst({
+          where: {
+            modelRevisionId: revision.id,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+        if (!lastBuild) return "Pending";
+        return lastBuild.errors.length === 0 ? "Success" : "Failure";
+      },
+    }),
     content: t.field({
       type: ModelContent,
       select: { squiggleSnippet: true },
