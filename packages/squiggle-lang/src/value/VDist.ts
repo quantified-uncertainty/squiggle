@@ -6,7 +6,6 @@ import {
   assertIsKnownSymbolicDist,
   deserializeSymbolicDist,
   SerializedSymbolicDist,
-  serializeSymbolicDist,
 } from "../dist/SymbolicDist/index.js";
 import { SerializedMixedShape } from "../PointSet/Mixed.js";
 import { BaseValue } from "./BaseValue.js";
@@ -59,7 +58,7 @@ export class VDist extends BaseValue<"Dist", SerializedDist> {
       assertIsKnownSymbolicDist(this.value);
       return {
         type: "Symbolic",
-        value: serializeSymbolicDist(this.value),
+        value: this.value.serialize(),
       };
     } else {
       throw new Error(`Unknown dist type ${this.value.type}`);

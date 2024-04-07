@@ -125,10 +125,7 @@ export function assertIsKnownSymbolicDist(
 export function serializeSymbolicDist(
   dist: KnownSymbolicDist
 ): SerializedSymbolicDist {
-  return {
-    type: dist.symbolicType,
-    args: dist.getArgs(),
-  } as SerializedSymbolicDist;
+  return dist.serialize();
 }
 
 export function deserializeSymbolicDist(

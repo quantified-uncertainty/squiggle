@@ -149,4 +149,11 @@ export abstract class BaseSymbolicDist<
   }
 
   abstract getArgs(): Args;
+
+  serialize(): { type: SymbolicType; args: Args } {
+    return {
+      type: this.symbolicType,
+      args: this.getArgs(),
+    };
+  }
 }
