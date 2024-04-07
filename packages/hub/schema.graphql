@@ -223,9 +223,11 @@ type ModelRevision implements Node {
 }
 
 type ModelRevisionBuild implements Node {
+  createdAtTimestamp: Float!
   errors: [String!]!
   id: ID!
   modelRevision: ModelRevision!
+  runTime: Float!
 }
 
 type ModelRevisionBuildConnection {
