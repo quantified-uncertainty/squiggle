@@ -227,7 +227,7 @@ type ModelRevisionBuild implements Node {
   errors: [String!]!
   id: ID!
   modelRevision: ModelRevision!
-  runTime: Float!
+  runtime: Float!
 }
 
 type ModelRevisionBuildConnection {

@@ -10,7 +10,7 @@ export const ModelRevisionBuild = builder.prismaNode("ModelRevisionBuild", {
     }),
     modelRevision: t.relation("modelRevision"),
     errors: t.exposeStringList("errors"),
-    runTime: t.exposeFloat("runTime"),
+    runtime: t.exposeFloat("runtime"),
   }),
 });
 

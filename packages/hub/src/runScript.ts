@@ -1,6 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
-import { SqLinker, SqProject, SqValue } from "@quri/squiggle-lang";
+import { ASTNode, SqLinker, SqProject, SqValue } from "@quri/squiggle-lang";
 
 import { DEFAULT_SEED } from "@/constants";
 
@@ -66,6 +66,22 @@ export const squiggleLinker: SqLinker = {
   },
 };
 
+function getExportedVariables(ast: ASTNode): string[] {
+  const exportedVariables: string[] = [];
+
+  if (ast.type === "Program") {
+    ast.statements.forEach((statement) => {
+      if (statement.type === "LetStatement" && statement.exported) {
+        exportedVariables.push(statement.variable.value);
+      } else if (statement.type === "DefunStatement" && statement.exported) {
+        exportedVariables.push(statement.variable.value);
+      }
+    });
+  }
+
+  return exportedVariables;
+}
+
 export async function runSquiggle2(
   currentRevisionId: string,
   code: string
@@ -86,8 +102,11 @@ export async function runSquiggle2(
   await project.run(MAIN);
 
   const outputR = project.getOutput(MAIN);
+  // const foo = project.
 
   if (outputR.ok) {
+    const ast = outputR.value.bindings.context?.ast;
+    console.log("AST", ast && getExportedVariables(ast));
     const _exports: ModelExport[] = outputR.value.exports
       .entries()
       .map((e) => ({
@@ -160,7 +179,15 @@ async function main(ownerSlug: string, slug: string) {
   const endTime = performance.now();
   const diff = endTime - startTime;
 
-  console.log(firstCode, diff, response);
+  const build = await prisma.modelRevisionBuild.create({
+    data: {
+      modelRevision: { connect: { id: model.currentRevisionId } },
+      runtime: diff,
+      errors: response.isOk ? [] : [response.errorString],
+    },
+  });
+
+  console.log("built", build, firstCode, diff, response);
 }
 
 main("ozzie", "test-model")

@@ -233,10 +233,9 @@ model ModelRevisionBuild {
   createdAt       DateTime      @default(now())
   modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
   modelRevisionId String
-  runTime         Float
+  runtime         Float
   errors          String[]
 
-  @@unique([modelRevisionId], name: "uniqueKey")
   @@index([modelRevisionId])
 }
 
