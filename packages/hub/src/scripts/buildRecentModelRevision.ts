@@ -16,7 +16,6 @@ type SquiggleOutput =
     }
   | {
       isOk: true;
-      errorString?: undefined;
     };
 
 const prisma = new PrismaClient();
@@ -59,7 +58,7 @@ export async function runSquiggle(
   currentRevisionId: string,
   code: string,
   seed: string
-): Promise<SquiggleOutput> {
+): Promise<string | undefined> {
   const env = {
     sampleCount: SAMPLE_COUNT_DEFAULT,
     xyPointLength: XY_POINT_LENGTH_DEFAULT,
@@ -110,14 +109,7 @@ export async function runSquiggle(
     }
   }
 
-  return outputR.ok
-    ? {
-        isOk: true,
-      }
-    : {
-        isOk: false,
-        errorString: outputR.value.toString(),
-      };
+  return outputR.ok ? undefined : outputR.value.toString();
 }
 
 async function oldestModelRevisionWithoutBuilds() {
@@ -172,7 +164,7 @@ async function buildRecentModelVersion() {
       data: {
         modelRevision: { connect: { id: model.currentRevisionId } },
         runtime: diff,
-        errors: response.isOk ? [] : [response.errorString],
+        errors: response === undefined ? [] : [response],
       },
     });
 

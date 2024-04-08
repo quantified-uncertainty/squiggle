@@ -31,20 +31,20 @@ const ModelRevisionBuildStatus = builder.enumType("ModelRevisionBuildStatus", {
   values: ["Skipped", "Pending", "Success", "Failure"],
 });
 
-function getExportedVariables(ast: ASTNode): string[] {
-  const exportedVariables: string[] = [];
+function getExportedVariableNames(ast: ASTNode): string[] {
+  const exportedVariableNames: string[] = [];
 
   if (ast.type === "Program") {
     ast.statements.forEach((statement) => {
       if (statement.type === "LetStatement" && statement.exported) {
-        exportedVariables.push(statement.variable.value);
+        exportedVariableNames.push(statement.variable.value);
       } else if (statement.type === "DefunStatement" && statement.exported) {
-        exportedVariables.push(statement.variable.value);
+        exportedVariableNames.push(statement.variable.value);
       }
     });
   }
 
-  return exportedVariables;
+  return exportedVariableNames;
 }
 
 export const ModelRevision = builder.prismaNode("ModelRevision", {
@@ -64,14 +64,21 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
       type: ModelRevisionBuild,
       nullable: true,
       async resolve(revision) {
-        return prisma.modelRevisionBuild.findFirst({
-          where: {
-            modelRevisionId: revision.id,
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        });
+        return prisma.modelRevision
+          .findUnique({
+            where: {
+              id: revision.id,
+            },
+            select: {
+              builds: {
+                orderBy: {
+                  createdAt: "desc",
+                },
+                take: 1,
+              },
+            },
+          })
+          .then((result) => result?.builds[0] || null);
       },
     }),
     author: t.relation("author", { nullable: true }),
@@ -79,29 +86,37 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     buildStatus: t.field({
       type: ModelRevisionBuildStatus,
       async resolve(revision) {
-        const lastBuild = await prisma.modelRevisionBuild.findFirst({
+        const modelRevision = await prisma.modelRevision.findUnique({
           where: {
-            modelRevisionId: revision.id,
+            id: revision.id,
           },
-          orderBy: {
-            createdAt: "desc",
+          select: {
+            builds: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              take: 1,
+            },
+            model: {
+              select: {
+                currentRevisionId: true,
+              },
+            },
           },
         });
-        if (!lastBuild) {
-          const lastRevision = await prisma.modelRevision.findFirst({
-            where: {
-              modelId: revision.modelId,
-            },
-            orderBy: {
-              createdAt: "desc",
-            },
-          });
-          if (lastRevision?.id === revision.id) {
-            return "Pending";
-          }
-          return "Skipped";
+
+        if (!modelRevision) {
+          throw new Error(`ModelRevision not found for id: ${revision.id}`);
         }
-        return lastBuild.errors.length === 0 ? "Success" : "Failure";
+
+        const lastBuild = modelRevision.builds[0];
+        if (lastBuild) {
+          return lastBuild.errors.length === 0 ? "Success" : "Failure";
+        }
+
+        return modelRevision.model.currentRevisionId === revision.id
+          ? "Pending"
+          : "Skipped";
       },
     }),
     content: t.field({
@@ -118,12 +133,10 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
       type: ["String"],
       select: { squiggleSnippet: true },
       async resolve(revision) {
-        console.log("RESOLVING?", revision);
         if (revision.contentType === "SquiggleSnippet") {
           const ast = parse(revision.squiggleSnippet!.code);
           if (ast.ok) {
-            console.log("RESOLVING!", getExportedVariables(ast.value));
-            return getExportedVariables(ast.value);
+            return getExportedVariableNames(ast.value);
           } else {
             return [];
           }

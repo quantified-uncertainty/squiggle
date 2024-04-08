@@ -88,22 +88,15 @@ export const ModelLayout: FC<
 
   const modelExports: ModelExport[] = model.currentRevision.exportNames.map(
     (name) => {
-      const _export = model.currentRevision.exports.find(
+      const matchingExport = model.currentRevision.exports.find(
         (e) => e.variableName === name
       );
-      if (_export) {
-        return {
-          variableName: _export.variableName,
-          variableType: _export.variableType,
-          title: _export.title || undefined,
-        };
-      } else {
-        return {
-          variableName: name,
-          variableType: undefined,
-          title: undefined,
-        };
-      }
+
+      return {
+        variableName: name,
+        variableType: matchingExport?.variableType || undefined,
+        title: matchingExport?.title || undefined,
+      };
     }
   );
 
