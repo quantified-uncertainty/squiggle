@@ -1,9 +1,12 @@
 import { UnionRef } from "@pothos/core";
 
+import { ASTNode, parse } from "@quri/squiggle-lang";
+
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
 import { NotFoundError } from "../errors/NotFoundError";
+import { ModelRevisionBuild } from "./ModelRevisionBuild";
 import { RelativeValuesExport } from "./RelativeValuesExport";
 import { SquiggleSnippet } from "./SquiggleSnippet";
 
@@ -25,8 +28,24 @@ const ModelContent: UnionRef<
 });
 
 const ModelRevisionBuildStatus = builder.enumType("ModelRevisionBuildStatus", {
-  values: ["Pending", "Success", "Failure"],
+  values: ["Skipped", "Pending", "Success", "Failure"],
 });
+
+function getExportedVariables(ast: ASTNode): string[] {
+  const exportedVariables: string[] = [];
+
+  if (ast.type === "Program") {
+    ast.statements.forEach((statement) => {
+      if (statement.type === "LetStatement" && statement.exported) {
+        exportedVariables.push(statement.variable.value);
+      } else if (statement.type === "DefunStatement" && statement.exported) {
+        exportedVariables.push(statement.variable.value);
+      }
+    });
+  }
+
+  return exportedVariables;
+}
 
 export const ModelRevision = builder.prismaNode("ModelRevision", {
   id: { field: "id" },
@@ -40,6 +59,21 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     exports: t.relation("exports"),
     model: t.relation("model"),
     builds: t.relation("builds"),
+
+    lastBuild: t.field({
+      type: ModelRevisionBuild,
+      nullable: true,
+      async resolve(revision) {
+        return prisma.modelRevisionBuild.findFirst({
+          where: {
+            modelRevisionId: revision.id,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+      },
+    }),
     author: t.relation("author", { nullable: true }),
     comment: t.exposeString("comment"),
     buildStatus: t.field({
@@ -53,7 +87,20 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
             createdAt: "desc",
           },
         });
-        if (!lastBuild) return "Pending";
+        if (!lastBuild) {
+          const lastRevision = await prisma.modelRevision.findFirst({
+            where: {
+              modelId: revision.modelId,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          });
+          if (lastRevision?.id === revision.id) {
+            return "Pending";
+          }
+          return "Skipped";
+        }
         return lastBuild.errors.length === 0 ? "Success" : "Failure";
       },
     }),
@@ -64,6 +111,24 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
         switch (revision.contentType) {
           case "SquiggleSnippet":
             return revision.squiggleSnippet!;
+        }
+      },
+    }),
+    exportNames: t.field({
+      type: ["String"],
+      select: { squiggleSnippet: true },
+      async resolve(revision) {
+        console.log("RESOLVING?", revision);
+        if (revision.contentType === "SquiggleSnippet") {
+          const ast = parse(revision.squiggleSnippet!.code);
+          if (ast.ok) {
+            console.log("RESOLVING!", getExportedVariables(ast.value));
+            return getExportedVariables(ast.value);
+          } else {
+            return [];
+          }
+        } else {
+          return [];
         }
       },
     }),

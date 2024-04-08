@@ -27,6 +27,7 @@ const ModelRevisionItem: FC<{
       fragment ModelRevisionsList_revision on ModelRevision {
         id
         createdAtTimestamp
+        buildStatus
         author {
           username
         }
@@ -35,6 +36,10 @@ const ModelRevisionItem: FC<{
           id
           variableName
           title
+        }
+        lastBuild {
+          errors
+          runtime
         }
       }
     `,
@@ -76,6 +81,9 @@ const ModelRevisionItem: FC<{
       {revision.comment ? (
         <div className="text-xs text-slate-700">{revision.comment}</div>
       ) : null}
+
+      <div className="text-xs text-slate-700">{revision.buildStatus}</div>
+      {revision.lastBuild && revision.lastBuild.runtime}
       {revision.exports.length > 0 ? (
         <div className="text-xs text-green-700">
           {`${revision.exports.length} exports `}
@@ -124,10 +132,15 @@ export const ModelRevisionsList: FC<{
               ...ModelRevisionsList_revision
               id
               createdAtTimestamp
+              buildStatus
               exports {
                 id
                 title
                 variableName
+              }
+              lastBuild {
+                errors
+                runtime
               }
             }
           }

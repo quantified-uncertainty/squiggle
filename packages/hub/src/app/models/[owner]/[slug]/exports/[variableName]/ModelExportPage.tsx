@@ -105,7 +105,6 @@ export const ModelExportPage: FC<{
               modelRevision {
                 id
                 createdAtTimestamp
-                buildStatus
                 content {
                   __typename
                   ...SquiggleModelExportPage

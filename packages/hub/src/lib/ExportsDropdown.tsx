@@ -17,10 +17,10 @@ import {
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 import { modelExportRoute, modelForRelativeValuesExportRoute } from "@/routes";
 
-type ModelExport = {
+export type ModelExport = {
   title?: string;
   variableName: string;
-  variableType: string;
+  variableType?: string;
 };
 type RelativeValuesExport = { slug: string; variableName: string };
 
@@ -89,7 +89,7 @@ export const ExportsDropdown: FC<
                     variableName: exportItem.variableName,
                   })}
                   title={`${exportItem.title || exportItem.variableName}`}
-                  icon={typeIcon(exportItem.variableType)}
+                  icon={typeIcon(exportItem.variableType || "")}
                   close={close}
                 />
               ))}{" "}

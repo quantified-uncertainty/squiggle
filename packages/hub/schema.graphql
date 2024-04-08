@@ -216,9 +216,11 @@ type ModelRevision implements Node {
   comment: String!
   content: ModelContent!
   createdAtTimestamp: Float!
+  exportNames: [String!]!
   exports: [ModelExport!]!
   forRelativeValues(input: ModelRevisionForRelativeValuesInput!): ModelRevisionForRelativeValuesResult!
   id: ID!
+  lastBuild: ModelRevisionBuild
   model: Model!
   relativeValuesExports: [RelativeValuesExport!]!
 }
@@ -244,6 +246,7 @@ type ModelRevisionBuildEdge {
 enum ModelRevisionBuildStatus {
   Failure
   Pending
+  Skipped
   Success
 }
 
