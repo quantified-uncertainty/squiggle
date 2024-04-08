@@ -9,15 +9,6 @@ import { parseSourceId } from "../squiggle/components/linker";
 
 const SOURCE_NAME = "main";
 
-type SquiggleOutput =
-  | {
-      isOk: false;
-      errorString: string;
-    }
-  | {
-      isOk: true;
-    };
-
 const prisma = new PrismaClient();
 
 export const squiggleLinker: SqLinker = {
@@ -121,6 +112,7 @@ async function oldestModelRevisionWithoutBuilds() {
       builds: {
         none: {},
       },
+      contentType: "SquiggleSnippet",
     },
     orderBy: {
       createdAt: "asc",
@@ -150,7 +142,9 @@ async function buildRecentModelVersion() {
     }
 
     if (!model?.currentRevisionId || !model.currentRevision?.squiggleSnippet) {
-      throw new NotFoundError(`Model revision didn't have needed information`);
+      throw new NotFoundError(
+        `Unexpected Error: Model revision didn't have needed information. This should never happen.`
+      );
     }
 
     const { code, seed } = model.currentRevision.squiggleSnippet;
