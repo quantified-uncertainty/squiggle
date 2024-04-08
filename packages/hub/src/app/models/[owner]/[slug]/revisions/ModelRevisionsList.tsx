@@ -82,8 +82,10 @@ const ModelRevisionItem: FC<{
         <div className="text-xs text-slate-700">{revision.comment}</div>
       ) : null}
 
-      <div className="text-xs text-slate-700">{revision.buildStatus}</div>
-      {revision.lastBuild && revision.lastBuild.runtime}
+      <div className="text-xs text-slate-700">{`Build Status: ${revision.buildStatus}`}</div>
+      {revision.lastBuild && (
+        <div className="text-xs text-slate-700">{`Build Time: ${revision.lastBuild.runtime.toFixed(0)}ms`}</div>
+      )}
       {revision.exports.length > 0 ? (
         <div className="text-xs text-green-700">
           {`${revision.exports.length} exports `}
