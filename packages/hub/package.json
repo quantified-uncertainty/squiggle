@@ -20,7 +20,7 @@
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
     "test:manual": "dotenv -e .env.test -- jest -i",
-    "run-squiggle": "tsx src/runScript.ts"
+    "build-last-revision": "tsx src/scripts/buildRecentModelRevision.ts"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
