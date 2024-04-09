@@ -45,9 +45,6 @@ builder.queryField("modelExports", (t) =>
               createdAt: "desc",
             },
           },
-          include: {
-            modelRevision: true,
-          },
         });
       },
     },
