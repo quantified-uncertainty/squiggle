@@ -136,7 +136,7 @@ export function userGroupsRoute({ username }: { username: string }) {
   return `/users/${username}/groups`;
 }
 
-export function userModelExportRoute({ username }: { username: string }) {
+export function userModelExportsRoute({ username }: { username: string }) {
   return `/users/${username}/exports`;
 }
 
