@@ -1,0 +1,52 @@
+# Ignore node_modules directories
+node_modules
+**/node_modules
+
+# Ignore .cache directories
+**/.cache
+
+# Ignore .DS_Store files
+**/.DS_Store
+
+# Ignore .sync.ffs_db directories
+**/.sync.ffs_db
+
+# Ignore .direnv directories
+**/.direnv
+
+# Ignore .log files
+**/*.log
+
+# Ignore .turbo directories
+**/.turbo
+.turbo
+
+# Ignore dist directories
+**/dist
+
+# Ignore .next directories
+**/.next
+
+# Ignore specific .vscode files
+.vscode/_.code-workspace
+.vscode/settings.json
+
+*.tsbuildinfo
+
+# Ignore dist directory in the current directory
+dist
+
+# Ignore .env files
+.env
+.env.test
+
+# Ignore tsconfig.tsbuildinfo file in the current directory
+/tsconfig.tsbuildinfo
+
+# Ignore .next directory in the current directory
+/.next
+
+# Ignore .vscode directory in the current directory
+/.vscode
+
+/.git

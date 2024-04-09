@@ -1,0 +1,35 @@
+# Use the official Node.js 20 image as the base
+FROM node:20
+WORKDIR /app
+
+# Copy the entire monorepo to the working directory
+
+RUN apt-get update && apt-get install -y apt
+# Install necessary dependencies for canvas
+RUN apt-get update && \
+    apt-get install -y \
+        build-essential \
+        libcairo2-dev \
+        libpango1.0-dev \
+        libjpeg-dev \
+        libgif-dev \
+        librsvg2-dev
+
+COPY . .
+# Install pnpm and turbo globally
+RUN npm install -g pnpm turbo 
+
+# Install monorepo dependencies
+RUN pnpm install
+
+# run turbo build 
+
+# WORKDIR /app/packages/hub
+
+# RUN pnpm install
+
+# Expose the port on which the application will run (adjust if necessary)
+# EXPOSE 3001
+
+# Set the command to run the application
+# CMD ["pnpm", "run", "build-last-revision"]
