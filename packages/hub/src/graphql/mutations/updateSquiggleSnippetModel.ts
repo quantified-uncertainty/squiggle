@@ -166,19 +166,6 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
                 data: relativeValuesExportsToInsert,
               },
             },
-            exports: {
-              createMany: {
-                data: (input.exports ?? []).map(
-                  ({ variableName, variableType, docstring, title }) => ({
-                    variableName,
-                    variableType,
-                    docstring: docstring ?? undefined,
-                    title: title ?? null,
-                    isCurrent: true,
-                  })
-                ),
-              },
-            },
           },
           include: {
             model: {
