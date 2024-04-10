@@ -17,7 +17,7 @@ async function runWorker(
   seed: string,
   timeoutSeconds: number
 ): Promise<SquiggleResult> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _) => {
     console.log("Spawning worker process for Revision ID: " + revisionId);
     const worker = spawn(
       "tsx",
@@ -93,7 +93,7 @@ async function oldestModelRevisionWithoutBuilds() {
   return modelRevision?.model;
 }
 
-async function buildRecentModelVersion() {
+async function buildRecentModelVersion(): Promise<void> {
   try {
     const model = await oldestModelRevisionWithoutBuilds();
 
@@ -120,7 +120,7 @@ async function buildRecentModelVersion() {
     const endTime = performance.now();
     console.log("RESPONSE", response);
 
-    const build = await prisma.modelRevisionBuild.create({
+    await prisma.modelRevisionBuild.create({
       data: {
         modelRevision: { connect: { id: model.currentRevisionId } },
         runSeconds: (endTime - startTime) / 1000,
@@ -128,9 +128,13 @@ async function buildRecentModelVersion() {
       },
     });
 
-    console.log("Build created:", build);
+    console.log(
+      "Build created for model revision ID:",
+      model.currentRevisionId
+    );
   } catch (error) {
-    console.error(error);
+    console.error("Error building model revision:", error);
+    throw error;
   }
 }
 
@@ -149,10 +153,10 @@ async function countItemsRemaining() {
   console.log("Model Revisions Remaining:", remaining);
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
-    buildRecentModelVersion();
-    countItemsRemaining();
+    await buildRecentModelVersion();
+    await countItemsRemaining();
   } catch (error) {
     console.error(error);
     process.exit(1);
@@ -161,9 +165,15 @@ async function main() {
   }
 }
 
-try {
-  main();
-} catch (error) {
-  console.error("An unhandled error occurred:", error);
-  process.exit(1);
+async function runContinuously() {
+  while (true) {
+    try {
+      await main();
+      await new Promise((resolve) => setTimeout(resolve, 500)); // Sleep for 1 second
+    } catch (error) {
+      console.error("An error occurred during continuous execution:", error);
+    }
+  }
 }
+
+runContinuously();
