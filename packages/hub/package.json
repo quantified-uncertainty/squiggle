@@ -21,8 +21,7 @@
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
     "test:manual": "dotenv -e .env.test -- jest -i",
-    "build-last-revision": "tsx src/scripts/buildRecentModelRevision.ts",
-    "build-main": "tsx src/scripts/main.ts"
+    "build-last-revision": "tsx src/scripts/buildRecentModelRevision/main.ts"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
