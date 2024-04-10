@@ -216,7 +216,6 @@ type ModelExportRevisionsConnectionEdge {
 type ModelRevision implements Node {
   author: User
   buildStatus: ModelRevisionBuildStatus!
-  builds: [ModelRevisionBuild!]!
   comment: String!
   content: ModelContent!
   createdAtTimestamp: Float!
@@ -235,16 +234,6 @@ type ModelRevisionBuild implements Node {
   id: ID!
   modelRevision: ModelRevision!
   runSeconds: Float!
-}
-
-type ModelRevisionBuildConnection {
-  edges: [ModelRevisionBuildEdge!]!
-  pageInfo: PageInfo!
-}
-
-type ModelRevisionBuildEdge {
-  cursor: String!
-  node: ModelRevisionBuild!
 }
 
 enum ModelRevisionBuildStatus {

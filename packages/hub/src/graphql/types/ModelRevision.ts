@@ -36,6 +36,8 @@ function getExportedVariableNames(ast: ASTNode): string[] {
 
   if (ast.type === "Program") {
     ast.statements.forEach((statement) => {
+      while (statement.type === "DecoratedStatement")
+        statement = statement.statement;
       if (statement.type === "LetStatement" && statement.exported) {
         exportedVariableNames.push(statement.variable.value);
       } else if (statement.type === "DefunStatement" && statement.exported) {
@@ -58,7 +60,6 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     relativeValuesExports: t.relation("relativeValuesExports"),
     exports: t.relation("exports"),
     model: t.relation("model"),
-    builds: t.relation("builds"),
 
     lastBuild: t.field({
       type: ModelRevisionBuild,

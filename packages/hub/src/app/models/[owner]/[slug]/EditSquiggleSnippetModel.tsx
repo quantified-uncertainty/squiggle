@@ -156,7 +156,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
               xyPointLength
             }
           }
-          exportNames
           exports {
             id
             variableName

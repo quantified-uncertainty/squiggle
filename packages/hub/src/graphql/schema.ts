@@ -1,7 +1,6 @@
 import "./errors/BaseError";
 import "./errors/NotFoundError";
 import "./errors/ValidationError";
-import "./types/ModelRevisionBuild";
 import "./queries/globalStatistics";
 import "./queries/group";
 import "./queries/groups";

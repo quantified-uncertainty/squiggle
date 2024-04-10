@@ -1,5 +1,3 @@
-import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
-
 import { builder } from "@/graphql/builder";
 
 export const ModelRevisionBuild = builder.prismaNode("ModelRevisionBuild", {
@@ -13,14 +11,3 @@ export const ModelRevisionBuild = builder.prismaNode("ModelRevisionBuild", {
     runSeconds: t.exposeFloat("runSeconds"),
   }),
 });
-
-export const ModelRevisionBuildConnection = builder.connectionObject({
-  type: ModelRevisionBuild,
-  name: "ModelRevisionBuildConnection",
-});
-
-export const modelConnectionHelpers = prismaConnectionHelpers(
-  builder,
-  "ModelRevisionBuild",
-  { cursor: "id" }
-);

@@ -157,7 +157,7 @@ async function buildRecentModelVersion() {
     const build = await prisma.modelRevisionBuild.create({
       data: {
         modelRevision: { connect: { id: model.currentRevisionId } },
-        runtime: diff,
+        runSeconds: diff,
         errors: response === undefined ? [] : [response],
       },
     });
@@ -185,12 +185,16 @@ async function countItemsRemaining() {
   console.log("Model Revisions Remaining:", remaining);
 }
 
-buildRecentModelVersion()
-  .catch((error) => {
+async function main() {
+  try {
+    buildRecentModelVersion();
+    countItemsRemaining();
+  } catch (error) {
     console.error(error);
     process.exit(1);
-  })
-  .finally(async () => {
-    countItemsRemaining();
+  } finally {
     await prisma.$disconnect();
-  });
+  }
+}
+
+main();
