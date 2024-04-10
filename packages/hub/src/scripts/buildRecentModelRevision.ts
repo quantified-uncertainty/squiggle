@@ -157,7 +157,7 @@ async function buildRecentModelVersion() {
     const build = await prisma.modelRevisionBuild.create({
       data: {
         modelRevision: { connect: { id: model.currentRevisionId } },
-        runSeconds: diff,
+        runSeconds: diff / 1000,
         errors: response === undefined ? [] : [response],
       },
     });
