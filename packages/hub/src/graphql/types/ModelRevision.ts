@@ -64,58 +64,46 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     lastBuild: t.field({
       type: ModelRevisionBuild,
       nullable: true,
+      select: {
+        builds: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 1,
+        },
+      },
       async resolve(revision) {
-        return prisma.modelRevision
-          .findUnique({
-            where: {
-              id: revision.id,
-            },
-            select: {
-              builds: {
-                orderBy: {
-                  createdAt: "desc",
-                },
-                take: 1,
-              },
-            },
-          })
-          .then((result) => result?.builds[0] || null);
+        return revision.builds[0];
       },
     }),
     author: t.relation("author", { nullable: true }),
     comment: t.exposeString("comment"),
     buildStatus: t.field({
       type: ModelRevisionBuildStatus,
-      async resolve(revision) {
-        const modelRevision = await prisma.modelRevision.findUnique({
-          where: {
-            id: revision.id,
-          },
+      select: {
+        builds: {
           select: {
-            builds: {
-              orderBy: {
-                createdAt: "desc",
-              },
-              take: 1,
-            },
-            model: {
-              select: {
-                currentRevisionId: true,
-              },
-            },
+            errors: true,
           },
-        });
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 1,
+        },
+        model: {
+          select: {
+            currentRevisionId: true,
+          },
+        },
+      },
+      async resolve(revision) {
+        const lastBuild = revision.builds[0];
 
-        if (!modelRevision) {
-          throw new Error(`ModelRevision not found for id: ${revision.id}`);
-        }
-
-        const lastBuild = modelRevision.builds[0];
         if (lastBuild) {
           return lastBuild.errors.length === 0 ? "Success" : "Failure";
         }
 
-        return modelRevision.model.currentRevisionId === revision.id
+        return revision.model.currentRevisionId === revision.id
           ? "Pending"
           : "Skipped";
       },
