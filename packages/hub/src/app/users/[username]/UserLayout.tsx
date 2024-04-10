@@ -17,7 +17,7 @@ import {
   newModelRoute,
   userDefinitionsRoute,
   userGroupsRoute,
-  userModelExportRoute,
+  userModelExportsRoute,
   userRoute,
 } from "@/routes";
 
@@ -119,7 +119,7 @@ export const UserLayout: FC<
           {isMe || user.modelExports.edges.length ? (
             <StyledTabLink
               name="Exports"
-              href={userModelExportRoute({ username: user.username })}
+              href={userModelExportsRoute({ username: user.username })}
             />
           ) : null}
           {isMe || user.relativeValuesDefinitions.edges.length ? (

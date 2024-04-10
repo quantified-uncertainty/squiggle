@@ -1,7 +1,9 @@
+import merge from "lodash/merge";
+
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
-import { modelExportWhereHasAccess } from "../helpers/modelExportHelpers";
+import { modelWhereHasAccess } from "../helpers/modelHelpers";
 import { ModelExport, ModelExportConnection } from "../types/ModelExport";
 
 const ModelExportQueryInput = builder.inputType("ModelExportQueryInput", {
@@ -22,22 +24,28 @@ builder.queryField("modelExports", (t) =>
       },
       resolve: (query, _, { input }, { session }) => {
         const modelId = input?.modelId;
+
+        const queries = merge(
+          {},
+          { modelRevision: { model: modelWhereHasAccess(session) } },
+          modelId && {
+            modelRevision: {
+              modelId: modelId,
+            },
+          },
+          input?.owner && {
+            modelRevision: { model: { owner: { slug: input.owner } } },
+          },
+          input &&
+            input.variableName && {
+              variableName: input.variableName,
+            }
+        );
+
         return prisma.modelExport.findMany({
           ...query,
           where: {
-            ...modelExportWhereHasAccess(session),
-            ...(modelId && {
-              modelRevision: {
-                modelId: modelId,
-              },
-            }),
-            ...(input &&
-              input.variableName && {
-                variableName: input.variableName,
-              }),
-            ...(input?.owner && {
-              modelRevision: { model: { owner: { slug: input.owner } } },
-            }),
+            ...queries,
             isCurrent: true,
           },
           orderBy: {

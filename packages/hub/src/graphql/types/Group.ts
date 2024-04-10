@@ -155,9 +155,9 @@ export const Group = builder.prismaNode("Group", {
             },
           },
         }),
-        resolve: (user, args, ctx) => {
+        resolve: (group, args, ctx) => {
           const exports =
-            user.asOwner?.models
+            group.asOwner?.models
               .map((model) => model.currentRevision?.exports ?? [])
               .flat() ?? [];
           return modelExportConnectionHelpers.resolve(exports, args, ctx);
