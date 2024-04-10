@@ -36,10 +36,12 @@ export async function getWriteableModel({
   session,
   owner,
   slug,
+  include,
 }: {
   session: Session;
   owner: string;
   slug: string;
+  include?: Prisma.ModelInclude;
 }): Promise<Model> {
   // Note: `findUnique` would be safer, but then we won't be able to use nested queries
   const model = await prisma.model.findFirst({
@@ -63,6 +65,7 @@ export async function getWriteableModel({
         ],
       },
     },
+    include,
   });
   if (!model) {
     // FIXME - this will happen if permissions are not sufficient
