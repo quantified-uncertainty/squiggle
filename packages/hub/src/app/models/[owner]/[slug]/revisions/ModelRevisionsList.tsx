@@ -39,7 +39,7 @@ const ModelRevisionItem: FC<{
         }
         lastBuild {
           errors
-          runtime
+          runSeconds
         }
       }
     `,
@@ -84,7 +84,7 @@ const ModelRevisionItem: FC<{
 
       <div className="text-xs text-slate-700">{`Build Status: ${revision.buildStatus}`}</div>
       {revision.lastBuild && (
-        <div className="text-xs text-slate-700">{`Build Time: ${revision.lastBuild.runtime.toFixed(0)}ms`}</div>
+        <div className="text-xs text-slate-700">{`Build Time: ${revision.lastBuild.runSeconds.toFixed(0)}ms`}</div>
       )}
       {revision.exports.length > 0 ? (
         <div className="text-xs text-green-700">
@@ -142,7 +142,7 @@ export const ModelRevisionsList: FC<{
               }
               lastBuild {
                 errors
-                runtime
+                runSeconds
               }
             }
           }

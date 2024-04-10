@@ -119,7 +119,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       const _exports: ModelExport[] = exports.entries().map((e) => ({
         variableName: e[0],
         variableType: e[1].tag,
-        title: e[1].title(),
+        title: e[1].tags.name() ? e[1].tags.name() : e[1].title() || "",
         docstring: e[1].context?.docstring() || "",
       }));
       onExportsChange && onExportsChange(_exports);

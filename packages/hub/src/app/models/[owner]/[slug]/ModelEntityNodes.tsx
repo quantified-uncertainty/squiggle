@@ -69,7 +69,7 @@ function entityNodes(
       slug: variable.name,
       href: modelExportRoute({
         owner: owner.slug,
-        slug,
+        modelSlug: slug,
         variableName: variable.name,
       }),
       icon: ShareIcon,

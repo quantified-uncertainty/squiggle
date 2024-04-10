@@ -415,7 +415,9 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     playgroundProps.onOpenExport = (sourceId: string, varName?: string) => {
       const { owner, slug } = parseSourceId(sourceId);
       if (varName) {
-        router.push(modelExportRoute({ owner, slug, variableName: varName }));
+        router.push(
+          modelExportRoute({ owner, modelSlug: slug, variableName: varName })
+        );
       } else {
         router.push(modelRoute({ owner, slug }));
       }

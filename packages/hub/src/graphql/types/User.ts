@@ -3,6 +3,10 @@ import { modelWhereHasAccess } from "../helpers/modelHelpers";
 import { isRootUser } from "../helpers/userHelpers";
 import { GroupConnection, groupFromMembershipConnectionHelpers } from "./Group";
 import { ModelConnection, modelConnectionHelpers } from "./Model";
+import {
+  ModelExportConnection,
+  modelExportConnectionHelpers,
+} from "./ModelExport";
 import { Owner } from "./Owner";
 import {
   RelativeValuesDefinitionConnection,
@@ -52,6 +56,38 @@ export const User = builder.prismaNode("User", {
           modelConnectionHelpers.resolve(user.asOwner?.models ?? [], args, ctx),
       },
       ModelConnection
+    ),
+    modelExports: t.connection(
+      {
+        type: modelExportConnectionHelpers.ref,
+        select: (args, ctx, nestedSelection) => ({
+          asOwner: {
+            select: {
+              models: {
+                select: {
+                  currentRevision: {
+                    select: {
+                      exports: modelExportConnectionHelpers.getQuery(
+                        args,
+                        ctx,
+                        nestedSelection
+                      ),
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }),
+        resolve: (user, args, ctx) => {
+          const exports =
+            user.asOwner?.models
+              .map((model) => model.currentRevision?.exports ?? [])
+              .flat() ?? [];
+          return modelExportConnectionHelpers.resolve(exports, args, ctx);
+        },
+      },
+      ModelExportConnection
     ),
     relativeValuesDefinitions: t.connection(
       {

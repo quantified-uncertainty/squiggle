@@ -85,7 +85,7 @@ export const ExportsDropdown: FC<
                   key={exportItem.variableName}
                   href={modelExportRoute({
                     owner: owner,
-                    slug: slug,
+                    modelSlug: slug,
                     variableName: exportItem.variableName,
                   })}
                   title={`${exportItem.title || exportItem.variableName}`}

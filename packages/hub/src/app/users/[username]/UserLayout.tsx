@@ -17,6 +17,7 @@ import {
   newModelRoute,
   userDefinitionsRoute,
   userGroupsRoute,
+  userModelExportsRoute,
   userRoute,
 } from "@/routes";
 
@@ -37,6 +38,11 @@ const Query = graphql`
         # fields for count (empty/non-empty)
         # TODO: implement "totalCount" field instead
         models(first: 1) {
+          edges {
+            __typename
+          }
+        }
+        modelExports(first: 1) {
           edges {
             __typename
           }
@@ -108,6 +114,12 @@ export const UserLayout: FC<
             <StyledTabLink
               name="Models"
               href={userRoute({ username: user.username })}
+            />
+          ) : null}
+          {isMe || user.modelExports.edges.length ? (
+            <StyledTabLink
+              name="Exports"
+              href={userModelExportsRoute({ username: user.username })}
             />
           ) : null}
           {isMe || user.relativeValuesDefinitions.edges.length ? (

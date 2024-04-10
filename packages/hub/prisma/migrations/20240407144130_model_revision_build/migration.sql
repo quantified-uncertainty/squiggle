@@ -3,7 +3,7 @@ CREATE TABLE "ModelRevisionBuild" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "modelRevisionId" TEXT NOT NULL,
-    "runtime" DOUBLE PRECISION NOT NULL,
+    "runSeconds" DOUBLE PRECISION NOT NULL,
     "errors" TEXT[],
 
     CONSTRAINT "ModelRevisionBuild_pkey" PRIMARY KEY ("id")
