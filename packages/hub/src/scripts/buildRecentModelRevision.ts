@@ -150,14 +150,16 @@ async function buildRecentModelVersion() {
     const { code, seed } = model.currentRevision.squiggleSnippet;
 
     const startTime = performance.now();
+
     let response = await runSquiggle(model.currentRevisionId, code, seed);
+
     const endTime = performance.now();
     const diff = endTime - startTime;
 
     const build = await prisma.modelRevisionBuild.create({
       data: {
         modelRevision: { connect: { id: model.currentRevisionId } },
-        runSeconds: diff,
+        runSeconds: diff / 1000,
         errors: response === undefined ? [] : [response],
       },
     });
@@ -197,4 +199,9 @@ async function main() {
   }
 }
 
-main();
+try {
+  main();
+} catch (error) {
+  console.error("An unhandled error occurred:", error);
+  process.exit(1);
+}
