@@ -66,6 +66,20 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
     relativeValuesExports
   );
 
+  const footerItems =
+    _totalImportLength > 0 ? (
+      <ExportsDropdown
+        modelExports={modelExports}
+        relativeValuesExports={relativeValuesExports}
+        owner={model.owner.slug}
+        slug={model.slug}
+      >
+        <div className="cursor-pointer items-center flex text-xs text-gray-500 hover:text-gray-900 hover:underline">
+          {`${_totalImportLength} exports`}
+        </div>
+      </ExportsDropdown>
+    ) : undefined;
+
   return (
     <EntityCard
       updatedAtTimestamp={model.updatedAtTimestamp}
@@ -74,19 +88,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
       isPrivate={model.isPrivate}
       ownerName={model.owner.slug}
       slug={model.slug}
-    >
-      {_totalImportLength > 0 && (
-        <ExportsDropdown
-          modelExports={modelExports}
-          relativeValuesExports={relativeValuesExports}
-          owner={model.owner.slug}
-          slug={model.slug}
-        >
-          <div className="cursor-pointer items-center flex text-xs text-gray-500 hover:text-gray-900 hover:underline">
-            {`${_totalImportLength} exports`}
-          </div>
-        </ExportsDropdown>
-      )}
-    </EntityCard>
+      footerItems={footerItems}
+    />
   );
 };
