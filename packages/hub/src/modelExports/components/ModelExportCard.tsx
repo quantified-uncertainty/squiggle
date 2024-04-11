@@ -1,3 +1,4 @@
+import truncate from "lodash/truncate";
 import { FC } from "react";
 import ReactMarkdown from "react-markdown";
 import { useFragment } from "react-relay";
@@ -38,6 +39,16 @@ export const ModelExportCard: FC<Props> = ({ modelExportRef }) => {
 
   const Icon = exportTypeIcon(modelExport.variableType);
 
+  // This will have problems with markdown tags, but I looked into markdown-truncation packages, and they can get complicated. Will try this for now.
+  const docstring =
+    (modelExport.docstring &&
+      truncate(modelExport.docstring, {
+        length: 500,
+        separator: " ",
+        omission: "...",
+      })) ||
+    undefined;
+
   return (
     <EntityCard
       updatedAtTimestamp={modelExport.modelRevision.createdAtTimestamp}
@@ -66,12 +77,14 @@ export const ModelExportCard: FC<Props> = ({ modelExportRef }) => {
         </>
       }
     >
-      <ReactMarkdown
-        className="prose text-sm text-gray-500"
-        remarkPlugins={[remarkGfm]}
-      >
-        {modelExport.docstring}
-      </ReactMarkdown>
+      {docstring && (
+        <ReactMarkdown
+          className={"prose text-sm text-gray-500"}
+          remarkPlugins={[remarkGfm]}
+        >
+          {docstring}
+        </ReactMarkdown>
+      )}
     </EntityCard>
   );
 };
