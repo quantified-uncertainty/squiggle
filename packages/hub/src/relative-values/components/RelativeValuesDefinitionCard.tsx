@@ -38,6 +38,6 @@ export const RelativeValuesDefinitionCard: FC<Props> = ({
       showOwner={showOwner}
       ownerName={definition.owner.slug}
       slug={definition.slug}
-    ></EntityCard>
+    />
   );
 };
