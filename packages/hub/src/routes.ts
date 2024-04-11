@@ -68,7 +68,7 @@ export function isModelRelativeValuesRoute(url: string) {
   return url.match("^/models/[^/]+/[^/]+/relative-values/[^/]+$");
 }
 
-export function modelExportRoute({
+export function variableRoute({
   owner,
   modelSlug,
   variableName,
@@ -78,7 +78,7 @@ export function modelExportRoute({
   variableName: string;
 }) {
   const modelUrl = modelRoute({ owner, slug: modelSlug });
-  return `${modelUrl}/exports/${variableName}`;
+  return `${modelUrl}/variables/${variableName}`;
 }
 
 export function modelViewRoute({
@@ -136,7 +136,7 @@ export function userGroupsRoute({ username }: { username: string }) {
   return `/users/${username}/groups`;
 }
 
-export function userModelExportsRoute({ username }: { username: string }) {
+export function userVariablesRoute({ username }: { username: string }) {
   return `/users/${username}/exports`;
 }
 

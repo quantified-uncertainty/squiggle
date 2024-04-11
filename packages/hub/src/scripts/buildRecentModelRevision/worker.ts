@@ -1,5 +1,5 @@
 import { runSquiggle } from "@/graphql/queries/runSquiggle";
-import { ModelExport } from "@/lib/ExportsDropdown";
+import { ModelExport } from "@/lib/VariablesDropdown";
 import { prisma } from "@/prisma";
 
 export type WorkerRunMessage = {

@@ -17,8 +17,8 @@ import {
   newModelRoute,
   userDefinitionsRoute,
   userGroupsRoute,
-  userModelExportsRoute,
   userRoute,
+  userVariablesRoute,
 } from "@/routes";
 
 import { UserLayoutQuery } from "@/__generated__/UserLayoutQuery.graphql";
@@ -42,7 +42,7 @@ const Query = graphql`
             __typename
           }
         }
-        modelExports(first: 1) {
+        variables(first: 1) {
           edges {
             __typename
           }
@@ -116,10 +116,10 @@ export const UserLayout: FC<
               href={userRoute({ username: user.username })}
             />
           ) : null}
-          {isMe || user.modelExports.edges.length ? (
+          {isMe || user.variables.edges.length ? (
             <StyledTabLink
               name="Exports"
-              href={userModelExportsRoute({ username: user.username })}
+              href={userVariablesRoute({ username: user.username })}
             />
           ) : null}
           {isMe || user.relativeValuesDefinitions.edges.length ? (

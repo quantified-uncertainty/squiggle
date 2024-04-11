@@ -7,12 +7,12 @@ import { CodeBracketIcon, RectangleStackIcon, ShareIcon } from "@quri/ui";
 
 import { EntityLayout } from "@/components/EntityLayout";
 import { EntityTab } from "@/components/ui/EntityTab";
-import {
-  ExportsDropdown,
-  type ModelExport,
-  totalImportLength,
-} from "@/lib/ExportsDropdown";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import {
+  totalImportLength,
+  type Variable,
+  VariablesDropdown,
+} from "@/lib/VariablesDropdown";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRevisionsRoute, modelRoute } from "@/routes";
@@ -50,7 +50,7 @@ const Query = graphql`
           id
           # for length; TODO - "hasExports" field?
           exportNames
-          exports {
+          variables {
             id
             variableName
             variableType
@@ -86,19 +86,17 @@ export const ModelLayout: FC<
     slug: model.slug,
   });
 
-  const modelExports: ModelExport[] = model.currentRevision.exportNames.map(
-    (name) => {
-      const matchingExport = model.currentRevision.exports.find(
-        (e) => e.variableName === name
-      );
+  const variable: Variable[] = model.currentRevision.exportNames.map((name) => {
+    const matchingExport = model.currentRevision.exports.find(
+      (e) => e.variableName === name
+    );
 
-      return {
-        variableName: name,
-        variableType: matchingExport?.variableType || undefined,
-        title: matchingExport?.title || undefined,
-      };
-    }
-  );
+    return {
+      variableName: name,
+      variableType: matchingExport?.variableType || undefined,
+      title: matchingExport?.title || undefined,
+    };
+  });
 
   const relativeValuesExports = model.currentRevision.relativeValuesExports.map(
     ({ variableName, definition: { slug } }) => ({
@@ -107,10 +105,7 @@ export const ModelLayout: FC<
     })
   );
 
-  const _totalImportLength = totalImportLength(
-    modelExports,
-    relativeValuesExports
-  );
+  const _totalImportLength = totalImportLength(variable, relativeValuesExports);
 
   return (
     <EntityLayout
@@ -121,8 +116,8 @@ export const ModelLayout: FC<
         <EntityTab.List>
           <EntityTab.Link name="Code" icon={CodeBracketIcon} href={modelUrl} />
           {Boolean(_totalImportLength) && (
-            <ExportsDropdown
-              modelExports={modelExports}
+            <VariablesDropdown
+              variable={variable}
               relativeValuesExports={relativeValuesExports}
               owner={model.owner.slug}
               slug={model.slug}
@@ -138,7 +133,7 @@ export const ModelLayout: FC<
                   );
                 }}
               />
-            </ExportsDropdown>
+            </VariablesDropdown>
           )}
           <EntityTab.Link
             name="Revisions"

@@ -52,7 +52,7 @@ export const RelativeValuesModelLayout: FC<
             id
             slug
             isEditable
-            ...EditModelExports_Model
+            ...EditVariables_Model
             owner {
               slug
             }

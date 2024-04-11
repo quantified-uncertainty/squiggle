@@ -1,11 +1,10 @@
 import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 
 import { builder } from "@/graphql/builder";
-import { prisma } from "@/prisma";
 
 import { Owner } from "./Owner";
 
-export const ModelExport = builder.prismaNode("ModelExport", {
+export const Variable = builder.prismaNode("Variable", {
   id: { field: "id" },
   fields: (t) => ({
     modelRevision: t.relation("modelRevision"),
@@ -46,13 +45,13 @@ export const ModelExport = builder.prismaNode("ModelExport", {
   }),
 });
 
-export const ModelExportConnection = builder.connectionObject({
-  type: ModelExport,
-  name: "ModelExportConnection",
+export const VariableConnection = builder.connectionObject({
+  type: Variable,
+  name: "VariableConnection",
 });
 
-export const modelExportConnectionHelpers = prismaConnectionHelpers(
+export const variableConnectionHelpers = prismaConnectionHelpers(
   builder,
-  "ModelExport",
+  "Variable",
   { cursor: "id" }
 );

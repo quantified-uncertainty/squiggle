@@ -4,9 +4,9 @@ import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
 import { modelWhereHasAccess } from "../helpers/modelHelpers";
-import { ModelExport, ModelExportConnection } from "../types/ModelExport";
+import { Variable, VariableConnection } from "../types/Variable";
 
-const ModelExportQueryInput = builder.inputType("ModelExportQueryInput", {
+const VariableQueryInput = builder.inputType("VariableQueryInput", {
   fields: (t) => ({
     modelId: t.string(),
     variableName: t.string(),
@@ -14,13 +14,13 @@ const ModelExportQueryInput = builder.inputType("ModelExportQueryInput", {
   }),
 });
 
-builder.queryField("modelExports", (t) =>
+builder.queryField("variables", (t) =>
   t.prismaConnection(
     {
-      type: ModelExport,
+      type: Variable,
       cursor: "id",
       args: {
-        input: t.arg({ type: ModelExportQueryInput }),
+        input: t.arg({ type: VariableQueryInput }),
       },
       resolve: (query, _, { input }, { session }) => {
         const modelId = input?.modelId;
@@ -42,7 +42,7 @@ builder.queryField("modelExports", (t) =>
             }
         );
 
-        return prisma.modelExport.findMany({
+        return prisma.variable.findMany({
           ...query,
           where: {
             ...queries,
@@ -56,6 +56,6 @@ builder.queryField("modelExports", (t) =>
         });
       },
     },
-    ModelExportConnection
+    VariableConnection
   )
 );

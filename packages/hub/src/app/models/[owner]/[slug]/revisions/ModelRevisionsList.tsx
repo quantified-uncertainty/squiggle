@@ -32,7 +32,7 @@ const ModelRevisionItem: FC<{
           username
         }
         comment
-        exports {
+        variables {
           id
           variableName
           title
@@ -86,9 +86,9 @@ const ModelRevisionItem: FC<{
       {revision.lastBuild && (
         <div className="text-xs text-slate-700">{`Build Time: ${revision.lastBuild.runSeconds.toFixed(2)}s`}</div>
       )}
-      {revision.exports.length > 0 ? (
+      {revision.variables.length > 0 ? (
         <div className="text-xs text-green-700">
-          {`${revision.exports.length} exports `}
+          {`${revision.variables.length} exports `}
         </div>
       ) : null}
     </div>
@@ -135,7 +135,7 @@ export const ModelRevisionsList: FC<{
               id
               createdAtTimestamp
               buildStatus
-              exports {
+              variables {
                 id
                 title
                 variableName

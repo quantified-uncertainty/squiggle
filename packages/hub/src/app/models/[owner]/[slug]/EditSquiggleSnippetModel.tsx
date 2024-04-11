@@ -28,14 +28,14 @@ import {
   versionSupportsOnOpenExport,
 } from "@quri/versioned-squiggle-components";
 
-import { EditModelExports } from "@/components/exports/EditModelExports";
+import { EditVariables } from "@/components/exports/EditVariables";
 import { ReactRoot } from "@/components/ReactRoot";
 import { FormModal } from "@/components/ui/FormModal";
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/constants";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { useMutationForm } from "@/hooks/useMutationForm";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { modelExportRoute, modelRoute } from "@/routes";
+import { modelRoute, variableRoute } from "@/routes";
 import { ImportTooltip } from "@/squiggle/components/ImportTooltip";
 import {
   parseSourceId,
@@ -137,7 +137,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
         id
         slug
         isEditable
-        ...EditModelExports_Model
+        ...EditVariables_Model
         ...SquiggleSnippetDraftDialog_Model
         owner {
           slug
@@ -162,7 +162,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
             }
           }
           exportNames
-          exports {
+          variables {
             id
             variableName
             variableType
@@ -357,11 +357,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       </div>
     ),
     renderExtraModal: (name) => {
-      if (name === "exports") {
+      if (name === "variables") {
         return {
           body: (
             <div className="px-6 py-2">
-              <EditModelExports
+              <EditVariables
                 append={(item) => {
                   appendVariableWithDefinition(item);
                   onSubmit();
@@ -398,7 +398,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           <DropdownMenuActionItem
             title="Exported Variables"
             icon={LinkIcon}
-            onClick={() => openModal("exports")}
+            onClick={() => openModal("variables")}
           />
         </>
       ) : null;
@@ -428,7 +428,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       const { owner, slug } = parseSourceId(sourceId);
       if (varName) {
         router.push(
-          modelExportRoute({ owner, modelSlug: slug, variableName: varName })
+          variableRoute({ owner, modelSlug: slug, variableName: varName })
         );
       } else {
         router.push(modelRoute({ owner, slug }));

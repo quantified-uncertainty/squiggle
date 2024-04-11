@@ -20,8 +20,8 @@ import {
   SelectRelativeValuesDefinitionOption,
 } from "./SelectRelativeValuesDefinition";
 
-import { EditModelExports_Model$key } from "@/__generated__/EditModelExports_Model.graphql";
 import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
+import { EditVariables_Model$key } from "@/__generated__/EditVariables_Model.graphql";
 
 const CreateVariableWithDefinitionModal: FC<{
   close: () => void;
@@ -90,12 +90,12 @@ const CreateVariableWithDefinitionModal: FC<{
 
 const ExportItem: FC<{
   item: RelativeValuesExportInput;
-  modelRef: EditModelExports_Model$key;
+  modelRef: EditVariables_Model$key;
   remove: () => void;
 }> = ({ item, modelRef, remove }) => {
   const model = useFragment(
     graphql`
-      fragment EditModelExports_Model on Model {
+      fragment EditVariables_Model on Model {
         id
         slug
         owner {
@@ -139,10 +139,10 @@ type Props = {
   append: (item: RelativeValuesExportInput) => void;
   remove: (id: number) => void;
   items: RelativeValuesExportInput[];
-  modelRef: EditModelExports_Model$key;
+  modelRef: EditVariables_Model$key;
 };
 
-export const EditModelExports: FC<Props> = ({
+export const EditVariables: FC<Props> = ({
   append,
   remove,
   items,

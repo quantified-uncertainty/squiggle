@@ -219,7 +219,7 @@ model ModelRevision {
   contentId       String?          @unique
 
   relativeValuesExports RelativeValuesExport[]
-  exports               ModelExport[]
+  variables             Variable[]
 
   // required by Prisma, but unused since `model` field should point at the same entity
   currentRevisionModel Model?               @relation("CurrentRevision")
@@ -252,7 +252,7 @@ model SquiggleSnippet {
   revision ModelRevision?
 }
 
-model ModelExport {
+model Variable {
   id              String        @id @default(cuid())
   modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
   modelRevisionId String

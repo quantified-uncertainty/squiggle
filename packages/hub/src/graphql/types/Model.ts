@@ -3,9 +3,9 @@ import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 import { builder } from "@/graphql/builder";
 
 import { decodeGlobalIdWithTypename } from "../utils";
-import { ModelExport } from "./ModelExport";
 import { ModelRevision, ModelRevisionConnection } from "./ModelRevision";
 import { Owner } from "./Owner";
+import { Variable } from "./Variable";
 
 export const Model = builder.prismaNode("Model", {
   id: { field: "id" },
@@ -100,7 +100,7 @@ export const Model = builder.prismaNode("Model", {
       ModelRevisionConnection
     ),
     exportRevisions: t.connection({
-      type: ModelExport,
+      type: Variable,
       args: exportRevisionConnectionHelpers.getArgs(),
       select: (args, ctx, nestedSelection) => ({
         revisions: exportRevisionConnectionHelpers.getQuery(

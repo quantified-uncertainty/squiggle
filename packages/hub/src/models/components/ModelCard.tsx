@@ -3,7 +3,7 @@ import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { EntityCard } from "@/components/EntityCard";
-import { ExportsDropdown, totalImportLength } from "@/lib/ExportsDropdown";
+import { totalImportLength, VariablesDropdown } from "@/lib/VariablesDropdown";
 import { modelRoute } from "@/routes";
 
 import { ModelCard$key } from "@/__generated__/ModelCard.graphql";
@@ -18,7 +18,7 @@ const Fragment = graphql`
     }
     isPrivate
     currentRevision {
-      exports {
+      variables {
         variableName
         variableType
         title
@@ -46,7 +46,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
     slug: model.slug,
   });
 
-  const modelExports = model.currentRevision.exports.map(
+  const modelVariables = model.currentRevision.variables.map(
     ({ variableName, variableType, title }) => ({
       variableName,
       variableType,
@@ -62,22 +62,22 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   );
 
   const _totalImportLength = totalImportLength(
-    modelExports,
+    modelVariables,
     relativeValuesExports
   );
 
   const footerItems =
     _totalImportLength > 0 ? (
-      <ExportsDropdown
-        modelExports={modelExports}
-        relativeValuesExports={relativeValuesExports}
+      <VariablesDropdown
+        modelVariables={modelVariables}
+        relativeValuesVariables={relativeValuesVariables}
         owner={model.owner.slug}
         slug={model.slug}
       >
         <div className="cursor-pointer items-center flex text-xs text-gray-500 hover:text-gray-900 hover:underline">
-          {`${_totalImportLength} exports`}
+          {`${_totalImportLength} variables`}
         </div>
-      </ExportsDropdown>
+      </VariablesDropdown>
     ) : undefined;
 
   return (
