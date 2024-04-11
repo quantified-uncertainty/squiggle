@@ -1,59 +1,39 @@
-import { PrismaClient } from "@prisma/client";
-
 import { runSquiggle } from "@/graphql/queries/runSquiggle";
 import { ModelExport } from "@/lib/ExportsDropdown";
+import { prisma } from "@/prisma";
 
-const prisma = new PrismaClient();
+export type WorkerOutput = {
+  errors: string;
+  exports: ModelExport[];
+};
 
 export async function runSquiggleCode(
-  currentRevisionId: string,
   code: string,
   seed: string
-): Promise<string | undefined> {
+): Promise<WorkerOutput> {
   const outputR = await runSquiggle(code, seed);
+
+  let exports: ModelExport[] = [];
 
   if (outputR.ok) {
     // I Imagine it would be nice to move this out of this worker file, but this would require exporting a lot more information. It seems wise to instead wait for the Serialization PR to go in and then refactor this.
-    const _exports: ModelExport[] = outputR.value.exports
-      .entries()
-      .map((e) => ({
-        variableName: e[0],
-        variableType: e[1].tag,
-        title: e[1].tags.name() ? e[1].tags.name() : e[1].title() || "",
-        docstring: e[1].tags.doc() || "",
-      }));
-
-    for (const e of _exports) {
-      await prisma.modelExport.upsert({
-        where: {
-          uniqueKey: {
-            modelRevisionId: currentRevisionId,
-            variableName: e.variableName,
-          },
-        },
-        update: {
-          variableType: e.variableType,
-          title: e.title,
-          docstring: e.docstring,
-        },
-        create: {
-          modelRevision: { connect: { id: currentRevisionId } },
-          variableName: e.variableName,
-          variableType: e.variableType,
-          title: e.title,
-          docstring: e.docstring,
-        },
-      });
-    }
+    exports = outputR.value.exports.entries().map((e) => ({
+      variableName: e[0],
+      variableType: e[1].tag,
+      title: e[1].tags.name() ? e[1].tags.name() : e[1].title() || "",
+      docstring: e[1].tags.doc() || "",
+    }));
   }
 
-  return outputR.ok ? undefined : outputR.value.toString();
+  return {
+    errors: outputR.ok ? "" : outputR.value.toString(),
+    exports,
+  };
 }
 
 type RunMessage = {
   type: "run";
   data: {
-    revisionId: string;
     code: string;
     seed: string;
   };
@@ -62,13 +42,11 @@ type RunMessage = {
 process.on("message", async (message: RunMessage) => {
   if (message.type === "run") {
     try {
-      const { revisionId, code, seed } = message.data;
-      const errors = await runSquiggleCode(revisionId, code, seed);
+      const { code, seed } = message.data;
+      const buildOutput = await runSquiggleCode(code, seed);
       process?.send?.({
         type: "result",
-        data: {
-          errors,
-        },
+        data: buildOutput,
       });
     } catch (error) {
       console.error("An error occurred in the worker process:", error);
@@ -80,7 +58,7 @@ process.on("message", async (message: RunMessage) => {
       });
     } finally {
       await prisma.$disconnect();
-      process.exit(1);
+      process.exit(0);
     }
   }
 });

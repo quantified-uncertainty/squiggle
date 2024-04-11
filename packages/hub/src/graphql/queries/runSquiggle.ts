@@ -17,8 +17,8 @@ import { NotFoundError } from "../errors/NotFoundError";
 
 function getKey(code: string, seed: string): string {
   return crypto
-    .createHash("md5")
-    .update(`__EXPORT__:${code}, __SEED__: ${seed}`)
+    .createHash("sha265")
+    .update(JSON.stringify({ code, seed }))
     .digest("base64");
 }
 

@@ -2,21 +2,18 @@ import { PrismaClient } from "@prisma/client";
 import { spawn } from "child_process";
 
 import { NotFoundError } from "../../graphql/errors/NotFoundError";
+import { WorkerOutput } from "./worker";
 
 const TIMEOUT_SECONDS = 60; // 60 seconds
 
 const prisma = new PrismaClient();
-
-type SquiggleResult = {
-  errors?: string;
-};
 
 async function runWorker(
   revisionId: string,
   code: string,
   seed: string,
   timeoutSeconds: number
-): Promise<SquiggleResult> {
+): Promise<WorkerOutput> {
   return new Promise((resolve, _) => {
     console.log("Spawning worker process for Revision ID: " + revisionId);
     const worker = spawn(
@@ -29,7 +26,7 @@ async function runWorker(
 
     const timeoutId = setTimeout(() => {
       worker.kill();
-      resolve({ errors: `Timeout Error, at ${timeoutSeconds}s ` });
+      resolve({ errors: `Timeout Error, at ${timeoutSeconds}s`, exports: [] });
     }, timeoutSeconds * 1000);
 
     worker.stdout?.on("data", (data) => {
@@ -42,7 +39,8 @@ async function runWorker(
 
     worker.on(
       "message",
-      async (message: { type: string; data: { errors?: string } }) => {
+      async (message: { type: string; data: WorkerOutput }) => {
+        console.log("Worker message received");
         resolve(message.data);
       }
     );
@@ -52,15 +50,15 @@ async function runWorker(
       if (code === 0) {
         console.log("Worker completed successfully");
       } else {
-        console.error(`Worker process exited with code ${code}`);
-        resolve({ errors: "Computation error, with code: " + code });
+        console.error(`Worker process exited with error code ${code}`);
+        resolve({
+          errors: "Computation error, with code: " + code,
+          exports: [],
+        });
       }
     });
 
-    worker.send({ type: "run", data: { revisionId, code, seed } });
-    worker.on("close", (code) => {
-      console.log(`Worker process CLOSED with code ${code}`);
-    });
+    worker.send({ type: "run", data: { code, seed } });
   });
 }
 
@@ -119,16 +117,43 @@ async function buildRecentModelVersion(): Promise<void> {
     );
     const endTime = performance.now();
 
-    await prisma.modelRevisionBuild.create({
-      data: {
-        modelRevision: { connect: { id: model.currentRevisionId } },
-        runSeconds: (endTime - startTime) / 1000,
-        errors: response.errors === undefined ? [] : [response.errors],
-      },
-    });
+    await prisma.$transaction(async (tx) => {
+      // For some reason, Typescript becomes unsure if `model.currentRevisionId` is null or not, even though it's checked above.
+      const revisionId = model.currentRevisionId!;
 
+      await tx.modelRevisionBuild.create({
+        data: {
+          modelRevision: { connect: { id: revisionId } },
+          runSeconds: (endTime - startTime) / 1000,
+          errors: response.errors === undefined ? [] : [response.errors],
+        },
+      });
+
+      for (const e of response.exports) {
+        await tx.modelExport.upsert({
+          where: {
+            uniqueKey: {
+              modelRevisionId: revisionId,
+              variableName: e.variableName,
+            },
+          },
+          update: {
+            variableType: e.variableType,
+            title: e.title,
+            docstring: e.docstring,
+          },
+          create: {
+            modelRevision: { connect: { id: revisionId } },
+            variableName: e.variableName,
+            variableType: e.variableType,
+            title: e.title,
+            docstring: e.docstring,
+          },
+        });
+      }
+    });
     console.log(
-      `Build created for model revision ID: ${model.currentRevisionId}, in ${endTime - startTime}ms.`
+      `Build created for model revision ID: ${model.currentRevisionId}, in ${endTime - startTime}ms. Created ${response.exports.length} exports.`
     );
   } catch (error) {
     console.error("Error building model revision:", error);
