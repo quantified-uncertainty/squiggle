@@ -1,4 +1,4 @@
-import { mixture } from "../../src/dist/distOperations/index.js";
+import { mixture } from "../../src/dists/distOperations/index.js";
 import { getDefaultRng } from "../../src/rng/index.js";
 import {
   env,

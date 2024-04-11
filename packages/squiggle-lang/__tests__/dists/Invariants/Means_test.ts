@@ -8,12 +8,12 @@ Details in https://squiggle-language.com/docs/internal/invariants/
 Note: epsilon of 1e3 means the invariants are, in general, not being satisfied. 
 */
 
-import { BaseDist } from "../../../src/dist/BaseDist.js";
+import { BaseDist } from "../../../src/dists/BaseDist.js";
 import {
   BinaryOperation,
   binaryOperations,
-} from "../../../src/dist/distOperations/index.js";
-import { Env } from "../../../src/dist/env.js";
+} from "../../../src/dists/distOperations/index.js";
+import { Env } from "../../../src/dists/env.js";
 import { getDefaultRng } from "../../../src/rng/index.js";
 import {
   env,

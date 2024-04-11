@@ -1,4 +1,4 @@
-import { BaseDist } from "../dist/BaseDist.js";
+import { BaseDist } from "../dists/BaseDist.js";
 import { BaseValue } from "./BaseValue.js";
 
 export class VDist extends BaseValue {

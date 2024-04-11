@@ -1,7 +1,7 @@
 import {
   logScoreScalarAnswer,
   mixture,
-} from "../../../src/dist/distOperations/index.js";
+} from "../../../src/dists/distOperations/index.js";
 import { getDefaultRng } from "../../../src/rng/index.js";
 import { env, mkPointMass, unpackResult } from "../../helpers/distHelpers.js";
 

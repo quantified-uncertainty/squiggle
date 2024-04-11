@@ -1,7 +1,7 @@
 import jstat from "jstat";
 import { LocationRange } from "peggy";
 
-import { Env } from "../dist/env.js";
+import { Env } from "../dists/env.js";
 import { IRuntimeError } from "../errors/IError.js";
 import {
   ErrorMessage,

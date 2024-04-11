@@ -2,7 +2,7 @@
 
 import jstat from "jstat";
 
-import * as SymbolicDist from "../dist/SymbolicDist.js";
+import * as SymbolicDist from "../dists/SymbolicDist.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { SDate } from "../index.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";

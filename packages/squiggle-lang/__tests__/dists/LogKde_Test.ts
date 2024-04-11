@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 
-import { logKde } from "../../src/dist/SampleSetDist/logKde.js";
+import { logKde } from "../../src/dists/SampleSetDist/logKde.js";
 import * as E_A_Floats from "../../src/utility/E_A_Floats.js";
 
 const exampleSets = [

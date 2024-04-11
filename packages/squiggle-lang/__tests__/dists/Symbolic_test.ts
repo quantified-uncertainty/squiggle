@@ -1,4 +1,4 @@
-import * as SymbolicDist from "../../src/dist/SymbolicDist.js";
+import * as SymbolicDist from "../../src/dists/SymbolicDist.js";
 import * as E_A from "../../src/utility/E_A.js";
 import * as E_A_Floats from "../../src/utility/E_A_Floats.js";
 import * as Result from "../../src/utility/result.js";

@@ -1,6 +1,6 @@
 import toPlainObject from "lodash/toPlainObject.js";
 
-import { SampleSetDist } from "../dist/SampleSetDist/index.js";
+import { SampleSetDist } from "../dists/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
 import { SDate } from "../index.js";
 import { BaseLambda, Lambda } from "../reducer/lambda.js";

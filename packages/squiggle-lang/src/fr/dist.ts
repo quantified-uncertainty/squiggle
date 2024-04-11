@@ -1,5 +1,5 @@
-import { argumentError, otherError } from "../dist/DistError.js";
-import * as SymbolicDist from "../dist/SymbolicDist.js";
+import { argumentError, otherError } from "../dists/DistError.js";
+import * as SymbolicDist from "../dists/SymbolicDist.js";
 import { REDistributionError } from "../errors/messages.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";

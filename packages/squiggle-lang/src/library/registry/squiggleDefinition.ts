@@ -1,5 +1,5 @@
 import { parse } from "../../ast/parse.js";
-import { defaultEnv } from "../../dist/env.js";
+import { defaultEnv } from "../../dists/env.js";
 import { compileAst } from "../../expression/compile.js";
 import { Reducer } from "../../reducer/Reducer.js";
 import { Bindings } from "../../reducer/Stack.js";

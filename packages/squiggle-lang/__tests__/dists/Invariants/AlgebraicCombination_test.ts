@@ -5,7 +5,7 @@ when things substantially change.
 Also, there are some open comments in https://github.com/quantified-uncertainty/squiggle/pull/232 that haven't been addressed.
 */
 
-import { binaryOperations } from "../../../src/dist/distOperations/index.js";
+import { binaryOperations } from "../../../src/dists/distOperations/index.js";
 import { getDefaultRng } from "../../../src/rng/index.js";
 import * as Result from "../../../src/utility/result.js";
 import {

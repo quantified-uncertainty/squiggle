@@ -1,4 +1,4 @@
-import { type Env } from "./dist/env.js";
+import { type Env } from "./dists/env.js";
 import { registry } from "./library/registry/index.js";
 import { SqProject } from "./public/SqProject/index.js";
 import {
@@ -74,7 +74,7 @@ export {
 } from "./utility/SDuration.js";
 
 export { type LocationRange as SqLocation } from "peggy";
-export { defaultEnv as defaultEnvironment } from "./dist/env.js";
+export { defaultEnv as defaultEnvironment } from "./dists/env.js";
 export {
   type Env,
   SqDateValue,

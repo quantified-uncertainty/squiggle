@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 
-import { binaryOperations } from "../../src/dist/distOperations/index.js";
+import { binaryOperations } from "../../src/dists/distOperations/index.js";
 import { DivisionByZeroError } from "../../src/operationError.js";
 import { getDefaultRng } from "../../src/rng/index.js";
 import {

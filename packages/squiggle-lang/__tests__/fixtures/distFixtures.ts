@@ -1,4 +1,4 @@
-import * as SymbolicDist from "../../src/dist/SymbolicDist.js";
+import * as SymbolicDist from "../../src/dists/SymbolicDist.js";
 import { unpackResult } from "../helpers/distHelpers.js";
 
 export const normalDist5 = unpackResult(
