@@ -1,35 +1,49 @@
+# Should be invoked from monorepo's root.
+
 # Use the official Node.js 20 image as the base
-FROM node:20
-WORKDIR /app
+ARG DOCKER_NODE_VERSION=20-bookworm-slim
+
+FROM node:$DOCKER_NODE_VERSION AS node-with-openssl
+
+# Install OpenSSL - necessary for Prisma client
+# Mount caches via https://stackoverflow.com/a/72851168
+RUN --mount=type=cache,id=apt-lists,target=/var/lib/apt/lists,sharing=locked \
+    --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
+    rm -f /etc/apt/apt.conf.d/docker-clean \
+    && apt-get update \
+    && apt-get install -y \
+    openssl
+# If we ever need canvas for components, uncomment these:
+# build-essential \
+# libcairo2-dev \
+# libpango1.0-dev \
+# libjpeg-dev \
+# libgif-dev \
+# librsvg2-dev
+
+# Build
+FROM node-with-openssl AS build-stage
+WORKDIR /build
+
+# Install pnpm and turbo globally
+RUN npm install -g pnpm
 
 # Copy the entire monorepo to the working directory
-
-RUN apt-get update && apt-get install -y apt
-# Install necessary dependencies for canvas
-RUN apt-get update && \
-    apt-get install -y \
-        build-essential \
-        libcairo2-dev \
-        libpango1.0-dev \
-        libjpeg-dev \
-        libgif-dev \
-        librsvg2-dev
-
 COPY . .
-# Install pnpm and turbo globally
-RUN npm install -g pnpm turbo 
 
 # Install monorepo dependencies
-RUN pnpm install
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store/v3 pnpm install --frozen-lockfile
 
-# run turbo build 
+WORKDIR /build/packages/hub
+ENV NODE_ENV=production
 
-# WORKDIR /app/packages/hub
+# TODO - turbo cache, either as volume or remote
+RUN npx turbo run bundle --concurrency=1
 
-# RUN pnpm install
+FROM node-with-openssl AS run-stage
+WORKDIR /app
 
-# Expose the port on which the application will run (adjust if necessary)
-# EXPOSE 3001
+COPY --from=build-stage /build/packages/hub/dist /app/dist
+COPY --from=build-stage /build/node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/*.so.node /app/dist
 
-# Set the command to run the application
-# CMD ["pnpm", "run", "build-last-revision"]
+CMD ["node", "dist/bundle/buildRecentModelRevision.js"]

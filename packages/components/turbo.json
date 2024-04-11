@@ -4,7 +4,6 @@
     "build": {
       "outputs": [
         "dist/**",
-        "storybook-static/**",
         "src/components/CodeEditor/languageSupport/generated/**"
       ]
     },

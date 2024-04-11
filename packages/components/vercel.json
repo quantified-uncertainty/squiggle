@@ -1,5 +1,5 @@
 {
-  "buildCommand": "PLATFORM=vercel npx turbo build",
+  "buildCommand": "PLATFORM=vercel npx turbo build:storybook",
   "outputDirectory": "storybook-static",
   "ignoreCommand": "npx turbo-ignore || ../../skip-dependabot.sh"
 }

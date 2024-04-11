@@ -33,9 +33,6 @@ node_modules
 
 *.tsbuildinfo
 
-# Ignore dist directory in the current directory
-dist
-
 # Ignore .env files
 .env
 .env.test
