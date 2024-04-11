@@ -142,6 +142,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
         owner {
           slug
         }
+        lastRevisionWithBuild {
+          lastBuild {
+            runSeconds
+          }
+        }
         currentRevision {
           id
           content {
@@ -186,6 +191,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     revision.content,
     "SquiggleSnippet"
   );
+
+  const lastBuildSpeed = model.lastRevisionWithBuild?.lastBuild?.runSeconds;
 
   const seed = content.seed;
 
@@ -304,13 +311,18 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
 
   const squiggle = use(versionedSquigglePackages(checkedVersion));
 
+  // Automatically turn off autorun, if the last build speed was > 5s. Note that this does not stop in the case of memory errors or similar.
+  const autorunMode =
+    content.autorunMode ||
+    (lastBuildSpeed ? (lastBuildSpeed > 5 ? false : true) : true);
+
   // Build props for versioned SquigglePlayground first, since they might depend on the version we use,
   // and we want to populate them incrementally.
   const playgroundProps: Parameters<
     typeof squiggle.components.SquigglePlayground
   >[0] = {
     defaultCode,
-    autorunMode: content.autorunMode ?? true,
+    autorunMode: autorunMode,
     sourceId: serializeSourceId({
       owner: model.owner.slug,
       slug: model.slug,

@@ -13,6 +13,7 @@ export async function runSquiggleCode(
   const outputR = await runSquiggle(code, seed);
 
   if (outputR.ok) {
+    // I Imagine it would be nice to move this out of this worker file, but this would require exporting a lot more information. It seems wise to instead wait for the Serialization PR to go in and then refactor this.
     const _exports: ModelExport[] = outputR.value.exports
       .entries()
       .map((e) => ({
@@ -60,16 +61,26 @@ type RunMessage = {
 
 process.on("message", async (message: RunMessage) => {
   if (message.type === "run") {
-    const { revisionId, code, seed } = message.data;
-
-    const errors = await runSquiggleCode(revisionId, code, seed);
-
-    process?.send?.({
-      type: "result",
-      data: {
-        errors,
-      },
-    });
-    process.exit(0);
+    try {
+      const { revisionId, code, seed } = message.data;
+      const errors = await runSquiggleCode(revisionId, code, seed);
+      process?.send?.({
+        type: "result",
+        data: {
+          errors,
+        },
+      });
+    } catch (error) {
+      console.error("An error occurred in the worker process:", error);
+      process?.send?.({
+        type: "result",
+        data: {
+          errors: "An unknown error occurred in the worker process.",
+        },
+      });
+    } finally {
+      await prisma.$disconnect();
+      process.exit(1);
+    }
   }
 });

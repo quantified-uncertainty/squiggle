@@ -118,7 +118,6 @@ async function buildRecentModelVersion(): Promise<void> {
       TIMEOUT_SECONDS
     );
     const endTime = performance.now();
-    console.log("RESPONSE", response);
 
     await prisma.modelRevisionBuild.create({
       data: {
@@ -129,8 +128,7 @@ async function buildRecentModelVersion(): Promise<void> {
     });
 
     console.log(
-      "Build created for model revision ID:",
-      model.currentRevisionId
+      `Build created for model revision ID: ${model.currentRevisionId}, in ${endTime - startTime}ms.`
     );
   } catch (error) {
     console.error("Error building model revision:", error);
@@ -165,11 +163,16 @@ async function main(): Promise<void> {
   }
 }
 
+async function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function runContinuously() {
   while (true) {
     try {
       await main();
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Sleep for 1 second
+      await new Promise((resolve) => process.nextTick(resolve));
+      await delay(500); // Delay for approximately .5s
     } catch (error) {
       console.error("An error occurred during continuous execution:", error);
     }
