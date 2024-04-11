@@ -2,6 +2,14 @@ import { runSquiggle } from "@/graphql/queries/runSquiggle";
 import { ModelExport } from "@/lib/ExportsDropdown";
 import { prisma } from "@/prisma";
 
+export type WorkerRunMessage = {
+  type: "run";
+  data: {
+    code: string;
+    seed: string;
+  };
+};
+
 export type WorkerOutput = {
   errors: string;
   exports: ModelExport[];
@@ -31,15 +39,7 @@ export async function runSquiggleCode(
   };
 }
 
-type RunMessage = {
-  type: "run";
-  data: {
-    code: string;
-    seed: string;
-  };
-};
-
-process.on("message", async (message: RunMessage) => {
+process.on("message", async (message: WorkerRunMessage) => {
   if (message.type === "run") {
     try {
       const { code, seed } = message.data;

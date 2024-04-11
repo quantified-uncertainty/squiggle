@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { spawn } from "child_process";
 
 import { NotFoundError } from "../../graphql/errors/NotFoundError";
-import { WorkerOutput } from "./worker";
+import { WorkerOutput, WorkerRunMessage } from "./worker";
 
 const TIMEOUT_SECONDS = 60; // 60 seconds
 
@@ -40,7 +40,6 @@ async function runWorker(
     worker.on(
       "message",
       async (message: { type: string; data: WorkerOutput }) => {
-        console.log("Worker message received");
         resolve(message.data);
       }
     );
@@ -58,7 +57,10 @@ async function runWorker(
       }
     });
 
-    worker.send({ type: "run", data: { code, seed } });
+    worker.send({
+      type: "run",
+      data: { code, seed },
+    } satisfies WorkerRunMessage);
   });
 }
 
