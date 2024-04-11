@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { runSquiggle } from "@/graphql/queries/runSquiggle";
+import { runSquiggleWithCache } from "@/graphql/queries/runSquiggle";
 
 export async function POST(req: NextRequest) {
   // Assuming 'code' is sent in the request body and is a string
   try {
     const body = await req.json();
     if (body.code) {
-      let response = await runSquiggle(body.code);
+      let response = await runSquiggleWithCache(
+        body.code,
+        body.seed || "DEFAULT_SEED"
+      );
       if (response.isOk) {
         return new NextResponse(
           JSON.stringify({
