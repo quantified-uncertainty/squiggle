@@ -22,7 +22,11 @@ import { vLambda } from "../../value/vLambda.js";
 import { vNumber } from "../../value/VNumber.js";
 import { Plot, vPlot } from "../../value/VPlot.js";
 import { Scale, vScale } from "../../value/VScale.js";
-import { Specification, vSpecification } from "../../value/VSpecification.js";
+import {
+  Specification,
+  vSpecification,
+  VSpecification,
+} from "../../value/VSpecification.js";
 import { vString } from "../../value/VString.js";
 import { TableChart, vTableChart } from "../../value/VTableChart.js";
 import { frTypesMatchesLengths } from "./helpers.js";
@@ -75,6 +79,11 @@ export const frCalculator: FRType<Calculator> = {
 export const frSpecification: FRType<Specification> = {
   unpack: (v: Value) => (v.type === "Specification" ? v.value : undefined),
   pack: (v) => vSpecification(v),
+  display: () => "Specification",
+};
+export const frSpecificationWithTags: FRType<VSpecification> = {
+  unpack: (v: Value) => (v.type === "Specification" ? v : undefined),
+  pack: (v) => v,
   display: () => "Specification",
 };
 export const frString: FRType<string> = {
