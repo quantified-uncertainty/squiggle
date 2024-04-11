@@ -1,8 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 import { runSquiggle } from "@/graphql/queries/runSquiggle";
-
-import { ModelExport } from "../../../../components/dist/src/components/SquigglePlayground";
+import { ModelExport } from "@/lib/ExportsDropdown";
 
 const prisma = new PrismaClient();
 

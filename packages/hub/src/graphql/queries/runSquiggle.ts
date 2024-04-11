@@ -1,14 +1,18 @@
 import { Prisma } from "@prisma/client";
 import crypto from "crypto";
 
-import { SqLinker, SqProject, SqValue } from "@quri/squiggle-lang";
+import {
+  SqLinker,
+  SqOutputResult,
+  SqProject,
+  SqValue,
+} from "@quri/squiggle-lang";
 
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/constants";
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 import { parseSourceId } from "@/squiggle/components/linker";
 
-import { SqOutputResult } from "../../../../squiggle-lang/dist/public/types";
 import { NotFoundError } from "../errors/NotFoundError";
 
 function getKey(code: string, seed: string): string {
