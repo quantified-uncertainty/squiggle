@@ -26,7 +26,10 @@ async function runWorker(
 
     const timeoutId = setTimeout(() => {
       worker.kill();
-      resolve({ errors: `Timeout Error, at ${timeoutSeconds}s`, exports: [] });
+      resolve({
+        errors: `Timeout Error, at ${timeoutSeconds}s`,
+        variableRevisions: [],
+      });
     }, timeoutSeconds * 1000);
 
     worker.stdout?.on("data", (data) => {
@@ -52,7 +55,7 @@ async function runWorker(
         console.error(`Worker process exited with error code ${code}`);
         resolve({
           errors: "Computation error, with code: " + code,
-          exports: [],
+          variableRevisions: [],
         });
       }
     });
@@ -123,6 +126,8 @@ async function buildRecentModelVersion(): Promise<void> {
       // For some reason, Typescript becomes unsure if `model.currentRevisionId` is null or not, even though it's checked above.
       const revisionId = model.currentRevisionId!;
 
+      const modelId = model.id;
+
       await tx.modelRevisionBuild.create({
         data: {
           modelRevision: { connect: { id: revisionId } },
@@ -131,22 +136,34 @@ async function buildRecentModelVersion(): Promise<void> {
         },
       });
 
-      for (const e of response.exports) {
-        await tx.modelExport.upsert({
+      for (const e of response.variableRevisions) {
+        const variable = await tx.variable.findFirst({
           where: {
-            uniqueKey: {
-              modelRevisionId: revisionId,
+            modelId: modelId,
+            variableName: e.variableName,
+          },
+        });
+
+        let createdVariableId: string | undefined = undefined;
+
+        if (!variable) {
+          // Create a new Variable if it doesn't exist
+          const createdVariable = await tx.variable.create({
+            data: {
+              model: { connect: { id: modelId } },
               variableName: e.variableName,
             },
-          },
-          update: {
-            variableType: e.variableType,
-            title: e.title,
-            docstring: e.docstring,
-          },
-          create: {
-            modelRevision: { connect: { id: revisionId } },
+          });
+          createdVariableId = createdVariable.id;
+        }
+
+        const variableId = variable?.id || createdVariableId!;
+
+        await tx.variableRevision.create({
+          data: {
             variableName: e.variableName,
+            variable: { connect: { id: variableId } },
+            modelRevision: { connect: { id: revisionId } },
             variableType: e.variableType,
             title: e.title,
             docstring: e.docstring,
@@ -155,7 +172,7 @@ async function buildRecentModelVersion(): Promise<void> {
       }
     });
     console.log(
-      `Build created for model revision ID: ${model.currentRevisionId}, in ${endTime - startTime}ms. Created ${response.exports.length} exports.`
+      `Build created for model revision ID: ${model.currentRevisionId}, in ${endTime - startTime}ms. Created ${response.variableRevisions.length} variableRevisions.`
     );
   } catch (error) {
     console.error("Error building model revision:", error);

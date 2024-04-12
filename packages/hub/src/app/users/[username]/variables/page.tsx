@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 import { loadPageQuery } from "@/relay/loadPageQuery";
 
-import { UserVariablesPage } from "./UserVariablePage";
+import { UserVariablesPage } from "./UserVariablesPage";
 
 import QueryNode, {
   UserVariablesPageQuery,

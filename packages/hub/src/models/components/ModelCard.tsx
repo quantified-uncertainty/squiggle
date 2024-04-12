@@ -5,7 +5,7 @@ import { graphql } from "relay-runtime";
 import { EntityCard } from "@/components/EntityCard";
 import {
   totalImportLength,
-  Variable,
+  VariableRevision,
   VariablesDropdown,
 } from "@/lib/VariablesDropdown";
 import { modelRoute } from "@/routes";
@@ -52,7 +52,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
     slug: model.slug,
   });
 
-  const modelVariables: Variable[] = model.variables.map((v) => ({
+  const modelVariables: VariableRevision[] = model.variables.map((v) => ({
     variableName: v.variableName,
     variableType: v.lastRevision?.variableType,
     title: v.lastRevision?.title || undefined,
@@ -74,8 +74,8 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   const footerItems =
     _totalImportLength > 0 ? (
       <VariablesDropdown
-        modelVariables={modelVariables}
-        relativeValuesVariables={relativeValuesExports}
+        variables={modelVariables}
+        relativeValuesExports={relativeValuesExports}
         owner={model.owner.slug}
         slug={model.slug}
       >

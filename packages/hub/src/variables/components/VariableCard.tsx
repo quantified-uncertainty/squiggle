@@ -40,12 +40,18 @@ type Props = {
 export const VariableCard: FC<Props> = ({ variableRef }) => {
   const variable = useFragment(Fragment, variableRef);
 
-  const Icon = exportTypeIcon(variable.variableType);
+  const lastRevision = variable.lastRevision;
+
+  if (!lastRevision) {
+    return null;
+  }
+
+  const Icon = exportTypeIcon(lastRevision.variableType || "");
 
   // This will have problems with markdown tags, but I looked into markdown-truncation packages, and they can get complicated. Will try this for now.
   const docstring =
-    (variable.lastRevision?.docstring &&
-      truncate(variable.docstring, {
+    (lastRevision.docstring &&
+      truncate(lastRevision.docstring, {
         length: 500,
         separator: " ",
         omission: "...",
@@ -54,11 +60,9 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
 
   return (
     <EntityCard
-      updatedAtTimestamp={
-        variable.lastRevision.modelRevision.createdAtTimestamp
-      }
+      updatedAtTimestamp={lastRevision.modelRevision.createdAtTimestamp}
       href={variableRoute({
-        modelSlug: variable.modelRevision.model.slug,
+        modelSlug: variable.model.slug,
         variableName: variable.variableName,
         owner: variable.owner.slug,
       })}
@@ -70,14 +74,14 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
             className="cursor-pointer items-center flex text-xs text-gray-500 hover:text-gray-900 hover:underline"
             href={modelRoute({
               owner: variable.owner.slug,
-              slug: variable.modelRevision.model.slug,
+              slug: variable.model.slug,
             })}
           >
-            {`${variable.owner.slug}/${variable.modelRevision.model.slug}`}
+            {`${variable.owner.slug}/${variable.model.slug}`}
           </a>
           <div className="items-center flex text-xs text-gray-500">
             <Icon size={10} className="mr-1" />
-            {variable.variableType}
+            {lastRevision.variableType}
           </div>
         </>
       }

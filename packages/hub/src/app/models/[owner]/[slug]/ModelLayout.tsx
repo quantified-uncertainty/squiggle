@@ -10,7 +10,7 @@ import { EntityTab } from "@/components/ui/EntityTab";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import {
   totalImportLength,
-  type Variable,
+  type VariableRevision,
   VariablesDropdown,
 } from "@/lib/VariablesDropdown";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
@@ -88,7 +88,7 @@ export const ModelLayout: FC<
     slug: model.slug,
   });
 
-  const variables: Variable[] = model.currentRevision.exportNames.map(
+  const variables: VariableRevision[] = model.currentRevision.exportNames.map(
     (name) => {
       const matchingExport = model.variables.find(
         (e) => e.variableName === name

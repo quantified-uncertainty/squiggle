@@ -12,7 +12,7 @@ import { modelForRelativeValuesExportRoute, variableRoute } from "@/routes";
 
 import { exportTypeIcon } from "./typeIcon";
 
-export type Variable = {
+export type VariableRevision = {
   title?: string;
   variableName: string;
   variableType?: string;
@@ -22,7 +22,7 @@ export type Variable = {
 type RelativeValuesExport = { slug: string; variableName: string };
 
 const nonRelativeValuesVariables = (
-  variables: Variable[],
+  variables: VariableRevision[],
   relativeValuesExports: RelativeValuesExport[]
 ) =>
   variables.filter(
@@ -34,7 +34,7 @@ const nonRelativeValuesVariables = (
 
 //It's a bit awkward that this here, but it's fairly closely coupled to ExportsDropdown.
 export const totalImportLength = (
-  variables: Variable[],
+  variables: VariableRevision[],
   relativeValuesExports: RelativeValuesExport[]
 ) =>
   nonRelativeValuesVariables(variables, relativeValuesExports).length +
@@ -42,7 +42,7 @@ export const totalImportLength = (
 
 export const VariablesDropdown: FC<
   PropsWithChildren<{
-    variables: Variable[];
+    variables: VariableRevision[];
     relativeValuesExports: RelativeValuesExport[];
     owner: string;
     slug: string;

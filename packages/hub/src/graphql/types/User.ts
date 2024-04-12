@@ -62,11 +62,11 @@ export const User = builder.prismaNode("User", {
             select: {
               models: {
                 select: {
-                  variables: variableConnectionHelpers.getQuery({
+                  variables: variableConnectionHelpers.getQuery(
                     args,
                     ctx,
-                    nestedSelection,
-                  }),
+                    nestedSelection
+                  ),
                 },
               },
             },

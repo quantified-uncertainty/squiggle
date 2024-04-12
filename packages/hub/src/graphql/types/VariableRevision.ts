@@ -22,6 +22,6 @@ export const variableRevisionConnectionHelpers = prismaConnectionHelpers(
 );
 
 export const VariableRevisionConnection = builder.connectionObject({
-  type: "VariableRevision",
+  type: VariableRevision,
   name: "VariableRevisionConnection",
 });

@@ -141,7 +141,7 @@ export const Group = builder.prismaNode("Group", {
                 select: {
                   currentRevision: {
                     select: {
-                      exports: {
+                      variableRevisions: {
                         ...variableRevisionConnectionHelpers.getQuery(
                           args,
                           ctx,
@@ -156,11 +156,15 @@ export const Group = builder.prismaNode("Group", {
           },
         }),
         resolve: (group, args, ctx) => {
-          const exports =
+          const variableRevisions =
             group.asOwner?.models
-              .map((model) => model.currentRevision?.exports ?? [])
+              .map((model) => model.currentRevision?.variableRevisions ?? [])
               .flat() ?? [];
-          return variableRevisionConnectionHelpers.resolve(exports, args, ctx);
+          return variableRevisionConnectionHelpers.resolve(
+            variableRevisions,
+            args,
+            ctx
+          );
         },
       },
       variableRevisionConnectionHelpers.ref

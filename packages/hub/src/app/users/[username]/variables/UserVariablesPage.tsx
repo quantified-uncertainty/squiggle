@@ -8,10 +8,10 @@ import { usePageQuery } from "@/relay/usePageQuery";
 
 import { UserVariableList } from "./UserVariableList";
 
-import { UserVariablePageQuery } from "@/__generated__/UserVariablesPageQuery.graphql";
+import { UserVariablesPageQuery } from "@/__generated__/UserVariablesPageQuery.graphql";
 
 const Query = graphql`
-  query UserVariablePageQuery($username: String!) {
+  query UserVariablesPageQuery($username: String!) {
     userByUsername(username: $username) {
       __typename
       ... on User {
@@ -22,7 +22,7 @@ const Query = graphql`
 `;
 
 export const UserVariablesPage: FC<{
-  query: SerializablePreloadedQuery<UserVariablePageQuery>;
+  query: SerializablePreloadedQuery<UserVariablesPageQuery>;
 }> = ({ query }) => {
   const [{ userByUsername: result }] = usePageQuery(Query, query);
 
