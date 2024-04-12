@@ -49,7 +49,7 @@ export const VariablesDropdown: FC<
   }>
 > = ({ variableRevisions, relativeValuesExports, owner, slug, children }) => {
   //We remove the relative values variables from the exports list, to not double count them.
-  const _variableRevisions = nonRelativeValuesVariables(
+  const allExports = nonRelativeValuesVariables(
     variableRevisions,
     relativeValuesExports
   );
@@ -57,10 +57,10 @@ export const VariablesDropdown: FC<
     <Dropdown
       render={({ close }) => (
         <DropdownMenu>
-          {_variableRevisions.length > 0 && (
+          {allExports.length > 0 && (
             <>
               <DropdownMenuHeader>Exported Variables</DropdownMenuHeader>
-              {_variableRevisions.map((exportItem) => (
+              {allExports.map((exportItem) => (
                 <DropdownMenuNextLinkItem
                   key={exportItem.variableName}
                   href={variableRoute({
