@@ -76,6 +76,10 @@ export const VariablePage: FC<{
     query
   );
 
+  if (result.__typename !== "Variable") {
+    return <div>No revisions found. They should be built shortly.</div>;
+  }
+
   const variable = extractFromGraphqlErrorUnion(result, "Variable");
 
   const {
@@ -114,9 +118,13 @@ export const VariablePage: FC<{
     variable
   );
 
-  const [selected, changeId] = useState<string>(
-    revisions.edges.at(0)?.node.id || ""
+  const [selected, changeId] = useState<string | null>(
+    revisions.edges.at(0)?.node.id ?? null
   );
+
+  if (selected === null) {
+    return <div>No revisions found. They should be built shortly.</div>;
+  }
 
   const content = revisions.edges.find((edge) => edge.node.id === selected)
     ?.node.modelRevision.content;
