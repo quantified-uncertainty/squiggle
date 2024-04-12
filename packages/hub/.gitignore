@@ -4,5 +4,7 @@
 /tsconfig.tsbuildinfo
 /.next
 /.vscode
+
+# Ignore all of the generated files, but keep the directory
 src/__generated__/*
 !src/__generated__/.gitkeep

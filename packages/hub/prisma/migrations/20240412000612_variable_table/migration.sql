@@ -4,6 +4,10 @@
   - Added the required column `variableId` to the `VariableRevision` table without a default value. This is not possible if the table is not empty.
 
 */
+
+-- Delete all existing VariableRevision records
+DELETE FROM "VariableRevision";
+
 -- AlterTable
 ALTER TABLE "VariableRevision" ADD COLUMN     "variableId" TEXT NOT NULL;
 
