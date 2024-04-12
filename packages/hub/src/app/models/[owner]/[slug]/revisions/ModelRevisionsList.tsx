@@ -34,10 +34,6 @@ const ModelRevisionItem: FC<{
         comment
         variableRevisions {
           id
-          title
-          variable {
-            variableName
-          }
         }
         lastBuild {
           errors
@@ -90,7 +86,7 @@ const ModelRevisionItem: FC<{
       )}
       {revision.variableRevisions.length > 0 ? (
         <div className="text-xs text-green-700">
-          {`${revision.variableRevisions.length} exports `}
+          {`${revision.variableRevisions.length} variables`}
         </div>
       ) : null}
     </div>
@@ -134,20 +130,6 @@ export const ModelRevisionsList: FC<{
           edges {
             node {
               ...ModelRevisionsList_revision
-              id
-              createdAtTimestamp
-              buildStatus
-              variableRevisions {
-                title
-                variable {
-                  id
-                  variableName
-                }
-              }
-              lastBuild {
-                errors
-                runSeconds
-              }
             }
           }
           pageInfo {

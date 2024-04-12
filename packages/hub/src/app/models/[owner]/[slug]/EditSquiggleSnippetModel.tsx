@@ -28,7 +28,7 @@ import {
   versionSupportsOnOpenExport,
 } from "@quri/versioned-squiggle-components";
 
-import { EditVariables } from "@/components/exports/EditVariables";
+import { EditRelativeValueExports } from "@/components/exports/EditRelativeValueExports";
 import { ReactRoot } from "@/components/ReactRoot";
 import { FormModal } from "@/components/ui/FormModal";
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/constants";
@@ -137,7 +137,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
         id
         slug
         isEditable
-        ...EditVariables_Model
+        ...EditRelativeValueExports_Model
         ...SquiggleSnippetDraftDialog_Model
         owner {
           slug
@@ -162,13 +162,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
             }
           }
           exportNames
-          variableRevisions {
-            id
-            variableName
-            title
-            variableType
-            docstring
-          }
           relativeValuesExports {
             id
             variableName
@@ -357,11 +350,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       </div>
     ),
     renderExtraModal: (name) => {
-      if (name === "variables") {
+      if (name === "Relative Values") {
         return {
           body: (
             <div className="px-6 py-2">
-              <EditVariables
+              <EditRelativeValueExports
                 append={(item) => {
                   appendVariableWithDefinition(item);
                   onSubmit();
@@ -375,7 +368,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
               />
             </div>
           ),
-          title: "Exported Variables",
+          title: "Relative Value Exports",
         };
       }
     },
@@ -396,9 +389,9 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
         <>
           <DropdownMenuHeader>Experimental</DropdownMenuHeader>
           <DropdownMenuActionItem
-            title="Exported Variables"
+            title="Relative Value Exports"
             icon={LinkIcon}
-            onClick={() => openModal("variables")}
+            onClick={() => openModal("Relative Values")}
           />
         </>
       ) : null;

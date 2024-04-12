@@ -56,7 +56,6 @@ const Query = graphql`
         }
         currentRevision {
           id
-          # for length; TODO - "hasExports" field?
           exportNames
           relativeValuesExports {
             id

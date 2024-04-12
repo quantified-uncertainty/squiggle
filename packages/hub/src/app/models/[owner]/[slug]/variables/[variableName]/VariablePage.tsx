@@ -9,7 +9,7 @@ import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 
-import { SquiggleVariablePage } from "./SquiggleVariablePage";
+import { SquiggleVariableRevisionPage } from "./SquiggleVariableRevisionPage";
 
 import {
   VariablePage$data,
@@ -104,7 +104,7 @@ export const VariablePage: FC<{
                 createdAtTimestamp
                 content {
                   __typename
-                  ...SquiggleVariablePage
+                  ...SquiggleVariableRevisionPage
                 }
               }
             }
@@ -135,7 +135,7 @@ export const VariablePage: FC<{
         return (
           <div className="flex">
             <div className="flex-1 w-full">
-              <SquiggleVariablePage
+              <SquiggleVariableRevisionPage
                 key={selected}
                 variableName={params.variableName}
                 contentRef={content}
