@@ -1,24 +1,24 @@
 import { loadPageQuery } from "@/relay/loadPageQuery";
 
-import { ModelExportPage } from "./ModelExportPage";
+import { VariablePage } from "./VariablePage";
 
 import QueryNode, {
-  ModelExportPageQuery,
-} from "@/__generated__/ModelExportPageQuery.graphql";
+  VariablePageQuery,
+} from "@/__generated__/VariablePageQuery.graphql";
 
 type Props = {
   params: { owner: string; slug: string; variableName: string };
 };
 
 export default async function OuterModelExportPage({ params }: Props) {
-  const query = await loadPageQuery<ModelExportPageQuery>(QueryNode, {
+  const query = await loadPageQuery<VariablePageQuery>(QueryNode, {
     input: { owner: params.owner, slug: params.slug },
     variableName: params.variableName,
   });
 
   return (
     <div className="py-4 px-8">
-      <ModelExportPage query={query} params={params} />
+      <VariablePage query={query} params={params} />
     </div>
   );
 }

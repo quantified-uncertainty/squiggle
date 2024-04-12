@@ -27,14 +27,10 @@ builder.queryField("variables", (t) =>
 
         const queries = merge(
           {},
-          { modelRevision: { model: modelWhereHasAccess(session) } },
-          modelId && {
-            modelRevision: {
-              modelId: modelId,
-            },
-          },
+          { model: modelWhereHasAccess(session) },
+          modelId && { modelId: modelId },
           input?.owner && {
-            modelRevision: { model: { owner: { slug: input.owner } } },
+            model: { owner: { slug: input.owner } },
           },
           input &&
             input.variableName && {
@@ -46,12 +42,6 @@ builder.queryField("variables", (t) =>
           ...query,
           where: {
             ...queries,
-            isCurrent: true,
-          },
-          orderBy: {
-            modelRevision: {
-              createdAt: "desc",
-            },
           },
         });
       },

@@ -5,7 +5,6 @@ import { builder } from "@/graphql/builder";
 import { decodeGlobalIdWithTypename } from "../utils";
 import { ModelRevision, ModelRevisionConnection } from "./ModelRevision";
 import { Owner } from "./Owner";
-import { Variable } from "./Variable";
 
 export const Model = builder.prismaNode("Model", {
   id: { field: "id" },
@@ -99,19 +98,7 @@ export const Model = builder.prismaNode("Model", {
       },
       ModelRevisionConnection
     ),
-    exportRevisions: t.connection({
-      type: Variable,
-      args: exportRevisionConnectionHelpers.getArgs(),
-      select: (args, ctx, nestedSelection) => ({
-        revisions: exportRevisionConnectionHelpers.getQuery(
-          args,
-          ctx,
-          nestedSelection
-        ),
-      }),
-      resolve: (model, args, ctx) =>
-        exportRevisionConnectionHelpers.resolve(model.revisions, args, ctx),
-    }),
+    variables: t.relation("variables"),
     lastRevisionWithBuild: t.field({
       type: ModelRevision,
       nullable: true,
@@ -148,35 +135,4 @@ export const modelConnectionHelpers = prismaConnectionHelpers(
   builder,
   "Model",
   { cursor: "id" }
-);
-
-const exportRevisionConnectionHelpers = prismaConnectionHelpers(
-  builder,
-  "ModelRevision",
-  {
-    cursor: "id",
-    args: (t) => ({
-      variableId: t.string({ required: true }),
-    }),
-    select: (nodeSelection, args) => ({
-      exports: nodeSelection({
-        where: {
-          variableName: args.variableId,
-        },
-      }),
-    }),
-    query: (args) => ({
-      where: {
-        exports: {
-          some: {
-            variableName: args.variableId,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc" as const,
-      },
-    }),
-    resolveNode: (revision) => revision.exports[0],
-  }
 );

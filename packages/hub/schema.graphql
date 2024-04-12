@@ -90,7 +90,7 @@ type Group implements Node & Owner {
   inviteForMe: GroupInvite
   invites(after: String, before: String, first: Int, last: Int): GroupInviteConnection
   memberships(after: String, before: String, first: Int, last: Int): UserGroupMembershipConnection!
-  modelExports(after: String, before: String, first: Int, last: Int): Variable!
+  modelExports(after: String, before: String, first: Int, last: Int): VariableRevision!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   myMembership: UserGroupMembership
   reusableInviteToken: String
@@ -153,7 +153,6 @@ enum MembershipRole {
 type Model implements Node {
   createdAtTimestamp: Float!
   currentRevision: ModelRevision!
-  exportRevisions(after: String, before: String, first: Int, last: Int, variableId: String!): ModelExportRevisionsConnection!
   id: ID!
   isEditable: Boolean!
   isPrivate: Boolean!
@@ -163,6 +162,7 @@ type Model implements Node {
   revisions(after: String, before: String, first: Int, last: Int): ModelRevisionConnection!
   slug: String!
   updatedAtTimestamp: Float!
+  variables: [Variable!]!
 }
 
 type ModelConnection {
@@ -177,16 +177,6 @@ type ModelEdge {
   node: Model!
 }
 
-type ModelExportRevisionsConnection {
-  edges: [ModelExportRevisionsConnectionEdge!]!
-  pageInfo: PageInfo!
-}
-
-type ModelExportRevisionsConnectionEdge {
-  cursor: String!
-  node: Variable!
-}
-
 type ModelRevision implements Node {
   author: User
   buildStatus: ModelRevisionBuildStatus!
@@ -199,7 +189,7 @@ type ModelRevision implements Node {
   lastBuild: ModelRevisionBuild
   model: Model!
   relativeValuesExports: [RelativeValuesExport!]!
-  variables: [Variable!]!
+  variableRevisions: [VariableRevision!]!
 }
 
 type ModelRevisionBuild implements Node {
@@ -527,6 +517,7 @@ type Query {
   search(after: String, before: String, first: Int, last: Int, text: String!): QuerySearchResult!
   userByUsername(username: String!): QueryUserByUsernameResult!
   users(after: String, before: String, first: Int, input: UsersQueryInput, last: Int): QueryUsersConnection!
+  variable(input: QueryVariableInput!): QueryVariableResult!
   variables(after: String, before: String, first: Int, input: VariableQueryInput, last: Int): VariableConnection!
 }
 
@@ -564,6 +555,13 @@ type QueryUsersConnectionEdge {
   cursor: String!
   node: User!
 }
+
+input QueryVariableInput {
+  modelId: String!
+  variableName: String!
+}
+
+union QueryVariableResult = BaseError | NotFoundError | Variable
 
 type ReactToGroupInviteResult {
   invite: GroupInvite!
@@ -779,14 +777,12 @@ type ValidationErrorIssue {
 }
 
 type Variable implements Node {
-  docstring: String!
   id: ID!
-  isCurrent: Boolean!
-  modelRevision: ModelRevision!
+  lastRevision: VariableRevision
+  model: Model!
   owner: Owner!
-  title: String
+  revisions(after: String, before: String, first: Int, last: Int): VariableRevisionConnection!
   variableName: String!
-  variableType: String!
 }
 
 type VariableConnection {
@@ -803,4 +799,25 @@ input VariableQueryInput {
   modelId: String
   owner: String
   variableName: String
+}
+
+type VariableRevision implements Node {
+  docstring: String!
+  id: ID!
+  isCurrent: Boolean!
+  modelRevision: ModelRevision!
+  title: String
+  variable: Variable!
+  variableName: String!
+  variableType: String!
+}
+
+type VariableRevisionConnection {
+  edges: [VariableRevisionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type VariableRevisionEdge {
+  cursor: String!
+  node: VariableRevision!
 }

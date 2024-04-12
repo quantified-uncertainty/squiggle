@@ -17,12 +17,14 @@ const Fragment = graphql`
       slug
     }
     isPrivate
-    currentRevision {
-      variables {
-        variableName
+    variables {
+      variableName
+      lastRevision {
         variableType
         title
       }
+    }
+    currentRevision {
       relativeValuesExports {
         variableName
         definition {
@@ -46,13 +48,11 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
     slug: model.slug,
   });
 
-  const modelVariables = model.currentRevision.variables.map(
-    ({ variableName, variableType, title }) => ({
-      variableName,
-      variableType,
-      title: title || undefined,
-    })
-  );
+  const modelVariables = model.currentRevision.variables.map((v) => ({
+    variableName: v.variableName,
+    variableType: v.lastRevision?.variableType,
+    title: v.lastRevision?.title || undefined,
+  }));
 
   const relativeValuesExports = model.currentRevision.relativeValuesExports.map(
     ({ variableName, definition: { slug } }) => ({

@@ -194,6 +194,7 @@ model Model {
   currentRevisionId String?        @unique
 
   searchable Searchable?
+  variables  Variable[]
 
   @@unique([slug, ownerId])
   @@index([createdAt])
@@ -219,7 +220,7 @@ model ModelRevision {
   contentId       String?          @unique
 
   relativeValuesExports RelativeValuesExport[]
-  variables             Variable[]
+  variableRevisions     VariableRevision[]
 
   // required by Prisma, but unused since `model` field should point at the same entity
   currentRevisionModel Model?               @relation("CurrentRevision")
@@ -253,9 +254,21 @@ model SquiggleSnippet {
 }
 
 model Variable {
+  id           String             @id @default(cuid())
+  variableName String
+  model        Model              @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  modelId      String
+  revisions    VariableRevision[]
+
+  @@unique([modelId, variableName], name: "uniqueKey")
+}
+
+model VariableRevision {
   id              String        @id @default(cuid())
   modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
   modelRevisionId String
+  variable        Variable      @relation(fields: [variableId], references: [id], onDelete: Cascade)
+  variableId      String
   variableName    String
   title           String?
   docstring       String        @default("")

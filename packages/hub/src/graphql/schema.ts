@@ -7,6 +7,7 @@ import "./queries/groups";
 import "./queries/me";
 import "./queries/model";
 import "./queries/variables";
+import "./queries/variable";
 import "./queries/models";
 import "./queries/modelsByVersion";
 import "./queries/relativeValuesDefinition";

@@ -3,35 +3,32 @@ import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 import { builder } from "@/graphql/builder";
 
 import { Owner } from "./Owner";
+import {
+  VariableRevision,
+  VariableRevisionConnection,
+} from "./VariableRevision";
 
 export const Variable = builder.prismaNode("Variable", {
   id: { field: "id" },
   fields: (t) => ({
-    modelRevision: t.relation("modelRevision"),
     variableName: t.exposeString("variableName"),
-    variableType: t.exposeString("variableType"),
-    docstring: t.exposeString("docstring"),
-    isCurrent: t.exposeBoolean("isCurrent"),
-    title: t.exposeString("title", { nullable: true }),
+    model: t.relation("model"),
+
     owner: t.field({
       type: Owner,
       select: {
-        modelRevision: {
+        model: {
           select: {
-            model: {
+            owner: {
               select: {
-                owner: {
-                  select: {
-                    user: true,
-                    group: true,
-                  },
-                },
+                user: true,
+                group: true,
               },
             },
           },
         },
       },
-      resolve: async ({ modelRevision: { model } }) => {
+      resolve: async ({ model }) => {
         const result = model.owner.user ?? model.owner.group;
         if (!result) {
           throw new Error("Invalid owner object, missing user or group");
@@ -40,6 +37,33 @@ export const Variable = builder.prismaNode("Variable", {
           type: model.owner.user ? "User" : "Group",
         };
         return result;
+      },
+    }),
+    revisions: t.relatedConnection(
+      "revisions",
+      {
+        cursor: "id",
+        query: () => ({
+          orderBy: {
+            createdAt: "desc",
+          },
+        }),
+      },
+      VariableRevisionConnection
+    ),
+    lastRevision: t.field({
+      type: VariableRevision,
+      nullable: true,
+      select: {
+        revisions: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 1,
+        },
+      },
+      async resolve(variable) {
+        return variable.revisions[0];
       },
     }),
   }),

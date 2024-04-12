@@ -46,16 +46,18 @@ const Query = graphql`
         ...FixModelUrlCasing
         ...ModelAccessControls
         ...ModelSettingsButton
+        variables {
+          id
+          variableName
+          lastRevision {
+            variableType
+            title
+          }
+        }
         currentRevision {
           id
           # for length; TODO - "hasExports" field?
           exportNames
-          variables {
-            id
-            variableName
-            variableType
-            title
-          }
           relativeValuesExports {
             id
             variableName
@@ -87,14 +89,12 @@ export const ModelLayout: FC<
   });
 
   const variable: Variable[] = model.currentRevision.exportNames.map((name) => {
-    const matchingExport = model.currentRevision.exports.find(
-      (e) => e.variableName === name
-    );
+    const matchingExport = model.variables.find((e) => e.variableName === name);
 
     return {
       variableName: name,
-      variableType: matchingExport?.variableType || undefined,
-      title: matchingExport?.title || undefined,
+      variableType: matchingExport?.lastRevision?.variableType || undefined,
+      title: matchingExport?.lastRevision?.title || undefined,
     };
   });
 

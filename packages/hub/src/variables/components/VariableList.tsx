@@ -34,7 +34,7 @@ export const VariableList: FC<Props> = ({ connectionRef, loadNext }) => {
     <div>
       <div className="grid md:grid-cols-2 gap-4">
         {connection.edges.map((edge) => (
-          <VariableCard key={edge.node.id} modelExportRef={edge.node} />
+          <VariableCard key={edge.node.id} variableRef={edge.node} />
         ))}
       </div>
       {connection.pageInfo.hasNextPage && <LoadMore loadNext={loadNext} />}

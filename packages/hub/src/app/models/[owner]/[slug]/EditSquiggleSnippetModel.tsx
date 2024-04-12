@@ -162,11 +162,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
             }
           }
           exportNames
-          variables {
+          variableRevisions {
             id
             variableName
-            variableType
             title
+            variableType
             docstring
           }
           relativeValuesExports {

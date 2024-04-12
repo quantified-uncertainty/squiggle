@@ -11,7 +11,7 @@ import {
 
 import { squiggleHubLinker } from "@/squiggle/components/linker";
 
-import { SquiggleModelExportPage$key } from "@/__generated__/SquiggleModelExportPage.graphql";
+import { SquiggleVariablePage$key } from "@/__generated__/SquiggleVariablePage.graphql";
 
 type SquiggleProps = {
   variableName: string;
@@ -23,7 +23,7 @@ type GuardedType<T> = T extends (x: any) => x is infer T ? T : never;
 
 type SupportedVersion = GuardedType<(typeof versionSupportsExports)["plain"]>;
 
-const VersionedSquiggleModelExportPage: FC<
+const VersionedSquiggleVariablePage: FC<
   SquiggleProps & {
     version: SupportedVersion;
   }
@@ -53,13 +53,13 @@ const VersionedSquiggleModelExportPage: FC<
   );
 };
 
-export const SquiggleModelExportPage: FC<{
+export const SquiggleVariablePage: FC<{
   variableName: string;
-  contentRef: SquiggleModelExportPage$key;
+  contentRef: SquiggleVariablePage$key;
 }> = ({ variableName, contentRef }) => {
   const content = useFragment(
     graphql`
-      fragment SquiggleModelExportPage on SquiggleSnippet {
+      fragment SquiggleVariablePage on SquiggleSnippet {
         id
         code
         version
@@ -79,7 +79,7 @@ export const SquiggleModelExportPage: FC<{
   }
 
   return (
-    <VersionedSquiggleModelExportPage
+    <VersionedSquiggleVariablePage
       code={content.code}
       variableName={variableName}
       version={checkedVersion}

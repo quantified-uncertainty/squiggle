@@ -62,26 +62,21 @@ export const User = builder.prismaNode("User", {
             select: {
               models: {
                 select: {
-                  currentRevision: {
-                    select: {
-                      exports: variableConnectionHelpers.getQuery(
-                        args,
-                        ctx,
-                        nestedSelection
-                      ),
-                    },
-                  },
+                  variables: variableConnectionHelpers.getQuery({
+                    args,
+                    ctx,
+                    nestedSelection,
+                  }),
                 },
               },
             },
           },
         }),
         resolve: (user, args, ctx) => {
-          const exports =
-            user.asOwner?.models
-              .map((model) => model.currentRevision?.exports ?? [])
-              .flat() ?? [];
-          return variableConnectionHelpers.resolve(exports, args, ctx);
+          const variables =
+            user.asOwner?.models.map((model) => model.variables ?? []).flat() ??
+            [];
+          return variableConnectionHelpers.resolve(variables, args, ctx);
         },
       },
       VariableConnection

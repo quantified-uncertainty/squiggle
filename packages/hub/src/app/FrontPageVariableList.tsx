@@ -5,6 +5,9 @@ import { graphql, usePaginationFragment } from "react-relay";
 
 import { VariableList } from "@/variables/components/VariableList";
 
+import { FrontPageVariableList$key } from "@/__generated__/FrontPageVariableList.graphql";
+import { FrontPageVariableListPaginationQuery } from "@/__generated__/FrontPageVariableListPaginationQuery.graphql";
+
 const Fragment = graphql`
   fragment FrontPageVariableList on Query
   @argumentDefinitions(
@@ -14,7 +17,6 @@ const Fragment = graphql`
   @refetchable(queryName: "FrontPageVariableListPaginationQuery") {
     variables(first: $count, after: $cursor)
       @connection(key: "FrontPageVariableList_variables") {
-      # necessary for Relay
       edges {
         __typename
       }

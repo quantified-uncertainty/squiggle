@@ -9,29 +9,24 @@ import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 
-import { SquiggleModelExportPage } from "./SquiggleModelExportPage";
+import { VariablePage$data } from "@/__generated__/VariablePage.graphql";
+import { VariablePageQuery } from "@/__generated__/VariablePageQuery.graphql";
 
-import {
-  ModelExportPage$data,
-  ModelExportPage$key,
-} from "@/__generated__/ModelExportPage.graphql";
-import { ModelExportPageQuery } from "@/__generated__/ModelExportPageQuery.graphql";
+type VariableRevisions = VariablePage$data["revisions"];
 
-type ExportRevisions = ModelExportPage$data["exportRevisions"];
-
-const RevisionsPanel: FC<{
-  exportRevisions: ExportRevisions;
+const VariableRevisionsPanel: FC<{
+  revisions: VariableRevisions;
   selected: string;
   changeId: (id: string) => void;
   loadNext?: (count: number) => void;
-}> = ({ exportRevisions, selected, changeId, loadNext }) => {
+}> = ({ revisions, selected, changeId, loadNext }) => {
   return (
     <div className="w-[150px] ml-4 bg-gray-50 rounded-sm py-2 px-3 flex flex-col">
       <h3 className="text-sm font-medium text-gray-700 border-b mb-1 pb-0.5">
         Revisions
       </h3>
       <ul>
-        {exportRevisions.edges.map(({ node: revision }) => (
+        {revisions.edges.map(({ node: revision }) => (
           <li
             key={revision.id}
             onClick={() => changeId(revision.id)}
@@ -52,26 +47,23 @@ const RevisionsPanel: FC<{
   );
 };
 
-export const ModelExportPage: FC<{
+export const VariablePage: FC<{
   params: {
     owner: string;
     slug: string;
     variableName: string;
   };
-  query: SerializablePreloadedQuery<ModelExportPageQuery>;
+  query: SerializablePreloadedQuery<VariablePageQuery>;
 }> = ({ query, params }) => {
-  const [{ model: result }] = usePageQuery(
+  const [{ variable: result }] = usePageQuery(
     graphql`
-      query ModelExportPageQuery(
-        $input: QueryModelInput!
-        $variableName: String!
-      ) {
-        model(input: $input) {
+      query VariablePageQuery($input: QueryVariableInput!) {
+        variable(input: $input) {
           __typename
-          ... on Model {
+          ... on Variable {
             id
-            slug
-            ...ModelExportPage @arguments(variableName: $variableName)
+            variableName
+            ...VariablePage
           }
         }
       }
@@ -79,25 +71,21 @@ export const ModelExportPage: FC<{
     query
   );
 
-  const model = extractFromGraphqlErrorUnion(result, "Model");
+  const variable = extractFromGraphqlErrorUnion(result, "Variable");
 
   const {
-    data: { exportRevisions },
+    data: { revisions },
     loadNext,
-  } = usePaginationFragment<ModelExportPageQuery, ModelExportPage$key>(
+  } = usePaginationFragment<VariablePageQuery, VariablePage$key>(
     graphql`
-      fragment ModelExportPage on Model
+      fragment VariablePage on Variable
       @argumentDefinitions(
         cursor: { type: "String" }
         count: { type: "Int", defaultValue: 20 }
-        variableName: { type: "String!" }
       )
-      @refetchable(queryName: "ModelExportPagePaginationQuery") {
-        exportRevisions(
-          first: $count
-          after: $cursor
-          variableId: $variableName
-        ) @connection(key: "ModelExportPage_exportRevisions") {
+      @refetchable(queryName: "VariablePagePaginationQuery") {
+        revisions(first: $count, after: $cursor)
+          @connection(key: "VariablePage_revisions") {
           edges {
             node {
               id
@@ -107,7 +95,7 @@ export const ModelExportPage: FC<{
                 createdAtTimestamp
                 content {
                   __typename
-                  ...SquiggleModelExportPage
+                  ...SquiggleVariablePage
                 }
               }
             }
@@ -118,16 +106,15 @@ export const ModelExportPage: FC<{
         }
       }
     `,
-    model
+    variable
   );
 
   const [selected, changeId] = useState<string>(
-    exportRevisions.edges.at(0)?.node.id || ""
+    revisions.edges.at(0)?.node.id || ""
   );
 
-  const content = exportRevisions.edges.find(
-    (edge) => edge.node.id === selected
-  )?.node.modelRevision.content;
+  const content = revisions.edges.find((edge) => edge.node.id === selected)
+    ?.node.modelRevision.content;
 
   if (content) {
     switch (content.__typename) {
@@ -135,19 +122,17 @@ export const ModelExportPage: FC<{
         return (
           <div className="flex">
             <div className="flex-1 w-full">
-              <SquiggleModelExportPage
+              <SquiggleVariablePage
                 key={selected}
                 variableName={params.variableName}
                 contentRef={content}
               />
             </div>
-            <RevisionsPanel
-              exportRevisions={exportRevisions}
+            <VariableRevisionsPanel
+              revisions={revisions}
               selected={selected}
               changeId={changeId}
-              loadNext={
-                exportRevisions.pageInfo.hasNextPage ? loadNext : undefined
-              }
+              loadNext={revisions.pageInfo.hasNextPage ? loadNext : undefined}
             />
           </div>
         );

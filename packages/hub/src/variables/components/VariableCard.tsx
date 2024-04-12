@@ -15,17 +15,20 @@ const Fragment = graphql`
   fragment VariableCard on Variable {
     id
     variableName
-    title
-    docstring
-    variableType
+    lastRevision {
+      id
+      title
+      docstring
+      variableType
+      modelRevision {
+        createdAtTimestamp
+      }
+    }
     owner {
       slug
     }
-    modelRevision {
-      createdAtTimestamp
-      model {
-        slug
-      }
+    model {
+      slug
     }
   }
 `;
@@ -41,7 +44,7 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
 
   // This will have problems with markdown tags, but I looked into markdown-truncation packages, and they can get complicated. Will try this for now.
   const docstring =
-    (variable.docstring &&
+    (variable.lastRevision?.docstring &&
       truncate(variable.docstring, {
         length: 500,
         separator: " ",
@@ -51,14 +54,16 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
 
   return (
     <EntityCard
-      updatedAtTimestamp={variable.modelRevision.createdAtTimestamp}
+      updatedAtTimestamp={
+        variable.lastRevision.modelRevision.createdAtTimestamp
+      }
       href={variableRoute({
         modelSlug: variable.modelRevision.model.slug,
         variableName: variable.variableName,
         owner: variable.owner.slug,
       })}
       showOwner={false}
-      slug={variable.title || variable.variableName}
+      slug={variable.lastRevision?.title || variable.variableName}
       footerItems={
         <>
           <a
