@@ -12,11 +12,13 @@ import { modelExportRoute, modelForRelativeValuesExportRoute } from "@/routes";
 
 import { exportTypeIcon } from "./typeIcon";
 
-type ModelExport = {
+export type ModelExport = {
   title?: string;
   variableName: string;
-  variableType: string;
+  variableType?: string;
+  docstring?: string;
 };
+
 type RelativeValuesExport = { slug: string; variableName: string };
 
 const nonRelativeValuesExports = (
@@ -64,7 +66,7 @@ export const ExportsDropdown: FC<
                     variableName: exportItem.variableName,
                   })}
                   title={`${exportItem.title || exportItem.variableName}`}
-                  icon={exportTypeIcon(exportItem.variableType)}
+                  icon={exportTypeIcon(exportItem.variableType || "")}
                   close={close}
                 />
               ))}{" "}

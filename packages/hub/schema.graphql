@@ -157,6 +157,7 @@ type Model implements Node {
   id: ID!
   isEditable: Boolean!
   isPrivate: Boolean!
+  lastRevisionWithBuild: ModelRevision
   owner: Owner!
   revision(id: ID!): ModelRevision!
   revisions(after: String, before: String, first: Int, last: Int): ModelRevisionConnection!
@@ -215,14 +216,32 @@ type ModelExportRevisionsConnectionEdge {
 
 type ModelRevision implements Node {
   author: User
+  buildStatus: ModelRevisionBuildStatus!
   comment: String!
   content: ModelContent!
   createdAtTimestamp: Float!
+  exportNames: [String!]!
   exports: [ModelExport!]!
   forRelativeValues(input: ModelRevisionForRelativeValuesInput!): ModelRevisionForRelativeValuesResult!
   id: ID!
+  lastBuild: ModelRevisionBuild
   model: Model!
   relativeValuesExports: [RelativeValuesExport!]!
+}
+
+type ModelRevisionBuild implements Node {
+  createdAtTimestamp: Float!
+  errors: [String!]!
+  id: ID!
+  modelRevision: ModelRevision!
+  runSeconds: Float!
+}
+
+enum ModelRevisionBuildStatus {
+  Failure
+  Pending
+  Skipped
+  Success
 }
 
 type ModelRevisionConnection {
@@ -483,7 +502,6 @@ union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeV
 input MutationUpdateSquiggleSnippetModelInput {
   comment: String
   content: SquiggleSnippetContentInput!
-  exports: [SquiggleModelExportInput!]
   owner: String!
   relativeValuesExports: [RelativeValuesExportInput!]
   slug: String!
@@ -533,7 +551,7 @@ type Query {
   nodes(ids: [ID!]!): [Node]!
   relativeValuesDefinition(input: QueryRelativeValuesDefinitionInput!): QueryRelativeValuesDefinitionResult!
   relativeValuesDefinitions(after: String, before: String, first: Int, input: RelativeValuesDefinitionsQueryInput, last: Int): RelativeValuesDefinitionConnection!
-  runSquiggle(code: String!): SquiggleOutput!
+  runSquiggle(code: String!, seed: String): SquiggleOutput!
   search(after: String, before: String, first: Int, last: Int, text: String!): QuerySearchResult!
   userByUsername(username: String!): QueryUserByUsernameResult!
   users(after: String, before: String, first: Int, input: UsersQueryInput, last: Int): QueryUsersConnection!
@@ -679,13 +697,6 @@ union SearchableObject = Group | Model | RelativeValuesDefinition | User
 type SquiggleErrorOutput implements SquiggleOutput {
   errorString: String!
   isCached: Boolean!
-}
-
-input SquiggleModelExportInput {
-  docstring: String
-  title: String
-  variableName: String!
-  variableType: String!
 }
 
 type SquiggleOkOutput implements SquiggleOutput {

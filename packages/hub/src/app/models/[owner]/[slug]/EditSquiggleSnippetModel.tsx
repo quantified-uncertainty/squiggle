@@ -54,13 +54,11 @@ import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippe
 import {
   EditSquiggleSnippetModelMutation,
   RelativeValuesExportInput,
-  SquiggleModelExportInput,
 } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 
 export type SquiggleSnippetFormShape = {
   code: string;
   relativeValuesExports: RelativeValuesExportInput[];
-  exports: SquiggleModelExportInput[];
 };
 
 type OnSubmit = (
@@ -144,6 +142,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
         owner {
           slug
         }
+        lastRevisionWithBuild {
+          lastBuild {
+            runSeconds
+          }
+        }
         currentRevision {
           id
           content {
@@ -158,6 +161,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
               xyPointLength
             }
           }
+          exportNames
           exports {
             id
             variableName
@@ -188,6 +192,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     "SquiggleSnippet"
   );
 
+  const lastBuildSpeed = model.lastRevisionWithBuild?.lastBuild?.runSeconds;
+
   const seed = content.seed;
 
   const initialFormValues: SquiggleSnippetFormShape = useMemo(() => {
@@ -200,14 +206,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           slug: item.definition.slug,
         },
       })),
-      exports: revision.exports.map((item) => ({
-        title: item.title,
-        variableName: item.variableName,
-        variableType: item.variableType,
-        docstring: item.docstring,
-      })),
     };
-  }, [content, revision.relativeValuesExports, revision.exports]);
+  }, [content, revision.relativeValuesExports]);
 
   const { form, onSubmit, inFlight } = useMutationForm<
     SquiggleSnippetFormShape,
@@ -245,7 +245,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           xyPointLength: content.xyPointLength,
         },
         relativeValuesExports: formData.relativeValuesExports,
-        exports: formData.exports,
         comment: extraData?.comment,
         slug: model.slug,
         owner: model.owner.slug,
@@ -312,13 +311,18 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
 
   const squiggle = use(versionedSquigglePackages(checkedVersion));
 
+  // Automatically turn off autorun, if the last build speed was > 5s. Note that this does not stop in the case of memory errors or similar.
+  const autorunMode =
+    content.autorunMode ||
+    (lastBuildSpeed ? (lastBuildSpeed > 5 ? false : true) : true);
+
   // Build props for versioned SquigglePlayground first, since they might depend on the version we use,
   // and we want to populate them incrementally.
   const playgroundProps: Parameters<
     typeof squiggle.components.SquigglePlayground
   >[0] = {
     defaultCode,
-    autorunMode: content.autorunMode ?? true,
+    autorunMode: autorunMode,
     sourceId: serializeSourceId({
       owner: model.owner.slug,
       slug: model.slug,
@@ -406,9 +410,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       playgroundProps
     )
   ) {
-    playgroundProps.onExportsChange = (exports) => {
-      form.setValue("exports", exports);
-    };
   }
 
   playgroundProps.environment = {

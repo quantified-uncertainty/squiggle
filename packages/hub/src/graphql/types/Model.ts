@@ -112,6 +112,30 @@ export const Model = builder.prismaNode("Model", {
       resolve: (model, args, ctx) =>
         exportRevisionConnectionHelpers.resolve(model.revisions, args, ctx),
     }),
+    lastRevisionWithBuild: t.field({
+      type: ModelRevision,
+      nullable: true,
+      select: {
+        revisions: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          where: {
+            builds: {
+              some: {
+                id: {
+                  not: undefined,
+                },
+              },
+            },
+          },
+          take: 1,
+        },
+      },
+      async resolve(model) {
+        return model.revisions[0];
+      },
+    }),
   }),
 });
 

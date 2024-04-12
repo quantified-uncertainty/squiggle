@@ -1,9 +1,12 @@
 import { UnionRef } from "@pothos/core";
 
+import { ASTNode, parse } from "@quri/squiggle-lang";
+
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
 import { NotFoundError } from "../errors/NotFoundError";
+import { ModelRevisionBuild } from "./ModelRevisionBuild";
 import { RelativeValuesExport } from "./RelativeValuesExport";
 import { SquiggleSnippet } from "./SquiggleSnippet";
 
@@ -24,6 +27,28 @@ const ModelContent: UnionRef<
   resolveType: () => SquiggleSnippet,
 });
 
+const ModelRevisionBuildStatus = builder.enumType("ModelRevisionBuildStatus", {
+  values: ["Skipped", "Pending", "Success", "Failure"],
+});
+
+function getExportedVariableNames(ast: ASTNode): string[] {
+  const exportedVariableNames: string[] = [];
+
+  if (ast.type === "Program") {
+    ast.statements.forEach((statement) => {
+      while (statement.type === "DecoratedStatement")
+        statement = statement.statement;
+      if (statement.type === "LetStatement" && statement.exported) {
+        exportedVariableNames.push(statement.variable.value);
+      } else if (statement.type === "DefunStatement" && statement.exported) {
+        exportedVariableNames.push(statement.variable.value);
+      }
+    });
+  }
+
+  return exportedVariableNames;
+}
+
 export const ModelRevision = builder.prismaNode("ModelRevision", {
   id: { field: "id" },
   fields: (t) => ({
@@ -35,8 +60,54 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     relativeValuesExports: t.relation("relativeValuesExports"),
     exports: t.relation("exports"),
     model: t.relation("model"),
+
+    lastBuild: t.field({
+      type: ModelRevisionBuild,
+      nullable: true,
+      select: {
+        builds: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 1,
+        },
+      },
+      async resolve(revision) {
+        return revision.builds[0];
+      },
+    }),
     author: t.relation("author", { nullable: true }),
     comment: t.exposeString("comment"),
+    buildStatus: t.field({
+      type: ModelRevisionBuildStatus,
+      select: {
+        builds: {
+          select: {
+            errors: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 1,
+        },
+        model: {
+          select: {
+            currentRevisionId: true,
+          },
+        },
+      },
+      async resolve(revision) {
+        const lastBuild = revision.builds[0];
+
+        if (lastBuild) {
+          return lastBuild.errors.length === 0 ? "Success" : "Failure";
+        }
+
+        return revision.model.currentRevisionId === revision.id
+          ? "Pending"
+          : "Skipped";
+      },
+    }),
     content: t.field({
       type: ModelContent,
       select: { squiggleSnippet: true },
@@ -44,6 +115,22 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
         switch (revision.contentType) {
           case "SquiggleSnippet":
             return revision.squiggleSnippet!;
+        }
+      },
+    }),
+    exportNames: t.field({
+      type: ["String"],
+      select: { squiggleSnippet: true },
+      async resolve(revision) {
+        if (revision.contentType === "SquiggleSnippet") {
+          const ast = parse(revision.squiggleSnippet!.code);
+          if (ast.ok) {
+            return getExportedVariableNames(ast.value);
+          } else {
+            return [];
+          }
+        } else {
+          return [];
         }
       },
     }),

@@ -7,7 +7,11 @@ import { CodeBracketIcon, RectangleStackIcon, ShareIcon } from "@quri/ui";
 
 import { EntityLayout } from "@/components/EntityLayout";
 import { EntityTab } from "@/components/ui/EntityTab";
-import { ExportsDropdown, totalImportLength } from "@/lib/ExportsDropdown";
+import {
+  ExportsDropdown,
+  type ModelExport,
+  totalImportLength,
+} from "@/lib/ExportsDropdown";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
@@ -45,6 +49,7 @@ const Query = graphql`
         currentRevision {
           id
           # for length; TODO - "hasExports" field?
+          exportNames
           exports {
             id
             variableName
@@ -81,12 +86,18 @@ export const ModelLayout: FC<
     slug: model.slug,
   });
 
-  const modelExports = model.currentRevision.exports.map(
-    ({ variableName, variableType, title }) => ({
-      variableName,
-      variableType,
-      title: title || undefined,
-    })
+  const modelExports: ModelExport[] = model.currentRevision.exportNames.map(
+    (name) => {
+      const matchingExport = model.currentRevision.exports.find(
+        (e) => e.variableName === name
+      );
+
+      return {
+        variableName: name,
+        variableType: matchingExport?.variableType || undefined,
+        title: matchingExport?.title || undefined,
+      };
+    }
   );
 
   const relativeValuesExports = model.currentRevision.relativeValuesExports.map(
