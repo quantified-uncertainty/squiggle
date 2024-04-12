@@ -805,7 +805,6 @@ input VariableQueryInput {
 type VariableRevision implements Node {
   docstring: String!
   id: ID!
-  isCurrent: Boolean!
   modelRevision: ModelRevision!
   title: String
   variable: Variable!

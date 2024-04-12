@@ -9,7 +9,6 @@ export const VariableRevision = builder.prismaNode("VariableRevision", {
     variableName: t.exposeString("variableName"),
     variableType: t.exposeString("variableType"),
     docstring: t.exposeString("docstring"),
-    isCurrent: t.exposeBoolean("isCurrent"),
     title: t.exposeString("title", { nullable: true }),
     variable: t.relation("variable"),
   }),
