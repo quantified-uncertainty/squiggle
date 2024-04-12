@@ -31,7 +31,7 @@ const ModelRevisionBuildStatus = builder.enumType("ModelRevisionBuildStatus", {
   values: ["Skipped", "Pending", "Success", "Failure"],
 });
 
-function getExportedVariableNames(ast: ASTNode): string[] {
+function astToVariableNames(ast: ASTNode): string[] {
   const exportedVariableNames: string[] = [];
 
   if (ast.type === "Program") {
@@ -47,6 +47,15 @@ function getExportedVariableNames(ast: ASTNode): string[] {
   }
 
   return exportedVariableNames;
+}
+
+export function getExportedVariableNames(code: string): string[] {
+  const ast = parse(code);
+  if (ast.ok) {
+    return astToVariableNames(ast.value);
+  } else {
+    return [];
+  }
 }
 
 export const ModelRevision = builder.prismaNode("ModelRevision", {
@@ -123,12 +132,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
       select: { squiggleSnippet: true },
       async resolve(revision) {
         if (revision.contentType === "SquiggleSnippet") {
-          const ast = parse(revision.squiggleSnippet!.code);
-          if (ast.ok) {
-            return getExportedVariableNames(ast.value);
-          } else {
-            return [];
-          }
+          return getExportedVariableNames(revision.squiggleSnippet!.code);
         } else {
           return [];
         }

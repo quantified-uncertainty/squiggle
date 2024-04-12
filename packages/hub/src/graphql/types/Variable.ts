@@ -45,7 +45,9 @@ export const Variable = builder.prismaNode("Variable", {
         cursor: "id",
         query: () => ({
           orderBy: {
-            createdAt: "desc",
+            modelRevision: {
+              createdAt: "desc",
+            },
           },
         }),
       },
@@ -57,7 +59,9 @@ export const Variable = builder.prismaNode("Variable", {
       select: {
         revisions: {
           orderBy: {
-            createdAt: "desc",
+            modelRevision: {
+              createdAt: "desc",
+            },
           },
           take: 1,
         },

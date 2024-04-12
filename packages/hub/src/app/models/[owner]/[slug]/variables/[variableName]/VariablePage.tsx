@@ -9,7 +9,12 @@ import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 
-import { VariablePage$data } from "@/__generated__/VariablePage.graphql";
+import { SquiggleVariablePage } from "./SquiggleVariablePage";
+
+import {
+  VariablePage$data,
+  VariablePage$key,
+} from "@/__generated__/VariablePage.graphql";
 import { VariablePageQuery } from "@/__generated__/VariablePageQuery.graphql";
 
 type VariableRevisions = VariablePage$data["revisions"];

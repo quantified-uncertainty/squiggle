@@ -88,15 +88,19 @@ export const ModelLayout: FC<
     slug: model.slug,
   });
 
-  const variable: Variable[] = model.currentRevision.exportNames.map((name) => {
-    const matchingExport = model.variables.find((e) => e.variableName === name);
+  const variables: Variable[] = model.currentRevision.exportNames.map(
+    (name) => {
+      const matchingExport = model.variables.find(
+        (e) => e.variableName === name
+      );
 
-    return {
-      variableName: name,
-      variableType: matchingExport?.lastRevision?.variableType || undefined,
-      title: matchingExport?.lastRevision?.title || undefined,
-    };
-  });
+      return {
+        variableName: name,
+        variableType: matchingExport?.lastRevision?.variableType || undefined,
+        title: matchingExport?.lastRevision?.title || undefined,
+      };
+    }
+  );
 
   const relativeValuesExports = model.currentRevision.relativeValuesExports.map(
     ({ variableName, definition: { slug } }) => ({
@@ -105,7 +109,10 @@ export const ModelLayout: FC<
     })
   );
 
-  const _totalImportLength = totalImportLength(variable, relativeValuesExports);
+  const _totalImportLength = totalImportLength(
+    variables,
+    relativeValuesExports
+  );
 
   return (
     <EntityLayout
@@ -117,7 +124,7 @@ export const ModelLayout: FC<
           <EntityTab.Link name="Code" icon={CodeBracketIcon} href={modelUrl} />
           {Boolean(_totalImportLength) && (
             <VariablesDropdown
-              variable={variable}
+              variables={variables}
               relativeValuesExports={relativeValuesExports}
               owner={model.owner.slug}
               slug={model.slug}

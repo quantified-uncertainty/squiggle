@@ -557,7 +557,8 @@ type QueryUsersConnectionEdge {
 }
 
 input QueryVariableInput {
-  modelId: String!
+  owner: String!
+  slug: String!
   variableName: String!
 }
 

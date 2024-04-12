@@ -7,19 +7,30 @@ builder.queryField("variable", (t) =>
   t.prismaFieldWithInput({
     type: "Variable",
     input: {
-      modelId: t.input.string({ required: true }),
       variableName: t.input.string({ required: true }),
+      slug: t.input.string({ required: true }),
+      owner: t.input.string({ required: true }),
     },
     errors: {
       types: [NotFoundError],
     },
     async resolve(query, _, { input }) {
+      const model = await prisma.model.findFirst({
+        where: {
+          slug: input.slug,
+          owner: { slug: input.owner },
+        },
+      });
+
+      if (!model) {
+        throw new NotFoundError();
+      }
+
       const variable = await prisma.variable.findFirst({
         ...query,
         where: {
-          modelId: input.modelId,
           variableName: input.variableName,
-          // no need to check access - will be checked by Variable authScopes
+          modelId: model.id,
         },
       });
 

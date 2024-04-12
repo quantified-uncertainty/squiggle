@@ -8,6 +8,7 @@ import { prisma } from "@/prisma";
 import { getWriteableModel } from "../helpers/modelHelpers";
 import { getSelf } from "../helpers/userHelpers";
 import { Model } from "../types/Model";
+import { getExportedVariableNames } from "../types/ModelRevision";
 
 const DefinitionRefInput = builder.inputType("DefinitionRefInput", {
   fields: (t) => ({
@@ -129,17 +130,29 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
 
       const self = await getSelf(session);
 
+      const code = input.content.code;
+      const varNames = code ? getExportedVariableNames(code) : [];
+
       const model = await prisma.$transaction(async (tx) => {
-        if (existingModel.currentRevisionId) {
-          await tx.modelExport.updateMany({
-            where: {
-              modelRevisionId: existingModel.currentRevisionId,
-            },
-            data: {
-              isCurrent: false,
-            },
-          });
-        }
+        const variables = await Promise.all(
+          varNames.map((varName) =>
+            tx.variable.upsert({
+              where: {
+                uniqueKey: {
+                  modelId: existingModel.id,
+                  variableName: varName,
+                },
+              },
+              create: {
+                variableName: varName,
+                model: {
+                  connect: { id: existingModel.id },
+                },
+              },
+              update: {},
+            })
+          )
+        );
 
         const revision = await tx.modelRevision.create({
           data: {
@@ -166,6 +179,14 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
                 data: relativeValuesExportsToInsert,
               },
             },
+            variableRevisions: {
+              createMany: {
+                data: variables.map((variable) => ({
+                  variableName: variable.variableName,
+                  variableId: variable.id,
+                })),
+              },
+            },
           },
           include: {
             model: {
@@ -175,9 +196,9 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
             },
           },
         });
-        const model = await tx.model.update({
+        const updatedModel = await tx.model.update({
           where: {
-            id: revision.model.id,
+            id: revision.modelId,
           },
           data: {
             currentRevisionId: revision.id,
@@ -185,7 +206,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
           // TODO - optimize with queryFromInfo, https://pothos-graphql.dev/docs/plugins/prisma#optimized-queries-without-tprismafield
         });
 
-        return model;
+        return updatedModel;
       });
 
       return { model };

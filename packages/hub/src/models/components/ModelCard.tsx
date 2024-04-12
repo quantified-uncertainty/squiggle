@@ -3,7 +3,11 @@ import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { EntityCard } from "@/components/EntityCard";
-import { totalImportLength, VariablesDropdown } from "@/lib/VariablesDropdown";
+import {
+  totalImportLength,
+  Variable,
+  VariablesDropdown,
+} from "@/lib/VariablesDropdown";
 import { modelRoute } from "@/routes";
 
 import { ModelCard$key } from "@/__generated__/ModelCard.graphql";
@@ -48,10 +52,11 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
     slug: model.slug,
   });
 
-  const modelVariables = model.currentRevision.variables.map((v) => ({
+  const modelVariables: Variable[] = model.variables.map((v) => ({
     variableName: v.variableName,
     variableType: v.lastRevision?.variableType,
     title: v.lastRevision?.title || undefined,
+    docString: undefined,
   }));
 
   const relativeValuesExports = model.currentRevision.relativeValuesExports.map(
@@ -70,7 +75,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
     _totalImportLength > 0 ? (
       <VariablesDropdown
         modelVariables={modelVariables}
-        relativeValuesVariables={relativeValuesVariables}
+        relativeValuesVariables={relativeValuesExports}
         owner={model.owner.slug}
         slug={model.slug}
       >
