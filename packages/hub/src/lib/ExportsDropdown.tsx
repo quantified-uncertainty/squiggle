@@ -1,27 +1,24 @@
 import React, { FC, PropsWithChildren } from "react";
 
 import {
-  CalculatorIcon,
-  CodeBracketIcon,
-  CurlyBracketsIcon,
   Dropdown,
   DropdownMenu,
   DropdownMenuHeader,
-  HashIcon,
   ScaleIcon,
-  ShareIcon,
-  SquareBracketIcon,
-  TableCellsIcon,
 } from "@quri/ui";
 
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 import { modelExportRoute, modelForRelativeValuesExportRoute } from "@/routes";
 
+import { exportTypeIcon } from "./typeIcon";
+
 export type ModelExport = {
   title?: string;
   variableName: string;
   variableType?: string;
+  docstring?: string;
 };
+
 type RelativeValuesExport = { slug: string; variableName: string };
 
 const nonRelativeValuesExports = (
@@ -42,26 +39,6 @@ export const totalImportLength = (
 ) =>
   nonRelativeValuesExports(modelExports, relativeValuesExports).length +
   relativeValuesExports.length;
-
-// I assume it would be appropriate to move this elsewhere, once we need it elsewhere.
-const typeIcon = (type: string) => {
-  switch (type) {
-    case "Number":
-      return HashIcon;
-    case "Array":
-      return SquareBracketIcon;
-    case "Dict":
-      return CurlyBracketsIcon;
-    case "Lambda":
-      return CodeBracketIcon;
-    case "TableChart":
-      return TableCellsIcon;
-    case "Calculator":
-      return CalculatorIcon;
-    default:
-      return ShareIcon;
-  }
-};
 
 export const ExportsDropdown: FC<
   PropsWithChildren<{
@@ -89,7 +66,7 @@ export const ExportsDropdown: FC<
                     variableName: exportItem.variableName,
                   })}
                   title={`${exportItem.title || exportItem.variableName}`}
-                  icon={typeIcon(exportItem.variableType || "")}
+                  icon={exportTypeIcon(exportItem.variableType || "")}
                   close={close}
                 />
               ))}{" "}

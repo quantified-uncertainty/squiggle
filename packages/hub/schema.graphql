@@ -157,6 +157,7 @@ type Model implements Node {
   id: ID!
   isEditable: Boolean!
   isPrivate: Boolean!
+  lastRevisionWithBuild: ModelRevision
   owner: Owner!
   revision(id: ID!): ModelRevision!
   revisions(after: String, before: String, first: Int, last: Int): ModelRevisionConnection!
@@ -550,7 +551,7 @@ type Query {
   nodes(ids: [ID!]!): [Node]!
   relativeValuesDefinition(input: QueryRelativeValuesDefinitionInput!): QueryRelativeValuesDefinitionResult!
   relativeValuesDefinitions(after: String, before: String, first: Int, input: RelativeValuesDefinitionsQueryInput, last: Int): RelativeValuesDefinitionConnection!
-  runSquiggle(code: String!): SquiggleOutput!
+  runSquiggle(code: String!, seed: String): SquiggleOutput!
   search(after: String, before: String, first: Int, last: Int, text: String!): QuerySearchResult!
   userByUsername(username: String!): QueryUserByUsernameResult!
   users(after: String, before: String, first: Int, input: UsersQueryInput, last: Int): QueryUsersConnection!
