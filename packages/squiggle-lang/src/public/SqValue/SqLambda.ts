@@ -1,4 +1,4 @@
-import { Env } from "../../dist/env.js";
+import { Env } from "../../dists/env.js";
 import { getStdLib } from "../../library/index.js";
 import { Lambda } from "../../reducer/lambda.js";
 import { Reducer } from "../../reducer/Reducer.js";

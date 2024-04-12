@@ -1,7 +1,7 @@
-import { BaseDist } from "../../dist/BaseDist.js";
-import { PointSetDist } from "../../dist/PointSetDist.js";
-import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
-import { SymbolicDist } from "../../dist/SymbolicDist.js";
+import { BaseDist } from "../../dists/BaseDist.js";
+import { PointSetDist } from "../../dists/PointSetDist.js";
+import { SampleSetDist } from "../../dists/SampleSetDist/index.js";
+import { SymbolicDist } from "../../dists/SymbolicDist.js";
 import { Lambda } from "../../reducer/lambda.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import { SDate } from "../../utility/SDate.js";

@@ -1,5 +1,5 @@
 import { parse } from "../ast/parse.js";
-import { defaultEnv } from "../dist/env.js";
+import { defaultEnv } from "../dists/env.js";
 import { ICompileError, IRuntimeError } from "../errors/IError.js";
 import { compileAst } from "../expression/compile.js";
 import { Expression } from "../expression/index.js";

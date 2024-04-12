@@ -1,5 +1,5 @@
-import { BaseDist } from "../dist/BaseDist.js";
-import { SampleSetDist } from "../dist/SampleSetDist/index.js";
+import { BaseDist } from "../dists/BaseDist.js";
+import { SampleSetDist } from "../dists/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
 import { BaseValue } from "./BaseValue.js";

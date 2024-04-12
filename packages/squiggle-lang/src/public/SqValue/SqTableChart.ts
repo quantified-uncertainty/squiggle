@@ -1,4 +1,4 @@
-import { Env } from "../../dist/env.js";
+import { Env } from "../../dists/env.js";
 import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
 import { TableChart } from "../../value/VTableChart.js";

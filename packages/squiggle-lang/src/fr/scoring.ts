@@ -1,6 +1,6 @@
-import { BaseDist } from "../dist/BaseDist.js";
-import * as distOperations from "../dist/distOperations/index.js";
-import { Env } from "../dist/env.js";
+import { BaseDist } from "../dists/BaseDist.js";
+import * as distOperations from "../dists/distOperations/index.js";
+import { Env } from "../dists/env.js";
 import { REArgumentError, REDistributionError } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";

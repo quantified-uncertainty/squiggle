@@ -1,12 +1,12 @@
 import intersection from "lodash/intersection.js";
 import last from "lodash/last.js";
 
-import { BaseDist } from "../../dist/BaseDist.js";
-import { DistError } from "../../dist/DistError.js";
-import { Env } from "../../dist/env.js";
-import * as SampleSetDist from "../../dist/SampleSetDist/index.js";
-import * as SymbolicDist from "../../dist/SymbolicDist.js";
-import { PointMass } from "../../dist/SymbolicDist.js";
+import { BaseDist } from "../../dists/BaseDist.js";
+import { DistError } from "../../dists/DistError.js";
+import { Env } from "../../dists/env.js";
+import * as SampleSetDist from "../../dists/SampleSetDist/index.js";
+import * as SymbolicDist from "../../dists/SymbolicDist.js";
+import { PointMass } from "../../dists/SymbolicDist.js";
 import {
   REArgumentError,
   REDistributionError,

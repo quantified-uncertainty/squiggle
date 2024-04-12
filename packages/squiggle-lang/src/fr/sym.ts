@@ -1,4 +1,4 @@
-import * as SymbolicDist from "../dist/SymbolicDist.js";
+import * as SymbolicDist from "../dists/SymbolicDist.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {

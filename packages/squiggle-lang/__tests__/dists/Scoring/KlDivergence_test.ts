@@ -1,9 +1,9 @@
-import { BaseDist } from "../../../src/dist/BaseDist.js";
-import { distErrorToString } from "../../../src/dist/DistError.js";
+import { BaseDist } from "../../../src/dists/BaseDist.js";
+import { distErrorToString } from "../../../src/dists/DistError.js";
 import {
   logScoreDistAnswer,
   mixture,
-} from "../../../src/dist/distOperations/index.js";
+} from "../../../src/dists/distOperations/index.js";
 import { getDefaultRng } from "../../../src/rng/index.js";
 import {
   floatDist,

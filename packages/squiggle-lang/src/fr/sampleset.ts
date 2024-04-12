@@ -1,4 +1,4 @@
-import * as SampleSetDist from "../dist/SampleSetDist/index.js";
+import * as SampleSetDist from "../dists/SampleSetDist/index.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
   FnDefinition,

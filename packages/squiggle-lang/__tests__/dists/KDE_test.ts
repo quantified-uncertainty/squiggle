@@ -3,7 +3,7 @@ import range from "lodash/range.js";
 import sum from "lodash/sum.js";
 import sumBy from "lodash/sumBy.js";
 
-import { kde } from "../../src/dist/SampleSetDist/kde.js";
+import { kde } from "../../src/dists/SampleSetDist/kde.js";
 import * as XYShape from "../../src/XYShape.js";
 
 // KDE by definition, with triangular kernel max(0, |1-x|)

@@ -1,5 +1,5 @@
-import { operationDistError } from "../../src/dist/DistError.js";
-import * as distOperations from "../../src/dist/distOperations/index.js";
+import { operationDistError } from "../../src/dists/DistError.js";
+import * as distOperations from "../../src/dists/distOperations/index.js";
 import {
   DivisionByZeroError,
   NegativeInfinityError,
