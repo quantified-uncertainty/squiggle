@@ -137,7 +137,7 @@ export function userGroupsRoute({ username }: { username: string }) {
 }
 
 export function userVariablesRoute({ username }: { username: string }) {
-  return `/users/${username}/exports`;
+  return `/users/${username}/variables`;
 }
 
 export function groupRoute({ slug }: { slug: string }) {

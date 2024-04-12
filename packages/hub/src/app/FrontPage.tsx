@@ -33,7 +33,7 @@ export const FrontPage: FC<{
       <StyledTab.Group>
         <StyledTab.List>
           <StyledTab name="Models" />
-          <StyledTab name="Exports" />
+          <StyledTab name="Variables" />
           <StyledTab name="Definitions" />
           <StyledTab name="Groups" />
         </StyledTab.List>

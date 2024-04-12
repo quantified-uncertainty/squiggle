@@ -118,7 +118,7 @@ export const UserLayout: FC<
           ) : null}
           {isMe || user.variables.edges.length ? (
             <StyledTabLink
-              name="Exports"
+              name="Variables"
               href={userVariablesRoute({ username: user.username })}
             />
           ) : null}

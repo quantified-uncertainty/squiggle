@@ -88,19 +88,18 @@ export const ModelLayout: FC<
     slug: model.slug,
   });
 
-  const variables: VariableRevision[] = model.currentRevision.exportNames.map(
-    (name) => {
-      const matchingExport = model.variables.find(
+  const variableRevisions: VariableRevision[] =
+    model.currentRevision.exportNames.map((name) => {
+      const matchingVariable = model.variables.find(
         (e) => e.variableName === name
       );
 
       return {
         variableName: name,
-        variableType: matchingExport?.lastRevision?.variableType || undefined,
-        title: matchingExport?.lastRevision?.title || undefined,
+        variableType: matchingVariable?.lastRevision?.variableType || undefined,
+        title: matchingVariable?.lastRevision?.title || undefined,
       };
-    }
-  );
+    });
 
   const relativeValuesExports = model.currentRevision.relativeValuesExports.map(
     ({ variableName, definition: { slug } }) => ({
@@ -110,7 +109,7 @@ export const ModelLayout: FC<
   );
 
   const _totalImportLength = totalImportLength(
-    variables,
+    variableRevisions,
     relativeValuesExports
   );
 
@@ -124,19 +123,19 @@ export const ModelLayout: FC<
           <EntityTab.Link name="Code" icon={CodeBracketIcon} href={modelUrl} />
           {Boolean(_totalImportLength) && (
             <VariablesDropdown
-              variables={variables}
+              variableRevisions={variableRevisions}
               relativeValuesExports={relativeValuesExports}
               owner={model.owner.slug}
               slug={model.slug}
             >
               <EntityTab.Div
-                name="Exports"
+                name="Variables"
                 icon={ShareIcon}
                 count={_totalImportLength}
                 selected={(pathname) => {
                   return (
                     pathname.startsWith(modelUrl + "/relative-values") ||
-                    pathname.startsWith(modelUrl + "/exports")
+                    pathname.startsWith(modelUrl + "/variables")
                   );
                 }}
               />

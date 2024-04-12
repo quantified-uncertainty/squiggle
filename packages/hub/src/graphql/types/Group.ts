@@ -131,7 +131,7 @@ export const Group = builder.prismaNode("Group", {
       },
       ModelConnection
     ),
-    modelExports: t.connection(
+    variableRevisions: t.connection(
       {
         type: variableRevisionConnectionHelpers.ref,
         select: (args, ctx, nestedSelection) => ({

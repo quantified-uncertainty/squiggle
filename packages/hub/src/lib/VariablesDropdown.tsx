@@ -42,25 +42,25 @@ export const totalImportLength = (
 
 export const VariablesDropdown: FC<
   PropsWithChildren<{
-    variables: VariableRevision[];
+    variableRevisions: VariableRevision[];
     relativeValuesExports: RelativeValuesExport[];
     owner: string;
     slug: string;
   }>
-> = ({ variables, relativeValuesExports, owner, slug, children }) => {
+> = ({ variableRevisions, relativeValuesExports, owner, slug, children }) => {
   //We remove the relative values variables from the exports list, to not double count them.
-  const _variables = nonRelativeValuesVariables(
-    variables,
+  const _variableRevisions = nonRelativeValuesVariables(
+    variableRevisions,
     relativeValuesExports
   );
   return (
     <Dropdown
       render={({ close }) => (
         <DropdownMenu>
-          {_variables.length > 0 && (
+          {_variableRevisions.length > 0 && (
             <>
-              <DropdownMenuHeader>Exports</DropdownMenuHeader>
-              {_variables.map((exportItem) => (
+              <DropdownMenuHeader>Exported Variables</DropdownMenuHeader>
+              {_variableRevisions.map((exportItem) => (
                 <DropdownMenuNextLinkItem
                   key={exportItem.variableName}
                   href={variableRoute({

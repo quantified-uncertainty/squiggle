@@ -90,12 +90,12 @@ type Group implements Node & Owner {
   inviteForMe: GroupInvite
   invites(after: String, before: String, first: Int, last: Int): GroupInviteConnection
   memberships(after: String, before: String, first: Int, last: Int): UserGroupMembershipConnection!
-  modelExports(after: String, before: String, first: Int, last: Int): VariableRevision!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   myMembership: UserGroupMembership
   reusableInviteToken: String
   slug: String!
   updatedAtTimestamp: Float!
+  variableRevisions(after: String, before: String, first: Int, last: Int): VariableRevision!
 }
 
 type GroupConnection {

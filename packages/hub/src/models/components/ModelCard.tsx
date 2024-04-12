@@ -52,7 +52,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
     slug: model.slug,
   });
 
-  const modelVariables: VariableRevision[] = model.variables.map((v) => ({
+  const variableRevisions: VariableRevision[] = model.variables.map((v) => ({
     variableName: v.variableName,
     variableType: v.lastRevision?.variableType,
     title: v.lastRevision?.title || undefined,
@@ -67,14 +67,14 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   );
 
   const _totalImportLength = totalImportLength(
-    modelVariables,
+    variableRevisions,
     relativeValuesExports
   );
 
   const footerItems =
     _totalImportLength > 0 ? (
       <VariablesDropdown
-        variables={modelVariables}
+        variableRevisions={variableRevisions}
         relativeValuesExports={relativeValuesExports}
         owner={model.owner.slug}
         slug={model.slug}
