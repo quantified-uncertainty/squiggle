@@ -129,6 +129,7 @@ export const ModelRevisionsList: FC<{
           @connection(key: "ModelRevisionsList_revisions") {
           edges {
             node {
+              id
               ...ModelRevisionsList_revision
             }
           }

@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { format } from "date-fns";
 import { FC, useState } from "react";
 import { graphql, usePaginationFragment } from "react-relay";
+import { FragmentRefs } from "relay-runtime";
 
 import { LoadMore } from "@/components/LoadMore";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
@@ -52,34 +53,15 @@ const VariableRevisionsPanel: FC<{
   );
 };
 
-export const VariablePage: FC<{
-  params: {
-    owner: string;
-    slug: string;
-    variableName: string;
+export const VariablePageBody: FC<{
+  variableName: string;
+  result: {
+    readonly __typename: "Variable";
+    readonly id: string;
+    readonly variableName: string;
+    readonly " $fragmentSpreads": FragmentRefs<"VariablePage">;
   };
-  query: SerializablePreloadedQuery<VariablePageQuery>;
-}> = ({ query, params }) => {
-  const [{ variable: result }] = usePageQuery(
-    graphql`
-      query VariablePageQuery($input: QueryVariableInput!) {
-        variable(input: $input) {
-          __typename
-          ... on Variable {
-            id
-            variableName
-            ...VariablePage
-          }
-        }
-      }
-    `,
-    query
-  );
-
-  if (result.__typename !== "Variable") {
-    return <div>No revisions found. They should be built shortly.</div>;
-  }
-
+}> = ({ result, variableName }) => {
   const variable = extractFromGraphqlErrorUnion(result, "Variable");
 
   const {
@@ -137,7 +119,7 @@ export const VariablePage: FC<{
             <div className="flex-1 w-full">
               <SquiggleVariableRevisionPage
                 key={selected}
-                variableName={params.variableName}
+                variableName={variableName}
                 contentRef={content}
               />
             </div>
@@ -154,4 +136,37 @@ export const VariablePage: FC<{
         return <div>Unknown model type {content.__typename}</div>;
     }
   }
+};
+
+export const VariablePage: FC<{
+  params: {
+    owner: string;
+    slug: string;
+    variableName: string;
+  };
+  query: SerializablePreloadedQuery<VariablePageQuery>;
+}> = ({ query, params }) => {
+  const [{ variable: result }] = usePageQuery(
+    graphql`
+      query VariablePageQuery($input: QueryVariableInput!) {
+        variable(input: $input) {
+          __typename
+          ... on Variable {
+            id
+            variableName
+            ...VariablePage
+          }
+        }
+      }
+    `,
+    query
+  );
+
+  if (result.__typename !== "Variable") {
+    return <div>No revisions found. They should be built shortly.</div>;
+  }
+
+  return (
+    <VariablePageBody variableName={params.variableName} result={result} />
+  );
 };

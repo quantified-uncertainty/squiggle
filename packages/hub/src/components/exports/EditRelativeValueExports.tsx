@@ -20,6 +20,7 @@ import {
   SelectRelativeValuesDefinitionOption,
 } from "./SelectRelativeValuesDefinition";
 
+import { EditRelativeValueExports_Model$key } from "@/__generated__/EditRelativeValueExports_Model.graphql";
 import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 
 const CreateVariableWithDefinitionModal: FC<{
