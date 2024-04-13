@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { spawn } from "child_process";
+import { spawn } from "node:child_process";
 
 import { NotFoundError } from "../../graphql/errors/NotFoundError";
 import { WorkerOutput, WorkerRunMessage } from "./worker";
@@ -16,13 +16,9 @@ async function runWorker(
 ): Promise<WorkerOutput> {
   return new Promise((resolve, _) => {
     console.log("Spawning worker process for Revision ID: " + revisionId);
-    const worker = spawn(
-      "tsx",
-      ["src/scripts/buildRecentModelRevision/worker.ts"],
-      {
-        stdio: ["pipe", "pipe", "pipe", "ipc"],
-      }
-    );
+    const worker = spawn("node", [__dirname + "/worker.js"], {
+      stdio: ["pipe", "pipe", "pipe", "ipc"],
+    });
 
     const timeoutId = setTimeout(() => {
       worker.kill();
