@@ -44,6 +44,6 @@ FROM node-with-openssl AS run-stage
 WORKDIR /app
 
 COPY --from=build-stage /build/packages/hub/dist /app/dist
-COPY --from=build-stage /build/node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/*.so.node /app/dist
+COPY --from=build-stage /build/node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/*.so.node /app
 
 CMD ["node", "dist/buildRecentModelRevision.js"]
