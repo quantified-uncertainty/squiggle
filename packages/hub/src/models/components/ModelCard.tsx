@@ -54,8 +54,8 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
 
   const variableRevisions: VariableRevision[] = model.variables.map((v) => ({
     variableName: v.variableName,
-    variableType: v.lastRevision?.variableType,
-    title: v.lastRevision?.title || undefined,
+    variableType: v.currentRevision?.variableType,
+    title: v.currentRevision?.title || undefined,
     docString: undefined,
   }));
 
