@@ -29,6 +29,7 @@ const Fragment = graphql`
     }
     model {
       slug
+      isPrivate
     }
   }
 `;
@@ -67,6 +68,7 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
         owner: variable.owner.slug,
       })}
       showOwner={false}
+      isPrivate={variable.model.isPrivate}
       slug={variable.lastRevision?.title || variable.variableName}
       footerItems={
         <>
