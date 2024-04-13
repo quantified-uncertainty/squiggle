@@ -31,7 +31,7 @@ const ModelRevisionBuildStatus = builder.enumType("ModelRevisionBuildStatus", {
   values: ["Skipped", "Pending", "Success", "Failure"],
 });
 
-function getExportedVariableNames(ast: ASTNode): string[] {
+function astToVariableNames(ast: ASTNode): string[] {
   const exportedVariableNames: string[] = [];
 
   if (ast.type === "Program") {
@@ -49,6 +49,15 @@ function getExportedVariableNames(ast: ASTNode): string[] {
   return exportedVariableNames;
 }
 
+export function getExportedVariableNames(code: string): string[] {
+  const ast = parse(code);
+  if (ast.ok) {
+    return astToVariableNames(ast.value);
+  } else {
+    return [];
+  }
+}
+
 export const ModelRevision = builder.prismaNode("ModelRevision", {
   id: { field: "id" },
   fields: (t) => ({
@@ -58,7 +67,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     // `relatedConnection` would be more principled, and in theory the number of variables with definitions could be high.
     // But connection is harder to deal with on the UI side, and since we send all variables back on updates, so it doesn't make much sense there.
     relativeValuesExports: t.relation("relativeValuesExports"),
-    exports: t.relation("exports"),
+    variableRevisions: t.relation("variableRevisions"),
     model: t.relation("model"),
 
     lastBuild: t.field({
@@ -123,12 +132,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
       select: { squiggleSnippet: true },
       async resolve(revision) {
         if (revision.contentType === "SquiggleSnippet") {
-          const ast = parse(revision.squiggleSnippet!.code);
-          if (ast.ok) {
-            return getExportedVariableNames(ast.value);
-          } else {
-            return [];
-          }
+          return getExportedVariableNames(revision.squiggleSnippet!.code);
         } else {
           return [];
         }

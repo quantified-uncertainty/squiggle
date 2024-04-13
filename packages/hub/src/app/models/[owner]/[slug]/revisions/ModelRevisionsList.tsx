@@ -32,10 +32,8 @@ const ModelRevisionItem: FC<{
           username
         }
         comment
-        exports {
+        variableRevisions {
           id
-          variableName
-          title
         }
         lastBuild {
           errors
@@ -86,9 +84,9 @@ const ModelRevisionItem: FC<{
       {revision.lastBuild && (
         <div className="text-xs text-slate-700">{`Build Time: ${revision.lastBuild.runSeconds.toFixed(2)}s`}</div>
       )}
-      {revision.exports.length > 0 ? (
+      {revision.variableRevisions.length > 0 ? (
         <div className="text-xs text-green-700">
-          {`${revision.exports.length} exports `}
+          {`${revision.variableRevisions.length} variables`}
         </div>
       ) : null}
     </div>
@@ -131,19 +129,8 @@ export const ModelRevisionsList: FC<{
           @connection(key: "ModelRevisionsList_revisions") {
           edges {
             node {
-              ...ModelRevisionsList_revision
               id
-              createdAtTimestamp
-              buildStatus
-              exports {
-                id
-                title
-                variableName
-              }
-              lastBuild {
-                errors
-                runSeconds
-              }
+              ...ModelRevisionsList_revision
             }
           }
           pageInfo {

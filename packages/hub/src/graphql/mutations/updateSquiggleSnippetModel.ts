@@ -130,17 +130,6 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       const self = await getSelf(session);
 
       const model = await prisma.$transaction(async (tx) => {
-        if (existingModel.currentRevisionId) {
-          await tx.modelExport.updateMany({
-            where: {
-              modelRevisionId: existingModel.currentRevisionId,
-            },
-            data: {
-              isCurrent: false,
-            },
-          });
-        }
-
         const revision = await tx.modelRevision.create({
           data: {
             squiggleSnippet: {
@@ -175,9 +164,9 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
             },
           },
         });
-        const model = await tx.model.update({
+        const updatedModel = await tx.model.update({
           where: {
-            id: revision.model.id,
+            id: revision.modelId,
           },
           data: {
             currentRevisionId: revision.id,
@@ -185,7 +174,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
           // TODO - optimize with queryFromInfo, https://pothos-graphql.dev/docs/plugins/prisma#optimized-queries-without-tprismafield
         });
 
-        return model;
+        return updatedModel;
       });
 
       return { model };

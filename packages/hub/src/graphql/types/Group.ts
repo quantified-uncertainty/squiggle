@@ -6,8 +6,8 @@ import { getMyMembershipById } from "../helpers/groupHelpers";
 import { modelWhereHasAccess } from "../helpers/modelHelpers";
 import { GroupInvite, GroupInviteConnection } from "./GroupInvite";
 import { ModelConnection, modelConnectionHelpers } from "./Model";
-import { modelExportConnectionHelpers } from "./ModelExport";
 import { Owner } from "./Owner";
+import { variableRevisionConnectionHelpers } from "./VariableRevision";
 
 export const MembershipRoleType = builder.enumType(MembershipRole, {
   name: "MembershipRole",
@@ -131,9 +131,9 @@ export const Group = builder.prismaNode("Group", {
       },
       ModelConnection
     ),
-    modelExports: t.connection(
+    variableRevisions: t.connection(
       {
-        type: modelExportConnectionHelpers.ref,
+        type: variableRevisionConnectionHelpers.ref,
         select: (args, ctx, nestedSelection) => ({
           asOwner: {
             select: {
@@ -141,8 +141,8 @@ export const Group = builder.prismaNode("Group", {
                 select: {
                   currentRevision: {
                     select: {
-                      exports: {
-                        ...modelExportConnectionHelpers.getQuery(
+                      variableRevisions: {
+                        ...variableRevisionConnectionHelpers.getQuery(
                           args,
                           ctx,
                           nestedSelection
@@ -156,14 +156,18 @@ export const Group = builder.prismaNode("Group", {
           },
         }),
         resolve: (group, args, ctx) => {
-          const exports =
+          const variableRevisions =
             group.asOwner?.models
-              .map((model) => model.currentRevision?.exports ?? [])
+              .map((model) => model.currentRevision?.variableRevisions ?? [])
               .flat() ?? [];
-          return modelExportConnectionHelpers.resolve(exports, args, ctx);
+          return variableRevisionConnectionHelpers.resolve(
+            variableRevisions,
+            args,
+            ctx
+          );
         },
       },
-      modelExportConnectionHelpers.ref
+      variableRevisionConnectionHelpers.ref
     ),
   }),
 });

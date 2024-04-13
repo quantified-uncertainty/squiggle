@@ -6,27 +6,27 @@ import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 
-import { UserModelExportList } from "./UserModelExportList";
+import { UserVariableList } from "./UserVariableList";
 
-import { UserModelExportsPageQuery } from "@/__generated__/UserModelExportsPageQuery.graphql";
+import { UserVariablesPageQuery } from "@/__generated__/UserVariablesPageQuery.graphql";
 
 const Query = graphql`
-  query UserModelExportsPageQuery($username: String!) {
+  query UserVariablesPageQuery($username: String!) {
     userByUsername(username: $username) {
       __typename
       ... on User {
-        ...UserModelExportList
+        ...UserVariableList
       }
     }
   }
 `;
 
-export const UserModelExportsPage: FC<{
-  query: SerializablePreloadedQuery<UserModelExportsPageQuery>;
+export const UserVariablesPage: FC<{
+  query: SerializablePreloadedQuery<UserVariablesPageQuery>;
 }> = ({ query }) => {
   const [{ userByUsername: result }] = usePageQuery(Query, query);
 
   const user = extractFromGraphqlErrorUnion(result, "User");
 
-  return <UserModelExportList dataRef={user} />;
+  return <UserVariableList dataRef={user} />;
 };

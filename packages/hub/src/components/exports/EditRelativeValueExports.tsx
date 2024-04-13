@@ -20,7 +20,7 @@ import {
   SelectRelativeValuesDefinitionOption,
 } from "./SelectRelativeValuesDefinition";
 
-import { EditModelExports_Model$key } from "@/__generated__/EditModelExports_Model.graphql";
+import { EditRelativeValueExports_Model$key } from "@/__generated__/EditRelativeValueExports_Model.graphql";
 import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 
 const CreateVariableWithDefinitionModal: FC<{
@@ -90,12 +90,12 @@ const CreateVariableWithDefinitionModal: FC<{
 
 const ExportItem: FC<{
   item: RelativeValuesExportInput;
-  modelRef: EditModelExports_Model$key;
+  modelRef: EditRelativeValueExports_Model$key;
   remove: () => void;
 }> = ({ item, modelRef, remove }) => {
   const model = useFragment(
     graphql`
-      fragment EditModelExports_Model on Model {
+      fragment EditRelativeValueExports_Model on Model {
         id
         slug
         owner {
@@ -139,10 +139,10 @@ type Props = {
   append: (item: RelativeValuesExportInput) => void;
   remove: (id: number) => void;
   items: RelativeValuesExportInput[];
-  modelRef: EditModelExports_Model$key;
+  modelRef: EditRelativeValueExports_Model$key;
 };
 
-export const EditModelExports: FC<Props> = ({
+export const EditRelativeValueExports: FC<Props> = ({
   append,
   remove,
   items,
@@ -165,7 +165,7 @@ export const EditModelExports: FC<Props> = ({
       </div>
       <div className="mt-2">
         <Button onClick={() => setIsOpen(true)} theme="primary">
-          Export New Variable
+          Export New Relative Value Variable
         </Button>
       </div>
       {isOpen && (

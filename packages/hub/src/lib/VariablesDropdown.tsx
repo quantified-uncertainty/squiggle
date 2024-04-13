@@ -8,11 +8,11 @@ import {
 } from "@quri/ui";
 
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
-import { modelExportRoute, modelForRelativeValuesExportRoute } from "@/routes";
+import { modelForRelativeValuesExportRoute, variableRoute } from "@/routes";
 
 import { exportTypeIcon } from "./typeIcon";
 
-export type ModelExport = {
+export type VariableRevision = {
   title?: string;
   variableName: string;
   variableType?: string;
@@ -21,11 +21,11 @@ export type ModelExport = {
 
 type RelativeValuesExport = { slug: string; variableName: string };
 
-const nonRelativeValuesExports = (
-  modelExports: ModelExport[],
+const nonRelativeValuesVariables = (
+  variables: VariableRevision[],
   relativeValuesExports: RelativeValuesExport[]
 ) =>
-  modelExports.filter(
+  variables.filter(
     (exportItem) =>
       !relativeValuesExports.find(
         ({ variableName: v }) => v === exportItem.variableName
@@ -34,33 +34,36 @@ const nonRelativeValuesExports = (
 
 //It's a bit awkward that this here, but it's fairly closely coupled to ExportsDropdown.
 export const totalImportLength = (
-  modelExports: ModelExport[],
+  variables: VariableRevision[],
   relativeValuesExports: RelativeValuesExport[]
 ) =>
-  nonRelativeValuesExports(modelExports, relativeValuesExports).length +
+  nonRelativeValuesVariables(variables, relativeValuesExports).length +
   relativeValuesExports.length;
 
-export const ExportsDropdown: FC<
+export const VariablesDropdown: FC<
   PropsWithChildren<{
-    modelExports: ModelExport[];
+    variableRevisions: VariableRevision[];
     relativeValuesExports: RelativeValuesExport[];
     owner: string;
     slug: string;
   }>
-> = ({ modelExports, relativeValuesExports, owner, slug, children }) => {
-  //We remove the relative values exports from the exports list, to not double count them.
-  const exports = nonRelativeValuesExports(modelExports, relativeValuesExports);
+> = ({ variableRevisions, relativeValuesExports, owner, slug, children }) => {
+  //We remove the relative values variables from the exports list, to not double count them.
+  const allExports = nonRelativeValuesVariables(
+    variableRevisions,
+    relativeValuesExports
+  );
   return (
     <Dropdown
       render={({ close }) => (
         <DropdownMenu>
-          {exports.length > 0 && (
+          {allExports.length > 0 && (
             <>
-              <DropdownMenuHeader>Exports</DropdownMenuHeader>
-              {exports.map((exportItem) => (
+              <DropdownMenuHeader>Exported Variables</DropdownMenuHeader>
+              {allExports.map((exportItem) => (
                 <DropdownMenuNextLinkItem
                   key={exportItem.variableName}
-                  href={modelExportRoute({
+                  href={variableRoute({
                     owner: owner,
                     modelSlug: slug,
                     variableName: exportItem.variableName,

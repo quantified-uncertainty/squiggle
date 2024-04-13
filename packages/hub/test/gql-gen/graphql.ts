@@ -248,8 +248,8 @@ export type ModelEdge = {
   node: Model;
 };
 
-export type ModelExport = Node & {
-  __typename?: 'ModelExport';
+export type Variable = Node & {
+  __typename?: 'Variable';
   docstring: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   modelRevision: ModelRevision;
@@ -264,7 +264,7 @@ export type ModelRevision = Node & {
   comment: Scalars['String']['output'];
   content: ModelContent;
   createdAtTimestamp: Scalars['Float']['output'];
-  exports: Array<ModelExport>;
+  variables: Array<Variable>;
   forRelativeValues?: Maybe<RelativeValuesExport>;
   id: Scalars['ID']['output'];
   model: Model;
@@ -626,7 +626,7 @@ export type MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRel
 export type MutationUpdateSquiggleSnippetModelInput = {
   comment?: InputMaybe<Scalars['String']['input']>;
   content: SquiggleSnippetContentInput;
-  exports?: InputMaybe<Array<SquiggleModelExportInput>>;
+  variables?: InputMaybe<Array<SquiggleVariableInput>>;
   owner: Scalars['String']['input'];
   relativeValuesExports?: InputMaybe<Array<RelativeValuesExportInput>>;
   slug: Scalars['String']['input'];
@@ -800,7 +800,7 @@ export type RelativeValuesDefinition = Node & {
   currentRevision: RelativeValuesDefinitionRevision;
   id: Scalars['ID']['output'];
   isEditable: Scalars['Boolean']['output'];
-  modelExports: Array<RelativeValuesExport>;
+  Variables: Array<RelativeValuesExport>;
   owner: Owner;
   slug: Scalars['String']['output'];
   updatedAtTimestamp: Scalars['Float']['output'];
@@ -876,7 +876,7 @@ export type SquiggleErrorOutput = SquiggleOutput & {
   isCached: Scalars['Boolean']['output'];
 };
 
-export type SquiggleModelExportInput = {
+export type SquiggleVariableInput = {
   docstring?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
   variableName: Scalars['String']['input'];

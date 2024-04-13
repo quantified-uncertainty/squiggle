@@ -4,16 +4,16 @@ import { graphql, useFragment } from "react-relay";
 
 import { LoadMore } from "@/components/LoadMore";
 
-import { ModelExportCard } from "./ModelExportCard";
+import { VariableCard } from "./VariableCard";
 
-import { ModelExportList$key } from "@/__generated__/ModelExportList.graphql";
+import { VariableList$key } from "@/__generated__/VariableList.graphql";
 
 const Fragment = graphql`
-  fragment ModelExportList on ModelExportConnection {
+  fragment VariableList on VariableConnection {
     edges {
       node {
         id
-        ...ModelExportCard
+        ...VariableCard
       }
     }
     pageInfo {
@@ -23,18 +23,18 @@ const Fragment = graphql`
 `;
 
 type Props = {
-  connectionRef: ModelExportList$key;
+  connectionRef: VariableList$key;
   loadNext(count: number): unknown;
 };
 
-export const ModelExportList: FC<Props> = ({ connectionRef, loadNext }) => {
+export const VariableList: FC<Props> = ({ connectionRef, loadNext }) => {
   const connection = useFragment(Fragment, connectionRef);
 
   return (
     <div>
       <div className="grid md:grid-cols-2 gap-4">
         {connection.edges.map((edge) => (
-          <ModelExportCard key={edge.node.id} modelExportRef={edge.node} />
+          <VariableCard key={edge.node.id} variableRef={edge.node} />
         ))}
       </div>
       {connection.pageInfo.hasNextPage && <LoadMore loadNext={loadNext} />}

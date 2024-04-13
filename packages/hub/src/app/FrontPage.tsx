@@ -9,15 +9,15 @@ import { usePageQuery } from "@/relay/usePageQuery";
 
 import { FrontPageDefinitionList } from "./FrontPageDefinitionList";
 import { FrontPageGroupList } from "./FrontPageGroupList";
-import { FrontPageModelExportList } from "./FrontPageModelExportList";
 import { FrontPageModelList } from "./FrontPageModelList";
+import { FrontPageVariableList } from "./FrontPageVariableList";
 
 import { FrontPageQuery } from "@/__generated__/FrontPageQuery.graphql";
 
 const Query = graphql`
   query FrontPageQuery {
     ...FrontPageModelList
-    ...FrontPageModelExportList
+    ...FrontPageVariableList
     ...FrontPageDefinitionList
     ...FrontPageGroupList
   }
@@ -33,7 +33,7 @@ export const FrontPage: FC<{
       <StyledTab.Group>
         <StyledTab.List>
           <StyledTab name="Models" />
-          <StyledTab name="Exports" />
+          <StyledTab name="Variables" />
           <StyledTab name="Definitions" />
           <StyledTab name="Groups" />
         </StyledTab.List>
@@ -43,7 +43,7 @@ export const FrontPage: FC<{
               <FrontPageModelList dataRef={data} />
             </StyledTab.Panel>
             <StyledTab.Panel>
-              <FrontPageModelExportList dataRef={data} />
+              <FrontPageVariableList dataRef={data} />
             </StyledTab.Panel>
             <StyledTab.Panel>
               <FrontPageDefinitionList dataRef={data} />

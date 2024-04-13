@@ -3,15 +3,12 @@ import { modelWhereHasAccess } from "../helpers/modelHelpers";
 import { isRootUser } from "../helpers/userHelpers";
 import { GroupConnection, groupFromMembershipConnectionHelpers } from "./Group";
 import { ModelConnection, modelConnectionHelpers } from "./Model";
-import {
-  ModelExportConnection,
-  modelExportConnectionHelpers,
-} from "./ModelExport";
 import { Owner } from "./Owner";
 import {
   RelativeValuesDefinitionConnection,
   relativeValuesDefinitionConnectionHelpers,
 } from "./RelativeValuesDefinition";
+import { VariableConnection, variableConnectionHelpers } from "./Variable";
 
 export const User = builder.prismaNode("User", {
   id: { field: "id" },
@@ -57,37 +54,32 @@ export const User = builder.prismaNode("User", {
       },
       ModelConnection
     ),
-    modelExports: t.connection(
+    variables: t.connection(
       {
-        type: modelExportConnectionHelpers.ref,
+        type: variableConnectionHelpers.ref,
         select: (args, ctx, nestedSelection) => ({
           asOwner: {
             select: {
               models: {
                 select: {
-                  currentRevision: {
-                    select: {
-                      exports: modelExportConnectionHelpers.getQuery(
-                        args,
-                        ctx,
-                        nestedSelection
-                      ),
-                    },
-                  },
+                  variables: variableConnectionHelpers.getQuery(
+                    args,
+                    ctx,
+                    nestedSelection
+                  ),
                 },
               },
             },
           },
         }),
         resolve: (user, args, ctx) => {
-          const exports =
-            user.asOwner?.models
-              .map((model) => model.currentRevision?.exports ?? [])
-              .flat() ?? [];
-          return modelExportConnectionHelpers.resolve(exports, args, ctx);
+          const variables =
+            user.asOwner?.models.map((model) => model.variables ?? []).flat() ??
+            [];
+          return variableConnectionHelpers.resolve(variables, args, ctx);
         },
       },
-      ModelExportConnection
+      VariableConnection
     ),
     relativeValuesDefinitions: t.connection(
       {
