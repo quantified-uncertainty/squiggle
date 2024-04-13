@@ -15,7 +15,7 @@ const Fragment = graphql`
   fragment VariableCard on Variable {
     id
     variableName
-    lastRevision {
+    currentRevision {
       id
       title
       docstring
@@ -29,6 +29,7 @@ const Fragment = graphql`
     }
     model {
       slug
+      isPrivate
     }
   }
 `;
@@ -40,18 +41,18 @@ type Props = {
 export const VariableCard: FC<Props> = ({ variableRef }) => {
   const variable = useFragment(Fragment, variableRef);
 
-  const lastRevision = variable.lastRevision;
+  const currentRevision = variable.currentRevision;
 
-  if (!lastRevision) {
+  if (!currentRevision) {
     return null;
   }
 
-  const Icon = exportTypeIcon(lastRevision.variableType || "");
+  const Icon = exportTypeIcon(currentRevision.variableType || "");
 
   // This will have problems with markdown tags, but I looked into markdown-truncation packages, and they can get complicated. Will try this for now.
   const docstring =
-    (lastRevision.docstring &&
-      truncate(lastRevision.docstring, {
+    (currentRevision.docstring &&
+      truncate(currentRevision.docstring, {
         length: 500,
         separator: " ",
         omission: "...",
@@ -60,14 +61,15 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
 
   return (
     <EntityCard
-      updatedAtTimestamp={lastRevision.modelRevision.createdAtTimestamp}
+      updatedAtTimestamp={currentRevision.modelRevision.createdAtTimestamp}
       href={variableRoute({
         modelSlug: variable.model.slug,
         variableName: variable.variableName,
         owner: variable.owner.slug,
       })}
       showOwner={false}
-      slug={variable.lastRevision?.title || variable.variableName}
+      isPrivate={variable.model.isPrivate}
+      slug={variable.currentRevision?.title || variable.variableName}
       footerItems={
         <>
           <a
@@ -81,7 +83,7 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
           </a>
           <div className="items-center flex text-xs text-gray-500">
             <Icon size={10} className="mr-1" />
-            {lastRevision.variableType}
+            {currentRevision.variableType}
           </div>
         </>
       }

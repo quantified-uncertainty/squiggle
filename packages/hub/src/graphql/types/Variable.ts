@@ -3,10 +3,7 @@ import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 import { builder } from "@/graphql/builder";
 
 import { Owner } from "./Owner";
-import {
-  VariableRevision,
-  VariableRevisionConnection,
-} from "./VariableRevision";
+import { VariableRevisionConnection } from "./VariableRevision";
 
 export const Variable = builder.prismaNode("Variable", {
   id: { field: "id" },
@@ -53,22 +50,8 @@ export const Variable = builder.prismaNode("Variable", {
       },
       VariableRevisionConnection
     ),
-    lastRevision: t.field({
-      type: VariableRevision,
+    currentRevision: t.relation("currentRevision", {
       nullable: true,
-      select: {
-        revisions: {
-          orderBy: {
-            modelRevision: {
-              createdAt: "desc",
-            },
-          },
-          take: 1,
-        },
-      },
-      async resolve(variable) {
-        return variable.revisions[0];
-      },
     }),
   }),
 });
