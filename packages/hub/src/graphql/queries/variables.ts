@@ -1,5 +1,3 @@
-import merge from "lodash/merge";
-
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
@@ -25,18 +23,14 @@ builder.queryField("variables", (t) =>
       resolve: (query, _, { input }, { session }) => {
         const modelId = input?.modelId;
 
-        const queries = merge(
-          {},
-          { model: modelWhereHasAccess(session) },
-          modelId && { modelId: modelId },
-          input?.owner && {
-            model: { owner: { slug: input.owner } },
+        const queries = {
+          model: {
+            ...modelWhereHasAccess(session),
+            ...(input?.owner && { owner: { slug: input.owner } }),
           },
-          input &&
-            input.variableName && {
-              variableName: input.variableName,
-            }
-        );
+          ...(modelId && { modelId: modelId }),
+          ...(input?.variableName && { variableName: input.variableName }),
+        };
 
         return prisma.variable.findMany({
           ...query,
