@@ -61,6 +61,7 @@ export const User = builder.prismaNode("User", {
           asOwner: {
             select: {
               models: {
+                where: modelWhereHasAccess(ctx.session),
                 select: {
                   variables: variableConnectionHelpers.getQuery(
                     args,
