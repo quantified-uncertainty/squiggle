@@ -23,7 +23,7 @@ const Fragment = graphql`
     isPrivate
     variables {
       variableName
-      lastRevision {
+      currentRevision {
         variableType
         title
       }

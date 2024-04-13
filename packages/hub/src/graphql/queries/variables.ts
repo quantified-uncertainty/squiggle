@@ -9,6 +9,7 @@ const VariableQueryInput = builder.inputType("VariableQueryInput", {
     modelId: t.string(),
     variableName: t.string(),
     owner: t.string(),
+    variableType: t.string(),
   }),
 });
 
@@ -30,6 +31,11 @@ builder.queryField("variables", (t) =>
           },
           ...(modelId && { modelId: modelId }),
           ...(input?.variableName && { variableName: input.variableName }),
+          ...(input?.variableType && {
+            currentRevision: {
+              variableType: input.variableType,
+            },
+          }),
         };
 
         return prisma.variable.findMany({

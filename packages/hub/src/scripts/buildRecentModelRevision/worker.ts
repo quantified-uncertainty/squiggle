@@ -1,5 +1,5 @@
 import { runSquiggle } from "@/graphql/queries/runSquiggle";
-import { VariableRevision } from "@/lib/VariablesDropdown";
+import { VariableRevisionInput } from "@/graphql/types/VariableRevision";
 import { prisma } from "@/prisma";
 
 export type WorkerRunMessage = {
@@ -12,7 +12,7 @@ export type WorkerRunMessage = {
 
 export type WorkerOutput = {
   errors: string;
-  variableRevisions: VariableRevision[];
+  variableRevisions: VariableRevisionInput[];
 };
 
 export async function runSquiggleCode(
@@ -21,7 +21,7 @@ export async function runSquiggleCode(
 ): Promise<WorkerOutput> {
   const outputR = await runSquiggle(code, seed);
 
-  let variableRevisions: VariableRevision[] = [];
+  let variableRevisions: VariableRevisionInput[] = [];
 
   if (outputR.ok) {
     // I Imagine it would be nice to move this out of this worker file, but this would require exporting a lot more information. It seems wise to instead wait for the Serialization PR to go in and then refactor this.

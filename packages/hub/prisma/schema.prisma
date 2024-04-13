@@ -258,7 +258,11 @@ model Variable {
   variableName String
   model        Model              @relation(fields: [modelId], references: [id], onDelete: Cascade)
   modelId      String
-  revisions    VariableRevision[]
+  revisions    VariableRevision[] @relation("Revisions")
+
+  // technically nullable, but won't ever be null in practice
+  currentRevision   VariableRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
+  currentRevisionId String?           @unique
 
   @@unique([modelId, variableName])
 }
@@ -267,12 +271,15 @@ model VariableRevision {
   id              String        @id @default(cuid())
   modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
   modelRevisionId String
-  variable        Variable      @relation(fields: [variableId], references: [id], onDelete: Cascade)
+  variable        Variable      @relation("Revisions", fields: [variableId], references: [id], onDelete: Cascade)
   variableId      String
   variableName    String
   title           String?
   docstring       String        @default("")
   variableType    String        @default("OTHER")
+
+  // required by Prisma, but unused since `model` field should point at the same entity
+  currentRevisionVariable Variable? @relation("CurrentRevision")
 
   @@unique([modelRevisionId, variableName])
 }

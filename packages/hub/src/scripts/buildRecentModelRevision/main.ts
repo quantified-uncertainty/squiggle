@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { spawn } from "child_process";
 
+import { createVariableRevision } from "@/graphql/types/VariableRevision";
+
 import { NotFoundError } from "../../graphql/errors/NotFoundError";
 import { WorkerOutput, WorkerRunMessage } from "./worker";
 
@@ -137,38 +139,7 @@ async function buildRecentModelVersion(): Promise<void> {
       });
 
       for (const e of response.variableRevisions) {
-        const variable = await tx.variable.findFirst({
-          where: {
-            modelId: modelId,
-            variableName: e.variableName,
-          },
-        });
-
-        let createdVariableId: string | undefined = undefined;
-
-        if (!variable) {
-          // Create a new Variable if it doesn't exist
-          const createdVariable = await tx.variable.create({
-            data: {
-              model: { connect: { id: modelId } },
-              variableName: e.variableName,
-            },
-          });
-          createdVariableId = createdVariable.id;
-        }
-
-        const variableId = variable?.id || createdVariableId!;
-
-        await tx.variableRevision.create({
-          data: {
-            variableName: e.variableName,
-            variable: { connect: { id: variableId } },
-            modelRevision: { connect: { id: revisionId } },
-            variableType: e.variableType,
-            title: e.title,
-            docstring: e.docstring,
-          },
-        });
+        createVariableRevision(modelId, revisionId, e);
       }
     });
     console.log(

@@ -49,7 +49,7 @@ const Query = graphql`
         variables {
           id
           variableName
-          lastRevision {
+          currentRevision {
             variableType
             title
           }
@@ -95,8 +95,9 @@ export const ModelLayout: FC<
 
       return {
         variableName: name,
-        variableType: matchingVariable?.lastRevision?.variableType || undefined,
-        title: matchingVariable?.lastRevision?.title || undefined,
+        variableType:
+          matchingVariable?.currentRevision?.variableType || undefined,
+        title: matchingVariable?.currentRevision?.title || undefined,
       };
     });
 

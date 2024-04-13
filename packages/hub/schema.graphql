@@ -778,8 +778,8 @@ type ValidationErrorIssue {
 }
 
 type Variable implements Node {
+  currentRevision: VariableRevision
   id: ID!
-  lastRevision: VariableRevision
   model: Model!
   owner: Owner!
   revisions(after: String, before: String, first: Int, last: Int): VariableRevisionConnection!
@@ -800,6 +800,7 @@ input VariableQueryInput {
   modelId: String
   owner: String
   variableName: String
+  variableType: String
 }
 
 type VariableRevision implements Node {
