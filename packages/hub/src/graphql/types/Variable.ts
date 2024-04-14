@@ -7,6 +7,15 @@ import { VariableRevisionConnection } from "./VariableRevision";
 
 export const Variable = builder.prismaNode("Variable", {
   id: { field: "id" },
+
+  include: { model: true },
+  authScopes: (variable) => {
+    if (!variable.model.isPrivate) {
+      return true;
+    }
+    return { controlsOwnerId: variable.model.ownerId };
+  },
+
   fields: (t) => ({
     variableName: t.exposeString("variableName"),
     model: t.relation("model"),
