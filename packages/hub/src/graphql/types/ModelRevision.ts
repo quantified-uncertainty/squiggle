@@ -60,6 +60,15 @@ export function getExportedVariableNames(code: string): string[] {
 
 export const ModelRevision = builder.prismaNode("ModelRevision", {
   id: { field: "id" },
+
+  include: { model: true },
+  authScopes: (revision) => {
+    if (!revision.model.isPrivate) {
+      return true;
+    }
+    return { controlsOwnerId: revision.model.ownerId };
+  },
+
   fields: (t) => ({
     createdAtTimestamp: t.float({
       resolve: (revision) => revision.createdAt.getTime(),

@@ -8,6 +8,7 @@ import { Owner } from "./Owner";
 
 export const Model = builder.prismaNode("Model", {
   id: { field: "id" },
+
   authScopes: (model) => {
     if (!model.isPrivate) {
       return true;
@@ -15,10 +16,9 @@ export const Model = builder.prismaNode("Model", {
 
     // This might leak the info that the model exists, but we handle that in `model()` query and return NotFoundError.
     // It's probable that we leak this info somewhere else, though.
-    return {
-      controlsOwnerId: model.ownerId,
-    };
+    return { controlsOwnerId: model.ownerId };
   },
+
   fields: (t) => ({
     slug: t.exposeString("slug"),
     // I'm not yet sure if we'll use custom scalars for datetime encoding, so `createdAtTimestamp` is a precaution; we'll probably switch to `createAt` in the future
@@ -73,6 +73,8 @@ export const Model = builder.prismaNode("Model", {
 
         return {
           revisions: nestedSelection({
+            // necessary for ModelRevision authScopes
+            include: { model: true },
             take: 1,
             where: { id },
           }),
@@ -102,8 +104,12 @@ export const Model = builder.prismaNode("Model", {
     lastRevisionWithBuild: t.field({
       type: ModelRevision,
       nullable: true,
-      select: {
-        revisions: {
+      select: (args, ctx, nestedSelection) => ({
+        revisions: nestedSelection({
+          include: {
+            // required by ModelRevision authScopes
+            model: true,
+          },
           orderBy: {
             createdAt: "desc",
           },
@@ -117,8 +123,8 @@ export const Model = builder.prismaNode("Model", {
             },
           },
           take: 1,
-        },
-      },
+        }),
+      }),
       async resolve(model) {
         return model.revisions[0];
       },
