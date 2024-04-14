@@ -1,9 +1,9 @@
 import truncate from "lodash/truncate";
 import { FC } from "react";
-import ReactMarkdown from "react-markdown";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
-import remarkGfm from "remark-gfm";
+
+import { MarkdownViewer } from "@quri/squiggle-components";
 
 import { EntityCard } from "@/components/EntityCard";
 import { exportTypeIcon } from "@/lib/typeIcon";
@@ -89,12 +89,11 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
       }
     >
       {docstring && (
-        <ReactMarkdown
-          className={"prose text-sm text-gray-500"}
-          remarkPlugins={[remarkGfm]}
-        >
-          {docstring}
-        </ReactMarkdown>
+        <div className="bg-gray-100 pb-2 pt-1">
+          <div className="overflow-x-hidden overflow-y-clip max-h-48 px-4">
+            <MarkdownViewer md={docstring} textSize="sm" />
+          </div>
+        </div>
       )}
     </EntityCard>
   );

@@ -118,7 +118,9 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
         const lastBuild = revision.builds[0];
 
         if (lastBuild) {
-          return lastBuild.errors.length === 0 ? "Success" : "Failure";
+          const errors = lastBuild.errors.filter((e) => e !== "");
+          console.log("ERRORS", errors);
+          return errors.length === 0 ? "Success" : "Failure";
         }
 
         return revision.model.currentRevisionId === revision.id
