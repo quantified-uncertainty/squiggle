@@ -4,7 +4,7 @@ import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { CodeSyntaxHighlighter, NumberShower } from "@quri/squiggle-components";
-import { LockIcon } from "@quri/ui";
+import { LockIcon, XIcon } from "@quri/ui";
 
 import { formatDate } from "@/components/EntityCard";
 import {
@@ -126,7 +126,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
           {model.slug}
         </Link>
       </div>
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-gray-500 text-xs mb-3 px-4 overflow-hidden">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-500 text-xs mb-3 px-4 overflow-hidden">
         {_totalImportLength > 0 ? (
           <VariablesDropdown
             variableRevisions={variableRevisions}
@@ -139,20 +139,30 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
             </div>
           </VariablesDropdown>
         ) : null}
-        <div>{model.currentRevision.buildStatus}</div>
-        {runSeconds && (
-          <div>
-            <NumberShower number={runSeconds} precision={1} />
-            {"s"}
+        {model.isPrivate && (
+          <div className={"flex items-center text-gray-500"}>
+            <LockIcon className="mr-1" size={12} />
+            Private
           </div>
         )}
-        {model.isPrivate && <LockIcon className="400" size={14} />}
         <div>
           <span className="mr-1">Updated</span>
           <time dateTime={new Date(model.updatedAtTimestamp).toISOString()}>
             {formatDate(new Date(model.updatedAtTimestamp))}
           </time>
         </div>
+        {model.currentRevision.buildStatus === "Failure" && (
+          <div className={"flex items-center text-red-800"}>
+            <XIcon className="mr-1" size={12} />
+            <div className="text-red-800">Build Failed</div>
+          </div>
+        )}
+        {runSeconds && model.currentRevision.buildStatus !== "Failure" && (
+          <div>
+            <NumberShower number={runSeconds} precision={1} />
+            {"s"}
+          </div>
+        )}
       </div>
       {body && (
         <div className="border border-gray-200 rounded-md ">
