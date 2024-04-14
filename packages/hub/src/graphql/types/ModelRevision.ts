@@ -119,7 +119,6 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
 
         if (lastBuild) {
           const errors = lastBuild.errors.filter((e) => e !== "");
-          console.log("ERRORS", errors);
           return errors.length === 0 ? "Success" : "Failure";
         }
 

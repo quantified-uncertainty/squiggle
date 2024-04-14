@@ -12,7 +12,7 @@ import {
   VariableRevision,
   VariablesDropdown,
 } from "@/lib/VariablesDropdown";
-import { modelRoute } from "@/routes";
+import { modelRoute, ownerRoute } from "@/routes";
 
 import { ModelCard$key } from "@/__generated__/ModelCard.graphql";
 
@@ -22,6 +22,7 @@ const Fragment = graphql`
     slug
     updatedAtTimestamp
     owner {
+      __typename
       slug
     }
     isPrivate
@@ -73,6 +74,10 @@ function keepFirstNLines(str: string, n: number) {
 export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   const model = useFragment(Fragment, modelRef);
 
+  const ownerUrl = ownerRoute({
+    __typename: model.owner.__typename,
+    slug: model.owner.slug,
+  });
   const modelUrl = modelRoute({
     owner: model.owner.slug,
     slug: model.slug,
@@ -98,29 +103,6 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   );
   const runSeconds = model.currentRevision.lastBuild?.runSeconds;
 
-  const footerItems = (
-    <>
-      {_totalImportLength > 0 ? (
-        <VariablesDropdown
-          variableRevisions={variableRevisions}
-          relativeValuesExports={relativeValuesExports}
-          owner={model.owner.slug}
-          slug={model.slug}
-        >
-          <div className="cursor-pointer items-center flex text-xs text-gray-500 hover:text-gray-900 hover:underline">
-            {`${_totalImportLength} variables`}
-          </div>
-        </VariablesDropdown>
-      ) : null}
-      <div>{model.currentRevision.buildStatus}</div>
-      {runSeconds && (
-        <div>
-          <NumberShower number={runSeconds} precision={1} />
-          {"s"}
-        </div>
-      )}
-    </>
-  );
   const body =
     model.currentRevision.content.__typename === "SquiggleSnippet"
       ? model.currentRevision.content.code
@@ -131,7 +113,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
         {showOwner && (
           <Link
             className="text-gray-900 font-medium hover:underline"
-            href={modelUrl}
+            href={ownerUrl}
           >
             {model.owner.slug}
           </Link>
@@ -144,8 +126,26 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
           {model.slug}
         </Link>
       </div>
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-gray-500 text-xs mb-4 px-4 overflow-hidden">
-        {footerItems}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-gray-500 text-xs mb-3 px-4 overflow-hidden">
+        {_totalImportLength > 0 ? (
+          <VariablesDropdown
+            variableRevisions={variableRevisions}
+            relativeValuesExports={relativeValuesExports}
+            owner={model.owner.slug}
+            slug={model.slug}
+          >
+            <div className="cursor-pointer items-center flex text-xs text-gray-500 hover:text-gray-900 hover:underline">
+              {`${_totalImportLength} variables`}
+            </div>
+          </VariablesDropdown>
+        ) : null}
+        <div>{model.currentRevision.buildStatus}</div>
+        {runSeconds && (
+          <div>
+            <NumberShower number={runSeconds} precision={1} />
+            {"s"}
+          </div>
+        )}
         {model.isPrivate && <LockIcon className="400" size={14} />}
         <div>
           <span className="mr-1">Updated</span>

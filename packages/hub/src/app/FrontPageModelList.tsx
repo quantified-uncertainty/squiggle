@@ -12,7 +12,7 @@ const Fragment = graphql`
   fragment FrontPageModelList on Query
   @argumentDefinitions(
     cursor: { type: "String" }
-    count: { type: "Int", defaultValue: 20 }
+    count: { type: "Int", defaultValue: 8 }
   )
   @refetchable(queryName: "FrontPageModelListPaginationQuery") {
     models(first: $count, after: $cursor)
