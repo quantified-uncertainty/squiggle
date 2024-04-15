@@ -49,7 +49,9 @@ export const ToolbarItem: FC<Props> = ({
         />
       )}
       {children && <div className="flex">{children}</div>}
-      {showDropdownArrow && <ChevronRightIcon className="rotate-90" />}
+      {showDropdownArrow && (
+        <ChevronRightIcon className="rotate-90" size={14} />
+      )}
     </div>
   );
 
