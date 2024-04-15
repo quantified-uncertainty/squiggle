@@ -3,12 +3,7 @@
 import { useParams, usePathname } from "next/navigation";
 import { FC } from "react";
 
-import {
-  CodeBracketSquareIcon,
-  EmptyIcon,
-  ScaleIcon,
-  ShareIcon,
-} from "@quri/ui";
+import { CodeBracketSquareIcon, EmptyIcon, ShareIcon } from "@quri/ui";
 
 import { EntityInfo } from "@/components/EntityInfo";
 import { type EntityNode } from "@/components/EntityLayout";
@@ -65,7 +60,6 @@ function entityNodes(
         slug,
         variableName: variable.name,
       }),
-      icon: ScaleIcon,
     });
   }
 

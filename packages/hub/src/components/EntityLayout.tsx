@@ -23,10 +23,7 @@ export const EntityLayout: FC<Props> = ({
 }) => {
   return (
     <div>
-      <div
-        className="border-gray-300 border-b"
-        style={{ backgroundColor: "#eceef0" }}
-      >
+      <div className="border-gray-200 border-b">
         <div
           className={clsx(
             "flex items-center justify-between gap-4 pt-1",

@@ -5,6 +5,7 @@ import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { MarkdownViewer } from "@quri/squiggle-components";
+import { CodeBracketSquareIcon } from "@quri/ui";
 
 import { PrivateBadge, UpdatedStatus } from "@/components/EntityCard";
 import { exportTypeIcon } from "@/lib/typeIcon";
@@ -85,6 +86,7 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
               slug: variable.model.slug,
             })}
           >
+            <CodeBracketSquareIcon size={12} className="mr-1" />
             {`${variable.owner.slug}/${variable.model.slug}`}
           </a>
           <div className="items-center flex text-xs text-gray-500">
