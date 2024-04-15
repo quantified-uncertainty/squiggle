@@ -24,7 +24,7 @@ const DiceIcon: FC<{ side: number; isSimulating: boolean }> = ({
   isSimulating,
 }) => {
   const props = {
-    size: 16,
+    size: 14,
     className: clsx(
       isSimulating
         ? "animate-spin text-gray-500 group-hover:text-gray-600"

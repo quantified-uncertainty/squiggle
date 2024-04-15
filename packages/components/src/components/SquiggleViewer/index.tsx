@@ -24,11 +24,13 @@ const ZoomedInNavigationItem: FC<{
   <div className="flex items-center">
     <span
       onClick={onClick}
-      className="text-sm text-stone-500 hover:text-stone-900 hover:underline font-mono cursor-pointer"
+      className="text-sm text-gray-500 hover:text-gray-900 hover:underline font-mono cursor-pointer"
     >
       {text}
     </span>
-    <ChevronRightIcon className="text-slate-300" size={24} />
+    <span className="px-1">
+      <ChevronRightIcon className="text-gray-300" size={14} />
+    </span>
   </div>
 );
 
@@ -51,7 +53,7 @@ const ZoomedInNavigation: FC<{
     : 0;
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center mt-1">
       {!rootPath?.edges.length && (
         <ZoomedInNavigationItem onClick={zoomOut} text="Home" />
       )}
@@ -89,7 +91,7 @@ export const SquiggleViewerWithoutProvider: FC<
   }
 
   return zoomedInPath ? (
-    <div className="space-y-3 pl-3">
+    <div className="space-y-4 pl-3">
       <ZoomedInNavigation
         zoomedInPath={zoomedInPath}
         rootPath={value.context?.path}

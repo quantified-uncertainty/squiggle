@@ -263,7 +263,7 @@ export const ValueWithContextViewer: FC<Props> = ({
         >
           {(isRootImport && exportData?.sourceId) || taggedName || name}
         </div>
-        {showColon && <div className="text-gray-400 font-mono">:</div>}
+        {showColon && <div className="text-gray-200 font-mono">:</div>}
       </div>
     );
   };
@@ -276,7 +276,7 @@ export const ValueWithContextViewer: FC<Props> = ({
           className="group w-4 shrink-0 flex justify-center cursor-pointer"
           onClick={handle.toggleCollapsed}
         >
-          <div className="w-px bg-stone-100 group-hover:bg-stone-400" />
+          <div className="w-px bg-gray-50 group-hover:bg-gray-300" />
         </div>
       );
     } else {
