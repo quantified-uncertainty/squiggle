@@ -2,9 +2,9 @@ import React from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
 
-import { valueHasContext } from "../../lib/utility.js";
-import { MessageAlert } from "../ui/Alert.js";
-import { ValueWithContextViewer } from "./ValueWithContextViewer.js";
+import { valueHasContext } from "../../../lib/utility.js";
+import { MessageAlert } from "../../ui/Alert.js";
+import { ValueWithContextViewer } from "./WithContext.js";
 
 // Same props as in `ValueWithContextViewer`, but no guarantee that value has context.
 type Props = Omit<Parameters<typeof ValueWithContextViewer>[0], "value"> & {

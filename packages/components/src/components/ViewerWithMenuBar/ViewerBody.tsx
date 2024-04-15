@@ -2,7 +2,11 @@ import { forwardRef } from "react";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SquiggleErrorAlert } from "../../index.js";
-import { ViewerTab, viewerTabToValue } from "../../lib/utility.js";
+import {
+  ViewerTab,
+  viewerTabToValue,
+  viewerTabToVisibleRootPath,
+} from "../../lib/utility.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleViewerWithoutProvider } from "../SquiggleViewer/index.js";
@@ -64,6 +68,7 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
         partialPlaygroundSettings={playgroundSettings}
         editor={editor}
         ref={viewerRef}
+        visibleRootPath={viewerTabToVisibleRootPath(viewerTab)}
         rootValue={
           outputResult.ok
             ? viewerTabToValue(viewerTab, outputResult)
