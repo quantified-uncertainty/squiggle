@@ -54,8 +54,8 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
         defaultTab={
           rootPathOverride
             ? {
-                tag: "CustomResultPath",
-                value: rootPathOverride,
+                tag: "CustomVisibleRootPath",
+                visibleRootPath: rootPathOverride,
               }
             : undefined
         }

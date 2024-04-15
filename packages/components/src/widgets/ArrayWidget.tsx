@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { DocumentTextIcon } from "@quri/ui";
 
-import { ValueViewer } from "../components/SquiggleViewer/ValueViewer.js";
+import { ValueViewer } from "../components/SquiggleViewer/ValueViewer/index.js";
 import { SqValueWithContext } from "../lib/utility.js";
 import { widgetRegistry } from "./registry.js";
 import { SqTypeWithCount } from "./SqTypeWithCount.js";

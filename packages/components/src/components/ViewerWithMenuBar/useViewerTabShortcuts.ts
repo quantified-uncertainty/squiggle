@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { Shortcut, useGlobalShortcuts } from "@quri/ui";
 
 import {
-  isCustomResultPath,
+  isCustomVisibleRootPath,
   SelectableViewerTab,
   ViewerTab,
 } from "../../lib/utility.js";
@@ -13,7 +13,7 @@ function incrementViewerTab(
   tab: ViewerTab,
   direction: "backwards" | "forwards"
 ): SelectableViewerTab {
-  if (isCustomResultPath(tab)) {
+  if (isCustomVisibleRootPath(tab)) {
     return "Variables";
   }
   const index = shownTabs.indexOf(tab as SelectableViewerTab);
