@@ -339,7 +339,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
             offset={5}
           >
             {/* div wrapper is required because TextTooltip clones its children and SquiggleVersionShower doesn't forwardRef */}
-            <div>
+            <div className="h-full">
               <SquiggleVersionShower version={version} />
             </div>
           </TextTooltip>

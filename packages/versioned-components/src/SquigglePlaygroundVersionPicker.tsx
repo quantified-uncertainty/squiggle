@@ -2,7 +2,6 @@
 import { FC } from "react";
 
 import {
-  Button,
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
@@ -32,7 +31,7 @@ export const SquigglePlaygroundVersionPicker: FC<{
   size: "small" | "medium";
 }> = ({ version, onChange, showUpdatePolicy, size }) => {
   return (
-    <div className="flex">
+    <div className="flex h-full">
       <Dropdown
         render={({ close }) => (
           <DropdownMenu>
@@ -91,9 +90,7 @@ export const SquigglePlaygroundVersionPicker: FC<{
           </DropdownMenu>
         )}
       >
-        <Button size={size}>
-          <SquiggleVersionShower version={version} />
-        </Button>
+        <SquiggleVersionShower version={version} />
       </Dropdown>
     </div>
   );
