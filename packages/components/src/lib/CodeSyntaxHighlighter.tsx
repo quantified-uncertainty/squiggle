@@ -22,7 +22,7 @@ async function codeToHtml(params: {
   language: SupportedLanguage;
   theme?: Theme;
 }) {
-  let _theme = params.theme || "vitesse-light";
+  const _theme = params.theme || "vitesse-light";
   if (!_shiki) {
     _shiki = await getHighlighter({
       themes: ["vitesse-light", "github-light"],
