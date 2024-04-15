@@ -195,7 +195,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     } else {
       return (
         <div className="grid place-items-center h-full">
-          <RefreshIcon className="animate-spin text-slate-400" size={24} />
+          <RefreshIcon className="animate-spin text-gray-400" size={24} />
         </div>
       );
     }

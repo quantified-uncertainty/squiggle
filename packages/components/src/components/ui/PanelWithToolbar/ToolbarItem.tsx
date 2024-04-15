@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import { ComponentType, FC, ReactNode } from "react";
 
-import { TextTooltip } from "@quri/ui";
+import { ChevronRightIcon, TextTooltip } from "@quri/ui";
 
 type Props = {
   icon?: ComponentType<{ className?: string }>;
@@ -11,6 +11,7 @@ type Props = {
   onClick?: () => void;
   tooltipText?: string;
   className?: string;
+  showDropdownArrow?: boolean;
 };
 
 export const ToolbarItem: FC<Props> = ({
@@ -20,6 +21,7 @@ export const ToolbarItem: FC<Props> = ({
   className,
   onClick,
   tooltipText,
+  showDropdownArrow = false,
   children,
 }) => {
   const withTooltip = (jsx: JSX.Element) => (
@@ -31,7 +33,7 @@ export const ToolbarItem: FC<Props> = ({
   const main = (
     <div
       className={clsx(
-        "flex items-center text-slate-600 space-x-1 text-sm px-4 h-full cursor-pointer hover:bg-slate-200 select-none whitespace-nowrap transition ",
+        "flex items-center font-light text-gray-500 space-x-1.5 text-sm px-4 h-full cursor-pointer hover:bg-gray-50 select-none whitespace-nowrap transition hover:text-gray-900",
         className
       )}
       onClick={onClick}
@@ -40,13 +42,14 @@ export const ToolbarItem: FC<Props> = ({
         <Icon
           className={clsx(
             iconSize,
-            "flex-shrink-0 text-slate-400",
+            "flex-shrink-0",
             iconClasses,
             iconSpin && "animate-spin"
           )}
         />
       )}
       {children && <div className="flex">{children}</div>}
+      {showDropdownArrow && <ChevronRightIcon className="rotate-90" />}
     </div>
   );
 

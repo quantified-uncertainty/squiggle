@@ -2,17 +2,16 @@ import clsx from "clsx";
 import { FC } from "react";
 
 import {
-  Button,
   CodeBracketIcon,
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
   DropdownMenuHeader,
-  TriangleIcon,
 } from "@quri/ui";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SelectableViewerTab, ViewerTab } from "../../lib/utility.js";
+import { ToolbarItem } from "../ui/PanelWithToolbar/ToolbarItem.js";
 
 const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
   title,
@@ -104,12 +103,7 @@ export const ViewerMenu: FC<Props> = ({
         </DropdownMenu>
       )}
     >
-      <Button size="small">
-        <div className="flex items-center space-x-1.5">
-          <span>{viewerTabTitle(viewerTab)}</span>
-          <TriangleIcon className="rotate-180 text-slate-400" size={10} />
-        </div>
-      </Button>
+      <ToolbarItem showDropdownArrow>{viewerTabTitle(viewerTab)}</ToolbarItem>
     </Dropdown>
   );
 };

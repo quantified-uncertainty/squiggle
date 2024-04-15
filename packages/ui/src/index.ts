@@ -108,6 +108,7 @@ export {
   Die6Icon,
 } from "./icons/DieIcons.js";
 export { ErrorIcon } from "./icons/ErrorIcon.js";
+export { IconByName } from "./icons/IconByName.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";
 

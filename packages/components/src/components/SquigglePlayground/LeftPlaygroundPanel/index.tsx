@@ -9,12 +9,11 @@ import {
 import { SqProject } from "@quri/squiggle-lang";
 import {
   AdjustmentsVerticalIcon,
-  Bars3CenterLeftIcon,
+  CurlyBracketsIcon,
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
   PuzzleIcon,
-  TriangleIcon,
 } from "@quri/ui";
 
 import { isSimulating, Simulation } from "../../../lib/hooks/useSimulator.js";
@@ -98,9 +97,11 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
         />
         <ToolbarItem
           tooltipText={`Format Code (${altKey()}+Shift+f)`}
-          icon={Bars3CenterLeftIcon}
+          icon={CurlyBracketsIcon}
           onClick={editorRef.current?.format}
-        />
+        >
+          Format
+        </ToolbarItem>
         <Dropdown
           render={() => (
             <DropdownMenu>
@@ -118,9 +119,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
             </DropdownMenu>
           )}
         >
-          <ToolbarItem icon={TriangleIcon} iconClasses="rotate-180">
-            Menu
-          </ToolbarItem>
+          <ToolbarItem showDropdownArrow>Menu</ToolbarItem>
         </Dropdown>
         <div className="flex-1">
           {props.renderExtraControls?.({ openModal })}
