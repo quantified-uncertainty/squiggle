@@ -17,7 +17,7 @@
     "gen": "pnpm gen:prisma && pnpm gen:schema && pnpm gen:relay",
     "gen:watch": "nodemon --watch src --ext ts,tsx,prisma --exec 'pnpm run gen'",
     "build:ts": "pnpm gen && tsc",
-    "bundle": "node ./esbuild.js",
+    "bundle": "node ./esbuild.js && cp ../../node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/*.node ./dist",
     "build": "pnpm gen && __NEXT_PRIVATE_PREBUNDLED_REACT=next next build",
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
