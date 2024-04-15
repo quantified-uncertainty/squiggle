@@ -2,7 +2,7 @@ import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { EntityCard } from "@/components/EntityCard";
+import { EntityCard, UpdatedStatus } from "@/components/EntityCard";
 import { relativeValuesRoute } from "@/routes";
 
 import { RelativeValuesDefinitionCard$key } from "@/__generated__/RelativeValuesDefinitionCard.graphql";
@@ -30,7 +30,6 @@ export const RelativeValuesDefinitionCard: FC<Props> = ({
 
   return (
     <EntityCard
-      updatedAtTimestamp={definition.updatedAtTimestamp}
       href={relativeValuesRoute({
         owner: definition.owner.slug,
         slug: definition.slug,
@@ -38,6 +37,11 @@ export const RelativeValuesDefinitionCard: FC<Props> = ({
       showOwner={showOwner}
       ownerName={definition.owner.slug}
       slug={definition.slug}
+      menuItems={
+        <>
+          <UpdatedStatus time={definition.updatedAtTimestamp} />
+        </>
+      }
     />
   );
 };

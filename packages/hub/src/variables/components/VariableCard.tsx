@@ -1,11 +1,12 @@
 import truncate from "lodash/truncate";
+import Link from "next/link";
 import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { MarkdownViewer } from "@quri/squiggle-components";
 
-import { EntityCard } from "@/components/EntityCard";
+import { PrivateBadge, UpdatedStatus } from "@/components/EntityCard";
 import { exportTypeIcon } from "@/lib/typeIcon";
 import { modelRoute, variableRoute } from "@/routes";
 
@@ -59,24 +60,24 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
       })) ||
     undefined;
 
+  const { createdAtTimestamp } = currentRevision.modelRevision;
+
   return (
-    <EntityCard
-      updatedAtTimestamp={currentRevision.modelRevision.createdAtTimestamp}
-      href={variableRoute({
-        modelSlug: variable.model.slug,
-        variableName: variable.variableName,
-        owner: variable.owner.slug,
-      })}
-      showOwner={false}
-      isPrivate={variable.model.isPrivate}
-      slug={variable.currentRevision?.title || variable.variableName}
-      bodyClasses={
-        docstring
-          ? "mt-2 pb-3 px-5 pt-2 bg-gray-50 border-t border-gray-100 rounded-b"
-          : "mt-3"
-      }
-      footerItems={
-        <>
+    <>
+      <div className="flex flex-col overflow-hidden">
+        <div className="mb-1 px-4">
+          <Link
+            className="text-gray-900 font-medium hover:underline"
+            href={variableRoute({
+              modelSlug: variable.model.slug,
+              variableName: variable.variableName,
+              owner: variable.owner.slug,
+            })}
+          >
+            {variable.currentRevision?.title || variable.variableName}
+          </Link>
+        </div>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-500 text-xs mb-3 px-4 overflow-hidden">
           <a
             className="cursor-pointer items-center flex text-xs text-gray-500 hover:text-gray-900 hover:underline"
             href={modelRoute({
@@ -90,14 +91,21 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
             <Icon size={10} className="mr-1" />
             {currentRevision.variableType}
           </div>
-        </>
-      }
-    >
-      {docstring && (
-        <div className="overflow-x-hidden">
-          <MarkdownViewer md={docstring} textSize="sm" background-color="" />
+          <UpdatedStatus time={createdAtTimestamp} />
+          {variable.model.isPrivate && <PrivateBadge />}
         </div>
-      )}
-    </EntityCard>
+        {docstring && (
+          <div className="border border-gray-200 rounded-md">
+            <div className="px-4 py-1 overflow-hidden text-xs">
+              <MarkdownViewer
+                md={docstring}
+                textSize="xs"
+                background-color=""
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 };

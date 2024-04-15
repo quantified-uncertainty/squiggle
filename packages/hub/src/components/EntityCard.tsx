@@ -17,26 +17,38 @@ export function formatDate(date: Date): string {
   return date.toLocaleDateString("en-US", options);
 }
 
+export const PrivateBadge: FC = () => (
+  <div className="flex items-center text-gray-500">
+    <LockIcon className="mr-1" size={12} />
+    Private
+  </div>
+);
+
+export const UpdatedStatus: FC<{ time: number }> = ({ time }) => (
+  <div>
+    <span className="mr-1">{"Updated"}</span>
+    <time dateTime={new Date(time).toISOString()}>
+      {formatDate(new Date(time))}
+    </time>
+  </div>
+);
+
 type Props = PropsWithChildren<{
-  updatedAtTimestamp: number;
   href: string;
   showOwner: boolean;
-  isPrivate?: boolean;
   ownerName?: string;
   slug: string;
-  footerItems?: React.ReactElement;
+  menuItems?: React.ReactElement;
   bodyClasses?: string;
 }>;
 
 export const EntityCard: FC<Props> = ({
-  updatedAtTimestamp,
   href,
   showOwner,
-  isPrivate,
   ownerName,
   slug,
   children,
-  footerItems,
+  menuItems,
   bodyClasses = "mt-3 pb-3 px-5",
 }) => {
   return (
@@ -52,14 +64,7 @@ export const EntityCard: FC<Props> = ({
           </Link>
         </div>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-gray-500 text-xs mb-2 px-5">
-          {footerItems}
-          {isPrivate && <LockIcon className="400" size={14} />}
-          <div>
-            <span className="mr-1">Updated</span>
-            <time dateTime={new Date(updatedAtTimestamp).toISOString()}>
-              {formatDate(new Date(updatedAtTimestamp))}
-            </time>
-          </div>
+          {menuItems}
         </div>
         {<div className={clsx("flex-grow", bodyClasses)}>{children}</div>}
       </div>

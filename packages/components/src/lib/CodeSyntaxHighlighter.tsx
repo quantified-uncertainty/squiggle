@@ -15,16 +15,17 @@ import squiggleGrammar from "@quri/squiggle-textmate-grammar/dist/squiggle.tmLan
 type SupportedLanguage = BundledLanguage | "squiggle";
 
 let _shiki: Highlighter; // cached singleton
+type Theme = "vitesse-light" | "github-light";
 
 async function codeToHtml(params: {
   code: string;
   language: SupportedLanguage;
-  theme?: string;
+  theme?: Theme;
 }) {
   let _theme = params.theme || "vitesse-light";
   if (!_shiki) {
     _shiki = await getHighlighter({
-      themes: [_theme],
+      themes: ["vitesse-light", "github-light"],
       langs: [
         {
           name: "squiggle",
@@ -52,7 +53,7 @@ function isSupportedLanguage(language: string): language is BundledLanguage {
 }
 
 export const CodeSyntaxHighlighter: FC<
-  { children: string; language: string; theme?: string } & Omit<
+  { children: string; language: string; theme?: Theme } & Omit<
     HTMLAttributes<HTMLElement>,
     "children"
   >

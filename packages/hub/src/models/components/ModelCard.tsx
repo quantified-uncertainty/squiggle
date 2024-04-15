@@ -4,9 +4,9 @@ import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { CodeSyntaxHighlighter, NumberShower } from "@quri/squiggle-components";
-import { LockIcon, XIcon } from "@quri/ui";
+import { XIcon } from "@quri/ui";
 
-import { formatDate } from "@/components/EntityCard";
+import { PrivateBadge, UpdatedStatus } from "@/components/EntityCard";
 import {
   totalImportLength,
   VariableRevision,
@@ -88,24 +88,6 @@ const ModelLink: FC<{ owner: string; slug: string }> = ({ owner, slug }) => (
   </Link>
 );
 
-const UpdatedStatus: FC<{ updatedAtTimestamp: number }> = ({
-  updatedAtTimestamp,
-}) => (
-  <div>
-    <span className="mr-1">{"Updated"}</span>
-    <time dateTime={new Date(updatedAtTimestamp).toISOString()}>
-      {formatDate(new Date(updatedAtTimestamp))}
-    </time>
-  </div>
-);
-
-const PrivateBadge: FC = () => (
-  <div className="flex items-center text-gray-500">
-    <LockIcon className="mr-1" size={12} />
-    Private
-  </div>
-);
-
 const BuildFailedBadge: FC = () => (
   <div className="flex items-center text-red-800">
     <XIcon className="mr-1" size={12} />
@@ -173,7 +155,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
           </VariablesDropdown>
         )}
         {isPrivate && <PrivateBadge />}
-        <UpdatedStatus updatedAtTimestamp={updatedAtTimestamp} />
+        <UpdatedStatus time={updatedAtTimestamp} />
         {buildStatus === "Failure" && <BuildFailedBadge />}
         {lastBuild?.runSeconds && buildStatus !== "Failure" && (
           <RunTime seconds={lastBuild.runSeconds} />
@@ -181,7 +163,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
       </div>
       {body && (
         <div className="border border-gray-200 rounded-md">
-          <div className="px-4 overflow-hidden text-xs">
+          <div className="px-4 py-1 overflow-hidden text-xs">
             <div className="overflow-x-auto">
               <CodeSyntaxHighlighter language="squiggle" theme="github-light">
                 {keepFirstNLines(body, 10)}

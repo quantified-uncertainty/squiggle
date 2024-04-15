@@ -2,7 +2,7 @@ import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { EntityCard } from "@/components/EntityCard";
+import { EntityCard, UpdatedStatus } from "@/components/EntityCard";
 import { groupRoute } from "@/routes";
 
 import { GroupCard$key } from "@/__generated__/GroupCard.graphql";
@@ -24,12 +24,16 @@ export const GroupCard: FC<Props> = ({ groupRef }) => {
 
   return (
     <EntityCard
-      updatedAtTimestamp={group.updatedAtTimestamp}
       href={groupRoute({
         slug: group.slug,
       })}
       showOwner={false}
       slug={group.slug}
+      menuItems={
+        <>
+          <UpdatedStatus time={group.updatedAtTimestamp} />
+        </>
+      }
     />
   );
 };
