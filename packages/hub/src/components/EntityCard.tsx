@@ -1,10 +1,10 @@
+import clsx from "clsx";
 import Link from "next/link";
 import React, { FC, PropsWithChildren } from "react";
 
 import { LockIcon } from "@quri/ui";
 
 import { EntityNode } from "./EntityInfo";
-import { Card } from "./ui/Card";
 
 export type { EntityNode };
 
@@ -25,6 +25,7 @@ type Props = PropsWithChildren<{
   ownerName?: string;
   slug: string;
   footerItems?: React.ReactElement;
+  bodyClasses?: string;
 }>;
 
 export const EntityCard: FC<Props> = ({
@@ -36,21 +37,21 @@ export const EntityCard: FC<Props> = ({
   slug,
   children,
   footerItems,
+  bodyClasses = "mt-3 pb-3 px-5",
 }) => {
   return (
-    <Card>
-      <div className="flex flex-col h-full">
-        <div className="mb-1">
+    <div className="pt-3 rounded bg-white border border-gray-200 hover:bg-gray-50">
+      <div className="flex flex-col h-full pt-3">
+        <div className="mb-1 px-5">
           <Link
-            className="text-gray-900 font-medium hover:underline"
+            className="text-gray-900 font-medium hover:underline mb-1"
             href={href}
           >
             {showOwner ? ownerName + "/" : ""}
             {slug}
           </Link>
         </div>
-        {<div className="flex-grow">{children}</div>}
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-gray-500 text-xs mt-3">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-gray-500 text-xs mb-2 px-5">
           {footerItems}
           {isPrivate && <LockIcon className="400" size={14} />}
           <div>
@@ -60,7 +61,8 @@ export const EntityCard: FC<Props> = ({
             </time>
           </div>
         </div>
+        {<div className={clsx("flex-grow", bodyClasses)}>{children}</div>}
       </div>
-    </Card>
+    </div>
   );
 };

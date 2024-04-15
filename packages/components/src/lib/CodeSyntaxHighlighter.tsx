@@ -15,13 +15,16 @@ import squiggleGrammar from "@quri/squiggle-textmate-grammar/dist/squiggle.tmLan
 type SupportedLanguage = BundledLanguage | "squiggle";
 
 let _shiki: Highlighter; // cached singleton
+
 async function codeToHtml(params: {
   code: string;
   language: SupportedLanguage;
+  theme?: string;
 }) {
+  let _theme = params.theme || "vitesse-light";
   if (!_shiki) {
     _shiki = await getHighlighter({
-      themes: ["vitesse-light"],
+      themes: [_theme],
       langs: [
         {
           name: "squiggle",
@@ -39,7 +42,7 @@ async function codeToHtml(params: {
   }
 
   return _shiki.codeToHtml(params.code, {
-    theme: "vitesse-light", // TODO - write a custom theme that would match Codemirror styles
+    theme: _theme, // TODO - write a custom theme that would match Codemirror styles
     lang: params.language,
   });
 }
@@ -49,18 +52,18 @@ function isSupportedLanguage(language: string): language is BundledLanguage {
 }
 
 export const CodeSyntaxHighlighter: FC<
-  { children: string; language: string } & Omit<
+  { children: string; language: string; theme?: string } & Omit<
     HTMLAttributes<HTMLElement>,
     "children"
   >
-> = ({ children, language, ...rest }) => {
+> = ({ children, language, theme, ...rest }) => {
   const [html, setHtml] = useState(children);
 
   // Syntax-highlighted blocks will start unstyled, that's fine.
   useEffect(() => {
     (async () => {
       if (isSupportedLanguage(language)) {
-        setHtml(await codeToHtml({ code: children, language }));
+        setHtml(await codeToHtml({ code: children, language, theme }));
       }
     })();
   });

@@ -30,18 +30,14 @@ type MarkdownViewerProps = {
   textSize: "sm" | "xs";
   textColor?: "prose-stone" | "prose-slate";
   className?: string;
-  bgColor?: string;
-  positioning?: string;
-  rounded?: string;
+  backgroundColor?: string;
 };
 export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
   md,
   className,
-  bgColor = "bg-slate-50",
   textColor,
   textSize,
-  positioning = "p-2 my-1",
-  rounded = "rounded",
+  backgroundColor = "bg-slate-50",
 }) => {
   return (
     <ReactMarkdown
@@ -58,10 +54,8 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
           return (
             <pre
               className={clsx(
-                "not-prose text-[.9em]",
-                bgColor,
-                positioning,
-                rounded
+                "rounded p-2 my-1 not-prose text-[.9em]",
+                backgroundColor
               )}
             >
               {children}

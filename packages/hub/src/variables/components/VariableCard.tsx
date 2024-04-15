@@ -70,6 +70,11 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
       showOwner={false}
       isPrivate={variable.model.isPrivate}
       slug={variable.currentRevision?.title || variable.variableName}
+      bodyClasses={
+        docstring
+          ? "mt-2 pb-3 px-5 pt-2 bg-gray-50 border-t border-gray-100 rounded-b"
+          : "mt-3"
+      }
       footerItems={
         <>
           <a
@@ -89,10 +94,8 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
       }
     >
       {docstring && (
-        <div className="bg-gray-100 pb-2 pt-1">
-          <div className="overflow-x-hidden overflow-y-clip max-h-48 px-4">
-            <MarkdownViewer md={docstring} textSize="sm" />
-          </div>
+        <div className="overflow-x-hidden">
+          <MarkdownViewer md={docstring} textSize="sm" background-color="" />
         </div>
       )}
     </EntityCard>

@@ -65,110 +65,125 @@ type Props = {
   showOwner?: boolean;
 };
 
-function keepFirstNLines(str: string, n: number) {
-  const lines = str.split("\n");
-  const firstNLines = lines.slice(0, n);
-  return firstNLines.join("\n");
-}
+const keepFirstNLines = (str: string, n: number) =>
+  str.split("\n").slice(0, n).join("\n");
+
+const OwnerLink: FC<{ owner: { __typename: string; slug: string } }> = ({
+  owner,
+}) => (
+  <Link
+    className="text-gray-900 font-medium hover:underline"
+    href={ownerRoute(owner)}
+  >
+    {owner.slug}
+  </Link>
+);
+
+const ModelLink: FC<{ owner: string; slug: string }> = ({ owner, slug }) => (
+  <Link
+    className="text-gray-900 font-medium hover:underline"
+    href={modelRoute({ owner, slug })}
+  >
+    {slug}
+  </Link>
+);
+
+const UpdatedStatus: FC<{ updatedAtTimestamp: number }> = ({
+  updatedAtTimestamp,
+}) => (
+  <div>
+    <span className="mr-1">{"Updated"}</span>
+    <time dateTime={new Date(updatedAtTimestamp).toISOString()}>
+      {formatDate(new Date(updatedAtTimestamp))}
+    </time>
+  </div>
+);
+
+const PrivateBadge: FC = () => (
+  <div className="flex items-center text-gray-500">
+    <LockIcon className="mr-1" size={12} />
+    Private
+  </div>
+);
+
+const BuildFailedBadge: FC = () => (
+  <div className="flex items-center text-red-800">
+    <XIcon className="mr-1" size={12} />
+    <div className="text-red-800">Build Failed</div>
+  </div>
+);
+
+const RunTime: FC<{ seconds: number }> = ({ seconds }) => (
+  <div>
+    <NumberShower number={seconds} precision={1} />s
+  </div>
+);
 
 export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   const model = useFragment(Fragment, modelRef);
+  const {
+    owner,
+    slug,
+    updatedAtTimestamp,
+    isPrivate,
+    variables,
+    currentRevision,
+  } = model;
 
-  const ownerUrl = ownerRoute({
-    __typename: model.owner.__typename,
-    slug: model.owner.slug,
-  });
-  const modelUrl = modelRoute({
-    owner: model.owner.slug,
-    slug: model.slug,
-  });
-
-  const variableRevisions: VariableRevision[] = model.variables.map((v) => ({
+  const variableRevisions: VariableRevision[] = variables.map((v) => ({
     variableName: v.variableName,
     variableType: v.currentRevision?.variableType,
     title: v.currentRevision?.title || undefined,
     docString: undefined,
   }));
 
-  const relativeValuesExports = model.currentRevision.relativeValuesExports.map(
+  const relativeValuesExports = currentRevision.relativeValuesExports.map(
     ({ variableName, definition: { slug } }) => ({
       variableName,
       slug,
     })
   );
 
-  const _totalImportLength = totalImportLength(
+  const totalImportCount = totalImportLength(
     variableRevisions,
     relativeValuesExports
   );
-  const runSeconds = model.currentRevision.lastBuild?.runSeconds;
-
+  const { buildStatus, lastBuild, content } = currentRevision;
   const body =
-    model.currentRevision.content.__typename === "SquiggleSnippet"
-      ? model.currentRevision.content.code
-      : undefined;
+    content.__typename === "SquiggleSnippet" ? content.code : undefined;
+
   return (
     <div className="flex flex-col overflow-hidden">
       <div className="mb-1 px-4">
-        {showOwner && (
-          <Link
-            className="text-gray-900 font-medium hover:underline"
-            href={ownerUrl}
-          >
-            {model.owner.slug}
-          </Link>
-        )}
-        {showOwner ? <span className="mx-1 text-gray-400">/</span> : ""}
-        <Link
-          className="text-gray-900 font-medium hover:underline"
-          href={modelUrl}
-        >
-          {model.slug}
-        </Link>
+        {showOwner && <OwnerLink owner={owner} />}
+        {showOwner && <span className="mx-1 text-gray-400">/</span>}
+        <ModelLink owner={owner.slug} slug={slug} />
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-500 text-xs mb-3 px-4 overflow-hidden">
-        {_totalImportLength > 0 ? (
+        {totalImportCount > 0 && (
           <VariablesDropdown
             variableRevisions={variableRevisions}
             relativeValuesExports={relativeValuesExports}
-            owner={model.owner.slug}
-            slug={model.slug}
+            owner={owner.slug}
+            slug={slug}
           >
             <div className="cursor-pointer items-center flex text-xs text-gray-500 hover:text-gray-900 hover:underline">
-              {`${_totalImportLength} variables`}
+              {`${totalImportCount} variables`}
             </div>
           </VariablesDropdown>
-        ) : null}
-        {model.isPrivate && (
-          <div className={"flex items-center text-gray-500"}>
-            <LockIcon className="mr-1" size={12} />
-            Private
-          </div>
         )}
-        <div>
-          <span className="mr-1">Updated</span>
-          <time dateTime={new Date(model.updatedAtTimestamp).toISOString()}>
-            {formatDate(new Date(model.updatedAtTimestamp))}
-          </time>
-        </div>
-        {model.currentRevision.buildStatus === "Failure" && (
-          <div className={"flex items-center text-red-800"}>
-            <XIcon className="mr-1" size={12} />
-            <div className="text-red-800">Build Failed</div>
-          </div>
-        )}
-        {runSeconds && model.currentRevision.buildStatus !== "Failure" && (
-          <div>
-            <NumberShower number={runSeconds} precision={1} />
-            {"s"}
-          </div>
+        {isPrivate && <PrivateBadge />}
+        <UpdatedStatus updatedAtTimestamp={updatedAtTimestamp} />
+        {buildStatus === "Failure" && <BuildFailedBadge />}
+        {lastBuild?.runSeconds && buildStatus !== "Failure" && (
+          <RunTime seconds={lastBuild.runSeconds} />
         )}
       </div>
       {body && (
-        <div className="border border-gray-200 rounded-md ">
+        <div className="border border-gray-200 rounded-md">
           <div className="px-4 overflow-hidden text-xs">
             <div className="overflow-x-auto">
-              <CodeSyntaxHighlighter language="squiggle">
+              <CodeSyntaxHighlighter language="squiggle" theme="github-light">
                 {keepFirstNLines(body, 10)}
               </CodeSyntaxHighlighter>
             </div>

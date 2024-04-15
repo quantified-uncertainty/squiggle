@@ -17,7 +17,8 @@ export const Squiggle: Story = {
 
   args: {
     language: "squiggle",
-    children: `const foo = "bar";
+    children: `/* This is a comment */
+const foo = "bar";
 normal(5, 1)
 normal({ p5: 4, p95: 10 })
 normal({ p10: 5, p95: 9 })
