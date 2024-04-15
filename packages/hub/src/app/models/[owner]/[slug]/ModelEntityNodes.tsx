@@ -3,7 +3,12 @@
 import { useParams, usePathname } from "next/navigation";
 import { FC } from "react";
 
-import { CodeBracketIcon, EmptyIcon, ScaleIcon, ShareIcon } from "@quri/ui";
+import {
+  CodeBracketSquareIcon,
+  EmptyIcon,
+  ScaleIcon,
+  ShareIcon,
+} from "@quri/ui";
 
 import { EntityInfo } from "@/components/EntityInfo";
 import { type EntityNode } from "@/components/EntityLayout";
@@ -48,7 +53,7 @@ function entityNodes(
     {
       slug,
       href: modelRoute({ owner: owner.slug, slug }),
-      icon: CodeBracketIcon,
+      icon: CodeBracketSquareIcon,
     },
   ];
 

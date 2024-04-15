@@ -60,7 +60,7 @@ const VariableRevisionsPanel: FC<{
             >
               <div
                 className={clsx(
-                  "w-8/10 pr-1 hover:text-gray-800 cursor-pointer hover:underline",
+                  "w-8/10 pr-2 hover:text-gray-800 cursor-pointer hover:underline",
                   revision.id === selected ? "text-blue-900" : "text-gray-400"
                 )}
               >
