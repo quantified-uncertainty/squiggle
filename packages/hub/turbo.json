@@ -6,7 +6,7 @@
     },
     "bundle": {
       "dependsOn": ["^build", "build:ts"],
-      "outputs": ["dist/bundle*"]
+      "outputs": ["dist"]
     }
   }
 }

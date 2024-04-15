@@ -115,12 +115,12 @@ export type ViewerTab =
   | "Variables"
   | "Result"
   | "AST"
-  | { tag: "CustomResultPath"; value: SqValuePath };
+  | { tag: "CustomVisibleRootPath"; visibleRootPath: SqValuePath };
 
-export const isCustomResultPath = (
+export const isCustomVisibleRootPath = (
   tab: ViewerTab
-): tab is { tag: "CustomResultPath"; value: SqValuePath } =>
-  typeof tab === "object" && tab.tag === "CustomResultPath";
+): tab is { tag: "CustomVisibleRootPath"; visibleRootPath: SqValuePath } =>
+  typeof tab === "object" && tab.tag === "CustomVisibleRootPath";
 
 export function defaultViewerTab(
   outputResult: SqOutputResult | undefined
@@ -130,6 +130,14 @@ export function defaultViewerTab(
   }
 
   return outputResult.value.result.tag !== "Void" ? "Result" : "Variables";
+}
+
+export function viewerTabToVisibleRootPath(
+  viewerTab: ViewerTab
+): SqValuePath | undefined {
+  return isCustomVisibleRootPath(viewerTab)
+    ? viewerTab.visibleRootPath
+    : undefined;
 }
 
 export function viewerTabToValue(
@@ -152,12 +160,10 @@ export function viewerTabToValue(
     case "AST":
       return undefined;
     default:
-      if (isCustomResultPath(viewerTab)) {
-        const rootValue =
-          viewerTab.value.root === "result"
-            ? output.value.result
-            : output.value.bindings.asValue();
-        return rootValue.getSubvalueByPath(viewerTab.value, () => undefined);
+      if (isCustomVisibleRootPath(viewerTab)) {
+        return viewerTab.visibleRootPath.root === "result" //Practically speaking, this should only be bindings.
+          ? output.value.result
+          : output.value.bindings.asValue();
       }
   }
 }

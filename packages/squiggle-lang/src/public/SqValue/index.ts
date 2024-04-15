@@ -142,9 +142,7 @@ export abstract class SqAbstractValue<Type extends string, JSType, ValueType> {
   ) {
     {
       let currentNodeValue = this as SqValue;
-      const subValuePaths = subValuePath.allPrefixPaths({
-        includeRoot: false,
-      });
+      const subValuePaths = subValuePath.allPrefixPaths().withoutRoot().paths;
 
       for (const subValuePath of subValuePaths) {
         const nextValue = currentNodeValue.walkLastEdge(
