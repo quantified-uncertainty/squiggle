@@ -118,7 +118,7 @@ const Benchmark: FC<{ version: SquiggleVersion; code: string }> = ({
       ) : outcome ? (
         <div className="flex gap-1 items-center">
           {outcome.ok ? (
-            <CheckIcon className="text-green-700" />
+            <CheckIcon className="text-emerald-700" />
           ) : (
             <ErrorIcon className="text-red-500" />
           )}

@@ -80,10 +80,10 @@ export const SuccessAlert: React.FC<{
 }> = (props) => (
   <Alert
     {...props}
-    backgroundColor="bg-green-50"
-    headingColor="text-green-800"
-    bodyColor="text-green-700"
+    backgroundColor="bg-emerald-50"
+    headingColor="text-emerald-800"
+    bodyColor="text-emerald-700"
     icon={CheckCircleIcon}
-    iconColor="text-green-400"
+    iconColor="text-emerald-400"
   />
 );

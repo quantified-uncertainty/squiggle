@@ -37,12 +37,12 @@ export const Button: FC<ButtonProps> = ({
       className={clsx(
         "border text-sm font-medium",
         theme === "primary"
-          ? "bg-green-700 border-green-900 text-white"
+          ? "bg-emerald-500 border-emerald-600 text-white"
           : "bg-slate-100 border-slate-300 text-gray-600",
         disabled
           ? "opacity-60"
           : theme === "primary"
-            ? "hover:bg-green-800 hover:border-green-800 hover:text-white"
+            ? "hover:bg-emerald-600"
             : "hover:bg-slate-200 hover:text-gray-900",
         wide && "w-full",
         size === "medium" && "h-8 rounded-md",

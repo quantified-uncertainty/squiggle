@@ -270,6 +270,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     }
   };
 
+  const codeHasChanged = form.watch("code") !== content.code;
+
   // We don't want to control SquigglePlayground, it's uncontrolled by design.
   // Instead, we reset the `defaultCode` that we pass to it when version is changed or draft is restored.
   const [defaultCode, setDefaultCode] = useState(content.code);
@@ -345,7 +347,10 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           </TextTooltip>
         )}
         {model.isEditable && (
-          <SaveButton onSubmit={onSubmit} disabled={inFlight} />
+          <SaveButton
+            onSubmit={onSubmit}
+            disabled={inFlight || !codeHasChanged}
+          />
         )}
       </div>
     ),
