@@ -25,25 +25,26 @@ export const badgeCss = (presentAsLink: boolean) => {
   );
 };
 
-export const Badge: FC<PropsWithChildren<{ presentAsLink: boolean }>> = ({
-  presentAsLink,
-  children,
-}) => <div className={badgeCss(presentAsLink)}>{children}</div>;
+export const EntityCardBadge: FC<
+  PropsWithChildren<{ presentAsLink: boolean }>
+> = ({ presentAsLink, children }) => (
+  <div className={badgeCss(presentAsLink)}>{children}</div>
+);
 
 export const PrivateBadge: FC = () => (
-  <Badge presentAsLink={false}>
+  <EntityCardBadge presentAsLink={false}>
     <LockIcon className="mr-1" size={10} />
     Private
-  </Badge>
+  </EntityCardBadge>
 );
 
 export const UpdatedStatus: FC<{ time: number }> = ({ time }) => (
-  <Badge presentAsLink={false}>
+  <EntityCardBadge presentAsLink={false}>
     <span className="mr-1">{"Updated"}</span>
     <time dateTime={new Date(time).toISOString()}>
       {formatDate(new Date(time))}
     </time>
-  </Badge>
+  </EntityCardBadge>
 );
 
 export const keepFirstNLines = (str: string, n: number) =>

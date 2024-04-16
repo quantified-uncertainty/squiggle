@@ -7,7 +7,7 @@ import { CodeSyntaxHighlighter, NumberShower } from "@quri/squiggle-components";
 import { XIcon } from "@quri/ui";
 
 import {
-  Badge,
+  EntityCardBadge,
   InterspersedMenuItemsWithDots,
   keepFirstNLines,
   PrivateBadge,
@@ -148,9 +148,9 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
             owner={owner?.slug}
             slug={slug}
           >
-            <Badge
+            <EntityCardBadge
               presentAsLink={true}
-            >{`${totalImportCount} variables`}</Badge>
+            >{`${totalImportCount} variables`}</EntityCardBadge>
           </VariablesDropdown>
         ),
         isPrivate && <PrivateBadge key="private-badge" />,

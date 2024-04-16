@@ -7,8 +7,8 @@ import { MarkdownViewer } from "@quri/squiggle-components";
 import { CodeBracketSquareIcon } from "@quri/ui";
 
 import {
-  Badge,
   badgeCss,
+  EntityCardBadge,
   InterspersedMenuItemsWithDots,
   keepFirstNLines,
   PrivateBadge,
@@ -91,10 +91,10 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
           <InterspersedMenuItemsWithDots
             items={[
-              <Badge presentAsLink={false}>
+              <EntityCardBadge presentAsLink={false}>
                 <Icon size={10} className="mr-1" />
                 {currentRevision.variableType}
-              </Badge>,
+              </EntityCardBadge>,
               <UpdatedStatus time={createdAtTimestamp} />,
               variable.model.isPrivate && <PrivateBadge />,
             ]}
