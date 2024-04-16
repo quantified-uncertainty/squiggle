@@ -24,7 +24,7 @@ type SerializedParameter = Omit<UserDefinedLambdaParameter, "domain"> & {
   domainId?: number | undefined;
 };
 
-type SerializedLambda =
+export type SerializedLambda =
   | {
       type: "Builtin";
       name: string;

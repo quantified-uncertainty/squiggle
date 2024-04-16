@@ -3,9 +3,11 @@ import { SampleSetDist } from "../dist/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
 import { BaseValue } from "./BaseValue.js";
-import { Value } from "./index.js";
+import { Value, vDist } from "./index.js";
 import { Indexable } from "./mixins.js";
-import { vLambda } from "./vLambda.js";
+import { SerializationStorage } from "./serialize.js";
+import { SerializedDist, VDist } from "./VDist.js";
+import { SerializedLambda, vLambda, VLambda } from "./vLambda.js";
 import { Scale } from "./VScale.js";
 
 export type LabeledDistribution = {
@@ -55,7 +57,30 @@ export type Plot = CommonPlotArgs &
       }
   );
 
-type SerializedPlot = null;
+type TypedPlot<T extends Plot["type"]> = Extract<Plot, { type: T }>;
+
+export type SerializedLabeledDistribution = {
+  name: string | null;
+  distribution: SerializedDist;
+};
+
+type SerializedPlot =
+  | (Omit<TypedPlot<"distributions">, "distributions"> & {
+      distributions: readonly SerializedLabeledDistribution[];
+    })
+  | (Omit<TypedPlot<"numericFn">, "fn"> & {
+      fn: SerializedLambda;
+    })
+  | (Omit<TypedPlot<"distFn">, "fn"> & {
+      fn: SerializedLambda;
+    })
+  | (Omit<TypedPlot<"scatter">, "xDist" | "yDist"> & {
+      xDist: SerializedDist;
+      yDist: SerializedDist;
+    })
+  | (Omit<TypedPlot<"relativeValues">, "fn"> & {
+      fn: SerializedLambda;
+    });
 
 export class VPlot
   extends BaseValue<"Plot", SerializedPlot>
@@ -98,12 +123,76 @@ export class VPlot
     throw new REOther("Trying to access non-existent field");
   }
 
-  override serializePayload(): SerializedPlot {
-    throw new Error("Method not implemented.");
+  override serializePayload(storage: SerializationStorage): SerializedPlot {
+    switch (this.value.type) {
+      case "distributions":
+        return {
+          ...this.value,
+          distributions: this.value.distributions.map((labeledDist) => ({
+            name: labeledDist.name ?? null,
+            distribution: vDist(labeledDist.distribution).serializePayload(),
+          })),
+        };
+      case "numericFn":
+      case "distFn":
+        return {
+          ...this.value,
+          fn: vLambda(this.value.fn).serializePayload(storage),
+        };
+      case "scatter":
+        return {
+          ...this.value,
+          xDist: vDist(this.value.xDist).serializePayload(),
+          yDist: vDist(this.value.yDist).serializePayload(),
+        };
+      case "relativeValues":
+        return {
+          ...this.value,
+          fn: vLambda(this.value.fn).serializePayload(storage),
+        };
+    }
   }
 
-  static deserialize(value: SerializedPlot): VPlot {
-    throw new Error("Method not implemented.");
+  static deserialize(
+    value: SerializedPlot,
+    load: (id: number) => Value
+  ): VPlot {
+    switch (value.type) {
+      case "distributions":
+        return new VPlot({
+          ...value,
+          distributions: value.distributions.map((labeledDist) => ({
+            name: labeledDist.name ?? undefined,
+            distribution: VDist.deserialize(labeledDist.distribution).value,
+          })),
+        });
+      case "numericFn":
+      case "distFn":
+        return new VPlot({
+          ...value,
+          fn: VLambda.deserialize(value.fn, load).value,
+        });
+      case "scatter": {
+        const xDist = VDist.deserialize(value.xDist).value;
+        const yDist = VDist.deserialize(value.yDist).value;
+        if (!(xDist instanceof SampleSetDist)) {
+          throw new Error("Expected xDist to be a SampleSetDist");
+        }
+        if (!(yDist instanceof SampleSetDist)) {
+          throw new Error("Expected yDist to be a SampleSetDist");
+        }
+        return new VPlot({
+          ...value,
+          xDist,
+          yDist,
+        });
+      }
+      case "relativeValues":
+        return new VPlot({
+          ...value,
+          fn: VLambda.deserialize(value.fn, load).value,
+        });
+    }
   }
 }
 

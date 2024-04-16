@@ -10,7 +10,7 @@ import {
 import { SerializedMixedShape } from "../PointSet/Mixed.js";
 import { BaseValue } from "./BaseValue.js";
 
-type SerializedDist =
+export type SerializedDist =
   | {
       type: "Symbolic";
       value: SerializedSymbolicDist;

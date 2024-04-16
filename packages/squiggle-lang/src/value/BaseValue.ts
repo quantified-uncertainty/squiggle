@@ -16,7 +16,7 @@ If you add a new value class, don't forget to add it to the "Value" union type b
 */
 export abstract class BaseValue<
   Type extends string,
-  SerializedPayload extends JsonValue,
+  SerializedPayload extends JsonValue, // this guarantees that the payload is JSON-serializable
 > {
   abstract type: Type;
   readonly tags: ValueTags | undefined;

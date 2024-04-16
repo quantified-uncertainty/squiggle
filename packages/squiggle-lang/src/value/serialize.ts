@@ -108,7 +108,7 @@ export function deserializeValue(serializedValue: SerializedBundle): Value {
         value = VDuration.deserialize(node.payload);
         break;
       case "Plot":
-        value = VPlot.deserialize(node.payload);
+        value = VPlot.deserialize(node.payload, visit);
         break;
       case "Scale":
         value = VScale.deserialize(node.payload);
