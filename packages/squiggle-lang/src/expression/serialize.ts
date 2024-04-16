@@ -1,5 +1,7 @@
-import { Value } from "../value/index.js";
-import { SerializationStorage } from "../value/serialize.js";
+import {
+  SquiggleDeserializationVisitor,
+  SquiggleSerializationVisitor,
+} from "../serialization/squiggle.js";
 import {
   Expression,
   ExpressionByKind,
@@ -99,13 +101,13 @@ export type SerializedExpression =
 
 export function serializeExpression(
   expression: Expression,
-  storage: SerializationStorage
+  visit: SquiggleSerializationVisitor
 ): SerializedExpression {
   switch (expression.kind) {
     case "Value":
       return {
         ...expression,
-        value: storage.serializeValue(expression.value),
+        value: visit.value(expression.value),
       };
     case "Program":
       return {
@@ -113,7 +115,7 @@ export function serializeExpression(
         value: {
           ...expression.value,
           statements: expression.value.statements.map((statement) =>
-            serializeExpression(statement, storage)
+            serializeExpression(statement, visit)
           ),
         },
       };
@@ -121,7 +123,7 @@ export function serializeExpression(
       return {
         ...expression,
         value: expression.value.map((statement) =>
-          serializeExpression(statement, storage)
+          serializeExpression(statement, visit)
         ),
       };
     case "Ternary":
@@ -129,9 +131,9 @@ export function serializeExpression(
         ...expression,
         value: {
           ...expression.value,
-          condition: serializeExpression(expression.value.condition, storage),
-          ifTrue: serializeExpression(expression.value.ifTrue, storage),
-          ifFalse: serializeExpression(expression.value.ifFalse, storage),
+          condition: serializeExpression(expression.value.condition, visit),
+          ifTrue: serializeExpression(expression.value.ifTrue, visit),
+          ifFalse: serializeExpression(expression.value.ifFalse, visit),
         },
       };
     case "Assign":
@@ -139,7 +141,7 @@ export function serializeExpression(
         ...expression,
         value: {
           ...expression.value,
-          right: serializeExpression(expression.value.right, storage),
+          right: serializeExpression(expression.value.right, visit),
         },
       };
 
@@ -148,9 +150,9 @@ export function serializeExpression(
         ...expression,
         value: {
           ...expression.value,
-          fn: serializeExpression(expression.value.fn, storage),
+          fn: serializeExpression(expression.value.fn, visit),
           args: expression.value.args.map((arg) =>
-            serializeExpression(arg, storage)
+            serializeExpression(arg, visit)
           ),
         },
       };
@@ -162,17 +164,17 @@ export function serializeExpression(
           parameters: expression.value.parameters.map((parameter) => ({
             ...parameter,
             annotation: parameter.annotation
-              ? serializeExpression(parameter.annotation, storage)
+              ? serializeExpression(parameter.annotation, visit)
               : undefined,
           })),
-          body: serializeExpression(expression.value.body, storage),
+          body: serializeExpression(expression.value.body, visit),
         },
       };
     case "Array":
       return {
         ...expression,
         value: expression.value.map((value) =>
-          serializeExpression(value, storage)
+          serializeExpression(value, visit)
         ),
       };
     case "Dict":
@@ -181,8 +183,8 @@ export function serializeExpression(
         value: expression.value.map(
           ([key, value]) =>
             [
-              serializeExpression(key, storage),
-              serializeExpression(value, storage),
+              serializeExpression(key, visit),
+              serializeExpression(value, visit),
             ] as [SerializedExpression, SerializedExpression]
         ),
       };
@@ -193,13 +195,13 @@ export function serializeExpression(
 
 export function deserializeExpression(
   expression: SerializedExpression,
-  load: (id: number) => Value
+  visit: SquiggleDeserializationVisitor
 ): Expression {
   switch (expression.kind) {
     case "Value":
       return {
         ...expression,
-        value: load(expression.value),
+        value: visit.value(expression.value),
       };
     case "Program":
       return {
@@ -207,7 +209,7 @@ export function deserializeExpression(
         value: {
           ...expression.value,
           statements: expression.value.statements.map((statement) =>
-            deserializeExpression(statement, load)
+            deserializeExpression(statement, visit)
           ),
         },
       };
@@ -216,7 +218,7 @@ export function deserializeExpression(
       return {
         ...expression,
         value: expression.value.map((statement) =>
-          deserializeExpression(statement, load)
+          deserializeExpression(statement, visit)
         ),
       };
     case "Ternary":
@@ -224,9 +226,9 @@ export function deserializeExpression(
         ...expression,
         value: {
           ...expression.value,
-          condition: deserializeExpression(expression.value.condition, load),
-          ifTrue: deserializeExpression(expression.value.ifTrue, load),
-          ifFalse: deserializeExpression(expression.value.ifFalse, load),
+          condition: deserializeExpression(expression.value.condition, visit),
+          ifTrue: deserializeExpression(expression.value.ifTrue, visit),
+          ifFalse: deserializeExpression(expression.value.ifFalse, visit),
         },
       };
     case "Assign":
@@ -234,7 +236,7 @@ export function deserializeExpression(
         ...expression,
         value: {
           ...expression.value,
-          right: deserializeExpression(expression.value.right, load),
+          right: deserializeExpression(expression.value.right, visit),
         },
       };
     case "Call":
@@ -242,9 +244,9 @@ export function deserializeExpression(
         ...expression,
         value: {
           ...expression.value,
-          fn: deserializeExpression(expression.value.fn, load),
+          fn: deserializeExpression(expression.value.fn, visit),
           args: expression.value.args.map((arg) =>
-            deserializeExpression(arg, load)
+            deserializeExpression(arg, visit)
           ),
         },
       };
@@ -256,17 +258,17 @@ export function deserializeExpression(
           parameters: expression.value.parameters.map((parameter) => ({
             ...parameter,
             annotation: parameter.annotation
-              ? deserializeExpression(parameter.annotation, load)
+              ? deserializeExpression(parameter.annotation, visit)
               : undefined,
           })),
-          body: deserializeExpression(expression.value.body, load),
+          body: deserializeExpression(expression.value.body, visit),
         },
       };
     case "Array":
       return {
         ...expression,
         value: expression.value.map((value) =>
-          deserializeExpression(value, load)
+          deserializeExpression(value, visit)
         ),
       };
     case "Dict":
@@ -275,8 +277,8 @@ export function deserializeExpression(
         value: expression.value.map(
           ([key, value]) =>
             [
-              deserializeExpression(key, load),
-              deserializeExpression(value, load),
+              deserializeExpression(key, visit),
+              deserializeExpression(value, visit),
             ] as [Expression, Expression]
         ),
       };

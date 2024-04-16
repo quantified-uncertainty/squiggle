@@ -1,6 +1,6 @@
+import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { JsonValue } from "../utility/typeHelpers.js";
 import { SerializedValue } from "./index.js";
-import { SerializationStorage } from "./serialize.js";
 import { ValueTags, ValueTagsType } from "./valueTags.js";
 
 /*
@@ -52,12 +52,14 @@ export abstract class BaseValue<
     return `${valueString}, with tags ${argsStr}`;
   }
 
-  abstract serializePayload(storage: SerializationStorage): SerializedPayload;
+  abstract serializePayload(
+    visitor: SquiggleSerializationVisitor
+  ): SerializedPayload;
 
-  serialize(storage: SerializationStorage): SerializedValue {
+  serialize(visitor: SquiggleSerializationVisitor): SerializedValue {
     return {
       type: this.type,
-      payload: this.serializePayload(storage),
+      payload: this.serializePayload(visitor),
     } as SerializedValue;
   }
 

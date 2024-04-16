@@ -1,10 +1,13 @@
 import isInteger from "lodash/isInteger.js";
 
 import { REArrayIndexNotFound, REOther } from "../errors/messages.js";
+import {
+  SquiggleDeserializationVisitor,
+  SquiggleSerializationVisitor,
+} from "../serialization/squiggle.js";
 import { BaseValue } from "./BaseValue.js";
 import { isEqual, Value } from "./index.js";
 import { Indexable } from "./mixins.js";
-import { SerializationStorage } from "./serialize.js";
 
 // list of value ids
 type SerializedArray = number[];
@@ -60,15 +63,17 @@ export class VArray
     return true;
   }
 
-  override serializePayload(storage: SerializationStorage): SerializedArray {
-    return this.value.map((element) => storage.serializeValue(element));
+  override serializePayload(
+    visit: SquiggleSerializationVisitor
+  ): SerializedArray {
+    return this.value.map((element) => visit.value(element));
   }
 
   static deserialize(
     serializedValue: SerializedArray,
-    load: (id: number) => Value
+    visit: SquiggleDeserializationVisitor
   ): VArray {
-    return new VArray(serializedValue.map(load));
+    return new VArray(serializedValue.map((value) => visit.value(value)));
   }
 }
 export const vArray = (v: readonly Value[]) => new VArray(v);

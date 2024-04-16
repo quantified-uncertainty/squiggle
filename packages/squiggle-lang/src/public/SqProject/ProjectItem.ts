@@ -1,22 +1,13 @@
-import Worker from "web-worker";
-
 import { AST, parse } from "../../ast/parse.js";
 import { ICompileError, IRuntimeError } from "../../errors/IError.js";
 import { Env, SqProject } from "../../index.js";
-import { RunOutput } from "../../runner/BaseRunner.js";
-import { NodeWorkerRunner } from "../../runner/NodeWorkerRunner.js";
+import { RunOutput } from "../../runners/BaseRunner.js";
+import { NodeWorkerRunner } from "../../runners/NodeWorkerRunner.js";
 import * as Result from "../../utility/result.js";
-import { Err, Ok, result } from "../../utility/result.js";
-import { deserializeValue, serializeValue } from "../../value/serialize.js";
+import { Ok, result } from "../../utility/result.js";
 import { VDict, vDictFromArray } from "../../value/VDict.js";
-import {
-  SqCompileError,
-  SqError,
-  SqOtherError,
-  SqRuntimeError,
-} from "../SqError.js";
+import { SqCompileError, SqError, SqRuntimeError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
-import { SquiggleWorkerResponse } from "./worker.js";
 
 // source -> ast -> imports -> result/bindings/exports
 
@@ -231,36 +222,5 @@ export class ProjectItem {
         throw err satisfies never;
       }
     }
-
-    const workerUrl = new URL("./worker.js", import.meta.url);
-    const worker = new (Worker as any)(workerUrl, { type: "module" });
-
-    worker.postMessage({
-      environment,
-      ast: this.ast.value,
-      externals: serializeValue(_externals),
-      sourceId: this.sourceId,
-    });
-
-    return new Promise<void>((resolve) => {
-      worker.addEventListener("message", (e: any) => {
-        const data: SquiggleWorkerResponse = e.data;
-        if (data.type !== "result")
-          throw new Error("Expected result message from worker");
-
-        if (data.payload.ok) {
-          this.output = Ok({
-            result: deserializeValue(data.payload.value.result),
-            bindings: deserializeValue(data.payload.value.bindings) as VDict,
-            exports: deserializeValue(data.payload.value.exports) as VDict,
-            externals,
-          });
-        } else {
-          this.output = Err(new SqOtherError(data.payload.value));
-        }
-        worker.terminate();
-        resolve();
-      });
-    });
   }
 }

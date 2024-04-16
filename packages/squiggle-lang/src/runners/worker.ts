@@ -1,27 +1,29 @@
-import { compileAst } from "../../expression/compile.js";
-import { AST, Env, SqCompileError } from "../../index.js";
-import { getStdLib } from "../../library/index.js";
-import { Reducer } from "../../reducer/Reducer.js";
-import { ImmutableMap } from "../../utility/immutableMap.js";
-import { errMap, result } from "../../utility/result.js";
-import { Value, vDict } from "../../value/index.js";
+import { compileAst } from "../expression/compile.js";
+import { AST, Env, SqCompileError } from "../index.js";
+import { getStdLib } from "../library/index.js";
+import { Reducer } from "../reducer/Reducer.js";
 import {
-  deserializeValue,
-  SerializedBundle,
-  serializeValue,
-} from "../../value/serialize.js";
+  SquiggleBundle,
+  SquiggleBundleEntrypoint,
+  squiggleCodec,
+} from "../serialization/squiggle.js";
+import { ImmutableMap } from "../utility/immutableMap.js";
+import { errMap, result } from "../utility/result.js";
+import { Value, vDict } from "../value/index.js";
 
-type SquiggleJob = {
+export type SquiggleJob = {
   environment: Env;
   ast: AST;
-  externals: SerializedBundle;
+  bundle: SquiggleBundle;
+  externalsEntrypoint: SquiggleBundleEntrypoint<"value">;
   sourceId: string;
 };
 
 export type SquiggleJobResult = {
-  result: SerializedBundle;
-  bindings: SerializedBundle;
-  exports: SerializedBundle;
+  bundle: SquiggleBundle;
+  result: SquiggleBundleEntrypoint<"value">;
+  bindings: SquiggleBundleEntrypoint<"value">;
+  exports: SquiggleBundleEntrypoint<"value">;
 };
 
 export type SquiggleWorkerResponse = {
@@ -30,9 +32,12 @@ export type SquiggleWorkerResponse = {
 };
 
 function processJob(job: SquiggleJob): SquiggleJobResult {
-  const { environment, ast, externals, sourceId } = job;
+  const { environment, ast, bundle, externalsEntrypoint, sourceId } = job;
 
-  const externalsValue = deserializeValue(externals);
+  const externalsValue = squiggleCodec
+    .makeDeserializer(bundle)
+    .deserialize(externalsEntrypoint);
+
   if (externalsValue.type !== "Dict") {
     throw new Error("Expected externals to be a dictionary");
   }
@@ -77,17 +82,25 @@ function processJob(job: SquiggleJob): SquiggleJobResult {
     (value, _) => value.tags?.exportData() !== undefined
   );
 
+  const resultStore = squiggleCodec.makeSerializer();
+  const resultEntrypoint = resultStore.serialize("value", result);
+  const bindingsEntrypoint = resultStore.serialize("value", vDict(bindings));
+  const exportsEntrypoint = resultStore.serialize(
+    "value",
+    vDict(exports).mergeTags({
+      exportData: {
+        sourceId,
+        path: [],
+      },
+    })
+  );
+  resultStore.serialize("value", result);
+
   return {
-    result: serializeValue(result),
-    bindings: serializeValue(vDict(bindings)),
-    exports: serializeValue(
-      vDict(exports).mergeTags({
-        exportData: {
-          sourceId,
-          path: [],
-        },
-      })
-    ),
+    bundle: resultStore.getBundle(),
+    result: resultEntrypoint,
+    bindings: bindingsEntrypoint,
+    exports: exportsEntrypoint,
   };
 }
 

@@ -1,7 +1,10 @@
 import { Lambda } from "../reducer/lambda.js";
+import {
+  SquiggleDeserializationVisitor,
+  SquiggleSerializationVisitor,
+} from "../serialization/squiggle.js";
 import { BaseValue } from "./BaseValue.js";
-import { Value, vLambda } from "./index.js";
-import { SerializationStorage } from "./serialize.js";
+import { vLambda } from "./index.js";
 
 export type Specification = {
   name: string;
@@ -34,20 +37,20 @@ export class VSpecification extends BaseValue<
   }
 
   override serializePayload(
-    storage: SerializationStorage
+    visit: SquiggleSerializationVisitor
   ): SerializedSpecification {
     return {
       name: this.value.name,
       documentation: this.value.documentation,
-      validateId: storage.serializeValue(vLambda(this.value.validate)),
+      validateId: visit.value(vLambda(this.value.validate)),
     };
   }
 
   static deserialize(
     payload: SerializedSpecification,
-    load: (id: number) => Value
+    visit: SquiggleDeserializationVisitor
   ): VSpecification {
-    const validate = load(payload.validateId);
+    const validate = visit.value(payload.validateId);
     if (validate.type !== "Lambda") {
       throw new Error("Expected lambda");
     }

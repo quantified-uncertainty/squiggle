@@ -1,8 +1,11 @@
 import { REOther } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
+import {
+  SquiggleDeserializationVisitor,
+  SquiggleSerializationVisitor,
+} from "../serialization/squiggle.js";
 import { BaseValue } from "./BaseValue.js";
-import { Value, vLambda } from "./index.js";
-import { SerializationStorage } from "./serialize.js";
+import { vLambda } from "./index.js";
 import { Input } from "./VInput.js";
 
 export type Calculator = {
@@ -57,21 +60,21 @@ export class VCalculator extends BaseValue<"Calculator", SerializedCalculator> {
   }
 
   override serializePayload(
-    storage: SerializationStorage
+    visit: SquiggleSerializationVisitor
   ): SerializedCalculator {
     const { fn, ...valueWithoutFn } = { ...this.value };
     return {
       ...valueWithoutFn,
-      fnId: storage.serializeValue(vLambda(fn)),
+      fnId: visit.value(vLambda(fn)),
     };
   }
 
   static deserialize(
     payload: SerializedCalculator,
-    visit: (id: number) => Value
+    visit: SquiggleDeserializationVisitor
   ): VCalculator {
     const { fnId, ...valueWithoutFn } = payload;
-    const fnValue = visit(fnId);
+    const fnValue = visit.value(fnId);
     if (fnValue.type !== "Lambda") {
       throw new Error("Expected lambda");
     }

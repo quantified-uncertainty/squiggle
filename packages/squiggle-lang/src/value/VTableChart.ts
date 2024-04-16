@@ -1,7 +1,10 @@
 import { Lambda } from "../reducer/lambda.js";
+import {
+  SquiggleDeserializationVisitor,
+  SquiggleSerializationVisitor,
+} from "../serialization/squiggle.js";
 import { BaseValue } from "./BaseValue.js";
 import { Value, vLambda } from "./index.js";
-import { SerializationStorage } from "./serialize.js";
 
 export type TableChart = {
   data: readonly Value[];
@@ -29,12 +32,12 @@ export class VTableChart extends BaseValue<"TableChart", SerializedTableChart> {
   }
 
   override serializePayload(
-    storage: SerializationStorage
+    visit: SquiggleSerializationVisitor
   ): SerializedTableChart {
     return {
-      dataIds: this.value.data.map((item) => storage.serializeValue(item)),
+      dataIds: this.value.data.map((item) => visit.value(item)),
       columns: this.value.columns.map(({ fn, name }) => ({
-        fnId: storage.serializeValue(vLambda(fn)),
+        fnId: visit.value(vLambda(fn)),
         name,
       })),
     };
@@ -42,12 +45,12 @@ export class VTableChart extends BaseValue<"TableChart", SerializedTableChart> {
 
   static deserialize(
     _value: SerializedTableChart,
-    load: (id: number) => Value
+    visit: SquiggleDeserializationVisitor
   ): VTableChart {
     return new VTableChart({
-      data: _value.dataIds.map(load),
+      data: _value.dataIds.map((id) => visit.value(id)),
       columns: _value.columns.map(({ fnId, name }) => {
-        const lambda = load(fnId);
+        const lambda = visit.value(fnId);
         if (lambda.type !== "Lambda") {
           throw new Error("Expected lambda");
         }

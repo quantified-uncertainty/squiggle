@@ -1,9 +1,12 @@
 import { REDictPropertyNotFound, REOther } from "../errors/messages.js";
+import {
+  SquiggleDeserializationVisitor,
+  SquiggleSerializationVisitor,
+} from "../serialization/squiggle.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { BaseValue } from "./BaseValue.js";
 import { isEqual, Value } from "./index.js";
 import { Indexable } from "./mixins.js";
-import { SerializationStorage } from "./serialize.js";
 
 type ValueMap = ImmutableMap<string, Value>;
 
@@ -88,15 +91,19 @@ export class VDict
     return this.value.size;
   }
 
-  override serializePayload(storage: SerializationStorage): SerializedDict {
-    return [...this.value.entries()].map(([k, v]) => [
-      k,
-      storage.serializeValue(v),
-    ]);
+  override serializePayload(
+    visit: SquiggleSerializationVisitor
+  ): SerializedDict {
+    return [...this.value.entries()].map(([k, v]) => [k, visit.value(v)]);
   }
 
-  static deserialize(payload: SerializedDict, load: (id: number) => Value) {
-    return new VDict(ImmutableMap(payload.map(([k, v]) => [k, load(v)])));
+  static deserialize(
+    payload: SerializedDict,
+    visit: SquiggleDeserializationVisitor
+  ) {
+    return new VDict(
+      ImmutableMap(payload.map(([k, v]) => [k, visit.value(v)]))
+    );
   }
 }
 

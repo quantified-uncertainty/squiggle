@@ -1,20 +1,18 @@
 import { REOther } from "../errors/messages.js";
-import {
-  deserializeExpression,
-  SerializedExpression,
-  serializeExpression,
-} from "../expression/serialize.js";
 import { getStdLib } from "../library/index.js";
 import {
   Lambda,
   UserDefinedLambda,
   UserDefinedLambdaParameter,
 } from "../reducer/lambda.js";
+import {
+  SquiggleDeserializationVisitor,
+  SquiggleSerializationVisitor,
+} from "../serialization/squiggle.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { BaseValue } from "./BaseValue.js";
 import { Value } from "./index.js";
 import { Indexable } from "./mixins.js";
-import { SerializationStorage } from "./serialize.js";
 import { vArray } from "./VArray.js";
 import { vDict } from "./VDict.js";
 import { VDomain } from "./VDomain.js";
@@ -32,7 +30,7 @@ export type SerializedLambda =
   | {
       type: "UserDefined";
       name?: string;
-      expression: SerializedExpression;
+      expressionId: number;
       parameters: SerializedParameter[];
       captureIds: number[];
     };
@@ -77,7 +75,9 @@ export class VLambda
     throw new REOther("No such field");
   }
 
-  override serializePayload(storage: SerializationStorage): SerializedLambda {
+  override serializePayload(
+    visit: SquiggleSerializationVisitor
+  ): SerializedLambda {
     switch (this.value.type) {
       case "BuiltinLambda":
         return {
@@ -88,15 +88,15 @@ export class VLambda
         return {
           type: "UserDefined",
           name: this.value.name,
-          expression: serializeExpression(this.value.expression, storage),
+          expressionId: visit.expression(this.value.expression),
           parameters: this.value.parameters.map((parameter) => ({
             ...parameter,
             domainId: parameter.domain
-              ? storage.serializeValue(parameter.domain)
+              ? visit.value(parameter.domain)
               : undefined,
           })),
           captureIds: this.value.captures.map((capture) =>
-            storage.serializeValue(capture)
+            visit.value(capture)
           ),
         };
     }
@@ -104,7 +104,7 @@ export class VLambda
 
   static deserialize(
     value: SerializedLambda,
-    load: (id: number) => Value
+    visit: SquiggleDeserializationVisitor
   ): VLambda {
     switch (value.type) {
       case "Builtin": {
@@ -121,11 +121,11 @@ export class VLambda
         return new VLambda(
           new UserDefinedLambda(
             value.name,
-            value.captureIds.map(load),
+            value.captureIds.map((id) => visit.value(id)),
             value.parameters.map((parameter) => {
               let domain: VDomain | undefined;
               if (parameter.domainId !== undefined) {
-                const shouldBeDomain = load(parameter.domainId);
+                const shouldBeDomain = visit.value(parameter.domainId);
                 if (!(shouldBeDomain instanceof VDomain)) {
                   throw new Error("Serialized domain is not a domain");
                 }
@@ -136,7 +136,7 @@ export class VLambda
                 domain,
               };
             }),
-            deserializeExpression(value.expression, load)
+            visit.expression(value.expressionId)
           )
         );
     }

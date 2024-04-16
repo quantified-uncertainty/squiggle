@@ -2,10 +2,13 @@ import { BaseDist } from "../dist/BaseDist.js";
 import { SampleSetDist } from "../dist/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
+import {
+  SquiggleDeserializationVisitor,
+  SquiggleSerializationVisitor,
+} from "../serialization/squiggle.js";
 import { BaseValue } from "./BaseValue.js";
 import { Value, vDist } from "./index.js";
 import { Indexable } from "./mixins.js";
-import { SerializationStorage } from "./serialize.js";
 import { SerializedDist, VDist } from "./VDist.js";
 import { SerializedLambda, vLambda, VLambda } from "./vLambda.js";
 import { Scale } from "./VScale.js";
@@ -123,7 +126,9 @@ export class VPlot
     throw new REOther("Trying to access non-existent field");
   }
 
-  override serializePayload(storage: SerializationStorage): SerializedPlot {
+  override serializePayload(
+    visit: SquiggleSerializationVisitor
+  ): SerializedPlot {
     switch (this.value.type) {
       case "distributions":
         return {
@@ -137,7 +142,7 @@ export class VPlot
       case "distFn":
         return {
           ...this.value,
-          fn: vLambda(this.value.fn).serializePayload(storage),
+          fn: vLambda(this.value.fn).serializePayload(visit),
         };
       case "scatter":
         return {
@@ -148,14 +153,14 @@ export class VPlot
       case "relativeValues":
         return {
           ...this.value,
-          fn: vLambda(this.value.fn).serializePayload(storage),
+          fn: vLambda(this.value.fn).serializePayload(visit),
         };
     }
   }
 
   static deserialize(
     value: SerializedPlot,
-    load: (id: number) => Value
+    visit: SquiggleDeserializationVisitor
   ): VPlot {
     switch (value.type) {
       case "distributions":
@@ -170,7 +175,7 @@ export class VPlot
       case "distFn":
         return new VPlot({
           ...value,
-          fn: VLambda.deserialize(value.fn, load).value,
+          fn: VLambda.deserialize(value.fn, visit).value,
         });
       case "scatter": {
         const xDist = VDist.deserialize(value.xDist).value;
@@ -190,7 +195,7 @@ export class VPlot
       case "relativeValues":
         return new VPlot({
           ...value,
-          fn: VLambda.deserialize(value.fn, load).value,
+          fn: VLambda.deserialize(value.fn, visit).value,
         });
     }
   }
