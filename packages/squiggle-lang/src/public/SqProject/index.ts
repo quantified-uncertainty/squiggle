@@ -17,7 +17,7 @@ import {
   type Externals,
   Import,
   ProjectItem,
-  RunOutput,
+  RunOutputWithExternals,
 } from "./ProjectItem.js";
 
 function getNeedToRunError() {
@@ -186,7 +186,7 @@ export class SqProject {
 
   private getInternalOutput(
     sourceId: string
-  ): Result.result<RunOutput, SqError> {
+  ): Result.result<RunOutputWithExternals, SqError> {
     return this.getItem(sourceId).output ?? Result.Err(getNeedToRunError());
   }
 

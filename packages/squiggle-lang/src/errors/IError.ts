@@ -4,6 +4,8 @@ import { ErrorMessage, REJavaScriptExn, REOther } from "./messages.js";
 
 // "I" stands for "Internal", since we also have a more public SqError proxy
 export class IRuntimeError extends Error {
+  readonly type = "IRuntimeError";
+
   // TODO - it would be better to store `m` in `cause`, to like native Error objects do.
   private constructor(
     public m: ErrorMessage,
@@ -121,9 +123,15 @@ ${emptyGutter}| ${bottomMarker}
   getFrameArray(): StackTraceFrame[] {
     return this.stackTrace.frames;
   }
+
+  serialize(): SerializedIRuntimeError {
+    throw "TODO";
+  }
 }
 
 export class ICompileError extends Error {
+  readonly type = "ICompileError";
+
   constructor(
     public override message: string,
     public location: LocationRange
@@ -142,4 +150,21 @@ export class ICompileError extends Error {
       `at line ${this.location.start.line}, column ${this.location.start.column}, file ${this.location.source}`
     );
   }
+
+  serialize(): SerializedICompileError {
+    throw "TODO";
+  }
 }
+
+type SerializedICompileError = {
+  type: "ICompileError";
+  message: string;
+  location: LocationRange;
+};
+
+type SerializedIRuntimeError = {
+  type: "IRuntimeError";
+  message: string;
+  location: LocationRange;
+};
+export type IError = ICompileError | IRuntimeError;

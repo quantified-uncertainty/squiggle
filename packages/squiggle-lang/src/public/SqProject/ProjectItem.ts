@@ -1,14 +1,20 @@
 import Worker from "web-worker";
 
 import { AST, parse } from "../../ast/parse.js";
-import { ICompileError } from "../../errors/IError.js";
+import { ICompileError, IRuntimeError } from "../../errors/IError.js";
 import { Env, SqProject } from "../../index.js";
+import { RunOutput } from "../../runner/BaseRunner.js";
+import { NodeWorkerRunner } from "../../runner/NodeWorkerRunner.js";
 import * as Result from "../../utility/result.js";
 import { Err, Ok, result } from "../../utility/result.js";
-import { Value } from "../../value/index.js";
 import { deserializeValue, serializeValue } from "../../value/serialize.js";
 import { VDict, vDictFromArray } from "../../value/VDict.js";
-import { SqCompileError, SqError, SqOtherError } from "../SqError.js";
+import {
+  SqCompileError,
+  SqError,
+  SqOtherError,
+  SqRuntimeError,
+} from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 import { SquiggleWorkerResponse } from "./worker.js";
 
@@ -19,10 +25,7 @@ export type Externals = {
   explicitImports: VDict;
 };
 
-export type RunOutput = {
-  result: Value;
-  bindings: VDict;
-  exports: VDict;
+export type RunOutputWithExternals = RunOutput & {
   externals: Externals;
 };
 
@@ -46,7 +49,7 @@ export class ProjectItem {
   continues: string[];
   ast?: result<AST, SqError>;
   imports?: result<Import[], SqError>;
-  output?: result<RunOutput, SqError>;
+  output?: result<RunOutputWithExternals, SqError>;
 
   constructor(props: { sourceId: string; source: string }) {
     this.sourceId = props.sourceId;
@@ -208,6 +211,27 @@ export class ProjectItem {
       .merge(externals.implicitImports)
       .merge(externals.explicitImports);
 
+    const runner = new NodeWorkerRunner();
+
+    const runnerOutput = await runner.run({
+      environment,
+      ast: this.ast.value,
+      externals: _externals,
+      sourceId: this.sourceId,
+    });
+    if (runnerOutput.ok) {
+      this.output = Ok({ ...runnerOutput.value, externals });
+    } else {
+      const err = runnerOutput.value;
+      if (err instanceof IRuntimeError) {
+        this.failRun(new SqRuntimeError(err, project));
+      } else if (err instanceof ICompileError) {
+        this.failRun(new SqCompileError(err));
+      } else {
+        throw err satisfies never;
+      }
+    }
+
     const workerUrl = new URL("./worker.js", import.meta.url);
     const worker = new (Worker as any)(workerUrl, { type: "module" });
 
@@ -238,9 +262,5 @@ export class ProjectItem {
         resolve();
       });
     });
-
-    // } catch (e: unknown) {
-    //   this.failRun(new SqRuntimeError(reducer.errorFromException(e), project));
-    // }
   }
 }
