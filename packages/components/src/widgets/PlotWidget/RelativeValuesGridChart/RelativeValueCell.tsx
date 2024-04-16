@@ -77,20 +77,20 @@ export const RelativeValueCell: FC<{
   showMedian,
 }) {
   return hasInvalid(item) ? (
-    <div className="h-full pt-[1px] min-h-[2em] relative bg-gray-300 bg-opacity-30">
-      <div className="text-center z-0 p-4 text-gray-500">Error</div>
+    <div className="relative h-full min-h-[2em] bg-gray-300 bg-opacity-30 pt-[1px]">
+      <div className="z-0 p-4 text-center text-gray-500">Error</div>
     </div>
   ) : (
     <div
       className={clsx(
-        "h-full pt-[1px] min-h-[2em] relative",
+        "relative h-full min-h-[2em] pt-[1px]",
         numberToColor2(item.uncertainty, uncertaintyPercentiles)
       )}
     >
-      <div className="text-center z-0 py-1">
+      <div className="z-0 py-1 text-center">
         <div>
           {showMedian && (
-            <span className="text-slate-700 text-lg font-semibold">
+            <span className="text-lg font-semibold text-slate-700">
               <NumberShower number={item.median} precision={1} />
             </span>
           )}
@@ -100,7 +100,7 @@ export const RelativeValueCell: FC<{
                 {" "}
                 <span
                   style={{ fontSize: "0.7em" }}
-                  className="text-gray-400 font-light"
+                  className="font-light text-gray-400"
                 >
                   ±
                 </span>{" "}
@@ -135,7 +135,7 @@ export const RelativeValueCell: FC<{
         {showRange && (
           <div
             style={{ fontSize: "0.7em" }}
-            className="text-gray-400 font-light"
+            className="font-light text-gray-400"
           >
             {item.min < 0 && item.max < 0 ? (
               <span>
@@ -153,7 +153,7 @@ export const RelativeValueCell: FC<{
         )}
       </div>
 
-      <div className="h-2 absolute bottom-0 inset-x-0 -z-10"></div>
+      <div className="absolute inset-x-0 bottom-0 -z-10 h-2"></div>
     </div>
   );
 });

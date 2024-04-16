@@ -1,7 +1,7 @@
 import { FC, PropsWithChildren } from "react";
 
 export const FormHeader: FC<PropsWithChildren> = ({ children }) => (
-  <header className="text-gray-500 capitalize font-medium mb-2">
+  <header className="mb-2 font-medium capitalize text-gray-500">
     {children}
   </header>
 );

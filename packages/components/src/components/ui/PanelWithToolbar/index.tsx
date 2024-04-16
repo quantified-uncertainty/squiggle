@@ -36,9 +36,9 @@ export function PanelWithToolbar<const ModalNames extends string[]>({
 
   //We want to center the title, so need similarly-widthed items on either side
   const modalHeader = modal && (
-    <div className="h-full flex gap-2">
+    <div className="flex h-full gap-2">
       <ToolbarItem
-        className="flex-grow-0 flex-shrink-0 w-20"
+        className="w-20 flex-shrink-0 flex-grow-0"
         onClick={closeModal}
       >
         &larr; Back
@@ -46,7 +46,7 @@ export function PanelWithToolbar<const ModalNames extends string[]>({
       <div className="flex-grow flex-shrink text-center self-center text-sm text-gray-600 font-semibold">
         {modal.title}
       </div>
-      <div className="flex-grow-0 flex-shrink-0 w-20 invisible"></div>
+      <div className="invisible w-20 flex-shrink-0 flex-grow-0"></div>
     </div>
   );
 
@@ -56,12 +56,12 @@ export function PanelWithToolbar<const ModalNames extends string[]>({
         {modal ? (
           modalHeader
         ) : (
-          <div className="h-full grid place-items-stretch">
+          <div className="grid h-full place-items-stretch">
             {renderToolbar({ openModal })}
           </div>
         )}
       </div>
-      <div className="flex-1 grid place-items-stretch overflow-auto">
+      <div className="grid flex-1 place-items-stretch overflow-auto">
         {modal ? <div className="px-4 py-4"> {modal.body} </div> : renderBody()}
       </div>
     </div>

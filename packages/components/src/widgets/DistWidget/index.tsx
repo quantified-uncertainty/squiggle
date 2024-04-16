@@ -41,7 +41,7 @@ widgetRegistry.register("Dist", {
     return oneValue ? (
       showNumber(p05)
     ) : (
-      <div className="flex flex-row space-x-2 items-center">
+      <div className="flex flex-row items-center space-x-2">
         <div className="flex">
           {showNumber(p05)}
           <span className="mx-1 opacity-60">to</span>

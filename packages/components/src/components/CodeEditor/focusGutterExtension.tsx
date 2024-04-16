@@ -115,7 +115,7 @@ class FocusableMarker extends GutterMarker {
   override toDOM() {
     return reactAsDom(
       <div
-        className="pr-1 pl-0.5 cursor-pointer group/marker"
+        className="group/marker cursor-pointer pl-0.5 pr-1"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -128,7 +128,7 @@ class FocusableMarker extends GutterMarker {
             "bg-violet-50 [.cm-activeLineGutter_&]:bg-white",
             // highlight all markers on gutter hover; highlight the hovered markers even more
             "group-hover/gutter:bg-violet-200 group-hover/marker:!bg-violet-400",
-            "rounded-sm w-[3px] h-4 br-1 mt-[1px]",
+            "br-1 mt-[1px] h-4 w-[3px] rounded-sm",
             "transition duration-75"
           )}
         />

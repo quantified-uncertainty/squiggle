@@ -21,10 +21,10 @@ interface TableRowProps {
 
 const TableRow: React.FC<TableRowProps> = ({ label, number }) => (
   <Fragment key={label}>
-    <div className="text-slate-400 py-1 mt-1 font-normal text-left text-xs col-span-1">
+    <div className="col-span-1 mt-1 py-1 text-left text-xs font-normal text-slate-400">
       {label}
     </div>
-    <div className="py-1 pl-2 text-left text-slate-600 col-span-2">
+    <div className="col-span-2 py-1 pl-2 text-left text-slate-600">
       <NumberShower number={number} precision={2} />
     </div>
   </Fragment>
@@ -123,36 +123,36 @@ export const ItemSideBar: FC<Props> = ({
     // It would be better to not load SquiggleChart, but rather, a lower-level compontent. That can be refactored later.
     return (
       <div>
-        <div className="mt-2 mb-6 flex overflow-x-auto items-center p-1">
-          <span className="text-slate-500 whitespace-nowrap mr-1">value</span>
-          <span className="text-slate-300 text-xl whitespace-nowrap">(</span>
-          <span className="text-sm bg-slate-200 font-semibold bg-opacity-80 rounded-sm text-slate-900 px-1 text-center whitespace-pre-wrap mr-2 ml-2">
+        <div className="mb-6 mt-2 flex items-center overflow-x-auto p-1">
+          <span className="mr-1 whitespace-nowrap text-slate-500">value</span>
+          <span className="whitespace-nowrap text-xl text-slate-300">(</span>
+          <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 bg-opacity-80 px-1 text-center text-sm font-semibold text-slate-900">
             {numeratorItem.name}
           </span>
-          <span className="text-slate-300 px-1 text-xl whitespace-nowrap">
+          <span className="whitespace-nowrap px-1 text-xl text-slate-300">
             /
           </span>
 
-          <span className="text-sm bg-slate-200  font-semibold rounded-sm text-slate-900 px-1 text-center whitespace-pre-wrap mr-2 ml-2">
+          <span className="ml-2 mr-2  whitespace-pre-wrap rounded-sm bg-slate-200 px-1 text-center text-sm font-semibold text-slate-900">
             <span className="inline-block">{denominatorItem.name}</span>
           </span>
-          <span className="text-slate-300 text-xl whitespace-nowrap">)</span>
+          <span className="whitespace-nowrap text-xl text-slate-300">)</span>
         </div>
 
-        <div className="mb-4 text-slate-500 xs">
+        <div className="xs mb-4 text-slate-500">
           An estimate of the value of{" "}
           <span className="font-semibold text-slate-700">
             {numeratorItem.name}
           </span>{" "}
           in terms of{" "}
-          <span className="text-slate-700 font-semibold">
+          <span className="font-semibold text-slate-700">
             {denominatorItem.name}
           </span>
         </div>
 
         <SquiggleChart code={squggleCode} />
 
-        <div className="grid grid-cols-6 gap-1 w-full mt-10 mb-10">
+        <div className="mb-10 mt-10 grid w-full grid-cols-6 gap-1">
           <TableRow label="median" number={item.median} />
           <TableRow label="mean" number={item.mean} />
           <TableRow label="p5" number={item.min} />

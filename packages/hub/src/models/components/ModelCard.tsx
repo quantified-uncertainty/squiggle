@@ -7,7 +7,8 @@ import { CodeSyntaxHighlighter, NumberShower } from "@quri/squiggle-components";
 import { XIcon } from "@quri/ui";
 
 import {
-  Badge,
+  EntityCardBadge,
+  InterspersedMenuItemsWithDots,
   keepFirstNLines,
   PrivateBadge,
   UpdatedStatus,
@@ -137,37 +138,46 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
     content.__typename === "SquiggleSnippet" ? content.code : undefined;
 
   const menuItems = (
-    <>
-      {totalImportCount > 0 && (
-        <VariablesDropdown
-          variableRevisions={variableRevisions}
-          relativeValuesExports={relativeValuesExports}
-          owner={owner.slug}
-          slug={slug}
-        >
-          <Badge presentAsLink={true}>{`${totalImportCount} variables`}</Badge>
-        </VariablesDropdown>
-      )}
-      {isPrivate && <PrivateBadge />}
-      <UpdatedStatus time={updatedAtTimestamp} />
-      {buildStatus === "Failure" && <BuildFailedBadge />}
-      {lastBuild?.runSeconds && buildStatus !== "Failure" && (
-        <RunTime seconds={lastBuild.runSeconds} />
-      )}
-    </>
+    <InterspersedMenuItemsWithDots
+      items={[
+        totalImportCount && totalImportCount > 0 && (
+          <VariablesDropdown
+            key="variables-dropdown"
+            variableRevisions={variableRevisions}
+            relativeValuesExports={relativeValuesExports}
+            owner={owner?.slug}
+            slug={slug}
+          >
+            <EntityCardBadge
+              presentAsLink={true}
+            >{`${totalImportCount} variables`}</EntityCardBadge>
+          </VariablesDropdown>
+        ),
+        isPrivate && <PrivateBadge key="private-badge" />,
+        updatedAtTimestamp && (
+          <UpdatedStatus key="updated-status" time={updatedAtTimestamp} />
+        ),
+        buildStatus === "Failure" && (
+          <BuildFailedBadge key="build-failed-badge" />
+        ),
+        lastBuild?.runSeconds && buildStatus !== "Failure" && (
+          <RunTime key="run-time" seconds={lastBuild.runSeconds} />
+        ),
+      ]}
+    />
   );
   return (
     <div className="flex flex-col overflow-hidden">
-      <div className="mb-1 px-4">
+      <div className="mb-1 px-2">
         {showOwner && <OwnerLink owner={owner} />}
         {showOwner && <span className="mx-1 text-gray-400">/</span>}
         <ModelLink owner={owner.slug} slug={slug} />
       </div>
-      <div className="flex flex-wrap items-center gap-4 px-4 text-xs text-gray-500">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 px-2 text-xs text-gray-500">
         {menuItems}
       </div>
       {body && (
-        <div className="mt-4 overflow-hidden rounded-md border border-gray-200 px-4 py-1 text-xs">
+        <div className="mt-3 overflow-hidden rounded-md bg-gray-100 px-2 py-2 text-xs">
           <div className="overflow-x-auto">
             <CodeSyntaxHighlighter language="squiggle" theme="github-light">
               {keepFirstNLines(body, 10)}

@@ -61,7 +61,7 @@ export const RandomizeSeedButton: FC<{
       placement="bottom"
       offset={5}
     >
-      <div className="ml-1 px-1 cursor-pointer group" onClick={randomizeSeed}>
+      <div className="group ml-1 cursor-pointer px-1" onClick={randomizeSeed}>
         <DiceIcon
           side={stringToRandomNumber(seed)}
           isSimulating={isSimulating}

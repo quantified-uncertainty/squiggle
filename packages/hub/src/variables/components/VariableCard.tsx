@@ -7,8 +7,9 @@ import { MarkdownViewer } from "@quri/squiggle-components";
 import { CodeBracketSquareIcon } from "@quri/ui";
 
 import {
-  Badge,
   badgeCss,
+  EntityCardBadge,
+  InterspersedMenuItemsWithDots,
   keepFirstNLines,
   PrivateBadge,
   UpdatedStatus,
@@ -75,7 +76,7 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
             {variable.currentRevision?.title || variable.variableName}
           </Link>
         </div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+        <div className="mb-1 text-sm text-gray-500">
           <a
             className={badgeCss(true)}
             href={modelRoute({
@@ -86,12 +87,18 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
             <CodeBracketSquareIcon size={12} className="mr-1" />
             {`${variable.owner.slug}/${variable.model.slug}`}
           </a>
-          <Badge presentAsLink={false}>
-            <Icon size={10} className="mr-1" />
-            {currentRevision.variableType}
-          </Badge>
-          <UpdatedStatus time={createdAtTimestamp} />
-          {variable.model.isPrivate && <PrivateBadge />}
+        </div>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+          <InterspersedMenuItemsWithDots
+            items={[
+              <EntityCardBadge presentAsLink={false} key={"variable-type"}>
+                <Icon size={10} className="mr-1" />
+                {currentRevision.variableType}
+              </EntityCardBadge>,
+              <UpdatedStatus time={createdAtTimestamp} key={"updated-at"} />,
+              variable.model.isPrivate && <PrivateBadge key={"is-private"} />,
+            ]}
+          />
         </div>
       </div>
       {currentRevision.docstring && (

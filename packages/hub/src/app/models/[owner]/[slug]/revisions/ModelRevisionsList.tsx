@@ -144,7 +144,7 @@ export const ModelRevisionsList: FC<{
 
   return (
     <div>
-      <div className="mt-4 mb-2 font-medium">Revision history</div>
+      <div className="mb-2 mt-4 font-medium">Revision history</div>
       <div className="space-y-2">
         {revisions.edges.map((edge) => (
           <ModelRevisionItem

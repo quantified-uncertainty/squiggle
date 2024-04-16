@@ -23,7 +23,7 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
     <div>
       <div className="bg-red-200 p-4">
         <H1>
-          <div className="flex gap-1 items-center">
+          <div className="flex items-center gap-1">
             <LockIcon />
             <span>Admin console</span>
           </div>

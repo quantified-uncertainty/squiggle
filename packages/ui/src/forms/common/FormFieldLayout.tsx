@@ -32,7 +32,7 @@ export const FieldLayout: FC<PropsWithChildren<FormFieldLayoutProps>> = ({
         {label !== undefined && (
           <InnerTag
             className={clsx(
-              "text-sm font-medium mb-1",
+              "mb-1 text-sm font-medium",
               // TODO - add `disabled` prop?
               "text-gray-900",
               inlineLabel && "leading-none"

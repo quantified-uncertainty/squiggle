@@ -30,7 +30,7 @@ export const CalculatorInput: FC<{
 
   return (
     <div className="flex flex-col">
-      <div className="flex-grow max-w-sm">
+      <div className="max-w-sm flex-grow">
         {input.tag === "text" && (
           <TextFormField
             {...commonProps}

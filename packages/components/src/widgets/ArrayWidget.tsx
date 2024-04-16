@@ -24,7 +24,7 @@ widgetRegistry.register("Array", {
   Chart: (value) => {
     const values = useMemo(() => value.value.getValues(), [value]);
     return (
-      <div className="space-y-1 pt-0.5 mt-0.5">
+      <div className="mt-0.5 space-y-1 pt-0.5">
         {values.map((r, i) => (
           <ValueViewer
             parentValue={value}

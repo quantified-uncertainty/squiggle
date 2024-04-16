@@ -12,7 +12,7 @@ export const ZoomedInNavigationItem: FC<{
   <div className="flex items-center">
     <span
       onClick={onClick}
-      className="text-sm text-stone-500 hover:text-stone-900 hover:underline font-mono cursor-pointer"
+      className="cursor-pointer font-mono text-sm text-stone-500 hover:text-stone-900 hover:underline"
     >
       {text}
     </span>

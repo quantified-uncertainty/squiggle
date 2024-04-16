@@ -78,7 +78,7 @@ const DesktopMenu: FC<MenuProps> = ({ queryRef }) => {
   const { data: session } = useSession();
   const menu = useFragment(fragment, queryRef);
   return (
-    <div className="flex gap-4 items-center">
+    <div className="flex items-center gap-4">
       <GlobalSearch />
       <AboutMenuLink mode="desktop" />
       <DocsMenuLink mode="desktop" />
@@ -112,7 +112,7 @@ const MobileMenu: FC<MenuProps> = ({ queryRef }) => {
   const close = () => setOpen(false);
   return (
     <div>
-      <div className="p-2 cursor-pointer">
+      <div className="cursor-pointer p-2">
         <Icon
           size={20}
           className="text-slate-100"
@@ -123,11 +123,11 @@ const MobileMenu: FC<MenuProps> = ({ queryRef }) => {
         <>
           {/* overlay */}
           <div
-            className="fixed inset-0 z-10 bg-black opacity-10 overflow-scroll"
+            className="fixed inset-0 z-10 overflow-scroll bg-black opacity-10"
             onClick={close}
           />
           {/* sidebar panel */}
-          <div className="fixed inset-y-0 right-0 z-20 bg-white shadow-xl overflow-y-auto overflow-x-hidden">
+          <div className="fixed inset-y-0 right-0 z-20 overflow-y-auto overflow-x-hidden bg-white shadow-xl">
             <DropdownMenu>
               <DropdownMenuHeader>Menu</DropdownMenuHeader>
               <NewModelMenuLink mode="mobile" close={close} />
@@ -165,8 +165,8 @@ export const PageMenu: FC<MenuProps> = ({ queryRef }) => {
   useForceChooseUsername();
 
   return (
-    <div className="h-10 px-8 bg-gray-800 flex items-center justify-between">
-      <Link className="text-slate-300 font-semibold" href="/">
+    <div className="flex h-10 items-center justify-between bg-gray-800 px-8">
+      <Link className="font-semibold text-slate-300" href="/">
         Squiggle Hub
       </Link>
       <div className="hidden md:block">

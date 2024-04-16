@@ -45,10 +45,10 @@ const SpecificationDropdownContent: FC<{
     <div className="px-3 py-2">
       <SpecificationView specification={specification} />
       <div>
-        <div className="mt-5 mb-2">
+        <div className="mb-2 mt-5">
           <div
             className={clsx(
-              "rounded-sm px-2 py-0.5 inline-flex font-medium text-sm items-center space-x-2",
+              "inline-flex items-center space-x-2 rounded-sm px-2 py-0.5 text-sm font-medium",
               hasError
                 ? "bg-red-100 text-red-900"
                 : "bg-emerald-100 text-emerald-900"
@@ -59,12 +59,12 @@ const SpecificationDropdownContent: FC<{
           </div>
         </div>
         {specificationStatus.type === "load-error" && (
-          <div className="text-red-700 text-xs">
+          <div className="text-xs text-red-700">
             <SquiggleErrorAlert error={specificationStatus.error} />
           </div>
         )}
         {specificationStatus.type === "validation-failure" && (
-          <div className="text-red-700 text-xs">
+          <div className="text-xs text-red-700">
             {specificationStatus.error}
           </div>
         )}
@@ -126,7 +126,7 @@ const SpecificationStatusPreview: FC<{
   return (
     <div
       className={clsx(
-        "rounded-sm cursor-pointer transition px-0.5 flex flex-row items-center space-x-1.5",
+        "flex cursor-pointer flex-row items-center space-x-1.5 rounded-sm px-0.5 transition",
         hasError
           ? "bg-red-100 hover:bg-red-300"
           : "bg-emerald-100 hover:bg-emerald-300"
@@ -151,7 +151,7 @@ const SpecificationStatusPreview: FC<{
 widgetRegistry.register("Specification", {
   Preview: () => <CubeTransparentIcon className="text-emerald-700" size={14} />,
   Chart: (value) => (
-    <div className="py-3 px-2">
+    <div className="px-2 py-3">
       <SpecificationView specification={value.value} />
     </div>
   ),

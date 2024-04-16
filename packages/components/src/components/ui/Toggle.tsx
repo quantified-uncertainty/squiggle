@@ -24,18 +24,18 @@ export const Toggle: React.FC<Props> = ({
     <div onClick={() => onChange(!status)}>
       <div
         className={clsx(
-          "flex items-center gap-1 text-slate-800 text-sm px-2 py-2 cursor-pointer rounded-sm hover:bg-slate-200 select-none whitespace-nowrap"
+          "flex cursor-pointer select-none items-center gap-1 whitespace-nowrap rounded-sm px-2 py-2 text-sm text-slate-800 hover:bg-slate-200"
         )}
       >
         <div className="relative" key={String(spinIcon)}>
           <CurrentIcon
             className={clsx(
-              "w-6 h-6 opacity-100 relative",
+              "relative h-6 w-6 opacity-100",
               spinIcon && "animate-hide"
             )}
           />
           {spinIcon && (
-            <RefreshIcon className="w-6 h-6 absolute top-0 opacity-0 animate-appear-and-spin" />
+            <RefreshIcon className="animate-appear-and-spin absolute top-0 h-6 w-6 opacity-0" />
           )}
         </div>
         <span>{status ? onText : offText}</span>

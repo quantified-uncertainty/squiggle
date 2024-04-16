@@ -28,7 +28,7 @@ const TooltipBox: FC<PropsWithChildren<{ view: EditorView }>> = ({
   });
 
   return (
-    <div className="border rounded-sm shadow-lg h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto rounded-sm border shadow-lg">
       {children}
     </div>
   );

@@ -25,7 +25,7 @@ export const RelativeValuesExportItemFragment = graphql`
 
 const Container: FC<PropsWithChildren> = ({ children }) => (
   <div className="px-4 py-2 hover:bg-slate-100">
-    <div className="text-slate-600 group-hover:text-slate-900 text-sm font-medium">
+    <div className="text-sm font-medium text-slate-600 group-hover:text-slate-900">
       {children}
     </div>
   </div>

@@ -6,7 +6,7 @@ export const ErrorCell: FC<{ error: string }> = ({ error }) => {
   // TODO - truncate?
   return (
     <CellBox>
-      <div className="text-red-500 text-xs">{error}</div>
+      <div className="text-xs text-red-500">{error}</div>
     </CellBox>
   );
 };

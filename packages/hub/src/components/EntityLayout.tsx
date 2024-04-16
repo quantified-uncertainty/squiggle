@@ -23,11 +23,11 @@ export const EntityLayout: FC<Props> = ({
 }) => {
   return (
     <div>
-      <div className="border-gray-200 border-b">
+      <div className="border-b border-gray-200">
         <div
           className={clsx(
             "flex items-center justify-between gap-4 pt-1",
-            !isFluid ? "max-w-4xl mx-auto" : "px-8"
+            !isFluid ? "mx-auto max-w-4xl" : "px-8"
           )}
         >
           <div className="flex items-center gap-2">
@@ -37,7 +37,7 @@ export const EntityLayout: FC<Props> = ({
           <div>{headerRight}</div>
         </div>
       </div>
-      <div className={clsx(!isFluid && "max-w-4xl mx-auto my-4")}>
+      <div className={clsx(!isFluid && "mx-auto my-4 max-w-4xl")}>
         {children}
       </div>
     </div>

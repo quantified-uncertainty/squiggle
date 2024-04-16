@@ -96,7 +96,7 @@ export const ResizableTwoPanelLayout: FC<Props> = ({
           />
         </DraggableCore>
       </div>
-      <div className="flex-1 flex flex-col overflow-y-auto">
+      <div className="flex flex-1 flex-col overflow-y-auto">
         {renderRight()}
       </div>
     </div>

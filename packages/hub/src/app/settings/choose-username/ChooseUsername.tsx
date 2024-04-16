@@ -58,7 +58,7 @@ export const ChooseUsername: FC = () => {
   return (
     <form onSubmit={onSubmit}>
       <FormProvider {...form}>
-        <div className="flex flex-col items-center mt-20">
+        <div className="mt-20 flex flex-col items-center">
           <div className="space-y-2">
             <div className="flex items-center gap-1">
               <SlugFormField<FormShape>

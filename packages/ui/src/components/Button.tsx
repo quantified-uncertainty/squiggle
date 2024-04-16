@@ -19,7 +19,7 @@ export type ButtonProps = PropsWithChildren<{
 
 // For internal use only, for now (see ButtonWithDropdown).
 export const ButtonGroup: FC<PropsWithChildren> = ({ children }) => {
-  return <div className="flex items-center button-group">{children}</div>;
+  return <div className="button-group flex items-center">{children}</div>;
 };
 
 export const Button: FC<ButtonProps> = ({

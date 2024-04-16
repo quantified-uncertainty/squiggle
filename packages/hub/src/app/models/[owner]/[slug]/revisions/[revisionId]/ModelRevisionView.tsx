@@ -76,7 +76,7 @@ export const ModelRevisionView: FC<{
   return (
     <div>
       <div className="border-b border-gray-300">
-        <div className="pt-4 pb-4 px-8 space-y-1">
+        <div className="space-y-1 px-8 pb-4 pt-4">
           <div className="text-sm">
             <span className="text-slate-500">Version from</span>{" "}
             {format(model.revision.createdAtTimestamp, commonDateFormat)}.{" "}
@@ -87,7 +87,7 @@ export const ModelRevisionView: FC<{
             <StyledLink href={modelUrl}>Go to latest version</StyledLink>
           </div>
           {model.revision.comment ? (
-            <div className="flex gap-2 items-center">
+            <div className="flex items-center gap-2">
               <CommentIcon size={14} className="text-slate-400" />
               <div className="text-sm">{model.revision.comment}</div>
             </div>

@@ -188,8 +188,8 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       );
     } else if (defaultAutorunMode === false) {
       return (
-        <div className="grid place-items-center h-full">
-          <div className="text-gray-500 text-sm">{`Press the "Run" button (top left) to simulate`}</div>
+        <div className="grid h-full place-items-center">
+          <div className="text-sm text-gray-500">{`Press the "Run" button (top left) to simulate`}</div>
         </div>
       );
     } else {

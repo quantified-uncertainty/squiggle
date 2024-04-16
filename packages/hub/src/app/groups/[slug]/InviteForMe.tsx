@@ -76,7 +76,7 @@ export const InviteForMe: FC<Props> = ({ groupRef }) => {
 
   return (
     <Card>
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>{"You've been invited to this group."}</div>
         <div className="flex gap-2">
           <InviteReactButton
