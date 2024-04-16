@@ -92,6 +92,7 @@
     "nodemon": "^3.1.0",
     "postcss": "^8.4.35",
     "prettier": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.5.14",
     "prisma": "^5.9.1",
     "relay-compiler": "^16.2.0",
     "tailwindcss": "^3.4.1",
