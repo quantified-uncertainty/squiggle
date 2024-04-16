@@ -6,7 +6,7 @@ export const ClusterInfo: FC<{
   cluster: { id: string; color: string };
 }> = ({ cluster }) => {
   return (
-    <div className="flex gap-1 items-center">
+    <div className="flex items-center gap-1">
       <div className="flex-0">
         <ClusterIcon cluster={cluster} />
       </div>

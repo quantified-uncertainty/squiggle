@@ -19,7 +19,7 @@ export type ButtonProps = PropsWithChildren<{
 
 // For internal use only, for now (see ButtonWithDropdown).
 export const ButtonGroup: FC<PropsWithChildren> = ({ children }) => {
-  return <div className="flex items-center button-group">{children}</div>;
+  return <div className="button-group flex items-center">{children}</div>;
 };
 
 export const Button: FC<ButtonProps> = ({
@@ -37,12 +37,12 @@ export const Button: FC<ButtonProps> = ({
       className={clsx(
         "border text-sm font-medium",
         theme === "primary"
-          ? "bg-green-700 border-green-900 text-white"
-          : "bg-slate-100 border-slate-300 text-gray-600",
+          ? "border-green-900 bg-green-700 text-white"
+          : "border-slate-300 bg-slate-100 text-gray-600",
         disabled
           ? "opacity-60"
           : theme === "primary"
-            ? "hover:bg-green-800 hover:border-green-800 hover:text-white"
+            ? "hover:border-green-800 hover:bg-green-800 hover:text-white"
             : "hover:bg-slate-200 hover:text-gray-900",
         wide && "w-full",
         size === "medium" && "h-8 rounded-md",

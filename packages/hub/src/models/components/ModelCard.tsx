@@ -79,7 +79,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
         owner={model.owner.slug}
         slug={model.slug}
       >
-        <div className="cursor-pointer items-center flex text-xs text-gray-500 hover:text-gray-900 hover:underline">
+        <div className="flex cursor-pointer items-center text-xs text-gray-500 hover:text-gray-900 hover:underline">
           {`${_totalImportLength} variables`}
         </div>
       </VariablesDropdown>

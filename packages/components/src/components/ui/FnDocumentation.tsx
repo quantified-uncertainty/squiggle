@@ -88,7 +88,7 @@ export const FnDocumentation: FC<{
               target="_blank"
               rel="noreferrer"
               className={clsx(
-                "text-blue-500 hover:underline leading-none",
+                "leading-none text-blue-500 hover:underline",
                 size === "small" ? "text-sm" : "text-md"
               )}
             >
@@ -117,7 +117,7 @@ export const FnDocumentation: FC<{
             {shorthand && (
               <div className={clsx("bg-orange-100 text-gray-500", tagCss)}>
                 {`${shorthand.type}:  `}
-                <span className="font-mono ml-2 text-orange-800">
+                <span className="ml-2 font-mono text-orange-800">
                   {shorthand.symbol}
                 </span>
               </div>
@@ -152,12 +152,12 @@ export const FnDocumentation: FC<{
       ) : null}
       {definitions ? (
         <Section>
-          <header className={clsx("text-slate-600 font-medium mb-2", textSize)}>
+          <header className={clsx("mb-2 font-medium text-slate-600", textSize)}>
             Signatures
           </header>
           <div
             className={clsx(
-              "text-slate-600 font-mono p-2 bg-slate-100 rounded-md space-y-2",
+              "space-y-2 rounded-md bg-slate-100 p-2 font-mono text-slate-600",
               textSize
             )}
           >
@@ -171,14 +171,14 @@ export const FnDocumentation: FC<{
       ) : null}
       {examples?.length ? (
         <Section>
-          <header className={clsx("text-slate-600 font-medium mb-2", textSize)}>
+          <header className={clsx("mb-2 font-medium text-slate-600", textSize)}>
             Examples
           </header>
 
           {examples &&
             examples.map(({ text, isInteractive }, i) =>
               isInteractive ? (
-                <div className="pt-2 pb-4" key={i}>
+                <div className="pb-4 pt-2" key={i}>
                   <SquiggleEditor
                     defaultCode={text}
                     editorFontSize={size === "small" ? 12 : 13}

@@ -9,8 +9,8 @@ type Props = PropsWithChildren<{
 export const CellBox: FC<Props> = ({ children, header, clickable }) => (
   <div
     className={clsx(
-      "border-t border-l border-gray-200 h-full",
-      header && "bg-gray-50 sticky top-0 left-0 z-10",
+      "h-full border-l border-t border-gray-200",
+      header && "sticky left-0 top-0 z-10 bg-gray-50",
       clickable && "cursor-pointer hover:bg-gray-200"
     )}
   >

@@ -269,7 +269,7 @@ export const PlaygroundSettingsForm: React.FC<{
   metaSettings,
 }) => {
   return (
-    <div className="divide-y divide-gray-200 max-w-2xl">
+    <div className="max-w-2xl divide-y divide-gray-200">
       {withGlobalSettings && (
         <>
           <div className="mb-6">
@@ -278,7 +278,7 @@ export const PlaygroundSettingsForm: React.FC<{
             </FormSection>
           </div>
 
-          <div className="pt-6 mb-6">
+          <div className="mb-6 pt-6">
             <FormSection title="General Display Settings">
               <NumberFormField<PlaygroundSettings>
                 name="chartHeight"
@@ -289,18 +289,18 @@ export const PlaygroundSettingsForm: React.FC<{
         </>
       )}
 
-      <div className="pt-6 mb-6">
+      <div className="mb-6 pt-6">
         <DistributionSettingsForm metaSettings={metaSettings} />
       </div>
 
       {withFunctionSettings ? (
-        <div className="pt-6 mb-6">
+        <div className="mb-6 pt-6">
           <FunctionSettingsForm />
         </div>
       ) : null}
 
       {withGlobalSettings ? (
-        <div className="pt-6 mb-6">
+        <div className="mb-6 pt-6">
           <EditorSettingsForm />
         </div>
       ) : null}

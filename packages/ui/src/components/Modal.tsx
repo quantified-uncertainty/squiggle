@@ -37,10 +37,10 @@ const Overlay: React.FC = () => {
 const ModalHeader: React.FC<PropsWithChildren> = ({ children }) => {
   const { close } = useContext(ModalContext);
   return (
-    <header className="pl-5 pr-4 py-3 border-b border-gray-200 font-bold flex items-center justify-between">
+    <header className="flex items-center justify-between border-b border-gray-200 py-3 pl-5 pr-4 font-bold">
       <div>{children}</div>
       <button
-        className="bg-transparent cursor-pointer text-slate-300 hover:text-slate-500"
+        className="cursor-pointer bg-transparent text-slate-300 hover:text-slate-500"
         type="button"
         onClick={close}
       >
@@ -53,12 +53,12 @@ const ModalHeader: React.FC<PropsWithChildren> = ({ children }) => {
 // TODO - get rid of forwardRef, support `focus` and `{...hotkeys}` via smart props
 const ModalBody = forwardRef<HTMLDivElement, JSX.IntrinsicElements["div"]>(
   function ModalBody(props, ref) {
-    return <div ref={ref} className="px-5 py-3 overflow-auto" {...props} />;
+    return <div ref={ref} className="overflow-auto px-5 py-3" {...props} />;
   }
 );
 
 const ModalFooter: React.FC<PropsWithChildren> = ({ children }) => (
-  <div className="px-5 py-3 border-t border-gray-200">{children}</div>
+  <div className="border-t border-gray-200 px-5 py-3">{children}</div>
 );
 
 const ModalWindow: React.FC<
@@ -124,7 +124,7 @@ const ModalWindow: React.FC<
   return (
     <div
       className={clsx(
-        "bg-white rounded-md shadow-toast flex flex-col overflow-auto border",
+        "shadow-toast flex flex-col overflow-auto rounded-md border bg-white",
         position && "fixed"
       )}
       style={{
@@ -180,7 +180,7 @@ export const Modal: ModalType = ({ children, container, close }) => {
   const modal = (
     <ModalContext.Provider value={{ close }}>
       <div className={tailwindSelector}>
-        <div className="fixed inset-0 z-40 flex justify-center items-center">
+        <div className="fixed inset-0 z-40 flex items-center justify-center">
           <Overlay />
           <ModalWindow container={container}>{children}</ModalWindow>
         </div>

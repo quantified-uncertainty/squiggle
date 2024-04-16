@@ -109,12 +109,12 @@ export const ClusterGridView: FC<{
   return (
     <div>
       <div
-        className="grid relative"
+        className="relative grid"
         style={{
           gridTemplateColumns: `repeat(${clusterItems.length + 1}, 200px)`,
         }}
       >
-        <div className="top-0 left-0 z-20" />
+        <div className="left-0 top-0 z-20" />
         {clusterItems.map((item) => (
           <CellBox header key={item.id}>
             <Header item={item} />
@@ -203,7 +203,7 @@ export const GridView: FC = () => {
 
   return (
     <div>
-      <div className="flex gap-8 mb-4 items-center">
+      <div className="mb-4 flex items-center gap-8">
         <div className="flex gap-2">
           <DropdownButton text="Row Settings">
             {() => <AxisMenu axis="rows" />}
@@ -222,12 +222,12 @@ export const GridView: FC = () => {
         <GridModeControls />
       </div>
       <div
-        className="grid relative"
+        className="relative grid"
         style={{
           gridTemplateColumns: `repeat(${columnItems.length + 1}, 140px)`,
         }}
       >
-        <div className="sticky bg-white top-0 left-0 z-20" />
+        <div className="sticky left-0 top-0 z-20 bg-white" />
         {columnItems.map((item) => (
           <CellBox header key={item.id}>
             <Header item={item} />

@@ -28,8 +28,8 @@ const CellBox: FC<PropsWithChildren<{ header?: boolean }>> = ({
 }) => (
   <div
     className={clsx(
-      "border-t border-l border-gray-200 h-full",
-      header && "bg-gray-50 top-0 left-0 z-10"
+      "h-full border-l border-t border-gray-200",
+      header && "left-0 top-0 z-10 bg-gray-50"
     )}
   >
     {children}
@@ -45,7 +45,7 @@ const ErrorCell: FC = () => {
 };
 
 const Header: FC<{ text: string }> = ({ text }) => (
-  <div className="p-2 text-xs break-all">{text}</div>
+  <div className="break-all p-2 text-xs">{text}</div>
 );
 
 const Cell: FC<{
@@ -114,7 +114,7 @@ export const RelativeValuesGridChart: FC<Props> = ({ plot, environment }) => {
         </div>
       )}
       <div
-        className="grid w-fit border-r border-b border-gray-200"
+        className="grid w-fit border-b border-r border-gray-200"
         style={{
           gridTemplateColumns: `repeat(${ids.length + 1}, 140px)`,
         }}

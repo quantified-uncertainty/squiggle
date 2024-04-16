@@ -324,7 +324,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     height: height ?? "100vh",
     onCodeChange,
     renderExtraControls: () => (
-      <div className="h-full flex items-center justify-end gap-2">
+      <div className="flex h-full items-center justify-end gap-2">
         {model.isEditable || forceVersionPicker ? (
           <SquigglePlaygroundVersionPicker
             version={version}

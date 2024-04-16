@@ -67,7 +67,7 @@ export const GroupMemberList: FC<Props> = ({ groupRef }) => {
           </DotsDropdown>
         )}
       </div>
-      <div className="space-y-2 mt-2">
+      <div className="mt-2 space-y-2">
         {group.memberships.edges.map(({ node: membership }) => (
           <GroupMemberCard
             key={membership.id}

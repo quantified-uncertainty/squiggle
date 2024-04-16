@@ -23,7 +23,7 @@ const linkClasses = "items-center flex hover:text-gray-900";
 
 export const PageFooter: FC = () => {
   const logoSection = (
-    <div className="flex items-center gap-x-5 h-16">
+    <div className="flex h-16 items-center gap-x-5">
       <Image
         src={logoPic}
         width={40}
@@ -82,8 +82,8 @@ export const PageFooter: FC = () => {
   );
 
   return (
-    <div className="px-8 py-4 border-t border-t-slate-200 bg-slate-100">
-      <div className="text-sm text-slate-400 flex justify-between max-w-4xl mx-auto flex-col gap-4 sm:flex-row ">
+    <div className="border-t border-t-slate-200 bg-slate-100 px-8 py-4">
+      <div className="mx-auto flex max-w-4xl flex-col justify-between gap-4 text-sm text-slate-400 sm:flex-row ">
         {logoSection}
         {internalLinkSection}
         {externalLinkSection}

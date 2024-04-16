@@ -35,7 +35,7 @@ const StyledTabInner: FC<StyledTabButtonType> = ({
   <>
     <span
       className={clsx(
-        "p-1 pl-2.5 pr-2.5 rounded-md flex items-center text-sm font-medium",
+        "flex items-center rounded-md p-1 pl-2.5 pr-2.5 text-sm font-medium",
         isSelected && "bg-white shadow-sm ring-1 ring-black ring-opacity-5"
       )}
     >

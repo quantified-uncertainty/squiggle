@@ -126,7 +126,7 @@ const ModelList: FC<{ modelsRef: UpgradeVersionsPage_List$key }> = ({
 
   return (
     <div>
-      <div className="flex gap-2 items-center">
+      <div className="flex items-center gap-2">
         <div>
           Model:{" "}
           <StyledLink
@@ -249,7 +249,7 @@ export const UpgradeVersionsPage: FC<{
           </strong>
         </p>
       </div>
-      <div className="text-sm mt-2">
+      <div className="mt-2 text-sm">
         <div>Dev models: {devCount}</div>
         <div>
           {defaultSquiggleVersion} models: {latestCount}

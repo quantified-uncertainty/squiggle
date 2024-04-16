@@ -16,7 +16,7 @@ export const SimulatingIndicator: FC<{
   return (
     <div
       className={clsx(
-        "text-sm whitespace-nowrap",
+        "whitespace-nowrap text-sm",
         _isSimulating ? "text-zinc-200" : "text-zinc-400"
       )}
     >

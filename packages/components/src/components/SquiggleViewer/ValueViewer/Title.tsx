@@ -100,7 +100,7 @@ export const Title: FC<TitleProps> = (props) => {
   return (
     <div
       className={clsx(
-        "leading-3 flex flex-row items-center",
+        "flex flex-row items-center leading-3",
         showColon && "mr-3"
       )}
     >
@@ -116,7 +116,7 @@ export const Title: FC<TitleProps> = (props) => {
       >
         {title}
       </div>
-      {showColon && <div className="text-gray-400 font-mono">:</div>}
+      {showColon && <div className="font-mono text-gray-400">:</div>}
     </div>
   );
 };

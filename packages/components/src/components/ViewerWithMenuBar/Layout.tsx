@@ -13,7 +13,7 @@ export const Layout: FC<{
     <div className="flex flex-col overflow-y-auto">
       <div
         className={clsx(
-          `flex justify-between items-center h-8 mb-1`,
+          `mb-1 flex h-8 items-center justify-between`,
           `px-${xPadding}`
         )}
       >

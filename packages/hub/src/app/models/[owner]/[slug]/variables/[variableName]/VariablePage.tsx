@@ -27,8 +27,8 @@ const VariableRevisionsPanel: FC<{
   loadNext?: (count: number) => void;
 }> = ({ revisions, selected, changeId, loadNext }) => {
   return (
-    <div className="w-[150px] ml-4 bg-gray-50 rounded-sm py-2 px-3 flex flex-col">
-      <h3 className="text-sm font-medium text-gray-700 border-b mb-1 pb-0.5">
+    <div className="ml-4 flex w-[150px] flex-col rounded-sm bg-gray-50 px-3 py-2">
+      <h3 className="mb-1 border-b pb-0.5 text-sm font-medium text-gray-700">
         Revisions
       </h3>
       <ul>
@@ -37,7 +37,7 @@ const VariableRevisionsPanel: FC<{
             key={revision.id}
             onClick={() => changeId(revision.id)}
             className={clsx(
-              "hover:text-gray-800 cursor-pointer hover:underline text-sm pt-0.5 pb-0.5",
+              "cursor-pointer pb-0.5 pt-0.5 text-sm hover:text-gray-800 hover:underline",
               revision.id === selected ? "text-blue-900" : "text-gray-400"
             )}
           >
@@ -116,7 +116,7 @@ export const VariablePageBody: FC<{
       case "SquiggleSnippet": {
         return (
           <div className="flex">
-            <div className="flex-1 w-full">
+            <div className="w-full flex-1">
               <SquiggleVariableRevisionPage
                 key={selected}
                 variableName={variableName}

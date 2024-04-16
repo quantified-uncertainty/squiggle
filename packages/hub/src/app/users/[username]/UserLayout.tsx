@@ -80,7 +80,7 @@ const NewButton: FC = () => {
 
   return (
     <Button onClick={() => router.push(link)}>
-      <div className="flex gap-1 items-center">
+      <div className="flex items-center gap-1">
         <PlusIcon size={16} />
         {text}
       </div>
@@ -104,11 +104,11 @@ export const UserLayout: FC<
     <div className="space-y-8">
       <H1 size="large">
         <div className="flex items-center">
-          <UserIcon className="opacity-50 mr-2" />
+          <UserIcon className="mr-2 opacity-50" />
           {user.username}
         </div>
       </H1>
-      <div className="flex gap-4 items-center">
+      <div className="flex items-center gap-4">
         <StyledTabLink.List>
           {isMe || user.models.edges.length ? (
             <StyledTabLink

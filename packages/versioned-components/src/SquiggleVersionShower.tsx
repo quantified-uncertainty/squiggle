@@ -28,7 +28,7 @@ export const SquiggleVersionShower: FC<{ version: string }> = ({ version }) => {
   return (
     <div className="flex items-center gap-2">
       <CurrentIcon size={14} className="text-slate-500" />
-      <div className="text-slate-600 text-sm">
+      <div className="text-sm text-slate-600">
         {uncheckedVersionTitle(version)}
       </div>
     </div>

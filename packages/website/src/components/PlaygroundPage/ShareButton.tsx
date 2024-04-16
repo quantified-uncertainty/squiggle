@@ -17,7 +17,7 @@ export const ShareButton = () => {
           "Copied!"
         ) : (
           <div className="flex items-center space-x-1">
-            <ClipboardCopyIcon className="w-4 h-4" />
+            <ClipboardCopyIcon className="h-4 w-4" />
             <span>Share link</span>
           </div>
         )}

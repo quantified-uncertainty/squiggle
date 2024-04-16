@@ -25,7 +25,7 @@ export const FormSectionHeader: FC<{ headerName: string }> = ({
 );
 
 const FormDivider: FC = () => (
-  <div className="border-b border-slate-400 pt-8 mb-6" />
+  <div className="mb-6 border-b border-slate-400 pt-8" />
 );
 
 const FormSection: FC<PropsWithChildren<{ headerName: string }>> = ({
@@ -67,7 +67,7 @@ export const HTMLForm: FC = () => {
         <div className="space-y-3">
           <div className="space-y-2">
             {clusterFields.map((_, i) => (
-              <div key={i} className="border-t pb-4 border-slate-200 space-y-2">
+              <div key={i} className="space-y-2 border-t border-slate-200 pb-4">
                 <div className="flex items-end gap-4">
                   <SlugFormField<FormShape>
                     label="ID"
@@ -108,7 +108,7 @@ export const HTMLForm: FC = () => {
             {itemFields.map((_, i) => (
               <div
                 key={i}
-                className="border-b pt-4 pb-6 border-slate-200 space-y-2"
+                className="space-y-2 border-b border-slate-200 pb-6 pt-4"
               >
                 <SlugFormField<FormShape>
                   label="ID"

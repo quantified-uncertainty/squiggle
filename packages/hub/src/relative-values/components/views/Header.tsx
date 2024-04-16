@@ -12,7 +12,7 @@ export const Header: FC<{
 
   const cluster = item.clusterId ? clusters[item.clusterId] : undefined;
   return (
-    <div className="text-sm p-1 font-semibold text-slate-800 flex">
+    <div className="flex p-1 text-sm font-semibold text-slate-800">
       {cluster ? (
         <div className="float-left px-0.5 pr-2 pt-1.5">
           <ClusterIcon cluster={cluster} />
