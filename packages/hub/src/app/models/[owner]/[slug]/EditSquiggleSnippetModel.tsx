@@ -331,7 +331,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           <SquigglePlaygroundVersionPicker
             version={version}
             onChange={handleVersionChange}
-            size="small"
             showUpdatePolicy
           />
         ) : (

@@ -113,7 +113,6 @@ export const PlaygroundPage: FC<{ version: string | null }> = (props) => {
               <div className="flex h-full items-center justify-end gap-2">
                 <ShareButton />
                 <SquigglePlaygroundVersionPicker
-                  size="small"
                   version={version}
                   onChange={onVersionChange}
                 />
