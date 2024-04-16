@@ -21,7 +21,7 @@ export const badgeCss = (presentAsLink: boolean) => {
   return clsx(
     "flex items-center",
     presentAsLink &&
-      "cursor-pointer hover:text-gray-900 hover:underline select-none",
+      "cursor-pointer hover:text-gray-900 hover:underline select-none"
   );
 };
 

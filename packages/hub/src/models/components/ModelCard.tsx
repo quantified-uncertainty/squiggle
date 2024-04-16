@@ -125,12 +125,12 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
     ({ variableName, definition: { slug } }) => ({
       variableName,
       slug,
-    }),
+    })
   );
 
   const totalImportCount = totalImportLength(
     variableRevisions,
-    relativeValuesExports,
+    relativeValuesExports
   );
   const { buildStatus, lastBuild, content } = currentRevision;
   const body =
