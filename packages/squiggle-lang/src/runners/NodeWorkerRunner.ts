@@ -36,6 +36,7 @@ export class NodeWorkerRunner extends BaseRunner {
 
         worker.terminate();
         if (data.payload.ok) {
+          console.log(JSON.stringify(data.payload.value.bundle, null, 2));
           const deserializer = squiggleCodec.makeDeserializer(
             data.payload.value.bundle
           );

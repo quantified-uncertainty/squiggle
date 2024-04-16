@@ -8,17 +8,11 @@ import {
   LambdaExpressionParameter,
 } from "./index.js";
 
-/**
- * TODO:
- * - Array
- * - Dict
- * */
-
 type SerializedLambdaExpressionParameter = Omit<
   LambdaExpressionParameter,
   "annotation"
 > & {
-  annotation?: SerializedExpression;
+  annotation?: number;
 };
 
 type SerializedExpressionByKindGeneric<
@@ -53,36 +47,36 @@ export type SerializedExpression =
       }
     >
   | SerializedExpressionByKindGeneric<"Value", number>
-  | SerializedExpressionByKindGeneric<"Block", SerializedExpression[]>
+  | SerializedExpressionByKindGeneric<"Block", number[]>
   | SerializedExpressionByKindObjectLike<
       "Program",
       "statements",
       {
-        statements: SerializedExpression[];
+        statements: number[];
       }
     >
   | SerializedExpressionByKindObjectLike<
       "Ternary",
       "condition" | "ifTrue" | "ifFalse",
       {
-        condition: SerializedExpression;
-        ifTrue: SerializedExpression;
-        ifFalse: SerializedExpression;
+        condition: number;
+        ifTrue: number;
+        ifFalse: number;
       }
     >
   | SerializedExpressionByKindObjectLike<
       "Assign",
       "right",
       {
-        right: SerializedExpression;
+        right: number;
       }
     >
   | SerializedExpressionByKindObjectLike<
       "Call",
       "fn" | "args",
       {
-        fn: SerializedExpression;
-        args: SerializedExpression[];
+        fn: number;
+        args: number[];
       }
     >
   | SerializedExpressionByKindObjectLike<
@@ -90,14 +84,11 @@ export type SerializedExpression =
       "parameters" | "body",
       {
         parameters: SerializedLambdaExpressionParameter[];
-        body: SerializedExpression;
+        body: number;
       }
     >
-  | SerializedExpressionByKindGeneric<"Array", SerializedExpression[]>
-  | SerializedExpressionByKindGeneric<
-      "Dict",
-      [SerializedExpression, SerializedExpression][]
-    >;
+  | SerializedExpressionByKindGeneric<"Array", number[]>
+  | SerializedExpressionByKindGeneric<"Dict", [number, number][]>;
 
 export function serializeExpression(
   expression: Expression,
@@ -115,25 +106,23 @@ export function serializeExpression(
         value: {
           ...expression.value,
           statements: expression.value.statements.map((statement) =>
-            serializeExpression(statement, visit)
+            visit.expression(statement)
           ),
         },
       };
     case "Block":
       return {
         ...expression,
-        value: expression.value.map((statement) =>
-          serializeExpression(statement, visit)
-        ),
+        value: expression.value.map((statement) => visit.expression(statement)),
       };
     case "Ternary":
       return {
         ...expression,
         value: {
           ...expression.value,
-          condition: serializeExpression(expression.value.condition, visit),
-          ifTrue: serializeExpression(expression.value.ifTrue, visit),
-          ifFalse: serializeExpression(expression.value.ifFalse, visit),
+          condition: visit.expression(expression.value.condition),
+          ifTrue: visit.expression(expression.value.ifTrue),
+          ifFalse: visit.expression(expression.value.ifFalse),
         },
       };
     case "Assign":
@@ -141,7 +130,7 @@ export function serializeExpression(
         ...expression,
         value: {
           ...expression.value,
-          right: serializeExpression(expression.value.right, visit),
+          right: visit.expression(expression.value.right),
         },
       };
 
@@ -150,10 +139,8 @@ export function serializeExpression(
         ...expression,
         value: {
           ...expression.value,
-          fn: serializeExpression(expression.value.fn, visit),
-          args: expression.value.args.map((arg) =>
-            serializeExpression(arg, visit)
-          ),
+          fn: visit.expression(expression.value.fn),
+          args: expression.value.args.map((arg) => visit.expression(arg)),
         },
       };
     case "Lambda":
@@ -164,28 +151,23 @@ export function serializeExpression(
           parameters: expression.value.parameters.map((parameter) => ({
             ...parameter,
             annotation: parameter.annotation
-              ? serializeExpression(parameter.annotation, visit)
+              ? visit.expression(parameter.annotation)
               : undefined,
           })),
-          body: serializeExpression(expression.value.body, visit),
+          body: visit.expression(expression.value.body),
         },
       };
     case "Array":
       return {
         ...expression,
-        value: expression.value.map((value) =>
-          serializeExpression(value, visit)
-        ),
+        value: expression.value.map((value) => visit.expression(value)),
       };
     case "Dict":
       return {
         ...expression,
         value: expression.value.map(
           ([key, value]) =>
-            [
-              serializeExpression(key, visit),
-              serializeExpression(value, visit),
-            ] as [SerializedExpression, SerializedExpression]
+            [visit.expression(key), visit.expression(value)] as [number, number]
         ),
       };
     default:
@@ -209,7 +191,7 @@ export function deserializeExpression(
         value: {
           ...expression.value,
           statements: expression.value.statements.map((statement) =>
-            deserializeExpression(statement, visit)
+            visit.expression(statement)
           ),
         },
       };
@@ -217,18 +199,16 @@ export function deserializeExpression(
     case "Block":
       return {
         ...expression,
-        value: expression.value.map((statement) =>
-          deserializeExpression(statement, visit)
-        ),
+        value: expression.value.map((statement) => visit.expression(statement)),
       };
     case "Ternary":
       return {
         ...expression,
         value: {
           ...expression.value,
-          condition: deserializeExpression(expression.value.condition, visit),
-          ifTrue: deserializeExpression(expression.value.ifTrue, visit),
-          ifFalse: deserializeExpression(expression.value.ifFalse, visit),
+          condition: visit.expression(expression.value.condition),
+          ifTrue: visit.expression(expression.value.ifTrue),
+          ifFalse: visit.expression(expression.value.ifFalse),
         },
       };
     case "Assign":
@@ -236,7 +216,7 @@ export function deserializeExpression(
         ...expression,
         value: {
           ...expression.value,
-          right: deserializeExpression(expression.value.right, visit),
+          right: visit.expression(expression.value.right),
         },
       };
     case "Call":
@@ -244,10 +224,8 @@ export function deserializeExpression(
         ...expression,
         value: {
           ...expression.value,
-          fn: deserializeExpression(expression.value.fn, visit),
-          args: expression.value.args.map((arg) =>
-            deserializeExpression(arg, visit)
-          ),
+          fn: visit.expression(expression.value.fn),
+          args: expression.value.args.map((arg) => visit.expression(arg)),
         },
       };
     case "Lambda":
@@ -258,28 +236,26 @@ export function deserializeExpression(
           parameters: expression.value.parameters.map((parameter) => ({
             ...parameter,
             annotation: parameter.annotation
-              ? deserializeExpression(parameter.annotation, visit)
+              ? visit.expression(parameter.annotation)
               : undefined,
           })),
-          body: deserializeExpression(expression.value.body, visit),
+          body: visit.expression(expression.value.body),
         },
       };
     case "Array":
       return {
         ...expression,
-        value: expression.value.map((value) =>
-          deserializeExpression(value, visit)
-        ),
+        value: expression.value.map((value) => visit.expression(value)),
       };
     case "Dict":
       return {
         ...expression,
         value: expression.value.map(
           ([key, value]) =>
-            [
-              deserializeExpression(key, visit),
-              deserializeExpression(value, visit),
-            ] as [Expression, Expression]
+            [visit.expression(key), visit.expression(value)] as [
+              Expression,
+              Expression,
+            ]
         ),
       };
     default:
