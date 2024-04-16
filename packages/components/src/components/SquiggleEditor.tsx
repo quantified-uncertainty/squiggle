@@ -56,7 +56,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   return (
     <div>
       <div
-        className="border border-gray-200 bg-gray-50 rounded-sm p-2"
+        className="rounded-sm border border-gray-200 bg-gray-50 p-2"
         data-testid="squiggle-editor"
       >
         <CodeEditor

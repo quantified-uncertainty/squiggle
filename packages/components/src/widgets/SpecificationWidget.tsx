@@ -103,11 +103,11 @@ const SpecificationView: FC<{ specification: SqSpecification }> = ({
 }) => {
   return (
     <div>
-      <div className="flex space-x-1.5 items-center text-emerald-800 opacity-80 mb-3">
+      <div className="mb-3 flex items-center space-x-1.5 text-emerald-800 opacity-80">
         <CubeTransparentIcon className="flex" size={16} />
         <span className="flex text-xs">Specification</span>
       </div>
-      <div className="font-medium text-emerald-900 mb-1">
+      <div className="mb-1 font-medium text-emerald-900">
         {specification.name}
       </div>
       {specification.documentation && (

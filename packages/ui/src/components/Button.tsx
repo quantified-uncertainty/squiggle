@@ -37,8 +37,8 @@ export const Button: FC<ButtonProps> = ({
       className={clsx(
         "border text-sm font-medium",
         theme === "primary"
-          ? "bg-emerald-500 border-emerald-600 text-white"
-          : "bg-slate-100 border-slate-300 text-gray-600",
+          ? "border-emerald-600 bg-emerald-500 text-white"
+          : "border-slate-300 bg-slate-100 text-gray-600",
         disabled
           ? "opacity-60"
           : theme === "primary"

@@ -5,7 +5,7 @@ export const FormSection: React.FC<{
   children: React.ReactNode;
 }> = ({ title, children }) => (
   <div>
-    <header className="text-md leading-4 font-medium text-gray-600">
+    <header className="text-md font-medium leading-4 text-gray-600">
       {title}
     </header>
     <div className="mt-4">{children}</div>

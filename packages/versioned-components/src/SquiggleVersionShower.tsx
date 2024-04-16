@@ -24,7 +24,7 @@ export function versionIcon(version: string) {
 
 export const SquiggleVersionShower: FC<{ version: string }> = ({ version }) => {
   return (
-    <div className="flex items-center font-light space-x-1.5 text-sm px-4 h-full cursor-pointer hover:bg-gray-50 select-none whitespace-nowrap transition hover:text-gray-900 text-gray-500">
+    <div className="flex h-full cursor-pointer select-none items-center space-x-1.5 whitespace-nowrap px-4 text-sm font-light text-gray-500 transition hover:bg-gray-50 hover:text-gray-900">
       <div className="flex">{uncheckedVersionTitle(version)}</div>
       <ChevronRightIcon className="rotate-90" size={14} />
     </div>

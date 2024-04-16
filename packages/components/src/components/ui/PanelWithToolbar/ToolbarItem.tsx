@@ -33,7 +33,7 @@ export const ToolbarItem: FC<Props> = ({
   const main = (
     <div
       className={clsx(
-        "flex items-center font-light text-gray-500 space-x-1.5 text-sm px-4 h-full cursor-pointer hover:bg-gray-50 select-none whitespace-nowrap transition hover:text-gray-900",
+        "flex h-full cursor-pointer select-none items-center space-x-1.5 whitespace-nowrap px-4 text-sm font-light text-gray-500 transition hover:bg-gray-50 hover:text-gray-900",
         className
       )}
       onClick={onClick}

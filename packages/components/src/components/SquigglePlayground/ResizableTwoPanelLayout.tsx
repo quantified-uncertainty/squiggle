@@ -91,7 +91,7 @@ export const ResizableTwoPanelLayout: FC<Props> = ({
         >
           <div
             ref={handleRef}
-            className="absolute top-0 h-full border-l border-slate-200 hover:border-blue-500 transition cursor-ew-resize"
+            className="absolute top-0 h-full cursor-ew-resize border-l border-slate-200 transition hover:border-blue-500"
             style={{ width: 5, right: -5 }}
           />
         </DraggableCore>

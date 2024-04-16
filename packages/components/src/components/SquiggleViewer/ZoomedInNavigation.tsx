@@ -34,7 +34,7 @@ export const ZoomedInNavigation: FC<{
     : zoomedInPath.allPrefixPaths();
 
   return (
-    <div className="flex items-center mt-1">
+    <div className="mt-1 flex items-center">
       <ZoomedInNavigationItem onClick={zoomOut} text="Home" />
 
       {/* We remove the last element, because it's the one being shown  */}

@@ -16,7 +16,7 @@ export const SimulatingIndicator: FC<{
   return (
     <div
       className={clsx(
-        "text-sm whitespace-nowrap font-light",
+        "whitespace-nowrap text-sm font-light",
         _isSimulating ? "text-gray-200" : "text-gray-500"
       )}
     >

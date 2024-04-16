@@ -27,9 +27,7 @@ export const SquigglePlaygroundVersionPicker: FC<{
   onChange: (newVersion: SquiggleVersion) => void;
   // This is mostly Squiggle Hub specific, but we might later decide to do auto-updates in Squiggle Playground too.
   showUpdatePolicy?: boolean;
-  // "medium" was intended for "New Model" form in Squiggle Hub, but it's currently unused
-  size: "small" | "medium";
-}> = ({ version, onChange, showUpdatePolicy, size }) => {
+}> = ({ version, onChange, showUpdatePolicy }) => {
   return (
     <div className="flex h-full">
       <Dropdown

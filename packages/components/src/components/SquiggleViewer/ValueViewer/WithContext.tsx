@@ -137,7 +137,7 @@ export const ValueWithContextViewer: FC<Props> = ({
       return (
         <div
           className={clsx(
-            "w-4 mr-1.5 flex justify-center cursor-pointer hover:!text-gray-600",
+            "mr-1.5 flex w-4 cursor-pointer justify-center hover:!text-gray-600",
             isOpen ? "text-gray-200" : "text-gray-500"
           )}
           onClick={handle.toggleCollapsed}
@@ -178,7 +178,7 @@ export const ValueWithContextViewer: FC<Props> = ({
             }}
             tabIndex={viewerType === "tooltip" ? undefined : 0}
             className={clsx(
-              "flex justify-between group pr-0.5 hover:bg-gray-100 rounded-sm focus-visible:outline-none",
+              "group flex justify-between rounded-sm pr-0.5 hover:bg-gray-100 focus-visible:outline-none",
               isZoomedIn
                 ? "mb-2 px-0.5 py-1 focus:bg-indigo-50"
                 : "focus:bg-indigo-100"

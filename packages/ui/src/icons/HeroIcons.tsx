@@ -173,8 +173,8 @@ export const ChevronRightIcon: FC<IconProps> = (props) => (
     fill="none"
   >
     <path
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       d="m8.25 4.5 7.5 7.5-7.5 7.5"
     />
   </Icon>
@@ -189,8 +189,8 @@ export const ChevronLeftIcon: FC<IconProps> = (props) => (
     fill="none"
   >
     <path
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       d="M15.75 19.5 8.25 12l7.5-7.5"
     />
   </Icon>

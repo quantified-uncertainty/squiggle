@@ -13,11 +13,11 @@ export const Layout: FC<{
     <div className="flex flex-col overflow-y-auto">
       <div
         className={clsx(
-          `flex justify-between items-center h-8 mb-1 border-b border-gray-200 overflow-hidden`,
+          `mb-1 flex h-8 items-center justify-between overflow-hidden border-b border-gray-200`,
           `px-${xPadding}`
         )}
       >
-        <div className="h-full grid place-items-stretch">{menu}</div>
+        <div className="grid h-full place-items-stretch">{menu}</div>
         <div className="flex items-center">
           {indicator}
           {changeSeedAndRunButton}
