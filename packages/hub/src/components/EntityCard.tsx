@@ -39,10 +39,10 @@ export const EntityCard: FC<Props> = ({
 }) => {
   return (
     <Card>
-      <div className="flex flex-col h-full">
+      <div className="flex h-full flex-col">
         <div className="mb-1">
           <Link
-            className="text-gray-900 font-medium hover:underline"
+            className="font-medium text-gray-900 hover:underline"
             href={href}
           >
             {showOwner ? ownerName + "/" : ""}
@@ -50,7 +50,7 @@ export const EntityCard: FC<Props> = ({
           </Link>
         </div>
         {<div className="flex-grow">{children}</div>}
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-gray-500 text-xs mt-3">
+        <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-2 text-xs text-gray-500">
           {footerItems}
           {isPrivate && <LockIcon className="400" size={14} />}
           <div>

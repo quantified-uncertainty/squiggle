@@ -91,12 +91,12 @@ export const ResizableTwoPanelLayout: FC<Props> = ({
         >
           <div
             ref={handleRef}
-            className="absolute top-0 h-full border-l border-slate-300 hover:border-blue-500 transition cursor-ew-resize"
+            className="absolute top-0 h-full cursor-ew-resize border-l border-slate-300 transition hover:border-blue-500"
             style={{ width: 5, right: -5 }}
           />
         </DraggableCore>
       </div>
-      <div className="flex-1 flex flex-col overflow-y-auto">
+      <div className="flex flex-1 flex-col overflow-y-auto">
         {renderRight()}
       </div>
     </div>

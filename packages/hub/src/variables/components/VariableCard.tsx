@@ -73,7 +73,7 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
       footerItems={
         <>
           <a
-            className="cursor-pointer items-center flex text-xs text-gray-500 hover:text-gray-900 hover:underline"
+            className="flex cursor-pointer items-center text-xs text-gray-500 hover:text-gray-900 hover:underline"
             href={modelRoute({
               owner: variable.owner.slug,
               slug: variable.model.slug,
@@ -81,7 +81,7 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
           >
             {`${variable.owner.slug}/${variable.model.slug}`}
           </a>
-          <div className="items-center flex text-xs text-gray-500">
+          <div className="flex items-center text-xs text-gray-500">
             <Icon size={10} className="mr-1" />
             {currentRevision.variableType}
           </div>

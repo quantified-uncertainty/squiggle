@@ -37,7 +37,7 @@ const FunctionCallErrorAlert: FC<{ error: SqError }> = ({ error }) => {
     <MessageAlert heading="Function Display Failed">
       <div className="space-y-2">
         <span
-          className="underline decoration-dashed cursor-pointer"
+          className="cursor-pointer underline decoration-dashed"
           onClick={() => setExpanded(!expanded)}
         >
           {expanded ? "Hide" : "Show"} error details

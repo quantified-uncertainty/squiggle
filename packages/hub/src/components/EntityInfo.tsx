@@ -31,13 +31,13 @@ const Entity: FC<EntityNode & { isFirst: boolean; isLast: boolean }> = ({
   const content = (
     <div
       className={clsx(
-        "flex items-center gap-1 group py-2 pr-3",
+        "group flex items-center gap-1 py-2 pr-3",
         !isFirst && "pl-3"
       )}
     >
       {Icon && (
         <Icon
-          className="text-slate-600 opacity-50 group-hover:opacity-100 transition mr-1"
+          className="mr-1 text-slate-600 opacity-50 transition group-hover:opacity-100"
           size={18}
         />
       )}

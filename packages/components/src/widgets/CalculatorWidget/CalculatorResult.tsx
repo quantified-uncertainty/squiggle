@@ -71,7 +71,7 @@ export const CalculatorResult: FC<Props> = ({
   }, [updateSavedState, calculator, calculatorResult]);
 
   return (
-    <div className="py-3 px-5">
+    <div className="px-5 py-3">
       {!autorun && (
         <div className="mb-3">
           <Button size="small" onClick={runCalculator} theme="primary">
@@ -81,7 +81,7 @@ export const CalculatorResult: FC<Props> = ({
       )}
       {calculatorResult ? (
         <div>
-          <div className="text-sm font-semibold text-gray-700 mb-2">Result</div>
+          <div className="mb-2 text-sm font-semibold text-gray-700">Result</div>
           <SquiggleValueResultChart
             result={calculatorResult}
             settings={settings}

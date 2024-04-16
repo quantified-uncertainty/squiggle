@@ -93,11 +93,11 @@ export const ModelAccessControls: FC<{ modelRef: ModelAccessControls$key }> = ({
     // TODO: copy-pasted from CacheMenu from relative-values, extract to <InvisibleMaybeDropdown> or something
     <div
       className={clsx(
-        "flex items-center text-sm text-gray-500 px-2 py-1 rounded-sm",
-        model.isEditable && "hover:bg-slate-200 cursor-pointer"
+        "flex items-center rounded-sm px-2 py-1 text-sm text-gray-500",
+        model.isEditable && "cursor-pointer hover:bg-slate-200"
       )}
     >
-      <Icon className="text-gray-500 mr-1" size={14} />
+      <Icon className="mr-1 text-gray-500" size={14} />
       {model.isPrivate ? "Private" : "Public"}
     </div>
   );

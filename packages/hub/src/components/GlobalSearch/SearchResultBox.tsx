@@ -5,7 +5,7 @@ export const SearchResultBox: FC<PropsWithChildren<{ name: string }>> = ({
   children,
 }) => (
   <div>
-    <div className="text-sm text-slate-400 capitalize">{name}</div>
+    <div className="text-sm capitalize text-slate-400">{name}</div>
     <div className="text-sm">{children}</div>
   </div>
 );

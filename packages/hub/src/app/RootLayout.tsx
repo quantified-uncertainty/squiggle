@@ -30,13 +30,13 @@ const InnerRootLayout: FC<PropsWithChildren> = ({ children }) => {
   const showFooter = !isModelRoute(pathname);
 
   return (
-    <div className={"min-h-screen flex flex-col bg-white"}>
+    <div className={"flex min-h-screen flex-col bg-white"}>
       <PageMenu queryRef={queryData} />
       <div
         // This allows us to center children vertically if necessary, e.g. in `not-found.tsx`.
         // Note that setting `height: 100%` instead of `flex-1` on children won't work;
         // see https://stackoverflow.com/questions/8468066/child-inside-parent-with-min-height-100-not-inheriting-height for details.
-        className="flex-1 flex flex-col"
+        className="flex flex-1 flex-col"
       >
         {children}
       </div>

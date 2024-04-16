@@ -8,7 +8,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
   args: {
-    children: <div className="flex border p-1 w-24">Hover me</div>,
+    children: <div className="flex w-24 border p-1">Hover me</div>,
     text: "Tooltip text",
     placement: "top",
   },
@@ -16,7 +16,7 @@ export const Primary: Story = {
 
 export const Long: Story = {
   args: {
-    children: <div className="flex border p-1 w-24">Hover me</div>,
+    children: <div className="flex w-24 border p-1">Hover me</div>,
     text: "Prow scuttle parrel provost Sail ho shrouds spirits boom mizzenmast yardarm. Pinnace holystone mizzenmast quarter crow's nest nipperkin grog yardarm hempen halter furl. Swab barque interloper chantey doubloon starboard grog black jack gangway rutters.",
     placement: "top",
   },

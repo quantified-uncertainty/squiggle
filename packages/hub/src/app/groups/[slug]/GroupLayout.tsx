@@ -52,7 +52,7 @@ const NewButton: FC<{ group: string }> = ({ group }) => {
 
   return (
     <Button onClick={() => router.push(link)}>
-      <div className="flex gap-1 items-center">
+      <div className="flex items-center gap-1">
         <PlusIcon size={16} />
         New Model
       </div>
@@ -76,7 +76,7 @@ export const GroupLayout: FC<
     <div className="space-y-8">
       <H1 size="large">
         <div className="flex items-center">
-          <GroupIcon className="opacity-50 mr-2" />
+          <GroupIcon className="mr-2 opacity-50" />
           {group.slug}
         </div>
       </H1>

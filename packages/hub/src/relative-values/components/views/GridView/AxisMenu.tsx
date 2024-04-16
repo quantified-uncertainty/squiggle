@@ -51,7 +51,7 @@ const SortBy: FC<{
   };
 
   return (
-    <div className="flex items-center cursor-pointer group" onClick={setSort}>
+    <div className="group flex cursor-pointer items-center" onClick={setSort}>
       <Icon
         className={
           isCurrentMode
@@ -81,7 +81,7 @@ export const AxisMenu: FC<{ axis: Axis; sortByAverage?: boolean }> = ({
     },
   } = useRelativeValuesContext();
   return (
-    <div className="px-6 py-6 min-w-[16em] flex flex-col gap-6">
+    <div className="flex min-w-[16em] flex-col gap-6 px-6 py-6">
       <div>
         <FormHeader>Clusters</FormHeader>
         <ClusterFilter axis={axis} />

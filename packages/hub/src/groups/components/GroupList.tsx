@@ -32,7 +32,7 @@ export const GroupList: FC<Props> = ({ connectionRef, loadNext }) => {
 
   return (
     <div>
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid gap-4 md:grid-cols-2">
         {connection.edges.map((edge) => (
           <GroupCard key={edge.node.id} groupRef={edge.node} />
         ))}

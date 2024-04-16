@@ -12,7 +12,7 @@ const Section: FC<PropsWithChildren<{ title: string; border?: boolean }>> = ({
   children,
 }) => (
   <div className="flex flex-col gap-2">
-    <header className="text-slate-800 font-bold text-center">{title}</header>
+    <header className="text-center font-bold text-slate-800">{title}</header>
     <div className={clsx(border && "border border-slate-100 p-1")}>
       {children}
     </div>

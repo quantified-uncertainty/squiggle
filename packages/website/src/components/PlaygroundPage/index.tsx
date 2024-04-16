@@ -110,7 +110,7 @@ export const PlaygroundPage: FC<{ version: string | null }> = (props) => {
               showSummary: hashData.showSummary ?? true,
             }}
             renderExtraControls={() => (
-              <div className="h-full flex justify-end items-center gap-2">
+              <div className="flex h-full items-center justify-end gap-2">
                 <ShareButton />
                 <SquigglePlaygroundVersionPicker
                   size="small"

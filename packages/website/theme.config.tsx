@@ -14,7 +14,7 @@ const config = {
         height={24}
         alt="Squiggle logo"
       />
-      <span style={{ color: "#cd5835" }} className="font-black font-lato">
+      <span style={{ color: "#cd5835" }} className="font-lato font-black">
         Squiggle
       </span>
     </div>

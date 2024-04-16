@@ -19,7 +19,7 @@ export const StyledInput = forwardRef<HTMLInputElement, StyledInputProps>(
         type={type}
         {...props}
         className={clsx(
-          "form-input block w-full text-sm shadow-sm rounded-md border-slate-300 focus:ring-indigo-500 active:ring-indigo-500 focus:border-indigo-500 active:border-indigo-500 placeholder:text-slate-300 disabled:text-slate-400",
+          "form-input block w-full rounded-md border-slate-300 text-sm shadow-sm placeholder:text-slate-300 focus:border-indigo-500 focus:ring-indigo-500 active:border-indigo-500 active:ring-indigo-500 disabled:text-slate-400",
           size === "normal" ? "h-10" : "h-8"
         )}
       />
