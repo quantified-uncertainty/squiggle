@@ -52,16 +52,12 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
       components={{
         pre({ children }) {
           return (
-<<<<<<< HEAD
             <pre
               className={clsx(
-                "rounded p-2 my-1 not-prose text-[.9em]",
+                "not-prose my-1 rounded p-2 text-[.9em]",
                 backgroundColor
               )}
             >
-=======
-            <pre className="not-prose my-1 rounded bg-slate-50 p-2 text-[.9em]">
->>>>>>> main
               {children}
             </pre>
           );
