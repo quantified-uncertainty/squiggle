@@ -9,6 +9,7 @@ import { CodeBracketSquareIcon } from "@quri/ui";
 import {
   Badge,
   badgeCss,
+  InterspersedMenuItemsWithDots,
   keepFirstNLines,
   PrivateBadge,
   UpdatedStatus,
@@ -75,7 +76,7 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
             {variable.currentRevision?.title || variable.variableName}
           </Link>
         </div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+        <div className="text-sm text-gray-500 mb-1">
           <a
             className={badgeCss(true)}
             href={modelRoute({
@@ -86,12 +87,18 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
             <CodeBracketSquareIcon size={12} className="mr-1" />
             {`${variable.owner.slug}/${variable.model.slug}`}
           </a>
-          <Badge presentAsLink={false}>
-            <Icon size={10} className="mr-1" />
-            {currentRevision.variableType}
-          </Badge>
-          <UpdatedStatus time={createdAtTimestamp} />
-          {variable.model.isPrivate && <PrivateBadge />}
+        </div>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+          <InterspersedMenuItemsWithDots
+            items={[
+              <Badge presentAsLink={false}>
+                <Icon size={10} className="mr-1" />
+                {currentRevision.variableType}
+              </Badge>,
+              <UpdatedStatus time={createdAtTimestamp} />,
+              variable.model.isPrivate && <PrivateBadge />,
+            ]}
+          />
         </div>
       </div>
       {currentRevision.docstring && (
