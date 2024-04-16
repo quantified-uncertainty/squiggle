@@ -27,7 +27,7 @@ export const Footer: FC = () => {
     </div>
   );
   return (
-    <div className="flex-1 nx-mx-auto nx-flex mt-auto">
+    <div className="nx-mx-auto nx-flex mt-auto flex-1">
       <div className="px-3 pb-4">{externalLinkSection}</div>
     </div>
   );

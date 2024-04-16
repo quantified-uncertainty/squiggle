@@ -9,7 +9,7 @@ export const StyledCheckbox = forwardRef<
       type="checkbox"
       ref={ref}
       {...props}
-      className="form-checkbox h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+      className="form-checkbox h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
     />
   );
 });

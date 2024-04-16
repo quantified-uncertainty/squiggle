@@ -25,11 +25,11 @@ const tabInnerSection = (
   Icon?: FC<IconProps>,
   count?: number
 ) => (
-  <div className="items-center flex group-hover:bg-white rounded-md px-3 py-1.5">
+  <div className="flex items-center rounded-md px-3 py-1.5 group-hover:bg-white">
     {Icon && <Icon className="mr-2 opacity-60" size={16} />}
     {name}
     {count && (
-      <span className="ml-2 text-xs text-gray-700 bg-gray-300 px-2 py-0.5 text-center rounded-full">
+      <span className="ml-2 rounded-full bg-gray-300 px-2 py-0.5 text-center text-xs text-gray-700">
         {count}
       </span>
     )}

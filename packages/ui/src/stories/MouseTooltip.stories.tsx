@@ -13,7 +13,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
   args: {
-    children: <div className="flex border p-1 w-24 h-24">Hover me</div>,
+    children: <div className="flex h-24 w-24 border p-1">Hover me</div>,
     isOpen: true,
     render: () => <div>Tooltip text</div>,
   },

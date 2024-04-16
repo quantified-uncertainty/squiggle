@@ -20,7 +20,7 @@ export default async function OuterVariablePage({ params }: Props) {
   });
 
   return (
-    <div className="py-4 px-8">
+    <div className="px-8 py-4">
       <VariablePage query={query} params={params} />
     </div>
   );

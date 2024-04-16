@@ -137,7 +137,7 @@ export const ValueWithContextViewer: FC<Props> = ({
       return (
         <div
           className={clsx(
-            "w-4 mr-1.5 flex justify-center cursor-pointer hover:!text-stone-600",
+            "mr-1.5 flex w-4 cursor-pointer justify-center hover:!text-stone-600",
             isOpen ? "text-stone-600 opacity-40" : "text-stone-800 opacity-40"
           )}
           onClick={handle.toggleCollapsed}
@@ -146,7 +146,7 @@ export const ValueWithContextViewer: FC<Props> = ({
         </div>
       );
     } else {
-      return <div className="w-4 mr-1.5" />;
+      return <div className="mr-1.5 w-4" />;
     }
   };
 
@@ -155,7 +155,7 @@ export const ValueWithContextViewer: FC<Props> = ({
     if (isDictOrList) {
       return (
         <div
-          className="group w-4 shrink-0 flex justify-center cursor-pointer"
+          className="group flex w-4 shrink-0 cursor-pointer justify-center"
           onClick={handle.toggleCollapsed}
         >
           <div className="w-px bg-stone-100 group-hover:bg-stone-400" />
@@ -178,9 +178,9 @@ export const ValueWithContextViewer: FC<Props> = ({
             }}
             tabIndex={viewerType === "tooltip" ? undefined : 0}
             className={clsx(
-              "flex justify-between group pr-0.5 hover:bg-stone-100 rounded-sm focus-visible:outline-none",
+              "group flex justify-between rounded-sm pr-0.5 hover:bg-stone-100 focus-visible:outline-none",
               isZoomedIn
-                ? "focus:bg-indigo-50 mb-2 px-0.5 py-1"
+                ? "mb-2 px-0.5 py-1 focus:bg-indigo-50"
                 : "focus:bg-indigo-100"
             )}
             onFocus={(_) => {
@@ -207,13 +207,13 @@ export const ValueWithContextViewer: FC<Props> = ({
               />
 
               {!isOpen && (
-                <div className="text-sm text-blue-800 ml-2">
+                <div className="ml-2 text-sm text-blue-800">
                   <SquiggleValuePreview value={value} />
                 </div>
               )}
               {!isOpen && <CommentIconForValue value={value} />}
             </div>
-            <div className="inline-flex space-x-2 items-center">
+            <div className="inline-flex items-center space-x-2">
               <SpecificationDropdown value={value} />
               {enableDropdownMenu && <SquiggleValueMenu value={value} />}
               {exportData && exportData.path.length < 2 && onOpenExport && (
@@ -237,7 +237,7 @@ export const ValueWithContextViewer: FC<Props> = ({
                         )
                       }
                       className={clsx(
-                        "transition cursor-pointer",
+                        "cursor-pointer transition",
                         isRootImport
                           ? "text-violet-400 hover:!text-violet-900 group-hover:text-violet-500 group-focus:text-violet-600"
                           : "text-slate-200 hover:!text-slate-900 group-hover:text-slate-400 group-focus:text-slate-400"

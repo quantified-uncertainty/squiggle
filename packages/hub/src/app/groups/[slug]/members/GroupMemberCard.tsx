@@ -52,13 +52,13 @@ export const GroupMemberCard: FC<{
 
   return (
     <Card key={membership.id}>
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <StyledLink href={userRoute({ username: membership.user.username })}>
           {membership.user.username}
         </StyledLink>
         <div>
           {isAdmin ? (
-            <div className="flex gap-1 items-center">
+            <div className="flex items-center gap-1">
               <MembershipRoleButton
                 membershipRef={membership}
                 groupRef={group}
@@ -76,7 +76,7 @@ export const GroupMemberCard: FC<{
               </DotsDropdown>
             </div>
           ) : (
-            <div className="text-slate-500 text-sm font-medium">
+            <div className="text-sm font-medium text-slate-500">
               {membership.role}
             </div>
           )}

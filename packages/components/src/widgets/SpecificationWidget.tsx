@@ -45,10 +45,10 @@ const SpecificationDropdownContent: FC<{
     <div className="px-3 py-2">
       <SpecificationView specification={specification} />
       <div>
-        <div className="mt-5 mb-2">
+        <div className="mb-2 mt-5">
           <div
             className={clsx(
-              "rounded-sm px-2 py-0.5 inline-flex font-medium text-sm items-center space-x-2",
+              "inline-flex items-center space-x-2 rounded-sm px-2 py-0.5 text-sm font-medium",
               hasError
                 ? "bg-red-100 text-red-900"
                 : "bg-green-100 text-green-900"
@@ -59,12 +59,12 @@ const SpecificationDropdownContent: FC<{
           </div>
         </div>
         {specificationStatus.type === "load-error" && (
-          <div className="text-red-700 text-xs">
+          <div className="text-xs text-red-700">
             <SquiggleErrorAlert error={specificationStatus.error} />
           </div>
         )}
         {specificationStatus.type === "validation-failure" && (
-          <div className="text-red-700 text-xs">
+          <div className="text-xs text-red-700">
             {specificationStatus.error}
           </div>
         )}
@@ -103,11 +103,11 @@ const SpecificationView: FC<{ specification: SqSpecification }> = ({
 }) => {
   return (
     <div>
-      <div className="flex space-x-1.5 items-center text-green-800 opacity-80 mb-3">
+      <div className="mb-3 flex items-center space-x-1.5 text-green-800 opacity-80">
         <CubeTransparentIcon className="flex" size={16} />
         <span className="flex text-xs">Specification</span>
       </div>
-      <div className="font-medium text-green-900 mb-1">
+      <div className="mb-1 font-medium text-green-900">
         {specification.name}
       </div>
       {specification.documentation && (
@@ -126,7 +126,7 @@ const SpecificationStatusPreview: FC<{
   return (
     <div
       className={clsx(
-        "rounded-sm cursor-pointer transition px-0.5 flex flex-row items-center space-x-1.5",
+        "flex cursor-pointer flex-row items-center space-x-1.5 rounded-sm px-0.5 transition",
         hasError
           ? "bg-red-100 hover:bg-red-300"
           : "bg-green-100 hover:bg-green-300"
@@ -151,7 +151,7 @@ const SpecificationStatusPreview: FC<{
 widgetRegistry.register("Specification", {
   Preview: () => <CubeTransparentIcon className="text-green-700" size={14} />,
   Chart: (value) => (
-    <div className="py-3 px-2">
+    <div className="px-2 py-3">
       <SpecificationView specification={value.value} />
     </div>
   ),

@@ -107,18 +107,18 @@ export const SummaryTable: FC<SummaryTableProps> = ({
     } else {
       return (
         <TextTooltip text={x.value.toString()}>
-          <XIcon className="w-5 h-5 text-gray-500" />
+          <XIcon className="h-5 w-5 text-gray-500" />
         </TextTooltip>
       );
     }
   };
 
   return (
-    <div className="overflow-x-auto relative">
+    <div className="relative overflow-x-auto">
       <table className="w-full text-left font-light">
         <thead
           className={clsx(
-            "font-light border-b border-slate-200 text-slate-700",
+            "border-b border-slate-200 font-light text-slate-700",
             sizeIsLarge ? "text-sm" : "text-xs"
           )}
         >

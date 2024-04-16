@@ -34,11 +34,11 @@ export const PageMenuLink: FC<Props> = ({
   const Icon = icon;
   return mode === "desktop" ? (
     <Link
-      className="text-white text-sm hover:bg-slate-700 px-2 py-1 rounded-md select-none"
+      className="select-none rounded-md px-2 py-1 text-sm text-white hover:bg-slate-700"
       href={href}
       target={external ? "_blank" : undefined}
     >
-      {Icon && <Icon className="inline-block mr-1 text-slate-400" size={14} />}
+      {Icon && <Icon className="mr-1 inline-block text-slate-400" size={14} />}
       {title}
     </Link>
   ) : (

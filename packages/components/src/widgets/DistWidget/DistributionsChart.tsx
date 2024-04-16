@@ -432,20 +432,20 @@ const InnerDistributionsChart: FC<{
         discreteTooltip ? (
           <div
             className={clsx(
-              "bg-white border border-gray-300 rounded text-xs p-2 grid gap-x-2"
+              "grid gap-x-2 rounded border border-gray-300 bg-white p-2 text-xs"
             )}
             style={{
               gridTemplateColumns: "min-content min-content",
             }}
           >
-            <div className="text-gray-500 text-right">Value:</div>
+            <div className="text-right text-gray-500">Value:</div>
             <div>
               {xScale.tickFormat(
                 undefined,
                 plot.xScale.tickFormat
               )(discreteTooltip.value)}
             </div>
-            <div className="text-gray-500 text-right">Probability:</div>
+            <div className="text-right text-gray-500">Probability:</div>
             <div>
               {yScale.tickFormat(
                 undefined,
@@ -537,7 +537,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
             )}] are not valid probability distributions, because their integrals do not add up to 1.`;
     return (
       <TextTooltip text={message} placement="top">
-        <div className="font-semibold text-xs text-orange-900 bg-orange-100 rounded-md px-1.5 py-0.5 w-fit ml-2">
+        <div className="ml-2 w-fit rounded-md bg-orange-100 px-1.5 py-0.5 text-xs font-semibold text-orange-900">
           Not Normalized
         </div>
       </TextTooltip>

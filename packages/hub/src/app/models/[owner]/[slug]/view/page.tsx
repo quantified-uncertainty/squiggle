@@ -16,7 +16,7 @@ export default async function OuterModelPage({ params }: Props) {
   });
 
   return (
-    <div className="py-4 px-8">
+    <div className="px-8 py-4">
       <ViewModelPage query={query} />
     </div>
   );

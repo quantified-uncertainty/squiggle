@@ -31,7 +31,7 @@ export const GroupInviteCard: FC<{
 
   return (
     <Card key={invite.id}>
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           {invite.__typename === "UserGroupInvite" ? (
             <UserGroupInvite inviteRef={invite} />
@@ -39,8 +39,8 @@ export const GroupInviteCard: FC<{
             "Unknown invite type"
           )}
         </div>
-        <div className="flex gap-1 items-center">
-          <span className="text-slate-500 text-sm">Invited as:</span>
+        <div className="flex items-center gap-1">
+          <span className="text-sm text-slate-500">Invited as:</span>
           <InviteRoleButton inviteRef={invite} />
           <DotsDropdown>
             {({ close }) => (

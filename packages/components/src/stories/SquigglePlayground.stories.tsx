@@ -104,7 +104,7 @@ export const WithExtraControls: Story = {
     defaultCode: "normal(5,2)",
     height: undefined,
     renderExtraControls: ({ openModal }) => (
-      <div className="ml-2 h-full flex items-center">
+      <div className="ml-2 flex h-full items-center">
         <Button size="small" onClick={() => openModal("extra")}>
           Extra modal
         </Button>

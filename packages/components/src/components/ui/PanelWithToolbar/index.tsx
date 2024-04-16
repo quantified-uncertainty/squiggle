@@ -36,32 +36,32 @@ export function PanelWithToolbar<const ModalNames extends string[]>({
 
   //We want to center the title, so need similarly-widthed items on either side
   const modalHeader = modal && (
-    <div className="h-full flex gap-2">
+    <div className="flex h-full gap-2">
       <ToolbarItem
-        className="flex-grow-0 flex-shrink-0 w-20"
+        className="w-20 flex-shrink-0 flex-grow-0"
         onClick={closeModal}
       >
         &larr; Back
       </ToolbarItem>
-      <div className="flex-grow flex-shrink text-center self-center text-sm text-slate-600 font-semibold">
+      <div className="flex-shrink flex-grow self-center text-center text-sm font-semibold text-slate-600">
         {modal.title}
       </div>
-      <div className="flex-grow-0 flex-shrink-0 w-20 invisible"></div>
+      <div className="invisible w-20 flex-shrink-0 flex-grow-0"></div>
     </div>
   );
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1 px-4">
+    <div className="flex h-full flex-col">
+      <div className="mb-1 h-8 overflow-hidden border-b border-slate-200 bg-slate-50 px-4">
         {modal ? (
           modalHeader
         ) : (
-          <div className="h-full grid place-items-stretch">
+          <div className="grid h-full place-items-stretch">
             {renderToolbar({ openModal })}
           </div>
         )}
       </div>
-      <div className="flex-1 grid place-items-stretch overflow-auto">
+      <div className="grid flex-1 place-items-stretch overflow-auto">
         {modal ? <div className="px-4 py-4"> {modal.body} </div> : renderBody()}
       </div>
     </div>

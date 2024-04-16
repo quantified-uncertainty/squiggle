@@ -110,7 +110,7 @@ export const EntityCard: FC<Props> = ({
           {menuItems}
         </div>
         {children && (
-          <div className={"flex-grow mt-3 pb-3 px-5"}>{children}</div>
+          <div className={"mt-3 flex-grow px-5 pb-3"}>{children}</div>
         )}
       </div>
     </div>

@@ -76,7 +76,7 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
             {variable.currentRevision?.title || variable.variableName}
           </Link>
         </div>
-        <div className="text-sm text-gray-500 mb-1">
+        <div className="mb-1 text-sm text-gray-500">
           <a
             className={badgeCss(true)}
             href={modelRoute({

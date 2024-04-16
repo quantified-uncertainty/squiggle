@@ -18,7 +18,7 @@ const ClusterItem: React.FC<{
 }> = ({ cluster, selected, toggle }) => {
   return (
     <div
-      className="flex gap-1 items-center cursor-pointer select-none"
+      className="flex cursor-pointer select-none items-center gap-1"
       onClick={toggle}
     >
       <div className="flex-none">
@@ -26,7 +26,7 @@ const ClusterItem: React.FC<{
       </div>
       <div
         className={clsx(
-          "text-sm hover:text-black font-medium",
+          "text-sm font-medium hover:text-black",
           selected ? "text-gray-600" : "text-gray-400"
         )}
       >

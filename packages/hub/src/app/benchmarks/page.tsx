@@ -111,12 +111,12 @@ const Benchmark: FC<{ version: SquiggleVersion; code: string }> = ({
   }, [run]);
 
   return (
-    <div className="grid grid-cols-subgrid col-span-2">
-      <div className="text-slate-700 font-medium">{version}</div>
+    <div className="col-span-2 grid grid-cols-subgrid">
+      <div className="font-medium text-slate-700">{version}</div>
       {isProcessing ? (
-        <RefreshIcon className="text-slate-500 animate-spin" />
+        <RefreshIcon className="animate-spin text-slate-500" />
       ) : outcome ? (
-        <div className="flex gap-1 items-center">
+        <div className="flex items-center gap-1">
           {outcome.ok ? (
             <CheckIcon className="text-green-700" />
           ) : (

@@ -18,11 +18,11 @@ export class ErrorBoundary extends Component<PropsWithChildren, State> {
   public override render() {
     if (this.state.error) {
       return (
-        <div className="m-2 p-4 bg-red-300 rounded">
+        <div className="m-2 rounded bg-red-300 p-4">
           <header className="mb-2 font-semibold">Fatal Error</header>
           <div className="mb-2">{this.state.error.message}</div>
           <div className="mb-2">Try reloading the browser.</div>
-          <pre className="text-xs overflow-auto">{this.state.error.stack}</pre>
+          <pre className="overflow-auto text-xs">{this.state.error.stack}</pre>
         </div>
       );
     }

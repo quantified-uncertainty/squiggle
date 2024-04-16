@@ -66,7 +66,7 @@ export const TextTooltip: FC<Props> = ({
                 },
               })}
             >
-              <div className="text-white max-w-sm">{text}</div>
+              <div className="max-w-sm text-white">{text}</div>
             </motion.div>
           </FloatingPortal>
         )}

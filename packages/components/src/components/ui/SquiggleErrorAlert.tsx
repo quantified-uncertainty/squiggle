@@ -26,7 +26,7 @@ const LocationLine: FC<{
 
   return (
     <span
-      className={clsx(editor && "cursor-pointer hover:underline text-blue-500")}
+      className={clsx(editor && "cursor-pointer text-blue-500 hover:underline")}
       onClick={editor ? findInEditor : undefined}
     >
       line {location.start.line}, column {location.start.column}
@@ -39,7 +39,7 @@ const WithHeader: FC<PropsWithChildren<{ header: string }>> = ({
   children,
 }) => (
   <div>
-    <div className="text-sm font-medium mb-1 text-gray-700">{header}</div>
+    <div className="mb-1 text-sm font-medium text-gray-700">{header}</div>
     <div className="ml-1">{children}</div>
   </div>
 );
@@ -49,7 +49,7 @@ const StackTraceFrame: FC<{ frame: SqFrame }> = ({ frame }) => {
   const name = frame.name();
   return (
     <>
-      <div className="text-gray-500 font-mono font-medium truncate">{name}</div>
+      <div className="truncate font-mono font-medium text-gray-500">{name}</div>
       <div>{location && <LocationLine location={location} />}</div>
     </>
   );

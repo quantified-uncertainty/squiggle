@@ -52,7 +52,7 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
       return (
         <div className="relative">
           {isSimulating && (
-            <div className="absolute z-10 inset-0 bg-white opacity-50" />
+            <div className="absolute inset-0 z-10 bg-white opacity-50" />
           )}
           {
             <SquiggleViewerWithoutProvider

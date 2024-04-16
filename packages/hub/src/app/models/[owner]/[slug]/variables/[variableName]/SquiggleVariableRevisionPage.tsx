@@ -72,7 +72,7 @@ export const SquiggleVariableRevisionPage: FC<{
 
   if (!versionSupportsExports.plain(checkedVersion)) {
     return (
-      <div className="p-4 bg-red-100 text-red-900">
+      <div className="bg-red-100 p-4 text-red-900">
         Export view pages don&apos;t support Squiggle {checkedVersion}.
       </div>
     );
