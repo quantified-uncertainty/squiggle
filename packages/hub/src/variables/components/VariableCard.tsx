@@ -91,12 +91,12 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
           <InterspersedMenuItemsWithDots
             items={[
-              <EntityCardBadge presentAsLink={false}>
+              <EntityCardBadge presentAsLink={false} key={"variable-type"}>
                 <Icon size={10} className="mr-1" />
                 {currentRevision.variableType}
               </EntityCardBadge>,
-              <UpdatedStatus time={createdAtTimestamp} />,
-              variable.model.isPrivate && <PrivateBadge />,
+              <UpdatedStatus time={createdAtTimestamp} key={"updated-at"} />,
+              variable.model.isPrivate && <PrivateBadge key={"is-private"} />,
             ]}
           />
         </div>
