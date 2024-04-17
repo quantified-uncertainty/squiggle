@@ -7,8 +7,8 @@ import { MarkdownViewer } from "@quri/squiggle-components";
 import { CodeBracketSquareIcon } from "@quri/ui";
 
 import {
-  badgeCss,
   EntityCardBadge,
+  entityCardBadgeCss,
   InterspersedMenuItemsWithDots,
   keepFirstNLines,
   PrivateBadge,
@@ -78,7 +78,7 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
         </div>
         <div className="mb-1 text-sm text-gray-500">
           <a
-            className={badgeCss(true)}
+            className={entityCardBadgeCss(true)}
             href={modelRoute({
               owner: variable.owner.slug,
               slug: variable.model.slug,
