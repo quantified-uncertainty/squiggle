@@ -28,6 +28,7 @@ export const SquigglePlaygroundVersionPickerDropdown: FC<
 > = ({ version, onChange, showUpdatePolicy, children }) => {
   return (
     <Dropdown
+      fullHeight
       render={({ close }) => (
         <DropdownMenu>
           <DropdownMenuHeader>Squiggle Version</DropdownMenuHeader>

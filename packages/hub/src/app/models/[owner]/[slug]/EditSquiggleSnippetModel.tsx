@@ -4,6 +4,7 @@ import { BaseSyntheticEvent, FC, use, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
+import { PlaygroundToolbarItem } from "@quri/squiggle-components";
 import {
   ButtonWithDropdown,
   CommentIcon,
@@ -333,7 +334,9 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
             onChange={handleVersionChange}
             showUpdatePolicy
           >
-            {uncheckedVersionTitle(version)}{" "}
+            <PlaygroundToolbarItem showDropdownArrow={true}>
+              {uncheckedVersionTitle(version)}
+            </PlaygroundToolbarItem>
           </SquigglePlaygroundVersionPickerDropdown>
         ) : (
           <TextTooltip
@@ -342,7 +345,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
             offset={5}
           >
             {/* div wrapper is required because TextTooltip clones its children and SquiggleVersionShower doesn't forwardRef */}
-            <div className="h-full">{uncheckedVersionTitle(version)}</div>
+            <div className="h-full">
+              <PlaygroundToolbarItem showDropdownArrow={false}>
+                {uncheckedVersionTitle(version)}{" "}
+              </PlaygroundToolbarItem>
+            </div>
           </TextTooltip>
         )}
         {model.isEditable && (
