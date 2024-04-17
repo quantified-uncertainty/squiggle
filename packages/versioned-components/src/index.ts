@@ -1,8 +1,7 @@
-export { SquigglePlaygroundVersionPickerDropdown } from "./SquigglePlaygroundVersionPickerDropdown.js";
 export {
-  SquiggleVersionShower,
+  SquigglePlaygroundVersionPickerDropdown,
   uncheckedVersionTitle,
-} from "./SquiggleVersionShower.js";
+} from "./SquigglePlaygroundVersionPickerDropdown.js";
 export { versionedSquigglePackages } from "./versionedSquigglePackages.js";
 
 export {

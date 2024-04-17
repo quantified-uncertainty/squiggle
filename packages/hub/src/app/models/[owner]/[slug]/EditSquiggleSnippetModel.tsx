@@ -330,7 +330,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       <div className="flex h-full items-center justify-end gap-2">
         {model.isEditable || forceVersionPicker ? (
           <SquigglePlaygroundVersionPickerDropdown
-            version={version}
             onChange={handleVersionChange}
             showUpdatePolicy
           >

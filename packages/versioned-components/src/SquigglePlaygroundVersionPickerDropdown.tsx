@@ -2,6 +2,7 @@
 import { FC, PropsWithChildren } from "react";
 
 import {
+  CodeBracketIcon,
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
@@ -11,21 +12,41 @@ import {
   DropdownMenuSeparator,
   HelpIcon,
   Modal,
+  WrenchIcon,
 } from "@quri/ui";
 
-import { versionIcon, versionTitle } from "./SquiggleVersionShower.js";
-import { SquiggleVersion, squiggleVersions } from "./versions.js";
+import {
+  checkSquiggleVersion,
+  SquiggleVersion,
+  squiggleVersions,
+} from "./versions.js";
+
+export function versionTitle(version: SquiggleVersion) {
+  return version === "dev" ? "next" : `v${version}`;
+}
+
+export function uncheckedVersionTitle(version: string) {
+  const versionIsValid = checkSquiggleVersion(version);
+  if (versionIsValid) {
+    return versionTitle(version);
+  } else {
+    return `${version} (unknown)`;
+  }
+}
+
+export function versionIcon(version: string) {
+  return version === "dev" ? WrenchIcon : CodeBracketIcon;
+}
 
 const CHANGELOG_URL = "https://www.squiggle-language.com/docs/Changelog";
 
 export const SquigglePlaygroundVersionPickerDropdown: FC<
   PropsWithChildren<{
-    version: string;
     onChange: (newVersion: SquiggleVersion) => void;
     // This is mostly Squiggle Hub specific, but we might later decide to do auto-updates in Squiggle Playground too.
     showUpdatePolicy?: boolean;
   }>
-> = ({ version, onChange, showUpdatePolicy, children }) => {
+> = ({ onChange, showUpdatePolicy, children }) => {
   return (
     <Dropdown
       fullHeight
