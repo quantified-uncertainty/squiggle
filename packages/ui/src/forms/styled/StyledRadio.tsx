@@ -28,7 +28,7 @@ export function StyledRadio({ value, options, onChange }: StyledRadioProps) {
               onChange={() => onChange(option.id)}
               checked={option.id === value}
               className={clsx(
-                "form-radio text-indigo-500 focus:ring-transparent",
+                "form-radio text-blue-500 focus:ring-transparent",
                 option.disabled ? "cursor-not-allowed" : "cursor-pointer"
               )}
               disabled={option.disabled}
@@ -40,7 +40,7 @@ export function StyledRadio({ value, options, onChange }: StyledRadioProps) {
                 "text-sm font-medium",
                 option.disabled
                   ? "cursor-not-allowed text-gray-400"
-                  : "cursor-pointer  text-gray-600 group-hover:text-gray-900"
+                  : "cursor-pointer  text-gray-600 group-hover:text-gray-800"
               )}
             >
               {option.name}

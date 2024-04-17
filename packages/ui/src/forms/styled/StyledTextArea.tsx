@@ -16,8 +16,8 @@ export const StyledTextArea = forwardRef<
       ref={ref}
       {...props}
       className={clsx(
-        "form-input block w-full rounded-md border-slate-300 text-sm shadow-sm placeholder:text-slate-300 focus:border-indigo-500 focus:ring-indigo-500 active:border-indigo-500 active:ring-indigo-500"
-        // disabled && "text-slate-400"
+        "form-input block w-full rounded-sm border-gray-300 text-sm shadow-sm placeholder:text-gray-300 focus:border-blue-500 focus:ring-blue-500 active:border-blue-500 active:ring-blue-500"
+        // disabled && "text-gray-400"
       )}
     />
   );

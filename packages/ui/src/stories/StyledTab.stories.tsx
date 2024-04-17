@@ -21,7 +21,7 @@ export const Default: Story = {
         <StyledTab name="Code" icon={BoltIcon} />
         <StyledTab name="Settings" icon={FireIcon} />
       </StyledTab.List>
-      <div className="mt-2 border border-slate-200 p-2">
+      <div className="mt-2 border border-gray-200 p-2">
         <StyledTab.Panels>
           <StyledTab.Panel>Code panel</StyledTab.Panel>
           <StyledTab.Panel>Settings panel</StyledTab.Panel>

@@ -204,29 +204,28 @@ export function SelectFormField<
                      * But it would require @emotion/cache dependency and also I'm unsure about performance implications.
                      */
                     "!min-h-0",
-                    "bg-white border-slate-300 border rounded-md shadow-sm focus-within:ring-indigo-500 focus-within:border-indigo-500 focus-within:ring-1"
+                    "bg-white border-gray-300 border rounded-sm shadow-sm focus-within:ring-blue-500 focus-within:border-blue-500 focus-within:ring-1"
                   ),
                 // disable default browser focus style
                 input: () => "[&_input:focus]:!ring-transparent",
                 placeholder: () =>
-                  clsx("text-slate-300", size === "small" && "text-sm"),
+                  clsx("text-gray-300", size === "small" && "text-sm"),
                 valueContainer: () => "px-3",
-                clearIndicator: () =>
-                  "text-slate-300 hover:text-slate-500 px-2",
+                clearIndicator: () => "text-gray-300 hover:text-gray-500 px-2",
                 loadingIndicator: () =>
-                  "text-slate-300 hover:text-slate-500 px-2",
-                indicatorSeparator: () => "w-px bg-slate-300 my-2",
+                  "text-gray-300 hover:text-gray-500 px-2",
+                indicatorSeparator: () => "w-px bg-gray-300 my-2",
                 dropdownIndicator: () =>
-                  "text-slate-300 hover:text-slate-500 px-2",
+                  "text-gray-300 hover:text-gray-500 px-2",
                 menuPortal: () => "!z-[100]",
                 // based on Dropdown styles
                 menu: () =>
-                  "mt-2 rounded-md bg-white shadow-xl border border-slate-300 overflow-hidden",
+                  "mt-2 rounded-sm bg-white shadow-xl border border-gray-300 overflow-hidden",
                 menuList: () => "p-1 overflow-auto",
                 option: () =>
-                  "px-2 py-1.5 rounded hover:bg-blue-100 text-slate-700 hover:text-slate-900",
-                loadingMessage: () => "text-slate-500",
-                noOptionsMessage: () => "text-slate-400 p-2",
+                  "px-2 py-1.5 rounded hover:bg-slate-100 text-gray-700 hover:text-gray-700",
+                loadingMessage: () => "text-gray-500",
+                noOptionsMessage: () => "text-gray-400 p-2",
               }}
               menuPortalTarget={
                 typeof document === "undefined" ? undefined : document.body

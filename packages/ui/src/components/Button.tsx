@@ -38,14 +38,14 @@ export const Button: FC<ButtonProps> = ({
         "border text-sm font-medium",
         theme === "primary"
           ? "border-emerald-600 bg-emerald-500 text-white"
-          : "border-slate-300 bg-slate-100 text-gray-600",
+          : "border-gray-300 bg-gray-50 text-gray-500",
         disabled
           ? "opacity-60"
           : theme === "primary"
             ? "hover:bg-emerald-600"
-            : "hover:bg-slate-200 hover:text-gray-900",
+            : "hover:bg-gray-200 hover:text-gray-900",
         wide && "w-full",
-        size === "medium" && "h-8 rounded-md",
+        size === "medium" && "h-8 rounded-sm",
         size === "small" && "h-6 rounded-sm",
         // This could probably be simplified, but I'm not sure how.
         // Tailwind group-* styles don't allow styling based on parent, only on parent state.
