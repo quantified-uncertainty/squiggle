@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { FC } from "react";
 
 import {
-  CodeBracketIcon,
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
@@ -77,12 +76,27 @@ export const ViewerMenu: FC<Props> = ({
                   return null;
               }
             };
+            const viewerName = () => {
+              switch (tab) {
+                case "Imports":
+                  return "Imports";
+                case "Variables":
+                  return "Private Variables";
+                case "Exports":
+                  return "Exports";
+                case "Result":
+                  return "Final Result";
+                default:
+                  return "";
+              }
+            };
             return (
               tab !== "AST" && (
                 <DropdownMenuActionItem
                   key={tab}
-                  icon={CodeBracketIcon}
-                  title={<MenuItemTitle title={tab} type={getType()} />}
+                  title={
+                    <MenuItemTitle title={viewerName()} type={getType()} />
+                  }
                   onClick={() => {
                     setViewerTab(tab);
                     close();
@@ -93,7 +107,6 @@ export const ViewerMenu: FC<Props> = ({
           })}
           <DropdownMenuHeader>Debugging</DropdownMenuHeader>
           <DropdownMenuActionItem
-            icon={CodeBracketIcon}
             title={<MenuItemTitle title="AST" type="" />}
             onClick={() => {
               setViewerTab("AST");

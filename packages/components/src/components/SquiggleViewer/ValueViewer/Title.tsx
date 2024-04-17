@@ -73,8 +73,8 @@ const getStandardProps = (props: TitleProps): StandardProps => {
     },
     isRootImport && {
       title: exportData?.sourceId || undefined,
-      color: "text-violet-900",
-      icon: <CodeBracketIcon size={12} className="mr-1 text-violet-900" />,
+      color: "text-cyan-600",
+      icon: <CodeBracketIcon size={12} className="mr-1 text-cyan-600" />,
       hasEdges: false,
     },
   ]);

@@ -237,7 +237,7 @@ export const ValueWithContextViewer: FC<Props> = ({
                       className={clsx(
                         "cursor-pointer transition",
                         isRootImport
-                          ? "text-violet-400 hover:!text-violet-900 group-hover:text-violet-500 group-focus:text-violet-600"
+                          ? "text-cyan-200 hover:!text-cyan-900 group-hover:text-cyan-700 group-focus:text-cyan-700"
                           : "text-slate-200 hover:!text-slate-900 group-hover:text-slate-400 group-focus:text-slate-400"
                       )}
                     />
