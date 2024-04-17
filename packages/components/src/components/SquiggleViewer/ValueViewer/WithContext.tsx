@@ -178,10 +178,8 @@ export const ValueWithContextViewer: FC<Props> = ({
             }}
             tabIndex={viewerType === "tooltip" ? undefined : 0}
             className={clsx(
-              "group flex justify-between rounded-sm pr-0.5 hover:bg-gray-100 focus-visible:outline-none",
-              isZoomedIn
-                ? "mb-2 px-0.5 py-1 focus:bg-indigo-50"
-                : "focus:bg-indigo-100"
+              "group flex justify-between rounded-sm pr-0.5 hover:bg-gray-100 focus:bg-slate-100 focus-visible:outline-none",
+              isZoomedIn && "mb-2 px-0.5 py-1"
             )}
             onFocus={(_) => {
               scrollEditorToPath();

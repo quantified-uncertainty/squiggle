@@ -29,7 +29,6 @@ type StandardProps = {
   title?: string;
   color?: string;
   textSize?: string;
-  font?: string;
   icon?: JSX.Element;
   hasEdges?: boolean;
   isFocusEnabled?: boolean;
@@ -71,7 +70,6 @@ const getStandardProps = (props: TitleProps): StandardProps => {
       },
     taggedName && {
       title: taggedName,
-      font: "font-sans",
     },
     isRootImport && {
       title: exportData?.sourceId || undefined,
@@ -94,7 +92,6 @@ export const Title: FC<TitleProps> = (props) => {
     hasEdges = false,
     isFocusEnabled = true,
     textSize = "text-sm",
-    font = "font-mono",
   } = standards;
 
   return (
@@ -109,7 +106,7 @@ export const Title: FC<TitleProps> = (props) => {
         className={clsx(
           color,
           textSize,
-          font,
+          "font-mono",
           isFocusEnabled && "cursor-pointer hover:underline"
         )}
         onClick={() => isFocusEnabled && zoomIn(valuePath)}
