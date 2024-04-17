@@ -1,6 +1,6 @@
-import { xyShapeDistError } from "../dist/DistError.js";
-import { PointSetDist } from "../dist/PointSetDist.js";
-import { PointMass } from "../dist/SymbolicDist/PointMass.js";
+import { xyShapeDistError } from "../dists/DistError.js";
+import { PointSetDist } from "../dists/PointSetDist.js";
+import { PointMass } from "../dists/SymbolicDist/PointMass.js";
 import { REDistributionError } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";

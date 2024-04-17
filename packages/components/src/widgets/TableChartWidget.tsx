@@ -11,7 +11,7 @@ import { widgetRegistry } from "./registry.js";
 
 widgetRegistry.register("TableChart", {
   Preview: (value) => (
-    <div className="items-center flex space-x-1">
+    <div className="flex items-center space-x-1">
       <TableCellsIcon size={14} className="flex opacity-60" />
       <div>
         {value.value.rowCount}
@@ -61,13 +61,13 @@ widgetRegistry.register("TableChart", {
 
     return (
       <div>
-        <div className="relative rounded-md overflow-hidden border border-stone-200 mt-0.5">
+        <div className="relative mt-0.5 overflow-hidden rounded-md border border-stone-200">
           <table
-            className="table-fixed w-full"
+            className="w-full table-fixed"
             style={{ minWidth: columnLength * 100 }}
           >
             {hasColumnNames && (
-              <thead className="text-sm text-stone-500 bg-stone-50 border-b border-stone-200 break-words">
+              <thead className="break-words border-b border-stone-200 bg-stone-50 text-sm text-stone-500">
                 <tr>
                   {Array.from({ length: columnLength }, (_, i) => (
                     <th
@@ -96,8 +96,8 @@ widgetRegistry.register("TableChart", {
                         }
                       }}
                       className={clsx(
-                        "px-1 overflow-hidden",
-                        k !== 0 && "border-stone-100 border-l",
+                        "overflow-hidden px-1",
+                        k !== 0 && "border-l border-stone-100",
                         "focus:bg-blue-50"
                       )}
                     >

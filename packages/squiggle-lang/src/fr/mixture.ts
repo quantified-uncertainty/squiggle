@@ -1,6 +1,6 @@
-import { BaseDist } from "../dist/BaseDist.js";
-import { argumentError } from "../dist/DistError.js";
-import * as distOperations from "../dist/distOperations/index.js";
+import { BaseDist } from "../dists/BaseDist.js";
+import { argumentError } from "../dists/DistError.js";
+import * as distOperations from "../dists/distOperations/index.js";
 import { REDistributionError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {

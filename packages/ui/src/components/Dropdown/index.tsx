@@ -78,7 +78,7 @@ export const Dropdown: FC<Props> = ({
       <div className={tailwindSelector}>
         <div
           ref={refs.setFloating}
-          className="z-30 rounded-md bg-white shadow-xl border border-slate-300 overflow-hidden"
+          className="z-30 overflow-hidden rounded-md border border-slate-300 bg-white shadow-xl"
           style={{
             position: strategy,
             top: y ?? 0,
@@ -109,7 +109,7 @@ export const Dropdown: FC<Props> = ({
   return (
     <DropdownContext.Provider value={{ closeDropdown }}>
       <div
-        className={clsx(fullHeight && "h-full grid place-items-stretch")}
+        className={clsx(fullHeight && "grid h-full place-items-stretch")}
         ref={refs.setReference}
         {...getReferenceProps()}
       >

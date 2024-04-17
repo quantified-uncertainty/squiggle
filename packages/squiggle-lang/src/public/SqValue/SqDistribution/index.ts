@@ -1,10 +1,10 @@
-import { BaseDist } from "../../../dist/BaseDist.js";
-import { DistError } from "../../../dist/DistError.js";
-import { Env } from "../../../dist/env.js";
-import { PointSetDist } from "../../../dist/PointSetDist.js";
-import { SampleSetDist } from "../../../dist/SampleSetDist/index.js";
-import { BaseSymbolicDist } from "../../../dist/SymbolicDist/BaseSymbolicDist.js";
-import { SymbolicDist } from "../../../dist/SymbolicDist/index.js";
+import { BaseDist } from "../../../dists/BaseDist.js";
+import { DistError } from "../../../dists/DistError.js";
+import { Env } from "../../../dists/env.js";
+import { PointSetDist } from "../../../dists/PointSetDist.js";
+import { SampleSetDist } from "../../../dists/SampleSetDist/index.js";
+import { BaseSymbolicDist } from "../../../dists/SymbolicDist/BaseSymbolicDist.js";
+import { SymbolicDist } from "../../../dists/SymbolicDist/index.js";
 import * as Result from "../../../utility/result.js";
 import { Ok, result } from "../../../utility/result.js";
 import { SqDistributionError } from "./SqDistributionError.js";

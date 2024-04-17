@@ -70,7 +70,7 @@ export const ListViewTable: FC<TableProps> = ({
     <div className="mb-10">
       <div className="">
         <div
-          className="grid border-r border-b border-gray-200 w-full"
+          className="grid w-full border-b border-r border-gray-200"
           style={{
             gridTemplateColumns: showDescriptions ? "2fr 2fr 1fr" : "3fr 1fr",
           }}
@@ -85,7 +85,7 @@ export const ListViewTable: FC<TableProps> = ({
             <Fragment key={item.id}>
               <CellBox>
                 <div
-                  className="p-2 flex justify-end text-slate-700 cursor-pointer font-bold text-sm"
+                  className="flex cursor-pointer justify-end p-2 text-sm font-bold text-slate-700"
                   onClick={() => setDenominatorItem(item)}
                 >
                   <div className="flex-grow text-sm hover:text-slate-900 hover:underline">
@@ -93,7 +93,7 @@ export const ListViewTable: FC<TableProps> = ({
                   </div>
                   <div
                     onClick={() => setDenominatorItem(item)}
-                    className={"pl-2 cursor-pointer"}
+                    className={"cursor-pointer pl-2"}
                   >
                     <CompassIcon
                       className={clsx(
@@ -110,7 +110,7 @@ export const ListViewTable: FC<TableProps> = ({
 
                 <div className="flex px-2 pb-3">
                   {item.clusterId !== undefined && item.clusterId !== null ? (
-                    <div className="flex gap-1 items-center">
+                    <div className="flex items-center gap-1">
                       <div className="flex-none opacity-50">
                         <ClusterIcon
                           cluster={clusters[item.clusterId]}
@@ -230,7 +230,7 @@ export const ListView: FC = () => {
 
         <input
           type="text"
-          className="p-1 rounded border border-gray-200 mb-4"
+          className="mb-4 rounded border border-gray-200 p-1"
           defaultValue={search}
           placeholder="Filter..."
           onChange={(e) => setSearch(e.currentTarget.value)}
@@ -246,8 +246,8 @@ export const ListView: FC = () => {
         </div>
 
         {sidebarItems && (
-          <div className="w-[500px] relative">
-            <div className="sticky top-4 bg-slate-50 px-2 py-4 ml-4 rounded-sm border-gray-200 border">
+          <div className="relative w-[500px]">
+            <div className="sticky top-4 ml-4 rounded-sm border border-gray-200 bg-slate-50 px-2 py-4">
               <ItemSideBar
                 model={model}
                 variableName={model.variableName}

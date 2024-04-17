@@ -3,7 +3,11 @@ import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { EntityCard } from "@/components/EntityCard";
-import { ExportsDropdown, totalImportLength } from "@/lib/ExportsDropdown";
+import {
+  totalImportLength,
+  VariableRevision,
+  VariablesDropdown,
+} from "@/lib/VariablesDropdown";
 import { modelRoute } from "@/routes";
 
 import { ModelCard$key } from "@/__generated__/ModelCard.graphql";
@@ -17,12 +21,14 @@ const Fragment = graphql`
       slug
     }
     isPrivate
-    currentRevision {
-      exports {
-        variableName
+    variables {
+      variableName
+      currentRevision {
         variableType
         title
       }
+    }
+    currentRevision {
       relativeValuesExports {
         variableName
         definition {
@@ -46,13 +52,12 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
     slug: model.slug,
   });
 
-  const modelExports = model.currentRevision.exports.map(
-    ({ variableName, variableType, title }) => ({
-      variableName,
-      variableType,
-      title: title || undefined,
-    })
-  );
+  const variableRevisions: VariableRevision[] = model.variables.map((v) => ({
+    variableName: v.variableName,
+    variableType: v.currentRevision?.variableType,
+    title: v.currentRevision?.title || undefined,
+    docString: undefined,
+  }));
 
   const relativeValuesExports = model.currentRevision.relativeValuesExports.map(
     ({ variableName, definition: { slug } }) => ({
@@ -62,9 +67,23 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   );
 
   const _totalImportLength = totalImportLength(
-    modelExports,
+    variableRevisions,
     relativeValuesExports
   );
+
+  const footerItems =
+    _totalImportLength > 0 ? (
+      <VariablesDropdown
+        variableRevisions={variableRevisions}
+        relativeValuesExports={relativeValuesExports}
+        owner={model.owner.slug}
+        slug={model.slug}
+      >
+        <div className="flex cursor-pointer items-center text-xs text-gray-500 hover:text-gray-900 hover:underline">
+          {`${_totalImportLength} variables`}
+        </div>
+      </VariablesDropdown>
+    ) : undefined;
 
   return (
     <EntityCard
@@ -74,19 +93,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
       isPrivate={model.isPrivate}
       ownerName={model.owner.slug}
       slug={model.slug}
-    >
-      {_totalImportLength > 0 && (
-        <ExportsDropdown
-          modelExports={modelExports}
-          relativeValuesExports={relativeValuesExports}
-          owner={model.owner.slug}
-          slug={model.slug}
-        >
-          <div className="cursor-pointer items-center flex text-xs text-gray-500 hover:text-gray-900 hover:underline">
-            {`${_totalImportLength} exports`}
-          </div>
-        </ExportsDropdown>
-      )}
-    </EntityCard>
+      footerItems={footerItems}
+    />
   );
 };

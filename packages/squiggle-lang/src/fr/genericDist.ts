@@ -4,12 +4,12 @@ import {
   algebraicDiff,
   algebraicProduct,
   algebraicSum,
-} from "../dist/distOperations/binaryOperations.js";
+} from "../dists/distOperations/binaryOperations.js";
 import {
   BinaryOperation,
   binaryOperations,
-} from "../dist/distOperations/index.js";
-import * as PointMassJs from "../dist/SymbolicDist/PointMass.js";
+} from "../dists/distOperations/index.js";
+import * as PointMassJs from "../dists/SymbolicDist/PointMass.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {

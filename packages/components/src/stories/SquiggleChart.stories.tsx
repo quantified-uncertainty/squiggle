@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { SqValuePath, SqValuePathEdge } from "@quri/squiggle-lang";
-
 import { SquiggleChart } from "../components/SquiggleChart.js";
 
 /**
@@ -42,15 +40,5 @@ export const Error: Story = {
 export const Dict: Story = {
   args: {
     code: "{foo: 35 to 50, bar: [1,2,3]}",
-  },
-};
-
-export const RootPathOverride: Story = {
-  args: {
-    code: "{foo: 35 to 50, bar: [1,2,3]}",
-    rootPathOverride: new SqValuePath({
-      root: "result",
-      edges: [SqValuePathEdge.fromKey("bar")],
-    }),
   },
 };

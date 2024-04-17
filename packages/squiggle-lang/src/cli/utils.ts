@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import isFinite from "lodash/isFinite.js";
 import path from "path";
 
-import { Env } from "../dist/env.js";
+import { Env } from "../dists/env.js";
 import { SqLinker } from "../public/SqLinker.js";
 import { SqProject } from "../public/SqProject/index.js";
 import { bold, red } from "./colors.js";

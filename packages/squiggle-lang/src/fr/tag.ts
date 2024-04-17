@@ -18,7 +18,7 @@ import {
   frOr,
   FrOrType,
   frPlot,
-  frSpecification,
+  frSpecificationWithTags,
   frString,
   frTableChart,
   FRType,
@@ -34,7 +34,6 @@ import { Value } from "../value/index.js";
 import { ValueTags, ValueTagsType } from "../value/valueTags.js";
 import { exportData, location, toMap } from "../value/valueTagsUtils.js";
 import { vBool, VBool } from "../value/VBool.js";
-import { vSpecification } from "../value/VSpecification.js";
 import { vString } from "../value/VString.js";
 
 const maker = new FnFactory({
@@ -245,9 +244,9 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [frWithTags(frAny({ genericName: "A" })), frSpecification],
+        [frWithTags(frAny({ genericName: "A" })), frSpecificationWithTags],
         frWithTags(frAny({ genericName: "A" })),
-        ([{ value, tags }, spec], reducer) => {
+        ([{ value, tags }, spec]) => {
           if (tags.specification()) {
             throw new REArgumentError(
               "Specification already exists. Be sure to use Tag.omit() first."
@@ -256,9 +255,9 @@ example2 = {|x| x + 1}`,
           return {
             value,
             tags: tags.merge({
-              specification: vSpecification(spec),
-              name: vString(spec.name),
-              doc: vString(spec.documentation),
+              specification: spec,
+              name: vString(spec.value.name),
+              doc: vString(spec.value.documentation),
             }),
           };
         },

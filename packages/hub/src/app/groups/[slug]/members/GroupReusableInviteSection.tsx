@@ -68,7 +68,7 @@ export const GroupReusableInviteSection: FC<Props> = ({ groupRef }) => {
           <TextTooltip text="Click to copy">
             <div
               onClick={copy}
-              className="group flex items-center gap-1 rounded shadow bg-white p-2 cursor-pointer hover:bg-slate-200"
+              className="group flex cursor-pointer items-center gap-1 rounded bg-white p-2 shadow hover:bg-slate-200"
             >
               <ClipboardCopyIcon
                 size={24}
@@ -81,7 +81,7 @@ export const GroupReusableInviteSection: FC<Props> = ({ groupRef }) => {
           <Skeleton height={36} />
         )
       ) : null}
-      <div className="flex gap-2 mt-4">
+      <div className="mt-4 flex gap-2">
         <MutationButton<
           GroupReusableInviteSection_CreateMutation,
           "CreateReusableGroupInviteTokenResult"

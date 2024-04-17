@@ -28,14 +28,14 @@ import {
   versionSupportsOnOpenExport,
 } from "@quri/versioned-squiggle-components";
 
-import { EditModelExports } from "@/components/exports/EditModelExports";
+import { EditRelativeValueExports } from "@/components/exports/EditRelativeValueExports";
 import { ReactRoot } from "@/components/ReactRoot";
 import { FormModal } from "@/components/ui/FormModal";
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/constants";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { useMutationForm } from "@/hooks/useMutationForm";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { modelExportRoute, modelRoute } from "@/routes";
+import { modelRoute, variableRoute } from "@/routes";
 import { ImportTooltip } from "@/squiggle/components/ImportTooltip";
 import {
   parseSourceId,
@@ -54,13 +54,11 @@ import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippe
 import {
   EditSquiggleSnippetModelMutation,
   RelativeValuesExportInput,
-  SquiggleModelExportInput,
 } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 
 export type SquiggleSnippetFormShape = {
   code: string;
   relativeValuesExports: RelativeValuesExportInput[];
-  exports: SquiggleModelExportInput[];
 };
 
 type OnSubmit = (
@@ -139,10 +137,15 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
         id
         slug
         isEditable
-        ...EditModelExports_Model
+        ...EditRelativeValueExports_Model
         ...SquiggleSnippetDraftDialog_Model
         owner {
           slug
+        }
+        lastRevisionWithBuild {
+          lastBuild {
+            runSeconds
+          }
         }
         currentRevision {
           id
@@ -158,13 +161,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
               xyPointLength
             }
           }
-          exports {
-            id
-            variableName
-            variableType
-            title
-            docstring
-          }
+          exportNames
           relativeValuesExports {
             id
             variableName
@@ -188,6 +185,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     "SquiggleSnippet"
   );
 
+  const lastBuildSpeed = model.lastRevisionWithBuild?.lastBuild?.runSeconds;
+
   const seed = content.seed;
 
   const initialFormValues: SquiggleSnippetFormShape = useMemo(() => {
@@ -200,14 +199,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           slug: item.definition.slug,
         },
       })),
-      exports: revision.exports.map((item) => ({
-        title: item.title,
-        variableName: item.variableName,
-        variableType: item.variableType,
-        docstring: item.docstring,
-      })),
     };
-  }, [content, revision.relativeValuesExports, revision.exports]);
+  }, [content, revision.relativeValuesExports]);
 
   const { form, onSubmit, inFlight } = useMutationForm<
     SquiggleSnippetFormShape,
@@ -245,7 +238,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           xyPointLength: content.xyPointLength,
         },
         relativeValuesExports: formData.relativeValuesExports,
-        exports: formData.exports,
         comment: extraData?.comment,
         slug: model.slug,
         owner: model.owner.slug,
@@ -312,13 +304,18 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
 
   const squiggle = use(versionedSquigglePackages(checkedVersion));
 
+  // Automatically turn off autorun, if the last build speed was > 5s. Note that this does not stop in the case of memory errors or similar.
+  const autorunMode =
+    content.autorunMode ||
+    (lastBuildSpeed ? (lastBuildSpeed > 5 ? false : true) : true);
+
   // Build props for versioned SquigglePlayground first, since they might depend on the version we use,
   // and we want to populate them incrementally.
   const playgroundProps: Parameters<
     typeof squiggle.components.SquigglePlayground
   >[0] = {
     defaultCode,
-    autorunMode: content.autorunMode ?? true,
+    autorunMode: autorunMode,
     sourceId: serializeSourceId({
       owner: model.owner.slug,
       slug: model.slug,
@@ -327,7 +324,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     height: height ?? "100vh",
     onCodeChange,
     renderExtraControls: () => (
-      <div className="h-full flex items-center justify-end gap-2">
+      <div className="flex h-full items-center justify-end gap-2">
         {model.isEditable || forceVersionPicker ? (
           <SquigglePlaygroundVersionPicker
             version={version}
@@ -353,11 +350,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       </div>
     ),
     renderExtraModal: (name) => {
-      if (name === "exports") {
+      if (name === "Relative Values") {
         return {
           body: (
             <div className="px-6 py-2">
-              <EditModelExports
+              <EditRelativeValueExports
                 append={(item) => {
                   appendVariableWithDefinition(item);
                   onSubmit();
@@ -371,7 +368,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
               />
             </div>
           ),
-          title: "Exported Variables",
+          title: "Relative Value Exports",
         };
       }
     },
@@ -392,9 +389,9 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
         <>
           <DropdownMenuHeader>Experimental</DropdownMenuHeader>
           <DropdownMenuActionItem
-            title="Exported Variables"
+            title="Relative Value Exports"
             icon={LinkIcon}
-            onClick={() => openModal("exports")}
+            onClick={() => openModal("Relative Values")}
           />
         </>
       ) : null;
@@ -406,9 +403,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       playgroundProps
     )
   ) {
-    playgroundProps.onExportsChange = (exports) => {
-      form.setValue("exports", exports);
-    };
   }
 
   playgroundProps.environment = {
@@ -426,7 +420,9 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     playgroundProps.onOpenExport = (sourceId: string, varName?: string) => {
       const { owner, slug } = parseSourceId(sourceId);
       if (varName) {
-        router.push(modelExportRoute({ owner, slug, variableName: varName }));
+        router.push(
+          variableRoute({ owner, modelSlug: slug, variableName: varName })
+        );
       } else {
         router.push(modelRoute({ owner, slug }));
       }

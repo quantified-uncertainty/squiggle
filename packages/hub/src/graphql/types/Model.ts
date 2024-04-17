@@ -3,12 +3,12 @@ import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 import { builder } from "@/graphql/builder";
 
 import { decodeGlobalIdWithTypename } from "../utils";
-import { ModelExport } from "./ModelExport";
 import { ModelRevision, ModelRevisionConnection } from "./ModelRevision";
 import { Owner } from "./Owner";
 
 export const Model = builder.prismaNode("Model", {
   id: { field: "id" },
+
   authScopes: (model) => {
     if (!model.isPrivate) {
       return true;
@@ -16,10 +16,9 @@ export const Model = builder.prismaNode("Model", {
 
     // This might leak the info that the model exists, but we handle that in `model()` query and return NotFoundError.
     // It's probable that we leak this info somewhere else, though.
-    return {
-      controlsOwnerId: model.ownerId,
-    };
+    return { controlsOwnerId: model.ownerId };
   },
+
   fields: (t) => ({
     slug: t.exposeString("slug"),
     // I'm not yet sure if we'll use custom scalars for datetime encoding, so `createdAtTimestamp` is a precaution; we'll probably switch to `createAt` in the future
@@ -74,6 +73,8 @@ export const Model = builder.prismaNode("Model", {
 
         return {
           revisions: nestedSelection({
+            // necessary for ModelRevision authScopes
+            include: { model: true },
             take: 1,
             where: { id },
           }),
@@ -99,18 +100,34 @@ export const Model = builder.prismaNode("Model", {
       },
       ModelRevisionConnection
     ),
-    exportRevisions: t.connection({
-      type: ModelExport,
-      args: exportRevisionConnectionHelpers.getArgs(),
+    variables: t.relation("variables"),
+    lastRevisionWithBuild: t.field({
+      type: ModelRevision,
+      nullable: true,
       select: (args, ctx, nestedSelection) => ({
-        revisions: exportRevisionConnectionHelpers.getQuery(
-          args,
-          ctx,
-          nestedSelection
-        ),
+        revisions: nestedSelection({
+          include: {
+            // required by ModelRevision authScopes
+            model: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          where: {
+            builds: {
+              some: {
+                id: {
+                  not: undefined,
+                },
+              },
+            },
+          },
+          take: 1,
+        }),
       }),
-      resolve: (model, args, ctx) =>
-        exportRevisionConnectionHelpers.resolve(model.revisions, args, ctx),
+      async resolve(model) {
+        return model.revisions[0];
+      },
     }),
   }),
 });
@@ -124,35 +141,4 @@ export const modelConnectionHelpers = prismaConnectionHelpers(
   builder,
   "Model",
   { cursor: "id" }
-);
-
-const exportRevisionConnectionHelpers = prismaConnectionHelpers(
-  builder,
-  "ModelRevision",
-  {
-    cursor: "id",
-    args: (t) => ({
-      variableId: t.string({ required: true }),
-    }),
-    select: (nodeSelection, args) => ({
-      exports: nodeSelection({
-        where: {
-          variableName: args.variableId,
-        },
-      }),
-    }),
-    query: (args) => ({
-      where: {
-        exports: {
-          some: {
-            variableName: args.variableId,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc" as const,
-      },
-    }),
-    resolveNode: (revision) => revision.exports[0],
-  }
 );

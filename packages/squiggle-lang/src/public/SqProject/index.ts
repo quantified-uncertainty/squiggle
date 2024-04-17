@@ -1,5 +1,5 @@
 import { isBindingStatement } from "../../ast/utils.js";
-import { defaultEnv, Env } from "../../dist/env.js";
+import { defaultEnv, Env } from "../../dists/env.js";
 import { AST } from "../../index.js";
 import { getStdLib } from "../../library/index.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";

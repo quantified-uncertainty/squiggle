@@ -16,7 +16,7 @@
     "build:css": "postcss ./src/styles/full.css -o ./dist/full.css",
     "build:storybook": "storybook build",
     "clean:ts": "rm -rf ./dist ./tsconfig.tsbuildinfo",
-    "build": "pnpm clean:ts && pnpm build:ts && pnpm build:css && pnpm build:storybook",
+    "build": "pnpm clean:ts && pnpm build:ts && pnpm build:css",
     "lint": "pnpm lint:prettier && pnpm eslint",
     "lint:prettier": "prettier --check .",
     "eslint": "eslint --ignore-path .gitignore ./src",

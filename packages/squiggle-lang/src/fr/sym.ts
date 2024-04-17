@@ -1,14 +1,14 @@
-import * as BernoulliJs from "../dist/SymbolicDist/Bernoulli.js";
-import * as BetaJs from "../dist/SymbolicDist/Beta.js";
-import * as CauchyJs from "../dist/SymbolicDist/Cauchy.js";
-import * as ExponentialJs from "../dist/SymbolicDist/Exponential.js";
-import * as GammaJs from "../dist/SymbolicDist/Gamma.js";
-import * as SymbolicDist from "../dist/SymbolicDist/index.js";
-import * as LogisticJs from "../dist/SymbolicDist/Logistic.js";
-import * as LognormalJs from "../dist/SymbolicDist/Lognormal.js";
-import * as PointMassJs from "../dist/SymbolicDist/PointMass.js";
-import * as TriangularJs from "../dist/SymbolicDist/Triangular.js";
-import * as UniformJs from "../dist/SymbolicDist/Uniform.js";
+import * as BernoulliJs from "../dists/SymbolicDist/Bernoulli.js";
+import * as BetaJs from "../dists/SymbolicDist/Beta.js";
+import * as CauchyJs from "../dists/SymbolicDist/Cauchy.js";
+import * as ExponentialJs from "../dists/SymbolicDist/Exponential.js";
+import * as GammaJs from "../dists/SymbolicDist/Gamma.js";
+import * as SymbolicDist from "../dists/SymbolicDist/index.js";
+import * as LogisticJs from "../dists/SymbolicDist/Logistic.js";
+import * as LognormalJs from "../dists/SymbolicDist/Lognormal.js";
+import * as PointMassJs from "../dists/SymbolicDist/PointMass.js";
+import * as TriangularJs from "../dists/SymbolicDist/Triangular.js";
+import * as UniformJs from "../dists/SymbolicDist/Uniform.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {

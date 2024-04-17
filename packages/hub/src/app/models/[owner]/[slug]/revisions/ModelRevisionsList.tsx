@@ -27,14 +27,17 @@ const ModelRevisionItem: FC<{
       fragment ModelRevisionsList_revision on ModelRevision {
         id
         createdAtTimestamp
+        buildStatus
         author {
           username
         }
         comment
-        exports {
+        variableRevisions {
           id
-          variableName
-          title
+        }
+        lastBuild {
+          errors
+          runSeconds
         }
       }
     `,
@@ -76,9 +79,14 @@ const ModelRevisionItem: FC<{
       {revision.comment ? (
         <div className="text-xs text-slate-700">{revision.comment}</div>
       ) : null}
-      {revision.exports.length > 0 ? (
+
+      <div className="text-xs text-slate-700">{`Build Status: ${revision.buildStatus}`}</div>
+      {revision.lastBuild && (
+        <div className="text-xs text-slate-700">{`Build Time: ${revision.lastBuild.runSeconds.toFixed(2)}s`}</div>
+      )}
+      {revision.variableRevisions.length > 0 ? (
         <div className="text-xs text-green-700">
-          {`${revision.exports.length} exports `}
+          {`${revision.variableRevisions.length} variables`}
         </div>
       ) : null}
     </div>
@@ -121,14 +129,8 @@ export const ModelRevisionsList: FC<{
           @connection(key: "ModelRevisionsList_revisions") {
           edges {
             node {
-              ...ModelRevisionsList_revision
               id
-              createdAtTimestamp
-              exports {
-                id
-                title
-                variableName
-              }
+              ...ModelRevisionsList_revision
             }
           }
           pageInfo {
@@ -142,7 +144,7 @@ export const ModelRevisionsList: FC<{
 
   return (
     <div>
-      <div className="mt-4 mb-2 font-medium">Revision history</div>
+      <div className="mb-2 mt-4 font-medium">Revision history</div>
       <div className="space-y-2">
         {revisions.edges.map((edge) => (
           <ModelRevisionItem

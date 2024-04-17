@@ -1,6 +1,6 @@
-import { defaultEnv, Env } from "../../src/dist/env.js";
-import { Beta } from "../../src/dist/SymbolicDist/Beta.js";
-import * as SymbolicDist from "../../src/dist/SymbolicDist/index.js";
+import { defaultEnv, Env } from "../../src/dists/env.js";
+import { Beta } from "../../src/dists/SymbolicDist/Beta.js";
+import * as SymbolicDist from "../../src/dists/SymbolicDist/index.js";
 import * as Result from "../../src/utility/result.js";
 
 export const env: Env = defaultEnv;

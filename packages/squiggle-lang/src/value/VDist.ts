@@ -1,12 +1,12 @@
-import { BaseDist } from "../dist/BaseDist.js";
-import { PointSetDist } from "../dist/PointSetDist.js";
-import { SampleSetDist } from "../dist/SampleSetDist/index.js";
-import { BaseSymbolicDist } from "../dist/SymbolicDist/BaseSymbolicDist.js";
+import { BaseDist } from "../dists/BaseDist.js";
+import { PointSetDist } from "../dists/PointSetDist.js";
+import { SampleSetDist } from "../dists/SampleSetDist/index.js";
+import { BaseSymbolicDist } from "../dists/SymbolicDist/BaseSymbolicDist.js";
 import {
   assertIsKnownSymbolicDist,
   deserializeSymbolicDist,
   SerializedSymbolicDist,
-} from "../dist/SymbolicDist/index.js";
+} from "../dists/SymbolicDist/index.js";
 import { SerializedMixedShape } from "../PointSet/Mixed.js";
 import { BaseValue } from "./BaseValue.js";
 

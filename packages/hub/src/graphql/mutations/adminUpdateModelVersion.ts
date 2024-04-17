@@ -33,7 +33,6 @@ builder.mutationField("adminUpdateModelVersion", (t) =>
               include: {
                 squiggleSnippet: true,
                 relativeValuesExports: true,
-                exports: true,
               },
             },
           },
@@ -73,14 +72,6 @@ builder.mutationField("adminUpdateModelVersion", (t) =>
                     definitionId: exp.definitionId,
                   })
                 ),
-              },
-            },
-            exports: {
-              createMany: {
-                data: model.currentRevision.exports.map((exp) => ({
-                  variableName: exp.variableName,
-                  title: exp.title,
-                })),
               },
             },
           },

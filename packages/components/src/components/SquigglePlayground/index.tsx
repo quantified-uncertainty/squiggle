@@ -119,7 +119,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       const _exports: ModelExport[] = exports.entries().map((e) => ({
         variableName: e[0],
         variableType: e[1].tag,
-        title: e[1].title(),
+        title: e[1].tags.name() ? e[1].tags.name() : e[1].title() || "",
         docstring: e[1].context?.docstring() || "",
       }));
       onExportsChange && onExportsChange(_exports);
@@ -188,13 +188,13 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
       );
     } else if (defaultAutorunMode === false) {
       return (
-        <div className="grid place-items-center h-full">
-          <div className="text-gray-500 text-sm">{`Press the "Run" button (top left) to simulate`}</div>
+        <div className="grid h-full place-items-center">
+          <div className="text-sm text-gray-500">{`Press the "Run" button (top left) to simulate`}</div>
         </div>
       );
     } else {
       return (
-        <div className="grid place-items-center h-full">
+        <div className="grid h-full place-items-center">
           <RefreshIcon className="animate-spin text-slate-400" size={24} />
         </div>
       );

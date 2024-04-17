@@ -64,7 +64,7 @@ const Toast: FC<{ toast: ToastShape }> = ({ toast }) => {
     <div
       className={clsx(
         "flex items-center gap-2",
-        "border px-8 py-4 bg-white rounded text-sm cursor-pointer shadow-lg",
+        "cursor-pointer rounded border bg-white px-8 py-4 text-sm shadow-lg",
         toast.type === "error" && "text-red-700",
         toast.type === "confirmation" && "text-slate-700"
       )}
@@ -102,7 +102,7 @@ export const WithToasts: FC<PropsWithChildren> = ({ children }) => {
   return (
     <Context.Provider value={dispatch}>
       <div>{children}</div>
-      <div className="fixed right-4 bottom-4 space-y-2 z-50">
+      <div className="fixed bottom-4 right-4 z-50 space-y-2">
         {state.toasts.map((toast) => (
           <Toast key={toast.id} toast={toast} />
         ))}

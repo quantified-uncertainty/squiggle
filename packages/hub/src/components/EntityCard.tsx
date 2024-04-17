@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FC, PropsWithChildren } from "react";
+import React, { FC, PropsWithChildren } from "react";
 
 import { LockIcon } from "@quri/ui";
 
@@ -24,6 +24,7 @@ type Props = PropsWithChildren<{
   isPrivate?: boolean;
   ownerName?: string;
   slug: string;
+  footerItems?: React.ReactElement;
 }>;
 
 export const EntityCard: FC<Props> = ({
@@ -34,21 +35,23 @@ export const EntityCard: FC<Props> = ({
   ownerName,
   slug,
   children,
+  footerItems,
 }) => {
   return (
     <Card>
-      <div className="w-full">
-        <div className="mb-3">
+      <div className="flex h-full flex-col">
+        <div className="mb-1">
           <Link
-            className="text-gray-900 font-medium hover:underline"
+            className="font-medium text-gray-900 hover:underline"
             href={href}
           >
             {showOwner ? ownerName + "/" : ""}
             {slug}
           </Link>
         </div>
-        <div className="flex items-center space-x-4 text-gray-500 text-xs">
-          {children}
+        {<div className="flex-grow">{children}</div>}
+        <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-2 text-xs text-gray-500">
+          {footerItems}
           {isPrivate && <LockIcon className="400" size={14} />}
           <div>
             <span className="mr-1">Updated</span>

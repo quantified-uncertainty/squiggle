@@ -43,15 +43,6 @@ const SquiggleSnippetContentInput = builder.inputType(
   }
 );
 
-const SquiggleModelExportInput = builder.inputType("SquiggleModelExportInput", {
-  fields: (t) => ({
-    variableName: t.string({ required: true }),
-    variableType: t.string({ required: true }),
-    docstring: t.string({ required: false }),
-    title: t.string({ required: false }),
-  }),
-});
-
 builder.mutationField("updateSquiggleSnippetModel", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("UpdateSquiggleSnippetResult", {
@@ -65,9 +56,6 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       slug: t.input.string({ required: true }),
       relativeValuesExports: t.input.field({
         type: [RelativeValuesExportInput],
-      }),
-      exports: t.input.field({
-        type: [SquiggleModelExportInput],
       }),
       content: t.input.field({
         type: SquiggleSnippetContentInput,
@@ -167,18 +155,6 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
                 data: relativeValuesExportsToInsert,
               },
             },
-            exports: {
-              createMany: {
-                data: (input.exports ?? []).map(
-                  ({ variableName, variableType, docstring, title }) => ({
-                    variableName,
-                    variableType,
-                    docstring: docstring ?? undefined,
-                    title: title ?? null,
-                  })
-                ),
-              },
-            },
           },
           include: {
             model: {
@@ -188,10 +164,9 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
             },
           },
         });
-
-        const model = await tx.model.update({
+        const updatedModel = await tx.model.update({
           where: {
-            id: revision.model.id,
+            id: revision.modelId,
           },
           data: {
             currentRevisionId: revision.id,
@@ -199,7 +174,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
           // TODO - optimize with queryFromInfo, https://pothos-graphql.dev/docs/plugins/prisma#optimized-queries-without-tprismafield
         });
 
-        return model;
+        return updatedModel;
       });
 
       return { model };

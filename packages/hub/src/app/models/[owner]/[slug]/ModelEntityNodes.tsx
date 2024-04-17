@@ -10,10 +10,10 @@ import { type EntityNode } from "@/components/EntityLayout";
 import { ownerIcon } from "@/lib/ownerIcon";
 import {
   isModelRelativeValuesRoute,
-  modelExportRoute,
   modelForRelativeValuesExportRoute,
   modelRoute,
   ownerRoute,
+  variableRoute,
 } from "@/routes";
 
 function hasTypename(owner: {
@@ -67,9 +67,9 @@ function entityNodes(
   if (variable && variable.type === "EXPORT") {
     nodes.push({
       slug: variable.name,
-      href: modelExportRoute({
+      href: variableRoute({
         owner: owner.slug,
-        slug,
+        modelSlug: slug,
         variableName: variable.name,
       }),
       icon: ShareIcon,

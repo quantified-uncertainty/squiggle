@@ -19,18 +19,18 @@ const ColumnHeaderContextMenu: FC<{
     <div className="w-96 px-4 py-4">
       <input
         type="text"
-        className="p-1 rounded border border-gray-200 w-full mb-4"
+        className="mb-4 w-full rounded border border-gray-200 p-1"
         defaultValue={search}
         onChange={(e) => setSearch(e.currentTarget.value)}
       />
-      <div className="overflow-auto max-h-96">
+      <div className="max-h-96 overflow-auto">
         <div className="flex flex-col gap-1">
           {items
             .filter((item) => item.name.match(new RegExp(search, "i")))
             .map((item) => (
               <div
                 key={item.id}
-                className="hover:bg-gray-100 rounded p-1 cursor-pointer text-xs"
+                className="cursor-pointer rounded p-1 text-xs hover:bg-gray-100"
                 onClick={() => setSelectedItem(item)}
               >
                 {item.name}
@@ -47,7 +47,7 @@ export const ColumnHeader: FC<{
   setSelectedItem(item: Item): void;
 }> = ({ selectedItem, setSelectedItem }) => {
   return (
-    <div className="sticky top-0 left-0 z-10 grid place-items-stretch h-full">
+    <div className="sticky left-0 top-0 z-10 grid h-full place-items-stretch">
       <Dropdown
         render={({ close }) => (
           <ColumnHeaderContextMenu
@@ -60,7 +60,7 @@ export const ColumnHeader: FC<{
         fullHeight
       >
         <CellBox header clickable>
-          <div className="text-sm pl-1 pt-1 text-slate-600">
+          <div className="pl-1 pt-1 text-sm text-slate-600">
             Estimated value, in terms of
           </div>
           <Header item={selectedItem} />

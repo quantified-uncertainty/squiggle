@@ -18,6 +18,7 @@ import {
   userDefinitionsRoute,
   userGroupsRoute,
   userRoute,
+  userVariablesRoute,
 } from "@/routes";
 
 import { UserLayoutQuery } from "@/__generated__/UserLayoutQuery.graphql";
@@ -37,6 +38,11 @@ const Query = graphql`
         # fields for count (empty/non-empty)
         # TODO: implement "totalCount" field instead
         models(first: 1) {
+          edges {
+            __typename
+          }
+        }
+        variables(first: 1) {
           edges {
             __typename
           }
@@ -74,7 +80,7 @@ const NewButton: FC = () => {
 
   return (
     <Button onClick={() => router.push(link)}>
-      <div className="flex gap-1 items-center">
+      <div className="flex items-center gap-1">
         <PlusIcon size={16} />
         {text}
       </div>
@@ -98,16 +104,22 @@ export const UserLayout: FC<
     <div className="space-y-8">
       <H1 size="large">
         <div className="flex items-center">
-          <UserIcon className="opacity-50 mr-2" />
+          <UserIcon className="mr-2 opacity-50" />
           {user.username}
         </div>
       </H1>
-      <div className="flex gap-4 items-center">
+      <div className="flex items-center gap-4">
         <StyledTabLink.List>
           {isMe || user.models.edges.length ? (
             <StyledTabLink
               name="Models"
               href={userRoute({ username: user.username })}
+            />
+          ) : null}
+          {isMe || user.variables.edges.length ? (
+            <StyledTabLink
+              name="Variables"
+              href={userVariablesRoute({ username: user.username })}
             />
           ) : null}
           {isMe || user.relativeValuesDefinitions.edges.length ? (

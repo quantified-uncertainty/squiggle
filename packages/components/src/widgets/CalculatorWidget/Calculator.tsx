@@ -245,11 +245,11 @@ export const Calculator: FC<Props> = ({ settings, valueWithContext }) => {
 
   return (
     <FormProvider {...form}>
-      <div className="border border-slate-200 rounded-sm max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl rounded-sm border border-slate-200">
         {hasTitleOrDescription && (
-          <div className="py-3 px-5 border-b border-slate-200 bg-slate-100 max-w-4xl">
+          <div className="max-w-4xl border-b border-slate-200 bg-slate-100 px-5 py-3">
             {calculator.title && (
-              <div className="text-lg text-slate-900 font-semibold mb-1">
+              <div className="mb-1 text-lg font-semibold text-slate-900">
                 {calculator.title}
               </div>
             )}
@@ -264,7 +264,7 @@ export const Calculator: FC<Props> = ({ settings, valueWithContext }) => {
         )}
 
         {Boolean(calculator.inputs.length) && (
-          <div className="py-3 px-5 border-b border-slate-200 bg-gray-50 space-y-3">
+          <div className="space-y-3 border-b border-slate-200 bg-gray-50 px-5 py-3">
             {calculator.inputs.map((row, i) => (
               <CalculatorInput
                 key={i}

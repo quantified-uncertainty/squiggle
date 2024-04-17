@@ -3,7 +3,7 @@ import {
   DistError,
   distErrorToString,
   serializeDistError,
-} from "../dist/DistError.js";
+} from "../dists/DistError.js";
 import {
   deserializeOperationError,
   OperationError,

@@ -194,6 +194,7 @@ model Model {
   currentRevisionId String?        @unique
 
   searchable Searchable?
+  variables  Variable[]
 
   @@unique([slug, ownerId])
   @@index([createdAt])
@@ -219,12 +220,24 @@ model ModelRevision {
   contentId       String?          @unique
 
   relativeValuesExports RelativeValuesExport[]
-  exports               ModelExport[]
+  variableRevisions     VariableRevision[]
 
   // required by Prisma, but unused since `model` field should point at the same entity
-  currentRevisionModel Model? @relation("CurrentRevision")
+  currentRevisionModel Model?               @relation("CurrentRevision")
+  builds               ModelRevisionBuild[]
 
   @@index([modelId])
+}
+
+model ModelRevisionBuild {
+  id              String        @id @default(cuid())
+  createdAt       DateTime      @default(now())
+  modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
+  modelRevisionId String
+  runSeconds      Float
+  errors          String[]
+
+  @@index([modelRevisionId])
 }
 
 model SquiggleSnippet {
@@ -240,16 +253,35 @@ model SquiggleSnippet {
   revision ModelRevision?
 }
 
-model ModelExport {
+model Variable {
+  id           String             @id @default(cuid())
+  variableName String
+  model        Model              @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  modelId      String
+  revisions    VariableRevision[] @relation("Revisions")
+
+  // technically nullable, but won't ever be null in practice
+  currentRevision   VariableRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
+  currentRevisionId String?           @unique
+
+  @@unique([modelId, variableName])
+}
+
+model VariableRevision {
   id              String        @id @default(cuid())
   modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
   modelRevisionId String
+  variable        Variable      @relation("Revisions", fields: [variableId], references: [id], onDelete: Cascade)
+  variableId      String
   variableName    String
   title           String?
   docstring       String        @default("")
   variableType    String        @default("OTHER")
 
-  @@unique([modelRevisionId, variableName], name: "uniqueKey")
+  // required by Prisma, but unused since `model` field should point at the same entity
+  currentRevisionVariable Variable? @relation("CurrentRevision")
+
+  @@unique([modelRevisionId, variableName])
 }
 
 // Definitions are polymorphic, but organized differently from Models, without content types.

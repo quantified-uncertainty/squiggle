@@ -2,8 +2,8 @@
 
 import jstat from "jstat";
 
-import { Binomial } from "../dist/SymbolicDist/Binomial.js";
-import * as PoissonJs from "../dist/SymbolicDist/Poisson.js";
+import { Binomial } from "../dists/SymbolicDist/Binomial.js";
+import * as PoissonJs from "../dists/SymbolicDist/Poisson.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { SDate } from "../index.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";

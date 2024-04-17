@@ -8,6 +8,7 @@ import {
   RelativeValuesDefinitionConnection,
   relativeValuesDefinitionConnectionHelpers,
 } from "./RelativeValuesDefinition";
+import { VariableConnection, variableConnectionHelpers } from "./Variable";
 
 export const User = builder.prismaNode("User", {
   id: { field: "id" },
@@ -52,6 +53,34 @@ export const User = builder.prismaNode("User", {
           modelConnectionHelpers.resolve(user.asOwner?.models ?? [], args, ctx),
       },
       ModelConnection
+    ),
+    variables: t.connection(
+      {
+        type: variableConnectionHelpers.ref,
+        select: (args, ctx, nestedSelection) => ({
+          asOwner: {
+            select: {
+              models: {
+                where: modelWhereHasAccess(ctx.session),
+                select: {
+                  variables: variableConnectionHelpers.getQuery(
+                    args,
+                    ctx,
+                    nestedSelection
+                  ),
+                },
+              },
+            },
+          },
+        }),
+        resolve: (user, args, ctx) => {
+          const variables =
+            user.asOwner?.models.map((model) => model.variables ?? []).flat() ??
+            [];
+          return variableConnectionHelpers.resolve(variables, args, ctx);
+        },
+      },
+      VariableConnection
     ),
     relativeValuesDefinitions: t.connection(
       {

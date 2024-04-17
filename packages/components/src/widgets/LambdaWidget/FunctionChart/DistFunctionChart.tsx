@@ -299,7 +299,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
         <div className={tailwindSelector}>
           <div
             ref={refs.setFloating}
-            className="z-30 rounded-md bg-white shadow-lg border"
+            className="z-30 rounded-md border bg-white shadow-lg"
             style={{
               position: strategy,
               top: y ?? 0,

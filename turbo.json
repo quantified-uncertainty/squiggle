@@ -6,7 +6,7 @@
   "pipeline": {
     // dev target for pre-push checks
     "build:ts": {
-      "dependsOn": ["^build:ts"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**", "*.tsbuildinfo"]
     },
     "build": {
@@ -19,14 +19,14 @@
         "!.next/cache/**"
       ]
     },
+    "build:storybook": {
+      "dependsOn": ["build"],
+      "outputs": ["storybook-static/**"]
+    },
     "lint": {},
     "eslint": {},
     "test": {
       "dependsOn": ["build"]
-    },
-    "bundle": {
-      "dependsOn": ["build"],
-      "outputs": ["dist/bundle*"]
     },
     "coverage": {
       "dependsOn": ["build"],
