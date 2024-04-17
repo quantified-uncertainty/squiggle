@@ -3,7 +3,7 @@
 import { FC, PropsWithChildren } from "react";
 import { graphql } from "relay-runtime";
 
-import { CodeBracketIcon, RectangleStackIcon, ShareIcon } from "@quri/ui";
+import { CodeBracketSquareIcon, RectangleStackIcon, ShareIcon } from "@quri/ui";
 
 import { EntityLayout } from "@/components/EntityLayout";
 import { EntityTab } from "@/components/ui/EntityTab";
@@ -120,7 +120,11 @@ export const ModelLayout: FC<
       headerLeft={<ModelAccessControls modelRef={model} />}
       headerRight={
         <EntityTab.List>
-          <EntityTab.Link name="Code" icon={CodeBracketIcon} href={modelUrl} />
+          <EntityTab.Link
+            name="Code"
+            icon={CodeBracketSquareIcon}
+            href={modelUrl}
+          />
           {Boolean(_totalImportLength) && (
             <VariablesDropdown
               variableRevisions={variableRevisions}

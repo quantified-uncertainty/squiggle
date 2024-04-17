@@ -7,7 +7,9 @@ export const ModelRevisionBuild = builder.prismaNode("ModelRevisionBuild", {
       resolve: (build) => build.createdAt.getTime(),
     }),
     modelRevision: t.relation("modelRevision"),
-    errors: t.exposeStringList("errors"),
+    errors: t.stringList({
+      resolve: (build) => build.errors.filter((e) => e !== ""),
+    }),
     runSeconds: t.exposeFloat("runSeconds"),
   }),
 });

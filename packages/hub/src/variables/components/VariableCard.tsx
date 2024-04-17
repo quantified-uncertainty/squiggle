@@ -1,11 +1,19 @@
-import truncate from "lodash/truncate";
+import Link from "next/link";
 import { FC } from "react";
-import ReactMarkdown from "react-markdown";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
-import remarkGfm from "remark-gfm";
 
-import { EntityCard } from "@/components/EntityCard";
+import { MarkdownViewer } from "@quri/squiggle-components";
+import { CodeBracketSquareIcon } from "@quri/ui";
+
+import {
+  EntityCardBadge,
+  entityCardBadgeCss,
+  InterspersedMenuItemsWithDots,
+  keepFirstNLines,
+  PrivateBadge,
+  UpdatedStatus,
+} from "@/components/EntityCard";
 import { exportTypeIcon } from "@/lib/typeIcon";
 import { modelRoute, variableRoute } from "@/routes";
 
@@ -50,52 +58,60 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
   const Icon = exportTypeIcon(currentRevision.variableType || "");
 
   // This will have problems with markdown tags, but I looked into markdown-truncation packages, and they can get complicated. Will try this for now.
-  const docstring =
-    (currentRevision.docstring &&
-      truncate(currentRevision.docstring, {
-        length: 500,
-        separator: " ",
-        omission: "...",
-      })) ||
-    undefined;
+
+  const { createdAtTimestamp } = currentRevision.modelRevision;
 
   return (
-    <EntityCard
-      updatedAtTimestamp={currentRevision.modelRevision.createdAtTimestamp}
-      href={variableRoute({
-        modelSlug: variable.model.slug,
-        variableName: variable.variableName,
-        owner: variable.owner.slug,
-      })}
-      showOwner={false}
-      isPrivate={variable.model.isPrivate}
-      slug={variable.currentRevision?.title || variable.variableName}
-      footerItems={
-        <>
+    <div className="flex flex-col">
+      <div className="flex-grow px-2">
+        <div className="mb-1">
+          <Link
+            className="font-medium text-gray-900 hover:underline"
+            href={variableRoute({
+              modelSlug: variable.model.slug,
+              variableName: variable.variableName,
+              owner: variable.owner.slug,
+            })}
+          >
+            {variable.currentRevision?.title || variable.variableName}
+          </Link>
+        </div>
+        <div className="mb-1 text-sm text-gray-500">
           <a
-            className="flex cursor-pointer items-center text-xs text-gray-500 hover:text-gray-900 hover:underline"
+            className={entityCardBadgeCss(true)}
             href={modelRoute({
               owner: variable.owner.slug,
               slug: variable.model.slug,
             })}
           >
+            <CodeBracketSquareIcon size={12} className="mr-1" />
             {`${variable.owner.slug}/${variable.model.slug}`}
           </a>
-          <div className="flex items-center text-xs text-gray-500">
-            <Icon size={10} className="mr-1" />
-            {currentRevision.variableType}
+        </div>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+          <InterspersedMenuItemsWithDots
+            items={[
+              <EntityCardBadge presentAsLink={false} key={"variable-type"}>
+                <Icon size={10} className="mr-1" />
+                {currentRevision.variableType}
+              </EntityCardBadge>,
+              <UpdatedStatus time={createdAtTimestamp} key={"updated-at"} />,
+              variable.model.isPrivate && <PrivateBadge key={"is-private"} />,
+            ]}
+          />
+        </div>
+      </div>
+      {currentRevision.docstring && (
+        <div className="mt-3 rounded-md bg-gray-50">
+          <div className="px-2 py-1 text-xs text-gray-600">
+            <MarkdownViewer
+              md={keepFirstNLines(currentRevision.docstring, 10)}
+              textSize="xs"
+              background-color=""
+            />
           </div>
-        </>
-      }
-    >
-      {docstring && (
-        <ReactMarkdown
-          className={"prose text-sm text-gray-500"}
-          remarkPlugins={[remarkGfm]}
-        >
-          {docstring}
-        </ReactMarkdown>
+        </div>
       )}
-    </EntityCard>
+    </div>
   );
 };
