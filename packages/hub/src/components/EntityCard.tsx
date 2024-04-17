@@ -17,7 +17,7 @@ export function formatDate(date: Date): string {
   return date.toLocaleDateString("en-US", options);
 }
 
-export const badgeCss = (presentAsLink: boolean) => {
+export const entityCardBadgeCss = (presentAsLink: boolean) => {
   return clsx(
     "flex items-center",
     presentAsLink &&
@@ -28,7 +28,7 @@ export const badgeCss = (presentAsLink: boolean) => {
 export const EntityCardBadge: FC<
   PropsWithChildren<{ presentAsLink: boolean }>
 > = ({ presentAsLink, children }) => (
-  <div className={badgeCss(presentAsLink)}>{children}</div>
+  <div className={entityCardBadgeCss(presentAsLink)}>{children}</div>
 );
 
 export const PrivateBadge: FC = () => (

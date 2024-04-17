@@ -29,11 +29,7 @@ export const GroupCard: FC<Props> = ({ groupRef }) => {
       })}
       showOwner={false}
       slug={group.slug}
-      menuItems={
-        <>
-          <UpdatedStatus time={group.updatedAtTimestamp} />
-        </>
-      }
+      menuItems={<UpdatedStatus time={group.updatedAtTimestamp} />}
     />
   );
 };
