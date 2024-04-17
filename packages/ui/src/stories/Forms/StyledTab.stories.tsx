@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { StyledTab } from "../components/StyledTab.js";
-import { BoltIcon, FireIcon } from "../index.js";
+import { StyledTab } from "../../components/StyledTab.js";
+import { BoltIcon, FireIcon } from "../../icons/HeroIcons.js";
 
 /**
  * StyledTab component wraps the [\<Tab\>](https://headlessui.com/react/tabs) component from Headless UI.

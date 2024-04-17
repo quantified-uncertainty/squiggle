@@ -38,6 +38,7 @@ export { StyledCheckbox } from "./forms/styled/StyledCheckbox.js";
 export { StyledColorInput } from "./forms/styled/StyledColorInput.js";
 export { StyledInput } from "./forms/styled/StyledInput.js";
 export { StyledTextArea } from "./forms/styled/StyledTextArea.js";
+export { StyledToggle } from "./forms/styled/StyledToggle.js";
 
 export { DotsHorizontalIcon } from "./icons/DotsHorizontalIcon.js";
 export { EditIcon } from "./icons/EditIcon.js";

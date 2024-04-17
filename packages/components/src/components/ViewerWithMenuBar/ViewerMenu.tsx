@@ -19,11 +19,11 @@ const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
   const isEmpty = type === null;
   return (
     <div className="flex justify-between">
-      <span className={clsx(isEmpty && "text-slate-400")}>{title}</span>
+      <span className={clsx(isEmpty && "text-gray-400")}>{title}</span>
       {isEmpty ? (
-        <span className="text-slate-300">Empty</span>
+        <span className="text-gray-300">Empty</span>
       ) : (
-        <span className="text-blue-800">{type}</span>
+        <span className="text-gray-400">{type}</span>
       )}
     </div>
   );

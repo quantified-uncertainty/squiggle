@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import React from "react";
 
-import { BoltIcon, PauseIcon } from "@quri/ui";
+import { StyledToggle } from "@quri/ui";
 
 import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 
@@ -16,11 +16,22 @@ export const AutorunnerMenuItem: React.FC<{
   >
     <ToolbarItem
       tooltipText="Triggers runs on code changes"
-      icon={autorunMode ? BoltIcon : PauseIcon}
-      className={clsx(!autorunMode && "opacity-60")}
+      className={clsx(
+        "flex items-center space-x-2",
+        !autorunMode && "opacity-60"
+      )}
       onClick={() => setAutorunMode(!autorunMode)}
     >
-      Autorun
+      <div className="flex items-center">
+        <StyledToggle
+          checked={autorunMode}
+          showFocusRing={false}
+          onChange={(isChecked) => {
+            setAutorunMode(isChecked);
+          }}
+        />
+        <span className="ml-2">Autorun</span>
+      </div>
     </ToolbarItem>
   </div>
 );

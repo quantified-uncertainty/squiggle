@@ -1,4 +1,5 @@
 "use client";
+
 import { Tab } from "@headlessui/react";
 import { clsx } from "clsx";
 import { FC, Fragment, ReactNode } from "react";
@@ -25,7 +26,7 @@ type StyledTabType = FC<StyledTabProps> & {
 };
 
 const tabStyle =
-  "group flex rounded-md focus:outline-none focus-visible:ring-offset-gray-100 hover:bg-gray-300 mx-px cursor-pointer";
+  "group flex rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-500 hover:bg-gray-100 mx-1 cursor-pointer transition-colors duration-200";
 
 const StyledTabInner: FC<StyledTabButtonType> = ({
   name,
@@ -35,36 +36,27 @@ const StyledTabInner: FC<StyledTabButtonType> = ({
   <>
     <span
       className={clsx(
-        "flex items-center rounded-md p-1 pl-2.5 pr-2.5 text-sm font-medium",
-        isSelected && "bg-white shadow-sm ring-1 ring-black ring-opacity-5"
+        "flex items-center rounded-md px-3 py-2 text-sm font-medium",
+        isSelected
+          ? "bg-gray-600 text-white shadow-sm"
+          : "text-gray-500 hover:text-gray-900"
       )}
     >
       {Icon && (
         <Icon
           className={clsx(
-            "-ml-0.5 mr-1.5 h-4 w-4",
+            "-ml-0.5 mr-1.5 h-5 w-5",
             isSelected
-              ? "text-gray-500"
-              : "text-gray-400 group-hover:text-gray-600"
+              ? "text-white"
+              : "text-gray-400 group-hover:text-gray-500"
           )}
         />
       )}
-      <span
-        className={clsx(
-          isSelected
-            ? "text-gray-800"
-            : "text-gray-500 group-hover:text-gray-900",
-          !Icon && "px-1"
-        )}
-      >
-        {name}
-      </span>
+      <span>{name}</span>
     </span>
   </>
 );
 
-//The really annoying thing is that if button isn't in this component, then clicking it won't work.
-//So we have to include button here, don't try to move into StyledTabInner
 export const StyledTab: StyledTabType = ({ name, icon: Icon }) => (
   <Tab as={Fragment}>
     {({ selected }) => (
@@ -81,8 +73,7 @@ const StyledTabButton: FC<StyledTabButtonType> = (props) => (
   </div>
 );
 
-const tabListStyle =
-  "flex w-fit py-0.5 px-0.5 rounded-md bg-gray-100 hover:bg-gray-200";
+const tabListStyle = "flex space-x-1 rounded-md bg-gray-100 p-1";
 
 StyledTab.List = function StyledTabList({ children }) {
   return <Tab.List className={tabListStyle}>{children}</Tab.List>;

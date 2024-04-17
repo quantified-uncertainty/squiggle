@@ -34,7 +34,7 @@ export const PageMenuLink: FC<Props> = ({
   const Icon = icon;
   return mode === "desktop" ? (
     <Link
-      className="select-none rounded-md px-2 py-1 text-sm text-white hover:bg-slate-700"
+      className="select-none rounded-md px-2 py-1 text-sm font-light text-white hover:bg-slate-700"
       href={href}
       target={external ? "_blank" : undefined}
     >

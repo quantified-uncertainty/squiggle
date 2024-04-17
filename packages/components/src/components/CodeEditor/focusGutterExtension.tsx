@@ -125,9 +125,9 @@ class FocusableMarker extends GutterMarker {
         <div
           className={clsx(
             // initial color, specialized for active lines
-            "bg-slate-100 [.cm-activeLineGutter_&]:bg-white",
+            "bg-gray-100 [.cm-activeLineGutter_&]:bg-white",
             // highlight all markers on gutter hover; highlight the hovered markers even more
-            "group-hover/gutter:bg-slate-200 group-hover/marker:!bg-slate-500",
+            "group-hover/gutter:bg-gray-200 group-hover/marker:!bg-gray-500",
             "br-1 mt-[1px] h-4 w-[4px] rounded-sm",
             "transition duration-75"
           )}
