@@ -6,7 +6,7 @@ import { ChevronRightIcon, CodeBracketIcon, WrenchIcon } from "@quri/ui";
 import { checkSquiggleVersion, SquiggleVersion } from "./versions.js";
 
 export function versionTitle(version: SquiggleVersion) {
-  return version === "dev" ? "vNext" : `v${version}`;
+  return version === "dev" ? "next" : `v${version}`;
 }
 
 export function uncheckedVersionTitle(version: string) {

@@ -17,9 +17,9 @@ import {
 } from "@quri/ui";
 import {
   checkSquiggleVersion,
-  SquigglePlaygroundVersionPicker,
+  SquigglePlaygroundVersionPickerDropdown,
   type SquiggleVersion,
-  SquiggleVersionShower,
+  uncheckedVersionTitle,
   useAdjustSquiggleVersion,
   versionedSquigglePackages,
   versionSupportsDropdownMenu,
@@ -328,11 +328,13 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     renderExtraControls: () => (
       <div className="flex h-full items-center justify-end gap-2">
         {model.isEditable || forceVersionPicker ? (
-          <SquigglePlaygroundVersionPicker
+          <SquigglePlaygroundVersionPickerDropdown
             version={version}
             onChange={handleVersionChange}
             showUpdatePolicy
-          />
+          >
+            {uncheckedVersionTitle(version)}{" "}
+          </SquigglePlaygroundVersionPickerDropdown>
         ) : (
           <TextTooltip
             text="Squiggle Version" // FIXME - positioning is bad for some reason
@@ -340,9 +342,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
             offset={5}
           >
             {/* div wrapper is required because TextTooltip clones its children and SquiggleVersionShower doesn't forwardRef */}
-            <div className="h-full">
-              <SquiggleVersionShower version={version} />
-            </div>
+            <div className="h-full">{uncheckedVersionTitle(version)}</div>
           </TextTooltip>
         )}
         {model.isEditable && (

@@ -26,6 +26,7 @@ export const AutorunnerMenuItem: React.FC<{
         <StyledToggle
           checked={autorunMode}
           showFocusRing={false}
+          size="tiny"
           onChange={(isChecked) => {
             setAutorunMode(isChecked);
           }}
