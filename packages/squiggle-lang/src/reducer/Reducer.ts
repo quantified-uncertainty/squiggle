@@ -102,7 +102,7 @@ export class Reducer implements EvaluateAllKinds {
   private runtimeError(error: ErrorMessage, ast: ASTNode) {
     return IRuntimeError.fromMessage(
       error,
-      new StackTrace(this.frameStack, ast.location)
+      StackTrace.make(this.frameStack, ast.location)
     );
   }
 
@@ -112,7 +112,7 @@ export class Reducer implements EvaluateAllKinds {
   errorFromException(e: unknown, location?: LocationRange) {
     return IRuntimeError.fromException(
       e,
-      new StackTrace(this.frameStack, location)
+      StackTrace.make(this.frameStack, location)
     );
   }
 

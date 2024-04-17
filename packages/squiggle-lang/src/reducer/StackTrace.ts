@@ -1,4 +1,5 @@
 import { LocationRange } from "../ast/parse.js";
+import { JsonValue } from "../utility/typeHelpers.js";
 import { FrameStack } from "./FrameStack.js";
 
 export class StackTraceFrame {
@@ -18,17 +19,17 @@ export class StackTraceFrame {
 }
 
 export class StackTrace {
-  frames: StackTraceFrame[];
-  location?: LocationRange;
+  private constructor(
+    public frames: StackTraceFrame[],
+    public location?: LocationRange // location where the error has happened; not necessarily a function call
+  ) {}
 
-  constructor(
+  static make(
     frameStack: FrameStack,
     location?: LocationRange // location where the error has happened; not necessarily a function call
   ) {
-    this.location = location;
-
     const callFrames = frameStack.frames;
-    this.frames = [];
+    const frames: StackTraceFrame[] = [];
 
     /**
      * Stack trace frames are shifted diagonally by one compared to the call stack frames.
@@ -44,9 +45,11 @@ export class StackTrace {
     for (let i = callFrames.length; i >= 0; i--) {
       const name = i ? callFrames[i - 1].lambda.display() : "<top>";
       const callLocation =
-        i === callFrames.length ? this.location : callFrames[i].location;
-      this.frames.push(new StackTraceFrame(name, callLocation));
+        i === callFrames.length ? location : callFrames[i].location;
+      frames.push(new StackTraceFrame(name, callLocation));
     }
+
+    return new StackTrace(frames, location);
   }
 
   toString() {
@@ -72,4 +75,31 @@ export class StackTrace {
       (this.frames.length === 1 && !this.frames[0].location)
     );
   }
+
+  serialize(): SerializedStackTrace {
+    return {
+      frames: this.frames.map((frame) => ({
+        name: frame.name,
+        location: frame.location ?? null,
+      })),
+      location: this.location ?? null,
+    } satisfies JsonValue;
+  }
+
+  static deserialize(data: SerializedStackTrace): StackTrace {
+    return new StackTrace(
+      data.frames.map(
+        (frame) => new StackTraceFrame(frame.name, frame.location ?? undefined)
+      ),
+      data.location ?? undefined
+    );
+  }
 }
+
+export type SerializedStackTrace = {
+  frames: {
+    name: string;
+    location: LocationRange | null;
+  }[];
+  location: LocationRange | null;
+};

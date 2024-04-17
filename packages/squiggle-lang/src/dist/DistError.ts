@@ -1,4 +1,8 @@
-import { OperationError } from "../operationError.js";
+import {
+  deserializeOperationError,
+  OperationError,
+} from "../operationError.js";
+import { JsonValue } from "../utility/typeHelpers.js";
 import { XYShapeError } from "../XYShape.js";
 
 type SimpleError<S extends string> = { type: S };
@@ -19,6 +23,33 @@ export type DistError =
   | StringError<"OtherError">
   | ValueError<"OperationError", OperationError>
   | ValueError<"XYShapeError", XYShapeError>;
+
+export function serializeDistError(err: DistError) {
+  switch (err.type) {
+    case "OperationError":
+      return {
+        type: err.type,
+        value: err.value.serialize(),
+      } satisfies JsonValue;
+    default:
+      // all other DistError types are serializable as-is
+      return err satisfies JsonValue;
+  }
+}
+
+export function deserializeDistError(
+  data: ReturnType<typeof serializeDistError>
+): DistError {
+  switch (data.type) {
+    case "OperationError":
+      return {
+        type: "OperationError",
+        value: deserializeOperationError(data.value),
+      } as DistError;
+    default:
+      return data;
+  }
+}
 
 export const tooFewSamplesForConversionToPointSet = (): DistError => {
   return {

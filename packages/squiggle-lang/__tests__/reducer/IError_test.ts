@@ -15,7 +15,7 @@ describe("IError", () => {
     expect(
       IRuntimeError.fromMessage(
         new REOther("test error"),
-        new StackTrace(FrameStack.make())
+        StackTrace.make(FrameStack.make())
       ).toString()
     ).toBe("Error: test error"));
 
@@ -23,7 +23,7 @@ describe("IError", () => {
     expect(
       IRuntimeError.fromMessage(
         new REOther("test error"),
-        new StackTrace(FrameStack.make())
+        StackTrace.make(FrameStack.make())
       ).toStringWithDetails()
     ).toBe("Error: test error"));
 
@@ -51,7 +51,7 @@ describe("IError", () => {
     expect(
       IRuntimeError.fromMessage(
         new REOther("test error"),
-        new StackTrace(frameStack)
+        StackTrace.make(frameStack)
       ).toStringWithDetails()
     ).toBe(`Error: test error
 Stack trace:

@@ -1,6 +1,17 @@
 import { LocationRange } from "../ast/parse.js";
-import { StackTrace, StackTraceFrame } from "../reducer/StackTrace.js";
-import { ErrorMessage, REJavaScriptExn, REOther } from "./messages.js";
+import {
+  SerializedStackTrace,
+  StackTrace,
+  StackTraceFrame,
+} from "../reducer/StackTrace.js";
+import {
+  BaseErrorMessage,
+  deserializeErrorMessage,
+  ErrorMessage,
+  REJavaScriptExn,
+  REOther,
+  SerializedErrorMessage,
+} from "./messages.js";
 
 // "I" stands for "Internal", since we also have a more public SqError proxy
 export class IRuntimeError extends Error {
@@ -26,9 +37,12 @@ export class IRuntimeError extends Error {
   static fromException(err: unknown, stackTrace: StackTrace): IRuntimeError {
     if (err instanceof IRuntimeError) {
       return err;
-    } else if (err instanceof ErrorMessage) {
+    } else if (err instanceof BaseErrorMessage) {
       // probably comes from FunctionRegistry, adding stacktrace
-      return IRuntimeError.fromMessage(err, stackTrace);
+      return IRuntimeError.fromMessage(
+        err as ErrorMessage, // assuming ErrorMessage type union is complete
+        stackTrace
+      );
     } else if (err instanceof Error) {
       return IRuntimeError.fromMessage(
         new REJavaScriptExn(err.message, err.name),
@@ -125,9 +139,26 @@ ${emptyGutter}| ${bottomMarker}
   }
 
   serialize(): SerializedIRuntimeError {
-    throw "TODO";
+    return {
+      type: "IRuntimeError",
+      message: this.m.serialize(),
+      stackTrace: this.stackTrace.serialize(),
+    };
+  }
+
+  static deserialize(data: SerializedIRuntimeError): IRuntimeError {
+    return new IRuntimeError(
+      deserializeErrorMessage(data.message),
+      StackTrace.deserialize(data.stackTrace)
+    );
   }
 }
+
+type SerializedIRuntimeError = {
+  type: "IRuntimeError";
+  message: SerializedErrorMessage;
+  stackTrace: SerializedStackTrace;
+};
 
 export class ICompileError extends Error {
   readonly type = "ICompileError";
@@ -152,9 +183,15 @@ export class ICompileError extends Error {
   }
 
   serialize(): SerializedICompileError {
-    throw "TODO";
+    return {
+      type: this.type,
+      message: this.message,
+      location: this.location,
+    };
   }
 }
+
+export type IError = ICompileError | IRuntimeError;
 
 type SerializedICompileError = {
   type: "ICompileError";
@@ -162,9 +199,21 @@ type SerializedICompileError = {
   location: LocationRange;
 };
 
-type SerializedIRuntimeError = {
-  type: "IRuntimeError";
-  message: string;
-  location: LocationRange;
-};
-export type IError = ICompileError | IRuntimeError;
+export type SerializedIError =
+  | SerializedICompileError
+  | SerializedIRuntimeError;
+
+export function serializeIError(value: IError): SerializedIError {
+  return value.serialize();
+}
+
+export function deserializeIError(value: SerializedIError): IError {
+  switch (value.type) {
+    case "ICompileError":
+      return new ICompileError(value.message, value.location);
+    case "IRuntimeError":
+      return IRuntimeError.deserialize(value);
+    default:
+      throw new Error(`Unknown value ${value} satisfies never`);
+  }
+}

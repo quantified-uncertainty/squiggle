@@ -1,5 +1,6 @@
+import { SerializedIError, serializeIError } from "../errors/IError.js";
 import { compileAst } from "../expression/compile.js";
-import { AST, Env, SqCompileError } from "../index.js";
+import { AST, Env } from "../index.js";
 import { getStdLib } from "../library/index.js";
 import { Reducer } from "../reducer/Reducer.js";
 import {
@@ -8,10 +9,10 @@ import {
   squiggleCodec,
 } from "../serialization/squiggle.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { errMap, result } from "../utility/result.js";
+import { Err, Ok, result } from "../utility/result.js";
 import { Value, vDict } from "../value/index.js";
 
-export type SquiggleJob = {
+export type SquiggleWorkerJob = {
   environment: Env;
   ast: AST;
   bundle: SquiggleBundle;
@@ -19,49 +20,59 @@ export type SquiggleJob = {
   sourceId: string;
 };
 
-export type SquiggleJobResult = {
+export type SquiggleWorkerOutput = {
   bundle: SquiggleBundle;
   result: SquiggleBundleEntrypoint<"value">;
   bindings: SquiggleBundleEntrypoint<"value">;
   exports: SquiggleBundleEntrypoint<"value">;
 };
 
-export type SquiggleWorkerResponse = {
-  type: "result";
-  payload: result<SquiggleJobResult, string>;
-};
+export type SquiggleWorkerResult = result<
+  SquiggleWorkerOutput,
+  SerializedIError
+>;
 
-function processJob(job: SquiggleJob): SquiggleJobResult {
-  const { environment, ast, bundle, externalsEntrypoint, sourceId } = job;
+export type SquiggleWorkerResponse =
+  | {
+      type: "result";
+      payload: SquiggleWorkerResult;
+    }
+  | {
+      type: "internal-error";
+      payload: string;
+    };
 
+function processJob(job: SquiggleWorkerJob): SquiggleWorkerResult {
   const externalsValue = squiggleCodec
-    .makeDeserializer(bundle)
-    .deserialize(externalsEntrypoint);
+    .makeDeserializer(job.bundle)
+    .deserialize(job.externalsEntrypoint);
 
   if (externalsValue.type !== "Dict") {
     throw new Error("Expected externals to be a dictionary");
   }
 
-  const expressionResult = errMap(
-    compileAst(ast, getStdLib().merge(externalsValue.value)),
-    (e) => new SqCompileError(e)
+  const expressionResult = compileAst(
+    job.ast,
+    getStdLib().merge(externalsValue.value)
   );
 
   if (!expressionResult.ok) {
-    throw new Error(
-      `Expected expression to be ok, got: ${expressionResult.value}`
-    );
+    return Err(serializeIError(expressionResult.value));
   }
   const expression = expressionResult.value;
-
-  const reducer = new Reducer(environment);
 
   if (expression.kind !== "Program") {
     // mostly for TypeScript, so that we could access `expression.value.exports`
     throw new Error("Expected Program expression");
   }
 
-  const result = reducer.evaluate(expression);
+  const reducer = new Reducer(job.environment);
+  let result: Value;
+  try {
+    result = reducer.evaluate(expression);
+  } catch (e: unknown) {
+    return Err(serializeIError(reducer.errorFromException(e)));
+  }
 
   const exportNames = new Set(expression.value.exports);
   const bindings = ImmutableMap<string, Value>(
@@ -70,7 +81,7 @@ function processJob(job: SquiggleJob): SquiggleJobResult {
       if (exportNames.has(name)) {
         value = value.mergeTags({
           exportData: {
-            sourceId,
+            sourceId: job.sourceId,
             path: [name],
           },
         });
@@ -89,19 +100,19 @@ function processJob(job: SquiggleJob): SquiggleJobResult {
     "value",
     vDict(exports).mergeTags({
       exportData: {
-        sourceId,
+        sourceId: job.sourceId,
         path: [],
       },
     })
   );
   resultStore.serialize("value", result);
 
-  return {
+  return Ok({
     bundle: resultStore.getBundle(),
     result: resultEntrypoint,
     bindings: bindingsEntrypoint,
     exports: exportsEntrypoint,
-  };
+  });
 }
 
 function postTypedMessage(data: SquiggleWorkerResponse) {
@@ -111,15 +122,14 @@ function postTypedMessage(data: SquiggleWorkerResponse) {
 addEventListener("message", (e) => {
   // TODO - validate e.data?
   try {
-    const jobResult = processJob(e.data);
     postTypedMessage({
       type: "result",
-      payload: { ok: true, value: jobResult },
+      payload: processJob(e.data),
     } satisfies SquiggleWorkerResponse);
   } catch (e: unknown) {
     postTypedMessage({
-      type: "result",
-      payload: { ok: false, value: String(e) },
+      type: "internal-error",
+      payload: String(e),
     });
   }
 });

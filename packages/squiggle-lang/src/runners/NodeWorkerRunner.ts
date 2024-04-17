@@ -1,10 +1,11 @@
 import Worker from "web-worker";
 
+import { deserializeIError } from "../errors/IError.js";
 import { squiggleCodec } from "../serialization/squiggle.js";
-import { Ok } from "../utility/result.js";
+import { Err, Ok } from "../utility/result.js";
 import { VDict } from "../value/VDict.js";
 import { BaseRunner, RunParams, RunResult } from "./BaseRunner.js";
-import { SquiggleJob, SquiggleWorkerResponse } from "./worker.js";
+import { SquiggleWorkerJob, SquiggleWorkerResponse } from "./worker.js";
 
 export class NodeWorkerRunner extends BaseRunner {
   async run({
@@ -26,17 +27,22 @@ export class NodeWorkerRunner extends BaseRunner {
       bundle,
       externalsEntrypoint,
       sourceId,
-    } satisfies SquiggleJob);
+    } satisfies SquiggleWorkerJob);
 
     return new Promise<RunResult>((resolve) => {
       worker.addEventListener("message", (e: any) => {
         const data: SquiggleWorkerResponse = e.data;
-        if (data.type !== "result")
-          throw new Error("Expected result message from worker");
+        if (data.type === "internal-error") {
+          throw new Error(`Internal worker error: ${data.payload}`);
+        }
+        if (data.type !== "result") {
+          throw new Error(
+            `Unexpected message ${JSON.stringify(data)} from worker`
+          );
+        }
 
         worker.terminate();
         if (data.payload.ok) {
-          console.log(JSON.stringify(data.payload.value.bundle, null, 2));
           const deserializer = squiggleCodec.makeDeserializer(
             data.payload.value.bundle
           );
@@ -54,8 +60,8 @@ export class NodeWorkerRunner extends BaseRunner {
             })
           );
         } else {
-          throw new Error(String(data.payload.value)); // TODO
-          // deserialize error and resolve(Err(...))
+          const error = deserializeIError(data.payload.value);
+          resolve(Err(error));
         }
       });
     });
