@@ -70,7 +70,7 @@ export const CodeSyntaxHighlighter: FC<
   });
 
   return (
-    <div
+    <pre
       className="*:!bg-inherit" // shiki themes add background color, so we have to override it
       dangerouslySetInnerHTML={{ __html: html }}
       {...rest}
