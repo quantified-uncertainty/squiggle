@@ -1,3 +1,4 @@
+import { lambdaToCalculator } from "../../fr/calculator.js";
 import { SDuration } from "../../index.js";
 import { result } from "../../utility/result.js";
 import { SDate } from "../../utility/SDate.js";
@@ -249,7 +250,7 @@ export class SqLambdaValue extends SqAbstractValue<
   }
 
   toCalculator(): SqCalculatorValue | undefined {
-    const calc = this.value._value.toCalculator();
+    const calc = lambdaToCalculator(this.value._value);
     return calc
       ? new SqCalculatorValue(vCalculator(calc), this.context)
       : undefined;

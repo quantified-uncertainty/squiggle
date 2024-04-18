@@ -1,3 +1,5 @@
+import maxBy from "lodash/maxBy.js";
+
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -13,15 +15,17 @@ import {
   frString,
   frWithTags,
 } from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
+import { FnFactory, frTypeToInput } from "../library/registry/helpers.js";
+import { Lambda } from "../reducer/lambda.js";
 import { Calculator, vCalculator } from "../value/VCalculator.js";
+import { Input } from "../value/VInput.js";
 
 const maker = new FnFactory({
   nameSpace: "Calculator",
   requiresNamespace: true,
 });
 
-const validateCalculator = (calc: Calculator): Calculator => {
+function validateCalculator(calc: Calculator): Calculator {
   const _calc = vCalculator(calc);
   const error = _calc.getError();
   if (error) {
@@ -29,7 +33,46 @@ const validateCalculator = (calc: Calculator): Calculator => {
   } else {
     return _calc.value;
   }
-};
+}
+
+function getDefaultInputs(lambda: Lambda): Input[] {
+  switch (lambda.type) {
+    case "BuiltinLambda": {
+      const longestSignature =
+        maxBy(lambda.signatures(), (s) => s.length) || [];
+      return longestSignature.map((sig, i) => {
+        const name = sig.varName ? sig.varName : `Input ${i + 1}`;
+        return frTypeToInput(sig, i, name);
+      });
+    }
+    case "UserDefinedLambda":
+      return lambda.getParameterNames().map((name) => ({
+        name,
+        type: "text",
+      }));
+  }
+}
+
+export function lambdaToCalculator(lambda: Lambda): Calculator {
+  const inputs = getDefaultInputs(lambda);
+  switch (lambda.type) {
+    case "BuiltinLambda": {
+      return {
+        fn: lambda,
+        inputs,
+        autorun: inputs.length !== 0,
+      };
+    }
+    case "UserDefinedLambda": {
+      const only0Params = lambda.parameters.length === 0;
+      return {
+        fn: lambda,
+        inputs,
+        autorun: only0Params,
+      };
+    }
+  }
+}
 
 export const library = [
   maker.make({
@@ -111,7 +154,7 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
             fn: value,
             title: title || tags.name() || undefined,
             description: description || tags.doc() || undefined,
-            inputs: inputs || value.defaultInputs(),
+            inputs: inputs || getDefaultInputs(value),
             autorun: autorun === null || autorun === undefined ? true : autorun,
             sampleCount: sampleCount || undefined,
           });
