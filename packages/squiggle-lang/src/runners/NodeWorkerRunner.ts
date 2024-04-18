@@ -1,10 +1,26 @@
-// import NodeWorker from "web-worker";
-import { deserializeIError } from "../errors/IError.js";
-import { squiggleCodec } from "../serialization/squiggle.js";
-import { Err, Ok } from "../utility/result.js";
-import { VDict } from "../value/VDict.js";
+import NodeWorker from "web-worker";
 import { BaseRunner, RunParams, RunResult } from "./BaseRunner.js";
-import { SquiggleWorkerJob, SquiggleWorkerResponse } from "./worker.js";
+import { runWithWorker } from "./WebWorkerRunner.js";
+
+/**
+ * This module is bad for webpack environments.
+ *
+ * Webpack (e.g. Next.js) tries to load it, gets to `import(varName)` statement
+ * in web-worker internals, and fails with "Critical dependency: the request of
+ * a dependency is an expression".
+ *
+ * It's probably possible to fix it with more webpack configuration, but that
+ * would create extra burden on all squiggle-lang users who need to use it with
+ * webpack.
+ *
+ * Because of this, we should never import this module in `src/index.js` (or
+ * anywhere else except tests or `src/cli/`). We provide a separate entrypoint
+ * in `package.json` instead.
+ *
+ * Unfortunately, this also means that this runner is not addressable by name;
+ * you have to import it explicitly, create `new NodeWorkerRunner()`, and then
+ * pass it to `SqProject`.
+ **/
 
 function isNodeJs() {
   return Boolean(
@@ -12,62 +28,6 @@ function isNodeJs() {
       typeof process.versions === "object" &&
       process.versions.node
   );
-}
-
-type Worker = (typeof global)["Worker"]["prototype"];
-
-export async function runWithWorker(
-  { environment, ast, sourceId, externals }: RunParams,
-  worker: Worker
-): Promise<RunResult> {
-  const store = squiggleCodec.makeSerializer();
-  const externalsEntrypoint = store.serialize("value", externals);
-  const bundle = store.getBundle();
-
-  worker.postMessage({
-    environment,
-    ast,
-    bundle,
-    externalsEntrypoint,
-    sourceId,
-  } satisfies SquiggleWorkerJob);
-
-  return new Promise<RunResult>((resolve) => {
-    worker.addEventListener("message", (e: any) => {
-      const data: SquiggleWorkerResponse = e.data;
-      if (data.type === "internal-error") {
-        throw new Error(`Internal worker error: ${data.payload}`);
-      }
-      if (data.type !== "result") {
-        throw new Error(
-          `Unexpected message ${JSON.stringify(data)} from worker`
-        );
-      }
-
-      worker.terminate();
-      if (data.payload.ok) {
-        const deserializer = squiggleCodec.makeDeserializer(
-          data.payload.value.bundle
-        );
-
-        const result = deserializer.deserialize(data.payload.value.result);
-        const bindings = deserializer.deserialize(data.payload.value.bindings);
-        const exports = deserializer.deserialize(data.payload.value.exports);
-
-        if (!(bindings instanceof VDict)) {
-          throw new Error("Expected VDict for bindings");
-        }
-        if (!(exports instanceof VDict)) {
-          throw new Error("Expected VDict for exports");
-        }
-
-        resolve(Ok({ result, bindings, exports, externals }));
-      } else {
-        const error = deserializeIError(data.payload.value);
-        resolve(Err(error));
-      }
-    });
-  });
 }
 
 export class NodeWorkerRunner extends BaseRunner {
@@ -82,14 +42,15 @@ export class NodeWorkerRunner extends BaseRunner {
   }
 
   async run(params: RunParams): Promise<RunResult> {
-    throw new Error("disabled");
-    //   const workerUrl = new URL("./worker.js", import.meta.url);
+    const workerUrl = new URL("./worker.js", import.meta.url);
 
-    //   // web-worker module types are broken, so we use browser types instead
-    //   const worker = new (NodeWorker as any)(workerUrl, {
-    //     type: "module",
-    //   }) as Worker;
+    type Worker = (typeof global)["Worker"]["prototype"];
 
-    //   return await runWithWorker(params, worker);
+    // web-worker module types are broken, so we use browser types instead
+    const worker = new (NodeWorker as any)(workerUrl, {
+      type: "module",
+    }) as Worker;
+
+    return await runWithWorker(params, worker);
   }
 }

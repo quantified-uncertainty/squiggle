@@ -66,7 +66,8 @@
   "types": "./dist/index.d.ts",
   "module": "./dist/index.js",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.js",
+    "./runners/WebWorkerRunner": "./dist/runners/WebWorkerRunner.js"
   },
   "bin": {
     "squiggle": "./dist/cli/index.js"

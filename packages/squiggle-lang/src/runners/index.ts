@@ -1,12 +1,10 @@
 import { EmbeddedRunner } from "./EmbeddedRunner.js";
 import { EmbeddedWithSerializationRunner } from "./EmbeddedWithSerializationRunner.js";
-import { NodeWorkerRunner } from "./NodeWorkerRunner.js";
 import { WebWorkerRunner } from "./WebWorkerRunner.js";
 
-export { EmbeddedRunner, NodeWorkerRunner };
-
+// We intentionally don't support `node-worker` here; it breaks webpack, see the
+// comment in `./NodeWorkerRunner.ts` for details.
 export const allRunnerNames = [
-  "node-worker",
   "web-worker",
   "embedded",
   "embedded-with-serialization",
@@ -16,8 +14,6 @@ export type RunnerName = (typeof allRunnerNames)[number];
 
 export function runnerByName(name: RunnerName) {
   switch (name) {
-    case "node-worker":
-      return new NodeWorkerRunner();
     case "web-worker":
       return new WebWorkerRunner();
     case "embedded":
