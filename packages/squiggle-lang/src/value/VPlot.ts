@@ -10,7 +10,7 @@ import { BaseValue } from "./BaseValue.js";
 import { Value, vDist } from "./index.js";
 import { Indexable } from "./mixins.js";
 import { SerializedDist, VDist } from "./VDist.js";
-import { SerializedLambda, vLambda, VLambda } from "./vLambda.js";
+import { vLambda } from "./vLambda.js";
 import { Scale } from "./VScale.js";
 
 export type LabeledDistribution = {
@@ -72,17 +72,17 @@ type SerializedPlot =
       distributions: readonly SerializedLabeledDistribution[];
     })
   | (Omit<TypedPlot<"numericFn">, "fn"> & {
-      fn: SerializedLambda;
+      fn: number;
     })
   | (Omit<TypedPlot<"distFn">, "fn"> & {
-      fn: SerializedLambda;
+      fn: number;
     })
   | (Omit<TypedPlot<"scatter">, "xDist" | "yDist"> & {
       xDist: SerializedDist;
       yDist: SerializedDist;
     })
   | (Omit<TypedPlot<"relativeValues">, "fn"> & {
-      fn: SerializedLambda;
+      fn: number;
     });
 
 export class VPlot
@@ -153,7 +153,7 @@ export class VPlot
       case "relativeValues":
         return {
           ...this.value,
-          fn: vLambda(this.value.fn).serializePayload(visit),
+          fn: visit.lambda(this.value.fn),
         };
     }
   }
@@ -175,7 +175,7 @@ export class VPlot
       case "distFn":
         return new VPlot({
           ...value,
-          fn: VLambda.deserialize(value.fn, visit).value,
+          fn: visit.lambda(value.fn),
         });
       case "scatter": {
         const xDist = VDist.deserialize(value.xDist).value;
@@ -195,7 +195,7 @@ export class VPlot
       case "relativeValues":
         return new VPlot({
           ...value,
-          fn: VLambda.deserialize(value.fn, visit).value,
+          fn: visit.lambda(value.fn),
         });
     }
   }

@@ -7,7 +7,14 @@ import { VDict } from "../value/VDict.js";
 import { BaseRunner, RunParams, RunResult } from "./BaseRunner.js";
 import { SquiggleWorkerJob, SquiggleWorkerResponse } from "./worker.js";
 
-export class NodeWorkerRunner extends BaseRunner {
+/**
+ * This runner is, in theory, universal: it relies on https://www.npmjs.com/package/web-worker,
+ * and so can run both in Node and in the browser.
+ *
+ * In practice, it's more complicated: loading the worker breaks webpack, so it
+ * doesn't work in Next.js yet.
+ */
+export class WorkerRunner extends BaseRunner {
   async run({
     environment,
     ast,
@@ -46,19 +53,21 @@ export class NodeWorkerRunner extends BaseRunner {
           const deserializer = squiggleCodec.makeDeserializer(
             data.payload.value.bundle
           );
+
           const result = deserializer.deserialize(data.payload.value.result);
           const bindings = deserializer.deserialize(
             data.payload.value.bindings
           );
           const exports = deserializer.deserialize(data.payload.value.exports);
-          resolve(
-            Ok({
-              result,
-              bindings: bindings as VDict,
-              exports: exports as VDict,
-              externals,
-            })
-          );
+
+          if (!(bindings instanceof VDict)) {
+            throw new Error("Expected VDict for bindings");
+          }
+          if (!(exports instanceof VDict)) {
+            throw new Error("Expected VDict for exports");
+          }
+
+          resolve(Ok({ result, bindings, exports, externals }));
         } else {
           const error = deserializeIError(data.payload.value);
           resolve(Err(error));

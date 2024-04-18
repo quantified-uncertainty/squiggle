@@ -1,3 +1,4 @@
+import { getStdLib } from "../library/index.js";
 import { SquiggleDeserializationVisitor } from "../serialization/squiggle.js";
 import { SerializedValue, Value } from "./index.js";
 import { VArray } from "./VArray.js";
@@ -9,7 +10,7 @@ import { VDist } from "./VDist.js";
 import { VDomain } from "./VDomain.js";
 import { VDuration } from "./VDuration.js";
 import { VInput } from "./VInput.js";
-import { VLambda } from "./vLambda.js";
+import { vLambda } from "./vLambda.js";
 import { VNumber } from "./VNumber.js";
 import { VPlot } from "./VPlot.js";
 import { VScale } from "./VScale.js";
@@ -31,8 +32,23 @@ export function deserializeValue(
       return VDate.deserialize(node.payload);
     case "Number":
       return VNumber.deserialize(node.payload);
-    case "Lambda":
-      return VLambda.deserialize(node.payload, visit);
+    case "Lambda": {
+      // lambda deserialization is special because of circular imports caused by stdLib
+      const innerValue = visit.lambda(node.payload);
+      if (innerValue.type === "BuiltinLambda") {
+        // guarantee that all deserialized builtin VLambdas are identical to the
+        // ones that came from the registry
+        const value = getStdLib().get(innerValue.name);
+        if (!value) {
+          throw new Error(
+            `Could not find built in function ${innerValue.name}`
+          );
+        }
+        return value;
+      } else {
+        return vLambda(innerValue);
+      }
+    }
     case "Calculator":
       return VCalculator.deserialize(node.payload, visit);
     case "Void":
