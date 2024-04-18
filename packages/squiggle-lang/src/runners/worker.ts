@@ -1,6 +1,7 @@
+import { AST } from "../ast/parse.js";
+import { Env } from "../dists/env.js";
 import { SerializedIError, serializeIError } from "../errors/IError.js";
 import { compileAst } from "../expression/compile.js";
-import { AST, Env } from "../index.js";
 import { getStdLib } from "../library/index.js";
 import { Reducer } from "../reducer/Reducer.js";
 import {

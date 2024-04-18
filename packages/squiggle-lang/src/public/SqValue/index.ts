@@ -1,7 +1,7 @@
 import { lambdaToCalculator } from "../../fr/calculator.js";
-import { SDuration } from "../../index.js";
 import { result } from "../../utility/result.js";
 import { SDate } from "../../utility/SDate.js";
+import { SDuration } from "../../utility/SDuration.js";
 import { Value } from "../../value/index.js";
 import {
   removeLambdas,

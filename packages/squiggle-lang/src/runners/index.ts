@@ -1,11 +1,13 @@
 import { EmbeddedRunner } from "./EmbeddedRunner.js";
 import { EmbeddedWithSerializationRunner } from "./EmbeddedWithSerializationRunner.js";
-import { WorkerRunner } from "./WorkerRunner.js";
+import { NodeWorkerRunner } from "./NodeWorkerRunner.js";
+import { WebWorkerRunner } from "./WebWorkerRunner.js";
 
-export { EmbeddedRunner, WorkerRunner };
+export { EmbeddedRunner, NodeWorkerRunner };
 
 export const allRunnerNames = [
   "node-worker",
+  "web-worker",
   "embedded",
   "embedded-with-serialization",
 ] as const;
@@ -15,7 +17,9 @@ export type RunnerName = (typeof allRunnerNames)[number];
 export function runnerByName(name: RunnerName) {
   switch (name) {
     case "node-worker":
-      return new WorkerRunner();
+      return new NodeWorkerRunner();
+    case "web-worker":
+      return new WebWorkerRunner();
     case "embedded":
       return new EmbeddedRunner();
     case "embedded-with-serialization":
