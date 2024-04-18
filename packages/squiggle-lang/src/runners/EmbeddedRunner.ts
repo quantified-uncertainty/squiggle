@@ -8,7 +8,7 @@ import { vDict } from "../value/VDict.js";
 import { BaseRunner, RunParams, RunResult } from "./BaseRunner.js";
 
 export class EmbeddedRunner extends BaseRunner {
-  async run(params: RunParams): Promise<RunResult> {
+  private async innerRun(params: RunParams): Promise<RunResult> {
     const expressionResult = compileAst(
       params.ast,
       getStdLib().merge(params.externals.value)
@@ -62,5 +62,23 @@ export class EmbeddedRunner extends BaseRunner {
         },
       }),
     });
+  }
+
+  async run(params: RunParams): Promise<RunResult> {
+    if (typeof MessageChannel === "undefined") {
+      return await this.innerRun(params);
+    } else {
+      // `innerRun` is not really async, but we want to run it in the next tick in the browser, so that the UI can update first.
+      // trick from https://stackoverflow.com/a/56727837
+      return new Promise<RunResult>((resolve) => {
+        const channel = new MessageChannel();
+        channel.port1.onmessage = async () => {
+          resolve(this.innerRun(params));
+        };
+        requestAnimationFrame(function () {
+          channel.port2.postMessage(undefined);
+        });
+      });
+    }
   }
 }
