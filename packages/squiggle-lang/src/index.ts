@@ -142,5 +142,5 @@ export {
   allRunnerNames,
   defaultRunnerName,
   runnerByName,
-  RunnerName,
+  type RunnerName,
 } from "./runners/index.js";
