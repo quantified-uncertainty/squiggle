@@ -56,11 +56,15 @@ export abstract class BaseValue<
     visitor: SquiggleSerializationVisitor
   ): SerializedPayload;
 
-  serialize(visitor: SquiggleSerializationVisitor): SerializedValue {
-    return {
+  serialize(visit: SquiggleSerializationVisitor): SerializedValue {
+    const result: SerializedValue = {
       type: this.type,
-      payload: this.serializePayload(visitor),
+      payload: this.serializePayload(visit),
     } as SerializedValue;
+    if (this.tags) {
+      result.tags = visit.tags(this.tags);
+    }
+    return result;
   }
 
   // Deserialization is implemented outside of this class; abstract static methods are not supported in TypeScript.

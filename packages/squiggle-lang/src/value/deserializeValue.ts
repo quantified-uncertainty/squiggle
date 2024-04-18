@@ -19,7 +19,7 @@ import { VString } from "./VString.js";
 import { VTableChart } from "./VTableChart.js";
 import { VVoid } from "./VVoid.js";
 
-export function deserializeValue(
+function deserializeValueWithoutTags(
   node: SerializedValue,
   visit: SquiggleDeserializationVisitor
 ): Value {
@@ -76,4 +76,16 @@ export function deserializeValue(
     default:
       throw new Error(`Can't deserialize node ${node satisfies never}`);
   }
+}
+
+export function deserializeValue(
+  node: SerializedValue,
+  visit: SquiggleDeserializationVisitor
+): Value {
+  let value = deserializeValueWithoutTags(node, visit);
+  if (node.tags !== undefined) {
+    // it's be easier/faster just to set `value.tags`, but that's not allowed, the field is readonly
+    value = value.copyWithTags(visit.tags(node.tags));
+  }
+  return value;
 }

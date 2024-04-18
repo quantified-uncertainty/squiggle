@@ -62,6 +62,7 @@ export type SerializedValue = {
   [k in Value["type"]]: {
     type: k;
     payload: SerializedPayload<Extract<Value, { type: k }>>;
+    tags?: number;
   };
 }[Value["type"]];
 

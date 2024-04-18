@@ -5,8 +5,9 @@ import {
   serializeExpression,
 } from "../expression/serialize.js";
 import { Lambda } from "../reducer/lambda.js";
+import { deserializeValue } from "../value/deserializeValue.js";
 import { SerializedValue, Value } from "../value/index.js";
-import { deserializeValue } from "../value/serialize.js";
+import { SerializedValueTags, ValueTags } from "../value/valueTags.js";
 import { deserializeLambda } from "./deserializeLambda.js";
 import {
   Bundle,
@@ -23,6 +24,7 @@ type SquiggleShape = {
   value: [Value, SerializedValue];
   expression: [Expression, SerializedExpression];
   lambda: [Lambda, SerializedLambda];
+  tags: [ValueTags, SerializedValueTags];
 };
 
 const squiggleConfig: StoreConfig<SquiggleShape> = {
@@ -40,6 +42,11 @@ const squiggleConfig: StoreConfig<SquiggleShape> = {
     serialize: (node, visitor) => serializeLambda(node, visitor),
     deserialize: (serializedNode, visitor) =>
       deserializeLambda(serializedNode, visitor),
+  },
+  tags: {
+    serialize: (node, visitor) => node.serialize(visitor),
+    deserialize: (serializedNode, visitor) =>
+      ValueTags.deserialize(serializedNode, visitor),
   },
 };
 

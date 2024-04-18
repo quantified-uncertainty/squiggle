@@ -81,7 +81,7 @@ x = 5
 
 x
 `,
-    '5, with tags {doc: "This is five", name: "five"}'
+    '5, with tags {name: "five", doc: "This is five"}'
   );
 
   testEvalToBe(
