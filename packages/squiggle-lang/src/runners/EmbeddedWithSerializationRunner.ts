@@ -23,9 +23,13 @@ export class EmbeddedWithSerializationRunner extends BaseRunner {
       const bindingsEntrypoint = serializer.serialize("value", output.bindings);
       const exportsEntrypoint = serializer.serialize("value", output.exports);
 
-      const deserializer = squiggleCodec.makeDeserializer(
-        serializer.getBundle()
-      );
+      const bundle = serializer.getBundle();
+
+      if (process.env["PRINT_SERIALIZED_BUNDLE"]) {
+        console.log(JSON.stringify(bundle, null, 2));
+      }
+
+      const deserializer = squiggleCodec.makeDeserializer(bundle);
       const result = deserializer.deserialize(resultEntrypoint);
       const bindings = deserializer.deserialize(bindingsEntrypoint);
       const exports = deserializer.deserialize(exportsEntrypoint);

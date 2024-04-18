@@ -4,7 +4,15 @@ import { WorkerRunner } from "./WorkerRunner.js";
 
 export { EmbeddedRunner, WorkerRunner };
 
-export function runnerByName(name: string) {
+export const allRunnerNames = [
+  "node-worker",
+  "embedded",
+  "embedded-with-serialization",
+] as const;
+
+type RunnerName = (typeof allRunnerNames)[number];
+
+export function runnerByName(name: RunnerName) {
   switch (name) {
     case "node-worker":
       return new WorkerRunner();
