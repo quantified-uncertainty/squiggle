@@ -24,3 +24,15 @@ export function runnerByName(name: RunnerName) {
       throw new Error(`Unknown runner: ${name}`);
   }
 }
+
+const DEFAULT_RUNNER: RunnerName = "embedded";
+
+export function getDefaultRunner() {
+  const defaultRunner =
+    process.env["SQUIGGLE_DEFAULT_RUNNER"] ?? DEFAULT_RUNNER;
+
+  if (!(allRunnerNames as readonly string[]).includes(defaultRunner)) {
+    throw new Error("Unknown runner: " + defaultRunner);
+  }
+  return runnerByName(defaultRunner as RunnerName);
+}

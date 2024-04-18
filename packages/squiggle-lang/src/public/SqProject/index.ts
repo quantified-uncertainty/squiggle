@@ -3,7 +3,7 @@ import { defaultEnv, Env } from "../../dists/env.js";
 import { AST } from "../../index.js";
 import { getStdLib } from "../../library/index.js";
 import { BaseRunner } from "../../runners/BaseRunner.js";
-import { EmbeddedRunner } from "../../runners/EmbeddedRunner.js";
+import { getDefaultRunner } from "../../runners/index.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { vDict, VDict } from "../../value/VDict.js";
@@ -51,7 +51,7 @@ export class SqProject {
     this.items = new Map();
     this.environment = options?.environment ?? defaultEnv;
     this.linker = options?.linker;
-    this.runner = options?.runner ?? new EmbeddedRunner();
+    this.runner = options?.runner ?? getDefaultRunner();
   }
 
   static create(options?: Options) {
