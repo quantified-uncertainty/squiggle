@@ -20,6 +20,7 @@ import {
 } from "./index.js";
 import { SerializedLambda, serializeLambda } from "./serializeLambda.js";
 
+// BaseShape for Squiggle.
 type SquiggleShape = {
   value: [Value, SerializedValue];
   expression: [Expression, SerializedExpression];
@@ -48,6 +49,7 @@ const squiggleConfig: StoreConfig<SquiggleShape> = {
     deserialize: (serializedNode, visitor) =>
       ValueTags.deserialize(serializedNode, visitor),
   },
+  // TODO - we should serialized AST nodes too, otherwise serialized lambdas could blow up in size, in some cases
 };
 
 export type SquiggleBundle = Bundle<SquiggleShape>;

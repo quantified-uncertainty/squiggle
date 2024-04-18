@@ -7,49 +7,85 @@ import { JsonValue } from "../utility/typeHelpers.js";
  * - type-safe
  * - supports multiple data types
  * - can serialize any DAG (directed acyclic graph) and deduplicate values
+ * - can serialize multiple values in a single bundle, and deserialize them back based on "entrypoints"
+ *
+ * Squiggle-specific adaptation of it is in `./squiggle.ts`.
+ *
+ * Terminology:
+ * - "Entity" is a type of data that can be serialized and deserialized (e.g. "value", "expression" for Squiggle); one multi-type codec can handle multiple entities.
+ * - "Node" is an instance of an entity type. I use "node" instead of "value" to avoid confusion with the "value" entity type.
+ * - "Bundle" is a JSON-serializable object that contains serialized values.
+ * - "Entrypoint" is a reference to a serialized value in a bundle. When you add a value to a bundle, you get an entrypoint that you can use to refer to this value later.
+ * - "Visitor" is an helper object that can serialize or deserialize nested nodes.
+ *
+ * To make things easier to understand, you can experiment with running Squiggle code with `embedded-with-serialization` runner and `PRINT_SERIALIZED_BUNDLE=1` enabled.
+ * It will print a JSON-serialized bundle to the console.
+ * Example: `PRINT_SERIALIZED_BUNDLE=1 pnpm --silent cli run -r embedded-with-serialization -e 'x=2+2;y=[x,x];z()=x'`
  */
 
-type BaseShape = Record<string, [unknown, JsonValue]>;
+/**
+ * This is a main type of serializer-deserializer ("codec") system.
+ *
+ * Other types are derived from it.
+ */
+type BaseShape = Record<
+  string, // entity name
+  [
+    unknown, // node type
+    JsonValue, // serialized node type
+  ]
+>;
 
-export type SerializationVisitor<Shape extends BaseShape> = {
-  [K in keyof Shape]: (node: Shape[K][0]) => number;
-};
+type Node<Shape extends BaseShape, Name extends keyof Shape> = Shape[Name][0];
 
-export type DeserializationVisitor<Shape extends BaseShape> = {
-  [K in keyof Shape]: (id: number) => Shape[K][0];
-};
-
-type EntitySerializer<
+type SerializedNode<
   Shape extends BaseShape,
-  EntityType extends keyof Shape,
-  Node = Shape[EntityType][0],
-  SerializedNode = Shape[EntityType][1],
-> = {
-  serialize: (
-    node: Node,
-    visitor: SerializationVisitor<Shape>
-  ) => SerializedNode;
-  deserialize: (
-    serializedNode: SerializedNode,
-    visitor: DeserializationVisitor<Shape>
-  ) => Node;
+  Name extends keyof Shape,
+> = Shape[Name][1];
+
+// This is an object that's passed to serialization functions to serialize a nested node.
+// Note how it returns a number (id), not `DeserializedNode` - we always store nodes themselves in a bundle, and refer to them by index.
+export type SerializationVisitor<Shape extends BaseShape> = {
+  [EntityName in keyof Shape]: (node: Node<Shape, EntityName>) => number;
 };
 
+// This is an object that's passed to deserialization functions to deserialize a nested node.
+export type DeserializationVisitor<Shape extends BaseShape> = {
+  [EntityName in keyof Shape]: (id: number) => Node<Shape, EntityName>;
+};
+
+// This config is used to describe how an entity type should be serialized and deserialized.
+type EntityCodec<Shape extends BaseShape, EntityType extends keyof Shape> = {
+  serialize: (
+    node: Node<Shape, EntityType>,
+    visitor: SerializationVisitor<Shape>
+  ) => SerializedNode<Shape, EntityType>;
+  deserialize: (
+    serializedNode: SerializedNode<Shape, EntityType>,
+    visitor: DeserializationVisitor<Shape>
+  ) => Node<Shape, EntityType>;
+};
+
+// StoreConfig is the primary config for the multi-entity codec. See `squiggleConfig` in `./squiggle.ts` for how it's used.
+// It will infer correct parameter types for `serialize` and `deserialize` methods, based on the `Shape` type.
 export type StoreConfig<Shape extends BaseShape> = {
-  [K in keyof Shape]: EntitySerializer<Shape, K>;
+  [EntityType in keyof Shape]: EntityCodec<Shape, EntityType>;
 };
 
 class EntitySerializationStore<
   Shape extends BaseShape,
   EntityType extends keyof Shape,
 > {
-  index: Map<Shape[EntityType][0], number> = new Map();
+  index: Map<Node<Shape, EntityType>, number> = new Map();
   // this is an array with serialized values themselves
-  data: Shape[EntityType][1][] = [];
+  data: SerializedNode<Shape, EntityType>[] = [];
 
-  constructor(private config: EntitySerializer<Shape, EntityType>) {}
+  constructor(private config: EntityCodec<Shape, EntityType>) {}
 
-  serialize(node: Shape[EntityType][0], visitor: SerializationVisitor<Shape>) {
+  serialize(
+    node: Node<Shape, EntityType>,
+    visitor: SerializationVisitor<Shape>
+  ) {
     const cachedId = this.index.get(node);
     if (cachedId !== undefined) {
       return cachedId;
@@ -65,16 +101,19 @@ class EntitySerializationStore<
 }
 
 type EntityStores<Shape extends BaseShape> = {
-  [K in keyof Shape]: EntitySerializationStore<Shape, K>;
+  [EntityType in keyof Shape]: EntitySerializationStore<Shape, EntityType>;
 };
 
-export type BundleEntrypoint<Shape extends BaseShape, T extends keyof Shape> = {
-  entityType: T;
+export type BundleEntrypoint<
+  Shape extends BaseShape,
+  EntityType extends keyof Shape,
+> = {
+  entityType: EntityType;
   pos: number;
 };
 
 export type Bundle<Shape extends BaseShape> = {
-  [K in keyof Shape]: Shape[K][1][];
+  [EntityType in keyof Shape]: SerializedNode<Shape, EntityType>[];
 };
 
 export class SerializationStore<Shape extends BaseShape> {
@@ -103,10 +142,10 @@ export class SerializationStore<Shape extends BaseShape> {
     ) as unknown as SerializationVisitor<Shape>;
   }
 
-  serialize<T extends keyof Shape>(
-    entityType: T,
-    node: Shape[T][0]
-  ): BundleEntrypoint<Shape, T> {
+  serialize<EntityType extends keyof Shape>(
+    entityType: EntityType,
+    node: Node<Shape, EntityType>
+  ): BundleEntrypoint<Shape, EntityType> {
     const pos = this.stores[entityType].serialize(
       node,
       this.serializationVisitor
@@ -126,7 +165,7 @@ export class SerializationStore<Shape extends BaseShape> {
 
 export class DeserializationStore<Shape extends BaseShape> {
   visited: {
-    [K in keyof Shape]: Shape[K][0][];
+    [EntityType in keyof Shape]: Node<Shape, EntityType>[];
   };
   deserializationVisitor: DeserializationVisitor<Shape>;
 
@@ -163,9 +202,9 @@ export class DeserializationStore<Shape extends BaseShape> {
     ) as unknown as DeserializationVisitor<Shape>;
   }
 
-  deserialize<const T extends keyof Shape>(
-    entrypoint: BundleEntrypoint<Shape, T>
-  ): Shape[T][0] {
+  deserialize<const EntityType extends keyof Shape>(
+    entrypoint: BundleEntrypoint<Shape, EntityType>
+  ): Node<Shape, EntityType> {
     return this.deserializationVisitor[entrypoint.entityType](entrypoint.pos);
   }
 }
