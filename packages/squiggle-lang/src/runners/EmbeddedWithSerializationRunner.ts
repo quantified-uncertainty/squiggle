@@ -25,7 +25,11 @@ export class EmbeddedWithSerializationRunner extends BaseRunner {
 
       const bundle = serializer.getBundle();
 
-      if (process.env["PRINT_SERIALIZED_BUNDLE"]) {
+      if (
+        // @types/node is a lie, process.env fails in Vite environment
+        typeof process !== "undefined" &&
+        process.env["PRINT_SERIALIZED_BUNDLE"]
+      ) {
         console.log(JSON.stringify(bundle, null, 2));
       }
 

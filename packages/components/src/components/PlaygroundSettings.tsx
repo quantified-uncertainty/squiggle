@@ -1,11 +1,12 @@
 import React from "react";
 import { z } from "zod";
 
-import { SqScale } from "@quri/squiggle-lang";
+import { defaultRunnerName, RunnerName, SqScale } from "@quri/squiggle-lang";
 import {
   CheckboxFormField,
   NumberFormField,
   RadioFormField,
+  SelectStringFormField,
   TextFormField,
 } from "@quri/ui";
 
@@ -19,6 +20,11 @@ export const environmentSchema = z.object({
   xyPointLength: z.number().int().gte(10).lte(10000),
   seed: z.string(),
 });
+
+const runnerSchema = z.union([
+  z.literal("embedded" satisfies RunnerName),
+  z.literal("embedded-with-serialization" satisfies RunnerName),
+]);
 
 export const functionSettingsSchema = z.object({
   start: z.number().finite(),
@@ -67,6 +73,7 @@ export const distributionSettingsSchema = z.object({
 
 export const viewSettingsSchema = z.object({
   environment: environmentSchema,
+  runner: runnerSchema,
   distributionChartSettings: distributionSettingsSchema,
   functionChartSettings: functionSettingsSchema,
   editorSettings: editorSettings,
@@ -83,6 +90,7 @@ export const defaultPlaygroundSettings: PlaygroundSettings = {
     xyPointLength: 1000,
     seed: "default_seed",
   },
+  runner: defaultRunnerName,
   functionChartSettings: {
     start: functionChartDefaults.min,
     stop: functionChartDefaults.max,
@@ -130,7 +138,7 @@ export type MetaSettings = {
   disableLogX?: boolean;
 };
 
-export const EnvironmentForm: React.FC = () => (
+export const RenderingSettingsForm: React.FC = () => (
   <div className="space-y-4">
     <TextFormField<PlaygroundSettings>
       name="environment.seed"
@@ -146,6 +154,13 @@ export const EnvironmentForm: React.FC = () => (
       name="environment.xyPointLength"
       label="Coordinate Count (For PointSet Shapes)"
       description="When distributions are converted into PointSet shapes, we need to know how many coordinates to use."
+    />
+    <SelectStringFormField<PlaygroundSettings>
+      name="runner"
+      label="Squiggle Runner (Experimental)"
+      size="small"
+      options={["embedded", "embedded-with-serialization"]}
+      required
     />
   </div>
 );
@@ -274,7 +289,7 @@ export const PlaygroundSettingsForm: React.FC<{
         <>
           <div className="mb-6">
             <FormSection title="Rendering Settings">
-              <EnvironmentForm />
+              <RenderingSettingsForm />
             </FormSection>
           </div>
 

@@ -110,6 +110,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     setup: { type: "projectFromLinker", linker },
     environment: settings.environment,
     initialAutorunMode: defaultAutorunMode,
+    runnerName: settings.runner,
   });
 
   useEffect(() => {

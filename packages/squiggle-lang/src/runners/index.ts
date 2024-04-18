@@ -10,7 +10,7 @@ export const allRunnerNames = [
   "embedded-with-serialization",
 ] as const;
 
-type RunnerName = (typeof allRunnerNames)[number];
+export type RunnerName = (typeof allRunnerNames)[number];
 
 export function runnerByName(name: RunnerName) {
   switch (name) {
@@ -25,11 +25,15 @@ export function runnerByName(name: RunnerName) {
   }
 }
 
-const DEFAULT_RUNNER: RunnerName = "embedded";
+export const defaultRunnerName = "embedded" as const satisfies RunnerName;
 
 export function getDefaultRunner() {
-  const defaultRunner =
-    process.env["SQUIGGLE_DEFAULT_RUNNER"] ?? DEFAULT_RUNNER;
+  // `process` can be undefined in Storybook environment; @types/node in squiggle-lang is a lie.
+  const envRunner =
+    typeof process === "undefined"
+      ? undefined
+      : process.env["SQUIGGLE_DEFAULT_RUNNER"];
+  const defaultRunner = envRunner ?? defaultRunnerName;
 
   if (!(allRunnerNames as readonly string[]).includes(defaultRunner)) {
     throw new Error("Unknown runner: " + defaultRunner);

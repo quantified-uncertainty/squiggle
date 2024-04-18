@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { Env, SqLinker, SqProject } from "@quri/squiggle-lang";
+import {
+  defaultRunnerName,
+  Env,
+  runnerByName,
+  RunnerName,
+  SqLinker,
+  SqProject,
+} from "@quri/squiggle-lang";
 
 import { isSimulating, Simulation, useSimulator } from "./useSimulator.js";
 
@@ -23,6 +30,7 @@ export type SimulatorManagerArgs = {
   sourceId?: string;
   environment?: Env;
   initialAutorunMode?: boolean;
+  runnerName?: RunnerName;
 };
 
 export type UseSimulatorManager = {
@@ -39,7 +47,17 @@ export type UseSimulatorManager = {
 // defaultContinues needs to have a stable identity.
 const defaultContinues: string[] = [];
 
-function useSetup(setup: SetupSettings, sourceId?: string, environment?: Env) {
+function useSetup({
+  setup,
+  sourceId,
+  environment,
+  runnerName,
+}: {
+  setup: SetupSettings;
+  sourceId?: string;
+  environment?: Env;
+  runnerName?: RunnerName;
+}) {
   const _sourceId = useMemo(() => {
     // random; https://stackoverflow.com/a/12502559
     return sourceId || Math.random().toString(36).slice(2);
@@ -53,9 +71,16 @@ function useSetup(setup: SetupSettings, sourceId?: string, environment?: Env) {
   const project = useMemo(() => {
     switch (setup.type) {
       case "standalone":
-        return SqProject.create({ environment });
+        return SqProject.create({
+          environment,
+          runner: runnerName ? runnerByName(runnerName) : undefined,
+        });
       case "projectFromLinker":
-        return SqProject.create({ environment, linker: setup.linker });
+        return SqProject.create({
+          environment,
+          linker: setup.linker,
+          runner: runnerName ? runnerByName(runnerName) : undefined,
+        });
       case "project":
         return setup.project;
       default:
@@ -74,11 +99,12 @@ export function useSimulatorManager(
     args.initialAutorunMode ?? true
   );
 
-  const { sourceId, project, continues } = useSetup(
-    args.setup,
-    args.sourceId,
-    args.environment
-  );
+  const { sourceId, project, continues } = useSetup({
+    setup: args.setup,
+    sourceId: args.sourceId,
+    environment: args.environment,
+    runnerName: args.runnerName,
+  });
 
   const [simulation, { runSimulation }] = useSimulator({
     sourceId,
@@ -108,6 +134,14 @@ export function useSimulatorManager(
   }, [args.environment]);
 
   useEffect(() => {
+    project.setRunner(runnerByName(args.runnerName ?? defaultRunnerName));
+    if (autorunMode) {
+      runSimulation();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [args.runnerName]);
+
+  useEffect(() => {
     // This removes the source from the project when the component unmounts.
     return () => {
       project.removeSource(sourceId);
@@ -122,6 +156,6 @@ export function useSimulatorManager(
     autorunMode,
     setAutorunMode,
 
-    runSimulation: runSimulation,
+    runSimulation,
   };
 }

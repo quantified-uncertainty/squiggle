@@ -71,6 +71,11 @@ export class SqProject {
     this.environment = environment;
   }
 
+  setRunner(runner: BaseRunner) {
+    // TODO - should we invalidate all outputs?
+    this.runner = runner;
+  }
+
   getSourceIds(): string[] {
     return Array.from(this.items.keys());
   }
