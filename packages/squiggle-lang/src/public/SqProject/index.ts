@@ -2,6 +2,8 @@ import { isBindingStatement } from "../../ast/utils.js";
 import { defaultEnv, Env } from "../../dists/env.js";
 import { AST } from "../../index.js";
 import { getStdLib } from "../../library/index.js";
+import { BaseRunner } from "../../runners/BaseRunner.js";
+import { EmbeddedRunner } from "../../runners/EmbeddedRunner.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { vDict, VDict } from "../../value/VDict.js";
@@ -27,12 +29,14 @@ function getNeedToRunError() {
 type Options = {
   linker?: SqLinker;
   environment?: Env;
+  runner?: BaseRunner;
 };
 
 export class SqProject {
   private readonly items: Map<string, ProjectItem>;
   private environment: Env;
   private linker?: SqLinker; // if not present, imports are forbidden
+  public runner: BaseRunner;
 
   // Direct graph of dependencies is maintained inside each ProjectItem,
   // while the inverse one is stored in this variable.
@@ -47,6 +51,7 @@ export class SqProject {
     this.items = new Map();
     this.environment = options?.environment ?? defaultEnv;
     this.linker = options?.linker;
+    this.runner = options?.runner ?? new EmbeddedRunner();
   }
 
   static create(options?: Options) {

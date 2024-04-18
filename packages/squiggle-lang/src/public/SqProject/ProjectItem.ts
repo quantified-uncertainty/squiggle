@@ -2,7 +2,6 @@ import { AST, parse } from "../../ast/parse.js";
 import { ICompileError, IRuntimeError } from "../../errors/IError.js";
 import { Env, SqProject } from "../../index.js";
 import { RunOutput } from "../../runners/BaseRunner.js";
-import { NodeWorkerRunner } from "../../runners/NodeWorkerRunner.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
 import { VDict, vDictFromArray } from "../../value/VDict.js";
@@ -202,9 +201,7 @@ export class ProjectItem {
       .merge(externals.implicitImports)
       .merge(externals.explicitImports);
 
-    const runner = new NodeWorkerRunner();
-
-    const runnerOutput = await runner.run({
+    const runnerOutput = await project.runner.run({
       environment,
       ast: this.ast.value,
       externals: _externals,

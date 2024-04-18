@@ -1,4 +1,4 @@
-import { Command } from "@commander-js/extra-typings";
+import { Command, Option } from "@commander-js/extra-typings";
 import fs from "fs";
 import open from "open";
 import util from "util";
@@ -43,6 +43,12 @@ export function makeProgram() {
     )
     .option("-t --time", "output the time it took to evaluate the code")
     .option("-q, --quiet", "don't output the results and bindings") // useful for measuring the performance or checking that the code is valid
+    .addOption(
+      new Option("-r, --runner <runner>", "embedded").choices([
+        "embedded",
+        "node-worker",
+      ] as const)
+    )
     .option(
       "-b, --show-bindings",
       "show bindings even if the result is present"
@@ -63,7 +69,14 @@ export function makeProgram() {
 
       const sampleCount = process.env["SAMPLE_COUNT"];
 
-      await run({ src, filename, output, measure: options.time, sampleCount });
+      await run({
+        src,
+        filename,
+        output,
+        measure: options.time,
+        sampleCount,
+        runner: options.runner,
+      });
     });
 
   program
