@@ -15,7 +15,7 @@
     "build:ts": "tsc -b",
     "dev": "tsc -b -w",
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js && rm *.tsbuildinfo",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest && NODE_OPTIONS=--experimental-vm-modules SQUIGGLE_DEFAULT_RUNNER=embedded-with-serialization jest __tests__/SqProject",
     "test:watch": "pnpm run test --watchAll",
     "coverage:local": "pnpm run test --coverage && echo && echo 'Open ./coverage/lcov-report/index.html to see the detailed report.'",
     "coverage": "pnpm run test --coverage && codecov",

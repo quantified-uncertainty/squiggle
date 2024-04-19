@@ -3,7 +3,10 @@ import { baseRun } from "./common.js";
 
 export class EmbeddedRunner extends BaseRunner {
   async run(params: RunParams): Promise<RunResult> {
-    if (typeof MessageChannel === "undefined") {
+    if (
+      typeof window === "undefined" ||
+      typeof MessageChannel === "undefined"
+    ) {
       // fallback for Node.js environment and older browsers
       return baseRun(params);
     } else {
