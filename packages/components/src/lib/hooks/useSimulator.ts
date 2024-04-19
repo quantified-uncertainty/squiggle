@@ -28,11 +28,11 @@ type UseSimulatorResult = [
 export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
   const [simulation, setSimulation] = useState<Simulation | undefined>();
 
-  const simulate = useCallback(async () => {
+  const runSimulation = useCallback(async () => {
     setSimulation((prevOutput) => {
       return prevOutput
         ? {
-            ...(prevOutput || {}),
+            ...prevOutput,
             isStale: true,
           }
         : undefined;
@@ -41,8 +41,10 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     const startTime = Date.now();
     args.project.setSource(args.sourceId, args.code);
     args.project.setContinues(args.sourceId, args.continues);
-    const _environment = args.project.getEnvironment(); // Get it here, just in case it changes during the run
+
+    const environment = args.project.getEnvironment(); // Get it here, just in case it changes during the run
     await args.project.run(args.sourceId);
+
     const output = args.project.getOutput(args.sourceId);
     const executionTime = Date.now() - startTime;
 
@@ -54,12 +56,12 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
         code: args.code,
         output,
         executionTime,
-        environment: _environment,
+        environment,
       };
     });
   }, [args.code, args.continues, args.project, args.sourceId]);
 
-  return [simulation, { runSimulation: simulate }];
+  return [simulation, { runSimulation }];
 }
 
 export function isSimulating(simulation: Simulation): boolean {
