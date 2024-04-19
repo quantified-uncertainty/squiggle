@@ -19,6 +19,10 @@ export type RunOutput = { result: Value; bindings: VDict; exports: VDict };
 
 export type RunResult = result<RunOutput, ICompileError | IRuntimeError>;
 
+// Ideas for future methods:
+// - streaming top-level values from `Program`
+// - client-server architecture where output stays on on the server and can be queried (this might be difficult because server would have to manage object lifetimes somehow)
+// - APIs for code -> AST and AST -> expression steps
 export abstract class BaseRunner {
   abstract run(params: RunParams): Promise<RunResult>;
 }
