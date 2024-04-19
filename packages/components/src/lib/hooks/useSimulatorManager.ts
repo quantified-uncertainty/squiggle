@@ -24,7 +24,7 @@ type SetupSettings =
       continues?: string[];
     };
 
-export type SimulatorManagerArgs = {
+type SimulatorManagerArgs = {
   code: string;
   setup: SetupSettings;
   sourceId?: string;
@@ -33,7 +33,7 @@ export type SimulatorManagerArgs = {
   runnerName?: RunnerName;
 };
 
-export type UseSimulatorManager = {
+type UseSimulatorManagerResult = {
   sourceId: string;
   simulation?: Simulation;
   project: SqProject;
@@ -94,7 +94,7 @@ function useSetup({
 
 export function useSimulatorManager(
   args: SimulatorManagerArgs
-): UseSimulatorManager {
+): UseSimulatorManagerResult {
   const [autorunMode, setAutorunMode] = useState(
     args.initialAutorunMode ?? true
   );
@@ -111,7 +111,6 @@ export function useSimulatorManager(
     code: args.code,
     project,
     continues,
-    autorunMode,
   });
 
   // runSimulation changes every time the code changes. That then triggers this, which would call runSimulation to actually run that updated function.

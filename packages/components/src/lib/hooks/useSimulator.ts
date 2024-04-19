@@ -9,7 +9,6 @@ export type SimulatorArgs = {
   sourceId: string;
   project: SqProject;
   continues: string[];
-  autorunMode: boolean;
 };
 
 export type Simulation = {
@@ -21,15 +20,13 @@ export type Simulation = {
   environment: Env;
 };
 
-export type UseSimulator = [
+type UseSimulatorResult = [
   Simulation | undefined,
   { runSimulation: () => void },
 ];
 
-export function useSimulator(args: SimulatorArgs): UseSimulator {
-  const [simulation, setSimulation] = useState<Simulation | undefined>(
-    undefined
-  );
+export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
+  const [simulation, setSimulation] = useState<Simulation | undefined>();
 
   const simulate = useCallback(async () => {
     setSimulation((prevOutput) => {
