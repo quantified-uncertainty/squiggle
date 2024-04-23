@@ -3,7 +3,7 @@ import { FC, memo } from "react";
 import { SqValuePath } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
-import { useSimulatorManager } from "../lib/hooks/useSimulatorManager.js";
+import { useSimulator } from "../lib/hooks/useSimulator.js";
 import {
   ProjectExecutionProps,
   StandaloneExecutionProps,
@@ -33,7 +33,7 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
     // This is important, for example, in VS Code extension.
     // TODO: maybe `useRunnerState` could be merged with `useSquiggle`, but it does some extra stuff (autorun mode).
 
-    const { simulation } = useSimulatorManager({
+    const { simulation } = useSimulator({
       code,
       setup: project
         ? { type: "project", project, continues }

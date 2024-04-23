@@ -2,7 +2,7 @@ import { FC, useMemo, useRef } from "react";
 
 import { useUncontrolledCode } from "../lib/hooks/index.js";
 import { usePlaygroundSettings } from "../lib/hooks/usePlaygroundSettings.js";
-import { useSimulatorManager } from "../lib/hooks/useSimulatorManager.js";
+import { useSimulator } from "../lib/hooks/useSimulator.js";
 import {
   ProjectExecutionProps,
   simulationErrors,
@@ -41,7 +41,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     onCodeChange,
   });
 
-  const { simulation, project, sourceId, runSimulation } = useSimulatorManager({
+  const { simulation, project, sourceId, runSimulation } = useSimulator({
     code,
     setup: propsProject
       ? { type: "project", project: propsProject, continues }
