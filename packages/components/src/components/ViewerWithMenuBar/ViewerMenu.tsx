@@ -81,9 +81,9 @@ export const ViewerMenu: FC<Props> = ({
                 case "Imports":
                   return "Imports";
                 case "Variables":
-                  return "Private Variables";
+                  return "Local Variables";
                 case "Exports":
-                  return "Exports";
+                  return "Exported Variables";
                 case "Result":
                   return "Final Result";
                 default:
