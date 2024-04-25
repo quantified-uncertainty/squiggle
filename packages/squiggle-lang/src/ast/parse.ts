@@ -134,3 +134,25 @@ export function nodeResultToString(
   }
   return nodeToString(r.value, printOptions);
 }
+
+export function astNodeIsEqual(
+  node1: ASTNode,
+  node2: ASTNode,
+  compareLocation = false
+): boolean {
+  if (compareLocation) {
+    return (
+      nodeToString(node1) === nodeToString(node2) &&
+      isLocationEqual(node1.location, node2.location)
+    );
+  } else {
+    return nodeToString(node1) === nodeToString(node2);
+  }
+}
+
+function isLocationEqual(loc1: LocationRange, loc2: LocationRange): boolean {
+  return (
+    loc1.start.offset === loc2.start.offset &&
+    loc1.end.offset === loc2.end.offset
+  );
+}

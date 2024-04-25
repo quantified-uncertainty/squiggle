@@ -86,7 +86,7 @@ export {
   type SqValue,
 };
 
-export { type AST, type ASTNode } from "./ast/parse.js";
+export { type AST, type ASTNode, astNodeIsEqual } from "./ast/parse.js";
 export { type ASTCommentNode } from "./ast/peggyHelpers.js";
 export { type SqLinker } from "./public/SqLinker.js";
 export { type SqOutput, type SqOutputResult } from "./public/types.js";
