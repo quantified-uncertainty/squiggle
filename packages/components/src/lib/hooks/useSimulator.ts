@@ -104,25 +104,36 @@ function useSetup({
   return { sourceId: _sourceId, project, continues };
 }
 
+type RunTask = {
+  code: string;
+  continues: string[];
+  environment: Env;
+  executionId: number;
+  inProgress: boolean;
+};
+
 type State = {
   autorunMode: boolean;
-  needToRun: boolean;
+  executionId: number;
+  runQueue: RunTask[];
   simulation: Simulation | undefined;
 };
+
 type Action =
   | {
       type: "setAutorunMode";
       value: boolean;
     }
   | {
-      type: "planToRun";
+      type: "run";
     }
   | {
-      type: "startedRun";
+      type: "startTask";
+      value: number; // execution id
     }
   | {
       type: "setSimulation";
-      value: Omit<Simulation, "executionId">;
+      value: Simulation;
     };
 
 export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
@@ -135,8 +146,9 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
 
   const [state, dispatch] = useReducer(reducer, {
     autorunMode: args.initialAutorunMode ?? true,
-    needToRun: args.initialAutorunMode !== false,
+    executionId: 0,
     simulation: undefined,
+    runQueue: [],
   });
 
   function reducer(state: State, action: Action): State {
@@ -146,32 +158,51 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
           ...state,
           autorunMode: action.value,
         };
-      case "planToRun": {
+      case "run": {
+        const executionId = state.executionId + 1;
         return {
           ...state,
-          needToRun: true,
+          executionId,
+          runQueue: [
+            // No point in keeping more than two tasks in a queue, for now (see
+            // below, we run tasks sequentially because SqProject is mutable and
+            // we'd run into race conditions otherwise).
+            ...state.runQueue.slice(0, 1),
+            {
+              // Note how this depends on args. This is a "cheat mode for
+              // hooks", explained in
+              // https://overreacted.io/a-complete-guide-to-useeffect/, under
+              // "Why useReducer Is the Cheat Mode of Hooks" section.
+              //
+              // Thanks to this, we can avoid dependencies in `runSimulation` callback.
+              code: args.code,
+              continues,
+              environment: project.getEnvironment(),
+              inProgress: false,
+              executionId,
+            },
+          ],
         };
       }
-      case "startedRun":
+      case "startTask":
         return {
           ...state,
-          needToRun: false,
           simulation: state.simulation
             ? { ...state.simulation, isStale: true }
             : undefined,
+          runQueue: state.runQueue.map((task) =>
+            action.value === task.executionId
+              ? { ...task, inProgress: true }
+              : task
+          ),
         };
       case "setSimulation": {
-        const previousExecutionId = state.simulation?.executionId || 0;
         return {
           ...state,
-          simulation: {
-            executionId: previousExecutionId + 1,
-            isStale: false,
-            code: args.code,
-            output: action.value.output,
-            executionTime: action.value.executionTime,
-            environment: action.value.environment,
-          },
+          runQueue: state.runQueue.filter(
+            (task) => task.executionId !== action.value.executionId
+          ),
+          simulation: action.value,
         };
       }
       default:
@@ -185,26 +216,28 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     []
   );
 
-  const runSimulation = useCallback(
-    async () => dispatch({ type: "planToRun" }),
-    []
-  );
+  const runSimulation = useCallback(() => dispatch({ type: "run" }), []);
 
+  // Whenever the run queue changes, we attempt to process it.
   useEffect(() => {
-    // We don't want to run the simulation if it's already running.
-    // FIXME - queue
-    if (!state.needToRun) {
+    // nothing to run
+    if (!state.runQueue.length) {
       return;
     }
 
-    dispatch({ type: "startedRun" });
+    // take the first task from the start of the queue
+    const task = state.runQueue[0];
+    if (task.inProgress) {
+      // SqProject can't run the same source with different code in parallel yet, so we process one task at a time.
+      return;
+    }
+    dispatch({ type: "startTask", value: task.executionId });
 
     (async () => {
       const startTime = Date.now();
-      project.setSource(sourceId, args.code);
-      project.setContinues(sourceId, continues);
+      project.setSource(sourceId, task.code);
+      project.setContinues(sourceId, task.continues);
 
-      const environment = project.getEnvironment(); // Get it here, just in case it changes during the run
       await project.run(sourceId);
 
       const output = project.getOutput(sourceId);
@@ -213,14 +246,15 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
       dispatch({
         type: "setSimulation",
         value: {
-          code: args.code,
+          executionId: task.executionId,
+          code: task.code,
           output,
           executionTime,
-          environment,
+          environment: task.environment,
         },
       });
     })();
-  }, [args.code, continues, project, sourceId, state.needToRun]);
+  }, [project, sourceId, state.runQueue]);
 
   // Re-run on environment and runner changes.
   useEffect(() => {
