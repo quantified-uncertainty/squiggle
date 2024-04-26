@@ -23,7 +23,7 @@
     "@vercel/analytics": "^1.2.2",
     "base64-js": "^1.5.1",
     "clsx": "^2.1.0",
-    "next": "^14.1.0",
+    "next": "^14.2.3",
     "nextra": "^2.13.3",
     "nextra-theme-docs": "^2.13.3",
     "pako": "^2.1.0",
