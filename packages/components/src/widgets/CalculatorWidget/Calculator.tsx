@@ -40,12 +40,11 @@ async function runSimulation(
   if (!code) {
     return undefined;
   }
-  const project = SqProject.create();
-  if (environment) {
-    project.setEnvironment(environment);
-  }
+  const project = SqProject.create({ environment });
+
   const sourceId = "calculator";
   project.setSource(sourceId, code);
+
   await project.run(sourceId);
   return project.getResult(sourceId);
 }

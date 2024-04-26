@@ -100,11 +100,10 @@ export async function run(
     environment?: Env;
   }
 ) {
-  const project = SqProject.create();
+  const project = SqProject.create({
+    environment: options?.environment,
+  });
   project.setSource("main", code);
-  if (options?.environment) {
-    project.setEnvironment(options.environment);
-  }
   await project.run("main");
   return project.getOutput("main");
 }
