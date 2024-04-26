@@ -261,22 +261,40 @@ model Variable {
   revisions    VariableRevision[] @relation("Revisions")
 
   // technically nullable, but won't ever be null in practice
-  currentRevision   VariableRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
-  currentRevisionId String?           @unique
+  currentRevision    VariableRevision?            @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
+  currentRevisionId  String?                      @unique
+  dependentRevisions VariableRevisionDependency[] @relation("DependentRevisions")
 
   @@unique([modelId, variableName])
 }
 
+enum VariableRevisionDependencyType {
+  Spec
+}
+
+model VariableRevisionDependency {
+  id String @id @default(cuid())
+
+  variableRevision   VariableRevision @relation("Dependencies", fields: [variableRevisionId], references: [id], onDelete: Cascade)
+  variableRevisionId String
+
+  variable   Variable @relation("DependentRevisions", fields: [variableId], references: [id], onDelete: Cascade)
+  variableId String
+
+  type VariableRevisionDependencyType
+}
+
 model VariableRevision {
-  id              String        @id @default(cuid())
-  modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
+  id              String                       @id @default(cuid())
+  modelRevision   ModelRevision                @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
   modelRevisionId String
-  variable        Variable      @relation("Revisions", fields: [variableId], references: [id], onDelete: Cascade)
+  variable        Variable                     @relation("Revisions", fields: [variableId], references: [id], onDelete: Cascade)
   variableId      String
   variableName    String
   title           String?
-  docstring       String        @default("")
-  variableType    String        @default("OTHER")
+  docstring       String                       @default("")
+  variableType    String                       @default("OTHER")
+  dependancies    VariableRevisionDependency[] @relation("Dependencies")
 
   // required by Prisma, but unused since `model` field should point at the same entity
   currentRevisionVariable Variable? @relation("CurrentRevision")
