@@ -41,7 +41,7 @@
     "@quri/versioned-squiggle-components": "workspace:*",
     "@vercel/analytics": "^1.2.2",
     "base64-js": "^1.5.1",
-    "clsx": "^2.1.0",
+    "clsx": "^2.1.1",
     "d3": "^7.8.5",
     "date-fns": "^3.6.0",
     "graphql": "^16.8.1",
