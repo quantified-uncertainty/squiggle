@@ -103,8 +103,8 @@ importers:
         specifier: ^0.5.13
         version: 0.5.13(tailwindcss@3.4.3)
       clsx:
-        specifier: ^2.1.0
-        version: 2.1.0
+        specifier: ^2.1.1
+        version: 2.1.1
       codemirror:
         specifier: ^6.0.1
         version: 6.0.1(@lezer/common@1.2.1)
@@ -340,8 +340,8 @@ importers:
         specifier: ^1.5.1
         version: 1.5.1
       clsx:
-        specifier: ^2.1.0
-        version: 2.1.0
+        specifier: ^2.1.1
+        version: 2.1.1
       d3:
         specifier: ^7.8.5
         version: 7.8.5
@@ -671,8 +671,8 @@ importers:
         specifier: ^1.7.19
         version: 1.7.19(react-dom@18.2.0)(react@18.2.0)
       clsx:
-        specifier: ^2.1.0
-        version: 2.1.0
+        specifier: ^2.1.1
+        version: 2.1.1
       framer-motion:
         specifier: ^11.0.3
         version: 11.0.3(react-dom@18.2.0)(react@18.2.0)
@@ -959,8 +959,8 @@ importers:
         specifier: ^1.5.1
         version: 1.5.1
       clsx:
-        specifier: ^2.1.0
-        version: 2.1.0
+        specifier: ^2.1.1
+        version: 2.1.1
       next:
         specifier: ^14.2.3
         version: 14.2.3(@babel/core@7.24.3)(react-dom@18.2.0)(react@18.2.0)
@@ -6619,7 +6619,7 @@ packages:
       '@react-hook/size': 2.1.2(react@18.2.0)
       '@tailwindcss/typography': 0.5.13(tailwindcss@3.4.3)
       '@types/d3': 7.4.3
-      clsx: 2.1.0
+      clsx: 2.1.1
       codemirror: 6.0.1(@lezer/common@1.2.1)
       d3: 7.8.5
       framer-motion: 10.18.0(react-dom@18.2.0)(react@18.2.0)
@@ -6663,7 +6663,7 @@ packages:
       '@react-hook/size': 2.1.2(react@18.2.0)
       '@tailwindcss/typography': 0.5.13(tailwindcss@3.4.3)
       '@types/d3': 7.4.3
-      clsx: 2.1.0
+      clsx: 2.1.1
       codemirror: 6.0.1(@lezer/common@1.2.1)
       d3: 7.8.5
       framer-motion: 10.18.0(react-dom@18.2.0)(react@18.2.0)
@@ -6708,7 +6708,7 @@ packages:
       '@react-hook/size': 2.1.2(react@18.2.0)
       '@tailwindcss/typography': 0.5.13(tailwindcss@3.4.3)
       '@types/d3': 7.4.3
-      clsx: 2.1.0
+      clsx: 2.1.1
       codemirror: 6.0.1(@lezer/common@1.2.1)
       d3: 7.8.5
       framer-motion: 10.18.0(react-dom@18.2.0)(react@18.2.0)
@@ -6751,7 +6751,7 @@ packages:
       '@quri/ui': 0.2.1(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
       '@react-hook/size': 2.1.2(react@18.2.0)
       '@tailwindcss/typography': 0.5.13(tailwindcss@3.4.3)
-      clsx: 2.1.0
+      clsx: 2.1.1
       codemirror: 6.0.1(@lezer/common@1.2.1)
       d3: 7.8.5
       framer-motion: 10.18.0(react-dom@18.2.0)(react@18.2.0)
@@ -6798,7 +6798,7 @@ packages:
       '@quri/ui': 0.2.1(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
       '@react-hook/size': 2.1.2(react@18.2.0)
       '@tailwindcss/typography': 0.5.13(tailwindcss@3.4.3)
-      clsx: 2.1.0
+      clsx: 2.1.1
       codemirror: 6.0.1(@lezer/common@1.2.1)
       d3: 7.8.5
       framer-motion: 10.18.0(react-dom@18.2.0)(react@18.2.0)
@@ -6897,7 +6897,7 @@ packages:
     dependencies:
       '@floating-ui/react': 0.24.8(react-dom@18.2.0)(react@18.2.0)
       '@headlessui/react': 1.7.19(react-dom@18.2.0)(react@18.2.0)
-      clsx: 2.1.0
+      clsx: 2.1.1
       framer-motion: 10.18.0(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-colorful: 5.6.1(react-dom@18.2.0)(react@18.2.0)
@@ -6918,7 +6918,7 @@ packages:
     dependencies:
       '@floating-ui/react': 0.26.13(react-dom@18.2.0)(react@18.2.0)
       '@headlessui/react': 1.7.19(react-dom@18.2.0)(react@18.2.0)
-      clsx: 2.1.0
+      clsx: 2.1.1
       framer-motion: 10.18.0(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-colorful: 5.6.1(react-dom@18.2.0)(react@18.2.0)
@@ -6939,7 +6939,7 @@ packages:
     dependencies:
       '@floating-ui/react': 0.26.13(react-dom@18.2.0)(react@18.2.0)
       '@headlessui/react': 1.7.19(react-dom@18.2.0)(react@18.2.0)
-      clsx: 2.1.0
+      clsx: 2.1.1
       framer-motion: 10.18.0(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-colorful: 5.6.1(react-dom@18.2.0)(react@18.2.0)
@@ -6960,7 +6960,7 @@ packages:
     dependencies:
       '@floating-ui/react': 0.26.13(react-dom@18.2.0)(react@18.2.0)
       '@headlessui/react': 1.7.19(react-dom@18.2.0)(react@18.2.0)
-      clsx: 2.1.0
+      clsx: 2.1.1
       framer-motion: 10.18.0(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-colorful: 5.6.1(react-dom@18.2.0)(react@18.2.0)
@@ -10896,8 +10896,8 @@ packages:
     engines: {node: '>=6'}
     dev: false
 
-  /clsx@2.1.0:
-    resolution: {integrity: sha512-m3iNNWpd9rl3jvvcBnu70ylMdrXt8Vlq4HYadnU5fwcOtvkSQWPmj7amUcDT2qYI7risszBjI5AUIUox9D16pg==}
+  /clsx@2.1.1:
+    resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
     dev: false
 
@@ -17423,7 +17423,7 @@ packages:
     dependencies:
       '@headlessui/react': 1.7.19(react-dom@18.2.0)(react@18.2.0)
       '@popperjs/core': 2.11.8
-      clsx: 2.1.0
+      clsx: 2.1.1
       escape-string-regexp: 5.0.0
       flexsearch: 0.7.31
       focus-visible: 5.2.0
@@ -17454,7 +17454,7 @@ packages:
       '@napi-rs/simple-git': 0.1.9
       '@theguild/remark-mermaid': 0.0.5(react@18.2.0)
       '@theguild/remark-npm2yarn': 0.2.1
-      clsx: 2.1.0
+      clsx: 2.1.1
       github-slugger: 2.0.0
       graceful-fs: 4.2.11
       gray-matter: 4.0.3
