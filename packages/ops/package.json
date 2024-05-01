@@ -21,7 +21,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@babel/core": "^7.24.0",
+    "@babel/core": "^7.24.5",
     "@babel/parser": "^7.24.5",
     "lodash": "^4.17.21",
     "mdast-util-to-string": "^4.0.0",
