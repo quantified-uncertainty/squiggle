@@ -188,8 +188,8 @@ importers:
         specifier: ^7.6.12
         version: 7.6.17(@types/react-dom@18.2.19)(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/node-logger':
-        specifier: ^7.6.12
-        version: 7.6.17
+        specifier: ^8.0.9
+        version: 8.0.9
       '@storybook/react':
         specifier: ^7.6.12
         version: 7.6.12(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.3)
@@ -7441,6 +7441,10 @@ packages:
 
   /@storybook/node-logger@7.6.17:
     resolution: {integrity: sha512-w59MQuXhhUNrUVmVkXhMwIg2nvFWjdDczLTwYLorhfsE36CWeUOY5QCZWQy0Qf/h+jz8Uo7Evy64qn18v9C4wA==}
+    dev: true
+
+  /@storybook/node-logger@8.0.9:
+    resolution: {integrity: sha512-5ajMdZFrYrjGLJOVDq7dlEQNFsgeLHymt4dCK9MulL/ciXykmXUZXE3Bye0wFy+I2qqDVvrvR8uzCvSFvm5MAQ==}
     dev: true
 
   /@storybook/postinstall@7.6.17:
