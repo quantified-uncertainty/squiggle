@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@babel/preset-react": "^7.24.1",
-    "@babel/preset-typescript": "^7.23.3",
+    "@babel/preset-typescript": "^7.24.1",
     "@chromatic-com/storybook": "^1",
     "@jest/globals": "^29.7.0",
     "@juggle/resize-observer": "^3.4.0",
