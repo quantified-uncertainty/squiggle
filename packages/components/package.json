@@ -54,7 +54,7 @@
     "@lezer/highlight": "^1.2.0",
     "@lezer/lr": "^1.4.0",
     "@quri/configs": "workspace:*",
-    "@storybook/addon-actions": "^7.6.17",
+    "@storybook/addon-actions": "^8.0.9",
     "@storybook/addon-docs": "^7.6.17",
     "@storybook/addon-essentials": "^7.6.17",
     "@storybook/addon-links": "^7.6.12",
