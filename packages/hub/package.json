@@ -42,7 +42,7 @@
     "@vercel/analytics": "^1.2.2",
     "base64-js": "^1.5.1",
     "clsx": "^2.1.1",
-    "d3": "^7.8.5",
+    "d3": "^7.9.0",
     "date-fns": "^3.6.0",
     "graphql": "^16.8.1",
     "graphql-yoga": "^5.1.1",
@@ -50,7 +50,7 @@
     "invariant": "^2.2.4",
     "lodash": "^4.17.21",
     "next": "^14.2.3",
-    "next-auth": "^4.24.6",
+    "next-auth": "^4.24.7",
     "nodemailer": "^6.9.13",
     "pako": "^2.1.0",
     "react": "^18.2.0",
@@ -76,7 +76,7 @@
     "@types/invariant": "^2.2.37",
     "@types/jest": "^29.5.12",
     "@types/lodash": "^4.14.202",
-    "@types/node": "^20.11.24",
+    "@types/node": "^20.12.7",
     "@types/pako": "^2.0.3",
     "@types/react": "^18.2.52",
     "@types/react-relay": "^16.0.6",
@@ -96,6 +96,6 @@
     "relay-compiler": "^16.2.0",
     "tailwindcss": "^3.4.3",
     "tsx": "^4.8.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.5"
   }
 }
