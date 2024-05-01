@@ -22,10 +22,10 @@
     "@quri/versioned-squiggle-components": "workspace:*",
     "@vercel/analytics": "^1.2.2",
     "base64-js": "^1.5.1",
-    "clsx": "^2.1.0",
+    "clsx": "^2.1.1",
     "next": "^14.2.3",
     "nextra": "^2.13.4",
-    "nextra-theme-docs": "^2.13.3",
+    "nextra-theme-docs": "^2.13.4",
     "pako": "^2.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -45,7 +45,7 @@
     "postcss": "^8.4.35",
     "prettier": "^3.2.5",
     "tailwindcss": "^3.4.3",
-    "tsx": "^4.7.0",
+    "tsx": "^4.8.2",
     "typescript": "^5.3.3"
   }
 }

@@ -41,7 +41,7 @@
     "@quri/versioned-squiggle-components": "workspace:*",
     "@vercel/analytics": "^1.2.2",
     "base64-js": "^1.5.1",
-    "clsx": "^2.1.0",
+    "clsx": "^2.1.1",
     "d3": "^7.8.5",
     "date-fns": "^3.6.0",
     "graphql": "^16.8.1",
@@ -49,7 +49,7 @@
     "immutable": "^4.3.5",
     "invariant": "^2.2.4",
     "lodash": "^4.17.21",
-    "next": "^14.1.0",
+    "next": "^14.2.3",
     "next-auth": "^4.24.6",
     "nodemailer": "^6.9.13",
     "pako": "^2.1.0",
@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.2",
-    "@graphql-codegen/client-preset": "^4.1.0",
+    "@graphql-codegen/client-preset": "^4.2.5",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@parcel/watcher": "^2.4.1",
     "@quri/configs": "workspace:*",
@@ -83,7 +83,7 @@
     "@types/relay-runtime": "^14.1.23",
     "babel-plugin-relay": "^16.2.0",
     "dotenv-cli": "^7.4.1",
-    "esbuild": "^0.20.1",
+    "esbuild": "^0.20.2",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.3",
     "graphql": "^16.8.1",
@@ -95,7 +95,7 @@
     "prisma": "^5.9.1",
     "relay-compiler": "^16.2.0",
     "tailwindcss": "^3.4.3",
-    "tsx": "^4.7.0",
+    "tsx": "^4.8.2",
     "typescript": "^5.3.3"
   }
 }
