@@ -59,7 +59,7 @@
     "@storybook/addon-essentials": "^7.6.17",
     "@storybook/addon-links": "^7.6.12",
     "@storybook/blocks": "^7.6.12",
-    "@storybook/node-logger": "^7.6.12",
+    "@storybook/node-logger": "^8.0.9",
     "@storybook/react": "^7.6.12",
     "@storybook/react-vite": "^7.6.12",
     "@testing-library/jest-dom": "^6.4.2",
