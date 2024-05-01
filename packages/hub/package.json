@@ -83,7 +83,7 @@
     "@types/relay-runtime": "^14.1.23",
     "babel-plugin-relay": "^16.2.0",
     "dotenv-cli": "^7.4.1",
-    "esbuild": "^0.20.1",
+    "esbuild": "^0.20.2",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.3",
     "graphql": "^16.8.1",
