@@ -17,7 +17,7 @@
     "@types/babel__core": "^7.20.5",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.24",
-    "tsx": "^4.7.0",
+    "tsx": "^4.8.2",
     "typescript": "^5.3.3"
   },
   "dependencies": {
