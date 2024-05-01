@@ -141,8 +141,8 @@
     "@quri/squiggle-lang": "workspace:*",
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@quri/versioned-squiggle-components": "workspace:*",
-    "@types/node": "^20.11.24",
     "@types/react": "^18.3.1",
+    "@types/node": "^20.12.7",
     "@types/react-dom": "^18.2.19",
     "@types/vscode": "^1.86.0",
     "@types/vscode-webview": "^1.57.5",
@@ -153,7 +153,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.2.0",
     "tailwindcss": "^3.4.3",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.5"
   },
   "dependencies": {
     "@vscode/vsce": "^2.26.0",
