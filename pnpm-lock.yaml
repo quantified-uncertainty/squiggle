@@ -191,8 +191,8 @@ importers:
         specifier: ^8.0.9
         version: 8.0.9
       '@storybook/react':
-        specifier: ^7.6.12
-        version: 7.6.12(react-dom@18.2.0)(react@18.3.1)(typescript@5.4.5)
+        specifier: ^8.0.9
+        version: 8.0.9(react-dom@18.2.0)(react@18.3.1)(typescript@5.4.5)
       '@storybook/react-vite':
         specifier: ^7.6.12
         version: 7.6.12(react-dom@18.2.0)(react@18.3.1)(typescript@5.4.5)(vite@5.2.10)
@@ -711,8 +711,8 @@ importers:
         specifier: ^7.6.12
         version: 7.6.17(@types/react-dom@18.2.19)(@types/react@18.3.1)(react-dom@18.2.0)(react@18.3.1)
       '@storybook/react':
-        specifier: ^7.6.12
-        version: 7.6.12(react-dom@18.2.0)(react@18.3.1)(typescript@5.4.5)
+        specifier: ^8.0.9
+        version: 8.0.9(react-dom@18.2.0)(react@18.3.1)(typescript@5.4.5)
       '@storybook/react-vite':
         specifier: ^7.6.12
         version: 7.6.12(react-dom@18.2.0)(react@18.3.1)(typescript@5.4.5)(vite@5.2.10)
@@ -7314,6 +7314,22 @@ packages:
       - supports-color
     dev: true
 
+  /@storybook/docs-tools@8.0.9:
+    resolution: {integrity: sha512-OzogAeOmeHea/MxSPKRBWtOQVNSpoq+OOpimO9YRA5h5GBRJ2TUOGT44Gny6QT4ll5AvQA8fIiq9KezKcLekAg==}
+    dependencies:
+      '@storybook/core-common': 8.0.9
+      '@storybook/core-events': 8.0.9
+      '@storybook/preview-api': 8.0.9
+      '@storybook/types': 8.0.9
+      '@types/doctrine': 0.0.3
+      assert: 2.1.0
+      doctrine: 3.0.0
+      lodash: 4.17.21
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+    dev: true
+
   /@storybook/global@5.0.0:
     resolution: {integrity: sha512-FcOqPAXACP0I3oJ/ws6/rrPT9WGhu915Cg8D02a9YxLo0DE9zI+a9A5gRGvmQ09fiWPukqI8ZAEoQEdWUKMQdQ==}
     dev: true
@@ -7404,7 +7420,7 @@ packages:
       '@storybook/channels': 7.6.12
       '@storybook/client-logger': 7.6.12
       '@storybook/core-events': 7.6.12
-      '@storybook/csf': 0.1.2
+      '@storybook/csf': 0.1.6
       '@storybook/global': 5.0.0
       '@storybook/types': 7.6.12
       '@types/qs': 6.9.11
@@ -7479,6 +7495,16 @@ packages:
       react-dom: 18.2.0(react@18.3.1)
     dev: true
 
+  /@storybook/react-dom-shim@8.0.9(react-dom@18.2.0)(react@18.3.1):
+    resolution: {integrity: sha512-8011KlRuG3obr5pZZ7bcEyYYNWF3tR596YadoMd267NPoHKvwAbKL1L/DNgb6kiYjZDUf9QfaKSCWW31k0kcRQ==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.2.0(react@18.3.1)
+    dev: true
+
   /@storybook/react-vite@7.6.12(react-dom@18.2.0)(react@18.3.1)(typescript@5.4.5)(vite@5.2.10):
     resolution: {integrity: sha512-kQjCWmTcHuZM1Mlt1QjpYNXP1TxfkSDFWC36fSEUC0q48wzyjUEZs6YraxZu0YE+zXK+X4tmaZhz8pUPgV3gLw==}
     engines: {node: '>=16'}
@@ -7537,6 +7563,46 @@ packages:
       react: 18.3.1
       react-dom: 18.2.0(react@18.3.1)
       react-element-to-jsx-string: 15.0.0(react-dom@18.2.0)(react@18.3.1)
+      ts-dedent: 2.2.0
+      type-fest: 2.19.0
+      typescript: 5.4.5
+      util-deprecate: 1.0.2
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+    dev: true
+
+  /@storybook/react@8.0.9(react-dom@18.2.0)(react@18.3.1)(typescript@5.4.5):
+    resolution: {integrity: sha512-NeQ6suZG3HKikwe3Tx9cAIaRx7uP8FKCmlVvIiBg4LTTI5orCt94PPakvuZukZcbkqvcCnEBkebAzwUpn8PiJw==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+      typescript: '>= 4.2.x'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    dependencies:
+      '@storybook/client-logger': 8.0.9
+      '@storybook/docs-tools': 8.0.9
+      '@storybook/global': 5.0.0
+      '@storybook/preview-api': 8.0.9
+      '@storybook/react-dom-shim': 8.0.9(react-dom@18.2.0)(react@18.3.1)
+      '@storybook/types': 8.0.9
+      '@types/escodegen': 0.0.6
+      '@types/estree': 0.0.51
+      '@types/node': 18.19.14
+      acorn: 7.4.1
+      acorn-jsx: 5.3.2(acorn@7.4.1)
+      acorn-walk: 7.2.0
+      escodegen: 2.1.0
+      html-tags: 3.2.0
+      lodash: 4.17.21
+      prop-types: 15.8.1
+      react: 18.3.1
+      react-dom: 18.2.0(react@18.3.1)
+      react-element-to-jsx-string: 15.0.0(react-dom@18.2.0)(react@18.3.1)
+      semver: 7.6.0
       ts-dedent: 2.2.0
       type-fest: 2.19.0
       typescript: 5.4.5
