@@ -45,7 +45,7 @@
     "react-dom": "^18"
   },
   "dependencies": {
-    "@floating-ui/react": "^0.26.9",
+    "@floating-ui/react": "^0.26.13",
     "@headlessui/react": "^1.7.19",
     "clsx": "^2.1.0",
     "framer-motion": "^11.0.3",
