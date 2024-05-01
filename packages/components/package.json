@@ -50,7 +50,7 @@
     "@babel/preset-typescript": "^7.23.3",
     "@jest/globals": "^29.7.0",
     "@juggle/resize-observer": "^3.4.0",
-    "@lezer/generator": "^1.6.0",
+    "@lezer/generator": "^1.7.0",
     "@lezer/highlight": "^1.2.0",
     "@lezer/lr": "^1.4.0",
     "@quri/configs": "workspace:*",
