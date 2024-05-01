@@ -76,7 +76,7 @@
     "@types/invariant": "^2.2.37",
     "@types/jest": "^29.5.12",
     "@types/lodash": "^4.14.202",
-    "@types/node": "^20.11.24",
+    "@types/node": "^20.12.7",
     "@types/pako": "^2.0.3",
     "@types/react": "^18.2.52",
     "@types/react-relay": "^16.0.6",
