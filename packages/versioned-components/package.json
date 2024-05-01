@@ -16,7 +16,7 @@
     "@quri/ui": "workspace:*",
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.13",
-    "glob": "^10.3.10",
+    "glob": "^10.3.12",
     "lodash": "^4.17.21",
     "squiggle-components-0.8.5": "npm:@quri/squiggle-components@0.8.5",
     "squiggle-components-0.8.6": "npm:@quri/squiggle-components@0.8.6",
