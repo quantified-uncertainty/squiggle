@@ -20,7 +20,7 @@
     "@codemirror/state": "^6.4.1",
     "@codemirror/theme-one-dark": "^6.1.2",
     "@codemirror/view": "^6.26.3",
-    "@floating-ui/react": "^0.26.9",
+    "@floating-ui/react": "^0.26.13",
     "@heroicons/react": "^1.0.6",
     "@hookform/resolvers": "^3.3.4",
     "@lezer/common": "^1.2.1",
