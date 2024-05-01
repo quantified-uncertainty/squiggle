@@ -37,7 +37,7 @@
     "open": "^10.1.0"
   },
   "devDependencies": {
-    "@babel/preset-typescript": "^7.23.3",
+    "@babel/preset-typescript": "^7.24.1",
     "@jest/globals": "^29.7.0",
     "@quri/configs": "workspace:*",
     "@types/jest": "^29.5.12",
