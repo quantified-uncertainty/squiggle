@@ -598,8 +598,8 @@ importers:
         specifier: ^4.17.21
         version: 4.17.21
       open:
-        specifier: ^10.0.4
-        version: 10.0.4
+        specifier: ^10.1.0
+        version: 10.1.0
     devDependencies:
       '@babel/preset-typescript':
         specifier: ^7.23.3
@@ -5926,7 +5926,7 @@ packages:
       immutable: 4.3.5
       jstat: 1.9.6
       lodash: 4.17.21
-      open: 10.0.4
+      open: 10.1.0
     dev: false
 
   /@quri/squiggle-lang@0.9.3:
@@ -5938,7 +5938,7 @@ packages:
       immutable: 4.3.5
       jstat: 1.9.6
       lodash: 4.17.21
-      open: 10.0.4
+      open: 10.1.0
     dev: false
 
   /@quri/squiggle-textmate-grammar@0.9.2:
@@ -16836,8 +16836,8 @@ packages:
     dependencies:
       mimic-fn: 4.0.0
 
-  /open@10.0.4:
-    resolution: {integrity: sha512-oujJ/FFr7ra6/7gJuQ4ZJJ8Gf2VHM0J3J/W7IvH++zaqEzacWVxzK++NiVY5NLHTTj7u/jNH5H3Ei9biL31Lng==}
+  /open@10.1.0:
+    resolution: {integrity: sha512-mnkeQ1qP5Ue2wd+aivTD3NHd/lZ96Lu0jgf0pwktLPtx6cTZiH7tyeGRRHs0zX0rbrahXPnXlUnbeXyaBBuIaw==}
     engines: {node: '>=18'}
     dependencies:
       default-browser: 5.2.1
