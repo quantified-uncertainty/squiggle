@@ -74,7 +74,7 @@
     "@types/react-dom": "^18.2.19",
     "@types/unist": "^3.0.2",
     "@typescript-eslint/eslint-plugin": "^7.1.0",
-    "@typescript-eslint/parser": "^7.1.0",
+    "@typescript-eslint/parser": "^7.8.0",
     "@wogns3623/eslint-plugin-better-exhaustive-deps": "^1.1.0",
     "babel-jest": "^29.7.0",
     "eslint": "^8.57.0",
