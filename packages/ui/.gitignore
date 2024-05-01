@@ -1,2 +1,4 @@
 /dist
 /storybook-static
+
+*storybook.log

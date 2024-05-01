@@ -1,38 +1,29 @@
 import type { StorybookConfig } from "@storybook/react-vite";
 
+import { join, dirname } from "path";
+
+/**
+ * This function is used to resolve the absolute path of a package.
+ * It is needed in projects that use Yarn PnP or are set up within a monorepo.
+ */
+function getAbsolutePath(value: string): any {
+  return dirname(require.resolve(join(value, "package.json")));
+}
 const config: StorybookConfig = {
-  stories: [
-    "../src/stories/**/*.mdx",
-    {
-      directory: "../src/stories",
-      titlePrefix: "UI",
-      files: "**/*.stories.@(js|jsx|ts|tsx)",
-    },
-  ],
+  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
   addons: [
-    "@storybook/addon-docs",
-    "@storybook/addon-links",
-    "@storybook/addon-essentials",
-    {
-      name: "@storybook/addon-styling",
-      options: {
-        postCss: true,
-      },
-    },
+    getAbsolutePath("@storybook/addon-onboarding"),
+    getAbsolutePath("@storybook/addon-links"),
+    getAbsolutePath("@storybook/addon-essentials"),
+    getAbsolutePath("@chromatic-com/storybook"),
+    getAbsolutePath("@storybook/addon-interactions"),
   ],
-  framework: "@storybook/react-vite",
-  typescript: {
-    check: false,
-    reactDocgen: "react-docgen-typescript",
-    reactDocgenTypescriptOptions: {
-      shouldExtractLiteralValuesFromEnum: true,
-      propFilter: (prop) =>
-        prop.parent ? !/node_modules/.test(prop.parent.fileName) : true,
-    },
+  framework: {
+    name: getAbsolutePath("@storybook/react-vite"),
+    options: {},
   },
   docs: {
-    autodocs: true,
+    autodocs: "tag",
   },
 };
-
 export default config;
