@@ -182,8 +182,8 @@ importers:
         specifier: ^7.6.17
         version: 7.6.17(@types/react-dom@18.2.19)(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/addon-links':
-        specifier: ^7.6.12
-        version: 7.6.12(react@18.2.0)
+        specifier: ^8.0.9
+        version: 8.0.9(react@18.2.0)
       '@storybook/blocks':
         specifier: ^7.6.12
         version: 7.6.17(@types/react-dom@18.2.19)(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
@@ -705,8 +705,8 @@ importers:
         specifier: ^7.6.12
         version: 7.6.12
       '@storybook/addon-links':
-        specifier: ^7.6.12
-        version: 7.6.12(react@18.2.0)
+        specifier: ^8.0.9
+        version: 8.0.9(react@18.2.0)
       '@storybook/blocks':
         specifier: ^7.6.12
         version: 7.6.17(@types/react-dom@18.2.19)(@types/react@18.2.52)(react-dom@18.2.0)(react@18.2.0)
@@ -7864,15 +7864,15 @@ packages:
       ts-dedent: 2.2.0
     dev: true
 
-  /@storybook/addon-links@7.6.12(react@18.2.0):
-    resolution: {integrity: sha512-rGwPYpZAANPrf2GaNi5t9zAjLF8PgzKizyBPltIXUtplxDg88ziXlDA1dhsuGDs4Kf0oXECyAHPw79JjkJQziA==}
+  /@storybook/addon-links@8.0.9(react@18.2.0):
+    resolution: {integrity: sha512-FVt+AdW3JFSqbJzkKiqKsMRWqHXqEvCBqFs7lNfk3OW0w0jfv1iREtrxE0dVdJoUFQC9V/2Im/EpJ7UB3C2bNQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     peerDependenciesMeta:
       react:
         optional: true
     dependencies:
-      '@storybook/csf': 0.1.2
+      '@storybook/csf': 0.1.6
       '@storybook/global': 5.0.0
       react: 18.2.0
       ts-dedent: 2.2.0
@@ -8093,7 +8093,7 @@ packages:
       '@babel/core': 7.24.3
       '@babel/preset-env': 7.23.9(@babel/core@7.24.3)
       '@babel/types': 7.24.0
-      '@storybook/csf': 0.1.2
+      '@storybook/csf': 0.1.6
       '@storybook/csf-tools': 7.6.12
       '@storybook/node-logger': 7.6.12
       '@storybook/types': 7.6.12
@@ -8227,7 +8227,7 @@ packages:
       '@storybook/channels': 7.6.12
       '@storybook/core-common': 7.6.12
       '@storybook/core-events': 7.6.12
-      '@storybook/csf': 0.1.2
+      '@storybook/csf': 0.1.6
       '@storybook/csf-tools': 7.6.12
       '@storybook/docs-mdx': 0.1.0
       '@storybook/global': 5.0.0
@@ -8294,7 +8294,7 @@ packages:
       '@babel/parser': 7.24.5
       '@babel/traverse': 7.24.1
       '@babel/types': 7.24.0
-      '@storybook/csf': 0.1.2
+      '@storybook/csf': 0.1.6
       '@storybook/types': 7.6.12
       fs-extra: 11.2.0
       recast: 0.23.4
@@ -8321,6 +8321,12 @@ packages:
 
   /@storybook/csf@0.1.2:
     resolution: {integrity: sha512-ePrvE/pS1vsKR9Xr+o+YwdqNgHUyXvg+1Xjx0h9LrVx7Zq4zNe06pd63F5EvzTbCbJsHj7GHr9tkiaqm7U8WRA==}
+    dependencies:
+      type-fest: 2.19.0
+    dev: true
+
+  /@storybook/csf@0.1.6:
+    resolution: {integrity: sha512-JjWnBptVhBYJ14yq+cHs66BXjykRUWQ5TlD1RhPxMOtavynYyV/Q+QR98/N+XB+mcPtFMm5I2DvNkpj0/Dk8Mw==}
     dependencies:
       type-fest: 2.19.0
     dev: true
