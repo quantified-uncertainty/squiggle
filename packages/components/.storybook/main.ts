@@ -11,17 +11,7 @@ const config: StorybookConfig = {
       files: "**/*.stories.@(js|jsx|ts|tsx)",
     },
   ],
-  addons: [
-    "@storybook/addon-docs",
-    "@storybook/addon-links",
-    "@storybook/addon-essentials",
-    {
-      name: "@storybook/addon-styling",
-      options: {
-        postCss: true,
-      },
-    },
-  ],
+  addons: ["@storybook/addon-essentials"],
   framework: {
     name: "@storybook/react-vite",
     options: {},
