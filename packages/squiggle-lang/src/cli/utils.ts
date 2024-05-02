@@ -52,10 +52,8 @@ async function _run(
   const project = SqProject.create({
     linker,
     runner: args.runner ? runnerByName(args.runner) : undefined,
+    environment: args.environment,
   });
-  if (args.environment) {
-    project.setEnvironment(args.environment);
-  }
   const filename = args.filename ? path.resolve(args.filename) : EVAL_SOURCE_ID;
 
   project.setSource(filename, args.src);
