@@ -18,7 +18,7 @@ export const Nested: Story = {
     code: `{
   square: {|x|x*x},
   dists: [
-    a = normal(5,2),
+    normal(5,2),
     mx(5, 2 to 5)
   ]
 }`,
