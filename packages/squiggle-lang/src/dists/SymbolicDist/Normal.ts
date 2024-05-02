@@ -1,8 +1,7 @@
 import jstat from "jstat";
 
-import { result } from "../../index.js";
 import * as Operation from "../../operation.js";
-import { Err, Ok } from "../../utility/result.js";
+import { Err, Ok, result } from "../../utility/result.js";
 import { DistError } from "../DistError.js";
 import { BaseSymbolicDist } from "./BaseSymbolicDist.js";
 import { PointMass } from "./PointMass.js";

@@ -5,7 +5,6 @@ import jstat from "jstat";
 import { Binomial } from "../dists/SymbolicDist/Binomial.js";
 import * as PoissonJs from "../dists/SymbolicDist/Poisson.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
-import { SDate } from "../index.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -35,6 +34,7 @@ import {
 } from "../value/simpleValue.js";
 import { vArray } from "../value/VArray.js";
 import { vNumber } from "../value/VNumber.js";
+import { SDate } from "../utility/SDate.js";
 
 const { factorial } = jstat;
 

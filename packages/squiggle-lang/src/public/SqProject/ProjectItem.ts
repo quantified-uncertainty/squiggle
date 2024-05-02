@@ -1,12 +1,13 @@
 import { AST, parse } from "../../ast/parse.js";
+import { Env } from "../../dists/env.js";
 import { ICompileError, IRuntimeError } from "../../errors/IError.js";
-import { Env, SqProject } from "../../index.js";
 import { RunOutput } from "../../runners/BaseRunner.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
 import { VDict, vDictFromArray } from "../../value/VDict.js";
 import { SqCompileError, SqError, SqRuntimeError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
+import { SqProject } from "./index.js";
 
 // source -> ast -> imports -> result/bindings/exports
 

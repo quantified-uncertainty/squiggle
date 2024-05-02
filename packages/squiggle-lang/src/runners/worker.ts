@@ -1,16 +1,13 @@
+import { AST } from "../ast/parse.js";
+import { Env } from "../dists/env.js";
 import { SerializedIError, serializeIError } from "../errors/IError.js";
-import { compileAst } from "../expression/compile.js";
-import { AST, Env } from "../index.js";
-import { getStdLib } from "../library/index.js";
-import { Reducer } from "../reducer/Reducer.js";
 import {
   SquiggleBundle,
   SquiggleBundleEntrypoint,
   squiggleCodec,
 } from "../serialization/squiggle.js";
-import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, Ok, result } from "../utility/result.js";
-import { Value, vDict } from "../value/index.js";
+import { baseRun } from "./common.js";
 
 export type SquiggleWorkerJob = {
   environment: Env;
@@ -51,68 +48,36 @@ function processJob(job: SquiggleWorkerJob): SquiggleWorkerResult {
     throw new Error("Expected externals to be a dictionary");
   }
 
-  const expressionResult = compileAst(
-    job.ast,
-    getStdLib().merge(externalsValue.value)
-  );
-
-  if (!expressionResult.ok) {
-    return Err(serializeIError(expressionResult.value));
-  }
-  const expression = expressionResult.value;
-
-  if (expression.kind !== "Program") {
-    // mostly for TypeScript, so that we could access `expression.value.exports`
-    throw new Error("Expected Program expression");
-  }
-
-  const reducer = new Reducer(job.environment);
-  let result: Value;
-  try {
-    result = reducer.evaluate(expression);
-  } catch (e: unknown) {
-    return Err(serializeIError(reducer.errorFromException(e)));
-  }
-
-  const exportNames = new Set(expression.value.exports);
-  const bindings = ImmutableMap<string, Value>(
-    Object.entries(expression.value.bindings).map(([name, offset]) => {
-      let value = reducer.stack.get(offset);
-      if (exportNames.has(name)) {
-        value = value.mergeTags({
-          exportData: {
-            sourceId: job.sourceId,
-            path: [name],
-          },
-        });
-      }
-      return [name, value];
-    })
-  );
-  const exports = bindings.filter(
-    (value, _) => value.tags?.exportData() !== undefined
-  );
-
-  const resultStore = squiggleCodec.makeSerializer();
-  const resultEntrypoint = resultStore.serialize("value", result);
-  const bindingsEntrypoint = resultStore.serialize("value", vDict(bindings));
-  const exportsEntrypoint = resultStore.serialize(
-    "value",
-    vDict(exports).mergeTags({
-      exportData: {
-        sourceId: job.sourceId,
-        path: [],
-      },
-    })
-  );
-  resultStore.serialize("value", result);
-
-  return Ok({
-    bundle: resultStore.getBundle(),
-    result: resultEntrypoint,
-    bindings: bindingsEntrypoint,
-    exports: exportsEntrypoint,
+  const result = baseRun({
+    ast: job.ast,
+    sourceId: job.sourceId,
+    environment: job.environment,
+    externals: externalsValue,
   });
+  if (result.ok) {
+    const resultStore = squiggleCodec.makeSerializer();
+    const resultEntrypoint = resultStore.serialize(
+      "value",
+      result.value.result
+    );
+    const bindingsEntrypoint = resultStore.serialize(
+      "value",
+      result.value.bindings
+    );
+    const exportsEntrypoint = resultStore.serialize(
+      "value",
+      result.value.exports
+    );
+
+    return Ok({
+      bundle: resultStore.getBundle(),
+      result: resultEntrypoint,
+      bindings: bindingsEntrypoint,
+      exports: exportsEntrypoint,
+    });
+  } else {
+    return Err(serializeIError(result.value));
+  }
 }
 
 function postTypedMessage(data: SquiggleWorkerResponse) {

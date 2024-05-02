@@ -1,6 +1,6 @@
 import jstat from "jstat";
 
-import { LocationRange } from "../ast/parse.js";
+import { ASTNode, LocationRange } from "../ast/parse.js";
 import { Env } from "../dists/env.js";
 import { IRuntimeError } from "../errors/IError.js";
 import {
@@ -12,7 +12,6 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { Expression, ExpressionByKind } from "../expression/index.js";
-import { ASTNode } from "../index.js";
 import { getAleaRng, PRNG } from "../rng/index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { annotationToDomain } from "../value/annotations.js";

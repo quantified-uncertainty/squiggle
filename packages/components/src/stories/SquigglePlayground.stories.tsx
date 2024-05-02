@@ -204,6 +204,7 @@ export const ManyTypes: Story = {
   args: {
     linker: linker,
     onOpenExport: (sourceId, varName) => {
+      // eslint-disable-next-line no-console
       console.log("Clicked Export with params", sourceId, varName);
     },
     defaultCode: `import "hub:source1" as s1  
