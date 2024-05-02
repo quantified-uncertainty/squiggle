@@ -1,11 +1,21 @@
 import isInteger from "lodash/isInteger.js";
 
 import { REArrayIndexNotFound, REOther } from "../errors/messages.js";
+import {
+  SquiggleDeserializationVisitor,
+  SquiggleSerializationVisitor,
+} from "../serialization/squiggle.js";
 import { BaseValue } from "./BaseValue.js";
 import { isEqual, Value } from "./index.js";
 import { Indexable } from "./mixins.js";
 
-export class VArray extends BaseValue implements Indexable {
+// list of value ids
+type SerializedArray = number[];
+
+export class VArray
+  extends BaseValue<"Array", SerializedArray>
+  implements Indexable
+{
   readonly type = "Array";
 
   override get publicName() {
@@ -51,6 +61,19 @@ export class VArray extends BaseValue implements Indexable {
       }
     }
     return true;
+  }
+
+  override serializePayload(
+    visit: SquiggleSerializationVisitor
+  ): SerializedArray {
+    return this.value.map((element) => visit.value(element));
+  }
+
+  static deserialize(
+    serializedValue: SerializedArray,
+    visit: SquiggleDeserializationVisitor
+  ): VArray {
+    return new VArray(serializedValue.map((value) => visit.value(value)));
   }
 }
 export const vArray = (v: readonly Value[]) => new VArray(v);

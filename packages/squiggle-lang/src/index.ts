@@ -73,7 +73,11 @@ export {
   SDuration,
 } from "./utility/SDuration.js";
 
-export { type LocationRange as SqLocation } from "peggy";
+export {
+  type AST,
+  type ASTNode,
+  type LocationRange as SqLocation,
+} from "./ast/parse.js";
 export { defaultEnv as defaultEnvironment } from "./dists/env.js";
 export {
   type Env,
@@ -86,7 +90,6 @@ export {
   type SqValue,
 };
 
-export { type AST, type ASTNode } from "./ast/parse.js";
 export { type ASTCommentNode } from "./ast/peggyHelpers.js";
 export { type SqLinker } from "./public/SqLinker.js";
 export { type SqOutput, type SqOutputResult } from "./public/types.js";
@@ -97,22 +100,15 @@ export async function run(
     environment?: Env;
   }
 ) {
-  const project = SqProject.create();
+  const project = SqProject.create({
+    environment: options?.environment,
+  });
   project.setSource("main", code);
-  if (options?.environment) {
-    project.setEnvironment(options.environment);
-  }
   await project.run("main");
   return project.getOutput("main");
 }
 
-// can be used for syntax highlighting in JS/TS files if you have Squiggle VS Code extension installed.
-export function sq(strings: TemplateStringsArray, ...rest: unknown[]) {
-  if (rest.length) {
-    throw new Error("Extrapolation in sq`` template literals is forbidden");
-  }
-  return strings.join("");
-}
+export { sq } from "./sq.js";
 
 export function getFunctionDocumentation(name: string) {
   return registry.getFunctionDocumentation(name);
@@ -134,3 +130,10 @@ export {
 } from "./value/VScale.js";
 
 export { generateSeed } from "./utility/seedGenerator.js";
+
+export {
+  allRunnerNames,
+  defaultRunnerName,
+  runnerByName,
+  type RunnerName,
+} from "./runners/index.js";

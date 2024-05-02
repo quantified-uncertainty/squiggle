@@ -1,8 +1,9 @@
+import { AST } from "../../ast/parse.js";
 import { isBindingStatement } from "../../ast/utils.js";
 import { defaultEnv, Env } from "../../dists/env.js";
-import { AST } from "../../index.js";
-import * as Library from "../../library/index.js";
-import { Bindings } from "../../reducer/Stack.js";
+import { getStdLib } from "../../library/index.js";
+import { BaseRunner } from "../../runners/BaseRunner.js";
+import { getDefaultRunner } from "../../runners/index.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { vDict, VDict } from "../../value/VDict.js";
@@ -18,7 +19,7 @@ import {
   type Externals,
   Import,
   ProjectItem,
-  RunOutput,
+  RunOutputWithExternals,
 } from "./ProjectItem.js";
 
 function getNeedToRunError() {
@@ -27,15 +28,15 @@ function getNeedToRunError() {
 
 type Options = {
   linker?: SqLinker;
-  stdLib?: Bindings;
   environment?: Env;
+  runner?: BaseRunner;
 };
 
 export class SqProject {
   private readonly items: Map<string, ProjectItem>;
-  private stdLib: Bindings;
   private environment: Env;
   private linker?: SqLinker; // if not present, imports are forbidden
+  public runner: BaseRunner;
 
   // Direct graph of dependencies is maintained inside each ProjectItem,
   // while the inverse one is stored in this variable.
@@ -48,9 +49,9 @@ export class SqProject {
 
   constructor(options?: Options) {
     this.items = new Map();
-    this.stdLib = options?.stdLib ?? Library.getStdLib();
     this.environment = options?.environment ?? defaultEnv;
     this.linker = options?.linker;
+    this.runner = options?.runner ?? getDefaultRunner();
   }
 
   static create(options?: Options) {
@@ -61,13 +62,18 @@ export class SqProject {
     return this.environment;
   }
 
+  getStdLib() {
+    return getStdLib();
+  }
+
   setEnvironment(environment: Env) {
     // TODO - should we invalidate all outputs?
     this.environment = environment;
   }
 
-  getStdLib(): Bindings {
-    return this.stdLib;
+  setRunner(runner: BaseRunner) {
+    // TODO - should we invalidate all outputs?
+    this.runner = runner;
   }
 
   getSourceIds(): string[] {
@@ -190,7 +196,7 @@ export class SqProject {
 
   private getInternalOutput(
     sourceId: string
-  ): Result.result<RunOutput, SqError> {
+  ): Result.result<RunOutputWithExternals, SqError> {
     return this.getItem(sourceId).output ?? Result.Err(getNeedToRunError());
   }
 
@@ -350,7 +356,7 @@ export class SqProject {
     return Result.Ok(exports);
   }
 
-  // Includes implicit imports ("continues"), explicit imports, and StdLib.
+  // Includes implicit imports ("continues") and explicit imports.
   private async buildExternals(
     sourceId: string,
     pendingIds: Set<string>
@@ -360,8 +366,6 @@ export class SqProject {
     const rImports = this.getImports(sourceId);
     if (!rImports) throw new Error("Internal logic error"); // Shouldn't happen, we just called parseImports.
     if (!rImports.ok) return rImports; // There's something wrong with imports, that's fatal.
-
-    const stdlibExternals = vDict(this.getStdLib());
 
     const implicitImports = await this.importsToBindings(
       pendingIds,
@@ -376,7 +380,6 @@ export class SqProject {
     if (!explicitImports.ok) return explicitImports;
 
     return Result.Ok({
-      stdlib: stdlibExternals,
       implicitImports: implicitImports.value,
       explicitImports: explicitImports.value,
     });

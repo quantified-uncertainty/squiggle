@@ -1,28 +1,22 @@
 import { AST, parse } from "../../ast/parse.js";
-import { ICompileError } from "../../errors/IError.js";
-import { compileAst } from "../../expression/compile.js";
-import { Env, SqProject } from "../../index.js";
-import { Reducer } from "../../reducer/Reducer.js";
-import { ImmutableMap } from "../../utility/immutableMap.js";
+import { Env } from "../../dists/env.js";
+import { ICompileError, IRuntimeError } from "../../errors/IError.js";
+import { RunOutput } from "../../runners/BaseRunner.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
-import { Value } from "../../value/index.js";
-import { vDict, VDict } from "../../value/VDict.js";
+import { VDict, vDictFromArray } from "../../value/VDict.js";
 import { SqCompileError, SqError, SqRuntimeError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
+import { SqProject } from "./index.js";
 
 // source -> ast -> imports -> result/bindings/exports
 
 export type Externals = {
-  stdlib: VDict;
   implicitImports: VDict;
   explicitImports: VDict;
 };
 
-export type RunOutput = {
-  result: Value;
-  bindings: VDict;
-  exports: VDict;
+export type RunOutputWithExternals = RunOutput & {
   externals: Externals;
 };
 
@@ -46,7 +40,7 @@ export class ProjectItem {
   continues: string[];
   ast?: result<AST, SqError>;
   imports?: result<Import[], SqError>;
-  output?: result<RunOutput, SqError>;
+  output?: result<RunOutputWithExternals, SqError>;
 
   constructor(props: { sourceId: string; source: string }) {
     this.sourceId = props.sourceId;
@@ -189,10 +183,6 @@ export class ProjectItem {
   }
 
   async run(environment: Env, externals: Externals, project: SqProject) {
-    const _externals = externals.stdlib
-      .merge(externals.implicitImports)
-      .merge(externals.explicitImports);
-
     if (this.output) {
       return;
     }
@@ -208,59 +198,27 @@ export class ProjectItem {
       return;
     }
 
-    const expression = Result.errMap(
-      compileAst(this.ast.value, _externals.value),
-      (e) => new SqCompileError(e)
-    );
+    const _externals = vDictFromArray([])
+      .merge(externals.implicitImports)
+      .merge(externals.explicitImports);
 
-    if (!expression.ok) {
-      this.failRun(expression.value);
-      return;
-    }
-
-    const reducer = new Reducer(environment);
-
-    try {
-      if (expression.value.kind !== "Program") {
-        // mostly for TypeScript, so that we could access `expression.value.exports`
-        throw new Error("Expected Program expression");
+    const runnerOutput = await project.runner.run({
+      environment,
+      ast: this.ast.value,
+      externals: _externals,
+      sourceId: this.sourceId,
+    });
+    if (runnerOutput.ok) {
+      this.output = Ok({ ...runnerOutput.value, externals });
+    } else {
+      const err = runnerOutput.value;
+      if (err instanceof IRuntimeError) {
+        this.failRun(new SqRuntimeError(err, project));
+      } else if (err instanceof ICompileError) {
+        this.failRun(new SqCompileError(err));
+      } else {
+        throw err satisfies never;
       }
-
-      const result = reducer.evaluate(expression.value);
-
-      const exportNames = new Set(expression.value.value.exports);
-      const bindings = ImmutableMap<string, Value>(
-        Object.entries(expression.value.value.bindings).map(
-          ([name, offset]) => {
-            let value = reducer.stack.get(offset);
-            if (exportNames.has(name)) {
-              value = value.mergeTags({
-                exportData: {
-                  sourceId: this.sourceId,
-                  path: [name],
-                },
-              });
-            }
-            return [name, value];
-          }
-        )
-      );
-      const exports = bindings.filter(
-        (value, _) => value.tags?.exportData() !== undefined
-      );
-      this.output = Ok({
-        result,
-        bindings: vDict(bindings),
-        exports: vDict(exports).mergeTags({
-          exportData: {
-            sourceId: this.sourceId,
-            path: [],
-          },
-        }),
-        externals,
-      });
-    } catch (e: unknown) {
-      this.failRun(new SqRuntimeError(reducer.errorFromException(e), project));
     }
   }
 }

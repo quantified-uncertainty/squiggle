@@ -5,6 +5,7 @@ import path from "path";
 import { Env } from "../dists/env.js";
 import { SqLinker } from "../public/SqLinker.js";
 import { SqProject } from "../public/SqProject/index.js";
+import { runnerByName } from "../runners/index.js";
 import { bold, red } from "./colors.js";
 
 export async function measure(callback: () => Promise<void>) {
@@ -24,6 +25,7 @@ export type RunArgs = {
   measure?: boolean;
   sampleCount?: string | number;
   seed?: string;
+  runner?: Parameters<typeof runnerByName>[0];
 };
 
 const EVAL_SOURCE_ID = "[eval]";
@@ -42,15 +44,16 @@ const linker: SqLinker = {
   },
 };
 
-async function _run(args: {
-  src: string;
-  filename?: string;
-  environment?: Env;
-}) {
-  const project = SqProject.create({ linker });
-  if (args.environment) {
-    project.setEnvironment(args.environment);
+async function _run(
+  args: Pick<RunArgs, "src" | "filename" | "runner"> & {
+    environment?: Env;
   }
+) {
+  const project = SqProject.create({
+    linker,
+    runner: args.runner ? runnerByName(args.runner) : undefined,
+    environment: args.environment,
+  });
   const filename = args.filename ? path.resolve(args.filename) : EVAL_SOURCE_ID;
 
   project.setSource(filename, args.src);
@@ -75,6 +78,7 @@ export async function run(args: RunArgs) {
     src: args.src,
     filename: args.filename,
     environment,
+    runner: args.runner,
   });
 
   // Prints a section consisting of multiple lines; prints an extra "\n" if a section was printed before.

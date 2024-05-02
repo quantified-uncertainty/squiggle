@@ -131,3 +131,44 @@ export class DateRangeDomain extends BaseDomain {
 }
 
 export type Domain = NumericRangeDomain | DateRangeDomain;
+
+export type SerializedDomain =
+  | {
+      type: "NumericRange";
+      min: number;
+      max: number;
+    }
+  | {
+      type: "DateRange";
+      min: number;
+      max: number;
+    };
+
+export function serializeDomain(domain: Domain): SerializedDomain {
+  switch (domain.type) {
+    case "NumericRange":
+      return {
+        type: "NumericRange",
+        min: domain.min,
+        max: domain.max,
+      };
+    case "DateRange":
+      return {
+        type: "DateRange",
+        min: domain.min.toMs(),
+        max: domain.max.toMs(),
+      };
+  }
+}
+
+export function deserializeDomain(domain: SerializedDomain): Domain {
+  switch (domain.type) {
+    case "NumericRange":
+      return new NumericRangeDomain(domain.min, domain.max);
+    case "DateRange":
+      return new DateRangeDomain(
+        SDate.fromMs(domain.min),
+        SDate.fromMs(domain.max)
+      );
+  }
+}

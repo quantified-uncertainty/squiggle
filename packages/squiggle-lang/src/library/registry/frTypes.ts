@@ -1,7 +1,8 @@
 import { BaseDist } from "../../dists/BaseDist.js";
 import { PointSetDist } from "../../dists/PointSetDist.js";
 import { SampleSetDist } from "../../dists/SampleSetDist/index.js";
-import { SymbolicDist } from "../../dists/SymbolicDist.js";
+import { BaseSymbolicDist } from "../../dists/SymbolicDist/BaseSymbolicDist.js";
+import { SymbolicDist } from "../../dists/SymbolicDist/index.js";
 import { Lambda } from "../../reducer/lambda.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import { SDate } from "../../utility/SDate.js";
@@ -138,7 +139,9 @@ export const frSampleSetDist: FRType<SampleSetDist> = {
 
 export const frDistSymbolic: FRType<SymbolicDist> = {
   unpack: (v) =>
-    v.type === "Dist" && v.value instanceof SymbolicDist ? v.value : undefined,
+    v.type === "Dist" && v.value instanceof BaseSymbolicDist
+      ? v.value
+      : undefined,
   pack: (v) => vDist(v),
   display: () => "SymbolicDist",
   default: "Sym.normal(1,1)",

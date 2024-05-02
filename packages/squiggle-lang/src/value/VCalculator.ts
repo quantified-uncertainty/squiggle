@@ -1,6 +1,11 @@
 import { REOther } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
+import {
+  SquiggleDeserializationVisitor,
+  SquiggleSerializationVisitor,
+} from "../serialization/squiggle.js";
 import { BaseValue } from "./BaseValue.js";
+import { vLambda } from "./index.js";
 import { Input } from "./VInput.js";
 
 export type Calculator = {
@@ -12,7 +17,11 @@ export type Calculator = {
   sampleCount?: number;
 };
 
-export class VCalculator extends BaseValue {
+type SerializedCalculator = Omit<Calculator, "fn"> & {
+  fnId: number;
+};
+
+export class VCalculator extends BaseValue<"Calculator", SerializedCalculator> {
   readonly type = "Calculator";
 
   private error: REOther | null = null;
@@ -48,6 +57,31 @@ export class VCalculator extends BaseValue {
 
   valueToString() {
     return `Calculator`;
+  }
+
+  override serializePayload(
+    visit: SquiggleSerializationVisitor
+  ): SerializedCalculator {
+    const { fn, ...valueWithoutFn } = { ...this.value };
+    return {
+      ...valueWithoutFn,
+      fnId: visit.value(vLambda(fn)),
+    };
+  }
+
+  static deserialize(
+    payload: SerializedCalculator,
+    visit: SquiggleDeserializationVisitor
+  ): VCalculator {
+    const { fnId, ...valueWithoutFn } = payload;
+    const fnValue = visit.value(fnId);
+    if (fnValue.type !== "Lambda") {
+      throw new Error("Expected lambda");
+    }
+    return new VCalculator({
+      ...valueWithoutFn,
+      fn: fnValue.value,
+    });
   }
 }
 

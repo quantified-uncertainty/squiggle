@@ -42,7 +42,7 @@ export type ViewerWithMenuBarHandle = {
 export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
   function ViewerWithMenuBar(
     {
-      simulation: simulation,
+      simulation,
       playgroundSettings,
       randomizeSeed,
       showMenu = true,

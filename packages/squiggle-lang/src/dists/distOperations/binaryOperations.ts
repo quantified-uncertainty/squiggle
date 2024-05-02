@@ -5,7 +5,7 @@ import { bind, Ok, result } from "../../utility/result.js";
 import { BaseDist } from "../BaseDist.js";
 import { DistError } from "../DistError.js";
 import { Env } from "../env.js";
-import { PointMass } from "../SymbolicDist.js";
+import { PointMass } from "../SymbolicDist/PointMass.js";
 import { algebraicCombination } from "./algebraicCombination.js";
 import { pointwiseCombination } from "./pointwiseCombination.js";
 

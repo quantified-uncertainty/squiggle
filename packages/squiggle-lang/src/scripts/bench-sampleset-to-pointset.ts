@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { measure } from "../cli/utils.js";
+import { defaultEnv } from "../dists/env.js";
 import { SqProject } from "../index.js";
 
 const maxP = 4;
@@ -10,14 +11,13 @@ const seed = process.env["SEED"];
 async function main() {
   for (let p = 0; p <= maxP; p++) {
     const size = Math.pow(10, p);
-    const project = SqProject.create();
-    if (sampleCount) {
-      project.setEnvironment({
-        sampleCount: Number(sampleCount),
-        xyPointLength: Number(sampleCount),
+    const project = SqProject.create({
+      environment: {
+        sampleCount: Number(sampleCount ?? defaultEnv.sampleCount),
+        xyPointLength: Number(sampleCount ?? defaultEnv.xyPointLength),
         seed: seed || "default-seed",
-      });
-    }
+      },
+    });
     project.setSource(
       "main",
       `

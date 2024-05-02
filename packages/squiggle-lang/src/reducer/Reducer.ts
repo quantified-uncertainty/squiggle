@@ -1,6 +1,6 @@
 import jstat from "jstat";
-import { LocationRange } from "peggy";
 
+import { ASTNode, LocationRange } from "../ast/parse.js";
 import { Env } from "../dists/env.js";
 import { IRuntimeError } from "../errors/IError.js";
 import {
@@ -12,7 +12,6 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { Expression, ExpressionByKind } from "../expression/index.js";
-import { ASTNode } from "../index.js";
 import { getAleaRng, PRNG } from "../rng/index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { annotationToDomain } from "../value/annotations.js";
@@ -102,7 +101,7 @@ export class Reducer implements EvaluateAllKinds {
   private runtimeError(error: ErrorMessage, ast: ASTNode) {
     return IRuntimeError.fromMessage(
       error,
-      new StackTrace(this.frameStack, ast.location)
+      StackTrace.make(this.frameStack, ast.location)
     );
   }
 
@@ -112,7 +111,7 @@ export class Reducer implements EvaluateAllKinds {
   errorFromException(e: unknown, location?: LocationRange) {
     return IRuntimeError.fromException(
       e,
-      new StackTrace(this.frameStack, location)
+      StackTrace.make(this.frameStack, location)
     );
   }
 

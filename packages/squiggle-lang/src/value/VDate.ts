@@ -1,7 +1,7 @@
 import { SDate } from "../utility/SDate.js";
 import { BaseValue } from "./BaseValue.js";
 
-export class VDate extends BaseValue {
+export class VDate extends BaseValue<"Date", number> {
   readonly type = "Date";
 
   constructor(public value: SDate) {
@@ -14,6 +14,14 @@ export class VDate extends BaseValue {
 
   isEqual(other: VDate) {
     return this.value.isEqual(other.value);
+  }
+
+  override serializePayload() {
+    return this.value.toMs();
+  }
+
+  static deserialize(value: number): VDate {
+    return new VDate(SDate.fromMs(value));
   }
 }
 

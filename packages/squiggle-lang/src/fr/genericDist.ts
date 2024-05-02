@@ -9,7 +9,7 @@ import {
   BinaryOperation,
   binaryOperations,
 } from "../dists/distOperations/index.js";
-import * as SymbolicDist from "../dists/SymbolicDist.js";
+import * as PointMassJs from "../dists/SymbolicDist/PointMass.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -73,12 +73,12 @@ const makeOperationFns = (): FRFunction[] => {
       definitions: [
         makeDefinition([frDist, frNumber], frDist, ([dist, n], reducer) =>
           unwrapDistResult(
-            op(dist, new SymbolicDist.PointMass(n), reducerToOpts(reducer))
+            op(dist, new PointMassJs.PointMass(n), reducerToOpts(reducer))
           )
         ),
         makeDefinition([frNumber, frDist], frDist, ([n, dist], reducer) =>
           unwrapDistResult(
-            op(new SymbolicDist.PointMass(n), dist, reducerToOpts(reducer))
+            op(new PointMassJs.PointMass(n), dist, reducerToOpts(reducer))
           )
         ),
         makeDefinition([frDist, frDist], frDist, ([dist1, dist2], reducer) =>
@@ -180,7 +180,7 @@ Produce a sparkline of length \`\`n\`\`. For example, \`▁▁▁▁▁▂▄▆
     fn: (dist, reducer) => {
       return unwrapDistResult(
         binaryOperations.algebraicPower(
-          new SymbolicDist.PointMass(Math.E),
+          new PointMassJs.PointMass(Math.E),
           dist,
           reducerToOpts(reducer)
         )
@@ -335,7 +335,7 @@ Sample set distributions are truncated by filtering samples, but point set distr
       unwrapDistResult(
         binaryOperations.algebraicLogarithm(
           dist,
-          new SymbolicDist.PointMass(Math.E),
+          new PointMassJs.PointMass(Math.E),
           reducerToOpts(reducer)
         )
       ),
@@ -347,7 +347,7 @@ Sample set distributions are truncated by filtering samples, but point set distr
       unwrapDistResult(
         binaryOperations.algebraicLogarithm(
           dist,
-          new SymbolicDist.PointMass(10),
+          new PointMassJs.PointMass(10),
           reducerToOpts(reducer)
         )
       ),
@@ -359,7 +359,7 @@ Sample set distributions are truncated by filtering samples, but point set distr
       unwrapDistResult(
         binaryOperations.algebraicMultiply(
           dist,
-          new SymbolicDist.PointMass(-1),
+          new PointMassJs.PointMass(-1),
           reducerToOpts(reducer)
         )
       ),
@@ -369,7 +369,7 @@ Sample set distributions are truncated by filtering samples, but point set distr
     fn: (dist, reducer) =>
       unwrapDistResult(
         binaryOperations.pointwisePower(
-          new SymbolicDist.PointMass(Math.E),
+          new PointMassJs.PointMass(Math.E),
           dist,
           reducerToOpts(reducer)
         )

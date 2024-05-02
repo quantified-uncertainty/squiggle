@@ -1,5 +1,4 @@
-import { LocationRange } from "peggy";
-
+import { LocationRange } from "./parse.js";
 import { ASTNode } from "./peggyHelpers.js";
 
 export function locationContains(location: LocationRange, offset: number) {

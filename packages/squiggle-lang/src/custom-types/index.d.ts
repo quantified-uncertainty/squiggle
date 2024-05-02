@@ -94,3 +94,9 @@ declare module "jstat" {
     export function sample(l: number): number;
   }
 }
+
+declare module "web-worker" {
+  export default class WebWorker {
+    constructor(url: string, options?: WorkerOptions);
+  }
+}

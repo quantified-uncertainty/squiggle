@@ -1,4 +1,8 @@
 import { REDictPropertyNotFound, REOther } from "../errors/messages.js";
+import {
+  SquiggleDeserializationVisitor,
+  SquiggleSerializationVisitor,
+} from "../serialization/squiggle.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { BaseValue } from "./BaseValue.js";
 import { isEqual, Value } from "./index.js";
@@ -6,7 +10,12 @@ import { Indexable } from "./mixins.js";
 
 type ValueMap = ImmutableMap<string, Value>;
 
-export class VDict extends BaseValue implements Indexable {
+type SerializedDict = [string, number][];
+
+export class VDict
+  extends BaseValue<"Dict", SerializedDict>
+  implements Indexable
+{
   readonly type = "Dict";
 
   override get publicName() {
@@ -80,6 +89,21 @@ export class VDict extends BaseValue implements Indexable {
 
   size(): number {
     return this.value.size;
+  }
+
+  override serializePayload(
+    visit: SquiggleSerializationVisitor
+  ): SerializedDict {
+    return [...this.value.entries()].map(([k, v]) => [k, visit.value(v)]);
+  }
+
+  static deserialize(
+    payload: SerializedDict,
+    visit: SquiggleDeserializationVisitor
+  ) {
+    return new VDict(
+      ImmutableMap(payload.map(([k, v]) => [k, visit.value(v)]))
+    );
   }
 }
 

@@ -1,7 +1,7 @@
 import { SDuration } from "../utility/SDuration.js";
 import { BaseValue } from "./BaseValue.js";
 
-export class VDuration extends BaseValue {
+export class VDuration extends BaseValue<"Duration", number> {
   readonly type = "Duration";
 
   override get publicName() {
@@ -18,6 +18,14 @@ export class VDuration extends BaseValue {
 
   isEqual(other: VDuration) {
     return this.value.toMs() === other.value.toMs();
+  }
+
+  override serializePayload(): number {
+    return this.value.toMs();
+  }
+
+  static deserialize(value: number): VDuration {
+    return new VDuration(SDuration.fromMs(value));
   }
 }
 

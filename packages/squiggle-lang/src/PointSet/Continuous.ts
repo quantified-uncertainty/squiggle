@@ -15,6 +15,13 @@ import {
   PointSet,
 } from "./PointSet.js";
 
+export type SerializedContinuousShape = {
+  xyShape: XYShape.XYShape;
+  interpolation: XYShape.InterpolationStrategy;
+  integralSumCache?: number;
+  integralCache?: SerializedContinuousShape;
+};
+
 export class ContinuousShape implements PointSet<ContinuousShape> {
   readonly xyShape: XYShape.XYShape;
   readonly interpolation: XYShape.InterpolationStrategy;
@@ -314,6 +321,26 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
       );
     }
     return MixedSet.fromContinuousDistShape(this.xyShape);
+  }
+
+  serialize(): SerializedContinuousShape {
+    return {
+      xyShape: this.xyShape,
+      interpolation: this.interpolation,
+      integralSumCache: this.integralSumCache,
+      integralCache: this.integralCache?.serialize(),
+    };
+  }
+
+  static deserialize(value: SerializedContinuousShape): ContinuousShape {
+    return new ContinuousShape({
+      xyShape: value.xyShape,
+      interpolation: value.interpolation,
+      integralSumCache: value.integralSumCache,
+      integralCache: value.integralCache
+        ? ContinuousShape.deserialize(value.integralCache)
+        : undefined,
+    });
   }
 }
 

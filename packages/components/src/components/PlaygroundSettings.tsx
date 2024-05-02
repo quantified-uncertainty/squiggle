@@ -1,24 +1,33 @@
-import React from "react";
+import { FC } from "react";
 import { z } from "zod";
 
-import { SqScale } from "@quri/squiggle-lang";
+import { defaultRunnerName, RunnerName, SqScale } from "@quri/squiggle-lang";
 import {
   CheckboxFormField,
   NumberFormField,
   RadioFormField,
+  SelectFormField,
   TextFormField,
+  WrenchIcon,
 } from "@quri/ui";
 
 import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../lib/constants.js";
 import { functionChartDefaults } from "../widgets/LambdaWidget/FunctionChart/utils.js";
 import { FormComment } from "./ui/FormComment.js";
 import { FormSection } from "./ui/FormSection.js";
+import { useWatch } from "react-hook-form";
 
 export const environmentSchema = z.object({
   sampleCount: z.number().int().gte(SAMPLE_COUNT_MIN).lte(SAMPLE_COUNT_MAX),
   xyPointLength: z.number().int().gte(10).lte(10000),
   seed: z.string(),
 });
+
+const runnerSchema = z.union([
+  z.literal("embedded" satisfies RunnerName),
+  z.literal("web-worker" satisfies RunnerName),
+  z.literal("embedded-with-serialization" satisfies RunnerName),
+]);
 
 export const functionSettingsSchema = z.object({
   start: z.number().finite(),
@@ -67,6 +76,7 @@ export const distributionSettingsSchema = z.object({
 
 export const viewSettingsSchema = z.object({
   environment: environmentSchema,
+  runner: runnerSchema,
   distributionChartSettings: distributionSettingsSchema,
   functionChartSettings: functionSettingsSchema,
   editorSettings: editorSettings,
@@ -83,6 +93,7 @@ export const defaultPlaygroundSettings: PlaygroundSettings = {
     xyPointLength: 1000,
     seed: "default_seed",
   },
+  runner: defaultRunnerName,
   functionChartSettings: {
     start: functionChartDefaults.min,
     stop: functionChartDefaults.max,
@@ -130,27 +141,97 @@ export type MetaSettings = {
   disableLogX?: boolean;
 };
 
-export const EnvironmentForm: React.FC = () => (
-  <div className="space-y-4">
-    <TextFormField<PlaygroundSettings>
-      name="environment.seed"
-      label="Random Seed"
-      description="Seed for random number generation. All random functions ultimately are dependent on this value."
-    />
-    <NumberFormField<PlaygroundSettings>
-      name="environment.sampleCount"
-      label="Sample Count"
-      description="How many samples to use for Monte Carlo simulations. This can occasionally be overridden by specific Squiggle programs."
-    />
-    <NumberFormField<PlaygroundSettings>
-      name="environment.xyPointLength"
-      label="Coordinate Count (For PointSet Shapes)"
-      description="When distributions are converted into PointSet shapes, we need to know how many coordinates to use."
-    />
-  </div>
-);
+const SelectRunnerField: FC = () => {
+  const runner = useWatch<PlaygroundSettings, "runner">({ name: "runner" });
 
-export const DistributionSettingsForm: React.FC<{
+  type Option = { value: RunnerName; label: string };
+
+  const options: Option[] = [
+    { value: "embedded", label: "Embedded" },
+    { value: "web-worker", label: "Web Worker (experimental)" },
+    {
+      value: "embedded-with-serialization",
+      label: "Embedded with serialization check (experimental)",
+    },
+  ];
+
+  return (
+    <div>
+      <SelectFormField<PlaygroundSettings, RunnerName, Option>
+        name="runner"
+        label="Squiggle Runner (Experimental)"
+        size="small"
+        options={options}
+        optionToFieldValue={(option) => option.value}
+        fieldValueToOption={(value) =>
+          options.find((o) => o.value === value) ?? null
+        }
+        renderOption={(option) => <div className="text-sm">{option.label}</div>}
+        required
+      />
+      {runner === "embedded" && (
+        <FormComment>
+          <p>
+            This runner runs all Squiggle code in the main browser thread. This
+            can cause the UI to freeze during long-running simulations.
+          </p>
+        </FormComment>
+      )}
+      {runner === "web-worker" && (
+        <FormComment>
+          <p className="pb-2 pt-1">
+            <WrenchIcon className="mr-1 inline" size={14} />
+            This runner is <strong>experimental</strong>.
+          </p>
+          <p className="pb-2">
+            Risks involved: out-of-memory errors; responses arriving in wrong
+            order; bugs in serialization code when we return values from the
+            worker to the main thread.
+          </p>
+          <p>
+            The main benefit is that the UI won&apos;t be blocked during
+            long-running computations.
+          </p>
+        </FormComment>
+      )}
+      {runner === "embedded-with-serialization" && (
+        <FormComment>
+          <p>
+            <WrenchIcon className="mr-1 inline" size={14} />
+            This runner is only useful for debugging. It works in the same way
+            as the embedded runner, but it serializes and then deserializes each
+            result to check for bugs in serialization code.
+          </p>
+        </FormComment>
+      )}
+    </div>
+  );
+};
+
+export const RenderingSettingsForm: FC = () => {
+  return (
+    <div className="space-y-4">
+      <TextFormField<PlaygroundSettings>
+        name="environment.seed"
+        label="Random Seed"
+        description="Seed for random number generation. All random functions ultimately are dependent on this value."
+      />
+      <NumberFormField<PlaygroundSettings>
+        name="environment.sampleCount"
+        label="Sample Count"
+        description="How many samples to use for Monte Carlo simulations. This can occasionally be overridden by specific Squiggle programs."
+      />
+      <NumberFormField<PlaygroundSettings>
+        name="environment.xyPointLength"
+        label="Coordinate Count (For PointSet Shapes)"
+        description="When distributions are converted into PointSet shapes, we need to know how many coordinates to use."
+      />
+      <SelectRunnerField />
+    </div>
+  );
+};
+
+export const DistributionSettingsForm: FC<{
   metaSettings?: MetaSettings;
 }> = ({ metaSettings }) => {
   return (
@@ -219,7 +300,7 @@ export const DistributionSettingsForm: React.FC<{
   );
 };
 
-export const FunctionSettingsForm: React.FC = () => {
+export const FunctionSettingsForm: FC = () => {
   return (
     <FormSection title="Function Display Settings">
       <div className="space-y-6">
@@ -248,7 +329,7 @@ export const FunctionSettingsForm: React.FC = () => {
   );
 };
 
-export const EditorSettingsForm: React.FC = () => {
+export const EditorSettingsForm: FC = () => {
   return (
     <FormSection title="Editor Settings">
       <CheckboxFormField<PlaygroundSettings>
@@ -259,7 +340,7 @@ export const EditorSettingsForm: React.FC = () => {
   );
 };
 
-export const PlaygroundSettingsForm: React.FC<{
+export const PlaygroundSettingsForm: FC<{
   withFunctionSettings?: boolean;
   withGlobalSettings?: boolean;
   metaSettings?: MetaSettings;
@@ -274,7 +355,7 @@ export const PlaygroundSettingsForm: React.FC<{
         <>
           <div className="mb-6">
             <FormSection title="Rendering Settings">
-              <EnvironmentForm />
+              <RenderingSettingsForm />
             </FormSection>
           </div>
 

@@ -121,6 +121,14 @@ export class PointSetDist extends BaseDist {
   yTransform(): PointSetDist {
     return new PointSetDist(this.pointSet.yTransform());
   }
+
+  serialize(): Mixed.SerializedMixedShape {
+    return this.pointSet.serialize();
+  }
+
+  static deserialize(value: Mixed.SerializedMixedShape): PointSetDist {
+    return new PointSetDist(MixedShape.deserialize(value));
+  }
 }
 
 //TODO WARNING: The combineAlgebraicallyWithDiscrete will break for subtraction and division, like, discrete - continous

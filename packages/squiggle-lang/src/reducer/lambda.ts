@@ -1,7 +1,6 @@
-import maxBy from "lodash/maxBy.js";
 import uniq from "lodash/uniq.js";
-import { LocationRange } from "peggy";
 
+import { LocationRange } from "../ast/parse.js";
 import {
   REArgumentDomainError,
   REArityError,
@@ -15,13 +14,10 @@ import {
   showInDocumentation,
   tryCallFnDefinition,
 } from "../library/registry/fnDefinition.js";
-import { FRType } from "../library/registry/frTypes.js";
-import { frTypeToInput } from "../library/registry/helpers.js";
+import { type FRType } from "../library/registry/frTypes.js";
 import { sort } from "../utility/E_A_Floats.js";
 import { Value } from "../value/index.js";
-import { Calculator } from "../value/VCalculator.js";
 import { VDomain } from "../value/VDomain.js";
-import { Input } from "../value/VInput.js";
 import { Frame } from "./FrameStack.js";
 import { Reducer } from "./Reducer.js";
 
@@ -40,8 +36,6 @@ export abstract class BaseLambda {
   abstract parameterString(): string;
   abstract parameterCounts(): number[];
   abstract parameterCountString(): string;
-  abstract defaultInputs(): Input[];
-  abstract toCalculator(): Calculator;
 
   protected abstract body(args: Value[], reducer: Reducer): Value;
 
@@ -69,7 +63,7 @@ export class UserDefinedLambda extends BaseLambda {
   readonly type = "UserDefinedLambda";
   parameters: UserDefinedLambdaParameter[];
   name?: string;
-  private expression: Expression;
+  expression: Expression;
 
   constructor(
     name: string | undefined,
@@ -115,7 +109,7 @@ export class UserDefinedLambda extends BaseLambda {
     return this.name || "<anonymous>";
   }
 
-  private getParameterNames() {
+  getParameterNames() {
     return this.parameters.map((parameter) => parameter.name);
   }
 
@@ -133,22 +127,6 @@ export class UserDefinedLambda extends BaseLambda {
 
   parameterCountString() {
     return this.parameters.length.toString();
-  }
-
-  defaultInputs(): Input[] {
-    return this.getParameterNames().map((name) => ({
-      name,
-      type: "text",
-    }));
-  }
-
-  toCalculator(): Calculator {
-    const only0Params = this.parameters.length === 0;
-    return {
-      fn: this,
-      inputs: this.defaultInputs(),
-      autorun: only0Params,
-    };
   }
 }
 
@@ -218,23 +196,6 @@ export class BuiltinLambda extends BaseLambda {
     };
 
     throw new REOther(showNameMatchDefinitions());
-  }
-
-  defaultInputs(): Input[] {
-    const longestSignature = maxBy(this.signatures(), (s) => s.length) || [];
-    return longestSignature.map((sig, i) => {
-      const name = sig.varName ? sig.varName : `Input ${i + 1}`;
-      return frTypeToInput(sig, i, name);
-    });
-  }
-
-  toCalculator(): Calculator {
-    const inputs = this.defaultInputs();
-    return {
-      fn: this,
-      inputs: inputs,
-      autorun: inputs.length !== 0,
-    };
   }
 }
 

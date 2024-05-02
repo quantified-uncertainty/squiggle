@@ -15,7 +15,7 @@
     "build:ts": "tsc -b",
     "dev": "tsc -b -w",
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js && rm *.tsbuildinfo",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest && NODE_OPTIONS=--experimental-vm-modules SQUIGGLE_DEFAULT_RUNNER=embedded-with-serialization jest __tests__/SqProject",
     "test:watch": "pnpm run test --watchAll",
     "coverage:local": "pnpm run test --coverage && echo && echo 'Open ./coverage/lcov-report/index.html to see the detailed report.'",
     "coverage": "pnpm run test --coverage && codecov",
@@ -34,7 +34,8 @@
     "immutable": "^4.3.5",
     "jstat": "^1.9.6",
     "lodash": "^4.17.21",
-    "open": "^10.1.0"
+    "open": "^10.1.0",
+    "web-worker": "^1.2.0"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.24.1",
@@ -65,7 +66,8 @@
   "types": "./dist/index.d.ts",
   "module": "./dist/index.js",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.js",
+    "./runners/WebWorkerRunner": "./dist/runners/WebWorkerRunner.js"
   },
   "bin": {
     "squiggle": "./dist/cli/index.js"

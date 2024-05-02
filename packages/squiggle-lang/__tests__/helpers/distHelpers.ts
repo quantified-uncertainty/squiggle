@@ -1,5 +1,6 @@
 import { defaultEnv, Env } from "../../src/dists/env.js";
-import * as SymbolicDist from "../../src/dists/SymbolicDist.js";
+import { Beta } from "../../src/dists/SymbolicDist/Beta.js";
+import * as SymbolicDist from "../../src/dists/SymbolicDist/index.js";
 import * as Result from "../../src/utility/result.js";
 
 export const env: Env = defaultEnv;
@@ -14,7 +15,7 @@ export const unpackResult = <T>(x: Result.result<T, unknown>): T => {
 export const mkNormal = (mean: number, stdev: number) =>
   unpackResult(SymbolicDist.Normal.make({ mean, stdev }));
 export const mkBeta = (alpha: number, beta: number) =>
-  unpackResult(SymbolicDist.Beta.make({ alpha, beta }));
+  unpackResult(Beta.make({ alpha, beta }));
 export const mkExponential = (rate: number) =>
   unpackResult(SymbolicDist.Exponential.make(rate));
 export const mkUniform = (low: number, high: number) =>

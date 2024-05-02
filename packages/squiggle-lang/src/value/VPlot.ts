@@ -2,9 +2,14 @@ import { BaseDist } from "../dists/BaseDist.js";
 import { SampleSetDist } from "../dists/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
+import {
+  SquiggleDeserializationVisitor,
+  SquiggleSerializationVisitor,
+} from "../serialization/squiggle.js";
 import { BaseValue } from "./BaseValue.js";
-import { Value } from "./index.js";
+import { Value, vDist } from "./index.js";
 import { Indexable } from "./mixins.js";
+import { SerializedDist, VDist } from "./VDist.js";
 import { vLambda } from "./vLambda.js";
 import { Scale } from "./VScale.js";
 
@@ -55,7 +60,35 @@ export type Plot = CommonPlotArgs &
       }
   );
 
-export class VPlot extends BaseValue implements Indexable {
+type TypedPlot<T extends Plot["type"]> = Extract<Plot, { type: T }>;
+
+export type SerializedLabeledDistribution = {
+  name: string | null;
+  distribution: SerializedDist;
+};
+
+type SerializedPlot =
+  | (Omit<TypedPlot<"distributions">, "distributions"> & {
+      distributions: readonly SerializedLabeledDistribution[];
+    })
+  | (Omit<TypedPlot<"numericFn">, "fn"> & {
+      fn: number;
+    })
+  | (Omit<TypedPlot<"distFn">, "fn"> & {
+      fn: number;
+    })
+  | (Omit<TypedPlot<"scatter">, "xDist" | "yDist"> & {
+      xDist: SerializedDist;
+      yDist: SerializedDist;
+    })
+  | (Omit<TypedPlot<"relativeValues">, "fn"> & {
+      fn: number;
+    });
+
+export class VPlot
+  extends BaseValue<"Plot", SerializedPlot>
+  implements Indexable
+{
   readonly type = "Plot";
 
   constructor(public value: Plot) {
@@ -91,6 +124,80 @@ export class VPlot extends BaseValue implements Indexable {
     }
 
     throw new REOther("Trying to access non-existent field");
+  }
+
+  override serializePayload(
+    visit: SquiggleSerializationVisitor
+  ): SerializedPlot {
+    switch (this.value.type) {
+      case "distributions":
+        return {
+          ...this.value,
+          distributions: this.value.distributions.map((labeledDist) => ({
+            name: labeledDist.name ?? null,
+            distribution: vDist(labeledDist.distribution).serializePayload(),
+          })),
+        };
+      case "numericFn":
+      case "distFn":
+        return {
+          ...this.value,
+          fn: vLambda(this.value.fn).serializePayload(visit),
+        };
+      case "scatter":
+        return {
+          ...this.value,
+          xDist: vDist(this.value.xDist).serializePayload(),
+          yDist: vDist(this.value.yDist).serializePayload(),
+        };
+      case "relativeValues":
+        return {
+          ...this.value,
+          fn: visit.lambda(this.value.fn),
+        };
+    }
+  }
+
+  static deserialize(
+    value: SerializedPlot,
+    visit: SquiggleDeserializationVisitor
+  ): VPlot {
+    switch (value.type) {
+      case "distributions":
+        return new VPlot({
+          ...value,
+          distributions: value.distributions.map((labeledDist) => ({
+            name: labeledDist.name ?? undefined,
+            distribution: VDist.deserialize(labeledDist.distribution).value,
+          })),
+        });
+      case "numericFn":
+      case "distFn":
+        return new VPlot({
+          ...value,
+          fn: visit.lambda(value.fn),
+        });
+      case "scatter": {
+        const xDist = VDist.deserialize(value.xDist).value;
+        const yDist = VDist.deserialize(value.yDist).value;
+        if (!(xDist instanceof SampleSetDist)) {
+          throw new Error("Expected xDist to be a SampleSetDist");
+        }
+        if (!(yDist instanceof SampleSetDist)) {
+          throw new Error("Expected yDist to be a SampleSetDist");
+        }
+        return new VPlot({
+          ...value,
+          xDist,
+          yDist,
+        });
+      }
+      case "relativeValues":
+        return new VPlot({
+          ...value,
+          fn: visit.lambda(value.fn),
+        });
+    }
   }
 }
 

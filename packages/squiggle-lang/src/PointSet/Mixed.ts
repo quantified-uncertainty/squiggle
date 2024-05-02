@@ -9,6 +9,11 @@ import { DiscreteShape } from "./Discrete.js";
 import * as MixedPoint from "./MixedPoint.js";
 import { ConvolutionOperation, PointSet } from "./PointSet.js";
 
+export type SerializedMixedShape = {
+  discrete: Discrete.SerializedDiscreteShape;
+  continuous: Continuous.SerializedContinuousShape;
+};
+
 export class MixedShape implements PointSet<MixedShape> {
   readonly continuous: ContinuousShape;
   readonly discrete: DiscreteShape;
@@ -297,6 +302,23 @@ export class MixedShape implements PointSet<MixedShape> {
     return Result.getExt(
       combinePointwise(continuous, discrete, (v1, v2) => Result.Ok(v1 + v2))
     );
+  }
+
+  serialize(): SerializedMixedShape {
+    return {
+      continuous: this.continuous.serialize(),
+      discrete: this.discrete.serialize(),
+    };
+  }
+
+  static deserialize({
+    continuous,
+    discrete,
+  }: SerializedMixedShape): MixedShape {
+    return new MixedShape({
+      continuous: ContinuousShape.deserialize(continuous),
+      discrete: DiscreteShape.deserialize(discrete),
+    });
   }
 }
 

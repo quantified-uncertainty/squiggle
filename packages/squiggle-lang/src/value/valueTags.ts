@@ -1,5 +1,8 @@
-import { LocationRange } from "peggy";
-
+import { LocationRange } from "../ast/parse.js";
+import {
+  SquiggleDeserializationVisitor,
+  SquiggleSerializationVisitor,
+} from "../serialization/squiggle.js";
 import { Err, fmap, mergeMany, Ok, result } from "../utility/result.js";
 import { Value } from "./index.js";
 import { type VBool } from "./VBool.js";
@@ -24,6 +27,10 @@ export type ValueTagsType = {
 };
 
 type ValueTagsTypeName = keyof ValueTagsType;
+
+export type SerializedValueTags = {
+  [K in Exclude<ValueTagsTypeName, "location" | "exportData">]?: number;
+} & Pick<ValueTagsType, "location" | "exportData">;
 
 const valueTagsTypeNames: ValueTagsTypeName[] = [
   "name",
@@ -76,8 +83,10 @@ export class ValueTags {
   }
 
   toString(): string {
-    return Object.entries(this.value)
-      .map(([key, value]) => {
+    return valueTagsTypeNames
+      .map((key) => {
+        const value = this.value[key];
+        if (value === undefined) return;
         if (
           value &&
           typeof value.toString === "function" &&
@@ -94,6 +103,7 @@ export class ValueTags {
           return `${key}: ${value}`;
         }
       })
+      .filter((s) => s !== undefined)
       .join(", ");
   }
 
@@ -169,5 +179,43 @@ export class ValueTags {
 
   exportData() {
     return this.value.exportData;
+  }
+
+  serialize(visit: SquiggleSerializationVisitor) {
+    const result: SerializedValueTags = {};
+
+    valueTagsTypeNames.forEach((key) => {
+      if (this.value[key] === undefined) return;
+
+      if (key === "exportData") {
+        result[key] = this.value[key];
+      } else if (key === "location") {
+        result[key] = this.value[key];
+      } else {
+        result[key] = visit.value(this.value[key]!);
+      }
+    });
+    return result;
+  }
+
+  static deserialize(
+    node: SerializedValueTags,
+    visit: SquiggleDeserializationVisitor
+  ) {
+    const value: ValueTagsType = {};
+    valueTagsTypeNames.forEach((key) => {
+      if (node[key] === undefined) return;
+      if (key === "exportData") {
+        value[key] = node[key];
+      } else if (key === "location") {
+        value[key] = node[key];
+      } else {
+        const valueId = node[key];
+        if (valueId !== undefined) {
+          value[key] = visit.value(valueId) as any;
+        }
+      }
+    });
+    return new ValueTags(value);
   }
 }

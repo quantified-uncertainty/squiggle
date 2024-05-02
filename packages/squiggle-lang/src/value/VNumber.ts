@@ -1,6 +1,6 @@
 import { BaseValue } from "./BaseValue.js";
 
-export class VNumber extends BaseValue {
+export class VNumber extends BaseValue<"Number", number> {
   readonly type = "Number";
 
   constructor(public value: number) {
@@ -13,6 +13,14 @@ export class VNumber extends BaseValue {
 
   isEqual(other: VNumber) {
     return this.value === other.value;
+  }
+
+  override serializePayload(): number {
+    return this.value;
+  }
+
+  static deserialize(value: number): VNumber {
+    return new VNumber(value);
   }
 }
 

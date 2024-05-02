@@ -1,5 +1,5 @@
 import { otherError } from "../dists/DistError.js";
-import * as SymbolicDist from "../dists/SymbolicDist.js";
+import * as SymbolicDist from "../dists/SymbolicDist/index.js";
 import { REDistributionError } from "../errors/messages.js";
 import * as Result from "../utility/result.js";
 

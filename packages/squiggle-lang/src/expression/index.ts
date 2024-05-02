@@ -26,9 +26,9 @@ export type LambdaExpressionParameter = {
 
 // All shapes are kind+value, to help with V8 monomorphism.
 // **Don't** inject any more fields on this or try to flatten `value` props, it will only make things slower.
-type MakeExpressionContent<Kind extends string, Value> = {
+type MakeExpressionContent<Kind extends string, Payload> = {
   kind: Kind;
-  value: Value;
+  value: Payload;
 };
 
 export type ExpressionContent =

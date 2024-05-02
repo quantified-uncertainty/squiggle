@@ -219,6 +219,14 @@ sample everything.
       fn(this.samples[i])
     );
   }
+
+  serialize(): readonly number[] {
+    return this.samples;
+  }
+
+  static deserialize(value: readonly number[]): SampleSetDist {
+    return new SampleSetDist(value);
+  }
 }
 
 const buildSampleSetFromFn = (

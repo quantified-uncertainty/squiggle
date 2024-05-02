@@ -1,3 +1,6 @@
+import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
+import { JsonValue } from "../utility/typeHelpers.js";
+import { SerializedValue } from "./index.js";
 import { ValueTags, ValueTagsType } from "./valueTags.js";
 
 /*
@@ -11,12 +14,15 @@ If you add a new value class, don't forget to add it to the "Value" union type b
 
 "vBlah" functions are just for the sake of brevity, so that we don't have to prefix any value creation with "new".
 */
-export abstract class BaseValue {
-  abstract type: string;
+export abstract class BaseValue<
+  Type extends string,
+  SerializedPayload extends JsonValue, // this guarantees that the payload is JSON-serializable
+> {
+  abstract type: Type;
   readonly tags: ValueTags | undefined;
 
   // This is a getter, not a field, for performance reasons.
-  get publicName() {
+  get publicName(): string {
     return this.type;
   }
 
@@ -45,4 +51,21 @@ export abstract class BaseValue {
     const argsStr = `{${this.tags.toString()}}`;
     return `${valueString}, with tags ${argsStr}`;
   }
+
+  abstract serializePayload(
+    visitor: SquiggleSerializationVisitor
+  ): SerializedPayload;
+
+  serialize(visit: SquiggleSerializationVisitor): SerializedValue {
+    const result: SerializedValue = {
+      type: this.type,
+      payload: this.serializePayload(visit),
+    } as SerializedValue;
+    if (this.tags) {
+      result.tags = visit.tags(this.tags);
+    }
+    return result;
+  }
+
+  // Deserialization is implemented outside of this class; abstract static methods are not supported in TypeScript.
 }

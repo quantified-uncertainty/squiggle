@@ -35,7 +35,7 @@ test("test exports", async () => {
   const project = SqProject.create();
   project.setSource("main", "x = 5; export y = 6; z = 7; export t = 8");
   expect(await runFetchExports(project, "main")).toBe(
-    '{y: 6, with tags {exportData: {sourceId:"main",path:["y"]}}, t: 8, with tags {exportData: {sourceId:"main",path:["t"]}}}, with tags {exportData: {sourceId:"main",path:[]}, name: "main"}'
+    '{y: 6, with tags {exportData: {sourceId:"main",path:["y"]}}, t: 8, with tags {exportData: {sourceId:"main",path:["t"]}}}, with tags {name: "main", exportData: {sourceId:"main",path:[]}}'
   );
 });
 
@@ -53,7 +53,7 @@ test("test decorated exports", async () => {
   `
   );
   expect(await runFetchExports(project, "main")).toBe(
-    '{x: 5, with tags {name: "X", exportData: {sourceId:"main",path:["x"]}}, y: 6, with tags {doc: "whatever", name: "Y", exportData: {sourceId:"main",path:["y"]}}}, with tags {exportData: {sourceId:"main",path:[]}, name: "main"}'
+    '{x: 5, with tags {name: "X", exportData: {sourceId:"main",path:["x"]}}, y: 6, with tags {name: "Y", doc: "whatever", exportData: {sourceId:"main",path:["y"]}}}, with tags {name: "main", exportData: {sourceId:"main",path:[]}}'
   );
 });
 

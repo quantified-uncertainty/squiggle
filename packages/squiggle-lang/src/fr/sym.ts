@@ -1,4 +1,14 @@
-import * as SymbolicDist from "../dists/SymbolicDist.js";
+import * as BernoulliJs from "../dists/SymbolicDist/Bernoulli.js";
+import * as BetaJs from "../dists/SymbolicDist/Beta.js";
+import * as CauchyJs from "../dists/SymbolicDist/Cauchy.js";
+import * as ExponentialJs from "../dists/SymbolicDist/Exponential.js";
+import * as GammaJs from "../dists/SymbolicDist/Gamma.js";
+import * as SymbolicDist from "../dists/SymbolicDist/index.js";
+import * as LogisticJs from "../dists/SymbolicDist/Logistic.js";
+import * as LognormalJs from "../dists/SymbolicDist/Lognormal.js";
+import * as PointMassJs from "../dists/SymbolicDist/PointMass.js";
+import * as TriangularJs from "../dists/SymbolicDist/Triangular.js";
+import * as UniformJs from "../dists/SymbolicDist/Uniform.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -93,11 +103,11 @@ export const library: FRFunction[] = [
     ],
     definitions: [
       makeTwoArgsSymDist((mu, sigma) =>
-        SymbolicDist.Lognormal.make({ mu, sigma })
+        LognormalJs.Lognormal.make({ mu, sigma })
       ),
       ...CI_CONFIG.map((entry) =>
         makeCISymDist(entry.lowKey, entry.highKey, (low, high) =>
-          SymbolicDist.Lognormal.fromCredibleInterval({
+          LognormalJs.Lognormal.fromCredibleInterval({
             low,
             high,
             probability: entry.probability,
@@ -105,7 +115,7 @@ export const library: FRFunction[] = [
         )
       ),
       makeMeanStdevSymDist((mean, stdev) =>
-        SymbolicDist.Lognormal.fromMeanAndStdev({ mean, stdev })
+        LognormalJs.Lognormal.fromMeanAndStdev({ mean, stdev })
       ),
     ],
   }),
@@ -113,9 +123,7 @@ export const library: FRFunction[] = [
     name: "uniform",
     examples: [makeFnExample("Sym.uniform(10, 12)")],
     definitions: [
-      makeTwoArgsSymDist((low, high) =>
-        SymbolicDist.Uniform.make({ low, high })
-      ),
+      makeTwoArgsSymDist((low, high) => UniformJs.Uniform.make({ low, high })),
     ],
   }),
   maker.make({
@@ -125,11 +133,9 @@ export const library: FRFunction[] = [
       makeFnExample("Sym.beta({ mean: 0.39, stdev: 0.1 })"),
     ],
     definitions: [
-      makeTwoArgsSymDist((alpha, beta) =>
-        SymbolicDist.Beta.make({ alpha, beta })
-      ),
+      makeTwoArgsSymDist((alpha, beta) => BetaJs.Beta.make({ alpha, beta })),
       makeMeanStdevSymDist((mean, stdev) =>
-        SymbolicDist.Beta.fromMeanAndStdev({ mean, stdev })
+        BetaJs.Beta.fromMeanAndStdev({ mean, stdev })
       ),
     ],
   }),
@@ -138,7 +144,7 @@ export const library: FRFunction[] = [
     examples: [makeFnExample("Sym.cauchy(5, 1)")],
     definitions: [
       makeTwoArgsSymDist((local, scale) =>
-        SymbolicDist.Cauchy.make({ local, scale })
+        CauchyJs.Cauchy.make({ local, scale })
       ),
     ],
   }),
@@ -147,7 +153,7 @@ export const library: FRFunction[] = [
     examples: [makeFnExample("Sym.gamma(5, 1)")],
     definitions: [
       makeTwoArgsSymDist((shape, scale) =>
-        SymbolicDist.Gamma.make({ shape, scale })
+        GammaJs.Gamma.make({ shape, scale })
       ),
     ],
   }),
@@ -156,7 +162,7 @@ export const library: FRFunction[] = [
     examples: [makeFnExample("Sym.logistic(5, 1)")],
     definitions: [
       makeTwoArgsSymDist((location, scale) =>
-        SymbolicDist.Logistic.make({ location, scale })
+        LogisticJs.Logistic.make({ location, scale })
       ),
     ],
   }),
@@ -164,13 +170,13 @@ export const library: FRFunction[] = [
     name: "exponential",
     examples: [makeFnExample("Sym.exponential(2)")],
     definitions: [
-      makeOneArgSymDist((rate) => SymbolicDist.Exponential.make(rate)),
+      makeOneArgSymDist((rate) => ExponentialJs.Exponential.make(rate)),
     ],
   }),
   maker.make({
     name: "bernoulli",
     examples: [makeFnExample("Sym.bernoulli(0.5)")],
-    definitions: [makeOneArgSymDist((p) => SymbolicDist.Bernoulli.make(p))],
+    definitions: [makeOneArgSymDist((p) => BernoulliJs.Bernoulli.make(p))],
   }),
   maker.make({
     name: "pointMass",
@@ -180,7 +186,7 @@ export const library: FRFunction[] = [
       "Point mass distributions are already symbolic, so you can use the regular `pointMass` function.",
     definitions: [
       makeDefinition([frNumber], frDistSymbolic, ([v]) => {
-        const result = SymbolicDist.PointMass.make(v);
+        const result = PointMassJs.PointMass.make(v);
         return unwrapSymDistResult(result);
       }),
     ],
@@ -193,7 +199,7 @@ export const library: FRFunction[] = [
         [frNumber, frNumber, frNumber],
         frDistSymbolic,
         ([low, medium, high]) => {
-          const result = SymbolicDist.Triangular.make({ low, medium, high });
+          const result = TriangularJs.Triangular.make({ low, medium, high });
           return unwrapSymDistResult(result);
         }
       ),

@@ -1,4 +1,3 @@
-import { sq } from "../index.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -14,6 +13,7 @@ import {
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeSquiggleDefinition } from "../library/registry/squiggleDefinition.js";
 import { Bindings } from "../reducer/Stack.js";
+import { sq } from "../sq.js";
 
 const maker = new FnFactory({
   nameSpace: "RelativeValues",

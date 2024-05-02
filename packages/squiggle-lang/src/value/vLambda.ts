@@ -1,5 +1,6 @@
 import { REOther } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
+import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { BaseValue } from "./BaseValue.js";
 import { Value } from "./index.js";
@@ -8,7 +9,7 @@ import { vArray } from "./VArray.js";
 import { vDict } from "./VDict.js";
 import { vString } from "./VString.js";
 
-export class VLambda extends BaseValue implements Indexable {
+export class VLambda extends BaseValue<"Lambda", number> implements Indexable {
   readonly type = "Lambda";
 
   override get publicName() {
@@ -44,6 +45,12 @@ export class VLambda extends BaseValue implements Indexable {
     }
     throw new REOther("No such field");
   }
+
+  override serializePayload(visit: SquiggleSerializationVisitor) {
+    return visit.lambda(this.value);
+  }
+
+  // deserialization is implemented in ./serialize.ts, because of circular import issues.
 }
 
 export const vLambda = (v: Lambda) => new VLambda(v);

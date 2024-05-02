@@ -1,4 +1,4 @@
-import { ErrorMessage, REThrow } from "../errors/messages.js";
+import { BaseErrorMessage, REThrow } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -103,7 +103,7 @@ myFn = typeOf({|e| e})`,
           try {
             return { tag: "1", value: reducer.call(fn, []) };
           } catch (e) {
-            if (!(e instanceof ErrorMessage)) {
+            if (!(e instanceof BaseErrorMessage)) {
               // This doesn't looks like an error in user code, treat it as fatal
               throw e;
             }

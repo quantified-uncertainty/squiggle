@@ -21,6 +21,8 @@ test("Creates and cleans up source", async () => {
   expect(project.getSource(sourceId)).toBe("normal(0, 1)");
 
   unmount();
+  await new Promise((r) => setTimeout(r, 50));
+
   expect(project.getSourceIds().length).toBe(0);
   expect(project.getSource(sourceId)).toBe(undefined);
 });

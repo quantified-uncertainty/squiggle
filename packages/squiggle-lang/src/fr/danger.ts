@@ -2,9 +2,9 @@
 
 import jstat from "jstat";
 
-import * as SymbolicDist from "../dists/SymbolicDist.js";
+import { Binomial } from "../dists/SymbolicDist/Binomial.js";
+import * as PoissonJs from "../dists/SymbolicDist/Poisson.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
-import { SDate } from "../index.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -34,6 +34,7 @@ import {
 } from "../value/simpleValue.js";
 import { vArray } from "../value/VArray.js";
 import { vNumber } from "../value/VNumber.js";
+import { SDate } from "../utility/SDate.js";
 
 const { factorial } = jstat;
 
@@ -450,7 +451,7 @@ const mapYLibrary: FRFunction[] = [
 Note: The binomial distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as partially or fully continuous. This is a visual mistake; if you inspect the underlying data, it should be discrete.`,
     definitions: [
       makeTwoArgsSamplesetDist(
-        (n, p) => SymbolicDist.Binomial.make(n, p),
+        (n, p) => Binomial.make({ n, p }),
         "numberOfTrials",
         "probabilityOfSuccess"
       ),
@@ -465,7 +466,7 @@ Note: The binomial distribution is a discrete distribution. When representing th
 Note: The Poisson distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as partially or fully continuous.  This is a visual mistake; if you inspect the underlying data, it should be discrete.`,
     definitions: [
       makeOneArgSamplesetDist(
-        (lambda) => SymbolicDist.Poisson.make(lambda),
+        (lambda) => PoissonJs.Poisson.make(lambda),
         "rate"
       ),
     ],

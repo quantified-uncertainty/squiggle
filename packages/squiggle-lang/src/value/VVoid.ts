@@ -1,6 +1,6 @@
 import { BaseValue } from "./BaseValue.js";
 
-export class VVoid extends BaseValue {
+export class VVoid extends BaseValue<"Void", null> {
   readonly type = "Void";
 
   constructor() {
@@ -9,6 +9,14 @@ export class VVoid extends BaseValue {
 
   valueToString() {
     return "()";
+  }
+
+  override serializePayload() {
+    return null;
+  }
+
+  static deserialize() {
+    return vVoid();
   }
 }
 

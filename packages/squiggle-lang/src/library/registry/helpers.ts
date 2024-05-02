@@ -5,8 +5,8 @@ import { BaseDist } from "../../dists/BaseDist.js";
 import { DistError } from "../../dists/DistError.js";
 import { Env } from "../../dists/env.js";
 import * as SampleSetDist from "../../dists/SampleSetDist/index.js";
-import * as SymbolicDist from "../../dists/SymbolicDist.js";
-import { PointMass } from "../../dists/SymbolicDist.js";
+import * as SymbolicDist from "../../dists/SymbolicDist/index.js";
+import { PointMass } from "../../dists/SymbolicDist/PointMass.js";
 import {
   REArgumentError,
   REDistributionError,
