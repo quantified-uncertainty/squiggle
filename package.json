@@ -13,7 +13,7 @@
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "turbo": "^1.13.0",
-    "turbo-ignore": "^1.13.0"
+    "turbo-ignore": "^1.13.3"
   },
   "version": "0.0.1-0"
 }

@@ -25,6 +25,9 @@ export { SquiggleErrorAlert } from "./components/ui/SquiggleErrorAlert.js";
 
 export { RelativeValueCell } from "./widgets/PlotWidget/RelativeValuesGridChart/RelativeValueCell.js";
 
+export { MarkdownViewer } from "./lib/MarkdownViewer.js";
+export { CodeSyntaxHighlighter } from "./lib/CodeSyntaxHighlighter.js";
+
 // for use in relative values
 export {
   type DrawContext,

@@ -37,7 +37,7 @@ export const ModelList: FC<Props> = ({
 
   return (
     <div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-y-8">
         {connection.edges.map((edge) => (
           <ModelCard
             key={edge.node.id}

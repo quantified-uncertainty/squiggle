@@ -18,11 +18,11 @@
     "prettier": "^3.2.5"
   },
   "devDependencies": {
-    "@babel/preset-typescript": "^7.23.3",
+    "@babel/preset-typescript": "^7.24.1",
     "@quri/configs": "workspace:*",
     "@types/jest": "^29.5.12",
     "jest": "^29.7.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.5"
   },
   "files": [
     "dist",

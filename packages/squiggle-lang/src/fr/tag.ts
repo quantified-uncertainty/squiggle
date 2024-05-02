@@ -67,7 +67,8 @@ type PickByValue<T, ValueType> = NonNullable<
       [Key in keyof T]: T[Key] extends ValueType | undefined ? Key : never;
     }[keyof T]
   >
->;
+> &
+  string;
 
 const booleanTagDefs = <T>(
   tagName: PickByValue<ValueTagsType, VBool>,

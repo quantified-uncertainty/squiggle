@@ -32,7 +32,7 @@ export const VariableList: FC<Props> = ({ connectionRef, loadNext }) => {
 
   return (
     <div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-x-4 gap-y-8 md:grid-cols-2">
         {connection.edges.map((edge) => (
           <VariableCard key={edge.node.id} variableRef={edge.node} />
         ))}
