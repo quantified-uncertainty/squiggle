@@ -282,7 +282,15 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
 
   useEffect(() => {
     // This removes the source from the project when the component unmounts.
-    return () => project.removeSource(sourceId);
+    return () => {
+      // We have to delay the cleanup, because `project.run` is async and can
+      // start with a bit of the delay; we don't want to remove source before
+      // the run starts.
+      // (It's possible there are still race conditions here.)
+      setTimeout(() => {
+        project.removeSource(sourceId);
+      }, 10);
+    };
   }, [project, sourceId]);
 
   return {

@@ -15,9 +15,9 @@ test("Chart logs nothing on render", async () => {
   unmount();
 
   /* eslint-disable no-console */
-  expect(console.log).not.toBeCalled();
-  expect(console.warn).not.toBeCalled();
-  expect(console.error).not.toBeCalled();
+  expect(console.log).not.toHaveBeenCalled();
+  expect(console.warn).not.toHaveBeenCalled();
+  expect(console.error).not.toHaveBeenCalled();
   /* eslint-enable no-console */
 });
 
@@ -26,9 +26,9 @@ test("Editor logs nothing on render", async () => {
   unmount();
 
   /* eslint-disable no-console */
-  expect(console.log).not.toBeCalled();
-  expect(console.warn).not.toBeCalled();
-  expect(console.error).not.toBeCalled();
+  expect(console.log).not.toHaveBeenCalled();
+  expect(console.warn).not.toHaveBeenCalled();
+  expect(console.error).not.toHaveBeenCalled();
   /* eslint-enable no-console */
 });
 
