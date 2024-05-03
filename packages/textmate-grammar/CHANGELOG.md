@@ -1,5 +1,7 @@
 # @quri/squiggle-textmate-grammar
 
+## 0.9.4
+
 ## 0.9.3
 
 Use 0.9.3 Squiggle. No extension-specific changes.
