@@ -1,5 +1,9 @@
 # @quri/prettier-plugin-squiggle
 
+## 0.9.4
+
+Compatible with Squiggle 0.9.4. No extension-specific changes.
+
 ## 0.9.3
 
 - Fixed incorrect extra commas on empty lists ([#2997](https://github.com/quantified-uncertainty/squiggle/pull/2997))

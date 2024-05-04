@@ -1,5 +1,35 @@
 # @quri/squiggle-components
 
+## 0.9.4
+
+Features:
+
+- Stable seeds; re-runs of the same model with the same seed will always give the identical result ([#3006](https://github.com/quantified-uncertainty/squiggle/pull/3006))
+
+- Added Meta+PageUp/PageDown shortcuts to control the current viewer tab ([#3055](https://github.com/quantified-uncertainty/squiggle/pull/3055))
+
+- Added clickable gutter lines to focus on value variables ([#2980](https://github.com/quantified-uncertainty/squiggle/pull/2980))
+
+- Show export data and links in Viewer ([#3056](https://github.com/quantified-uncertainty/squiggle/pull/3056))
+
+- Support `autorun={false}` prop in `<SquigglePlayground>` component ([#3119](https://github.com/quantified-uncertainty/squiggle/pull/3119))
+
+Bugfixes:
+
+- Fixed the regression where stacktrace locations weren't clickable
+
+- Recognize `!=` operators during highlighting ([#3133](https://github.com/quantified-uncertainty/squiggle/pull/3133))
+
+- Fixed the issue with persisting focus and collapse/expand state after errors ([#3129](https://github.com/quantified-uncertainty/squiggle/pull/3129))
+
+- Render negative values in pointsets correctly ([#3126](https://github.com/quantified-uncertainty/squiggle/pull/3126))
+
+Experimental:
+
+- Support `Spec` values ([#3113](https://github.com/quantified-uncertainty/squiggle/pull/3113))
+
+- WebWorker runner ([#3158](https://github.com/quantified-uncertainty/squiggle/pull/3158))
+
 ## 0.9.3
 
 - Tooltips for top-level variables ([#2776](https://github.com/quantified-uncertainty/squiggle/pull/2776))

@@ -1,5 +1,39 @@
 # @quri/squiggle-lang
 
+## 0.9.4
+
+Standard library:
+
+- Added `Spec.make` function and `@spec` tag ([#3113](https://github.com/quantified-uncertainty/squiggle/pull/3113))
+
+- Added the basic `try()` function ([#3137](https://github.com/quantified-uncertainty/squiggle/pull/3137))
+
+- Added `PointSet.support` function and a new `MixedSet.*` namespace with several functions for working with 1-dimensional sets of points and segments ([#3115](https://github.com/quantified-uncertainty/squiggle/pull/3115), [#3151](https://github.com/quantified-uncertainty/squiggle/pull/3151))
+
+- Added `Danger.yTransform` function ([#3127](https://github.com/quantified-uncertainty/squiggle/pull/3127))
+
+Bugfixes:
+
+- Fixed the issue with very slightly negative KDE values because of floating point errors ([#3114](https://github.com/quantified-uncertainty/squiggle/pull/3114))
+
+- Fixed parsing of `x = {|...|...} -> ...` statements([#3136](https://github.com/quantified-uncertainty/squiggle/pull/3136))
+
+Internals:
+
+- Use a custom PRNG (aleaPRNG) and always require seed in environment ([#3006](https://github.com/quantified-uncertainty/squiggle/pull/3006))
+
+  - Note that this can make some models up to 2x slower, because it's hard to beat the native `Math.random`; but we'll make up for it with other optimizations in future releases
+
+- Variable stack is array-based, with up to 50% better performance in synthetic tests ([#3054](https://github.com/quantified-uncertainty/squiggle/pull/3054))
+
+- All Squiggle values are serializable ([#3158](https://github.com/quantified-uncertainty/squiggle/pull/3158))
+
+- Support pluggable runners, including the experimental webworker runner ([#3158](https://github.com/quantified-uncertainty/squiggle/pull/3158))
+
+- Simplified AST representation ([#3136](https://github.com/quantified-uncertainty/squiggle/pull/3136))
+
+- Disallow overrides of an internal function responsible for index lookups ([#3135](https://github.com/quantified-uncertainty/squiggle/pull/3135))
+
 ## 0.9.3
 
 - Breaking: disallow capitalized variable names that we allowed by accident in 0.9.0 release ([#2987](https://github.com/quantified-uncertainty/squiggle/pull/2987))

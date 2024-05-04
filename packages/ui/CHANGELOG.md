@@ -1,5 +1,9 @@
 # @quri/ui
 
+## 0.2.2
+
+- Add `CubeTransparentIcon` icon
+
 ## 0.2.1
 
 - Support JSX titles in dropdown items
