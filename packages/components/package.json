@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-components",
-  "version": "0.9.4",
+  "version": "0.9.5-0",
   "license": "MIT",
   "engines": {
     "node": "20.x"
