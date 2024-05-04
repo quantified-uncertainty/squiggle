@@ -12,7 +12,7 @@
   },
   "icon": "dist/media/icon.png",
   "engines": {
-    "vscode": "^1.83.0"
+    "vscode": "^1.86.0"
   },
   "categories": [
     "Programming Languages",
