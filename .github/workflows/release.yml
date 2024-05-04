@@ -13,7 +13,7 @@ env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: quantified-uncertainty
   # used by turbo cache hashes, see turbo.json
-  PLATFORM: github2
+  PLATFORM: github
 
 # not needed while we don't run this workflow automatically
 # concurrency: ${{ github.workflow }}-${{ github.ref }}
