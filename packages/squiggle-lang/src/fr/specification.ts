@@ -22,14 +22,11 @@ export const library = [
       makeFnExample(
         `@startClosed
 validate(fn) = {
-  errors = List.upTo(2020, 2030)
-    -> List.map(
-      {|e| [Date(e), typeOf(fn(Date(e))) == "Distribution"]}
+  hasErrors = List.upTo(2020, 2030)
+    -> List.some(
+      {|e| typeOf(fn(Date(e))) != "Distribution"}
     )
-    -> List.filter(
-      {|e| e == false}
-    )
-  List.length(errors) > 0 ? "Some results aren't distributions" : ""
+  hasErrors ? "Some results aren't distributions" : ""
 }
 
 spec = Spec.make(
