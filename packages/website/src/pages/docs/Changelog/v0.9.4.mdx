@@ -2,51 +2,76 @@
 
 ### [@quri/squiggle-lang](https://www.npmjs.com/package/@quri/squiggle-lang)
 
-* Added several functions to MixedSet ([#3151](https://github.com/quantified-uncertainty/squiggle/pull/3151))
+Standard library:
 
-* Added Danger.yTransform function ([#3127](https://github.com/quantified-uncertainty/squiggle/pull/3127))
+- Added `Spec.make` function and `@spec` tag ([#3113](https://github.com/quantified-uncertainty/squiggle/pull/3113))
 
-* Fix parsing of `x = {|...|...} -> ...` statements; avoid extra block nodes in AST ([#3136](https://github.com/quantified-uncertainty/squiggle/pull/3136))
+- Added the basic `try()` function ([#3137](https://github.com/quantified-uncertainty/squiggle/pull/3137))
 
-* Seeds should be stored for Model Revisions ([#3068](https://github.com/quantified-uncertainty/squiggle/pull/3068))
+- Added `PointSet.support` function and a new `MixedSet.*` namespace with several functions for working with 1-dimensional sets of points and segments ([#3115](https://github.com/quantified-uncertainty/squiggle/pull/3115), [#3151](https://github.com/quantified-uncertainty/squiggle/pull/3151))
 
-* Add the basic try() function ([#3137](https://github.com/quantified-uncertainty/squiggle/pull/3137))
+- Added `Danger.yTransform` function ([#3127](https://github.com/quantified-uncertainty/squiggle/pull/3127))
 
-* Adds clickable gutter lines to focus on value variables ([#2980](https://github.com/quantified-uncertainty/squiggle/pull/2980))
+Bugfixes:
 
-* Show export data and links in Viewer ([#3056](https://github.com/quantified-uncertainty/squiggle/pull/3056))
+- Fixed the issue with very slightly negative KDE values because of floating point errors ([#3114](https://github.com/quantified-uncertainty/squiggle/pull/3114))
 
-* Adds simple Specification Tag and Type ([#3113](https://github.com/quantified-uncertainty/squiggle/pull/3113))
+- Fixed parsing of `x = {|...|...} -> ...` statements([#3136](https://github.com/quantified-uncertainty/squiggle/pull/3136))
 
-* Added support for simple Distribution Support, and MixedSets. ([#3115](https://github.com/quantified-uncertainty/squiggle/pull/3115))
+Internals:
 
-* KDE should force distributions to have pdfs above zero ([#3114](https://github.com/quantified-uncertainty/squiggle/pull/3114))
+- Use a custom PRNG (aleaPRNG) and always require seed in environment ([#3006](https://github.com/quantified-uncertainty/squiggle/pull/3006))
+
+  - Note that this can make some models up to 2x slower, because it's hard to beat the native `Math.random`; but we'll make up for it with other optimizations in future releases
+
+- Variable stack is array-based, with up to 50% better performance in synthetic tests ([#3054](https://github.com/quantified-uncertainty/squiggle/pull/3054))
+
+- All Squiggle values are serializable ([#3158](https://github.com/quantified-uncertainty/squiggle/pull/3158))
+
+- Support pluggable runners, including the experimental webworker runner ([#3158](https://github.com/quantified-uncertainty/squiggle/pull/3158))
+
+- Simplified AST representation ([#3136](https://github.com/quantified-uncertainty/squiggle/pull/3136))
+
+- Disallow overrides of an internal function responsible for index lookups ([#3135](https://github.com/quantified-uncertainty/squiggle/pull/3135))
 
 ### [@quri/squiggle-components](https://www.npmjs.com/package/@quri/squiggle-components)
 
-* Recognize != operators during highlighting ([#3133](https://github.com/quantified-uncertainty/squiggle/pull/3133))
+Features:
 
-* Seeds should be stored for Model Revisions ([#3068](https://github.com/quantified-uncertainty/squiggle/pull/3068))
+- Stable seeds; re-runs of the same model with the same seed will always give the identical result ([#3006](https://github.com/quantified-uncertainty/squiggle/pull/3006))
 
-* Adds meta+pageup/pagedown shortcuts to control viewerTab ([#3055](https://github.com/quantified-uncertainty/squiggle/pull/3055))
+- Added Meta+PageUp/PageDown shortcuts to control the current viewer tab ([#3055](https://github.com/quantified-uncertainty/squiggle/pull/3055))
 
-* Adds clickable gutter lines to focus on value variables ([#2980](https://github.com/quantified-uncertainty/squiggle/pull/2980))
+- Added clickable gutter lines to focus on value variables ([#2980](https://github.com/quantified-uncertainty/squiggle/pull/2980))
 
-* Show export data and links in Viewer ([#3056](https://github.com/quantified-uncertainty/squiggle/pull/3056))
+- Show export data and links in Viewer ([#3056](https://github.com/quantified-uncertainty/squiggle/pull/3056))
 
-* Adds simple Specification Tag and Type ([#3113](https://github.com/quantified-uncertainty/squiggle/pull/3113))
+- Support `autorun={false}` prop in `<SquigglePlayground>` component ([#3119](https://github.com/quantified-uncertainty/squiggle/pull/3119))
 
-* Fix the issue with persisting viewer state after errors ([#3129](https://github.com/quantified-uncertainty/squiggle/pull/3129))
+Bugfixes:
+
+- Fixed the regression where stacktrace locations weren't clickable
+
+- Recognize `!=` operators during highlighting ([#3133](https://github.com/quantified-uncertainty/squiggle/pull/3133))
+
+- Fixed the issue with persisting focus and collapse/expand state after errors ([#3129](https://github.com/quantified-uncertainty/squiggle/pull/3129))
+
+- Render negative values in pointsets correctly ([#3126](https://github.com/quantified-uncertainty/squiggle/pull/3126))
+
+Experimental:
+
+- Support `Spec` values ([#3113](https://github.com/quantified-uncertainty/squiggle/pull/3113))
+
+- WebWorker runner ([#3158](https://github.com/quantified-uncertainty/squiggle/pull/3158))
 
 ### [@quri/prettier-plugin-squiggle](https://www.npmjs.com/package/@quri/prettier-plugin-squiggle)
 
-_No changes._
+_Use 0.9.4 Squiggle. No extension-specific changes._
 
 ### [@quri/squiggle-textmate-grammar](https://www.npmjs.com/package/@quri/squiggle-textmate-grammar)
 
-_No changes._
+_Use 0.9.4 Squiggle. No extension-specific changes._
 
 ### [vscode-squiggle](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle)
 
-* Show export data and links in Viewer ([#3056](https://github.com/quantified-uncertainty/squiggle/pull/3056))
-
+_Use 0.9.4 Squiggle. No extension-specific changes._
