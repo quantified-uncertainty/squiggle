@@ -84,6 +84,7 @@ export const library = [
   }),
   maker.make({
     name: "min",
+    description: "Returns the minimum value in the set",
     definitions: [
       makeDefinition([frMixedSet], frNumber, ([m]) => {
         const min = fromDict(m).min();
@@ -96,6 +97,7 @@ export const library = [
   }),
   maker.make({
     name: "max",
+    description: "Returns the maximum value in the set",
     definitions: [
       makeDefinition([frMixedSet], frNumber, ([m]) => {
         const max = fromDict(m).max();

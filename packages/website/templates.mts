@@ -90,12 +90,6 @@ The only functions that do not return normalized distributions are the pointwise
     ],
   },
   {
-    name: "Sym",
-    description:
-      "The Sym module provides functions to create some common symbolic distributions.",
-    intro: `Symbolic Distributions. All these functions match the functions for creating sample set distributions, but produce symbolic distributions instead. Symbolic distributions won't capture correlations, but are more performant than sample distributions.`,
-  },
-  {
     name: "SampleSet",
     sections: [
       { name: "Constructors" },
@@ -109,6 +103,12 @@ The only functions that do not return normalized distributions are the pointwise
 Monte Carlo calculations typically result in sample set distributions.
 
 All regular distribution function work on sample set distributions. In addition, there are several functions that only work on sample set distributions.`,
+  },
+  {
+    name: "Sym",
+    description:
+      "The Sym module provides functions to create some common symbolic distributions.",
+    intro: `Symbolic Distributions. All these functions match the functions for creating sample set distributions, but produce symbolic distributions instead. Symbolic distributions won't capture correlations, but are more performant than sample distributions.`,
   },
   {
     name: "PointSet",
@@ -187,6 +187,17 @@ Lists are immutable, meaning that they cannot be modified. Instead, all list fun
   `,
   },
   {
+    name: "MixedSet",
+    description: "",
+    intro: `The MixedSet module offers functionality for creating mixed sets, which are sets that can contain both discrete and continuous values. Discrete values are represented as points, while continuous values are represented as ranges. Mixed sets are particularly useful for describing the support of mixed probability distributions.
+
+The majority of set functions in the MixedSet module are designed to mirror the [upcomming set functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set) in Javascript.
+
+The primary purpose of mixed sets in Squiggle is to facilitate scoring. For instance, by utilizing mixed sets, you can easily determine if one distribution covers the support of another distribution. If it doesn't, it may be prone to receiving a score of negative infinity.
+
+Currently, there is no dedicated MixedSet object type. Instead, mixed sets are implemented as dictionaries, where discrete values are stored as points and continuous values are stored as segments.`,
+  },
+  {
     name: "Plot",
     description: "",
     intro: `The Plot module provides functions to create plots of distributions and functions.
@@ -213,6 +224,12 @@ Raw functions and distributions are plotted with default parameters, while plot 
     intro: `Chart axes in [plots](./Plot.mdx) can be scaled using the following functions. Each scale function accepts optional min and max value. Power scale accepts an extra exponent parameter.
 
 Squiggle uses D3 for the tick formats. You can read about d3 tick formats [here](https://github.com/d3/d3-format).`,
+  },
+  {
+    name: "Spec",
+    description: "Function Specifications",
+    intro:
+      "Function specifications (Specs) are an experimental feature in Squiggle. They are used to specify the structure of functions and verify that they match that structure. They are used primarily as a tag for functions.",
   },
   {
     name: "String",

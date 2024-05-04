@@ -17,27 +17,32 @@ export const library = [
   maker.make({
     name: "make",
     description: "Create a specification.",
+    isExperimental: true,
     examples: [
       makeFnExample(
-        `validate(fn) = {
+        `@startClosed
+validate(fn) = {
   errors = List.upTo(2020, 2030)
     -> List.map(
       {|e| [Date(e), typeOf(fn(Date(e))) == "Distribution"]}
     )
     -> List.filter(
-      {|e| true}
+      {|e| e == false}
     )
-  "Has errors!"
+  List.length(errors) > 0 ? "Some results aren't distributions" : ""
 }
 
 spec = Spec.make(
   {
-    title: "Stock market over time",
+    name: "Stock market over time",
     documentation: "A distribution of stock market values over time.",
-    validate: validate
+    validate: validate,
   }
-)`,
-        { isInteractive: false, useForTests: false }
+)
+
+@spec(spec)
+myEstimate(t: [Date(2020), Date(2030)]) = normal(10, 3)`,
+        { isInteractive: true, useForTests: false }
       ),
     ],
     definitions: [
