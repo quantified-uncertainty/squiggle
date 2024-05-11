@@ -18,9 +18,14 @@ type Props = {
 const LocationLine: FC<{ location: SqLocation }> = ({ location }) => {
   const { externalViewerActions } = useViewerContext();
 
-  const text = `line ${location.start.line}, column ${location.start.column}`;
+  const text =
+    `line ${location.start.line}, column ${location.start.column}` +
+    (externalViewerActions?.isDefaultSourceId?.(location.source)
+      ? ""
+      : `, file ${location.source}`);
 
-  return externalViewerActions.show ? (
+  return externalViewerActions.show &&
+    externalViewerActions.isFocusable?.(location) ? (
     <a
       href="#"
       onClick={(e) => {

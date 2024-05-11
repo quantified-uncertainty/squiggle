@@ -32,6 +32,7 @@ export type CodeEditorProps = {
 export type CodeEditorHandle = {
   format(): void;
   scrollTo(position: number, focus: boolean): void;
+  getSourceId(): string;
 };
 
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
@@ -50,6 +51,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     useImperativeHandle(ref, () => ({
       format: () => formatSquiggle(view),
       scrollTo,
+      getSourceId: () => props.sourceId,
     }));
 
     return (

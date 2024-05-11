@@ -369,14 +369,12 @@ export type ExternalViewerActions = Partial<{
   // go to the source that's identified not just by an offset, but also its
   // sourceId.
   show: (location: SqLocation, focus: boolean) => void;
-}>;
-
-type Props = PropsWithChildren<{
-  partialPlaygroundSettings: PartialPlaygroundSettings;
-  externalViewerActions?: ExternalViewerActions;
-  viewerType?: ViewerType;
-  rootValue: SqValue | undefined;
-  visibleRootPath?: SqValuePath;
+  // When the viewer can focus on the location, will it be able to do that?
+  // This affects, for example, whether the links in stacktraces are clickable.
+  isFocusable: (location: SqLocation) => boolean;
+  // Should the viewer omit the source id because it's trivial?
+  // E.g. in playground stacktraces we want to show source id only for imports, but not for the currently edited file.
+  isDefaultSourceId: (sourceId: string) => boolean;
 }>;
 
 // Configure external actions for the common case of editor actions, e.g. for the playground or `<SquiggleEditor>` component.
@@ -396,10 +394,25 @@ export function useExternalViewerActionsForEditor(
         // TODO - check if sourceId matches the sourceId in editor.
         editor.scrollTo(location.start.offset, focus);
       },
+      isFocusable: (location) => {
+        // only the edited source id is focusable
+        return editor.getSourceId() === location.source;
+      },
+      isDefaultSourceId: (sourceId) => {
+        return editor.getSourceId() === sourceId;
+      },
     };
     return actions;
   }, [editor]);
 }
+
+type Props = PropsWithChildren<{
+  partialPlaygroundSettings: PartialPlaygroundSettings;
+  externalViewerActions?: ExternalViewerActions;
+  viewerType?: ViewerType;
+  rootValue: SqValue | undefined;
+  visibleRootPath?: SqValuePath;
+}>;
 
 export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
   (
