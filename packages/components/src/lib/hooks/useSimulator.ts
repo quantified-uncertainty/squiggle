@@ -267,6 +267,11 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
   }, [project, args.environment, state.autorunMode]);
 
   useEffect(() => {
+    if (!args.runnerName) {
+      // Undefined runnerName shouldn't reset the project.
+      // (Consider the case where `setup.project` is set with a pre-configured runner)
+      return;
+    }
     project.setRunner(runnerByName(args.runnerName ?? defaultRunnerName));
     if (state.autorunMode) {
       runSimulation();
