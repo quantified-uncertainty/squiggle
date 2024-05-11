@@ -10,6 +10,7 @@ import { useGetSubvalueByPath } from "./utils.js";
 import { ValueViewer } from "./ValueViewer/index.js";
 import {
   SquiggleViewerHandle,
+  useExternalActionsForEditor,
   useViewerContext,
   ViewerProvider,
 } from "./ViewerProvider.js";
@@ -68,11 +69,12 @@ const component = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
     { value, editor, ...partialPlaygroundSettings },
     ref
   ) {
+    const externalActions = useExternalActionsForEditor(editor);
     return (
       <ErrorBoundary>
         <ViewerProvider
           partialPlaygroundSettings={partialPlaygroundSettings}
-          editor={editor}
+          externalActions={externalActions}
           ref={ref}
           rootValue={value}
         >

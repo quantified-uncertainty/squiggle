@@ -12,6 +12,7 @@ import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleViewerWithoutProvider } from "../SquiggleViewer/index.js";
 import {
   SquiggleViewerHandle,
+  useExternalActionsForEditor,
   ViewerProvider,
 } from "../SquiggleViewer/ViewerProvider.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
@@ -63,11 +64,13 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
       );
     };
 
+    const externalActions = useExternalActionsForEditor(editor);
+
     return (
       <ViewerProvider
-        partialPlaygroundSettings={playgroundSettings}
-        editor={editor}
         ref={viewerRef}
+        partialPlaygroundSettings={playgroundSettings}
+        externalActions={externalActions}
         visibleRootPath={viewerTabToVisibleRootPath(viewerTab)}
         rootValue={
           outputResult.ok

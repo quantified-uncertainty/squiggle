@@ -18,16 +18,18 @@ type Props = {
 const LocationLine: FC<{
   location: NonNullable<ReturnType<SqFrame["location"]>>;
 }> = ({ location }) => {
-  const { editor } = useViewerContext();
+  const { externalActions } = useViewerContext();
 
-  const findInEditor = () => {
-    editor?.scrollTo(location.start.offset, true);
-  };
+  const onClick = externalActions?.show
+    ? () => externalActions.show?.(location.start.offset, true)
+    : undefined;
 
   return (
     <span
-      className={clsx(editor && "cursor-pointer text-blue-500 hover:underline")}
-      onClick={editor ? findInEditor : undefined}
+      className={clsx(
+        externalActions?.show && "cursor-pointer text-blue-500 hover:underline"
+      )}
+      onClick={onClick}
     >
       line {location.start.line}, column {location.start.column}
     </span>

@@ -7,7 +7,7 @@ export function useZoomedOutSqValueKeyEvent(selected: SqValuePath) {
   const {
     setZoomedInPath: setZoomedInPath,
     itemStore,
-    editor,
+    externalActions,
     findNode,
   } = useViewerContext();
 
@@ -52,7 +52,7 @@ export function useZoomedOutSqValueKeyEvent(selected: SqValuePath) {
       const location = value?.context?.findLocation();
 
       if (location) {
-        editor?.scrollTo(location.start.offset, true);
+        externalActions?.show?.(location.start.offset, true);
       }
     },
   });

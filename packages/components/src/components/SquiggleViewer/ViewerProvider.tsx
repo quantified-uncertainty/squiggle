@@ -190,7 +190,7 @@ type ViewerContextShape = {
   globalSettings: PlaygroundSettings;
   zoomedInPath: SqValuePath | undefined;
   setZoomedInPath: (value: SqValuePath | undefined) => void;
-  editor?: CodeEditorHandle;
+  externalActions?: ExternalViewerActions;
   itemStore: ItemStore;
   viewerType: ViewerType;
   initialized: boolean;
@@ -204,7 +204,7 @@ export const ViewerContext = createContext<ViewerContextShape>({
   globalSettings: defaultPlaygroundSettings,
   zoomedInPath: undefined,
   setZoomedInPath: () => undefined,
-  editor: undefined,
+  externalActions: undefined,
   itemStore: new ItemStore(),
   viewerType: "normal",
   handle: {
@@ -326,15 +326,15 @@ export function useZoomOut() {
 }
 
 export function useScrollToEditorPath(path: SqValuePath) {
-  const { editor, findNode } = useViewerContext();
+  const { externalActions, findNode } = useViewerContext();
   return () => {
-    if (editor) {
+    if (externalActions?.show) {
       const value = findNode(path)?.value();
       const taggedLocation = value?.tags.location();
       const location = taggedLocation || value?.context?.findLocation();
 
       if (location) {
-        editor?.scrollTo(location.start.offset, false);
+        externalActions?.show?.(location.start.offset, false);
       }
     }
   };
@@ -362,19 +362,37 @@ export function useViewerType() {
   return viewerType;
 }
 
+type ExternalViewerActions = Partial<{
+  show: (offset: number, focus: boolean) => void;
+}>;
+
 type Props = PropsWithChildren<{
   partialPlaygroundSettings: PartialPlaygroundSettings;
-  editor?: CodeEditorHandle;
+  externalActions?: ExternalViewerActions;
   viewerType?: ViewerType;
   rootValue: SqValue | undefined;
   visibleRootPath?: SqValuePath;
 }>;
 
+export function useExternalActionsForEditor(
+  editor: CodeEditorHandle | undefined
+): ExternalViewerActions {
+  return useMemo(() => {
+    if (!editor) {
+      return {};
+    }
+    const actions: ExternalViewerActions = {
+      show: (offset, focus) => editor.scrollTo(offset, focus),
+    };
+    return actions;
+  }, [editor]);
+}
+
 export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
   (
     {
       partialPlaygroundSettings: unstablePlaygroundSettings,
-      editor,
+      externalActions = {},
       viewerType = "normal",
       rootValue,
       visibleRootPath,
@@ -421,7 +439,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
           rootValue: _rootValue,
           visibleRootPath,
           globalSettings,
-          editor,
+          externalActions,
           zoomedInPath,
           setZoomedInPath: setZoomedInPathPath,
           itemStore,
