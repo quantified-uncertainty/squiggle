@@ -14,9 +14,11 @@ import {
   ViewerTab,
   viewerTabsToShow,
 } from "../../lib/utility.js";
-import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
-import { SquiggleViewerHandle } from "../SquiggleViewer/ViewerProvider.js";
+import {
+  ExternalViewerActions,
+  SquiggleViewerHandle,
+} from "../SquiggleViewer/ViewerProvider.js";
 import { Layout } from "./Layout.js";
 import { RandomizeSeedButton } from "./RandomizeSeedButton.js";
 import { SimulatingIndicator } from "./SimulatingIndicator.js";
@@ -26,7 +28,7 @@ import { ViewerMenu } from "./ViewerMenu.js";
 
 type Props = {
   simulation: Simulation;
-  editor?: CodeEditorHandle;
+  externalActions?: ExternalViewerActions;
   playgroundSettings: PartialPlaygroundSettings;
   showMenu?: boolean;
   defaultTab?: ViewerTab;
@@ -46,7 +48,7 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
       playgroundSettings,
       randomizeSeed,
       showMenu = true,
-      editor,
+      externalActions,
       defaultTab,
       useGlobalShortcuts: enableGlobalShortcuts = false,
       xPadding = 2,
@@ -115,12 +117,12 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
         }
         viewer={
           <ViewerBody
+            externalActions={externalActions}
             viewerTab={viewerTab}
             outputResult={output}
             isSimulating={isSimulating(simulation)}
             playgroundSettings={playgroundSettings}
             ref={viewerRef}
-            editor={editor}
           />
         }
         xPadding={xPadding}

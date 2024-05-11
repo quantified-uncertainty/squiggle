@@ -7,12 +7,11 @@ import {
   viewerTabToValue,
   viewerTabToVisibleRootPath,
 } from "../../lib/utility.js";
-import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleViewerWithoutProvider } from "../SquiggleViewer/index.js";
 import {
+  ExternalViewerActions,
   SquiggleViewerHandle,
-  useExternalActionsForEditor,
   ViewerProvider,
 } from "../SquiggleViewer/ViewerProvider.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
@@ -21,13 +20,19 @@ type Props = {
   viewerTab: ViewerTab;
   outputResult: SqOutputResult;
   isSimulating: boolean;
-  editor?: CodeEditorHandle;
+  externalActions?: ExternalViewerActions;
   playgroundSettings: PartialPlaygroundSettings;
 };
 
 export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
   function ViewerBody(
-    { outputResult, viewerTab, isSimulating, editor, playgroundSettings },
+    {
+      outputResult,
+      viewerTab,
+      isSimulating,
+      externalActions,
+      playgroundSettings,
+    },
     viewerRef
   ) {
     const body = () => {
@@ -63,8 +68,6 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
         </div>
       );
     };
-
-    const externalActions = useExternalActionsForEditor(editor);
 
     return (
       <ViewerProvider

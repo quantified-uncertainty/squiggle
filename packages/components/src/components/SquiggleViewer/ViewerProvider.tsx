@@ -364,7 +364,7 @@ export function useViewerType() {
 
 // List of callbacks that should do something outside of the viewer.
 // The common case is to scroll the editor to the necessary position in the playground.
-type ExternalViewerActions = Partial<{
+export type ExternalViewerActions = Partial<{
   // TODO: this function is not imports-friendly yet.
   // E.g. in stacktraces, the user might want to click on an error location and
   // go to the source that's identified not just by an offset, but also its
@@ -382,9 +382,10 @@ type Props = PropsWithChildren<{
 
 // Configure external actions for the common case of editor actions, e.g. for the playground or `<SquiggleEditor>` component.
 export function useExternalActionsForEditor(
-  // Intentionally supports undefined - conditional hooks are not possible and
-  // this hook is often used in components that take an optional `editor` prop.
-  editor: CodeEditorHandle | undefined
+  // Intentionally supports null and undefined - conditional hooks are not
+  // possible and this hook is often used in components that take an optional
+  // `editor` prop, or wire the editor components with a ref.
+  editor: CodeEditorHandle | null | undefined
 ): ExternalViewerActions {
   return useMemo(() => {
     if (!editor) {
