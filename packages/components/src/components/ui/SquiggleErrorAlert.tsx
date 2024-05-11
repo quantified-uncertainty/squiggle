@@ -1,4 +1,3 @@
-import { clsx } from "clsx";
 import { FC, PropsWithChildren } from "react";
 
 import {
@@ -20,19 +19,21 @@ const LocationLine: FC<{
 }> = ({ location }) => {
   const { externalActions } = useViewerContext();
 
-  const onClick = externalActions?.show
-    ? () => externalActions.show?.(location.start.offset, true)
-    : undefined;
+  const text = `line ${location.start.line}, column ${location.start.column}`;
 
-  return (
-    <span
-      className={clsx(
-        externalActions?.show && "cursor-pointer text-blue-500 hover:underline"
-      )}
-      onClick={onClick}
+  return externalActions?.show ? (
+    <a
+      href="#"
+      onClick={(e) => {
+        e.preventDefault();
+        externalActions.show?.(location.start.offset, true);
+      }}
+      className="text-blue-500 hover:underline"
     >
-      line {location.start.line}, column {location.start.column}
-    </span>
+      {text}
+    </a>
+  ) : (
+    <span>{text}</span>
   );
 };
 
