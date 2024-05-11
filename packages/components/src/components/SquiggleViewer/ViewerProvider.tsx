@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 
-import { SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { SqLocation, SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
 import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
@@ -334,7 +334,7 @@ export function useScrollToEditorPath(path: SqValuePath) {
       const location = taggedLocation || value?.context?.findLocation();
 
       if (location) {
-        externalViewerActions?.show?.(location.start.offset, false);
+        externalViewerActions?.show?.(location, false);
       }
     }
   };
@@ -369,7 +369,7 @@ export type ExternalViewerActions = Partial<{
   // E.g. in stacktraces, the user might want to click on an error location and
   // go to the source that's identified not just by an offset, but also its
   // sourceId.
-  show: (offset: number, focus: boolean) => void;
+  show: (location: SqLocation, focus: boolean) => void;
 }>;
 
 type Props = PropsWithChildren<{
@@ -392,7 +392,11 @@ export function useExternalViewerActionsForEditor(
       return {};
     }
     const actions: ExternalViewerActions = {
-      show: (offset, focus) => editor.scrollTo(offset, focus),
+      show: (location, focus) => {
+        // TODO - scroll to fit the foll range on screen, and maybe select the entire range.
+        // TODO - check if sourceId matches the sourceId in editor.
+        editor.scrollTo(location.start.offset, focus);
+      },
     };
     return actions;
   }, [editor]);

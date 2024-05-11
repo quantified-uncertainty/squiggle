@@ -26,7 +26,7 @@ const LocationLine: FC<{
       href="#"
       onClick={(e) => {
         e.preventDefault();
-        externalViewerActions.show?.(location.start.offset, true);
+        externalViewerActions.show?.(location, true);
       }}
       className="text-blue-500 hover:underline"
     >
