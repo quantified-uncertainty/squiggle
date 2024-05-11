@@ -30,4 +30,5 @@ test("Stacktrace links are clickable", async () => {
   expect(errorHeader).toBeDefined();
 
   expect(getByText(errorHeader.parentElement!, /column /)).toBeDefined();
+  expect(getByText(errorHeader.parentElement!, /column /).tagName).toBe("A");
 });
