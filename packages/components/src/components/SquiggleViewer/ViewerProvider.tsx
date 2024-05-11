@@ -184,35 +184,34 @@ export class ItemStore {
 }
 
 type ViewerContextShape = {
-  // Note that we don't store `localItemState` itself in the context (that would cause rerenders of the entire tree on each settings update).
-  // Instead, we keep `localItemState` in local state and notify the global context via `setLocalItemState` to pass them down the component tree again if it got rebuilt from scratch.
-  // See ./SquiggleViewer.tsx and ./ValueWithContextViewer.tsx for other implementation details on this.
+  initialized: boolean;
+  viewerType: ViewerType;
+  // Note that `ItemStore` is not reactive (making it immutable and reactive would cause rerenders of the entire tree on each settings update).
+  // See `ItemStore` and `./SquiggleViewer/index.tsx` and `ValueWithContextViewer.tsx` for more details on this.
+  itemStore: ItemStore;
+  rootValue?: SqValueWithContext;
   globalSettings: PlaygroundSettings;
+  visibleRootPath?: SqValuePath;
   zoomedInPath: SqValuePath | undefined;
   setZoomedInPath: (value: SqValuePath | undefined) => void;
-  externalViewerActions?: ExternalViewerActions;
-  itemStore: ItemStore;
-  viewerType: ViewerType;
-  initialized: boolean;
+  externalViewerActions: ExternalViewerActions;
   handle: SquiggleViewerHandle;
-  rootValue?: SqValueWithContext;
-  visibleRootPath?: SqValuePath;
   findNode: (path: SqValuePath) => SqListViewNode | undefined;
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
+  initialized: false,
+  viewerType: "normal",
+  itemStore: new ItemStore(),
+  rootValue: undefined,
   globalSettings: defaultPlaygroundSettings,
+  visibleRootPath: undefined,
   zoomedInPath: undefined,
   setZoomedInPath: () => undefined,
-  externalViewerActions: undefined,
-  itemStore: new ItemStore(),
-  viewerType: "normal",
+  externalViewerActions: {},
   handle: {
     focusByPath: () => {},
   },
-  initialized: false,
-  rootValue: undefined,
-  visibleRootPath: undefined,
   findNode: () => undefined,
 });
 
@@ -328,13 +327,13 @@ export function useZoomOut() {
 export function useScrollToEditorPath(path: SqValuePath) {
   const { externalViewerActions, findNode } = useViewerContext();
   return () => {
-    if (externalViewerActions?.show) {
+    if (externalViewerActions.show) {
       const value = findNode(path)?.value();
       const taggedLocation = value?.tags.location();
       const location = taggedLocation || value?.context?.findLocation();
 
       if (location) {
-        externalViewerActions?.show?.(location, false);
+        externalViewerActions.show?.(location, false);
       }
     }
   };
@@ -393,7 +392,7 @@ export function useExternalViewerActionsForEditor(
     }
     const actions: ExternalViewerActions = {
       show: (location, focus) => {
-        // TODO - scroll to fit the foll range on screen, and maybe select the entire range.
+        // TODO - scroll to fit the full range on screen, and maybe select the entire range.
         // TODO - check if sourceId matches the sourceId in editor.
         editor.scrollTo(location.start.offset, focus);
       },
@@ -425,17 +424,15 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       unstablePlaygroundSettings
     );
 
-    const [zoomedInPath, setZoomedInPathPath] = useState<
-      SqValuePath | undefined
-    >();
-
     const globalSettings = useMemo(() => {
       return merge({}, defaultPlaygroundSettings, playgroundSettings);
     }, [playgroundSettings]);
 
+    const [zoomedInPath, setZoomedInPath] = useState<SqValuePath | undefined>();
+
     const handle: SquiggleViewerHandle = {
       focusByPath(path: SqValuePath) {
-        setZoomedInPathPath(undefined);
+        setZoomedInPath(undefined);
         setTimeout(() => {
           itemStore.focusByPath(path);
         }, 0);
@@ -450,16 +447,16 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
     return (
       <ViewerContext.Provider
         value={{
-          rootValue: _rootValue,
-          visibleRootPath,
-          globalSettings,
-          externalViewerActions: externalViewerActions,
-          zoomedInPath,
-          setZoomedInPath: setZoomedInPathPath,
-          itemStore,
-          viewerType,
-          handle,
           initialized: true,
+          viewerType,
+          itemStore,
+          rootValue: _rootValue,
+          globalSettings,
+          visibleRootPath,
+          zoomedInPath,
+          setZoomedInPath,
+          externalViewerActions,
+          handle,
           findNode: (path) => findNode(_rootValue, path, itemStore),
         }}
       >

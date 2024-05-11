@@ -4,6 +4,7 @@ import {
   SqCompileError,
   SqError,
   SqFrame,
+  SqLocation,
   SqRuntimeError,
 } from "@quri/squiggle-lang";
 
@@ -14,14 +15,12 @@ type Props = {
   error: SqError;
 };
 
-const LocationLine: FC<{
-  location: NonNullable<ReturnType<SqFrame["location"]>>;
-}> = ({ location }) => {
+const LocationLine: FC<{ location: SqLocation }> = ({ location }) => {
   const { externalViewerActions } = useViewerContext();
 
   const text = `line ${location.start.line}, column ${location.start.column}`;
 
-  return externalViewerActions?.show ? (
+  return externalViewerActions.show ? (
     <a
       href="#"
       onClick={(e) => {

@@ -52,7 +52,7 @@ export function useZoomedOutSqValueKeyEvent(selected: SqValuePath) {
       const location = value?.context?.findLocation();
 
       if (location) {
-        externalViewerActions?.show?.(location, true);
+        externalViewerActions.show?.(location, true);
       }
     },
   });
