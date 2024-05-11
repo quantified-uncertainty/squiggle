@@ -17,16 +17,16 @@ type Props = {
 const LocationLine: FC<{
   location: NonNullable<ReturnType<SqFrame["location"]>>;
 }> = ({ location }) => {
-  const { externalActions } = useViewerContext();
+  const { externalViewerActions } = useViewerContext();
 
   const text = `line ${location.start.line}, column ${location.start.column}`;
 
-  return externalActions?.show ? (
+  return externalViewerActions?.show ? (
     <a
       href="#"
       onClick={(e) => {
         e.preventDefault();
-        externalActions.show?.(location.start.offset, true);
+        externalViewerActions.show?.(location.start.offset, true);
       }}
       className="text-blue-500 hover:underline"
     >

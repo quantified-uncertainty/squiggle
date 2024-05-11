@@ -20,7 +20,7 @@ type Props = {
   viewerTab: ViewerTab;
   outputResult: SqOutputResult;
   isSimulating: boolean;
-  externalActions?: ExternalViewerActions;
+  externalViewerActions?: ExternalViewerActions;
   playgroundSettings: PartialPlaygroundSettings;
 };
 
@@ -30,7 +30,7 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
       outputResult,
       viewerTab,
       isSimulating,
-      externalActions,
+      externalViewerActions,
       playgroundSettings,
     },
     viewerRef
@@ -73,7 +73,7 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
       <ViewerProvider
         ref={viewerRef}
         partialPlaygroundSettings={playgroundSettings}
-        externalActions={externalActions}
+        externalViewerActions={externalViewerActions}
         visibleRootPath={viewerTabToVisibleRootPath(viewerTab)}
         rootValue={
           outputResult.ok

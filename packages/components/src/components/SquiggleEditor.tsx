@@ -10,7 +10,7 @@ import {
 } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { useExternalActionsForEditor } from "./SquiggleViewer/ViewerProvider.js";
+import { useExternalViewerActionsForEditor } from "./SquiggleViewer/ViewerProvider.js";
 import { ViewerWithMenuBar } from "./ViewerWithMenuBar/index.js";
 
 export type SquiggleEditorProps = {
@@ -54,7 +54,9 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
 
   const editorRef = useRef<CodeEditorHandle>(null);
 
-  const viewerExternalActions = useExternalActionsForEditor(editorRef.current);
+  const externalViewerActions = useExternalViewerActionsForEditor(
+    editorRef.current
+  );
 
   return (
     <div>
@@ -77,7 +79,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
       {!simulation ? null : (
         <ViewerWithMenuBar
           simulation={simulation}
-          externalActions={viewerExternalActions}
+          externalViewerActions={externalViewerActions}
           playgroundSettings={settings}
           xPadding={0}
           randomizeSeed={randomizeSeed}

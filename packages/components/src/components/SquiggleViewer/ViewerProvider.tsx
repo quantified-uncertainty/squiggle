@@ -190,7 +190,7 @@ type ViewerContextShape = {
   globalSettings: PlaygroundSettings;
   zoomedInPath: SqValuePath | undefined;
   setZoomedInPath: (value: SqValuePath | undefined) => void;
-  externalActions?: ExternalViewerActions;
+  externalViewerActions?: ExternalViewerActions;
   itemStore: ItemStore;
   viewerType: ViewerType;
   initialized: boolean;
@@ -204,7 +204,7 @@ export const ViewerContext = createContext<ViewerContextShape>({
   globalSettings: defaultPlaygroundSettings,
   zoomedInPath: undefined,
   setZoomedInPath: () => undefined,
-  externalActions: undefined,
+  externalViewerActions: undefined,
   itemStore: new ItemStore(),
   viewerType: "normal",
   handle: {
@@ -326,15 +326,15 @@ export function useZoomOut() {
 }
 
 export function useScrollToEditorPath(path: SqValuePath) {
-  const { externalActions, findNode } = useViewerContext();
+  const { externalViewerActions, findNode } = useViewerContext();
   return () => {
-    if (externalActions?.show) {
+    if (externalViewerActions?.show) {
       const value = findNode(path)?.value();
       const taggedLocation = value?.tags.location();
       const location = taggedLocation || value?.context?.findLocation();
 
       if (location) {
-        externalActions?.show?.(location.start.offset, false);
+        externalViewerActions?.show?.(location.start.offset, false);
       }
     }
   };
@@ -374,14 +374,14 @@ export type ExternalViewerActions = Partial<{
 
 type Props = PropsWithChildren<{
   partialPlaygroundSettings: PartialPlaygroundSettings;
-  externalActions?: ExternalViewerActions;
+  externalViewerActions?: ExternalViewerActions;
   viewerType?: ViewerType;
   rootValue: SqValue | undefined;
   visibleRootPath?: SqValuePath;
 }>;
 
 // Configure external actions for the common case of editor actions, e.g. for the playground or `<SquiggleEditor>` component.
-export function useExternalActionsForEditor(
+export function useExternalViewerActionsForEditor(
   // Intentionally supports null and undefined - conditional hooks are not
   // possible and this hook is often used in components that take an optional
   // `editor` prop, or wire the editor components with a ref.
@@ -402,7 +402,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
   (
     {
       partialPlaygroundSettings: unstablePlaygroundSettings,
-      externalActions = {},
+      externalViewerActions = {},
       viewerType = "normal",
       rootValue,
       visibleRootPath,
@@ -449,7 +449,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
           rootValue: _rootValue,
           visibleRootPath,
           globalSettings,
-          externalActions,
+          externalViewerActions: externalViewerActions,
           zoomedInPath,
           setZoomedInPath: setZoomedInPathPath,
           itemStore,

@@ -28,7 +28,7 @@ import { ViewerMenu } from "./ViewerMenu.js";
 
 type Props = {
   simulation: Simulation;
-  externalActions?: ExternalViewerActions;
+  externalViewerActions?: ExternalViewerActions;
   playgroundSettings: PartialPlaygroundSettings;
   showMenu?: boolean;
   defaultTab?: ViewerTab;
@@ -48,7 +48,7 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
       playgroundSettings,
       randomizeSeed,
       showMenu = true,
-      externalActions,
+      externalViewerActions,
       defaultTab,
       useGlobalShortcuts: enableGlobalShortcuts = false,
       xPadding = 2,
@@ -117,7 +117,7 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
         }
         viewer={
           <ViewerBody
-            externalActions={externalActions}
+            externalViewerActions={externalViewerActions}
             viewerTab={viewerTab}
             outputResult={output}
             isSimulating={isSimulating(simulation)}
