@@ -390,8 +390,6 @@ export function useExternalViewerActionsForEditor(
     }
     const actions: ExternalViewerActions = {
       show: (location, focus) => {
-        // TODO - scroll to fit the full range on screen, and maybe select the entire range.
-        // TODO - check if sourceId matches the sourceId in editor.
         editor.scrollTo(location, focus);
       },
       isFocusable: (location) => {
@@ -399,6 +397,7 @@ export function useExternalViewerActionsForEditor(
         return editor.getSourceId() === location.source;
       },
       isDefaultSourceId: (sourceId) => {
+        // hide the sourceId in stacktraces if it's for the currently edited code
         return editor.getSourceId() === sourceId;
       },
     };
