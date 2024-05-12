@@ -3,7 +3,7 @@
   "version": "0.2.2",
   "license": "MIT",
   "engines": {
-    "node": "20.x"
+    "node": ">=20.x"
   },
   "repository": {
     "type": "git",
