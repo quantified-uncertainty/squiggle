@@ -8,6 +8,7 @@ patterns:
 repository:
   statement:
     patterns:
+      - include: "#export-keyword"
       - include: "#let"
       - include: "#decorator-call"
       - include: "#decorator"
@@ -108,6 +109,9 @@ repository:
   keywords:
     match: \b(if|then|else|to)\b
     name: keyword.control.squiggle
+  export-keyword:
+    match: \bexport\b
+    name: keyword.other.squiggle
   integer:
     match: \b\d+([_a-zA-Z]+[_a-zA-Z0-9]*)?
     name: constant.numeric.integer.squiggle
