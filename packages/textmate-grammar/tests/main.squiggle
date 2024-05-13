@@ -7,8 +7,17 @@ foo = 5
 //    ^ constant.numeric.integer.squiggle
 
 export bar = 6
-// <------ keyword.control.squiggle
+// <------ keyword.other.squiggle
 //     ^^^ variable.other.squiggle
+
+f(x) = x
+// <- entity.name.function.squiggle
+//     ^ variable.other.squiggle
+
+export f(x) = x
+// <------ keyword.other.squiggle
+//     ^ entity.name.function.squiggle
+//            ^ variable.other.squiggle
 
 @name("X var")
 // <- punctuation.decorator.squiggle
