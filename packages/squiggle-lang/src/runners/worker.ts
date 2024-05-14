@@ -1,13 +1,11 @@
 import { AST } from "../ast/parse.js";
 import { Env } from "../dists/env.js";
-import { SerializedIError, serializeIError } from "../errors/IError.js";
 import {
   SquiggleBundle,
   SquiggleBundleEntrypoint,
   squiggleCodec,
 } from "../serialization/squiggle.js";
-import { Err, Ok, result } from "../utility/result.js";
-import { baseRun } from "./common.js";
+import { baseRun, SerializedRunResult, serializeRunResult } from "./common.js";
 
 export type SquiggleWorkerJob = {
   environment: Env;
@@ -17,34 +15,22 @@ export type SquiggleWorkerJob = {
   sourceId: string;
 };
 
-export type SquiggleWorkerOutput = {
-  bundle: SquiggleBundle;
-  result: SquiggleBundleEntrypoint<"value">;
-  bindings: SquiggleBundleEntrypoint<"value">;
-  exports: SquiggleBundleEntrypoint<"value">;
-};
-
-export type SquiggleWorkerResult = result<
-  SquiggleWorkerOutput,
-  SerializedIError
->;
-
 export type SquiggleWorkerResponse =
   | {
       type: "result";
-      payload: SquiggleWorkerResult;
+      payload: SerializedRunResult;
     }
   | {
       type: "internal-error";
       payload: string;
     };
 
-function processJob(job: SquiggleWorkerJob): SquiggleWorkerResult {
-  const externalsValue = squiggleCodec
+function processJob(job: SquiggleWorkerJob): SerializedRunResult {
+  const externals = squiggleCodec
     .makeDeserializer(job.bundle)
     .deserialize(job.externalsEntrypoint);
 
-  if (externalsValue.type !== "Dict") {
+  if (externals.type !== "Dict") {
     throw new Error("Expected externals to be a dictionary");
   }
 
@@ -52,46 +38,24 @@ function processJob(job: SquiggleWorkerJob): SquiggleWorkerResult {
     ast: job.ast,
     sourceId: job.sourceId,
     environment: job.environment,
-    externals: externalsValue,
+    externals,
   });
-  if (result.ok) {
-    const resultStore = squiggleCodec.makeSerializer();
-    const resultEntrypoint = resultStore.serialize(
-      "value",
-      result.value.result
-    );
-    const bindingsEntrypoint = resultStore.serialize(
-      "value",
-      result.value.bindings
-    );
-    const exportsEntrypoint = resultStore.serialize(
-      "value",
-      result.value.exports
-    );
 
-    return Ok({
-      bundle: resultStore.getBundle(),
-      result: resultEntrypoint,
-      bindings: bindingsEntrypoint,
-      exports: exportsEntrypoint,
-    });
-  } else {
-    return Err(serializeIError(result.value));
-  }
+  return serializeRunResult(result);
 }
 
 function postTypedMessage(data: SquiggleWorkerResponse) {
   postMessage(data);
 }
 
-addEventListener("message", (e) => {
-  // TODO - validate e.data?
+addEventListener("message", (e: MessageEvent<SquiggleWorkerJob>) => {
   try {
+    const result = processJob(e.data);
     postTypedMessage({
       type: "result",
-      payload: processJob(e.data),
-    } satisfies SquiggleWorkerResponse);
-  } catch (e: unknown) {
+      payload: result,
+    });
+  } catch (e) {
     postTypedMessage({
       type: "internal-error",
       payload: String(e),
