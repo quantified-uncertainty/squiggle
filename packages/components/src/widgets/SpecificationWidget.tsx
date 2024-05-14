@@ -51,7 +51,7 @@ const SpecificationDropdownContent: FC<{
               "inline-flex items-center space-x-2 rounded-sm px-2 py-0.5 text-sm font-medium",
               hasError
                 ? "bg-red-100 text-red-900"
-                : "bg-green-100 text-green-900"
+                : "bg-emerald-100 text-emerald-900"
             )}
           >
             {hasError ? <XIcon size={12} /> : <CheckIcon size={16} />}
@@ -103,11 +103,11 @@ const SpecificationView: FC<{ specification: SqSpecification }> = ({
 }) => {
   return (
     <div>
-      <div className="mb-3 flex items-center space-x-1.5 text-green-800 opacity-80">
+      <div className="mb-3 flex items-center space-x-1.5 text-emerald-800 opacity-80">
         <CubeTransparentIcon className="flex" size={16} />
         <span className="flex text-xs">Specification</span>
       </div>
-      <div className="mb-1 font-medium text-green-900">
+      <div className="mb-1 font-medium text-emerald-900">
         {specification.name}
       </div>
       {specification.documentation && (
@@ -129,27 +129,27 @@ const SpecificationStatusPreview: FC<{
         "flex cursor-pointer flex-row items-center space-x-1.5 rounded-sm px-0.5 transition",
         hasError
           ? "bg-red-100 hover:bg-red-300"
-          : "bg-green-100 hover:bg-green-300"
+          : "bg-emerald-100 hover:bg-emerald-300"
       )}
     >
       <CubeTransparentIcon
         size={16}
         className={clsx(
           "opacity-50",
-          hasError ? "text-red-900" : "text-green-900"
+          hasError ? "text-red-900" : "text-emerald-900"
         )}
       />
       {hasError ? (
         <XIcon size={12} className="text-red-800" />
       ) : (
-        <CheckIcon size={16} className="text-green-800" />
+        <CheckIcon size={16} className="text-emerald-800" />
       )}
     </div>
   );
 };
 
 widgetRegistry.register("Specification", {
-  Preview: () => <CubeTransparentIcon className="text-green-700" size={14} />,
+  Preview: () => <CubeTransparentIcon className="text-emerald-700" size={14} />,
   Chart: (value) => (
     <div className="px-2 py-3">
       <SpecificationView specification={value.value} />

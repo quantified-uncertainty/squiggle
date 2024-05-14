@@ -4,6 +4,7 @@ import { BaseSyntheticEvent, FC, use, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
+import { PlaygroundToolbarItem } from "@quri/squiggle-components";
 import {
   ButtonWithDropdown,
   CommentIcon,
@@ -17,9 +18,9 @@ import {
 } from "@quri/ui";
 import {
   checkSquiggleVersion,
-  SquigglePlaygroundVersionPicker,
+  SquigglePlaygroundVersionPickerDropdown,
   type SquiggleVersion,
-  SquiggleVersionShower,
+  uncheckedVersionTitle,
   useAdjustSquiggleVersion,
   versionedSquigglePackages,
   versionSupportsDropdownMenu,
@@ -270,6 +271,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     }
   };
 
+  const codeHasChanged = form.watch("code") !== content.code;
+
   // We don't want to control SquigglePlayground, it's uncontrolled by design.
   // Instead, we reset the `defaultCode` that we pass to it when version is changed or draft is restored.
   const [defaultCode, setDefaultCode] = useState(content.code);
@@ -326,12 +329,14 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     renderExtraControls: () => (
       <div className="flex h-full items-center justify-end gap-2">
         {model.isEditable || forceVersionPicker ? (
-          <SquigglePlaygroundVersionPicker
-            version={version}
+          <SquigglePlaygroundVersionPickerDropdown
             onChange={handleVersionChange}
-            size="small"
             showUpdatePolicy
-          />
+          >
+            <PlaygroundToolbarItem showDropdownArrow={true}>
+              {uncheckedVersionTitle(version)}
+            </PlaygroundToolbarItem>
+          </SquigglePlaygroundVersionPickerDropdown>
         ) : (
           <TextTooltip
             text="Squiggle Version" // FIXME - positioning is bad for some reason
@@ -339,13 +344,18 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
             offset={5}
           >
             {/* div wrapper is required because TextTooltip clones its children and SquiggleVersionShower doesn't forwardRef */}
-            <div>
-              <SquiggleVersionShower version={version} />
+            <div className="h-full">
+              <PlaygroundToolbarItem showDropdownArrow={false}>
+                {uncheckedVersionTitle(version)}{" "}
+              </PlaygroundToolbarItem>
             </div>
           </TextTooltip>
         )}
         {model.isEditable && (
-          <SaveButton onSubmit={onSubmit} disabled={inFlight} />
+          <SaveButton
+            onSubmit={onSubmit}
+            disabled={inFlight || !codeHasChanged}
+          />
         )}
       </div>
     ),

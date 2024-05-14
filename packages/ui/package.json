@@ -108,6 +108,16 @@
       "no-console": "error",
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off"
-    }
+    },
+    "overrides": [
+      {
+        "files": [
+          "src/stories/**/*.tsx"
+        ],
+        "rules": {
+          "no-console": "off"
+        }
+      }
+    ]
   }
 }

@@ -16,11 +16,11 @@ export const SimulatingIndicator: FC<{
   return (
     <div
       className={clsx(
-        "whitespace-nowrap text-sm",
-        _isSimulating ? "text-zinc-200" : "text-zinc-400"
+        "whitespace-nowrap text-sm font-light",
+        _isSimulating ? "text-gray-200" : "text-gray-500"
       )}
     >
-      {`simulation #${simulation.executionId} in ${showTime(
+      {`Simulation #${simulation.executionId} in ${showTime(
         simulation.executionTime
       )}`}
     </div>

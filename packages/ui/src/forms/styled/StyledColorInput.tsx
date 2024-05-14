@@ -20,13 +20,13 @@ export function StyledColorInput({ value, onChange }: Props) {
               color={value}
               onChange={onChange}
               prefixed
-              className="mt-1 w-20 border border-gray-300 bg-slate-100 px-1 py-0 text-sm outline-indigo-500"
+              className="mt-1 w-20 border border-gray-300 bg-gray-100 px-1 py-0 text-sm outline-blue-500"
             />
           </div>
         </DropdownMenu>
       )}
     >
-      <div className="h-10 w-10 rounded border border-slate-200 p-1">
+      <div className="h-10 w-10 rounded border border-gray-200 p-1">
         <div
           style={{ backgroundColor: value }}
           className="h-full w-full rounded"

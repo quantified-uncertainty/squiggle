@@ -66,7 +66,7 @@ const Toast: FC<{ toast: ToastShape }> = ({ toast }) => {
         "flex items-center gap-2",
         "cursor-pointer rounded border bg-white px-8 py-4 text-sm shadow-lg",
         toast.type === "error" && "text-red-700",
-        toast.type === "confirmation" && "text-slate-700"
+        toast.type === "confirmation" && "text-gray-700"
       )}
       onClick={remove}
     >

@@ -17,7 +17,7 @@ const iconDisplay = (icon?: FC<IconProps>, acting?: boolean) => {
     <Icon
       size={14}
       className={clsx(
-        "text-slate-400 group-hover:text-slate-900",
+        "text-gray-400 group-hover:text-gray-500",
         acting && "animate-spin"
       )}
     />
@@ -30,9 +30,9 @@ export const DropdownMenuItemLayout: FC<ItemLayoutProps> = ({
   acting,
 }) => {
   return (
-    <div className="group m-1 flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 transition-colors duration-75 hover:bg-blue-100">
+    <div className="group m-1 flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 transition-colors duration-75 hover:bg-slate-50">
       {iconDisplay(icon, acting)}
-      <div className="flex-1 text-sm font-medium text-slate-700 group-hover:text-slate-900">
+      <div className="flex-1 text-sm font-light text-gray-700 group-hover:text-gray-900">
         {title}
       </div>
     </div>

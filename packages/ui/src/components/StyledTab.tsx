@@ -52,8 +52,8 @@ const StyledTabInner: FC<StyledTabButtonType> = ({
       <span
         className={clsx(
           isSelected
-            ? "text-gray-900"
-            : "text-gray-600 group-hover:text-gray-900",
+            ? "text-gray-800"
+            : "text-gray-500 group-hover:text-gray-900",
           !Icon && "px-1"
         )}
       >

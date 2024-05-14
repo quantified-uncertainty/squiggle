@@ -137,12 +137,12 @@ export const ValueWithContextViewer: FC<Props> = ({
       return (
         <div
           className={clsx(
-            "mr-1.5 flex w-4 cursor-pointer justify-center hover:!text-stone-600",
-            isOpen ? "text-stone-600 opacity-40" : "text-stone-800 opacity-40"
+            "mr-1.5 flex w-4 cursor-pointer justify-center hover:!text-gray-600",
+            isOpen ? "text-gray-200" : "text-gray-500"
           )}
           onClick={handle.toggleCollapsed}
         >
-          <Icon size={13} />
+          <Icon size={9} />
         </div>
       );
     } else {
@@ -158,7 +158,7 @@ export const ValueWithContextViewer: FC<Props> = ({
           className="group flex w-4 shrink-0 cursor-pointer justify-center"
           onClick={handle.toggleCollapsed}
         >
-          <div className="w-px bg-stone-100 group-hover:bg-stone-400" />
+          <div className="w-px bg-gray-50 group-hover:bg-gray-300" />
         </div>
       );
     } else {
@@ -178,10 +178,8 @@ export const ValueWithContextViewer: FC<Props> = ({
             }}
             tabIndex={viewerType === "tooltip" ? undefined : 0}
             className={clsx(
-              "group flex justify-between rounded-sm pr-0.5 hover:bg-stone-100 focus-visible:outline-none",
-              isZoomedIn
-                ? "mb-2 px-0.5 py-1 focus:bg-indigo-50"
-                : "focus:bg-indigo-100"
+              "group flex justify-between rounded-sm pr-0.5 hover:bg-gray-100 focus:bg-slate-100 focus-visible:outline-none",
+              isZoomedIn && "mb-2 px-0.5 py-1"
             )}
             onFocus={(_) => {
               scrollEditorToPath();
@@ -239,7 +237,7 @@ export const ValueWithContextViewer: FC<Props> = ({
                       className={clsx(
                         "cursor-pointer transition",
                         isRootImport
-                          ? "text-violet-400 hover:!text-violet-900 group-hover:text-violet-500 group-focus:text-violet-600"
+                          ? "text-cyan-200 hover:!text-cyan-900 group-hover:text-cyan-700 group-focus:text-cyan-700"
                           : "text-slate-200 hover:!text-slate-900 group-hover:text-slate-400 group-focus:text-slate-400"
                       )}
                     />

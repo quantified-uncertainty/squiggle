@@ -43,7 +43,7 @@ export function PanelWithToolbar<const ModalNames extends string[]>({
       >
         &larr; Back
       </ToolbarItem>
-      <div className="flex-shrink flex-grow self-center text-center text-sm font-semibold text-slate-600">
+      <div className="flex-shrink flex-grow self-center text-center text-sm font-semibold text-gray-600">
         {modal.title}
       </div>
       <div className="invisible w-20 flex-shrink-0 flex-grow-0"></div>
@@ -52,7 +52,7 @@ export function PanelWithToolbar<const ModalNames extends string[]>({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="mb-1 h-8 overflow-hidden border-b border-slate-200 bg-slate-50 px-4">
+      <div className="mb-1 h-8 overflow-hidden border-b border-gray-200 px-4">
         {modal ? (
           modalHeader
         ) : (

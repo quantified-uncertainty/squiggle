@@ -29,9 +29,8 @@ type StandardProps = {
   title?: string;
   color?: string;
   textSize?: string;
-  font?: string;
   icon?: JSX.Element;
-  showColon?: boolean;
+  hasEdges?: boolean;
   isFocusEnabled?: boolean;
 };
 
@@ -51,18 +50,18 @@ const getStandardProps = (props: TitleProps): StandardProps => {
     viewerType === "tooltip" && { isFocusEnabled: false },
     valuePath.edges.length > 1 && {
       color: "text-teal-700",
-      showColon: true,
+      hasEdges: true,
     },
     headerVisibility === "large" && {
       color: "text-stone-700",
       textSize: "text-md font-bold",
-      showColon: false,
+      hasEdges: false,
       isFocusEnabled: false,
     },
     isRoot && {
       color: "text-stone-500",
       textSize: "text-sm font-semibold",
-      showColon: false,
+      hasEdges: false,
       isFocusEnabled: false,
     },
     parentValue?.tag === "Array" &&
@@ -71,13 +70,12 @@ const getStandardProps = (props: TitleProps): StandardProps => {
       },
     taggedName && {
       title: taggedName,
-      font: "font-sans",
     },
     isRootImport && {
       title: exportData?.sourceId || undefined,
-      color: "text-violet-900",
-      icon: <CodeBracketIcon size={12} className="mr-1 text-violet-900" />,
-      showColon: false,
+      color: "text-cyan-600",
+      icon: <CodeBracketIcon size={12} className="mr-1 text-cyan-600" />,
+      hasEdges: false,
     },
   ]);
 
@@ -91,17 +89,16 @@ export const Title: FC<TitleProps> = (props) => {
     title = pathToShortName(valuePath),
     color = "text-orange-900",
     icon = undefined,
-    showColon = false,
+    hasEdges = false,
     isFocusEnabled = true,
     textSize = "text-sm",
-    font = "font-mono",
   } = standards;
 
   return (
     <div
       className={clsx(
         "flex flex-row items-center leading-3",
-        showColon && "mr-3"
+        hasEdges && "mr-3"
       )}
     >
       {icon}
@@ -109,14 +106,13 @@ export const Title: FC<TitleProps> = (props) => {
         className={clsx(
           color,
           textSize,
-          font,
+          "font-mono",
           isFocusEnabled && "cursor-pointer hover:underline"
         )}
         onClick={() => isFocusEnabled && zoomIn(valuePath)}
       >
         {title}
       </div>
-      {showColon && <div className="font-mono text-gray-400">:</div>}
     </div>
   );
 };

@@ -2,11 +2,13 @@ import { fromByteArray, toByteArray } from "base64-js";
 import { deflate, inflate } from "pako";
 import { FC, useEffect, useState } from "react";
 
+import { PlaygroundToolbarItem } from "@quri/squiggle-components";
 import {
   defaultSquiggleVersion,
-  SquigglePlaygroundVersionPicker,
+  SquigglePlaygroundVersionPickerDropdown,
   type SquiggleVersion,
   squiggleVersions,
+  uncheckedVersionTitle,
   versionedSquigglePackages,
 } from "@quri/versioned-squiggle-components";
 
@@ -112,11 +114,14 @@ export const PlaygroundPage: FC<{ version: string | null }> = (props) => {
             renderExtraControls={() => (
               <div className="flex h-full items-center justify-end gap-2">
                 <ShareButton />
-                <SquigglePlaygroundVersionPicker
-                  size="small"
-                  version={version}
+                <SquigglePlaygroundVersionPickerDropdown
                   onChange={onVersionChange}
-                />
+                  showUpdatePolicy
+                >
+                  <PlaygroundToolbarItem showDropdownArrow={true}>
+                    {uncheckedVersionTitle(version)}
+                  </PlaygroundToolbarItem>
+                </SquigglePlaygroundVersionPickerDropdown>
               </div>
             )}
             onCodeChange={(code) => updateUrl({ defaultCode: code }, version)}

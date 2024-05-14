@@ -34,7 +34,7 @@ export const FieldLayout: FC<PropsWithChildren<FormFieldLayoutProps>> = ({
             className={clsx(
               "mb-1 text-sm font-medium",
               // TODO - add `disabled` prop?
-              "text-gray-900",
+              "text-gray-700",
               inlineLabel && "leading-none"
             )}
           >
@@ -44,7 +44,7 @@ export const FieldLayout: FC<PropsWithChildren<FormFieldLayoutProps>> = ({
         {children}
       </div>
       {description !== undefined && (
-        <div className="mt-1 text-sm text-slate-600">{description}</div>
+        <div className="mt-1 text-sm text-gray-600">{description}</div>
       )}
     </OuterTag>
   );

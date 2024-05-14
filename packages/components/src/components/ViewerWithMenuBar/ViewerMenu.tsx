@@ -2,17 +2,15 @@ import clsx from "clsx";
 import { FC } from "react";
 
 import {
-  Button,
-  CodeBracketIcon,
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
   DropdownMenuHeader,
-  TriangleIcon,
 } from "@quri/ui";
 
 import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SelectableViewerTab, ViewerTab } from "../../lib/utility.js";
+import { ToolbarItem } from "../ui/PanelWithToolbar/ToolbarItem.js";
 
 const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
   title,
@@ -21,11 +19,11 @@ const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
   const isEmpty = type === null;
   return (
     <div className="flex justify-between">
-      <span className={clsx(isEmpty && "text-slate-400")}>{title}</span>
+      <span className={clsx(isEmpty && "text-gray-400")}>{title}</span>
       {isEmpty ? (
-        <span className="text-slate-300">Empty</span>
+        <span className="text-gray-300">Empty</span>
       ) : (
-        <span className="text-blue-800">{type}</span>
+        <span className="text-gray-400">{type}</span>
       )}
     </div>
   );
@@ -78,12 +76,27 @@ export const ViewerMenu: FC<Props> = ({
                   return null;
               }
             };
+            const viewerName = () => {
+              switch (tab) {
+                case "Imports":
+                  return "Imports";
+                case "Variables":
+                  return "Local Variables";
+                case "Exports":
+                  return "Exported Variables";
+                case "Result":
+                  return "Final Result";
+                default:
+                  return "";
+              }
+            };
             return (
               tab !== "AST" && (
                 <DropdownMenuActionItem
                   key={tab}
-                  icon={CodeBracketIcon}
-                  title={<MenuItemTitle title={tab} type={getType()} />}
+                  title={
+                    <MenuItemTitle title={viewerName()} type={getType()} />
+                  }
                   onClick={() => {
                     setViewerTab(tab);
                     close();
@@ -94,7 +107,6 @@ export const ViewerMenu: FC<Props> = ({
           })}
           <DropdownMenuHeader>Debugging</DropdownMenuHeader>
           <DropdownMenuActionItem
-            icon={CodeBracketIcon}
             title={<MenuItemTitle title="AST" type="" />}
             onClick={() => {
               setViewerTab("AST");
@@ -104,12 +116,7 @@ export const ViewerMenu: FC<Props> = ({
         </DropdownMenu>
       )}
     >
-      <Button size="small">
-        <div className="flex items-center space-x-1.5">
-          <span>{viewerTabTitle(viewerTab)}</span>
-          <TriangleIcon className="rotate-180 text-slate-400" size={10} />
-        </div>
-      </Button>
+      <ToolbarItem showDropdownArrow>{viewerTabTitle(viewerTab)}</ToolbarItem>
     </Dropdown>
   );
 };

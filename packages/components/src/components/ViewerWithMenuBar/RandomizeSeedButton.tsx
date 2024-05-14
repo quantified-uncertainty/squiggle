@@ -24,11 +24,11 @@ const DiceIcon: FC<{ side: number; isSimulating: boolean }> = ({
   isSimulating,
 }) => {
   const props = {
-    size: 16,
+    size: 14,
     className: clsx(
       isSimulating
-        ? "animate-spin text-violet-400 group-hover:text-violet-900"
-        : "text-violet-200 group-hover:text-violet-500"
+        ? "animate-spin text-gray-500 group-hover:text-gray-600"
+        : "text-gray-300 group-hover:text-gray-600"
     ),
   };
   switch (side) {

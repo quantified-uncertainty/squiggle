@@ -38,6 +38,7 @@ export { StyledCheckbox } from "./forms/styled/StyledCheckbox.js";
 export { StyledColorInput } from "./forms/styled/StyledColorInput.js";
 export { StyledInput } from "./forms/styled/StyledInput.js";
 export { StyledTextArea } from "./forms/styled/StyledTextArea.js";
+// export { StyledToggle } from "./forms/styled/StyledToggle.js"; // For some reason, this breaks the Hub, in dev.
 
 export { DotsHorizontalIcon } from "./icons/DotsHorizontalIcon.js";
 export { EditIcon } from "./icons/EditIcon.js";
@@ -108,6 +109,7 @@ export {
   Die6Icon,
 } from "./icons/DieIcons.js";
 export { ErrorIcon } from "./icons/ErrorIcon.js";
+export { IconByName } from "./icons/IconByName.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";
 
