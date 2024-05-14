@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 
-import { SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { SqLocation, SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
 import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
@@ -184,35 +184,34 @@ export class ItemStore {
 }
 
 type ViewerContextShape = {
-  // Note that we don't store `localItemState` itself in the context (that would cause rerenders of the entire tree on each settings update).
-  // Instead, we keep `localItemState` in local state and notify the global context via `setLocalItemState` to pass them down the component tree again if it got rebuilt from scratch.
-  // See ./SquiggleViewer.tsx and ./ValueWithContextViewer.tsx for other implementation details on this.
+  initialized: boolean;
+  viewerType: ViewerType;
+  // Note that `ItemStore` is not reactive (making it immutable and reactive would cause rerenders of the entire tree on each settings update).
+  // See `ItemStore` and `./SquiggleViewer/index.tsx` and `ValueWithContextViewer.tsx` for more details on this.
+  itemStore: ItemStore;
+  rootValue?: SqValueWithContext;
   globalSettings: PlaygroundSettings;
+  visibleRootPath?: SqValuePath;
   zoomedInPath: SqValuePath | undefined;
   setZoomedInPath: (value: SqValuePath | undefined) => void;
-  editor?: CodeEditorHandle;
-  itemStore: ItemStore;
-  viewerType: ViewerType;
-  initialized: boolean;
+  externalViewerActions: ExternalViewerActions;
   handle: SquiggleViewerHandle;
-  rootValue?: SqValueWithContext;
-  visibleRootPath?: SqValuePath;
   findNode: (path: SqValuePath) => SqListViewNode | undefined;
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
+  initialized: false,
+  viewerType: "normal",
+  itemStore: new ItemStore(),
+  rootValue: undefined,
   globalSettings: defaultPlaygroundSettings,
+  visibleRootPath: undefined,
   zoomedInPath: undefined,
   setZoomedInPath: () => undefined,
-  editor: undefined,
-  itemStore: new ItemStore(),
-  viewerType: "normal",
+  externalViewerActions: {},
   handle: {
     focusByPath: () => {},
   },
-  initialized: false,
-  rootValue: undefined,
-  visibleRootPath: undefined,
   findNode: () => undefined,
 });
 
@@ -326,15 +325,15 @@ export function useZoomOut() {
 }
 
 export function useScrollToEditorPath(path: SqValuePath) {
-  const { editor, findNode } = useViewerContext();
+  const { externalViewerActions, findNode } = useViewerContext();
   return () => {
-    if (editor) {
+    if (externalViewerActions.show) {
       const value = findNode(path)?.value();
       const taggedLocation = value?.tags.location();
       const location = taggedLocation || value?.context?.findLocation();
 
       if (location) {
-        editor?.scrollTo(location.start.offset, false);
+        externalViewerActions.show?.(location, false);
       }
     }
   };
@@ -362,9 +361,53 @@ export function useViewerType() {
   return viewerType;
 }
 
+// List of callbacks that should do something outside of the viewer.
+// The common case is to scroll the editor to the necessary position in the playground.
+export type ExternalViewerActions = Partial<{
+  // TODO: this function is not imports-friendly yet.
+  // E.g. in stacktraces, the user might want to click on an error location and
+  // go to the source that's identified not just by an offset, but also its
+  // sourceId.
+  show: (location: SqLocation, focus: boolean) => void;
+  // When the viewer can focus on the location, will it be able to do that?
+  // This affects, for example, whether the links in stacktraces are clickable.
+  isFocusable: (location: SqLocation) => boolean;
+  // Should the viewer omit the source id because it's trivial?
+  // E.g. in playground stacktraces we want to show source id only for imports, but not for the currently edited file.
+  isDefaultSourceId: (sourceId: string) => boolean;
+}>;
+
+// Configure external actions for the common case of editor actions, e.g. for the playground or `<SquiggleEditor>` component.
+export function useExternalViewerActionsForEditor(
+  // Intentionally supports null and undefined - conditional hooks are not
+  // possible and this hook is often used in components that take an optional
+  // `editor` prop, or wire the editor components with a ref.
+  editor: CodeEditorHandle | null | undefined
+): ExternalViewerActions {
+  return useMemo(() => {
+    if (!editor) {
+      return {};
+    }
+    const actions: ExternalViewerActions = {
+      show: (location, focus) => {
+        editor.scrollTo(location, focus);
+      },
+      isFocusable: (location) => {
+        // only the edited source id is focusable
+        return editor.getSourceId() === location.source;
+      },
+      isDefaultSourceId: (sourceId) => {
+        // hide the sourceId in stacktraces if it's for the currently edited code
+        return editor.getSourceId() === sourceId;
+      },
+    };
+    return actions;
+  }, [editor]);
+}
+
 type Props = PropsWithChildren<{
   partialPlaygroundSettings: PartialPlaygroundSettings;
-  editor?: CodeEditorHandle;
+  externalViewerActions?: ExternalViewerActions;
   viewerType?: ViewerType;
   rootValue: SqValue | undefined;
   visibleRootPath?: SqValuePath;
@@ -374,7 +417,7 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
   (
     {
       partialPlaygroundSettings: unstablePlaygroundSettings,
-      editor,
+      externalViewerActions = {},
       viewerType = "normal",
       rootValue,
       visibleRootPath,
@@ -393,17 +436,15 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
       unstablePlaygroundSettings
     );
 
-    const [zoomedInPath, setZoomedInPathPath] = useState<
-      SqValuePath | undefined
-    >();
-
     const globalSettings = useMemo(() => {
       return merge({}, defaultPlaygroundSettings, playgroundSettings);
     }, [playgroundSettings]);
 
+    const [zoomedInPath, setZoomedInPath] = useState<SqValuePath | undefined>();
+
     const handle: SquiggleViewerHandle = {
       focusByPath(path: SqValuePath) {
-        setZoomedInPathPath(undefined);
+        setZoomedInPath(undefined);
         setTimeout(() => {
           itemStore.focusByPath(path);
         }, 0);
@@ -418,16 +459,16 @@ export const InnerViewerProvider = forwardRef<SquiggleViewerHandle, Props>(
     return (
       <ViewerContext.Provider
         value={{
-          rootValue: _rootValue,
-          visibleRootPath,
-          globalSettings,
-          editor,
-          zoomedInPath,
-          setZoomedInPath: setZoomedInPathPath,
-          itemStore,
-          viewerType,
-          handle,
           initialized: true,
+          viewerType,
+          itemStore,
+          rootValue: _rootValue,
+          globalSettings,
+          visibleRootPath,
+          zoomedInPath,
+          setZoomedInPath,
+          externalViewerActions,
+          handle,
           findNode: (path) => findNode(_rootValue, path, itemStore),
         }}
       >

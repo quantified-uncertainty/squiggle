@@ -1,10 +1,10 @@
-import { clsx } from "clsx";
 import { FC, PropsWithChildren } from "react";
 
 import {
   SqCompileError,
   SqError,
   SqFrame,
+  SqLocation,
   SqRuntimeError,
 } from "@quri/squiggle-lang";
 
@@ -15,22 +15,29 @@ type Props = {
   error: SqError;
 };
 
-const LocationLine: FC<{
-  location: NonNullable<ReturnType<SqFrame["location"]>>;
-}> = ({ location }) => {
-  const { editor } = useViewerContext();
+const LocationLine: FC<{ location: SqLocation }> = ({ location }) => {
+  const { externalViewerActions } = useViewerContext();
 
-  const findInEditor = () => {
-    editor?.scrollTo(location.start.offset, true);
-  };
+  const text =
+    `line ${location.start.line}, column ${location.start.column}` +
+    (externalViewerActions?.isDefaultSourceId?.(location.source)
+      ? ""
+      : `, file ${location.source}`);
 
-  return (
-    <span
-      className={clsx(editor && "cursor-pointer text-blue-500 hover:underline")}
-      onClick={editor ? findInEditor : undefined}
+  return externalViewerActions.show &&
+    externalViewerActions.isFocusable?.(location) ? (
+    <a
+      href="#"
+      onClick={(e) => {
+        e.preventDefault();
+        externalViewerActions.show?.(location, true);
+      }}
+      className="text-blue-500 hover:underline"
     >
-      line {location.start.line}, column {location.start.column}
-    </span>
+      {text}
+    </a>
+  ) : (
+    <span>{text}</span>
   );
 };
 

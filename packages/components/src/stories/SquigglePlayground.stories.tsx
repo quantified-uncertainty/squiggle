@@ -202,7 +202,7 @@ export x=1`;
 export const ManyTypes: Story = {
   name: "Many types",
   args: {
-    linker: linker,
+    linker,
     onOpenExport: (sourceId, varName) => {
       // eslint-disable-next-line no-console
       console.log("Clicked Export with params", sourceId, varName);

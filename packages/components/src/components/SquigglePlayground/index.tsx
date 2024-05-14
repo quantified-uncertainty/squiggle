@@ -11,6 +11,7 @@ import {
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import { ProjectContext } from "../ProjectProvider.js";
+import { useExternalViewerActionsForEditor } from "../SquiggleViewer/ViewerProvider.js";
 import {
   ViewerWithMenuBar,
   ViewerWithMenuBarHandle,
@@ -162,6 +163,10 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     );
   };
 
+  const externalViewerActions = useExternalViewerActionsForEditor(
+    leftPanelRef.current?.getEditor()
+  );
+
   const renderRight = () => {
     if (simulation) {
       return (
@@ -171,7 +176,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
           <ViewerWithMenuBar
             simulation={simulation}
             // FIXME - this will cause viewer to be rendered twice on initial render
-            editor={leftPanelRef.current?.getEditor() ?? undefined}
+            externalViewerActions={externalViewerActions}
             playgroundSettings={settings}
             ref={rightPanelRef}
             useGlobalShortcuts={true}

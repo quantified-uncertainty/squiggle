@@ -7,10 +7,10 @@ import {
   viewerTabToValue,
   viewerTabToVisibleRootPath,
 } from "../../lib/utility.js";
-import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleViewerWithoutProvider } from "../SquiggleViewer/index.js";
 import {
+  ExternalViewerActions,
   SquiggleViewerHandle,
   ViewerProvider,
 } from "../SquiggleViewer/ViewerProvider.js";
@@ -20,13 +20,19 @@ type Props = {
   viewerTab: ViewerTab;
   outputResult: SqOutputResult;
   isSimulating: boolean;
-  editor?: CodeEditorHandle;
+  externalViewerActions?: ExternalViewerActions;
   playgroundSettings: PartialPlaygroundSettings;
 };
 
 export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
   function ViewerBody(
-    { outputResult, viewerTab, isSimulating, editor, playgroundSettings },
+    {
+      outputResult,
+      viewerTab,
+      isSimulating,
+      externalViewerActions,
+      playgroundSettings,
+    },
     viewerRef
   ) {
     const body = () => {
@@ -65,9 +71,9 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
 
     return (
       <ViewerProvider
-        partialPlaygroundSettings={playgroundSettings}
-        editor={editor}
         ref={viewerRef}
+        partialPlaygroundSettings={playgroundSettings}
+        externalViewerActions={externalViewerActions}
         visibleRootPath={viewerTabToVisibleRootPath(viewerTab)}
         rootValue={
           outputResult.ok
