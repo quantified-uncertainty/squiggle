@@ -273,6 +273,7 @@ export class SqProject {
         "bindings"
       ),
       imports: wrapSqDict(externals.explicitImports, "imports"),
+      raw: internalOutputR.value,
     });
   }
 

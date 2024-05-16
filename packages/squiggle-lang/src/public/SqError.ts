@@ -1,6 +1,16 @@
-import { ICompileError, IRuntimeError } from "../errors/IError.js";
+import { ICompileError, IError, IRuntimeError } from "../errors/IError.js";
 import { StackTraceFrame } from "../reducer/StackTrace.js";
 import { SqProject } from "./SqProject/index.js";
+
+export function wrapError(err: IError, project: SqProject): SqError {
+  if (err instanceof IRuntimeError) {
+    return new SqRuntimeError(err, project);
+  } else if (err instanceof ICompileError) {
+    return new SqCompileError(err);
+  } else {
+    throw err satisfies never;
+  }
+}
 
 abstract class SqAbstractError<T extends string> {
   abstract tag: T;
