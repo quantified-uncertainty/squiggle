@@ -224,9 +224,7 @@ export class SqProject {
 
     const {
       runOutput: { result, bindings, exports },
-      externals,
-      ast,
-      source,
+      context: { externals, ast, source },
     } = internalOutputR.value;
 
     const lastStatement = ast.statements.at(-1);

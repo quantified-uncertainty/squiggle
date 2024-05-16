@@ -4,7 +4,7 @@ import { deserializeRunResult } from "./common.js";
 import { SquiggleWorkerJob, SquiggleWorkerResponse } from "./worker.js";
 
 export async function runWithWorker(
-  { environment, ast, sourceId, externals }: RunParams,
+  { environment, ast, externals }: RunParams,
   worker: Worker
 ): Promise<RunResult> {
   const store = squiggleCodec.makeSerializer();
@@ -16,7 +16,6 @@ export async function runWithWorker(
     ast,
     bundle,
     externalsEntrypoint,
-    sourceId,
   } satisfies SquiggleWorkerJob);
 
   return new Promise<RunResult>((resolve) => {

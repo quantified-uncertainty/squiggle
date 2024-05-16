@@ -1,7 +1,7 @@
 import { AST, parse } from "../../ast/parse.js";
 import { Env } from "../../dists/env.js";
 import { ICompileError } from "../../errors/IError.js";
-import { RunOutput } from "../../runners/BaseRunner.js";
+import { RunOutput, RunParams } from "../../runners/BaseRunner.js";
 import * as Result from "../../utility/result.js";
 import { Err, Ok, result } from "../../utility/result.js";
 import { VDict, vDictFromArray } from "../../value/VDict.js";
@@ -16,11 +16,20 @@ export type Externals = {
   explicitImports: VDict;
 };
 
-export type ProjectItemOutput = {
-  runOutput: RunOutput;
-  source: string;
+// Every time we run the item and cache its `ProjectItemOutput`, we also store the context that was used for that run.
+// This context is useful later for constructing `SqOutput`, and also for `SqValueContext`.
+// This type is similar to `RunParams` from the runners APIs, but has enough differences to be separate.
+type RunContext = {
   ast: AST;
+  sourceId: string;
+  source: string;
+  environment: Env;
   externals: Externals;
+};
+
+export type ProjectItemOutput = {
+  context: RunContext;
+  runOutput: RunOutput;
 };
 
 export type ProjectItemOutputResult = result<ProjectItemOutput, SqError>;
@@ -207,25 +216,29 @@ export class ProjectItem {
     }
     const ast = this.ast.value;
 
-    const _externals = vDictFromArray([])
-      .merge(externals.implicitImports)
-      .merge(externals.explicitImports);
-
-    const runResult = await project.runner.run({
-      environment,
+    const context: RunContext = {
       ast,
-      externals: _externals,
       sourceId: this.sourceId,
-    });
+      source: this.source,
+      environment,
+      externals,
+    };
+
+    const runParams: RunParams = {
+      ast,
+      environment,
+      externals: vDictFromArray([])
+        .merge(externals.implicitImports)
+        .merge(externals.explicitImports),
+    };
+
+    const runResult = await project.runner.run(runParams);
 
     this.output = Result.fmap2(
       runResult,
       (value) => ({
         runOutput: value,
-        source: this.source,
-        sourceId: this.sourceId,
-        ast,
-        externals,
+        context,
       }),
       (err) => wrapError(err, project)
     );

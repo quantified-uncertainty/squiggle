@@ -17,7 +17,11 @@ import { Value } from "../value/index.js";
 import { vDict, VDict } from "../value/VDict.js";
 import { RunParams, RunResult } from "./BaseRunner.js";
 
-export function baseRun(params: RunParams): RunResult {
+export function baseRun(
+  // `source` is not used, and we don't pass it to worker in WebWorkerRunner;
+  // it's fine if some code passes the full `RunParams` here though.
+  params: Omit<RunParams, "source">
+): RunResult {
   const expressionResult = compileAst(
     params.ast,
     getStdLib().merge(params.externals.value)
@@ -43,13 +47,15 @@ export function baseRun(params: RunParams): RunResult {
   }
 
   const exportNames = new Set(expression.value.exports);
+  const sourceId = params.ast.location.source;
+
   const bindings = ImmutableMap<string, Value>(
     Object.entries(expression.value.bindings).map(([name, offset]) => {
       let value = reducer.stack.get(offset);
       if (exportNames.has(name)) {
         value = value.mergeTags({
           exportData: {
-            sourceId: params.sourceId,
+            sourceId,
             path: [name],
           },
         });
@@ -66,7 +72,7 @@ export function baseRun(params: RunParams): RunResult {
     bindings: vDict(bindings),
     exports: vDict(exports).mergeTags({
       exportData: {
-        sourceId: params.sourceId,
+        sourceId,
         path: [],
       },
     }),

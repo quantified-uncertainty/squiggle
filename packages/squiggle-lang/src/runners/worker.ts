@@ -12,7 +12,6 @@ export type SquiggleWorkerJob = {
   ast: AST;
   bundle: SquiggleBundle;
   externalsEntrypoint: SquiggleBundleEntrypoint<"value">;
-  sourceId: string;
 };
 
 export type SquiggleWorkerResponse =
@@ -36,7 +35,6 @@ function processJob(job: SquiggleWorkerJob): SerializedRunResult {
 
   const result = baseRun({
     ast: job.ast,
-    sourceId: job.sourceId,
     environment: job.environment,
     externals,
   });
