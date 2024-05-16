@@ -9,16 +9,21 @@ import { SqCompileError, SqError, wrapError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 import { SqProject } from "./index.js";
 
-// source -> ast -> imports -> result/bindings/exports
+// source -> ast -> imports -> runOutput
 
 export type Externals = {
   implicitImports: VDict;
   explicitImports: VDict;
 };
 
-export type RunOutputWithExternals = RunOutput & {
+export type ProjectItemOutput = {
+  runOutput: RunOutput;
+  source: string;
+  ast: AST;
   externals: Externals;
 };
+
+export type ProjectItemOutputResult = result<ProjectItemOutput, SqError>;
 
 export type Import =
   | {
@@ -40,7 +45,7 @@ export class ProjectItem {
   continues: string[];
   ast?: result<AST, SqError>;
   imports?: result<Import[], SqError>;
-  output?: result<RunOutputWithExternals, SqError>;
+  output?: ProjectItemOutputResult;
 
   constructor(props: { sourceId: string; source: string }) {
     this.sourceId = props.sourceId;
@@ -200,6 +205,7 @@ export class ProjectItem {
       this.output = Err(this.ast.value);
       return;
     }
+    const ast = this.ast.value;
 
     const _externals = vDictFromArray([])
       .merge(externals.implicitImports)
@@ -207,14 +213,20 @@ export class ProjectItem {
 
     const runResult = await project.runner.run({
       environment,
-      ast: this.ast.value,
+      ast,
       externals: _externals,
       sourceId: this.sourceId,
     });
 
     this.output = Result.fmap2(
       runResult,
-      (value) => ({ ...value, externals }),
+      (value) => ({
+        runOutput: value,
+        source: this.source,
+        sourceId: this.sourceId,
+        ast,
+        externals,
+      }),
       (err) => wrapError(err, project)
     );
   }

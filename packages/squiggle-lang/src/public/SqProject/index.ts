@@ -1,4 +1,3 @@
-import { AST } from "../../ast/parse.js";
 import { isBindingStatement } from "../../ast/utils.js";
 import { defaultEnv, Env } from "../../dists/env.js";
 import { getStdLib } from "../../library/index.js";
@@ -19,7 +18,7 @@ import {
   type Externals,
   Import,
   ProjectItem,
-  RunOutputWithExternals,
+  ProjectItemOutput,
 } from "./ProjectItem.js";
 
 function getNeedToRunError() {
@@ -196,7 +195,7 @@ export class SqProject {
 
   private getInternalOutput(
     sourceId: string
-  ): Result.result<RunOutputWithExternals, SqError> {
+  ): Result.result<ProjectItemOutput, SqError> {
     return this.getItem(sourceId).output ?? Result.Err(getNeedToRunError());
   }
 
@@ -223,19 +222,12 @@ export class SqProject {
       return internalOutputR;
     }
 
-    const source = this.getSource(sourceId);
-    if (source === undefined) {
-      throw new Error("Internal error: source not found");
-    }
-
-    const astR = this.getItem(sourceId).ast;
-    if (!astR) {
-      throw new Error("Internal error: AST is missing when result is ok");
-    }
-    if (!astR.ok) {
-      return astR; // impossible because output is valid
-    }
-    const ast: AST = astR.value;
+    const {
+      runOutput: { result, bindings, exports },
+      externals,
+      ast,
+      source,
+    } = internalOutputR.value;
 
     const lastStatement = ast.statements.at(-1);
 
@@ -247,12 +239,12 @@ export class SqProject {
       return new SqValueContext({
         project: this,
         sourceId,
-        source: source!,
+        source,
         ast,
         valueAst: isResult && hasEndExpression ? lastStatement : ast,
         valueAstIsPrecise: isResult ? hasEndExpression : true,
         path: new SqValuePath({
-          root: root,
+          root,
           edges: [],
         }),
       });
@@ -261,8 +253,6 @@ export class SqProject {
     const wrapSqDict = (innerDict: VDict, root: ValuePathRoot): SqDict => {
       return new SqDict(innerDict, newContext(root));
     };
-
-    const { result, bindings, exports, externals } = internalOutputR.value;
 
     return Result.Ok({
       result: wrapValue(result, newContext("result")),
@@ -325,12 +315,12 @@ export class SqProject {
     // TODO - check for name collisions?
     switch (importBinding.type) {
       case "flat":
-        return Result.Ok(outputR.value.bindings);
+        return Result.Ok(outputR.value.runOutput.bindings);
       case "named":
         return Result.Ok(
           vDict(
             ImmutableMap({
-              [importBinding.variable]: outputR.value.exports,
+              [importBinding.variable]: outputR.value.runOutput.exports,
             })
           )
         );
