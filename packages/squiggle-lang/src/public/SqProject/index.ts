@@ -222,9 +222,10 @@ export class SqProject {
       return internalOutputR;
     }
 
+    const runContext = internalOutputR.value.context;
+    const { externals, ast } = runContext;
     const {
       runOutput: { result, bindings, exports },
-      context: { externals, ast, source },
     } = internalOutputR.value;
 
     const lastStatement = ast.statements.at(-1);
@@ -235,10 +236,7 @@ export class SqProject {
     const newContext = (root: ValuePathRoot) => {
       const isResult = root === "result";
       return new SqValueContext({
-        project: this,
-        sourceId,
-        source,
-        ast,
+        runContext,
         valueAst: isResult && hasEndExpression ? lastStatement : ast,
         valueAstIsPrecise: isResult ? hasEndExpression : true,
         path: new SqValuePath({

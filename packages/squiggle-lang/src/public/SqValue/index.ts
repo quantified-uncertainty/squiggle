@@ -124,7 +124,7 @@ export abstract class SqAbstractValue<Type extends string, JSType, ValueType> {
       return (this as SqDictValue).value.get(pathEdge.value.value);
     } else if (this.tag === "TableChart" && pathEdgeType === "cellAddress") {
       // Maybe it would be better to get the environment in a different way.
-      const environment = context.project.getEnvironment();
+      const environment = context.runContext.environment;
       const item = (this as SqTableChartValue).value.item(
         pathEdge.value.value.row,
         pathEdge.value.value.column,

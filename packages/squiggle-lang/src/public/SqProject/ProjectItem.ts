@@ -9,7 +9,7 @@ import { SqCompileError, SqError, wrapError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 import { SqProject } from "./index.js";
 
-// source -> ast -> imports -> runOutput
+// source -> ast -> imports -> output
 
 export type Externals = {
   implicitImports: VDict;
@@ -19,7 +19,7 @@ export type Externals = {
 // Every time we run the item and cache its `ProjectItemOutput`, we also store the context that was used for that run.
 // This context is useful later for constructing `SqOutput`, and also for `SqValueContext`.
 // This type is similar to `RunParams` from the runners APIs, but has enough differences to be separate.
-type RunContext = {
+export type RunContext = {
   ast: AST;
   sourceId: string;
   source: string;
@@ -240,7 +240,7 @@ export class ProjectItem {
         runOutput: value,
         context,
       }),
-      (err) => wrapError(err, project)
+      (err) => wrapError(err)
     );
   }
 }

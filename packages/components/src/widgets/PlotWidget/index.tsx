@@ -9,7 +9,7 @@ import { ScatterChart } from "./ScatterChart/index.js";
 widgetRegistry.register("Plot", {
   Chart: (value, settings) => {
     const plot = value.value;
-    const environment = value.context.project.getEnvironment();
+    const environment = value.context.runContext.environment;
 
     switch (plot.tag) {
       case "distributions":

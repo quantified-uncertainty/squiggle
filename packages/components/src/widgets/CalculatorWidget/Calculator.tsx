@@ -210,7 +210,7 @@ export const Calculator: FC<Props> = ({ settings, valueWithContext }) => {
   const _environment = useMemo(
     () =>
       getEnvironment(
-        valueWithContext.context.project.getEnvironment(),
+        valueWithContext.context.runContext.environment,
         valueWithContext.value
       ),
     [valueWithContext]
