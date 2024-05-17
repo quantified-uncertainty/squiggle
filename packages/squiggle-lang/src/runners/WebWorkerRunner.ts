@@ -1,6 +1,6 @@
 import { squiggleCodec } from "../serialization/squiggle.js";
 import { BaseRunner, RunParams, RunResult } from "./BaseRunner.js";
-import { deserializeRunResult } from "./common.js";
+import { deserializeRunResult } from "./serialization.js";
 import { SquiggleWorkerJob, SquiggleWorkerResponse } from "./worker.js";
 
 export async function runWithWorker(

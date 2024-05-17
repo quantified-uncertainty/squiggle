@@ -1,4 +1,3 @@
-import { isBindingStatement } from "../../ast/utils.js";
 import { defaultEnv, Env } from "../../dists/env.js";
 import { getStdLib } from "../../library/index.js";
 import { BaseRunner } from "../../runners/BaseRunner.js";
@@ -6,14 +5,12 @@ import { getDefaultRunner } from "../../runners/index.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { vDict, VDict } from "../../value/VDict.js";
-import { vString } from "../../value/VString.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
-import { SqValue, wrapValue } from "../SqValue/index.js";
+import { SqValue } from "../SqValue/index.js";
 import { SqDict } from "../SqValue/SqDict.js";
-import { SqValueContext } from "../SqValueContext.js";
-import { SqValuePath, ValuePathRoot } from "../SqValuePath.js";
-import { SqOutputResult } from "../types.js";
+import { SqValuePath } from "../SqValuePath.js";
+import { SqOutput, SqOutputResult } from "../types.js";
 import {
   type Externals,
   Import,
@@ -217,50 +214,9 @@ export class SqProject {
   }
 
   getOutput(sourceId: string): SqOutputResult {
-    const internalOutputR = this.getInternalOutput(sourceId);
-    if (!internalOutputR.ok) {
-      return internalOutputR;
-    }
-
-    const runContext = internalOutputR.value.context;
-    const { externals, ast } = runContext;
-    const {
-      runOutput: { result, bindings, exports },
-    } = internalOutputR.value;
-
-    const lastStatement = ast.statements.at(-1);
-
-    const hasEndExpression =
-      !!lastStatement && !isBindingStatement(lastStatement);
-
-    const newContext = (root: ValuePathRoot) => {
-      const isResult = root === "result";
-      return new SqValueContext({
-        runContext,
-        valueAst: isResult && hasEndExpression ? lastStatement : ast,
-        valueAstIsPrecise: isResult ? hasEndExpression : true,
-        path: new SqValuePath({
-          root,
-          edges: [],
-        }),
-      });
-    };
-
-    const wrapSqDict = (innerDict: VDict, root: ValuePathRoot): SqDict => {
-      return new SqDict(innerDict, newContext(root));
-    };
-
-    return Result.Ok({
-      result: wrapValue(result, newContext("result")),
-      bindings: wrapSqDict(bindings, "bindings"),
-      exports: wrapSqDict(
-        exports.mergeTags({ name: vString(sourceId) }),
-        // In terms of context, exports are the same as bindings.
-        "bindings"
-      ),
-      imports: wrapSqDict(externals.explicitImports, "imports"),
-      raw: internalOutputR.value,
-    });
+    return Result.fmap(this.getInternalOutput(sourceId), (output) =>
+      SqOutput.fromProjectItemOutput(output)
+    );
   }
 
   getResult(sourceId: string): Result.result<SqValue, SqError> {

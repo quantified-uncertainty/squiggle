@@ -32,7 +32,18 @@ export type ProjectItemOutput = {
   runOutput: RunOutput;
 };
 
-export type ProjectItemOutputResult = result<ProjectItemOutput, SqError>;
+export type ProjectItemOutputResult = result<
+  ProjectItemOutput,
+  /*
+   * `IError` would be more appropriate, because `ProjectItemOutput` is not
+   * SqValue-upgraded yet at this point.
+   *
+   * Unfortunately, `IError` only covers runtime and compile-time errors, while
+   * this type can also contain linker errors when `ProjectItem.failRun` is
+   * called.
+   */
+  SqError
+>;
 
 export type Import =
   | {
@@ -200,11 +211,14 @@ export class ProjectItem {
     // will be set again by the end of this method, unless it throws
     this.output = undefined;
 
-    // This part usually won't be necessary: by the time we get to
-    // `ProjectItem.run`, imports must be parsed and passed as `externals` by
-    // `SqProject`, so AST is already present.
-    // Still, it gives us a bit better guarantees that this class will do the
-    // right thing.
+    /*
+     * This part usually won't be necessary: by the time we get to
+     * `ProjectItem.run`, imports must be parsed and passed as `externals` by
+     * `SqProject`, so AST is already present.
+     *
+     * Still, it gives us slightly better guarantees that this class will do the
+     * right thing.
+     */
     this.buildAst();
     if (!this.ast) {
       // buildAst() guarantees that the ast is set
@@ -236,10 +250,7 @@ export class ProjectItem {
 
     this.output = Result.fmap2(
       runResult,
-      (value) => ({
-        runOutput: value,
-        context,
-      }),
+      (runOutput) => ({ runOutput, context }),
       (err) => wrapError(err)
     );
   }

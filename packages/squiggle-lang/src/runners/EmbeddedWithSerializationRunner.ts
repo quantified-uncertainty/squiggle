@@ -1,6 +1,6 @@
 import { BaseRunner, RunParams, RunResult } from "./BaseRunner.js";
-import { deserializeRunResult, serializeRunResult } from "./common.js";
 import { EmbeddedRunner } from "./EmbeddedRunner.js";
+import { deserializeRunResult, serializeRunResult } from "./serialization.js";
 
 /**
  * This runner is useful for testing serialization and deserialization.

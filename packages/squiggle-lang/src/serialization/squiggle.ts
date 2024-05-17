@@ -54,7 +54,7 @@ const squiggleConfig: StoreConfig<SquiggleShape> = {
 
 export type SquiggleBundle = Bundle<SquiggleShape>;
 
-class SquiggleSerializationStore extends SerializationStore<SquiggleShape> {
+export class SquiggleSerializationStore extends SerializationStore<SquiggleShape> {
   constructor() {
     super(squiggleConfig);
   }

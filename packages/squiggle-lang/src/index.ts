@@ -65,7 +65,14 @@ export { SqValuePath, SqValuePathEdge } from "./public/SqValuePath.js";
 export { parse } from "./public/parse.js";
 export { fmap as resultMap, type result } from "./utility/result.js";
 
-export { deserializeRunResult, serializeRunResult } from "./runners/common.js";
+export {
+  deserializeRunOutputFromBundle,
+  deserializeRunResult,
+  serializeRunOutputToStore,
+  serializeRunResult,
+} from "./runners/serialization.js";
+
+export { squiggleCodec } from "./serialization/squiggle.js";
 
 export { SDate } from "./utility/SDate.js";
 

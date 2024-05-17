@@ -5,7 +5,8 @@ import {
   SquiggleBundleEntrypoint,
   squiggleCodec,
 } from "../serialization/squiggle.js";
-import { baseRun, SerializedRunResult, serializeRunResult } from "./common.js";
+import { baseRun } from "./common.js";
+import { SerializedRunResult, serializeRunResult } from "./serialization.js";
 
 export type SquiggleWorkerJob = {
   environment: Env;
