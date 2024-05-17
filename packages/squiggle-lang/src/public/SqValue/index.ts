@@ -2,7 +2,7 @@ import { lambdaToCalculator } from "../../fr/calculator.js";
 import { result } from "../../utility/result.js";
 import { SDate } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
-import { Value } from "../../value/index.js";
+import { Value, vVoid } from "../../value/index.js";
 import {
   removeLambdas,
   simpleValueFromValue,
@@ -397,6 +397,10 @@ export class SqInputValue extends SqAbstractValue<"Input", unknown, SqInput> {
 
 export class SqVoidValue extends SqAbstractValue<"Void", null, null> {
   tag = "Void" as const;
+
+  static make() {
+    return new SqVoidValue(vVoid());
+  }
 
   get value() {
     return null;

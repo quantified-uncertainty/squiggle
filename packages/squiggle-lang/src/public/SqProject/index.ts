@@ -138,6 +138,20 @@ export class SqProject {
     }
   }
 
+  async loadSource(sourceId: string): Promise<SqError | undefined> {
+    if (!this.linker) {
+      throw new Error(`Can't load source for ${sourceId}, linker is missing`);
+    }
+
+    let newSource: string;
+    try {
+      newSource = await this.linker.loadSource(sourceId);
+    } catch (e) {
+      return new SqOtherError(`Failed to load import ${sourceId}`);
+    }
+    this.setSource(sourceId, newSource);
+  }
+
   removeSource(sourceId: string) {
     if (!this.items.has(sourceId)) {
       return;
@@ -232,23 +246,12 @@ export class SqProject {
     pendingIds: Set<string>
   ): Promise<Result.result<VDict, SqError>> {
     if (!this.items.has(importBinding.sourceId)) {
-      if (!this.linker) {
-        throw new Error(
-          `Can't load source for ${importBinding.sourceId}, linker is missing`
-        );
-      }
-
       // We have got one of the new imports.
       // Let's load it and add it to the project.
-      let newSource: string;
-      try {
-        newSource = await this.linker.loadSource(importBinding.sourceId);
-      } catch (e) {
-        return Result.Err(
-          new SqOtherError(`Failed to load import ${importBinding.sourceId}`)
-        );
+      const maybeError = await this.loadSource(importBinding.sourceId);
+      if (maybeError) {
+        return Result.Err(maybeError);
       }
-      this.setSource(importBinding.sourceId, newSource);
     }
 
     if (pendingIds.has(importBinding.sourceId)) {

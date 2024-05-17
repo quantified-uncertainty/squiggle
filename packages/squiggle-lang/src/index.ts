@@ -1,13 +1,16 @@
 import { type Env } from "./dists/env.js";
 import { registry } from "./library/registry/index.js";
 import { SqProject } from "./public/SqProject/index.js";
-import {
+
+export {
   SqDateValue,
+  SqDictValue,
   SqDurationValue,
   SqLambdaValue,
   SqNumberValue,
   SqStringValue,
   type SqValue,
+  SqVoidValue,
 } from "./public/SqValue/index.js"; // TODO - reexport other values too
 
 export { type FnDefinition } from "./library/registry/fnDefinition.js";
@@ -47,7 +50,6 @@ export {
   SqNumericRangeDomain,
 } from "./public/SqValue/SqDomain.js";
 export { SqLambda, type SqLambdaParameter } from "./public/SqValue/SqLambda.js";
-export { SqDictValue } from "./public/SqValue/index.js";
 export {
   SqDistFnPlot,
   SqDistributionsPlot,
@@ -88,16 +90,7 @@ export {
   type LocationRange as SqLocation,
 } from "./ast/parse.js";
 export { defaultEnv as defaultEnvironment } from "./dists/env.js";
-export {
-  type Env,
-  SqDateValue,
-  SqDurationValue,
-  SqLambdaValue,
-  SqNumberValue,
-  SqProject,
-  SqStringValue,
-  type SqValue,
-};
+export { type Env, SqProject };
 
 export { type ASTCommentNode } from "./ast/peggyHelpers.js";
 export { type SqLinker } from "./public/SqLinker.js";
@@ -146,3 +139,6 @@ export {
   runnerByName,
   type RunnerName,
 } from "./runners/index.js";
+
+// Needs to be parameterized with the wrapped runner, so can't be obtained through `runnerByName`
+export { WithCacheLoaderRunner } from "./runners/WithCacheLoaderRunner.js";
