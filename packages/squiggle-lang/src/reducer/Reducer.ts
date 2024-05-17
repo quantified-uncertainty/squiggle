@@ -51,6 +51,8 @@ export class Reducer implements EvaluateAllKinds {
 
   readonly rng: PRNG;
 
+  private isRunning: boolean = false;
+
   constructor(environment: Env) {
     this.environment = environment;
 
@@ -64,10 +66,22 @@ export class Reducer implements EvaluateAllKinds {
     this.rng = getAleaRng(seed);
   }
 
-  // Recursively evaluate the expression.
-  // TODO - separate "internal loop evaluate" and "public entrypoint evaluate" methods?
+  // Evaluate the expression.
+  // When recursing into nested expressions, call `innerEvaluate()` instead of this method.
   evaluate(expression: Expression): Value {
+    if (this.isRunning) {
+      throw new Error(
+        "Can't recursively reenter the reducer, consider `.innerEvaluate()` if you're working on Squiggle internals"
+      );
+    }
     jstat.setRandom(this.rng); // TODO - roll back at the end
+    this.isRunning = true;
+    const result = this.innerEvaluate(expression);
+    this.isRunning = false;
+    return result;
+  }
+
+  innerEvaluate(expression: Expression): Value {
     switch (expression.kind) {
       case "Call":
         return this.evaluateCall(expression.value, expression.ast);
@@ -120,7 +134,7 @@ export class Reducer implements EvaluateAllKinds {
 
     let currentValue: Value = vVoid();
     for (const statement of statements) {
-      currentValue = this.evaluate(statement);
+      currentValue = this.innerEvaluate(statement);
     }
 
     this.stack.shrink(initialStackSize);
@@ -132,14 +146,14 @@ export class Reducer implements EvaluateAllKinds {
     let currentValue: Value = vVoid();
 
     for (const statement of expressionValue.statements) {
-      currentValue = this.evaluate(statement);
+      currentValue = this.innerEvaluate(statement);
     }
     return currentValue;
   }
 
   evaluateArray(expressionValue: ExpressionValue<"Array">) {
     const values = expressionValue.map((element) => {
-      return this.evaluate(element);
+      return this.innerEvaluate(element);
     });
     return vArray(values);
   }
@@ -148,7 +162,7 @@ export class Reducer implements EvaluateAllKinds {
     return vDict(
       ImmutableMap(
         expressionValue.map(([eKey, eValue]) => {
-          const key = this.evaluate(eKey);
+          const key = this.innerEvaluate(eKey);
           if (key.type !== "String") {
             throw this.runtimeError(
               new REOther("Dict keys must be strings"),
@@ -156,7 +170,7 @@ export class Reducer implements EvaluateAllKinds {
             );
           }
           const keyString: string = key.value;
-          const value = this.evaluate(eValue);
+          const value = this.innerEvaluate(eValue);
           return [keyString, value];
         })
       )
@@ -164,7 +178,7 @@ export class Reducer implements EvaluateAllKinds {
   }
 
   evaluateAssign(expressionValue: ExpressionValue<"Assign">) {
-    const result = this.evaluate(expressionValue.right);
+    const result = this.innerEvaluate(expressionValue.right);
     this.stack.push(result);
     return vVoid();
   }
@@ -197,7 +211,7 @@ export class Reducer implements EvaluateAllKinds {
   }
 
   evaluateTernary(expressionValue: ExpressionValue<"Ternary">) {
-    const predicateResult = this.evaluate(expressionValue.condition);
+    const predicateResult = this.innerEvaluate(expressionValue.condition);
     if (predicateResult.type !== "Bool") {
       throw this.runtimeError(
         new REExpectedType("Boolean", predicateResult.type),
@@ -205,7 +219,7 @@ export class Reducer implements EvaluateAllKinds {
       );
     }
 
-    return this.evaluate(
+    return this.innerEvaluate(
       predicateResult.value ? expressionValue.ifTrue : expressionValue.ifFalse
     );
   }
@@ -217,7 +231,9 @@ export class Reducer implements EvaluateAllKinds {
       // Processing annotations, e.g. f(x: [3, 5]) = { ... }
       if (parameterExpression.annotation) {
         // First, we evaluate `[3, 5]` expression.
-        const annotationValue = this.evaluate(parameterExpression.annotation);
+        const annotationValue = this.innerEvaluate(
+          parameterExpression.annotation
+        );
         // Now we cast it to domain value, e.g. `NumericRangeDomain(3, 5)`.
         // Casting can fail, in which case we throw the error with a correct stacktrace.
         try {
@@ -264,7 +280,7 @@ export class Reducer implements EvaluateAllKinds {
   }
 
   evaluateCall(expressionValue: ExpressionValue<"Call">, ast: ASTNode) {
-    const lambda = this.evaluate(expressionValue.fn);
+    const lambda = this.innerEvaluate(expressionValue.fn);
     if (lambda.type !== "Lambda") {
       throw this.runtimeError(
         new RENotAFunction(lambda.toString()),
@@ -278,7 +294,9 @@ export class Reducer implements EvaluateAllKinds {
       );
     }
 
-    const argValues = expressionValue.args.map((arg) => this.evaluate(arg));
+    const argValues = expressionValue.args.map((arg) =>
+      this.innerEvaluate(arg)
+    );
 
     // we pass the ast of a current expression here, to put it on frameStack
     try {
