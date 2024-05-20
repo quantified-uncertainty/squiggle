@@ -142,7 +142,11 @@ export class Reducer implements EvaluateAllKinds {
       default:
         throw new Error(`Unreachable: ${expression satisfies never}`);
     }
-    if (this.profile) {
+    if (
+      this.profile &&
+      // TODO - exclude other trivial expression kinds?
+      expression.kind !== "Program"
+    ) {
       const end = new Date();
       const time = end.getTime() - start!.getTime();
       this.profile.addRange(expression.ast.location, time);
