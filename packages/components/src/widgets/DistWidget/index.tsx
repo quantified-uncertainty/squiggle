@@ -16,7 +16,7 @@ export const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.55;
 widgetRegistry.register("Dist", {
   Preview(value) {
     const dist = value.value;
-    const environment = value.context.project.getEnvironment();
+    const environment = value.context.runContext.environment;
     const numberFormat = value.tags.numberFormat();
 
     const showNumber = (number: number) => {
@@ -50,7 +50,7 @@ widgetRegistry.register("Dist", {
         <div className="flex w-14">
           <DistributionsChart
             plot={plot}
-            environment={value.context.project.getEnvironment()}
+            environment={value.context.runContext.environment}
             height={14}
           />
         </div>
@@ -58,7 +58,7 @@ widgetRegistry.register("Dist", {
     );
   },
   Menu(value) {
-    const shape = value.value.pointSet(value.context.project.getEnvironment());
+    const shape = value.value.pointSet(value.context.runContext.environment);
 
     return (
       <ItemSettingsMenuItems
@@ -83,7 +83,7 @@ widgetRegistry.register("Dist", {
     return (
       <DistributionsChart
         plot={plot}
-        environment={value.context.project.getEnvironment()}
+        environment={value.context.runContext.environment}
         height={settings.chartHeight * CHART_TO_DIST_HEIGHT_ADJUSTMENT}
       />
     );

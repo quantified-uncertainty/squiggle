@@ -1,15 +1,10 @@
-import { AST, ASTNode } from "../ast/parse.js";
+import { ASTNode } from "../ast/parse.js";
 import { isBindingStatement } from "../ast/utils.js";
-import { SqProject } from "./SqProject/index.js";
+import { RunContext } from "./SqProject/ProjectItem.js";
 import { SqValuePath, SqValuePathEdge } from "./SqValuePath.js";
 
 export class SqValueContext {
-  public project: SqProject;
-  public sourceId: string;
-  public source: string;
-
-  // top-level AST; we pull comments from it for docstrings
-  public ast: AST;
+  public runContext: RunContext;
 
   /* Used for "focus in editor" feature in the playground, and for associating values with comments.
    * We try our best to find nested ASTs, but when the value is built dynamically, it's not always possible.
@@ -20,18 +15,12 @@ export class SqValueContext {
   public path: SqValuePath;
 
   constructor(props: {
-    project: SqProject;
-    sourceId: string;
-    source: string;
-    ast: AST;
+    runContext: RunContext;
     valueAst: ASTNode;
     valueAstIsPrecise: boolean;
     path: SqValuePath;
   }) {
-    this.project = props.project;
-    this.sourceId = props.sourceId;
-    this.source = props.source;
-    this.ast = props.ast;
+    this.runContext = props.runContext;
     this.valueAst = props.valueAst;
     this.valueAstIsPrecise = props.valueAstIsPrecise;
     this.path = props.path;
@@ -89,10 +78,7 @@ export class SqValueContext {
     }
 
     return new SqValueContext({
-      project: this.project,
-      sourceId: this.sourceId,
-      source: this.source,
-      ast: this.ast,
+      runContext: this.runContext,
       valueAst: newAst ?? this.valueAst,
       valueAstIsPrecise: Boolean(newAst),
       path: this.path.extend(item),
@@ -104,11 +90,13 @@ export class SqValueContext {
   }
 
   docstring(): string | undefined {
+    const { ast } = this.runContext;
+
     if (!this.valueAstIsPrecise) {
       return;
     }
 
-    if (!this.ast.comments.length) {
+    if (!ast.comments.length) {
       return; // no comments
     }
 
@@ -121,11 +109,11 @@ export class SqValueContext {
 
     // Binary search; looking for the last comment that ends before `valueStarts`.
     let a = 0,
-      b = this.ast.comments.length - 1;
+      b = ast.comments.length - 1;
 
     while (a < b) {
       const m = Math.floor((a + b) / 2);
-      const commentToCheck = this.ast.comments[m + 1];
+      const commentToCheck = ast.comments[m + 1];
       if (commentToCheck.location.end.offset > valueStarts) {
         // too far
         b = m;
@@ -134,7 +122,7 @@ export class SqValueContext {
       }
     }
 
-    const comment = this.ast.comments[a];
+    const comment = ast.comments[a];
     const commentEnds = comment.location.end.offset;
     if (commentEnds > valueStarts) {
       return;
@@ -153,7 +141,9 @@ export class SqValueContext {
     }
 
     // Let's check that all text between the comment and the value node is whitespace.
-    const ok = this.source.substring(commentEnds, valueStarts).match(/^\s*$/);
+    const ok = this.runContext.source
+      .substring(commentEnds, valueStarts)
+      .match(/^\s*$/);
 
     if (ok) {
       return match[1].trim();

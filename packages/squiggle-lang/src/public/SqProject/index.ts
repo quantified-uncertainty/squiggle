@@ -1,5 +1,3 @@
-import { AST } from "../../ast/parse.js";
-import { isBindingStatement } from "../../ast/utils.js";
 import { defaultEnv, Env } from "../../dists/env.js";
 import { getStdLib } from "../../library/index.js";
 import { BaseRunner } from "../../runners/BaseRunner.js";
@@ -7,19 +5,17 @@ import { getDefaultRunner } from "../../runners/index.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { vDict, VDict } from "../../value/VDict.js";
-import { vString } from "../../value/VString.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
-import { SqValue, wrapValue } from "../SqValue/index.js";
+import { SqValue } from "../SqValue/index.js";
 import { SqDict } from "../SqValue/SqDict.js";
-import { SqValueContext } from "../SqValueContext.js";
-import { SqValuePath, ValuePathRoot } from "../SqValuePath.js";
-import { SqOutputResult } from "../types.js";
+import { SqValuePath } from "../SqValuePath.js";
+import { SqOutput, SqOutputResult } from "../types.js";
 import {
   type Externals,
   Import,
   ProjectItem,
-  RunOutputWithExternals,
+  ProjectItemOutput,
 } from "./ProjectItem.js";
 
 function getNeedToRunError() {
@@ -142,6 +138,20 @@ export class SqProject {
     }
   }
 
+  async loadSource(sourceId: string): Promise<SqError | undefined> {
+    if (!this.linker) {
+      throw new Error(`Can't load source for ${sourceId}, linker is missing`);
+    }
+
+    let newSource: string;
+    try {
+      newSource = await this.linker.loadSource(sourceId);
+    } catch (e) {
+      return new SqOtherError(`Failed to load import ${sourceId}`);
+    }
+    this.setSource(sourceId, newSource);
+  }
+
   removeSource(sourceId: string) {
     if (!this.items.has(sourceId)) {
       return;
@@ -194,9 +204,9 @@ export class SqProject {
     this.cleanDependents(sourceId);
   }
 
-  private getInternalOutput(
+  getInternalOutput(
     sourceId: string
-  ): Result.result<RunOutputWithExternals, SqError> {
+  ): Result.result<ProjectItemOutput, SqError> {
     return this.getItem(sourceId).output ?? Result.Err(getNeedToRunError());
   }
 
@@ -218,62 +228,9 @@ export class SqProject {
   }
 
   getOutput(sourceId: string): SqOutputResult {
-    const internalOutputR = this.getInternalOutput(sourceId);
-    if (!internalOutputR.ok) {
-      return internalOutputR;
-    }
-
-    const source = this.getSource(sourceId);
-    if (source === undefined) {
-      throw new Error("Internal error: source not found");
-    }
-
-    const astR = this.getItem(sourceId).ast;
-    if (!astR) {
-      throw new Error("Internal error: AST is missing when result is ok");
-    }
-    if (!astR.ok) {
-      return astR; // impossible because output is valid
-    }
-    const ast: AST = astR.value;
-
-    const lastStatement = ast.statements.at(-1);
-
-    const hasEndExpression =
-      !!lastStatement && !isBindingStatement(lastStatement);
-
-    const newContext = (root: ValuePathRoot) => {
-      const isResult = root === "result";
-      return new SqValueContext({
-        project: this,
-        sourceId,
-        source: source!,
-        ast,
-        valueAst: isResult && hasEndExpression ? lastStatement : ast,
-        valueAstIsPrecise: isResult ? hasEndExpression : true,
-        path: new SqValuePath({
-          root: root,
-          edges: [],
-        }),
-      });
-    };
-
-    const wrapSqDict = (innerDict: VDict, root: ValuePathRoot): SqDict => {
-      return new SqDict(innerDict, newContext(root));
-    };
-
-    const { result, bindings, exports, externals } = internalOutputR.value;
-
-    return Result.Ok({
-      result: wrapValue(result, newContext("result")),
-      bindings: wrapSqDict(bindings, "bindings"),
-      exports: wrapSqDict(
-        exports.mergeTags({ name: vString(sourceId) }),
-        // In terms of context, exports are the same as bindings.
-        "bindings"
-      ),
-      imports: wrapSqDict(externals.explicitImports, "imports"),
-    });
+    return Result.fmap(this.getInternalOutput(sourceId), (output) =>
+      SqOutput.fromProjectItemOutput(output)
+    );
   }
 
   getResult(sourceId: string): Result.result<SqValue, SqError> {
@@ -289,23 +246,12 @@ export class SqProject {
     pendingIds: Set<string>
   ): Promise<Result.result<VDict, SqError>> {
     if (!this.items.has(importBinding.sourceId)) {
-      if (!this.linker) {
-        throw new Error(
-          `Can't load source for ${importBinding.sourceId}, linker is missing`
-        );
-      }
-
       // We have got one of the new imports.
       // Let's load it and add it to the project.
-      let newSource: string;
-      try {
-        newSource = await this.linker.loadSource(importBinding.sourceId);
-      } catch (e) {
-        return Result.Err(
-          new SqOtherError(`Failed to load import ${importBinding.sourceId}`)
-        );
+      const maybeError = await this.loadSource(importBinding.sourceId);
+      if (maybeError) {
+        return Result.Err(maybeError);
       }
-      this.setSource(importBinding.sourceId, newSource);
     }
 
     if (pendingIds.has(importBinding.sourceId)) {
@@ -324,12 +270,12 @@ export class SqProject {
     // TODO - check for name collisions?
     switch (importBinding.type) {
       case "flat":
-        return Result.Ok(outputR.value.bindings);
+        return Result.Ok(outputR.value.runOutput.bindings);
       case "named":
         return Result.Ok(
           vDict(
             ImmutableMap({
-              [importBinding.variable]: outputR.value.exports,
+              [importBinding.variable]: outputR.value.runOutput.exports,
             })
           )
         );

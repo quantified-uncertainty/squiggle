@@ -102,7 +102,7 @@ export class UserDefinedLambda extends BaseLambda {
       reducer.stack.push(args[i]);
     }
 
-    return reducer.evaluate(this.expression);
+    return reducer.innerEvaluate(this.expression);
   }
 
   display() {

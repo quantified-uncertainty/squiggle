@@ -5,6 +5,7 @@ import {
   serializeExpression,
 } from "../expression/serialize.js";
 import { Lambda } from "../reducer/lambda.js";
+import { RunProfile, SerializedRunProfile } from "../reducer/RunProfile.js";
 import { deserializeValue } from "../value/deserializeValue.js";
 import { SerializedValue, Value } from "../value/index.js";
 import { SerializedValueTags, ValueTags } from "../value/valueTags.js";
@@ -26,6 +27,7 @@ type SquiggleShape = {
   expression: [Expression, SerializedExpression];
   lambda: [Lambda, SerializedLambda];
   tags: [ValueTags, SerializedValueTags];
+  profile: [RunProfile, SerializedRunProfile];
 };
 
 const squiggleConfig: StoreConfig<SquiggleShape> = {
@@ -49,12 +51,16 @@ const squiggleConfig: StoreConfig<SquiggleShape> = {
     deserialize: (serializedNode, visitor) =>
       ValueTags.deserialize(serializedNode, visitor),
   },
-  // TODO - we should serialized AST nodes too, otherwise serialized lambdas could blow up in size, in some cases
+  profile: {
+    serialize: (node) => node.serialize(),
+    deserialize: (serializedNode) => RunProfile.deserialize(serializedNode),
+  },
+  // TODO - we should serialize AST nodes too, otherwise serialized lambdas could blow up in size, in some cases
 };
 
 export type SquiggleBundle = Bundle<SquiggleShape>;
 
-class SquiggleSerializationStore extends SerializationStore<SquiggleShape> {
+export class SquiggleSerializationStore extends SerializationStore<SquiggleShape> {
   constructor() {
     super(squiggleConfig);
   }

@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import isFinite from "lodash/isFinite.js";
 import path from "path";
 
-import { Env } from "../dists/env.js";
+import { defaultEnv, Env } from "../dists/env.js";
 import { SqLinker } from "../public/SqLinker.js";
 import { SqProject } from "../public/SqProject/index.js";
 import { runnerByName } from "../runners/index.js";
@@ -25,6 +25,7 @@ export type RunArgs = {
   measure?: boolean;
   sampleCount?: string | number;
   seed?: string;
+  profile?: boolean;
   runner?: Parameters<typeof runnerByName>[0];
 };
 
@@ -61,20 +62,25 @@ async function _run(
   const time = await measure(async () => await project.run(filename));
   const output = project.getOutput(filename);
 
-  return { output, time };
+  return { output, time, project };
 }
 
 export async function run(args: RunArgs) {
-  let environment: Env | undefined;
-  if (args.sampleCount && isFinite(Number(args.sampleCount))) {
-    environment = {
-      sampleCount: Number(args.sampleCount),
-      xyPointLength: Number(args.sampleCount),
-      seed: args.seed || "default-seed",
-    };
-  }
+  const environment: Env = {
+    ...(args.sampleCount && isFinite(Number(args.sampleCount))
+      ? {
+          sampleCount: Number(args.sampleCount),
+          xyPointLength: Number(args.sampleCount),
+        }
+      : {
+          sampleCount: defaultEnv.sampleCount,
+          xyPointLength: defaultEnv.xyPointLength,
+        }),
+    seed: args.seed || "default-seed",
+    profile: args.profile ?? false,
+  };
 
-  const { output, time } = await _run({
+  const { output, time, project } = await _run({
     src: args.src,
     filename: args.filename,
     environment,
@@ -92,7 +98,7 @@ export async function run(args: RunArgs) {
   };
 
   if (!output.ok) {
-    printLines(red("Error:"), output.value.toStringWithDetails());
+    printLines(red("Error:"), output.value.toStringWithDetails(project));
   } else {
     switch (args.output) {
       case "RESULT_OR_BINDINGS":

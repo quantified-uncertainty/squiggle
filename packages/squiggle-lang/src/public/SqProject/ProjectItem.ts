@@ -1,24 +1,50 @@
-import { AST, parse } from "../../ast/parse.js";
+import { AST, LocationRange, parse } from "../../ast/parse.js";
 import { Env } from "../../dists/env.js";
-import { ICompileError, IRuntimeError } from "../../errors/IError.js";
-import { RunOutput } from "../../runners/BaseRunner.js";
+import { ICompileError } from "../../errors/IError.js";
+import { RunOutput, RunParams } from "../../runners/BaseRunner.js";
 import * as Result from "../../utility/result.js";
-import { Ok, result } from "../../utility/result.js";
+import { Err, Ok, result } from "../../utility/result.js";
 import { VDict, vDictFromArray } from "../../value/VDict.js";
-import { SqCompileError, SqError, SqRuntimeError } from "../SqError.js";
+import { SqCompileError, SqError, wrapError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 import { SqProject } from "./index.js";
 
-// source -> ast -> imports -> result/bindings/exports
+// source -> ast -> imports -> output
 
 export type Externals = {
   implicitImports: VDict;
   explicitImports: VDict;
 };
 
-export type RunOutputWithExternals = RunOutput & {
+// Every time we run the item and cache its `ProjectItemOutput`, we also store the context that was used for that run.
+// This context is useful later for constructing `SqOutput`, and also for `SqValueContext`.
+// This type is similar to `RunParams` from the runners APIs, but has enough differences to be separate.
+export type RunContext = {
+  ast: AST;
+  sourceId: string;
+  source: string;
+  environment: Env;
   externals: Externals;
 };
+
+export type ProjectItemOutput = {
+  context: RunContext;
+  runOutput: RunOutput;
+  executionTime: number; // milliseconds
+};
+
+export type ProjectItemOutputResult = result<
+  ProjectItemOutput,
+  /*
+   * `IError` would be more appropriate, because `ProjectItemOutput` is not
+   * SqValue-upgraded yet at this point.
+   *
+   * Unfortunately, `IError` only covers runtime and compile-time errors, while
+   * this type can also contain linker errors when `ProjectItem.failRun` is
+   * called.
+   */
+  SqError
+>;
 
 export type Import =
   | {
@@ -32,6 +58,7 @@ export type Import =
       type: "named";
       sourceId: string;
       variable: string;
+      location: LocationRange;
     };
 
 export class ProjectItem {
@@ -40,7 +67,7 @@ export class ProjectItem {
   continues: string[];
   ast?: result<AST, SqError>;
   imports?: result<Import[], SqError>;
-  output?: result<RunOutputWithExternals, SqError>;
+  output?: ProjectItemOutputResult;
 
   constructor(props: { sourceId: string; source: string }) {
     this.sourceId = props.sourceId;
@@ -129,7 +156,7 @@ export class ProjectItem {
 
       if (!linker) {
         this.setImports(
-          Result.Err(
+          Err(
             new SqCompileError(
               new ICompileError(
                 "Can't use imports when linker is not configured",
@@ -147,11 +174,12 @@ export class ProjectItem {
           type: "named",
           variable: variable.value,
           sourceId,
+          location: file.location,
         });
       } catch (e) {
         // linker.resolve has failed, that's fatal
         this.setImports(
-          Result.Err(
+          Err(
             new SqCompileError(
               new ICompileError(
                 `SqLinker.resolve has failed to resolve ${file.value}`,
@@ -179,46 +207,75 @@ export class ProjectItem {
   }
 
   failRun(e: SqError): void {
-    this.output = Result.Err(e);
+    this.output = Err(e);
   }
 
   async run(environment: Env, externals: Externals, project: SqProject) {
-    if (this.output) {
-      return;
-    }
+    // will be set again by the end of this method, unless it throws
+    this.output = undefined;
 
+    /*
+     * This part usually won't be necessary: by the time we get to
+     * `ProjectItem.run`, imports must be parsed and passed as `externals` by
+     * `SqProject`, so AST is already present.
+     *
+     * Still, it gives us slightly better guarantees that this class will do the
+     * right thing.
+     */
     this.buildAst();
     if (!this.ast) {
       // buildAst() guarantees that the ast is set
       throw new Error("Internal logic error");
     }
-
     if (!this.ast.ok) {
-      this.failRun(this.ast.value);
+      this.output = Err(this.ast.value);
       return;
     }
+    const ast = this.ast.value;
 
-    const _externals = vDictFromArray([])
-      .merge(externals.implicitImports)
-      .merge(externals.explicitImports);
-
-    const runnerOutput = await project.runner.run({
-      environment,
-      ast: this.ast.value,
-      externals: _externals,
+    const context: RunContext = {
+      ast,
       sourceId: this.sourceId,
-    });
-    if (runnerOutput.ok) {
-      this.output = Ok({ ...runnerOutput.value, externals });
-    } else {
-      const err = runnerOutput.value;
-      if (err instanceof IRuntimeError) {
-        this.failRun(new SqRuntimeError(err, project));
-      } else if (err instanceof ICompileError) {
-        this.failRun(new SqCompileError(err));
-      } else {
-        throw err satisfies never;
+      source: this.source,
+      environment,
+      externals,
+    };
+
+    const runParams: RunParams = {
+      ast,
+      environment,
+      externals: vDictFromArray([])
+        .merge(externals.implicitImports)
+        .merge(externals.explicitImports),
+    };
+
+    const started = new Date();
+    const runResult = await project.runner.run(runParams);
+    const executionTime = new Date().getTime() - started.getTime();
+
+    // patch profile - add timings for import statements
+    if (runResult.ok && runResult.value.profile) {
+      // trivial condition, but satisfies typescript
+      if (this.imports?.ok) {
+        for (const item of this.imports.value) {
+          if (item.type !== "named") {
+            continue;
+          }
+          const importOutput = project.getInternalOutput(item.sourceId);
+          if (importOutput.ok) {
+            runResult.value.profile.addRange(
+              item.location,
+              importOutput.value.executionTime
+            );
+          }
+        }
       }
     }
+
+    this.output = Result.fmap2(
+      runResult,
+      (runOutput) => ({ runOutput, context, executionTime }),
+      (err) => wrapError(err)
+    );
   }
 }
