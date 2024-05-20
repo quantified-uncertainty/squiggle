@@ -18,6 +18,7 @@ type SerializedRunOutputEntrypoints = {
   result: SquiggleBundleEntrypoint<"value">;
   bindings: SquiggleBundleEntrypoint<"value">;
   exports: SquiggleBundleEntrypoint<"value">;
+  profile: SquiggleBundleEntrypoint<"profile"> | undefined;
 };
 
 type SerializedRunOutput = {
@@ -77,11 +78,15 @@ export function serializeRunOutputToStore(
   const resultEntrypoint = store.serialize("value", runOutput.result);
   const bindingsEntrypoint = store.serialize("value", runOutput.bindings);
   const exportsEntrypoint = store.serialize("value", runOutput.exports);
+  const profileEntrypoint = runOutput.profile
+    ? store.serialize("profile", runOutput.profile)
+    : undefined;
 
   return {
     result: resultEntrypoint,
     bindings: bindingsEntrypoint,
     exports: exportsEntrypoint,
+    profile: profileEntrypoint,
   };
 }
 
@@ -95,6 +100,10 @@ export function deserializeRunOutputFromBundle(
   const bindings = deserializer.deserialize(entrypoints.bindings);
   const exports = deserializer.deserialize(entrypoints.exports);
 
+  const profile = entrypoints.profile
+    ? deserializer.deserialize(entrypoints.profile)
+    : undefined;
+
   if (!(bindings instanceof VDict)) {
     throw new Error("Expected VDict for bindings");
   }
@@ -102,5 +111,5 @@ export function deserializeRunOutputFromBundle(
     throw new Error("Expected VDict for exports");
   }
 
-  return { result, bindings, exports };
+  return { result, bindings, exports, profile };
 }

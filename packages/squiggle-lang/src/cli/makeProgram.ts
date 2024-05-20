@@ -43,6 +43,7 @@ export function makeProgram() {
       "run a given squiggle code string instead of a file"
     )
     .option("-t --time", "output the time it took to evaluate the code")
+    .option("-p --profile", "performance profiler")
     .option("-q, --quiet", "don't output the results and bindings") // useful for measuring the performance or checking that the code is valid
     .addOption(
       new Option("-r, --runner <runner>", "embedded").choices(allRunnerNames)
@@ -71,6 +72,7 @@ export function makeProgram() {
         src,
         filename,
         output,
+        profile: options.profile,
         measure: options.time,
         sampleCount,
         runner: options.runner,

@@ -23,6 +23,7 @@ import {
   UserDefinedLambda,
   UserDefinedLambdaParameter,
 } from "./lambda.js";
+import { RunProfile } from "./RunProfile.js";
 import { Stack } from "./Stack.js";
 import { StackTrace } from "./StackTrace.js";
 
@@ -52,9 +53,15 @@ export class Reducer implements EvaluateAllKinds {
   readonly rng: PRNG;
 
   private isRunning: boolean = false;
+  profile: RunProfile | undefined;
 
   constructor(environment: Env) {
-    this.environment = environment;
+    this.environment = {
+      ...environment,
+      // environment is heavily used so we want it to be monomorphic
+      // (I haven't benchmarked this though)
+      profile: environment.profile ?? false,
+    };
 
     this.stack = Stack.make();
     this.frameStack = FrameStack.make();
@@ -75,39 +82,72 @@ export class Reducer implements EvaluateAllKinds {
       );
     }
     jstat.setRandom(this.rng); // TODO - roll back at the end
+
     this.isRunning = true;
+
+    // avoid stale data
+    if (this.environment.profile) {
+      this.profile = new RunProfile(expression.ast.location.source);
+    } else {
+      this.profile = undefined;
+    }
+
     const result = this.innerEvaluate(expression);
     this.isRunning = false;
+
     return result;
   }
 
   innerEvaluate(expression: Expression): Value {
+    let start: Date | undefined;
+    if (this.profile) {
+      start = new Date();
+    }
+
+    let result: Value;
     switch (expression.kind) {
       case "Call":
-        return this.evaluateCall(expression.value, expression.ast);
+        result = this.evaluateCall(expression.value, expression.ast);
+        break;
       case "StackRef":
-        return this.evaluateStackRef(expression.value);
+        result = this.evaluateStackRef(expression.value);
+        break;
       case "CaptureRef":
-        return this.evaluateCaptureRef(expression.value);
+        result = this.evaluateCaptureRef(expression.value);
+        break;
       case "Block":
-        return this.evaluateBlock(expression.value);
+        result = this.evaluateBlock(expression.value);
+        break;
       case "Assign":
-        return this.evaluateAssign(expression.value);
+        result = this.evaluateAssign(expression.value);
+        break;
       case "Array":
-        return this.evaluateArray(expression.value);
+        result = this.evaluateArray(expression.value);
+        break;
       case "Dict":
-        return this.evaluateDict(expression.value);
+        result = this.evaluateDict(expression.value);
+        break;
       case "Value":
-        return this.evaluateValue(expression.value);
+        result = this.evaluateValue(expression.value);
+        break;
       case "Ternary":
-        return this.evaluateTernary(expression.value);
+        result = this.evaluateTernary(expression.value);
+        break;
       case "Lambda":
-        return this.evaluateLambda(expression.value);
+        result = this.evaluateLambda(expression.value);
+        break;
       case "Program":
-        return this.evaluateProgram(expression.value);
+        result = this.evaluateProgram(expression.value);
+        break;
       default:
         throw new Error(`Unreachable: ${expression satisfies never}`);
     }
+    if (this.profile) {
+      const end = new Date();
+      const time = end.getTime() - start!.getTime();
+      this.profile.addRange(expression.ast.location, time);
+    }
+    return result;
   }
 
   // This method is mostly useful in the reducer code.

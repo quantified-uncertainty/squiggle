@@ -66,5 +66,6 @@ export function baseRun(
         path: [],
       },
     }),
+    profile: reducer.profile,
   });
 }

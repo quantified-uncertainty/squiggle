@@ -1,4 +1,4 @@
-import { AST, parse } from "../../ast/parse.js";
+import { AST, LocationRange, parse } from "../../ast/parse.js";
 import { Env } from "../../dists/env.js";
 import { ICompileError } from "../../errors/IError.js";
 import { RunOutput, RunParams } from "../../runners/BaseRunner.js";
@@ -30,6 +30,7 @@ export type RunContext = {
 export type ProjectItemOutput = {
   context: RunContext;
   runOutput: RunOutput;
+  executionTime: number; // milliseconds
 };
 
 export type ProjectItemOutputResult = result<
@@ -57,6 +58,7 @@ export type Import =
       type: "named";
       sourceId: string;
       variable: string;
+      location: LocationRange;
     };
 
 export class ProjectItem {
@@ -172,6 +174,7 @@ export class ProjectItem {
           type: "named",
           variable: variable.value,
           sourceId,
+          location: file.location,
         });
       } catch (e) {
         // linker.resolve has failed, that's fatal
@@ -246,11 +249,32 @@ export class ProjectItem {
         .merge(externals.explicitImports),
     };
 
+    const started = new Date();
     const runResult = await project.runner.run(runParams);
+    const executionTime = new Date().getTime() - started.getTime();
+
+    // patch profile - add timings for import statements
+    if (runResult.ok && runResult.value.profile) {
+      // trivial condition, but satisfies typescript
+      if (this.imports?.ok) {
+        for (const item of this.imports.value) {
+          if (item.type !== "named") {
+            continue;
+          }
+          const importOutput = project.getInternalOutput(item.sourceId);
+          if (importOutput.ok) {
+            runResult.value.profile.addRange(
+              item.location,
+              importOutput.value.executionTime
+            );
+          }
+        }
+      }
+    }
 
     this.output = Result.fmap2(
       runResult,
-      (runOutput) => ({ runOutput, context }),
+      (runOutput) => ({ runOutput, context, executionTime }),
       (err) => wrapError(err)
     );
   }

@@ -39,7 +39,8 @@ describe("Imports", () => {
     });
 
     test("getImports", () => {
-      expect(project.getImports("main")).toEqual({
+      const imports = project.getImports("main");
+      expect(imports).toMatchObject({
         ok: true,
         value: [
           { type: "named", variable: "common", sourceId: "./common" },
