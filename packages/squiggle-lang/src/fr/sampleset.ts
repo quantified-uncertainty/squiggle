@@ -189,8 +189,8 @@ const baseLibrary = [
                 Ok(
                   doNumberLambdaCall(lambda, [vNumber(a), vNumber(b)], reducer)
                 ),
-              t1: dist1,
-              t2: dist2,
+              dist1,
+              dist2,
             })
           );
         }
@@ -231,9 +231,9 @@ const baseLibrary = [
                     reducer
                   )
                 ),
-              t1: dist1,
-              t2: dist2,
-              t3: dist3,
+              dist1,
+              dist2,
+              dist3,
             })
           );
         }
@@ -261,16 +261,13 @@ const baseLibrary = [
         ],
         frSampleSetDist,
         ([dists, lambda], reducer) => {
-          const sampleSetDists = dists.map((d) => {
-            return d;
-          });
           return unwrapDistResult(
             SampleSetDist.mapN({
               fn: (a) =>
                 Ok(
                   doNumberLambdaCall(lambda, [vArray(a.map(vNumber))], reducer)
                 ),
-              t1: sampleSetDists,
+              dists,
             })
           );
         }

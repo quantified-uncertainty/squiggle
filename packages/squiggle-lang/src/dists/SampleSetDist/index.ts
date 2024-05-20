@@ -22,8 +22,9 @@ import { PointSetDist } from "../PointSetDist.js";
 import { samplesToPointSetDist } from "./samplesToPointSetDist.js";
 
 export class SampleSetDist extends BaseDist {
-  type = "SampleSetDist";
-  samples: readonly number[];
+  readonly type = "SampleSetDist";
+  readonly samples: readonly number[];
+
   private constructor(samples: readonly number[]) {
     super();
     this.samples = samples;
@@ -229,10 +230,10 @@ sample everything.
   }
 }
 
-const buildSampleSetFromFn = (
+function buildSampleSetFromFn(
   n: number,
   fn: (i: number) => Result.result<number, OperationError>
-): Result.result<SampleSetDist, DistError> => {
+): Result.result<SampleSetDist, DistError> {
   const samples: number[] = [];
   for (let i = 0; i < n; i++) {
     const result = fn(i);
@@ -242,64 +243,62 @@ const buildSampleSetFromFn = (
     samples.push(result.value);
   }
   return SampleSetDist.make(samples);
-};
+}
 
 // TODO: Figure out what to do if distributions are different lengths.
 // Currently we just drop all extra values.
-export const map2 = ({
+export function map2({
   fn,
-  t1,
-  t2,
+  dist1,
+  dist2,
 }: {
   fn: (v1: number, v2: number) => Result.result<number, OperationError>;
-  t1: SampleSetDist;
-  t2: SampleSetDist;
-}): Result.result<SampleSetDist, DistError> => {
-  const length = Math.min(t1.samples.length, t2.samples.length);
-  return buildSampleSetFromFn(length, (i) => fn(t1.samples[i], t2.samples[i]));
-};
+  dist1: SampleSetDist;
+  dist2: SampleSetDist;
+}): Result.result<SampleSetDist, DistError> {
+  const length = Math.min(dist1.samples.length, dist2.samples.length);
+  return buildSampleSetFromFn(length, (i) =>
+    fn(dist1.samples[i], dist2.samples[i])
+  );
+}
 
-export const map3 = ({
+export function map3({
   fn,
-  t1,
-  t2,
-  t3,
+  dist1,
+  dist2,
+  dist3,
 }: {
   fn: (
     v1: number,
     v2: number,
     v3: number
   ) => Result.result<number, OperationError>;
-  t1: SampleSetDist;
-  t2: SampleSetDist;
-  t3: SampleSetDist;
-}): Result.result<SampleSetDist, DistError> => {
+  dist1: SampleSetDist;
+  dist2: SampleSetDist;
+  dist3: SampleSetDist;
+}): Result.result<SampleSetDist, DistError> {
   const length = Math.min(
-    t1.samples.length,
-    t2.samples.length,
-    t3.samples.length
+    dist1.samples.length,
+    dist2.samples.length,
+    dist3.samples.length
   );
   return buildSampleSetFromFn(length, (i) =>
-    fn(t1.samples[i], t2.samples[i], t3.samples[i])
+    fn(dist1.samples[i], dist2.samples[i], dist3.samples[i])
   );
-};
+}
 
-export const mapN = ({
+export function mapN({
   fn,
-  t1,
+  dists,
 }: {
   fn: (v: number[]) => Result.result<number, OperationError>;
-  t1: SampleSetDist[];
-}): Result.result<SampleSetDist, DistError> => {
-  const length = Math.max(...t1.map((t) => t.samples.length));
+  dists: readonly SampleSetDist[];
+}): Result.result<SampleSetDist, DistError> {
+  const length = Math.min(...dists.map((dist) => dist.samples.length));
   return buildSampleSetFromFn(length, (i) =>
-    fn(
-      t1
-        .map((t) => (i < t.samples.length ? t.samples[i] : undefined))
-        .filter((v): v is number => v !== undefined)
-    )
+    fn(dists.map((dist) => dist.samples[i]))
   );
-};
+}
 
 export const mixture = (
   values: [SampleSetDist, number][],
@@ -340,10 +339,18 @@ export type CompareDistWithFloatFn = (
 ) => Result.result<SampleSetDist, DistError>;
 
 export const minOfTwo: CompareTwoDistsFn = (t1, t2) => {
-  return map2({ fn: (a, b) => Result.Ok(Math.min(a, b)), t1, t2 });
+  return map2({
+    fn: (a, b) => Result.Ok(Math.min(a, b)),
+    dist1: t1,
+    dist2: t2,
+  });
 };
 export const maxOfTwo: CompareTwoDistsFn = (t1, t2) => {
-  return map2({ fn: (a, b) => Result.Ok(Math.max(a, b)), t1, t2 });
+  return map2({
+    fn: (a, b) => Result.Ok(Math.max(a, b)),
+    dist1: t1,
+    dist2: t2,
+  });
 };
 
 export const minOfFloat: CompareDistWithFloatFn = (t, f) => {

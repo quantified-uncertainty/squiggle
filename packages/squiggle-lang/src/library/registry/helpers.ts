@@ -330,8 +330,8 @@ export function twoVarSample(
     return unwrapDistResult(
       SampleSetDist.map2({
         fn: sampleFn,
-        t1: s1,
-        t2: s2,
+        dist1: s1,
+        dist2: s2,
       })
     );
   } else if (v1 instanceof BaseDist && typeof v2 === "number") {

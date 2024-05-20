@@ -129,7 +129,7 @@ const monteCarloStrategy: StrategyImplementation = ({
   }
   const s1 = s1r.value;
   const s2 = s2r.value;
-  return SampleSetDist.map2({ fn, t1: s1, t2: s2 });
+  return SampleSetDist.map2({ fn, dist1: s1, dist2: s2 });
 };
 
 const preferConvolutionToMonteCarlo = (args: CombinationArgs): boolean => {

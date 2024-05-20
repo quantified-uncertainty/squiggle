@@ -1,5 +1,6 @@
 import * as fc from "fast-check";
 
+import { sq } from "../../src/sq.js";
 import { expectErrorToBeBounded, testRun } from "../helpers/helpers.js";
 import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
@@ -30,10 +31,6 @@ describe("Various SampleSet functions", () => {
     "[2,3,4,5,6,7]"
   );
   testEvalToBe(
-    "SampleSet.toList(SampleSet.mapN([SampleSet.fromList([1,2,3,4,5,6]), SampleSet.fromList([6, 5, 4, 3, 2, 1])], {|x| x[0] > x[1] ? x[0] : x[1]}))",
-    "[6,5,4,4,5,6]"
-  );
-  testEvalToBe(
     "SampleSet.fromList([1, 2, 3])",
     "Error(Distribution Math Error: Too few samples when constructing sample set)"
   );
@@ -42,6 +39,24 @@ describe("Various SampleSet functions", () => {
   testEvalToBe(
     "SampleSet.fromList([5,5,5,5,5,5]) -> sampleN(10) -> List.length",
     "10"
+  );
+});
+
+describe("mapN", () => {
+  // equal length
+  testEvalToBe(
+    sq`SampleSet.mapN([SampleSet.fromList([1,2,3,4,5,6]), SampleSet.fromList([6,5,4,3,2,1])], {|x| x[0] > x[1] ? x[0] : x[1]}) -> SampleSet.toList`,
+    "[6,5,4,4,5,6]"
+  );
+
+  // unequal length
+  testEvalToBe(
+    sq`SampleSet.mapN([SampleSet.fromList([1,2,3,4,5,6]), SampleSet.fromList([6,5,4,3,2,1,1,1])], {|x| x[0] > x[1] ? x[0] : x[1]}) -> SampleSet.toList`,
+    "[6,5,4,4,5,6]"
+  );
+  testEvalToBe(
+    sq`SampleSet.mapN([SampleSet.fromList([1,2,3,4,5,6,1,1]), SampleSet.fromList([6,5,4,3,2,1])], {|x| x[0] > x[1] ? x[0] : x[1]}) -> SampleSet.toList`,
+    "[6,5,4,4,5,6]"
   );
 });
 
