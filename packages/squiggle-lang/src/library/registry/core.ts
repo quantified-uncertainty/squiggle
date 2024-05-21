@@ -1,7 +1,7 @@
 import get from "lodash/get.js";
 import invert from "lodash/invert.js";
 
-import { infixFunctions, unaryFunctions } from "../../ast/peggyHelpers.js";
+import { infixFunctions, unaryFunctions } from "../../ast/operators.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 import {
   FnDefinition,

@@ -1,6 +1,6 @@
 import jstat from "jstat";
 
-import { ASTNode, LocationRange } from "../ast/parse.js";
+import { ASTNode, LocationRange } from "../ast/types.js";
 import { Env } from "../dists/env.js";
 import { IRuntimeError } from "../errors/IError.js";
 import {

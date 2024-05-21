@@ -1,4 +1,5 @@
-import { AST, parse as astParse } from "../ast/parse.js";
+import { parse as astParse } from "../ast/parse.js";
+import { AST } from "../ast/types.js";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
 import { SqCompileError } from "./SqError.js";

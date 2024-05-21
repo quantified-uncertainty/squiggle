@@ -1,4 +1,4 @@
-import { LocationRange } from "../../ast/parse.js";
+import { LocationRange } from "../../ast/types.js";
 import { ValueTags } from "../../value/valueTags.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValue, wrapValue } from "./index.js";

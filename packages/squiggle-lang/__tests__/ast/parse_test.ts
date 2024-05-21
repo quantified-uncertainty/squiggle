@@ -1,4 +1,5 @@
-import { ASTNode, parse } from "../../src/ast/parse.js";
+import { parse } from "../../src/ast/parse.js";
+import { ASTNode } from "../../src/ast/types.js";
 import {
   testEvalError,
   testEvalToBe,

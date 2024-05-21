@@ -10,7 +10,7 @@
  * The main difference between our IR and AST is that in IR, variable names are
  * resolved to stack and capture references.
  */
-import { ASTNode } from "../ast/parse.js";
+import { ASTNode } from "../ast/types.js";
 import {
   sExpr,
   SExpr,
