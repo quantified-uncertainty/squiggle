@@ -4,12 +4,9 @@ import { FC, useCallback, useMemo } from "react";
 import { Env, SqScale, SqScatterPlot } from "@quri/squiggle-lang";
 
 import { sqScaleToD3 } from "../../../lib/d3/index.js";
-import {
-  drawAxes,
-  drawCircle,
-  drawCursorLines,
-  primaryColor,
-} from "../../../lib/draw/index.js";
+import { primaryColor } from "../../../lib/draw/colors.js";
+import { drawCursorGuideLines } from "../../../lib/draw/guideLines.js";
+import { drawAxes, drawCircle } from "../../../lib/draw/index.js";
 import {
   DrawContext,
   useCanvas,
@@ -83,7 +80,7 @@ export const ScatterChart: FC<Props> = ({ plot, height }) => {
       context.globalAlpha = 1;
       frame.exit();
 
-      drawCursorLines({
+      drawCursorGuideLines({
         frame,
         cursor,
         x: {

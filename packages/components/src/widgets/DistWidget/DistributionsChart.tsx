@@ -18,14 +18,16 @@ import { useViewerType } from "../../components/SquiggleViewer/ViewerProvider.js
 import { ErrorAlert } from "../../components/ui/Alert.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
+import { distributionColor } from "../../lib/draw/colors.js";
+import {
+  drawCursorGuideLines,
+  drawVerticalGuideLine,
+} from "../../lib/draw/guideLines.js";
 import {
   calculatePadding,
   distance,
-  distributionColor,
   drawAxes,
   drawCircle,
-  drawCursorLines,
-  drawVerticalLine,
   makeCartesianFrame,
 } from "../../lib/draw/index.js";
 import { Point } from "../../lib/draw/types.js";
@@ -382,7 +384,7 @@ const InnerDistributionsChart: FC<{
 
       {
         showCursorLine &&
-          drawCursorLines({
+          drawCursorGuideLines({
             frame,
             cursor,
             x: {
@@ -393,7 +395,7 @@ const InnerDistributionsChart: FC<{
       }
 
       if (verticalLine) {
-        drawVerticalLine({
+        drawVerticalGuideLine({
           frame,
           scale: xScale,
           format: plot.xScale.tickFormat,

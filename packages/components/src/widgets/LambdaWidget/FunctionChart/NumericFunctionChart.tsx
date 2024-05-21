@@ -4,11 +4,9 @@ import { FC, useCallback, useMemo } from "react";
 import { Env, SqNumericFnPlot } from "@quri/squiggle-lang";
 
 import { sqScaleToD3 } from "../../../lib/d3/index.js";
-import {
-  drawAxes,
-  drawCursorLines,
-  primaryColor,
-} from "../../../lib/draw/index.js";
+import { primaryColor } from "../../../lib/draw/colors.js";
+import { drawCursorGuideLines } from "../../../lib/draw/guideLines.js";
+import { drawAxes } from "../../../lib/draw/index.js";
 import {
   DrawContext,
   useCanvas,
@@ -104,7 +102,7 @@ export const NumericFunctionChart: FC<Props> = ({
       context.stroke();
       frame.exit();
 
-      drawCursorLines({
+      drawCursorGuideLines({
         frame,
         cursor,
         x: {
