@@ -1,7 +1,10 @@
 import { infixFunctions, unaryFunctions } from "./operators.js";
 
-// Types copy-pasted from Peggy, but converted from interface to type.
-// We need a type because interfaces don't match JsonValue type that we use for serialization.
+/*
+ *`Location` and `LocationRange` types are copy-pasted from Peggy, but
+ * converted from interface to type. We need a type because interfaces don't
+ * match `JsonValue` type that we use for serialization.
+ */
 
 /** Provides information pointing to a location within a source. */
 export type Location = {
@@ -23,10 +26,6 @@ export type LocationRange = {
   end: Location;
 };
 
-export type AST = Extract<ASTNode, { type: "Program" }> & {
-  comments: ASTCommentNode[];
-};
-
 export type InfixOperator = keyof typeof infixFunctions;
 
 export type UnaryOperator = keyof typeof unaryFunctions;
@@ -36,6 +35,11 @@ type Node = {
 };
 
 type N<T extends string, V extends object> = Node & { type: T } & V;
+
+/*
+ * Specific `Node*` types are mostly not exported, because they're easy to
+ * obtain with `Extract<...>` (see `TypedNode` in `./peggyHelpers.ts`)
+ */
 
 type NodeBlock = N<
   "Block",
@@ -198,6 +202,10 @@ export type ASTNode =
   | NodeFloat
   | NodeString
   | NodeBoolean;
+
+export type AST = Extract<ASTNode, { type: "Program" }> & {
+  comments: ASTCommentNode[];
+};
 
 export type ASTCommentNode = {
   type: "lineComment" | "blockComment";
