@@ -30,11 +30,10 @@ export type InfixOperator = keyof typeof infixFunctions;
 
 export type UnaryOperator = keyof typeof unaryFunctions;
 
-type Node = {
+type N<T extends string, V extends object> = {
+  type: T;
   location: LocationRange;
-};
-
-type N<T extends string, V extends object> = Node & { type: T } & V;
+} & V;
 
 /*
  * Specific `Node*` types are mostly not exported, because they're easy to
@@ -60,7 +59,12 @@ type NodeProgram = N<
   }
 >;
 
-type NodeArray = N<"Array", { elements: ASTNode[] }>;
+type NodeArray = N<
+  "Array",
+  {
+    elements: ASTNode[];
+  }
+>;
 
 type NodeDict = N<
   "Dict",
@@ -80,16 +84,37 @@ type NodeKeyValue = N<
 >;
 export type AnyNodeDictEntry = NodeKeyValue | NodeIdentifier;
 
-type NodeUnitValue = N<"UnitValue", { value: ASTNode; unit: string }>;
+type NodeUnitValue = N<
+  "UnitValue",
+  {
+    value: ASTNode;
+    unit: string;
+  }
+>;
 
-type NodeCall = N<"Call", { fn: ASTNode; args: ASTNode[] }>;
+type NodeCall = N<
+  "Call",
+  {
+    fn: ASTNode;
+    args: ASTNode[];
+  }
+>;
 
 type NodeInfixCall = N<
   "InfixCall",
-  { op: InfixOperator; args: [ASTNode, ASTNode] }
+  {
+    op: InfixOperator;
+    args: [ASTNode, ASTNode];
+  }
 >;
 
-type NodeUnaryCall = N<"UnaryCall", { op: UnaryOperator; arg: ASTNode }>;
+type NodeUnaryCall = N<
+  "UnaryCall",
+  {
+    op: UnaryOperator;
+    arg: ASTNode;
+  }
+>;
 
 type NodePipe = N<
   "Pipe",
@@ -100,9 +125,21 @@ type NodePipe = N<
   }
 >;
 
-type NodeDotLookup = N<"DotLookup", { arg: ASTNode; key: string }>;
+type NodeDotLookup = N<
+  "DotLookup",
+  {
+    arg: ASTNode;
+    key: string;
+  }
+>;
 
-type NodeBracketLookup = N<"BracketLookup", { arg: ASTNode; key: ASTNode }>;
+type NodeBracketLookup = N<
+  "BracketLookup",
+  {
+    arg: ASTNode;
+    key: ASTNode;
+  }
+>;
 
 type NodeFloat = N<
   "Float",
@@ -116,23 +153,39 @@ type NodeFloat = N<
 
 type NodeIdentifierWithAnnotation = N<
   "IdentifierWithAnnotation",
-  { variable: string; annotation: ASTNode }
+  {
+    variable: string;
+    annotation: ASTNode;
+  }
 >;
 
 type NodeIdentifier = N<"Identifier", { value: string }>;
 
-type NodeDecorator = N<"Decorator", { name: NodeIdentifier; args: ASTNode[] }>;
+type NodeDecorator = N<
+  "Decorator",
+  {
+    name: NodeIdentifier;
+    args: ASTNode[];
+  }
+>;
 
 type LetOrDefun = {
   variable: NodeIdentifier;
   exported: boolean;
 };
 
-type NodeLetStatement = N<"LetStatement", LetOrDefun & { value: ASTNode }>;
+type NodeLetStatement = N<
+  "LetStatement",
+  LetOrDefun & {
+    value: ASTNode;
+  }
+>;
 
 type NodeDefunStatement = N<
   "DefunStatement",
-  LetOrDefun & { value: NamedNodeLambda }
+  LetOrDefun & {
+    value: NamedNodeLambda;
+  }
 >;
 
 type NodeDecoratedStatement = N<
