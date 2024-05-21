@@ -35,7 +35,7 @@ export {
   useCanvasCursor,
 } from "./lib/hooks/index.js";
 
-export { drawAxes } from "./lib/draw/index.js";
+export { drawAxes } from "./lib/draw/drawAxes.js";
 
 export const d3Extended = {
   scaleLinear,

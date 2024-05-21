@@ -19,18 +19,18 @@ import { ErrorAlert } from "../../components/ui/Alert.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import { distributionColor } from "../../lib/draw/colors.js";
+import { drawAxes } from "../../lib/draw/drawAxes.js";
+import { drawCircle } from "../../lib/draw/drawCircle.js";
 import {
   drawCursorGuideLines,
   drawVerticalGuideLine,
 } from "../../lib/draw/guideLines.js";
+import { Point } from "../../lib/draw/types.js";
 import {
   calculatePadding,
   distance,
-  drawAxes,
-  drawCircle,
   makeCartesianFrame,
-} from "../../lib/draw/index.js";
-import { Point } from "../../lib/draw/types.js";
+} from "../../lib/draw/utils.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { canvasClasses, flattenResult } from "../../lib/utility.js";

@@ -5,8 +5,9 @@ import { Env, SqScale, SqScatterPlot } from "@quri/squiggle-lang";
 
 import { sqScaleToD3 } from "../../../lib/d3/index.js";
 import { primaryColor } from "../../../lib/draw/colors.js";
+import { drawAxes } from "../../../lib/draw/drawAxes.js";
+import { drawCircle } from "../../../lib/draw/drawCircle.js";
 import { drawCursorGuideLines } from "../../../lib/draw/guideLines.js";
-import { drawAxes, drawCircle } from "../../../lib/draw/index.js";
 import {
   DrawContext,
   useCanvas,

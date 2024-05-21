@@ -8,19 +8,22 @@ import {
   axisTitleFont,
   labelColor,
 } from "./colors.js";
-import { Padding, Point } from "./types.js";
+import { Padding } from "./types.js";
+import { calculatePadding, makeCartesianFrame } from "./utils.js";
 
 const labelFont = "10px sans-serif";
 const xLabelOffset = 6;
 const yLabelOffset = 6;
 
+export const tickCountInterpolator = d3
+  .scaleLinear()
+  .domain([40000, 1000000]) // The potential width*height of the chart
+  .range([3, 16]) // The range of circle radiuses
+  .clamp(true);
+
 type AnyNumericScale = d3.ScaleContinuousNumeric<number, number, never>;
 
-export function distance(point1: Point, point2: Point) {
-  return Math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2);
-}
-
-interface DrawAxesParams {
+type DrawAxesParams = {
   context: CanvasRenderingContext2D;
   xScale: AnyNumericScale;
   yScale: AnyNumericScale;
@@ -37,52 +40,7 @@ interface DrawAxesParams {
   xAxisTitle?: string;
   yAxisTitle?: string;
   frame?: CartesianFrame;
-}
-
-const tickCountInterpolator = d3
-  .scaleLinear()
-  .domain([40000, 1000000]) // The potential width*height of the chart
-  .range([3, 16]) // The range of circle radiuses
-  .clamp(true);
-
-export function calculatePadding({
-  suggestedPadding,
-  hasXAxisTitle,
-  hasYAxisTitle,
-}: {
-  suggestedPadding: Padding;
-  hasXAxisTitle: boolean;
-  hasYAxisTitle: boolean;
-}): Padding {
-  const padding: Padding = { ...suggestedPadding };
-  if (hasXAxisTitle) {
-    padding.bottom = padding.bottom + 20;
-  }
-  if (hasYAxisTitle) {
-    padding.left = padding.left + 35;
-  }
-  return padding;
-}
-
-export function makeCartesianFrame({
-  context,
-  padding,
-  width,
-  height,
-}: {
-  context: CanvasRenderingContext2D;
-  padding: Padding;
-  width: number;
-  height: number;
-}) {
-  return new CartesianFrame({
-    context,
-    x0: padding.left,
-    y0: height - padding.bottom,
-    width: width - padding.left - padding.right,
-    height: height - padding.top - padding.bottom,
-  });
-}
+};
 
 export function drawAxes({
   context,
@@ -276,20 +234,4 @@ export function drawAxes({
     padding,
     frame,
   };
-}
-
-export function drawCircle({
-  context,
-  x,
-  y,
-  r,
-}: {
-  context: CanvasRenderingContext2D;
-  x: number;
-  y: number;
-  r: number;
-}) {
-  context.beginPath();
-  context.arc(x, y, r, 0, Math.PI * 2, true);
-  context.fill();
 }

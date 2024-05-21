@@ -5,8 +5,8 @@ import { Env, SqNumericFnPlot } from "@quri/squiggle-lang";
 
 import { sqScaleToD3 } from "../../../lib/d3/index.js";
 import { primaryColor } from "../../../lib/draw/colors.js";
+import { drawAxes } from "../../../lib/draw/drawAxes.js";
 import { drawCursorGuideLines } from "../../../lib/draw/guideLines.js";
-import { drawAxes } from "../../../lib/draw/index.js";
 import {
   DrawContext,
   useCanvas,
