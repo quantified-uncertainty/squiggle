@@ -8,25 +8,28 @@ type TextOptions = {
 };
 
 /*
-Implemented by GPT-4.
+ * Usage example:
+ *
+ * frame.enter(); // Entering the frame
+ *
+ * // Draw your 2D charts here
+ *
+ * frame.drawText('Label', 100, 50, { textAlign: 'center', textBaseline: 'middle', font: '14px Arial', fillStyle: 'blue' });
+ *
+ * frame.exit(); // Exiting the frame
+ */
 
-Usage example:
+// `down` is the default for HTML canvas - (0,0) is at top-left corner.
+// For drawing charts, though, it's useful to flip the direction to `up`, with (0,0) in bottom-left corner.
+type YDirection = "up" | "down";
 
-frame.enter(); // Entering the Cartesian frame
-
-// Draw your 2D charts here
-
-frame.drawText('Label', 100, 50, { textAlign: 'center', textBaseline: 'middle', font: '14px Arial', fillStyle: 'blue' });
-
-frame.exit(); // Exiting the Cartesian frame
-*/
-
-export class CartesianFrame {
+export class CanvasFrame {
   public context: CanvasRenderingContext2D;
   public x0: number;
   public y0: number;
   public width: number;
   public height: number;
+  public yDirection: YDirection = "up";
 
   constructor(props: {
     context: CanvasRenderingContext2D;
@@ -34,52 +37,55 @@ export class CartesianFrame {
     y0: number;
     width: number;
     height: number;
+    yDirection?: YDirection;
   }) {
     this.context = props.context;
     this.x0 = props.x0;
     this.y0 = props.y0;
     this.width = props.width;
     this.height = props.height;
+    this.yDirection = props.yDirection ?? "up";
   }
 
   // useful for converting cursor coordinates to frame
   translatedPoint(point: Point): Point {
     return {
       x: point.x - this.x0,
-      y: this.y0 - point.y,
+      y: this.yDirection === "up" ? this.y0 - point.y : this.y0 - point.y,
     };
   }
 
   // `point` is in global canvas coordinates, e.g. `cursor` from `useCanvasCursor()`
   containsPoint(point: Point): boolean {
+    const translated = this.translatedPoint(point);
     return (
-      point.x >= this.x0 &&
-      point.x - this.x0 <= this.width &&
-      point.y <= this.y0 &&
-      this.y0 - point.y <= this.height
+      translated.x >= 0 &&
+      translated.x <= this.width &&
+      translated.y >= 0 &&
+      translated.y <= this.height
     );
   }
 
-  // TODO: `using framed = frame.enter()` would be good after Typescript 5.2 is released.
-  // See also: https://devblogs.microsoft.com/typescript/announcing-typescript-5-2-beta/#using-declarations-and-explicit-resource-management
-  enter(): void {
+  // Note: `using framed = frame.enter()` would be good after
+  // https://github.com/tc39/proposal-explicit-resource-management is widely
+  // supported.
+  enter() {
     this.context.save();
     this.context.translate(this.x0, this.y0);
-    this.context.scale(1, -1);
+    if (this.yDirection === "up") {
+      this.context.scale(1, -1);
+    }
   }
 
-  exit(): void {
+  exit() {
     this.context.restore();
   }
 
-  fillText(
-    text: string,
-    x: number,
-    y: number,
-    options: TextOptions = {}
-  ): void {
+  fillText(text: string, x: number, y: number, options: TextOptions = {}) {
     this.context.save();
-    this.context.scale(1, -1); // Invert the scale for the text rendering
+    if (this.yDirection === "up") {
+      this.context.scale(1, -1); // Invert the scale for the text rendering
+    }
     if (options.textAlign !== undefined) {
       this.context.textAlign = options.textAlign;
     }
@@ -92,7 +98,7 @@ export class CartesianFrame {
     if (options.textBaseline !== undefined) {
       this.context.textBaseline = options.textBaseline;
     }
-    this.context.fillText(text, x, -y); // Use negative y value to adjust the position
+    this.context.fillText(text, x, this.yDirection === "up" ? -y : y);
     this.context.restore();
   }
 }

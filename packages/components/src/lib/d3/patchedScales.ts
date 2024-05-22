@@ -11,7 +11,7 @@ export const defaultTickFormatSpecifier: SquiggleDefaultFormat =
 function shouldUseSquiggleDefaultFormat(
   specifier: string | undefined
 ): specifier is SquiggleDefaultFormat {
-  return specifier === "squiggle-default" || specifier === undefined;
+  return specifier === defaultTickFormatSpecifier || specifier === undefined;
 }
 
 function squiggleDefaultFormat() {

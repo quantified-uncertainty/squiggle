@@ -1,7 +1,6 @@
 import * as d3 from "d3";
 
 import { defaultTickFormatSpecifier } from "../d3/patchedScales.js";
-import { CartesianFrame } from "./CartesianFrame.js";
 import {
   axisColor,
   axisTitleColor,
@@ -39,7 +38,6 @@ type DrawAxesParams = {
   yTickFormat?: string;
   xAxisTitle?: string;
   yAxisTitle?: string;
-  frame?: CartesianFrame;
 };
 
 export function drawAxes({
@@ -58,7 +56,6 @@ export function drawAxes({
   yTickFormat: yTickFormatSpecifier = defaultTickFormatSpecifier,
   xAxisTitle,
   yAxisTitle,
-  frame: _frame,
 }: DrawAxesParams) {
   const xTickCount = _xTickCount || tickCountInterpolator(width * height);
   const yTickCount = _yTickCount || tickCountInterpolator(height * width);
@@ -90,8 +87,7 @@ export function drawAxes({
     });
   }
 
-  const frame =
-    _frame || makeCartesianFrame({ context, padding, width, height });
+  const frame = makeCartesianFrame({ context, padding, width, height });
 
   xScale.range([0, frame.width]);
   yScale.range([0, frame.height]);
@@ -206,11 +202,13 @@ export function drawAxes({
     const chartWidth = width - padding.left - padding.right; // Actual charting area width
     const titleX = padding.left + chartWidth / 2; // center the title within the charting area
     const titleY = height - padding.bottom + 33; // adjust this value based on desired distance from x-axis
+    context.save();
     context.textAlign = "center";
     context.textBaseline = "bottom";
     context.font = axisTitleFont;
     context.fillStyle = axisTitleColor;
     context.fillText(xAxisTitle, titleX, titleY);
+    context.restore();
   }
   if (yAxisTitle) {
     const chartHeight = height - padding.top - padding.bottom; // Actual charting area height

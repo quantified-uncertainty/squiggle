@@ -1,4 +1,4 @@
-import { CartesianFrame } from "./CartesianFrame.js";
+import { CanvasFrame } from "./CanvasFrame.js";
 import { Padding, Point } from "./types.js";
 
 export function distance(point1: Point, point2: Point) {
@@ -35,7 +35,7 @@ export function makeCartesianFrame({
   width: number;
   height: number;
 }) {
-  return new CartesianFrame({
+  return new CanvasFrame({
     context,
     x0: padding.left,
     y0: height - padding.bottom,

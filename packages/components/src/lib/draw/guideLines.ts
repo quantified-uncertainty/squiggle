@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 
-import { CartesianFrame } from "./CartesianFrame.js";
+import { CanvasFrame } from "./CanvasFrame.js";
 import { guideLineColor, labelColor } from "./colors.js";
 import { Point } from "./types.js";
 
@@ -20,7 +20,7 @@ export function drawVerticalGuideLine({
   scale: d3.ScaleContinuousNumeric<number, number, never>;
   format?: string | undefined;
   x: number;
-  frame: CartesianFrame;
+  frame: CanvasFrame;
 }) {
   const context = frame.context;
   frame.enter();
@@ -86,7 +86,7 @@ export function drawHorizontalGuideLine({
   scale: d3.ScaleContinuousNumeric<number, number, never>;
   format?: string | undefined;
   y: number;
-  frame: CartesianFrame;
+  frame: CanvasFrame;
 }) {
   // TODO - copy-pasted from drawVerticalGuideLine
   const context = frame.context;
@@ -148,7 +148,7 @@ export function drawCursorGuideLines({
   // original canvas coordinates;
   // can be undefined for convenience (this function will check if cursor lines are necessary)
   cursor?: Point;
-  frame: CartesianFrame;
+  frame: CanvasFrame;
   x?: {
     scale: d3.ScaleContinuousNumeric<number, number, never>;
     format?: string | undefined;
