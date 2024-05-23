@@ -4,9 +4,10 @@ import { FC, useCallback, useMemo } from "react";
 import { Env, SqNumericFnPlot } from "@quri/squiggle-lang";
 
 import { sqScaleToD3 } from "../../../lib/d3/index.js";
-import { primaryColor } from "../../../lib/draw/colors.js";
+import { CanvasFrame } from "../../../lib/draw/CanvasFrame.js";
 import { drawAxes } from "../../../lib/draw/drawAxes.js";
 import { drawCursorGuideLines } from "../../../lib/draw/guideLines.js";
+import { primaryColor } from "../../../lib/draw/styles.js";
 import {
   DrawContext,
   useCanvas,
@@ -53,10 +54,7 @@ export const NumericFunctionChart: FC<Props> = ({
       );
 
       const { frame } = drawAxes({
-        context,
-        width,
-        height,
-        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
+        frame: CanvasFrame.fullFrame(context),
         xScale,
         yScale,
         xTickFormat: plot.xScale.tickFormat,

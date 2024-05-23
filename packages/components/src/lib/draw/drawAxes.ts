@@ -1,16 +1,11 @@
 import * as d3 from "d3";
 
 import { defaultTickFormatSpecifier } from "../d3/patchedScales.js";
-import {
-  axisColor,
-  axisTitleColor,
-  axisTitleFont,
-  labelColor,
-} from "./colors.js";
+import { CanvasFrame } from "./CanvasFrame.js";
+import { drawAxesTitles } from "./drawAxesTitles.js";
+import { axisColor, labelColor, labelFont } from "./styles.js";
 import { Padding } from "./types.js";
-import { calculatePadding, makeCartesianFrame } from "./utils.js";
 
-const labelFont = "10px sans-serif";
 const xLabelOffset = 6;
 const yLabelOffset = 6;
 
@@ -23,12 +18,9 @@ export const tickCountInterpolator = d3
 type AnyNumericScale = d3.ScaleContinuousNumeric<number, number, never>;
 
 type DrawAxesParams = {
-  context: CanvasRenderingContext2D;
+  frame: CanvasFrame;
   xScale: AnyNumericScale;
   yScale: AnyNumericScale;
-  suggestedPadding: Padding;
-  width: number;
-  height: number;
   showXAxis?: boolean;
   showYAxis?: boolean;
   showAxisLines?: boolean;
@@ -41,15 +33,12 @@ type DrawAxesParams = {
 };
 
 export function drawAxes({
-  context,
+  frame,
   xScale, // will be mutated with the correct range
   yScale,
-  suggestedPadding,
-  width,
-  height,
   showYAxis = true,
   showXAxis = true,
-  showAxisLines = height > 150 && width > 150,
+  showAxisLines: _showAxisLines,
   xTickCount: _xTickCount,
   yTickCount: _yTickCount,
   xTickFormat: xTickFormatSpecifier = defaultTickFormatSpecifier,
@@ -57,6 +46,14 @@ export function drawAxes({
   xAxisTitle,
   yAxisTitle,
 }: DrawAxesParams) {
+  const { innerFrame } = drawAxesTitles({
+    frame,
+    xAxisTitle,
+    yAxisTitle,
+  });
+  const { context, width, height } = innerFrame;
+
+  const showAxisLines = _showAxisLines ?? (height > 150 && width > 150);
   const xTickCount = _xTickCount || tickCountInterpolator(width * height);
   const yTickCount = _yTickCount || tickCountInterpolator(height * width);
 
@@ -68,39 +65,47 @@ export function drawAxes({
 
   const tickSize = 2;
 
-  const padding: Padding = calculatePadding({
-    suggestedPadding,
-    hasXAxisTitle: !!xAxisTitle,
-    hasYAxisTitle: !!yAxisTitle,
-  });
+  const padding: Padding = {
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  };
 
-  // measure tick sizes for dynamic padding
-  if (showYAxis) {
-    yTicks.forEach((d) => {
-      const measured = context.measureText(yTickFormat(d));
-      padding.left = Math.max(
-        padding.left,
-        measured.actualBoundingBoxLeft +
-          measured.actualBoundingBoxRight +
-          yLabelOffset
-      );
-    });
+  // update padding to fit things outside of the main cartesian frame
+  {
+    // measure x tick sizes for dynamic padding
+    if (showYAxis) {
+      yTicks.forEach((d) => {
+        const measured = context.measureText(yTickFormat(d));
+        padding.left = Math.max(
+          padding.left,
+          measured.actualBoundingBoxLeft +
+            measured.actualBoundingBoxRight +
+            yLabelOffset
+        );
+      });
+    }
+
+    if (showXAxis) {
+      padding.bottom += 20; // TODO - measure
+    }
   }
 
-  const frame = makeCartesianFrame({ context, padding, width, height });
+  const mainFrame = innerFrame.subframeWithPadding(padding);
 
-  xScale.range([0, frame.width]);
-  yScale.range([0, frame.height]);
+  xScale.range([0, mainFrame.width]);
+  yScale.range([0, mainFrame.height]);
 
   // x axis
   if (showXAxis) {
-    frame.enter();
+    mainFrame.enter();
     if (showAxisLines) {
       context.beginPath();
       context.strokeStyle = axisColor;
       context.lineWidth = 1;
       context.moveTo(0, yScale(0));
-      context.lineTo(frame.width, yScale(0));
+      context.lineTo(mainFrame.width, yScale(0));
       context.stroke();
     }
 
@@ -129,31 +134,31 @@ export function drawAxes({
       if (i === 0) {
         startX = Math.max(x - textWidth / 2, prevBoundary);
       } else if (i === xTicks.length - 1) {
-        startX = Math.min(x - textWidth / 2, frame.width - textWidth);
+        startX = Math.min(x - textWidth / 2, mainFrame.width - textWidth);
       } else {
         startX = x - textWidth / 2;
       }
       if (startX < prevBoundary) {
         continue; // doesn't fit, skip
       }
-      frame.fillText(text, startX, y - xLabelOffset, {
+      mainFrame.fillText(text, startX, y - xLabelOffset, {
         textAlign: "left",
         textBaseline: "top",
       });
       prevBoundary = startX + textWidth;
     }
-    frame.exit();
+    mainFrame.exit();
   }
 
   // y axis
   if (showYAxis) {
-    frame.enter();
+    mainFrame.enter();
     if (showAxisLines) {
       context.beginPath();
       context.strokeStyle = axisColor;
       context.lineWidth = 1;
       context.moveTo(0, 0);
-      context.lineTo(0, frame.height);
+      context.lineTo(0, mainFrame.height);
       context.stroke();
     }
 
@@ -179,7 +184,7 @@ export function drawAxes({
       if (i === 0) {
         startY = Math.max(y - textHeight / 2, prevBoundary);
       } else if (i === yTicks.length - 1) {
-        startY = Math.min(y - textHeight / 2, frame.height - textHeight);
+        startY = Math.min(y - textHeight / 2, mainFrame.height - textHeight);
       } else {
         startY = y - textHeight / 2;
       }
@@ -187,7 +192,7 @@ export function drawAxes({
       if (startY < prevBoundary) {
         continue; // doesn't fit, skip
       }
-      frame.fillText(text, x - yLabelOffset, startY - 1, {
+      mainFrame.fillText(text, x - yLabelOffset, startY - 1, {
         textAlign: "right",
         textBaseline: "bottom",
         fillStyle: labelColor,
@@ -195,41 +200,13 @@ export function drawAxes({
       });
       prevBoundary = startY + textHeight;
     }
-    frame.exit();
-  }
-
-  if (xAxisTitle) {
-    const chartWidth = width - padding.left - padding.right; // Actual charting area width
-    const titleX = padding.left + chartWidth / 2; // center the title within the charting area
-    const titleY = height - padding.bottom + 33; // adjust this value based on desired distance from x-axis
-    context.save();
-    context.textAlign = "center";
-    context.textBaseline = "bottom";
-    context.font = axisTitleFont;
-    context.fillStyle = axisTitleColor;
-    context.fillText(xAxisTitle, titleX, titleY);
-    context.restore();
-  }
-  if (yAxisTitle) {
-    const chartHeight = height - padding.top - padding.bottom; // Actual charting area height
-    const titleY = padding.top + chartHeight / 2; // center the title vertically within the charting area
-    const titleX = 0;
-    context.save(); // save the current context state
-    context.translate(titleX, titleY);
-    context.rotate(-Math.PI / 2); // rotate 90 degrees counter-clockwise
-    context.textAlign = "center";
-    context.textBaseline = "top";
-    context.font = axisTitleFont;
-    context.fillStyle = axisTitleColor;
-    context.fillText(yAxisTitle, 0, 0);
-    context.restore(); // restore the context state to before rotation and translation
+    mainFrame.exit();
   }
 
   return {
     xScale,
     yScale,
     xTickFormat,
-    padding,
-    frame,
+    frame: mainFrame,
   };
 }

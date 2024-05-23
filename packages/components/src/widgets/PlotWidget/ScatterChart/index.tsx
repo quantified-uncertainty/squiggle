@@ -4,10 +4,11 @@ import { FC, useCallback, useMemo } from "react";
 import { Env, SqScale, SqScatterPlot } from "@quri/squiggle-lang";
 
 import { sqScaleToD3 } from "../../../lib/d3/index.js";
-import { primaryColor } from "../../../lib/draw/colors.js";
+import { CanvasFrame } from "../../../lib/draw/CanvasFrame.js";
 import { drawAxes } from "../../../lib/draw/drawAxes.js";
 import { drawCircle } from "../../../lib/draw/drawCircle.js";
 import { drawCursorGuideLines } from "../../../lib/draw/guideLines.js";
+import { primaryColor } from "../../../lib/draw/styles.js";
 import {
   DrawContext,
   useCanvas,
@@ -33,7 +34,7 @@ export const ScatterChart: FC<Props> = ({ plot, height }) => {
     [plot]
   );
   const draw = useCallback(
-    ({ context, width }: DrawContext) => {
+    ({ context }: DrawContext) => {
       const points = SqScatterPlot.zipToPoints(xDist, yDist);
 
       const xSqScale = plot.xScale ?? SqScale.linearDefault();
@@ -51,15 +52,12 @@ export const ScatterChart: FC<Props> = ({ plot, height }) => {
       ]);
 
       const { frame } = drawAxes({
-        context,
-        width,
-        height,
-        suggestedPadding: {
+        frame: CanvasFrame.fullFrame(context).subframeWithPadding({
           top: 10,
           bottom: 16,
           left: 0,
           right: 0,
-        },
+        }),
         xScale,
         yScale,
         xTickFormat: plot.xScale?.tickFormat,

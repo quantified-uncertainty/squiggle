@@ -15,10 +15,10 @@ import {
 import { TailwindContext } from "@quri/ui";
 
 import { sqScaleToD3 } from "../../../lib/d3/index.js";
-import { CartesianFrame } from "../../../lib/draw/CartesianFrame.js";
-import { primaryColor } from "../../../lib/draw/colors.js";
+import { CanvasFrame } from "../../../lib/draw/CanvasFrame.js";
 import { drawAxes } from "../../../lib/draw/drawAxes.js";
 import { drawCursorGuideLines } from "../../../lib/draw/guideLines.js";
+import { primaryColor } from "../../../lib/draw/styles.js";
 import { useCanvas, useCanvasCursor } from "../../../lib/hooks/index.js";
 import { DrawContext } from "../../../lib/hooks/useCanvas.js";
 import { canvasClasses, unwrapOrFailure } from "../../../lib/utility.js";
@@ -150,12 +150,9 @@ function useDrawDistFunctionChart({
       context.clearRect(0, 0, width, height);
 
       const { frame } = drawAxes({
-        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
+        frame: CanvasFrame.fullFrame(context),
         xScale,
         yScale,
-        width,
-        height,
-        context,
         xTickFormat: plot.xScale.tickFormat,
         yTickFormat: plot.yScale.tickFormat,
         xAxisTitle: plot.xScale.title,
@@ -208,7 +205,7 @@ function useDrawDistFunctionChart({
   const { ref, width } = useCanvas({ height, init: initCursor, draw });
 
   const d3ref = useRef<{
-    frame: CartesianFrame;
+    frame: CanvasFrame;
     xScale: d3.ScaleContinuousNumeric<number, number, never>;
   }>();
 

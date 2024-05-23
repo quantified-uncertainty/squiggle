@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 
 import { CanvasFrame } from "./CanvasFrame.js";
-import { guideLineColor, labelColor } from "./colors.js";
+import { guideLineColor, labelColor, labelFont } from "./styles.js";
 import { Point } from "./types.js";
 
 const TOOLTIP_OFFSETS = {
@@ -36,6 +36,8 @@ export function drawVerticalGuideLine({
 
   context.textAlign = "left";
   context.textBaseline = "bottom";
+  context.fillStyle = labelColor;
+  context.font = labelFont;
   const text = scale.tickFormat(
     Infinity, // important for scaleLog; https://github.com/d3/d3-scale/tree/main#log_tickFormat
     format
@@ -103,6 +105,8 @@ export function drawHorizontalGuideLine({
 
   context.textAlign = "left";
   context.textBaseline = "bottom";
+  context.fillStyle = labelColor;
+  context.font = labelFont;
   const text = scale.tickFormat(
     Infinity, // important for scaleLog; https://github.com/d3/d3-scale/tree/main#log_tickFormat
     format

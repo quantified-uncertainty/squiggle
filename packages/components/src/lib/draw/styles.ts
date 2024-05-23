@@ -5,3 +5,4 @@ export const distributionColor = "#649ece"; // for distributions. Slightly light
 export const axisTitleColor = "rgb(100 116 139)";
 export const axisTitleFont = "bold 12px ui-sans-serif, system-ui";
 export const guideLineColor = "rgba(114, 125, 147, 0.4)";
+export const labelFont = "10px sans-serif";

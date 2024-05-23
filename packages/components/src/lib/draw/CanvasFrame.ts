@@ -1,4 +1,4 @@
-import { Point } from "./types.js";
+import { Padding, Point } from "./types.js";
 
 type TextOptions = {
   textAlign?: CanvasTextAlign;
@@ -19,9 +19,28 @@ type TextOptions = {
  * frame.exit(); // Exiting the frame
  */
 
-// `down` is the default for HTML canvas - (0,0) is at top-left corner.
-// For drawing charts, though, it's useful to flip the direction to `up`, with (0,0) in bottom-left corner.
+/*
+ * `down` is the default for HTML canvas - (0,0) is at top-left corner.
+ *
+ * For drawing charts, though, it's useful to flip the direction to `up`, with
+ * (0,0) in bottom-left corner.
+ *
+ * Note that this only affects the frame's internal coordinates that you get by
+ * calling `frame.enter()`. `frame.y0` always points to the frame's top compared
+ * to the canvas, to simplify the math.
+ */
+
 type YDirection = "up" | "down";
+
+function contextWidthHeight(context: CanvasRenderingContext2D) {
+  const devicePixelRatio =
+    typeof window === "undefined" ? 1 : window.devicePixelRatio;
+
+  return {
+    width: context.canvas.width / devicePixelRatio,
+    height: context.canvas.height / devicePixelRatio,
+  };
+}
 
 export class CanvasFrame {
   public context: CanvasRenderingContext2D;
@@ -47,11 +66,58 @@ export class CanvasFrame {
     this.yDirection = props.yDirection ?? "up";
   }
 
-  // useful for converting cursor coordinates to frame
+  padding(): Padding {
+    const contextSizes = contextWidthHeight(this.context);
+    return {
+      left: this.x0,
+      right: contextSizes.width - this.x0 - this.width,
+      top: this.y0,
+      bottom: contextSizes.height - this.y0 - this.height,
+    };
+  }
+
+  static fullFrame(context: CanvasRenderingContext2D) {
+    const { width, height } = contextWidthHeight(context);
+    return new CanvasFrame({
+      context,
+      x0: 0,
+      y0: 0,
+      width,
+      height,
+      yDirection: "down",
+    });
+  }
+
+  flip(): CanvasFrame {
+    return new CanvasFrame({
+      context: this.context,
+      x0: this.x0,
+      y0: this.y0,
+      width: this.width,
+      height: this.height,
+      yDirection: this.yDirection === "up" ? "down" : "up",
+    });
+  }
+
+  subframeWithPadding(padding: Padding): CanvasFrame {
+    return new CanvasFrame({
+      context: this.context,
+      x0: this.x0 + padding.left,
+      y0: this.y0 + padding.top,
+      width: this.width - padding.left - padding.right,
+      height: this.height - padding.top - padding.bottom,
+      yDirection: this.yDirection,
+    });
+  }
+
+  // Useful for converting cursor coordinates to frame.
   translatedPoint(point: Point): Point {
     return {
       x: point.x - this.x0,
-      y: this.yDirection === "up" ? this.y0 - point.y : this.y0 - point.y,
+      y:
+        this.yDirection === "down"
+          ? point.y - this.y0
+          : this.y0 + this.height - point.y,
     };
   }
 
@@ -71,7 +137,10 @@ export class CanvasFrame {
   // supported.
   enter() {
     this.context.save();
-    this.context.translate(this.x0, this.y0);
+    this.context.translate(
+      this.x0,
+      this.yDirection === "up" ? this.y0 + this.height : this.y0
+    );
     if (this.yDirection === "up") {
       this.context.scale(1, -1);
     }
@@ -96,7 +165,7 @@ export class CanvasFrame {
       this.context.fillStyle = options.fillStyle;
     }
     if (options.textBaseline !== undefined) {
-      this.context.textBaseline = options.textBaseline;
+      this.context.textBaseline = options.textBaseline; // TODO - does this make sense in both yDirection modes?
     }
     this.context.fillText(text, x, this.yDirection === "up" ? -y : y);
     this.context.restore();

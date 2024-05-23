@@ -18,19 +18,16 @@ import { useViewerType } from "../../components/SquiggleViewer/ViewerProvider.js
 import { ErrorAlert } from "../../components/ui/Alert.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
-import { distributionColor } from "../../lib/draw/colors.js";
+import { CanvasFrame } from "../../lib/draw/CanvasFrame.js";
 import { drawAxes } from "../../lib/draw/drawAxes.js";
 import { drawCircle } from "../../lib/draw/drawCircle.js";
 import {
   drawCursorGuideLines,
   drawVerticalGuideLine,
 } from "../../lib/draw/guideLines.js";
+import { distributionColor } from "../../lib/draw/styles.js";
 import { Point } from "../../lib/draw/types.js";
-import {
-  calculatePadding,
-  distance,
-  makeCartesianFrame,
-} from "../../lib/draw/utils.js";
+import { distance } from "../../lib/draw/utils.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { canvasClasses, flattenResult } from "../../lib/utility.js";
@@ -141,11 +138,9 @@ const InnerDistributionsChart: FC<{
     : 0;
   const samplesFooterHeight = samplesBarSetting === "bottom" ? 20 : 0;
 
-  const bottomPadding = (showXAxis ? 14 : 0) + samplesFooterHeight;
-
   const height = Math.max(
-    innerHeight + bottomPadding,
-    legendHeight + bottomPadding
+    innerHeight + samplesFooterHeight,
+    legendHeight + samplesFooterHeight
   );
 
   const discreteRadius = distRadiusScalingFromHeight(height);
@@ -192,33 +187,43 @@ const InnerDistributionsChart: FC<{
         left: discreteRadius,
         right: discreteRadius,
         top: discreteRadius,
-        bottom: bottomPadding,
+        bottom: samplesFooterHeight,
       };
 
-      const padding = calculatePadding({
-        suggestedPadding,
-        hasXAxisTitle: showAxisTitles && !!plot.xScale.title,
-        hasYAxisTitle: false,
+      const { frame } = drawAxes({
+        frame:
+          CanvasFrame.fullFrame(context).subframeWithPadding(suggestedPadding),
+        xScale,
+        yScale,
+        showYAxis: false,
+        showXAxis,
+        showAxisLines: true,
+        xTickFormat: plot.xScale.tickFormat,
+        xAxisTitle: showAxisTitles ? plot.xScale.title : undefined,
       });
 
-      const frame = makeCartesianFrame({ context, padding, width, height });
+      const padding = frame.padding();
 
       xScale.range([0, frame.width]);
       yScale.range([0, frame.height]);
-      // samplesBar
-      function samplesBarShowSettings(): { yOffset: number; color: string } {
-        if (samplesBarSetting === "behind") {
-          return { yOffset: bottomPadding, color: getColor(0, 0.4) };
-        } else if (samplesBarSetting === "bottom") {
-          return { yOffset: 0, color: getColor(0) };
-        } else {
-          // Only for the case of samplesBarSetting === "none", should not happen
-          return { yOffset: 0, color: getColor(0) };
-        }
-      }
+
+      // samples bar
       if (samplesBarSetting !== "none") {
+        let yOffset: number, color: string;
+        switch (samplesBarSetting) {
+          case "behind":
+            yOffset = samplesFooterHeight;
+            color = getColor(0, 0.4);
+            break;
+          case "bottom":
+            yOffset = 0;
+            color = getColor(0);
+            break;
+          default:
+            throw samplesBarSetting satisfies never;
+        }
+
         context.save();
-        const { yOffset, color } = samplesBarShowSettings();
         context.lineWidth = 0.5;
         context.strokeStyle = color;
         samples.forEach((sample) => {
@@ -346,20 +351,6 @@ const InnerDistributionsChart: FC<{
         frame.exit();
       }
 
-      drawAxes({
-        context,
-        width,
-        height,
-        suggestedPadding,
-        xScale,
-        yScale,
-        showYAxis: false,
-        showXAxis,
-        xTickFormat: plot.xScale.tickFormat,
-        xAxisTitle: showAxisTitles ? plot.xScale.title : undefined,
-        showAxisLines: true, // Set this to true to show the axis lines
-      });
-
       if (isMulti) {
         const radius = 5;
         for (let i = 0; i < shapes.length; i++) {
@@ -416,12 +407,12 @@ const InnerDistributionsChart: FC<{
       yScale,
       verticalLine,
       sampleBarHeight,
-      bottomPadding,
       samplesBarSetting,
       showCursorLine,
       showPercentileLines,
       showXAxis,
       showAxisTitles,
+      samplesFooterHeight,
     ]
   );
 
