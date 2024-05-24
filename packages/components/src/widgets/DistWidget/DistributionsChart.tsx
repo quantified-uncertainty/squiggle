@@ -18,8 +18,9 @@ import { useViewerType } from "../../components/SquiggleViewer/ViewerProvider.js
 import { ErrorAlert } from "../../components/ui/Alert.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
-import { CanvasFrame } from "../../lib/draw/CanvasFrame.js";
-import { drawAxes } from "../../lib/draw/drawAxes.js";
+import { AxesBox } from "../../lib/draw/AxesBox.js";
+import { AxesTitlesBox } from "../../lib/draw/AxesTitlesBox.js";
+import { CanvasElement } from "../../lib/draw/CanvasElement.js";
 import { drawCircle } from "../../lib/draw/drawCircle.js";
 import {
   drawCursorGuideLines,
@@ -81,6 +82,152 @@ function interpolateYAtX(
 }
 
 type SampleBarSetting = "none" | "bottom" | "behind";
+
+type ChartElementProps {
+
+}
+
+class ChartElement extends CanvasElement {
+  constructor(public props: ChartElementProps) {
+    super();
+  }
+
+  draw(context: CanvasRenderingContext2D) {
+    // shapes
+    {
+      const translatedCursor: Point | undefined = cursor
+        ? frame.translatedPoint(cursor)
+        : undefined;
+
+      // there can be only one
+      let newDiscreteTooltip: typeof discreteTooltip = undefined;
+
+      for (let i = 0; i < shapes.length; i++) {
+        const shape = shapes[i];
+
+        // continuous fill
+        //In the case of one distribution, we don't want it to be transparent, so that we can show the samples lines. In the case of multiple distributions, we want them to be transparent so that we can see the other distributions.
+        context.fillStyle = isMulti ? getColor(i, 0) : getColor(i, 0.7);
+        context.globalAlpha = isMulti ? 0.4 : 1;
+        context.beginPath();
+        d3
+          .area<SqShape["continuous"][number]>()
+          .x((d) => xScale(d.x))
+          .y0((d) => yScale(d.y))
+          .y1(yScale(0))
+          .context(context)(shape.continuous);
+        context.fill();
+        context.globalAlpha = 1;
+
+        // Percentile lines
+        if (showPercentileLines) {
+          const percentiles = [
+            [shape.p5, "p5"],
+            [shape.p50, "p50"],
+            [shape.p95, "p95"],
+          ] as const;
+          percentiles.forEach(([percentile, name]) => {
+            if (percentile.ok) {
+              const xPoint = percentile.value;
+              //We need to find the y value of the percentile in question, to draw the line only up to the top of the distribution. We have to do this with interpolation, which is not provided straightforwardly by d3.
+              const interpolateY = interpolateYAtX(
+                xPoint,
+                shape.continuous,
+                yScale
+              );
+              if (interpolateY) {
+                context.beginPath();
+                context.strokeStyle = getColor(i, name === "p50" ? 0.4 : 0.3);
+                if (name === "p50") {
+                  context.setLineDash([6, 4]);
+                } else {
+                  context.setLineDash([2, 2]);
+                }
+                context.lineWidth = 1;
+                context.moveTo(xScale(xPoint), 0);
+                context.lineTo(xScale(xPoint), interpolateY);
+                context.stroke();
+                context.setLineDash([]);
+              }
+            }
+          });
+        }
+
+        // The top line
+        context.strokeStyle = getColor(i);
+        context.beginPath();
+        d3
+          .line<SqShape["continuous"][number]>()
+          .x((d) => xScale(d.x))
+          .y((d) => yScale(d.y))
+          .context(context)(shape.continuous);
+        context.stroke();
+
+        const darkenAmountCircle = isMulti ? 0.05 : 0.1;
+
+        const discreteLineColor = getColor(i, -darkenAmountCircle);
+        const discreteCircleColor = getColor(i, -darkenAmountCircle);
+
+        context.fillStyle = discreteCircleColor;
+        context.strokeStyle = discreteLineColor;
+        for (const point of shape.discrete) {
+          context.beginPath();
+          context.lineWidth = 1;
+          const x = xScale(point.x);
+          // The circle is drawn from the top of the circle, so we need to subtract the radius to get the center of the circle to be at the top of the bar.
+          const y = yScale(point.y) - discreteRadius;
+          if (
+            translatedCursor &&
+            distance({ x, y }, translatedCursor) <= discreteRadius + 2
+          ) {
+            // the last discrete point always wins over overlapping previous points
+            // this makes sense because it's drawn last
+            newDiscreteTooltip = { value: point.x, probability: point.y };
+            //darken the point if it's hovered
+            context.fillStyle = getColor(i, -1);
+            context.strokeStyle = getColor(i, -1);
+          }
+          context.moveTo(x, 0);
+          context.lineTo(x, y);
+          context.globalAlpha = 0.5; // We want the lines to be transparent - the circles are the main focus
+          context.stroke();
+          context.globalAlpha = 1;
+          drawCircle({
+            context,
+            x,
+            y,
+            r: discreteRadius,
+          });
+        }
+      }
+      if (!isEqual(discreteTooltip, newDiscreteTooltip)) {
+        setDiscreteTooltip(newDiscreteTooltip);
+      }
+    }
+
+    if (isMulti) {
+      const radius = 5;
+      for (let i = 0; i < shapes.length; i++) {
+        context.save();
+        context.translate(padding.left, legendItemHeight * i + legendOffset);
+        context.fillStyle = getColor(i);
+        drawCircle({
+          context,
+          x: radius,
+          y: radius,
+          r: radius,
+        });
+
+        context.textAlign = "left";
+        context.textBaseline = "middle";
+        context.fillStyle = "black";
+        context.font = "12px sans-serif";
+        context.fillText(shapes[i].name, 16, radius);
+        context.restore();
+      }
+    }
+  }
+}
 
 const InnerDistributionsChart: FC<{
   shapes: (SqShape & {
@@ -190,19 +337,24 @@ const InnerDistributionsChart: FC<{
         bottom: samplesFooterHeight,
       };
 
-      const { frame } = drawAxes({
-        frame:
-          CanvasFrame.fullFrame(context).subframeWithPadding(suggestedPadding),
-        xScale,
-        yScale,
-        showYAxis: false,
-        showXAxis,
-        showAxisLines: true,
-        xTickFormat: plot.xScale.tickFormat,
+      const element = new AxesTitlesBox({
+        child: new AxesBox({
+          xScale,
+          yScale,
+          showYAxis: false,
+          showXAxis,
+          showAxisLines: true,
+          xTickFormat: plot.xScale.tickFormat,
+          child: new ChartElement({}),
+        }),
         xAxisTitle: showAxisTitles ? plot.xScale.title : undefined,
       });
 
-      const padding = frame.padding();
+      element.layout(context, {
+        width,
+        height,
+      });
+      element.draw(context);
 
       xScale.range([0, frame.width]);
       yScale.range([0, frame.height]);
@@ -235,142 +387,6 @@ const InnerDistributionsChart: FC<{
           context.stroke();
         });
         context.restore();
-      }
-
-      // shapes
-      {
-        frame.enter();
-        const translatedCursor: Point | undefined = cursor
-          ? frame.translatedPoint(cursor)
-          : undefined;
-
-        // there can be only one
-        let newDiscreteTooltip: typeof discreteTooltip = undefined;
-
-        for (let i = 0; i < shapes.length; i++) {
-          const shape = shapes[i];
-
-          // continuous fill
-          //In the case of one distribution, we don't want it to be transparent, so that we can show the samples lines. In the case of multiple distributions, we want them to be transparent so that we can see the other distributions.
-          context.fillStyle = isMulti ? getColor(i, 0) : getColor(i, 0.7);
-          context.globalAlpha = isMulti ? 0.4 : 1;
-          context.beginPath();
-          d3
-            .area<SqShape["continuous"][number]>()
-            .x((d) => xScale(d.x))
-            .y0((d) => yScale(d.y))
-            .y1(yScale(0))
-            .context(context)(shape.continuous);
-          context.fill();
-          context.globalAlpha = 1;
-
-          // Percentile lines
-          if (showPercentileLines) {
-            const percentiles = [
-              [shape.p5, "p5"],
-              [shape.p50, "p50"],
-              [shape.p95, "p95"],
-            ] as const;
-            percentiles.forEach(([percentile, name]) => {
-              if (percentile.ok) {
-                const xPoint = percentile.value;
-                //We need to find the y value of the percentile in question, to draw the line only up to the top of the distribution. We have to do this with interpolation, which is not provided straightforwardly by d3.
-                const interpolateY = interpolateYAtX(
-                  xPoint,
-                  shape.continuous,
-                  yScale
-                );
-                if (interpolateY) {
-                  context.beginPath();
-                  context.strokeStyle = getColor(i, name === "p50" ? 0.4 : 0.3);
-                  if (name === "p50") {
-                    context.setLineDash([6, 4]);
-                  } else {
-                    context.setLineDash([2, 2]);
-                  }
-                  context.lineWidth = 1;
-                  context.moveTo(xScale(xPoint), 0);
-                  context.lineTo(xScale(xPoint), interpolateY);
-                  context.stroke();
-                  context.setLineDash([]);
-                }
-              }
-            });
-          }
-
-          // The top line
-          context.strokeStyle = getColor(i);
-          context.beginPath();
-          d3
-            .line<SqShape["continuous"][number]>()
-            .x((d) => xScale(d.x))
-            .y((d) => yScale(d.y))
-            .context(context)(shape.continuous);
-          context.stroke();
-
-          const darkenAmountCircle = isMulti ? 0.05 : 0.1;
-
-          const discreteLineColor = getColor(i, -darkenAmountCircle);
-          const discreteCircleColor = getColor(i, -darkenAmountCircle);
-
-          context.fillStyle = discreteCircleColor;
-          context.strokeStyle = discreteLineColor;
-          for (const point of shape.discrete) {
-            context.beginPath();
-            context.lineWidth = 1;
-            const x = xScale(point.x);
-            // The circle is drawn from the top of the circle, so we need to subtract the radius to get the center of the circle to be at the top of the bar.
-            const y = yScale(point.y) - discreteRadius;
-            if (
-              translatedCursor &&
-              distance({ x, y }, translatedCursor) <= discreteRadius + 2
-            ) {
-              // the last discrete point always wins over overlapping previous points
-              // this makes sense because it's drawn last
-              newDiscreteTooltip = { value: point.x, probability: point.y };
-              //darken the point if it's hovered
-              context.fillStyle = getColor(i, -1);
-              context.strokeStyle = getColor(i, -1);
-            }
-            context.moveTo(x, 0);
-            context.lineTo(x, y);
-            context.globalAlpha = 0.5; // We want the lines to be transparent - the circles are the main focus
-            context.stroke();
-            context.globalAlpha = 1;
-            drawCircle({
-              context,
-              x,
-              y,
-              r: discreteRadius,
-            });
-          }
-        }
-        if (!isEqual(discreteTooltip, newDiscreteTooltip)) {
-          setDiscreteTooltip(newDiscreteTooltip);
-        }
-        frame.exit();
-      }
-
-      if (isMulti) {
-        const radius = 5;
-        for (let i = 0; i < shapes.length; i++) {
-          context.save();
-          context.translate(padding.left, legendItemHeight * i + legendOffset);
-          context.fillStyle = getColor(i);
-          drawCircle({
-            context,
-            x: radius,
-            y: radius,
-            r: radius,
-          });
-
-          context.textAlign = "left";
-          context.textBaseline = "middle";
-          context.fillStyle = "black";
-          context.font = "12px sans-serif";
-          context.fillText(shapes[i].name, 16, radius);
-          context.restore();
-        }
       }
 
       {

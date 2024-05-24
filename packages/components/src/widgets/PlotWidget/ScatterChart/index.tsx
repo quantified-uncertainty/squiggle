@@ -4,8 +4,8 @@ import { FC, useCallback, useMemo } from "react";
 import { Env, SqScale, SqScatterPlot } from "@quri/squiggle-lang";
 
 import { sqScaleToD3 } from "../../../lib/d3/index.js";
+import { drawAxes } from "../../../lib/draw/AxesBox.js";
 import { CanvasFrame } from "../../../lib/draw/CanvasFrame.js";
-import { drawAxes } from "../../../lib/draw/drawAxes.js";
 import { drawCircle } from "../../../lib/draw/drawCircle.js";
 import { drawCursorGuideLines } from "../../../lib/draw/guideLines.js";
 import { primaryColor } from "../../../lib/draw/styles.js";

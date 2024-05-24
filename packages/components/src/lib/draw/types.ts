@@ -9,3 +9,8 @@ export type Padding = {
   bottom: number;
   right: number;
 };
+
+export type Dimensions = {
+  width: number;
+  height: number;
+};

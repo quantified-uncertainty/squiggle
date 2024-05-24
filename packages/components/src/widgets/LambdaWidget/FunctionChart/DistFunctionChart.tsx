@@ -15,8 +15,8 @@ import {
 import { TailwindContext } from "@quri/ui";
 
 import { sqScaleToD3 } from "../../../lib/d3/index.js";
+import { drawAxes } from "../../../lib/draw/AxesBox.js";
 import { CanvasFrame } from "../../../lib/draw/CanvasFrame.js";
-import { drawAxes } from "../../../lib/draw/drawAxes.js";
 import { drawCursorGuideLines } from "../../../lib/draw/guideLines.js";
 import { primaryColor } from "../../../lib/draw/styles.js";
 import { useCanvas, useCanvasCursor } from "../../../lib/hooks/index.js";
