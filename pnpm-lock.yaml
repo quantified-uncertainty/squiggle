@@ -248,11 +248,11 @@ importers:
         specifier: ^24.0.0
         version: 24.0.0
       postcss:
-        specifier: ^8.4.35
-        version: 8.4.35
+        specifier: ^8.4.38
+        version: 8.4.38
       postcss-cli:
         specifier: ^11.0.0
-        version: 11.0.0(postcss@8.4.35)
+        version: 11.0.0(postcss@8.4.38)
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -467,8 +467,8 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0
       postcss:
-        specifier: ^8.4.35
-        version: 8.4.35
+        specifier: ^8.4.38
+        version: 8.4.38
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -727,7 +727,7 @@ importers:
         version: 7.8.0(eslint@8.57.0)(typescript@5.3.3)
       autoprefixer:
         specifier: ^10.4.19
-        version: 10.4.19(postcss@8.4.35)
+        version: 10.4.19(postcss@8.4.38)
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -735,11 +735,11 @@ importers:
         specifier: ^7.33.2
         version: 7.33.2(eslint@8.57.0)
       postcss:
-        specifier: ^8.4.35
-        version: 8.4.35
+        specifier: ^8.4.38
+        version: 8.4.38
       postcss-cli:
         specifier: ^11.0.0
-        version: 11.0.0(postcss@8.4.35)
+        version: 11.0.0(postcss@8.4.38)
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -1000,7 +1000,7 @@ importers:
         version: 18.3.1
       autoprefixer:
         specifier: ^10.4.19
-        version: 10.4.19(postcss@8.4.35)
+        version: 10.4.19(postcss@8.4.38)
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -1011,8 +1011,8 @@ importers:
         specifier: ^10.3.12
         version: 10.3.12
       postcss:
-        specifier: ^8.4.35
-        version: 8.4.35
+        specifier: ^8.4.38
+        version: 8.4.38
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -8681,7 +8681,7 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /autoprefixer@10.4.19(postcss@8.4.35):
+  /autoprefixer@10.4.19(postcss@8.4.38):
     resolution: {integrity: sha512-BaENR2+zBZ8xXhM4pUaKUxlVdxZ0EZhjvbopwnXmxRUfqDmwSpC2lAi/QXvx7NRdPCo1WKEcEF6mV64si1z4Ew==}
     engines: {node: ^10 || ^12 || >=14}
     hasBin: true
@@ -8693,7 +8693,7 @@ packages:
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.0.0
-      postcss: 8.4.35
+      postcss: 8.4.38
       postcss-value-parser: 4.2.0
     dev: true
 
@@ -16933,7 +16933,7 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
-  /postcss-cli@11.0.0(postcss@8.4.35):
+  /postcss-cli@11.0.0(postcss@8.4.38):
     resolution: {integrity: sha512-xMITAI7M0u1yolVcXJ9XTZiO9aO49mcoKQy6pCDFdMh9kGqhzLVpWxeD/32M/QBmkhcGypZFFOLNLmIW4Pg4RA==}
     engines: {node: '>=18'}
     hasBin: true
@@ -16946,9 +16946,9 @@ packages:
       get-stdin: 9.0.0
       globby: 14.0.0
       picocolors: 1.0.0
-      postcss: 8.4.35
-      postcss-load-config: 5.0.2(postcss@8.4.35)
-      postcss-reporter: 7.0.5(postcss@8.4.35)
+      postcss: 8.4.38
+      postcss-load-config: 5.0.2(postcss@8.4.38)
+      postcss-reporter: 7.0.5(postcss@8.4.38)
       pretty-hrtime: 1.0.3
       read-cache: 1.0.0
       slash: 5.1.0
@@ -16993,7 +16993,7 @@ packages:
       postcss: 8.4.38
       yaml: 2.3.4
 
-  /postcss-load-config@5.0.2(postcss@8.4.35):
+  /postcss-load-config@5.0.2(postcss@8.4.38):
     resolution: {integrity: sha512-Q8QR3FYbqOKa0bnC1UQ2bFq9/ulHX5Bi34muzitMr8aDtUelO5xKeJEYC/5smE0jNE9zdB/NBnOwXKexELbRlw==}
     engines: {node: '>= 18'}
     peerDependencies:
@@ -17006,7 +17006,7 @@ packages:
         optional: true
     dependencies:
       lilconfig: 3.0.0
-      postcss: 8.4.35
+      postcss: 8.4.38
       yaml: 2.3.4
     dev: true
 
@@ -17019,14 +17019,14 @@ packages:
       postcss: 8.4.38
       postcss-selector-parser: 6.0.13
 
-  /postcss-reporter@7.0.5(postcss@8.4.35):
+  /postcss-reporter@7.0.5(postcss@8.4.38):
     resolution: {integrity: sha512-glWg7VZBilooZGOFPhN9msJ3FQs19Hie7l5a/eE6WglzYqVeH3ong3ShFcp9kDWJT1g2Y/wd59cocf9XxBtkWA==}
     engines: {node: '>=10'}
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
       picocolors: 1.0.0
-      postcss: 8.4.35
+      postcss: 8.4.38
       thenby: 1.3.4
     dev: true
 
@@ -17056,15 +17056,6 @@ packages:
       picocolors: 1.0.0
       source-map-js: 1.2.0
     dev: false
-
-  /postcss@8.4.35:
-    resolution: {integrity: sha512-u5U8qYpBCpN13BsiEB0CbR1Hhh4Gc0zLFuedrHJKMctHCHAGrMdG0PRM/KErzAL3CU6/eckEtmHNB3x6e3c0vA==}
-    engines: {node: ^10 || ^12 || >=14}
-    dependencies:
-      nanoid: 3.3.7
-      picocolors: 1.0.0
-      source-map-js: 1.0.2
-    dev: true
 
   /postcss@8.4.38:
     resolution: {integrity: sha512-Wglpdk03BSfXkHoQa3b/oulrotAkwrlLDRSOb9D0bN86FdRyE9lppSp33aHNPgBa0JKCoB+drFLZkQoRRYae5A==}
@@ -18661,11 +18652,6 @@ packages:
   /source-map-generator@0.8.0:
     resolution: {integrity: sha512-psgxdGMwl5MZM9S3FWee4EgsEaIjahYV5AzGnwUvPhWeITz/j6rKpysQHlQ4USdxvINlb8lKfWGIXwfkrgtqkA==}
     engines: {node: '>= 10'}
-    dev: true
-
-  /source-map-js@1.0.2:
-    resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}
-    engines: {node: '>=0.10.0'}
     dev: true
 
   /source-map-js@1.2.0:
