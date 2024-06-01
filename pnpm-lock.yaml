@@ -623,8 +623,8 @@ importers:
         specifier: ^8.57.0
         version: 8.57.0
       fast-check:
-        specifier: ^3.18.0
-        version: 3.18.0
+        specifier: ^3.19.0
+        version: 3.19.0
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@20.12.7)(ts-node@10.9.2)
@@ -11663,8 +11663,8 @@ packages:
     engines: {node: ^12.20 || >= 14.13}
     dev: true
 
-  /fast-check@3.18.0:
-    resolution: {integrity: sha512-/951xaT0kA40w0GXRsZXEwSTE7LugjZtSA/8vPgFkiPQ8wNp8tRvqWuNDHBgLxJYXtsK11e/7Q4ObkKW5BdTFQ==}
+  /fast-check@3.19.0:
+    resolution: {integrity: sha512-CO2JX/8/PT9bDGO1iXa5h5ey1skaKI1dvecERyhH4pp3PGjwd3KIjMAXEg79Ps9nclsdt4oPbfqiAnLU0EwrAQ==}
     engines: {node: '>=8.0.0'}
     dependencies:
       pure-rand: 6.1.0
