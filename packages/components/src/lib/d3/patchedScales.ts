@@ -63,16 +63,31 @@ type ScaleLogarithmic = d3.ScaleLogarithmic<number, number, never>;
 type ScaleSymLog = d3.ScaleSymLog<number, number, never>;
 type ScalePower = d3.ScalePower<number, number, never>;
 
+function patchCopy<T extends ScaleLinear | ScaleSymLog | ScalePower>(
+  scale: T
+): T {
+  const originalCopy = scale.copy;
+  scale.copy = (() => {
+    const copiedScale = originalCopy();
+    copiedScale.tickFormat = scale.tickFormat;
+    copiedScale.ticks = scale.ticks;
+    return copiedScale;
+  }) as typeof scale.copy;
+
+  return scale;
+}
+
 function patchLinearishTickFormat<
   T extends ScaleLinear | ScaleSymLog | ScalePower,
 >(scale: T): T {
   // copy-pasted from https://github.com/d3/d3-scale/blob/83555bd759c7314420bd4240642beda5e258db9e/src/linear.js#L14
-  scale.tickFormat = (count, specifier) => {
+  const tickFormat: typeof scale.tickFormat = (count, specifier) => {
     const d = scale.domain();
     return tickFormatWithCustom(d[0], d[d.length - 1], count ?? 10, specifier);
   };
+  scale.tickFormat = tickFormat;
 
-  return scale;
+  return patchCopy(scale);
 }
 
 function patchDateTickFormat<T extends ScaleLinear>(scale: T): T {
@@ -99,7 +114,8 @@ function patchDateTickFormat<T extends ScaleLinear>(scale: T): T {
       .ticks(count ?? 10)
       .map((d) => d.getTime());
   };
-  return scale;
+
+  return patchCopy(scale);
 }
 
 function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
@@ -197,7 +213,7 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     return ticks;
   };
 
-  return scale;
+  return patchCopy(scale);
 }
 
 function patchLogarithmicTickFormat(scale: ScaleLogarithmic): ScaleLogarithmic {
@@ -213,7 +229,7 @@ function patchLogarithmicTickFormat(scale: ScaleLogarithmic): ScaleLogarithmic {
         : specifier
     );
   };
-  return scale;
+  return patchCopy(scale);
 }
 
 // Original d3.scale* should never be used; they won't support our custom tick formats.

@@ -10,9 +10,10 @@ import {
 export type DrawContext = {
   context: CanvasRenderingContext2D;
   width: number;
+  height: number;
 };
 
-type DrawFunction = (context: DrawContext) => void;
+export type DrawFunction = (context: DrawContext) => void;
 
 // We throttle to get around a Firefox bug.
 // See: https://github.com/quantified-uncertainty/squiggle/issues/2263
@@ -81,7 +82,11 @@ export function useCanvas({
       context.scale(devicePixelRatio, devicePixelRatio);
 
       setContext(context);
-      init?.({ context, width: usedWidth });
+      init?.({
+        context,
+        width: usedWidth,
+        height: canvas.height / devicePixelRatio,
+      });
       // TODO - call `draw` too? would be slightly faster; but we can't put `draw` in callback dependencies
 
       observer?.disconnect();
@@ -105,7 +110,7 @@ export function useCanvas({
     context.resetTransform();
     context.scale(devicePixelRatio, devicePixelRatio);
 
-    draw({ width, context });
+    draw({ width, height, context });
   }, [draw, width, height, context, devicePixelRatio]);
 
   useLayoutEffect(() => {

@@ -32,7 +32,7 @@ type TextOptions = {
 
 type YDirection = "up" | "down";
 
-function contextWidthHeight(context: CanvasRenderingContext2D) {
+export function contextWidthHeight(context: CanvasRenderingContext2D) {
   const devicePixelRatio =
     typeof window === "undefined" ? 1 : window.devicePixelRatio;
 

@@ -7,7 +7,6 @@ import { sqScaleToD3 } from "../../../lib/d3/index.js";
 import { drawAxes } from "../../../lib/draw/AxesBox.js";
 import { CanvasFrame } from "../../../lib/draw/CanvasFrame.js";
 import { drawCircle } from "../../../lib/draw/drawCircle.js";
-import { drawCursorGuideLines } from "../../../lib/draw/guideLines.js";
 import { primaryColor } from "../../../lib/draw/styles.js";
 import {
   DrawContext,
@@ -79,18 +78,18 @@ export const ScatterChart: FC<Props> = ({ plot, height }) => {
       context.globalAlpha = 1;
       frame.exit();
 
-      drawCursorGuideLines({
-        frame,
-        cursor,
-        x: {
-          scale: xScale,
-          format: xSqScale.tickFormat,
-        },
-        y: {
-          scale: yScale,
-          format: ySqScale.tickFormat,
-        },
-      });
+      // drawCursorGuideLines({
+      //   frame,
+      //   cursor,
+      //   x: {
+      //     scale: xScale,
+      //     format: xSqScale.tickFormat,
+      //   },
+      //   y: {
+      //     scale: yScale,
+      //     format: ySqScale.tickFormat,
+      //   },
+      // });
     },
     [xDist, yDist, height, cursor, plot.xScale, plot.yScale]
   );

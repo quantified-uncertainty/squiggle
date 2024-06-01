@@ -17,7 +17,6 @@ import { TailwindContext } from "@quri/ui";
 import { sqScaleToD3 } from "../../../lib/d3/index.js";
 import { drawAxes } from "../../../lib/draw/AxesBox.js";
 import { CanvasFrame } from "../../../lib/draw/CanvasFrame.js";
-import { drawCursorGuideLines } from "../../../lib/draw/guideLines.js";
 import { primaryColor } from "../../../lib/draw/styles.js";
 import { useCanvas, useCanvasCursor } from "../../../lib/hooks/index.js";
 import { DrawContext } from "../../../lib/hooks/useCanvas.js";
@@ -190,14 +189,14 @@ function useDrawDistFunctionChart({
 
       frame.exit();
 
-      drawCursorGuideLines({
-        frame,
-        cursor,
-        x: {
-          scale: xScale,
-          format: plot.xScale.tickFormat,
-        },
-      });
+      // drawCursorGuideLines({
+      //   frame,
+      //   cursor,
+      //   x: {
+      //     scale: xScale,
+      //     format: plot.xScale.tickFormat,
+      //   },
+      // });
     },
     [cursor, height, data, plot, xScale, yScale]
   );

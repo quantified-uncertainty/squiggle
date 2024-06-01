@@ -6,7 +6,6 @@ import { Env, SqNumericFnPlot } from "@quri/squiggle-lang";
 import { sqScaleToD3 } from "../../../lib/d3/index.js";
 import { drawAxes } from "../../../lib/draw/AxesBox.js";
 import { CanvasFrame } from "../../../lib/draw/CanvasFrame.js";
-import { drawCursorGuideLines } from "../../../lib/draw/guideLines.js";
 import { primaryColor } from "../../../lib/draw/styles.js";
 import {
   DrawContext,
@@ -100,18 +99,18 @@ export const NumericFunctionChart: FC<Props> = ({
       context.stroke();
       frame.exit();
 
-      drawCursorGuideLines({
-        frame,
-        cursor,
-        x: {
-          scale: xScale,
-          format: plot.xScale.tickFormat,
-        },
-        y: {
-          scale: yScale,
-          format: plot.yScale.tickFormat,
-        },
-      });
+      // drawCursorGuideLines({
+      //   frame,
+      //   cursor,
+      //   x: {
+      //     scale: xScale,
+      //     format: plot.xScale.tickFormat,
+      //   },
+      //   y: {
+      //     scale: yScale,
+      //     format: plot.yScale.tickFormat,
+      //   },
+      // });
     },
     [functionImage, height, cursor, plot, xScale]
   );
