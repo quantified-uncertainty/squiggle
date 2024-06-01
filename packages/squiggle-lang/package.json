@@ -29,7 +29,7 @@
     "cli": "node ./dist/cli/index.js"
   },
   "dependencies": {
-    "@commander-js/extra-typings": "^12.0.1",
+    "@commander-js/extra-typings": "^12.1.0",
     "commander": "^12.0.0",
     "immutable": "^4.3.6",
     "jstat": "^1.9.6",
