@@ -33,8 +33,8 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0
       commander:
-        specifier: ^12.0.0
-        version: 12.0.0
+        specifier: ^12.1.0
+        version: 12.1.0
       fs:
         specifier: ^0.0.1-security
         version: 0.0.1-security
@@ -572,10 +572,10 @@ importers:
     dependencies:
       '@commander-js/extra-typings':
         specifier: ^12.1.0
-        version: 12.1.0(commander@12.0.0)
+        version: 12.1.0(commander@12.1.0)
       commander:
-        specifier: ^12.0.0
-        version: 12.0.0
+        specifier: ^12.1.0
+        version: 12.1.0
       immutable:
         specifier: ^4.3.6
         version: 4.3.6
@@ -2936,12 +2936,12 @@ packages:
       commander: 11.1.0
     dev: false
 
-  /@commander-js/extra-typings@12.1.0(commander@12.0.0):
+  /@commander-js/extra-typings@12.1.0(commander@12.1.0):
     resolution: {integrity: sha512-wf/lwQvWAA0goIghcb91dQYpkLBcyhOhQNqG/VgWhnKzgt+UOMvra7EX/2fv70arm5RW+PUHoQHHDa6/p77Eqg==}
     peerDependencies:
       commander: ~12.1.0
     dependencies:
-      commander: 12.0.0
+      commander: 12.1.0
     dev: false
 
   /@cspotcode/source-map-support@0.8.1:
@@ -5798,8 +5798,8 @@ packages:
     resolution: {integrity: sha512-FA7Tvmc6dZWu92o1f3Q2vUu96C+8IH292t5wyeXPNYW04UN0femUt63+EXxQLeclfqj2StmbG0/Z22YwMpxS/Q==}
     hasBin: true
     dependencies:
-      '@commander-js/extra-typings': 12.1.0(commander@12.0.0)
-      commander: 12.0.0
+      '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
+      commander: 12.1.0
       immutable: 4.3.6
       jstat: 1.9.6
       lodash: 4.17.21
@@ -9594,8 +9594,8 @@ packages:
     engines: {node: '>=16'}
     dev: false
 
-  /commander@12.0.0:
-    resolution: {integrity: sha512-MwVNWlYjDTtOjX5PiD7o5pK0UrFU/OYgcJfjjK4RaHZETNtjJqrZa9Y9ds88+A+f+d5lv+561eZ+yCKoS3gbAA==}
+  /commander@12.1.0:
+    resolution: {integrity: sha512-Vw8qHK3bZM9y/P10u3Vib8o/DdkvA2OtPtZvD871QKjy74Wj1WSKFILMPRPSdUSx5RFK1arlJzEtA4PkFgnbuA==}
     engines: {node: '>=18'}
 
   /commander@4.1.1:
@@ -16831,7 +16831,7 @@ packages:
     hasBin: true
     dependencies:
       '@peggyjs/from-mem': 1.2.1
-      commander: 12.0.0
+      commander: 12.1.0
       source-map-generator: 0.8.0
     dev: true
 
