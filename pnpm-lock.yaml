@@ -76,8 +76,8 @@ importers:
         specifier: ^6.26.3
         version: 6.26.3
       '@floating-ui/react':
-        specifier: ^0.26.13
-        version: 0.26.13(react-dom@18.3.1)(react@18.3.1)
+        specifier: ^0.26.16
+        version: 0.26.16(react-dom@18.3.1)(react@18.3.1)
       '@heroicons/react':
         specifier: ^1.0.6
         version: 1.0.6(react@18.3.1)
@@ -656,8 +656,8 @@ importers:
   packages/ui:
     dependencies:
       '@floating-ui/react':
-        specifier: ^0.26.13
-        version: 0.26.13(react-dom@18.3.1)(react@18.3.1)
+        specifier: ^0.26.16
+        version: 0.26.16(react-dom@18.3.1)(react@18.3.1)
       '@headlessui/react':
         specifier: ^1.7.19
         version: 1.7.19(react-dom@18.3.1)(react@18.3.1)
@@ -3746,8 +3746,8 @@ packages:
       '@floating-ui/utils': 0.2.1
     dev: false
 
-  /@floating-ui/react-dom@2.0.8(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-HOdqOt3R3OGeTKidaLvJKcgg75S6tibQ3Tif4eyd91QnIJWr0NLvoXFpJA/j8HqkFSL68GDca9AuyWEHlhyClw==}
+  /@floating-ui/react-dom@2.1.0(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-lNzj5EQmEKn5FFKc04+zasr09h/uX8RtJRNj5gUXsSQIXHVWTVh+hVAg1vOMCexkX8EgvemMvIFpQfkosnVNyA==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -3763,20 +3763,20 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
     dependencies:
-      '@floating-ui/react-dom': 2.0.8(react-dom@18.3.1)(react@18.3.1)
+      '@floating-ui/react-dom': 2.1.0(react-dom@18.3.1)(react@18.3.1)
       aria-hidden: 1.2.3
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       tabbable: 6.2.0
     dev: false
 
-  /@floating-ui/react@0.26.13(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-kBa9wntpugzrZ8t/4yWelvSmEKZdeTXTJzrxqyrLmcU/n1SM4nvse8yQh2e1b37rJGvtu0EplV9+IkBrCJ1vkw==}
+  /@floating-ui/react@0.26.16(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-HEf43zxZNAI/E781QIVpYSF3K2VH4TTYZpqecjdsFkjsaU1EbaWcM++kw0HXFffj7gDUcBFevX8s0rQGQpxkow==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
     dependencies:
-      '@floating-ui/react-dom': 2.0.8(react-dom@18.3.1)(react@18.3.1)
+      '@floating-ui/react-dom': 2.1.0(react-dom@18.3.1)(react@18.3.1)
       '@floating-ui/utils': 0.2.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -5522,7 +5522,7 @@ packages:
       '@codemirror/state': 6.4.1
       '@codemirror/theme-one-dark': 6.1.2
       '@codemirror/view': 6.26.3
-      '@floating-ui/react': 0.26.13(react-dom@18.3.1)(react@18.3.1)
+      '@floating-ui/react': 0.26.16(react-dom@18.3.1)(react@18.3.1)
       '@heroicons/react': 1.0.6(react@18.3.1)
       '@hookform/resolvers': 3.3.4(react-hook-form@7.50.0)
       '@lezer/common': 1.2.1
@@ -5567,7 +5567,7 @@ packages:
       '@codemirror/state': 6.4.1
       '@codemirror/theme-one-dark': 6.1.2
       '@codemirror/view': 6.26.3
-      '@floating-ui/react': 0.26.13(react-dom@18.3.1)(react@18.3.1)
+      '@floating-ui/react': 0.26.16(react-dom@18.3.1)(react@18.3.1)
       '@heroicons/react': 1.0.6(react@18.3.1)
       '@hookform/resolvers': 3.3.4(react-hook-form@7.50.0)
       '@lezer/common': 1.2.1
@@ -5610,7 +5610,7 @@ packages:
       '@codemirror/state': 6.4.1
       '@codemirror/theme-one-dark': 6.1.2
       '@codemirror/view': 6.26.3
-      '@floating-ui/react': 0.26.13(react-dom@18.3.1)(react@18.3.1)
+      '@floating-ui/react': 0.26.16(react-dom@18.3.1)(react@18.3.1)
       '@heroicons/react': 1.0.6(react@18.3.1)
       '@hookform/resolvers': 3.3.4(react-hook-form@7.50.0)
       '@lezer/common': 1.2.1
@@ -5657,7 +5657,7 @@ packages:
       '@codemirror/state': 6.4.1
       '@codemirror/theme-one-dark': 6.1.2
       '@codemirror/view': 6.26.3
-      '@floating-ui/react': 0.26.13(react-dom@18.3.1)(react@18.3.1)
+      '@floating-ui/react': 0.26.16(react-dom@18.3.1)(react@18.3.1)
       '@heroicons/react': 1.0.6(react@18.3.1)
       '@hookform/resolvers': 3.3.4(react-hook-form@7.50.0)
       '@lezer/common': 1.2.1
@@ -5705,7 +5705,7 @@ packages:
       '@codemirror/state': 6.4.1
       '@codemirror/theme-one-dark': 6.1.2
       '@codemirror/view': 6.26.3
-      '@floating-ui/react': 0.26.13(react-dom@18.3.1)(react@18.3.1)
+      '@floating-ui/react': 0.26.16(react-dom@18.3.1)(react@18.3.1)
       '@heroicons/react': 1.0.6(react@18.3.1)
       '@hookform/resolvers': 3.3.4(react-hook-form@7.50.0)
       '@lezer/common': 1.2.1
@@ -5848,7 +5848,7 @@ packages:
       react: ^17 || ^18
       react-dom: ^17 || ^18
     dependencies:
-      '@floating-ui/react': 0.26.13(react-dom@18.3.1)(react@18.3.1)
+      '@floating-ui/react': 0.26.16(react-dom@18.3.1)(react@18.3.1)
       '@headlessui/react': 1.7.19(react-dom@18.3.1)(react@18.3.1)
       clsx: 2.1.1
       framer-motion: 10.18.0(react-dom@18.3.1)(react@18.3.1)
@@ -5869,7 +5869,7 @@ packages:
       react: ^17 || ^18
       react-dom: ^17 || ^18
     dependencies:
-      '@floating-ui/react': 0.26.13(react-dom@18.3.1)(react@18.3.1)
+      '@floating-ui/react': 0.26.16(react-dom@18.3.1)(react@18.3.1)
       '@headlessui/react': 1.7.19(react-dom@18.3.1)(react@18.3.1)
       clsx: 2.1.1
       framer-motion: 10.18.0(react-dom@18.3.1)(react@18.3.1)
@@ -5890,7 +5890,7 @@ packages:
       react: ^17 || ^18
       react-dom: ^17 || ^18
     dependencies:
-      '@floating-ui/react': 0.26.13(react-dom@18.3.1)(react@18.3.1)
+      '@floating-ui/react': 0.26.16(react-dom@18.3.1)(react@18.3.1)
       '@headlessui/react': 1.7.19(react-dom@18.3.1)(react@18.3.1)
       clsx: 2.1.1
       framer-motion: 10.18.0(react-dom@18.3.1)(react@18.3.1)
@@ -5912,7 +5912,7 @@ packages:
       react: ^18
       react-dom: ^18
     dependencies:
-      '@floating-ui/react': 0.26.13(react-dom@18.3.1)(react@18.3.1)
+      '@floating-ui/react': 0.26.16(react-dom@18.3.1)(react@18.3.1)
       '@headlessui/react': 1.7.19(react-dom@18.3.1)(react@18.3.1)
       clsx: 2.1.1
       framer-motion: 11.0.3(react-dom@18.3.1)(react@18.3.1)
