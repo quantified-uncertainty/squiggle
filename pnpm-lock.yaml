@@ -289,8 +289,8 @@ importers:
         specifier: ^3.11.1
         version: 3.11.1(@pothos/core@3.41.0)(graphql@16.8.1)
       '@pothos/plugin-prisma':
-        specifier: ^3.64.0
-        version: 3.64.0(@pothos/core@3.41.0)(@prisma/client@5.10.2)(graphql@16.8.1)(typescript@5.3.3)
+        specifier: ^3.65.2
+        version: 3.65.2(@pothos/core@3.41.0)(@prisma/client@5.10.2)(graphql@16.8.1)(typescript@5.3.3)
       '@pothos/plugin-relay':
         specifier: ^3.46.0
         version: 3.46.0(@pothos/core@3.41.0)(graphql@16.8.1)
@@ -5304,18 +5304,18 @@ packages:
       graphql: 16.8.1
     dev: false
 
-  /@pothos/plugin-prisma@3.64.0(@pothos/core@3.41.0)(@prisma/client@5.10.2)(graphql@16.8.1)(typescript@5.3.3):
-    resolution: {integrity: sha512-UFQ0KSX3KM6iVJ9V0ow5gfIdMdbf+LXbs7r8rUjGQbHpVwshXAOYexVeLoZv4H6/21pPIHImYk1FhknXUDHiTA==}
+  /@pothos/plugin-prisma@3.65.2(@pothos/core@3.41.0)(@prisma/client@5.10.2)(graphql@16.8.1)(typescript@5.3.3):
+    resolution: {integrity: sha512-Ahv2UfHhKINNwjWw7kO3esg7CFePg4xEUrvvSPqI6/Qt+XmvA0btXpN/lYknRoz93M/BuJLYoH15DslHCazhWA==}
     hasBin: true
     peerDependencies:
       '@pothos/core': '*'
       '@prisma/client': '*'
-      graphql: '>=15.1.0'
+      graphql: 16.8.1
       typescript: '>=4.7.2'
     dependencies:
       '@pothos/core': 3.41.0(graphql@16.8.1)
       '@prisma/client': 5.10.2(prisma@5.9.1)
-      '@prisma/generator-helper': 5.7.1
+      '@prisma/generator-helper': 5.14.0
       graphql: 16.8.1
       typescript: 5.3.3
     dev: false
@@ -5385,8 +5385,8 @@ packages:
       prisma: 5.9.1
     dev: false
 
-  /@prisma/debug@5.7.1:
-    resolution: {integrity: sha512-yrVSO/YZOxdeIxcBtZ5BaNqUfPrZkNsAKQIQg36cJKMxj/VYK3Vk5jMKkI+gQLl0KReo1YvX8GWKfV788SELjw==}
+  /@prisma/debug@5.14.0:
+    resolution: {integrity: sha512-iq56qBZuFfX3fCxoxT8gBX33lQzomBU0qIUaEj1RebsKVz1ob/BVH1XSBwwwvRVtZEV1b7Fxx2eVu34Ge/mg3w==}
     dev: false
 
   /@prisma/debug@5.9.1:
@@ -5411,10 +5411,10 @@ packages:
       '@prisma/engines-version': 5.9.0-32.23fdc5965b1e05fc54e5f26ed3de66776b93de64
       '@prisma/get-platform': 5.9.1
 
-  /@prisma/generator-helper@5.7.1:
-    resolution: {integrity: sha512-BiaCt3YtMnjAoqJ51rVSkvlPk0p7ErjmgFOjRUmAE/m75E9tJmFtgT6NWzXiX6KWs2OvnVuAqNY7imK6ZwlExA==}
+  /@prisma/generator-helper@5.14.0:
+    resolution: {integrity: sha512-xVc71cmTnPZ0lnSs4FAY6Ta72vFJ3webrQwKMQ2ujr6hDG1VPIEf820T1TOS3ZZQd/OKigNKXnq3co8biz9/qw==}
     dependencies:
-      '@prisma/debug': 5.7.1
+      '@prisma/debug': 5.14.0
     dev: false
 
   /@prisma/get-platform@5.9.1:
