@@ -494,8 +494,8 @@ importers:
         specifier: ^7.24.5
         version: 7.24.5
       '@babel/parser':
-        specifier: ^7.24.5
-        version: 7.24.5
+        specifier: ^7.24.6
+        version: 7.24.6
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -1056,7 +1056,7 @@ packages:
     dependencies:
       '@babel/core': 7.24.5
       '@babel/generator': 7.24.1
-      '@babel/parser': 7.24.5
+      '@babel/parser': 7.24.6
       '@babel/runtime': 7.24.5
       '@babel/traverse': 7.24.1
       '@babel/types': 7.24.6
@@ -1233,7 +1233,7 @@ packages:
       '@babel/helper-compilation-targets': 7.23.6
       '@babel/helper-module-transforms': 7.24.5(@babel/core@7.24.5)
       '@babel/helpers': 7.24.5
-      '@babel/parser': 7.24.5
+      '@babel/parser': 7.24.6
       '@babel/template': 7.24.0
       '@babel/traverse': 7.24.5
       '@babel/types': 7.24.6
@@ -1498,12 +1498,12 @@ packages:
       js-tokens: 4.0.0
       picocolors: 1.0.0
 
-  /@babel/parser@7.24.5:
-    resolution: {integrity: sha512-EOv5IK8arwh3LI47dz1b0tKUb/1uhHAnHJOrjgtQMIpu1uXd9mlFrJg9IUgGUgZ41Ch0K8REPTYpO7B76b4vJg==}
+  /@babel/parser@7.24.6:
+    resolution: {integrity: sha512-eNZXdfU35nJC2h24RznROuOpO94h6x8sg9ju0tT9biNtLZ2vuP8SduLqqV+/8+cebSLV9SJEAN5Z3zQbJG/M+Q==}
     engines: {node: '>=6.0.0'}
     hasBin: true
     dependencies:
-      '@babel/types': 7.24.0
+      '@babel/types': 7.24.6
 
   /@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression@7.23.3(@babel/core@7.24.5):
     resolution: {integrity: sha512-iRkKcCqb7iGnq9+3G6rZ+Ciz5VywC4XNRHe57lKM+jOeYAoR0lVqdeeDRfh0tQcTfw/+vBhHn926FmQhLtlFLQ==}
@@ -2571,7 +2571,7 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/code-frame': 7.24.2
-      '@babel/parser': 7.24.5
+      '@babel/parser': 7.24.6
       '@babel/types': 7.24.6
     dev: true
 
@@ -2580,7 +2580,7 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/code-frame': 7.24.2
-      '@babel/parser': 7.24.5
+      '@babel/parser': 7.24.6
       '@babel/types': 7.24.6
 
   /@babel/traverse@7.24.1:
@@ -2593,7 +2593,7 @@ packages:
       '@babel/helper-function-name': 7.23.0
       '@babel/helper-hoist-variables': 7.22.5
       '@babel/helper-split-export-declaration': 7.24.5
-      '@babel/parser': 7.24.5
+      '@babel/parser': 7.24.6
       '@babel/types': 7.24.6
       debug: 4.3.4(supports-color@5.5.0)
       globals: 11.12.0
@@ -2611,7 +2611,7 @@ packages:
       '@babel/helper-function-name': 7.23.0
       '@babel/helper-hoist-variables': 7.22.5
       '@babel/helper-split-export-declaration': 7.24.5
-      '@babel/parser': 7.24.5
+      '@babel/parser': 7.24.6
       '@babel/types': 7.24.6
       debug: 4.3.4(supports-color@5.5.0)
       globals: 11.12.0
@@ -2620,23 +2620,6 @@ packages:
 
   /@babel/types@7.23.9:
     resolution: {integrity: sha512-dQjSq/7HaSjRM43FFGnv5keM2HsxpmyV1PfaSVm0nzzjwwTmjOe6J4bC8e3+pTEIgHaHj+1ZlLThRJ2auc/w1Q==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/helper-string-parser': 7.24.6
-      '@babel/helper-validator-identifier': 7.24.6
-      to-fast-properties: 2.0.0
-    dev: true
-
-  /@babel/types@7.24.0:
-    resolution: {integrity: sha512-+j7a5c253RfKh8iABBhywc8NSfP5LURe7Uh4qpsh6jc+aLJguvmIUBdjSdEMQv2bENrCR5MfRdjGo7vzS/ob7w==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/helper-string-parser': 7.24.6
-      '@babel/helper-validator-identifier': 7.24.6
-      to-fast-properties: 2.0.0
-
-  /@babel/types@7.24.5:
-    resolution: {integrity: sha512-6mQNsaLeXTw0nxYUYu+NSa4Hx4BlF1x1x8/PMFbiR+GBSr+2DkECc69b8hgy2frEodNcvPffeH8YfWd3LI6jhQ==}
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/helper-string-parser': 7.24.6
@@ -4210,7 +4193,7 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
       '@babel/core': 7.24.5
-      '@babel/parser': 7.24.5
+      '@babel/parser': 7.24.6
       '@babel/plugin-syntax-import-assertions': 7.23.3(@babel/core@7.24.5)
       '@babel/traverse': 7.24.1
       '@babel/types': 7.24.6
@@ -6748,7 +6731,7 @@ packages:
     resolution: {integrity: sha512-PiNMhL97giLytTdQwuhsZ92buVk4gy9H/8DtrDhUc45/1OmF95gogm6T2Yap729SIFwgpOcuq/U3aVo6d6swVQ==}
     dependencies:
       '@babel/generator': 7.24.5
-      '@babel/parser': 7.24.5
+      '@babel/parser': 7.24.6
       '@babel/traverse': 7.24.5
       '@babel/types': 7.24.6
       '@storybook/csf': 0.1.6
@@ -7388,7 +7371,7 @@ packages:
   /@types/babel__core@7.20.5:
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
     dependencies:
-      '@babel/parser': 7.24.5
+      '@babel/parser': 7.24.6
       '@babel/types': 7.23.9
       '@types/babel__generator': 7.6.5
       '@types/babel__template': 7.4.2
@@ -7404,7 +7387,7 @@ packages:
   /@types/babel__template@7.4.2:
     resolution: {integrity: sha512-/AVzPICMhMOMYoSx9MoKpGDKdBRsIXMNByh1PXSZoa+v6ZoLa8xxtsT/uLQ/NJm0XVAWl/BvId4MlDeXJaeIZQ==}
     dependencies:
-      '@babel/parser': 7.24.5
+      '@babel/parser': 7.24.6
       '@babel/types': 7.24.6
     dev: true
 
@@ -13458,7 +13441,7 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       '@babel/core': 7.24.5
-      '@babel/parser': 7.24.5
+      '@babel/parser': 7.24.6
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.0
       semver: 6.3.1
@@ -13471,7 +13454,7 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       '@babel/core': 7.24.5
-      '@babel/parser': 7.24.5
+      '@babel/parser': 7.24.6
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.0
       semver: 7.6.0
@@ -14060,7 +14043,7 @@ packages:
         optional: true
     dependencies:
       '@babel/core': 7.24.5
-      '@babel/parser': 7.24.5
+      '@babel/parser': 7.24.6
       '@babel/plugin-transform-class-properties': 7.23.3(@babel/core@7.24.5)
       '@babel/plugin-transform-modules-commonjs': 7.24.1(@babel/core@7.24.5)
       '@babel/plugin-transform-nullish-coalescing-operator': 7.23.4(@babel/core@7.24.5)
@@ -17425,7 +17408,7 @@ packages:
     dependencies:
       '@babel/core': 7.24.5
       '@babel/traverse': 7.24.5
-      '@babel/types': 7.24.5
+      '@babel/types': 7.24.6
       '@types/babel__core': 7.20.5
       '@types/babel__traverse': 7.20.5
       '@types/doctrine': 0.0.9
