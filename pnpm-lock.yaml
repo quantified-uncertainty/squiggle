@@ -164,8 +164,8 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0
       '@lezer/lr':
-        specifier: ^1.4.0
-        version: 1.4.0
+        specifier: ^1.4.1
+        version: 1.4.1
       '@quri/configs':
         specifier: workspace:*
         version: link:../configs
@@ -2886,7 +2886,7 @@ packages:
       '@codemirror/view': 6.26.3
       '@lezer/common': 1.2.1
       '@lezer/highlight': 1.2.0
-      '@lezer/lr': 1.4.0
+      '@lezer/lr': 1.4.1
       style-mod: 4.1.0
     dev: false
 
@@ -4779,7 +4779,7 @@ packages:
     hasBin: true
     dependencies:
       '@lezer/common': 1.2.1
-      '@lezer/lr': 1.4.0
+      '@lezer/lr': 1.4.1
     dev: true
 
   /@lezer/highlight@1.2.0:
@@ -4787,8 +4787,8 @@ packages:
     dependencies:
       '@lezer/common': 1.2.1
 
-  /@lezer/lr@1.4.0:
-    resolution: {integrity: sha512-Wst46p51km8gH0ZUmeNrtpRYmdlRHUpN1DQd3GFAyKANi8WVz8c2jHYTf1CVScFaCjQw1iO3ZZdqGDxQPRErTg==}
+  /@lezer/lr@1.4.1:
+    resolution: {integrity: sha512-CHsKq8DMKBf9b3yXPDIU4DbH+ZJd/sJdYOW2llbW/HudP5u0VS6Bfq1hLYfgU7uAYGFIyGGQIsSOXGPEErZiJw==}
     dependencies:
       '@lezer/common': 1.2.1
 

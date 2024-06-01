@@ -51,7 +51,7 @@
     "@juggle/resize-observer": "^3.4.0",
     "@lezer/generator": "^1.7.0",
     "@lezer/highlight": "^1.2.0",
-    "@lezer/lr": "^1.4.0",
+    "@lezer/lr": "^1.4.1",
     "@quri/configs": "workspace:*",
     "@storybook/addon-essentials": "^8.0.9",
     "@storybook/addon-links": "^8.0.9",
