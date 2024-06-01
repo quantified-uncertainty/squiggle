@@ -9,7 +9,7 @@
     "post-publish": "cd packages/ops && turbo build && pnpm run post-publish"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.1",
+    "@changesets/cli": "^2.27.5",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "turbo": "^1.13.0",
