@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { DrawContext, DrawFunction, useCanvas } from "../hooks/useCanvas.js";
-import { CanvasElement } from "./CanvasElement.js";
+import { CanvasElement, makeNode } from "./CanvasElement.js";
 import { CanvasFrame } from "./CanvasFrame.js";
 import { Padding, Point } from "./types.js";
 
@@ -74,6 +74,12 @@ export function useYogaCanvas(
     init?: DrawFunction;
   } = {}
 ) {
+  const rootNode = useMemo(() => {
+    const node = makeNode();
+    node.insertChild(element.node, 0);
+    return node;
+  }, [element]);
+
   const draw = useCallback(
     ({ context, width, height }: DrawContext) => {
       context.clearRect(0, 0, width, height);
@@ -89,9 +95,10 @@ export function useYogaCanvas(
     if (width === undefined) {
       return undefined;
     }
-    element.node.calculateLayout(width, undefined);
+    rootNode.calculateLayout(width, undefined);
+
     return element;
-  }, [element, width]);
+  }, [rootNode, element, width]);
 
   const { ref } = useCanvas({
     height: elementWithCalculatedLayout?.node.getComputedHeight() ?? 0, // TODO - support `initialHeight` to miminize the reflows

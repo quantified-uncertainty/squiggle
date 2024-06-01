@@ -114,6 +114,11 @@ const Legend: CC<{ shapes: Shapes }> = ({ shapes }) => {
   };
 };
 
+export type MainChartHandle = {
+  getMargin(): number;
+  getHeight(): number;
+};
+
 export const MainChart: CC<
   {
     shapes: Shapes;
@@ -130,7 +135,7 @@ export const MainChart: CC<
     xTickFormat?: string; // useful for guidelines
     verticalLine?: number;
   },
-  { getMargin: () => number }
+  MainChartHandle
 > = ({
   shapes,
   isMulti,
@@ -288,8 +293,7 @@ export const MainChart: CC<
             context.beginPath();
             context.lineWidth = 1;
             const x = xScale(point.x);
-            // The circle is drawn from the top of the circle, so we need to subtract the radius to get the center of the circle to be at the top of the bar.
-            const y = yScale(point.y) - discreteRadius;
+            const y = yScale(point.y);
             if (
               translatedCursor &&
               distance({ x, y }, translatedCursor) <= discreteRadius + 2
@@ -329,6 +333,7 @@ export const MainChart: CC<
     },
     handle: {
       getMargin: () => discreteRadius,
+      getHeight: () => height,
     },
   };
 };

@@ -5,8 +5,9 @@ import { defaultTickFormatSpecifier } from "../d3/patchedScales.js";
 import { AnyNumericScale } from "./AxesBox.js";
 import { CanvasElement, CC, makeNode } from "./CanvasElement.js";
 import { contextWidthHeight } from "./CanvasFrame.js";
+import { MainChartHandle } from "./MainChart.js";
 import { axisColor, labelColor, labelFont } from "./styles.js";
-import { drawElement, measureText } from "./utils.js";
+import { drawElement, getLocalPoint, measureText } from "./utils.js";
 
 const xLabelOffset = 6;
 const yLabelOffset = 6;
@@ -150,7 +151,13 @@ const XAxis: CC<AxisProps> = ({
       }
       context.fillStyle = labelColor;
       context.font = labelFont;
-      let prevBoundary = -node.getComputedLeft(); // allow overflow outside of node boundaries
+
+      // Allow overflow outside of node boundaries if there's space on canvas
+      let prevBoundary = Math.max(
+        -node.getComputedLeft(),
+        getLocalPoint(context, { x: 0, y: 0 }).x
+      );
+
       for (let i = 0; i < ticks.length; i++) {
         const xTick = ticks[i];
         const x = usedScale(xTick);
@@ -171,7 +178,10 @@ const XAxis: CC<AxisProps> = ({
         } else if (i === ticks.length - 1) {
           startX = Math.min(
             x - textWidth / 2,
-            contextWidthHeight(context).width - textWidth
+            getLocalPoint(context, {
+              x: contextWidthHeight(context).width,
+              y: 0,
+            }).x - textWidth
           );
         } else {
           startX = x - textWidth / 2;
@@ -199,22 +209,19 @@ export const AxesContainer: CC<{
   yTickCount?: number;
   xTickFormat?: string;
   yTickFormat?: string;
-  child: CanvasElement<{ getMargin: () => number }>;
+  child: CanvasElement<MainChartHandle>;
 }> = (props) => {
-  const height = props.child.node.getHeight().value;
-  if (!height) {
-    /*
-     * Axes container is a grid, and yoga doesn't support grids.
-     *
-     * It'd be quite difficult to layout axes container if the chart height is
-     * not known, because x axis width must match the chart width, and we should
-     * set it correctly before `getComputedLayout` is called.
-     *
-     * If we ever need it: maybe incremental layouts could help,
-     * https://www.yogalayout.dev/docs/advanced/incremental-layout
-     */
-    throw new Error("Child height must be known to render the axes container");
-  }
+  /*
+   * Axes container is a grid, and yoga doesn't support grids.
+   *
+   * It'd be quite difficult to layout axes container if the chart height is
+   * not known, because x axis width must match the chart width, and we should
+   * set it correctly before `getComputedLayout` is called.
+   *
+   * If we ever need it: maybe incremental layouts could help,
+   * https://www.yogalayout.dev/docs/advanced/incremental-layout
+   */
+  const height = props.child.handle.getHeight();
 
   const node = makeNode();
 

@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import * as d3 from "d3";
 import { FC, useMemo, useState } from "react";
+import { Edge, PositionType } from "yoga-layout";
 
 import {
   Env,
@@ -17,10 +18,14 @@ import { useViewerType } from "../../components/SquiggleViewer/ViewerProvider.js
 import { ErrorAlert } from "../../components/ui/Alert.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
+import { AnyNumericScale } from "../../lib/draw/AxesBox.js";
 import { AxesContainer } from "../../lib/draw/AxesContainer.js";
 import { AxesTitlesContainer } from "../../lib/draw/AxesTitlesContainer.js";
-import { MainChart } from "../../lib/draw/MainChart.js";
-import { useYogaCanvas } from "../../lib/draw/utils.js";
+import { BarSamples } from "../../lib/draw/BarSamples.js";
+import { CanvasElement, CC, makeNode } from "../../lib/draw/CanvasElement.js";
+import { MainChart, MainChartHandle } from "../../lib/draw/MainChart.js";
+import { Point } from "../../lib/draw/types.js";
+import { drawElement, useYogaCanvas } from "../../lib/draw/utils.js";
 import { useCanvasCursor } from "../../lib/hooks/index.js";
 import { canvasClasses, flattenResult } from "../../lib/utility.js";
 import { PlotTitle } from "../PlotWidget/PlotTitle.js";
@@ -35,6 +40,143 @@ export type DistributionsChartProps = {
 };
 
 type SampleBarSetting = "none" | "bottom" | "behind";
+type DiscreteTooltip = { value: number; probability: number };
+
+const MainChartWithBarSamplesBehind: CC<
+  {
+    mainChart: CanvasElement<MainChartHandle>;
+    barSamples: CanvasElement;
+  },
+  MainChartHandle
+> = ({ mainChart, barSamples }) => {
+  const node = makeNode();
+  node.insertChild(mainChart.node, 0);
+
+  node.insertChild(barSamples.node, 1);
+  barSamples.node.setPositionType(PositionType.Absolute);
+  barSamples.node.setPosition(Edge.Bottom, mainChart.handle.getMargin());
+  barSamples.node.setPosition(Edge.Left, 0);
+  barSamples.node.setPosition(Edge.Right, 0);
+  barSamples.node.setHeight(
+    Math.min(7, mainChart.node.getHeight().value * 0.04 + 1)
+  );
+
+  return {
+    node,
+    draw: (context) => {
+      drawElement(barSamples, context);
+      drawElement(mainChart, context);
+    },
+    handle: mainChart.handle, // forward to main chart - this should work...
+  };
+};
+
+const CanvasDistChart: CC<{
+  shapes: (SqShape & {
+    name: string;
+    p5: result<number, SqDistributionError>;
+    p50: result<number, SqDistributionError>;
+    p95: result<number, SqDistributionError>;
+  })[];
+  samples: number[];
+  innerHeight: number;
+  isMulti: boolean; // enables legend and semi-transparent rendering
+  samplesBarSetting: SampleBarSetting;
+  showCursorLine: boolean;
+  showPercentileLines: boolean;
+  showXAxis: boolean;
+  discreteTooltip: DiscreteTooltip | undefined;
+  setDiscreteTooltip: (value: DiscreteTooltip | undefined) => void;
+  cursor: Point | undefined;
+  xScale: AnyNumericScale;
+  yScale: AnyNumericScale;
+  verticalLine: number | undefined;
+  xTickFormat: string | undefined;
+  xAxisTitle: string | undefined;
+}> = ({
+  innerHeight,
+  shapes,
+  isMulti,
+  showPercentileLines,
+  setDiscreteTooltip,
+  showCursorLine,
+  xScale,
+  yScale,
+  verticalLine,
+  showXAxis,
+  discreteTooltip,
+  cursor,
+  xTickFormat,
+  xAxisTitle,
+  samples,
+  samplesBarSetting,
+}) => {
+  let barSamples: CanvasElement | undefined;
+  if (samplesBarSetting !== "none") {
+    barSamples = BarSamples({
+      behindShapes: samplesBarSetting === "behind",
+      samples,
+      scale: xScale,
+    });
+  }
+
+  const mainChart = MainChart({
+    height: innerHeight,
+    shapes,
+    isMulti,
+    showPercentileLines,
+    discreteTooltip,
+    setDiscreteTooltip,
+    cursor: showCursorLine ? cursor : undefined,
+    xScale,
+    yScale,
+    xTickFormat,
+    verticalLine,
+  });
+
+  const mainChartWithBarSamplesBehind =
+    samplesBarSetting === "behind"
+      ? MainChartWithBarSamplesBehind({
+          mainChart,
+          barSamples: BarSamples({
+            behindShapes: true,
+            samples,
+            scale: xScale,
+          }),
+        })
+      : mainChart;
+
+  const chart = AxesContainer({
+    xScale,
+    yScale,
+    showAxisLines: true,
+    showXAxis,
+    showYAxis: false,
+    child: mainChartWithBarSamplesBehind,
+    xTickFormat,
+  });
+  const chartWithTitles = AxesTitlesContainer({
+    xAxisTitle,
+    child: chart,
+  });
+
+  const rootNode = makeNode();
+  rootNode.insertChild(chartWithTitles.node, rootNode.getChildCount());
+
+  if (barSamples && samplesBarSetting === "bottom") {
+    rootNode.insertChild(barSamples.node, rootNode.getChildCount());
+  }
+
+  return {
+    node: rootNode,
+    draw: (context) => {
+      drawElement(chartWithTitles, context);
+      if (barSamples && samplesBarSetting === "bottom") {
+        drawElement(barSamples, context);
+      }
+    },
+  };
+};
 
 const InnerDistributionsChart: FC<{
   shapes: (SqShape & {
@@ -67,7 +209,7 @@ const InnerDistributionsChart: FC<{
   const verticalLine = useSelectedVerticalLine();
 
   const [discreteTooltip, setDiscreteTooltip] = useState<
-    { value: number; probability: number } | undefined
+    DiscreteTooltip | undefined
   >();
 
   const shapes = unAdjustedShapes.map(
@@ -107,9 +249,28 @@ const InnerDistributionsChart: FC<{
   const { cursor, initCursor } = useCanvasCursor();
 
   // TODO - memoize this and `calculateLayout` call below?
-  const chart = useMemo(() => {
-    const mainChart = MainChart({
-      height: innerHeight,
+  const chart = useMemo(
+    () =>
+      CanvasDistChart({
+        innerHeight: innerHeight,
+        shapes,
+        isMulti,
+        showPercentileLines,
+        discreteTooltip,
+        setDiscreteTooltip,
+        cursor,
+        xScale,
+        yScale,
+        showXAxis,
+        xTickFormat: plot.xScale.tickFormat,
+        xAxisTitle: showAxisTitles ? plot.xScale.title : undefined,
+        verticalLine,
+        showCursorLine,
+        samples,
+        samplesBarSetting,
+      }),
+    [
+      innerHeight,
       shapes,
       isMulti,
       showPercentileLines,
@@ -118,39 +279,16 @@ const InnerDistributionsChart: FC<{
       cursor,
       xScale,
       yScale,
-      xTickFormat: plot.xScale.tickFormat,
-      verticalLine,
-    });
-    const chart = AxesContainer({
-      xScale,
-      yScale,
-      showAxisLines: true,
       showXAxis,
-      showYAxis: false,
-      child: mainChart,
-      xTickFormat: plot.xScale.tickFormat,
-    });
-    return AxesTitlesContainer({
-      xAxisTitle: plot.xScale.title,
-      yAxisTitle: plot.yScale.title,
-      child: chart,
-    });
-  }, [
-    innerHeight,
-    shapes,
-    isMulti,
-    showPercentileLines,
-    discreteTooltip,
-    setDiscreteTooltip,
-    cursor,
-    xScale,
-    yScale,
-    showXAxis,
-    plot.xScale.tickFormat,
-    plot.xScale.title,
-    plot.yScale.title,
-    verticalLine,
-  ]);
+      plot.xScale.tickFormat,
+      plot.xScale.title,
+      verticalLine,
+      showAxisTitles,
+      showCursorLine,
+      samples,
+      samplesBarSetting,
+    ]
+  );
 
   const { outerRef, ref } = useYogaCanvas(chart, { init: initCursor });
 
@@ -314,9 +452,17 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
           <div className="flex flex-col items-stretch">
             <div
               className="flex-1"
-              // In tooltips, dist widgets are setting their own size, so without max width there's a risk that the canvas would expand incrementally because of its ResizeObserver.
-              // See also: https://github.com/quantified-uncertainty/squiggle/issues/3013
-              // Note that 300px is the default width in HTML5 Canvas standard, so it's the safest default. So any larger `maxWidth` could still cause incremental expanding up to that value.
+              /*
+               * In tooltips, dist widgets are setting their own size, so without
+               * max width there's a risk that the canvas would expand
+               * incrementally because of its ResizeObserver.
+               *
+               * Note that 300px is the default width in HTML5 Canvas standard,
+               * so it's the safest default. So any smaller `maxWidth` could
+               * still cause incremental expanding up to that value.
+               *
+               * See also: https://github.com/quantified-uncertainty/squiggle/issues/3013
+               */
               style={viewerType === "tooltip" ? { maxWidth: 300 } : undefined}
             >
               <InnerDistributionsChart
