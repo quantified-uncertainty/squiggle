@@ -71,7 +71,7 @@
     "@typescript-eslint/eslint-plugin": "^7.11.0",
     "@typescript-eslint/parser": "^7.11.0",
     "autoprefixer": "^10.4.19",
-    "eslint": "^8.57.0",
+    "eslint": "^9.4.0",
     "eslint-plugin-react": "^7.33.2",
     "postcss": "^8.4.38",
     "postcss-cli": "^11.0.0",
