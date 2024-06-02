@@ -133,7 +133,7 @@ export const ItemSideBar: FC<Props> = ({
             /
           </span>
 
-          <span className="ml-2 mr-2  whitespace-pre-wrap rounded-sm bg-slate-200 px-1 text-center text-sm font-semibold text-slate-900">
+          <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 px-1 text-center text-sm font-semibold text-slate-900">
             <span className="inline-block">{denominatorItem.name}</span>
           </span>
           <span className="whitespace-nowrap text-xl text-slate-300">)</span>
