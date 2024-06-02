@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@quri/configs": "workspace:*",
-    "@storybook/addon-docs": "^8.0.9",
+    "@storybook/addon-docs": "^8.1.5",
     "@storybook/addon-essentials": "^8.0.9",
     "@storybook/addon-interactions": "^8.1.5",
     "@storybook/addon-links": "^8.0.9",
