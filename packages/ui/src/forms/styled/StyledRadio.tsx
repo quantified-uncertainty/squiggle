@@ -40,7 +40,7 @@ export function StyledRadio({ value, options, onChange }: StyledRadioProps) {
                 "text-sm font-medium",
                 option.disabled
                   ? "cursor-not-allowed text-gray-400"
-                  : "cursor-pointer  text-gray-600 group-hover:text-gray-900"
+                  : "cursor-pointer text-gray-600 group-hover:text-gray-900"
               )}
             >
               {option.name}
