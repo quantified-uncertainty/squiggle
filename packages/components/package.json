@@ -55,7 +55,7 @@
     "@quri/configs": "workspace:*",
     "@storybook/addon-essentials": "^8.0.9",
     "@storybook/addon-links": "^8.0.9",
-    "@storybook/react": "^7.6.12",
+    "@storybook/react": "^8.1.5",
     "@storybook/react-vite": "^8.0.9",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^15.0.6",
