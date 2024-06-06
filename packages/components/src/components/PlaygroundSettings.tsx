@@ -231,7 +231,7 @@ export const RenderingSettingsForm: FC = () => {
       <CheckboxFormField<PlaygroundSettings>
         name="environment.profile"
         label="Performance Profiler"
-        description="When enabled, source code will be highlighted according to how much time was spent. Enabling this option slightly slow down the execution of the model."
+        description="When enabled, source code will be highlighted according to how much time was spent. Enabling this option will slow down the execution of the model."
       />
       <SelectRunnerField />
     </div>
