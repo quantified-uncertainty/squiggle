@@ -137,7 +137,7 @@ export function drawAxes({
     _frame || makeCartesianFrame({ context, padding, width, height });
 
   xScale.range([0, frame.width]);
-  yScale.range([0, frame.height]);
+  yScale.range([0, frame.height]).clamp(true);
 
   // x axis
   if (showXAxis) {
