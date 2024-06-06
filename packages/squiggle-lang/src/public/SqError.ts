@@ -1,12 +1,29 @@
-import { ICompileError, IRuntimeError } from "../errors/IError.js";
+import { ICompileError, IError, IRuntimeError } from "../errors/IError.js";
 import { StackTraceFrame } from "../reducer/StackTrace.js";
 import { SqProject } from "./SqProject/index.js";
+
+export function wrapError(err: IError): SqError {
+  if (err instanceof IRuntimeError) {
+    return new SqRuntimeError(err);
+  } else if (err instanceof ICompileError) {
+    return new SqCompileError(err);
+  } else {
+    throw err satisfies never;
+  }
+}
 
 abstract class SqAbstractError<T extends string> {
   abstract tag: T;
 
   abstract toString(): string;
-  abstract toStringWithDetails(): string;
+
+  abstract toStringWithDetails(
+    // Only used to render SqRuntimeError in CLI, for now. We'll need to
+    // refactor this further. Ideally, sources should be available in some other
+    // way than through `project` instance, because projects are mutable and the
+    // source could change by the time the error is serialized.
+    project: SqProject
+  ): string;
 }
 
 export class SqFrame {
@@ -24,10 +41,7 @@ export class SqFrame {
 export class SqRuntimeError extends SqAbstractError<"runtime"> {
   tag = "runtime" as const;
 
-  constructor(
-    private _value: IRuntimeError,
-    private project?: SqProject
-  ) {
+  constructor(private _value: IRuntimeError) {
     super();
   }
 
@@ -35,8 +49,7 @@ export class SqRuntimeError extends SqAbstractError<"runtime"> {
     return this._value.toString();
   }
 
-  toStringWithDetails() {
-    const { project } = this;
+  toStringWithDetails(project: SqProject) {
     return this._value.toString({
       withStackTrace: true,
       resolveSource: project ? (id) => project.getSource(id) : undefined,

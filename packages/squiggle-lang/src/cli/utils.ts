@@ -61,7 +61,7 @@ async function _run(
   const time = await measure(async () => await project.run(filename));
   const output = project.getOutput(filename);
 
-  return { output, time };
+  return { output, time, project };
 }
 
 export async function run(args: RunArgs) {
@@ -74,7 +74,7 @@ export async function run(args: RunArgs) {
     };
   }
 
-  const { output, time } = await _run({
+  const { output, time, project } = await _run({
     src: args.src,
     filename: args.filename,
     environment,
@@ -92,7 +92,7 @@ export async function run(args: RunArgs) {
   };
 
   if (!output.ok) {
-    printLines(red("Error:"), output.value.toStringWithDetails());
+    printLines(red("Error:"), output.value.toStringWithDetails(project));
   } else {
     switch (args.output) {
       case "RESULT_OR_BINDINGS":

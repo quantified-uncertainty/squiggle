@@ -26,12 +26,7 @@ export class SqSpecification {
     if (!this.context) {
       return Result.Err(new SqOtherError("No context for specification"));
     }
-    const env = this.context.project.getEnvironment();
-    return runLambda(
-      this._value.validate,
-      [subvalue._value],
-      env,
-      this.context.project
-    );
+    const env = this.context.runContext.environment;
+    return runLambda(this._value.validate, [subvalue._value], env);
   }
 }

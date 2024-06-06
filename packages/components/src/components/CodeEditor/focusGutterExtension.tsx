@@ -152,12 +152,14 @@ export function getMarkers(
     return;
   }
 
-  if (sqResult.value.result.context?.source !== state.doc.toString()) {
+  if (
+    sqResult.value.result.context?.runContext.source !== state.doc.toString()
+  ) {
     return; // autorun is off or the result is still rendering, can't show markers yet
   }
 
   // TODO - use AST for the current code state, and `sqResult` only for filtering
-  const ast = sqResult.value.bindings.context?.ast;
+  const ast = sqResult.value.bindings.context?.runContext.ast;
   if (!ast) {
     return;
   }
