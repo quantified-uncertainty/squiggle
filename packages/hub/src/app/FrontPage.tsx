@@ -29,31 +29,29 @@ export const FrontPage: FC<{
   const [data] = usePageQuery(Query, query);
 
   return (
-    <div className="space-y-8">
-      <StyledTab.Group>
-        <StyledTab.List>
-          <StyledTab name="Models" />
-          <StyledTab name="Variables" />
-          <StyledTab name="Definitions" />
-          <StyledTab name="Groups" />
-        </StyledTab.List>
-        <div className="mt-4">
-          <StyledTab.Panels>
-            <StyledTab.Panel>
-              <FrontPageModelList dataRef={data} />
-            </StyledTab.Panel>
-            <StyledTab.Panel>
-              <FrontPageVariableList dataRef={data} />
-            </StyledTab.Panel>
-            <StyledTab.Panel>
-              <FrontPageDefinitionList dataRef={data} />
-            </StyledTab.Panel>
-            <StyledTab.Panel>
-              <FrontPageGroupList dataRef={data} />
-            </StyledTab.Panel>
-          </StyledTab.Panels>
-        </div>
-      </StyledTab.Group>
-    </div>
+    <StyledTab.Group className="space-y-8">
+      <StyledTab.List>
+        <StyledTab name="Models" />
+        <StyledTab name="Variables" />
+        <StyledTab name="Definitions" />
+        <StyledTab name="Groups" />
+      </StyledTab.List>
+      <div className="mt-4">
+        <StyledTab.Panels>
+          <StyledTab.Panel>
+            <FrontPageModelList dataRef={data} />
+          </StyledTab.Panel>
+          <StyledTab.Panel>
+            <FrontPageVariableList dataRef={data} />
+          </StyledTab.Panel>
+          <StyledTab.Panel>
+            <FrontPageDefinitionList dataRef={data} />
+          </StyledTab.Panel>
+          <StyledTab.Panel>
+            <FrontPageGroupList dataRef={data} />
+          </StyledTab.Panel>
+        </StyledTab.Panels>
+      </div>
+    </StyledTab.Group>
   );
 };
