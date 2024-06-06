@@ -83,7 +83,7 @@ export const PageFooter: FC = () => {
 
   return (
     <div className="border-t border-t-slate-200 bg-slate-100 px-8 py-4">
-      <div className="mx-auto flex max-w-4xl flex-col justify-between gap-4 text-sm text-slate-400 sm:flex-row ">
+      <div className="mx-auto flex max-w-4xl flex-col justify-between gap-4 text-sm text-slate-400 sm:flex-row">
         {logoSection}
         {internalLinkSection}
         {externalLinkSection}
