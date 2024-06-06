@@ -1,6 +1,6 @@
 import uniq from "lodash/uniq.js";
 
-import { LocationRange } from "../ast/parse.js";
+import { LocationRange } from "../ast/types.js";
 import {
   REArgumentDomainError,
   REArityError,
@@ -102,7 +102,7 @@ export class UserDefinedLambda extends BaseLambda {
       reducer.stack.push(args[i]);
     }
 
-    return reducer.evaluate(this.expression);
+    return reducer.innerEvaluate(this.expression);
   }
 
   display() {

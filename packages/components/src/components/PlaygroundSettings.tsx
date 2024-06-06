@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { useWatch } from "react-hook-form";
 import { z } from "zod";
 
 import { defaultRunnerName, RunnerName, SqScale } from "@quri/squiggle-lang";
@@ -15,12 +16,12 @@ import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../lib/constants.js";
 import { functionChartDefaults } from "../widgets/LambdaWidget/FunctionChart/utils.js";
 import { FormComment } from "./ui/FormComment.js";
 import { FormSection } from "./ui/FormSection.js";
-import { useWatch } from "react-hook-form";
 
 export const environmentSchema = z.object({
   sampleCount: z.number().int().gte(SAMPLE_COUNT_MIN).lte(SAMPLE_COUNT_MAX),
   xyPointLength: z.number().int().gte(10).lte(10000),
   seed: z.string(),
+  profile: z.boolean(),
 });
 
 const runnerSchema = z.union([
@@ -92,6 +93,7 @@ export const defaultPlaygroundSettings: PlaygroundSettings = {
     sampleCount: 1000,
     xyPointLength: 1000,
     seed: "default_seed",
+    profile: false,
   },
   runner: defaultRunnerName,
   functionChartSettings: {
@@ -225,6 +227,11 @@ export const RenderingSettingsForm: FC = () => {
         name="environment.xyPointLength"
         label="Coordinate Count (For PointSet Shapes)"
         description="When distributions are converted into PointSet shapes, we need to know how many coordinates to use."
+      />
+      <CheckboxFormField<PlaygroundSettings>
+        name="environment.profile"
+        label="Performance Profiler"
+        description="When enabled, source code will be highlighted according to how much time was spent. Enabling this option will slow down the execution of the model."
       />
       <SelectRunnerField />
     </div>

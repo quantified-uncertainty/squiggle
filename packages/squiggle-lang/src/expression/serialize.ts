@@ -4,7 +4,8 @@ import {
 } from "../serialization/squiggle.js";
 import {
   Expression,
-  ExpressionByKind,
+  ExpressionContent,
+  ExpressionContentByKind,
   LambdaExpressionParameter,
 } from "./index.js";
 
@@ -15,24 +16,24 @@ type SerializedLambdaExpressionParameter = Omit<
   annotation?: number;
 };
 
-type SerializedExpressionByKindGeneric<
-  K extends Expression["kind"],
+type SerializedExpressionContentByKindGeneric<
+  K extends ExpressionContent["kind"],
   ReplaceValue,
-> = Omit<ExpressionByKind<K>, "value"> & {
+> = Omit<ExpressionContentByKind<K>, "value"> & {
   value: ReplaceValue;
 };
 
-type SerializedExpressionByKindObjectLike<
-  K extends Expression["kind"],
-  SkipFields extends keyof ExpressionByKind<K>["value"],
+type SerializedExpressionContentByKindObjectLike<
+  K extends ExpressionContent["kind"],
+  SkipFields extends keyof ExpressionContentByKind<K>["value"],
   ReplaceFields,
-> = Omit<ExpressionByKind<K>, "value"> & {
-  value: Omit<ExpressionByKind<K>["value"], SkipFields> & ReplaceFields;
+> = Omit<ExpressionContentByKind<K>, "value"> & {
+  value: Omit<ExpressionContentByKind<K>["value"], SkipFields> & ReplaceFields;
 };
 
-export type SerializedExpression =
+export type SerializedExpressionContent =
   | Exclude<
-      Expression,
+      ExpressionContent,
       {
         kind:
           | "Value"
@@ -46,16 +47,16 @@ export type SerializedExpression =
           | "Dict";
       }
     >
-  | SerializedExpressionByKindGeneric<"Value", number>
-  | SerializedExpressionByKindGeneric<"Block", number[]>
-  | SerializedExpressionByKindObjectLike<
+  | SerializedExpressionContentByKindGeneric<"Value", number>
+  | SerializedExpressionContentByKindGeneric<"Block", number[]>
+  | SerializedExpressionContentByKindObjectLike<
       "Program",
       "statements",
       {
         statements: number[];
       }
     >
-  | SerializedExpressionByKindObjectLike<
+  | SerializedExpressionContentByKindObjectLike<
       "Ternary",
       "condition" | "ifTrue" | "ifFalse",
       {
@@ -64,14 +65,14 @@ export type SerializedExpression =
         ifFalse: number;
       }
     >
-  | SerializedExpressionByKindObjectLike<
+  | SerializedExpressionContentByKindObjectLike<
       "Assign",
       "right",
       {
         right: number;
       }
     >
-  | SerializedExpressionByKindObjectLike<
+  | SerializedExpressionContentByKindObjectLike<
       "Call",
       "fn" | "args",
       {
@@ -79,7 +80,7 @@ export type SerializedExpression =
         args: number[];
       }
     >
-  | SerializedExpressionByKindObjectLike<
+  | SerializedExpressionContentByKindObjectLike<
       "Lambda",
       "parameters" | "body",
       {
@@ -87,13 +88,17 @@ export type SerializedExpression =
         body: number;
       }
     >
-  | SerializedExpressionByKindGeneric<"Array", number[]>
-  | SerializedExpressionByKindGeneric<"Dict", [number, number][]>;
+  | SerializedExpressionContentByKindGeneric<"Array", number[]>
+  | SerializedExpressionContentByKindGeneric<"Dict", [number, number][]>;
 
-export function serializeExpression(
-  expression: Expression,
+export type SerializedExpression = SerializedExpressionContent & {
+  ast: number;
+};
+
+function serializeExpressionContent(
+  expression: ExpressionContent,
   visit: SquiggleSerializationVisitor
-): SerializedExpression {
+): SerializedExpressionContent {
   switch (expression.kind) {
     case "Value":
       return {
@@ -175,10 +180,20 @@ export function serializeExpression(
   }
 }
 
-export function deserializeExpression(
+export function serializeExpression(
+  expression: Expression,
+  visit: SquiggleSerializationVisitor
+) {
+  return {
+    ...serializeExpressionContent(expression, visit),
+    ast: visit.ast(expression.ast),
+  };
+}
+
+function deserializeExpressionContent(
   expression: SerializedExpression,
   visit: SquiggleDeserializationVisitor
-): Expression {
+): ExpressionContent {
   switch (expression.kind) {
     case "Value":
       return {
@@ -261,4 +276,14 @@ export function deserializeExpression(
     default:
       return expression;
   }
+}
+
+export function deserializeExpression(
+  expression: SerializedExpression,
+  visit: SquiggleDeserializationVisitor
+): Expression {
+  return {
+    ...deserializeExpressionContent(expression, visit),
+    ast: visit.ast(expression.ast),
+  };
 }

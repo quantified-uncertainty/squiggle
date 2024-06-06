@@ -1,10 +1,17 @@
+import {
+  deserializeAstNode,
+  serializeAstNode,
+  SerializedASTNode,
+} from "../ast/serialize.js";
 import { Expression } from "../expression/index.js";
 import {
   deserializeExpression,
   SerializedExpression,
   serializeExpression,
 } from "../expression/serialize.js";
+import { ASTNode } from "../index.js";
 import { Lambda } from "../reducer/lambda.js";
+import { RunProfile, SerializedRunProfile } from "../reducer/RunProfile.js";
 import { deserializeValue } from "../value/deserializeValue.js";
 import { SerializedValue, Value } from "../value/index.js";
 import { SerializedValueTags, ValueTags } from "../value/valueTags.js";
@@ -26,30 +33,36 @@ type SquiggleShape = {
   expression: [Expression, SerializedExpression];
   lambda: [Lambda, SerializedLambda];
   tags: [ValueTags, SerializedValueTags];
+  profile: [RunProfile, SerializedRunProfile];
+  ast: [ASTNode, SerializedASTNode];
 };
 
 const squiggleConfig: StoreConfig<SquiggleShape> = {
   value: {
     serialize: (node, visitor) => node.serialize(visitor),
-    deserialize: (serializedNode, visitor) =>
-      deserializeValue(serializedNode, visitor),
+    deserialize: deserializeValue,
   },
   expression: {
-    serialize: (node, visitor) => serializeExpression(node, visitor),
-    deserialize: (serializedNode, visitor) =>
-      deserializeExpression(serializedNode, visitor),
+    serialize: serializeExpression,
+    deserialize: deserializeExpression,
   },
   lambda: {
-    serialize: (node, visitor) => serializeLambda(node, visitor),
-    deserialize: (serializedNode, visitor) =>
-      deserializeLambda(serializedNode, visitor),
+    serialize: serializeLambda,
+    deserialize: deserializeLambda,
   },
   tags: {
     serialize: (node, visitor) => node.serialize(visitor),
-    deserialize: (serializedNode, visitor) =>
-      ValueTags.deserialize(serializedNode, visitor),
+    deserialize: ValueTags.deserialize,
   },
-  // TODO - we should serialized AST nodes too, otherwise serialized lambdas could blow up in size, in some cases
+  profile: {
+    serialize: (node) => node.serialize(),
+    deserialize: RunProfile.deserialize,
+  },
+  ast: {
+    serialize: serializeAstNode,
+    deserialize: deserializeAstNode,
+  },
+  // TODO - we should serialize AST nodes too, otherwise serialized lambdas could blow up in size, in some cases
 };
 
 export type SquiggleBundle = Bundle<SquiggleShape>;

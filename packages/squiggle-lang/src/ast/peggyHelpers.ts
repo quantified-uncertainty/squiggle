@@ -1,200 +1,21 @@
-import { type LocationRange } from "./parse.js";
+import {
+  AnyNodeDictEntry,
+  ASTCommentNode,
+  ASTNode,
+  InfixOperator,
+  LocationRange,
+  NamedNodeLambda,
+  UnaryOperator,
+} from "./types.js";
 import { undecorated } from "./utils.js";
 
-export const infixFunctions = {
-  "+": "add",
-  "-": "subtract",
-  "!=": "unequal",
-  ".-": "Dist.dotSubtract",
-  ".*": "Dist.dotMultiply",
-  "./": "Dist.dotDivide",
-  ".^": "Dist.dotPow",
-  ".+": "Dist.dotAdd",
-  "*": "multiply",
-  "/": "divide",
-  "&&": "and",
-  "^": "pow", // or xor
-  "<": "smaller",
-  "<=": "smallerEq",
-  "==": "equal",
-  ">": "larger",
-  ">=": "largerEq",
-  "||": "or",
-  to: "to",
-};
-export type InfixOperator = keyof typeof infixFunctions;
-
-export const unaryFunctions = {
-  "-": "unaryMinus",
-  "!": "not",
-  ".-": "unaryDotMinus",
-};
-export type UnaryOperator = keyof typeof unaryFunctions;
-
-type Node = {
-  location: LocationRange;
-};
-
-type N<T extends string, V extends object> = Node & { type: T } & V;
-
-type NodeBlock = N<
-  "Block",
-  {
-    statements: ASTNode[];
-  }
->;
-
-type NodeProgram = N<
-  "Program",
-  {
-    imports: [NodeString, NodeIdentifier][];
-    statements: ASTNode[];
-    // Var name -> statement node, for faster path resolution.
-    // Not used for evaluation.
-    // Note: symbols point to undecorated statements.
-    symbols: { [k in string]: ASTNode };
-  }
->;
-
-type NodeArray = N<"Array", { elements: ASTNode[] }>;
-
-type NodeDict = N<
-  "Dict",
-  {
-    elements: AnyNodeDictEntry[];
-    // Static key -> node, for faster path resolution.
-    // Not used for evaluation.
-    symbols: { [k in number | string]: AnyNodeDictEntry };
-  }
->;
-type NodeKeyValue = N<
-  "KeyValue",
-  {
-    key: ASTNode;
-    value: ASTNode;
-  }
->;
-type AnyNodeDictEntry = NodeKeyValue | NodeIdentifier;
-
-type NodeUnitValue = N<"UnitValue", { value: ASTNode; unit: string }>;
-
-type NodeCall = N<"Call", { fn: ASTNode; args: ASTNode[] }>;
-
-type NodeInfixCall = N<
-  "InfixCall",
-  { op: InfixOperator; args: [ASTNode, ASTNode] }
->;
-
-type NodeUnaryCall = N<"UnaryCall", { op: UnaryOperator; arg: ASTNode }>;
-
-type NodePipe = N<
-  "Pipe",
-  {
-    leftArg: ASTNode;
-    fn: ASTNode;
-    rightArgs: ASTNode[];
-  }
->;
-
-type NodeDotLookup = N<"DotLookup", { arg: ASTNode; key: string }>;
-
-type NodeBracketLookup = N<"BracketLookup", { arg: ASTNode; key: ASTNode }>;
-
-type NodeFloat = N<
-  "Float",
-  {
-    // floats are always positive, `-123` is an unary operation
-    integer: number;
-    fractional: string | null; // heading zeros are significant, so we can't store this as a number
-    exponent: number | null;
-  }
->;
-
-type NodeIdentifierWithAnnotation = N<
-  "IdentifierWithAnnotation",
-  { variable: string; annotation: ASTNode }
->;
-
-type NodeIdentifier = N<"Identifier", { value: string }>;
-
-type NodeDecorator = N<"Decorator", { name: NodeIdentifier; args: ASTNode[] }>;
-
-type LetOrDefun = {
-  variable: NodeIdentifier;
-  exported: boolean;
-};
-
-type NodeLetStatement = N<"LetStatement", LetOrDefun & { value: ASTNode }>;
-
-type NodeDefunStatement = N<
-  "DefunStatement",
-  LetOrDefun & { value: NamedNodeLambda }
->;
-
-type NodeDecoratedStatement = N<
-  "DecoratedStatement",
-  {
-    decorator: NodeDecorator;
-    statement: NodeLetStatement | NodeDefunStatement | NodeDecoratedStatement;
-  }
->;
-
-type NodeLambda = N<
-  "Lambda",
-  {
-    // Don't try to convert it to string[], ASTNode is intentional because we need locations.
-    args: ASTNode[];
-    body: ASTNode;
-    name?: string;
-  }
->;
-
-type NamedNodeLambda = NodeLambda & Required<Pick<NodeLambda, "name">>;
-
-type NodeTernary = N<
-  "Ternary",
-  {
-    condition: ASTNode;
-    trueExpression: ASTNode;
-    falseExpression: ASTNode;
-    kind: "IfThenElse" | "C";
-  }
->;
-
-type NodeString = N<"String", { value: string }>;
-
-type NodeBoolean = N<"Boolean", { value: boolean }>;
-
-export type ASTNode =
-  | NodeArray
-  | NodeDict
-  | NodeBlock
-  | NodeProgram
-  | NodeUnitValue
-  | NodeCall
-  | NodeInfixCall
-  | NodeUnaryCall
-  | NodePipe
-  | NodeDotLookup
-  | NodeBracketLookup
-  | NodeFloat
-  | NodeIdentifier
-  | NodeIdentifierWithAnnotation
-  | NodeDecorator
-  | NodeDecoratedStatement
-  | NodeLetStatement
-  | NodeDefunStatement
-  | NodeLambda
-  | NodeTernary
-  | NodeKeyValue
-  | NodeString
-  | NodeBoolean;
+type TypedNode<T extends ASTNode["type"]> = Extract<ASTNode, { type: T }>;
 
 export function nodeCall(
   fn: ASTNode,
   args: ASTNode[],
   location: LocationRange
-): NodeCall {
+): TypedNode<"Call"> {
   return { type: "Call", fn, args, location };
 }
 
@@ -213,7 +34,7 @@ export function nodeInfixCall(
   arg1: ASTNode,
   arg2: ASTNode,
   location: LocationRange
-): NodeInfixCall {
+): TypedNode<"InfixCall"> {
   return {
     type: "InfixCall",
     op,
@@ -226,7 +47,7 @@ export function nodeUnaryCall(
   op: UnaryOperator,
   arg: ASTNode,
   location: LocationRange
-): NodeUnaryCall {
+): TypedNode<"UnaryCall"> {
   return { type: "UnaryCall", op, arg, location };
 }
 
@@ -235,7 +56,7 @@ export function nodePipe(
   fn: ASTNode,
   rightArgs: ASTNode[],
   location: LocationRange
-): NodePipe {
+): TypedNode<"Pipe"> {
   return { type: "Pipe", leftArg, fn, rightArgs, location };
 }
 
@@ -243,7 +64,7 @@ export function nodeDotLookup(
   arg: ASTNode,
   key: string,
   location: LocationRange
-): NodeDotLookup {
+): TypedNode<"DotLookup"> {
   return { type: "DotLookup", arg, key, location };
 }
 
@@ -251,21 +72,21 @@ export function nodeBracketLookup(
   arg: ASTNode,
   key: ASTNode,
   location: LocationRange
-): NodeBracketLookup {
+): TypedNode<"BracketLookup"> {
   return { type: "BracketLookup", arg, key, location };
 }
 
 export function nodeArray(
   elements: ASTNode[],
   location: LocationRange
-): NodeArray {
+): TypedNode<"Array"> {
   return { type: "Array", elements, location };
 }
 export function nodeDict(
   elements: AnyNodeDictEntry[],
   location: LocationRange
-): NodeDict {
-  const symbols: NodeDict["symbols"] = {};
+): TypedNode<"Dict"> {
+  const symbols: TypedNode<"Dict">["symbols"] = {};
   for (const element of elements) {
     if (element.type === "KeyValue" && element.key.type === "String") {
       symbols[element.key.value] = element;
@@ -280,22 +101,22 @@ export function nodeUnitValue(
   value: ASTNode,
   unit: string,
   location: LocationRange
-): NodeUnitValue {
+): TypedNode<"UnitValue"> {
   return { type: "UnitValue", value, unit, location };
 }
 
 export function nodeBlock(
   statements: ASTNode[],
   location: LocationRange
-): NodeBlock {
+): TypedNode<"Block"> {
   return { type: "Block", statements, location };
 }
 export function nodeProgram(
-  imports: [NodeString, NodeIdentifier][],
+  imports: [TypedNode<"String">, TypedNode<"Identifier">][],
   statements: ASTNode[],
   location: LocationRange
-): NodeProgram {
-  const symbols: NodeProgram["symbols"] = {};
+): TypedNode<"Program"> {
+  const symbols: TypedNode<"Program">["symbols"] = {};
   for (const statement of statements) {
     const _undecorated = undecorated(statement);
     if (
@@ -310,21 +131,21 @@ export function nodeProgram(
 export function nodeBoolean(
   value: boolean,
   location: LocationRange
-): NodeBoolean {
+): TypedNode<"Boolean"> {
   return { type: "Boolean", value, location };
 }
 
 export function nodeFloat(
-  args: Omit<NodeFloat, "type" | "location">,
+  args: Omit<TypedNode<"Float">, "type" | "location">,
   location: LocationRange
-): NodeFloat {
+): TypedNode<"Float"> {
   return { type: "Float", ...args, location };
 }
 
 export function nodeIdentifier(
   value: string,
   location: LocationRange
-): NodeIdentifier {
+): TypedNode<"Identifier"> {
   return { type: "Identifier", value, location };
 }
 
@@ -332,7 +153,7 @@ export function nodeIdentifierWithAnnotation(
   variable: string,
   annotation: ASTNode,
   location: LocationRange
-): NodeIdentifierWithAnnotation {
+): TypedNode<"IdentifierWithAnnotation"> {
   return { type: "IdentifierWithAnnotation", variable, annotation, location };
 }
 
@@ -340,7 +161,7 @@ export function nodeKeyValue(
   key: ASTNode,
   value: ASTNode,
   location: LocationRange
-): NodeKeyValue {
+): TypedNode<"KeyValue"> {
   if (key.type === "Identifier") {
     key = {
       ...key,
@@ -353,16 +174,16 @@ export function nodeLambda(
   args: ASTNode[],
   body: ASTNode,
   location: LocationRange,
-  name?: NodeIdentifier
-): NodeLambda {
+  name?: TypedNode<"Identifier">
+): TypedNode<"Lambda"> {
   return { type: "Lambda", args, body, location, name: name?.value };
 }
 export function nodeLetStatement(
-  variable: NodeIdentifier,
+  variable: TypedNode<"Identifier">,
   value: ASTNode,
   exported: boolean,
   location: LocationRange
-): NodeLetStatement {
+): TypedNode<"LetStatement"> {
   const patchedValue =
     value.type === "Lambda" ? { ...value, name: variable.value } : value;
   return {
@@ -374,11 +195,11 @@ export function nodeLetStatement(
   };
 }
 export function nodeDefunStatement(
-  variable: NodeIdentifier,
+  variable: TypedNode<"Identifier">,
   value: NamedNodeLambda,
   exported: boolean,
   location: LocationRange
-): NodeDefunStatement {
+): TypedNode<"DefunStatement"> {
   return {
     type: "DefunStatement",
     variable,
@@ -389,15 +210,15 @@ export function nodeDefunStatement(
 }
 
 export function nodeDecorator(
-  name: NodeIdentifier,
+  name: TypedNode<"Identifier">,
   args: ASTNode[],
   location: LocationRange
-): NodeDecorator {
+): TypedNode<"Decorator"> {
   return { type: "Decorator", name, args, location };
 }
 
 export function nodeDecoratedStatement(
-  decorator: NodeDecorator,
+  decorator: TypedNode<"Decorator">,
   statement: ASTNode,
   location: LocationRange
 ): ASTNode {
@@ -419,7 +240,10 @@ export function nodeDecoratedStatement(
   };
 }
 
-export function nodeString(value: string, location: LocationRange): NodeString {
+export function nodeString(
+  value: string,
+  location: LocationRange
+): TypedNode<"String"> {
   return { type: "String", value, location };
 }
 
@@ -427,9 +251,9 @@ export function nodeTernary(
   condition: ASTNode,
   trueExpression: ASTNode,
   falseExpression: ASTNode,
-  kind: NodeTernary["kind"],
+  kind: TypedNode<"Ternary">["kind"],
   location: LocationRange
-): NodeTernary {
+): TypedNode<"Ternary"> {
   return {
     type: "Ternary",
     condition,
@@ -439,12 +263,6 @@ export function nodeTernary(
     location,
   };
 }
-
-export type ASTCommentNode = {
-  type: "lineComment" | "blockComment";
-  value: string;
-  location: LocationRange;
-};
 
 export function lineComment(
   text: string,

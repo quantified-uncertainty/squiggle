@@ -86,13 +86,13 @@ export {
 
 export {
   type AST,
+  type ASTCommentNode,
   type ASTNode,
   type LocationRange as SqLocation,
-} from "./ast/parse.js";
+} from "./ast/types.js";
 export { defaultEnv as defaultEnvironment } from "./dists/env.js";
 export { type Env, SqProject };
 
-export { type ASTCommentNode } from "./ast/peggyHelpers.js";
 export { type SqLinker } from "./public/SqLinker.js";
 export { type SqOutput, type SqOutputResult } from "./public/types.js";
 

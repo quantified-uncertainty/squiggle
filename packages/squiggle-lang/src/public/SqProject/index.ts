@@ -204,7 +204,7 @@ export class SqProject {
     this.cleanDependents(sourceId);
   }
 
-  private getInternalOutput(
+  getInternalOutput(
     sourceId: string
   ): Result.result<ProjectItemOutput, SqError> {
     return this.getItem(sourceId).output ?? Result.Err(getNeedToRunError());

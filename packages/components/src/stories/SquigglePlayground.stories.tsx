@@ -397,3 +397,14 @@ export const Specification: Story = {
   `,
   },
 };
+
+export const WithProfiler: Story = {
+  args: {
+    defaultCode: `x = 5 // fast
+y = List.upTo(1, 1000) -> map({|v| v + 1 }) -> List.length // slow
+`,
+    environment: {
+      profile: true,
+    },
+  },
+};

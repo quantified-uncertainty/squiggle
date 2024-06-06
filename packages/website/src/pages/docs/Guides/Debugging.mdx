@@ -28,3 +28,21 @@ fn(e) = e
   jsonString: Danger.jsonString([pointSet, fn]),
 }`}
 />
+
+## Profiling
+
+In the playground configuration panel, you can enable the "Performance Profiler" checkbox. This will highlight the code in the editor according to how much time was spend on each expression.
+
+Caveats:
+- The code will execute slightly slower in profiler mode
+- Imports won't be profiled correctly (but slow calls of imported functions will be highlighted)
+- If the code is fast, you'll randomly get highlighted and unhighlighted results, because time measurement is imprecise
+
+If you're using Squiggle components in React, you can enable the profiler for any component that supports the `environment` prop with `environment={profile: true}`:
+
+<SquiggleEditor
+  environment={{ profile: true }}
+  defaultCode={`dist = normal(0, 1)
+list = List.upTo(1, 100000) -> List.length
+`}
+/>

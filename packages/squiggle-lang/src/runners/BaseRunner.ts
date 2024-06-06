@@ -1,6 +1,7 @@
-import { AST } from "../ast/parse.js";
+import { AST } from "../ast/types.js";
 import { Env } from "../dists/env.js";
 import { ICompileError, IRuntimeError } from "../errors/IError.js";
+import { RunProfile } from "../reducer/RunProfile.js";
 import { result } from "../utility/result.js";
 import { Value } from "../value/index.js";
 import { VDict } from "../value/VDict.js";
@@ -14,7 +15,12 @@ export type RunParams = {
   externals: VDict;
 };
 
-export type RunOutput = { result: Value; bindings: VDict; exports: VDict };
+export type RunOutput = {
+  result: Value;
+  bindings: VDict;
+  exports: VDict;
+  profile: RunProfile | undefined;
+};
 
 export type RunResult = result<RunOutput, ICompileError | IRuntimeError>;
 

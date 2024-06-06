@@ -34,6 +34,7 @@ import {
 import { onFocusByPathField, simulationField } from "./fields.js";
 import { CodeEditorProps } from "./index.js";
 import { lightThemeHighlightingStyle } from "./languageSupport/highlightingStyle.js";
+import { profilerExtension } from "./profilerExtension.js";
 import { useErrorsExtension } from "./useErrorsExtension.js";
 import { useFormatSquiggleExtension } from "./useFormatSquiggleExtension.js";
 import { useGutterExtension } from "./useGutterExtension.js";
@@ -136,6 +137,7 @@ export function useSquiggleEditorExtensions(
     formatExtension,
     errorsExtension,
     tooltipsExtension,
+    profilerExtension(),
     squiggleLanguageExtension,
   ];
 

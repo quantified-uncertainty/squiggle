@@ -1,4 +1,4 @@
-import { LocationRange } from "../ast/parse.js";
+import { LocationRange } from "../ast/types.js";
 import { JsonValue } from "../utility/typeHelpers.js";
 import { FrameStack } from "./FrameStack.js";
 

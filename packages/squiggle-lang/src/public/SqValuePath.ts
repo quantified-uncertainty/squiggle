@@ -1,4 +1,4 @@
-import { ASTNode } from "../ast/parse.js";
+import { ASTNode } from "../ast/types.js";
 import { locationContains } from "../ast/utils.js";
 
 // Note that 'exports' is shown separately, but is not a valid path root.

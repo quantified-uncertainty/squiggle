@@ -72,6 +72,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           showGutter={false}
           errors={errors}
           project={project}
+          simulation={simulation}
           sourceId={sourceId}
           onSubmit={runSimulation}
         />
