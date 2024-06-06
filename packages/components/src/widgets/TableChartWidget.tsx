@@ -21,7 +21,7 @@ widgetRegistry.register("TableChart", {
     </div>
   ),
   Chart: (valueWithContext, settings) => {
-    const environment = valueWithContext.context.project.getEnvironment();
+    const environment = valueWithContext.context.runContext.environment;
     const value = valueWithContext.value;
     const zoomedIn = useZoomIn();
     const rowsAndColumns = value.items(environment);

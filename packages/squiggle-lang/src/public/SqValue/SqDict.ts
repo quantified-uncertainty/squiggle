@@ -1,4 +1,4 @@
-import { VDict } from "../../value/VDict.js";
+import { VDict, vDictFromArray } from "../../value/VDict.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValuePathEdge } from "../SqValuePath.js";
 import { SqDictValue, SqValue, wrapValue } from "./index.js";
@@ -8,6 +8,10 @@ export class SqDict {
     private _value: VDict,
     public context?: SqValueContext
   ) {}
+
+  static makeEmpty() {
+    return new SqDict(vDictFromArray([]));
+  }
 
   entries(): [string, SqValue][] {
     return [...this._value.value.entries()].map(

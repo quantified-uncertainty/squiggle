@@ -6,7 +6,6 @@ import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
 import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
-import { SqProject } from "../SqProject/index.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValue, wrapValue } from "./index.js";
 import { SqDomain, wrapDomain } from "./SqDomain.js";
@@ -44,17 +43,14 @@ function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
 export function runLambda(
   lambda: Lambda,
   values: Value[],
-  env: Env,
-  project?: SqProject
+  env: Env
 ): result<SqValue, SqError> {
   const reducer = new Reducer(env);
   try {
     const value = reducer.call(lambda, values);
     return Result.Ok(wrapValue(value) as SqValue);
   } catch (e) {
-    return Result.Err(
-      new SqRuntimeError(reducer.errorFromException(e), project)
-    );
+    return Result.Err(new SqRuntimeError(reducer.errorFromException(e)));
   }
 }
 
@@ -96,13 +92,13 @@ export class SqLambda {
           )
         );
       }
-      // default to project environment that created this lambda
-      env = this.context.project.getEnvironment();
+      // default to environment that was used when this lambda was created
+      env = this.context.runContext.environment;
     }
     const rawArgs = args.map((arg) => arg._value);
 
     // TODO - reuse more parts of the project's primary reducer?
-    return runLambda(this._value, rawArgs, env, this.context?.project);
+    return runLambda(this._value, rawArgs, env);
   }
 
   toString() {
