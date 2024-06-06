@@ -1,6 +1,6 @@
 import uniq from "lodash/uniq.js";
 
-import { LocationRange } from "../ast/parse.js";
+import { LocationRange } from "../ast/types.js";
 import {
   REArgumentDomainError,
   REArityError,

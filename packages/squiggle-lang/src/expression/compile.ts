@@ -1,5 +1,5 @@
-import { ASTNode } from "../ast/parse.js";
-import { infixFunctions, unaryFunctions } from "../ast/peggyHelpers.js";
+import { infixFunctions, unaryFunctions } from "../ast/operators.js";
+import { ASTNode } from "../ast/types.js";
 import { undecorated } from "../ast/utils.js";
 import { ICompileError } from "../errors/IError.js";
 import { Bindings } from "../reducer/Stack.js";

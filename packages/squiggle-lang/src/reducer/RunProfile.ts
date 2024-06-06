@@ -1,4 +1,4 @@
-import { LocationRange } from "../ast/parse.js";
+import { LocationRange } from "../ast/types.js";
 
 function prefixSum(arr: number[]): number[] {
   const result: number[] = [];

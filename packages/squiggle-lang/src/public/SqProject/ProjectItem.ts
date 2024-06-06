@@ -1,4 +1,5 @@
-import { AST, LocationRange, parse } from "../../ast/parse.js";
+import { parse } from "../../ast/parse.js";
+import { AST, LocationRange } from "../../ast/types.js";
 import { Env } from "../../dists/env.js";
 import { ICompileError } from "../../errors/IError.js";
 import { RunOutput, RunParams } from "../../runners/BaseRunner.js";

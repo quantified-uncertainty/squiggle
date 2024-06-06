@@ -1,4 +1,4 @@
-import { Location, LocationRange } from "../ast/parse.js";
+import { Location, LocationRange } from "../ast/types.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Value, vArray, vNumber, vString } from "./index.js";
 import { ValueTags } from "./valueTags.js";

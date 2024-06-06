@@ -1,4 +1,4 @@
-import { AST } from "../ast/parse.js";
+import { AST } from "../ast/types.js";
 import { Env } from "../dists/env.js";
 import { ICompileError, IRuntimeError } from "../errors/IError.js";
 import { RunProfile } from "../reducer/RunProfile.js";

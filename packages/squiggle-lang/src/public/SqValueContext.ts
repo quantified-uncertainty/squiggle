@@ -1,4 +1,4 @@
-import { ASTNode } from "../ast/parse.js";
+import { ASTNode } from "../ast/types.js";
 import { isBindingStatement } from "../ast/utils.js";
 import { RunContext } from "./SqProject/ProjectItem.js";
 import { SqValuePath, SqValuePathEdge } from "./SqValuePath.js";
