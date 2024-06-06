@@ -121,5 +121,6 @@ export function useCanvas({
     ref,
     redraw,
     width,
+    context,
   };
 }

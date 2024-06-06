@@ -24,10 +24,11 @@ import { AxesTitlesContainer } from "../../lib/draw/AxesTitlesContainer.js";
 import { BarSamples } from "../../lib/draw/BarSamples.js";
 import { CanvasElement, CC, makeNode } from "../../lib/draw/CanvasElement.js";
 import { MainChart, MainChartHandle } from "../../lib/draw/MainChart.js";
+import { ReactCanvas } from "../../lib/draw/ReactCanvas.js";
 import { Point } from "../../lib/draw/types.js";
-import { drawElement, useYogaCanvas } from "../../lib/draw/utils.js";
+import { drawElement } from "../../lib/draw/utils.js";
 import { useCanvasCursor } from "../../lib/hooks/index.js";
-import { canvasClasses, flattenResult } from "../../lib/utility.js";
+import { flattenResult } from "../../lib/utility.js";
 import { PlotTitle } from "../PlotWidget/PlotTitle.js";
 import { DistProvider, useSelectedVerticalLine } from "./DistProvider.js";
 import { SummaryTable } from "./SummaryTable.js";
@@ -290,8 +291,6 @@ const InnerDistributionsChart: FC<{
     ]
   );
 
-  const { outerRef, ref } = useYogaCanvas(chart, { init: initCursor });
-
   return (
     <MouseTooltip
       isOpen={!!discreteTooltip}
@@ -325,13 +324,7 @@ const InnerDistributionsChart: FC<{
       }
     >
       <div ref={outerRef}>
-        <canvas
-          data-testid="multi-distribution-chart"
-          className={canvasClasses}
-          ref={ref}
-        >
-          Distribution plot
-        </canvas>
+        <ReactCanvas alt="Distributions plot"></ReactCanvas>
       </div>
     </MouseTooltip>
   );
