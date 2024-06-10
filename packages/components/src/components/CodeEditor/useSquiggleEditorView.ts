@@ -64,12 +64,10 @@ export function useSquiggleEditorExtensions(
    * We still have to run all `use.*Extension` hooks every time, because they set up `useEffect` hooks.
    * After the initial render, the extensions are re-configured through `useEffect` on props changes.
    */
-
   const reactPropsField = useReactPropsField(
     {
       simulation: params.simulation ?? null,
       onFocusByPath: params.onFocusByPath ?? null,
-      errors: params.errors ?? null,
       showGutter: params.showGutter ?? false,
       lineWrapping: params.lineWrapping ?? true,
     },

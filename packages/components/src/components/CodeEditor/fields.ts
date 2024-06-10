@@ -2,14 +2,13 @@ import { Facet, StateEffect, StateField } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { useEffect, useState } from "react";
 
-import { SqError, SqValuePath } from "@quri/squiggle-lang";
+import { SqValuePath } from "@quri/squiggle-lang";
 
 import { Simulation } from "../../lib/hooks/useSimulator.js";
 
 type ReactProps = {
   simulation: Simulation | null;
   onFocusByPath: ((path: SqValuePath) => void) | null;
-  errors: SqError[] | null;
   showGutter: boolean;
   lineWrapping: boolean;
 };
@@ -19,7 +18,6 @@ export const reactPropsField = StateField.define<ReactProps>({
   create: () => ({
     simulation: null,
     onFocusByPath: null,
-    errors: null,
     showGutter: false,
     lineWrapping: true,
   }),
@@ -60,14 +58,11 @@ const onFocusByPathFacet = makeReactPropFacet("onFocusByPath");
 
 const simulationFacet = makeReactPropFacet("simulation");
 
-const errorsFacet = makeReactPropFacet("errors");
-
 const showGutterFacet = makeReactPropFacet("showGutter");
 
 const lineWrappingFacet = makeReactPropFacet("lineWrapping");
 
 export {
-  errorsFacet,
   lineWrappingFacet,
   onFocusByPathFacet,
   showGutterFacet,

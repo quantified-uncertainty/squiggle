@@ -1,10 +1,4 @@
-import {
-  forwardRef,
-  ReactNode,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-} from "react";
+import { forwardRef, ReactNode, useImperativeHandle, useRef } from "react";
 
 import { SqProject } from "@quri/squiggle-lang";
 import {
@@ -18,7 +12,7 @@ import {
 } from "@quri/ui";
 
 import { isSimulating, Simulation } from "../../../lib/hooks/useSimulator.js";
-import { altKey, simulationErrors } from "../../../lib/utility.js";
+import { altKey } from "../../../lib/utility.js";
 import {
   CodeEditor,
   CodeEditorHandle,
@@ -62,11 +56,6 @@ export type LeftPlaygroundPanelHandle = {
 
 export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
   function LeftPlaygroundPanel(props, ref) {
-    const errors = useMemo(
-      () => simulationErrors(props.simulation),
-      [props.simulation]
-    );
-
     const editorRef = useRef<CodeEditorHandle>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -135,7 +124,6 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           // it's important to pass `code` and not `defaultCode` here;
           // see https://github.com/quantified-uncertainty/squiggle/issues/1952
           defaultValue={props.code}
-          errors={errors}
           height="100%"
           project={props.project}
           simulation={props.simulation}

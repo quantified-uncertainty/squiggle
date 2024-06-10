@@ -1,11 +1,6 @@
 import { forwardRef, ReactNode, useImperativeHandle } from "react";
 
-import {
-  SqError,
-  SqLocation,
-  SqProject,
-  SqValuePath,
-} from "@quri/squiggle-lang";
+import { SqLocation, SqProject, SqValuePath } from "@quri/squiggle-lang";
 
 import { Simulation } from "../../lib/hooks/useSimulator.js";
 import { formatSquiggle } from "./formatSquiggleExtension.js";
@@ -20,7 +15,6 @@ export type CodeEditorProps = {
   width?: number;
   height?: number | string;
   lineWrapping?: boolean;
-  errors?: SqError[];
   sourceId: string;
   fontSize?: number;
   showGutter?: boolean;

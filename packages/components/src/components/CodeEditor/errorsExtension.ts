@@ -1,15 +1,28 @@
 import { linter } from "@codemirror/lint";
-import { Extension } from "@codemirror/state";
+import { Extension, Facet } from "@codemirror/state";
 
-import { SqCompileError, SqRuntimeError } from "@quri/squiggle-lang";
+import { SqCompileError, SqError, SqRuntimeError } from "@quri/squiggle-lang";
 
-import { errorsFacet, reactPropsEffect } from "./fields.js";
+import { Simulation } from "../../lib/hooks/useSimulator.js";
+import { simulationErrors } from "../../lib/utility.js";
+import { reactPropsEffect, simulationFacet } from "./fields.js";
+
+const errorsFacet = Facet.define<Simulation | null, SqError[]>({
+  combine: (value) => {
+    if (!value.length || !value[0]) return [];
+    const simulation = value[0];
+    return simulationErrors(simulation);
+  },
+});
 
 export function errorsExtension(): Extension {
   return [
+    errorsFacet.compute([simulationFacet.facet], (state) =>
+      state.facet(simulationFacet.facet)
+    ),
     linter(
       (view) => {
-        const errors = view.state.facet(errorsFacet.facet) ?? [];
+        const errors = view.state.facet(errorsFacet) ?? [];
         const docLength = view.state.doc.length;
 
         const diagnostics = errors
@@ -52,6 +65,6 @@ export function errorsExtension(): Extension {
         },
       }
     ),
-    errorsFacet.extension,
+    simulationFacet.extension,
   ];
 }
