@@ -12,8 +12,11 @@ import {
   useViewerContext,
 } from "../SquiggleViewer/ViewerProvider.js";
 import { FnDocumentation } from "../ui/FnDocumentation.js";
-import { useReactiveExtension } from "./codemirrorHooks.js";
-import { CodeEditorProps } from "./index.js";
+import {
+  projectFacet,
+  renderImportTooltipFacet,
+  sourceIdFacet,
+} from "./fields.js";
 import { reactAsDom } from "./utils.js";
 
 type Hover = NonNullable<ReturnType<typeof getFunctionDocumentation>>;
@@ -80,14 +83,26 @@ function nodeTooltip(syntaxNode: SyntaxNode, reactNode: ReactNode) {
   };
 }
 
-// Based on https://codemirror.net/examples/tooltip/#hover-tooltips
-// See also: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_hover
-function buildTooltipExtension({
-  project,
-  sourceId,
-  renderImportTooltip,
-}: Pick<CodeEditorProps, "project" | "sourceId" | "renderImportTooltip">) {
-  return hoverTooltip((view, pos, side) => {
+const tooltipTheme = EditorView.baseTheme({
+  ".cm-tooltip-hover": {
+    backgroundColor: "white !important",
+    border: "0 !important",
+  },
+  ".cm-tooltip-section": {
+    height: "100%", // necessary for scrolling, see also: "h-full" in `TooltipBox`
+  },
+});
+
+export function tooltipsExtension() {
+  // Based on https://codemirror.net/examples/tooltip/#hover-tooltips
+  // See also: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_hover
+  const hoverExtension = hoverTooltip((view, pos, side) => {
+    const renderImportTooltip = view.state.facet(
+      renderImportTooltipFacet.facet
+    );
+    const project = view.state.facet(projectFacet.facet);
+    const sourceId = view.state.facet(sourceIdFacet.facet);
+
     const { doc } = view.state;
 
     const tree = syntaxTree(view.state);
@@ -182,32 +197,6 @@ function buildTooltipExtension({
 
     return null;
   });
-}
 
-const tooltipTheme = EditorView.baseTheme({
-  ".cm-tooltip-hover": {
-    backgroundColor: "white !important",
-    border: "0 !important",
-  },
-  ".cm-tooltip-section": {
-    height: "100%", // necessary for scrolling, see also: "h-full" in `TooltipBox`
-  },
-});
-
-export function useTooltipsExtension(
-  view: EditorView | undefined,
-  {
-    project,
-    sourceId,
-    renderImportTooltip,
-  }: Pick<CodeEditorProps, "project" | "sourceId" | "renderImportTooltip">
-) {
-  return useReactiveExtension(
-    view,
-    () => [
-      buildTooltipExtension({ project, sourceId, renderImportTooltip }),
-      tooltipTheme,
-    ],
-    [project, sourceId, renderImportTooltip]
-  );
+  return [hoverExtension, tooltipTheme];
 }

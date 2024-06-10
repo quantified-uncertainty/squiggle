@@ -1,4 +1,5 @@
 import {
+  Compartment,
   EditorState,
   Extension,
   Facet,
@@ -40,4 +41,33 @@ export function dispatchOnFacetsChange<T extends unknown[]>(
     }
     return action(values);
   });
+}
+
+/**
+ * Creates an extension with dynamic configuration based on a list of facets.
+ *
+ * Whenever the facet values change, the extension will be reconfigured.
+ *
+ * Note that this function creates a new anonymous compartment every time it's called, so you should call it just once during the initial configuration.
+ */
+export function extensionFromFacets<T extends unknown[]>({
+  facets,
+  makeExtension,
+  initialValues,
+}: {
+  facets: { [Index in keyof T]: Facet<T[Index], unknown> };
+  makeExtension: (values: T) => Extension;
+  initialValues: T;
+}) {
+  const compartment = new Compartment();
+
+  return [
+    dispatchOnFacetsChange<T>(
+      (values) => ({
+        effects: compartment.reconfigure(makeExtension(values)),
+      }),
+      facets
+    ),
+    compartment.of(makeExtension(initialValues)),
+  ];
 }

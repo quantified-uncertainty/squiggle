@@ -12,7 +12,6 @@ export type CodeEditorProps = {
   onSubmit?: () => void;
   // can be used as a hotkey (Cmd+Option+V, see `useViewNodeExtension`) or as an action for gutter markers
   onFocusByPath?: (path: SqValuePath) => void;
-  width?: number;
   height?: number | string;
   lineWrapping?: boolean;
   sourceId: string;
