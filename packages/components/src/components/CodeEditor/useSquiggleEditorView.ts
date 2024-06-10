@@ -32,7 +32,7 @@ import {
   useConfigureCodemirrorView,
 } from "./codemirrorHooks.js";
 import { errorsExtension } from "./errorsExtension.js";
-import { errorsField, onFocusByPathField, simulationField } from "./fields.js";
+import { errorsFacet, useReactPropsField } from "./fields.js";
 import { formatSquiggleExtension } from "./formatSquiggleExtension.js";
 import { CodeEditorProps } from "./index.js";
 import { lightThemeHighlightingStyle } from "./languageSupport/highlightingStyle.js";
@@ -46,6 +46,15 @@ import { useTooltipsExtension } from "./useTooltipsExtension.js";
 import { useViewNodeExtension } from "./useViewNodeExtension.js";
 import { useWidthHeightExtension } from "./useWidthHeightExtension.js";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function debugExtension() {
+  // Print state or specific fields on changes.
+  return EditorView.updateListener.of(({ state }) => {
+    // eslint-disable-next-line no-console
+    console.log(state.facet(errorsFacet.facet));
+  });
+}
+
 export function useSquiggleEditorExtensions(
   view: EditorView | undefined,
   params: Omit<CodeEditorProps, "defaultValue">
@@ -56,16 +65,20 @@ export function useSquiggleEditorExtensions(
    * After the initial render, the extensions are re-configured through `useEffect` on props changes.
    */
 
-  simulationField.use(view, params.simulation ?? null);
-  onFocusByPathField.use(view, params.onFocusByPath ?? null);
-  const fieldExtensions = [
-    simulationField.field.init(() => params.simulation ?? null),
-    onFocusByPathField.field.init(() => params.onFocusByPath ?? null),
-  ];
-  errorsField.use(view, params.errors ?? null);
+  const reactPropsField = useReactPropsField(
+    {
+      simulation: params.simulation ?? null,
+      onFocusByPath: params.onFocusByPath ?? null,
+      errors: params.errors ?? null,
+    },
+    view
+  );
 
   const builtinExtensions = useMemo(
     () => [
+      // uncomment for local debugging:
+      // debugExtension(),
+      reactPropsField,
       highlightSpecialChars(),
       history(),
       drawSelection(),
@@ -142,7 +155,6 @@ export function useSquiggleEditorExtensions(
   return [
     highPrioritySquiggleExtensions,
     builtinExtensions,
-    fieldExtensions,
     squiggleExtensions,
   ];
 }

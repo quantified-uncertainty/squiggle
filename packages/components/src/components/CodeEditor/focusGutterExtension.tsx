@@ -1,5 +1,6 @@
 import {
   EditorState,
+  Extension,
   Facet,
   RangeSet,
   RangeSetBuilder,
@@ -9,7 +10,7 @@ import { clsx } from "clsx";
 
 import { ASTNode, SqValuePath, SqValuePathEdge } from "@quri/squiggle-lang";
 
-import { onFocusByPathField, simulationField } from "./fields.js";
+import { onFocusByPathFacet, simulationFacet } from "./fields.js";
 import { reactAsDom } from "./utils.js";
 
 type MarkerDatum = {
@@ -141,11 +142,11 @@ class FocusableMarker extends GutterMarker {
 export function getMarkers(
   state: EditorState
 ): RangeSet<GutterMarker> | undefined {
-  const onFocusByPath = state.field(onFocusByPathField.field);
+  const onFocusByPath = state.facet(onFocusByPathFacet.facet);
   if (!onFocusByPath) {
     return;
   }
-  const simulation = state.field(simulationField.field);
+  const simulation = state.facet(simulationFacet.facet);
 
   const sqResult = simulation?.output;
   if (!sqResult?.ok) {
@@ -183,7 +184,7 @@ export function getMarkers(
   return markers;
 }
 
-export function focusGutterExtension() {
+export function focusGutterExtension(): Extension {
   const markersFacet = Facet.define<
     RangeSet<GutterMarker>,
     RangeSet<GutterMarker>
@@ -192,11 +193,13 @@ export function focusGutterExtension() {
   });
 
   const computedMarkers = markersFacet.compute(
-    ["doc", simulationField.field, onFocusByPathField.field],
+    ["doc", simulationFacet.facet, onFocusByPathFacet.facet],
     (state) => getMarkers(state) ?? RangeSet.of([])
   );
 
   return [
+    simulationFacet.extension,
+    onFocusByPathFacet.extension,
     computedMarkers,
     gutter({
       class: "min-w-[9px] group/gutter",

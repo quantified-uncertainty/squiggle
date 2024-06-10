@@ -1,55 +1,61 @@
-import { StateEffect, StateEffectType, StateField } from "@codemirror/state";
+import { Facet, StateEffect, StateField } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { SqError, SqValuePath } from "@quri/squiggle-lang";
 
 import { Simulation } from "../../lib/hooks/useSimulator.js";
 
-// Helper class for turning any React prop into a CodeMirror field.
-// How to use:
-// 1. Create a field once statically with `ReactiveStateField.define<T>(initialValue)`
-// 2. Use `myField.field` as a CodeMirror extension
-// 3. Call `myField.use(view, prop)` as a hook to update the field with an effect.
-class ReactiveStateField<Value> {
-  effect: StateEffectType<Value>;
-  field: StateField<Value>;
+type ReactProps = {
+  simulation: Simulation | null;
+  onFocusByPath: ((path: SqValuePath) => void) | null;
+  errors: SqError[] | null;
+};
 
-  private constructor(initialValue: Value) {
-    this.effect = StateEffect.define<Value>();
-    this.field = StateField.define<Value>({
-      create: () => initialValue,
-      update: (value, tr) => {
-        for (const e of tr.effects) if (e.is(this.effect)) value = e.value;
-        return value;
-      },
+export const reactPropsEffect = StateEffect.define<ReactProps>();
+export const reactPropsField = StateField.define<ReactProps>({
+  create: () => ({
+    simulation: null,
+    onFocusByPath: null,
+    errors: null,
+  }),
+  update: (value, tr) => {
+    for (const e of tr.effects) if (e.is(reactPropsEffect)) value = e.value;
+    return value;
+  },
+});
+
+export function useReactPropsField(
+  props: ReactProps,
+  view: EditorView | undefined
+) {
+  // init extension only once
+  const [extension] = useState(reactPropsField.init(() => props));
+
+  useEffect(() => {
+    view?.dispatch({
+      effects: reactPropsEffect.of(props),
     });
-  }
-
-  // `Value` can't include undefined; see
-  // https://codemirror.net/docs/ref/#state.StateEffect^define (We don't use
-  // position mapping so maybe it's not important right now, but might be useful
-  // in the future somehow.)
-  static define<Value>(initialValue: Value extends undefined ? never : Value) {
-    return new ReactiveStateField<Value>(initialValue);
-  }
-
-  use(view: EditorView | undefined, prop: Value) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEffect(() => {
-      view?.dispatch({
-        effects: this.effect.of(prop),
-      });
-    }, [view, prop]);
-  }
+  }, [view, props]);
+  return extension;
 }
 
-export const simulationField = ReactiveStateField.define<Simulation | null>(
-  null
-);
+function makeReactPropFacet<T extends keyof ReactProps>(field: T) {
+  const facet = Facet.define<ReactProps[T], ReactProps[T]>({
+    combine: (value) => {
+      return value[0];
+    },
+  });
 
-export const onFocusByPathField = ReactiveStateField.define<
-  ((path: SqValuePath) => void) | null
->(null);
+  const extension = facet.from(reactPropsField, (props) => props[field]);
 
-export const errorsField = ReactiveStateField.define<SqError[] | null>(null);
+  return { facet, extension };
+}
+
+const onFocusByPathFacet = makeReactPropFacet("onFocusByPath");
+
+const simulationFacet = makeReactPropFacet("simulation");
+
+const errorsFacet = makeReactPropFacet("errors");
+
+export { errorsFacet, onFocusByPathFacet, simulationFacet };
