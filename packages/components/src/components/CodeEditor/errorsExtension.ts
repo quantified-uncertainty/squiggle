@@ -1,22 +1,17 @@
-import { setDiagnostics } from "@codemirror/lint";
-import { Extension } from "@codemirror/state";
-import { EditorView } from "@codemirror/view";
-import { useEffect } from "react";
+import { linter } from "@codemirror/lint";
 
-import { SqCompileError, SqError, SqRuntimeError } from "@quri/squiggle-lang";
+import { SqCompileError, SqRuntimeError } from "@quri/squiggle-lang";
 
-export function useErrorsExtension(
-  view: EditorView | undefined,
-  errors: SqError[] | undefined = []
-) {
-  useEffect(() => {
-    if (!view) return;
-    const docLength = view.state.doc.length;
+import { errorsField } from "./fields.js";
 
-    view.dispatch(
-      setDiagnostics(
-        view.state,
-        errors
+export function errorsExtension() {
+  return [
+    linter(
+      (view) => {
+        const errors = view.state.field(errorsField.field) ?? [];
+        const docLength = view.state.doc.length;
+
+        return errors
           .map((err) => {
             if (
               !(err instanceof SqCompileError || err instanceof SqRuntimeError)
@@ -42,11 +37,12 @@ export function useErrorsExtension(
             to: err.location.end.offset,
             severity: "error",
             message: err.err.toString(),
-          }))
-      )
-    );
-  }, [view, errors]);
-
-  // fake extension
-  return [] as Extension;
+          }));
+      },
+      {
+        delay: 0,
+      }
+    ),
+    errorsField.field,
+  ];
 }

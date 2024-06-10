@@ -2,7 +2,7 @@ import { StateEffect, StateEffectType, StateField } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { useEffect } from "react";
 
-import { SqValuePath } from "@quri/squiggle-lang";
+import { SqError, SqValuePath } from "@quri/squiggle-lang";
 
 import { Simulation } from "../../lib/hooks/useSimulator.js";
 
@@ -51,3 +51,5 @@ export const simulationField = ReactiveStateField.define<Simulation | null>(
 export const onFocusByPathField = ReactiveStateField.define<
   ((path: SqValuePath) => void) | null
 >(null);
+
+export const errorsField = ReactiveStateField.define<SqError[] | null>(null);

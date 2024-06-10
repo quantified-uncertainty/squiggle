@@ -8,7 +8,7 @@ import {
 } from "@quri/squiggle-lang";
 
 import { Simulation } from "../../lib/hooks/useSimulator.js";
-import { formatSquiggle } from "./useFormatSquiggleExtension.js";
+import { formatSquiggle } from "./formatSquiggleExtension.js";
 import { useSquiggleEditorView } from "./useSquiggleEditorView.js";
 
 export type CodeEditorProps = {

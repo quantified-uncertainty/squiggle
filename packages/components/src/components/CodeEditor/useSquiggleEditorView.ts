@@ -31,12 +31,12 @@ import {
   useCodemirrorView,
   useConfigureCodemirrorView,
 } from "./codemirrorHooks.js";
-import { onFocusByPathField, simulationField } from "./fields.js";
+import { errorsExtension } from "./errorsExtension.js";
+import { errorsField, onFocusByPathField, simulationField } from "./fields.js";
+import { formatSquiggleExtension } from "./formatSquiggleExtension.js";
 import { CodeEditorProps } from "./index.js";
 import { lightThemeHighlightingStyle } from "./languageSupport/highlightingStyle.js";
 import { profilerExtension } from "./profilerExtension.js";
-import { useErrorsExtension } from "./useErrorsExtension.js";
-import { useFormatSquiggleExtension } from "./useFormatSquiggleExtension.js";
 import { useGutterExtension } from "./useGutterExtension.js";
 import { useLineWrappingExtension } from "./useLineWrappingExtension.js";
 import { useOnChangeExtension } from "./useOnChangeExtension.js";
@@ -62,6 +62,7 @@ export function useSquiggleEditorExtensions(
     simulationField.field.init(() => params.simulation ?? null),
     onFocusByPathField.field.init(() => params.onFocusByPath ?? null),
   ];
+  errorsField.use(view, params.errors ?? null);
 
   const builtinExtensions = useMemo(
     () => [
@@ -116,9 +117,6 @@ export function useSquiggleEditorExtensions(
     sourceId: params.sourceId,
   });
 
-  const formatExtension = useFormatSquiggleExtension();
-  const errorsExtension = useErrorsExtension(view, params.errors);
-
   const tooltipsExtension = useTooltipsExtension(view, {
     project: params.project,
     sourceId: params.sourceId,
@@ -134,8 +132,8 @@ export function useSquiggleEditorExtensions(
     onChangeExtension,
     widthHeightExtension,
     viewNodeExtension,
-    formatExtension,
-    errorsExtension,
+    formatSquiggleExtension(),
+    errorsExtension(),
     tooltipsExtension,
     profilerExtension(),
     squiggleLanguageExtension,
