@@ -10,6 +10,8 @@ type ReactProps = {
   simulation: Simulation | null;
   onFocusByPath: ((path: SqValuePath) => void) | null;
   errors: SqError[] | null;
+  showGutter: boolean;
+  lineWrapping: boolean;
 };
 
 export const reactPropsEffect = StateEffect.define<ReactProps>();
@@ -18,6 +20,8 @@ export const reactPropsField = StateField.define<ReactProps>({
     simulation: null,
     onFocusByPath: null,
     errors: null,
+    showGutter: false,
+    lineWrapping: true,
   }),
   update: (value, tr) => {
     for (const e of tr.effects) if (e.is(reactPropsEffect)) value = e.value;
@@ -58,4 +62,14 @@ const simulationFacet = makeReactPropFacet("simulation");
 
 const errorsFacet = makeReactPropFacet("errors");
 
-export { errorsFacet, onFocusByPathFacet, simulationFacet };
+const showGutterFacet = makeReactPropFacet("showGutter");
+
+const lineWrappingFacet = makeReactPropFacet("lineWrapping");
+
+export {
+  errorsFacet,
+  lineWrappingFacet,
+  onFocusByPathFacet,
+  showGutterFacet,
+  simulationFacet,
+};

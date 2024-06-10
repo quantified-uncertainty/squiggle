@@ -32,13 +32,13 @@ import {
   useConfigureCodemirrorView,
 } from "./codemirrorHooks.js";
 import { errorsExtension } from "./errorsExtension.js";
-import { errorsFacet, useReactPropsField } from "./fields.js";
+import { showGutterFacet, useReactPropsField } from "./fields.js";
 import { formatSquiggleExtension } from "./formatSquiggleExtension.js";
+import { gutterExtension } from "./gutter/gutterExtension.js";
 import { CodeEditorProps } from "./index.js";
 import { lightThemeHighlightingStyle } from "./languageSupport/highlightingStyle.js";
+import { lineWrappingExtension } from "./lineWrappingExtension.js";
 import { profilerExtension } from "./profilerExtension.js";
-import { useGutterExtension } from "./useGutterExtension.js";
-import { useLineWrappingExtension } from "./useLineWrappingExtension.js";
 import { useOnChangeExtension } from "./useOnChangeExtension.js";
 import { useSquiggleLanguageExtension } from "./useSquiggleLanguageExtension.js";
 import { useSubmitExtension } from "./useSubmitExtension.js";
@@ -51,7 +51,7 @@ function debugExtension() {
   // Print state or specific fields on changes.
   return EditorView.updateListener.of(({ state }) => {
     // eslint-disable-next-line no-console
-    console.log(state.facet(errorsFacet.facet));
+    console.log(state.facet(showGutterFacet.facet));
   });
 }
 
@@ -70,6 +70,8 @@ export function useSquiggleEditorExtensions(
       simulation: params.simulation ?? null,
       onFocusByPath: params.onFocusByPath ?? null,
       errors: params.errors ?? null,
+      showGutter: params.showGutter ?? false,
+      lineWrapping: params.lineWrapping ?? true,
     },
     view
   );
@@ -78,7 +80,6 @@ export function useSquiggleEditorExtensions(
     () => [
       // uncomment for local debugging:
       // debugExtension(),
-      reactPropsField,
       highlightSpecialChars(),
       history(),
       drawSelection(),
@@ -110,14 +111,6 @@ export function useSquiggleEditorExtensions(
     view,
     params.project
   );
-  const showGutterExtension = useGutterExtension(
-    view,
-    params.showGutter ?? false
-  );
-  const lineWrappingExtension = useLineWrappingExtension(
-    view,
-    params.lineWrapping ?? true
-  );
   const submitExtension = useSubmitExtension(view, params.onSubmit);
   const onChangeExtension = useOnChangeExtension(view, params.onChange);
   const widthHeightExtension = useWidthHeightExtension(view, {
@@ -140,8 +133,8 @@ export function useSquiggleEditorExtensions(
     submitExtension, // works only if listed before `builtinExtensions`
   ];
   const squiggleExtensions = [
-    showGutterExtension,
-    lineWrappingExtension,
+    gutterExtension(params.showGutter ?? false),
+    lineWrappingExtension(params.lineWrapping ?? true),
     onChangeExtension,
     widthHeightExtension,
     viewNodeExtension,
@@ -154,6 +147,7 @@ export function useSquiggleEditorExtensions(
 
   return [
     highPrioritySquiggleExtensions,
+    reactPropsField,
     builtinExtensions,
     squiggleExtensions,
   ];

@@ -10,8 +10,8 @@ import { clsx } from "clsx";
 
 import { ASTNode, SqValuePath, SqValuePathEdge } from "@quri/squiggle-lang";
 
-import { onFocusByPathFacet, simulationFacet } from "./fields.js";
-import { reactAsDom } from "./utils.js";
+import { onFocusByPathFacet, simulationFacet } from "../fields.js";
+import { reactAsDom } from "../utils.js";
 
 type MarkerDatum = {
   path: SqValuePath;
