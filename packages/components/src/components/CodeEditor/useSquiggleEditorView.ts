@@ -124,7 +124,7 @@ export function useSquiggleEditorExtensions(
       formatSquiggleExtension(),
       errorsExtension(),
       profilerExtension(),
-      squiggleLanguageExtension(),
+      squiggleLanguageExtension(params.renderImportTooltip ?? null),
       themeExtension({
         height: params.height,
       }),

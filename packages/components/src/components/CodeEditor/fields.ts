@@ -6,7 +6,7 @@ import { SqProject, SqValuePath } from "@quri/squiggle-lang";
 
 import { Simulation } from "../../lib/hooks/useSimulator.js";
 
-type ReactProps = {
+export type CodemirrorReactProps = {
   // Similar to React props for CodeEditor, but with null values; CodeMirror doesn't like `undefined` values.
   // TODO - it should be possible to auto-generate this type with some clever TypeScript.
   simulation: Simulation | null;
@@ -23,7 +23,7 @@ type ReactProps = {
     | null;
 };
 
-const defaultReactProps: ReactProps = {
+const defaultReactProps: CodemirrorReactProps = {
   simulation: null,
   onFocusByPath: null,
   showGutter: false,
@@ -36,8 +36,8 @@ const defaultReactProps: ReactProps = {
   renderImportTooltip: null,
 };
 
-function makeReactPropFacet<T extends keyof ReactProps>(field: T) {
-  return Facet.define<ReactProps[T], ReactProps[T]>({
+function makeReactPropFacet<T extends keyof CodemirrorReactProps>(field: T) {
+  return Facet.define<CodemirrorReactProps[T], CodemirrorReactProps[T]>({
     combine: (value) => {
       return value.length ? value[0] : defaultReactProps[field];
     },
@@ -69,13 +69,13 @@ export const renderImportTooltipFacet = makeReactPropFacet(
 // Note: any new facet must have a matching extension in `useReactPropsField` result below.
 
 export function useReactPropsField(
-  props: ReactProps,
+  props: CodemirrorReactProps,
   view: EditorView | undefined
 ) {
   // init extension only once - further updates to `props` will be handled through `useEffect`.
   const [{ field, fieldExtension, effectType }] = useState(() => {
-    const effectType = StateEffect.define<ReactProps>();
-    const reactPropsField = StateField.define<ReactProps>({
+    const effectType = StateEffect.define<CodemirrorReactProps>();
+    const reactPropsField = StateField.define<CodemirrorReactProps>({
       create: () => defaultReactProps,
       update: (value, tr) => {
         for (const e of tr.effects) if (e.is(effectType)) value = e.value;
@@ -99,8 +99,8 @@ export function useReactPropsField(
   }, [view, effectType, props]);
 
   // Generics here help to prevent typos in calls to this function.
-  const defineFacet = <T extends keyof ReactProps>(
-    facet: Facet<unknown, ReactProps[T]>,
+  const defineFacet = <T extends keyof CodemirrorReactProps>(
+    facet: Facet<unknown, CodemirrorReactProps[T]>,
     fieldName: T
   ) => {
     return facet.from(

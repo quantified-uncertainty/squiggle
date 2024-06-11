@@ -1,10 +1,12 @@
 import { getStyleTags, Tag, tags } from "@lezer/highlight";
 
 import { hoverableTag } from "../src/components/CodeEditor/languageSupport/highlightingStyle.js";
-import { parserWithMetadata } from "../src/components/CodeEditor/languageSupport/index.js";
+import { getLezerParser } from "../src/components/CodeEditor/languageSupport/index.js";
+
+const parser = getLezerParser({ hoverableImports: true });
 
 function testTagsAtPosition(code: string, pos: number, tags: Tag[]) {
-  const parsed = parserWithMetadata.parse(code);
+  const parsed = parser.parse(code);
   const rule = getStyleTags(parsed.cursorAt(pos, 1));
   expect(rule?.tags).toEqual(tags);
 }
