@@ -12,7 +12,7 @@ import { focusGutterExtension } from "./focusGutterExtension.js";
 export function gutterExtension(initialShowGutter: boolean) {
   return [
     extensionFromFacets({
-      facets: [showGutterFacet.facet],
+      facets: [showGutterFacet],
       initialValues: [initialShowGutter],
       makeExtension: ([showGutter]) =>
         showGutter
@@ -25,6 +25,5 @@ export function gutterExtension(initialShowGutter: boolean) {
             ]
           : [],
     }),
-    showGutterFacet.extension,
   ];
 }

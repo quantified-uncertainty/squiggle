@@ -5,20 +5,20 @@ import { SqCompileError, SqError, SqRuntimeError } from "@quri/squiggle-lang";
 
 import { Simulation } from "../../lib/hooks/useSimulator.js";
 import { simulationErrors } from "../../lib/utility.js";
-import { reactPropsEffect, simulationFacet } from "./fields.js";
-
-const errorsFacet = Facet.define<Simulation | null, SqError[]>({
-  combine: (value) => {
-    if (!value.length || !value[0]) return [];
-    const simulation = value[0];
-    return simulationErrors(simulation);
-  },
-});
+import { simulationFacet } from "./fields.js";
 
 export function errorsExtension(): Extension {
+  const errorsFacet = Facet.define<Simulation | null, SqError[]>({
+    combine: (value) => {
+      if (!value.length || !value[0]) return [];
+      const simulation = value[0];
+      return simulationErrors(simulation);
+    },
+  });
+
   return [
-    errorsFacet.compute([simulationFacet.facet], (state) =>
-      state.facet(simulationFacet.facet)
+    errorsFacet.compute([simulationFacet], (state) =>
+      state.facet(simulationFacet)
     ),
     linter(
       (view) => {
@@ -56,15 +56,9 @@ export function errorsExtension(): Extension {
       },
       {
         delay: 0,
-        needsRefresh: ({ transactions }) => {
-          // When the new react props arrive (including `errors` field), it's applied in `useEffect` and then becomes available through facet.
-          for (const tr of transactions) {
-            for (const e of tr.effects) if (e.is(reactPropsEffect)) return true;
-          }
-          return false;
-        },
+        needsRefresh: ({ startState, state }) =>
+          startState.facet(errorsFacet) !== state.facet(errorsFacet),
       }
     ),
-    simulationFacet.extension,
   ];
 }

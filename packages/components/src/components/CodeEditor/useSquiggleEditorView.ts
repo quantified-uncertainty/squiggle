@@ -51,7 +51,7 @@ function debugExtension() {
   // Print state or specific fields on changes.
   return EditorView.updateListener.of(({ state }) => {
     // eslint-disable-next-line no-console
-    console.log(state.facet(showGutterFacet.facet));
+    console.log(state.facet(showGutterFacet));
   });
 }
 
@@ -124,7 +124,7 @@ export function useSquiggleEditorExtensions(
       formatSquiggleExtension(),
       errorsExtension(),
       profilerExtension(),
-      squiggleLanguageExtension(params.project),
+      squiggleLanguageExtension(),
       themeExtension({
         height: params.height,
       }),

@@ -142,11 +142,11 @@ class FocusableMarker extends GutterMarker {
 export function getMarkers(
   state: EditorState
 ): RangeSet<GutterMarker> | undefined {
-  const onFocusByPath = state.facet(onFocusByPathFacet.facet);
+  const onFocusByPath = state.facet(onFocusByPathFacet);
   if (!onFocusByPath) {
     return;
   }
-  const simulation = state.facet(simulationFacet.facet);
+  const simulation = state.facet(simulationFacet);
 
   const sqResult = simulation?.output;
   if (!sqResult?.ok) {
@@ -193,13 +193,11 @@ export function focusGutterExtension(): Extension {
   });
 
   const computedMarkers = markersFacet.compute(
-    ["doc", simulationFacet.facet, onFocusByPathFacet.facet],
+    ["doc", simulationFacet, onFocusByPathFacet],
     (state) => getMarkers(state) ?? RangeSet.of([])
   );
 
   return [
-    simulationFacet.extension,
-    onFocusByPathFacet.extension,
     computedMarkers,
     gutter({
       class: "min-w-[9px] group/gutter",

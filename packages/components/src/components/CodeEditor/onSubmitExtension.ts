@@ -7,7 +7,7 @@ export function onSubmitExtension() {
     {
       key: "Mod-Enter",
       run: (view) => {
-        view.state.facet(onSubmitFacet.facet)?.();
+        view.state.facet(onSubmitFacet)?.();
         return true;
       },
     },

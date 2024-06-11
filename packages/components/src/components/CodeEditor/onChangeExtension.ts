@@ -7,7 +7,7 @@ export function onChangeExtension() {
     if (!update.docChanged) {
       return;
     }
-    const onChange = update.state.facet(onChangeFacet.facet);
+    const onChange = update.state.facet(onChangeFacet);
     onChange(update.state.doc.toString());
   });
 }

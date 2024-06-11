@@ -5,11 +5,14 @@ import {
   LanguageSupport,
   LRLanguage,
 } from "@codemirror/language";
+import { Extension } from "@codemirror/state";
 import { styleTags, tags as t } from "@lezer/highlight";
 
-import { SqProject } from "@quri/squiggle-lang";
-
-import { makeCompletionSource } from "./autocomplete.js";
+import { projectFacet } from "../fields.js";
+import {
+  builtinCompletionsFacet,
+  makeCompletionSource,
+} from "./autocomplete.js";
 import { parser } from "./generated/squiggle.js";
 
 const parserWithMetadata = parser.configure({
@@ -67,21 +70,26 @@ const parserWithMetadata = parser.configure({
   ],
 });
 
-export function squiggleLanguageSupport(project: SqProject) {
-  return new LanguageSupport(
-    LRLanguage.define({
-      name: "squiggle",
-      parser: parserWithMetadata,
-      languageData: {
-        commentTokens: {
-          line: "//",
+export function squiggleLanguageSupport(): Extension {
+  return [
+    new LanguageSupport(
+      LRLanguage.define({
+        name: "squiggle",
+        parser: parserWithMetadata,
+        languageData: {
+          commentTokens: {
+            line: "//",
+          },
+          autocomplete: makeCompletionSource(),
+          closeBrackets: {
+            brackets: ['"', "'", "(", "{"],
+          },
         },
-        autocomplete: makeCompletionSource(project),
-        closeBrackets: {
-          brackets: ['"', "'", "(", "{"],
-        },
-      },
-    }),
-    []
-  );
+      }),
+      []
+    ),
+    builtinCompletionsFacet.compute([projectFacet], (state) =>
+      state.facet(projectFacet)
+    ),
+  ];
 }

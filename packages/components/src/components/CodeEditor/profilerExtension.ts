@@ -17,9 +17,9 @@ export function profilerExtension(): Extension {
   const empty = RangeSet.of<Decoration>([]);
 
   const decorations = EditorView.decorations.compute(
-    ["doc", simulationFacet.facet],
+    ["doc", simulationFacet],
     (state) => {
-      const simulation = state.facet(simulationFacet.facet);
+      const simulation = state.facet(simulationFacet);
       if (!simulation) {
         return empty;
       }

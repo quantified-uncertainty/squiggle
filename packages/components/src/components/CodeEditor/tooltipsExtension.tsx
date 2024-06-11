@@ -97,11 +97,9 @@ export function tooltipsExtension() {
   // Based on https://codemirror.net/examples/tooltip/#hover-tooltips
   // See also: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_hover
   const hoverExtension = hoverTooltip((view, pos, side) => {
-    const renderImportTooltip = view.state.facet(
-      renderImportTooltipFacet.facet
-    );
-    const project = view.state.facet(projectFacet.facet);
-    const sourceId = view.state.facet(sourceIdFacet.facet);
+    const renderImportTooltip = view.state.facet(renderImportTooltipFacet);
+    const project = view.state.facet(projectFacet);
+    const sourceId = view.state.facet(sourceIdFacet);
 
     const { doc } = view.state;
 

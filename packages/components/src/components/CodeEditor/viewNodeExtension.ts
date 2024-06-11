@@ -7,9 +7,9 @@ export function viewNodeExtension() {
     {
       key: "Alt-Shift-v",
       run: (view) => {
-        const onFocusByPath = view.state.facet(onFocusByPathFacet.facet);
-        const sourceId = view.state.facet(sourceIdFacet.facet);
-        const project = view.state.facet(projectFacet.facet);
+        const onFocusByPath = view.state.facet(onFocusByPathFacet);
+        const sourceId = view.state.facet(sourceIdFacet);
+        const project = view.state.facet(projectFacet);
 
         if (!onFocusByPath) {
           return true;

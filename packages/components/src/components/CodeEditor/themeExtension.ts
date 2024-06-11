@@ -7,7 +7,7 @@ export function themeExtension(initial: {
   height: number | string | undefined;
 }) {
   return extensionFromFacets({
-    facets: [heightFacet.facet],
+    facets: [heightFacet],
     initialValues: [initial.height ?? null],
     makeExtension: ([height]) =>
       EditorView.theme({

@@ -7,6 +7,8 @@ import { SqProject, SqValuePath } from "@quri/squiggle-lang";
 import { Simulation } from "../../lib/hooks/useSimulator.js";
 
 type ReactProps = {
+  // Similar to React props for CodeEditor, but with null values; CodeMirror doesn't like `undefined` values.
+  // TODO - it should be possible to auto-generate this type with some clever TypeScript.
   simulation: Simulation | null;
   onFocusByPath: ((path: SqValuePath) => void) | null;
   onChange: (value: string) => void;
@@ -34,78 +36,92 @@ const defaultReactProps: ReactProps = {
   renderImportTooltip: null,
 };
 
-export const reactPropsEffect = StateEffect.define<ReactProps>();
-export const reactPropsField = StateField.define<ReactProps>({
-  create: () => defaultReactProps,
-  update: (value, tr) => {
-    for (const e of tr.effects) if (e.is(reactPropsEffect)) value = e.value;
-    return value;
-  },
-});
-
 function makeReactPropFacet<T extends keyof ReactProps>(field: T) {
-  const facet = Facet.define<ReactProps[T], ReactProps[T]>({
+  return Facet.define<ReactProps[T], ReactProps[T]>({
     combine: (value) => {
       return value.length ? value[0] : defaultReactProps[field];
     },
   });
-
-  const extension = facet.from(reactPropsField, (props) => {
-    return props[field] ?? defaultReactProps[field];
-  });
-
-  return { facet, extension };
 }
 
-const onFocusByPathFacet = makeReactPropFacet("onFocusByPath");
-const simulationFacet = makeReactPropFacet("simulation");
-const showGutterFacet = makeReactPropFacet("showGutter");
-const lineWrappingFacet = makeReactPropFacet("lineWrapping");
-const projectFacet = makeReactPropFacet("project");
-const heightFacet = makeReactPropFacet("height");
-const onChangeFacet = makeReactPropFacet("onChange");
-const onSubmitFacet = makeReactPropFacet("onSubmit");
-const sourceIdFacet = makeReactPropFacet("sourceId");
-const renderImportTooltipFacet = makeReactPropFacet("renderImportTooltip");
-
-export {
-  heightFacet,
-  lineWrappingFacet,
-  onChangeFacet,
-  onFocusByPathFacet,
-  onSubmitFacet,
-  projectFacet,
-  renderImportTooltipFacet,
-  showGutterFacet,
-  simulationFacet,
-  sourceIdFacet,
-};
+/**
+ * These facets are derived from the single
+ * [StateField](https://codemirror.net/docs/ref/#state.StateEffect) defined by
+ * `useReactPropsField` below.
+ *
+ * Alternatively, we could model them as separate fields. This would simplify
+ * some things (we don't really use aggregational capabilities of facets), but
+ * it would complicate other things (we'd have to call `useEffect` once per
+ * field). I'm not sure which approach is better.
+ */
+export const onFocusByPathFacet = makeReactPropFacet("onFocusByPath");
+export const simulationFacet = makeReactPropFacet("simulation");
+export const showGutterFacet = makeReactPropFacet("showGutter");
+export const lineWrappingFacet = makeReactPropFacet("lineWrapping");
+export const projectFacet = makeReactPropFacet("project");
+export const heightFacet = makeReactPropFacet("height");
+export const onChangeFacet = makeReactPropFacet("onChange");
+export const onSubmitFacet = makeReactPropFacet("onSubmit");
+export const sourceIdFacet = makeReactPropFacet("sourceId");
+export const renderImportTooltipFacet = makeReactPropFacet(
+  "renderImportTooltip"
+);
+// Note: any new facet must have a matching extension in `useReactPropsField` result below.
 
 export function useReactPropsField(
   props: ReactProps,
   view: EditorView | undefined
 ) {
-  // init extension only once
-  const [extension] = useState(reactPropsField.init(() => props));
+  // init extension only once - further updates to `props` will be handled through `useEffect`.
+  const [{ field, fieldExtension, effectType }] = useState(() => {
+    const effectType = StateEffect.define<ReactProps>();
+    const reactPropsField = StateField.define<ReactProps>({
+      create: () => defaultReactProps,
+      update: (value, tr) => {
+        for (const e of tr.effects) if (e.is(effectType)) value = e.value;
+        return value;
+      },
+    });
 
+    return {
+      fieldExtension: reactPropsField.init(() => props),
+      effectType: effectType,
+      field: reactPropsField,
+    };
+  });
+
+  // When any prop changes, we update the entire field.
+  // Note that specific facets will be updated only if the prop actually has changed.
   useEffect(() => {
     view?.dispatch({
-      effects: reactPropsEffect.of(props),
+      effects: effectType.of(props),
     });
-  }, [view, props]);
+  }, [view, effectType, props]);
+
+  // Generics here help to prevent typos in calls to this function.
+  const defineFacet = <T extends keyof ReactProps>(
+    facet: Facet<unknown, ReactProps[T]>,
+    fieldName: T
+  ) => {
+    return facet.from(
+      field,
+      (props) => props[fieldName] ?? defaultReactProps[fieldName]
+    );
+  };
+
   return [
-    extension,
+    fieldExtension,
     [
-      heightFacet.extension,
-      lineWrappingFacet.extension,
-      onChangeFacet.extension,
-      onFocusByPathFacet.extension,
-      onSubmitFacet.extension,
-      projectFacet.extension,
-      showGutterFacet.extension,
-      simulationFacet.extension,
-      sourceIdFacet.extension,
-      renderImportTooltipFacet.extension,
+      defineFacet(heightFacet, "height"),
+      defineFacet(lineWrappingFacet, "lineWrapping"),
+      defineFacet(onChangeFacet, "onChange"),
+      defineFacet(onFocusByPathFacet, "onFocusByPath"),
+      defineFacet(onSubmitFacet, "onSubmit"),
+      defineFacet(projectFacet, "project"),
+      defineFacet(showGutterFacet, "showGutter"),
+      defineFacet(simulationFacet, "simulation"),
+      defineFacet(sourceIdFacet, "sourceId"),
+      defineFacet(renderImportTooltipFacet, "renderImportTooltip"),
     ],
   ];
 }
