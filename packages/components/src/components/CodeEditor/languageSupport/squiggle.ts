@@ -14,8 +14,9 @@ import {
   makeCompletionSource,
 } from "./autocomplete.js";
 import { parser } from "./generated/squiggle.js";
+import { hoverableTag } from "./highlightingStyle.js";
 
-const parserWithMetadata = parser.configure({
+export const parserWithMetadata = parser.configure({
   props: [
     styleTags({
       "if then else import export as": t.keyword,
@@ -44,6 +45,10 @@ const parserWithMetadata = parser.configure({
       At: t.keyword,
 
       VariableName: t.constant(t.variableName),
+      "Import/*/VariableName Program/*/LetStatement/VariableName": [
+        hoverableTag,
+        t.constant(t.variableName),
+      ],
       Identifier: t.variableName,
       Field: t.variableName,
       LambdaParameterName: t.variableName,
@@ -70,26 +75,24 @@ const parserWithMetadata = parser.configure({
   ],
 });
 
+export const squiggleLanguage = LRLanguage.define({
+  name: "squiggle",
+  parser: parserWithMetadata,
+  languageData: {
+    commentTokens: {
+      line: "//",
+    },
+    autocomplete: makeCompletionSource(),
+    closeBrackets: {
+      brackets: ['"', "'", "(", "{"],
+    },
+  },
+});
+
 export function squiggleLanguageSupport(): Extension {
-  return [
-    new LanguageSupport(
-      LRLanguage.define({
-        name: "squiggle",
-        parser: parserWithMetadata,
-        languageData: {
-          commentTokens: {
-            line: "//",
-          },
-          autocomplete: makeCompletionSource(),
-          closeBrackets: {
-            brackets: ['"', "'", "(", "{"],
-          },
-        },
-      }),
-      []
-    ),
+  return new LanguageSupport(squiggleLanguage, [
     builtinCompletionsFacet.compute([projectFacet], (state) =>
       state.facet(projectFacet)
     ),
-  ];
+  ]);
 }

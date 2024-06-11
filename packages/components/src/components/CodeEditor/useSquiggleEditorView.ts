@@ -43,7 +43,7 @@ import { onChangeExtension } from "./onChangeExtension.js";
 import { onSubmitExtension } from "./onSubmitExtension.js";
 import { profilerExtension } from "./profilerExtension.js";
 import { themeExtension } from "./themeExtension.js";
-import { tooltipsExtension } from "./tooltipsExtension.js";
+import { tooltipsExtension } from "./tooltips/index.js";
 import { viewNodeExtension } from "./viewNodeExtension.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

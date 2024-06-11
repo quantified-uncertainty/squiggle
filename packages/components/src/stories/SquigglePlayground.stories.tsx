@@ -248,6 +248,22 @@ export varScatter = Plot.scatter({
   },
 };
 
+export const ImportsWithTooltips: Story = {
+  args: {
+    linker,
+    defaultCode: `import "hub:source1" as s1
+import "source2" as s2
+
+x = s1
+`,
+    renderImportTooltip: ({ importId }) => (
+      <div className="p-2">
+        <span className="font-medium text-slate-500">Import:</span> {importId}
+      </div>
+    ),
+  },
+};
+
 export const SpecialList: Story = {
   name: "List Notebook",
   args: {

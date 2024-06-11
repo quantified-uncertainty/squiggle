@@ -1,20 +1,23 @@
 import { HighlightStyle } from "@codemirror/language";
-import { tags } from "@lezer/highlight";
+import { Tag, tags } from "@lezer/highlight";
+import clsx from "clsx";
 
-const numbers = "#001063";
-const names = "#00746a";
-const operators = "#341d0e";
-const invalid = "#000000";
-const separators = "#2a2111";
-const comments = "#60553f";
-const variables = "#822500";
-const strings = "#9b2d00";
-const escapes = "#e10303";
-const constants = "#003e7b";
-const keywords = "#096600";
+/**
+ * We use Tailwind classes for all styling, for consistency.
+ *
+ * This scheme uses many custom colors. We should either replace them
+ * with tailwind colors, or move them to tailwind theme.
+ */
+
+const names = "text-[#00746a]";
+const comments = "text-[#60553f]";
+const constants = "text-[#003e7b]";
+const variable = "text-[#822500]";
+
+export const hoverableTag = Tag.define();
 
 export const lightThemeHighlightingStyle = HighlightStyle.define([
-  { tag: tags.keyword, fontWeight: "bold", color: keywords },
+  { tag: tags.keyword, class: "font-bold text-[#096600]" },
   {
     tag: [
       tags.name,
@@ -23,7 +26,7 @@ export const lightThemeHighlightingStyle = HighlightStyle.define([
       tags.propertyName,
       tags.macroName,
     ],
-    color: names,
+    class: names,
   },
   {
     tag: [
@@ -31,13 +34,20 @@ export const lightThemeHighlightingStyle = HighlightStyle.define([
       tags.constant(tags.variableName),
       tags.labelName,
     ],
-    color: variables,
+    class: variable,
+  },
+  {
+    tag: hoverableTag,
+    class: "cursor-pointer hover:bg-slate-200",
   },
   {
     tag: [tags.color, tags.constant(tags.name), tags.standard(tags.name)],
-    color: constants,
+    class: constants,
   },
-  { tag: [tags.definition(tags.name), tags.separator], color: separators },
+  {
+    tag: [tags.definition(tags.name), tags.separator],
+    class: "text-[#2a2111]",
+  },
   {
     tag: [
       tags.typeName,
@@ -49,9 +59,9 @@ export const lightThemeHighlightingStyle = HighlightStyle.define([
       tags.self,
       tags.namespace,
     ],
-    color: numbers,
+    class: "text-[#001063]",
   },
-  { tag: tags.escape, color: escapes },
+  { tag: tags.escape, class: "text-[#e10303]" },
   {
     tag: [
       tags.operator,
@@ -61,22 +71,21 @@ export const lightThemeHighlightingStyle = HighlightStyle.define([
       tags.link,
       tags.special(tags.string),
     ],
-    fontWeight: "bold",
-    color: operators,
+    class: "font-bold text-[#341d0e]",
   },
-  { tag: tags.comment, color: comments },
-  { tag: tags.strong, fontWeight: "bold" },
-  { tag: tags.emphasis, fontStyle: "italic" },
-  { tag: tags.strikethrough, textDecoration: "line-through" },
-  { tag: tags.link, color: comments, textDecoration: "underline" },
-  { tag: tags.heading, fontWeight: "bold", color: names },
+  { tag: tags.comment, class: comments },
+  { tag: tags.strong, class: "font-bold" },
+  { tag: tags.emphasis, class: "italic" },
+  { tag: tags.strikethrough, class: "line-through" },
+  { tag: tags.link, class: clsx(comments, "underline") },
+  { tag: tags.heading, class: clsx(names, "font-bold") },
   {
     tag: [tags.atom, tags.bool, tags.special(tags.variableName)],
-    color: constants,
+    class: constants,
   },
   {
     tag: [tags.processingInstruction, tags.string, tags.inserted],
-    color: strings,
+    class: "text-[#9b2d00]",
   },
-  { tag: tags.invalid, color: invalid },
+  { tag: tags.invalid, class: "text-black" },
 ]);

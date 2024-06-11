@@ -1,78 +1,19 @@
 import { syntaxTree } from "@codemirror/language";
-import { EditorView, hoverTooltip, repositionTooltips } from "@codemirror/view";
+import { EditorView, hoverTooltip } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
-import { FC, PropsWithChildren, ReactNode, useEffect } from "react";
+import { ReactNode } from "react";
 
-import { getFunctionDocumentation, SqValue } from "@quri/squiggle-lang";
+import { getFunctionDocumentation } from "@quri/squiggle-lang";
 
-import { valueHasContext } from "../../lib/utility.js";
-import { SquiggleValueChart } from "../SquiggleViewer/SquiggleValueChart.js";
-import {
-  InnerViewerProvider,
-  useViewerContext,
-} from "../SquiggleViewer/ViewerProvider.js";
-import { FnDocumentation } from "../ui/FnDocumentation.js";
 import {
   projectFacet,
   renderImportTooltipFacet,
   sourceIdFacet,
-} from "./fields.js";
-import { reactAsDom } from "./utils.js";
-
-type Hover = NonNullable<ReturnType<typeof getFunctionDocumentation>>;
-
-const TooltipBox: FC<PropsWithChildren<{ view: EditorView }>> = ({
-  view,
-  children,
-}) => {
-  useEffect(() => {
-    // https://codemirror.net/docs/ref/#view.repositionTooltips needs to be called on each render.
-    repositionTooltips(view);
-  });
-
-  return (
-    <div className="h-full overflow-y-auto rounded-sm border shadow-lg">
-      {children}
-    </div>
-  );
-};
-
-const ValueTooltip: FC<{ value: SqValue; view: EditorView }> = ({
-  value,
-  view,
-}) => {
-  const { globalSettings } = useViewerContext();
-
-  if (valueHasContext(value)) {
-    return (
-      <TooltipBox view={view}>
-        <div className="px-4 py-1">
-          {/* Force a standalone ephemeral ViewerProvider, so that we won't sync up collapsed state with the top-level viewer */}
-          <InnerViewerProvider
-            partialPlaygroundSettings={globalSettings}
-            viewerType="tooltip"
-            rootValue={value}
-          >
-            <SquiggleValueChart value={value} settings={globalSettings} />
-          </InnerViewerProvider>
-        </div>
-      </TooltipBox>
-    );
-  } else {
-    return null; // shouldn't happen
-  }
-};
-
-const HoverTooltip: FC<{ hover: Hover; view: EditorView }> = ({
-  hover,
-  view,
-}) => (
-  <TooltipBox view={view}>
-    <div className="min-w-[200px] max-w-[600px] px-2">
-      <FnDocumentation documentation={hover} />
-    </div>
-  </TooltipBox>
-);
+} from "../fields.js";
+import { reactAsDom } from "../utils.js";
+import { HoverTooltip } from "./HoverTooltip.js";
+import { TooltipBox } from "./TooltipBox.js";
+import { ValueTooltip } from "./ValueTooltip.js";
 
 function nodeTooltip(syntaxNode: SyntaxNode, reactNode: ReactNode) {
   return {
@@ -120,14 +61,13 @@ export function tooltipsExtension() {
     switch (cursor.name) {
       case "String": {
         // Is this an import?
-        const stringNode = cursor.node;
         if (!cursor.parent()) {
           return null;
         }
-        if (cursor.type.is("Import") && renderImportTooltip) {
-          const importId = getText(stringNode).slice(1, -1);
+        if (cursor.type.is("ImportName") && renderImportTooltip) {
+          const importId = getText(cursor.node).slice(1, -1);
           return nodeTooltip(
-            stringNode,
+            cursor.node,
             <TooltipBox view={view}>
               {renderImportTooltip({ project, importId })}
             </TooltipBox>
