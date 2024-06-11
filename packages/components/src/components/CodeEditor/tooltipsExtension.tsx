@@ -155,40 +155,53 @@ export function tooltipsExtension() {
         if (!cursor.parent()) {
           return null;
         }
-        // Ascend through decorated statements.
-        while (cursor.type.is("Statement") && cursor.parent());
-
-        // Is this a top-level variable?
-        if (!cursor.type.is("Program")) {
-          return null;
-        }
 
         const name = getText(node);
+        if (cursor.type.is("Import")) {
+          const output = project.getOutput(sourceId);
+          if (!output.ok) return null;
 
-        const bindings = project.getBindings(sourceId);
-        if (!bindings.ok) return null;
+          const value = output.value.imports.get(name);
+          if (!value) return null;
 
-        const value = bindings.value.get(name);
-        if (!value) return null;
-
-        // Should be a statement
-        const valueAst = value.context?.valueAst;
-
-        if (!valueAst) {
-          return null;
-        }
-
-        if (
-          // Note that `valueAst` can't be "DecoratedStatement", we skip those in `SqValueContext` and AST symbols
-          (valueAst.type === "LetStatement" ||
-            valueAst.type === "DefunStatement") &&
-          // If these don't match then variable was probably shadowed by a later statement and we can't show its value.
-          // Or it could be caused by code rot, if we change the logic of how `valueAst` is computed, or add another statement type in AST.
-          // TODO - if we can prove that the variable was shadowed, show the tooltip pointing to the latest assignment.
-          valueAst.variable.location.start.offset === node.from &&
-          valueAst.variable.location.end.offset === node.to
-        ) {
           return nodeTooltip(node, <ValueTooltip value={value} view={view} />);
+        } else if (cursor.type.is("Statement")) {
+          // Ascend through decorated statements.
+          while (cursor.type.is("Statement") && cursor.parent());
+
+          // Is this a top-level variable?
+          if (!cursor.type.is("Program")) {
+            return null;
+          }
+
+          const bindings = project.getBindings(sourceId);
+          if (!bindings.ok) return null;
+
+          const value = bindings.value.get(name);
+          if (!value) return null;
+
+          // Should be a statement
+          const valueAst = value.context?.valueAst;
+
+          if (!valueAst) {
+            return null;
+          }
+
+          if (
+            // Note that `valueAst` can't be "DecoratedStatement", we skip those in `SqValueContext` and AST symbols
+            (valueAst.type === "LetStatement" ||
+              valueAst.type === "DefunStatement") &&
+            // If these don't match then variable was probably shadowed by a later statement and we can't show its value.
+            // Or it could be caused by code rot, if we change the logic of how `valueAst` is computed, or add another statement type in AST.
+            // TODO - if we can prove that the variable was shadowed, show the tooltip pointing to the latest assignment.
+            valueAst.variable.location.start.offset === node.from &&
+            valueAst.variable.location.end.offset === node.to
+          ) {
+            return nodeTooltip(
+              node,
+              <ValueTooltip value={value} view={view} />
+            );
+          }
         }
       }
     }

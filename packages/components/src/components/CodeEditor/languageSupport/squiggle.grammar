@@ -31,7 +31,7 @@ blockContent {
     (expression)
 }
 
-Import { import String as identifier }
+Import { import String as VariableName { identifier } }
 
 commaSep<content> {
     "" | content ("," content)*
