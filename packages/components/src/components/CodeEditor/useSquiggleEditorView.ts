@@ -37,7 +37,7 @@ import { formatSquiggleExtension } from "./formatSquiggleExtension.js";
 import { gutterExtension } from "./gutter/gutterExtension.js";
 import { CodeEditorProps } from "./index.js";
 import { lightThemeHighlightingStyle } from "./languageSupport/highlightingStyle.js";
-import { squiggleLanguageExtension } from "./languageSupport/squiggleLanguageExtension.js";
+import { squiggleLanguageExtension } from "./languageSupport/index.js";
 import { lineWrappingExtension } from "./lineWrappingExtension.js";
 import { onChangeExtension } from "./onChangeExtension.js";
 import { onSubmitExtension } from "./onSubmitExtension.js";

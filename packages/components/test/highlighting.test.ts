@@ -1,7 +1,7 @@
 import { getStyleTags, Tag, tags } from "@lezer/highlight";
 
 import { hoverableTag } from "../src/components/CodeEditor/languageSupport/highlightingStyle.js";
-import { parserWithMetadata } from "../src/components/CodeEditor/languageSupport/squiggle.js";
+import { parserWithMetadata } from "../src/components/CodeEditor/languageSupport/index.js";
 
 function testTagsAtPosition(code: string, pos: number, tags: Tag[]) {
   const parsed = parserWithMetadata.parse(code);
@@ -15,11 +15,21 @@ describe("Highlighting tests", () => {
   test("Keyword", () =>
     testTagsAtPosition("if true then 1 else 2", 0, [tags.keyword]));
 
-  test("Top-level variable", () =>
+  test("Top-level variable is hoverable", () =>
     testTagsAtPosition("var = 123", 0, [
       hoverableTag,
       tags.constant(tags.variableName),
     ]));
+
+  test("Top-level variable with tags is hoverable", () => {
+    const code = `@foo
+@bar
+var = 123`;
+    testTagsAtPosition(code, code.match(/.*(var)/)?.index ?? -1, [
+      hoverableTag,
+      tags.constant(tags.variableName),
+    ]);
+  });
 
   test("Nested variable is not hoverable", () =>
     testTagsAtPosition("var = { nested = 123; nested }", 9, [
