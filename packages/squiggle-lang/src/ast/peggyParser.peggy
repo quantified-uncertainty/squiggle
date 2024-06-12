@@ -50,36 +50,27 @@ quotedInnerBlock
     '}'
     { return h.nodeBlock([finalExpression], location()); }
 
-statementsList = decoratedStatement|1.., statementSeparator|
+statementsList = statement|1.., statementSeparator|
 
-decoratedStatement
-  = decorator:decorator statement:decoratedStatement
+decorator
+  = '@' name:dollarIdentifier args:(_ '(' _nl @functionArguments _nl ')')?  __nl
     {
-      return h.nodeDecoratedStatement(decorator, statement, location())
+      return h.nodeDecorator(name, args ?? [], location());
     }
-  / letStatement
-  / defunStatement
-
-  decorator
-    = '@' name:dollarIdentifier args:(_ '(' _nl @functionArguments _nl ')')?  __nl
-      {
-        return h.nodeDecorator(name, args ?? [], location());
-      }
 
 statement
-  = decoratedStatement
-  / letStatement
+  = letStatement
   / defunStatement
 
 letStatement
-  = exported:("export" __nl)? variable:dollarIdentifier _ assignmentOp _nl value:innerBlockOrExpression
-    { return h.nodeLetStatement(variable, value, Boolean(exported), location()); }
+  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier _ assignmentOp _nl value:innerBlockOrExpression
+    { return h.nodeLetStatement(decorators, variable, value, Boolean(exported), location()); }
 
 defunStatement
-  = exported:("export" __nl)? variable:dollarIdentifier '(' _nl args:functionParameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
+  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier '(' _nl args:functionParameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
     {
       const value = h.nodeLambda(args, body, location(), variable);
-      return h.nodeDefunStatement(variable, value, Boolean(exported), location());
+      return h.nodeDefunStatement(decorators, variable, value, Boolean(exported), location());
     }
 
   assignmentOp "assignment" = '='

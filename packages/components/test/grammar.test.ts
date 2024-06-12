@@ -76,7 +76,7 @@ x = 5
         )
         .toString()
     ).toBe(
-      'Program(DecoratedStatement(Decorator(At,DecoratorName,"(",Argument(String),")"),LetStatement(VariableName,Equals,Number)))'
+      'Program(LetStatement(Decorator(At,DecoratorName,"(",Argument(String),")"),VariableName,Equals,Number))'
     );
   });
 

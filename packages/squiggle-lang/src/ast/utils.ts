@@ -6,20 +6,8 @@ export function locationContains(location: LocationRange, offset: number) {
 
 export function isBindingStatement(
   statement: ASTNode
-): statement is Extract<
-  ASTNode,
-  { type: "LetStatement" | "DefunStatement" | "DecoratedStatement" }
-> {
+): statement is Extract<ASTNode, { type: "LetStatement" | "DefunStatement" }> {
   return (
-    statement.type === "LetStatement" ||
-    statement.type === "DefunStatement" ||
-    statement.type === "DecoratedStatement"
+    statement.type === "LetStatement" || statement.type === "DefunStatement"
   );
-}
-
-export function undecorated(node: ASTNode) {
-  while (node.type === "DecoratedStatement") {
-    node = node.statement;
-  }
-  return node;
 }

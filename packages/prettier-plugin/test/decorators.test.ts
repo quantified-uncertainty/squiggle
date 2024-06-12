@@ -11,7 +11,8 @@ x=5`)
     ).toBe(`@foo
 @bar(1, 2)
 @baz
-x = 5`);
+x = 5
+`);
   });
 
   test("multiline arguments", async () => {
@@ -28,7 +29,8 @@ x=5`)
   "aweuyraiuweyrlaiuewyriaweyari3"
 )
 @baz
-x = 5`);
+x = 5
+`);
   });
 
   test("on functions", async () => {
@@ -41,6 +43,7 @@ f(x)=x`)
     ).toBe(`@foo
 @bar(1, 2)
 @baz
-f(x) = x`);
+f(x) = x
+`);
   });
 });
