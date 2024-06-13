@@ -1,7 +1,8 @@
 import { EditorView } from "@codemirror/view";
-import { FC, useCallback, useMemo } from "react";
+import { FC } from "react";
 
 import { ASTNode, SqValue } from "@quri/squiggle-lang";
+import { Button, Dropdown, DropdownMenu } from "@quri/ui";
 
 import { SqValueWithContext, valueHasContext } from "../../../lib/utility.js";
 import { SquiggleValueChart } from "../../SquiggleViewer/SquiggleValueChart.js";
@@ -9,121 +10,23 @@ import {
   InnerViewerProvider,
   useViewerContext,
 } from "../../SquiggleViewer/ViewerProvider.js";
+import { ExportUnexportAction } from "./ExportUnexportAction.js";
+import { HideAction } from "./HideAction.js";
 import { TooltipBox } from "./TooltipBox.js";
 
-type CommonProps = { value: SqValueWithContext; view: EditorView };
+export type CommonProps = { value: SqValueWithContext; view: EditorView };
 type Props = { value: SqValue; view: EditorView };
 
-function checkAstType(
+export function checkAstType(
   ast: ASTNode
 ): ast is Extract<ASTNode, { type: "LetStatement" | "DefunStatement" }> {
   return ast.type === "LetStatement" || ast.type === "DefunStatement";
 }
 
-const TooltipAction: FC<{ act: () => void; text: string }> = ({
-  act,
-  text,
+const ValueActions: FC<{ value: SqValueWithContext; view: EditorView }> = ({
+  value,
+  view,
 }) => {
-  return (
-    <a
-      href=""
-      className="text-xs text-blue-500 hover:underline"
-      onClick={(e) => {
-        e.preventDefault();
-        act();
-      }}
-    >
-      {text}
-    </a>
-  );
-};
-
-const ExportUnexportAction: FC<CommonProps> = ({ value, view }) => {
-  const ast = value.context.valueAst;
-
-  const act = useCallback(() => {
-    if (!checkAstType(ast)) {
-      return;
-    }
-    if (ast.exported) {
-      // can include decorators and ends with "   export   " string
-      const text = view.state.sliceDoc(
-        ast.location.start.offset,
-        ast.variable.location.start.offset
-      );
-      const match = text.match(/\bexport\s+$/s);
-      if (!match || match.index === undefined) {
-        return; // TODO - show error?
-      }
-      view.dispatch({
-        changes: {
-          from: ast.location.start.offset + match.index,
-          to: ast.variable.location.start.offset,
-          insert: "",
-        },
-      });
-    } else {
-      view.dispatch({
-        changes: {
-          from: ast.variable.location.start.offset,
-          to: ast.variable.location.start.offset,
-          insert: "export ",
-        },
-      });
-    }
-  }, [ast, view]);
-
-  if (!checkAstType(ast) || !value.context.valueAstIsPrecise) {
-    return null;
-  }
-
-  return (
-    <TooltipAction act={act} text={ast.exported ? "Unexport" : "Export"} />
-  );
-};
-
-const HideAction: FC<CommonProps> = ({ value, view }) => {
-  const ast = value.context.valueAst;
-
-  const hideDecorator = useMemo<ASTNode | undefined>(() => {
-    if (!checkAstType(ast)) {
-      return;
-    }
-    for (const decorator of ast.decorators) {
-      if (decorator.name.value === "hide") {
-        return decorator;
-      }
-    }
-  }, [ast]);
-
-  const act = useCallback(() => {
-    if (!checkAstType(ast)) {
-      return;
-    }
-
-    if (hideDecorator) {
-      view.dispatch({
-        changes: {
-          from: hideDecorator.location.start.offset,
-          to: hideDecorator.location.end.offset,
-          insert: "",
-        },
-      });
-    } else {
-      view.dispatch({
-        changes: {
-          from: ast.location.start.offset,
-          to: ast.location.start.offset,
-          insert: "@hide\n",
-        },
-      });
-    }
-  }, [view, ast, hideDecorator]);
-
-  return <TooltipAction act={act} text={hideDecorator ? "Unhide" : "Hide"} />;
-};
-
-const ValueActions: FC<CommonProps> = ({ value, view }) => {
   const valueMatchesDoc =
     value.context.runContext.source === view.state.doc.toString();
 
@@ -133,8 +36,17 @@ const ValueActions: FC<CommonProps> = ({ value, view }) => {
 
   return (
     <div className="flex gap-2 px-4 py-2">
-      <ExportUnexportAction view={view} value={value} />
-      <HideAction view={view} value={value} />
+      <Dropdown
+        render={() => (
+          <DropdownMenu>
+            <ExportUnexportAction view={view} value={value} />
+            <HideAction view={view} value={value} />
+          </DropdownMenu>
+        )}
+        portal={false}
+      >
+        <Button size="small">Actions</Button>
+      </Dropdown>
     </div>
   );
 };

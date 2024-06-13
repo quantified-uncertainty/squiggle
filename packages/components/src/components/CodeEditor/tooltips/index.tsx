@@ -25,6 +25,9 @@ function nodeTooltip(syntaxNode: SyntaxNode, reactNode: ReactNode) {
 }
 
 const tooltipTheme = EditorView.baseTheme({
+  ".cm-tooltip": {
+    zIndex: "20 !important", // less than Dropdown from @quri/ui
+  },
   ".cm-tooltip-hover": {
     backgroundColor: "white !important",
     border: "0 !important",
