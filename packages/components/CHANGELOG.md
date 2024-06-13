@@ -16,6 +16,8 @@
 
 - Names with tooltips have hover styles ([#3312](https://github.com/quantified-uncertainty/squiggle/pull/3312))
 
+- Improved styles for the editor search panel ([#3316](https://github.com/quantified-uncertainty/squiggle/pull/3316))
+
 ## 0.9.4
 
 Features:

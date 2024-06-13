@@ -4,6 +4,8 @@
 
 - Profiler mode ([#3268](https://github.com/quantified-uncertainty/squiggle/pull/3268))
 
+- `SampleSet.sampleN` combines samples up to the shortest sampleset in its arguments ([#3270](https://github.com/quantified-uncertainty/squiggle/pull/3270))
+
 - Normalized AST serialization - significantly reduces the produced bundle size, in some cases ([#3271](https://github.com/quantified-uncertainty/squiggle/pull/3271))
 
 ## 0.9.4
