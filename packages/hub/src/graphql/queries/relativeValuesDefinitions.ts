@@ -31,6 +31,7 @@ builder.queryField("relativeValuesDefinitions", (t) =>
             ...(args.input?.slugContains && {
               slug: {
                 contains: args.input.slugContains,
+                mode: "insensitive",
               },
             }),
             ...(args.input?.owner && {
