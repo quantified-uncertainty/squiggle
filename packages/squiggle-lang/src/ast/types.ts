@@ -170,6 +170,7 @@ type NodeDecorator = N<
 >;
 
 type LetOrDefun = {
+  decorators: NodeDecorator[];
   variable: NodeIdentifier;
   exported: boolean;
 };
@@ -185,14 +186,6 @@ type NodeDefunStatement = N<
   "DefunStatement",
   LetOrDefun & {
     value: NamedNodeLambda;
-  }
->;
-
-type NodeDecoratedStatement = N<
-  "DecoratedStatement",
-  {
-    decorator: NodeDecorator;
-    statement: NodeLetStatement | NodeDefunStatement | NodeDecoratedStatement;
   }
 >;
 
@@ -227,7 +220,6 @@ export type ASTNode =
   | NodeProgram
   | NodeBlock
   // statements
-  | NodeDecoratedStatement
   | NodeLetStatement
   | NodeDefunStatement
   // functions & lambdas

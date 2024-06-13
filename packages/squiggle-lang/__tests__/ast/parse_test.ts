@@ -481,7 +481,7 @@ describe("Peggy parse", () => {
   });
 
   describe("Exports", () => {
-    testParse("export x = 5", "(Program (LetStatement export :x 5))");
+    testParse("export x = 5", "(Program (LetStatement :x 5 exported))");
     testParse("exportx = 5", "(Program (LetStatement :exportx 5))");
   });
 
@@ -498,7 +498,7 @@ x = 5
 @baz
 f(x) = x
 `,
-      "(Program (DecoratedStatement (Decorator :foo) (DecoratedStatement (Decorator :bar 1 2) (DecoratedStatement (Decorator :baz) (LetStatement :x 5)))) (DecoratedStatement (Decorator :foo) (DecoratedStatement (Decorator :bar 1 2) (DecoratedStatement (Decorator :baz) (DefunStatement :f (Lambda :x :x))))))"
+      "(Program (LetStatement :x 5 (Decorator :foo) (Decorator :bar 1 2) (Decorator :baz)) (DefunStatement :f (Lambda :x :x) (Decorator :foo) (Decorator :bar 1 2) (Decorator :baz)))"
     );
   });
 });

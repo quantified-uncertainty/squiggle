@@ -1,5 +1,6 @@
 import {
   EditorState,
+  Extension,
   Facet,
   RangeSet,
   RangeSetBuilder,
@@ -9,8 +10,8 @@ import { clsx } from "clsx";
 
 import { ASTNode, SqValuePath, SqValuePathEdge } from "@quri/squiggle-lang";
 
-import { onFocusByPathField, simulationField } from "./fields.js";
-import { reactAsDom } from "./utils.js";
+import { onFocusByPathFacet, simulationFacet } from "../fields.js";
+import { reactAsDom } from "../utils.js";
 
 type MarkerDatum = {
   path: SqValuePath;
@@ -57,38 +58,35 @@ function* getMarkerData(ast: ASTNode): Generator<MarkerDatum, void> {
     return; // unexpected
   }
 
-  nextStatement: for (let statement of ast.statements) {
-    while (statement.type === "DecoratedStatement") {
-      if (statement.decorator.name.value === "hide") {
-        break nextStatement;
-      }
-      statement = statement.statement;
-    }
-
-    switch (statement.type) {
-      case "DefunStatement":
-      case "LetStatement": {
-        const name = statement.variable.value;
-        if (ast.symbols[name] !== statement) {
-          break; // skip, probably redefined later
+  nextStatement: for (const statement of ast.statements) {
+    if (
+      statement.type === "DefunStatement" ||
+      statement.type === "LetStatement"
+    ) {
+      for (const decorator of statement.decorators) {
+        if (decorator.name.value === "hide") {
+          break nextStatement;
         }
-        const path = new SqValuePath({
-          root: "bindings",
-          edges: [SqValuePathEdge.fromKey(name)],
-        });
-        yield { ast: statement.variable, path };
-        yield* getMarkerSubData(statement.value, path);
-        break;
       }
-      default: {
-        // end expression
-        const path = new SqValuePath({
-          root: "result",
-          edges: [],
-        });
-        yield { ast: statement, path };
-        yield* getMarkerSubData(statement, path);
+      const name = statement.variable.value;
+      if (ast.symbols[name] !== statement) {
+        break; // skip, probably redefined later
       }
+      const path = new SqValuePath({
+        root: "bindings",
+        edges: [SqValuePathEdge.fromKey(name)],
+      });
+      yield { ast: statement.variable, path };
+      yield* getMarkerSubData(statement.value, path);
+      break;
+    } else {
+      // end expression
+      const path = new SqValuePath({
+        root: "result",
+        edges: [],
+      });
+      yield { ast: statement, path };
+      yield* getMarkerSubData(statement, path);
     }
   }
 }
@@ -141,11 +139,11 @@ class FocusableMarker extends GutterMarker {
 export function getMarkers(
   state: EditorState
 ): RangeSet<GutterMarker> | undefined {
-  const onFocusByPath = state.field(onFocusByPathField.field);
+  const onFocusByPath = state.facet(onFocusByPathFacet);
   if (!onFocusByPath) {
     return;
   }
-  const simulation = state.field(simulationField.field);
+  const simulation = state.facet(simulationFacet);
 
   const sqResult = simulation?.output;
   if (!sqResult?.ok) {
@@ -183,7 +181,7 @@ export function getMarkers(
   return markers;
 }
 
-export function focusGutterExtension() {
+export function focusGutterExtension(): Extension {
   const markersFacet = Facet.define<
     RangeSet<GutterMarker>,
     RangeSet<GutterMarker>
@@ -192,7 +190,7 @@ export function focusGutterExtension() {
   });
 
   const computedMarkers = markersFacet.compute(
-    ["doc", simulationField.field, onFocusByPathField.field],
+    ["doc", simulationFacet, onFocusByPathFacet],
     (state) => getMarkers(state) ?? RangeSet.of([])
   );
 

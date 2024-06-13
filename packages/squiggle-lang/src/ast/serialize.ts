@@ -72,16 +72,11 @@ export function serializeAstNode(
         ...node,
         statements: node.statements.map(visit.ast),
       };
-    case "DecoratedStatement":
-      return {
-        ...node,
-        decorator: visit.ast(node.decorator),
-        statement: visit.ast(node.statement),
-      };
     case "LetStatement":
     case "DefunStatement":
       return {
         ...node,
+        decorators: node.decorators.map(visit.ast),
         variable: visit.ast(node.variable),
         value: visit.ast(node.value),
       };
@@ -206,21 +201,17 @@ export function deserializeAstNode(
         ...node,
         statements: node.statements.map(visit.ast),
       };
-    case "DecoratedStatement":
-      return {
-        ...node,
-        decorator: visit.ast(node.decorator) as TypedNode<"Decorator">,
-        statement: visit.ast(node.statement) as TypedNode<"LetStatement">,
-      };
     case "LetStatement":
       return {
         ...node,
+        decorators: node.decorators.map(visit.ast) as TypedNode<"Decorator">[],
         variable: visit.ast(node.variable) as TypedNode<"Identifier">,
         value: visit.ast(node.value),
       };
     case "DefunStatement":
       return {
         ...node,
+        decorators: node.decorators.map(visit.ast) as TypedNode<"Decorator">[],
         variable: visit.ast(node.variable) as TypedNode<"Identifier">,
         value: visit.ast(node.value) as NamedNodeLambda,
       };

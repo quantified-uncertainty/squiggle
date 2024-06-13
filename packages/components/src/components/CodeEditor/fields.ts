@@ -1,53 +1,127 @@
-import { StateEffect, StateEffectType, StateField } from "@codemirror/state";
+import { Facet, StateEffect, StateField } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
-import { SqValuePath } from "@quri/squiggle-lang";
+import { SqProject, SqValuePath } from "@quri/squiggle-lang";
 
 import { Simulation } from "../../lib/hooks/useSimulator.js";
 
-// Helper class for turning any React prop into a CodeMirror field.
-// How to use:
-// 1. Create a field once statically with `ReactiveStateField.define<T>(initialValue)`
-// 2. Use `myField.field` as a CodeMirror extension
-// 3. Call `myField.use(view, prop)` as a hook to update the field with an effect.
-class ReactiveStateField<Value> {
-  effect: StateEffectType<Value>;
-  field: StateField<Value>;
+export type CodemirrorReactProps = {
+  // Similar to React props for CodeEditor, but with null values; CodeMirror doesn't like `undefined` values.
+  // TODO - it should be possible to auto-generate this type with some clever TypeScript.
+  simulation: Simulation | null;
+  onFocusByPath: ((path: SqValuePath) => void) | null;
+  onChange: (value: string) => void;
+  onSubmit: (() => void) | null;
+  showGutter: boolean;
+  lineWrapping: boolean;
+  project: SqProject;
+  sourceId: string;
+  height: string | number | null;
+  renderImportTooltip:
+    | ((params: { project: SqProject; importId: string }) => ReactNode)
+    | null;
+};
 
-  private constructor(initialValue: Value) {
-    this.effect = StateEffect.define<Value>();
-    this.field = StateField.define<Value>({
-      create: () => initialValue,
+const defaultReactProps: CodemirrorReactProps = {
+  simulation: null,
+  onFocusByPath: null,
+  showGutter: false,
+  lineWrapping: true,
+  project: SqProject.create(),
+  sourceId: "fake",
+  onChange: () => {},
+  onSubmit: null,
+  height: null,
+  renderImportTooltip: null,
+};
+
+function makeReactPropFacet<T extends keyof CodemirrorReactProps>(field: T) {
+  return Facet.define<CodemirrorReactProps[T], CodemirrorReactProps[T]>({
+    combine: (value) => {
+      return value.length ? value[0] : defaultReactProps[field];
+    },
+  });
+}
+
+/**
+ * These facets are derived from the single
+ * [StateField](https://codemirror.net/docs/ref/#state.StateEffect) defined by
+ * `useReactPropsField` below.
+ *
+ * Alternatively, we could model them as separate fields. This would simplify
+ * some things (we don't really use aggregational capabilities of facets), but
+ * it would complicate other things (we'd have to call `useEffect` once per
+ * field). I'm not sure which approach is better.
+ */
+export const onFocusByPathFacet = makeReactPropFacet("onFocusByPath");
+export const simulationFacet = makeReactPropFacet("simulation");
+export const showGutterFacet = makeReactPropFacet("showGutter");
+export const lineWrappingFacet = makeReactPropFacet("lineWrapping");
+export const projectFacet = makeReactPropFacet("project");
+export const heightFacet = makeReactPropFacet("height");
+export const onChangeFacet = makeReactPropFacet("onChange");
+export const onSubmitFacet = makeReactPropFacet("onSubmit");
+export const sourceIdFacet = makeReactPropFacet("sourceId");
+export const renderImportTooltipFacet = makeReactPropFacet(
+  "renderImportTooltip"
+);
+// Note: any new facet must have a matching extension in `useReactPropsField` result below.
+
+export function useReactPropsField(
+  props: CodemirrorReactProps,
+  view: EditorView | undefined
+) {
+  // init extension only once - further updates to `props` will be handled through `useEffect`.
+  const [{ field, fieldExtension, effectType }] = useState(() => {
+    const effectType = StateEffect.define<CodemirrorReactProps>();
+    const reactPropsField = StateField.define<CodemirrorReactProps>({
+      create: () => defaultReactProps,
       update: (value, tr) => {
-        for (const e of tr.effects) if (e.is(this.effect)) value = e.value;
+        for (const e of tr.effects) if (e.is(effectType)) value = e.value;
         return value;
       },
     });
-  }
 
-  // `Value` can't include undefined; see
-  // https://codemirror.net/docs/ref/#state.StateEffect^define (We don't use
-  // position mapping so maybe it's not important right now, but might be useful
-  // in the future somehow.)
-  static define<Value>(initialValue: Value extends undefined ? never : Value) {
-    return new ReactiveStateField<Value>(initialValue);
-  }
+    return {
+      fieldExtension: reactPropsField.init(() => props),
+      effectType: effectType,
+      field: reactPropsField,
+    };
+  });
 
-  use(view: EditorView | undefined, prop: Value) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEffect(() => {
-      view?.dispatch({
-        effects: this.effect.of(prop),
-      });
-    }, [view, prop]);
-  }
+  // When any prop changes, we update the entire field.
+  // Note that specific facets will be updated only if the prop actually has changed.
+  useEffect(() => {
+    view?.dispatch({
+      effects: effectType.of(props),
+    });
+  }, [view, effectType, props]);
+
+  // Generics here help to prevent typos in calls to this function.
+  const defineFacet = <T extends keyof CodemirrorReactProps>(
+    facet: Facet<unknown, CodemirrorReactProps[T]>,
+    fieldName: T
+  ) => {
+    return facet.from(
+      field,
+      (props) => props[fieldName] ?? defaultReactProps[fieldName]
+    );
+  };
+
+  return [
+    fieldExtension,
+    [
+      defineFacet(heightFacet, "height"),
+      defineFacet(lineWrappingFacet, "lineWrapping"),
+      defineFacet(onChangeFacet, "onChange"),
+      defineFacet(onFocusByPathFacet, "onFocusByPath"),
+      defineFacet(onSubmitFacet, "onSubmit"),
+      defineFacet(projectFacet, "project"),
+      defineFacet(showGutterFacet, "showGutter"),
+      defineFacet(simulationFacet, "simulation"),
+      defineFacet(sourceIdFacet, "sourceId"),
+      defineFacet(renderImportTooltipFacet, "renderImportTooltip"),
+    ],
+  ];
 }
-
-export const simulationField = ReactiveStateField.define<Simulation | null>(
-  null
-);
-
-export const onFocusByPathField = ReactiveStateField.define<
-  ((path: SqValuePath) => void) | null
->(null);

@@ -1,7 +1,7 @@
-import { RangeSet, RangeSetBuilder } from "@codemirror/state";
+import { Extension, RangeSet, RangeSetBuilder } from "@codemirror/state";
 import { Decoration, EditorView } from "@codemirror/view";
 
-import { simulationField } from "./fields.js";
+import { simulationFacet } from "./fields.js";
 
 const makeMark = (intensity: number) => {
   const min = 100;
@@ -13,13 +13,13 @@ const makeMark = (intensity: number) => {
   });
 };
 
-export function profilerExtension() {
+export function profilerExtension(): Extension {
   const empty = RangeSet.of<Decoration>([]);
 
   const decorations = EditorView.decorations.compute(
-    ["doc", simulationField.field],
+    ["doc", simulationFacet],
     (state) => {
-      const simulation = state.field(simulationField.field);
+      const simulation = state.facet(simulationFacet);
       if (!simulation) {
         return empty;
       }

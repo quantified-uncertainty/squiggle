@@ -4,6 +4,7 @@ import {
   snippetCompletion,
 } from "@codemirror/autocomplete";
 import { syntaxTree } from "@codemirror/language";
+import { Facet } from "@codemirror/state";
 import { SyntaxNode, Tree } from "@lezer/common";
 
 import { SqProject } from "@quri/squiggle-lang";
@@ -27,17 +28,11 @@ export function getNameNodes(tree: Tree, from: number): NameNode[] {
     if (cursor.type.is("Statement") && direction === "sibling") {
       // Only for sibling nodes; `foo = { <cursor> }` shouldn't autocomplete `foo`.
 
-      // Unwrap decorated statements.
-      let node: SyntaxNode | null = cursor.node;
-      while (node && node.type.is("DecoratedStatement")) {
-        node = node.getChild("Statement");
-      }
-
-      const nameNode = node?.getChild("VariableName");
-      if (node && nameNode) {
+      const nameNode = cursor.node.getChild("VariableName");
+      if (nameNode) {
         nameNodes.push({
           node: nameNode,
-          type: node?.type.is("DefunStatement") ? "function" : "variable",
+          type: cursor.node.type.is("DefunStatement") ? "function" : "variable",
         });
       }
     } else if (cursor.type.is("DefunStatement") && direction !== "sibling") {
@@ -73,37 +68,59 @@ export function getNameNodes(tree: Tree, from: number): NameNode[] {
   return nameNodes;
 }
 
-export function makeCompletionSource(project: SqProject) {
-  const stdlibCompletions: Completion[] = [];
-  const decoratorCompletions: Completion[] = [];
+export const builtinCompletionsFacet = Facet.define<
+  SqProject,
+  { stdlibCompletions: Completion[]; decoratorCompletions: Completion[] }
+>({
+  combine: (value) => {
+    const project = value.at(0);
+    const stdlibCompletions: Completion[] = [];
+    const decoratorCompletions: Completion[] = [];
 
-  const getInfoFunction = (name: string): Completion["info"] => {
-    return () => reactAsDom(<FnDocumentationFromName functionName={name} />);
-  };
-
-  for (const [name, value] of project.getStdLib().entrySeq()) {
-    stdlibCompletions.push({
-      label: name,
-      info: getInfoFunction(name),
-      type: value.type === "Lambda" ? "function" : "variable",
-    });
-
-    if (
-      value.type === "Lambda" &&
-      value.value.isDecorator &&
-      name.startsWith("Tag.")
-    ) {
-      const shortName = name.split(".")[1];
-      decoratorCompletions.push({
-        label: `@${shortName}`,
-        apply: shortName,
-        info: getInfoFunction(name),
-        type: "function",
-      });
+    if (!project) {
+      return {
+        stdlibCompletions,
+        decoratorCompletions,
+      };
     }
-  }
 
+    const getInfoFunction = (name: string): Completion["info"] => {
+      return () => reactAsDom(<FnDocumentationFromName functionName={name} />);
+    };
+
+    for (const [name, value] of project.getStdLib().entrySeq()) {
+      stdlibCompletions.push({
+        label: name,
+        info: getInfoFunction(name),
+        type: value.type === "Lambda" ? "function" : "variable",
+      });
+
+      if (
+        value.type === "Lambda" &&
+        value.value.isDecorator &&
+        name.startsWith("Tag.")
+      ) {
+        const shortName = name.split(".")[1];
+        decoratorCompletions.push({
+          label: `@${shortName}`,
+          apply: shortName,
+          info: getInfoFunction(name),
+          type: "function",
+        });
+      }
+    }
+    return {
+      stdlibCompletions,
+      decoratorCompletions,
+    };
+  },
+});
+
+export function makeCompletionSource() {
   const autocomplete: CompletionSource = (cmpl) => {
+    const { stdlibCompletions, decoratorCompletions } = cmpl.state.facet(
+      builtinCompletionsFacet
+    );
     const tree = syntaxTree(cmpl.state);
 
     {

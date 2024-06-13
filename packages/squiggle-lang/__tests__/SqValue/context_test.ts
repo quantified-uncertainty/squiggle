@@ -41,7 +41,7 @@ z = 5
     assertTag(z, "Number");
 
     expect(nodeToString(z.context!.valueAst, { pretty: false })).toBe(
-      "(LetStatement :z 5)"
+      "(LetStatement :z 5 (Decorator :name 'Z'))"
     );
   });
 });

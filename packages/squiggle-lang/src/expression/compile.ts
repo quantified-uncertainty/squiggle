@@ -1,6 +1,5 @@
 import { infixFunctions, unaryFunctions } from "../ast/operators.js";
 import { ASTNode } from "../ast/types.js";
-import { undecorated } from "../ast/utils.js";
 import { ICompileError } from "../errors/IError.js";
 import { Bindings } from "../reducer/Stack.js";
 import * as Result from "../utility/result.js";
@@ -216,16 +215,13 @@ function compileToContent(
       for (const astStatement of ast.statements) {
         const statement = innerCompileAst(astStatement, context);
         statements.push(statement);
-        {
-          const maybeExportedStatement = undecorated(astStatement);
-          if (
-            maybeExportedStatement.type === "LetStatement" ||
-            maybeExportedStatement.type === "DefunStatement"
-          ) {
-            if (maybeExportedStatement.exported) {
-              const name = maybeExportedStatement.variable.value;
-              exports.push(name);
-            }
+        if (
+          astStatement.type === "LetStatement" ||
+          astStatement.type === "DefunStatement"
+        ) {
+          if (astStatement.exported) {
+            const name = astStatement.variable.value;
+            exports.push(name);
           }
         }
       }
@@ -238,62 +234,28 @@ function compileToContent(
     case "DefunStatement":
     case "LetStatement": {
       const name = ast.variable.value;
-      const value = innerCompileAst(ast.value, context);
-      context.defineLocal(name);
-      return expression.make("Assign", { left: name, right: value });
-    }
-    case "DecoratedStatement": {
-      const decoratedStatements: Extract<
-        ASTNode,
-        { type: "DecoratedStatement" }
-      >[] = [];
-      let unwrappedAst: (typeof ast)["statement"] = ast;
-      while (unwrappedAst.type === "DecoratedStatement") {
-        decoratedStatements.push(unwrappedAst);
-        unwrappedAst = unwrappedAst.statement;
-      }
+      let value = innerCompileAst(ast.value, context);
 
-      // duplicates cases for these types defined above - we have to do things
-      // in a different order here, can't `context.defineLocal` this var yet
-      if (
-        unwrappedAst.type !== "DefunStatement" &&
-        unwrappedAst.type !== "LetStatement"
-      ) {
-        // Shouldn't happen, `ast.statement` is always compiled to `Assign`
-        throw new ICompileError(
-          "Can't apply a decorator to non-Assign expression",
-          ast.location
-        );
-      }
-      let valueExpression = innerCompileAst(unwrappedAst.value, context);
-
-      decoratedStatements.reverse();
-      for (const decoratedStatement of decoratedStatements) {
+      for (const decorator of [...ast.decorators].reverse()) {
         const decoratorFn = context.resolveName(
           ast,
-          `Tag.${decoratedStatement.decorator.name.value}`
+          `Tag.${decorator.name.value}`
         );
-        valueExpression = {
-          ast: decoratedStatement.statement,
+        value = {
+          ast,
           ...expression.eCall(
             decoratorFn,
             [
-              valueExpression,
-              ...decoratedStatement.decorator.args.map((arg) =>
-                innerCompileAst(arg, context)
-              ),
+              value,
+              ...decorator.args.map((arg) => innerCompileAst(arg, context)),
             ],
             "decorate"
           ),
         };
       }
 
-      const name = unwrappedAst.variable.value;
       context.defineLocal(name);
-      return expression.make("Assign", {
-        left: name,
-        right: valueExpression,
-      });
+      return expression.make("Assign", { left: name, right: value });
     }
     case "Decorator":
       throw new ICompileError("Can't compile Decorator node", ast.location);

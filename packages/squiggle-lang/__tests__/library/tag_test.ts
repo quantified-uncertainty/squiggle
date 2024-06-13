@@ -36,7 +36,7 @@ describe("Tags", () => {
 a = 3
 Tag.getLocation(a)
 `,
-      '{source: "main", start: {line: 2, column: 1, offset: 10}, end: {line: 2, column: 6, offset: 15}}'
+      '{source: "main", start: {line: 1, column: 1, offset: 0}, end: {line: 2, column: 6, offset: 15}}'
     );
   });
 

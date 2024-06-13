@@ -25,26 +25,35 @@ import {
   highlightSpecialChars,
   keymap,
 } from "@codemirror/view";
-import { useMemo } from "react";
+import { useState } from "react";
 
 import {
   useCodemirrorView,
   useConfigureCodemirrorView,
 } from "./codemirrorHooks.js";
-import { onFocusByPathField, simulationField } from "./fields.js";
+import { errorsExtension } from "./errorsExtension.js";
+import { showGutterFacet, useReactPropsField } from "./fields.js";
+import { formatSquiggleExtension } from "./formatSquiggleExtension.js";
+import { gutterExtension } from "./gutter/gutterExtension.js";
 import { CodeEditorProps } from "./index.js";
 import { lightThemeHighlightingStyle } from "./languageSupport/highlightingStyle.js";
+import { squiggleLanguageExtension } from "./languageSupport/index.js";
+import { lineWrappingExtension } from "./lineWrappingExtension.js";
+import { onChangeExtension } from "./onChangeExtension.js";
+import { onSubmitExtension } from "./onSubmitExtension.js";
 import { profilerExtension } from "./profilerExtension.js";
-import { useErrorsExtension } from "./useErrorsExtension.js";
-import { useFormatSquiggleExtension } from "./useFormatSquiggleExtension.js";
-import { useGutterExtension } from "./useGutterExtension.js";
-import { useLineWrappingExtension } from "./useLineWrappingExtension.js";
-import { useOnChangeExtension } from "./useOnChangeExtension.js";
-import { useSquiggleLanguageExtension } from "./useSquiggleLanguageExtension.js";
-import { useSubmitExtension } from "./useSubmitExtension.js";
-import { useTooltipsExtension } from "./useTooltipsExtension.js";
-import { useViewNodeExtension } from "./useViewNodeExtension.js";
-import { useWidthHeightExtension } from "./useWidthHeightExtension.js";
+import { themeExtension } from "./themeExtension.js";
+import { tooltipsExtension } from "./tooltips/index.js";
+import { viewNodeExtension } from "./viewNodeExtension.js";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function debugExtension() {
+  // Print state or specific fields on changes.
+  return EditorView.updateListener.of(({ state }) => {
+    // eslint-disable-next-line no-console
+    console.log(state.facet(showGutterFacet));
+  });
+}
 
 export function useSquiggleEditorExtensions(
   view: EditorView | undefined,
@@ -55,16 +64,29 @@ export function useSquiggleEditorExtensions(
    * We still have to run all `use.*Extension` hooks every time, because they set up `useEffect` hooks.
    * After the initial render, the extensions are re-configured through `useEffect` on props changes.
    */
+  const reactPropsField = useReactPropsField(
+    {
+      simulation: params.simulation ?? null,
+      onFocusByPath: params.onFocusByPath ?? null,
+      showGutter: params.showGutter ?? false,
+      lineWrapping: params.lineWrapping ?? true,
+      project: params.project,
+      sourceId: params.sourceId,
+      height: params.height ?? null,
+      onChange: params.onChange,
+      onSubmit: params.onSubmit ?? null,
+      renderImportTooltip: params.renderImportTooltip ?? null,
+    },
+    view
+  );
 
-  simulationField.use(view, params.simulation ?? null);
-  onFocusByPathField.use(view, params.onFocusByPath ?? null);
-  const fieldExtensions = [
-    simulationField.field.init(() => params.simulation ?? null),
-    onFocusByPathField.field.init(() => params.onFocusByPath ?? null),
-  ];
-
-  const builtinExtensions = useMemo(
-    () => [
+  // Extensions are initialized only once; all reconfigurations on prop changes
+  // happen because `reactPropsField` extension updates in `useReactPropsField`
+  // hook and causes facet updates.
+  const [extensions] = useState(() => {
+    const builtinExtensions = [
+      // uncomment for local debugging:
+      // debugExtension(),
       highlightSpecialChars(),
       history(),
       drawSelection(),
@@ -88,65 +110,36 @@ export function useSquiggleEditorExtensions(
         ...completionKeymap,
         indentWithTab,
       ]),
-    ],
-    []
-  );
+    ];
 
-  const squiggleLanguageExtension = useSquiggleLanguageExtension(
-    view,
-    params.project
-  );
-  const showGutterExtension = useGutterExtension(
-    view,
-    params.showGutter ?? false
-  );
-  const lineWrappingExtension = useLineWrappingExtension(
-    view,
-    params.lineWrapping ?? true
-  );
-  const submitExtension = useSubmitExtension(view, params.onSubmit);
-  const onChangeExtension = useOnChangeExtension(view, params.onChange);
-  const widthHeightExtension = useWidthHeightExtension(view, {
-    width: params.width,
-    height: params.height,
-  });
-  const viewNodeExtension = useViewNodeExtension(view, {
-    project: params.project,
-    onFocusByPath: params.onFocusByPath,
-    sourceId: params.sourceId,
-  });
+    const highPrioritySquiggleExtensions = [
+      onSubmitExtension(), // works only if listed before `builtinExtensions`
+    ];
 
-  const formatExtension = useFormatSquiggleExtension();
-  const errorsExtension = useErrorsExtension(view, params.errors);
+    const staticSquiggleExtensions = [
+      onChangeExtension(),
+      viewNodeExtension(),
+      gutterExtension(params.showGutter ?? false),
+      lineWrappingExtension(params.lineWrapping ?? true),
+      formatSquiggleExtension(),
+      errorsExtension(),
+      profilerExtension(),
+      squiggleLanguageExtension(params.renderImportTooltip ?? null),
+      themeExtension({
+        height: params.height,
+      }),
+      tooltipsExtension(),
+    ];
 
-  const tooltipsExtension = useTooltipsExtension(view, {
-    project: params.project,
-    sourceId: params.sourceId,
-    renderImportTooltip: params.renderImportTooltip,
+    return [
+      reactPropsField,
+      highPrioritySquiggleExtensions,
+      builtinExtensions,
+      staticSquiggleExtensions,
+    ];
   });
 
-  const highPrioritySquiggleExtensions = [
-    submitExtension, // works only if listed before `builtinExtensions`
-  ];
-  const squiggleExtensions = [
-    showGutterExtension,
-    lineWrappingExtension,
-    onChangeExtension,
-    widthHeightExtension,
-    viewNodeExtension,
-    formatExtension,
-    errorsExtension,
-    tooltipsExtension,
-    profilerExtension(),
-    squiggleLanguageExtension,
-  ];
-
-  return [
-    highPrioritySquiggleExtensions,
-    builtinExtensions,
-    fieldExtensions,
-    squiggleExtensions,
-  ];
+  return extensions;
 }
 
 export function useSquiggleEditorView({

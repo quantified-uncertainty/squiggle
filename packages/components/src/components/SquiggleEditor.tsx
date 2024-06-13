@@ -1,11 +1,10 @@
-import { FC, useMemo, useRef } from "react";
+import { FC, useRef } from "react";
 
 import { useUncontrolledCode } from "../lib/hooks/index.js";
 import { usePlaygroundSettings } from "../lib/hooks/usePlaygroundSettings.js";
 import { useSimulator } from "../lib/hooks/useSimulator.js";
 import {
   ProjectExecutionProps,
-  simulationErrors,
   StandaloneExecutionProps,
 } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
@@ -50,8 +49,6 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     environment: settings.environment,
   });
 
-  const errors = useMemo(() => simulationErrors(simulation), [simulation]);
-
   const editorRef = useRef<CodeEditorHandle>(null);
 
   const externalViewerActions = useExternalViewerActionsForEditor(
@@ -70,7 +67,6 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           onChange={setCode}
           fontSize={editorFontSize}
           showGutter={false}
-          errors={errors}
           project={project}
           simulation={simulation}
           sourceId={sourceId}

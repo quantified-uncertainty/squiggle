@@ -1,14 +1,9 @@
 import { forwardRef, ReactNode, useImperativeHandle } from "react";
 
-import {
-  SqError,
-  SqLocation,
-  SqProject,
-  SqValuePath,
-} from "@quri/squiggle-lang";
+import { SqLocation, SqProject, SqValuePath } from "@quri/squiggle-lang";
 
 import { Simulation } from "../../lib/hooks/useSimulator.js";
-import { formatSquiggle } from "./useFormatSquiggleExtension.js";
+import { formatSquiggle } from "./formatSquiggleExtension.js";
 import { useSquiggleEditorView } from "./useSquiggleEditorView.js";
 
 export type CodeEditorProps = {
@@ -17,10 +12,8 @@ export type CodeEditorProps = {
   onSubmit?: () => void;
   // can be used as a hotkey (Cmd+Option+V, see `useViewNodeExtension`) or as an action for gutter markers
   onFocusByPath?: (path: SqValuePath) => void;
-  width?: number;
   height?: number | string;
   lineWrapping?: boolean;
-  errors?: SqError[];
   sourceId: string;
   fontSize?: number;
   showGutter?: boolean;

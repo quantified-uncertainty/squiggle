@@ -31,7 +31,7 @@ blockContent {
     (expression)
 }
 
-Import { import String as identifier }
+Import { import ImportName { String } as VariableName { identifier } }
 
 commaSep<content> {
     "" | content ("," content)*
@@ -39,8 +39,6 @@ commaSep<content> {
 
 // when trailing comma is allowed
 commaSep1<content> { "" | content ("," content?)* }
-
-LetStatement { export? VariableName { identifier } "=" expression }
 
 LambdaParameter {
     LambdaParameterName { identifier } (":" expression)?
@@ -50,8 +48,6 @@ LambdaArgs {
     () | LambdaParameter ("," LambdaParameter)*
 }
 
-DefunStatement { export? VariableName { identifier } ~callOrDeclaration "(" LambdaArgs ")" "=" expression }
-
 Decorator {
     "@" DecoratorName { identifier }
     (
@@ -60,10 +56,13 @@ Decorator {
     )
 }
 
+LetStatement { Decorator* export? VariableName { identifier } "=" expression }
+
+DefunStatement { Decorator* export? VariableName { identifier } ~callOrDeclaration "(" LambdaArgs ")" "=" expression }
+
 statement[@isGroup="Statement"] {
     LetStatement
     | DefunStatement
-    | DecoratedStatement { Decorator statement }
 }
 
 expression {

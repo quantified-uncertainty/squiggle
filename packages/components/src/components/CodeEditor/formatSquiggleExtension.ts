@@ -1,6 +1,5 @@
 import { EditorView, keymap } from "@codemirror/view";
 import * as prettier from "prettier/standalone";
-import { useMemo } from "react";
 
 import * as prettierSquigglePlugin from "@quri/prettier-plugin-squiggle/standalone";
 
@@ -24,18 +23,14 @@ export async function formatSquiggle(view: EditorView | undefined) {
   });
 }
 
-export function useFormatSquiggleExtension() {
-  return useMemo(
-    () =>
-      keymap.of([
-        {
-          key: "Alt-Shift-f",
-          run: (view) => {
-            formatSquiggle(view);
-            return true;
-          },
-        },
-      ]),
-    []
-  );
+export function formatSquiggleExtension() {
+  return keymap.of([
+    {
+      key: "Alt-Shift-f",
+      run: (view) => {
+        formatSquiggle(view);
+        return true;
+      },
+    },
+  ]);
 }
