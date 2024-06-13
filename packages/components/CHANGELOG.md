@@ -1,5 +1,21 @@
 # @quri/squiggle-components
 
+## 0.9.5
+
+- Profiler mode ([#3268](https://github.com/quantified-uncertainty/squiggle/pull/3268))
+
+- Fix x axis position in function charts ([#3311](https://github.com/quantified-uncertainty/squiggle/pull/3311))
+
+- Improve stacktrace locations for imports ([#3262](https://github.com/quantified-uncertainty/squiggle/pull/3262))
+
+- Support `externalViewerActions` prop in `SquiggleChart` for wiring the viewer with something else than an editor ([#3262](https://github.com/quantified-uncertainty/squiggle/pull/3262))
+
+- Normalized AST serialization - significantly reduces the produced bundle size, in some cases ([#3271](https://github.com/quantified-uncertainty/squiggle/pull/3271))
+
+- Import variables have tooltips ([#3312](https://github.com/quantified-uncertainty/squiggle/pull/3312))
+
+- Names with tooltips have hover styles ([#3312](https://github.com/quantified-uncertainty/squiggle/pull/3312))
+
 ## 0.9.4
 
 Features:
