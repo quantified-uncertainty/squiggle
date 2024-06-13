@@ -38,6 +38,7 @@ builder.queryField("groups", (t) =>
               asOwner: {
                 slug: {
                   contains: input.slugContains,
+                  mode: "insensitive",
                 },
               },
             }),

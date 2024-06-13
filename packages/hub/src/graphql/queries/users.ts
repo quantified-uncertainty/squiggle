@@ -25,7 +25,10 @@ builder.queryField("users", (t) =>
 
       if (input?.usernameContains) {
         where.asOwner = {
-          slug: { contains: input.usernameContains },
+          slug: {
+            contains: input.usernameContains,
+            mode: "insensitive",
+          },
         };
       }
 
