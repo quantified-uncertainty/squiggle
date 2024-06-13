@@ -143,12 +143,6 @@ export function createSquigglePrinter(
             ? content
             : group(["{", indent([line, content]), line, "}"]);
         }
-        case "DecoratedStatement":
-          return [
-            typedPath(node).call(print, "decorator"),
-            hardline,
-            typedPath(node).call(print, "statement"),
-          ];
         case "Decorator":
           return group([
             "@",
@@ -167,6 +161,10 @@ export function createSquigglePrinter(
           ]);
         case "LetStatement":
           return group([
+            node.decorators.map((_, i) => [
+              typedPath(node).call(print, "decorators", i),
+              hardline,
+            ]),
             node.exported ? "export " : "",
             node.variable.value,
             " = ",
@@ -174,6 +172,10 @@ export function createSquigglePrinter(
           ]);
         case "DefunStatement":
           return group([
+            node.decorators.map((_, i) => [
+              typedPath(node).call(print, "decorators", i),
+              hardline,
+            ]),
             node.exported ? "export " : "",
             node.variable.value,
             group([

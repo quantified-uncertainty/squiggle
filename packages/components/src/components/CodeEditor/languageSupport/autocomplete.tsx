@@ -28,17 +28,11 @@ export function getNameNodes(tree: Tree, from: number): NameNode[] {
     if (cursor.type.is("Statement") && direction === "sibling") {
       // Only for sibling nodes; `foo = { <cursor> }` shouldn't autocomplete `foo`.
 
-      // Unwrap decorated statements.
-      let node: SyntaxNode | null = cursor.node;
-      while (node && node.type.is("DecoratedStatement")) {
-        node = node.getChild("Statement");
-      }
-
-      const nameNode = node?.getChild("VariableName");
-      if (node && nameNode) {
+      const nameNode = cursor.node.getChild("VariableName");
+      if (nameNode) {
         nameNodes.push({
           node: nameNode,
-          type: node?.type.is("DefunStatement") ? "function" : "variable",
+          type: cursor.node.type.is("DefunStatement") ? "function" : "variable",
         });
       }
     } else if (cursor.type.is("DefunStatement") && direction !== "sibling") {

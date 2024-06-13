@@ -7,7 +7,6 @@ import {
   NamedNodeLambda,
   UnaryOperator,
 } from "./types.js";
-import { undecorated } from "./utils.js";
 
 type TypedNode<T extends ASTNode["type"]> = Extract<ASTNode, { type: T }>;
 
@@ -118,12 +117,11 @@ export function nodeProgram(
 ): TypedNode<"Program"> {
   const symbols: TypedNode<"Program">["symbols"] = {};
   for (const statement of statements) {
-    const _undecorated = undecorated(statement);
     if (
-      _undecorated.type === "LetStatement" ||
-      _undecorated.type === "DefunStatement"
+      statement.type === "LetStatement" ||
+      statement.type === "DefunStatement"
     ) {
-      symbols[_undecorated.variable.value] = _undecorated;
+      symbols[statement.variable.value] = statement;
     }
   }
   return { type: "Program", imports, statements, symbols, location };
@@ -179,6 +177,7 @@ export function nodeLambda(
   return { type: "Lambda", args, body, location, name: name?.value };
 }
 export function nodeLetStatement(
+  decorators: TypedNode<"Decorator">[],
   variable: TypedNode<"Identifier">,
   value: ASTNode,
   exported: boolean,
@@ -188,6 +187,7 @@ export function nodeLetStatement(
     value.type === "Lambda" ? { ...value, name: variable.value } : value;
   return {
     type: "LetStatement",
+    decorators,
     variable,
     value: patchedValue,
     exported,
@@ -195,6 +195,7 @@ export function nodeLetStatement(
   };
 }
 export function nodeDefunStatement(
+  decorators: TypedNode<"Decorator">[],
   variable: TypedNode<"Identifier">,
   value: NamedNodeLambda,
   exported: boolean,
@@ -202,6 +203,7 @@ export function nodeDefunStatement(
 ): TypedNode<"DefunStatement"> {
   return {
     type: "DefunStatement",
+    decorators,
     variable,
     value,
     exported,
@@ -215,29 +217,6 @@ export function nodeDecorator(
   location: LocationRange
 ): TypedNode<"Decorator"> {
   return { type: "Decorator", name, args, location };
-}
-
-export function nodeDecoratedStatement(
-  decorator: TypedNode<"Decorator">,
-  statement: ASTNode,
-  location: LocationRange
-): ASTNode {
-  if (
-    statement.type !== "LetStatement" &&
-    statement.type !== "DefunStatement" &&
-    statement.type !== "DecoratedStatement"
-  ) {
-    // shouldn't happen after we remove support for voids
-    throw new Error(
-      `Can't add a decorator to a node of type ${statement.type}`
-    );
-  }
-  return {
-    type: "DecoratedStatement",
-    decorator,
-    statement,
-    location,
-  };
 }
 
 export function nodeString(

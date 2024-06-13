@@ -61,26 +61,6 @@ export function getLezerParser({
           "Import/*/VariableName",
           "Program/*/LetStatement/VariableName",
           "Program/*/DefunStatement/VariableName",
-          /**
-           * TODO - this is a workaround for Lezer limitation that `*` only
-           * matches a single level.
-           *
-           * We only support up to 3 decorators.
-           *
-           * There might be a better way to do this, e.g. by providing a class
-           * that's used through CSS selectors, but it's complicated.
-           *
-           * I'm also unsure about the performance consequences of this.
-           *
-           * Alternatively, we could just support tooltips on _all_ variable
-           * names.
-           */
-          "Program/*/DecoratedStatement/*/LetStatement/VariableName",
-          "Program/*/DecoratedStatement/*/DecoratedStatement/*/LetStatement/VariableName",
-          "Program/*/DecoratedStatement/*/DecoratedStatement/*/DecoratedStatement/*/LetStatement/VariableName",
-          "Program/*/DecoratedStatement/*/DefunStatement/VariableName",
-          "Program/*/DecoratedStatement/*/DecoratedStatement/*/DefunStatement/VariableName",
-          "Program/*/DecoratedStatement/*/DecoratedStatement/*/DecoratedStatement/*/DefunStatement/VariableName",
         ].join(" ")]: [hoverableTag, t.constant(t.variableName)],
         Identifier: t.variableName,
         Field: t.variableName,

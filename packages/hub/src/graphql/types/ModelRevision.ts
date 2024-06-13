@@ -36,11 +36,11 @@ function astToVariableNames(ast: ASTNode): string[] {
 
   if (ast.type === "Program") {
     ast.statements.forEach((statement) => {
-      while (statement.type === "DecoratedStatement")
-        statement = statement.statement;
-      if (statement.type === "LetStatement" && statement.exported) {
-        exportedVariableNames.push(statement.variable.value);
-      } else if (statement.type === "DefunStatement" && statement.exported) {
+      if (
+        (statement.type === "LetStatement" ||
+          statement.type === "DefunStatement") &&
+        statement.exported
+      ) {
         exportedVariableNames.push(statement.variable.value);
       }
     });

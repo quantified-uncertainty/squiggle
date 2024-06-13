@@ -58,38 +58,35 @@ function* getMarkerData(ast: ASTNode): Generator<MarkerDatum, void> {
     return; // unexpected
   }
 
-  nextStatement: for (let statement of ast.statements) {
-    while (statement.type === "DecoratedStatement") {
-      if (statement.decorator.name.value === "hide") {
-        break nextStatement;
-      }
-      statement = statement.statement;
-    }
-
-    switch (statement.type) {
-      case "DefunStatement":
-      case "LetStatement": {
-        const name = statement.variable.value;
-        if (ast.symbols[name] !== statement) {
-          break; // skip, probably redefined later
+  nextStatement: for (const statement of ast.statements) {
+    if (
+      statement.type === "DefunStatement" ||
+      statement.type === "LetStatement"
+    ) {
+      for (const decorator of statement.decorators) {
+        if (decorator.name.value === "hide") {
+          break nextStatement;
         }
-        const path = new SqValuePath({
-          root: "bindings",
-          edges: [SqValuePathEdge.fromKey(name)],
-        });
-        yield { ast: statement.variable, path };
-        yield* getMarkerSubData(statement.value, path);
-        break;
       }
-      default: {
-        // end expression
-        const path = new SqValuePath({
-          root: "result",
-          edges: [],
-        });
-        yield { ast: statement, path };
-        yield* getMarkerSubData(statement, path);
+      const name = statement.variable.value;
+      if (ast.symbols[name] !== statement) {
+        break; // skip, probably redefined later
       }
+      const path = new SqValuePath({
+        root: "bindings",
+        edges: [SqValuePathEdge.fromKey(name)],
+      });
+      yield { ast: statement.variable, path };
+      yield* getMarkerSubData(statement.value, path);
+      break;
+    } else {
+      // end expression
+      const path = new SqValuePath({
+        root: "result",
+        edges: [],
+      });
+      yield { ast: statement, path };
+      yield* getMarkerSubData(statement, path);
     }
   }
 }

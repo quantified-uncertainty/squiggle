@@ -93,16 +93,14 @@ export function nodeToString(
         return sExpr([...node.args, node.body].map(toSExpr));
       case "Decorator":
         return sExpr([node.name, ...node.args].map(toSExpr));
-      case "DecoratedStatement":
-        return sExpr([node.decorator, node.statement].map(toSExpr));
       case "LetStatement":
+      case "DefunStatement":
         return sExpr([
-          node.exported ? "export" : undefined,
           toSExpr(node.variable),
           toSExpr(node.value),
+          node.exported ? "exported" : undefined,
+          ...node.decorators.map(toSExpr),
         ]);
-      case "DefunStatement":
-        return sExpr([node.variable, node.value].map(toSExpr));
       case "String":
         return `'${node.value}'`; // TODO - quote?
       case "Ternary":
