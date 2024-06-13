@@ -45,6 +45,7 @@ export type SquiggleComponentsPackageTypes = {
   "0.9.2": GetImportType<typeof import("squiggle-components-0.9.2")>;
   "0.9.3": GetImportType<typeof import("squiggle-components-0.9.3")>;
   "0.9.4": GetImportType<typeof import("squiggle-components-0.9.4")>;
+  "0.9.5": GetImportType<typeof import("squiggle-components-0.9.5")>;
   dev: GetImportType<typeof import("@quri/squiggle-components")>;
 };
 export async function squiggleComponentsByVersion<T extends SquiggleVersion>(
@@ -76,6 +77,10 @@ export async function squiggleComponentsByVersion<T extends SquiggleVersion>(
     case "0.9.4":
       return (await import(
         "squiggle-components-0.9.4"
+      )) as unknown as SquiggleComponentsPackageTypes[T];
+    case "0.9.5":
+      return (await import(
+        "squiggle-components-0.9.5"
       )) as unknown as SquiggleComponentsPackageTypes[T];
     case "dev":
       return (await import(
