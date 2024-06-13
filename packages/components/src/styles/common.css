@@ -52,5 +52,29 @@
 }
 
 .cm-tooltip-autocomplete .cm-tooltip {
-  background: white;
+  @apply bg-white;
+}
+
+.cm-search {
+  @apply !bg-slate-50 !px-2 !py-1;
+}
+
+.cm-search .cm-button {
+  @apply !h-6 !rounded-sm !border !border-slate-300 !bg-slate-100 !bg-none !px-2 !py-0.5 !text-xs !font-medium !text-gray-600 hover:!bg-slate-200 hover:!text-gray-900;
+}
+
+.cm-search .cm-textfield {
+  @apply !rounded-sm !border-slate-300 !px-2 !py-1 !text-xs !shadow-sm placeholder:!text-slate-300 focus:!border-indigo-500 focus:!ring-indigo-500 active:!border-indigo-500 active:!ring-indigo-500;
+}
+
+.cm-search label {
+  @apply !text-xs;
+}
+
+.cm-search input[type="checkbox"] {
+  @apply !form-checkbox !mr-1 !h-4 !w-4 !rounded !border-gray-300 !text-indigo-600 focus:!ring-0;
+}
+
+.cm-search button[name="close"] {
+  @apply !right-2 !text-base !text-slate-400 hover:!text-slate-700;
 }
