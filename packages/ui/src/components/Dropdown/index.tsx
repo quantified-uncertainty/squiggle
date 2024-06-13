@@ -11,7 +11,7 @@ import {
   useFloating,
   useInteractions,
 } from "@floating-ui/react";
-import { clsx } from "clsx";
+import clsx from "clsx";
 import {
   FC,
   PropsWithChildren,
@@ -32,12 +32,14 @@ type Props = PropsWithChildren<{
   // since dropdowns put its children in an extra div, this option might be necessary.
   fullHeight?: boolean;
   placement?: Placement;
+  portal?: boolean;
 }>;
 
 export const Dropdown: FC<Props> = ({
   render,
   fullHeight,
   placement: suggestedPlacement = "bottom-start",
+  portal = true,
   children,
 }) => {
   const { selector: tailwindSelector } = useContext(TailwindContext);
@@ -73,38 +75,44 @@ export const Dropdown: FC<Props> = ({
     setIsOpen(false);
   }, []);
 
-  const renderTooltip = () => (
-    <FloatingPortal>
-      <div className={tailwindSelector}>
-        <div
-          ref={refs.setFloating}
-          className="z-30 overflow-hidden rounded-md border border-slate-300 bg-white shadow-xl"
-          style={{
-            position: strategy,
-            top: y ?? 0,
-            left: x ?? 0,
-          }}
-          {...getFloatingProps()}
-        >
-          {render({ close: closeDropdown })}
-          {
-            // arrow is disabled for now - has rendering issues
-            false && (
-              <div
-                ref={arrowRef}
-                style={{
-                  left: middlewareData.arrow?.x ?? "",
-                  top: middlewareData.arrow?.y ?? "",
-                  [staticSide]: "-0.25rem",
-                }}
-                className="absolute h-2 w-2 rotate-45 bg-white"
-              />
-            )
-          }
-        </div>
+  const renderTooltip = () => {
+    let tooltip = (
+      <div
+        ref={refs.setFloating}
+        className="z-30 overflow-hidden rounded-md border border-slate-300 bg-white shadow-xl"
+        style={{
+          position: strategy,
+          top: y ?? 0,
+          left: x ?? 0,
+        }}
+        {...getFloatingProps()}
+      >
+        {render({ close: closeDropdown })}
+        {
+          // arrow is disabled for now - has rendering issues
+          false && (
+            <div
+              ref={arrowRef}
+              style={{
+                left: middlewareData.arrow?.x ?? "",
+                top: middlewareData.arrow?.y ?? "",
+                [staticSide]: "-0.25rem",
+              }}
+              className="absolute h-2 w-2 rotate-45 bg-white"
+            />
+          )
+        }
       </div>
-    </FloatingPortal>
-  );
+    );
+    if (portal) {
+      tooltip = (
+        <FloatingPortal>
+          <div className={tailwindSelector}>{tooltip}</div>
+        </FloatingPortal>
+      );
+    }
+    return tooltip;
+  };
 
   return (
     <DropdownContext.Provider value={{ closeDropdown }}>
