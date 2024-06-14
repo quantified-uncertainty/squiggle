@@ -1,6 +1,6 @@
 "use client";
 import { FC, use } from "react";
-import { useFragment } from "react-relay";
+import { useFragment, useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import {
@@ -11,33 +11,61 @@ import {
 } from "@quri/versioned-squiggle-components";
 
 import { EditSquiggleSnippetModel } from "@/app/models/[owner]/[slug]/EditSquiggleSnippetModel";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { squiggleHubLinker } from "@/squiggle/components/linker";
 
-import { UpgradeableModel$key } from "@/__generated__/UpgradeableModel.graphql";
+import { UpgradeableModel_Ref$key } from "@/__generated__/UpgradeableModel_Ref.graphql";
+import { UpgradeableModelQuery } from "@/__generated__/UpgradeableModelQuery.graphql";
 
 export const UpgradeableModel: FC<{
-  modelRef: UpgradeableModel$key;
+  modelRef: UpgradeableModel_Ref$key;
 }> = ({ modelRef }) => {
-  const model = useFragment(
+  const incompleteModel = useFragment(
     graphql`
-      fragment UpgradeableModel on Model {
+      fragment UpgradeableModel_Ref on Model {
         id
-        currentRevision {
-          content {
-            __typename
-            ... on SquiggleSnippet {
-              id
-              code
-              version
-              seed
-            }
-          }
+        slug
+        owner {
+          id
+          slug
         }
-        ...EditSquiggleSnippetModel
       }
     `,
     modelRef
   );
+
+  const result = useLazyLoadQuery<UpgradeableModelQuery>(
+    graphql`
+      query UpgradeableModelQuery($input: QueryModelInput!) {
+        model(input: $input) {
+          __typename
+          ... on Model {
+            id
+            currentRevision {
+              content {
+                __typename
+                ... on SquiggleSnippet {
+                  id
+                  code
+                  version
+                  seed
+                }
+              }
+            }
+            ...EditSquiggleSnippetModel
+          }
+        }
+      }
+    `,
+    {
+      input: {
+        slug: incompleteModel.slug,
+        owner: incompleteModel.owner.slug,
+      },
+    }
+  );
+
+  const model = extractFromGraphqlErrorUnion(result.model, "Model");
 
   const currentRevision = model.currentRevision;
 

@@ -37,7 +37,7 @@ const ModelList: FC<{
           id
           slug
         }
-        ...UpgradeableModel
+        ...UpgradeableModel_Ref
       }
     `,
     modelsRef
