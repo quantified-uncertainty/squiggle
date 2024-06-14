@@ -1,5 +1,5 @@
 "use client";
-import { FC, use, useState } from "react";
+import { FC, useState } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
@@ -9,100 +9,25 @@ import {
   DropdownMenu,
   DropdownMenuActionItem,
 } from "@quri/ui";
-import {
-  defaultSquiggleVersion,
-  useAdjustSquiggleVersion,
-  versionedSquigglePackages,
-  versionSupportsSquiggleChart,
-} from "@quri/versioned-squiggle-components";
+import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
 
-import { EditSquiggleSnippetModel } from "@/app/models/[owner]/[slug]/EditSquiggleSnippetModel";
 import { H2 } from "@/components/ui/Headers";
 import { MutationButton } from "@/components/ui/MutationButton";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRoute } from "@/routes";
-import { squiggleHubLinker } from "@/squiggle/components/linker";
+
+import { UpgradeableModel } from "./UpgradeableModel";
 
 import { UpgradeVersionsPage_List$key } from "@/__generated__/UpgradeVersionsPage_List.graphql";
-import { UpgradeVersionsPage_Model$key } from "@/__generated__/UpgradeVersionsPage_Model.graphql";
 import { UpgradeVersionsPage_updateMutation } from "@/__generated__/UpgradeVersionsPage_updateMutation.graphql";
 import { UpgradeVersionsPageQuery } from "@/__generated__/UpgradeVersionsPageQuery.graphql";
 
-const UpgradeableModel: FC<{ modelRef: UpgradeVersionsPage_Model$key }> = ({
-  modelRef,
-}) => {
-  const model = useFragment(
-    graphql`
-      fragment UpgradeVersionsPage_Model on Model {
-        id
-        currentRevision {
-          content {
-            __typename
-            ... on SquiggleSnippet {
-              id
-              code
-              version
-              seed
-            }
-          }
-        }
-        ...EditSquiggleSnippetModel
-      }
-    `,
-    modelRef
-  );
-
-  const currentRevision = model.currentRevision;
-
-  if (currentRevision.content.__typename !== "SquiggleSnippet") {
-    throw new Error("Wrong content type");
-  }
-
-  const version = useAdjustSquiggleVersion(currentRevision.content.version);
-  const updatedVersion = defaultSquiggleVersion;
-
-  const squiggle = use(versionedSquigglePackages(version));
-  const updatedSquiggle = use(versionedSquigglePackages(updatedVersion));
-
-  const project = new squiggle.lang.SqProject({
-    linker: squiggleHubLinker,
-  });
-  const updatedProject = new updatedSquiggle.lang.SqProject({
-    linker: squiggleHubLinker,
-  });
-
-  if (versionSupportsSquiggleChart.plain(version)) {
-    const headerClasses = "py-1 px-2 m-1 bg-slate-200 font-medium";
-    return (
-      <div className="grid grid-cols-2">
-        <div className={headerClasses}>{version}</div>
-        <div className={headerClasses}>{updatedVersion}</div>
-        <squiggle.components.SquiggleChart
-          code={currentRevision.content.code}
-          project={project}
-        />
-        <updatedSquiggle.components.SquiggleChart
-          code={currentRevision.content.code}
-          project={updatedProject}
-        />
-      </div>
-    );
-  } else {
-    return (
-      <EditSquiggleSnippetModel
-        key={model.id}
-        modelRef={model}
-        forceVersionPicker
-      />
-    );
-  }
-};
-
-const ModelList: FC<{ modelsRef: UpgradeVersionsPage_List$key }> = ({
-  modelsRef,
-}) => {
+const ModelList: FC<{
+  modelsRef: UpgradeVersionsPage_List$key;
+  reload: () => void;
+}> = ({ modelsRef, reload }) => {
   const models = useFragment(
     graphql`
       fragment UpgradeVersionsPage_List on Model @relay(plural: true) {
@@ -112,7 +37,7 @@ const ModelList: FC<{ modelsRef: UpgradeVersionsPage_List$key }> = ({
           id
           slug
         }
-        ...UpgradeVersionsPage_Model
+        ...UpgradeableModel
       }
     `,
     modelsRef
@@ -160,9 +85,11 @@ const ModelList: FC<{ modelsRef: UpgradeVersionsPage_List$key }> = ({
               }
             }
           `}
-          updater={() => {
+          updater={(store) => {
             // reload() from usePageQuery doesn't work for some reason
-            window.location.reload();
+            store.get(model.id)?.invalidateRecord();
+            reload();
+            // window.location.reload();
           }}
           variables={{
             input: {
@@ -192,7 +119,7 @@ export const UpgradeVersionsPage: FC<{
   query: SerializablePreloadedQuery<UpgradeVersionsPageQuery>;
 }> = ({ query }) => {
   // TODO - this fetches all models even if we show just one, can we optimize it?
-  const [{ modelsByVersion }] = usePageQuery(
+  const [{ modelsByVersion }, { reload }] = usePageQuery(
     graphql`
       query UpgradeVersionsPageQuery {
         modelsByVersion {
@@ -238,12 +165,12 @@ export const UpgradeVersionsPage: FC<{
   return (
     <div>
       <H2>Upgrade model versions</H2>
-      <div className="text-xs">
+      <div>
         <p className="text-xs">
           Check models with their current version and the new version, then
           press the upgrade button if everything is ok.
         </p>
-        <p>
+        <p className="text-xs">
           <strong>
             {`Code edits won't be saved, "Upgrade" button bumps only the model's version.`}
           </strong>
@@ -279,7 +206,9 @@ export const UpgradeVersionsPage: FC<{
           </Button>
         </Dropdown>
       </div>
-      {selectedEntry ? <ModelList modelsRef={selectedEntry.models} /> : null}
+      {selectedEntry ? (
+        <ModelList modelsRef={selectedEntry.models} reload={reload} />
+      ) : null}
     </div>
   );
 };
