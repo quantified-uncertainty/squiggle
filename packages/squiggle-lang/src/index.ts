@@ -136,9 +136,12 @@ export { generateSeed } from "./utility/seedGenerator.js";
 export {
   allRunnerNames,
   defaultRunnerName,
+  EmbeddedRunner,
+  EmbeddedWithSerializationRunner,
+  PoolRunner,
   runnerByName,
   type RunnerName,
+  RunnerPool,
+  WebWorkerRunner,
+  WithCacheLoaderRunner,
 } from "./runners/index.js";
-
-// Needs to be parameterized with the wrapped runner, so can't be obtained through `runnerByName`
-export { WithCacheLoaderRunner } from "./runners/WithCacheLoaderRunner.js";

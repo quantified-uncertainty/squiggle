@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 
 import {
-  defaultRunnerName,
   Env,
   runnerByName,
   RunnerName,
@@ -82,17 +81,22 @@ function useSetup({
 
   // Intentionally using `useState` instead of `useMemo` - updates to project configuration happen as effects.
   const [project] = useState(() => {
+    const getRunner = () =>
+      runnerName
+        ? runnerByName(runnerName, runnerName === "web-worker" ? 2 : 1)
+        : undefined;
+
     switch (setup.type) {
       case "standalone":
         return SqProject.create({
           environment,
-          runner: runnerName ? runnerByName(runnerName) : undefined,
+          runner: getRunner(),
         });
       case "projectFromLinker":
         return SqProject.create({
           environment,
           linker: setup.linker,
-          runner: runnerName ? runnerByName(runnerName) : undefined,
+          runner: getRunner(),
         });
       case "project":
         return setup.project;
@@ -272,7 +276,9 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
       // (Consider the case where `setup.project` is set with a pre-configured runner)
       return;
     }
-    project.setRunner(runnerByName(args.runnerName ?? defaultRunnerName));
+    project.setRunner(
+      runnerByName(args.runnerName, args.runnerName === "web-worker" ? 2 : 1)
+    );
     if (state.autorunMode) {
       runSimulation();
     }

@@ -32,7 +32,6 @@ export async function runWithWorker(
         }
         const { payload } = e.data;
 
-        worker.terminate();
         resolve(deserializeRunResult(payload));
       }
     );

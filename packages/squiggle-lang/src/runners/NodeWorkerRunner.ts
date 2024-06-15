@@ -35,6 +35,8 @@ function isNodeJs() {
 type Worker = (typeof global)["Worker"]["prototype"];
 
 export class NodeWorkerRunner extends AnyWorkerRunner {
+  worker: Worker;
+
   constructor() {
     // This runner is Node.js-specific. In theory,
     // https://www.npmjs.com/package/web-worker is universal, but it doesn't
@@ -42,17 +44,17 @@ export class NodeWorkerRunner extends AnyWorkerRunner {
     if (!isNodeJs()) {
       throw new Error("NodeWorkerRunner is only available in Node.js");
     }
+
     super();
+
+    // web-worker module types are broken, so we use browser types instead
+    const workerUrl = new URL("./worker.js", import.meta.url);
+    this.worker = new (NodeWorker as any)(workerUrl, {
+      type: "module",
+    }) as Worker;
   }
 
   async getWorker(): Promise<Worker> {
-    const workerUrl = new URL("./worker.js", import.meta.url);
-
-    // web-worker module types are broken, so we use browser types instead
-    const worker = new (NodeWorker as any)(workerUrl, {
-      type: "module",
-    }) as Worker;
-
-    return worker;
+    return this.worker;
   }
 }
