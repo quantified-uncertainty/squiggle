@@ -7,8 +7,9 @@ import { defaultEnv, Env } from "../../dists/env.js";
 import { SqLinker } from "../../public/SqLinker.js";
 import { SqProject } from "../../public/SqProject/index.js";
 import { allRunnerNames, runnerByName } from "../../runners/index.js";
+import { CliPrinter } from "../CliPrinter.js";
 import { bold, red } from "../colors.js";
-import { loadSrc, measure } from "../utils.js";
+import { loadSrc, measure, myParseInt } from "../utils.js";
 
 type OutputMode = "NONE" | "RESULT_OR_BINDINGS" | "RESULT_AND_BINDINGS";
 
@@ -21,6 +22,7 @@ type RunArgs = {
   seed?: string;
   profile?: boolean;
   runner?: Parameters<typeof runnerByName>[0];
+  runnerThreads?: number;
 };
 
 const EVAL_SOURCE_ID = "[eval]";
@@ -40,13 +42,15 @@ const linker: SqLinker = {
 };
 
 async function _run(
-  args: Pick<RunArgs, "src" | "filename" | "runner"> & {
+  args: Pick<RunArgs, "src" | "filename" | "runner" | "runnerThreads"> & {
     environment?: Env;
   }
 ) {
   const project = SqProject.create({
     linker,
-    runner: args.runner ? runnerByName(args.runner) : undefined,
+    runner: args.runner
+      ? runnerByName(args.runner, args.runnerThreads ?? 1)
+      : undefined,
     environment: args.environment,
   });
   const filename = args.filename ? path.resolve(args.filename) : EVAL_SOURCE_ID;
@@ -81,30 +85,27 @@ async function run(args: RunArgs) {
     runner: args.runner,
   });
 
-  // Prints a section consisting of multiple lines; prints an extra "\n" if a section was printed before.
-  let isFirstSection = true;
-  const printLines = (...lines: string[]) => {
-    if (!isFirstSection) {
-      console.log();
-    }
-    isFirstSection = false;
-    lines.forEach((line) => console.log(line));
-  };
-
+  const printer = new CliPrinter();
   if (!output.ok) {
-    printLines(red("Error:"), output.value.toStringWithDetails(project));
+    printer.printSection(
+      red("Error:"),
+      output.value.toStringWithDetails(project)
+    );
   } else {
     switch (args.output) {
       case "RESULT_OR_BINDINGS":
         if (output.value.result.tag === "Void") {
-          printLines(output.value.bindings.toString());
+          printer.printSection(output.value.bindings.toString());
         } else {
-          printLines(output.value.result.toString());
+          printer.printSection(output.value.result.toString());
         }
         break;
       case "RESULT_AND_BINDINGS":
-        printLines(bold("Result:"), output.value.result.toString());
-        printLines(bold("Bindings:"), output.value.bindings.toString());
+        printer.printSection(bold("Result:"), output.value.result.toString());
+        printer.printSection(
+          bold("Bindings:"),
+          output.value.bindings.toString()
+        );
         break;
       case "NONE":
       // do nothing
@@ -112,7 +113,7 @@ async function run(args: RunArgs) {
   }
 
   if (args.measure) {
-    printLines(`${bold("Time:")} ${time}s`);
+    printer.printSection(`${bold("Time:")} ${time}s`);
   }
 }
 
@@ -130,6 +131,7 @@ export function addRunCommand(program: Command) {
     .addOption(
       new Option("-r, --runner <runner>", "embedded").choices(allRunnerNames)
     )
+    .addOption(new Option("--runner-threads <number>").argParser(myParseInt))
     .option(
       "-b, --show-bindings",
       "show bindings even if the result is present"
@@ -158,6 +160,7 @@ export function addRunCommand(program: Command) {
         measure: options.time,
         sampleCount,
         runner: options.runner,
+        runnerThreads: options.runnerThreads,
       });
     });
 }

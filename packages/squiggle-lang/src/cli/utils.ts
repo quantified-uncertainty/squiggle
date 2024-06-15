@@ -1,4 +1,4 @@
-import { Command } from "@commander-js/extra-typings";
+import { Command, InvalidArgumentError } from "@commander-js/extra-typings";
 import fs from "fs";
 
 import { JsonValue } from "../utility/typeHelpers.js";
@@ -74,4 +74,12 @@ export function coloredJson(value: JsonValue, indent = 0): string {
     (Object.keys(value).length ? "\n" + " ".repeat(indent) : "") +
     "}"
   );
+}
+
+export function myParseInt(value: string) {
+  const parsedValue = parseInt(value, 10);
+  if (isNaN(parsedValue)) {
+    throw new InvalidArgumentError("Not a number.");
+  }
+  return parsedValue;
 }
