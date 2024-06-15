@@ -1,10 +1,9 @@
 import { Command } from "@commander-js/extra-typings";
-import util from "util";
 
 import { nodeResultToString } from "../../ast/parse.js";
 import { parse } from "../../public/parse.js";
 import { red } from "../colors.js";
-import { loadSrc } from "../utils.js";
+import { coloredJson, loadSrc } from "../utils.js";
 
 export function addParseCommand(program: Command) {
   program
@@ -21,9 +20,7 @@ export function addParseCommand(program: Command) {
       const parseResult = parse(src);
       if (parseResult.ok) {
         if (options.raw) {
-          console.log(
-            util.inspect(parseResult.value, { depth: Infinity, colors: true })
-          );
+          console.log(coloredJson(parseResult.value));
         } else {
           console.log(nodeResultToString(parseResult, { colored: true }));
         }
