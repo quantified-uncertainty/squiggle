@@ -619,6 +619,9 @@ importers:
       codecov:
         specifier: ^3.8.3
         version: 3.8.3
+      date-fns:
+        specifier: ^3.6.0
+        version: 3.6.0
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -11352,7 +11355,6 @@ packages:
 
   /date-fns@3.6.0:
     resolution: {integrity: sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==}
-    dev: false
 
   /dayjs@1.11.10:
     resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}

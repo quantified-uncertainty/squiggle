@@ -12,6 +12,12 @@ import { SqDict } from "../SqValue/SqDict.js";
 import { SqValuePath } from "../SqValuePath.js";
 import { SqOutput, SqOutputResult } from "../types.js";
 import {
+  ProjectEvent,
+  ProjectEventListener,
+  ProjectEventShapes,
+  ProjectEventType,
+} from "./events.js";
+import {
   type Externals,
   Import,
   ProjectItem,
@@ -33,6 +39,8 @@ export class SqProject {
   private environment: Env;
   private linker?: SqLinker; // if not present, imports are forbidden
   public runner: BaseRunner;
+
+  private eventTarget = new EventTarget();
 
   // Direct graph of dependencies is maintained inside each ProjectItem,
   // while the inverse one is stored in this variable.
@@ -341,11 +349,13 @@ export class SqProject {
       if (!rExternals.ok) {
         this.getItem(sourceId).failRun(rExternals.value);
       } else {
+        this.dispatchEvent("start-run", { sourceId });
         await this.getItem(sourceId).run(
           this.getEnvironment(),
           rExternals.value,
           this
         );
+        this.dispatchEvent("end-run", { sourceId });
       }
     }
 
@@ -376,5 +386,29 @@ export class SqProject {
       return Result.Err(new SqOtherError("Not found"));
     }
     return Result.Ok(found);
+  }
+
+  private dispatchEvent<T extends ProjectEventType>(
+    type: T,
+    data: Extract<ProjectEventShapes, { type: T }>["payload"]
+  ) {
+    this.eventTarget.dispatchEvent(new ProjectEvent(type, data));
+  }
+
+  addEventListener<T extends ProjectEventType>(
+    type: T,
+    listener: ProjectEventListener<T>
+  ) {
+    this.eventTarget.addEventListener(type, listener as (event: Event) => void);
+  }
+
+  removeEventListener<T extends ProjectEventType>(
+    type: T,
+    listener: ProjectEventListener<T>
+  ) {
+    this.eventTarget.removeEventListener(
+      type,
+      listener as (event: Event) => void
+    );
   }
 }

@@ -9,7 +9,7 @@ import { SqProject } from "../../public/SqProject/index.js";
 import { allRunnerNames, runnerByName } from "../../runners/index.js";
 import { CliPrinter } from "../CliPrinter.js";
 import { bold, red } from "../colors.js";
-import { loadSrc, measure, myParseInt } from "../utils.js";
+import { debugLog, loadSrc, measure, myParseInt } from "../utils.js";
 
 type OutputMode = "NONE" | "RESULT_OR_BINDINGS" | "RESULT_AND_BINDINGS";
 
@@ -23,6 +23,7 @@ type RunArgs = {
   profile?: boolean;
   runner?: Parameters<typeof runnerByName>[0];
   runnerThreads?: number;
+  logEvents?: boolean;
 };
 
 const EVAL_SOURCE_ID = "[eval]";
@@ -42,7 +43,10 @@ const linker: SqLinker = {
 };
 
 async function _run(
-  args: Pick<RunArgs, "src" | "filename" | "runner" | "runnerThreads"> & {
+  args: Pick<
+    RunArgs,
+    "src" | "filename" | "runner" | "runnerThreads" | "logEvents"
+  > & {
     environment?: Env;
   }
 ) {
@@ -53,6 +57,15 @@ async function _run(
       : undefined,
     environment: args.environment,
   });
+
+  if (args.logEvents) {
+    project.addEventListener("start-run", (e) => {
+      debugLog("Started", e.data.sourceId);
+    });
+    project.addEventListener("end-run", (e) => {
+      debugLog("Finished", e.data.sourceId);
+    });
+  }
   const filename = args.filename ? path.resolve(args.filename) : EVAL_SOURCE_ID;
 
   project.setSource(filename, args.src);
@@ -83,6 +96,8 @@ async function run(args: RunArgs) {
     filename: args.filename,
     environment,
     runner: args.runner,
+    runnerThreads: args.runnerThreads,
+    logEvents: args.logEvents,
   });
 
   const printer = new CliPrinter();
@@ -128,6 +143,7 @@ export function addRunCommand(program: Command) {
     .option("-t --time", "output the time it took to evaluate the code")
     .option("-p --profile", "performance profiler")
     .option("-q, --quiet", "don't output the results and bindings") // useful for measuring the performance or checking that the code is valid
+    .option("--log-events", "log start/end run events")
     .addOption(
       new Option("-r, --runner <runner>", "embedded").choices(allRunnerNames)
     )
@@ -161,6 +177,7 @@ export function addRunCommand(program: Command) {
         sampleCount,
         runner: options.runner,
         runnerThreads: options.runnerThreads,
+        logEvents: options.logEvents,
       });
     });
 }

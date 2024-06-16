@@ -1,4 +1,5 @@
 import { Command, InvalidArgumentError } from "@commander-js/extra-typings";
+import { format as formatDate } from "date-fns/format";
 import fs from "fs";
 
 import { JsonValue } from "../utility/typeHelpers.js";
@@ -82,4 +83,9 @@ export function myParseInt(value: string) {
     throw new InvalidArgumentError("Not a number.");
   }
   return parsedValue;
+}
+
+export function debugLog(...args: string[]) {
+  const date = new Date();
+  console.debug(yellow(formatDate(date, "yyyy-MM-dd HH:mm:ss.SSS")), ...args);
 }
