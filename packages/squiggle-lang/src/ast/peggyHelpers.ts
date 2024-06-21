@@ -3,6 +3,7 @@ import {
   ASTCommentNode,
   ASTNode,
   InfixOperator,
+  TypeOperator,
   LocationRange,
   NamedNodeLambda,
   UnaryOperator,
@@ -36,6 +37,30 @@ export function nodeInfixCall(
 ): TypedNode<"InfixCall"> {
   return {
     type: "InfixCall",
+    op,
+    args: [arg1, arg2],
+    location,
+  };
+}
+
+export function makeInfixTypeChain(
+  head: ASTNode,
+  tail: [TypeOperator, ASTNode][],
+  location: LocationRange
+): ASTNode {
+  return tail.reduce((result, [operator, right]) => {
+    return nodeInfixType(operator, result, right, location);
+  }, head);
+}
+
+export function nodeInfixType(
+  op: TypeOperator,
+  arg1: ASTNode,
+  arg2: ASTNode,
+  location: LocationRange
+): TypedNode<"InfixType"> {
+  return {
+    type: "InfixType",
     op,
     args: [arg1, arg2],
     location,
@@ -110,6 +135,7 @@ export function nodeBlock(
 ): TypedNode<"Block"> {
   return { type: "Block", statements, location };
 }
+
 export function nodeProgram(
   imports: [TypedNode<"String">, TypedNode<"Identifier">][],
   statements: ASTNode[],
@@ -126,6 +152,29 @@ export function nodeProgram(
   }
   return { type: "Program", imports, statements, symbols, location };
 }
+
+export function nodeTypeSignature(
+  isImplicit: boolean,
+  body: ASTNode,
+  location: LocationRange
+): TypedNode<"TypeSignature"> {
+  return {
+    type: "TypeSignature",
+    isImplicit: isImplicit,
+    body: body,
+    location: location
+  };
+}
+
+export function nodeImplicitType(
+  location: LocationRange
+): TypedNode<"ImplicitType"> {
+  return {
+    type: "ImplicitType",
+    location: location
+  };
+}
+
 export function nodeBoolean(
   value: boolean,
   location: LocationRange
@@ -179,6 +228,7 @@ export function nodeLambda(
 export function nodeLetStatement(
   decorators: TypedNode<"Decorator">[],
   variable: TypedNode<"Identifier">,
+  typeSignature: TypedNode<"TypeSignature">,
   value: ASTNode,
   exported: boolean,
   location: LocationRange
@@ -189,6 +239,7 @@ export function nodeLetStatement(
     type: "LetStatement",
     decorators,
     variable,
+    typeSignature,
     value: patchedValue,
     exported,
     location,

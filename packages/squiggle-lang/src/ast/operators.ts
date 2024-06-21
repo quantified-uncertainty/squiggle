@@ -21,7 +21,12 @@ export const infixFunctions = {
 };
 
 export const unaryFunctions = {
-  "-": "unaryMinus",
-  "!": "not",
-  ".-": "unaryDotMinus",
+    "-": "unaryMinus",
+    "!": "not",
+    ".-": "unaryDotMinus",
+};
+
+export const typeFunctions = {
+    "*": "multiply",
+    "/": "divide",
 };

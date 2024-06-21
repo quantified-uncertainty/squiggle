@@ -73,6 +73,13 @@ export function serializeAstNode(
         statements: node.statements.map(visit.ast),
       };
     case "LetStatement":
+      return {
+        ...node,
+        decorators: node.decorators.map(visit.ast),
+        variable: visit.ast(node.variable),
+        typeSignature: visit.ast(node.typeSignature),
+        value: visit.ast(node.value),
+      };
     case "DefunStatement":
       return {
         ...node,
@@ -160,6 +167,18 @@ export function serializeAstNode(
         trueExpression: visit.ast(node.trueExpression),
         falseExpression: visit.ast(node.falseExpression),
       };
+    case "TypeSignature":
+      return {
+        ...node,
+        body: visit.ast(node.body),
+      };
+    case "InfixType":
+      return {
+        ...node,
+        args: [visit.ast(node.args[0]), visit.ast(node.args[1])],
+      };
+    case "ImplicitType":
+      return node;
     case "Identifier":
       return node;
     case "IdentifierWithAnnotation":
@@ -206,6 +225,7 @@ export function deserializeAstNode(
         ...node,
         decorators: node.decorators.map(visit.ast) as TypedNode<"Decorator">[],
         variable: visit.ast(node.variable) as TypedNode<"Identifier">,
+        typeSignature: visit.ast(node.typeSignature) as TypedNode<"TypeSignature">,
         value: visit.ast(node.value),
       };
     case "DefunStatement":
@@ -297,6 +317,18 @@ export function deserializeAstNode(
         trueExpression: visit.ast(node.trueExpression),
         falseExpression: visit.ast(node.falseExpression),
       };
+    case "TypeSignature":
+      return {
+        ...node,
+        body: visit.ast(node.body) as TypedNode<"ImplicitType" | "InfixType">,
+      };
+    case "InfixType":
+      return {
+        ...node,
+        args: [visit.ast(node.args[0]), visit.ast(node.args[1])],
+      };
+    case "ImplicitType":
+        return node;
     case "Identifier":
       return node;
     case "IdentifierWithAnnotation":

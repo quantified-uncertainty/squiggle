@@ -1,4 +1,4 @@
-import { infixFunctions, unaryFunctions } from "./operators.js";
+import { infixFunctions, unaryFunctions, typeFunctions } from "./operators.js";
 
 /*
  *`Location` and `LocationRange` types are copy-pasted from Peggy, but
@@ -29,6 +29,8 @@ export type LocationRange = {
 export type InfixOperator = keyof typeof infixFunctions;
 
 export type UnaryOperator = keyof typeof unaryFunctions;
+
+export type TypeOperator = keyof typeof typeFunctions;
 
 type N<T extends string, V extends object> = {
   type: T;
@@ -178,6 +180,7 @@ type LetOrDefun = {
 type NodeLetStatement = N<
   "LetStatement",
   LetOrDefun & {
+    typeSignature: NodeTypeSignature;
     value: ASTNode;
   }
 >;
@@ -211,6 +214,24 @@ type NodeTernary = N<
   }
 >;
 
+type NodeTypeSignature = N<
+  "TypeSignature",
+  {
+    isImplicit: boolean;
+    body: ASTNode;
+  }
+>;
+
+type NodeImplicitType = N<"ImplicitType", {}>;
+
+type NodeInfixType = N<
+  "InfixType",
+  {
+    op: TypeOperator;
+    args: [ASTNode, ASTNode];
+  }
+>;
+
 type NodeString = N<"String", { value: string }>;
 
 type NodeBoolean = N<"Boolean", { value: boolean }>;
@@ -240,6 +261,10 @@ export type ASTNode =
   | NodeBracketLookup
   // control flow - if/else
   | NodeTernary
+  // type signature
+  | NodeTypeSignature
+  | NodeInfixType
+  | NodeImplicitType
   // identifiers
   | NodeIdentifier
   | NodeIdentifierWithAnnotation
