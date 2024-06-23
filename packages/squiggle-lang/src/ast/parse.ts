@@ -12,6 +12,7 @@ import {
   type ASTNode,
   LocationRange,
 } from "./types.js";
+import { typeCheck } from "./typeChecker.js";
 
 export type ParseError = {
   type: "SyntaxError";
@@ -31,6 +32,7 @@ export function parse(expr: string, source: string): ParseResult {
     if (parsed.type !== "Program") {
       throw new Error("Expected parse to result in a Program node");
     }
+    typeCheck(parsed);
     parsed.comments = comments;
     return Result.Ok(parsed);
   } catch (e) {
