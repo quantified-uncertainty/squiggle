@@ -58,13 +58,38 @@ decorator
       return h.nodeDecorator(name, args ?? [], location());
     }
 
+typeSignature
+  = _ ":" _ body:infixType
+    {
+      return h.nodeTypeSignature(false, body, location());
+    }
+  / body:implicitType
+    {
+      return h.nodeTypeSignature(true, body, location());
+    }
+
+infixType
+  = head:identifier tail:(@typeMultiplicativeOp @identifier)*
+    { return h.makeInfixTypeChain(head, tail, location()); }
+  typeMultiplicativeOp "operator" = '*' / '/'
+
+implicitType
+  = ""
+    { return h.nodeImplicitType(location()); }
+
+typeWord
+  = name:identifier
+    {
+      return h.nodeDecorator(name, args ?? [], location());
+    }
+
 statement
   = letStatement
   / defunStatement
 
 letStatement
-  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier _ assignmentOp _nl value:innerBlockOrExpression
-    { return h.nodeLetStatement(decorators, variable, value, Boolean(exported), location()); }
+  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier typeSignature:typeSignature _ assignmentOp _nl value:innerBlockOrExpression
+    { return h.nodeLetStatement(decorators, variable, typeSignature, value, Boolean(exported), location()); }
 
 defunStatement
   = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier '(' _nl args:functionParameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
@@ -264,13 +289,13 @@ unitIdentifier 'identifier'
 dollarIdentifier 'identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
-escapeSeq 'escape sequence' 
+escapeSeq 'escape sequence'
   = "\\"
      @( esc:[^u]          { return h.parseEscapeSequence([esc], location(), error) }
       / esc:("u" . . . .) { return h.parseEscapeSequence(esc, location(), error) }
       )
 
-string 'string' 
+string 'string'
   = "'" characters:(!("'" / "\\") @. / escapeSeq)* "'" { return h.nodeString(characters.join(""), location()); }
   / '"' characters:(!('"' / "\\") @. / escapeSeq)* '"' { return h.nodeString(characters.join(""), location()); }
 
@@ -294,7 +319,7 @@ float 'number'
         exponent,
       }, location());
     }
-  
+
   floatSignificand
     = integer:intLiteral "." fractional:($d+)?
       {

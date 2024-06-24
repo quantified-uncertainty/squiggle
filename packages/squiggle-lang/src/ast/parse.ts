@@ -12,6 +12,7 @@ import {
   type ASTNode,
   LocationRange,
 } from "./types.js";
+import { typeCheck } from "./typeChecker.js";
 
 export type ParseError = {
   type: "SyntaxError";
@@ -31,6 +32,7 @@ export function parse(expr: string, source: string): ParseResult {
     if (parsed.type !== "Program") {
       throw new Error("Expected parse to result in a Program node");
     }
+    typeCheck(parsed);
     parsed.comments = comments;
     return Result.Ok(parsed);
   } catch (e) {
@@ -94,6 +96,22 @@ export function nodeToString(
       case "Decorator":
         return sExpr([node.name, ...node.args].map(toSExpr));
       case "LetStatement":
+        if (node.typeSignature.isImplicit) {
+          return sExpr([
+            toSExpr(node.variable),
+            toSExpr(node.value),
+            node.exported ? "exported" : undefined,
+            ...node.decorators.map(toSExpr),
+          ]);
+        } else {
+          return sExpr([
+            toSExpr(node.variable),
+            toSExpr(node.typeSignature),
+            toSExpr(node.value),
+            node.exported ? "exported" : undefined,
+            ...node.decorators.map(toSExpr),
+          ]);
+        }
       case "DefunStatement":
         return sExpr([
           toSExpr(node.variable),
@@ -109,6 +127,12 @@ export function nodeToString(
             toSExpr
           )
         );
+      case "TypeSignature":
+        return sExpr([toSExpr(node.body)]);
+      case "InfixType":
+        return sExpr([node.op, ...node.args.map(toSExpr)]);
+      case "ImplicitType":
+        return sExpr([]);
       case "UnitValue":
         return sExpr([toSExpr(node.value), node.unit]);
 

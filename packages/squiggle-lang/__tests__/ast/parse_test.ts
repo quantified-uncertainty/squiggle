@@ -157,6 +157,13 @@ describe("Peggy parse", () => {
     testEvalError("Foo.bar = 1");
   });
 
+  describe("typed variables", () => {
+    testParse("x: kg = 1", "(Program (LetStatement :x (TypeSignature :kg) 1))");
+    testParse("x: kg/m = 1", "(Program (LetStatement :x (TypeSignature (InfixType / :kg :m)) 1))");
+    testParse("x: kg*m/s = 1", "(Program (LetStatement :x (TypeSignature (InfixType / (InfixType * :kg :m) :s)) 1))");
+    testParse("x: m/s/s = 1", "(Program (LetStatement :x (TypeSignature (InfixType / (InfixType / :m :s) :s)) 1))");
+  });
+
   describe("functions", () => {
     testParse(
       "identity(x) = x",
@@ -219,8 +226,8 @@ describe("Peggy parse", () => {
     testParse("/* This is a multi line comment */ 1", "(Program 1)");
     testParse(
       `
-  /* This is 
-  a multi line 
+  /* This is
+  a multi line
   comment */
   1`,
       "(Program 1)"
@@ -506,7 +513,7 @@ f(x) = x
 describe("Parsing new line", () => {
   testParse(
     `
- a + 
+ a +
  b`,
     "(Program (InfixCall + :a :b))"
   );
@@ -542,7 +549,7 @@ describe("Parsing new line", () => {
     `
  x={
   y=2
-  y 
+  y
   }
  x`,
     "(Program (LetStatement :x (Block (LetStatement :y 2) :y)) :x)"
@@ -597,7 +604,7 @@ describe("Parsing new line", () => {
  g ->
   h ->
   p ->
-  q 
+  q
  `,
     "(Program (LetStatement :f (Block (LetStatement :x 1) (LetStatement :y 2) (LetStatement :z 3) (InfixCall + (InfixCall + :x :y) :z))) (LetStatement :g (InfixCall + :f 4)) (Pipe (Pipe (Pipe :g :h) :p) :q))"
   );
@@ -606,7 +613,7 @@ describe("Parsing new line", () => {
   a ->
   b ->
   c ->
-  d 
+  d
  `,
     "(Program (Pipe (Pipe (Pipe :a :b) :c) :d))"
   );

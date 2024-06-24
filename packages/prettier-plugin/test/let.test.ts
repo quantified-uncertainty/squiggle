@@ -17,7 +17,7 @@ describe("let", () => {
     expect(await format("f(x,y)=x*y")).toBe("f(x, y) = x * y\n");
   });
 
-  test("defun with long args args", async () => {
+  test("defun with long args", async () => {
     expect(
       await format(
         "f(yaewrtawieyra,auweyrauweyrauwyer,wekuryakwueyruaweyr,wekuryakwueyruaweyr,wekuryakwueyruaweyr)=x*y"

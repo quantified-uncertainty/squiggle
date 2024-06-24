@@ -396,6 +396,14 @@ function compileToContent(
         innerCompileAst(ast.value, context),
       ]);
     }
+    case "TypeSignature":
+    case "InfixType":
+    case "ImplicitType":
+      // should never happen
+      throw new ICompileError(
+        `Can't compile ${ast.type} node of type signature`,
+        ast.location
+      );
     case "IdentifierWithAnnotation":
       // should never happen
       throw new ICompileError(
