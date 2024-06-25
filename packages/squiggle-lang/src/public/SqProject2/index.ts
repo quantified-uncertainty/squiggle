@@ -32,21 +32,45 @@ export class SqProject2 {
     runner?: BaseRunner;
     environment: Env;
   }) {
-    this.state = ProjectState.init(params.rootSource);
+    let state = ProjectState.init();
+    state = state.clone({
+      heads: state.heads.set("root", params.rootSource.hash()),
+      unresolvedModules: state.unresolvedModules.set(
+        params.rootSource.hash(),
+        params.rootSource
+      ),
+    });
+    this.state = state;
     this.linker = params.linker;
     this.runner = params.runner ?? getDefaultRunner();
     this.environment = params.environment;
 
     this.dispatch({
       type: "loadImports",
-      payload: this.state.module.hash(),
+      payload: this.getRootHash(),
     });
     this.dispatch({
       type: "resolveIfPossible",
       payload: {
-        hash: this.state.module.hash(),
+        hash: this.getRootHash(),
       },
     });
+  }
+
+  private getRootHash(): string {
+    const result = this.state.heads.get("root");
+    if (!result) {
+      throw new Error("Root head not found");
+    }
+    return result;
+  }
+
+  private getRootModule(): UnresolvedModule {
+    const module = this.state.unresolvedModules.get(this.getRootHash());
+    if (!module) {
+      throw new Error("Root head module not found");
+    }
+    return module;
   }
 
   dispatch(action: Project2Action) {
@@ -204,7 +228,7 @@ export class SqProject2 {
   }
 
   getOutput(): SqOutputResult | undefined {
-    const resolved = this.state.getResolvedModule(this.state.module);
+    const resolved = this.state.getResolvedModule(this.getRootModule());
     if (!resolved) {
       // Root module is not resolved yet;
       return undefined;

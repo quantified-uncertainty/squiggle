@@ -4,45 +4,51 @@ import { ResolvedModule, ResolvedModuleHash } from "./ResolvedModule.js";
 import { UnresolvedModule, UnresolvedModuleHash } from "./UnresolvedModule.js";
 
 type ProjectStateData = {
-  module: UnresolvedModule;
+  // Heads point to modules that are important to keep, similar to git branches.
+  // Everything else will be garbage-collected eventually.
+  heads: ImmutableMap<string, UnresolvedModuleHash>;
 
+  // Unresolved modules are modules that have not been fully loaded (deeply
+  // resolved imports) yet.
   unresolvedModules: ImmutableMap<UnresolvedModuleHash, UnresolvedModule>;
+
+  // Resolved modules are immutable: we've loaded all imports and
+  // imports-of-imports and so on, and confirmed with a hash that they are
+  // immutable.
   resolvedModules: ImmutableMap<ResolvedModuleHash, ResolvedModule>;
+
+  // Outputs are the results of running a module in a specific environment.
   outputs: ImmutableMap<ResolvedModuleHash, ModuleOutput>;
 };
 
 export class ProjectState implements ProjectStateData {
-  module: ProjectStateData["module"];
+  heads: ProjectStateData["heads"];
   unresolvedModules: ProjectStateData["unresolvedModules"];
   resolvedModules: ProjectStateData["resolvedModules"];
   outputs: ProjectStateData["outputs"];
 
   private constructor(props: ProjectStateData) {
-    this.module = props.module;
+    this.heads = props.heads;
     this.unresolvedModules = props.unresolvedModules;
     this.resolvedModules = props.resolvedModules;
     this.outputs = props.outputs;
   }
 
-  static init(rootSource: UnresolvedModule) {
+  static init() {
     return new ProjectState({
-      module: rootSource,
-      unresolvedModules: ImmutableMap([[rootSource.hash(), rootSource]]),
+      heads: ImmutableMap(),
+      unresolvedModules: ImmutableMap(),
       resolvedModules: ImmutableMap(),
       outputs: ImmutableMap(),
     });
   }
 
-  clone({
-    resolvedModules,
-    unresolvedModules,
-    outputs,
-  }: Partial<Omit<ProjectStateData, "module">>): ProjectState {
+  clone(params: Partial<Omit<ProjectStateData, "module">>): ProjectState {
     return new ProjectState({
-      module: this.module,
-      resolvedModules: resolvedModules ?? this.resolvedModules,
-      unresolvedModules: unresolvedModules ?? this.unresolvedModules,
-      outputs: outputs ?? this.outputs,
+      heads: params.heads ?? this.heads,
+      resolvedModules: params.resolvedModules ?? this.resolvedModules,
+      unresolvedModules: params.unresolvedModules ?? this.unresolvedModules,
+      outputs: params.outputs ?? this.outputs,
     });
   }
 
