@@ -19,21 +19,21 @@ export class ModuleOutput {
   }
 
   hash(): string {
-    return (
-      `output-${this.module.module.name}-` +
-      ModuleOutput.hash({
-        module: this.module,
-        environment: this.environment,
-      })
-    );
+    return ModuleOutput.hash({
+      module: this.module,
+      environment: this.environment,
+    });
   }
 
   static hash(params: { module: ResolvedModule; environment: Env }): string {
-    return getHash(
-      JSON.stringify({
-        module: params.module.hash(),
-        environment: params.environment,
-      })
+    return (
+      `output-${params.module.module.name}-` +
+      getHash(
+        JSON.stringify({
+          module: params.module.hash(),
+          environment: params.environment,
+        })
+      )
     );
   }
 }

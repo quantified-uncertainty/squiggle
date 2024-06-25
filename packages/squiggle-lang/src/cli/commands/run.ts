@@ -11,7 +11,7 @@ import { UnresolvedModule } from "../../public/SqProject2/UnresolvedModule.js";
 import { allRunnerNames, runnerByName } from "../../runners/index.js";
 import { CliPrinter } from "../CliPrinter.js";
 import { bold, red } from "../colors.js";
-import { loadSrc, myParseInt } from "../utils.js";
+import { debugLog, loadSrc, myParseInt } from "../utils.js";
 
 type OutputMode = "NONE" | "RESULT_OR_BINDINGS" | "RESULT_AND_BINDINGS";
 
@@ -84,14 +84,22 @@ async function _run(
     runner,
     environment: args.environment,
   });
+
+  if (args.logEvents) {
+    project.addEventListener("action", (e) => {
+      debugLog(e.data.type, JSON.stringify(e.data.payload));
+    });
+  }
+
+  const started = new Date();
   return new Promise<{ output: SqOutputResult; time: number }>(
     (resolve, reject) => {
       project.addEventListener("output", (e) => {
-        console.log(`output for ${e.data.output.module.module.name}`);
         if (e.data.output.module.module === rootSource) {
           const output = project.getOutput();
           if (output) {
-            resolve({ output, time: 0 });
+            const time = (new Date().getTime() - started.getTime()) / 1000;
+            resolve({ output, time });
           } else {
             reject(new Error("Output is not set"));
           }
@@ -99,17 +107,6 @@ async function _run(
       });
     }
   );
-
-  // if (args.logEvents) {
-  //   project.addEventListener("start-run", (e) => {
-  //     debugLog("Started", e.data.sourceId);
-  //   });
-  //   project.addEventListener("end-run", (e) => {
-  //     debugLog("Finished", e.data.sourceId);
-  //   });
-  // }
-
-  // const time = await measure(async () => await project.run(filename));
 }
 
 async function run(args: RunArgs) {

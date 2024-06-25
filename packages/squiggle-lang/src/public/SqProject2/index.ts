@@ -8,48 +8,17 @@ import { wrapError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 import { Externals, RunContext } from "../SqProject/ProjectItem.js";
 import { SqOutput, SqOutputResult } from "../types.js";
-import {
-  Project2Event,
-  Project2EventListener,
-  Project2EventShapes,
-  Project2EventType,
-} from "./events.js";
 import { ModuleOutput } from "./ModuleOutput.js";
 import { ProjectState } from "./ProjectState.js";
 import { ResolvedModule, ResolvedModuleHash } from "./ResolvedModule.js";
-import { UnresolvedModule, UnresolvedModuleHash } from "./UnresolvedModule.js";
-
-type Action =
-  | {
-      type: "loadImports";
-      payload: UnresolvedModuleHash;
-    }
-  | {
-      type: "addModule";
-      payload: {
-        module: UnresolvedModule;
-      };
-    }
-  | {
-      type: "loadModule";
-      payload: {
-        sourceId: string;
-        hash: string | undefined;
-      };
-    }
-  | {
-      type: "resolveIfPossible";
-      payload: {
-        hash: UnresolvedModuleHash;
-      };
-    }
-  | {
-      type: "buildOutputIfPossible";
-      payload: {
-        hash: ResolvedModuleHash;
-        environment: Env;
-      };
-    };
+import {
+  Project2Action,
+  Project2Event,
+  Project2EventListener,
+  Project2EventShape,
+  Project2EventType,
+} from "./types.js";
+import { UnresolvedModule } from "./UnresolvedModule.js";
 
 export class SqProject2 {
   private state: ProjectState;
@@ -80,12 +49,8 @@ export class SqProject2 {
     });
   }
 
-  private logAction(action: Action) {
-    console.log(action.type, action.payload);
-  }
-
-  dispatch(action: Action) {
-    this.logAction(action);
+  dispatch(action: Project2Action) {
+    this.dispatchEvent({ type: "action", payload: action });
 
     switch (action.type) {
       case "loadImports": {
@@ -220,7 +185,7 @@ export class SqProject2 {
           this.state = this.state.clone({
             outputs: this.state.outputs.set(output.hash(), output),
           });
-          this.dispatchEvent("output", { output });
+          this.dispatchEvent({ type: "output", payload: { output } });
 
           for (const parent of this.state.getResolvedParents(module)) {
             this.dispatch({
@@ -377,11 +342,10 @@ export class SqProject2 {
 
   private eventTarget = new EventTarget();
 
-  private dispatchEvent<T extends Project2EventType>(
-    type: T,
-    data: Extract<Project2EventShapes, { type: T }>["payload"]
-  ) {
-    this.eventTarget.dispatchEvent(new Project2Event(type, data));
+  private dispatchEvent(shape: Project2EventShape) {
+    this.eventTarget.dispatchEvent(
+      new Project2Event(shape.type, shape.payload)
+    );
   }
 
   addEventListener<T extends Project2EventType>(
