@@ -35,6 +35,9 @@ export function buildNaiveLinker(sources?: { [k: string]: string }) {
       }
       throw new Error(`Unknown id ${id}`);
     },
+    loadModule: () => {
+      throw new Error("Not implemented");
+    },
   };
   return linker;
 }

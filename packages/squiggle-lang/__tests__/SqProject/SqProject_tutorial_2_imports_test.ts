@@ -25,6 +25,9 @@ describe("SqProject with imports", () => {
         loadSource: () => {
           throw new Error("Loading not supported"); // this is ok because we're going to set all sources explicitly
         },
+        loadModule: () => {
+          throw new Error("Not implemented");
+        },
       },
     });
 
@@ -71,6 +74,9 @@ describe("SqProject with imports", () => {
           default:
             throw new Error(`source ${sourceName} not found`);
         }
+      },
+      loadModule: () => {
+        throw new Error("Not implemented");
       },
     };
 

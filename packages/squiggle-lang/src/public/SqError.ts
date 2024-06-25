@@ -49,7 +49,7 @@ export class SqRuntimeError extends SqAbstractError<"runtime"> {
     return this._value.toString();
   }
 
-  toStringWithDetails(project: SqProject) {
+  toStringWithDetails(project: SqProject | undefined) {
     return this._value.toString({
       withStackTrace: true,
       resolveSource: project ? (id) => project.getSource(id) : undefined,

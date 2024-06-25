@@ -5,11 +5,12 @@ import path from "path";
 
 import { defaultEnv, Env } from "../../dists/env.js";
 import { SqLinker } from "../../public/SqLinker.js";
-import { SqProject } from "../../public/SqProject/index.js";
+import { SqProject2 } from "../../public/SqProject2/index.js";
+import { UnresolvedModule } from "../../public/SqProject2/UnresolvedModule.js";
 import { allRunnerNames, runnerByName } from "../../runners/index.js";
 import { CliPrinter } from "../CliPrinter.js";
 import { bold, red } from "../colors.js";
-import { debugLog, loadSrc, measure, myParseInt } from "../utils.js";
+import { loadSrc, myParseInt } from "../utils.js";
 
 type OutputMode = "NONE" | "RESULT_OR_BINDINGS" | "RESULT_AND_BINDINGS";
 
@@ -28,52 +29,79 @@ type RunArgs = {
 
 const EVAL_SOURCE_ID = "[eval]";
 
-const linker: SqLinker = {
-  resolve: (name, fromId) => {
-    if (!name.startsWith("./") && !name.startsWith("../")) {
-      throw new Error("Only relative paths in imports are allowed");
-    }
-    const dir =
-      fromId === EVAL_SOURCE_ID ? process.cwd() : path.dirname(fromId);
-    return path.resolve(dir, name);
-  },
-  loadSource: async (importId: string) => {
-    return await fs.readFile(importId, "utf-8");
-  },
-};
+function getLinker(params: {
+  seed: string; // we use a fixed seed for all sources, since we don't have a way to store per-source seed in the file system yet
+}): SqLinker {
+  const linker: SqLinker = {
+    resolve(name, fromId) {
+      if (!name.startsWith("./") && !name.startsWith("../")) {
+        throw new Error("Only relative paths in imports are allowed");
+      }
+      const dir =
+        fromId === EVAL_SOURCE_ID ? process.cwd() : path.dirname(fromId);
+      return path.resolve(dir, name);
+    },
+    async loadSource(sourceId) {
+      return await fs.readFile(sourceId, "utf-8");
+    },
+    async loadModule(sourceId, hash) {
+      if (hash) {
+        throw new Error("Hashes are not supported");
+      }
+      const code = await linker.loadSource(sourceId);
+      return new UnresolvedModule({
+        name: sourceId,
+        code,
+        linker,
+      });
+    },
+  };
+  return linker;
+}
 
 async function _run(
   args: Pick<
     RunArgs,
     "src" | "filename" | "runner" | "runnerThreads" | "logEvents"
   > & {
-    environment?: Env;
+    environment: Env;
   }
 ) {
-  const project = SqProject.create({
+  const linker = getLinker({ seed: args.environment.seed });
+  const rootSource = new UnresolvedModule({
+    name: args.filename ?? EVAL_SOURCE_ID,
+    code: args.src,
     linker,
-    runner: args.runner
-      ? runnerByName(args.runner, args.runnerThreads ?? 1)
-      : undefined,
+  });
+  const runner = args.runner
+    ? runnerByName(args.runner, args.runnerThreads ?? 1)
+    : undefined;
+
+  const project = new SqProject2({
+    rootSource,
+    linker,
+    runner,
     environment: args.environment,
   });
+  await new Promise((r) => setTimeout(r, 5000));
 
-  if (args.logEvents) {
-    project.addEventListener("start-run", (e) => {
-      debugLog("Started", e.data.sourceId);
-    });
-    project.addEventListener("end-run", (e) => {
-      debugLog("Finished", e.data.sourceId);
-    });
+  // if (args.logEvents) {
+  //   project.addEventListener("start-run", (e) => {
+  //     debugLog("Started", e.data.sourceId);
+  //   });
+  //   project.addEventListener("end-run", (e) => {
+  //     debugLog("Finished", e.data.sourceId);
+  //   });
+  // }
+
+  // const time = await measure(async () => await project.run(filename));
+  const time = 0;
+  const output = project.getOutput();
+  if (!output) {
+    throw new Error("Output is not set");
   }
-  const filename = args.filename ? path.resolve(args.filename) : EVAL_SOURCE_ID;
 
-  project.setSource(filename, args.src);
-
-  const time = await measure(async () => await project.run(filename));
-  const output = project.getOutput(filename);
-
-  return { output, time, project };
+  return { output, time };
 }
 
 async function run(args: RunArgs) {
@@ -91,7 +119,7 @@ async function run(args: RunArgs) {
     profile: args.profile ?? false,
   };
 
-  const { output, time, project } = await _run({
+  const { output, time } = await _run({
     src: args.src,
     filename: args.filename,
     environment,
@@ -104,7 +132,7 @@ async function run(args: RunArgs) {
   if (!output.ok) {
     printer.printSection(
       red("Error:"),
-      output.value.toStringWithDetails(project)
+      output.value.toStringWithDetails(/* project */ undefined)
     );
   } else {
     switch (args.output) {
