@@ -19,10 +19,13 @@ export class ModuleOutput {
   }
 
   hash(): string {
-    return ModuleOutput.hash({
-      module: this.module,
-      environment: this.environment,
-    });
+    return (
+      `output-${this.module.module.name}-` +
+      ModuleOutput.hash({
+        module: this.module,
+        environment: this.environment,
+      })
+    );
   }
 
   static hash(params: { module: ResolvedModule; environment: Env }): string {

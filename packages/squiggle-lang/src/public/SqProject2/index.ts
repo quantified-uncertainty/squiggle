@@ -3,11 +3,17 @@ import { BaseRunner, RunParams } from "../../runners/BaseRunner.js";
 import { getDefaultRunner } from "../../runners/index.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import { Err, fmap, fmap2 } from "../../utility/result.js";
-import { vDict, VDict, vDictFromArray } from "../../value/VDict.js";
+import { vDict, VDict } from "../../value/VDict.js";
 import { wrapError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 import { Externals, RunContext } from "../SqProject/ProjectItem.js";
 import { SqOutput, SqOutputResult } from "../types.js";
+import {
+  Project2Event,
+  Project2EventListener,
+  Project2EventShapes,
+  Project2EventType,
+} from "./events.js";
 import { ModuleOutput } from "./ModuleOutput.js";
 import { ProjectState } from "./ProjectState.js";
 import { ResolvedModule, ResolvedModuleHash } from "./ResolvedModule.js";
@@ -74,8 +80,12 @@ export class SqProject2 {
     });
   }
 
+  private logAction(action: Action) {
+    console.log(action.type, action.payload);
+  }
+
   dispatch(action: Action) {
-    console.log(action); // DEBUG
+    this.logAction(action);
 
     switch (action.type) {
       case "loadImports": {
@@ -210,6 +220,8 @@ export class SqProject2 {
           this.state = this.state.clone({
             outputs: this.state.outputs.set(output.hash(), output),
           });
+          this.dispatchEvent("output", { output });
+
           for (const parent of this.state.getResolvedParents(module)) {
             this.dispatch({
               type: "buildOutputIfPossible",
@@ -331,7 +343,7 @@ export class SqProject2 {
     const runParams: RunParams = {
       ast,
       environment,
-      externals: vDictFromArray([]).merge(importBindings),
+      externals: importBindings,
     };
 
     const started = new Date();
@@ -361,5 +373,31 @@ export class SqProject2 {
       environment,
       output,
     });
+  }
+
+  private eventTarget = new EventTarget();
+
+  private dispatchEvent<T extends Project2EventType>(
+    type: T,
+    data: Extract<Project2EventShapes, { type: T }>["payload"]
+  ) {
+    this.eventTarget.dispatchEvent(new Project2Event(type, data));
+  }
+
+  addEventListener<T extends Project2EventType>(
+    type: T,
+    listener: Project2EventListener<T>
+  ) {
+    this.eventTarget.addEventListener(type, listener as (event: Event) => void);
+  }
+
+  removeEventListener<T extends Project2EventType>(
+    type: T,
+    listener: Project2EventListener<T>
+  ) {
+    this.eventTarget.removeEventListener(
+      type,
+      listener as (event: Event) => void
+    );
   }
 }

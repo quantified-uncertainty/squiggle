@@ -16,13 +16,16 @@ export class ResolvedModule {
   }
 
   hash(): ResolvedModuleHash {
-    return getHash(
-      JSON.stringify({
-        self: this.module.hash(),
-        deps: this.module
-          .imports()
-          .map((imp) => this.resolutions[imp.sourceId].hash()),
-      })
+    return (
+      `resolved-${this.module.name}-` +
+      getHash(
+        JSON.stringify({
+          self: this.module.hash(),
+          deps: this.module
+            .imports()
+            .map((imp) => this.resolutions[imp.sourceId].hash()),
+        })
+      )
     );
   }
 }

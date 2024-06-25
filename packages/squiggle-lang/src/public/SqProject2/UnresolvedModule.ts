@@ -68,12 +68,15 @@ export class UnresolvedModule {
   }
 
   hash(): UnresolvedModuleHash {
-    return getHash(
-      JSON.stringify({
-        name: this.name,
-        code: this.code,
-        pins: this.pins,
-      })
+    return (
+      `unresolved-${this.name}-` +
+      getHash(
+        JSON.stringify({
+          name: this.name,
+          code: this.code,
+          pins: this.pins,
+        })
+      )
     );
   }
 }

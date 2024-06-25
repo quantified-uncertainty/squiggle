@@ -4,6 +4,7 @@ import isFinite from "lodash/isFinite.js";
 import path from "path";
 
 import { defaultEnv, Env } from "../../dists/env.js";
+import { SqOutputResult } from "../../index.js";
 import { SqLinker } from "../../public/SqLinker.js";
 import { SqProject2 } from "../../public/SqProject2/index.js";
 import { UnresolvedModule } from "../../public/SqProject2/UnresolvedModule.js";
@@ -83,7 +84,21 @@ async function _run(
     runner,
     environment: args.environment,
   });
-  await new Promise((r) => setTimeout(r, 5000));
+  return new Promise<{ output: SqOutputResult; time: number }>(
+    (resolve, reject) => {
+      project.addEventListener("output", (e) => {
+        console.log(`output for ${e.data.output.module.module.name}`);
+        if (e.data.output.module.module === rootSource) {
+          const output = project.getOutput();
+          if (output) {
+            resolve({ output, time: 0 });
+          } else {
+            reject(new Error("Output is not set"));
+          }
+        }
+      });
+    }
+  );
 
   // if (args.logEvents) {
   //   project.addEventListener("start-run", (e) => {
@@ -95,13 +110,6 @@ async function _run(
   // }
 
   // const time = await measure(async () => await project.run(filename));
-  const time = 0;
-  const output = project.getOutput();
-  if (!output) {
-    throw new Error("Output is not set");
-  }
-
-  return { output, time };
 }
 
 async function run(args: RunArgs) {
