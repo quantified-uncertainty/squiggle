@@ -1,17 +1,20 @@
 import { Command, Option } from "@commander-js/extra-typings";
 import { promises as fs } from "fs";
+import { Box, render, Text } from "ink";
 import isFinite from "lodash/isFinite.js";
 import path from "path";
+import { FC } from "react";
 
 import { defaultEnv, Env } from "../../dists/env.js";
 import { SqOutputResult } from "../../index.js";
 import { SqLinker } from "../../public/SqLinker.js";
 import { SqProject2 } from "../../public/SqProject2/index.js";
+import { ProjectState } from "../../public/SqProject2/ProjectState.js";
 import { UnresolvedModule } from "../../public/SqProject2/UnresolvedModule.js";
 import { allRunnerNames, runnerByName } from "../../runners/index.js";
 import { CliPrinter } from "../CliPrinter.js";
 import { bold, red } from "../colors.js";
-import { debugLog, loadSrc, myParseInt } from "../utils.js";
+import { loadSrc, myParseInt } from "../utils.js";
 
 type OutputMode = "NONE" | "RESULT_OR_BINDINGS" | "RESULT_AND_BINDINGS";
 
@@ -25,14 +28,12 @@ type RunArgs = {
   profile?: boolean;
   runner?: Parameters<typeof runnerByName>[0];
   runnerThreads?: number;
-  logEvents?: boolean;
+  showProjectState?: boolean;
 };
 
 const EVAL_SOURCE_ID = "[eval]";
 
-function getLinker(params: {
-  seed: string; // we use a fixed seed for all sources, since we don't have a way to store per-source seed in the file system yet
-}): SqLinker {
+function getLinker(): SqLinker {
   const linker: SqLinker = {
     resolve(name, fromId) {
       if (!name.startsWith("./") && !name.startsWith("../")) {
@@ -40,7 +41,7 @@ function getLinker(params: {
       }
       const dir =
         fromId === EVAL_SOURCE_ID ? process.cwd() : path.dirname(fromId);
-      return path.resolve(dir, name);
+      return path.relative(process.cwd(), path.resolve(dir, name));
     },
     async loadSource(sourceId) {
       return await fs.readFile(sourceId, "utf-8");
@@ -60,15 +61,52 @@ function getLinker(params: {
   return linker;
 }
 
+const ModuleInfo: FC<{
+  state: ProjectState;
+  module: UnresolvedModule;
+  environment: Env;
+}> = ({ state, module, environment }) => {
+  const resolved = state.getResolvedModule(module);
+  const output = resolved ? state.getOutput(resolved, environment) : undefined;
+
+  return (
+    <Box gap={2}>
+      <Text>{output ? "✅" : resolved ? "▶️" : "🔄"}</Text>
+      <Text>{module.name}</Text>
+    </Box>
+  );
+};
+
+const StateGraph: FC<{ state: ProjectState; environment: Env }> = ({
+  state,
+  environment,
+}) => {
+  return (
+    <Box flexDirection="column">
+      <Text bold color="green">
+        State
+      </Text>
+      {[...state.unresolvedModules.entries()].map(([hash, module]) => (
+        <ModuleInfo
+          key={hash}
+          state={state}
+          module={module}
+          environment={environment}
+        />
+      ))}
+    </Box>
+  );
+};
+
 async function _run(
   args: Pick<
     RunArgs,
-    "src" | "filename" | "runner" | "runnerThreads" | "logEvents"
+    "src" | "filename" | "runner" | "runnerThreads" | "showProjectState"
   > & {
     environment: Env;
   }
 ) {
-  const linker = getLinker({ seed: args.environment.seed });
+  const linker = getLinker();
   const rootSource = new UnresolvedModule({
     name: args.filename ?? EVAL_SOURCE_ID,
     code: args.src,
@@ -85,10 +123,12 @@ async function _run(
     environment: args.environment,
   });
 
-  if (args.logEvents) {
-    project.addEventListener("action", (e) => {
-      debugLog(e.data.type, JSON.stringify(e.data.payload));
-    });
+  const showState = () => {
+    render(<StateGraph state={project.state} environment={args.environment} />);
+  };
+
+  if (args.showProjectState) {
+    project.addEventListener("action", showState);
   }
 
   const started = new Date();
@@ -99,6 +139,9 @@ async function _run(
           const output = project.getOutput();
           if (output) {
             const time = (new Date().getTime() - started.getTime()) / 1000;
+            if (args.showProjectState) {
+              showState();
+            }
             resolve({ output, time });
           } else {
             reject(new Error("Output is not set"));
@@ -130,7 +173,7 @@ async function run(args: RunArgs) {
     environment,
     runner: args.runner,
     runnerThreads: args.runnerThreads,
-    logEvents: args.logEvents,
+    showProjectState: args.showProjectState,
   });
 
   const printer = new CliPrinter();
@@ -176,7 +219,7 @@ export function addRunCommand(program: Command) {
     .option("-t --time", "output the time it took to evaluate the code")
     .option("-p --profile", "performance profiler")
     .option("-q, --quiet", "don't output the results and bindings") // useful for measuring the performance or checking that the code is valid
-    .option("--log-events", "log start/end run events")
+    .option("--show-project-state", "show project state")
     .addOption(
       new Option("-r, --runner <runner>", "embedded").choices(allRunnerNames)
     )
@@ -210,7 +253,7 @@ export function addRunCommand(program: Command) {
         sampleCount,
         runner: options.runner,
         runnerThreads: options.runnerThreads,
-        logEvents: options.logEvents,
+        showProjectState: options.showProjectState,
       });
     });
 }

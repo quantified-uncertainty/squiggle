@@ -1,3 +1,4 @@
+import { Env } from "../../dists/env.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import { ModuleOutput } from "./ModuleOutput.js";
 import { ResolvedModule, ResolvedModuleHash } from "./ResolvedModule.js";
@@ -110,5 +111,17 @@ export class ProjectState implements ProjectStateData {
       }
     }
     return parents;
+  }
+
+  getOutput(
+    module: ResolvedModule,
+    environment: Env
+  ): ModuleOutput | undefined {
+    return this.outputs.get(
+      ModuleOutput.hash({
+        module,
+        environment,
+      })
+    );
   }
 }

@@ -21,7 +21,7 @@ import {
 import { UnresolvedModule } from "./UnresolvedModule.js";
 
 export class SqProject2 {
-  private state: ProjectState;
+  state: ProjectState;
   linker: SqLinker;
   runner: BaseRunner;
   environment: Env;
@@ -97,12 +97,14 @@ export class SqProject2 {
         this.linker
           .loadModule(action.payload.sourceId, action.payload.hash)
           .then((module) => {
-            this.dispatch({
-              type: "addModule",
-              payload: {
-                module,
-              },
-            });
+            if (!this.state.unresolvedModules.has(module.hash())) {
+              this.dispatch({
+                type: "addModule",
+                payload: {
+                  module,
+                },
+              });
+            }
           });
         break;
       }
@@ -119,6 +121,11 @@ export class SqProject2 {
           this.dispatch({
             type: "resolveIfPossible",
             payload: { hash: module.hash() },
+          });
+        } else {
+          this.dispatch({
+            type: "loadImports",
+            payload: module.hash(),
           });
         }
         break;
