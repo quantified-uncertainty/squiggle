@@ -6,11 +6,11 @@ import path from "path";
 import { FC } from "react";
 
 import { defaultEnv, Env } from "../../dists/env.js";
-import { SqOutputResult } from "../../index.js";
 import { SqLinker } from "../../public/SqLinker.js";
-import { SqProject2 } from "../../public/SqProject2/index.js";
-import { ProjectState } from "../../public/SqProject2/ProjectState.js";
-import { UnresolvedModule } from "../../public/SqProject2/UnresolvedModule.js";
+import { SqProject } from "../../public/SqProject/index.js";
+import { OutputResult } from "../../public/SqProject/ModuleOutput.js";
+import { ProjectState } from "../../public/SqProject/ProjectState.js";
+import { UnresolvedModule } from "../../public/SqProject/UnresolvedModule.js";
 import { allRunnerNames, runnerByName } from "../../runners/index.js";
 import { CliPrinter } from "../CliPrinter.js";
 import { bold, red } from "../colors.js";
@@ -43,14 +43,11 @@ function getLinker(): SqLinker {
         fromId === EVAL_SOURCE_ID ? process.cwd() : path.dirname(fromId);
       return path.relative(process.cwd(), path.resolve(dir, name));
     },
-    async loadSource(sourceId) {
-      return await fs.readFile(sourceId, "utf-8");
-    },
     async loadModule(sourceId, hash) {
       if (hash) {
         throw new Error("Hashes are not supported");
       }
-      const code = await linker.loadSource(sourceId);
+      const code = await fs.readFile(sourceId, "utf-8");
       return new UnresolvedModule({
         name: sourceId,
         code,
@@ -116,7 +113,7 @@ async function _run(
     ? runnerByName(args.runner, args.runnerThreads ?? 1)
     : undefined;
 
-  const project = new SqProject2({
+  const project = new SqProject({
     rootSource,
     linker,
     runner,
@@ -132,7 +129,7 @@ async function _run(
   }
 
   const started = new Date();
-  return new Promise<{ output: SqOutputResult; time: number }>(
+  return new Promise<{ output: OutputResult; time: number }>(
     (resolve, reject) => {
       project.addEventListener("output", (e) => {
         if (e.data.output.module.module === rootSource) {
@@ -142,7 +139,7 @@ async function _run(
             if (args.showProjectState) {
               showState();
             }
-            resolve({ output, time });
+            resolve({ output: output.output, time });
           } else {
             reject(new Error("Output is not set"));
           }
@@ -178,10 +175,7 @@ async function run(args: RunArgs) {
 
   const printer = new CliPrinter();
   if (!output.ok) {
-    printer.printSection(
-      red("Error:"),
-      output.value.toStringWithDetails(/* project */ undefined)
-    );
+    printer.printSection(red("Error:"), output.value.toStringWithDetails());
   } else {
     switch (args.output) {
       case "RESULT_OR_BINDINGS":

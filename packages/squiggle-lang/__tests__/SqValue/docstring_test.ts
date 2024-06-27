@@ -2,21 +2,21 @@ import { run, sq } from "../../src/index.js";
 
 describe("docstrings", () => {
   const runToResult = async (code: string) => {
-    const outputR = await run(code);
-    if (!outputR.ok) {
+    const { output } = await run(code);
+    if (!output.ok) {
       throw new Error();
     }
-    const { result } = outputR.value;
+    const { result } = output.value;
 
     return result;
   };
 
   const runToBindings = async (code: string) => {
-    const outputR = await run(code);
-    if (!outputR.ok) {
+    const { output } = await run(code);
+    if (!output.ok) {
       throw new Error();
     }
-    const { bindings } = outputR.value;
+    const { bindings } = output.value;
 
     return bindings;
   };

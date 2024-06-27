@@ -9,8 +9,8 @@ export class ResolvedModule {
     public resolutions: Record<string, ResolvedModule> // key is a source id (unresolved.name)
   ) {
     for (const imp of this.module.imports()) {
-      if (!this.resolutions[imp.sourceId]) {
-        throw new Error(`Missing resolution for ${imp.sourceId}`);
+      if (!this.resolutions[imp.name]) {
+        throw new Error(`Missing resolution for ${imp.name}`);
       }
     }
   }
@@ -23,7 +23,7 @@ export class ResolvedModule {
           self: this.module.hash(),
           deps: this.module
             .imports()
-            .map((imp) => this.resolutions[imp.sourceId].hash()),
+            .map((imp) => this.resolutions[imp.name].hash()),
         })
       )
     );

@@ -88,9 +88,8 @@ export class ProjectState implements ProjectStateData {
           .imports()
           .some(
             (imp) =>
-              imp.sourceId === module.name &&
-              (!mod.pins[imp.sourceId] ||
-                mod.pins[imp.sourceId] === module.hash())
+              imp.name === module.name &&
+              (!mod.pins[imp.name] || mod.pins[imp.name] === module.hash())
           )
       ) {
         parents.push(hash);

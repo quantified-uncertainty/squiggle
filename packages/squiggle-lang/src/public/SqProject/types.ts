@@ -18,7 +18,7 @@ export type Project2Action =
   | {
       type: "loadModule";
       payload: {
-        sourceId: string;
+        name: string;
         hash: string | undefined;
       };
     }

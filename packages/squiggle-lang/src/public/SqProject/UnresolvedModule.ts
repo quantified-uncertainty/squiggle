@@ -9,7 +9,7 @@ import { getHash } from "./utils.js";
 export type UnresolvedModuleHash = string;
 
 type Import = {
-  sourceId: string;
+  name: string;
   variable: string;
   location: LocationRange;
 };
@@ -57,7 +57,7 @@ export class UnresolvedModule {
       const sourceId = this.linker.resolve(file.value, this.name);
       resolvedImports.push({
         variable: variable.value,
-        sourceId,
+        name: sourceId,
         // TODO - this is used for errors, but we should use the entire import statement;
         // To fix this, we need to represent each import statement as an AST node.
         location: file.location,

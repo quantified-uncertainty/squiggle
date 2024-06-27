@@ -1,6 +1,5 @@
 import { type Env } from "./dists/env.js";
 import { registry } from "./library/registry/index.js";
-import { SqProject } from "./public/SqProject/index.js";
 
 export {
   SqDateValue,
@@ -91,24 +90,11 @@ export {
   type LocationRange as SqLocation,
 } from "./ast/types.js";
 export { defaultEnv as defaultEnvironment } from "./dists/env.js";
-export { type Env, SqProject };
+export { type Env };
 
 export { type SqLinker } from "./public/SqLinker.js";
-export { type SqOutput, type SqOutputResult } from "./public/types.js";
 
-export async function run(
-  code: string,
-  options?: {
-    environment?: Env;
-  }
-) {
-  const project = SqProject.create({
-    environment: options?.environment,
-  });
-  project.setSource("main", code);
-  await project.run("main");
-  return project.getOutput("main");
-}
+export { run } from "./run.js";
 
 export { sq } from "./sq.js";
 

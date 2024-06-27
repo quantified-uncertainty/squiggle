@@ -1,6 +1,5 @@
 import { ICompileError, IError, IRuntimeError } from "../errors/IError.js";
 import { StackTraceFrame } from "../reducer/StackTrace.js";
-import { SqProject } from "./SqProject/index.js";
 
 export function wrapError(err: IError): SqError {
   if (err instanceof IRuntimeError) {
@@ -17,13 +16,8 @@ abstract class SqAbstractError<T extends string> {
 
   abstract toString(): string;
 
-  abstract toStringWithDetails(
-    // Only used to render SqRuntimeError in CLI, for now. We'll need to
-    // refactor this further. Ideally, sources should be available in some other
-    // way than through `project` instance, because projects are mutable and the
-    // source could change by the time the error is serialized.
-    project: SqProject
-  ): string;
+  // Includes the full stack trace for runtime errors.
+  abstract toStringWithDetails(): string;
 }
 
 export class SqFrame {
@@ -49,10 +43,11 @@ export class SqRuntimeError extends SqAbstractError<"runtime"> {
     return this._value.toString();
   }
 
-  toStringWithDetails(project: SqProject | undefined) {
+  toStringWithDetails() {
     return this._value.toString({
       withStackTrace: true,
-      resolveSource: project ? (id) => project.getSource(id) : undefined,
+      // TODO - reimplement the support for source maps with the new SqProject
+      // resolveSource: project ? (id) => project.getSource(id) : undefined,
     });
   }
 

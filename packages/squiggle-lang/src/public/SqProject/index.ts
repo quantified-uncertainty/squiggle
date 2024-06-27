@@ -1,414 +1,319 @@
-import { defaultEnv, Env } from "../../dists/env.js";
-import { getStdLib } from "../../library/index.js";
+import { Env } from "../../dists/env.js";
 import { BaseRunner } from "../../runners/BaseRunner.js";
 import { getDefaultRunner } from "../../runners/index.js";
-import { ImmutableMap } from "../../utility/immutableMap.js";
-import * as Result from "../../utility/result.js";
-import { vDict, VDict } from "../../value/VDict.js";
-import { SqError, SqOtherError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
-import { SqValue } from "../SqValue/index.js";
-import { SqDict } from "../SqValue/SqDict.js";
-import { SqValuePath } from "../SqValuePath.js";
-import { SqOutput, SqOutputResult } from "../types.js";
+import { ModuleOutput } from "./ModuleOutput.js";
+import { ProjectState } from "./ProjectState.js";
+import { ResolvedModule, ResolvedModuleHash } from "./ResolvedModule.js";
 import {
-  ProjectEvent,
-  ProjectEventListener,
-  ProjectEventShapes,
-  ProjectEventType,
-} from "./events.js";
-import {
-  type Externals,
-  Import,
-  ProjectItem,
-  ProjectItemOutput,
-} from "./ProjectItem.js";
-
-function getNeedToRunError() {
-  return new SqOtherError("Need to run");
-}
-
-type Options = {
-  linker?: SqLinker;
-  environment?: Env;
-  runner?: BaseRunner;
-};
+  Project2Action,
+  Project2Event,
+  Project2EventListener,
+  Project2EventShape,
+  Project2EventType,
+} from "./types.js";
+import { UnresolvedModule } from "./UnresolvedModule.js";
 
 export class SqProject {
-  private readonly items: Map<string, ProjectItem>;
-  private environment: Env;
-  private linker?: SqLinker; // if not present, imports are forbidden
-  public runner: BaseRunner;
+  state: ProjectState;
+  linker: SqLinker;
+  runner: BaseRunner;
+  environment: Env;
+
+  constructor(params: {
+    rootSource: UnresolvedModule;
+    linker: SqLinker;
+    runner?: BaseRunner;
+    environment: Env;
+  }) {
+    let state = ProjectState.init();
+    state = state.clone({
+      heads: state.heads.set("root", params.rootSource.hash()),
+      unresolvedModules: state.unresolvedModules.set(
+        params.rootSource.hash(),
+        params.rootSource
+      ),
+    });
+    this.state = state;
+    this.linker = params.linker;
+    this.runner = params.runner ?? getDefaultRunner();
+    this.environment = params.environment;
+
+    this.dispatch({
+      type: "loadImports",
+      payload: this.getRootHash(),
+    });
+    this.dispatch({
+      type: "resolveIfPossible",
+      payload: {
+        hash: this.getRootHash(),
+      },
+    });
+  }
+
+  private getRootHash(): string {
+    const result = this.state.heads.get("root");
+    if (!result) {
+      throw new Error("Root head not found");
+    }
+    return result;
+  }
+
+  private getRootModule(): UnresolvedModule {
+    const module = this.state.unresolvedModules.get(this.getRootHash());
+    if (!module) {
+      throw new Error("Root head module not found");
+    }
+    return module;
+  }
+
+  dispatch(action: Project2Action) {
+    this.dispatchEvent({ type: "action", payload: action });
+
+    switch (action.type) {
+      case "loadImports": {
+        const module = this.state.unresolvedModules.get(action.payload);
+        if (!module) {
+          throw new Error(`Module not found: ${action.payload}`);
+        }
+        for (const imp of module.imports()) {
+          this.dispatch({
+            type: "loadModule",
+            payload: {
+              name: imp.name,
+              hash: module.pins[imp.name],
+            },
+          });
+        }
+        break;
+      }
+      case "loadModule": {
+        this.linker
+          .loadModule(action.payload.name, action.payload.hash)
+          .then((module) => {
+            if (!this.state.unresolvedModules.has(module.hash())) {
+              this.dispatch({
+                type: "addModule",
+                payload: {
+                  module,
+                },
+              });
+            }
+          });
+        break;
+      }
+      case "addModule": {
+        const { module } = action.payload;
+        this.state = this.state.clone({
+          unresolvedModules: this.state.unresolvedModules.set(
+            module.hash(),
+            module
+          ),
+        });
+
+        if (module.imports().length === 0) {
+          this.dispatch({
+            type: "resolveIfPossible",
+            payload: { hash: module.hash() },
+          });
+        } else {
+          this.dispatch({
+            type: "loadImports",
+            payload: module.hash(),
+          });
+        }
+        break;
+      }
+      case "resolveIfPossible": {
+        const { hash } = action.payload;
+
+        const unresolvedModule = this.state.unresolvedModules.get(hash);
+        if (!unresolvedModule) {
+          // TODO - warn
+          return;
+        }
+        if (this.state.getResolvedModule(unresolvedModule)) {
+          // already resolved
+          break;
+        }
+
+        const resolutions: Record<ResolvedModuleHash, ResolvedModule> = {};
+
+        let allResolved = true;
+        for (const imp of unresolvedModule.imports()) {
+          const unresolvedImport = this.state.getUnresolvedModule({
+            sourceId: imp.name,
+            hash: unresolvedModule.pins[imp.name],
+          });
+          if (!unresolvedImport) {
+            // import is not loaded yet
+            allResolved = false;
+            break;
+          }
+          const resolvedImport = this.state.getResolvedModule(unresolvedImport);
+          if (!resolvedImport) {
+            // import is not resolved yet
+            allResolved = false;
+            break;
+          }
+          resolutions[imp.name] = resolvedImport;
+        }
+
+        if (!allResolved) {
+          // not possible to resolve yet
+          break;
+        }
+
+        const resolvedModule = new ResolvedModule(
+          unresolvedModule,
+          resolutions
+        );
+
+        this.state = this.state.clone({
+          resolvedModules: this.state.resolvedModules.set(
+            resolvedModule.hash(),
+            resolvedModule
+          ),
+        });
+
+        this.dispatch({
+          type: "buildOutputIfPossible",
+          payload: {
+            hash: resolvedModule.hash(),
+            environment: this.environment,
+          },
+        });
+
+        // 1) all that import sourceId without pins
+        // 2) all that import sourceId with the matching pin
+        for (const parent of this.state.getParents(unresolvedModule)) {
+          this.dispatch({
+            type: "resolveIfPossible",
+            payload: { hash: parent },
+          });
+        }
+
+        break;
+      }
+      case "buildOutputIfPossible": {
+        const { hash, environment } = action.payload;
+        const module = this.state.resolvedModules.get(hash);
+        if (!module) {
+          throw new Error(`Can't find module with hash ${hash}`);
+        }
+
+        if (!this.allImportsHaveOutputs(module, environment)) {
+          break;
+        }
+
+        ModuleOutput.make({
+          module,
+          environment,
+          runner: this.runner,
+          state: this.state,
+        }).then((output) => {
+          this.state = this.state.clone({
+            outputs: this.state.outputs.set(output.hash(), output),
+          });
+          this.dispatchEvent({ type: "output", payload: { output } });
+
+          for (const parent of this.state.getResolvedParents(module)) {
+            this.dispatch({
+              type: "buildOutputIfPossible",
+              payload: { hash: parent, environment },
+            });
+          }
+        });
+        // TODO - catch?
+
+        break;
+      }
+      default:
+        throw action satisfies never;
+    }
+  }
+
+  getOutput(): ModuleOutput | undefined {
+    const resolved = this.state.getResolvedModule(this.getRootModule());
+    if (!resolved) {
+      // Root module is not resolved yet;
+      return undefined;
+    }
+    const output = this.state.outputs.get(
+      ModuleOutput.hash({
+        module: resolved,
+        environment: this.environment,
+      })
+    );
+    if (!output) {
+      return undefined;
+    }
+    return output;
+  }
+
+  private allImportsHaveOutputs(
+    module: ResolvedModule,
+    environment: Env
+  ): boolean {
+    for (const importBinding of module.module.imports()) {
+      const importedModule = module.resolutions[importBinding.name];
+      if (!importedModule) {
+        // shouldn't happen, ResolvedModule constructor verifies that imports and resolutions match
+        throw new Error(
+          `Can't find resolved import module ${importBinding.name}`
+        );
+      }
+      const importOutputHash = ModuleOutput.hash({
+        module: importedModule,
+        environment,
+      });
+      const output = this.state.outputs.get(importOutputHash);
+      if (!output) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   private eventTarget = new EventTarget();
 
-  // Direct graph of dependencies is maintained inside each ProjectItem,
-  // while the inverse one is stored in this variable.
-  // We need to update it every time we update the list of direct dependencies:
-  // - when sources are deleted
-  // - on `setContinues`
-  // - on `parseImports`
-  // (this list might be incomplete)
-  private inverseGraph: Map<string, Set<string>> = new Map();
-
-  constructor(options?: Options) {
-    this.items = new Map();
-    this.environment = options?.environment ?? defaultEnv;
-    this.linker = options?.linker;
-    this.runner = options?.runner ?? getDefaultRunner();
-  }
-
-  static create(options?: Options) {
-    return new SqProject(options);
-  }
-
-  getEnvironment(): Env {
-    return this.environment;
-  }
-
-  getStdLib() {
-    return getStdLib();
-  }
-
-  setEnvironment(environment: Env) {
-    // TODO - should we invalidate all outputs?
-    this.environment = environment;
-  }
-
-  setRunner(runner: BaseRunner) {
-    // TODO - should we invalidate all outputs?
-    this.runner = runner;
-  }
-
-  getSourceIds(): string[] {
-    return Array.from(this.items.keys());
-  }
-
-  private getItem(sourceId: string): ProjectItem {
-    const item = this.items.get(sourceId);
-    if (!item) {
-      throw new Error(`Source ${sourceId} not found`);
-    }
-    return item;
-  }
-
-  private cleanDependents(initialSourceId: string) {
-    // Traverse dependents recursively and call "clean" on each.
-    const visited = new Set<string>();
-    const inner = (currentSourceId: string) => {
-      visited.add(currentSourceId);
-      if (currentSourceId !== initialSourceId) {
-        this.clean(currentSourceId);
-      }
-      for (const sourceId of this.getDependents(currentSourceId)) {
-        if (visited.has(sourceId)) {
-          continue;
-        }
-        inner(sourceId);
-      }
-    };
-    inner(initialSourceId);
-  }
-
-  getDependents(sourceId: string): string[] {
-    return [...(this.inverseGraph.get(sourceId)?.values() ?? [])];
-  }
-
-  getDependencies(sourceId: string): string[] {
-    this.parseImports(sourceId);
-    return this.getItem(sourceId).getDependencies();
-  }
-
-  // Removes only explicit imports (not continues).
-  // Useful on source changes.
-  private removeImportEdges(fromSourceId: string) {
-    const item = this.getItem(fromSourceId);
-    if (item.imports?.ok) {
-      for (const importData of item.imports.value) {
-        this.inverseGraph.get(importData.sourceId)?.delete(fromSourceId);
-      }
-    }
-  }
-
-  touchSource(sourceId: string) {
-    this.removeImportEdges(sourceId);
-    this.getItem(sourceId).touchSource();
-    this.cleanDependents(sourceId);
-  }
-
-  setSource(sourceId: string, value: string) {
-    if (this.items.has(sourceId)) {
-      this.removeImportEdges(sourceId);
-      this.getItem(sourceId).setSource(value);
-      this.cleanDependents(sourceId);
-    } else {
-      this.items.set(sourceId, new ProjectItem({ sourceId, source: value }));
-    }
-  }
-
-  async loadSource(sourceId: string): Promise<SqError | undefined> {
-    if (!this.linker) {
-      throw new Error(`Can't load source for ${sourceId}, linker is missing`);
-    }
-
-    let newSource: string;
-    try {
-      newSource = await this.linker.loadSource(sourceId);
-    } catch (e) {
-      return new SqOtherError(`Failed to load import ${sourceId}`);
-    }
-    this.setSource(sourceId, newSource);
-  }
-
-  removeSource(sourceId: string) {
-    if (!this.items.has(sourceId)) {
-      return;
-    }
-    this.cleanDependents(sourceId);
-    this.removeImportEdges(sourceId);
-    this.setContinues(sourceId, []);
-    this.items.delete(sourceId);
-  }
-
-  getSource(sourceId: string) {
-    return this.items.get(sourceId)?.source;
-  }
-
-  clean(sourceId: string) {
-    this.getItem(sourceId).clean();
-  }
-
-  cleanAll() {
-    this.getSourceIds().forEach((id) => this.clean(id));
-  }
-
-  getImportIds(sourceId: string): Result.result<string[], SqError> {
-    const imports = this.getImports(sourceId);
-    if (!imports) {
-      return Result.Err(getNeedToRunError());
-    }
-    return Result.fmap(imports, (imports) => imports.map((i) => i.sourceId));
-  }
-
-  getImports(sourceId: string): Result.result<Import[], SqError> | undefined {
-    return this.getItem(sourceId).imports;
-  }
-
-  getContinues(sourceId: string): string[] {
-    return this.getItem(sourceId).continues;
-  }
-
-  setContinues(sourceId: string, continues: string[]): void {
-    for (const continueId of this.getContinues(sourceId)) {
-      this.inverseGraph.get(continueId)?.delete(sourceId);
-    }
-    for (const continueId of continues) {
-      if (!this.inverseGraph.has(continueId)) {
-        this.inverseGraph.set(continueId, new Set());
-      }
-      this.inverseGraph.get(continueId)?.add(sourceId);
-    }
-    this.getItem(sourceId).setContinues(continues);
-    this.cleanDependents(sourceId);
-  }
-
-  getInternalOutput(
-    sourceId: string
-  ): Result.result<ProjectItemOutput, SqError> {
-    return this.getItem(sourceId).output ?? Result.Err(getNeedToRunError());
-  }
-
-  private parseImports(sourceId: string): void {
-    // linker can be undefined; in this case parseImports will fail if there are any imports
-    const item = this.getItem(sourceId);
-    if (item.imports) {
-      // already set, shortcut so that we don't have to update `inverseGraph`
-      return;
-    }
-
-    item.parseImports(this.linker);
-    for (const dependencyId of item.getDependencies()) {
-      if (!this.inverseGraph.has(dependencyId)) {
-        this.inverseGraph.set(dependencyId, new Set());
-      }
-      this.inverseGraph.get(dependencyId)?.add(sourceId);
-    }
-  }
-
-  getOutput(sourceId: string): SqOutputResult {
-    return Result.fmap(this.getInternalOutput(sourceId), (output) =>
-      SqOutput.fromProjectItemOutput(output)
+  private dispatchEvent(shape: Project2EventShape) {
+    this.eventTarget.dispatchEvent(
+      new Project2Event(shape.type, shape.payload)
     );
   }
 
-  getResult(sourceId: string): Result.result<SqValue, SqError> {
-    return Result.fmap(this.getOutput(sourceId), ({ result }) => result);
-  }
-
-  getBindings(sourceId: string): Result.result<SqDict, SqError> {
-    return Result.fmap(this.getOutput(sourceId), ({ bindings }) => bindings);
-  }
-
-  private async importToBindingResult(
-    importBinding: Import,
-    pendingIds: Set<string>
-  ): Promise<Result.result<VDict, SqError>> {
-    if (!this.items.has(importBinding.sourceId)) {
-      // We have got one of the new imports.
-      // Let's load it and add it to the project.
-      const maybeError = await this.loadSource(importBinding.sourceId);
-      if (maybeError) {
-        return Result.Err(maybeError);
-      }
-    }
-
-    if (pendingIds.has(importBinding.sourceId)) {
-      // Oh we have already visited this source. There is an import cycle.
-      return Result.Err(
-        new SqOtherError(`Cyclic import ${importBinding.sourceId}`)
-      );
-    }
-
-    await this.innerRun(importBinding.sourceId, pendingIds);
-    const outputR = this.getInternalOutput(importBinding.sourceId);
-    if (!outputR.ok) {
-      return outputR;
-    }
-
-    // TODO - check for name collisions?
-    switch (importBinding.type) {
-      case "flat":
-        return Result.Ok(outputR.value.runOutput.bindings);
-      case "named":
-        return Result.Ok(
-          vDict(
-            ImmutableMap({
-              [importBinding.variable]: outputR.value.runOutput.exports,
-            })
-          )
-        );
-      default:
-        throw new Error(`Internal error, ${importBinding satisfies never}`);
-    }
-  }
-
-  private async importsToBindings(
-    pendingIds: Set<string>,
-    imports: Import[]
-  ): Promise<Result.result<VDict, SqError>> {
-    let exports = VDict.empty();
-
-    for (const importBinding of imports) {
-      const loadResult = await this.importToBindingResult(
-        importBinding,
-        pendingIds
-      );
-      if (!loadResult.ok) return loadResult; // Early return for load/validation errors
-
-      exports = exports.merge(loadResult.value);
-    }
-    return Result.Ok(exports);
-  }
-
-  // Includes implicit imports ("continues") and explicit imports.
-  private async buildExternals(
-    sourceId: string,
-    pendingIds: Set<string>
-  ): Promise<Result.result<Externals, SqError>> {
-    this.parseImports(sourceId);
-
-    const rImports = this.getImports(sourceId);
-    if (!rImports) throw new Error("Internal logic error"); // Shouldn't happen, we just called parseImports.
-    if (!rImports.ok) return rImports; // There's something wrong with imports, that's fatal.
-
-    const implicitImports = await this.importsToBindings(
-      pendingIds,
-      this.getItem(sourceId).getImplicitImports()
-    );
-
-    if (!implicitImports.ok) return implicitImports;
-    const explicitImports = await this.importsToBindings(
-      pendingIds,
-      rImports.value
-    );
-    if (!explicitImports.ok) return explicitImports;
-
-    return Result.Ok({
-      implicitImports: implicitImports.value,
-      explicitImports: explicitImports.value,
-    });
-  }
-
-  private async innerRun(sourceId: string, pendingIds: Set<string>) {
-    pendingIds.add(sourceId);
-
-    const cachedOutput = this.getItem(sourceId).output;
-    if (!cachedOutput) {
-      const rExternals = await this.buildExternals(sourceId, pendingIds);
-
-      if (!rExternals.ok) {
-        this.getItem(sourceId).failRun(rExternals.value);
-      } else {
-        this.dispatchEvent("start-run", { sourceId });
-        await this.getItem(sourceId).run(
-          this.getEnvironment(),
-          rExternals.value,
-          this
-        );
-        this.dispatchEvent("end-run", { sourceId });
-      }
-    }
-
-    pendingIds.delete(sourceId);
-  }
-
-  async run(sourceId: string) {
-    await this.innerRun(sourceId, new Set());
-  }
-
-  // Helper method for "Find in Editor" feature
-  findValuePathByOffset(
-    sourceId: string,
-    offset: number
-  ): Result.result<SqValuePath, SqError> {
-    const { ast } = this.getItem(sourceId);
-    if (!ast) {
-      return Result.Err(new SqOtherError("Not parsed"));
-    }
-    if (!ast.ok) {
-      return ast;
-    }
-    const found = SqValuePath.findByAstOffset({
-      ast: ast.value,
-      offset,
-    });
-    if (!found) {
-      return Result.Err(new SqOtherError("Not found"));
-    }
-    return Result.Ok(found);
-  }
-
-  private dispatchEvent<T extends ProjectEventType>(
+  addEventListener<T extends Project2EventType>(
     type: T,
-    data: Extract<ProjectEventShapes, { type: T }>["payload"]
-  ) {
-    this.eventTarget.dispatchEvent(new ProjectEvent(type, data));
-  }
-
-  addEventListener<T extends ProjectEventType>(
-    type: T,
-    listener: ProjectEventListener<T>
+    listener: Project2EventListener<T>
   ) {
     this.eventTarget.addEventListener(type, listener as (event: Event) => void);
   }
 
-  removeEventListener<T extends ProjectEventType>(
+  removeEventListener<T extends Project2EventType>(
     type: T,
-    listener: ProjectEventListener<T>
+    listener: Project2EventListener<T>
   ) {
     this.eventTarget.removeEventListener(
       type,
       listener as (event: Event) => void
     );
+  }
+
+  async runRoot(): Promise<ModuleOutput> {
+    const existingOutput = this.getOutput();
+    if (existingOutput) {
+      return existingOutput;
+    }
+
+    return new Promise<ModuleOutput>((resolve) => {
+      const listener: Project2EventListener<"output"> = (event) => {
+        if (event.data.output.module.module === this.getRootModule()) {
+          this.removeEventListener("output", listener);
+          resolve(event.data.output);
+        }
+      };
+      this.addEventListener("output", listener);
+    });
   }
 }

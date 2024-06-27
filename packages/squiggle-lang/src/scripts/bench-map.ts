@@ -1,21 +1,27 @@
 #!/usr/bin/env node
-import { measure } from "../cli/utils.js";
-import { SqProject } from "../index.js";
+import { defaultEnv } from "../dists/env.js";
+import { makeSelfContainedLinker } from "../public/SqLinker.js";
+import { SqProject } from "../public/SqProject/index.js";
 
 const maxP = 7;
 
 async function main() {
   for (let p = 0; p <= maxP; p++) {
     const size = Math.pow(10, p);
-    const project = SqProject.create();
-    project.setSource("list", `l = List.upTo(1,${size})`);
-    project.run("list");
-    project.setSource("map", "l -> map({|x| x})");
-    project.setContinues("map", ["list"]);
-    const time = await measure(async () => {
-      await project.run("map");
+    const linker = makeSelfContainedLinker({
+      list: `export l = List.upTo(1,${size})`,
+      map: `
+import "list" as list
+list.l -> map({|x| x})
+`,
     });
-    console.log(`1e${p}`, "\t", time);
+    const project = new SqProject({
+      linker,
+      rootSource: await linker.loadModule("map"),
+      environment: defaultEnv,
+    });
+    const result = await project.runRoot();
+    console.log(`1e${p}`, "\t", result.executionTime / 1000);
   }
 }
 
