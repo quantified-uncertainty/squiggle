@@ -1,7 +1,7 @@
 import { Env } from "../../dists/env.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
-import { ModuleOutput } from "./ModuleOutput.js";
 import { ResolvedModule, ResolvedModuleHash } from "./ResolvedModule.js";
+import { SqModuleOutput } from "./SqModuleOutput.js";
 import { UnresolvedModule, UnresolvedModuleHash } from "./UnresolvedModule.js";
 
 type ProjectStateData = {
@@ -19,7 +19,7 @@ type ProjectStateData = {
   resolvedModules: ImmutableMap<ResolvedModuleHash, ResolvedModule>;
 
   // Outputs are the results of running a module in a specific environment.
-  outputs: ImmutableMap<ResolvedModuleHash, ModuleOutput>;
+  outputs: ImmutableMap<ResolvedModuleHash, SqModuleOutput>;
 };
 
 export class ProjectState implements ProjectStateData {
@@ -115,9 +115,9 @@ export class ProjectState implements ProjectStateData {
   getOutput(
     module: ResolvedModule,
     environment: Env
-  ): ModuleOutput | undefined {
+  ): SqModuleOutput | undefined {
     return this.outputs.get(
-      ModuleOutput.hash({
+      SqModuleOutput.hash({
         module,
         environment,
       })

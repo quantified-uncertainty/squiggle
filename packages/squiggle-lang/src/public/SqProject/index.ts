@@ -1,10 +1,10 @@
-import { Env } from "../../dists/env.js";
+import { defaultEnv, Env } from "../../dists/env.js";
 import { BaseRunner } from "../../runners/BaseRunner.js";
 import { getDefaultRunner } from "../../runners/index.js";
-import { SqLinker } from "../SqLinker.js";
-import { ModuleOutput } from "./ModuleOutput.js";
+import { defaultLinker, SqLinker } from "../SqLinker.js";
 import { ProjectState } from "./ProjectState.js";
 import { ResolvedModule, ResolvedModuleHash } from "./ResolvedModule.js";
+import { SqModuleOutput } from "./SqModuleOutput.js";
 import {
   Project2Action,
   Project2Event,
@@ -14,6 +14,28 @@ import {
 } from "./types.js";
 import { UnresolvedModule } from "./UnresolvedModule.js";
 
+/*
+ * SqProject is a Squiggle project, which is a collection of modules and their
+ * dependencies.
+ *
+ * The project is responsible for loading and resolving modules, building
+ * outputs, and running the project.
+ *
+ * The project is uses the [Functional Core, Imperative
+ * Shell](https://codemirror.net/docs/guide/#functional-core%2C-imperative-shell)
+ * approach: its state is immutable and updated by dispatching actions.
+ *
+ * The project is also an event target, and emits events when outputs are built;
+ * it provides some helpers for waiting for outputs with async/await, but events
+ * are the primary way to interact with the project. One of the reasons for this
+ * is that runs can have multiple steps (load dependencies, run them, then run
+ * the parent), but should be cancellable: if the root source code changes, we
+ * don't want to run the old code.
+ *
+ * When the project is initialized, it will fire the first "loadImports" action,
+ * which will eventually dispatch other actions to load all dependencies and run
+ * the root module.
+ */
 export class SqProject {
   state: ProjectState;
   linker: SqLinker;
@@ -22,33 +44,15 @@ export class SqProject {
 
   constructor(params: {
     rootSource: UnresolvedModule;
-    linker: SqLinker;
+    linker?: SqLinker;
     runner?: BaseRunner;
-    environment: Env;
+    environment?: Env;
   }) {
-    let state = ProjectState.init();
-    state = state.clone({
-      heads: state.heads.set("root", params.rootSource.hash()),
-      unresolvedModules: state.unresolvedModules.set(
-        params.rootSource.hash(),
-        params.rootSource
-      ),
-    });
-    this.state = state;
-    this.linker = params.linker;
+    this.state = ProjectState.init();
+    this.linker = params.linker ?? defaultLinker;
     this.runner = params.runner ?? getDefaultRunner();
-    this.environment = params.environment;
-
-    this.dispatch({
-      type: "loadImports",
-      payload: this.getRootHash(),
-    });
-    this.dispatch({
-      type: "resolveIfPossible",
-      payload: {
-        hash: this.getRootHash(),
-      },
-    });
+    this.environment = params.environment ?? defaultEnv;
+    this.setRootModule(params.rootSource);
   }
 
   private getRootHash(): string {
@@ -67,6 +71,27 @@ export class SqProject {
     return module;
   }
 
+  setRootModule(rootModule: UnresolvedModule) {
+    this.state = this.state.clone({
+      heads: this.state.heads.set("root", rootModule.hash()),
+      unresolvedModules: this.state.unresolvedModules.set(
+        rootModule.hash(),
+        rootModule
+      ),
+    });
+
+    this.dispatch({
+      type: "loadImports",
+      payload: this.getRootHash(),
+    });
+    this.dispatch({
+      type: "resolveIfPossible",
+      payload: {
+        hash: this.getRootHash(),
+      },
+    });
+  }
+
   dispatch(action: Project2Action) {
     this.dispatchEvent({ type: "action", payload: action });
 
@@ -77,6 +102,8 @@ export class SqProject {
           throw new Error(`Module not found: ${action.payload}`);
         }
         for (const imp of module.imports()) {
+          // TODO - how can we de-dupe this? If two modules import the same module, we'll load it twice.
+          // Should we mark in the state that we're loading it?
           this.dispatch({
             type: "loadModule",
             payload: {
@@ -206,7 +233,7 @@ export class SqProject {
           break;
         }
 
-        ModuleOutput.make({
+        SqModuleOutput.make({
           module,
           environment,
           runner: this.runner,
@@ -233,14 +260,14 @@ export class SqProject {
     }
   }
 
-  getOutput(): ModuleOutput | undefined {
+  getOutput(): SqModuleOutput | undefined {
     const resolved = this.state.getResolvedModule(this.getRootModule());
     if (!resolved) {
       // Root module is not resolved yet;
       return undefined;
     }
     const output = this.state.outputs.get(
-      ModuleOutput.hash({
+      SqModuleOutput.hash({
         module: resolved,
         environment: this.environment,
       })
@@ -263,7 +290,7 @@ export class SqProject {
           `Can't find resolved import module ${importBinding.name}`
         );
       }
-      const importOutputHash = ModuleOutput.hash({
+      const importOutputHash = SqModuleOutput.hash({
         module: importedModule,
         environment,
       });
@@ -273,6 +300,24 @@ export class SqProject {
       }
     }
     return true;
+  }
+
+  // Helper for awaiting the root module output.
+  async runRoot(): Promise<SqModuleOutput> {
+    const existingOutput = this.getOutput();
+    if (existingOutput) {
+      return existingOutput;
+    }
+
+    return new Promise<SqModuleOutput>((resolve) => {
+      const listener: Project2EventListener<"output"> = (event) => {
+        if (event.data.output.module.module === this.getRootModule()) {
+          this.removeEventListener("output", listener);
+          resolve(event.data.output);
+        }
+      };
+      this.addEventListener("output", listener);
+    });
   }
 
   private eventTarget = new EventTarget();
@@ -298,22 +343,5 @@ export class SqProject {
       type,
       listener as (event: Event) => void
     );
-  }
-
-  async runRoot(): Promise<ModuleOutput> {
-    const existingOutput = this.getOutput();
-    if (existingOutput) {
-      return existingOutput;
-    }
-
-    return new Promise<ModuleOutput>((resolve) => {
-      const listener: Project2EventListener<"output"> = (event) => {
-        if (event.data.output.module.module === this.getRootModule()) {
-          this.removeEventListener("output", listener);
-          resolve(event.data.output);
-        }
-      };
-      this.addEventListener("output", listener);
-    });
   }
 }

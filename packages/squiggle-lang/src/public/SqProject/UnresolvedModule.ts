@@ -17,7 +17,9 @@ type Import = {
 export class UnresolvedModule {
   name: string;
   code: string;
-  pins: Record<string, ResolvedModuleHash>; // key is source id
+  // key is module name
+  // TODO - are values the hashes for resolved or unresolved modules?
+  pins: Record<string, ResolvedModuleHash>;
   linker: SqLinker;
 
   private _ast?: result<AST, SqError>;
@@ -34,6 +36,9 @@ export class UnresolvedModule {
     this.pins = params.pins ?? {};
   }
 
+  // For now, parsing is done lazily but synchronously and on happens on the
+  // main thread. Parsing is usually fast enough and this makes the
+  // implementation simpler.
   ast() {
     if (!this._ast) {
       this._ast = errMap(
@@ -54,10 +59,10 @@ export class UnresolvedModule {
     const resolvedImports: Import[] = [];
 
     for (const [file, variable] of program.imports) {
-      const sourceId = this.linker.resolve(file.value, this.name);
+      const name = this.linker.resolve(file.value, this.name);
       resolvedImports.push({
         variable: variable.value,
-        name: sourceId,
+        name,
         // TODO - this is used for errors, but we should use the entire import statement;
         // To fix this, we need to represent each import statement as an AST node.
         location: file.location,

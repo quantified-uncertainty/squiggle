@@ -1,7 +1,7 @@
 import { Env } from "../../dists/env.js";
-import { ModuleOutput } from "./ModuleOutput.js";
 import { ProjectState } from "./ProjectState.js";
 import { ResolvedModuleHash } from "./ResolvedModule.js";
+import { SqModuleOutput } from "./SqModuleOutput.js";
 import { UnresolvedModule, UnresolvedModuleHash } from "./UnresolvedModule.js";
 
 export type Project2Action =
@@ -40,7 +40,7 @@ export type Project2EventShape =
   | {
       type: "output";
       payload: {
-        output: ModuleOutput;
+        output: SqModuleOutput;
       };
     }
   | {

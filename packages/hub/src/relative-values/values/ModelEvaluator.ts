@@ -119,7 +119,7 @@ export class ModelEvaluator {
       if (!result.ok) {
         return {
           ok: false,
-          value: `Failed to evaluate Squiggle code: ${result.value.toStringWithDetails(project)}`,
+          value: `Failed to evaluate Squiggle code: ${result.value.toStringWithDetails()}`,
         };
       }
 

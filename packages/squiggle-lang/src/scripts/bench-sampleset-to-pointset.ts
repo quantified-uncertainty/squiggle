@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { measure } from "../cli/utils.js";
 import { defaultEnv } from "../dists/env.js";
-import { ModuleOutput } from "../public/SqProject/ModuleOutput.js";
+import { SqModuleOutput } from "../public/SqProject/SqModuleOutput.js";
 import { run } from "../run.js";
 
 const maxP = 4;
@@ -12,7 +12,7 @@ const seed = process.env["SEED"];
 async function main() {
   for (let p = 0; p <= maxP; p++) {
     const size = Math.pow(10, p);
-    let result: ModuleOutput | undefined;
+    let result: SqModuleOutput | undefined;
     const time = await measure(async () => {
       result = await run(
         `

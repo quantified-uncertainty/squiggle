@@ -93,6 +93,8 @@ export { defaultEnv as defaultEnvironment } from "./dists/env.js";
 export { type Env };
 
 export { type SqLinker } from "./public/SqLinker.js";
+export { SqProject } from "./public/SqProject/index.js";
+export { SqModuleOutput } from "./public/SqProject/SqModuleOutput.js";
 
 export { run } from "./run.js";
 

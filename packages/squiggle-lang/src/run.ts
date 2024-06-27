@@ -1,7 +1,7 @@
 import { defaultEnv, Env } from "./dists/env.js";
 import { defaultLinker } from "./public/SqLinker.js";
 import { SqProject } from "./public/SqProject/index.js";
-import { ModuleOutput } from "./public/SqProject/ModuleOutput.js";
+import { SqModuleOutput } from "./public/SqProject/SqModuleOutput.js";
 import { UnresolvedModule } from "./public/SqProject/UnresolvedModule.js";
 
 // Simplified interface to SqProject for single-source execution.
@@ -10,7 +10,7 @@ export async function run(
   options?: {
     environment?: Env;
   }
-): Promise<ModuleOutput> {
+): Promise<SqModuleOutput> {
   const project = new SqProject({
     rootSource: new UnresolvedModule({
       name: "main",
@@ -20,7 +20,7 @@ export async function run(
     environment: options?.environment ?? defaultEnv,
     linker: defaultLinker,
   });
-  return new Promise<ModuleOutput>((resolve) => {
+  return new Promise<SqModuleOutput>((resolve) => {
     project.addEventListener("output", (event) => {
       resolve(event.data.output);
     });

@@ -6,11 +6,11 @@ import { Err, fmap2, Ok, result } from "../../utility/result.js";
 import { vDict, VDict } from "../../value/VDict.js";
 import { vString } from "../../value/VString.js";
 import { SqError, SqOtherError, wrapError } from "../SqError.js";
-import { Externals, RunContext } from "../SqProject/ProjectItem.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqDict } from "../SqValue/SqDict.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValuePath, ValuePathRoot } from "../SqValuePath.js";
+import { Externals, RunContext } from "./ProjectItem.js";
 import { ProjectState } from "./ProjectState.js";
 import { ResolvedModule } from "./ResolvedModule.js";
 import { getHash } from "./utils.js";
@@ -25,7 +25,7 @@ export type OutputResult = result<
   SqError
 >;
 
-export class ModuleOutput {
+export class SqModuleOutput {
   module: ResolvedModule;
   environment: Env;
   output: OutputResult;
@@ -44,7 +44,7 @@ export class ModuleOutput {
   }
 
   hash(): string {
-    return ModuleOutput.hash({
+    return SqModuleOutput.hash({
       module: this.module,
       environment: this.environment,
     });
@@ -78,12 +78,12 @@ export class ModuleOutput {
     environment: Env;
     runner: BaseRunner;
     state: ProjectState;
-  }): Promise<ModuleOutput> {
+  }): Promise<SqModuleOutput> {
     const { environment, module } = params;
 
     const astR = module.module.ast();
     if (!astR.ok) {
-      return new ModuleOutput({
+      return new SqModuleOutput({
         module,
         environment,
         output: astR,
@@ -102,7 +102,7 @@ export class ModuleOutput {
           `Can't find resolved import module ${importBinding.name}`
         );
       }
-      const importOutputHash = ModuleOutput.hash({
+      const importOutputHash = SqModuleOutput.hash({
         module: importedModule,
         environment,
       });
@@ -198,7 +198,7 @@ export class ModuleOutput {
       (err) => wrapError(err)
     );
 
-    return new ModuleOutput({
+    return new SqModuleOutput({
       module,
       environment,
       output,

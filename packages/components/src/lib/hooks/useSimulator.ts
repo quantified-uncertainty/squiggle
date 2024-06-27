@@ -5,18 +5,13 @@ import {
   runnerByName,
   RunnerName,
   SqLinker,
-  SqOutputResult,
+  SqModuleOutput,
   SqProject,
 } from "@quri/squiggle-lang";
 
-export type Simulation = {
-  output: SqOutputResult;
-  code: string;
-  executionId: number;
-  executionTime: number;
-  isStale?: boolean;
-  environment: Env;
-};
+import { UnresolvedModule } from "../../../../squiggle-lang/src/public/SqProject/UnresolvedModule.js";
+
+export type Simulation = SqModuleOutput;
 
 export function isSimulating(simulation: Simulation): boolean {
   return simulation.isStale ?? false;
@@ -27,12 +22,10 @@ type SetupSettings =
   | {
       type: "project";
       project: SqProject;
-      continues?: string[];
     } // Project for the parent execution. Continues is what other squiggle sources to continue. Default []
   | {
       type: "projectFromLinker";
       linker?: SqLinker;
-      continues?: string[];
     };
 
 type SimulatorArgs = {
@@ -55,9 +48,6 @@ type UseSimulatorResult = {
   runSimulation: () => void;
 };
 
-// defaultContinues needs to have a stable identity.
-const defaultContinues: string[] = [];
-
 function useSetup({
   setup,
   sourceId,
@@ -74,11 +64,6 @@ function useSetup({
     return sourceId || Math.random().toString(36).slice(2);
   }, [sourceId]);
 
-  const continues =
-    setup.type === "standalone"
-      ? defaultContinues
-      : setup.continues ?? defaultContinues;
-
   // Intentionally using `useState` instead of `useMemo` - updates to project configuration happen as effects.
   const [project] = useState(() => {
     const getRunner = () =>
@@ -88,12 +73,12 @@ function useSetup({
 
     switch (setup.type) {
       case "standalone":
-        return SqProject.create({
+        return new SqProject({
           environment,
           runner: getRunner(),
         });
       case "projectFromLinker":
-        return SqProject.create({
+        return new SqProject({
           environment,
           linker: setup.linker,
           runner: getRunner(),
@@ -105,12 +90,11 @@ function useSetup({
     }
   });
 
-  return { sourceId: _sourceId, project, continues };
+  return { sourceId: _sourceId, project };
 }
 
 type RunTask = {
   code: string;
-  continues: string[];
   environment: Env;
   executionId: number;
   inProgress: boolean;
@@ -141,12 +125,22 @@ type Action =
     };
 
 export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
-  const { sourceId, project, continues } = useSetup({
+  const { sourceId, project } = useSetup({
     setup: args.setup,
     sourceId: args.sourceId,
     environment: args.environment,
     runnerName: args.runnerName,
   });
+
+  const rootModule = useMemo(
+    () =>
+      new UnresolvedModule({
+        name: sourceId,
+        code: args.code,
+        linker: project.getLinker(),
+      }),
+    []
+  );
 
   const [state, dispatch] = useReducer(reducer, {
     autorunMode: args.initialAutorunMode ?? true,
@@ -180,7 +174,6 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
               //
               // Thanks to this, we can avoid dependencies in `runSimulation` callback.
               code: args.code,
-              continues,
               environment: project.getEnvironment(),
               inProgress: false,
               executionId,
@@ -240,7 +233,6 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     (async () => {
       const startTime = Date.now();
       project.setSource(sourceId, task.code);
-      project.setContinues(sourceId, task.continues);
 
       await project.run(sourceId);
 
@@ -307,7 +299,7 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
   return {
     sourceId,
     project,
-    simulation: state.simulation,
+    simulation: project.getOutput(),
     autorunMode: state.autorunMode,
     setAutorunMode,
     runSimulation,
