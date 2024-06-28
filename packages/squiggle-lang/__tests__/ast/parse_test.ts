@@ -158,10 +158,10 @@ describe("Peggy parse", () => {
   });
 
   describe("typed variables", () => {
-    testParse("x: kg = 1", "(Program (LetStatement :x (TypeSignature :kg) 1))");
-    testParse("x: kg/m = 1", "(Program (LetStatement :x (TypeSignature (InfixType / :kg :m)) 1))");
-    testParse("x: kg*m/s = 1", "(Program (LetStatement :x (TypeSignature (InfixType / (InfixType * :kg :m) :s)) 1))");
-    testParse("x: m/s/s = 1", "(Program (LetStatement :x (TypeSignature (InfixType / (InfixType / :m :s) :s)) 1))");
+    testParse("x :: kg = 1", "(Program (LetStatement :x (TypeSignature :kg) 1))");
+    testParse("x :: kg/m = 1", "(Program (LetStatement :x (TypeSignature (InfixType / :kg :m)) 1))");
+    testParse("x :: kg*m/s = 1", "(Program (LetStatement :x (TypeSignature (InfixType / (InfixType * :kg :m) :s)) 1))");
+    testParse("x :: m/s/s = 1", "(Program (LetStatement :x (TypeSignature (InfixType / (InfixType / :m :s) :s)) 1))");
   });
 
   describe("functions", () => {

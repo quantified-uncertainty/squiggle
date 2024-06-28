@@ -59,7 +59,7 @@ decorator
     }
 
 typeSignature
-  = _ ":" _ body:infixType
+  = _ "::" _ body:infixType
     {
       return h.nodeTypeSignature(false, body, location());
     }
