@@ -7,9 +7,8 @@ import {
   SqLinker,
   SqModuleOutput,
   SqProject,
+  UnresolvedModule,
 } from "@quri/squiggle-lang";
-
-import { UnresolvedModule } from "../../../../squiggle-lang/src/public/SqProject/UnresolvedModule.js";
 
 export type Simulation = {
   isStale: boolean;
@@ -144,9 +143,8 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     [sourceId, state.codeToSimulate, project.linker]
   );
 
-  // TODO - generate random head name?
+  // TODO - generate random head name? `project` could be passed from outside and have a head already.
   const mainHead = "main";
-  const upcomingHead = "main-upcoming";
 
   // Whenever the code changes, we update the project.
   // Setting the head will automatically run it.
@@ -154,11 +152,7 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     if (!rootModule) {
       return;
     }
-    if (project.hasHead(mainHead)) {
-      project.setHead(upcomingHead, rootModule);
-    } else {
-      project.setHead(mainHead, rootModule);
-    }
+    project.setHead(mainHead, rootModule);
   }, [project, rootModule]);
 
   function reducer(state: State, action: Action): State {
@@ -187,7 +181,7 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
           simulation: {
             output: action.value,
             executionId: (state.simulation?.executionId ?? 0) + 1,
-            isStale: true,
+            isStale: false,
           },
         };
       }
@@ -210,8 +204,8 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
       event
     ) => {
       if (
-        event.data.output.module.module ===
-        project.state.unresolvedModules.get(project.state.heads.get(mainHead)!)
+        rootModule &&
+        event.data.output.module.module.hash() === rootModule.hash()
       ) {
         dispatch({
           type: "setSimulation",
@@ -222,7 +216,7 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     project.addEventListener("output", listener);
 
     return () => project.removeEventListener("output", listener);
-  }, [project, state.executionId]);
+  }, [project, rootModule, state.executionId]);
 
   // // Re-run on environment and runner changes.
   // useEffect(() => {

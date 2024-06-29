@@ -94,6 +94,7 @@ export { type Env };
 
 export { makeSelfContainedLinker, type SqLinker } from "./public/SqLinker.js";
 export { SqProject } from "./public/SqProject/index.js";
+export { UnresolvedModule } from "./public/SqProject/UnresolvedModule.js";
 export { SqModuleOutput } from "./public/SqProject/SqModuleOutput.js";
 
 export { run } from "./run.js";

@@ -8,7 +8,7 @@ import { getFunctionDocumentation } from "@quri/squiggle-lang";
 import {
   projectFacet,
   renderImportTooltipFacet,
-  sourceIdFacet,
+  simulationFacet,
 } from "../fields.js";
 import { reactAsDom } from "../utils.js";
 import { HoverTooltip } from "./HoverTooltip.js";
@@ -39,8 +39,8 @@ export function tooltipsExtension() {
   // See also: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_hover
   const hoverExtension = hoverTooltip((view, pos, side) => {
     const renderImportTooltip = view.state.facet(renderImportTooltipFacet);
+    const simulation = view.state.facet(simulationFacet);
     const project = view.state.facet(projectFacet);
-    const sourceId = view.state.facet(sourceIdFacet);
 
     const { doc } = view.state;
 
@@ -97,11 +97,11 @@ export function tooltipsExtension() {
         }
 
         const name = getText(node);
-        if (cursor.type.is("Import")) {
-          const output = project.getOutput(sourceId);
-          if (!output.ok) return null;
+        if (!simulation?.output.output?.ok) return null;
+        const output = simulation?.output.output.value;
 
-          const value = output.value.imports.get(name);
+        if (cursor.type.is("Import")) {
+          const value = output.imports.get(name);
           if (!value) return null;
 
           return nodeTooltip(node, <ValueTooltip value={value} view={view} />);
@@ -114,10 +114,7 @@ export function tooltipsExtension() {
             return null;
           }
 
-          const bindings = project.getBindings(sourceId);
-          if (!bindings.ok) return null;
-
-          const value = bindings.value.get(name);
+          const value = output.bindings.get(name);
           if (!value) return null;
 
           // Should be a statement
