@@ -55,14 +55,16 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
     },
     viewerWithMenuBarRef
   ) {
+    const {
+      output: { output },
+    } = simulation;
     const [viewerTab, setViewerTab] = useState<ViewerTab>(
-      defaultTab ?? defaultViewerTab(simulation.output)
+      defaultTab ?? defaultViewerTab(output)
     );
 
     const viewerRef = useRef<SquiggleViewerHandle>(null);
     const _isSimulating = isSimulating(simulation);
-    const { output } = simulation;
-    const shownTabs = viewerTabsToShow(simulation.output);
+    const shownTabs = viewerTabsToShow(output);
 
     useViewerTabShortcuts({
       enableGlobalShortcuts,
@@ -110,7 +112,7 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
           randomizeSeed ? (
             <RandomizeSeedButton
               isSimulating={_isSimulating}
-              seed={simulation.environment.seed || "default-seed"}
+              seed={simulation.output.environment.seed || "default-seed"}
               randomizeSeed={randomizeSeed}
             />
           ) : null

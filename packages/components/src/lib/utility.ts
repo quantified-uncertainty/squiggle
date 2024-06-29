@@ -2,12 +2,12 @@ import {
   Env,
   result,
   SqError,
+  SqModuleOutput,
   SqProject,
   SqValue,
   SqValuePath,
 } from "@quri/squiggle-lang";
 
-import { SqOutputResult } from "../../../squiggle-lang/src/public/types.js";
 import { Simulation } from "./hooks/useSimulator.js";
 
 export function flattenResult<a, b>(x: result<a, b>[]): result<a[], b> {
@@ -47,10 +47,10 @@ export function some(arr: boolean[]): boolean {
 export function simulationErrors(simulation?: Simulation): SqError[] {
   if (!simulation) {
     return [];
-  } else if (simulation.output.ok) {
+  } else if (simulation.output.output.ok) {
     return [];
   } else {
-    return [simulation.output.value];
+    return [simulation.output.output.value];
   }
 }
 
@@ -123,7 +123,7 @@ export const isCustomVisibleRootPath = (
   typeof tab === "object" && tab.tag === "CustomVisibleRootPath";
 
 export function defaultViewerTab(
-  outputResult: SqOutputResult | undefined
+  outputResult: SqModuleOutput["output"] | undefined
 ): ViewerTab {
   if (!outputResult?.ok) {
     return "Variables";
@@ -142,7 +142,7 @@ export function viewerTabToVisibleRootPath(
 
 export function viewerTabToValue(
   viewerTab: ViewerTab,
-  output: SqOutputResult
+  output: SqModuleOutput["output"]
 ): SqValue | undefined {
   if (!output.ok) {
     return;
@@ -162,8 +162,8 @@ export function viewerTabToValue(
     default:
       if (isCustomVisibleRootPath(viewerTab)) {
         return viewerTab.visibleRootPath.root === "result" //Practically speaking, this should only be bindings.
-          ? output.value.result
-          : output.value.bindings.asValue();
+          ? sqOutput.result
+          : sqOutput.bindings.asValue();
       }
   }
 }
@@ -179,12 +179,12 @@ const selectableViewerTabs = [
 export type SelectableViewerTab = (typeof selectableViewerTabs)[number];
 
 export function viewerTabsToShow(
-  outputResult: SqOutputResult
+  output: SqModuleOutput["output"]
 ): SelectableViewerTab[] {
-  if (!outputResult.ok) return ["Variables", "AST"]; // Default tabs if outputResult is not OK
+  if (!output.ok) return ["Variables", "AST"]; // Default tabs if outputResult is not OK
 
   const tabs: SelectableViewerTab[] = []; // Always show AST
-  const { bindings, imports, exports, result } = outputResult.value;
+  const { bindings, imports, exports, result } = output.value;
 
   if (imports.size()) tabs.push("Imports");
   if (bindings.size()) tabs.push("Variables");
@@ -200,7 +200,6 @@ export function viewerTabsToShow(
 export type StandaloneExecutionProps = {
   project?: undefined;
   environment?: Env;
-  continues?: undefined;
 };
 
 // Props needed when executing inside a project.
@@ -208,6 +207,4 @@ export type ProjectExecutionProps = {
   /** The project that this execution is part of */
   project: SqProject;
   environment?: undefined;
-  /** What other squiggle sources from the project to continue. Default [] */
-  continues?: string[];
 };

@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { FC } from "react";
 
+import { SqModuleOutput } from "@quri/squiggle-lang";
 import {
   Button,
   CodeBracketIcon,
@@ -11,7 +12,6 @@ import {
   TriangleIcon,
 } from "@quri/ui";
 
-import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SelectableViewerTab, ViewerTab } from "../../lib/utility.js";
 
 const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
@@ -42,7 +42,7 @@ function viewerTabTitle(mode: ViewerTab): string {
 type Props = {
   viewerTab: ViewerTab;
   setViewerTab: (viewerTab: ViewerTab) => void;
-  outputResult: SqOutputResult;
+  outputResult: SqModuleOutput["output"];
   shownTabs: SelectableViewerTab[];
 };
 

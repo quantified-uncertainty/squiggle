@@ -2,8 +2,6 @@ import "@testing-library/jest-dom";
 
 import { render, waitFor } from "@testing-library/react";
 
-import { SqProject } from "@quri/squiggle-lang";
-
 import {
   SquiggleChart,
   SquiggleEditor,
@@ -30,28 +28,6 @@ test("Editor logs nothing on render", async () => {
   expect(console.warn).not.toHaveBeenCalled();
   expect(console.error).not.toHaveBeenCalled();
   /* eslint-enable no-console */
-});
-
-test("Project dependencies work in editors", async () => {
-  const project = SqProject.create();
-
-  project.setSource("depend", "x = 123");
-
-  const rendered = render(
-    <SquiggleEditor
-      defaultCode="x + 456"
-      project={project}
-      continues={["depend"]}
-    />
-  );
-
-  await waitFor(() => expect(project.getSourceIds().length).toBe(2));
-
-  await waitFor(() =>
-    expect(rendered.getByTestId("dynamic-viewer-result")).toHaveTextContent(
-      "579"
-    )
-  );
 });
 
 test("Playground", async () => {

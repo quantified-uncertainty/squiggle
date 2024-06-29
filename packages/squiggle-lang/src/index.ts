@@ -92,7 +92,7 @@ export {
 export { defaultEnv as defaultEnvironment } from "./dists/env.js";
 export { type Env };
 
-export { type SqLinker } from "./public/SqLinker.js";
+export { makeSelfContainedLinker, type SqLinker } from "./public/SqLinker.js";
 export { SqProject } from "./public/SqProject/index.js";
 export { SqModuleOutput } from "./public/SqProject/SqModuleOutput.js";
 
@@ -133,3 +133,5 @@ export {
   WebWorkerRunner,
   WithCacheLoaderRunner,
 } from "./runners/index.js";
+
+export { getStdLib } from "./library/index.js";

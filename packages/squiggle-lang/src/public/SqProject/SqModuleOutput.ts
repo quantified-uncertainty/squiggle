@@ -1,5 +1,6 @@
 import { isBindingStatement } from "../../ast/utils.js";
 import { Env } from "../../dists/env.js";
+import { RunProfile } from "../../reducer/RunProfile.js";
 import { BaseRunner, RunParams } from "../../runners/BaseRunner.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import { Err, fmap2, Ok, result } from "../../utility/result.js";
@@ -21,6 +22,7 @@ export type OutputResult = result<
     bindings: SqDict;
     imports: SqDict;
     exports: SqDict;
+    profile: RunProfile | undefined;
   },
   SqError
 >;
@@ -48,6 +50,10 @@ export class SqModuleOutput {
       module: this.module,
       environment: this.environment,
     });
+  }
+
+  code(): string {
+    return this.module.module.code;
   }
 
   // Helper method for "Find in Editor" feature
@@ -193,6 +199,7 @@ export class SqModuleOutput {
             "bindings"
           ),
           imports: wrapSqDict(externals.explicitImports, "imports"),
+          profile: runOutput.profile,
         };
       },
       (err) => wrapError(err)

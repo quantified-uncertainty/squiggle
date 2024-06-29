@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { sq, SqLinker } from "@quri/squiggle-lang";
+import { makeSelfContainedLinker, sq } from "@quri/squiggle-lang";
 import { Button } from "@quri/ui";
 
 import { SquigglePlayground as Component } from "../components/SquigglePlayground/index.js";
@@ -174,30 +174,19 @@ r = {
   },
 };
 
-const linker: SqLinker = {
-  resolve: (name) => name,
-  loadSource: async (sourceName) => {
-    // Note how this function is async and can load sources remotely on demand.
-    switch (sourceName) {
-      case "hub:source1":
-        return `@name("my Import")
-export x=1`;
-      case "source2":
-        return `
-          import "hub:source1" as s1
-          export y=2
-          export foo = {a: s1}
-        `;
-      case "source3":
-        return `
-          import "source2" as s2
-          export z=3
-        `;
-      default:
-        throw new Error(`source ${sourceName} not found`);
-    }
-  },
-};
+const linker = makeSelfContainedLinker({
+  "hub:source1": `@name("my Import")
+export x=1`,
+  source2: `
+    import "hub:source1" as s1
+    export y=2
+    export foo = {a: s1}
+  `,
+  source3: `
+    import "source2" as s2
+    export z=3
+  `,
+});
 
 export const ManyTypes: Story = {
   name: "Many types",

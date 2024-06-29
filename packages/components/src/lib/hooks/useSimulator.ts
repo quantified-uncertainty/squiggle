@@ -11,7 +11,11 @@ import {
 
 import { UnresolvedModule } from "../../../../squiggle-lang/src/public/SqProject/UnresolvedModule.js";
 
-export type Simulation = SqModuleOutput;
+export type Simulation = {
+  isStale: boolean;
+  executionId: number;
+  output: SqModuleOutput;
+};
 
 export function isSimulating(simulation: Simulation): boolean {
   return simulation.isStale ?? false;
@@ -93,17 +97,10 @@ function useSetup({
   return { sourceId: _sourceId, project };
 }
 
-type RunTask = {
-  code: string;
-  environment: Env;
-  executionId: number;
-  inProgress: boolean;
-};
-
 type State = {
   autorunMode: boolean;
   executionId: number;
-  runQueue: RunTask[];
+  codeToSimulate: string | undefined;
   simulation: Simulation | undefined;
 };
 
@@ -116,12 +113,8 @@ type Action =
       type: "run";
     }
   | {
-      type: "startTask";
-      value: number; // execution id
-    }
-  | {
       type: "setSimulation";
-      value: Simulation;
+      value: SqModuleOutput;
     };
 
 export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
@@ -132,22 +125,41 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     runnerName: args.runnerName,
   });
 
-  const rootModule = useMemo(
-    () =>
-      new UnresolvedModule({
-        name: sourceId,
-        code: args.code,
-        linker: project.getLinker(),
-      }),
-    []
-  );
-
   const [state, dispatch] = useReducer(reducer, {
     autorunMode: args.initialAutorunMode ?? true,
     executionId: 0,
+    codeToSimulate: args.initialAutorunMode ? args.code : undefined,
     simulation: undefined,
-    runQueue: [],
   });
+
+  const rootModule = useMemo(
+    () =>
+      state.codeToSimulate
+        ? new UnresolvedModule({
+            name: sourceId,
+            code: state.codeToSimulate,
+            linker: project.linker,
+          })
+        : undefined,
+    [sourceId, state.codeToSimulate, project.linker]
+  );
+
+  // TODO - generate random head name?
+  const mainHead = "main";
+  const upcomingHead = "main-upcoming";
+
+  // Whenever the code changes, we update the project.
+  // Setting the head will automatically run it.
+  useEffect(() => {
+    if (!rootModule) {
+      return;
+    }
+    if (project.hasHead(mainHead)) {
+      project.setHead(upcomingHead, rootModule);
+    } else {
+      project.setHead(mainHead, rootModule);
+    }
+  }, [project, rootModule]);
 
   function reducer(state: State, action: Action): State {
     switch (action.type) {
@@ -155,55 +167,32 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
         return {
           ...state,
           autorunMode: action.value,
+          codeToSimulate: action.value ? args.code : state.codeToSimulate,
         };
       case "run": {
-        const executionId = state.executionId + 1;
         return {
           ...state,
-          executionId,
-          runQueue: [
-            // No point in keeping more than two tasks in a queue, for now (see
-            // below, we run tasks sequentially because SqProject is mutable and
-            // we'd run into race conditions otherwise).
-            ...state.runQueue.slice(0, 1),
-            {
-              // Note how this depends on args. This is a "cheat mode for
-              // hooks", explained in
-              // https://overreacted.io/a-complete-guide-to-useeffect/, under
-              // "Why useReducer Is the Cheat Mode of Hooks" section.
-              //
-              // Thanks to this, we can avoid dependencies in `runSimulation` callback.
-              code: args.code,
-              environment: project.getEnvironment(),
-              inProgress: false,
-              executionId,
-            },
-          ],
+          codeToSimulate: args.code,
+          simulation: state.simulation
+            ? {
+                ...state.simulation,
+                isStale: true,
+              }
+            : undefined,
         };
       }
-      case "startTask":
-        return {
-          ...state,
-          simulation: state.simulation
-            ? { ...state.simulation, isStale: true }
-            : undefined,
-          runQueue: state.runQueue.map((task) =>
-            action.value === task.executionId
-              ? { ...task, inProgress: true }
-              : task
-          ),
-        };
       case "setSimulation": {
         return {
           ...state,
-          runQueue: state.runQueue.filter(
-            (task) => task.executionId !== action.value.executionId
-          ),
-          simulation: action.value,
+          simulation: {
+            output: action.value,
+            executionId: (state.simulation?.executionId ?? 0) + 1,
+            isStale: true,
+          },
         };
       }
       default:
-        return state;
+        throw action satisfies never;
     }
   }
 
@@ -215,66 +204,49 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
 
   const runSimulation = useCallback(() => dispatch({ type: "run" }), []);
 
-  // Whenever the run queue changes, we attempt to process it.
+  // Whenever the main head output arrives, we capture it.
   useEffect(() => {
-    // nothing to run
-    if (!state.runQueue.length) {
-      return;
-    }
+    const listener: Parameters<typeof project.addEventListener<"output">>[1] = (
+      event
+    ) => {
+      if (
+        event.data.output.module.module ===
+        project.state.unresolvedModules.get(project.state.heads.get(mainHead)!)
+      ) {
+        dispatch({
+          type: "setSimulation",
+          value: event.data.output,
+        });
+      }
+    };
+    project.addEventListener("output", listener);
 
-    // take the first task from the start of the queue
-    const task = state.runQueue[0];
-    if (task.inProgress) {
-      // SqProject can't run the same source with different code in parallel yet, so we process one task at a time.
-      return;
-    }
-    dispatch({ type: "startTask", value: task.executionId });
+    return () => project.removeEventListener("output", listener);
+  }, [project, state.executionId]);
 
-    (async () => {
-      const startTime = Date.now();
-      project.setSource(sourceId, task.code);
+  // // Re-run on environment and runner changes.
+  // useEffect(() => {
+  //   if (args.environment) {
+  //     project.setEnvironment(args.environment);
+  //   }
+  //   if (state.autorunMode) {
+  //     runSimulation();
+  //   }
+  // }, [project, args.environment, state.autorunMode]);
 
-      await project.run(sourceId);
-
-      const output = project.getOutput(sourceId);
-      const executionTime = Date.now() - startTime;
-
-      dispatch({
-        type: "setSimulation",
-        value: {
-          executionId: task.executionId,
-          code: task.code,
-          output,
-          executionTime,
-          environment: task.environment,
-        },
-      });
-    })();
-  }, [project, sourceId, state.runQueue]);
-
-  // Re-run on environment and runner changes.
-  useEffect(() => {
-    if (args.environment) {
-      project.setEnvironment(args.environment);
-    }
-    if (state.autorunMode) {
-      runSimulation();
-    }
-  }, [project, args.environment, state.autorunMode]);
-
-  useEffect(() => {
-    if (!args.runnerName) {
-      // Undefined runnerName shouldn't reset the project.
-      // (Consider the case where `setup.project` is set with a pre-configured runner)
-      return;
-    }
-    project.setRunner(
-      runnerByName(args.runnerName, args.runnerName === "web-worker" ? 2 : 1)
-    );
-    if (state.autorunMode) {
-      runSimulation();
-    }
-  }, [project, args.runnerName, state.autorunMode]);
+  // useEffect(() => {
+  //   if (!args.runnerName) {
+  //     // Undefined runnerName shouldn't reset the project.
+  //     // (Consider the case where `setup.project` is set with a pre-configured runner)
+  //     return;
+  //   }
+  //   project.setRunner(
+  //     runnerByName(args.runnerName, args.runnerName === "web-worker" ? 2 : 1)
+  //   );
+  //   if (state.autorunMode) {
+  //     runSimulation();
+  //   }
+  // }, [project, args.runnerName, state.autorunMode]);
 
   // Run on code changes.
   useEffect(() => {
@@ -283,23 +255,10 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     }
   }, [state.autorunMode, args.code]);
 
-  useEffect(() => {
-    // This removes the source from the project when the component unmounts.
-    return () => {
-      // We have to delay the cleanup, because `project.run` is async and can
-      // start with a bit of the delay; we don't want to remove source before
-      // the run starts.
-      // (It's possible there are still race conditions here.)
-      setTimeout(() => {
-        project.removeSource(sourceId);
-      }, 10);
-    };
-  }, [project, sourceId]);
-
   return {
     sourceId,
     project,
-    simulation: project.getOutput(),
+    simulation: state.simulation,
     autorunMode: state.autorunMode,
     setAutorunMode,
     runSimulation,

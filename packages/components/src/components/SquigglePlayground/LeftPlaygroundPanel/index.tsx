@@ -74,7 +74,9 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           <RunMenuItem
             runSimulation={props.runSimulation}
             autorunMode={props.autorunMode}
-            codeHasChanged={props.code !== props.simulation?.code}
+            codeHasChanged={
+              props.code !== props.simulation?.output.module.module.code
+            }
             isSimulating={
               props.simulation ? isSimulating(props.simulation) : false
             }

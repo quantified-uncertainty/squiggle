@@ -12,17 +12,17 @@ export async function run(
   }
 ): Promise<SqModuleOutput> {
   const project = new SqProject({
-    rootSource: new UnresolvedModule({
-      name: "main",
-      code,
-      linker: defaultLinker,
-    }),
     environment: options?.environment ?? defaultEnv,
     linker: defaultLinker,
   });
-  return new Promise<SqModuleOutput>((resolve) => {
-    project.addEventListener("output", (event) => {
-      resolve(event.data.output);
-    });
-  });
+
+  project.setHead(
+    "root",
+    new UnresolvedModule({
+      name: "main",
+      code,
+      linker: defaultLinker,
+    })
+  );
+  return await project.runHead("root");
 }

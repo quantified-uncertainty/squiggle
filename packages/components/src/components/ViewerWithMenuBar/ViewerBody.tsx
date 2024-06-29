@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 
-import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
+import { SqModuleOutput } from "@quri/squiggle-lang";
+
 import { SquiggleErrorAlert } from "../../index.js";
 import {
   ViewerTab,
@@ -18,7 +19,7 @@ import { ErrorBoundary } from "../ui/ErrorBoundary.js";
 
 type Props = {
   viewerTab: ViewerTab;
-  outputResult: SqOutputResult;
+  outputResult: SqModuleOutput["output"];
   isSimulating: boolean;
   externalViewerActions?: ExternalViewerActions;
   playgroundSettings: PartialPlaygroundSettings;

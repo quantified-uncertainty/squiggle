@@ -15,10 +15,10 @@ type Story = StoryObj<typeof meta>;
 
 async function getErrorFromCode(code: string) {
   const result = await run(code);
-  if (result.ok) {
+  if (result.output.ok) {
     throw new Error("Expected an error");
   }
-  return result.value;
+  return result.output.value;
 }
 
 export const CompileError: Story = {

@@ -29,12 +29,12 @@ import { UnresolvedModule } from "./UnresolvedModule.js";
  * it provides some helpers for waiting for outputs with async/await, but events
  * are the primary way to interact with the project. One of the reasons for this
  * is that runs can have multiple steps (load dependencies, run them, then run
- * the parent), but should be cancellable: if the root source code changes, we
+ * the parent), but should be cancellable: if the head source code changes, we
  * don't want to run the old code.
  *
- * When the project is initialized, it will fire the first "loadImports" action,
- * which will eventually dispatch other actions to load all dependencies and run
- * the root module.
+ * When the new head is added to the project, it will fire the first
+ * "loadImports" action, which will eventually dispatch other actions to load
+ * all dependencies and run the head module.
  */
 export class SqProject {
   state: ProjectState;
@@ -42,54 +42,59 @@ export class SqProject {
   runner: BaseRunner;
   environment: Env;
 
-  constructor(params: {
-    rootSource: UnresolvedModule;
-    linker?: SqLinker;
-    runner?: BaseRunner;
-    environment?: Env;
-  }) {
+  constructor(
+    params: {
+      linker?: SqLinker;
+      runner?: BaseRunner;
+      environment?: Env;
+    } = {}
+  ) {
     this.state = ProjectState.init();
     this.linker = params.linker ?? defaultLinker;
     this.runner = params.runner ?? getDefaultRunner();
     this.environment = params.environment ?? defaultEnv;
-    this.setRootModule(params.rootSource);
   }
 
-  private getRootHash(): string {
-    const result = this.state.heads.get("root");
-    if (!result) {
-      throw new Error("Root head not found");
-    }
-    return result;
-  }
-
-  private getRootModule(): UnresolvedModule {
-    const module = this.state.unresolvedModules.get(this.getRootHash());
-    if (!module) {
-      throw new Error("Root head module not found");
-    }
-    return module;
-  }
-
-  setRootModule(rootModule: UnresolvedModule) {
+  setHead(headName: string, module: UnresolvedModule) {
     this.state = this.state.clone({
-      heads: this.state.heads.set("root", rootModule.hash()),
+      heads: this.state.heads.set(headName, module.hash()),
       unresolvedModules: this.state.unresolvedModules.set(
-        rootModule.hash(),
-        rootModule
+        module.hash(),
+        module
       ),
     });
 
     this.dispatch({
       type: "loadImports",
-      payload: this.getRootHash(),
+      payload: module.hash(),
     });
     this.dispatch({
       type: "resolveIfPossible",
       payload: {
-        hash: this.getRootHash(),
+        hash: module.hash(),
       },
     });
+  }
+
+  async loadHead(headName: string, name: string) {
+    const module = await this.linker.loadModule(name);
+    this.setHead(headName, module);
+  }
+
+  hasHead(headName: string): boolean {
+    return this.state.heads.has(headName);
+  }
+
+  private getHead(headName: string): UnresolvedModule {
+    const moduleHash = this.state.heads.get(headName);
+    if (!moduleHash) {
+      throw new Error(`Head ${headName} not found`);
+    }
+    const module = this.state.unresolvedModules.get(moduleHash);
+    if (!module) {
+      throw new Error(`Head ${headName} not found`);
+    }
+    return module;
   }
 
   dispatch(action: Project2Action) {
@@ -260,8 +265,8 @@ export class SqProject {
     }
   }
 
-  getOutput(): SqModuleOutput | undefined {
-    const resolved = this.state.getResolvedModule(this.getRootModule());
+  getOutput(headName: string): SqModuleOutput | undefined {
+    const resolved = this.state.getResolvedModule(this.getHead(headName));
     if (!resolved) {
       // Root module is not resolved yet;
       return undefined;
@@ -302,16 +307,16 @@ export class SqProject {
     return true;
   }
 
-  // Helper for awaiting the root module output.
-  async runRoot(): Promise<SqModuleOutput> {
-    const existingOutput = this.getOutput();
+  // Helper for awaiting the head output.
+  async runHead(headName: string): Promise<SqModuleOutput> {
+    const existingOutput = this.getOutput(headName);
     if (existingOutput) {
       return existingOutput;
     }
 
     return new Promise<SqModuleOutput>((resolve) => {
       const listener: Project2EventListener<"output"> = (event) => {
-        if (event.data.output.module.module === this.getRootModule()) {
+        if (event.data.output.module.module === this.getHead(headName)) {
           this.removeEventListener("output", listener);
           resolve(event.data.output);
         }

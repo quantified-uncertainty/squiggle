@@ -17,10 +17,10 @@ list.l -> map({|x| x})
     });
     const project = new SqProject({
       linker,
-      rootSource: await linker.loadModule("map"),
       environment: defaultEnv,
     });
-    const result = await project.runRoot();
+    await project.loadHead("root", "map");
+    const result = await project.runHead("root");
     console.log(`1e${p}`, "\t", result.executionTime / 1000);
   }
 }

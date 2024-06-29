@@ -24,16 +24,18 @@ export function profilerExtension(): Extension {
         return empty;
       }
 
-      if (simulation.code !== state.doc.toString()) {
+      if (simulation.output.code() !== state.doc.toString()) {
         return empty;
       }
 
-      const { output } = simulation;
+      const {
+        output: { output },
+      } = simulation;
       if (!output.ok) {
         return empty;
       }
 
-      const profile = output.value.raw.runOutput.profile;
+      const profile = output.value.profile;
       if (!profile) {
         return empty;
       }

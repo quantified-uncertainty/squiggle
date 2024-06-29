@@ -104,21 +104,22 @@ async function _run(
   }
 ) {
   const linker = getLinker();
-  const rootSource = new UnresolvedModule({
-    name: args.filename ?? EVAL_SOURCE_ID,
-    code: args.src,
-    linker,
-  });
   const runner = args.runner
     ? runnerByName(args.runner, args.runnerThreads ?? 1)
     : undefined;
 
   const project = new SqProject({
-    rootSource,
     linker,
     runner,
     environment: args.environment,
   });
+
+  const rootSource = new UnresolvedModule({
+    name: args.filename ?? EVAL_SOURCE_ID,
+    code: args.src,
+    linker,
+  });
+  project.setHead("root", rootSource);
 
   const showState = () => {
     render(<StateGraph state={project.state} environment={args.environment} />);
@@ -133,7 +134,7 @@ async function _run(
     (resolve, reject) => {
       project.addEventListener("output", (e) => {
         if (e.data.output.module.module === rootSource) {
-          const output = project.getOutput();
+          const output = project.getOutput("root");
           if (output) {
             const time = (new Date().getTime() - started.getTime()) / 1000;
             if (args.showProjectState) {
