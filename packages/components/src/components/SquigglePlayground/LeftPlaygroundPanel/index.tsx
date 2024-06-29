@@ -1,4 +1,10 @@
-import { forwardRef, ReactNode, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  lazy,
+  ReactNode,
+  useImperativeHandle,
+  useRef,
+} from "react";
 
 import { SqProject } from "@quri/squiggle-lang";
 import {
@@ -22,9 +28,14 @@ import { PlaygroundSettings } from "../../PlaygroundSettings.js";
 import { PanelWithToolbar } from "../../ui/PanelWithToolbar/index.js";
 import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 import { AutorunnerMenuItem } from "./AutorunnerMenuItem.js";
-import { DependencyGraphModal } from "./DependencyGraphModal.js";
 import { GlobalSettingsModal } from "./GlobalSettingsModal.js";
 import { RunMenuItem } from "./RunMenuItem.js";
+
+const DependencyGraphModal = lazy(() =>
+  import("./DependencyGraphModal.js").then((module) => ({
+    default: module.DependencyGraphModal,
+  }))
+);
 
 export type RenderExtraControls = (props: {
   openModal: (name: string) => void;

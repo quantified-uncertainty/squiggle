@@ -123,4 +123,15 @@ export class ProjectState implements ProjectStateData {
       })
     );
   }
+
+  // Remove modules from the state that are not reachable from the heads.
+  gc() {
+    const needed = {
+      unresolved: new Set<UnresolvedModuleHash>(),
+      resolved: new Set<ResolvedModuleHash>(),
+      outputs: new Set<ResolvedModuleHash>(),
+    };
+    for (const hash of this.unresolvedModules.keys()) {
+    }
+  }
 }

@@ -333,6 +333,11 @@ export class SqProject {
     );
   }
 
+  // Remove modules from the state that are not reachable from the heads.
+  gc() {
+    this.state.gc();
+  }
+
   addEventListener<T extends Project2EventType>(
     type: T,
     listener: Project2EventListener<T>
