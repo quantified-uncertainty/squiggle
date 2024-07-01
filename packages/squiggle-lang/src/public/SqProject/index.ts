@@ -38,7 +38,7 @@ import {
 export class SqProject {
   state: ProjectState;
   linker: SqLinker;
-  runner: BaseRunner;
+  runner: BaseRunner; // move to state?
 
   constructor(
     params: {
@@ -74,7 +74,17 @@ export class SqProject {
   setEnvironment(environment: Env) {
     // TODO - do this through dispatch?
     this.setState(this.state.withEnvironment(environment));
-    // TODO - rebuild outputs
+
+    for (const hash of this.state.modules.keys()) {
+      this.dispatch({
+        type: "buildOutputIfPossible",
+        payload: { hash, environment },
+      });
+    }
+  }
+
+  setRunner(runner: BaseRunner) {
+    this.runner = runner;
   }
 
   async loadHead(

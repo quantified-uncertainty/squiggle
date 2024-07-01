@@ -20,11 +20,14 @@ export function isSimulating(simulation: Simulation): boolean {
   return simulation.isStale ?? false;
 }
 
+// Useful for debugging.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function useProjectActionLogger(project: SqProject) {
   useEffect(() => {
     const listener: Parameters<typeof project.addEventListener<"action">>[1] = (
       event
     ) => {
+      // eslint-disable-next-line no-console
       console.log("action", event.data);
     };
     project.addEventListener("action", listener);
@@ -32,11 +35,14 @@ function useProjectActionLogger(project: SqProject) {
   }, [project]);
 }
 
+// Useful for debugging.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function useProjectStateChangeLogger(project: SqProject) {
   useEffect(() => {
     const listener: Parameters<typeof project.addEventListener<"state">>[1] = (
       event
     ) => {
+      // eslint-disable-next-line no-console
       console.log(event.data);
     };
     project.addEventListener("state", listener);
@@ -148,8 +154,9 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     runnerName: args.runnerName,
   });
 
-  useProjectActionLogger(project);
-  useProjectStateChangeLogger(project);
+  // Uncomment these lines if you need to debug SqProject actions or state changes:
+  // useProjectActionLogger(project);
+  // useProjectStateChangeLogger(project);
 
   const [state, dispatch] = useReducer(reducer, {
     autorunMode: args.initialAutorunMode ?? true,
@@ -252,19 +259,19 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     }
   }, [project, args.environment, state.autorunMode]);
 
-  // useEffect(() => {
-  //   if (!args.runnerName) {
-  //     // Undefined runnerName shouldn't reset the project.
-  //     // (Consider the case where `setup.project` is set with a pre-configured runner)
-  //     return;
-  //   }
-  //   project.setRunner(
-  //     runnerByName(args.runnerName, args.runnerName === "web-worker" ? 2 : 1)
-  //   );
-  //   if (state.autorunMode) {
-  //     runSimulation();
-  //   }
-  // }, [project, args.runnerName, state.autorunMode]);
+  useEffect(() => {
+    if (!args.runnerName) {
+      // Undefined runnerName shouldn't reset the project.
+      // (Consider the case where `setup.project` is set with a pre-configured runner)
+      return;
+    }
+    project.setRunner(
+      runnerByName(args.runnerName, args.runnerName === "web-worker" ? 2 : 1)
+    );
+    if (state.autorunMode) {
+      runSimulation();
+    }
+  }, [project, args.runnerName, state.autorunMode]);
 
   // Run on code changes.
   useEffect(() => {

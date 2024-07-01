@@ -1,5 +1,6 @@
 import { jest } from "@jest/globals";
 import { ResizeObserver } from "@juggle/resize-observer";
+import { TextEncoder } from "util";
 
 window.ResizeObserver = ResizeObserver;
 
@@ -32,3 +33,5 @@ Range.prototype.getClientRects = () => ({
   length: 0,
   [Symbol.iterator]: jest.fn<() => IterableIterator<DOMRect>>(),
 });
+
+global.TextEncoder = TextEncoder;

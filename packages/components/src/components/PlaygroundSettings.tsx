@@ -2,7 +2,7 @@ import { FC } from "react";
 import { useWatch } from "react-hook-form";
 import { z } from "zod";
 
-import { defaultRunnerName, RunnerName, SqScale } from "@quri/squiggle-lang";
+import { RunnerName, SqScale } from "@quri/squiggle-lang";
 import {
   CheckboxFormField,
   NumberFormField,
@@ -95,7 +95,7 @@ export const defaultPlaygroundSettings: PlaygroundSettings = {
     seed: "default_seed",
     profile: false,
   },
-  runner: defaultRunnerName,
+  runner: "web-worker",
   functionChartSettings: {
     start: functionChartDefaults.min,
     stop: functionChartDefaults.max,
