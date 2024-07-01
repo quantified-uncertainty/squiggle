@@ -1,8 +1,8 @@
-import { UnresolvedModule } from "./SqProject/UnresolvedModule.js";
+import { SqModule } from "./SqProject/SqModule.js";
 
 export type SqLinker = {
   resolve: (name: string, fromId: string) => string;
-  loadModule: (sourceId: string, hash?: string) => Promise<UnresolvedModule>;
+  loadModule: (sourceId: string, hash?: string) => Promise<SqModule>;
 };
 
 export const defaultLinker: SqLinker = {
@@ -27,7 +27,7 @@ export function makeSelfContainedLinker(
       if (!code) {
         throw new Error(`Can't find source with id ${sourceId}`);
       }
-      return new UnresolvedModule({
+      return new SqModule({
         name: sourceId,
         code,
         linker,

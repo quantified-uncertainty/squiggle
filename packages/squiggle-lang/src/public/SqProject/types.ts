@@ -1,19 +1,12 @@
 import { Env } from "../../dists/env.js";
 import { ProjectState } from "./ProjectState.js";
-import { ResolvedModuleHash } from "./ResolvedModule.js";
+import { ModuleHash } from "./SqModule.js";
 import { SqModuleOutput } from "./SqModuleOutput.js";
-import { UnresolvedModule, UnresolvedModuleHash } from "./UnresolvedModule.js";
 
-export type Project2Action =
+export type ProjectAction =
   | {
       type: "loadImports";
-      payload: UnresolvedModuleHash;
-    }
-  | {
-      type: "addModule";
-      payload: {
-        module: UnresolvedModule;
-      };
+      payload: ModuleHash;
     }
   | {
       type: "loadModule";
@@ -23,20 +16,23 @@ export type Project2Action =
       };
     }
   | {
-      type: "resolveIfPossible";
+      type: "processModule";
       payload: {
-        hash: UnresolvedModuleHash;
+        hash: ModuleHash;
       };
+    }
+  | {
+      type: "gc";
     }
   | {
       type: "buildOutputIfPossible";
       payload: {
-        hash: ResolvedModuleHash;
+        hash: ModuleHash;
         environment: Env;
       };
     };
 
-export type Project2EventShape =
+export type ProjectEventShape =
   | {
       type: "output";
       payload: {
@@ -45,19 +41,19 @@ export type Project2EventShape =
     }
   | {
       type: "action";
-      payload: Project2Action;
+      payload: ProjectAction;
     }
   | {
-      type: "stateChange";
+      type: "state";
       payload: ProjectState;
     };
 
-export type Project2EventType = Project2EventShape["type"];
+export type Project2EventType = ProjectEventShape["type"];
 
 export class Project2Event<T extends Project2EventType> extends Event {
   constructor(
     type: T,
-    public data: Extract<Project2EventShape, { type: T }>["payload"]
+    public data: Extract<ProjectEventShape, { type: T }>["payload"]
   ) {
     super(type);
   }

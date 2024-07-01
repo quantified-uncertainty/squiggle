@@ -3,10 +3,9 @@ import { AST, LocationRange } from "../../ast/types.js";
 import { errMap, result } from "../../utility/result.js";
 import { SqCompileError, SqError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
-import { ResolvedModuleHash } from "./ResolvedModule.js";
 import { getHash } from "./utils.js";
 
-export type UnresolvedModuleHash = string;
+export type ModuleHash = string;
 
 type Import = {
   name: string;
@@ -14,12 +13,11 @@ type Import = {
   location: LocationRange;
 };
 
-export class UnresolvedModule {
+export class SqModule {
   name: string;
   code: string;
   // key is module name
-  // TODO - are values the hashes for resolved or unresolved modules?
-  pins: Record<string, ResolvedModuleHash>;
+  pins: Record<string, ModuleHash>;
   linker: SqLinker;
 
   private _ast?: result<AST, SqError>;
@@ -28,7 +26,7 @@ export class UnresolvedModule {
     name: string;
     code: string;
     linker: SqLinker;
-    pins?: Record<string, ResolvedModuleHash>;
+    pins?: Record<string, ModuleHash>;
   }) {
     this.name = params.name;
     this.code = params.code;
@@ -72,9 +70,9 @@ export class UnresolvedModule {
     return resolvedImports;
   }
 
-  hash(): UnresolvedModuleHash {
+  hash(): ModuleHash {
     return (
-      `unresolved-${this.name}-` +
+      `module-${this.name}-` +
       getHash(
         JSON.stringify({
           name: this.name,

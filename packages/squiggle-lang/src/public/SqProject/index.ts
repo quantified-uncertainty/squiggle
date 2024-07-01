@@ -3,16 +3,15 @@ import { BaseRunner } from "../../runners/BaseRunner.js";
 import { getDefaultRunner } from "../../runners/index.js";
 import { defaultLinker, SqLinker } from "../SqLinker.js";
 import { ProjectState } from "./ProjectState.js";
-import { ResolvedModule, ResolvedModuleHash } from "./ResolvedModule.js";
+import { SqModule } from "./SqModule.js";
 import { SqModuleOutput } from "./SqModuleOutput.js";
 import {
-  Project2Action,
   Project2Event,
   Project2EventListener,
-  Project2EventShape,
   Project2EventType,
+  ProjectAction,
+  ProjectEventShape,
 } from "./types.js";
-import { UnresolvedModule } from "./UnresolvedModule.js";
 
 /*
  * SqProject is a Squiggle project, which is a collection of modules and their
@@ -40,7 +39,6 @@ export class SqProject {
   state: ProjectState;
   linker: SqLinker;
   runner: BaseRunner;
-  environment: Env;
 
   constructor(
     params: {
@@ -49,66 +47,86 @@ export class SqProject {
       environment?: Env;
     } = {}
   ) {
-    this.state = ProjectState.init();
     this.linker = params.linker ?? defaultLinker;
     this.runner = params.runner ?? getDefaultRunner();
-    this.environment = params.environment ?? defaultEnv;
+    this.state = ProjectState.init();
+    this.setEnvironment(params.environment ?? defaultEnv);
   }
 
-  setHead(headName: string, module: UnresolvedModule) {
-    this.state = this.state.clone({
-      heads: this.state.heads.set(headName, module.hash()),
-      unresolvedModules: this.state.unresolvedModules.set(
-        module.hash(),
-        module
-      ),
-    });
+  setHead(headName: string, head: { module: SqModule }) {
+    const hash = head.module.hash();
+    this.setState(
+      this.state.clone({
+        heads: this.state.heads.set(headName, {
+          hash,
+        }),
+        modules: this.state.modules.set(hash, head.module),
+      })
+    );
 
+    this.dispatch({ type: "gc" });
     this.dispatch({
-      type: "loadImports",
-      payload: module.hash(),
-    });
-    this.dispatch({
-      type: "resolveIfPossible",
-      payload: {
-        hash: module.hash(),
-      },
+      type: "processModule",
+      payload: { hash },
     });
   }
 
-  async loadHead(headName: string, name: string) {
-    const module = await this.linker.loadModule(name);
-    this.setHead(headName, module);
+  setEnvironment(environment: Env) {
+    // TODO - do this through dispatch?
+    this.setState(this.state.withEnvironment(environment));
+    // TODO - rebuild outputs
+  }
+
+  async loadHead(
+    headName: string,
+    head: { moduleName: string; environment: Env }
+  ) {
+    const module = await this.linker.loadModule(head.moduleName);
+    this.setHead(headName, { module });
   }
 
   hasHead(headName: string): boolean {
     return this.state.heads.has(headName);
   }
 
-  private getHead(headName: string): UnresolvedModule {
-    const moduleHash = this.state.heads.get(headName);
+  private getHead(headName: string): SqModule {
+    const moduleHash = this.state.heads.get(headName)?.hash;
     if (!moduleHash) {
       throw new Error(`Head ${headName} not found`);
     }
-    const module = this.state.unresolvedModules.get(moduleHash);
+    const module = this.state.modules.get(moduleHash);
     if (!module) {
       throw new Error(`Head ${headName} not found`);
     }
     return module;
   }
 
-  dispatch(action: Project2Action) {
+  // All state changes should go through this method, so we can emit events.
+  private setState(newState: ProjectState) {
+    this.state = newState;
+    this.dispatchEvent({ type: "state", payload: this.state });
+  }
+
+  dispatch(action: ProjectAction) {
     this.dispatchEvent({ type: "action", payload: action });
 
     switch (action.type) {
       case "loadImports": {
-        const module = this.state.unresolvedModules.get(action.payload);
+        const module = this.state.modules.get(action.payload);
         if (!module) {
           throw new Error(`Module not found: ${action.payload}`);
         }
         for (const imp of module.imports()) {
-          // TODO - how can we de-dupe this? If two modules import the same module, we'll load it twice.
-          // Should we mark in the state that we're loading it?
+          if (
+            module.pins[imp.name] &&
+            this.state.modules.has(module.pins[imp.name])
+          ) {
+            // import is already loaded
+            continue;
+          }
+
+          // TODO - mark in the state that we're loading a module.
+          // Otherwise if two modules import the same module asynchronously, we'll load it twice.
           this.dispatch({
             type: "loadModule",
             payload: {
@@ -123,118 +141,64 @@ export class SqProject {
         this.linker
           .loadModule(action.payload.name, action.payload.hash)
           .then((module) => {
-            if (!this.state.unresolvedModules.has(module.hash())) {
-              this.dispatch({
-                type: "addModule",
-                payload: {
-                  module,
-                },
-              });
+            if (action.payload.hash && action.payload.hash !== module.hash()) {
+              throw new Error(
+                `Hash mismatch for module ${action.payload.name}: expected ${action.payload.hash}, got ${module.hash()}`
+              );
             }
+
+            if (!action.payload.hash) {
+              this.setState(
+                this.state.clone({
+                  resolutions: this.state.resolutions.set(
+                    action.payload.name,
+                    module.hash()
+                  ),
+                })
+              );
+            }
+
+            this.setState(this.state.withModule(module));
+            this.dispatch({
+              type: "processModule",
+              payload: { hash: module.hash() },
+            });
           });
         break;
       }
-      case "addModule": {
-        const { module } = action.payload;
-        this.state = this.state.clone({
-          unresolvedModules: this.state.unresolvedModules.set(
-            module.hash(),
-            module
-          ),
+      case "processModule": {
+        const module = this.state.modules.get(action.payload.hash);
+        if (!module) {
+          throw new Error(`Module not found: ${action.payload.hash}`);
+        }
+        this.dispatch({
+          type: "loadImports",
+          payload: module.hash(),
         });
-
-        if (module.imports().length === 0) {
-          this.dispatch({
-            type: "resolveIfPossible",
-            payload: { hash: module.hash() },
-          });
-        } else {
-          this.dispatch({
-            type: "loadImports",
-            payload: module.hash(),
-          });
-        }
-        break;
-      }
-      case "resolveIfPossible": {
-        const { hash } = action.payload;
-
-        const unresolvedModule = this.state.unresolvedModules.get(hash);
-        if (!unresolvedModule) {
-          // TODO - warn
-          return;
-        }
-        if (this.state.getResolvedModule(unresolvedModule)) {
-          // already resolved
-          break;
-        }
-
-        const resolutions: Record<ResolvedModuleHash, ResolvedModule> = {};
-
-        let allResolved = true;
-        for (const imp of unresolvedModule.imports()) {
-          const unresolvedImport = this.state.getUnresolvedModule({
-            sourceId: imp.name,
-            hash: unresolvedModule.pins[imp.name],
-          });
-          if (!unresolvedImport) {
-            // import is not loaded yet
-            allResolved = false;
-            break;
-          }
-          const resolvedImport = this.state.getResolvedModule(unresolvedImport);
-          if (!resolvedImport) {
-            // import is not resolved yet
-            allResolved = false;
-            break;
-          }
-          resolutions[imp.name] = resolvedImport;
-        }
-
-        if (!allResolved) {
-          // not possible to resolve yet
-          break;
-        }
-
-        const resolvedModule = new ResolvedModule(
-          unresolvedModule,
-          resolutions
-        );
-
-        this.state = this.state.clone({
-          resolvedModules: this.state.resolvedModules.set(
-            resolvedModule.hash(),
-            resolvedModule
-          ),
-        });
-
         this.dispatch({
           type: "buildOutputIfPossible",
           payload: {
-            hash: resolvedModule.hash(),
-            environment: this.environment,
+            hash: module.hash(),
+            environment: this.state.environment,
           },
         });
-
-        // 1) all that import sourceId without pins
-        // 2) all that import sourceId with the matching pin
-        for (const parent of this.state.getParents(unresolvedModule)) {
-          this.dispatch({
-            type: "resolveIfPossible",
-            payload: { hash: parent },
-          });
-        }
-
         break;
       }
       case "buildOutputIfPossible": {
         const { hash, environment } = action.payload;
-        const module = this.state.resolvedModules.get(hash);
+        const module = this.state.modules.get(hash);
         if (!module) {
-          throw new Error(`Can't find module with hash ${hash}`);
+          throw new Error(`Module not found: ${hash}`);
         }
 
-        if (!this.allImportsHaveOutputs(module, environment)) {
+        if (!this.state.allImportsHaveOutputs(module, environment)) {
+          break;
+        }
+
+        // output already exists
+        if (
+          this.state.outputs.has(SqModuleOutput.hash({ module, environment }))
+        ) {
           break;
         }
 
@@ -244,12 +208,10 @@ export class SqProject {
           runner: this.runner,
           state: this.state,
         }).then((output) => {
-          this.state = this.state.clone({
-            outputs: this.state.outputs.set(output.hash(), output),
-          });
+          this.setState(this.state.withOutput(output));
           this.dispatchEvent({ type: "output", payload: { output } });
 
-          for (const parent of this.state.getResolvedParents(module)) {
+          for (const parent of this.state.getParents(module)) {
             this.dispatch({
               type: "buildOutputIfPossible",
               payload: { hash: parent, environment },
@@ -260,51 +222,23 @@ export class SqProject {
 
         break;
       }
+      case "gc": {
+        // Remove modules from the state that are not reachable from the heads.
+        this.setState(this.state.gc());
+        break;
+      }
       default:
         throw action satisfies never;
     }
   }
 
   getOutput(headName: string): SqModuleOutput | undefined {
-    const resolved = this.state.getResolvedModule(this.getHead(headName));
-    if (!resolved) {
-      // Root module is not resolved yet;
-      return undefined;
-    }
-    const output = this.state.outputs.get(
+    return this.state.outputs.get(
       SqModuleOutput.hash({
-        module: resolved,
-        environment: this.environment,
+        module: this.getHead(headName),
+        environment: this.state.environment,
       })
     );
-    if (!output) {
-      return undefined;
-    }
-    return output;
-  }
-
-  private allImportsHaveOutputs(
-    module: ResolvedModule,
-    environment: Env
-  ): boolean {
-    for (const importBinding of module.module.imports()) {
-      const importedModule = module.resolutions[importBinding.name];
-      if (!importedModule) {
-        // shouldn't happen, ResolvedModule constructor verifies that imports and resolutions match
-        throw new Error(
-          `Can't find resolved import module ${importBinding.name}`
-        );
-      }
-      const importOutputHash = SqModuleOutput.hash({
-        module: importedModule,
-        environment,
-      });
-      const output = this.state.outputs.get(importOutputHash);
-      if (!output) {
-        return false;
-      }
-    }
-    return true;
   }
 
   // Helper for awaiting the head output.
@@ -316,7 +250,7 @@ export class SqProject {
 
     return new Promise<SqModuleOutput>((resolve) => {
       const listener: Project2EventListener<"output"> = (event) => {
-        if (event.data.output.module.module === this.getHead(headName)) {
+        if (event.data.output.module === this.getHead(headName)) {
           this.removeEventListener("output", listener);
           resolve(event.data.output);
         }
@@ -327,15 +261,10 @@ export class SqProject {
 
   private eventTarget = new EventTarget();
 
-  private dispatchEvent(shape: Project2EventShape) {
+  private dispatchEvent(shape: ProjectEventShape) {
     this.eventTarget.dispatchEvent(
       new Project2Event(shape.type, shape.payload)
     );
-  }
-
-  // Remove modules from the state that are not reachable from the heads.
-  gc() {
-    this.state.gc();
   }
 
   addEventListener<T extends Project2EventType>(

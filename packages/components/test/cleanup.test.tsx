@@ -7,7 +7,7 @@ import { SqProject } from "@quri/squiggle-lang";
 import { SquiggleChart } from "../src/index.js";
 
 test("Creates and cleans up source", async () => {
-  const project = SqProject.create();
+  const project = new SqProject();
 
   const { unmount } = render(
     <SquiggleChart code={"normal(0, 1)"} project={project} />

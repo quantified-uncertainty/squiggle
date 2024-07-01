@@ -5,9 +5,9 @@ import {
   runnerByName,
   RunnerName,
   SqLinker,
+  SqModule,
   SqModuleOutput,
   SqProject,
-  UnresolvedModule,
 } from "@quri/squiggle-lang";
 
 export type Simulation = {
@@ -18,6 +18,30 @@ export type Simulation = {
 
 export function isSimulating(simulation: Simulation): boolean {
   return simulation.isStale ?? false;
+}
+
+function useProjectActionLogger(project: SqProject) {
+  useEffect(() => {
+    const listener: Parameters<typeof project.addEventListener<"action">>[1] = (
+      event
+    ) => {
+      console.log("action", event.data);
+    };
+    project.addEventListener("action", listener);
+    return () => project.removeEventListener("action", listener);
+  }, [project]);
+}
+
+function useProjectStateChangeLogger(project: SqProject) {
+  useEffect(() => {
+    const listener: Parameters<typeof project.addEventListener<"state">>[1] = (
+      event
+    ) => {
+      console.log(event.data);
+    };
+    project.addEventListener("state", listener);
+    return () => project.removeEventListener("state", listener);
+  }, [project]);
 }
 
 type SetupSettings =
@@ -124,6 +148,9 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     runnerName: args.runnerName,
   });
 
+  useProjectActionLogger(project);
+  useProjectStateChangeLogger(project);
+
   const [state, dispatch] = useReducer(reducer, {
     autorunMode: args.initialAutorunMode ?? true,
     executionId: 0,
@@ -134,7 +161,7 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
   const rootModule = useMemo(
     () =>
       state.codeToSimulate
-        ? new UnresolvedModule({
+        ? new SqModule({
             name: sourceId,
             code: state.codeToSimulate,
             linker: project.linker,
@@ -152,7 +179,7 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     if (!rootModule) {
       return;
     }
-    project.setHead(mainHead, rootModule);
+    project.setHead(mainHead, { module: rootModule });
   }, [project, rootModule]);
 
   function reducer(state: State, action: Action): State {
@@ -203,10 +230,7 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     const listener: Parameters<typeof project.addEventListener<"output">>[1] = (
       event
     ) => {
-      if (
-        rootModule &&
-        event.data.output.module.module.hash() === rootModule.hash()
-      ) {
+      if (rootModule && event.data.output.module.hash() === rootModule.hash()) {
         dispatch({
           type: "setSimulation",
           value: event.data.output,
@@ -218,15 +242,15 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     return () => project.removeEventListener("output", listener);
   }, [project, rootModule, state.executionId]);
 
-  // // Re-run on environment and runner changes.
-  // useEffect(() => {
-  //   if (args.environment) {
-  //     project.setEnvironment(args.environment);
-  //   }
-  //   if (state.autorunMode) {
-  //     runSimulation();
-  //   }
-  // }, [project, args.environment, state.autorunMode]);
+  // Re-run on environment and runner changes.
+  useEffect(() => {
+    if (args.environment) {
+      project.setEnvironment(args.environment);
+    }
+    if (state.autorunMode) {
+      runSimulation();
+    }
+  }, [project, args.environment, state.autorunMode]);
 
   // useEffect(() => {
   //   if (!args.runnerName) {

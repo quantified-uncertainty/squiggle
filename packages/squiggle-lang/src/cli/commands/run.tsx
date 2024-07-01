@@ -9,8 +9,8 @@ import { defaultEnv, Env } from "../../dists/env.js";
 import { SqLinker } from "../../public/SqLinker.js";
 import { SqProject } from "../../public/SqProject/index.js";
 import { ProjectState } from "../../public/SqProject/ProjectState.js";
+import { SqModule } from "../../public/SqProject/SqModule.js";
 import { OutputResult } from "../../public/SqProject/SqModuleOutput.js";
-import { UnresolvedModule } from "../../public/SqProject/UnresolvedModule.js";
 import { allRunnerNames, runnerByName } from "../../runners/index.js";
 import { CliPrinter } from "../CliPrinter.js";
 import { bold, red } from "../colors.js";
@@ -48,7 +48,7 @@ function getLinker(): SqLinker {
         throw new Error("Hashes are not supported");
       }
       const code = await fs.readFile(sourceId, "utf-8");
-      return new UnresolvedModule({
+      return new SqModule({
         name: sourceId,
         code,
         linker,
@@ -60,15 +60,20 @@ function getLinker(): SqLinker {
 
 const ModuleInfo: FC<{
   state: ProjectState;
-  module: UnresolvedModule;
+  module: SqModule;
   environment: Env;
 }> = ({ state, module, environment }) => {
-  const resolved = state.getResolvedModule(module);
-  const output = resolved ? state.getOutput(resolved, environment) : undefined;
+  const output = state.getOutput(module, environment);
 
   return (
     <Box gap={2}>
-      <Text>{output ? "✅" : resolved ? "▶️" : "🔄"}</Text>
+      <Text>
+        {output
+          ? "✅"
+          : state.allImportsHaveOutputs(module, environment)
+            ? "▶️"
+            : "🔄"}
+      </Text>
       <Text>{module.name}</Text>
     </Box>
   );
@@ -83,7 +88,7 @@ const StateGraph: FC<{ state: ProjectState; environment: Env }> = ({
       <Text bold color="green">
         State
       </Text>
-      {[...state.unresolvedModules.entries()].map(([hash, module]) => (
+      {[...state.modules.entries()].map(([hash, module]) => (
         <ModuleInfo
           key={hash}
           state={state}
@@ -114,12 +119,12 @@ async function _run(
     environment: args.environment,
   });
 
-  const rootSource = new UnresolvedModule({
+  const rootSource = new SqModule({
     name: args.filename ?? EVAL_SOURCE_ID,
     code: args.src,
     linker,
   });
-  project.setHead("root", rootSource);
+  project.setHead("root", { module: rootSource });
 
   const showState = () => {
     render(<StateGraph state={project.state} environment={args.environment} />);
@@ -133,7 +138,7 @@ async function _run(
   return new Promise<{ output: OutputResult; time: number }>(
     (resolve, reject) => {
       project.addEventListener("output", (e) => {
-        if (e.data.output.module.module === rootSource) {
+        if (e.data.output.module === rootSource) {
           const output = project.getOutput("root");
           if (output) {
             const time = (new Date().getTime() - started.getTime()) / 1000;

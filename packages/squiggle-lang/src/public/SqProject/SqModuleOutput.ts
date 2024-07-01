@@ -13,7 +13,7 @@ import { SqValueContext } from "../SqValueContext.js";
 import { SqValuePath, ValuePathRoot } from "../SqValuePath.js";
 import { Externals, RunContext } from "./ProjectItem.js";
 import { ProjectState } from "./ProjectState.js";
-import { ResolvedModule } from "./ResolvedModule.js";
+import { SqModule } from "./SqModule.js";
 import { getHash } from "./utils.js";
 
 export type OutputResult = result<
@@ -28,13 +28,13 @@ export type OutputResult = result<
 >;
 
 export class SqModuleOutput {
-  module: ResolvedModule;
+  module: SqModule;
   environment: Env;
   output: OutputResult;
   executionTime: number;
 
   private constructor(params: {
-    module: ResolvedModule;
+    module: SqModule;
     environment: Env;
     output: OutputResult;
     executionTime: number;
@@ -53,12 +53,12 @@ export class SqModuleOutput {
   }
 
   code(): string {
-    return this.module.module.code;
+    return this.module.code;
   }
 
   // Helper method for "Find in Editor" feature
   findValuePathByOffset(offset: number): result<SqValuePath, SqError> {
-    const ast = this.module.module.ast();
+    const ast = this.module.ast();
     if (!ast.ok) {
       return ast;
     }
@@ -80,14 +80,14 @@ export class SqModuleOutput {
    * intentionally doesn't attempt to recursively run the dependencies.
    */
   static async make(params: {
-    module: ResolvedModule;
+    module: SqModule;
     environment: Env;
     runner: BaseRunner;
     state: ProjectState;
   }): Promise<SqModuleOutput> {
     const { environment, module } = params;
 
-    const astR = module.module.ast();
+    const astR = module.ast();
     if (!astR.ok) {
       return new SqModuleOutput({
         module,
@@ -100,12 +100,19 @@ export class SqModuleOutput {
 
     let importBindings = VDict.empty();
 
-    for (const importBinding of module.module.imports()) {
-      const importedModule = module.resolutions[importBinding.name];
-      if (!importedModule) {
-        // shouldn't happen, ResolvedModule constructor verifies that imports and resolutions match
+    for (const importBinding of module.imports()) {
+      const importedHash =
+        module.pins[importBinding.name] ??
+        params.state.resolutions.get(importBinding.name);
+      if (!importedHash) {
         throw new Error(
-          `Can't find resolved import module ${importBinding.name}`
+          `Unpinned import ${importBinding.name} in module ${module.name} is not loaded yet`
+        );
+      }
+      const importedModule = params.state.modules.get(importedHash);
+      if (!importedModule) {
+        throw new Error(
+          `Can't find import module ${importBinding.name} (${importedHash})`
         );
       }
       const importOutputHash = SqModuleOutput.hash({
@@ -134,8 +141,8 @@ export class SqModuleOutput {
 
     const context: RunContext = {
       ast,
-      sourceId: module.module.name,
-      source: module.module.code,
+      sourceId: module.name,
+      source: module.code,
       environment,
       externals,
     };
@@ -194,7 +201,7 @@ export class SqModuleOutput {
           result: wrapValue(result, newContext("result")),
           bindings: wrapSqDict(bindings, "bindings"),
           exports: wrapSqDict(
-            exports.mergeTags({ name: vString(params.module.module.name) }),
+            exports.mergeTags({ name: vString(params.module.name) }),
             // In terms of context, exports are the same as bindings.
             "bindings"
           ),
@@ -213,9 +220,9 @@ export class SqModuleOutput {
     });
   }
 
-  static hash(params: { module: ResolvedModule; environment: Env }): string {
+  static hash(params: { module: SqModule; environment: Env }): string {
     return (
-      `output-${params.module.module.name}-` +
+      `output-${params.module.name}-` +
       getHash(
         JSON.stringify({
           module: params.module.hash(),
