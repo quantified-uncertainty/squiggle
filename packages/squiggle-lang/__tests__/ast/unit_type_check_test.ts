@@ -2,34 +2,45 @@ import { parse } from "../../src/ast/parse.js";
 import { parse as peggyParse } from "../../src/ast/peggyParser.js";
 import { ASTNode } from "../../src/ast/types.js";
 import { ICompileError } from "../../src/errors/IError.js";
-import { TypeConstraint, checkTypeConstraints, findTypeConstraints, gaussianElim, typeConstraintsToMatrix, unitTypeCheck } from "../../src/ast/unitTypeChecker.js";
+import { TypeConstraint, checkTypeConstraints, cleanTypeConstraints, gaussianElim, typeConstraintsToMatrix, unitTypeCheck, unitTypeCheckInner } from "../../src/ast/unitTypeChecker.js";
 import {
     testEvalError,
     testEvalToBe,
     testParse,
 } from "../helpers/reducerHelpers.js";
 
-function gaussianElimHelper(sourceCode: string): [number[][], number[][]] {
+function findTypeConstraints(sourceCode: string): [TypeConstraint, ASTNode][] {
     const node = peggyParse(sourceCode, { grammarSource: "test", comments: [] });
-    const typeConstraints = findTypeConstraints(node);
+    const typeConstraints: [TypeConstraint, ASTNode][] = [];
+    if (node.type !== "Program") {
+        throw new Error("findTypeConstraintsHelper only accepts a node of type Program");
+    }
+    for (const statement of node.statements) {
+        unitTypeCheckInner(statement, typeConstraints);
+    }
+    cleanTypeConstraints(typeConstraints);
+    return typeConstraints;
+}
+
+function gaussianElimHelper(sourceCode: string): [number[][], number[][]] {
+    const typeConstraints = findTypeConstraints(sourceCode);
     const [varNames, unitNames, varMatrix, unitMatrix] = typeConstraintsToMatrix(typeConstraints);
     gaussianElim(varMatrix, unitMatrix);
     return [varMatrix, unitMatrix];
 }
 
 function getUnitTypes(sourceCode: string): { [key: string]: { [key: string]: number } } {
-    const node = peggyParse(sourceCode, { grammarSource: "test", comments: [] });
-    const typeConstraints = findTypeConstraints(node);
+    const typeConstraints = findTypeConstraints(sourceCode);
     return checkTypeConstraints(typeConstraints);
 }
 
 describe("find unit type constraints", () => {
-    test("assign m/s to m/s", () => expect(findTypeConstraints(peggyParse(
+    test("assign m/s to m/s", () => expect(findTypeConstraints(
         `
 x :: m = 1
 y = 2
 z :: m/s = x/y
-`, { grammarSource: "test", comments: [] }))).toEqual([
+`)).toEqual([
             [{
                 defined: true,
                 variables: { x: 1 },
@@ -136,17 +147,47 @@ describe("unit type checking", () => {
 x :: m = 1
 y :: s = 4
 z :: m/s = x * y`, "test"
-        )).toThrow(/Conflicting unit types/));
+        )).toThrow("Conflicting unit types"));
 
         test("assign m/s to m/s", () => expect(getUnitTypes(
             `
 x :: m = 1
 y :: s = 4
-z :: m/s = x / y`)).toEqual({
+z :: m/s = x / y
+`)).toEqual({
     x: {m: 1},
     y: {s: 1},
     z: {m: 1, s: -1},
 }));
+
+        test("adding a literal preserves expression type", () => expect(getUnitTypes(
+            `
+x :: kg = -3.5
+y = x + 12
+`)).toEqual({
+    x: {kg: 1},
+    y: {kg: 1},
+}));
+
+        test("can only subtract values of the same type", () => expect(() => parse(
+            `
+x :: kg = 2
+y :: lb = 0.5
+x - y
+`)).toThrow("Conflicting unit types"));
+
+        test("can only compare values of the same type", () => expect(() => parse(
+            `
+x :: kg = 2
+y :: lb = 0.5
+x < y
+`)).toThrow("Conflicting unit types"));
+
+        test("cannot re-declare a variable with a new type", () => expect(() => parse(
+            `
+x :: socks = 1
+x :: shoes = 1`, "test"
+        )).toThrow("Conflicting unit types"));
 
         test("two groups of constrained variables, one with a conflict", () => expect(() => parse(
             `
@@ -166,5 +207,39 @@ x :: m/s = a / b
 y :: kg/s = b / c
 z :: kg/m = c / a
 `, "test")).toThrow("Conflicting unit types"));
+    });
+
+    describe("blocks", () => {
+        test("type error inside block gets caught", () => expect(() => parse(
+            `
+{
+  x :: kg = 1
+  y :: lb = x
+  y
+}
+`, "test"
+        )).toThrow("Conflicting unit types"));
+
+        test("unit type of block is unit type of last expression", () => expect(getUnitTypes(
+            `
+x = {
+  y :: joules = 27
+  y
+}
+`, "test"
+        )).toEqual({
+            x: {joules: 1}
+        }));
+
+        test("nested blocks", () => expect(() => parse(
+            `
+{
+  x :: DALYs = {
+    y :: logincomeUnits = 130
+    y
+  }
+}
+`, "test"
+        )).toThrow("Conflicting unit types"));
     });
 });

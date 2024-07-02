@@ -13,6 +13,10 @@ export type TypeConstraint = {
     units: { [key: string]: number };
 };
 
+type VariableTypes = {
+    [key: string]: { [key: string]: number }
+};
+
 const EMPTY_CONSTRAINT: TypeConstraint = {
     defined: true,
     variables: {},
@@ -138,62 +142,48 @@ function divideConstraints(
 // Two expressions have the same unit type if their ratio is unitless.
 const requireConstraintsToBeEqual = divideConstraints;
 
-/* Recursively scan the AST to find all type constraints. */
-function findTypeConstraintsInner(
+function resolveType(
     node: ASTNode,
-    typeConstraints: [TypeConstraint, ASTNode][]
+    variableTypes: VariableTypes
 ): TypeConstraint {
+    // TODO: A Program/LetStatement/etc. doesn't have no constraint, it has no
+    // type at all and you can't resolve its type. But throwing an error here
+    // will screw up the control flow.
     switch (node.type) {
-        case "Program":
-            for (const statement of node.statements) {
-                findTypeConstraintsInner(statement, typeConstraints);
-            }
-            return NO_CONSTRAINT;
-        case "LetStatement":
-            const variableConstraint = findTypeConstraintsInner(node.variable, typeConstraints);
-            const typeDefConstraint = createTypeConstraint(node.typeSignature);
-            const valueConstraint = findTypeConstraintsInner(node.value, typeConstraints);
-            typeConstraints.push([
-                requireConstraintsToBeEqual(variableConstraint, typeDefConstraint),
-                node
-            ]);
-            typeConstraints.push([
-                requireConstraintsToBeEqual(variableConstraint, valueConstraint),
-                node
-            ]);
-            return NO_CONSTRAINT;
-        case "Identifier":
-            return {
-                defined: true,
-                variables: { [node.value]: 1 },
-                units: {},
-            };
         case "Float":
         case "UnitValue":
             return NO_CONSTRAINT;
+        case "Block":
+            return resolveType(node.statements[node.statements.length - 1], variableTypes);
+        case "Identifier":
+            if (node.value in variableTypes) {
+                return {
+                    defined: true,
+                    variables: {},
+                    units: variableTypes[node.value],
+                };
+            }
         case "InfixCall":
-            // handled in separate block below
+            // handled below
             break;
         default:
-            // TODO: handle other node types. this is a quick fix to make tests pass
-            return NO_CONSTRAINT;
-            // throw new ICompileError(`No way to find type constraints for node type ${node.type}: ${node}`, node.location);
+            // Should never happen
+            throw new Error(`No way to resolve type for node type ${node.type}: ${node}`, node.location);
     }
 
     // for InfixCall
-    var isBooleanOp = false;
     switch (node.op) {
         case "*":
         case ".*":
             return multiplyConstraints(
-                findTypeConstraintsInner(node.args[0], typeConstraints),
-                findTypeConstraintsInner(node.args[1], typeConstraints)
+                resolveType(node.args[0], variableTypes),
+                resolveType(node.args[1], variableTypes)
             );
         case "/":
         case "./":
             return divideConstraints(
-                findTypeConstraintsInner(node.args[0], typeConstraints),
-                findTypeConstraintsInner(node.args[1], typeConstraints)
+                resolveType(node.args[0], variableTypes),
+                resolveType(node.args[1], variableTypes)
             );
         case "==":
         case "!=":
@@ -201,27 +191,19 @@ function findTypeConstraintsInner(
         case "<=":
         case ">":
         case ">=":
-            isBooleanOp = true;
         case "+":
         case "-":
         case ".+":
         case ".-":
         case "to":
-            // These operators require the two operands to have the same unit type.
-            // Note: `x to y` is syntactic sugar for `lognormal({p5:x, p95:y}).
-            const leftType = findTypeConstraintsInner(node.args[0], typeConstraints);
-            const rightType = findTypeConstraintsInner(node.args[1], typeConstraints);
-            const jointConstraint = requireConstraintsToBeEqual(leftType, rightType);
-            typeConstraints.push([jointConstraint, node]);
-
-            // Boolean ops require their arguments to have the same unit type,
-            // but the result does not have a unit type. Arithmetic ops require
-            // their arguments to have the same unit type, and the result has
-            // the same unit type as the arguments.
-            if (isBooleanOp) {
-                return NO_CONSTRAINT;
+            // We can safely assume both args have the same type because there
+            // would be a type error otherwise.
+            const leftType = resolveType(node.args[0], variableTypes);
+            const rightType = resolveType(node.args[1], variableTypes);
+            if (leftType.defined) {
+                return leftType;
             } else {
-                return jointConstraint;
+                return rightType;
             }
         case ".^":
         case "^":
@@ -237,10 +219,124 @@ function findTypeConstraintsInner(
     }
 }
 
-export function findTypeConstraints(node: ASTNode): [TypeConstraint, ASTNode][] {
-    const typeConstraints: [TypeConstraint, ASTNode][] = [];
-    findTypeConstraintsInner(node, typeConstraints);
-    // Delete empty or undefined constraints
+/* Recursively scan the AST to find and check all type constraints. */
+export function unitTypeCheckInner(
+    node: ASTNode,
+    typeConstraints: [TypeConstraint, ASTNode][]
+): TypeConstraint {
+    let scopedTypeConstraints = typeConstraints.map((x) => x);
+    switch (node.type) {
+        case "Program":
+        case "Block":
+            for (const statement of node.statements) {
+                unitTypeCheckInner(statement, scopedTypeConstraints);
+            }
+            if (node.type === "Block") {
+                console.log("checking constraints: ", scopedTypeConstraints.map((x) => JSON.stringify(x[0])).join("\n\t"));
+            }
+            const variableTypes = checkTypeConstraints(scopedTypeConstraints);
+            if (node.type === "Program") {
+                return NO_CONSTRAINT;
+            } else {
+                return resolveType(node.statements[node.statements.length - 1], variableTypes);
+            }
+        case "LetStatement":
+            const variableConstraint = unitTypeCheckInner(node.variable, typeConstraints);
+            const typeDefConstraint = createTypeConstraint(node.typeSignature);
+            const valueConstraint = unitTypeCheckInner(node.value, typeConstraints);
+            typeConstraints.push([
+                requireConstraintsToBeEqual(variableConstraint, typeDefConstraint),
+                node
+            ]);
+            typeConstraints.push([
+                requireConstraintsToBeEqual(variableConstraint, valueConstraint),
+                node
+            ]);
+            if (node.value.type === "Block") {
+                console.log("Type constraint from let statement: ", typeConstraints[typeConstraints.length - 1][0]);
+            }
+            return NO_CONSTRAINT;
+        case "Identifier":
+            return {
+                defined: true,
+                variables: { [node.value]: 1 },
+                units: {},
+            };
+        case "Float":
+        case "UnitValue":
+            return NO_CONSTRAINT;
+        case "InfixCall":
+            // handled in separate switch statement below
+            break;
+        default:
+            // TODO: handle other node types. this is a quick fix to make tests pass
+            return NO_CONSTRAINT;
+            // throw new ICompileError(`No way to find type constraints for node type ${node.type}: ${node}`, node.location);
+    }
+
+    // for InfixCall
+    var isBooleanOp = false;
+    switch (node.op) {
+        case "*":
+        case ".*":
+            return multiplyConstraints(
+                unitTypeCheckInner(node.args[0], typeConstraints),
+                unitTypeCheckInner(node.args[1], typeConstraints)
+            );
+        case "/":
+        case "./":
+            return divideConstraints(
+                unitTypeCheckInner(node.args[0], typeConstraints),
+                unitTypeCheckInner(node.args[1], typeConstraints)
+            );
+        case "==":
+        case "!=":
+        case "<":
+        case "<=":
+        case ">":
+        case ">=":
+            isBooleanOp = true;
+        case "+":
+        case "-":
+        case ".+":
+        case ".-":
+        case "to":
+            // These operators require the two operands to have the same unit type.
+            // Note: `x to y` is syntactic sugar for `lognormal({p5:x, p95:y}).
+            const leftType = unitTypeCheckInner(node.args[0], typeConstraints);
+            const rightType = unitTypeCheckInner(node.args[1], typeConstraints);
+            const jointConstraint = requireConstraintsToBeEqual(leftType, rightType);
+            typeConstraints.push([jointConstraint, node]);
+
+            // Boolean ops require their arguments to have the same unit type,
+            // but the result does not have a unit type. Arithmetic ops require
+            // their arguments to have the same unit type, and the result has
+            // the same unit type as the arguments.
+            if (isBooleanOp) {
+                return NO_CONSTRAINT;
+            } else if (!leftType.defined && rightType.defined) {
+                return rightType;
+            } else {
+                return leftType;
+            }
+        case ".^":
+        case "^":
+            // Unit type cannot be determined for exponentiation.
+            return NO_CONSTRAINT;
+        case "&&":
+        case "||":
+            // Booleans do not have a unit type.
+            return NO_CONSTRAINT;
+        default:
+            // This should never happen.
+            throw new Error(`No way to find type constraints for node: ${node}`);
+    }
+}
+
+/* Remove empty or undefined unit type constraints. Modify in place and return
+ * the result.
+ */
+export function cleanTypeConstraints(typeConstraints: [TypeConstraint, ASTNode][]): [TypeConstraint, ASTNode][] {
     for (var i = 0; i < typeConstraints.length; ) {
         if (!typeConstraints[i][0].defined || isConstraintEmpty(typeConstraints[i][0])) {
             typeConstraints.splice(i, 1);
@@ -378,7 +474,7 @@ export function typeConstraintsToMatrix(typeConstraints: [TypeConstraint, ASTNod
     return [varNames, unitNames, varMatrix, unitMatrix];
 }
 
-function matrixToSimplifiedTypes(varNames: string[], unitNames: string[], varMatrix: number[][], unitMatrix: number[][]): { [key: string]: { [key: string]: number } } {
+function matrixToSimplifiedTypes(varNames: string[], unitNames: string[], varMatrix: number[][], unitMatrix: number[][]): VariableTypes {
     let varTypes: { [key: string]: { [key: string]: number } } = {};
     for (let i = 0; i < varMatrix.length; i++) {
         const varIndex = varMatrix[i].indexOf(1);
@@ -406,7 +502,8 @@ function matrixToSimplifiedTypes(varNames: string[], unitNames: string[], varMat
  * equivalent to a system of linear equations. If the system has no solution,
  * then the constraints cannot be satisfied and a type error is raised.
  */
-export function checkTypeConstraints(typeConstraints: [TypeConstraint, ASTNode][]): { [key: string]: { [key: string]: number } } {
+export function checkTypeConstraints(typeConstraints: [TypeConstraint, ASTNode][]): VariableTypes {
+    cleanTypeConstraints(typeConstraints);
     const [varNames, unitNames, varMatrix, unitMatrix] = typeConstraintsToMatrix(typeConstraints);
     const conflictingRows = gaussianElim(varMatrix, unitMatrix);
     if (conflictingRows.length > 0) {
@@ -419,6 +516,6 @@ export function checkTypeConstraints(typeConstraints: [TypeConstraint, ASTNode][
 }
 
 export function unitTypeCheck(node: ASTNode): void {
-    const typeConstraints = findTypeConstraints(node);
-    checkTypeConstraints(typeConstraints);
+    const typeConstraints: [TypeConstraint, ASTNode][] = [];
+    unitTypeCheckInner(node, typeConstraints);
 }
