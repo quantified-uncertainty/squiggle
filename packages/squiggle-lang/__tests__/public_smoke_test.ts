@@ -66,7 +66,7 @@ describe("Distribution", () => {
 
   const buildDist = async (samples: number[]) => {
     const src = `SampleSet.fromList([${samples.join(",")}])`;
-    const { output } = await run(src, {
+    const { result: output } = await run(src, {
       environment: env,
     });
     if (!output.ok) {

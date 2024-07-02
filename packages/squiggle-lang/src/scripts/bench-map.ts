@@ -22,7 +22,7 @@ list.l -> map({|x| x})
       moduleName: "map",
       environment: defaultEnv,
     });
-    const result = await project.runHead("root");
+    const result = await project.waitForOutput("root");
     console.log(`1e${p}`, "\t", result.executionTime / 1000);
   }
 }

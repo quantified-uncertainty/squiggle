@@ -20,8 +20,7 @@ export async function run(
     module: new SqModule({
       name: "main",
       code,
-      linker: defaultLinker,
     }),
   });
-  return await project.runHead("root");
+  return await project.waitForOutput("root");
 }

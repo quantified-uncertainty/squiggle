@@ -18,19 +18,16 @@ export class SqModule {
   code: string;
   // key is module name
   pins: Record<string, ModuleHash>;
-  linker: SqLinker;
 
   private _ast?: result<AST, SqError>;
 
   constructor(params: {
     name: string;
     code: string;
-    linker: SqLinker;
     pins?: Record<string, ModuleHash>;
   }) {
     this.name = params.name;
     this.code = params.code;
-    this.linker = params.linker;
     this.pins = params.pins ?? {};
   }
 
@@ -47,7 +44,7 @@ export class SqModule {
     return this._ast;
   }
 
-  imports(): Import[] {
+  imports(linker: SqLinker): Import[] {
     const ast = this.ast();
     if (!ast.ok) {
       return [];
@@ -57,7 +54,7 @@ export class SqModule {
     const resolvedImports: Import[] = [];
 
     for (const [file, variable] of program.imports) {
-      const name = this.linker.resolve(file.value, this.name);
+      const name = linker.resolve(file.value, this.name);
       resolvedImports.push({
         variable: variable.value,
         name,

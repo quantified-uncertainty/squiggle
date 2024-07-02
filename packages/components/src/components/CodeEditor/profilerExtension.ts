@@ -29,13 +29,13 @@ export function profilerExtension(): Extension {
       }
 
       const {
-        output: { output },
+        output: { result },
       } = simulation;
-      if (!output.ok) {
+      if (!result.ok) {
         return empty;
       }
 
-      const profile = output.value.profile;
+      const profile = result.value.profile;
       if (!profile) {
         return empty;
       }

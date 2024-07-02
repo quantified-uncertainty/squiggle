@@ -47,10 +47,10 @@ export function some(arr: boolean[]): boolean {
 export function simulationErrors(simulation?: Simulation): SqError[] {
   if (!simulation) {
     return [];
-  } else if (simulation.output.output.ok) {
+  } else if (simulation.output.result.ok) {
     return [];
   } else {
-    return [simulation.output.output.value];
+    return [simulation.output.result.value];
   }
 }
 
@@ -123,7 +123,7 @@ export const isCustomVisibleRootPath = (
   typeof tab === "object" && tab.tag === "CustomVisibleRootPath";
 
 export function defaultViewerTab(
-  outputResult: SqModuleOutput["output"] | undefined
+  outputResult: SqModuleOutput["result"] | undefined
 ): ViewerTab {
   if (!outputResult?.ok) {
     return "Variables";
@@ -142,12 +142,12 @@ export function viewerTabToVisibleRootPath(
 
 export function viewerTabToValue(
   viewerTab: ViewerTab,
-  output: SqModuleOutput["output"]
+  outputResult: SqModuleOutput["result"]
 ): SqValue | undefined {
-  if (!output.ok) {
+  if (!outputResult.ok) {
     return;
   }
-  const sqOutput = output.value;
+  const sqOutput = outputResult.value;
   switch (viewerTab) {
     case "Result":
       return sqOutput.result;
@@ -179,7 +179,7 @@ const selectableViewerTabs = [
 export type SelectableViewerTab = (typeof selectableViewerTabs)[number];
 
 export function viewerTabsToShow(
-  output: SqModuleOutput["output"]
+  output: SqModuleOutput["result"]
 ): SelectableViewerTab[] {
   if (!output.ok) return ["Variables", "AST"]; // Default tabs if outputResult is not OK
 

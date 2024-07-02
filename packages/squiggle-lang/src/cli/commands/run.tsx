@@ -34,7 +34,7 @@ type RunArgs = {
 const EVAL_SOURCE_ID = "[eval]";
 
 function getLinker(): SqLinker {
-  const linker: SqLinker = {
+  return {
     resolve(name, fromId) {
       if (!name.startsWith("./") && !name.startsWith("../")) {
         throw new Error("Only relative paths in imports are allowed");
@@ -51,11 +51,9 @@ function getLinker(): SqLinker {
       return new SqModule({
         name: sourceId,
         code,
-        linker,
       });
     },
   };
-  return linker;
 }
 
 const ModuleInfo: FC<{
@@ -122,7 +120,6 @@ async function _run(
   const rootSource = new SqModule({
     name: args.filename ?? EVAL_SOURCE_ID,
     code: args.src,
-    linker,
   });
   project.setHead("root", { module: rootSource });
 
@@ -145,7 +142,7 @@ async function _run(
             if (args.showProjectState) {
               showState();
             }
-            resolve({ output: output.output, time });
+            resolve({ output: output.result, time });
           } else {
             reject(new Error("Output is not set"));
           }

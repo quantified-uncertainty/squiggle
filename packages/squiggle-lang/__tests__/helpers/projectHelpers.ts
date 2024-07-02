@@ -1,43 +1,32 @@
-// import { SqLinker } from "../../src/index.js";
-// import { SqProject } from "../../src/public/SqProject/index.js";
-// import { toStringResult } from "../../src/public/SqValue/index.js";
+import { SqDict } from "../../src/index.js";
+import { SqError } from "../../src/public/SqError.js";
+import { SqProject } from "../../src/public/SqProject/index.js";
+import { SqValue } from "../../src/public/SqValue/index.js";
+import { result } from "../../src/utility/result.js";
 
-// export async function runFetchResult(project: SqProject, sourceId: string) {
-//   await project.run(sourceId);
-//   const result = project.getResult(sourceId);
-//   return toStringResult(result);
-// }
+export function valueResultToString(result: result<SqValue, SqError>) {
+  return `${result.ok ? "Ok" : "Error"}(${result.value.toString()})`;
+}
 
-// export async function runFetchBindings(project: SqProject, sourceId: string) {
-//   await project.run(sourceId);
-//   const bindingsR = project.getBindings(sourceId);
-//   if (!bindingsR.ok) {
-//     return `Error(${bindingsR.value})`;
-//   }
-//   return bindingsR.value.toString();
-// }
+export function dictResultToString(result: result<SqDict, SqError>) {
+  if (result.ok) {
+    return result.value.toString();
+  } else {
+    return `Error(${result.value})`;
+  }
+}
 
-// export async function runFetchExports(project: SqProject, sourceId: string) {
-//   await project.run(sourceId);
-//   const outputR = project.getOutput(sourceId);
-//   if (!outputR.ok) {
-//     return `Error(${outputR.value})`;
-//   }
-//   return outputR.value.exports.toString();
-// }
+export async function runFetchResult(project: SqProject, headName: string) {
+  const output = await project.waitForOutput(headName);
+  return valueResultToString(output.getEndResult());
+}
 
-// export function buildNaiveLinker(sources?: { [k: string]: string }) {
-//   const linker: SqLinker = {
-//     resolve: (name) => name,
-//     loadSource: async (id) => {
-//       if (sources && id in sources) {
-//         return sources[id];
-//       }
-//       throw new Error(`Unknown id ${id}`);
-//     },
-//     loadModule: () => {
-//       throw new Error("Not implemented");
-//     },
-//   };
-//   return linker;
-// }
+export async function runFetchBindings(project: SqProject, headName: string) {
+  const output = await project.waitForOutput(headName);
+  return dictResultToString(output.getBindings());
+}
+
+export async function runFetchExports(project: SqProject, headName: string) {
+  const output = await project.waitForOutput(headName);
+  return dictResultToString(output.getExports());
+}

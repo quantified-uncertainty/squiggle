@@ -3,7 +3,7 @@ import { Env } from "../../dists/env.js";
 import { RunProfile } from "../../reducer/RunProfile.js";
 import { BaseRunner, RunParams } from "../../runners/BaseRunner.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
-import { Err, fmap2, Ok, result } from "../../utility/result.js";
+import { Err, fmap, fmap2, Ok, result } from "../../utility/result.js";
 import { vDict, VDict } from "../../value/VDict.js";
 import { vString } from "../../value/VString.js";
 import { SqError, SqOtherError, wrapError } from "../SqError.js";
@@ -30,18 +30,18 @@ export type OutputResult = result<
 export class SqModuleOutput {
   module: SqModule;
   environment: Env;
-  output: OutputResult;
+  result: OutputResult;
   executionTime: number;
 
   private constructor(params: {
     module: SqModule;
     environment: Env;
-    output: OutputResult;
+    result: OutputResult;
     executionTime: number;
   }) {
     this.module = params.module;
     this.environment = params.environment;
-    this.output = params.output;
+    this.result = params.result;
     this.executionTime = params.executionTime;
   }
 
@@ -54,6 +54,20 @@ export class SqModuleOutput {
 
   code(): string {
     return this.module.code;
+  }
+
+  // "result" word is overloaded, so we use "end result" for clarity.
+  // TODO: it would also be good to rename "result" to "endResult" in the OutputResult and runners code for the same reason.
+  getEndResult(): result<SqValue, SqError> {
+    return fmap(this.result, (r) => r.result);
+  }
+
+  getBindings(): result<SqDict, SqError> {
+    return fmap(this.result, (r) => r.bindings);
+  }
+
+  getExports(): result<SqDict, SqError> {
+    return fmap(this.result, (r) => r.exports);
   }
 
   // Helper method for "Find in Editor" feature
@@ -92,7 +106,7 @@ export class SqModuleOutput {
       return new SqModuleOutput({
         module,
         environment,
-        output: astR,
+        result: astR,
         executionTime: 0,
       });
     }
@@ -100,7 +114,7 @@ export class SqModuleOutput {
 
     let importBindings = VDict.empty();
 
-    for (const importBinding of module.imports()) {
+    for (const importBinding of module.imports(params.state.linker)) {
       const importedHash =
         module.pins[importBinding.name] ??
         params.state.resolutions.get(importBinding.name);
@@ -123,13 +137,13 @@ export class SqModuleOutput {
       if (!importOutput) {
         throw new Error(`Can't find output with hash ${importOutputHash}`);
       }
-      if (!importOutput.output.ok) {
+      if (!importOutput.result.ok) {
         return importOutput;
       }
       importBindings = importBindings.merge(
         vDict(
           ImmutableMap({
-            [importBinding.variable]: importOutput.output.value.exports._value,
+            [importBinding.variable]: importOutput.result.value.exports._value,
           })
         )
       );
@@ -170,8 +184,8 @@ export class SqModuleOutput {
     //   }
     // }
 
-    // upgrade runOutput values from the runner to SqValues
-    const output = fmap2(
+    // upgrade result values from the runner to SqValues
+    const result = fmap2(
       runResult,
       (runOutput) => {
         const { result, bindings, exports } = runOutput;
@@ -215,7 +229,7 @@ export class SqModuleOutput {
     return new SqModuleOutput({
       module,
       environment,
-      output,
+      result,
       executionTime,
     });
   }

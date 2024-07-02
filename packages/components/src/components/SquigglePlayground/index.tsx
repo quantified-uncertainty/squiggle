@@ -113,9 +113,9 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   });
 
   useEffect(() => {
-    const _output = simulation?.output.output;
-    if (_output && _output.ok) {
-      const exports = _output.value.exports;
+    const exportsR = simulation?.output.getExports();
+    if (exportsR && exportsR.ok) {
+      const exports = exportsR.value;
       const _exports: ModelExport[] = exports.entries().map((e) => ({
         variableName: e[0],
         variableType: e[1].tag,

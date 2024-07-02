@@ -24,12 +24,13 @@ import {
  * Shell](https://codemirror.net/docs/guide/#functional-core%2C-imperative-shell)
  * approach: its state is immutable and updated by dispatching actions.
  *
- * The project is also an event target, and emits events when outputs are built;
- * it provides some helpers for waiting for outputs with async/await, but events
- * are the primary way to interact with the project. One of the reasons for this
- * is that runs can have multiple steps (load dependencies, run them, then run
- * the parent), but should be cancellable: if the head source code changes, we
- * don't want to run the old code.
+ * The project is also an event target, and emits events when outputs are built
+ * or actions are dispatched; it provides some helpers for waiting for outputs
+ * with async/await, but events are the primary way to interact with the
+ * project. One of the reasons for this is that runs can have multiple steps
+ * (load dependencies, run them, then run the parent), but should be
+ * cancellable: if the head source code changes, we don't want to run the old
+ * code.
  *
  * When the new head is added to the project, it will fire the first
  * "loadImports" action, which will eventually dispatch other actions to load
@@ -37,8 +38,7 @@ import {
  */
 export class SqProject {
   state: ProjectState;
-  linker: SqLinker;
-  runner: BaseRunner; // move to state?
+  runner: BaseRunner; // TODO: move to state
 
   constructor(
     params: {
@@ -47,11 +47,14 @@ export class SqProject {
       environment?: Env;
     } = {}
   ) {
-    this.linker = params.linker ?? defaultLinker;
     this.runner = params.runner ?? getDefaultRunner();
-    this.state = ProjectState.init();
-    this.setEnvironment(params.environment ?? defaultEnv);
+    this.state = ProjectState.init({
+      linker: params.linker ?? defaultLinker,
+      environment: params.environment ?? defaultEnv,
+    });
   }
+
+  // Public methods
 
   setHead(headName: string, head: { module: SqModule }) {
     const hash = head.module.hash();
@@ -71,10 +74,23 @@ export class SqProject {
     });
   }
 
+  async loadHead(headName: string, head: { moduleName: string }) {
+    const module = await this.state.linker.loadModule(head.moduleName);
+    this.setHead(headName, { module });
+  }
+
+  // Helper method for setting a head with a simple code string.
+  // Source name will be identical to the head name.
+  setSimpleHead(headName: string, code: string) {
+    this.setHead(headName, { module: new SqModule({ name: headName, code }) });
+  }
+
   setEnvironment(environment: Env) {
     // TODO - do this through dispatch?
+    // This will clean all outputs.
     this.setState(this.state.withEnvironment(environment));
 
+    // Rebuild outputs.
     for (const hash of this.state.modules.keys()) {
       this.dispatch({
         type: "buildOutputIfPossible",
@@ -87,159 +103,8 @@ export class SqProject {
     this.runner = runner;
   }
 
-  async loadHead(
-    headName: string,
-    head: { moduleName: string; environment: Env }
-  ) {
-    const module = await this.linker.loadModule(head.moduleName);
-    this.setHead(headName, { module });
-  }
-
   hasHead(headName: string): boolean {
     return this.state.heads.has(headName);
-  }
-
-  private getHead(headName: string): SqModule {
-    const moduleHash = this.state.heads.get(headName)?.hash;
-    if (!moduleHash) {
-      throw new Error(`Head ${headName} not found`);
-    }
-    const module = this.state.modules.get(moduleHash);
-    if (!module) {
-      throw new Error(`Head ${headName} not found`);
-    }
-    return module;
-  }
-
-  // All state changes should go through this method, so we can emit events.
-  private setState(newState: ProjectState) {
-    this.state = newState;
-    this.dispatchEvent({ type: "state", payload: this.state });
-  }
-
-  dispatch(action: ProjectAction) {
-    this.dispatchEvent({ type: "action", payload: action });
-
-    switch (action.type) {
-      case "loadImports": {
-        const module = this.state.modules.get(action.payload);
-        if (!module) {
-          throw new Error(`Module not found: ${action.payload}`);
-        }
-        for (const imp of module.imports()) {
-          if (
-            module.pins[imp.name] &&
-            this.state.modules.has(module.pins[imp.name])
-          ) {
-            // import is already loaded
-            continue;
-          }
-
-          // TODO - mark in the state that we're loading a module.
-          // Otherwise if two modules import the same module asynchronously, we'll load it twice.
-          this.dispatch({
-            type: "loadModule",
-            payload: {
-              name: imp.name,
-              hash: module.pins[imp.name],
-            },
-          });
-        }
-        break;
-      }
-      case "loadModule": {
-        this.linker
-          .loadModule(action.payload.name, action.payload.hash)
-          .then((module) => {
-            if (action.payload.hash && action.payload.hash !== module.hash()) {
-              throw new Error(
-                `Hash mismatch for module ${action.payload.name}: expected ${action.payload.hash}, got ${module.hash()}`
-              );
-            }
-
-            if (!action.payload.hash) {
-              this.setState(
-                this.state.clone({
-                  resolutions: this.state.resolutions.set(
-                    action.payload.name,
-                    module.hash()
-                  ),
-                })
-              );
-            }
-
-            this.setState(this.state.withModule(module));
-            this.dispatch({
-              type: "processModule",
-              payload: { hash: module.hash() },
-            });
-          });
-        break;
-      }
-      case "processModule": {
-        const module = this.state.modules.get(action.payload.hash);
-        if (!module) {
-          throw new Error(`Module not found: ${action.payload.hash}`);
-        }
-        this.dispatch({
-          type: "loadImports",
-          payload: module.hash(),
-        });
-        this.dispatch({
-          type: "buildOutputIfPossible",
-          payload: {
-            hash: module.hash(),
-            environment: this.state.environment,
-          },
-        });
-        break;
-      }
-      case "buildOutputIfPossible": {
-        const { hash, environment } = action.payload;
-        const module = this.state.modules.get(hash);
-        if (!module) {
-          throw new Error(`Module not found: ${hash}`);
-        }
-
-        if (!this.state.allImportsHaveOutputs(module, environment)) {
-          break;
-        }
-
-        // output already exists
-        if (
-          this.state.outputs.has(SqModuleOutput.hash({ module, environment }))
-        ) {
-          break;
-        }
-
-        SqModuleOutput.make({
-          module,
-          environment,
-          runner: this.runner,
-          state: this.state,
-        }).then((output) => {
-          this.setState(this.state.withOutput(output));
-          this.dispatchEvent({ type: "output", payload: { output } });
-
-          for (const parent of this.state.getParents(module)) {
-            this.dispatch({
-              type: "buildOutputIfPossible",
-              payload: { hash: parent, environment },
-            });
-          }
-        });
-        // TODO - catch?
-
-        break;
-      }
-      case "gc": {
-        // Remove modules from the state that are not reachable from the heads.
-        this.setState(this.state.gc());
-        break;
-      }
-      default:
-        throw action satisfies never;
-    }
   }
 
   getOutput(headName: string): SqModuleOutput | undefined {
@@ -251,8 +116,23 @@ export class SqProject {
     );
   }
 
-  // Helper for awaiting the head output.
-  async runHead(headName: string): Promise<SqModuleOutput> {
+  getModuleOrThrow(hash: string): SqModule {
+    const module = this.state.modules.get(hash);
+    if (!module) {
+      throw new Error(`Module not found: ${hash}`);
+    }
+    return module;
+  }
+
+  getHead(headName: string): SqModule {
+    const moduleHash = this.state.heads.get(headName)?.hash;
+    if (!moduleHash) {
+      throw new Error(`Head ${headName} not found`);
+    }
+    return this.getModuleOrThrow(moduleHash);
+  }
+
+  async waitForOutput(headName: string): Promise<SqModuleOutput> {
     const existingOutput = this.getOutput(headName);
     if (existingOutput) {
       return existingOutput;
@@ -268,6 +148,137 @@ export class SqProject {
       this.addEventListener("output", listener);
     });
   }
+
+  // Dispatch methods
+
+  dispatch(action: ProjectAction) {
+    this.dispatchEvent({ type: "action", payload: action });
+
+    switch (action.type) {
+      case "loadImports": {
+        this.loadImports(action.payload);
+        break;
+      }
+      case "loadModule": {
+        this.loadModule(action.payload.name, action.payload.hash);
+        break;
+      }
+      case "processModule": {
+        this.processModule(action.payload.hash);
+        break;
+      }
+      case "buildOutputIfPossible": {
+        this.buildOutputIfPossible(
+          action.payload.hash,
+          action.payload.environment
+        );
+        break;
+      }
+      case "gc": {
+        // Remove modules from the state that are not reachable from the heads.
+        this.setState(this.state.gc());
+        break;
+      }
+      default:
+        throw action satisfies never;
+    }
+  }
+
+  private loadImports(hash: string) {
+    const module = this.getModuleOrThrow(hash);
+
+    for (const imp of module.imports(this.state.linker)) {
+      if (
+        module.pins[imp.name] &&
+        this.state.modules.has(module.pins[imp.name])
+      ) {
+        // import is already loaded
+        continue;
+      }
+
+      // TODO - mark in the state that we're loading a module.
+      // Otherwise if two modules import the same module asynchronously, we'll load it twice.
+      this.dispatch({
+        type: "loadModule",
+        payload: {
+          name: imp.name,
+          hash: module.pins[imp.name],
+        },
+      });
+    }
+  }
+
+  private async loadModule(name: string, hash?: string) {
+    // TODO - try/catch
+    const module = await this.state.linker.loadModule(name, hash);
+    if (hash && hash !== module.hash()) {
+      throw new Error(
+        `Hash mismatch for module ${name}: expected ${hash}, got ${module.hash()}`
+      );
+    }
+
+    if (!hash) {
+      this.setState(
+        this.state.clone({
+          resolutions: this.state.resolutions.set(name, module.hash()),
+        })
+      );
+    }
+
+    this.setState(this.state.withModule(module));
+    this.dispatch({
+      type: "processModule",
+      payload: { hash: module.hash() },
+    });
+  }
+
+  private processModule(hash: string) {
+    const module = this.getModuleOrThrow(hash);
+
+    this.dispatch({
+      type: "loadImports",
+      payload: module.hash(),
+    });
+    this.dispatch({
+      type: "buildOutputIfPossible",
+      payload: {
+        hash: module.hash(),
+        environment: this.state.environment,
+      },
+    });
+  }
+
+  private async buildOutputIfPossible(hash: string, environment: Env) {
+    const module = this.getModuleOrThrow(hash);
+
+    if (!this.state.allImportsHaveOutputs(module, environment)) {
+      return;
+    }
+
+    // output already exists
+    if (this.state.outputs.has(SqModuleOutput.hash({ module, environment }))) {
+      return;
+    }
+
+    // TODO - try/catch
+    const output = await SqModuleOutput.make({
+      module,
+      environment,
+      runner: this.runner,
+      state: this.state,
+    });
+    this.setState(this.state.withOutput(output));
+    this.dispatchEvent({ type: "output", payload: { output } });
+
+    for (const parent of this.state.getParents(module)) {
+      this.dispatch({
+        type: "buildOutputIfPossible",
+        payload: { hash: parent, environment },
+      });
+    }
+  }
+
+  // Event methods
 
   private eventTarget = new EventTarget();
 
@@ -292,5 +303,13 @@ export class SqProject {
       type,
       listener as (event: Event) => void
     );
+  }
+
+  // Internal helpers
+
+  // All state changes should go through this method, so we can emit events.
+  private setState(newState: ProjectState) {
+    this.state = newState;
+    this.dispatchEvent({ type: "state", payload: this.state });
   }
 }

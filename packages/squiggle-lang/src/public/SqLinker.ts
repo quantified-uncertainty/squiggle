@@ -17,7 +17,7 @@ export const defaultLinker: SqLinker = {
 export function makeSelfContainedLinker(
   sources: Record<string, string>
 ): SqLinker {
-  const linker: SqLinker = {
+  return {
     resolve: (name) => name,
     async loadModule(sourceId, hash) {
       if (hash) {
@@ -30,9 +30,7 @@ export function makeSelfContainedLinker(
       return new SqModule({
         name: sourceId,
         code,
-        linker,
       });
     },
   };
-  return linker;
 }

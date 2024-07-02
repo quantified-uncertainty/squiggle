@@ -2,7 +2,7 @@ import { blue, bold, green, red } from "../../cli/colors.js";
 import { run } from "../../index.js";
 
 const testRun = async (x: string) => {
-  const { output } = await run(x, {
+  const { result: output } = await run(x, {
     environment: { sampleCount: 100, xyPointLength: 100, seed: "default-seed" },
   });
   if (output.ok) {

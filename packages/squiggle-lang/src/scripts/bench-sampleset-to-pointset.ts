@@ -29,8 +29,8 @@ async function main() {
         }
       );
     });
-    if (!result?.output.ok) {
-      throw new Error("Code failed: " + result?.output.value.toString());
+    if (!result?.result.ok) {
+      throw new Error("Code failed: " + result?.result.value.toString());
     }
     console.log(`1e${p}`, "\t", time);
   }

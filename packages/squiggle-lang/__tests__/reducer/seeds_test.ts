@@ -3,7 +3,7 @@ import { run } from "../../src/index.js";
 const SAMPLE_COUNT = 100;
 
 async function getSamplesForSeed(seed?: string | undefined) {
-  const { output } = await run("2 to 3", {
+  const { result: output } = await run("2 to 3", {
     environment: {
       sampleCount: SAMPLE_COUNT,
       xyPointLength: 100,

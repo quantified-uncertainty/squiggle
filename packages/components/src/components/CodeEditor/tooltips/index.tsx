@@ -97,8 +97,9 @@ export function tooltipsExtension() {
         }
 
         const name = getText(node);
-        if (!simulation?.output.output?.ok) return null;
-        const output = simulation?.output.output.value;
+        if (!simulation) return null;
+        if (!simulation.output.result.ok) return null;
+        const output = simulation.output.result.value;
 
         if (cursor.type.is("Import")) {
           const value = output.imports.get(name);

@@ -56,15 +56,15 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
     viewerWithMenuBarRef
   ) {
     const {
-      output: { output },
+      output: { result: outputResult },
     } = simulation;
     const [viewerTab, setViewerTab] = useState<ViewerTab>(
-      defaultTab ?? defaultViewerTab(output)
+      defaultTab ?? defaultViewerTab(outputResult)
     );
 
     const viewerRef = useRef<SquiggleViewerHandle>(null);
     const _isSimulating = isSimulating(simulation);
-    const shownTabs = viewerTabsToShow(output);
+    const shownTabs = viewerTabsToShow(outputResult);
 
     useViewerTabShortcuts({
       enableGlobalShortcuts,
@@ -99,7 +99,7 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
             <ViewerMenu
               viewerTab={viewerTab}
               setViewerTab={setViewerTab}
-              outputResult={output}
+              outputResult={outputResult}
               shownTabs={shownTabs}
             />
           ) : (
@@ -121,7 +121,7 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
           <ViewerBody
             externalViewerActions={externalViewerActions}
             viewerTab={viewerTab}
-            outputResult={output}
+            outputResult={outputResult}
             isSimulating={isSimulating(simulation)}
             playgroundSettings={playgroundSettings}
             ref={viewerRef}

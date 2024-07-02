@@ -14,11 +14,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 async function getErrorFromCode(code: string) {
-  const result = await run(code);
-  if (result.output.ok) {
+  const output = await run(code);
+  if (output.result.ok) {
     throw new Error("Expected an error");
   }
-  return result.output.value;
+  return output.result.value;
 }
 
 export const CompileError: Story = {

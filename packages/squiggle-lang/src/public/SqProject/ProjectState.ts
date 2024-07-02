@@ -1,5 +1,6 @@
 import { defaultEnv, Env } from "../../dists/env.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
+import { SqLinker } from "../SqLinker.js";
 import { ModuleHash, SqModule } from "./SqModule.js";
 import { SqModuleOutput } from "./SqModuleOutput.js";
 
@@ -25,6 +26,8 @@ type ProjectStateData = {
 
   // Outputs are the results of running a module in a specific environment.
   outputs: ImmutableMap<ModuleHash, SqModuleOutput>;
+
+  linker: SqLinker;
 };
 
 export class ProjectState implements ProjectStateData {
@@ -33,6 +36,7 @@ export class ProjectState implements ProjectStateData {
   readonly resolutions: ProjectStateData["resolutions"];
   readonly outputs: ProjectStateData["outputs"];
   readonly environment: ProjectStateData["environment"];
+  readonly linker: ProjectStateData["linker"];
 
   private constructor(props: ProjectStateData) {
     this.heads = props.heads;
@@ -40,15 +44,17 @@ export class ProjectState implements ProjectStateData {
     this.resolutions = props.resolutions;
     this.outputs = props.outputs;
     this.environment = props.environment;
+    this.linker = props.linker;
   }
 
-  static init() {
+  static init(params: { linker: SqLinker; environment?: Env }) {
     return new ProjectState({
       heads: ImmutableMap(),
       modules: ImmutableMap(),
       resolutions: ImmutableMap(),
       outputs: ImmutableMap(),
-      environment: defaultEnv,
+      environment: params.environment ?? defaultEnv,
+      linker: params.linker,
     });
   }
 
@@ -61,13 +67,17 @@ export class ProjectState implements ProjectStateData {
     });
   }
 
-  clone(params: Partial<ProjectStateData>): ProjectState {
+  clone(
+    // It usually doesn't make sense to update linker, so we forbid it.
+    params: Partial<Omit<ProjectStateData, "linker">>
+  ): ProjectState {
     return new ProjectState({
       heads: params.heads ?? this.heads,
       modules: params.modules ?? this.modules,
       resolutions: params.resolutions ?? this.resolutions,
       outputs: params.outputs ?? this.outputs,
       environment: params.environment ?? this.environment,
+      linker: this.linker,
     });
   }
 
@@ -106,7 +116,7 @@ export class ProjectState implements ProjectStateData {
     for (const [hash, mod] of this.modules) {
       if (
         mod
-          .imports()
+          .imports(this.linker)
           .some(
             (imp) =>
               imp.name === module.name &&
@@ -129,7 +139,7 @@ export class ProjectState implements ProjectStateData {
   }
 
   allImportsHaveOutputs(module: SqModule, environment: Env): boolean {
-    for (const importBinding of module.imports()) {
+    for (const importBinding of module.imports(this.linker)) {
       const importedModuleHash =
         module.pins[importBinding.name] ??
         this.resolutions.get(importBinding.name);
@@ -178,7 +188,7 @@ export class ProjectState implements ProjectStateData {
         if (!module) {
           return;
         }
-        for (const importBinding of module.imports() ?? []) {
+        for (const importBinding of module.imports(this.linker) ?? []) {
           let importedModuleHash: string | undefined =
             module.pins[importBinding.name];
 

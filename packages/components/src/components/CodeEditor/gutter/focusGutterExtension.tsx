@@ -145,7 +145,7 @@ export function getMarkers(
   }
   const simulation = state.facet(simulationFacet);
 
-  const sqResult = simulation?.output.output;
+  const sqResult = simulation?.output.result;
   if (!sqResult?.ok) {
     return;
   }

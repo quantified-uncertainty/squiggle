@@ -1,7 +1,7 @@
 import { run, SqValue } from "../../src/index.js";
 
 export async function testRun(x: string) {
-  const { output } = await run(x, {
+  const { result: output } = await run(x, {
     environment: {
       sampleCount: 1000,
       xyPointLength: 100,

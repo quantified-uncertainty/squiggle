@@ -2,7 +2,7 @@ import { run, sq } from "../../src/index.js";
 
 describe("docstrings", () => {
   const runToResult = async (code: string) => {
-    const { output } = await run(code);
+    const { result: output } = await run(code);
     if (!output.ok) {
       throw new Error();
     }
@@ -12,7 +12,7 @@ describe("docstrings", () => {
   };
 
   const runToBindings = async (code: string) => {
-    const { output } = await run(code);
+    const { result: output } = await run(code);
     if (!output.ok) {
       throw new Error();
     }
