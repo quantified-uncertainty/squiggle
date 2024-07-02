@@ -77,12 +77,6 @@ implicitType
   = ""
     { return h.nodeImplicitType(location()); }
 
-typeWord
-  = name:identifier
-    {
-      return h.nodeDecorator(name, args ?? [], location());
-    }
-
 statement
   = letStatement
   / defunStatement
