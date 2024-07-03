@@ -162,6 +162,8 @@ function resolveType(
                     variables: {},
                     units: variableTypes[node.value],
                 };
+            } else {
+                return NO_CONSTRAINT;
             }
         case "InfixCall":
             // handled below
@@ -171,7 +173,7 @@ function resolveType(
             throw new Error(`No way to resolve type for node type ${node.type}: ${node}`, node.location);
     }
 
-    // for InfixCall
+    console.assert(node.type === "InfixCall");
     switch (node.op) {
         case "*":
         case ".*":
@@ -215,7 +217,7 @@ function resolveType(
             return NO_CONSTRAINT;
         default:
             // This should never happen.
-            throw new Error(`No way to find type constraints for node: ${node}`);
+            throw new Error(`No way to find type constraints for node: ${JSON.stringify(node)}`);
     }
 }
 
@@ -225,15 +227,30 @@ export function unitTypeCheckInner(
     typeConstraints: [TypeConstraint, ASTNode][]
 ): TypeConstraint {
     let scopedTypeConstraints = typeConstraints.map((x) => x);
+
     switch (node.type) {
         case "Program":
         case "Block":
             for (const statement of node.statements) {
                 unitTypeCheckInner(statement, scopedTypeConstraints);
             }
-            if (node.type === "Block") {
-                console.log("checking constraints: ", scopedTypeConstraints.map((x) => JSON.stringify(x[0])).join("\n\t"));
+
+            // Make list of symbols in parent scope
+            const parentSymbols = new Set<string>();
+            for (const [constraint, node] of typeConstraints) {
+                for (const variable in constraint.variables) {
+                    parentSymbols.add(variable);
+                }
             }
+
+            // Any type constraints that only reference variables in the parent
+            // scope should be added to the parent scope.
+            for (const [constraint, node] of scopedTypeConstraints) {
+                if (Object.keys(constraint.variables).every((variable) => parentSymbols.has(variable))) {
+                    typeConstraints.push([constraint, node]);
+                }
+            }
+
             const variableTypes = checkTypeConstraints(scopedTypeConstraints);
             if (node.type === "Program") {
                 return NO_CONSTRAINT;
@@ -252,9 +269,6 @@ export function unitTypeCheckInner(
                 requireConstraintsToBeEqual(variableConstraint, valueConstraint),
                 node
             ]);
-            if (node.value.type === "Block") {
-                console.log("Type constraint from let statement: ", typeConstraints[typeConstraints.length - 1][0]);
-            }
             return NO_CONSTRAINT;
         case "Identifier":
             return {
@@ -274,7 +288,7 @@ export function unitTypeCheckInner(
             // throw new ICompileError(`No way to find type constraints for node type ${node.type}: ${node}`, node.location);
     }
 
-    // for InfixCall
+    console.assert(node.type === "InfixCall");
     var isBooleanOp = false;
     switch (node.op) {
         case "*":

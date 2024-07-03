@@ -206,7 +206,8 @@ socks :: socks = cats
 x :: m/s = a / b
 y :: kg/s = b / c
 z :: kg/m = c / a
-`, "test")).toThrow("Conflicting unit types"));
+`, "test"
+        )).toThrow("Conflicting unit types"));
     });
 
     describe("blocks", () => {
@@ -231,15 +232,37 @@ x = {
             x: {joules: 1}
         }));
 
-        test("nested blocks", () => expect(() => parse(
+        // TODO: need some way of keeping the inferred types when dropping
+        // scope. Maybe in unitTypeCheckInner, make a list of variables that
+        // exist in the parent scope and keep all type constraints that include
+        // only variables in parent scope.
+        //
+        // But that alone isn't sufficient, you need to run Gaussian elimination
+        // and *then* out-propagate any relevant constraints.
+        //
+        // Maybe the best way is to not do type inference recursively, just do
+        // it at the end, but give each block an id and tag variables with the
+        // block ids. Maintain a stack so that when a var is reference, we know
+        // where it comes from.
+        test("type inference back-propagates from outside to inside a block", expect(getUnitTypes(
             `
-{
-  x :: DALYs = {
-    y :: logincomeUnits = 130
-    y
-  }
+x = 10
+y :: dollars = {
+  z = x + 3
+  z
 }
 `, "test"
-        )).toThrow("Conflicting unit types"));
+        )).toEqual({
+            x: {dollars: 1},
+            y: {dollars: 1},
+        }));
+
+        test("type declaration outside block cannot conflict with block expression type", () => expect(() => parse(
+            `
+x :: dalys = {
+y :: logIncomeUnits = 130
+y
+}
+`, "test")).toThrow("Conflicting unit types"));
     });
 });
