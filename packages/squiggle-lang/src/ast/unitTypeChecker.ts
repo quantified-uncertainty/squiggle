@@ -3,9 +3,14 @@ import { ICompileError } from "../errors/IError.js";
 
 type TypedNode<T extends ASTNode["type"]> = Extract<ASTNode, { type: T }>;
 
+/*
+ * There can be multiple distinct variables with the same name. During unit type
+ * checking, every variable is assigned a unique ID.
+ */
 export type VariableId = number;
 
-/* Defines a product of variables and units with the values of the dicts giving
+/*
+ * Defines a product of variables and units with the values of the dicts giving
  * their (possibly negative) exponents. A type constraint specifies that the
  * product of all variables and units must be dimensionless.
  */
@@ -15,17 +20,38 @@ export type TypeConstraint = {
     units: { [key: string]: number };
 };
 
-export type VariableTypes = {
+/*
+ * A dictionary mapping variables to their unit types.
+ */
+export type VariableUnitTypes = {
     [key: VariableId]: { [key: string]: number }
 };
 
+/*
+ * A dictionary mapping variable names to unique IDs within a particular scope.
+ */
 type Scope = { [key: string]: VariableId };
 
+/*
+ * Scope info required for type checking.
+ *
+ * stack: A stack of variable scopes, with the global scope at the bottom and
+ * most narrow scope at the top.
+ *
+ * variableNodes: An array where the ith index gives the ASTNode for the `let`
+ * statement declaring the variable with ID `i`.
+ */
 type ScopeInfo = {
     stack: Scope[],
     variableNodes: ASTNode[]
 };
 
+/*
+ * A type constraint that does not contain any variables or units. This is
+ * distinct from `NO_CONSTRAINT` because combining an empty constraint with a
+ * non-empty constraint produces a non-empty constraint, but combining
+ * `NO_CONSTRAINT` with any other constraint produces `NO_CONSTRAINT`.
+ */
 const EMPTY_CONSTRAINT: TypeConstraint = {
     defined: true,
     variables: {},
@@ -38,6 +64,28 @@ const NO_CONSTRAINT: TypeConstraint = {
     units: {},
 };
 
+/*
+ * Pretty-print a unit type (defined as a dictionary mapping unit names to
+ * exponents) as a string.
+ */
+function unitTypeToString(unitTypes: { [key: string]: number }) {
+    const entries = Object.entries(unitTypes).sort(([name1, _1], [name2, _2]) => name1.localeCompare(name2));
+    const positiveEntries = entries.filter(([_, value]) => value > 0);
+    const negativeEntries = entries.filter(([_, value]) => value < 0);
+    return (
+        (positiveEntries.length === 0 ? "1" : "")
+            + positiveEntries.map(([name, value]) =>
+                value > 1 ? `${name}^${value}` : name).join(" * ")
+            + (negativeEntries.length > 0 ? " / " : "")
+            + negativeEntries.map(([name, value]) =>
+                value < -1 ? `${name}^${-value}` : name).join(" / ")
+    );
+}
+
+/*
+ * Pretty-print a `TypeConstraint.variables` or `TypeConstraint.units` object as
+ * a string.
+ */
 function subConstraintToString(subConstraint: { [key: VariableId | string]: number }, scopes: ScopeInfo, isVariable: boolean): string {
     if (Object.keys(subConstraint).length === 0) {
         return "<unitless>";
@@ -45,7 +93,8 @@ function subConstraintToString(subConstraint: { [key: VariableId | string]: numb
     const entries = Object.entries(subConstraint).map(([key, value]) => {
         let name = "";
         if (isVariable) {
-            const node = scopes.variableNodes[key] as { value: string };
+            console.assert(typeof key !== "string");
+            const node = scopes.variableNodes[key as unknown as VariableId] as { value: string };
             name = node.value;
         } else {
             name = key;
@@ -54,16 +103,7 @@ function subConstraintToString(subConstraint: { [key: VariableId | string]: numb
         return [name, value];
     });
 
-    const positiveEntries = entries.filter(([_, value]) => value > 0);
-    const negativeEntries = entries.filter(([_, value]) => value < 0);
-    return (
-        positiveEntries.map(([name, value]) =>
-            (positiveEntries.length == 0 ? "1" : "")
-            + value > 1 ? `${name}^${value}` : name).join(" * ")
-            + (negativeEntries.length > 0 ? " / " : "")
-            + negativeEntries.map(([name, value]) =>
-                value < -1 ? `${name}^{${-value}}` : name).join(" / ")
-    );
+    return unitTypeToString(Object.fromEntries(entries));
 }
 
 /* Create a TypeConstraint object from a type signature. */
@@ -311,7 +351,7 @@ export function innerFindTypeConstraints(
     }
 }
 
-export function findTypeConstraints(node: ASTNode): [[TypeConstraint, ASTNode][], ScopeInfo] {
+function findTypeConstraints(node: ASTNode): [[TypeConstraint, ASTNode][], ScopeInfo] {
     let typeConstraints: [TypeConstraint, ASTNode][] = [];
     let scopes: ScopeInfo = {
         stack: [{}],
@@ -327,7 +367,14 @@ function swap(arr: any[], i: number, j: number): void {
     arr[j] = temp;
 }
 
-export function gaussianElim(varMatrix: number[][], unitMatrix: number[][]): number[][] {
+/*
+ * Solve type inference by running Gaussian elimination on the matrix of variables.
+ *
+ * Return a list of type conflicts, where each list entry is a list of row
+ * indexes for rows that mutually conflict. If there are no type errors, this
+ * list will be empty.
+ */
+function gaussianElim(varMatrix: number[][], unitMatrix: number[][]): number[][] {
     if (varMatrix.length === 0) {
         return [];
     }
@@ -412,7 +459,18 @@ export function gaussianElim(varMatrix: number[][], unitMatrix: number[][]): num
     return conflictingRows;
 }
 
-export function typeConstraintsToMatrix(typeConstraints: [TypeConstraint, ASTNode][], scopes: ScopeInfo): [string[], number[][], number[][]] {
+/*
+ * Produce two matrices (one for variables and one for units) that define a
+ * system of linear equations where each equation is isomorphic to a type
+ * constraint.
+ *
+ * Also return a list of unit names such that the ith column in the unit matrix
+ * represents the ith unit name. For the variable matrix, the ith column
+ * represents the variable with ID i.
+ *
+ * Return value: [unit names, variable matrix, unit matrix]
+ */
+function typeConstraintsToMatrix(typeConstraints: [TypeConstraint, ASTNode][], scopes: ScopeInfo): [string[], number[][], number[][]] {
     let varMatrix = [];
     let unitMatrix = [];
     let rowNodes = [];
@@ -443,11 +501,15 @@ export function typeConstraintsToMatrix(typeConstraints: [TypeConstraint, ASTNod
     return [unitNames, varMatrix, unitMatrix];
 }
 
+/*
+ * Given a diagonal matrix of variables and a matrix of units, produce a mapping
+ * from variables to unit types.
+ */
 function matrixToSimplifiedTypes(
     unitNames: string[],
     varMatrix: number[][],
     unitMatrix: number[][]
-): VariableTypes {
+): VariableUnitTypes {
     let varTypes: { [key: string]: { [key: string]: number } } = {};
     for (let i = 0; i < varMatrix.length; i++) {
         const varIndex = varMatrix[i].indexOf(1);
@@ -468,17 +530,18 @@ function matrixToSimplifiedTypes(
 }
 
 
-/* Check that the type constraints are consistent.
+/*
+ * Perform type inference and check that the type constraints are consistent.
  *
  * This function works based on the insight that the logarithm of a type
  * constraint is a linear equation, and thus the type constraints together are
  * equivalent to a system of linear equations. If the system has no solution,
  * then the constraints cannot be satisfied and a type error is raised.
  */
-export function checkTypeConstraints(
+function checkTypeConstraints(
     typeConstraints: [TypeConstraint, ASTNode][],
     scopes: ScopeInfo
-): VariableTypes {
+): VariableUnitTypes {
     const [unitNames, varMatrix, unitMatrix] = typeConstraintsToMatrix(typeConstraints, scopes);
     const conflictingRows = gaussianElim(varMatrix, unitMatrix);
     if (conflictingRows.length > 0) {
@@ -490,7 +553,46 @@ export function checkTypeConstraints(
     return matrixToSimplifiedTypes(unitNames, varMatrix, unitMatrix);
 }
 
+/*
+ * Put known unit-type information for each variable into the list of decorators
+ * for the ASTNode where the variable is defined.
+ *
+ * TODO: has not been tested at all
+ */
+function putUnitTypesOnAST(variableTypes: VariableUnitTypes, scopes: ScopeInfo) {
+    for (const variableId in variableTypes) {
+        const node = scopes.variableNodes[variableId];
+        console.assert(node.type === "LetStatement");
+        const fakeLocation = node.location;
+        const unitType = variableTypes[variableId];
+        const unitTypeStr = unitTypeToString(unitType);
+        (node as { decorators: ASTNode[] }).decorators.push({
+            type: "Decorator",
+            name: {
+                type: "Identifier",
+                value: "unitType",
+                location: fakeLocation,
+            },
+            args: [{
+                type: "String",
+                value: unitTypeStr,
+                location: fakeLocation,
+            }],
+            location: fakeLocation,
+        });
+    }
+}
+
 export function unitTypeCheck(node: ASTNode): void {
     const [typeConstraints, scopes] = findTypeConstraints(node);
     const variableTypes = checkTypeConstraints(typeConstraints, scopes);
+    putUnitTypesOnAST(variableTypes, scopes);
+}
+
+export const exportedForTesting = {
+    checkTypeConstraints,
+    findTypeConstraints,
+    gaussianElim,
+    typeConstraintsToMatrix,
+    unitTypeToString
 }

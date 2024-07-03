@@ -2,7 +2,8 @@ import { parse } from "../../src/ast/parse.js";
 import { parse as peggyParse } from "../../src/ast/peggyParser.js";
 import { ASTNode } from "../../src/ast/types.js";
 import { ICompileError } from "../../src/errors/IError.js";
-import { TypeConstraint, VariableTypes, checkTypeConstraints, findTypeConstraints, gaussianElim, typeConstraintsToMatrix, unitTypeCheck } from "../../src/ast/unitTypeChecker.js";
+import { TypeConstraint, VariableUnitTypes, exportedForTesting, unitTypeCheck } from "../../src/ast/unitTypeChecker.js";
+const { checkTypeConstraints, findTypeConstraints, gaussianElim, typeConstraintsToMatrix, unitTypeToString } = exportedForTesting;
 import {
     testEvalError,
     testEvalToBe,
@@ -27,12 +28,39 @@ function gaussianElimHelper(sourceCode: string): [number[][], number[][]] {
     return [varMatrix, unitMatrix];
 }
 
-function getUnitTypes(sourceCode: string): [VariableTypes, IdNameMapping] {
+function getUnitTypes(sourceCode: string): [VariableUnitTypes, IdNameMapping] {
     const node = peggyParse(sourceCode, { grammarSource: "test", comments: [] });
     const [typeConstraints, scopes] = findTypeConstraints(node);
     const idNameMapping = scopes.variableNodes.map((node) => (node as { value: string }).value);
     return [checkTypeConstraints(typeConstraints, scopes), idNameMapping];
 }
+
+describe("unitTypeToString", () => {
+    test("m", () => expect(unitTypeToString({
+        m: 1,
+    })).toEqual("m"));
+    test("1/s", () => expect(unitTypeToString({
+        s: -1,
+    })).toEqual("1 / s"));
+    test("m/s", () => expect(unitTypeToString({
+        m: 1,
+        s: -1,
+    })).toEqual("m / s"));
+    test("s/m", () => expect(unitTypeToString({
+        m: -1,
+        s: 1,
+    })).toEqual("s / m"));
+    test("m/s/s", () => expect(unitTypeToString({
+        m: 1,
+        s: -2,
+    })).toEqual("m / s^2"));
+    test("kg*m/s/s/lb", () => expect(unitTypeToString({
+        kg: 1,
+        m: 1,
+        s: -2,
+        lb: -1,
+    })).toEqual("kg * m / lb / s^2"));
+});
 
 describe("find unit type constraints", () => {
     test("assign m/s to m/s", () => expect(findTypeConstraintsHelper(
