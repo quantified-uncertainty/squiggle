@@ -141,6 +141,32 @@ socks :: socks = cats
         [0, -1, 1],  // -unit:cats + unit:socks = 0 (type error)
     ],
 ]));
+
+    // Determining types in reverse order means the initial matrix won't be
+    // triangular, which could catch bugs in the Gaussian elimination
+    // implementation.
+    // Note: parse+stringify is a hack to work around the fact
+    // that Jest considers 0 and -0 to be different.
+    test("types determined in reverse order of declarations", () => expect(JSON.parse(JSON.stringify(gaussianElimHelper(
+        `
+a = 1
+b = 2
+x :: bxType = b
+y :: ayType = a
+`)))).toEqual([
+    [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1],
+    ],
+    [
+        [-1, 0],
+        [0, -1],
+        [0, -1],
+        [-1, 0],
+    ],
+]));
 });
 
 describe("unit type checking", () => {
@@ -163,7 +189,7 @@ z :: m/s = x / y
     2: {m: 1, s: -1},
 }, ["x", "y", "z"]]));
 
-        test("types determined in reverse order of declarations", () => expect(getUnitTypes(
+        test("types determined in reverse order of declarations can still be inferred", () => expect(getUnitTypes(
             `
 a = 1
 b = 2
@@ -234,59 +260,80 @@ z :: kg/m = c / a
         )).toThrow("Conflicting unit types"));
     });
 
-//     describe("blocks", () => {
-//         test("type error inside block gets caught", () => expect(() => parse(
-//             `
-// {
-//   x :: kg = 1
-//   y :: lb = x
-//   y
-// }
-// `, "test"
-//         )).toThrow("Conflicting unit types"));
+    describe("blocks", () => {
+        test("type error inside block gets caught", () => expect(() => parse(
+            `
+{
+  x :: kg = 1
+  y :: lb = x
+  y
+}
+`, "test"
+        )).toThrow("Conflicting unit types"));
 
-//         test("unit type of block is unit type of last expression", () => expect(getUnitTypes(
-//             `
-// x = {
-//   y :: joules = 27
-//   y
-// }
-// `, "test"
-//         )).toEqual({
-//             x: {joules: 1}
-//         }));
+        test("unit type of block is unit type of last expression", () => expect(getUnitTypes(
+            `
+x = {
+  y :: joules = 27
+  y
+}
+`)).toEqual([{
+    0: {joules: 1},
+    1: {joules: 1},
+}, ["x", "y"]]));
 
-//         // TODO: need some way of keeping the inferred types when dropping
-//         // scope. Maybe in innerFindTypeConstraints, make a list of variables that
-//         // exist in the parent scope and keep all type constraints that include
-//         // only variables in parent scope.
-//         //
-//         // But that alone isn't sufficient, you need to run Gaussian elimination
-//         // and *then* out-propagate any relevant constraints.
-//         //
-//         // Maybe the best way is to not do type inference recursively, just do
-//         // it at the end, but give each block an id and tag variables with the
-//         // block ids. Maintain a stack so that when a var is reference, we know
-//         // where it comes from.
-//         test("type inference back-propagates from outside to inside a block", expect(getUnitTypes(
-//             `
-// x = 10
-// y :: dollars = {
-//   z = x + 3
-//   z
-// }
-// `, "test"
-//         )).toEqual({
-//             x: {dollars: 1},
-//             y: {dollars: 1},
-//         }));
+        test("variable declaration inside block can override previous declaration, then be forgotten", () => expect(getUnitTypes(
+            `
+x :: kg = 1
+y = {
+  x :: lb = 2
+  x
+}
+z :: kg = x
+`)).toEqual([{
+    0: {kg: 1},
+    1: {lb: 1},
+    2: {lb: 1},
+    3: {kg: 1},
+}, ["x", "y", "x", "z"]]));
 
-//         test("type declaration outside block cannot conflict with block expression type", () => expect(() => parse(
-//             `
-// x :: dalys = {
-// y :: logIncomeUnits = 130
-// y
-// }
-// `, "test")).toThrow("Conflicting unit types"));
-//     });
+        test("type declaration outside block cannot conflict with block expression type", () => expect(() => parse(
+            `
+x :: dalys = {
+  y :: logIncomeUnits = 130
+  y
+}
+`, "test")).toThrow(`Conflicting unit types:
+	x / y :: <unitless>
+	x :: dalys
+	y :: logIncomeUnits`));
+
+        test("unit types come out of triple-nested blocks", () => expect(getUnitTypes(
+        `
+x = {
+  {
+    {
+      y :: kg = 1
+      y
+    }
+  }
+}
+`)).toEqual([{
+    0: {kg: 1},
+    1: {kg: 1},
+}, ["x", "y"]]));
+
+        test("type inference back-propagates from outside to inside a block", () => expect(getUnitTypes(
+            `
+x = 10
+y :: dollars = {
+  z = x + 3
+  z
+}
+`)).toEqual([{
+    0: {dollars: 1},
+    1: {dollars: 1},
+    2: {dollars: 1},
+}, ["x", "y", "z"]]));
+    });
 });

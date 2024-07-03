@@ -216,6 +216,8 @@ export function innerFindTypeConstraints(
                 lastTypeConstraint = innerFindTypeConstraints(statement, typeConstraints, scopes);
             }
 
+            scopes.stack.pop();
+
             if (node.type === "Program") {
                 return NO_CONSTRAINT;
             } else {
