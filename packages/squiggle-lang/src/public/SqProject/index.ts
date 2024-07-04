@@ -2,7 +2,7 @@ import { defaultEnv, Env } from "../../dists/env.js";
 import { BaseRunner } from "../../runners/BaseRunner.js";
 import { getDefaultRunner } from "../../runners/index.js";
 import { defaultLinker, SqLinker } from "../SqLinker.js";
-import { ProjectState } from "./ProjectState.js";
+import { ModulePointer, ProjectState } from "./ProjectState.js";
 import { SqModule } from "./SqModule.js";
 import { SqModuleOutput } from "./SqModuleOutput.js";
 import {
@@ -166,7 +166,10 @@ export class SqProject {
         break;
       }
       case "loadModule": {
-        this.loadModule(action.payload.name, action.payload.hash);
+        this.loadModule({
+          name: action.payload.name,
+          hash: action.payload.hash,
+        });
         break;
       }
       case "processModule": {
@@ -219,7 +222,7 @@ export class SqProject {
     }
   }
 
-  private async loadModule(name: string, hash?: string) {
+  private async loadModule({ name, hash }: ModulePointer) {
     if (hash) {
       this.setState(
         this.state.clone({

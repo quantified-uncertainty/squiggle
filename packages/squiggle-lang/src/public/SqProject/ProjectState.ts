@@ -12,7 +12,7 @@ export type SqProjectHead = {
 // We can point to modules in two different ways:
 // 1. by hash, when the module is already loaded, or when the module is pinned so we know the hash apriori
 // 2. by name, when we're still resolving the unpinned module
-type ModulePointer = {
+export type ModulePointer = {
   name: string;
   hash: string | undefined;
 };
@@ -130,7 +130,7 @@ export class ProjectState implements ProjectStateData {
     });
   }
 
-  getParents(module: ModulePointer) {
+  getParents(modulePointer: ModulePointer) {
     const parents: ModuleHash[] = [];
     for (const [hash, entry] of this.modules) {
       if (entry.type !== "loaded") {
@@ -143,8 +143,8 @@ export class ProjectState implements ProjectStateData {
           .imports(this.linker)
           .some(
             (imp) =>
-              imp.name === module.name &&
-              (!mod.pins[imp.name] || mod.pins[imp.name] === module.hash)
+              imp.name === modulePointer.name &&
+              (!mod.pins[imp.name] || mod.pins[imp.name] === modulePointer.hash)
           )
       ) {
         parents.push(hash);
