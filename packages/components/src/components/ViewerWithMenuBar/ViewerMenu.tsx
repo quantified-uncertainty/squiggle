@@ -42,7 +42,7 @@ function viewerTabTitle(mode: ViewerTab): string {
 type Props = {
   viewerTab: ViewerTab;
   setViewerTab: (viewerTab: ViewerTab) => void;
-  outputResult: SqModuleOutput["output"];
+  outputResult: SqModuleOutput["result"];
   shownTabs: SelectableViewerTab[];
 };
 

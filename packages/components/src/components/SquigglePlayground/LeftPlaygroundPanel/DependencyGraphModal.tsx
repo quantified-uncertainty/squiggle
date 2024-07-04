@@ -44,7 +44,14 @@ export const DependencyGraphModal: FC<{
         },
       });
     }
-    for (const [id, module] of project.state.modules) {
+    for (const [id, moduleData] of project.state.modules) {
+      if (moduleData.type !== "loaded") {
+        // TODO - visualize loading nodes
+        continue;
+      }
+
+      const module = moduleData.value;
+
       nodes.push({
         id: `module:${id}`,
         className: "!bg-blue-300",
@@ -54,7 +61,7 @@ export const DependencyGraphModal: FC<{
         data: { label: module.name },
       });
 
-      for (const importBinding of module.imports()) {
+      for (const importBinding of module.imports(project.state.linker)) {
         edges.push({
           id: `module:${id}->${importBinding.name}`,
           source: `module:${id}`,

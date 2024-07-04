@@ -19,7 +19,7 @@ import { ErrorBoundary } from "../ui/ErrorBoundary.js";
 
 type Props = {
   viewerTab: ViewerTab;
-  outputResult: SqModuleOutput["output"];
+  outputResult: SqModuleOutput["result"];
   isSimulating: boolean;
   externalViewerActions?: ExternalViewerActions;
   playgroundSettings: PartialPlaygroundSettings;

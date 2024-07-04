@@ -171,10 +171,9 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
         ? new SqModule({
             name: sourceId,
             code: state.codeToSimulate,
-            linker: project.linker,
           })
         : undefined,
-    [sourceId, state.codeToSimulate, project.linker]
+    [sourceId, state.codeToSimulate]
   );
 
   // TODO - generate random head name? `project` could be passed from outside and have a head already.
