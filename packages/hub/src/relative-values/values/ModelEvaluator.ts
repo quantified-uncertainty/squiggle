@@ -105,7 +105,7 @@ export class ModelEvaluator {
     cache?: RelativeValuesExport$data["cache"]
   ): Promise<result<ModelEvaluator, string>> {
     // TODO - versioned SqProject
-    const project = SqProject.create({
+    const project = new SqProject({
       linker: squiggleHubLinker,
     });
     project.setSource("wrapper", `RelativeValues.wrap(${variableName})`);

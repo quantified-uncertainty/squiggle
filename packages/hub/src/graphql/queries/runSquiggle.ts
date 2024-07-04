@@ -3,7 +3,8 @@ import crypto from "crypto";
 
 import {
   SqLinker,
-  SqOutputResult,
+  SqModule,
+  SqModuleOutput,
   SqProject,
   SqValue,
 } from "@quri/squiggle-lang";
@@ -92,7 +93,7 @@ export const squiggleLinker: SqLinker = {
   resolve(name) {
     return name;
   },
-  async loadSource(sourceId: string) {
+  async loadModule(sourceId: string) {
     const { owner, slug } = parseSourceId(sourceId);
     const model = await prisma.model.findFirst({
       where: {
@@ -114,7 +115,7 @@ export const squiggleLinker: SqLinker = {
 
     const content = model?.currentRevision?.squiggleSnippet;
     if (content) {
-      return content.code;
+      return new SqModule({ name: sourceId, code: content.code });
     } else {
       throw new NotFoundError();
     }
@@ -124,7 +125,7 @@ export const squiggleLinker: SqLinker = {
 export async function runSquiggle(
   code: string,
   seed: string
-): Promise<SqOutputResult> {
+): Promise<SqModuleOutput> {
   const MAIN = "main";
 
   const env = {
@@ -133,15 +134,13 @@ export async function runSquiggle(
     seed: seed,
   };
 
-  const project = SqProject.create({
+  const project = new SqProject({
     environment: env,
     linker: squiggleLinker,
   });
 
-  project.setSource(MAIN, code);
-  await project.run(MAIN);
-
-  return project.getOutput(MAIN);
+  project.setSimpleHead(MAIN, code);
+  return await project.waitForOutput(MAIN);
 }
 
 //Warning: Caching will break if any imports change. It would be good to track this. Maybe we could compile the import tree, then store that as well, and recalculate whenever either that or the code changes.
@@ -164,7 +163,7 @@ export async function runSquiggleWithCache(
     } as unknown as SquiggleOutput;
   }
 
-  const outputR = await runSquiggle(code, seed);
+  const { result: outputR } = await runSquiggle(code, seed);
 
   const result: SquiggleOutput = outputR.ok
     ? {

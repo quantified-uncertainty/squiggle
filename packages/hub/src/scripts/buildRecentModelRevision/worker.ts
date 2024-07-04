@@ -19,7 +19,7 @@ export async function runSquiggleCode(
   code: string,
   seed: string
 ): Promise<WorkerOutput> {
-  const outputR = await runSquiggle(code, seed);
+  const { result: outputR } = await runSquiggle(code, seed);
 
   let variableRevisions: VariableRevisionInput[] = [];
 

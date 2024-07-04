@@ -1,6 +1,6 @@
 import { fetchQuery, graphql } from "relay-runtime";
 
-import { SqLinker } from "@quri/squiggle-lang";
+import { SqLinker, SqModule } from "@quri/squiggle-lang";
 
 import { getCurrentEnvironment } from "@/relay/environment";
 
@@ -39,7 +39,7 @@ export const squiggleHubLinker: SqLinker = {
   resolve(name) {
     return name;
   },
-  async loadSource(sourceId: string) {
+  async loadModule(sourceId: string) {
     const { owner, slug } = parseSourceId(sourceId);
 
     const environment = getCurrentEnvironment();
@@ -79,6 +79,9 @@ export const squiggleHubLinker: SqLinker = {
       throw new Error(`${sourceId} is not a SquiggleSnippet`);
     }
 
-    return content.code;
+    return new SqModule({
+      name: sourceId,
+      code: content.code,
+    });
   },
 };
