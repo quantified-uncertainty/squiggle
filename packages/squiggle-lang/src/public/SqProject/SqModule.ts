@@ -1,8 +1,11 @@
 import { parse } from "../../ast/parse.js";
 import { AST, LocationRange } from "../../ast/types.js";
+import { Env } from "../../dists/env.js";
 import { errMap, result } from "../../utility/result.js";
-import { SqCompileError, SqError } from "../SqError.js";
+import { SqCompileError, SqError, SqOtherError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
+import { ProjectState } from "./ProjectState.js";
+import { SqModuleOutput } from "./SqModuleOutput.js";
 import { getHash } from "./utils.js";
 
 export type ModuleHash = string;
@@ -12,6 +15,32 @@ type Import = {
   variable: string;
   location: LocationRange;
 };
+
+type ImportModules =
+  | {
+      type: "loaded";
+      value: Record<string, SqModule>;
+    }
+  | {
+      type: "loading";
+    }
+  | {
+      type: "failed";
+      value: SqError;
+    };
+
+type ImportOutputs =
+  | {
+      type: "loaded";
+      value: Record<string, SqModuleOutput>;
+    }
+  | {
+      type: "loading"; // or running - i.e. ImportModules might be loaded, but outputs don't exist yet
+    }
+  | {
+      type: "failed";
+      value: SqError;
+    };
 
 export class SqModule {
   name: string;
@@ -78,5 +107,74 @@ export class SqModule {
         })
       )
     );
+  }
+
+  // Helper methods
+
+  importModules({ state }: { state: ProjectState }): ImportModules {
+    const ast = this.ast();
+    if (!ast.ok) {
+      return {
+        type: "failed",
+        value: ast.value,
+      };
+    }
+
+    const result: Record<string, SqModule> = {};
+    for (const importBinding of this.imports(state.linker)) {
+      let importedModuleHash = this.pins[importBinding.name];
+      if (!importedModuleHash) {
+        const resolution = state.resolutions.get(importBinding.name);
+        if (resolution?.type === "resolved") {
+          importedModuleHash = resolution.value;
+        } else if (resolution?.type === "failed") {
+          return { type: "failed", value: new SqOtherError(resolution.value) };
+        } else {
+          return { type: "loading" };
+        }
+      }
+      const importedModule = state.modules.get(importedModuleHash);
+      if (!importedModule) {
+        // internal error - if resolution exists, it also should be in the modules
+        throw new Error("Imported module not found in state");
+      }
+      if (importedModule.type === "failed") {
+        return {
+          type: "failed",
+          value: new SqOtherError(importedModule.value),
+        };
+      }
+
+      if (importedModule.type === "loading") {
+        return { type: "loading" };
+      }
+
+      result[importBinding.name] = importedModule.value;
+    }
+    return { type: "loaded", value: result };
+  }
+
+  importOutputs({
+    state,
+    environment,
+  }: {
+    state: ProjectState;
+    environment: Env;
+  }): ImportOutputs {
+    const importModules = this.importModules({ state });
+    if (importModules.type !== "loaded") {
+      return importModules;
+    }
+
+    const result: Record<string, SqModuleOutput> = {};
+    for (const [name, module] of Object.entries(importModules.value)) {
+      const importOutputHash = SqModuleOutput.hash({ module, environment });
+      const output = state.outputs.get(importOutputHash);
+      if (!output) {
+        return { type: "loading" };
+      }
+      result[name] = output;
+    }
+    return { type: "loaded", value: result };
   }
 }

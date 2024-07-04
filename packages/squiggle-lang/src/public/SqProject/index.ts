@@ -6,11 +6,11 @@ import { ProjectState } from "./ProjectState.js";
 import { SqModule } from "./SqModule.js";
 import { SqModuleOutput } from "./SqModuleOutput.js";
 import {
-  Project2Event,
   Project2EventListener,
-  Project2EventType,
   ProjectAction,
+  ProjectEvent,
   ProjectEventShape,
+  ProjectEventType,
 } from "./types.js";
 
 /*
@@ -63,7 +63,10 @@ export class SqProject {
         heads: this.state.heads.set(headName, {
           hash,
         }),
-        modules: this.state.modules.set(hash, head.module),
+        modules: this.state.modules.set(hash, {
+          type: "loaded",
+          value: head.module,
+        }),
       })
     );
 
@@ -121,7 +124,10 @@ export class SqProject {
     if (!module) {
       throw new Error(`Module not found: ${hash}`);
     }
-    return module;
+    if (module.type !== "loaded") {
+      throw new Error(`Module is not loaded yet: ${hash}`);
+    }
+    return module.value;
   }
 
   getHead(headName: string): SqModule {
@@ -188,12 +194,17 @@ export class SqProject {
     const module = this.getModuleOrThrow(hash);
 
     for (const imp of module.imports(this.state.linker)) {
-      if (
-        module.pins[imp.name] &&
-        this.state.modules.has(module.pins[imp.name])
-      ) {
-        // import is already loaded
-        continue;
+      if (module.pins[imp.name]) {
+        if (this.state.modules.has(module.pins[imp.name])) {
+          // pinned import is already loaded
+          continue;
+        }
+      } else {
+        const resolvedHash = this.state.resolutions.get(imp.name);
+        if (resolvedHash) {
+          // unpinned import is already loaded
+          continue;
+        }
       }
 
       // TODO - mark in the state that we're loading a module.
@@ -209,27 +220,77 @@ export class SqProject {
   }
 
   private async loadModule(name: string, hash?: string) {
-    // TODO - try/catch
-    const module = await this.state.linker.loadModule(name, hash);
-    if (hash && hash !== module.hash()) {
-      throw new Error(
-        `Hash mismatch for module ${name}: expected ${hash}, got ${module.hash()}`
-      );
-    }
-
-    if (!hash) {
+    if (hash) {
       this.setState(
         this.state.clone({
-          resolutions: this.state.resolutions.set(name, module.hash()),
+          modules: this.state.modules.set(hash, { type: "loading" }),
+        })
+      );
+    } else {
+      this.setState(
+        this.state.clone({
+          resolutions: this.state.resolutions.set(name, { type: "loading" }),
         })
       );
     }
 
-    this.setState(this.state.withModule(module));
-    this.dispatch({
-      type: "processModule",
-      payload: { hash: module.hash() },
-    });
+    try {
+      const module = await this.state.linker.loadModule(name, hash);
+      if (hash && hash !== module.hash()) {
+        throw new Error(
+          `Hash mismatch for module ${name}: expected ${hash}, got ${module.hash()}`
+        );
+      }
+
+      if (!hash) {
+        this.setState(
+          this.state.clone({
+            resolutions: this.state.resolutions.set(name, {
+              type: "resolved",
+              value: module.hash(),
+            }),
+          })
+        );
+      }
+
+      this.setState(this.state.withModule(module));
+      this.dispatch({
+        type: "processModule",
+        payload: { hash: module.hash() },
+      });
+    } catch (e) {
+      // loading has failed
+      if (hash) {
+        this.setState(
+          this.state.clone({
+            modules: this.state.modules.set(hash, {
+              type: "failed",
+              value: String(e),
+            }),
+          })
+        );
+      } else {
+        this.setState(
+          this.state.clone({
+            resolutions: this.state.resolutions.set(name, {
+              type: "failed",
+              value: String(e),
+            }),
+          })
+        );
+      }
+
+      // even if loading failed, we should try to build outputs for parents
+      for (const parent of this.state.getParents({
+        name,
+        hash,
+      })) {
+        this.dispatch({
+          type: "buildOutputIfPossible",
+          payload: { hash: parent, environment: this.state.environment },
+        });
+      }
+    }
   }
 
   private processModule(hash: string) {
@@ -251,26 +312,29 @@ export class SqProject {
   private async buildOutputIfPossible(hash: string, environment: Env) {
     const module = this.getModuleOrThrow(hash);
 
-    if (!this.state.allImportsHaveOutputs(module, environment)) {
-      return;
-    }
-
     // output already exists
     if (this.state.outputs.has(SqModuleOutput.hash({ module, environment }))) {
       return;
     }
 
-    // TODO - try/catch
+    // TODO - try/catch?
     const output = await SqModuleOutput.make({
       module,
       environment,
       runner: this.runner,
       state: this.state,
     });
+    if (!output) {
+      return;
+    }
+
     this.setState(this.state.withOutput(output));
     this.dispatchEvent({ type: "output", payload: { output } });
 
-    for (const parent of this.state.getParents(module)) {
+    for (const parent of this.state.getParents({
+      name: module.name,
+      hash: module.hash(),
+    })) {
       this.dispatch({
         type: "buildOutputIfPossible",
         payload: { hash: parent, environment },
@@ -283,19 +347,17 @@ export class SqProject {
   private eventTarget = new EventTarget();
 
   private dispatchEvent(shape: ProjectEventShape) {
-    this.eventTarget.dispatchEvent(
-      new Project2Event(shape.type, shape.payload)
-    );
+    this.eventTarget.dispatchEvent(new ProjectEvent(shape.type, shape.payload));
   }
 
-  addEventListener<T extends Project2EventType>(
+  addEventListener<T extends ProjectEventType>(
     type: T,
     listener: Project2EventListener<T>
   ) {
     this.eventTarget.addEventListener(type, listener as (event: Event) => void);
   }
 
-  removeEventListener<T extends Project2EventType>(
+  removeEventListener<T extends ProjectEventType>(
     type: T,
     listener: Project2EventListener<T>
   ) {

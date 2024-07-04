@@ -8,9 +8,11 @@ import { FC } from "react";
 import { defaultEnv, Env } from "../../dists/env.js";
 import { SqLinker } from "../../public/SqLinker.js";
 import { SqProject } from "../../public/SqProject/index.js";
-import { ProjectState } from "../../public/SqProject/ProjectState.js";
+import {
+  ModuleData,
+  ProjectState,
+} from "../../public/SqProject/ProjectState.js";
 import { SqModule } from "../../public/SqProject/SqModule.js";
-import { OutputResult } from "../../public/SqProject/SqModuleOutput.js";
 import { allRunnerNames, runnerByName } from "../../runners/index.js";
 import { CliPrinter } from "../CliPrinter.js";
 import { bold, red } from "../colors.js";
@@ -29,6 +31,7 @@ type RunArgs = {
   runner?: Parameters<typeof runnerByName>[0];
   runnerThreads?: number;
   showProjectState?: boolean;
+  logProjectActions?: boolean;
 };
 
 const EVAL_SOURCE_ID = "[eval]";
@@ -65,14 +68,44 @@ const ModuleInfo: FC<{
 
   return (
     <Box gap={2}>
+      <Text>{module.name}</Text>
       <Text>
         {output
           ? "✅"
-          : state.allImportsHaveOutputs(module, environment)
-            ? "▶️"
-            : "🔄"}
+          : module.importModules({ state }).type === "loading"
+            ? "⌛ Loading imports"
+            : module.importOutputs({ state, environment }).type === "loading"
+              ? "🔄 Waiting for import outputs"
+              : "▶️ Running"}
       </Text>
-      <Text>{module.name}</Text>
+    </Box>
+  );
+};
+
+const ModuleDataInfo: FC<{
+  state: ProjectState;
+  hash: string;
+  moduleData: ModuleData;
+  environment: Env;
+}> = ({ state, hash, moduleData, environment }) => {
+  return (
+    <Box gap={2}>
+      <Text>
+        {moduleData.type === "loaded"
+          ? "✅"
+          : moduleData.type === "loading"
+            ? "⌛"
+            : "❌"}
+      </Text>
+      {moduleData.type === "loaded" ? (
+        <ModuleInfo
+          module={moduleData.value}
+          state={state}
+          environment={environment}
+        />
+      ) : (
+        <Text>{hash}</Text>
+      )}
     </Box>
   );
 };
@@ -86,11 +119,12 @@ const StateGraph: FC<{ state: ProjectState; environment: Env }> = ({
       <Text bold color="green">
         State
       </Text>
-      {[...state.modules.entries()].map(([hash, module]) => (
-        <ModuleInfo
+      {[...state.modules.entries()].map(([hash, moduleData]) => (
+        <ModuleDataInfo
           key={hash}
+          hash={hash}
           state={state}
-          module={module}
+          moduleData={moduleData}
           environment={environment}
         />
       ))}
@@ -101,7 +135,12 @@ const StateGraph: FC<{ state: ProjectState; environment: Env }> = ({
 async function _run(
   args: Pick<
     RunArgs,
-    "src" | "filename" | "runner" | "runnerThreads" | "showProjectState"
+    | "src"
+    | "filename"
+    | "runner"
+    | "runnerThreads"
+    | "showProjectState"
+    | "logProjectActions"
   > & {
     environment: Env;
   }
@@ -121,7 +160,6 @@ async function _run(
     name: args.filename ?? EVAL_SOURCE_ID,
     code: args.src,
   });
-  project.setHead("root", { module: rootSource });
 
   const showState = () => {
     render(<StateGraph state={project.state} environment={args.environment} />);
@@ -131,25 +169,14 @@ async function _run(
     project.addEventListener("action", showState);
   }
 
-  const started = new Date();
-  return new Promise<{ output: OutputResult; time: number }>(
-    (resolve, reject) => {
-      project.addEventListener("output", (e) => {
-        if (e.data.output.module === rootSource) {
-          const output = project.getOutput("root");
-          if (output) {
-            const time = (new Date().getTime() - started.getTime()) / 1000;
-            if (args.showProjectState) {
-              showState();
-            }
-            resolve({ output: output.result, time });
-          } else {
-            reject(new Error("Output is not set"));
-          }
-        }
-      });
-    }
-  );
+  if (args.logProjectActions) {
+    project.addEventListener("action", (action) => {
+      console.log(action.data);
+    });
+  }
+
+  project.setHead("root", { module: rootSource });
+  return await project.waitForOutput("root");
 }
 
 async function run(args: RunArgs) {
@@ -167,32 +194,37 @@ async function run(args: RunArgs) {
     profile: args.profile ?? false,
   };
 
-  const { output, time } = await _run({
+  const output = await _run({
     src: args.src,
     filename: args.filename,
     environment,
     runner: args.runner,
     runnerThreads: args.runnerThreads,
     showProjectState: args.showProjectState,
+    logProjectActions: args.logProjectActions,
   });
 
   const printer = new CliPrinter();
-  if (!output.ok) {
-    printer.printSection(red("Error:"), output.value.toStringWithDetails());
+  if (!output.result.ok) {
+    printer.printSection(
+      red("Error:"),
+      output.result.value.toStringWithDetails()
+    );
   } else {
+    const outputResult = output.result.value;
     switch (args.output) {
       case "RESULT_OR_BINDINGS":
-        if (output.value.result.tag === "Void") {
-          printer.printSection(output.value.bindings.toString());
+        if (outputResult.result.tag === "Void") {
+          printer.printSection(outputResult.bindings.toString());
         } else {
-          printer.printSection(output.value.result.toString());
+          printer.printSection(outputResult.result.toString());
         }
         break;
       case "RESULT_AND_BINDINGS":
-        printer.printSection(bold("Result:"), output.value.result.toString());
+        printer.printSection(bold("Result:"), outputResult.result.toString());
         printer.printSection(
           bold("Bindings:"),
-          output.value.bindings.toString()
+          outputResult.bindings.toString()
         );
         break;
       case "NONE":
@@ -201,7 +233,7 @@ async function run(args: RunArgs) {
   }
 
   if (args.measure) {
-    printer.printSection(`${bold("Time:")} ${time}s`);
+    printer.printSection(`${bold("Time:")} ${output.executionTime}s`);
   }
 }
 
@@ -216,7 +248,8 @@ export function addRunCommand(program: Command) {
     .option("-t --time", "output the time it took to evaluate the code")
     .option("-p --profile", "performance profiler")
     .option("-q, --quiet", "don't output the results and bindings") // useful for measuring the performance or checking that the code is valid
-    .option("--show-project-state", "show project state")
+    .option("--show-project-state")
+    .option("--log-project-actions")
     .addOption(
       new Option("-r, --runner <runner>", "embedded").choices(allRunnerNames)
     )
@@ -251,6 +284,7 @@ export function addRunCommand(program: Command) {
         runner: options.runner,
         runnerThreads: options.runnerThreads,
         showProjectState: options.showProjectState,
+        logProjectActions: options.logProjectActions,
       });
     });
 }

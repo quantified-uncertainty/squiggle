@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { defaultEnv } from "../dists/env.js";
 import { makeSelfContainedLinker } from "../public/SqLinker.js";
 import { SqProject } from "../public/SqProject/index.js";
 
@@ -20,7 +19,6 @@ list.l -> map({|x| x})
     });
     await project.loadHead("root", {
       moduleName: "map",
-      environment: defaultEnv,
     });
     const result = await project.waitForOutput("root");
     console.log(`1e${p}`, "\t", result.executionTime / 1000);

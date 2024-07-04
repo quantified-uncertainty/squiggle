@@ -9,15 +9,49 @@ export type SqProjectHead = {
   // TODO - per-head environments
 };
 
+// We can point to modules in two different ways:
+// 1. by hash, when the module is already loaded, or when the module is pinned so we know the hash apriori
+// 2. by name, when we're still resolving the unpinned module
+type ModulePointer = {
+  name: string;
+  hash: string | undefined;
+};
+
+type ResolutionData =
+  | {
+      type: "loading";
+    }
+  | {
+      type: "resolved";
+      value: ModuleHash;
+    }
+  | {
+      type: "failed";
+      value: string;
+    };
+
+export type ModuleData =
+  | {
+      type: "loaded";
+      value: SqModule;
+    }
+  | {
+      type: "loading";
+    }
+  | {
+      type: "failed";
+      value: string;
+    };
+
 type ProjectStateData = {
   // Heads point to modules that are important to keep, similar to git branches.
   // Everything else will be garbage-collected eventually.
   heads: ImmutableMap<string, SqProjectHead>;
 
-  modules: ImmutableMap<ModuleHash, SqModule>;
+  modules: ImmutableMap<ModuleHash, ModuleData>;
 
-  // sourceId -> hash for imported source ids that are not pinned.
-  resolutions: ImmutableMap<string, ModuleHash>;
+  // module name -> hash for imported module names that are not pinned.
+  resolutions: ImmutableMap<string, ResolutionData>;
 
   // TODO: environment should be per-head. But it's difficult because we'd have
   // to track outputs per-head, and for that we'd have to store information
@@ -83,7 +117,10 @@ export class ProjectState implements ProjectStateData {
 
   withModule(module: SqModule): ProjectState {
     return this.clone({
-      modules: this.modules.set(module.hash(), module),
+      modules: this.modules.set(module.hash(), {
+        type: "loaded",
+        value: module,
+      }),
     });
   }
 
@@ -93,34 +130,21 @@ export class ProjectState implements ProjectStateData {
     });
   }
 
-  getModule(params: {
-    sourceId: string;
-    hash?: ModuleHash;
-  }): SqModule | undefined {
-    if (params.hash) {
-      return this.modules.get(params.hash);
-    } else {
-      // TODO - this is slow, prebuild sourceId -> modules index
-      // TODO - how can we handle multiple modules with the same name?
-      for (const module of this.modules.values()) {
-        if (module.name === params.sourceId) {
-          return module;
-        }
-      }
-      return undefined;
-    }
-  }
-
-  getParents(module: SqModule) {
+  getParents(module: ModulePointer) {
     const parents: ModuleHash[] = [];
-    for (const [hash, mod] of this.modules) {
+    for (const [hash, entry] of this.modules) {
+      if (entry.type !== "loaded") {
+        continue;
+      }
+      const mod = entry.value;
+
       if (
         mod
           .imports(this.linker)
           .some(
             (imp) =>
               imp.name === module.name &&
-              (!mod.pins[imp.name] || mod.pins[imp.name] === module.hash())
+              (!mod.pins[imp.name] || mod.pins[imp.name] === module.hash)
           )
       ) {
         parents.push(hash);
@@ -136,31 +160,6 @@ export class ProjectState implements ProjectStateData {
         environment,
       })
     );
-  }
-
-  allImportsHaveOutputs(module: SqModule, environment: Env): boolean {
-    for (const importBinding of module.imports(this.linker)) {
-      const importedModuleHash =
-        module.pins[importBinding.name] ??
-        this.resolutions.get(importBinding.name);
-      if (!importedModuleHash) {
-        return false; // not resolved yet
-      }
-      const importedModule = this.modules.get(importedModuleHash);
-      if (!importedModule) {
-        // if resolution exists, it also should be in the modules
-        throw new Error("Imported module not found in state");
-      }
-      const importOutputHash = SqModuleOutput.hash({
-        module: importedModule,
-        environment,
-      });
-      const output = this.outputs.get(importOutputHash);
-      if (!output) {
-        return false;
-      }
-    }
-    return true;
   }
 
   // Remove modules from the state that are not reachable from the heads.
@@ -185,16 +184,19 @@ export class ProjectState implements ProjectStateData {
         );
 
         const module = this.modules.get(hash);
-        if (!module) {
+        if (!module || module.type !== "loaded") {
           return;
         }
-        for (const importBinding of module.imports(this.linker) ?? []) {
+        for (const importBinding of module.value.imports(this.linker) ?? []) {
           let importedModuleHash: string | undefined =
-            module.pins[importBinding.name];
+            module.value.pins[importBinding.name];
 
           if (!importedModuleHash) {
-            importedModuleHash = this.resolutions.get(importBinding.name);
-            usedResolutions.add(importBinding.name);
+            const resolution = this.resolutions.get(importBinding.name);
+            if (resolution?.type === "resolved") {
+              importedModuleHash = resolution.value;
+              usedResolutions.add(importBinding.name);
+            }
           }
 
           if (
@@ -208,6 +210,8 @@ export class ProjectState implements ProjectStateData {
 
       dfs(headHash);
     }
+
+    // TODO - cleanup failedModules
 
     const newModules = this.modules.filter((_, hash) => usedModules.has(hash));
     const newResolutions = this.resolutions.filter((_, hash) =>

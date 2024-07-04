@@ -48,9 +48,9 @@ export type ProjectEventShape =
       payload: ProjectState;
     };
 
-export type Project2EventType = ProjectEventShape["type"];
+export type ProjectEventType = ProjectEventShape["type"];
 
-export class Project2Event<T extends Project2EventType> extends Event {
+export class ProjectEvent<T extends ProjectEventType> extends Event {
   constructor(
     type: T,
     public data: Extract<ProjectEventShape, { type: T }>["payload"]
@@ -59,6 +59,6 @@ export class Project2Event<T extends Project2EventType> extends Event {
   }
 }
 
-export type Project2EventListener<T extends Project2EventType> = (
-  event: Project2Event<T>
+export type Project2EventListener<T extends ProjectEventType> = (
+  event: ProjectEvent<T>
 ) => void;

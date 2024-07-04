@@ -6,9 +6,7 @@ export type SqLinker = {
 };
 
 export const defaultLinker: SqLinker = {
-  resolve: () => {
-    throw new Error("Imports are not implemented");
-  },
+  resolve: (name) => name,
   loadModule: () => {
     throw new Error("Imports are not implemented");
   },
@@ -19,16 +17,16 @@ export function makeSelfContainedLinker(
 ): SqLinker {
   return {
     resolve: (name) => name,
-    async loadModule(sourceId, hash) {
+    async loadModule(name, hash) {
       if (hash) {
         throw new Error("Hashes are not supported");
       }
-      const code = sources[sourceId];
+      const code = sources[name];
       if (!code) {
-        throw new Error(`Can't find source with id ${sourceId}`);
+        throw new Error(`Can't find source with id ${name}`);
       }
       return new SqModule({
-        name: sourceId,
+        name: name,
         code,
       });
     },

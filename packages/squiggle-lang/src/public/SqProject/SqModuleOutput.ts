@@ -90,52 +90,51 @@ export class SqModuleOutput {
    * This static method creates a new ModuleOutput instance by running the module.
    * It depends on ProjectState.outputs to find the output of the module's imports.
    *
-   * Note that all import outputs should already exist in state; this method
-   * intentionally doesn't attempt to recursively run the dependencies.
+   * If any of imports are not loaded yet, it returns undefined.
+   *
+   * If any of imports failed to load, or their outputs are failed, it returns a failed output.
    */
   static async make(params: {
     module: SqModule;
     environment: Env;
     runner: BaseRunner;
     state: ProjectState;
-  }): Promise<SqModuleOutput> {
+  }): Promise<SqModuleOutput | undefined> {
     const { environment, module } = params;
 
-    const astR = module.ast();
-    if (!astR.ok) {
+    const importOutputs = module.importOutputs({
+      state: params.state,
+      environment,
+    });
+
+    if (importOutputs.type === "failed") {
       return new SqModuleOutput({
         module,
         environment,
-        result: astR,
+        result: Err(importOutputs.value),
         executionTime: 0,
       });
     }
+
+    if (importOutputs.type === "loading") {
+      return undefined;
+    }
+
+    const astR = module.ast();
+    if (!astR.ok) {
+      throw new Error("Impossible, importOutputs() should have caught this");
+    }
+
     const ast = astR.value;
 
     let importBindings = VDict.empty();
 
     for (const importBinding of module.imports(params.state.linker)) {
-      const importedHash =
-        module.pins[importBinding.name] ??
-        params.state.resolutions.get(importBinding.name);
-      if (!importedHash) {
-        throw new Error(
-          `Unpinned import ${importBinding.name} in module ${module.name} is not loaded yet`
-        );
-      }
-      const importedModule = params.state.modules.get(importedHash);
-      if (!importedModule) {
-        throw new Error(
-          `Can't find import module ${importBinding.name} (${importedHash})`
-        );
-      }
-      const importOutputHash = SqModuleOutput.hash({
-        module: importedModule,
-        environment,
-      });
-      const importOutput = params.state.outputs.get(importOutputHash);
+      const importOutput = importOutputs.value[importBinding.name];
       if (!importOutput) {
-        throw new Error(`Can't find output with hash ${importOutputHash}`);
+        throw new Error(
+          `Internal error, can't find output ${importBinding.name} in importOutputs`
+        );
       }
       if (!importOutput.result.ok) {
         return importOutput;
