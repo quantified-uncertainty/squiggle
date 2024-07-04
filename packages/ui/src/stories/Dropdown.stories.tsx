@@ -64,3 +64,10 @@ export const Default: Story = {
     },
   },
 };
+
+export const WithoutPortal: Story = {
+  args: {
+    ...Default.args,
+    portal: false,
+  },
+};
