@@ -4,17 +4,23 @@ import { Env } from "../../dists/env.js";
 import { errMap, result } from "../../utility/result.js";
 import { SqCompileError, SqError, SqOtherError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
-import { ProjectState } from "./ProjectState.js";
+import { ModulePointer, ProjectState } from "./ProjectState.js";
 import { SqModuleOutput } from "./SqModuleOutput.js";
 import { getHash } from "./utils.js";
 
-export type ModuleHash = string;
-
 type Import = {
   name: string;
+  hash: string | undefined;
   variable: string;
   location: LocationRange;
 };
+
+export function importToPointer(importBinding: Import): ModulePointer {
+  return {
+    name: importBinding.name,
+    hash: importBinding.hash,
+  };
+}
 
 type ImportModules =
   | {
@@ -45,15 +51,15 @@ type ImportOutputs =
 export class SqModule {
   name: string;
   code: string;
-  // key is module name
-  pins: Record<string, ModuleHash>;
+  // key is module name, value is hash
+  pins: Record<string, string>;
 
   private _ast?: result<AST, SqError>;
 
   constructor(params: {
     name: string;
     code: string;
-    pins?: Record<string, ModuleHash>;
+    pins?: Record<string, string>;
   }) {
     this.name = params.name;
     this.code = params.code;
@@ -73,7 +79,7 @@ export class SqModule {
     return this._ast;
   }
 
-  imports(linker: SqLinker): Import[] {
+  getImports(linker: SqLinker): Import[] {
     const ast = this.ast();
     if (!ast.ok) {
       return [];
@@ -85,8 +91,9 @@ export class SqModule {
     for (const [file, variable] of program.imports) {
       const name = linker.resolve(file.value, this.name);
       resolvedImports.push({
-        variable: variable.value,
         name,
+        hash: this.pins[name],
+        variable: variable.value,
         // TODO - this is used for errors, but we should use the entire import statement;
         // To fix this, we need to represent each import statement as an AST node.
         location: file.location,
@@ -96,7 +103,7 @@ export class SqModule {
     return resolvedImports;
   }
 
-  hash(): ModuleHash {
+  hash(): string {
     return (
       `module-${this.name}-` +
       getHash(
@@ -111,7 +118,7 @@ export class SqModule {
 
   // Helper methods
 
-  importModules({ state }: { state: ProjectState }): ImportModules {
+  getImportModules({ state }: { state: ProjectState }): ImportModules {
     const ast = this.ast();
     if (!ast.ok) {
       return {
@@ -121,47 +128,34 @@ export class SqModule {
     }
 
     const result: Record<string, SqModule> = {};
-    for (const importBinding of this.imports(state.linker)) {
-      let importedModuleHash = this.pins[importBinding.name];
-      if (!importedModuleHash) {
-        const resolution = state.resolutions.get(importBinding.name);
-        if (resolution?.type === "resolved") {
-          importedModuleHash = resolution.value;
-        } else if (resolution?.type === "failed") {
-          return { type: "failed", value: new SqOtherError(resolution.value) };
-        } else {
-          return { type: "loading" };
-        }
-      }
-      const importedModule = state.modules.get(importedModuleHash);
-      if (!importedModule) {
-        // internal error - if resolution exists, it also should be in the modules
-        throw new Error("Imported module not found in state");
-      }
-      if (importedModule.type === "failed") {
-        return {
-          type: "failed",
-          value: new SqOtherError(importedModule.value),
-        };
-      }
-
-      if (importedModule.type === "loading") {
+    for (const importBinding of this.getImports(state.linker)) {
+      const importedModuleData = state.getModuleDataByPointer(
+        importToPointer(importBinding)
+      );
+      if (!importedModuleData || importedModuleData.type === "loading") {
         return { type: "loading" };
       }
 
-      result[importBinding.name] = importedModule.value;
+      if (importedModuleData.type === "failed") {
+        return {
+          type: "failed",
+          value: new SqOtherError(importedModuleData.value),
+        };
+      }
+
+      result[importBinding.name] = importedModuleData.value;
     }
     return { type: "loaded", value: result };
   }
 
-  importOutputs({
+  getImportOutputs({
     state,
     environment,
   }: {
     state: ProjectState;
     environment: Env;
   }): ImportOutputs {
-    const importModules = this.importModules({ state });
+    const importModules = this.getImportModules({ state });
     if (importModules.type !== "loaded") {
       return importModules;
     }

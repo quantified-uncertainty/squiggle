@@ -61,11 +61,19 @@ export const DependencyGraphModal: FC<{
         data: { label: module.name },
       });
 
-      for (const importBinding of module.imports(project.state.linker)) {
+      for (const importBinding of module.getImports(project.state.linker)) {
+        const target = project.state.getModuleDataByPointer({
+          name: importBinding.name,
+          hash: importBinding.hash,
+        });
+        if (target?.type !== "loaded") {
+          continue;
+        }
+        const targetId = target.value.hash();
         edges.push({
-          id: `module:${id}->${importBinding.name}`,
+          id: `module:${id}->${targetId}`,
           source: `module:${id}`,
-          target: `module:${module.pins[importBinding.name] ?? project.state.resolutions.get(importBinding.name)}`,
+          target: `module:${targetId}`,
           markerEnd: {
             type: MarkerType.Arrow,
             width: 24,

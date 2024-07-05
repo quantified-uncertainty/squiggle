@@ -3,7 +3,7 @@ import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,
 } from "../serialization/squiggle.js";
-import { ImmutableMap } from "../utility/immutableMap.js";
+import { ImmutableMap } from "../utility/immutable.js";
 import { BaseValue } from "./BaseValue.js";
 import { isEqual, Value } from "./index.js";
 import { Indexable } from "./mixins.js";

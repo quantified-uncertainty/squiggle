@@ -1,14 +1,15 @@
 import { defaultEnv, Env } from "../../dists/env.js";
 import { BaseRunner } from "../../runners/BaseRunner.js";
 import { getDefaultRunner } from "../../runners/index.js";
+import { SqOtherError } from "../SqError.js";
 import { defaultLinker, SqLinker } from "../SqLinker.js";
 import { ModulePointer, ProjectState } from "./ProjectState.js";
 import { SqModule } from "./SqModule.js";
 import { SqModuleOutput } from "./SqModuleOutput.js";
 import {
-  Project2EventListener,
   ProjectAction,
   ProjectEvent,
+  ProjectEventListener,
   ProjectEventShape,
   ProjectEventType,
 } from "./types.js";
@@ -145,7 +146,7 @@ export class SqProject {
     }
 
     return new Promise<SqModuleOutput>((resolve) => {
-      const listener: Project2EventListener<"output"> = (event) => {
+      const listener: ProjectEventListener<"output"> = (event) => {
         if (event.data.output.module === this.getHead(headName)) {
           this.removeEventListener("output", listener);
           resolve(event.data.output);
@@ -196,7 +197,7 @@ export class SqProject {
   private loadImports(hash: string) {
     const module = this.getModuleOrThrow(hash);
 
-    for (const imp of module.imports(this.state.linker)) {
+    for (const imp of module.getImports(this.state.linker)) {
       if (module.pins[imp.name]) {
         if (this.state.modules.has(module.pins[imp.name])) {
           // pinned import is already loaded
@@ -249,7 +250,7 @@ export class SqProject {
         this.setState(
           this.state.clone({
             resolutions: this.state.resolutions.set(name, {
-              type: "resolved",
+              type: "loaded",
               value: module.hash(),
             }),
           })
@@ -296,20 +297,38 @@ export class SqProject {
     }
   }
 
+  // If the module is already loaded, we'll to build its output.
+  // Otherwise, we'll load its imports, which will eventually trigger the build.
+  // If the output is impossible to build, e.g. because of circular imports, we'll produce a failed output.
   private processModule(hash: string) {
     const module = this.getModuleOrThrow(hash);
 
-    this.dispatch({
-      type: "loadImports",
-      payload: module.hash(),
+    const loadingStatus = this.state.getLoadingStatus({
+      name: module.name,
+      hash,
     });
-    this.dispatch({
-      type: "buildOutputIfPossible",
-      payload: {
-        hash: module.hash(),
-        environment: this.state.environment,
-      },
-    });
+
+    switch (loadingStatus.type) {
+      case "loaded":
+      case "failed":
+      case "circular":
+        this.dispatch({
+          type: "buildOutputIfPossible",
+          payload: {
+            hash: module.hash(),
+            environment: this.state.environment,
+          },
+        });
+        break;
+      case "not-loaded":
+        this.dispatch({
+          type: "loadImports",
+          payload: module.hash(),
+        });
+        break;
+      default:
+        throw loadingStatus satisfies never;
+    }
   }
 
   private async buildOutputIfPossible(hash: string, environment: Env) {
@@ -320,13 +339,30 @@ export class SqProject {
       return;
     }
 
-    // TODO - try/catch?
-    const output = await SqModuleOutput.make({
-      module,
-      environment,
-      runner: this.runner,
-      state: this.state,
+    const loadingStatus = this.state.getLoadingStatus({
+      name: module.name,
+      hash,
     });
+    let output: SqModuleOutput | undefined;
+    if (loadingStatus.type === "circular") {
+      output = SqModuleOutput.makeError({
+        module,
+        environment,
+        error: new SqOtherError(
+          `Circular import: ${loadingStatus.path.join(" -> ")}`
+        ), // TODO - details
+      });
+    } else {
+      // TODO - try/catch?
+      // TODO - mark as building?
+      output = await SqModuleOutput.make({
+        module,
+        environment,
+        runner: this.runner,
+        state: this.state,
+      });
+    }
+
     if (!output) {
       return;
     }
@@ -355,14 +391,14 @@ export class SqProject {
 
   addEventListener<T extends ProjectEventType>(
     type: T,
-    listener: Project2EventListener<T>
+    listener: ProjectEventListener<T>
   ) {
     this.eventTarget.addEventListener(type, listener as (event: Event) => void);
   }
 
   removeEventListener<T extends ProjectEventType>(
     type: T,
-    listener: Project2EventListener<T>
+    listener: ProjectEventListener<T>
   ) {
     this.eventTarget.removeEventListener(
       type,

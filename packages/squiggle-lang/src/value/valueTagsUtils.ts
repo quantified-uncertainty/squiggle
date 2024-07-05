@@ -1,5 +1,5 @@
 import { Location, LocationRange } from "../ast/types.js";
-import { ImmutableMap } from "../utility/immutableMap.js";
+import { ImmutableMap } from "../utility/immutable.js";
 import { Value, vArray, vNumber, vString } from "./index.js";
 import { ValueTags } from "./valueTags.js";
 import { vDict, type VDict, vDictFromArray } from "./VDict.js";

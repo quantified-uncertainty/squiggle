@@ -1,12 +1,11 @@
 import { Env } from "../../dists/env.js";
 import { ProjectState } from "./ProjectState.js";
-import { ModuleHash } from "./SqModule.js";
 import { SqModuleOutput } from "./SqModuleOutput.js";
 
 export type ProjectAction =
   | {
       type: "loadImports";
-      payload: ModuleHash;
+      payload: string;
     }
   | {
       type: "loadModule";
@@ -18,7 +17,7 @@ export type ProjectAction =
   | {
       type: "processModule";
       payload: {
-        hash: ModuleHash;
+        hash: string;
       };
     }
   | {
@@ -27,7 +26,7 @@ export type ProjectAction =
   | {
       type: "buildOutputIfPossible";
       payload: {
-        hash: ModuleHash;
+        hash: string;
         environment: Env;
       };
     };
@@ -59,6 +58,6 @@ export class ProjectEvent<T extends ProjectEventType> extends Event {
   }
 }
 
-export type Project2EventListener<T extends ProjectEventType> = (
+export type ProjectEventListener<T extends ProjectEventType> = (
   event: ProjectEvent<T>
 ) => void;

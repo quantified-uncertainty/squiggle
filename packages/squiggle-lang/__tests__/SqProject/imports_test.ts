@@ -20,7 +20,7 @@ describe("Imports", () => {
     test("module.imports()", () => {
       // `module.imports()` always parses the source
       // (Also note how imported sources are missing but that's ok; it doesn't prevent parsing)
-      expect(project.getHead("main").imports(linker)).toMatchObject([
+      expect(project.getHead("main").getImports(linker)).toMatchObject([
         { variable: "common", name: "./common" },
         { variable: "myVariable", name: "./myModule" },
       ]);
@@ -94,7 +94,7 @@ describe("Imports", () => {
     );
   });
 
-  test("Cyclic imports", async () => {
+  test("Circular imports", async () => {
     const project = new SqProject({
       linker: makeSelfContainedLinker({
         bar: `
@@ -118,53 +118,57 @@ describe("Imports", () => {
     const output = await project.waitForOutput("main");
 
     expect(output.getEndResult().ok).toEqual(false);
-    expect(output.getEndResult().value.toString()).toEqual("Cyclic import foo");
+    expect(output.getEndResult().value.toString()).toEqual(
+      "Circular import: main -> foo -> bar -> foo"
+    );
   });
 
-  //   test("Self-import", async () => {
-  //     const linker = makeSelfContainedLinker({
-  //       main: `
-  //         import "main" as self
-  //         self
-  //     `,
-  //     });
-  //     const project = new SqProject({ linker });
-  //     project.loadHead("main", { moduleName: "main" });
+  test("Self-import", async () => {
+    const linker = makeSelfContainedLinker({
+      main: `
+          import "main" as self
+          self
+      `,
+    });
+    const project = new SqProject({ linker });
+    await project.loadHead("main", { moduleName: "main" });
 
-  //     const output = await project.waitForOutput("main");
+    const output = await project.waitForOutput("main");
 
-  //     expect(output.result.ok).toEqual(false);
-  //     expect(output.result.value.toString()).toEqual("Cyclic import main");
-  //   });
+    expect(output.result.ok).toEqual(false);
+    expect(output.result.value.toString()).toEqual(
+      "Circular import: main -> main"
+    );
+  });
 
-  //   test("Diamond shape", async () => {
-  //     const project = new SqProject({
-  //       linker: makeSelfContainedLinker({
-  //         root: `
-  //           export x = 10
-  //         `,
-  //         left: `
-  //           import "root" as root
-  //           export x = root.x * 2
-  //         `,
-  //         right: `
-  //           import "root" as root
-  //           export x = root.x * 3
-  //         `,
-  //       }),
-  //     });
-  //     project.setSimpleHead(
-  //       "main",
-  //       `
-  //         import "left" as foo
-  //         import "right" as bar
-  //         foo.x + bar.x
-  //       `
-  //     );
+  test("Diamond shape", async () => {
+    const project = new SqProject({
+      linker: makeSelfContainedLinker({
+        root: `
+            export x = 10
+          `,
+        left: `
+            import "root" as root
+            export x = root.x * 2
+          `,
+        right: `
+            import "root" as root
+            export x = root.x * 3
+          `,
+      }),
+    });
+    project.setSimpleHead(
+      "main",
+      `
+          import "left" as foo
+          import "right" as bar
+          foo.x + bar.x
+        `
+    );
 
-  //     const output = await project.waitForOutput("main");
-  //     const result = output.getEndResult();
-  //     expect(result.ok).toBe(true);
-  //     expect(result.value.toString()).toBe("50");
-  // });
+    const output = await project.waitForOutput("main");
+    const result = output.getEndResult();
+    expect(result.ok).toBe(true);
+    expect(result.value.toString()).toBe("50");
+  });
 });

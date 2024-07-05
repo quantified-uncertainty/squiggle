@@ -2,7 +2,7 @@ import { isBindingStatement } from "../../ast/utils.js";
 import { Env } from "../../dists/env.js";
 import { RunProfile } from "../../reducer/RunProfile.js";
 import { BaseRunner, RunParams } from "../../runners/BaseRunner.js";
-import { ImmutableMap } from "../../utility/immutableMap.js";
+import { ImmutableMap } from "../../utility/immutable.js";
 import { Err, fmap, fmap2, Ok, result } from "../../utility/result.js";
 import { vDict, VDict } from "../../value/VDict.js";
 import { vString } from "../../value/VString.js";
@@ -102,7 +102,7 @@ export class SqModuleOutput {
   }): Promise<SqModuleOutput | undefined> {
     const { environment, module } = params;
 
-    const importOutputs = module.importOutputs({
+    const importOutputs = module.getImportOutputs({
       state: params.state,
       environment,
     });
@@ -129,7 +129,7 @@ export class SqModuleOutput {
 
     let importBindings = VDict.empty();
 
-    for (const importBinding of module.imports(params.state.linker)) {
+    for (const importBinding of module.getImports(params.state.linker)) {
       const importOutput = importOutputs.value[importBinding.name];
       if (!importOutput) {
         throw new Error(
@@ -230,6 +230,19 @@ export class SqModuleOutput {
       environment,
       result,
       executionTime,
+    });
+  }
+
+  static makeError(params: {
+    module: SqModule;
+    environment: Env;
+    error: SqError;
+  }): SqModuleOutput {
+    return new SqModuleOutput({
+      module: params.module,
+      environment: params.environment,
+      result: Err(params.error),
+      executionTime: 0,
     });
   }
 

@@ -72,9 +72,9 @@ const ModuleInfo: FC<{
       <Text>
         {output
           ? "✅"
-          : module.importModules({ state }).type === "loading"
+          : module.getImportModules({ state }).type === "loading"
             ? "⌛ Loading imports"
-            : module.importOutputs({ state, environment }).type === "loading"
+            : module.getImportOutputs({ state, environment }).type === "loading"
               ? "🔄 Waiting for import outputs"
               : "▶️ Running"}
       </Text>
