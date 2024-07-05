@@ -401,4 +401,14 @@ y = { |a| a }(x)
     1: {unit: 1},
 }, ["x", "y", "a"]]));
 
+    test("1-parameter generic function", () => expect(getUnitTypes(
+        `
+f(a) = a
+x :: unit = 3
+y = f(x)
+`)).toEqual([{
+    1: {unit: 1},
+    2: {unit: 1},
+}, ["a", "x", "y"]]));
+
 });
