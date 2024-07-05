@@ -181,20 +181,41 @@ a = 1
 b = 2
 x :: bxType = b
 y :: ayType = a
-`)))).toEqual([
-    [
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1],
-    ],
-    [
-        [-1, 0],
-        [0, -1],
-        [0, -1],
-        [-1, 0],
-    ],
-]));
+`
+    )))).toEqual([
+        [
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+        ],
+        [
+            [-1, 0],
+            [0, -1],
+            [0, -1],
+            [-1, 0],
+        ],
+    ]));
+
+    test("type inference with no defined types", () => expect(gaussianElimHelper(
+        `
+x = 1
+y = 2
+z = x + y
+foo = x * z
+`
+    )).toEqual([
+        // TODO: what should the result be?
+    ]));
+
+    test("1-parameter generic lambda", () => expect(gaussianElimHelper(
+        `
+f(x) = x
+`
+    )).toEqual([
+
+    ]));
+
 });
 
 describe("unit type checking", () => {
@@ -259,10 +280,12 @@ x < y
             `
 x :: socks = 1
 x :: shoes = 1
+y = x
 `)).toEqual([{
     0: {socks: 1},
     1: {shoes: 1},
-}, ["x", "x"]]));
+    2: {shoes: 1},
+}, ["x", "x", "y"]]));
 
         test("two groups of constrained variables, one with a conflict", () => expect(() => parse(
             `
@@ -286,6 +309,15 @@ y :: kg/s = b / c
 z :: kg/m = c / a
 `, "test"
         )).toThrow("Conflicting unit types"));
+
+        test("type inference with no defined types", () => expect(getUnitTypes(
+            `
+x = 1
+y = 2
+z = x + y
+foo = x * z
+`
+        )).toEqual([{}, ["x", "y", "z", "foo"]]));
     });
 
     describe("blocks", () => {
@@ -299,7 +331,7 @@ z :: kg/m = c / a
 `, "test"
         )).toThrow("Conflicting unit types"));
 
-        test("unit type of block is unit type of last expression", () => expect(getUnitTypes(
+        test("unit type of block is unit type of its last expression", () => expect(getUnitTypes(
             `
 x = {
   y :: joules = 27
@@ -317,7 +349,7 @@ y = {
   x :: lb = 2
   x
 }
-z :: kg = x
+z = x  // should infer type as "kg"
 `)).toEqual([{
     0: {kg: 1},
     1: {lb: 1},
@@ -364,4 +396,20 @@ y :: dollars = {
     2: {dollars: 1},
 }, ["x", "y", "z"]]));
     });
+});
+
+
+describe("unit types for generic functions", () => {
+
+    test("basic 1-param generic function", () => expect(getUnitTypes(
+        `
+f(a) = a
+x :: unit = 3
+y = f(x)
+`)).toEqual([{
+    1: {"0": 1},
+    2: {unit: 1},
+    3: {unit: 1},
+}, ["f", "x", "y"]]));
+
 });

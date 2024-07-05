@@ -9,6 +9,8 @@ type TypedNode<T extends ASTNode["type"]> = Extract<ASTNode, { type: T }>;
  */
 export type VariableId = number;
 
+type IdentifierType = "declaration" | "parameter" | "reference" | "functionResult";
+
 /*
  * Defines a product of variables and units with the values of the dicts giving
  * their (possibly negative) exponents. A type constraint specifies that the
@@ -28,9 +30,14 @@ export type VariableUnitTypes = {
 };
 
 /*
- * A dictionary mapping variable names to unique IDs within a particular scope.
+ * A pair of dictionaries:
+ * - one mapping variable names to unique IDs within a particular scope
+ * - one mapping function names to the variable IDs of their return value and arguments
  */
-type Scope = { [key: string]: VariableId };
+type Scope = {
+    variables: { [key: string]: VariableId }
+    functions: { [key: string]: [VariableId, VariableId[]] }
+};
 
 /*
  * Scope info required for type checking.
@@ -44,6 +51,7 @@ type Scope = { [key: string]: VariableId };
 type ScopeInfo = {
     stack: Scope[],
     variableNodes: ASTNode[]
+    isFunctionParameter :: ASTNode[]
 };
 
 /*
@@ -146,23 +154,36 @@ function identifierConstraint(
     name: string,
     node: ASTNode,
     scopes: ScopeInfo,
-    isDeclaration: boolean
+    identifierType: IdentifierType
 ): TypeConstraint {
     let uniqueId: VariableId = 0;
-    if (isDeclaration) {
-        // TODO: is it ok to overwrite scope? I think so because anything that
-        // comes after must only reference the new variable
-        uniqueId = scopes.variableNodes.length;
-        scopes.variableNodes.push(node);
-        scopes.stack[scopes.stack.length - 1][name] = uniqueId;
-    } else {
-        if (name in scopes.stack[scopes.stack.length - 1]) {
-            uniqueId = scopes.stack[scopes.stack.length - 1][name];
-        } else {
-            // Referencing an undefined variable is a compile error, but this
-            // isn't the right place to raise an error, so just ignore it.
-            return NO_CONSTRAINT;
-        }
+    let isFunctionParameter: boolean = false;
+    switch (identifierType) {
+        case "parameter":
+            isFunctionParameter = true;
+        case "declaration":
+            // Overwrite scope because anything that comes after must only reference
+            // the new variable
+            uniqueId = scopes.variableNodes.length;
+            scopes.variableNodes.push(node);
+            scopes.isFunctionParameter.push(isFunctionParameter);
+            scopes.stack[scopes.stack.length - 1].variables[name] = uniqueId;
+            break;
+        case "reference":
+            if (name in scopes.stack[scopes.stack.length - 1].variables) {
+                uniqueId = scopes.stack[scopes.stack.length - 1].variables[name];
+            } else {
+                // Referencing an undefined variable is a compile error, but this
+                // isn't the right place to raise an error, so just ignore it.
+                return NO_CONSTRAINT;
+            }
+            break;
+        case "functionResult":
+            uniqueId = scopes.variableNodes.length;
+            scopes.variableNodes.push(node);
+            scopes.isFunctionParameter.push(false);
+        default:
+            throw new Error(`Internal error: unknown identifier type ${identifierType}`);
     }
 
     return {
@@ -249,7 +270,10 @@ export function innerFindTypeConstraints(
     switch (node.type) {
         case "Program":
         case "Block":
-            scopes.stack.push({ ...scopes.stack[scopes.stack.length - 1] });
+            scopes.stack.push({
+                variables: ...scopes.stack[scopes.stack.length - 1].variables,
+                functions: ...scopes.stack[scopes.stack.length - 1].functions,
+            });
 
             let lastTypeConstraint = NO_CONSTRAINT;
             for (const statement of node.statements) {
@@ -264,7 +288,7 @@ export function innerFindTypeConstraints(
                 return lastTypeConstraint;
             }
         case "LetStatement":
-            const variableConstraint = identifierConstraint(node.variable.value, node.variable, scopes, true);
+            const variableConstraint = identifierConstraint(node.variable.value, node.variable, scopes, "declaration");
             const typeDefConstraint = createTypeConstraint(node.typeSignature);
             const valueConstraint = innerFindTypeConstraints(node.value, typeConstraints, scopes);
             addTypeConstraint(
@@ -278,8 +302,47 @@ export function innerFindTypeConstraints(
                 node
             );
             return NO_CONSTRAINT;
+        case "DefunStatement":
+            const variableConstraint = identifierConstraint(node.variable.value, node.variable, scopes, "declaration");
+            const returnTypeConstraint = innerFindTypeconstraints(node.value, typeConstraints, scope);
+
+            // TODO: this is wrong, need some way to represent function application
+            addTypeConstraint(
+                typeConstraints,
+                requireConstraintsToBeEqual(variableConstraint, returnTypeConstraint),
+                node
+            );
+
+        case "Lambda":
+            // Add arguments to scope
+            scopes.stack.push({
+                variables: ...scopes.stack[scopes.stack.length - 1].variables,
+                functions: ...scopes.stack[scopes.stack.length - 1].functions,
+            });
+            for (const arg of node.args) {
+                console.assert(arg.type === "Identifier");
+                identifierConstraint((arg as { value: string}).value, arg, scopes, "parameter");
+            }
+
+            // Create a pseudo-variable representing the return value of the function.
+            const functionResultVariable = identifierConstraint("", node, scopes, "functionResult");
+            const returnTypeConstraint = innerFindTypeConstraints(node.body, typeConstraints, scopes);
+            const functionConstraint = requireConstraintsToBeEqual(functionResultVariable, returnTypeConstraint);
+
+            scopes.stack.pop();
+
+            return functionConstraint;
+
+            // TODO
+            // 1. store the type constraints
+            // 2. store the IDs of the arguments
+            // 3. when calling the lambda, replace the IDs with the actual arguments
+            //
+            // Mark untyped arguments. When constructing the matrices, put the
+            // untyped arguments on the right matrix.
+
         case "Identifier":
-            return identifierConstraint(node.value, node, scopes, false);
+            return identifierConstraint(node.value, node, scopes, "reference");
         case "Float":
         case "UnitValue":
             return NO_CONSTRAINT;
@@ -356,6 +419,7 @@ function findTypeConstraints(node: ASTNode): [[TypeConstraint, ASTNode][], Scope
     let scopes: ScopeInfo = {
         stack: [{}],
         variableNodes: [],
+        isFunctionParameter: [],
     };
     innerFindTypeConstraints(node, typeConstraints, scopes);
     return [typeConstraints, scopes];
@@ -475,7 +539,8 @@ function typeConstraintsToMatrix(typeConstraints: [TypeConstraint, ASTNode][], s
     let unitMatrix = [];
     let rowNodes = [];
 
-    const varIds = scopes.variableNodes.map((_, i) => i);
+    const varIds = scopes.variableNodes.map((_, i) => i).filter((i) => !scopes.isFunctionParameter[i]);
+    const funcParamIds = scopes.variableNodes.map((_, i) => i).filter((i) => scopes.isFunctionParameter[i]);
 
     // Make an ordered list of all unit names.
     let unitNameSet = new Set<string>();
@@ -491,10 +556,10 @@ function typeConstraintsToMatrix(typeConstraints: [TypeConstraint, ASTNode][], s
     // Create matrices where columns are variables/units and rows are constraints.
     for (const [constraint, node] of typeConstraints) {
         let varRow = varIds.map((varId) => varId in constraint.variables ? constraint.variables[varId] : 0);
-
+        let funcParamRow = funcParamIds.map((paramId) => paramId in constraint.variables ? constraint.variables[paramId] : 0);
         let unitRow = unitNames.map((unitName) => unitName in constraint.units ? constraint.units[unitName] : 0);
         varMatrix.push(varRow);
-        unitMatrix.push(unitRow);
+        unitMatrix.push(funcParamRow.concat(unitRow));
         rowNodes.push(node);
     }
 
@@ -508,8 +573,11 @@ function typeConstraintsToMatrix(typeConstraints: [TypeConstraint, ASTNode][], s
 function matrixToSimplifiedTypes(
     unitNames: string[],
     varMatrix: number[][],
-    unitMatrix: number[][]
+    unitMatrix: number[][],
+    scopes: ScopeInfo
 ): VariableUnitTypes {
+    const funcParamIds = scopes.variableNodes.map((_, i) => i).filter((i) => scopes.isFunctionParameter[i]);
+    const numParams = funcParamIds.length;
     let varTypes: { [key: string]: { [key: string]: number } } = {};
     for (let i = 0; i < varMatrix.length; i++) {
         const varIndex = varMatrix[i].indexOf(1);
@@ -520,8 +588,13 @@ function matrixToSimplifiedTypes(
         let varType: { [key: string]: number } = {};
         for (let j = 0; j < unitMatrix[i].length; j++) {
             if (unitMatrix[i][j] !== 0) {
-                // negate to convert var + unit = 0 to var = -unit
-                varType[unitNames[j]] = -unitMatrix[i][j];
+                if (j < numParams) {
+                    var unitName = String(funcParamIds[j]);
+                } else {
+                    var unitName = unitNames[j - numParams];
+                }
+                    // negate to convert var + unit = 0 to var = -unit
+                varType[unitName] = -unitMatrix[i][j];
             }
         }
         varTypes[varId] = varType;
@@ -529,13 +602,11 @@ function matrixToSimplifiedTypes(
     return varTypes;
 }
 
-
 /*
  * Perform type inference and check that the type constraints are consistent.
  *
- * This function works based on the insight that the logarithm of a type
- * constraint is a linear equation, and thus the type constraints together are
- * equivalent to a system of linear equations. If the system has no solution,
+ * This function works by translating type constraints into linear equations and
+ * then solving the system of linear equations. If the system has no solution,
  * then the constraints cannot be satisfied and a type error is raised.
  */
 function checkTypeConstraints(
@@ -550,7 +621,7 @@ function checkTypeConstraints(
             throw new ICompileError(`Conflicting unit types:\n\t${conflictStrs.join("\n\t")}`, typeConstraints[rowIndices[0]][1].location);
         }
     }
-    return matrixToSimplifiedTypes(unitNames, varMatrix, unitMatrix);
+    return matrixToSimplifiedTypes(unitNames, varMatrix, unitMatrix, scopes);
 }
 
 /*
