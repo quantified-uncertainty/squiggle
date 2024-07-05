@@ -411,4 +411,48 @@ y = f(x)
     2: {unit: 1},
 }, ["a", "x", "y"]]));
 
+    test("2-parameter generic function", () => expect(getUnitTypes(
+        `
+f(a, b) = a / b
+dist :: meters = 100
+time :: seconds = 9.5
+speed = f(dist, time)
+`)).toEqual([{
+    2: {meters: 1},
+    3: {seconds: 1},
+    4: {meters: 1, seconds: -1},
+}, ["a", "b", "dist", "time", "speed"]]));
+
+    test("1-parameter generic function with type error", () => expect(() => getUnitTypes(
+        `
+f(a) = a
+x :: meters = 3
+y :: feet = f(x)
+`)).toThrow(`Conflicting unit types:
+	y / x :: <unitless>
+	x :: meters
+	y :: feet`));
+
+    test("1-parameter generic named lambda", () => expect(getUnitTypes(
+        `
+f = { |a| a }
+x :: unit = 3
+y = f(x)
+`)).toEqual([{
+    1: {unit: 1},
+    2: {unit: 1},
+}, ["a", "x", "y"]]));
+
+    test("generic function where types must equal each other", () => expect(getUnitTypes(
+        `
+sum(a, b) = a + b
+aliceDist :: meters = 19
+bobDist = 22
+totalDist = sum(aliceDist, bobDist)
+`)).toEqual([{
+    2: {meters: 1},
+    3: {meters: 1},
+    4: {meters: 1},
+}, ["a", "b", "aliceDist", "bobDist", "totalDist"]]));
+
 });

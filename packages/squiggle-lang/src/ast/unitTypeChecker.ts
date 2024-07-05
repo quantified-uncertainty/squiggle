@@ -206,11 +206,18 @@ function multiplyConstraints(
     if (!left.defined || !right.defined) {
         return NO_CONSTRAINT;
     }
+    // Note: The loops below are duplicated so that TypeScript is aware of the key types.
     const variables = { ...left.variables, ...right.variables };
+    const parameters = { ...left.parameters, ...right.parameters };
     const units = { ...left.units, ...right.units };
     for (const variable in left.variables) {
         if (variable in right.variables) {
             variables[variable] = left.variables[variable] + right.variables[variable];
+        }
+    }
+    for (const parameters in left.parameters) {
+        if (parameters in right.parameters) {
+            parameters[parameters] = left.parameters[parameters] + right.parameters[parameters];
         }
     }
     for (const unit in left.units) {
@@ -224,6 +231,11 @@ function multiplyConstraints(
             delete variables[variable];
         }
     }
+    for (const parameter in parameters) {
+        if (parameters[parameter] === 0) {
+            delete parameters[parameter];
+        }
+    }
     for (const unit in units) {
         if (units[unit] === 0) {
             delete units[unit];
@@ -232,7 +244,7 @@ function multiplyConstraints(
     return {
         defined: true,
         variables: variables,
-        parameters: {},  // TODO
+        parameters: parameters,
         units: units,
     };
 }
@@ -246,7 +258,9 @@ function divideConstraints(
         variables: Object.fromEntries(
             Object.entries(right.variables).map(([variable, power]) => [variable, -power])
         ),
-        parameters: {},  // TODO
+        parameters: Object.fromEntries(
+            Object.entries(right.parameters).map(([parameter, power]) => [parameter, -power])
+        ),
         units: Object.fromEntries(
             Object.entries(right.units).map(([unit, power]) => [unit, -power])
         ),
@@ -292,21 +306,32 @@ export function innerFindTypeConstraints(
             } else {
                 return lastTypeConstraint;
             }
+
         case "LetStatement":
-            let variableConstraint = identifierConstraint(node.variable.value, node.variable, scopes, "declaration");
-            const typeDefConstraint = createTypeConstraint(node.typeSignature);
-            const valueConstraint = innerFindTypeConstraints(node.value, typeConstraints, scopes);
-            addTypeConstraint(
-                typeConstraints,
-                requireConstraintsToBeEqual(variableConstraint, typeDefConstraint),
-                node
-            );
-            addTypeConstraint(
-                typeConstraints,
-                requireConstraintsToBeEqual(variableConstraint, valueConstraint),
-                node
-            );
+            if (node.value.type === "Lambda") {
+                // TODO: this shouldn't require a special case, and this isn't
+                // gonna generalize well
+                var returnTypeConstraint = innerFindTypeConstraints(node.value, typeConstraints, scopes);
+                const uniqueId = FUNCTION_OFFSET + scopes.functionConstraints.length;
+                scopes.functionConstraints.push(returnTypeConstraint);
+                scopes.stack[scopes.stack.length - 1][node.variable.value] = uniqueId;
+            } else {
+                var variableConstraint = identifierConstraint(node.variable.value, node.variable, scopes, "declaration");
+                var typeDefConstraint = createTypeConstraint(node.typeSignature);
+                var valueConstraint = innerFindTypeConstraints(node.value, typeConstraints, scopes);
+                addTypeConstraint(
+                    typeConstraints,
+                    requireConstraintsToBeEqual(variableConstraint, typeDefConstraint),
+                    node
+                );
+                addTypeConstraint(
+                    typeConstraints,
+                    requireConstraintsToBeEqual(variableConstraint, valueConstraint),
+                    node
+                );
+            }
             return NO_CONSTRAINT;
+
         case "DefunStatement":
             var returnTypeConstraint = innerFindTypeConstraints(node.value, typeConstraints, scopes);
             const uniqueId = FUNCTION_OFFSET + scopes.functionConstraints.length;
@@ -314,6 +339,7 @@ export function innerFindTypeConstraints(
             scopes.stack[scopes.stack.length - 1][node.variable.value] = uniqueId;
 
             return NO_CONSTRAINT;
+
         case "Lambda":
             // Add arguments to scope
             scopes.stack.push({...scopes.stack[scopes.stack.length - 1]});
@@ -335,21 +361,15 @@ export function innerFindTypeConstraints(
             scopes.stack.pop();
             return returnTypeConstraint;
 
-            // TODO
-            // 1. store the type constraints
-            // 2. store the IDs of the arguments
-            // 3. when calling the lambda, replace the IDs with the actual arguments
-            //
-            // Mark untyped arguments. When constructing the matrices, put the
-            // untyped arguments on the right matrix.
-
         case "Call":
-            // TODO: works for lambdas only
             var functionConstraint = innerFindTypeConstraints(node.fn, typeConstraints, scopes);
             console.log("functionConstraint before substitution:", JSON.stringify(functionConstraint));
             // substitute function params for args
             for (let i = 0; i < node.args.length; i++) {
                 const argConstraint = innerFindTypeConstraints(node.args[i], typeConstraints, scopes);
+                if (!(i in functionConstraint.parameters)) {
+                    continue;
+                }
                 const paramExponent = functionConstraint.parameters[i];
                 // TODO: is it possible for argConstraint to contain `parameters`?
                 for (const k in argConstraint.variables) {
