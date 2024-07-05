@@ -19,6 +19,7 @@ type IdentifierType = "declaration" | "parameter" | "reference" | "functionResul
 export type TypeConstraint = {
     defined: boolean;
     variables: { [key: VariableId]: number };
+    parameters: { [key: number]: number };
     units: { [key: string]: number };
 };
 
@@ -35,8 +36,8 @@ export type VariableUnitTypes = {
  * - one mapping function names to the variable IDs of their return value and arguments
  */
 type Scope = {
-    variables: { [key: string]: VariableId }
-    functions: { [key: string]: [VariableId, VariableId[]] }
+    variables: { [key: string]: VariableId };
+    functions: { [key: string]: [VariableId, VariableId[]] };
 };
 
 /*
@@ -49,9 +50,9 @@ type Scope = {
  * statement declaring the variable with ID `i`.
  */
 type ScopeInfo = {
-    stack: Scope[],
-    variableNodes: ASTNode[]
-    isFunctionParameter :: ASTNode[]
+    stack: Scope[];
+    variableNodes: ASTNode[];
+    isFunctionParameter: boolean[];
 };
 
 /*
@@ -63,12 +64,14 @@ type ScopeInfo = {
 const EMPTY_CONSTRAINT: TypeConstraint = {
     defined: true,
     variables: {},
+    parameters: {},
     units: {},
 };
 
 const NO_CONSTRAINT: TypeConstraint = {
     defined: false,
     variables: {},
+    parameters: {},
     units: {},
 };
 
@@ -127,6 +130,7 @@ function createTypeConstraint(node: ASTNode): TypeConstraint {
             return {
                 defined: true,
                 variables: {},
+                parameters: {},
                 units: { [node.value]: 1 },
             };
         case "ImplicitType":
@@ -179,6 +183,7 @@ function identifierConstraint(
             }
             break;
         case "functionResult":
+            // TODO: delete
             uniqueId = scopes.variableNodes.length;
             scopes.variableNodes.push(node);
             scopes.isFunctionParameter.push(false);
@@ -189,6 +194,7 @@ function identifierConstraint(
     return {
         defined: true,
         variables: { [uniqueId]: 1 },
+        parameters: {},
         units: {},
     };
 }
@@ -226,6 +232,7 @@ function multiplyConstraints(
     return {
         defined: true,
         variables: variables,
+        parameters: {},  // TODO
         units: units,
     };
 }
@@ -239,6 +246,7 @@ function divideConstraints(
         variables: Object.fromEntries(
             Object.entries(right.variables).map(([variable, power]) => [variable, -power])
         ),
+        parameters: {},  // TODO
         units: Object.fromEntries(
             Object.entries(right.units).map(([unit, power]) => [unit, -power])
         ),
@@ -271,8 +279,8 @@ export function innerFindTypeConstraints(
         case "Program":
         case "Block":
             scopes.stack.push({
-                variables: ...scopes.stack[scopes.stack.length - 1].variables,
-                functions: ...scopes.stack[scopes.stack.length - 1].functions,
+                variables: {...scopes.stack[scopes.stack.length - 1].variables},
+                functions: {...scopes.stack[scopes.stack.length - 1].functions},
             });
 
             let lastTypeConstraint = NO_CONSTRAINT;
@@ -288,7 +296,7 @@ export function innerFindTypeConstraints(
                 return lastTypeConstraint;
             }
         case "LetStatement":
-            const variableConstraint = identifierConstraint(node.variable.value, node.variable, scopes, "declaration");
+            let variableConstraint = identifierConstraint(node.variable.value, node.variable, scopes, "declaration");
             const typeDefConstraint = createTypeConstraint(node.typeSignature);
             const valueConstraint = innerFindTypeConstraints(node.value, typeConstraints, scopes);
             addTypeConstraint(
@@ -303,35 +311,40 @@ export function innerFindTypeConstraints(
             );
             return NO_CONSTRAINT;
         case "DefunStatement":
-            const variableConstraint = identifierConstraint(node.variable.value, node.variable, scopes, "declaration");
-            const returnTypeConstraint = innerFindTypeconstraints(node.value, typeConstraints, scope);
+            variableConstraint = identifierConstraint(node.variable.value, node.variable, scopes, "declaration");
+            var functionConstraint = innerFindTypeConstraints(node.value, typeConstraints, scopes);
 
-            // TODO: this is wrong, need some way to represent function application
-            addTypeConstraint(
-                typeConstraints,
-                requireConstraintsToBeEqual(variableConstraint, returnTypeConstraint),
-                node
-            );
+            // TODO: idk
 
+            return NO_CONSTRAINT;
         case "Lambda":
             // Add arguments to scope
             scopes.stack.push({
-                variables: ...scopes.stack[scopes.stack.length - 1].variables,
-                functions: ...scopes.stack[scopes.stack.length - 1].functions,
+                variables: {...scopes.stack[scopes.stack.length - 1].variables},
+                functions: {...scopes.stack[scopes.stack.length - 1].functions},
             });
             for (const arg of node.args) {
                 console.assert(arg.type === "Identifier");
                 identifierConstraint((arg as { value: string}).value, arg, scopes, "parameter");
             }
 
-            // Create a pseudo-variable representing the return value of the function.
-            const functionResultVariable = identifierConstraint("", node, scopes, "functionResult");
+            // TODO: unused
+            const functionResultConstraint: TypeConstraint = {
+                defined: true,
+                variables: {},
+                parameters: {0: 1},
+                units: {},
+            }
             const returnTypeConstraint = innerFindTypeConstraints(node.body, typeConstraints, scopes);
-            const functionConstraint = requireConstraintsToBeEqual(functionResultVariable, returnTypeConstraint);
+            for (let i = 0; i < node.args.length; i++) {
+                const paramName = (node.args[i] as {value: string}).value;
+                const paramId = scopes.stack[scopes.stack.length - 1].variables[paramName];
+                returnTypeConstraint.parameters[i + 1] = returnTypeConstraint.variables[paramId];
+                delete returnTypeConstraint.variables[paramId];
+            }
 
             scopes.stack.pop();
-
-            return functionConstraint;
+            return returnTypeConstraint;
 
             // TODO
             // 1. store the type constraints
@@ -340,6 +353,27 @@ export function innerFindTypeConstraints(
             //
             // Mark untyped arguments. When constructing the matrices, put the
             // untyped arguments on the right matrix.
+
+        case "Call":
+            // TODO: works for lambdas only
+            var functionConstraint = innerFindTypeConstraints(node.fn, typeConstraints, scopes);
+            // substitute function params for args
+            for (let i = 0; i < node.args.length; i++) {
+                const argConstraint = innerFindTypeConstraints(node.args[i], typeConstraints, scopes);
+                const paramId = i + 1;
+                const paramExponent = functionConstraint.parameters[paramId];
+                // TODO: is it possible for argConstraint to contain `parameters`?
+                for (const k in argConstraint.variables) {
+                    argConstraint.variables[k] *= paramExponent;
+                }
+                for (const k in argConstraint.units) {
+                    argConstraint.units[k] *= paramExponent;
+                }
+                functionConstraint = multiplyConstraints(functionConstraint, argConstraint);
+                delete functionConstraint.parameters[paramId];
+            }
+
+            return functionConstraint;
 
         case "Identifier":
             return identifierConstraint(node.value, node, scopes, "reference");
@@ -417,7 +451,10 @@ export function innerFindTypeConstraints(
 function findTypeConstraints(node: ASTNode): [[TypeConstraint, ASTNode][], ScopeInfo] {
     let typeConstraints: [TypeConstraint, ASTNode][] = [];
     let scopes: ScopeInfo = {
-        stack: [{}],
+        stack: [{
+            variables: {},
+            functions: {},
+        }],
         variableNodes: [],
         isFunctionParameter: [],
     };
@@ -524,7 +561,7 @@ function gaussianElim(varMatrix: number[][], unitMatrix: number[][]): number[][]
 }
 
 /*
- * Produce two matrices (one for variables and one for units) that define a
+ * Construct two matrices (one for variables and one for units) that define a
  * system of linear equations where each equation is isomorphic to a type
  * constraint.
  *
@@ -562,6 +599,11 @@ function typeConstraintsToMatrix(typeConstraints: [TypeConstraint, ASTNode][], s
         unitMatrix.push(funcParamRow.concat(unitRow));
         rowNodes.push(node);
     }
+
+    console.log("variable names:", JSON.stringify(scopes.variableNodes.map((node) => node.value)),
+                "\nvariable IDs:", JSON.stringify(varIds),
+                "\nconstraints:", JSON.stringify(typeConstraints.map((pair) => pair[0])),
+                `\nvarMatrix:\n\t` + varMatrix.map((row) => row.join("  ")).join("\n\t"));
 
     return [unitNames, varMatrix, unitMatrix];
 }

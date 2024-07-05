@@ -207,15 +207,6 @@ foo = x * z
     )).toEqual([
         // TODO: what should the result be?
     ]));
-
-    test("1-parameter generic lambda", () => expect(gaussianElimHelper(
-        `
-f(x) = x
-`
-    )).toEqual([
-
-    ]));
-
 });
 
 describe("unit type checking", () => {
@@ -401,15 +392,13 @@ y :: dollars = {
 
 describe("unit types for generic functions", () => {
 
-    test("basic 1-param generic function", () => expect(getUnitTypes(
+    test("1-parameter generic lambda", () => expect(getUnitTypes(
         `
-f(a) = a
 x :: unit = 3
-y = f(x)
+y = { |a| a }(x)
 `)).toEqual([{
-    1: {"0": 1},
-    2: {unit: 1},
-    3: {unit: 1},
-}, ["f", "x", "y"]]));
+    0: {unit: 1},
+    1: {unit: 1},
+}, ["x", "y", "a"]]));
 
 });
