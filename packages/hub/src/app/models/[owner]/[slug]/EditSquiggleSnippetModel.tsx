@@ -38,9 +38,9 @@ import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { modelRoute, variableRoute } from "@/routes";
 import { ImportTooltip } from "@/squiggle/components/ImportTooltip";
 import {
+  getHubLinker,
   parseSourceId,
   serializeSourceId,
-  squiggleHubLinker,
 } from "@/squiggle/components/linker";
 
 import {
@@ -320,7 +320,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       owner: model.owner.slug,
       slug: model.slug,
     }),
-    linker: squiggleHubLinker,
+    linker: getHubLinker(squiggle),
     height: height ?? "100vh",
     onCodeChange,
     renderExtraControls: () => (

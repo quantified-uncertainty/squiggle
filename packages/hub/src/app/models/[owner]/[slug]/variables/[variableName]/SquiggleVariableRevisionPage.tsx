@@ -9,7 +9,7 @@ import {
   versionSupportsSqPathV2,
 } from "@quri/versioned-squiggle-components";
 
-import { squiggleHubLinker } from "@/squiggle/components/linker";
+import { sqProjectWithHubLinker } from "@/squiggle/components/linker";
 
 import { SquiggleVariableRevisionPage$key } from "@/__generated__/SquiggleVariableRevisionPage.graphql";
 
@@ -30,9 +30,7 @@ const VersionedSquiggleVariableRevisionPage: FC<
 > = ({ variableName, code, version }) => {
   const squiggle = use(versionedSquigglePackages(version));
 
-  const project = new squiggle.lang.SqProject({
-    linker: squiggleHubLinker,
-  });
+  const project = sqProjectWithHubLinker(squiggle);
 
   const rootPathOverride = versionSupportsSqPathV2.object(squiggle)
     ? new squiggle.lang.SqValuePath({

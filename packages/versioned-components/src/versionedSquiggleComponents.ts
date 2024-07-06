@@ -2,6 +2,10 @@
 
 // squiggle-components are not RSC-friendly
 import { FC } from "react";
+import { type SqLinker as SqLinkerV1 } from "squiggle-lang-0.9.5";
+
+import { type SqLinker as SqLinkerV2 } from "@quri/squiggle-lang";
+
 import { SquiggleLangPackageTypes } from "./versionedSquiggleLang.js";
 import { SquiggleVersion } from "./versions.js";
 
@@ -16,11 +20,16 @@ type AnySqProject = InstanceType<
 type AnySqValuePath = InstanceType<
   SquiggleLangPackageTypes[SquiggleVersion]["SqValuePath"]
 >;
+type AnySqLinker = SqLinkerV1 | SqLinkerV2;
+
 type PatchSqType<Prop> = Prop extends AnySqProject
   ? AnySqProject
   : Prop extends AnySqValuePath
     ? AnySqValuePath
-    : Prop;
+    : Prop extends AnySqLinker
+      ? AnySqLinker
+      : Prop;
+
 type PatchSqTypesInProps<Props> =
   Props extends Record<string, unknown>
     ? { [k in keyof Props]: PatchSqType<Props[k]> }

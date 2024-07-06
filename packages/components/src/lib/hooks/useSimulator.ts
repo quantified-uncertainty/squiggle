@@ -246,7 +246,7 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     project.addEventListener("output", listener);
 
     return () => project.removeEventListener("output", listener);
-  }, [project, rootModule, state.executionId]);
+  }, [project, rootModule]);
 
   // Re-run on environment and runner changes.
   useEffect(() => {

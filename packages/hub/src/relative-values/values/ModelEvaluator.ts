@@ -1,13 +1,12 @@
 import { z } from "zod";
 
 import {
+  makeSelfContainedLinker,
   result,
   SqLambda,
   SqProject,
   SqStringValue,
 } from "@quri/squiggle-lang";
-
-import { squiggleHubLinker } from "@/squiggle/components/linker";
 
 import { cartesianProduct } from "../lib/utils";
 import {
@@ -104,16 +103,19 @@ export class ModelEvaluator {
     variableName: string,
     cache?: RelativeValuesExport$data["cache"]
   ): Promise<result<ModelEvaluator, string>> {
-    // TODO - versioned SqProject
+    // TODO - versioned-components
     const project = new SqProject({
-      linker: squiggleHubLinker,
+      linker: makeSelfContainedLinker({
+        wrapper: `
+        import "model" as model
+        RelativeValues.wrap(model.${variableName})
+        `,
+        model: modelCode,
+      }),
     });
-    project.setSource("wrapper", `RelativeValues.wrap(${variableName})`);
-    project.setContinues("wrapper", ["model"]);
-    project.setSource("model", modelCode);
+    await project.loadHead("wrapper", { moduleName: "wrapper" });
 
-    await project.run("wrapper");
-    const result = project.getResult("wrapper");
+    const result = (await project.waitForOutput("wrapper")).getEndResult();
 
     if (!result.ok || result.value.tag !== "Lambda") {
       if (!result.ok) {
