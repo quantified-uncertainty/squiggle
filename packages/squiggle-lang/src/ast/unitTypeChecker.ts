@@ -52,7 +52,7 @@ const FUNCTION_OFFSET = 1 << 24;
 type ScopeInfo = {
     stack: Scope[];
     variableNodes: ASTNode[];
-    functionConstraints: TypeConstraint[];
+    functionConstraints: TypeConstraint[][];
     isFunctionParameter: boolean[];
 };
 
@@ -105,7 +105,7 @@ function subConstraintToString(subConstraint: { [key: VariableId | string]: numb
     const entries = Object.entries(subConstraint).map(([key, value]) => {
         let name = "";
         if (isVariable) {
-            console.assert(typeof key !== "string");
+            console.assert(typeof key !== "string", `In subConstraintToString, expected variable key to be a number, got ${key}`);
             const node = scopes.variableNodes[key as unknown as VariableId] as { value: string };
             name = node.value;
         } else {
@@ -178,8 +178,9 @@ function identifierConstraint(
             if (name in scopes.stack[scopes.stack.length - 1]) {
                 uniqueId = scopes.stack[scopes.stack.length - 1][name];
                 if (uniqueId >= FUNCTION_OFFSET) {
-                    // This id refers to a function
-                    return scopes.functionConstraints[uniqueId - FUNCTION_OFFSET];
+                    // Don't type-check a function that's referenced outside the
+                    // context of a function call
+                    return NO_CONSTRAINT;
                 }
             } else {
                 // Referencing an undefined variable is a compile error, but this
@@ -215,9 +216,9 @@ function multiplyConstraints(
             variables[variable] = left.variables[variable] + right.variables[variable];
         }
     }
-    for (const parameters in left.parameters) {
-        if (parameters in right.parameters) {
-            parameters[parameters] = left.parameters[parameters] + right.parameters[parameters];
+    for (const parameter in left.parameters) {
+        if (parameter in right.parameters) {
+            parameters[parameter] = left.parameters[parameter] + right.parameters[parameter];
         }
     }
     for (const unit in left.units) {
@@ -281,10 +282,52 @@ function addTypeConstraint(
     }
 }
 
+function lambdaFindTypeConstraints(
+    node: ASTNode,
+    typeConstraints: [TypeConstraint, ASTNode][],
+    scopes: ScopeInfo
+): TypeConstraint[] {
+    switch (node.type) {
+        case "Lambda":
+            // Add arguments to scope
+            scopes.stack.push({...scopes.stack[scopes.stack.length - 1]});
+            for (const arg of (node as {args: ASTNode[]}).args) {
+                console.assert(arg.type === "Identifier");
+                identifierConstraint((arg as { value: string}).value, arg, scopes, "parameter");
+            }
+            const numPreConstraints = typeConstraints.length;
+
+            var returnTypeConstraint = innerFindTypeConstraints(node.body, typeConstraints, scopes);
+
+            // Get all constraints that were added within the function body and
+            // delete them from the global constraints list.
+            var newlyAddedConstraints = typeConstraints.slice(numPreConstraints).map((pair) => pair[0]);
+            typeConstraints.splice(numPreConstraints, newlyAddedConstraints.length);
+            newlyAddedConstraints = [returnTypeConstraint].concat(newlyAddedConstraints);
+
+            // loop thru all new constraints and replace variables with params
+            for (const constraint of newlyAddedConstraints) {
+                for (let i = 0; i < node.args.length; i++) {
+                    const paramName = (node.args[i] as {value: string}).value;
+                    const paramId = scopes.stack[scopes.stack.length - 1][paramName];
+                    if (paramId in constraint.variables) {
+                        constraint.parameters[i] = constraint.variables[paramId];
+                        delete constraint.variables[paramId];
+                    }
+                }
+            }
+            scopes.stack.pop();
+
+            return newlyAddedConstraints;
+        default:
+            throw new Error(`Argument to lambdaFindTypeConstraints must have type lambda, not ${node.type}`);
+    }
+}
+
 /*
  * Recursively scan the AST to find all type constraints.
  */
-export function innerFindTypeConstraints(
+function innerFindTypeConstraints(
     node: ASTNode,
     typeConstraints: [TypeConstraint, ASTNode][],
     scopes: ScopeInfo
@@ -309,12 +352,7 @@ export function innerFindTypeConstraints(
 
         case "LetStatement":
             if (node.value.type === "Lambda") {
-                // TODO: this shouldn't require a special case, and this isn't
-                // gonna generalize well
-                var returnTypeConstraint = innerFindTypeConstraints(node.value, typeConstraints, scopes);
-                const uniqueId = FUNCTION_OFFSET + scopes.functionConstraints.length;
-                scopes.functionConstraints.push(returnTypeConstraint);
-                scopes.stack[scopes.stack.length - 1][node.variable.value] = uniqueId;
+                // Fall through to "DefunStatement" below
             } else {
                 var variableConstraint = identifierConstraint(node.variable.value, node.variable, scopes, "declaration");
                 var typeDefConstraint = createTypeConstraint(node.typeSignature);
@@ -329,61 +367,60 @@ export function innerFindTypeConstraints(
                     requireConstraintsToBeEqual(variableConstraint, valueConstraint),
                     node
                 );
+                return NO_CONSTRAINT;
             }
-            return NO_CONSTRAINT;
 
         case "DefunStatement":
-            var returnTypeConstraint = innerFindTypeConstraints(node.value, typeConstraints, scopes);
+            var functionConstraints = lambdaFindTypeConstraints(node.value, typeConstraints, scopes);
             const uniqueId = FUNCTION_OFFSET + scopes.functionConstraints.length;
-            scopes.functionConstraints.push(returnTypeConstraint);
+            scopes.functionConstraints.push(functionConstraints);
             scopes.stack[scopes.stack.length - 1][node.variable.value] = uniqueId;
 
             return NO_CONSTRAINT;
 
         case "Lambda":
-            // Add arguments to scope
-            scopes.stack.push({...scopes.stack[scopes.stack.length - 1]});
-            for (const arg of node.args) {
-                console.assert(arg.type === "Identifier");
-                identifierConstraint((arg as { value: string}).value, arg, scopes, "parameter");
-            }
-
-            var returnTypeConstraint = innerFindTypeConstraints(node.body, typeConstraints, scopes);
-            console.log(`returnTypeConstraint before substitution: ${JSON.stringify(returnTypeConstraint)}`);
-            for (let i = 0; i < node.args.length; i++) {
-                const paramName = (node.args[i] as {value: string}).value;
-                const paramId = scopes.stack[scopes.stack.length - 1][paramName];
-                returnTypeConstraint.parameters[i] = returnTypeConstraint.variables[paramId];
-                delete returnTypeConstraint.variables[paramId];
-            }
-            console.log(`Constructed function spec ${JSON.stringify(returnTypeConstraint)}`);
-
-            scopes.stack.pop();
-            return returnTypeConstraint;
+            // Don't type check a lambda unless it's part of a defun or
+            // directly assigned to a variable.
+            return NO_CONSTRAINT;
 
         case "Call":
-            var functionConstraint = innerFindTypeConstraints(node.fn, typeConstraints, scopes);
-            console.log("functionConstraint before substitution:", JSON.stringify(functionConstraint));
+            if (node.fn.type !== "Identifier") {
+                // Don't type check calls to things that aren't static
+                // identifiers. For example, `(condition ? f : g)(x)` is valid,
+                // but not type checked.
+                return NO_CONSTRAINT;
+            }
+            var name = (node.fn as { value: string }).value;
+            var index = scopes.stack[scopes.stack.length - 1][name];
+            console.assert(index >= FUNCTION_OFFSET);
+            var functionConstraints = scopes.functionConstraints[index - FUNCTION_OFFSET];
+
             // substitute function params for args
             for (let i = 0; i < node.args.length; i++) {
                 const argConstraint = innerFindTypeConstraints(node.args[i], typeConstraints, scopes);
-                if (!(i in functionConstraint.parameters)) {
-                    continue;
+                for (let j = 0; j < functionConstraints.length; j++) {
+                    let constraint = functionConstraints[j];
+                    if (!(i in constraint.parameters)) {
+                        continue;
+                    }
+                    const paramExponent = constraint.parameters[i];
+                    // TODO: is it possible for argConstraint to contain `parameters`?
+                    for (const k in argConstraint.variables) {
+                        argConstraint.variables[k] *= paramExponent;
+                    }
+                    for (const k in argConstraint.units) {
+                        argConstraint.units[k] *= paramExponent;
+                    }
+                    delete constraint.parameters[i];
+                    constraint = multiplyConstraints(constraint, argConstraint);
+                    functionConstraints[j] = constraint;
                 }
-                const paramExponent = functionConstraint.parameters[i];
-                // TODO: is it possible for argConstraint to contain `parameters`?
-                for (const k in argConstraint.variables) {
-                    argConstraint.variables[k] *= paramExponent;
-                }
-                for (const k in argConstraint.units) {
-                    argConstraint.units[k] *= paramExponent;
-                }
-                functionConstraint = multiplyConstraints(functionConstraint, argConstraint);
-                delete functionConstraint.parameters[i];
             }
-            console.log("functionConstraint after substitution:", JSON.stringify(functionConstraint));
 
-            return functionConstraint;
+            for (let i = 1; i < functionConstraints.length; i++) {
+                addTypeConstraint(typeConstraints, functionConstraints[i], node);
+            }
+            return functionConstraints[0];
 
         case "Identifier":
             return identifierConstraint(node.value, node, scopes, "reference");
@@ -607,11 +644,6 @@ function typeConstraintsToMatrix(typeConstraints: [TypeConstraint, ASTNode][], s
         unitMatrix.push(funcParamRow.concat(unitRow));
         rowNodes.push(node);
     }
-
-    console.log("variable names:", JSON.stringify(scopes.variableNodes.map((node) => node.value)),
-                "\nvariable IDs:", JSON.stringify(varIds),
-                "\nconstraints:", JSON.stringify(typeConstraints.map((pair) => pair[0])),
-                `\nvarMatrix:\n\t` + varMatrix.map((row) => row.join("  ")).join("\n\t"));
 
     return [unitNames, varMatrix, unitMatrix];
 }

@@ -392,14 +392,13 @@ y :: dollars = {
 
 describe("unit types for generic functions", () => {
 
-    test("1-parameter generic lambda", () => expect(getUnitTypes(
+    test("a directly-called lambda isn't type-checked", () => expect(getUnitTypes(
         `
 x :: unit = 3
 y = { |a| a }(x)
 `)).toEqual([{
     0: {unit: 1},
-    1: {unit: 1},
-}, ["x", "y", "a"]]));
+}, ["x", "y"]]));
 
     test("1-parameter generic function", () => expect(getUnitTypes(
         `
@@ -454,5 +453,52 @@ totalDist = sum(aliceDist, bobDist)
     3: {meters: 1},
     4: {meters: 1},
 }, ["a", "b", "aliceDist", "bobDist", "totalDist"]]));
+
+    test("can infer type of internal variable", () => expect(getUnitTypes(
+        `
+speed(dist) = {
+  minuteTime = 60
+  dist / minuteTime
+}
+trackLength :: meters = 1000
+raceSpeed :: meters/seconds = speed(trackLength)
+`)).toEqual([{
+    1: {seconds: 1},
+    2: {meters: 1},
+    3: {meters: 1, seconds: -1},
+}, ["dist", "minuteTime", "trackLength", "raceSpeed"]]));
+
+    test("can infer type of lexically closed variable", () => expect(getUnitTypes(
+        `
+minuteTime = 60
+speed(dist) = dist / minuteTime
+trackLength :: meters = 1000
+raceSpeed :: meters/seconds = speed(trackLength)
+`)).toEqual([{
+    0: {seconds: 1},
+    2: {meters: 1},
+    3: {meters: 1, seconds: -1},
+}, ["minuteTime", "dist", "trackLength", "raceSpeed"]]));
+
+    test("can type-check lexical closures", () => expect(() => getUnitTypes(
+        `
+minuteTime :: minutes = 1
+speed(dist) = {
+  longerTime = minuteTime + 1  // add 1 just to make type checking a little more complex
+  dist / longerTime
+}
+trackLength :: meters = 1000
+raceSpeed :: meters/seconds = speed(trackLength)
+`)).toThrow(`Conflicting unit types`));
+
+    test("can type-check variables inside functions", () => expect(() => getUnitTypes(
+        `
+f(n) = {
+wealth :: dollars = 1
+conflicting :: pesos = wealth
+n
+}
+f(10)
+`)).toThrow(`Conflicting unit types`));
 
 });
