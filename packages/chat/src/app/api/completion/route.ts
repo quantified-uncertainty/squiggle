@@ -1,6 +1,9 @@
+import { anthropic } from "@ai-sdk/anthropic";
 import { openai } from "@ai-sdk/openai";
-import { generateObject, GenerateObjectResult } from "ai";
+import { streamObject, StreamObjectResult } from "ai";
 import { z } from "zod";
+
+import { AVAILABLE_MODELS } from "../../utils/llms"; // Adjust the import path as needed
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -186,54 +189,63 @@ f(t: [Date(2020), Date(2040)]) = {
 \`\`\`
 `;
 
-console.log(8);
+const squiggleSchema = z.object({
+  code: z.string().describe("Squiggle code snippet"),
+});
+
 export async function POST(req: Request) {
+  const abortController = new AbortController();
+
   try {
-    const { prompt }: { prompt: string } = await req.json();
-    const result: GenerateObjectResult<{
-      code: string;
-    }> = await generateObject({
-      model: openai("gpt-4o"),
-      system: `You generate code using the Squiggle programming language. See: ${squiggleDocs}`,
-      prompt,
-      schema: z.object({
-        code: z
-          .string()
-          .describe(
-            "Code snippet. Be sure to use the Squiggle programming language."
-          ),
-      }),
-    });
+    const body = await req.json();
+    const { prompt, model: backendTitle } = body;
 
-    console.log("Raw result:", JSON.stringify(result));
-
-    if (!result || typeof result.object.code !== "string") {
-      throw new Error("Invalid result structure");
+    if (!prompt) {
+      throw new Error("Prompt is required");
     }
 
-    const squiggleCode = result.object.code;
-    console.log("Squiggle code:", squiggleCode);
+    const selectedModel = AVAILABLE_MODELS.find(
+      (m) => m.backendTitle === backendTitle
+    );
+    if (!selectedModel) {
+      throw new Error("Invalid model selected:");
+    }
 
-    // Encode the Squiggle code for JSON inclusion
-    const encodedSquiggleCode = Buffer.from(squiggleCode).toString("base64");
+    let modelFunction;
+    if (selectedModel.company === "OpenAI") {
+      modelFunction = openai(selectedModel.fullModelId);
+    } else if (selectedModel.company === "Anthropic") {
+      modelFunction = anthropic(selectedModel.fullModelId);
+    } else {
+      throw new Error("Unsupported model company");
+    }
 
-    return new Response(JSON.stringify({ code: encodedSquiggleCode }), {
-      headers: { "Content-Type": "application/json" },
+    const result: StreamObjectResult<z.infer<typeof squiggleSchema>> =
+      await streamObject({
+        model: modelFunction,
+        schema: squiggleSchema,
+        prompt: `Generate Squiggle code for the following prompt: ${prompt}\n\nUse the Squiggle programming language. ${squiggleDocs}`,
+      });
+
+    // Handle client disconnection
+    req.signal.addEventListener("abort", () => {
+      abortController.abort();
     });
+
+    return result.toTextStreamResponse();
   } catch (error) {
-    console.error("Error in POST function:", error);
-    let errorMessage = "An error occurred while processing the request";
-    let statusCode = 500;
-    if (error instanceof Error) {
-      errorMessage = error.message;
-      if (error.message === "Invalid result structure") {
-        statusCode = 400;
-      }
+    if (error === "AbortError") {
+      return new Response("Generation stopped", { status: 499 }); // 499 is "Client Closed Request"
     }
-
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: statusCode,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error("Error in POST function:", error);
+    return new Response(
+      JSON.stringify({
+        error: "An error occurred while processing the request",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }

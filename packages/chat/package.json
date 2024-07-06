@@ -9,7 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^0.0.27",
     "@ai-sdk/openai": "^0.0.34",
+    "@quri/squiggle-components": "workspace:*",
+    "@quri/versioned-squiggle-components": "workspace:*",
+    "@tailwindcss/typography": "^0.5.13",
     "ai": "^3.2.16",
     "next": "14.2.4",
     "react": "^18",

@@ -1,6 +1,6 @@
-import type { Config } from "tailwindcss";
+import { getTailwindConfig } from "@quri/versioned-squiggle-components/tailwind";
 
-const config: Config = {
+export default getTailwindConfig({
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -8,13 +8,14 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: "100%",
+          },
+        },
       },
     },
   },
-  plugins: [],
-};
-export default config;
+  plugins: [require("@tailwindcss/typography"), require("@tailwindcss/forms")],
+});

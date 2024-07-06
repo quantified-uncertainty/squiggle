@@ -293,7 +293,7 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
       // the run starts.
       // (It's possible there are still race conditions here.)
       setTimeout(() => {
-        project.removeSource(sourceId);
+        // project.removeSource(sourceId);
       }, 10);
     };
   }, [project, sourceId]);

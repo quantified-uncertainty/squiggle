@@ -1,65 +1,103 @@
 "use client";
-import { useChat } from "ai/react";
-import { useState } from "react";
+import { experimental_useObject as useObject } from "ai/react";
+import { useEffect, useState } from "react";
+import { z } from "zod";
 
-export function Pagee() {
-  const [generation, setGeneration] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+import { SquigglePlayground } from "@quri/squiggle-components";
 
-  return (
-    <div>
-      <div
-        onClick={async () => {
-          setIsLoading(true);
+import { AVAILABLE_MODELS, ModelInfo } from "@/app/utils/llms"; // Adjust the import path as needed
 
-          await fetch("/api/completion", {
-            method: "POST",
-            body: JSON.stringify({
-              prompt: "Make a complex finance china model.",
-            }),
-          }).then((response) => {
-            response.json().then((json) => {
-              setGeneration(json.code);
-              setIsLoading(false);
-            });
-          });
-        }}
-      >
-        Generate
-        {JSON.stringify(generation)}
-      </div>
-
-      {isLoading ? "Loading..." : <pre>{JSON.stringify(generation)}</pre>}
-    </div>
-  );
-}
-export function Chat() {
-  const { messages, input, handleInputChange, handleSubmit } = useChat();
-  return (
-    <div className="stretch mx-auto flex w-full max-w-md flex-col py-24">
-      {messages.map((m) => (
-        <div key={m.id} className="whitespace-pre-wrap">
-          {m.role === "user" ? "User: " : "AI: "}
-          {m.content}
-        </div>
-      ))}
-
-      <form onSubmit={handleSubmit}>
-        <input
-          className="fixed bottom-0 mb-8 w-full max-w-md rounded border border-gray-300 p-2 shadow-xl"
-          value={input}
-          placeholder="Say something..."
-          onChange={handleInputChange}
-        />
-      </form>
-    </div>
-  );
-}
+const squiggleSchema = z.object({
+  code: z.string().describe("Squiggle code snippet"),
+});
 
 export default function Home() {
+  const [prompt, setPrompt] = useState(
+    "Make a 1-line model, that is just 1 line in total, no comments, no decorators. Be creative."
+  );
+  const [selectedModel, setSelectedModel] = useState<ModelInfo>(
+    AVAILABLE_MODELS[0]
+  );
+  const [playgroundOpacity, setPlaygroundOpacity] = useState(100);
+  const { object, submit, isLoading, stop } = useObject({
+    api: "/api/completion",
+    schema: squiggleSchema,
+  });
+
+  useEffect(() => {
+    if (object?.code) {
+      setPlaygroundOpacity(100);
+    }
+  }, [object?.code]);
+
+  const handleSubmit = () => {
+    setPlaygroundOpacity(50);
+
+    submit({ prompt, model: selectedModel.backendTitle });
+    setPrompt("");
+  };
+
+  const handleStop = () => {
+    stop();
+    setPlaygroundOpacity(100);
+  };
+
   return (
-    <main>
-      <Pagee />
-    </main>
+    <div className="flex h-screen">
+      {/* Left column: Chat and Form */}
+      <div className="flex w-1/4 flex-col p-4">
+        <div className="mb-4">
+          <select
+            className="w-full rounded border p-2"
+            value={selectedModel.backendTitle}
+            onChange={(e) =>
+              setSelectedModel(
+                AVAILABLE_MODELS.find(
+                  (m) => m.backendTitle === e.target.value
+                ) || AVAILABLE_MODELS[0]
+              )
+            }
+          >
+            {AVAILABLE_MODELS.map((model) => (
+              <option key={model.backendTitle} value={model.backendTitle}>
+                {model.presentedTitle} ({model.company})
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex">
+          <textarea
+            className="flex-grow rounded-l border p-2"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Enter your prompt here"
+          />
+          <button
+            className="rounded-r bg-blue-500 px-4 py-2 text-white"
+            onClick={handleSubmit}
+            disabled={isLoading}
+          >
+            {isLoading ? "Generating..." : "Send"}
+          </button>
+        </div>
+        {isLoading && (
+          <button
+            className="mt-2 rounded bg-red-500 px-4 py-2 text-white"
+            onClick={handleStop}
+          >
+            Stop Generation
+          </button>
+        )}
+      </div>
+
+      {/* Right column: SquigglePlayground */}
+      <div className="w-3/4 p-4" style={{ opacity: playgroundOpacity / 100 }}>
+        <SquigglePlayground
+          defaultCode={object?.code || "// Your Squiggle code will appear here"}
+          key={object?.code}
+          onNewSimulation={(e: any) => console.log("NEW SIMULATION", e)}
+        />
+      </div>
+    </div>
   );
 }
