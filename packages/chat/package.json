@@ -11,17 +11,22 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^0.0.27",
     "@ai-sdk/openai": "^0.0.34",
+    "@anthropic-ai/sdk": "^0.24.3",
     "@quri/squiggle-components": "workspace:*",
     "@quri/versioned-squiggle-components": "workspace:*",
     "@tailwindcss/typography": "^0.5.13",
     "ai": "^3.2.16",
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "lucide-react": "^0.400.0",
     "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18",
+    "ts-node": "^10.9.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^20.12.8",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",

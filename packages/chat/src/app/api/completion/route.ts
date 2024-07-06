@@ -198,7 +198,13 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { prompt, model: backendTitle } = body;
+    const {
+      prompt,
+      model: backendTitle,
+      previousPrompt,
+      previousCode,
+      previousResponse,
+    } = body;
 
     if (!prompt) {
       throw new Error("Prompt is required");
@@ -220,11 +226,27 @@ export async function POST(req: Request) {
       throw new Error("Unsupported model company");
     }
 
+    const previousSection = `
+---------------
+## Previous Run Info
+prompt: ${previousPrompt}
+code: ${previousCode}
+----------------
+response: ${previousResponse}
+----------------
+
+
+    `;
+
+    const fullPrompt = `Generate Squiggle code for the following prompt or request for a code change: ${prompt}
+${previousPrompt ? previousSection : ""}
+Use the Squiggle programming language. ${squiggleDocs}`;
+
     const result: StreamObjectResult<z.infer<typeof squiggleSchema>> =
       await streamObject({
         model: modelFunction,
         schema: squiggleSchema,
-        prompt: `Generate Squiggle code for the following prompt: ${prompt}\n\nUse the Squiggle programming language. ${squiggleDocs}`,
+        prompt: fullPrompt,
       });
 
     // Handle client disconnection
