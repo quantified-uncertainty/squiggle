@@ -563,3 +563,17 @@ y :: feet = (x < 10 ? mul : div)(x)
 }, ["k", "x", "x", "x", "y"]]));
 
 });
+
+describe("explicit unit types for functions", () => {
+    test("incorrect argument type", () => expect(() => getUnitTypes(`
+convertUnits(x :: kg) :: lbs = x * 2.2
+arg :: lbs = 45
+convertUnits(arg)
+`)).toThrow("TODO"));
+
+    test("incorrect return type", () => expect(() => getUnitTypes(`
+convertUnits(x :: kg) :: lbs = x * 2.2
+res :: kg = convertUnits(45)
+`)).toThrow("TODO"));
+
+});

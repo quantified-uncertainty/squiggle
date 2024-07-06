@@ -1,3 +1,4 @@
+import { nodeToString } from "./parse.js";
 import { ASTNode } from "./types.js";
 import { ICompileError } from "../errors/IError.js";
 
@@ -146,7 +147,7 @@ function createTypeConstraint(node: ASTNode): TypeConstraint {
                 throw new ICompileError(`Unknown infix operator in type signature: ${node.op}`, node.location);
             }
         default:
-            throw new ICompileError(`Unknown syntax in type signature: ${node}`, node.location);
+            throw new ICompileError(`Unknown syntax in type signature: ${nodeToString(node)}`, node.location);
     }
 }
 
@@ -298,15 +299,31 @@ function lambdaFindTypeConstraints(
 
             var returnTypeConstraint = innerFindTypeConstraints(node.body, typeConstraints, scopes);
 
-            // Get all constraints that were added within the function body and
-            // delete them from the global constraints list.
+            // Get all constraints that were added within the function body
             var newlyAddedConstraints = typeConstraints.slice(numPreConstraints).map((pair) => pair[0]);
-            typeConstraints.splice(numPreConstraints, newlyAddedConstraints.length);
+            // TODO
+            // typeConstraints.splice(numPreConstraints, newlyAddedConstraints.length);
             newlyAddedConstraints = [returnTypeConstraint].concat(newlyAddedConstraints);
+            var explicitParamConstraints = [];
 
             // loop thru all new constraints and replace variables with params
-            for (const constraint of newlyAddedConstraints) {
-                for (let i = 0; i < node.args.length; i++) {
+            for (let i = 0; i < node.args.length; i++) {
+                const arg = (node.args[i] as { returnUnitType?: ASTNode });
+                if (arg.returnUnitType) {
+                    const paramType = createTypeConstraint(arg.returnUnitType);
+                    const paramAsConstraint = {
+                        defined: true,
+                        variables: {},
+                        parameters: { [i]: 1 },
+                        units: {},
+                    };
+                    const newConstraint = requireConstraintsToBeEqual(paramType, paramAsConstraint);
+                    console.log("Adding param constraint:", JSON.stringify(newConstraint));
+                    addTypeConstraint(typeConstraints, newConstraint, node);
+                    explicitParamConstraints.push(newConstraint);
+                }
+
+                for (const constraint of newlyAddedConstraints) {
                     const paramName = (node.args[i] as {value: string}).value;
                     const paramId = scopes.stack[scopes.stack.length - 1][paramName];
                     if (paramId in constraint.variables) {
@@ -317,7 +334,16 @@ function lambdaFindTypeConstraints(
             }
             scopes.stack.pop();
 
-            return newlyAddedConstraints;
+            if (node.returnUnitType) {
+                const returnType = createTypeConstraint(node.returnUnitType);
+                const newConstraint = requireConstraintsToBeEqual(returnTypeConstraint, returnType);
+                console.log("Adding return type constraint:", JSON.stringify(newConstraint));
+                addTypeConstraint(typeConstraints, newConstraint, node);
+                // replace the old return value type because it's obsolete
+                newlyAddedConstraints[0] = newConstraint;
+            }
+
+            return newlyAddedConstraints.concat(explicitParamConstraints);
         default:
             throw new Error(`Argument to lambdaFindTypeConstraints must have type lambda, not ${node.type}`);
     }
@@ -456,9 +482,8 @@ function innerFindTypeConstraints(
             // handled in separate switch statement below
             break;
         default:
-            // TODO: handle other node types. this is a quick fix to make tests pass
+            // TODO: handle other node types
             return NO_CONSTRAINT;
-            // throw new ICompileError(`No way to find type constraints for node type ${node.type}: ${node}`, node.location);
     }
 
     console.assert(node.type === "InfixCall");
@@ -736,7 +761,7 @@ function checkTypeConstraints(
  * Put known unit-type information for each variable into the list of decorators
  * for the ASTNode where the variable is defined.
  *
- * TODO: has not been tested at all
+ * TODO: currently broken
  */
 function putUnitTypesOnAST(variableTypes: VariableUnitTypes, scopes: ScopeInfo) {
     for (const variableId in variableTypes) {
@@ -765,7 +790,7 @@ function putUnitTypesOnAST(variableTypes: VariableUnitTypes, scopes: ScopeInfo) 
 export function unitTypeCheck(node: ASTNode): void {
     const [typeConstraints, scopes] = findTypeConstraints(node);
     const variableTypes = checkTypeConstraints(typeConstraints, scopes);
-    putUnitTypesOnAST(variableTypes, scopes);
+    // putUnitTypesOnAST(variableTypes, scopes);
 }
 
 export const exportedForTesting = {

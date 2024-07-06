@@ -92,6 +92,7 @@ export function serializeAstNode(
         ...node,
         args: node.args.map(visit.ast),
         body: visit.ast(node.body),
+        returnUnitType: node.returnUnitType ? visit.ast(node.returnUnitType) : undefined,
       };
     case "Array":
       return {
@@ -180,11 +181,15 @@ export function serializeAstNode(
     case "ImplicitType":
       return node;
     case "Identifier":
-      return node;
+      return {
+        ...node,
+        typeSignature: node.typeSignature ? visit.ast(node.typeSignature) : undefined,
+      }
     case "IdentifierWithAnnotation":
       return {
         ...node,
         annotation: visit.ast(node.annotation),
+        typeSignature: node.typeSignature ? visit.ast(node.typeSignature) : undefined,
       };
     case "Float":
     case "String":
@@ -240,6 +245,7 @@ export function deserializeAstNode(
         ...node,
         args: node.args.map(visit.ast),
         body: visit.ast(node.body),
+        returnUnitType: node.returnUnitType ? visit.ast(node.returnUnitType) as TypedNode<"TypeSignature"> : undefined,
       };
     case "Array":
       return {
@@ -328,13 +334,17 @@ export function deserializeAstNode(
         args: [visit.ast(node.args[0]), visit.ast(node.args[1])],
       };
     case "ImplicitType":
-        return node;
-    case "Identifier":
       return node;
+    case "Identifier":
+      return {
+        ...node,
+          typeSignature: node.typeSignature ? visit.ast(node.typeSignature) as TypedNode<"TypeSignature"> : undefined,
+      };
     case "IdentifierWithAnnotation":
       return {
         ...node,
         annotation: visit.ast(node.annotation),
+          typeSignature: node.typeSignature ? visit.ast(node.typeSignature) as TypedNode<"TypeSignature"> : undefined,
       };
     case "Float":
     case "String":

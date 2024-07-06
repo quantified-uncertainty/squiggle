@@ -86,9 +86,9 @@ letStatement
     { return h.nodeLetStatement(decorators, variable, typeSignature, value, Boolean(exported), location()); }
 
 defunStatement
-  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier '(' _nl args:functionParameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
+  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier '(' _nl args:functionParameters _nl ')' returnUnitType:typeSignature _ assignmentOp _nl body:innerBlockOrExpression
     {
-      const value = h.nodeLambda(args, body, location(), variable);
+      const value = h.nodeLambda(args, body, location(), variable, returnUnitType);
       return h.nodeDefunStatement(decorators, variable, value, Boolean(exported), location());
     }
 
@@ -96,9 +96,9 @@ defunStatement
 
 functionParameters = functionParameter|.., commaSeparator|
   functionParameter
-    = id:dollarIdentifier annotation:(_ ':' _nl @expression)?
+    = id:dollarIdentifier annotation:(_ ':' _nl @expression)? paramUnitType:typeSignature
       {
-        return annotation ? h.nodeIdentifierWithAnnotation(id.value, annotation, location()) : id;
+        return annotation ? h.nodeIdentifierWithAnnotation(id.value, annotation, paramUnitType, location()) : h.nodeIdentifierWithUnitType(id.value, paramUnitType, location());
       }
 
 /*
@@ -358,10 +358,10 @@ lambda
   = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}'
     {
       statements.push(finalExpression);
-      return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined);
+      return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined, undefined);
     }
   / '{' _nl '|' _nl args:functionParameters _nl '|' _nl finalExpression: expression  _nl '}'
-    { return h.nodeLambda(args, finalExpression, location(), undefined); }
+    { return h.nodeLambda(args, finalExpression, location(), undefined, undefined); }
 
 arrayConstructor 'array'
   = '[' _nl ']'

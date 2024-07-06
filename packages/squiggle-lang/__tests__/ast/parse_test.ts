@@ -157,11 +157,16 @@ describe("Peggy parse", () => {
     testEvalError("Foo.bar = 1");
   });
 
-  describe("typed variables", () => {
+  describe("unit-typed variables", () => {
     testParse("x :: kg = 1", "(Program (LetStatement :x (TypeSignature :kg) 1))");
     testParse("x :: kg/m = 1", "(Program (LetStatement :x (TypeSignature (InfixType / :kg :m)) 1))");
     testParse("x :: kg*m/s = 1", "(Program (LetStatement :x (TypeSignature (InfixType / (InfixType * :kg :m) :s)) 1))");
     testParse("x :: m/s/s = 1", "(Program (LetStatement :x (TypeSignature (InfixType / (InfixType / :m :s) :s)) 1))");
+  });
+
+  describe("unit-typed functions", () => {
+      testParse("f(x :: kg) = y", "(Program (DefunStatement :f (Lambda (Identifier x (TypeSignature :kg)) :y)))");
+    testParse("f(x) :: lbs = y", "(Program (DefunStatement :f (Lambda :x :y (TypeSignature :lbs))))");
   });
 
   describe("functions", () => {

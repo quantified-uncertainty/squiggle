@@ -196,12 +196,21 @@ export function nodeIdentifier(
   return { type: "Identifier", value, location };
 }
 
+export function nodeIdentifierWithUnitType(
+  value: string,
+  typeSignature: TypedNode<"TypeSignature">,
+  location: LocationRange
+): TypedNode<"Identifier"> {
+  return { type: "Identifier", value, typeSignature, location };
+}
+
 export function nodeIdentifierWithAnnotation(
   variable: string,
   annotation: ASTNode,
+  typeSignature: TypedNode<"TypeSignature">,
   location: LocationRange
 ): TypedNode<"IdentifierWithAnnotation"> {
-  return { type: "IdentifierWithAnnotation", variable, annotation, location };
+  return { type: "IdentifierWithAnnotation", variable, annotation, typeSignature, location };
 }
 
 export function nodeKeyValue(
@@ -221,9 +230,10 @@ export function nodeLambda(
   args: ASTNode[],
   body: ASTNode,
   location: LocationRange,
-  name?: TypedNode<"Identifier">
+  name?: TypedNode<"Identifier">,
+  returnUnitType?: TypedNode<"TypeSignature">,
 ): TypedNode<"Lambda"> {
-  return { type: "Lambda", args, body, location, name: name?.value };
+    return { type: "Lambda", args: args, body: body, name: name?.value, returnUnitType: returnUnitType, location: location };
 }
 export function nodeLetStatement(
   decorators: TypedNode<"Decorator">[],

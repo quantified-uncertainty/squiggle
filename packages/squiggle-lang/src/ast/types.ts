@@ -158,10 +158,14 @@ type NodeIdentifierWithAnnotation = N<
   {
     variable: string;
     annotation: ASTNode;
+    typeSignature?: NodeTypeSignature;
   }
 >;
 
-type NodeIdentifier = N<"Identifier", { value: string }>;
+type NodeIdentifier = N<"Identifier", {
+    value: string;
+    typeSignature?: NodeTypeSignature;
+}>;
 
 type NodeDecorator = N<
   "Decorator",
@@ -199,6 +203,7 @@ type NodeLambda = N<
     args: ASTNode[];
     body: ASTNode;
     name?: string;
+    returnUnitType?: NodeTypeSignature;
   }
 >;
 

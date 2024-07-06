@@ -86,33 +86,33 @@ export function nodeToString(
           node.fractional === null ? "" : `.${node.fractional}`
         }${node.exponent === null ? "" : `e${node.exponent}`}`;
       case "Identifier":
-        return `:${node.value}`;
+        if (node.typeSignature && !node.typeSignature.isImplicit) {
+          return sExpr([node.value, toSExpr(node.typeSignature)]);
+        } else {
+          return `:${node.value}`;
+        }
       case "IdentifierWithAnnotation":
         return sExpr([node.variable, toSExpr(node.annotation)]);
       case "KeyValue":
         return sExpr([node.key, node.value].map(toSExpr));
       case "Lambda":
-        return sExpr([...node.args, node.body].map(toSExpr));
+        return sExpr([
+          ...node.args.map(toSExpr),
+          toSExpr(node.body),
+          node.returnUnitType && !node.returnUnitType.isImplicit ? toSExpr(node.returnUnitType) : undefined,
+        ]);
       case "Decorator":
         return sExpr([node.name, ...node.args].map(toSExpr));
       case "LetStatement":
-        if (node.typeSignature.isImplicit) {
-          return sExpr([
-            toSExpr(node.variable),
-            toSExpr(node.value),
-            node.exported ? "exported" : undefined,
-            ...node.decorators.map(toSExpr),
-          ]);
-        } else {
-          return sExpr([
-            toSExpr(node.variable),
-            toSExpr(node.typeSignature),
-            toSExpr(node.value),
-            node.exported ? "exported" : undefined,
-            ...node.decorators.map(toSExpr),
-          ]);
-        }
+        return sExpr([
+          toSExpr(node.variable),
+          node.typeSignature.isImplicit ? undefined : toSExpr(node.typeSignature),
+          toSExpr(node.value),
+          node.exported ? "exported" : undefined,
+          ...node.decorators.map(toSExpr),
+        ]);
       case "DefunStatement":
+        console.log("node.value = ", node.value);
         return sExpr([
           toSExpr(node.variable),
           toSExpr(node.value),
