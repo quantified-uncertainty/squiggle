@@ -267,6 +267,15 @@ x < y
 `, "test"
         )).toThrow("Conflicting unit types"));
 
+        test("negation operator preserves type", () => expect(getUnitTypes(
+            `
+x :: kg = 3.5
+y = -x
+`)).toEqual([{
+    0: {kg: 1},
+    1: {kg: 1},
+}, ["x", "y"]]));
+
         test("ternary branches must have the same type", () => expect(() => parse(
             `
 a :: kg = 2

@@ -431,6 +431,14 @@ function innerFindTypeConstraints(
         case "Float":
         case "UnitValue":
             return NO_CONSTRAINT;
+        case "UnaryCall":
+            switch (node.op) {
+                case "-":
+                case ".-":
+                    return innerFindTypeConstraints(node.arg, typeConstraints, scopes);
+                default:
+                    return NO_CONSTRAINT;
+            }
         case "Ternary":
             // Require the true and false expressions to have the same unit
             // type, and require the result to have the same unit type as both.
