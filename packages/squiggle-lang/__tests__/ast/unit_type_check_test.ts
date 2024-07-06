@@ -501,4 +501,25 @@ n
 f(10)
 `)).toThrow(`Conflicting unit types`));
 
+    test("higher-order function isn't type-checked", () => expect(getUnitTypes(`
+apply(f, x) = f(x)
+double(x) = 2*x
+x :: m = 2
+y = apply(double, x)
+`)).toEqual([{
+    3: {m: 1},
+}, ["f", "x", "x", "x", "y"]]));
+
+    test("function whose value isn't known until runtime isn't type-checked", () => expect(getUnitTypes(`
+k :: kg = 10
+mul(x) = x * k
+div(x) = x / k
+x :: meters = 25
+y :: feet = (x < 10 ? mul : div)(x)
+`)).toEqual([{
+    0: {kg: 1},
+    3: {meters: 1},
+    4: {feet: 1},
+}, ["k", "x", "x", "x", "y"]]));
+
 });

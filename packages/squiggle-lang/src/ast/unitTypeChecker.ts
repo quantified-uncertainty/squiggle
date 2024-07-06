@@ -105,7 +105,6 @@ function subConstraintToString(subConstraint: { [key: VariableId | string]: numb
     const entries = Object.entries(subConstraint).map(([key, value]) => {
         let name = "";
         if (isVariable) {
-            console.assert(typeof key !== "string", `In subConstraintToString, expected variable key to be a number, got ${key}`);
             const node = scopes.variableNodes[key as unknown as VariableId] as { value: string };
             name = node.value;
         } else {
@@ -392,7 +391,12 @@ function innerFindTypeConstraints(
             }
             var name = (node.fn as { value: string }).value;
             var index = scopes.stack[scopes.stack.length - 1][name];
-            console.assert(index >= FUNCTION_OFFSET);
+            if (index < FUNCTION_OFFSET) {
+                // The referenced identifier is not known to be a function. That
+                // doesn't mean it's *not* a function because it might be set as
+                // a function at runtime, but we can't type-check it.
+                return NO_CONSTRAINT;
+            }
             var functionConstraints = scopes.functionConstraints[index - FUNCTION_OFFSET];
 
             // substitute function params for args
