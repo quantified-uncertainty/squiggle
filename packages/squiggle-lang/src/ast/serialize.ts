@@ -178,8 +178,6 @@ export function serializeAstNode(
         ...node,
         args: [visit.ast(node.args[0]), visit.ast(node.args[1])],
       };
-    case "ImplicitType":
-      return node;
     case "Identifier":
       return {
         ...node,
@@ -326,15 +324,13 @@ export function deserializeAstNode(
     case "TypeSignature":
       return {
         ...node,
-        body: visit.ast(node.body) as TypedNode<"ImplicitType" | "InfixType">,
+        body: visit.ast(node.body),
       };
     case "InfixType":
       return {
         ...node,
         args: [visit.ast(node.args[0]), visit.ast(node.args[1])],
       };
-    case "ImplicitType":
-      return node;
     case "Identifier":
       return {
         ...node,

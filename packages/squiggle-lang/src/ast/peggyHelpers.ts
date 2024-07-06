@@ -154,23 +154,12 @@ export function nodeProgram(
 }
 
 export function nodeTypeSignature(
-  isImplicit: boolean,
   body: ASTNode,
   location: LocationRange
 ): TypedNode<"TypeSignature"> {
   return {
     type: "TypeSignature",
-    isImplicit: isImplicit,
     body: body,
-    location: location
-  };
-}
-
-export function nodeImplicitType(
-  location: LocationRange
-): TypedNode<"ImplicitType"> {
-  return {
-    type: "ImplicitType",
     location: location
   };
 }

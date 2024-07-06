@@ -61,32 +61,24 @@ decorator
 typeSignature
   = _ "::" _ body:infixType
     {
-      return h.nodeTypeSignature(false, body, location());
-    }
-  / body:implicitType
-    {
-      return h.nodeTypeSignature(true, body, location());
+      return h.nodeTypeSignature(body, location());
     }
 
 infixType
-  = head:identifier tail:(@typeMultiplicativeOp @identifier)*
+  = head:identifier _ tail:(@typeMultiplicativeOp _ @identifier)*
     { return h.makeInfixTypeChain(head, tail, location()); }
   typeMultiplicativeOp "operator" = '*' / '/'
-
-implicitType
-  = ""
-    { return h.nodeImplicitType(location()); }
 
 statement
   = letStatement
   / defunStatement
 
 letStatement
-  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier typeSignature:typeSignature _ assignmentOp _nl value:innerBlockOrExpression
+  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier typeSignature:typeSignature? _ assignmentOp _nl value:innerBlockOrExpression
     { return h.nodeLetStatement(decorators, variable, typeSignature, value, Boolean(exported), location()); }
 
 defunStatement
-  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier '(' _nl args:functionParameters _nl ')' returnUnitType:typeSignature _ assignmentOp _nl body:innerBlockOrExpression
+  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier '(' _nl args:functionParameters _nl ')' returnUnitType:typeSignature? _ assignmentOp _nl body:innerBlockOrExpression
     {
       const value = h.nodeLambda(args, body, location(), variable, returnUnitType);
       return h.nodeDefunStatement(decorators, variable, value, Boolean(exported), location());
@@ -96,7 +88,7 @@ defunStatement
 
 functionParameters = functionParameter|.., commaSeparator|
   functionParameter
-    = id:dollarIdentifier annotation:(_ ':' _nl @expression)? paramUnitType:typeSignature
+    = id:dollarIdentifier annotation:(_ ':' _nl @expression)? paramUnitType:typeSignature?
       {
         return annotation ? h.nodeIdentifierWithAnnotation(id.value, annotation, paramUnitType, location()) : h.nodeIdentifierWithUnitType(id.value, paramUnitType, location());
       }

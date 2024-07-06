@@ -134,8 +134,6 @@ function createTypeConstraint(node: ASTNode): TypeConstraint {
                 parameters: {},
                 units: { [node.value]: 1 },
             };
-        case "ImplicitType":
-            return NO_CONSTRAINT;
         case "InfixType":
             let left = createTypeConstraint(node.args[0]);
             let right = createTypeConstraint(node.args[1]);

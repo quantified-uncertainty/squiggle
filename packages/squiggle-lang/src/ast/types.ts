@@ -222,12 +222,9 @@ type NodeTernary = N<
 type NodeTypeSignature = N<
   "TypeSignature",
   {
-    isImplicit: boolean;
     body: ASTNode;
   }
 >;
-
-type NodeImplicitType = N<"ImplicitType", {}>;
 
 type NodeInfixType = N<
   "InfixType",
@@ -269,7 +266,6 @@ export type ASTNode =
   // type signature
   | NodeTypeSignature
   | NodeInfixType
-  | NodeImplicitType
   // identifiers
   | NodeIdentifier
   | NodeIdentifierWithAnnotation

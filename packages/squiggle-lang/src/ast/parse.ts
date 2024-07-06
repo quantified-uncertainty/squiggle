@@ -86,7 +86,7 @@ export function nodeToString(
           node.fractional === null ? "" : `.${node.fractional}`
         }${node.exponent === null ? "" : `e${node.exponent}`}`;
       case "Identifier":
-        if (node.typeSignature && !node.typeSignature.isImplicit) {
+        if (node.typeSignature) {
           return sExpr([node.value, toSExpr(node.typeSignature)]);
         } else {
           return `:${node.value}`;
@@ -99,14 +99,14 @@ export function nodeToString(
         return sExpr([
           ...node.args.map(toSExpr),
           toSExpr(node.body),
-          node.returnUnitType && !node.returnUnitType.isImplicit ? toSExpr(node.returnUnitType) : undefined,
+          node.returnUnitType ? toSExpr(node.returnUnitType) : undefined,
         ]);
       case "Decorator":
         return sExpr([node.name, ...node.args].map(toSExpr));
       case "LetStatement":
         return sExpr([
           toSExpr(node.variable),
-          node.typeSignature.isImplicit ? undefined : toSExpr(node.typeSignature),
+          node.typeSignature ? toSExpr(node.typeSignature) : undefined,
           toSExpr(node.value),
           node.exported ? "exported" : undefined,
           ...node.decorators.map(toSExpr),
@@ -131,8 +131,6 @@ export function nodeToString(
         return sExpr([toSExpr(node.body)]);
       case "InfixType":
         return sExpr([node.op, ...node.args.map(toSExpr)]);
-      case "ImplicitType":
-        return sExpr([]);
       case "UnitValue":
         return sExpr([toSExpr(node.value), node.unit]);
 

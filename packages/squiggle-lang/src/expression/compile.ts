@@ -398,7 +398,6 @@ function compileToContent(
     }
     case "TypeSignature":
     case "InfixType":
-    case "ImplicitType":
       // should never happen
       throw new ICompileError(
         `Can't compile ${ast.type} node of type signature`,
