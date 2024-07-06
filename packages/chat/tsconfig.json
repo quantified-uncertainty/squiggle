@@ -1,32 +1,13 @@
 {
-  "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next",
-      },
-    ],
-    "paths": {
-      "@/*": ["./src/*"],
-    },
-  },
+  "extends": "@quri/configs/tsconfig.nextjs.json",
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "script.ts",
+    "src/squigglePrompts.ts",
+    "src/script.mts",
   ],
   "exclude": ["node_modules"],
 }
+, "src/squigglePrompts.mts"
