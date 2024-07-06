@@ -431,6 +431,19 @@ function innerFindTypeConstraints(
         case "Float":
         case "UnitValue":
             return NO_CONSTRAINT;
+        case "Ternary":
+            // Require the true and false expressions to have the same unit
+            // type, and require the result to have the same unit type as both.
+
+            // the result of node.condition is a boolean so it doesn't have a
+            // unit type, but it might contain sub-expressions that we need to
+            // check
+            innerFindTypeConstraints(node.condition, typeConstraints, scopes);
+            const leftType = innerFindTypeConstraints(node.trueExpression, typeConstraints, scopes);
+            const rightType = innerFindTypeConstraints(node.falseExpression, typeConstraints, scopes);
+            const jointConstraint = requireConstraintsToBeEqual(leftType, rightType);
+            addTypeConstraint(typeConstraints, jointConstraint, node);
+            return leftType;
         case "InfixCall":
             // handled in separate switch statement below
             break;

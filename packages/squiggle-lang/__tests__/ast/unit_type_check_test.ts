@@ -267,6 +267,37 @@ x < y
 `, "test"
         )).toThrow("Conflicting unit types"));
 
+        test("ternary branches must have the same type", () => expect(() => parse(
+            `
+a :: kg = 2
+b :: lb = 0.5
+a == a ? a : b
+`, "test"
+        )).toThrow("Conflicting unit types"));
+
+        test("condition in ternary branch gets type-checked", () => expect(() => parse(
+            `
+a :: kg = 2
+b :: lb = 0.5
+a < b ? 1 : -1
+`, "test"
+        )).toThrow("Conflicting unit types"));
+
+
+        test("can infer the type of one ternary branch based on the other branch", () => expect(getUnitTypes(
+            `
+a :: kg = 2
+b :: m = -6.8
+c = 0.5
+d = true ? a : (c / b)
+d
+`)).toEqual([{
+    0: {kg: 1},
+    1: {m: 1},
+    2: {kg: 1, m: 1},
+    3: {kg: 1},
+}, ["a", "b", "c", "d"]]));
+
         test("can re-declare a variable with a new type", () => expect(getUnitTypes(
             `
 x :: socks = 1
