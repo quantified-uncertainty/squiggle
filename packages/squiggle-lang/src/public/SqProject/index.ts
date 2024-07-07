@@ -354,7 +354,7 @@ export class SqProject {
       });
     } else {
       // TODO - try/catch?
-      // TODO - mark as building?
+      // TODO - mark as building; cancel if garbage-collected.
       output = await SqModuleOutput.make({
         module,
         environment,

@@ -10,6 +10,8 @@ import {
   SqProject,
 } from "@quri/squiggle-lang";
 
+import { useForceUpdate } from "./useForceUpdate.js";
+
 export type Simulation = {
   isStale: boolean;
   executionId: number;
@@ -17,37 +19,7 @@ export type Simulation = {
 };
 
 export function isSimulating(simulation: Simulation): boolean {
-  return simulation.isStale ?? false;
-}
-
-// Useful for debugging.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function useProjectActionLogger(project: SqProject) {
-  useEffect(() => {
-    const listener: Parameters<typeof project.addEventListener<"action">>[1] = (
-      event
-    ) => {
-      // eslint-disable-next-line no-console
-      console.log("action", event.data);
-    };
-    project.addEventListener("action", listener);
-    return () => project.removeEventListener("action", listener);
-  }, [project]);
-}
-
-// Useful for debugging.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function useProjectStateChangeLogger(project: SqProject) {
-  useEffect(() => {
-    const listener: Parameters<typeof project.addEventListener<"state">>[1] = (
-      event
-    ) => {
-      // eslint-disable-next-line no-console
-      console.log(event.data);
-    };
-    project.addEventListener("state", listener);
-    return () => project.removeEventListener("state", listener);
-  }, [project]);
+  return simulation.isStale;
 }
 
 type SetupSettings =
@@ -81,56 +53,10 @@ type UseSimulatorResult = {
   runSimulation: () => void;
 };
 
-function useSetup({
-  setup,
-  sourceId,
-  environment,
-  runnerName,
-}: {
-  setup: SetupSettings;
-  sourceId?: string;
-  environment?: Env;
-  runnerName?: RunnerName;
-}) {
-  const _sourceId = useMemo(() => {
-    // random; https://stackoverflow.com/a/12502559
-    return sourceId || Math.random().toString(36).slice(2);
-  }, [sourceId]);
-
-  // Intentionally using `useState` instead of `useMemo` - updates to project configuration happen as effects.
-  const [project] = useState(() => {
-    const getRunner = () =>
-      runnerName
-        ? runnerByName(runnerName, runnerName === "web-worker" ? 2 : 1)
-        : undefined;
-
-    switch (setup.type) {
-      case "standalone":
-        return new SqProject({
-          environment,
-          runner: getRunner(),
-        });
-      case "projectFromLinker":
-        return new SqProject({
-          environment,
-          linker: setup.linker,
-          runner: getRunner(),
-        });
-      case "project":
-        return setup.project;
-      default:
-        throw new Error("Invalid setup type");
-    }
-  });
-
-  return { sourceId: _sourceId, project };
-}
-
 type State = {
   autorunMode: boolean;
   executionId: number;
-  codeToSimulate: string | undefined;
-  simulation: Simulation | undefined;
+  output: SqModuleOutput | undefined;
 };
 
 type Action =
@@ -139,54 +65,48 @@ type Action =
       value: boolean;
     }
   | {
-      type: "run";
-    }
-  | {
-      type: "setSimulation";
+      type: "setOutput";
       value: SqModuleOutput;
     };
 
 export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
-  const { sourceId, project } = useSetup({
-    setup: args.setup,
-    sourceId: args.sourceId,
-    environment: args.environment,
-    runnerName: args.runnerName,
+  const sourceId = useMemo(() => {
+    // random; https://stackoverflow.com/a/12502559
+    return args.sourceId || Math.random().toString(36).slice(2);
+  }, [args.sourceId]);
+
+  // Intentionally using `useState` instead of `useMemo` - updates to project configuration happen as effects.
+  const [project] = useState(() => {
+    const getRunner = () =>
+      args.runnerName
+        ? runnerByName(
+            args.runnerName,
+            args.runnerName === "web-worker" ? 2 : 1
+          )
+        : undefined;
+
+    switch (args.setup.type) {
+      case "standalone":
+        return new SqProject({
+          environment: args.environment,
+          runner: getRunner(),
+        });
+      case "projectFromLinker":
+        return new SqProject({
+          environment: args.environment,
+          linker: args.setup.linker,
+          runner: getRunner(),
+        });
+      case "project":
+        return args.setup.project;
+      default:
+        throw new Error("Invalid setup type");
+    }
   });
 
   // Uncomment these lines if you need to debug SqProject actions or state changes:
   // useProjectActionLogger(project);
   // useProjectStateChangeLogger(project);
-
-  const [state, dispatch] = useReducer(reducer, {
-    autorunMode: args.initialAutorunMode ?? true,
-    executionId: 0,
-    codeToSimulate: args.initialAutorunMode ? args.code : undefined,
-    simulation: undefined,
-  });
-
-  const rootModule = useMemo(
-    () =>
-      state.codeToSimulate
-        ? new SqModule({
-            name: sourceId,
-            code: state.codeToSimulate,
-          })
-        : undefined,
-    [sourceId, state.codeToSimulate]
-  );
-
-  // TODO - generate random head name? `project` could be passed from outside and have a head already.
-  const mainHead = "main";
-
-  // Whenever the code changes, we update the project.
-  // Setting the head will automatically run it.
-  useEffect(() => {
-    if (!rootModule) {
-      return;
-    }
-    project.setHead(mainHead, { module: rootModule });
-  }, [project, rootModule]);
 
   function reducer(state: State, action: Action): State {
     switch (action.type) {
@@ -194,28 +114,12 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
         return {
           ...state,
           autorunMode: action.value,
-          codeToSimulate: action.value ? args.code : state.codeToSimulate,
         };
-      case "run": {
+      case "setOutput": {
         return {
           ...state,
-          codeToSimulate: args.code,
-          simulation: state.simulation
-            ? {
-                ...state.simulation,
-                isStale: true,
-              }
-            : undefined,
-        };
-      }
-      case "setSimulation": {
-        return {
-          ...state,
-          simulation: {
-            output: action.value,
-            executionId: (state.simulation?.executionId ?? 0) + 1,
-            isStale: false,
-          },
+          output: action.value,
+          executionId: state.executionId + 1,
         };
       }
       default:
@@ -223,22 +127,55 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     }
   }
 
+  const [state, dispatch] = useReducer(reducer, {
+    autorunMode: args.initialAutorunMode ?? true,
+    executionId: 0,
+    output: undefined,
+  });
+
+  // TODO - generate random head name? `project` could be passed from outside and have a head already.
+  const mainHead = "main";
+
+  const forceUpdate = useForceUpdate();
+
+  const runSimulation = useCallback(() => {
+    if (args.environment && args.environment !== project.state.environment) {
+      project.setEnvironment(args.environment);
+    }
+
+    const rootModule = new SqModule({
+      name: sourceId,
+      code: args.code,
+    });
+    project.setHead(mainHead, { module: rootModule });
+    forceUpdate(); // necessary for correct isStale
+  }, [project, sourceId, forceUpdate, args.environment, args.code]);
+
+  // Run on code and environment changes if autorun is on.
+  useEffect(() => {
+    if (state.autorunMode) {
+      runSimulation();
+    }
+  }, [state.autorunMode, runSimulation]);
+
   // callbacks with stable identity
   const setAutorunMode = useCallback(
     (value: boolean) => dispatch({ type: "setAutorunMode", value }),
     []
   );
 
-  const runSimulation = useCallback(() => dispatch({ type: "run" }), []);
-
   // Whenever the main head output arrives, we capture it.
   useEffect(() => {
     const listener: Parameters<typeof project.addEventListener<"output">>[1] = (
       event
     ) => {
-      if (rootModule && event.data.output.module.hash() === rootModule.hash()) {
+      if (!project.hasHead(mainHead)) {
+        return;
+      }
+      const rootModule = project.getHead(mainHead);
+      if (event.data.output.module.hash() === rootModule.hash()) {
         dispatch({
-          type: "setSimulation",
+          type: "setOutput",
           value: event.data.output,
         });
       }
@@ -246,18 +183,9 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     project.addEventListener("output", listener);
 
     return () => project.removeEventListener("output", listener);
-  }, [project, rootModule]);
+  }, [project]);
 
-  // Re-run on environment and runner changes.
-  useEffect(() => {
-    if (args.environment) {
-      project.setEnvironment(args.environment);
-    }
-    if (state.autorunMode) {
-      runSimulation();
-    }
-  }, [project, args.environment, state.autorunMode]);
-
+  // React to runner changes.
   useEffect(() => {
     if (!args.runnerName) {
       // Undefined runnerName shouldn't reset the project.
@@ -267,22 +195,19 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     project.setRunner(
       runnerByName(args.runnerName, args.runnerName === "web-worker" ? 2 : 1)
     );
-    if (state.autorunMode) {
-      runSimulation();
-    }
   }, [project, args.runnerName, state.autorunMode]);
-
-  // Run on code changes.
-  useEffect(() => {
-    if (state.autorunMode) {
-      runSimulation();
-    }
-  }, [state.autorunMode, args.code]);
 
   return {
     sourceId,
     project,
-    simulation: state.simulation,
+    simulation: state.output
+      ? {
+          executionId: state.executionId,
+          output: state.output,
+          isStale:
+            state.output.module.hash() !== project.getHead(mainHead).hash(),
+        }
+      : undefined,
     autorunMode: state.autorunMode,
     setAutorunMode,
     runSimulation,
