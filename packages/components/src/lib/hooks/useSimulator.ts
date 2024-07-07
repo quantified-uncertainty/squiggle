@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   Env,
@@ -53,22 +53,6 @@ type UseSimulatorResult = {
   runSimulation: () => void;
 };
 
-type State = {
-  autorunMode: boolean;
-  executionId: number;
-  output: SqModuleOutput | undefined;
-};
-
-type Action =
-  | {
-      type: "setAutorunMode";
-      value: boolean;
-    }
-  | {
-      type: "setOutput";
-      value: SqModuleOutput;
-    };
-
 export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
   const sourceId = useMemo(() => {
     // random; https://stackoverflow.com/a/12502559
@@ -108,33 +92,14 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
   // useProjectActionLogger(project);
   // useProjectStateChangeLogger(project);
 
-  function reducer(state: State, action: Action): State {
-    switch (action.type) {
-      case "setAutorunMode":
-        return {
-          ...state,
-          autorunMode: action.value,
-        };
-      case "setOutput": {
-        return {
-          ...state,
-          output: action.value,
-          executionId: state.executionId + 1,
-        };
-      }
-      default:
-        throw action satisfies never;
-    }
-  }
-
-  const [state, dispatch] = useReducer(reducer, {
-    autorunMode: args.initialAutorunMode ?? true,
-    executionId: 0,
-    output: undefined,
-  });
-
-  // TODO - generate random head name? `project` could be passed from outside and have a head already.
+  // TODO - generate random head names? `project` could be passed from outside and have heads already.
   const mainHead = "main";
+  const renderedHead = "rendered";
+
+  const [autorunMode, setAutorunMode] = useState(
+    args.initialAutorunMode ?? true
+  );
+  const [executionId, setExecutionId] = useState(0);
 
   const forceUpdate = useForceUpdate();
 
@@ -153,16 +118,10 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
 
   // Run on code and environment changes if autorun is on.
   useEffect(() => {
-    if (state.autorunMode) {
+    if (autorunMode) {
       runSimulation();
     }
-  }, [state.autorunMode, runSimulation]);
-
-  // callbacks with stable identity
-  const setAutorunMode = useCallback(
-    (value: boolean) => dispatch({ type: "setAutorunMode", value }),
-    []
-  );
+  }, [autorunMode, runSimulation]);
 
   // Whenever the main head output arrives, we capture it.
   useEffect(() => {
@@ -174,10 +133,8 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
       }
       const rootModule = project.getHead(mainHead);
       if (event.data.output.module.hash() === rootModule.hash()) {
-        dispatch({
-          type: "setOutput",
-          value: event.data.output,
-        });
+        project.setHead(renderedHead, event.data.output);
+        setExecutionId((prev) => prev + 1);
       }
     };
     project.addEventListener("output", listener);
@@ -195,20 +152,23 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     project.setRunner(
       runnerByName(args.runnerName, args.runnerName === "web-worker" ? 2 : 1)
     );
-  }, [project, args.runnerName, state.autorunMode]);
+  }, [project, args.runnerName, autorunMode]);
+
+  const output = project.hasHead(renderedHead)
+    ? project.getOutput(renderedHead)
+    : undefined;
 
   return {
     sourceId,
     project,
-    simulation: state.output
+    simulation: output
       ? {
-          executionId: state.executionId,
-          output: state.output,
-          isStale:
-            state.output.module.hash() !== project.getHead(mainHead).hash(),
+          executionId,
+          output,
+          isStale: project.getHead(mainHead) !== project.getHead(mainHead),
         }
       : undefined,
-    autorunMode: state.autorunMode,
+    autorunMode,
     setAutorunMode,
     runSimulation,
   };
