@@ -14,9 +14,8 @@ import {
 } from "../SqError.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqDict } from "../SqValue/SqDict.js";
-import { SqValueContext } from "../SqValueContext.js";
+import { RunContext, SqValueContext } from "../SqValueContext.js";
 import { SqValuePath, ValuePathRoot } from "../SqValuePath.js";
-import { Externals, RunContext } from "./ProjectItem.js";
 import { ProjectState } from "./ProjectState.js";
 import { SqModule } from "./SqModule.js";
 import { getHash } from "./utils.js";
@@ -55,10 +54,6 @@ export class SqModuleOutput {
       module: this.module,
       environment: this.environment,
     });
-  }
-
-  code(): string {
-    return this.module.code;
   }
 
   // "result" word is overloaded, so we use "end result" for clarity.
@@ -159,18 +154,6 @@ export class SqModuleOutput {
         )
       );
     }
-    const externals: Externals = {
-      implicitImports: vDict(ImmutableMap()),
-      explicitImports: importBindings,
-    };
-
-    const context: RunContext = {
-      ast,
-      sourceId: module.name,
-      source: module.code,
-      environment,
-      externals,
-    };
 
     const runParams: RunParams = {
       ast,
@@ -194,6 +177,11 @@ export class SqModuleOutput {
     //     }
     //   }
     // }
+
+    const context: RunContext = {
+      module,
+      environment,
+    };
 
     // upgrade result values from the runner to SqValues
     const result = fmap2(
@@ -230,7 +218,7 @@ export class SqModuleOutput {
             // In terms of context, exports are the same as bindings.
             "bindings"
           ),
-          imports: wrapSqDict(externals.explicitImports, "imports"),
+          imports: wrapSqDict(importBindings, "imports"),
           profile: runOutput.profile,
         };
       },

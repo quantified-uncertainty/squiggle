@@ -24,7 +24,7 @@ export function profilerExtension(): Extension {
         return empty;
       }
 
-      if (simulation.output.code() !== state.doc.toString()) {
+      if (simulation.output.module.code !== state.doc.toString()) {
         return empty;
       }
 
