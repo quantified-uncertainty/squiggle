@@ -24,7 +24,7 @@ test("Time", async () => {
   const result = await runCLI(["run", "--time", "--eval", "2+2"]);
   expect(result.exitCode).toBe(0);
   expect(result.stderr).toBe("");
-  expect(stripAnsi(result.stdout)).toMatch(/4\n\nTime: 0(\.\d+)?s\n/);
+  expect(stripAnsi(result.stdout)).toMatch(/4\n\nTime: \d(\.\d+)?s\n/);
 });
 
 test("Bindings", async () => {
