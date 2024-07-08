@@ -41,9 +41,7 @@ async function runSimulation(
     return undefined;
   }
   const output = await run(code, { environment });
-  return output.result.ok
-    ? { ok: true, value: output.result.value.result }
-    : { ok: false, value: output.result.value };
+  return output.getEndResult();
 }
 
 function fieldValueToCode(

@@ -78,14 +78,3 @@ describe("Single source SqProject", () => {
     expect(output).toBeOkOutput("3", "{}");
   });
 });
-
-/*
- * TODO: Multiple sources with multi level imports. Cycle detection.
- * TODO: Implement a runOrder consideration - clean results based on run order.
- * TODO: runOrder vs setSource/touchSource.
- * TODO: Advanced details: (below).
- * TODO: runOrder. imports vs continues. Run order based reexecution.
- * TODO: Dependents and reexecution.
- * TODO: Dependencies and reexecution.
- * TODO: cleanAll, clean.
- */

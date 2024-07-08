@@ -15,7 +15,7 @@ import {
   SquiggleViewerHandle,
   ViewerProvider,
 } from "../SquiggleViewer/ViewerProvider.js";
-import { StateGraphViewer } from "../StateGraphViewer/StateGraphViewer.js";
+import { StateGraphViewer } from "../StateGraphViewer/index.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
 
 type Props = {

@@ -1,7 +1,7 @@
 import { run, SqValue } from "../../src/index.js";
 
 export async function testRun(x: string) {
-  const { result: output } = await run(x, {
+  const { result } = await run(x, {
     environment: {
       sampleCount: 1000,
       xyPointLength: 100,
@@ -9,11 +9,11 @@ export async function testRun(x: string) {
     },
   });
 
-  if (output.ok) {
-    return output.value;
+  if (result.ok) {
+    return result.value;
   } else {
     throw new Error(
-      `Expected squiggle expression to evaluate but got error: ${output.value}`
+      `Expected squiggle expression to evaluate but got error: ${result.value}`
     );
   }
 }

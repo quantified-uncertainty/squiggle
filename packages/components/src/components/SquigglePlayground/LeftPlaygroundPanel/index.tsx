@@ -31,8 +31,8 @@ import { AutorunnerMenuItem } from "./AutorunnerMenuItem.js";
 import { GlobalSettingsModal } from "./GlobalSettingsModal.js";
 import { RunMenuItem } from "./RunMenuItem.js";
 
-const DependencyGraphModal = lazy(() =>
-  import("../../StateGraphViewer/StateGraphViewer.js").then((module) => ({
+const StateGraphViewer = lazy(() =>
+  import("../../StateGraphViewer/index.js").then((module) => ({
     default: module.StateGraphViewer,
   }))
 );
@@ -164,7 +164,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
         case "dependency-graph":
           return {
             title: "Dependency Graph",
-            body: <DependencyGraphModal project={props.project} />,
+            body: <StateGraphViewer project={props.project} />,
           };
         default:
           return props.renderExtraModal?.(modalName);

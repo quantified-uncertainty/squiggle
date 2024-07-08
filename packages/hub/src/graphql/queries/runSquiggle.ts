@@ -163,19 +163,21 @@ export async function runSquiggleWithCache(
     } as unknown as SquiggleOutput;
   }
 
-  const { result: outputR } = await runSquiggle(code, seed);
+  const { result: outputResult } = await runSquiggle(code, seed);
 
-  const result: SquiggleOutput = outputR.ok
+  const result: SquiggleOutput = outputResult.ok
     ? {
         isCached: false,
         isOk: true,
-        resultJSON: squiggleValueToJSON(outputR.value.result),
-        bindingsJSON: squiggleValueToJSON(outputR.value.bindings.asValue()),
+        resultJSON: squiggleValueToJSON(outputResult.value.result),
+        bindingsJSON: squiggleValueToJSON(
+          outputResult.value.bindings.asValue()
+        ),
       }
     : {
         isCached: false,
         isOk: false,
-        errorString: outputR.value.toString(),
+        errorString: outputResult.value.toString(),
       };
 
   await prisma.squiggleCache.upsert({

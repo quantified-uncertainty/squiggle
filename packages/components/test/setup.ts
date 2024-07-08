@@ -34,4 +34,4 @@ Range.prototype.getClientRects = () => ({
   [Symbol.iterator]: jest.fn<() => IterableIterator<DOMRect>>(),
 });
 
-global.TextEncoder = TextEncoder;
+global.TextEncoder = TextEncoder; // necessary for sha256

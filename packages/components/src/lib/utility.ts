@@ -182,12 +182,12 @@ const selectableViewerTabs = [
 export type SelectableViewerTab = (typeof selectableViewerTabs)[number];
 
 export function viewerTabsToShow(
-  output: SqModuleOutput["result"]
+  outputResult: SqModuleOutput["result"]
 ): SelectableViewerTab[] {
-  if (!output.ok) return ["Variables", "AST"]; // Default tabs if outputResult is not OK
+  if (!outputResult.ok) return ["Variables", "AST"]; // Default tabs if outputResult is not OK
 
   const tabs: SelectableViewerTab[] = []; // Always show AST
-  const { bindings, imports, exports, result } = output.value;
+  const { bindings, imports, exports, result } = outputResult.value;
 
   if (imports.size()) tabs.push("Imports");
   if (bindings.size()) tabs.push("Variables");
