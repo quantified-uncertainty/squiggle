@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 
-import { SqModuleOutput } from "@quri/squiggle-lang";
+import { SqModuleOutput, SqProject } from "@quri/squiggle-lang";
 
 import { SquiggleErrorAlert } from "../../index.js";
 import {
@@ -15,11 +15,13 @@ import {
   SquiggleViewerHandle,
   ViewerProvider,
 } from "../SquiggleViewer/ViewerProvider.js";
+import { StateGraphViewer } from "../StateGraphViewer/StateGraphViewer.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
 
 type Props = {
   viewerTab: ViewerTab;
   outputResult: SqModuleOutput["result"];
+  project: SqProject;
   isSimulating: boolean;
   externalViewerActions?: ExternalViewerActions;
   playgroundSettings: PartialPlaygroundSettings;
@@ -28,8 +30,9 @@ type Props = {
 export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
   function ViewerBody(
     {
-      outputResult,
       viewerTab,
+      outputResult,
+      project,
       isSimulating,
       externalViewerActions,
       playgroundSettings,
@@ -37,6 +40,10 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
     viewerRef
   ) {
     const body = () => {
+      if (viewerTab === "Dependency Graph") {
+        return <StateGraphViewer project={project} />;
+      }
+
       if (!outputResult.ok) {
         return <SquiggleErrorAlert error={outputResult.value} />;
       }

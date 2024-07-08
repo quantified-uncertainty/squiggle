@@ -13,6 +13,7 @@ import {
 import { useForceUpdate } from "./useForceUpdate.js";
 
 export type Simulation = {
+  project: SqProject; // useful in ViewerWithMenuBar
   isStale: boolean;
   executionId: number;
   output: SqModuleOutput;
@@ -163,6 +164,7 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     project,
     simulation: output
       ? {
+          project,
           executionId,
           output,
           isStale: project.getHead(mainHead) !== project.getHead(mainHead),

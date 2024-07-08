@@ -104,15 +104,13 @@ export class SqModule {
   }
 
   hash(): string {
-    return (
-      `module-${this.name}-` +
-      getHash(
+    return getHash(
+      `module/${this.name}/` +
         JSON.stringify({
           name: this.name,
           code: this.code,
           pins: this.pins,
         })
-      )
     );
   }
 

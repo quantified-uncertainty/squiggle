@@ -32,8 +32,8 @@ import { GlobalSettingsModal } from "./GlobalSettingsModal.js";
 import { RunMenuItem } from "./RunMenuItem.js";
 
 const DependencyGraphModal = lazy(() =>
-  import("./DependencyGraphModal.js").then((module) => ({
-    default: module.DependencyGraphModal,
+  import("../../StateGraphViewer/StateGraphViewer.js").then((module) => ({
+    default: module.StateGraphViewer,
   }))
 );
 

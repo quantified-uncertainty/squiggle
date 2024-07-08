@@ -114,6 +114,7 @@ export type ViewerTab =
   | "Exports"
   | "Variables"
   | "Result"
+  | "Dependency Graph"
   | "AST"
   | { tag: "CustomVisibleRootPath"; visibleRootPath: SqValuePath };
 
@@ -158,6 +159,7 @@ export function viewerTabToValue(
     case "Exports":
       return sqOutput.exports.asValue();
     case "AST":
+    case "Dependency Graph":
       return undefined;
     default:
       if (isCustomVisibleRootPath(viewerTab)) {
@@ -173,6 +175,7 @@ const selectableViewerTabs = [
   "Variables",
   "Exports",
   "Result",
+  "Dependency Graph",
   "AST",
 ] as const;
 

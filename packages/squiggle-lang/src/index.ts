@@ -96,6 +96,10 @@ export { makeSelfContainedLinker, type SqLinker } from "./public/SqLinker.js";
 export { SqProject } from "./public/SqProject/index.js";
 export { SqModule } from "./public/SqProject/SqModule.js";
 export { SqModuleOutput } from "./public/SqProject/SqModuleOutput.js";
+export {
+  type ProjectAction,
+  type ProjectEventListener,
+} from "./public/SqProject/types.js";
 
 export { run } from "./run.js";
 

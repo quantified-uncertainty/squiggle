@@ -68,6 +68,19 @@ export class SqProject {
           type: "loaded",
           value: head.module,
         }),
+        /**
+         * Any head module is treated as the default resolution for that module.
+         *
+         * This helps with some subtle bugs, e.g. the circular import from the head
+         * module to itself.  If we didn't do this, the import would load from
+         * the backend, hashes would be different, and the module would exist in
+         * two instances. If the backend instance won't have the same circular
+         * import, the evaluation could pass, which would be confusing.
+         */
+        resolutions: this.state.resolutions.set(head.module.name, {
+          type: "loaded",
+          value: hash,
+        }),
       })
     );
 

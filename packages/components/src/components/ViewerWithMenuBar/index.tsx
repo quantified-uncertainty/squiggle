@@ -121,6 +121,7 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
           <ViewerBody
             externalViewerActions={externalViewerActions}
             viewerTab={viewerTab}
+            project={simulation.project}
             outputResult={outputResult}
             isSimulating={isSimulating(simulation)}
             playgroundSettings={playgroundSettings}

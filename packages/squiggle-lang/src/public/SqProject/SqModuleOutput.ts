@@ -247,14 +247,12 @@ export class SqModuleOutput {
   }
 
   static hash(params: { module: SqModule; environment: Env }): string {
-    return (
-      `output-${params.module.name}-` +
-      getHash(
+    return getHash(
+      `output/${params.module.name}/` +
         JSON.stringify({
           module: params.module.hash(),
           environment: params.environment,
         })
-      )
     );
   }
 }

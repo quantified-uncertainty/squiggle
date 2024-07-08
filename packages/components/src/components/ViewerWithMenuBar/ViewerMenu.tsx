@@ -9,6 +9,7 @@ import {
   DropdownMenu,
   DropdownMenuActionItem,
   DropdownMenuHeader,
+  PuzzleIcon,
   TriangleIcon,
 } from "@quri/ui";
 
@@ -98,6 +99,14 @@ export const ViewerMenu: FC<Props> = ({
             title={<MenuItemTitle title="AST" type="" />}
             onClick={() => {
               setViewerTab("AST");
+              close();
+            }}
+          />
+          <DropdownMenuActionItem
+            icon={PuzzleIcon}
+            title={<MenuItemTitle title="Dependency Graph" type="" />}
+            onClick={() => {
+              setViewerTab("Dependency Graph");
               close();
             }}
           />
