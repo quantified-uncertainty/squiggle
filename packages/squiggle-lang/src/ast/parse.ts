@@ -112,7 +112,6 @@ export function nodeToString(
           ...node.decorators.map(toSExpr),
         ]);
       case "DefunStatement":
-        console.log("node.value = ", node.value);
         return sExpr([
           toSExpr(node.variable),
           toSExpr(node.value),

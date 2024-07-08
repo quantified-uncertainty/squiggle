@@ -159,7 +159,7 @@ describe("Peggy parse", () => {
 
   describe("unit-typed variables", () => {
     testParse("x :: kg = 1", "(Program (LetStatement :x (TypeSignature :kg) 1))");
-    testParse("x :: kg/m = 1", "(Program (LetStatement :x (TypeSignature (InfixType / :kg :m)) 1))");
+    testParse("x :: kg / m = 1", "(Program (LetStatement :x (TypeSignature (InfixType / :kg :m)) 1))");
     testParse("x :: kg*m/s = 1", "(Program (LetStatement :x (TypeSignature (InfixType / (InfixType * :kg :m) :s)) 1))");
     testParse("x :: m/s/s = 1", "(Program (LetStatement :x (TypeSignature (InfixType / (InfixType / :m :s) :s)) 1))");
   });
@@ -167,29 +167,30 @@ describe("Peggy parse", () => {
   describe("unit-typed functions", () => {
       testParse("f(x :: kg) = y", "(Program (DefunStatement :f (Lambda (Identifier x (TypeSignature :kg)) :y)))");
     testParse("f(x) :: lbs = y", "(Program (DefunStatement :f (Lambda :x :y (TypeSignature :lbs))))");
+    testParse("f(x :: m, y :: s) :: m/s = x/y", "(Program (DefunStatement :f (Lambda (Identifier x (TypeSignature :m)) (Identifier y (TypeSignature :s)) (InfixCall / :x :y) (TypeSignature (InfixType / :m :s)))))");
   });
 
-  describe("functions", () => {
-    testParse(
-      "identity(x) = x",
-      "(Program (DefunStatement :identity (Lambda :x :x)))"
-    ); // Function definitions become lambda assignments
-    testParse("identity(x)", "(Program (Call :identity :x))");
+    describe("functions", () => {
+        testParse(
+            "identity(x) = x",
+            "(Program (DefunStatement :identity (Lambda :x :x)))"
+        ); // Function definitions become lambda assignments
+        testParse("identity(x)", "(Program (Call :identity :x))");
 
-    testParse(
-      "annotated(x: [3,5]) = x",
-      "(Program (DefunStatement :annotated (Lambda (IdentifierWithAnnotation x (Array 3 5)) :x)))"
-    );
-  });
+        testParse(
+            "annotated(x: [3,5]) = x",
+            "(Program (DefunStatement :annotated (Lambda (IdentifierWithAnnotation x (Array 3 5)) :x)))"
+        );
+    });
 
-  describe("arrays", () => {
-    testParse("[]", "(Program (Array))");
-    testParse("[0, 1, 2]", "(Program (Array 0 1 2))");
-    testParse("['hello', 'world']", "(Program (Array 'hello' 'world'))");
-    testParse("([0,1,2])[1]", "(Program (BracketLookup (Array 0 1 2) 1))");
-  });
+    describe("arrays", () => {
+        testParse("[]", "(Program (Array))");
+        testParse("[0, 1, 2]", "(Program (Array 0 1 2))");
+        testParse("['hello', 'world']", "(Program (Array 'hello' 'world'))");
+        testParse("([0,1,2])[1]", "(Program (BracketLookup (Array 0 1 2) 1))");
+    });
 
-  describe("dicts", () => {
+    describe("dicts", () => {
     testParse(
       "{a: 1, b: 2}",
       "(Program (Dict (KeyValue 'a' 1) (KeyValue 'b' 2)))"

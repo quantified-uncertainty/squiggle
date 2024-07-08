@@ -31,7 +31,7 @@ function gaussianElimHelper(sourceCode: string): [number[][], number[][]] {
 function getUnitTypes(sourceCode: string): [VariableUnitTypes, IdNameMapping] {
     const node = peggyParse(sourceCode, { grammarSource: "test", comments: [] });
     const [typeConstraints, scopes] = findTypeConstraints(node);
-    const idNameMapping = scopes.variableNodes.map((node) => (node as { value: string }).value);
+    const idNameMapping = scopes.variableNodes.filter((node) => "value" in node).map((node) => (node as { value: string }).value);
     return [checkTypeConstraints(typeConstraints, scopes), idNameMapping];
 }
 
@@ -72,16 +72,19 @@ z :: m/s = x/y
     {
         defined: true,
         variables: { 0: 1 },
+        parameters: {},
         units: { m: -1 },
     },
     {
         defined: true,
         variables: { 2: 1 },
+        parameters: {},
         units: { m: -1, s: 1},
     },
     {
         defined: true,
         variables: { 2: 1, 0: -1, 1: 1 },
+        parameters: {},
         units: {},
     },
 ], [
@@ -197,16 +200,6 @@ y :: ayType = a
         ],
     ]));
 
-    test("type inference with no defined types", () => expect(gaussianElimHelper(
-        `
-x = 1
-y = 2
-z = x + y
-foo = x * z
-`
-    )).toEqual([
-        // TODO: what should the result be?
-    ]));
 });
 
 describe("unit type checking", () => {
@@ -341,6 +334,8 @@ z :: kg/m = c / a
 `, "test"
         )).toThrow("Conflicting unit types"));
 
+        // Note: It might look like these should have unit types, but actually
+        // there are infinitely many solutions to these constraints.
         test("type inference with no defined types", () => expect(getUnitTypes(
             `
 x = 1
@@ -430,24 +425,72 @@ y :: dollars = {
 });
 
 
+describe("explicit unit types for functions", () => {
+    test("incorrect argument type", () => expect(() => getUnitTypes(`
+convertUnits(x :: kg) :: lbs = x * 2.2
+arg :: lbs = 45
+convertUnits(arg)
+`)).toThrow(`Conflicting unit types:
+	arg :: kg
+	arg :: lbs`));
+
+    test("incorrect return type", () => expect(() => getUnitTypes(`
+convertUnits(x :: kg) :: lbs = x * 2.2
+res :: kg = convertUnits(45)
+`)).toThrow(`Conflicting unit types:
+	res :: lbs
+	res :: kg`));
+
+    test("return type does not match", () => expect(() => getUnitTypes(`
+convertUnits(x :: kg) :: lbs = x
+res = convertUnits(45)
+`)).toThrow(`Conflicting unit types:
+	x :: lbs
+	x :: kg`));
+
+   test("variable inside function body mismatches return type", () => expect(() => getUnitTypes(`
+f(x :: kg) :: lbs = {
+  y :: kg = x + 1
+  y
+}
+`)).toThrow(`Conflicting unit types:
+	y :: lbs
+	y :: kg`));
+
+    test("type error across function parameters", () => expect(() => getUnitTypes(`
+sum(x :: kg, y :: lbs) :: kg = {
+a = x + y
+x
+}
+`)).toThrow(`Conflicting unit types`));
+
+    test("type error on return type of inner function", () => expect(() => getUnitTypes(`
+outer(x) :: outie = {
+  inner(y) :: innie = y
+  inner(x)
+}
+`)).toThrow(`Conflicting unit types`));
+
+});
+
 describe("unit types for generic functions", () => {
 
     test("a directly-called lambda isn't type-checked", () => expect(getUnitTypes(
         `
-x :: unit = 3
+x :: unitType = 3
 y = { |a| a }(x)
 `)).toEqual([{
-    0: {unit: 1},
+    0: {unitType: 1},
 }, ["x", "y"]]));
 
-    test("1-parameter generic function", () => expect(getUnitTypes(
+    test("1-parameter generic function with inferred type", () => expect(getUnitTypes(
         `
 f(a) = a
-x :: unit = 3
+x :: m/s = 3
 y = f(x)
 `)).toEqual([{
-    1: {unit: 1},
-    2: {unit: 1},
+    1: {m: 1, s: -1},
+    2: {m: 1, s: -1},
 }, ["a", "x", "y"]]));
 
     test("2-parameter generic function", () => expect(getUnitTypes(
@@ -531,12 +574,12 @@ trackLength :: meters = 1000
 raceSpeed :: meters/seconds = speed(trackLength)
 `)).toThrow(`Conflicting unit types`));
 
-    test("can type-check variables inside functions", () => expect(() => getUnitTypes(
+    test("type error inside function body", () => expect(() => getUnitTypes(
         `
 f(n) = {
-wealth :: dollars = 1
-conflicting :: pesos = wealth
-n
+  wealth :: dollars = 1
+  conflicting :: pesos = wealth
+  n
 }
 f(10)
 `)).toThrow(`Conflicting unit types`));
@@ -562,18 +605,33 @@ y :: feet = (x < 10 ? mul : div)(x)
     4: {feet: 1},
 }, ["k", "x", "x", "x", "y"]]));
 
-});
+    test("implicit return type is inferred from explicit parameter", () => expect(getUnitTypes(
+        `
+f(a :: meters) = a
+x = f(0)
+`)).toEqual([{
+    0: {meters: 1},
+    1: {meters: 1},
+}, ["a", "x"]]));
 
-describe("explicit unit types for functions", () => {
-    test("incorrect argument type", () => expect(() => getUnitTypes(`
-convertUnits(x :: kg) :: lbs = x * 2.2
-arg :: lbs = 45
-convertUnits(arg)
-`)).toThrow("TODO"));
+    test("implicit parameter type is inferred from explicit return type", () => expect(getUnitTypes(
+        `
+f(a) :: meters = a
+x = 5
+f(x)
+`)).toEqual([{
+    0: {meters: 1},
+    1: {meters: 1},
+}, ["a", "x"]]));
 
-    test("incorrect return type", () => expect(() => getUnitTypes(`
-convertUnits(x :: kg) :: lbs = x * 2.2
-res :: kg = convertUnits(45)
-`)).toThrow("TODO"));
+    test("implicit parameter type is inferred from squared explicit return type", () => expect(getUnitTypes(
+        `
+f(a) :: meters*meters = a
+x = 5
+f(x)
+`)).toEqual([{
+    0: {meters: 2},
+    1: {meters: 2},
+}, ["a", "x"]]));
 
 });
