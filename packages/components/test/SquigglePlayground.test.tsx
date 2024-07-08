@@ -41,7 +41,7 @@ test("Stacktrace lines are clickable", async () => {
   expect(getByText(errorHeader.parentElement!, /column /).tagName).toBe("A");
 });
 
-test("Stacktrace lines for imports are not clickable", async () => {
+test("Stacktrace lines for imports are clickable", async () => {
   const linker = makeSelfContainedLinker({
     source1: `export x = 1 + // syntax error`,
   });
@@ -62,11 +62,44 @@ x = 1
   );
   await waitFor(() => screen.getByText(/simulation/));
 
-  const errorHeader = screen.getByText("Compile Error");
+  const errorHeader = screen.getByText("Import Error");
   expect(errorHeader).toBeDefined();
 
   expect(getByText(errorHeader.parentElement!, /column /)).toBeDefined();
-  expect(getByText(errorHeader.parentElement!, /column /).tagName).not.toBe(
+  expect(getByText(errorHeader.parentElement!, /column /).tagName).toBe("A");
+});
+
+test("Stacktrace lines for errors in imports are not clickable", async () => {
+  const linker = makeSelfContainedLinker({
+    source1: `export f() = 1 + ""`,
+  });
+
+  const code = `
+import "source1" as s1
+x = s1.f()
+`;
+
+  act(() =>
+    render(
+      <SquigglePlayground
+        defaultCode={code}
+        linker={linker}
+        runner="embedded"
+      />
+    )
+  );
+  await waitFor(() => screen.getByText(/simulation/));
+
+  const errorHeader = screen.getByText("Runtime Error");
+  expect(errorHeader).toBeDefined();
+
+  // error in main code - clickable
+  expect(getByText(errorHeader.parentElement!, /column 5/)).toBeDefined();
+  expect(getByText(errorHeader.parentElement!, /column 5/).tagName).toBe("A");
+
+  // error in import - not clickable
+  expect(getByText(errorHeader.parentElement!, /column 14/)).toBeDefined();
+  expect(getByText(errorHeader.parentElement!, /column 14/).tagName).not.toBe(
     "A"
   );
 });
