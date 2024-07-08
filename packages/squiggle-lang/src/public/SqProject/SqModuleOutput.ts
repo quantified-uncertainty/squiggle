@@ -17,7 +17,7 @@ import { SqDict } from "../SqValue/SqDict.js";
 import { RunContext, SqValueContext } from "../SqValueContext.js";
 import { SqValuePath, ValuePathRoot } from "../SqValuePath.js";
 import { ProjectState } from "./ProjectState.js";
-import { SqModule } from "./SqModule.js";
+import { Import, SqModule } from "./SqModule.js";
 import { getHash } from "./utils.js";
 
 export type OutputResult = result<
@@ -125,6 +125,12 @@ export class SqModuleOutput {
 
     let importBindings = VDict.empty();
 
+    // useful for profiling later
+    const importsAndOutputs: {
+      importBinding: Import;
+      importOutput: SqModuleOutput;
+    }[] = [];
+
     for (const importBinding of module.getImports(params.state.linker)) {
       const importOutput = importOutputs.value[importBinding.name];
       if (!importOutput) {
@@ -149,6 +155,10 @@ export class SqModuleOutput {
           })
         )
       );
+      importsAndOutputs.push({
+        importBinding,
+        importOutput,
+      });
     }
 
     const runParams: RunParams = {
@@ -161,18 +171,17 @@ export class SqModuleOutput {
     const runResult = await params.runner.run(runParams);
     const executionTime = new Date().getTime() - started.getTime();
 
-    // // patch profile - add timings for import statements
-    // if (runResult.ok && runResult.value.profile) {
-    //   for (const item of module.module.imports()) {
-    //     const importOutput = project.getInternalOutput(item.sourceId);
-    //     if (importOutput.ok) {
-    //       runResult.value.profile.addRange(
-    //         item.location,
-    //         importOutput.value.executionTime
-    //       );
-    //     }
-    //   }
-    // }
+    // patch profile - add timings for import statements
+    if (runResult.ok && runResult.value.profile) {
+      for (const { importBinding, importOutput } of importsAndOutputs) {
+        if (importOutput.result.ok) {
+          runResult.value.profile.addRange(
+            importBinding.location,
+            importOutput.executionTime
+          );
+        }
+      }
+    }
 
     const context: RunContext = {
       module,
