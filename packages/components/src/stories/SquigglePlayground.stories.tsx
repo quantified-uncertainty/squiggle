@@ -182,10 +182,6 @@ export x=1`,
     export y=2
     export foo = {a: s1}
   `,
-  source3: `
-    import "source2" as s2
-    export z=3
-  `,
 });
 
 export const ManyTypes: Story = {
@@ -234,22 +230,6 @@ export varScatter = Plot.scatter({
 })
 `,
     height: 800,
-  },
-};
-
-export const ImportsWithTooltips: Story = {
-  args: {
-    linker,
-    defaultCode: `import "hub:source1" as s1
-import "source2" as s2
-
-x = s1
-`,
-    renderImportTooltip: ({ importId }) => (
-      <div className="p-2">
-        <span className="font-medium text-slate-500">Import:</span> {importId}
-      </div>
-    ),
   },
 };
 

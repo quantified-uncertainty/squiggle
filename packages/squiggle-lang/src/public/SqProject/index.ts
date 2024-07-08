@@ -1,7 +1,7 @@
 import { defaultEnv, Env } from "../../dists/env.js";
 import { BaseRunner } from "../../runners/BaseRunner.js";
 import { getDefaultRunner } from "../../runners/index.js";
-import { SqOtherError } from "../SqError.js";
+import { SqError, SqImportError, SqOtherError } from "../SqError.js";
 import { defaultLinker, SqLinker } from "../SqLinker.js";
 import { ModulePointer, ProjectState } from "./ProjectState.js";
 import { SqModule } from "./SqModule.js";
@@ -18,23 +18,22 @@ import {
  * SqProject is a Squiggle project, which is a collection of modules and their
  * dependencies.
  *
- * The project is responsible for loading and resolving modules, building
+ * A project is responsible for loading and resolving modules, building
  * outputs, and running the project.
  *
- * The project is uses the [Functional Core, Imperative
+ * SqProject uses the [Functional Core, Imperative
  * Shell](https://codemirror.net/docs/guide/#functional-core%2C-imperative-shell)
  * approach: its state is immutable and updated by dispatching actions.
  *
- * The project is also an event target, and emits events when outputs are built
- * or actions are dispatched; it provides some helpers for waiting for outputs
- * with async/await, but events are the primary way to interact with the
- * project. One of the reasons for this is that runs can have multiple steps
- * (load dependencies, run them, then run the parent), but should be
- * cancellable: if the head source code changes, we don't want to run the old
- * code.
+ * A project is also an event target, and emits events when outputs are built or
+ * actions are dispatched; it provides some helpers for waiting for outputs with
+ * async/await, but events are the primary way to interact with the project. One
+ * of the reasons for this is that runs can have multiple steps (load
+ * dependencies, run them, then run the parent), but should be cancellable: if
+ * the head source code changes, we don't want to run the old code.
  *
  * When the new head is added to the project, it will fire the first
- * "loadImports" action, which will eventually dispatch other actions to load
+ * "processModule" action, which will eventually dispatch other actions to load
  * all dependencies and run the head module.
  */
 export class SqProject {
@@ -361,9 +360,10 @@ export class SqProject {
       output = SqModuleOutput.makeError({
         module,
         environment,
-        error: new SqOtherError(
-          `Circular import: ${loadingStatus.path.join(" -> ")}`
-        ), // TODO - details
+        error: loadingStatus.path.reduceRight<SqError>(
+          (acc, cur) => new SqImportError(acc, cur),
+          new SqOtherError("Circular import")
+        ),
       });
     } else {
       // TODO - try/catch?

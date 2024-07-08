@@ -1,5 +1,5 @@
-import { Command, Option } from "@commander-js/extra-typings";
-import { promises as fs } from "fs";
+import { type Command, Option } from "@commander-js/extra-typings";
+import fs from "fs/promises";
 import { Box, render, Text } from "ink";
 import isFinite from "lodash/isFinite.js";
 import path from "path";

@@ -6,7 +6,12 @@ import { ImmutableMap } from "../../utility/immutable.js";
 import { Err, fmap, fmap2, Ok, result } from "../../utility/result.js";
 import { vDict, VDict } from "../../value/VDict.js";
 import { vString } from "../../value/VString.js";
-import { SqError, SqOtherError, wrapError } from "../SqError.js";
+import {
+  SqError,
+  SqImportError,
+  SqOtherError,
+  wrapIError,
+} from "../SqError.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqDict } from "../SqValue/SqDict.js";
 import { SqValueContext } from "../SqValueContext.js";
@@ -137,7 +142,14 @@ export class SqModuleOutput {
         );
       }
       if (!importOutput.result.ok) {
-        return importOutput;
+        return new SqModuleOutput({
+          module,
+          environment,
+          result: Err(
+            new SqImportError(importOutput.result.value, importBinding)
+          ),
+          executionTime: 0,
+        });
       }
       importBindings = importBindings.merge(
         vDict(
@@ -222,7 +234,7 @@ export class SqModuleOutput {
           profile: runOutput.profile,
         };
       },
-      (err) => wrapError(err)
+      (err) => wrapIError(err)
     );
 
     return new SqModuleOutput({

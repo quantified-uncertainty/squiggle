@@ -60,18 +60,50 @@ describe("Imports", () => {
 
     const output = await project.waitForOutput("main");
 
-    expect(output.result.ok).toEqual(false);
-    expect(output.getEndResult().ok).toEqual(false);
-    expect(output.getEndResult().value.toString()).toEqual(
+    const result = output.getEndResult();
+    expect(result.ok).toEqual(false);
+    if (result.ok) throw "assert";
+
+    expect(result.value.toString()).toEqual(
       "Error: Can't find source with id ./lib"
+    );
+    expect(result.value.toStringWithDetails()).toEqual(
+      `Error: Can't find source with id ./lib
+Import chain:
+  import ./lib at line 2, column 16, file main`
     );
   });
 
-  // test("getParents", () => {
-  //   expect(
-  //     project.state.getParents(project.getModuleOrThrow("./common"))
-  //   ).toEqual(["main"]);
-  // });
+  test("Nested unknown import", async () => {
+    const project = new SqProject({
+      linker: makeSelfContainedLinker({
+        foo: "import 'bar' as bar\n1",
+      }),
+    });
+    project.setSimpleHead(
+      "main",
+      `
+        import 'foo' as foo
+        123
+      `
+    );
+
+    const output = await project.waitForOutput("main");
+
+    const result = output.getEndResult();
+    expect(result.ok).toEqual(false);
+    if (result.ok) throw "assert";
+
+    expect(result.value.toString()).toEqual(
+      "Error: Can't find source with id bar"
+    );
+    expect(result.value.toStringWithDetails()).toEqual(
+      `Error: Can't find source with id bar
+Import chain:
+  import bar at line 1, column 8, file foo
+  import foo at line 2, column 16, file main`
+    );
+  });
 
   test("Known import", async () => {
     const project = new SqProject({
@@ -118,8 +150,17 @@ describe("Imports", () => {
     const output = await project.waitForOutput("main");
 
     expect(output.getEndResult().ok).toEqual(false);
-    expect(output.getEndResult().value.toString()).toEqual(
-      "Circular import: main -> foo -> bar -> foo"
+    if (output.result.ok) throw "assert";
+
+    // expect(output.getEndResult().value.toString()).toEqual(
+    //   "Circular import: main -> foo -> bar -> foo"
+    // );
+    expect(output.result.value.toStringWithDetails()).toEqual(
+      `Circular import
+Import chain:
+  import foo at line 2, column 20, file bar
+  import bar at line 2, column 20, file foo
+  import foo at line 2, column 18, file main`
     );
   });
 
@@ -136,8 +177,13 @@ describe("Imports", () => {
     const output = await project.waitForOutput("main");
 
     expect(output.result.ok).toEqual(false);
-    expect(output.result.value.toString()).toEqual(
-      "Circular import: main -> main"
+    if (output.result.ok) throw "assert";
+
+    expect(output.result.value.toString()).toEqual("Circular import");
+    expect(output.result.value.toStringWithDetails()).toEqual(
+      `Circular import
+Import chain:
+  import main at line 2, column 18, file main`
     );
   });
 

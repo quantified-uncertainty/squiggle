@@ -117,14 +117,9 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     forceUpdate(); // necessary for correct isStale
   }, [project, sourceId, forceUpdate, args.environment, args.code]);
 
-  // Run on code and environment changes if autorun is on.
-  useEffect(() => {
-    if (autorunMode) {
-      runSimulation();
-    }
-  }, [autorunMode, runSimulation]);
-
   // Whenever the main head output arrives, we capture it.
+  // Important: this listener should be set before the first runSimulation call.
+  // In some cases (trivial circular imports), project will emit output event synchronously.
   useEffect(() => {
     const listener: Parameters<typeof project.addEventListener<"output">>[1] = (
       event
@@ -142,6 +137,13 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
 
     return () => project.removeEventListener("output", listener);
   }, [project]);
+
+  // Run on code and environment changes if autorun is on.
+  useEffect(() => {
+    if (autorunMode) {
+      runSimulation();
+    }
+  }, [autorunMode, runSimulation]);
 
   // React to runner changes.
   useEffect(() => {

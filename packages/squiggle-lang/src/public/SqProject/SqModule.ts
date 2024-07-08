@@ -2,13 +2,18 @@ import { parse } from "../../ast/parse.js";
 import { AST, LocationRange } from "../../ast/types.js";
 import { Env } from "../../dists/env.js";
 import { errMap, result } from "../../utility/result.js";
-import { SqCompileError, SqError, SqOtherError } from "../SqError.js";
+import {
+  SqCompileError,
+  SqError,
+  SqImportError,
+  SqOtherError,
+} from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 import { ModulePointer, ProjectState } from "./ProjectState.js";
 import { SqModuleOutput } from "./SqModuleOutput.js";
 import { getHash } from "./utils.js";
 
-type Import = {
+export type Import = {
   name: string;
   hash: string | undefined;
   variable: string;
@@ -137,7 +142,10 @@ export class SqModule {
       if (importedModuleData.type === "failed") {
         return {
           type: "failed",
-          value: new SqOtherError(importedModuleData.value),
+          value: new SqImportError(
+            new SqOtherError(importedModuleData.value),
+            importBinding
+          ),
         };
       }
 

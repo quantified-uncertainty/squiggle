@@ -41,6 +41,7 @@
     "web-worker": "^1.2.0"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7.24.6",
     "@babel/preset-typescript": "^7.24.1",
     "@jest/globals": "^29.7.0",
     "@quri/configs": "workspace:*",

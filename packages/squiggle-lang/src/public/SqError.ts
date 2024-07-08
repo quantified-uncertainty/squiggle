@@ -1,7 +1,8 @@
 import { ICompileError, IError, IRuntimeError } from "../errors/IError.js";
 import { StackTraceFrame } from "../reducer/StackTrace.js";
+import { Import } from "./SqProject/SqModule.js";
 
-export function wrapError(err: IError): SqError {
+export function wrapIError(err: IError): SqError {
   if (err instanceof IRuntimeError) {
     return new SqRuntimeError(err);
   } else if (err instanceof ICompileError) {
@@ -86,6 +87,66 @@ export class SqCompileError extends SqAbstractError<"compile"> {
   }
 }
 
+export class SqImportError extends SqAbstractError<"import"> {
+  tag = "import" as const;
+
+  constructor(
+    private _value: SqError,
+    private _imp: Import
+  ) {
+    super();
+  }
+
+  // Similar to runtime error; frames are for imports, so it's not the same as
+  // the stack trace, but it's the closest thing we have.
+  getFrameArray(): SqFrame[] {
+    const frames: SqFrame[] = [];
+
+    let error: SqError = this;
+
+    while (error.tag === "import") {
+      frames.push(
+        new SqFrame(new StackTraceFrame(error._imp.name, error._imp.location))
+      );
+      error = error._value;
+    }
+    frames.reverse();
+
+    return frames;
+  }
+
+  location() {
+    return this._imp.location;
+  }
+
+  toString(): string {
+    return this._value.toString();
+  }
+
+  toStringWithDetails() {
+    let error: SqError = this;
+    const imports: Import[] = [];
+
+    while (error.tag === "import") {
+      imports.push(error._imp);
+      error = error._value;
+    }
+
+    imports.reverse();
+
+    return (
+      error.toString() +
+      "\nImport chain:\n" +
+      imports
+        .map(
+          (imp) =>
+            `  import ${imp.name} at line ${imp.location.start.line}, column ${imp.location.start.column}, file ${imp.location.source}`
+        )
+        .join("\n")
+    );
+  }
+}
+
 export class SqOtherError extends SqAbstractError<"other"> {
   tag = "other" as const;
 
@@ -103,4 +164,8 @@ export class SqOtherError extends SqAbstractError<"other"> {
   }
 }
 
-export type SqError = SqRuntimeError | SqCompileError | SqOtherError;
+export type SqError =
+  | SqRuntimeError
+  | SqCompileError
+  | SqImportError
+  | SqOtherError;

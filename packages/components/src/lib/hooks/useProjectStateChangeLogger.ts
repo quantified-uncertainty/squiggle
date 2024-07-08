@@ -9,7 +9,7 @@ export function useProjectStateChangeLogger(project: SqProject) {
       event
     ) => {
       // eslint-disable-next-line no-console
-      console.log("event", event.data);
+      console.log("state", event.data);
     };
     project.addEventListener("state", listener);
     return () => project.removeEventListener("state", listener);

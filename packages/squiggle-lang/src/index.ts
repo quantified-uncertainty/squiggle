@@ -27,6 +27,7 @@ export {
   SqCompileError,
   type SqError,
   SqFrame,
+  SqImportError,
   SqOtherError,
   SqRuntimeError,
 } from "./public/SqError.js";

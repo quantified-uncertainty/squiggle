@@ -1,7 +1,7 @@
 import { defaultEnv, Env } from "../../dists/env.js";
 import { ImmutableMap, ImmutableSet } from "../../utility/immutable.js";
 import { SqLinker } from "../SqLinker.js";
-import { importToPointer, SqModule } from "./SqModule.js";
+import { Import, importToPointer, SqModule } from "./SqModule.js";
 import { SqModuleOutput } from "./SqModuleOutput.js";
 
 // TODO - per-head environments
@@ -29,7 +29,7 @@ type LoadingStatus =
 
   | { type: "not-loaded" }
   | { type: "loaded" }
-  | { type: "circular"; path: string[] }
+  | { type: "circular"; path: Import[] }
   | { type: "failed" };
 
 type ResolutionData =
@@ -219,7 +219,7 @@ export class ProjectState implements ProjectStateData {
         ) {
           return {
             type: "circular",
-            path: [module.value.name, importedModule.value.name],
+            path: [imp],
           };
         }
 
@@ -228,7 +228,7 @@ export class ProjectState implements ProjectStateData {
           return status.type === "circular"
             ? {
                 type: "circular",
-                path: [module.value.name, ...status.path],
+                path: [imp, ...status.path],
               }
             : status;
         }

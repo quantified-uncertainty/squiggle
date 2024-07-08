@@ -31,7 +31,9 @@ test("Editor logs nothing on render", async () => {
 });
 
 test("Playground", async () => {
-  const rendered = render(<SquigglePlayground defaultCode="123 + 456" />);
+  const rendered = render(
+    <SquigglePlayground defaultCode="123 + 456" runner="embedded" />
+  );
   // We must await here because SquigglePlayground loads results asynchronously
   await waitFor(() =>
     expect(rendered.getByTestId("dynamic-viewer-result")).toHaveTextContent(
