@@ -13,7 +13,6 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
-  PuzzleIcon,
   TriangleIcon,
 } from "@quri/ui";
 
@@ -108,11 +107,6 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
                 title="Configuration"
                 icon={AdjustmentsVerticalIcon}
                 onClick={() => openModal("settings")}
-              />
-              <DropdownMenuActionItem
-                title="Dependency Graph"
-                icon={PuzzleIcon}
-                onClick={() => openModal("dependency-graph")}
               />
               {props.renderExtraDropdownItems?.({ openModal })}
             </DropdownMenu>

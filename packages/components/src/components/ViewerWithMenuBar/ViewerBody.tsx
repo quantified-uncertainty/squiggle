@@ -17,6 +17,7 @@ import {
 } from "../SquiggleViewer/ViewerProvider.js";
 import { StateGraphViewer } from "../StateGraphViewer/index.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
+import { Overlay } from "./Overlay.js";
 
 type Props = {
   viewerTab: ViewerTab;
@@ -69,9 +70,7 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
 
       return (
         <div className="relative">
-          {isSimulating && (
-            <div className="absolute inset-0 z-10 bg-white opacity-50" />
-          )}
+          {isSimulating && <Overlay />}
           {
             <SquiggleViewerWithoutProvider
               value={viewerTabToValue(viewerTab, outputResult)!}

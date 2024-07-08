@@ -169,7 +169,7 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
           project,
           executionId,
           output,
-          isStale: project.getHead(mainHead) !== project.getHead(mainHead),
+          isStale: project.getHead(mainHead) !== project.getHead(renderedHead),
         }
       : undefined,
     autorunMode,

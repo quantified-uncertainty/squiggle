@@ -9,7 +9,6 @@ import {
   RadioFormField,
   SelectFormField,
   TextFormField,
-  WrenchIcon,
 } from "@quri/ui";
 
 import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../lib/constants.js";
@@ -25,9 +24,8 @@ export const environmentSchema = z.object({
 });
 
 const runnerSchema = z.union([
-  z.literal("embedded" satisfies RunnerName),
   z.literal("web-worker" satisfies RunnerName),
-  z.literal("embedded-with-serialization" satisfies RunnerName),
+  z.literal("embedded" satisfies RunnerName),
 ]);
 
 export const functionSettingsSchema = z.object({
@@ -149,19 +147,15 @@ const SelectRunnerField: FC = () => {
   type Option = { value: RunnerName; label: string };
 
   const options: Option[] = [
-    { value: "embedded", label: "Embedded" },
-    { value: "web-worker", label: "Web Worker (experimental)" },
-    {
-      value: "embedded-with-serialization",
-      label: "Embedded with serialization check (experimental)",
-    },
+    { value: "web-worker", label: "Web Worker" },
+    { value: "embedded", label: "Embedded (legacy)" },
   ];
 
   return (
     <div>
       <SelectFormField<PlaygroundSettings, RunnerName, Option>
         name="runner"
-        label="Squiggle Runner (Experimental)"
+        label="Squiggle Runner"
         size="small"
         options={options}
         optionToFieldValue={(option) => option.value}
@@ -171,38 +165,25 @@ const SelectRunnerField: FC = () => {
         renderOption={(option) => <div className="text-sm">{option.label}</div>}
         required
       />
-      {runner === "embedded" && (
-        <FormComment>
-          <p>
-            This runner runs all Squiggle code in the main browser thread. This
-            can cause the UI to freeze during long-running simulations.
-          </p>
-        </FormComment>
-      )}
       {runner === "web-worker" && (
         <FormComment>
-          <p className="pb-2 pt-1">
-            <WrenchIcon className="mr-1 inline" size={14} />
-            This runner is <strong>experimental</strong>.
+          <p className="pt-1">
+            The code will run in a separate Web Worker process. The main benefit
+            is that the UI won&apos;t be blocked during long-running
+            computations.
           </p>
-          <p className="pb-2">
-            Risks involved: out-of-memory errors; responses arriving in wrong
-            order; bugs in serialization code when we return values from the
-            worker to the main thread.
-          </p>
-          <p>
-            The main benefit is that the UI won&apos;t be blocked during
-            long-running computations.
+          <p className="pt-2">
+            Minor downsides are: we have to marshall data between the worker and
+            the main thread; the implementation is new and there could be bugs;
+            higher memory usage.
           </p>
         </FormComment>
       )}
-      {runner === "embedded-with-serialization" && (
+      {runner === "embedded" && (
         <FormComment>
-          <p>
-            <WrenchIcon className="mr-1 inline" size={14} />
-            This runner is only useful for debugging. It works in the same way
-            as the embedded runner, but it serializes and then deserializes each
-            result to check for bugs in serialization code.
+          <p className="pt-1">
+            This runner runs all Squiggle code in the main browser thread. This
+            can cause the UI to freeze during long-running simulations.
           </p>
         </FormComment>
       )}
