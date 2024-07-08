@@ -54,7 +54,7 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
         return (
           <pre className="text-xs">
             {JSON.stringify(
-              sqOutput.bindings.asValue().context?.runContext.ast,
+              sqOutput.bindings.asValue().context?.runContext.module.ast(),
               null,
               2
             )}

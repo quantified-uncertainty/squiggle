@@ -97,13 +97,11 @@ export class SqValueContext {
   }
 
   docstring(): string | undefined {
-    const astR = this.runContext.module.ast();
-
-    if (!this.valueAstIsPrecise || !astR.ok) {
+    if (!this.valueAstIsPrecise) {
       return;
     }
 
-    const ast = astR.value;
+    const ast = this.runContext.module.expectAst();
 
     if (!ast.comments.length) {
       return; // no comments

@@ -1,4 +1,4 @@
-import { OutputResult } from "../../src/public/SqProject/SqModuleOutput.js";
+import { SqModuleOutput } from "../../src/public/SqProject/SqModuleOutput.js";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -11,14 +11,16 @@ declare global {
 }
 
 expect.extend({
-  toBeOkOutput(outputR: OutputResult, result: string, bindings: string) {
-    if (!outputR.ok) {
+  toBeOkOutput(output: SqModuleOutput, result: string, bindings: string) {
+    const outputResult = output.result;
+    if (!outputResult.ok) {
       return {
         pass: false,
-        message: () => `Expected: ok output\n` + `Received: ${outputR.value}`,
+        message: () =>
+          `Expected: ok output\n` + `Received: ${outputResult.value}`,
       };
     }
-    const gotResult = outputR.value.result.toString();
+    const gotResult = outputResult.value.result.toString();
     if (gotResult !== result) {
       return {
         pass: false,
@@ -27,7 +29,7 @@ expect.extend({
       };
     }
 
-    const gotBindings = outputR.value.bindings.toString();
+    const gotBindings = outputResult.value.bindings.toString();
     if (gotBindings !== bindings) {
       return {
         pass: false,

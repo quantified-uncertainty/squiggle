@@ -45,7 +45,7 @@ describe("Single source SqProject", () => {
     const output = await project.waitForOutput("main"); // Output is a SqModuleOutput object
 
     /* Let's display the result and bindings. */
-    expect(output.result).toBeOkOutput("3", "{}");
+    expect(output).toBeOkOutput("3", "{}");
     /* You've got 3 with empty bindings. */
   });
 
@@ -75,11 +75,7 @@ describe("Single source SqProject", () => {
     const output = await run("1+2");
     expect(output.result.ok).toBe(true);
 
-    if (!output.result.ok) {
-      throw new Error("failed");
-    }
-
-    expect(output.result).toBeOkOutput("3", "{}");
+    expect(output).toBeOkOutput("3", "{}");
   });
 });
 

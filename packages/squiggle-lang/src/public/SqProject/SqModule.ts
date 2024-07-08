@@ -84,6 +84,16 @@ export class SqModule {
     return this._ast;
   }
 
+  // Useful when we're sure that AST is ok, e.g. when we obtain `SqModule` from `SqValueContext`.
+  // Name is following the Rust conventions (https://doc.rust-lang.org/std/result/enum.Result.html#method.expect).
+  expectAst(): AST {
+    const ast = this.ast();
+    if (!ast.ok) {
+      throw ast.value;
+    }
+    return ast.value;
+  }
+
   getImports(linker: SqLinker): Import[] {
     const ast = this.ast();
     if (!ast.ok) {

@@ -30,33 +30,6 @@ describe("Dict", () => {
   });
 });
 
-// describe("Continues", () => {
-//   test("Bindings from continues are accessible", async () => {
-//     const project = SqProject.create();
-//     project.setSource("p1", "x = 5");
-//     project.setSource("p2", "y = x + 2");
-//     project.setSource("main", "y + 3");
-//     project.setContinues("main", ["p2"]);
-//     project.setContinues("p2", ["p1"]);
-//     await project.run("main");
-//     const result = project.getResult("main");
-//     expect(result.ok).toEqual(true);
-//     expect(result.value.toString()).toEqual("10");
-//   });
-//   test("Can merge bindings from three partials", async () => {
-//     const project = SqProject.create();
-//     project.setSource("p1", "x = 1");
-//     project.setSource("p2", "y = 2");
-//     project.setSource("p3", "z = 3");
-//     project.setSource("main", "x + y + z");
-//     project.setContinues("main", ["p1", "p2", "p3"]);
-//     await project.run("main");
-//     const result = project.getResult("main");
-//     expect(result.ok).toEqual(true);
-//     expect(result.value.toString()).toEqual("6");
-//   });
-// });
-
 describe("Distribution", () => {
   //It's important that sampleCount is less than 9. If it's more, than that will create randomness
   //Also, note, the value should be created using makeSampleSetDist() later on.

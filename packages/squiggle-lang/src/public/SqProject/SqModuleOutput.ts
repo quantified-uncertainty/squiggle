@@ -120,12 +120,8 @@ export class SqModuleOutput {
       return undefined;
     }
 
-    const astR = module.ast();
-    if (!astR.ok) {
-      throw new Error("Impossible, importOutputs() should have caught this");
-    }
-
-    const ast = astR.value;
+    // AST is guaranteed to be ok, otherwise `getImportOutputs` would throw.
+    const ast = module.expectAst();
 
     let importBindings = VDict.empty();
 
