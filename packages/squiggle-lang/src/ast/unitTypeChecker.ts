@@ -10,7 +10,7 @@ type TypedNode<T extends ASTNode["type"]> = Extract<ASTNode, { type: T }>;
  */
 export type VariableId = number;
 
-type IdentifierType = "declaration" | "parameter" | "reference";
+type IdentifierType = "declaration" | "reference";
 
 /*
  * Defines a product of variables and units with the values of the dicts giving
@@ -54,7 +54,6 @@ type ScopeInfo = {
     stack: Scope[];
     variableNodes: ASTNode[];
     functionConstraints: TypeConstraint[][];
-    isFunctionParameter: boolean[];
 };
 
 /*
@@ -171,10 +170,7 @@ function identifierConstraint(
     identifierType: IdentifierType
 ): TypeConstraint {
     let uniqueId: VariableId = 0;
-    let isFunctionParameter: boolean = false;
     switch (identifierType) {
-        case "parameter":
-            isFunctionParameter = true;
         case "declaration":
             // Overwrite scope because anything that comes after must only reference
             // the new variable
@@ -183,7 +179,6 @@ function identifierConstraint(
             }
             uniqueId = scopes.variableNodes.length;
             scopes.variableNodes.push(node);
-            scopes.isFunctionParameter.push(isFunctionParameter);
             scopes.stack[scopes.stack.length - 1][name] = uniqueId;
             break;
         case "reference":
@@ -304,10 +299,7 @@ function lambdaFindTypeConstraints(
             for (const arg of (node as {args: ASTNode[]}).args) {
                 console.assert(arg.type === "Identifier");
 
-                // If no type signature, treat the parameter as a value that
-                // needs to be substituted to determine its type. If type
-                // signature given, treat it as an ordinary variable.
-                const varCategory = arg.typeSignature ? "declaration" : "parameter";
+                const varCategory = "declaration";
                 identifierConstraint((arg as { value: string}).value, arg, scopes, varCategory);
             }
             const numPreConstraints = typeConstraints.length;
@@ -316,8 +308,6 @@ function lambdaFindTypeConstraints(
 
             // Get all constraints that were added within the function body
             var newlyAddedConstraints = typeConstraints.slice(numPreConstraints).map((pair) => structuredClone(pair[0]));
-            // TODO
-            // typeConstraints.splice(numPreConstraints, newlyAddedConstraints.length);
             if (!node.returnUnitType) {
                 newlyAddedConstraints = [structuredClone(returnTypeConstraint)].concat(newlyAddedConstraints);
             }
@@ -460,17 +450,19 @@ function innerFindTypeConstraints(
                 return NO_CONSTRAINT;
             }
             var functionConstraints = scopes.functionConstraints[index - FUNCTION_OFFSET];
-            console.log("Constraints before substitutions:", functionConstraints);
+            console.log("Constraints before substitutions of", name,  ":", functionConstraints);
 
             // substitute function params for args
             for (let i = 0; i < node.args.length; i++) {
                 const argConstraint = innerFindTypeConstraints(node.args[i], typeConstraints, scopes);
+                console.log("argConstraint", i, "in", name, ":", argConstraint);
                 if (!argConstraint.defined) {
-                    // TODO: If argument is a literal, do this dumb hack to give
-                    // it a dummy variable
+                    // TODO: If argument is a literal, assign it a dummy
+                    // variable. This is a hack to make it possible to infer
+                    // unit types where the types depend on a parameter and the
+                    // parameter's argument is a literal.
                     const newId = scopes.variableNodes.length;
                     scopes.variableNodes.push(node.args[i]);
-                    scopes.isFunctionParameter.push(false);
                     argConstraint.variables[newId] = 1;
                 }
                 for (let j = 0; j < functionConstraints.length; j++) {
@@ -479,7 +471,6 @@ function innerFindTypeConstraints(
                         continue;
                     }
                     const paramExponent = constraint.parameters[i];
-                    // TODO: is it possible for argConstraint to contain `parameters`?
                     for (const k in argConstraint.variables) {
                         constraint.variables[k] = argConstraint.variables[k] * paramExponent;
                     }
@@ -488,7 +479,7 @@ function innerFindTypeConstraints(
                 }
             }
 
-            console.log("Constraints after substitutions:", functionConstraints);
+            console.log("Constraints after substitutions of", name,  ":", functionConstraints);
             for (let i = 1; i < functionConstraints.length; i++) {
                 addTypeConstraint(typeConstraints, functionConstraints[i], node);
             }
@@ -592,7 +583,6 @@ function findTypeConstraints(node: ASTNode): [[TypeConstraint, ASTNode][], Scope
     let scopes: ScopeInfo = {
         stack: [{}],
         variableNodes: [],
-        isFunctionParameter: [],
         functionConstraints: [],
     };
     innerFindTypeConstraints(node, typeConstraints, scopes);
@@ -713,14 +703,7 @@ function typeConstraintsToMatrix(typeConstraints: [TypeConstraint, ASTNode][], s
     let unitMatrix = [];
     let rowNodes = [];
 
-    // TODO: probably change this line idk. maybe should use
-    // constraint.parameters instead of constraint.variables but that might
-    // require changing other stuff. also does this even help? maybe just
-    // delete it
     const varIds = scopes.variableNodes.map((_, i) => i);
-    const genericParamIds = [];
-    // const varIds = scopes.variableNodes.map((_, i) => i).filter((i) => !scopes.isFunctionParameter[i]);
-    // const genericParamIds = scopes.variableNodes.map((_, i) => i).filter((i) => scopes.isFunctionParameter[i]);
 
     // Make an ordered list of all unit names.
     let unitNameSet = new Set<string>();
@@ -737,14 +720,13 @@ function typeConstraintsToMatrix(typeConstraints: [TypeConstraint, ASTNode][], s
     for (const [constraint, node] of typeConstraints) {
         let varRow = varIds.map((varId) => varId in constraint.variables ? constraint.variables[varId] : 0);
 
-        let funcParamRow = genericParamIds.map((paramId) => paramId in constraint.variables ? constraint.variables[paramId] : 0);
         let unitRow = unitNames.map((unitName) => unitName in constraint.units ? constraint.units[unitName] : 0);
         varMatrix.push(varRow);
-        unitMatrix.push(funcParamRow.concat(unitRow));
+        unitMatrix.push(unitRow);
         rowNodes.push(node);
     }
 
-    console.log("All constraints:\n\t" + typeConstraints.map(([constraint, _]) => JSON.stringify(constraint)).join("\n\t") + "\nVariables: " + scopes.variableNodes.map((node, i) => node.value + (scopes.isFunctionParameter[i] ? "'" : "")).join(",") + "\nUnit names: " + unitNames.join(","));
+    console.log("All constraints:\n\t" + typeConstraints.map(([constraint, _]) => JSON.stringify(constraint)).join("\n\t") + "\nVariables: " + scopes.variableNodes.map((node, i) => node.value).join(",") + "\nUnit names: " + unitNames.join(","));
     printMatrices("Initial matrix:", varMatrix, unitMatrix);
 
     return [unitNames, varMatrix, unitMatrix];
@@ -760,12 +742,7 @@ function matrixToSimplifiedTypes(
     unitMatrix: number[][],
     scopes: ScopeInfo
 ): VariableUnitTypes {
-    // TODO
     const varIds = scopes.variableNodes.map((_, i) => i);
-    const genericParamIds = [];
-    // const varIds = scopes.variableNodes.map((_, i) => i).filter((i) => !scopes.isFunctionParameter[i]);
-    // const genericParamIds = scopes.variableNodes.map((_, i) => i).filter((i) => scopes.isFunctionParameter[i]);
-    const numParams = genericParamIds.length;
     let varTypes: { [key: string]: { [key: string]: number } } = {};
     for (let i = 0; i < varMatrix.length; i++) {
         let nonzeroIndexes = varMatrix[i].map((x, j) => [x, j]).filter((pair) => pair[0] !== 0).map((pair) => pair[1]);
@@ -784,13 +761,8 @@ function matrixToSimplifiedTypes(
         let varType: { [key: string]: number } = {};
         for (let j = 0; j < unitMatrix[i].length; j++) {
             if (unitMatrix[i][j] !== 0) {
-                if (j < numParams) {
-                    var unitName = String(genericParamIds[j]);
-                } else {
-                    var unitName = unitNames[j - numParams];
-                }
-                    // negate to convert var + unit = 0 to var = -unit
-                varType[unitName] = -unitMatrix[i][j];
+                // negate to convert var + unit = 0 to var = -unit
+                varType[unitNames[j]] = -unitMatrix[i][j];
             }
         }
         varTypes[varId] = varType;

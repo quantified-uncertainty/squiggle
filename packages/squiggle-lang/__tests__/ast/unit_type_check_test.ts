@@ -634,4 +634,29 @@ f(x)
     1: {meters: 2},
 }, ["a", "x"]]));
 
+    test("implicit parameter type is inferred when argument is squared", () => expect(getUnitTypes(
+        `
+f(a) :: meters = a
+x = 5
+f(x * x)
+`)).toEqual([{
+    0: {meters: 1},
+    1: {meters: 0.5},
+}, ["a", "x"]]));
+
+    test("argument contains parameters for outer function", () => expect(getUnitTypes(
+        `
+f(x) = {
+  denom :: seconds = 60
+  x / denom
+}
+wrapper(y) = f(y)
+a :: meters = 5
+b = wrapper(a)
+`)).toEqual([{
+    1: {seconds: 1},
+    3: {meters: 1},
+    4: {meters: 1, seconds: -1},
+}, ["x", "denom", "y", "a", "b"]]));
+
 });
