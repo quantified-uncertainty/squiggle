@@ -53,7 +53,7 @@ const FUNCTION_OFFSET = 1 << 24;
 type ScopeInfo = {
     stack: Scope[];
     variableNodes: ASTNode[];
-    functionConstraints: TypeConstraint[][];
+    functions: [string, TypeConstraint[]][];
 };
 
 /*
@@ -112,12 +112,14 @@ function subConstraintToString(subConstraint: { [key: VariableId | string]: numb
     }
     const entries = Object.entries(subConstraint).map(([key, value]) => {
         let name = "";
-        if (isVariable) {
-            const node = scopes.variableNodes[key as unknown as VariableId] as { value: string };
-            name = node.value;
-        } else {
+        if (!isVariable) {
             name = key;
             value = -value;
+        } else if (key >= FUNCTION_OFFSET) {
+            name = scopes.functions[key - FUNCTION_OFFSET][0];
+        } else {
+            const node = scopes.variableNodes[key as unknown as VariableId] as { value: string };
+            name = node.value;
         }
         return [name, value];
     });
@@ -174,9 +176,6 @@ function identifierConstraint(
         case "declaration":
             // Overwrite scope because anything that comes after must only reference
             // the new variable
-            if (name === "double") {
-                console.log("declaring 'double'");
-            }
             uniqueId = scopes.variableNodes.length;
             scopes.variableNodes.push(node);
             scopes.stack[scopes.stack.length - 1][name] = uniqueId;
@@ -284,7 +283,11 @@ function addTypeConstraint(
     }
 }
 
-/* Like `findTypeConstraints` but specifically for lambda expressions. */
+/* Like `findTypeConstraints` but specifically for lambda expressions. Instead
+ * of returning a single type constraint, returns a list of special type
+ * constraints that use function parameters instead of variables. The parent can
+ * then associate these constraints with a function name.
+ */
 function lambdaFindTypeConstraints(
     node: ASTNode,
     typeConstraints: [TypeConstraint, ASTNode][],
@@ -297,10 +300,9 @@ function lambdaFindTypeConstraints(
             // Add arguments to scope
             scopes.stack.push({...scopes.stack[scopes.stack.length - 1]});
             for (const arg of (node as {args: ASTNode[]}).args) {
+                // this should never happen, it would be a syntax error
                 console.assert(arg.type === "Identifier");
-
-                const varCategory = "declaration";
-                identifierConstraint((arg as { value: string}).value, arg, scopes, varCategory);
+                identifierConstraint((arg as { value: string}).value, arg, scopes, "declaration");
             }
             const numPreConstraints = typeConstraints.length;
 
@@ -423,9 +425,10 @@ function innerFindTypeConstraints(
 
         case "DefunStatement":
             var functionConstraints = lambdaFindTypeConstraints(node.value, typeConstraints, scopes);
-            const uniqueId = FUNCTION_OFFSET + scopes.functionConstraints.length;
-            scopes.functionConstraints.push(functionConstraints);
-            scopes.stack[scopes.stack.length - 1][node.variable.value] = uniqueId;
+            const functionName = node.variable.value;
+            const uniqueId = FUNCTION_OFFSET + scopes.functions.length;
+            scopes.functions.push([functionName, functionConstraints]);
+            scopes.stack[scopes.stack.length - 1][functionName] = uniqueId;
 
             return NO_CONSTRAINT;
 
@@ -436,12 +439,17 @@ function innerFindTypeConstraints(
 
         case "Call":
             if (node.fn.type !== "Identifier") {
-                // Don't type check calls to things that aren't static
+                // Don't type-check calls to things that aren't static
                 // identifiers. For example, `(condition ? f : g)(x)` is valid,
                 // but not type checked.
                 return NO_CONSTRAINT;
             }
             var name = (node.fn as { value: string }).value;
+            if (!(name in scopes.stack[scopes.stack.length - 1])) {
+                // TODO: This means the function is built in or imported. Those
+                // can be type checked in theory but it's not implemented yet.
+                return NO_CONSTRAINT;
+            }
             var index = scopes.stack[scopes.stack.length - 1][name];
             if (index < FUNCTION_OFFSET) {
                 // The referenced identifier is not known to be a function. That
@@ -449,18 +457,18 @@ function innerFindTypeConstraints(
                 // a function at runtime, but we can't type-check it.
                 return NO_CONSTRAINT;
             }
-            var functionConstraints = scopes.functionConstraints[index - FUNCTION_OFFSET];
-            console.log("Constraints before substitutions of", name,  ":", functionConstraints);
+            var functionConstraints = scopes.functions[index - FUNCTION_OFFSET][1];
 
             // substitute function params for args
             for (let i = 0; i < node.args.length; i++) {
                 const argConstraint = innerFindTypeConstraints(node.args[i], typeConstraints, scopes);
-                console.log("argConstraint", i, "in", name, ":", argConstraint);
                 if (!argConstraint.defined) {
-                    // TODO: If argument is a literal, assign it a dummy
+                    // TODO: If argument isn't a variable, assign it a dummy
                     // variable. This is a hack to make it possible to infer
                     // unit types where the types depend on a parameter and the
                     // parameter's argument is a literal.
+                    // This also allows the type checker to check undefined
+                    // variables.
                     const newId = scopes.variableNodes.length;
                     scopes.variableNodes.push(node.args[i]);
                     argConstraint.variables[newId] = 1;
@@ -583,7 +591,7 @@ function findTypeConstraints(node: ASTNode): [[TypeConstraint, ASTNode][], Scope
     let scopes: ScopeInfo = {
         stack: [{}],
         variableNodes: [],
-        functionConstraints: [],
+        functions: [],
     };
     innerFindTypeConstraints(node, typeConstraints, scopes);
     return [typeConstraints, scopes];

@@ -344,6 +344,17 @@ z = x + y
 foo = x * z
 `
         )).toEqual([{}, ["x", "y", "z", "foo"]]));
+
+    });
+
+    describe("built-in function calls", () => {
+        test("can assign unit-typed variable to a builtin function result", () => expect(getUnitTypes(
+            `
+x :: kg = lognormal({p5: 1, p95: 100})
+`)).toEqual([{
+    0: {kg: 1},
+}, ["x"]]));
+
     });
 
     describe("blocks", () => {
@@ -658,5 +669,26 @@ b = wrapper(a)
     3: {meters: 1},
     4: {meters: 1, seconds: -1},
 }, ["x", "denom", "y", "a", "b"]]));
+
+    test("can pass an unknown variable as an implicit parameter type", () => expect(() => getUnitTypes(
+        `
+f(a) :: meters = a
+x = 5
+f(y)
+`)).not.toThrow());
+
+    // This test passes but the way it passes is kind of brittle. An identifier
+    // that references an undefined variable returns an undefined type
+    // constraint, while an identifier that references a function returns a type
+    // constraint containing the identifier, which the parent node then uses to
+    // create a type constraint like `func :: unit`. But when constructing the
+    // constraint matrix, functions are left out, so this creates the constraint
+    // `<nothing> :: unit` which is a type error.
+    test("passing a function as an implicit parameter type throws a type error", () => expect(() => getUnitTypes(
+        `
+f(a) :: meters = a
+x = 5
+f(f)
+`)).toThrow(`Conflicting unit types`));
 
 });
