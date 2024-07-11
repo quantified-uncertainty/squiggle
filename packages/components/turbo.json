@@ -1,17 +1,14 @@
 {
   "extends": ["//"],
-  "pipeline": {
+  "tasks": {
     "build": {
-      "outputs": [
-        "dist/**",
-        "src/components/CodeEditor/languageSupport/generated/**"
-      ]
+      "outputs": ["dist", "src/components/CodeEditor/languageSupport/generated"]
     },
     "build:ts": {
       "dependsOn": ["build:lezer"]
     },
     "build:lezer": {
-      "outputs": ["src/components/CodeEditor/languageSupport/generated/**"]
+      "outputs": ["src/components/CodeEditor/languageSupport/generated"]
     }
   }
 }

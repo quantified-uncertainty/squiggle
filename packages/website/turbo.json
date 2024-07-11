@@ -1,12 +1,12 @@
 {
   "extends": ["//"],
-  "pipeline": {
+  "tasks": {
     "build": {
       "outputs": [
-        "dist/**",
-        ".next/**",
+        "dist",
         "*.tsbuildinfo",
-        "!.next/cache/**",
+        ".next",
+        "!.next/cache",
         "public/llms/documentationBundle.txt",
         "src/pages/docs/Ecosystem/LLMPrompt.md",
         "src/pages/docs/Api/*",
