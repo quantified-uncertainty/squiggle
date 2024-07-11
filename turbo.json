@@ -3,7 +3,7 @@
   // Next.js manifests contain full path names which are platform-dependent,
   // so we can't share builds between Vercel deployments and Github Actions
   "globalEnv": ["PLATFORM"],
-  "pipeline": {
+  "tasks": {
     // dev target for pre-push checks
     "build:ts": {
       "dependsOn": ["^build"],
@@ -11,17 +11,11 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [
-        "dist/**",
-        "build/**",
-        ".next/**",
-        "*.tsbuildinfo",
-        "!.next/cache/**"
-      ]
+      "outputs": ["dist", "build", ".next", "*.tsbuildinfo", "!.next/cache"]
     },
     "build:storybook": {
       "dependsOn": ["build"],
-      "outputs": ["storybook-static/**"]
+      "outputs": ["storybook-static"]
     },
     "lint": {},
     "eslint": {},
@@ -30,7 +24,7 @@
     },
     "coverage": {
       "dependsOn": ["build"],
-      "outputs": ["coverage/**"]
+      "outputs": ["coverage"]
     },
     "dev": {
       "cache": false,
