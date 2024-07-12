@@ -487,7 +487,6 @@ function innerFindTypeConstraints(
                 }
             }
 
-            console.log("Constraints after substitutions of", name,  ":", functionConstraints);
             for (let i = 1; i < functionConstraints.length; i++) {
                 addTypeConstraint(typeConstraints, functionConstraints[i], node);
             }
@@ -734,9 +733,6 @@ function typeConstraintsToMatrix(typeConstraints: [TypeConstraint, ASTNode][], s
         rowNodes.push(node);
     }
 
-    console.log("All constraints:\n\t" + typeConstraints.map(([constraint, _]) => JSON.stringify(constraint)).join("\n\t") + "\nVariables: " + scopes.variableNodes.map((node, i) => node.value).join(",") + "\nUnit names: " + unitNames.join(","));
-    printMatrices("Initial matrix:", varMatrix, unitMatrix);
-
     return [unitNames, varMatrix, unitMatrix];
 }
 
@@ -792,8 +788,6 @@ function checkTypeConstraints(
     const [unitNames, varMatrix, unitMatrix] = typeConstraintsToMatrix(typeConstraints, scopes);
     const conflictingRows = gaussianElim(varMatrix, unitMatrix);
 
-    printMatrices("Solved matrix:", varMatrix, unitMatrix);
-
     if (conflictingRows.length > 0) {
         for (const rowIndices of conflictingRows) {
             const conflictStrs = rowIndices.map(i => `${subConstraintToString(typeConstraints[i][0].variables, scopes, true)} :: ${subConstraintToString(typeConstraints[i][0].units, scopes, false)}`);
@@ -807,16 +801,21 @@ function checkTypeConstraints(
  * Put known unit-type information for each variable into the list of decorators
  * for the ASTNode where the variable is defined.
  *
- * TODO: currently broken
+ * TODO: untested
  */
 function putUnitTypesOnAST(variableTypes: VariableUnitTypes, scopes: ScopeInfo) {
     for (const variableId in variableTypes) {
         const node = scopes.variableNodes[variableId];
+
+        // TODO: assertion is false, node is Identifier
         console.assert(node.type === "LetStatement");
         const fakeLocation = node.location;
         const unitType = variableTypes[variableId];
         const unitTypeStr = unitTypeToString(unitType);
-        (node as { decorators: ASTNode[] }).decorators.push({
+        if (!("decorators" in node)) {
+            node.decorators = [];
+        }
+        node.decorators.push({
             type: "Decorator",
             name: {
                 type: "Identifier",
@@ -836,13 +835,14 @@ function putUnitTypesOnAST(variableTypes: VariableUnitTypes, scopes: ScopeInfo) 
 export function unitTypeCheck(node: ASTNode): void {
     const [typeConstraints, scopes] = findTypeConstraints(node);
     const variableTypes = checkTypeConstraints(typeConstraints, scopes);
-    // putUnitTypesOnAST(variableTypes, scopes);
+    putUnitTypesOnAST(variableTypes, scopes);
 }
 
 export const exportedForTesting = {
     checkTypeConstraints,
     findTypeConstraints,
     gaussianElim,
+    putUnitTypesOnAST,
     typeConstraintsToMatrix,
     unitTypeToString
 }

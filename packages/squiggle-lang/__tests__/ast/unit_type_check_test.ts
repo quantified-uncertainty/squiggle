@@ -2,8 +2,8 @@ import { parse } from "../../src/ast/parse.js";
 import { parse as peggyParse } from "../../src/ast/peggyParser.js";
 import { ASTNode } from "../../src/ast/types.js";
 import { ICompileError } from "../../src/errors/IError.js";
-import { TypeConstraint, VariableUnitTypes, exportedForTesting, unitTypeCheck } from "../../src/ast/unitTypeChecker.js";
-const { checkTypeConstraints, findTypeConstraints, gaussianElim, typeConstraintsToMatrix, unitTypeToString } = exportedForTesting;
+import { TypeConstraint, VariableUnitTypes, exportedForTesting } from "../../src/ast/unitTypeChecker.js";
+const { checkTypeConstraints, findTypeConstraints, gaussianElim, putUnitTypesOnAST, typeConstraintsToMatrix, unitTypeToString } = exportedForTesting;
 import {
     testEvalError,
     testEvalToBe,
@@ -32,7 +32,9 @@ function getUnitTypes(sourceCode: string): [VariableUnitTypes, IdNameMapping] {
     const node = peggyParse(sourceCode, { grammarSource: "test", comments: [] });
     const [typeConstraints, scopes] = findTypeConstraints(node);
     const idNameMapping = scopes.variableNodes.filter((node) => "value" in node).map((node) => (node as { value: string }).value);
-    return [checkTypeConstraints(typeConstraints, scopes), idNameMapping];
+    const res = [checkTypeConstraints(typeConstraints, scopes), idNameMapping];
+    putUnitTypesOnAST(res[0], scopes);
+    return res;
 }
 
 describe("unitTypeToString", () => {
@@ -222,6 +224,14 @@ z :: m/s = x / y
     2: {m: 1, s: -1},
 }, ["x", "y", "z"]]));
 
+        test("values with unit suffixes can have unit types", () => expect(getUnitTypes(`x :: m = 4.6k`)).toEqual([{
+            0: {m: 1},
+        }, ["x"]]));
+
+        test("values in scientific notation can have unit types", () => expect(getUnitTypes(`x :: m = 1.75e9`)).toEqual([{
+            0: {m: 1},
+        }, ["x"]]));
+
         test("types determined in reverse order of declarations can still be inferred", () => expect(getUnitTypes(
             `
 a = 1
@@ -355,6 +365,33 @@ x :: kg = lognormal({p5: 1, p95: 100})
     0: {kg: 1},
 }, ["x"]]));
 
+    });
+
+    describe("data structures", () => {
+        test("can assign a list of unit-typed variables", () => expect(getUnitTypes(
+            `
+x :: kg = 1
+y :: kg = 2
+a = [x, y]
+entry = a[0]
+`)).toEqual([{
+    0: {kg: 1},
+    1: {kg: 1},
+}, ["x", "y", "a", "entry"]]));
+    });
+
+    describe("performance test", () => {
+        test("whole bunch of constraints", () => {
+            const numVars = 200;
+            const varNames = Array.from({ length: numVars }, (_, i) => `x${i}`);
+            const unitNames = Array.from({ length: numVars }, (_, i) => `kg${i}`);
+            const sourceCode = varNames.map((name, i) => `${name} :: ${unitNames[i]} = 1`).join("\n");
+            const expectedTypes = varNames.reduce((acc, name, i) => {
+                acc[i] = { [unitNames[i]]: 1 };
+                return acc;
+            }, {});
+            expect(getUnitTypes(sourceCode)).toEqual([expectedTypes, varNames]);
+        });
     });
 
     describe("blocks", () => {
