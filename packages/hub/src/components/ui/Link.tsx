@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import NextLink, { LinkProps } from "next/link";
 import { forwardRef, useMemo } from "react";
 
@@ -6,14 +7,11 @@ import {
   useIsIntercepting,
 } from "../NavigationBlocker/hooks";
 
-// Link type, copy-pasted from next/link for reference:
-
-// declare const Link: React.ForwardRefExoticComponent<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, keyof InternalLinkProps> & InternalLinkProps & {
-//     children?: React.ReactNode;
-// } & React.RefAttributes<HTMLAnchorElement>>;
+// This component patches the original <Link> from next/link to intercept clicks and prevent navigation if the user is on the page that should be blocked with `NavigationBlocker`.
 
 export const Link = forwardRef<
   HTMLAnchorElement,
+  // type copy-pasted from next/link
   Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps> &
     LinkProps & {
       children?: React.ReactNode;
