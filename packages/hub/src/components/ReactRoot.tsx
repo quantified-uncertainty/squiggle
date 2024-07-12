@@ -9,7 +9,7 @@ import { WithToasts } from "@quri/ui";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { getCurrentEnvironment } from "@/relay/environment";
 
-import { NavigationBlocker } from "./NavigationBlocker";
+import { NavigationBlockerProvider } from "./NavigationBlocker/NavigationBlockerProvider";
 
 // This component is used in the app's root layout to configure all common providers and wrappers.
 // It's also useful when you want to mount a separate React root. One example is CodeMirror tooltips, which are mounted as separate DOM elements.
@@ -22,11 +22,11 @@ export const ReactRoot: FC<PropsWithChildren<{ session: Session | null }>> = ({
   return (
     <SessionProvider session={session}>
       <RelayEnvironmentProvider environment={environment}>
-        <NavigationBlocker>
+        <NavigationBlockerProvider>
           <WithToasts>
             <ErrorBoundary>{children}</ErrorBoundary>
           </WithToasts>
-        </NavigationBlocker>
+        </NavigationBlockerProvider>
       </RelayEnvironmentProvider>
     </SessionProvider>
   );

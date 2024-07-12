@@ -1,7 +1,10 @@
 import NextLink, { LinkProps } from "next/link";
 import { forwardRef, useMemo } from "react";
 
-import { useInterceptLink, useIsIntercepting } from "../NavigationBlocker";
+import {
+  useInterceptLink,
+  useIsIntercepting,
+} from "../NavigationBlocker/hooks";
 
 // Link type, copy-pasted from next/link for reference:
 

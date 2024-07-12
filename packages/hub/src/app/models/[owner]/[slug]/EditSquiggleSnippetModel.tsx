@@ -36,7 +36,7 @@ import {
 } from "@quri/versioned-squiggle-components";
 
 import { EditRelativeValueExports } from "@/components/exports/EditRelativeValueExports";
-import { useBlockNavigation } from "@/components/NavigationBlocker";
+import { useBlockNavigation } from "@/components/NavigationBlocker/hooks";
 import { ReactRoot } from "@/components/ReactRoot";
 import { FormModal } from "@/components/ui/FormModal";
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/constants";
