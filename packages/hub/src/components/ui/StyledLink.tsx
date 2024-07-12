@@ -1,5 +1,6 @@
 import clsx from "clsx";
-import Link from "next/link";
+
+import { Link } from "./Link";
 
 export const StyledLink: React.FC<
   React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }

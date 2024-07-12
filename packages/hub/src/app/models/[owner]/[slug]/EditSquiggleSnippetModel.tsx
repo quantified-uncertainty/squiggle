@@ -1,6 +1,13 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { BaseSyntheticEvent, FC, use, useMemo, useState } from "react";
+import {
+  BaseSyntheticEvent,
+  FC,
+  use,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
@@ -29,6 +36,7 @@ import {
 } from "@quri/versioned-squiggle-components";
 
 import { EditRelativeValueExports } from "@/components/exports/EditRelativeValueExports";
+import { useBlockNavigation } from "@/components/NavigationBlocker";
 import { ReactRoot } from "@/components/ReactRoot";
 import { FormModal } from "@/components/ui/FormModal";
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/constants";
@@ -269,6 +277,14 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       draftUtils.save(draftLocator, { formState: form.getValues(), version });
     }
   };
+
+  // block navigation if code is edited
+  useBlockNavigation(
+    useCallback(
+      () => form.getValues("code") !== content.code,
+      [form, content.code]
+    )
+  );
 
   // We don't want to control SquigglePlayground, it's uncontrolled by design.
   // Instead, we reset the `defaultCode` that we pass to it when version is changed or draft is restored.
