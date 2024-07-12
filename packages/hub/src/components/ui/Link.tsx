@@ -1,3 +1,4 @@
+"use client";
 // eslint-disable-next-line no-restricted-imports
 import NextLink, { LinkProps } from "next/link";
 import { forwardRef, useMemo } from "react";
