@@ -1,9 +1,10 @@
 import clsx from "clsx";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FC, ReactNode } from "react";
 
 import { IconProps } from "@quri/ui";
+
+import { Link } from "./Link";
 
 type TabDivProps = {
   name: string;

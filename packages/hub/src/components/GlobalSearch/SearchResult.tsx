@@ -1,14 +1,15 @@
-import Link from "next/link";
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 import { components, type OptionProps } from "react-select";
 
-import { SearchResult$key } from "@/__generated__/SearchResult.graphql";
-import { SearchOption } from ".";
+import { Link } from "../ui/Link";
+import { SearchOption } from "./";
 import { SearchResultGroup } from "./SearchResultGroup";
 import { SearchResultModel } from "./SearchResultModel";
 import { SearchResultRelativeValuesDefinition } from "./SearchResultRelativeValuesDefinition";
 import { SearchResultUser } from "./SearchResultUser";
+
+import { SearchResult$key } from "@/__generated__/SearchResult.graphql";
 import { SearchResultEdge$key } from "@/__generated__/SearchResultEdge.graphql";
 
 export function useEdgeFragment(edgeFragment: SearchResultEdge$key) {
