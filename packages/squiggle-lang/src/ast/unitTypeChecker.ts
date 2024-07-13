@@ -316,6 +316,7 @@ function lambdaFindTypeConstraints(
             var numPreConstraints = typeConstraints.length;
 
             var returnTypeConstraint = innerFindTypeConstraints(node.body, typeConstraints, scopes);
+            var returnTypeConstraintAsParam = structuredClone(returnTypeConstraint);
 
             // Get all constraints that were added within the function body
             var newlyAddedConstraints = typeConstraints.slice(numPreConstraints).map((pair) => structuredClone(pair[0]));
@@ -349,7 +350,7 @@ function lambdaFindTypeConstraints(
                     explicitConstraints.push(requireConstraintsToBeEqual(paramAsParam, paramType));
                 }
 
-                for (const constraint of newlyAddedConstraints) {
+                for (const constraint of newlyAddedConstraints.concat([returnTypeConstraintAsParam])) {
                     if (paramId in constraint.variables) {
                         constraint.parameters[i] = constraint.variables[paramId];
                         delete constraint.variables[paramId];
@@ -364,8 +365,8 @@ function lambdaFindTypeConstraints(
                 //
                 // Note: returnTypeConstraint contains the params on `variables`,
                 // not on `parameters`.
-                const returnType = createTypeConstraint(node.returnUnitType);
-                const newReturnConstraint = requireConstraintsToBeEqual(returnTypeConstraint, returnType);
+                const explicitReturnType = createTypeConstraint(node.returnUnitType);
+                const newReturnConstraint = requireConstraintsToBeEqual(returnTypeConstraint, explicitReturnType);
                 addTypeConstraint(typeConstraints, newReturnConstraint, node, numPreConstraints);
                 numPreConstraints++;
 
@@ -386,7 +387,9 @@ function lambdaFindTypeConstraints(
                 }
                 // If there is an explicit return type, use it as the function's
                 // return type instead of the inferred type.
-                returnTypeConstraint = returnType;
+                returnTypeConstraint = explicitReturnType;
+            } else {
+                returnTypeConstraint = returnTypeConstraintAsParam;
             }
 
             scopes.stack.pop();
