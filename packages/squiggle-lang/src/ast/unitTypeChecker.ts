@@ -318,7 +318,9 @@ function lambdaFindTypeConstraints(
             // Get all constraints that were added within the function body
             var newlyAddedConstraints = typeConstraints.slice(numPreConstraints).map((pair) => structuredClone(pair[0]));
             if (!node.returnUnitType) {
+                // TODO part 1
                 newlyAddedConstraints.push(structuredClone(returnTypeConstraint));
+                // newlyAddedConstraints = [structuredClone(returnTypeConstraint)].concat(newlyAddedConstraints);
             }
             var explicitConstraints = [];
 
@@ -378,7 +380,9 @@ function lambdaFindTypeConstraints(
 
                 // replace the old return value type because it's obsolete
                 explicitConstraints.push(substitutableConstraint);
+                // TODO part 2
                 newlyAddedConstraints[newlyAddedConstraints.length - 1] = returnType;
+                // newlyAddedConstraints[0] = returnType;
             }
 
             scopes.stack.pop();
@@ -792,20 +796,23 @@ function forwardCheckConstraints(
     const unitTypes: VariableUnitTypes = {};
     const conflicts: [TypeConstraint, ASTNode, VariableId[]][] = [];
 
-    console.log("all constraints:", typeConstraints.map((pair) => pair[0]));
-    console.log("function constraints:", scopes.functions[0][1]);
+    // console.log("all constraints:", typeConstraints.map((pair) => pair[0]));
+    // console.log("function constraints:", scopes.functions[0][1]);
 
-    for (let [constraint, node] of typeConstraints) {
+    for (let i = 0; i < typeConstraints.length; i++) {
+        let [constraint, node] = typeConstraints[i];
         const originalConstraint = constraint;
         constraint = structuredClone(constraint);
         const typedVariablesInConstraint = [];
-        for (const variable in constraint.variables) {
-            if (variable in unitTypes) {
-                // Substitute this variable's known unit type into `constraint`.
-                typedVariablesInConstraint.push(variable);
-                const variableType = unitTypes[variable];
-                const exponent = constraint.variables[variable];
-                delete constraint.variables[variable];
+
+        // Find all variables in this constraint with known types and
+        // substitute them in.
+        for (const varId in constraint.variables) {
+            if (varId in unitTypes) {
+                typedVariablesInConstraint.push(varId);
+                const variableType = unitTypes[varId];
+                const exponent = constraint.variables[varId];
+                delete constraint.variables[varId];
                 for (const unit in variableType) {
                     if (!(unit in constraint.units)) {
                         constraint.units[unit] = 0;
@@ -815,23 +822,38 @@ function forwardCheckConstraints(
                         delete constraint.units[unit];
                     }
                 }
+            } else if (varId >= FUNCTION_OFFSET) {
+                // TODO: this could be better
+                // If the variable is a function, just delete it from the
+                // constraint lol
+                delete constraint.variables[varId];
             }
         }
 
         const numVariablesLeft = Object.keys(constraint.variables).length;
         if (numVariablesLeft === 1) {
-            const variable = Object.keys(constraint.variables)[0];
-            const exponent = constraint.variables[variable];
+            const varId = Object.keys(constraint.variables)[0];
+            const exponent = constraint.variables[varId];
             const unitType = {};
             for (const unit in constraint.units) {
                 if (constraint.units[unit] !== 0) {
                     unitType[unit] = -constraint.units[unit] / exponent;
                 }
             }
-            unitTypes[variable] = unitType;
+            unitTypes[varId] = unitType;
+            // TODO: uncomment this line to switch to forward-only type inference
+            i = -1;
         } else if (numVariablesLeft === 0 && Object.keys(constraint.units).length > 0) {
             // This type constraint cannot be satisfied.
             conflicts.push([originalConstraint, node, typedVariablesInConstraint]);
+        }
+    }
+
+    for (const varId in unitTypes) {
+        if (!("value" in scopes.variableNodes[varId])) {
+            // Delete dummy variables that aren't associated with an
+            // identifier node
+            delete unitTypes[varId];
         }
     }
 
@@ -849,6 +871,17 @@ function checkTypeConstraints(
     typeConstraints: [TypeConstraint, ASTNode][],
     scopes: ScopeInfo
 ): VariableUnitTypes {
+    // TODO
+    // const [unitNames, varMatrix, unitMatrix] = typeConstraintsToMatrix(typeConstraints, scopes);
+    // const conflictingRows = gaussianElim(varMatrix, unitMatrix);
+    // if (conflictingRows.length > 0) {
+    //     for (const rowIndices of conflictingRows) {
+    //         const conflictStrs = rowIndices.map(i => `${subConstraintToString(typeConstraints[i][0].variables, scopes, true)} :: ${subConstraintToString(typeConstraints[i][0].units, scopes, false)}`);
+    //         throw new ICompileError(`Conflicting unit types:\n\t${conflictStrs.join("\n\t")}`, typeConstraints[rowIndices[0]][1].location);
+    //     }
+    // }
+    // return matrixToSimplifiedTypes(unitNames, varMatrix, unitMatrix, scopes);
+
     const [unitTypes, conflicts] = forwardCheckConstraints(typeConstraints, scopes);
 
     if (conflicts.length > 0) {
