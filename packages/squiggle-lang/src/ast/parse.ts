@@ -86,8 +86,8 @@ export function nodeToString(
           node.fractional === null ? "" : `.${node.fractional}`
         }${node.exponent === null ? "" : `e${node.exponent}`}`;
       case "Identifier":
-        if (node.typeSignature) {
-          return sExpr([node.value, toSExpr(node.typeSignature)]);
+        if (node.unitTypeSignature) {
+          return sExpr([node.value, toSExpr(node.unitTypeSignature)]);
         } else {
           return `:${node.value}`;
         }
@@ -106,7 +106,7 @@ export function nodeToString(
       case "LetStatement":
         return sExpr([
           toSExpr(node.variable),
-          node.typeSignature ? toSExpr(node.typeSignature) : undefined,
+          node.unitTypeSignature ? toSExpr(node.unitTypeSignature) : undefined,
           toSExpr(node.value),
           node.exported ? "exported" : undefined,
           ...node.decorators.map(toSExpr),
@@ -126,7 +126,7 @@ export function nodeToString(
             toSExpr
           )
         );
-      case "TypeSignature":
+      case "UnitTypeSignature":
         return sExpr([toSExpr(node.body)]);
       case "InfixType":
         return sExpr([node.op, ...node.args.map(toSExpr)]);

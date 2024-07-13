@@ -396,7 +396,7 @@ function compileToContent(
         innerCompileAst(ast.value, context),
       ]);
     }
-    case "TypeSignature":
+    case "UnitTypeSignature":
     case "InfixType":
       // should never happen
       throw new ICompileError(

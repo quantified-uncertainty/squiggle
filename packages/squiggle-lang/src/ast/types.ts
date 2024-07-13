@@ -158,13 +158,13 @@ type NodeIdentifierWithAnnotation = N<
   {
     variable: string;
     annotation: ASTNode;
-    typeSignature?: NodeTypeSignature;
+    unitTypeSignature?: NodeTypeSignature;
   }
 >;
 
 type NodeIdentifier = N<"Identifier", {
     value: string;
-    typeSignature?: NodeTypeSignature;
+    unitTypeSignature?: NodeTypeSignature;
 }>;
 
 type NodeDecorator = N<
@@ -184,7 +184,7 @@ type LetOrDefun = {
 type NodeLetStatement = N<
   "LetStatement",
   LetOrDefun & {
-    typeSignature: NodeTypeSignature;
+    unitTypeSignature: NodeTypeSignature;
     value: ASTNode;
   }
 >;
@@ -220,7 +220,7 @@ type NodeTernary = N<
 >;
 
 type NodeTypeSignature = N<
-  "TypeSignature",
+  "UnitTypeSignature",
   {
     body: ASTNode;
   }

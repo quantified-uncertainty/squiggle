@@ -140,7 +140,7 @@ function createTypeConstraint(node?: ASTNode): TypeConstraint {
         return no_constraint();
     }
     switch (node.type) {
-        case "TypeSignature":
+        case "UnitTypeSignature":
             return createTypeConstraint(node.body);
         case "Float":
         case "UnitValue":
@@ -332,11 +332,11 @@ function lambdaFindTypeConstraints(
             // loop thru all new constraints and replace parameter variables
             // with `parameter` entries
             for (let i = 0; i < node.args.length; i++) {
-                const arg = (node.args[i] as { typeSignature?: ASTNode });
+                const arg = (node.args[i] as { unitTypeSignature?: ASTNode });
                 const paramName = (node.args[i] as {value: string}).value;
                 const paramId = scopes.stack[scopes.stack.length - 1][paramName];
-                if (arg.typeSignature) {
-                    const paramType = createTypeConstraint(arg.typeSignature);
+                if (arg.unitTypeSignature) {
+                    const paramType = createTypeConstraint(arg.unitTypeSignature);
                     const paramAsVariable = {
                         defined: true,
                         variables: { [paramId]: 1 },
@@ -432,7 +432,7 @@ function innerFindTypeConstraints(
                 // Fall through to "DefunStatement" below
             } else {
                 var variableConstraint = identifierConstraint(node.variable.value, node.variable, scopes, "declaration");
-                var typeDefConstraint = createTypeConstraint(node.typeSignature);
+                var typeDefConstraint = createTypeConstraint(node.unitTypeSignature);
                 var valueConstraint = innerFindTypeConstraints(node.value, typeConstraints, scopes);
                 addTypeConstraint(
                     typeConstraints,

@@ -58,7 +58,7 @@ decorator
       return h.nodeDecorator(name, args ?? [], location());
     }
 
-typeSignature
+unitTypeSignature
   = _ "::" _ body:infixType
     {
       return h.nodeTypeSignature(body, location());
@@ -74,11 +74,11 @@ statement
   / defunStatement
 
 letStatement
-  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier typeSignature:typeSignature? _ assignmentOp _nl value:innerBlockOrExpression
-    { return h.nodeLetStatement(decorators, variable, typeSignature, value, Boolean(exported), location()); }
+  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier unitTypeSignature:unitTypeSignature? _ assignmentOp _nl value:innerBlockOrExpression
+    { return h.nodeLetStatement(decorators, variable, unitTypeSignature, value, Boolean(exported), location()); }
 
 defunStatement
-  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier '(' _nl args:functionParameters _nl ')' returnUnitType:typeSignature? _ assignmentOp _nl body:innerBlockOrExpression
+  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier '(' _nl args:functionParameters _nl ')' returnUnitType:unitTypeSignature? _ assignmentOp _nl body:innerBlockOrExpression
     {
       const value = h.nodeLambda(args, body, location(), variable, returnUnitType);
       return h.nodeDefunStatement(decorators, variable, value, Boolean(exported), location());
@@ -88,7 +88,7 @@ defunStatement
 
 functionParameters = functionParameter|.., commaSeparator|
   functionParameter
-    = id:dollarIdentifier annotation:(_ ':' _nl @expression)? paramUnitType:typeSignature?
+    = id:dollarIdentifier annotation:(_ ':' _nl @expression)? paramUnitType:unitTypeSignature?
       {
         return annotation ? h.nodeIdentifierWithAnnotation(id.value, annotation, paramUnitType, location()) : h.nodeIdentifierWithUnitType(id.value, paramUnitType, location());
       }

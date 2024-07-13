@@ -156,9 +156,9 @@ export function nodeProgram(
 export function nodeTypeSignature(
   body: ASTNode,
   location: LocationRange
-): TypedNode<"TypeSignature"> {
+): TypedNode<"UnitTypeSignature"> {
   return {
-    type: "TypeSignature",
+    type: "UnitTypeSignature",
     body: body,
     location: location
   };
@@ -187,19 +187,19 @@ export function nodeIdentifier(
 
 export function nodeIdentifierWithUnitType(
   value: string,
-  typeSignature: TypedNode<"TypeSignature">,
+  unitTypeSignature: TypedNode<"UnitTypeSignature">,
   location: LocationRange
 ): TypedNode<"Identifier"> {
-  return { type: "Identifier", value, typeSignature, location };
+  return { type: "Identifier", value, unitTypeSignature, location };
 }
 
 export function nodeIdentifierWithAnnotation(
   variable: string,
   annotation: ASTNode,
-  typeSignature: TypedNode<"TypeSignature">,
+  unitTypeSignature: TypedNode<"UnitTypeSignature">,
   location: LocationRange
 ): TypedNode<"IdentifierWithAnnotation"> {
-  return { type: "IdentifierWithAnnotation", variable, annotation, typeSignature, location };
+  return { type: "IdentifierWithAnnotation", variable, annotation, unitTypeSignature, location };
 }
 
 export function nodeKeyValue(
@@ -220,14 +220,14 @@ export function nodeLambda(
   body: ASTNode,
   location: LocationRange,
   name?: TypedNode<"Identifier">,
-  returnUnitType?: TypedNode<"TypeSignature">,
+  returnUnitType?: TypedNode<"UnitTypeSignature">,
 ): TypedNode<"Lambda"> {
     return { type: "Lambda", args: args, body: body, name: name?.value, returnUnitType: returnUnitType, location: location };
 }
 export function nodeLetStatement(
   decorators: TypedNode<"Decorator">[],
   variable: TypedNode<"Identifier">,
-  typeSignature: TypedNode<"TypeSignature">,
+  unitTypeSignature: TypedNode<"UnitTypeSignature">,
   value: ASTNode,
   exported: boolean,
   location: LocationRange
@@ -238,7 +238,7 @@ export function nodeLetStatement(
     type: "LetStatement",
     decorators,
     variable,
-    typeSignature,
+    unitTypeSignature,
     value: patchedValue,
     exported,
     location,
