@@ -1,5 +1,5 @@
 import Dagre from "@dagrejs/dagre";
-import { FC, useMemo } from "react";
+import { FC, ReactNode, useMemo } from "react";
 import {
   Background,
   BackgroundVariant,
@@ -17,80 +17,88 @@ import { CustomEdge } from "./CustomEdge.js";
 import { NodeLabel } from "./NodeLabel.js";
 import { StateStats } from "./StateStats.js";
 
+type SizedNode = Omit<
+  Node,
+  "position" // position will be overwritten by Dagre
+> & { width: number; height: number }; // width and height are required by Dagre
+
+function makeNode(params: {
+  id: string;
+  className: string;
+  label: ReactNode;
+}): SizedNode {
+  return {
+    id: params.id,
+    className: params.className,
+    data: { label: params.label },
+    width: 200,
+    height: 100,
+  };
+}
+
+function makeEdge(source: string, target: string): Edge {
+  return {
+    id: `${source}->${target}`,
+    source,
+    target,
+    markerEnd: {
+      type: MarkerType.Arrow,
+      width: 24,
+      height: 24,
+    },
+  };
+}
+
 function useNodesAndEdges(project: SqProject) {
   const { nodes, edges }: { nodes: Node[]; edges: Edge[] } = useMemo(() => {
-    const nodes: (Omit<Node, "width" | "height"> & {
-      width: number;
-      height: number;
-    })[] = [];
+    const nodes: SizedNode[] = [];
     const edges: Edge[] = [];
 
     for (const [headName, head] of project.state.heads) {
       const headId = `head:${headName}`;
-      nodes.push({
-        id: headId,
-        position: { x: 0, y: 0 },
-        className: "!bg-green-300",
-        width: 200,
-        height: 100,
-        data: { label: <NodeLabel type="Head">{headName}</NodeLabel> },
-      });
-      edges.push({
-        id: `head:${headId}->${head.hash}`,
-        source: headId,
-        target: `module:${head.hash}`,
-        markerEnd: {
-          type: MarkerType.Arrow,
-          width: 24,
-          height: 24,
-        },
-      });
+      nodes.push(
+        makeNode({
+          id: headId,
+          className: "!bg-green-300",
+          label: <NodeLabel type="Head">{headName}</NodeLabel>,
+        })
+      );
+      edges.push(makeEdge(headId, `module:${head.hash}`));
     }
     for (const [id, moduleData] of project.state.modules) {
       switch (moduleData.type) {
         case "failed":
-          nodes.push({
-            id: `module:${id}`,
-            className: "!bg-red-300",
-            position: { x: 0, y: 0 },
-            width: 200,
-            height: 100,
-            data: { label: `FAILED: ${id}` },
-          });
+          nodes.push(
+            makeNode({
+              id: `module:${id}`,
+              className: "!bg-red-300",
+              label: `FAILED: ${id}`,
+            })
+          );
           break;
         case "loading":
-          nodes.push({
-            id: `module:${id}`,
-            className: "!bg-blue-300",
-            position: { x: 0, y: 0 },
-            width: 200,
-            height: 100,
-            data: {
-              label: (
-                <div>
-                  <RefreshIcon className="animate-spin" />
-                </div>
-              ),
-            },
-          });
+          nodes.push(
+            makeNode({
+              id: `module:${id}`,
+              className: "!bg-blue-300",
+              label: <RefreshIcon className="animate-spin" />,
+            })
+          );
           break;
         case "loaded": {
           const module = moduleData.value;
 
-          nodes.push({
-            id: `module:${id}`,
-            className: "!bg-blue-300",
-            position: { x: 0, y: 0 },
-            width: 200,
-            height: 100,
-            data: {
+          nodes.push(
+            makeNode({
+              id: `module:${id}`,
+              className: "!bg-blue-300",
               label: (
                 <NodeLabel type="Module" hash={id}>
                   {module.name}
                 </NodeLabel>
               ),
-            },
-          });
+            })
+          );
 
           for (const importBinding of module.getImports(project.state.linker)) {
             const target = project.state.getModuleDataByPointer({
@@ -102,29 +110,20 @@ function useNodesAndEdges(project: SqProject) {
             // 1. target is loaded, so we can add an edge to its module node (doesn't matter if it's pinned or not)
             // 2. target is not loaded but pinned, so we add an edge to its loading module node
             // 3. target is not loaded and not pinned, so we add an edge to its pending resolution
-            if (target?.type !== "loaded" && !importBinding.hash) {
-              edges.push({
-                id: `import:${id}->resolution:${importBinding.name}`,
-                source: `module:${id}`,
-                target: `resolution:${importBinding.name}`,
-                markerEnd: {
-                  type: MarkerType.Arrow,
-                  width: 24,
-                  height: 24,
-                },
-              });
+            if (target?.type === "loaded") {
+              edges.push(
+                makeEdge(`module:${id}`, `module:${target.value.hash()}`)
+              );
             } else {
-              const targetId = importBinding.hash;
-              edges.push({
-                id: `import:${id}->module:${targetId}`,
-                source: `module:${id}`,
-                target: `module:${targetId}`,
-                markerEnd: {
-                  type: MarkerType.Arrow,
-                  width: 24,
-                  height: 24,
-                },
-              });
+              if (importBinding.hash) {
+                edges.push(
+                  makeEdge(`module:${id}`, `module:${importBinding.hash}`)
+                );
+              } else {
+                edges.push(
+                  makeEdge(`module:${id}`, `resolution:${importBinding.name}`)
+                );
+              }
             }
           }
           break;
@@ -138,13 +137,10 @@ function useNodesAndEdges(project: SqProject) {
       if (resolution.type === "loaded") {
         continue; // loaded resolutions are not very useful, we connect import edges directly to modules
       }
-      nodes.push({
-        id: `resolution:${id}`,
-        className: "!bg-slate-300",
-        position: { x: 0, y: 0 },
-        width: 200,
-        height: 100,
-        data: {
+      nodes.push(
+        makeNode({
+          id: `resolution:${id}`,
+          className: "!bg-slate-300",
           label: (
             <NodeLabel type="Module">
               <div className="flex">
@@ -158,32 +154,20 @@ function useNodesAndEdges(project: SqProject) {
               </div>
             </NodeLabel>
           ),
-        },
-      });
+        })
+      );
     }
 
     for (const [id, output] of project.state.outputs) {
-      nodes.push({
-        id: `output:${id}`,
-        className: "!bg-yellow-300",
-        position: { x: 0, y: 0 },
-        width: 200,
-        height: 100,
-        data: {
+      nodes.push(
+        makeNode({
+          id: `output:${id}`,
+          className: "!bg-yellow-300",
           label: <NodeLabel type="Output" hash={id} />,
-        },
-      });
+        })
+      );
 
-      edges.push({
-        id: `output:${id}->${output.module.hash()}`,
-        source: `module:${output.module.hash()}`,
-        target: `output:${id}`,
-        markerEnd: {
-          type: MarkerType.Arrow,
-          width: 24,
-          height: 24,
-        },
-      });
+      edges.push(makeEdge(`module:${output.module.hash()}`, `output:${id}`));
     }
 
     const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));

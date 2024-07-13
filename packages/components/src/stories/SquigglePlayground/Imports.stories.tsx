@@ -10,6 +10,20 @@ const meta: Meta<typeof Component> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Variant of linker that takes 3 seconds to load each module.
+function makeSlowLinker(
+  sources: Parameters<typeof makeSelfContainedLinker>[0]
+) {
+  const linker = makeSelfContainedLinker(sources);
+  return {
+    ...linker,
+    async loadModule(name: string) {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      return linker.loadModule(name);
+    },
+  };
+}
+
 export const ImportsWithTooltips: Story = {
   args: {
     linker: makeSelfContainedLinker({
@@ -45,6 +59,22 @@ export const InvalidImportCode: Story = {
     }),
     defaultCode: `import "source1" as s1
 x = 1
+`,
+  },
+};
+
+export const SlowImports: Story = {
+  args: {
+    linker: makeSlowLinker({
+      source1: `export x = 1`,
+      source2: `export y = 2`,
+    }),
+    defaultCode: `// This story demonstrates how slow imports are handled by SqProject.
+// Open "Dependency Graph" tab, remove these two lines and paste them again to see how modules are loaded:
+import "source1" as s1
+import "source2" as s2
+
+x = s1
 `,
   },
 };
