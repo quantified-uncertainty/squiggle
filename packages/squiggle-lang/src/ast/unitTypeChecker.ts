@@ -53,7 +53,7 @@ const FUNCTION_OFFSET = 1 << 24;
 type ScopeInfo = {
     stack: Scope[];
     variableNodes: ASTNode[];
-    functions: [string, TypeConstraint[]][];
+    functions: [string, [TypeConstraint[], TypeConstraint]][];
 };
 
 /*
@@ -294,12 +294,14 @@ function addTypeConstraint(
  * of returning a single type constraint, returns a list of special type
  * constraints that use function parameters instead of variables. The parent can
  * then associate these constraints with a function name.
+ *
+ * The second constraint in the tuple represents the return value.
  */
 function lambdaFindTypeConstraints(
     node: ASTNode,
     typeConstraints: [TypeConstraint, ASTNode][],
     scopes: ScopeInfo
-): TypeConstraint[] {
+): [TypeConstraint[], TypeConstraint] {
     // This switch statement serves to statically guarantee that `node` has type
     // `TypedNode<"Lambda">` so TypeScript can correctly infer types.
     switch (node.type) {
@@ -317,9 +319,6 @@ function lambdaFindTypeConstraints(
 
             // Get all constraints that were added within the function body
             var newlyAddedConstraints = typeConstraints.slice(numPreConstraints).map((pair) => structuredClone(pair[0]));
-            if (!node.returnUnitType) {
-                newlyAddedConstraints.push(structuredClone(returnTypeConstraint));
-            }
             var explicitConstraints = [];
 
             // loop thru all new constraints and replace parameter variables
@@ -357,15 +356,21 @@ function lambdaFindTypeConstraints(
                     }
                 }
             }
+            const functionConstraints = newlyAddedConstraints.concat(explicitConstraints);
+
             if (node.returnUnitType) {
-                // Note: returnTypeConstraint contains the params as variables,
-                // not parameter entries
+                // If the lambda has an explicit return type, add a constraint
+                // that the return type is equal to the specified return type.
+                //
+                // Note: returnTypeConstraint contains the params on `variables`,
+                // not on `parameters`.
                 const returnType = createTypeConstraint(node.returnUnitType);
                 const newReturnConstraint = requireConstraintsToBeEqual(returnTypeConstraint, returnType);
                 addTypeConstraint(typeConstraints, newReturnConstraint, node, numPreConstraints);
                 numPreConstraints++;
 
-                // replace params as variables in newReturnConstraint with params as parameters
+                // replace params as `variables` in newReturnConstraint with
+                // params as `parameters`
                 const substitutableConstraint = structuredClone(newReturnConstraint);
                 for (let i = 0; i < node.args.length; i++) {
                     const paramName = (node.args[i] as {value: string}).value;
@@ -376,13 +381,16 @@ function lambdaFindTypeConstraints(
                     }
                 }
 
-                // replace the old return value type because it's obsolete
-                explicitConstraints.push(substitutableConstraint);
-                newlyAddedConstraints.push(returnType);
+                if (substitutableConstraint.defined) {
+                    functionConstraints.push(substitutableConstraint);
+                }
+                // If there is an explicit return type, use it as the function's
+                // return type instead of the inferred type.
+                returnTypeConstraint = returnType;
             }
 
             scopes.stack.pop();
-            return newlyAddedConstraints.concat(explicitConstraints);
+            return [functionConstraints, returnTypeConstraint];
         default:
             throw new Error(`Argument to lambdaFindTypeConstraints must have type lambda, not ${node.type}`);
     }
@@ -468,7 +476,7 @@ function innerFindTypeConstraints(
                 // a function at runtime, but we can't type-check it.
                 return NO_CONSTRAINT;
             }
-            var functionConstraints = scopes.functions[index - FUNCTION_OFFSET][1];
+            var [functionConstraints, returnTypeConstraint] = scopes.functions[index - FUNCTION_OFFSET][1];
 
             // substitute function params for args
             for (let i = 0; i < node.args.length; i++) {
@@ -484,8 +492,7 @@ function innerFindTypeConstraints(
                     scopes.variableNodes.push(node.args[i]);
                     argConstraint.variables[newId] = 1;
                 }
-                for (let j = 0; j < functionConstraints.length; j++) {
-                    let constraint = functionConstraints[j];
+                for (let constraint of functionConstraints.concat(returnTypeConstraint)) {
                     if (!(i in constraint.parameters)) {
                         continue;
                     }
@@ -494,14 +501,13 @@ function innerFindTypeConstraints(
                         constraint.variables[k] = argConstraint.variables[k] * paramExponent;
                     }
                     delete constraint.parameters[i];
-                    functionConstraints[j] = constraint;
                 }
             }
 
-            for (let i = 1; i < functionConstraints.length; i++) {
+            for (let i = 0; i < functionConstraints.length; i++) {
                 addTypeConstraint(typeConstraints, functionConstraints[i], node);
             }
-            return functionConstraints[0];
+            return returnTypeConstraint;
 
         case "Identifier":
             return identifierConstraint(node.value, node, scopes, "reference");
@@ -864,10 +870,10 @@ function checkTypeConstraints(
     typeConstraints: [TypeConstraint, ASTNode][],
     scopes: ScopeInfo
 ): VariableUnitTypes {
-    // TODO
     // console.log("all constraints:", typeConstraints.map((pair) => pair[0]));
     // console.log("function constraints:", scopes.functions[0][1]);
 
+    // TODO
     // const [unitNames, varMatrix, unitMatrix] = typeConstraintsToMatrix(typeConstraints, scopes);
     // const conflictingRows = gaussianElim(varMatrix, unitMatrix);
     // if (conflictingRows.length > 0) {
