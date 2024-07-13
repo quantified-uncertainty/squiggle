@@ -356,6 +356,17 @@ foo = x * z
 `
         )).toEqual([{}, ["x", "y", "z", "foo"]]));
 
+        // This test fails if the type checker does not correctly handle
+        // exponents in unit type constraints.
+        test("over-determined type containing a power does not create a conflict", () => expect(getUnitTypes(
+            `
+x :: meters = 2
+y :: meters*meters = x * x
+`)).toEqual([{
+    0: {meters: 1},
+    1: {meters: 2},
+}, ["x", "y"]]));
+
     });
 
     describe("built-in function calls", () => {
@@ -459,7 +470,7 @@ x = {
 }, ["x", "y"]]));
 
         // this only works with backward type inference
-        test.skip("type inference back-propagates from outside to inside a block", () => expect(getUnitTypes(
+        test("type inference back-propagates from outside to inside a block", () => expect(getUnitTypes(
             `
 x = 10
 y :: dollars = {
@@ -704,9 +715,9 @@ f(x)
 
     test("implicit parameter type is inferred when argument is squared", () => expect(getUnitTypes(
         `
-f(a) :: meters = a
+goober(a) :: meters = a
 x = 5
-f(x * x)
+goober(x * x)
 `)).toEqual([{
     0: {meters: 1},
     1: {meters: 0.5},

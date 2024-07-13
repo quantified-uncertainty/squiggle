@@ -58,23 +58,27 @@ type ScopeInfo = {
 
 /*
  * A type constraint that does not contain any variables or units. This is
- * distinct from `NO_CONSTRAINT` because combining an empty constraint with a
+ * distinct from `no_constraint()` because combining an empty constraint with a
  * non-empty constraint produces a non-empty constraint, but combining
- * `NO_CONSTRAINT` with any other constraint produces `NO_CONSTRAINT`.
+ * `no_constraint()` with any other constraint produces `no_constraint()`.
  */
-const EMPTY_CONSTRAINT: TypeConstraint = {
-    defined: true,
-    variables: {},
-    parameters: {},
-    units: {},
-};
+function empty_constraint(): TypeConstraint {
+    return {
+        defined: true,
+        variables: {},
+        parameters: {},
+        units: {},
+    };
+}
 
-const NO_CONSTRAINT: TypeConstraint = {
-    defined: false,
-    variables: {},
-    parameters: {},
-    units: {},
-};
+function no_constraint(): TypeConstraint {
+    return {
+        defined: false,
+        variables: {},
+        parameters: {},
+        units: {},
+    };
+}
 
 /* Helper function for testing purposes. Print the matrices in a readable
  * format.
@@ -110,17 +114,18 @@ function subConstraintToString(subConstraint: { [key: VariableId | string]: numb
     if (Object.keys(subConstraint).length === 0) {
         return "<unitless>";
     }
-    const entries = Object.entries(subConstraint).map(([key, value]) => {
+    const entries = Object.entries(subConstraint).map(([key1, value]) => {
+        const key = key1 as unknown as number;
         let name = "";
         if (negate) {
             value = -value;
         }
         if (!isVariable) {
-            name = key;
+            name = key1;
         } else if (key >= FUNCTION_OFFSET) {
             name = scopes.functions[key - FUNCTION_OFFSET][0];
         } else {
-            const node = scopes.variableNodes[key as unknown as VariableId] as { value: string };
+            const node = scopes.variableNodes[key] as { value: string };
             name = node.value;
         }
         return [name, value];
@@ -132,7 +137,7 @@ function subConstraintToString(subConstraint: { [key: VariableId | string]: numb
 /* Create a TypeConstraint object from a type signature. */
 function createTypeConstraint(node?: ASTNode): TypeConstraint {
     if (!node) {
-        return NO_CONSTRAINT;
+        return no_constraint();
     }
     switch (node.type) {
         case "TypeSignature":
@@ -140,7 +145,7 @@ function createTypeConstraint(node?: ASTNode): TypeConstraint {
         case "Float":
         case "UnitValue":
             // Can use a unitless literal in a type signature, e.g. `1/meters`.
-            return EMPTY_CONSTRAINT;
+            return empty_constraint();
         case "Identifier":
             return {
                 defined: true,
@@ -188,7 +193,7 @@ function identifierConstraint(
             } else {
                 // Referencing an undefined variable is a compile error, but this
                 // isn't the right place to raise an error, so just ignore it.
-                return NO_CONSTRAINT;
+                return no_constraint();
             }
             break;
         default:
@@ -208,7 +213,7 @@ function multiplyConstraints(
     right: TypeConstraint
 ): TypeConstraint {
     if (!left.defined || !right.defined) {
-        return NO_CONSTRAINT;
+        return no_constraint();
     }
     // Note: The loops below are duplicated so that TypeScript is aware of the key types.
     const variables = { ...left.variables, ...right.variables };
@@ -315,8 +320,10 @@ function lambdaFindTypeConstraints(
             }
             var numPreConstraints = typeConstraints.length;
 
+            // returnTypeConstraint will be modified to replace variables with
+            // parameters. returnTypeConstraintAsVariable is left unmodified.
             var returnTypeConstraint = innerFindTypeConstraints(node.body, typeConstraints, scopes);
-            var returnTypeConstraintAsParam = structuredClone(returnTypeConstraint);
+            var returnTypeConstraintAsVariable = structuredClone(returnTypeConstraint);
 
             // Get all constraints that were added within the function body
             var newlyAddedConstraints = typeConstraints.slice(numPreConstraints).map((pair) => structuredClone(pair[0]));
@@ -350,7 +357,7 @@ function lambdaFindTypeConstraints(
                     explicitConstraints.push(requireConstraintsToBeEqual(paramAsParam, paramType));
                 }
 
-                for (const constraint of newlyAddedConstraints.concat([returnTypeConstraintAsParam])) {
+                for (const constraint of newlyAddedConstraints.concat([returnTypeConstraint])) {
                     if (paramId in constraint.variables) {
                         constraint.parameters[i] = constraint.variables[paramId];
                         delete constraint.variables[paramId];
@@ -362,11 +369,8 @@ function lambdaFindTypeConstraints(
             if (node.returnUnitType) {
                 // If the lambda has an explicit return type, add a constraint
                 // that the return type is equal to the specified return type.
-                //
-                // Note: returnTypeConstraint contains the params on `variables`,
-                // not on `parameters`.
                 const explicitReturnType = createTypeConstraint(node.returnUnitType);
-                const newReturnConstraint = requireConstraintsToBeEqual(returnTypeConstraint, explicitReturnType);
+                const newReturnConstraint = requireConstraintsToBeEqual(returnTypeConstraintAsVariable, explicitReturnType);
                 addTypeConstraint(typeConstraints, newReturnConstraint, node, numPreConstraints);
                 numPreConstraints++;
 
@@ -388,8 +392,6 @@ function lambdaFindTypeConstraints(
                 // If there is an explicit return type, use it as the function's
                 // return type instead of the inferred type.
                 returnTypeConstraint = explicitReturnType;
-            } else {
-                returnTypeConstraint = returnTypeConstraintAsParam;
             }
 
             scopes.stack.pop();
@@ -412,7 +414,7 @@ function innerFindTypeConstraints(
         case "Block":
             scopes.stack.push({...scopes.stack[scopes.stack.length - 1]});
 
-            let lastTypeConstraint = NO_CONSTRAINT;
+            let lastTypeConstraint = no_constraint();
             for (const statement of node.statements) {
                 lastTypeConstraint = innerFindTypeConstraints(statement, typeConstraints, scopes);
             }
@@ -420,7 +422,7 @@ function innerFindTypeConstraints(
             scopes.stack.pop();
 
             if (node.type === "Program") {
-                return NO_CONSTRAINT;
+                return no_constraint();
             } else {
                 return lastTypeConstraint;
             }
@@ -442,42 +444,42 @@ function innerFindTypeConstraints(
                     requireConstraintsToBeEqual(variableConstraint, valueConstraint),
                     node
                 );
-                return NO_CONSTRAINT;
+                return no_constraint();
             }
 
         case "DefunStatement":
-            var functionConstraints = lambdaFindTypeConstraints(node.value, typeConstraints, scopes);
+            var constraintPair = lambdaFindTypeConstraints(node.value, typeConstraints, scopes);
             const functionName = node.variable.value;
             const uniqueId = FUNCTION_OFFSET + scopes.functions.length;
-            scopes.functions.push([functionName, functionConstraints]);
+            scopes.functions.push([functionName, constraintPair]);
             scopes.stack[scopes.stack.length - 1][functionName] = uniqueId;
 
-            return NO_CONSTRAINT;
+            return no_constraint();
 
         case "Lambda":
             // Don't type check a lambda unless it's part of a defun or
             // directly assigned to a variable.
-            return NO_CONSTRAINT;
+            return no_constraint();
 
         case "Call":
             if (node.fn.type !== "Identifier") {
                 // Don't type-check calls to things that aren't static
                 // identifiers. For example, `(condition ? f : g)(x)` is valid,
                 // but not type checked.
-                return NO_CONSTRAINT;
+                return no_constraint();
             }
             var name = (node.fn as { value: string }).value;
             if (!(name in scopes.stack[scopes.stack.length - 1])) {
                 // TODO: This means the function is built in or imported. Those
                 // can be type checked in theory but it's not implemented yet.
-                return NO_CONSTRAINT;
+                return no_constraint();
             }
             var index = scopes.stack[scopes.stack.length - 1][name];
             if (index < FUNCTION_OFFSET) {
                 // The referenced identifier is not known to be a function. That
                 // doesn't mean it's *not* a function because it might be set as
                 // a function at runtime, but we can't type-check it.
-                return NO_CONSTRAINT;
+                return no_constraint();
             }
             var [functionConstraints, returnTypeConstraint] = scopes.functions[index - FUNCTION_OFFSET][1];
 
@@ -516,14 +518,14 @@ function innerFindTypeConstraints(
             return identifierConstraint(node.value, node, scopes, "reference");
         case "Float":
         case "UnitValue":
-            return NO_CONSTRAINT;
+            return no_constraint();
         case "UnaryCall":
             switch (node.op) {
                 case "-":
                 case ".-":
                     return innerFindTypeConstraints(node.arg, typeConstraints, scopes);
                 default:
-                    return NO_CONSTRAINT;
+                    return no_constraint();
             }
         case "Ternary":
             // Require the true and false expressions to have the same unit
@@ -543,7 +545,7 @@ function innerFindTypeConstraints(
             break;
         default:
             // TODO: handle other node types
-            return NO_CONSTRAINT;
+            return no_constraint();
     }
 
     console.assert(node.type === "InfixCall");
@@ -585,7 +587,7 @@ function innerFindTypeConstraints(
             // their arguments to have the same unit type, and the result has
             // the same unit type as the arguments.
             if (isBooleanOp) {
-                return NO_CONSTRAINT;
+                return no_constraint();
             } else if (!leftType.defined && rightType.defined) {
                 return rightType;
             } else {
@@ -594,11 +596,11 @@ function innerFindTypeConstraints(
         case ".^":
         case "^":
             // Unit type cannot be determined for exponentiation.
-            return NO_CONSTRAINT;
+            return no_constraint();
         case "&&":
         case "||":
             // Booleans do not have a unit type.
-            return NO_CONSTRAINT;
+            return no_constraint();
         default:
             // This should never happen.
             throw new Error(`No way to find type constraints for node: ${node}`);
@@ -694,11 +696,8 @@ function gaussianElim(varMatrix: number[][], unitMatrix: number[][]): number[][]
 
     // Scale the rows so that the diagonal elements are 1
     for (let i = 0; i < numRows; i++) {
-        let scale = varMatrix[i].find((x) => x !== 0);
-        if (scale === undefined) {
-            continue;
-        }
-        if (scale !== 0) {
+        const scale = varMatrix[i].find((x) => x !== 0);
+        if (scale !== undefined && scale !== 0) {
             varMatrix[i] = varMatrix[i].map(x => x / scale);
             unitMatrix[i] = unitMatrix[i].map(x => x / scale);
         }
@@ -794,36 +793,38 @@ function matrixToSimplifiedTypes(
     return varTypes;
 }
 
-function forwardCheckConstraints(
+function simpleCheckConstraints(
     typeConstraints: [TypeConstraint, ASTNode][],
     scopes: ScopeInfo
 ): [VariableUnitTypes, [TypeConstraint, ASTNode, VariableId[]][]] {
     const unitTypes: VariableUnitTypes = {};
     const conflicts: [TypeConstraint, ASTNode, VariableId[]][] = [];
 
+    let completed = 0;
     for (let i = 0; i < typeConstraints.length; i++) {
         let [constraint, node] = typeConstraints[i];
         const originalConstraint = constraint;
         constraint = structuredClone(constraint);
-        const typedVariablesInConstraint = [];
+        const typedVariablesInConstraint: VariableId[] = [];
 
         // Find all variables in this constraint with known types and
         // substitute them in.
-        for (const varId in constraint.variables) {
+        for (const varIdStr in constraint.variables) {
+            const varId = parseInt(varIdStr);  // JS converts keys to strings but really varId is an int
             if (varId in unitTypes) {
                 typedVariablesInConstraint.push(varId);
                 const variableType = unitTypes[varId];
                 const exponent = constraint.variables[varId];
-                delete constraint.variables[varId];
                 for (const unit in variableType) {
                     if (!(unit in constraint.units)) {
                         constraint.units[unit] = 0;
                     }
-                    constraint.units[unit] += variableType[unit] / exponent;
+                    constraint.units[unit] += variableType[unit] * exponent;
                     if (constraint.units[unit] === 0) {
                         delete constraint.units[unit];
                     }
                 }
+                delete constraint.variables[varId];
             } else if (varId >= FUNCTION_OFFSET) {
                 // TODO: this could be better
                 // If the variable is a function, just delete it from the
@@ -834,17 +835,20 @@ function forwardCheckConstraints(
 
         const numVariablesLeft = Object.keys(constraint.variables).length;
         if (numVariablesLeft === 1) {
-            const varId = Object.keys(constraint.variables)[0];
+            const varId: VariableId = parseInt(Object.keys(constraint.variables)[0]);
             const exponent = constraint.variables[varId];
-            const unitType = {};
+            const unitType: { [key: VariableId]: number } = {};
             for (const unit in constraint.units) {
                 if (constraint.units[unit] !== 0) {
-                    unitType[unit] = -constraint.units[unit] / exponent;
+                    unitType[unit as unknown as number] = -constraint.units[unit] / exponent;
                 }
             }
             unitTypes[varId] = unitType;
-            // TODO: uncomment this line to switch to forward-only type inference
-            i = -1;
+            swap(typeConstraints, i, completed);
+            completed++;
+
+            // Comment this line to switch to forward-only type inference
+            i = completed - 1;
         } else if (numVariablesLeft === 0 && Object.keys(constraint.units).length > 0) {
             // This type constraint cannot be satisfied.
             conflicts.push([originalConstraint, node, typedVariablesInConstraint]);
@@ -873,9 +877,6 @@ function checkTypeConstraints(
     typeConstraints: [TypeConstraint, ASTNode][],
     scopes: ScopeInfo
 ): VariableUnitTypes {
-    // console.log("all constraints:", typeConstraints.map((pair) => pair[0]));
-    // console.log("function constraints:", scopes.functions[0][1]);
-
     // TODO
     // const [unitNames, varMatrix, unitMatrix] = typeConstraintsToMatrix(typeConstraints, scopes);
     // const conflictingRows = gaussianElim(varMatrix, unitMatrix);
@@ -887,7 +888,7 @@ function checkTypeConstraints(
     // }
     // return matrixToSimplifiedTypes(unitNames, varMatrix, unitMatrix, scopes);
 
-    const [unitTypes, conflicts] = forwardCheckConstraints(typeConstraints, scopes);
+    const [unitTypes, conflicts] = simpleCheckConstraints(typeConstraints, scopes);
 
     if (conflicts.length > 0) {
         for (const conflict of conflicts) {
