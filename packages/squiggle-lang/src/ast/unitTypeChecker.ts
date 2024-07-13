@@ -106,15 +106,17 @@ function unitTypeToString(unitTypes: { [key: string]: number }) {
  * Pretty-print a `TypeConstraint.variables` or `TypeConstraint.units` object as
  * a string.
  */
-function subConstraintToString(subConstraint: { [key: VariableId | string]: number }, scopes: ScopeInfo, isVariable: boolean): string {
+function subConstraintToString(subConstraint: { [key: VariableId | string]: number }, scopes: ScopeInfo, isVariable: boolean, negate: boolean = false): string {
     if (Object.keys(subConstraint).length === 0) {
         return "<unitless>";
     }
     const entries = Object.entries(subConstraint).map(([key, value]) => {
         let name = "";
+        if (negate) {
+            value = -value;
+        }
         if (!isVariable) {
             name = key;
-            value = -value;
         } else if (key >= FUNCTION_OFFSET) {
             name = scopes.functions[key - FUNCTION_OFFSET][0];
         } else {
@@ -276,10 +278,15 @@ const requireConstraintsToBeEqual = divideConstraints;
 function addTypeConstraint(
     typeConstraints: [TypeConstraint, ASTNode][],
     constraint: TypeConstraint,
-    node: ASTNode
+    node: ASTNode,
+    index?: number,
 ): void {
     if (constraint.defined && (Object.keys(constraint.variables).length > 0 || Object.keys(constraint.units).length > 0)) {
-        typeConstraints.push([constraint, node]);
+        if (index === undefined) {
+            typeConstraints.push([constraint, node]);
+        } else {
+            typeConstraints.splice(index, 0, [constraint, node]);
+        }
     }
 }
 
@@ -300,18 +307,18 @@ function lambdaFindTypeConstraints(
             // Add arguments to scope
             scopes.stack.push({...scopes.stack[scopes.stack.length - 1]});
             for (const arg of (node as {args: ASTNode[]}).args) {
-                // this should never happen, it would be a syntax error
+                // this should never be false, it would be a syntax error
                 console.assert(arg.type === "Identifier");
                 identifierConstraint((arg as { value: string}).value, arg, scopes, "declaration");
             }
-            const numPreConstraints = typeConstraints.length;
+            var numPreConstraints = typeConstraints.length;
 
             var returnTypeConstraint = innerFindTypeConstraints(node.body, typeConstraints, scopes);
 
             // Get all constraints that were added within the function body
             var newlyAddedConstraints = typeConstraints.slice(numPreConstraints).map((pair) => structuredClone(pair[0]));
             if (!node.returnUnitType) {
-                newlyAddedConstraints = [structuredClone(returnTypeConstraint)].concat(newlyAddedConstraints);
+                newlyAddedConstraints.push(structuredClone(returnTypeConstraint));
             }
             var explicitConstraints = [];
 
@@ -323,7 +330,6 @@ function lambdaFindTypeConstraints(
                 const paramId = scopes.stack[scopes.stack.length - 1][paramName];
                 if (arg.typeSignature) {
                     const paramType = createTypeConstraint(arg.typeSignature);
-
                     const paramAsVariable = {
                         defined: true,
                         variables: { [paramId]: 1 },
@@ -336,7 +342,11 @@ function lambdaFindTypeConstraints(
                         parameters: { [i]: 1 },
                         units: {},
                     }
-                    addTypeConstraint(typeConstraints, requireConstraintsToBeEqual(paramAsVariable, paramType), node);
+                    // Insert param constraints before body constraints so that
+                    // when type-checking the body, the param types are already
+                    // known
+                    addTypeConstraint(typeConstraints, requireConstraintsToBeEqual(paramAsVariable, paramType), node, numPreConstraints);
+                    numPreConstraints++;
                     explicitConstraints.push(requireConstraintsToBeEqual(paramAsParam, paramType));
                 }
 
@@ -352,7 +362,8 @@ function lambdaFindTypeConstraints(
                 // not parameter entries
                 const returnType = createTypeConstraint(node.returnUnitType);
                 const newReturnConstraint = requireConstraintsToBeEqual(returnTypeConstraint, returnType);
-                addTypeConstraint(typeConstraints, newReturnConstraint, node);
+                addTypeConstraint(typeConstraints, newReturnConstraint, node, numPreConstraints);
+                numPreConstraints++;
 
                 // replace params as variables in newReturnConstraint with params as parameters
                 const substitutableConstraint = structuredClone(newReturnConstraint);
@@ -367,7 +378,7 @@ function lambdaFindTypeConstraints(
 
                 // replace the old return value type because it's obsolete
                 explicitConstraints.push(substitutableConstraint);
-                newlyAddedConstraints[0] = returnType;
+                newlyAddedConstraints[newlyAddedConstraints.length - 1] = returnType;
             }
 
             scopes.stack.pop();
@@ -774,6 +785,59 @@ function matrixToSimplifiedTypes(
     return varTypes;
 }
 
+function forwardCheckConstraints(
+    typeConstraints: [TypeConstraint, ASTNode][],
+    scopes: ScopeInfo
+): [VariableUnitTypes, [TypeConstraint, ASTNode, VariableId[]][]] {
+    const unitTypes: VariableUnitTypes = {};
+    const conflicts: [TypeConstraint, ASTNode, VariableId[]][] = [];
+
+    console.log("all constraints:", typeConstraints.map((pair) => pair[0]));
+    console.log("function constraints:", scopes.functions[0][1]);
+
+    for (let [constraint, node] of typeConstraints) {
+        const originalConstraint = constraint;
+        constraint = structuredClone(constraint);
+        const typedVariablesInConstraint = [];
+        for (const variable in constraint.variables) {
+            if (variable in unitTypes) {
+                // Substitute this variable's known unit type into `constraint`.
+                typedVariablesInConstraint.push(variable);
+                const variableType = unitTypes[variable];
+                const exponent = constraint.variables[variable];
+                delete constraint.variables[variable];
+                for (const unit in variableType) {
+                    if (!(unit in constraint.units)) {
+                        constraint.units[unit] = 0;
+                    }
+                    constraint.units[unit] += variableType[unit] / exponent;
+                    if (constraint.units[unit] === 0) {
+                        delete constraint.units[unit];
+                    }
+                }
+            }
+        }
+
+        const numVariablesLeft = Object.keys(constraint.variables).length;
+        if (numVariablesLeft === 1) {
+            const variable = Object.keys(constraint.variables)[0];
+            const exponent = constraint.variables[variable];
+            const unitType = {};
+            for (const unit in constraint.units) {
+                if (constraint.units[unit] !== 0) {
+                    unitType[unit] = -constraint.units[unit] / exponent;
+                }
+            }
+            unitTypes[variable] = unitType;
+        } else if (numVariablesLeft === 0 && Object.keys(constraint.units).length > 0) {
+            // This type constraint cannot be satisfied.
+            conflicts.push([originalConstraint, node, typedVariablesInConstraint]);
+        }
+    }
+
+    return [unitTypes, conflicts];
+}
+
 /*
  * Perform type inference and check that the type constraints are consistent.
  *
@@ -785,25 +849,28 @@ function checkTypeConstraints(
     typeConstraints: [TypeConstraint, ASTNode][],
     scopes: ScopeInfo
 ): VariableUnitTypes {
-    const [unitNames, varMatrix, unitMatrix] = typeConstraintsToMatrix(typeConstraints, scopes);
-    const conflictingRows = gaussianElim(varMatrix, unitMatrix);
+    const [unitTypes, conflicts] = forwardCheckConstraints(typeConstraints, scopes);
 
-    if (conflictingRows.length > 0) {
-        for (const rowIndices of conflictingRows) {
-            const conflictStrs = rowIndices.map(i => `${subConstraintToString(typeConstraints[i][0].variables, scopes, true)} :: ${subConstraintToString(typeConstraints[i][0].units, scopes, false)}`);
-            throw new ICompileError(`Conflicting unit types:\n\t${conflictStrs.join("\n\t")}`, typeConstraints[rowIndices[0]][1].location);
+    if (conflicts.length > 0) {
+        for (const conflict of conflicts) {
+            const knownTypeStrs = conflict[2].map(
+                (varId) => `${subConstraintToString({ [varId]: 1 }, scopes, true)} :: ${subConstraintToString(unitTypes[varId], scopes, false)}`
+            ).join("\n\t");
+            throw new ICompileError(`Conflicting unit types:\n\t${subConstraintToString(conflict[0].variables, scopes, true)} :: ${subConstraintToString(conflict[0].units, scopes, false, true)}\n\t` + knownTypeStrs, conflict[1].location);
         }
     }
-    return matrixToSimplifiedTypes(unitNames, varMatrix, unitMatrix, scopes);
+    return unitTypes;
 }
 
 /*
  * Put known unit-type information for each variable into the list of decorators
  * for the ASTNode where the variable is defined.
  *
- * TODO: untested
+ * TODO: broken
  */
 function putUnitTypesOnAST(variableTypes: VariableUnitTypes, scopes: ScopeInfo) {
+    return undefined;
+
     for (const variableId in variableTypes) {
         const node = scopes.variableNodes[variableId];
 
