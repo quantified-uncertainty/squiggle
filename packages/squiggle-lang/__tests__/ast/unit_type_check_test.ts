@@ -484,6 +484,15 @@ convertUnits(arg)
 	arg :: kg
 	arg :: lbs`));
 
+    test("return type conflicts with explicit unit type in body", () => expect(() => getUnitTypes(`
+convertUnits(x :: kg) :: lbs = {
+  a :: lbs = 10
+  a
+}
+convertUnits(1)
+`)).toThrow(`Conflicting unit types:
+<unitless> :: lbs`));
+
     test("incorrect return type", () => expect(() => getUnitTypes(`
 convertUnits(x :: kg) :: lbs = x * 2.2
 res :: kg = convertUnits(45)

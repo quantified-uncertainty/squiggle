@@ -318,9 +318,7 @@ function lambdaFindTypeConstraints(
             // Get all constraints that were added within the function body
             var newlyAddedConstraints = typeConstraints.slice(numPreConstraints).map((pair) => structuredClone(pair[0]));
             if (!node.returnUnitType) {
-                // TODO part 1
                 newlyAddedConstraints.push(structuredClone(returnTypeConstraint));
-                // newlyAddedConstraints = [structuredClone(returnTypeConstraint)].concat(newlyAddedConstraints);
             }
             var explicitConstraints = [];
 
@@ -380,9 +378,7 @@ function lambdaFindTypeConstraints(
 
                 // replace the old return value type because it's obsolete
                 explicitConstraints.push(substitutableConstraint);
-                // TODO part 2
-                newlyAddedConstraints[newlyAddedConstraints.length - 1] = returnType;
-                // newlyAddedConstraints[0] = returnType;
+                newlyAddedConstraints.push(returnType);
             }
 
             scopes.stack.pop();
@@ -796,9 +792,6 @@ function forwardCheckConstraints(
     const unitTypes: VariableUnitTypes = {};
     const conflicts: [TypeConstraint, ASTNode, VariableId[]][] = [];
 
-    // console.log("all constraints:", typeConstraints.map((pair) => pair[0]));
-    // console.log("function constraints:", scopes.functions[0][1]);
-
     for (let i = 0; i < typeConstraints.length; i++) {
         let [constraint, node] = typeConstraints[i];
         const originalConstraint = constraint;
@@ -872,6 +865,9 @@ function checkTypeConstraints(
     scopes: ScopeInfo
 ): VariableUnitTypes {
     // TODO
+    // console.log("all constraints:", typeConstraints.map((pair) => pair[0]));
+    // console.log("function constraints:", scopes.functions[0][1]);
+
     // const [unitNames, varMatrix, unitMatrix] = typeConstraintsToMatrix(typeConstraints, scopes);
     // const conflictingRows = gaussianElim(varMatrix, unitMatrix);
     // if (conflictingRows.length > 0) {
