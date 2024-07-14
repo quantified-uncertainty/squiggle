@@ -152,7 +152,7 @@ function createTypeConstraint(node?: ASTNode): TypeConstraint {
                 parameters: {},
                 units: { [node.value]: 1 },
             };
-        case "InfixType":
+        case "InfixUnitType":
             let left = createTypeConstraint(node.args[0]);
             let right = createTypeConstraint(node.args[1]);
             if (node.op === "*") {
@@ -162,6 +162,18 @@ function createTypeConstraint(node?: ASTNode): TypeConstraint {
             } else {
                 throw new ICompileError(`Unknown infix operator in type signature: ${node.op}`, node.location);
             }
+        case "ExponentialUnitType":
+            const floatNode = node.exponent as { integer: number, fractional: string | null, exponent: number | null };
+            if (floatNode?.fractional !== null || floatNode?.exponent !== null) {
+                throw new ICompileError(`Exponents in unit types must be integers, not ${nodeToString(node.exponent)}`, node.location);
+            }
+            const exponent = floatNode.integer;
+            return {
+                defined: true,
+                variables: {},
+                parameters: {},
+                units: { [(node.base as {value: string}).value]: exponent },
+            };
         default:
             throw new ICompileError(`Unknown syntax in type signature: ${nodeToString(node)}`, node.location);
     }

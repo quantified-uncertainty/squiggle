@@ -226,12 +226,20 @@ type NodeTypeSignature = N<
   }
 >;
 
-type NodeInfixType = N<
-  "InfixType",
+type NodeInfixUnitType = N<
+  "InfixUnitType",
   {
     op: TypeOperator;
     args: [ASTNode, ASTNode];
   }
+>;
+
+type NodeExponentialUnitType = N<
+    "ExponentialUnitType",
+    {
+        base: ASTNode;
+        exponent: ASTNode;
+    }
 >;
 
 type NodeString = N<"String", { value: string }>;
@@ -265,7 +273,8 @@ export type ASTNode =
   | NodeTernary
   // type signature
   | NodeTypeSignature
-  | NodeInfixType
+  | NodeInfixUnitType
+  | NodeExponentialUnitType
   // identifiers
   | NodeIdentifier
   | NodeIdentifierWithAnnotation

@@ -14,8 +14,16 @@ describe("unit type signature", () => {
             expect(await format("x :: meters/seconds = 3")).toBe("x :: meters/seconds = 3\n");
         });
 
+        test("exponentiation", async () => {
+            expect(await format("x :: meters^2 = 4")).toBe("x :: meters^2 = 4\n");
+        });
+
         test("complex type", async () => {
-            expect(await format("x :: kg*meters/seconds/seconds = 4")).toBe("x :: kg*meters/seconds/seconds = 4\n");
+            expect(await format("x :: kg*meters/seconds/seconds = 5")).toBe("x :: kg*meters/seconds/seconds = 5\n");
+        });
+
+        test("complex type with exponents", async () => {
+            expect(await format("x :: kg*meters^2/seconds^3 = 6")).toBe("x :: kg*meters^2/seconds^3 = 6\n");
         });
     });
 

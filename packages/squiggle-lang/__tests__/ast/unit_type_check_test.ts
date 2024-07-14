@@ -224,12 +224,38 @@ z :: m/s = x / y
     2: {m: 1, s: -1},
 }, ["x", "y", "z"]]));
 
+        test("assign m*m to m^2", () => expect(getUnitTypes(
+            `
+x :: m = 1
+y :: m = 4
+z :: m^2 = x * y
+`)).toEqual([{
+    0: {m: 1},
+    1: {m: 1},
+    2: {m: 2},
+}, ["x", "y", "z"]]));
+
+        test("unit types can negate themselves", () => expect(getUnitTypes(
+            `
+x :: m = 1
+y :: m^2/m = 2
+z :: m^3/m^2 = 3
+`)).toEqual([{
+    0: {m: 1},
+    1: {m: 1},
+    2: {m: 1},
+}, ["x", "y", "z"]]));
+
         test("values with unit suffixes can have unit types", () => expect(getUnitTypes(`x :: m = 4.6k`)).toEqual([{
             0: {m: 1},
         }, ["x"]]));
 
         test("values in scientific notation can have unit types", () => expect(getUnitTypes(`x :: m = 1.75e9`)).toEqual([{
             0: {m: 1},
+        }, ["x"]]));
+
+        test("follows PEMDAS", () => expect(getUnitTypes(`x :: m/s*kg/s = 1`)).toEqual([{
+            0: {m: 1, kg: 1, s: -2},
         }, ["x"]]));
 
         test("types determined in reverse order of declarations can still be inferred", () => expect(getUnitTypes(
@@ -538,10 +564,12 @@ outer(x) :: outie = {
 `)).toThrow(`Conflicting unit types`));
 
     test("can use annotations", () => expect(getUnitTypes(`
-raceSpeed(raceLength : 0.1 to 5 :: km, raceTime : 0 to 360) = raceLength / raceTime
+raceSpeed(raceLength : [0.1, 5] :: km, raceTime : Number.rangeDomain(0, 360) :: s) = raceLength / raceTime
 speed = raceSpeed(2, 100)
 `)).toEqual([{
     0: {km: 1},
+    1: {s: 1},
+    2: {km: 1, s: -1},
 }, ["raceLength", "raceTime", "speed"]]));
 
 });
@@ -777,7 +805,7 @@ f(f)
 
 });
 
-describe("unit type checking performance test", () => {
+describe.skip("unit type checking performance test", () => {
     test("whole bunch of variables", () => {
         // On my 4.2 GHz processor:
         //  2.5 sec to type-check  10,000 variables

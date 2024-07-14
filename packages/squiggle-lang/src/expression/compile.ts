@@ -397,7 +397,8 @@ function compileToContent(
       ]);
     }
     case "UnitTypeSignature":
-    case "InfixType":
+    case "InfixUnitType":
+    case "ExponentialUnitType":
       // should never happen
       throw new ICompileError(
         `Can't compile ${ast.type} node of type signature`,

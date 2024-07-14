@@ -158,16 +158,19 @@ describe("Peggy parse", () => {
   });
 
   describe("unit-typed variables", () => {
-    testParse("x :: kg = 1", "(Program (LetStatement :x (UnitTypeSignature :kg) 1))");
-    testParse("x :: kg / m = 1", "(Program (LetStatement :x (UnitTypeSignature (InfixType / :kg :m)) 1))");
-    testParse("x :: kg*m/s = 1", "(Program (LetStatement :x (UnitTypeSignature (InfixType / (InfixType * :kg :m) :s)) 1))");
-    testParse("x :: m/s/s = 1", "(Program (LetStatement :x (UnitTypeSignature (InfixType / (InfixType / :m :s) :s)) 1))");
+      testParse("x :: kg = 1", "(Program (LetStatement :x (UnitTypeSignature :kg) 1))");
+      testParse("x :: kg / m = 1", "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / :kg :m)) 1))");
+      testParse("x :: kg*m/s = 1", "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * :kg :m) :s)) 1))");
+      testParse("x :: m/s/s = 1", "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType / :m :s) :s)) 1))");
+      testParse("x :: m/s*kg/s = 1", "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * (InfixUnitType / :m :s) :kg) :s)) 1))");
+      testParse("x :: m^3 = 1", "(Program (LetStatement :x (UnitTypeSignature (ExponentialUnitType :m 3)) 1))");
+      testParse("x :: kg*m^2/s^3 = 1", "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * :kg (ExponentialUnitType :m 2)) (ExponentialUnitType :s 3))) 1))");
   });
 
   describe("unit-typed functions", () => {
       testParse("f(x :: kg) = y", "(Program (DefunStatement :f (Lambda (Identifier x (UnitTypeSignature :kg)) :y)))");
     testParse("f(x) :: lbs = y", "(Program (DefunStatement :f (Lambda :x :y (UnitTypeSignature :lbs))))");
-    testParse("f(x :: m, y :: s) :: m/s = x/y", "(Program (DefunStatement :f (Lambda (Identifier x (UnitTypeSignature :m)) (Identifier y (UnitTypeSignature :s)) (InfixCall / :x :y) (UnitTypeSignature (InfixType / :m :s)))))");
+    testParse("f(x :: m, y :: s) :: m/s = x/y", "(Program (DefunStatement :f (Lambda (Identifier x (UnitTypeSignature :m)) (Identifier y (UnitTypeSignature :s)) (InfixCall / :x :y) (UnitTypeSignature (InfixUnitType / :m :s)))))");
   });
 
     describe("functions", () => {

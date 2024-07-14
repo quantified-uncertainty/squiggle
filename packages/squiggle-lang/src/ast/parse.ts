@@ -40,6 +40,8 @@ export function parse(expr: string, source: string): ParseResult {
       return Result.Err(
         new ICompileError((e as any).message, (e as any).location)
       );
+    } else if (e instanceof ICompileError) {
+      return Result.Err(e);
     } else {
       throw e;
     }
@@ -128,8 +130,13 @@ export function nodeToString(
         );
       case "UnitTypeSignature":
         return sExpr([toSExpr(node.body)]);
-      case "InfixType":
+      case "InfixUnitType":
         return sExpr([node.op, ...node.args.map(toSExpr)]);
+      case "ExponentialUnitType":
+            return sExpr([
+                toSExpr(node.base),
+                node.exponent !== undefined ? toSExpr(node.exponent) : undefined,
+            ]);
       case "UnitValue":
         return sExpr([toSExpr(node.value), node.unit]);
 

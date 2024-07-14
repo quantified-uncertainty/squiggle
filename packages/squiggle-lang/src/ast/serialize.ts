@@ -173,10 +173,16 @@ export function serializeAstNode(
         ...node,
         body: visit.ast(node.body),
       };
-    case "InfixType":
+    case "InfixUnitType":
       return {
         ...node,
         args: [visit.ast(node.args[0]), visit.ast(node.args[1])],
+      };
+    case "ExponentialUnitType":
+      return {
+        ...node,
+        base: visit.ast(node.base),
+        exponent: visit.ast(node.exponent),
       };
     case "Identifier":
       return {
@@ -326,10 +332,16 @@ export function deserializeAstNode(
         ...node,
         body: visit.ast(node.body),
       };
-    case "InfixType":
+    case "InfixUnitType":
       return {
         ...node,
         args: [visit.ast(node.args[0]), visit.ast(node.args[1])],
+      };
+    case "ExponentialUnitType":
+      return {
+        ...node,
+        base: visit.ast(node.base),
+        exponent: visit.ast(node.exponent),
       };
     case "Identifier":
       return {

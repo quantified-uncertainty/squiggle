@@ -49,22 +49,35 @@ export function makeInfixTypeChain(
   location: LocationRange
 ): ASTNode {
   return tail.reduce((result, [operator, right]) => {
-    return nodeInfixType(operator, result, right, location);
+    return nodeInfixUnitType(operator, result, right, location);
   }, head);
 }
 
-export function nodeInfixType(
+export function nodeInfixUnitType(
   op: TypeOperator,
   arg1: ASTNode,
   arg2: ASTNode,
   location: LocationRange
-): TypedNode<"InfixType"> {
+): TypedNode<"InfixUnitType"> {
   return {
-    type: "InfixType",
-    op,
-    args: [arg1, arg2],
-    location,
+    type: "InfixUnitType",
+      op,
+      args: [arg1, arg2],
+      location,
   };
+}
+
+export function nodeExponentialUnitType(
+    base: ASTNode,
+    exponent: ASTNode,
+    location: LocationRange,
+): TypedNode<"ExponentialUnitType"> {
+    return {
+        type: "ExponentialUnitType",
+        base: base,
+        exponent: exponent,
+        location: location,
+    };
 }
 
 export function nodeUnaryCall(

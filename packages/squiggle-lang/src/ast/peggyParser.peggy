@@ -59,15 +59,21 @@ decorator
     }
 
 unitTypeSignature
-  = _ "::" _ body:infixType
+  = _ "::" _ body:infixUnitType
     {
       return h.nodeTypeSignature(body, location());
     }
 
-infixType
-  = head:identifier _ tail:(@typeMultiplicativeOp _ @identifier)*
+infixUnitType
+  = head:exponentialUnitType _ tail:(@typeMultiplicativeOp _ @exponentialUnitType)*
     { return h.makeInfixTypeChain(head, tail, location()); }
   typeMultiplicativeOp "operator" = '*' / '/'
+
+exponentialUnitType
+  = unit:identifier _ "^" _ exponent:number
+    { return h.nodeExponentialUnitType(unit, exponent, location()); }
+  / unit:identifier
+    { return unit; }
 
 statement
   = letStatement
