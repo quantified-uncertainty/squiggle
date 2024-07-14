@@ -919,9 +919,9 @@ function putUnitTypesOnAST(variableTypes: VariableUnitTypes, scopes: ScopeInfo) 
         const unitType = variableTypes[variableId];
         const unitTypeStr = unitTypeToString(unitType);
         if (!("decorators" in node)) {
-            node.decorators = [];
+            (node as { decorators: ASTNode[] }).decorators = [];
         }
-        node.decorators.push({
+        (node as { decorators: ASTNode[] }).decorators.push({
             type: "Decorator",
             name: {
                 type: "Identifier",

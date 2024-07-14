@@ -167,6 +167,7 @@ export function createSquigglePrinter(
             ]),
             node.exported ? "export " : "",
             node.variable.value,
+            node.unitTypeSignature ? typedPath(node).call(print, "unitTypeSignature") : "",
             " = ",
             typedPath(node).call(print, "value"),
           ]);
@@ -187,6 +188,7 @@ export function createSquigglePrinter(
               softline,
               ")",
             ]),
+            node.value.returnUnitType ? typedPath(node).call(print, "value", "returnUnitType") : "",
             " = ",
             typedPath(node).call(print, "value", "body"),
           ]);
@@ -280,7 +282,10 @@ export function createSquigglePrinter(
             "]",
           ]);
         case "Identifier":
-          return node.value;
+            return group([
+              node.value,
+              node.unitTypeSignature ? typedPath(node).call(print, "unitTypeSignature") : "",
+            ]);
         case "IdentifierWithAnnotation":
           return [
             node.variable,
@@ -325,6 +330,7 @@ export function createSquigglePrinter(
             ]),
             softline,
             "}",
+            typedPath(node).call(print, "returnUnitType"),
           ]);
         case "Dict": {
           const isSingleKeyWithoutValue =
@@ -356,6 +362,17 @@ export function createSquigglePrinter(
             node.kind === "C" ? " : " : " else ",
             path.call(print, "falseExpression"),
           ];
+        case "UnitTypeSignature":
+          return group([
+            " :: ",
+            typedPath(node).call(print, "body"),
+          ]);
+        case "InfixType":
+            return group([
+                typedPath(node).call(print, "args", 0),
+                node.op,
+                typedPath(node).call(print, "args", 1),
+            ]);
         case "UnitValue":
           return [typedPath(node).call(print, "value"), node.unit];
         case "lineComment":

@@ -32,9 +32,9 @@ function getUnitTypes(sourceCode: string): [VariableUnitTypes, IdNameMapping] {
     const node = peggyParse(sourceCode, { grammarSource: "test", comments: [] });
     const [typeConstraints, scopes] = findTypeConstraints(node);
     const idNameMapping = scopes.variableNodes.filter((node) => "value" in node).map((node) => (node as { value: string }).value);
-    const res = [checkTypeConstraints(typeConstraints, scopes), idNameMapping];
-    putUnitTypesOnAST(res[0], scopes);
-    return res;
+    const unitTypes = checkTypeConstraints(typeConstraints, scopes);
+    putUnitTypesOnAST(unitTypes, scopes);
+    return [unitTypes, idNameMapping];
 }
 
 describe("unitTypeToString", () => {
@@ -205,7 +205,7 @@ y :: ayType = a
 });
 
 describe("unit type checking", () => {
-    describe("basic arithmetic", () => {
+    describe("basics", () => {
         test("assign m/s to m*s", () => expect(() => getUnitTypes(
             `
 x :: m = 1
@@ -333,7 +333,8 @@ socks :: socks = cats
 	cats :: cats
 	socks :: socks`));
 
-        // new unit type checker can't detect this conflict
+        // simplified type checker can't detect this conflict, detecting it requires
+        // Gaussian elimination
         test.skip("three-way conflict", () => expect(() => getUnitTypes(
             `
 a = 0
@@ -390,20 +391,6 @@ entry = a[0]
     0: {kg: 1},
     1: {kg: 1},
 }, ["x", "y", "a", "entry"]]));
-    });
-
-    describe("performance test", () => {
-        test("whole bunch of constraints", () => {
-            const numVars = 200;
-            const varNames = Array.from({ length: numVars }, (_, i) => `x${i}`);
-            const unitNames = Array.from({ length: numVars }, (_, i) => `kg${i}`);
-            const sourceCode = varNames.map((name, i) => `${name} :: ${unitNames[i]} = 1`).join("\n");
-            const expectedTypes = varNames.reduce((acc, name, i) => {
-                acc[i] = { [unitNames[i]]: 1 };
-                return acc;
-            }, {});
-            expect(getUnitTypes(sourceCode)).toEqual([expectedTypes, varNames]);
-        });
     });
 
     describe("blocks", () => {
@@ -551,6 +538,27 @@ outer(x) :: outie = {
 `)).toThrow(`Conflicting unit types`));
 
 });
+
+describe("explicit unit types for lambdas", () => {
+    test("lambda argument must have correct type", () => expect(() => getUnitTypes(
+        `
+f = { |a :: usd| a }
+x :: aud = 3
+y = f(x)
+`)).toThrow(`Conflicting unit types:
+	x :: usd
+	x :: aud`));
+
+    test("lambda return value must have correct type", () => expect(getUnitTypes(
+        `
+f = { |a| a } :: usd
+x = f(1)
+`)).toEqual([{
+    0: {usd: 1},
+    1: {usd: 1},
+}, ["a", "x"]]));
+});
+
 
 describe("unit types for generic functions", () => {
 
@@ -759,4 +767,18 @@ x = 5
 f(f)
 `)).toThrow(`Conflicting unit types`));
 
+});
+
+describe("performance test", () => {
+    test("whole bunch of constraints", () => {
+        const numVars = 1000;
+        const varNames = Array.from({ length: numVars }, (_, i) => `x${i}`);
+        const unitNames = Array.from({ length: numVars }, (_, i) => `kg${i}`);
+        const sourceCode = varNames.map((name, i) => `${name} :: ${unitNames[i]} = 1`).join("\n");
+        const expectedTypes: { [key: number]: { [key: string]: number } } = {};
+        for (let i = 0; i < numVars; i++) {
+            expectedTypes[i] = { [unitNames[i]]: 1 };
+        }
+        expect(getUnitTypes(sourceCode)).toEqual([expectedTypes, varNames]);
+    });
 });

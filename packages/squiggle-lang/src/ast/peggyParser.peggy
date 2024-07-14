@@ -347,13 +347,13 @@ valueConstructor
   / dictConstructor
 
 lambda
-  = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}'
+  = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}' returnUnitType:unitTypeSignature?
     {
       statements.push(finalExpression);
-      return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined, undefined);
+      return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined, returnUnitType);
     }
-  / '{' _nl '|' _nl args:functionParameters _nl '|' _nl finalExpression: expression  _nl '}'
-    { return h.nodeLambda(args, finalExpression, location(), undefined, undefined); }
+  / '{' _nl '|' _nl args:functionParameters _nl '|' _nl finalExpression: expression  _nl '}'  returnUnitType:unitTypeSignature?
+    { return h.nodeLambda(args, finalExpression, location(), undefined, returnUnitType); }
 
 arrayConstructor 'array'
   = '[' _nl ']'
