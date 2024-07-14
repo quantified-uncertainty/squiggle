@@ -125,8 +125,7 @@ function subConstraintToString(subConstraint: { [key: VariableId | string]: numb
         } else if (key >= FUNCTION_OFFSET) {
             name = scopes.functions[key - FUNCTION_OFFSET][0];
         } else {
-            const node = scopes.variableNodes[key] as { value: string };
-            name = node.value;
+            name = getIdentifierName(scopes.variableNodes[key]);
         }
         return [name, value];
     });
@@ -295,6 +294,17 @@ function addTypeConstraint(
     }
 }
 
+function getIdentifierName(node: ASTNode): string {
+    switch (node.type) {
+        case "Identifier":
+            return node.value;
+        case "IdentifierWithAnnotation":
+            return node.variable;
+        default:
+            throw new ICompileError(`Node must have type identifier, not ${node.type}`, node.location);
+    }
+}
+
 /* Like `findTypeConstraints` but specifically for lambda expressions. Instead
  * of returning a single type constraint, returns a list of special type
  * constraints that use function parameters instead of variables. The parent can
@@ -314,9 +324,7 @@ function lambdaFindTypeConstraints(
             // Add arguments to scope
             scopes.stack.push({...scopes.stack[scopes.stack.length - 1]});
             for (const arg of (node as {args: ASTNode[]}).args) {
-                // this should never be false, it would be a syntax error
-                console.assert(arg.type === "Identifier");
-                identifierConstraint((arg as { value: string}).value, arg, scopes, "declaration");
+                identifierConstraint(getIdentifierName(arg), arg, scopes, "declaration");
             }
             var numPreConstraints = typeConstraints.length;
 
@@ -333,7 +341,7 @@ function lambdaFindTypeConstraints(
             // with `parameter` entries
             for (let i = 0; i < node.args.length; i++) {
                 const arg = (node.args[i] as { unitTypeSignature?: ASTNode });
-                const paramName = (node.args[i] as {value: string}).value;
+                const paramName = getIdentifierName(node.args[i]);
                 const paramId = scopes.stack[scopes.stack.length - 1][paramName];
                 if (arg.unitTypeSignature) {
                     const paramType = createTypeConstraint(arg.unitTypeSignature);
@@ -516,6 +524,8 @@ function innerFindTypeConstraints(
 
         case "Identifier":
             return identifierConstraint(node.value, node, scopes, "reference");
+        case "IdentifierWithAnnotation":
+            return identifierConstraint(node.variable, node, scopes, "reference");
         case "Float":
         case "UnitValue":
             return no_constraint();
@@ -810,7 +820,8 @@ function simpleCheckConstraints(
         // Find all variables in this constraint with known types and
         // substitute them in.
         for (const varIdStr in constraint.variables) {
-            const varId = parseInt(varIdStr);  // JS converts keys to strings but really varId is an int
+            // JS converts keys to strings but really varId is an int
+            const varId = parseInt(varIdStr);
             if (varId in unitTypes) {
                 typedVariablesInConstraint.push(varId);
                 const variableType = unitTypes[varId];
@@ -856,7 +867,7 @@ function simpleCheckConstraints(
     }
 
     for (const varId in unitTypes) {
-        if (!("value" in scopes.variableNodes[varId])) {
+        if (!["Identifier", "IdentifierWithAnnotation"].includes(scopes.variableNodes[varId].type)) {
             // Delete dummy variables that aren't associated with an
             // identifier node
             delete unitTypes[varId];
@@ -948,6 +959,7 @@ export const exportedForTesting = {
     checkTypeConstraints,
     findTypeConstraints,
     gaussianElim,
+    getIdentifierName,
     putUnitTypesOnAST,
     typeConstraintsToMatrix,
     unitTypeToString

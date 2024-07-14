@@ -330,7 +330,7 @@ export function createSquigglePrinter(
             ]),
             softline,
             "}",
-            typedPath(node).call(print, "returnUnitType"),
+            node.returnUnitType ? typedPath(node).call(print, "returnUnitType") : "",
           ]);
         case "Dict": {
           const isSingleKeyWithoutValue =

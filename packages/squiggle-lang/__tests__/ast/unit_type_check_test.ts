@@ -3,7 +3,7 @@ import { parse as peggyParse } from "../../src/ast/peggyParser.js";
 import { ASTNode } from "../../src/ast/types.js";
 import { ICompileError } from "../../src/errors/IError.js";
 import { TypeConstraint, VariableUnitTypes, exportedForTesting } from "../../src/ast/unitTypeChecker.js";
-const { checkTypeConstraints, findTypeConstraints, gaussianElim, putUnitTypesOnAST, typeConstraintsToMatrix, unitTypeToString } = exportedForTesting;
+const { checkTypeConstraints, findTypeConstraints, gaussianElim, getIdentifierName, putUnitTypesOnAST, typeConstraintsToMatrix, unitTypeToString } = exportedForTesting;
 import {
     testEvalError,
     testEvalToBe,
@@ -31,7 +31,7 @@ function gaussianElimHelper(sourceCode: string): [number[][], number[][]] {
 function getUnitTypes(sourceCode: string): [VariableUnitTypes, IdNameMapping] {
     const node = peggyParse(sourceCode, { grammarSource: "test", comments: [] });
     const [typeConstraints, scopes] = findTypeConstraints(node);
-    const idNameMapping = scopes.variableNodes.filter((node) => "value" in node).map((node) => (node as { value: string }).value);
+    const idNameMapping = scopes.variableNodes.filter((node) => ["Identifier", "IdentifierWithAnnotation"].includes(node.type)).map((node) => getIdentifierName(node));
     const unitTypes = checkTypeConstraints(typeConstraints, scopes);
     putUnitTypesOnAST(unitTypes, scopes);
     return [unitTypes, idNameMapping];
@@ -537,7 +537,15 @@ outer(x) :: outie = {
 }
 `)).toThrow(`Conflicting unit types`));
 
+    test("can use annotations", () => expect(getUnitTypes(`
+raceSpeed(raceLength : 0.1 to 5 :: km, raceTime : 0 to 360) = raceLength / raceTime
+speed = raceSpeed(2, 100)
+`)).toEqual([{
+    0: {km: 1},
+}, ["raceLength", "raceTime", "speed"]]));
+
 });
+
 
 describe("explicit unit types for lambdas", () => {
     test("lambda argument must have correct type", () => expect(() => getUnitTypes(
@@ -769,9 +777,13 @@ f(f)
 
 });
 
-describe("performance test", () => {
-    test("whole bunch of constraints", () => {
-        const numVars = 1000;
+describe("unit type checking performance test", () => {
+    test("whole bunch of variables", () => {
+        // On my 4.2 GHz processor:
+        //  2.5 sec to type-check  10,000 variables
+        //  5.2 sec to type-check  20,000 variables
+        // 12.4 sec to type-check 100,000 variables
+        const numVars = 10000;
         const varNames = Array.from({ length: numVars }, (_, i) => `x${i}`);
         const unitNames = Array.from({ length: numVars }, (_, i) => `kg${i}`);
         const sourceCode = varNames.map((name, i) => `${name} :: ${unitNames[i]} = 1`).join("\n");
