@@ -155,11 +155,6 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
               />
             ),
           };
-        case "dependency-graph":
-          return {
-            title: "Dependency Graph",
-            body: <StateGraphViewer project={props.project} />,
-          };
         default:
           return props.renderExtraModal?.(modalName);
       }

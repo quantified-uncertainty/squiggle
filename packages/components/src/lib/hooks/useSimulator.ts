@@ -54,6 +54,9 @@ type UseSimulatorResult = {
   runSimulation: () => void;
 };
 
+export const mainHeadName = "main";
+export const renderedHeadName = "rendered";
+
 export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
   const sourceId = useMemo(() => {
     // random; https://stackoverflow.com/a/12502559
@@ -93,10 +96,6 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
   // useProjectActionLogger(project);
   // useProjectStateChangeLogger(project);
 
-  // TODO - generate random head names? `project` could be passed from outside and have heads already.
-  const mainHead = "main";
-  const renderedHead = "rendered";
-
   const [autorunMode, setAutorunMode] = useState(
     args.initialAutorunMode ?? true
   );
@@ -113,7 +112,7 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
       name: sourceId,
       code: args.code,
     });
-    project.setHead(mainHead, { module: rootModule });
+    project.setHead(mainHeadName, { module: rootModule });
     forceUpdate(); // necessary for correct isStale
   }, [project, sourceId, forceUpdate, args.environment, args.code]);
 
@@ -124,12 +123,12 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     const listener: Parameters<typeof project.addEventListener<"output">>[1] = (
       event
     ) => {
-      if (!project.hasHead(mainHead)) {
+      if (!project.hasHead(mainHeadName)) {
         return;
       }
-      const rootModule = project.getHead(mainHead);
+      const rootModule = project.getHead(mainHeadName);
       if (event.data.output.module.hash() === rootModule.hash()) {
-        project.setHead(renderedHead, event.data.output);
+        project.setHead(renderedHeadName, event.data.output);
         setExecutionId((prev) => prev + 1);
       }
     };
@@ -157,8 +156,8 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     );
   }, [project, args.runnerName, autorunMode]);
 
-  const output = project.hasHead(renderedHead)
-    ? project.getOutput(renderedHead)
+  const output = project.hasHead(renderedHeadName)
+    ? project.getOutput(renderedHeadName)
     : undefined;
 
   return {
@@ -169,7 +168,8 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
           project,
           executionId,
           output,
-          isStale: project.getHead(mainHead) !== project.getHead(renderedHead),
+          isStale:
+            project.getHead(mainHeadName) !== project.getHead(renderedHeadName),
         }
       : undefined,
     autorunMode,

@@ -4,6 +4,10 @@ import { SqModuleOutput, SqProject } from "@quri/squiggle-lang";
 
 import { SquiggleErrorAlert } from "../../index.js";
 import {
+  mainHeadName,
+  renderedHeadName,
+} from "../../lib/hooks/useSimulator.js";
+import {
   ViewerTab,
   viewerTabToValue,
   viewerTabToVisibleRootPath,
@@ -42,7 +46,17 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
   ) {
     const body = () => {
       if (viewerTab === "Dependency Graph") {
-        return <StateGraphViewer project={project} />;
+        return (
+          <StateGraphViewer
+            project={project}
+            headTooltips={{
+              [mainHeadName]:
+                "Main head points to the module that should be simulated. When simulation is running, the main head is the module that's not simulated yet; otherwise it's the same as the rendered head.",
+              [renderedHeadName]:
+                "Rendered head points to the module that's displayed in the viewer. After the simulation is done, the rendered head switches to the same module as the main head, and the old module and its output are garbage collected.",
+            }}
+          />
+        );
       }
 
       if (!outputResult.ok) {

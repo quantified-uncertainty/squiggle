@@ -1,0 +1,16 @@
+---
+title: Multi-module projects
+description: This page describes Squiggle APIs for running multi-module projects.
+---
+
+Squiggle is designed to be used in multi-module projects. This means that you can have multiple Squiggle modules in the same project, and they can depend on each other. This is useful when you want to break down a large computation into smaller parts, or when you want to reuse some code across different projects.
+
+
+
+TODO
+- design approach: functional core, immutability, content-addressable data
+- terminology: linker, runners, heads, modules, pins, resolutions, outputs
+- reproducibility: name+code+seed+imports -> output
+- top-level example: `addHead`, `waitForOutput`
+- garbage collection
+- async vs dispatch-based execution

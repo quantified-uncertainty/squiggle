@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import { FC } from "react";
 import { BaseEdge, BezierEdge, EdgeProps } from "reactflow";
 
 export const CustomEdge: FC<EdgeProps> = (props) => {
