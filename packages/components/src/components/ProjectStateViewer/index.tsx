@@ -226,11 +226,11 @@ function useNodesAndEdges({
     }
 
     return layoutGraph(nodes, edges);
-  }, [project.state]);
+  }, [headTooltips, project.state]);
   return { nodes, edges };
 }
 
-export const StateGraphViewer: FC<{
+export const ProjectStateViewer: FC<{
   project: SqProject;
   headTooltips?: Record<string, string>;
 }> = ({ project, headTooltips = {} }) => {

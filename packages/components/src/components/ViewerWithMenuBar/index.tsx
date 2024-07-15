@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  startTransition,
   useCallback,
   useImperativeHandle,
   useRef,
@@ -58,9 +59,12 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
     const {
       output: { result: outputResult },
     } = simulation;
-    const [viewerTab, setViewerTab] = useState<ViewerTab>(
+    const [viewerTab, _setViewerTab] = useState<ViewerTab>(
       defaultTab ?? defaultViewerTab(outputResult)
     );
+
+    const setViewerTab = (tab: ViewerTab) =>
+      startTransition(() => _setViewerTab(tab)); // more performant and important for lazy-loading ProjectStateViewer
 
     const viewerRef = useRef<SquiggleViewerHandle>(null);
     const _isSimulating = isSimulating(simulation);

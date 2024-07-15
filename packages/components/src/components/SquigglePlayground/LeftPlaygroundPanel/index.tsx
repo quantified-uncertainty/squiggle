@@ -30,9 +30,9 @@ import { AutorunnerMenuItem } from "./AutorunnerMenuItem.js";
 import { GlobalSettingsModal } from "./GlobalSettingsModal.js";
 import { RunMenuItem } from "./RunMenuItem.js";
 
-const StateGraphViewer = lazy(() =>
-  import("../../StateGraphViewer/index.js").then((module) => ({
-    default: module.StateGraphViewer,
+const ProjectStateViewer = lazy(() =>
+  import("../../ProjectStateViewer/index.js").then((module) => ({
+    default: module.ProjectStateViewer,
   }))
 );
 

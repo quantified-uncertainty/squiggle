@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, lazy } from "react";
 
 import { SqModuleOutput, SqProject } from "@quri/squiggle-lang";
 
@@ -19,9 +19,14 @@ import {
   SquiggleViewerHandle,
   ViewerProvider,
 } from "../SquiggleViewer/ViewerProvider.js";
-import { StateGraphViewer } from "../StateGraphViewer/index.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
 import { Overlay } from "./Overlay.js";
+
+const ProjectStateViewer = lazy(() =>
+  import("../ProjectStateViewer/index.js").then((module) => ({
+    default: module.ProjectStateViewer,
+  }))
+);
 
 type Props = {
   viewerTab: ViewerTab;
@@ -47,7 +52,7 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
     const body = () => {
       if (viewerTab === "Dependency Graph") {
         return (
-          <StateGraphViewer
+          <ProjectStateViewer
             project={project}
             headTooltips={{
               [mainHeadName]:
