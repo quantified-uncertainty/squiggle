@@ -78,8 +78,8 @@ const FUNCTION_OFFSET = 1 << 24;
  * stack: A stack of `Scope` objects, with the global scope at the bottom and
  * most narrow scope at the top.
  *
- * variableNodes: An array where the ith index gives the ASTNode for the `let`
- * statement declaring the variable with ID `i`.
+ * variableNodes: An array where the ith index gives the ASTNode for the
+ * identifier on the `let` statement declaring the variable with ID `i`.
  *
  * functions: An array of [function name, [type constraints within function,
  * return type of function]].
@@ -1134,7 +1134,6 @@ function checkTypeConstraints(
             `${subConstraintToString({ [varId]: 1 }, scopes, true)} :: ${subConstraintToString(unitTypes[varId], scopes, false)}`
         )
         .join("\n\t");
-      const formattedNode = prettier.print(conflict[1]);
       throw new ICompileError(
         `Conflicting unit types:\n\t${subConstraintToString(conflict[0].variables, scopes, true)} :: ${subConstraintToString(conflict[0].units, scopes, false, true)}\n\t` +
           knownTypeStrs,

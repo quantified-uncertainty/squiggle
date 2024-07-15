@@ -400,25 +400,23 @@ y = x + 12
 
     test("can only subtract values of the same type", () =>
       expect(() =>
-        parse(
+        getUnitTypes(
           `
 x :: kg = 2
 y :: lb = 0.5
 x - y
-`,
-          "test"
+`
         )
       ).toThrow("Conflicting unit types"));
 
     test("can only compare values of the same type", () =>
       expect(() =>
-        parse(
+        getUnitTypes(
           `
 x :: kg = 2
 y :: lb = 0.5
 x < y
-`,
-          "test"
+`
         )
       ).toThrow("Conflicting unit types"));
 
@@ -440,25 +438,23 @@ y = -x
 
     test("ternary branches must have the same type", () =>
       expect(() =>
-        parse(
+        getUnitTypes(
           `
 a :: kg = 2
 b :: lb = 0.5
 a == a ? a : b
-`,
-          "test"
+`
         )
       ).toThrow("Conflicting unit types"));
 
     test("condition in ternary branch gets type-checked", () =>
       expect(() =>
-        parse(
+        getUnitTypes(
           `
 a :: kg = 2
 b :: lb = 0.5
 a < b ? 1 : -1
-`,
-          "test"
+`
         )
       ).toThrow("Conflicting unit types"));
 
@@ -503,14 +499,13 @@ y = x
 
     test("two groups of constrained variables, one with a conflict", () =>
       expect(() =>
-        parse(
+        getUnitTypes(
           `
 boots :: boots = 1
 bootsForMyCat :: boots = boots / 2
 cats :: cats = 3
 socks :: socks = cats
-`,
-          "test"
+`
         )
       ).toThrow(`Conflicting unit types:
 	socks / cats :: <unitless>
@@ -605,15 +600,14 @@ entry = a[0]
   describe("blocks", () => {
     test("type error inside block gets caught", () =>
       expect(() =>
-        parse(
+        getUnitTypes(
           `
 {
   x :: kg = 1
   y :: lb = x
   y
 }
-`,
-          "test"
+`
         )
       ).toThrow("Conflicting unit types"));
 
@@ -659,14 +653,13 @@ z = x  // should infer type as "kg"
 
     test("type declaration outside block cannot conflict with block expression type", () =>
       expect(() =>
-        parse(
+        getUnitTypes(
           `
 x :: dalys = {
   y :: logIncomeUnits = 130
   y
 }
-`,
-          "test"
+`
         )
       ).toThrow(`Conflicting unit types:
 	x / y :: <unitless>
