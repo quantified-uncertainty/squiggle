@@ -162,10 +162,13 @@ type NodeIdentifierWithAnnotation = N<
   }
 >;
 
-type NodeIdentifier = N<"Identifier", {
+type NodeIdentifier = N<
+  "Identifier",
+  {
     value: string;
     unitTypeSignature?: NodeTypeSignature;
-}>;
+  }
+>;
 
 type NodeDecorator = N<
   "Decorator",
@@ -235,11 +238,11 @@ type NodeInfixUnitType = N<
 >;
 
 type NodeExponentialUnitType = N<
-    "ExponentialUnitType",
-    {
-        base: ASTNode;
-        exponent: ASTNode;
-    }
+  "ExponentialUnitType",
+  {
+    base: ASTNode;
+    exponent: ASTNode;
+  }
 >;
 
 type NodeString = N<"String", { value: string }>;

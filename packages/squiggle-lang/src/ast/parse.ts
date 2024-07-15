@@ -133,10 +133,10 @@ export function nodeToString(
       case "InfixUnitType":
         return sExpr([node.op, ...node.args.map(toSExpr)]);
       case "ExponentialUnitType":
-            return sExpr([
-                toSExpr(node.base),
-                node.exponent !== undefined ? toSExpr(node.exponent) : undefined,
-            ]);
+        return sExpr([
+          toSExpr(node.base),
+          node.exponent !== undefined ? toSExpr(node.exponent) : undefined,
+        ]);
       case "UnitValue":
         return sExpr([toSExpr(node.value), node.unit]);
 

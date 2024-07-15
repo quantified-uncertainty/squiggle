@@ -61,23 +61,23 @@ export function nodeInfixUnitType(
 ): TypedNode<"InfixUnitType"> {
   return {
     type: "InfixUnitType",
-      op,
-      args: [arg1, arg2],
-      location,
+    op,
+    args: [arg1, arg2],
+    location,
   };
 }
 
 export function nodeExponentialUnitType(
-    base: ASTNode,
-    exponent: ASTNode,
-    location: LocationRange,
+  base: ASTNode,
+  exponent: ASTNode,
+  location: LocationRange
 ): TypedNode<"ExponentialUnitType"> {
-    return {
-        type: "ExponentialUnitType",
-        base: base,
-        exponent: exponent,
-        location: location,
-    };
+  return {
+    type: "ExponentialUnitType",
+    base: base,
+    exponent: exponent,
+    location: location,
+  };
 }
 
 export function nodeUnaryCall(
@@ -173,7 +173,7 @@ export function nodeTypeSignature(
   return {
     type: "UnitTypeSignature",
     body: body,
-    location: location
+    location: location,
   };
 }
 
@@ -212,7 +212,13 @@ export function nodeIdentifierWithAnnotation(
   unitTypeSignature: TypedNode<"UnitTypeSignature">,
   location: LocationRange
 ): TypedNode<"IdentifierWithAnnotation"> {
-  return { type: "IdentifierWithAnnotation", variable, annotation, unitTypeSignature, location };
+  return {
+    type: "IdentifierWithAnnotation",
+    variable,
+    annotation,
+    unitTypeSignature,
+    location,
+  };
 }
 
 export function nodeKeyValue(
@@ -233,9 +239,16 @@ export function nodeLambda(
   body: ASTNode,
   location: LocationRange,
   name?: TypedNode<"Identifier">,
-  returnUnitType?: TypedNode<"UnitTypeSignature">,
+  returnUnitType?: TypedNode<"UnitTypeSignature">
 ): TypedNode<"Lambda"> {
-    return { type: "Lambda", args: args, body: body, name: name?.value, returnUnitType: returnUnitType, location: location };
+  return {
+    type: "Lambda",
+    args: args,
+    body: body,
+    name: name?.value,
+    returnUnitType: returnUnitType,
+    location: location,
+  };
 }
 export function nodeLetStatement(
   decorators: TypedNode<"Decorator">[],
