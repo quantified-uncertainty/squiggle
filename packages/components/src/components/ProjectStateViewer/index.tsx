@@ -111,6 +111,7 @@ function useNodesAndEdges({
           tooltip: headTooltips[headName]
             ? () => headTooltips[headName]
             : undefined,
+          noTargetHandle: true,
         })
       );
       edges.push(makeEdge(headId, `module:${head.hash}`));
@@ -245,6 +246,7 @@ function useNodesAndEdges({
               />
             </InnerViewerProvider>
           ),
+          noSourceHandle: true,
         })
       );
 
