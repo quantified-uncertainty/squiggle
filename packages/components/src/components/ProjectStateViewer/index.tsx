@@ -10,9 +10,11 @@ import {
 } from "reactflow";
 
 import { SqProject } from "@quri/squiggle-lang";
-import { ErrorIcon, RefreshIcon } from "@quri/ui";
+import { CheckIcon, ErrorIcon, RefreshIcon } from "@quri/ui";
 
 import { CodeSyntaxHighlighter } from "../../index.js";
+import { InnerViewerProvider } from "../SquiggleViewer/ViewerProvider.js";
+import { ViewerBody } from "../ViewerWithMenuBar/ViewerBody.js";
 import { ActionLog } from "./ActionLog.js";
 import { CustomEdge } from "./CustomEdge.js";
 import { CustomNode } from "./CustomNode.js";
@@ -66,7 +68,7 @@ function layoutGraph(
 ): { nodes: Node[]; edges: Edge[] } {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
-  g.setGraph({ rankdir: "TB", ranksep: 25 });
+  g.setGraph({ rankdir: "TB", ranksep: 20 });
 
   dagreNodes.forEach((node) => g.setNode(node.id, node));
   dagreEdges.forEach((edge) =>
@@ -83,7 +85,7 @@ function layoutGraph(
     return { ...node, position: { x, y } };
   });
 
-  const edges = dagreEdges.map(({ minlen, ...edge }) => edge);
+  const edges = dagreEdges.map(({ minlen: _, ...edge }) => edge);
 
   return { nodes, edges };
 }
@@ -106,7 +108,9 @@ function useNodesAndEdges({
           id: headId,
           className: "!bg-green-300",
           label: <NodeLabel type="Head">{headName}</NodeLabel>,
-          tooltip: headTooltips[headName],
+          tooltip: headTooltips[headName]
+            ? () => headTooltips[headName]
+            : undefined,
         })
       );
       edges.push(makeEdge(headId, `module:${head.hash}`));
@@ -143,7 +147,7 @@ function useNodesAndEdges({
                   {module.name}
                 </NodeLabel>
               ),
-              tooltip: (
+              tooltip: () => (
                 <CodeSyntaxHighlighter language="squiggle">
                   {module.code}
                 </CodeSyntaxHighlighter>
@@ -214,7 +218,33 @@ function useNodesAndEdges({
         makeNode({
           id: `output:${id}`,
           className: "!bg-yellow-300",
-          label: <NodeLabel type="Output" hash={id} />,
+          label: (
+            <NodeLabel type="Output" hash={id}>
+              <div className="flex items-center gap-1">
+                <div>{output.executionTime}ms</div>
+                {output.result.ok ? (
+                  <CheckIcon />
+                ) : (
+                  <ErrorIcon className="text-red-500" />
+                )}
+              </div>
+            </NodeLabel>
+          ),
+          tooltip: () => (
+            <InnerViewerProvider
+              partialPlaygroundSettings={{ environment: output.environment }}
+              viewerType="tooltip"
+              rootValue={undefined}
+            >
+              <ViewerBody
+                viewerTab="Variables"
+                outputResult={output.result}
+                project={project}
+                isSimulating={false}
+                playgroundSettings={{ environment: output.environment }}
+              />
+            </InnerViewerProvider>
+          ),
         })
       );
 

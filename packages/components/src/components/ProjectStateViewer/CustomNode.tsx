@@ -19,12 +19,13 @@ export const CustomNode: FC<NodeProps<NodeData>> = (props) => {
       <Handle type="source" position={Position.Bottom} isConnectable={false} />
     </div>
   );
-  if (props.data.tooltip) {
+  const tooltip = props.data.tooltip;
+  if (tooltip) {
     return (
       <Tooltip
         render={() => (
-          <div className="max-w-64 rounded border bg-white px-3 py-2 text-xs shadow-lg">
-            {props.data.tooltip}
+          <div className="max-w-80 rounded border bg-white px-3 py-2 text-xs shadow-lg">
+            {tooltip()}
           </div>
         )}
       >

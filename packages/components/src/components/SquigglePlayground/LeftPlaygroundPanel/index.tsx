@@ -1,10 +1,4 @@
-import {
-  forwardRef,
-  lazy,
-  ReactNode,
-  useImperativeHandle,
-  useRef,
-} from "react";
+import { forwardRef, ReactNode, useImperativeHandle, useRef } from "react";
 
 import { SqProject } from "@quri/squiggle-lang";
 import {
@@ -29,12 +23,6 @@ import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 import { AutorunnerMenuItem } from "./AutorunnerMenuItem.js";
 import { GlobalSettingsModal } from "./GlobalSettingsModal.js";
 import { RunMenuItem } from "./RunMenuItem.js";
-
-const ProjectStateViewer = lazy(() =>
-  import("../../ProjectStateViewer/index.js").then((module) => ({
-    default: module.ProjectStateViewer,
-  }))
-);
 
 export type RenderExtraControls = (props: {
   openModal: (name: string) => void;

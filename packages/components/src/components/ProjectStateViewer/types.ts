@@ -2,6 +2,6 @@ import { ReactNode } from "react";
 
 export type NodeData = {
   label: ReactNode;
-  tooltip?: ReactNode;
+  tooltip?: () => ReactNode;
   className?: string;
 };
