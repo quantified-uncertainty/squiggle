@@ -25,7 +25,7 @@ export const ActionLog: FC<{ project: SqProject }> = ({ project }) => {
 
   useEffect(() => {
     const listener: ProjectEventListener<"action"> = (event) => {
-      setActionLog([...actionLog, event.data]);
+      setActionLog((log) => [...log, event.data]);
     };
     project.addEventListener("action", listener);
     return () => project.removeEventListener("action", listener);

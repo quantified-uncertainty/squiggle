@@ -1,5 +1,5 @@
 import Dagre from "@dagrejs/dagre";
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo } from "react";
 import {
   Background,
   BackgroundVariant,
@@ -13,6 +13,7 @@ import { SqProject } from "@quri/squiggle-lang";
 import { CheckIcon, ErrorIcon, RefreshIcon } from "@quri/ui";
 
 import { CodeSyntaxHighlighter } from "../../index.js";
+import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { InnerViewerProvider } from "../SquiggleViewer/ViewerProvider.js";
 import { ViewerBody } from "../ViewerWithMenuBar/ViewerBody.js";
 import { ActionLog } from "./ActionLog.js";
@@ -258,7 +259,8 @@ function useNodesAndEdges({
     }
 
     return layoutGraph(nodes, edges);
-  }, [headTooltips, project.state]);
+    // eslint-disable-next-line @wogns3623/better-exhaustive-deps/exhaustive-deps
+  }, [headTooltips, project, project.state]);
   return { nodes, edges };
 }
 
@@ -267,6 +269,13 @@ export const ProjectStateViewer: FC<{
   headTooltips?: Record<string, string>;
 }> = ({ project, headTooltips = {} }) => {
   const { nodes, edges } = useNodesAndEdges({ project, headTooltips });
+
+  // re-render on state changes
+  const forceUpdate = useForceUpdate();
+  useEffect(() => {
+    project.addEventListener("state", forceUpdate);
+    return () => project.removeEventListener("action", forceUpdate);
+  });
 
   return (
     <div className="flex h-full w-full flex-col">

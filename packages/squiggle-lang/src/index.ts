@@ -140,4 +140,6 @@ export {
   WithCacheLoaderRunner,
 } from "./runners/index.js";
 
+export { BaseRunner } from "./runners/BaseRunner.js";
+
 export { getStdLib } from "./library/index.js";
