@@ -1,15 +1,10 @@
 import { createContext, Reducer } from "react";
 
-/*
- * There are two types of exits:
- * 1. Navigation to another page.
- * 2. Closing the tab.
- */
 type State = {
-  // Checkers are functions; this way we can check dynamic parameters such as
+  // Checks are functions; this way we can check dynamic parameters such as
   // form values to decide whether navigation should be intercepted.
-  // If any of the checkers returns a true value, the exit confirmation will be shown.
-  checkers: Record<string, () => boolean>;
+  // If any of the checks returns a true value, the exit confirmation will be shown.
+  checks: Record<string, () => boolean>;
   // Link was intercepted, need to show a modal.
   pendingLink: string | undefined;
 };
@@ -46,14 +41,14 @@ export const exitConfirmationReducer: Reducer<State, Action> = (
     case "addExitConfirmationCheck":
       return {
         ...state,
-        checkers: {
-          ...state.checkers,
+        checks: {
+          ...state.checks,
           [action.payload.key]: action.payload.check,
         },
       };
     case "removeExitConfirmationCheck":
-      const { [action.payload.key]: _, ...blockers } = state.checkers;
-      return { ...state, checkers: blockers };
+      const { [action.payload.key]: _, ...blockers } = state.checks;
+      return { ...state, checks: blockers };
     case "intercept":
       return { ...state, pendingLink: action.payload.link };
     case "clearPendingLink":
@@ -68,7 +63,7 @@ export const ExitConfirmationWrapperContext = createContext<{
   dispatch: (action: Action) => void;
 }>({
   state: {
-    checkers: {},
+    checks: {},
     pendingLink: undefined,
   },
   dispatch: () => {},
