@@ -35,8 +35,8 @@ import {
   versionSupportsOnOpenExport,
 } from "@quri/versioned-squiggle-components";
 
+import { useExitConfirmation } from "@/components/ExitConfirmationWrapper/hooks";
 import { EditRelativeValueExports } from "@/components/exports/EditRelativeValueExports";
-import { useBlockNavigation } from "@/components/NavigationBlocker/hooks";
 import { ReactRoot } from "@/components/ReactRoot";
 import { FormModal } from "@/components/ui/FormModal";
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/constants";
@@ -278,8 +278,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     }
   };
 
-  // block navigation if code is edited
-  useBlockNavigation(
+  // confirm navigation if code is edited
+  useExitConfirmation(
     useCallback(
       () => form.getValues("code") !== content.code,
       [form, content.code]

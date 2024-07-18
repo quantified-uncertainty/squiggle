@@ -4,9 +4,9 @@ import NextLink, { LinkProps } from "next/link";
 import { forwardRef, useMemo } from "react";
 
 import {
-  useInterceptLink,
-  useIsIntercepting,
-} from "../NavigationBlocker/hooks";
+  useConfirmNavigation,
+  useIsExitConfirmationActive,
+} from "../ExitConfirmationWrapper/hooks";
 
 // This component patches the original <Link> from next/link to intercept clicks and prevent navigation if the user is on the page that should be blocked with `NavigationBlocker`.
 
@@ -18,18 +18,18 @@ export const Link = forwardRef<
       children?: React.ReactNode;
     }
 >(function Link({ onClick, ...props }, ref) {
-  const isIntercepting = useIsIntercepting();
-  const interceptLink = useInterceptLink();
+  const isConfirmationActive = useIsExitConfirmationActive();
+  const confirmNavigation = useConfirmNavigation();
 
   const patchedOnClick = useMemo(() => {
     return (e: React.MouseEvent<HTMLAnchorElement>) => {
-      if (!isIntercepting()) {
+      if (!isConfirmationActive()) {
         return onClick?.(e);
       }
-      interceptLink(e.currentTarget.href);
+      confirmNavigation(e.currentTarget.href);
       e.preventDefault();
     };
-  }, [onClick, isIntercepting, interceptLink]);
+  }, [onClick, isConfirmationActive, confirmNavigation]);
 
   return <NextLink ref={ref} {...props} onClick={patchedOnClick} />;
 });

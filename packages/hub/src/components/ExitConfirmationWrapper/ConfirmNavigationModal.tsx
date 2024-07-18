@@ -3,17 +3,17 @@ import { FC, use, useCallback } from "react";
 
 import { Button, Modal } from "@quri/ui";
 
-import { NavigationBlockerContext } from "./context";
+import { ExitConfirmationWrapperContext } from "./context";
 
-export const InterceptedLinkModal: FC = () => {
-  const { state, dispatch } = use(NavigationBlockerContext);
+export const ConfirmNavigationModal: FC = () => {
+  const { state, dispatch } = use(ExitConfirmationWrapperContext);
   const close = useCallback(() => {
-    dispatch({ type: "clearInterceptedLink" });
+    dispatch({ type: "clearPendingLink" });
   }, [dispatch]);
 
   const router = useRouter();
 
-  if (!state.interceptedLink) {
+  if (!state.pendingLink) {
     return null;
   }
 
@@ -28,7 +28,7 @@ export const InterceptedLinkModal: FC = () => {
           <Button onClick={() => close()}>Stay on this page</Button>
           <Button
             onClick={() => {
-              router.push(state.interceptedLink!);
+              router.push(state.pendingLink!);
               close();
             }}
             theme="primary"
