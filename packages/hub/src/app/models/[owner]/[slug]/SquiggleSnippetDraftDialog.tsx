@@ -1,7 +1,7 @@
-import { FC, useState } from "react";
+import { FC, PropsWithChildren, useState } from "react";
 import { graphql, useFragment } from "react-relay";
 
-import { Button, Modal, TextTooltip } from "@quri/ui";
+import { Button, Modal } from "@quri/ui";
 
 import { useClientOnlyRender } from "@/hooks/useClientOnlyRender";
 
@@ -26,6 +26,10 @@ function draftKey(key: DraftLocator) {
 function localStorageExists() {
   return Boolean(typeof window !== "undefined" && window.localStorage);
 }
+
+const Hint: FC<PropsWithChildren> = ({ children }) => (
+  <div className="text-sm text-slate-700">{children}</div>
+);
 
 const CopyToClipboardButton: FC<{ draftLocator: DraftLocator }> = ({
   draftLocator,
@@ -168,29 +172,25 @@ export const SquiggleSnippetDraftDialog: FC<Props> = ({
       <Modal.Header>Unsaved Draft</Modal.Header>
       <Modal.Body>You have an unsaved draft for this model.</Modal.Body>
       <Modal.Footer>
-        <div className="flex items-center justify-end gap-2">
-          <TextTooltip text="Draft will be ignored but you'll see this prompt again on next load.">
-            <div>
-              <Button onClick={skip}>Ignore</Button>
-            </div>
-          </TextTooltip>
-          <TextTooltip text="Draft will be discarded.">
-            <div>
-              <Button onClick={discard}>Discard</Button>
-            </div>
-          </TextTooltip>
-          <TextTooltip text="Draft will be copied to clipboard.">
-            <div>
-              <CopyToClipboardButton draftLocator={draftLocator} />
-            </div>
-          </TextTooltip>
-          <TextTooltip text="Code and version will be replaced by draft version. You'll still need to save it manually.">
-            <div>
-              <Button theme="primary" onClick={_restore}>
-                Restore
-              </Button>
-            </div>
-          </TextTooltip>
+        <div className="grid grid-cols-[minmax(180px,max-content),1fr] items-center gap-4 p-2">
+          <Button onClick={skip}>Ignore</Button>
+          <Hint>
+            {
+              "Draft will be ignored but you'll see this prompt again on next load."
+            }
+          </Hint>
+          <Button onClick={discard}>Discard</Button>
+          <Hint>Draft will be discarded and forgotten.</Hint>
+          <CopyToClipboardButton draftLocator={draftLocator} />
+          <Hint>Draft will be copied to clipboard.</Hint>
+          <Button theme="primary" onClick={_restore}>
+            Restore
+          </Button>
+          <Hint>
+            {
+              "Code and version will be replaced by draft version. You'll still need to save it manually."
+            }
+          </Hint>
         </div>
       </Modal.Footer>
     </Modal>

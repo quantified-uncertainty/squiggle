@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
@@ -13,6 +12,7 @@ import {
   PrivateBadge,
   UpdatedStatus,
 } from "@/components/EntityCard";
+import { Link } from "@/components/ui/Link";
 import {
   totalImportLength,
   VariableRevision,
