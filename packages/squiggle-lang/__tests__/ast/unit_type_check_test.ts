@@ -8,10 +8,8 @@ import {
 const {
   checkTypeConstraints,
   findTypeConstraints,
-  gaussianElim,
   getIdentifierName,
   putUnitTypesOnAST,
-  typeConstraintsToMatrix,
   unitTypeToString,
 } = exportedForTesting;
 
@@ -27,17 +25,6 @@ function findTypeConstraintsHelper(
     (node) => (node as { value: string }).value
   );
   return [plainConstraints, idNameMapping];
-}
-
-function gaussianElimHelper(sourceCode: string): [number[][], number[][]] {
-  const node = peggyParse(sourceCode, { grammarSource: "test", comments: [] });
-  const [typeConstraints, scopes] = findTypeConstraints(node);
-  const [unitNames, varMatrix, unitMatrix] = typeConstraintsToMatrix(
-    typeConstraints,
-    scopes
-  );
-  gaussianElim(varMatrix, unitMatrix);
-  return [varMatrix, unitMatrix];
 }
 
 function getUnitTypes(sourceCode: string): [VariableUnitTypes, IdNameMapping] {
@@ -130,138 +117,6 @@ z :: m/s = x/y
         },
       ],
       ["x", "y", "z"],
-    ]));
-});
-
-describe("unit-type Gaussian elimination", () => {
-  test("assign m/s to m/s", () =>
-    expect(
-      gaussianElimHelper(
-        `
-x :: m = 1
-y = 2
-z :: m/s = x/y
-`
-      )
-    ).toEqual([
-      [
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1],
-      ],
-      [
-        [-1, 0],
-        [0, -1],
-        [-1, 1],
-      ],
-    ]));
-
-  test("assign m/s to m*s", () =>
-    expect(
-      gaussianElimHelper(
-        `
-x :: m = 1
-y :: s = 2
-z :: m/s = x * y
-`
-      )
-    ).toEqual([
-      [
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1],
-        [0, 0, 0],
-      ],
-      [
-        [-1, 0],
-        [0, -1],
-        [-1, 1],
-        [0, -2],
-      ],
-    ]));
-
-  test("conflicting assignment with extra free variable", () =>
-    expect(
-      gaussianElimHelper(
-        `
-x = 1  // free variable
-y :: boots = 3
-z :: cats = y
-`
-      )
-    ).toEqual([
-      [
-        [0, 1, 0],
-        [0, 0, 1],
-        [0, 0, 0],
-      ],
-      [
-        [-1, 0],
-        [0, -1],
-        [-1, 1],
-      ],
-    ]));
-
-  test("two groups of constrained variables, one with a conflict", () =>
-    expect(
-      gaussianElimHelper(
-        `
-boots :: boots = 1
-bootsForMyCat :: boots = boots / 2
-cats :: cats = 3
-socks :: socks = cats
-`
-      )
-    ).toEqual([
-      [
-        [1, 0, 0, 0], // boots
-        [0, 1, 0, 0], // bootsForMyCat
-        // bootsForMyCat / boots (reduced to 0 = 0)
-        [0, 0, 1, 0], // cats
-        [0, 0, 0, 1], // socks
-        [0, 0, 0, 0], // socks / cats (reduced)
-      ],
-      [
-        [-1, 0, 0], // boots - unit:boots = 0
-        [-1, 0, 0], // bootsForMyCat - unit:boots = 0
-        [0, -1, 0], // cats - unit:cats = 0
-        [0, 0, -1], // socks - cats = 0
-        [0, -1, 1], // -unit:cats + unit:socks = 0 (type error)
-      ],
-    ]));
-
-  // Determining types in reverse order means the initial matrix won't be
-  // triangular, which could catch bugs in the Gaussian elimination
-  // implementation.
-  // Note: parse+stringify is a hack to work around the fact
-  // that Jest considers 0 and -0 to be different.
-  test("types determined in reverse order of declarations", () =>
-    expect(
-      JSON.parse(
-        JSON.stringify(
-          gaussianElimHelper(
-            `
-a = 1
-b = 2
-x :: bxType = b
-y :: ayType = a
-`
-          )
-        )
-      )
-    ).toEqual([
-      [
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1],
-      ],
-      [
-        [-1, 0],
-        [0, -1],
-        [0, -1],
-        [-1, 0],
-      ],
     ]));
 });
 
