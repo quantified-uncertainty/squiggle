@@ -1,12 +1,10 @@
-import { parse } from "../../src/ast/parse.js";
 import { parse as peggyParse } from "../../src/ast/peggyParser.js";
-import { ASTNode } from "../../src/ast/types.js";
-import { ICompileError } from "../../src/errors/IError.js";
 import {
+  exportedForTesting,
   TypeConstraint,
   VariableUnitTypes,
-  exportedForTesting,
 } from "../../src/ast/unitTypeChecker.js";
+
 const {
   checkTypeConstraints,
   findTypeConstraints,
@@ -16,11 +14,6 @@ const {
   typeConstraintsToMatrix,
   unitTypeToString,
 } = exportedForTesting;
-import {
-  testEvalError,
-  testEvalToBe,
-  testParse,
-} from "../helpers/reducerHelpers.js";
 
 type IdNameMapping = string[];
 
