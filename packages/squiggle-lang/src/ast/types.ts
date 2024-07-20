@@ -1,4 +1,4 @@
-import { infixFunctions, unaryFunctions, typeFunctions } from "./operators.js";
+import { infixFunctions, typeFunctions, unaryFunctions } from "./operators.js";
 
 /*
  *`Location` and `LocationRange` types are copy-pasted from Peggy, but
@@ -33,7 +33,7 @@ export type UnaryOperator = keyof typeof unaryFunctions;
 export type TypeOperator = keyof typeof typeFunctions;
 
 type N<T extends string, V extends object> = {
-  type: T;
+  kind: T;
   location: LocationRange;
 } & V;
 
@@ -218,7 +218,7 @@ type NodeTernary = N<
     condition: ASTNode;
     trueExpression: ASTNode;
     falseExpression: ASTNode;
-    kind: "IfThenElse" | "C";
+    syntax: "IfThenElse" | "C";
   }
 >;
 
@@ -286,12 +286,12 @@ export type ASTNode =
   | NodeString
   | NodeBoolean;
 
-export type AST = Extract<ASTNode, { type: "Program" }> & {
+export type AST = Extract<ASTNode, { kind: "Program" }> & {
   comments: ASTCommentNode[];
 };
 
 export type ASTCommentNode = {
-  type: "lineComment" | "blockComment";
+  kind: "lineComment" | "blockComment";
   value: string;
   location: LocationRange;
 };

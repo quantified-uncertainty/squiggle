@@ -28,7 +28,7 @@ describe("Peggy parse", () => {
     ] satisfies [
       string,
       Pick<
-        Extract<ASTNode, { type: "Float" }>,
+        Extract<ASTNode, { kind: "Float" }>,
         "integer" | "fractional" | "exponent"
       >,
     ][])("%s", (code, expected) => {
@@ -36,14 +36,14 @@ describe("Peggy parse", () => {
       if (
         !(
           result.ok &&
-          result.value.type === "Program" &&
+          result.value.kind === "Program" &&
           result.value.statements.length === 1
         )
       ) {
         throw new Error();
       }
       const value = result.value.statements[0];
-      if (value.type !== "Float") {
+      if (value.kind !== "Float") {
         throw new Error();
       }
       expect(value).toMatchObject(expected);

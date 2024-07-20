@@ -31,7 +31,7 @@ function getNodePrecedence(node: SquiggleNode): number {
     "->": 10,
     "|>": 10, // removed since 0.8.0
   };
-  switch (node.type) {
+  switch (node.kind) {
     case "Ternary":
       return 1;
     case "InfixCall": {
@@ -84,7 +84,7 @@ export function createSquigglePrinter(
         return needParens ? ["(", doc, ")"] : doc;
       };
 
-      switch (node.type) {
+      switch (node.kind) {
         case "Program":
           // TODO - preserve line breaks, break long lines
           // TODO - comments will be moved to the end because imports is not a real AST, need to be fixed in squiggle-lang
@@ -111,7 +111,7 @@ export function createSquigglePrinter(
             ),
             node.statements.length &&
             ["LetStatement", "DefunStatement"].includes(
-              node.statements[node.statements.length - 1].type
+              node.statements[node.statements.length - 1].kind
             )
               ? hardline // new line if final expression is a statement
               : "",
@@ -167,7 +167,9 @@ export function createSquigglePrinter(
             ]),
             node.exported ? "export " : "",
             node.variable.value,
-            node.unitTypeSignature ? typedPath(node).call(print, "unitTypeSignature") : "",
+            node.unitTypeSignature
+              ? typedPath(node).call(print, "unitTypeSignature")
+              : "",
             " = ",
             typedPath(node).call(print, "value"),
           ]);
@@ -188,8 +190,10 @@ export function createSquigglePrinter(
               softline,
               ")",
             ]),
-            // @ts-ignore
-            node.value.returnUnitType ? typedPath(node).call(print, "value", "returnUnitType") : "",
+            node.value.returnUnitType
+              ? // @ts-ignore
+                typedPath(node).call(print, "value", "returnUnitType")
+              : "",
             " = ",
             typedPath(node).call(print, "value", "body"),
           ]);
@@ -283,11 +287,13 @@ export function createSquigglePrinter(
             "]",
           ]);
         case "Identifier":
-            return group([
-              node.value,
-              // @ts-ignore
-              node.unitTypeSignature ? typedPath(node).call(print, "unitTypeSignature") : "",
-            ]);
+          return group([
+            node.value,
+            node.unitTypeSignature
+              ? // @ts-ignore
+                typedPath(node).call(print, "unitTypeSignature")
+              : "",
+          ]);
         case "IdentifierWithAnnotation":
           return [
             node.variable,
@@ -296,7 +302,7 @@ export function createSquigglePrinter(
           ];
         case "KeyValue": {
           const key =
-            node.key.type === "String" &&
+            node.key.kind === "String" &&
             node.key.value.match(/^[\$_a-z]+[\$_a-zA-Z0-9]*$/)
               ? node.key.value
               : typedPath(node).call(print, "key");
@@ -309,9 +315,9 @@ export function createSquigglePrinter(
           ]);
         }
         case "Lambda":
-          if (node.body.type === "Block") {
+          if (node.body.kind === "Block") {
             (
-              node.body as Extract<PatchedASTNode, { type: "Block" }>
+              node.body as Extract<PatchedASTNode, { kind: "Block" }>
             ).isLambdaBody = true;
           }
           return group([
@@ -332,13 +338,15 @@ export function createSquigglePrinter(
             ]),
             softline,
             "}",
-            // @ts-ignore
-            node.returnUnitType ? typedPath(node).call(print, "returnUnitType") : "",
+            node.returnUnitType
+              ? // @ts-ignore
+                typedPath(node).call(print, "returnUnitType")
+              : "",
           ]);
         case "Dict": {
           const isSingleKeyWithoutValue =
             node.elements.length === 1 &&
-            node.elements[0].type === "Identifier";
+            node.elements[0].kind === "Identifier";
           return group([
             "{",
             node.elements.length
@@ -358,30 +366,27 @@ export function createSquigglePrinter(
           return [JSON.stringify(node.value).replaceAll("\\n", "\n")];
         case "Ternary":
           return [
-            node.kind === "C" ? [] : "if ",
+            node.syntax === "C" ? [] : "if ",
             path.call(print, "condition"),
-            node.kind === "C" ? " ? " : " then ",
+            node.syntax === "C" ? " ? " : " then ",
             path.call(print, "trueExpression"),
-            node.kind === "C" ? " : " : " else ",
+            node.syntax === "C" ? " : " : " else ",
             path.call(print, "falseExpression"),
           ];
         case "UnitTypeSignature":
-          return group([
-            " :: ",
-            typedPath(node).call(print, "body"),
-          ]);
+          return group([" :: ", typedPath(node).call(print, "body")]);
         case "InfixUnitType":
-            return group([
-                typedPath(node).call(print, "args", 0),
-                node.op,
-                typedPath(node).call(print, "args", 1),
-            ]);
+          return group([
+            typedPath(node).call(print, "args", 0),
+            node.op,
+            typedPath(node).call(print, "args", 1),
+          ]);
         case "ExponentialUnitType":
-            return group([
-                typedPath(node).call(print, "base"),
-                "^",
-                typedPath(node).call(print, "exponent"),
-            ]);
+          return group([
+            typedPath(node).call(print, "base"),
+            "^",
+            typedPath(node).call(print, "exponent"),
+          ]);
         case "UnitValue":
           return [typedPath(node).call(print, "value"), node.unit];
         case "lineComment":
@@ -391,7 +396,7 @@ export function createSquigglePrinter(
     },
     printComment: (path: AstPath<ASTCommentNode>) => {
       const commentNode = path.node;
-      switch (commentNode.type) {
+      switch (commentNode.kind) {
         case "lineComment":
           // I'm not sure why "hardline" at the end here is not necessary
           return ["//", commentNode.value];
@@ -402,14 +407,14 @@ export function createSquigglePrinter(
       }
     },
     isBlockComment: (node) => {
-      return node.type === "blockComment";
+      return node.kind === "blockComment";
     },
     ...({
       getCommentChildNodes: (node: ASTNode) => {
         if (!node) {
           return [];
         }
-        switch (node.type) {
+        switch (node.kind) {
           case "Program":
             return node.statements;
           case "Block":
@@ -433,7 +438,7 @@ export function createSquigglePrinter(
         }
       },
       canAttachComment: (node: ASTNode) => {
-        return node && node.type;
+        return node && node.kind;
       },
     } as any),
   };

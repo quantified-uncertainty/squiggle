@@ -174,7 +174,7 @@ function createTypeConstraint(node?: ASTNode): TypeConstraint {
   if (!node) {
     return no_constraint();
   }
-  switch (node.type) {
+  switch (node.kind) {
     case "UnitTypeSignature":
       return createTypeConstraint(node.body);
     case "Float":
@@ -396,14 +396,14 @@ function addTypeConstraint(
  * "IdentifierWithAnnotation" node.
  */
 function getIdentifierName(node: ASTNode): string {
-  switch (node.type) {
+  switch (node.kind) {
     case "Identifier":
       return node.value;
     case "IdentifierWithAnnotation":
       return node.variable;
     default:
       throw new ICompileError(
-        `Node must have type identifier, not ${node.type}`,
+        `Node must have type identifier, not ${node.kind}`,
         node.location
       );
   }
@@ -424,7 +424,7 @@ function lambdaFindTypeConstraints(
 ): [TypeConstraint[], TypeConstraint] {
   // This switch statement serves to statically guarantee that `node` has type
   // `TypedNode<"Lambda">` so TypeScript can correctly infer types.
-  switch (node.type) {
+  switch (node.kind) {
     case "Lambda": {
       // Add arguments to scope
       scopes.stack.push({ ...scopes.stack[scopes.stack.length - 1] });
@@ -543,7 +543,7 @@ function lambdaFindTypeConstraints(
     }
     default:
       throw new Error(
-        `Argument to lambdaFindTypeConstraints must have type lambda, not ${node.type}`
+        `Argument to lambdaFindTypeConstraints must have type lambda, not ${node.kind}`
       );
   }
 }
@@ -561,7 +561,7 @@ function innerFindTypeConstraints(
   typeConstraints: [TypeConstraint, ASTNode][],
   scopes: ScopeInfo
 ): TypeConstraint {
-  switch (node.type) {
+  switch (node.kind) {
     case "Program":
     case "Block": {
       scopes.stack.push({ ...scopes.stack[scopes.stack.length - 1] });
@@ -577,14 +577,14 @@ function innerFindTypeConstraints(
 
       scopes.stack.pop();
 
-      if (node.type === "Program") {
+      if (node.kind === "Program") {
         return no_constraint();
       } else {
         return lastTypeConstraint;
       }
     }
     case "LetStatement":
-      if (node.value.type === "Lambda") {
+      if (node.value.kind === "Lambda") {
         // Fall through to "DefunStatement" below
       } else {
         const variableConstraint = identifierConstraint(
@@ -631,7 +631,7 @@ function innerFindTypeConstraints(
       return no_constraint();
 
     case "Call": {
-      if (node.fn.type !== "Identifier") {
+      if (node.fn.kind !== "Identifier") {
         // Don't type-check calls to things that aren't static
         // identifiers. For example, `(condition ? f : g)(x)` is valid,
         // but not type checked.
@@ -735,7 +735,7 @@ function innerFindTypeConstraints(
       return no_constraint();
   }
 
-  console.assert(node.type === "InfixCall");
+  console.assert(node.kind === "InfixCall");
   let isBooleanOp = false;
   switch (node.op) {
     case "*":
@@ -892,7 +892,7 @@ function simpleCheckConstraints(
   for (const varId in unitTypes) {
     if (
       !["Identifier", "IdentifierWithAnnotation"].includes(
-        scopes.variableNodes[varId].type
+        scopes.variableNodes[varId].kind
       )
     ) {
       // Delete dummy variables that aren't associated with an
@@ -950,7 +950,7 @@ function putUnitTypesOnAST(
     const node = scopes.variableNodes[variableId];
 
     // TODO: assertion is false, node is Identifier
-    console.assert(node.type === "LetStatement");
+    console.assert(node.kind === "LetStatement");
     const fakeLocation = node.location;
     const unitType = variableTypes[variableId];
     const unitTypeStr = unitTypeToString(unitType);
@@ -958,15 +958,15 @@ function putUnitTypesOnAST(
       (node as { decorators: ASTNode[] }).decorators = [];
     }
     (node as { decorators: ASTNode[] }).decorators.push({
-      type: "Decorator",
+      kind: "Decorator",
       name: {
-        type: "Identifier",
+        kind: "Identifier",
         value: "unitType",
         location: fakeLocation,
       },
       args: [
         {
-          type: "String",
+          kind: "String",
           value: unitTypeStr,
           location: fakeLocation,
         },

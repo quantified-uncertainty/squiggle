@@ -32,7 +32,7 @@ function getUnitTypes(sourceCode: string): [VariableUnitTypes, IdNameMapping] {
   const [typeConstraints, scopes] = findTypeConstraints(node);
   const idNameMapping = scopes.variableNodes
     .filter((node) =>
-      ["Identifier", "IdentifierWithAnnotation"].includes(node.type)
+      ["Identifier", "IdentifierWithAnnotation"].includes(node.kind)
     )
     .map((node) => getIdentifierName(node));
   const unitTypes = checkTypeConstraints(typeConstraints, scopes);

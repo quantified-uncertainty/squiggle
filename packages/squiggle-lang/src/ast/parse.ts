@@ -29,7 +29,7 @@ export function parse(expr: string, source: string): ParseResult {
       grammarSource: source,
       comments,
     });
-    if (parsed.type !== "Program") {
+    if (parsed.kind !== "Program") {
       throw new Error("Expected parse to result in a Program node");
     }
     unitTypeCheck(parsed);
@@ -56,11 +56,11 @@ export function nodeToString(
 ): string {
   const toSExpr = (node: ASTNode): SExpr => {
     const sExpr = (components: (SExpr | undefined)[]): SExpr => ({
-      name: node.type,
+      name: node.kind,
       args: components,
     });
 
-    switch (node.type) {
+    switch (node.kind) {
       case "Block":
       case "Program":
         return sExpr(node.statements.map(toSExpr));
