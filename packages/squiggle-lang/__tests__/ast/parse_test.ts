@@ -167,6 +167,14 @@ describe("Peggy parse", () => {
       "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / :kg :m)) 1))"
     );
     testParse(
+      "x :: 1 / kg = 1",
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / 1 :kg)) 1))"
+    );
+    testParse(
+      "x :: 1 = 2",
+      "(Program (LetStatement :x (UnitTypeSignature 1) 2))"
+    );
+    testParse(
       "x :: kg*m/s = 1",
       "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * :kg :m) :s)) 1))"
     );

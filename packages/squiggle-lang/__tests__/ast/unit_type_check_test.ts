@@ -320,6 +320,24 @@ z :: m^2 = x * y
         ["x", "y", "z"],
       ]));
 
+      test("numbers are unitless types", () =>
+        expect(
+            getUnitTypes(
+                `
+pi :: 1 = 3.14
+invDiameter :: 1/m = 4
+circumference = pi / invDiameter
+`
+            )
+        ).toEqual([
+            {
+                0: {},
+                1: { m: -1 },
+                2: { m: 1 },
+            },
+            ["pi", "invDiameter", "circumference"],
+        ]));
+
     test("unit types can negate themselves", () =>
       expect(
         getUnitTypes(
