@@ -45,6 +45,9 @@ export const toList = (tags: ValueTags): [string, Value][] => {
   if (value.doc?.value !== undefined) {
     result.push(["doc", value.doc]);
   }
+  if (value.unitType?.value !== undefined) {
+    result.push(["unitType", value.unitType]);
+  }
   if (value.showAs !== undefined) {
     result.push(["showAs", value.showAs]);
   }

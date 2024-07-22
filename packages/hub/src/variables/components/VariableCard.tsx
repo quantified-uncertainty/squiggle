@@ -102,16 +102,27 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
         </div>
       </div>
       {currentRevision.docstring && (
+          <div className="mt-3 rounded-md bg-gray-50">
+              <div className="px-2 py-1 text-xs text-gray-600">
+                  <MarkdownViewer
+                      md={keepFirstNLines(currentRevision.docstring, 10)}
+                      textSize="xs"
+                      background-color=""
+                  />
+              </div>
+          </div>
+      )}
+      {currentRevision.unitType ? (
         <div className="mt-3 rounded-md bg-gray-50">
           <div className="px-2 py-1 text-xs text-gray-600">
             <MarkdownViewer
-              md={keepFirstNLines(currentRevision.docstring, 10)}
+              md={keepFirstNLines(currentRevision.unitType, 10)}
               textSize="xs"
               background-color=""
             />
           </div>
         </div>
-      )}
+      ) : (<div>"there is no unit type lol"</div>)}
     </div>
   );
 };

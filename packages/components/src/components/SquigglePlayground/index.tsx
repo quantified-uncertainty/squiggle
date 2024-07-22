@@ -27,6 +27,7 @@ export type ModelExport = {
   variableType: string;
   title?: string;
   docstring: string;
+  unitType: string;
 };
 
 /*
@@ -121,6 +122,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         variableType: e[1].tag,
         title: e[1].tags.name() ? e[1].tags.name() : e[1].title() || "",
         docstring: e[1].context?.docstring() || "",
+        unitType: e[1].tags.unitType() || "",
       }));
       onExportsChange && onExportsChange(_exports);
     } else {

@@ -120,6 +120,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
     variableType: v.currentRevision?.variableType,
     title: v.currentRevision?.title || undefined,
     docString: undefined,
+    unitType: undefined,
   }));
 
   const relativeValuesExports = currentRevision.relativeValuesExports.map(

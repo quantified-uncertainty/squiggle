@@ -36,6 +36,7 @@ export type SerializedValueTags = {
 const valueTagsTypeNames: ValueTagsTypeName[] = [
   "name",
   "doc",
+  "unitType",
   "showAs",
   "numberFormat",
   "dateFormat",
@@ -133,6 +134,10 @@ export class ValueTags {
 
   doc() {
     return this.value.doc?.value;
+  }
+
+  unitType() {
+    return this.value.unitType?.value;
   }
 
   showAs() {

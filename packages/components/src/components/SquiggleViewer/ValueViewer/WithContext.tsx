@@ -109,6 +109,7 @@ export const ValueWithContextViewer: FC<Props> = ({
 
   const isRoot = valuePath.isRoot();
   const taggedName = value.tags.name();
+  const unitType = value.tags.unitType();
 
   const exportData = value.tags.exportData();
 

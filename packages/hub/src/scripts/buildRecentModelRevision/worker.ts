@@ -30,6 +30,7 @@ export async function runSquiggleCode(
       variableType: e[1].tag,
       title: e[1].tags.name() ? e[1].tags.name() : e[1].title() || "",
       docstring: e[1].tags.doc() || "",
+      unitType: e[1].tags.unitType() || "",
     }));
   }
 

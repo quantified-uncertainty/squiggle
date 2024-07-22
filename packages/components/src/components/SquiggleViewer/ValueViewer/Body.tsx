@@ -16,6 +16,7 @@ const WithComment: FC<PropsWithChildren<WithCommentProps>> = ({
   children,
 }) => {
   const comment = getValueComment(value);
+  const unitType = value.tags.unitType();
 
   if (!comment) {
     return children;
@@ -38,6 +39,7 @@ const WithComment: FC<PropsWithChildren<WithCommentProps>> = ({
       )}
     >
       <MarkdownViewer md={comment} textSize="sm" />
+      {unitType && (<MarkdownViewer md={unitType} textSize="sm" />)}
     </div>
   );
 

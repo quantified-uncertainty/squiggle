@@ -23,6 +23,7 @@ export const VariableRevision = builder.prismaNode("VariableRevision", {
     variableName: t.exposeString("variableName"),
     variableType: t.exposeString("variableType"),
     docstring: t.exposeString("docstring"),
+    unitType: t.exposeString("unitType"),
     title: t.exposeString("title", { nullable: true }),
     variable: t.relation("variable"),
   }),
@@ -44,6 +45,7 @@ export type VariableRevisionInput = {
   variableName: string;
   variableType?: string;
   docstring?: string;
+  unitType?: string;
 };
 
 export async function createVariableRevision(
@@ -79,6 +81,7 @@ export async function createVariableRevision(
       variableType: variableData.variableType,
       title: variableData.title,
       docstring: variableData.docstring,
+      unitType: variableData.unitType,
     },
   });
 
