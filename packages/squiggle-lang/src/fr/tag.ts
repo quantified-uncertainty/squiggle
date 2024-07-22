@@ -158,6 +158,28 @@ export const library = [
     ],
   }),
   maker.make({
+    name: "unitType",
+    description: `Adds unit type (as a string) to a value..`,
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition(
+        [frAny({ genericName: "A" }), frString],
+        frAny({ genericName: "A" }),
+        ([value, unitType]) => value.mergeTags({ unitType: vString(unitType) }),
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getUnitType",
+    displaySection: "Tags",
+    definitions: [
+      makeDefinition([frAny()], frString, ([value]) => {
+        return value.tags?.unitType() || "";
+      }),
+    ],
+  }),
+  maker.make({
     name: "doc",
     description: `Adds text documentation to a value. This is useful for documenting what a value represents or how it was calculated.`,
     displaySection: "Tags",
@@ -184,7 +206,7 @@ export const library = [
     description: `Overrides the default visualization for a value.
 \`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization.
 
-Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, \`Number\` can be used with Dates and Durations as well.  
+Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, \`Number\` can be used with Dates and Durations as well.
 | **Input Type**                      | **Visualization Types**               |
 | ----------------------------------- | ------------------------------------- |
 | **Distribution**                    | \`Plot.dist\`                         |

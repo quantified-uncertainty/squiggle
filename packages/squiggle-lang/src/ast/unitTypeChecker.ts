@@ -81,12 +81,15 @@ const FUNCTION_OFFSET = 1 << 24;
  * variableNodes: An array where the ith index gives the ASTNode for the
  * identifier on the `let` statement declaring the variable with ID `i`.
  *
+ * variableParentNodes: An array of parent nodes to `variableNodes`.
+ *
  * functions: An array of [function name, [type constraints within function,
  * return type of function]].
  */
 type ScopeInfo = {
   stack: Scope[];
   variableNodes: ASTNode[];
+  variableParentNodes: (ASTNode | null)[];
   functions: [string, [TypeConstraint[], TypeConstraint]][];
 };
 
@@ -263,6 +266,7 @@ function createTypeConstraint(node?: ASTNode): TypeConstraint {
 function identifierConstraint(
   name: string,
   node: ASTNode,
+  parentNode: ASTNode | null,
   scopes: ScopeInfo,
   identifierType: IdentifierType
 ): TypeConstraint {
@@ -273,6 +277,7 @@ function identifierConstraint(
       // the new variable
       uniqueId = scopes.variableNodes.length;
       scopes.variableNodes.push(node);
+      scopes.variableParentNodes.push(parentNode);
       scopes.stack[scopes.stack.length - 1][name] = uniqueId;
       break;
     case "reference":
@@ -456,6 +461,7 @@ function lambdaFindTypeConstraints(
         identifierConstraint(
           getIdentifierName(arg),
           arg,
+          null,
           scopes,
           "declaration"
         );
@@ -613,6 +619,7 @@ function innerFindTypeConstraints(
         var variableConstraint = identifierConstraint(
           node.variable.value,
           node.variable,
+          node,
           scopes,
           "declaration"
         );
@@ -691,6 +698,7 @@ function innerFindTypeConstraints(
           // undefined variables.
           const newId = scopes.variableNodes.length;
           scopes.variableNodes.push(node.args[i]);
+          scopes.variableParentNodes.push(null);
           argConstraint.variables[newId] = 1;
         }
         for (let constraint of functionConstraints.concat(
@@ -714,9 +722,15 @@ function innerFindTypeConstraints(
       return returnTypeConstraint;
 
     case "Identifier":
-      return identifierConstraint(node.value, node, scopes, "reference");
+      return identifierConstraint(node.value, node, null, scopes, "reference");
     case "IdentifierWithAnnotation":
-      return identifierConstraint(node.variable, node, scopes, "reference");
+      return identifierConstraint(
+        node.variable,
+        node,
+        null,
+        scopes,
+        "reference"
+      );
     case "Float":
     case "UnitValue":
       return no_constraint();
@@ -834,6 +848,7 @@ function findTypeConstraints(
   let scopes: ScopeInfo = {
     stack: [{}],
     variableNodes: [],
+    variableParentNodes: [],
     functions: [],
   };
   innerFindTypeConstraints(node, typeConstraints, scopes);
@@ -1015,7 +1030,10 @@ function matrixToSimplifiedTypes(
     }
     const varIndex = nonzeroIndexes[0];
     const varId: VariableId = varIds[varIndex];
-    if (!("value" in scopes.variableNodes[varId])) {
+    if (
+      !("value" in scopes.variableNodes[varId]) &&
+      !("variable" in scopes.variableNodes[varId])
+    ) {
       // Skip over dummy variables that aren't associated with an
       // identifier node
       continue;
@@ -1148,20 +1166,22 @@ function checkTypeConstraints(
  * Put known unit-type information for each variable into the list of decorators
  * for the ASTNode where the variable is defined.
  *
- * TODO: broken
+ * Note: This doesn't work for function parameters because function parameters
+ * can't have decorators.
  */
 function putUnitTypesOnAST(
   variableTypes: VariableUnitTypes,
   scopes: ScopeInfo
 ) {
-  return undefined;
-
   for (const variableId in variableTypes) {
-    const node = scopes.variableNodes[variableId];
-
-    // TODO: assertion is false, node is Identifier
-    console.assert(node.type === "LetStatement");
-    const fakeLocation = node.location;
+    const node = scopes.variableParentNodes[variableId];
+    if (node === null || node.type !== "LetStatement") {
+      continue;
+    }
+    let fakeLocation = node.location;
+    if (node.unitTypeSignature) {
+      fakeLocation = node.unitTypeSignature.location;
+    }
     const unitType = variableTypes[variableId];
     const unitTypeStr = unitTypeToString(unitType);
     if (!("decorators" in node)) {

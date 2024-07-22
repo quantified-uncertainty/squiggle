@@ -15,6 +15,7 @@ import { type VString } from "./VString.js";
 export type ValueTagsType = {
   name?: VString;
   doc?: VString;
+  unitType?: VString;
   showAs?: Value;
   numberFormat?: VString; // can be set on numbers, dists and durations
   dateFormat?: VString; // can be set on dates

@@ -18,6 +18,10 @@ export class SqTags {
     return this.tags.doc();
   }
 
+  unitType(): string | undefined {
+    return this.tags.unitType();
+  }
+
   showAs(): SqValue | undefined {
     const showAs = this.tags.showAs();
     return showAs ? wrapValue(showAs, this.context) : undefined;

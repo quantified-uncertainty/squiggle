@@ -160,11 +160,11 @@ describe("Peggy parse", () => {
   describe("unit-typed variables", () => {
     testParse(
       "x :: kg = 1",
-      "(Program (LetStatement :x (UnitTypeSignature :kg) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature :kg) 1 (Decorator :unitType 'kg')))"
     );
     testParse(
       "x :: kg / m = 1",
-      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / :kg :m)) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / :kg :m)) 1 (Decorator :unitType 'kg / m')))"
     );
     testParse(
       "x :: 1 / kg = 1",
@@ -176,23 +176,23 @@ describe("Peggy parse", () => {
     );
     testParse(
       "x :: kg*m/s = 1",
-      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * :kg :m) :s)) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * :kg :m) :s)) 1 (Decorator :unitType 'kg * m / s')))"
     );
     testParse(
       "x :: m/s/s = 1",
-      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType / :m :s) :s)) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType / :m :s) :s)) 1 (Decorator :unitType 'm / s^2')))"
     );
     testParse(
       "x :: m/s*kg/s = 1",
-      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * (InfixUnitType / :m :s) :kg) :s)) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * (InfixUnitType / :m :s) :kg) :s)) 1 (Decorator :unitType 'kg * m / s^2')))"
     );
     testParse(
       "x :: m^3 = 1",
-      "(Program (LetStatement :x (UnitTypeSignature (ExponentialUnitType :m 3)) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature (ExponentialUnitType :m 3)) 1 (Decorator :unitType 'm^3')))"
     );
     testParse(
       "x :: kg*m^2/s^3 = 1",
-      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * :kg (ExponentialUnitType :m 2)) (ExponentialUnitType :s 3))) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * :kg (ExponentialUnitType :m 2)) (ExponentialUnitType :s 3))) 1 (Decorator :unitType 'kg * m^2 / s^3')))"
     );
   });
 
@@ -208,6 +208,13 @@ describe("Peggy parse", () => {
     testParse(
       "f(x :: m, y :: s) :: m/s = x/y",
       "(Program (DefunStatement :f (Lambda (Identifier x (UnitTypeSignature :m)) (Identifier y (UnitTypeSignature :s)) (InfixCall / :x :y) (UnitTypeSignature (InfixUnitType / :m :s)))))"
+    );
+  });
+
+  describe("variables with inferred unit types", () => {
+    testParse(
+      "x :: kg = 1; y = x",
+      "(Program (LetStatement :x (UnitTypeSignature :kg) 1 (Decorator :unitType 'kg')) (LetStatement :y :x (Decorator :unitType 'kg')))"
     );
   });
 
@@ -489,7 +496,7 @@ describe("Peggy parse", () => {
   describe("Using lambda as value", () => {
     testParse(
       "myadd(x,y)=x+y; z=myadd; z",
-      "(Program (DefunStatement :myadd (Lambda :x :y (InfixCall + :x :y))) (LetStatement :z :myadd) :z)"
+      "(Program (DefunStatement :myadd (Lambda :x :y (InfixCall + :x :y))) (LetStatement :z :myadd (Decorator :unitType '1')) :z)"
     );
     testParse(
       "myadd(x,y)=x+y; z=[myadd]; z",
