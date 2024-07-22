@@ -208,7 +208,7 @@ export const ValueWithContextViewer: FC<Props> = ({
                 }}
               />
 
-              {unitType && (<UnitType {...{unitType}} />)}
+              {unitType && <UnitType {...{ unitType }} />}
 
               {!isOpen && (
                 <div className="ml-2 text-sm text-blue-800">
