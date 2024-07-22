@@ -675,6 +675,8 @@ function innerFindTypeConstraints(
       }
       var [functionConstraints, returnTypeConstraint] =
         scopes.functions[index - FUNCTION_OFFSET][1];
+      functionConstraints = functionConstraints.map((c) => structuredClone(c));
+      returnTypeConstraint = structuredClone(returnTypeConstraint);
 
       // substitute function params for args
       for (let i = 0; i < node.args.length; i++) {
@@ -711,6 +713,8 @@ function innerFindTypeConstraints(
       for (let i = 0; i < functionConstraints.length; i++) {
         addTypeConstraint(typeConstraints, functionConstraints[i], node);
       }
+
+      console.log("returnTypeConstraint:", returnTypeConstraint);
       return returnTypeConstraint;
 
     case "Identifier":

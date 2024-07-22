@@ -320,23 +320,23 @@ z :: m^2 = x * y
         ["x", "y", "z"],
       ]));
 
-      test("numbers are unitless types", () =>
-        expect(
-            getUnitTypes(
-                `
+    test("numbers are unitless types", () =>
+      expect(
+        getUnitTypes(
+          `
 pi :: 1 = 3.14
 invDiameter :: 1/m = 4
 circumference = pi / invDiameter
 `
-            )
-        ).toEqual([
-            {
-                0: {},
-                1: { m: -1 },
-                2: { m: 1 },
-            },
-            ["pi", "invDiameter", "circumference"],
-        ]));
+        )
+      ).toEqual([
+        {
+          0: {},
+          1: { m: -1 },
+          2: { m: 1 },
+        },
+        ["pi", "invDiameter", "circumference"],
+      ]));
 
     test("unit types can negate themselves", () =>
       expect(
@@ -1185,6 +1185,27 @@ f(f)
 `
       )
     ).toThrow(`Conflicting unit types`));
+
+  test("generic function can have two different unit types", () =>
+    expect(
+      getUnitTypes(
+        `
+f(a)=a
+x=1
+y=2
+x1::kg=f(x)
+y1::m=f(y)
+`
+      )
+    ).toEqual([
+      {
+        1: { kg: 1 },
+        2: { m: 1 },
+        3: { kg: 1 },
+        4: { m: 1 },
+      },
+      ["a", "x", "y", "x1", "y1"],
+    ]));
 });
 
 describe.skip("unit type checking performance test", () => {
