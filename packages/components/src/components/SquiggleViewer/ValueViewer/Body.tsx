@@ -39,7 +39,6 @@ const WithComment: FC<PropsWithChildren<WithCommentProps>> = ({
       )}
     >
       <MarkdownViewer md={comment} textSize="sm" />
-      {unitType && (<MarkdownViewer md={unitType} textSize="sm" />)}
     </div>
   );
 

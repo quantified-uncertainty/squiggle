@@ -29,6 +29,7 @@ import {
 } from "../ViewerProvider.js";
 import { Body } from "./Body.js";
 import { Title } from "./Title.js";
+import { UnitType } from "./UnitType.js";
 
 const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
   const comment = getValueComment(value);
@@ -206,6 +207,8 @@ export const ValueWithContextViewer: FC<Props> = ({
                   exportData,
                 }}
               />
+
+              {unitType && (<UnitType {...{unitType}} />)}
 
               {!isOpen && (
                 <div className="ml-2 text-sm text-blue-800">
