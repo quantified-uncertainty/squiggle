@@ -714,7 +714,6 @@ function innerFindTypeConstraints(
         addTypeConstraint(typeConstraints, functionConstraints[i], node);
       }
 
-      console.log("returnTypeConstraint:", returnTypeConstraint);
       return returnTypeConstraint;
 
     case "Identifier":
