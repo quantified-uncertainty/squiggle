@@ -2,8 +2,8 @@ import { type ASTCommentNode, type ASTNode } from "@quri/squiggle-lang";
 
 // This doesn't patch children types (e.g. `node.statements[0]` is `ASTNode`, not `PatchedASTNode`)
 export type PatchedASTNode = (
-  | Exclude<ASTNode, { type: "Block" }>
-  | (Extract<ASTNode, { type: "Block" }> & { isLambdaBody?: boolean })
+  | Exclude<ASTNode, { kind: "Block" }>
+  | (Extract<ASTNode, { kind: "Block" }> & { isLambdaBody?: boolean })
 ) & {
   comments?: ASTCommentNode[];
 };

@@ -28,7 +28,7 @@ describe("Peggy parse", () => {
     ] satisfies [
       string,
       Pick<
-        Extract<ASTNode, { type: "Float" }>,
+        Extract<ASTNode, { kind: "Float" }>,
         "integer" | "fractional" | "exponent"
       >,
     ][])("%s", (code, expected) => {
@@ -36,14 +36,14 @@ describe("Peggy parse", () => {
       if (
         !(
           result.ok &&
-          result.value.type === "Program" &&
+          result.value.kind === "Program" &&
           result.value.statements.length === 1
         )
       ) {
         throw new Error();
       }
       const value = result.value.statements[0];
-      if (value.type !== "Float") {
+      if (value.kind !== "Float") {
         throw new Error();
       }
       expect(value).toMatchObject(expected);
@@ -157,6 +157,60 @@ describe("Peggy parse", () => {
     testEvalError("Foo.bar = 1");
   });
 
+  describe("unit-typed variables", () => {
+    testParse(
+      "x :: kg = 1",
+      "(Program (LetStatement :x (UnitTypeSignature :kg) 1))"
+    );
+    testParse(
+      "x :: kg / m = 1",
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / :kg :m)) 1))"
+    );
+    testParse(
+      "x :: 1 / kg = 1",
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / 1 :kg)) 1))"
+    );
+    testParse(
+      "x :: 1 = 2",
+      "(Program (LetStatement :x (UnitTypeSignature 1) 2))"
+    );
+    testParse(
+      "x :: kg*m/s = 1",
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * :kg :m) :s)) 1))"
+    );
+    testParse(
+      "x :: m/s/s = 1",
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType / :m :s) :s)) 1))"
+    );
+    testParse(
+      "x :: m/s*kg/s = 1",
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * (InfixUnitType / :m :s) :kg) :s)) 1))"
+    );
+    testParse(
+      "x :: m^3 = 1",
+      "(Program (LetStatement :x (UnitTypeSignature (ExponentialUnitType :m 3)) 1))"
+    );
+    testParse(
+      "x :: kg*m^2/s^3 = 1",
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * :kg (ExponentialUnitType :m 2)) (ExponentialUnitType :s 3))) 1))"
+    );
+  });
+
+  describe("unit-typed functions", () => {
+    testParse(
+      "f(x :: kg) = y",
+      "(Program (DefunStatement :f (Lambda (Identifier x (UnitTypeSignature :kg)) :y)))"
+    );
+    testParse(
+      "f(x) :: lbs = y",
+      "(Program (DefunStatement :f (Lambda :x :y (UnitTypeSignature :lbs))))"
+    );
+    testParse(
+      "f(x :: m, y :: s) :: m/s = x/y",
+      "(Program (DefunStatement :f (Lambda (Identifier x (UnitTypeSignature :m)) (Identifier y (UnitTypeSignature :s)) (InfixCall / :x :y) (UnitTypeSignature (InfixUnitType / :m :s)))))"
+    );
+  });
+
   describe("functions", () => {
     testParse(
       "identity(x) = x",
@@ -219,8 +273,8 @@ describe("Peggy parse", () => {
     testParse("/* This is a multi line comment */ 1", "(Program 1)");
     testParse(
       `
-  /* This is 
-  a multi line 
+  /* This is
+  a multi line
   comment */
   1`,
       "(Program 1)"
@@ -506,7 +560,7 @@ f(x) = x
 describe("Parsing new line", () => {
   testParse(
     `
- a + 
+ a +
  b`,
     "(Program (InfixCall + :a :b))"
   );
@@ -542,7 +596,7 @@ describe("Parsing new line", () => {
     `
  x={
   y=2
-  y 
+  y
   }
  x`,
     "(Program (LetStatement :x (Block (LetStatement :y 2) :y)) :x)"
@@ -597,7 +651,7 @@ describe("Parsing new line", () => {
  g ->
   h ->
   p ->
-  q 
+  q
  `,
     "(Program (LetStatement :f (Block (LetStatement :x 1) (LetStatement :y 2) (LetStatement :z 3) (InfixCall + (InfixCall + :x :y) :z))) (LetStatement :g (InfixCall + :f 4)) (Pipe (Pipe (Pipe :g :h) :p) :q))"
   );
@@ -606,7 +660,7 @@ describe("Parsing new line", () => {
   a ->
   b ->
   c ->
-  d 
+  d
  `,
     "(Program (Pipe (Pipe (Pipe :a :b) :c) :d))"
   );

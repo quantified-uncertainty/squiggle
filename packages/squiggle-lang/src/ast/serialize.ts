@@ -4,7 +4,7 @@ import {
 } from "../serialization/squiggle.js";
 import { ASTNode, LocationRange, NamedNodeLambda } from "./types.js";
 
-type TypedNode<T extends ASTNode["type"]> = Extract<ASTNode, { type: T }>;
+type KindNode<T extends ASTNode["kind"]> = Extract<ASTNode, { kind: T }>;
 
 /*
  * Derive serialized AST type from ASTNode automatically.
@@ -13,7 +13,7 @@ type TypedNode<T extends ASTNode["type"]> = Extract<ASTNode, { type: T }>;
 type SerializedNodeField<T> = T extends string | number | boolean | null
   ? T
   : T extends {
-        type: ASTNode["type"];
+        kind: ASTNode["kind"];
         location: LocationRange;
       }
     ? number // convert ASTNode to number
@@ -27,31 +27,31 @@ type SerializedNodeField<T> = T extends string | number | boolean | null
             ? Record<K, SerializedNodeField<V>> // convert { string: ASTNode } to { string: number }
             : never;
 
-type TypedNodeToSerializedNode<
-  T extends ASTNode["type"],
-  Node extends { type: T; location: LocationRange },
-> = Pick<Node, "type" | "location"> & {
-  [K in keyof Node as Exclude<K, "type" | "location">]: SerializedNodeField<
+type KindNodeToSerializedNode<
+  T extends ASTNode["kind"],
+  Node extends { kind: T; location: LocationRange },
+> = Pick<Node, "kind" | "location"> & {
+  [K in keyof Node as Exclude<K, "kind" | "location">]: SerializedNodeField<
     Node[K]
   >;
 };
 
 // Trick for mapping over a discriminated union, https://stackoverflow.com/a/51691257
 type Distribute<U> = U extends ASTNode
-  ? TypedNodeToSerializedNode<U["type"], U>
+  ? KindNodeToSerializedNode<U["kind"], U>
   : never;
 
 export type SerializedASTNode = Distribute<ASTNode>;
 
 // It can be difficult to see if the type above is correct, but for debugging you can use something like this:
-// type T = Extract<SerializedASTNode, { type: "Program" }>;
+// type T = Extract<SerializedASTNode, { kind: "Program" }>;
 // Uncomment the line above and hover over it it VS Code to check the output.
 
 export function serializeAstNode(
   node: ASTNode,
   visit: SquiggleSerializationVisitor
 ): SerializedASTNode {
-  switch (node.type) {
+  switch (node.kind) {
     case "Program":
       return {
         ...node,
@@ -73,6 +73,13 @@ export function serializeAstNode(
         statements: node.statements.map(visit.ast),
       };
     case "LetStatement":
+      return {
+        ...node,
+        decorators: node.decorators.map(visit.ast),
+        variable: visit.ast(node.variable),
+        unitTypeSignature: visit.ast(node.unitTypeSignature),
+        value: visit.ast(node.value),
+      };
     case "DefunStatement":
       return {
         ...node,
@@ -85,6 +92,9 @@ export function serializeAstNode(
         ...node,
         args: node.args.map(visit.ast),
         body: visit.ast(node.body),
+        returnUnitType: node.returnUnitType
+          ? visit.ast(node.returnUnitType)
+          : undefined,
       };
     case "Array":
       return {
@@ -160,12 +170,36 @@ export function serializeAstNode(
         trueExpression: visit.ast(node.trueExpression),
         falseExpression: visit.ast(node.falseExpression),
       };
+    case "UnitTypeSignature":
+      return {
+        ...node,
+        body: visit.ast(node.body),
+      };
+    case "InfixUnitType":
+      return {
+        ...node,
+        args: [visit.ast(node.args[0]), visit.ast(node.args[1])],
+      };
+    case "ExponentialUnitType":
+      return {
+        ...node,
+        base: visit.ast(node.base),
+        exponent: visit.ast(node.exponent),
+      };
     case "Identifier":
-      return node;
+      return {
+        ...node,
+        unitTypeSignature: node.unitTypeSignature
+          ? visit.ast(node.unitTypeSignature)
+          : undefined,
+      };
     case "IdentifierWithAnnotation":
       return {
         ...node,
         annotation: visit.ast(node.annotation),
+        unitTypeSignature: node.unitTypeSignature
+          ? visit.ast(node.unitTypeSignature)
+          : undefined,
       };
     case "Float":
     case "String":
@@ -180,13 +214,13 @@ export function deserializeAstNode(
   node: SerializedASTNode,
   visit: SquiggleDeserializationVisitor
 ): ASTNode {
-  switch (node.type) {
+  switch (node.kind) {
     case "Program":
       return {
         ...node,
         imports: node.imports.map((item) => [
-          visit.ast(item[0]) as TypedNode<"String">,
-          visit.ast(item[0]) as TypedNode<"Identifier">,
+          visit.ast(item[0]) as KindNode<"String">,
+          visit.ast(item[0]) as KindNode<"Identifier">,
         ]),
         statements: node.statements.map(visit.ast),
         symbols: Object.fromEntries(
@@ -204,15 +238,18 @@ export function deserializeAstNode(
     case "LetStatement":
       return {
         ...node,
-        decorators: node.decorators.map(visit.ast) as TypedNode<"Decorator">[],
-        variable: visit.ast(node.variable) as TypedNode<"Identifier">,
+        decorators: node.decorators.map(visit.ast) as KindNode<"Decorator">[],
+        variable: visit.ast(node.variable) as KindNode<"Identifier">,
+        unitTypeSignature: visit.ast(
+          node.unitTypeSignature
+        ) as KindNode<"UnitTypeSignature">,
         value: visit.ast(node.value),
       };
     case "DefunStatement":
       return {
         ...node,
-        decorators: node.decorators.map(visit.ast) as TypedNode<"Decorator">[],
-        variable: visit.ast(node.variable) as TypedNode<"Identifier">,
+        decorators: node.decorators.map(visit.ast) as KindNode<"Decorator">[],
+        variable: visit.ast(node.variable) as KindNode<"Identifier">,
         value: visit.ast(node.value) as NamedNodeLambda,
       };
     case "Lambda":
@@ -220,6 +257,9 @@ export function deserializeAstNode(
         ...node,
         args: node.args.map(visit.ast),
         body: visit.ast(node.body),
+        returnUnitType: node.returnUnitType
+          ? (visit.ast(node.returnUnitType) as KindNode<"UnitTypeSignature">)
+          : undefined,
       };
     case "Array":
       return {
@@ -230,12 +270,12 @@ export function deserializeAstNode(
       return {
         ...node,
         elements: node.elements.map(
-          (node) => visit.ast(node) as TypedNode<"KeyValue" | "Identifier">
+          (node) => visit.ast(node) as KindNode<"KeyValue" | "Identifier">
         ),
         symbols: Object.fromEntries(
           Object.entries(node.symbols).map(([key, value]) => [
             key,
-            visit.ast(value) as TypedNode<"KeyValue" | "Identifier">,
+            visit.ast(value) as KindNode<"KeyValue" | "Identifier">,
           ])
         ),
       };
@@ -276,7 +316,7 @@ export function deserializeAstNode(
     case "Decorator":
       return {
         ...node,
-        name: visit.ast(node.name) as TypedNode<"Identifier">,
+        name: visit.ast(node.name) as KindNode<"Identifier">,
         args: node.args.map(visit.ast),
       };
     case "DotLookup":
@@ -297,12 +337,36 @@ export function deserializeAstNode(
         trueExpression: visit.ast(node.trueExpression),
         falseExpression: visit.ast(node.falseExpression),
       };
+    case "UnitTypeSignature":
+      return {
+        ...node,
+        body: visit.ast(node.body),
+      };
+    case "InfixUnitType":
+      return {
+        ...node,
+        args: [visit.ast(node.args[0]), visit.ast(node.args[1])],
+      };
+    case "ExponentialUnitType":
+      return {
+        ...node,
+        base: visit.ast(node.base),
+        exponent: visit.ast(node.exponent),
+      };
     case "Identifier":
-      return node;
+      return {
+        ...node,
+        unitTypeSignature: node.unitTypeSignature
+          ? (visit.ast(node.unitTypeSignature) as KindNode<"UnitTypeSignature">)
+          : undefined,
+      };
     case "IdentifierWithAnnotation":
       return {
         ...node,
         annotation: visit.ast(node.annotation),
+        unitTypeSignature: node.unitTypeSignature
+          ? (visit.ast(node.unitTypeSignature) as KindNode<"UnitTypeSignature">)
+          : undefined,
       };
     case "Float":
     case "String":

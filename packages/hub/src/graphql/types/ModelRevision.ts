@@ -34,11 +34,11 @@ const ModelRevisionBuildStatus = builder.enumType("ModelRevisionBuildStatus", {
 function astToVariableNames(ast: ASTNode): string[] {
   const exportedVariableNames: string[] = [];
 
-  if (ast.type === "Program") {
+  if (ast.kind === "Program") {
     ast.statements.forEach((statement) => {
       if (
-        (statement.type === "LetStatement" ||
-          statement.type === "DefunStatement") &&
+        (statement.kind === "LetStatement" ||
+          statement.kind === "DefunStatement") &&
         statement.exported
       ) {
         exportedVariableNames.push(statement.variable.value);

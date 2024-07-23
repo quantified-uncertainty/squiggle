@@ -5,17 +5,18 @@ import {
   InfixOperator,
   LocationRange,
   NamedNodeLambda,
+  TypeOperator,
   UnaryOperator,
 } from "./types.js";
 
-type TypedNode<T extends ASTNode["type"]> = Extract<ASTNode, { type: T }>;
+type KindNode<T extends ASTNode["kind"]> = Extract<ASTNode, { kind: T }>;
 
 export function nodeCall(
   fn: ASTNode,
   args: ASTNode[],
   location: LocationRange
-): TypedNode<"Call"> {
-  return { type: "Call", fn, args, location };
+): KindNode<"Call"> {
+  return { kind: "Call", fn, args, location };
 }
 
 export function makeInfixChain(
@@ -33,12 +34,49 @@ export function nodeInfixCall(
   arg1: ASTNode,
   arg2: ASTNode,
   location: LocationRange
-): TypedNode<"InfixCall"> {
+): KindNode<"InfixCall"> {
   return {
-    type: "InfixCall",
+    kind: "InfixCall",
     op,
     args: [arg1, arg2],
     location,
+  };
+}
+
+export function makeInfixTypeChain(
+  head: ASTNode,
+  tail: [TypeOperator, ASTNode][],
+  location: LocationRange
+): ASTNode {
+  return tail.reduce((result, [operator, right]) => {
+    return nodeInfixUnitType(operator, result, right, location);
+  }, head);
+}
+
+export function nodeInfixUnitType(
+  op: TypeOperator,
+  arg1: ASTNode,
+  arg2: ASTNode,
+  location: LocationRange
+): KindNode<"InfixUnitType"> {
+  return {
+    kind: "InfixUnitType",
+    op,
+    args: [arg1, arg2],
+    location,
+  };
+}
+
+export function nodeExponentialUnitType(
+  base: ASTNode,
+  exponent: ASTNode,
+  location: LocationRange
+): KindNode<"ExponentialUnitType"> {
+  return {
+    kind: "ExponentialUnitType",
+    base: base,
+    exponent: exponent,
+    location: location,
   };
 }
 
@@ -46,8 +84,8 @@ export function nodeUnaryCall(
   op: UnaryOperator,
   arg: ASTNode,
   location: LocationRange
-): TypedNode<"UnaryCall"> {
-  return { type: "UnaryCall", op, arg, location };
+): KindNode<"UnaryCall"> {
+  return { kind: "UnaryCall", op, arg, location };
 }
 
 export function nodePipe(
@@ -55,154 +93,192 @@ export function nodePipe(
   fn: ASTNode,
   rightArgs: ASTNode[],
   location: LocationRange
-): TypedNode<"Pipe"> {
-  return { type: "Pipe", leftArg, fn, rightArgs, location };
+): KindNode<"Pipe"> {
+  return { kind: "Pipe", leftArg, fn, rightArgs, location };
 }
 
 export function nodeDotLookup(
   arg: ASTNode,
   key: string,
   location: LocationRange
-): TypedNode<"DotLookup"> {
-  return { type: "DotLookup", arg, key, location };
+): KindNode<"DotLookup"> {
+  return { kind: "DotLookup", arg, key, location };
 }
 
 export function nodeBracketLookup(
   arg: ASTNode,
   key: ASTNode,
   location: LocationRange
-): TypedNode<"BracketLookup"> {
-  return { type: "BracketLookup", arg, key, location };
+): KindNode<"BracketLookup"> {
+  return { kind: "BracketLookup", arg, key, location };
 }
 
 export function nodeArray(
   elements: ASTNode[],
   location: LocationRange
-): TypedNode<"Array"> {
-  return { type: "Array", elements, location };
+): KindNode<"Array"> {
+  return { kind: "Array", elements, location };
 }
 export function nodeDict(
   elements: AnyNodeDictEntry[],
   location: LocationRange
-): TypedNode<"Dict"> {
-  const symbols: TypedNode<"Dict">["symbols"] = {};
+): KindNode<"Dict"> {
+  const symbols: KindNode<"Dict">["symbols"] = {};
   for (const element of elements) {
-    if (element.type === "KeyValue" && element.key.type === "String") {
+    if (element.kind === "KeyValue" && element.key.kind === "String") {
       symbols[element.key.value] = element;
-    } else if (element.type === "Identifier") {
+    } else if (element.kind === "Identifier") {
       symbols[element.value] = element;
     }
   }
-  return { type: "Dict", elements, symbols, location };
+  return { kind: "Dict", elements, symbols, location };
 }
 
 export function nodeUnitValue(
   value: ASTNode,
   unit: string,
   location: LocationRange
-): TypedNode<"UnitValue"> {
-  return { type: "UnitValue", value, unit, location };
+): KindNode<"UnitValue"> {
+  return { kind: "UnitValue", value, unit, location };
 }
 
 export function nodeBlock(
   statements: ASTNode[],
   location: LocationRange
-): TypedNode<"Block"> {
-  return { type: "Block", statements, location };
+): KindNode<"Block"> {
+  return { kind: "Block", statements, location };
 }
+
 export function nodeProgram(
-  imports: [TypedNode<"String">, TypedNode<"Identifier">][],
+  imports: [KindNode<"String">, KindNode<"Identifier">][],
   statements: ASTNode[],
   location: LocationRange
-): TypedNode<"Program"> {
-  const symbols: TypedNode<"Program">["symbols"] = {};
+): KindNode<"Program"> {
+  const symbols: KindNode<"Program">["symbols"] = {};
   for (const statement of statements) {
     if (
-      statement.type === "LetStatement" ||
-      statement.type === "DefunStatement"
+      statement.kind === "LetStatement" ||
+      statement.kind === "DefunStatement"
     ) {
       symbols[statement.variable.value] = statement;
     }
   }
-  return { type: "Program", imports, statements, symbols, location };
+  return { kind: "Program", imports, statements, symbols, location };
 }
+
+export function nodeTypeSignature(
+  body: ASTNode,
+  location: LocationRange
+): KindNode<"UnitTypeSignature"> {
+  return {
+    kind: "UnitTypeSignature",
+    body: body,
+    location: location,
+  };
+}
+
 export function nodeBoolean(
   value: boolean,
   location: LocationRange
-): TypedNode<"Boolean"> {
-  return { type: "Boolean", value, location };
+): KindNode<"Boolean"> {
+  return { kind: "Boolean", value, location };
 }
 
 export function nodeFloat(
-  args: Omit<TypedNode<"Float">, "type" | "location">,
+  args: Omit<KindNode<"Float">, "kind" | "location">,
   location: LocationRange
-): TypedNode<"Float"> {
-  return { type: "Float", ...args, location };
+): KindNode<"Float"> {
+  return { kind: "Float", ...args, location };
 }
 
 export function nodeIdentifier(
   value: string,
   location: LocationRange
-): TypedNode<"Identifier"> {
-  return { type: "Identifier", value, location };
+): KindNode<"Identifier"> {
+  return { kind: "Identifier", value, location };
+}
+
+export function nodeIdentifierWithUnitType(
+  value: string,
+  unitTypeSignature: KindNode<"UnitTypeSignature">,
+  location: LocationRange
+): KindNode<"Identifier"> {
+  return { kind: "Identifier", value, unitTypeSignature, location };
 }
 
 export function nodeIdentifierWithAnnotation(
   variable: string,
   annotation: ASTNode,
+  unitTypeSignature: KindNode<"UnitTypeSignature">,
   location: LocationRange
-): TypedNode<"IdentifierWithAnnotation"> {
-  return { type: "IdentifierWithAnnotation", variable, annotation, location };
+): KindNode<"IdentifierWithAnnotation"> {
+  return {
+    kind: "IdentifierWithAnnotation",
+    variable,
+    annotation,
+    unitTypeSignature,
+    location,
+  };
 }
 
 export function nodeKeyValue(
   key: ASTNode,
   value: ASTNode,
   location: LocationRange
-): TypedNode<"KeyValue"> {
-  if (key.type === "Identifier") {
+): KindNode<"KeyValue"> {
+  if (key.kind === "Identifier") {
     key = {
       ...key,
-      type: "String",
+      kind: "String",
     };
   }
-  return { type: "KeyValue", key, value, location };
+  return { kind: "KeyValue", key, value, location };
 }
 export function nodeLambda(
   args: ASTNode[],
   body: ASTNode,
   location: LocationRange,
-  name?: TypedNode<"Identifier">
-): TypedNode<"Lambda"> {
-  return { type: "Lambda", args, body, location, name: name?.value };
+  name?: KindNode<"Identifier">,
+  returnUnitType?: KindNode<"UnitTypeSignature">
+): KindNode<"Lambda"> {
+  return {
+    kind: "Lambda",
+    args: args,
+    body: body,
+    name: name?.value,
+    returnUnitType: returnUnitType,
+    location: location,
+  };
 }
 export function nodeLetStatement(
-  decorators: TypedNode<"Decorator">[],
-  variable: TypedNode<"Identifier">,
+  decorators: KindNode<"Decorator">[],
+  variable: KindNode<"Identifier">,
+  unitTypeSignature: KindNode<"UnitTypeSignature">,
   value: ASTNode,
   exported: boolean,
   location: LocationRange
-): TypedNode<"LetStatement"> {
+): KindNode<"LetStatement"> {
   const patchedValue =
-    value.type === "Lambda" ? { ...value, name: variable.value } : value;
+    value.kind === "Lambda" ? { ...value, name: variable.value } : value;
   return {
-    type: "LetStatement",
+    kind: "LetStatement",
     decorators,
     variable,
+    unitTypeSignature,
     value: patchedValue,
     exported,
     location,
   };
 }
 export function nodeDefunStatement(
-  decorators: TypedNode<"Decorator">[],
-  variable: TypedNode<"Identifier">,
+  decorators: KindNode<"Decorator">[],
+  variable: KindNode<"Identifier">,
   value: NamedNodeLambda,
   exported: boolean,
   location: LocationRange
-): TypedNode<"DefunStatement"> {
+): KindNode<"DefunStatement"> {
   return {
-    type: "DefunStatement",
+    kind: "DefunStatement",
     decorators,
     variable,
     value,
@@ -212,33 +288,33 @@ export function nodeDefunStatement(
 }
 
 export function nodeDecorator(
-  name: TypedNode<"Identifier">,
+  name: KindNode<"Identifier">,
   args: ASTNode[],
   location: LocationRange
-): TypedNode<"Decorator"> {
-  return { type: "Decorator", name, args, location };
+): KindNode<"Decorator"> {
+  return { kind: "Decorator", name, args, location };
 }
 
 export function nodeString(
   value: string,
   location: LocationRange
-): TypedNode<"String"> {
-  return { type: "String", value, location };
+): KindNode<"String"> {
+  return { kind: "String", value, location };
 }
 
 export function nodeTernary(
   condition: ASTNode,
   trueExpression: ASTNode,
   falseExpression: ASTNode,
-  kind: TypedNode<"Ternary">["kind"],
+  syntax: KindNode<"Ternary">["syntax"],
   location: LocationRange
-): TypedNode<"Ternary"> {
+): KindNode<"Ternary"> {
   return {
-    type: "Ternary",
+    kind: "Ternary",
     condition,
     trueExpression,
     falseExpression,
-    kind,
+    syntax,
     location,
   };
 }
@@ -248,7 +324,7 @@ export function lineComment(
   location: LocationRange
 ): ASTCommentNode {
   return {
-    type: "lineComment",
+    kind: "lineComment",
     value: text,
     location,
   };
@@ -259,7 +335,7 @@ export function blockComment(
   location: LocationRange
 ): ASTCommentNode {
   return {
-    type: "blockComment",
+    kind: "blockComment",
     value: text,
     location,
   };

@@ -39,9 +39,9 @@ export class SqValueContext {
 
       // descend into trivial nodes
       while (true) {
-        if (ast.type === "Block") {
+        if (ast.kind === "Block") {
           ast = ast.statements[ast.statements.length - 1];
-        } else if (ast.type === "KeyValue") {
+        } else if (ast.kind === "KeyValue") {
           ast = ast.value;
         } else if (isBindingStatement(ast)) {
           ast = ast.value;
@@ -51,7 +51,7 @@ export class SqValueContext {
         // TODO - descend into calls
       }
 
-      switch (ast.type) {
+      switch (ast.kind) {
         case "Program": {
           if (this.path.root === "bindings" && pathEdge.type === "key") {
             newAst = ast.symbols[pathEdge.value];
@@ -126,7 +126,7 @@ export class SqValueContext {
       return;
     }
 
-    if (comment.type !== "blockComment") {
+    if (comment.kind !== "blockComment") {
       return;
     }
 

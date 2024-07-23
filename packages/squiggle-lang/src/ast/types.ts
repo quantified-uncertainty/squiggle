@@ -1,4 +1,4 @@
-import { infixFunctions, unaryFunctions } from "./operators.js";
+import { infixFunctions, typeFunctions, unaryFunctions } from "./operators.js";
 
 /*
  *`Location` and `LocationRange` types are copy-pasted from Peggy, but
@@ -30,8 +30,10 @@ export type InfixOperator = keyof typeof infixFunctions;
 
 export type UnaryOperator = keyof typeof unaryFunctions;
 
+export type TypeOperator = keyof typeof typeFunctions;
+
 type N<T extends string, V extends object> = {
-  type: T;
+  kind: T;
   location: LocationRange;
 } & V;
 
@@ -156,10 +158,17 @@ type NodeIdentifierWithAnnotation = N<
   {
     variable: string;
     annotation: ASTNode;
+    unitTypeSignature?: NodeTypeSignature;
   }
 >;
 
-type NodeIdentifier = N<"Identifier", { value: string }>;
+type NodeIdentifier = N<
+  "Identifier",
+  {
+    value: string;
+    unitTypeSignature?: NodeTypeSignature;
+  }
+>;
 
 type NodeDecorator = N<
   "Decorator",
@@ -178,6 +187,7 @@ type LetOrDefun = {
 type NodeLetStatement = N<
   "LetStatement",
   LetOrDefun & {
+    unitTypeSignature: NodeTypeSignature;
     value: ASTNode;
   }
 >;
@@ -196,6 +206,7 @@ type NodeLambda = N<
     args: ASTNode[];
     body: ASTNode;
     name?: string;
+    returnUnitType?: NodeTypeSignature;
   }
 >;
 
@@ -207,7 +218,30 @@ type NodeTernary = N<
     condition: ASTNode;
     trueExpression: ASTNode;
     falseExpression: ASTNode;
-    kind: "IfThenElse" | "C";
+    syntax: "IfThenElse" | "C";
+  }
+>;
+
+type NodeTypeSignature = N<
+  "UnitTypeSignature",
+  {
+    body: ASTNode;
+  }
+>;
+
+type NodeInfixUnitType = N<
+  "InfixUnitType",
+  {
+    op: TypeOperator;
+    args: [ASTNode, ASTNode];
+  }
+>;
+
+type NodeExponentialUnitType = N<
+  "ExponentialUnitType",
+  {
+    base: ASTNode;
+    exponent: ASTNode;
   }
 >;
 
@@ -240,6 +274,10 @@ export type ASTNode =
   | NodeBracketLookup
   // control flow - if/else
   | NodeTernary
+  // type signature
+  | NodeTypeSignature
+  | NodeInfixUnitType
+  | NodeExponentialUnitType
   // identifiers
   | NodeIdentifier
   | NodeIdentifierWithAnnotation
@@ -248,12 +286,12 @@ export type ASTNode =
   | NodeString
   | NodeBoolean;
 
-export type AST = Extract<ASTNode, { type: "Program" }> & {
+export type AST = Extract<ASTNode, { kind: "Program" }> & {
   comments: ASTCommentNode[];
 };
 
 export type ASTCommentNode = {
-  type: "lineComment" | "blockComment";
+  kind: "lineComment" | "blockComment";
   value: string;
   location: LocationRange;
 };
