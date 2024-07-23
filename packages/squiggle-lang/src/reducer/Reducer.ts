@@ -173,16 +173,17 @@ export class Reducer implements EvaluateAllKinds {
     );
   }
 
-  evaluateBlock(statements: Expression[]) {
+  evaluateBlock(expressionValue: ExpressionValue<"Block">) {
     const initialStackSize = this.stack.size();
 
-    let currentValue: Value = vVoid();
-    for (const statement of statements) {
-      currentValue = this.innerEvaluate(statement);
+    for (const statement of expressionValue.statements) {
+      this.innerEvaluate(statement);
     }
 
+    const result = this.innerEvaluate(expressionValue.result);
     this.stack.shrink(initialStackSize);
-    return currentValue;
+
+    return result;
   }
 
   evaluateProgram(expressionValue: ExpressionValue<"Program">) {

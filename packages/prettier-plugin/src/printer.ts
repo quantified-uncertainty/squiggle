@@ -1,8 +1,6 @@
 import { type AstPath, type Doc, type Printer } from "prettier";
 import * as doc from "prettier/doc";
 
-import { type ASTCommentNode, type ASTNode } from "@quri/squiggle-lang";
-
 import { PatchedASTNode, PrettierUtil, type SquiggleNode } from "./types.js";
 
 const { group, indent, softline, line, hardline, join, ifBreak } = doc.builders;
@@ -29,7 +27,6 @@ function getNodePrecedence(node: SquiggleNode): number {
     "^": 9,
     ".^": 9,
     "->": 10,
-    "|>": 10, // removed since 0.8.0
   };
   switch (node.kind) {
     case "Ternary":
@@ -50,9 +47,9 @@ function getNodePrecedence(node: SquiggleNode): number {
     case "Call":
       return 13;
     case "Block":
-      if (node.statements.length === 1) {
+      if (node.statements.length === 0) {
         // will be unwrapped by printer
-        return getNodePrecedence(node.statements[0]);
+        return getNodePrecedence(node.result);
       }
     default:
       return 100;
@@ -118,26 +115,28 @@ export function createSquigglePrinter(
           ]);
         case "Block": {
           if (
-            node.statements.length === 1 &&
+            node.statements.length === 0 &&
             !node.comments &&
-            !(node.statements[0] as PatchedASTNode).comments
+            !(node.result as PatchedASTNode).comments
           ) {
-            return typedPath(node).call(print, "statements", 0);
+            return typedPath(node).call(print, "result");
           }
 
-          const content = join(
-            hardline,
-            node.statements.map((statement, i) => [
-              typedPath(node).call(print, "statements", i),
-              // keep extra new lines
-              util.isNextLineEmpty(
-                options.originalText,
-                statement.location.end.offset
-              )
-                ? hardline
-                : "",
-            ])
-          );
+          const content = [
+            join(hardline, [
+              ...node.statements.map((statement, i) => [
+                typedPath(node).call(print, "statements", i),
+                // keep extra new lines
+                util.isNextLineEmpty(
+                  options.originalText,
+                  statement.location.end.offset
+                )
+                  ? hardline
+                  : "",
+              ]),
+              typedPath(node).call(print, "result"),
+            ]),
+          ];
 
           return node.isLambdaBody
             ? content
@@ -394,11 +393,10 @@ export function createSquigglePrinter(
           throw new Error("Didn't expect comment node in print()");
       }
     },
-    printComment: (path: AstPath<ASTCommentNode>) => {
+    printComment: (path) => {
       const commentNode = path.node;
       switch (commentNode.kind) {
         case "lineComment":
-          // I'm not sure why "hardline" at the end here is not necessary
           return ["//", commentNode.value];
         case "blockComment":
           return ["/*", commentNode.value, "*/"];
@@ -409,37 +407,35 @@ export function createSquigglePrinter(
     isBlockComment: (node) => {
       return node.kind === "blockComment";
     },
-    ...({
-      getCommentChildNodes: (node: ASTNode) => {
-        if (!node) {
-          return [];
-        }
-        switch (node.kind) {
-          case "Program":
-            return node.statements;
-          case "Block":
-            return node.statements;
-          case "Array":
-            return node.elements;
-          case "LetStatement":
-            return [node.variable, node.value];
-          case "DefunStatement":
-            return [node.value];
-          case "Call":
-            return [...node.args, node.fn];
-          case "Dict":
-            return node.elements;
-          case "Lambda":
-            return [...node.args, node.body];
-          case "KeyValue":
-            return [node.key, node.value];
-          default:
-            return undefined;
-        }
-      },
-      canAttachComment: (node: ASTNode) => {
-        return node && node.kind;
-      },
-    } as any),
+    getCommentChildNodes: (node) => {
+      if (!node) {
+        return [];
+      }
+      switch (node.kind) {
+        case "Program":
+          return node.statements;
+        case "Block":
+          return [...node.statements, node.result];
+        case "Array":
+          return node.elements;
+        case "LetStatement":
+          return [node.variable, node.value];
+        case "DefunStatement":
+          return [node.value];
+        case "Call":
+          return [...node.args, node.fn];
+        case "Dict":
+          return node.elements;
+        case "Lambda":
+          return [...node.args, node.body];
+        case "KeyValue":
+          return [node.key, node.value];
+        default:
+          return undefined;
+      }
+    },
+    canAttachComment: (node) => {
+      return Boolean(node && node.kind);
+    },
   };
 }

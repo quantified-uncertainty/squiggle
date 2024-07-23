@@ -3,13 +3,12 @@ import {
   ASTCommentNode,
   ASTNode,
   InfixOperator,
+  KindNode,
   LocationRange,
   NamedNodeLambda,
   TypeOperator,
   UnaryOperator,
 } from "./types.js";
-
-type KindNode<T extends ASTNode["kind"]> = Extract<ASTNode, { kind: T }>;
 
 export function nodeCall(
   fn: ASTNode,
@@ -144,9 +143,10 @@ export function nodeUnitValue(
 
 export function nodeBlock(
   statements: ASTNode[],
+  result: ASTNode,
   location: LocationRange
 ): KindNode<"Block"> {
-  return { kind: "Block", statements, location };
+  return { kind: "Block", statements, result, location };
 }
 
 export function nodeProgram(

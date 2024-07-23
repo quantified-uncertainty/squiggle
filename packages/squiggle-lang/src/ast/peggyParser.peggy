@@ -37,18 +37,15 @@ innerBlockOrExpression
 quotedInnerBlock
   = '{' _nl
     statements:statementsList
-    finalExpression:(statementSeparator @expression) _nl
+    result:(statementSeparator @expression) _nl
     '}'
     {
-      if (finalExpression) {
-        statements.push(finalExpression);
-      }
-      return h.nodeBlock(statements, location());
+      return h.nodeBlock(statements, result, location());
     }
   / '{' _nl
-    finalExpression:expression _nl
+    result:expression _nl
     '}'
-    { return h.nodeBlock([finalExpression], location()); }
+    { return h.nodeBlock([], result, location()); }
 
 statementsList = statement|1.., statementSeparator|
 
@@ -353,13 +350,26 @@ valueConstructor
   / dictConstructor
 
 lambda
-  = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}' returnUnitType:unitTypeSignature?
+  = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  result:(statementSeparator @expression)  _nl '}' returnUnitType:unitTypeSignature?
     {
-      statements.push(finalExpression);
-      return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined, returnUnitType);
+      return h.nodeLambda(
+        args,
+        h.nodeBlock(statements, result, location()),
+        location(),
+        undefined,
+        returnUnitType
+      );
     }
-  / '{' _nl '|' _nl args:functionParameters _nl '|' _nl finalExpression: expression  _nl '}'  returnUnitType:unitTypeSignature?
-    { return h.nodeLambda(args, finalExpression, location(), undefined, returnUnitType); }
+  / '{' _nl '|' _nl args:functionParameters _nl '|' _nl result:expression  _nl '}'  returnUnitType:unitTypeSignature?
+    {
+      return h.nodeLambda(
+        args,
+        result,
+        location(),
+        undefined,
+        returnUnitType
+      );
+    }
 
 arrayConstructor 'array'
   = '[' _nl ']'

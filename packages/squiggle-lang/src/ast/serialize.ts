@@ -2,9 +2,7 @@ import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,
 } from "../serialization/squiggle.js";
-import { ASTNode, LocationRange, NamedNodeLambda } from "./types.js";
-
-type KindNode<T extends ASTNode["kind"]> = Extract<ASTNode, { kind: T }>;
+import { ASTNode, KindNode, LocationRange, NamedNodeLambda } from "./types.js";
 
 /*
  * Derive serialized AST type from ASTNode automatically.
@@ -71,6 +69,7 @@ export function serializeAstNode(
       return {
         ...node,
         statements: node.statements.map(visit.ast),
+        result: visit.ast(node.result),
       };
     case "LetStatement":
       return {
@@ -234,6 +233,7 @@ export function deserializeAstNode(
       return {
         ...node,
         statements: node.statements.map(visit.ast),
+        result: visit.ast(node.result),
       };
     case "LetStatement":
       return {

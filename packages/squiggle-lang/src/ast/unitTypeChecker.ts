@@ -562,26 +562,32 @@ function innerFindTypeConstraints(
   scopes: ScopeInfo
 ): TypeConstraint {
   switch (node.kind) {
-    case "Program":
-    case "Block": {
+    case "Program": {
       scopes.stack.push({ ...scopes.stack[scopes.stack.length - 1] });
 
-      let lastTypeConstraint = no_constraint();
       for (const statement of node.statements) {
-        lastTypeConstraint = innerFindTypeConstraints(
-          statement,
-          typeConstraints,
-          scopes
-        );
+        innerFindTypeConstraints(statement, typeConstraints, scopes);
       }
 
       scopes.stack.pop();
 
-      if (node.kind === "Program") {
-        return no_constraint();
-      } else {
-        return lastTypeConstraint;
+      return no_constraint();
+    }
+    case "Block": {
+      scopes.stack.push({ ...scopes.stack[scopes.stack.length - 1] });
+
+      for (const statement of node.statements) {
+        innerFindTypeConstraints(statement, typeConstraints, scopes);
       }
+      const lastTypeConstraint = innerFindTypeConstraints(
+        node.result,
+        typeConstraints,
+        scopes
+      );
+
+      scopes.stack.pop();
+
+      return lastTypeConstraint;
     }
     case "LetStatement":
       if (node.value.kind === "Lambda") {

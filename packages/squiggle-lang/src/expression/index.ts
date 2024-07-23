@@ -42,7 +42,13 @@ export type ExpressionContent =
         bindings: Record<string, number>; // variable name -> stack offset mapping
       }
     >
-  | MakeExpressionContent<"Block", Expression[]>
+  | MakeExpressionContent<
+      "Block",
+      {
+        statements: Expression[];
+        result: Expression;
+      }
+    >
   | MakeExpressionContent<
       "StackRef",
       /**
@@ -196,7 +202,9 @@ export function expressionToString(
 
     switch (expression.kind) {
       case "Block":
-        return selfExpr(expression.value.map(toSExpr));
+        return selfExpr(
+          [...expression.value.statements, expression.value.result].map(toSExpr)
+        );
       case "Program":
         return selfExpr([
           sExpr(".statements", expression.value.statements.map(toSExpr)),

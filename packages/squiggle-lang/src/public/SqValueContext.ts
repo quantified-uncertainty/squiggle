@@ -40,7 +40,7 @@ export class SqValueContext {
       // descend into trivial nodes
       while (true) {
         if (ast.kind === "Block") {
-          ast = ast.statements[ast.statements.length - 1];
+          ast = ast.result;
         } else if (ast.kind === "KeyValue") {
           ast = ast.value;
         } else if (isBindingStatement(ast)) {

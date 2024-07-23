@@ -39,13 +39,14 @@ type N<T extends string, V extends object> = {
 
 /*
  * Specific `Node*` types are mostly not exported, because they're easy to
- * obtain with `Extract<...>` (see `TypedNode` in `./peggyHelpers.ts`)
+ * obtain with `KindNode<"Name">` helper.
  */
 
 type NodeBlock = N<
   "Block",
   {
     statements: ASTNode[];
+    result: ASTNode;
   }
 >;
 
@@ -286,12 +287,14 @@ export type ASTNode =
   | NodeString
   | NodeBoolean;
 
-export type AST = Extract<ASTNode, { kind: "Program" }> & {
-  comments: ASTCommentNode[];
-};
-
 export type ASTCommentNode = {
   kind: "lineComment" | "blockComment";
   value: string;
   location: LocationRange;
+};
+
+export type KindNode<T extends ASTNode["kind"]> = Extract<ASTNode, { kind: T }>;
+
+export type AST = KindNode<"Program"> & {
+  comments: ASTCommentNode[];
 };

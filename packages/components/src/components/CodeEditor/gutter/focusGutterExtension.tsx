@@ -44,10 +44,7 @@ function* getMarkerSubData(
       }
       break;
     case "Block": {
-      const lastNode = ast.statements.at(-1);
-      if (lastNode) {
-        yield* getMarkerSubData(lastNode, path);
-      }
+      yield* getMarkerSubData(ast.result, path);
       break;
     }
   }

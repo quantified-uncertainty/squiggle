@@ -185,9 +185,9 @@ function compileToContent(
 ): expression.ExpressionContent {
   switch (ast.kind) {
     case "Block": {
-      if (ast.statements.length === 1) {
+      if (ast.statements.length === 0) {
         // unwrap blocks; no need for extra scopes or Block expressions
-        return compileToContent(ast.statements[0], context);
+        return compileToContent(ast.result, context);
       }
       context.startScope();
       const statements: Expression[] = [];
@@ -205,8 +205,9 @@ function compileToContent(
         const statement = innerCompileAst(astStatement, context);
         statements.push(statement);
       }
+      const result = innerCompileAst(ast.result, context);
       context.finishScope();
-      return expression.make("Block", statements);
+      return expression.make("Block", { statements, result });
     }
     case "Program": {
       // No need to start a top-level scope, it already exists.

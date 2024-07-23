@@ -48,7 +48,14 @@ export type SerializedExpressionContent =
       }
     >
   | SerializedExpressionContentByKindGeneric<"Value", number>
-  | SerializedExpressionContentByKindGeneric<"Block", number[]>
+  | SerializedExpressionContentByKindObjectLike<
+      "Block",
+      "statements" | "result",
+      {
+        statements: number[];
+        result: number;
+      }
+    >
   | SerializedExpressionContentByKindObjectLike<
       "Program",
       "statements",
@@ -110,15 +117,16 @@ function serializeExpressionContent(
         ...expression,
         value: {
           ...expression.value,
-          statements: expression.value.statements.map((statement) =>
-            visit.expression(statement)
-          ),
+          statements: expression.value.statements.map(visit.expression),
         },
       };
     case "Block":
       return {
         ...expression,
-        value: expression.value.map((statement) => visit.expression(statement)),
+        value: {
+          statements: expression.value.statements.map(visit.expression),
+          result: visit.expression(expression.value.result),
+        },
       };
     case "Ternary":
       return {
@@ -145,7 +153,7 @@ function serializeExpressionContent(
         value: {
           ...expression.value,
           fn: visit.expression(expression.value.fn),
-          args: expression.value.args.map((arg) => visit.expression(arg)),
+          args: expression.value.args.map(visit.expression),
         },
       };
     case "Lambda":
@@ -214,7 +222,10 @@ function deserializeExpressionContent(
     case "Block":
       return {
         ...expression,
-        value: expression.value.map((statement) => visit.expression(statement)),
+        value: {
+          statements: expression.value.statements.map(visit.expression),
+          result: visit.expression(expression.value.result),
+        },
       };
     case "Ternary":
       return {

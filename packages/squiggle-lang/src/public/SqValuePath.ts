@@ -153,10 +153,10 @@ function astOffsetToPathEdges(ast: ASTNode, offset: number): SqValuePathEdge[] {
       }
       case "Block": {
         if (
-          ast.statements.length === 1 &&
-          ["Array", "Dict"].includes(ast.statements[0].kind)
+          ast.statements.length === 0 &&
+          ["Array", "Dict"].includes(ast.result.kind)
         ) {
-          return buildRemainingPathEdges(ast.statements[0]);
+          return buildRemainingPathEdges(ast.result);
         }
       }
     }

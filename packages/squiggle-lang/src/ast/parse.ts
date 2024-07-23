@@ -61,9 +61,10 @@ export function nodeToString(
     });
 
     switch (node.kind) {
-      case "Block":
       case "Program":
         return sExpr(node.statements.map(toSExpr));
+      case "Block":
+        return sExpr([...node.statements.map(toSExpr), toSExpr(node.result)]);
       case "Array":
         return sExpr(node.elements.map(toSExpr));
       case "Dict":
