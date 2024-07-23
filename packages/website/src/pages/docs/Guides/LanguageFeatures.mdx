@@ -78,6 +78,13 @@ You can use any number of `*` and `/` operators in a unit type, but you cannot u
 
 The following unit types are all equivalent: `kg*m/s^2`, `kg*m/s/s`, `m/s*kg/s`, `m/s^2*kg`, `kg*m^2/m/s/s`.
 
+For unitless types, you may use a number in the unit type annotation (by convention you should use the number `1`):
+
+<SquiggleEditor
+  defaultCode={`springConstant :: 1 = 10
+inverseTime :: 1/s = 20`}
+/>
+
 If you use unit type annotations, Squiggle will enforce that variables must have consistent unit types.
 
 If a variable does not have a unit type annotation, Squiggle will attempt to infer its unit type. If the unit type can't be inferred, the variable is treated as any type.

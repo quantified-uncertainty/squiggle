@@ -70,9 +70,9 @@ infixUnitType
   typeMultiplicativeOp "operator" = '*' / '/'
 
 exponentialUnitType
-  = unit:identifier _ "^" _ exponent:number
+  = unit:(identifier / float) _ "^" _ exponent:number
     { return h.nodeExponentialUnitType(unit, exponent, location()); }
-  / unit:identifier
+  / unit:(identifier / float)
     { return unit; }
 
 statement
