@@ -31,9 +31,7 @@ function getUnitTypes(sourceCode: string): [VariableUnitTypes, IdNameMapping] {
   const node = peggyParse(sourceCode, { grammarSource: "test", comments: [] });
   const [typeConstraints, scopes] = findTypeConstraints(node);
   const idNameMapping = scopes.variableNodes
-    .filter((node) =>
-      ["Identifier", "IdentifierWithAnnotation"].includes(node.kind)
-    )
+    .filter((node) => ["Identifier", "LambdaParameter"].includes(node.kind))
     .map((node) => getIdentifierName(node));
   const unitTypes = checkTypeConstraints(typeConstraints, scopes);
   putUnitTypesOnAST(unitTypes, scopes);

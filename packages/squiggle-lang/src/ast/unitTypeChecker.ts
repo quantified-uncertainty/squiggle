@@ -170,7 +170,7 @@ function subConstraintToString(
 }
 
 /* Create a TypeConstraint object from a type signature. */
-function createTypeConstraint(node?: ASTNode): TypeConstraint {
+function createTypeConstraint(node: ASTNode | null): TypeConstraint {
   if (!node) {
     return no_constraint();
   }
@@ -393,13 +393,13 @@ function addTypeConstraint(
 
 /*
  * Get an identifier name from either an "Identifier" or
- * "IdentifierWithAnnotation" node.
+ * "LambdaParameter" node.
  */
 function getIdentifierName(node: ASTNode): string {
   switch (node.kind) {
     case "Identifier":
       return node.value;
-    case "IdentifierWithAnnotation":
+    case "LambdaParameter":
       return node.variable;
     default:
       throw new ICompileError(
@@ -701,7 +701,7 @@ function innerFindTypeConstraints(
     }
     case "Identifier":
       return identifierConstraint(node.value, node, scopes, "reference");
-    case "IdentifierWithAnnotation":
+    case "LambdaParameter":
       return identifierConstraint(node.variable, node, scopes, "reference");
     case "Float":
     case "UnitValue":
@@ -900,7 +900,7 @@ function simpleCheckConstraints(
 
   for (const varId in unitTypes) {
     if (
-      !["Identifier", "IdentifierWithAnnotation"].includes(
+      !["Identifier", "LambdaParameter"].includes(
         scopes.variableNodes[varId].kind
       )
     ) {

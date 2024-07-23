@@ -295,22 +295,20 @@ function compileToContent(
     case "Lambda": {
       const parameters: expression.LambdaExpressionParameter[] = [];
       for (const astParameter of ast.args) {
-        let parameter: expression.LambdaExpressionParameter;
-        if (astParameter.kind === "Identifier") {
-          parameter = { name: astParameter.value, annotation: undefined };
-        } else if (astParameter.kind === "IdentifierWithAnnotation") {
-          parameter = {
-            name: astParameter.variable,
-            annotation: innerCompileAst(astParameter.annotation, context),
-          };
-        } else {
+        if (astParameter.kind !== "LambdaParameter") {
           // should never happen
           throw new ICompileError(
-            `Internal error: argument ${astParameter.kind} is not an identifier`,
+            `Internal error: argument ${astParameter.kind} is not a LambdaParameter`,
             ast.location
           );
         }
-        parameters.push(parameter);
+
+        parameters.push({
+          name: astParameter.variable,
+          annotation: astParameter.annotation
+            ? innerCompileAst(astParameter.annotation, context)
+            : undefined,
+        });
       }
 
       // It's important that we start function scope after we've collected all
@@ -327,7 +325,7 @@ function compileToContent(
       const captures = context.currentScopeCaptures();
       context.finishScope();
       return expression.make("Lambda", {
-        name: ast.name,
+        name: ast.name ?? undefined,
         captures,
         parameters,
         body,
@@ -405,10 +403,10 @@ function compileToContent(
         `Can't compile ${ast.kind} node of type signature`,
         ast.location
       );
-    case "IdentifierWithAnnotation":
+    case "LambdaParameter":
       // should never happen
       throw new ICompileError(
-        "Can't compile IdentifierWithAnnotation outside of lambda declaration",
+        "Can't compile LambdaParameter outside of lambda declaration",
         ast.location
       );
     default: {

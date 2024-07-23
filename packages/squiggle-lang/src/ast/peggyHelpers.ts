@@ -198,22 +198,14 @@ export function nodeIdentifier(
   return { kind: "Identifier", value, location };
 }
 
-export function nodeIdentifierWithUnitType(
-  value: string,
-  unitTypeSignature: KindNode<"UnitTypeSignature">,
-  location: LocationRange
-): KindNode<"Identifier"> {
-  return { kind: "Identifier", value, unitTypeSignature, location };
-}
-
-export function nodeIdentifierWithAnnotation(
+export function nodeLambdaParameter(
   variable: string,
-  annotation: ASTNode,
-  unitTypeSignature: KindNode<"UnitTypeSignature">,
+  annotation: ASTNode | null,
+  unitTypeSignature: KindNode<"UnitTypeSignature"> | null,
   location: LocationRange
-): KindNode<"IdentifierWithAnnotation"> {
+): KindNode<"LambdaParameter"> {
   return {
-    kind: "IdentifierWithAnnotation",
+    kind: "LambdaParameter",
     variable,
     annotation,
     unitTypeSignature,
@@ -238,22 +230,22 @@ export function nodeLambda(
   args: ASTNode[],
   body: ASTNode,
   location: LocationRange,
-  name?: KindNode<"Identifier">,
-  returnUnitType?: KindNode<"UnitTypeSignature">
+  name: KindNode<"Identifier"> | undefined,
+  returnUnitType: KindNode<"UnitTypeSignature"> | null
 ): KindNode<"Lambda"> {
   return {
     kind: "Lambda",
-    args: args,
-    body: body,
-    name: name?.value,
-    returnUnitType: returnUnitType,
-    location: location,
+    args,
+    body,
+    name: name?.value ?? null,
+    returnUnitType,
+    location,
   };
 }
 export function nodeLetStatement(
   decorators: KindNode<"Decorator">[],
   variable: KindNode<"Identifier">,
-  unitTypeSignature: KindNode<"UnitTypeSignature">,
+  unitTypeSignature: KindNode<"UnitTypeSignature"> | null,
   value: ASTNode,
   exported: boolean,
   location: LocationRange

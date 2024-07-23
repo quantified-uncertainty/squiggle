@@ -8,7 +8,7 @@ import { ASTNode, KindNode, LocationRange, NamedNodeLambda } from "./types.js";
  * Derive serialized AST type from ASTNode automatically.
  */
 
-type SerializedNodeField<T> = T extends string | number | boolean | null
+type RequiredSerializedNodeField<T> = T extends string | number | boolean
   ? T
   : T extends {
         kind: ASTNode["kind"];
@@ -24,6 +24,10 @@ type SerializedNodeField<T> = T extends string | number | boolean | null
           : T extends Record<infer K, infer V>
             ? Record<K, SerializedNodeField<V>> // convert { string: ASTNode } to { string: number }
             : never;
+
+type SerializedNodeField<T> = T extends null
+  ? RequiredSerializedNodeField<NonNullable<T>> | null
+  : RequiredSerializedNodeField<T>;
 
 type KindNodeToSerializedNode<
   T extends ASTNode["kind"],
@@ -76,7 +80,9 @@ export function serializeAstNode(
         ...node,
         decorators: node.decorators.map(visit.ast),
         variable: visit.ast(node.variable),
-        unitTypeSignature: visit.ast(node.unitTypeSignature),
+        unitTypeSignature: node.unitTypeSignature
+          ? visit.ast(node.unitTypeSignature)
+          : null,
         value: visit.ast(node.value),
       };
     case "DefunStatement":
@@ -93,7 +99,7 @@ export function serializeAstNode(
         body: visit.ast(node.body),
         returnUnitType: node.returnUnitType
           ? visit.ast(node.returnUnitType)
-          : undefined,
+          : null,
       };
     case "Array":
       return {
@@ -185,24 +191,17 @@ export function serializeAstNode(
         base: visit.ast(node.base),
         exponent: visit.ast(node.exponent),
       };
-    case "Identifier":
+    case "LambdaParameter":
       return {
         ...node,
-        unitTypeSignature: node.unitTypeSignature
-          ? visit.ast(node.unitTypeSignature)
-          : undefined,
-      };
-    case "IdentifierWithAnnotation":
-      return {
-        ...node,
-        annotation: visit.ast(node.annotation),
-        unitTypeSignature: node.unitTypeSignature
-          ? visit.ast(node.unitTypeSignature)
-          : undefined,
+        annotation: node.annotation && visit.ast(node.annotation),
+        unitTypeSignature:
+          node.unitTypeSignature && visit.ast(node.unitTypeSignature),
       };
     case "Float":
     case "String":
     case "Boolean":
+    case "Identifier":
       return node;
     default:
       throw node satisfies never;
@@ -240,9 +239,9 @@ export function deserializeAstNode(
         ...node,
         decorators: node.decorators.map(visit.ast) as KindNode<"Decorator">[],
         variable: visit.ast(node.variable) as KindNode<"Identifier">,
-        unitTypeSignature: visit.ast(
-          node.unitTypeSignature
-        ) as KindNode<"UnitTypeSignature">,
+        unitTypeSignature: node.unitTypeSignature
+          ? (visit.ast(node.unitTypeSignature) as KindNode<"UnitTypeSignature">)
+          : null,
         value: visit.ast(node.value),
       };
     case "DefunStatement":
@@ -259,7 +258,7 @@ export function deserializeAstNode(
         body: visit.ast(node.body),
         returnUnitType: node.returnUnitType
           ? (visit.ast(node.returnUnitType) as KindNode<"UnitTypeSignature">)
-          : undefined,
+          : null,
       };
     case "Array":
       return {
@@ -356,17 +355,18 @@ export function deserializeAstNode(
     case "Identifier":
       return {
         ...node,
-        unitTypeSignature: node.unitTypeSignature
-          ? (visit.ast(node.unitTypeSignature) as KindNode<"UnitTypeSignature">)
-          : undefined,
       };
-    case "IdentifierWithAnnotation":
+    case "LambdaParameter":
       return {
         ...node,
-        annotation: visit.ast(node.annotation),
-        unitTypeSignature: node.unitTypeSignature
-          ? (visit.ast(node.unitTypeSignature) as KindNode<"UnitTypeSignature">)
-          : undefined,
+        annotation:
+          node.annotation !== null ? visit.ast(node.annotation) : null,
+        unitTypeSignature:
+          node.unitTypeSignature !== null
+            ? (visit.ast(
+                node.unitTypeSignature
+              ) as KindNode<"UnitTypeSignature">)
+            : null,
       };
     case "Float":
     case "String":

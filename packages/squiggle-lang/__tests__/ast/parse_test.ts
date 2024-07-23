@@ -199,7 +199,7 @@ describe("Peggy parse", () => {
   describe("unit-typed functions", () => {
     testParse(
       "f(x :: kg) = y",
-      "(Program (DefunStatement :f (Lambda (Identifier x (UnitTypeSignature :kg)) :y)))"
+      "(Program (DefunStatement :f (Lambda (LambdaParameter x (UnitTypeSignature :kg)) :y)))"
     );
     testParse(
       "f(x) :: lbs = y",
@@ -207,7 +207,7 @@ describe("Peggy parse", () => {
     );
     testParse(
       "f(x :: m, y :: s) :: m/s = x/y",
-      "(Program (DefunStatement :f (Lambda (Identifier x (UnitTypeSignature :m)) (Identifier y (UnitTypeSignature :s)) (InfixCall / :x :y) (UnitTypeSignature (InfixUnitType / :m :s)))))"
+      "(Program (DefunStatement :f (Lambda (LambdaParameter x (UnitTypeSignature :m)) (LambdaParameter y (UnitTypeSignature :s)) (InfixCall / :x :y) (UnitTypeSignature (InfixUnitType / :m :s)))))"
     );
   });
 
@@ -220,7 +220,7 @@ describe("Peggy parse", () => {
 
     testParse(
       "annotated(x: [3,5]) = x",
-      "(Program (DefunStatement :annotated (Lambda (IdentifierWithAnnotation x (Array 3 5)) :x)))"
+      "(Program (DefunStatement :annotated (Lambda (LambdaParameter x (Array 3 5)) :x)))"
     );
   });
 

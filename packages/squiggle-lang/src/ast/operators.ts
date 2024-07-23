@@ -25,8 +25,3 @@ export const unaryFunctions = {
   "!": "not",
   ".-": "unaryDotMinus",
 };
-
-export const typeFunctions = {
-  "*": "multiply",
-  "/": "divide",
-};

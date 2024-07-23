@@ -3,7 +3,7 @@ import { blue } from "../cli/colors.js";
 export type SExpr =
   | {
       name: string;
-      args: (SExpr | undefined)[];
+      args: (SExpr | null | undefined)[];
     }
   | string
   | number;
@@ -38,7 +38,7 @@ export function sExprToString(
   const stringifiedArgs: string[] = [];
   let nested = false;
   for (const arg of expr.args) {
-    if (arg === undefined) continue;
+    if (arg === undefined || arg === null) continue;
     stringifiedArgs.push(sExprToString(arg, { ...opts, depth: depth + 1 }));
     if (typeof arg === "object") nested = true;
   }

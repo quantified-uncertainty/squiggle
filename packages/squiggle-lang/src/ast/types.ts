@@ -1,4 +1,4 @@
-import { infixFunctions, typeFunctions, unaryFunctions } from "./operators.js";
+import { infixFunctions, unaryFunctions } from "./operators.js";
 
 /*
  *`Location` and `LocationRange` types are copy-pasted from Peggy, but
@@ -30,7 +30,7 @@ export type InfixOperator = keyof typeof infixFunctions;
 
 export type UnaryOperator = keyof typeof unaryFunctions;
 
-export type TypeOperator = keyof typeof typeFunctions;
+export type TypeOperator = "*" | "/";
 
 type N<T extends string, V extends object> = {
   kind: T;
@@ -154,12 +154,12 @@ type NodeFloat = N<
   }
 >;
 
-type NodeIdentifierWithAnnotation = N<
-  "IdentifierWithAnnotation",
+type NodeLambdaParameter = N<
+  "LambdaParameter",
   {
     variable: string;
-    annotation: ASTNode;
-    unitTypeSignature?: NodeTypeSignature;
+    annotation: ASTNode | null;
+    unitTypeSignature: NodeTypeSignature | null;
   }
 >;
 
@@ -167,7 +167,6 @@ type NodeIdentifier = N<
   "Identifier",
   {
     value: string;
-    unitTypeSignature?: NodeTypeSignature;
   }
 >;
 
@@ -188,7 +187,7 @@ type LetOrDefun = {
 type NodeLetStatement = N<
   "LetStatement",
   LetOrDefun & {
-    unitTypeSignature: NodeTypeSignature;
+    unitTypeSignature: NodeTypeSignature | null;
     value: ASTNode;
   }
 >;
@@ -206,8 +205,8 @@ type NodeLambda = N<
     // Don't try to convert it to string[], ASTNode is intentional because we need locations.
     args: ASTNode[];
     body: ASTNode;
-    name?: string;
-    returnUnitType?: NodeTypeSignature;
+    name: string | null;
+    returnUnitType: NodeTypeSignature | null;
   }
 >;
 
@@ -281,7 +280,7 @@ export type ASTNode =
   | NodeExponentialUnitType
   // identifiers
   | NodeIdentifier
-  | NodeIdentifierWithAnnotation
+  | NodeLambdaParameter
   // basic values
   | NodeFloat
   | NodeString

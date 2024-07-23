@@ -55,7 +55,7 @@ export function nodeToString(
   printOptions: SExprPrintOptions = {}
 ): string {
   const toSExpr = (node: ASTNode): SExpr => {
-    const sExpr = (components: (SExpr | undefined)[]): SExpr => ({
+    const sExpr = (components: (SExpr | null | undefined)[]): SExpr => ({
       name: node.kind,
       args: components,
     });
@@ -89,13 +89,16 @@ export function nodeToString(
           node.fractional === null ? "" : `.${node.fractional}`
         }${node.exponent === null ? "" : `e${node.exponent}`}`;
       case "Identifier":
-        if (node.unitTypeSignature) {
-          return sExpr([node.value, toSExpr(node.unitTypeSignature)]);
-        } else {
-          return `:${node.value}`;
+        return `:${node.value}`;
+      case "LambdaParameter":
+        if (!node.annotation && !node.unitTypeSignature) {
+          return `:${node.variable}`;
         }
-      case "IdentifierWithAnnotation":
-        return sExpr([node.variable, toSExpr(node.annotation)]);
+        return sExpr([
+          node.variable,
+          node.annotation && toSExpr(node.annotation),
+          node.unitTypeSignature && toSExpr(node.unitTypeSignature),
+        ]);
       case "KeyValue":
         return sExpr([node.key, node.value].map(toSExpr));
       case "Lambda":

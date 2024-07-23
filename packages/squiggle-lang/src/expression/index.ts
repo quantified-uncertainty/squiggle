@@ -21,7 +21,7 @@ import { Value } from "../value/index.js";
 
 export type LambdaExpressionParameter = {
   name: string;
-  annotation?: Expression;
+  annotation: Expression | undefined;
 };
 
 // All shapes are kind+value, to help with V8 monomorphism.
