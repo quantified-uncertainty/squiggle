@@ -650,7 +650,7 @@ function innerFindTypeConstraints(
         // a function at runtime, but we can't type-check it.
         return no_constraint();
       }
-      const [functionConstraints, returnTypeConstraint] =
+      let [functionConstraints, returnTypeConstraint] =
         scopes.functions[index - FUNCTION_OFFSET][1];
       functionConstraints = functionConstraints.map((c) => structuredClone(c));
       returnTypeConstraint = structuredClone(returnTypeConstraint);
