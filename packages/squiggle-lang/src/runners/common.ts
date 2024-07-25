@@ -1,3 +1,4 @@
+import { analyzeAst } from "../analysis/index.js";
 import { compileAst } from "../expression/compile.js";
 import { getStdLib } from "../library/index.js";
 import { Reducer } from "../reducer/Reducer.js";
@@ -13,7 +14,7 @@ export function baseRun(
   params: Omit<RunParams, "source">
 ): RunResult {
   const expressionResult = compileAst(
-    params.ast,
+    analyzeAst(params.ast),
     getStdLib().merge(params.externals.value)
   );
 

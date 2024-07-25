@@ -22,7 +22,7 @@ export function testCompile(
 ) {
   test(code, async () => {
     const rExpr = Result.bind(parse(code, "test"), (ast) =>
-      compileAst(ast.raw, getStdLib())
+      compileAst(ast, getStdLib())
     );
 
     let serializedExpr: string | string[];

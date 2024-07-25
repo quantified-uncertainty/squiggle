@@ -287,7 +287,7 @@ export type KindTypedNode<T extends TypedASTNode["kind"]> = Extract<
 
 export const statementKinds = ["LetStatement", "DefunStatement"] as const;
 
-export const expressionKinds: TypedASTNode["kind"][] = [
+export const expressionKinds = [
   "Block",
   "Lambda",
   "Array",
@@ -305,7 +305,8 @@ export const expressionKinds: TypedASTNode["kind"][] = [
   "String",
   "Boolean",
 ] as const;
-export const unitTypeKinds: TypedASTNode["kind"][] = [
+
+export const unitTypeKinds = [
   "Identifier",
   "Float",
   "InfixUnitType",

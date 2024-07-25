@@ -1,5 +1,12 @@
 import { AST, ASTNode } from "../ast/types.js";
-import { frAny } from "../library/registry/frTypes.js";
+import {
+  frAny,
+  frArray,
+  frBool,
+  frDictWithArbitraryKeys,
+  frNumber,
+  frString,
+} from "../library/registry/frTypes.js";
 import {
   AnyExpressionNode,
   AnyStatementNode,
@@ -135,7 +142,7 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
         ...node,
         statements,
         result,
-        type: frAny(),
+        type: result.type,
       };
     }
     case "LetStatement": {
@@ -197,7 +204,7 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
         returnUnitType: node.returnUnitType
           ? analyzeKind(node.returnUnitType, "UnitTypeSignature", symbols)
           : null,
-        type: frAny(),
+        type: frAny(), // TODO - lambda type
       };
     }
     case "LambdaParameter": {
@@ -215,25 +222,25 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
     case "Identifier": {
       return {
         ...node,
-        type: frAny(),
+        type: frAny(), // TODO - resolve
       };
     }
     case "String": {
       return {
         ...node,
-        type: frAny(),
+        type: frString,
       };
     }
     case "Float": {
       return {
         ...node,
-        type: frAny(),
+        type: frNumber,
       };
     }
     case "Boolean": {
       return {
         ...node,
-        type: frAny(),
+        type: frBool,
       };
     }
     case "Array": {
@@ -244,7 +251,8 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
       return {
         ...node,
         elements,
-        type: frAny(),
+        // TODO - get the type from the elements
+        type: frArray(frAny()),
       };
     }
     case "Dict": {
@@ -264,7 +272,7 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
         ...node,
         elements,
         symbols: dictSymbols,
-        type: frAny(),
+        type: frDictWithArbitraryKeys(frAny()),
       };
     }
     case "KeyValue": {
@@ -278,7 +286,7 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
       return {
         ...node,
         value: analyzeKind(node.value, "Float", symbols),
-        type: frAny(),
+        type: frNumber,
       };
     }
     case "Call": {
@@ -289,7 +297,7 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
         ...node,
         fn,
         args,
-        type: frAny(),
+        type: frAny(), // TODO - function result type
       };
     }
     case "InfixCall": {
@@ -299,14 +307,14 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
           analyzeExpression(node.args[0], symbols),
           analyzeExpression(node.args[1], symbols),
         ],
-        type: frAny(),
+        type: frAny(), // TODO - function result type
       };
     }
     case "UnaryCall": {
       return {
         ...node,
         arg: analyzeExpression(node.arg, symbols),
-        type: frAny(),
+        type: frAny(), // TODO - function result type
       };
     }
     case "Pipe": {
@@ -315,14 +323,14 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
         leftArg: analyzeExpression(node.leftArg, symbols),
         fn: analyzeExpression(node.fn, symbols),
         rightArgs: node.rightArgs.map((arg) => analyzeExpression(arg, symbols)),
-        type: frAny(),
+        type: frAny(), // TODO - function result type
       };
     }
     case "DotLookup": {
       return {
         ...node,
         arg: analyzeExpression(node.arg, symbols),
-        type: frAny(),
+        type: frAny(), // TODO
       };
     }
     case "BracketLookup": {
@@ -330,7 +338,7 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
         ...node,
         arg: analyzeExpression(node.arg, symbols),
         key: analyzeExpression(node.key, symbols),
-        type: frAny(),
+        type: frAny(), // TODO
       };
     }
     case "Ternary": {
@@ -339,7 +347,7 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
         condition: analyzeExpression(node.condition, symbols),
         trueExpression: analyzeExpression(node.trueExpression, symbols),
         falseExpression: analyzeExpression(node.falseExpression, symbols),
-        type: frAny(),
+        type: frAny(), // TODO
       };
     }
     case "UnitTypeSignature": {

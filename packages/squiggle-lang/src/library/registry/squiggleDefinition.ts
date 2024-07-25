@@ -25,7 +25,7 @@ export function makeSquiggleDefinition({
     throw new Error(`Stdlib code ${code} is invalid`);
   }
 
-  const expressionResult = compileAst(astResult.value.raw, builtins);
+  const expressionResult = compileAst(astResult.value, builtins);
 
   if (!expressionResult.ok) {
     // fail fast

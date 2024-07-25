@@ -1,5 +1,11 @@
+import {
+  AnyExpressionNode,
+  AnyStatementNode,
+  KindTypedNode,
+  TypedAST,
+} from "../analysis/types.js";
 import { infixFunctions, unaryFunctions } from "../ast/operators.js";
-import { ASTNode, LocationRange } from "../ast/types.js";
+import { LocationRange } from "../ast/types.js";
 import { ICompileError } from "../errors/IError.js";
 import { Bindings } from "../reducer/Stack.js";
 import * as Result from "../utility/result.js";
@@ -9,6 +15,11 @@ import { vString } from "../value/VString.js";
 import { INDEX_LOOKUP_FUNCTION } from "./constants.js";
 import * as expression from "./index.js";
 import { Expression } from "./index.js";
+
+type CompilableNode =
+  | AnyExpressionNode
+  | AnyStatementNode
+  | KindTypedNode<"Program">;
 
 type Scope = {
   // Position on stack is counted from the first element on stack, unlike in
@@ -179,7 +190,7 @@ class CompileContext {
 }
 
 function compileToContent(
-  ast: ASTNode,
+  ast: CompilableNode,
   context: CompileContext
 ): expression.ExpressionContent {
   switch (ast.kind) {
@@ -191,11 +202,7 @@ function compileToContent(
       context.startScope();
       const statements: Expression[] = [];
       for (const astStatement of ast.statements) {
-        if (
-          (astStatement.kind === "LetStatement" ||
-            astStatement.kind === "DefunStatement") &&
-          astStatement.exported
-        ) {
+        if (astStatement.exported) {
           throw new ICompileError(
             "Exports aren't allowed in blocks",
             astStatement.location
@@ -215,12 +222,7 @@ function compileToContent(
       for (const astStatement of ast.statements) {
         const statement = innerCompileAst(astStatement, context);
         statements.push(statement);
-        if (
-          // trivial condition, can be removed when we switch to TypedAST
-          (astStatement.kind === "LetStatement" ||
-            astStatement.kind === "DefunStatement") &&
-          astStatement.exported
-        ) {
+        if (astStatement.exported) {
           const name = astStatement.variable.value;
           exports.push(name);
         }
@@ -262,8 +264,6 @@ function compileToContent(
       context.defineLocal(name);
       return expression.make("Assign", { left: name, right: value });
     }
-    case "Decorator":
-      throw new ICompileError("Can't compile Decorator node", ast.location);
     case "Call": {
       return expression.eCall(
         innerCompileAst(ast.fn, context),
@@ -305,14 +305,6 @@ function compileToContent(
     case "Lambda": {
       const parameters: expression.LambdaExpressionParameter[] = [];
       for (const astParameter of ast.args) {
-        if (astParameter.kind !== "LambdaParameter") {
-          // should never happen
-          throw new ICompileError(
-            `Internal error: argument ${astParameter.kind} is not a LambdaParameter`,
-            ast.location
-          );
-        }
-
         parameters.push({
           name: astParameter.variable,
           annotation: astParameter.annotation
@@ -341,11 +333,6 @@ function compileToContent(
         body,
       });
     }
-    case "KeyValue":
-      return expression.make("Array", [
-        innerCompileAst(ast.key, context),
-        innerCompileAst(ast.value, context),
-      ]);
     case "Ternary":
       return expression.make("Ternary", {
         condition: innerCompileAst(ast.condition, context),
@@ -377,7 +364,7 @@ function compileToContent(
           } else {
             throw new Error(
               `Internal AST error: unexpected kv ${kv satisfies never}`
-            ); // parsed to incorrect AST, shouldn't happen
+            );
           }
         })
       );
@@ -408,20 +395,6 @@ function compileToContent(
         innerCompileAst(ast.value, context),
       ]);
     }
-    case "UnitTypeSignature":
-    case "InfixUnitType":
-    case "ExponentialUnitType":
-      // should never happen
-      throw new ICompileError(
-        `Can't compile ${ast.kind} node of type signature`,
-        ast.location
-      );
-    case "LambdaParameter":
-      // should never happen
-      throw new ICompileError(
-        "Can't compile LambdaParameter outside of lambda declaration",
-        ast.location
-      );
     default: {
       const badAst = ast satisfies never;
       throw new Error(`Unsupported AST value ${JSON.stringify(badAst)}`);
@@ -430,7 +403,7 @@ function compileToContent(
 }
 
 function innerCompileAst(
-  ast: ASTNode,
+  ast: CompilableNode,
   context: CompileContext
 ): expression.Expression {
   const content = compileToContent(ast, context);
@@ -441,7 +414,7 @@ function innerCompileAst(
 }
 
 export function compileAst(
-  ast: ASTNode,
+  ast: TypedAST,
   externals: Bindings
 ): Result.result<expression.Expression, ICompileError> {
   try {
