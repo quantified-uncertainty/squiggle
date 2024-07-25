@@ -10,7 +10,7 @@
  * The main difference between our IR and AST is that in IR, variable names are
  * resolved to stack and capture references.
  */
-import { ASTNode } from "../ast/types.js";
+import { LocationRange } from "../ast/types.js";
 import {
   sExpr,
   SExpr,
@@ -125,7 +125,7 @@ export type ExpressionContentByKind<T extends ExpressionContent["kind"]> =
 
 export type Ref = ExpressionContentByKind<"StackRef" | "CaptureRef">;
 
-export type Expression = ExpressionContent & { ast: ASTNode };
+export type Expression = ExpressionContent & { location: LocationRange };
 
 export type ExpressionByKind<T extends ExpressionContent["kind"]> = Extract<
   Expression,

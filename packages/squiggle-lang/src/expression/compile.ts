@@ -1,5 +1,5 @@
 import { infixFunctions, unaryFunctions } from "../ast/operators.js";
-import { ASTNode } from "../ast/types.js";
+import { ASTNode, LocationRange } from "../ast/types.js";
 import { ICompileError } from "../errors/IError.js";
 import { Bindings } from "../reducer/Stack.js";
 import * as Result from "../utility/result.js";
@@ -91,7 +91,7 @@ class CompileContext {
   }
 
   private resolveNameFromDepth(
-    ast: ASTNode,
+    location: LocationRange,
     name: string,
     fromDepth: number
   ): expression.ExpressionByKind<"StackRef" | "CaptureRef" | "Value"> {
@@ -102,7 +102,7 @@ class CompileContext {
       const scope = this.scopes[i];
       if (name in scope.stack) {
         return {
-          ast,
+          location,
           ...expression.make(
             "StackRef",
             offset + scope.size - 1 - scope.stack[name]
@@ -115,7 +115,7 @@ class CompileContext {
         // Have we already captured this name?
         if (name in scope.captureIndex) {
           return {
-            ast,
+            location,
             ...expression.make("CaptureRef", scope.captureIndex[name]),
           };
         }
@@ -123,7 +123,7 @@ class CompileContext {
         // This is either an external or a capture. Let's look for the
         // reference in the outer scopes, and then convert it to a capture if
         // necessary.
-        const resolved = this.resolveNameFromDepth(ast, name, i - 1);
+        const resolved = this.resolveNameFromDepth(location, name, i - 1);
 
         if (resolved.kind === "Value") {
           // Inlined, so it's probably an external. Nothing more to do.
@@ -143,7 +143,7 @@ class CompileContext {
         scope.captures.push(newCapture);
         scope.captureIndex[name] = newIndex;
         return {
-          ast,
+          location,
           ...expression.make("CaptureRef", newIndex),
         };
       }
@@ -153,16 +153,16 @@ class CompileContext {
     const value = this.externals.get(name);
     if (value !== undefined) {
       return {
-        ast,
+        location,
         ...expression.make("Value", value),
       };
     }
 
-    throw new ICompileError(`${name} is not defined`, ast.location);
+    throw new ICompileError(`${name} is not defined`, location);
   }
 
-  resolveName(ast: ASTNode, name: string): Expression {
-    return this.resolveNameFromDepth(ast, name, this.scopes.length - 1);
+  resolveName(location: LocationRange, name: string): Expression {
+    return this.resolveNameFromDepth(location, name, this.scopes.length - 1);
   }
 
   localsOffsets() {
@@ -243,11 +243,11 @@ function compileToContent(
 
       for (const decorator of [...ast.decorators].reverse()) {
         const decoratorFn = context.resolveName(
-          ast,
+          ast.location,
           `Tag.${decorator.name.value}`
         );
         value = {
-          ast,
+          location: ast.location,
           ...expression.eCall(
             decoratorFn,
             [
@@ -272,13 +272,13 @@ function compileToContent(
     }
     case "InfixCall": {
       return expression.eCall(
-        context.resolveName(ast, infixFunctions[ast.op]),
+        context.resolveName(ast.location, infixFunctions[ast.op]),
         ast.args.map((arg) => innerCompileAst(arg, context))
       );
     }
     case "UnaryCall":
       return expression.eCall(
-        context.resolveName(ast, unaryFunctions[ast.op]),
+        context.resolveName(ast.location, unaryFunctions[ast.op]),
         [innerCompileAst(ast.arg, context)]
       );
     case "Pipe":
@@ -287,15 +287,21 @@ function compileToContent(
         ...ast.rightArgs.map((arg) => innerCompileAst(arg, context)),
       ]);
     case "DotLookup":
-      return expression.eCall(context.resolveName(ast, INDEX_LOOKUP_FUNCTION), [
-        innerCompileAst(ast.arg, context),
-        { ast, ...expression.make("Value", vString(ast.key)) },
-      ]);
+      return expression.eCall(
+        context.resolveName(ast.location, INDEX_LOOKUP_FUNCTION),
+        [
+          innerCompileAst(ast.arg, context),
+          {
+            location: ast.location,
+            ...expression.make("Value", vString(ast.key)),
+          },
+        ]
+      );
     case "BracketLookup":
-      return expression.eCall(context.resolveName(ast, INDEX_LOOKUP_FUNCTION), [
-        innerCompileAst(ast.arg, context),
-        innerCompileAst(ast.key, context),
-      ]);
+      return expression.eCall(
+        context.resolveName(ast.location, INDEX_LOOKUP_FUNCTION),
+        [innerCompileAst(ast.arg, context), innerCompileAst(ast.key, context)]
+      );
     case "Lambda": {
       const parameters: expression.LambdaExpressionParameter[] = [];
       for (const astParameter of ast.args) {
@@ -363,10 +369,10 @@ function compileToContent(
           } else if (kv.kind === "Identifier") {
             // shorthand
             const key = {
-              ast: kv,
+              location: kv.location,
               ...expression.make("Value", vString(kv.value)),
             };
-            const value = context.resolveName(kv, kv.value);
+            const value = context.resolveName(kv.location, kv.value);
             return [key, value] as [Expression, Expression];
           } else {
             throw new Error(
@@ -391,10 +397,13 @@ function compileToContent(
     case "String":
       return expression.make("Value", vString(ast.value));
     case "Identifier": {
-      return context.resolveName(ast, ast.value);
+      return context.resolveName(ast.location, ast.value);
     }
     case "UnitValue": {
-      const fromUnitFn = context.resolveName(ast, `fromUnit_${ast.unit}`);
+      const fromUnitFn = context.resolveName(
+        ast.location,
+        `fromUnit_${ast.unit}`
+      );
       return expression.eCall(fromUnitFn, [
         innerCompileAst(ast.value, context),
       ]);
@@ -426,7 +435,7 @@ function innerCompileAst(
 ): expression.Expression {
   const content = compileToContent(ast, context);
   return {
-    ast,
+    location: ast.location,
     ...content,
   };
 }

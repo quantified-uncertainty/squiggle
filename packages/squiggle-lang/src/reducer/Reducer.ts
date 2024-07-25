@@ -1,6 +1,6 @@
 import jstat from "jstat";
 
-import { ASTNode, LocationRange } from "../ast/types.js";
+import { LocationRange } from "../ast/types.js";
 import { Env } from "../dists/env.js";
 import { IRuntimeError } from "../errors/IError.js";
 import {
@@ -31,7 +31,7 @@ type ExpressionValue<Kind extends Expression["kind"]> =
   ExpressionByKind<Kind>["value"];
 
 /**
- * Checks that all `evaluateFoo` methods follow the same the convention.
+ * Checks that all `evaluateFoo` methods follow the same naming convention.
  *
  * Note: unfortunately, it's not possible to reuse method signatures. Don't try
  * `evaluateFoo: EvalutateAllKinds["Foo"] = () => ...`, it's a bad idea because
@@ -40,7 +40,7 @@ type ExpressionValue<Kind extends Expression["kind"]> =
 type EvaluateAllKinds = {
   [Kind in Expression["kind"] as `evaluate${Kind}`]: (
     expressionValue: ExpressionValue<Kind>,
-    ast: ASTNode
+    location: LocationRange
   ) => Value;
 };
 
@@ -87,7 +87,7 @@ export class Reducer implements EvaluateAllKinds {
 
     // avoid stale data
     if (this.environment.profile) {
-      this.profile = new RunProfile(expression.ast.location.source);
+      this.profile = new RunProfile(expression.location.source);
     } else {
       this.profile = undefined;
     }
@@ -107,7 +107,7 @@ export class Reducer implements EvaluateAllKinds {
     let result: Value;
     switch (expression.kind) {
       case "Call":
-        result = this.evaluateCall(expression.value, expression.ast);
+        result = this.evaluateCall(expression.value, expression.location);
         break;
       case "StackRef":
         result = this.evaluateStackRef(expression.value);
@@ -149,17 +149,17 @@ export class Reducer implements EvaluateAllKinds {
     ) {
       const end = new Date();
       const time = end.getTime() - start!.getTime();
-      this.profile.addRange(expression.ast.location, time);
+      this.profile.addRange(expression.location, time);
     }
     return result;
   }
 
   // This method is mostly useful in the reducer code.
   // In Stdlib, it's fine to throw ErrorMessage instances, they'll be upgraded to errors with stack traces automatically.
-  private runtimeError(error: ErrorMessage, ast: ASTNode) {
+  private runtimeError(error: ErrorMessage, location: LocationRange) {
     return IRuntimeError.fromMessage(
       error,
-      StackTrace.make(this.frameStack, ast.location)
+      StackTrace.make(this.frameStack, location)
     );
   }
 
@@ -214,7 +214,7 @@ export class Reducer implements EvaluateAllKinds {
           if (key.type !== "String") {
             throw this.runtimeError(
               new REOther("Dict keys must be strings"),
-              eKey.ast
+              eKey.location
             );
           }
           const keyString: string = key.value;
@@ -263,7 +263,7 @@ export class Reducer implements EvaluateAllKinds {
     if (predicateResult.type !== "Bool") {
       throw this.runtimeError(
         new REExpectedType("Boolean", predicateResult.type),
-        expressionValue.condition.ast
+        expressionValue.condition.location
       );
     }
 
@@ -290,7 +290,7 @@ export class Reducer implements EvaluateAllKinds {
           // see also: `Lambda.callFrom`
           throw this.errorFromException(
             e,
-            parameterExpression.annotation.ast.location
+            parameterExpression.annotation.location
           );
         }
       }
@@ -327,18 +327,21 @@ export class Reducer implements EvaluateAllKinds {
     );
   }
 
-  evaluateCall(expressionValue: ExpressionValue<"Call">, ast: ASTNode) {
+  evaluateCall(
+    expressionValue: ExpressionValue<"Call">,
+    location: LocationRange
+  ) {
     const lambda = this.innerEvaluate(expressionValue.fn);
     if (lambda.type !== "Lambda") {
       throw this.runtimeError(
         new RENotAFunction(lambda.toString()),
-        expressionValue.fn.ast
+        expressionValue.fn.location
       );
     }
     if (expressionValue.as === "decorate" && !lambda.value.isDecorator) {
       throw this.runtimeError(
         new RENotADecorator(lambda.toString()),
-        expressionValue.fn.ast
+        expressionValue.fn.location
       );
     }
 
@@ -348,20 +351,23 @@ export class Reducer implements EvaluateAllKinds {
 
     // we pass the ast of a current expression here, to put it on frameStack
     try {
-      return this.call(lambda.value, argValues, ast);
+      return this.call(lambda.value, argValues, location);
     } catch (e) {
       if (e instanceof REArgumentDomainError) {
         // Function is still on frame stack, remove it.
         // (This is tightly coupled with lambda implementations.)
         this.frameStack.pop();
-        throw this.runtimeError(e, expressionValue.args.at(e.idx)?.ast ?? ast);
+        throw this.runtimeError(
+          e,
+          expressionValue.args.at(e.idx)?.location ?? location
+        );
       } else {
         throw e;
       }
     }
   }
 
-  call(lambda: Lambda, args: Value[], ast?: ASTNode) {
-    return lambda.call(args, this, ast?.location);
+  call(lambda: Lambda, args: Value[], location?: LocationRange) {
+    return lambda.call(args, this, location);
   }
 }

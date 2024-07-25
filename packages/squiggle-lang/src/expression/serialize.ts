@@ -1,3 +1,4 @@
+import { LocationRange } from "../ast/types.js";
 import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,
@@ -100,7 +101,7 @@ export type SerializedExpressionContent =
   | SerializedExpressionContentByKindGeneric<"Dict", [number, number][]>;
 
 export type SerializedExpression = SerializedExpressionContent & {
-  ast: number;
+  location: LocationRange;
 };
 
 function serializeExpressionContent(
@@ -198,7 +199,7 @@ export function serializeExpression(
 ) {
   return {
     ...serializeExpressionContent(expression, visit),
-    ast: visit.ast(expression.ast),
+    location: expression.location,
   };
 }
 
@@ -303,6 +304,6 @@ export function deserializeExpression(
 ): Expression {
   return {
     ...deserializeExpressionContent(expression, visit),
-    ast: visit.ast(expression.ast),
+    location: expression.location,
   };
 }
