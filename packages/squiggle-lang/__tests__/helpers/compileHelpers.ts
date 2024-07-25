@@ -15,40 +15,48 @@ export function testCompile(
     // For `x = 5; x + 1` source:
     // "full": (Program (.statements (Assign x 5) (Call add (StackRef 0) 1)) (.bindings (x 1)))
     // "statements": (Assign x 5) (Call add (StackRef 0) 1)
+    // "last-statement": (Assign x 5)
     // "end": (Call add (StackRef 0) 1)
-    mode?: "full" | "end" | "statements";
+    mode?: "full" | "end" | "statements" | "last-statement";
   } = {}
 ) {
   test(code, async () => {
     const rExpr = Result.bind(parse(code, "test"), (ast) =>
-      compileAst(ast, getStdLib())
+      compileAst(ast.raw, getStdLib())
     );
 
     let serializedExpr: string | string[];
     if (rExpr.ok) {
       const expr = rExpr.value;
+      if (expr.kind !== "Program") {
+        throw new Error("Expected a program");
+      }
       switch (mode) {
         case "full":
           serializedExpr = expressionToString(expr, { pretty });
           break;
         case "statements": {
-          if (expr.kind !== "Program") {
-            throw new Error("Expected a program");
+          // TODO - this name is confusing, we're serializing both statements and the end result
+          serializedExpr = [
+            ...expr.value.statements,
+            ...(expr.value.result ? [expr.value.result] : []),
+          ].map((statement) => expressionToString(statement, { pretty }));
+          break;
+        }
+        case "last-statement": {
+          const lastStatement = expr.value.statements.at(-1);
+          if (!lastStatement) {
+            throw new Error("No end result");
           }
-          serializedExpr = expr.value.statements.map((statement) =>
-            expressionToString(statement, { pretty })
-          );
+          serializedExpr = expressionToString(lastStatement, { pretty });
           break;
         }
         case "end": {
-          if (expr.kind !== "Program") {
-            throw new Error("Expected a program");
+          const result = expr.value.result;
+          if (!result) {
+            throw new Error("No end result");
           }
-          const lastStatement = expr.value.statements.at(-1);
-          if (!lastStatement) {
-            throw new Error("No last statement");
-          }
-          serializedExpr = expressionToString(lastStatement, { pretty });
+          serializedExpr = expressionToString(result, { pretty });
           break;
         }
       }
@@ -59,12 +67,20 @@ export function testCompile(
     expect(serializedExpr).toEqual(answer);
   });
 }
-// shortcut
 
+// shortcuts
 export function testCompileEnd(
   code: string,
   answer: string,
   { pretty = false }: { pretty?: boolean } = {}
 ) {
   testCompile(code, answer, { pretty, mode: "end" });
+}
+
+export function testCompileLastStatement(
+  code: string,
+  answer: string,
+  { pretty = false }: { pretty?: boolean } = {}
+) {
+  testCompile(code, answer, { pretty, mode: "last-statement" });
 }

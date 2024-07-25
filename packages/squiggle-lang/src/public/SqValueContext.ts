@@ -1,5 +1,4 @@
 import { TypedASTNode } from "../analysis/types.js";
-import { ASTNode } from "../ast/types.js";
 import { isBindingStatement } from "../ast/utils.js";
 import { Env } from "../dists/env.js";
 import { SqModule } from "../index.js";
@@ -40,7 +39,7 @@ export class SqValueContext {
     let ast = this.valueAst;
     const pathEdge = item.value;
 
-    let newAst: ASTNode | undefined;
+    let newAst: TypedASTNode | undefined;
     const itemisNotTableIndexOrCalculator =
       pathEdge.type !== "cellAddress" && pathEdge.type !== "calculator";
 

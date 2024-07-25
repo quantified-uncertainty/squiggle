@@ -13,16 +13,13 @@ outerBlock
     statements:statementsList
     finalExpression:(statementSeparator @expression)?
     {
-      if (finalExpression) {
-        statements.push(finalExpression);
-      }
-      return h.nodeProgram(imports, statements, location());
+      return h.nodeProgram(imports, statements, finalExpression, location());
     }
   / imports:importStatementsList
     finalExpression:expression
-    { return h.nodeProgram(imports, [finalExpression], location()); }
+    { return h.nodeProgram(imports, [], finalExpression, location()); }
   / imports:importStatementsList
-    { return h.nodeProgram(imports, [], location()); }
+    { return h.nodeProgram(imports, [], null, location()); }
 
 importStatementsList = (@importStatement __nl)*
 
@@ -67,7 +64,7 @@ infixUnitType
   typeMultiplicativeOp "operator" = '*' / '/'
 
 exponentialUnitType
-  = unit:(identifier / float) _ "^" _ exponent:number
+  = unit:(identifier / float) _ "^" _ exponent:float
     { return h.nodeExponentialUnitType(unit, exponent, location()); }
   / unit:(identifier / float)
     { return unit; }

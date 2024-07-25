@@ -58,9 +58,10 @@ export type SerializedExpressionContent =
     >
   | SerializedExpressionContentByKindObjectLike<
       "Program",
-      "statements",
+      "statements" | "result",
       {
         statements: number[];
+        result: number | null;
       }
     >
   | SerializedExpressionContentByKindObjectLike<
@@ -118,6 +119,9 @@ function serializeExpressionContent(
         value: {
           ...expression.value,
           statements: expression.value.statements.map(visit.expression),
+          result: expression.value.result
+            ? visit.expression(expression.value.result)
+            : null,
         },
       };
     case "Block":
@@ -216,6 +220,10 @@ function deserializeExpressionContent(
           statements: expression.value.statements.map((statement) =>
             visit.expression(statement)
           ),
+          result:
+            expression.value.result === null
+              ? undefined
+              : visit.expression(expression.value.result),
         },
       };
 

@@ -144,9 +144,10 @@ export function nodeBlock(
 export function nodeProgram(
   imports: [KindNode<"String">, KindNode<"Identifier">][],
   statements: ASTNode[],
+  result: ASTNode | null,
   location: LocationRange
 ): KindNode<"Program"> {
-  return { kind: "Program", imports, statements, location };
+  return { kind: "Program", imports, statements, result, location };
 }
 
 export function nodeTypeSignature(

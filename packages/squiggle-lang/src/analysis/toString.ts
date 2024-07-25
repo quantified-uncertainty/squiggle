@@ -1,59 +1,12 @@
-import { analyzeAst } from "../analysis/index.js";
-import { TypedAST } from "../analysis/types.js";
-import { ICompileError } from "../errors/IError.js";
-import * as Result from "../utility/result.js";
-import { result } from "../utility/result.js";
 import { SExpr, SExprPrintOptions, sExprToString } from "../utility/sExpr.js";
-import {
-  parse as peggyParse,
-  SyntaxError as PeggySyntaxError,
-} from "./peggyParser.js";
-import { AST, type ASTCommentNode, ASTNode, LocationRange } from "./types.js";
-import { unitTypeCheck } from "./unitTypeChecker.js";
+import { TypedASTNode } from "./types.js";
 
-export type ParseError = {
-  type: "SyntaxError";
-  location: LocationRange;
-  message: string;
-};
-
-type ParseResult = result<TypedAST, ICompileError>;
-
-export function parse(expr: string, source: string): ParseResult {
-  try {
-    const comments: ASTCommentNode[] = [];
-    const parsed: AST = peggyParse(expr, {
-      grammarSource: source,
-      comments,
-    });
-    if (parsed.kind !== "Program") {
-      throw new Error("Expected parse to result in a Program node");
-    }
-    unitTypeCheck(parsed);
-    parsed.comments = comments;
-
-    const analyzed = analyzeAst(parsed);
-    return Result.Ok(analyzed);
-  } catch (e) {
-    if (e instanceof PeggySyntaxError) {
-      return Result.Err(
-        new ICompileError((e as any).message, (e as any).location)
-      );
-    } else if (e instanceof ICompileError) {
-      return Result.Err(e);
-    } else {
-      throw e;
-    }
-  }
-}
-
-// This function is just for the sake of tests.
-// For real generation of Squiggle code from AST try our prettier plugin.
+// This function is similar to `nodeToString` for raw AST, but takes a TypedASTNode.
 export function nodeToString(
-  node: ASTNode,
+  node: TypedASTNode,
   printOptions: SExprPrintOptions = {}
 ): string {
-  const toSExpr = (node: ASTNode): SExpr => {
+  const toSExpr = (node: TypedASTNode): SExpr => {
     const sExpr = (components: (SExpr | null | undefined)[]): SExpr => ({
       name: node.kind,
       args: components,
@@ -152,14 +105,4 @@ export function nodeToString(
   };
 
   return sExprToString(toSExpr(node), printOptions);
-}
-
-export function nodeResultToString(
-  r: ParseResult,
-  printOptions?: SExprPrintOptions
-): string {
-  if (!r.ok) {
-    return r.value.toString();
-  }
-  return nodeToString(r.value.raw, printOptions);
 }

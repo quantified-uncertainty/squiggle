@@ -1,4 +1,4 @@
-import { nodeToString } from "../../src/ast/parse.js";
+import { nodeToString } from "../../src/analysis/toString.js";
 import { assertTag, testRun } from "../helpers/helpers.js";
 
 describe("SqValueContext", () => {

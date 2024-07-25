@@ -20,7 +20,7 @@ export function addParseCommand(program: Command) {
       const parseResult = parse(src);
       if (parseResult.ok) {
         if (options.raw) {
-          console.log(coloredJson(parseResult.value));
+          console.log(coloredJson(parseResult.value.raw));
         } else {
           console.log(nodeResultToString(parseResult, { colored: true }));
         }

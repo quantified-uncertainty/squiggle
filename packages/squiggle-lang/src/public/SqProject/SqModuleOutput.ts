@@ -1,4 +1,3 @@
-import { isBindingStatement } from "../../ast/utils.js";
 import { Env } from "../../dists/env.js";
 import { RunProfile } from "../../reducer/RunProfile.js";
 import { BaseRunner, RunParams } from "../../runners/BaseRunner.js";
@@ -162,7 +161,7 @@ export class SqModuleOutput {
     }
 
     const runParams: RunParams = {
-      ast,
+      ast: ast.raw,
       environment,
       externals: importBindings,
     };
@@ -193,17 +192,13 @@ export class SqModuleOutput {
       runResult,
       (runOutput) => {
         const { result, bindings, exports } = runOutput;
-        const lastStatement = ast.statements.at(-1);
-
-        const hasEndExpression =
-          !!lastStatement && !isBindingStatement(lastStatement);
 
         const newContext = (root: ValuePathRoot) => {
           const isResult = root === "result";
           return new SqValueContext({
             runContext: context,
-            valueAst: isResult && hasEndExpression ? lastStatement : ast,
-            valueAstIsPrecise: isResult ? hasEndExpression : true,
+            valueAst: isResult && ast.result ? ast.result : ast,
+            valueAstIsPrecise: isResult ? !!ast.result : true,
             path: new SqValuePath({
               root,
               edges: [],

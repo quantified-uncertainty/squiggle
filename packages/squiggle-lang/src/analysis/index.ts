@@ -3,6 +3,7 @@ import { frAny } from "../library/registry/frTypes.js";
 import {
   AnyExpressionNode,
   AnyStatementNode,
+  AnyUnitTypeNode,
   expressionKinds,
   KindTypedNode,
   statementKinds,
@@ -43,6 +44,10 @@ function assertExpression(
   assertOneOfKinds(node, expressionKinds, "expression");
 }
 
+function assertUnitType(node: TypedASTNode): asserts node is AnyUnitTypeNode {
+  assertOneOfKinds(node, unitTypeKinds, "unit type");
+}
+
 function analyzeKind<Kind extends TypedASTNode["kind"]>(
   node: ASTNode,
   kind: Kind,
@@ -69,6 +74,12 @@ function analyzeExpression(
 ): AnyExpressionNode {
   const typedNode = analyzeAstNode(node, symbols);
   assertExpression(typedNode);
+  return typedNode;
+}
+
+function analyzeUnitType(node: ASTNode, symbols: SymbolTable): AnyUnitTypeNode {
+  const typedNode = analyzeAstNode(node, symbols);
+  assertUnitType(typedNode);
   return typedNode;
 }
 
@@ -100,10 +111,15 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
         programSymbols[statement.variable.value] = statement;
       }
 
+      const result = node.result
+        ? analyzeExpression(node.result, symbols)
+        : null;
+
       return {
         ...node,
         imports,
         statements,
+        result,
         symbols: programSymbols,
       };
     }
@@ -329,21 +345,21 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
     case "UnitTypeSignature": {
       return {
         ...node,
-        body: analyzeOneOfKinds(node.body, unitTypeKinds, symbols),
+        body: analyzeUnitType(node.body, symbols),
       };
     }
     case "InfixUnitType":
       return {
         ...node,
         args: [
-          analyzeExpression(node.args[0], symbols),
-          analyzeExpression(node.args[1], symbols),
+          analyzeUnitType(node.args[0], symbols),
+          analyzeUnitType(node.args[1], symbols),
         ],
       };
     case "ExponentialUnitType":
       return {
         ...node,
-        base: analyzeExpression(node.base, symbols),
+        base: analyzeUnitType(node.base, symbols),
         exponent: analyzeKind(node.exponent, "Float", symbols),
       };
     default:

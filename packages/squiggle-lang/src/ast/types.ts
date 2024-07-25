@@ -55,6 +55,7 @@ type NodeProgram = N<
   {
     imports: [NodeString, NodeIdentifier][];
     statements: ASTNode[];
+    result: ASTNode | null;
   }
 >;
 

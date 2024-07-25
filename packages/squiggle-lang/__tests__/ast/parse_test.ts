@@ -1,5 +1,5 @@
+import { TypedASTNode } from "../../src/analysis/types.js";
 import { parse } from "../../src/ast/parse.js";
-import { ASTNode } from "../../src/ast/types.js";
 import {
   testEvalError,
   testEvalToBe,
@@ -28,21 +28,17 @@ describe("Peggy parse", () => {
     ] satisfies [
       string,
       Pick<
-        Extract<ASTNode, { kind: "Float" }>,
+        Extract<TypedASTNode, { kind: "Float" }>,
         "integer" | "fractional" | "exponent"
       >,
     ][])("%s", (code, expected) => {
       const result = parse(code, "test");
       if (
-        !(
-          result.ok &&
-          result.value.kind === "Program" &&
-          result.value.statements.length === 1
-        )
+        !(result.ok && result.value.kind === "Program" && result.value.result)
       ) {
         throw new Error();
       }
-      const value = result.value.statements[0];
+      const value = result.value.result;
       if (value.kind !== "Float") {
         throw new Error();
       }

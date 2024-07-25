@@ -32,7 +32,7 @@ type NodeProgram = Node<
   {
     imports: readonly [NodeString, NodeIdentifier][];
     statements: AnyStatementNode[];
-    // TODO - result node
+    result: AnyExpressionNode | null;
     // Var name -> statement node, for faster path resolution.
     // Not used for evaluation.
     // Note: symbols point to undecorated statements.
@@ -306,7 +306,8 @@ export const expressionKinds: TypedASTNode["kind"][] = [
   "Boolean",
 ] as const;
 export const unitTypeKinds: TypedASTNode["kind"][] = [
-  "String",
+  "Identifier",
+  "Float",
   "InfixUnitType",
   "ExponentialUnitType",
 ] as const;

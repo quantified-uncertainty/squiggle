@@ -188,12 +188,15 @@ export class Reducer implements EvaluateAllKinds {
 
   evaluateProgram(expressionValue: ExpressionValue<"Program">) {
     // Same as Block, but doesn't shrink back the stack, so that we could return bindings and exports from it.
-    let currentValue: Value = vVoid();
-
     for (const statement of expressionValue.statements) {
-      currentValue = this.innerEvaluate(statement);
+      this.innerEvaluate(statement);
     }
-    return currentValue;
+
+    if (expressionValue.result) {
+      return this.innerEvaluate(expressionValue.result);
+    } else {
+      return vVoid();
+    }
   }
 
   evaluateArray(expressionValue: ExpressionValue<"Array">) {

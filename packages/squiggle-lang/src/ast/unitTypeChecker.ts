@@ -568,6 +568,9 @@ function innerFindTypeConstraints(
       for (const statement of node.statements) {
         innerFindTypeConstraints(statement, typeConstraints, scopes);
       }
+      if (node.result) {
+        innerFindTypeConstraints(node.result, typeConstraints, scopes);
+      }
 
       scopes.stack.pop();
 

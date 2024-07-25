@@ -216,17 +216,22 @@ function compileToContent(
         const statement = innerCompileAst(astStatement, context);
         statements.push(statement);
         if (
-          astStatement.kind === "LetStatement" ||
-          astStatement.kind === "DefunStatement"
+          // trivial condition, can be removed when we switch to TypedAST
+          (astStatement.kind === "LetStatement" ||
+            astStatement.kind === "DefunStatement") &&
+          astStatement.exported
         ) {
-          if (astStatement.exported) {
-            const name = astStatement.variable.value;
-            exports.push(name);
-          }
+          const name = astStatement.variable.value;
+          exports.push(name);
         }
       }
+      const result = ast.result
+        ? innerCompileAst(ast.result, context)
+        : undefined;
+
       return expression.make("Program", {
         statements,
+        result,
         exports,
         bindings: context.localsOffsets(),
       });

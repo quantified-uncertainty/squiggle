@@ -20,7 +20,7 @@ export function addPrintIrCommand(program: Command) {
 
       const parseResult = parse(src);
       if (parseResult.ok) {
-        const expression = compileAst(parseResult.value, getStdLib());
+        const expression = compileAst(parseResult.value.raw, getStdLib());
 
         if (expression.ok) {
           console.log(expressionToString(expression.value, { colored: true }));

@@ -62,6 +62,7 @@ export function serializeAstNode(
           visit.ast(item[1]),
         ]),
         statements: node.statements.map(visit.ast),
+        result: node.result ? visit.ast(node.result) : null,
       };
     case "Block":
       return {
@@ -209,6 +210,7 @@ export function deserializeAstNode(
           visit.ast(item[0]) as KindNode<"Identifier">,
         ]),
         statements: node.statements.map(visit.ast),
+        result: node.result ? visit.ast(node.result) : null,
       };
     case "Block":
       return {

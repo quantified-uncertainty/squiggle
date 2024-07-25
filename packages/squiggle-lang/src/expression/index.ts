@@ -38,6 +38,7 @@ export type ExpressionContent =
       "Program",
       {
         statements: Expression[];
+        result: Expression | undefined;
         exports: string[]; // all exported names
         bindings: Record<string, number>; // variable name -> stack offset mapping
       }
@@ -206,7 +207,9 @@ export function expressionToString(
         );
       case "Program":
         return selfExpr([
-          sExpr(".statements", expression.value.statements.map(toSExpr)),
+          expression.value.statements.length
+            ? sExpr(".statements", expression.value.statements.map(toSExpr))
+            : undefined,
           Object.keys(expression.value.bindings).length
             ? sExpr(
                 ".bindings",
@@ -217,6 +220,9 @@ export function expressionToString(
             : undefined,
           expression.value.exports.length
             ? sExpr(".exports", expression.value.exports)
+            : undefined,
+          expression.value.result
+            ? toSExpr(expression.value.result)
             : undefined,
         ]);
       case "Array":

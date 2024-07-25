@@ -1,5 +1,6 @@
+import { TypedAST } from "../../analysis/types.js";
 import { parse } from "../../ast/parse.js";
-import { AST, LocationRange } from "../../ast/types.js";
+import { LocationRange } from "../../ast/types.js";
 import { Env } from "../../dists/env.js";
 import { errMap, result } from "../../utility/result.js";
 import {
@@ -59,7 +60,7 @@ export class SqModule {
   // key is module name, value is hash
   pins: Record<string, string>;
 
-  private _ast?: result<AST, SqError>;
+  private _ast?: result<TypedAST, SqError>;
 
   constructor(params: {
     name: string;
@@ -86,7 +87,7 @@ export class SqModule {
 
   // Useful when we're sure that AST is ok, e.g. when we obtain `SqModule` from `SqValueContext`.
   // Name is following the Rust conventions (https://doc.rust-lang.org/std/result/enum.Result.html#method.expect).
-  expectAst(): AST {
+  expectAst(): TypedAST {
     const ast = this.ast();
     if (!ast.ok) {
       throw ast.value;
