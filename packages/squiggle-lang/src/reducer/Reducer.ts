@@ -13,7 +13,7 @@ import {
 } from "../errors/messages.js";
 import { Expression, ExpressionByKind } from "../expression/index.js";
 import { getAleaRng, PRNG } from "../rng/index.js";
-import { ImmutableMap } from "../utility/immutableMap.js";
+import { ImmutableMap } from "../utility/immutable.js";
 import { annotationToDomain } from "../value/annotations.js";
 import { Value, vArray, vDict, vLambda, vVoid } from "../value/index.js";
 import { vDomain, VDomain } from "../value/VDomain.js";

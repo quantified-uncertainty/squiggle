@@ -142,19 +142,20 @@ export function getMarkers(
   }
   const simulation = state.facet(simulationFacet);
 
-  const sqResult = simulation?.output;
+  const sqResult = simulation?.output.result;
   if (!sqResult?.ok) {
     return;
   }
 
   if (
-    sqResult.value.result.context?.runContext.source !== state.doc.toString()
+    sqResult.value.result.context?.runContext.module.code !==
+    state.doc.toString()
   ) {
     return; // autorun is off or the result is still rendering, can't show markers yet
   }
 
   // TODO - use AST for the current code state, and `sqResult` only for filtering
-  const ast = sqResult.value.bindings.context?.runContext.ast;
+  const ast = sqResult.value.bindings.context?.runContext.module.expectAst();
   if (!ast) {
     return;
   }

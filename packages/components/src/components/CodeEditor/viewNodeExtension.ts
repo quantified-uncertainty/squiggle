@@ -1,6 +1,6 @@
 import { keymap } from "@codemirror/view";
 
-import { onFocusByPathFacet, projectFacet, sourceIdFacet } from "./fields.js";
+import { onFocusByPathFacet, simulationFacet } from "./fields.js";
 
 export function viewNodeExtension() {
   return keymap.of([
@@ -8,8 +8,7 @@ export function viewNodeExtension() {
       key: "Alt-Shift-v",
       run: (view) => {
         const onFocusByPath = view.state.facet(onFocusByPathFacet);
-        const sourceId = view.state.facet(sourceIdFacet);
-        const project = view.state.facet(projectFacet);
+        const simulation = view.state.facet(simulationFacet);
 
         if (!onFocusByPath) {
           return true;
@@ -18,8 +17,9 @@ export function viewNodeExtension() {
         if (offset === undefined) {
           return true;
         }
-        const valuePathResult = project.findValuePathByOffset(sourceId, offset);
-        if (valuePathResult.ok) {
+        const valuePathResult =
+          simulation?.output?.findValuePathByOffset(offset);
+        if (valuePathResult?.ok) {
           onFocusByPath(valuePathResult.value);
         }
         return true;

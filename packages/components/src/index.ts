@@ -43,3 +43,5 @@ export const d3Extended = {
   scaleSymlog,
   scalePow,
 };
+
+export { ProjectStateViewer } from "./components/ProjectStateViewer/index.js";

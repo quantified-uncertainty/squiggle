@@ -12,7 +12,7 @@ import {
 
 import { EditSquiggleSnippetModel } from "@/app/models/[owner]/[slug]/EditSquiggleSnippetModel";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { squiggleHubLinker } from "@/squiggle/components/linker";
+import { sqProjectWithHubLinker } from "@/squiggle/components/linker";
 
 import { UpgradeableModel_Ref$key } from "@/__generated__/UpgradeableModel_Ref.graphql";
 import { UpgradeableModelQuery } from "@/__generated__/UpgradeableModelQuery.graphql";
@@ -79,12 +79,8 @@ export const UpgradeableModel: FC<{
   const squiggle = use(versionedSquigglePackages(version));
   const updatedSquiggle = use(versionedSquigglePackages(updatedVersion));
 
-  const project = new squiggle.lang.SqProject({
-    linker: squiggleHubLinker,
-  });
-  const updatedProject = new updatedSquiggle.lang.SqProject({
-    linker: squiggleHubLinker,
-  });
+  const project = sqProjectWithHubLinker(squiggle);
+  const updatedProject = sqProjectWithHubLinker(updatedSquiggle);
 
   // TODO - starting from 0.9.5, we will be able to compare serialized outputs for the new and old verison.
 

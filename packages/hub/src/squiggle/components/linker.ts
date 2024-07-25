@@ -1,8 +1,11 @@
 import { fetchQuery, graphql } from "relay-runtime";
 
-import { SqLinker } from "@quri/squiggle-lang";
+import { SqLinker, SqModule } from "@quri/squiggle-lang";
+import { versionSupportsSqProjectV2 } from "@quri/versioned-squiggle-components";
 
 import { getCurrentEnvironment } from "@/relay/environment";
+
+import { versionedSquigglePackages } from "../../../../versioned-components/dist/src/versionedSquigglePackages";
 
 import { linkerQuery } from "@/__generated__/linkerQuery.graphql";
 
@@ -35,11 +38,11 @@ export function serializeSourceId({ owner, slug }: ParsedSourceId): string {
   return `${PREFIX}:${owner}/${slug}`;
 }
 
-export const squiggleHubLinker: SqLinker = {
+const linker: SqLinker = {
   resolve(name) {
     return name;
   },
-  async loadSource(sourceId: string) {
+  async loadModule(sourceId: string) {
     const { owner, slug } = parseSourceId(sourceId);
 
     const environment = getCurrentEnvironment();
@@ -79,6 +82,48 @@ export const squiggleHubLinker: SqLinker = {
       throw new Error(`${sourceId} is not a SquiggleSnippet`);
     }
 
-    return content.code;
+    return new SqModule({
+      name: sourceId,
+      code: content.code,
+    });
   },
 };
+
+const oldLinker: OldSqLinker = {
+  resolve: (name) => name,
+  loadSource: async (sourceId: string) => {
+    return (await linker.loadModule(sourceId)).code;
+  },
+};
+
+// export directly from versioned-components?
+type SquigglePackages = Awaited<ReturnType<typeof versionedSquigglePackages>>;
+
+// this type extraction is awkward but it works
+type OldSqLinker = NonNullable<
+  NonNullable<
+    ConstructorParameters<
+      Extract<SquigglePackages, { version: "0.9.5" }>["lang"]["SqProject"]
+    >[0]
+  >["linker"]
+>;
+
+export function getHubLinker(
+  squiggle: Awaited<ReturnType<typeof versionedSquigglePackages>>
+) {
+  if (versionSupportsSqProjectV2.plain(squiggle.version)) {
+    return linker;
+  } else {
+    return oldLinker;
+  }
+}
+
+export function sqProjectWithHubLinker(
+  squiggle: Awaited<ReturnType<typeof versionedSquigglePackages>>
+) {
+  if (versionSupportsSqProjectV2.object(squiggle)) {
+    return new squiggle.lang.SqProject({ linker });
+  } else {
+    return new squiggle.lang.SqProject({ linker: oldLinker });
+  }
+}
