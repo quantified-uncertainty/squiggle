@@ -203,7 +203,7 @@ function assertStatement(ir: IR): StatementIR {
   return ir;
 }
 
-function assertExpression(ir: IR): AnyExpressionIR {
+export function assertExpression(ir: IR): AnyExpressionIR {
   if (ir.kind === "Program" || ir.kind === "Assign") {
     throw new Error("Expected expression");
   }

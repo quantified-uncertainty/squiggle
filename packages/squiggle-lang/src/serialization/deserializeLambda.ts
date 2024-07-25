@@ -1,3 +1,4 @@
+import { assertExpression } from "../compiler/serialize.js";
 import { getStdLib } from "../library/index.js";
 import { Lambda, UserDefinedLambda } from "../reducer/lambda.js";
 import { VDomain } from "../value/VDomain.js";
@@ -48,7 +49,7 @@ export function deserializeLambda(
             domain,
           };
         }),
-        visit.ir(value.irId)
+        assertExpression(visit.ir(value.irId))
       );
   }
 }

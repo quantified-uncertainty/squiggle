@@ -1,7 +1,7 @@
 import jstat from "jstat";
 
 import { LocationRange } from "../ast/types.js";
-import { IR, IRByKind } from "../compiler/types.js";
+import { AnyExpressionIR, IR, IRByKind, ProgramIR } from "../compiler/types.js";
 import { Env } from "../dists/env.js";
 import { IRuntimeError } from "../errors/IError.js";
 import {
@@ -37,7 +37,7 @@ type IRValue<Kind extends IR["kind"]> = IRByKind<Kind>["value"];
  * arrow functions shouldn't be used as methods.
  */
 type EvaluateAllKinds = {
-  [Kind in IR["kind"] as `evaluate${Kind}`]: (
+  [Kind in Exclude<IR["kind"], "Program"> as `evaluate${Kind}`]: (
     irValue: IRValue<Kind>,
     location: LocationRange
   ) => Value;
@@ -73,8 +73,8 @@ export class Reducer implements EvaluateAllKinds {
   }
 
   // Evaluate the IR.
-  // When recursing into nested IR nodes, call `innerEvaluate()` instead of this method.
-  evaluate(ir: IR): Value {
+  // When recursing into nested IR nodes, call `evaluateExpression()` instead of this method.
+  evaluate(ir: ProgramIR): Value {
     if (this.isRunning) {
       throw new Error(
         "Can't recursively reenter the reducer, consider `.innerEvaluate()` if you're working on Squiggle internals"
@@ -91,13 +91,20 @@ export class Reducer implements EvaluateAllKinds {
       this.profile = undefined;
     }
 
-    const result = this.innerEvaluate(ir);
+    // Same as Block, but doesn't shrink back the stack, so that we could return bindings and exports from it.
+    for (const statement of ir.value.statements) {
+      this.evaluateAssign(statement.value);
+    }
+
+    const result = ir.value.result
+      ? this.evaluateExpression(ir.value.result)
+      : vVoid();
     this.isRunning = false;
 
     return result;
   }
 
-  innerEvaluate(ir: IR): Value {
+  evaluateExpression(ir: AnyExpressionIR): Value {
     let start: Date | undefined;
     if (this.profile) {
       start = new Date();
@@ -117,9 +124,6 @@ export class Reducer implements EvaluateAllKinds {
       case "Block":
         result = this.evaluateBlock(ir.value);
         break;
-      case "Assign":
-        result = this.evaluateAssign(ir.value);
-        break;
       case "Array":
         result = this.evaluateArray(ir.value);
         break;
@@ -135,17 +139,10 @@ export class Reducer implements EvaluateAllKinds {
       case "Lambda":
         result = this.evaluateLambda(ir.value);
         break;
-      case "Program":
-        result = this.evaluateProgram(ir.value);
-        break;
       default:
         throw new Error(`Unreachable: ${ir satisfies never}`);
     }
-    if (
-      this.profile &&
-      // TODO - exclude other trivial IR nodes?
-      ir.kind !== "Program"
-    ) {
+    if (this.profile) {
       const end = new Date();
       const time = end.getTime() - start!.getTime();
       this.profile.addRange(ir.location, time);
@@ -176,31 +173,18 @@ export class Reducer implements EvaluateAllKinds {
     const initialStackSize = this.stack.size();
 
     for (const statement of irValue.statements) {
-      this.innerEvaluate(statement);
+      this.evaluateAssign(statement.value);
     }
 
-    const result = this.innerEvaluate(irValue.result);
+    const result = this.evaluateExpression(irValue.result);
     this.stack.shrink(initialStackSize);
 
     return result;
   }
 
-  evaluateProgram(irValue: IRValue<"Program">) {
-    // Same as Block, but doesn't shrink back the stack, so that we could return bindings and exports from it.
-    for (const statement of irValue.statements) {
-      this.innerEvaluate(statement);
-    }
-
-    if (irValue.result) {
-      return this.innerEvaluate(irValue.result);
-    } else {
-      return vVoid();
-    }
-  }
-
   evaluateArray(irValue: IRValue<"Array">) {
     const values = irValue.map((element) => {
-      return this.innerEvaluate(element);
+      return this.evaluateExpression(element);
     });
     return vArray(values);
   }
@@ -209,7 +193,7 @@ export class Reducer implements EvaluateAllKinds {
     return vDict(
       ImmutableMap(
         irValue.map(([eKey, eValue]) => {
-          const key = this.innerEvaluate(eKey);
+          const key = this.evaluateExpression(eKey);
           if (key.type !== "String") {
             throw this.runtimeError(
               new REOther("Dict keys must be strings"),
@@ -217,7 +201,7 @@ export class Reducer implements EvaluateAllKinds {
             );
           }
           const keyString: string = key.value;
-          const value = this.innerEvaluate(eValue);
+          const value = this.evaluateExpression(eValue);
           return [keyString, value];
         })
       )
@@ -225,7 +209,7 @@ export class Reducer implements EvaluateAllKinds {
   }
 
   evaluateAssign(irValue: IRValue<"Assign">) {
-    const result = this.innerEvaluate(irValue.right);
+    const result = this.evaluateExpression(irValue.right);
     this.stack.push(result);
     return vVoid();
   }
@@ -258,7 +242,7 @@ export class Reducer implements EvaluateAllKinds {
   }
 
   evaluateTernary(irValue: IRValue<"Ternary">) {
-    const predicateResult = this.innerEvaluate(irValue.condition);
+    const predicateResult = this.evaluateExpression(irValue.condition);
     if (predicateResult.type !== "Bool") {
       throw this.runtimeError(
         new REExpectedType("Boolean", predicateResult.type),
@@ -266,7 +250,7 @@ export class Reducer implements EvaluateAllKinds {
       );
     }
 
-    return this.innerEvaluate(
+    return this.evaluateExpression(
       predicateResult.value ? irValue.ifTrue : irValue.ifFalse
     );
   }
@@ -278,7 +262,7 @@ export class Reducer implements EvaluateAllKinds {
       // Processing annotations, e.g. f(x: [3, 5]) = { ... }
       if (parameterIR.annotation) {
         // First, we evaluate `[3, 5]` expression.
-        const annotationValue = this.innerEvaluate(parameterIR.annotation);
+        const annotationValue = this.evaluateExpression(parameterIR.annotation);
         // Now we cast it to domain value, e.g. `NumericRangeDomain(3, 5)`.
         // Casting can fail, in which case we throw the error with a correct stacktrace.
         try {
@@ -322,7 +306,7 @@ export class Reducer implements EvaluateAllKinds {
   }
 
   evaluateCall(irValue: IRValue<"Call">, location: LocationRange) {
-    const lambda = this.innerEvaluate(irValue.fn);
+    const lambda = this.evaluateExpression(irValue.fn);
     if (lambda.type !== "Lambda") {
       throw this.runtimeError(
         new RENotAFunction(lambda.toString()),
@@ -336,7 +320,7 @@ export class Reducer implements EvaluateAllKinds {
       );
     }
 
-    const argValues = irValue.args.map((arg) => this.innerEvaluate(arg));
+    const argValues = irValue.args.map((arg) => this.evaluateExpression(arg));
 
     // We pass the location of a current IR node here, to put it on frameStack.
     try {

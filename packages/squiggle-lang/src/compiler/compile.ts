@@ -15,11 +15,6 @@ import { vString } from "../value/VString.js";
 import { INDEX_LOOKUP_FUNCTION } from "./constants.js";
 import * as ir from "./types.js";
 
-type CompilableNode =
-  | AnyExpressionNode
-  | AnyStatementNode
-  | KindTypedNode<"Program">;
-
 type Scope = {
   // Position on stack is counted from the first element on stack, unlike in
   // StackRef's offset.  See switch branch for "Identifier" AST type below.
@@ -408,7 +403,7 @@ function compileStatement(
 function compileProgram(
   ast: KindTypedNode<"Program">,
   context: CompileContext
-): ir.IRByKind<"Program"> {
+): ir.ProgramIR {
   // No need to start a top-level scope, it already exists.
   const statements: ir.StatementIR[] = [];
   const exports: string[] = [];
@@ -438,7 +433,7 @@ function compileProgram(
 export function compileAst(
   ast: TypedAST,
   externals: Bindings
-): Result.result<ir.IR, ICompileError> {
+): Result.result<ir.ProgramIR, ICompileError> {
   try {
     const ir = compileProgram(ast, new CompileContext(externals));
     return Result.Ok(ir);

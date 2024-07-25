@@ -131,6 +131,7 @@ export type IRByKind<T extends IRContent["kind"]> = Extract<IR, { kind: T }>;
 
 export type AnyExpressionIR = Exclude<IR, { kind: "Program" | "Assign" }>;
 export type StatementIR = IRByKind<"Assign">;
+export type ProgramIR = IRByKind<"Program">;
 
 export const eCall = (
   fn: AnyExpressionIR,

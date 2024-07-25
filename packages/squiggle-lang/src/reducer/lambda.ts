@@ -1,7 +1,7 @@
 import uniq from "lodash/uniq.js";
 
 import { LocationRange } from "../ast/types.js";
-import { IR } from "../compiler/types.js";
+import { AnyExpressionIR } from "../compiler/types.js";
 import {
   REArgumentDomainError,
   REArityError,
@@ -63,13 +63,13 @@ export class UserDefinedLambda extends BaseLambda {
   readonly type = "UserDefinedLambda";
   parameters: UserDefinedLambdaParameter[];
   name?: string;
-  body: IR;
+  body: AnyExpressionIR;
 
   constructor(
     name: string | undefined,
     captures: Value[],
     parameters: UserDefinedLambdaParameter[],
-    body: IR
+    body: AnyExpressionIR
   ) {
     super();
     this.name = name;
@@ -102,7 +102,7 @@ export class UserDefinedLambda extends BaseLambda {
       reducer.stack.push(args[i]);
     }
 
-    return reducer.innerEvaluate(this.body);
+    return reducer.evaluateExpression(this.body);
   }
 
   display() {
