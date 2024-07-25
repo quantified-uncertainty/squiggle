@@ -86,7 +86,7 @@ export function nodeToString(
       case "UnaryCall":
         return sExpr([node.op, toSExpr(node.arg)]);
       case "Float":
-        // see also: "Float" branch in expression/compile.ts
+        // see also: "Float" branch in compiler/compile.ts
         return `${node.integer}${
           node.fractional === null ? "" : `.${node.fractional}`
         }${node.exponent === null ? "" : `e${node.exponent}`}`;

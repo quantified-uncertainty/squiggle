@@ -1,5 +1,5 @@
 import { analyzeAst } from "../analysis/index.js";
-import { compileAst } from "../expression/compile.js";
+import { compileAst } from "../compiler/compile.js";
 import { getStdLib } from "../library/index.js";
 import { Reducer } from "../reducer/Reducer.js";
 import { ImmutableMap } from "../utility/immutable.js";
@@ -13,35 +13,35 @@ export function baseRun(
   // it's fine if some code passes the full `RunParams` here though.
   params: Omit<RunParams, "source">
 ): RunResult {
-  const expressionResult = compileAst(
+  const irResult = compileAst(
     analyzeAst(params.ast),
     getStdLib().merge(params.externals.value)
   );
 
-  if (!expressionResult.ok) {
-    return expressionResult;
+  if (!irResult.ok) {
+    return irResult;
   }
-  const expression = expressionResult.value;
+  const ir = irResult.value;
 
   const reducer = new Reducer(params.environment);
 
-  if (expression.kind !== "Program") {
-    // mostly for TypeScript, so that we could access `expression.value.exports`
-    throw new Error("Expected Program expression");
+  if (ir.kind !== "Program") {
+    // mostly for TypeScript, so that we could access `ir.value.exports`
+    throw new Error("Expected Program IR node");
   }
 
   let result: Value;
   try {
-    result = reducer.evaluate(expression);
+    result = reducer.evaluate(ir);
   } catch (e: unknown) {
     return Err(reducer.errorFromException(e));
   }
 
-  const exportNames = new Set(expression.value.exports);
+  const exportNames = new Set(ir.value.exports);
   const sourceId = params.ast.location.source;
 
   const bindings = ImmutableMap<string, Value>(
-    Object.entries(expression.value.bindings).map(([name, offset]) => {
+    Object.entries(ir.value.bindings).map(([name, offset]) => {
       let value = reducer.stack.get(offset);
       if (exportNames.has(name)) {
         value = value.mergeTags({

@@ -13,8 +13,8 @@ import { vBool } from "../value/VBool.js";
 import { vNumber } from "../value/VNumber.js";
 import { vString } from "../value/VString.js";
 import { INDEX_LOOKUP_FUNCTION } from "./constants.js";
-import * as expression from "./index.js";
-import { Expression } from "./index.js";
+import * as ir from "./index.js";
+import { IR } from "./index.js";
 
 type CompilableNode =
   | AnyExpressionNode
@@ -34,7 +34,7 @@ type Scope = {
   | {
       type: "function";
       // Captures will be populated on the first attempt to resolve a name that should be captured.
-      captures: expression.Ref[];
+      captures: ir.Ref[];
       captureIndex: Record<string, number>;
     }
 );
@@ -56,7 +56,7 @@ class CompileContext {
   // Externals will include:
   // 1. stdLib symbols
   // 2. imports
-  // Externals will be inlined in the resulting expression.
+  // Externals will be inlined in the resulting IR.
   constructor(public externals: Bindings) {
     // top-level scope
     this.startScope();
@@ -105,7 +105,7 @@ class CompileContext {
     location: LocationRange,
     name: string,
     fromDepth: number
-  ): expression.ExpressionByKind<"StackRef" | "CaptureRef" | "Value"> {
+  ): ir.IRByKind<"StackRef" | "CaptureRef" | "Value"> {
     let offset = 0;
 
     // Unwind the scopes upwards.
@@ -114,10 +114,7 @@ class CompileContext {
       if (name in scope.stack) {
         return {
           location,
-          ...expression.make(
-            "StackRef",
-            offset + scope.size - 1 - scope.stack[name]
-          ),
+          ...ir.make("StackRef", offset + scope.size - 1 - scope.stack[name]),
         };
       }
       offset += scope.size;
@@ -127,7 +124,7 @@ class CompileContext {
         if (name in scope.captureIndex) {
           return {
             location,
-            ...expression.make("CaptureRef", scope.captureIndex[name]),
+            ...ir.make("CaptureRef", scope.captureIndex[name]),
           };
         }
 
@@ -155,7 +152,7 @@ class CompileContext {
         scope.captureIndex[name] = newIndex;
         return {
           location,
-          ...expression.make("CaptureRef", newIndex),
+          ...ir.make("CaptureRef", newIndex),
         };
       }
     }
@@ -165,14 +162,14 @@ class CompileContext {
     if (value !== undefined) {
       return {
         location,
-        ...expression.make("Value", value),
+        ...ir.make("Value", value),
       };
     }
 
     throw new ICompileError(`${name} is not defined`, location);
   }
 
-  resolveName(location: LocationRange, name: string): Expression {
+  resolveName(location: LocationRange, name: string): IR {
     return this.resolveNameFromDepth(location, name, this.scopes.length - 1);
   }
 
@@ -192,15 +189,15 @@ class CompileContext {
 function compileToContent(
   ast: CompilableNode,
   context: CompileContext
-): expression.ExpressionContent {
+): ir.IRContent {
   switch (ast.kind) {
     case "Block": {
       if (ast.statements.length === 0) {
-        // unwrap blocks; no need for extra scopes or Block expressions
+        // unwrap blocks; no need for extra scopes or Block IR nodes.
         return compileToContent(ast.result, context);
       }
       context.startScope();
-      const statements: Expression[] = [];
+      const statements: IR[] = [];
       for (const astStatement of ast.statements) {
         if (astStatement.exported) {
           throw new ICompileError(
@@ -213,11 +210,11 @@ function compileToContent(
       }
       const result = innerCompileAst(ast.result, context);
       context.finishScope();
-      return expression.make("Block", { statements, result });
+      return ir.make("Block", { statements, result });
     }
     case "Program": {
       // No need to start a top-level scope, it already exists.
-      const statements: Expression[] = [];
+      const statements: IR[] = [];
       const exports: string[] = [];
       for (const astStatement of ast.statements) {
         const statement = innerCompileAst(astStatement, context);
@@ -231,7 +228,7 @@ function compileToContent(
         ? innerCompileAst(ast.result, context)
         : undefined;
 
-      return expression.make("Program", {
+      return ir.make("Program", {
         statements,
         result,
         exports,
@@ -250,7 +247,7 @@ function compileToContent(
         );
         value = {
           location: ast.location,
-          ...expression.eCall(
+          ...ir.eCall(
             decoratorFn,
             [
               value,
@@ -262,48 +259,48 @@ function compileToContent(
       }
 
       context.defineLocal(name);
-      return expression.make("Assign", { left: name, right: value });
+      return ir.make("Assign", { left: name, right: value });
     }
     case "Call": {
-      return expression.eCall(
+      return ir.eCall(
         innerCompileAst(ast.fn, context),
         ast.args.map((arg) => innerCompileAst(arg, context))
       );
     }
     case "InfixCall": {
-      return expression.eCall(
+      return ir.eCall(
         context.resolveName(ast.location, infixFunctions[ast.op]),
         ast.args.map((arg) => innerCompileAst(arg, context))
       );
     }
     case "UnaryCall":
-      return expression.eCall(
+      return ir.eCall(
         context.resolveName(ast.location, unaryFunctions[ast.op]),
         [innerCompileAst(ast.arg, context)]
       );
     case "Pipe":
-      return expression.eCall(innerCompileAst(ast.fn, context), [
+      return ir.eCall(innerCompileAst(ast.fn, context), [
         innerCompileAst(ast.leftArg, context),
         ...ast.rightArgs.map((arg) => innerCompileAst(arg, context)),
       ]);
     case "DotLookup":
-      return expression.eCall(
+      return ir.eCall(
         context.resolveName(ast.location, INDEX_LOOKUP_FUNCTION),
         [
           innerCompileAst(ast.arg, context),
           {
             location: ast.location,
-            ...expression.make("Value", vString(ast.key)),
+            ...ir.make("Value", vString(ast.key)),
           },
         ]
       );
     case "BracketLookup":
-      return expression.eCall(
+      return ir.eCall(
         context.resolveName(ast.location, INDEX_LOOKUP_FUNCTION),
         [innerCompileAst(ast.arg, context), innerCompileAst(ast.key, context)]
       );
     case "Lambda": {
-      const parameters: expression.LambdaExpressionParameter[] = [];
+      const parameters: ir.LambdaIRParameter[] = [];
       for (const astParameter of ast.args) {
         parameters.push({
           name: astParameter.variable,
@@ -326,7 +323,7 @@ function compileToContent(
       const body = innerCompileAst(ast.body, context);
       const captures = context.currentScopeCaptures();
       context.finishScope();
-      return expression.make("Lambda", {
+      return ir.make("Lambda", {
         name: ast.name ?? undefined,
         captures,
         parameters,
@@ -334,33 +331,33 @@ function compileToContent(
       });
     }
     case "Ternary":
-      return expression.make("Ternary", {
+      return ir.make("Ternary", {
         condition: innerCompileAst(ast.condition, context),
         ifTrue: innerCompileAst(ast.trueExpression, context),
         ifFalse: innerCompileAst(ast.falseExpression, context),
       });
     case "Array":
-      return expression.make(
+      return ir.make(
         "Array",
         ast.elements.map((statement) => innerCompileAst(statement, context))
       );
     case "Dict":
-      return expression.make(
+      return ir.make(
         "Dict",
         ast.elements.map((kv) => {
           if (kv.kind === "KeyValue") {
             return [
               innerCompileAst(kv.key, context),
               innerCompileAst(kv.value, context),
-            ] as [Expression, Expression];
+            ] as [IR, IR];
           } else if (kv.kind === "Identifier") {
             // shorthand
             const key = {
               location: kv.location,
-              ...expression.make("Value", vString(kv.value)),
+              ...ir.make("Value", vString(kv.value)),
             };
             const value = context.resolveName(kv.location, kv.value);
-            return [key, value] as [Expression, Expression];
+            return [key, value] as [IR, IR];
           } else {
             throw new Error(
               `Internal AST error: unexpected kv ${kv satisfies never}`
@@ -369,7 +366,7 @@ function compileToContent(
         })
       );
     case "Boolean":
-      return expression.make("Value", vBool(ast.value));
+      return ir.make("Value", vBool(ast.value));
     case "Float": {
       const value = parseFloat(
         `${ast.integer}${ast.fractional === null ? "" : `.${ast.fractional}`}${
@@ -379,10 +376,10 @@ function compileToContent(
       if (Number.isNaN(value)) {
         throw new ICompileError("Failed to compile a number", ast.location);
       }
-      return expression.make("Value", vNumber(value));
+      return ir.make("Value", vNumber(value));
     }
     case "String":
-      return expression.make("Value", vString(ast.value));
+      return ir.make("Value", vString(ast.value));
     case "Identifier": {
       return context.resolveName(ast.location, ast.value);
     }
@@ -391,9 +388,7 @@ function compileToContent(
         ast.location,
         `fromUnit_${ast.unit}`
       );
-      return expression.eCall(fromUnitFn, [
-        innerCompileAst(ast.value, context),
-      ]);
+      return ir.eCall(fromUnitFn, [innerCompileAst(ast.value, context)]);
     }
     default: {
       const badAst = ast satisfies never;
@@ -402,10 +397,7 @@ function compileToContent(
   }
 }
 
-function innerCompileAst(
-  ast: CompilableNode,
-  context: CompileContext
-): expression.Expression {
+function innerCompileAst(ast: CompilableNode, context: CompileContext): ir.IR {
   const content = compileToContent(ast, context);
   return {
     location: ast.location,
@@ -416,10 +408,10 @@ function innerCompileAst(
 export function compileAst(
   ast: TypedAST,
   externals: Bindings
-): Result.result<expression.Expression, ICompileError> {
+): Result.result<ir.IR, ICompileError> {
   try {
-    const expression = innerCompileAst(ast, new CompileContext(externals));
-    return Result.Ok(expression);
+    const ir = innerCompileAst(ast, new CompileContext(externals));
+    return Result.Ok(ir);
   } catch (err) {
     if (err instanceof ICompileError) {
       return Result.Err(err);

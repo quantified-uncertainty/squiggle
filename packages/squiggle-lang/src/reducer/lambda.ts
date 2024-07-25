@@ -1,13 +1,13 @@
 import uniq from "lodash/uniq.js";
 
 import { LocationRange } from "../ast/types.js";
+import { IR } from "../compiler/index.js";
 import {
   REArgumentDomainError,
   REArityError,
   REDomainError,
   REOther,
 } from "../errors/messages.js";
-import { Expression } from "../expression/index.js";
 import {
   FnDefinition,
   fnDefinitionToString,
@@ -37,7 +37,7 @@ export abstract class BaseLambda {
   abstract parameterCounts(): number[];
   abstract parameterCountString(): string;
 
-  protected abstract body(args: Value[], reducer: Reducer): Value;
+  protected abstract callBody(args: Value[], reducer: Reducer): Value;
 
   // Prepare a new frame and call the lambda's body with given args.
   call(args: Value[], reducer: Reducer, location?: LocationRange) {
@@ -46,7 +46,7 @@ export abstract class BaseLambda {
     reducer.frameStack.extend(new Frame(this, location));
 
     try {
-      const result = this.body(args, reducer);
+      const result = this.callBody(args, reducer);
       // If lambda throws an exception, this won't happen.  This is intentional;
       // it allows us to build the correct stacktrace with `.errorFromException`
       // method later.
@@ -63,22 +63,22 @@ export class UserDefinedLambda extends BaseLambda {
   readonly type = "UserDefinedLambda";
   parameters: UserDefinedLambdaParameter[];
   name?: string;
-  expression: Expression;
+  body: IR;
 
   constructor(
     name: string | undefined,
     captures: Value[],
     parameters: UserDefinedLambdaParameter[],
-    expression: Expression
+    body: IR
   ) {
     super();
     this.name = name;
     this.captures = captures;
-    this.expression = expression;
+    this.body = body;
     this.parameters = parameters;
   }
 
-  body(args: Value[], reducer: Reducer) {
+  callBody(args: Value[], reducer: Reducer) {
     const argsLength = args.length;
     const parametersLength = this.parameters.length;
     if (argsLength !== parametersLength) {
@@ -102,7 +102,7 @@ export class UserDefinedLambda extends BaseLambda {
       reducer.stack.push(args[i]);
     }
 
-    return reducer.innerEvaluate(this.expression);
+    return reducer.innerEvaluate(this.body);
   }
 
   display() {
@@ -174,7 +174,7 @@ export class BuiltinLambda extends BaseLambda {
     return this.definitions.map((d) => d.inputs);
   }
 
-  body(args: Value[], reducer: Reducer): Value {
+  callBody(args: Value[], reducer: Reducer): Value {
     for (const definition of this.definitions) {
       const callResult = tryCallFnDefinition(definition, args, reducer);
       if (callResult !== undefined) {

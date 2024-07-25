@@ -48,7 +48,7 @@ export function deserializeLambda(
             domain,
           };
         }),
-        visit.expression(value.expressionId)
+        visit.ir(value.irId)
       );
   }
 }

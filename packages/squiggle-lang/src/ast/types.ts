@@ -20,9 +20,9 @@ export type Location = {
 export type LocationRange = {
   /** Unlike in Peggy, this must be a string. */
   source: string;
-  /** Position at the beginning of the expression. */
+  /** Position at the beginning of the node. */
   start: Location;
-  /** Position after the end of the expression. */
+  /** Position after the end of the node. */
   end: Location;
 };
 

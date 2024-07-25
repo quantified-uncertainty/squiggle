@@ -3,12 +3,12 @@ import {
   serializeAstNode,
   SerializedASTNode,
 } from "../ast/serialize.js";
-import { Expression } from "../expression/index.js";
+import { IR } from "../compiler/index.js";
 import {
-  deserializeExpression,
-  SerializedExpression,
-  serializeExpression,
-} from "../expression/serialize.js";
+  deserializeIR,
+  SerializedIR,
+  serializeIR,
+} from "../compiler/serialize.js";
 import { ASTNode } from "../index.js";
 import { Lambda } from "../reducer/lambda.js";
 import { RunProfile, SerializedRunProfile } from "../reducer/RunProfile.js";
@@ -30,7 +30,7 @@ import { SerializedLambda, serializeLambda } from "./serializeLambda.js";
 // BaseShape for Squiggle.
 type SquiggleShape = {
   value: [Value, SerializedValue];
-  expression: [Expression, SerializedExpression];
+  ir: [IR, SerializedIR];
   lambda: [Lambda, SerializedLambda];
   tags: [ValueTags, SerializedValueTags];
   profile: [RunProfile, SerializedRunProfile];
@@ -42,9 +42,9 @@ const squiggleConfig: StoreConfig<SquiggleShape> = {
     serialize: (node, visitor) => node.serialize(visitor),
     deserialize: deserializeValue,
   },
-  expression: {
-    serialize: serializeExpression,
-    deserialize: deserializeExpression,
+  ir: {
+    serialize: serializeIR,
+    deserialize: deserializeIR,
   },
   lambda: {
     serialize: serializeLambda,
@@ -97,7 +97,7 @@ export type SquiggleBundleEntrypoint<T extends keyof SquiggleShape> =
  * // you can throw multiple things in the bundle, just don't forget to track the entrypoints
  * const entrypoint1 = serializer.serialize("value", myValue); // serialize a value
  * const entrypoint2 = serializer.serialize("value", myValue2); // serialize another value
- * const entrypoint3 = serializer.serialize("expression", expression); // serialize an expression (or any other entity type that's supported)
+ * const entrypoint3 = serializer.serialize("ir", ir); // serialize an IR node (or any other entity type that's supported)
  *
  * // get the bundle - it will contain everything that was serialized
  * const bundle = serializer.getBundle();

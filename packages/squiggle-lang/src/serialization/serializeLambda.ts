@@ -13,7 +13,7 @@ export type SerializedLambda =
   | {
       type: "UserDefined";
       name?: string;
-      expressionId: number;
+      irId: number;
       parameters: SerializedParameter[];
       captureIds: number[];
     };
@@ -32,7 +32,7 @@ export function serializeLambda(
       return {
         type: "UserDefined",
         name: lambda.name,
-        expressionId: visit.expression(lambda.expression),
+        irId: visit.ir(lambda.body),
         parameters: lambda.parameters.map((parameter) => ({
           ...parameter,
           domainId: parameter.domain

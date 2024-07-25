@@ -1,6 +1,7 @@
 import jstat from "jstat";
 
 import { LocationRange } from "../ast/types.js";
+import { IR, IRByKind } from "../compiler/index.js";
 import { Env } from "../dists/env.js";
 import { IRuntimeError } from "../errors/IError.js";
 import {
@@ -11,7 +12,6 @@ import {
   RENotAFunction,
   REOther,
 } from "../errors/messages.js";
-import { Expression, ExpressionByKind } from "../expression/index.js";
 import { getAleaRng, PRNG } from "../rng/index.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { annotationToDomain } from "../value/annotations.js";
@@ -27,8 +27,7 @@ import { RunProfile } from "./RunProfile.js";
 import { Stack } from "./Stack.js";
 import { StackTrace } from "./StackTrace.js";
 
-type ExpressionValue<Kind extends Expression["kind"]> =
-  ExpressionByKind<Kind>["value"];
+type IRValue<Kind extends IR["kind"]> = IRByKind<Kind>["value"];
 
 /**
  * Checks that all `evaluateFoo` methods follow the same naming convention.
@@ -38,8 +37,8 @@ type ExpressionValue<Kind extends Expression["kind"]> =
  * arrow functions shouldn't be used as methods.
  */
 type EvaluateAllKinds = {
-  [Kind in Expression["kind"] as `evaluate${Kind}`]: (
-    expressionValue: ExpressionValue<Kind>,
+  [Kind in IR["kind"] as `evaluate${Kind}`]: (
+    irValue: IRValue<Kind>,
     location: LocationRange
   ) => Value;
 };
@@ -73,9 +72,9 @@ export class Reducer implements EvaluateAllKinds {
     this.rng = getAleaRng(seed);
   }
 
-  // Evaluate the expression.
-  // When recursing into nested expressions, call `innerEvaluate()` instead of this method.
-  evaluate(expression: Expression): Value {
+  // Evaluate the IR.
+  // When recursing into nested IR nodes, call `innerEvaluate()` instead of this method.
+  evaluate(ir: IR): Value {
     if (this.isRunning) {
       throw new Error(
         "Can't recursively reenter the reducer, consider `.innerEvaluate()` if you're working on Squiggle internals"
@@ -87,69 +86,69 @@ export class Reducer implements EvaluateAllKinds {
 
     // avoid stale data
     if (this.environment.profile) {
-      this.profile = new RunProfile(expression.location.source);
+      this.profile = new RunProfile(ir.location.source);
     } else {
       this.profile = undefined;
     }
 
-    const result = this.innerEvaluate(expression);
+    const result = this.innerEvaluate(ir);
     this.isRunning = false;
 
     return result;
   }
 
-  innerEvaluate(expression: Expression): Value {
+  innerEvaluate(ir: IR): Value {
     let start: Date | undefined;
     if (this.profile) {
       start = new Date();
     }
 
     let result: Value;
-    switch (expression.kind) {
+    switch (ir.kind) {
       case "Call":
-        result = this.evaluateCall(expression.value, expression.location);
+        result = this.evaluateCall(ir.value, ir.location);
         break;
       case "StackRef":
-        result = this.evaluateStackRef(expression.value);
+        result = this.evaluateStackRef(ir.value);
         break;
       case "CaptureRef":
-        result = this.evaluateCaptureRef(expression.value);
+        result = this.evaluateCaptureRef(ir.value);
         break;
       case "Block":
-        result = this.evaluateBlock(expression.value);
+        result = this.evaluateBlock(ir.value);
         break;
       case "Assign":
-        result = this.evaluateAssign(expression.value);
+        result = this.evaluateAssign(ir.value);
         break;
       case "Array":
-        result = this.evaluateArray(expression.value);
+        result = this.evaluateArray(ir.value);
         break;
       case "Dict":
-        result = this.evaluateDict(expression.value);
+        result = this.evaluateDict(ir.value);
         break;
       case "Value":
-        result = this.evaluateValue(expression.value);
+        result = this.evaluateValue(ir.value);
         break;
       case "Ternary":
-        result = this.evaluateTernary(expression.value);
+        result = this.evaluateTernary(ir.value);
         break;
       case "Lambda":
-        result = this.evaluateLambda(expression.value);
+        result = this.evaluateLambda(ir.value);
         break;
       case "Program":
-        result = this.evaluateProgram(expression.value);
+        result = this.evaluateProgram(ir.value);
         break;
       default:
-        throw new Error(`Unreachable: ${expression satisfies never}`);
+        throw new Error(`Unreachable: ${ir satisfies never}`);
     }
     if (
       this.profile &&
-      // TODO - exclude other trivial expression kinds?
-      expression.kind !== "Program"
+      // TODO - exclude other trivial IR nodes?
+      ir.kind !== "Program"
     ) {
       const end = new Date();
       const time = end.getTime() - start!.getTime();
-      this.profile.addRange(expression.location, time);
+      this.profile.addRange(ir.location, time);
     }
     return result;
   }
@@ -173,43 +172,43 @@ export class Reducer implements EvaluateAllKinds {
     );
   }
 
-  evaluateBlock(expressionValue: ExpressionValue<"Block">) {
+  evaluateBlock(irValue: IRValue<"Block">) {
     const initialStackSize = this.stack.size();
 
-    for (const statement of expressionValue.statements) {
+    for (const statement of irValue.statements) {
       this.innerEvaluate(statement);
     }
 
-    const result = this.innerEvaluate(expressionValue.result);
+    const result = this.innerEvaluate(irValue.result);
     this.stack.shrink(initialStackSize);
 
     return result;
   }
 
-  evaluateProgram(expressionValue: ExpressionValue<"Program">) {
+  evaluateProgram(irValue: IRValue<"Program">) {
     // Same as Block, but doesn't shrink back the stack, so that we could return bindings and exports from it.
-    for (const statement of expressionValue.statements) {
+    for (const statement of irValue.statements) {
       this.innerEvaluate(statement);
     }
 
-    if (expressionValue.result) {
-      return this.innerEvaluate(expressionValue.result);
+    if (irValue.result) {
+      return this.innerEvaluate(irValue.result);
     } else {
       return vVoid();
     }
   }
 
-  evaluateArray(expressionValue: ExpressionValue<"Array">) {
-    const values = expressionValue.map((element) => {
+  evaluateArray(irValue: IRValue<"Array">) {
+    const values = irValue.map((element) => {
       return this.innerEvaluate(element);
     });
     return vArray(values);
   }
 
-  evaluateDict(expressionValue: ExpressionValue<"Dict">) {
+  evaluateDict(irValue: IRValue<"Dict">) {
     return vDict(
       ImmutableMap(
-        expressionValue.map(([eKey, eValue]) => {
+        irValue.map(([eKey, eValue]) => {
           const key = this.innerEvaluate(eKey);
           if (key.type !== "String") {
             throw this.runtimeError(
@@ -225,14 +224,14 @@ export class Reducer implements EvaluateAllKinds {
     );
   }
 
-  evaluateAssign(expressionValue: ExpressionValue<"Assign">) {
-    const result = this.innerEvaluate(expressionValue.right);
+  evaluateAssign(irValue: IRValue<"Assign">) {
+    const result = this.innerEvaluate(irValue.right);
     this.stack.push(result);
     return vVoid();
   }
 
-  evaluateStackRef(expressionValue: ExpressionValue<"StackRef">) {
-    return this.stack.get(expressionValue);
+  evaluateStackRef(irValue: IRValue<"StackRef">) {
+    return this.stack.get(irValue);
   }
 
   private getCapture(id: number) {
@@ -250,7 +249,7 @@ export class Reducer implements EvaluateAllKinds {
     return value;
   }
 
-  evaluateCaptureRef(id: ExpressionValue<"CaptureRef">) {
+  evaluateCaptureRef(id: IRValue<"CaptureRef">) {
     return this.getCapture(id);
   }
 
@@ -258,50 +257,45 @@ export class Reducer implements EvaluateAllKinds {
     return value;
   }
 
-  evaluateTernary(expressionValue: ExpressionValue<"Ternary">) {
-    const predicateResult = this.innerEvaluate(expressionValue.condition);
+  evaluateTernary(irValue: IRValue<"Ternary">) {
+    const predicateResult = this.innerEvaluate(irValue.condition);
     if (predicateResult.type !== "Bool") {
       throw this.runtimeError(
         new REExpectedType("Boolean", predicateResult.type),
-        expressionValue.condition.location
+        irValue.condition.location
       );
     }
 
     return this.innerEvaluate(
-      predicateResult.value ? expressionValue.ifTrue : expressionValue.ifFalse
+      predicateResult.value ? irValue.ifTrue : irValue.ifFalse
     );
   }
 
-  evaluateLambda(expressionValue: ExpressionValue<"Lambda">) {
+  evaluateLambda(irValue: IRValue<"Lambda">) {
     const parameters: UserDefinedLambdaParameter[] = [];
-    for (const parameterExpression of expressionValue.parameters) {
+    for (const parameterIR of irValue.parameters) {
       let domain: VDomain | undefined;
       // Processing annotations, e.g. f(x: [3, 5]) = { ... }
-      if (parameterExpression.annotation) {
+      if (parameterIR.annotation) {
         // First, we evaluate `[3, 5]` expression.
-        const annotationValue = this.innerEvaluate(
-          parameterExpression.annotation
-        );
+        const annotationValue = this.innerEvaluate(parameterIR.annotation);
         // Now we cast it to domain value, e.g. `NumericRangeDomain(3, 5)`.
         // Casting can fail, in which case we throw the error with a correct stacktrace.
         try {
           domain = vDomain(annotationToDomain(annotationValue));
         } catch (e) {
           // see also: `Lambda.callFrom`
-          throw this.errorFromException(
-            e,
-            parameterExpression.annotation.location
-          );
+          throw this.errorFromException(e, parameterIR.annotation.location);
         }
       }
       parameters.push({
-        name: parameterExpression.name,
+        name: parameterIR.name,
         domain,
       });
     }
 
     const capturedValues: Value[] = [];
-    for (const capture of expressionValue.captures) {
+    for (const capture of irValue.captures) {
       // identical to `evaluateStackRef` and `evaluateCaptureRef`
       switch (capture.kind) {
         case "StackRef": {
@@ -319,37 +313,32 @@ export class Reducer implements EvaluateAllKinds {
 
     return vLambda(
       new UserDefinedLambda(
-        expressionValue.name,
+        irValue.name,
         capturedValues,
         parameters,
-        expressionValue.body
+        irValue.body
       )
     );
   }
 
-  evaluateCall(
-    expressionValue: ExpressionValue<"Call">,
-    location: LocationRange
-  ) {
-    const lambda = this.innerEvaluate(expressionValue.fn);
+  evaluateCall(irValue: IRValue<"Call">, location: LocationRange) {
+    const lambda = this.innerEvaluate(irValue.fn);
     if (lambda.type !== "Lambda") {
       throw this.runtimeError(
         new RENotAFunction(lambda.toString()),
-        expressionValue.fn.location
+        irValue.fn.location
       );
     }
-    if (expressionValue.as === "decorate" && !lambda.value.isDecorator) {
+    if (irValue.as === "decorate" && !lambda.value.isDecorator) {
       throw this.runtimeError(
         new RENotADecorator(lambda.toString()),
-        expressionValue.fn.location
+        irValue.fn.location
       );
     }
 
-    const argValues = expressionValue.args.map((arg) =>
-      this.innerEvaluate(arg)
-    );
+    const argValues = irValue.args.map((arg) => this.innerEvaluate(arg));
 
-    // we pass the ast of a current expression here, to put it on frameStack
+    // We pass the location of a current IR node here, to put it on frameStack.
     try {
       return this.call(lambda.value, argValues, location);
     } catch (e) {
@@ -359,7 +348,7 @@ export class Reducer implements EvaluateAllKinds {
         this.frameStack.pop();
         throw this.runtimeError(
           e,
-          expressionValue.args.at(e.idx)?.location ?? location
+          irValue.args.at(e.idx)?.location ?? location
         );
       } else {
         throw e;

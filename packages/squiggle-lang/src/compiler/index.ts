@@ -1,11 +1,10 @@
 /**
- * An "Expression" is an intermediate representation of a Squiggle code.
+ * An "IR" is an intermediate representation of a Squiggle code.
  *
- * Note that expressions are not "things that evaluate to values"! The entire
- * Squiggle program is also an expression. (Maybe we should rename this to
- * "IR".) Expressions are evaluated by reducer's `evaluate` function.
+ * IR is evaluated by reducer's `evaluate` function.
  *
- * Also, our IR is not flattened, so we can't call it a "bytecode" yet.
+ * Our IR is nested because the interpreter relies on Javascript stack for
+ * native function calls, so we can't call it a "bytecode" yet.
  *
  * The main difference between our IR and AST is that in IR, variable names are
  * resolved to stack and capture references.
@@ -19,38 +18,38 @@ import {
 } from "../utility/sExpr.js";
 import { Value } from "../value/index.js";
 
-export type LambdaExpressionParameter = {
+export type LambdaIRParameter = {
   name: string;
-  annotation: Expression | undefined;
+  annotation: IR | undefined;
 };
 
 // All shapes are kind+value, to help with V8 monomorphism.
 // **Don't** inject any more fields on this or try to flatten `value` props, it will only make things slower.
-type MakeExpressionContent<Kind extends string, Payload> = {
+type MakeIRContent<Kind extends string, Payload> = {
   kind: Kind;
   value: Payload;
 };
 
-export type ExpressionContent =
+export type IRContent =
   // Programs are similar to blocks, but they can export things for other modules to use.
-  // There can be only one program at the top level of the expression.
-  | MakeExpressionContent<
+  // There can be only one program at the top level of the IR.
+  | MakeIRContent<
       "Program",
       {
-        statements: Expression[];
-        result: Expression | undefined;
+        statements: IR[];
+        result: IR | undefined;
         exports: string[]; // all exported names
         bindings: Record<string, number>; // variable name -> stack offset mapping
       }
     >
-  | MakeExpressionContent<
+  | MakeIRContent<
       "Block",
       {
-        statements: Expression[];
-        result: Expression;
+        statements: IR[];
+        result: IR;
       }
     >
-  | MakeExpressionContent<
+  | MakeIRContent<
       "StackRef",
       /**
        * Position on stack, counting backwards (so last variable on stack has
@@ -68,33 +67,33 @@ export type ExpressionContent =
   // captures to stack on every call, but that would be more expensive.  See
   // also: https://en.wikipedia.org/wiki/Funarg_problem; supporting closures
   // mean that Squiggle can't be entirely stack-based.
-  | MakeExpressionContent<
+  | MakeIRContent<
       "CaptureRef",
       number // Position in captures
     >
   // Ternaries can't be simplified to calls, because they're lazy.
   // (In a way, ternaries is the only way to do control flow in Squiggle.)
-  | MakeExpressionContent<
+  | MakeIRContent<
       "Ternary",
       {
-        condition: Expression;
-        ifTrue: Expression;
-        ifFalse: Expression;
+        condition: IR;
+        ifTrue: IR;
+        ifFalse: IR;
       }
     >
   // Both variable definitions (`x = 5`) and function definitions (`f(x) = x`) compile to this.
-  | MakeExpressionContent<
+  | MakeIRContent<
       "Assign",
       {
         left: string;
-        right: Expression;
+        right: IR;
       }
     >
-  | MakeExpressionContent<
+  | MakeIRContent<
       "Call",
       {
-        fn: Expression;
-        args: Expression[];
+        fn: IR;
+        args: IR[];
         // Note that `Decorate` is applied to values, not to statements;
         // decorated statements get rewritten in `./compile.ts`. If "decorate"
         // is set, the call will work only on lambdas marked with `isDecorator:
@@ -102,41 +101,40 @@ export type ExpressionContent =
         as: "call" | "decorate";
       }
     >
-  | MakeExpressionContent<
+  | MakeIRContent<
       "Lambda",
       {
         name?: string;
-        // Lambda values produced by lambda expressions carry captured values
-        // with them. `captures` are references to values that should be stored
-        // in lambda. Captures can come either from the stack, or from captures
-        // of the enclosing function.
+        // Lambda values produced by lambda IR nodes carry captured values with
+        // them. `captures` are references to values that should be stored in
+        // lambda. Captures can come either from the stack, or from captures of
+        // the enclosing function.
         captures: Ref[];
-        parameters: LambdaExpressionParameter[];
-        body: Expression;
+        parameters: LambdaIRParameter[];
+        body: IR;
       }
     >
-  | MakeExpressionContent<"Array", Expression[]>
-  | MakeExpressionContent<"Dict", [Expression, Expression][]>
+  | MakeIRContent<"Array", IR[]>
+  | MakeIRContent<"Dict", [IR, IR][]>
   // Constants or external references that were inlined during compilation.
-  | MakeExpressionContent<"Value", Value>;
+  | MakeIRContent<"Value", Value>;
 
-export type ExpressionContentByKind<T extends ExpressionContent["kind"]> =
-  Extract<ExpressionContent, { kind: T }>;
-
-export type Ref = ExpressionContentByKind<"StackRef" | "CaptureRef">;
-
-export type Expression = ExpressionContent & { location: LocationRange };
-
-export type ExpressionByKind<T extends ExpressionContent["kind"]> = Extract<
-  Expression,
+export type IRContentByKind<T extends IRContent["kind"]> = Extract<
+  IRContent,
   { kind: T }
 >;
 
+export type Ref = IRContentByKind<"StackRef" | "CaptureRef">;
+
+export type IR = IRContent & { location: LocationRange };
+
+export type IRByKind<T extends IRContent["kind"]> = Extract<IR, { kind: T }>;
+
 export const eCall = (
-  fn: Expression,
-  args: Expression[],
+  fn: IR,
+  args: IR[],
   as: "call" | "decorate" = "call"
-): ExpressionContentByKind<"Call"> => ({
+): IRContentByKind<"Call"> => ({
   kind: "Call",
   value: {
     fn,
@@ -145,19 +143,19 @@ export const eCall = (
   },
 });
 
-export function make<Kind extends ExpressionContent["kind"]>(
+export function make<Kind extends IRContent["kind"]>(
   kind: Kind,
-  value: ExpressionContentByKind<Kind>["value"]
-): ExpressionContentByKind<Kind> {
+  value: IRContentByKind<Kind>["value"]
+): IRContentByKind<Kind> {
   return {
     kind,
     value,
     // Need to cast explicitly because TypeScript doesn't support `oneof` yet; `Kind` type parameter could be a union.
-  } as ExpressionContentByKind<Kind>;
+  } as IRContentByKind<Kind>;
 }
 
 /**
- * Converts the expression to string. Useful for tests.
+ * Converts the IR to string. Useful for tests.
  * Example:
 
 (Program
@@ -190,76 +188,61 @@ export function make<Kind extends ExpressionContent["kind"]>(
 )
 
  */
-export function expressionToString(
-  expression: ExpressionContent,
+export function irToString(
+  ir: IRContent,
   printOptions: SExprPrintOptions = {}
 ): string {
-  const toSExpr = (expression: ExpressionContent): SExpr => {
+  const toSExpr = (ir: IRContent): SExpr => {
     const selfExpr = (args: (SExpr | undefined)[]): SExpr => ({
-      name: expression.kind,
+      name: ir.kind,
       args,
     });
 
-    switch (expression.kind) {
+    switch (ir.kind) {
       case "Block":
-        return selfExpr(
-          [...expression.value.statements, expression.value.result].map(toSExpr)
-        );
+        return selfExpr([...ir.value.statements, ir.value.result].map(toSExpr));
       case "Program":
         return selfExpr([
-          expression.value.statements.length
-            ? sExpr(".statements", expression.value.statements.map(toSExpr))
+          ir.value.statements.length
+            ? sExpr(".statements", ir.value.statements.map(toSExpr))
             : undefined,
-          Object.keys(expression.value.bindings).length
+          Object.keys(ir.value.bindings).length
             ? sExpr(
                 ".bindings",
-                Object.entries(expression.value.bindings).map(
-                  ([name, offset]) => sExpr(name, [offset])
+                Object.entries(ir.value.bindings).map(([name, offset]) =>
+                  sExpr(name, [offset])
                 )
               )
             : undefined,
-          expression.value.exports.length
-            ? sExpr(".exports", expression.value.exports)
+          ir.value.exports.length
+            ? sExpr(".exports", ir.value.exports)
             : undefined,
-          expression.value.result
-            ? toSExpr(expression.value.result)
-            : undefined,
+          ir.value.result ? toSExpr(ir.value.result) : undefined,
         ]);
       case "Array":
-        return selfExpr(expression.value.map(toSExpr));
+        return selfExpr(ir.value.map(toSExpr));
       case "Dict":
-        return selfExpr(
-          expression.value.map((pair) => sExpr("kv", pair.map(toSExpr)))
-        );
+        return selfExpr(ir.value.map((pair) => sExpr("kv", pair.map(toSExpr))));
       case "StackRef":
-        return selfExpr([expression.value]);
+        return selfExpr([ir.value]);
       case "CaptureRef":
-        return selfExpr([expression.value]);
+        return selfExpr([ir.value]);
       case "Ternary":
         return selfExpr(
-          [
-            expression.value.condition,
-            expression.value.ifTrue,
-            expression.value.ifFalse,
-          ].map(toSExpr)
+          [ir.value.condition, ir.value.ifTrue, ir.value.ifFalse].map(toSExpr)
         );
       case "Assign":
-        return selfExpr([
-          expression.value.left,
-          toSExpr(expression.value.right),
-        ]);
+        return selfExpr([ir.value.left, toSExpr(ir.value.right)]);
       case "Call":
-        return selfExpr(
-          [expression.value.fn, ...expression.value.args].map(toSExpr)
-        );
+        return selfExpr([ir.value.fn, ...ir.value.args].map(toSExpr));
       case "Lambda":
         return selfExpr([
-          expression.value.captures.length
-            ? sExpr(".captures", expression.value.captures.map(toSExpr))
+          ir.value.captures.length
+            ? sExpr(".captures", ir.value.captures.map(toSExpr))
             : undefined,
           sExpr(
             ".parameters",
-            expression.value.parameters.map((parameter) =>
+            ir.value.parameters.map((parameter) =>
               parameter.annotation
                 ? sExpr(".annotated", [
                     parameter.name,
@@ -268,14 +251,14 @@ export function expressionToString(
                 : parameter.name
             )
           ),
-          toSExpr(expression.value.body),
+          toSExpr(ir.value.body),
         ]);
       case "Value":
-        return expression.value.toString();
+        return ir.value.toString();
       default:
-        return `Unknown expression ${expression satisfies never}`;
+        return `Unknown IR node ${ir satisfies never}`;
     }
   };
 
-  return sExprToString(toSExpr(expression), printOptions);
+  return sExprToString(toSExpr(ir), printOptions);
 }

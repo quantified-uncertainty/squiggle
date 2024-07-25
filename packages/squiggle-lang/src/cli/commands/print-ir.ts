@@ -1,7 +1,7 @@
 import { Command } from "@commander-js/extra-typings";
 
-import { compileAst } from "../../expression/compile.js";
-import { expressionToString } from "../../expression/index.js";
+import { compileAst } from "../../compiler/compile.js";
+import { irToString } from "../../compiler/index.js";
 import { getStdLib } from "../../library/index.js";
 import { parse } from "../../public/parse.js";
 import { red } from "../colors.js";
@@ -20,12 +20,12 @@ export function addPrintIrCommand(program: Command) {
 
       const parseResult = parse(src);
       if (parseResult.ok) {
-        const expression = compileAst(parseResult.value, getStdLib());
+        const ir = compileAst(parseResult.value, getStdLib());
 
-        if (expression.ok) {
-          console.log(expressionToString(expression.value, { colored: true }));
+        if (ir.ok) {
+          console.log(irToString(ir.value, { colored: true }));
         } else {
-          console.log(red(expression.value.toString()));
+          console.log(red(ir.value.toString()));
         }
       } else {
         console.log(red(parseResult.value.toString()));
