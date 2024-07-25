@@ -55,10 +55,6 @@ type NodeProgram = N<
   {
     imports: [NodeString, NodeIdentifier][];
     statements: ASTNode[];
-    // Var name -> statement node, for faster path resolution.
-    // Not used for evaluation.
-    // Note: symbols point to undecorated statements.
-    symbols: { [k in string]: ASTNode };
   }
 >;
 
@@ -73,9 +69,6 @@ type NodeDict = N<
   "Dict",
   {
     elements: AnyNodeDictEntry[];
-    // Static key -> node, for faster path resolution.
-    // Not used for evaluation.
-    symbols: { [k in number | string]: AnyNodeDictEntry };
   }
 >;
 type NodeKeyValue = N<

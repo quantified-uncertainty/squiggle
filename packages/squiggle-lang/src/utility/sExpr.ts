@@ -3,7 +3,7 @@ import { blue } from "../cli/colors.js";
 export type SExpr =
   | {
       name: string;
-      args: (SExpr | null | undefined)[];
+      args: readonly (SExpr | null | undefined)[];
     }
   | string
   | number;

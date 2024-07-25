@@ -1,3 +1,5 @@
+import { analyzeAst } from "../analysis/index.js";
+import { TypedAST, TypedASTNode } from "../analysis/types.js";
 import { ICompileError } from "../errors/IError.js";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
@@ -6,12 +8,7 @@ import {
   parse as peggyParse,
   SyntaxError as PeggySyntaxError,
 } from "./peggyParser.js";
-import {
-  AST,
-  type ASTCommentNode,
-  type ASTNode,
-  LocationRange,
-} from "./types.js";
+import { AST, type ASTCommentNode, LocationRange } from "./types.js";
 import { unitTypeCheck } from "./unitTypeChecker.js";
 
 export type ParseError = {
@@ -20,7 +17,7 @@ export type ParseError = {
   message: string;
 };
 
-type ParseResult = result<AST, ICompileError>;
+type ParseResult = result<TypedAST, ICompileError>;
 
 export function parse(expr: string, source: string): ParseResult {
   try {
@@ -34,7 +31,9 @@ export function parse(expr: string, source: string): ParseResult {
     }
     unitTypeCheck(parsed);
     parsed.comments = comments;
-    return Result.Ok(parsed);
+
+    const analyzed = analyzeAst(parsed);
+    return Result.Ok(analyzed);
   } catch (e) {
     if (e instanceof PeggySyntaxError) {
       return Result.Err(
@@ -51,10 +50,10 @@ export function parse(expr: string, source: string): ParseResult {
 // This function is just for the sake of tests.
 // For real generation of Squiggle code from AST try our prettier plugin.
 export function nodeToString(
-  node: ASTNode,
+  node: TypedASTNode,
   printOptions: SExprPrintOptions = {}
 ): string {
-  const toSExpr = (node: ASTNode): SExpr => {
+  const toSExpr = (node: TypedASTNode): SExpr => {
     const sExpr = (components: (SExpr | null | undefined)[]): SExpr => ({
       name: node.kind,
       args: components,

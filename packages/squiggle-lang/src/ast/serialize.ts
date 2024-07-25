@@ -62,12 +62,6 @@ export function serializeAstNode(
           visit.ast(item[1]),
         ]),
         statements: node.statements.map(visit.ast),
-        symbols: Object.fromEntries(
-          Object.entries(node.symbols).map(([key, value]) => [
-            key,
-            visit.ast(value),
-          ])
-        ),
       };
     case "Block":
       return {
@@ -110,12 +104,6 @@ export function serializeAstNode(
       return {
         ...node,
         elements: node.elements.map(visit.ast),
-        symbols: Object.fromEntries(
-          Object.entries(node.symbols).map(([key, value]) => [
-            key,
-            visit.ast(value),
-          ])
-        ),
       };
     case "KeyValue":
       return {
@@ -221,12 +209,6 @@ export function deserializeAstNode(
           visit.ast(item[0]) as KindNode<"Identifier">,
         ]),
         statements: node.statements.map(visit.ast),
-        symbols: Object.fromEntries(
-          Object.entries(node.symbols).map(([key, value]) => [
-            key,
-            visit.ast(value),
-          ])
-        ),
       };
     case "Block":
       return {
@@ -270,12 +252,6 @@ export function deserializeAstNode(
         ...node,
         elements: node.elements.map(
           (node) => visit.ast(node) as KindNode<"KeyValue" | "Identifier">
-        ),
-        symbols: Object.fromEntries(
-          Object.entries(node.symbols).map(([key, value]) => [
-            key,
-            visit.ast(value) as KindNode<"KeyValue" | "Identifier">,
-          ])
         ),
       };
     case "KeyValue":

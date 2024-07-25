@@ -25,7 +25,7 @@ export async function evaluateStringToResult(
   code: string
 ): Promise<result<Value, ICompileError | IRuntimeError>> {
   const exprR = Result.bind(parse(code, "main"), (ast) =>
-    compileAst(ast, getStdLib())
+    compileAst(ast.raw, getStdLib())
   );
 
   if (exprR.ok) {

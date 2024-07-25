@@ -1,3 +1,4 @@
+import { TypedASTNode } from "../analysis/types.js";
 import { ASTNode } from "../ast/types.js";
 import { isBindingStatement } from "../ast/utils.js";
 import { RunContext } from "./SqProject/ProjectItem.js";
@@ -10,13 +11,13 @@ export class SqValueContext {
    * We try our best to find nested ASTs, but when the value is built dynamically, it's not always possible.
    * In that case, we store the outermost AST and set `valueAstIsPrecise` flag to `false`.
    */
-  public valueAst: ASTNode;
+  public valueAst: TypedASTNode;
   public valueAstIsPrecise: boolean;
   public path: SqValuePath;
 
   constructor(props: {
     runContext: RunContext;
-    valueAst: ASTNode;
+    valueAst: TypedASTNode;
     valueAstIsPrecise: boolean;
     path: SqValuePath;
   }) {

@@ -122,15 +122,7 @@ export function nodeDict(
   elements: AnyNodeDictEntry[],
   location: LocationRange
 ): KindNode<"Dict"> {
-  const symbols: KindNode<"Dict">["symbols"] = {};
-  for (const element of elements) {
-    if (element.kind === "KeyValue" && element.key.kind === "String") {
-      symbols[element.key.value] = element;
-    } else if (element.kind === "Identifier") {
-      symbols[element.value] = element;
-    }
-  }
-  return { kind: "Dict", elements, symbols, location };
+  return { kind: "Dict", elements, location };
 }
 
 export function nodeUnitValue(
@@ -154,16 +146,7 @@ export function nodeProgram(
   statements: ASTNode[],
   location: LocationRange
 ): KindNode<"Program"> {
-  const symbols: KindNode<"Program">["symbols"] = {};
-  for (const statement of statements) {
-    if (
-      statement.kind === "LetStatement" ||
-      statement.kind === "DefunStatement"
-    ) {
-      symbols[statement.variable.value] = statement;
-    }
-  }
-  return { kind: "Program", imports, statements, symbols, location };
+  return { kind: "Program", imports, statements, location };
 }
 
 export function nodeTypeSignature(
