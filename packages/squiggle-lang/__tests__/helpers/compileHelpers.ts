@@ -1,6 +1,6 @@
 import { parse } from "../../src/ast/parse.js";
 import { compileAst } from "../../src/compiler/compile.js";
-import { irToString } from "../../src/compiler/index.js";
+import { irToString } from "../../src/compiler/toString.js";
 import { getStdLib } from "../../src/library/index.js";
 import * as Result from "../../src/utility/result.js";
 

@@ -3,7 +3,14 @@ import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,
 } from "../serialization/squiggle.js";
-import { IR, IRContent, IRContentByKind, LambdaIRParameter } from "./index.js";
+import {
+  AnyExpressionIR,
+  IR,
+  IRContent,
+  IRContentByKind,
+  LambdaIRParameter,
+  StatementIR,
+} from "./types.js";
 
 type SerializedLambdaIRParameter = Omit<LambdaIRParameter, "annotation"> & {
   annotation?: number;
@@ -189,6 +196,20 @@ export function serializeIR(ir: IR, visit: SquiggleSerializationVisitor) {
   };
 }
 
+function assertStatement(ir: IR): StatementIR {
+  if (ir.kind !== "Assign") {
+    throw new Error("Expected statement");
+  }
+  return ir;
+}
+
+function assertExpression(ir: IR): AnyExpressionIR {
+  if (ir.kind === "Program" || ir.kind === "Assign") {
+    throw new Error("Expected expression");
+  }
+  return ir;
+}
+
 function deserializeIRContent(
   ir: SerializedIR,
   visit: SquiggleDeserializationVisitor
@@ -205,10 +226,12 @@ function deserializeIRContent(
         value: {
           ...ir.value,
           statements: ir.value.statements.map((statement) =>
-            visit.ir(statement)
+            assertStatement(visit.ir(statement))
           ),
           result:
-            ir.value.result === null ? undefined : visit.ir(ir.value.result),
+            ir.value.result === null
+              ? undefined
+              : assertExpression(visit.ir(ir.value.result)),
         },
       };
 
@@ -216,8 +239,10 @@ function deserializeIRContent(
       return {
         ...ir,
         value: {
-          statements: ir.value.statements.map(visit.ir),
-          result: visit.ir(ir.value.result),
+          statements: ir.value.statements.map((id) =>
+            assertStatement(visit.ir(id))
+          ),
+          result: assertExpression(visit.ir(ir.value.result)),
         },
       };
     case "Ternary":
@@ -225,9 +250,9 @@ function deserializeIRContent(
         ...ir,
         value: {
           ...ir.value,
-          condition: visit.ir(ir.value.condition),
-          ifTrue: visit.ir(ir.value.ifTrue),
-          ifFalse: visit.ir(ir.value.ifFalse),
+          condition: assertExpression(visit.ir(ir.value.condition)),
+          ifTrue: assertExpression(visit.ir(ir.value.ifTrue)),
+          ifFalse: assertExpression(visit.ir(ir.value.ifFalse)),
         },
       };
     case "Assign":
@@ -235,7 +260,7 @@ function deserializeIRContent(
         ...ir,
         value: {
           ...ir.value,
-          right: visit.ir(ir.value.right),
+          right: assertExpression(visit.ir(ir.value.right)),
         },
       };
     case "Call":
@@ -243,8 +268,8 @@ function deserializeIRContent(
         ...ir,
         value: {
           ...ir.value,
-          fn: visit.ir(ir.value.fn),
-          args: ir.value.args.map((arg) => visit.ir(arg)),
+          fn: assertExpression(visit.ir(ir.value.fn)),
+          args: ir.value.args.map((arg) => assertExpression(visit.ir(arg))),
         },
       };
     case "Lambda":
@@ -255,22 +280,26 @@ function deserializeIRContent(
           parameters: ir.value.parameters.map((parameter) => ({
             ...parameter,
             annotation: parameter.annotation
-              ? visit.ir(parameter.annotation)
+              ? assertExpression(visit.ir(parameter.annotation))
               : undefined,
           })),
-          body: visit.ir(ir.value.body),
+          body: assertExpression(visit.ir(ir.value.body)),
         },
       };
     case "Array":
       return {
         ...ir,
-        value: ir.value.map((value) => visit.ir(value)),
+        value: ir.value.map((value) => assertExpression(visit.ir(value))),
       };
     case "Dict":
       return {
         ...ir,
         value: ir.value.map(
-          ([key, value]) => [visit.ir(key), visit.ir(value)] as [IR, IR]
+          ([key, value]) =>
+            [
+              assertExpression(visit.ir(key)),
+              assertExpression(visit.ir(value)),
+            ] as [AnyExpressionIR, AnyExpressionIR]
         ),
       };
     default:

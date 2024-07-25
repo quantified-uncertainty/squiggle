@@ -13,8 +13,7 @@ import { vBool } from "../value/VBool.js";
 import { vNumber } from "../value/VNumber.js";
 import { vString } from "../value/VString.js";
 import { INDEX_LOOKUP_FUNCTION } from "./constants.js";
-import * as ir from "./index.js";
-import { IR } from "./index.js";
+import * as ir from "./types.js";
 
 type CompilableNode =
   | AnyExpressionNode
@@ -169,7 +168,10 @@ class CompileContext {
     throw new ICompileError(`${name} is not defined`, location);
   }
 
-  resolveName(location: LocationRange, name: string): IR {
+  resolveName(
+    location: LocationRange,
+    name: string
+  ): ir.IRByKind<"StackRef" | "CaptureRef" | "Value"> {
     return this.resolveNameFromDepth(location, name, this.scopes.length - 1);
   }
 
@@ -186,18 +188,18 @@ class CompileContext {
   }
 }
 
-function compileToContent(
-  ast: CompilableNode,
+function compileExpressionContent(
+  ast: AnyExpressionNode,
   context: CompileContext
-): ir.IRContent {
+): ir.AnyExpressionIRContent {
   switch (ast.kind) {
     case "Block": {
       if (ast.statements.length === 0) {
         // unwrap blocks; no need for extra scopes or Block IR nodes.
-        return compileToContent(ast.result, context);
+        return compileExpression(ast.result, context);
       }
       context.startScope();
-      const statements: IR[] = [];
+      const statements: ir.StatementIR[] = [];
       for (const astStatement of ast.statements) {
         if (astStatement.exported) {
           throw new ICompileError(
@@ -205,89 +207,40 @@ function compileToContent(
             astStatement.location
           );
         }
-        const statement = innerCompileAst(astStatement, context);
+        const statement = compileStatement(astStatement, context);
         statements.push(statement);
       }
-      const result = innerCompileAst(ast.result, context);
+      const result = compileExpression(ast.result, context);
       context.finishScope();
       return ir.make("Block", { statements, result });
     }
-    case "Program": {
-      // No need to start a top-level scope, it already exists.
-      const statements: IR[] = [];
-      const exports: string[] = [];
-      for (const astStatement of ast.statements) {
-        const statement = innerCompileAst(astStatement, context);
-        statements.push(statement);
-        if (astStatement.exported) {
-          const name = astStatement.variable.value;
-          exports.push(name);
-        }
-      }
-      const result = ast.result
-        ? innerCompileAst(ast.result, context)
-        : undefined;
-
-      return ir.make("Program", {
-        statements,
-        result,
-        exports,
-        bindings: context.localsOffsets(),
-      });
-    }
-    case "DefunStatement":
-    case "LetStatement": {
-      const name = ast.variable.value;
-      let value = innerCompileAst(ast.value, context);
-
-      for (const decorator of [...ast.decorators].reverse()) {
-        const decoratorFn = context.resolveName(
-          ast.location,
-          `Tag.${decorator.name.value}`
-        );
-        value = {
-          location: ast.location,
-          ...ir.eCall(
-            decoratorFn,
-            [
-              value,
-              ...decorator.args.map((arg) => innerCompileAst(arg, context)),
-            ],
-            "decorate"
-          ),
-        };
-      }
-
-      context.defineLocal(name);
-      return ir.make("Assign", { left: name, right: value });
-    }
     case "Call": {
       return ir.eCall(
-        innerCompileAst(ast.fn, context),
-        ast.args.map((arg) => innerCompileAst(arg, context))
+        compileExpression(ast.fn, context),
+        ast.args.map((arg) => compileExpression(arg, context))
       );
     }
     case "InfixCall": {
       return ir.eCall(
         context.resolveName(ast.location, infixFunctions[ast.op]),
-        ast.args.map((arg) => innerCompileAst(arg, context))
+        ast.args.map((arg) => compileExpression(arg, context))
       );
     }
     case "UnaryCall":
       return ir.eCall(
         context.resolveName(ast.location, unaryFunctions[ast.op]),
-        [innerCompileAst(ast.arg, context)]
+        [compileExpression(ast.arg, context)]
       );
     case "Pipe":
-      return ir.eCall(innerCompileAst(ast.fn, context), [
-        innerCompileAst(ast.leftArg, context),
-        ...ast.rightArgs.map((arg) => innerCompileAst(arg, context)),
+      return ir.eCall(compileExpression(ast.fn, context), [
+        compileExpression(ast.leftArg, context),
+        ...ast.rightArgs.map((arg) => compileExpression(arg, context)),
       ]);
     case "DotLookup":
       return ir.eCall(
         context.resolveName(ast.location, INDEX_LOOKUP_FUNCTION),
         [
-          innerCompileAst(ast.arg, context),
+          compileExpression(ast.arg, context),
           {
             location: ast.location,
             ...ir.make("Value", vString(ast.key)),
@@ -297,7 +250,10 @@ function compileToContent(
     case "BracketLookup":
       return ir.eCall(
         context.resolveName(ast.location, INDEX_LOOKUP_FUNCTION),
-        [innerCompileAst(ast.arg, context), innerCompileAst(ast.key, context)]
+        [
+          compileExpression(ast.arg, context),
+          compileExpression(ast.key, context),
+        ]
       );
     case "Lambda": {
       const parameters: ir.LambdaIRParameter[] = [];
@@ -305,7 +261,7 @@ function compileToContent(
         parameters.push({
           name: astParameter.variable,
           annotation: astParameter.annotation
-            ? innerCompileAst(astParameter.annotation, context)
+            ? compileExpression(astParameter.annotation, context)
             : undefined,
         });
       }
@@ -320,7 +276,7 @@ function compileToContent(
         context.defineLocal(parameter.name);
       }
 
-      const body = innerCompileAst(ast.body, context);
+      const body = compileExpression(ast.body, context);
       const captures = context.currentScopeCaptures();
       context.finishScope();
       return ir.make("Lambda", {
@@ -332,14 +288,14 @@ function compileToContent(
     }
     case "Ternary":
       return ir.make("Ternary", {
-        condition: innerCompileAst(ast.condition, context),
-        ifTrue: innerCompileAst(ast.trueExpression, context),
-        ifFalse: innerCompileAst(ast.falseExpression, context),
+        condition: compileExpression(ast.condition, context),
+        ifTrue: compileExpression(ast.trueExpression, context),
+        ifFalse: compileExpression(ast.falseExpression, context),
       });
     case "Array":
       return ir.make(
         "Array",
-        ast.elements.map((statement) => innerCompileAst(statement, context))
+        ast.elements.map((statement) => compileExpression(statement, context))
       );
     case "Dict":
       return ir.make(
@@ -347,9 +303,9 @@ function compileToContent(
         ast.elements.map((kv) => {
           if (kv.kind === "KeyValue") {
             return [
-              innerCompileAst(kv.key, context),
-              innerCompileAst(kv.value, context),
-            ] as [IR, IR];
+              compileExpression(kv.key, context),
+              compileExpression(kv.value, context),
+            ] as [ir.AnyExpressionIR, ir.AnyExpressionIR];
           } else if (kv.kind === "Identifier") {
             // shorthand
             const key = {
@@ -357,7 +313,7 @@ function compileToContent(
               ...ir.make("Value", vString(kv.value)),
             };
             const value = context.resolveName(kv.location, kv.value);
-            return [key, value] as [IR, IR];
+            return [key, value] as [ir.AnyExpressionIR, ir.AnyExpressionIR];
           } else {
             throw new Error(
               `Internal AST error: unexpected kv ${kv satisfies never}`
@@ -388,7 +344,7 @@ function compileToContent(
         ast.location,
         `fromUnit_${ast.unit}`
       );
-      return ir.eCall(fromUnitFn, [innerCompileAst(ast.value, context)]);
+      return ir.eCall(fromUnitFn, [compileExpression(ast.value, context)]);
     }
     default: {
       const badAst = ast satisfies never;
@@ -397,11 +353,85 @@ function compileToContent(
   }
 }
 
-function innerCompileAst(ast: CompilableNode, context: CompileContext): ir.IR {
-  const content = compileToContent(ast, context);
+function compileExpression(
+  ast: AnyExpressionNode,
+  context: CompileContext
+): ir.AnyExpressionIR {
+  const content = compileExpressionContent(ast, context);
   return {
-    location: ast.location,
     ...content,
+    location: ast.location,
+  };
+}
+
+function compileStatement(
+  ast: AnyStatementNode,
+  context: CompileContext
+): ir.StatementIR {
+  switch (ast.kind) {
+    case "DefunStatement":
+    case "LetStatement": {
+      const name = ast.variable.value;
+      let value = compileExpression(ast.value, context);
+
+      for (const decorator of [...ast.decorators].reverse()) {
+        const decoratorFn = context.resolveName(
+          ast.location,
+          `Tag.${decorator.name.value}`
+        );
+        value = {
+          ...ir.eCall(
+            decoratorFn,
+            [
+              value,
+              ...decorator.args.map((arg) => compileExpression(arg, context)),
+            ],
+            "decorate"
+          ),
+          location: ast.location,
+        };
+      }
+
+      context.defineLocal(name);
+      return {
+        ...ir.make("Assign", { left: name, right: value }),
+        location: ast.location,
+      };
+    }
+    default: {
+      const badAst = ast satisfies never;
+      throw new Error(`Unsupported AST value ${JSON.stringify(badAst)}`);
+    }
+  }
+}
+
+function compileProgram(
+  ast: KindTypedNode<"Program">,
+  context: CompileContext
+): ir.IRByKind<"Program"> {
+  // No need to start a top-level scope, it already exists.
+  const statements: ir.StatementIR[] = [];
+  const exports: string[] = [];
+  for (const astStatement of ast.statements) {
+    const statement = compileStatement(astStatement, context);
+    statements.push(statement);
+    if (astStatement.exported) {
+      const name = astStatement.variable.value;
+      exports.push(name);
+    }
+  }
+  const result = ast.result
+    ? compileExpression(ast.result, context)
+    : undefined;
+
+  return {
+    ...ir.make("Program", {
+      statements,
+      result,
+      exports,
+      bindings: context.localsOffsets(),
+    }),
+    location: ast.location,
   };
 }
 
@@ -410,7 +440,7 @@ export function compileAst(
   externals: Bindings
 ): Result.result<ir.IR, ICompileError> {
   try {
-    const ir = innerCompileAst(ast, new CompileContext(externals));
+    const ir = compileProgram(ast, new CompileContext(externals));
     return Result.Ok(ir);
   } catch (err) {
     if (err instanceof ICompileError) {

@@ -1,7 +1,7 @@
 import uniq from "lodash/uniq.js";
 
 import { LocationRange } from "../ast/types.js";
-import { IR } from "../compiler/index.js";
+import { IR } from "../compiler/types.js";
 import {
   REArgumentDomainError,
   REArityError,

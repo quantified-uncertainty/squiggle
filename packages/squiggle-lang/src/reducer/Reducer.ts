@@ -1,7 +1,7 @@
 import jstat from "jstat";
 
 import { LocationRange } from "../ast/types.js";
-import { IR, IRByKind } from "../compiler/index.js";
+import { IR, IRByKind } from "../compiler/types.js";
 import { Env } from "../dists/env.js";
 import { IRuntimeError } from "../errors/IError.js";
 import {

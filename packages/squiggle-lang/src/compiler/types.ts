@@ -10,17 +10,11 @@
  * resolved to stack and capture references.
  */
 import { LocationRange } from "../ast/types.js";
-import {
-  sExpr,
-  SExpr,
-  SExprPrintOptions,
-  sExprToString,
-} from "../utility/sExpr.js";
 import { Value } from "../value/index.js";
 
 export type LambdaIRParameter = {
   name: string;
-  annotation: IR | undefined;
+  annotation: AnyExpressionIR | undefined;
 };
 
 // All shapes are kind+value, to help with V8 monomorphism.
@@ -36,17 +30,26 @@ export type IRContent =
   | MakeIRContent<
       "Program",
       {
-        statements: IR[];
-        result: IR | undefined;
+        statements: StatementIR[];
+        result: AnyExpressionIR | undefined;
         exports: string[]; // all exported names
         bindings: Record<string, number>; // variable name -> stack offset mapping
       }
     >
+  // Both variable definitions (`x = 5`) and function definitions (`f(x) = x`) compile to this.
+  | MakeIRContent<
+      "Assign",
+      {
+        left: string;
+        right: AnyExpressionIR;
+      }
+    >
+  // The remaining IR nodes are expressions.
   | MakeIRContent<
       "Block",
       {
-        statements: IR[];
-        result: IR;
+        statements: StatementIR[];
+        result: AnyExpressionIR;
       }
     >
   | MakeIRContent<
@@ -76,24 +79,16 @@ export type IRContent =
   | MakeIRContent<
       "Ternary",
       {
-        condition: IR;
-        ifTrue: IR;
-        ifFalse: IR;
-      }
-    >
-  // Both variable definitions (`x = 5`) and function definitions (`f(x) = x`) compile to this.
-  | MakeIRContent<
-      "Assign",
-      {
-        left: string;
-        right: IR;
+        condition: AnyExpressionIR;
+        ifTrue: AnyExpressionIR;
+        ifFalse: AnyExpressionIR;
       }
     >
   | MakeIRContent<
       "Call",
       {
-        fn: IR;
-        args: IR[];
+        fn: AnyExpressionIR;
+        args: AnyExpressionIR[];
         // Note that `Decorate` is applied to values, not to statements;
         // decorated statements get rewritten in `./compile.ts`. If "decorate"
         // is set, the call will work only on lambdas marked with `isDecorator:
@@ -111,17 +106,21 @@ export type IRContent =
         // the enclosing function.
         captures: Ref[];
         parameters: LambdaIRParameter[];
-        body: IR;
+        body: AnyExpressionIR;
       }
     >
-  | MakeIRContent<"Array", IR[]>
-  | MakeIRContent<"Dict", [IR, IR][]>
+  | MakeIRContent<"Array", AnyExpressionIR[]>
+  | MakeIRContent<"Dict", [AnyExpressionIR, AnyExpressionIR][]>
   // Constants or external references that were inlined during compilation.
   | MakeIRContent<"Value", Value>;
 
 export type IRContentByKind<T extends IRContent["kind"]> = Extract<
   IRContent,
   { kind: T }
+>;
+export type AnyExpressionIRContent = Exclude<
+  IRContent,
+  { kind: "Program" | "Assign" }
 >;
 
 export type Ref = IRContentByKind<"StackRef" | "CaptureRef">;
@@ -130,9 +129,12 @@ export type IR = IRContent & { location: LocationRange };
 
 export type IRByKind<T extends IRContent["kind"]> = Extract<IR, { kind: T }>;
 
+export type AnyExpressionIR = Exclude<IR, { kind: "Program" | "Assign" }>;
+export type StatementIR = IRByKind<"Assign">;
+
 export const eCall = (
-  fn: IR,
-  args: IR[],
+  fn: AnyExpressionIR,
+  args: AnyExpressionIR[],
   as: "call" | "decorate" = "call"
 ): IRContentByKind<"Call"> => ({
   kind: "Call",
@@ -152,113 +154,4 @@ export function make<Kind extends IRContent["kind"]>(
     value,
     // Need to cast explicitly because TypeScript doesn't support `oneof` yet; `Kind` type parameter could be a union.
   } as IRContentByKind<Kind>;
-}
-
-/**
- * Converts the IR to string. Useful for tests.
- * Example:
-
-(Program
-  (.statements
-    (Assign
-      f
-      (Block 99)
-    )
-    (Assign
-      g
-      (Lambda
-        (.captures
-          (StackRef 0)
-        )
-        (.parameters x)
-        (Block
-          (CaptureRef 0)
-        )
-      )
-    )
-    (Call
-      (StackRef 0)
-      2
-    )
-  )
-  (.bindings
-    (f 1)
-    (g 0)
-  )
-)
-
- */
-export function irToString(
-  ir: IRContent,
-  printOptions: SExprPrintOptions = {}
-): string {
-  const toSExpr = (ir: IRContent): SExpr => {
-    const selfExpr = (args: (SExpr | undefined)[]): SExpr => ({
-      name: ir.kind,
-      args,
-    });
-
-    switch (ir.kind) {
-      case "Block":
-        return selfExpr([...ir.value.statements, ir.value.result].map(toSExpr));
-      case "Program":
-        return selfExpr([
-          ir.value.statements.length
-            ? sExpr(".statements", ir.value.statements.map(toSExpr))
-            : undefined,
-          Object.keys(ir.value.bindings).length
-            ? sExpr(
-                ".bindings",
-                Object.entries(ir.value.bindings).map(([name, offset]) =>
-                  sExpr(name, [offset])
-                )
-              )
-            : undefined,
-          ir.value.exports.length
-            ? sExpr(".exports", ir.value.exports)
-            : undefined,
-          ir.value.result ? toSExpr(ir.value.result) : undefined,
-        ]);
-      case "Array":
-        return selfExpr(ir.value.map(toSExpr));
-      case "Dict":
-        return selfExpr(ir.value.map((pair) => sExpr("kv", pair.map(toSExpr))));
-      case "StackRef":
-        return selfExpr([ir.value]);
-      case "CaptureRef":
-        return selfExpr([ir.value]);
-      case "Ternary":
-        return selfExpr(
-          [ir.value.condition, ir.value.ifTrue, ir.value.ifFalse].map(toSExpr)
-        );
-      case "Assign":
-        return selfExpr([ir.value.left, toSExpr(ir.value.right)]);
-      case "Call":
-        return selfExpr([ir.value.fn, ...ir.value.args].map(toSExpr));
-      case "Lambda":
-        return selfExpr([
-          ir.value.captures.length
-            ? sExpr(".captures", ir.value.captures.map(toSExpr))
-            : undefined,
-          sExpr(
-            ".parameters",
-            ir.value.parameters.map((parameter) =>
-              parameter.annotation
-                ? sExpr(".annotated", [
-                    parameter.name,
-                    toSExpr(parameter.annotation),
-                  ])
-                : parameter.name
-            )
-          ),
-          toSExpr(ir.value.body),
-        ]);
-      case "Value":
-        return ir.value.toString();
-      default:
-        return `Unknown IR node ${ir satisfies never}`;
-    }
-  };
-
-  return sExprToString(toSExpr(ir), printOptions);
 }

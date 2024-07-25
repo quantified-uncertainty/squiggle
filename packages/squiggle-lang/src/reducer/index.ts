@@ -1,6 +1,6 @@
 import { parse } from "../ast/parse.js";
 import { compileAst } from "../compiler/compile.js";
-import { IR } from "../compiler/index.js";
+import { IR } from "../compiler/types.js";
 import { defaultEnv } from "../dists/env.js";
 import { ICompileError, IRuntimeError } from "../errors/IError.js";
 import { getStdLib } from "../library/index.js";
