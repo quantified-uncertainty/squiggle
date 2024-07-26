@@ -1,5 +1,5 @@
 import { analyzeAst } from "../analysis/index.js";
-import { compileAst } from "../compiler/compile.js";
+import { compileAst } from "../compiler/index.js";
 import { getStdLib } from "../library/index.js";
 import { Reducer } from "../reducer/Reducer.js";
 import { ImmutableMap } from "../utility/immutable.js";

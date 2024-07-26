@@ -1,6 +1,6 @@
 import { Command } from "@commander-js/extra-typings";
 
-import { compileAst } from "../../compiler/compile.js";
+import { compileAst } from "../../compiler/index.js";
 import { irToString } from "../../compiler/toString.js";
 import { getStdLib } from "../../library/index.js";
 import { parse } from "../../public/parse.js";
