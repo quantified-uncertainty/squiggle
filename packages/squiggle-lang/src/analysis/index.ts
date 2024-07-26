@@ -7,6 +7,7 @@ import {
   frNumber,
   frString,
 } from "../library/registry/frTypes.js";
+import { ImmutableMap } from "../utility/immutable.js";
 import {
   AnyExpressionNode,
   AnyStatementNode,
@@ -14,11 +15,14 @@ import {
   expressionKinds,
   KindTypedNode,
   statementKinds,
-  SymbolTable,
   TypedAST,
   TypedASTNode,
   unitTypeKinds,
 } from "./types.js";
+
+type AnalysisContext = {
+  definitions: ImmutableMap<string, KindTypedNode<"IdentifierDefinition">>;
+};
 
 function assertKind<Kind extends TypedASTNode["kind"]>(
   node: TypedASTNode,
@@ -58,9 +62,9 @@ function assertUnitType(node: TypedASTNode): asserts node is AnyUnitTypeNode {
 function analyzeKind<Kind extends TypedASTNode["kind"]>(
   node: ASTNode,
   kind: Kind,
-  symbols: SymbolTable
+  context: AnalysisContext
 ): KindTypedNode<Kind> {
-  const typedNode = analyzeAstNode(node, symbols);
+  const typedNode = analyzeAstNode(node, context);
   assertKind(typedNode, kind);
   return typedNode;
 }
@@ -68,31 +72,34 @@ function analyzeKind<Kind extends TypedASTNode["kind"]>(
 function analyzeOneOfKinds<Kind extends TypedASTNode["kind"]>(
   node: ASTNode,
   kinds: Kind[],
-  symbols: SymbolTable
+  context: AnalysisContext
 ): KindTypedNode<Kind> {
-  const typedNode = analyzeAstNode(node, symbols);
+  const typedNode = analyzeAstNode(node, context);
   assertOneOfKinds(typedNode, kinds);
   return typedNode;
 }
 
 function analyzeExpression(
   node: ASTNode,
-  symbols: SymbolTable
+  context: AnalysisContext
 ): AnyExpressionNode {
-  const typedNode = analyzeAstNode(node, symbols);
+  const typedNode = analyzeAstNode(node, context);
   assertExpression(typedNode);
   return typedNode;
 }
 
-function analyzeUnitType(node: ASTNode, symbols: SymbolTable): AnyUnitTypeNode {
-  const typedNode = analyzeAstNode(node, symbols);
+function analyzeUnitType(
+  node: ASTNode,
+  context: AnalysisContext
+): AnyUnitTypeNode {
+  const typedNode = analyzeAstNode(node, context);
   assertUnitType(typedNode);
   return typedNode;
 }
 
 function analyzeStatement(
   node: ASTNode,
-  symbols: SymbolTable
+  symbols: AnalysisContext
 ): AnyStatementNode {
   const typedNode = analyzeAstNode(node, symbols);
   assertStatement(typedNode);
@@ -110,27 +117,36 @@ function analyzeIdentifierDefinition(
   };
 }
 
-function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
+function analyzeAstNode(node: ASTNode, context: AnalysisContext): TypedASTNode {
   switch (node.kind) {
     case "Program": {
-      const imports = node.imports.map(([path, alias]) => {
-        const typedPath = analyzeKind(path, "String", symbols);
+      const imports: [
+        KindTypedNode<"String">,
+        KindTypedNode<"IdentifierDefinition">,
+      ][] = [];
+      for (const [path, alias] of node.imports) {
+        const typedPath = analyzeKind(path, "String", context);
         const typedAlias = analyzeIdentifierDefinition(alias);
-        return [typedPath, typedAlias] as [
-          KindTypedNode<"String">,
-          KindTypedNode<"IdentifierDefinition">,
-        ];
-      });
-      const statements = node.statements.map((statement) =>
-        analyzeStatement(statement, symbols)
-      );
+        imports.push([typedPath, typedAlias]);
+      }
+
+      const statements: AnyStatementNode[] = [];
+      for (const statement of node.statements) {
+        const typedStatement = analyzeStatement(statement, context);
+        statements.push(typedStatement);
+        context.definitions = context.definitions.set(
+          typedStatement.variable.value,
+          typedStatement.variable
+        );
+      }
+
       const programSymbols: KindTypedNode<"Program">["symbols"] = {};
       for (const statement of statements) {
         programSymbols[statement.variable.value] = statement;
       }
 
       const result = node.result
-        ? analyzeExpression(node.result, symbols)
+        ? analyzeExpression(node.result, context)
         : null;
 
       return {
@@ -143,12 +159,24 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
     }
     // TODO typed expressions
     case "Block": {
-      const statements = node.statements.map((statement) =>
-        analyzeStatement(statement, symbols)
-      );
+      // snapshot definitions - we won't store them since they're local
+      const definitions = context.definitions;
 
-      const result = analyzeExpression(node.result, symbols);
+      const statements: AnyStatementNode[] = [];
+      for (const statement of node.statements) {
+        const typedStatement = analyzeStatement(statement, context);
+        statements.push(typedStatement);
 
+        // we're modifying context here but will refert `context.definitions` when the block is processed
+        context.definitions = context.definitions.set(
+          typedStatement.variable.value,
+          typedStatement.variable
+        );
+      }
+
+      const result = analyzeExpression(node.result, context);
+
+      context.definitions = definitions;
       return {
         ...node,
         statements,
@@ -157,10 +185,10 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
       };
     }
     case "LetStatement": {
-      const value = analyzeAstNode(node.value, symbols);
+      const value = analyzeAstNode(node.value, context);
       assertExpression(value);
       const decorators = node.decorators.map((decorator) =>
-        analyzeKind(decorator, "Decorator", symbols)
+        analyzeKind(decorator, "Decorator", context)
       );
 
       return {
@@ -169,15 +197,20 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
         value,
         variable: analyzeIdentifierDefinition(node.variable),
         unitTypeSignature: node.unitTypeSignature
-          ? analyzeKind(node.unitTypeSignature, "UnitTypeSignature", symbols)
+          ? analyzeKind(node.unitTypeSignature, "UnitTypeSignature", context)
           : null,
       };
     }
     case "Decorator": {
-      const name = analyzeAstNode(node.name, symbols);
-      assertKind(name, "Identifier");
+      // decorator names never refer to user-defined variables, so we always resolve them to `Tag.*` builtins
+      const name: KindTypedNode<"Identifier"> = {
+        ...node.name,
+        resolved: { kind: "builtin" },
+        type: frAny(), // TODO - from stdlib
+      };
+
       const args = node.args.map((arg) => {
-        const typedArg = analyzeAstNode(arg, symbols);
+        const typedArg = analyzeAstNode(arg, context);
         assertExpression(typedArg);
         return typedArg;
       });
@@ -189,9 +222,9 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
     }
     case "DefunStatement": {
       const decorators = node.decorators.map((decorator) =>
-        analyzeKind(decorator, "Decorator", symbols)
+        analyzeKind(decorator, "Decorator", context)
       );
-      const value = analyzeKind(node.value, "Lambda", symbols);
+      const value = analyzeKind(node.value, "Lambda", context);
 
       return {
         ...node,
@@ -202,10 +235,21 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
       };
     }
     case "Lambda": {
+      const definitions = context.definitions;
+
       const args = node.args.map((arg) =>
-        analyzeKind(arg, "LambdaParameter", symbols)
+        analyzeKind(arg, "LambdaParameter", context)
       );
-      const body = analyzeExpression(node.body, symbols);
+      for (const arg of args) {
+        context.definitions = context.definitions.set(
+          arg.variable.value,
+          arg.variable
+        );
+      }
+      const body = analyzeExpression(node.body, context);
+
+      // revert definitions
+      context.definitions = definitions;
 
       return {
         ...node,
@@ -213,7 +257,7 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
         body,
         name: node.name,
         returnUnitType: node.returnUnitType
-          ? analyzeKind(node.returnUnitType, "UnitTypeSignature", symbols)
+          ? analyzeKind(node.returnUnitType, "UnitTypeSignature", context)
           : null,
         type: frAny(), // TODO - lambda type
       };
@@ -223,16 +267,20 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
         ...node,
         variable: analyzeIdentifierDefinition(node.variable),
         annotation: node.annotation
-          ? analyzeExpression(node.annotation, symbols)
+          ? analyzeExpression(node.annotation, context)
           : null,
         unitTypeSignature: node.unitTypeSignature
-          ? analyzeKind(node.unitTypeSignature, "UnitTypeSignature", symbols)
+          ? analyzeKind(node.unitTypeSignature, "UnitTypeSignature", context)
           : null,
       };
     }
     case "Identifier": {
+      const definition = context.definitions.get(node.value);
       return {
         ...node,
+        resolved: definition
+          ? { kind: "definition", node: definition }
+          : { kind: "builtin" },
         type: frAny(), // TODO - resolve from definition
       };
     }
@@ -256,7 +304,7 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
     }
     case "Array": {
       const elements = node.elements.map((element) =>
-        analyzeExpression(element, symbols)
+        analyzeExpression(element, context)
       );
 
       return {
@@ -268,7 +316,7 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
     }
     case "Dict": {
       const elements = node.elements.map((element) =>
-        analyzeOneOfKinds(element, ["KeyValue", "Identifier"], symbols)
+        analyzeOneOfKinds(element, ["KeyValue", "Identifier"], context)
       );
 
       const dictSymbols: KindTypedNode<"Dict">["symbols"] = {};
@@ -289,20 +337,20 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
     case "KeyValue": {
       return {
         ...node,
-        key: analyzeExpression(node.key, symbols),
-        value: analyzeExpression(node.value, symbols),
+        key: analyzeExpression(node.key, context),
+        value: analyzeExpression(node.value, context),
       };
     }
     case "UnitValue": {
       return {
         ...node,
-        value: analyzeKind(node.value, "Float", symbols),
+        value: analyzeKind(node.value, "Float", context),
         type: frNumber,
       };
     }
     case "Call": {
-      const fn = analyzeExpression(node.fn, symbols);
-      const args = node.args.map((arg) => analyzeExpression(arg, symbols));
+      const fn = analyzeExpression(node.fn, context);
+      const args = node.args.map((arg) => analyzeExpression(arg, context));
 
       return {
         ...node,
@@ -315,8 +363,8 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
       return {
         ...node,
         args: [
-          analyzeExpression(node.args[0], symbols),
-          analyzeExpression(node.args[1], symbols),
+          analyzeExpression(node.args[0], context),
+          analyzeExpression(node.args[1], context),
         ],
         type: frAny(), // TODO - function result type
       };
@@ -324,62 +372,62 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
     case "UnaryCall": {
       return {
         ...node,
-        arg: analyzeExpression(node.arg, symbols),
+        arg: analyzeExpression(node.arg, context),
         type: frAny(), // TODO - function result type
       };
     }
     case "Pipe": {
       return {
         ...node,
-        leftArg: analyzeExpression(node.leftArg, symbols),
-        fn: analyzeExpression(node.fn, symbols),
-        rightArgs: node.rightArgs.map((arg) => analyzeExpression(arg, symbols)),
+        leftArg: analyzeExpression(node.leftArg, context),
+        fn: analyzeExpression(node.fn, context),
+        rightArgs: node.rightArgs.map((arg) => analyzeExpression(arg, context)),
         type: frAny(), // TODO - function result type
       };
     }
     case "DotLookup": {
       return {
         ...node,
-        arg: analyzeExpression(node.arg, symbols),
+        arg: analyzeExpression(node.arg, context),
         type: frAny(), // TODO
       };
     }
     case "BracketLookup": {
       return {
         ...node,
-        arg: analyzeExpression(node.arg, symbols),
-        key: analyzeExpression(node.key, symbols),
+        arg: analyzeExpression(node.arg, context),
+        key: analyzeExpression(node.key, context),
         type: frAny(), // TODO
       };
     }
     case "Ternary": {
       return {
         ...node,
-        condition: analyzeExpression(node.condition, symbols),
-        trueExpression: analyzeExpression(node.trueExpression, symbols),
-        falseExpression: analyzeExpression(node.falseExpression, symbols),
+        condition: analyzeExpression(node.condition, context),
+        trueExpression: analyzeExpression(node.trueExpression, context),
+        falseExpression: analyzeExpression(node.falseExpression, context),
         type: frAny(), // TODO
       };
     }
     case "UnitTypeSignature": {
       return {
         ...node,
-        body: analyzeUnitType(node.body, symbols),
+        body: analyzeUnitType(node.body, context),
       };
     }
     case "InfixUnitType":
       return {
         ...node,
         args: [
-          analyzeUnitType(node.args[0], symbols),
-          analyzeUnitType(node.args[1], symbols),
+          analyzeUnitType(node.args[0], context),
+          analyzeUnitType(node.args[1], context),
         ],
       };
     case "ExponentialUnitType":
       return {
         ...node,
-        base: analyzeUnitType(node.base, symbols),
-        exponent: analyzeKind(node.exponent, "Float", symbols),
+        base: analyzeUnitType(node.base, context),
+        exponent: analyzeKind(node.exponent, "Float", context),
       };
     default:
       return node satisfies never;
@@ -387,13 +435,13 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
 }
 
 export function analyzeAst(ast: AST): TypedAST {
-  const symbolTable: SymbolTable = [];
-  const typedProgram = analyzeAstNode(ast, symbolTable);
+  const typedProgram = analyzeAstNode(ast, {
+    definitions: ImmutableMap(),
+  });
 
   return {
     ...(typedProgram as KindTypedNode<"Program">),
     raw: ast,
-    symbolTable,
     comments: ast.comments,
   };
 }

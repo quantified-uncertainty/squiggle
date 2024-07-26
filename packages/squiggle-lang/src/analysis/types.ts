@@ -7,12 +7,6 @@ import {
 } from "../ast/types.js";
 import { FRType } from "../library/registry/frTypes.js";
 
-type SymbolEntry = {
-  name: string;
-};
-
-export type SymbolTable = SymbolEntry[];
-
 type Node<T extends string, V extends object> = {
   kind: T;
   location: LocationRange;
@@ -166,7 +160,14 @@ type NodeIdentifier = ExpressionNode<
   "Identifier",
   {
     value: string;
-    // definition: NodeIdentifierDefinition; // resolved reference; TODO - builtins?
+    resolved:
+      | {
+          kind: "definition";
+          node: NodeIdentifierDefinition;
+        }
+      | {
+          kind: "builtin";
+        };
   }
 >;
 
@@ -341,5 +342,4 @@ export type AnyUnitTypeNode = KindTypedNode<(typeof unitTypeKinds)[number]>;
 export type TypedAST = KindTypedNode<"Program"> & {
   raw: AST;
   comments: ASTCommentNode[];
-  symbolTable: SymbolTable;
 };
