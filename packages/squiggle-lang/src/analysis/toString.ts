@@ -15,6 +15,7 @@ export function nodeToString(
     switch (node.kind) {
       case "Program":
         return sExpr([
+          // TODO - imports
           ...node.statements.map(toSExpr),
           node.result ? toSExpr(node.result) : undefined,
         ]);
@@ -44,13 +45,14 @@ export function nodeToString(
           node.fractional === null ? "" : `.${node.fractional}`
         }${node.exponent === null ? "" : `e${node.exponent}`}`;
       case "Identifier":
+      case "IdentifierDefinition":
         return `:${node.value}`;
       case "LambdaParameter":
         if (!node.annotation && !node.unitTypeSignature) {
-          return `:${node.variable}`;
+          return `:${node.variable.value}`;
         }
         return sExpr([
-          node.variable,
+          node.variable.value,
           node.annotation && toSExpr(node.annotation),
           node.unitTypeSignature && toSExpr(node.unitTypeSignature),
         ]);
@@ -91,6 +93,8 @@ export function nodeToString(
         return sExpr([toSExpr(node.body)]);
       case "InfixUnitType":
         return sExpr([node.op, ...node.args.map(toSExpr)]);
+      case "UnitName":
+        return node.value;
       case "ExponentialUnitType":
         return sExpr([
           toSExpr(node.base),

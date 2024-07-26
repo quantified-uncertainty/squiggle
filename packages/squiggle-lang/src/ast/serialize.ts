@@ -183,6 +183,7 @@ export function serializeAstNode(
     case "LambdaParameter":
       return {
         ...node,
+        variable: visit.ast(node.variable),
         annotation: node.annotation && visit.ast(node.annotation),
         unitTypeSignature:
           node.unitTypeSignature && visit.ast(node.unitTypeSignature),
@@ -337,6 +338,7 @@ export function deserializeAstNode(
     case "LambdaParameter":
       return {
         ...node,
+        variable: visit.ast(node.variable) as KindNode<"Identifier">,
         annotation:
           node.annotation !== null ? visit.ast(node.annotation) : null,
         unitTypeSignature:

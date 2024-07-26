@@ -80,7 +80,7 @@ function compileExpressionContent(
       const parameters: LambdaIRParameter[] = [];
       for (const astParameter of ast.args) {
         parameters.push({
-          name: astParameter.variable,
+          name: astParameter.variable.value,
           annotation: astParameter.annotation
             ? compileExpression(astParameter.annotation, context)
             : undefined,

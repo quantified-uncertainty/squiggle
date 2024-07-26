@@ -1,4 +1,4 @@
-import { AST, ASTNode } from "../ast/types.js";
+import { AST, ASTNode, KindNode } from "../ast/types.js";
 import {
   frAny,
   frArray,
@@ -99,15 +99,26 @@ function analyzeStatement(
   return typedNode;
 }
 
+// Identifier definitions (e.g. `x` in `x = 5`) are represented as `Identifier` nodes in the AST,
+// but they are treated as a separate kind of node in the analysis phase.
+function analyzeIdentifierDefinition(
+  node: KindNode<"Identifier">
+): KindTypedNode<"IdentifierDefinition"> {
+  return {
+    ...node,
+    kind: "IdentifierDefinition",
+  };
+}
+
 function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
   switch (node.kind) {
     case "Program": {
       const imports = node.imports.map(([path, alias]) => {
         const typedPath = analyzeKind(path, "String", symbols);
-        const typedAlias = analyzeKind(alias, "Identifier", symbols);
+        const typedAlias = analyzeIdentifierDefinition(alias);
         return [typedPath, typedAlias] as [
           KindTypedNode<"String">,
-          KindTypedNode<"Identifier">,
+          KindTypedNode<"IdentifierDefinition">,
         ];
       });
       const statements = node.statements.map((statement) =>
@@ -156,7 +167,7 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
         ...node,
         decorators,
         value,
-        variable: analyzeKind(node.variable, "Identifier", symbols),
+        variable: analyzeIdentifierDefinition(node.variable),
         unitTypeSignature: node.unitTypeSignature
           ? analyzeKind(node.unitTypeSignature, "UnitTypeSignature", symbols)
           : null,
@@ -186,7 +197,7 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
         ...node,
         decorators,
         value,
-        variable: analyzeKind(node.variable, "Identifier", symbols),
+        variable: analyzeIdentifierDefinition(node.variable),
         exported: node.exported,
       };
     }
@@ -210,7 +221,7 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
     case "LambdaParameter": {
       return {
         ...node,
-        variable: node.variable,
+        variable: analyzeIdentifierDefinition(node.variable),
         annotation: node.annotation
           ? analyzeExpression(node.annotation, symbols)
           : null,
@@ -222,7 +233,7 @@ function analyzeAstNode(node: ASTNode, symbols: SymbolTable): TypedASTNode {
     case "Identifier": {
       return {
         ...node,
-        type: frAny(), // TODO - resolve
+        type: frAny(), // TODO - resolve from definition
       };
     }
     case "String": {

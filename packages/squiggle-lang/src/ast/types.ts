@@ -151,7 +151,7 @@ type NodeFloat = N<
 type NodeLambdaParameter = N<
   "LambdaParameter",
   {
-    variable: string;
+    variable: NodeIdentifier;
     annotation: ASTNode | null;
     unitTypeSignature: NodeTypeSignature | null;
   }

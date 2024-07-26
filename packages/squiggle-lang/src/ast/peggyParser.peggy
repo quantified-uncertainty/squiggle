@@ -90,7 +90,7 @@ functionParameters = functionParameter|.., commaSeparator|
   functionParameter
     = id:dollarIdentifier annotation:(_ ':' _nl @expression)? paramUnitType:unitTypeSignature?
       {
-        return h.nodeLambdaParameter(id.value, annotation, paramUnitType, location());
+        return h.nodeLambdaParameter(id, annotation, paramUnitType, location());
       }
 
 /*

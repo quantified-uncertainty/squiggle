@@ -400,7 +400,7 @@ function getIdentifierName(node: ASTNode): string {
     case "Identifier":
       return node.value;
     case "LambdaParameter":
-      return node.variable;
+      return node.variable.value;
     default:
       throw new ICompileError(
         `Node must have type identifier, not ${node.kind}`,
@@ -705,7 +705,12 @@ function innerFindTypeConstraints(
     case "Identifier":
       return identifierConstraint(node.value, node, scopes, "reference");
     case "LambdaParameter":
-      return identifierConstraint(node.variable, node, scopes, "reference");
+      return identifierConstraint(
+        node.variable.value,
+        node,
+        scopes,
+        "reference"
+      );
     case "Float":
     case "UnitValue":
       return no_constraint();

@@ -30,7 +30,7 @@ type ExpressionNode<T extends string, V extends object> = Node<T, V> & {
 type NodeProgram = Node<
   "Program",
   {
-    imports: readonly [NodeString, NodeIdentifier][];
+    imports: readonly [NodeString, NodeIdentifierDefinition][];
     statements: AnyStatementNode[];
     result: AnyExpressionNode | null;
     // Var name -> statement node, for faster path resolution.
@@ -145,9 +145,20 @@ type NodeFloat = ExpressionNode<
 type NodeLambdaParameter = Node<
   "LambdaParameter",
   {
-    variable: string;
+    variable: NodeIdentifierDefinition;
     annotation: AnyExpressionNode | null;
     unitTypeSignature: NodeUnitTypeSignature | null;
+  }
+>;
+
+// definitions are:
+// `x` in `x = 5`
+// `x` in `import "foo" as x`
+// `x` in `f(x) = 5`
+type NodeIdentifierDefinition = Node<
+  "IdentifierDefinition",
+  {
+    value: string;
   }
 >;
 
@@ -155,6 +166,7 @@ type NodeIdentifier = ExpressionNode<
   "Identifier",
   {
     value: string;
+    // definition: NodeIdentifierDefinition; // resolved reference; TODO - builtins?
   }
 >;
 
@@ -168,7 +180,7 @@ type NodeDecorator = Node<
 
 type LetOrDefun = {
   decorators: NodeDecorator[];
-  variable: NodeIdentifier;
+  variable: NodeIdentifierDefinition;
   exported: boolean;
 };
 
@@ -233,6 +245,13 @@ type NodeExponentialUnitType = Node<
   }
 >;
 
+type NodeUnitName = Node<
+  "UnitName",
+  {
+    value: string;
+  }
+>;
+
 type NodeString = ExpressionNode<"String", { value: string }>;
 
 type NodeBoolean = ExpressionNode<"Boolean", { value: boolean }>;
@@ -266,10 +285,12 @@ export type TypedASTNode =
   | NodeUnitTypeSignature
   | NodeInfixUnitType
   | NodeExponentialUnitType
+  | NodeUnitName
   // identifiers
-  | NodeIdentifier
   | NodeLambdaParameter
+  | NodeIdentifierDefinition
   // basic values
+  | NodeIdentifier
   | NodeFloat
   | NodeString
   | NodeBoolean;

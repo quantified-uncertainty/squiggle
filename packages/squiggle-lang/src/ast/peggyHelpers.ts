@@ -183,7 +183,7 @@ export function nodeIdentifier(
 }
 
 export function nodeLambdaParameter(
-  variable: string,
+  variable: KindNode<"Identifier">,
   annotation: ASTNode | null,
   unitTypeSignature: KindNode<"UnitTypeSignature"> | null,
   location: LocationRange

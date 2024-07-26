@@ -94,10 +94,10 @@ export function nodeToString(
         return `:${node.value}`;
       case "LambdaParameter":
         if (!node.annotation && !node.unitTypeSignature) {
-          return `:${node.variable}`;
+          return `:${node.variable.value}`;
         }
         return sExpr([
-          node.variable,
+          node.variable.value,
           node.annotation && toSExpr(node.annotation),
           node.unitTypeSignature && toSExpr(node.unitTypeSignature),
         ]);
