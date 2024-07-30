@@ -104,15 +104,14 @@ export class SqModule {
 
     const resolvedImports: Import[] = [];
 
-    for (const [file, variable] of program.imports) {
-      const name = linker.resolve(file.value, this.name);
+    for (const importNode of program.imports) {
+      const { path, variable } = importNode;
+      const name = linker.resolve(path.value, this.name);
       resolvedImports.push({
         name,
         hash: this.pins[name],
         variable: variable.value,
-        // TODO - this is used for errors, but we should use the entire import statement;
-        // To fix this, we need to represent each import statement as an AST node.
-        location: file.location,
+        location: path.location,
       });
     }
 

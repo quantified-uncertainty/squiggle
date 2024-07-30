@@ -12,6 +12,7 @@ import { NodeDotLookup } from "./NodeDotLookup.js";
 import { NodeExponentialUnitType } from "./NodeExponentialUnitType.js";
 import { NodeFloat } from "./NodeFloat.js";
 import { NodeIdentifier } from "./NodeIdentifier.js";
+import { NodeImport } from "./NodeImport.js";
 import { NodeInfixCall } from "./NodeInfixCall.js";
 import { NodeInfixUnitType } from "./NodeInfixUnitType.js";
 import { NodeKeyValue } from "./NodeKeyValue.js";
@@ -127,6 +128,8 @@ function analyzeAstNode(node: ASTNode, context: AnalysisContext): TypedASTNode {
   switch (node.kind) {
     case "Program":
       throw new Error("Encountered a nested Program node");
+    case "Import":
+      return NodeImport.fromAst(node);
     case "Block":
       return NodeBlock.fromAst(node, context);
     case "LetStatement":

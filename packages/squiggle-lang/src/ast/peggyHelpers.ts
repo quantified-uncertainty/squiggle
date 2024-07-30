@@ -142,12 +142,20 @@ export function nodeBlock(
 }
 
 export function nodeProgram(
-  imports: [KindNode<"String">, KindNode<"Identifier">][],
+  imports: KindNode<"Import">[],
   statements: ASTNode[],
   result: ASTNode | null,
   location: LocationRange
 ): KindNode<"Program"> {
   return { kind: "Program", imports, statements, result, location };
+}
+
+export function nodeImport(
+  path: KindNode<"String">,
+  variable: KindNode<"Identifier">,
+  location: LocationRange
+): KindNode<"Import"> {
+  return { kind: "Import", path, variable, location };
 }
 
 export function nodeTypeSignature(

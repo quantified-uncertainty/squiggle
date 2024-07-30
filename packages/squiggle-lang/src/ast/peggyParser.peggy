@@ -25,7 +25,7 @@ importStatementsList = (@importStatement __nl)*
 
 importStatement
   = _nl 'import' __ file:string variable:(__ 'as' __ @identifier)
-    { return [file, variable]; }
+    { return h.nodeImport(file, variable, location()); }
 
 innerBlockOrExpression
   = quotedInnerBlock

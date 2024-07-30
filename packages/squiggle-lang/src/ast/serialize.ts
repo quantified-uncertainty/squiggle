@@ -57,12 +57,15 @@ export function serializeAstNode(
     case "Program":
       return {
         ...node,
-        imports: node.imports.map((item) => [
-          visit.ast(item[0]),
-          visit.ast(item[1]),
-        ]),
+        imports: node.imports.map(visit.ast),
         statements: node.statements.map(visit.ast),
         result: node.result ? visit.ast(node.result) : null,
+      };
+    case "Import":
+      return {
+        ...node,
+        path: visit.ast(node.path),
+        variable: visit.ast(node.variable),
       };
     case "Block":
       return {
@@ -206,12 +209,15 @@ export function deserializeAstNode(
     case "Program":
       return {
         ...node,
-        imports: node.imports.map((item) => [
-          visit.ast(item[0]) as KindNode<"String">,
-          visit.ast(item[0]) as KindNode<"Identifier">,
-        ]),
+        imports: node.imports.map(visit.ast) as KindNode<"Import">[],
         statements: node.statements.map(visit.ast),
         result: node.result ? visit.ast(node.result) : null,
+      };
+    case "Import":
+      return {
+        ...node,
+        path: visit.ast(node.path) as KindNode<"String">,
+        variable: visit.ast(node.variable) as KindNode<"Identifier">,
       };
     case "Block":
       return {

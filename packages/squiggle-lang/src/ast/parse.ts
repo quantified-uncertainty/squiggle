@@ -62,9 +62,12 @@ export function nodeToString(
     switch (node.kind) {
       case "Program":
         return sExpr([
+          // TODO - imports
           ...node.statements.map(toSExpr),
           node.result ? toSExpr(node.result) : undefined,
         ]);
+      case "Import":
+        return sExpr([toSExpr(node.path), toSExpr(node.variable)]);
       case "Block":
         return sExpr([...node.statements.map(toSExpr), toSExpr(node.result)]);
       case "Array":

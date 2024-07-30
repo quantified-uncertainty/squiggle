@@ -42,6 +42,15 @@ type N<T extends string, V extends object> = {
  * obtain with `KindNode<"Name">` helper.
  */
 
+type NodeProgram = N<
+  "Program",
+  {
+    imports: NodeImport[];
+    statements: ASTNode[];
+    result: ASTNode | null;
+  }
+>;
+
 type NodeBlock = N<
   "Block",
   {
@@ -50,12 +59,11 @@ type NodeBlock = N<
   }
 >;
 
-type NodeProgram = N<
-  "Program",
+type NodeImport = N<
+  "Import",
   {
-    imports: [NodeString, NodeIdentifier][];
-    statements: ASTNode[];
-    result: ASTNode | null;
+    path: NodeString;
+    variable: NodeIdentifier;
   }
 >;
 
@@ -246,6 +254,7 @@ type NodeBoolean = N<"Boolean", { value: boolean }>;
 export type ASTNode =
   // blocks
   | NodeProgram
+  | NodeImport
   | NodeBlock
   // statements
   | NodeLetStatement

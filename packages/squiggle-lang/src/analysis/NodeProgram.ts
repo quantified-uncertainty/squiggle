@@ -3,14 +3,13 @@ import { ImmutableMap } from "../utility/immutable.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression, analyzeKind, analyzeStatement } from "./index.js";
 import { Node } from "./Node.js";
-import { NodeIdentifierDefinition } from "./NodeIdentifierDefinition.js";
-import { NodeString } from "./NodeString.js";
-import { AnyExpressionNode, AnyStatementNode, KindTypedNode } from "./types.js";
+import { NodeImport } from "./NodeImport.js";
+import { AnyExpressionNode, AnyStatementNode } from "./types.js";
 
 export class NodeProgram extends Node<"Program"> {
   private constructor(
     public raw: AST,
-    public imports: [NodeString, NodeIdentifierDefinition][],
+    public imports: NodeImport[],
     public statements: AnyStatementNode[],
     public result: AnyExpressionNode | null
   ) {
@@ -48,19 +47,15 @@ export class NodeProgram extends Node<"Program"> {
       definitions: ImmutableMap(),
     };
 
-    const imports: [
-      KindTypedNode<"String">,
-      KindTypedNode<"IdentifierDefinition">,
-    ][] = [];
+    const imports: NodeImport[] = [];
 
-    for (const [path, alias] of ast.imports) {
-      const typedPath = analyzeKind(path, "String", context);
-      const typedAlias = NodeIdentifierDefinition.fromAst(alias);
+    for (const importNode of ast.imports) {
+      const typedImportNode = analyzeKind(importNode, "Import", context);
       context.definitions = context.definitions.set(
-        typedAlias.value,
-        typedAlias
+        typedImportNode.variable.value,
+        typedImportNode.variable
       );
-      imports.push([typedPath, typedAlias]);
+      imports.push(typedImportNode);
     }
 
     const statements: AnyStatementNode[] = [];

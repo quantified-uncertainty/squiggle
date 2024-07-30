@@ -12,6 +12,7 @@ import { NodeExponentialUnitType } from "./NodeExponentialUnitType.js";
 import { NodeFloat } from "./NodeFloat.js";
 import { NodeIdentifier } from "./NodeIdentifier.js";
 import { NodeIdentifierDefinition } from "./NodeIdentifierDefinition.js";
+import { NodeImport } from "./NodeImport.js";
 import { NodeInfixCall } from "./NodeInfixCall.js";
 import { NodeInfixUnitType } from "./NodeInfixUnitType.js";
 import { NodeKeyValue } from "./NodeKeyValue.js";
@@ -33,6 +34,7 @@ export type AnyDictEntryNode = NodeKeyValue | NodeIdentifier;
 export type TypedASTNode =
   // blocks
   | NodeProgram
+  | NodeImport
   | NodeBlock
   // statements
   | NodeLetStatement
