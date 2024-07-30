@@ -12,6 +12,11 @@ export class NodeInfixCall extends ExpressionNode<"InfixCall"> {
     public args: [AnyExpressionNode, AnyExpressionNode]
   ) {
     super("InfixCall", location, frAny());
+    this._init();
+  }
+
+  children() {
+    return this.args;
   }
 
   static fromAst(

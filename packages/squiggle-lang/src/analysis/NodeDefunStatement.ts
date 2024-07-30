@@ -19,6 +19,11 @@ export class NodeDefunStatement
     public value: NodeLambda
   ) {
     super("DefunStatement", location);
+    this._init();
+  }
+
+  children() {
+    return [...this.decorators, this.variable, this.value];
   }
 
   static fromAst(

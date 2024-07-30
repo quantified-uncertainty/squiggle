@@ -18,6 +18,11 @@ export class NodeTernary extends ExpressionNode<"Ternary"> {
       location,
       frAny() // TODO - infer, union of true and false expression types
     );
+    this._init();
+  }
+
+  children() {
+    return [this.condition, this.trueExpression, this.falseExpression];
   }
 
   static fromAst(

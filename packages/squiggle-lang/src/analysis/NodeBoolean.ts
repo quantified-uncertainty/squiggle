@@ -8,6 +8,11 @@ export class NodeBoolean extends ExpressionNode<"Boolean"> {
     public value: boolean
   ) {
     super("Boolean", location, frBool);
+    this._init();
+  }
+
+  children() {
+    return [];
   }
 
   static fromAst(node: KindNode<"Boolean">): NodeBoolean {

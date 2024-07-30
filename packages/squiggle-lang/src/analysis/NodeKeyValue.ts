@@ -11,6 +11,11 @@ export class NodeKeyValue extends Node<"KeyValue"> {
     public value: AnyExpressionNode
   ) {
     super("KeyValue", location);
+    this._init();
+  }
+
+  children() {
+    return [this.key, this.value];
   }
 
   static fromAst(

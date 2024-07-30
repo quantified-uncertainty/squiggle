@@ -28,7 +28,6 @@ import { NodeUnitTypeSignature } from "./NodeUnitTypeSignature.js";
 import { NodeUnitValue } from "./NodeUnitValue.js";
 
 // TODO - this name is inconsistent with `AnyNodeDictEntry` in the raw AST, rename it there
-
 export type AnyDictEntryNode = NodeKeyValue | NodeIdentifier;
 
 export type TypedASTNode =

@@ -16,6 +16,11 @@ export class NodeCall extends ExpressionNode<"Call"> {
       location,
       frAny() // TODO - infer
     );
+    this._init();
+  }
+
+  children() {
+    return [this.fn, ...this.args];
   }
 
   static fromAst(node: KindNode<"Call">, context: AnalysisContext): NodeCall {

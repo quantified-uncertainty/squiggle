@@ -25,6 +25,11 @@ export class NodeIdentifier extends ExpressionNode<"Identifier"> {
       location,
       frAny() // TODO - from definition
     );
+    this._init();
+  }
+
+  children() {
+    return [];
   }
 
   static fromAst(

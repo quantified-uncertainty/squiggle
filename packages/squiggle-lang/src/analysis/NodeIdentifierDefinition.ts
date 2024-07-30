@@ -11,6 +11,11 @@ export class NodeIdentifierDefinition extends Node<"IdentifierDefinition"> {
     public value: string
   ) {
     super("IdentifierDefinition", location);
+    this._init();
+  }
+
+  children() {
+    return [];
   }
 
   static fromAst(

@@ -16,6 +16,11 @@ export class NodeDict extends ExpressionNode<"Dict"> {
       // TODO - get the type from the elements
       frDictWithArbitraryKeys(frAny())
     );
+    this._init();
+  }
+
+  children() {
+    return this.elements;
   }
 
   // Static key -> node, for faster path resolution.

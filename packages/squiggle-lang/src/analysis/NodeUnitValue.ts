@@ -11,6 +11,11 @@ export class NodeUnitValue extends ExpressionNode<"UnitValue"> {
     public unit: string
   ) {
     super("UnitValue", location, value.type);
+    this._init();
+  }
+
+  children() {
+    return [this.value];
   }
 
   static fromAst(

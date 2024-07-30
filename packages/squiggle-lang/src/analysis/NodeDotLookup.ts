@@ -16,6 +16,11 @@ export class NodeDotLookup extends ExpressionNode<"DotLookup"> {
       location,
       frAny() // TODO - infer
     );
+    this._init();
+  }
+
+  children() {
+    return [this.arg];
   }
 
   static fromAst(

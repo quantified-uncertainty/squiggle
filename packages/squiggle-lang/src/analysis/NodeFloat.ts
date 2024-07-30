@@ -10,6 +10,11 @@ export class NodeFloat extends ExpressionNode<"Float"> {
     public exponent: number | null
   ) {
     super("Float", location, frNumber);
+    this._init();
+  }
+
+  children() {
+    return [];
   }
 
   static fromAst(node: KindNode<"Float">) {

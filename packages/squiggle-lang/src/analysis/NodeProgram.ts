@@ -15,6 +15,15 @@ export class NodeProgram extends Node<"Program"> {
     public result: AnyExpressionNode | null
   ) {
     super("Program", raw.location);
+    this._init();
+  }
+
+  children() {
+    return [
+      ...this.imports,
+      this.statements,
+      this.result ? [this.result] : [],
+    ].flat();
   }
 
   get comments() {

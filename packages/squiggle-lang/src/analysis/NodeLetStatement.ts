@@ -26,6 +26,16 @@ export class NodeLetStatement
     public value: AnyExpressionNode
   ) {
     super("LetStatement", location);
+    this._init();
+  }
+
+  children() {
+    return [
+      ...this.decorators,
+      this.variable,
+      ...(this.unitTypeSignature ? [this.unitTypeSignature] : []),
+      this.value,
+    ];
   }
 
   static fromAst(node: KindNode<"LetStatement">, context: AnalysisContext) {

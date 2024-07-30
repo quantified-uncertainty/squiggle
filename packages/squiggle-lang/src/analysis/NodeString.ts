@@ -8,6 +8,11 @@ export class NodeString extends ExpressionNode<"String"> {
     public value: string
   ) {
     super("String", location, frString);
+    this._init();
+  }
+
+  children() {
+    return [];
   }
 
   static fromAst(node: KindNode<"String">): NodeString {

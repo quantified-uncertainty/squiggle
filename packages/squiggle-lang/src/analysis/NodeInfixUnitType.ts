@@ -11,6 +11,11 @@ export class NodeInfixUnitType extends Node<"InfixUnitType"> {
     public args: [AnyUnitTypeNode, AnyUnitTypeNode]
   ) {
     super("InfixUnitType", location);
+    this._init();
+  }
+
+  children() {
+    return this.args;
   }
 
   static fromAst(

@@ -7,5 +7,10 @@ export class NodeUnitName extends Node<"UnitName"> {
     public value: string
   ) {
     super("UnitName", location);
+    this._init();
+  }
+
+  children() {
+    return [];
   }
 }

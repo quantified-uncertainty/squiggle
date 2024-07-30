@@ -17,6 +17,11 @@ export class NodePipe extends ExpressionNode<"Pipe"> {
       location,
       frAny() // TODO - infer from `fn` and arg types
     );
+    this._init();
+  }
+
+  children() {
+    return [this.leftArg, this.fn, ...this.rightArgs];
   }
 
   static fromAst(node: KindNode<"Pipe">, context: AnalysisContext): NodePipe {

@@ -16,6 +16,11 @@ export class NodeArray extends ExpressionNode<"Array"> {
       // TODO - get the type from the elements
       frArray(frAny())
     );
+    this._init();
+  }
+
+  children() {
+    return this.elements;
   }
 
   static fromAst(node: KindNode<"Array">, context: AnalysisContext): NodeArray {

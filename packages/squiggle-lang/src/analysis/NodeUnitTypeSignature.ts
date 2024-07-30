@@ -10,6 +10,11 @@ export class NodeUnitTypeSignature extends Node<"UnitTypeSignature"> {
     public body: AnyUnitTypeNode
   ) {
     super("UnitTypeSignature", location);
+    this._init();
+  }
+
+  children() {
+    return [this.body];
   }
 
   static fromAst(

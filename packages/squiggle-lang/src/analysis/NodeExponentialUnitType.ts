@@ -12,6 +12,11 @@ export class NodeExponentialUnitType extends Node<"ExponentialUnitType"> {
     public exponent: NodeFloat
   ) {
     super("ExponentialUnitType", location);
+    this._init();
+  }
+
+  children() {
+    return [this.base, this.exponent];
   }
 
   static fromAst(

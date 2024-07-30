@@ -11,6 +11,11 @@ export class NodeBlock extends ExpressionNode<"Block"> {
     public result: AnyExpressionNode
   ) {
     super("Block", location, result.type);
+    this._init();
+  }
+
+  children() {
+    return [...this.statements, this.result];
   }
 
   static fromAst(node: KindNode<"Block">, context: AnalysisContext): NodeBlock {

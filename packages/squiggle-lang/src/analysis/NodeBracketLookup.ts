@@ -16,6 +16,11 @@ export class NodeBracketLookup extends ExpressionNode<"BracketLookup"> {
       location,
       frAny() // TODO - infer
     );
+    this._init();
+  }
+
+  children() {
+    return [this.arg, this.key];
   }
 
   static fromAst(

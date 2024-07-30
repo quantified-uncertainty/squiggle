@@ -9,6 +9,8 @@ import { Ok, result } from "../utility/result.js";
 import { Value } from "../value/index.js";
 import { Reducer } from "./Reducer.js";
 
+// These helper functions are used only in tests.
+
 export async function evaluateIRToResult(
   ir: ProgramIR
 ): Promise<result<Value, IRuntimeError>> {

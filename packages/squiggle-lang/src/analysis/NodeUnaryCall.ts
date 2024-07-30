@@ -16,6 +16,11 @@ export class NodeUnaryCall extends ExpressionNode<"UnaryCall"> {
       location,
       frAny() // TODO - function result type
     );
+    this._init();
+  }
+
+  children() {
+    return [this.arg];
   }
 
   static fromAst(

@@ -12,6 +12,11 @@ export class NodeDecorator extends Node<"Decorator"> {
     public args: AnyExpressionNode[]
   ) {
     super("Decorator", location);
+    this._init();
+  }
+
+  children() {
+    return [this.name, ...this.args];
   }
 
   static fromAst(

@@ -20,6 +20,15 @@ export class NodeLambda extends ExpressionNode<"Lambda"> {
       location,
       frAny() // TODO - lambda type
     );
+    this._init();
+  }
+
+  children() {
+    return [
+      ...this.args,
+      this.body,
+      ...(this.returnUnitType ? [this.returnUnitType] : []),
+    ];
   }
 
   static fromAst(
