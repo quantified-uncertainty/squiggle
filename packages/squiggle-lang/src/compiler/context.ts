@@ -1,13 +1,26 @@
+import { NodeIdentifier } from "../analysis/NodeIdentifier.js";
+import { NodeIdentifierDefinition } from "../analysis/NodeIdentifierDefinition.js";
 import { LocationRange } from "../ast/types.js";
 import { ICompileError } from "../errors/IError.js";
 import { Bindings } from "../reducer/Stack.js";
+import { Value } from "../value/index.js";
 import { IRByKind, make, Ref } from "./types.js";
 
+/*
+ * During the compilation stage, identifers are already resolved to their
+ * definitions (AST nodes that define the identifier).
+ *
+ * So, for the sake of consistency and simplicity, we don't store name ->
+ * definition mappings here. Instead, we store definition nodes themselves, and
+ * we resolve them to their positions in the stack or captures.
+ */
 type Scope = {
-  // Position on stack is counted from the first element on stack, unlike in
-  // StackRef's offset.  See switch branch for "Identifier" AST type below.
-  stack: Record<string, number>;
-  size: number;
+  /*
+   * Position on stack is counted from the first element on stack, unlike in
+   * StackRef's offset. See the branch for "Identifier" AST type in
+   * `compileExpressionContent`.
+   */
+  stack: Map<NodeIdentifierDefinition, number>;
 } & (
   | {
       // It's possible to have multiple block scopes; example: `x = 5; { y = 6; z = 7; {{{ x + y + z }}} }`.
@@ -17,7 +30,7 @@ type Scope = {
       type: "function";
       // Captures will be populated on the first attempt to resolve a name that should be captured.
       captures: Ref[];
-      captureIndex: Record<string, number>;
+      captureIndex: Map<NodeIdentifierDefinition, number>;
     }
 );
 
@@ -35,11 +48,11 @@ type Scope = {
 export class CompileContext {
   scopes: Scope[] = [];
 
-  // Externals will include:
-  // 1. stdLib symbols
-  // 2. imports
-  // Externals will be inlined in the resulting IR.
-  constructor(public externals: Bindings) {
+  // Stdlib values will be inlined in the resulting IR.
+  constructor(
+    public stdlib: Bindings,
+    public imports: Record<string, Value>
+  ) {
     // top-level scope
     this.startScope();
   }
@@ -47,8 +60,7 @@ export class CompileContext {
   startScope() {
     this.scopes.push({
       type: "block",
-      stack: {},
-      size: 0,
+      stack: new Map(),
     });
   }
 
@@ -59,10 +71,9 @@ export class CompileContext {
   startFunctionScope() {
     this.scopes.push({
       type: "function",
-      stack: {},
-      size: 0,
+      stack: new Map(),
       captures: [],
-      captureIndex: {},
+      captureIndex: new Map(),
     });
   }
 
@@ -74,18 +85,17 @@ export class CompileContext {
     return currentScope.captures;
   }
 
-  defineLocal(name: string) {
+  defineLocal(name: NodeIdentifierDefinition) {
     const currentScope = this.scopes.at(-1);
     if (!currentScope) {
       throw new Error("Compiler error, out of scopes");
     }
-    currentScope.stack[name] = currentScope.size;
-    currentScope.size++;
+    currentScope.stack.set(name, currentScope.stack.size);
   }
 
   private resolveNameFromDepth(
-    location: LocationRange,
-    name: string,
+    location: LocationRange, // location of the Identifier node
+    name: NodeIdentifierDefinition, // definition to which the Identifier node was resolved by the analysis stage
     fromDepth: number
   ): IRByKind<"StackRef" | "CaptureRef" | "Value"> {
     let offset = 0;
@@ -93,21 +103,26 @@ export class CompileContext {
     // Unwind the scopes upwards.
     for (let i = fromDepth; i >= 0; i--) {
       const scope = this.scopes[i];
-      if (name in scope.stack) {
+
+      const position = scope.stack.get(name);
+      if (position !== undefined) {
         return {
           location,
-          ...make("StackRef", offset + scope.size - 1 - scope.stack[name]),
+          ...make("StackRef", offset + scope.stack.size - 1 - position),
         };
       }
-      offset += scope.size;
+      offset += scope.stack.size;
 
       if (scope.type === "function") {
         // Have we already captured this name?
-        if (name in scope.captureIndex) {
-          return {
-            location,
-            ...make("CaptureRef", scope.captureIndex[name]),
-          };
+        {
+          const position = scope.captureIndex.get(name);
+          if (position !== undefined) {
+            return {
+              location,
+              ...make("CaptureRef", position),
+            };
+          }
         }
 
         // This is either an external or a capture. Let's look for the
@@ -131,7 +146,7 @@ export class CompileContext {
         const newIndex = scope.captures.length;
         const newCapture = resolved;
         scope.captures.push(newCapture);
-        scope.captureIndex[name] = newIndex;
+        scope.captureIndex.set(name, newIndex);
         return {
           location,
           ...make("CaptureRef", newIndex),
@@ -139,34 +154,36 @@ export class CompileContext {
       }
     }
 
-    // `name` not found in scopes. So it must come from externals.
-    const value = this.externals.get(name);
-    if (value !== undefined) {
-      return {
-        location,
-        ...make("Value", value),
-      };
-    }
-
-    throw new ICompileError(`${name} is not defined`, location);
+    // This shouldn't happen - if the analysis stage says that the identifier is
+    // resolved to its definition, it should be in the stack.
+    throw new ICompileError(
+      `Internal compiler error: ${name.value} definition not found in compiler context`,
+      location
+    );
   }
 
-  resolveName(
-    location: LocationRange,
-    name: string
+  resolveIdentifier(
+    identifier: NodeIdentifier
   ): IRByKind<"StackRef" | "CaptureRef" | "Value"> {
-    return this.resolveNameFromDepth(location, name, this.scopes.length - 1);
+    if (identifier.resolved.kind === "builtin") {
+      return this.resolveBuiltin(identifier.location, identifier.value);
+    }
+
+    return this.resolveNameFromDepth(
+      identifier.location,
+      identifier.resolved.node,
+      this.scopes.length - 1
+    );
   }
 
-  localsOffsets() {
-    const currentScope = this.scopes.at(-1);
-    if (!currentScope) {
-      throw new Error("Compiler error, out of scopes");
+  resolveBuiltin(location: LocationRange, name: string): IRByKind<"Value"> {
+    const value = this.stdlib.get(name);
+    if (value === undefined) {
+      throw new ICompileError(`${name} is not defined`, location);
     }
-    const result: Record<string, number> = {};
-    for (const [name, offset] of Object.entries(currentScope.stack)) {
-      result[name] = currentScope.size - 1 - offset;
-    }
-    return result;
+    return {
+      location,
+      ...make("Value", value),
+    };
   }
 }

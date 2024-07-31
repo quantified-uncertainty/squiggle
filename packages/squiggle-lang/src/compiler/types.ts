@@ -40,7 +40,7 @@ export type IRContent =
   | MakeIRContent<
       "Assign",
       {
-        left: string;
+        left: string; // TODO - this is mostly unused, we can replace `Assign` with `PushOnStack`
         right: AnyExpressionIR;
       }
     >

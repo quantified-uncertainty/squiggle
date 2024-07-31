@@ -15,7 +15,8 @@ import { SqModuleOutput } from "./SqModuleOutput.js";
 import { getHash } from "./utils.js";
 
 export type Import = {
-  name: string;
+  path: string; // original import string in code
+  name: string; // import name resolved through `linker.resolve`
   hash: string | undefined;
   variable: string;
   location: LocationRange;
@@ -108,6 +109,7 @@ export class SqModule {
       const { path, variable } = importNode;
       const name = linker.resolve(path.value, this.name);
       resolvedImports.push({
+        path: path.value,
         name,
         hash: this.pins[name],
         variable: variable.value,

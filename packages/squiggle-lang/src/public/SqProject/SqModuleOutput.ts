@@ -1,9 +1,9 @@
 import { Env } from "../../dists/env.js";
 import { RunProfile } from "../../reducer/RunProfile.js";
 import { BaseRunner, RunParams } from "../../runners/BaseRunner.js";
-import { ImmutableMap } from "../../utility/immutable.js";
 import { Err, fmap, fmap2, Ok, result } from "../../utility/result.js";
-import { vDict, VDict } from "../../value/VDict.js";
+import { Value } from "../../value/index.js";
+import { VDict, vDictFromArray } from "../../value/VDict.js";
 import { vString } from "../../value/VString.js";
 import {
   SqError,
@@ -122,7 +122,7 @@ export class SqModuleOutput {
     // AST is guaranteed to be ok, otherwise `getImportOutputs` would throw.
     const ast = module.expectAst();
 
-    let importBindings = VDict.empty();
+    const importBindings: Record<string, Value> = {};
 
     // useful for profiling later
     const importsAndOutputs: {
@@ -147,13 +147,9 @@ export class SqModuleOutput {
           executionTime: 0,
         });
       }
-      importBindings = importBindings.merge(
-        vDict(
-          ImmutableMap({
-            [importBinding.variable]: importOutput.result.value.exports._value,
-          })
-        )
-      );
+      importBindings[importBinding.path] =
+        importOutput.result.value.exports._value;
+
       importsAndOutputs.push({
         importBinding,
         importOutput,
@@ -163,7 +159,7 @@ export class SqModuleOutput {
     const runParams: RunParams = {
       ast: ast.raw,
       environment,
-      externals: importBindings,
+      imports: importBindings,
     };
 
     const started = new Date();
@@ -218,7 +214,10 @@ export class SqModuleOutput {
             // In terms of context, exports are the same as bindings.
             "bindings"
           ),
-          imports: wrapSqDict(importBindings, "imports"),
+          imports: wrapSqDict(
+            vDictFromArray(Object.entries(importBindings)),
+            "imports"
+          ),
           profile: runOutput.profile,
         };
       },

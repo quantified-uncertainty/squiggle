@@ -3,7 +3,6 @@ import { compileAst } from "../compiler/index.js";
 import { ProgramIR } from "../compiler/types.js";
 import { defaultEnv } from "../dists/env.js";
 import { ICompileError, IRuntimeError } from "../errors/IError.js";
-import { getStdLib } from "../library/index.js";
 import * as Result from "../utility/result.js";
 import { Ok, result } from "../utility/result.js";
 import { Value } from "../value/index.js";
@@ -16,8 +15,8 @@ export async function evaluateIRToResult(
 ): Promise<result<Value, IRuntimeError>> {
   const reducer = new Reducer(defaultEnv);
   try {
-    const value = reducer.evaluate(ir);
-    return Ok(value);
+    const { result } = reducer.evaluate(ir);
+    return Ok(result);
   } catch (e) {
     return Result.Err(reducer.errorFromException(e));
   }
@@ -27,7 +26,7 @@ export async function evaluateStringToResult(
   code: string
 ): Promise<result<Value, ICompileError | IRuntimeError>> {
   const exprR = Result.bind(parse(code, "main"), (ast) =>
-    compileAst(ast, getStdLib())
+    compileAst({ ast, imports: {} })
   );
 
   if (exprR.ok) {

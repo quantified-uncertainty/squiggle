@@ -16,6 +16,7 @@ import { getAleaRng, PRNG } from "../rng/index.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { annotationToDomain } from "../value/annotations.js";
 import { Value, vArray, vDict, vLambda, vVoid } from "../value/index.js";
+import { VDict } from "../value/VDict.js";
 import { vDomain, VDomain } from "../value/VDomain.js";
 import { FrameStack } from "./FrameStack.js";
 import {
@@ -29,6 +30,13 @@ import { StackTrace } from "./StackTrace.js";
 
 type IRValue<Kind extends IR["kind"]> = IRByKind<Kind>["value"];
 
+export type RunOutput = {
+  result: Value;
+  bindings: VDict;
+  exports: VDict;
+  profile: RunProfile | undefined;
+};
+
 /**
  * Checks that all `evaluateFoo` methods follow the same naming convention.
  *
@@ -40,7 +48,7 @@ type EvaluateAllKinds = {
   [Kind in Exclude<IR["kind"], "Program"> as `evaluate${Kind}`]: (
     irValue: IRValue<Kind>,
     location: LocationRange
-  ) => Value;
+  ) => Kind extends "Assign" ? void : Value;
 };
 
 export class Reducer implements EvaluateAllKinds {
@@ -74,7 +82,7 @@ export class Reducer implements EvaluateAllKinds {
 
   // Evaluate the IR.
   // When recursing into nested IR nodes, call `evaluateExpression()` instead of this method.
-  evaluate(ir: ProgramIR): Value {
+  evaluate(ir: ProgramIR): RunOutput {
     if (this.isRunning) {
       throw new Error(
         "Can't recursively reenter the reducer, consider `.innerEvaluate()` if you're working on Squiggle internals"
@@ -83,10 +91,11 @@ export class Reducer implements EvaluateAllKinds {
     jstat.setRandom(this.rng); // TODO - roll back at the end
 
     this.isRunning = true;
+    const sourceId = ir.location.source;
 
     // avoid stale data
     if (this.environment.profile) {
-      this.profile = new RunProfile(ir.location.source);
+      this.profile = new RunProfile(sourceId);
     } else {
       this.profile = undefined;
     }
@@ -96,12 +105,40 @@ export class Reducer implements EvaluateAllKinds {
       this.evaluateAssign(statement.value);
     }
 
+    const exportNames = new Set(ir.value.exports);
+
+    const bindings = ImmutableMap<string, Value>(
+      Object.entries(ir.value.bindings).map(([name, offset]) => {
+        let value = this.stack.get(offset);
+        if (exportNames.has(name)) {
+          value = value.mergeTags({
+            exportData: {
+              sourceId,
+              path: [name],
+            },
+          });
+        }
+        return [name, value];
+      })
+    );
+    const exports = bindings.filter((_, name) => exportNames.has(name));
+
     const result = ir.value.result
       ? this.evaluateExpression(ir.value.result)
       : vVoid();
     this.isRunning = false;
 
-    return result;
+    return {
+      result,
+      bindings: vDict(bindings),
+      exports: vDict(exports).mergeTags({
+        exportData: {
+          sourceId,
+          path: [],
+        },
+      }),
+      profile: this.profile,
+    };
   }
 
   evaluateExpression(ir: AnyExpressionIR): Value {
@@ -211,7 +248,6 @@ export class Reducer implements EvaluateAllKinds {
   evaluateAssign(irValue: IRValue<"Assign">) {
     const result = this.evaluateExpression(irValue.right);
     this.stack.push(result);
-    return vVoid();
   }
 
   evaluateStackRef(irValue: IRValue<"StackRef">) {

@@ -25,7 +25,11 @@ export function makeSquiggleDefinition({
     throw new Error(`Stdlib code ${code} is invalid`);
   }
 
-  const irResult = compileAst(astResult.value, builtins);
+  const irResult = compileAst({
+    ast: astResult.value,
+    stdlib: builtins,
+    imports: {},
+  });
 
   if (!irResult.ok) {
     // fail fast
@@ -34,7 +38,7 @@ export function makeSquiggleDefinition({
 
   // TODO - do we need runtime env? That would mean that we'd have to build stdlib for each env separately.
   const reducer = new Reducer(defaultEnv);
-  const value = reducer.evaluate(irResult.value);
+  const { result: value } = reducer.evaluate(irResult.value);
 
   return { name, value };
 }

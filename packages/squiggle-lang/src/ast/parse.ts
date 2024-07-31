@@ -3,7 +3,12 @@ import { TypedAST } from "../analysis/types.js";
 import { ICompileError } from "../errors/IError.js";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
-import { SExpr, SExprPrintOptions, sExprToString } from "../utility/sExpr.js";
+import {
+  sExpr,
+  SExpr,
+  SExprPrintOptions,
+  sExprToString,
+} from "../utility/sExpr.js";
 import {
   parse as peggyParse,
   SyntaxError as PeggySyntaxError,
@@ -54,40 +59,47 @@ export function nodeToString(
   printOptions: SExprPrintOptions = {}
 ): string {
   const toSExpr = (node: ASTNode): SExpr => {
-    const sExpr = (components: (SExpr | null | undefined)[]): SExpr => ({
+    const selfExpr = (components: (SExpr | null | undefined)[]): SExpr => ({
       name: node.kind,
       args: components,
     });
 
     switch (node.kind) {
       case "Program":
-        return sExpr([
-          // TODO - imports
+        return selfExpr([
+          node.imports.length
+            ? sExpr(".imports", node.imports.map(toSExpr))
+            : undefined,
           ...node.statements.map(toSExpr),
           node.result ? toSExpr(node.result) : undefined,
         ]);
       case "Import":
-        return sExpr([toSExpr(node.path), toSExpr(node.variable)]);
+        return selfExpr([toSExpr(node.path), toSExpr(node.variable)]);
       case "Block":
-        return sExpr([...node.statements.map(toSExpr), toSExpr(node.result)]);
+        return selfExpr([
+          ...node.statements.map(toSExpr),
+          toSExpr(node.result),
+        ]);
       case "Array":
-        return sExpr(node.elements.map(toSExpr));
+        return selfExpr(node.elements.map(toSExpr));
       case "Dict":
-        return sExpr(node.elements.map(toSExpr));
+        return selfExpr(node.elements.map(toSExpr));
       case "Boolean":
         return String(node.value);
       case "Call":
-        return sExpr([node.fn, ...node.args].map(toSExpr));
+        return selfExpr([node.fn, ...node.args].map(toSExpr));
       case "InfixCall":
-        return sExpr([node.op, ...node.args.map(toSExpr)]);
+        return selfExpr([node.op, ...node.args.map(toSExpr)]);
       case "Pipe":
-        return sExpr([node.leftArg, node.fn, ...node.rightArgs].map(toSExpr));
+        return selfExpr(
+          [node.leftArg, node.fn, ...node.rightArgs].map(toSExpr)
+        );
       case "DotLookup":
-        return sExpr([toSExpr(node.arg), node.key]);
+        return selfExpr([toSExpr(node.arg), node.key]);
       case "BracketLookup":
-        return sExpr([node.arg, node.key].map(toSExpr));
+        return selfExpr([node.arg, node.key].map(toSExpr));
       case "UnaryCall":
-        return sExpr([node.op, toSExpr(node.arg)]);
+        return selfExpr([node.op, toSExpr(node.arg)]);
       case "Float":
         // see also: "Float" branch in compiler/compile.ts
         return `${node.integer}${
@@ -99,23 +111,23 @@ export function nodeToString(
         if (!node.annotation && !node.unitTypeSignature) {
           return `:${node.variable.value}`;
         }
-        return sExpr([
+        return selfExpr([
           node.variable.value,
           node.annotation && toSExpr(node.annotation),
           node.unitTypeSignature && toSExpr(node.unitTypeSignature),
         ]);
       case "KeyValue":
-        return sExpr([node.key, node.value].map(toSExpr));
+        return selfExpr([node.key, node.value].map(toSExpr));
       case "Lambda":
-        return sExpr([
+        return selfExpr([
           ...node.args.map(toSExpr),
           toSExpr(node.body),
           node.returnUnitType ? toSExpr(node.returnUnitType) : undefined,
         ]);
       case "Decorator":
-        return sExpr([node.name, ...node.args].map(toSExpr));
+        return selfExpr([node.name, ...node.args].map(toSExpr));
       case "LetStatement":
-        return sExpr([
+        return selfExpr([
           toSExpr(node.variable),
           node.unitTypeSignature ? toSExpr(node.unitTypeSignature) : undefined,
           toSExpr(node.value),
@@ -123,7 +135,7 @@ export function nodeToString(
           ...node.decorators.map(toSExpr),
         ]);
       case "DefunStatement":
-        return sExpr([
+        return selfExpr([
           toSExpr(node.variable),
           toSExpr(node.value),
           node.exported ? "exported" : undefined,
@@ -132,22 +144,22 @@ export function nodeToString(
       case "String":
         return `'${node.value}'`; // TODO - quote?
       case "Ternary":
-        return sExpr(
+        return selfExpr(
           [node.condition, node.trueExpression, node.falseExpression].map(
             toSExpr
           )
         );
       case "UnitTypeSignature":
-        return sExpr([toSExpr(node.body)]);
+        return selfExpr([toSExpr(node.body)]);
       case "InfixUnitType":
-        return sExpr([node.op, ...node.args.map(toSExpr)]);
+        return selfExpr([node.op, ...node.args.map(toSExpr)]);
       case "ExponentialUnitType":
-        return sExpr([
+        return selfExpr([
           toSExpr(node.base),
           node.exponent !== undefined ? toSExpr(node.exponent) : undefined,
         ]);
       case "UnitValue":
-        return sExpr([toSExpr(node.value), node.unit]);
+        return selfExpr([toSExpr(node.value), node.unit]);
 
       default:
         throw new Error(`Unknown node: ${node satisfies never}`);
@@ -155,14 +167,4 @@ export function nodeToString(
   };
 
   return sExprToString(toSExpr(node), printOptions);
-}
-
-export function nodeResultToString(
-  r: ParseResult,
-  printOptions?: SExprPrintOptions
-): string {
-  if (!r.ok) {
-    return r.value.toString();
-  }
-  return nodeToString(r.value.raw, printOptions);
 }

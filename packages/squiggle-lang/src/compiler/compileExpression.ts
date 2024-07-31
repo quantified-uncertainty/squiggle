@@ -50,32 +50,39 @@ function compileExpressionContent(
     }
     case "InfixCall": {
       return eCall(
-        context.resolveName(ast.location, infixFunctions[ast.op]),
+        context.resolveBuiltin(ast.location, infixFunctions[ast.op]),
         ast.args.map((arg) => compileExpression(arg, context))
       );
     }
     case "UnaryCall":
-      return eCall(context.resolveName(ast.location, unaryFunctions[ast.op]), [
-        compileExpression(ast.arg, context),
-      ]);
+      return eCall(
+        context.resolveBuiltin(ast.location, unaryFunctions[ast.op]),
+        [compileExpression(ast.arg, context)]
+      );
     case "Pipe":
       return eCall(compileExpression(ast.fn, context), [
         compileExpression(ast.leftArg, context),
         ...ast.rightArgs.map((arg) => compileExpression(arg, context)),
       ]);
     case "DotLookup":
-      return eCall(context.resolveName(ast.location, INDEX_LOOKUP_FUNCTION), [
-        compileExpression(ast.arg, context),
-        {
-          location: ast.location,
-          ...make("Value", vString(ast.key)),
-        },
-      ]);
+      return eCall(
+        context.resolveBuiltin(ast.location, INDEX_LOOKUP_FUNCTION),
+        [
+          compileExpression(ast.arg, context),
+          {
+            location: ast.location,
+            ...make("Value", vString(ast.key)),
+          },
+        ]
+      );
     case "BracketLookup":
-      return eCall(context.resolveName(ast.location, INDEX_LOOKUP_FUNCTION), [
-        compileExpression(ast.arg, context),
-        compileExpression(ast.key, context),
-      ]);
+      return eCall(
+        context.resolveBuiltin(ast.location, INDEX_LOOKUP_FUNCTION),
+        [
+          compileExpression(ast.arg, context),
+          compileExpression(ast.key, context),
+        ]
+      );
     case "Lambda": {
       const parameters: LambdaIRParameter[] = [];
       for (const astParameter of ast.args) {
@@ -93,8 +100,8 @@ function compileExpressionContent(
       // function is called.
       // See also: https://github.com/quantified-uncertainty/squiggle/issues/3141
       context.startFunctionScope();
-      for (const parameter of parameters) {
-        context.defineLocal(parameter.name);
+      for (const parameter of ast.args) {
+        context.defineLocal(parameter.variable);
       }
 
       const body = compileExpression(ast.body, context);
@@ -133,7 +140,7 @@ function compileExpressionContent(
               location: kv.location,
               ...make("Value", vString(kv.value)),
             };
-            const value = context.resolveName(kv.location, kv.value);
+            const value = compileExpression(kv, context);
             return [key, value];
           } else {
             throw new Error(
@@ -158,10 +165,10 @@ function compileExpressionContent(
     case "String":
       return make("Value", vString(ast.value));
     case "Identifier": {
-      return context.resolveName(ast.location, ast.value);
+      return context.resolveIdentifier(ast);
     }
     case "UnitValue": {
-      const fromUnitFn = context.resolveName(
+      const fromUnitFn = context.resolveBuiltin(
         ast.location,
         `fromUnit_${ast.unit}`
       );

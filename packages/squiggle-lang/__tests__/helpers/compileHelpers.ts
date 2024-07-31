@@ -1,7 +1,6 @@
 import { parse } from "../../src/ast/parse.js";
 import { compileAst } from "../../src/compiler/index.js";
 import { irToString } from "../../src/compiler/toString.js";
-import { getStdLib } from "../../src/library/index.js";
 import * as Result from "../../src/utility/result.js";
 
 export function testCompile(
@@ -22,7 +21,7 @@ export function testCompile(
 ) {
   test(code, async () => {
     const rExpr = Result.bind(parse(code, "test"), (ast) =>
-      compileAst(ast, getStdLib())
+      compileAst({ ast, imports: {} })
     );
 
     let serializedExpr: string | string[];

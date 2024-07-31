@@ -1,4 +1,5 @@
-import { nodeResultToString, parse } from "../../src/ast/parse.js";
+import { nodeResultToString } from "../../src/analysis/toString.js";
+import { parse } from "../../src/ast/parse.js";
 import { ICompileError, IRuntimeError } from "../../src/errors/IError.js";
 import { evaluateStringToResult } from "../../src/reducer/index.js";
 import * as Result from "../../src/utility/result.js";

@@ -1,6 +1,6 @@
 import { Command } from "@commander-js/extra-typings";
 
-import { nodeResultToString } from "../../ast/parse.js";
+import { nodeResultToString } from "../../analysis/toString.js";
 import { parse } from "../../public/parse.js";
 import { red } from "../colors.js";
 import { coloredJson, loadSrc } from "../utils.js";

@@ -1,8 +1,11 @@
 import { KindTypedNode, TypedAST } from "../analysis/types.js";
 import { ICompileError } from "../errors/IError.js";
+import { getStdLib } from "../library/index.js";
 import { Bindings } from "../reducer/Stack.js";
 import * as Result from "../utility/result.js";
+import { Value } from "../value/index.js";
 import { compileExpression } from "./compileExpression.js";
+import { compileImport } from "./compileImport.js";
 import { compileStatement } from "./compileStatement.js";
 import { CompileContext } from "./context.js";
 import * as ir from "./types.js";
@@ -13,15 +16,31 @@ function compileProgram(
 ): ir.ProgramIR {
   // No need to start a top-level scope, it already exists.
   const statements: ir.StatementIR[] = [];
+
+  for (const importNode of ast.imports) {
+    statements.push(compileImport(importNode, context));
+  }
+
   const exports: string[] = [];
+
+  // absolute stack positions
+  const absoluteBindings: Record<string, number> = {};
+  const scope = context.scopes.at(-1)!;
   for (const astStatement of ast.statements) {
     const statement = compileStatement(astStatement, context);
     statements.push(statement);
+
+    const name = astStatement.variable.value;
     if (astStatement.exported) {
-      const name = astStatement.variable.value;
       exports.push(name);
     }
+    absoluteBindings[name] = scope.stack.size - 1;
   }
+  const bindings: Record<string, number> = {};
+  for (const [name, offset] of Object.entries(absoluteBindings)) {
+    bindings[name] = scope.stack.size - 1 - offset;
+  }
+
   const result = ast.result
     ? compileExpression(ast.result, context)
     : undefined;
@@ -31,18 +50,26 @@ function compileProgram(
       statements,
       result,
       exports,
-      bindings: context.localsOffsets(),
+      bindings,
     }),
     location: ast.location,
   };
 }
 
-export function compileAst(
-  ast: TypedAST,
-  externals: Bindings
-): Result.result<ir.ProgramIR, ICompileError> {
+export function compileAst({
+  ast,
+  stdlib,
+  imports,
+}: {
+  ast: TypedAST;
+  stdlib?: Bindings; // if not defined, default stdlib will be used
+  imports: Record<string, Value>; // mapping of import strings (original paths) to values
+}): Result.result<ir.ProgramIR, ICompileError> {
   try {
-    const ir = compileProgram(ast, new CompileContext(externals));
+    const ir = compileProgram(
+      ast,
+      new CompileContext(stdlib ?? getStdLib(), imports)
+    );
     return Result.Ok(ir);
   } catch (err) {
     if (err instanceof ICompileError) {

@@ -11,7 +11,7 @@ export function compileStatement(
   let value = compileExpression(ast.value, context);
 
   for (const decorator of [...ast.decorators].reverse()) {
-    const decoratorFn = context.resolveName(
+    const decoratorFn = context.resolveBuiltin(
       ast.location,
       `Tag.${decorator.name.value}`
     );
@@ -28,7 +28,7 @@ export function compileStatement(
     };
   }
 
-  context.defineLocal(name);
+  context.defineLocal(ast.variable);
   return {
     ...make("Assign", { left: name, right: value }),
     location: ast.location,

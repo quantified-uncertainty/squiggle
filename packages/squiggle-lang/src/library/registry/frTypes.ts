@@ -407,7 +407,7 @@ export const frAny = (params?: { genericName?: string }): FRType<Value> => ({
   default: "",
 });
 
-// We currently support dicts with up to 5 pairs.
+// We currently support dicts with up to 7 pairs.
 // The limit could be increased with the same pattern, but there might be a better solution for this.
 export function frDict<K1 extends string, T1>(
   kv1: [K1, FRType<T1>]
