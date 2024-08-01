@@ -1,12 +1,11 @@
 import { BaseErrorMessage, REThrow } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { fnInput } from "../library/registry/fnInput.js";
 import {
   frAny,
   frBool,
   frLambdaTyped,
-  frNamed,
-  frOptional,
   frOr,
   frString,
 } from "../library/registry/frTypes.js";
@@ -60,7 +59,10 @@ myFn = typeOf({|e| e})`,
     description: `Runs Console.log() in the [Javascript developer console](https://www.digitalocean.com/community/tutorials/how-to-use-the-javascript-developer-console) and returns the value passed in.`,
     definitions: [
       makeDefinition(
-        [frAny({ genericName: "A" }), frNamed("message", frOptional(frString))],
+        [
+          frAny({ genericName: "A" }),
+          fnInput({ name: "message", type: frString, optional: true }),
+        ],
         frAny({ genericName: "A" }),
         ([value, message]) => {
           message ? console.log(message, value) : console.log(value);
@@ -75,7 +77,7 @@ myFn = typeOf({|e| e})`,
       "Throws an error. You can use `try` to recover from this error.",
     definitions: [
       makeDefinition(
-        [frOptional(frNamed("message", frString))],
+        [fnInput({ name: "message", optional: true, type: frString })],
         frAny(),
         ([value]) => {
           if (value) {
@@ -94,9 +96,15 @@ myFn = typeOf({|e| e})`,
     definitions: [
       makeDefinition(
         [
-          frNamed("fn", frLambdaTyped([], frAny({ genericName: "A" }))),
-          // in the future, this function could be called with the error message
-          frNamed("fallbackFn", frLambdaTyped([], frAny({ genericName: "B" }))),
+          fnInput({
+            name: "fn",
+            type: frLambdaTyped([], frAny({ genericName: "A" })),
+          }),
+          fnInput({
+            name: "fallbackFn",
+            // in the future, this function could be called with the error message
+            type: frLambdaTyped([], frAny({ genericName: "B" })),
+          }),
         ],
         frOr(frAny({ genericName: "A" }), frAny({ genericName: "B" })),
         ([fn, fallbackFn], reducer) => {

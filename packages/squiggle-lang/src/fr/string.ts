@@ -1,10 +1,6 @@
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import {
-  frAny,
-  frArray,
-  frNamed,
-  frString,
-} from "../library/registry/frTypes.js";
+import { frNamed } from "../library/registry/fnInput.js";
+import { frAny, frArray, frString } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 
 const maker = new FnFactory({

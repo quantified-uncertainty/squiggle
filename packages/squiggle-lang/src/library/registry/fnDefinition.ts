@@ -1,13 +1,14 @@
 import { REAmbiguous } from "../../errors/messages.js";
 import { Reducer } from "../../reducer/Reducer.js";
 import { Value } from "../../value/index.js";
-import { frAny, FRType, isOptional } from "./frTypes.js";
+import { fnInput, FnInput } from "./fnInput.js";
+import { frAny, FRType } from "./frTypes.js";
 
 // Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `FRType` unpack logic.
 // It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
 // because of contravariance (we need to store all FnDefinitions in a generic array later on).
 export type FnDefinition<OutputType = any> = {
-  inputs: FRType<any>[];
+  inputs: FnInput<any>[];
   run: (args: any[], reducer: Reducer) => OutputType;
   output: FRType<OutputType>;
   minInputs: number;
@@ -20,19 +21,25 @@ export type FnDefinition<OutputType = any> = {
   isDecorator?: boolean;
 };
 
+export type InputOrType<T> = FnInput<T> | FRType<T>;
+
+export function inputOrTypeToInput<T>(input: InputOrType<T>): FnInput<T> {
+  return input instanceof FnInput ? input : fnInput({ type: input });
+}
+
 export const showInDocumentation = (def: FnDefinition) =>
   !def.isAssert && !def.deprecated;
 
 // A function to make sure that there are no non-optional inputs after optional inputs:
-function assertOptionalsAreAtEnd(inputs: FRType<any>[]) {
+function assertOptionalsAreAtEnd(inputs: FnInput<any>[]) {
   let optionalFound = false;
   for (const input of inputs) {
-    if (optionalFound && !isOptional(input)) {
+    if (optionalFound && !input.optional) {
       throw new Error(
         `Optional inputs must be last. Found non-optional input after optional input. ${inputs}`
       );
     }
-    if (isOptional(input)) {
+    if (input.optional) {
       optionalFound = true;
     }
   }
@@ -43,11 +50,13 @@ export function makeDefinition<
   const OutputType,
 >(
   // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
-  inputs: [...{ [K in keyof InputTypes]: FRType<InputTypes[K]> }],
+  maybeInputs: [...{ [K in keyof InputTypes]: InputOrType<InputTypes[K]> }],
   output: FRType<OutputType>,
   run: (args: InputTypes, reducer: Reducer) => OutputType,
   params?: { deprecated?: string; isDecorator?: boolean }
 ): FnDefinition {
+  const inputs = maybeInputs.map(inputOrTypeToInput);
+
   assertOptionalsAreAtEnd(inputs);
   return {
     inputs,
@@ -58,7 +67,7 @@ export function makeDefinition<
     isAssert: false,
     deprecated: params?.deprecated,
     isDecorator: params?.isDecorator,
-    minInputs: inputs.filter((t) => !isOptional(t)).length,
+    minInputs: inputs.filter((t) => !t.optional).length,
     maxInputs: inputs.length,
   };
 }
@@ -66,9 +75,11 @@ export function makeDefinition<
 //Some definitions are just used to guard against ambiguous function calls, and should never be called.
 export function makeAssertDefinition<const T extends any[]>(
   // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
-  inputs: [...{ [K in keyof T]: FRType<T[K]> }],
+  maybeInputs: [...{ [K in keyof T]: InputOrType<T[K]> }],
   errorMsg: string
 ): FnDefinition {
+  const inputs = maybeInputs.map(inputOrTypeToInput);
+
   assertOptionalsAreAtEnd(inputs);
   return {
     inputs,
@@ -77,7 +88,7 @@ export function makeAssertDefinition<const T extends any[]>(
       throw new REAmbiguous(errorMsg);
     },
     isAssert: true,
-    minInputs: inputs.filter((t) => !isOptional(t)).length,
+    minInputs: inputs.filter((t) => !t.optional).length,
     maxInputs: inputs.length,
   };
 }
@@ -94,7 +105,7 @@ export function tryCallFnDefinition(
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
 
-    const unpackedArg = fn.inputs[i].unpack(arg);
+    const unpackedArg = fn.inputs[i].type.unpack(arg);
     if (unpackedArg === undefined) {
       // type mismatch
       return;
@@ -112,9 +123,7 @@ export function tryCallFnDefinition(
 }
 
 export function fnDefinitionToString(fn: FnDefinition): string {
-  const inputs = fn.inputs
-    .map((t) => t.display() + (isOptional(t) && t.tag !== "named" ? "?" : ""))
-    .join(", ");
+  const inputs = fn.inputs.map((t) => t.toString()).join(", ");
   const output = fn.output.display();
   return `(${inputs})${output ? ` => ${output}` : ""}`;
 }

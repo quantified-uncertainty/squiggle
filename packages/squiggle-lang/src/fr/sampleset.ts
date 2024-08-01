@@ -1,16 +1,12 @@
 import * as SampleSetDist from "../dists/SampleSetDist/index.js";
 import { makeFnExample } from "../library/registry/core.js";
-import {
-  FnDefinition,
-  makeDefinition,
-} from "../library/registry/fnDefinition.js";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { fnInput, frNamed } from "../library/registry/fnInput.js";
 import {
   frArray,
   frDist,
   frLambdaTyped,
-  frNamed,
   frNumber,
-  frOptional,
   frOr,
   frSampleSetDist,
 } from "../library/registry/frTypes.js";
@@ -65,8 +61,13 @@ const fromFn = (lambda: Lambda, reducer: Reducer, fn: (i: number) => Value[]) =>
     }, reducer.environment)
   );
 
-const fromFnDefinition: FnDefinition = makeDefinition(
-  [frLambdaTyped([frNamed("index", frOptional(frNumber))], frNumber)],
+const fromFnDefinition = makeDefinition(
+  [
+    frLambdaTyped(
+      [fnInput({ name: "index", type: frNumber, optional: true })],
+      frNumber
+    ),
+  ],
   frSampleSetDist,
   ([lambda], reducer) => {
     const usedOptional = chooseLambdaParamLength([0, 1], lambda) === 1;
@@ -179,7 +180,10 @@ const baseLibrary = [
         [
           frSampleSetDist,
           frSampleSetDist,
-          frNamed("fn", frLambdaTyped([frNumber, frNumber], frNumber)),
+          fnInput({
+            name: "fn",
+            type: frLambdaTyped([frNumber, frNumber], frNumber),
+          }),
         ],
         frSampleSetDist,
         ([dist1, dist2, lambda], reducer) => {

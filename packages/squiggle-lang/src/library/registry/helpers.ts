@@ -25,16 +25,15 @@ import { Value } from "../../value/index.js";
 import { Input } from "../../value/VInput.js";
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
+import { FnInput, frNamed } from "./fnInput.js";
 import {
   frBool,
   frDist,
   frDistOrNumber,
-  frNamed,
   frNumber,
   frSampleSetDist,
   frString,
   FRType,
-  isOptional,
 } from "./frTypes.js";
 
 type SimplifiedArgs = Omit<FRFunction, "nameSpace" | "requiresNamespace"> &
@@ -464,11 +463,11 @@ export const chooseLambdaParamLength = (
 
 // A helper to check if a list of frTypes would match inputs of a given length.
 // Non-trivial because of optional arguments.
-export const frTypesMatchesLengths = (
-  inputs: FRType<any>[],
+export const fnInputsMatchesLengths = (
+  inputs: FnInput<any>[],
   lengths: number[]
 ): boolean => {
-  const min = inputs.filter((i) => !isOptional(i)).length;
+  const min = inputs.filter((i) => !i.optional).length;
   const max = inputs.length;
   return intersection(upTo(min, max), lengths).length > 0;
 };

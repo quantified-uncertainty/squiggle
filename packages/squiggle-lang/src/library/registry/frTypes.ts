@@ -30,7 +30,8 @@ import {
 } from "../../value/VSpecification.js";
 import { vString } from "../../value/VString.js";
 import { TableChart, vTableChart } from "../../value/VTableChart.js";
-import { frTypesMatchesLengths } from "./helpers.js";
+import { InputOrType, inputOrTypeToInput } from "./fnDefinition.js";
+import { fnInputsMatchesLengths } from "./helpers.js";
 
 /*
 FRType is a function that unpacks a Value.
@@ -42,19 +43,8 @@ export type FRType<T> = {
   display: () => string;
   transparent?: T extends Value ? boolean : undefined;
   varName?: string;
-  isOptional?: boolean;
-  tag?: string;
-  underlyingType?: FRType<any>;
   default?: string;
   fieldType?: InputType;
-};
-
-export const isOptional = <T>(frType: FRType<T>): boolean => {
-  return frType.isOptional === undefined ? false : frType.isOptional;
-};
-
-export const isDeprecated = <T>(frType: FRType<T>): boolean => {
-  return frType.tag === "deprecated";
 };
 
 export const frNumber: FRType<number> = {
@@ -91,14 +81,12 @@ export const frString: FRType<string> = {
   unpack: (v: Value) => (v.type === "String" ? v.value : undefined),
   pack: (v) => vString(v),
   display: () => "String",
-  tag: "string",
   default: "",
 };
 export const frBool: FRType<boolean> = {
   unpack: (v: Value) => (v.type === "Bool" ? v.value : undefined),
   pack: (v) => vBool(v),
   display: () => "Bool",
-  tag: "bool",
   default: "false",
   fieldType: "checkbox",
 };
@@ -106,7 +94,6 @@ export const frDate: FRType<SDate> = {
   unpack: (v) => (v.type === "Date" ? v.value : undefined),
   pack: (v) => vDate(v),
   display: () => "Date",
-  tag: "date",
   default: "Date(2023)",
 };
 export const frDuration: FRType<SDuration> = {
@@ -151,25 +138,25 @@ export const frLambda: FRType<Lambda> = {
   unpack: (v) => (v.type === "Lambda" ? v.value : undefined),
   pack: (v) => vLambda(v),
   display: () => "Function",
-  tag: "lambda",
   default: "{|e| e}",
 };
 
 export const frLambdaTyped = (
-  inputs: FRType<any>[],
+  maybeInputs: InputOrType<any>[],
   output: FRType<any>
 ): FRType<Lambda> => {
+  const inputs = maybeInputs.map(inputOrTypeToInput);
+
   return {
     unpack: (v: Value) => {
       return v.type === "Lambda" &&
-        frTypesMatchesLengths(inputs, v.value.parameterCounts())
+        fnInputsMatchesLengths(inputs, v.value.parameterCounts())
         ? v.value
         : undefined;
     },
     pack: (v) => vLambda(v),
     display: () =>
-      `(${inputs.map((i) => i.display()).join(", ")}) => ${output.display()}`,
-    tag: "lambda",
+      `(${inputs.map((i) => i.toString()).join(", ")}) => ${output.display()}`,
     default: `{|${inputs.map((i, index) => `x${index}`).join(", ")}| ${
       output.default
     }`,
@@ -209,7 +196,6 @@ export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
     },
     pack: (v) => vLambda(v),
     display: () => `lambda(${paramLengths.join(",")})`,
-    tag: "lambda",
     default: "",
     fieldType: "textArea",
   };
@@ -222,6 +208,7 @@ export const frScale: FRType<Scale> = {
   default: "",
   fieldType: "textArea",
 };
+
 export const frInput: FRType<Input> = {
   unpack: (v) => (v.type === "Input" ? v.value : undefined),
   pack: (v) => vInput(v),
@@ -272,7 +259,6 @@ export const frArray = <T>(itemType: FRType<T>): FRType<readonly T[]> => {
         ? vArray(v as readonly Value[])
         : vArray(v.map(itemType.pack)),
     display: () => `List(${itemType.display()})`,
-    tag: "array",
     default: "[]",
     fieldType: "textArea",
   };
@@ -341,7 +327,6 @@ export function frTuple<const T extends any[]>(
       return vArray(values.map((val, index) => types[index].pack(val)));
     },
     display: () => `[${types.map((type) => type.display()).join(", ")}]`,
-    tag: "tuple",
     default: `[${types.map((type) => type.default).join(", ")}]`,
     fieldType: "textArea",
   };
@@ -371,7 +356,6 @@ export const frDictWithArbitraryKeys = <T>(
         ImmutableMap([...v.entries()].map(([k, v]) => [k, itemType.pack(v)]))
       ),
     display: () => `Dict(${itemType.display()})`,
-    tag: "dict",
     default: "{}",
     fieldType: "textArea",
   };
@@ -385,14 +369,57 @@ export const frAny = (params?: { genericName?: string }): FRType<Value> => ({
   default: "",
 });
 
+type FROptional<T extends FRType<unknown>> = FRType<UnwrapFRType<T> | null>;
+
+type FRDictDetailedEntry<K extends string, V extends FRType<any>> = {
+  key: K;
+  type: V;
+  optional?: boolean;
+  deprecated?: boolean;
+};
+
+type FRDictSimpleEntry<K extends string, V extends FRType<any>> = [K, V];
+
+type FRDictEntry<K extends string, V extends FRType<any>> =
+  | FRDictDetailedEntry<K, V>
+  | FRDictSimpleEntry<K, V>;
+
+export type DictEntryKey<T extends FRDictEntry<any, any>> =
+  T extends FRDictDetailedEntry<infer K, any>
+    ? K
+    : T extends FRDictSimpleEntry<infer K, any>
+      ? K
+      : never;
+
+type DictEntryType<T extends FRDictEntry<any, any>> =
+  T extends FRDictDetailedEntry<any, infer Type>
+    ? T extends { optional: true }
+      ? FROptional<Type>
+      : Type
+    : T extends FRDictSimpleEntry<any, infer Type>
+      ? Type
+      : never;
+
 // The complex generic type here allows us to construct the correct result type based on the input types.
-export function frDict<const KVList extends [string, FRType<any>][]>(
+export function frDict<const KVList extends FRDictEntry<any, FRType<any>>[]>(
   ...allKvs: [...{ [K in keyof KVList]: KVList[K] }]
 ): FRType<{
-  [Key in KVList[number][0]]: UnwrapFRType<
-    Extract<KVList[number], [Key, unknown]>[1]
+  [Key in DictEntryKey<KVList[number]>]: UnwrapFRType<
+    DictEntryType<Extract<KVList[number], [Key, unknown] | { key: Key }>>
   >;
 }> {
+  const kvs = allKvs.map(
+    (kv): FRDictDetailedEntry<string, FRType<unknown>> =>
+      "key" in kv
+        ? kv
+        : {
+            key: kv[0],
+            type: kv[1],
+            optional: false,
+            deprecated: false,
+          }
+  );
+
   return {
     unpack: (v: Value) => {
       // extra keys are allowed
@@ -404,93 +431,42 @@ export function frDict<const KVList extends [string, FRType<any>][]>(
 
       const result: { [k: string]: any } = {};
 
-      for (const [key, valueShape] of allKvs) {
-        const subvalue = r.get(key);
+      for (const kv of kvs) {
+        const subvalue = r.get(kv.key);
         if (subvalue === undefined) {
-          if (isOptional(valueShape)) {
+          if (kv.optional) {
             // that's ok!
             continue;
           }
           return undefined;
         }
-        const unpackedSubvalue = valueShape.unpack(subvalue);
+        const unpackedSubvalue = kv.type.unpack(subvalue);
         if (unpackedSubvalue === undefined) {
           return undefined;
         }
-        result[key] = unpackedSubvalue;
+        result[kv.key] = unpackedSubvalue;
       }
       return result as any; // that's ok, we've checked the types in return type
     },
     pack: (v) =>
       vDict(
         ImmutableMap(
-          allKvs
-            .filter(
-              ([key, valueShape]) =>
-                !isOptional(valueShape) || (v as any)[key] !== null
-            )
-            .map(([key, valueShape]) => [key, valueShape.pack((v as any)[key])])
+          kvs
+            .filter((kv) => !kv.optional || (v as any)[kv.key] !== null)
+            .map((kv) => [kv.key, kv.type.pack((v as any)[kv.key])])
         )
       ),
     display: () =>
       "{" +
-      allKvs
-        .filter(([_, frType]) => !isDeprecated(frType))
-        .map(
-          ([name, frType]) =>
-            `${name}${isOptional(frType) ? "?" : ""}: ${frType.display()}`
-        )
+      kvs
+        .filter((kv) => !kv.deprecated)
+        .map((kv) => `${kv.key}${kv.optional ? "?" : ""}: ${kv.type.display()}`)
         .join(", ") +
       "}",
-    tag: "dict",
     default: "{}",
     fieldType: "textArea",
   };
 }
-
-export const frNamed = <T>(name: string, itemType: FRType<T>): FRType<T> => ({
-  unpack: itemType.unpack,
-  pack: (v) => itemType.pack(v),
-  display: () => {
-    const _isOptional = isOptional(itemType);
-    return `${name}${_isOptional ? "?" : ""}: ${itemType.display()}`;
-  },
-  isOptional: isOptional(itemType),
-  tag: "named",
-  underlyingType: itemType,
-  varName: name,
-  default: itemType.default,
-  fieldType: itemType.fieldType,
-});
-
-export const frOptional = <T>(itemType: FRType<T>): FRType<T | null> => {
-  return {
-    unpack: itemType.unpack,
-    pack: (v) => {
-      if (v === null) {
-        // shouldn't happen if frDict implementation is correct and frOptional is used correctly.
-        throw new Error("Unable to pack null value");
-      }
-      return itemType.pack(v);
-    },
-    display: () => itemType.display(),
-    underlyingType: itemType,
-    isOptional: true,
-    default: itemType.default,
-    fieldType: itemType.fieldType,
-  };
-};
-
-export const frDeprecated = <T>(itemType: FRType<T>): FRType<T> => ({
-  unpack: itemType.unpack,
-  pack: (v) => itemType.pack(v),
-  display: () => ``,
-  isOptional: isOptional(itemType),
-  tag: "deprecated",
-  underlyingType: itemType,
-  default: itemType.default,
-  fieldType: itemType.fieldType,
-});
 
 export const frMixedSet = frDict(
   ["points", frArray(frNumber)],

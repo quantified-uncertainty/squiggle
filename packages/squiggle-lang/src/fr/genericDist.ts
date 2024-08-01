@@ -12,13 +12,12 @@ import {
 import * as PointMassJs from "../dists/SymbolicDist/PointMass.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { frNamed, frOptional } from "../library/registry/fnInput.js";
 import {
   frArray,
   frDist,
   frDistOrNumber,
-  frNamed,
   frNumber,
-  frOptional,
   frString,
 } from "../library/registry/frTypes.js";
 import {

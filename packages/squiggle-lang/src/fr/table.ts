@@ -1,12 +1,11 @@
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { frNamed } from "../library/registry/fnInput.js";
 import {
   frAny,
   frArray,
   frDict,
   frLambdaTyped,
-  frNamed,
-  frOptional,
   frString,
   frTableChart,
 } from "../library/registry/frTypes.js";
@@ -79,7 +78,7 @@ export const library = [
               frArray(
                 frDict(
                   ["fn", frLambdaTyped([frAny({ genericName: "A" })], frAny())],
-                  ["name", frOptional(frString)]
+                  { key: "name", type: frString, optional: true }
                 )
               ),
             ])
@@ -106,7 +105,7 @@ export const library = [
               frArray(
                 frDict(
                   ["fn", frLambdaTyped([frAny({ genericName: "A" })], frAny())],
-                  ["name", frOptional(frString)]
+                  { key: "name", type: frString, optional: true }
                 )
               ),
             ]

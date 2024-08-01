@@ -3,13 +3,12 @@ import { argumentError } from "../dists/DistError.js";
 import * as distOperations from "../dists/distOperations/index.js";
 import { REDistributionError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { fnInput } from "../library/registry/fnInput.js";
 import {
   frArray,
   frDist,
   frDistOrNumber,
-  frNamed,
   frNumber,
-  frOptional,
   frTuple,
 } from "../library/registry/frTypes.js";
 import {
@@ -42,7 +41,10 @@ function mixtureWithDefaultWeights(
 }
 
 const asArrays = makeDefinition(
-  [frArray(frDistOrNumber), frNamed("weights", frOptional(frArray(frNumber)))],
+  [
+    frArray(frDistOrNumber),
+    fnInput({ name: "weights", type: frArray(frNumber), optional: true }),
+  ],
   frDist,
   ([dists, weights], reducer) => {
     if (weights) {
@@ -75,7 +77,11 @@ const asArguments = [
     [
       frDistOrNumber,
       frDistOrNumber,
-      frNamed("weights", frOptional(frTuple(frNumber, frNumber))),
+      fnInput({
+        name: "weights",
+        type: frTuple(frNumber, frNumber),
+        optional: true,
+      }),
     ],
     frDist,
     ([dist1, dist2, weights], reducer) =>
@@ -95,7 +101,11 @@ const asArguments = [
       frDistOrNumber,
       frDistOrNumber,
       frDistOrNumber,
-      frNamed("weights", frOptional(frTuple(frNumber, frNumber, frNumber))),
+      fnInput({
+        name: "weights",
+        type: frTuple(frNumber, frNumber, frNumber),
+        optional: true,
+      }),
     ],
     frDist,
     ([dist1, dist2, dist3, weights], reducer) =>
@@ -116,10 +126,11 @@ const asArguments = [
       frDistOrNumber,
       frDistOrNumber,
       frDistOrNumber,
-      frNamed(
-        "weights",
-        frOptional(frTuple(frNumber, frNumber, frNumber, frNumber))
-      ),
+      fnInput({
+        name: "weights",
+        type: frTuple(frNumber, frNumber, frNumber, frNumber),
+        optional: true,
+      }),
     ],
     frDist,
     ([dist1, dist2, dist3, dist4, weights], reducer) =>
@@ -141,10 +152,11 @@ const asArguments = [
       frDistOrNumber,
       frDistOrNumber,
       frDistOrNumber,
-      frNamed(
-        "weights",
-        frOptional(frTuple(frNumber, frNumber, frNumber, frNumber, frNumber))
-      ),
+      fnInput({
+        name: "weights",
+        type: frTuple(frNumber, frNumber, frNumber, frNumber, frNumber),
+        optional: true,
+      }),
     ],
     frDist,
     ([dist1, dist2, dist3, dist4, dist5, weights], reducer) =>

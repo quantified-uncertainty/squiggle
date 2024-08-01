@@ -8,15 +8,14 @@ import {
   makeAssertDefinition,
   makeDefinition,
 } from "../library/registry/fnDefinition.js";
+import { fnInput, frNamed } from "../library/registry/fnInput.js";
 import {
   frAny,
   frArray,
   frBool,
   frLambdaNand,
   frLambdaTyped,
-  frNamed,
   frNumber,
-  frOptional,
   frSampleSetDist,
   frString,
   frTuple,
@@ -164,7 +163,7 @@ export const library = [
           frNamed(
             "fn",
             frLambdaTyped(
-              [frNamed("index", frOptional(frNumber))],
+              [fnInput({ name: "index", type: frNumber, optional: true })],
               frAny({ genericName: "A" })
             )
           ),
@@ -382,7 +381,7 @@ export const library = [
         [
           frArray(frAny({ genericName: "A" })),
           frNamed("startIndex", frNumber),
-          frNamed("endIndex", frOptional(frNumber)),
+          fnInput({ name: "endIndex", type: frNumber, optional: true }),
         ],
         frArray(frAny({ genericName: "A" })),
         ([array, start, end]) => {
@@ -453,7 +452,7 @@ export const library = [
           frLambdaTyped(
             [
               frAny({ genericName: "A" }),
-              frNamed("index", frOptional(frNumber)),
+              fnInput({ name: "index", type: frNumber, optional: true }),
             ],
             frAny({ genericName: "B" })
           ),
@@ -488,7 +487,11 @@ export const library = [
               [
                 frNamed("accumulator", frAny({ genericName: "A" })),
                 frNamed("currentValue", frAny({ genericName: "B" })),
-                frNamed("currentIndex", frOptional(frNumber)),
+                fnInput({
+                  name: "currentIndex",
+                  type: frNumber,
+                  optional: true,
+                }),
               ],
               frAny({ genericName: "A" })
             )
@@ -686,7 +689,10 @@ List.reduceWhile(
     displaySection: "Modifications",
     definitions: [
       makeDefinition(
-        [frArray(frString), frNamed("separator", frOptional(frString))],
+        [
+          frArray(frString),
+          fnInput({ name: "separator", type: frString, optional: true }),
+        ],
         frString,
         ([array, joinStr]) => array.join(joinStr ?? ",")
       ),

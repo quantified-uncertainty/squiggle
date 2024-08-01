@@ -5,7 +5,6 @@ import {
   frDate,
   frDict,
   frNumber,
-  frOptional,
   frScale,
   frString,
 } from "../library/registry/frTypes.js";
@@ -21,17 +20,17 @@ const maker = new FnFactory({
 });
 
 const commonDict = frDict(
-  ["min", frOptional(frNumber)],
-  ["max", frOptional(frNumber)],
-  ["tickFormat", frOptional(frString)],
-  ["title", frOptional(frString)]
+  { key: "min", type: frNumber, optional: true },
+  { key: "max", type: frNumber, optional: true },
+  { key: "tickFormat", type: frString, optional: true },
+  { key: "title", type: frString, optional: true }
 );
 
 const dateDict = frDict(
-  ["min", frOptional(frDate)],
-  ["max", frOptional(frDate)],
-  ["tickFormat", frOptional(frString)],
-  ["title", frOptional(frString)]
+  { key: "min", type: frDate, optional: true },
+  { key: "max", type: frDate, optional: true },
+  { key: "tickFormat", type: frString, optional: true },
+  { key: "title", type: frString, optional: true }
 );
 
 function checkMinMax(min: number | null, max: number | null) {
@@ -117,11 +116,11 @@ The default value for \`constant\` is \`${0.0001}\`.`, // I tried to set this to
       makeDefinition(
         [
           frDict(
-            ["min", frOptional(frNumber)],
-            ["max", frOptional(frNumber)],
-            ["tickFormat", frOptional(frString)],
-            ["title", frOptional(frString)],
-            ["constant", frOptional(frNumber)]
+            { key: "min", type: frNumber, optional: true },
+            { key: "max", type: frNumber, optional: true },
+            { key: "tickFormat", type: frString, optional: true },
+            { key: "title", type: frString, optional: true },
+            { key: "constant", type: frNumber, optional: true }
           ),
         ],
         frScale,
@@ -159,11 +158,11 @@ The default value for \`exponent\` is \`${0.1}\`.`,
       makeDefinition(
         [
           frDict(
-            ["min", frOptional(frNumber)],
-            ["max", frOptional(frNumber)],
-            ["tickFormat", frOptional(frString)],
-            ["title", frOptional(frString)],
-            ["exponent", frOptional(frNumber)]
+            { key: "min", type: frNumber, optional: true },
+            { key: "max", type: frNumber, optional: true },
+            { key: "tickFormat", type: frString, optional: true },
+            { key: "title", type: frString, optional: true },
+            { key: "exponent", type: frNumber, optional: true }
           ),
         ],
         frScale,

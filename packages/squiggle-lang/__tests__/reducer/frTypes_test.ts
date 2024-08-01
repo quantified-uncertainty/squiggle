@@ -15,9 +15,7 @@ import {
   frDomain,
   frDuration,
   frInput,
-  frNamed,
   frNumber,
-  frOptional,
   frOr,
   frPlot,
   frSampleSetDist,
@@ -283,11 +281,11 @@ describe("frDict", () => {
         ["bar", vString(dict.bar)],
       ])
     );
-    const t = frDict(
-      ["foo", frNumber],
-      ["bar", frString],
-      ["baz", frOptional(frString)]
-    );
+    const t = frDict(["foo", frNumber], ["bar", frString], {
+      key: "baz",
+      type: frString,
+      optional: true,
+    });
 
     expect(t.unpack(v)).toEqual(dict);
     expect(t.pack({ ...dict, baz: null })).toEqual(v);
@@ -333,36 +331,6 @@ describe("frOr", () => {
     test("should return the correct name", () => {
       expect(frNumberOrString.display()).toBe("Number|String");
     });
-  });
-});
-
-describe("frNamed", () => {
-  const testNumber = 42;
-  const testValue: Value = vNumber(testNumber);
-  const namedNumberType = frNamed("TestNumber", frNumber);
-
-  test("Unpack", () => {
-    expect(namedNumberType.unpack(testValue)).toBe(testNumber);
-  });
-
-  test("Pack", () => {
-    expect(namedNumberType.pack(testNumber)).toEqual(testValue);
-  });
-
-  test("display", () => {
-    expect(namedNumberType).toBeDefined();
-    expect(namedNumberType.display()).toBe("TestNumber: Number");
-  });
-
-  test("display with Optional Type", () => {
-    const optionalNumberType = frOptional(frNumber);
-    const namedOptionalNumberType = frNamed(
-      "OptionalTestNumber",
-      optionalNumberType
-    );
-    expect(namedOptionalNumberType.display()).toBe(
-      "OptionalTestNumber?: Number"
-    );
   });
 });
 

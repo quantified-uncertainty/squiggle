@@ -1,11 +1,11 @@
 import { REArgumentError } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { frNamed } from "../library/registry/fnInput.js";
 import {
   frArray,
   frBool,
   frDomain,
-  frNamed,
   frNumber,
 } from "../library/registry/frTypes.js";
 import {

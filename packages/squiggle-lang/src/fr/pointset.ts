@@ -4,6 +4,7 @@ import { PointMass } from "../dists/SymbolicDist/PointMass.js";
 import { REDistributionError } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { frNamed } from "../library/registry/fnInput.js";
 import {
   frArray,
   frDict,
@@ -11,7 +12,6 @@ import {
   frDistPointset,
   frLambdaTyped,
   frMixedSet,
-  frNamed,
   frNumber,
 } from "../library/registry/frTypes.js";
 import {

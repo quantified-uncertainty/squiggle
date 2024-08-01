@@ -3,13 +3,13 @@ import { OrderedMap } from "immutable";
 import { REArgumentError } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { frNamed } from "../library/registry/fnInput.js";
 import {
   frAny,
   frArray,
   frBool,
   frDictWithArbitraryKeys,
   frLambdaTyped,
-  frNamed,
   frNumber,
   frString,
   frTuple,
@@ -282,9 +282,9 @@ Dict.omit(data, ["b", "d"]) // {a: 1, c: 3}`
       makeDefinition(
         [
           frDictWithArbitraryKeys(frAny({ genericName: "A" })),
-          frArray(frString),
+          frNamed("keys", frArray(frString)),
         ],
-        frNamed("keys", frDictWithArbitraryKeys(frAny({ genericName: "A" }))),
+        frDictWithArbitraryKeys(frAny({ genericName: "A" })),
         ([dict, keys]) => {
           const response: OrderedMap<string, Value> = dict.withMutations(
             (result) => {

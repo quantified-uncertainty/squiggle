@@ -1,6 +1,7 @@
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { frNamed } from "../library/registry/fnInput.js";
 import {
   frAny,
   frArray,
@@ -13,7 +14,6 @@ import {
   frDuration,
   frLambda,
   frLambdaTyped,
-  frNamed,
   frNumber,
   frOr,
   FrOrType,

@@ -2,6 +2,7 @@ import maxBy from "lodash/maxBy.js";
 
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { fnInput } from "../library/registry/fnInput.js";
 import {
   frArray,
   frBool,
@@ -9,9 +10,7 @@ import {
   frDict,
   frInput,
   frLambda,
-  frNamed,
   frNumber,
-  frOptional,
   frString,
   frWithTags,
 } from "../library/registry/frTypes.js";
@@ -112,11 +111,11 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
         [
           frDict(
             ["fn", frLambda],
-            ["title", frOptional(frString)],
-            ["description", frOptional(frString)],
-            ["inputs", frOptional(frArray(frInput))],
-            ["autorun", frOptional(frBool)],
-            ["sampleCount", frOptional(frNumber)]
+            { key: "title", type: frString, optional: true },
+            { key: "description", type: frString, optional: true },
+            { key: "inputs", type: frArray(frInput), optional: true },
+            { key: "autorun", type: frBool, optional: true },
+            { key: "sampleCount", type: frNumber, optional: true }
           ),
         ],
         frCalculator,
@@ -133,18 +132,17 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
       makeDefinition(
         [
           frWithTags(frLambda),
-          frNamed(
-            "params",
-            frOptional(
-              frDict(
-                ["title", frOptional(frString)],
-                ["description", frOptional(frString)],
-                ["inputs", frOptional(frArray(frInput))],
-                ["autorun", frOptional(frBool)],
-                ["sampleCount", frOptional(frNumber)]
-              )
-            )
-          ),
+          fnInput({
+            name: "params",
+            optional: true,
+            type: frDict(
+              { key: "title", type: frString, optional: true },
+              { key: "description", type: frString, optional: true },
+              { key: "inputs", type: frArray(frInput), optional: true },
+              { key: "autorun", type: frBool, optional: true },
+              { key: "sampleCount", type: frNumber, optional: true }
+            ),
+          }),
         ],
         frCalculator,
         ([{ value, tags }, params]) => {

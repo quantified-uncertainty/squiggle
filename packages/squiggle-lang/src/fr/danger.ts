@@ -7,13 +7,13 @@ import * as PoissonJs from "../dists/SymbolicDist/Poisson.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { fnInput, frNamed } from "../library/registry/fnInput.js";
 import {
   frAny,
   frArray,
   frDate,
   frDistPointset,
   frLambda,
-  frNamed,
   frNumber,
   frOr,
   frString,
@@ -26,6 +26,7 @@ import {
 import { Lambda } from "../reducer/lambda.js";
 import { Reducer } from "../reducer/Reducer.js";
 import * as E_A from "../utility/E_A.js";
+import { SDate } from "../utility/SDate.js";
 import {
   removeLambdas,
   simpleValueFromValue,
@@ -34,7 +35,6 @@ import {
 } from "../value/simpleValue.js";
 import { vArray } from "../value/VArray.js";
 import { vNumber } from "../value/VNumber.js";
-import { SDate } from "../utility/SDate.js";
 
 const { factorial } = jstat;
 
@@ -234,10 +234,10 @@ Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, nu
     definitions: [
       makeDefinition(
         [
-          frNamed("f", frLambda),
-          frNamed("min", frNumber),
-          frNamed("max", frNumber),
-          frNamed("numIntegrationPoints", frNumber),
+          fnInput({ name: "f", type: frLambda }),
+          fnInput({ name: "min", type: frNumber }),
+          fnInput({ name: "max", type: frNumber }),
+          fnInput({ name: "numIntegrationPoints", type: frNumber }),
         ],
         frNumber,
         ([lambda, min, max, numIntegrationPoints], reducer) => {

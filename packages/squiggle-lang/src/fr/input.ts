@@ -7,7 +7,6 @@ import {
   frDict,
   frInput,
   frNumber,
-  frOptional,
   frOr,
   frString,
 } from "../library/registry/frTypes.js";
@@ -46,8 +45,8 @@ export const library = [
         [
           frDict(
             ["name", frString],
-            ["description", frOptional(frString)],
-            ["default", frOptional(frOr(frNumber, frString))]
+            { key: "description", type: frString, optional: true },
+            { key: "default", type: frOr(frNumber, frString), optional: true }
           ),
         ],
         frInput,
@@ -77,8 +76,8 @@ export const library = [
         [
           frDict(
             ["name", frString],
-            ["description", frOptional(frString)],
-            ["default", frOptional(frOr(frNumber, frString))]
+            { key: "description", type: frString, optional: true },
+            { key: "default", type: frOr(frNumber, frString), optional: true }
           ),
         ],
         frInput,
@@ -104,8 +103,8 @@ export const library = [
         [
           frDict(
             ["name", frString],
-            ["description", frOptional(frString)],
-            ["default", frOptional(frBool)]
+            { key: "description", type: frString, optional: true },
+            { key: "default", type: frBool, optional: true }
           ),
         ],
         frInput,
@@ -133,9 +132,9 @@ export const library = [
         [
           frDict(
             ["name", frString],
-            ["description", frOptional(frString)],
             ["options", frArray(frString)],
-            ["default", frOptional(frString)]
+            { key: "description", type: frString, optional: true },
+            { key: "default", type: frString, optional: true }
           ),
         ],
         frInput,

@@ -171,7 +171,7 @@ export class BuiltinLambda extends BaseLambda {
   }
 
   signatures(): FRType<unknown>[][] {
-    return this.definitions.map((d) => d.inputs);
+    return this.definitions.map((d) => d.inputs.map((input) => input.type));
   }
 
   callBody(args: Value[], reducer: Reducer): Value {

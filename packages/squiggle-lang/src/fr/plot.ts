@@ -3,17 +3,15 @@ import mergeWith from "lodash/mergeWith.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { fnInput, frNamed, frOptional } from "../library/registry/fnInput.js";
 import {
   frArray,
   frBool,
-  frDeprecated,
   frDict,
   frDist,
   frDistOrNumber,
   frLambdaTyped,
-  frNamed,
   frNumber,
-  frOptional,
   frOr,
   frPlot,
   frSampleSetDist,
@@ -183,17 +181,21 @@ const numericFnDef = () => {
       makeDefinition(
         [
           frNamed("fn", frWithTags(fnType)),
-          frNamed(
-            "params",
-            frOptional(
-              frDict(
-                ["xScale", frOptional(frScale)],
-                ["yScale", frOptional(frScale)],
-                ["title", frDeprecated(frOptional(frString))],
-                ["xPoints", frOptional(frArray(frNumber))]
-              )
-            )
-          ),
+          fnInput({
+            name: "params",
+            optional: true,
+            type: frDict(
+              { key: "xScale", type: frScale, optional: true },
+              { key: "yScale", type: frScale, optional: true },
+              {
+                key: "title",
+                type: frString,
+                optional: true,
+                deprecated: true,
+              },
+              { key: "xPoints", type: frArray(frNumber), optional: true }
+            ),
+          }),
         ],
         frPlot,
         ([{ value, tags }, params]) => {
@@ -211,10 +213,10 @@ const numericFnDef = () => {
         [
           frDict(
             ["fn", fnType],
-            ["xScale", frOptional(frScale)],
-            ["yScale", frOptional(frScale)],
-            ["title", frDeprecated(frOptional(frString))],
-            ["xPoints", frOptional(frArray(frNumber))]
+            { key: "xScale", type: frScale, optional: true },
+            { key: "yScale", type: frScale, optional: true },
+            { key: "title", type: frString, optional: true, deprecated: true },
+            { key: "xPoints", type: frArray(frNumber), optional: true }
           ),
         ],
         frPlot,
@@ -253,17 +255,21 @@ export const library = [
       makeDefinition(
         [
           frNamed("dist", frDist),
-          frNamed(
-            "params",
-            frOptional(
-              frDict(
-                ["xScale", frOptional(frScale)],
-                ["yScale", frOptional(frScale)],
-                ["title", frDeprecated(frOptional(frString))],
-                ["showSummary", frOptional(frBool)]
-              )
-            )
-          ),
+          fnInput({
+            name: "params",
+            type: frDict(
+              { key: "xScale", type: frScale, optional: true },
+              { key: "yScale", type: frScale, optional: true },
+              {
+                key: "title",
+                type: frString,
+                optional: true,
+                deprecated: true,
+              },
+              { key: "showSummary", type: frBool, optional: true }
+            ),
+            optional: true,
+          }),
         ],
         frPlot,
         ([dist, params]) => {
@@ -282,10 +288,15 @@ export const library = [
         [
           frDict(
             ["dist", frDist],
-            ["xScale", frOptional(frScale)],
-            ["yScale", frOptional(frScale)],
-            ["title", frDeprecated(frOptional(frString))],
-            ["showSummary", frOptional(frBool)]
+            { key: "xScale", type: frScale, optional: true },
+            { key: "yScale", type: frScale, optional: true },
+            {
+              key: "title",
+              type: frString,
+              optional: true,
+              deprecated: true,
+            },
+            { key: "showSummary", type: frBool, optional: true }
           ),
         ],
         frPlot,
@@ -328,19 +339,24 @@ export const library = [
             frOr(
               frArray(frDistOrNumber),
               frArray(
-                frDict(
-                  ["name", frOptional(frString)],
-                  ["value", frDistOrNumber]
-                )
+                frDict({ key: "name", type: frString, optional: true }, [
+                  "value",
+                  frDistOrNumber,
+                ])
               )
             )
           ),
           frOptional(
             frDict(
-              ["xScale", frOptional(frScale)],
-              ["yScale", frOptional(frScale)],
-              ["title", frDeprecated(frOptional(frString))],
-              ["showSummary", frOptional(frBool)]
+              { key: "xScale", type: frScale, optional: true },
+              { key: "yScale", type: frScale, optional: true },
+              {
+                key: "title",
+                type: frString,
+                optional: true,
+                deprecated: true,
+              },
+              { key: "showSummary", type: frBool, optional: true }
             )
           ),
         ],
@@ -381,10 +397,15 @@ export const library = [
               "dists",
               frArray(frDict(["name", frString], ["value", frDistOrNumber])),
             ],
-            ["xScale", frOptional(frScale)],
-            ["yScale", frOptional(frScale)],
-            ["title", frDeprecated(frOptional(frString))],
-            ["showSummary", frOptional(frBool)]
+            { key: "xScale", type: frScale, optional: true },
+            { key: "yScale", type: frScale, optional: true },
+            {
+              key: "title",
+              type: frString,
+              optional: true,
+              deprecated: true,
+            },
+            { key: "showSummary", type: frBool, optional: true }
           ),
         ],
         frPlot,
@@ -431,18 +452,22 @@ export const library = [
       makeDefinition(
         [
           frNamed("fn", frWithTags(frLambdaTyped([frNumber], frDist))),
-          frNamed(
-            "params",
-            frOptional(
-              frDict(
-                ["xScale", frOptional(frScale)],
-                ["yScale", frOptional(frScale)],
-                ["distXScale", frOptional(frScale)],
-                ["title", frDeprecated(frOptional(frString))],
-                ["xPoints", frOptional(frArray(frNumber))]
-              )
-            )
-          ),
+          fnInput({
+            name: "params",
+            type: frDict(
+              { key: "distXScale", type: frScale, optional: true },
+              { key: "xScale", type: frScale, optional: true },
+              { key: "yScale", type: frScale, optional: true },
+              {
+                key: "title",
+                type: frString,
+                optional: true,
+                deprecated: true,
+              },
+              { key: "xPoints", type: frArray(frNumber), optional: true }
+            ),
+            optional: true,
+          }),
         ],
         frPlot,
         ([{ value, tags }, params]) => {
@@ -465,11 +490,11 @@ export const library = [
         [
           frDict(
             ["fn", frLambdaTyped([frNumber], frDist)],
-            ["xScale", frOptional(frScale)],
-            ["yScale", frOptional(frScale)],
-            ["distXScale", frOptional(frScale)],
-            ["title", frDeprecated(frOptional(frString))],
-            ["xPoints", frOptional(frArray(frNumber))]
+            { key: "distXScale", type: frScale, optional: true },
+            { key: "xScale", type: frScale, optional: true },
+            { key: "yScale", type: frScale, optional: true },
+            { key: "title", type: frString, optional: true, deprecated: true },
+            { key: "xPoints", type: frArray(frNumber), optional: true }
           ),
         ],
         frPlot,
@@ -522,9 +547,9 @@ Plot.scatter({
           frDict(
             ["xDist", frWithTags(frSampleSetDist)],
             ["yDist", frWithTags(frSampleSetDist)],
-            ["xScale", frOptional(frScale)],
-            ["yScale", frOptional(frScale)],
-            ["title", frDeprecated(frOptional(frString))]
+            { key: "xScale", type: frScale, optional: true },
+            { key: "yScale", type: frScale, optional: true },
+            { key: "title", type: frString, optional: true, deprecated: true }
           ),
         ],
         frPlot,

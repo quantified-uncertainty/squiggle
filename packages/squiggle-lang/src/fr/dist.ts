@@ -13,11 +13,11 @@ import * as UniformJs from "../dists/SymbolicDist/Uniform.js";
 import { REDistributionError } from "../errors/messages.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { frNamed } from "../library/registry/fnInput.js";
 import {
   frDict,
   frDist,
   frDistSymbolic,
-  frNamed,
   frNumber,
   frSampleSetDist,
 } from "../library/registry/frTypes.js";

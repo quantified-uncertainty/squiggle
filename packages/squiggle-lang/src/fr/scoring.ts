@@ -9,7 +9,6 @@ import {
   frDist,
   frDistOrNumber,
   frNumber,
-  frOptional,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 
@@ -88,11 +87,11 @@ Note that this can be very brittle. If the second distribution has probability m
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["estimate", frDist],
-            ["answer", frDistOrNumber],
-            ["prior", frOptional(frDist)]
-          ),
+          frDict(["estimate", frDist], ["answer", frDistOrNumber], {
+            key: "prior",
+            type: frDist,
+            optional: true,
+          }),
         ],
         frNumber,
         ([{ estimate, answer, prior }], reducer) => {
