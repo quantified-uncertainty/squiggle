@@ -40,8 +40,8 @@ function getDefaultInputs(lambda: Lambda): Input[] {
       const longestSignature =
         maxBy(lambda.signatures(), (s) => s.length) || [];
       return longestSignature.map((sig, i) => {
-        const name = sig.varName ? sig.varName : `Input ${i + 1}`;
-        return frTypeToInput(sig, i, name);
+        const name = sig.name ?? `Input ${i + 1}`;
+        return frTypeToInput(sig.type, name);
       });
     }
     case "UserDefinedLambda":

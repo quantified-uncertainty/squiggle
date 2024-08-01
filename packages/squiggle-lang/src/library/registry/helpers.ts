@@ -472,11 +472,7 @@ export const fnInputsMatchesLengths = (
   return intersection(upTo(min, max), lengths).length > 0;
 };
 
-export const frTypeToInput = (
-  frType: FRType<any>,
-  i: number,
-  name: string
-): Input => {
+export const frTypeToInput = (frType: FRType<any>, name: string): Input => {
   const type = frType.fieldType || "text";
   switch (type) {
     case "text":

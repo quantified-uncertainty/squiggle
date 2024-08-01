@@ -42,7 +42,6 @@ export type FRType<T> = {
   pack: (v: T) => Value; // used in makeSquiggleDefinition
   display: () => string;
   transparent?: T extends Value ? boolean : undefined;
-  varName?: string;
   default?: string;
   fieldType?: InputType;
 };

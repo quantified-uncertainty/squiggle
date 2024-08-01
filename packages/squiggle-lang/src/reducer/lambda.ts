@@ -14,7 +14,7 @@ import {
   showInDocumentation,
   tryCallFnDefinition,
 } from "../library/registry/fnDefinition.js";
-import { type FRType } from "../library/registry/frTypes.js";
+import { FnInput } from "../library/registry/fnInput.js";
 import { sort } from "../utility/E_A_Floats.js";
 import { Value } from "../value/index.js";
 import { VDomain } from "../value/VDomain.js";
@@ -170,8 +170,8 @@ export class BuiltinLambda extends BaseLambda {
     return `[${this.parameterCounts().join(",")}]`;
   }
 
-  signatures(): FRType<unknown>[][] {
-    return this.definitions.map((d) => d.inputs.map((input) => input.type));
+  signatures(): FnInput<unknown>[][] {
+    return this.definitions.map((d) => d.inputs);
   }
 
   callBody(args: Value[], reducer: Reducer): Value {
