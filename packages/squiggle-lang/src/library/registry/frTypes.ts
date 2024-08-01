@@ -316,33 +316,11 @@ export const frDistOrNumber: FRType<BaseDist | number> = {
   default: frDist.default,
 };
 
-export function frTuple<T1, T2>(
-  type1: FRType<T1>,
-  type2: FRType<T2>
-): FRType<[T1, T2]>;
+type UnwrapFRType<T> = T extends FRType<infer U> ? U : never;
 
-export function frTuple<T1, T2, T3>(
-  type1: FRType<T1>,
-  type2: FRType<T2>,
-  type3: FRType<T3>
-): FRType<[T1, T2, T3]>;
-
-export function frTuple<T1, T2, T3, T4>(
-  type1: FRType<T1>,
-  type2: FRType<T2>,
-  type3: FRType<T3>,
-  type4: FRType<T4>
-): FRType<[T1, T2, T3, T4]>;
-
-export function frTuple<T1, T2, T3, T4, T5>(
-  type1: FRType<T1>,
-  type2: FRType<T2>,
-  type3: FRType<T3>,
-  type4: FRType<T4>,
-  type5: FRType<T5>
-): FRType<[T1, T2, T3, T4, T5]>;
-
-export function frTuple(...types: FRType<unknown>[]): FRType<any> {
+export function frTuple<const T extends any[]>(
+  ...types: [...{ [K in keyof T]: T[K] }]
+): FRType<[...{ [K in keyof T]: UnwrapFRType<T[K]> }]> {
   const numTypes = types.length;
 
   return {
@@ -357,7 +335,7 @@ export function frTuple(...types: FRType<unknown>[]): FRType<any> {
         return undefined;
       }
 
-      return items;
+      return items as any;
     },
     pack: (values: unknown[]) => {
       return vArray(values.map((val, index) => types[index].pack(val)));
@@ -407,123 +385,14 @@ export const frAny = (params?: { genericName?: string }): FRType<Value> => ({
   default: "",
 });
 
-// We currently support dicts with up to 7 pairs.
-// The limit could be increased with the same pattern, but there might be a better solution for this.
-export function frDict<K1 extends string, T1>(
-  kv1: [K1, FRType<T1>]
-): FRType<{ [k in K1]: T1 }>;
-export function frDict<K1 extends string, T1, K2 extends string, T2>(
-  kv1: [K1, FRType<T1>],
-  kv2: [K2, FRType<T2>]
-): FRType<{ [k in K1]: T1 } & { [k in K2]: T2 }>;
-export function frDict<
-  K1 extends string,
-  T1,
-  K2 extends string,
-  T2,
-  K3 extends string,
-  T3,
->(
-  kv1: [K1, FRType<T1>],
-  kv2: [K2, FRType<T2>],
-  kv3: [K3, FRType<T3>]
-): FRType<{ [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 }>;
-export function frDict<
-  K1 extends string,
-  T1,
-  K2 extends string,
-  T2,
-  K3 extends string,
-  T3,
-  K4 extends string,
-  T4,
->(
-  kv1: [K1, FRType<T1>],
-  kv2: [K2, FRType<T2>],
-  kv3: [K3, FRType<T3>],
-  kv4: [K4, FRType<T4>]
-): FRType<
-  { [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 } & { [k in K4]: T4 }
->;
-export function frDict<
-  K1 extends string,
-  T1,
-  K2 extends string,
-  T2,
-  K3 extends string,
-  T3,
-  K4 extends string,
-  T4,
-  K5 extends string,
-  T5,
->(
-  kv1: [K1, FRType<T1>],
-  kv2: [K2, FRType<T2>],
-  kv3: [K3, FRType<T3>],
-  kv4: [K4, FRType<T4>],
-  kv5: [K5, FRType<T5>]
-): FRType<
-  { [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 } & {
-    [k in K4]: T4;
-  } & { [k in K5]: T5 }
->;
-export function frDict<
-  K1 extends string,
-  T1,
-  K2 extends string,
-  T2,
-  K3 extends string,
-  T3,
-  K4 extends string,
-  T4,
-  K5 extends string,
-  T5,
-  K6 extends string,
-  T6,
->(
-  kv1: [K1, FRType<T1>],
-  kv2: [K2, FRType<T2>],
-  kv3: [K3, FRType<T3>],
-  kv4: [K4, FRType<T4>],
-  kv5: [K5, FRType<T5>],
-  kv6: [K6, FRType<T6>]
-): FRType<
-  { [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 } & {
-    [k in K4]: T4;
-  } & { [k in K5]: T5 } & { [k in K6]: T6 }
->;
-export function frDict<
-  K1 extends string,
-  T1,
-  K2 extends string,
-  T2,
-  K3 extends string,
-  T3,
-  K4 extends string,
-  T4,
-  K5 extends string,
-  T5,
-  K6 extends string,
-  T6,
-  K7 extends string,
-  T7,
->(
-  kv1: [K1, FRType<T1>],
-  kv2: [K2, FRType<T2>],
-  kv3: [K3, FRType<T3>],
-  kv4: [K4, FRType<T4>],
-  kv5: [K5, FRType<T5>],
-  kv6: [K6, FRType<T6>],
-  kv7: [K7, FRType<T7>]
-): FRType<
-  { [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 } & {
-    [k in K4]: T4;
-  } & { [k in K5]: T5 } & { [k in K6]: T6 } & { [k in K7]: T7 }
->;
-
-export function frDict<T extends object>(
-  ...allKvs: [string, FRType<unknown>][]
-): FRType<T> {
+// The complex generic type here allows us to construct the correct result type based on the input types.
+export function frDict<const KVList extends [string, FRType<any>][]>(
+  ...allKvs: [...{ [K in keyof KVList]: KVList[K] }]
+): FRType<{
+  [Key in KVList[number][0]]: UnwrapFRType<
+    Extract<KVList[number], [Key, unknown]>[1]
+  >;
+}> {
   return {
     unpack: (v: Value) => {
       // extra keys are allowed
@@ -550,7 +419,7 @@ export function frDict<T extends object>(
         }
         result[key] = unpackedSubvalue;
       }
-      return result as any; // that's ok, overload signatures guarantee type safety
+      return result as any; // that's ok, we've checked the types in return type
     },
     pack: (v) =>
       vDict(

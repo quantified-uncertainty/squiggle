@@ -4,6 +4,7 @@ import {
   serializeIError,
 } from "../errors/IError.js";
 import { result } from "../index.js";
+import { RunOutput } from "../reducer/Reducer.js";
 import {
   SquiggleBundle,
   SquiggleBundleEntrypoint,
@@ -12,7 +13,7 @@ import {
 } from "../serialization/squiggle.js";
 import { Err, Ok } from "../utility/result.js";
 import { VDict } from "../value/VDict.js";
-import { RunOutput, RunResult } from "./BaseRunner.js";
+import { RunResult } from "./BaseRunner.js";
 
 type SerializedRunOutputEntrypoints = {
   result: SquiggleBundleEntrypoint<"value">;
