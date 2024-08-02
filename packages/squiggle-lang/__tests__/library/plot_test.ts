@@ -43,15 +43,14 @@ describe("Plot", () => {
         fn: {|x| x * 5},
         xPoints: [10,20,40]
       })`,
-      "Plot for numeric function",
-      true
+      "Plot for numeric function"
     );
 
     testEvalToMatch(
       `Plot.numericFn({|x,y| x * 5})`,
       `Error(Error: There are function matches for Plot.numericFn(), but with different arguments:
-  Plot.numericFn(fn: (Number) => Number, params?: {xScale?: Scale, yScale?: Scale, title?: String, xPoints?: List(Number)}) => Plot
-Was given arguments: ((x,y) => internal code)`
+  Plot.numericFn(fn: (Number) => Number, params?: {xScale?: Scale, yScale?: Scale, xPoints?: List(Number)}) => Plot
+Was given arguments: ((x,y) => internal code))`
     );
 
     testPlotResult(
@@ -139,8 +138,8 @@ Was given arguments: ((x,y) => internal code)`
     testEvalToMatch(
       `Plot.distFn({|x,y| x to x + y})`,
       `Error(Error: There are function matches for Plot.distFn(), but with different arguments:
-  Plot.distFn(fn: (Number) => Dist, params?: {xScale?: Scale, yScale?: Scale, distXScale?: Scale, title?: String, xPoints?: List(Number)}) => Plot
-Was given arguments: ((x,y) => internal code)`
+  Plot.distFn(fn: (Number) => Dist, params?: {xScale?: Scale, yScale?: Scale, distXScale?: Scale, xPoints?: List(Number)}) => Plot
+Was given arguments: ((x,y) => internal code))`
     );
   });
 
