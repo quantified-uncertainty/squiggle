@@ -3,11 +3,7 @@ import invert from "lodash/invert.js";
 
 import { infixFunctions, unaryFunctions } from "../../ast/operators.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
-import {
-  FnDefinition,
-  fnDefinitionToString,
-  showInDocumentation,
-} from "./fnDefinition.js";
+import { FnDefinition } from "./fnDefinition.js";
 
 type Shorthand = { type: "infix" | "unary"; symbol: string };
 
@@ -136,8 +132,8 @@ export class Registry {
       definitions: fn.definitions,
       examples: fn.examples,
       signatures: fn.definitions
-        .filter((d) => showInDocumentation(d))
-        .map(fnDefinitionToString),
+        .filter((d) => d.showInDocumentation())
+        .map((d) => d.toString()),
       isUnit: fn.isUnit,
       shorthand: getShorthandName(fn.name),
       displaySection: fn.displaySection,

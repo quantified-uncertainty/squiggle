@@ -5,7 +5,7 @@ import sortBy from "lodash/sortBy.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
-  makeAssertDefinition,
+  FnDefinition,
   makeDefinition,
 } from "../library/registry/fnDefinition.js";
 import { fnInput, namedInput } from "../library/registry/fnInput.js";
@@ -153,7 +153,7 @@ export const library = [
     displaySection: "Constructors",
     description: `Creates an array of length \`count\`, with each element being \`value\`. If \`value\` is a function, it will be called \`count\` times, with the index as the argument.`,
     definitions: [
-      makeAssertDefinition(
+      FnDefinition.makeAssert(
         [tNumber, tLambdaNand([0, 1])],
         "Call with either 0 or 1 arguments, not both."
       ),
@@ -442,7 +442,7 @@ export const library = [
       makeFnExample("List.map([1,4,5], {|x,i| x+i+1})"),
     ],
     definitions: [
-      makeAssertDefinition(
+      FnDefinition.makeAssert(
         [tNumber, tLambdaNand([1, 2])],
         "Call with either 1 or 2 arguments, not both."
       ),
@@ -473,7 +473,7 @@ export const library = [
       "Applies `f` to each element of `arr`. The function `f` has two main paramaters, an accumulator and the next value from the array. It can also accept an optional third `index` parameter.",
     examples: [makeFnExample(`List.reduce([1,4,5], 2, {|acc, el| acc+el})`)],
     definitions: [
-      makeAssertDefinition(
+      FnDefinition.makeAssert(
         [tNumber, namedInput("fn", tLambdaNand([2, 3]))],
         "Call with either 2 or 3 arguments, not both."
       ),

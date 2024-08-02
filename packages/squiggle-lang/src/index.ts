@@ -12,7 +12,7 @@ export {
   SqVoidValue,
 } from "./public/SqValue/index.js"; // TODO - reexport other values too
 
-export { type FnDefinition } from "./library/registry/fnDefinition.js";
+export { FnDefinition } from "./library/registry/fnDefinition.js";
 
 export { type FnDocumentation } from "./library/registry/core.js";
 export {

@@ -8,12 +8,7 @@ import {
   REDomainError,
   REOther,
 } from "../errors/messages.js";
-import {
-  FnDefinition,
-  fnDefinitionToString,
-  showInDocumentation,
-  tryCallFnDefinition,
-} from "../library/registry/fnDefinition.js";
+import { FnDefinition } from "../library/registry/fnDefinition.js";
 import { FnInput } from "../library/registry/fnInput.js";
 import { Type } from "../types/Type.js";
 import { sort } from "../utility/E_A_Floats.js";
@@ -158,8 +153,8 @@ export class BuiltinLambda extends BaseLambda {
 
   parameterString() {
     return this.definitions
-      .filter(showInDocumentation)
-      .map(fnDefinitionToString)
+      .filter((d) => d.showInDocumentation())
+      .map((d) => d.toString())
       .join(" | ");
   }
 
@@ -177,7 +172,7 @@ export class BuiltinLambda extends BaseLambda {
 
   callBody(args: Value[], reducer: Reducer): Value {
     for (const definition of this.definitions) {
-      const callResult = tryCallFnDefinition(definition, args, reducer);
+      const callResult = definition.tryCall(args, reducer);
       if (callResult !== undefined) {
         return callResult;
       }
@@ -185,8 +180,8 @@ export class BuiltinLambda extends BaseLambda {
 
     const showNameMatchDefinitions = () => {
       const defsString = this.definitions
-        .filter(showInDocumentation)
-        .map(fnDefinitionToString)
+        .filter((d) => d.showInDocumentation())
+        .map((d) => d.toString())
         .map((def) => `  ${this.name}${def}\n`)
         .join("");
       return `There are function matches for ${
