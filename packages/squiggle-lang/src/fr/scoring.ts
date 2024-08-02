@@ -3,8 +3,8 @@ import * as distOperations from "../dists/distOperations/index.js";
 import { Env } from "../dists/env.js";
 import { REArgumentError, REDistributionError } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { tDict, tDist, tDistOrNumber, tNumber } from "../types/index.js";
 
 const maker = new FnFactory({

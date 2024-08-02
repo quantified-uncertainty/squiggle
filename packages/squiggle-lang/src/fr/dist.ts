@@ -12,8 +12,6 @@ import * as TriangularJs from "../dists/SymbolicDist/Triangular.js";
 import * as UniformJs from "../dists/SymbolicDist/Uniform.js";
 import { REDistributionError } from "../errors/messages.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { namedInput } from "../library/registry/fnInput.js";
 import {
   FnFactory,
   makeOneArgSamplesetDist,
@@ -21,6 +19,8 @@ import {
   makeTwoArgsSamplesetDist,
   twoVarSample,
 } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { namedInput } from "../reducer/lambda/FnInput.js";
 import {
   tDict,
   tDist,

@@ -1,4 +1,4 @@
-import { fnInput, namedInput } from "../../src/library/registry/fnInput.js";
+import { fnInput, namedInput } from "../../src/reducer/lambda/FnInput.js";
 import { tNumber } from "../../src/types/index.js";
 
 describe("fnInput", () => {

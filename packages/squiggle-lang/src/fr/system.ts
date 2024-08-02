@@ -1,5 +1,5 @@
-import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { tNumber } from "../types/index.js";
 
 // Also, see version.ts for System.version.

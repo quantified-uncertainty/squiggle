@@ -17,6 +17,11 @@ import {
   OtherOperationError,
   SampleMapNeedsNtoNFunction,
 } from "../../operationError.js";
+import {
+  FnDefinition,
+  makeDefinition,
+} from "../../reducer/lambda/FnDefinition.js";
+import { FnInput, namedInput } from "../../reducer/lambda/FnInput.js";
 import { Lambda } from "../../reducer/lambda/index.js";
 import { Reducer } from "../../reducer/Reducer.js";
 import {
@@ -33,8 +38,6 @@ import * as Result from "../../utility/result.js";
 import { Value } from "../../value/index.js";
 import { Input } from "../../value/VInput.js";
 import { FRFunction } from "./core.js";
-import { FnDefinition, makeDefinition } from "./fnDefinition.js";
-import { FnInput, namedInput } from "./fnInput.js";
 
 type SimplifiedArgs = Omit<FRFunction, "nameSpace" | "requiresNamespace"> &
   Partial<Pick<FRFunction, "nameSpace" | "requiresNamespace">>;

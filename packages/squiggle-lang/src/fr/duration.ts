@@ -1,9 +1,9 @@
 import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   FnFactory,
   makeNumericComparisons,
 } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { tDuration, tNumber } from "../types/index.js";
 import { SDuration } from "../utility/SDuration.js";
 

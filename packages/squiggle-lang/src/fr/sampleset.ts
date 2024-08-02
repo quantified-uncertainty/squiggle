@@ -1,13 +1,13 @@
 import * as SampleSetDist from "../dists/SampleSetDist/index.js";
 import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { fnInput, namedInput } from "../library/registry/fnInput.js";
 import {
   chooseLambdaParamLength,
   doNumberLambdaCall,
   FnFactory,
   unwrapDistResult,
 } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { fnInput, namedInput } from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { Reducer } from "../reducer/Reducer.js";
 import {

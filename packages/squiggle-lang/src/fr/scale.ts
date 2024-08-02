@@ -1,10 +1,10 @@
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   checkNumericTickFormat,
   FnFactory,
 } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { tDate, tDict, tNumber, tScale, tString } from "../types/index.js";
 import { SDate } from "../utility/SDate.js";
 

@@ -1,6 +1,6 @@
 import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { tNumber, tWithTags } from "../types/index.js";
 import { ValueTags } from "../value/valueTags.js";
 import { vString } from "../value/VString.js";

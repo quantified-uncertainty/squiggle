@@ -1,7 +1,7 @@
 import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeSquiggleDefinition } from "../library/registry/squiggleDefinition.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { Bindings } from "../reducer/Stack.js";
 import { sq } from "../sq.js";
 import {

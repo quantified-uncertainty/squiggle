@@ -2,9 +2,9 @@ import { OrderedMap } from "immutable";
 
 import { REArgumentError } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { namedInput } from "../library/registry/fnInput.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { namedInput } from "../reducer/lambda/FnInput.js";
 import {
   tAny,
   tArray,

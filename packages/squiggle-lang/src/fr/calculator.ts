@@ -1,9 +1,9 @@
 import maxBy from "lodash/maxBy.js";
 
 import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { fnInput } from "../library/registry/fnInput.js";
 import { FnFactory, frTypeToInput } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { fnInput } from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import {
   tArray,

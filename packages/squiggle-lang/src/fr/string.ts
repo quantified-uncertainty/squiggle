@@ -1,6 +1,6 @@
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { namedInput } from "../library/registry/fnInput.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { namedInput } from "../reducer/lambda/FnInput.js";
 import { tAny, tArray, tString } from "../types/index.js";
 
 const maker = new FnFactory({

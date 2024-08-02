@@ -3,8 +3,6 @@ import { PointSetDist } from "../dists/PointSetDist.js";
 import { PointMass } from "../dists/SymbolicDist/PointMass.js";
 import { REDistributionError } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { namedInput } from "../library/registry/fnInput.js";
 import {
   doNumberLambdaCall,
   FnFactory,
@@ -12,6 +10,8 @@ import {
 } from "../library/registry/helpers.js";
 import * as Continuous from "../PointSet/Continuous.js";
 import * as Discrete from "../PointSet/Discrete.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { namedInput } from "../reducer/lambda/FnInput.js";
 import {
   tArray,
   tDict,

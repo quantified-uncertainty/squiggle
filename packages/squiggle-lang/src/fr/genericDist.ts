@@ -11,14 +11,14 @@ import {
 } from "../dists/distOperations/index.js";
 import * as PointMassJs from "../dists/SymbolicDist/PointMass.js";
 import { FRFunction } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { namedInput, optionalInput } from "../library/registry/fnInput.js";
 import {
   FnFactory,
   parseDistFromDistOrNumber,
   unwrapDistResult,
 } from "../library/registry/helpers.js";
 import * as magicNumbers from "../magicNumbers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { namedInput, optionalInput } from "../reducer/lambda/FnInput.js";
 import { Reducer } from "../reducer/Reducer.js";
 import {
   tArray,

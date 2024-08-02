@@ -1,12 +1,21 @@
 import { REAmbiguous } from "../../errors/messages.js";
-import { Reducer } from "../../reducer/Reducer.js";
 import { UnwrapType } from "../../types/helpers.js";
 import { tAny } from "../../types/index.js";
 import { Type } from "../../types/Type.js";
 import { Value } from "../../value/index.js";
-import { fnInput, FnInput } from "./fnInput.js";
+import { Reducer } from "../Reducer.js";
+import { fnInput, FnInput } from "./FnInput.js";
 
-// Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `FRType` unpack logic.
+/**
+ * FnDefinition represents a single builtin lambda implementation.
+ *
+ * Squiggle builtin functions are, in general, polymorphic: they can dispatch on
+ * the types of their arguments.
+ *
+ * So each builtin lambda, represented by `BuiltinLambda`, has a list of `FnDefinition`s.
+ */
+
+// Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `Type` unpack logic.
 // It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
 // because of contravariance (we need to store all FnDefinitions in a generic array later on).
 export class FnDefinition<OutputType = any> {

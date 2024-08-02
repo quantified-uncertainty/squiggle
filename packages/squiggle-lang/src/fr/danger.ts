@@ -6,13 +6,13 @@ import { Binomial } from "../dists/SymbolicDist/Binomial.js";
 import * as PoissonJs from "../dists/SymbolicDist/Poisson.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { fnInput, namedInput } from "../library/registry/fnInput.js";
 import {
   FnFactory,
   makeOneArgSamplesetDist,
   makeTwoArgsSamplesetDist,
 } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { fnInput, namedInput } from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { Reducer } from "../reducer/Reducer.js";
 import {

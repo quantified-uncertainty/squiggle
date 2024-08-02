@@ -2,12 +2,12 @@ import { BaseDist } from "../dists/BaseDist.js";
 import { argumentError } from "../dists/DistError.js";
 import * as distOperations from "../dists/distOperations/index.js";
 import { REDistributionError } from "../errors/messages.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { fnInput } from "../library/registry/fnInput.js";
 import {
   parseDistFromDistOrNumber,
   unwrapDistResult,
 } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { fnInput } from "../reducer/lambda/FnInput.js";
 import { Reducer } from "../reducer/Reducer.js";
 import {
   tArray,

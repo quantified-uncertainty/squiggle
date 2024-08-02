@@ -1,8 +1,8 @@
 import { BaseErrorMessage, REThrow } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { fnInput } from "../library/registry/fnInput.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { fnInput } from "../reducer/lambda/FnInput.js";
 import { tAny, tBool, tLambdaTyped, tOr, tString } from "../types/index.js";
 import { isEqual } from "../value/index.js";
 

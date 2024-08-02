@@ -1,9 +1,9 @@
+import { fnInputsMatchesLengths } from "../library/registry/helpers.js";
 import {
   InputOrType,
   inputOrTypeToInput,
-} from "../library/registry/fnDefinition.js";
-import { FnInput } from "../library/registry/fnInput.js";
-import { fnInputsMatchesLengths } from "../library/registry/helpers.js";
+} from "../reducer/lambda/FnDefinition.js";
+import { FnInput } from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { Value, vLambda } from "../value/index.js";
 import { InputType } from "../value/VInput.js";

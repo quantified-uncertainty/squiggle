@@ -1,5 +1,5 @@
-import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { tBool, tMixedSet, tNumber } from "../types/index.js";
 import { MixedSet } from "../utility/MixedSet.js";
 

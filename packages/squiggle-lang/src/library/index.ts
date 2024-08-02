@@ -1,6 +1,7 @@
 import { INDEX_LOOKUP_FUNCTION } from "../compiler/constants.js";
 import { REOther } from "../errors/messages.js";
 import { BuiltinLambda } from "../reducer/lambda/BuiltinLambda.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { Bindings } from "../reducer/Stack.js";
 import { tAny } from "../types/index.js";
@@ -8,7 +9,6 @@ import { ImmutableMap } from "../utility/immutable.js";
 import { Value } from "../value/index.js";
 import { vLambda } from "../value/vLambda.js";
 import { makeMathConstants } from "./math.js";
-import { makeDefinition } from "./registry/fnDefinition.js";
 import { makeSquiggleBindings, registry } from "./registry/index.js";
 import { makeVersionConstant } from "./version.js";
 

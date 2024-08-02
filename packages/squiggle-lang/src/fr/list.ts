@@ -5,15 +5,15 @@ import sortBy from "lodash/sortBy.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
-  FnDefinition,
-  makeDefinition,
-} from "../library/registry/fnDefinition.js";
-import { fnInput, namedInput } from "../library/registry/fnInput.js";
-import {
   chooseLambdaParamLength,
   doBinaryLambdaCall,
   FnFactory,
 } from "../library/registry/helpers.js";
+import {
+  FnDefinition,
+  makeDefinition,
+} from "../reducer/lambda/FnDefinition.js";
+import { fnInput, namedInput } from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { Reducer } from "../reducer/Reducer.js";
 import {
