@@ -41,13 +41,8 @@ export function testEvalToBe(expr: string, answer: string) {
   test(expr, async () => await expectEvalToBe(expr, answer));
 }
 
-export function testEvalToMatch(
-  expr: string,
-  expected: string | RegExp,
-  only = false
-) {
-  const fn = only ? test.only : test;
-  fn(expr, async () => await expectEvalToMatch(expr, expected));
+export function testEvalToMatch(expr: string, expected: string | RegExp) {
+  test(expr, async () => await expectEvalToMatch(expr, expected));
 }
 
 export const MySkip = {
