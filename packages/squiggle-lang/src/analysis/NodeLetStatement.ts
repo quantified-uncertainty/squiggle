@@ -48,7 +48,7 @@ export class NodeLetStatement
       node.location,
       decorators,
       node.exported,
-      NodeIdentifierDefinition.fromAst(node.variable),
+      NodeIdentifierDefinition.fromAst(node.variable, value.type),
       node.unitTypeSignature
         ? analyzeKind(node.unitTypeSignature, "UnitTypeSignature", context)
         : null,

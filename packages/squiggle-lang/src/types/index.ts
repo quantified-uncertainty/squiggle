@@ -16,16 +16,18 @@ export { tInput } from "./TInput.js";
 export { tWithTags } from "./TWithTags.js";
 export { tDictWithArbitraryKeys } from "./TDictWithArbitraryKeys.js";
 export { tDate } from "./TDate.js";
-export { tPointSetDist } from "./TPointSetDist.js";
+export {
+  tDist,
+  tPointSetDist,
+  tSampleSetDist,
+  tSymbolicDist,
+} from "./TDist.js";
 export { tOr } from "./TOr.js";
 export { tDomain } from "./TDomain.js";
 export { tDuration } from "./TDuration.js";
-export { tDist } from "./TDist.js";
 export { tDistOrNumber } from "./TDistOrNumber.js";
-export { tSampleSetDist } from "./TSampleSetDist.js";
 export { tScale } from "./TScale.js";
 export { tPlot } from "./TPlot.js";
-export { tSymbolicDist } from "./TSymbolicDist.js";
 export { tTableChart } from "./TTableChart.js";
 export { tSpecificationWithTags } from "./TSpecificationWithTags.js";
 export { tSpecification } from "./TSpecification.js";

@@ -19,8 +19,8 @@ import { fnInput, FnInput } from "./FnInput.js";
 // It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
 // because of contravariance (we need to store all FnDefinitions in a generic array later on).
 export class FnDefinition<OutputType = any> {
-  inputs: FnInput<any>[];
-  run: (args: any[], reducer: Reducer) => OutputType;
+  inputs: FnInput<Type<unknown>>[];
+  run: (args: unknown[], reducer: Reducer) => OutputType;
   output: Type<OutputType>;
   minInputs: number;
   maxInputs: number;
@@ -33,7 +33,7 @@ export class FnDefinition<OutputType = any> {
 
   constructor(props: {
     inputs: FnInput<any>[];
-    run: (args: any[], reducer: Reducer) => OutputType;
+    run: (args: unknown[], reducer: Reducer) => OutputType;
     output: Type<OutputType>;
     isAssert?: boolean;
     deprecated?: string;
@@ -101,6 +101,19 @@ export class FnDefinition<OutputType = any> {
     }
 
     return this.output.pack(this.run(unpackedArgs, reducer));
+  }
+
+  inferOutputType(argTypes: Type<unknown>[]): Type<unknown> | undefined {
+    if (argTypes.length < this.minInputs || argTypes.length > this.maxInputs) {
+      return; // args length mismatch
+    }
+
+    for (let i = 0; i < argTypes.length; i++) {
+      if (!this.inputs[i].type.isSupertype(argTypes[i])) {
+        return;
+      }
+    }
+    return this.output;
   }
 
   static make<const InputTypes extends InputOrType<any>[], const OutputType>(

@@ -29,6 +29,13 @@ export class TDictWithArbitraryKeys<T> extends Type<ImmutableMap<string, T>> {
     );
   }
 
+  override isSupertype(other: Type<unknown>) {
+    return (
+      other instanceof TDictWithArbitraryKeys &&
+      this.itemType.isSupertype(other.itemType)
+    );
+  }
+
   override display() {
     return `Dict(${this.itemType.display()})`;
   }

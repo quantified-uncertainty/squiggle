@@ -3,6 +3,8 @@ import { Type } from "./Type.js";
 
 export type OrType<T1, T2> = { tag: "1"; value: T1 } | { tag: "2"; value: T2 };
 
+// TODO - this only supports union types of 2 types. We should support more than
+// 2 types, but it's not clear how to implement pack/unpack for that.
 export class TOr<T1, T2> extends Type<OrType<T1, T2>> {
   constructor(
     private type1: Type<T1>,
@@ -27,6 +29,18 @@ export class TOr<T1, T2> extends Type<OrType<T1, T2>> {
     return v.tag === "1" ? this.type1.pack(v.value) : this.type2.pack(v.value);
   }
 
+  override isSupertype(other: Type<unknown>) {
+    if (other instanceof TOr) {
+      return (
+        (this.type1.isSupertype(other.type1) &&
+          this.type2.isSupertype(other.type2)) ||
+        (this.type1.isSupertype(other.type2) &&
+          this.type2.isSupertype(other.type1))
+      );
+    }
+    return this.type1.isSupertype(other) || this.type2.isSupertype(other);
+  }
+
   override display() {
     return `${this.type1.display()}|${this.type2.display()}`;
   }
@@ -36,6 +50,7 @@ export class TOr<T1, T2> extends Type<OrType<T1, T2>> {
   }
 
   override defaultFormInputType() {
+    // TODO - is this ok? what if the first type is a checkbox and the second requries a text input?
     return this.type1.defaultFormInputType();
   }
 }

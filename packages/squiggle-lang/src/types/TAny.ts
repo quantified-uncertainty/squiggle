@@ -14,6 +14,11 @@ export class TAny extends Type<Value> {
     return v;
   }
 
+  override isSupertype() {
+    // `any` is a supertype of all types
+    return true;
+  }
+
   override display() {
     return this.genericName ? `'${this.genericName}` : "any";
   }

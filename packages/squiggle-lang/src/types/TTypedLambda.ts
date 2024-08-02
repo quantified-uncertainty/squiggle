@@ -7,9 +7,10 @@ import { FnInput } from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { Value, vLambda } from "../value/index.js";
 import { InputType } from "../value/VInput.js";
+import { TLambda } from "./TLambda.js";
 import { Type } from "./Type.js";
 
-export class TTypedLambda extends Type<Lambda> {
+export class TTypedLambda extends TLambda {
   public inputs: FnInput<Type<unknown>>[];
 
   constructor(
@@ -20,15 +21,27 @@ export class TTypedLambda extends Type<Lambda> {
     this.inputs = maybeInputs.map(inputOrTypeToInput);
   }
 
-  unpack(v: Value) {
+  override unpack(v: Value) {
     return v.type === "Lambda" &&
       fnInputsMatchesLengths(this.inputs, v.value.parameterCounts())
       ? v.value
       : undefined;
   }
 
-  pack(v: Lambda) {
+  override pack(v: Lambda) {
     return vLambda(v);
+  }
+
+  override isSupertype(other: Type<unknown>) {
+    return (
+      other instanceof TTypedLambda &&
+      this.output.isSupertype(other.output) &&
+      this.inputs.length === other.inputs.length &&
+      // inputs are contravariant
+      other.inputs.every((input, index) =>
+        input.type.isSupertype(this.inputs[index].type)
+      )
+    );
   }
 
   override display() {

@@ -1,4 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
+import { tAny } from "../types/TAny.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression, analyzeKind } from "./index.js";
 import { Node } from "./Node.js";
@@ -27,7 +28,10 @@ export class NodeLambdaParameter extends Node<"LambdaParameter"> {
   static fromAst(node: KindNode<"LambdaParameter">, context: AnalysisContext) {
     return new NodeLambdaParameter(
       node.location,
-      NodeIdentifierDefinition.fromAst(node.variable),
+      NodeIdentifierDefinition.fromAst(
+        node.variable,
+        tAny() // TODO - infer from parameter signature, at least the unit type, until we get the real type signatures
+      ),
       node.annotation ? analyzeExpression(node.annotation, context) : null,
       node.unitTypeSignature
         ? analyzeKind(node.unitTypeSignature, "UnitTypeSignature", context)

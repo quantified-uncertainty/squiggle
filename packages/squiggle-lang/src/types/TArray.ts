@@ -33,6 +33,10 @@ export class TArray<T> extends Type<readonly T[]> {
       : vArray(v.map((item) => this.itemType.pack(item)));
   }
 
+  override isSupertype(other: Type<unknown>) {
+    return other instanceof TArray && this.itemType.isSupertype(other.itemType);
+  }
+
   override display() {
     return `List(${this.itemType.display()})`;
   }

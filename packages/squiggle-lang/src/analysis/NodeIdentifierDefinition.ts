@@ -1,4 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
+import { Type } from "../types/Type.js";
 import { Node } from "./Node.js";
 
 type Rank = "top" | "import" | "parameter" | "local";
@@ -10,7 +11,8 @@ type Rank = "top" | "import" | "parameter" | "local";
 export class NodeIdentifierDefinition extends Node<"IdentifierDefinition"> {
   private constructor(
     location: LocationRange,
-    public value: string
+    public value: string,
+    public type: Type<unknown>
   ) {
     super("IdentifierDefinition", location);
     this._init();
@@ -23,9 +25,10 @@ export class NodeIdentifierDefinition extends Node<"IdentifierDefinition"> {
   static fromAst(
     // Identifier definitions (e.g. `x` in `x = 5`) are represented as `Identifier` nodes in the AST,
     // but they are treated as a separate kind of node in the analysis phase.
-    node: KindNode<"Identifier">
+    node: KindNode<"Identifier">,
+    type: Type<unknown>
   ): NodeIdentifierDefinition {
-    return new NodeIdentifierDefinition(node.location, node.value);
+    return new NodeIdentifierDefinition(node.location, node.value, type);
   }
 
   // unused method, but can be useful later

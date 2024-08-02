@@ -101,6 +101,29 @@ export class TDict<const KVList extends BaseKVList> extends Type<
     );
   }
 
+  valueType(key: string) {
+    const kv = this.kvs.find((kv) => kv.key === key);
+    if (!kv) {
+      return undefined;
+    }
+    return kv.type;
+  }
+
+  override isSupertype(other: Type<unknown>): boolean {
+    if (!(other instanceof TDict)) {
+      return false;
+    }
+    if (this.kvs.length !== other.kvs.length) {
+      return false;
+    }
+    for (let i = 0; i < this.kvs.length; i++) {
+      if (!this.kvs[i].type.isSupertype(other.kvs[i].type)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   override display() {
     return (
       "{" +

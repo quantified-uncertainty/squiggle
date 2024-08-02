@@ -13,6 +13,7 @@ export function addParseCommand(program: Command) {
       "-e, --eval <code>",
       "parse a given squiggle code string instead of a file"
     )
+    .option("--types", "print types")
     .option("-r, --raw", "output as JSON")
     .action((filename, options) => {
       const src = loadSrc({ program, filename, inline: options.eval });
@@ -22,7 +23,12 @@ export function addParseCommand(program: Command) {
         if (options.raw) {
           console.log(coloredJson(parseResult.value.raw));
         } else {
-          console.log(nodeResultToString(parseResult, { colored: true }));
+          console.log(
+            nodeResultToString(parseResult, {
+              colored: true,
+              withTypes: options.types,
+            })
+          );
         }
       } else {
         console.log(red(parseResult.value.toString()));

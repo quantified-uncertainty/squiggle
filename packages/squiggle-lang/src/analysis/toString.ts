@@ -6,18 +6,29 @@ import {
   SExprPrintOptions,
   sExprToString,
 } from "../utility/sExpr.js";
+import { ExpressionNode } from "./Node.js";
 import { TypedAST, TypedASTNode } from "./types.js";
+
+type Options = SExprPrintOptions & { withTypes?: boolean };
 
 // This function is similar to `nodeToString` for raw AST, but takes a TypedASTNode.
 export function nodeToString(
   node: TypedASTNode,
-  printOptions: SExprPrintOptions = {}
+  options: Options = {}
 ): string {
+  const { withTypes, ...printOptions } = options;
+
   const toSExpr = (node: TypedASTNode): SExpr => {
-    const selfExpr = (components: (SExpr | null | undefined)[]): SExpr => ({
-      name: node.kind,
-      args: components,
-    });
+    const selfExpr = (components: (SExpr | null | undefined)[]): SExpr => {
+      const args =
+        withTypes && node instanceof ExpressionNode
+          ? [...components, `:${node.type.display()}`]
+          : components;
+      return {
+        name: node.kind,
+        args,
+      };
+    };
 
     switch (node.kind) {
       case "Program":
@@ -62,7 +73,7 @@ export function nodeToString(
         }${node.exponent === null ? "" : `e${node.exponent}`}`;
       case "Identifier":
       case "IdentifierDefinition":
-        return `:${node.value}`;
+        return `:${node.value}` + (withTypes ? `:${node.type.display()}` : "");
       case "LambdaParameter":
         if (!node.annotation && !node.unitTypeSignature) {
           return `:${node.variable.value}`;
@@ -129,10 +140,10 @@ export function nodeToString(
 
 export function nodeResultToString(
   r: result<TypedAST, ICompileError>,
-  printOptions?: SExprPrintOptions
+  options?: Options
 ): string {
   if (!r.ok) {
     return r.value.toString();
   }
-  return nodeToString(r.value, printOptions);
+  return nodeToString(r.value, options);
 }

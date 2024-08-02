@@ -20,11 +20,8 @@ export class NodeIdentifier extends ExpressionNode<"Identifier"> {
     public value: string,
     public resolved: ResolvedIdentifier
   ) {
-    super(
-      "Identifier",
-      location,
-      tAny() // TODO - from definition
-    );
+    const type = resolved.kind === "definition" ? resolved.node.type : tAny(); // TODO - types for builtins
+    super("Identifier", location, type);
     this._init();
   }
 

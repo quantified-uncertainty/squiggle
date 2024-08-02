@@ -16,6 +16,12 @@ export abstract class Type<T> {
     return className;
   }
 
+  // This check is good enough for most types (VBool, VNumber, etc.)
+  // More complex types, e.g. TArray and TDict, override this method to provide a more specific check.
+  isSupertype(other: Type<unknown>) {
+    return other instanceof this.constructor;
+  }
+
   isTransparent() {
     return false;
   }
