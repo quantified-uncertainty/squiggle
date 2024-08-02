@@ -1,5 +1,5 @@
 import { Env } from "../../dists/env.js";
-import { Lambda } from "../../reducer/lambda.js";
+import { Lambda } from "../../reducer/lambda/index.js";
 import * as Result from "../../utility/result.js";
 import { TableChart } from "../../value/VTableChart.js";
 import { SqError, SqOtherError } from "../SqError.js";

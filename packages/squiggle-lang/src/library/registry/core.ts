@@ -2,7 +2,8 @@ import get from "lodash/get.js";
 import invert from "lodash/invert.js";
 
 import { infixFunctions, unaryFunctions } from "../../ast/operators.js";
-import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
+import { BuiltinLambda } from "../../reducer/lambda/BuiltinLambda.js";
+import { Lambda } from "../../reducer/lambda/index.js";
 import { FnDefinition } from "./fnDefinition.js";
 
 type Shorthand = { type: "infix" | "unary"; symbol: string };

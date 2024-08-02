@@ -14,7 +14,7 @@ import {
   doBinaryLambdaCall,
   FnFactory,
 } from "../library/registry/helpers.js";
-import { Lambda } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import { Reducer } from "../reducer/Reducer.js";
 import {
   tAny,

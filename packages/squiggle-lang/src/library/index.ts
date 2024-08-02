@@ -1,6 +1,7 @@
 import { INDEX_LOOKUP_FUNCTION } from "../compiler/constants.js";
 import { REOther } from "../errors/messages.js";
-import { BuiltinLambda, Lambda } from "../reducer/lambda.js";
+import { BuiltinLambda } from "../reducer/lambda/BuiltinLambda.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import { Bindings } from "../reducer/Stack.js";
 import { tAny } from "../types/index.js";
 import { ImmutableMap } from "../utility/immutable.js";

@@ -1,4 +1,4 @@
-import { Lambda } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import { Value, vLambda } from "../value/index.js";
 import { Type } from "./Type.js";
 

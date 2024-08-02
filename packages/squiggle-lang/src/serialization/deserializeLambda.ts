@@ -1,6 +1,7 @@
 import { assertExpression } from "../compiler/serialize.js";
 import { getStdLib } from "../library/index.js";
-import { Lambda, UserDefinedLambda } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda/index.js";
+import { UserDefinedLambda } from "../reducer/lambda/UserDefinedLambda.js";
 import { VDomain } from "../value/VDomain.js";
 import { VLambda } from "../value/vLambda.js";
 import { SerializedLambda } from "./serializeLambda.js";

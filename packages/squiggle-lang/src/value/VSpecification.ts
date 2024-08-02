@@ -1,4 +1,4 @@
-import { Lambda } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,

@@ -10,7 +10,7 @@ import {
 } from "../compiler/serialize.js";
 import { IR } from "../compiler/types.js";
 import { ASTNode } from "../index.js";
-import { Lambda } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import { RunProfile, SerializedRunProfile } from "../reducer/RunProfile.js";
 import { deserializeValue } from "../value/deserializeValue.js";
 import { SerializedValue, Value } from "../value/index.js";

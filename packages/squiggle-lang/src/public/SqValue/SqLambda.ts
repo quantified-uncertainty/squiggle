@@ -1,6 +1,6 @@
 import { Env } from "../../dists/env.js";
 import { getStdLib } from "../../library/index.js";
-import { Lambda } from "../../reducer/lambda.js";
+import { Lambda } from "../../reducer/lambda/index.js";
 import { Reducer } from "../../reducer/Reducer.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";

@@ -4,7 +4,7 @@ import {
 } from "../library/registry/fnDefinition.js";
 import { FnInput } from "../library/registry/fnInput.js";
 import { fnInputsMatchesLengths } from "../library/registry/helpers.js";
-import { Lambda } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import { Value, vLambda } from "../value/index.js";
 import { InputType } from "../value/VInput.js";
 import { Type } from "./Type.js";

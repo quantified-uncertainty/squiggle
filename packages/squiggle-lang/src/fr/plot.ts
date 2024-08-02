@@ -12,7 +12,7 @@ import {
   FnFactory,
   parseDistFromDistOrNumber,
 } from "../library/registry/helpers.js";
-import { Lambda } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import {
   tArray,
   tBool,
@@ -459,9 +459,9 @@ export const library = [
           fnInput({
             name: "params",
             type: tDict(
-              { key: "distXScale", type: tScale, optional: true },
               { key: "xScale", type: tScale, optional: true },
               { key: "yScale", type: tScale, optional: true },
+              { key: "distXScale", type: tScale, optional: true },
               {
                 key: "title",
                 type: tString,

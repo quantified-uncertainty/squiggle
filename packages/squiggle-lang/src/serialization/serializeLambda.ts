@@ -1,4 +1,5 @@
-import { Lambda, UserDefinedLambdaParameter } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda/index.js";
+import { UserDefinedLambdaParameter } from "../reducer/lambda/UserDefinedLambda.js";
 import { SquiggleSerializationVisitor } from "./squiggle.js";
 
 type SerializedParameter = Omit<UserDefinedLambdaParameter, "domain"> & {

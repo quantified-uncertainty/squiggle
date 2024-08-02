@@ -17,7 +17,7 @@ import {
   OtherOperationError,
   SampleMapNeedsNtoNFunction,
 } from "../../operationError.js";
-import { Lambda } from "../../reducer/lambda.js";
+import { Lambda } from "../../reducer/lambda/index.js";
 import { Reducer } from "../../reducer/Reducer.js";
 import {
   tBool,

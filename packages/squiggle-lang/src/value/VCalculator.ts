@@ -1,5 +1,5 @@
 import { REOther } from "../errors/messages.js";
-import { Lambda } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,

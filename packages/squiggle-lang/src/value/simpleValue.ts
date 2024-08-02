@@ -2,7 +2,7 @@ import toPlainObject from "lodash/toPlainObject.js";
 
 import { SampleSetDist } from "../dists/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
-import { BaseLambda, Lambda } from "../reducer/lambda.js";
+import { BaseLambda, Lambda } from "../reducer/lambda/index.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { SDate } from "../utility/SDate.js";
 import { Value } from "./index.js";

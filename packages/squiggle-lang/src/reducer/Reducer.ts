@@ -19,11 +19,11 @@ import { Value, vArray, vDict, vLambda, vVoid } from "../value/index.js";
 import { VDict } from "../value/VDict.js";
 import { vDomain, VDomain } from "../value/VDomain.js";
 import { FrameStack } from "./FrameStack.js";
+import { Lambda } from "./lambda/index.js";
 import {
-  Lambda,
   UserDefinedLambda,
   UserDefinedLambdaParameter,
-} from "./lambda.js";
+} from "./lambda/UserDefinedLambda.js";
 import { RunProfile } from "./RunProfile.js";
 import { Stack } from "./Stack.js";
 import { StackTrace } from "./StackTrace.js";

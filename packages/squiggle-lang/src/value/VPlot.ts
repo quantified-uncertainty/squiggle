@@ -1,7 +1,7 @@
 import { BaseDist } from "../dists/BaseDist.js";
 import { SampleSetDist } from "../dists/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
-import { Lambda } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,

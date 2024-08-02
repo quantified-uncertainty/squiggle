@@ -4,7 +4,7 @@ import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { fnInput } from "../library/registry/fnInput.js";
 import { FnFactory, frTypeToInput } from "../library/registry/helpers.js";
-import { Lambda } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import {
   tArray,
   tBool,
