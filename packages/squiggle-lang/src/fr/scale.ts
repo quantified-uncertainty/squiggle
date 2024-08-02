@@ -2,16 +2,10 @@ import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
-  frDate,
-  frDict,
-  frNumber,
-  frScale,
-  frString,
-} from "../library/registry/frTypes.js";
-import {
   checkNumericTickFormat,
   FnFactory,
 } from "../library/registry/helpers.js";
+import { tDate, tDict, tNumber, tScale, tString } from "../types/index.js";
 import { SDate } from "../utility/SDate.js";
 
 const maker = new FnFactory({
@@ -19,18 +13,18 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
-const commonDict = frDict(
-  { key: "min", type: frNumber, optional: true },
-  { key: "max", type: frNumber, optional: true },
-  { key: "tickFormat", type: frString, optional: true },
-  { key: "title", type: frString, optional: true }
+const commonDict = tDict(
+  { key: "min", type: tNumber, optional: true },
+  { key: "max", type: tNumber, optional: true },
+  { key: "tickFormat", type: tString, optional: true },
+  { key: "title", type: tString, optional: true }
 );
 
-const dateDict = frDict(
-  { key: "min", type: frDate, optional: true },
-  { key: "max", type: frDate, optional: true },
-  { key: "tickFormat", type: frString, optional: true },
-  { key: "title", type: frString, optional: true }
+const dateDict = tDict(
+  { key: "min", type: tDate, optional: true },
+  { key: "max", type: tDate, optional: true },
+  { key: "tickFormat", type: tString, optional: true },
+  { key: "title", type: tString, optional: true }
 );
 
 function checkMinMax(min: number | null, max: number | null) {
@@ -57,7 +51,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [commonDict],
-        frScale,
+        tScale,
         ([{ min, max, tickFormat, title }]) => {
           checkMinMax(min, max);
           checkNumericTickFormat(tickFormat);
@@ -70,7 +64,7 @@ export const library = [
           };
         }
       ),
-      makeDefinition([], frScale, () => {
+      makeDefinition([], tScale, () => {
         return { method: { type: "linear" } };
       }),
     ],
@@ -82,7 +76,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [commonDict],
-        frScale,
+        tScale,
         ([{ min, max, tickFormat, title }]) => {
           if (min !== null && min <= 0) {
             throw new REOther(`Min must be over 0 for log scale, got: ${min}`);
@@ -98,7 +92,7 @@ export const library = [
           };
         }
       ),
-      makeDefinition([], frScale, () => {
+      makeDefinition([], tScale, () => {
         return { method: { type: "log" } };
       }),
     ],
@@ -115,15 +109,15 @@ The default value for \`constant\` is \`${0.0001}\`.`, // I tried to set this to
     definitions: [
       makeDefinition(
         [
-          frDict(
-            { key: "min", type: frNumber, optional: true },
-            { key: "max", type: frNumber, optional: true },
-            { key: "tickFormat", type: frString, optional: true },
-            { key: "title", type: frString, optional: true },
-            { key: "constant", type: frNumber, optional: true }
+          tDict(
+            { key: "min", type: tNumber, optional: true },
+            { key: "max", type: tNumber, optional: true },
+            { key: "tickFormat", type: tString, optional: true },
+            { key: "title", type: tString, optional: true },
+            { key: "constant", type: tNumber, optional: true }
           ),
         ],
-        frScale,
+        tScale,
         ([{ min, max, tickFormat, title, constant }]) => {
           checkMinMax(min, max);
           checkNumericTickFormat(tickFormat);
@@ -140,7 +134,7 @@ The default value for \`constant\` is \`${0.0001}\`.`, // I tried to set this to
           };
         }
       ),
-      makeDefinition([], frScale, () => {
+      makeDefinition([], tScale, () => {
         return { method: { type: "symlog" } };
       }),
     ],
@@ -157,15 +151,15 @@ The default value for \`exponent\` is \`${0.1}\`.`,
     definitions: [
       makeDefinition(
         [
-          frDict(
-            { key: "min", type: frNumber, optional: true },
-            { key: "max", type: frNumber, optional: true },
-            { key: "tickFormat", type: frString, optional: true },
-            { key: "title", type: frString, optional: true },
-            { key: "exponent", type: frNumber, optional: true }
+          tDict(
+            { key: "min", type: tNumber, optional: true },
+            { key: "max", type: tNumber, optional: true },
+            { key: "tickFormat", type: tString, optional: true },
+            { key: "title", type: tString, optional: true },
+            { key: "exponent", type: tNumber, optional: true }
           ),
         ],
-        frScale,
+        tScale,
         ([{ min, max, tickFormat, title, exponent }]) => {
           checkMinMax(min, max);
           checkNumericTickFormat(tickFormat);
@@ -182,7 +176,7 @@ The default value for \`exponent\` is \`${0.1}\`.`,
           };
         }
       ),
-      makeDefinition([], frScale, () => {
+      makeDefinition([], tScale, () => {
         return { method: { type: "power" } };
       }),
     ],
@@ -197,7 +191,7 @@ The default value for \`exponent\` is \`${0.1}\`.`,
     definitions: [
       makeDefinition(
         [dateDict],
-        frScale,
+        tScale,
         ([{ min, max, tickFormat, title }]) => {
           checkMinMaxDates(min, max);
           // We don't check the tick format, because the format is much more complicated for dates.
@@ -210,7 +204,7 @@ The default value for \`exponent\` is \`${0.1}\`.`,
           };
         }
       ),
-      makeDefinition([], frScale, () => {
+      makeDefinition([], tScale, () => {
         return { method: { type: "date" } };
       }),
     ],

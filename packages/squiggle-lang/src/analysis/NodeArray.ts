@@ -1,5 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { frAny, frArray } from "../library/registry/frTypes.js";
+import { tAny, tArray } from "../types/index.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";
@@ -14,7 +14,7 @@ export class NodeArray extends ExpressionNode<"Array"> {
       "Array",
       location,
       // TODO - get the type from the elements
-      frArray(frAny())
+      tArray(tAny())
     );
     this._init();
   }

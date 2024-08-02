@@ -4,16 +4,7 @@ import { PointMass } from "../dists/SymbolicDist/PointMass.js";
 import { REDistributionError } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frNamed } from "../library/registry/fnInput.js";
-import {
-  frArray,
-  frDict,
-  frDist,
-  frDistPointset,
-  frLambdaTyped,
-  frMixedSet,
-  frNumber,
-} from "../library/registry/frTypes.js";
+import { namedInput } from "../library/registry/fnInput.js";
 import {
   doNumberLambdaCall,
   FnFactory,
@@ -21,6 +12,15 @@ import {
 } from "../library/registry/helpers.js";
 import * as Continuous from "../PointSet/Continuous.js";
 import * as Discrete from "../PointSet/Discrete.js";
+import {
+  tArray,
+  tDict,
+  tDist,
+  tLambdaTyped,
+  tMixedSet,
+  tNumber,
+  tPointSetDist,
+} from "../types/index.js";
 import { Ok } from "../utility/result.js";
 import { vNumber } from "../value/VNumber.js";
 import * as XYShape from "../XYShape.js";
@@ -42,11 +42,11 @@ const argsToXYShape = (
   return result.value;
 };
 
-const fromDist = makeDefinition([frDist], frDistPointset, ([dist], reducer) =>
+const fromDist = makeDefinition([tDist], tPointSetDist, ([dist], reducer) =>
   unwrapDistResult(dist.toPointSetDist(reducer.environment))
 );
 
-const fromNumber = makeDefinition([frNumber], frDistPointset, ([num], _) => {
+const fromNumber = makeDefinition([tNumber], tPointSetDist, ([num], _) => {
   const pointMass = new PointMass(num);
   return unwrapDistResult(pointMass.toPointSetDist());
 });
@@ -83,8 +83,8 @@ export const library = [
     displaySection: "Conversions",
     definitions: [
       makeDefinition(
-        [frDistPointset, frNamed("newLength", frNumber)],
-        frDistPointset,
+        [tPointSetDist, namedInput("newLength", tNumber)],
+        tPointSetDist,
         ([dist, number]) => {
           return dist.downsample(number);
         }
@@ -98,7 +98,7 @@ export const library = [
     ],
     displaySection: "Conversions",
     definitions: [
-      makeDefinition([frDistPointset], frMixedSet, ([dist]) => {
+      makeDefinition([tPointSetDist], tMixedSet, ([dist]) => {
         const support = dist.support();
         return {
           points: support.numberSet.numbers,
@@ -122,8 +122,8 @@ export const library = [
     displaySection: "Constructors",
     definitions: [
       makeDefinition(
-        [frArray(frDict(["x", frNumber], ["y", frNumber]))],
-        frDistPointset,
+        [tArray(tDict(["x", tNumber], ["y", tNumber]))],
+        tPointSetDist,
         ([arr]) => {
           return new PointSetDist(
             new Continuous.ContinuousShape({
@@ -147,8 +147,8 @@ export const library = [
     displaySection: "Constructors",
     definitions: [
       makeDefinition(
-        [frArray(frDict(["x", frNumber], ["y", frNumber]))],
-        frDistPointset,
+        [tArray(tDict(["x", tNumber], ["y", tNumber]))],
+        tPointSetDist,
         ([arr]) => {
           return new PointSetDist(
             new Discrete.DiscreteShape({
@@ -167,8 +167,8 @@ export const library = [
     displaySection: "Transformations",
     definitions: [
       makeDefinition(
-        [frDistPointset, frNamed("fn", frLambdaTyped([frNumber], frNumber))],
-        frDistPointset,
+        [tPointSetDist, namedInput("fn", tLambdaTyped([tNumber], tNumber))],
+        tPointSetDist,
         ([dist, lambda], reducer) => {
           return unwrapDistResult(
             dist.mapYResult(

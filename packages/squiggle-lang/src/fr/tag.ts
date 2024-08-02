@@ -1,34 +1,34 @@
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frNamed } from "../library/registry/fnInput.js";
-import {
-  frAny,
-  frArray,
-  frBool,
-  frCalculator,
-  frDate,
-  frDictWithArbitraryKeys,
-  frDist,
-  frDistOrNumber,
-  frDuration,
-  frLambda,
-  frLambdaTyped,
-  frNumber,
-  frOr,
-  FrOrType,
-  frPlot,
-  frSpecificationWithTags,
-  frString,
-  frTableChart,
-  FRType,
-  frWithTags,
-} from "../library/registry/frTypes.js";
+import { namedInput } from "../library/registry/fnInput.js";
 import {
   checkNumericTickFormat,
   FnFactory,
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
+import {
+  tAny,
+  tArray,
+  tBool,
+  tCalculator,
+  tDate,
+  tDictWithArbitraryKeys,
+  tDist,
+  tDistOrNumber,
+  tDuration,
+  tLambda,
+  tLambdaTyped,
+  tNumber,
+  tOr,
+  tPlot,
+  tSpecificationWithTags,
+  tString,
+  tTableChart,
+  tWithTags,
+} from "../types/index.js";
+import { OrType } from "../types/TOr.js";
+import { Type } from "../types/Type.js";
 import { getOrThrow } from "../utility/result.js";
 import { Value } from "../value/index.js";
 import { ValueTags, ValueTagsType } from "../value/valueTags.js";
@@ -43,8 +43,8 @@ const maker = new FnFactory({
 
 //I could also see inlining this into the next function, either way is fine.
 function _ensureTypeUsingLambda<T1>(
-  outputType: FRType<T1>,
-  inputValue: FrOrType<T1, Lambda>,
+  outputType: Type<T1>,
+  inputValue: OrType<T1, Lambda>,
   runLambdaToGetType: (fn: Lambda) => Value
 ): T1 {
   if (inputValue.tag === "1") {
@@ -72,11 +72,11 @@ type PickByValue<T, ValueType> = NonNullable<
 
 const booleanTagDefs = <T>(
   tagName: PickByValue<ValueTagsType, VBool>,
-  frType: FRType<T>
+  frType: Type<T>
 ) => [
   makeDefinition(
-    [frWithTags(frType), frBool],
-    frWithTags(frType),
+    [tWithTags(frType), tBool],
+    tWithTags(frType),
     ([{ value, tags }, tagValue]) => ({
       value,
       tags: tags.merge({ [tagName]: vBool(tagValue) }),
@@ -84,8 +84,8 @@ const booleanTagDefs = <T>(
     { isDecorator: true }
   ),
   makeDefinition(
-    [frWithTags(frType)],
-    frWithTags(frType),
+    [tWithTags(frType)],
+    tWithTags(frType),
     ([{ value, tags }]) => ({
       value,
       tags: tags.merge({ [tagName]: vBool(true) }),
@@ -96,20 +96,20 @@ const booleanTagDefs = <T>(
 
 // This constructs definitions where the second argument is either a type T or a function that takes in the first argument and returns a type T.
 function decoratorWithInputOrFnInput<T>(
-  inputType: FRType<any>,
-  outputType: FRType<T>,
+  inputType: Type<any>,
+  outputType: Type<T>,
   toValueTagsFn: (arg: T) => ValueTagsType
 ) {
   return makeDefinition(
     [
-      frWithTags(inputType),
-      frOr(outputType, frLambdaTyped([inputType], outputType)),
+      tWithTags(inputType),
+      tOr(outputType, tLambdaTyped([inputType], outputType)),
     ],
-    frWithTags(inputType),
+    tWithTags(inputType),
     ([{ value, tags }, newInput], reducer) => {
       const runLambdaToGetType = (fn: Lambda) => {
         //When we call the function, we pass in the tags as well, just in case they are asked for in the call.
-        const val = frWithTags(inputType).pack({ value: value, tags });
+        const val = tWithTags(inputType).pack({ value: value, tags });
         return reducer.call(fn, [val]);
       };
       const correctTypedInputValue: T = _ensureTypeUsingLambda(
@@ -126,7 +126,7 @@ function decoratorWithInputOrFnInput<T>(
   );
 }
 
-function showAsDef<T>(inputType: FRType<any>, outputType: FRType<T>) {
+function showAsDef<T>(inputType: Type<any>, outputType: Type<T>) {
   return decoratorWithInputOrFnInput(inputType, outputType, (result) => ({
     showAs: outputType.pack(result),
   }));
@@ -141,8 +141,8 @@ export const library = [
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [frAny({ genericName: "A" }), frString],
-        frAny({ genericName: "A" }),
+        [tAny({ genericName: "A" }), tString],
+        tAny({ genericName: "A" }),
         ([value, name]) => value.mergeTags({ name: vString(name) }),
         { isDecorator: true }
       ),
@@ -152,7 +152,7 @@ export const library = [
     name: "getName",
     displaySection: "Tags",
     definitions: [
-      makeDefinition([frAny()], frString, ([value]) => {
+      makeDefinition([tAny()], tString, ([value]) => {
         return value.tags?.name() || "";
       }),
     ],
@@ -163,8 +163,8 @@ export const library = [
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [frAny({ genericName: "A" }), frString],
-        frAny({ genericName: "A" }),
+        [tAny({ genericName: "A" }), tString],
+        tAny({ genericName: "A" }),
         ([value, doc]) => value.mergeTags({ doc: vString(doc) }),
         { isDecorator: true }
       ),
@@ -174,7 +174,7 @@ export const library = [
     name: "getDoc",
     displaySection: "Tags",
     definitions: [
-      makeDefinition([frAny()], frString, ([value]) => {
+      makeDefinition([tAny()], tString, ([value]) => {
         return value.tags?.doc() || "";
       }),
     ],
@@ -203,29 +203,26 @@ example2 = {|x| x + 1}`,
       ),
     ],
     definitions: [
-      showAsDef(frWithTags(frDist), frPlot),
-      showAsDef(frArray(frAny()), frTableChart),
+      showAsDef(tWithTags(tDist), tPlot),
+      showAsDef(tArray(tAny()), tTableChart),
       showAsDef(
-        frLambdaTyped([frNumber], frDistOrNumber),
-        frOr(frPlot, frCalculator)
+        tLambdaTyped([tNumber], tDistOrNumber),
+        tOr(tPlot, tCalculator)
       ),
+      showAsDef(tLambdaTyped([tDate], tDistOrNumber), tOr(tPlot, tCalculator)),
       showAsDef(
-        frLambdaTyped([frDate], frDistOrNumber),
-        frOr(frPlot, frCalculator)
-      ),
-      showAsDef(
-        frLambdaTyped([frDuration], frDistOrNumber),
-        frOr(frPlot, frCalculator)
+        tLambdaTyped([tDuration], tDistOrNumber),
+        tOr(tPlot, tCalculator)
       ),
       //The frLambda definition needs to come after the more narrow frLambdaTyped definitions.
-      showAsDef(frLambda, frCalculator),
+      showAsDef(tLambda, tCalculator),
     ],
   }),
   maker.make({
     name: "getShowAs",
     displaySection: "Tags",
     definitions: [
-      makeDefinition([frAny()], frAny(), ([value]) => {
+      makeDefinition([tAny()], tAny(), ([value]) => {
         return value.tags?.value.showAs || vString("None"); // Not sure what to use when blank.
       }),
     ],
@@ -234,7 +231,7 @@ example2 = {|x| x + 1}`,
     name: "getExportData",
     displaySection: "Tags",
     definitions: [
-      makeDefinition([frWithTags(frAny())], frAny(), ([{ tags }]) => {
+      makeDefinition([tWithTags(tAny())], tAny(), ([{ tags }]) => {
         return exportData(tags) || vString("None");
       }),
     ],
@@ -245,8 +242,8 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [frWithTags(frAny({ genericName: "A" })), frSpecificationWithTags],
-        frWithTags(frAny({ genericName: "A" })),
+        [tWithTags(tAny({ genericName: "A" })), tSpecificationWithTags],
+        tWithTags(tAny({ genericName: "A" })),
         ([{ value, tags }, spec]) => {
           if (tags.specification()) {
             throw new REArgumentError(
@@ -270,7 +267,7 @@ example2 = {|x| x + 1}`,
     name: "getSpec",
     displaySection: "Tags",
     definitions: [
-      makeDefinition([frWithTags(frAny())], frAny(), ([value]) => {
+      makeDefinition([tWithTags(tAny())], tAny(), ([value]) => {
         return value.tags?.value.specification || vString("None");
       }),
     ],
@@ -281,8 +278,8 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [frWithTags(frDistOrNumber), frNamed("numberFormat", frString)],
-        frWithTags(frDistOrNumber),
+        [tWithTags(tDistOrNumber), namedInput("numberFormat", tString)],
+        tWithTags(tDistOrNumber),
         ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
           return { value, tags: tags.merge({ numberFormat: vString(format) }) };
@@ -290,8 +287,8 @@ example2 = {|x| x + 1}`,
         { isDecorator: true }
       ),
       makeDefinition(
-        [frWithTags(frDuration), frNamed("numberFormat", frString)],
-        frWithTags(frDuration),
+        [tWithTags(tDuration), namedInput("numberFormat", tString)],
+        tWithTags(tDuration),
         ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
           return { value, tags: tags.merge({ numberFormat: vString(format) }) };
@@ -299,8 +296,8 @@ example2 = {|x| x + 1}`,
         { isDecorator: true }
       ),
       makeDefinition(
-        [frWithTags(frDate), frNamed("timeFormat", frString)],
-        frWithTags(frDate),
+        [tWithTags(tDate), namedInput("timeFormat", tString)],
+        tWithTags(tDate),
         ([{ value, tags }, format]) => {
           return { value, tags: tags.merge({ dateFormat: vString(format) }) };
         },
@@ -313,13 +310,13 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     examples: [],
     definitions: [
-      makeDefinition([frWithTags(frDistOrNumber)], frString, ([{ tags }]) => {
+      makeDefinition([tWithTags(tDistOrNumber)], tString, ([{ tags }]) => {
         return tags?.numberFormat() || "None";
       }),
-      makeDefinition([frWithTags(frDuration)], frString, ([{ tags }]) => {
+      makeDefinition([tWithTags(tDuration)], tString, ([{ tags }]) => {
         return tags?.numberFormat() || "None";
       }),
-      makeDefinition([frWithTags(frDate)], frString, ([{ tags }]) => {
+      makeDefinition([tWithTags(tDate)], tString, ([{ tags }]) => {
         return tags?.dateFormat() || "None";
       }),
     ],
@@ -328,13 +325,13 @@ example2 = {|x| x + 1}`,
     name: "hide",
     description: `Hides a value when displayed under Variables. This is useful for hiding intermediate values or helper functions that are used in calculations, but are not directly relevant to the user. Only hides top-level variables.`,
     displaySection: "Tags",
-    definitions: booleanTagDefs("hidden", frAny({ genericName: "A" })),
+    definitions: booleanTagDefs("hidden", tAny({ genericName: "A" })),
   }),
   maker.make({
     name: "getHide",
     displaySection: "Tags",
     definitions: [
-      makeDefinition([frAny()], frBool, ([value]) => {
+      makeDefinition([tAny()], tBool, ([value]) => {
         return value.getTags().hidden() ?? false;
       }),
     ],
@@ -345,8 +342,8 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [frWithTags(frAny({ genericName: "A" }))],
-        frWithTags(frAny({ genericName: "A" })),
+        [tWithTags(tAny({ genericName: "A" }))],
+        tWithTags(tAny({ genericName: "A" })),
         ([{ value, tags }]) => ({
           value,
           tags: tags.merge({ startOpenState: vString("open") }),
@@ -361,8 +358,8 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [frWithTags(frAny({ genericName: "A" }))],
-        frWithTags(frAny({ genericName: "A" })),
+        [tWithTags(tAny({ genericName: "A" }))],
+        tWithTags(tAny({ genericName: "A" })),
         ([{ value, tags }]) => ({
           value,
           tags: tags.merge({ startOpenState: vString("closed") }),
@@ -377,8 +374,8 @@ example2 = {|x| x + 1}`,
     description: `Returns the startOpenState of a value, which can be "open", "closed", or "" if no startOpenState is set. Set using \`Tag.startOpen\` and \`Tag.startClosed\`.`,
     definitions: [
       makeDefinition(
-        [frWithTags(frAny())],
-        frString,
+        [tWithTags(tAny())],
+        tString,
         ([{ tags }]) => tags?.value.startOpenState?.value ?? ""
       ),
     ],
@@ -414,16 +411,13 @@ example2 = {|x| x + 1}`,
       ),
     ],
     displaySection: "Tags",
-    definitions: booleanTagDefs(
-      "notebook",
-      frArray(frAny({ genericName: "A" }))
-    ),
+    definitions: booleanTagDefs("notebook", tArray(tAny({ genericName: "A" }))),
   }),
   maker.make({
     name: "getNotebook",
     displaySection: "Tags",
     definitions: [
-      makeDefinition([frAny()], frBool, ([value]) => {
+      makeDefinition([tAny()], tBool, ([value]) => {
         return value.tags?.notebook() ?? false;
       }),
     ],
@@ -434,8 +428,8 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [frWithTags(frAny({ genericName: "A" }))],
-        frWithTags(frAny({ genericName: "A" })),
+        [tWithTags(tAny({ genericName: "A" }))],
+        tWithTags(tAny({ genericName: "A" })),
         ([{ value, tags }], { frameStack }) => {
           const location = frameStack.getTopFrame()?.location;
           if (!location) {
@@ -454,7 +448,7 @@ example2 = {|x| x + 1}`,
     name: "getLocation",
     displaySection: "Tags",
     definitions: [
-      makeDefinition([frWithTags(frAny())], frAny(), ([{ tags }]) => {
+      makeDefinition([tWithTags(tAny())], tAny(), ([{ tags }]) => {
         return location(tags) || vString("None");
       }),
     ],
@@ -464,7 +458,7 @@ example2 = {|x| x + 1}`,
     displaySection: "Functions",
     description: "Returns a dictionary of all tags on a value.",
     definitions: [
-      makeDefinition([frAny()], frDictWithArbitraryKeys(frAny()), ([value]) => {
+      makeDefinition([tAny()], tDictWithArbitraryKeys(tAny()), ([value]) => {
         return toMap(value.getTags());
       }),
     ],
@@ -475,8 +469,8 @@ example2 = {|x| x + 1}`,
     displaySection: "Functions",
     definitions: [
       makeDefinition(
-        [frWithTags(frAny({ genericName: "A" })), frArray(frString)],
-        frWithTags(frAny({ genericName: "A" })),
+        [tWithTags(tAny({ genericName: "A" })), tArray(tString)],
+        tWithTags(tAny({ genericName: "A" })),
         ([{ tags, value }, parameterNames]) => {
           const newParams = tags.omitUsingStringKeys([...parameterNames]);
           const _args = getOrThrow(newParams, (e) => new REArgumentError(e));
@@ -491,8 +485,8 @@ example2 = {|x| x + 1}`,
     description: "Returns a copy of the value with all tags removed.",
     definitions: [
       makeDefinition(
-        [frWithTags(frAny({ genericName: "A" }))],
-        frWithTags(frAny({ genericName: "A" })),
+        [tWithTags(tAny({ genericName: "A" }))],
+        tWithTags(tAny({ genericName: "A" })),
         ([{ value }]) => {
           return { value, tags: new ValueTags({}) };
         }

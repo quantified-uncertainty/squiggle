@@ -1,27 +1,27 @@
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import {
-  frArray,
-  frDict,
-  frLambdaTyped,
-  frNumber,
-  frPlot,
-  frString,
-} from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeSquiggleDefinition } from "../library/registry/squiggleDefinition.js";
 import { Bindings } from "../reducer/Stack.js";
 import { sq } from "../sq.js";
+import {
+  tArray,
+  tDict,
+  tLambdaTyped,
+  tNumber,
+  tPlot,
+  tString,
+} from "../types/index.js";
 
 const maker = new FnFactory({
   nameSpace: "RelativeValues",
   requiresNamespace: true,
 });
 
-const relativeValuesShape = frDict(
-  ["ids", frArray(frString)],
-  ["fn", frLambdaTyped([frString, frString], frArray(frNumber))],
-  { key: "title", type: frString, optional: true, deprecated: true }
+const relativeValuesShape = tDict(
+  ["ids", tArray(tString)],
+  ["fn", tLambdaTyped([tString, tString], tArray(tNumber))],
+  { key: "title", type: tString, optional: true, deprecated: true }
 );
 
 export const library = [
@@ -37,7 +37,7 @@ export const library = [
       ),
     ],
     definitions: [
-      makeDefinition([relativeValuesShape], frPlot, ([{ ids, fn, title }]) => {
+      makeDefinition([relativeValuesShape], tPlot, ([{ ids, fn, title }]) => {
         return {
           type: "relativeValues",
           fn,

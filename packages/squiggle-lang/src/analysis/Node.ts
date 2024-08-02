@@ -1,5 +1,5 @@
 import { LocationRange } from "../ast/types.js";
-import { FRType } from "../library/registry/frTypes.js";
+import { Type } from "../types/Type.js";
 import { TypedASTNode } from "./types.js";
 
 export abstract class Node<T extends string> {
@@ -24,7 +24,7 @@ export abstract class ExpressionNode<T extends string> extends Node<T> {
   constructor(
     kind: T,
     location: LocationRange,
-    public type: FRType<any>
+    public type: Type<any>
   ) {
     super(kind, location);
   }

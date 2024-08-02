@@ -1,6 +1,6 @@
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frNumber } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { tNumber } from "../types/index.js";
 
 // Also, see version.ts for System.version.
 
@@ -18,7 +18,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [],
-        frNumber,
+        tNumber,
         (_, { environment }) => environment.sampleCount
       ),
     ],

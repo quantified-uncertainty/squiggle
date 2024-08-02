@@ -1,28 +1,28 @@
-import { fnInput, frNamed } from "../../src/library/registry/fnInput.js";
-import { frNumber } from "../../src/library/registry/frTypes.js";
+import { fnInput, namedInput } from "../../src/library/registry/fnInput.js";
+import { tNumber } from "../../src/types/index.js";
 
 describe("fnInput", () => {
   test("named", () => {
-    const input = frNamed("TestNumber", frNumber);
+    const input = namedInput("TestNumber", tNumber);
     expect(input.toString()).toBe("TestNumber: Number");
   });
 
   test("named with optional", () => {
     const input = fnInput({
       name: "TestNumber",
-      type: frNumber,
+      type: tNumber,
       optional: true,
     });
     expect(input.toString()).toBe("TestNumber?: Number");
   });
 
   test("unnamed", () => {
-    const input = fnInput({ type: frNumber });
+    const input = fnInput({ type: tNumber });
     expect(input.toString()).toBe("Number");
   });
 
   test("unnamed with optional", () => {
-    const input = fnInput({ type: frNumber, optional: true });
+    const input = fnInput({ type: tNumber, optional: true });
     expect(input.toString()).toBe("Number?");
   });
 });

@@ -1,5 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { frString } from "../library/registry/frTypes.js";
+import { tString } from "../types/index.js";
 import { ExpressionNode } from "./Node.js";
 
 export class NodeString extends ExpressionNode<"String"> {
@@ -7,7 +7,7 @@ export class NodeString extends ExpressionNode<"String"> {
     location: LocationRange,
     public value: string
   ) {
-    super("String", location, frString);
+    super("String", location, tString);
     this._init();
   }
 

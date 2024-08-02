@@ -1,7 +1,7 @@
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frNumber, frWithTags } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { tNumber, tWithTags } from "../types/index.js";
 import { ValueTags } from "../value/valueTags.js";
 import { vString } from "../value/VString.js";
 
@@ -23,13 +23,13 @@ const makeUnitFn = (
     isUnit: true,
     definitions: [
       format
-        ? makeDefinition([frNumber], frWithTags(frNumber), ([x]) => {
+        ? makeDefinition([tNumber], tWithTags(tNumber), ([x]) => {
             return {
               value: x * multiplier,
               tags: new ValueTags({ numberFormat: vString(format) }),
             };
           })
-        : makeDefinition([frNumber], frNumber, ([x]) => x * multiplier),
+        : makeDefinition([tNumber], tNumber, ([x]) => x * multiplier),
     ],
   });
 };

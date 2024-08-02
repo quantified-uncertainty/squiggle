@@ -1,5 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { frAny } from "../library/registry/frTypes.js";
+import { tAny } from "../types/index.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";
@@ -14,7 +14,7 @@ export class NodeBracketLookup extends ExpressionNode<"BracketLookup"> {
     super(
       "BracketLookup",
       location,
-      frAny() // TODO - infer
+      tAny() // TODO - infer
     );
     this._init();
   }

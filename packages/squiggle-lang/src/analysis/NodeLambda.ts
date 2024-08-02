@@ -1,5 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { frAny } from "../library/registry/frTypes.js";
+import { tAny } from "../types/index.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression, analyzeKind } from "./index.js";
 import { ExpressionNode } from "./Node.js";
@@ -18,7 +18,7 @@ export class NodeLambda extends ExpressionNode<"Lambda"> {
     super(
       "Lambda",
       location,
-      frAny() // TODO - lambda type
+      tAny() // TODO - lambda type
     );
     this._init();
   }

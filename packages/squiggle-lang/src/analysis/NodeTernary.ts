@@ -1,5 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { frAny } from "../library/registry/frTypes.js";
+import { tAny } from "../types/index.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";
@@ -16,7 +16,7 @@ export class NodeTernary extends ExpressionNode<"Ternary"> {
     super(
       "Ternary",
       location,
-      frAny() // TODO - infer, union of true and false expression types
+      tAny() // TODO - infer, union of true and false expression types
     );
     this._init();
   }

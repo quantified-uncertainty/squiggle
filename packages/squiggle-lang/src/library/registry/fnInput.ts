@@ -1,13 +1,13 @@
-import { FRType } from "./frTypes.js";
+import { Type } from "../../types/Type.js";
 
-type Props<T> = {
-  type: FRType<T>;
+type Props<T extends Type<any>> = {
+  type: T;
   name?: string;
   optional?: boolean;
 };
 
-export class FnInput<T> {
-  type: FRType<T>;
+export class FnInput<T extends Type<any>> {
+  type: T;
   name: string | undefined;
   optional: boolean;
 
@@ -30,14 +30,14 @@ export class FnInput<T> {
   }
 }
 
-export function fnInput<T>(props: Props<T>) {
+export function fnInput<T extends Type<any>>(props: Props<T>) {
   return new FnInput(props);
 }
 
-export function frOptional<T>(type: FRType<T>) {
+export function optionalInput<T extends Type<any>>(type: T) {
   return new FnInput({ type, optional: true });
 }
 
-export function frNamed<T>(name: string, type: FRType<T>) {
+export function namedInput<T extends Type<any>>(name: string, type: T) {
   return new FnInput({ type, name });
 }

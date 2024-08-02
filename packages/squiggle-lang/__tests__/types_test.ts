@@ -1,37 +1,37 @@
-import { PointSetDist } from "../../src/dists/PointSetDist.js";
-import { SampleSetDist } from "../../src/dists/SampleSetDist/index.js";
-import { Normal } from "../../src/dists/SymbolicDist/index.js";
+import { PointSetDist } from "../src/dists/PointSetDist.js";
+import { SampleSetDist } from "../src/dists/SampleSetDist/index.js";
+import { Normal } from "../src/dists/SymbolicDist/index.js";
+import { ContinuousShape } from "../src/PointSet/Continuous.js";
+import { DiscreteShape } from "../src/PointSet/Discrete.js";
+import { MixedShape } from "../src/PointSet/Mixed.js";
 import {
-  frAny,
-  frArray,
-  frBool,
-  frDate,
-  frDict,
-  frDictWithArbitraryKeys,
-  frDist,
-  frDistOrNumber,
-  frDistPointset,
-  frDistSymbolic,
-  frDomain,
-  frDuration,
-  frInput,
-  frNumber,
-  frOr,
-  frPlot,
-  frSampleSetDist,
-  frScale,
-  frString,
-  frTableChart,
-  frTuple,
-  frWithTags,
-} from "../../src/library/registry/frTypes.js";
-import { ContinuousShape } from "../../src/PointSet/Continuous.js";
-import { DiscreteShape } from "../../src/PointSet/Discrete.js";
-import { MixedShape } from "../../src/PointSet/Mixed.js";
-import { ImmutableMap } from "../../src/utility/immutable.js";
-import { SDate } from "../../src/utility/SDate.js";
-import { SDuration } from "../../src/utility/SDuration.js";
-import { NumericRangeDomain } from "../../src/value/domain.js";
+  tAny,
+  tArray,
+  tBool,
+  tDate,
+  tDict,
+  tDictWithArbitraryKeys,
+  tDist,
+  tDistOrNumber,
+  tDomain,
+  tDuration,
+  tInput,
+  tNumber,
+  tOr,
+  tPlot,
+  tPointSetDist,
+  tSampleSetDist,
+  tScale,
+  tString,
+  tSymbolicDist,
+  tTableChart,
+  tTuple,
+  tWithTags,
+} from "../src/types/index.js";
+import { ImmutableMap } from "../src/utility/immutable.js";
+import { SDate } from "../src/utility/SDate.js";
+import { SDuration } from "../src/utility/SDuration.js";
+import { NumericRangeDomain } from "../src/value/domain.js";
 import {
   Value,
   vArray,
@@ -47,50 +47,50 @@ import {
   vScale,
   vString,
   vTableChart,
-} from "../../src/value/index.js";
-import { ValueTags } from "../../src/value/valueTags.js";
-import { Input } from "../../src/value/VInput.js";
-import { Plot } from "../../src/value/VPlot.js";
-import { Scale } from "../../src/value/VScale.js";
+} from "../src/value/index.js";
+import { ValueTags } from "../src/value/valueTags.js";
+import { Input } from "../src/value/VInput.js";
+import { Plot } from "../src/value/VPlot.js";
+import { Scale } from "../src/value/VScale.js";
 
 test("frNumber", () => {
   const value = vNumber(5);
-  expect(frNumber.unpack(value)).toBe(5);
-  expect(frNumber.pack(5)).toEqual(value);
+  expect(tNumber.unpack(value)).toBe(5);
+  expect(tNumber.pack(5)).toEqual(value);
 });
 
 test("frString", () => {
   const value = vString("foo");
-  expect(frString.unpack(value)).toBe("foo");
-  expect(frString.pack("foo")).toEqual(value);
+  expect(tString.unpack(value)).toBe("foo");
+  expect(tString.pack("foo")).toEqual(value);
 });
 
 test("frBool", () => {
   const value = vBool(true);
-  expect(frBool.unpack(value)).toBe(true);
-  expect(frBool.pack(true)).toEqual(value);
+  expect(tBool.unpack(value)).toBe(true);
+  expect(tBool.pack(true)).toEqual(value);
 });
 
 test("frDate", () => {
   const date = SDate.now();
   const value = vDate(date);
-  expect(frDate.unpack(value)).toBe(date);
-  expect(frDate.pack(date)).toEqual(value);
+  expect(tDate.unpack(value)).toBe(date);
+  expect(tDate.pack(date)).toEqual(value);
 });
 
 test("frDuration", () => {
   const duration = SDuration.fromMs(1234);
   const value = vDuration(duration);
-  expect(frDuration.unpack(value)).toBe(duration);
-  expect(frDuration.pack(duration)).toEqual(value);
+  expect(tDuration.unpack(value)).toBe(duration);
+  expect(tDuration.pack(duration)).toEqual(value);
 });
 
 describe("frDistOrNumber", () => {
   test("number", () => {
     const number = 123;
     const value = vNumber(number);
-    expect(frDistOrNumber.unpack(value)).toBe(number);
-    expect(frDistOrNumber.pack(number)).toEqual(value);
+    expect(tDistOrNumber.unpack(value)).toBe(number);
+    expect(tDistOrNumber.pack(number)).toEqual(value);
   });
 
   test("dist", () => {
@@ -100,8 +100,8 @@ describe("frDistOrNumber", () => {
     }
     const dist = dResult.value;
     const value = vDist(dist);
-    expect(frDistOrNumber.unpack(value)).toBe(dist);
-    expect(frDistOrNumber.pack(dist)).toEqual(value);
+    expect(tDistOrNumber.unpack(value)).toBe(dist);
+    expect(tDistOrNumber.pack(dist)).toEqual(value);
   });
 });
 
@@ -112,19 +112,19 @@ describe("frDist", () => {
   }
   const dist = dResult.value;
   const value = vDist(dist);
-  expect(frDist.unpack(value)).toBe(dist);
-  expect(frDist.pack(dist)).toEqual(value);
+  expect(tDist.unpack(value)).toBe(dist);
+  expect(tDist.pack(dist)).toEqual(value);
 });
 
-test("distSymbolic", () => {
+test("symbolicDist", () => {
   const dResult = Normal.make({ mean: 2, stdev: 5 });
   if (!dResult.ok) {
     throw new Error();
   }
   const dist = dResult.value;
   const value = vDist(dist);
-  expect(frDistSymbolic.unpack(value)).toBe(dist);
-  expect(frDistSymbolic.pack(dist)).toEqual(value);
+  expect(tSymbolicDist.unpack(value)).toBe(dist);
+  expect(tSymbolicDist.pack(dist)).toEqual(value);
 });
 
 test("sampleSetDist", () => {
@@ -134,8 +134,8 @@ test("sampleSetDist", () => {
   }
   const dist = dResult.value;
   const value = vDist(dist);
-  expect(frSampleSetDist.unpack(value)).toBe(dist);
-  expect(frSampleSetDist.pack(dist)).toEqual(value);
+  expect(tSampleSetDist.unpack(value)).toBe(dist);
+  expect(tSampleSetDist.pack(dist)).toEqual(value);
 });
 
 test("pointSetDist", () => {
@@ -146,8 +146,8 @@ test("pointSetDist", () => {
     })
   );
   const value = vDist(dist);
-  expect(frDistPointset.unpack(value)).toBe(dist);
-  expect(frDistPointset.pack(dist)).toEqual(value);
+  expect(tPointSetDist.unpack(value)).toBe(dist);
+  expect(tPointSetDist.pack(dist)).toEqual(value);
 });
 
 test.todo("frLambda");
@@ -155,22 +155,22 @@ test.todo("frLambda");
 test("frTableChart", () => {
   const tableChart = { columns: [], data: [] };
   const value = vTableChart(tableChart);
-  expect(frTableChart.unpack(value)).toBe(tableChart);
-  expect(frTableChart.pack(tableChart)).toEqual(value);
+  expect(tTableChart.unpack(value)).toBe(tableChart);
+  expect(tTableChart.pack(tableChart)).toEqual(value);
 });
 
 test("frScale", () => {
   const scale: Scale = { method: { type: "linear" } };
   const value = vScale(scale);
-  expect(frScale.unpack(value)).toBe(scale);
-  expect(frScale.pack(scale)).toEqual(value);
+  expect(tScale.unpack(value)).toBe(scale);
+  expect(tScale.pack(scale)).toEqual(value);
 });
 
 test("frInput", () => {
   const input: Input = { name: "first", type: "text" };
   const value = vInput(input);
-  expect(frInput.unpack(value)).toBe(input);
-  expect(frInput.pack(input)).toEqual(value);
+  expect(tInput.unpack(value)).toBe(input);
+  expect(tInput.pack(input)).toEqual(value);
 });
 
 test("frPlot", () => {
@@ -182,15 +182,15 @@ test("frPlot", () => {
     showSummary: false,
   };
   const value = vPlot(plot);
-  expect(frPlot.unpack(value)).toBe(plot);
-  expect(frPlot.pack(plot)).toEqual(value);
+  expect(tPlot.unpack(value)).toBe(plot);
+  expect(tPlot.pack(plot)).toEqual(value);
 });
 
 test("frDomain", () => {
   const domain = new NumericRangeDomain(0, 1);
   const value = vDomain(domain);
-  expect(frDomain.unpack(value)).toBe(domain);
-  expect(frDomain.pack(domain)).toEqual(value);
+  expect(tDomain.unpack(value)).toBe(domain);
+  expect(tDomain.pack(domain)).toEqual(value);
 });
 
 describe("frArray", () => {
@@ -198,15 +198,15 @@ describe("frArray", () => {
   const value = vArray(arr.map((i) => vNumber(i)));
 
   test("unpack number[]", () => {
-    expect(frArray(frNumber).unpack(value)).toEqual(arr);
+    expect(tArray(tNumber).unpack(value)).toEqual(arr);
   });
 
   test("pack number[]", () => {
-    expect(frArray(frNumber).pack(arr)).toEqual(value);
+    expect(tArray(tNumber).pack(arr)).toEqual(value);
   });
 
   test("unpack any[]", () => {
-    expect(frArray(frAny()).unpack(value)).toEqual([
+    expect(tArray(tAny()).unpack(value)).toEqual([
       vNumber(3),
       vNumber(5),
       vNumber(6),
@@ -218,8 +218,8 @@ describe("frTuple", () => {
   test("two elements", () => {
     const arr = [3, "foo"] as [number, string];
     const value = vArray([vNumber(arr[0]), vString(arr[1])]);
-    expect(frTuple(frNumber, frString).unpack(value)).toEqual(arr);
-    expect(frTuple(frNumber, frString).pack(arr)).toEqual(value);
+    expect(tTuple(tNumber, tString).unpack(value)).toEqual(arr);
+    expect(tTuple(tNumber, tString).pack(arr)).toEqual(value);
   });
 
   test("five elements", () => {
@@ -231,7 +231,7 @@ describe("frTuple", () => {
       vNumber(arr[3]),
       vNumber(arr[4]),
     ]);
-    const tuple = frTuple(frNumber, frString, frNumber, frNumber, frNumber);
+    const tuple = tTuple(tNumber, tString, tNumber, tNumber, tNumber);
     expect(tuple.unpack(value)).toEqual(arr);
     expect(tuple.pack(arr)).toEqual(value);
   });
@@ -248,8 +248,8 @@ test("frDictWithArbitraryKeys", () => {
       ["bar", vNumber(6)],
     ])
   );
-  expect(frDictWithArbitraryKeys(frNumber).unpack(value)).toEqual(dict);
-  expect(frDictWithArbitraryKeys(frNumber).pack(dict)).toEqual(value);
+  expect(tDictWithArbitraryKeys(tNumber).unpack(value)).toEqual(dict);
+  expect(tDictWithArbitraryKeys(tNumber).pack(dict)).toEqual(value);
 });
 
 describe("frDict", () => {
@@ -264,7 +264,7 @@ describe("frDict", () => {
         ["bar", vString(dict.bar)],
       ])
     );
-    const t = frDict(["foo", frNumber], ["bar", frString]);
+    const t = tDict(["foo", tNumber], ["bar", tString]);
 
     expect(t.unpack(v)).toEqual(dict);
     expect(t.pack(dict)).toEqual(v);
@@ -281,9 +281,9 @@ describe("frDict", () => {
         ["bar", vString(dict.bar)],
       ])
     );
-    const t = frDict(["foo", frNumber], ["bar", frString], {
+    const t = tDict(["foo", tNumber], ["bar", tString], {
       key: "baz",
-      type: frString,
+      type: tString,
       optional: true,
     });
 
@@ -293,7 +293,7 @@ describe("frDict", () => {
 });
 
 describe("frOr", () => {
-  const frNumberOrString = frOr(frNumber, frString);
+  const frNumberOrString = tOr(tNumber, tString);
 
   describe("unpack", () => {
     test("should correctly unpack a number", () => {
@@ -335,8 +335,8 @@ describe("frOr", () => {
 });
 
 describe("frWithTags", () => {
-  const itemType = frNumber;
-  const frTaggedNumber = frWithTags(itemType);
+  const itemType = tNumber;
+  const frTaggedNumber = tWithTags(itemType);
 
   test("Unpack Non-Tagged Item", () => {
     const value = vNumber(10);

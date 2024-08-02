@@ -1,8 +1,10 @@
 import { REAmbiguous } from "../../errors/messages.js";
 import { Reducer } from "../../reducer/Reducer.js";
+import { UnwrapType } from "../../types/helpers.js";
+import { tAny } from "../../types/index.js";
+import { Type } from "../../types/Type.js";
 import { Value } from "../../value/index.js";
 import { fnInput, FnInput } from "./fnInput.js";
-import { frAny, FRType } from "./frTypes.js";
 
 // Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `FRType` unpack logic.
 // It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
@@ -10,7 +12,7 @@ import { frAny, FRType } from "./frTypes.js";
 export type FnDefinition<OutputType = any> = {
   inputs: FnInput<any>[];
   run: (args: any[], reducer: Reducer) => OutputType;
-  output: FRType<OutputType>;
+  output: Type<OutputType>;
   minInputs: number;
   maxInputs: number;
   isAssert: boolean;
@@ -21,9 +23,16 @@ export type FnDefinition<OutputType = any> = {
   isDecorator?: boolean;
 };
 
-export type InputOrType<T> = FnInput<T> | FRType<T>;
+export type InputOrType<T> = FnInput<Type<T>> | Type<T>;
 
-export function inputOrTypeToInput<T>(input: InputOrType<T>): FnInput<T> {
+type UnwrapInputOrType<T extends InputOrType<any>> =
+  T extends FnInput<infer U>
+    ? UnwrapType<U>
+    : T extends Type<any>
+      ? UnwrapType<T>
+      : never;
+
+export function inputOrTypeToInput<T>(input: InputOrType<T>): FnInput<Type<T>> {
   return input instanceof FnInput ? input : fnInput({ type: input });
 }
 
@@ -46,13 +55,16 @@ function assertOptionalsAreAtEnd(inputs: FnInput<any>[]) {
 }
 
 export function makeDefinition<
-  const InputTypes extends any[],
+  const InputTypes extends InputOrType<any>[],
   const OutputType,
 >(
   // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
-  maybeInputs: [...{ [K in keyof InputTypes]: InputOrType<InputTypes[K]> }],
-  output: FRType<OutputType>,
-  run: (args: InputTypes, reducer: Reducer) => OutputType,
+  maybeInputs: InputTypes,
+  output: Type<OutputType>,
+  run: (
+    args: [...{ [K in keyof InputTypes]: UnwrapInputOrType<InputTypes[K]> }],
+    reducer: Reducer
+  ) => OutputType,
   params?: { deprecated?: string; isDecorator?: boolean }
 ): FnDefinition {
   const inputs = maybeInputs.map(inputOrTypeToInput);
@@ -83,7 +95,7 @@ export function makeAssertDefinition<const T extends any[]>(
   assertOptionalsAreAtEnd(inputs);
   return {
     inputs,
-    output: frAny(),
+    output: tAny(),
     run: () => {
       throw new REAmbiguous(errorMsg);
     },

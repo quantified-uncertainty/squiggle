@@ -1,5 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { frAny, frDictWithArbitraryKeys } from "../library/registry/frTypes.js";
+import { tAny, tDictWithArbitraryKeys } from "../types/index.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeOneOfKinds } from "./index.js";
 import { ExpressionNode } from "./Node.js";
@@ -14,7 +14,7 @@ export class NodeDict extends ExpressionNode<"Dict"> {
       "Dict",
       location,
       // TODO - get the type from the elements
-      frDictWithArbitraryKeys(frAny())
+      tDictWithArbitraryKeys(tAny())
     );
     this._init();
   }

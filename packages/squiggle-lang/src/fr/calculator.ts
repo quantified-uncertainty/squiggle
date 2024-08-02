@@ -3,19 +3,19 @@ import maxBy from "lodash/maxBy.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { fnInput } from "../library/registry/fnInput.js";
-import {
-  frArray,
-  frBool,
-  frCalculator,
-  frDict,
-  frInput,
-  frLambda,
-  frNumber,
-  frString,
-  frWithTags,
-} from "../library/registry/frTypes.js";
 import { FnFactory, frTypeToInput } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
+import {
+  tArray,
+  tBool,
+  tCalculator,
+  tDict,
+  tInput,
+  tLambda,
+  tNumber,
+  tString,
+  tWithTags,
+} from "../types/index.js";
 import { Calculator, vCalculator } from "../value/VCalculator.js";
 import { Input } from "../value/VInput.js";
 
@@ -109,16 +109,16 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["fn", frLambda],
-            { key: "title", type: frString, optional: true },
-            { key: "description", type: frString, optional: true },
-            { key: "inputs", type: frArray(frInput), optional: true },
-            { key: "autorun", type: frBool, optional: true },
-            { key: "sampleCount", type: frNumber, optional: true }
+          tDict(
+            ["fn", tLambda],
+            { key: "title", type: tString, optional: true },
+            { key: "description", type: tString, optional: true },
+            { key: "inputs", type: tArray(tInput), optional: true },
+            { key: "autorun", type: tBool, optional: true },
+            { key: "sampleCount", type: tNumber, optional: true }
           ),
         ],
-        frCalculator,
+        tCalculator,
         ([{ fn, title, description, inputs, autorun, sampleCount }]) =>
           validateCalculator({
             fn,
@@ -131,20 +131,20 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
       ),
       makeDefinition(
         [
-          frWithTags(frLambda),
+          tWithTags(tLambda),
           fnInput({
             name: "params",
             optional: true,
-            type: frDict(
-              { key: "title", type: frString, optional: true },
-              { key: "description", type: frString, optional: true },
-              { key: "inputs", type: frArray(frInput), optional: true },
-              { key: "autorun", type: frBool, optional: true },
-              { key: "sampleCount", type: frNumber, optional: true }
+            type: tDict(
+              { key: "title", type: tString, optional: true },
+              { key: "description", type: tString, optional: true },
+              { key: "inputs", type: tArray(tInput), optional: true },
+              { key: "autorun", type: tBool, optional: true },
+              { key: "sampleCount", type: tNumber, optional: true }
             ),
           }),
         ],
-        frCalculator,
+        tCalculator,
         ([{ value, tags }, params]) => {
           const { title, description, inputs, autorun, sampleCount } =
             params ?? {};

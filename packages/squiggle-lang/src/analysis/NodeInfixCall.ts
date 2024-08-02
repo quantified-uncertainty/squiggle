@@ -1,5 +1,5 @@
 import { InfixOperator, KindNode, LocationRange } from "../ast/types.js";
-import { frAny } from "../library/registry/frTypes.js";
+import { tAny } from "../types/index.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";
@@ -11,7 +11,7 @@ export class NodeInfixCall extends ExpressionNode<"InfixCall"> {
     public op: InfixOperator,
     public args: [AnyExpressionNode, AnyExpressionNode]
   ) {
-    super("InfixCall", location, frAny());
+    super("InfixCall", location, tAny());
     this._init();
   }
 

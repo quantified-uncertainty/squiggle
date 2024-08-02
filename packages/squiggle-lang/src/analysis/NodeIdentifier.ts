@@ -1,5 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { frAny } from "../library/registry/frTypes.js";
+import { tAny } from "../types/index.js";
 import { AnalysisContext } from "./context.js";
 import { ExpressionNode } from "./Node.js";
 import { NodeIdentifierDefinition } from "./NodeIdentifierDefinition.js";
@@ -23,7 +23,7 @@ export class NodeIdentifier extends ExpressionNode<"Identifier"> {
     super(
       "Identifier",
       location,
-      frAny() // TODO - from definition
+      tAny() // TODO - from definition
     );
     this._init();
   }

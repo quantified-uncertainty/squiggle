@@ -1,16 +1,16 @@
 import { REArgumentError } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import {
-  frArray,
-  frBool,
-  frDict,
-  frInput,
-  frNumber,
-  frOr,
-  frString,
-} from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import {
+  tArray,
+  tBool,
+  tDict,
+  tInput,
+  tNumber,
+  tOr,
+  tString,
+} from "../types/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Input",
@@ -43,13 +43,13 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["name", frString],
-            { key: "description", type: frString, optional: true },
-            { key: "default", type: frOr(frNumber, frString), optional: true }
+          tDict(
+            ["name", tString],
+            { key: "description", type: tString, optional: true },
+            { key: "default", type: tOr(tNumber, tString), optional: true }
           ),
         ],
-        frInput,
+        tInput,
         ([vars]) => {
           return {
             type: "text",
@@ -74,13 +74,13 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["name", frString],
-            { key: "description", type: frString, optional: true },
-            { key: "default", type: frOr(frNumber, frString), optional: true }
+          tDict(
+            ["name", tString],
+            { key: "description", type: tString, optional: true },
+            { key: "default", type: tOr(tNumber, tString), optional: true }
           ),
         ],
-        frInput,
+        tInput,
         ([vars]) => {
           return {
             type: "textArea",
@@ -101,13 +101,13 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["name", frString],
-            { key: "description", type: frString, optional: true },
-            { key: "default", type: frBool, optional: true }
+          tDict(
+            ["name", tString],
+            { key: "description", type: tString, optional: true },
+            { key: "default", type: tBool, optional: true }
           ),
         ],
-        frInput,
+        tInput,
         ([vars]) => {
           return {
             type: "checkbox",
@@ -130,14 +130,14 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["name", frString],
-            ["options", frArray(frString)],
-            { key: "description", type: frString, optional: true },
-            { key: "default", type: frString, optional: true }
+          tDict(
+            ["name", tString],
+            ["options", tArray(tString)],
+            { key: "description", type: tString, optional: true },
+            { key: "default", type: tString, optional: true }
           ),
         ],
-        frInput,
+        tInput,
         ([vars]) => {
           //Throw error if options are empty, if default is not in options, or if options have duplicate
           const isEmpty = () => vars.options.length === 0;

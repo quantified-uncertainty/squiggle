@@ -1,15 +1,15 @@
 import { makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frNamed } from "../library/registry/fnInput.js";
-import {
-  frAny,
-  frArray,
-  frDict,
-  frLambdaTyped,
-  frString,
-  frTableChart,
-} from "../library/registry/frTypes.js";
+import { namedInput } from "../library/registry/fnInput.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import {
+  tAny,
+  tArray,
+  tDict,
+  tLambdaTyped,
+  tString,
+  tTableChart,
+} from "../types/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Table",
@@ -70,21 +70,21 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frNamed("data", frArray(frAny({ genericName: "A" }))),
-          frNamed(
+          namedInput("data", tArray(tAny({ genericName: "A" }))),
+          namedInput(
             "params",
-            frDict([
+            tDict([
               "columns",
-              frArray(
-                frDict(
-                  ["fn", frLambdaTyped([frAny({ genericName: "A" })], frAny())],
-                  { key: "name", type: frString, optional: true }
+              tArray(
+                tDict(
+                  ["fn", tLambdaTyped([tAny({ genericName: "A" })], tAny())],
+                  { key: "name", type: tString, optional: true }
                 )
               ),
             ])
           ),
         ],
-        frTableChart,
+        tTableChart,
         ([data, params]) => {
           const { columns } = params ?? {};
           return {
@@ -98,20 +98,20 @@ export const library = [
       ),
       makeDefinition(
         [
-          frDict(
-            ["data", frArray(frAny({ genericName: "A" }))],
+          tDict(
+            ["data", tArray(tAny({ genericName: "A" }))],
             [
               "columns",
-              frArray(
-                frDict(
-                  ["fn", frLambdaTyped([frAny({ genericName: "A" })], frAny())],
-                  { key: "name", type: frString, optional: true }
+              tArray(
+                tDict(
+                  ["fn", tLambdaTyped([tAny({ genericName: "A" })], tAny())],
+                  { key: "name", type: tString, optional: true }
                 )
               ),
             ]
           ),
         ],
-        frTableChart,
+        tTableChart,
         ([{ data, columns }]) => {
           return {
             data,

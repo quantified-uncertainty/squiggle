@@ -15,6 +15,7 @@ import {
   tryCallFnDefinition,
 } from "../library/registry/fnDefinition.js";
 import { FnInput } from "../library/registry/fnInput.js";
+import { Type } from "../types/Type.js";
 import { sort } from "../utility/E_A_Floats.js";
 import { Value } from "../value/index.js";
 import { VDomain } from "../value/VDomain.js";
@@ -170,7 +171,7 @@ export class BuiltinLambda extends BaseLambda {
     return `[${this.parameterCounts().join(",")}]`;
   }
 
-  signatures(): FnInput<unknown>[][] {
+  signatures(): FnInput<Type<unknown>>[][] {
     return this.definitions.map((d) => d.inputs);
   }
 

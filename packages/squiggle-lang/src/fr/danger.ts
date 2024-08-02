@@ -7,17 +7,7 @@ import * as PoissonJs from "../dists/SymbolicDist/Poisson.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { fnInput, frNamed } from "../library/registry/fnInput.js";
-import {
-  frAny,
-  frArray,
-  frDate,
-  frDistPointset,
-  frLambda,
-  frNumber,
-  frOr,
-  frString,
-} from "../library/registry/frTypes.js";
+import { fnInput, namedInput } from "../library/registry/fnInput.js";
 import {
   FnFactory,
   makeOneArgSamplesetDist,
@@ -25,6 +15,16 @@ import {
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { Reducer } from "../reducer/Reducer.js";
+import {
+  tAny,
+  tArray,
+  tDate,
+  tLambda,
+  tNumber,
+  tOr,
+  tPointSetDist,
+  tString,
+} from "../types/index.js";
 import * as E_A from "../utility/E_A.js";
 import { SDate } from "../utility/SDate.js";
 import {
@@ -84,7 +84,7 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
     displaySection: "Javascript",
     description: `Converts a string to a number. If the string can't be converted, returns \`Parse Failed\`. Calls Javascript \`parseFloat\` under the hood.`,
     definitions: [
-      makeDefinition([frString], frOr(frNumber, frString), ([str]) => {
+      makeDefinition([tString], tOr(tNumber, tString), ([str]) => {
         const result = parseFloat(str);
         if (isNaN(result)) {
           return { tag: "2", value: "Parse Failed" };
@@ -103,7 +103,7 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
     requiresNamespace: true,
     displaySection: "Javascript",
     definitions: [
-      makeDefinition([], frDate, () => {
+      makeDefinition([], tDate, () => {
         return SDate.now();
       }),
     ],
@@ -128,8 +128,8 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
     examples: [makeFnExample(`Danger.binomial(1, 20, 0.5)`)],
     definitions: [
       makeDefinition(
-        [frNumber, frNumber, frNumber],
-        frNumber,
+        [tNumber, tNumber, tNumber],
+        tNumber,
         ([n, k, p]) => choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k)
       ),
     ],
@@ -234,12 +234,12 @@ Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, nu
     definitions: [
       makeDefinition(
         [
-          fnInput({ name: "f", type: frLambda }),
-          fnInput({ name: "min", type: frNumber }),
-          fnInput({ name: "max", type: frNumber }),
-          fnInput({ name: "numIntegrationPoints", type: frNumber }),
+          fnInput({ name: "f", type: tLambda }),
+          fnInput({ name: "min", type: tNumber }),
+          fnInput({ name: "max", type: tNumber }),
+          fnInput({ name: "numIntegrationPoints", type: tNumber }),
         ],
-        frNumber,
+        tNumber,
         ([lambda, min, max, numIntegrationPoints], reducer) => {
           if (numIntegrationPoints === 0) {
             throw new REOther(
@@ -276,12 +276,12 @@ Same caveats as \`integrateFunctionBetweenWithNumIntegrationPoints\` apply.`,
     definitions: [
       makeDefinition(
         [
-          frNamed("f", frLambda),
-          frNamed("min", frNumber),
-          frNamed("max", frNumber),
-          frNamed("epsilon", frNumber),
+          namedInput("f", tLambda),
+          namedInput("min", tNumber),
+          namedInput("max", tNumber),
+          namedInput("epsilon", tNumber),
         ],
-        frNumber,
+        tNumber,
         ([lambda, min, max, epsilon], reducer) => {
           if (epsilon === 0) {
             throw new REOther(
@@ -329,11 +329,11 @@ const diminishingReturnsLibrary = [
     definitions: [
       makeDefinition(
         [
-          frNamed("fs", frArray(frLambda)),
-          frNamed("funds", frNumber),
-          frNamed("approximateIncrement", frNumber),
+          namedInput("fs", tArray(tLambda)),
+          namedInput("funds", tNumber),
+          namedInput("approximateIncrement", tNumber),
         ],
-        frAny(),
+        tAny(),
         ([lambdas, funds, approximateIncrement], reducer) => {
           // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas.
           /*
@@ -482,8 +482,8 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
     description: `Returns all combinations of the input list taken r elements at a time.`,
     definitions: [
       makeDefinition(
-        [frArray(frAny({ genericName: "A" })), frNumber],
-        frArray(frArray(frAny({ genericName: "A" }))),
+        [tArray(tAny({ genericName: "A" })), tNumber],
+        tArray(tArray(tAny({ genericName: "A" }))),
         ([elements, n]) => {
           if (n > elements.length) {
             throw new REArgumentError(
@@ -506,8 +506,8 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
     ],
     definitions: [
       makeDefinition(
-        [frArray(frAny({ genericName: "A" }))],
-        frArray(frArray(frAny({ genericName: "A" }))),
+        [tArray(tAny({ genericName: "A" }))],
+        tArray(tArray(tAny({ genericName: "A" }))),
         ([elements]) => {
           return allCombinations(elements);
         }
@@ -526,7 +526,7 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
       ),
     ],
     definitions: [
-      makeDefinition([frAny()], frAny(), ([v]) => {
+      makeDefinition([tAny()], tAny(), ([v]) => {
         return simpleValueToValue(simpleValueFromValue(v));
       }),
     ],
@@ -543,7 +543,7 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
       ),
     ],
     definitions: [
-      makeDefinition([frAny()], frString, ([v]) => {
+      makeDefinition([tAny()], tString, ([v]) => {
         return JSON.stringify(
           simpleValueToJson(removeLambdas(simpleValueFromValue(v)))
         );
@@ -555,7 +555,7 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
     examples: [makeFnExample(`Danger.yTransform(PointSet(Sym.normal(5,2)))`)],
     displaySection: "Math",
     definitions: [
-      makeDefinition([frDistPointset], frDistPointset, ([dist]) => {
+      makeDefinition([tPointSetDist], tPointSetDist, ([dist]) => {
         return dist.yTransform();
       }),
     ],

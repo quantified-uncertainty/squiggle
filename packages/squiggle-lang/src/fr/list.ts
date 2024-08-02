@@ -8,18 +8,7 @@ import {
   makeAssertDefinition,
   makeDefinition,
 } from "../library/registry/fnDefinition.js";
-import { fnInput, frNamed } from "../library/registry/fnInput.js";
-import {
-  frAny,
-  frArray,
-  frBool,
-  frLambdaNand,
-  frLambdaTyped,
-  frNumber,
-  frSampleSetDist,
-  frString,
-  frTuple,
-} from "../library/registry/frTypes.js";
+import { fnInput, namedInput } from "../library/registry/fnInput.js";
 import {
   chooseLambdaParamLength,
   doBinaryLambdaCall,
@@ -27,6 +16,17 @@ import {
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { Reducer } from "../reducer/Reducer.js";
+import {
+  tAny,
+  tArray,
+  tBool,
+  tLambdaNand,
+  tLambdaTyped,
+  tNumber,
+  tSampleSetDist,
+  tString,
+  tTuple,
+} from "../types/index.js";
 import { shuffle, unzip, zip } from "../utility/E_A.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { uniq, uniqBy, Value } from "../value/index.js";
@@ -154,21 +154,21 @@ export const library = [
     description: `Creates an array of length \`count\`, with each element being \`value\`. If \`value\` is a function, it will be called \`count\` times, with the index as the argument.`,
     definitions: [
       makeAssertDefinition(
-        [frNumber, frLambdaNand([0, 1])],
+        [tNumber, tLambdaNand([0, 1])],
         "Call with either 0 or 1 arguments, not both."
       ),
       makeDefinition(
         [
-          frNamed("count", frNumber),
-          frNamed(
+          namedInput("count", tNumber),
+          namedInput(
             "fn",
-            frLambdaTyped(
-              [fnInput({ name: "index", type: frNumber, optional: true })],
-              frAny({ genericName: "A" })
+            tLambdaTyped(
+              [fnInput({ name: "index", type: tNumber, optional: true })],
+              tAny({ genericName: "A" })
             )
           ),
         ],
-        frArray(frAny({ genericName: "A" })),
+        tArray(tAny({ genericName: "A" })),
         ([num, lambda], reducer) => {
           _assertValidArrayLength(num);
           const usedOptional = chooseLambdaParamLength([0, 1], lambda) === 1;
@@ -180,16 +180,16 @@ export const library = [
       ),
       makeDefinition(
         [
-          frNamed("count", frNumber),
-          frNamed("value", frAny({ genericName: "A" })),
+          namedInput("count", tNumber),
+          namedInput("value", tAny({ genericName: "A" })),
         ],
-        frArray(frAny({ genericName: "A" })),
+        tArray(tAny({ genericName: "A" })),
         ([number, value]) => {
           _assertValidArrayLength(number);
           return new Array(number).fill(value);
         }
       ),
-      makeDefinition([frSampleSetDist], frArray(frNumber), ([dist]) => {
+      makeDefinition([tSampleSetDist], tArray(tNumber), ([dist]) => {
         return dist.samples;
       }),
     ],
@@ -200,8 +200,8 @@ export const library = [
     displaySection: "Constructors",
     definitions: [
       makeDefinition(
-        [frNamed("low", frNumber), frNamed("high", frNumber)],
-        frArray(frNumber),
+        [namedInput("low", tNumber), namedInput("high", tNumber)],
+        tArray(tNumber),
         ([low, high]) => {
           if (!Number.isInteger(low) || !Number.isInteger(high)) {
             throw new REArgumentError(
@@ -219,7 +219,7 @@ export const library = [
     examples: [makeFnExample(`List.length([1,4,5])`)],
     displaySection: "Queries",
     definitions: [
-      makeDefinition([frArray(frAny())], frNumber, ([values]) => values.length),
+      makeDefinition([tArray(tAny())], tNumber, ([values]) => values.length),
     ],
   }),
   maker.make({
@@ -229,8 +229,8 @@ export const library = [
     displaySection: "Queries",
     definitions: [
       makeDefinition(
-        [frArray(frAny({ genericName: "A" }))],
-        frAny({ genericName: "A" }),
+        [tArray(tAny({ genericName: "A" }))],
+        tAny({ genericName: "A" }),
         ([array]) => {
           _assertUnemptyArray(array);
           return array[0];
@@ -245,8 +245,8 @@ export const library = [
     displaySection: "Queries",
     definitions: [
       makeDefinition(
-        [frArray(frAny({ genericName: "A" }))],
-        frAny({ genericName: "A" }),
+        [tArray(tAny({ genericName: "A" }))],
+        tAny({ genericName: "A" }),
         ([array]) => {
           _assertUnemptyArray(array);
           return array[array.length - 1];
@@ -261,8 +261,8 @@ export const library = [
     displaySection: "Modifications",
     definitions: [
       makeDefinition(
-        [frArray(frAny({ genericName: "A" }))],
-        frArray(frAny({ genericName: "A" })),
+        [tArray(tAny({ genericName: "A" }))],
+        tArray(tAny({ genericName: "A" })),
         ([array]) => [...array].reverse()
       ),
     ],
@@ -276,10 +276,10 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frArray(frAny({ genericName: "A" })),
-          frArray(frAny({ genericName: "A" })),
+          tArray(tAny({ genericName: "A" })),
+          tArray(tAny({ genericName: "A" })),
         ],
-        frArray(frAny({ genericName: "A" })),
+        tArray(tAny({ genericName: "A" })),
         ([array1, array2]) => [...array1].concat(array2)
       ),
     ],
@@ -292,10 +292,10 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
+          tArray(tAny({ genericName: "A" })),
+          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tNumber)),
         ],
-        frArray(frAny({ genericName: "A" })),
+        tArray(tAny({ genericName: "A" })),
         ([array, lambda], reducer) => {
           return sortBy(array, (e) =>
             applyLambdaAndCheckNumber(e, lambda, reducer)
@@ -312,10 +312,10 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
+          tArray(tAny({ genericName: "A" })),
+          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tNumber)),
         ],
-        frAny({ genericName: "A" }),
+        tAny({ genericName: "A" }),
         ([array, lambda], reducer) => {
           _assertUnemptyArray(array);
           const el = minBy(array, (e) =>
@@ -338,10 +338,10 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
+          tArray(tAny({ genericName: "A" })),
+          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tNumber)),
         ],
-        frAny({ genericName: "A" }),
+        tAny({ genericName: "A" }),
         ([array, lambda], reducer) => {
           _assertUnemptyArray(array);
           const el = maxBy(array, (e) =>
@@ -363,8 +363,8 @@ export const library = [
     displaySection: "Modifications",
     definitions: [
       makeDefinition(
-        [frArray(frAny({ genericName: "A" })), frAny({ genericName: "A" })],
-        frArray(frAny({ genericName: "A" })),
+        [tArray(tAny({ genericName: "A" })), tAny({ genericName: "A" })],
+        tArray(tAny({ genericName: "A" })),
         ([array, el]) => [...array, el]
       ),
     ],
@@ -379,11 +379,11 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frArray(frAny({ genericName: "A" })),
-          frNamed("startIndex", frNumber),
-          fnInput({ name: "endIndex", type: frNumber, optional: true }),
+          tArray(tAny({ genericName: "A" })),
+          namedInput("startIndex", tNumber),
+          fnInput({ name: "endIndex", type: tNumber, optional: true }),
         ],
-        frArray(frAny({ genericName: "A" })),
+        tArray(tAny({ genericName: "A" })),
         ([array, start, end]) => {
           _assertInteger(start);
           if (end !== null) {
@@ -405,8 +405,8 @@ export const library = [
     displaySection: "Filtering",
     definitions: [
       makeDefinition(
-        [frArray(frAny({ genericName: "A" }))],
-        frArray(frAny({ genericName: "A" })),
+        [tArray(tAny({ genericName: "A" }))],
+        tArray(tAny({ genericName: "A" })),
         ([arr]) => uniq(arr)
       ),
     ],
@@ -421,13 +421,13 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frArray(frAny({ genericName: "A" })),
-          frLambdaTyped(
-            [frAny({ genericName: "A" })],
-            frAny({ genericName: "B" })
+          tArray(tAny({ genericName: "A" })),
+          tLambdaTyped(
+            [tAny({ genericName: "A" })],
+            tAny({ genericName: "B" })
           ),
         ],
-        frArray(frAny({ genericName: "A" })),
+        tArray(tAny({ genericName: "A" })),
         ([arr, lambda], reducer) =>
           uniqBy(arr, (e) => reducer.call(lambda, [e]))
       ),
@@ -443,21 +443,21 @@ export const library = [
     ],
     definitions: [
       makeAssertDefinition(
-        [frNumber, frLambdaNand([1, 2])],
+        [tNumber, tLambdaNand([1, 2])],
         "Call with either 1 or 2 arguments, not both."
       ),
       makeDefinition(
         [
-          frArray(frAny({ genericName: "A" })),
-          frLambdaTyped(
+          tArray(tAny({ genericName: "A" })),
+          tLambdaTyped(
             [
-              frAny({ genericName: "A" }),
-              fnInput({ name: "index", type: frNumber, optional: true }),
+              tAny({ genericName: "A" }),
+              fnInput({ name: "index", type: tNumber, optional: true }),
             ],
-            frAny({ genericName: "B" })
+            tAny({ genericName: "B" })
           ),
         ],
-        frArray(frAny({ genericName: "B" })),
+        tArray(tAny({ genericName: "B" })),
         ([array, lambda], reducer) => {
           const usedOptional = chooseLambdaParamLength([1, 2], lambda) === 2;
           return _map(array, lambda, reducer, usedOptional ? true : false);
@@ -474,30 +474,30 @@ export const library = [
     examples: [makeFnExample(`List.reduce([1,4,5], 2, {|acc, el| acc+el})`)],
     definitions: [
       makeAssertDefinition(
-        [frNumber, frNamed("fn", frLambdaNand([2, 3]))],
+        [tNumber, namedInput("fn", tLambdaNand([2, 3]))],
         "Call with either 2 or 3 arguments, not both."
       ),
       makeDefinition(
         [
-          frArray(frAny({ genericName: "B" })),
-          frNamed("initialValue", frAny({ genericName: "A" })),
-          frNamed(
+          tArray(tAny({ genericName: "B" })),
+          namedInput("initialValue", tAny({ genericName: "A" })),
+          namedInput(
             "callbackFn",
-            frLambdaTyped(
+            tLambdaTyped(
               [
-                frNamed("accumulator", frAny({ genericName: "A" })),
-                frNamed("currentValue", frAny({ genericName: "B" })),
+                namedInput("accumulator", tAny({ genericName: "A" })),
+                namedInput("currentValue", tAny({ genericName: "B" })),
                 fnInput({
                   name: "currentIndex",
-                  type: frNumber,
+                  type: tNumber,
                   optional: true,
                 }),
               ],
-              frAny({ genericName: "A" })
+              tAny({ genericName: "A" })
             )
           ),
         ],
-        frAny({ genericName: "A" }),
+        tAny({ genericName: "A" }),
         ([array, initialValue, lambda], reducer) => {
           const usedOptional = chooseLambdaParamLength([2, 3], lambda) === 3;
           return _reduce(
@@ -522,20 +522,20 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frArray(frAny({ genericName: "B" })),
-          frNamed("initialValue", frAny({ genericName: "A" })),
-          frNamed(
+          tArray(tAny({ genericName: "B" })),
+          namedInput("initialValue", tAny({ genericName: "A" })),
+          namedInput(
             "callbackFn",
-            frLambdaTyped(
+            tLambdaTyped(
               [
-                frNamed("accumulator", frAny({ genericName: "A" })),
-                frNamed("currentValue", frAny({ genericName: "B" })),
+                namedInput("accumulator", tAny({ genericName: "A" })),
+                namedInput("currentValue", tAny({ genericName: "B" })),
               ],
-              frAny({ genericName: "A" })
+              tAny({ genericName: "A" })
             )
           ),
         ],
-        frAny({ genericName: "A" }),
+        tAny({ genericName: "A" }),
         ([array, initialValue, lambda], reducer) =>
           _reduce([...array].reverse(), initialValue, lambda, reducer, false)
       ),
@@ -567,24 +567,24 @@ List.reduceWhile(
     definitions: [
       makeDefinition(
         [
-          frArray(frAny({ genericName: "B" })),
-          frNamed("initialValue", frAny({ genericName: "A" })),
-          frNamed(
+          tArray(tAny({ genericName: "B" })),
+          namedInput("initialValue", tAny({ genericName: "A" })),
+          namedInput(
             "callbackFn",
-            frLambdaTyped(
+            tLambdaTyped(
               [
-                frNamed("accumulator", frAny({ genericName: "A" })),
-                frNamed("currentValue", frAny({ genericName: "B" })),
+                namedInput("accumulator", tAny({ genericName: "A" })),
+                namedInput("currentValue", tAny({ genericName: "B" })),
               ],
-              frAny({ genericName: "A" })
+              tAny({ genericName: "A" })
             )
           ),
-          frNamed(
+          namedInput(
             "conditionFn",
-            frLambdaTyped([frAny({ genericName: "A" })], frBool)
+            tLambdaTyped([tAny({ genericName: "A" })], tBool)
           ),
         ],
-        frAny({ genericName: "A" }),
+        tAny({ genericName: "A" }),
         ([array, initialValue, step, condition], reducer) =>
           _reduceWhile(array, initialValue, step, condition, reducer)
       ),
@@ -598,10 +598,10 @@ List.reduceWhile(
     definitions: [
       makeDefinition(
         [
-          frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
+          tArray(tAny({ genericName: "A" })),
+          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tBool)),
         ],
-        frArray(frAny({ genericName: "A" })),
+        tArray(tAny({ genericName: "A" })),
         ([array, lambda], reducer) =>
           array.filter(_binaryLambdaCheck1(lambda, reducer))
       ),
@@ -615,10 +615,10 @@ List.reduceWhile(
     definitions: [
       makeDefinition(
         [
-          frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
+          tArray(tAny({ genericName: "A" })),
+          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tBool)),
         ],
-        frBool,
+        tBool,
         ([array, lambda], reducer) =>
           array.every(_binaryLambdaCheck1(lambda, reducer))
       ),
@@ -632,10 +632,10 @@ List.reduceWhile(
     definitions: [
       makeDefinition(
         [
-          frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
+          tArray(tAny({ genericName: "A" })),
+          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tBool)),
         ],
-        frBool,
+        tBool,
         ([array, lambda], reducer) =>
           array.some(_binaryLambdaCheck1(lambda, reducer))
       ),
@@ -650,10 +650,10 @@ List.reduceWhile(
     definitions: [
       makeDefinition(
         [
-          frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
+          tArray(tAny({ genericName: "A" })),
+          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tBool)),
         ],
-        frAny({ genericName: "A" }),
+        tAny({ genericName: "A" }),
         ([array, lambda], reducer) => {
           const result = array.find(_binaryLambdaCheck1(lambda, reducer));
           if (!result) {
@@ -673,10 +673,10 @@ List.reduceWhile(
     definitions: [
       makeDefinition(
         [
-          frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
+          tArray(tAny({ genericName: "A" })),
+          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tBool)),
         ],
-        frNumber,
+        tNumber,
         ([array, lambda], reducer) =>
           array.findIndex(_binaryLambdaCheck1(lambda, reducer))
       ),
@@ -690,13 +690,13 @@ List.reduceWhile(
     definitions: [
       makeDefinition(
         [
-          frArray(frString),
-          fnInput({ name: "separator", type: frString, optional: true }),
+          tArray(tString),
+          fnInput({ name: "separator", type: tString, optional: true }),
         ],
-        frString,
+        tString,
         ([array, joinStr]) => array.join(joinStr ?? ",")
       ),
-      makeDefinition([frArray(frString)], frString, ([array]) => array.join()),
+      makeDefinition([tArray(tString)], tString, ([array]) => array.join()),
     ],
   }),
   maker.make({
@@ -705,7 +705,7 @@ List.reduceWhile(
     examples: [makeFnExample(`List.flatten([[1,2], [3,4]])`)],
     displaySection: "Modifications",
     definitions: [
-      makeDefinition([frArray(frAny())], frArray(frAny()), ([arr]) =>
+      makeDefinition([tArray(tAny())], tArray(tAny()), ([arr]) =>
         arr.reduce(
           (acc: Value[], v) =>
             acc.concat(v.type === "Array" ? v.value : ([v] as Value[])),
@@ -721,8 +721,8 @@ List.reduceWhile(
     displaySection: "Modifications",
     definitions: [
       makeDefinition(
-        [frArray(frAny({ genericName: "A" }))],
-        frArray(frAny({ genericName: "A" })),
+        [tArray(tAny({ genericName: "A" }))],
+        tArray(tAny({ genericName: "A" })),
         ([arr], reducer) => shuffle(arr, reducer.rng)
       ),
     ],
@@ -735,12 +735,10 @@ List.reduceWhile(
     definitions: [
       makeDefinition(
         [
-          frArray(frAny({ genericName: "A" })),
-          frArray(frAny({ genericName: "B" })),
+          tArray(tAny({ genericName: "A" })),
+          tArray(tAny({ genericName: "B" })),
         ],
-        frArray(
-          frTuple(frAny({ genericName: "A" }), frAny({ genericName: "B" }))
-        ),
+        tArray(tTuple(tAny({ genericName: "A" }), tAny({ genericName: "B" }))),
         ([array1, array2]) => {
           if (array1.length !== array2.length) {
             throw new REArgumentError("List lengths must be equal");
@@ -758,13 +756,13 @@ List.reduceWhile(
     definitions: [
       makeDefinition(
         [
-          frArray(
-            frTuple(frAny({ genericName: "A" }), frAny({ genericName: "B" }))
+          tArray(
+            tTuple(tAny({ genericName: "A" }), tAny({ genericName: "B" }))
           ),
         ],
-        frTuple(
-          frArray(frAny({ genericName: "A" })),
-          frArray(frAny({ genericName: "B" }))
+        tTuple(
+          tArray(tAny({ genericName: "A" })),
+          tArray(tAny({ genericName: "B" }))
         ),
         ([array]) => unzip(array)
       ),

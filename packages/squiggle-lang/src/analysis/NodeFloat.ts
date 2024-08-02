@@ -1,5 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { frNumber } from "../library/registry/frTypes.js";
+import { tNumber } from "../types/index.js";
 import { ExpressionNode } from "./Node.js";
 
 export class NodeFloat extends ExpressionNode<"Float"> {
@@ -9,7 +9,7 @@ export class NodeFloat extends ExpressionNode<"Float"> {
     public fractional: string | null,
     public exponent: number | null
   ) {
-    super("Float", location, frNumber);
+    super("Float", location, tNumber);
     this._init();
   }
 
