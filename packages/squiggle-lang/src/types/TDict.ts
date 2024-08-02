@@ -88,7 +88,7 @@ export class TDict<const KVList extends BaseKVList> extends Type<
       }
       result[kv.key] = unpackedSubvalue;
     }
-    return result as any; // that's ok, we've checked the types in the class type
+    return result as KVListToDict<KVList>; // that's ok, we've checked the types in the class type
   }
 
   pack(v: KVListToDict<KVList>) {

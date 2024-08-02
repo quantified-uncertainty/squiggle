@@ -7,13 +7,13 @@ export class TArray<T> extends Type<readonly T[]> {
     super();
   }
 
-  unpack(v: Value) {
+  unpack(v: Value): readonly T[] | undefined {
     if (v.type !== "Array") {
       return undefined;
     }
     if (this.itemType.isTransparent()) {
       // special case, performance optimization
-      return v.value as T[];
+      return v.value as readonly T[];
     }
 
     const unpackedArray: T[] = [];
