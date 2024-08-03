@@ -1,6 +1,6 @@
-import { tDictWithArbitraryKeys, tNumber } from "../../src/types";
-import { ImmutableMap } from "../../src/utility/immutable";
-import { vDict, vNumber } from "../../src/value";
+import { tDictWithArbitraryKeys, tNumber } from "../../src/types/index.js";
+import { ImmutableMap } from "../../src/utility/immutable.js";
+import { vDict, vNumber } from "../../src/value/index.js";
 
 test("pack/unpack", () => {
   const dict = ImmutableMap([

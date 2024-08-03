@@ -1,5 +1,5 @@
-import { tNumber, tOr, tString } from "../../src/types";
-import { vNumber, vString } from "../../src/value";
+import { tNumber, tOr, tString } from "../../src/types/index.js";
+import { vNumber, vString } from "../../src/value/index.js";
 
 const numberOrString = tOr(tNumber, tString);
 

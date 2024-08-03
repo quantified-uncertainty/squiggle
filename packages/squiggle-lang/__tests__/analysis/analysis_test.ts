@@ -15,8 +15,7 @@ test("parent node", () => {
 function returnType(code: string) {
   const ast = parse(code, "test");
   if (!ast.ok) {
-    throw new Error("Parse failed");
-    return ast;
+    throw ast.value;
   }
   return ast.value.result?.type.display();
 }
@@ -66,6 +65,12 @@ describe("inference", () => {
 
   test("lookup constant keys", () => {
     expect(returnType("d = { foo: 1 }; d.foo")).toBe("Number");
+  });
+
+  test("lookup non-existent key", () => {
+    expect(() => returnType("{ foo: 1 }.bar")).toThrow(
+      "Key bar doesn't exist in dict {foo: Number}"
+    );
   });
 
   test.failing("builtin functions", () => {

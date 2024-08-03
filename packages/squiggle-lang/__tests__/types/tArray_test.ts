@@ -1,5 +1,5 @@
-import { tAny, tArray, tNumber } from "../../src/types";
-import { vArray, vNumber } from "../../src/value";
+import { tAny, tArray, tNumber } from "../../src/types/index.js";
+import { vArray, vNumber } from "../../src/value/index.js";
 
 describe("unpack", () => {
   const arr = [3, 5, 6];

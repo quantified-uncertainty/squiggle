@@ -1,5 +1,5 @@
-import { tPlot } from "../../src/types";
-import { Plot, vPlot } from "../../src/value/VPlot";
+import { tPlot } from "../../src/types/index.js";
+import { Plot, vPlot } from "../../src/value/VPlot.js";
 
 test("pack/unpack", () => {
   const plot: Plot = {

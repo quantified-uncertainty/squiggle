@@ -1,6 +1,6 @@
-import { tDict, tNumber, tString } from "../../src/types";
-import { ImmutableMap } from "../../src/utility/immutable";
-import { Value, vDict, vNumber, vString } from "../../src/value";
+import { tDict, tNumber, tString } from "../../src/types/index.js";
+import { ImmutableMap } from "../../src/utility/immutable.js";
+import { Value, vDict, vNumber, vString } from "../../src/value/index.js";
 
 test("two keys", () => {
   const dict = {

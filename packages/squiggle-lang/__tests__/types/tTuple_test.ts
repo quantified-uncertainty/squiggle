@@ -1,5 +1,5 @@
-import { tNumber, tString, tTuple } from "../../src/types";
-import { vArray, vNumber, vString } from "../../src/value";
+import { tNumber, tString, tTuple } from "../../src/types/index.js";
+import { vArray, vNumber, vString } from "../../src/value/index.js";
 
 describe("pack/unpack", () => {
   test("two elements", () => {

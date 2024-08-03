@@ -1,6 +1,6 @@
-import { tNumber, tWithTags } from "../../src/types";
-import { vNumber, vString } from "../../src/value";
-import { ValueTags } from "../../src/value/valueTags";
+import { tNumber, tWithTags } from "../../src/types/index.js";
+import { vNumber, vString } from "../../src/value/index.js";
+import { ValueTags } from "../../src/value/valueTags.js";
 
 const tTaggedNumber = tWithTags(tNumber);
 

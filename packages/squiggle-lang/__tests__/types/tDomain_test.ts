@@ -1,6 +1,6 @@
-import { tDomain } from "../../src/types";
-import { vDomain } from "../../src/value";
-import { NumericRangeDomain } from "../../src/value/domain";
+import { tDomain } from "../../src/types/index.js";
+import { NumericRangeDomain } from "../../src/value/domain.js";
+import { vDomain } from "../../src/value/index.js";
 
 test("pack/unpack", () => {
   const domain = new NumericRangeDomain(0, 1);

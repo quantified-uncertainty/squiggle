@@ -67,7 +67,7 @@ describe("eval", () => {
     test("index", async () =>
       await expectEvalToBe(
         "r = {a: 1}; r.b",
-        "Error(Dict property not found: b)"
+        "Error(Key b doesn't exist in dict {a: Number})" // compile-time error
       ));
     testEvalError("{a: 1}.b"); // invalid syntax
     test("trailing comma", async () =>
