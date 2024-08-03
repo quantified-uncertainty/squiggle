@@ -1,8 +1,11 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { tAny, tDictWithArbitraryKeys } from "../types/index.js";
+import { tAny, tDict, tDictWithArbitraryKeys } from "../types/index.js";
+import { Type } from "../types/Type.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeOneOfKinds } from "./index.js";
 import { ExpressionNode } from "./Node.js";
+import { NodeIdentifier } from "./NodeIdentifier.js";
+import { NodeString } from "./NodeString.js";
 import { AnyDictEntryNode } from "./types.js";
 
 export class NodeDict extends ExpressionNode<"Dict"> {
@@ -10,12 +13,24 @@ export class NodeDict extends ExpressionNode<"Dict"> {
     location: LocationRange,
     public elements: AnyDictEntryNode[]
   ) {
-    super(
-      "Dict",
-      location,
-      // TODO - get the type from the elements
-      tDictWithArbitraryKeys(tAny())
-    );
+    const kvTypes: [string, Type<unknown>][] = [];
+    let staticKeys = true;
+    for (const element of elements) {
+      if (element instanceof NodeIdentifier) {
+        kvTypes.push([element.value, element.type]);
+      } else if (element.key instanceof NodeString) {
+        kvTypes.push([element.key.value, element.value.type]);
+      } else {
+        staticKeys = false;
+        break;
+      }
+    }
+
+    const type = staticKeys
+      ? tDict(...kvTypes)
+      : tDictWithArbitraryKeys(tAny());
+
+    super("Dict", location, type);
     this._init();
   }
 

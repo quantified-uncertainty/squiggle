@@ -19,7 +19,7 @@ export function makeSquiggleDefinition({
   name: string;
   code: string;
 }): SquiggleDefinition {
-  const astResult = parse(code, "@stdlib");
+  const astResult = parse(code, "@stdlib", builtins);
   if (!astResult.ok) {
     // will be detected during tests, should never happen in runtime
     throw new Error(`Stdlib code ${code} is invalid`);

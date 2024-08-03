@@ -1,5 +1,6 @@
 import { Value } from "../value/index.js";
 import { InputType } from "../value/VInput.js";
+import { TAny } from "./TAny.js";
 
 export abstract class Type<T> {
   abstract unpack(v: Value): T | undefined;
@@ -19,7 +20,7 @@ export abstract class Type<T> {
   // This check is good enough for most types (VBool, VNumber, etc.)
   // More complex types, e.g. TArray and TDict, override this method to provide a more specific check.
   isSupertype(other: Type<unknown>) {
-    return other instanceof this.constructor;
+    return other instanceof TAny || other instanceof this.constructor;
   }
 
   isTransparent() {

@@ -1,5 +1,6 @@
 import { ImmutableMap } from "../utility/immutable.js";
 import { Value, vDict } from "../value/index.js";
+import { TAny } from "./TAny.js";
 import { Type } from "./Type.js";
 
 export class TDictWithArbitraryKeys<T> extends Type<ImmutableMap<string, T>> {
@@ -30,6 +31,7 @@ export class TDictWithArbitraryKeys<T> extends Type<ImmutableMap<string, T>> {
   }
 
   override isSupertype(other: Type<unknown>) {
+    if (other instanceof TAny) return true;
     return (
       other instanceof TDictWithArbitraryKeys &&
       this.itemType.isSupertype(other.itemType)

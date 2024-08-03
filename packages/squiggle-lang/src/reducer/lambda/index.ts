@@ -1,4 +1,5 @@
 import { LocationRange } from "../../ast/types.js";
+import { Type } from "../../types/Type.js";
 import { Value } from "../../value/index.js";
 import { Frame } from "../FrameStack.js";
 import { Reducer } from "../Reducer.js";
@@ -15,6 +16,9 @@ export abstract class BaseLambda {
   abstract parameterString(): string;
   abstract parameterCounts(): number[];
   abstract parameterCountString(): string;
+  abstract inferOutputType(
+    argTypes: Type<unknown>[]
+  ): Type<unknown> | undefined;
 
   protected abstract callBody(args: Value[], reducer: Reducer): Value;
 

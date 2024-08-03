@@ -1,6 +1,7 @@
 import { analyzeAst } from "../analysis/index.js";
 import { TypedAST } from "../analysis/types.js";
 import { ICompileError } from "../errors/IError.js";
+import { Bindings } from "../reducer/Stack.js";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
 import {
@@ -24,7 +25,11 @@ export type ParseError = {
 
 type ParseResult = result<TypedAST, ICompileError>;
 
-export function parse(expr: string, source: string): ParseResult {
+export function parse(
+  expr: string,
+  source: string,
+  stdlib?: Bindings // stdlib is necessary for typechecking
+): ParseResult {
   try {
     const comments: ASTCommentNode[] = [];
     const parsed: AST = peggyParse(expr, {
@@ -34,10 +39,14 @@ export function parse(expr: string, source: string): ParseResult {
     if (parsed.kind !== "Program") {
       throw new Error("Expected parse to result in a Program node");
     }
+
+    // TODO - move code to analyzeAst stage
     unitTypeCheck(parsed);
     parsed.comments = comments;
 
-    const analyzed = analyzeAst(parsed);
+    // TODO - do as a separate step
+    const analyzed = analyzeAst(parsed, stdlib);
+
     return Result.Ok(analyzed);
   } catch (e) {
     if (e instanceof PeggySyntaxError) {

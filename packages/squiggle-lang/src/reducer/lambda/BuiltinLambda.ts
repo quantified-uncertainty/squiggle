@@ -1,6 +1,7 @@
 import uniq from "lodash/uniq.js";
 
 import { REOther } from "../../errors/messages.js";
+import { tAny } from "../../types/TAny.js";
 import { Type } from "../../types/Type.js";
 import { sort } from "../../utility/E_A_Floats.js";
 import { Value } from "../../value/index.js";
@@ -80,5 +81,25 @@ export class BuiltinLambda extends BaseLambda {
     )})`;
 
     throw new REOther(message);
+  }
+
+  override inferOutputType(
+    argTypes: Type<unknown>[]
+  ): Type<unknown> | undefined {
+    const possibleOutputTypes: Type<unknown>[] = [];
+    for (const definition of this.definitions) {
+      const outputType = definition.inferOutputType(argTypes);
+      if (outputType !== undefined) {
+        possibleOutputTypes.push(outputType);
+      }
+    }
+    if (!possibleOutputTypes.length) {
+      return undefined;
+    }
+    if (possibleOutputTypes.length > 1) {
+      // TODO - union
+      return tAny();
+    }
+    return possibleOutputTypes[0];
   }
 }

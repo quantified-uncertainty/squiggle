@@ -1,5 +1,6 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { tAny } from "../types/index.js";
+import { tAny } from "../types/TAny.js";
+import { Type } from "../types/Type.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";
@@ -9,13 +10,10 @@ export class NodeCall extends ExpressionNode<"Call"> {
   private constructor(
     location: LocationRange,
     public fn: AnyExpressionNode,
-    public args: AnyExpressionNode[]
+    public args: AnyExpressionNode[],
+    type: Type<unknown>
   ) {
-    super(
-      "Call",
-      location,
-      tAny() // TODO - infer
-    );
+    super("Call", location, type);
     this._init();
   }
 
@@ -27,6 +25,11 @@ export class NodeCall extends ExpressionNode<"Call"> {
     const fn = analyzeExpression(node.fn, context);
     const args = node.args.map((arg) => analyzeExpression(arg, context));
 
-    return new NodeCall(node.location, fn, args);
+    return new NodeCall(
+      node.location,
+      fn,
+      args,
+      tAny() // TODO
+    );
   }
 }

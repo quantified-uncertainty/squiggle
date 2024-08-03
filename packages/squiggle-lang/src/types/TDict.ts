@@ -1,6 +1,7 @@
 import { ImmutableMap } from "../utility/immutable.js";
 import { Value, vDict } from "../value/index.js";
 import { UnwrapType } from "./helpers.js";
+import { TAny } from "./TAny.js";
 import { Type } from "./Type.js";
 
 type OptionalType<T extends Type<unknown>> = Type<UnwrapType<T> | null>;
@@ -110,6 +111,7 @@ export class TDict<const KVList extends BaseKVList> extends Type<
   }
 
   override isSupertype(other: Type<unknown>): boolean {
+    if (other instanceof TAny) return true;
     if (!(other instanceof TDict)) {
       return false;
     }

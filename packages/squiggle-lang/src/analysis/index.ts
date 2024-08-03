@@ -1,5 +1,7 @@
 import { AST, ASTNode } from "../ast/types.js";
-import { ImmutableMap } from "../utility/immutable.js";
+import { getStdLib } from "../library/index.js";
+import { Bindings } from "../reducer/Stack.js";
+import { AnalysisContext } from "./context.js";
 import { NodeArray } from "./NodeArray.js";
 import { NodeBlock } from "./NodeBlock.js";
 import { NodeBoolean } from "./NodeBoolean.js";
@@ -37,10 +39,6 @@ import {
   TypedASTNode,
   unitTypeKinds,
 } from "./types.js";
-
-type AnalysisContext = {
-  definitions: ImmutableMap<string, KindTypedNode<"IdentifierDefinition">>;
-};
 
 function assertKind<Kind extends TypedASTNode["kind"]>(
   node: TypedASTNode,
@@ -183,6 +181,6 @@ function analyzeAstNode(node: ASTNode, context: AnalysisContext): TypedASTNode {
   }
 }
 
-export function analyzeAst(ast: AST): TypedAST {
-  return NodeProgram.fromAst(ast);
+export function analyzeAst(ast: AST, builtins?: Bindings): TypedAST {
+  return NodeProgram.fromAst(ast, builtins ?? getStdLib());
 }

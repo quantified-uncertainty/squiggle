@@ -1,5 +1,6 @@
 import { BaseDist } from "../dists/BaseDist.js";
 import { Value, vDist, vNumber } from "../value/index.js";
+import { TAny } from "./TAny.js";
 import { tDist, TDist } from "./TDist.js";
 import { TNumber } from "./TNumber.js";
 import { Type } from "./Type.js";
@@ -20,6 +21,7 @@ export class TDistOrNumber extends Type<BaseDist | number> {
 
   override isSupertype(other: Type<unknown>): boolean {
     return (
+      other instanceof TAny ||
       other instanceof this.constructor ||
       other instanceof TDist ||
       other instanceof TNumber

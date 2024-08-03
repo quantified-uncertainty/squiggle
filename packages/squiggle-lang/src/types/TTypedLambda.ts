@@ -7,6 +7,7 @@ import { FnInput } from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { Value, vLambda } from "../value/index.js";
 import { InputType } from "../value/VInput.js";
+import { TAny } from "./TAny.js";
 import { TLambda } from "./TLambda.js";
 import { Type } from "./Type.js";
 
@@ -33,6 +34,7 @@ export class TTypedLambda extends TLambda {
   }
 
   override isSupertype(other: Type<unknown>) {
+    if (other instanceof TAny) return true;
     return (
       other instanceof TTypedLambda &&
       this.output.isSupertype(other.output) &&

@@ -1,5 +1,6 @@
 import { Value, vArray } from "../value/index.js";
 import { UnwrapType } from "./helpers.js";
+import { TAny } from "./TAny.js";
 import { Type } from "./Type.js";
 
 export class TArray<T> extends Type<readonly T[]> {
@@ -34,6 +35,7 @@ export class TArray<T> extends Type<readonly T[]> {
   }
 
   override isSupertype(other: Type<unknown>) {
+    if (other instanceof TAny) return true;
     return other instanceof TArray && this.itemType.isSupertype(other.itemType);
   }
 

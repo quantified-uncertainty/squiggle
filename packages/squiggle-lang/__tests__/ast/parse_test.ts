@@ -93,36 +93,36 @@ describe("Peggy parse", () => {
       "(Program (InfixCall - (InfixCall * 1 2) (InfixCall * 3 4)))"
     );
     testParse(
-      "1 * 2 .+ 3 * 4",
-      "(Program (InfixCall .+ (InfixCall * 1 2) (InfixCall * 3 4)))"
+      "mx(1) * 2 .+ mx(3) * 4",
+      "(Program (InfixCall .+ (InfixCall * (Call :mx 1) 2) (InfixCall * (Call :mx 3) 4)))"
     );
     testParse(
-      "1 * 2 .- 3 * 4",
-      "(Program (InfixCall .- (InfixCall * 1 2) (InfixCall * 3 4)))"
+      "mx(1) * 2 .- mx(3) * 4",
+      "(Program (InfixCall .- (InfixCall * (Call :mx 1) 2) (InfixCall * (Call :mx 3) 4)))"
     );
     testParse(
-      "1 * 2 + 3 .* 4",
-      "(Program (InfixCall + (InfixCall * 1 2) (InfixCall .* 3 4)))"
+      "1 * 2 + 3 .* mx(4)",
+      "(Program (InfixCall + (InfixCall * 1 2) (InfixCall .* 3 (Call :mx 4))))"
     );
     testParse(
       "1 * 2 + 3 / 4",
       "(Program (InfixCall + (InfixCall * 1 2) (InfixCall / 3 4)))"
     );
     testParse(
-      "1 * 2 + 3 ./ 4",
-      "(Program (InfixCall + (InfixCall * 1 2) (InfixCall ./ 3 4)))"
+      "1 * 2 + 3 ./ mx(4)",
+      "(Program (InfixCall + (InfixCall * 1 2) (InfixCall ./ 3 (Call :mx 4))))"
     );
     testParse(
-      "1 * 2 - 3 .* 4",
-      "(Program (InfixCall - (InfixCall * 1 2) (InfixCall .* 3 4)))"
+      "1 * 2 - 3 .* mx(4)",
+      "(Program (InfixCall - (InfixCall * 1 2) (InfixCall .* 3 (Call :mx 4))))"
     );
     testParse(
       "1 * 2 - 3 / 4",
       "(Program (InfixCall - (InfixCall * 1 2) (InfixCall / 3 4)))"
     );
     testParse(
-      "1 * 2 - 3 ./ 4",
-      "(Program (InfixCall - (InfixCall * 1 2) (InfixCall ./ 3 4)))"
+      "1 * 2 - 3 ./ mx(4)",
+      "(Program (InfixCall - (InfixCall * 1 2) (InfixCall ./ 3 (Call :mx 4))))"
     );
     testParse(
       "1 * 2 - 3 * 4^5",
@@ -133,7 +133,10 @@ describe("Peggy parse", () => {
       "(Program (InfixCall - (InfixCall * 1 2) (InfixCall * 3 (InfixCall ^ 4 (InfixCall ^ 5 6)))))"
     );
     testParse("2^3^4", "(Program (InfixCall ^ 2 (InfixCall ^ 3 4)))");
-    testParse("2 .^ 3 .^ 4", "(Program (InfixCall .^ 2 (InfixCall .^ 3 4)))");
+    testParse(
+      "mx(2) .^ mx(3) .^ mx(4)",
+      "(Program (InfixCall .^ (Call :mx 2) (InfixCall .^ (Call :mx 3) (Call :mx 4))))"
+    );
     testParse(
       "1 * -a[-2]",
       "(Program (InfixCall * 1 (UnaryCall - (BracketLookup :a (UnaryCall - 2)))))"

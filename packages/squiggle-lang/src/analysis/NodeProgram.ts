@@ -1,4 +1,5 @@
 import { AST } from "../ast/types.js";
+import { Bindings } from "../reducer/Stack.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression, analyzeKind, analyzeStatement } from "./index.js";
@@ -42,9 +43,10 @@ export class NodeProgram extends Node<"Program"> {
     return this._symbols;
   }
 
-  static fromAst(ast: AST): NodeProgram {
+  static fromAst(ast: AST, stdlib: Bindings): NodeProgram {
     const context: AnalysisContext = {
       definitions: ImmutableMap(),
+      stdlib,
     };
 
     const imports: NodeImport[] = [];

@@ -1,4 +1,5 @@
 import { Value } from "../value/index.js";
+import { TAny } from "./TAny.js";
 import { Type } from "./Type.js";
 
 export type OrType<T1, T2> = { tag: "1"; value: T1 } | { tag: "2"; value: T2 };
@@ -30,6 +31,7 @@ export class TOr<T1, T2> extends Type<OrType<T1, T2>> {
   }
 
   override isSupertype(other: Type<unknown>) {
+    if (other instanceof TAny) return true;
     if (other instanceof TOr) {
       return (
         (this.type1.isSupertype(other.type1) &&

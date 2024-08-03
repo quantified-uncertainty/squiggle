@@ -4,6 +4,7 @@ import {
   REArityError,
   REDomainError,
 } from "../../errors/messages.js";
+import { tAny } from "../../types/TAny.js";
 import { Value } from "../../value/index.js";
 import { VDomain } from "../../value/VDomain.js";
 import { Reducer } from "../Reducer.js";
@@ -84,5 +85,9 @@ export class UserDefinedLambda extends BaseLambda {
 
   parameterCountString() {
     return this.parameters.length.toString();
+  }
+
+  override inferOutputType() {
+    return tAny(); // TODO
   }
 }

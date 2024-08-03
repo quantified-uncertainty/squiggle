@@ -4,6 +4,7 @@ import { SampleSetDist } from "../dists/SampleSetDist/index.js";
 import { BaseSymbolicDist } from "../dists/SymbolicDist/BaseSymbolicDist.js";
 import { SymbolicDist } from "../dists/SymbolicDist/index.js";
 import { Value, vDist } from "../value/index.js";
+import { TAny } from "./TAny.js";
 import { Type } from "./Type.js";
 
 export type DistClass<T extends BaseDist> = { new (...args: any[]): T };
@@ -32,6 +33,7 @@ export class TDist<T extends BaseDist> extends Type<T> {
   }
 
   override isSupertype(other: Type<unknown>): boolean {
+    if (other instanceof TAny) return true;
     return (
       other instanceof TDist &&
       // either this is a generic dist or the dist classes match
