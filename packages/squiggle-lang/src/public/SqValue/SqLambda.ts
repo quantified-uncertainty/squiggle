@@ -30,8 +30,8 @@ function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
         }),
       ];
     case "BuiltinLambda":
-      return lambda.signatures().map((def) =>
-        def.map((p, index) => ({
+      return lambda.signatures().map((signature) =>
+        signature.inputs.map((p, index) => ({
           name: index.toString(),
           domain: undefined,
           typeName: p.type.display(),

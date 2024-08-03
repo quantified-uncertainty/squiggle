@@ -8,6 +8,7 @@ import { Value } from "../../value/index.js";
 import { Reducer } from "../Reducer.js";
 import { FnDefinition } from "./FnDefinition.js";
 import { FnInput } from "./FnInput.js";
+import { FnSignature } from "./FnSignature.js";
 import { BaseLambda } from "./index.js";
 
 /*
@@ -50,15 +51,15 @@ export class BuiltinLambda extends BaseLambda {
   }
 
   parameterCounts() {
-    return sort(uniq(this.definitions.map((d) => d.inputs.length)));
+    return sort(uniq(this.definitions.map((d) => d.signature.inputs.length)));
   }
 
   parameterCountString() {
     return `[${this.parameterCounts().join(",")}]`;
   }
 
-  signatures(): FnInput<Type<unknown>>[][] {
-    return this.definitions.map((d) => d.inputs);
+  signatures(): FnSignature<FnInput<Type<any>>[], Type<any>>[] {
+    return this.definitions.map((d) => d.signature);
   }
 
   callBody(args: Value[], reducer: Reducer): Value {
@@ -83,12 +84,10 @@ export class BuiltinLambda extends BaseLambda {
     throw new REOther(message);
   }
 
-  override inferOutputType(
-    argTypes: Type<unknown>[]
-  ): Type<unknown> | undefined {
+  override inferOutputType(argTypes: Type<any>[]): Type<any> | undefined {
     const possibleOutputTypes: Type<unknown>[] = [];
     for (const definition of this.definitions) {
-      const outputType = definition.inferOutputType(argTypes);
+      const outputType = definition.signature.inferOutputType(argTypes);
       if (outputType !== undefined) {
         possibleOutputTypes.push(outputType);
       }

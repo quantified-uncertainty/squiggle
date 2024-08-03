@@ -5,6 +5,7 @@ import { Type } from "../../types/Type.js";
 import { Value } from "../../value/index.js";
 import { Reducer } from "../Reducer.js";
 import { fnInput, FnInput } from "./FnInput.js";
+import { FnSignature } from "./FnSignature.js";
 
 /**
  * FnDefinition represents a single builtin lambda implementation.
@@ -18,12 +19,9 @@ import { fnInput, FnInput } from "./FnInput.js";
 // Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `Type` unpack logic.
 // It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
 // because of contravariance (we need to store all FnDefinitions in a generic array later on).
-export class FnDefinition<OutputType = any> {
-  inputs: FnInput<Type<unknown>>[];
-  run: (args: unknown[], reducer: Reducer) => OutputType;
-  output: Type<OutputType>;
-  minInputs: number;
-  maxInputs: number;
+export class FnDefinition {
+  signature: FnSignature<FnInput<Type<any>>[], Type<any>>;
+  run: (args: unknown[], reducer: Reducer) => unknown;
   isAssert: boolean;
   // If set, the function can be used as a decorator.
   // Note that the name will always be prepended with `Tag.`, so it makes sense only on function in `Tag` namespace.
@@ -31,38 +29,18 @@ export class FnDefinition<OutputType = any> {
   // We don't use the string value right now, but could later on.
   deprecated?: string;
 
-  constructor(props: {
-    inputs: FnInput<any>[];
-    run: (args: unknown[], reducer: Reducer) => OutputType;
-    output: Type<OutputType>;
+  private constructor(props: {
+    signature: FnSignature<FnInput<Type<any>>[], Type<any>>;
+    run: (args: unknown[], reducer: Reducer) => unknown;
     isAssert?: boolean;
     deprecated?: string;
     isDecorator?: boolean;
   }) {
-    // Make sure that there are no non-optional inputs after optional inputs:
-    {
-      let optionalFound = false;
-      for (const input of props.inputs) {
-        if (optionalFound && !input.optional) {
-          throw new Error(
-            `Optional inputs must be last. Found non-optional input after optional input. ${props.inputs}`
-          );
-        }
-        if (input.optional) {
-          optionalFound = true;
-        }
-      }
-    }
-
-    this.inputs = props.inputs;
+    this.signature = props.signature;
     this.run = props.run;
-    this.output = props.output;
     this.isAssert = props.isAssert ?? false;
     this.isDecorator = props.isDecorator ?? false;
     this.deprecated = props.deprecated;
-
-    this.minInputs = this.inputs.filter((t) => !t.optional).length;
-    this.maxInputs = this.inputs.length;
   }
 
   showInDocumentation(): boolean {
@@ -70,21 +48,23 @@ export class FnDefinition<OutputType = any> {
   }
 
   toString() {
-    const inputs = this.inputs.map((t) => t.toString()).join(", ");
-    const output = this.output.display();
-    return `(${inputs})${output ? ` => ${output}` : ""}`;
+    return this.signature.toString();
   }
 
   tryCall(args: Value[], reducer: Reducer): Value | undefined {
-    if (args.length < this.minInputs || args.length > this.maxInputs) {
+    // unpack signature fields to attempt small speedups (is this useful? not sure)
+    const { minInputs, maxInputs } = this.signature;
+
+    if (args.length < minInputs || args.length > maxInputs) {
       return; // args length mismatch
     }
+    const { inputs } = this.signature;
 
     const unpackedArgs: any = []; // any, but that's ok, type safety is guaranteed by FnDefinition type
     for (let i = 0; i < args.length; i++) {
       const arg = args[i];
 
-      const unpackedArg = this.inputs[i].type.unpack(arg);
+      const unpackedArg = inputs[i].type.unpack(arg);
       if (unpackedArg === undefined) {
         // type mismatch
         return;
@@ -94,43 +74,33 @@ export class FnDefinition<OutputType = any> {
 
     // Fill in missing optional arguments with nulls.
     // This is important, because empty optionals should be nulls, but without this they would be undefined.
-    if (unpackedArgs.length < this.maxInputs) {
-      unpackedArgs.push(
-        ...Array(this.maxInputs - unpackedArgs.length).fill(null)
-      );
+    if (unpackedArgs.length < maxInputs) {
+      unpackedArgs.push(...Array(maxInputs - unpackedArgs.length).fill(null));
     }
 
-    return this.output.pack(this.run(unpackedArgs, reducer));
+    return this.signature.output.pack(this.run(unpackedArgs, reducer));
   }
 
-  inferOutputType(argTypes: Type<unknown>[]): Type<unknown> | undefined {
-    if (argTypes.length < this.minInputs || argTypes.length > this.maxInputs) {
-      return; // args length mismatch
-    }
-
-    for (let i = 0; i < argTypes.length; i++) {
-      if (!this.inputs[i].type.isSupertype(argTypes[i])) {
-        return;
-      }
-    }
-    return this.output;
-  }
-
-  static make<const InputTypes extends InputOrType<any>[], const OutputType>(
+  static make<const MaybeInputTypes extends InputOrType<any>[], const Output>(
     // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
-    maybeInputs: InputTypes,
-    output: Type<OutputType>,
+    maybeInputs: MaybeInputTypes,
+    output: Type<Output>,
     run: (
-      args: [...{ [K in keyof InputTypes]: UnwrapInputOrType<InputTypes[K]> }],
+      args: [
+        ...{
+          [K in keyof MaybeInputTypes]: UnwrapInputOrType<MaybeInputTypes[K]>;
+        },
+      ],
       reducer: Reducer
-    ) => OutputType,
+    ) => Output,
     params?: { deprecated?: string; isDecorator?: boolean }
-  ): FnDefinition<OutputType> {
-    const inputs = maybeInputs.map(inputOrTypeToInput);
+  ) {
+    type InputTypes = UpgradeMaybeInputTypes<MaybeInputTypes>;
+
+    const inputs = maybeInputs.map(inputOrTypeToInput) as InputTypes;
 
     return new FnDefinition({
-      inputs,
-      output,
+      signature: new FnSignature(inputs, output),
       // Type of `run` argument must match `FnDefinition['run']`. This
       // This unsafe type casting is necessary because function type parameters are contravariant.
       run: run as FnDefinition["run"],
@@ -140,16 +110,17 @@ export class FnDefinition<OutputType = any> {
   }
 
   //Some definitions are just used to guard against ambiguous function calls, and should never be called.
-  static makeAssert<const T extends any[]>(
+  static makeAssert<const MaybeInputTypes extends InputOrType<any>[]>(
     // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
-    maybeInputs: [...{ [K in keyof T]: InputOrType<T[K]> }],
+    maybeInputs: MaybeInputTypes,
     errorMsg: string
-  ): FnDefinition {
-    const inputs = maybeInputs.map(inputOrTypeToInput);
+  ) {
+    type InputTypes = UpgradeMaybeInputTypes<MaybeInputTypes>;
+
+    const inputs = maybeInputs.map(inputOrTypeToInput) as InputTypes;
 
     return new FnDefinition({
-      inputs,
-      output: tAny(),
+      signature: new FnSignature(inputs, tAny()),
       run: () => {
         throw new REAmbiguous(errorMsg);
       },
@@ -158,11 +129,24 @@ export class FnDefinition<OutputType = any> {
   }
 }
 
+type UpgradeMaybeInputTypes<T extends InputOrType<any>[]> = [
+  ...{
+    [K in keyof T]: T[K] extends FnInput<any>
+      ? T[K]
+      : T[K] extends Type<infer T>
+        ? FnInput<Type<T>>
+        : never;
+  },
+];
+
 export type InputOrType<T> = FnInput<Type<T>> | Type<T>;
 
+type UnwrapInput<T extends FnInput<any>> =
+  T extends FnInput<Type<infer U>> ? U : never;
+
 type UnwrapInputOrType<T extends InputOrType<any>> =
-  T extends FnInput<infer U>
-    ? UnwrapType<U>
+  T extends FnInput<any>
+    ? UnwrapInput<T>
     : T extends Type<any>
       ? UnwrapType<T>
       : never;
@@ -174,13 +158,13 @@ export function inputOrTypeToInput<T>(input: InputOrType<T>): FnInput<Type<T>> {
 // Trivial wrapper around `FnDefinition.make` to make it easier to use in the codebase.
 export function makeDefinition<
   const InputTypes extends InputOrType<any>[],
-  const OutputType,
+  const Output, // it's better to use Output and not OutputType; otherwise `run` return type will require `const` on strings
 >(
   // TODO - is there a more elegant way to type this?
-  maybeInputs: Parameters<typeof FnDefinition.make<InputTypes, OutputType>>[0],
-  output: Parameters<typeof FnDefinition.make<InputTypes, OutputType>>[1],
-  run: Parameters<typeof FnDefinition.make<InputTypes, OutputType>>[2],
-  params?: Parameters<typeof FnDefinition.make<InputTypes, OutputType>>[3]
+  maybeInputs: Parameters<typeof FnDefinition.make<InputTypes, Output>>[0],
+  output: Parameters<typeof FnDefinition.make<InputTypes, Output>>[1],
+  run: Parameters<typeof FnDefinition.make<InputTypes, Output>>[2],
+  params?: Parameters<typeof FnDefinition.make<InputTypes, Output>>[3]
 ) {
   return FnDefinition.make(maybeInputs, output, run, params);
 }

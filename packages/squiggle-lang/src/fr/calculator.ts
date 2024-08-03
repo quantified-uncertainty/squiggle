@@ -37,11 +37,13 @@ function validateCalculator(calc: Calculator): Calculator {
 function getDefaultInputs(lambda: Lambda): Input[] {
   switch (lambda.type) {
     case "BuiltinLambda": {
-      const longestSignature =
-        maxBy(lambda.signatures(), (s) => s.length) || [];
-      return longestSignature.map((sig, i) => {
-        const name = sig.name ?? `Input ${i + 1}`;
-        return frTypeToInput(sig.type, name);
+      const longestSignature = maxBy(
+        lambda.signatures(),
+        (s) => s.inputs.length
+      );
+      return (longestSignature?.inputs ?? []).map((input, i) => {
+        const name = input.name ?? `Input ${i + 1}`;
+        return frTypeToInput(input.type, name);
       });
     }
     case "UserDefinedLambda":

@@ -32,19 +32,14 @@ function assertWithinBounds(
 
 abstract class BaseDomain {
   abstract type: string;
-  abstract valueType: string;
 
   abstract toString(): string;
 
   abstract validateValue(value: Value): void;
-
-  abstract get minAsNumber(): number;
-  abstract get maxAsNumber(): number;
 }
 
 export class NumericRangeDomain extends BaseDomain {
   readonly type = "NumericRange";
-  readonly valueType = "Number";
 
   constructor(
     public min: number,
@@ -66,14 +61,6 @@ export class NumericRangeDomain extends BaseDomain {
     return this.min === other.min && this.max === other.max;
   }
 
-  get minAsNumber() {
-    return this.min;
-  }
-
-  get maxAsNumber() {
-    return this.max;
-  }
-
   toDefaultScale(): Scale {
     return {
       method: { type: "linear" },
@@ -85,7 +72,6 @@ export class NumericRangeDomain extends BaseDomain {
 
 export class DateRangeDomain extends BaseDomain {
   readonly type = "DateRange";
-  readonly valueType = "Date";
 
   constructor(
     public min: SDate,
@@ -111,14 +97,6 @@ export class DateRangeDomain extends BaseDomain {
 
   isEqual(other: DateRangeDomain) {
     return this.min === other.min && this.max === other.max;
-  }
-
-  get minAsNumber() {
-    return this.min.toMs();
-  }
-
-  get maxAsNumber() {
-    return this.max.toMs();
   }
 
   toDefaultScale(): Scale {
