@@ -1,3 +1,4 @@
+import { DateRangeDomain } from "../domains/DateRangeDomain.js";
 import { REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
@@ -8,7 +9,6 @@ import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { namedInput } from "../reducer/lambda/FnInput.js";
 import { tDate, tDomain, tDuration, tNumber, tString } from "../types/index.js";
 import { SDate } from "../utility/SDate.js";
-import { DateRangeDomain } from "../value/domain.js";
 
 const maker = new FnFactory({
   nameSpace: "Date",

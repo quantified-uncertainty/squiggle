@@ -1,7 +1,6 @@
 import { Value, vArray } from "../value/index.js";
 import { UnwrapType } from "./helpers.js";
-import { TAny } from "./TAny.js";
-import { Type } from "./Type.js";
+import { TAny, Type } from "./Type.js";
 
 export class TArray<T> extends Type<readonly T[]> {
   constructor(private itemType: Type<T>) {

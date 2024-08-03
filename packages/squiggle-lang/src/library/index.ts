@@ -9,7 +9,7 @@ import { ImmutableMap } from "../utility/immutable.js";
 import { Value } from "../value/index.js";
 import { vLambda } from "../value/vLambda.js";
 import { makeMathConstants } from "./math.js";
-import { makeSquiggleBindings, registry } from "./registry/index.js";
+import { getRegistry, makeSquiggleBindings } from "./registry/index.js";
 import { makeVersionConstant } from "./version.js";
 
 function makeLookupLambda(): Lambda {
@@ -25,6 +25,8 @@ function makeLookupLambda(): Lambda {
 }
 
 function makeStdLib(): Bindings {
+  const registry = getRegistry();
+
   let res: Bindings = ImmutableMap<string, Value>().merge(
     // global constants
     makeMathConstants(),

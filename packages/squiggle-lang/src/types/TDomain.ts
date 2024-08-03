@@ -1,4 +1,4 @@
-import { Domain } from "../value/domain.js";
+import { type Domain } from "../domains/index.js";
 import { Value, vDomain } from "../value/index.js";
 import { Type } from "./Type.js";
 

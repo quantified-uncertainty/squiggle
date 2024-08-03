@@ -1,8 +1,7 @@
 import uniq from "lodash/uniq.js";
 
 import { REOther } from "../../errors/messages.js";
-import { tAny } from "../../types/TAny.js";
-import { Type } from "../../types/Type.js";
+import { tAny, Type } from "../../types/Type.js";
 import { sort } from "../../utility/E_A_Floats.js";
 import { Value } from "../../value/index.js";
 import { Reducer } from "../Reducer.js";

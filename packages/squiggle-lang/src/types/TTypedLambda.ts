@@ -7,9 +7,8 @@ import { FnInput } from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { Value, vLambda } from "../value/index.js";
 import { InputType } from "../value/VInput.js";
-import { TAny } from "./TAny.js";
 import { TLambda } from "./TLambda.js";
-import { Type } from "./Type.js";
+import { TAny, Type } from "./Type.js";
 
 export class TTypedLambda extends TLambda {
   public inputs: FnInput<Type<unknown>>[];

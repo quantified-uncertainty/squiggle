@@ -1,6 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { tAny } from "../types/TAny.js";
-import { Type } from "../types/Type.js";
+import { tAny, Type } from "../types/Type.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";

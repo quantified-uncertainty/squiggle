@@ -1,5 +1,5 @@
 import { blue, bold, green, red } from "../../cli/colors.js";
-import { run } from "../../index.js";
+import { run } from "../../run.js";
 
 const testRun = async (x: string) => {
   const { result: output } = await run(x, {

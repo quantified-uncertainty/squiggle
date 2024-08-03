@@ -1,13 +1,11 @@
-import {
-  DateRangeDomain,
-  Domain,
-  NumericRangeDomain,
-} from "../../value/domain.js";
+import { DateRangeDomain } from "../../domains/DateRangeDomain.js";
+import { Domain } from "../../domains/index.js";
+import { NumericRangeDomain } from "../../domains/NumberRangeDomain.js";
 import { SqDateValue, SqNumberValue } from "./index.js";
 import { SqScale } from "./SqScale.js";
 
 export function wrapDomain(value: Domain) {
-  switch (value.type) {
+  switch (value.kind) {
     case "NumericRange":
       return new SqNumericRangeDomain(value);
     case "DateRange":
@@ -18,7 +16,7 @@ export function wrapDomain(value: Domain) {
 }
 
 // Domain internals are not exposed yet
-abstract class SqAbstractDomain<T extends Domain["type"]> {
+abstract class SqAbstractDomain<T extends Domain["kind"]> {
   abstract tag: T;
 }
 

@@ -7,7 +7,7 @@ export { tArray, tDict, tNumber, tTuple };
 
 export { tString } from "./TString.js";
 export { tBool } from "./TBool.js";
-export { tAny } from "./TAny.js";
+export { tAny } from "./Type.js";
 export { tCalculator } from "./TCalculator.js";
 export { tLambda } from "./TLambda.js";
 export { tLambdaTyped } from "./TTypedLambda.js";

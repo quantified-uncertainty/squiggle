@@ -32,38 +32,46 @@ import { Bindings } from "../../reducer/Stack.js";
 import { ImmutableMap } from "../../utility/immutable.js";
 import { FRFunction, Registry } from "./core.js";
 
-const fnList: FRFunction[] = [
-  ...booleanLibrary,
-  ...dangerLibrary,
-  ...dateLibrary,
-  ...dictLibrary,
-  ...durationLibrary,
-  //It's important that numberLibrary comes before distLibrary, because we want Number.sum[] to be prioritized over Dist.sum[].
-  ...numberLibrary,
-  ...distLibrary,
-  ...genericDistLibrary,
-  ...tableLibrary,
-  ...listLibrary,
-  ...mathLibrary,
-  ...tagLibrary,
-  ...plotLibrary,
-  ...pointsetLibrary,
-  ...relativeValuesLibrary,
-  ...stringLibrary,
-  ...samplesetLibrary,
-  ...scaleLibrary,
-  ...scoringLibrary,
-  ...mixedSetLibrary,
-  ...symLibrary,
-  ...unitsLibrary,
-  ...calculatorLibrary,
-  ...inputLibrary,
-  ...specificationLibrary,
-  ...systemLibrary,
-  ...commonLibrary, // should go last, because has some catch-all functions
-];
+function makeRegistry() {
+  const fnList: FRFunction[] = [
+    ...booleanLibrary,
+    ...dangerLibrary,
+    ...dateLibrary,
+    ...dictLibrary,
+    ...durationLibrary,
+    //It's important that numberLibrary comes before distLibrary, because we want Number.sum[] to be prioritized over Dist.sum[].
+    ...numberLibrary,
+    ...distLibrary,
+    ...genericDistLibrary,
+    ...tableLibrary,
+    ...listLibrary,
+    ...mathLibrary,
+    ...tagLibrary,
+    ...plotLibrary,
+    ...pointsetLibrary,
+    ...relativeValuesLibrary,
+    ...stringLibrary,
+    ...samplesetLibrary,
+    ...scaleLibrary,
+    ...scoringLibrary,
+    ...mixedSetLibrary,
+    ...symLibrary,
+    ...unitsLibrary,
+    ...calculatorLibrary,
+    ...inputLibrary,
+    ...specificationLibrary,
+    ...systemLibrary,
+    ...commonLibrary, // should go last, because has some catch-all functions
+  ];
+  return Registry.make(fnList);
+}
 
-export const registry = Registry.make(fnList);
+// lazy cache
+let cachedRegistry: Registry | undefined;
+export function getRegistry(): Registry {
+  cachedRegistry ??= makeRegistry();
+  return cachedRegistry;
+}
 
 export function makeSquiggleBindings(builtins: Bindings): Bindings {
   let squiggleBindings: Bindings = ImmutableMap();

@@ -1,5 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { tAny } from "../types/TAny.js";
+import { tAny } from "../types/index.js";
 import { Node } from "./Node.js";
 import { NodeIdentifierDefinition } from "./NodeIdentifierDefinition.js";
 import { NodeString } from "./NodeString.js";

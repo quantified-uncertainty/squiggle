@@ -1,6 +1,5 @@
 import { Value } from "../value/index.js";
-import { TAny } from "./TAny.js";
-import { Type } from "./Type.js";
+import { TAny, Type } from "./Type.js";
 
 export type OrType<T1, T2> = { tag: "1"; value: T1 } | { tag: "2"; value: T2 };
 

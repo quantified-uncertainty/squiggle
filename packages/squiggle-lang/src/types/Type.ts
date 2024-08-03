@@ -1,6 +1,5 @@
-import { Value } from "../value/index.js";
-import { InputType } from "../value/VInput.js";
-import { TAny } from "./TAny.js";
+import { type Value } from "../value/index.js";
+import { type InputType } from "../value/VInput.js";
 
 export abstract class Type<T> {
   abstract unpack(v: Value): T | undefined;
@@ -34,4 +33,35 @@ export abstract class Type<T> {
   defaultFormInputType(): InputType {
     return "text";
   }
+}
+
+export class TAny extends Type<Value> {
+  constructor(public genericName?: string) {
+    super();
+  }
+
+  unpack(v: Value) {
+    return v;
+  }
+
+  pack(v: Value) {
+    return v;
+  }
+
+  override isSupertype() {
+    // `any` is a supertype of all types
+    return true;
+  }
+
+  override display() {
+    return this.genericName ? `'${this.genericName}` : "any";
+  }
+
+  override isTransparent() {
+    return true;
+  }
+}
+
+export function tAny(params?: { genericName?: string }) {
+  return new TAny(params?.genericName);
 }

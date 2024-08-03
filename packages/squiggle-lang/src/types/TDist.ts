@@ -4,8 +4,7 @@ import { SampleSetDist } from "../dists/SampleSetDist/index.js";
 import { BaseSymbolicDist } from "../dists/SymbolicDist/BaseSymbolicDist.js";
 import { SymbolicDist } from "../dists/SymbolicDist/index.js";
 import { Value, vDist } from "../value/index.js";
-import { TAny } from "./TAny.js";
-import { Type } from "./Type.js";
+import { TAny, Type } from "./Type.js";
 
 export type DistClass<T extends BaseDist> = { new (...args: any[]): T };
 

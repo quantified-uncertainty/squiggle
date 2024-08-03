@@ -3,13 +3,13 @@ import {
   serializeAstNode,
   SerializedASTNode,
 } from "../ast/serialize.js";
+import { ASTNode } from "../ast/types.js";
 import {
   deserializeIR,
   SerializedIR,
   serializeIR,
 } from "../compiler/serialize.js";
 import { IR } from "../compiler/types.js";
-import { ASTNode } from "../index.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { RunProfile, SerializedRunProfile } from "../reducer/RunProfile.js";
 import { deserializeValue } from "../value/deserializeValue.js";

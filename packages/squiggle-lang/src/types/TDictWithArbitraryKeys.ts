@@ -1,7 +1,6 @@
 import { ImmutableMap } from "../utility/immutable.js";
 import { Value, vDict } from "../value/index.js";
-import { TAny } from "./TAny.js";
-import { Type } from "./Type.js";
+import { TAny, Type } from "./Type.js";
 
 export class TDictWithArbitraryKeys<T> extends Type<ImmutableMap<string, T>> {
   constructor(public itemType: Type<T>) {

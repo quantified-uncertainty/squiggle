@@ -1,24 +1,24 @@
+import { DateRangeDomain } from "../domains/DateRangeDomain.js";
+import { Domain } from "../domains/index.js";
+import { NumericRangeDomain } from "../domains/NumberRangeDomain.js";
+import {
+  deserializeDomain,
+  SerializedDomain,
+  serializeDomain,
+} from "../domains/serialize.js";
 import { REOther } from "../errors/messages.js";
 import { SDate } from "../utility/SDate.js";
 import { BaseValue } from "./BaseValue.js";
-import {
-  DateRangeDomain,
-  deserializeDomain,
-  Domain,
-  NumericRangeDomain,
-  SerializedDomain,
-  serializeDomain,
-} from "./domain.js";
 import { Value } from "./index.js";
 import { Indexable } from "./mixins.js";
 import { vDate, VDate } from "./VDate.js";
 import { vNumber, VNumber } from "./VNumber.js";
 
 function domainIsEqual(valueA: Domain, valueB: Domain) {
-  if (valueA.type !== valueB.type) {
+  if (valueA.kind !== valueB.kind) {
     return false;
   }
-  switch (valueA.type) {
+  switch (valueA.kind) {
     case "DateRange":
       return (valueA as DateRangeDomain).isEqual(valueB as DateRangeDomain);
     case "NumericRange":

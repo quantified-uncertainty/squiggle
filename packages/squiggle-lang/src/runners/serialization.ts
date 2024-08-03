@@ -3,7 +3,6 @@ import {
   SerializedIError,
   serializeIError,
 } from "../errors/IError.js";
-import { result } from "../index.js";
 import { RunOutput } from "../reducer/Reducer.js";
 import {
   SquiggleBundle,
@@ -11,7 +10,7 @@ import {
   squiggleCodec,
   SquiggleSerializationStore,
 } from "../serialization/squiggle.js";
-import { Err, Ok } from "../utility/result.js";
+import { Err, Ok, result } from "../utility/result.js";
 import { VDict } from "../value/VDict.js";
 import { RunResult } from "./BaseRunner.js";
 

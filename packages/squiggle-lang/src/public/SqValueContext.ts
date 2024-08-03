@@ -1,7 +1,7 @@
 import { TypedASTNode } from "../analysis/types.js";
 import { isBindingStatement } from "../ast/utils.js";
 import { Env } from "../dists/env.js";
-import { SqModule } from "../index.js";
+import { SqModule } from "./SqProject/SqModule.js";
 import { SqValuePath, SqValuePathEdge } from "./SqValuePath.js";
 
 // The common scenario is:

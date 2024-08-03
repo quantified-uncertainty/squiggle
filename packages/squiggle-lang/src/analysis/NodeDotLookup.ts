@@ -1,9 +1,8 @@
 import { KindNode, LocationRange } from "../ast/types.js";
 import { ICompileError } from "../errors/IError.js";
-import { tAny } from "../types/TAny.js";
 import { TDict } from "../types/TDict.js";
 import { TDictWithArbitraryKeys } from "../types/TDictWithArbitraryKeys.js";
-import { Type } from "../types/Type.js";
+import { tAny, Type } from "../types/Type.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";

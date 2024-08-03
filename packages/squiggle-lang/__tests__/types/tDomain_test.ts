@@ -1,5 +1,5 @@
+import { NumericRangeDomain } from "../../src/domains/NumberRangeDomain.js";
 import { tDomain } from "../../src/types/index.js";
-import { NumericRangeDomain } from "../../src/value/domain.js";
 import { vDomain } from "../../src/value/index.js";
 
 test("pack/unpack", () => {

@@ -1,5 +1,7 @@
+import { DateRangeDomain } from "../domains/DateRangeDomain.js";
+import { Domain } from "../domains/index.js";
+import { NumericRangeDomain } from "../domains/NumberRangeDomain.js";
 import { REArgumentError } from "../errors/messages.js";
-import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 import { Value } from "./index.js";
 
 function assertMinLessThanMax(min: number, max: number) {

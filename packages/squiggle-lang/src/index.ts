@@ -1,5 +1,5 @@
 import { type Env } from "./dists/env.js";
-import { registry } from "./library/registry/index.js";
+import { getRegistry } from "./library/registry/index.js";
 
 export {
   SqDateValue,
@@ -107,15 +107,15 @@ export { run } from "./run.js";
 export { sq } from "./sq.js";
 
 export function getFunctionDocumentation(name: string) {
-  return registry.getFunctionDocumentation(name);
+  return getRegistry().getFunctionDocumentation(name);
 }
 
 export function getAllFunctionNames() {
-  return registry.allNames();
+  return getRegistry().allNames();
 }
 
 export function getAllFunctionNamesWithNamespace(name: string) {
-  return registry
+  return getRegistry()
     .allFunctionsWithNamespace(name)
     .map((fn) => `${name}.${fn.name}`);
 }

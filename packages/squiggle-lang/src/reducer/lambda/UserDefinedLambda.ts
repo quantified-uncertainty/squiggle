@@ -4,7 +4,7 @@ import {
   REArityError,
   REDomainError,
 } from "../../errors/messages.js";
-import { tAny } from "../../types/TAny.js";
+import { tAny } from "../../types/Type.js";
 import { Value } from "../../value/index.js";
 import { VDomain } from "../../value/VDomain.js";
 import { Reducer } from "../Reducer.js";
