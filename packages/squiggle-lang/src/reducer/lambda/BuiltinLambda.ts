@@ -1,12 +1,8 @@
-import uniq from "lodash/uniq.js";
-
 import { REOther } from "../../errors/messages.js";
 import { tAny, Type } from "../../types/Type.js";
-import { sort } from "../../utility/E_A_Floats.js";
 import { Value } from "../../value/index.js";
 import { Reducer } from "../Reducer.js";
 import { FnDefinition } from "./FnDefinition.js";
-import { FnInput } from "./FnInput.js";
 import { FnSignature } from "./FnSignature.js";
 import { BaseLambda } from "./index.js";
 
@@ -42,23 +38,15 @@ export class BuiltinLambda extends BaseLambda {
     return this.name;
   }
 
+  override signatures(): FnSignature[] {
+    return this.definitions.map((d) => d.signature);
+  }
+
   parameterString() {
     return this.definitions
       .filter((d) => d.showInDocumentation())
       .map((d) => d.toString())
       .join(" | ");
-  }
-
-  parameterCounts() {
-    return sort(uniq(this.definitions.map((d) => d.signature.inputs.length)));
-  }
-
-  parameterCountString() {
-    return `[${this.parameterCounts().join(",")}]`;
-  }
-
-  signatures(): FnSignature<FnInput<Type<any>>[], Type<any>>[] {
-    return this.definitions.map((d) => d.signature);
   }
 
   callBody(args: Value[], reducer: Reducer): Value {

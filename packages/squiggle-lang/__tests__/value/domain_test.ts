@@ -6,8 +6,8 @@ describe("valueToDomain", () => {
     test("two-item tuple", () => {
       const domain = annotationToDomain(vArray([vNumber(3), vNumber(5)]));
       expect(domain.kind).toEqual("NumericRange");
-      expect(domain.min).toEqual(3);
-      expect(domain.max).toEqual(5);
+      expect((domain as any).min).toEqual(3);
+      expect((domain as any).max).toEqual(5);
     });
 
     test("min > max", () => {

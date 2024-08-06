@@ -5,7 +5,7 @@ import { Scale } from "../value/VScale.js";
 import { BaseDomain } from "./BaseDomain.js";
 import { assertCorrectType, assertWithinBounds } from "./utils.js";
 
-export class NumericRangeDomain extends BaseDomain {
+export class NumericRangeDomain extends BaseDomain<number> {
   readonly kind = "NumericRange";
   readonly type: Type<number>; // can't initialize early because of circular dependency
 

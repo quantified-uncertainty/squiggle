@@ -1,5 +1,6 @@
 import mergeWith from "lodash/mergeWith.js";
 
+import { Domain } from "../domains/index.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
@@ -29,7 +30,7 @@ import {
   tWithTags,
 } from "../types/index.js";
 import { clamp, sort, uniq } from "../utility/E_A_Floats.js";
-import { VDomain } from "../value/VDomain.js";
+import { vDomain, VDomain } from "../value/VDomain.js";
 import { LabeledDistribution, Plot } from "../value/VPlot.js";
 import { Scale } from "../value/VScale.js";
 
@@ -79,7 +80,10 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
 
   scale && assertValidMinMax(scale);
 
-  const _defaultScale = domain ? domain.value.toDefaultScale() : defaultScale;
+  const _defaultScale =
+    domain?.value.kind === "NumericRange" || domain?.value.kind === "DateRange"
+      ? domain.value.toDefaultScale()
+      : defaultScale;
 
   // _defaultScale can have a lot of undefined values. These should be over-written.
   const resultScale = mergeWith(
@@ -101,15 +105,15 @@ function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
     );
   }
 
-  let domain;
+  let domain: Domain | undefined;
   if (fn.type === "UserDefinedLambda") {
-    domain = fn.parameters[0]?.domain;
+    domain = fn.signature.inputs[0]?.domain;
   } else {
     domain = undefined;
   }
   // We could also verify a domain here, to be more confident that the function expects numeric args.
   // But we might get other numeric domains besides `NumericRange`, so checking domain type here would be risky.
-  return domain;
+  return domain ? vDomain(domain) : undefined;
 }
 
 const _assertYScaleNotDateScale = (yScale: Scale | null) => {

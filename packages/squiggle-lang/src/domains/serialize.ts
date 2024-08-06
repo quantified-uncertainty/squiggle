@@ -29,6 +29,8 @@ export function serializeDomain(domain: Domain): SerializedDomain {
         min: domain.min.toMs(),
         max: domain.max.toMs(),
       };
+    case "Type":
+      throw new Error("Not implemented");
   }
 }
 

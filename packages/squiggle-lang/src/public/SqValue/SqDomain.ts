@@ -1,6 +1,7 @@
 import { DateRangeDomain } from "../../domains/DateRangeDomain.js";
 import { Domain } from "../../domains/index.js";
 import { NumericRangeDomain } from "../../domains/NumberRangeDomain.js";
+import { TypeDomain } from "../../domains/TypeDomain.js";
 import { SqDateValue, SqNumberValue } from "./index.js";
 import { SqScale } from "./SqScale.js";
 
@@ -10,6 +11,8 @@ export function wrapDomain(value: Domain) {
       return new SqNumericRangeDomain(value);
     case "DateRange":
       return new SqDateRangeDomain(value);
+    case "Type":
+      return new SqTypeDomain(value);
     default:
       throw new Error(`${value satisfies never} has unknown type`);
   }
@@ -77,6 +80,14 @@ export class SqDateRangeDomain extends SqAbstractDomain<"DateRange"> {
 
   toDefaultScale() {
     return new SqScale(this._value.toDefaultScale());
+  }
+}
+
+export class SqTypeDomain extends SqAbstractDomain<"Type"> {
+  tag = "Type" as const;
+
+  constructor(public _value: TypeDomain<unknown>) {
+    super();
   }
 }
 

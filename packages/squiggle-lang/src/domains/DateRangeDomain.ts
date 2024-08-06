@@ -6,7 +6,7 @@ import { Scale } from "../value/VScale.js";
 import { BaseDomain } from "./BaseDomain.js";
 import { assertCorrectType, assertWithinBounds } from "./utils.js";
 
-export class DateRangeDomain extends BaseDomain {
+export class DateRangeDomain extends BaseDomain<SDate> {
   readonly kind = "DateRange";
   readonly type: Type<SDate>; // can't initialize early because of circular dependency
 

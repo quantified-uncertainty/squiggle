@@ -20,7 +20,7 @@ import { FnSignature } from "./FnSignature.js";
 // It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
 // because of contravariance (we need to store all FnDefinitions in a generic array later on).
 export class FnDefinition {
-  signature: FnSignature<FnInput<Type<any>>[], Type<any>>;
+  signature: FnSignature<FnInput<any>[], Type<any>>;
   run: (args: unknown[], reducer: Reducer) => unknown;
   isAssert: boolean;
   // If set, the function can be used as a decorator.
@@ -30,7 +30,7 @@ export class FnDefinition {
   deprecated?: string;
 
   private constructor(props: {
-    signature: FnSignature<FnInput<Type<any>>[], Type<any>>;
+    signature: FnSignature<FnInput<any>[], Type<any>>;
     run: (args: unknown[], reducer: Reducer) => unknown;
     isAssert?: boolean;
     deprecated?: string;
@@ -52,30 +52,9 @@ export class FnDefinition {
   }
 
   tryCall(args: Value[], reducer: Reducer): Value | undefined {
-    // unpack signature fields to attempt small speedups (is this useful? not sure)
-    const { minInputs, maxInputs } = this.signature;
-
-    if (args.length < minInputs || args.length > maxInputs) {
-      return; // args length mismatch
-    }
-    const { inputs } = this.signature;
-
-    const unpackedArgs: any = []; // any, but that's ok, type safety is guaranteed by FnDefinition type
-    for (let i = 0; i < args.length; i++) {
-      const arg = args[i];
-
-      const unpackedArg = inputs[i].type.unpack(arg);
-      if (unpackedArg === undefined) {
-        // type mismatch
-        return;
-      }
-      unpackedArgs.push(unpackedArg);
-    }
-
-    // Fill in missing optional arguments with nulls.
-    // This is important, because empty optionals should be nulls, but without this they would be undefined.
-    if (unpackedArgs.length < maxInputs) {
-      unpackedArgs.push(...Array(maxInputs - unpackedArgs.length).fill(null));
+    const unpackedArgs = this.signature.validateAndUnpackArgs(args);
+    if (!unpackedArgs) {
+      return;
     }
 
     return this.signature.output.pack(this.run(unpackedArgs, reducer));
@@ -134,15 +113,15 @@ type UpgradeMaybeInputTypes<T extends InputOrType<any>[]> = [
     [K in keyof T]: T[K] extends FnInput<any>
       ? T[K]
       : T[K] extends Type<infer T>
-        ? FnInput<Type<T>>
+        ? FnInput<T>
         : never;
   },
 ];
 
-export type InputOrType<T> = FnInput<Type<T>> | Type<T>;
+export type InputOrType<T> = FnInput<T> | Type<T>;
 
 type UnwrapInput<T extends FnInput<any>> =
-  T extends FnInput<Type<infer U>> ? U : never;
+  T extends FnInput<infer U> ? U : never;
 
 type UnwrapInputOrType<T extends InputOrType<any>> =
   T extends FnInput<any>
@@ -151,7 +130,7 @@ type UnwrapInputOrType<T extends InputOrType<any>> =
       ? UnwrapType<T>
       : never;
 
-export function inputOrTypeToInput<T>(input: InputOrType<T>): FnInput<Type<T>> {
+export function inputOrTypeToInput<T>(input: InputOrType<T>): FnInput<T> {
   return input instanceof FnInput ? input : fnInput({ type: input });
 }
 

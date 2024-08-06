@@ -1,9 +1,13 @@
+import uniq from "lodash/uniq.js";
+
 import { LocationRange } from "../../ast/types.js";
 import { Type } from "../../types/Type.js";
+import { sort } from "../../utility/E_A_Floats.js";
 import { Value } from "../../value/index.js";
 import { Frame } from "../FrameStack.js";
 import { Reducer } from "../Reducer.js";
 import { BuiltinLambda } from "./BuiltinLambda.js";
+import { FnSignature } from "./FnSignature.js";
 import { UserDefinedLambda } from "./UserDefinedLambda.js";
 
 export abstract class BaseLambda {
@@ -13,9 +17,9 @@ export abstract class BaseLambda {
   abstract readonly type: string;
   abstract display(): string;
   abstract toString(): string;
+
+  abstract signatures(): FnSignature[];
   abstract parameterString(): string;
-  abstract parameterCounts(): number[];
-  abstract parameterCountString(): string;
   abstract inferOutputType(
     argTypes: Type<unknown>[]
   ): Type<unknown> | undefined;
@@ -38,6 +42,19 @@ export abstract class BaseLambda {
     } finally {
       reducer.stack.shrink(initialStackSize);
     }
+  }
+
+  parameterCounts() {
+    return sort(uniq(this.signatures().map((s) => s.inputs.length)));
+  }
+
+  parameterCountString() {
+    const counts = this.parameterCounts();
+    return (
+      counts.slice(0, -1).join(", ") +
+      (counts.length > 1 ? " or " : "") +
+      counts[counts.length - 1]
+    );
   }
 }
 

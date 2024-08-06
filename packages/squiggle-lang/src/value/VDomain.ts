@@ -49,15 +49,17 @@ export class VDomain
   }
 
   get(key: Value): VNumber | VDate {
-    const mapValue = (value: number | SDate) =>
-      typeof value === "number" ? vNumber(value) : vDate(value);
+    if (this.value.kind === "NumericRange" || this.value.kind === "DateRange") {
+      const mapValue = (value: number | SDate) =>
+        typeof value === "number" ? vNumber(value) : vDate(value);
 
-    if (key.type === "String") {
-      if (key.value === "min") {
-        return mapValue(this.value.min);
-      }
-      if (key.value === "max") {
-        return mapValue(this.value.max);
+      if (key.type === "String") {
+        if (key.value === "min") {
+          return mapValue(this.value.min);
+        }
+        if (key.value === "max") {
+          return mapValue(this.value.max);
+        }
       }
     }
 

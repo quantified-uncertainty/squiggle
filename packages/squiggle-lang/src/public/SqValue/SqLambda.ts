@@ -2,6 +2,7 @@ import { Env } from "../../dists/env.js";
 import { getStdLib } from "../../library/index.js";
 import { Lambda } from "../../reducer/lambda/index.js";
 import { Reducer } from "../../reducer/Reducer.js";
+import { TAny } from "../../types/Type.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
@@ -22,10 +23,12 @@ function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
   switch (lambda.type) {
     case "UserDefinedLambda":
       return [
-        lambda.parameters.map((param) => {
+        lambda.signature.inputs.map((input, i) => {
           return {
-            name: param.name,
-            domain: param.domain ? wrapDomain(param.domain.value) : undefined,
+            name: input.name ?? `Input ${i + 1}`,
+            domain: input.domain ? wrapDomain(input.domain) : undefined,
+            typeName:
+              input.type instanceof TAny ? undefined : input.type.display(),
           };
         }),
       ];

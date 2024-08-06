@@ -35,44 +35,23 @@ function validateCalculator(calc: Calculator): Calculator {
 }
 
 function getDefaultInputs(lambda: Lambda): Input[] {
-  switch (lambda.type) {
-    case "BuiltinLambda": {
-      const longestSignature = maxBy(
-        lambda.signatures(),
-        (s) => s.inputs.length
-      );
-      return (longestSignature?.inputs ?? []).map((input, i) => {
-        const name = input.name ?? `Input ${i + 1}`;
-        return frTypeToInput(input.type, name);
-      });
-    }
-    case "UserDefinedLambda":
-      return lambda.getParameterNames().map((name) => ({
-        name,
-        type: "text",
-      }));
+  const longestSignature = maxBy(lambda.signatures(), (s) => s.inputs.length);
+  if (!longestSignature) {
+    throw new Error("No signatures found for lambda");
   }
+  return longestSignature.inputs.map((input, i) => {
+    const name = input.name ?? `Input ${i + 1}`;
+    return frTypeToInput(input.type, name);
+  });
 }
 
 export function lambdaToCalculator(lambda: Lambda): Calculator {
   const inputs = getDefaultInputs(lambda);
-  switch (lambda.type) {
-    case "BuiltinLambda": {
-      return {
-        fn: lambda,
-        inputs,
-        autorun: inputs.length !== 0,
-      };
-    }
-    case "UserDefinedLambda": {
-      const only0Params = lambda.parameters.length === 0;
-      return {
-        fn: lambda,
-        inputs,
-        autorun: only0Params,
-      };
-    }
-  }
+  return {
+    fn: lambda,
+    inputs,
+    autorun: inputs.length !== 0,
+  };
 }
 
 export const library = [

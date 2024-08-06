@@ -1,20 +1,25 @@
+import { BaseDomain } from "../../domains/BaseDomain.js";
+import { Domain } from "../../domains/index.js";
+import { TypeDomain } from "../../domains/TypeDomain.js";
 import { Type } from "../../types/Type.js";
 
-type Props<T extends Type<any>> = {
-  type: T;
+type Props<T> = {
+  domain: Extract<Domain, BaseDomain<T>>;
   name?: string;
   optional?: boolean;
 };
 
-export class FnInput<T extends Type<any>> {
-  type: T;
-  name: string | undefined;
-  optional: boolean;
+export class FnInput<T> {
+  readonly domain: Extract<Domain, BaseDomain<T>>;
+  readonly name: string | undefined;
+  readonly optional: boolean;
+  readonly type: Type<T>;
 
   constructor(props: Props<T>) {
-    this.type = props.type;
+    this.domain = props.domain;
     this.name = props.name;
     this.optional = props.optional ?? false;
+    this.type = this.domain.type; // for convenience and a bit of performance
   }
 
   toString() {
@@ -30,14 +35,25 @@ export class FnInput<T extends Type<any>> {
   }
 }
 
-export function fnInput<T extends Type<any>>(props: Props<T>) {
-  return new FnInput(props);
+export function fnInput<T>(
+  props: Omit<Props<T>, "domain"> & { type: Type<T> }
+) {
+  return new FnInput({
+    ...props,
+    domain: new TypeDomain(props.type),
+  });
 }
 
-export function optionalInput<T extends Type<any>>(type: T) {
-  return new FnInput({ type, optional: true });
+export function optionalInput<T>(type: Type<T>) {
+  return new FnInput({
+    domain: new TypeDomain(type),
+    optional: true,
+  });
 }
 
-export function namedInput<T extends Type<any>>(name: string, type: T) {
-  return new FnInput({ type, name });
+export function namedInput<T>(name: string, type: Type<T>) {
+  return new FnInput({
+    domain: new TypeDomain(type),
+    name,
+  });
 }

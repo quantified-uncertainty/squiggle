@@ -3,6 +3,8 @@ import jstat from "jstat";
 import { LocationRange } from "../ast/types.js";
 import { AnyExpressionIR, IR, IRByKind, ProgramIR } from "../compiler/types.js";
 import { Env } from "../dists/env.js";
+import { Domain } from "../domains/index.js";
+import { TypeDomain } from "../domains/TypeDomain.js";
 import { IRuntimeError } from "../errors/IError.js";
 import {
   ErrorMessage,
@@ -13,17 +15,16 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { getAleaRng, PRNG } from "../rng/index.js";
+import { tAny } from "../types/Type.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { annotationToDomain } from "../value/annotations.js";
 import { Value, vArray, vDict, vLambda, vVoid } from "../value/index.js";
 import { VDict } from "../value/VDict.js";
-import { vDomain, VDomain } from "../value/VDomain.js";
 import { FrameStack } from "./FrameStack.js";
+import { FnInput } from "./lambda/FnInput.js";
+import { FnSignature } from "./lambda/FnSignature.js";
 import { Lambda } from "./lambda/index.js";
-import {
-  UserDefinedLambda,
-  UserDefinedLambdaParameter,
-} from "./lambda/UserDefinedLambda.js";
+import { UserDefinedLambda } from "./lambda/UserDefinedLambda.js";
 import { RunProfile } from "./RunProfile.js";
 import { Stack } from "./Stack.js";
 import { StackTrace } from "./StackTrace.js";
@@ -292,9 +293,9 @@ export class Reducer implements EvaluateAllKinds {
   }
 
   evaluateLambda(irValue: IRValue<"Lambda">) {
-    const parameters: UserDefinedLambdaParameter[] = [];
+    const inputs: FnInput<any>[] = [];
     for (const parameterIR of irValue.parameters) {
-      let domain: VDomain | undefined;
+      let domain: Domain | undefined;
       // Processing annotations, e.g. f(x: [3, 5]) = { ... }
       if (parameterIR.annotation) {
         // First, we evaluate `[3, 5]` expression.
@@ -302,17 +303,20 @@ export class Reducer implements EvaluateAllKinds {
         // Now we cast it to domain value, e.g. `NumericRangeDomain(3, 5)`.
         // Casting can fail, in which case we throw the error with a correct stacktrace.
         try {
-          domain = vDomain(annotationToDomain(annotationValue));
+          domain = annotationToDomain(annotationValue);
         } catch (e) {
           // see also: `Lambda.callFrom`
           throw this.errorFromException(e, parameterIR.annotation.location);
         }
       }
-      parameters.push({
-        name: parameterIR.name,
-        domain,
-      });
+      inputs.push(
+        new FnInput<any>({
+          name: parameterIR.name,
+          domain: domain ?? new TypeDomain(tAny()), // TODO - infer
+        })
+      );
     }
+    const signature = new FnSignature(inputs, tAny());
 
     const capturedValues: Value[] = [];
     for (const capture of irValue.captures) {
@@ -335,7 +339,7 @@ export class Reducer implements EvaluateAllKinds {
       new UserDefinedLambda(
         irValue.name,
         capturedValues,
-        parameters,
+        signature,
         irValue.body
       )
     );

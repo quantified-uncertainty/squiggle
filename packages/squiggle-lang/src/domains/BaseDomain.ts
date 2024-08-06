@@ -12,9 +12,9 @@ import { Value } from "../value/index.js";
  * value is a number, and its runtime check is to ensure that the number is
  * between 0 and 10.
  */
-export abstract class BaseDomain {
+export abstract class BaseDomain<T> {
   abstract kind: string;
-  abstract type: Type<unknown>;
+  abstract type: Type<T>;
 
   abstract toString(): string;
 

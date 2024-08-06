@@ -3,7 +3,7 @@ import { Lambda } from "../reducer/lambda/index.js";
 import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { BaseValue } from "./BaseValue.js";
-import { Value } from "./index.js";
+import { Value, vDomain } from "./index.js";
 import { Indexable } from "./mixins.js";
 import { vArray } from "./VArray.js";
 import { vDict } from "./VDict.js";
@@ -29,12 +29,12 @@ export class VLambda extends BaseValue<"Lambda", number> implements Indexable {
       switch (this.value.type) {
         case "UserDefinedLambda":
           return vArray(
-            this.value.parameters.map((parameter) => {
+            this.value.signature.inputs.map((input, i) => {
               const fields: [string, Value][] = [
-                ["name", vString(parameter.name)],
+                ["name", vString(input.name ?? `Input ${i + 1}`)],
               ];
-              if (parameter.domain) {
-                fields.push(["domain", parameter.domain]);
+              if (input.domain) {
+                fields.push(["domain", vDomain(input.domain)]);
               }
               return vDict(ImmutableMap(fields));
             })
