@@ -1,5 +1,7 @@
 import { BaseDist } from "../dists/BaseDist.js";
+import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value, vDist, vNumber } from "../value/index.js";
+import { SerializedType } from "./serialize.js";
 import { tDist, TDist } from "./TDist.js";
 import { TNumber } from "./TNumber.js";
 import { TAny, Type } from "./Type.js";
@@ -16,6 +18,10 @@ export class TDistOrNumber extends Type<BaseDist | number> {
 
   pack(v: BaseDist | number) {
     return typeof v === "number" ? vNumber(v) : vDist(v);
+  }
+
+  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+    return { kind: "DistOrNumber" };
   }
 
   override isSupertype(other: Type<unknown>): boolean {

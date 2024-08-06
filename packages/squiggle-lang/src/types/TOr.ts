@@ -1,4 +1,6 @@
+import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value } from "../value/index.js";
+import { SerializedType } from "./serialize.js";
 import { TAny, Type } from "./Type.js";
 
 export type OrType<T1, T2> = { tag: "1"; value: T1 } | { tag: "2"; value: T2 };
@@ -27,6 +29,14 @@ export class TOr<T1, T2> extends Type<OrType<T1, T2>> {
 
   pack(v: OrType<T1, T2>) {
     return v.tag === "1" ? this.type1.pack(v.value) : this.type2.pack(v.value);
+  }
+
+  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+    return {
+      kind: "Or",
+      type1: visit.type(this.type1),
+      type2: visit.type(this.type2),
+    };
   }
 
   override isSupertype(other: Type<unknown>) {

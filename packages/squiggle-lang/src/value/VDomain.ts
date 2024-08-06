@@ -1,42 +1,25 @@
-import { DateRangeDomain } from "../domains/DateRangeDomain.js";
-import { Domain } from "../domains/index.js";
-import { NumericRangeDomain } from "../domains/NumberRangeDomain.js";
-import {
-  deserializeDomain,
-  SerializedDomain,
-  serializeDomain,
-} from "../domains/serialize.js";
 import { REOther } from "../errors/messages.js";
-import { SDate } from "../utility/SDate.js";
+import {
+  SquiggleDeserializationVisitor,
+  SquiggleSerializationVisitor,
+} from "../serialization/squiggle.js";
+import { TDateRange } from "../types/TDateRange.js";
+import { TNumberRange } from "../types/TNumberRange.js";
+import { Type } from "../types/Type.js";
 import { BaseValue } from "./BaseValue.js";
 import { Value } from "./index.js";
 import { Indexable } from "./mixins.js";
 import { vDate, VDate } from "./VDate.js";
 import { vNumber, VNumber } from "./VNumber.js";
 
-function domainIsEqual(valueA: Domain, valueB: Domain) {
-  if (valueA.kind !== valueB.kind) {
-    return false;
-  }
-  switch (valueA.kind) {
-    case "DateRange":
-      return (valueA as DateRangeDomain).isEqual(valueB as DateRangeDomain);
-    case "NumericRange":
-      return (valueA as NumericRangeDomain).isEqual(
-        valueB as NumericRangeDomain
-      );
-    default:
-      return false;
-  }
+function domainIsEqual(valueA: Type<unknown>, valueB: Type<unknown>) {
+  return valueA.isSupertype(valueB) && valueB.isSupertype(valueA);
 }
 
-export class VDomain
-  extends BaseValue<"Domain", SerializedDomain>
-  implements Indexable
-{
+export class VDomain extends BaseValue<"Domain", number> implements Indexable {
   readonly type = "Domain";
 
-  constructor(public value: Domain) {
+  constructor(public value: Type<unknown>) {
     super();
   }
 
@@ -44,21 +27,23 @@ export class VDomain
     return this.value.toString();
   }
 
-  get domainType() {
-    return this.value.type;
-  }
-
   get(key: Value): VNumber | VDate {
-    if (this.value.kind === "NumericRange" || this.value.kind === "DateRange") {
-      const mapValue = (value: number | SDate) =>
-        typeof value === "number" ? vNumber(value) : vDate(value);
-
+    if (this.value instanceof TNumberRange) {
       if (key.type === "String") {
         if (key.value === "min") {
-          return mapValue(this.value.min);
+          return vNumber(this.value.min);
         }
         if (key.value === "max") {
-          return mapValue(this.value.max);
+          return vNumber(this.value.max);
+        }
+      }
+    } else if (this.value instanceof TDateRange) {
+      if (key.type === "String") {
+        if (key.value === "min") {
+          return vDate(this.value.min);
+        }
+        if (key.value === "max") {
+          return vDate(this.value.max);
         }
       }
     }
@@ -70,13 +55,13 @@ export class VDomain
     return domainIsEqual(this.value, other.value);
   }
 
-  override serializePayload(): SerializedDomain {
-    return serializeDomain(this.value);
+  override serializePayload(visit: SquiggleSerializationVisitor) {
+    return visit.type(this.value);
   }
 
-  static deserialize(payload: SerializedDomain): VDomain {
-    return new VDomain(deserializeDomain(payload));
+  static deserialize(payload: number, visit: SquiggleDeserializationVisitor) {
+    return new VDomain(visit.type(payload));
   }
 }
 
-export const vDomain = (domain: Domain) => new VDomain(domain);
+export const vDomain = (domain: Type<unknown>) => new VDomain(domain);

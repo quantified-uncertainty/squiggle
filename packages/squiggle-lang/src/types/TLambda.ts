@@ -1,5 +1,7 @@
 import { Lambda } from "../reducer/lambda/index.js";
+import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value, vLambda } from "../value/index.js";
+import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
 export class TLambda extends Type<Lambda> {
@@ -9,6 +11,10 @@ export class TLambda extends Type<Lambda> {
 
   pack(v: Lambda) {
     return vLambda(v);
+  }
+
+  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+    return { kind: "Lambda" };
   }
 
   override display() {

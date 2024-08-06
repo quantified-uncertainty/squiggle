@@ -26,7 +26,7 @@ function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
         lambda.signature.inputs.map((input, i) => {
           return {
             name: input.name ?? `Input ${i + 1}`,
-            domain: input.domain ? wrapDomain(input.domain) : undefined,
+            domain: input.type ? wrapDomain(input.type) : undefined,
             typeName:
               input.type instanceof TAny ? undefined : input.type.display(),
           };

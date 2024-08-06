@@ -1,5 +1,6 @@
 import { SDate } from "../utility/SDate.js";
 import { Value, vDate } from "../value/index.js";
+import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
 export class TDate extends Type<SDate> {
@@ -9,6 +10,10 @@ export class TDate extends Type<SDate> {
 
   pack(v: SDate) {
     return vDate(v);
+  }
+
+  override serialize(): SerializedType {
+    return { kind: "Date" };
   }
 
   override defaultFormInputCode(): string {

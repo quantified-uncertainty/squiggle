@@ -1,3 +1,4 @@
+import { TNumberRange } from "../../src/types/TNumberRange.js";
 import { annotationToDomain } from "../../src/value/annotations.js";
 import { vArray, vNumber } from "../../src/value/index.js";
 
@@ -5,9 +6,13 @@ describe("valueToDomain", () => {
   describe("numeric range", () => {
     test("two-item tuple", () => {
       const domain = annotationToDomain(vArray([vNumber(3), vNumber(5)]));
-      expect(domain.kind).toEqual("NumericRange");
-      expect((domain as any).min).toEqual(3);
-      expect((domain as any).max).toEqual(5);
+      expect(domain).toBeInstanceOf(TNumberRange);
+
+      if (!(domain instanceof TNumberRange)) {
+        throw "assert";
+      }
+      expect(domain.min).toEqual(3);
+      expect(domain.max).toEqual(5);
     });
 
     test("min > max", () => {

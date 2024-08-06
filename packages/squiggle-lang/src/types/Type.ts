@@ -1,9 +1,12 @@
+import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { type Value } from "../value/index.js";
 import { type InputType } from "../value/VInput.js";
+import { SerializedType } from "./serialize.js";
 
-export abstract class Type<T> {
+export abstract class Type<T = unknown> {
   abstract unpack(v: Value): T | undefined;
   abstract pack(v: T): Value;
+  abstract serialize(visit: SquiggleSerializationVisitor): SerializedType;
 
   // Default to "Bool" for "TBool" class, etc.
   // Subclasses can override this method to provide a more descriptive name.
@@ -14,6 +17,10 @@ export abstract class Type<T> {
     }
     // shouldn't happen, the convention is that all types start with T
     return className;
+  }
+
+  toString() {
+    return this.display();
   }
 
   // This check is good enough for most types (VBool, VNumber, etc.)
@@ -46,6 +53,10 @@ export class TAny extends Type<Value> {
 
   pack(v: Value) {
     return v;
+  }
+
+  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+    return { kind: "Any", genericName: this.genericName };
   }
 
   override isSupertype() {

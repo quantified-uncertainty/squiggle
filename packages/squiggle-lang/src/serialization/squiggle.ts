@@ -10,8 +10,11 @@ import {
   serializeIR,
 } from "../compiler/serialize.js";
 import { IR } from "../compiler/types.js";
+import { FnInput, SerializedFnInput } from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { RunProfile, SerializedRunProfile } from "../reducer/RunProfile.js";
+import { deserializeType, SerializedType } from "../types/serialize.js";
+import { Type } from "../types/Type.js";
 import { deserializeValue } from "../value/deserializeValue.js";
 import { SerializedValue, Value } from "../value/index.js";
 import { SerializedValueTags, ValueTags } from "../value/valueTags.js";
@@ -35,6 +38,8 @@ type SquiggleShape = {
   tags: [ValueTags, SerializedValueTags];
   profile: [RunProfile, SerializedRunProfile];
   ast: [ASTNode, SerializedASTNode];
+  type: [Type, SerializedType];
+  input: [FnInput<unknown>, SerializedFnInput];
 };
 
 const squiggleConfig: StoreConfig<SquiggleShape> = {
@@ -62,7 +67,14 @@ const squiggleConfig: StoreConfig<SquiggleShape> = {
     serialize: serializeAstNode,
     deserialize: deserializeAstNode,
   },
-  // TODO - we should serialize AST nodes too, otherwise serialized lambdas could blow up in size, in some cases
+  type: {
+    serialize: (node, visitor) => node.serialize(visitor),
+    deserialize: deserializeType,
+  },
+  input: {
+    serialize: (node, visitor) => node.serialize(visitor),
+    deserialize: FnInput.deserialize,
+  },
 };
 
 export type SquiggleBundle = Bundle<SquiggleShape>;

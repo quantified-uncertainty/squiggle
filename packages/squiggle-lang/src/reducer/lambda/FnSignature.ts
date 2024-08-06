@@ -1,3 +1,4 @@
+import { REDomainError } from "../../errors/messages.js";
 import { Type } from "../../types/Type.js";
 import { Err, Ok, result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
@@ -82,14 +83,15 @@ export class FnSignature<
 
     for (let i = 0; i < parametersLength; i++) {
       const input = this.inputs[i];
-      if (input.domain) {
-        try {
-          input.domain.validateValue(args[i]);
-        } catch (e) {
+      if (input.type) {
+        const unpacked = input.type.unpack(args[i]);
+        if (unpacked === undefined) {
           return Err({
             kind: "domain",
             position: i,
-            err: e,
+            err: new REDomainError(
+              `Parameter ${args[i].valueToString()} must be in domain ${input.type}`
+            ),
           });
         }
       }

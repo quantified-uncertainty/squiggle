@@ -1,5 +1,7 @@
+import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { Value, vDict } from "../value/index.js";
+import { SerializedType } from "./serialize.js";
 import { TAny, Type } from "./Type.js";
 
 export class TDictWithArbitraryKeys<T> extends Type<ImmutableMap<string, T>> {
@@ -27,6 +29,13 @@ export class TDictWithArbitraryKeys<T> extends Type<ImmutableMap<string, T>> {
     return vDict(
       ImmutableMap([...v.entries()].map(([k, v]) => [k, this.itemType.pack(v)]))
     );
+  }
+
+  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+    return {
+      kind: "DictWithArbitraryKeys",
+      itemType: visit.type(this.itemType),
+    };
   }
 
   override isSupertype(other: Type<unknown>) {

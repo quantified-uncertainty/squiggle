@@ -1,6 +1,5 @@
 import mergeWith from "lodash/mergeWith.js";
 
-import { Domain } from "../domains/index.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
@@ -29,6 +28,9 @@ import {
   tString,
   tWithTags,
 } from "../types/index.js";
+import { TDateRange } from "../types/TDateRange.js";
+import { TNumberRange } from "../types/TNumberRange.js";
+import { Type } from "../types/Type.js";
 import { clamp, sort, uniq } from "../utility/E_A_Floats.js";
 import { vDomain, VDomain } from "../value/VDomain.js";
 import { LabeledDistribution, Plot } from "../value/VPlot.js";
@@ -81,7 +83,7 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
   scale && assertValidMinMax(scale);
 
   const _defaultScale =
-    domain?.value.kind === "NumericRange" || domain?.value.kind === "DateRange"
+    domain?.value instanceof TNumberRange || domain?.value instanceof TDateRange
       ? domain.value.toDefaultScale()
       : defaultScale;
 
@@ -105,9 +107,9 @@ function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
     );
   }
 
-  let domain: Domain | undefined;
+  let domain: Type | undefined;
   if (fn.type === "UserDefinedLambda") {
-    domain = fn.signature.inputs[0]?.domain;
+    domain = fn.signature.inputs[0]?.type;
   } else {
     domain = undefined;
   }

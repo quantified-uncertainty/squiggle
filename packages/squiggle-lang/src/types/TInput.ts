@@ -1,5 +1,7 @@
+import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value } from "../value/index.js";
 import { Input, InputType, vInput } from "../value/VInput.js";
+import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
 export class TInput extends Type<Input> {
@@ -9,6 +11,10 @@ export class TInput extends Type<Input> {
 
   pack(v: Input) {
     return vInput(v);
+  }
+
+  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+    return { kind: "Input" };
   }
 
   override defaultFormInputType(): InputType {

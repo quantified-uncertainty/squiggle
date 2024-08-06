@@ -1,38 +1,34 @@
-import { DateRangeDomain } from "../../domains/DateRangeDomain.js";
-import { Domain } from "../../domains/index.js";
-import { NumericRangeDomain } from "../../domains/NumberRangeDomain.js";
-import { TypeDomain } from "../../domains/TypeDomain.js";
+import { TDateRange } from "../../types/TDateRange.js";
+import { TNumberRange } from "../../types/TNumberRange.js";
+import { Type } from "../../types/Type.js";
 import { SqDateValue, SqNumberValue } from "./index.js";
 import { SqScale } from "./SqScale.js";
 
-export function wrapDomain(value: Domain) {
-  switch (value.kind) {
-    case "NumericRange":
-      return new SqNumericRangeDomain(value);
-    case "DateRange":
-      return new SqDateRangeDomain(value);
-    case "Type":
-      return new SqTypeDomain(value);
-    default:
-      throw new Error(`${value satisfies never} has unknown type`);
+export function wrapDomain(value: Type) {
+  if (value instanceof TNumberRange) {
+    return new SqNumericRangeDomain(value);
   }
+  if (value instanceof TDateRange) {
+    return new SqDateRangeDomain(value);
+  }
+  return new SqTypeDomain(value);
 }
 
 // Domain internals are not exposed yet
-abstract class SqAbstractDomain<T extends Domain["kind"]> {
+abstract class SqAbstractDomain<T extends string> {
   abstract tag: T;
 }
 
 export class SqNumericRangeDomain extends SqAbstractDomain<"NumericRange"> {
   tag = "NumericRange" as const;
 
-  constructor(public _value: NumericRangeDomain) {
+  constructor(public _value: TNumberRange) {
     super();
   }
 
   //A simple alternative to making a Domain object and pass that in.
   static fromMinMax(min: number, max: number) {
-    return new this(new NumericRangeDomain(min, max));
+    return new this(new TNumberRange(min, max));
   }
 
   get min() {
@@ -58,7 +54,7 @@ export class SqNumericRangeDomain extends SqAbstractDomain<"NumericRange"> {
 export class SqDateRangeDomain extends SqAbstractDomain<"DateRange"> {
   tag = "DateRange" as const;
 
-  constructor(public _value: DateRangeDomain) {
+  constructor(public _value: TDateRange) {
     super();
   }
 
@@ -86,7 +82,7 @@ export class SqDateRangeDomain extends SqAbstractDomain<"DateRange"> {
 export class SqTypeDomain extends SqAbstractDomain<"Type"> {
   tag = "Type" as const;
 
-  constructor(public _value: TypeDomain<unknown>) {
+  constructor(public _value: Type) {
     super();
   }
 }

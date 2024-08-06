@@ -1,6 +1,8 @@
+import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value } from "../value/index.js";
 import { vArray } from "../value/VArray.js";
 import { InputType } from "../value/VInput.js";
+import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
 export class TTuple<const T extends any[]> extends Type<
@@ -23,9 +25,18 @@ export class TTuple<const T extends any[]> extends Type<
 
     return items as any;
   }
+
   pack(values: unknown[]) {
     return vArray(values.map((val, index) => this.types[index].pack(val)));
   }
+
+  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+    return {
+      kind: "Tuple",
+      types: this.types.map((type) => visit.type(type)),
+    };
+  }
+
   override display() {
     return `[${this.types.map((type) => type.display()).join(", ")}]`;
   }

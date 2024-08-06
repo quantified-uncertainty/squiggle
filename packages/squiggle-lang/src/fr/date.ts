@@ -1,4 +1,3 @@
-import { DateRangeDomain } from "../domains/DateRangeDomain.js";
 import { REOther } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
@@ -8,6 +7,7 @@ import {
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { namedInput } from "../reducer/lambda/FnInput.js";
 import { tDate, tDomain, tDuration, tNumber, tString } from "../types/index.js";
+import { TDateRange } from "../types/TDateRange.js";
 import { SDate } from "../utility/SDate.js";
 
 const maker = new FnFactory({
@@ -140,9 +140,9 @@ d3 = Date.make(2020.5)`,
     definitions: [
       makeDefinition(
         [namedInput("min", tDate), namedInput("min", tDate)],
-        tDomain,
+        tDomain(tDate),
         ([min, max]) => {
-          return new DateRangeDomain(min, max);
+          return new TDateRange(min, max);
         }
       ),
     ],

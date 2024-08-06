@@ -1,4 +1,3 @@
-import { NumericRangeDomain } from "../domains/NumberRangeDomain.js";
 import { REArgumentError } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
@@ -8,6 +7,7 @@ import {
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { namedInput } from "../reducer/lambda/FnInput.js";
 import { tArray, tBool, tDomain, tNumber } from "../types/index.js";
+import { TNumberRange } from "../types/TNumberRange.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 
 const maker = new FnFactory({
@@ -282,9 +282,9 @@ export const library = [
     definitions: [
       makeDefinition(
         [namedInput("min", tNumber), namedInput("max", tNumber)],
-        tDomain,
+        tDomain(tNumber),
         ([min, max]) => {
-          return new NumericRangeDomain(min, max);
+          return new TNumberRange(min, max);
         }
       ),
     ],

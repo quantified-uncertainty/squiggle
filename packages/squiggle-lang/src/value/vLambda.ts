@@ -33,8 +33,8 @@ export class VLambda extends BaseValue<"Lambda", number> implements Indexable {
               const fields: [string, Value][] = [
                 ["name", vString(input.name ?? `Input ${i + 1}`)],
               ];
-              if (input.domain) {
-                fields.push(["domain", vDomain(input.domain)]);
+              if (input.type) {
+                fields.push(["domain", vDomain(input.type)]);
               }
               return vDict(ImmutableMap(fields));
             })

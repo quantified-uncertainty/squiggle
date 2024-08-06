@@ -3,8 +3,6 @@ import jstat from "jstat";
 import { LocationRange } from "../ast/types.js";
 import { AnyExpressionIR, IR, IRByKind, ProgramIR } from "../compiler/types.js";
 import { Env } from "../dists/env.js";
-import { Domain } from "../domains/index.js";
-import { TypeDomain } from "../domains/TypeDomain.js";
 import { IRuntimeError } from "../errors/IError.js";
 import {
   ErrorMessage,
@@ -15,7 +13,7 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { getAleaRng, PRNG } from "../rng/index.js";
-import { tAny } from "../types/Type.js";
+import { tAny, Type } from "../types/Type.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { annotationToDomain } from "../value/annotations.js";
 import { Value, vArray, vDict, vLambda, vVoid } from "../value/index.js";
@@ -295,7 +293,7 @@ export class Reducer implements EvaluateAllKinds {
   evaluateLambda(irValue: IRValue<"Lambda">) {
     const inputs: FnInput<any>[] = [];
     for (const parameterIR of irValue.parameters) {
-      let domain: Domain | undefined;
+      let domain: Type | undefined;
       // Processing annotations, e.g. f(x: [3, 5]) = { ... }
       if (parameterIR.annotation) {
         // First, we evaluate `[3, 5]` expression.
@@ -312,7 +310,7 @@ export class Reducer implements EvaluateAllKinds {
       inputs.push(
         new FnInput<any>({
           name: parameterIR.name,
-          domain: domain ?? new TypeDomain(tAny()), // TODO - infer
+          type: domain ?? tAny(), // TODO - infer
         })
       );
     }

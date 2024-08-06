@@ -1,6 +1,7 @@
 import { Value, vPlot } from "../value/index.js";
 import { InputType } from "../value/VInput.js";
 import { Plot } from "../value/VPlot.js";
+import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
 export class TPlot extends Type<Plot> {
@@ -10,6 +11,10 @@ export class TPlot extends Type<Plot> {
 
   pack(v: Plot) {
     return vPlot(v);
+  }
+
+  override serialize(): SerializedType {
+    return { kind: "Plot" };
   }
 
   override defaultFormInputType(): InputType {

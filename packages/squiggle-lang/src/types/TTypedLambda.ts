@@ -5,8 +5,10 @@ import {
 } from "../reducer/lambda/FnDefinition.js";
 import { FnInput } from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
+import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value, vLambda } from "../value/index.js";
 import { InputType } from "../value/VInput.js";
+import { SerializedType } from "./serialize.js";
 import { TLambda } from "./TLambda.js";
 import { TAny, Type } from "./Type.js";
 
@@ -30,6 +32,14 @@ export class TTypedLambda extends TLambda {
 
   override pack(v: Lambda) {
     return vLambda(v);
+  }
+
+  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+    return {
+      kind: "TypedLambda",
+      inputs: this.inputs.map((input) => visit.input(input)),
+      output: visit.type(this.output),
+    };
   }
 
   override isSupertype(other: Type<unknown>) {

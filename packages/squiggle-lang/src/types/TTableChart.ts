@@ -1,5 +1,6 @@
 import { Value } from "../value/index.js";
 import { TableChart, vTableChart } from "../value/VTableChart.js";
+import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
 export class TTableChart extends Type<TableChart> {
@@ -9,6 +10,10 @@ export class TTableChart extends Type<TableChart> {
 
   pack(v: TableChart) {
     return vTableChart(v);
+  }
+
+  override serialize(): SerializedType {
+    return { kind: "TableChart" };
   }
 
   override display() {

@@ -1,7 +1,7 @@
-import { DateRangeDomain } from "../domains/DateRangeDomain.js";
-import { Domain } from "../domains/index.js";
-import { NumericRangeDomain } from "../domains/NumberRangeDomain.js";
 import { REArgumentError } from "../errors/messages.js";
+import { TDateRange } from "../types/TDateRange.js";
+import { TNumberRange } from "../types/TNumberRange.js";
+import { Type } from "../types/Type.js";
 import { Value } from "./index.js";
 
 function assertMinLessThanMax(min: number, max: number) {
@@ -12,7 +12,7 @@ function assertMinLessThanMax(min: number, max: number) {
   }
 }
 
-export function annotationToDomain(value: Value): Domain {
+export function annotationToDomain(value: Value): Type {
   if (value.type === "Domain") {
     return value.value;
   }
@@ -32,10 +32,10 @@ export function annotationToDomain(value: Value): Domain {
 
   if (min.type === "Date" && max.type === "Date") {
     assertMinLessThanMax(min.value.toMs(), max.value.toMs());
-    return new DateRangeDomain(min.value, max.value);
+    return new TDateRange(min.value, max.value);
   } else if (min.type === "Number" && max.type === "Number") {
     assertMinLessThanMax(min.value, max.value);
-    return new NumericRangeDomain(min.value, max.value);
+    return new TNumberRange(min.value, max.value);
   } else {
     throw new REArgumentError(
       `The range minimum and maximum must be of the same type. Got ${min.type} and ${max.type}`

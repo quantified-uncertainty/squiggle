@@ -1,5 +1,4 @@
 import { assertExpression } from "../compiler/serialize.js";
-import { TypeDomain } from "../domains/TypeDomain.js";
 import { getStdLib } from "../library/index.js";
 import { FnInput } from "../reducer/lambda/FnInput.js";
 import { FnSignature } from "../reducer/lambda/FnSignature.js";
@@ -43,8 +42,8 @@ export function deserializeLambda(
         new FnSignature(
           value.inputs.map((input) => {
             let domain: VDomain | undefined;
-            if (input.domainId !== undefined) {
-              const shouldBeDomain = visit.value(input.domainId);
+            if (input.typeId !== undefined) {
+              const shouldBeDomain = visit.value(input.typeId);
               if (!(shouldBeDomain instanceof VDomain)) {
                 throw new Error("Serialized domain is not a domain");
               }
@@ -52,7 +51,7 @@ export function deserializeLambda(
             }
             return new FnInput<any>({
               name: input.name ?? undefined,
-              domain: domain?.value ?? new TypeDomain(tAny()),
+              type: domain?.value ?? tAny(),
             });
           }),
           tAny()

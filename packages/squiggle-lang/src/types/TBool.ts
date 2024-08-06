@@ -1,4 +1,5 @@
 import { Value, vBool } from "../value/index.js";
+import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
 export class TBool extends Type<boolean> {
@@ -8,6 +9,10 @@ export class TBool extends Type<boolean> {
 
   pack(v: boolean) {
     return vBool(v);
+  }
+
+  override serialize(): SerializedType {
+    return { kind: "Bool" };
   }
 
   override defaultFormInputCode() {

@@ -1,11 +1,13 @@
+import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { Value, vDict } from "../value/index.js";
 import { UnwrapType } from "./helpers.js";
+import { SerializedType } from "./serialize.js";
 import { TAny, Type } from "./Type.js";
 
 type OptionalType<T extends Type<unknown>> = Type<UnwrapType<T> | null>;
 
-type DetailedEntry<K extends string, V extends Type<any>> = {
+export type DetailedEntry<K extends string, V extends Type<any>> = {
   key: K;
   type: V;
   optional?: boolean;
@@ -99,6 +101,16 @@ export class TDict<const KVList extends BaseKVList> extends Type<
           .map((kv) => [kv.key, kv.type.pack((v as any)[kv.key])])
       )
     );
+  }
+
+  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+    return {
+      kind: "Dict",
+      kvs: this.kvs.map((kv) => ({
+        ...kv,
+        type: visit.type(kv.type),
+      })),
+    };
   }
 
   valueType(key: string) {

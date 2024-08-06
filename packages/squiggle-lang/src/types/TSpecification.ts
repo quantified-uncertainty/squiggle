@@ -1,5 +1,7 @@
+import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value } from "../value/index.js";
 import { Specification, vSpecification } from "../value/VSpecification.js";
+import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
 export class TSpecification extends Type<Specification> {
@@ -9,6 +11,10 @@ export class TSpecification extends Type<Specification> {
 
   pack(v: Specification) {
     return vSpecification(v);
+  }
+
+  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+    return { kind: "Specification" };
   }
 }
 

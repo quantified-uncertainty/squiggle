@@ -5,7 +5,7 @@ import { SquiggleSerializationVisitor } from "./squiggle.js";
 // TODO - serialize other input fields, e.g. `optional`? not necessary for now
 type SerializedInput = {
   name: string | null;
-  domainId?: number;
+  typeId?: number;
 };
 
 export type SerializedLambda =
@@ -39,9 +39,7 @@ export function serializeLambda(
         irId: visit.ir(lambda.body),
         inputs: lambda.signature.inputs.map((input) => ({
           name: input.name ?? null,
-          domainId: input.domain
-            ? visit.value(vDomain(input.domain))
-            : undefined,
+          typeId: input.type ? visit.value(vDomain(input.type)) : undefined,
         })),
         captureIds: lambda.captures.map((capture) => visit.value(capture)),
       };
