@@ -70,7 +70,6 @@ export class FnSignature<
     | {
         kind: "domain";
         position: number;
-        err: unknown;
       }
   > {
     const argsLength = args.length;

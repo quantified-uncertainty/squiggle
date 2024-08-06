@@ -41,12 +41,12 @@ export class UserDefinedLambda extends BaseLambda {
           args.length
         );
       } else if (err.kind === "domain") {
-        // Attach the position of an invalid parameter.  Later, in the
-        // Reducer, this error will be upgraded once more with the proper AST,
-        // based on the position.
-        throw err.err instanceof REDomainError
-          ? new REArgumentDomainError(err.position, err.err)
-          : err;
+        throw new REArgumentDomainError(
+          err.position,
+          new REDomainError(
+            `Parameter ${args[err.position].valueToString()} must be in domain ${this.signature.inputs[err.position].type}`
+          )
+        );
       } else {
         throw err satisfies never;
       }
