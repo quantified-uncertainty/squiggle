@@ -161,6 +161,7 @@ export class ProjectState implements ProjectStateData {
   }
 
   getParents(modulePointer: ModulePointer) {
+    // TODO - maintain the list of parents in the state, so we don't have to scan all modules.
     const parents: string[] = []; // hashes
     for (const [hash, entry] of this.modules) {
       if (entry.type !== "loaded") {

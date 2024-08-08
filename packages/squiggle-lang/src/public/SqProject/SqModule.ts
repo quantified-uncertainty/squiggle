@@ -118,6 +118,7 @@ export class SqModule {
     return resolvedImports;
   }
 
+  // TODO - cache the hash for performace
   hash(): string {
     return getHash(
       `module/${this.name}/` +
@@ -130,6 +131,21 @@ export class SqModule {
   }
 
   // Helper methods
+
+  /**
+   * The methods below are somewhat awkward and their return types are more
+   * ad-hoc than I'd like (is it enough to return `{ type: "loading" }`, or do
+   * we need the details about which imports are loading? for now it's enough,
+   * but hard to tell if it's going to stay this way).
+   *
+   * By this point I was just looking for some solution for "I have a module and
+   * need to check if it's ready for running" and similar problems, and I was
+   * moving the code around until it ended up here.
+   *
+   * Passing the `state` as a parameter is also weird; these are multi-methods
+   * on "module + state". Maybe they belong in `ProjectState` and not on this
+   * class.
+   */
 
   getImportModules({ state }: { state: ProjectState }): ImportModules {
     const ast = this.ast();

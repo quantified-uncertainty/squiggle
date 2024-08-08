@@ -56,7 +56,14 @@ export class SqProject {
 
   // Public methods
 
-  setHead(headName: string, head: { module: SqModule }) {
+  setHead(
+    headName: string,
+    // In the future we might support per-head environments, so `head` is an object and not just `SqModule` instance.
+    // You can use `setSimpleHead` for simple cases.
+    head: {
+      module: SqModule;
+    }
+  ) {
     const hash = head.module.hash();
     this.setState(
       this.state.clone({
