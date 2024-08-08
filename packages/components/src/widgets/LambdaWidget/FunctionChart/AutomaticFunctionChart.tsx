@@ -3,8 +3,8 @@ import { FC, useState } from "react";
 import {
   Env,
   result,
+  SqDateRangeDomain,
   SqDistFnPlot,
-  SqDomain,
   SqError,
   SqLambda,
   SqNumericFnPlot,
@@ -49,7 +49,7 @@ const FunctionCallErrorAlert: FC<{ error: SqError }> = ({ error }) => {
 };
 // Sees if it can get a valid result from either bounds of the domain.
 function getInferredFnOutputType(
-  domain: SqDomain,
+  domain: SqNumericRangeDomain | SqDateRangeDomain,
   fn: SqLambda,
   environment: Env
 ): result<string, SqError> {
@@ -90,9 +90,11 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
     .signatures()
     .find((s) => s.length === 1)?.[0]?.domain;
 
-  const xDomain = includedDomain
-    ? includedDomain
-    : SqNumericRangeDomain.fromMinMax(min, max);
+  const xDomain =
+    includedDomain instanceof SqNumericRangeDomain ||
+    includedDomain instanceof SqDateRangeDomain
+      ? includedDomain
+      : SqNumericRangeDomain.fromMinMax(min, max);
 
   const inferredOutputType = getInferredFnOutputType(xDomain, fn, environment);
 

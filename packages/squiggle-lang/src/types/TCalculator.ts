@@ -1,4 +1,3 @@
-import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value } from "../value/index.js";
 import { Calculator, vCalculator } from "../value/VCalculator.js";
 import { SerializedType } from "./serialize.js";
@@ -13,7 +12,7 @@ export class TCalculator extends Type<Calculator> {
     return vCalculator(v);
   }
 
-  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+  override serialize(): SerializedType {
     return { kind: "Calculator" };
   }
 

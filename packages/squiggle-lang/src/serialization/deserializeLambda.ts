@@ -49,7 +49,7 @@ export function deserializeLambda(
               }
               domain = shouldBeDomain;
             }
-            return new FnInput<any>({
+            return new FnInput<unknown>({
               name: input.name ?? undefined,
               type: domain?.value ?? tAny(),
             });

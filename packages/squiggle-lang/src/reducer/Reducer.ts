@@ -291,7 +291,7 @@ export class Reducer implements EvaluateAllKinds {
   }
 
   evaluateLambda(irValue: IRValue<"Lambda">) {
-    const inputs: FnInput<any>[] = [];
+    const inputs: FnInput<unknown>[] = [];
     for (const parameterIR of irValue.parameters) {
       let domain: Type | undefined;
       // Processing annotations, e.g. f(x: [3, 5]) = { ... }
@@ -308,7 +308,7 @@ export class Reducer implements EvaluateAllKinds {
         }
       }
       inputs.push(
-        new FnInput<any>({
+        new FnInput<unknown>({
           name: parameterIR.name,
           type: domain ?? tAny(), // TODO - infer
         })

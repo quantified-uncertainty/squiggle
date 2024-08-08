@@ -1,4 +1,3 @@
-import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value } from "../value/index.js";
 import { InputType } from "../value/VInput.js";
 import { Scale, vScale } from "../value/VScale.js";
@@ -14,7 +13,7 @@ export class TScale extends Type<Scale> {
     return vScale(v);
   }
 
-  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+  override serialize(): SerializedType {
     return { kind: "Scale" };
   }
 

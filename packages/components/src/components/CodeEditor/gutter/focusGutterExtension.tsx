@@ -8,7 +8,11 @@ import {
 import { gutter, GutterMarker } from "@codemirror/view";
 import { clsx } from "clsx";
 
-import { ASTNode, SqValuePath, SqValuePathEdge } from "@quri/squiggle-lang";
+import {
+  SqValuePath,
+  SqValuePathEdge,
+  TypedASTNode,
+} from "@quri/squiggle-lang";
 
 import { onFocusByPathFacet, simulationFacet } from "../fields.js";
 import { reactAsDom } from "../utils.js";
@@ -17,11 +21,11 @@ type MarkerDatum = {
   path: SqValuePath;
   // For assignments and dict keys, AST contains the variable name node or dict key node.
   // For arrays, it contains the value.
-  ast: ASTNode;
+  ast: TypedASTNode;
 };
 
 function* getMarkerSubData(
-  ast: ASTNode,
+  ast: TypedASTNode,
   path: SqValuePath
 ): Generator<MarkerDatum, void> {
   switch (ast.kind) {
@@ -50,7 +54,7 @@ function* getMarkerSubData(
   }
 }
 
-function* getMarkerData(ast: ASTNode): Generator<MarkerDatum, void> {
+function* getMarkerData(ast: TypedASTNode): Generator<MarkerDatum, void> {
   if (ast.kind !== "Program") {
     return; // unexpected
   }
@@ -88,7 +92,7 @@ function* getMarkerData(ast: ASTNode): Generator<MarkerDatum, void> {
   }
 }
 
-function visiblePathsWithUniqueLines(node: ASTNode): MarkerDatum[] {
+function visiblePathsWithUniqueLines(node: TypedASTNode): MarkerDatum[] {
   const result: MarkerDatum[] = [];
   const seenLines = new Set<number>();
   for (const datum of getMarkerData(node)) {

@@ -32,6 +32,9 @@ import { tLambdaTyped } from "./TTypedLambda.js";
 import { tWithTags } from "./TWithTags.js";
 import { tAny, Type } from "./Type.js";
 
+// Serialization code is represented as `serialize()` method on `Type` subclasses.
+// Deserialization code is in `deserializeType()` function below.
+
 export type SerializedType =
   | {
       kind:
