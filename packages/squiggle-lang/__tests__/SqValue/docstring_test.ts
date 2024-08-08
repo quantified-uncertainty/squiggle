@@ -2,23 +2,20 @@ import { run, sq } from "../../src/index.js";
 
 describe("docstrings", () => {
   const runToResult = async (code: string) => {
-    const outputR = await run(code);
-    if (!outputR.ok) {
+    const { result } = await run(code);
+    if (!result.ok) {
       throw new Error();
     }
-    const { result } = outputR.value;
 
-    return result;
+    return result.value.result;
   };
 
   const runToBindings = async (code: string) => {
-    const outputR = await run(code);
-    if (!outputR.ok) {
+    const { result } = await run(code);
+    if (!result.ok) {
       throw new Error();
     }
-    const { bindings } = outputR.value;
-
-    return bindings;
+    return result.value.bindings;
   };
 
   test("Basic", async () => {

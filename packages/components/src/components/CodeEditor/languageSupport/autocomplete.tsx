@@ -7,7 +7,7 @@ import { syntaxTree } from "@codemirror/language";
 import { Facet } from "@codemirror/state";
 import { SyntaxNode, Tree } from "@lezer/common";
 
-import { SqProject } from "@quri/squiggle-lang";
+import { getStdLib, SqProject } from "@quri/squiggle-lang";
 
 import { FnDocumentationFromName } from "../../ui/FnDocumentation.js";
 import { reactAsDom } from "../utils.js";
@@ -88,7 +88,7 @@ export const builtinCompletionsFacet = Facet.define<
       return () => reactAsDom(<FnDocumentationFromName functionName={name} />);
     };
 
-    for (const [name, value] of project.getStdLib().entrySeq()) {
+    for (const [name, value] of getStdLib().entrySeq()) {
       stdlibCompletions.push({
         label: name,
         info: getInfoFunction(name),

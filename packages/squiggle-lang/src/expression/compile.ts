@@ -44,8 +44,7 @@ class CompileContext {
 
   // Externals will include:
   // 1. stdLib symbols
-  // 2. "continues"
-  // 3. imports
+  // 2. imports
   // Externals will be inlined in the resulting expression.
   constructor(public externals: Bindings) {
     // top-level scope

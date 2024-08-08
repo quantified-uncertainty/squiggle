@@ -5,7 +5,7 @@ import { SqDictValue, SqValue, wrapValue } from "./index.js";
 
 export class SqDict {
   constructor(
-    private _value: VDict,
+    public _value: VDict,
     public context?: SqValueContext
   ) {}
 

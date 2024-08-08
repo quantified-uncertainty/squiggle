@@ -15,7 +15,7 @@ import {
   frTuple,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { ImmutableMap } from "../utility/immutableMap.js";
+import { ImmutableMap } from "../utility/immutable.js";
 import { Value } from "../value/index.js";
 import { vString } from "../value/VString.js";
 

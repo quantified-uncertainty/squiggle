@@ -1,6 +1,6 @@
 const jestConfig = {
   testEnvironment: "node",
-  extensionsToTreatAsEsm: [".ts"],
+  extensionsToTreatAsEsm: [".ts", ".tsx"],
   moduleNameMapper: {
     "^(.*/peggyParser\\.js)$": "$1",
     "^(\\.{1,2}/.*)\\.js$": "$1",

@@ -25,7 +25,6 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   onCodeChange,
   project: propsProject,
   environment,
-  continues,
   editorFontSize,
   ...defaultSettings
 }) => {
@@ -44,7 +43,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   const { simulation, project, sourceId, runSimulation } = useSimulator({
     code,
     setup: propsProject
-      ? { type: "project", project: propsProject, continues }
+      ? { type: "project", project: propsProject }
       : { type: "standalone" },
     environment: settings.environment,
   });

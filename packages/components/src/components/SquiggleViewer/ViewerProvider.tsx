@@ -251,7 +251,7 @@ export function useSetLocalItemState() {
 
 export function useRootValueSourceId() {
   const { rootValue } = useViewerContext();
-  return rootValue?.context.runContext.sourceId;
+  return rootValue?.context.runContext.module.name;
 }
 
 export function toggleCollapsed(itemStore: ItemStore, path: SqValuePath) {

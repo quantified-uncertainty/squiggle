@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  startTransition,
   useCallback,
   useImperativeHandle,
   useRef,
@@ -55,14 +56,19 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
     },
     viewerWithMenuBarRef
   ) {
-    const [viewerTab, setViewerTab] = useState<ViewerTab>(
-      defaultTab ?? defaultViewerTab(simulation.output)
+    const {
+      output: { result: outputResult },
+    } = simulation;
+    const [viewerTab, _setViewerTab] = useState<ViewerTab>(
+      defaultTab ?? defaultViewerTab(outputResult)
     );
+
+    const setViewerTab = (tab: ViewerTab) =>
+      startTransition(() => _setViewerTab(tab)); // more performant and important for lazy-loading ProjectStateViewer
 
     const viewerRef = useRef<SquiggleViewerHandle>(null);
     const _isSimulating = isSimulating(simulation);
-    const { output } = simulation;
-    const shownTabs = viewerTabsToShow(simulation.output);
+    const shownTabs = viewerTabsToShow(outputResult);
 
     useViewerTabShortcuts({
       enableGlobalShortcuts,
@@ -97,7 +103,7 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
             <ViewerMenu
               viewerTab={viewerTab}
               setViewerTab={setViewerTab}
-              outputResult={output}
+              outputResult={outputResult}
               shownTabs={shownTabs}
             />
           ) : (
@@ -110,7 +116,7 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
           randomizeSeed ? (
             <RandomizeSeedButton
               isSimulating={_isSimulating}
-              seed={simulation.environment.seed || "default-seed"}
+              seed={simulation.output.environment.seed || "default-seed"}
               randomizeSeed={randomizeSeed}
             />
           ) : null
@@ -119,7 +125,8 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
           <ViewerBody
             externalViewerActions={externalViewerActions}
             viewerTab={viewerTab}
-            outputResult={output}
+            project={simulation.project}
+            outputResult={outputResult}
             isSimulating={isSimulating(simulation)}
             playgroundSettings={playgroundSettings}
             ref={viewerRef}

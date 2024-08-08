@@ -2,12 +2,12 @@ import {
   Env,
   result,
   SqError,
+  SqModuleOutput,
   SqProject,
   SqValue,
   SqValuePath,
 } from "@quri/squiggle-lang";
 
-import { SqOutputResult } from "../../../squiggle-lang/src/public/types.js";
 import { Simulation } from "./hooks/useSimulator.js";
 
 export function flattenResult<a, b>(x: result<a, b>[]): result<a[], b> {
@@ -47,10 +47,10 @@ export function some(arr: boolean[]): boolean {
 export function simulationErrors(simulation?: Simulation): SqError[] {
   if (!simulation) {
     return [];
-  } else if (simulation.output.ok) {
+  } else if (simulation.output.result.ok) {
     return [];
   } else {
-    return [simulation.output.value];
+    return [simulation.output.result.value];
   }
 }
 
@@ -114,6 +114,7 @@ export type ViewerTab =
   | "Exports"
   | "Variables"
   | "Result"
+  | "Dependency Graph"
   | "AST"
   | { tag: "CustomVisibleRootPath"; visibleRootPath: SqValuePath };
 
@@ -123,7 +124,7 @@ export const isCustomVisibleRootPath = (
   typeof tab === "object" && tab.tag === "CustomVisibleRootPath";
 
 export function defaultViewerTab(
-  outputResult: SqOutputResult | undefined
+  outputResult: SqModuleOutput["result"] | undefined
 ): ViewerTab {
   if (!outputResult?.ok) {
     return "Variables";
@@ -142,12 +143,12 @@ export function viewerTabToVisibleRootPath(
 
 export function viewerTabToValue(
   viewerTab: ViewerTab,
-  output: SqOutputResult
+  outputResult: SqModuleOutput["result"]
 ): SqValue | undefined {
-  if (!output.ok) {
+  if (!outputResult.ok) {
     return;
   }
-  const sqOutput = output.value;
+  const sqOutput = outputResult.value;
   switch (viewerTab) {
     case "Result":
       return sqOutput.result;
@@ -158,12 +159,13 @@ export function viewerTabToValue(
     case "Exports":
       return sqOutput.exports.asValue();
     case "AST":
+    case "Dependency Graph":
       return undefined;
     default:
       if (isCustomVisibleRootPath(viewerTab)) {
         return viewerTab.visibleRootPath.root === "result" //Practically speaking, this should only be bindings.
-          ? output.value.result
-          : output.value.bindings.asValue();
+          ? sqOutput.result
+          : sqOutput.bindings.asValue();
       }
   }
 }
@@ -173,13 +175,14 @@ const selectableViewerTabs = [
   "Variables",
   "Exports",
   "Result",
+  "Dependency Graph",
   "AST",
 ] as const;
 
 export type SelectableViewerTab = (typeof selectableViewerTabs)[number];
 
 export function viewerTabsToShow(
-  outputResult: SqOutputResult
+  outputResult: SqModuleOutput["result"]
 ): SelectableViewerTab[] {
   if (!outputResult.ok) return ["Variables", "AST"]; // Default tabs if outputResult is not OK
 
@@ -200,7 +203,6 @@ export function viewerTabsToShow(
 export type StandaloneExecutionProps = {
   project?: undefined;
   environment?: Env;
-  continues?: undefined;
 };
 
 // Props needed when executing inside a project.
@@ -208,6 +210,4 @@ export type ProjectExecutionProps = {
   /** The project that this execution is part of */
   project: SqProject;
   environment?: undefined;
-  /** What other squiggle sources from the project to continue. Default [] */
-  continues?: string[];
 };

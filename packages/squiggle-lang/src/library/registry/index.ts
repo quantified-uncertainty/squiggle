@@ -29,7 +29,7 @@ import { library as tableLibrary } from "../../fr/table.js";
 import { library as tagLibrary } from "../../fr/tag.js";
 import { library as unitsLibrary } from "../../fr/units.js";
 import { Bindings } from "../../reducer/Stack.js";
-import { ImmutableMap } from "../../utility/immutableMap.js";
+import { ImmutableMap } from "../../utility/immutable.js";
 import { FRFunction, Registry } from "./core.js";
 
 const fnList: FRFunction[] = [

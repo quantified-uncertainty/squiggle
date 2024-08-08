@@ -4,6 +4,7 @@ import {
   SqCompileError,
   SqError,
   SqFrame,
+  SqImportError,
   SqLocation,
   SqRuntimeError,
 } from "@quri/squiggle-lang";
@@ -62,6 +63,20 @@ const StackTraceFrame: FC<{ frame: SqFrame }> = ({ frame }) => {
   );
 };
 
+const ImportChainFrame: FC<{ frame: SqFrame }> = ({ frame }) => {
+  const location = frame.location();
+  const name = frame.name();
+  return (
+    <>
+      <div className="font-mono">
+        import{" "}
+        <span className="truncate font-medium text-gray-500">{name}</span>
+      </div>
+      <div>{location && <LocationLine location={location} />}</div>
+    </>
+  );
+};
+
 const StackTrace: FC<{ error: SqRuntimeError }> = ({ error }) => {
   const frames = error.getFrameArray();
   return frames.length ? (
@@ -75,12 +90,27 @@ const StackTrace: FC<{ error: SqRuntimeError }> = ({ error }) => {
   ) : null;
 };
 
+const ImportChain: FC<{ error: SqImportError }> = ({ error }) => {
+  const frames = error.getFrameArray();
+  return frames.length ? (
+    <WithHeader header="Import Chain">
+      <div className="grid grid-cols-[minmax(60px,max-content),1fr] gap-x-4">
+        {frames.map((frame, i) => (
+          <ImportChainFrame frame={frame} key={i} />
+        ))}
+      </div>
+    </WithHeader>
+  ) : null;
+};
+
 export const SquiggleErrorAlert: FC<Props> = ({ error }) => {
   function errorName(): string {
     if (error instanceof SqCompileError) {
       return "Compile Error";
     } else if (error instanceof SqRuntimeError) {
       return "Runtime Error";
+    } else if (error instanceof SqImportError) {
+      return "Import Error";
     } else {
       return "Error";
     }
@@ -91,6 +121,8 @@ export const SquiggleErrorAlert: FC<Props> = ({ error }) => {
         <div className="whitespace-pre-wrap">{error.toString()}</div>
         {error instanceof SqRuntimeError ? (
           <StackTrace error={error} />
+        ) : error instanceof SqImportError ? (
+          <ImportChain error={error} />
         ) : error instanceof SqCompileError ? (
           <WithHeader header="Location:">
             <LocationLine location={error.location()} />

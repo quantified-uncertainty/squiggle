@@ -7,7 +7,7 @@ import {
   versionedSquigglePackages,
 } from "@quri/versioned-squiggle-components";
 
-import { squiggleHubLinker } from "./linker";
+import { sqProjectWithHubLinker } from "./linker";
 
 import { ViewSquiggleSnippet$key } from "@/__generated__/ViewSquiggleSnippet.graphql";
 
@@ -31,11 +31,7 @@ export const ViewSquiggleSnippet: FC<Props> = ({ dataRef }) => {
 
   const squiggle = use(versionedSquigglePackages(checkedVersion));
 
-  const project = useMemo(() => {
-    return new squiggle.lang.SqProject({
-      linker: squiggleHubLinker,
-    });
-  }, [squiggle.lang]);
+  const project = useMemo(() => sqProjectWithHubLinker(squiggle), [squiggle]);
 
   return <squiggle.components.SquiggleChart code={code} project={project} />;
 };

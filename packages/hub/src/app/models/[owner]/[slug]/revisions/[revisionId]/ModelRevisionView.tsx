@@ -17,7 +17,7 @@ import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRoute } from "@/routes";
-import { squiggleHubLinker } from "@/squiggle/components/linker";
+import { getHubLinker } from "@/squiggle/components/linker";
 
 const Query = graphql`
   query ModelRevisionViewQuery($input: QueryModelInput!, $revisionId: ID!) {
@@ -96,7 +96,7 @@ export const ModelRevisionView: FC<{
       </div>
       <squiggle.components.SquigglePlayground
         defaultCode={model.revision.content.code}
-        linker={squiggleHubLinker}
+        linker={getHubLinker(squiggle)}
       />
     </div>
   );

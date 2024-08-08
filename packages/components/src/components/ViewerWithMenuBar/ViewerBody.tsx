@@ -1,7 +1,12 @@
-import { forwardRef } from "react";
+import { forwardRef, lazy } from "react";
 
-import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
+import { SqModuleOutput, SqProject } from "@quri/squiggle-lang";
+
 import { SquiggleErrorAlert } from "../../index.js";
+import {
+  mainHeadName,
+  renderedHeadName,
+} from "../../lib/hooks/useSimulator.js";
 import {
   ViewerTab,
   viewerTabToValue,
@@ -15,10 +20,18 @@ import {
   ViewerProvider,
 } from "../SquiggleViewer/ViewerProvider.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
+import { Overlay } from "./Overlay.js";
+
+const ProjectStateViewer = lazy(() =>
+  import("../ProjectStateViewer/index.js").then((module) => ({
+    default: module.ProjectStateViewer,
+  }))
+);
 
 type Props = {
   viewerTab: ViewerTab;
-  outputResult: SqOutputResult;
+  outputResult: SqModuleOutput["result"];
+  project: SqProject;
   isSimulating: boolean;
   externalViewerActions?: ExternalViewerActions;
   playgroundSettings: PartialPlaygroundSettings;
@@ -27,8 +40,9 @@ type Props = {
 export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
   function ViewerBody(
     {
-      outputResult,
       viewerTab,
+      outputResult,
+      project,
       isSimulating,
       externalViewerActions,
       playgroundSettings,
@@ -36,6 +50,20 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
     viewerRef
   ) {
     const body = () => {
+      if (viewerTab === "Dependency Graph") {
+        return (
+          <ProjectStateViewer
+            project={project}
+            headTooltips={{
+              [mainHeadName]:
+                "Main head points to the module that should be simulated. When simulation is running, the main head is the module that's not simulated yet; otherwise it's the same as the rendered head.",
+              [renderedHeadName]:
+                "Rendered head points to the module that's displayed in the viewer. After the simulation is done, the rendered head switches to the same module as the main head, and the old module and its output are garbage collected.",
+            }}
+          />
+        );
+      }
+
       if (!outputResult.ok) {
         return <SquiggleErrorAlert error={outputResult.value} />;
       }
@@ -46,7 +74,7 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
         return (
           <pre className="text-xs">
             {JSON.stringify(
-              sqOutput.bindings.asValue().context?.runContext.ast,
+              sqOutput.bindings.asValue().context?.runContext.module.ast(),
               null,
               2
             )}
@@ -61,9 +89,7 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
 
       return (
         <div className="relative">
-          {isSimulating && (
-            <div className="absolute inset-0 z-10 bg-white opacity-50" />
-          )}
+          {isSimulating && <Overlay />}
           {
             <SquiggleViewerWithoutProvider
               value={viewerTabToValue(viewerTab, outputResult)!}

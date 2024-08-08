@@ -48,8 +48,7 @@ export type ExpressionContent =
       /**
        * Position on stack, counting backwards (so last variable on stack has
        * offset=0).  It's important to count backwards, because we want to store
-       * imports and continues on top of the stack.  (And maybe stdLib too, in
-       * the future.)
+       * imports on top of the stack.  (And maybe stdLib too, in the future.)
        *
        * Important: a function should never reference values on stack beyond its
        * locals. Captures are referenced through `CaptureRef`s.  This is

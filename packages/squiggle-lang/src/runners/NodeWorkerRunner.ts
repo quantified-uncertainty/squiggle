@@ -1,6 +1,6 @@
 import NodeWorker from "web-worker";
-import { BaseRunner, RunParams, RunResult } from "./BaseRunner.js";
-import { runWithWorker } from "./WebWorkerRunner.js";
+
+import { AnyWorkerRunner } from "./AnyWorkerRunner.js";
 
 /**
  * This module is bad for webpack environments.
@@ -8,6 +8,8 @@ import { runWithWorker } from "./WebWorkerRunner.js";
  * Webpack (e.g. Next.js) tries to load it, gets to `import(varName)` statement
  * in web-worker internals, and fails with "Critical dependency: the request of
  * a dependency is an expression".
+ *
+ * This will happen even if you try to load this module conditionally.
  *
  * It's probably possible to fix it with more webpack configuration, but that
  * would create extra burden on all squiggle-lang users who need to use it with
@@ -17,9 +19,9 @@ import { runWithWorker } from "./WebWorkerRunner.js";
  * anywhere else except tests or `src/cli/`). We provide a separate entrypoint
  * in `package.json` instead.
  *
- * Unfortunately, this also means that this runner is not addressable by name;
- * you have to import it explicitly, create `new NodeWorkerRunner()`, and then
- * pass it to `SqProject`.
+ * Unfortunately, this also means that this runner is not addressable by name in
+ * `runnerByName`; you have to import it explicitly, create `new
+ * NodeWorkerRunner()`, and then pass it to `SqProject`.
  **/
 
 function isNodeJs() {
@@ -30,7 +32,11 @@ function isNodeJs() {
   );
 }
 
-export class NodeWorkerRunner extends BaseRunner {
+type Worker = (typeof global)["Worker"]["prototype"];
+
+export class NodeWorkerRunner extends AnyWorkerRunner {
+  worker: Worker;
+
   constructor() {
     // This runner is Node.js-specific. In theory,
     // https://www.npmjs.com/package/web-worker is universal, but it doesn't
@@ -38,19 +44,17 @@ export class NodeWorkerRunner extends BaseRunner {
     if (!isNodeJs()) {
       throw new Error("NodeWorkerRunner is only available in Node.js");
     }
+
     super();
-  }
-
-  async run(params: RunParams): Promise<RunResult> {
-    const workerUrl = new URL("./worker.js", import.meta.url);
-
-    type Worker = (typeof global)["Worker"]["prototype"];
 
     // web-worker module types are broken, so we use browser types instead
-    const worker = new (NodeWorker as any)(workerUrl, {
+    const workerUrl = new URL("./worker.js", import.meta.url);
+    this.worker = new (NodeWorker as any)(workerUrl, {
       type: "module",
     }) as Worker;
+  }
 
-    return await runWithWorker(params, worker);
+  async getWorker(): Promise<Worker> {
+    return this.worker;
   }
 }

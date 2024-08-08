@@ -1,7 +1,7 @@
 import { REOther } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
 import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
-import { ImmutableMap } from "../utility/immutableMap.js";
+import { ImmutableMap } from "../utility/immutable.js";
 import { BaseValue } from "./BaseValue.js";
 import { Value } from "./index.js";
 import { Indexable } from "./mixins.js";

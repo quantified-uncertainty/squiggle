@@ -8,12 +8,16 @@ import {
   waitFor,
 } from "@testing-library/react";
 
-import { SqLinker } from "@quri/squiggle-lang";
+import { makeSelfContainedLinker } from "@quri/squiggle-lang";
 
 import { SquigglePlayground } from "../src/index.js";
 
 test("Playground renders", async () => {
-  act(() => render(<SquigglePlayground defaultCode="2 to 3" />));
+  act(() =>
+    // we have to use runner="embedded" because the default runner is web-worker;
+    // TODO - try https://github.com/developit/jsdom-worker
+    render(<SquigglePlayground defaultCode="2 to 3" runner="embedded" />)
+  );
   await waitFor(() => screen.getByText(/simulation/));
 
   expect(screen.getByText(/simulation/)).toHaveTextContent(
@@ -25,7 +29,9 @@ test("Playground renders", async () => {
 });
 
 test("Stacktrace lines are clickable", async () => {
-  act(() => render(<SquigglePlayground defaultCode="2 to a" />));
+  act(() =>
+    render(<SquigglePlayground defaultCode="2 to a" runner="embedded" />)
+  );
   await waitFor(() => screen.getByText(/simulation/));
 
   const errorHeader = screen.getByText("Compile Error");
@@ -35,33 +41,65 @@ test("Stacktrace lines are clickable", async () => {
   expect(getByText(errorHeader.parentElement!, /column /).tagName).toBe("A");
 });
 
-test("Stacktrace lines for imports are not clickable", async () => {
-  const linker: SqLinker = {
-    resolve: (name) => name,
-    loadSource: async (sourceName) => {
-      // Note how this function is async and can load sources remotely on demand.
-      switch (sourceName) {
-        case "source1":
-          return `export x = 1 + // syntax error`;
-        default:
-          throw new Error(`source ${sourceName} not found`);
-      }
-    },
-  };
+test("Stacktrace lines for imports are clickable", async () => {
+  const linker = makeSelfContainedLinker({
+    source1: `export x = 1 + // syntax error`,
+  });
 
   const code = `
 import "source1" as s1
 x = 1
 `;
 
-  act(() => render(<SquigglePlayground defaultCode={code} linker={linker} />));
+  act(() =>
+    render(
+      <SquigglePlayground
+        defaultCode={code}
+        linker={linker}
+        runner="embedded"
+      />
+    )
+  );
   await waitFor(() => screen.getByText(/simulation/));
 
-  const errorHeader = screen.getByText("Compile Error");
+  const errorHeader = screen.getByText("Import Error");
   expect(errorHeader).toBeDefined();
 
   expect(getByText(errorHeader.parentElement!, /column /)).toBeDefined();
-  expect(getByText(errorHeader.parentElement!, /column /).tagName).not.toBe(
+  expect(getByText(errorHeader.parentElement!, /column /).tagName).toBe("A");
+});
+
+test("Stacktrace lines for errors in imports are not clickable", async () => {
+  const linker = makeSelfContainedLinker({
+    source1: `export f() = 1 + ""`,
+  });
+
+  const code = `
+import "source1" as s1
+x = s1.f()
+`;
+
+  act(() =>
+    render(
+      <SquigglePlayground
+        defaultCode={code}
+        linker={linker}
+        runner="embedded"
+      />
+    )
+  );
+  await waitFor(() => screen.getByText(/simulation/));
+
+  const errorHeader = screen.getByText("Runtime Error");
+  expect(errorHeader).toBeDefined();
+
+  // error in main code - clickable
+  expect(getByText(errorHeader.parentElement!, /column 5/)).toBeDefined();
+  expect(getByText(errorHeader.parentElement!, /column 5/).tagName).toBe("A");
+
+  // error in import - not clickable
+  expect(getByText(errorHeader.parentElement!, /column 14/)).toBeDefined();
+  expect(getByText(errorHeader.parentElement!, /column 14/).tagName).not.toBe(
     "A"
   );
 });

@@ -1,6 +1,6 @@
 /** @type {import('jest').Config} */
 const jestConfig = {
-  testEnvironment: "jsdom",
+  testEnvironment: "./test/FixJSDOMEnvironment.ts",
   extensionsToTreatAsEsm: [".ts", ".tsx"],
   setupFiles: ["jest-canvas-mock"],
   setupFilesAfterEnv: ["<rootDir>/test/setup.ts"],

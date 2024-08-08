@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { FC } from "react";
 
+import { SqModuleOutput } from "@quri/squiggle-lang";
 import {
   Button,
   CodeBracketIcon,
@@ -8,10 +9,10 @@ import {
   DropdownMenu,
   DropdownMenuActionItem,
   DropdownMenuHeader,
+  PuzzleIcon,
   TriangleIcon,
 } from "@quri/ui";
 
-import { SqOutputResult } from "../../../../squiggle-lang/src/public/types.js";
 import { SelectableViewerTab, ViewerTab } from "../../lib/utility.js";
 
 const MenuItemTitle: FC<{ title: string; type: string | null }> = ({
@@ -42,7 +43,7 @@ function viewerTabTitle(mode: ViewerTab): string {
 type Props = {
   viewerTab: ViewerTab;
   setViewerTab: (viewerTab: ViewerTab) => void;
-  outputResult: SqOutputResult;
+  outputResult: SqModuleOutput["result"];
   shownTabs: SelectableViewerTab[];
 };
 
@@ -98,6 +99,14 @@ export const ViewerMenu: FC<Props> = ({
             title={<MenuItemTitle title="AST" type="" />}
             onClick={() => {
               setViewerTab("AST");
+              close();
+            }}
+          />
+          <DropdownMenuActionItem
+            icon={PuzzleIcon}
+            title={<MenuItemTitle title="Dependency Graph" type="" />}
+            onClick={() => {
+              setViewerTab("Dependency Graph");
               close();
             }}
           />

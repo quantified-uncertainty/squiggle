@@ -105,3 +105,13 @@ export const versionSupportsSqPathV2 = excludeVersions([
   "0.9.0",
   "0.9.2",
 ]);
+
+export const versionSupportsSqProjectV2 = excludeVersions([
+  "0.8.5",
+  "0.8.6",
+  "0.9.0",
+  "0.9.2",
+  "0.9.3",
+  "0.9.4",
+  "0.9.5",
+]);

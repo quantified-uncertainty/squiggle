@@ -16,6 +16,7 @@ export { Dropdown } from "./components/Dropdown/index.js";
 
 export { MouseTooltip } from "./components/MouseTooltip.js";
 export { TextTooltip } from "./components/TextTooltip.js";
+export { Tooltip } from "./components/Tooltip.js";
 
 // react-hook-form inputs, with label and description; you should usually use these to build forms
 export { CheckboxFormField } from "./forms/fields/CheckboxFormField.js";

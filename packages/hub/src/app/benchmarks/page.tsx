@@ -10,6 +10,7 @@ import {
   SquiggleVersion,
   squiggleVersions,
   versionedSquigglePackages,
+  versionSupportsSqProjectV2,
 } from "@quri/versioned-squiggle-components";
 
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
@@ -59,12 +60,11 @@ class Queue {
     task.onStart();
 
     const squiggle = await versionedSquigglePackages(task.version);
-    const project = squiggle.lang.SqProject.create();
-    project.setSource("main", task.code);
-
     const started = new Date();
-    await project.run("main");
-    const result = project.getResult("main");
+    const result = versionSupportsSqProjectV2.object(squiggle)
+      ? (await squiggle.lang.run(task.code)).result
+      : await squiggle.lang.run(task.code);
+
     const ended = new Date();
 
     const ms = ended.getTime() - started.getTime();

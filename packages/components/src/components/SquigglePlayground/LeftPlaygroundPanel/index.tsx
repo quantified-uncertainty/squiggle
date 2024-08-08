@@ -7,7 +7,6 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
-  PuzzleIcon,
   TriangleIcon,
 } from "@quri/ui";
 
@@ -22,7 +21,6 @@ import { PlaygroundSettings } from "../../PlaygroundSettings.js";
 import { PanelWithToolbar } from "../../ui/PanelWithToolbar/index.js";
 import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 import { AutorunnerMenuItem } from "./AutorunnerMenuItem.js";
-import { DependencyGraphModal } from "./DependencyGraphModal.js";
 import { GlobalSettingsModal } from "./GlobalSettingsModal.js";
 import { RunMenuItem } from "./RunMenuItem.js";
 
@@ -74,7 +72,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           <RunMenuItem
             runSimulation={props.runSimulation}
             autorunMode={props.autorunMode}
-            codeHasChanged={props.code !== props.simulation?.code}
+            codeHasChanged={props.code !== props.simulation?.output.module.code}
             isSimulating={
               props.simulation ? isSimulating(props.simulation) : false
             }
@@ -97,11 +95,6 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
                 title="Configuration"
                 icon={AdjustmentsVerticalIcon}
                 onClick={() => openModal("settings")}
-              />
-              <DropdownMenuActionItem
-                title="Dependency Graph"
-                icon={PuzzleIcon}
-                onClick={() => openModal("dependency-graph")}
               />
               {props.renderExtraDropdownItems?.({ openModal })}
             </DropdownMenu>
@@ -149,11 +142,6 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
                 onSettingsChange={props.onSettingsChange}
               />
             ),
-          };
-        case "dependency-graph":
-          return {
-            title: "Dependency Graph",
-            body: <DependencyGraphModal project={props.project} />,
           };
         default:
           return props.renderExtraModal?.(modalName);

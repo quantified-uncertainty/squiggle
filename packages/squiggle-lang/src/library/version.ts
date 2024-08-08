@@ -1,4 +1,4 @@
-import { ImmutableMap } from "../utility/immutableMap.js";
+import { ImmutableMap } from "../utility/immutable.js";
 import { Value } from "../value/index.js";
 import { vString } from "../value/VString.js";
 

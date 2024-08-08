@@ -19,13 +19,13 @@ export async function runSquiggleCode(
   code: string,
   seed: string
 ): Promise<WorkerOutput> {
-  const outputR = await runSquiggle(code, seed);
+  const { result } = await runSquiggle(code, seed);
 
   let variableRevisions: VariableRevisionInput[] = [];
 
-  if (outputR.ok) {
+  if (result.ok) {
     // I Imagine it would be nice to move this out of this worker file, but this would require exporting a lot more information. It seems wise to instead wait for the Serialization PR to go in and then refactor this.
-    variableRevisions = outputR.value.exports.entries().map((e) => ({
+    variableRevisions = result.value.exports.entries().map((e) => ({
       variableName: e[0],
       variableType: e[1].tag,
       title: e[1].tags.name() ? e[1].tags.name() : e[1].title() || "",
@@ -34,7 +34,7 @@ export async function runSquiggleCode(
   }
 
   return {
-    errors: outputR.ok ? "" : outputR.value.toString(),
+    errors: result.ok ? "" : result.value.toString(),
     variableRevisions,
   };
 }

@@ -10,7 +10,7 @@ export const Layout: FC<{
 }> = ({ viewer, menu, indicator, changeSeedAndRunButton, xPadding }) => {
   return (
     // `flex flex-col` helps to fit this in playground right panel and doesn't hurt otherwise
-    <div className="flex flex-col overflow-y-auto">
+    <div className="flex flex-1 flex-col overflow-y-auto">
       <div
         className={clsx(
           `mb-1 flex h-8 items-center justify-between`,

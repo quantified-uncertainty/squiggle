@@ -1,380 +1,436 @@
 import { defaultEnv, Env } from "../../dists/env.js";
-import { getStdLib } from "../../library/index.js";
 import { BaseRunner } from "../../runners/BaseRunner.js";
 import { getDefaultRunner } from "../../runners/index.js";
-import { ImmutableMap } from "../../utility/immutableMap.js";
-import * as Result from "../../utility/result.js";
-import { vDict, VDict } from "../../value/VDict.js";
-import { SqError, SqOtherError } from "../SqError.js";
-import { SqLinker } from "../SqLinker.js";
-import { SqValue } from "../SqValue/index.js";
-import { SqDict } from "../SqValue/SqDict.js";
-import { SqValuePath } from "../SqValuePath.js";
-import { SqOutput, SqOutputResult } from "../types.js";
+import { SqError, SqImportError, SqOtherError } from "../SqError.js";
+import { defaultLinker, SqLinker } from "../SqLinker.js";
+import { ModulePointer, ProjectState } from "./ProjectState.js";
+import { SqModule } from "./SqModule.js";
+import { SqModuleOutput } from "./SqModuleOutput.js";
 import {
-  type Externals,
-  Import,
-  ProjectItem,
-  ProjectItemOutput,
-} from "./ProjectItem.js";
+  ProjectAction,
+  ProjectEvent,
+  ProjectEventListener,
+  ProjectEventShape,
+  ProjectEventType,
+} from "./types.js";
 
-function getNeedToRunError() {
-  return new SqOtherError("Need to run");
-}
-
-type Options = {
-  linker?: SqLinker;
-  environment?: Env;
-  runner?: BaseRunner;
-};
-
+/*
+ * SqProject is a Squiggle project, which is a collection of modules and their
+ * dependencies.
+ *
+ * A project is responsible for loading and resolving modules, building
+ * outputs, and running the project.
+ *
+ * SqProject uses the [Functional Core, Imperative
+ * Shell](https://codemirror.net/docs/guide/#functional-core%2C-imperative-shell)
+ * approach: its state is immutable and updated by dispatching actions.
+ *
+ * A project is also an event target, and emits events when outputs are built or
+ * actions are dispatched; it provides some helpers for waiting for outputs with
+ * async/await, but events are the primary way to interact with the project. One
+ * of the reasons for this is that runs can have multiple steps (load
+ * dependencies, run them, then run the parent), but should be cancellable: if
+ * the head source code changes, we don't want to run the old code.
+ *
+ * When the new head is added to the project, it will fire the first
+ * "processModule" action, which will eventually dispatch other actions to load
+ * all dependencies and run the head module.
+ */
 export class SqProject {
-  private readonly items: Map<string, ProjectItem>;
-  private environment: Env;
-  private linker?: SqLinker; // if not present, imports are forbidden
-  public runner: BaseRunner;
+  state: ProjectState;
+  runner: BaseRunner; // TODO: move to state
 
-  // Direct graph of dependencies is maintained inside each ProjectItem,
-  // while the inverse one is stored in this variable.
-  // We need to update it every time we update the list of direct dependencies:
-  // - when sources are deleted
-  // - on `setContinues`
-  // - on `parseImports`
-  // (this list might be incomplete)
-  private inverseGraph: Map<string, Set<string>> = new Map();
-
-  constructor(options?: Options) {
-    this.items = new Map();
-    this.environment = options?.environment ?? defaultEnv;
-    this.linker = options?.linker;
-    this.runner = options?.runner ?? getDefaultRunner();
+  constructor(
+    params: {
+      linker?: SqLinker;
+      runner?: BaseRunner;
+      environment?: Env;
+    } = {}
+  ) {
+    this.runner = params.runner ?? getDefaultRunner();
+    this.state = ProjectState.init({
+      linker: params.linker ?? defaultLinker,
+      environment: params.environment ?? defaultEnv,
+    });
   }
 
-  static create(options?: Options) {
-    return new SqProject(options);
+  // Public methods
+
+  setHead(
+    headName: string,
+    // In the future we might support per-head environments, so `head` is an object and not just `SqModule` instance.
+    // You can use `setSimpleHead` for simple cases.
+    head: {
+      module: SqModule;
+    }
+  ) {
+    const hash = head.module.hash();
+    this.setState(
+      this.state.clone({
+        heads: this.state.heads.set(headName, {
+          hash,
+        }),
+        modules: this.state.modules.set(hash, {
+          type: "loaded",
+          value: head.module,
+        }),
+        /**
+         * Any head module is treated as the default resolution for that module.
+         *
+         * This helps with some subtle bugs, e.g. the circular import from the head
+         * module to itself.  If we didn't do this, the import would load from
+         * the backend, hashes would be different, and the module would exist in
+         * two instances. If the backend instance won't have the same circular
+         * import, the evaluation could pass, which would be confusing.
+         */
+        resolutions: this.state.resolutions.set(head.module.name, {
+          type: "loaded",
+          value: hash,
+        }),
+      })
+    );
+
+    this.dispatch({ type: "gc" });
+    this.dispatch({
+      type: "processModule",
+      payload: { hash },
+    });
   }
 
-  getEnvironment(): Env {
-    return this.environment;
+  async loadHead(headName: string, head: { moduleName: string }) {
+    const module = await this.state.linker.loadModule(head.moduleName);
+    this.setHead(headName, { module });
   }
 
-  getStdLib() {
-    return getStdLib();
+  // Helper method for setting a head with a simple code string.
+  // Source name will be identical to the head name.
+  setSimpleHead(headName: string, code: string) {
+    this.setHead(headName, { module: new SqModule({ name: headName, code }) });
   }
 
   setEnvironment(environment: Env) {
-    // TODO - should we invalidate all outputs?
-    this.environment = environment;
+    // TODO - do this through dispatch?
+    // This will clean all outputs.
+    this.setState(this.state.withEnvironment(environment));
+
+    // Rebuild outputs.
+    for (const hash of this.state.modules.keys()) {
+      this.dispatch({
+        type: "buildOutputIfPossible",
+        payload: { hash, environment },
+      });
+    }
   }
 
   setRunner(runner: BaseRunner) {
-    // TODO - should we invalidate all outputs?
     this.runner = runner;
   }
 
-  getSourceIds(): string[] {
-    return Array.from(this.items.keys());
+  hasHead(headName: string): boolean {
+    return this.state.heads.has(headName);
   }
 
-  private getItem(sourceId: string): ProjectItem {
-    const item = this.items.get(sourceId);
-    if (!item) {
-      throw new Error(`Source ${sourceId} not found`);
+  getOutput(headName: string): SqModuleOutput | undefined {
+    return this.state.outputs.get(
+      SqModuleOutput.hash({
+        module: this.getHead(headName),
+        environment: this.state.environment,
+      })
+    );
+  }
+
+  getModuleOrThrow(hash: string): SqModule {
+    const module = this.state.modules.get(hash);
+    if (!module) {
+      throw new Error(`Module not found: ${hash}`);
     }
-    return item;
+    if (module.type !== "loaded") {
+      throw new Error(`Module is not loaded yet: ${hash}`);
+    }
+    return module.value;
   }
 
-  private cleanDependents(initialSourceId: string) {
-    // Traverse dependents recursively and call "clean" on each.
-    const visited = new Set<string>();
-    const inner = (currentSourceId: string) => {
-      visited.add(currentSourceId);
-      if (currentSourceId !== initialSourceId) {
-        this.clean(currentSourceId);
+  getHead(headName: string): SqModule {
+    const moduleHash = this.state.heads.get(headName)?.hash;
+    if (!moduleHash) {
+      throw new Error(`Head ${headName} not found`);
+    }
+    return this.getModuleOrThrow(moduleHash);
+  }
+
+  async waitForOutput(headName: string): Promise<SqModuleOutput> {
+    const existingOutput = this.getOutput(headName);
+    if (existingOutput) {
+      return existingOutput;
+    }
+
+    return new Promise<SqModuleOutput>((resolve) => {
+      const listener: ProjectEventListener<"output"> = (event) => {
+        if (event.data.output.module === this.getHead(headName)) {
+          this.removeEventListener("output", listener);
+          resolve(event.data.output);
+        }
+      };
+      this.addEventListener("output", listener);
+    });
+  }
+
+  // Dispatch methods
+
+  dispatch(action: ProjectAction) {
+    this.dispatchEvent({ type: "action", payload: action });
+
+    switch (action.type) {
+      case "loadImports": {
+        this.loadImports(action.payload);
+        break;
       }
-      for (const sourceId of this.getDependents(currentSourceId)) {
-        if (visited.has(sourceId)) {
+      case "loadModule": {
+        this.loadModule({
+          name: action.payload.name,
+          hash: action.payload.hash,
+        });
+        break;
+      }
+      case "processModule": {
+        this.processModule(action.payload.hash);
+        break;
+      }
+      case "buildOutputIfPossible": {
+        this.buildOutputIfPossible(
+          action.payload.hash,
+          action.payload.environment
+        );
+        break;
+      }
+      case "gc": {
+        // Remove modules from the state that are not reachable from the heads.
+        this.setState(this.state.gc());
+        break;
+      }
+      default:
+        throw action satisfies never;
+    }
+  }
+
+  private loadImports(hash: string) {
+    const module = this.getModuleOrThrow(hash);
+
+    for (const imp of module.getImports(this.state.linker)) {
+      if (module.pins[imp.name]) {
+        if (this.state.modules.has(module.pins[imp.name])) {
+          // pinned import is already loaded
           continue;
         }
-        inner(sourceId);
-      }
-    };
-    inner(initialSourceId);
-  }
-
-  getDependents(sourceId: string): string[] {
-    return [...(this.inverseGraph.get(sourceId)?.values() ?? [])];
-  }
-
-  getDependencies(sourceId: string): string[] {
-    this.parseImports(sourceId);
-    return this.getItem(sourceId).getDependencies();
-  }
-
-  // Removes only explicit imports (not continues).
-  // Useful on source changes.
-  private removeImportEdges(fromSourceId: string) {
-    const item = this.getItem(fromSourceId);
-    if (item.imports?.ok) {
-      for (const importData of item.imports.value) {
-        this.inverseGraph.get(importData.sourceId)?.delete(fromSourceId);
-      }
-    }
-  }
-
-  touchSource(sourceId: string) {
-    this.removeImportEdges(sourceId);
-    this.getItem(sourceId).touchSource();
-    this.cleanDependents(sourceId);
-  }
-
-  setSource(sourceId: string, value: string) {
-    if (this.items.has(sourceId)) {
-      this.removeImportEdges(sourceId);
-      this.getItem(sourceId).setSource(value);
-      this.cleanDependents(sourceId);
-    } else {
-      this.items.set(sourceId, new ProjectItem({ sourceId, source: value }));
-    }
-  }
-
-  async loadSource(sourceId: string): Promise<SqError | undefined> {
-    if (!this.linker) {
-      throw new Error(`Can't load source for ${sourceId}, linker is missing`);
-    }
-
-    let newSource: string;
-    try {
-      newSource = await this.linker.loadSource(sourceId);
-    } catch (e) {
-      return new SqOtherError(`Failed to load import ${sourceId}`);
-    }
-    this.setSource(sourceId, newSource);
-  }
-
-  removeSource(sourceId: string) {
-    if (!this.items.has(sourceId)) {
-      return;
-    }
-    this.cleanDependents(sourceId);
-    this.removeImportEdges(sourceId);
-    this.setContinues(sourceId, []);
-    this.items.delete(sourceId);
-  }
-
-  getSource(sourceId: string) {
-    return this.items.get(sourceId)?.source;
-  }
-
-  clean(sourceId: string) {
-    this.getItem(sourceId).clean();
-  }
-
-  cleanAll() {
-    this.getSourceIds().forEach((id) => this.clean(id));
-  }
-
-  getImportIds(sourceId: string): Result.result<string[], SqError> {
-    const imports = this.getImports(sourceId);
-    if (!imports) {
-      return Result.Err(getNeedToRunError());
-    }
-    return Result.fmap(imports, (imports) => imports.map((i) => i.sourceId));
-  }
-
-  getImports(sourceId: string): Result.result<Import[], SqError> | undefined {
-    return this.getItem(sourceId).imports;
-  }
-
-  getContinues(sourceId: string): string[] {
-    return this.getItem(sourceId).continues;
-  }
-
-  setContinues(sourceId: string, continues: string[]): void {
-    for (const continueId of this.getContinues(sourceId)) {
-      this.inverseGraph.get(continueId)?.delete(sourceId);
-    }
-    for (const continueId of continues) {
-      if (!this.inverseGraph.has(continueId)) {
-        this.inverseGraph.set(continueId, new Set());
-      }
-      this.inverseGraph.get(continueId)?.add(sourceId);
-    }
-    this.getItem(sourceId).setContinues(continues);
-    this.cleanDependents(sourceId);
-  }
-
-  getInternalOutput(
-    sourceId: string
-  ): Result.result<ProjectItemOutput, SqError> {
-    return this.getItem(sourceId).output ?? Result.Err(getNeedToRunError());
-  }
-
-  private parseImports(sourceId: string): void {
-    // linker can be undefined; in this case parseImports will fail if there are any imports
-    const item = this.getItem(sourceId);
-    if (item.imports) {
-      // already set, shortcut so that we don't have to update `inverseGraph`
-      return;
-    }
-
-    item.parseImports(this.linker);
-    for (const dependencyId of item.getDependencies()) {
-      if (!this.inverseGraph.has(dependencyId)) {
-        this.inverseGraph.set(dependencyId, new Set());
-      }
-      this.inverseGraph.get(dependencyId)?.add(sourceId);
-    }
-  }
-
-  getOutput(sourceId: string): SqOutputResult {
-    return Result.fmap(this.getInternalOutput(sourceId), (output) =>
-      SqOutput.fromProjectItemOutput(output)
-    );
-  }
-
-  getResult(sourceId: string): Result.result<SqValue, SqError> {
-    return Result.fmap(this.getOutput(sourceId), ({ result }) => result);
-  }
-
-  getBindings(sourceId: string): Result.result<SqDict, SqError> {
-    return Result.fmap(this.getOutput(sourceId), ({ bindings }) => bindings);
-  }
-
-  private async importToBindingResult(
-    importBinding: Import,
-    pendingIds: Set<string>
-  ): Promise<Result.result<VDict, SqError>> {
-    if (!this.items.has(importBinding.sourceId)) {
-      // We have got one of the new imports.
-      // Let's load it and add it to the project.
-      const maybeError = await this.loadSource(importBinding.sourceId);
-      if (maybeError) {
-        return Result.Err(maybeError);
-      }
-    }
-
-    if (pendingIds.has(importBinding.sourceId)) {
-      // Oh we have already visited this source. There is an import cycle.
-      return Result.Err(
-        new SqOtherError(`Cyclic import ${importBinding.sourceId}`)
-      );
-    }
-
-    await this.innerRun(importBinding.sourceId, pendingIds);
-    const outputR = this.getInternalOutput(importBinding.sourceId);
-    if (!outputR.ok) {
-      return outputR;
-    }
-
-    // TODO - check for name collisions?
-    switch (importBinding.type) {
-      case "flat":
-        return Result.Ok(outputR.value.runOutput.bindings);
-      case "named":
-        return Result.Ok(
-          vDict(
-            ImmutableMap({
-              [importBinding.variable]: outputR.value.runOutput.exports,
-            })
-          )
-        );
-      default:
-        throw new Error(`Internal error, ${importBinding satisfies never}`);
-    }
-  }
-
-  private async importsToBindings(
-    pendingIds: Set<string>,
-    imports: Import[]
-  ): Promise<Result.result<VDict, SqError>> {
-    let exports = VDict.empty();
-
-    for (const importBinding of imports) {
-      const loadResult = await this.importToBindingResult(
-        importBinding,
-        pendingIds
-      );
-      if (!loadResult.ok) return loadResult; // Early return for load/validation errors
-
-      exports = exports.merge(loadResult.value);
-    }
-    return Result.Ok(exports);
-  }
-
-  // Includes implicit imports ("continues") and explicit imports.
-  private async buildExternals(
-    sourceId: string,
-    pendingIds: Set<string>
-  ): Promise<Result.result<Externals, SqError>> {
-    this.parseImports(sourceId);
-
-    const rImports = this.getImports(sourceId);
-    if (!rImports) throw new Error("Internal logic error"); // Shouldn't happen, we just called parseImports.
-    if (!rImports.ok) return rImports; // There's something wrong with imports, that's fatal.
-
-    const implicitImports = await this.importsToBindings(
-      pendingIds,
-      this.getItem(sourceId).getImplicitImports()
-    );
-
-    if (!implicitImports.ok) return implicitImports;
-    const explicitImports = await this.importsToBindings(
-      pendingIds,
-      rImports.value
-    );
-    if (!explicitImports.ok) return explicitImports;
-
-    return Result.Ok({
-      implicitImports: implicitImports.value,
-      explicitImports: explicitImports.value,
-    });
-  }
-
-  private async innerRun(sourceId: string, pendingIds: Set<string>) {
-    pendingIds.add(sourceId);
-
-    const cachedOutput = this.getItem(sourceId).output;
-    if (!cachedOutput) {
-      const rExternals = await this.buildExternals(sourceId, pendingIds);
-
-      if (!rExternals.ok) {
-        this.getItem(sourceId).failRun(rExternals.value);
       } else {
-        await this.getItem(sourceId).run(
-          this.getEnvironment(),
-          rExternals.value,
-          this
+        const resolvedHash = this.state.resolutions.get(imp.name);
+        if (resolvedHash) {
+          // unpinned import is already loaded
+          continue;
+        }
+      }
+
+      // TODO - mark in the state that we're loading a module.
+      // Otherwise if two modules import the same module asynchronously, we'll load it twice.
+      this.dispatch({
+        type: "loadModule",
+        payload: {
+          name: imp.name,
+          hash: module.pins[imp.name],
+        },
+      });
+    }
+  }
+
+  private async loadModule({ name, hash }: ModulePointer) {
+    if (hash) {
+      this.setState(
+        this.state.clone({
+          modules: this.state.modules.set(hash, { type: "loading" }),
+        })
+      );
+    } else {
+      this.setState(
+        this.state.clone({
+          resolutions: this.state.resolutions.set(name, { type: "loading" }),
+        })
+      );
+    }
+
+    try {
+      const module = await this.state.linker.loadModule(name, hash);
+      if (hash && hash !== module.hash()) {
+        throw new Error(
+          `Hash mismatch for module ${name}: expected ${hash}, got ${module.hash()}`
         );
       }
-    }
 
-    pendingIds.delete(sourceId);
+      if (!hash) {
+        this.setState(
+          this.state.clone({
+            resolutions: this.state.resolutions.set(name, {
+              type: "loaded",
+              value: module.hash(),
+            }),
+          })
+        );
+      }
+
+      this.setState(this.state.withModule(module));
+      this.dispatch({
+        type: "processModule",
+        payload: { hash: module.hash() },
+      });
+    } catch (e) {
+      // loading has failed
+      if (hash) {
+        this.setState(
+          this.state.clone({
+            modules: this.state.modules.set(hash, {
+              type: "failed",
+              value: String(e),
+            }),
+          })
+        );
+      } else {
+        this.setState(
+          this.state.clone({
+            resolutions: this.state.resolutions.set(name, {
+              type: "failed",
+              value: String(e),
+            }),
+          })
+        );
+      }
+
+      // even if loading failed, we should try to build outputs for parents
+      for (const parent of this.state.getParents({
+        name,
+        hash,
+      })) {
+        this.dispatch({
+          type: "buildOutputIfPossible",
+          payload: { hash: parent, environment: this.state.environment },
+        });
+      }
+    }
   }
 
-  async run(sourceId: string) {
-    await this.innerRun(sourceId, new Set());
-  }
+  // If the module is already loaded, we'll to build its output.
+  // Otherwise, we'll load its imports, which will eventually trigger the build.
+  // If the output is impossible to build, e.g. because of circular imports, we'll produce a failed output.
+  private processModule(hash: string) {
+    const module = this.getModuleOrThrow(hash);
 
-  // Helper method for "Find in Editor" feature
-  findValuePathByOffset(
-    sourceId: string,
-    offset: number
-  ): Result.result<SqValuePath, SqError> {
-    const { ast } = this.getItem(sourceId);
-    if (!ast) {
-      return Result.Err(new SqOtherError("Not parsed"));
-    }
-    if (!ast.ok) {
-      return ast;
-    }
-    const found = SqValuePath.findByAstOffset({
-      ast: ast.value,
-      offset,
+    const loadingStatus = this.state.getLoadingStatus({
+      name: module.name,
+      hash,
     });
-    if (!found) {
-      return Result.Err(new SqOtherError("Not found"));
+
+    switch (loadingStatus.type) {
+      case "loaded":
+      case "failed":
+      case "circular":
+        this.dispatch({
+          type: "buildOutputIfPossible",
+          payload: {
+            hash: module.hash(),
+            environment: this.state.environment,
+          },
+        });
+        break;
+      case "not-loaded":
+        this.dispatch({
+          type: "loadImports",
+          payload: module.hash(),
+        });
+        break;
+      default:
+        throw loadingStatus satisfies never;
     }
-    return Result.Ok(found);
+  }
+
+  private async buildOutputIfPossible(hash: string, environment: Env) {
+    const module = this.getModuleOrThrow(hash);
+
+    // output already exists
+    if (this.state.outputs.has(SqModuleOutput.hash({ module, environment }))) {
+      return;
+    }
+
+    const loadingStatus = this.state.getLoadingStatus({
+      name: module.name,
+      hash,
+    });
+    let output: SqModuleOutput | undefined;
+    if (loadingStatus.type === "circular") {
+      output = SqModuleOutput.makeError({
+        module,
+        environment,
+        error: loadingStatus.path.reduceRight<SqError>(
+          (acc, cur) => new SqImportError(acc, cur),
+          new SqOtherError("Circular import")
+        ),
+      });
+    } else {
+      // TODO - try/catch?
+      // TODO - mark as building; cancel if garbage-collected.
+      output = await SqModuleOutput.make({
+        module,
+        environment,
+        runner: this.runner,
+        state: this.state,
+      });
+    }
+
+    if (!output) {
+      return;
+    }
+
+    this.setState(this.state.withOutput(output));
+    this.dispatchEvent({ type: "output", payload: { output } });
+
+    for (const parent of this.state.getParents({
+      name: module.name,
+      hash: module.hash(),
+    })) {
+      this.dispatch({
+        type: "buildOutputIfPossible",
+        payload: { hash: parent, environment },
+      });
+    }
+  }
+
+  // Event methods
+
+  private eventTarget = new EventTarget();
+
+  private dispatchEvent(shape: ProjectEventShape) {
+    this.eventTarget.dispatchEvent(new ProjectEvent(shape.type, shape.payload));
+  }
+
+  addEventListener<T extends ProjectEventType>(
+    type: T,
+    listener: ProjectEventListener<T>
+  ) {
+    this.eventTarget.addEventListener(type, listener as (event: Event) => void);
+  }
+
+  removeEventListener<T extends ProjectEventType>(
+    type: T,
+    listener: ProjectEventListener<T>
+  ) {
+    this.eventTarget.removeEventListener(
+      type,
+      listener as (event: Event) => void
+    );
+  }
+
+  // Internal helpers
+
+  // All state changes should go through this method, so we can emit events.
+  private setState(newState: ProjectState) {
+    this.state = newState;
+    this.dispatchEvent({ type: "state", payload: this.state });
   }
 }

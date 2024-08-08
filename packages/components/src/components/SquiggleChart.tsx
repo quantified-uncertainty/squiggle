@@ -26,7 +26,6 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
   function SquiggleChart({
     code,
     project,
-    continues,
     environment,
     rootPathOverride,
     externalViewerActions,
@@ -38,9 +37,7 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
 
     const { simulation } = useSimulator({
       code,
-      setup: project
-        ? { type: "project", project, continues }
-        : { type: "standalone" },
+      setup: project ? { type: "project", project } : { type: "standalone" },
       environment,
     });
 
