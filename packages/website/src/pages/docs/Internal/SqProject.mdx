@@ -53,9 +53,9 @@ Here's how the project state will look when you run the code above:
 
 <DemoProjectStateViewer
     headName="main"
-    headModule="my-module"
+    headModule="myModule"
     modules={{
-        main: `x = 2 + 2`
+        myModule: `x = 2 + 2`
     }}
 />
 
@@ -133,9 +133,19 @@ res = foo.x + bar.x`,
 
 ## Linkers
 
-`SqLinker` type is a pluggable object that describes how imports are resolved.
+[SqLinker](https://github.com/quantified-uncertainty/squiggle/blob/main/packages/squiggle-lang/src/public/SqLinker.ts) type is a pluggable object that describes how imports are resolved.
 
-It allows you to customize the way Squiggle modules are resolved and loaded.
+It allows you to customize the way Squiggle modules are resolved and loaded, by defining two hooks: `linker.resolve` and `linker.loadModule`.
+
+As an example, import statement can look like this: `import "import-name" as importVar`.
+
+In this example, `"import-name"` is a string that will first be resolved by the `linker.resolve` method to the real module name.
+
+Typically, the normalized name is the same as the name in the import, so `linker.resolve` will be defined as `(name) => name`.
+
+In other environments, e.g. in the CLI that relies on the local filesystem, import names can be reslative: `import "./foo" as foo`, and the `linker.resolve` function will normalize that to the absolute path.
+
+After the name is resolved, the module is loaded with `linker.loadModule` method.
 
 For example, on [Squiggle Hub](https://squigglehub.org), we use a custom linker that fetches `hub:*` modules from the server through GraphQL.
 
@@ -151,21 +161,15 @@ When you update a head, the project will clean up all modules that are not reach
 
 ## Dependency resolving and pinning
 
-<Callout type="warn">
+<Callout type="warning">
     This functionality is still untested. We don't use dependency pinning on Squiggle Hub yet.
 </Callout>
 
-Imports look like this: `import "import-name" as importVar`.
-
-In this example, `"import-name"` is a string that will first be resolved by the `linker.resolve` method to the real module name.
-
-This is useful because in the command-line environment you might prefer to do relative imports: `import "./foo" as foo`, and we resolve that to the absolute path. Otherwise you'd get duplicate instances of the same module.
-
-After that, the module is loaded with `linker.loadModule` method. This module takes two parameters: the module name and its optional hash that comes from pins stored on the parent module object.
+`linker.loadModule` method takes two parameters: the module name and its optional hash that comes from pins stored on the parent module object.
 
 If the hash is provided, the linker **must** return the module with that hash.
 
-If **all** modules have pins, all the way down to the leaf modules, the project will be completely deterministic and reproducible.
+If **all** modules have pins, all the way down to the leaf modules, the project will be completely deterministic and reproducible. This is going to be useful for caching in the future releases of Squiggle.
 
 ## Performance considerations
 
