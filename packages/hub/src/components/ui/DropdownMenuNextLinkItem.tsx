@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { FC } from "react";
 
 import { DropdownMenuItemLayout, IconProps } from "@quri/ui";
+
+import { Link } from "./Link";
 
 type Props = {
   href: string;

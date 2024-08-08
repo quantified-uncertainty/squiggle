@@ -1,5 +1,4 @@
 import { signIn, useSession } from "next-auth/react";
-import Link from "next/link";
 import { FC, useState } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
@@ -16,6 +15,7 @@ import {
   UserCircleIcon,
 } from "@quri/ui";
 
+import { Link } from "@/components/ui/Link";
 import { useUsername } from "@/hooks/useUsername";
 import { SQUIGGLE_DOCS_URL } from "@/lib/common";
 import { aboutRoute, newModelRoute } from "@/routes";

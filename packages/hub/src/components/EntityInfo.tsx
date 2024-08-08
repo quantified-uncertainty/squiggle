@@ -1,8 +1,9 @@
 import { clsx } from "clsx";
-import Link from "next/link";
 import { FC, ReactNode } from "react";
 
 import { IconProps } from "@/relative-values/components/ui/icons/Icon";
+
+import { Link } from "./ui/Link";
 
 // works both for models and for definitions
 export type EntityNode = {

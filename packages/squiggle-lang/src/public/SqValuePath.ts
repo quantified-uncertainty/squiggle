@@ -89,7 +89,7 @@ export class SqValuePathEdge {
 // There might be a better place for this to go, nearer to the ASTNode type.
 function astOffsetToPathEdges(ast: ASTNode, offset: number): SqValuePathEdge[] {
   function buildRemainingPathEdges(ast: ASTNode): SqValuePathEdge[] {
-    switch (ast.type) {
+    switch (ast.kind) {
       case "Program": {
         for (const statement of ast.statements) {
           if (locationContains(statement.location, offset)) {
@@ -114,14 +114,14 @@ function astOffsetToPathEdges(ast: ASTNode, offset: number): SqValuePathEdge[] {
           }
 
           if (
-            pair.type === "KeyValue" &&
-            pair.key.type === "String" // only string keys are supported
+            pair.kind === "KeyValue" &&
+            pair.key.kind === "String" // only string keys are supported
           ) {
             return [
               SqValuePathEdge.fromKey(pair.key.value),
               ...buildRemainingPathEdges(pair.value),
             ];
-          } else if (pair.type === "Identifier") {
+          } else if (pair.kind === "Identifier") {
             return [SqValuePathEdge.fromKey(pair.value)]; // this is a final node, no need to buildRemainingPathEdges recursively
           }
         }
@@ -154,7 +154,7 @@ function astOffsetToPathEdges(ast: ASTNode, offset: number): SqValuePathEdge[] {
       case "Block": {
         if (
           ast.statements.length === 1 &&
-          ["Array", "Dict"].includes(ast.statements[0].type)
+          ["Array", "Dict"].includes(ast.statements[0].kind)
         ) {
           return buildRemainingPathEdges(ast.statements[0]);
         }

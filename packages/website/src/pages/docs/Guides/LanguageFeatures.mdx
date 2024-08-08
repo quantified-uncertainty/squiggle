@@ -5,7 +5,7 @@ description: "Language features: an overview of syntax, operators, functions, an
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
 
-# Language Features 
+# Language Features
 
 ## Program Structure
 
@@ -55,6 +55,48 @@ argPlusX(5)`}
 />
 
 In the above example, the `argPlusX` function captures the value of `x` from line 1, not the newly shadowed `x` from line 4. As a result, `argPlusX(5)` returns 10, not 15.
+
+## Unit Type Annotations
+
+Variable declarations may optionally be annotated with *unit types*, such as `kilograms` or `dollars`. Unit types are declared with `::`, for example:
+
+<SquiggleEditor
+  defaultCode={`distance :: meters = 100`}
+/>
+
+A unit type can be any identifier, and you don't have to define a unit type before you use it.
+
+You can also create composite unit types using `*` (multiplication), `/` (division), and '^' (exponentiation). For example:
+
+<SquiggleEditor
+  defaultCode={`raceDistance :: m = 100
+usainBoltTime :: s = 9.58
+usainBoltSpeed :: m/s = raceDistance / usainBoltTime`}
+/>
+
+You can use any number of `*` and `/` operators in a unit type, but you cannot use parentheses. Unit type operators follow standard order of operations: `*` and `/` are left-associative and have the same precedence, and `^` has higher precedence.
+
+The following unit types are all equivalent: `kg*m/s^2`, `kg*m/s/s`, `m/s*kg/s`, `m/s^2*kg`, `kg*m^2/m/s/s`.
+
+For unitless types, you may use a number in the unit type annotation (by convention you should use the number `1`):
+
+<SquiggleEditor
+  defaultCode={`springConstant :: 1 = 10
+inverseTime :: 1/s = 20`}
+/>
+
+If you use unit type annotations, Squiggle will enforce that variables must have consistent unit types.
+
+If a variable does not have a unit type annotation, Squiggle will attempt to infer its unit type. If the unit type can't be inferred, the variable is treated as any type.
+
+Inline unit type annotations are not currently supported (for example, `x = (y :: meters)`).
+
+Operators and functions obey the following semantics:
+
+- Multiplying or dividing two unit-typed variables multiplies or divides their unit types (respectively).
+- Raising a unit-typed variable to a power produces a result of any unit type (i.e., the result is not type-checked).
+- Most binary operators, including `+`, `-`, and comparison operators (`==`, `>=`, etc.), require that both arguments have the same unit type.
+- Built-in functions can take any unit type and return any unit type.
 
 ## Blocks
 

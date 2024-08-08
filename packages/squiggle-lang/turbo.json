@@ -1,8 +1,8 @@
 {
   "extends": ["//"],
-  "pipeline": {
+  "tasks": {
     "build": {
-      "outputs": ["src/**/*.js", "dist/**", "*.tsbuildinfo"]
+      "outputs": ["src/**/*.js", "dist", "*.tsbuildinfo"]
     },
     "build:ts": {
       "dependsOn": ["build:peggy"]

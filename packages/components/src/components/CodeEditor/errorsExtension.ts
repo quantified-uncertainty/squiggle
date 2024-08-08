@@ -51,8 +51,8 @@ export function errorsExtension(): Extension {
             };
           })
           .filter((err): err is NonNullable<typeof err> => {
-            return Boolean(
-              err && err.location && err.location.end.offset <= docLength
+            return (
+              !!err && err.location && err.location.end.offset <= docLength
             );
           })
           .map((err) => ({

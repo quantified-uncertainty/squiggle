@@ -12,6 +12,7 @@ import {
   type ASTNode,
   LocationRange,
 } from "./types.js";
+import { unitTypeCheck } from "./unitTypeChecker.js";
 
 export type ParseError = {
   type: "SyntaxError";
@@ -28,9 +29,10 @@ export function parse(expr: string, source: string): ParseResult {
       grammarSource: source,
       comments,
     });
-    if (parsed.type !== "Program") {
+    if (parsed.kind !== "Program") {
       throw new Error("Expected parse to result in a Program node");
     }
+    unitTypeCheck(parsed);
     parsed.comments = comments;
     return Result.Ok(parsed);
   } catch (e) {
@@ -38,6 +40,8 @@ export function parse(expr: string, source: string): ParseResult {
       return Result.Err(
         new ICompileError((e as any).message, (e as any).location)
       );
+    } else if (e instanceof ICompileError) {
+      return Result.Err(e);
     } else {
       throw e;
     }
@@ -52,11 +56,11 @@ export function nodeToString(
 ): string {
   const toSExpr = (node: ASTNode): SExpr => {
     const sExpr = (components: (SExpr | undefined)[]): SExpr => ({
-      name: node.type,
+      name: node.kind,
       args: components,
     });
 
-    switch (node.type) {
+    switch (node.kind) {
       case "Block":
       case "Program":
         return sExpr(node.statements.map(toSExpr));
@@ -84,16 +88,31 @@ export function nodeToString(
           node.fractional === null ? "" : `.${node.fractional}`
         }${node.exponent === null ? "" : `e${node.exponent}`}`;
       case "Identifier":
-        return `:${node.value}`;
+        if (node.unitTypeSignature) {
+          return sExpr([node.value, toSExpr(node.unitTypeSignature)]);
+        } else {
+          return `:${node.value}`;
+        }
       case "IdentifierWithAnnotation":
         return sExpr([node.variable, toSExpr(node.annotation)]);
       case "KeyValue":
         return sExpr([node.key, node.value].map(toSExpr));
       case "Lambda":
-        return sExpr([...node.args, node.body].map(toSExpr));
+        return sExpr([
+          ...node.args.map(toSExpr),
+          toSExpr(node.body),
+          node.returnUnitType ? toSExpr(node.returnUnitType) : undefined,
+        ]);
       case "Decorator":
         return sExpr([node.name, ...node.args].map(toSExpr));
       case "LetStatement":
+        return sExpr([
+          toSExpr(node.variable),
+          node.unitTypeSignature ? toSExpr(node.unitTypeSignature) : undefined,
+          toSExpr(node.value),
+          node.exported ? "exported" : undefined,
+          ...node.decorators.map(toSExpr),
+        ]);
       case "DefunStatement":
         return sExpr([
           toSExpr(node.variable),
@@ -109,6 +128,15 @@ export function nodeToString(
             toSExpr
           )
         );
+      case "UnitTypeSignature":
+        return sExpr([toSExpr(node.body)]);
+      case "InfixUnitType":
+        return sExpr([node.op, ...node.args.map(toSExpr)]);
+      case "ExponentialUnitType":
+        return sExpr([
+          toSExpr(node.base),
+          node.exponent !== undefined ? toSExpr(node.exponent) : undefined,
+        ]);
       case "UnitValue":
         return sExpr([toSExpr(node.value), node.unit]);
 

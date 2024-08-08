@@ -1,10 +1,10 @@
 import clsx from "clsx";
-import Link from "next/link";
 import React, { FC, PropsWithChildren } from "react";
 
 import { LockIcon } from "@quri/ui";
 
 import { EntityNode } from "./EntityInfo";
+import { Link } from "./ui/Link";
 
 export type { EntityNode };
 

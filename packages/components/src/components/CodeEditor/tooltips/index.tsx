@@ -127,8 +127,8 @@ export function tooltipsExtension() {
 
           if (
             // Note that `valueAst` can't be "DecoratedStatement", we skip those in `SqValueContext` and AST symbols
-            (valueAst.type === "LetStatement" ||
-              valueAst.type === "DefunStatement") &&
+            (valueAst.kind === "LetStatement" ||
+              valueAst.kind === "DefunStatement") &&
             // If these don't match then variable was probably shadowed by a later statement and we can't show its value.
             // Or it could be caused by code rot, if we change the logic of how `valueAst` is computed, or add another statement type in AST.
             // TODO - if we can prove that the variable was shadowed, show the tooltip pointing to the latest assignment.
