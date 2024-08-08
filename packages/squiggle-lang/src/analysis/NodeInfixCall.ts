@@ -1,5 +1,6 @@
 import { infixFunctions } from "../ast/operators.js";
 import { InfixOperator, KindNode, LocationRange } from "../ast/types.js";
+import { ICompileError } from "../errors/IError.js";
 import { Type } from "../types/Type.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
@@ -27,10 +28,17 @@ export class NodeInfixCall extends ExpressionNode<"InfixCall"> {
   ): NodeInfixCall {
     const fn = context.stdlib.get(infixFunctions[node.op]);
     if (!fn) {
-      throw new Error(`Infix function not found: ${node.op}`);
+      // shouldn't happen with the default stdlib in context and the correct peggy grammar
+      throw new ICompileError(
+        `Internal error: Infix function not found: '${node.op}'`,
+        node.location
+      );
     }
     if (fn.type !== "Lambda") {
-      throw new Error(`Expected infix function to be a function`);
+      throw new ICompileError(
+        `Internal error: Expected infix function to be a function`,
+        node.location
+      );
     }
 
     const arg1 = analyzeExpression(node.args[0], context);
@@ -38,8 +46,9 @@ export class NodeInfixCall extends ExpressionNode<"InfixCall"> {
 
     const type = fn.value.inferOutputType([arg1.type, arg2.type]);
     if (!type) {
-      throw new Error(
-        `Infix function ${node.op} does not support arguments of type ${arg1.type.display()} and ${arg2.type.display()}`
+      throw new ICompileError(
+        `Operator '${node.op}' does not support types '${arg1.type.display()}' and '${arg2.type.display()}'`,
+        node.location
       );
     }
 

@@ -1,4 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
+import { ICompileError } from "../errors/IError.js";
 import { Type } from "../types/Type.js";
 import { Node } from "./Node.js";
 
@@ -34,7 +35,10 @@ export class NodeIdentifierDefinition extends Node<"IdentifierDefinition"> {
   // unused method, but can be useful later
   get rank(): Rank {
     if (!this.parent) {
-      throw new Error("IdentifierDefinition has no parent");
+      throw new ICompileError(
+        "Internal error: IdentifierDefinition has no parent",
+        this.location
+      );
     }
     if (this.parent.kind === "LambdaParameter") {
       return "parameter";

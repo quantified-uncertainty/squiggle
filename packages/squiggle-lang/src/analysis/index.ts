@@ -1,4 +1,5 @@
 import { AST, ASTNode } from "../ast/types.js";
+import { ICompileError } from "../errors/IError.js";
 import { getStdLib } from "../library/index.js";
 import { Bindings } from "../reducer/Stack.js";
 import { AnalysisContext } from "./context.js";
@@ -45,7 +46,11 @@ function assertKind<Kind extends TypedASTNode["kind"]>(
   kind: Kind
 ): asserts node is KindTypedNode<Kind> {
   if (node.kind !== kind) {
-    throw new Error(`Expected ${kind}, got ${node.kind}`);
+    // shouldn't happen if Peggy grammar is correct
+    throw new ICompileError(
+      `Internal error: Expected ${kind}, got ${node.kind}`,
+      node.location
+    );
   }
 }
 
@@ -55,8 +60,10 @@ function assertOneOfKinds<Kind extends TypedASTNode["kind"]>(
   kindsName?: string
 ): asserts node is KindTypedNode<Kind> {
   if (!(kinds as readonly string[]).includes(node.kind)) {
-    throw new Error(
-      `Expected ${kindsName ?? kinds.join("|")}, got ${node.kind}`
+    // shouldn't happen if Peggy grammar is correct
+    throw new ICompileError(
+      `Internal error: Expected ${kindsName ?? kinds.join("|")}, got ${node.kind}`,
+      node.location
     );
   }
 }
@@ -125,7 +132,11 @@ export function analyzeStatement(
 function analyzeAstNode(node: ASTNode, context: AnalysisContext): TypedASTNode {
   switch (node.kind) {
     case "Program":
-      throw new Error("Encountered a nested Program node");
+      // shouldn't happen if Peggy grammar is correct
+      throw new ICompileError(
+        "Encountered a nested Program node",
+        node.location
+      );
     case "Import":
       return NodeImport.fromAst(node);
     case "Block":

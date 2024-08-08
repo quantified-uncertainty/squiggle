@@ -25,15 +25,35 @@ export type ParseError = {
 
 type ParseResult = result<TypedAST, ICompileError>;
 
+function codeToFullLocationRange(
+  code: string,
+  sourceId: string
+): LocationRange {
+  const lines = code.split("\n");
+  return {
+    start: {
+      line: 1,
+      column: 1,
+      offset: 0,
+    },
+    end: {
+      line: lines.length,
+      column: lines.at(-1)?.length ?? 1,
+      offset: code.length,
+    },
+    source: sourceId,
+  };
+}
+
 export function parse(
   expr: string,
-  source: string,
+  sourceId: string,
   stdlib?: Bindings // stdlib is necessary for typechecking
 ): ParseResult {
   try {
     const comments: ASTCommentNode[] = [];
     const parsed: AST = peggyParse(expr, {
-      grammarSource: source,
+      grammarSource: sourceId,
       comments,
     });
     if (parsed.kind !== "Program") {
@@ -56,7 +76,9 @@ export function parse(
     } else if (e instanceof ICompileError) {
       return Result.Err(e);
     } else {
-      throw e;
+      return Result.Err(
+        new ICompileError(String(e), codeToFullLocationRange(expr, sourceId))
+      );
     }
   }
 }
