@@ -8,7 +8,7 @@ import {
 } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { Env, SqCalculator, SqInput, SqProject } from "@quri/squiggle-lang";
+import { Env, run, SqCalculator, SqInput } from "@quri/squiggle-lang";
 
 import { PlaygroundSettings } from "../../components/PlaygroundSettings.js";
 import { ErrorAlert } from "../../components/ui/Alert.js";
@@ -40,13 +40,8 @@ async function runSimulation(
   if (!code) {
     return undefined;
   }
-  const project = SqProject.create({ environment });
-
-  const sourceId = "calculator";
-  project.setSource(sourceId, code);
-
-  await project.run(sourceId);
-  return project.getResult(sourceId);
+  const output = await run(code, { environment });
+  return output.getEndResult();
 }
 
 function fieldValueToCode(

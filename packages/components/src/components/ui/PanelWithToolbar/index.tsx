@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useState } from "react";
+import { ReactNode, startTransition, useCallback, useState } from "react";
 
 import { ToolbarItem } from "./ToolbarItem.js";
 
@@ -25,11 +25,11 @@ export function PanelWithToolbar<const ModalNames extends string[]>({
   const [modalName, setModalName] = useState<ModalNames[number] | undefined>();
 
   const openModal = useCallback((newModalName: ModalNames[number]) => {
-    setModalName(newModalName);
+    startTransition(() => setModalName(newModalName));
   }, []);
 
   const closeModal = useCallback(() => {
-    setModalName(undefined);
+    startTransition(() => setModalName(undefined));
   }, []);
 
   const modal = modalName ? renderModal?.(modalName) : undefined;

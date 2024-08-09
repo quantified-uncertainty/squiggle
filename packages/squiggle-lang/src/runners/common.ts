@@ -1,7 +1,7 @@
 import { compileAst } from "../expression/compile.js";
 import { getStdLib } from "../library/index.js";
 import { Reducer } from "../reducer/Reducer.js";
-import { ImmutableMap } from "../utility/immutableMap.js";
+import { ImmutableMap } from "../utility/immutable.js";
 import { Err, Ok } from "../utility/result.js";
 import { Value } from "../value/index.js";
 import { vDict } from "../value/VDict.js";

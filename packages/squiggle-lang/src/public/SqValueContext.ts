@@ -1,7 +1,16 @@
 import { ASTNode } from "../ast/types.js";
 import { isBindingStatement } from "../ast/utils.js";
-import { RunContext } from "./SqProject/ProjectItem.js";
+import { Env } from "../dists/env.js";
+import { SqModule } from "../index.js";
 import { SqValuePath, SqValuePathEdge } from "./SqValuePath.js";
+
+// The common scenario is:
+// - you obtain `SqValue` somehow
+// - you need to know where it came from, so you query `value.context.runContext`.
+export type RunContext = {
+  module: SqModule;
+  environment: Env;
+};
 
 export class SqValueContext {
   public runContext: RunContext;
@@ -88,11 +97,11 @@ export class SqValueContext {
   }
 
   docstring(): string | undefined {
-    const { ast } = this.runContext;
-
     if (!this.valueAstIsPrecise) {
       return;
     }
+
+    const ast = this.runContext.module.expectAst();
 
     if (!ast.comments.length) {
       return; // no comments
@@ -139,7 +148,7 @@ export class SqValueContext {
     }
 
     // Let's check that all text between the comment and the value node is whitespace.
-    const ok = this.runContext.source
+    const ok = this.runContext.module.code
       .substring(commentEnds, valueStarts)
       .match(/^\s*$/);
 

@@ -1,22 +1,19 @@
-import { SqProject } from "../../src/index.js";
+import { run } from "../../src/index.js";
 
 const SAMPLE_COUNT = 100;
 
 async function getSamplesForSeed(seed?: string | undefined) {
-  const project = new SqProject({
+  const { result: output } = await run("2 to 3", {
     environment: {
       sampleCount: SAMPLE_COUNT,
       xyPointLength: 100,
       seed: seed || "default",
     },
   });
-  project.setSource("main", "2 to 3");
-  await project.run("main");
-  const result = project.getResult("main");
-  if (!result.ok) {
+  if (!output.ok) {
     throw new Error("Run failed");
   }
-  const samples = result.value.asJS();
+  const samples = output.value.result.asJS();
   if (!Array.isArray(samples)) {
     throw new Error("Expected an array");
   }

@@ -1,5 +1,4 @@
 import { lambdaToCalculator } from "../../fr/calculator.js";
-import { result } from "../../utility/result.js";
 import { SDate } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
 import { Value, vVoid } from "../../value/index.js";
@@ -13,7 +12,6 @@ import { vDate } from "../../value/VDate.js";
 import { vLambda } from "../../value/vLambda.js";
 import { vNumber } from "../../value/VNumber.js";
 import { vString } from "../../value/VString.js";
-import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValuePath } from "../SqValuePath.js";
 import { SqArray } from "./SqArray.js";
@@ -448,7 +446,3 @@ export class SqSpecificationValue extends SqAbstractValue<
 }
 
 export type SqValue = ReturnType<typeof wrapValue>;
-
-export function toStringResult(result: result<SqValue, SqError>) {
-  return `${result.ok ? "Ok" : "Error"}(${result.value.toString()})`;
-}

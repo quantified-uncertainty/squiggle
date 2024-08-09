@@ -15,6 +15,7 @@ export {
   versionSupportsImportTooltip,
   versionSupportsOnOpenExport,
   versionSupportsSqPathV2,
+  versionSupportsSqProjectV2,
   versionSupportsSquiggleChart,
 } from "./predicates.js";
 

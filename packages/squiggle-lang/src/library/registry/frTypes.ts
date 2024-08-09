@@ -4,7 +4,7 @@ import { SampleSetDist } from "../../dists/SampleSetDist/index.js";
 import { BaseSymbolicDist } from "../../dists/SymbolicDist/BaseSymbolicDist.js";
 import { SymbolicDist } from "../../dists/SymbolicDist/index.js";
 import { Lambda } from "../../reducer/lambda.js";
-import { ImmutableMap } from "../../utility/immutableMap.js";
+import { ImmutableMap } from "../../utility/immutable.js";
 import { SDate } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
 import { Domain } from "../../value/domain.js";

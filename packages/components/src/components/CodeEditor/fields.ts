@@ -28,7 +28,7 @@ const defaultReactProps: CodemirrorReactProps = {
   onFocusByPath: null,
   showGutter: false,
   lineWrapping: true,
-  project: SqProject.create(),
+  project: new SqProject(),
   sourceId: "fake",
   onChange: () => {},
   onSubmit: null,
