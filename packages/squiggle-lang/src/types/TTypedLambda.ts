@@ -13,11 +13,11 @@ import { TLambda } from "./TLambda.js";
 import { TAny, Type } from "./Type.js";
 
 export class TTypedLambda extends TLambda {
-  public inputs: FnInput<Type<unknown>>[];
+  public inputs: FnInput<unknown>[];
 
   constructor(
-    maybeInputs: InputOrType<any>[],
-    public output: Type<any>
+    maybeInputs: InputOrType<unknown>[],
+    public output: Type
   ) {
     super();
     this.inputs = maybeInputs.map(inputOrTypeToInput);
@@ -42,7 +42,7 @@ export class TTypedLambda extends TLambda {
     };
   }
 
-  override isSupertype(other: Type<unknown>) {
+  override isSupertype(other: Type) {
     if (other instanceof TAny) return true;
     return (
       other instanceof TTypedLambda &&
@@ -69,6 +69,6 @@ export class TTypedLambda extends TLambda {
 }
 
 // TODO - consistent naming
-export function tTypedLambda(inputs: InputOrType<any>[], output: Type<any>) {
+export function tTypedLambda(inputs: InputOrType<unknown>[], output: Type) {
   return new TTypedLambda(inputs, output);
 }

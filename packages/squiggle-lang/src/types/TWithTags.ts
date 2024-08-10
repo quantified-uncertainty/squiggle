@@ -19,6 +19,7 @@ export class TWithTags<T> extends Type<{ value: T; tags: ValueTags }> {
       tags: v.tags ?? new ValueTags({}),
     };
   }
+
   // This will overwrite the original tags in case of `frWithTags(frAny())`. But
   // in that situation you shouldn't use `frWithTags`, a simple `frAny` will do.
   // (TODO: this is not true anymore, `frAny` can be valid for the sake of naming a generic type; investigate)

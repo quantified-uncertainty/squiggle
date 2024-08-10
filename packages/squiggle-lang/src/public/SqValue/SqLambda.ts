@@ -20,6 +20,7 @@ export type SqLambdaParameter = {
 type SqLambdaSignature = SqLambdaParameter[];
 
 function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
+  // TODO - just return `FnSignature`, no need to convert to `SqLambdaSignature`
   switch (lambda.type) {
     case "UserDefinedLambda":
       return [

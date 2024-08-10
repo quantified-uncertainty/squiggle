@@ -5,7 +5,7 @@ import { Reducer } from "../../reducer/Reducer.js";
 import { Bindings } from "../../reducer/Stack.js";
 import { Value } from "../../value/index.js";
 
-export type SquiggleDefinition = {
+type SquiggleDefinition = {
   name: string;
   value: Value;
 };
