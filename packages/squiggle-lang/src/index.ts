@@ -90,7 +90,7 @@ export {
   type ASTNode,
   type LocationRange as SqLocation,
 } from "./ast/types.js";
-export { TypedASTNode } from "./analysis/types.js";
+export { type TypedASTNode } from "./analysis/types.js";
 export { defaultEnv as defaultEnvironment } from "./dists/env.js";
 export { type Env };
 

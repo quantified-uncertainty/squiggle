@@ -23,7 +23,7 @@ export class TTuple<const T extends any[]> extends Type<
       return undefined;
     }
 
-    return items as any;
+    return items as T;
   }
 
   pack(values: unknown[]) {

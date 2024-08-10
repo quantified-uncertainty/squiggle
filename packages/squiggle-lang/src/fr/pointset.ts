@@ -16,10 +16,10 @@ import {
   tArray,
   tDict,
   tDist,
-  tLambdaTyped,
   tMixedSet,
   tNumber,
   tPointSetDist,
+  tTypedLambda,
 } from "../types/index.js";
 import { Ok } from "../utility/result.js";
 import { vNumber } from "../value/VNumber.js";
@@ -167,7 +167,7 @@ export const library = [
     displaySection: "Transformations",
     definitions: [
       makeDefinition(
-        [tPointSetDist, namedInput("fn", tLambdaTyped([tNumber], tNumber))],
+        [tPointSetDist, namedInput("fn", tTypedLambda([tNumber], tNumber))],
         tPointSetDist,
         ([dist, lambda], reducer) => {
           return unwrapDistResult(

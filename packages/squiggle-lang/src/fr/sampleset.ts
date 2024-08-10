@@ -13,10 +13,10 @@ import { Reducer } from "../reducer/Reducer.js";
 import {
   tArray,
   tDist,
-  tLambdaTyped,
   tNumber,
   tOr,
   tSampleSetDist,
+  tTypedLambda,
 } from "../types/index.js";
 import { Ok } from "../utility/result.js";
 import { Value } from "../value/index.js";
@@ -63,7 +63,7 @@ const fromFn = (lambda: Lambda, reducer: Reducer, fn: (i: number) => Value[]) =>
 
 const fromFnDefinition = makeDefinition(
   [
-    tLambdaTyped(
+    tTypedLambda(
       [fnInput({ name: "index", type: tNumber, optional: true })],
       tNumber
     ),
@@ -152,7 +152,7 @@ const baseLibrary = [
     description: `Transforms a sample set distribution by applying a function to each sample. Returns a new sample set distribution.`,
     definitions: [
       makeDefinition(
-        [tSampleSetDist, namedInput("fn", tLambdaTyped([tNumber], tNumber))],
+        [tSampleSetDist, namedInput("fn", tTypedLambda([tNumber], tNumber))],
         tSampleSetDist,
         ([dist, lambda], reducer) => {
           return unwrapDistResult(
@@ -182,7 +182,7 @@ const baseLibrary = [
           tSampleSetDist,
           fnInput({
             name: "fn",
-            type: tLambdaTyped([tNumber, tNumber], tNumber),
+            type: tTypedLambda([tNumber, tNumber], tNumber),
           }),
         ],
         tSampleSetDist,
@@ -218,7 +218,7 @@ const baseLibrary = [
           tSampleSetDist,
           tSampleSetDist,
           tSampleSetDist,
-          namedInput("fn", tLambdaTyped([tNumber, tNumber, tNumber], tNumber)),
+          namedInput("fn", tTypedLambda([tNumber, tNumber, tNumber], tNumber)),
         ],
         tSampleSetDist,
         ([dist1, dist2, dist3, lambda], reducer) => {
@@ -258,7 +258,7 @@ const baseLibrary = [
       makeDefinition(
         [
           tArray(tSampleSetDist),
-          namedInput("fn", tLambdaTyped([tArray(tNumber)], tNumber)),
+          namedInput("fn", tTypedLambda([tArray(tNumber)], tNumber)),
         ],
         tSampleSetDist,
         ([dists, lambda], reducer) => {

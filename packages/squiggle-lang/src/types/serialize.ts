@@ -28,7 +28,7 @@ import { tSpecificationWithTags } from "./TSpecificationWithTags.js";
 import { tString } from "./TString.js";
 import { tTableChart } from "./TTableChart.js";
 import { tTuple } from "./TTuple.js";
-import { tLambdaTyped } from "./TTypedLambda.js";
+import { tTypedLambda } from "./TTypedLambda.js";
 import { tWithTags } from "./TWithTags.js";
 import { tAny, Type } from "./Type.js";
 
@@ -174,7 +174,7 @@ export function deserializeType(
     case "LambdaNand":
       return tLambdaNand(type.paramLengths);
     case "TypedLambda":
-      return tLambdaTyped(
+      return tTypedLambda(
         type.inputs.map((input) => visit.input(input)),
         visit.type(type.output)
       );

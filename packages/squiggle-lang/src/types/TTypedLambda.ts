@@ -48,7 +48,7 @@ export class TTypedLambda extends TLambda {
       other instanceof TTypedLambda &&
       this.output.isSupertype(other.output) &&
       this.inputs.length === other.inputs.length &&
-      // inputs are contravariant
+      // inputs are contravariant; https://en.wikipedia.org/wiki/Subtyping#Function_types
       other.inputs.every((input, index) =>
         input.type.isSupertype(this.inputs[index].type)
       )
@@ -69,6 +69,6 @@ export class TTypedLambda extends TLambda {
 }
 
 // TODO - consistent naming
-export function tLambdaTyped(inputs: InputOrType<any>[], output: Type<any>) {
+export function tTypedLambda(inputs: InputOrType<any>[], output: Type<any>) {
   return new TTypedLambda(inputs, output);
 }

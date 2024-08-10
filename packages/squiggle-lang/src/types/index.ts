@@ -10,7 +10,7 @@ export { tBool } from "./TBool.js";
 export { tAny } from "./Type.js";
 export { tCalculator } from "./TCalculator.js";
 export { tLambda } from "./TLambda.js";
-export { tLambdaTyped } from "./TTypedLambda.js";
+export { tTypedLambda } from "./TTypedLambda.js";
 export { tLambdaNand } from "./TLambdaNand.js";
 export { tInput } from "./TInput.js";
 export { tWithTags } from "./TWithTags.js";

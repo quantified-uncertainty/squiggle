@@ -10,10 +10,10 @@ import {
   tArray,
   tBool,
   tDictWithArbitraryKeys,
-  tLambdaTyped,
   tNumber,
   tString,
   tTuple,
+  tTypedLambda,
 } from "../types/index.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { Value } from "../value/index.js";
@@ -184,7 +184,7 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
           tDictWithArbitraryKeys(tAny({ genericName: "A" })),
           namedInput(
             "fn",
-            tLambdaTyped(
+            tTypedLambda(
               [tAny({ genericName: "A" })],
               tAny({ genericName: "B" })
             )
@@ -215,7 +215,7 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
       makeDefinition(
         [
           tDictWithArbitraryKeys(tAny({ genericName: "A" })),
-          namedInput("fn", tLambdaTyped([tString], tString)),
+          namedInput("fn", tTypedLambda([tString], tString)),
         ],
         tDictWithArbitraryKeys(tAny({ genericName: "A" })),
         ([dict, lambda], reducer) => {

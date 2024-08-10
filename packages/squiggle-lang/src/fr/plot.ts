@@ -19,13 +19,13 @@ import {
   tDict,
   tDist,
   tDistOrNumber,
-  tLambdaTyped,
   tNumber,
   tOr,
   tPlot,
   tSampleSetDist,
   tScale,
   tString,
+  tTypedLambda,
   tWithTags,
 } from "../types/index.js";
 import { TDateRange } from "../types/TDateRange.js";
@@ -174,7 +174,7 @@ const numericFnDef = () => {
     };
   };
 
-  const fnType = tLambdaTyped([tNumber], tNumber);
+  const fnType = tTypedLambda([tNumber], tNumber);
 
   return maker.make({
     name: "numericFn",
@@ -461,7 +461,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          namedInput("fn", tWithTags(tLambdaTyped([tNumber], tDist))),
+          namedInput("fn", tWithTags(tTypedLambda([tNumber], tDist))),
           fnInput({
             name: "params",
             type: tDict(
@@ -499,7 +499,7 @@ export const library = [
       makeDefinition(
         [
           tDict(
-            ["fn", tLambdaTyped([tNumber], tDist)],
+            ["fn", tTypedLambda([tNumber], tDist)],
             { key: "distXScale", type: tScale, optional: true },
             { key: "xScale", type: tScale, optional: true },
             { key: "yScale", type: tScale, optional: true },

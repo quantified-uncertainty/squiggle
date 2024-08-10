@@ -3,7 +3,7 @@ import { makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { fnInput } from "../reducer/lambda/FnInput.js";
-import { tAny, tBool, tLambdaTyped, tOr, tString } from "../types/index.js";
+import { tAny, tBool, tOr, tString, tTypedLambda } from "../types/index.js";
 import { isEqual } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -92,12 +92,12 @@ myFn = typeOf({|e| e})`,
         [
           fnInput({
             name: "fn",
-            type: tLambdaTyped([], tAny({ genericName: "A" })),
+            type: tTypedLambda([], tAny({ genericName: "A" })),
           }),
           fnInput({
             name: "fallbackFn",
             // in the future, this function could be called with the error message
-            type: tLambdaTyped([], tAny({ genericName: "B" })),
+            type: tTypedLambda([], tAny({ genericName: "B" })),
           }),
         ],
         tOr(tAny({ genericName: "A" }), tAny({ genericName: "B" })),

@@ -6,9 +6,9 @@ import {
   tAny,
   tArray,
   tDict,
-  tLambdaTyped,
   tString,
   tTableChart,
+  tTypedLambda,
 } from "../types/index.js";
 
 const maker = new FnFactory({
@@ -77,7 +77,7 @@ export const library = [
               "columns",
               tArray(
                 tDict(
-                  ["fn", tLambdaTyped([tAny({ genericName: "A" })], tAny())],
+                  ["fn", tTypedLambda([tAny({ genericName: "A" })], tAny())],
                   { key: "name", type: tString, optional: true }
                 )
               ),
@@ -104,7 +104,7 @@ export const library = [
               "columns",
               tArray(
                 tDict(
-                  ["fn", tLambdaTyped([tAny({ genericName: "A" })], tAny())],
+                  ["fn", tTypedLambda([tAny({ genericName: "A" })], tAny())],
                   { key: "name", type: tString, optional: true }
                 )
               ),

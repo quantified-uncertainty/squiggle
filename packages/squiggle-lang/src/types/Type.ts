@@ -55,7 +55,7 @@ export class TAny extends Type<Value> {
     return v;
   }
 
-  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+  override serialize(): SerializedType {
     return { kind: "Any", genericName: this.genericName };
   }
 

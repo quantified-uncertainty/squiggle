@@ -18,13 +18,13 @@ import {
   tDistOrNumber,
   tDuration,
   tLambda,
-  tLambdaTyped,
   tNumber,
   tOr,
   tPlot,
   tSpecificationWithTags,
   tString,
   tTableChart,
+  tTypedLambda,
   tWithTags,
 } from "../types/index.js";
 import { OrType } from "../types/TOr.js";
@@ -103,7 +103,7 @@ function decoratorWithInputOrFnInput<T>(
   return makeDefinition(
     [
       tWithTags(inputType),
-      tOr(outputType, tLambdaTyped([inputType], outputType)),
+      tOr(outputType, tTypedLambda([inputType], outputType)),
     ],
     tWithTags(inputType),
     ([{ value, tags }, newInput], reducer) => {
@@ -206,12 +206,12 @@ example2 = {|x| x + 1}`,
       showAsDef(tWithTags(tDist), tPlot),
       showAsDef(tArray(tAny()), tTableChart),
       showAsDef(
-        tLambdaTyped([tNumber], tDistOrNumber),
+        tTypedLambda([tNumber], tDistOrNumber),
         tOr(tPlot, tCalculator)
       ),
-      showAsDef(tLambdaTyped([tDate], tDistOrNumber), tOr(tPlot, tCalculator)),
+      showAsDef(tTypedLambda([tDate], tDistOrNumber), tOr(tPlot, tCalculator)),
       showAsDef(
-        tLambdaTyped([tDuration], tDistOrNumber),
+        tTypedLambda([tDuration], tDistOrNumber),
         tOr(tPlot, tCalculator)
       ),
       //The frLambda definition needs to come after the more narrow frLambdaTyped definitions.

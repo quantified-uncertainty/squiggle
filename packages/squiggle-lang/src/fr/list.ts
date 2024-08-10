@@ -21,11 +21,11 @@ import {
   tArray,
   tBool,
   tLambdaNand,
-  tLambdaTyped,
   tNumber,
   tSampleSetDist,
   tString,
   tTuple,
+  tTypedLambda,
 } from "../types/index.js";
 import { shuffle, unzip, zip } from "../utility/E_A.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
@@ -162,7 +162,7 @@ export const library = [
           namedInput("count", tNumber),
           namedInput(
             "fn",
-            tLambdaTyped(
+            tTypedLambda(
               [fnInput({ name: "index", type: tNumber, optional: true })],
               tAny({ genericName: "A" })
             )
@@ -293,7 +293,7 @@ export const library = [
       makeDefinition(
         [
           tArray(tAny({ genericName: "A" })),
-          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tNumber)),
+          namedInput("fn", tTypedLambda([tAny({ genericName: "A" })], tNumber)),
         ],
         tArray(tAny({ genericName: "A" })),
         ([array, lambda], reducer) => {
@@ -313,7 +313,7 @@ export const library = [
       makeDefinition(
         [
           tArray(tAny({ genericName: "A" })),
-          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tNumber)),
+          namedInput("fn", tTypedLambda([tAny({ genericName: "A" })], tNumber)),
         ],
         tAny({ genericName: "A" }),
         ([array, lambda], reducer) => {
@@ -339,7 +339,7 @@ export const library = [
       makeDefinition(
         [
           tArray(tAny({ genericName: "A" })),
-          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tNumber)),
+          namedInput("fn", tTypedLambda([tAny({ genericName: "A" })], tNumber)),
         ],
         tAny({ genericName: "A" }),
         ([array, lambda], reducer) => {
@@ -422,7 +422,7 @@ export const library = [
       makeDefinition(
         [
           tArray(tAny({ genericName: "A" })),
-          tLambdaTyped(
+          tTypedLambda(
             [tAny({ genericName: "A" })],
             tAny({ genericName: "B" })
           ),
@@ -449,7 +449,7 @@ export const library = [
       makeDefinition(
         [
           tArray(tAny({ genericName: "A" })),
-          tLambdaTyped(
+          tTypedLambda(
             [
               tAny({ genericName: "A" }),
               fnInput({ name: "index", type: tNumber, optional: true }),
@@ -483,7 +483,7 @@ export const library = [
           namedInput("initialValue", tAny({ genericName: "A" })),
           namedInput(
             "callbackFn",
-            tLambdaTyped(
+            tTypedLambda(
               [
                 namedInput("accumulator", tAny({ genericName: "A" })),
                 namedInput("currentValue", tAny({ genericName: "B" })),
@@ -526,7 +526,7 @@ export const library = [
           namedInput("initialValue", tAny({ genericName: "A" })),
           namedInput(
             "callbackFn",
-            tLambdaTyped(
+            tTypedLambda(
               [
                 namedInput("accumulator", tAny({ genericName: "A" })),
                 namedInput("currentValue", tAny({ genericName: "B" })),
@@ -571,7 +571,7 @@ List.reduceWhile(
           namedInput("initialValue", tAny({ genericName: "A" })),
           namedInput(
             "callbackFn",
-            tLambdaTyped(
+            tTypedLambda(
               [
                 namedInput("accumulator", tAny({ genericName: "A" })),
                 namedInput("currentValue", tAny({ genericName: "B" })),
@@ -581,7 +581,7 @@ List.reduceWhile(
           ),
           namedInput(
             "conditionFn",
-            tLambdaTyped([tAny({ genericName: "A" })], tBool)
+            tTypedLambda([tAny({ genericName: "A" })], tBool)
           ),
         ],
         tAny({ genericName: "A" }),
@@ -599,7 +599,7 @@ List.reduceWhile(
       makeDefinition(
         [
           tArray(tAny({ genericName: "A" })),
-          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tBool)),
+          namedInput("fn", tTypedLambda([tAny({ genericName: "A" })], tBool)),
         ],
         tArray(tAny({ genericName: "A" })),
         ([array, lambda], reducer) =>
@@ -616,7 +616,7 @@ List.reduceWhile(
       makeDefinition(
         [
           tArray(tAny({ genericName: "A" })),
-          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tBool)),
+          namedInput("fn", tTypedLambda([tAny({ genericName: "A" })], tBool)),
         ],
         tBool,
         ([array, lambda], reducer) =>
@@ -633,7 +633,7 @@ List.reduceWhile(
       makeDefinition(
         [
           tArray(tAny({ genericName: "A" })),
-          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tBool)),
+          namedInput("fn", tTypedLambda([tAny({ genericName: "A" })], tBool)),
         ],
         tBool,
         ([array, lambda], reducer) =>
@@ -651,7 +651,7 @@ List.reduceWhile(
       makeDefinition(
         [
           tArray(tAny({ genericName: "A" })),
-          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tBool)),
+          namedInput("fn", tTypedLambda([tAny({ genericName: "A" })], tBool)),
         ],
         tAny({ genericName: "A" }),
         ([array, lambda], reducer) => {
@@ -674,7 +674,7 @@ List.reduceWhile(
       makeDefinition(
         [
           tArray(tAny({ genericName: "A" })),
-          namedInput("fn", tLambdaTyped([tAny({ genericName: "A" })], tBool)),
+          namedInput("fn", tTypedLambda([tAny({ genericName: "A" })], tBool)),
         ],
         tNumber,
         ([array, lambda], reducer) =>

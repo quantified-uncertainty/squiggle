@@ -2,6 +2,7 @@ import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,
 } from "../../serialization/squiggle.js";
+import { UnwrapType } from "../../types/helpers.js";
 import { Type } from "../../types/Type.js";
 
 type Props<T> = {
@@ -59,8 +60,8 @@ export class FnInput<T> {
   }
 }
 
-export function fnInput<T>(props: Props<T>) {
-  return new FnInput(props);
+export function fnInput<const T extends Props<any>>(props: T) {
+  return new FnInput<UnwrapType<T["type"]>>(props);
 }
 
 export function optionalInput<T>(type: Type<T>) {

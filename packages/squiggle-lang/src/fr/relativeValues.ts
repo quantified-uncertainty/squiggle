@@ -7,10 +7,10 @@ import { sq } from "../sq.js";
 import {
   tArray,
   tDict,
-  tLambdaTyped,
   tNumber,
   tPlot,
   tString,
+  tTypedLambda,
 } from "../types/index.js";
 
 const maker = new FnFactory({
@@ -20,7 +20,7 @@ const maker = new FnFactory({
 
 const relativeValuesShape = tDict(
   ["ids", tArray(tString)],
-  ["fn", tLambdaTyped([tString, tString], tArray(tNumber))],
+  ["fn", tTypedLambda([tString, tString], tArray(tNumber))],
   { key: "title", type: tString, optional: true, deprecated: true }
 );
 
