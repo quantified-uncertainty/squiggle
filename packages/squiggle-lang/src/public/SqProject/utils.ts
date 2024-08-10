@@ -1,4 +1,15 @@
-// via https://github.com/6502/sha256/blob/main/sha256.js
+/**
+ * SHA-256 implementation fromhttps://github.com/6502/sha256/blob/main/sha256.js
+ *
+ * There are many SHA-256 implementations in various not-very-popular github
+ * projects and gists.
+ *
+ * I'm not sure which one is the best; some might be more performant. But we can
+ * optimize it later if necessary.
+ *
+ * The hash-based approach in SqProject is inspired by git architecture. Git
+ * uses SHA-1, but SHA-1 is legacy, so we use SHA-256 instead.
+ */
 
 /*
 Copyright 2022 Andrea Griffini
