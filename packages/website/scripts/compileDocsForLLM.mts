@@ -37,12 +37,66 @@ function moduleItemToJson({
   );
 }
 
+function moduleItemToCompressedFormat({
+  name,
+  description,
+  nameSpace,
+  signatures,
+  shorthand,
+  examples,
+}: FnDocumentation): string {
+  // Function signature line
+  const sigLine = `${nameSpace ? nameSpace + "." : ""}${name}${shorthand ? " " + shorthand.symbol : ""}: ${signatures.join(", ")}`;
+
+  // Description
+  const descLine = description ? `\n${description}` : "";
+
+  // Examples
+  let exampleLines = "";
+  if (examples && Array.isArray(examples) && examples.length > 0) {
+    exampleLines = "\n" + examples.map((e) => e.text).join("\n");
+  }
+
+  return `${sigLine}${descLine}${exampleLines}\n`;
+}
+
+function convertSquiggleEditorTags(input: string): string {
+  // Replace opening tags and everything up to the closing />
+  let result = input.replace(
+    /<SquiggleEditor[\s\S]*?defaultCode=\{`([\s\S]*?)`\}\s*\/>/g,
+    (match, codeContent) => {
+      return "```squiggle\n" + codeContent.trim() + "\n```";
+    }
+  );
+
+  return result;
+}
+
+function removeHeaderLines(content: string): string {
+  // Split the content into lines
+  const lines = content.split("\n");
+
+  // Find the index of the first title (line starting with '#')
+  const firstTitleIndex = lines.findIndex((line) =>
+    line.trim().startsWith("#")
+  );
+
+  // If a title is found, remove everything before it
+  if (firstTitleIndex !== -1) {
+    return lines.slice(firstTitleIndex).join("\n");
+  }
+
+  // If no title is found, return the original content
+  return content;
+}
+
 const allDocumentationItems = () => {
   return modulePages
-    .map((page) => generateModuleContent(page, moduleItemToJson))
+    .map((page) => generateModuleContent(page, moduleItemToCompressedFormat))
     .join("\n\n\n");
 };
 
+const promptPageRaw = readFile("./public/llms/prompt.txt");
 const documentationBundlePage = async () => {
   const targetFilename = "./public/llms/documentationBundle.txt";
 
@@ -57,20 +111,27 @@ This file is auto-generated from the documentation files in the Squiggle reposit
   };
 
   const getGuideContent = async () => {
-    const documentationFiles = await glob(
-      "./src/pages/docs/{Guides}/*.{md,mdx}"
-    );
-    return documentationFiles.map(readFile).join("\n\n\n");
+    const documentationFiles = await glob("./src/pages/docs/Guides/*.{md,mdx}");
+    return Promise.all(
+      documentationFiles.map(async (filePath) => {
+        const content = readFile(filePath);
+        const withoutHeaders = removeHeaderLines(content);
+        const convertedContent = convertSquiggleEditorTags(withoutHeaders);
+        return convertedContent;
+      })
+    ).then((contents) => contents.join("\n\n\n"));
   };
 
   console.log("Compiling documentation bundle page...");
   const grammarContent = await getGrammarContent();
   const guideContent = await getGuideContent();
   const apiContent = allDocumentationItems();
+  // const content = guideContent;
   const content =
     header +
+    promptPageRaw +
     `## Peggy Grammar \n\n ${grammarContent} \n\n --- \n\n ` +
-    guideContent +
+    convertSquiggleEditorTags(guideContent) +
     apiContent;
   fs.writeFile(targetFilename, content, (err) => {
     if (err) {
@@ -83,7 +144,6 @@ This file is auto-generated from the documentation files in the Squiggle reposit
 
 const promptPage = async () => {
   console.log("Compiling prompt page...");
-  const promptPage = readFile("./public/llms/prompt.txt");
   const introduction = `---
 description: LLM Prompt Example
 notes: "This Doc is generated using a script, do not edit directly!"
@@ -101,7 +161,7 @@ You can read this document in plaintext [here](/llms/prompt.txt).
   const target = "./src/pages/docs/Ecosystem/LLMPrompt.md";
   fs.writeFile(
     target,
-    introduction + promptPage.replace(/\`squiggle/g, "`js"),
+    introduction + promptPageRaw.replace(/\`squiggle/g, "`js"),
     (err) => {
       if (err) {
         console.error(err);

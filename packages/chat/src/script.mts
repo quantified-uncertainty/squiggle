@@ -3,21 +3,44 @@ import { Anthropic } from "@anthropic-ai/sdk";
 import boxen from "boxen";
 import chalk from "chalk";
 import dotenv from "dotenv";
+import fs from "fs";
 
 import { SqProject } from "@quri/squiggle-components";
 
-import * as allPrompts from "./squigglePrompts.mjs";
-
-// Load environment variables
+// Configuration
 dotenv.config({ path: ".env.local" });
+const MAX_ATTEMPTS = 5;
+const SQUIGGLE_DOCS_PATH = "./src/prompt.txt";
+// const ANTHROPIC_MODEL = "claude-3-haiku-20240307";
+const ANTHROPIC_MODEL = "claude-3-5-sonnet-20240620";
 
+// Initialize Anthropic client
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-const MAX_ATTEMPTS = 3;
+// Utility functions
+const loadTxtFileSync = (filePath) => {
+  try {
+    return fs.readFileSync(filePath, "utf8");
+  } catch (err) {
+    console.error(chalk.red("Error reading file:"), err);
+    throw err;
+  }
+};
 
-async function runSquiggle(code) {
+const extractSquiggleCode = (content) => {
+  const match = content.match(/```squiggle([\s\S]*?)```/);
+  return match ? match[1].trim() : "";
+};
+
+const displayCode = (code, title) => {
+  console.log(chalk.yellow(title));
+  console.log(chalk.green(code));
+};
+
+// Squiggle-related functions
+const runSquiggle = async (code) => {
   const project = SqProject.create({});
   project.setSource("wrapper", code);
   await project.run("wrapper");
@@ -29,18 +52,18 @@ async function runSquiggle(code) {
         ok: false,
         value: `Failed to evaluate Squiggle code: ${result.value.toStringWithDetails(project)}`,
       };
-}
+};
 
-async function createSquiggleCode(prompt, existingCode = "", error = "") {
+const createSquiggleCode = async (prompt, existingCode = "", error = "") => {
   const isFixing = Boolean(existingCode);
   const content = isFixing
-    ? `Fix the following Squiggle code. It produced this error: ${error}\n\nCode:\n${existingCode}\n\n. Explain your thinking. Wrap the code in \`\`\`squiggle tags.`
-    : `Generate Squiggle code for the following prompt. Mainly produce code, short explanations. Wrap the code in \`\`\`squiggle tags.\n\nPrompt: ${prompt}. \n\n\n Information about the Squiggle Language: \n\n\n ${allPrompts.standardPrompt}`;
+    ? `Fix the following Squiggle code. It produced this error: ${error}\n\nCode:\n${existingCode}\n\n. Explain your thinking. Wrap the code in \`\`\`squiggle tags. \n\n Information on Squiggle Language: \n\n\n ${squiggleDocs}`
+    : `Generate Squiggle code for the following prompt. Mainly produce code, short explanations. Wrap the code in \`\`\`squiggle tags.\n\nPrompt: ${prompt}. \n\n\n Information about the Squiggle Language: \n\n\n ${squiggleDocs}`;
 
   try {
     const message = await anthropic.messages.create({
-      model: "claude-3-haiku-20240307",
-      max_tokens: 1000,
+      model: ANTHROPIC_MODEL,
+      max_tokens: 4000,
       messages: [{ role: "user", content }],
     });
 
@@ -49,8 +72,8 @@ async function createSquiggleCode(prompt, existingCode = "", error = "") {
         `✨ Got response from Claude ${isFixing ? "(fix attempt)" : "(initial generation)"}`
       )
     );
+    console.log("Response tokens count:", message.usage);
 
-    console.log("got response", message.content);
     const extractedCode = extractSquiggleCode(message.content[0].text);
     if (!extractedCode) {
       console.error(
@@ -65,19 +88,9 @@ async function createSquiggleCode(prompt, existingCode = "", error = "") {
     );
     throw error;
   }
-}
+};
 
-function extractSquiggleCode(content) {
-  const match = content.match(/```squiggle([\s\S]*?)```/);
-  return match ? match[1].trim() : "";
-}
-
-function displayCode(code, title) {
-  console.log(chalk.yellow(title));
-  console.log(chalk.green(code));
-}
-
-async function validateAndFixCode(prompt, initialCode) {
+const validateAndFixCode = async (prompt, initialCode) => {
   let code = initialCode;
   let isValid = false;
   let attempts = 0;
@@ -106,11 +119,13 @@ async function validateAndFixCode(prompt, initialCode) {
   }
 
   return { isValid, code };
-}
+};
 
-async function main() {
+// Main function
+const main = async () => {
   const prompt =
-    "Create a simple model that estimates the probability of rain tomorrow based on today's temperature. 5-lines.";
+    "Make a very complicated stochastic simulation of a person's finances over time, who has 5+ different asset classes. 400+ lines of code. \n\n Keep this part simple. Do not use any annotations ('@name', '@doc'), do not use domains (i.e. f(t: [2,3])), do not use custom visualizations or calculators yet. Just get the core functionality right. Use the sTest library for tests.";
+
   console.log(chalk.blue.bold("\n🚀 Starting Squiggle Code Generation\n"));
   console.log(chalk.magenta("Prompt:"), prompt);
 
@@ -131,8 +146,12 @@ async function main() {
       )
     );
   }
-}
+};
 
+// Load Squiggle docs
+const squiggleDocs = loadTxtFileSync(SQUIGGLE_DOCS_PATH);
+
+// Run the main function
 main().catch((error) => {
   console.error(chalk.red.bold("\n💥 An unexpected error occurred:"));
   console.error(chalk.red(error));
