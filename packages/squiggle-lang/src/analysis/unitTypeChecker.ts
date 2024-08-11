@@ -1,6 +1,6 @@
+import { astNodeToString } from "../ast/parse.js";
+import { ASTNode } from "../ast/types.js";
 import { ICompileError } from "../errors/IError.js";
-import { nodeToString } from "./parse.js";
-import { ASTNode } from "./types.js";
 
 function swap(arr: any[], i: number, j: number): void {
   const temp = arr[i];
@@ -210,7 +210,7 @@ function createTypeConstraint(node: ASTNode | null): TypeConstraint {
       };
       if (floatNode?.fractional !== null || floatNode?.exponent !== null) {
         throw new ICompileError(
-          `Exponents in unit types must be integers, not ${nodeToString(node.exponent)}`,
+          `Exponents in unit types must be integers, not ${astNodeToString(node.exponent)}`,
           node.location
         );
       }
@@ -226,7 +226,7 @@ function createTypeConstraint(node: ASTNode | null): TypeConstraint {
       // This should never happen because a syntax error should've already
       // gotten raised by this point.
       throw new ICompileError(
-        `Unknown syntax in type signature: ${nodeToString(node)}`,
+        `Unknown syntax in type signature: ${astNodeToString(node)}`,
         node.location
       );
   }

@@ -1,4 +1,4 @@
-import { evaluateStringToResult } from "../../src/reducer/index.js";
+import { evaluateStringToResult } from "../helpers/reducerHelpers.js";
 
 describe("stacktraces", () => {
   test("nested calls", async () => {

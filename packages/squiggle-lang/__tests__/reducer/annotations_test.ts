@@ -1,5 +1,8 @@
-import { evaluateStringToResult } from "../../src/reducer/index.js";
-import { testEvalToBe, testEvalToMatch } from "../helpers/reducerHelpers.js";
+import {
+  evaluateStringToResult,
+  testEvalToBe,
+  testEvalToMatch,
+} from "../helpers/reducerHelpers.js";
 
 describe("annotations", () => {
   describe(".parameters", () => {

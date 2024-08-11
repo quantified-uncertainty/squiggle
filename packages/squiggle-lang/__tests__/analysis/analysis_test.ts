@@ -1,23 +1,27 @@
-import { parse } from "../../src/ast/parse.js";
+import { analyzeStringToTypedAst } from "../helpers/compileHelpers.js";
 
 // This tests one particular case, `parent` on `InfixCall` nodes.
 // Any node constructor can miss `this._init()` and cause problems with
 // `parent`, but testing all nodes would be too annoying.
 test("parent node", () => {
-  const ast = parse("2 + 2", "test");
-  expect(ast.ok).toBe(true);
-  const value = (ast as Extract<typeof ast, { ok: true }>).value;
+  const typedAstR = analyzeStringToTypedAst("2 + 2");
+  expect(typedAstR.ok).toBe(true);
 
-  expect(value.parent).toBe(null);
-  expect(value.result?.parent).toBe(ast.value);
+  const typedAst = (typedAstR as Extract<typeof typedAstR, { ok: true }>).value;
+
+  expect(typedAst.parent).toBe(null);
+  expect(typedAst.result?.parent).toBe(typedAst);
 });
 
 function returnType(code: string) {
-  const ast = parse(code, "test");
-  if (!ast.ok) {
-    throw ast.value;
+  const typedAstR = analyzeStringToTypedAst(code);
+  if (!typedAstR.ok) {
+    throw typedAstR.value;
   }
-  return ast.value.result?.type.display();
+
+  const typedAst = (typedAstR as Extract<typeof typedAstR, { ok: true }>).value;
+
+  return typedAst.result?.type.display();
 }
 
 describe("inference", () => {

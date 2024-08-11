@@ -1,16 +1,20 @@
-import { analyzeAst } from "../analysis/index.js";
-import { compileAst } from "../compiler/index.js";
+import { parse } from "../ast/parse.js";
+import { compileTypedAst } from "../compiler/index.js";
 import { Reducer } from "../reducer/Reducer.js";
 import { Err, Ok } from "../utility/result.js";
 import { RunParams, RunResult } from "./BaseRunner.js";
 
-export function baseRun(
-  // `source` is not used, and we don't pass it to worker in WebWorkerRunner;
-  // it's fine if some code passes the full `RunParams` here though.
-  params: Omit<RunParams, "source">
-): RunResult {
-  const irResult = compileAst({
-    ast: analyzeAst(params.ast),
+export function baseRun(params: RunParams): RunResult {
+  const astR = parse(params.module.code, params.module.name);
+  if (!astR.ok) {
+    return astR;
+  }
+  const typedAst = params.module.typedAst();
+  if (!typedAst.ok) {
+    return Err(typedAst.value._value);
+  }
+  const irResult = compileTypedAst({
+    ast: typedAst.value,
     imports: params.imports,
   });
 

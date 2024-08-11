@@ -1,9 +1,9 @@
-import { parse as peggyParse } from "../../src/ast/peggyParser.js";
 import {
   exportedForTesting,
   TypeConstraint,
   VariableUnitTypes,
-} from "../../src/ast/unitTypeChecker.js";
+} from "../../src/analysis/unitTypeChecker.js";
+import { parse as peggyParse } from "../../src/ast/peggyParser.js";
 
 const {
   checkTypeConstraints,

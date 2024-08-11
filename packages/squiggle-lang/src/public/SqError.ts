@@ -70,7 +70,7 @@ export class SqRuntimeError extends SqAbstractError<"runtime"> {
 export class SqCompileError extends SqAbstractError<"compile"> {
   tag = "compile" as const;
 
-  constructor(private _value: ICompileError) {
+  constructor(public _value: ICompileError) {
     super();
   }
 

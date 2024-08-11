@@ -12,7 +12,7 @@ import { TypedAST, TypedASTNode } from "./types.js";
 type Options = SExprPrintOptions & { withTypes?: boolean };
 
 // This function is similar to `nodeToString` for raw AST, but takes a TypedASTNode.
-export function nodeToString(
+export function typedAstNodeToString(
   node: TypedASTNode,
   options: Options = {}
 ): string {
@@ -138,12 +138,12 @@ export function nodeToString(
   return sExprToString(toSExpr(node), printOptions);
 }
 
-export function nodeResultToString(
+export function typedAstResultToString(
   r: result<TypedAST, ICompileError>,
   options?: Options
 ): string {
   if (!r.ok) {
     return r.value.toString();
   }
-  return nodeToString(r.value, options);
+  return typedAstNodeToString(r.value, options);
 }

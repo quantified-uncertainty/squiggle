@@ -2,6 +2,7 @@ import { AST, ASTNode } from "../ast/types.js";
 import { ICompileError } from "../errors/IError.js";
 import { getStdLib } from "../library/index.js";
 import { Bindings } from "../reducer/Stack.js";
+import { Err, Ok, result } from "../utility/result.js";
 import { AnalysisContext } from "./context.js";
 import { NodeArray } from "./NodeArray.js";
 import { NodeBlock } from "./NodeBlock.js";
@@ -40,6 +41,7 @@ import {
   TypedASTNode,
   unitTypeKinds,
 } from "./types.js";
+import { unitTypeCheck } from "./unitTypeChecker.js";
 
 function assertKind<Kind extends TypedASTNode["kind"]>(
   node: TypedASTNode,
@@ -192,6 +194,20 @@ function analyzeAstNode(node: ASTNode, context: AnalysisContext): TypedASTNode {
   }
 }
 
-export function analyzeAst(ast: AST, builtins?: Bindings): TypedAST {
-  return NodeProgram.fromAst(ast, builtins ?? getStdLib());
+export function analyzeAst(
+  ast: AST,
+  builtins?: Bindings
+): result<TypedAST, ICompileError> {
+  try {
+    // TODO - adapt this code to new type checking
+    unitTypeCheck(ast);
+
+    return Ok(NodeProgram.fromAst(ast, builtins ?? getStdLib()));
+  } catch (e) {
+    if (e instanceof ICompileError) {
+      return Err(e);
+    } else {
+      return Err(new ICompileError(String(e), ast.location));
+    }
+  }
 }

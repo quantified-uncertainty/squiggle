@@ -1,5 +1,5 @@
 import { getRegistry } from "../../src/library/registry/index.js";
-import { evaluateStringToResult } from "../../src/reducer/index.js";
+import { evaluateStringToResult } from "../helpers/reducerHelpers.js";
 
 test.each(
   getRegistry()

@@ -1,5 +1,5 @@
-import { AST } from "../ast/types.js";
 import { Env } from "../dists/env.js";
+import { SqModule } from "../public/SqProject/SqModule.js";
 import {
   SquiggleBundle,
   SquiggleBundleEntrypoint,
@@ -10,8 +10,11 @@ import { baseRun } from "./common.js";
 import { SerializedRunResult, serializeRunResult } from "./serialization.js";
 
 export type SquiggleWorkerJob = {
+  module: {
+    name: string;
+    code: string;
+  };
   environment: Env;
-  ast: AST;
   bundle: SquiggleBundle;
   imports: Record<string, SquiggleBundleEntrypoint<"value">>;
 };
@@ -33,8 +36,14 @@ function processJob(job: SquiggleWorkerJob): SerializedRunResult {
     imports[path] = deserializer.deserialize(entrypoint);
   }
 
+  const module = new SqModule({
+    name: job.module.name,
+    code: job.module.code,
+    // no pins, but that's fine
+  });
+
   const result = baseRun({
-    ast: job.ast,
+    module,
     environment: job.environment,
     imports,
   });

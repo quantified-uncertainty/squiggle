@@ -1,7 +1,28 @@
+import { analyzeAst } from "../../src/analysis/index.js";
+import { TypedAST } from "../../src/analysis/types.js";
 import { parse } from "../../src/ast/parse.js";
-import { compileAst } from "../../src/compiler/index.js";
+import { compileTypedAst } from "../../src/compiler/index.js";
 import { irToString } from "../../src/compiler/toString.js";
-import * as Result from "../../src/utility/result.js";
+import { ProgramIR } from "../../src/compiler/types.js";
+import { ICompileError } from "../../src/errors/IError.js";
+import { bind, result } from "../../src/utility/result.js";
+
+export function analyzeStringToTypedAst(
+  code: string,
+  name = "test"
+): result<TypedAST, ICompileError> {
+  return bind(parse(code, name), (ast) => analyzeAst(ast));
+}
+
+export function compileStringToIR(
+  code: string,
+  name = "test"
+): result<ProgramIR, ICompileError> {
+  return bind(
+    bind(parse(code, name), (ast) => analyzeAst(ast)),
+    (typedAst) => compileTypedAst({ ast: typedAst, imports: {} })
+  );
+}
 
 export function testCompile(
   code: string,
@@ -20,9 +41,7 @@ export function testCompile(
   } = {}
 ) {
   test(code, async () => {
-    const rExpr = Result.bind(parse(code, "test"), (ast) =>
-      compileAst({ ast, imports: {} })
-    );
+    const rExpr = compileStringToIR(code, "test");
 
     let serializedExpr: string | string[];
     if (rExpr.ok) {

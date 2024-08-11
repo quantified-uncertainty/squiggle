@@ -56,7 +56,7 @@ function compileProgram(
   };
 }
 
-export function compileAst({
+export function compileTypedAst({
   ast,
   stdlib,
   imports,

@@ -13,7 +13,7 @@ import {
 } from "../SqError.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqDict } from "../SqValue/SqDict.js";
-import { RunContext, SqValueContext } from "../SqValueContext.js";
+import { SqValueContext } from "../SqValueContext.js";
 import { SqValuePath, ValuePathRoot } from "../SqValuePath.js";
 import { ProjectState } from "./ProjectState.js";
 import { Import, SqModule } from "./SqModule.js";
@@ -119,9 +119,6 @@ export class SqModuleOutput {
       return undefined;
     }
 
-    // AST is guaranteed to be ok, otherwise `getImportOutputs` would throw.
-    const ast = module.expectAst();
-
     const importBindings: Record<string, Value> = {};
 
     // useful for profiling later
@@ -157,7 +154,7 @@ export class SqModuleOutput {
     }
 
     const runParams: RunParams = {
-      ast: ast.raw,
+      module,
       environment,
       imports: importBindings,
     };
@@ -178,21 +175,20 @@ export class SqModuleOutput {
       }
     }
 
-    const context: RunContext = {
-      module,
-      environment,
-    };
-
     // upgrade result values from the runner to SqValues
     const result = fmap2(
       runResult,
       (runOutput) => {
+        // AST is guaranteed to be ok, otherwise the run would fail.
+        // TODO: this will slow down the run, can we do this is parallel with the runner, or marshall the typed AST from the worker?
+        const ast = module.expectTypedAst();
+
         const { result, bindings, exports } = runOutput;
 
         const newContext = (root: ValuePathRoot) => {
           const isResult = root === "result";
           return new SqValueContext({
-            runContext: context,
+            runContext: runParams,
             valueAst: isResult && ast.result ? ast.result : ast,
             valueAstIsPrecise: isResult ? !!ast.result : true,
             path: new SqValuePath({

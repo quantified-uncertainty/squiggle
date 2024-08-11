@@ -1,14 +1,12 @@
-import { AST } from "../ast/types.js";
 import { Env } from "../dists/env.js";
 import { ICompileError, IRuntimeError } from "../errors/IError.js";
+import { SqModule } from "../public/SqProject/SqModule.js";
 import { RunOutput } from "../reducer/Reducer.js";
 import { result } from "../utility/result.js";
 import { Value } from "../value/index.js";
 
 export type RunParams = {
-  // source is already parsed, because by this point `externals` already exists, which means that someone parsed the source code already
-  // Note that `sourceId` can be restored from AST through `ast.location.source`.
-  ast: AST;
+  module: SqModule;
   environment: Env;
   // This is a mapping from import _string_ ("foo" in `import "foo"`) to the value that should be imported.
   imports: Record<string, Value>;

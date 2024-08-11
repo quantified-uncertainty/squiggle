@@ -1,12 +1,39 @@
-import { nodeResultToString } from "../../src/analysis/toString.js";
-import { parse } from "../../src/ast/parse.js";
+import { astResultToString, parse } from "../../src/ast/parse.js";
+import { ProgramIR } from "../../src/compiler/types.js";
+import { defaultEnv } from "../../src/dists/env.js";
 import { ICompileError, IRuntimeError } from "../../src/errors/IError.js";
-import { evaluateStringToResult } from "../../src/reducer/index.js";
+import { Reducer } from "../../src/reducer/Reducer.js";
 import * as Result from "../../src/utility/result.js";
+import { result } from "../../src/utility/result.js";
 import { Value } from "../../src/value/index.js";
+import { compileStringToIR } from "./compileHelpers.js";
+
+export async function evaluateIRToResult(
+  ir: ProgramIR
+): Promise<Result.result<Value, IRuntimeError>> {
+  const reducer = new Reducer(defaultEnv);
+  try {
+    const { result } = reducer.evaluate(ir);
+    return Result.Ok(result);
+  } catch (e) {
+    return Result.Err(reducer.errorFromException(e));
+  }
+}
+
+export async function evaluateStringToResult(
+  code: string
+): Promise<result<Value, ICompileError | IRuntimeError>> {
+  const irR = compileStringToIR(code, "main");
+
+  if (irR.ok) {
+    return await evaluateIRToResult(irR.value);
+  } else {
+    return Result.Err(irR.value);
+  }
+}
 
 const expectParseToBe = (expr: string, answer: string) => {
-  expect(nodeResultToString(parse(expr, "test"), { pretty: false })).toBe(
+  expect(astResultToString(parse(expr, "test"), { pretty: false })).toBe(
     answer
   );
 };

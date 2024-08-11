@@ -1,8 +1,9 @@
+import { analyzeAst } from "../../analysis/index.js";
 import { TypedAST } from "../../analysis/types.js";
 import { parse } from "../../ast/parse.js";
-import { LocationRange } from "../../ast/types.js";
+import { AST, LocationRange } from "../../ast/types.js";
 import { Env } from "../../dists/env.js";
-import { errMap, result } from "../../utility/result.js";
+import { errMap, getExt, result } from "../../utility/result.js";
 import {
   SqCompileError,
   SqError,
@@ -61,7 +62,8 @@ export class SqModule {
   // key is module name, value is hash
   pins: Record<string, string>;
 
-  private _ast?: result<TypedAST, SqError>;
+  private _ast?: result<AST, SqCompileError>;
+  private _typedAst?: result<TypedAST, SqCompileError>;
 
   constructor(params: {
     name: string;
@@ -73,9 +75,8 @@ export class SqModule {
     this.pins = params.pins ?? {};
   }
 
-  // For now, parsing is done lazily but synchronously and on happens on the
-  // main thread. Parsing is usually fast enough and this makes the
-  // implementation simpler.
+  // Parsing is done lazily but synchronously and can happen on the main thread.
+  // TODO - separate imports parsing with a simplified grammar and do everything else in a worker.
   ast() {
     if (!this._ast) {
       this._ast = errMap(
@@ -86,14 +87,29 @@ export class SqModule {
     return this._ast;
   }
 
+  typedAst() {
+    if (!this._typedAst) {
+      const ast = this.ast();
+      if (ast.ok) {
+        this._typedAst = errMap(
+          analyzeAst(ast.value),
+          (e) => new SqCompileError(e)
+        );
+      } else {
+        this._typedAst = ast;
+      }
+    }
+    return this._typedAst;
+  }
+
   // Useful when we're sure that AST is ok, e.g. when we obtain `SqModule` from `SqValueContext`.
   // Name is following the Rust conventions (https://doc.rust-lang.org/std/result/enum.Result.html#method.expect).
-  expectAst(): TypedAST {
-    const ast = this.ast();
-    if (!ast.ok) {
-      throw ast.value;
-    }
-    return ast.value;
+  expectAst(): AST {
+    return getExt(this.ast());
+  }
+
+  expectTypedAst(): TypedAST {
+    return getExt(this.typedAst());
   }
 
   getImports(linker: SqLinker): Import[] {
@@ -120,7 +136,7 @@ export class SqModule {
     return resolvedImports;
   }
 
-  // TODO - cache the hash for performace
+  // TODO - cache the hash for performance
   hash(): string {
     return getHash(
       `module/${this.name}/` +

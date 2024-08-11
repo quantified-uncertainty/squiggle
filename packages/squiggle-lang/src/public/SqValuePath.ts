@@ -1,4 +1,4 @@
-import { TypedASTNode } from "../analysis/types.js";
+import { ASTNode } from "../ast/types.js";
 import { locationContains } from "../ast/utils.js";
 
 // Note that 'exports' is shown separately, but is not a valid path root.
@@ -87,11 +87,8 @@ export class SqValuePathEdge {
 }
 
 // There might be a better place for this to go, nearer to the ASTNode type.
-function astOffsetToPathEdges(
-  ast: TypedASTNode,
-  offset: number
-): SqValuePathEdge[] {
-  function buildRemainingPathEdges(ast: TypedASTNode): SqValuePathEdge[] {
+function astOffsetToPathEdges(ast: ASTNode, offset: number): SqValuePathEdge[] {
+  function buildRemainingPathEdges(ast: ASTNode): SqValuePathEdge[] {
     switch (ast.kind) {
       case "Program": {
         for (const statement of ast.statements) {
@@ -203,7 +200,7 @@ export class SqValuePath {
     ast,
     offset,
   }: {
-    ast: TypedASTNode;
+    ast: ASTNode;
     offset: number;
   }): SqValuePath | undefined {
     return new SqValuePath({

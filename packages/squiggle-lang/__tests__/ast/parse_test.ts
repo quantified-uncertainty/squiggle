@@ -1,5 +1,5 @@
-import { TypedASTNode } from "../../src/analysis/types.js";
 import { parse } from "../../src/ast/parse.js";
+import { ASTNode } from "../../src/ast/types.js";
 import {
   testEvalError,
   testEvalToBe,
@@ -28,7 +28,7 @@ describe("Peggy parse", () => {
     ] satisfies [
       string,
       Pick<
-        Extract<TypedASTNode, { kind: "Float" }>,
+        Extract<ASTNode, { kind: "Float" }>,
         "integer" | "fractional" | "exponent"
       >,
     ][])("%s", (code, expected) => {

@@ -1,19 +1,13 @@
 import { TypedASTNode } from "../analysis/types.js";
 import { isBindingStatement } from "../ast/utils.js";
-import { Env } from "../dists/env.js";
-import { SqModule } from "./SqProject/SqModule.js";
+import { RunParams } from "../runners/BaseRunner.js";
 import { SqValuePath, SqValuePathEdge } from "./SqValuePath.js";
 
-// The common scenario is:
-// - you obtain `SqValue` somehow
-// - you need to know where it came from, so you query `value.context.runContext`.
-export type RunContext = {
-  module: SqModule;
-  environment: Env;
-};
-
 export class SqValueContext {
-  public runContext: RunContext;
+  // The common scenario is:
+  // - you obtain `SqValue` somehow
+  // - you need to know how it was produced, e.g. AST or the source code, so you query `value.context.runContext`.
+  public runContext: RunParams;
 
   /* Used for "focus in editor" feature in the playground, and for associating values with comments.
    * We try our best to find nested ASTs, but when the value is built dynamically, it's not always possible.
@@ -24,7 +18,7 @@ export class SqValueContext {
   public path: SqValuePath;
 
   constructor(props: {
-    runContext: RunContext;
+    runContext: RunParams;
     valueAst: TypedASTNode;
     valueAstIsPrecise: boolean;
     path: SqValuePath;

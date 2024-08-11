@@ -4,7 +4,7 @@ import { deserializeRunResult } from "./serialization.js";
 import { SquiggleWorkerJob, SquiggleWorkerResponse } from "./worker.js";
 
 export async function runWithWorker(
-  { environment, ast, imports }: RunParams,
+  { module, environment, imports }: RunParams,
   worker: Worker
 ): Promise<RunResult> {
   const serializedImports: SquiggleWorkerJob["imports"] = {};
@@ -16,8 +16,11 @@ export async function runWithWorker(
   const bundle = store.getBundle();
 
   worker.postMessage({
+    module: {
+      name: module.name,
+      code: module.code,
+    },
     environment,
-    ast,
     bundle,
     imports: serializedImports,
   } satisfies SquiggleWorkerJob);

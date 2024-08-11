@@ -1,7 +1,4 @@
-import { analyzeAst } from "../analysis/index.js";
-import { TypedAST } from "../analysis/types.js";
 import { ICompileError } from "../errors/IError.js";
-import { Bindings } from "../reducer/Stack.js";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
 import {
@@ -15,7 +12,6 @@ import {
   SyntaxError as PeggySyntaxError,
 } from "./peggyParser.js";
 import { AST, type ASTCommentNode, ASTNode, LocationRange } from "./types.js";
-import { unitTypeCheck } from "./unitTypeChecker.js";
 
 export type ParseError = {
   type: "SyntaxError";
@@ -23,7 +19,7 @@ export type ParseError = {
   message: string;
 };
 
-type ParseResult = result<TypedAST, ICompileError>;
+type ParseResult = result<AST, ICompileError>;
 
 function codeToFullLocationRange(
   code: string,
@@ -45,11 +41,7 @@ function codeToFullLocationRange(
   };
 }
 
-export function parse(
-  expr: string,
-  sourceId: string,
-  stdlib?: Bindings // stdlib is necessary for typechecking
-): ParseResult {
+export function parse(expr: string, sourceId: string): ParseResult {
   try {
     const comments: ASTCommentNode[] = [];
     const parsed: AST = peggyParse(expr, {
@@ -60,14 +52,9 @@ export function parse(
       throw new Error("Expected parse to result in a Program node");
     }
 
-    // TODO - move code to analyzeAst stage
-    unitTypeCheck(parsed);
     parsed.comments = comments;
 
-    // TODO - do as a separate step
-    const analyzed = analyzeAst(parsed, stdlib);
-
-    return Result.Ok(analyzed);
+    return Result.Ok(parsed);
   } catch (e) {
     if (e instanceof PeggySyntaxError) {
       return Result.Err(
@@ -85,7 +72,7 @@ export function parse(
 
 // This function is just for the sake of tests.
 // For real generation of Squiggle code from AST try our prettier plugin.
-export function nodeToString(
+export function astNodeToString(
   node: ASTNode,
   printOptions: SExprPrintOptions = {}
 ): string {
@@ -198,4 +185,14 @@ export function nodeToString(
   };
 
   return sExprToString(toSExpr(node), printOptions);
+}
+
+export function astResultToString(
+  r: result<AST, ICompileError>,
+  options?: SExprPrintOptions
+): string {
+  if (!r.ok) {
+    return r.value.toString();
+  }
+  return astNodeToString(r.value, options);
 }

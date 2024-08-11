@@ -1,5 +1,6 @@
+import { analyzeAst } from "../../analysis/index.js";
 import { parse } from "../../ast/parse.js";
-import { compileAst } from "../../compiler/index.js";
+import { compileTypedAst } from "../../compiler/index.js";
 import { defaultEnv } from "../../dists/env.js";
 import { Reducer } from "../../reducer/Reducer.js";
 import { Bindings } from "../../reducer/Stack.js";
@@ -19,20 +20,26 @@ export function makeSquiggleDefinition({
   name: string;
   code: string;
 }): SquiggleDefinition {
-  const astResult = parse(code, "@stdlib", builtins);
+  const astResult = parse(code, "@stdlib");
   if (!astResult.ok) {
     // will be detected during tests, should never happen in runtime
     throw new Error(`Stdlib code ${code} is invalid`);
   }
 
-  const irResult = compileAst({
-    ast: astResult.value,
+  const typedAst = analyzeAst(astResult.value, builtins);
+
+  if (!typedAst.ok) {
+    // fail fast
+    throw typedAst.value;
+  }
+
+  const irResult = compileTypedAst({
+    ast: typedAst.value,
     stdlib: builtins,
     imports: {},
   });
 
   if (!irResult.ok) {
-    // fail fast
     throw irResult.value;
   }
 
