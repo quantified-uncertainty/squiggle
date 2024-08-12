@@ -6,17 +6,12 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/squigglePrompts.ts",
-    "src/script.mts"
+    "src/script.mts",
+    "src/llmScript/logger.mts",
   ],
-  "exclude": [
-    "node_modules"
-  ],
+  "exclude": ["node_modules"],
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -30,8 +25,8 @@
     "jsx": "preserve",
     "plugins": [
       {
-        "name": "next"
-      }
-    ]
-  }
+        "name": "next",
+      },
+    ],
+  },
 }

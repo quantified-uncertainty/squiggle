@@ -106,13 +106,14 @@ totalTunersAtTime(t: domain) = populationAtTime(t) *
   proportionOfPopulationWithPianos *
   pianoTunersPerPiano
 
-{
+result = {
   populationAtTime,
   totalTunersAtTimeMedian: {|t: domain| median(totalTunersAtTime(t))},
 }
 ```
+
 ```squiggle
-Calculator(
+calculator = Calculator(
   {|a, b,c,d| [a,b,c,d]},
   {
     title: "Concat()",
@@ -132,8 +133,9 @@ Calculator(
   }
 )
 ```
+
 ```squiggle
-Table.make(
+table = Table.make(
   [
     { name: "First Dist", value: Sym.lognormal({ p5: 1, p95: 10 }) },
     { name: "Second Dist", value: Sym.lognormal({ p5: 5, p95: 30 }) },
@@ -159,6 +161,7 @@ Table.make(
   }
 )
 ```
+
 ```squiggle
 x = 10
 result = if x == 1 then {
@@ -169,12 +172,14 @@ result = if x == 1 then {
 y = result.y
 z = result.z
 ```
+
 ```squiggle
 @showAs({|f| Plot.numericFn(f, { xScale: Scale.log({ min: 1, max: 100 }) })})
 fn(t) = t ^ 2
 ```
+
 ```squiggle
-{|t| normal(t, 2) * normal(5, 3)}
+plot = {|t| normal(t, 2) * normal(5, 3)}
   -> Plot.distFn(
     {
       title: "A Function of Value over Time",
@@ -185,11 +190,37 @@ fn(t) = t ^ 2
   )
 ```
 
-```
+````squiggle
 f(t: [Date(2020), Date(2040)]) = {
   yearsPassed = toYears(t - Date(2020))
   normal({mean: yearsPassed ^ 2, stdev: yearsPassed^1.3+1})
-}
+}```
+
+```squiggle
+import "hub:ozziegooen/sTest" as sTest
+// Model Parameters
+flightCost = normal({ mean: 600, stdev: 100 }) // Distribution for cost of flight in USD
+benefitEstimate = normal({ mean: 1500, stdev: 300 }) // Distribution for benefit of traveling to London
+
+// Calculation of Net Benefit
+netBenefit = benefitEstimate - flightCost
+
+// Test Suite for the Model
+testSuite = sTest.describe(
+  "Flight to London Test Suite",
+  [
+    // Test for reasonable flight costs
+    sTest.test(
+      "Flight cost should be reasonable",
+      {
+        ||
+        sampleValue = sample(flightCost)
+        sTest.expect(sampleValue).toBeGreaterThan(300)
+      }
+    ),
+  ]
+)
+```
 
 # Language Features 
 
@@ -2094,7 +2125,7 @@ Integrates the function `f` between `min` and `max`, and uses an interval of `ep
 Same caveats as `integrateFunctionBetweenWithNumIntegrationPoints` apply.
 Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 0.1)
 
-## Errors:
+## Common Errors:
 
 Failed to evaluate Squiggle code: Expected "->", end of input, or whitespace but "P" found.  
 -> This likely means that you are using two return statements. Every statement but the last should be a variable assignment.
@@ -2146,3 +2177,7 @@ foo = {
 
 Compile Error. Number is not defined
 -> Are you trying to use Number as a Type? This is not supported. Domains are very restricted, see that documentation.
+
+
+Validation error. Failed to evaluate Squiggle code: Expected "->", "?", assignment, end of input, operator, or whitespace
+-> Did you have an import statement that's not on the top of the file? Make sure that all import statements are on the top of the file.

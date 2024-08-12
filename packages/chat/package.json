@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "tsx src/script.mts",
+    "test": "tsx src/llmScript/main.mts",
     "open": "tsx src/openrouter.mts",
     "lint": "next lint"
   },
