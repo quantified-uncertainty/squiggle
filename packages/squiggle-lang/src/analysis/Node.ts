@@ -24,7 +24,7 @@ export abstract class ExpressionNode<T extends string> extends Node<T> {
   constructor(
     kind: T,
     location: LocationRange,
-    public type: Type<any>
+    public type: Type
   ) {
     super(kind, location);
   }

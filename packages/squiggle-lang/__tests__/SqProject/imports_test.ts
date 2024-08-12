@@ -187,6 +187,33 @@ Import chain:
     );
   });
 
+  test("Compile-time error in import", async () => {
+    const linker = makeSelfContainedLinker({
+      foo: `x = 1 + ""`,
+      main: `
+          import "foo" as foo
+          foo.x
+      `,
+    });
+    const project = new SqProject({ linker });
+    await project.loadHead("main", { moduleName: "main" });
+
+    const output = await project.waitForOutput("main");
+
+    expect(output.result.ok).toEqual(false);
+    if (output.result.ok) throw "assert";
+
+    expect(output.result.value.toString()).toEqual(
+      "Operator '+' does not support types 'Number' and 'String'"
+    );
+    expect(output.result.value.toStringWithDetails())
+      .toEqual(`Operator '+' does not support types 'Number' and 'String'
+Location:
+  at line 1, column 5, file foo
+Import chain:
+  import foo at line 2, column 18, file main`);
+  });
+
   test("Diamond shape", async () => {
     const project = new SqProject({
       linker: makeSelfContainedLinker({

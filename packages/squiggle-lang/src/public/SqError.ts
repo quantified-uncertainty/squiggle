@@ -97,6 +97,14 @@ export class SqImportError extends SqAbstractError<"import"> {
     super();
   }
 
+  wrappedError() {
+    let error: SqError = this._value;
+    while (error.tag === "import") {
+      error = error._value;
+    }
+    return error;
+  }
+
   // Similar to runtime error; frames are for imports, so it's not the same as
   // the stack trace, but it's the closest thing we have.
   getFrameArray(): SqFrame[] {
@@ -135,7 +143,7 @@ export class SqImportError extends SqAbstractError<"import"> {
     imports.reverse();
 
     return (
-      error.toString() +
+      error.toStringWithDetails() +
       "\nImport chain:\n" +
       imports
         .map(

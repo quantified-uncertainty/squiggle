@@ -48,6 +48,10 @@ type NodeProgram = N<
     imports: NodeImport[];
     statements: AnyStatementNode[];
     result: AnyExpressionNode | null;
+    // Var name -> statement node, for faster path resolution.
+    // Not used for evaluation.
+    // Note: symbols point to undecorated statements.
+    symbols: { [k in string]: ASTNode };
   }
 >;
 

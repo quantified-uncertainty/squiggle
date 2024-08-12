@@ -72,6 +72,12 @@ export function serializeAstNode(
         imports: node.imports.map(visit.ast),
         statements: node.statements.map(visit.ast),
         result: node.result ? visit.ast(node.result) : null,
+        symbols: Object.fromEntries(
+          Object.entries(node.symbols).map(([key, value]) => [
+            key,
+            visit.ast(value),
+          ])
+        ),
       };
     case "Import":
       return {
@@ -226,6 +232,12 @@ export function deserializeAstNode(
           .map((node) => assertKind(node, "Import")),
         statements: node.statements.map(visit.ast).map(assertStatement),
         result: node.result ? assertExpression(visit.ast(node.result)) : null,
+        symbols: Object.fromEntries(
+          Object.entries(node.symbols).map(([key, value]) => [
+            key,
+            visit.ast(value),
+          ])
+        ),
       };
     case "Import":
       return {

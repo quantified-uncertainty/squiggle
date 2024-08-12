@@ -8,11 +8,7 @@ import {
 import { gutter, GutterMarker } from "@codemirror/view";
 import { clsx } from "clsx";
 
-import {
-  SqValuePath,
-  SqValuePathEdge,
-  TypedASTNode,
-} from "@quri/squiggle-lang";
+import { ASTNode, SqValuePath, SqValuePathEdge } from "@quri/squiggle-lang";
 
 import { onFocusByPathFacet, simulationFacet } from "../fields.js";
 import { reactAsDom } from "../utils.js";
@@ -21,11 +17,11 @@ type MarkerDatum = {
   path: SqValuePath;
   // For assignments and dict keys, AST contains the variable name node or dict key node.
   // For arrays, it contains the value.
-  ast: TypedASTNode;
+  ast: ASTNode;
 };
 
 function* getMarkerSubData(
-  ast: TypedASTNode,
+  ast: ASTNode,
   path: SqValuePath
 ): Generator<MarkerDatum, void> {
   switch (ast.kind) {
@@ -54,45 +50,42 @@ function* getMarkerSubData(
   }
 }
 
-function* getMarkerData(ast: TypedASTNode): Generator<MarkerDatum, void> {
+function* getMarkerData(ast: ASTNode): Generator<MarkerDatum, void> {
   if (ast.kind !== "Program") {
     return; // unexpected
   }
 
   nextStatement: for (const statement of ast.statements) {
-    if (
-      statement.kind === "DefunStatement" ||
-      statement.kind === "LetStatement"
-    ) {
-      for (const decorator of statement.decorators) {
-        if (decorator.name.value === "hide") {
-          break nextStatement;
-        }
+    for (const decorator of statement.decorators) {
+      if (decorator.name.value === "hide") {
+        break nextStatement;
       }
-      const name = statement.variable.value;
-      if (ast.symbols[name] !== statement) {
-        break; // skip, probably redefined later
-      }
-      const path = new SqValuePath({
-        root: "bindings",
-        edges: [SqValuePathEdge.fromKey(name)],
-      });
-      yield { ast: statement.variable, path };
-      yield* getMarkerSubData(statement.value, path);
-      break;
-    } else {
-      // end expression
-      const path = new SqValuePath({
-        root: "result",
-        edges: [],
-      });
-      yield { ast: statement, path };
-      yield* getMarkerSubData(statement, path);
     }
+    const name = statement.variable.value;
+    if (ast.symbols[name] !== statement) {
+      break; // skip, probably redefined later
+    }
+    const path = new SqValuePath({
+      root: "bindings",
+      edges: [SqValuePathEdge.fromKey(name)],
+    });
+    yield { ast: statement.variable, path };
+    yield* getMarkerSubData(statement.value, path);
+    break;
+  }
+
+  // end expression
+  if (ast.result) {
+    const path = new SqValuePath({
+      root: "result",
+      edges: [],
+    });
+    yield { ast: ast.result, path };
+    yield* getMarkerSubData(ast.result, path);
   }
 }
 
-function visiblePathsWithUniqueLines(node: TypedASTNode): MarkerDatum[] {
+function visiblePathsWithUniqueLines(node: ASTNode): MarkerDatum[] {
   const result: MarkerDatum[] = [];
   const seenLines = new Set<number>();
   for (const datum of getMarkerData(node)) {

@@ -184,11 +184,21 @@ export function nodeProgram(
   result: ASTNode | null,
   location: LocationRange
 ): KindNode<"Program"> {
+  const symbols: KindNode<"Program">["symbols"] = {};
+  for (const statement of statements) {
+    if (
+      statement.kind === "LetStatement" ||
+      statement.kind === "DefunStatement"
+    ) {
+      symbols[statement.variable.value] = statement;
+    }
+  }
   return {
     kind: "Program",
     imports: imports.map((imp) => assertKind(imp, "Import")),
     statements: statements.map(assertStatement),
     result: result ? assertExpression(result) : null,
+    symbols,
     location,
   };
 }

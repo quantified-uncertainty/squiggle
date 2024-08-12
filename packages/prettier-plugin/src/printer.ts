@@ -59,7 +59,7 @@ export function createSquigglePrinter(
   util: PrettierUtil
 ): Printer<SquiggleNode> {
   return {
-    print: (path, options, print) => {
+    print: (path, options, print): Doc => {
       const { node } = path;
       const typedPath = <T extends SquiggleNode>(_: T) => {
         return path as AstPath<T>;
@@ -83,36 +83,43 @@ export function createSquigglePrinter(
 
       switch (node.kind) {
         case "Program":
-          // TODO - preserve line breaks, break long lines
-          // TODO - comments will be moved to the end because imports is not a real AST, need to be fixed in squiggle-lang
           return group([
-            node.imports.map((_, i) => [
-              "import ",
-              typedPath(node).call(print, "imports", i, 0),
-              " as ",
-              typedPath(node).call(print, "imports", i, 1),
+            node.imports.map((imp, i) => [
+              typedPath(node).call(print, "imports", i),
               hardline,
+              util.isNextLineEmpty(
+                options.originalText,
+                imp.location.end.offset
+              )
+                ? hardline
+                : "",
             ]),
-            join(
+            node.statements.map((statement, i) => [
+              typedPath(node).call(print, "statements", i),
               hardline,
-              node.statements.map((statement, i) => [
-                typedPath(node).call(print, "statements", i),
-                // keep extra new lines
-                util.isNextLineEmpty(
-                  options.originalText,
-                  statement.location.end.offset
-                )
-                  ? hardline
-                  : "",
-              ])
-            ),
-            node.statements.length &&
-            ["LetStatement", "DefunStatement"].includes(
-              node.statements[node.statements.length - 1].kind
-            )
-              ? hardline // new line if final expression is a statement
+              // keep extra new lines
+              util.isNextLineEmpty(
+                options.originalText,
+                statement.location.end.offset
+              )
+                ? hardline
+                : "",
+            ]),
+            node.result
+              ? typedPath(
+                  node as typeof node & {
+                    result: NonNullable<(typeof node)["result"]>;
+                  }
+                ).call(print, "result")
               : "",
           ]);
+        case "Import":
+          return [
+            "import ",
+            typedPath(node).call(print, "path"),
+            " as ",
+            typedPath(node).call(print, "variable"),
+          ];
         case "Block": {
           if (
             node.statements.length === 0 &&
@@ -290,7 +297,7 @@ export function createSquigglePrinter(
           return node.value;
         case "LambdaParameter":
           return [
-            node.variable,
+            typedPath(node).call(print, "variable"),
             node.annotation
               ? // @ts-ignore
                 [": ", typedPath(node).call(print, "annotation")]
@@ -392,6 +399,8 @@ export function createSquigglePrinter(
         case "lineComment":
         case "blockComment":
           throw new Error("Didn't expect comment node in print()");
+        default:
+          throw new Error(`Unexpected node ${node satisfies never}`);
       }
     },
     printComment: (path) => {
@@ -414,7 +423,13 @@ export function createSquigglePrinter(
       }
       switch (node.kind) {
         case "Program":
-          return node.statements;
+          return [
+            ...node.imports,
+            ...node.statements,
+            ...(node.result ? [node.result] : []),
+          ];
+        case "Import":
+          return [node.path, node.variable];
         case "Block":
           return [...node.statements, node.result];
         case "Array":
