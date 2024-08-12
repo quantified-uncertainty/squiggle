@@ -3,13 +3,13 @@ import { tAny, Type } from "../types/Type.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";
-import { AnyExpressionNode } from "./types.js";
+import { AnyTypedExpressionNode } from "./types.js";
 
 export class NodeCall extends ExpressionNode<"Call"> {
   private constructor(
     location: LocationRange,
-    public fn: AnyExpressionNode,
-    public args: AnyExpressionNode[],
+    public fn: AnyTypedExpressionNode,
+    public args: AnyTypedExpressionNode[],
     type: Type<unknown>
   ) {
     super("Call", location, type);

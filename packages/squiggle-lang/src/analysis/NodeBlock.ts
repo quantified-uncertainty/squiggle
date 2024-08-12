@@ -2,13 +2,13 @@ import { KindNode, LocationRange } from "../ast/types.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression, analyzeStatement } from "./index.js";
 import { ExpressionNode } from "./Node.js";
-import { AnyExpressionNode, AnyStatementNode } from "./types.js";
+import { AnyTypedExpressionNode, AnyTypedStatementNode } from "./types.js";
 
 export class NodeBlock extends ExpressionNode<"Block"> {
   private constructor(
     location: LocationRange,
-    public statements: AnyStatementNode[],
-    public result: AnyExpressionNode
+    public statements: AnyTypedStatementNode[],
+    public result: AnyTypedExpressionNode
   ) {
     super("Block", location, result.type);
     this._init();
@@ -22,7 +22,7 @@ export class NodeBlock extends ExpressionNode<"Block"> {
     // snapshot definitions - we won't store them since they're local
     const definitions = context.definitions;
 
-    const statements: AnyStatementNode[] = [];
+    const statements: AnyTypedStatementNode[] = [];
     for (const statement of node.statements) {
       const typedStatement = analyzeStatement(statement, context);
       statements.push(typedStatement);

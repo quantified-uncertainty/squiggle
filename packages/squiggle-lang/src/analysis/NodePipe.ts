@@ -3,14 +3,14 @@ import { tAny } from "../types/index.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";
-import { AnyExpressionNode } from "./types.js";
+import { AnyTypedExpressionNode } from "./types.js";
 
 export class NodePipe extends ExpressionNode<"Pipe"> {
   private constructor(
     location: LocationRange,
-    public leftArg: AnyExpressionNode,
-    public fn: AnyExpressionNode,
-    public rightArgs: AnyExpressionNode[]
+    public leftArg: AnyTypedExpressionNode,
+    public fn: AnyTypedExpressionNode,
+    public rightArgs: AnyTypedExpressionNode[]
   ) {
     super(
       "Pipe",

@@ -1,10 +1,10 @@
-import { AnyStatementNode } from "../analysis/types.js";
+import { AnyTypedStatementNode } from "../analysis/types.js";
 import { compileExpression } from "./compileExpression.js";
 import { CompileContext } from "./context.js";
 import { eCall, make, StatementIR } from "./types.js";
 
 export function compileStatement(
-  ast: AnyStatementNode,
+  ast: AnyTypedStatementNode,
   context: CompileContext
 ): StatementIR {
   const name = ast.variable.value;

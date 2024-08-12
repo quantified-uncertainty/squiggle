@@ -1,4 +1,10 @@
 import {
+  assertExpression,
+  assertKind,
+  assertStatement,
+  assertUnitType,
+} from "./asserts.js";
+import {
   AnyNodeDictEntry,
   ASTCommentNode,
   ASTNode,
@@ -15,7 +21,12 @@ export function nodeCall(
   args: ASTNode[],
   location: LocationRange
 ): KindNode<"Call"> {
-  return { kind: "Call", fn, args, location };
+  return {
+    kind: "Call",
+    fn: assertExpression(fn),
+    args: args.map((arg) => assertExpression(arg)),
+    location,
+  };
 }
 
 export function makeInfixChain(
@@ -37,7 +48,7 @@ export function nodeInfixCall(
   return {
     kind: "InfixCall",
     op,
-    args: [arg1, arg2],
+    args: [assertExpression(arg1), assertExpression(arg2)],
     location,
   };
 }
@@ -61,7 +72,7 @@ export function nodeInfixUnitType(
   return {
     kind: "InfixUnitType",
     op,
-    args: [arg1, arg2],
+    args: [assertUnitType(arg1), assertUnitType(arg2)],
     location,
   };
 }
@@ -73,9 +84,9 @@ export function nodeExponentialUnitType(
 ): KindNode<"ExponentialUnitType"> {
   return {
     kind: "ExponentialUnitType",
-    base: base,
-    exponent: exponent,
-    location: location,
+    base: assertUnitType(base),
+    exponent: assertKind(exponent, "Float"),
+    location,
   };
 }
 
@@ -84,7 +95,7 @@ export function nodeUnaryCall(
   arg: ASTNode,
   location: LocationRange
 ): KindNode<"UnaryCall"> {
-  return { kind: "UnaryCall", op, arg, location };
+  return { kind: "UnaryCall", op, arg: assertExpression(arg), location };
 }
 
 export function nodePipe(
@@ -93,7 +104,13 @@ export function nodePipe(
   rightArgs: ASTNode[],
   location: LocationRange
 ): KindNode<"Pipe"> {
-  return { kind: "Pipe", leftArg, fn, rightArgs, location };
+  return {
+    kind: "Pipe",
+    leftArg: assertExpression(leftArg),
+    fn: assertExpression(fn),
+    rightArgs: rightArgs.map(assertExpression),
+    location,
+  };
 }
 
 export function nodeDotLookup(
@@ -101,7 +118,12 @@ export function nodeDotLookup(
   key: string,
   location: LocationRange
 ): KindNode<"DotLookup"> {
-  return { kind: "DotLookup", arg, key, location };
+  return {
+    kind: "DotLookup",
+    arg: assertExpression(arg),
+    key,
+    location,
+  };
 }
 
 export function nodeBracketLookup(
@@ -109,14 +131,19 @@ export function nodeBracketLookup(
   key: ASTNode,
   location: LocationRange
 ): KindNode<"BracketLookup"> {
-  return { kind: "BracketLookup", arg, key, location };
+  return {
+    kind: "BracketLookup",
+    arg: assertExpression(arg),
+    key: assertExpression(key),
+    location,
+  };
 }
 
 export function nodeArray(
   elements: ASTNode[],
   location: LocationRange
 ): KindNode<"Array"> {
-  return { kind: "Array", elements, location };
+  return { kind: "Array", elements: elements.map(assertExpression), location };
 }
 export function nodeDict(
   elements: AnyNodeDictEntry[],
@@ -130,7 +157,12 @@ export function nodeUnitValue(
   unit: string,
   location: LocationRange
 ): KindNode<"UnitValue"> {
-  return { kind: "UnitValue", value, unit, location };
+  return {
+    kind: "UnitValue",
+    value: assertKind(value, "Float"),
+    unit,
+    location,
+  };
 }
 
 export function nodeBlock(
@@ -138,16 +170,27 @@ export function nodeBlock(
   result: ASTNode,
   location: LocationRange
 ): KindNode<"Block"> {
-  return { kind: "Block", statements, result, location };
+  return {
+    kind: "Block",
+    statements: statements.map(assertStatement),
+    result: assertExpression(result),
+    location,
+  };
 }
 
 export function nodeProgram(
-  imports: KindNode<"Import">[],
+  imports: ASTNode[],
   statements: ASTNode[],
   result: ASTNode | null,
   location: LocationRange
 ): KindNode<"Program"> {
-  return { kind: "Program", imports, statements, result, location };
+  return {
+    kind: "Program",
+    imports: imports.map((imp) => assertKind(imp, "Import")),
+    statements: statements.map(assertStatement),
+    result: result ? assertExpression(result) : null,
+    location,
+  };
 }
 
 export function nodeImport(
@@ -164,7 +207,7 @@ export function nodeTypeSignature(
 ): KindNode<"UnitTypeSignature"> {
   return {
     kind: "UnitTypeSignature",
-    body: body,
+    body: assertUnitType(body),
     location: location,
   };
 }
@@ -191,16 +234,18 @@ export function nodeIdentifier(
 }
 
 export function nodeLambdaParameter(
-  variable: KindNode<"Identifier">,
+  variable: ASTNode,
   annotation: ASTNode | null,
-  unitTypeSignature: KindNode<"UnitTypeSignature"> | null,
+  unitTypeSignature: ASTNode | null,
   location: LocationRange
 ): KindNode<"LambdaParameter"> {
   return {
     kind: "LambdaParameter",
-    variable,
-    annotation,
-    unitTypeSignature,
+    variable: assertKind(variable, "Identifier"),
+    annotation: annotation ? assertExpression(annotation) : null,
+    unitTypeSignature: unitTypeSignature
+      ? assertKind(unitTypeSignature, "UnitTypeSignature")
+      : null,
     location,
   };
 }
@@ -214,57 +259,74 @@ export function nodeKeyValue(
     key = {
       ...key,
       kind: "String",
-    };
+    } satisfies KindNode<"String">;
   }
-  return { kind: "KeyValue", key, value, location };
+  return {
+    kind: "KeyValue",
+    key: assertExpression(key),
+    value: assertExpression(value),
+    location,
+  };
 }
 export function nodeLambda(
   args: ASTNode[],
   body: ASTNode,
   location: LocationRange,
-  name: KindNode<"Identifier"> | undefined,
-  returnUnitType: KindNode<"UnitTypeSignature"> | null
+  name: ASTNode | undefined,
+  returnUnitType: ASTNode | null
 ): KindNode<"Lambda"> {
   return {
     kind: "Lambda",
-    args,
-    body,
-    name: name?.value ?? null,
-    returnUnitType,
+    args: args.map((arg) => assertKind(arg, "LambdaParameter")),
+    body: assertExpression(body),
+    name: name === undefined ? null : assertKind(name, "Identifier").value,
+    returnUnitType: returnUnitType
+      ? assertKind(returnUnitType, "UnitTypeSignature")
+      : null,
     location,
   };
 }
 export function nodeLetStatement(
-  decorators: KindNode<"Decorator">[],
-  variable: KindNode<"Identifier">,
-  unitTypeSignature: KindNode<"UnitTypeSignature"> | null,
-  value: ASTNode,
+  decorators: ASTNode[],
+  _variable: ASTNode,
+  unitTypeSignature: ASTNode | null,
+  _value: ASTNode,
   exported: boolean,
   location: LocationRange
 ): KindNode<"LetStatement"> {
-  const patchedValue =
-    value.kind === "Lambda" ? { ...value, name: variable.value } : value;
+  const variable = assertKind(_variable, "Identifier");
+  const value =
+    _value.kind === "Lambda"
+      ? { ..._value, name: variable.value }
+      : assertExpression(_value);
+
   return {
     kind: "LetStatement",
-    decorators,
+    decorators: decorators.map((decorator) =>
+      assertKind(decorator, "Decorator")
+    ),
     variable,
-    unitTypeSignature,
-    value: patchedValue,
+    unitTypeSignature: unitTypeSignature
+      ? assertKind(unitTypeSignature, "UnitTypeSignature")
+      : null,
+    value,
     exported,
     location,
   };
 }
 export function nodeDefunStatement(
-  decorators: KindNode<"Decorator">[],
-  variable: KindNode<"Identifier">,
+  decorators: ASTNode[],
+  variable: ASTNode,
   value: NamedNodeLambda,
   exported: boolean,
   location: LocationRange
 ): KindNode<"DefunStatement"> {
   return {
     kind: "DefunStatement",
-    decorators,
-    variable,
+    decorators: decorators.map((decorator) =>
+      assertKind(decorator, "Decorator")
+    ),
+    variable: assertKind(variable, "Identifier"),
     value,
     exported,
     location,
@@ -272,11 +334,16 @@ export function nodeDefunStatement(
 }
 
 export function nodeDecorator(
-  name: KindNode<"Identifier">,
+  name: ASTNode,
   args: ASTNode[],
   location: LocationRange
 ): KindNode<"Decorator"> {
-  return { kind: "Decorator", name, args, location };
+  return {
+    kind: "Decorator",
+    name: assertKind(name, "Identifier"),
+    args: args.map(assertExpression),
+    location,
+  };
 }
 
 export function nodeString(
@@ -295,9 +362,9 @@ export function nodeTernary(
 ): KindNode<"Ternary"> {
   return {
     kind: "Ternary",
-    condition,
-    trueExpression,
-    falseExpression,
+    condition: assertExpression(condition),
+    trueExpression: assertExpression(trueExpression),
+    falseExpression: assertExpression(falseExpression),
     syntax,
     location,
   };

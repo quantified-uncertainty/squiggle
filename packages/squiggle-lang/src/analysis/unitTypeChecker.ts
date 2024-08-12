@@ -521,7 +521,7 @@ function lambdaFindTypeConstraints(
         // params as `parameters`
         const substitutableConstraint = structuredClone(newReturnConstraint);
         for (let i = 0; i < node.args.length; i++) {
-          const paramName = (node.args[i] as { value: string }).value;
+          const paramName = (node.args[i].variable as { value: string }).value;
           const paramId = scopes.stack[scopes.stack.length - 1][paramName];
           if (paramId in substitutableConstraint.variables) {
             substitutableConstraint.parameters[i] =

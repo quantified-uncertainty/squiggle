@@ -1,4 +1,4 @@
-import { AnyExpressionNode } from "../analysis/types.js";
+import { AnyTypedExpressionNode } from "../analysis/types.js";
 import { infixFunctions, unaryFunctions } from "../ast/operators.js";
 import { ICompileError } from "../errors/IError.js";
 import { vBool } from "../value/VBool.js";
@@ -17,7 +17,7 @@ import {
 } from "./types.js";
 
 function compileExpressionContent(
-  ast: AnyExpressionNode,
+  ast: AnyTypedExpressionNode,
   context: CompileContext
 ): AnyExpressionIRContent {
   switch (ast.kind) {
@@ -182,7 +182,7 @@ function compileExpressionContent(
 }
 
 export function compileExpression(
-  ast: AnyExpressionNode,
+  ast: AnyTypedExpressionNode,
   context: CompileContext
 ): AnyExpressionIR {
   const content = compileExpressionContent(ast, context);

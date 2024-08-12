@@ -3,14 +3,14 @@ import { tAny } from "../types/index.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";
-import { AnyExpressionNode } from "./types.js";
+import { AnyTypedExpressionNode } from "./types.js";
 
 export class NodeTernary extends ExpressionNode<"Ternary"> {
   private constructor(
     location: LocationRange,
-    public condition: AnyExpressionNode,
-    public trueExpression: AnyExpressionNode,
-    public falseExpression: AnyExpressionNode,
+    public condition: AnyTypedExpressionNode,
+    public trueExpression: AnyTypedExpressionNode,
+    public falseExpression: AnyTypedExpressionNode,
     public syntax: "IfThenElse" | "C"
   ) {
     super(

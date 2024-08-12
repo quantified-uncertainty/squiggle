@@ -3,12 +3,12 @@ import { tAny, tArray } from "../types/index.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";
-import { AnyExpressionNode } from "./types.js";
+import { AnyTypedExpressionNode } from "./types.js";
 
 export class NodeArray extends ExpressionNode<"Array"> {
   private constructor(
     location: LocationRange,
-    public elements: AnyExpressionNode[]
+    public elements: AnyTypedExpressionNode[]
   ) {
     super(
       "Array",

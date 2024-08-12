@@ -112,8 +112,15 @@ export const unitTypeKinds = [
   "ExponentialUnitType",
 ] as const satisfies Kind[];
 
-export type AnyStatementNode = KindTypedNode<(typeof statementKinds)[number]>;
-export type AnyExpressionNode = KindTypedNode<(typeof expressionKinds)[number]>;
-export type AnyUnitTypeNode = KindTypedNode<(typeof unitTypeKinds)[number]>;
+export type AnyTypedStatementNode = KindTypedNode<
+  (typeof statementKinds)[number]
+>;
+
+export type AnyTypedExpressionNode = KindTypedNode<
+  (typeof expressionKinds)[number]
+>;
+export type AnyTypedUnitTypeNode = KindTypedNode<
+  (typeof unitTypeKinds)[number]
+>;
 
 export type TypedAST = NodeProgram;

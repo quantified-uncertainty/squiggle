@@ -5,13 +5,13 @@ import { analyzeExpression, analyzeKind } from "./index.js";
 import { Node } from "./Node.js";
 import { NodeIdentifierDefinition } from "./NodeIdentifierDefinition.js";
 import { NodeUnitTypeSignature } from "./NodeUnitTypeSignature.js";
-import { AnyExpressionNode, TypedASTNode } from "./types.js";
+import { AnyTypedExpressionNode, TypedASTNode } from "./types.js";
 
 export class NodeLambdaParameter extends Node<"LambdaParameter"> {
   private constructor(
     location: LocationRange,
     public variable: NodeIdentifierDefinition,
-    public annotation: AnyExpressionNode | null,
+    public annotation: AnyTypedExpressionNode | null,
     public unitTypeSignature: NodeUnitTypeSignature | null
   ) {
     super("LambdaParameter", location);

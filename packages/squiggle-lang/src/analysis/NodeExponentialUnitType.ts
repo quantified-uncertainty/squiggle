@@ -3,12 +3,12 @@ import { AnalysisContext } from "./context.js";
 import { analyzeKind, analyzeUnitType } from "./index.js";
 import { Node } from "./Node.js";
 import { NodeFloat } from "./NodeFloat.js";
-import { AnyUnitTypeNode } from "./types.js";
+import { AnyTypedUnitTypeNode } from "./types.js";
 
 export class NodeExponentialUnitType extends Node<"ExponentialUnitType"> {
   private constructor(
     location: LocationRange,
-    public base: AnyUnitTypeNode,
+    public base: AnyTypedUnitTypeNode,
     public exponent: NodeFloat
   ) {
     super("ExponentialUnitType", location);

@@ -2,13 +2,13 @@ import { KindNode, LocationRange } from "../ast/types.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { Node } from "./Node.js";
-import { AnyExpressionNode } from "./types.js";
+import { AnyTypedExpressionNode } from "./types.js";
 
 export class NodeKeyValue extends Node<"KeyValue"> {
   private constructor(
     location: LocationRange,
-    public key: AnyExpressionNode,
-    public value: AnyExpressionNode
+    public key: AnyTypedExpressionNode,
+    public value: AnyTypedExpressionNode
   ) {
     super("KeyValue", location);
     this._init();

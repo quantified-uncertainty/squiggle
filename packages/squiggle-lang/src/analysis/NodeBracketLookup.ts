@@ -3,13 +3,13 @@ import { tAny } from "../types/index.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";
-import { AnyExpressionNode } from "./types.js";
+import { AnyTypedExpressionNode } from "./types.js";
 
 export class NodeBracketLookup extends ExpressionNode<"BracketLookup"> {
   private constructor(
     location: LocationRange,
-    public arg: AnyExpressionNode,
-    public key: AnyExpressionNode
+    public arg: AnyTypedExpressionNode,
+    public key: AnyTypedExpressionNode
   ) {
     super(
       "BracketLookup",

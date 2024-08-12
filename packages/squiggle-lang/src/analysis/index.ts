@@ -31,9 +31,9 @@ import { NodeUnaryCall } from "./NodeUnaryCall.js";
 import { NodeUnitTypeSignature } from "./NodeUnitTypeSignature.js";
 import { NodeUnitValue } from "./NodeUnitValue.js";
 import {
-  AnyExpressionNode,
-  AnyStatementNode,
-  AnyUnitTypeNode,
+  AnyTypedExpressionNode,
+  AnyTypedStatementNode,
+  AnyTypedUnitTypeNode,
   expressionKinds,
   KindTypedNode,
   statementKinds,
@@ -70,17 +70,21 @@ function assertOneOfKinds<Kind extends TypedASTNode["kind"]>(
   }
 }
 
-function assertStatement(node: TypedASTNode): asserts node is AnyStatementNode {
+function assertStatement(
+  node: TypedASTNode
+): asserts node is AnyTypedStatementNode {
   assertOneOfKinds(node, statementKinds, "statement");
 }
 
 function assertExpression(
   node: TypedASTNode
-): asserts node is AnyExpressionNode {
+): asserts node is AnyTypedExpressionNode {
   assertOneOfKinds(node, expressionKinds, "expression");
 }
 
-function assertUnitType(node: TypedASTNode): asserts node is AnyUnitTypeNode {
+function assertUnitType(
+  node: TypedASTNode
+): asserts node is AnyTypedUnitTypeNode {
   assertOneOfKinds(node, unitTypeKinds, "unit type");
 }
 
@@ -107,7 +111,7 @@ export function analyzeOneOfKinds<Kind extends TypedASTNode["kind"]>(
 export function analyzeExpression(
   node: ASTNode,
   context: AnalysisContext
-): AnyExpressionNode {
+): AnyTypedExpressionNode {
   const typedNode = analyzeAstNode(node, context);
   assertExpression(typedNode);
   return typedNode;
@@ -116,7 +120,7 @@ export function analyzeExpression(
 export function analyzeUnitType(
   node: ASTNode,
   context: AnalysisContext
-): AnyUnitTypeNode {
+): AnyTypedUnitTypeNode {
   const typedNode = analyzeAstNode(node, context);
   assertUnitType(typedNode);
   return typedNode;
@@ -125,7 +129,7 @@ export function analyzeUnitType(
 export function analyzeStatement(
   node: ASTNode,
   symbols: AnalysisContext
-): AnyStatementNode {
+): AnyTypedStatementNode {
   const typedNode = analyzeAstNode(node, symbols);
   assertStatement(typedNode);
   return typedNode;

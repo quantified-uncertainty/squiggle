@@ -46,16 +46,16 @@ type NodeProgram = N<
   "Program",
   {
     imports: NodeImport[];
-    statements: ASTNode[];
-    result: ASTNode | null;
+    statements: AnyStatementNode[];
+    result: AnyExpressionNode | null;
   }
 >;
 
 type NodeBlock = N<
   "Block",
   {
-    statements: ASTNode[];
-    result: ASTNode;
+    statements: AnyStatementNode[];
+    result: AnyExpressionNode;
   }
 >;
 
@@ -70,7 +70,7 @@ type NodeImport = N<
 type NodeArray = N<
   "Array",
   {
-    elements: ASTNode[];
+    elements: AnyExpressionNode[];
   }
 >;
 
@@ -83,8 +83,8 @@ type NodeDict = N<
 type NodeKeyValue = N<
   "KeyValue",
   {
-    key: ASTNode;
-    value: ASTNode;
+    key: AnyExpressionNode;
+    value: AnyExpressionNode;
   }
 >;
 export type AnyNodeDictEntry = NodeKeyValue | NodeIdentifier;
@@ -92,7 +92,7 @@ export type AnyNodeDictEntry = NodeKeyValue | NodeIdentifier;
 type NodeUnitValue = N<
   "UnitValue",
   {
-    value: ASTNode;
+    value: NodeFloat;
     unit: string;
   }
 >;
@@ -100,8 +100,8 @@ type NodeUnitValue = N<
 type NodeCall = N<
   "Call",
   {
-    fn: ASTNode;
-    args: ASTNode[];
+    fn: AnyExpressionNode;
+    args: AnyExpressionNode[];
   }
 >;
 
@@ -109,7 +109,7 @@ type NodeInfixCall = N<
   "InfixCall",
   {
     op: InfixOperator;
-    args: [ASTNode, ASTNode];
+    args: [AnyExpressionNode, AnyExpressionNode];
   }
 >;
 
@@ -117,23 +117,23 @@ type NodeUnaryCall = N<
   "UnaryCall",
   {
     op: UnaryOperator;
-    arg: ASTNode;
+    arg: AnyExpressionNode;
   }
 >;
 
 type NodePipe = N<
   "Pipe",
   {
-    leftArg: ASTNode;
-    fn: ASTNode;
-    rightArgs: ASTNode[];
+    leftArg: AnyExpressionNode;
+    fn: AnyExpressionNode;
+    rightArgs: AnyExpressionNode[];
   }
 >;
 
 type NodeDotLookup = N<
   "DotLookup",
   {
-    arg: ASTNode;
+    arg: AnyExpressionNode;
     key: string;
   }
 >;
@@ -141,8 +141,8 @@ type NodeDotLookup = N<
 type NodeBracketLookup = N<
   "BracketLookup",
   {
-    arg: ASTNode;
-    key: ASTNode;
+    arg: AnyExpressionNode;
+    key: AnyExpressionNode;
   }
 >;
 
@@ -160,8 +160,8 @@ type NodeLambdaParameter = N<
   "LambdaParameter",
   {
     variable: NodeIdentifier;
-    annotation: ASTNode | null;
-    unitTypeSignature: NodeTypeSignature | null;
+    annotation: AnyExpressionNode | null;
+    unitTypeSignature: NodeUnitTypeSignature | null;
   }
 >;
 
@@ -176,7 +176,7 @@ type NodeDecorator = N<
   "Decorator",
   {
     name: NodeIdentifier;
-    args: ASTNode[];
+    args: AnyExpressionNode[];
   }
 >;
 
@@ -189,8 +189,8 @@ type LetOrDefun = {
 type NodeLetStatement = N<
   "LetStatement",
   LetOrDefun & {
-    unitTypeSignature: NodeTypeSignature | null;
-    value: ASTNode;
+    unitTypeSignature: NodeUnitTypeSignature | null;
+    value: AnyExpressionNode;
   }
 >;
 
@@ -204,11 +204,10 @@ type NodeDefunStatement = N<
 type NodeLambda = N<
   "Lambda",
   {
-    // Don't try to convert it to string[], ASTNode is intentional because we need locations.
-    args: ASTNode[];
-    body: ASTNode;
+    args: NodeLambdaParameter[];
+    body: AnyExpressionNode;
     name: string | null;
-    returnUnitType: NodeTypeSignature | null;
+    returnUnitType: NodeUnitTypeSignature | null;
   }
 >;
 
@@ -217,17 +216,17 @@ export type NamedNodeLambda = NodeLambda & Required<Pick<NodeLambda, "name">>;
 type NodeTernary = N<
   "Ternary",
   {
-    condition: ASTNode;
-    trueExpression: ASTNode;
-    falseExpression: ASTNode;
+    condition: AnyExpressionNode;
+    trueExpression: AnyExpressionNode;
+    falseExpression: AnyExpressionNode;
     syntax: "IfThenElse" | "C";
   }
 >;
 
-type NodeTypeSignature = N<
+type NodeUnitTypeSignature = N<
   "UnitTypeSignature",
   {
-    body: ASTNode;
+    body: AnyUnitTypeNode;
   }
 >;
 
@@ -235,15 +234,15 @@ type NodeInfixUnitType = N<
   "InfixUnitType",
   {
     op: TypeOperator;
-    args: [ASTNode, ASTNode];
+    args: [AnyUnitTypeNode, AnyUnitTypeNode];
   }
 >;
 
 type NodeExponentialUnitType = N<
   "ExponentialUnitType",
   {
-    base: ASTNode;
-    exponent: ASTNode;
+    base: AnyUnitTypeNode;
+    exponent: NodeFloat;
   }
 >;
 
@@ -278,7 +277,7 @@ export type ASTNode =
   // control flow - if/else
   | NodeTernary
   // type signature
-  | NodeTypeSignature
+  | NodeUnitTypeSignature
   | NodeInfixUnitType
   | NodeExponentialUnitType
   // identifiers
@@ -295,7 +294,44 @@ export type ASTCommentNode = {
   location: LocationRange;
 };
 
-export type KindNode<T extends ASTNode["kind"]> = Extract<ASTNode, { kind: T }>;
+type Kind = ASTNode["kind"];
+
+export type KindNode<T extends Kind> = Extract<ASTNode, { kind: T }>;
+
+export const statementKinds = [
+  "LetStatement",
+  "DefunStatement",
+] as const satisfies Kind[];
+
+export const expressionKinds = [
+  "Block",
+  "Lambda",
+  "Array",
+  "Dict",
+  "UnitValue",
+  "Call",
+  "InfixCall",
+  "UnaryCall",
+  "Pipe",
+  "DotLookup",
+  "BracketLookup",
+  "Ternary",
+  "Identifier",
+  "Float",
+  "String",
+  "Boolean",
+] as const satisfies Kind[];
+
+export const unitTypeKinds = [
+  "Identifier",
+  "Float",
+  "InfixUnitType",
+  "ExponentialUnitType",
+] as const satisfies Kind[];
+
+export type AnyStatementNode = KindNode<(typeof statementKinds)[number]>;
+export type AnyExpressionNode = KindNode<(typeof expressionKinds)[number]>;
+export type AnyUnitTypeNode = KindNode<(typeof unitTypeKinds)[number]>;
 
 export type AST = KindNode<"Program"> & {
   comments: ASTCommentNode[];

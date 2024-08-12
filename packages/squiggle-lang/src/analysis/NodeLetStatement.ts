@@ -5,7 +5,7 @@ import { Node } from "./Node.js";
 import { NodeDecorator } from "./NodeDecorator.js";
 import { NodeIdentifierDefinition } from "./NodeIdentifierDefinition.js";
 import { NodeUnitTypeSignature } from "./NodeUnitTypeSignature.js";
-import { AnyExpressionNode } from "./types.js";
+import { AnyTypedExpressionNode } from "./types.js";
 
 export type LetOrDefun = {
   decorators: NodeDecorator[];
@@ -23,7 +23,7 @@ export class NodeLetStatement
     public exported: boolean,
     public variable: NodeIdentifierDefinition,
     public unitTypeSignature: NodeUnitTypeSignature | null,
-    public value: AnyExpressionNode
+    public value: AnyTypedExpressionNode
   ) {
     super("LetStatement", location);
     this._init();

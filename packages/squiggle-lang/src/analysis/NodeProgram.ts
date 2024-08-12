@@ -2,17 +2,17 @@ import { AST } from "../ast/types.js";
 import { Bindings } from "../reducer/Stack.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { AnalysisContext } from "./context.js";
-import { analyzeExpression, analyzeKind, analyzeStatement } from "./index.js";
+import { analyzeExpression, analyzeStatement } from "./index.js";
 import { Node } from "./Node.js";
 import { NodeImport } from "./NodeImport.js";
-import { AnyExpressionNode, AnyStatementNode } from "./types.js";
+import { AnyTypedExpressionNode, AnyTypedStatementNode } from "./types.js";
 
 export class NodeProgram extends Node<"Program"> {
   private constructor(
     public raw: AST,
     public imports: NodeImport[],
-    public statements: AnyStatementNode[],
-    public result: AnyExpressionNode | null
+    public statements: AnyTypedStatementNode[],
+    public result: AnyTypedExpressionNode | null
   ) {
     super("Program", raw.location);
     this._init();
@@ -32,8 +32,8 @@ export class NodeProgram extends Node<"Program"> {
 
   // Var name -> statement node, for faster path resolution.
   // Not used for evaluation.
-  private _symbols: Record<string, AnyStatementNode> | undefined;
-  get symbols(): Record<string, AnyStatementNode> {
+  private _symbols: Record<string, AnyTypedStatementNode> | undefined;
+  get symbols(): Record<string, AnyTypedStatementNode> {
     if (!this._symbols) {
       this._symbols = {};
       for (const statement of this.statements) {
@@ -52,7 +52,7 @@ export class NodeProgram extends Node<"Program"> {
     const imports: NodeImport[] = [];
 
     for (const importNode of ast.imports) {
-      const typedImportNode = analyzeKind(importNode, "Import", context);
+      const typedImportNode = NodeImport.fromAst(importNode);
       context.definitions = context.definitions.set(
         typedImportNode.variable.value,
         typedImportNode.variable
@@ -60,7 +60,7 @@ export class NodeProgram extends Node<"Program"> {
       imports.push(typedImportNode);
     }
 
-    const statements: AnyStatementNode[] = [];
+    const statements: AnyTypedStatementNode[] = [];
     for (const statement of ast.statements) {
       const typedStatement = analyzeStatement(statement, context);
       statements.push(typedStatement);

@@ -3,13 +3,13 @@ import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { Node } from "./Node.js";
 import { NodeIdentifier } from "./NodeIdentifier.js";
-import { AnyExpressionNode } from "./types.js";
+import { AnyTypedExpressionNode } from "./types.js";
 
 export class NodeDecorator extends Node<"Decorator"> {
   private constructor(
     location: LocationRange,
     public name: NodeIdentifier,
-    public args: AnyExpressionNode[]
+    public args: AnyTypedExpressionNode[]
   ) {
     super("Decorator", location);
     this._init();

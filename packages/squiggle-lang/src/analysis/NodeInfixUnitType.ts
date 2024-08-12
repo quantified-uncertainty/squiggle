@@ -2,13 +2,13 @@ import { KindNode, LocationRange, TypeOperator } from "../ast/types.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeUnitType } from "./index.js";
 import { Node } from "./Node.js";
-import { AnyUnitTypeNode } from "./types.js";
+import { AnyTypedUnitTypeNode } from "./types.js";
 
 export class NodeInfixUnitType extends Node<"InfixUnitType"> {
   constructor(
     location: LocationRange,
     public op: TypeOperator,
-    public args: [AnyUnitTypeNode, AnyUnitTypeNode]
+    public args: [AnyTypedUnitTypeNode, AnyTypedUnitTypeNode]
   ) {
     super("InfixUnitType", location);
     this._init();

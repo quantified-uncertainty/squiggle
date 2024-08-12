@@ -6,12 +6,12 @@ import { tAny, Type } from "../types/Type.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";
-import { AnyExpressionNode } from "./types.js";
+import { AnyTypedExpressionNode } from "./types.js";
 
 export class NodeDotLookup extends ExpressionNode<"DotLookup"> {
   private constructor(
     location: LocationRange,
-    public arg: AnyExpressionNode,
+    public arg: AnyTypedExpressionNode,
     public key: string
   ) {
     let type: Type<unknown>;
