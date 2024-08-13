@@ -173,6 +173,11 @@ export function getSquiggleAdvice(errorMessage: string): string {
       Do: foo = { a = 1 a + 3 }`,
     },
     {
+      pattern:
+        / "{", array, boolean, dict, identifier, number, string, unary operator, or whitespace but/,
+      advice: `This likely means that you have a block without a return statement. Don't: foo = { a = 1 b = a + 3 }`,
+    },
+    {
       pattern: /Number is not defined/,
       advice: `Are you trying to use Number as a Type? This is not supported. Domains are very restricted, see that documentation.`,
     },
@@ -180,6 +185,11 @@ export function getSquiggleAdvice(errorMessage: string): string {
       pattern:
         /Failed to evaluate Squiggle code: Expected "->", "?", assignment, end of input, operator, or whitespace/,
       advice: `Did you have an import statement that's not on the top of the file? Make sure that all import statements are on the top of the file.`,
+    },
+    {
+      pattern:
+        /"if", "{", array, boolean, dict, identifier, number, string, or unary operator but ".*?" found./,
+      advice: `Do you have two returns in a block? You can only have one, at the end. Everything else should be a variable declaration.`,
     },
   ];
 

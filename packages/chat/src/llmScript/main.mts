@@ -5,28 +5,15 @@ import { Logger } from "./logger.mts";
 
 const MAX_ATTEMPTS = 10;
 
-// Tracking info
 const trackingInfo = {
-  time: { createSquiggleCode: 0, validateAndFixCode: 0 },
-  tokens: { input: 0, output: 0 },
-};
-
-const extractSquiggleCode = (content) => {
-  const match = content.match(/```squiggle([\s\S]*?)```/);
-  return match ? match[1].trim() : "";
-};
-
-const measureTime = async (fn) => {
-  const start = Date.now();
-  const result = await fn();
-  const duration = (Date.now() - start) / 1000;
-  return { result, duration };
-};
-
-const updateTrackingInfo = (duration, usage) => {
-  trackingInfo.time.createSquiggleCode += duration;
-  trackingInfo.tokens.input += usage.prompt_tokens;
-  trackingInfo.tokens.output += usage.completion_tokens;
+  time: {
+    createSquiggleCode: 0,
+    validateAndFixCode: 0,
+  },
+  tokens: {
+    input: 0,
+    output: 0,
+  },
 };
 
 const generateSquiggleContent = (
@@ -37,40 +24,81 @@ const generateSquiggleContent = (
   const isFixing = Boolean(existingCode);
   const advice = getSquiggleAdvice(error);
 
+  let content = "";
+
   if (isFixing) {
-    let content = `Fix the following Squiggle code. It produced this error: ${error}\n\nCode:\n${existingCode}\n\n`;
+    content = `Fix the following Squiggle code. It produced this error: ${error}\n\nCode:\n${existingCode}\n\n`;
     if (advice) {
       Logger.log(`Advice: ${advice}`);
       content += `Advice: ${advice}\n\n`;
     }
-    content += `Explain your thinking in detail. Think step by step. Wrap the code in \`\`\`squiggle tags.\n\nInformation on Squiggle Language:\n\n\n${squiggleDocs}`;
-    return content;
   } else {
-    return `Generate Squiggle code for the following prompt. Mainly produce code, short explanations. Wrap the code in \`\`\`squiggle tags.\n\nPrompt: ${prompt}.\n\n\nInformation about the Squiggle Language:\n\n\n${squiggleDocs}`;
+    content = `Generate Squiggle code for the following prompt. Produce mainly code with short explanations. Wrap the code in \`\`\`squiggle tags.\n\nPrompt: ${prompt}.\n\n`;
+    content += `Information about the Squiggle Language:\n\n${squiggleDocs}`;
+  }
+
+  // Logger.logPrompt(content);
+  return content;
+};
+
+const updateTrackingInfo = (
+  duration: number,
+  usage?: { prompt_tokens?: number; completion_tokens?: number }
+) => {
+  trackingInfo.time.createSquiggleCode += duration;
+  if (usage) {
+    trackingInfo.tokens.input += usage.prompt_tokens || 0;
+    trackingInfo.tokens.output += usage.completion_tokens || 0;
   }
 };
 
-const createSquiggleCode = async (prompt, existingCode = "", error = "") => {
+const createSquiggleCode = async (
+  prompt: string,
+  existingCode = "",
+  error = ""
+) => {
   const content = generateSquiggleContent(prompt, existingCode, error);
-  const { result: completion, duration } = await measureTime(async () =>
-    runLLM(content)
-  );
+  try {
+    const { result: completion, duration } = await measureTime(async () =>
+      runLLM(content, existingCode ? "user" : "system")
+    );
 
-  updateTrackingInfo(duration, completion.usage);
-  Logger.highlight(
-    `✨ Got response from OpenRouter ${existingCode ? "(fix attempt)" : "(initial generation)"}`
-  );
+    Logger.logLLMResponse(JSON.stringify(completion, null, 2));
 
-  const extractedCode = extractSquiggleCode(
-    completion.choices[0].message.content
-  );
-  if (!extractedCode) {
-    Logger.error("Error generating/fixing Squiggle code. Didn't get code.");
+    if (!completion || !completion.choices || completion.choices.length === 0) {
+      Logger.error("Received an empty response from the API");
+      return "";
+    }
+
+    updateTrackingInfo(duration, completion.usage);
+    Logger.highlight(
+      `✨ Got response from OpenRouter ${existingCode ? "(fix attempt)" : "(initial generation)"}`
+    );
+
+    const message = completion.choices[0].message;
+    if (!message || !message.content) {
+      Logger.error("Received a response without content");
+      return "";
+    }
+
+    const extractedCode = extractSquiggleCode(message.content);
+    if (!extractedCode) {
+      Logger.error("Error generating/fixing Squiggle code. Didn't get code.");
+      return "";
+    }
+    return extractedCode;
+  } catch (error) {
+    Logger.error(`Error in createSquiggleCode: ${error.message}`);
+    return "";
   }
-  return extractedCode;
 };
 
-const validateAndFixCode = async (prompt, initialCode) => {
+const extractSquiggleCode = (content: string): string => {
+  const match = content.match(/```squiggle([\s\S]*?)```/);
+  return match ? match[1].trim() : "";
+};
+
+const validateAndFixCode = async (prompt: string, initialCode: string) => {
   let code = initialCode;
   let isValid = false;
   let attempts = 0;
@@ -89,49 +117,77 @@ const validateAndFixCode = async (prompt, initialCode) => {
       run.value && Logger.errorBox(run.value);
       Logger.highlight("\n🔧 Attempting to fix the code...");
 
-      const { result: newCode, duration } = await measureTime(() =>
-        createSquiggleCode(prompt, code, run.value)
-      );
-      trackingInfo.time.validateAndFixCode += duration;
-      code = newCode;
+      try {
+        const { result: newCode, duration } = await measureTime(() =>
+          createSquiggleCode(prompt, code, run.value)
+        );
+        trackingInfo.time.validateAndFixCode += duration;
 
-      Logger.code(code, "Fixed Code:");
-      attempts++;
+        if (!newCode) {
+          Logger.error("Failed to generate new code. Stopping attempts.");
+          break;
+        }
+
+        code = newCode;
+        Logger.code(code, "Fixed Code:");
+      } catch (error) {
+        Logger.error(`Error during code fix attempt: ${error.message}`);
+        break;
+      }
     }
+    attempts++;
   }
 
   return { isValid, code };
 };
 
-// Main function
+const measureTime = async <T,>(
+  fn: () => Promise<T>
+): Promise<{ result: T; duration: number }> => {
+  const start = Date.now();
+  const result = await fn();
+  const duration = Date.now() - start;
+  return { result, duration };
+};
+
 const main = async () => {
-  const prompt =
-    "Make a model to estimate the costs and benefits of flying from SFO to London.\n\n" +
-    "Keep this part simple. Do not use any annotations ('@name', '@doc'), do not use domains (i.e. f(t: [2,3])), do not use custom visualizations or calculators yet. Just get the core functionality right. Use the sTest library for tests.";
+  const prompt = "write a complex Squiggle model about personal finance.";
 
-  Logger.info("\n🚀 Starting Squiggle Code Generation\n");
-  Logger.log(`Prompt: ${prompt}`);
+  Logger.initNewLog();
+  Logger.info("🚀 Squiggle Code Generator");
+  Logger.info(`Prompt: ${prompt}`);
 
-  Logger.highlight("\n📝 Generating initial Squiggle code...");
-  const { result: initialCode, duration } = await measureTime(() =>
-    createSquiggleCode(prompt)
-  );
-  trackingInfo.time.createSquiggleCode += duration;
-  Logger.code(initialCode, "Generated Code:");
-
-  const { isValid, code } = await validateAndFixCode(prompt, initialCode);
-
-  Logger.info("\n🏁 Final Result:");
-  if (isValid) {
-    Logger.success("Successfully generated valid Squiggle code!");
-    Logger.code(code, "Final Valid Squiggle Code:");
-  } else {
-    Logger.error(
-      `Failed to generate valid Squiggle code after ${MAX_ATTEMPTS} attempts.`
+  try {
+    Logger.highlight("\n📝 Generating initial Squiggle code...");
+    const { result: initialCode, duration } = await measureTime(() =>
+      createSquiggleCode(prompt)
     );
-  }
+    trackingInfo.time.createSquiggleCode += duration;
 
-  Logger.summary(trackingInfo);
+    if (!initialCode) {
+      throw new Error("Failed to generate initial code");
+    }
+
+    Logger.code(initialCode, "Generated Code:");
+
+    const { isValid, code } = await validateAndFixCode(prompt, initialCode);
+
+    Logger.info("\n🏁 Final Result:");
+    if (isValid) {
+      Logger.success("Successfully generated valid Squiggle code!");
+      Logger.code(code, "Final Valid Squiggle Code:");
+    } else {
+      Logger.error(
+        `Failed to generate valid Squiggle code after ${MAX_ATTEMPTS} attempts.`
+      );
+      Logger.code(code, "Last attempted code:");
+    }
+
+    Logger.summary(trackingInfo);
+  } catch (error) {
+    Logger.error("\n💥 An error occurred during code generation:");
+    Logger.error(error.toString());
+  }
 };
 
 // Run the main function

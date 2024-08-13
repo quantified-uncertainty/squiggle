@@ -1,26 +1,4 @@
-Write Squiggle code, using the attached documentation for how it works.  
-
-Be sure to use the sTest library.
-
-## Available Matchers
-
-- `toBe(expected)`: Checks for exact equality
-- `toBeGreaterThan(expected)`: Checks if the actual value is greater than the expected
-- `toBeLessThan(expected)`: Checks if the actual value is less than the expected
-- `toBeTrue()`: Checks if the value is true
-- `toBeFalse()`: Checks if the value is false
-
-```squiggle
-import "hub:ozziegooen/sTest" as sTest
-
-myTestSuite = sTest.describe("My Test Suite", [
-  sTest.test("First test", {|| sTest.expect(true).toBeTrue()}),
-  sTest.test("Second test", {|| sTest.expect(5).toBeGreaterThan(3)})
-])
-```
-
-Key instructions:
-Write the entire code, don't truncate it. So don't ever use "...", just write out the entire code. The code output you produce should be directly runnable in Squiggle, it shouldn't need any changes from users.
+Write Squiggle code, using the attached documentation for how it works. Do not describe your work, just return the text of the code. Don't add any explanations. Write the entire code, don't truncate it. So don't ever use "...", just write out the entire code. The code output you produce should be directly runnable in Squiggle, it shouldn't need any changes from users.
 
 About Squiggle.
 Squiggle is a very simple language, that's much simpler than JS. Don't try using language primitives/constructs you don't see below, or that aren't in our documentation. They are likely to fail.
@@ -28,54 +6,62 @@ Squiggle is a very simple language, that's much simpler than JS. Don't try using
 When writing Squiggle code, it's important to avoid certain common mistakes:
 
 ### Syntax and Structure
+
 1. Variable Expansion: Not supported. Don't use syntax like |v...| or |...v|.
 2. All pipes are "->", not "|>".
 3. Dict keys and variable names must be lowercase.
 4. The last value in a block/function is returned (no "return" keyword).
-5. Variable declaration: Directly assign values to variables without using keywords. For example, use ``foo = 3`` instead of ``let foo = 3``.
-6. All statements in your model, besides the last one must either be comments or variable declarations. You can't do, ```4 \n 5 \n 6``` Similarly, you can't do, ```Calculator() ... Table()``` - instead, you need to set everything but the last item to a variable.
+5. Variable declaration: Directly assign values to variables without using keywords. For example, use `foo = 3` instead of `let foo = 3`.
+6. All statements in your model, besides the last one must either be comments or variable declarations. You can't do, `4 \n 5 \n 6` Similarly, you can't do, `Calculator() ... Table()` - instead, you need to set everything but the last item to a variable.
 
 ### Function Definitions and Use
+
 1. Anonymous Functions: Use {|e| e} syntax for anonymous functions.
 2. Function Parameters: When using functions like normal, specify the standard deviation with stdev instead of sd. For example, use normal({mean: 0.3, stdev: 0.1}) instead of normal({mean: 0.3, sd: 0.1}).
 3. There's no recursion.
-4. You can't call functions that accept ranges, with distributions. No, ``({|foo: [1,20]| foo}) (4 to 5)``.
+4. You can't call functions that accept ranges, with distributions. No, `({|foo: [1,20]| foo}) (4 to 5)`.
 
 ### Data Types and Input Handling
+
 1. Input Types: Use Input.text for numeric inputs instead of Input.number or Input.slider.
 2. The only function param types you can provide are numeric/date ranges, for numbers. f(n:[1,10]). Nothing else is valid. You cannot provide regular input type declarations.
 3. Only use Inputs directly inside calculators. They won't return numbers, just input types.
 
 ### Looping, Conditionals, and Data Operations
+
 1. Conditional Statements: There are no case or switch statements. Use if/else for conditional logic.
 2. There aren't for loops or mutation. Use immutable code, and List.map / List.reduce / List.reduceWhile.
-3. Remember to use ``Number.sum`` and ``Number.product``, instead of using Reduce in those cases.
+3. Remember to use `Number.sum` and `Number.product`, instead of using Reduce in those cases.
 
 ### List and Dictionary Operations
+
 1. You can't do "(0..years)". Use List.make or List.upTo.
 2. There's no "List.sort", but there is "List.sortBy", "Number.sort".
 
 ### Randomness and Distribution Handling
+
 1. There's no random() function. Use alternatives like sample(uniform(0,1)).
 2. When representing percentages, use "5%" instead of "0.05" for readability.
-3. The ``to`` syntax only works for >0 values. "4 to 10", not "0 to 10".
+3. The `to` syntax only works for >0 values. "4 to 10", not "0 to 10".
 
 ### Units and Scales
+
 1. The only "units" are k/m/n/M/t/B, for different orders of magnitude, and "%" for percentage (which is equal to 0.01).
 2. If you make a table that contains a column of similar distributions, use a scale to ensure consistent min and max.
 3. Scale.symlog() has support for negative values, Scale.log() doesn't. Scale.symlog() is often a better choice for this reason, though Scale.log() is better when you are sure values are above 0.
 4. Do use Scale.symlog() and Scale.log() on dists/plots that might need it. Many do!
 
 ### Documentation and Comments
+
 1. Tags like @name and @doc apply to the following variable, not the full file.
 2. If you use a domain for Years, try to use the Date domain, and pass in Date objects, like Date(2022) instead of 2022.
 
---- 
+---
 
 This format provides a clear and organized view of the guidelines for writing Squiggle code.
 
-
 Here's are some simple example Squiggle programs:
+
 ```squiggle
 //Model for Piano Tuners in New York Over Time
 
@@ -222,7 +208,26 @@ testSuite = sTest.describe(
 )
 ```
 
-# Language Features 
+## sTest Library
+
+### Available Matchers
+
+- `toBe(expected)`: Checks for exact equality
+- `toBeGreaterThan(expected)`: Checks if the actual value is greater than the expected
+- `toBeLessThan(expected)`: Checks if the actual value is less than the expected
+- `toBeTrue()`: Checks if the value is true
+- `toBeFalse()`: Checks if the value is false
+
+```squiggle
+import "hub:ozziegooen/sTest" as sTest
+
+myTestSuite = sTest.describe("My Test Suite", [
+  sTest.test("First test", {|| sTest.expect(true).toBeTrue()}),
+  sTest.test("Second test", {|| sTest.expect(5).toBeGreaterThan(3)})
+])
+```
+
+# Language Features
 
 ## Program Structure
 
@@ -593,7 +598,7 @@ ys = List.map(xs, {|x| f(x)})
 
 ## Numbers
 
-Squiggle numbers are built directly on [Javascript numbers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number). They can be integers or floats, and support all the usual arithmetic operations.  
+Squiggle numbers are built directly on [Javascript numbers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number). They can be integers or floats, and support all the usual arithmetic operations.
 [Number API](/docs/Api/Number)
 
 Numbers support a few scientific notation suffixes.
@@ -630,7 +635,7 @@ f = false
 
 ## Strings
 
-Strings can be created with either single or double quotes.  
+Strings can be created with either single or double quotes.
 [String API](/docs/Api/String)
 
 ```squiggle
@@ -659,9 +664,9 @@ There are [3 internal representation formats for distributions](docs/Discussions
 
 ## Lists
 
-Squiggle lists can contain items of any type, similar to lists in Python. You can access individual list elements with `[number]` notation, starting from `0`. 
+Squiggle lists can contain items of any type, similar to lists in Python. You can access individual list elements with `[number]` notation, starting from `0`.
 
-Squiggle is an immutable language, so you cannot modify lists in-place. Instead, you can use functions such as `List.map` or `List.reduce` to create new lists.  
+Squiggle is an immutable language, so you cannot modify lists in-place. Instead, you can use functions such as `List.map` or `List.reduce` to create new lists.
 [List API](/docs/Api/List)
 
 ```squiggle
@@ -673,7 +678,7 @@ bar = myList[3][1] // "bar"
 
 ## Dictionaries
 
-Squiggle dictionaries work similarly to Python dictionaries or Javascript objects. Like lists, they can contain values of any type. Keys must be strings.  
+Squiggle dictionaries work similarly to Python dictionaries or Javascript objects. Like lists, they can contain values of any type. Keys must be strings.
 [Dictionary API](/docs/Api/Dictionary)
 
 ```squiggle
@@ -689,7 +694,7 @@ Other Squiggle types include:
 - [Plots](/docs/Api/Plot)
 - [Scales](/docs/Api/Plot#scales)
 - [Domains](#parameter-annotations)---
-description: 
+description:
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
@@ -725,7 +730,7 @@ Common.try: (fn: () => 'A, fallbackFn: () => 'B) => 'A|'B
 Try to run a function and return its result. If the function throws an error, return the result of the fallback function instead.
 
 ---
-description: 
+description:
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
@@ -757,7 +762,7 @@ defaultCode={`f(t: [Date(2020), Date(2040)]) = {
   yearsPassed = toYears(t - Date(2020))
   normal({mean: yearsPassed ^ 2, stdev: yearsPassed^1.3+1})
 }`}/>
-    
+
 
 ## Constructors
 
@@ -895,7 +900,7 @@ Distributions are the flagship data type in Squiggle. The distribution type is a
 These subtypes are [point set](/docs/api/DistPointSet), [sample set](/docs/api/DistSampleSet), and [symbolic](/docs/api/Sym). The first two of these have a few custom functions that only work on them. You can read more about the differences between these formats [here](/docs/Discussions/Three-Formats-Of-Distributions).
 
 Several functions below only can work on particular distribution formats. For example, scoring and pointwise math requires the point set format. When this happens, the types are automatically converted to the correct format. These conversions are lossy.
-    
+
 Distributions are created as [sample sets](/DistSampleSet) by default. To create a symbolic distribution, use `Sym.` namespace: `Sym.normal`, `Sym.beta` and so on.
 
 ## Distributions
@@ -910,7 +915,7 @@ Dist.make(normal({p5: 4, p95: 10}))
 
 Dist.mixture: (List(Dist|Number), weights?: List(Number)) => Dist, (Dist|Number) => Dist, (Dist|Number, Dist|Number, weights?: [Number, Number]) => Dist, (Dist|Number, Dist|Number, Dist|Number, weights?: [Number, Number, Number]) => Dist, (Dist|Number, Dist|Number, Dist|Number, Dist|Number, weights?: [Number, Number, Number, Number]) => Dist, (Dist|Number, Dist|Number, Dist|Number, Dist|Number, Dist|Number, weights?: [Number, Number, Number, Number, Number]) => Dist
 The ``mixture`` function takes a list of distributions and a list of weights, and returns a new distribution that is a mixture of the distributions in the list. The weights should be positive numbers that sum to 1. If no weights are provided, the function will assume that all distributions have equal weight.
-    
+
 Note: If you want to pass in over 5 distributions, you must use the list syntax.
 mixture(1,normal(5,2))
 mixture(normal(5,2), normal(10,2), normal(15,2), [0.3, 0.5, 0.2])
@@ -1043,7 +1048,7 @@ Dist.diff: (List(Dist|Number)) => List(Dist)
 
 Pointwise arithmetic operations cover the standard arithmetic operations, but work in a different way than the regular operations. These operate on the y-values of the distributions instead of the x-values. A pointwise addition would add the y-values of two distributions.
 
-The infixes `.+`,`.-`, `.*`, `./`, `.^` are supported for their respective operations. `Mixture` works using pointwise addition. 
+The infixes `.+`,`.-`, `.*`, `./`, `.^` are supported for their respective operations. `Mixture` works using pointwise addition.
 
 Pointwise operations work on Point Set distributions, so will convert other distributions to Point Set ones first. Pointwise arithmetic operations typically return unnormalized or completely invalid distributions. For example, the operation{" "} <code>normal(5,2) .- uniform(10,12)</code> results in a distribution-like object with negative probability mass.
 
@@ -1509,7 +1514,7 @@ List.reduceReverse([1,4,5], 2, {|acc, el| acc-el})
 
 List.reduceWhile: (List('B), initialValue: 'A, callbackFn: (accumulator: 'A, currentValue: 'B) => 'A, conditionFn: ('A) => Bool) => 'A
 Works like `reduce`, but stops when the condition is no longer met. This is useful, in part, for simulating processes that need to stop based on the process state.
-    
+
 // Adds first two elements, returns `11`.
 List.reduceWhile([5, 6, 7], 0, {|acc, curr| acc + curr}, {|acc| acc < 15})
 
@@ -1549,7 +1554,7 @@ import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 | `Math.tau`     | Tau is the ratio constant of a circle's circumference to radius, equal to 2 * pi | 6.283185307179586    |
 
 ## Functions
-  
+
 
 Math.sqrt: (Number) => Number
 
@@ -1574,7 +1579,7 @@ Math.atan: (Number) => Number
 
 
 ---
-description: 
+description:
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
@@ -1620,7 +1625,7 @@ Returns the maximum value in the set
 
 
 ---
-description: 
+description:
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
@@ -1835,7 +1840,7 @@ Scale.symlog: ({min?: Number, max?: Number, tickFormat?: String, title?: String,
 Symmetric log scale. Useful for plotting data that includes zero or negative values.
 
 The function accepts an additional `constant` parameter, used as follows: `Scale.symlog({constant: 0.1})`. This parameter allows you to allocate more pixel space to data with lower or higher absolute values. By adjusting this constant, you effectively control the scale's focus, shifting it between smaller and larger values. For more detailed information on this parameter, refer to the [D3 Documentation](https://d3js.org/d3-scale/symlog).
-    
+
 The default value for `constant` is `0.0001`.
 Scale.symlog({ min: -10, max: 10 })
 
@@ -1972,7 +1977,7 @@ Table.make(
 
 
 ---
-description: 
+description:
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
@@ -2000,7 +2005,7 @@ import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
 
 # Danger
-The Danger library contains newer experimental functions which are less stable than Squiggle as a whole. They are not recommended for production use, but are useful for testing out new ideas., 
+The Danger library contains newer experimental functions which are less stable than Squiggle as a whole. They are not recommended for production use, but are useful for testing out new ideas.,
 
 
 ## JSON
@@ -2047,7 +2052,7 @@ Converts a string to a number. If the string can't be converted, returns `Parse 
 Danger.parseFloat('10.3')
 
 Danger.now: () => Date
-Returns the current date. Internally calls ``Date.now()`` in JavaScript.  
+Returns the current date. Internally calls ``Date.now()`` in JavaScript.
 
 *Caution: This function, which returns the current date, produces varying outputs with each call. As a result, accurately estimating the value of functions that incorporate ``Danger.now()`` at past time points is challenging. In the future, we intend to implement a feature allowing the input of a simulated time via an environment variable to address this issue.*
 Danger.now()
@@ -2092,7 +2097,7 @@ Danger.allCombinations([1, 2, 3]) // [[1], [2], [3], [1, 2], [1, 3], [2, 3], [1,
 Danger.binomialDist: (numberOfTrials: Dist|Number, probabilityOfSuccess: Dist|Number) => SampleSetDist
 A binomial distribution.
 
-``n`` must be above 0, and ``p`` must be between 0 and 1. 
+``n`` must be above 0, and ``p`` must be between 0 and 1.
 
 Note: The binomial distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as partially or fully continuous. This is a visual mistake; if you inspect the underlying data, it should be discrete.
 Danger.binomialDist(8, 0.5)
@@ -2127,7 +2132,7 @@ Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 0.1)
 
 ## Common Errors:
 
-Failed to evaluate Squiggle code: Expected "->", end of input, or whitespace but "P" found.  
+Failed to evaluate Squiggle code: Expected "->", end of input, or whitespace but "P" found.
 -> This likely means that you are using two return statements. Every statement but the last should be a variable assignment.
 
 Don't:
@@ -2137,7 +2142,7 @@ foo + 3
 foo
 ```
 
-Do: 
+Do:
 ```
 foo = 4
 bar = foo + 3
@@ -2181,3 +2186,4 @@ Compile Error. Number is not defined
 
 Validation error. Failed to evaluate Squiggle code: Expected "->", "?", assignment, end of input, operator, or whitespace
 -> Did you have an import statement that's not on the top of the file? Make sure that all import statements are on the top of the file.
+````

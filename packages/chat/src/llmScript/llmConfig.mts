@@ -4,9 +4,7 @@ import OpenAI from "openai";
 
 // Configuration
 dotenv.config({ path: ".env.local" });
-const MAX_ATTEMPTS = 10;
-const SQUIGGLE_DOCS_PATH = "./src/prompt.md";
-// const OPENROUTER_MODEL = "openai/gpt-4o-202408-06";
+
 const OPENROUTER_MODEL = "openai/gpt-4o-mini";
 
 // Initialize OpenRouter client
@@ -15,9 +13,52 @@ const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
-export async function runLLM(content: string) {
-  return openai.chat.completions.create({
-    model: OPENROUTER_MODEL,
-    messages: [{ role: "user", content }],
-  });
+type Message = {
+  role: "system" | "user" | "assistant";
+  content: string;
+};
+
+let conversationHistory: Message[] = [];
+
+export async function runLLM(
+  content: string,
+  role: "system" | "user" = "user"
+) {
+  conversationHistory.push({ role, content });
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: OPENROUTER_MODEL,
+      messages: conversationHistory,
+    });
+
+    if (
+      completion.choices &&
+      completion.choices.length > 0 &&
+      completion.choices[0].message
+    ) {
+      conversationHistory.push({
+        role: "assistant",
+        content: completion.choices[0].message.content || "",
+      });
+    } else {
+      console.warn(
+        "Unexpected API response structure:",
+        JSON.stringify(completion, null, 2)
+      );
+    }
+
+    return completion;
+  } catch (error) {
+    console.error("Error in API call:", error);
+    throw error;
+  }
+}
+
+export function resetConversation() {
+  conversationHistory = [];
+}
+
+export function getConversationHistory() {
+  return conversationHistory;
 }
