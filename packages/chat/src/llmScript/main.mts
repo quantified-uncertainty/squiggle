@@ -3,7 +3,7 @@ import { getSquiggleAdvice, runSquiggle, squiggleDocs } from "./helpers.mts";
 import { runLLM } from "./llmConfig.mts";
 import { Logger } from "./logger.mts";
 
-const MAX_ATTEMPTS = 10;
+const MAX_ATTEMPTS = 15;
 
 const trackingInfo = {
   time: {

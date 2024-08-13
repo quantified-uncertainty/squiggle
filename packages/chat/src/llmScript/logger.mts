@@ -3,6 +3,8 @@ import chalk from "chalk";
 import fs from "fs";
 import path from "path";
 
+import { calculatePrice, SELECTED_MODEL } from "./llmConfig.mjs";
+
 export class Logger {
   private static logDir = path.join(process.cwd(), "logs");
   private static currentLogFile: string;
@@ -79,11 +81,18 @@ export class Logger {
     console.log(chalk.blue.bold("\n📊 Summary:"));
     this.writeToFile("SUMMARY", "Summary:");
 
+    // Calculate the price
+    const estimatedCost = calculatePrice(
+      trackingInfo.tokens.input,
+      trackingInfo.tokens.output
+    );
+
     const details = [
       `Total time spent creating Squiggle code: ${trackingInfo.time.createSquiggleCode.toFixed(2) / 1000} seconds`,
       `Total time spent validating and fixing code: ${trackingInfo.time.validateAndFixCode.toFixed(2) / 1000} seconds`,
       `Total input tokens: ${trackingInfo.tokens.input}`,
       `Total output tokens: ${trackingInfo.tokens.output}`,
+      `Estimated cost: $${estimatedCost.toFixed(6)} (${SELECTED_MODEL})`,
     ];
 
     details.forEach((detail) => {
