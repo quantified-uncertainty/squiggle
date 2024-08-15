@@ -65,14 +65,14 @@ Here's are some simple example Squiggle programs:
 ```squiggle
 //Model for Piano Tuners in New York Over Time
 
-@name("Population of New York in 2022")
+@name("🌆 Population of New York in 2022")
 @doc("I'm really not sure here, this is a quick guess.")
 populationOfNewYork2022 = 8.1M to 8.4M
 
-@name("Percentage of Population with Pianos")
+@name("🎹 Percentage of Population with Pianos")
 proportionOfPopulationWithPianos = 0.2% to 1%
 
-@name("Number of Piano Tuners per Piano")
+@name("🔧 Number of Piano Tuners per Piano")
 pianoTunersPerPiano = {
   pianosPerPianoTuner = 2k to 50k
   1 / pianosPerPianoTuner
@@ -82,7 +82,7 @@ pianoTunersPerPiano = {
 @hide
 domain = [Date(2024), Date(2034)]
 
-@name("Time in years after 2024")
+@name("⏳ Time in years after 2024")
 populationAtTime(t: domain) = {
   dateDiff = Duration.toYears(t - Date(2024))
   averageYearlyPercentageChange = normal({ p5: -1%, p95: 5% }) // We're expecting NYC to continuously grow with an mean of roughly between -1% and +4% per year
@@ -184,14 +184,20 @@ f(t: [Date(2020), Date(2040)]) = {
 
 ```squiggle
 import "hub:ozziegooen/sTest" as sTest
-// Model Parameters
-flightCost = normal({ mean: 600, stdev: 100 }) // Distribution for cost of flight in USD
-benefitEstimate = normal({ mean: 1500, stdev: 300 }) // Distribution for benefit of traveling to London
 
-// Calculation of Net Benefit
+@name("💰 Expected Cost")
+flightCost = normal({ mean: 600, stdev: 100 })
+
+@name("🥇 Expected Benefit")
+benefitEstimate = normal({ mean: 1500, stdev: 300 })
+
+@name("📊 Net Benefit")
 netBenefit = benefitEstimate - flightCost
 
-// Test Suite for the Model
+@name("🚦 Test Suite")
+@doc(
+  "Test suite to validate various aspects of the flight cost and benefits model using sTest."
+)
 testSuite = sTest.describe(
   "Flight to London Test Suite",
   [
@@ -206,6 +212,7 @@ testSuite = sTest.describe(
     ),
   ]
 )
+
 ```
 
 ## sTest Library

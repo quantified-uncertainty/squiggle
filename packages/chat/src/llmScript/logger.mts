@@ -109,7 +109,11 @@ export class Logger {
     this.writeToFile("PROMPT", `Full Prompt:\n${prompt}`);
   }
 
-  static logLLMResponse(response: string) {
-    this.writeToFile("LLM_RESPONSE", `LLM Response:\n${response}`);
+  static logLLMResponse(response: string, duration: number) {
+    console.log(`Response finished in ${duration / 1000}s.`);
+    this.writeToFile(
+      "LLM_RESPONSE",
+      `LLM Response after ${duration / 1000}s:\n${response}`
+    );
   }
 }

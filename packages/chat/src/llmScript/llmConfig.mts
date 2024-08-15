@@ -5,7 +5,7 @@ import OpenAI from "openai";
 // Configuration
 dotenv.config({ path: ".env.local" });
 
-export const SELECTED_MODEL = "Llama-3.1-405B-Instruct";
+export const SELECTED_MODEL = "GPT-4o-mini";
 
 // Model selection and pricing
 type ModelConfig = {
@@ -43,7 +43,7 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
     outputRate: 0.00000028, // $0.28 per million output tokens
     contextWindow: 128000, // 128K context window
   },
-  "Llama-3.1-405B-Instruct": {
+  "Llama-3.1": {
     // seems pretty mediocre, weird results much of the time.
     model: "meta-llama/llama-3.1-405b-instruct",
     inputRate: 0.0000027, // $2.7 per million input tokens

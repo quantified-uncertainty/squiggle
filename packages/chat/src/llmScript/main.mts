@@ -27,7 +27,7 @@ const generateSquiggleContent = (
   let content = "";
 
   if (isFixing) {
-    content = `Fix the following Squiggle code. It produced this error: ${error}\n\nCode:\n${existingCode}\n\n`;
+    content = `Fix the following Squiggle code, by producing a full new Squiggle model. It produced this error: ${error}\n\nCode:\n${existingCode}\n\n`;
     if (advice) {
       Logger.log(`Advice: ${advice}`);
       content += `Advice: ${advice}\n\n`;
@@ -63,7 +63,7 @@ const createSquiggleCode = async (
       runLLM(content, existingCode ? "user" : "system")
     );
 
-    Logger.logLLMResponse(JSON.stringify(completion, null, 2));
+    Logger.logLLMResponse(JSON.stringify(completion, null, 2), duration);
 
     if (!completion || !completion.choices || completion.choices.length === 0) {
       Logger.error("Received an empty response from the API");
@@ -151,7 +151,8 @@ const measureTime = async <T,>(
 };
 
 const main = async () => {
-  const prompt = "write a complex Squiggle model about personal finance.";
+  const prompt =
+    "write a Squiggle function that describes the probability that a US male will get die from different diseases over their lifetimes. It should have a function that takes in (birthday, year, cause), and outputs the probability that they will die at that time due to that cause. It then should visualize this in a few different ways.";
 
   Logger.initNewLog();
   Logger.info("🚀 Squiggle Code Generator");
