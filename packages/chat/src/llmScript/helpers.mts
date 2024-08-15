@@ -218,9 +218,9 @@ function getInvalidSquiggleElements(): InvalidElement[] {
   ];
   return [
     {
-      check: (line: string) => /\b(null|nil)\b/.test(line),
+      check: (line: string) => /\b(null|nil|undefined)\b/.test(line),
       getMessage: (lineNumber: number) =>
-        `Line ${lineNumber}: The use of 'null' or 'nil' is not valid in Squiggle. Use 'None' for optional values.`,
+        `Line ${lineNumber}: The use of 'null' or 'nil' is not valid in Squiggle. Use an empty string or false for null values.`,
     },
     {
       check: (line: string) => {
@@ -246,6 +246,12 @@ function getInvalidSquiggleElements(): InvalidElement[] {
       },
       getMessage: (lineNumber: number) =>
         `Line ${lineNumber}: A common function or object (like List.sum, Number, etc.) is used but not defined in Squiggle. Check for typos or missing imports.`,
+    },
+    {
+      // New check for Date.now
+      check: (line: string) => /\bDate\.now\b/.test(line),
+      getMessage: (lineNumber: number) =>
+        `Line ${lineNumber}: 'Date.now' is not available in Squiggle. Use 'Danger.now' instead for the current timestamp.`,
     },
   ];
 }
