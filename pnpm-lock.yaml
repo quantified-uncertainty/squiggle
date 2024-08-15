@@ -35,9 +35,15 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.24.3
         version: 0.24.3
+      '@quri/prettier-plugin-squiggle':
+        specifier: workspace:*
+        version: link:../prettier-plugin
       '@quri/squiggle-components':
         specifier: workspace:*
         version: link:../components
+      '@quri/squiggle-lang':
+        specifier: workspace:*
+        version: link:../squiggle-lang
       '@quri/versioned-squiggle-components':
         specifier: workspace:*
         version: link:../versioned-components
@@ -46,7 +52,7 @@ importers:
         version: 0.5.13(tailwindcss@3.4.3)
       ai:
         specifier: ^3.2.16
-        version: 3.2.16(react@18.3.1)(svelte@4.2.18)(vue@3.4.31)(zod@3.23.8)
+        version: 3.2.16(openai@4.55.7)(react@18.3.1)(svelte@4.2.18)(vue@3.4.31)(zod@3.23.8)
       axios:
         specifier: ^1.7.2
         version: 1.7.2
@@ -65,6 +71,12 @@ importers:
       next:
         specifier: 14.2.4
         version: 14.2.4(react-dom@18.3.1)(react@18.3.1)
+      openai:
+        specifier: ^4.55.7
+        version: 4.55.7(zod@3.23.8)
+      prettier:
+        specifier: ^3.2.5
+        version: 3.2.5
       react:
         specifier: ^18
         version: 18.3.1
@@ -9809,7 +9821,7 @@ packages:
       indent-string: 4.0.0
     dev: true
 
-  /ai@3.2.16(react@18.3.1)(svelte@4.2.18)(vue@3.4.31)(zod@3.23.8):
+  /ai@3.2.16(openai@4.55.7)(react@18.3.1)(svelte@4.2.18)(vue@3.4.31)(zod@3.23.8):
     resolution: {integrity: sha512-kNqnmSQxUm3dcxLv/NoOusoMAq7EK/zahB/N//wkGoawgYqfOUpvz3+uS/FG52tZwMyy4YblVoeuBHpfPWzNDw==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -9838,6 +9850,7 @@ packages:
       json-schema: 0.4.0
       jsondiffpatch: 0.6.0
       nanoid: 3.3.6
+      openai: 4.55.7(zod@3.23.8)
       react: 18.3.1
       secure-json-parse: 2.7.0
       sswr: 2.1.0(svelte@4.2.18)
@@ -18172,6 +18185,27 @@ packages:
       define-lazy-prop: 3.0.0
       is-inside-container: 1.0.0
       is-wsl: 2.2.0
+    dev: false
+
+  /openai@4.55.7(zod@3.23.8):
+    resolution: {integrity: sha512-I2dpHTINt0Zk+Wlns6KzkKu77MmNW3VfIIQf5qYziEUI6t7WciG1zTobfKqdPzBmZi3TTM+3DtjPumxQdcvzwA==}
+    hasBin: true
+    peerDependencies:
+      zod: ^3.23.8
+    peerDependenciesMeta:
+      zod:
+        optional: true
+    dependencies:
+      '@types/node': 18.19.31
+      '@types/node-fetch': 2.6.11
+      abort-controller: 3.0.0
+      agentkeepalive: 4.5.0
+      form-data-encoder: 1.7.2
+      formdata-node: 4.4.1
+      node-fetch: 2.7.0
+      zod: 3.23.8
+    transitivePeerDependencies:
+      - encoding
     dev: false
 
   /openid-client@5.6.1:

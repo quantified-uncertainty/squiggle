@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import fs from "fs";
+import * as prettier from "prettier/standalone";
 
+import * as prettierSquigglePlugin from "@quri/prettier-plugin-squiggle/standalone";
 import { SqProject } from "@quri/squiggle-components";
 import { SqLinker } from "@quri/squiggle-lang";
 
@@ -140,10 +142,18 @@ export const runSquiggle = async (code) => {
       };
 };
 
-// I haven't tested this, am not sure if it will work.
-export function getSquiggleAdvice(errorMessage: string): string {
-  // Define regex patterns for each error and their corresponding advice
-  const patterns = [
+type ErrorPattern = {
+  pattern: RegExp;
+  advice: string;
+};
+
+type InvalidElement = {
+  check: (line: string) => boolean;
+  getMessage: (lineNumber: number) => string;
+};
+
+function getSquiggleErrorPatterns(): ErrorPattern[] {
+  return [
     {
       pattern:
         /Failed to evaluate Squiggle code: Expected "->", end of input, or whitespace but ".*?" found./,
@@ -175,7 +185,7 @@ export function getSquiggleAdvice(errorMessage: string): string {
     {
       pattern:
         / "{", array, boolean, dict, identifier, number, string, unary operator, or whitespace but/,
-      advice: `This likely means that you have a block without a return statement. Don't: foo = { a = 1 b = a + 3 }`,
+      advice: `This likely means that you have a block without a return statement. Don't: foo = { a = 1 \n b = a + 3 }. Instead, return with one single value. If you instead want to return a Dict, then the format is {a:3, b:5, c:10}.`,
     },
     {
       pattern: /Number is not defined/,
@@ -192,16 +202,94 @@ export function getSquiggleAdvice(errorMessage: string): string {
       advice: `Do you have two returns in a block? You can only have one, at the end. Everything else should be a variable declaration.`,
     },
   ];
+}
 
-  // Check the error message against each pattern and return the corresponding advice
-  for (const { pattern, advice } of patterns) {
+// Function to define invalid Squiggle elements
+function getInvalidSquiggleElements(): InvalidElement[] {
+  const commonUndefinedElements = [
+    "List.sum",
+    "List.map2",
+    "List.keys",
+    "List.sample",
+    "List.sampleN",
+    "List.repeat",
+    "Number.parseFloat",
+    "Duration.toMonths",
+  ];
+  return [
+    {
+      check: (line: string) => /\b(null|nil)\b/.test(line),
+      getMessage: (lineNumber: number) =>
+        `Line ${lineNumber}: The use of 'null' or 'nil' is not valid in Squiggle. Use 'None' for optional values.`,
+    },
+    {
+      check: (line: string) => {
+        // Ignore lines starting with @ (decorators)
+        if (line.trim().startsWith("@")) return false;
+
+        // Ignore content within string literals
+        const withoutStrings = line.replace(/"(?:[^"\\]|\\.)*"/g, '""');
+
+        // Check for type annotations
+        return /\b\w+\s*:\s*[A-Z]\w+(?:\s*[,)]|$)/.test(withoutStrings);
+      },
+      getMessage: (lineNumber: number) =>
+        `Line ${lineNumber}: Type annotation like 'variableName: Type' is not valid in Squiggle. Squiggle uses structural typing.`,
+    },
+    {
+      check: (line: string) => {
+        return commonUndefinedElements.some(
+          (element) =>
+            new RegExp(`\\b${element}\\b`).test(line) &&
+            !line.includes(`${element} is not defined`)
+        );
+      },
+      getMessage: (lineNumber: number) =>
+        `Line ${lineNumber}: A common function or object (like List.sum, Number, etc.) is used but not defined in Squiggle. Check for typos or missing imports.`,
+    },
+  ];
+}
+
+// Function to check for invalid Squiggle elements
+function checkInvalidSquiggleElements(code: string): string[] {
+  const warnings: string[] = [];
+  const lines = code.split("\n");
+  const invalidElements = getInvalidSquiggleElements();
+
+  lines.forEach((line, index) => {
+    const lineNumber = index + 1;
+    invalidElements.forEach((element) => {
+      if (element.check(line)) {
+        warnings.push(element.getMessage(lineNumber));
+      }
+    });
+  });
+
+  return warnings;
+}
+
+// Main function to get Squiggle advice
+export function getSquiggleAdvice(errorMessage: string, code: string): string {
+  let advice = "";
+
+  // Check for error-based advice
+  const errorPatterns = getSquiggleErrorPatterns();
+  for (const { pattern, advice: errorAdvice } of errorPatterns) {
     if (pattern.test(errorMessage)) {
-      return advice;
+      advice += errorAdvice + "\n\n";
+      break; // Only use the first matching error advice
     }
   }
 
-  // If no pattern matches, return a default message
-  return "";
+  // Check for invalid elements in the code
+  const warnings = checkInvalidSquiggleElements(code);
+  if (warnings.length > 0) {
+    advice += "Additional warnings:\n" + warnings.join("\n") + "\n\n";
+    advice +=
+      "Remember that Squiggle doesn't use explicit type annotations and 'null' or 'nil' are not valid. Use 'None' for optional values.\n";
+  }
+
+  return advice.trim(); // Remove any trailing whitespace
 }
 
 // Utility functions
@@ -215,3 +303,16 @@ const readTxtFileSync = (filePath: string) => {
 };
 // Load Squiggle docs
 export const squiggleDocs = readTxtFileSync(SQUIGGLE_DOCS_PATH);
+
+export const formatSquiggleCode = async (code: string): Promise<string> => {
+  try {
+    const formatted = await prettier.format(code, {
+      parser: "squiggle",
+      plugins: [prettierSquigglePlugin],
+    });
+    return formatted;
+  } catch (error) {
+    Logger.error(`Error formatting Squiggle code: ${error.message}`);
+    return code; // Return original code if formatting fails
+  }
+};

@@ -1,5 +1,10 @@
 #!/usr/bin/env node
-import { getSquiggleAdvice, runSquiggle, squiggleDocs } from "./helpers.mts";
+import {
+  formatSquiggleCode,
+  getSquiggleAdvice,
+  runSquiggle,
+  squiggleDocs,
+} from "./helpers.mts";
 import { runLLM } from "./llmConfig.mts";
 import { Logger } from "./logger.mts";
 
@@ -22,7 +27,7 @@ const generateSquiggleContent = (
   error: string
 ): string => {
   const isFixing = Boolean(existingCode);
-  const advice = getSquiggleAdvice(error);
+  const advice = getSquiggleAdvice(error, existingCode);
 
   let content = "";
 
@@ -112,6 +117,8 @@ const validateAndFixCode = async (prompt: string, initialCode: string) => {
     if (run.ok) {
       isValid = true;
       Logger.success("Code is valid!");
+      // Format the valid code
+      code = await formatSquiggleCode(code);
     } else {
       Logger.error("Validation error:");
       run.value && Logger.errorBox(run.value);
@@ -128,8 +135,9 @@ const validateAndFixCode = async (prompt: string, initialCode: string) => {
           break;
         }
 
-        code = newCode;
-        Logger.code(code, "Fixed Code:");
+        // Format the new code
+        code = await formatSquiggleCode(newCode);
+        Logger.code(code, "Fixed and Formatted Code:");
       } catch (error) {
         Logger.error(`Error during code fix attempt: ${error.message}`);
         break;
