@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import Anthropic from "@anthropic-ai/sdk";
+// import  { ContentBlock } from '@anthropic-ai/sdk';
 import dotenv from "dotenv";
 import OpenAI from "openai";
 
@@ -6,6 +8,10 @@ import OpenAI from "openai";
 dotenv.config({ path: ".env.local" });
 
 export const SELECTED_MODEL = "GPT-4o-mini";
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
 
 // Model selection and pricing
 type ModelConfig = {
@@ -66,37 +72,126 @@ type Message = {
   content: string;
 };
 
+function convertToClaudeMessages(
+  history: Message[]
+): Anthropic.Messages.MessageParam[] {
+  return history
+    .filter((msg) => msg.role !== "system")
+    .map((msg) => ({
+      role: msg.role as "user" | "assistant",
+      content: msg.content,
+    }));
+}
+
+// Helper function to extract text content from Claude API response
+function extractTextContent(content: Anthropic.ContentBlock[]): string {
+  return content
+    .filter(
+      (block): block is Extract<Anthropic.ContentBlock, { type: "text" }> =>
+        block.type === "text"
+    )
+    .map((block) => block.text)
+    .join("\n");
+}
+
 let conversationHistory: Message[] = [];
+
+interface StandardizedChatCompletion {
+  id: string;
+  object: string;
+  created: number;
+  model: string;
+  content: string;
+  role: "assistant";
+  finish_reason: string | null;
+  usage: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+}
+function convertClaudeToStandardFormat(
+  claudeResponse: Anthropic.Message
+): StandardizedChatCompletion {
+  return {
+    id: claudeResponse.id,
+    object: "chat.completion",
+    created: Date.now(),
+    model: claudeResponse.model,
+    content: extractTextContent(claudeResponse.content),
+    role: "assistant",
+    finish_reason: claudeResponse.stop_reason || null,
+    usage: {
+      prompt_tokens: claudeResponse.usage.input_tokens,
+      completion_tokens: claudeResponse.usage.output_tokens,
+      total_tokens:
+        claudeResponse.usage.input_tokens + claudeResponse.usage.output_tokens,
+    },
+  };
+}
+
+function convertOpenAIToStandardFormat(
+  openAIResponse: OpenAI.Chat.Completions.ChatCompletion
+): StandardizedChatCompletion {
+  const choice = openAIResponse.choices[0];
+  return {
+    id: openAIResponse.id,
+    object: openAIResponse.object,
+    created: openAIResponse.created,
+    model: openAIResponse.model,
+    content: choice.message.content || "",
+    role: "assistant",
+    finish_reason: choice.finish_reason || null,
+    usage: openAIResponse.usage || {
+      prompt_tokens: 0,
+      completion_tokens: 0,
+      total_tokens: 0,
+    },
+  };
+}
 
 export async function runLLM(
   content: string,
   role: "system" | "user" = "user"
-) {
+): Promise<StandardizedChatCompletion> {
   conversationHistory.push({ role, content });
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: OPENROUTER_MODEL,
-      messages: conversationHistory,
-    });
+    if (SELECTED_MODEL === "Claude-3.5-Sonnet") {
+      // Use Claude SDK with prompt caching
+      const claudeMessages = convertToClaudeMessages(conversationHistory);
+      const completion = await anthropic.messages.create({
+        max_tokens: 4000,
+        messages: claudeMessages,
+        model: "claude-3-opus-20240229", // Adjust the model as needed
+        system: conversationHistory.find((msg) => msg.role === "system")
+          ?.content, // Add system message if present
+      });
 
-    if (
-      completion.choices &&
-      completion.choices.length > 0 &&
-      completion.choices[0].message
-    ) {
+      const standardizedCompletion = convertClaudeToStandardFormat(completion);
+
       conversationHistory.push({
         role: "assistant",
-        content: completion.choices[0].message.content || "",
+        content: standardizedCompletion.content,
       });
-    } else {
-      console.warn(
-        "Unexpected API response structure:",
-        JSON.stringify(completion, null, 2)
-      );
-    }
 
-    return completion;
+      return standardizedCompletion;
+    } else {
+      // Use OpenAI (OpenRouter)
+      const completion = await openai.chat.completions.create({
+        model: OPENROUTER_MODEL,
+        messages: conversationHistory,
+      });
+
+      const standardizedCompletion = convertOpenAIToStandardFormat(completion);
+
+      conversationHistory.push({
+        role: "assistant",
+        content: standardizedCompletion.content,
+      });
+
+      return standardizedCompletion;
+    }
   } catch (error) {
     console.error("Error in API call:", error);
     throw error;

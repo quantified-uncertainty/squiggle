@@ -70,7 +70,7 @@ const createSquiggleCode = async (
 
     Logger.logLLMResponse(JSON.stringify(completion, null, 2), duration);
 
-    if (!completion || !completion.choices || completion.choices.length === 0) {
+    if (!completion || !completion.content || completion.content.length === 0) {
       Logger.error("Received an empty response from the API");
       return "";
     }
@@ -80,13 +80,13 @@ const createSquiggleCode = async (
       `✨ Got response from OpenRouter ${existingCode ? "(fix attempt)" : "(initial generation)"}`
     );
 
-    const message = completion.choices[0].message;
-    if (!message || !message.content) {
+    const message = completion.content;
+    if (!message) {
       Logger.error("Received a response without content");
       return "";
     }
 
-    const extractedCode = extractSquiggleCode(message.content);
+    const extractedCode = extractSquiggleCode(message);
     if (!extractedCode) {
       Logger.error("Error generating/fixing Squiggle code. Didn't get code.");
       return "";
@@ -160,7 +160,7 @@ const measureTime = async <T,>(
 
 const main = async () => {
   const prompt =
-    "write a Squiggle function that describes the probability that a US male will get die from different diseases over their lifetimes. It should have a function that takes in (birthday, year, cause), and outputs the probability that they will die at that time due to that cause. It then should visualize this in a few different ways.";
+    "Write a very complex, 100+line, fermi estimate of the value of eating chocolate - considering productivity and health. Use functions and tables.";
 
   Logger.initNewLog();
   Logger.info("🚀 Squiggle Code Generator");
