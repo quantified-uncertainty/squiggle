@@ -9,8 +9,8 @@ import { squiggleDocs } from "./helpers.mjs";
 // Configuration
 dotenv.config({ path: ".env.local" });
 
-// export const SELECTED_MODEL = "Claude-3.5-Sonnet";
-export const SELECTED_MODEL = "GPT-4o-mini";
+export const SELECTED_MODEL = "Claude-3.5-Sonnet";
+// export const SELECTED_MODEL = "GPT-4o-mini";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -154,11 +154,15 @@ const CLAUDE_MODEL = "claude-3-5-sonnet-20240620";
 // const CLAUDE_MODEL = "claude-3-haiku-20240307";
 
 function generateSquiggleSystemContent(): string {
-  return `You are an AI assistant specialized in generating Squiggle code. Squiggle is a probabilistic programming language designed for estimation. Here's a brief overview of Squiggle syntax:
+  return `You are an AI assistant specialized in generating Squiggle code. Squiggle is a probabilistic programming language designed for estimation. Always respond with valid Squiggle code enclosed in triple backticks (\`\`\`). Do not give any more explanation, just provide the code and nothing else. Think through things, step by step.
+
+Write the entire code, don't truncate it. So don't ever use "...", just write out the entire code. The code output you produce should be directly runnable in Squiggle, it shouldn't need any changes from users.
+
+Here's the full Squiggle Documentation. It's important that all of the functions you use are contained here. Check this before finishing your work.
 
 ${squiggleDocs}
 
-Always respond with valid Squiggle code enclosed in triple backticks (\`\`\`).`;
+`;
 }
 
 export async function runLLM(

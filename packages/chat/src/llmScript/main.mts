@@ -7,7 +7,7 @@ import {
 import { type Message, runLLM } from "./llmConfig.mts";
 import { Logger } from "./logger.mts";
 
-const MAX_ATTEMPTS = 15;
+const MAX_ATTEMPTS = 10;
 
 interface TrackingInfo {
   time: {
@@ -48,7 +48,7 @@ const generateSquiggleUserRequest = (
   let content = "";
 
   if (isFixing) {
-    content = `Fix the following Squiggle code, by producing a full new Squiggle model. It produced this error: ${error}\n\nCode:\n${existingCode}\n\n`;
+    content = `That code produced the following error. Write a full new model that fixes that error. ${error}\n\n`;
     if (advice) {
       Logger.log(`Advice: ${advice}`);
       content += `Advice: ${advice}\n\n`;
@@ -71,6 +71,15 @@ const updateTrackingInfo = (
     trackingInfo.tokens.output += usage.completion_tokens || 0;
   }
 };
+
+function addLineNumbersToCodeBlock(codeBlock: string): string {
+  const lines = codeBlock.split("\n");
+  const numberedLines = lines.map((line, index) => {
+    const lineNumber = (index + 1).toString().padStart(3, " ");
+    return `${lineNumber} | ${line}`;
+  });
+  return numberedLines.join("\n");
+}
 
 const createSquiggleCode = async (
   prompt: string,
@@ -108,13 +117,24 @@ const createSquiggleCode = async (
       return { code: "", trackingInfo, conversationHistory };
     }
 
-    conversationHistory.push({ role: "assistant", content: message });
-
     const extractedCode = extractSquiggleCode(message);
+
     if (!extractedCode) {
       Logger.error("Error generating/fixing Squiggle code. Didn't get code.");
       return { code: "", trackingInfo, conversationHistory };
     }
+
+    const numberedCode = addLineNumbersToCodeBlock(extractedCode);
+
+    // Replace the original code block with the numbered version in the message
+    const numberedMessage = message.replace(
+      /```squiggle\n[\s\S]*?\n```/,
+      "```squiggle\n" + numberedCode + "\n```"
+    );
+
+    // Add the assistant's response to the conversation history
+    conversationHistory.push({ role: "assistant", content: message });
+
     return { code: extractedCode, trackingInfo, conversationHistory };
   } catch (error) {
     Logger.error(`Error in createSquiggleCode: ${error.message}`);
@@ -202,7 +222,7 @@ const measureTime = async <T,>(
 
 const main = async () => {
   const prompt =
-    "Write a financial projection for a college grad, for their finances until retirement. 40-60 lines.";
+    "Make a model to estimate by when we will have another global pandemic. 30-50 lines.";
 
   Logger.initNewLog();
   Logger.info("🚀 Squiggle Code Generator");
@@ -254,6 +274,8 @@ const main = async () => {
       );
       Logger.code(code, "Last attempted code:");
     }
+
+    Logger.logConversationHistory(conversationHistory);
 
     Logger.summary(trackingInfo);
   } catch (error) {

@@ -1,7 +1,6 @@
-Write Squiggle code, using the attached documentation for how it works. Do not describe your work, just return the text of the code. Don't add any explanations. Write the entire code, don't truncate it. So don't ever use "...", just write out the entire code. The code output you produce should be directly runnable in Squiggle, it shouldn't need any changes from users.
+# Squiggle Documentation
 
-About Squiggle.
-Squiggle is a very simple language, that's much simpler than JS. Don't try using language primitives/constructs you don't see below, or that aren't in our documentation. They are likely to fail.
+Squiggle is a very simple language. Don't try using language primitives/constructs you don't see below, or that aren't in our documentation. They are likely to fail.
 
 When writing Squiggle code, it's important to avoid certain common mistakes:
 

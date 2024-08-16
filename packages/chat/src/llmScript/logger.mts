@@ -3,7 +3,7 @@ import chalk from "chalk";
 import fs from "fs";
 import path from "path";
 
-import { calculatePrice, SELECTED_MODEL } from "./llmConfig.mjs";
+import { calculatePrice, type Message, SELECTED_MODEL } from "./llmConfig.mjs";
 
 export class Logger {
   private static logDir = path.join(process.cwd(), "logs");
@@ -28,7 +28,7 @@ export class Logger {
       this.initNewLog();
     }
     const timestamp = new Date().toISOString();
-    const logMessage = `${timestamp} [${level}]: ${this.stripAnsi(message)}\n`;
+    const logMessage = `${timestamp} [${level}]:\n${this.stripAnsi(message)}\n\n`;
     fs.appendFileSync(this.currentLogFile, logMessage);
   }
 
@@ -44,6 +44,20 @@ export class Logger {
   static info(message: string) {
     console.log(chalk.blue(message));
     this.writeToFile("INFO", message);
+  }
+
+  static logConversationHistory(history: Message[]) {
+    // console.log(chalk.cyan("Conversation History:"));
+    history.forEach((message, index) => {
+      // console.log(
+      //   chalk.yellow(`\n--- Message ${index + 1} (${message.role}) ---`)
+      // );
+      // console.log(message.content);
+      this.writeToFile(
+        "CONVERSATION_HISTORY",
+        `Message ${index + 1} (${message.role}):\n${message.content}`
+      );
+    });
   }
 
   static success(message: string) {
