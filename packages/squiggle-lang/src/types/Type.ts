@@ -8,7 +8,6 @@ export abstract class Type<T = unknown> {
   abstract unpack(v: Value): T | undefined;
   abstract pack(v: T): Value;
   abstract serialize(visit: SquiggleSerializationVisitor): SerializedType;
-  abstract isSupertypeOf(other: Type<unknown>): boolean;
   abstract display(): string;
 
   toString() {
@@ -39,11 +38,6 @@ export class TAny extends Type<Value> {
 
   pack(v: Value) {
     return v;
-  }
-
-  isSupertypeOf() {
-    // `any` is a supertype of all types
-    return true;
   }
 
   display() {

@@ -11,8 +11,7 @@ import { VScale } from "../value/VScale.js";
 import { VSpecification } from "../value/VSpecification.js";
 import { VString } from "../value/VString.js";
 import { VTableChart } from "../value/VTableChart.js";
-import { TTagged } from "./TTagged.js";
-import { TAny, Type } from "./Type.js";
+import { Type } from "./Type.js";
 
 export type IntrinsicValueType = Exclude<
   Value["type"],
@@ -59,20 +58,6 @@ export class TIntrinsic<T extends IntrinsicValueType> extends Type<
 
   pack(v: InstanceType<ValueClass<T>>["value"]) {
     return new this.valueClass(v);
-  }
-
-  isSupertypeOf(other: Type): boolean {
-    if (other instanceof TAny) {
-      return true;
-    }
-    if (other instanceof TTagged) {
-      // `f(x: Number)` can be called with `Tagged<Number>`
-      return this.isSupertypeOf(other.itemType);
-    }
-    if (other instanceof TIntrinsic) {
-      return this.valueType === other.valueType;
-    }
-    return false; // TODO - support subtypes
   }
 
   serialize() {

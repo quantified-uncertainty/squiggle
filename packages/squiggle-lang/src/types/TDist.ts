@@ -5,7 +5,7 @@ import { BaseSymbolicDist } from "../dists/SymbolicDist/BaseSymbolicDist.js";
 import { SymbolicDist } from "../dists/SymbolicDist/index.js";
 import { Value, vDist } from "../value/index.js";
 import { SerializedType } from "./serialize.js";
-import { TAny, Type } from "./Type.js";
+import { Type } from "./Type.js";
 
 export type DistClass<T extends BaseDist> = { new (...args: any[]): T };
 
@@ -53,15 +53,6 @@ export class TDist<T extends BaseDist> extends Type<T> {
               ? "SampleSet"
               : undefined,
     };
-  }
-
-  isSupertypeOf(other: Type<unknown>): boolean {
-    if (other instanceof TAny) return true;
-    return (
-      other instanceof TDist &&
-      // either this is a generic dist or the dist classes match
-      (!this.distClass || this.distClass === other.distClass)
-    );
   }
 
   display(): string {

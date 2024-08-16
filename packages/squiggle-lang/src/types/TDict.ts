@@ -3,7 +3,7 @@ import { ImmutableMap } from "../utility/immutable.js";
 import { Value, vDict } from "../value/index.js";
 import { UnwrapType } from "./helpers.js";
 import { SerializedType } from "./serialize.js";
-import { TAny, Type } from "./Type.js";
+import { Type } from "./Type.js";
 
 type OptionalType<T extends Type<unknown>> = Type<UnwrapType<T> | null>;
 
@@ -65,7 +65,7 @@ export class TDict<const KVList extends BaseKVList> extends Type<
     );
   }
 
-  override check(v: Value) {
+  check(v: Value) {
     if (v.type !== "Dict") {
       return false;
     }
@@ -124,7 +124,7 @@ export class TDict<const KVList extends BaseKVList> extends Type<
     );
   }
 
-  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+  serialize(visit: SquiggleSerializationVisitor): SerializedType {
     return {
       kind: "Dict",
       kvs: this.kvs.map((kv) => ({
@@ -142,23 +142,7 @@ export class TDict<const KVList extends BaseKVList> extends Type<
     return kv.type;
   }
 
-  override isSupertypeOf(other: Type<unknown>): boolean {
-    if (other instanceof TAny) return true;
-    if (!(other instanceof TDict)) {
-      return false;
-    }
-    if (this.kvs.length !== other.kvs.length) {
-      return false;
-    }
-    for (let i = 0; i < this.kvs.length; i++) {
-      if (!this.kvs[i].type.isSupertypeOf(other.kvs[i].type)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  override display() {
+  display() {
     return (
       "{" +
       this.kvs

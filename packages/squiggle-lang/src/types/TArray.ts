@@ -2,11 +2,10 @@ import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value, vArray } from "../value/index.js";
 import { UnwrapType } from "./helpers.js";
 import { SerializedType } from "./serialize.js";
-import { TTuple } from "./TTuple.js";
 import { TAny, Type } from "./Type.js";
 
 export class TArray<T> extends Type<readonly T[]> {
-  constructor(private itemType: Type<T>) {
+  constructor(public itemType: Type<T>) {
     super();
   }
 
@@ -56,16 +55,6 @@ export class TArray<T> extends Type<readonly T[]> {
       kind: "Array",
       itemType: visit.type(this.itemType),
     };
-  }
-
-  isSupertypeOf(other: Type<unknown>): boolean {
-    if (other instanceof TAny) return true;
-    return (
-      (other instanceof TArray &&
-        this.itemType.isSupertypeOf(other.itemType)) ||
-      (other instanceof TTuple &&
-        other.types.every((type) => this.isSupertypeOf(type)))
-    );
   }
 
   display() {

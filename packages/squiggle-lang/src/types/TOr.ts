@@ -1,7 +1,7 @@
 import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value } from "../value/index.js";
 import { SerializedType } from "./serialize.js";
-import { TAny, Type } from "./Type.js";
+import { Type } from "./Type.js";
 
 export type OrType<T1, T2> = { tag: "1"; value: T1 } | { tag: "2"; value: T2 };
 
@@ -9,8 +9,8 @@ export type OrType<T1, T2> = { tag: "1"; value: T1 } | { tag: "2"; value: T2 };
 // 2 types, but it's not clear how to implement pack/unpack for that.
 export class TOr<T1, T2> extends Type<OrType<T1, T2>> {
   constructor(
-    private type1: Type<T1>,
-    private type2: Type<T2>
+    public type1: Type<T1>,
+    public type2: Type<T2>
   ) {
     super();
   }
@@ -41,19 +41,6 @@ export class TOr<T1, T2> extends Type<OrType<T1, T2>> {
       type1: visit.type(this.type1),
       type2: visit.type(this.type2),
     };
-  }
-
-  override isSupertypeOf(other: Type<unknown>) {
-    if (other instanceof TAny) return true;
-    if (other instanceof TOr) {
-      return (
-        (this.type1.isSupertypeOf(other.type1) &&
-          this.type2.isSupertypeOf(other.type2)) ||
-        (this.type1.isSupertypeOf(other.type2) &&
-          this.type2.isSupertypeOf(other.type1))
-      );
-    }
-    return this.type1.isSupertypeOf(other) || this.type2.isSupertypeOf(other);
   }
 
   override display() {

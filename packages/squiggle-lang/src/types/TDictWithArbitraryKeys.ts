@@ -46,22 +46,14 @@ export class TDictWithArbitraryKeys<T> extends Type<ImmutableMap<string, T>> {
     );
   }
 
-  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+  serialize(visit: SquiggleSerializationVisitor): SerializedType {
     return {
       kind: "DictWithArbitraryKeys",
       itemType: visit.type(this.itemType),
     };
   }
 
-  override isSupertypeOf(other: Type<unknown>) {
-    if (other instanceof TAny) return true;
-    return (
-      other instanceof TDictWithArbitraryKeys &&
-      this.itemType.isSupertypeOf(other.itemType)
-    );
-  }
-
-  override display() {
+  display() {
     return `Dict(${this.itemType.display()})`;
   }
 

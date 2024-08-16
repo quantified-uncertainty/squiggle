@@ -2,7 +2,7 @@ import { Value, vNumber } from "../value/index.js";
 import { VNumber } from "../value/VNumber.js";
 import { Scale } from "../value/VScale.js";
 import { SerializedType } from "./serialize.js";
-import { TAny, Type } from "./Type.js";
+import { Type } from "./Type.js";
 
 export class TNumberRange extends Type<number> {
   constructor(
@@ -22,17 +22,6 @@ export class TNumberRange extends Type<number> {
 
   pack(v: number): Value {
     return vNumber(v);
-  }
-
-  isSupertypeOf(other: Type): boolean {
-    if (other instanceof TAny) {
-      return true;
-    }
-    return (
-      other instanceof TNumberRange &&
-      other.min >= this.min &&
-      other.max <= this.max
-    );
   }
 
   serialize(): SerializedType {

@@ -1,9 +1,8 @@
 import { BaseDist } from "../dists/BaseDist.js";
 import { Value, vDist, vNumber } from "../value/index.js";
 import { SerializedType } from "./serialize.js";
-import { tDist, TDist } from "./TDist.js";
-import { TIntrinsic } from "./TIntrinsic.js";
-import { TAny, Type } from "./Type.js";
+import { tDist } from "./TDist.js";
+import { Type } from "./Type.js";
 
 // TODO: It would probably eventually be good to refactor this out, to use frOr instead. However, that would be slightly less efficient.
 export class TDistOrNumber extends Type<BaseDist | number> {
@@ -25,15 +24,6 @@ export class TDistOrNumber extends Type<BaseDist | number> {
 
   serialize(): SerializedType {
     return { kind: "DistOrNumber" };
-  }
-
-  isSupertypeOf(other: Type): boolean {
-    return (
-      other instanceof TAny ||
-      other instanceof this.constructor ||
-      other instanceof TDist ||
-      (other instanceof TIntrinsic && other.valueType === "Number")
-    );
   }
 
   display() {

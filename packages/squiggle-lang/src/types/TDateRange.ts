@@ -3,7 +3,7 @@ import { Value, vDate } from "../value/index.js";
 import { VDate } from "../value/VDate.js";
 import { Scale } from "../value/VScale.js";
 import { SerializedType } from "./serialize.js";
-import { TAny, Type } from "./Type.js";
+import { Type } from "./Type.js";
 
 export class TDateRange extends Type<SDate> {
   constructor(
@@ -27,16 +27,6 @@ export class TDateRange extends Type<SDate> {
 
   pack(v: SDate): Value {
     return vDate(v);
-  }
-
-  isSupertypeOf(other: Type): boolean {
-    return (
-      other instanceof TAny ||
-      (other instanceof TDateRange &&
-        // should this be <= and >= instead?
-        this.min.toMs() === other.min.toMs() &&
-        this.max.toMs() === other.max.toMs())
-    );
   }
 
   serialize(): SerializedType {

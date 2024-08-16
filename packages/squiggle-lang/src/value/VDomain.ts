@@ -3,6 +3,7 @@ import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,
 } from "../serialization/squiggle.js";
+import { typesAreEqual } from "../types/helpers.js";
 import { TDateRange } from "../types/TDateRange.js";
 import { TNumberRange } from "../types/TNumberRange.js";
 import { Type } from "../types/Type.js";
@@ -11,10 +12,6 @@ import { Value } from "./index.js";
 import { Indexable } from "./mixins.js";
 import { vDate, VDate } from "./VDate.js";
 import { vNumber, VNumber } from "./VNumber.js";
-
-function domainIsEqual(valueA: Type<unknown>, valueB: Type<unknown>) {
-  return valueA.isSupertypeOf(valueB) && valueB.isSupertypeOf(valueA);
-}
 
 export class VDomain extends BaseValue<"Domain", number> implements Indexable {
   readonly type = "Domain";
@@ -52,7 +49,7 @@ export class VDomain extends BaseValue<"Domain", number> implements Indexable {
   }
 
   isEqual(other: VDomain) {
-    return domainIsEqual(this.value, other.value);
+    return typesAreEqual(this.value, other.value);
   }
 
   override serializePayload(visit: SquiggleSerializationVisitor) {

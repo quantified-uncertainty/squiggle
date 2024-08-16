@@ -2,7 +2,7 @@ import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value } from "../value/index.js";
 import { ValueTags } from "../value/valueTags.js";
 import { SerializedType } from "./serialize.js";
-import { TAny, Type } from "./Type.js";
+import { Type } from "./Type.js";
 
 export class TTagged<T> extends Type<{ value: T; tags: ValueTags }> {
   constructor(public itemType: Type<T>) {
@@ -29,19 +29,6 @@ export class TTagged<T> extends Type<{ value: T; tags: ValueTags }> {
   // (TODO: this is not true anymore, `frAny` can be valid for the sake of naming a generic type; investigate)
   pack({ value, tags }: { value: T; tags: ValueTags }) {
     return this.itemType.pack(value).copyWithTags(tags);
-  }
-
-  isSupertypeOf(other: Type): boolean {
-    if (other instanceof TAny) {
-      return true;
-    }
-    if (other instanceof TTagged) {
-      // `f(x: Tagged<Number>)` can be called with `Tagged<Number>`
-      return this.itemType.isSupertypeOf(other.itemType);
-    } else {
-      // `f(x: Tagged<Number>)` can be called with `Number`
-      return this.itemType.isSupertypeOf(other);
-    }
   }
 
   serialize(visit: SquiggleSerializationVisitor): SerializedType {

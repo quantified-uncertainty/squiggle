@@ -1,4 +1,5 @@
 import { REDomainError } from "../../errors/messages.js";
+import { isSupertypeOf } from "../../types/helpers.js";
 import { Type } from "../../types/Type.js";
 import { Err, Ok, result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
@@ -101,7 +102,7 @@ export class FnSignature<
     }
 
     for (let i = 0; i < argTypes.length; i++) {
-      if (!this.inputs[i].type.isSupertypeOf(argTypes[i])) {
+      if (!isSupertypeOf(this.inputs[i].type, argTypes[i])) {
         return;
       }
     }

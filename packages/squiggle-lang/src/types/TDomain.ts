@@ -4,7 +4,7 @@ import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
 export class TDomain<T> extends Type<Type<T>> {
-  constructor(private type: Type<T>) {
+  constructor(public type: Type<T>) {
     super();
   }
 
@@ -20,7 +20,7 @@ export class TDomain<T> extends Type<Type<T>> {
       if (v.type !== "Domain") {
         return;
       }
-      return this.type.isSupertype(v.value) ? v.value : undefined;
+      return isSupertype(this.type, v.value) ? v.value : undefined;
       
       // But `isSupertypeOf` is not enough for TypeScript-level type safety, and also I'm not even sure that it's correct.
       // This is not a big problem because we don't have stdlib functions that take domains yet.
@@ -29,10 +29,6 @@ export class TDomain<T> extends Type<Type<T>> {
 
   pack(v: Type<T>) {
     return vDomain(v);
-  }
-
-  override isSupertypeOf(other: Type) {
-    return this.type.isSupertypeOf(other);
   }
 
   override display() {
