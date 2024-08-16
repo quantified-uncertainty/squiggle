@@ -13,7 +13,7 @@ import { vDate, VDate } from "./VDate.js";
 import { vNumber, VNumber } from "./VNumber.js";
 
 function domainIsEqual(valueA: Type<unknown>, valueB: Type<unknown>) {
-  return valueA.isSupertype(valueB) && valueB.isSupertype(valueA);
+  return valueA.isSupertypeOf(valueB) && valueB.isSupertypeOf(valueA);
 }
 
 export class VDomain extends BaseValue<"Domain", number> implements Indexable {

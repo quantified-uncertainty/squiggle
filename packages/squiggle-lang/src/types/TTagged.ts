@@ -2,11 +2,15 @@ import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value } from "../value/index.js";
 import { ValueTags } from "../value/valueTags.js";
 import { SerializedType } from "./serialize.js";
-import { Type } from "./Type.js";
+import { TAny, Type } from "./Type.js";
 
-export class TWithTags<T> extends Type<{ value: T; tags: ValueTags }> {
+export class TTagged<T> extends Type<{ value: T; tags: ValueTags }> {
   constructor(public itemType: Type<T>) {
     super();
+  }
+
+  check(v: Value): boolean {
+    return this.itemType.check(v);
   }
 
   unpack(v: Value) {
@@ -27,14 +31,27 @@ export class TWithTags<T> extends Type<{ value: T; tags: ValueTags }> {
     return this.itemType.pack(value).copyWithTags(tags);
   }
 
-  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+  isSupertypeOf(other: Type): boolean {
+    if (other instanceof TAny) {
+      return true;
+    }
+    if (other instanceof TTagged) {
+      // `f(x: Tagged<Number>)` can be called with `Tagged<Number>`
+      return this.itemType.isSupertypeOf(other.itemType);
+    } else {
+      // `f(x: Tagged<Number>)` can be called with `Number`
+      return this.itemType.isSupertypeOf(other);
+    }
+  }
+
+  serialize(visit: SquiggleSerializationVisitor): SerializedType {
     return {
       kind: "WithTags",
       itemType: visit.type(this.itemType),
     };
   }
 
-  override display() {
+  display() {
     return this.itemType.display();
   }
 
@@ -46,6 +63,6 @@ export class TWithTags<T> extends Type<{ value: T; tags: ValueTags }> {
   }
 }
 
-export function tWithTags<T>(itemType: Type<T>) {
-  return new TWithTags(itemType);
+export function tTagged<T>(itemType: Type<T>) {
+  return new TTagged(itemType);
 }

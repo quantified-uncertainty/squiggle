@@ -1,9 +1,7 @@
 import { SquiggleDeserializationVisitor } from "../serialization/squiggle.js";
 import { SDate } from "../utility/SDate.js";
+import { tDate, tDuration, tPlot } from "./index.js";
 import { tArray } from "./TArray.js";
-import { tBool } from "./TBool.js";
-import { tCalculator } from "./TCalculator.js";
-import { tDate } from "./TDate.js";
 import { TDateRange } from "./TDateRange.js";
 import { DetailedEntry, tDict } from "./TDict.js";
 import { tDictWithArbitraryKeys } from "./TDictWithArbitraryKeys.js";
@@ -15,21 +13,24 @@ import {
 } from "./TDist.js";
 import { tDistOrNumber } from "./TDistOrNumber.js";
 import { tDomain } from "./TDomain.js";
-import { tDuration } from "./TDuration.js";
-import { tInput } from "./TInput.js";
-import { tLambda } from "./TLambda.js";
+import {
+  IntrinsicValueType,
+  tBool,
+  tCalculator,
+  tInput,
+  tLambda,
+  tNumber,
+  tScale,
+  tSpecification,
+  tString,
+  tTableChart,
+} from "./TIntrinsic.js";
 import { tLambdaNand } from "./TLambdaNand.js";
-import { tNumber } from "./TNumber.js";
+import { TNumberRange } from "./TNumberRange.js";
 import { tOr } from "./TOr.js";
-import { tPlot } from "./TPlot.js";
-import { tScale } from "./TScale.js";
-import { tSpecification } from "./TSpecification.js";
-import { tSpecificationWithTags } from "./TSpecificationWithTags.js";
-import { tString } from "./TString.js";
-import { tTableChart } from "./TTableChart.js";
+import { tTagged } from "./TTagged.js";
 import { tTuple } from "./TTuple.js";
 import { tTypedLambda } from "./TTypedLambda.js";
-import { tWithTags } from "./TWithTags.js";
 import { tAny, Type } from "./Type.js";
 
 // Serialization code is represented as `serialize()` method on `Type` subclasses.
@@ -37,25 +38,15 @@ import { tAny, Type } from "./Type.js";
 
 export type SerializedType =
   | {
-      kind:
-        | "Bool"
-        | "Number"
-        | "Plot"
-        | "String"
-        | "Date"
-        | "Duration"
-        | "Calculator"
-        | "Scale"
-        | "Input"
-        | "Lambda"
-        | "Specification"
-        | "SpecificationWithTags"
-        | "DistOrNumber"
-        | "TableChart";
+      kind: "Intrinsic";
+      valueType: IntrinsicValueType;
     }
   | {
       kind: "Any";
       genericName?: string;
+    }
+  | {
+      kind: "DistOrNumber";
     }
   | {
       kind: "Tuple";
@@ -89,6 +80,11 @@ export type SerializedType =
       })[];
     }
   | {
+      kind: "NumberRange";
+      min: number;
+      max: number;
+    }
+  | {
       kind: "DateRange";
       min: number;
       max: number;
@@ -112,36 +108,45 @@ export function deserializeType(
   visit: SquiggleDeserializationVisitor
 ): Type<unknown> {
   switch (type.kind) {
-    case "Bool":
-      return tBool;
-    case "Number":
-      return tNumber;
-    case "Date":
-      return tDate;
-    case "Calculator":
-      return tCalculator;
-    case "Duration":
-      return tDuration;
-    case "Scale":
-      return tScale;
-    case "Input":
-      return tInput;
-    case "Plot":
-      return tPlot;
-    case "Specification":
-      return tSpecification;
-    case "String":
-      return tString;
-    case "TableChart":
-      return tTableChart;
+    case "Intrinsic":
+      switch (type.valueType) {
+        case "Bool":
+          return tBool;
+        case "Number":
+          return tNumber;
+        case "Date":
+          return tDate;
+        case "Calculator":
+          return tCalculator;
+        case "Duration":
+          return tDuration;
+        case "Lambda":
+          return tLambda;
+        case "Scale":
+          return tScale;
+        case "Input":
+          return tInput;
+        case "Plot":
+          return tPlot;
+        case "Specification":
+          return tSpecification;
+        case "String":
+          return tString;
+        case "TableChart":
+          return tTableChart;
+        default:
+          throw type.valueType satisfies never;
+      }
     case "Any":
       return tAny({ genericName: type.genericName });
+    case "NumberRange":
+      return new TNumberRange(type.min, type.max);
     case "DateRange":
       return new TDateRange(SDate.fromMs(type.min), SDate.fromMs(type.max));
     case "Array":
       return tArray(visit.type(type.itemType));
     case "WithTags":
-      return tWithTags(visit.type(type.itemType));
+      return tTagged(visit.type(type.itemType));
     case "Tuple":
       return tTuple(...type.types.map((t) => visit.type(t)));
     case "Or":
@@ -155,12 +160,8 @@ export function deserializeType(
       );
     case "DictWithArbitraryKeys":
       return tDictWithArbitraryKeys(visit.type(type.itemType));
-    case "SpecificationWithTags":
-      return tSpecificationWithTags;
     case "DistOrNumber":
       return tDistOrNumber;
-    case "Lambda":
-      return tLambda;
     case "Domain":
       return tDomain(visit.type(type.type));
     case "Dist":

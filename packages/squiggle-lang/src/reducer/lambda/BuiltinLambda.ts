@@ -1,5 +1,4 @@
 import { REOther } from "../../errors/messages.js";
-import { tAny, Type } from "../../types/Type.js";
 import { Value } from "../../value/index.js";
 import { Reducer } from "../Reducer.js";
 import { FnDefinition } from "./FnDefinition.js";
@@ -69,23 +68,5 @@ export class BuiltinLambda extends BaseLambda {
     )})`;
 
     throw new REOther(message);
-  }
-
-  override inferOutputType(argTypes: Type<any>[]): Type<any> | undefined {
-    const possibleOutputTypes: Type<unknown>[] = [];
-    for (const definition of this.definitions) {
-      const outputType = definition.signature.inferOutputType(argTypes);
-      if (outputType !== undefined) {
-        possibleOutputTypes.push(outputType);
-      }
-    }
-    if (!possibleOutputTypes.length) {
-      return undefined;
-    }
-    if (possibleOutputTypes.length > 1) {
-      // TODO - union
-      return tAny();
-    }
-    return possibleOutputTypes[0];
   }
 }

@@ -9,10 +9,9 @@ import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value, vLambda } from "../value/index.js";
 import { InputType } from "../value/VInput.js";
 import { SerializedType } from "./serialize.js";
-import { TLambda } from "./TLambda.js";
 import { TAny, Type } from "./Type.js";
 
-export class TTypedLambda extends TLambda {
+export class TTypedLambda extends Type<Lambda> {
   public inputs: FnInput<unknown>[];
 
   constructor(
@@ -21,6 +20,10 @@ export class TTypedLambda extends TLambda {
   ) {
     super();
     this.inputs = maybeInputs.map(inputOrTypeToInput);
+  }
+
+  override check(v: Value): boolean {
+    return this.unpack(v) !== undefined;
   }
 
   override unpack(v: Value) {
@@ -42,15 +45,15 @@ export class TTypedLambda extends TLambda {
     };
   }
 
-  override isSupertype(other: Type) {
+  override isSupertypeOf(other: Type) {
     if (other instanceof TAny) return true;
     return (
       other instanceof TTypedLambda &&
-      this.output.isSupertype(other.output) &&
+      this.output.isSupertypeOf(other.output) &&
       this.inputs.length === other.inputs.length &&
       // inputs are contravariant; https://en.wikipedia.org/wiki/Subtyping#Function_types
       other.inputs.every((input, index) =>
-        input.type.isSupertype(this.inputs[index].type)
+        input.type.isSupertypeOf(this.inputs[index].type)
       )
     );
   }

@@ -81,14 +81,13 @@ export class FnSignature<
     }
 
     for (let i = 0; i < parametersLength; i++) {
-      const input = this.inputs[i];
-      const unpacked = input.type.unpack(args[i]);
-      if (unpacked === undefined) {
+      const type = this.inputs[i].type;
+      if (!type.check(args[i])) {
         return Err({
           kind: "domain",
           position: i,
           err: new REDomainError(
-            `Parameter ${args[i].valueToString()} must be in domain ${input.type}`
+            `Parameter ${args[i].valueToString()} must be in domain ${type}`
           ),
         });
       }
@@ -96,13 +95,13 @@ export class FnSignature<
     return Ok(args);
   }
 
-  inferOutputType(argTypes: Type<any>[]): Type<any> | undefined {
+  inferOutputType(argTypes: Type[]): Type | undefined {
     if (argTypes.length < this.minInputs || argTypes.length > this.maxInputs) {
       return; // args length mismatch
     }
 
     for (let i = 0; i < argTypes.length; i++) {
-      if (!this.inputs[i].type.isSupertype(argTypes[i])) {
+      if (!this.inputs[i].type.isSupertypeOf(argTypes[i])) {
         return;
       }
     }

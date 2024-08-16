@@ -78,8 +78,4 @@ export class UserDefinedLambda extends BaseLambda {
   parameterString() {
     return this.getParameterNames().join(",");
   }
-
-  override inferOutputType() {
-    return this.signature.output;
-  }
 }

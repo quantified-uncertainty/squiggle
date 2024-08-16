@@ -1,6 +1,7 @@
 import { infixFunctions } from "../ast/operators.js";
 import { InfixOperator, KindNode, LocationRange } from "../ast/types.js";
 import { ICompileError } from "../errors/IError.js";
+import { inferLambdaOutputType } from "../types/helpers.js";
 import { Type } from "../types/Type.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
@@ -44,7 +45,7 @@ export class NodeInfixCall extends ExpressionNode<"InfixCall"> {
     const arg1 = analyzeExpression(node.args[0], context);
     const arg2 = analyzeExpression(node.args[1], context);
 
-    const type = fn.value.inferOutputType([arg1.type, arg2.type]);
+    const type = inferLambdaOutputType(fn.value, [arg1.type, arg2.type]);
     if (!type) {
       throw new ICompileError(
         `Operator '${node.op}' does not support types '${arg1.type.display()}' and '${arg2.type.display()}'`,

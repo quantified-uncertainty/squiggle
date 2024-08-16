@@ -8,6 +8,10 @@ export class TDomain<T> extends Type<Type<T>> {
     super();
   }
 
+  override check(v: Value) {
+    return v.type === "Domain";
+  }
+
   unpack(v: Value): undefined {
     throw new Error("Domain unpacking is not implemented");
     /*
@@ -18,12 +22,21 @@ export class TDomain<T> extends Type<Type<T>> {
       }
       return this.type.isSupertype(v.value) ? v.value : undefined;
       
-      // But `isSupertype` is not enough for TypeScript-level type safety, and also I'm not even sure that it's correct.
+      // But `isSupertypeOf` is not enough for TypeScript-level type safety, and also I'm not even sure that it's correct.
+      // This is not a big problem because we don't have stdlib functions that take domains yet.
     */
   }
 
   pack(v: Type<T>) {
     return vDomain(v);
+  }
+
+  override isSupertypeOf(other: Type) {
+    return this.type.isSupertypeOf(other);
+  }
+
+  override display() {
+    return `Domain(${this.type.display()})`;
   }
 
   override serialize(visit: SquiggleSerializationVisitor): SerializedType {

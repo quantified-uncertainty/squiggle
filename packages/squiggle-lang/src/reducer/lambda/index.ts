@@ -1,7 +1,6 @@
 import uniq from "lodash/uniq.js";
 
 import { LocationRange } from "../../ast/types.js";
-import { Type } from "../../types/Type.js";
 import { sort } from "../../utility/E_A_Floats.js";
 import { Value } from "../../value/index.js";
 import { Frame } from "../FrameStack.js";
@@ -20,9 +19,6 @@ export abstract class BaseLambda {
 
   abstract signatures(): FnSignature[];
   abstract parameterString(): string;
-  abstract inferOutputType(
-    argTypes: Type<unknown>[]
-  ): Type<unknown> | undefined;
 
   protected abstract callBody(args: Value[], reducer: Reducer): Value;
 

@@ -9,6 +9,21 @@ export class TDictWithArbitraryKeys<T> extends Type<ImmutableMap<string, T>> {
     super();
   }
 
+  override check(v: Value) {
+    if (v.type !== "Dict") {
+      return false;
+    }
+    if (this.itemType instanceof TAny) {
+      return true;
+    }
+    for (const value of v.value.values()) {
+      if (!this.itemType.check(value)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   unpack(v: Value) {
     if (v.type !== "Dict") {
       return undefined;
@@ -38,11 +53,11 @@ export class TDictWithArbitraryKeys<T> extends Type<ImmutableMap<string, T>> {
     };
   }
 
-  override isSupertype(other: Type<unknown>) {
+  override isSupertypeOf(other: Type<unknown>) {
     if (other instanceof TAny) return true;
     return (
       other instanceof TDictWithArbitraryKeys &&
-      this.itemType.isSupertype(other.itemType)
+      this.itemType.isSupertypeOf(other.itemType)
     );
   }
 

@@ -3,13 +3,17 @@ import { Value } from "../value/index.js";
 import { vArray } from "../value/VArray.js";
 import { InputType } from "../value/VInput.js";
 import { SerializedType } from "./serialize.js";
-import { Type } from "./Type.js";
+import { TAny, Type } from "./Type.js";
 
 export class TTuple<const T extends any[]> extends Type<
   [...{ [K in keyof T]: T[K] }]
 > {
-  constructor(private types: [...{ [K in keyof T]: Type<T[K]> }]) {
+  constructor(public types: [...{ [K in keyof T]: Type<T[K]> }]) {
     super();
+  }
+
+  override check(v: Value): boolean {
+    return this.unpack(v) !== undefined;
   }
 
   unpack(v: Value) {
@@ -28,6 +32,17 @@ export class TTuple<const T extends any[]> extends Type<
 
   pack(values: unknown[]) {
     return vArray(values.map((val, index) => this.types[index].pack(val)));
+  }
+
+  override isSupertypeOf(other: Type): boolean {
+    return (
+      other instanceof TAny ||
+      (other instanceof TTuple &&
+        this.types.length === other.types.length &&
+        this.types.every((type, index) =>
+          type.isSupertypeOf(other.types[index])
+        ))
+    );
   }
 
   override serialize(visit: SquiggleSerializationVisitor): SerializedType {

@@ -1,10 +1,11 @@
 import { SDate } from "../utility/SDate.js";
-import { Value } from "../value/index.js";
+import { Value, vDate } from "../value/index.js";
+import { VDate } from "../value/VDate.js";
 import { Scale } from "../value/VScale.js";
 import { SerializedType } from "./serialize.js";
-import { TDate } from "./TDate.js";
+import { TAny, Type } from "./Type.js";
 
-export class TDateRange extends TDate {
+export class TDateRange extends Type<SDate> {
   constructor(
     public min: SDate,
     public max: SDate
@@ -12,20 +13,38 @@ export class TDateRange extends TDate {
     super();
   }
 
-  override unpack(v: Value) {
-    return v.type === "Date" &&
-      v.value.toMs() >= this.min.toMs() &&
-      v.value.toMs() <= this.max.toMs()
-      ? v.value
-      : undefined;
+  check(v: Value): v is VDate {
+    return Boolean(
+      v.type === "Date" &&
+        v.value.toMs() >= this.min.toMs() &&
+        v.value.toMs() <= this.max.toMs()
+    );
   }
 
-  override display(): string {
-    return `Date.rangeDomain(${this.min.toString()}, ${this.max.toString()})`;
+  unpack(v: Value) {
+    return this.check(v) ? v.value : undefined;
   }
 
-  override serialize(): SerializedType {
+  pack(v: SDate): Value {
+    return vDate(v);
+  }
+
+  isSupertypeOf(other: Type): boolean {
+    return (
+      other instanceof TAny ||
+      (other instanceof TDateRange &&
+        // should this be <= and >= instead?
+        this.min.toMs() === other.min.toMs() &&
+        this.max.toMs() === other.max.toMs())
+    );
+  }
+
+  serialize(): SerializedType {
     return { kind: "DateRange", min: this.min.toMs(), max: this.max.toMs() };
+  }
+
+  display() {
+    return `Date.rangeDomain(${this.min.toString()}, ${this.max.toString()})`;
   }
 
   toDefaultScale(): Scale {

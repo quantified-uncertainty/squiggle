@@ -15,6 +15,10 @@ export class TOr<T1, T2> extends Type<OrType<T1, T2>> {
     super();
   }
 
+  check(v: Value): boolean {
+    return this.unpack(v) !== undefined;
+  }
+
   unpack(v: Value): OrType<T1, T2> | undefined {
     const unpackedType1Value = this.type1.unpack(v);
     if (unpackedType1Value !== undefined) {
@@ -39,17 +43,17 @@ export class TOr<T1, T2> extends Type<OrType<T1, T2>> {
     };
   }
 
-  override isSupertype(other: Type<unknown>) {
+  override isSupertypeOf(other: Type<unknown>) {
     if (other instanceof TAny) return true;
     if (other instanceof TOr) {
       return (
-        (this.type1.isSupertype(other.type1) &&
-          this.type2.isSupertype(other.type2)) ||
-        (this.type1.isSupertype(other.type2) &&
-          this.type2.isSupertype(other.type1))
+        (this.type1.isSupertypeOf(other.type1) &&
+          this.type2.isSupertypeOf(other.type2)) ||
+        (this.type1.isSupertypeOf(other.type2) &&
+          this.type2.isSupertypeOf(other.type1))
       );
     }
-    return this.type1.isSupertype(other) || this.type2.isSupertype(other);
+    return this.type1.isSupertypeOf(other) || this.type2.isSupertypeOf(other);
   }
 
   override display() {

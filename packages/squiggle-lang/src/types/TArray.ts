@@ -2,6 +2,7 @@ import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value, vArray } from "../value/index.js";
 import { UnwrapType } from "./helpers.js";
 import { SerializedType } from "./serialize.js";
+import { TTuple } from "./TTuple.js";
 import { TAny, Type } from "./Type.js";
 
 export class TArray<T> extends Type<readonly T[]> {
@@ -9,11 +10,26 @@ export class TArray<T> extends Type<readonly T[]> {
     super();
   }
 
+  check(v: Value) {
+    if (v.type !== "Array") {
+      return false;
+    }
+    if (this.itemType instanceof TAny) {
+      return true;
+    }
+    for (const item of v.value) {
+      if (!this.itemType.check(item)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   unpack(v: Value): readonly T[] | undefined {
     if (v.type !== "Array") {
       return undefined;
     }
-    if (this.itemType.isTransparent()) {
+    if (this.itemType instanceof TAny) {
       // special case, performance optimization
       return v.value as readonly T[];
     }
@@ -30,24 +46,29 @@ export class TArray<T> extends Type<readonly T[]> {
   }
 
   pack(v: readonly T[]) {
-    return this.itemType.isTransparent()
+    return this.itemType instanceof TAny
       ? vArray(v as readonly Value[])
       : vArray(v.map((item) => this.itemType.pack(item)));
   }
 
-  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+  serialize(visit: SquiggleSerializationVisitor): SerializedType {
     return {
       kind: "Array",
       itemType: visit.type(this.itemType),
     };
   }
 
-  override isSupertype(other: Type<unknown>) {
+  isSupertypeOf(other: Type<unknown>): boolean {
     if (other instanceof TAny) return true;
-    return other instanceof TArray && this.itemType.isSupertype(other.itemType);
+    return (
+      (other instanceof TArray &&
+        this.itemType.isSupertypeOf(other.itemType)) ||
+      (other instanceof TTuple &&
+        other.types.every((type) => this.isSupertypeOf(type)))
+    );
   }
 
-  override display() {
+  display() {
     return `List(${this.itemType.display()})`;
   }
 

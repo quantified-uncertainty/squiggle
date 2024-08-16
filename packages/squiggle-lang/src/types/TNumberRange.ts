@@ -1,8 +1,10 @@
-import { Value } from "../value/index.js";
+import { Value, vNumber } from "../value/index.js";
+import { VNumber } from "../value/VNumber.js";
 import { Scale } from "../value/VScale.js";
-import { TNumber } from "./TNumber.js";
+import { SerializedType } from "./serialize.js";
+import { TAny, Type } from "./Type.js";
 
-export class TNumberRange extends TNumber {
+export class TNumberRange extends Type<number> {
   constructor(
     public min: number,
     public max: number
@@ -10,13 +12,38 @@ export class TNumberRange extends TNumber {
     super();
   }
 
-  override unpack(v: Value) {
-    return v.type === "Number" && v.value >= this.min && v.value <= this.max
-      ? v.value
-      : undefined;
+  check(v: Value): v is VNumber {
+    return v.type === "Number" && v.value >= this.min && v.value <= this.max;
   }
 
-  override display(): string {
+  unpack(v: Value) {
+    return this.check(v) ? v.value : undefined;
+  }
+
+  pack(v: number): Value {
+    return vNumber(v);
+  }
+
+  isSupertypeOf(other: Type): boolean {
+    if (other instanceof TAny) {
+      return true;
+    }
+    return (
+      other instanceof TNumberRange &&
+      other.min >= this.min &&
+      other.max <= this.max
+    );
+  }
+
+  serialize(): SerializedType {
+    return {
+      kind: "NumberRange",
+      min: this.min,
+      max: this.max,
+    };
+  }
+
+  display(): string {
     return `Number.rangeDomain(${this.min}, ${this.max})`;
   }
 

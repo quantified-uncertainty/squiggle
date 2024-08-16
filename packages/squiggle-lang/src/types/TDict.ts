@@ -65,6 +65,27 @@ export class TDict<const KVList extends BaseKVList> extends Type<
     );
   }
 
+  override check(v: Value) {
+    if (v.type !== "Dict") {
+      return false;
+    }
+    const r = v.value;
+
+    for (const kv of this.kvs) {
+      const subvalue = r.get(kv.key);
+      if (subvalue === undefined) {
+        if (!kv.optional) {
+          return false;
+        }
+        continue;
+      }
+      if (!kv.type.check(subvalue)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   unpack(v: Value) {
     // extra keys are allowed
 
@@ -121,7 +142,7 @@ export class TDict<const KVList extends BaseKVList> extends Type<
     return kv.type;
   }
 
-  override isSupertype(other: Type<unknown>): boolean {
+  override isSupertypeOf(other: Type<unknown>): boolean {
     if (other instanceof TAny) return true;
     if (!(other instanceof TDict)) {
       return false;
@@ -130,7 +151,7 @@ export class TDict<const KVList extends BaseKVList> extends Type<
       return false;
     }
     for (let i = 0; i < this.kvs.length; i++) {
-      if (!this.kvs[i].type.isSupertype(other.kvs[i].type)) {
+      if (!this.kvs[i].type.isSupertypeOf(other.kvs[i].type)) {
         return false;
       }
     }

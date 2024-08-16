@@ -1,13 +1,16 @@
 import { BaseDist } from "../dists/BaseDist.js";
-import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value, vDist, vNumber } from "../value/index.js";
 import { SerializedType } from "./serialize.js";
 import { tDist, TDist } from "./TDist.js";
-import { TNumber } from "./TNumber.js";
+import { TIntrinsic } from "./TIntrinsic.js";
 import { TAny, Type } from "./Type.js";
 
 // TODO: It would probably eventually be good to refactor this out, to use frOr instead. However, that would be slightly less efficient.
 export class TDistOrNumber extends Type<BaseDist | number> {
+  check(v: Value): boolean {
+    return this.unpack(v) !== undefined;
+  }
+
   unpack(v: Value) {
     return v.type === "Dist"
       ? v.value
@@ -20,20 +23,20 @@ export class TDistOrNumber extends Type<BaseDist | number> {
     return typeof v === "number" ? vNumber(v) : vDist(v);
   }
 
-  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+  serialize(): SerializedType {
     return { kind: "DistOrNumber" };
   }
 
-  override isSupertype(other: Type<unknown>): boolean {
+  isSupertypeOf(other: Type): boolean {
     return (
       other instanceof TAny ||
       other instanceof this.constructor ||
       other instanceof TDist ||
-      other instanceof TNumber
+      (other instanceof TIntrinsic && other.valueType === "Number")
     );
   }
 
-  override display() {
+  display() {
     return "Dist|Number";
   }
 

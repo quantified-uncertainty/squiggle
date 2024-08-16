@@ -3,7 +3,6 @@ import { PointSetDist } from "../dists/PointSetDist.js";
 import { SampleSetDist } from "../dists/SampleSetDist/index.js";
 import { BaseSymbolicDist } from "../dists/SymbolicDist/BaseSymbolicDist.js";
 import { SymbolicDist } from "../dists/SymbolicDist/index.js";
-import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value, vDist } from "../value/index.js";
 import { SerializedType } from "./serialize.js";
 import { TAny, Type } from "./Type.js";
@@ -25,6 +24,10 @@ export class TDist<T extends BaseDist> extends Type<T> {
     this.defaultCode = props.defaultCode;
   }
 
+  check(v: Value): boolean {
+    return this.unpack(v) !== undefined;
+  }
+
   unpack(v: Value) {
     if (v.type !== "Dist") return undefined;
 
@@ -38,7 +41,7 @@ export class TDist<T extends BaseDist> extends Type<T> {
     return vDist(v);
   }
 
-  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+  serialize(): SerializedType {
     return {
       kind: "Dist",
       distClass:
@@ -50,16 +53,25 @@ export class TDist<T extends BaseDist> extends Type<T> {
               ? "SampleSet"
               : undefined,
     };
-    throw new Error("Method not implemented.");
   }
 
-  override isSupertype(other: Type<unknown>): boolean {
+  isSupertypeOf(other: Type<unknown>): boolean {
     if (other instanceof TAny) return true;
     return (
       other instanceof TDist &&
       // either this is a generic dist or the dist classes match
       (!this.distClass || this.distClass === other.distClass)
     );
+  }
+
+  display(): string {
+    return (this.distClass as any) === BaseSymbolicDist
+      ? "SymbolicDist"
+      : (this.distClass as any) === PointSetDist
+        ? "PointSetDist"
+        : (this.distClass as any) === SampleSetDist
+          ? "SampleSetDist"
+          : "Dist";
   }
 
   override defaultFormInputCode() {
