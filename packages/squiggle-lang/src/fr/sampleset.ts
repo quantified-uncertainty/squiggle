@@ -14,7 +14,6 @@ import {
   tArray,
   tDist,
   tNumber,
-  tOr,
   tSampleSetDist,
   tTypedLambda,
 } from "../types/index.js";
@@ -293,18 +292,17 @@ const mkComparison = (
       makeFnExample(`SampleSet.${name}(4.0, SampleSet.fromDist(normal(6,2)))`),
     ],
     definitions: [
-      makeDefinition(
-        [tSampleSetDist, tOr(tNumber, tSampleSetDist)],
-        tSampleSetDist,
-        ([dist, f]) => {
-          const distResult =
-            f.tag === "1" ? withFloat(dist, f.value) : withDist(dist, f.value);
-          return unwrapDistResult(distResult);
-        }
+      makeDefinition([tSampleSetDist, tNumber], tSampleSetDist, ([dist, f]) =>
+        unwrapDistResult(withFloat(dist, f))
       ),
-      makeDefinition([tNumber, tSampleSetDist], tSampleSetDist, ([f, dist]) => {
-        return unwrapDistResult(withFloat(dist, f));
-      }),
+      makeDefinition([tNumber, tSampleSetDist], tSampleSetDist, ([f, dist]) =>
+        unwrapDistResult(withFloat(dist, f))
+      ),
+      makeDefinition(
+        [tSampleSetDist, tSampleSetDist],
+        tSampleSetDist,
+        ([dist1, dist2]) => unwrapDistResult(withDist(dist1, dist2))
+      ),
     ],
   });
 

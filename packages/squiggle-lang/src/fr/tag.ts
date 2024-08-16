@@ -6,7 +6,6 @@ import {
 } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { namedInput } from "../reducer/lambda/FnInput.js";
-import { Lambda } from "../reducer/lambda/index.js";
 import {
   tAny,
   tArray,
@@ -21,43 +20,24 @@ import {
   tNumber,
   tOr,
   tPlot,
-  tSpecificationWithTags,
+  tSpecification,
   tString,
   tTableChart,
   tTypedLambda,
   tWithTags,
 } from "../types/index.js";
-import { OrType } from "../types/TOr.js";
 import { Type } from "../types/Type.js";
 import { getOrThrow } from "../utility/result.js";
-import { Value } from "../value/index.js";
 import { ValueTags, ValueTagsType } from "../value/valueTags.js";
 import { exportData, location, toMap } from "../value/valueTagsUtils.js";
 import { vBool, VBool } from "../value/VBool.js";
+import { vSpecification } from "../value/VSpecification.js";
 import { vString } from "../value/VString.js";
 
 const maker = new FnFactory({
   nameSpace: "Tag",
   requiresNamespace: true,
 });
-
-//I could also see inlining this into the next function, either way is fine.
-function _ensureTypeUsingLambda<T1>(
-  outputType: Type<T1>,
-  inputValue: OrType<T1, Lambda>,
-  runLambdaToGetType: (fn: Lambda) => Value
-): T1 {
-  if (inputValue.tag === "1") {
-    return inputValue.value;
-  }
-  const show = runLambdaToGetType(inputValue.value);
-  const unpack = outputType.unpack(show);
-  if (unpack) {
-    return unpack;
-  } else {
-    throw new Error("showAs must return correct type");
-  }
-}
 
 //This helps ensure that the tag name is a valid key of ValueTagsType, with the required type.
 type PickByValue<T, ValueType> = NonNullable<
@@ -107,16 +87,21 @@ function decoratorWithInputOrFnInput<T>(
     ],
     tWithTags(inputType),
     ([{ value, tags }, newInput], reducer) => {
-      const runLambdaToGetType = (fn: Lambda) => {
-        //When we call the function, we pass in the tags as well, just in case they are asked for in the call.
-        const val = tWithTags(inputType).pack({ value: value, tags });
-        return reducer.call(fn, [val]);
-      };
-      const correctTypedInputValue: T = _ensureTypeUsingLambda(
-        outputType,
-        newInput,
-        runLambdaToGetType
-      );
+      let correctTypedInputValue: T;
+      if (newInput.tag === "1") {
+        correctTypedInputValue = newInput.value;
+      } else {
+        // When we call the function, we pass in the tags as well, just in case they are asked for in the call.
+        const val = tWithTags(inputType).pack({ value, tags });
+        const show = reducer.call(newInput.value, [val]);
+        const unpack = outputType.unpack(show);
+        if (unpack !== undefined) {
+          correctTypedInputValue = unpack;
+        } else {
+          throw new Error("showAs must return correct type");
+        }
+      }
+
       return {
         value,
         tags: tags.merge(toValueTagsFn(correctTypedInputValue)),
@@ -242,9 +227,9 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [tWithTags(tAny({ genericName: "A" })), tSpecificationWithTags],
+        [tWithTags(tAny({ genericName: "A" })), tWithTags(tSpecification)],
         tWithTags(tAny({ genericName: "A" })),
-        ([{ value, tags }, spec]) => {
+        ([{ value, tags }, { value: specValue, tags: specTags }]) => {
           if (tags.specification()) {
             throw new REArgumentError(
               "Specification already exists. Be sure to use Tag.omit() first."
@@ -253,9 +238,9 @@ example2 = {|x| x + 1}`,
           return {
             value,
             tags: tags.merge({
-              specification: spec,
-              name: vString(spec.value.name),
-              doc: vString(spec.value.documentation),
+              specification: vSpecification(specValue).copyWithTags(specTags),
+              name: vString(specValue.name),
+              doc: vString(specValue.documentation),
             }),
           };
         },
