@@ -3,12 +3,28 @@ import {
   formatSquiggleCode,
   getSquiggleAdvice,
   runSquiggle,
-  squiggleDocs,
 } from "./helpers.mts";
-import { runLLM } from "./llmConfig.mts";
+import { type Message, runLLM } from "./llmConfig.mts";
 import { Logger } from "./logger.mts";
 
 const MAX_ATTEMPTS = 15;
+
+interface TrackingInfo {
+  time: {
+    createSquiggleCode: number;
+    validateAndFixCode: number;
+  };
+  tokens: {
+    input: number;
+    output: number;
+  };
+}
+
+interface SquiggleResult {
+  code: string;
+  trackingInfo: TrackingInfo;
+  conversationHistory: Message[];
+}
 
 const trackingInfo = {
   time: {
@@ -21,7 +37,7 @@ const trackingInfo = {
   },
 };
 
-const generateSquiggleContent = (
+const generateSquiggleUserRequest = (
   prompt: string,
   existingCode: string,
   error: string
@@ -39,7 +55,6 @@ const generateSquiggleContent = (
     }
   } else {
     content = `Generate Squiggle code for the following prompt. Produce mainly code with short explanations. Wrap the code in \`\`\`squiggle tags.\n\nPrompt: ${prompt}.\n\n`;
-    content += `Information about the Squiggle Language:\n\n${squiggleDocs}`;
   }
 
   // Logger.logPrompt(content);
@@ -60,22 +75,29 @@ const updateTrackingInfo = (
 const createSquiggleCode = async (
   prompt: string,
   existingCode = "",
-  error = ""
-) => {
-  const content = generateSquiggleContent(prompt, existingCode, error);
+  error = "",
+  trackingInfo: TrackingInfo,
+  conversationHistory: Message[]
+): Promise<SquiggleResult> => {
+  const userRequest = generateSquiggleUserRequest(prompt, existingCode, error);
+
   try {
+    conversationHistory.push({ role: "user", content: userRequest });
     const { result: completion, duration } = await measureTime(async () =>
-      runLLM(content, existingCode ? "user" : "system")
+      runLLM(conversationHistory)
     );
 
     Logger.logLLMResponse(JSON.stringify(completion, null, 2), duration);
 
     if (!completion || !completion.content || completion.content.length === 0) {
       Logger.error("Received an empty response from the API");
-      return "";
+      return { code: "", trackingInfo, conversationHistory };
     }
 
-    updateTrackingInfo(duration, completion.usage);
+    trackingInfo.time.createSquiggleCode += duration;
+    trackingInfo.tokens.input += completion.usage?.prompt_tokens || 0;
+    trackingInfo.tokens.output += completion.usage?.completion_tokens || 0;
+
     Logger.highlight(
       `✨ Got response from OpenRouter ${existingCode ? "(fix attempt)" : "(initial generation)"}`
     );
@@ -83,18 +105,20 @@ const createSquiggleCode = async (
     const message = completion.content;
     if (!message) {
       Logger.error("Received a response without content");
-      return "";
+      return { code: "", trackingInfo, conversationHistory };
     }
+
+    conversationHistory.push({ role: "assistant", content: message });
 
     const extractedCode = extractSquiggleCode(message);
     if (!extractedCode) {
       Logger.error("Error generating/fixing Squiggle code. Didn't get code.");
-      return "";
+      return { code: "", trackingInfo, conversationHistory };
     }
-    return extractedCode;
+    return { code: extractedCode, trackingInfo, conversationHistory };
   } catch (error) {
     Logger.error(`Error in createSquiggleCode: ${error.message}`);
-    return "";
+    return { code: "", trackingInfo, conversationHistory };
   }
 };
 
@@ -103,7 +127,17 @@ const extractSquiggleCode = (content: string): string => {
   return match ? match[1].trim() : "";
 };
 
-const validateAndFixCode = async (prompt: string, initialCode: string) => {
+const validateAndFixCode = async (
+  prompt: string,
+  initialCode: string,
+  trackingInfo: TrackingInfo,
+  conversationHistory: Message[]
+): Promise<{
+  isValid: boolean;
+  code: string;
+  trackingInfo: TrackingInfo;
+  conversationHistory: Message[];
+}> => {
   let code = initialCode;
   let isValid = false;
   let attempts = 0;
@@ -125,18 +159,26 @@ const validateAndFixCode = async (prompt: string, initialCode: string) => {
       Logger.highlight("\n🔧 Attempting to fix the code...");
 
       try {
-        const { result: newCode, duration } = await measureTime(() =>
-          createSquiggleCode(prompt, code, run.value)
+        const { result: squiggleResult, duration } = await measureTime(() =>
+          createSquiggleCode(
+            prompt,
+            code,
+            run.value,
+            trackingInfo,
+            conversationHistory
+          )
         );
+        trackingInfo = squiggleResult.trackingInfo;
+        conversationHistory = squiggleResult.conversationHistory;
         trackingInfo.time.validateAndFixCode += duration;
 
-        if (!newCode) {
+        if (!squiggleResult.code) {
           Logger.error("Failed to generate new code. Stopping attempts.");
           break;
         }
 
         // Format the new code
-        code = await formatSquiggleCode(newCode);
+        code = await formatSquiggleCode(squiggleResult.code);
         Logger.code(code, "Fixed and Formatted Code:");
       } catch (error) {
         Logger.error(`Error during code fix attempt: ${error.message}`);
@@ -146,7 +188,7 @@ const validateAndFixCode = async (prompt: string, initialCode: string) => {
     attempts++;
   }
 
-  return { isValid, code };
+  return { isValid, code, trackingInfo, conversationHistory };
 };
 
 const measureTime = async <T,>(
@@ -160,26 +202,47 @@ const measureTime = async <T,>(
 
 const main = async () => {
   const prompt =
-    "Write a very complex, 100+line, fermi estimate of the value of eating chocolate - considering productivity and health. Use functions and tables.";
+    "Write a financial projection for a college grad, for their finances until retirement. 40-60 lines.";
 
   Logger.initNewLog();
   Logger.info("🚀 Squiggle Code Generator");
   Logger.info(`Prompt: ${prompt}`);
 
+  let trackingInfo: TrackingInfo = {
+    time: { createSquiggleCode: 0, validateAndFixCode: 0 },
+    tokens: { input: 0, output: 0 },
+  };
+  let conversationHistory: Message[] = [];
+
   try {
     Logger.highlight("\n📝 Generating initial Squiggle code...");
-    const { result: initialCode, duration } = await measureTime(() =>
-      createSquiggleCode(prompt)
+    const { result: squiggleResult, duration } = await measureTime(() =>
+      createSquiggleCode(prompt, "", "", trackingInfo, conversationHistory)
     );
+    trackingInfo = squiggleResult.trackingInfo;
+    conversationHistory = squiggleResult.conversationHistory;
     trackingInfo.time.createSquiggleCode += duration;
 
-    if (!initialCode) {
+    if (!squiggleResult.code) {
       throw new Error("Failed to generate initial code");
     }
 
-    Logger.code(initialCode, "Generated Code:");
+    Logger.code(squiggleResult.code, "Generated Code:");
 
-    const { isValid, code } = await validateAndFixCode(prompt, initialCode);
+    const {
+      isValid,
+      code,
+      trackingInfo: updatedTrackingInfo,
+      conversationHistory: updatedConversationHistory,
+    } = await validateAndFixCode(
+      prompt,
+      squiggleResult.code,
+      trackingInfo,
+      conversationHistory
+    );
+
+    trackingInfo = updatedTrackingInfo;
+    conversationHistory = updatedConversationHistory;
 
     Logger.info("\n🏁 Final Result:");
     if (isValid) {

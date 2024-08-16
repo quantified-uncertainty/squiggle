@@ -33,8 +33,8 @@ importers:
         specifier: ^0.0.34
         version: 0.0.34(zod@3.23.8)
       '@anthropic-ai/sdk':
-        specifier: ^0.26.0
-        version: 0.26.0
+        specifier: ^0.26.1
+        version: 0.26.1
       '@quri/prettier-plugin-squiggle':
         specifier: workspace:*
         version: link:../prettier-plugin
@@ -1296,8 +1296,8 @@ packages:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
 
-  /@anthropic-ai/sdk@0.26.0:
-    resolution: {integrity: sha512-vNbZ2rnnMfk8Bf4OdeVy6GA4EXao8tGC0tLEoSAl1NZrip9oOxnEGUkXl3FsPQgeBM5hmpGE1tSLuu9HEVJiHg==}
+  /@anthropic-ai/sdk@0.26.1:
+    resolution: {integrity: sha512-HeMJP1bDFfQPQS3XTJAmfXkFBdZ88wvfkE05+vsoA9zGn5dHqEaHOPsqkazf/i0gXYg2XlLxxZrf6rUAarSqzw==}
     dependencies:
       '@types/node': 18.19.31
       '@types/node-fetch': 2.6.11

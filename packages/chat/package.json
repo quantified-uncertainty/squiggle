@@ -13,7 +13,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^0.0.41",
     "@ai-sdk/openai": "^0.0.34",
-    "@anthropic-ai/sdk": "^0.26.0",
+    "@anthropic-ai/sdk": "^0.26.1",
     "@quri/prettier-plugin-squiggle": "workspace:*",
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",

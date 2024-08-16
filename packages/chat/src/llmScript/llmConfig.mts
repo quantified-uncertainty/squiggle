@@ -4,9 +4,12 @@ import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 
+import { squiggleDocs } from "./helpers.mjs";
+
 // Configuration
 dotenv.config({ path: ".env.local" });
 
+// export const SELECTED_MODEL = "Claude-3.5-Sonnet";
 export const SELECTED_MODEL = "GPT-4o-mini";
 
 const anthropic = new Anthropic({
@@ -67,20 +70,20 @@ const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
-type Message = {
+export type Message = {
   role: "system" | "user" | "assistant";
   content: string;
 };
 
-function convertToClaudeMessages(
-  history: Message[]
-): Anthropic.Messages.MessageParam[] {
-  return history
+function convertToClaudeMessages(history: Message[]): Anthropic.MessageParam[] {
+  const messages = history
     .filter((msg) => msg.role !== "system")
     .map((msg) => ({
       role: msg.role as "user" | "assistant",
       content: msg.content,
     }));
+
+  return messages;
 }
 
 // Helper function to extract text content from Claude API response
@@ -93,8 +96,6 @@ function extractTextContent(content: Anthropic.ContentBlock[]): string {
     .map((block) => block.text)
     .join("\n");
 }
-
-let conversationHistory: Message[] = [];
 
 interface StandardizedChatCompletion {
   id: string;
@@ -149,46 +150,60 @@ function convertOpenAIToStandardFormat(
     },
   };
 }
+const CLAUDE_MODEL = "claude-3-5-sonnet-20240620";
+// const CLAUDE_MODEL = "claude-3-haiku-20240307";
+
+function generateSquiggleSystemContent(): string {
+  return `You are an AI assistant specialized in generating Squiggle code. Squiggle is a probabilistic programming language designed for estimation. Here's a brief overview of Squiggle syntax:
+
+${squiggleDocs}
+
+Always respond with valid Squiggle code enclosed in triple backticks (\`\`\`).`;
+}
 
 export async function runLLM(
-  content: string,
-  role: "system" | "user" = "user"
+  conversationHistory: Message[]
 ): Promise<StandardizedChatCompletion> {
-  conversationHistory.push({ role, content });
+  // Always add the new message to the conversation history
+  const squiggleContext = generateSquiggleSystemContent();
 
   try {
     if (SELECTED_MODEL === "Claude-3.5-Sonnet") {
-      // Use Claude SDK with prompt caching
-      const claudeMessages = convertToClaudeMessages(conversationHistory);
-      const completion = await anthropic.messages.create({
+      // Compress assistant messages for Claude
+      const compressedMessages = compressAssistantMessages(conversationHistory);
+      const claudeMessages = convertToClaudeMessages(compressedMessages);
+
+      if (claudeMessages.length === 0) {
+        throw new Error("At least one message is required");
+      }
+
+      const completion = await anthropic.beta.promptCaching.messages.create({
         max_tokens: 4000,
         messages: claudeMessages,
-        model: "claude-3-opus-20240229", // Adjust the model as needed
-        system: conversationHistory.find((msg) => msg.role === "system")
-          ?.content, // Add system message if present
+        model: CLAUDE_MODEL,
+        system: [
+          {
+            text: squiggleContext,
+            type: "text",
+            cache_control: { type: "ephemeral" },
+          },
+        ],
       });
 
       const standardizedCompletion = convertClaudeToStandardFormat(completion);
-
-      conversationHistory.push({
-        role: "assistant",
-        content: standardizedCompletion.content,
-      });
 
       return standardizedCompletion;
     } else {
       // Use OpenAI (OpenRouter)
       const completion = await openai.chat.completions.create({
         model: OPENROUTER_MODEL,
-        messages: conversationHistory,
+        messages: [
+          { role: "system", content: squiggleContext },
+          ...conversationHistory,
+        ],
       });
 
       const standardizedCompletion = convertOpenAIToStandardFormat(completion);
-
-      conversationHistory.push({
-        role: "assistant",
-        content: standardizedCompletion.content,
-      });
 
       return standardizedCompletion;
     }
@@ -198,12 +213,18 @@ export async function runLLM(
   }
 }
 
-export function resetConversation() {
-  conversationHistory = [];
-}
-
-export function getConversationHistory() {
-  return conversationHistory;
+// Helper function to compress assistant messages
+function compressAssistantMessages(messages: Message[]): Message[] {
+  return messages.reduce((acc, current, index, array) => {
+    if (current.role !== "assistant") {
+      acc.push(current);
+    } else if (index === 0 || array[index - 1].role !== "assistant") {
+      acc.push(current);
+    } else {
+      acc[acc.length - 1].content += "\n\n" + current.content;
+    }
+    return acc;
+  }, [] as Message[]);
 }
 
 export function calculatePrice(
