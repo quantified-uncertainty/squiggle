@@ -1,15 +1,8 @@
-import { z } from "zod";
+import { Logger } from "../../../llmScript/logger";
+import { runSquiggleGenerator } from "../../../llmScript/main";
+import { AVAILABLE_MODELS } from "../../utils/llms";
 
-import { runSquiggleGenerator } from "../../../llmScript/main"; // Import the new function
-import { AVAILABLE_MODELS } from "../../utils/llms"; // Adjust the import path as needed
-
-// Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
-
-const squiggleSchema = z.object({
-  code: z.string().describe("Squiggle code snippet"),
-});
-
 export async function POST(req: Request) {
   const abortController = new AbortController();
 
@@ -31,29 +24,40 @@ export async function POST(req: Request) {
       (m) => m.backendTitle === backendTitle
     );
     if (!selectedModel) {
-      throw new Error("Invalid model selected:");
+      throw new Error("Invalid model selected");
     }
 
-    // Run the Squiggle generator
-    const squiggleResult = await runSquiggleGenerator(prompt);
+    // Run the Squiggle generator 3 times in parallel
+    const squigglePromises = [
+      runSquiggleGenerator(prompt, new Logger()),
+      runSquiggleGenerator(prompt, new Logger()),
+      runSquiggleGenerator(prompt, new Logger()),
+    ];
 
-    // Prepare the response
-    const response = {
-      code: squiggleResult.code,
-      isValid: squiggleResult.isValid,
-      trackingInfo: squiggleResult.trackingInfo,
-      conversationHistory: squiggleResult.conversationHistory,
-    };
+    const squiggleResults = await Promise.all(squigglePromises);
+
+    // Log all responses
+    squiggleResults.forEach((result, index) => {
+      console.log(`Response ${index + 1}:`, result);
+    });
+
+    // Prepare the responses including all results
+    const responses = squiggleResults.map((result) => ({
+      code: result.code,
+      isValid: result.isValid,
+      trackingInfo: result.trackingInfo,
+      conversationHistory: result.conversationHistory,
+    }));
 
     // Handle client disconnection
     req.signal.addEventListener("abort", () => {
       abortController.abort();
     });
 
-    // Return the response as a stream
+    // Return the responses as a stream
     const stream = new ReadableStream({
       start(controller) {
-        controller.enqueue(JSON.stringify(response));
+        controller.enqueue(JSON.stringify(responses));
         controller.close();
       },
     });
@@ -63,7 +67,7 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     if (error === "AbortError") {
-      return new Response("Generation stopped", { status: 499 }); // 499 is "Client Closed Request"
+      return new Response("Generation stopped", { status: 499 });
     }
     console.error("Error in POST function:", error);
     return new Response(

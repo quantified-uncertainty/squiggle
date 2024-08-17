@@ -8,7 +8,7 @@ import {
   Loader,
   XCircle,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { z } from "zod";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
@@ -55,7 +55,9 @@ const squiggleSchema = z.object({
   code: z.string().describe("Squiggle code snippet"),
 });
 
-// Types
+// Extend schema to handle an array of responses
+const squiggleResponseSchema = z.array(squiggleSchema);
+
 type Action = {
   id: string;
   prompt: string;
@@ -65,6 +67,8 @@ type Action = {
   status: "loading" | "success" | "error";
   timestamp: Date;
 };
+
+type SquiggleResponse = z.infer<typeof squiggleResponseSchema>;
 
 // Action Component
 const ActionComponent: React.FC<{ action: Action }> = ({ action }) => {
@@ -132,39 +136,43 @@ export default function Home() {
   );
   const [playgroundOpacity, setPlaygroundOpacity] = useState(100);
   const [actions, setActions] = useState<Action[]>([]);
+  console.log("Actions", actions, actions.length && actions.at(-1).id);
+  const [squiggleResponses, setSquiggleResponses] =
+    useState<SquiggleResponse | null>(null);
 
   const { ref, height } = useAvailableHeight(); // Use useAvailableHeight hook
 
-  // Hooks
   const { object, submit, isLoading, stop } = useObject({
     api: "/api/completion",
-    schema: squiggleSchema,
+    schema: squiggleResponseSchema,
   });
 
   useEffect(() => {
-    if (object?.code) {
+    if (object) {
       setPlaygroundOpacity(100);
-      updateLastAction("success", object.code);
+      setSquiggleResponses(object);
+      object.forEach((response, index) =>
+        updateLastAction("success", response.code, `Response ${index + 1}`)
+      );
     }
-  }, [object?.code]);
+  }, [object]);
 
   // Helper functions
-  const updateLastAction = (
-    status: Action["status"],
-    code?: string,
-    result?: string
-  ) => {
-    setActions((prevActions) => {
-      const updatedActions = [...prevActions];
-      if (updatedActions.length > 0) {
-        const lastAction = updatedActions[updatedActions.length - 1];
-        lastAction.status = status;
-        if (code) lastAction.code = code;
-        if (result) lastAction.result = result;
-      }
-      return updatedActions;
-    });
-  };
+  const updateLastAction = useCallback(
+    (status: Action["status"], code?: string, result?: string) => {
+      setActions((prevActions) => {
+        const updatedActions = [...prevActions];
+        if (updatedActions.length > 0) {
+          const lastAction = updatedActions[updatedActions.length - 1];
+          lastAction.status = status;
+          if (code) lastAction.code = code;
+          if (result) lastAction.result = result;
+        }
+        return updatedActions;
+      });
+    },
+    []
+  );
 
   // Event handlers
   const handleSubmit = () => {
@@ -178,20 +186,14 @@ export default function Home() {
     };
     setActions((prevActions) => [...prevActions, newAction]);
 
-    const recentAction = actions.at(-1);
-    console.log("actions", actions, "recent", recentAction);
-    const previousResult = !recentAction
-      ? "No recent Action"
-      : recentAction.result === "error"
-        ? recentAction.result
-        : "Run was a success";
     submit({
       prompt,
       model: selectedModel.backendTitle,
-      previousPrompt: recentAction?.prompt,
-      previousCode: recentAction?.code,
-      previousResult,
+      previousPrompt: newAction.prompt,
+      previousCode: newAction.code,
+      previousResult: newAction.result,
     });
+
     setPrompt("");
   };
 
@@ -256,25 +258,31 @@ export default function Home() {
           ))}
         </div>
       </div>
-      {/* Right column: SquigglePlayground */}
+      {/* Right column: SquigglePlaygrounds */}
       <div
         className="w-4/5 px-2"
         style={{ opacity: playgroundOpacity / 100, height: height || "auto" }}
         ref={ref} // Attach the ref here
       >
-        <SquigglePlayground
-          defaultCode={object?.code || "// Your Squiggle code will appear here"}
-          key={object?.code}
-          height={height}
-          onNewSimulation={(simulation: Simulation) => {
-            console.log("NEW SIMULATION", simulation);
-            updateLastAction(
-              simulation.output.ok ? "success" : "error",
-              undefined,
-              JSON.stringify(simulation.output, null, 2)
-            );
-          }}
-        />
+        {squiggleResponses &&
+          squiggleResponses.map((response, index) => (
+            <div key={actions.at(-1).id + index}>
+              <SquigglePlayground
+                key={response.code}
+                defaultCode={
+                  response.code || "// Your Squiggle code will appear here"
+                }
+                height={height / squiggleResponses.length} // Divide height
+                onNewSimulation={(simulation: Simulation) => {
+                  updateLastAction(
+                    simulation.output.ok ? "success" : "error",
+                    undefined,
+                    JSON.stringify(simulation.output, null, 2)
+                  );
+                }}
+              />
+            </div>
+          ))}
       </div>
     </div>
   );

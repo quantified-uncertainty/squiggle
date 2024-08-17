@@ -5,7 +5,6 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/squigglePrompts.ts",
     "src/script.mts",
     "src/llmScript/logger.ts",
   ],

@@ -1,6 +1,5 @@
 import next from "next";
 import { createServer } from "node:http";
-import { Server } from "socket.io";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -11,12 +10,6 @@ const handler = app.getRequestHandler();
 
 app.prepare().then(() => {
   const httpServer = createServer(handler);
-
-  const io = new Server(httpServer);
-
-  io.on("connection", (socket) => {
-    // ...
-  });
 
   httpServer
     .once("error", (err) => {
