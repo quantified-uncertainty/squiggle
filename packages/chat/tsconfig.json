@@ -7,7 +7,7 @@
     ".next/types/**/*.ts",
     "src/squigglePrompts.ts",
     "src/script.mts",
-    "src/llmScript/logger.mts",
+    "src/llmScript/logger.ts",
   ],
   "exclude": ["node_modules"],
   "compilerOptions": {

@@ -3,10 +3,9 @@ import fs from "fs";
 import * as prettier from "prettier/standalone";
 
 import * as prettierSquigglePlugin from "@quri/prettier-plugin-squiggle/standalone";
-import { SqProject } from "@quri/squiggle-components";
-import { SqLinker } from "@quri/squiggle-lang";
+import { SqLinker, SqProject } from "@quri/squiggle-lang";
 
-import { Logger } from "./logger.mts";
+import { Logger } from "./logger";
 
 const SQUIGGLE_DOCS_PATH = "./src/llmScript/prompt.md";
 

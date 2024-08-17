@@ -14,6 +14,7 @@ import { z } from "zod";
 import { SquigglePlayground } from "@quri/squiggle-components";
 
 import { Simulation } from "../../../components/dist/src/lib/hooks/useSimulator";
+import { useAvailableHeight } from "./utils/useAvailableHeight";
 
 export interface ModelInfo {
   presentedTitle: string;
@@ -132,6 +133,8 @@ export default function Home() {
   const [playgroundOpacity, setPlaygroundOpacity] = useState(100);
   const [actions, setActions] = useState<Action[]>([]);
 
+  const { ref, height } = useAvailableHeight(); // Use useAvailableHeight hook
+
   // Hooks
   const { object, submit, isLoading, stop } = useObject({
     api: "/api/completion",
@@ -161,13 +164,6 @@ export default function Home() {
       }
       return updatedActions;
     });
-  };
-
-  const getMostRecentCode = (): string => {
-    const recentSuccessfulAction = [...actions]
-      .reverse()
-      .find((action) => action.status === "success" && action.code);
-    return recentSuccessfulAction?.code || "";
   };
 
   // Event handlers
@@ -213,9 +209,9 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen text-sm">
       {/* Left column: Chat, Form, and Actions */}
-      <div className="flex w-1/3 flex-col p-4">
+      <div className="flex w-1/5 flex-col px-2 py-2">
         <div className="mb-4">
           <select
             className="w-full rounded border p-2"
@@ -231,39 +227,45 @@ export default function Home() {
         </div>
         <div className="mb-4 flex">
           <textarea
-            className="flex-grow rounded-l border p-2"
+            className="flex-grow rounded-l border p-2 text-sm"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Enter your prompt here"
+            rows={10}
           />
-          <button
-            className="rounded-r bg-blue-500 px-4 py-2 text-white"
-            onClick={handleSubmit}
-            disabled={isLoading}
-          >
-            {isLoading ? "Generating..." : "Send"}
-          </button>
         </div>
+        <button
+          className="rounded-r bg-blue-500 px-4 py-2 text-sm text-white"
+          onClick={handleSubmit}
+          disabled={isLoading}
+        >
+          {isLoading ? "Generating..." : "Send"}
+        </button>
         {isLoading && (
           <button
-            className="mb-4 rounded bg-red-500 px-4 py-2 text-white"
+            className="mb-4 rounded bg-red-500 px-4 py-2 text-sm text-white"
             onClick={handleStop}
           >
             Stop Generation
           </button>
         )}
         <div className="flex-grow overflow-y-auto">
-          <h2 className="mb-2 text-xl font-bold">Actions</h2>
+          <h2 className="text-md mb-2 font-bold">Actions</h2>
           {actions.map((action) => (
             <ActionComponent key={action.id} action={action} />
           ))}
         </div>
       </div>
       {/* Right column: SquigglePlayground */}
-      <div className="w-2/3 p-4" style={{ opacity: playgroundOpacity / 100 }}>
+      <div
+        className="w-4/5 px-2"
+        style={{ opacity: playgroundOpacity / 100, height: height || "auto" }}
+        ref={ref} // Attach the ref here
+      >
         <SquigglePlayground
           defaultCode={object?.code || "// Your Squiggle code will appear here"}
           key={object?.code}
+          height={height}
           onNewSimulation={(simulation: Simulation) => {
             console.log("NEW SIMULATION", simulation);
             updateLastAction(

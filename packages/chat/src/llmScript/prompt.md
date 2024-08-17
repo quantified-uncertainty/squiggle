@@ -69,6 +69,7 @@ Here's are some simple example Squiggle programs:
 populationOfNewYork2022 = 8.1M to 8.4M
 
 @name("🎹 Percentage of Population with Pianos")
+@format(".1%")
 proportionOfPopulationWithPianos = 0.2% to 1%
 
 @name("🔧 Number of Piano Tuners per Piano")
@@ -81,70 +82,191 @@ pianoTunersPerPiano = {
 @hide
 domain = [Date(2024), Date(2034)]
 
-@name("⏳ Time in years after 2024")
+@name("Population at Time")
 populationAtTime(t: domain) = {
   dateDiff = Duration.toYears(t - Date(2024))
   averageYearlyPercentageChange = normal({ p5: -1%, p95: 5% }) // We're expecting NYC to continuously grow with an mean of roughly between -1% and +4% per year
   populationOfNewYork2022 * (averageYearlyPercentageChange + 1) ^ dateDiff
 }
+
+@name("Total Tuners, at Time")
 totalTunersAtTime(t: domain) = populationAtTime(t) *
   proportionOfPopulationWithPianos *
   pianoTunersPerPiano
 
-result = {
-  populationAtTime,
-  totalTunersAtTimeMedian: {|t: domain| median(totalTunersAtTime(t))},
-}
+meanTunersAtTime(t: domain) = mean(totalTunersAtTime(t))
 ```
 
 ```squiggle
 calculator = Calculator(
-  {|a, b,c,d| [a,b,c,d]},
+  {|a, b, c, d| [a, b, c, d]},
   {
     title: "Concat()",
     description: "This function takes in 4 arguments, then displays them",
-    autorun: true,
     sampleCount: 10000,
     inputs: [
-      Input.text({
-        name: "First Param",
-        default: "10 to 13",
-        description: "Must be a number or distribution",
-      }),
-      Input.textArea({ name: "Second Param", default: "[4,5,2,3,4,5,3,3,2,2,2,3,3,4,45,5,5,2,1]" }),
-      Input.select({ name: "Third Param", default: "Option 1", options: ["Option 1", "Option 2", "Option 3"] }),
-      Input.checkbox({ name: "Fourth Param", default: false})
-    ]
-  }
-)
-```
-
-```squiggle
-table = Table.make(
-  [
-    { name: "First Dist", value: Sym.lognormal({ p5: 1, p95: 10 }) },
-    { name: "Second Dist", value: Sym.lognormal({ p5: 5, p95: 30 }) },
-    { name: "Third Dist", value: Sym.lognormal({ p5: 50, p95: 90 }) },
-  ],
-  {
-    columns: [
-      { name: "Name", fn: {|d|d.name} },
-      {
-        name: "Plot",
-        fn: {
-          |d|
-          Plot.dist(
-            {
-              dist: d.value,
-              xScale: Scale.log({ min: 0.5, max: 100 }),
-              showSummary: false,
-            }
-          )
-        },
-      },
+      Input.text(
+        {
+          name: "First Param",
+          default: "10 to 13",
+          description: "Must be a number or distribution",
+        }
+      ),
+      Input.textArea(
+        {
+          name: "Second Param",
+          default: "[4,5,2,3,4,5,3,3,2,2,2,3,3,4,45,5,5,2,1]",
+        }
+      ),
+      Input.select(
+        {
+          name: "Third Param",
+          default: "Option 1",
+          options: ["Option 1", "Option 2", "Option 3"],
+        }
+      ),
+      Input.checkbox({ name: "Fourth Param", default: false }),
     ],
   }
 )
+
+```
+
+```squiggle
+// Cost-benefit analysis for a housing addition in berkeley
+
+// Input section
+@name("Model Inputs")
+@doc("Key parameters for the housing development project")
+inputs = {
+  landCost: 1M to 2M,
+  constructionCost: 500k to 800k,
+  permitFees: 50k to 100k,
+  numberOfHomes: 10,
+  monthlyRentalIncome: 3k to 5k,
+  annualPropertyAppreciation: 2% to 5%,
+  annualSocialBenefit: 10k to 30k,
+  yearsToConsider: 30,
+}
+
+// Calculation section
+@name("Calculations")
+@doc("Core calculations for the cost-benefit analysis")
+calculations(i) = {
+  totalCostPerHome = i.landCost + i.constructionCost + i.permitFees
+  annualRentalIncome = i.numberOfHomes * i.monthlyRentalIncome * 12
+  totalCost = i.numberOfHomes * totalCostPerHome
+
+  annualAppreciation(year) = i.numberOfHomes * totalCostPerHome *
+    ((1 + i.annualPropertyAppreciation) ^ year -
+      (1 + i.annualPropertyAppreciation) ^ (year - 1))
+
+  annualBenefit(year) = annualRentalIncome + annualAppreciation(year) +
+    i.numberOfHomes * i.annualSocialBenefit
+
+  totalBenefit = List.upTo(1, i.yearsToConsider) -> List.map(annualBenefit)
+    -> List.reduce(
+      0,
+      {|acc, val| acc + val}
+    )
+
+  netBenefit = totalBenefit - totalCost
+  probPositiveNetBenefit = 1 - cdf(netBenefit, 0)
+
+  {
+    totalCostPerHome: totalCostPerHome,
+    annualRentalIncome: annualRentalIncome,
+    totalCost: totalCost,
+    totalBenefit: totalBenefit,
+    netBenefit: netBenefit,
+    probPositiveNetBenefit: probPositiveNetBenefit,
+  }
+}
+
+// Apply calculations to inputs
+@name("Results")
+@doc("Output of calculations based on input parameters")
+results = calculations(inputs)
+
+// Analysis section
+@name("Cost-Benefit Analysis")
+@doc("Detailed analysis of the housing development project")
+analysis = {
+  costsTable = Table.make(
+    [
+      { name: "Land Cost per Home", value: inputs.landCost },
+      { name: "Construction Cost per Home", value: inputs.constructionCost },
+      { name: "Permit Fees per Home", value: inputs.permitFees },
+      { name: "Total Cost per Home", value: results.totalCostPerHome },
+      { name: "Total Cost for 10 Homes", value: results.totalCost },
+    ],
+    {
+      columns: [
+        { name: "Item", fn: {|r| r.name} },
+        {
+          name: "Cost",
+          fn: {
+            |r|
+            Plot.dist(
+              r.value,
+              {
+                xScale: Scale.log({ tickFormat: "($.1s", min: 20k, max: 200M }),
+              }
+            )
+          },
+        },
+      ],
+    }
+  )
+
+  benefitTable = Table.make(
+    [
+      {
+        name: "Monthly Rental Income per Home",
+        value: inputs.monthlyRentalIncome,
+      },
+      {
+        name: "Annual Social Benefit per Home",
+        value: inputs.annualSocialBenefit,
+      },
+      { name: "Total Benefit over 30 years", value: results.totalBenefit },
+    ],
+    {
+      columns: [
+        { name: "Item", fn: {|r| r.name} },
+        {
+          name: "Value",
+          fn: {
+            |r|
+            Plot.dist(
+              r.value,
+              { xScale: Scale.linear({ tickFormat: "($.1s" }) }
+            )
+          },
+        },
+      ],
+    }
+  )
+
+  netBenefitPlot = Plot.dist(
+    results.netBenefit,
+    {
+      title: "Distribution of Net Benefit",
+      xScale: Scale.log({ tickFormat: "($.1s", min: 10M, max: 200M }),
+    }
+  )
+
+  {
+    title: "Cost-Benefit Analysis: Adding 10 Homes to Berkeley, CA",
+    costs: costsTable,
+    benefits: benefitTable,
+    netBenefit: netBenefitPlot,
+    probabilityOfPositiveNetBenefit: results.probPositiveNetBenefit,
+  }
+}
+
+analysis
+
 ```
 
 ```squiggle
@@ -183,14 +305,16 @@ f(t: [Date(2020), Date(2040)]) = {
 
 ```squiggle
 import "hub:ozziegooen/sTest" as sTest
-
 @name("💰 Expected Cost")
+@format("($.2s")
 flightCost = normal({ mean: 600, stdev: 100 })
 
 @name("🥇 Expected Benefit")
+@format("($.2s")
 benefitEstimate = normal({ mean: 1500, stdev: 300 })
 
 @name("📊 Net Benefit")
+@format("($.2s")
 netBenefit = benefitEstimate - flightCost
 
 @name("🚦 Test Suite")
@@ -2010,6 +2134,244 @@ import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
 
+# Tag
+Tags are metadata that can be added to Squiggle variables. They are used to add additional information to variables, such as names, descriptions, and visualization options. While tags can be accessed at runtime, they are primarily meant for use with the Squiggle Playground and other visualizations.
+Tags can be added to variables either by using their name `Tag.get[Name]` or by using decorators.
+
+## List of Tags
+| Tag Name    | Description |
+| --------- | ----------- |
+| `name` | Change the default display name for the variable, in the playground.       |
+| `doc` | Adds documentation to the variable in the playground.       |
+| `showAs` | Change the default view for the value when displayed. |
+| `format` | Format a number, date, or duration when displayed. |
+| `notebook` | Formats lists as notebooks. |
+| `hide` | Don't show the variable in the playground |
+| `startOpen` | Start the variable open in the playground |
+| `startClosed` | Start the variable closed in the playground |
+| `location` | Store the proper location. Helps when you want to locate code corresponding to a variable. |
+| `exportData` | Metadata about exported variables. Cannot be added manually. |
+
+## Example
+<SquiggleEditor
+defaultCode={`@name("My Great Function") // Decorator syntax to add a name tag
+@doc("This is an example function.")
+@showAs(Calculator) // Show this as a simple calculator in the Playground
+exampleFn(f) = f^2
+
+myVarTags = Tag.getAll(exampleFn)
+
+docs = Tag.getDoc(exampleFn)
+
+@hide // Hide this variable in the Playground
+helperFn(f) = f `}/>
+
+
+## Tags
+
+Tag.name: ('A, String) => 'A
+Adds a user-facing name to a value. This is useful for documenting what a value represents, or how it was calculated.
+
+*Note: While names are shown in the sidebar, you still need to call variables by their regular variable names in code.*
+
+Tag.getName: (any) => String
+
+Tag.doc: ('A, String) => 'A
+Adds text documentation to a value. This is useful for documenting what a value represents or how it was calculated.
+
+Tag.getDoc: (any) => String
+
+Tag.showAs: (Dist, Plot|(Dist) => Plot) => Dist, (List(any), Table|(List(any)) => Table) => List(any), ((Number) => Dist|Number, Plot|Calculator|((Number) => Dist|Number) => Plot|Calculator) => (Number) => Dist|Number, ((Date) => Dist|Number, Plot|Calculator|((Date) => Dist|Number) => Plot|Calculator) => (Date) => Dist|Number, ((Duration) => Dist|Number, Plot|Calculator|((Duration) => Dist|Number) => Plot|Calculator) => (Duration) => Dist|Number, (Function, Calculator|(Function) => Calculator) => Function
+Overrides the default visualization for a value.
+`showAs()` can take either a visualization, or a function that calls the value and returns a visualization.
+
+Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, `Number` can be used with Dates and Durations as well.
+| **Input Type**                      | **Visualization Types**               |
+| ----------------------------------- | ------------------------------------- |
+| **Distribution**                    | `Plot.dist`                         |
+| **List**                            | `Table`                             |
+| **`(Number -> Number)` Function** | `Plot.numericFn`, `Calculator`    |
+| **`(Number -> Dist)` Function**   | `Plot.distFn`, `Calculator`       |
+| **Function**                        | `Calculator`                        |
+
+example1 = ({|x| x + 1}) -> Tag.showAs(Calculator)
+@showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
+example2 = {|x| x + 1}
+
+Tag.getShowAs: (any) => any
+
+Tag.getExportData: (any) => any
+
+Tag.spec: ('A, Specification) => 'A
+Adds a specification to a value. This is useful for documenting how a value was calculated, or what it represents.
+
+Tag.getSpec: (any) => any
+
+Tag.format: (Dist|Number, numberFormat: String) => Dist|Number, (Duration, numberFormat: String) => Duration, (Date, timeFormat: String) => Date
+Set the display format for a number, distribution, duration, or date. Uses the [d3-format](https://d3js.org/d3-format) syntax on numbers and distributions, and the [d3-time-format](https://d3js.org/d3-time-format) syntax for dates.
+
+Tag.getFormat: (Dist|Number) => String, (Duration) => String, (Date) => String
+
+Tag.hide: ('A, Bool) => 'A, ('A) => 'A
+Hides a value when displayed under Variables. This is useful for hiding intermediate values or helper functions that are used in calculations, but are not directly relevant to the user. Only hides top-level variables.
+
+Tag.getHide: (any) => Bool
+
+Tag.startOpen: ('A) => 'A
+When the value is first displayed, it will begin open in the viewer. Refresh the page to reset.
+
+Tag.startClosed: ('A) => 'A
+When the value is first displayed, it will begin collapsed in the viewer. Refresh the page to reset.
+
+Tag.getStartOpenState: (any) => String
+Returns the startOpenState of a value, which can be "open", "closed", or "" if no startOpenState is set. Set using `Tag.startOpen` and `Tag.startClosed`.
+
+Tag.notebook: (List('A), Bool) => List('A), (List('A)) => List('A)
+Displays the list of values as a notebook. This means that element indices are hidden, and the values are displayed in a vertical list. Useful for displaying combinations of text and values.
+Calculator.make(
+  {|f, contents| f ? Tag.notebook(contents) : contents},
+  {
+    description: "Shows the contents as a notebook if the checkbox is checked.",
+    inputs: [
+      Input.checkbox({ name: "Show as Notebook", default: true }),
+      Input.textArea(
+        {
+          name: "Contents to show",
+          default: "[
+  \"## Distribution 1\",
+  normal(5, 2),
+  \"## Distribution 1\",
+  normal(20, 1),
+  \"This is an opening section. Here is more text.
+\",
+]",
+        }
+      ),
+    ],
+  }
+)
+
+Tag.getNotebook: (any) => Bool
+
+Tag.location: ('A) => 'A
+Saves the location of a value. Note that this must be called at the point where the location is to be saved. If you use it in a helper function, it will save the location of the helper function, not the location where the helper function is called.
+
+Tag.getLocation: (any) => any
+
+
+## Functions
+
+Tag.getAll: (any) => Dict(any)
+Returns a dictionary of all tags on a value.
+
+Tag.omit: ('A, List(String)) => 'A
+Returns a copy of the value with the specified tags removed.
+
+Tag.clear: ('A) => 'A
+Returns a copy of the value with all tags removed.
+
+
+
+---
+description: The Calculator module helps you create custom calculators
+---
+import { FnDocumentationFromName } from "@quri/squiggle-components";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
+
+# Calculator
+
+The Calculator module allows you to make custom calculators for functions. This is a form that's tied to a specific Squiggle function, where the inputs to the form are passed to that function, and the output of the function gets shown on the bottom.
+
+Calculators can be useful for debugging functions or to present functions to end users.
+
+
+Calculator.make: ({fn: Function, title?: String, description?: String, inputs?: List(Input), autorun?: Bool, sampleCount?: Number}) => Calculator, (Function, params?: {title?: String, description?: String, inputs?: List(Input), autorun?: Bool, sampleCount?: Number}) => Calculator
+
+`Calculator.make` takes in a function, a description, and a list of inputs. The function should take in the same number of arguments as the number of inputs, and the arguments should be of the same type as the default value of the input.
+
+Inputs are created using the `Input` module. The Input module has a few different functions for creating different types of inputs.
+
+For calculators that take a long time to run, we recommend setting `autorun` to `false`. This will create a button that the user can click to run the calculator.
+
+Calculator.make(
+{|text, textArea, select, checkbox| text + textArea},
+{
+  title: "My example calculator",
+  inputs: [
+    Input.text({ name: "text", default: "20" }),
+    Input.textArea({ name: "textArea", default: "50 to 80" }),
+    Input.select({ name: "select", default: "second", options: ["first", "second", "third"] }),
+    Input.checkbox({ name: "checkbox", default: true }),
+  ],
+  sampleCount: 10k,
+})
+// When a calculator is created with only a function, it will guess the inputs based on the function's parameters. It won't provide default values if it's a user-written function.
+
+({|x| x * 5}) -> Calculator
+
+
+
+---
+description: Inputs are now only used for describing forms for calculators.
+---
+import { FnDocumentationFromName } from "@quri/squiggle-components";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
+
+# Input
+Inputs are now only used for describing forms for [calculators](./Calculator.mdx).
+
+Input.text: ({name: String, description?: String, default?: Number|String}) => Input
+Creates a single-line input. This input can be used for all Squiggle types.
+Input.text({ name: "First", default: "John" })
+Input.text({ name: "Number of X in Y", default: '20 to 300' })
+
+
+Input.textArea: ({name: String, description?: String, default?: Number|String}) => Input
+Creates a multi-line input, sized with the provided input. This input can be used for all Squiggle types.
+Input.textArea({ name: "people", default: '{
+  "John": 20 to 50,
+  "Mary": 30 to 90,
+}' })
+
+
+Input.checkbox: ({name: String, description?: String, default?: Bool}) => Input
+Creates a checkbox input. Used for Squiggle booleans.
+Input.checkbox({ name: "IsTrue?", default: true })
+
+
+Input.select: ({name: String, description?: String, options: List(String), default?: String}) => Input
+Creates a dropdown input. Used for Squiggle strings.
+Input.select({ name: "Name", default: "Sue", options: ["John", "Mary", "Sue"] })
+
+
+
+---
+description:
+---
+import { FnDocumentationFromName } from "@quri/squiggle-components";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
+
+# RelativeValues
+*Warning: Relative value functions are particularly experimental and subject to change.*
+
+RelativeValues.gridPlot: ({ids: List(String), fn: (String, String) => List(Number)}) => Plot
+RelativeValues.gridPlot({
+  ids: ["foo", "bar"],
+  fn: {|id1, id2| [SampleSet.fromDist(2 to 5), SampleSet.fromDist(3 to 6)]},
+})
+
+
+
+---
+description: Newer experimental functions which are less stable than Squiggle as a whole
+---
+import { FnDocumentationFromName } from "@quri/squiggle-components";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
+
 # Danger
 The Danger library contains newer experimental functions which are less stable than Squiggle as a whole. They are not recommended for production use, but are useful for testing out new ideas.,
 
@@ -2136,60 +2498,18 @@ Integrates the function `f` between `min` and `max`, and uses an interval of `ep
 Same caveats as `integrateFunctionBetweenWithNumIntegrationPoints` apply.
 Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 0.1)
 
-## Common Errors:
 
-Failed to evaluate Squiggle code: Expected "->", end of input, or whitespace but "P" found.
--> This likely means that you are using two return statements. Every statement but the last should be a variable assignment.
+## Optimization
 
-Don't:
-```
-foo = 4
-foo + 3
-foo
-```
+Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions: (fs: List(Function), funds: Number, approximateIncrement: Number) => any
+Computes the optimal allocation of $`funds` between `f1` and `f2`. For the answer given to be correct, `f1` and `f2` will have to be decreasing, i.e., if `x > y`, then `f_i(x) < f_i(y)`.
+Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(
+  [
+    {|x| x+1},
+    {|y| 10}
+  ],
+  100,
+  0.01
+)
 
-Do:
-```
-foo = 4
-bar = foo + 3
-foo
-```
-
-
-Compile Error. Expected "->", end of input, or whitespace but "m" found.
--> This likely means the same as the above error. You returned a statement, and then had a variable assignment. All statements except for the last must be variable assignment.
-
-
-Failed to evaluate Squiggle code: Expected "(", "@", "export", "if", "import", "{", array, boolean, dict, end of input, identifier, number, string, unary operator, or whitespace but "#" found.
--> Did you use "#" as a line comment? That's not valid in Squiggle. Use "//" instead.
-
-
-Compile Error. Expected "(", "{", array, boolean, dict, identifier, number, string, unary operator, or whitespace but "=" found.
--> Did you try using "+=" or "-=" or similar? These are not allowed in Squiggle, as you cannot mutate variables.
-
-
-Compile Error. Expected "(", "->", "@", "export", "if", "{", array, boolean, dict, identifier, number, string, unary operator, or whitespace but "}" found.
--> This likely means that you have a block without a return statement.
-Don't:
-```
-foo = {
-  a = 1
-  b = a + 3
-}
-```
-Do:
-```
-foo = {
-  a = 1
-  a + 3
-}
-```
-
-
-Compile Error. Number is not defined
--> Are you trying to use Number as a Type? This is not supported. Domains are very restricted, see that documentation.
-
-
-Validation error. Failed to evaluate Squiggle code: Expected "->", "?", assignment, end of input, operator, or whitespace
--> Did you have an import statement that's not on the top of the file? Make sure that all import statements are on the top of the file.
 ````

@@ -4,7 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 
-import { squiggleDocs } from "./helpers.mjs";
+import { squiggleDocs } from "./helpers";
 
 // Configuration
 dotenv.config({ path: ".env.local" });

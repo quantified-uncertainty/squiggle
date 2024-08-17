@@ -3,7 +3,7 @@ import chalk from "chalk";
 import fs from "fs";
 import path from "path";
 
-import { calculatePrice, type Message, SELECTED_MODEL } from "./llmConfig.mjs";
+import { calculatePrice, type Message, SELECTED_MODEL } from "./llmConfig";
 
 export class Logger {
   private static logDir = path.join(process.cwd(), "logs");
