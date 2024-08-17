@@ -393,3 +393,32 @@ y = List.upTo(1, 1000) -> map({|v| v + 1 }) -> List.length // slow
     },
   },
 };
+
+export const TypeInference: Story = {
+  args: {
+    defaultCode: `// hover over "x" to see its type; should be Number
+x = 1
+
+// Number
+// inference is based on argument to the builtin "+" infix operator
+y = 1 + 1
+
+// (any) => Number|Dist|String
+// "+" is polymorphic and "x" type is unknown.
+f(x) = x + 1
+
+// Number|Dist|String
+// "f" output type is a union; we can't narrow it based on argument type yet.
+z = f(1)
+
+// Here it gets messy; right now we infer "Number|Dist|Dist|Dist", because:
+// 1. "z" can be either a number or a dist
+// 2. Builtin "/" is polymorphic and there are multiple overloads for it.
+// 3. We don't de-duplicate union types yet.
+d = z / z
+`,
+    environment: {
+      profile: true,
+    },
+  },
+};

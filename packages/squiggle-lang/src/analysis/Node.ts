@@ -2,7 +2,9 @@ import { LocationRange } from "../ast/types.js";
 import { Type } from "../types/Type.js";
 import {
   AnyTypedExpressionNode,
+  AnyTypedStatementNode,
   expressionKinds,
+  statementKinds,
   TypedASTNode,
 } from "./types.js";
 
@@ -48,6 +50,10 @@ export abstract class Node<T extends string> {
 
   isExpression(): this is AnyTypedExpressionNode {
     return (expressionKinds as string[]).includes(this.kind);
+  }
+
+  isStatement(): this is AnyTypedStatementNode {
+    return (statementKinds as string[]).includes(this.kind);
   }
 }
 
