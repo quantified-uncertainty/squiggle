@@ -60,6 +60,30 @@ export function tooltipsExtension() {
       return nodeTooltip(node, <HoverTooltip hover={hover} view={view} />);
     };
 
+    const createTypeTooltip = (node: SyntaxNode) => {
+      // TODO - pass head name through facet
+      if (!project.hasHead(mainHeadName)) {
+        return null;
+      }
+      const module = project.getHead(mainHeadName);
+      const astR = module.typedAst();
+      if (!astR.ok) {
+        return null;
+      }
+
+      const ast = astR.value;
+      const astNode = ast.findDescendantByLocation(node.from, node.to);
+
+      if (astNode?.isExpression() || astNode?.kind === "IdentifierDefinition") {
+        return nodeTooltip(
+          node,
+          <TypeTooltip type={astNode.type} view={view} />
+        );
+      } else {
+        return null;
+      }
+    };
+
     switch (cursor.name) {
       case "String": {
         // Is this an import?
@@ -83,35 +107,9 @@ export function tooltipsExtension() {
           return null;
         }
         // TODO - check that the identifier is not overwritten by a local variable
-        const builtinTooltip = createBuiltinTooltip(cursor.node);
-        if (builtinTooltip) {
-          return builtinTooltip;
-        }
-
-        // TODO - pass head name through facet
-        if (!project.hasHead(mainHeadName)) {
-          return null;
-        }
-        const module = project.getHead(mainHeadName);
-        const astR = module.typedAst();
-        if (!astR.ok) {
-          return null;
-        }
-
-        const ast = astR.value;
-        const astNode = ast.findDescendantByLocation(
-          cursor.node.from,
-          cursor.node.to
+        return (
+          createBuiltinTooltip(cursor.node) ?? createTypeTooltip(cursor.node)
         );
-
-        if (astNode?.isExpression()) {
-          return nodeTooltip(
-            cursor.node,
-            <TypeTooltip type={astNode.type} view={view} />
-          );
-        } else {
-          return null;
-        }
       }
       case "Field":
         // `Namespace.function`; go up to fully identified name.
@@ -141,7 +139,8 @@ export function tooltipsExtension() {
           // Ascend to the parent scope; is this a top-level variable?
           cursor.parent();
           if (!cursor.type.is("Program")) {
-            return null;
+            // Not a top-level variable, but we can still show its type.
+            return createTypeTooltip(node);
           }
 
           const value = output.bindings.get(name);
