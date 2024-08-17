@@ -27,10 +27,9 @@ export class NodeDotLookup extends ExpressionNode<"DotLookup"> {
     } else if (arg.type instanceof TDictWithArbitraryKeys) {
       type = arg.type.itemType;
     } else {
+      // TODO - some other value types can be indexed by a string too
       type = tAny();
     }
-
-    // TODO - some other value types can be indexed by a string too
 
     super("DotLookup", location, type);
     this._init();

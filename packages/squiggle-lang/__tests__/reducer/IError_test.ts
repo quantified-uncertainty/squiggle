@@ -24,7 +24,7 @@ describe("IError", () => {
       IRuntimeError.fromMessage(
         new REOther("test error"),
         StackTrace.make(FrameStack.make())
-      ).toStringWithDetails()
+      ).toString({ withStackTrace: true })
     ).toBe("Error: test error"));
 
   test("toStringWithStackTrace", () => {
@@ -52,7 +52,7 @@ describe("IError", () => {
       IRuntimeError.fromMessage(
         new REOther("test error"),
         StackTrace.make(frameStack)
-      ).toStringWithDetails()
+      ).toString({ withStackTrace: true })
     ).toBe(`Error: test error
 Stack trace:
   normal

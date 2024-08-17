@@ -1,11 +1,11 @@
 import { REAmbiguous } from "../../errors/messages.js";
 import { UnwrapType } from "../../types/helpers.js";
-import { tAny } from "../../types/index.js";
+import { tAny, tTypedLambda } from "../../types/index.js";
+import { TTypedLambda } from "../../types/TTypedLambda.js";
 import { Type } from "../../types/Type.js";
 import { Value } from "../../value/index.js";
 import { Reducer } from "../Reducer.js";
 import { fnInput, FnInput } from "./FnInput.js";
-import { FnSignature } from "./FnSignature.js";
 
 /**
  * FnDefinition represents a single builtin lambda implementation.
@@ -20,7 +20,7 @@ import { FnSignature } from "./FnSignature.js";
 // It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
 // because of contravariance (we need to store all FnDefinitions in a generic array later on).
 export class FnDefinition {
-  signature: FnSignature<FnInput<any>[], Type<any>>;
+  signature: TTypedLambda;
   run: (args: unknown[], reducer: Reducer) => unknown;
   isAssert: boolean;
   // If set, the function can be used as a decorator.
@@ -30,7 +30,7 @@ export class FnDefinition {
   deprecated?: string;
 
   private constructor(props: {
-    signature: FnSignature<FnInput<any>[], Type<any>>;
+    signature: TTypedLambda;
     run: (args: unknown[], reducer: Reducer) => unknown;
     isAssert?: boolean;
     deprecated?: string;
@@ -79,7 +79,7 @@ export class FnDefinition {
     const inputs = maybeInputs.map(inputOrTypeToInput) as InputTypes;
 
     return new FnDefinition({
-      signature: new FnSignature(inputs, output),
+      signature: tTypedLambda(inputs, output),
       // Type of `run` argument must match `FnDefinition['run']`. This
       // This unsafe type casting is necessary because function type parameters are contravariant.
       run: run as FnDefinition["run"],
@@ -99,7 +99,7 @@ export class FnDefinition {
     const inputs = maybeInputs.map(inputOrTypeToInput) as InputTypes;
 
     return new FnDefinition({
-      signature: new FnSignature(inputs, tAny()),
+      signature: tTypedLambda(inputs, tAny()),
       run: () => {
         throw new REAmbiguous(errorMsg);
       },

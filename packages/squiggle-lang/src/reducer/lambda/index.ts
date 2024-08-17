@@ -1,12 +1,12 @@
 import uniq from "lodash/uniq.js";
 
 import { LocationRange } from "../../ast/types.js";
+import { TTypedLambda } from "../../types/TTypedLambda.js";
 import { sort } from "../../utility/E_A_Floats.js";
 import { Value } from "../../value/index.js";
 import { Frame } from "../FrameStack.js";
 import { Reducer } from "../Reducer.js";
 import { BuiltinLambda } from "./BuiltinLambda.js";
-import { FnSignature } from "./FnSignature.js";
 import { UserDefinedLambda } from "./UserDefinedLambda.js";
 
 export abstract class BaseLambda {
@@ -17,7 +17,7 @@ export abstract class BaseLambda {
   abstract display(): string;
   abstract toString(): string;
 
-  abstract signatures(): FnSignature[];
+  abstract signatures(): TTypedLambda[];
   abstract parameterString(): string;
 
   protected abstract callBody(args: Value[], reducer: Reducer): Value;

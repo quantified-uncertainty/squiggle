@@ -80,7 +80,7 @@ describe("annotations", () => {
       if (result.ok) {
         throw new Error("expected error");
       }
-      expect(result.value.toStringWithDetails())
+      expect(result.value.toString({ withStackTrace: true }))
         .toEqual(`Argument Error: Expected two-value array
 Stack trace:
   g at line 1, column 14, file main
@@ -95,7 +95,7 @@ Stack trace:
       if (result.ok) {
         throw new Error("expected error");
       }
-      expect(result.value.toStringWithDetails())
+      expect(result.value.toString({ withStackTrace: true }))
         .toEqual(`Domain Error: Parameter 6 must be in domain Number.rangeDomain(3, 5)
 Stack trace:
   g at line 1, column 26, file main

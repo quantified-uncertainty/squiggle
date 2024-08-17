@@ -31,6 +31,7 @@ import { tOr } from "./TOr.js";
 import { tTagged } from "./TTagged.js";
 import { tTuple } from "./TTuple.js";
 import { tTypedLambda } from "./TTypedLambda.js";
+import { tUnion } from "./TUnion.js";
 import { tAny, Type } from "./Type.js";
 
 // Serialization code is represented as `serialize()` method on `Type` subclasses.
@@ -72,6 +73,10 @@ export type SerializedType =
       kind: "Or";
       type1: number;
       type2: number;
+    }
+  | {
+      kind: "Union";
+      types: number[];
     }
   | {
       kind: "Dict";
@@ -151,6 +156,8 @@ export function deserializeType(
       return tTuple(...type.types.map((t) => visit.type(t)));
     case "Or":
       return tOr(visit.type(type.type1), visit.type(type.type2));
+    case "Union":
+      return tUnion(type.types.map(visit.type));
     case "Dict":
       return tDict(
         ...type.kvs.map((kv) => ({

@@ -87,7 +87,7 @@ export function typedAstNodeToString(
         return selfExpr([node.key, node.value].map(toSExpr));
       case "Lambda":
         return selfExpr([
-          ...node.args.map(toSExpr),
+          ...node.parameters.map(toSExpr),
           toSExpr(node.body),
           node.returnUnitType ? toSExpr(node.returnUnitType) : undefined,
         ]);

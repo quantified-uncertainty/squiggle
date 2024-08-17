@@ -85,7 +85,7 @@ function compileExpressionContent(
       );
     case "Lambda": {
       const parameters: LambdaIRParameter[] = [];
-      for (const astParameter of ast.args) {
+      for (const astParameter of ast.parameters) {
         parameters.push({
           name: astParameter.variable.value,
           annotation: astParameter.annotation
@@ -100,7 +100,7 @@ function compileExpressionContent(
       // function is called.
       // See also: https://github.com/quantified-uncertainty/squiggle/issues/3141
       context.startFunctionScope();
-      for (const parameter of ast.args) {
+      for (const parameter of ast.parameters) {
         context.defineLocal(parameter.variable);
       }
 

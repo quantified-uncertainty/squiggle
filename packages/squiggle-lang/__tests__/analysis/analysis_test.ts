@@ -16,7 +16,7 @@ test("parent node", () => {
 function returnType(code: string) {
   const typedAstR = analyzeStringToTypedAst(code);
   if (!typedAstR.ok) {
-    throw typedAstR.value;
+    throw new Error(typedAstR.value.toString({ withLocation: true }));
   }
 
   const typedAst = (typedAstR as Extract<typeof typedAstR, { ok: true }>).value;
@@ -77,7 +77,29 @@ describe("inference", () => {
     );
   });
 
-  test.failing("builtin functions", () => {
+  test("builtin constants", () => {
+    expect(returnType("Math.pi")).toBe("Number");
+  });
+
+  test("builtin functions", () => {
+    expect(returnType("System.sampleCount")).toBe("() => Number");
+  });
+
+  test("function calls", () => {
     expect(returnType("System.sampleCount()")).toBe("Number");
+  });
+
+  test("function output type based on polymorphic end expression", () => {
+    expect(
+      returnType(`
+{
+  f(x) = x + 1
+  f(1)
+}`)
+    ).toBe("Number|Dist|String"); // TODO - ideally, Squiggle should filter out `String` here.
+  });
+
+  test("polymorphic builtin functions", () => {
+    expect(returnType("lognormal(1, 100)")).toBe("SampleSetDist");
   });
 });

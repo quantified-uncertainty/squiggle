@@ -1,10 +1,10 @@
 import { assertExpression } from "../compiler/serialize.js";
 import { getStdLib } from "../library/index.js";
 import { FnInput } from "../reducer/lambda/FnInput.js";
-import { FnSignature } from "../reducer/lambda/FnSignature.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { UserDefinedLambda } from "../reducer/lambda/UserDefinedLambda.js";
 import { tAny } from "../types/index.js";
+import { TTypedLambda } from "../types/TTypedLambda.js";
 import { VDomain } from "../value/VDomain.js";
 import { VLambda } from "../value/vLambda.js";
 import { SerializedLambda } from "./serializeLambda.js";
@@ -39,7 +39,7 @@ export function deserializeLambda(
       return new UserDefinedLambda(
         value.name,
         value.captureIds.map((id) => visit.value(id)),
-        new FnSignature(
+        new TTypedLambda(
           value.inputs.map((input) => {
             let domain: VDomain | undefined;
             if (input.typeId !== undefined) {

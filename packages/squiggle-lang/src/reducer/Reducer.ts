@@ -13,6 +13,7 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { getAleaRng, PRNG } from "../rng/index.js";
+import { tTypedLambda } from "../types/TTypedLambda.js";
 import { tAny, Type } from "../types/Type.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { annotationToDomain } from "../value/annotations.js";
@@ -20,7 +21,6 @@ import { Value, vArray, vDict, vLambda, vVoid } from "../value/index.js";
 import { VDict } from "../value/VDict.js";
 import { FrameStack } from "./FrameStack.js";
 import { FnInput } from "./lambda/FnInput.js";
-import { FnSignature } from "./lambda/FnSignature.js";
 import { Lambda } from "./lambda/index.js";
 import { UserDefinedLambda } from "./lambda/UserDefinedLambda.js";
 import { RunProfile } from "./RunProfile.js";
@@ -314,7 +314,7 @@ export class Reducer implements EvaluateAllKinds {
         })
       );
     }
-    const signature = new FnSignature(inputs, tAny());
+    const signature = tTypedLambda(inputs, tAny());
 
     const capturedValues: Value[] = [];
     for (const capture of irValue.captures) {

@@ -1,8 +1,8 @@
 import { REOther } from "../../errors/messages.js";
+import { TTypedLambda } from "../../types/TTypedLambda.js";
 import { Value } from "../../value/index.js";
 import { Reducer } from "../Reducer.js";
 import { FnDefinition } from "./FnDefinition.js";
-import { FnSignature } from "./FnSignature.js";
 import { BaseLambda } from "./index.js";
 
 /*
@@ -37,7 +37,7 @@ export class BuiltinLambda extends BaseLambda {
     return this.name;
   }
 
-  override signatures(): FnSignature[] {
+  override signatures(): TTypedLambda[] {
     return this.definitions.map((d) => d.signature);
   }
 

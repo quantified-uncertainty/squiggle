@@ -4,23 +4,23 @@ import {
   REArityError,
   REDomainError,
 } from "../../errors/messages.js";
+import { TTypedLambda } from "../../types/TTypedLambda.js";
 import { Value } from "../../value/index.js";
 import { Reducer } from "../Reducer.js";
-import { FnSignature } from "./FnSignature.js";
 import { BaseLambda } from "./index.js";
 
 // User-defined functions, e.g. `add2 = {|x, y| x + y}`, are instances of this class.
 
 export class UserDefinedLambda extends BaseLambda {
   readonly type = "UserDefinedLambda";
-  signature: FnSignature;
+  signature: TTypedLambda;
   name?: string;
   body: AnyExpressionIR;
 
   constructor(
     name: string | undefined,
     captures: Value[],
-    signature: FnSignature,
+    signature: TTypedLambda,
     body: AnyExpressionIR
   ) {
     super();
@@ -67,7 +67,7 @@ export class UserDefinedLambda extends BaseLambda {
     return `(${this.getParameterNames().join(",")}) => internal code`;
   }
 
-  override signatures(): FnSignature[] {
+  override signatures(): TTypedLambda[] {
     return [this.signature];
   }
 

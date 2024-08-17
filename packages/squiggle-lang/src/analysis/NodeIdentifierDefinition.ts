@@ -13,7 +13,7 @@ export class NodeIdentifierDefinition extends Node<"IdentifierDefinition"> {
   private constructor(
     location: LocationRange,
     public value: string,
-    public type: Type<unknown>
+    public type: Type
   ) {
     super("IdentifierDefinition", location);
     this._init();
@@ -27,7 +27,7 @@ export class NodeIdentifierDefinition extends Node<"IdentifierDefinition"> {
     // Identifier definitions (e.g. `x` in `x = 5`) are represented as `Identifier` nodes in the AST,
     // but they are treated as a separate kind of node in the analysis phase.
     node: KindNode<"Identifier">,
-    type: Type<unknown>
+    type: Type
   ): NodeIdentifierDefinition {
     return new NodeIdentifierDefinition(node.location, node.value, type);
   }

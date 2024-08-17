@@ -1,5 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { tAny } from "../types/index.js";
+import { tAny, tTypedLambda } from "../types/index.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression, analyzeKind } from "./index.js";
 import { ExpressionNode } from "./Node.js";
@@ -10,7 +10,7 @@ import { AnyTypedExpressionNode } from "./types.js";
 export class NodeLambda extends ExpressionNode<"Lambda"> {
   private constructor(
     location: LocationRange,
-    public args: NodeLambdaParameter[],
+    public parameters: NodeLambdaParameter[],
     public body: AnyTypedExpressionNode,
     public name: string | null,
     public returnUnitType: NodeUnitTypeSignature | null
@@ -18,14 +18,17 @@ export class NodeLambda extends ExpressionNode<"Lambda"> {
     super(
       "Lambda",
       location,
-      tAny() // TODO - lambda type
+      tTypedLambda(
+        parameters.map((arg) => tAny()), // TODO - infer from parameter annotation
+        body.type
+      )
     );
     this._init();
   }
 
   children() {
     return [
-      ...this.args,
+      ...this.parameters,
       this.body,
       ...(this.returnUnitType ? [this.returnUnitType] : []),
     ];
@@ -37,13 +40,13 @@ export class NodeLambda extends ExpressionNode<"Lambda"> {
   ): NodeLambda {
     const definitions = context.definitions;
 
-    const args = node.args.map((arg) =>
+    const parameters = node.args.map((arg) =>
       analyzeKind(arg, "LambdaParameter", context)
     );
-    for (const arg of args) {
+    for (const parameter of parameters) {
       context.definitions = context.definitions.set(
-        arg.variable.value,
-        arg.variable
+        parameter.variable.value,
+        parameter.variable
       );
     }
     const body = analyzeExpression(node.body, context);
@@ -53,7 +56,7 @@ export class NodeLambda extends ExpressionNode<"Lambda"> {
 
     return new NodeLambda(
       node.location,
-      args,
+      parameters,
       body,
       node.name,
       node.returnUnitType

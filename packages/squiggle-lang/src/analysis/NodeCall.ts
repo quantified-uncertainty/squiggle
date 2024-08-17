@@ -1,5 +1,10 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { tAny, Type } from "../types/Type.js";
+import { ICompileError } from "../errors/IError.js";
+import { inferOutputTypeFromMultipleSignatures } from "../types/helpers.js";
+import { TIntrinsic } from "../types/TIntrinsic.js";
+import { TTypedLambda } from "../types/TTypedLambda.js";
+import { TUnion } from "../types/TUnion.js";
+import { tAny, TAny, Type } from "../types/Type.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";
@@ -24,11 +29,53 @@ export class NodeCall extends ExpressionNode<"Call"> {
     const fn = analyzeExpression(node.fn, context);
     const args = node.args.map((arg) => analyzeExpression(arg, context));
 
-    return new NodeCall(
-      node.location,
-      fn,
-      args,
-      tAny() // TODO
+    let type: Type | undefined;
+    const signatures: TTypedLambda[] = [];
+
+    const collectSignatures = (fnType: Type) => {
+      if (type) {
+        // already settled on `any`
+        return;
+      }
+
+      if (fnType instanceof TUnion) {
+        for (const singleFnType of fnType.types) {
+          collectSignatures(singleFnType);
+          if (type) {
+            // already settled on `any`
+            break;
+          }
+        }
+      } else if (fnType instanceof TTypedLambda) {
+        signatures.push(fnType);
+      } else if (
+        fnType instanceof TIntrinsic &&
+        fnType.valueType === "Lambda"
+      ) {
+        type = tAny();
+      } else if (fnType instanceof TAny) {
+        type = tAny();
+      } else {
+        throw new ICompileError(
+          `Value of type ${fnType.display()} is not callable`,
+          node.location
+        );
+      }
+    };
+    collectSignatures(fn.type);
+
+    type ??= inferOutputTypeFromMultipleSignatures(
+      signatures,
+      args.map((a) => a.type)
     );
+
+    if (!type) {
+      throw new ICompileError(
+        `Function does not support types (${args.map((arg) => arg.type.display()).join(", ")})`,
+        node.location
+      );
+    }
+
+    return new NodeCall(node.location, fn, args, type);
   }
 }
