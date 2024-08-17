@@ -222,30 +222,6 @@ export default function Home() {
     <div className="flex h-screen text-sm">
       {/* Left column: Chat, Form, and Actions */}
       <div className="flex w-1/5 flex-col px-2 py-2">
-        <div className="mb-4">
-          <select
-            className="mb-2 w-full rounded border p-2"
-            value={selectedModel.backendTitle}
-            onChange={handleModelChange}
-          >
-            {AVAILABLE_MODELS.map((model) => (
-              <option key={model.backendTitle} value={model.backendTitle}>
-                {model.presentedTitle} ({model.company})
-              </option>
-            ))}
-          </select>
-          <select
-            className="w-full rounded border p-2"
-            value={numPlaygrounds}
-            onChange={handleNumPlaygroundsChange}
-          >
-            {[1, 2, 3, 4, 5].map((num) => (
-              <option key={num} value={num}>
-                {num} Playground{num > 1 ? "s" : ""}
-              </option>
-            ))}
-          </select>
-        </div>
         <div className="mb-4 flex">
           <textarea
             className="flex-grow rounded-l border p-2 text-sm"
@@ -254,6 +230,19 @@ export default function Home() {
             placeholder="Enter your prompt here"
             rows={10}
           />
+        </div>
+        <div className="mb-4">
+          <select
+            className="w-full rounded border p-2"
+            value={numPlaygrounds}
+            onChange={handleNumPlaygroundsChange}
+          >
+            {[1, 2, 3, 4, 5].map((num) => (
+              <option key={num} value={num}>
+                {num} Run{num > 1 ? "s" : ""}
+              </option>
+            ))}
+          </select>
         </div>
         <button
           className="rounded-r bg-blue-500 px-4 py-2 text-sm text-white"
