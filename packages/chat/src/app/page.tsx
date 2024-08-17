@@ -124,7 +124,6 @@ const ActionComponent: React.FC<{ action: Action }> = ({ action }) => {
     </div>
   );
 };
-
 // Main Component
 export default function Home() {
   // State
@@ -136,11 +135,11 @@ export default function Home() {
   );
   const [playgroundOpacity, setPlaygroundOpacity] = useState(100);
   const [actions, setActions] = useState<Action[]>([]);
-  console.log("Actions", actions, actions.length && actions.at(-1).id);
   const [squiggleResponses, setSquiggleResponses] =
     useState<SquiggleResponse | null>(null);
+  const [numPlaygrounds, setNumPlaygrounds] = useState(1);
 
-  const { ref, height } = useAvailableHeight(); // Use useAvailableHeight hook
+  const { ref, height } = useAvailableHeight();
 
   const { object, submit, isLoading, stop } = useObject({
     api: "/api/completion",
@@ -150,12 +149,14 @@ export default function Home() {
   useEffect(() => {
     if (object) {
       setPlaygroundOpacity(100);
-      setSquiggleResponses(object);
-      object.forEach((response, index) =>
-        updateLastAction("success", response.code, `Response ${index + 1}`)
-      );
+      setSquiggleResponses(object.slice(0, numPlaygrounds));
+      object
+        .slice(0, numPlaygrounds)
+        .forEach((response, index) =>
+          updateLastAction("success", response.code, `Response ${index + 1}`)
+        );
     }
-  }, [object]);
+  }, [object, numPlaygrounds]);
 
   // Helper functions
   const updateLastAction = useCallback(
@@ -192,6 +193,7 @@ export default function Home() {
       previousPrompt: newAction.prompt,
       previousCode: newAction.code,
       previousResult: newAction.result,
+      numPlaygrounds, // Pass the number of playgrounds to the API
     });
 
     setPrompt("");
@@ -210,19 +212,36 @@ export default function Home() {
     setSelectedModel(newModel);
   };
 
+  const handleNumPlaygroundsChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setNumPlaygrounds(Number(e.target.value));
+  };
+
   return (
     <div className="flex h-screen text-sm">
       {/* Left column: Chat, Form, and Actions */}
       <div className="flex w-1/5 flex-col px-2 py-2">
         <div className="mb-4">
           <select
-            className="w-full rounded border p-2"
+            className="mb-2 w-full rounded border p-2"
             value={selectedModel.backendTitle}
             onChange={handleModelChange}
           >
             {AVAILABLE_MODELS.map((model) => (
               <option key={model.backendTitle} value={model.backendTitle}>
                 {model.presentedTitle} ({model.company})
+              </option>
+            ))}
+          </select>
+          <select
+            className="w-full rounded border p-2"
+            value={numPlaygrounds}
+            onChange={handleNumPlaygroundsChange}
+          >
+            {[1, 2, 3, 4, 5].map((num) => (
+              <option key={num} value={num}>
+                {num} Playground{num > 1 ? "s" : ""}
               </option>
             ))}
           </select>
@@ -262,17 +281,17 @@ export default function Home() {
       <div
         className="w-4/5 px-2"
         style={{ opacity: playgroundOpacity / 100, height: height || "auto" }}
-        ref={ref} // Attach the ref here
+        ref={ref}
       >
         {squiggleResponses &&
           squiggleResponses.map((response, index) => (
-            <div key={actions.at(-1).id + index}>
+            <div key={actions.at(-1)?.id + index}>
               <SquigglePlayground
                 key={response.code}
                 defaultCode={
                   response.code || "// Your Squiggle code will appear here"
                 }
-                height={height / squiggleResponses.length} // Divide height
+                height={height / numPlaygrounds}
                 onNewSimulation={(simulation: Simulation) => {
                   updateLastAction(
                     simulation.output.ok ? "success" : "error",

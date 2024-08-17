@@ -3,6 +3,7 @@ import { runSquiggleGenerator } from "../../../llmScript/main";
 import { AVAILABLE_MODELS } from "../../utils/llms";
 
 export const maxDuration = 30;
+
 export async function POST(req: Request) {
   const abortController = new AbortController();
 
@@ -14,6 +15,7 @@ export async function POST(req: Request) {
       previousPrompt,
       previousCode,
       previousResponse,
+      numPlaygrounds,
     } = body;
 
     if (!prompt) {
@@ -27,12 +29,16 @@ export async function POST(req: Request) {
       throw new Error("Invalid model selected");
     }
 
-    // Run the Squiggle generator 3 times in parallel
-    const squigglePromises = [
-      runSquiggleGenerator(prompt, new Logger()),
-      runSquiggleGenerator(prompt, new Logger()),
-      runSquiggleGenerator(prompt, new Logger()),
-    ];
+    // Ensure numPlaygrounds is between 1 and 5
+    const playgroundCount = Math.max(
+      1,
+      Math.min(5, Number(numPlaygrounds) || 1)
+    );
+
+    // Run the Squiggle generator the specified number of times in parallel
+    const squigglePromises = Array(playgroundCount)
+      .fill(null)
+      .map(() => runSquiggleGenerator(prompt, new Logger()));
 
     const squiggleResults = await Promise.all(squigglePromises);
 
