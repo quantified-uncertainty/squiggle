@@ -5,6 +5,7 @@ import { ReactNode } from "react";
 
 import { getFunctionDocumentation } from "@quri/squiggle-lang";
 
+import { mainHeadName } from "../../../lib/hooks/useSimulator.js";
 import {
   projectFacet,
   renderImportTooltipFacet,
@@ -13,6 +14,7 @@ import {
 import { reactAsDom } from "../utils.js";
 import { HoverTooltip } from "./HoverTooltip.js";
 import { TooltipBox } from "./TooltipBox.js";
+import { TypeTooltip } from "./TypeTooltip.js";
 import { ValueTooltip } from "./ValueTooltip.js";
 
 function nodeTooltip(syntaxNode: SyntaxNode, reactNode: ReactNode) {
@@ -75,13 +77,42 @@ export function tooltipsExtension() {
         }
         break;
       }
-      case "Identifier":
+      case "Identifier": {
         if (getText(cursor.node).match(/^[A-Z]/)) {
           // TODO - expand the namespace to the identifier, or just show the namespace documentation
           return null;
         }
         // TODO - check that the identifier is not overwritten by a local variable
-        return createBuiltinTooltip(cursor.node);
+        const builtinTooltip = createBuiltinTooltip(cursor.node);
+        if (builtinTooltip) {
+          return builtinTooltip;
+        }
+
+        // TODO - pass head name through facet
+        if (!project.hasHead(mainHeadName)) {
+          return null;
+        }
+        const module = project.getHead(mainHeadName);
+        const astR = module.typedAst();
+        if (!astR.ok) {
+          return null;
+        }
+
+        const ast = astR.value;
+        const astNode = ast.findDescendantByLocation(
+          cursor.node.from,
+          cursor.node.to
+        );
+
+        if (astNode?.isExpression()) {
+          return nodeTooltip(
+            cursor.node,
+            <TypeTooltip type={astNode.type} view={view} />
+          );
+        } else {
+          return null;
+        }
+      }
       case "Field":
         // `Namespace.function`; go up to fully identified name.
         if (!cursor.parent()) {
@@ -107,10 +138,8 @@ export function tooltipsExtension() {
 
           return nodeTooltip(node, <ValueTooltip value={value} view={view} />);
         } else if (cursor.type.is("Statement")) {
-          // Ascend through decorated statements.
-          while (cursor.type.is("Statement") && cursor.parent());
-
-          // Is this a top-level variable?
+          // Ascend to the parent scope; is this a top-level variable?
+          cursor.parent();
           if (!cursor.type.is("Program")) {
             return null;
           }
@@ -126,7 +155,6 @@ export function tooltipsExtension() {
           }
 
           if (
-            // Note that `valueAst` can't be "DecoratedStatement", we skip those in `SqValueContext` and AST symbols
             (valueAst.kind === "LetStatement" ||
               valueAst.kind === "DefunStatement") &&
             // If these don't match then variable was probably shadowed by a later statement and we can't show its value.

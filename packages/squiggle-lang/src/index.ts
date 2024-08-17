@@ -93,6 +93,7 @@ export {
 export { type TypedASTNode } from "./analysis/types.js";
 export { defaultEnv as defaultEnvironment } from "./dists/env.js";
 export { type Env };
+export { Type } from "./types/Type.js";
 
 export { makeSelfContainedLinker, type SqLinker } from "./public/SqLinker.js";
 export { SqProject } from "./public/SqProject/index.js";
