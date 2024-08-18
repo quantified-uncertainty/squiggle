@@ -50,8 +50,6 @@ export async function POST(req: Request) {
     const responses = squiggleResults.map((result) => ({
       code: result.code,
       isValid: result.isValid,
-      performanceMetrics: result.performanceMetrics,
-      conversationHistory: result.conversationHistory,
     }));
 
     // Handle client disconnection

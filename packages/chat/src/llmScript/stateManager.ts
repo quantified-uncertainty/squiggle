@@ -1,110 +1,138 @@
 // stateManager.ts
 
 import { Message } from "./llmConfig";
-import { LogEntry, LogLevel, LogManager } from "./logManager";
+
+export enum LogLevel {
+  INFO,
+  WARN,
+  ERROR,
+  SUCCESS,
+  HIGHLIGHT,
+}
+
+export interface LogEntry {
+  message: string;
+  timestamp: Date;
+  level: LogLevel;
+}
 
 export enum State {
   START,
   GENERATE_CODE,
-  ENSURE_CODE_RUNS,
-  GET_FEEDBACK_FROM_RUN,
+  FIX_CODE_UNTIL_IT_RUNS,
   DONE,
   CRITICAL_ERROR,
 }
 
 export type CodeState =
   | { type: "noCode" }
-  | { type: "codeGenerated"; code: string; errors: string[] };
+  | {
+      type: "formattingFailed";
+      error: string;
+      code: string;
+    }
+  | { type: "runFailed"; code: string; error: string }
+  | { type: "success"; code: string };
 
-export interface PerformanceMetrics {
+export interface LlmMetrics {
   apiCalls: number;
   inputTokens: number;
   outputTokens: number;
-  durationMs: number;
-}
-
-const emptyMetrics: PerformanceMetrics = {
-  apiCalls: 0,
-  inputTokens: 0,
-  outputTokens: 0,
-  durationMs: 0,
-};
-
-export interface StateHistoryEntry {
-  state: State;
-  executionId: number;
-  codeState: CodeState;
-  performanceMetrics: PerformanceMetrics;
-  logs: LogEntry[];
-}
-
-export interface StateContext {
-  prompt: string;
-  maxAttempts: number;
 }
 
 export interface StateHandler {
-  execute: (
-    manager: StateManager,
-    context: StateContext
-  ) => Promise<{
-    codeState: CodeState;
-    performanceMetrics: PerformanceMetrics;
-  }>;
+  execute: (stateExecution: StateExecution) => Promise<void>;
 }
 
-export interface ExecutionSummary {
-  totalPerformanceMetrics: PerformanceMetrics;
-  stateTransitions: { from: State; to: State; duration: number }[];
-  logSummary: {
-    total: number;
-    byLevel: { [key in LogLevel]: number };
-    topMessages: string[];
+export class StateExecution {
+  public nextState: State;
+  public durationMs?: number;
+  private logs: LogEntry[] = [];
+  private conversationMessages: Message[] = [];
+  public llmMetrics: LlmMetrics = {
+    apiCalls: 0,
+    inputTokens: 0,
+    outputTokens: 0,
   };
+
+  constructor(
+    public readonly stateExecutionId: number,
+    public readonly state: State,
+    public codeState: CodeState,
+    private readonly startTime: number = Date.now()
+  ) {
+    this.nextState = state;
+  }
+
+  log(message: string, level: LogLevel): void {
+    const logEntry: LogEntry = {
+      message,
+      timestamp: new Date(),
+      level,
+    };
+    console.log(level, message);
+    this.logs.push(logEntry);
+  }
+
+  addConversationMessage(message: Message): void {
+    this.conversationMessages.push(message);
+  }
+
+  updateCodeState(codeState: CodeState): void {
+    this.codeState = codeState;
+  }
+
+  updateLlmMetrics(metrics: Partial<LlmMetrics>): void {
+    this.llmMetrics = { ...this.llmMetrics, ...metrics };
+  }
+
+  updateNextState(nextState: State): void {
+    this.nextState = nextState;
+  }
+
+  complete() {
+    this.durationMs = Date.now() - this.startTime;
+  }
+
+  getLogs(): LogEntry[] {
+    return this.logs;
+  }
+
+  getConversationMessages(): Message[] {
+    return this.conversationMessages;
+  }
+
+  criticalError(error: string) {
+    this.log(error, LogLevel.ERROR);
+    this.updateNextState(State.CRITICAL_ERROR);
+  }
 }
 
 export class StateManager {
-  private currentState: State = State.START;
-  private stateHistory: StateHistoryEntry[] = [];
-  private logManager: LogManager;
+  private stateExecutions: StateExecution[] = [];
   private stateHandlers: Map<State, StateHandler> = new Map();
-  private isCancelled: boolean = false;
-  private attempts: number = 0;
-  private conversationHistory: Message[] = [];
+  private currentExecutionId: number = 0;
 
   constructor() {
-    this.logManager = new LogManager();
     this.registerDefaultHandlers();
   }
 
   private registerDefaultHandlers() {
     this.registerStateHandler(State.START, {
-      execute: async (manager) => {
-        manager.transitionTo(State.GENERATE_CODE);
-        return {
-          codeState: { type: "noCode" },
-          performanceMetrics: emptyMetrics,
-        };
+      execute: async (stateExecution) => {
+        stateExecution.updateNextState(State.GENERATE_CODE);
       },
     });
 
     this.registerStateHandler(State.DONE, {
-      execute: async () => {
-        const lastEntry = this.stateHistory.at(-1);
-        return {
-          codeState: lastEntry ? lastEntry.codeState : { type: "noCode" },
-          performanceMetrics: emptyMetrics,
-        };
+      execute: async (stateExecution) => {
+        stateExecution.updateNextState(State.DONE);
       },
     });
 
     this.registerStateHandler(State.CRITICAL_ERROR, {
-      execute: async () => {
-        const lastEntry = this.stateHistory.at(-1);
-        return {
-          codeState: lastEntry ? lastEntry.codeState : { type: "noCode" },
-          performanceMetrics: emptyMetrics,
-        };
+      execute: async (stateExecution) => {
+        stateExecution.updateNextState(State.CRITICAL_ERROR);
       },
     });
   }
@@ -113,176 +141,116 @@ export class StateManager {
     this.stateHandlers.set(state, handler);
   }
 
-  async next(context: StateContext): Promise<boolean> {
-    if (this.isCancelled) {
-      this.transitionTo(State.CRITICAL_ERROR);
-      return false;
-    }
+  createNewStateExecution(): StateExecution {
+    const previousExecution = this.getCurrentStateExecution();
+    const currentState = previousExecution?.nextState ?? State.START;
+    const initialCodeState = previousExecution?.codeState ?? { type: "noCode" };
 
-    const startTime = Date.now();
-    const executionId = this.logManager.startNewExecution();
+    const newExecution = new StateExecution(
+      this.getNextExecutionId(),
+      currentState,
+      initialCodeState
+    );
+    this.stateExecutions.push(newExecution);
+    return newExecution;
+  }
 
-    let result: {
-      codeState: CodeState;
-      performanceMetrics: PerformanceMetrics;
-    };
+  async step(): Promise<{
+    continueExecution: boolean;
+    stateExecution: StateExecution;
+  }> {
+    const stateExecution = this.createNewStateExecution();
+
     try {
-      const handler = this.stateHandlers.get(this.currentState);
+      const handler = this.stateHandlers.get(stateExecution.state);
       if (handler) {
-        result = await handler.execute(this, context);
+        await handler.execute(stateExecution);
+        stateExecution.complete();
       } else {
         throw new Error(
-          `No handler registered for state ${State[this.currentState]}`
+          `No handler registered for state ${State[stateExecution.state]}`
         );
       }
     } catch (error) {
-      this.log(
-        `Unexpected error in state ${State[this.currentState]}: ${error.message}`,
+      stateExecution.log(
+        `Unexpected error in state ${State[stateExecution.state]}: ${error.message}`,
         LogLevel.ERROR
       );
-      this.transitionTo(State.CRITICAL_ERROR);
-      result = {
-        codeState: { type: "noCode" },
-        performanceMetrics: emptyMetrics,
-      };
+      stateExecution.updateNextState(State.CRITICAL_ERROR);
     }
 
-    const duration = Date.now() - startTime;
-    const logs = this.logManager.getLogs(executionId);
-    this.addStateHistory(
-      executionId,
-      result.codeState,
-      result.performanceMetrics,
-      logs
-    );
-
-    return (
-      this.currentState !== State.DONE &&
-      this.currentState !== State.CRITICAL_ERROR
-    );
+    console.log("Finishing state", stateExecution);
+    return {
+      continueExecution: !this.isProcessComplete(),
+      stateExecution,
+    };
   }
 
-  transitionTo(newState: State): void {
-    this.log(
-      `Transitioning from ${State[this.currentState]} to ${State[newState]}`,
-      LogLevel.INFO
-    );
-    this.currentState = newState;
+  getCurrentStateExecution(): StateExecution | undefined {
+    return this.stateExecutions.at(-1);
   }
 
   getCurrentState(): State {
-    return this.currentState;
+    const currentExecution = this.getCurrentStateExecution();
+    return currentExecution ? currentExecution.state : State.START;
   }
 
-  addStateHistory(
-    executionId: number,
-    codeState: CodeState,
-    performanceMetrics: PerformanceMetrics,
-    logs: LogEntry[]
-  ) {
-    this.stateHistory.push({
-      state: this.currentState,
-      executionId,
-      codeState,
-      performanceMetrics,
-      logs,
-    });
+  isProcessComplete(): boolean {
+    const currentState = this.getCurrentState();
+    return currentState === State.DONE || currentState === State.CRITICAL_ERROR;
   }
 
-  getStateHistory(): StateHistoryEntry[] {
-    return this.stateHistory;
-  }
-
-  log(message: string, level: LogLevel) {
-    this.logManager.log(message, level);
-  }
-
-  getLogs(executionId?: number) {
-    return this.logManager.getLogs(executionId);
-  }
-
-  getLatestLogs(count: number) {
-    return this.logManager.getLatestLogs(count);
-  }
-
-  cancel() {
-    this.isCancelled = true;
-  }
-
-  reset() {
-    this.currentState = State.START;
-    this.stateHistory = [];
-    this.attempts = 0;
-    this.isCancelled = false;
-    this.conversationHistory = [];
-  }
-
-  incrementAttempts() {
-    this.attempts++;
-  }
-
-  getAttempts() {
-    return this.attempts;
-  }
-
-  setConversationHistory(history: Message[]) {
-    this.conversationHistory = history;
-  }
-
-  getConversationHistory(): Message[] {
-    return [...this.conversationHistory];
-  }
-
-  recentHistoryEntry() {
-    return this.getConversationHistory().at(-1);
-  }
-
-  getLatestStateEntry(): StateHistoryEntry | undefined {
-    return this.stateHistory.at(-1);
-  }
-
-  getTotalPerformanceMetrics(): PerformanceMetrics {
-    return this.stateHistory.reduce(
-      (total, entry) => ({
-        apiCalls: total.apiCalls + entry.performanceMetrics.apiCalls,
-        inputTokens: total.inputTokens + entry.performanceMetrics.inputTokens,
-        outputTokens:
-          total.outputTokens + entry.performanceMetrics.outputTokens,
-        durationMs: total.durationMs + entry.performanceMetrics.durationMs,
+  getAllMetrics(): LlmMetrics {
+    return this.stateExecutions.reduce(
+      (acc, execution) => ({
+        apiCalls: acc.apiCalls + execution.llmMetrics.apiCalls,
+        inputTokens: acc.inputTokens + execution.llmMetrics.inputTokens,
+        outputTokens: acc.outputTokens + execution.llmMetrics.outputTokens,
       }),
-      { ...emptyMetrics }
+      { apiCalls: 0, inputTokens: 0, outputTokens: 0 }
     );
   }
 
-  getExecutionSummary(): ExecutionSummary {
-    const totalPerformanceMetrics = this.getTotalPerformanceMetrics();
+  getFinalResult(): { isValid: boolean; code: string; logs: LogEntry[] } {
+    const finalExecution = this.getCurrentStateExecution();
+    if (!finalExecution) {
+      throw new Error("No state executions found");
+    }
 
-    const stateTransitions = this.stateHistory.slice(1).map((entry, index) => ({
-      from: this.stateHistory[index].state,
-      to: entry.state,
-      duration: entry.performanceMetrics.durationMs,
-    }));
-
-    const allLogs = this.stateHistory.flatMap((entry) => entry.logs);
-    const logSummary = {
-      total: allLogs.length,
-      byLevel: allLogs.reduce(
-        (acc, log) => {
-          acc[log.level] = (acc[log.level] || 0) + 1;
-          return acc;
-        },
-        {} as { [key in LogLevel]: number }
-      ),
-      topMessages: allLogs
-        .sort((a, b) => b.level - a.level)
-        .slice(0, 5)
-        .map((log) => `[${LogLevel[log.level]}] ${log.message}`),
-    };
+    const isValid = finalExecution.nextState === State.DONE;
+    const code =
+      finalExecution.codeState.type !== "noCode" &&
+      finalExecution.codeState.code;
 
     return {
-      totalPerformanceMetrics,
-      stateTransitions,
-      logSummary,
+      isValid,
+      code,
+      logs: this.getLogs(),
     };
+  }
+
+  log(message: string, level: LogLevel) {
+    const currentExecution = this.getCurrentStateExecution();
+    if (currentExecution) {
+      currentExecution.log(message, level);
+    } else {
+      console.log(`[${level}] ${message}`);
+    }
+  }
+
+  getLogs(): LogEntry[] {
+    return this.stateExecutions.flatMap((r) => r.getLogs());
+  }
+
+  getConversationMessages(): Message[] {
+    return this.stateExecutions.flatMap((r) => r.getConversationMessages());
+  }
+
+  getStateExecutions(): StateExecution[] {
+    return this.stateExecutions;
+  }
+
+  private getNextExecutionId(): number {
+    return ++this.currentExecutionId;
   }
 }
