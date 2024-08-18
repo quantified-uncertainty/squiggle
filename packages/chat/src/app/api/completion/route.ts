@@ -1,4 +1,3 @@
-import { Logger } from "../../../llmScript/logger";
 import { runSquiggleGenerator } from "../../../llmScript/main";
 import { AVAILABLE_MODELS } from "../../utils/llms";
 
@@ -38,7 +37,7 @@ export async function POST(req: Request) {
     // Run the Squiggle generator the specified number of times in parallel
     const squigglePromises = Array(playgroundCount)
       .fill(null)
-      .map(() => runSquiggleGenerator(prompt, new Logger()));
+      .map(() => runSquiggleGenerator(prompt));
 
     const squiggleResults = await Promise.all(squigglePromises);
 
@@ -51,7 +50,7 @@ export async function POST(req: Request) {
     const responses = squiggleResults.map((result) => ({
       code: result.code,
       isValid: result.isValid,
-      trackingInfo: result.trackingInfo,
+      performanceMetrics: result.performanceMetrics,
       conversationHistory: result.conversationHistory,
     }));
 

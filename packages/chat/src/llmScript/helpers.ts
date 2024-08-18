@@ -3,9 +3,7 @@ import fs from "fs";
 import * as prettier from "prettier/standalone";
 
 import * as prettierSquigglePlugin from "@quri/prettier-plugin-squiggle/standalone";
-import { SqLinker, SqProject } from "@quri/squiggle-lang";
-
-import { Logger } from "./logger";
+import { result, SqLinker, SqProject } from "@quri/squiggle-lang";
 
 const SQUIGGLE_DOCS_PATH = "./src/llmScript/prompt.md";
 
@@ -316,17 +314,18 @@ const readTxtFileSync = (filePath: string) => {
 export const squiggleDocs = readTxtFileSync(SQUIGGLE_DOCS_PATH);
 
 export const formatSquiggleCode = async (
-  code: string,
-  logger: Logger
-): Promise<string> => {
+  code: string
+): Promise<result<string, string>> => {
   try {
     const formatted = await prettier.format(code, {
       parser: "squiggle",
       plugins: [prettierSquigglePlugin],
     });
-    return formatted;
+    return { ok: true, value: formatted };
   } catch (error) {
-    logger.error(`Error formatting Squiggle code: ${error.message}`);
-    return code; // Return original code if formatting fails
+    return {
+      ok: false,
+      value: `Error formatting Squiggle code: ${error.message}`,
+    };
   }
 };
