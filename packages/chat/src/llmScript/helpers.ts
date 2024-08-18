@@ -132,12 +132,18 @@ export const runSquiggle = async (code) => {
   project.setSource("wrapper", code);
   await project.run("wrapper");
   const result = project.getResult("wrapper");
+  const output = project.getOutput("wrapper");
+
+  const outputJS = output.ok && {
+    result: output.value.result.asJS(),
+    bindings: output.value.bindings.asValue().asJS(),
+  };
 
   return result.ok
-    ? { ok: true }
+    ? { ok: true, output: outputJS }
     : {
         ok: false,
-        value: `Failed to evaluate Squiggle code: ${result.value.toStringWithDetails(project)}`,
+        value: `Failed to evaluate Squiggle code: ${result.value}`,
       };
 };
 
@@ -302,14 +308,17 @@ const readTxtFileSync = (filePath: string) => {
   try {
     return fs.readFileSync(filePath, "utf8");
   } catch (err) {
-    Logger.error(`Error reading file: ${err}`);
+    console.error(`Error reading file: ${err}`);
     throw err;
   }
 };
 // Load Squiggle docs
 export const squiggleDocs = readTxtFileSync(SQUIGGLE_DOCS_PATH);
 
-export const formatSquiggleCode = async (code: string): Promise<string> => {
+export const formatSquiggleCode = async (
+  code: string,
+  logger: Logger
+): Promise<string> => {
   try {
     const formatted = await prettier.format(code, {
       parser: "squiggle",
@@ -317,7 +326,7 @@ export const formatSquiggleCode = async (code: string): Promise<string> => {
     });
     return formatted;
   } catch (error) {
-    Logger.error(`Error formatting Squiggle code: ${error.message}`);
+    logger.error(`Error formatting Squiggle code: ${error.message}`);
     return code; // Return original code if formatting fails
   }
 };

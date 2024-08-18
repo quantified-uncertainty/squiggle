@@ -139,8 +139,9 @@ const validateAndFixCode = async (
 
     if (run.ok) {
       isValid = true;
+      logger.info("RESULT:" + JSON.stringify(run.output, null, 4));
       logger.success("Code is valid!");
-      code = await formatSquiggleCode(code);
+      code = await formatSquiggleCode(code, logger);
     } else {
       logger.error("Validation error:");
       run.value && logger.errorBox(run.value);
@@ -166,7 +167,7 @@ const validateAndFixCode = async (
           break;
         }
 
-        code = await formatSquiggleCode(squiggleResult.code);
+        code = await formatSquiggleCode(squiggleResult.code, logger);
         logger.code(code, "Fixed and Formatted Code:");
       } catch (error) {
         logger.error(`Error during code fix attempt: ${error.message}`);
