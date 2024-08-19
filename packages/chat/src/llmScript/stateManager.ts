@@ -141,7 +141,7 @@ export class StateManager {
     this.stateHandlers.set(state, handler);
   }
 
-  createNewStateExecution(): StateExecution {
+  private createNewStateExecution(): StateExecution {
     const previousExecution = this.getCurrentStateExecution();
     const currentState = previousExecution?.nextState ?? State.START;
     const initialCodeState = previousExecution?.codeState ?? { type: "noCode" };

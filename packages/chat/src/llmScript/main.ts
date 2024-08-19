@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 //main.ts
+import { generateAndSaveSummary } from "./generateSummary";
 import { formatSquiggleCode, getSquiggleAdvice, runSquiggle } from "./helpers";
 import { runLLM } from "./llmConfig";
 import {
@@ -91,6 +92,7 @@ class SquiggleGenerator {
       if (!continueExecution) break;
     }
   }
+
   private async generateCode(stateExecution: StateExecution): Promise<void> {
     await this.createSquiggleCodeAndUpdateStateExecution(
       this.prompt,
@@ -208,17 +210,20 @@ export const runSquiggleGenerator = async (
   prompt: string
 ): Promise<SquiggleResult> => {
   const generator = new SquiggleGenerator(prompt);
-  const initialExecution = generator.stateManager.createNewStateExecution();
-  initialExecution.log("🚀 Squiggle Code Generator", LogLevel.INFO);
-  initialExecution.log(`Prompt: ${prompt}`, LogLevel.INFO);
-
   try {
     await generator.run();
+
+    generateAndSaveSummary(generator.stateManager);
+
     return generator.stateManager.getFinalResult();
   } catch (error) {
-    const errorExecution = generator.stateManager.createNewStateExecution();
-    errorExecution.log("\n💥 An unexpected error occurred:", LogLevel.ERROR);
-    errorExecution.log(error.toString(), LogLevel.ERROR);
+    const stateExecution = generator.stateManager.getCurrentStateExecution();
+    stateExecution.criticalError(
+      "runSquiggleGenerator error:" + error.toString()
+    );
+
+    generateAndSaveSummary(generator.stateManager);
+
     throw error;
   }
 };
