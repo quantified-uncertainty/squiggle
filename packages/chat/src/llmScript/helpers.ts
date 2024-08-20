@@ -161,7 +161,7 @@ export const runSquiggle = async (
     return {
       ok: false,
       value:
-        "Squiggle Error" +
+        "Squiggle Error: \n" +
         (output.value as SqError).toStringWithDetails(project),
     };
   }
