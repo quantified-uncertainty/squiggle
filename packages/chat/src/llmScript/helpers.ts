@@ -177,6 +177,110 @@ type InvalidElement = {
   getMessage: (lineNumber: number) => string;
 };
 
+function checkImportStatementsAreOnTop(code: string): string[] {
+  const warnings: string[] = [];
+  const lines = code.split("\n");
+  let foundNonImport = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const trimmedLine = lines[i].trim();
+
+    if (trimmedLine === "" || trimmedLine.startsWith("//")) {
+      // Skip empty lines and comments
+      continue;
+    }
+
+    if (!foundNonImport && !trimmedLine.startsWith("import")) {
+      foundNonImport = true;
+    }
+
+    if (trimmedLine.startsWith("import")) {
+      if (foundNonImport) {
+        warnings.push(
+          `Line ${i + 1}: Import statement found after non-import code. Move all imports to the top of the file.`
+        );
+      }
+    }
+  }
+
+  return warnings;
+}
+
+function checkAnnotationsAndComments(code: string): string[] {
+  const warnings: string[] = [];
+  const lines = code.split("\n");
+  let lastAnnotationLine = -1;
+  let lastAnnotationName = "";
+
+  for (let i = 0; i < lines.length; i++) {
+    const trimmedLine = lines[i].trim();
+
+    // Check for annotations
+    if (trimmedLine.startsWith("@")) {
+      if (lastAnnotationLine !== -1 && i - lastAnnotationLine > 1) {
+        warnings.push(
+          `Lines ${lastAnnotationLine + 1}-${i}: Comments or blank lines found between annotations. Remove them to keep annotations together.`
+        );
+      }
+      lastAnnotationLine = i;
+      lastAnnotationName = trimmedLine.split("(")[0].substring(1);
+    }
+    // Check for variable declaration after annotations
+    else if (lastAnnotationLine !== -1 && trimmedLine.includes("=")) {
+      lastAnnotationLine = -1;
+      lastAnnotationName = "";
+    }
+    // Check for non-empty, non-comment lines that aren't variable declarations
+    else if (
+      lastAnnotationLine !== -1 &&
+      trimmedLine !== "" &&
+      !trimmedLine.startsWith("//")
+    ) {
+      warnings.push(
+        `Line ${i + 1}: Annotation '${lastAnnotationName}' is not followed by a variable declaration. Annotations should refer to variables, not the full file.`
+      );
+      lastAnnotationLine = -1;
+      lastAnnotationName = "";
+    }
+  }
+
+  return warnings;
+}
+
+function checkInvalidCommas(code: string): string[] {
+  const warnings: string[] = [];
+  const lines = code.split("\n");
+  let inBlock = false;
+  let blockStartLine = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const trimmedLine = lines[i].trim();
+
+    // Check for block start
+    if (trimmedLine.endsWith("{")) {
+      inBlock = true;
+      blockStartLine = i + 1;
+    }
+
+    // Check for block end
+    if (trimmedLine === "}") {
+      inBlock = false;
+    }
+
+    // Check for invalid comma if in a block
+    if (inBlock) {
+      const assignmentMatch = trimmedLine.match(/^(\w+)\s*=.*,\s*$/);
+      if (assignmentMatch) {
+        warnings.push(
+          `Line ${i + 1}: Invalid comma at the end of variable assignment '${assignmentMatch[1]}' inside a block. Remove the trailing comma.`
+        );
+      }
+    }
+  }
+
+  return warnings;
+}
+
 function getSquiggleErrorPatterns(): ErrorPattern[] {
   return [
     {
@@ -310,6 +414,29 @@ export function getSquiggleAdvice(errorMessage: string, code: string): string {
       advice += errorAdvice + "\n\n";
       break; // Only use the first matching error advice
     }
+  }
+
+  // Check for import statement issues
+  const importWarnings = checkImportStatementsAreOnTop(code);
+  if (importWarnings.length > 0) {
+    advice +=
+      "Import statement warnings:\n" + importWarnings.join("\n") + "\n\n";
+  }
+
+  // Check for invalid commas
+  const commaWarnings = checkInvalidCommas(code);
+  if (commaWarnings.length > 0) {
+    advice +=
+      "Invalid comma usage warnings:\n" + commaWarnings.join("\n") + "\n\n";
+  }
+
+  // Check for annotation and comment issues
+  const annotationWarnings = checkAnnotationsAndComments(code);
+  if (annotationWarnings.length > 0) {
+    advice +=
+      "Annotation and comment warnings:\n" +
+      annotationWarnings.join("\n") +
+      "\n\n";
   }
 
   // Check for invalid elements in the code
