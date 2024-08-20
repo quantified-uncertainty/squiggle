@@ -1,6 +1,6 @@
 import { KindNode, LocationRange } from "../ast/types.js";
 import { ICompileError } from "../errors/IError.js";
-import { inferOutputTypeFromMultipleSignatures } from "../types/helpers.js";
+import { inferOutputTypeByMultipleSignatures } from "../types/helpers.js";
 import { TIntrinsic } from "../types/TIntrinsic.js";
 import { TTypedLambda } from "../types/TTypedLambda.js";
 import { TUnion } from "../types/TUnion.js";
@@ -53,7 +53,10 @@ export class NodeCall extends ExpressionNode<"Call"> {
         fnType.valueType === "Lambda"
       ) {
         type = tAny();
-      } else if (fnType instanceof TAny) {
+      } else if (
+        fnType instanceof TAny ||
+        (fnType instanceof TIntrinsic && fnType.valueType === "Lambda")
+      ) {
         type = tAny();
       } else {
         throw new ICompileError(
@@ -64,7 +67,7 @@ export class NodeCall extends ExpressionNode<"Call"> {
     };
     collectSignatures(fn.type);
 
-    type ??= inferOutputTypeFromMultipleSignatures(
+    type ??= inferOutputTypeByMultipleSignatures(
       signatures,
       args.map((a) => a.type)
     );

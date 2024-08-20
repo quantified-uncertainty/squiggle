@@ -1,3 +1,5 @@
+import isEqual from "lodash/isEqual.js";
+
 import { Lambda } from "../reducer/lambda/index.js";
 import { Value } from "../value/index.js";
 import { TArray } from "./TArray.js";
@@ -23,7 +25,7 @@ export type UnwrapType<T extends Type<any>> = Exclude<
   undefined
 >;
 
-export function inferOutputTypeFromMultipleSignatures(
+export function inferOutputTypeByMultipleSignatures(
   signatures: TTypedLambda[],
   argTypes: Type[]
 ): Type | undefined {
@@ -37,14 +39,14 @@ export function inferOutputTypeFromMultipleSignatures(
   if (!possibleOutputTypes.length) {
     return undefined;
   }
-  return unionIfNecessary(possibleOutputTypes);
+  return makeUnionAndSimplify(possibleOutputTypes);
 }
 
-export function inferLambdaOutputType(
+export function inferOutputTypeByLambda(
   lambda: Lambda,
   argTypes: Type[]
 ): Type | undefined {
-  return inferOutputTypeFromMultipleSignatures(lambda.signatures(), argTypes);
+  return inferOutputTypeByMultipleSignatures(lambda.signatures(), argTypes);
 }
 
 // Check whether the value of type `type2` can be used in place of a variable
@@ -101,6 +103,7 @@ export function typeCanBeAssigned(type1: Type, type2: Type): boolean {
     } else if (type2 instanceof TDateRange) {
       return type1.valueType === "Date";
     } else if (type2 instanceof TTypedLambda) {
+      // can assign any typed lambda to a lambda
       return true;
     } else {
       return false;
@@ -133,16 +136,20 @@ export function typeCanBeAssigned(type1: Type, type2: Type): boolean {
   }
 
   if (type1 instanceof TDict) {
-    // TODO - support subtyping - `{ foo: string }` should be a supertype of `{ foo: string, bar: number }`
     if (!(type2 instanceof TDict)) {
       return false;
     }
-    if (type1.kvs.length !== type2.kvs.length) {
-      return false;
-    }
-    for (let i = 0; i < type1.kvs.length; i++) {
-      if (!typeCanBeAssigned(type1.kvs[i].type, type2.kvs[i].type)) {
-        return false;
+    // check all keys and values
+    for (const kv of type1.kvs) {
+      const vtype2 = type2.valueType(kv.key);
+      if (vtype2) {
+        if (!typeCanBeAssigned(kv.type, vtype2)) {
+          return false;
+        }
+      } else {
+        if (!kv.optional) {
+          return false;
+        }
       }
     }
     return true;
@@ -152,7 +159,9 @@ export function typeCanBeAssigned(type1: Type, type2: Type): boolean {
     return (
       type2 instanceof TDist &&
       // either this is a generic dist or the dist classes match
-      (!type1.distClass || type1.distClass === type2.distClass)
+      (!type1.distClass ||
+        !type2.distClass || // allow any dist class as a parameter to a specific dist class
+        type1.distClass === type2.distClass)
     );
   }
 
@@ -195,35 +204,83 @@ export function typeCanBeAssigned(type1: Type, type2: Type): boolean {
           typeCanBeAssigned(type, type2.types[index])
         )
       );
+    } else if (type2 instanceof TArray) {
+      return type1.types.every((type, index) =>
+        typeCanBeAssigned(type, type2.itemType)
+      );
     } else {
       return false;
     }
   }
 
   if (type1 instanceof TTypedLambda) {
-    return (
-      type2 instanceof TTypedLambda &&
-      typeCanBeAssigned(type1.output, type2.output) &&
-      type1.inputs.length === type2.inputs.length &&
+    if (type2 instanceof TIntrinsic && type2.valueType === "Lambda") {
+      return true;
+    }
+
+    if (!(type2 instanceof TTypedLambda)) {
+      return false;
+    }
+
+    if (!typeCanBeAssigned(type1.output, type2.output)) {
+      // output types don't match
+      return false;
+    }
+
+    if (
+      type1.minInputs > type2.minInputs ||
+      type1.maxInputs < type2.maxInputs
+    ) {
+      // input count doesn't match
+      return false;
+    }
+
+    for (let i = 0; i < type1.minInputs; i++) {
+      const inputType1 = type1.inputs.at(i)?.type;
+      const inputType2 = type2.inputs.at(i)?.type;
       // inputs are contravariant; https://en.wikipedia.org/wiki/Subtyping#Function_types
-      type2.inputs.every((input, index) =>
-        typeCanBeAssigned(input.type, type1.inputs[index].type)
-      )
-    );
+      if (
+        !inputType1 ||
+        !inputType2 ||
+        !typeCanBeAssigned(inputType2, inputType1)
+      ) {
+        return false;
+      }
+    }
+    return true;
   }
 
   return false;
 }
 
-export function unionIfNecessary(types: Type[]): Type {
-  if (types.length === 1) {
-    return types[0];
+export function makeUnionAndSimplify(types: Type[]): Type {
+  const flatTypes: Type[] = [];
+  const traverse = (type: Type) => {
+    if (type instanceof TUnion) {
+      type.types.forEach(traverse);
+    } else {
+      flatTypes.push(type);
+    }
+  };
+  for (const type of types) traverse(type);
+
+  const uniqueTypes: Type[] = [];
+  // TODO - quadratic complexity; serialize and sort as strings, or keep the global deduplicated type registry?
+  for (const type of flatTypes) {
+    if (!uniqueTypes.some((uniqueType) => isEqual(type, uniqueType))) {
+      uniqueTypes.push(type);
+    }
   }
-  return tUnion(types);
+  if (uniqueTypes.length === 1) {
+    return uniqueTypes[0];
+  }
+
+  // TODO - unwrap nested unions
+  return tUnion(uniqueTypes);
 }
 
 export function typesAreEqual(type1: Type, type2: Type): boolean {
-  throw new Error("Equality check on types is not implemented");
+  return isEqual(type1, type2);
 }
 
 // This function is used for stdlib values, which are represented as `Value` instances.
@@ -238,7 +295,7 @@ export function getValueType(value: Value): Type {
   }
 
   if (value.type === "Lambda") {
-    return unionIfNecessary(value.value.signatures());
+    return makeUnionAndSimplify(value.value.signatures());
   } else {
     return tAny();
   }

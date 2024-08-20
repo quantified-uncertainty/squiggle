@@ -1,7 +1,7 @@
 import { unaryFunctions } from "../ast/operators.js";
 import { KindNode, LocationRange, UnaryOperator } from "../ast/types.js";
 import { ICompileError } from "../errors/IError.js";
-import { inferLambdaOutputType } from "../types/helpers.js";
+import { inferOutputTypeByLambda } from "../types/helpers.js";
 import { Type } from "../types/Type.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
@@ -44,7 +44,7 @@ export class NodeUnaryCall extends ExpressionNode<"UnaryCall"> {
 
     const arg = analyzeExpression(node.arg, context);
 
-    const type = inferLambdaOutputType(fn.value, [arg.type]);
+    const type = inferOutputTypeByLambda(fn.value, [arg.type]);
     if (!type) {
       throw new ICompileError(
         `Operator '${node.op}' does not support type '${arg.type.display()}'`,

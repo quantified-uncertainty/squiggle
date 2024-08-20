@@ -1,4 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
+import { makeUnionAndSimplify } from "../types/helpers.js";
 import { tAny, tArray } from "../types/index.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
@@ -13,8 +14,11 @@ export class NodeArray extends ExpressionNode<"Array"> {
     super(
       "Array",
       location,
-      // TODO - get the type from the elements
-      tArray(tAny())
+      tArray(
+        elements.length
+          ? makeUnionAndSimplify(elements.map((element) => element.type))
+          : tAny()
+      )
     );
     this._init();
   }

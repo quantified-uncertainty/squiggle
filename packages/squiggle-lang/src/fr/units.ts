@@ -5,6 +5,10 @@ import { tNumber, tWithTags } from "../types/index.js";
 import { ValueTags } from "../value/valueTags.js";
 import { vString } from "../value/VString.js";
 
+export function unitNameToBuiltinFunctionName(unitName: string) {
+  return `fromUnit_${unitName}`;
+}
+
 const maker = new FnFactory({
   nameSpace: "",
   requiresNamespace: false,
@@ -17,7 +21,7 @@ const makeUnitFn = (
   format?: string
 ) => {
   return maker.make({
-    name: "fromUnit_" + shortName,
+    name: unitNameToBuiltinFunctionName(shortName),
     description: `Unit conversion from ${fullName}.`,
     examples: [makeFnExample(`3${shortName} // ${3 * multiplier}`)],
     isUnit: true,

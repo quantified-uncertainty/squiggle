@@ -112,11 +112,13 @@ export function tooltipsExtension() {
         );
       }
       case "Field":
-        // `Namespace.function`; go up to fully identified name.
+        // Either `Namespace.function` (fake namespaced builtin) or `foo.bar` (real field access)
         if (!cursor.parent()) {
           return null;
         }
-        return createBuiltinTooltip(cursor.node);
+        return (
+          createBuiltinTooltip(cursor.node) ?? createTypeTooltip(cursor.node)
+        );
       case "VariableName": {
         const node = cursor.node;
 

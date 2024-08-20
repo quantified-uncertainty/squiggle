@@ -11,11 +11,7 @@ export class TDistOrNumber extends Type<BaseDist | number> {
   }
 
   unpack(v: Value) {
-    return v.type === "Dist"
-      ? v.value
-      : v.type === "Number"
-        ? v.value
-        : undefined;
+    return v.type === "Dist" || v.type === "Number" ? v.value : undefined;
   }
 
   pack(v: BaseDist | number) {

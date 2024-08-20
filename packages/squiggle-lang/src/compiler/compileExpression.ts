@@ -1,6 +1,7 @@
 import { AnyTypedExpressionNode } from "../analysis/types.js";
 import { infixFunctions, unaryFunctions } from "../ast/operators.js";
 import { ICompileError } from "../errors/IError.js";
+import { unitNameToBuiltinFunctionName } from "../fr/units.js";
 import { vBool } from "../value/VBool.js";
 import { vNumber } from "../value/VNumber.js";
 import { vString } from "../value/VString.js";
@@ -170,7 +171,7 @@ function compileExpressionContent(
     case "UnitValue": {
       const fromUnitFn = context.resolveBuiltin(
         ast.location,
-        `fromUnit_${ast.unit}`
+        unitNameToBuiltinFunctionName(ast.unit)
       );
       return eCall(fromUnitFn, [compileExpression(ast.value, context)]);
     }

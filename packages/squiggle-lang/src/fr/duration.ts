@@ -6,6 +6,7 @@ import {
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { tDuration, tNumber } from "../types/index.js";
 import { SDuration } from "../utility/SDuration.js";
+import { unitNameToBuiltinFunctionName } from "./units.js";
 
 const maker = new FnFactory({
   nameSpace: "Duration",
@@ -134,25 +135,25 @@ export const library = [
   makeDurationToNumberFn("toYears", "Conversions", (d) => d.toYears()),
 
   makeNumberToDurationFn(
-    "fromUnit_minutes",
+    unitNameToBuiltinFunctionName("minutes"),
     "Conversions",
     true,
     SDuration.fromMinutes
   ),
   makeNumberToDurationFn(
-    "fromUnit_hours",
+    unitNameToBuiltinFunctionName("hours"),
     "Conversions",
     true,
     SDuration.fromHours
   ),
   makeNumberToDurationFn(
-    "fromUnit_days",
+    unitNameToBuiltinFunctionName("days"),
     "Conversions",
     true,
     SDuration.fromDays
   ),
   makeNumberToDurationFn(
-    "fromUnit_years",
+    unitNameToBuiltinFunctionName("years"),
     "Conversions",
     true,
     SDuration.fromYears

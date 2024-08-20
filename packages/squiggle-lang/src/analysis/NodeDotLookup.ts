@@ -14,7 +14,7 @@ export class NodeDotLookup extends ExpressionNode<"DotLookup"> {
     public arg: AnyTypedExpressionNode,
     public key: string
   ) {
-    let type: Type<unknown>;
+    let type: Type;
     if (arg.type instanceof TDict) {
       const valueType = arg.type.valueType(key);
       if (!valueType) {
