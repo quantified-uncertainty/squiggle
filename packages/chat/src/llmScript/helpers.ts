@@ -3,7 +3,9 @@ import fs from "fs";
 
 import {
   removeLambdas,
+  result,
   simpleValueFromAny,
+  SqError,
   SqLinker,
   SqProject,
   summarizeSimpleValueWithoutLambda,
@@ -128,33 +130,41 @@ testResults = describe(
   },
 };
 
-// Squiggle-related functions
-export const runSquiggle = async (code) => {
+function summarizeAny(json: any): string {
+  return summarizeSimpleValueWithoutLambda(
+    removeLambdas(simpleValueFromAny(json)),
+    0,
+    6
+  );
+}
+
+type SqOutputSummary = {
+  result: string;
+  bindings: string;
+};
+
+export const runSquiggle = async (
+  code: string
+): Promise<result<SqOutputSummary, string>> => {
   const project = SqProject.create({ linker: linker });
   project.setSource("wrapper", code);
   await project.run("wrapper");
-  const result = project.getResult("wrapper");
   const output = project.getOutput("wrapper");
 
-  const outputJS = output.ok && {
-    result: summarizeSimpleValueWithoutLambda(
-      removeLambdas(simpleValueFromAny(output.value.result.asJS())),
-      0,
-      6
-    ),
-    bindings: summarizeSimpleValueWithoutLambda(
-      removeLambdas(simpleValueFromAny(output.value.bindings.asValue().asJS())),
-      0,
-      6
-    ),
-  };
-
-  return result.ok
-    ? { ok: true, output: outputJS }
-    : {
-        ok: false,
-        value: `Failed to evaluate Squiggle code: ${result.value}`,
-      };
+  if (output.ok) {
+    const outputJS: SqOutputSummary = {
+      result: summarizeAny(output.value.result.asJS()),
+      bindings: summarizeAny(output.value.bindings.asValue().asJS()),
+    };
+    return { ok: true, value: outputJS };
+  } else {
+    return {
+      ok: false,
+      value:
+        "Squiggle Error" +
+        (output.value as SqError).toStringWithDetails(project),
+    };
+  }
 };
 
 type ErrorPattern = {

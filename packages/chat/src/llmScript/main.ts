@@ -52,7 +52,7 @@ async function formatAndRunSquiggle(code: string): Promise<CodeState> {
     return {
       type: "runFailed",
       code: formattedCode.value,
-      error: run.value,
+      error: run.value as string,
     };
   }
 }
@@ -243,8 +243,8 @@ class SquiggleGenerator {
       );
       return;
     }
-    const bindings = runResult.output.bindings;
-    const result = runResult.output.result;
+    const bindings = runResult.value.bindings;
+    const result = runResult.value.result;
 
     const adjustmentPrompt = `The previous Squiggle code produced this output:
 Output:

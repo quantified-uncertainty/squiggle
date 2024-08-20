@@ -117,7 +117,7 @@ export class StateManager {
   private durationLimitMs: number;
   private startTime: number;
 
-  constructor(stepLimit: number = 10, durationLimitMinutes: number = 2) {
+  constructor(stepLimit: number = 30, durationLimitMinutes: number = 5) {
     this.registerDefaultHandlers();
     this.stepLimit = stepLimit;
     this.durationLimitMs = durationLimitMinutes * 1000 * 60;
