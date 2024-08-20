@@ -113,9 +113,15 @@ export class StateManager {
   private stateExecutions: StateExecution[] = [];
   private stateHandlers: Map<State, StateHandler> = new Map();
   private currentExecutionId: number = 0;
+  private stepLimit: number;
+  private durationLimitMs: number;
+  private startTime: number;
 
-  constructor() {
+  constructor(stepLimit: number = 10, durationLimitMinutes: number = 2) {
     this.registerDefaultHandlers();
+    this.stepLimit = stepLimit;
+    this.durationLimitMs = durationLimitMinutes * 1000 * 60;
+    this.startTime = Date.now();
   }
 
   private registerDefaultHandlers() {
@@ -160,6 +166,14 @@ export class StateManager {
     continueExecution: boolean;
     stateExecution: StateExecution;
   }> {
+    if (this.stateExecutions.length >= this.stepLimit) {
+      return this.transitionToCriticalError("Step limit exceeded");
+    }
+
+    if (Date.now() - this.startTime > this.durationLimitMs) {
+      return this.transitionToCriticalError("Duration limit exceeded");
+    }
+
     const stateExecution = this.createNewStateExecution();
 
     try {
@@ -183,6 +197,21 @@ export class StateManager {
     console.log("Finishing state", stateExecution);
     return {
       continueExecution: !this.isProcessComplete(),
+      stateExecution,
+    };
+  }
+
+  private transitionToCriticalError(reason: string): {
+    continueExecution: boolean;
+    stateExecution: StateExecution;
+  } {
+    const stateExecution = this.createNewStateExecution();
+    stateExecution.log(reason, LogLevel.ERROR);
+    stateExecution.updateNextState(State.CRITICAL_ERROR);
+    stateExecution.complete();
+
+    return {
+      continueExecution: false,
       stateExecution,
     };
   }

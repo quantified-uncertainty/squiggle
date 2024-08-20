@@ -246,11 +246,7 @@ class SquiggleGenerator {
     const bindings = runResult.output.bindings;
     const result = runResult.output.result;
 
-    const adjustmentPrompt = `The following Squiggle code produced this output:
-
-Code:
-${currentCode}
-
+    const adjustmentPrompt = `The previous Squiggle code produced this output:
 Output:
 
 variables: ${bindings}

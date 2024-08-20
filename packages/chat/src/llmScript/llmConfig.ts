@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import Anthropic from "@anthropic-ai/sdk";
-// import  { ContentBlock } from '@anthropic-ai/sdk';
 import dotenv from "dotenv";
 import OpenAI from "openai";
 
@@ -9,7 +8,8 @@ import { squiggleDocs } from "./helpers";
 // Configuration
 dotenv.config({ path: ".env.local" });
 
-export const SELECTED_MODEL = "Claude-3.5-Sonnet";
+// export const SELECTED_MODEL = "Claude-3.5-Sonnet";
+export const SELECTED_MODEL = "Claude-3-Haiku";
 // export const SELECTED_MODEL = "GPT-4o-mini";
 
 const anthropic = new Anthropic({
@@ -18,6 +18,7 @@ const anthropic = new Anthropic({
 
 // Model selection and pricing
 type ModelConfig = {
+  provider: "anthropic" | "openrouter";
   model: string;
   inputRate: number;
   outputRate: number;
@@ -26,43 +27,50 @@ type ModelConfig = {
 
 const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
   "GPT-4o": {
+    provider: "openrouter",
     model: "openai/gpt-4o-2024-08-06",
-    inputRate: 0.0000025, // $2.5 per million input tokens
-    outputRate: 0.00001, // $10 per million output tokens
-    contextWindow: 128000, // Assuming 128K context window
+    inputRate: 0.0000025,
+    outputRate: 0.00001,
+    contextWindow: 128000,
   },
   "GPT-4o-mini": {
-    // seems like a good trade-off, for development
+    provider: "openrouter",
     model: "openai/gpt-4o-mini-2024-07-18",
-    inputRate: 0.00000015, // $0.15 per million input tokens
-    outputRate: 0.0000006, // $0.6 per million output tokens
-    contextWindow: 128000, // Assuming 128K context window
+    inputRate: 0.00000015,
+    outputRate: 0.0000006,
+    contextWindow: 128000,
   },
   "Claude-3.5-Sonnet": {
-    // maybe the best, but seems expensive and slow
-    model: "anthropic/claude-3.5-sonnet",
-    inputRate: 0.000003, // $3 per million input tokens
-    outputRate: 0.000015, // $15 per million output tokens
-    contextWindow: 200000, // 200K context window
+    provider: "anthropic",
+    model: "claude-3-sonnet-20240229",
+    inputRate: 0.000003,
+    outputRate: 0.000015,
+    contextWindow: 200000,
+  },
+  "Claude-3-Haiku": {
+    provider: "anthropic",
+    model: "claude-3-haiku-20240307",
+    inputRate: 0.00000025,
+    outputRate: 0.00000125,
+    contextWindow: 200000,
   },
   "DeepSeek-Coder-V2": {
-    // Decent and cheap, but very slow
+    provider: "openrouter",
     model: "deepseek/deepseek-coder",
-    inputRate: 0.00000014, // $0.14 per million input tokens
-    outputRate: 0.00000028, // $0.28 per million output tokens
-    contextWindow: 128000, // 128K context window
+    inputRate: 0.00000014,
+    outputRate: 0.00000028,
+    contextWindow: 128000,
   },
   "Llama-3.1": {
-    // seems pretty mediocre, weird results much of the time.
+    provider: "openrouter",
     model: "meta-llama/llama-3.1-405b-instruct",
-    inputRate: 0.0000027, // $2.7 per million input tokens
-    outputRate: 0.0000027, // $2.7 per million output tokens
-    contextWindow: 131072, // 131,072 context window
+    inputRate: 0.0000027,
+    outputRate: 0.0000027,
+    contextWindow: 131072,
   },
 };
 
-// Select the model you want to use
-const OPENROUTER_MODEL = MODEL_CONFIGS[SELECTED_MODEL].model;
+const SELECTED_MODEL_CONFIG = MODEL_CONFIGS[SELECTED_MODEL];
 
 // Initialize OpenRouter client
 const openai = new OpenAI({
@@ -76,17 +84,14 @@ export type Message = {
 };
 
 function convertToClaudeMessages(history: Message[]): Anthropic.MessageParam[] {
-  const messages = history
+  return history
     .filter((msg) => msg.role !== "system")
     .map((msg) => ({
       role: msg.role as "user" | "assistant",
       content: msg.content,
     }));
-
-  return messages;
 }
 
-// Helper function to extract text content from Claude API response
 function extractTextContent(content: Anthropic.ContentBlock[]): string {
   return content
     .filter(
@@ -111,6 +116,7 @@ interface StandardizedChatCompletion {
     total_tokens: number;
   };
 }
+
 function convertClaudeToStandardFormat(
   claudeResponse: Anthropic.Message
 ): StandardizedChatCompletion {
@@ -150,8 +156,6 @@ function convertOpenAIToStandardFormat(
     },
   };
 }
-const CLAUDE_MODEL = "claude-3-5-sonnet-20240620";
-// const CLAUDE_MODEL = "claude-3-haiku-20240307";
 
 function generateSquiggleSystemContent(): string {
   return `You are an AI assistant specialized in generating Squiggle code. Squiggle is a probabilistic programming language designed for estimation. Always respond with valid Squiggle code enclosed in triple backticks (\`\`\`). Do not give any more explanation, just provide the code and nothing else. Think through things, step by step.
@@ -168,15 +172,17 @@ ${squiggleDocs}
 export async function runLLM(
   conversationHistory: Message[]
 ): Promise<StandardizedChatCompletion> {
-  // Always add the new message to the conversation history
   const squiggleContext = generateSquiggleSystemContent();
 
   try {
-    if (SELECTED_MODEL === "Claude-3.5-Sonnet") {
-      // Compress assistant messages for Claude
+    if (SELECTED_MODEL_CONFIG.provider === "anthropic") {
       const compressedMessages = compressAssistantMessages(conversationHistory);
       const claudeMessages = convertToClaudeMessages(compressedMessages);
 
+      console.log("Sending to Claude:", {
+        conversationHistory,
+        claudeMessages,
+      });
       if (claudeMessages.length === 0) {
         throw new Error("At least one message is required");
       }
@@ -184,7 +190,7 @@ export async function runLLM(
       const completion = await anthropic.beta.promptCaching.messages.create({
         max_tokens: 4000,
         messages: claudeMessages,
-        model: CLAUDE_MODEL,
+        model: SELECTED_MODEL_CONFIG.model,
         system: [
           {
             text: squiggleContext,
@@ -194,22 +200,18 @@ export async function runLLM(
         ],
       });
 
-      const standardizedCompletion = convertClaudeToStandardFormat(completion);
-
-      return standardizedCompletion;
+      return convertClaudeToStandardFormat(completion);
     } else {
       // Use OpenAI (OpenRouter)
       const completion = await openai.chat.completions.create({
-        model: OPENROUTER_MODEL,
+        model: SELECTED_MODEL_CONFIG.model,
         messages: [
           { role: "system", content: squiggleContext },
           ...conversationHistory,
         ],
       });
 
-      const standardizedCompletion = convertOpenAIToStandardFormat(completion);
-
-      return standardizedCompletion;
+      return convertOpenAIToStandardFormat(completion);
     }
   } catch (error) {
     console.error("Error in API call:", error);
@@ -217,7 +219,6 @@ export async function runLLM(
   }
 }
 
-// Helper function to compress assistant messages
 function compressAssistantMessages(messages: Message[]): Message[] {
   return messages.reduce((acc, current, index, array) => {
     if (current.role !== "assistant") {
@@ -235,7 +236,7 @@ export function calculatePrice(
   inputTokens: number,
   outputTokens: number
 ): number {
-  const { inputRate, outputRate } = MODEL_CONFIGS[SELECTED_MODEL];
+  const { inputRate, outputRate } = SELECTED_MODEL_CONFIG;
   const inputCost = inputTokens * inputRate;
   const outputCost = outputTokens * outputRate;
   return inputCost + outputCost;
