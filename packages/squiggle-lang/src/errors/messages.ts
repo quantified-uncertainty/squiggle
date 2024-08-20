@@ -22,21 +22,24 @@ export abstract class BaseErrorMessage extends Error {
 export class REArityError extends BaseErrorMessage {
   readonly type = "REArityError";
   constructor(
-    public fn: string | undefined,
-    public arity: number,
-    public usedArity: number
+    public arity: number[], // possible arities
+    public usedArity: number // actual arity, shouldn't be in `this.arity`
   ) {
     super();
   }
 
   toString() {
-    return `${this.arity} arguments expected. Instead ${this.usedArity} argument(s) were passed.`;
+    const minArity = Math.min(...this.arity);
+    const maxArity = Math.max(...this.arity);
+    const arityMessage =
+      minArity === maxArity ? `${minArity}` : `${minArity}-${maxArity}`;
+
+    return `${arityMessage} arguments expected. Instead ${this.usedArity} argument(s) were passed.`;
   }
 
   serialize() {
     return {
       type: this.type,
-      fn: this.fn ?? null,
       arity: this.arity,
       usedArity: this.usedArity,
     } as const;
@@ -400,11 +403,7 @@ export function deserializeErrorMessage(
 ): ErrorMessage {
   switch (serialized.type) {
     case "REArityError":
-      return new REArityError(
-        serialized.fn ?? undefined,
-        serialized.arity,
-        serialized.usedArity
-      );
+      return new REArityError(serialized.arity, serialized.usedArity);
     case "REArrayIndexNotFound":
       return new REArrayIndexNotFound(serialized.msg, serialized.index);
     case "REDistributionError":

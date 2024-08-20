@@ -18,6 +18,24 @@ test("function calls", () => {
   expect(returnType("System.sampleCount()")).toBe("Number");
 });
 
+test("single signature builtin arity", () => {
+  expect(() => returnType("System.sampleCount(1)")).toThrow(
+    "0 arguments expected. Instead 1 argument(s) were passed."
+  );
+});
+
+test("polymorphic builtin arity with single arity", () => {
+  expect(() => returnType("map([1,2,3], 1,2,3)")).toThrow(
+    /^2 arguments expected\. Instead 4 argument\(s\) were passed\./
+  );
+});
+
+test("polymorphic builtin arity with multiple arities", () => {
+  expect(() => returnType("Sym.normal(1,2,3)")).toThrow(
+    /^1-2 arguments expected\. Instead 3 argument\(s\) were passed\./
+  );
+});
+
 test("function output type based on polymorphic end expression", () => {
   expect(
     returnType(`

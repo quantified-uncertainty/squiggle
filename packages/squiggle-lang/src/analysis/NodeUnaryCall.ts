@@ -44,8 +44,8 @@ export class NodeUnaryCall extends ExpressionNode<"UnaryCall"> {
 
     const arg = analyzeExpression(node.arg, context);
 
-    const type = inferOutputTypeByLambda(fn.value, [arg.type]);
-    if (!type) {
+    const inferResult = inferOutputTypeByLambda(fn.value, [arg.type]);
+    if (inferResult.kind !== "ok") {
       throw new ICompileError(
         `Operator '${node.op}' does not support type '${arg.type.display()}'`,
         node.location
@@ -56,7 +56,7 @@ export class NodeUnaryCall extends ExpressionNode<"UnaryCall"> {
       node.location,
       node.op,
       analyzeExpression(node.arg, context),
-      type
+      inferResult.type
     );
   }
 }

@@ -45,14 +45,22 @@ export class NodeInfixCall extends ExpressionNode<"InfixCall"> {
     const arg1 = analyzeExpression(node.args[0], context);
     const arg2 = analyzeExpression(node.args[1], context);
 
-    const type = inferOutputTypeByLambda(fn.value, [arg1.type, arg2.type]);
-    if (!type) {
+    const inferResult = inferOutputTypeByLambda(fn.value, [
+      arg1.type,
+      arg2.type,
+    ]);
+    if (inferResult.kind !== "ok") {
       throw new ICompileError(
         `Operator '${node.op}' does not support types '${arg1.type.display()}' and '${arg2.type.display()}'`,
         node.location
       );
     }
 
-    return new NodeInfixCall(node.location, node.op, [arg1, arg2], type);
+    return new NodeInfixCall(
+      node.location,
+      node.op,
+      [arg1, arg2],
+      inferResult.type
+    );
   }
 }

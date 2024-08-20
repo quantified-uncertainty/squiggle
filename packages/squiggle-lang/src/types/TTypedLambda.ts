@@ -14,6 +14,21 @@ import { typeCanBeAssigned } from "./helpers.js";
 import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
+export type InferredOutputType =
+  | {
+      kind: "ok";
+      type: Type;
+      // TODO - list all compatible signatures
+    }
+  | {
+      kind: "arity";
+      arity: number[]; // list of possible arities, see REArityError
+    }
+  | {
+      // arity is ok but types are not compatible
+      kind: "no-match";
+    };
+
 export class TTypedLambda extends Type<Lambda> {
   minInputs: number;
   maxInputs: number;
@@ -140,17 +155,30 @@ export class TTypedLambda extends Type<Lambda> {
     return Ok(args);
   }
 
-  inferOutputType(argTypes: Type[]): Type | undefined {
+  inferOutputType(argTypes: Type[]): InferredOutputType {
     if (argTypes.length < this.minInputs || argTypes.length > this.maxInputs) {
-      return; // args length mismatch
+      // args length mismatch
+      const arity: number[] = [];
+      for (let i = this.minInputs; i <= this.maxInputs; i++) {
+        arity.push(i);
+      }
+      return {
+        kind: "arity",
+        arity,
+      };
     }
 
     for (let i = 0; i < argTypes.length; i++) {
       if (!typeCanBeAssigned(this.inputs[i].type, argTypes[i])) {
-        return;
+        return {
+          kind: "no-match",
+        };
       }
     }
-    return this.output;
+    return {
+      kind: "ok",
+      type: this.output,
+    };
   }
 }
 

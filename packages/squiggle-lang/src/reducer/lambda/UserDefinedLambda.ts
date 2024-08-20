@@ -35,11 +35,7 @@ export class UserDefinedLambda extends BaseLambda {
     if (!validatedArgs.ok) {
       const err = validatedArgs.value;
       if (err.kind === "arity") {
-        throw new REArityError(
-          this.display(),
-          this.signature.inputs.length,
-          args.length
-        );
+        throw new REArityError([this.signature.inputs.length], args.length);
       } else if (err.kind === "domain") {
         throw new REArgumentDomainError(
           err.position,

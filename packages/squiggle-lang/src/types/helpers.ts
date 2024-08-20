@@ -14,7 +14,7 @@ import { TNumberRange } from "./TNumberRange.js";
 import { TOr } from "./TOr.js";
 import { TTagged } from "./TTagged.js";
 import { TTuple } from "./TTuple.js";
-import { TTypedLambda } from "./TTypedLambda.js";
+import { InferredOutputType, TTypedLambda } from "./TTypedLambda.js";
 import { tUnion, TUnion } from "./TUnion.js";
 import { tAny, TAny, Type } from "./Type.js";
 
@@ -25,27 +25,62 @@ export type UnwrapType<T extends Type<any>> = Exclude<
   undefined
 >;
 
+// This is not a method on `TTypedLambda` because the signatures could be
+// gathered from a union of typed lambdas; see `NodeCall` for details.
 export function inferOutputTypeByMultipleSignatures(
   signatures: TTypedLambda[],
   argTypes: Type[]
-): Type | undefined {
+): InferredOutputType {
+  // We're gathering all possible output types, not just the first one.
+  // Polymorphic functions in stdlib are greedy (they take the first matching
+  // signature), but during the analysis stage we don't know enough about the
+  // value to decide which signature will be used in runtime.
   const possibleOutputTypes: Type[] = [];
+
+  const arityErrors: Extract<InferredOutputType, { kind: "arity" }>[] = [];
+  const noMatchErrors: Extract<InferredOutputType, { kind: "no-match" }>[] = [];
+
   for (const signature of signatures) {
     const outputType = signature.inferOutputType(argTypes);
-    if (outputType !== undefined) {
-      possibleOutputTypes.push(outputType);
+    switch (outputType.kind) {
+      case "ok":
+        possibleOutputTypes.push(outputType.type);
+        break;
+      case "arity":
+        arityErrors.push(outputType);
+        break;
+      case "no-match":
+        noMatchErrors.push(outputType);
+        break;
+      default:
+        throw outputType satisfies never;
     }
   }
-  if (!possibleOutputTypes.length) {
-    return undefined;
+
+  if (possibleOutputTypes.length) {
+    return {
+      kind: "ok",
+      type: makeUnionAndSimplify(possibleOutputTypes),
+    };
   }
-  return makeUnionAndSimplify(possibleOutputTypes);
+
+  if (noMatchErrors.length || !arityErrors.length) {
+    // at least one signature had the correct arity
+    return {
+      kind: "no-match",
+    };
+  }
+
+  // all signatures had the wrong arity
+  // TODO - if the function supports 1 or 3 args and is called with 2 args, the error will be confusing
+  // (I don't think we have any functions like that in stdlib, though)
+  return {
+    kind: "arity",
+    arity: arityErrors.flatMap((error) => error.arity), // de-dupe?
+  };
 }
 
-export function inferOutputTypeByLambda(
-  lambda: Lambda,
-  argTypes: Type[]
-): Type | undefined {
+export function inferOutputTypeByLambda(lambda: Lambda, argTypes: Type[]) {
   return inferOutputTypeByMultipleSignatures(lambda.signatures(), argTypes);
 }
 
@@ -254,6 +289,10 @@ export function typeCanBeAssigned(type1: Type, type2: Type): boolean {
 }
 
 export function makeUnionAndSimplify(types: Type[]): Type {
+  if (!types.length) {
+    return tAny(); // usually shouldn't happen
+  }
+
   const flatTypes: Type[] = [];
   const traverse = (type: Type) => {
     if (type instanceof TUnion) {
