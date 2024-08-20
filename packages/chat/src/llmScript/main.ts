@@ -1,7 +1,8 @@
 #!/usr/bin/env node
+import { formatSquiggleCode } from "./formatSquiggleCode";
 //main.ts
 import { generateAndSaveSummary } from "./generateSummary";
-import { formatSquiggleCode, getSquiggleAdvice, runSquiggle } from "./helpers";
+import { getSquiggleAdvice, runSquiggle } from "./helpers";
 import { runLLM } from "./llmConfig";
 import {
   CodeState,
@@ -11,74 +12,6 @@ import {
   StateExecution,
   StateManager,
 } from "./stateManager";
-
-// Enhance function with types
-function truncateAndFormatData(jsonData: any): any {
-  // Set the threshold for array length and number of significant figures
-  const maxArrayLength = 20;
-  const significantFigures = 4;
-
-  // Helper function to format numbers to significant figures
-  function toSignificantFigures(num: number, sigFigs: number): number {
-    if (num === 0) return 0;
-    const d = Math.ceil(Math.log10(num < 0 ? -num : num));
-    const power = sigFigs - d;
-    const magnitude = Math.pow(10, power);
-    const shifted = Math.round(num * magnitude);
-    return shifted / magnitude;
-  }
-
-  // Helper function to process array
-  function processArray(arr: number[]): (number | string)[] {
-    const formattedArray = arr.map((num) =>
-      typeof num === "number"
-        ? toSignificantFigures(num, significantFigures)
-        : num
-    );
-    if (formattedArray.length > maxArrayLength) {
-      return [...formattedArray.slice(0, maxArrayLength), "..."];
-    }
-    return formattedArray;
-  }
-
-  // Process and format the data
-  try {
-    if (jsonData && typeof jsonData === "object") {
-      if (jsonData.vtype === "Dict" && jsonData.value && jsonData.value.foo) {
-        if (Array.isArray(jsonData.value.foo)) {
-          jsonData.value.foo = processArray(jsonData.value.foo);
-        }
-      }
-    }
-    return jsonData;
-  } catch (error) {
-    console.error("Error in truncateAndFormatData:", error);
-    return jsonData; // Return the original data if there's an error
-  }
-}
-
-// Sample JSON data
-const jsonData = {
-  vtype: "Dict",
-  value: {
-    foo: [
-      4.248299088001309, 3.283777682976534, 3.5641257696299684,
-      6.9298914061959715, 1.5420968298322872, 2.4360400029254876,
-      2.190185578450418, 5.50633457136622, 3.559258628728251, 4.335418029933416,
-      2.1564742513787385, 3.096953741391773, 7.601348445876665,
-      3.0022899716229774, 3.1673031755646255, 4.953070684458059,
-      5.375524596548717, 2.3275126363308303, 3.495475615335954,
-      3.4254426916884233, 6.554585787065609, 3.126424953698332,
-      // Add more numbers as needed
-    ],
-  },
-};
-
-// Process the JSON data
-const processedData = truncateAndFormatData(jsonData);
-
-// Output the processed data
-console.log(JSON.stringify(processedData, null, 2));
 
 function generateSquiggleUserRequest(
   prompt: string,
@@ -310,16 +243,8 @@ class SquiggleGenerator {
       );
       return;
     }
-    const bindings = JSON.stringify(
-      truncateAndFormatData(runResult.output.bindings),
-      null,
-      2
-    );
-    const result = JSON.stringify(
-      truncateAndFormatData(runResult.output.result),
-      null,
-      2
-    );
+    const bindings = runResult.output.bindings;
+    const result = runResult.output.result;
 
     const adjustmentPrompt = `The following Squiggle code produced this output:
 
@@ -333,6 +258,9 @@ variables: ${bindings}
 result: ${result}
 
 Analyze the code and its output. Do you think the code needs adjustment? If not, respond with exactly "NO_ADJUSTMENT_NEEDED". If yes, please provide the full adjusted code. Consider unexpected results, failing tests, or any improvements that could be made based on the output.`;
+
+    console.log("prompt", adjustmentPrompt);
+    stateExecution.log("sent out prompt" + adjustmentPrompt, LogLevel.INFO);
 
     const userRequest = adjustmentPrompt;
 
@@ -403,7 +331,7 @@ Analyze the code and its output. Do you think the code needs adjustment? If not,
       stateExecution.updateCodeState(newCodeState);
       stateExecution.updateNextState(
         newCodeState.type === "success"
-          ? State.DONE
+          ? State.ADJUST_TO_FEEDBACK
           : State.FIX_CODE_UNTIL_IT_RUNS
       );
     } catch (error) {

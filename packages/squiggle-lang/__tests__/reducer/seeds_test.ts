@@ -16,11 +16,19 @@ async function getSamplesForSeed(seed?: string | undefined) {
   if (!result.ok) {
     throw new Error("Run failed");
   }
-  const samples = result.value.asJS();
-  if (!Array.isArray(samples)) {
-    throw new Error("Expected an array");
+  interface ResultValue {
+    samples: number[];
   }
-  return samples as number[];
+
+  // Assert the type of value.asJS()
+  const value = result.value.asJS() as ResultValue;
+
+  // Check if samples exists and is an array
+  if (!Array.isArray(value.samples)) {
+    throw new Error("Expected samples to be an array");
+  }
+
+  return value.samples;
 }
 
 describe("seeds", () => {

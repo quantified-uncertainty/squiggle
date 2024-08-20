@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 import fs from "fs";
-import * as prettier from "prettier/standalone";
 
-import * as prettierSquigglePlugin from "@quri/prettier-plugin-squiggle/standalone";
-import { result, SqLinker, SqProject } from "@quri/squiggle-lang";
+import {
+  removeLambdas,
+  simpleValueFromAny,
+  SqLinker,
+  SqProject,
+  summarizeSimpleValueWithoutLambda,
+} from "@quri/squiggle-lang";
 
 const SQUIGGLE_DOCS_PATH = "./src/llmScript/prompt.md";
 
@@ -133,8 +137,16 @@ export const runSquiggle = async (code) => {
   const output = project.getOutput("wrapper");
 
   const outputJS = output.ok && {
-    result: output.value.result.asJS(),
-    bindings: output.value.bindings.asValue().asJS(),
+    result: summarizeSimpleValueWithoutLambda(
+      removeLambdas(simpleValueFromAny(output.value.result.asJS())),
+      0,
+      6
+    ),
+    bindings: summarizeSimpleValueWithoutLambda(
+      removeLambdas(simpleValueFromAny(output.value.bindings.asValue().asJS())),
+      0,
+      6
+    ),
   };
 
   return result.ok
@@ -313,19 +325,46 @@ const readTxtFileSync = (filePath: string) => {
 // Load Squiggle docs
 export const squiggleDocs = readTxtFileSync(SQUIGGLE_DOCS_PATH);
 
-export const formatSquiggleCode = async (
-  code: string
-): Promise<result<string, string>> => {
-  try {
-    const formatted = await prettier.format(code, {
-      parser: "squiggle",
-      plugins: [prettierSquigglePlugin],
-    });
-    return { ok: true, value: formatted };
-  } catch (error) {
-    return {
-      ok: false,
-      value: `Error formatting Squiggle code: ${error.message}`,
-    };
+export function truncateAndFormatData(jsonData: any): any {
+  // Set the threshold for array length and number of significant figures
+  const maxArrayLength = 20;
+  const significantFigures = 4;
+
+  // Helper function to format numbers to significant figures
+  function toSignificantFigures(num: number, sigFigs: number): number {
+    if (num === 0) return 0;
+    const d = Math.ceil(Math.log10(num < 0 ? -num : num));
+    const power = sigFigs - d;
+    const magnitude = Math.pow(10, power);
+    const shifted = Math.round(num * magnitude);
+    return shifted / magnitude;
   }
-};
+
+  // Helper function to process array
+  function processArray(arr: number[]): (number | string)[] {
+    const formattedArray = arr.map((num) =>
+      typeof num === "number"
+        ? toSignificantFigures(num, significantFigures)
+        : num
+    );
+    if (formattedArray.length > maxArrayLength) {
+      return [...formattedArray.slice(0, maxArrayLength), "..."];
+    }
+    return formattedArray;
+  }
+
+  // Process and format the data
+  try {
+    if (jsonData && typeof jsonData === "object") {
+      if (jsonData.vtype === "Dict" && jsonData.value && jsonData.value.foo) {
+        if (Array.isArray(jsonData.value.foo)) {
+          jsonData.value.foo = processArray(jsonData.value.foo);
+        }
+      }
+    }
+    return jsonData;
+  } catch (error) {
+    console.error("Error in truncateAndFormatData:", error);
+    return jsonData; // Return the original data if there's an error
+  }
+}
