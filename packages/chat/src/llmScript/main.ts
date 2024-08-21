@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 //main.ts
 import { generateAndSaveSummary } from "./generateSummary";
-import { runLLM } from "./llmConfig";
+import { Message, runLLM } from "./llmConfig";
 import { processSquiggleCode } from "./processSquiggleCode";
 import {
   adjustToFeedbackPrompt,
   editExistingSquiggleCodePrompt,
   generateNewSquiggleCodePrompt,
+  PromptPair,
 } from "./prompts";
 import {
   CodeState,
@@ -71,8 +72,11 @@ class SquiggleGenerator {
   private async executeGenerateCode(
     stateExecution: StateExecution
   ): Promise<void> {
-    const prompt = generateNewSquiggleCodePrompt(this.prompt);
-    const completion = await this.processLLMResponse(prompt, stateExecution);
+    const promptPair = generateNewSquiggleCodePrompt(this.prompt);
+    const completion = await this.processLLMResponse(
+      promptPair,
+      stateExecution
+    );
     if (completion) {
       await this.handleCodeGenerationResponse(completion, stateExecution);
     }
@@ -100,12 +104,12 @@ class SquiggleGenerator {
         return;
       case "formattingFailed":
       case "runFailed":
-        const prompt = editExistingSquiggleCodePrompt(
+        const promptPair = editExistingSquiggleCodePrompt(
           codeState.code,
           codeState.error
         );
         const completion = await this.processLLMResponse(
-          prompt,
+          promptPair,
           stateExecution
         );
         if (completion) {
@@ -131,6 +135,8 @@ class SquiggleGenerator {
     const { codeState: newCodeState, runResult } =
       await processSquiggleCode(currentCode);
 
+    stateExecution.logCodeState(codeState);
+
     if (newCodeState.type !== "success" || !runResult) {
       stateExecution.criticalError(
         "Failed to process code in Adjust To Feedback stage"
@@ -139,32 +145,41 @@ class SquiggleGenerator {
     }
 
     const { bindings, result } = runResult;
-    const prompt = adjustToFeedbackPrompt(bindings, result);
+    const promptPair = adjustToFeedbackPrompt(this.prompt, bindings, result);
 
-    const completion = await this.processLLMResponse(prompt, stateExecution);
+    const completion = await this.processLLMResponse(
+      promptPair,
+      stateExecution
+    );
     if (completion) {
       await this.handleAdjustToFeedbackResponse(completion, stateExecution);
     }
   }
 
   private async processLLMResponse(
-    llmPrompt: string,
+    promptPair: PromptPair,
     stateExecution: StateExecution
   ): Promise<string | null> {
     try {
-      stateExecution.addConversationMessage({
+      const recentFullMessage: Message = {
         role: "user",
-        content: llmPrompt,
-      });
+        content: promptPair.fullPrompt,
+      };
 
-      const completion = await runLLM(
-        this.stateManager.getConversationMessages()
-      );
+      const completion = await runLLM([
+        ...this.stateManager.getRelevantPreviousConversationMessages(3),
+        recentFullMessage,
+      ]);
 
       stateExecution.updateLlmMetrics({
         apiCalls: 1,
         inputTokens: completion?.usage?.prompt_tokens ?? 0,
         outputTokens: completion?.usage?.completion_tokens ?? 0,
+      });
+
+      stateExecution.addConversationMessage({
+        role: "user",
+        content: promptPair.summarizedPrompt,
       });
 
       stateExecution.addConversationMessage({
@@ -209,6 +224,7 @@ class SquiggleGenerator {
     }
 
     const { codeState } = await processSquiggleCode(extractedCode);
+    stateExecution.logCodeState(codeState);
     stateExecution.updateCodeState(codeState);
     stateExecution.updateNextState(codeStateNextState(codeState));
   }
@@ -244,6 +260,7 @@ class SquiggleGenerator {
 
     const { codeState: adjustedCodeState } =
       await processSquiggleCode(extractedCode);
+    stateExecution.logCodeState(adjustedCodeState);
     stateExecution.updateCodeState(adjustedCodeState);
     stateExecution.updateNextState(codeStateNextState(adjustedCodeState));
   }
@@ -262,7 +279,7 @@ export const runSquiggleGenerator = async (
   try {
     await generator.run();
 
-    generateAndSaveSummary(generator.stateManager);
+    generateAndSaveSummary(prompt, generator.stateManager);
 
     return generator.stateManager.getFinalResult();
   } catch (error) {
@@ -270,8 +287,7 @@ export const runSquiggleGenerator = async (
     stateExecution.criticalError(
       "runSquiggleGenerator error:" + error.toString()
     );
-
-    generateAndSaveSummary(generator.stateManager);
+    generateAndSaveSummary(prompt, generator.stateManager);
 
     throw error;
   }

@@ -1,13 +1,41 @@
 // stateManager.ts
 
+import chalk from "chalk";
+
 import { Message } from "./llmConfig";
 
 export enum LogLevel {
   INFO,
   WARN,
   ERROR,
+  CODE_RUN_ERROR,
   SUCCESS,
   HIGHLIGHT,
+}
+
+function logWithLevel(message: string, level: LogLevel): void {
+  switch (level) {
+    case LogLevel.INFO:
+      console.log(chalk.blue(`[INFO] ${message}`));
+      break;
+    case LogLevel.WARN:
+      console.warn(chalk.yellow(`[WARN] ${message}`));
+      break;
+    case LogLevel.ERROR:
+      console.error(chalk.red(`[ERROR] ${message}`));
+      break;
+    case LogLevel.CODE_RUN_ERROR:
+      console.error(chalk.red.bold(`[CODE_RUN_ERROR] ${message}`));
+      break;
+    case LogLevel.SUCCESS:
+      console.log(chalk.green(`[SUCCESS] ${message}`));
+      break;
+    case LogLevel.HIGHLIGHT:
+      console.log(chalk.magenta(`[HIGHLIGHT] ${message}`));
+      break;
+    default:
+      console.log(`[${LogLevel[level]}] ${message}`);
+  }
 }
 
 export interface LogEntry {
@@ -71,7 +99,7 @@ export class StateExecution {
       timestamp: new Date(),
       level,
     };
-    console.log(level, message);
+    logWithLevel(message, level);
     this.logs.push(logEntry);
   }
 
@@ -107,6 +135,17 @@ export class StateExecution {
     this.log(error, LogLevel.ERROR);
     this.updateNextState(State.CRITICAL_ERROR);
   }
+
+  logCodeState(codeState: CodeState) {
+    switch (codeState.type) {
+      case "success":
+      case "noCode":
+        return;
+      case "formattingFailed":
+      case "runFailed":
+        this.log(codeState.error, LogLevel.CODE_RUN_ERROR);
+    }
+  }
 }
 
 export class StateManager {
@@ -117,7 +156,7 @@ export class StateManager {
   private durationLimitMs: number;
   private startTime: number;
 
-  constructor(stepLimit: number = 30, durationLimitMinutes: number = 5) {
+  constructor(stepLimit: number = 20, durationLimitMinutes: number = 5) {
     this.registerDefaultHandlers();
     this.stepLimit = stepLimit;
     this.durationLimitMs = durationLimitMinutes * 1000 * 60;
@@ -194,7 +233,10 @@ export class StateManager {
       stateExecution.updateNextState(State.CRITICAL_ERROR);
     }
 
-    console.log("Finishing state", stateExecution);
+    console.log(
+      chalk.cyan(`Finishing state ${State[stateExecution.state]}`),
+      stateExecution
+    );
     return {
       continueExecution: !this.isProcessComplete(),
       stateExecution,
@@ -264,7 +306,7 @@ export class StateManager {
     if (currentExecution) {
       currentExecution.log(message, level);
     } else {
-      console.log(`[${level}] ${message}`);
+      logWithLevel(message, level);
     }
   }
 
@@ -282,5 +324,44 @@ export class StateManager {
 
   private getNextExecutionId(): number {
     return ++this.currentExecutionId;
+  }
+
+  private findLastGenerateCodeIndex(): number {
+    return this.stateExecutions.findLastIndex(
+      (execution) => execution.state === State.GENERATE_CODE
+    );
+  }
+
+  private getMessagesFromExecutions(executionIndexes: number[]): Message[] {
+    return executionIndexes.flatMap((index) =>
+      this.stateExecutions[index].getConversationMessages()
+    );
+  }
+
+  getRelevantPreviousConversationMessages(maxRecentExecutions = 3): Message[] {
+    const getRelevantExecutionIndexes = (
+      lastGenerateCodeIndex: number,
+      maxRecentExecutions: number
+    ): number[] => {
+      const endIndex = this.stateExecutions.length - 1;
+      const startIndex = Math.max(
+        lastGenerateCodeIndex,
+        endIndex - maxRecentExecutions + 1
+      );
+      return [
+        lastGenerateCodeIndex,
+        ...Array.from(
+          { length: endIndex - startIndex + 1 },
+          (_, i) => startIndex + i
+        ),
+      ].filter((index, i, arr) => index >= 0 && arr.indexOf(index) === i);
+    };
+
+    const lastGenerateCodeIndex = this.findLastGenerateCodeIndex();
+    const relevantIndexes = getRelevantExecutionIndexes(
+      lastGenerateCodeIndex,
+      maxRecentExecutions
+    );
+    return this.getMessagesFromExecutions(relevantIndexes);
   }
 }
