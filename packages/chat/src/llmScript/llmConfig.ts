@@ -8,8 +8,8 @@ import { squiggleDocs } from "./helpers";
 // Configuration
 dotenv.config({ path: ".env.local" });
 
-// export const SELECTED_MODEL = "Claude-3.5-Sonnet";
-export const SELECTED_MODEL = "Claude-3-Haiku";
+export const SELECTED_MODEL = "Claude-3.5-Sonnet";
+// export const SELECTED_MODEL = "Claude-3-Haiku";
 // export const SELECTED_MODEL = "GPT-4o-mini";
 
 const anthropic = new Anthropic({
@@ -42,7 +42,7 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
   },
   "Claude-3.5-Sonnet": {
     provider: "anthropic",
-    model: "claude-3-sonnet-20240229",
+    model: "claude-3-5-sonnet-20240620",
     inputRate: 0.000003,
     outputRate: 0.000015,
     contextWindow: 200000,
@@ -179,10 +179,6 @@ export async function runLLM(
       const compressedMessages = compressAssistantMessages(conversationHistory);
       const claudeMessages = convertToClaudeMessages(compressedMessages);
 
-      console.log("Sending to Claude:", {
-        conversationHistory,
-        claudeMessages,
-      });
       if (claudeMessages.length === 0) {
         throw new Error("At least one message is required");
       }

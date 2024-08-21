@@ -1,7 +1,9 @@
+//promts.ts
+
 import { getSquiggleAdvice } from "./getSquiggleAdvice";
 
 export const generateNewSquiggleCodePrompt = (prompt: string): string => {
-  return `Generate Squiggle code for the following prompt. Produce only code, no explanations. Wrap the code in \`\`\`squiggle tags.\n\nPrompt: ${prompt}.\n\n`;
+  return `Generate Squiggle code for the following prompt. Produce only code, no explanations. Wrap the code in \`\`\`squiggle tags.\n\nPrompt: ${prompt}.\n\n It's important that we don't use many tokens, so don't add comments, and use short variable names if you can.`;
 };
 
 export const editExistingSquiggleCodePrompt = (
