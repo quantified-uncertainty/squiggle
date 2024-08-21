@@ -195,8 +195,10 @@ class SquiggleGenerator {
         return null;
       }
 
-      stateExecution.log(JSON.stringify(completion, null, 2), LogLevel.INFO);
-      stateExecution.log(`✨ Got response from OpenRouter`, LogLevel.HIGHLIGHT);
+      stateExecution.log(
+        "```json \n" + JSON.stringify(completion, null, 2) + "\n```",
+        LogLevel.INFO
+      );
 
       return completion.content;
     } catch (error: any) {
