@@ -1,4 +1,4 @@
-import { REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { BaseValue } from "./BaseValue.js";
 // Specific value classes
 import { VArray } from "./VArray.js";
@@ -90,7 +90,7 @@ export function isEqual(a: Value, b: Value): boolean {
   if (a.toString() !== b.toString()) {
     return false;
   }
-  throw new REOther("Equal not implemented for these inputs");
+  throw ErrorMessage.otherError("Equal not implemented for these inputs");
 }
 
 const _isUniqableType = (t: Value) => "isEqual" in t;
@@ -100,7 +100,9 @@ export function uniq(array: readonly Value[]): Value[] {
 
   for (const item of array) {
     if (!_isUniqableType(item)) {
-      throw new REOther(`Can't apply uniq() to element with type ${item.type}`);
+      throw ErrorMessage.otherError(
+        `Can't apply uniq() to element with type ${item.type}`
+      );
     }
     if (!uniqueArray.some((existingItem) => isEqual(existingItem, item))) {
       uniqueArray.push(item);
@@ -120,7 +122,7 @@ export function uniqBy(
   for (const item of array) {
     const computed = fn(item);
     if (!_isUniqableType(computed)) {
-      throw new REOther(
+      throw ErrorMessage.otherError(
         `Can't apply uniq() to element with type ${computed.type}`
       );
     }

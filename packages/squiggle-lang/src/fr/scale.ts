@@ -1,4 +1,4 @@
-import { REArgumentError, REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
   checkNumericTickFormat,
@@ -29,7 +29,7 @@ const dateDict = tDict(
 
 function checkMinMax(min: number | null, max: number | null) {
   if (min !== null && max !== null && max <= min) {
-    throw new REArgumentError(
+    throw ErrorMessage.argumentError(
       `Max must be greater than min, got: min=${min}, max=${max}`
     );
   }
@@ -37,7 +37,7 @@ function checkMinMax(min: number | null, max: number | null) {
 
 function checkMinMaxDates(min: SDate | null, max: SDate | null) {
   if (!!min && !!max && max.toMs() <= min.toMs()) {
-    throw new REArgumentError(
+    throw ErrorMessage.argumentError(
       `Max must be greater than min, got: min=${min.toString()}, max=${max.toString()}`
     );
   }
@@ -79,7 +79,9 @@ export const library = [
         tScale,
         ([{ min, max, tickFormat, title }]) => {
           if (min !== null && min <= 0) {
-            throw new REOther(`Min must be over 0 for log scale, got: ${min}`);
+            throw ErrorMessage.otherError(
+              `Min must be over 0 for log scale, got: ${min}`
+            );
           }
           checkMinMax(min, max);
           checkNumericTickFormat(tickFormat);
@@ -122,7 +124,7 @@ The default value for \`constant\` is \`${0.0001}\`.`, // I tried to set this to
           checkMinMax(min, max);
           checkNumericTickFormat(tickFormat);
           if (constant !== null && constant === 0) {
-            throw new REOther(`Symlog scale constant cannot be 0.`);
+            throw ErrorMessage.otherError(`Symlog scale constant cannot be 0.`);
           }
 
           return {
@@ -164,7 +166,9 @@ The default value for \`exponent\` is \`${0.1}\`.`,
           checkMinMax(min, max);
           checkNumericTickFormat(tickFormat);
           if (exponent !== null && exponent <= 0) {
-            throw new REOther(`Power Scale exponent must be over 0.`);
+            throw ErrorMessage.otherError(
+              `Power Scale exponent must be over 0.`
+            );
           }
 
           return {

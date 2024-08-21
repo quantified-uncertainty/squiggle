@@ -1,6 +1,6 @@
 import mergeWith from "lodash/mergeWith.js";
 
-import { REArgumentError, REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
   FnFactory,
@@ -57,13 +57,13 @@ export function assertValidMinMax(scale: Scale) {
 
   // Validate scale properties
   if (hasMin !== hasMax) {
-    throw new REArgumentError(
+    throw ErrorMessage.argumentError(
       `Scale ${hasMin ? "min" : "max"} set without ${
         hasMin ? "max" : "min"
       }. Must set either both or neither.`
     );
   } else if (hasMin && hasMax && scale.min! >= scale.max!) {
-    throw new REArgumentError(
+    throw ErrorMessage.argumentError(
       `Scale min (${scale.min}) is greater or equal than than max (${scale.max})`
     );
   }
@@ -102,7 +102,7 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
 function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
   const counts = fn.parameterCounts();
   if (!counts.includes(1)) {
-    throw new REOther(
+    throw ErrorMessage.otherError(
       `Unreachable: extractDomainFromOneArgFunction() called with function that doesn't have exactly one parameter.`
     );
   }
@@ -120,7 +120,7 @@ function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
 
 const _assertYScaleNotDateScale = (yScale: Scale | null) => {
   if (yScale && yScale.method?.type === "date") {
-    throw new REArgumentError(
+    throw ErrorMessage.argumentError(
       "Using a date scale as the plot yScale is not yet supported."
     );
   }
@@ -146,7 +146,7 @@ function formatXPoints(
   }
 
   if (points.length > 10000) {
-    throw new REArgumentError(
+    throw ErrorMessage.argumentError(
       "xPoints must have under 10001 unique elements, within the provided xScale"
     );
   }

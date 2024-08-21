@@ -1,4 +1,4 @@
-import { REArgumentError } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
@@ -147,13 +147,15 @@ export const library = [
             new Set(vars.options).size !== vars.options.length;
 
           if (isEmpty()) {
-            throw new REArgumentError("Options cannot be empty");
+            throw ErrorMessage.argumentError("Options cannot be empty");
           } else if (defaultNotInOptions()) {
-            throw new REArgumentError(
+            throw ErrorMessage.argumentError(
               "Default value must be one of the options provided"
             );
           } else if (hasDuplicates()) {
-            throw new REArgumentError("Options cannot have duplicate values");
+            throw ErrorMessage.argumentError(
+              "Options cannot have duplicate values"
+            );
           }
           return {
             type: "select",

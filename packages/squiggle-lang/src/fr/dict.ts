@@ -1,6 +1,6 @@
 import { OrderedMap } from "immutable";
 
-import { REArgumentError } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
@@ -226,7 +226,9 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
             if (mappedKey.type === "String") {
               mappedEntries.push([mappedKey.value, value]);
             } else {
-              throw new REArgumentError("mapKeys: lambda must return a string");
+              throw ErrorMessage.argumentError(
+                "mapKeys: lambda must return a string"
+              );
             }
           }
           return ImmutableMap(mappedEntries);

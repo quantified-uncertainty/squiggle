@@ -1,6 +1,8 @@
-import { REOther } from "../../errors/messages.js";
+import { LocationRange } from "../../ast/types.js";
+import { ErrorMessage } from "../../errors/messages.js";
 import { TTypedLambda } from "../../types/TTypedLambda.js";
 import { Value } from "../../value/index.js";
+import { Frame } from "../FrameStack.js";
 import { Reducer } from "../Reducer.js";
 import { FnDefinition } from "./FnDefinition.js";
 import { BaseLambda } from "./index.js";
@@ -14,7 +16,7 @@ export class BuiltinLambda extends BaseLambda {
 
   constructor(
     public name: string,
-    private definitions: FnDefinition[]
+    public definitions: FnDefinition[]
   ) {
     super();
 
@@ -48,25 +50,21 @@ export class BuiltinLambda extends BaseLambda {
       .join(" | ");
   }
 
-  callBody(args: Value[], reducer: Reducer): Value {
+  call(args: Value[], reducer: Reducer, location?: LocationRange): Value {
+    reducer.frameStack.extend(new Frame(this, location));
+
     for (const definition of this.definitions) {
       const callResult = definition.tryCall(args, reducer);
       if (callResult !== undefined) {
+        // If lambda throws an exception, this won't happen.  This is intentional;
+        // it allows us to build the correct stacktrace with `.errorFromException`
+        // method later.
+        reducer.frameStack.pop();
         return callResult;
       }
     }
 
     // None of the definitions matched the arguments.
-
-    const defsString = this.definitions
-      .filter((d) => d.showInDocumentation())
-      .map((def) => `  ${this.name}${def}\n`)
-      .join("");
-
-    const message = `There are function matches for ${this.name}(), but with different arguments:\n${defsString}Was given arguments: (${args.join(
-      ","
-    )})`;
-
-    throw new REOther(message);
+    throw ErrorMessage.runtimeCallSignatureMismatchError(this, args);
   }
 }

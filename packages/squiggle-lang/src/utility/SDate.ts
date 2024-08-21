@@ -1,4 +1,4 @@
-import { REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import * as Result from "./result.js";
 import { Err, Ok, result } from "./result.js";
 import { durationUnits, SDuration } from "./SDuration.js";
@@ -52,9 +52,11 @@ export class SDate {
 
   static fromYearMonthDay(year: number, month: number, day: number): SDate {
     if (month < 1 || month > 12) {
-      throw new REOther(`Month must be between 1 and 12, got ${month}`);
+      throw ErrorMessage.otherError(
+        `Month must be between 1 and 12, got ${month}`
+      );
     } else if (day < 1 || day > 31) {
-      throw new REOther(`Day must be between 1 and 31, got ${day}`);
+      throw ErrorMessage.otherError(`Day must be between 1 and 31, got ${day}`);
     }
     return new SDate(new Date(year, month - 1, day));
   }

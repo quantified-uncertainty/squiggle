@@ -4,7 +4,7 @@ import jstat from "jstat";
 
 import { Binomial } from "../dists/SymbolicDist/Binomial.js";
 import * as PoissonJs from "../dists/SymbolicDist/Poisson.js";
-import { REArgumentError, REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import {
   FnFactory,
@@ -149,7 +149,7 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
     if (result.type === "Number") {
       return result.value;
     }
-    throw new REOther(
+    throw ErrorMessage.otherError(
       "Error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"
     );
   };
@@ -242,7 +242,7 @@ Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, nu
         tNumber,
         ([lambda, min, max, numIntegrationPoints], reducer) => {
           if (numIntegrationPoints === 0) {
-            throw new REOther(
+            throw ErrorMessage.otherError(
               "Integration error 4 in Danger.integrate: Increment can't be 0."
             );
           }
@@ -284,7 +284,7 @@ Same caveats as \`integrateFunctionBetweenWithNumIntegrationPoints\` apply.`,
         tNumber,
         ([lambda, min, max, epsilon], reducer) => {
           if (epsilon === 0) {
-            throw new REOther(
+            throw ErrorMessage.otherError(
               "Integration error in Danger.integrate: Increment can't be 0."
             );
           }
@@ -355,22 +355,22 @@ const diminishingReturnsLibrary = [
       2. O(n*(m-1)): Iterate through all possible spending combinations. The advantage of this option is that it wouldn't assume that the returns of marginal spending are diminishing.
  */
           if (lambdas.length <= 1) {
-            throw new REOther(
+            throw ErrorMessage.otherError(
               "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, number of functions should be greater than 1."
             );
           }
           if (funds <= 0) {
-            throw new REOther(
+            throw ErrorMessage.otherError(
               "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, funds should be greater than 0."
             );
           }
           if (approximateIncrement <= 0) {
-            throw new REOther(
+            throw ErrorMessage.otherError(
               "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be greater than 0."
             );
           }
           if (approximateIncrement >= funds) {
-            throw new REOther(
+            throw ErrorMessage.otherError(
               "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be smaller than funds amount."
             );
           }
@@ -380,7 +380,7 @@ const diminishingReturnsLibrary = [
             if (lambdaResult.type === "Number") {
               return lambdaResult.value;
             }
-            throw new REOther(
+            throw ErrorMessage.otherError(
               "Error 1 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"
             );
           };
@@ -486,7 +486,7 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
         tArray(tArray(tAny({ genericName: "A" }))),
         ([elements, n]) => {
           if (n > elements.length) {
-            throw new REArgumentError(
+            throw ErrorMessage.argumentError(
               `Combinations of length ${n} were requested, but full list is only ${elements.length} long.`
             );
           }

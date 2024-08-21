@@ -1,4 +1,4 @@
-import { REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,
@@ -45,7 +45,7 @@ export class VDomain extends BaseValue<"Domain", number> implements Indexable {
       }
     }
 
-    throw new REOther("Trying to access non-existent field");
+    throw ErrorMessage.otherError("Trying to access non-existent field");
   }
 
   isEqual(other: VDomain) {

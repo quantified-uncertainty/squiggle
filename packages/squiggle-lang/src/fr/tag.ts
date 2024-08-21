@@ -1,4 +1,4 @@
-import { REArgumentError, REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
   checkNumericTickFormat,
@@ -231,7 +231,7 @@ example2 = {|x| x + 1}`,
         tWithTags(tAny({ genericName: "A" })),
         ([{ value, tags }, { value: specValue, tags: specTags }]) => {
           if (tags.specification()) {
-            throw new REArgumentError(
+            throw ErrorMessage.argumentError(
               "Specification already exists. Be sure to use Tag.omit() first."
             );
           }
@@ -418,7 +418,7 @@ example2 = {|x| x + 1}`,
         ([{ value, tags }], { frameStack }) => {
           const location = frameStack.getTopFrame()?.location;
           if (!location) {
-            throw new REOther("Location is missing in call stack");
+            throw ErrorMessage.otherError("Location is missing in call stack");
           }
           return {
             value,
@@ -458,7 +458,9 @@ example2 = {|x| x + 1}`,
         tWithTags(tAny({ genericName: "A" })),
         ([{ tags, value }, parameterNames]) => {
           const newParams = tags.omitUsingStringKeys([...parameterNames]);
-          const _args = getOrThrow(newParams, (e) => new REArgumentError(e));
+          const _args = getOrThrow(newParams, (e) =>
+            ErrorMessage.argumentError(e)
+          );
           return { tags: _args, value };
         }
       ),

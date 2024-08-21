@@ -2,7 +2,7 @@ import maxBy from "lodash/maxBy.js";
 import minBy from "lodash/minBy.js";
 import sortBy from "lodash/sortBy.js";
 
-import { REArgumentError, REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
   chooseLambdaParamLength,
@@ -86,7 +86,7 @@ export function _reduceWhile(
 
     const checkResult = reducer.call(condition, [newAcc]);
     if (checkResult.type !== "Bool") {
-      throw new REArgumentError(
+      throw ErrorMessage.argumentError(
         `Condition should return a boolean value, got: ${checkResult.type}`
       );
     }
@@ -101,20 +101,20 @@ export function _reduceWhile(
 
 const _assertInteger = (number: number) => {
   if (!Number.isInteger(number)) {
-    throw new REArgumentError(`Number ${number} must be an integer`);
+    throw ErrorMessage.argumentError(`Number ${number} must be an integer`);
   }
 };
 
 const _assertValidArrayLength = (number: number) => {
   if (number < 0) {
-    throw new REArgumentError("Expected non-negative number");
+    throw ErrorMessage.argumentError("Expected non-negative number");
   } else if (!Number.isInteger(number)) {
-    throw new REArgumentError("Number must be an integer");
+    throw ErrorMessage.argumentError("Number must be an integer");
   }
 };
 const _assertUnemptyArray = (array: readonly Value[]) => {
   if (array.length === 0) {
-    throw new REArgumentError("List must not be empty");
+    throw ErrorMessage.argumentError("List must not be empty");
   }
 };
 
@@ -132,7 +132,7 @@ function applyLambdaAndCheckNumber(
 ): number {
   const item = reducer.call(lambda, [element]);
   if (item.type !== "Number") {
-    throw new REArgumentError("Function must return a number");
+    throw ErrorMessage.argumentError("Function must return a number");
   }
   return item.value;
 }
@@ -204,7 +204,7 @@ export const library = [
         tArray(tNumber),
         ([low, high]) => {
           if (!Number.isInteger(low) || !Number.isInteger(high)) {
-            throw new REArgumentError(
+            throw ErrorMessage.argumentError(
               "Low and high values must both be integers"
             );
           }
@@ -323,7 +323,7 @@ export const library = [
           );
           if (!el) {
             //This should never be reached, because we checked that the array is not empty
-            throw new REOther("No element found");
+            throw ErrorMessage.otherError("No element found");
           }
           return el;
         }
@@ -349,7 +349,7 @@ export const library = [
           );
           if (!el) {
             //This should never be reached, because we checked that the array is not empty
-            throw new REOther("No element found");
+            throw ErrorMessage.otherError("No element found");
           }
           return el;
         }
@@ -657,7 +657,7 @@ List.reduceWhile(
         ([array, lambda], reducer) => {
           const result = array.find(_binaryLambdaCheck1(lambda, reducer));
           if (!result) {
-            throw new REOther("No element found");
+            throw ErrorMessage.otherError("No element found");
           }
           return result;
         }
@@ -741,7 +741,7 @@ List.reduceWhile(
         tArray(tTuple(tAny({ genericName: "A" }), tAny({ genericName: "B" }))),
         ([array1, array2]) => {
           if (array1.length !== array2.length) {
-            throw new REArgumentError("List lengths must be equal");
+            throw ErrorMessage.argumentError("List lengths must be equal");
           }
           return zip(array1, array2);
         }

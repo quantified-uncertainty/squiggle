@@ -1,4 +1,4 @@
-import { BaseErrorMessage, REThrow } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
@@ -74,11 +74,9 @@ myFn = typeOf({|e| e})`,
         [fnInput({ name: "message", optional: true, type: tString })],
         tAny(),
         ([value]) => {
-          if (value) {
-            throw new REThrow(value);
-          } else {
-            throw new REThrow("Common.throw() was called");
-          }
+          throw ErrorMessage.userThrowError(
+            value ?? "Common.throw() was called"
+          );
         }
       ),
     ],
@@ -105,7 +103,7 @@ myFn = typeOf({|e| e})`,
           try {
             return { tag: "1", value: reducer.call(fn, []) };
           } catch (e) {
-            if (!(e instanceof BaseErrorMessage)) {
+            if (!(e instanceof ErrorMessage)) {
               // This doesn't looks like an error in user code, treat it as fatal
               throw e;
             }

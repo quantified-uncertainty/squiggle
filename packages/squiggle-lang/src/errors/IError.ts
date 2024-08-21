@@ -4,14 +4,7 @@ import {
   StackTrace,
   StackTraceFrame,
 } from "../reducer/StackTrace.js";
-import {
-  BaseErrorMessage,
-  deserializeErrorMessage,
-  ErrorMessage,
-  REJavaScriptExn,
-  REOther,
-  SerializedErrorMessage,
-} from "./messages.js";
+import { ErrorMessage } from "./messages.js";
 
 function snippetByLocation(
   location: LocationRange,
@@ -83,20 +76,17 @@ export class IRuntimeError extends Error {
   static fromException(err: unknown, stackTrace: StackTrace): IRuntimeError {
     if (err instanceof IRuntimeError) {
       return err;
-    } else if (err instanceof BaseErrorMessage) {
+    } else if (err instanceof ErrorMessage) {
       // probably comes from FunctionRegistry, adding stacktrace
-      return IRuntimeError.fromMessage(
-        err as ErrorMessage, // assuming ErrorMessage type union is complete
-        stackTrace
-      );
+      return IRuntimeError.fromMessage(err, stackTrace);
     } else if (err instanceof Error) {
       return IRuntimeError.fromMessage(
-        new REJavaScriptExn(err.message, err.name),
+        ErrorMessage.javascriptError(err.message, err.name),
         stackTrace
       );
     } else {
       return IRuntimeError.fromMessage(
-        new REOther("Unknown exception"),
+        ErrorMessage.otherError("Unknown exception"),
         stackTrace
       );
     }
@@ -151,7 +141,7 @@ export class IRuntimeError extends Error {
 
   static deserialize(data: SerializedIRuntimeError): IRuntimeError {
     return new IRuntimeError(
-      deserializeErrorMessage(data.message),
+      ErrorMessage.deserialize(data.message),
       StackTrace.deserialize(data.stackTrace)
     );
   }
@@ -159,7 +149,7 @@ export class IRuntimeError extends Error {
 
 type SerializedIRuntimeError = {
   type: "IRuntimeError";
-  message: SerializedErrorMessage;
+  message: ReturnType<ErrorMessage["serialize"]>;
   stackTrace: SerializedStackTrace;
 };
 

@@ -1,7 +1,7 @@
 import { xyShapeDistError } from "../dists/DistError.js";
 import { PointSetDist } from "../dists/PointSetDist.js";
 import { PointMass } from "../dists/SymbolicDist/PointMass.js";
-import { REDistributionError } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
   doNumberLambdaCall,
@@ -37,7 +37,7 @@ const argsToXYShape = (
     inputs.map(({ x, y }) => [x, y] as const)
   );
   if (!result.ok) {
-    throw new REDistributionError(xyShapeDistError(result.value));
+    throw ErrorMessage.distributionError(xyShapeDistError(result.value));
   }
   return result.value;
 };

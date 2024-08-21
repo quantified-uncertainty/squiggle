@@ -166,7 +166,10 @@ export class CompileContext {
     identifier: NodeIdentifier
   ): IRByKind<"StackRef" | "CaptureRef" | "Value"> {
     if (identifier.resolved.kind === "builtin") {
-      return this.resolveBuiltin(identifier.location, identifier.value);
+      return {
+        location: identifier.location,
+        ...make("Value", identifier.resolved.value),
+      };
     }
 
     return this.resolveNameFromDepth(

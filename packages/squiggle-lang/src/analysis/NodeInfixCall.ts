@@ -13,7 +13,7 @@ export class NodeInfixCall extends ExpressionNode<"InfixCall"> {
     location: LocationRange,
     public op: InfixOperator,
     public args: [AnyTypedExpressionNode, AnyTypedExpressionNode],
-    type: Type<unknown>
+    type: Type
   ) {
     super("InfixCall", location, type);
     this._init();

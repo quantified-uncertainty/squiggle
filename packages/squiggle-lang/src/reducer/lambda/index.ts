@@ -4,7 +4,6 @@ import { LocationRange } from "../../ast/types.js";
 import { TTypedLambda } from "../../types/TTypedLambda.js";
 import { sort } from "../../utility/E_A_Floats.js";
 import { Value } from "../../value/index.js";
-import { Frame } from "../FrameStack.js";
 import { Reducer } from "../Reducer.js";
 import { BuiltinLambda } from "./BuiltinLambda.js";
 import { UserDefinedLambda } from "./UserDefinedLambda.js";
@@ -20,25 +19,21 @@ export abstract class BaseLambda {
   abstract signatures(): TTypedLambda[];
   abstract parameterString(): string;
 
-  protected abstract callBody(args: Value[], reducer: Reducer): Value;
-
-  // Prepare a new frame and call the lambda's body with given args.
-  call(args: Value[], reducer: Reducer, location?: LocationRange) {
-    const initialStackSize = reducer.stack.size();
-
-    reducer.frameStack.extend(new Frame(this, location));
-
-    try {
-      const result = this.callBody(args, reducer);
-      // If lambda throws an exception, this won't happen.  This is intentional;
-      // it allows us to build the correct stacktrace with `.errorFromException`
-      // method later.
-      reducer.frameStack.pop();
-      return result;
-    } finally {
-      reducer.stack.shrink(initialStackSize);
-    }
-  }
+  // Call the lambda's body with given args.
+  // Implementation is responsible for extending and popping the frame stack.
+  //
+  // Frame stack should be popped only if the lambda body completes
+  // successfully; if the lambda throws while evaluating its body, the frame of
+  // this lambda should be left on the frame stack.
+  //
+  // Note: it's hard to reuse the common code between UserDefinedLambda and
+  // BuiltinLambda here, because UserDefinedLambda checks its arguments _before_
+  // it pushes the frame on frame stack.
+  abstract call(
+    args: Value[],
+    reducer: Reducer,
+    location?: LocationRange
+  ): Value;
 
   parameterCounts() {
     return sort(uniq(this.signatures().map((s) => s.inputs.length)));

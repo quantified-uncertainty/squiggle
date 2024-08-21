@@ -1,4 +1,4 @@
-import { REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { ImmutableMap } from "../utility/immutable.js";
@@ -40,10 +40,12 @@ export class VLambda extends BaseValue<"Lambda", number> implements Indexable {
             })
           );
         case "BuiltinLambda":
-          throw new REOther("Can't access parameters on built in functions");
+          throw ErrorMessage.otherError(
+            "Can't access parameters on built in functions"
+          );
       }
     }
-    throw new REOther("No such field");
+    throw ErrorMessage.otherError("No such field");
   }
 
   override serializePayload(visit: SquiggleSerializationVisitor) {

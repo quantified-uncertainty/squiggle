@@ -1,4 +1,4 @@
-import { REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
   FnFactory,
@@ -40,7 +40,7 @@ d3 = Date.make(2020.5)`,
       makeDefinition([tString], tDate, ([str]) => {
         const result = SDate.fromString(str);
         if (!result.ok) {
-          throw new REOther(result.value);
+          throw ErrorMessage.otherError(result.value);
         }
         return result.value;
       }),
@@ -59,7 +59,7 @@ d3 = Date.make(2020.5)`,
       makeDefinition([namedInput("year", tNumber)], tDate, ([yr]) => {
         const year = SDate.fromYear(yr);
         if (!year.ok) {
-          throw new REOther(year.value);
+          throw ErrorMessage.otherError(year.value);
         }
         return year.value;
       }),

@@ -1,4 +1,3 @@
-import { REDomainError } from "../errors/messages.js";
 import { fnInputsMatchesLengths } from "../library/registry/helpers.js";
 import {
   InputOrType,
@@ -18,7 +17,7 @@ export type InferredOutputType =
   | {
       kind: "ok";
       type: Type;
-      // TODO - list all compatible signatures
+      // TODO - list all compatible signatures; then we can use the filtered list in the reducer for better performance
     }
   | {
       kind: "arity";
@@ -146,9 +145,6 @@ export class TTypedLambda extends Type<Lambda> {
         return Err({
           kind: "domain",
           position: i,
-          err: new REDomainError(
-            `Parameter ${args[i].valueToString()} must be in domain ${type}`
-          ),
         });
       }
     }

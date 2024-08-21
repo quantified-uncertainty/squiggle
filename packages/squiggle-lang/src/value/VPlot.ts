@@ -1,6 +1,6 @@
 import { BaseDist } from "../dists/BaseDist.js";
 import { SampleSetDist } from "../dists/SampleSetDist/index.js";
-import { REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import {
   SquiggleDeserializationVisitor,
@@ -123,7 +123,7 @@ export class VPlot
       return vLambda(this.value.fn);
     }
 
-    throw new REOther("Trying to access non-existent field");
+    throw ErrorMessage.otherError("Trying to access non-existent field");
   }
 
   override serializePayload(

@@ -7,12 +7,7 @@ import { Env } from "../../dists/env.js";
 import * as SampleSetDist from "../../dists/SampleSetDist/index.js";
 import * as SymbolicDist from "../../dists/SymbolicDist/index.js";
 import { PointMass } from "../../dists/SymbolicDist/PointMass.js";
-import {
-  REArgumentError,
-  REDistributionError,
-  REOperationError,
-  REOther,
-} from "../../errors/messages.js";
+import { ErrorMessage } from "../../errors/messages.js";
 import {
   OtherOperationError,
   SampleMapNeedsNtoNFunction,
@@ -264,7 +259,7 @@ export class FnFactory {
 
 export function unwrapDistResult<T>(result: Result.result<T, DistError>): T {
   if (!result.ok) {
-    throw new REDistributionError(result.value);
+    throw ErrorMessage.distributionError(result.value);
   }
   return result.value;
 }
@@ -278,7 +273,7 @@ export function doNumberLambdaCall(
   if (value.type === "Number") {
     return value.value;
   }
-  throw new REOperationError(new SampleMapNeedsNtoNFunction());
+  throw ErrorMessage.operationError(new SampleMapNeedsNtoNFunction());
 }
 
 export function doBinaryLambdaCall(
@@ -290,7 +285,7 @@ export function doBinaryLambdaCall(
   if (value.type === "Bool") {
     return value.value;
   }
-  throw new REOther("Expected function to return a boolean value");
+  throw ErrorMessage.otherError("Expected function to return a boolean value");
 }
 
 export const parseDistFromDistOrNumber = (d: number | BaseDist): BaseDist =>
@@ -303,7 +298,7 @@ export function makeSampleSet(d: BaseDist, reducer: Reducer) {
     reducer.rng
   );
   if (!result.ok) {
-    throw new REDistributionError(result.value);
+    throw ErrorMessage.distributionError(result.value);
   }
   return result.value;
 }
@@ -343,11 +338,11 @@ export function twoVarSample(
   } else if (typeof v1 === "number" && typeof v2 === "number") {
     const result = fn(v1, v2);
     if (!result.ok) {
-      throw new REOther(result.value);
+      throw ErrorMessage.otherError(result.value);
     }
     return makeSampleSet(result.value, reducer);
   }
-  throw new REOther("Impossible branch");
+  throw ErrorMessage.otherError("Impossible branch");
 }
 
 export function makeTwoArgsSamplesetDist(
@@ -386,11 +381,11 @@ export function makeOneArgSamplesetDist(
       } else if (typeof v === "number") {
         const result = fn(v);
         if (!result.ok) {
-          throw new REOther(result.value);
+          throw ErrorMessage.otherError(result.value);
         }
         return makeSampleSet(result.value, reducer);
       }
-      throw new REOther("Impossible branch");
+      throw ErrorMessage.otherError("Impossible branch");
     }
   );
 }
@@ -514,6 +509,6 @@ const d3TickFormatRegex =
 
 export function checkNumericTickFormat(tickFormat: string | null) {
   if (tickFormat && !d3TickFormatRegex.test(tickFormat)) {
-    throw new REArgumentError(`Tick format [${tickFormat}] is invalid.`);
+    throw ErrorMessage.argumentError(`Tick format [${tickFormat}] is invalid.`);
   }
 }

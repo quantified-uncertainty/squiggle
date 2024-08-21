@@ -1,11 +1,9 @@
+import { LocationRange } from "../../ast/types.js";
 import { AnyExpressionIR } from "../../compiler/types.js";
-import {
-  REArgumentDomainError,
-  REArityError,
-  REDomainError,
-} from "../../errors/messages.js";
+import { ErrorMessage } from "../../errors/messages.js";
 import { TTypedLambda } from "../../types/TTypedLambda.js";
 import { Value } from "../../value/index.js";
+import { Frame } from "../FrameStack.js";
 import { Reducer } from "../Reducer.js";
 import { BaseLambda } from "./index.js";
 
@@ -30,17 +28,22 @@ export class UserDefinedLambda extends BaseLambda {
     this.signature = signature;
   }
 
-  callBody(args: Value[], reducer: Reducer) {
+  call(args: Value[], reducer: Reducer, location?: LocationRange): Value {
+    // validate domains
     const validatedArgs = this.signature.validateArgs(args);
     if (!validatedArgs.ok) {
       const err = validatedArgs.value;
       if (err.kind === "arity") {
-        throw new REArityError([this.signature.inputs.length], args.length);
+        throw ErrorMessage.arityError(
+          [this.signature.inputs.length],
+          args.length
+        );
       } else if (err.kind === "domain") {
-        throw new REArgumentDomainError(
+        throw new UserDefinedLambdaDomainError(
           err.position,
-          new REDomainError(
-            `Parameter ${args[err.position].valueToString()} must be in domain ${this.signature.inputs[err.position].type}`
+          ErrorMessage.domainError(
+            args[err.position],
+            this.signature.inputs[err.position].type
           )
         );
       } else {
@@ -48,11 +51,21 @@ export class UserDefinedLambda extends BaseLambda {
       }
     }
 
-    for (const arg of validatedArgs.value) {
-      reducer.stack.push(arg);
-    }
+    // put the lambda on the frame stack and args on the stack, call the lambda
+    reducer.frameStack.extend(new Frame(this, location));
 
-    return reducer.evaluateExpression(this.body);
+    const initialStackSize = reducer.stack.size();
+
+    try {
+      for (const arg of validatedArgs.value) {
+        reducer.stack.push(arg);
+      }
+      const callResult = reducer.evaluateExpression(this.body);
+      reducer.frameStack.pop();
+      return callResult;
+    } finally {
+      reducer.stack.shrink(initialStackSize);
+    }
   }
 
   display() {
@@ -74,4 +87,11 @@ export class UserDefinedLambda extends BaseLambda {
   parameterString() {
     return this.getParameterNames().join(",");
   }
+}
+
+export class UserDefinedLambdaDomainError {
+  constructor(
+    public idx: number,
+    public error: ErrorMessage
+  ) {}
 }

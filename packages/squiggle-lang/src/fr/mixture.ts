@@ -1,7 +1,7 @@
 import { BaseDist } from "../dists/BaseDist.js";
 import { argumentError } from "../dists/DistError.js";
 import * as distOperations from "../dists/distOperations/index.js";
-import { REDistributionError } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import {
   parseDistFromDistOrNumber,
   unwrapDistResult,
@@ -49,7 +49,7 @@ const asArrays = makeDefinition(
   ([dists, weights], reducer) => {
     if (weights) {
       if (dists.length !== weights.length) {
-        throw new REDistributionError(
+        throw ErrorMessage.distributionError(
           argumentError(
             "Error, mixture call has different number of distributions and weights"
           )

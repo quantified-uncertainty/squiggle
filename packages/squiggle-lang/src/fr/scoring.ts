@@ -1,7 +1,7 @@
 import { BaseDist } from "../dists/BaseDist.js";
 import * as distOperations from "../dists/distOperations/index.js";
 import { Env } from "../dists/env.js";
-import { REArgumentError, REDistributionError } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
@@ -25,7 +25,7 @@ const runScoringScalarAnswer = (
     env,
   });
   if (!result.ok) {
-    throw new REDistributionError(result.value);
+    throw ErrorMessage.distributionError(result.value);
   }
   return result.value;
 };
@@ -43,7 +43,7 @@ const runScoringDistAnswer = (
     env,
   });
   if (!result.ok) {
-    throw new REDistributionError(result.value);
+    throw ErrorMessage.distributionError(result.value);
   }
   return result.value;
 };
@@ -124,7 +124,7 @@ Note that this can be very brittle. If the second distribution has probability m
               );
             }
           }
-          throw new REArgumentError("Impossible type");
+          throw ErrorMessage.argumentError("Impossible type");
         }
       ),
     ],

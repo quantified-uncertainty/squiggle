@@ -2,6 +2,7 @@ import { KindNode, LocationRange } from "../ast/types.js";
 import { ICompileError } from "../errors/IError.js";
 import { getValueType } from "../types/helpers.js";
 import { Type } from "../types/Type.js";
+import { Value } from "../value/index.js";
 import { AnalysisContext } from "./context.js";
 import { ExpressionNode } from "./Node.js";
 import { NodeIdentifierDefinition } from "./NodeIdentifierDefinition.js";
@@ -13,7 +14,7 @@ type ResolvedIdentifier =
     }
   | {
       kind: "builtin";
-      // TODO - point to the specific builtin (this will require access to stdlib during analysis stage)
+      value: Value;
     };
 
 export class NodeIdentifier extends ExpressionNode<"Identifier"> {
@@ -57,6 +58,7 @@ export class NodeIdentifier extends ExpressionNode<"Identifier"> {
         node.value,
         {
           kind: "builtin",
+          value: builtin,
         },
         getValueType(builtin)
       );
@@ -75,7 +77,7 @@ export class NodeIdentifier extends ExpressionNode<"Identifier"> {
     return new NodeIdentifier(
       node.location,
       node.value,
-      { kind: "builtin" },
+      { kind: "builtin", value: builtin },
       getValueType(builtin)
     );
   }

@@ -1,4 +1,4 @@
-import { REArgumentError } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
   FnFactory,
@@ -17,7 +17,7 @@ const maker = new FnFactory({
 
 const assertIsNotEmpty = (arr: readonly number[]) => {
   if (arr.length === 0) {
-    throw new REArgumentError("List is empty");
+    throw ErrorMessage.argumentError("List is empty");
   }
 };
 

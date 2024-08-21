@@ -6,7 +6,7 @@ test("call wrong type", () => {
 x = 1
 y = x(1)
 `)
-  ).toThrow("Value of type Number is not callable");
+  ).toThrow(/^Number is not a function/);
 });
 
 test("infix calls", () => {

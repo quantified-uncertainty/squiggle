@@ -1,4 +1,4 @@
-import { REAmbiguous } from "../../errors/messages.js";
+import { ErrorMessage } from "../../errors/messages.js";
 import { UnwrapType } from "../../types/helpers.js";
 import { tAny, tTypedLambda } from "../../types/index.js";
 import { TTypedLambda } from "../../types/TTypedLambda.js";
@@ -101,7 +101,7 @@ export class FnDefinition {
     return new FnDefinition({
       signature: tTypedLambda(inputs, tAny()),
       run: () => {
-        throw new REAmbiguous(errorMsg);
+        throw ErrorMessage.ambiguousError(errorMsg);
       },
       isAssert: true,
     });

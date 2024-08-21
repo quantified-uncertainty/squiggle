@@ -1,5 +1,5 @@
 import { INDEX_LOOKUP_FUNCTION } from "../compiler/constants.js";
-import { REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { BuiltinLambda } from "../reducer/lambda/BuiltinLambda.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { Lambda } from "../reducer/lambda/index.js";
@@ -18,7 +18,7 @@ function makeLookupLambda(): Lambda {
       if ("get" in obj) {
         return obj.get(key);
       } else {
-        throw new REOther("Trying to access key on wrong value");
+        throw ErrorMessage.otherError("Trying to access key on wrong value");
       }
     }),
   ]);

@@ -1,6 +1,6 @@
 import { KindNode, LocationRange } from "../ast/types.js";
 import { ICompileError } from "../errors/IError.js";
-import { REArityError } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { inferOutputTypeByMultipleSignatures } from "../types/helpers.js";
 import { TIntrinsic } from "../types/TIntrinsic.js";
 import { TTypedLambda } from "../types/TTypedLambda.js";
@@ -61,7 +61,7 @@ export class NodeCall extends ExpressionNode<"Call"> {
         type = tAny();
       } else {
         throw new ICompileError(
-          `Value of type ${fnType.display()} is not callable`,
+          ErrorMessage.typeIsNotAFunctionError(fnType).toString(),
           node.location
         );
       }
@@ -80,12 +80,15 @@ export class NodeCall extends ExpressionNode<"Call"> {
           break;
         case "arity":
           throw new ICompileError(
-            new REArityError(inferResult.arity, args.length).toString(),
+            ErrorMessage.arityError(inferResult.arity, args.length).toString(),
             node.location
           );
         case "no-match":
           throw new ICompileError(
-            `Function does not support types (${args.map((arg) => arg.type.display()).join(", ")})`,
+            ErrorMessage.callSignatureMismatchError(
+              fn,
+              args.map((a) => a.type)
+            ).toString(),
             node.location
           );
       }

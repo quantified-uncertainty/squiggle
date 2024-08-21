@@ -76,7 +76,7 @@ export function inferOutputTypeByMultipleSignatures(
   // (I don't think we have any functions like that in stdlib, though)
   return {
     kind: "arity",
-    arity: arityErrors.flatMap((error) => error.arity), // de-dupe?
+    arity: arityErrors.flatMap((error) => error.arity), // de-dupe? (doesn't matter for now, REArityError only checks for min and max)
   };
 }
 

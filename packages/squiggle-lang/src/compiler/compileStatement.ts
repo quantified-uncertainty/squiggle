@@ -11,10 +11,8 @@ export function compileStatement(
   let value = compileExpression(ast.value, context);
 
   for (const decorator of [...ast.decorators].reverse()) {
-    const decoratorFn = context.resolveBuiltin(
-      ast.location,
-      `Tag.${decorator.name.value}`
-    );
+    const decoratorFn = context.resolveIdentifier(decorator.name);
+
     value = {
       ...eCall(
         decoratorFn,

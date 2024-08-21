@@ -4,14 +4,7 @@ import { LocationRange } from "../ast/types.js";
 import { AnyExpressionIR, IR, IRByKind, ProgramIR } from "../compiler/types.js";
 import { Env } from "../dists/env.js";
 import { IRuntimeError } from "../errors/IError.js";
-import {
-  ErrorMessage,
-  REArgumentDomainError,
-  REExpectedType,
-  RENotADecorator,
-  RENotAFunction,
-  REOther,
-} from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { getAleaRng, PRNG } from "../rng/index.js";
 import { tTypedLambda } from "../types/TTypedLambda.js";
 import { tAny, Type } from "../types/Type.js";
@@ -22,7 +15,10 @@ import { VDict } from "../value/VDict.js";
 import { FrameStack } from "./FrameStack.js";
 import { FnInput } from "./lambda/FnInput.js";
 import { Lambda } from "./lambda/index.js";
-import { UserDefinedLambda } from "./lambda/UserDefinedLambda.js";
+import {
+  UserDefinedLambda,
+  UserDefinedLambdaDomainError,
+} from "./lambda/UserDefinedLambda.js";
 import { RunProfile } from "./RunProfile.js";
 import { Stack } from "./Stack.js";
 import { StackTrace } from "./StackTrace.js";
@@ -232,7 +228,7 @@ export class Reducer implements EvaluateAllKinds {
           const key = this.evaluateExpression(eKey);
           if (key.type !== "String") {
             throw this.runtimeError(
-              new REOther("Dict keys must be strings"),
+              ErrorMessage.otherError("Dict keys must be strings"),
               eKey.location
             );
           }
@@ -280,7 +276,7 @@ export class Reducer implements EvaluateAllKinds {
     const predicateResult = this.evaluateExpression(irValue.condition);
     if (predicateResult.type !== "Bool") {
       throw this.runtimeError(
-        new REExpectedType("Boolean", predicateResult.type),
+        ErrorMessage.expectedTypeError("Boolean", predicateResult.type),
         irValue.condition.location
       );
     }
@@ -347,13 +343,13 @@ export class Reducer implements EvaluateAllKinds {
     const lambda = this.evaluateExpression(irValue.fn);
     if (lambda.type !== "Lambda") {
       throw this.runtimeError(
-        new RENotAFunction(lambda.toString()),
+        ErrorMessage.valueIsNotAFunctionError(lambda),
         irValue.fn.location
       );
     }
     if (irValue.as === "decorate" && !lambda.value.isDecorator) {
       throw this.runtimeError(
-        new RENotADecorator(lambda.toString()),
+        ErrorMessage.valueIsNotADecoratorError(lambda),
         irValue.fn.location
       );
     }
@@ -364,12 +360,10 @@ export class Reducer implements EvaluateAllKinds {
     try {
       return this.call(lambda.value, argValues, location);
     } catch (e) {
-      if (e instanceof REArgumentDomainError) {
-        // Function is still on frame stack, remove it.
-        // (This is tightly coupled with lambda implementations.)
-        this.frameStack.pop();
+      if (e instanceof UserDefinedLambdaDomainError) {
+        // location fix - we want to show the location of the argument that caused the error
         throw this.runtimeError(
-          e,
+          e.error,
           irValue.args.at(e.idx)?.location ?? location
         );
       } else {
