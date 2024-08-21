@@ -9,8 +9,8 @@ import { squiggleDocs } from "./helpers";
 dotenv.config({ path: ".env.local" });
 
 // export const SELECTED_MODEL = "Claude-3.5-Sonnet";
-// export const SELECTED_MODEL = "Claude-3-Haiku";
-export const SELECTED_MODEL = "GPT-4o-mini";
+export const SELECTED_MODEL = "Claude-3-Haiku";
+// export const SELECTED_MODEL = "GPT-4o-mini";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,

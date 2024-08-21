@@ -1,9 +1,13 @@
 #!/usr/bin/env node
-import { formatSquiggleCode } from "./formatSquiggleCode";
 //main.ts
 import { generateAndSaveSummary } from "./generateSummary";
-import { getSquiggleAdvice, runSquiggle } from "./helpers";
 import { runLLM } from "./llmConfig";
+import { processSquiggleCode } from "./processSquiggleCode";
+import {
+  adjustToFeedbackPrompt,
+  editExistingSquiggleCodePrompt,
+  generateNewSquiggleCodePrompt,
+} from "./prompts";
 import {
   CodeState,
   LogEntry,
@@ -13,48 +17,12 @@ import {
   StateManager,
 } from "./stateManager";
 
-function generateSquiggleUserRequest(
-  prompt: string,
-  existingCode: string,
-  error: string
-): string {
-  const isFixing = Boolean(existingCode);
-  const advice = getSquiggleAdvice(error, existingCode);
-
-  let content = "";
-
-  if (isFixing) {
-    content = `That code produced the following error. Write a full new model that fixes that error. ${error}\n\n`;
-    if (advice) {
-      content += `Advice: ${advice}\n\n`;
-    }
-  } else {
-    content = `Generate Squiggle code for the following prompt. Produce only code, no explanations. Wrap the code in \`\`\`squiggle tags.\n\nPrompt: ${prompt}.\n\n`;
-  }
-
-  return content;
-}
-
+/*
+ * Extracts Squiggle code from the content string.
+ */
 function extractSquiggleCode(content: string): string {
   const match = content.match(/```squiggle([\s\S]*?)```/);
   return match ? match[1].trim() : "";
-}
-
-async function formatAndRunSquiggle(code: string): Promise<CodeState> {
-  const formattedCode = await formatSquiggleCode(code);
-  if (!formattedCode.ok) {
-    return { type: "formattingFailed", code, error: formattedCode.value };
-  }
-  const run = await runSquiggle(formattedCode.value);
-  if (run.ok) {
-    return { type: "success", code: formattedCode.value };
-  } else {
-    return {
-      type: "runFailed",
-      code: formattedCode.value,
-      error: run.value as string,
-    };
-  }
 }
 
 function codeStateNextState(codeState: CodeState): State {
@@ -73,26 +41,6 @@ class SquiggleGenerator {
     this.registerStateHandlers();
   }
 
-  private registerStateHandlers() {
-    this.stateManager.registerStateHandler(State.GENERATE_CODE, {
-      execute: async (stateExecution) => {
-        await this.generateCode(stateExecution);
-      },
-    });
-
-    this.stateManager.registerStateHandler(State.FIX_CODE_UNTIL_IT_RUNS, {
-      execute: async (stateExecution) => {
-        await this.fixCodeUntilItRuns(stateExecution);
-      },
-    });
-
-    this.stateManager.registerStateHandler(State.ADJUST_TO_FEEDBACK, {
-      execute: async (stateExecution) => {
-        await this.adjustToFeedback(stateExecution);
-      },
-    });
-  }
-
   async run(): Promise<void> {
     while (true) {
       const { continueExecution } = await this.stateManager.step();
@@ -100,128 +48,74 @@ class SquiggleGenerator {
     }
   }
 
-  private async generateCode(stateExecution: StateExecution): Promise<void> {
-    await this.createSquiggleCodeAndUpdateStateExecution(
-      this.prompt,
-      stateExecution
-    );
+  private registerStateHandlers() {
+    this.stateManager.registerStateHandler(State.GENERATE_CODE, {
+      execute: async (stateExecution) => {
+        await this.executeGenerateCode(stateExecution);
+      },
+    });
+
+    this.stateManager.registerStateHandler(State.FIX_CODE_UNTIL_IT_RUNS, {
+      execute: async (stateExecution) => {
+        await this.executeFixCodeUntilItRuns(stateExecution);
+      },
+    });
+
+    this.stateManager.registerStateHandler(State.ADJUST_TO_FEEDBACK, {
+      execute: async (stateExecution) => {
+        await this.executeAdjustToFeedback(stateExecution);
+      },
+    });
   }
 
-  private async fixCodeUntilItRuns(
+  private async executeGenerateCode(
+    stateExecution: StateExecution
+  ): Promise<void> {
+    const prompt = generateNewSquiggleCodePrompt(this.prompt);
+    const completion = await this.processLLMResponse(prompt, stateExecution);
+    if (completion) {
+      await this.handleCodeGenerationResponse(completion, stateExecution);
+    }
+  }
+
+  private async executeFixCodeUntilItRuns(
     stateExecution: StateExecution
   ): Promise<void> {
     const { codeState } = stateExecution;
 
-    if (codeState.type === "success") {
-      stateExecution.log(
-        "Code is already successful, moving to Feedback state",
-        LogLevel.INFO
-      );
-      stateExecution.updateNextState(State.ADJUST_TO_FEEDBACK);
-      return;
-    }
-
-    let code: string;
-    let error: string | undefined;
-
     switch (codeState.type) {
-      case "formattingFailed":
-      case "runFailed":
-        code = codeState.code;
-        error = codeState.error;
-        break;
-      default:
+      case "success":
+        stateExecution.log(
+          "Code is already successful, moving to Feedback state",
+          LogLevel.INFO
+        );
+        stateExecution.updateNextState(State.ADJUST_TO_FEEDBACK);
+        return;
+      case "noCode":
         stateExecution.log(
           "Unexpected code state in FIX_CODE_UNTIL_IT_RUNS",
           LogLevel.ERROR
         );
         stateExecution.updateNextState(State.GENERATE_CODE);
         return;
-    }
-
-    await this.createSquiggleCodeAndUpdateStateExecution(
-      this.prompt,
-      stateExecution,
-      code,
-      error || ""
-    );
-  }
-
-  private async createSquiggleCodeAndUpdateStateExecution(
-    prompt: string,
-    stateExecution: StateExecution,
-    existingCode = "",
-    error = ""
-  ): Promise<void> {
-    const userRequest = generateSquiggleUserRequest(
-      prompt,
-      existingCode,
-      error
-    );
-
-    function failAndRedoState(message: string) {
-      stateExecution.log(message, LogLevel.ERROR);
-      stateExecution.updateCodeState({ type: "noCode" });
-      stateExecution.updateNextState(State.GENERATE_CODE);
-    }
-
-    try {
-      stateExecution.addConversationMessage({
-        role: "user",
-        content: userRequest,
-      });
-
-      const completion = await runLLM(
-        this.stateManager.getConversationMessages()
-      );
-
-      stateExecution.updateLlmMetrics({
-        apiCalls: 1,
-        inputTokens: completion?.usage?.prompt_tokens || 0,
-        outputTokens: completion?.usage?.completion_tokens || 0,
-      });
-
-      stateExecution.addConversationMessage({
-        role: "assistant",
-        content: completion?.content || "no response",
-      });
-
-      if (
-        !completion ||
-        !completion.content ||
-        completion.content.length === 0
-      ) {
-        failAndRedoState("Received an empty response from the API");
-        return;
-      }
-
-      stateExecution.log(JSON.stringify(completion, null, 2), LogLevel.INFO);
-
-      stateExecution.log(
-        `✨ Got response from OpenRouter ${existingCode ? "(fix attempt)" : "(initial generation)"}`,
-        LogLevel.HIGHLIGHT
-      );
-
-      const extractedCode = extractSquiggleCode(completion.content);
-
-      if (!extractedCode) {
-        failAndRedoState(
-          "Error generating/fixing Squiggle code. Didn't get code."
+      case "formattingFailed":
+      case "runFailed":
+        const prompt = editExistingSquiggleCodePrompt(
+          codeState.code,
+          codeState.error
         );
-        return;
-      }
-
-      const codeState = await formatAndRunSquiggle(extractedCode);
-      stateExecution.updateCodeState(codeState);
-      stateExecution.updateNextState(codeStateNextState(codeState));
-    } catch (error) {
-      failAndRedoState(
-        `Error in createSquiggleCodeAndUpdateStateExecution: ${error.message}`
-      );
+        const completion = await this.processLLMResponse(
+          prompt,
+          stateExecution
+        );
+        if (completion) {
+          await this.handleCodeGenerationResponse(completion, stateExecution);
+        }
+        break;
     }
   }
 
-  private async adjustToFeedback(
+  private async executeAdjustToFeedback(
     stateExecution: StateExecution
   ): Promise<void> {
     const { codeState } = stateExecution;
@@ -234,109 +128,124 @@ class SquiggleGenerator {
     }
 
     const currentCode = codeState.code!;
+    const { codeState: newCodeState, runResult } =
+      await processSquiggleCode(currentCode);
 
-    const runResult = await runSquiggle(currentCode);
-
-    if (!runResult.ok) {
+    if (newCodeState.type !== "success" || !runResult) {
       stateExecution.criticalError(
-        "Entered Adjust To Feedback stage without a good code state"
+        "Failed to process code in Adjust To Feedback stage"
       );
       return;
     }
-    const bindings = runResult.value.bindings;
-    const result = runResult.value.result;
 
-    const adjustmentPrompt = `The previous Squiggle code produced this output:
-Output:
+    const { bindings, result } = runResult;
+    const prompt = adjustToFeedbackPrompt(bindings, result);
 
-variables: ${bindings}
+    const completion = await this.processLLMResponse(prompt, stateExecution);
+    if (completion) {
+      await this.handleAdjustToFeedbackResponse(completion, stateExecution);
+    }
+  }
 
-result: ${result}
-
-Analyze the code and its output. Do you think the code needs adjustment? If not, respond with exactly "NO_ADJUSTMENT_NEEDED". If yes, please provide the full adjusted code. Consider unexpected results, failing tests, or any improvements that could be made based on the output.`;
-
-    console.log("prompt", adjustmentPrompt);
-    stateExecution.log("sent out prompt" + adjustmentPrompt, LogLevel.INFO);
-
-    const userRequest = adjustmentPrompt;
-
+  private async processLLMResponse(
+    llmPrompt: string,
+    stateExecution: StateExecution
+  ): Promise<string | null> {
     try {
       stateExecution.addConversationMessage({
         role: "user",
-        content: userRequest,
+        content: llmPrompt,
       });
 
       const completion = await runLLM(
         this.stateManager.getConversationMessages()
       );
 
-      stateExecution.log("got back LLM response", LogLevel.INFO);
-      stateExecution.log(JSON.stringify(completion, null, 2), LogLevel.INFO);
-
       stateExecution.updateLlmMetrics({
         apiCalls: 1,
-        inputTokens: completion?.usage?.prompt_tokens || 0,
-        outputTokens: completion?.usage?.completion_tokens || 0,
+        inputTokens: completion?.usage?.prompt_tokens ?? 0,
+        outputTokens: completion?.usage?.completion_tokens ?? 0,
       });
 
       stateExecution.addConversationMessage({
         role: "assistant",
-        content: completion?.content || "no response",
+        content: completion?.content ?? "no response",
       });
 
-      if (
-        !completion ||
-        !completion.content ||
-        completion.content.length === 0
-      ) {
+      if (!completion?.content) {
         stateExecution.log(
           "Received an empty response from the API",
           LogLevel.ERROR
         );
-        stateExecution.updateNextState(State.FIX_CODE_UNTIL_IT_RUNS);
-        return;
+        return null;
       }
 
-      const response = completion.content.trim();
+      stateExecution.log(JSON.stringify(completion, null, 2), LogLevel.INFO);
+      stateExecution.log(`✨ Got response from OpenRouter`, LogLevel.HIGHLIGHT);
 
-      const noAdjustmentRegex = /no\s+adjust(?:ment)?\s+needed/i;
-      const isShortResponse = response.length <= 100; // Adjust this threshold as needed
-
-      if (noAdjustmentRegex.test(response) && isShortResponse) {
-        stateExecution.log(
-          "LLM determined no adjustment is needed",
-          LogLevel.INFO
-        );
-        stateExecution.updateNextState(State.DONE);
-        return;
-      }
-
-      stateExecution.log("LLM response: " + response, LogLevel.INFO);
-      const extractedCode = extractSquiggleCode(response);
-
-      if (!extractedCode) {
-        stateExecution.log(
-          "No code adjustments provided. Considering process complete.",
-          LogLevel.INFO
-        );
-        stateExecution.updateNextState(State.DONE);
-        return;
-      }
-
-      const newCodeState = await formatAndRunSquiggle(extractedCode);
-      stateExecution.updateCodeState(newCodeState);
-      stateExecution.updateNextState(
-        newCodeState.type === "success"
-          ? State.ADJUST_TO_FEEDBACK
-          : State.FIX_CODE_UNTIL_IT_RUNS
-      );
-    } catch (error) {
+      return completion.content;
+    } catch (error: any) {
       stateExecution.log(
-        `Error in adjustToFeedback: ${error.message}`,
+        `Error in processLLMResponse: ${error.message}`,
         LogLevel.ERROR
       );
-      stateExecution.updateNextState(State.FIX_CODE_UNTIL_IT_RUNS);
+      return null;
     }
+  }
+
+  private async handleCodeGenerationResponse(
+    completionContent: string,
+    stateExecution: StateExecution
+  ): Promise<void> {
+    const extractedCode = extractSquiggleCode(completionContent);
+    if (!extractedCode) {
+      stateExecution.log(
+        "Error generating/fixing Squiggle code. Didn't get code.",
+        LogLevel.ERROR
+      );
+      stateExecution.updateCodeState({ type: "noCode" });
+      stateExecution.updateNextState(State.GENERATE_CODE);
+      return;
+    }
+
+    const { codeState } = await processSquiggleCode(extractedCode);
+    stateExecution.updateCodeState(codeState);
+    stateExecution.updateNextState(codeStateNextState(codeState));
+  }
+
+  private async handleAdjustToFeedbackResponse(
+    completionContent: string,
+    stateExecution: StateExecution
+  ): Promise<void> {
+    const trimmedResponse = completionContent.trim();
+    const noAdjustmentRegex = /no\s+adjust(?:ment)?\s+needed/i;
+    const isShortResponse = trimmedResponse.length <= 100;
+
+    if (noAdjustmentRegex.test(trimmedResponse) && isShortResponse) {
+      stateExecution.log(
+        "LLM determined no adjustment is needed",
+        LogLevel.INFO
+      );
+      stateExecution.updateNextState(State.DONE);
+      return;
+    }
+
+    stateExecution.log(`LLM response: ${trimmedResponse}`, LogLevel.INFO);
+    const extractedCode = extractSquiggleCode(trimmedResponse);
+
+    if (!extractedCode) {
+      stateExecution.log(
+        "No code adjustments provided. Considering process complete.",
+        LogLevel.INFO
+      );
+      stateExecution.updateNextState(State.DONE);
+      return;
+    }
+
+    const { codeState: adjustedCodeState } =
+      await processSquiggleCode(extractedCode);
+    stateExecution.updateCodeState(adjustedCodeState);
+    stateExecution.updateNextState(codeStateNextState(adjustedCodeState));
   }
 }
 
