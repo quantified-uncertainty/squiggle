@@ -2,6 +2,7 @@ import { AnyTypedExpressionNode } from "../analysis/types.js";
 import { DistError, distErrorToString } from "../dists/DistError.js";
 import { OperationError } from "../operationError.js";
 import { BuiltinLambda } from "../reducer/lambda/BuiltinLambda.js";
+import { TDict } from "../types/TDict.js";
 import { Type } from "../types/Type.js";
 import { Value } from "../value/index.js";
 
@@ -121,6 +122,12 @@ export class ErrorMessage extends Error {
 
   static dictPropertyNotFoundError(key: string) {
     return new ErrorMessage(`Dict property not found: ${key}`);
+  }
+
+  static dictPropertyNotFoundCompileError(key: string, dictType: TDict<any>) {
+    return new ErrorMessage(
+      `Property ${key} doesn't exist in dict ${dictType}`
+    );
   }
 
   static todoError(msg: string) {

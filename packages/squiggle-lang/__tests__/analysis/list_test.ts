@@ -11,3 +11,7 @@ test("union of all possible types", () => {
 test("de-duped union", () => {
   expect(returnType("[1, 'foo', 2]")).toBe("List(Number|String)");
 });
+
+test("lookup", () => {
+  expect(returnType("[1, 2, 3][1]")).toBe("Number");
+});
