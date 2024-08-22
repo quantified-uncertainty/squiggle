@@ -118,11 +118,17 @@ class SquiggleGenerator {
           stateExecution
         );
         if (completion) {
-          await completionContentToCodeState(
+          const state = await completionContentToCodeState(
             completion,
             stateExecution.codeState,
             "diff"
           );
+          if (state.okay) {
+            stateExecution.updateCodeState(state.value);
+            stateExecution.updateNextState(codeStateNextState(state.value));
+          } else {
+            stateExecution.log(state.value as string, LogLevel.CODE_RUN_ERROR);
+          }
         }
         break;
     }
@@ -175,7 +181,17 @@ class SquiggleGenerator {
       ]);
 
       stateExecution.log(
-        "```json \n" + JSON.stringify(completion, null, 2) + "\n```",
+        "```json \n" +
+          JSON.stringify(completion, null, 2).replace(/`/g, "\\`") +
+          "\n```\n",
+        LogLevel.INFO
+      );
+
+      // Print the completion.content with actual line breaks
+      stateExecution.log(
+        "Completion content:\n```\n" +
+          completion.content.replace(/`/g, "\\`") +
+          "\n```\n",
         LogLevel.INFO
       );
 

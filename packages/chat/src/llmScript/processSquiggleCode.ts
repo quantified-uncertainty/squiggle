@@ -251,28 +251,26 @@ export async function completionContentToCodeState(
   }
 
   let newCode: string;
-  try {
-    if (inputFormat === "generation") {
-      newCode = extractSquiggleCode(completionContent);
-      if (newCode === "") {
-        return { okay: false, value: "Didn't get code from extraction" };
-      }
-    } else if (inputFormat === "diff") {
-      const { okay, value } = diffToNewCode(completionContent, codeState);
-      if (!okay) {
-        return { okay: false, value: value };
-      }
-      newCode = value;
-    }
 
-    const { codeState: newCodeState } =
-      await squiggleCodeToCodeStateViaRunningAndFormatting(newCode);
-    if (newCodeState.type === "noCode") {
-      throw "no code returned";
-    } else {
-      return { okay: true, value: newCodeState };
+  if (inputFormat === "generation") {
+    newCode = extractSquiggleCode(completionContent);
+    if (newCode === "") {
+      return { okay: false, value: "Didn't get code from extraction" };
     }
-  } catch (error) {
-    return { okay: false, value: error };
+  } else if (inputFormat === "diff") {
+    const { okay, value } = diffToNewCode(completionContent, codeState);
+    if (!okay) {
+      return { okay: false, value: value };
+    }
+    newCode = value;
+  }
+
+  const { codeState: newCodeState } =
+    await squiggleCodeToCodeStateViaRunningAndFormatting(newCode);
+
+  if (newCodeState.type === "noCode") {
+    return { okay: false, value: "No code returned" };
+  } else {
+    return { okay: true, value: newCodeState };
   }
 }
