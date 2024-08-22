@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 //main.ts
 import { generateAndSaveSummary } from "./generateSummary";
-import { Message, runLLM } from "./llmConfig";
-import { processSquiggleCode } from "./processSquiggleCode";
+import { runLLM } from "./llmConfig";
+import {
+  completionContentToCodeState,
+  diffToNewCode,
+  squiggleCodeToCodeStateViaRunningAndFormatting,
+} from "./processSquiggleCode";
 import {
   adjustToFeedbackPrompt,
   editExistingSquiggleCodePrompt,
@@ -17,14 +21,6 @@ import {
   StateExecution,
   StateManager,
 } from "./stateManager";
-
-/*
- * Extracts Squiggle code from the content string.
- */
-function extractSquiggleCode(content: string): string {
-  const match = content.match(/```squiggle([\s\S]*?)```/);
-  return match ? match[1].trim() : "";
-}
 
 function codeStateNextState(codeState: CodeState): State {
   return codeState.type === "success"
@@ -77,8 +73,16 @@ class SquiggleGenerator {
       promptPair,
       stateExecution
     );
-    if (completion) {
-      await this.handleCodeGenerationResponse(completion, stateExecution);
+    const state = await completionContentToCodeState(
+      completion,
+      stateExecution.codeState,
+      "generation"
+    );
+    if (state.okay) {
+      stateExecution.updateCodeState(state.value);
+      stateExecution.updateNextState(codeStateNextState(state.value));
+    } else {
+      stateExecution.log(state.value as string, LogLevel.CODE_RUN_ERROR);
     }
   }
 
@@ -97,9 +101,10 @@ class SquiggleGenerator {
         return;
       case "noCode":
         stateExecution.log(
-          "Unexpected code state in FIX_CODE_UNTIL_IT_RUNS",
+          "Unexpected code state in FIX_CODE_UNTIL_IT_RUNS. Doesn't have code. This should not be possible.",
           LogLevel.ERROR
         );
+        //TODO: Roll back to previous state with code.
         stateExecution.updateNextState(State.GENERATE_CODE);
         return;
       case "formattingFailed":
@@ -113,7 +118,11 @@ class SquiggleGenerator {
           stateExecution
         );
         if (completion) {
-          await this.handleCodeGenerationResponse(completion, stateExecution);
+          await completionContentToCodeState(
+            completion,
+            stateExecution.codeState,
+            "diff"
+          );
         }
         break;
     }
@@ -133,9 +142,7 @@ class SquiggleGenerator {
 
     const currentCode = codeState.code!;
     const { codeState: newCodeState, runResult } =
-      await processSquiggleCode(currentCode);
-
-    stateExecution.logCodeState(codeState);
+      await squiggleCodeToCodeStateViaRunningAndFormatting(currentCode);
 
     if (newCodeState.type !== "success" || !runResult) {
       stateExecution.criticalError(
@@ -144,13 +151,11 @@ class SquiggleGenerator {
       return;
     }
 
-    const { bindings, result } = runResult;
-    const promptPair = adjustToFeedbackPrompt(this.prompt, bindings, result);
-
     const completion = await this.processLLMResponse(
-      promptPair,
+      adjustToFeedbackPrompt(this.prompt, runResult.bindings, runResult.result),
       stateExecution
     );
+
     if (completion) {
       await this.handleAdjustToFeedbackResponse(completion, stateExecution);
     }
@@ -161,30 +166,23 @@ class SquiggleGenerator {
     stateExecution: StateExecution
   ): Promise<string | null> {
     try {
-      const recentFullMessage: Message = {
-        role: "user",
-        content: promptPair.fullPrompt,
-      };
-
       const completion = await runLLM([
         ...this.stateManager.getRelevantPreviousConversationMessages(3),
-        recentFullMessage,
+        {
+          role: "user",
+          content: promptPair.fullPrompt,
+        },
       ]);
+
+      stateExecution.log(
+        "```json \n" + JSON.stringify(completion, null, 2) + "\n```",
+        LogLevel.INFO
+      );
 
       stateExecution.updateLlmMetrics({
         apiCalls: 1,
         inputTokens: completion?.usage?.prompt_tokens ?? 0,
         outputTokens: completion?.usage?.completion_tokens ?? 0,
-      });
-
-      stateExecution.addConversationMessage({
-        role: "user",
-        content: promptPair.summarizedPrompt,
-      });
-
-      stateExecution.addConversationMessage({
-        role: "assistant",
-        content: completion?.content ?? "no response",
       });
 
       if (!completion?.content) {
@@ -193,12 +191,17 @@ class SquiggleGenerator {
           LogLevel.ERROR
         );
         return null;
-      }
+      } else {
+        stateExecution.addConversationMessage({
+          role: "user",
+          content: promptPair.summarizedPrompt,
+        });
 
-      stateExecution.log(
-        "```json \n" + JSON.stringify(completion, null, 2) + "\n```",
-        LogLevel.INFO
-      );
+        stateExecution.addConversationMessage({
+          role: "assistant",
+          content: completion?.content ?? "no response",
+        });
+      }
 
       return completion.content;
     } catch (error: any) {
@@ -210,33 +213,13 @@ class SquiggleGenerator {
     }
   }
 
-  private async handleCodeGenerationResponse(
-    completionContent: string,
-    stateExecution: StateExecution
-  ): Promise<void> {
-    const extractedCode = extractSquiggleCode(completionContent);
-    if (!extractedCode) {
-      stateExecution.log(
-        "Error generating/fixing Squiggle code. Didn't get code.",
-        LogLevel.ERROR
-      );
-      stateExecution.updateCodeState({ type: "noCode" });
-      stateExecution.updateNextState(State.GENERATE_CODE);
-      return;
-    }
-
-    const { codeState } = await processSquiggleCode(extractedCode);
-    stateExecution.logCodeState(codeState);
-    stateExecution.updateCodeState(codeState);
-    stateExecution.updateNextState(codeStateNextState(codeState));
-  }
-
   private async handleAdjustToFeedbackResponse(
     completionContent: string,
     stateExecution: StateExecution
   ): Promise<void> {
     const trimmedResponse = completionContent.trim();
-    const noAdjustmentRegex = /no\s+adjust(?:ment)?\s+needed/i;
+    const noAdjustmentRegex =
+      /no\s+adjust(?:ment)?\s+needed|NO_ADJUSTMENT_NEEDED/i;
     const isShortResponse = trimmedResponse.length <= 100;
 
     if (noAdjustmentRegex.test(trimmedResponse) && isShortResponse) {
@@ -249,22 +232,37 @@ class SquiggleGenerator {
     }
 
     stateExecution.log(`LLM response: ${trimmedResponse}`, LogLevel.INFO);
-    const extractedCode = extractSquiggleCode(trimmedResponse);
 
-    if (!extractedCode) {
+    // Only proceed with diff if there's actual content to process
+    if (
+      trimmedResponse.length > 0 &&
+      !noAdjustmentRegex.test(trimmedResponse)
+    ) {
+      const diffResponse = diffToNewCode(
+        completionContent,
+        stateExecution.codeState
+      );
+      if (!diffResponse.okay) {
+        stateExecution.log("FAIL: " + diffResponse.value, LogLevel.ERROR);
+        stateExecution.updateNextState(State.FIX_CODE_UNTIL_IT_RUNS);
+        return;
+      }
+
+      const { codeState: adjustedCodeState } =
+        await squiggleCodeToCodeStateViaRunningAndFormatting(
+          diffResponse.value
+        );
+      stateExecution.logCodeState(adjustedCodeState);
+      stateExecution.updateCodeState(adjustedCodeState);
+      stateExecution.updateNextState(codeStateNextState(adjustedCodeState));
+    } else {
+      // If there's no content to process, consider it as no adjustment needed
       stateExecution.log(
-        "No code adjustments provided. Considering process complete.",
+        "No adjustments provided, considering process complete",
         LogLevel.INFO
       );
       stateExecution.updateNextState(State.DONE);
-      return;
     }
-
-    const { codeState: adjustedCodeState } =
-      await processSquiggleCode(extractedCode);
-    stateExecution.logCodeState(adjustedCodeState);
-    stateExecution.updateCodeState(adjustedCodeState);
-    stateExecution.updateNextState(codeStateNextState(adjustedCodeState));
   }
 }
 

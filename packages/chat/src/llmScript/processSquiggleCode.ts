@@ -10,6 +10,7 @@ import {
 } from "@quri/squiggle-lang";
 
 import { formatSquiggleCode } from "./formatSquiggleCode";
+import { processSearchReplaceResponse } from "./searchReplace";
 import { CodeState } from "./stateManager";
 
 const linker: SqLinker = {
@@ -176,7 +177,39 @@ interface ProcessSquiggleResult {
   runResult: SquiggleRunResult | null;
 }
 
-export async function processSquiggleCode(
+export function diffToNewCode(
+  completionContentWithDiff: string,
+  oldCodeState: CodeState
+): { okay: boolean; value: string } {
+  if (oldCodeState.type === "noCode") {
+    return { okay: false, value: "Didn't find any codeState code" };
+  } else {
+    const response = processSearchReplaceResponse(
+      oldCodeState.code,
+      completionContentWithDiff
+    );
+    return response.success
+      ? { okay: true, value: response.value }
+      : {
+          okay: false,
+          value: "Search and Replace Failed: " + response.value,
+        };
+  }
+}
+
+/*
+ * Extracts Squiggle code from the content string.
+ */
+function extractSquiggleCode(content: string): string {
+  if (!content || typeof content !== "string") {
+    console.error("Invalid content provided to extractSquiggleCode:", content);
+    return "";
+  }
+  const match = content.match(/```squiggle([\s\S]*?)```/);
+  return match && match[1] ? match[1].trim() : "";
+}
+
+export async function squiggleCodeToCodeStateViaRunningAndFormatting(
   code: string
 ): Promise<ProcessSquiggleResult> {
   // First, try running code and get errors
@@ -206,4 +239,40 @@ export async function processSquiggleCode(
     codeState: { type: "success", code: formattedCode.value },
     runResult: run.value as SquiggleRunResult,
   };
+}
+
+export async function completionContentToCodeState(
+  completionContent: string,
+  codeState: CodeState,
+  inputFormat: "generation" | "diff"
+): Promise<{ okay: true; value: CodeState } | { okay: false; value: string }> {
+  if (completionContent === "") {
+    return { okay: false, value: "Received empty completion content" };
+  }
+
+  let newCode: string;
+  try {
+    if (inputFormat === "generation") {
+      newCode = extractSquiggleCode(completionContent);
+      if (newCode === "") {
+        return { okay: false, value: "Didn't get code from extraction" };
+      }
+    } else if (inputFormat === "diff") {
+      const { okay, value } = diffToNewCode(completionContent, codeState);
+      if (!okay) {
+        return { okay: false, value: value };
+      }
+      newCode = value;
+    }
+
+    const { codeState: newCodeState } =
+      await squiggleCodeToCodeStateViaRunningAndFormatting(newCode);
+    if (newCodeState.type === "noCode") {
+      throw "no code returned";
+    } else {
+      return { okay: true, value: newCodeState };
+    }
+  } catch (error) {
+    return { okay: false, value: error };
+  }
 }

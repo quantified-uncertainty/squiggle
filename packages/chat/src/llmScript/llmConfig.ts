@@ -3,7 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 
-import { squiggleDocs } from "./helpers";
+import { squiggleDocs } from "./prompts";
 
 // Configuration
 dotenv.config({ path: ".env.local" });
@@ -24,6 +24,7 @@ type ModelConfig = {
   inputRate: number;
   outputRate: number;
   contextWindow: number;
+  maxTokens?: number;
 };
 
 const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
@@ -47,6 +48,7 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
     inputRate: 0.000003,
     outputRate: 0.000015,
     contextWindow: 200000,
+    maxTokens: 8192,
   },
   "Claude-3-Haiku": {
     provider: "anthropic",
@@ -54,6 +56,7 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
     inputRate: 0.00000025,
     outputRate: 0.00000125,
     contextWindow: 200000,
+    maxTokens: 4096,
   },
   "DeepSeek-Coder-V2": {
     provider: "openrouter",
@@ -185,7 +188,7 @@ export async function runLLM(
       }
 
       const completion = await anthropic.beta.promptCaching.messages.create({
-        max_tokens: 4000,
+        max_tokens: SELECTED_MODEL_CONFIG.maxTokens,
         messages: claudeMessages,
         model: SELECTED_MODEL_CONFIG.model,
         system: [

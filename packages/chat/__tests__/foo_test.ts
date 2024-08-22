@@ -1,4 +1,4 @@
-import { runSquiggle } from "../src/llmScript/helpers";
+import { runSquiggle } from "../src/llmScript/getSquiggleDocs";
 
 describe("errors", () => {
   let runResult;

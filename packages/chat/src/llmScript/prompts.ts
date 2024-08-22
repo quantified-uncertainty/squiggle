@@ -1,4 +1,20 @@
+import fs from "fs";
+
 import { getSquiggleAdvice } from "./getSquiggleAdvice";
+
+const SQUIGGLE_DOCS_PATH = "./src/llmScript/squiggleDocs.md";
+
+// Utility functions
+const readTxtFileSync = (filePath: string) => {
+  try {
+    return fs.readFileSync(filePath, "utf8");
+  } catch (err) {
+    console.error(`Error reading file: ${err}`);
+    throw err;
+  }
+};
+// Load Squiggle docs
+export const squiggleDocs = readTxtFileSync(SQUIGGLE_DOCS_PATH);
 
 export type PromptPair = {
   fullPrompt: string;
@@ -6,7 +22,7 @@ export type PromptPair = {
 };
 
 export const generateNewSquiggleCodePrompt = (prompt: string): PromptPair => {
-  const fullPrompt = `You are a Squiggle code generator. Create concise, efficient Squiggle code based on the given prompt. Follow these guidelines:
+  const fullPrompt = `You are an expert Squiggle code developer. Create concise, efficient Squiggle code based on the given prompt. Follow these guidelines:
 
 1. Analyze the prompt carefully to understand all key requirements.
 2. Generate functional, streamlined Squiggle code that addresses all main points of the prompt.
@@ -31,13 +47,83 @@ Generate your Squiggle code response based on the given prompt. Include only the
 
   return { fullPrompt, summarizedPrompt };
 };
+const changeFormat = `
+Response format:
+Provide your changes using SEARCH/REPLACE blocks as follows. You can use multiple SEARCH/REPLACE blocks if needed. 
+
+IMPORTANT: Ensure that each SEARCH block is unique within the code. If you encounter potential duplicates, use a larger block of code in the SEARCH to ensure uniqueness.
+
+<changes>
+<<<<<<< SEARCH
+// Unique block of code to be replaced
+=======
+// New code that fixes the error or improves the existing code
+>>>>>>> REPLACE
+</changes>
+
+<explanation>
+Brief explanation of changes and why they were necessary (1-2 sentences max)
+</explanation>
+
+Examples:
+
+1. Multiple changes (adding a comment and fixing a calculation):
+<changes>
+<<<<<<< SEARCH
+calculateArea(r) = {
+  Math.PI * r * r
+}
+=======
+// Calculate the area of a circle given its radius
+calculateArea(r) = {
+  Math.PI * r ** 2
+}
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+calculateVolume(r, h) = {
+  Math.PI * r * r * h
+}
+=======
+// Calculate the volume of a cylinder given its radius and height
+calculateVolume(r, h) = {
+  Math.PI * r ** 2 * h
+}
+>>>>>>> REPLACE
+</changes>
+
+<explanation>
+Added comments to explain the functions' purposes and corrected the power operation for radius in both area and volume calculations.
+</explanation>
+
+2. Larger block to ensure uniqueness:
+<changes>
+<<<<<<< SEARCH
+function processData(data) {
+  // Process the data
+  for (let i = 0; i < data.length; i++) {
+    data[i] = data[i] * 2;
+  }
+  return data;
+}
+=======
+function processData(data) {
+  // Process the data using map for better readability
+  return data.map(item => item * 2);
+}
+>>>>>>> REPLACE
+</changes>
+
+<explanation>
+Replaced the for loop with a map function for cleaner and more functional code.
+</explanation>
+`;
 
 export const editExistingSquiggleCodePrompt = (
   existingCode: string,
   error: string
 ): PromptPair => {
   const advice = getSquiggleAdvice(error, existingCode);
-  const fullPrompt = `You are a Squiggle code debugger. Your task is to fix an error in the given Squiggle code. Follow these steps:
+  const fullPrompt = `You are an expert Squiggle code debugger. Your task is to fix an error in the given Squiggle code. Follow these steps:
 
 1. Carefully analyze the original code and the error message.
 2. Consider the provided advice, if any.
@@ -64,12 +150,8 @@ Advice:
 ${advice || "No specific advice provided."}
 </advice>
 
-Response format:
-\`\`\`squiggle
-// Your improved code here
-\`\`\`
-
-Provide only the improved code within the response format, without any additional text or explanations outside the code block.`;
+${changeFormat}
+`;
 
   const summarizedPrompt = `Debug Squiggle code. Error: ${error.substring(0, 300)}${error.length > 300 ? "..." : ""}. Fix the error while maintaining code structure and efficiency.`;
 
@@ -81,7 +163,7 @@ export const adjustToFeedbackPrompt = (
   bindings: any,
   result: any
 ): PromptPair => {
-  const fullPrompt = `You are a Squiggle code reviewer. Your task is to review and potentially improve Squiggle code based on the given prompt and previous output.
+  const fullPrompt = `You are an expert Squiggle code reviewer. Your task is to review and potentially improve Squiggle code based on the given prompt and previous output.
 
 Original prompt:
 <original_prompt>
@@ -109,12 +191,8 @@ NO_ADJUSTMENT_NEEDED
 </response>
 
 If adjustments are strongly needed, provide the full adjusted code and a brief explanation:
-\`\`\`squiggle
-// Your adjusted code here
-\`\`\`
-Brief explanation of changes and why they were necessary (1-2 sentences max)
-</explanation>
-</response>
+
+${changeFormat}
 
 Aim for concise, effective code that meets all requirements and handles edge cases. Pay special attention to any important errors in the variables or result, and recommend changes if you notice any. However, there should be a fairly low bar for responding with NO_ADJUSTMENT_NEEDED. If you do recommend changes, provide your best recommendation, all things considered.
 
