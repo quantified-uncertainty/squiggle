@@ -5,8 +5,6 @@ import { BuiltinLambda } from "../reducer/lambda/BuiltinLambda.js";
 import { Type } from "../types/Type.js";
 import { Value } from "../value/index.js";
 
-// Common error types.
-
 // Messages don't contain any stack trace information.
 // Stdlib functions are allowed to throw messages, because they will be caught later
 // and wrapped in `IRuntimeError.fromException` with the correct stacktrace.

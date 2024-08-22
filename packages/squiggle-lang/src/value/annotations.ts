@@ -17,7 +17,7 @@ export function annotationToDomain(value: Value): Type {
     return value.value;
   }
   if (value.type !== "Array") {
-    throw ErrorMessage.argumentError("Only array domains are supported");
+    throw ErrorMessage.argumentError("Only array annotations are supported");
   }
   if (value.value.length !== 2) {
     throw ErrorMessage.argumentError("Expected two-value array");
