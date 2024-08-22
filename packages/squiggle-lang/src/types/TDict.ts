@@ -142,12 +142,12 @@ export class TDict<const KVList extends BaseKVList> extends Type<
     return kv.type;
   }
 
-  display() {
+  toString() {
     return (
       "{" +
       this.kvs
         .filter((kv) => !kv.deprecated)
-        .map((kv) => `${kv.key}${kv.optional ? "?" : ""}: ${kv.type.display()}`)
+        .map((kv) => `${kv.key}${kv.optional ? "?" : ""}: ${kv.type}`)
         .join(", ") +
       "}"
     );

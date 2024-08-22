@@ -13,7 +13,7 @@ export abstract class BaseLambda {
   captures: Value[] = []; // used only on user-defined lambdas, but useful for all lambdas for faster lookups
 
   abstract readonly type: string;
-  abstract display(): string;
+  abstract display(): string; // get nambda name; TODO: rename to `getName()` to avoid confusion?
   abstract toString(): string;
 
   abstract signatures(): TTypedLambda[];

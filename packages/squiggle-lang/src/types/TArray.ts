@@ -57,8 +57,8 @@ export class TArray<T> extends Type<readonly T[]> {
     };
   }
 
-  display() {
-    return `List(${this.itemType.display()})`;
+  toString() {
+    return `List(${this.itemType})`;
   }
 
   override defaultFormInputCode() {

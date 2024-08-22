@@ -32,7 +32,7 @@ export class TLambdaNand extends Type<Lambda> {
     };
   }
 
-  display(): string {
+  toString(): string {
     return "LambdaNand";
   }
 }

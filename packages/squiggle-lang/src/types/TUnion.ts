@@ -29,8 +29,8 @@ export class TUnion extends Type<Value> {
     };
   }
 
-  override display() {
-    return this.types.map((t) => t.display()).join("|");
+  toString() {
+    return this.types.map((t) => t.toString()).join("|");
   }
 }
 

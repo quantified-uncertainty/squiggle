@@ -27,6 +27,6 @@ test("Pack", () => {
   expect(packed).toEqual(vNumber(10).mergeTags({ name: vString("myName") }));
 });
 
-test("Display", () => {
-  expect(tTaggedNumber.display()).toBe("Number");
+test("toString", () => {
+  expect(tTaggedNumber.toString()).toBe("Number");
 });

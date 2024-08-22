@@ -32,7 +32,7 @@ export class TNumberRange extends Type<number> {
     };
   }
 
-  display(): string {
+  toString(): string {
     return `Number.rangeDomain(${this.min}, ${this.max})`;
   }
 

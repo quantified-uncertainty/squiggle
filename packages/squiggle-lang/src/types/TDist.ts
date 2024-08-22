@@ -55,7 +55,7 @@ export class TDist<T extends BaseDist> extends Type<T> {
     };
   }
 
-  display(): string {
+  toString() {
     return (this.distClass as any) === BaseSymbolicDist
       ? "SymbolicDist"
       : (this.distClass as any) === PointSetDist

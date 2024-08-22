@@ -22,7 +22,7 @@ export function typedAstNodeToString(
     const selfExpr = (components: (SExpr | null | undefined)[]): SExpr => {
       const args =
         withTypes && node instanceof ExpressionNode
-          ? [...components, `:${node.type.display()}`]
+          ? [...components, `:${node.type}`]
           : components;
       return {
         name: node.kind,
@@ -73,7 +73,7 @@ export function typedAstNodeToString(
         }${node.exponent === null ? "" : `e${node.exponent}`}`;
       case "Identifier":
       case "IdentifierDefinition":
-        return `:${node.value}` + (withTypes ? `:${node.type.display()}` : "");
+        return `:${node.value}` + (withTypes ? `:${node.type}` : "");
       case "LambdaParameter":
         if (!node.annotation && !node.unitTypeSignature) {
           return `:${node.variable.value}`;

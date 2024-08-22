@@ -35,8 +35,8 @@ describe("pack", () => {
   });
 });
 
-describe("display", () => {
+describe("toString", () => {
   test("should return the correct name", () => {
-    expect(numberOrString.display()).toBe("Number|String");
+    expect(numberOrString.toString()).toBe("Number|String");
   });
 });

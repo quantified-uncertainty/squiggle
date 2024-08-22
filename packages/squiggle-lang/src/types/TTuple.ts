@@ -41,8 +41,8 @@ export class TTuple<const T extends any[]> extends Type<
     };
   }
 
-  override display() {
-    return `[${this.types.map((type) => type.display()).join(", ")}]`;
+  toString() {
+    return `[${this.types.map((type) => type.toString()).join(", ")}]`;
   }
 
   override defaultFormInputCode() {

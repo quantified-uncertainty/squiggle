@@ -33,7 +33,7 @@ export class TDateRange extends Type<SDate> {
     return { kind: "DateRange", min: this.min.toMs(), max: this.max.toMs() };
   }
 
-  display() {
+  toString() {
     return `Date.rangeDomain(${this.min.toString()}, ${this.max.toString()})`;
   }
 

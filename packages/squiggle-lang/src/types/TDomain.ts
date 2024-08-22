@@ -31,8 +31,8 @@ export class TDomain<T> extends Type<Type<T>> {
     return vDomain(v);
   }
 
-  override display() {
-    return `Domain(${this.type.display()})`;
+  toString() {
+    return `Domain(${this.type})`;
   }
 
   override serialize(visit: SquiggleSerializationVisitor): SerializedType {

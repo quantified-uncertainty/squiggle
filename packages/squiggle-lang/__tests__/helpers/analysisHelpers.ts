@@ -19,5 +19,5 @@ export function returnType(code: string) {
 
   const typedAst = (typedAstR as Extract<typeof typedAstR, { ok: true }>).value;
 
-  return typedAst.result?.type.display();
+  return typedAst.result?.type.toString();
 }

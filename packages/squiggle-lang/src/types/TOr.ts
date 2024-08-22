@@ -43,8 +43,8 @@ export class TOr<T1, T2> extends Type<OrType<T1, T2>> {
     };
   }
 
-  override display() {
-    return `${this.type1.display()}|${this.type2.display()}`;
+  toString() {
+    return `${this.type1}|${this.type2}`;
   }
 
   override defaultFormInputCode() {

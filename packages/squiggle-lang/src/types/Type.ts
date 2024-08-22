@@ -4,15 +4,28 @@ import { type InputType } from "../value/VInput.js";
 import { SerializedType } from "./serialize.js";
 
 export abstract class Type<T = unknown> {
+  // Check if the given value is of this type.
   abstract check(v: Value): boolean;
+
+  // These two methods are useful for builtin functions, because we implement
+  // them in terms of unpacked values (native JS types, `number`, `string` and
+  // so on), not in term of `Value` objects.
+  //
+  // Technically, these methods don't belong in the `Type` class. It would be
+  // better to do pack/unpack in another layer, specific to the function
+  // registry. This could simplify our type hierarchy, by removing `TOr`,
+  // `TDistOrNumber` and `TLambdaNand`.
+  //
+  // Fixing this would require a separate set of constructors for the input
+  // parameters and output parameters in `FnDefinition`.
   abstract unpack(v: Value): T | undefined;
   abstract pack(v: T): Value;
-  abstract serialize(visit: SquiggleSerializationVisitor): SerializedType;
-  abstract display(): string;
 
-  toString() {
-    return this.display();
-  }
+  // Types must be serializable, because values are serializable, and Domain
+  // values (`VDomain`) refer to types.
+  abstract serialize(visit: SquiggleSerializationVisitor): SerializedType;
+
+  abstract toString(): string;
 
   defaultFormInputCode() {
     return "";
@@ -40,7 +53,7 @@ export class TAny extends Type<Value> {
     return v;
   }
 
-  display() {
+  toString() {
     return this.genericName ? `'${this.genericName}` : "any";
   }
 

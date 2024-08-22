@@ -6,11 +6,11 @@ import {
 } from "../serialization/squiggle.js";
 import { BaseValue } from "./BaseValue.js";
 import { vLambda } from "./index.js";
-import { Input } from "./VInput.js";
+import { FormInput } from "./VInput.js";
 
 export type Calculator = {
   fn: Lambda;
-  inputs: readonly Input[];
+  inputs: readonly FormInput[];
   autorun: boolean;
   description?: string;
   title?: string;

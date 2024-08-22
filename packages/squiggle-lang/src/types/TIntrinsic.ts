@@ -72,7 +72,7 @@ export class TIntrinsic<T extends IntrinsicValueType> extends Type<
     return this._defaultFormInputType;
   }
 
-  override display(): string {
+  toString() {
     return this._display;
   }
 }

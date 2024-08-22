@@ -22,7 +22,7 @@ export class TDistOrNumber extends Type<BaseDist | number> {
     return { kind: "DistOrNumber" };
   }
 
-  display() {
+  toString() {
     return "Dist|Number";
   }
 

@@ -53,8 +53,8 @@ export class TDictWithArbitraryKeys<T> extends Type<ImmutableMap<string, T>> {
     };
   }
 
-  display() {
-    return `Dict(${this.itemType.display()})`;
+  toString() {
+    return `Dict(${this.itemType})`;
   }
 
   override defaultFormInputCode() {

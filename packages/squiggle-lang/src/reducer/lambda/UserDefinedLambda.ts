@@ -73,10 +73,11 @@ export class UserDefinedLambda extends BaseLambda {
   }
 
   toString() {
+    // TODO - show output type and parameter types?
     return `(${this.getParameterNames().join(",")}) => internal code`;
   }
 
-  override signatures(): TTypedLambda[] {
+  signatures(): TTypedLambda[] {
     return [this.signature];
   }
 

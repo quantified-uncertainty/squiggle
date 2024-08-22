@@ -26,14 +26,14 @@ const StyleDefinition: FC<{ fullName: string; def: FnDefinition }> = ({
   const secondaryColor = "text-slate-400";
   const inputs = def.signature.inputs.map((t, index) => (
     <span key={index}>
-      <span className={primaryColor}>{t.type.display()}</span>
+      <span className={primaryColor}>{t.type.toString()}</span>
       {t.optional ? <span className={primaryColor}>?</span> : ""}
       {index !== def.signature.inputs.length - 1 && (
         <span className={secondaryColor}>, </span>
       )}
     </span>
   ));
-  const output = def.signature.output.display();
+  const output = def.signature.output.toString();
   return (
     <div>
       <span className="text-slate-500">{fullName}</span>

@@ -38,8 +38,9 @@ export class TTagged<T> extends Type<{ value: T; tags: ValueTags }> {
     };
   }
 
-  display() {
-    return this.itemType.display();
+  toString() {
+    // TODO - `Tagged(type)`?
+    return this.itemType.toString();
   }
 
   override defaultFormInputCode() {

@@ -80,8 +80,8 @@ export class TTypedLambda extends Type<Lambda> {
     };
   }
 
-  override display() {
-    return `(${this.inputs.map((i) => i.toString()).join(", ")}) => ${this.output.display()}`;
+  toString() {
+    return `(${this.inputs.map((i) => i.toString()).join(", ")}) => ${this.output}`;
   }
 
   override defaultFormInputCode() {

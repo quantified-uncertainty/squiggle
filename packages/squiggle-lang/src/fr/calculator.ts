@@ -1,7 +1,7 @@
 import maxBy from "lodash/maxBy.js";
 
 import { makeFnExample } from "../library/registry/core.js";
-import { FnFactory, frTypeToInput } from "../library/registry/helpers.js";
+import { FnFactory, typeToFormInput } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { fnInput } from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
@@ -17,7 +17,7 @@ import {
   tWithTags,
 } from "../types/index.js";
 import { Calculator, vCalculator } from "../value/VCalculator.js";
-import { Input } from "../value/VInput.js";
+import { FormInput } from "../value/VInput.js";
 
 const maker = new FnFactory({
   nameSpace: "Calculator",
@@ -34,14 +34,14 @@ function validateCalculator(calc: Calculator): Calculator {
   }
 }
 
-function getDefaultInputs(lambda: Lambda): Input[] {
+function getDefaultInputs(lambda: Lambda): FormInput[] {
   const longestSignature = maxBy(lambda.signatures(), (s) => s.inputs.length);
   if (!longestSignature) {
     throw new Error("No signatures found for lambda");
   }
   return longestSignature.inputs.map((input, i) => {
     const name = input.name ?? `Input ${i + 1}`;
-    return frTypeToInput(input.type, name);
+    return typeToFormInput(input.type, name);
   });
 }
 

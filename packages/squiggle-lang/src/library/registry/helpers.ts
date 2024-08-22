@@ -31,7 +31,7 @@ import { Type } from "../../types/Type.js";
 import { upTo } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
 import { Value } from "../../value/index.js";
-import { Input } from "../../value/VInput.js";
+import { FormInput } from "../../value/VInput.js";
 import { FRFunction } from "./core.js";
 
 type SimplifiedArgs = Omit<FRFunction, "nameSpace" | "requiresNamespace"> &
@@ -468,36 +468,36 @@ export const fnInputsMatchesLengths = (
   return intersection(upTo(min, max), lengths).length > 0;
 };
 
-export const frTypeToInput = (frType: Type<any>, name: string): Input => {
-  const type = frType.defaultFormInputType() || "text";
-  switch (type) {
+export const typeToFormInput = (type: Type, name: string): FormInput => {
+  const formInputType = type.defaultFormInputType() || "text";
+  switch (formInputType) {
     case "text":
       return {
         name,
-        type,
-        typeName: frType.display(),
-        default: frType.defaultFormInputCode(),
+        type: formInputType,
+        typeName: type.toString(),
+        default: type.defaultFormInputCode(),
       };
     case "textArea":
       return {
         name,
-        type,
-        typeName: frType.display(),
-        default: frType.defaultFormInputCode(),
+        type: formInputType,
+        typeName: type.toString(),
+        default: type.defaultFormInputCode(),
       };
     case "checkbox":
       return {
         name,
-        type,
-        typeName: frType.display(),
-        default: frType.defaultFormInputCode() === "true" ? true : false,
+        type: formInputType,
+        typeName: type.toString(),
+        default: type.defaultFormInputCode() === "true" ? true : false,
       };
     case "select":
       return {
         name,
-        type,
-        typeName: frType.display(),
-        default: frType.defaultFormInputCode(),
+        type: formInputType,
+        typeName: type.toString(),
+        default: type.defaultFormInputCode(),
         options: [],
       };
   }

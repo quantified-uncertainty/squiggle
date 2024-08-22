@@ -51,7 +51,7 @@ export class NodeInfixCall extends ExpressionNode<"InfixCall"> {
     ]);
     if (inferResult.kind !== "ok") {
       throw new ICompileError(
-        `Operator '${node.op}' does not support types '${arg1.type.display()}' and '${arg2.type.display()}'`,
+        `Operator '${node.op}' does not support types '${arg1.type}' and '${arg2.type}'`,
         node.location
       );
     }

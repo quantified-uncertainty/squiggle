@@ -102,7 +102,7 @@ export class ErrorMessage extends Error {
     }
 
     return new ErrorMessage(
-      `Function does not support types (${args.map((arg) => arg.display()).join(", ")})`
+      `Function does not support types (${args.map((arg) => arg.toString()).join(", ")})`
     );
   }
 

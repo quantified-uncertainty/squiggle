@@ -29,7 +29,7 @@ function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
             name: input.name ?? `Input ${i + 1}`,
             domain: input.type ? wrapDomain(input.type) : undefined,
             typeName:
-              input.type instanceof TAny ? undefined : input.type.display(),
+              input.type instanceof TAny ? undefined : input.type.toString(),
           };
         }),
       ];
@@ -38,7 +38,7 @@ function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
         signature.inputs.map((p, index) => ({
           name: index.toString(),
           domain: undefined,
-          typeName: p.type.display(),
+          typeName: p.type.toString(),
         }))
       );
   }

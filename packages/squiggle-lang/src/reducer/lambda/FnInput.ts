@@ -17,6 +17,9 @@ export type SerializedFnInput = {
   type: number;
 };
 
+// FnInput represents a single parameter of a function.
+// It's used both for builtin functions and for user-defined functions.
+// Inputs can be optional, and they can have names.
 export class FnInput<T> {
   readonly name: string | undefined;
   readonly optional: boolean;
@@ -30,13 +33,9 @@ export class FnInput<T> {
 
   toString() {
     if (this.optional) {
-      return this.name
-        ? `${this.name}?: ${this.type.display()}`
-        : `${this.type.display()}?`;
+      return this.name ? `${this.name}?: ${this.type}` : `${this.type}?`;
     } else {
-      return this.name
-        ? `${this.name}: ${this.type.display()}`
-        : this.type.display();
+      return this.name ? `${this.name}: ${this.type}` : this.type.toString();
     }
   }
 
