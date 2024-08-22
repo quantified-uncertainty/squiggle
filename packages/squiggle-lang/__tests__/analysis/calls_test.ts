@@ -50,6 +50,10 @@ test("polymorphic builtin functions", () => {
   expect(returnType("lognormal(1, 100)")).toBe("SampleSetDist");
 });
 
+test("pipe", () => {
+  expect(returnType("1 -> lognormal(100)")).toBe("SampleSetDist");
+});
+
 // generics are not implemented yet
 test.failing("generic return type", () => {
   expect(returnType("List.map([1,2,3], {|x|x})")).toBe("List(Number)");

@@ -1,8 +1,9 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { tAny } from "../types/index.js";
+import { Type } from "../types/Type.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression } from "./index.js";
 import { ExpressionNode } from "./Node.js";
+import { inferCallType } from "./NodeCall.js";
 import { AnyTypedExpressionNode } from "./types.js";
 
 export class NodePipe extends ExpressionNode<"Pipe"> {
@@ -10,13 +11,10 @@ export class NodePipe extends ExpressionNode<"Pipe"> {
     location: LocationRange,
     public leftArg: AnyTypedExpressionNode,
     public fn: AnyTypedExpressionNode,
-    public rightArgs: AnyTypedExpressionNode[]
+    public rightArgs: AnyTypedExpressionNode[],
+    type: Type
   ) {
-    super(
-      "Pipe",
-      location,
-      tAny() // TODO - infer from `fn` and arg types
-    );
+    super("Pipe", location, type);
     this._init();
   }
 
@@ -25,11 +23,13 @@ export class NodePipe extends ExpressionNode<"Pipe"> {
   }
 
   static fromAst(node: KindNode<"Pipe">, context: AnalysisContext): NodePipe {
-    return new NodePipe(
-      node.location,
-      analyzeExpression(node.leftArg, context),
-      analyzeExpression(node.fn, context),
-      node.rightArgs.map((arg) => analyzeExpression(arg, context))
+    const fn = analyzeExpression(node.fn, context);
+    const leftArg = analyzeExpression(node.leftArg, context);
+    const rightArgs = node.rightArgs.map((arg) =>
+      analyzeExpression(arg, context)
     );
+    const type = inferCallType(node.location, fn, [leftArg, ...rightArgs]);
+
+    return new NodePipe(node.location, leftArg, fn, rightArgs, type);
   }
 }

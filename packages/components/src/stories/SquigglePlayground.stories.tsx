@@ -396,14 +396,14 @@ y = List.upTo(1, 1000) -> map({|v| v + 1 }) -> List.length // slow
 
 export const TypeInference: Story = {
   args: {
-    defaultCode: `// This example is wrapped in f() so that we only show types. For top-level variables we'd show both types and values.
+    defaultCode: sq`// This example is wrapped in f() so that we only show types. For top-level variables we'd show both types and values.
 
 typeInference() = {
   // hover over "x" to see its type; should be Number
   x = 1
 
   // Number
-  // inference is based on argument to the builtin "+" infix operator
+  // inference is based on the arguments to the builtin "+" infix operator
   y = 1 + 1
 
   // (any) => Number|Dist|String
@@ -414,11 +414,14 @@ typeInference() = {
   // "f" output type is a union; we can't narrow it based on argument type yet.
   z = f(1)
 
-  // Here it gets messy; right now we infer "Number|Dist|Dist|Dist", because:
-  // 1. "z" can be either a number or a dist
-  // 2. Builtin "/" is polymorphic and there are multiple overloads for it.
-  // 3. We don't de-duplicate union types yet.
+  // Number|Dist
+  // - "z" is Number|Dist|String
+  // - "/" is polymorphic but doesn't have signatures with String
   d = z / z
+
+  // List('B) (i.e., List(any))
+  // Generics are not implemented yet
+  l = [1,2,3] -> map({|x| x})
   
   "fake result"
 }
