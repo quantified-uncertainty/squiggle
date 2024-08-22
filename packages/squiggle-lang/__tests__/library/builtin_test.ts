@@ -68,6 +68,6 @@ describe("Operators", () => {
 
   describe("try", () => {
     testEvalToBe("try({|| 2+2 }, {||0})", "4");
-    testEvalToBe("try({|| {}['foo'] }, {||3})", "3");
+    testEvalToBe("try({|| Dict.fromList([])['foo'] }, {||3})", "3");
   });
 });
