@@ -46,7 +46,7 @@ export class TIntrinsic<T extends IntrinsicValueType> extends Type<
     this._display = params.display ?? this.valueType;
   }
 
-  override check(v: Value) {
+  check(v: Value) {
     return v.type === this.valueType;
   }
 

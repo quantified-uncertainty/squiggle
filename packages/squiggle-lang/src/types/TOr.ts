@@ -35,7 +35,7 @@ export class TOr<T1, T2> extends Type<OrType<T1, T2>> {
     return v.tag === "1" ? this.type1.pack(v.value) : this.type2.pack(v.value);
   }
 
-  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+  serialize(visit: SquiggleSerializationVisitor): SerializedType {
     return {
       kind: "Or",
       type1: visit.type(this.type1),

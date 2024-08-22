@@ -9,7 +9,7 @@ export class TDictWithArbitraryKeys<T> extends Type<ImmutableMap<string, T>> {
     super();
   }
 
-  override check(v: Value) {
+  check(v: Value) {
     if (v.type !== "Dict") {
       return false;
     }

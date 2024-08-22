@@ -57,22 +57,22 @@ export class TTypedLambda extends Type<Lambda> {
     this.maxInputs = this.inputs.length;
   }
 
-  override check(v: Value): boolean {
+  check(v: Value): boolean {
     return this.unpack(v) !== undefined;
   }
 
-  override unpack(v: Value) {
+  unpack(v: Value) {
     return v.type === "Lambda" &&
       fnInputsMatchesLengths(this.inputs, v.value.parameterCounts())
       ? v.value
       : undefined;
   }
 
-  override pack(v: Lambda) {
+  pack(v: Lambda) {
     return vLambda(v);
   }
 
-  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+  serialize(visit: SquiggleSerializationVisitor): SerializedType {
     return {
       kind: "TypedLambda",
       inputs: this.inputs.map((input) => visit.input(input)),

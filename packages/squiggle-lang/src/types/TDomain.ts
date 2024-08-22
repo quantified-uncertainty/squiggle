@@ -35,7 +35,7 @@ export class TDomain<T> extends Type<Type<T>> {
     return `Domain(${this.type})`;
   }
 
-  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+  serialize(visit: SquiggleSerializationVisitor): SerializedType {
     return { kind: "Domain", type: visit.type(this.type) };
   }
 }

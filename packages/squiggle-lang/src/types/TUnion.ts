@@ -22,7 +22,7 @@ export class TUnion extends Type<Value> {
     return v;
   }
 
-  override serialize(visit: SquiggleSerializationVisitor): SerializedType {
+  serialize(visit: SquiggleSerializationVisitor): SerializedType {
     return {
       kind: "Union",
       types: this.types.map(visit.type),
