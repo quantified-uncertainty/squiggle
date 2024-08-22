@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-//main.ts
 import { generateAndSaveSummary } from "./generateSummary";
-import { runLLM } from "./llmConfig";
+import { LLMName, runLLM } from "./llmHelper";
 import {
   completionContentToCodeState,
   diffToNewCode,
@@ -28,13 +27,32 @@ function codeStateNextState(codeState: CodeState): State {
     : State.FIX_CODE_UNTIL_IT_RUNS;
 }
 
+export interface LlmConfig {
+  llmName: LLMName;
+  priceLimit: number;
+  durationLimitMinutes: number;
+  messagesInHistoryToKeep: number;
+}
+
+export const llmConfigDefault: LlmConfig = {
+  llmName: "Claude-3.5-Sonnet",
+  priceLimit: 0.5,
+  durationLimitMinutes: 1.5,
+  messagesInHistoryToKeep: 4,
+};
+
 class SquiggleGenerator {
   public stateManager: StateManager;
   private prompt: string;
+  private llmConfig: LlmConfig;
 
-  constructor(prompt: string) {
+  constructor(prompt: string, llmConfig: LlmConfig) {
     this.prompt = prompt;
-    this.stateManager = new StateManager();
+    this.llmConfig = llmConfig;
+    this.stateManager = new StateManager(
+      this.llmConfig.priceLimit,
+      this.llmConfig.durationLimitMinutes
+    );
     this.registerStateHandlers();
   }
 
@@ -172,13 +190,18 @@ class SquiggleGenerator {
     stateExecution: StateExecution
   ): Promise<string | null> {
     try {
-      const completion = await runLLM([
-        ...this.stateManager.getRelevantPreviousConversationMessages(3),
-        {
-          role: "user",
-          content: promptPair.fullPrompt,
-        },
-      ]);
+      const completion = await runLLM(
+        [
+          ...this.stateManager.getRelevantPreviousConversationMessages(
+            this.llmConfig.messagesInHistoryToKeep
+          ),
+          {
+            role: "user",
+            content: promptPair.fullPrompt,
+          },
+        ],
+        this.llmConfig.llmName
+      );
 
       stateExecution.log(
         "```json \n" +
@@ -199,6 +222,7 @@ class SquiggleGenerator {
         apiCalls: 1,
         inputTokens: completion?.usage?.prompt_tokens ?? 0,
         outputTokens: completion?.usage?.completion_tokens ?? 0,
+        llmName: this.llmConfig.llmName,
       });
 
       if (!completion?.content) {
@@ -289,9 +313,10 @@ export interface SquiggleResult {
 }
 
 export const runSquiggleGenerator = async (
-  prompt: string
+  prompt: string,
+  llmConfig: LlmConfig = llmConfigDefault
 ): Promise<SquiggleResult> => {
-  const generator = new SquiggleGenerator(prompt);
+  const generator = new SquiggleGenerator(prompt, llmConfig);
   try {
     await generator.run();
 

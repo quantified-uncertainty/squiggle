@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-import { calculatePrice, SELECTED_MODEL } from "./llmConfig";
+import { calculatePriceMultipleCalls } from "./llmHelper";
 import { CodeState, LogLevel, State, StateManager } from "./stateManager";
 
 const generateSummary = (
@@ -10,7 +10,7 @@ const generateSummary = (
 ): string => {
   let summary = "";
   const executions = stateManager.getStateExecutions();
-  const metrics = stateManager.getAllMetrics();
+  const metricsByLLM = stateManager.llmMetricSummary();
 
   // Prompt
   summary += "# 🔮 PROMPT\n";
@@ -18,7 +18,7 @@ const generateSummary = (
 
   // Overview
   summary += "# 📊 SUMMARY OVERVIEW\n";
-  summary += generateOverview(executions, metrics);
+  summary += generateOverview(executions, metricsByLLM);
 
   // Error Summary
   summary += "# 🚨 ERROR SUMMARY\n";
@@ -31,24 +31,28 @@ const generateSummary = (
   return summary;
 };
 
-const generateOverview = (executions, metrics) => {
+const generateOverview = (executions, metricsByLLM) => {
   const totalTime = executions.reduce(
     (acc, exec) => acc + (exec.durationMs || 0),
     0
   );
-  const estimatedCost = calculatePrice(
-    metrics.inputTokens,
-    metrics.outputTokens
-  );
+  const estimatedCost = calculatePriceMultipleCalls(metricsByLLM);
 
-  return `- Total Executions: ${executions.length}
-- Total Time: ${(totalTime / 1000).toFixed(2)} seconds
-- Total API Calls: ${metrics.apiCalls}
-- Total Input Tokens: ${metrics.inputTokens}
-- Total Output Tokens: ${metrics.outputTokens}
-- Estimated Cost: $${estimatedCost.toFixed(6)} (${SELECTED_MODEL})\n`;
+  let overview = `- Total Executions: ${executions.length}\n`;
+  overview += `- Total Time: ${(totalTime / 1000).toFixed(2)} seconds\n`;
+
+  for (const llmName in metricsByLLM) {
+    const metrics = metricsByLLM[llmName];
+    overview += `- ${llmName}:\n`;
+    overview += `  - API Calls: ${metrics.apiCalls}\n`;
+    overview += `  - Input Tokens: ${metrics.inputTokens}\n`;
+    overview += `  - Output Tokens: ${metrics.outputTokens}\n`;
+  }
+
+  overview += `- Estimated Total Cost: $${estimatedCost.toFixed(6)}\n`;
+
+  return overview;
 };
-
 const generateErrorSummary = (executions) => {
   let errorSummary = "";
   executions.forEach((execution, index) => {
@@ -71,13 +75,18 @@ const generateErrorSummary = (executions) => {
 const generateDetailedExecutionLogs = (executions) => {
   let detailedLogs = "";
   executions.forEach((execution, index) => {
-    detailedLogs += `## Execution ${index + 1} - ${State[execution.state]} - $${calculatePrice(execution.llmMetrics.inputTokens, execution.llmMetrics.outputTokens)}\n`;
+    detailedLogs += `## Execution ${index + 1} - ${State[execution.state]}\n`;
     detailedLogs += `- Duration: ${(execution.durationMs || 0) / 1000} seconds\n`;
-    detailedLogs += `- API Calls: ${execution.llmMetrics.apiCalls}\n`;
-    detailedLogs += `- Input Tokens: ${execution.llmMetrics.inputTokens}\n`;
-    detailedLogs += `- Output Tokens: ${execution.llmMetrics.outputTokens}\n`;
-    detailedLogs += `- Input Costs: Input: $${calculatePrice(execution.llmMetrics.inputTokens, 0)}\n`;
-    detailedLogs += `- Output Costs: Input: $${calculatePrice(0, execution.llmMetrics.outputTokens)}\n`;
+
+    execution.llmMetricsList.forEach((metrics) => {
+      const cost = calculatePriceMultipleCalls({ [metrics.llmName]: metrics });
+      detailedLogs += `- ${metrics.llmName}:\n`;
+      detailedLogs += `  - API Calls: ${metrics.apiCalls}\n`;
+      detailedLogs += `  - Input Tokens: ${metrics.inputTokens}\n`;
+      detailedLogs += `  - Output Tokens: ${metrics.outputTokens}\n`;
+      detailedLogs += `  - Estimated Cost: $${cost.toFixed(6)}\n`;
+    });
+
     detailedLogs += "### Logs:\n";
     execution.getLogs().forEach((log) => {
       detailedLogs += `#### **${LogLevel[log.level]}:** \n ${log.message}\n\n`;

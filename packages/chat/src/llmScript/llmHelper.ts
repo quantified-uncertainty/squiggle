@@ -3,15 +3,9 @@ import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 
-import { squiggleDocs } from "./prompts";
+import { squiggleSystemContent } from "./prompts";
 
-// Configuration
 dotenv.config({ path: ".env.local" });
-
-export const SELECTED_MODEL = "Claude-3.5-Sonnet";
-// export const SELECTED_MODEL = "Claude-3-Haiku";
-// export const SELECTED_MODEL = "GPT-4o-mini";
-// export const SELECTED_MODEL = "GPT-4o";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -74,7 +68,7 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
   },
 };
 
-const SELECTED_MODEL_CONFIG = MODEL_CONFIGS[SELECTED_MODEL];
+export type LLMName = keyof typeof MODEL_CONFIGS;
 
 // Initialize OpenRouter client
 const openai = new OpenAI({
@@ -161,25 +155,15 @@ function convertOpenAIToStandardFormat(
   };
 }
 
-function generateSquiggleSystemContent(): string {
-  return `You are an AI assistant specialized in generating Squiggle code. Squiggle is a probabilistic programming language designed for estimation. Always respond with valid Squiggle code enclosed in triple backticks (\`\`\`). Do not give any more explanation, just provide the code and nothing else. Think through things, step by step.
-
-Write the entire code, don't truncate it. So don't ever use "...", just write out the entire code. The code output you produce should be directly runnable in Squiggle, it shouldn't need any changes from users.
-
-Here's the full Squiggle Documentation. It's important that all of the functions you use are contained here. Check this before finishing your work.
-
-${squiggleDocs}
-
-`;
-}
-
 export async function runLLM(
-  conversationHistory: Message[]
+  conversationHistory: Message[],
+  llmName: LLMName
 ): Promise<StandardizedChatCompletion> {
-  const squiggleContext = generateSquiggleSystemContent();
+  const squiggleContext = squiggleSystemContent;
+  const selectedModelConfig = MODEL_CONFIGS[llmName];
 
   try {
-    if (SELECTED_MODEL_CONFIG.provider === "anthropic") {
+    if (selectedModelConfig.provider === "anthropic") {
       const compressedMessages = compressAssistantMessages(conversationHistory);
       const claudeMessages = convertToClaudeMessages(compressedMessages);
 
@@ -188,9 +172,9 @@ export async function runLLM(
       }
 
       const completion = await anthropic.beta.promptCaching.messages.create({
-        max_tokens: SELECTED_MODEL_CONFIG.maxTokens,
+        max_tokens: selectedModelConfig.maxTokens,
         messages: claudeMessages,
-        model: SELECTED_MODEL_CONFIG.model,
+        model: selectedModelConfig.model,
         system: [
           {
             text: squiggleContext,
@@ -204,7 +188,7 @@ export async function runLLM(
     } else {
       // Use OpenAI (OpenRouter)
       const completion = await openai.chat.completions.create({
-        model: SELECTED_MODEL_CONFIG.model,
+        model: selectedModelConfig.model,
         messages: [
           { role: "system", content: squiggleContext },
           ...conversationHistory,
@@ -232,12 +216,31 @@ function compressAssistantMessages(messages: Message[]): Message[] {
   }, [] as Message[]);
 }
 
-export function calculatePrice(
-  inputTokens: number,
-  outputTokens: number
-): number {
-  const { inputRate, outputRate } = SELECTED_MODEL_CONFIG;
-  const inputCost = inputTokens * inputRate;
-  const outputCost = outputTokens * outputRate;
-  return inputCost + outputCost;
+export interface LlmMetrics {
+  apiCalls: number;
+  inputTokens: number;
+  outputTokens: number;
+  llmName?: LLMName;
+}
+
+export function calculatePriceMultipleCalls(metrics: {
+  [key: LLMName]: LlmMetrics;
+}): number {
+  let totalCost = 0;
+
+  for (const llmName in metrics) {
+    const { inputTokens, outputTokens } = metrics[llmName];
+    const modelConfig = MODEL_CONFIGS[llmName];
+
+    if (!modelConfig) {
+      console.warn(`No pricing information found for LLM: ${llmName}`);
+      continue;
+    }
+
+    const inputCost = inputTokens * modelConfig.inputRate;
+    const outputCost = outputTokens * modelConfig.outputRate;
+    totalCost += inputCost + outputCost;
+  }
+
+  return totalCost;
 }

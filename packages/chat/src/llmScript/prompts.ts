@@ -16,6 +16,16 @@ const readTxtFileSync = (filePath: string) => {
 // Load Squiggle docs
 export const squiggleDocs = readTxtFileSync(SQUIGGLE_DOCS_PATH);
 
+// Used as context for Claude, and as first message for other LLMs.
+export const squiggleSystemContent: string = `You are an AI assistant specialized in generating Squiggle code. Squiggle is a probabilistic programming language designed for estimation. Always respond with valid Squiggle code enclosed in triple backticks (\`\`\`). Do not give any more explanation, just provide the code and nothing else. Think through things, step by step.
+
+Write the entire code, don't truncate it. So don't ever use "...", just write out the entire code. The code output you produce should be directly runnable in Squiggle, it shouldn't need any changes from users.
+
+Here's the full Squiggle Documentation. It's important that all of the functions you use are contained here. Check this before finishing your work.
+
+${squiggleDocs}
+`;
+
 export type PromptPair = {
   fullPrompt: string;
   summarizedPrompt: string;

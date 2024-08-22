@@ -2,7 +2,12 @@
 
 import chalk from "chalk";
 
-import { Message } from "./llmConfig";
+import {
+  calculatePriceMultipleCalls,
+  LlmMetrics,
+  LLMName,
+  Message,
+} from "./llmHelper";
 
 export enum LogLevel {
   INFO,
@@ -63,12 +68,6 @@ export type CodeState =
   | { type: "runFailed"; code: string; error: string }
   | { type: "success"; code: string };
 
-export interface LlmMetrics {
-  apiCalls: number;
-  inputTokens: number;
-  outputTokens: number;
-}
-
 export interface StateHandler {
   execute: (stateExecution: StateExecution) => Promise<void>;
 }
@@ -78,11 +77,7 @@ export class StateExecution {
   public durationMs?: number;
   private logs: LogEntry[] = [];
   private conversationMessages: Message[] = [];
-  public llmMetrics: LlmMetrics = {
-    apiCalls: 0,
-    inputTokens: 0,
-    outputTokens: 0,
-  };
+  public llmMetricsList: LlmMetrics[] = [];
 
   constructor(
     public readonly stateExecutionId: number,
@@ -111,8 +106,8 @@ export class StateExecution {
     this.codeState = codeState;
   }
 
-  updateLlmMetrics(metrics: Partial<LlmMetrics>): void {
-    this.llmMetrics = { ...this.llmMetrics, ...metrics };
+  updateLlmMetrics(metrics: LlmMetrics): void {
+    this.llmMetricsList.push(metrics);
   }
 
   updateNextState(nextState: State): void {
@@ -152,13 +147,13 @@ export class StateManager {
   private stateExecutions: StateExecution[] = [];
   private stateHandlers: Map<State, StateHandler> = new Map();
   private currentExecutionId: number = 0;
-  private stepLimit: number;
+  private priceLimit: number;
   private durationLimitMs: number;
   private startTime: number;
 
-  constructor(stepLimit: number = 20, durationLimitMinutes: number = 5) {
+  constructor(priceLimit: number = 0.5, durationLimitMinutes: number = 5) {
     this.registerDefaultHandlers();
-    this.stepLimit = stepLimit;
+    this.priceLimit = priceLimit;
     this.durationLimitMs = durationLimitMinutes * 1000 * 60;
     this.startTime = Date.now();
   }
@@ -205,12 +200,14 @@ export class StateManager {
     continueExecution: boolean;
     stateExecution: StateExecution;
   }> {
-    if (this.stateExecutions.length >= this.stepLimit) {
-      return this.transitionToCriticalError("Step limit exceeded");
-    }
-
     if (Date.now() - this.startTime > this.durationLimitMs) {
       return this.transitionToCriticalError("Duration limit exceeded");
+    }
+
+    if (this.priceSoFar() > this.priceLimit) {
+      return this.transitionToCriticalError(
+        `Price limit of $${this.priceLimit.toFixed(2)} exceeded`
+      );
     }
 
     const stateExecution = this.createNewStateExecution();
@@ -237,6 +234,7 @@ export class StateManager {
       chalk.cyan(`Finishing state ${State[stateExecution.state]}`),
       stateExecution
     );
+
     return {
       continueExecution: !this.isProcessComplete(),
       stateExecution,
@@ -270,17 +268,6 @@ export class StateManager {
   isProcessComplete(): boolean {
     const currentState = this.getCurrentState();
     return currentState === State.DONE || currentState === State.CRITICAL_ERROR;
-  }
-
-  getAllMetrics(): LlmMetrics {
-    return this.stateExecutions.reduce(
-      (acc, execution) => ({
-        apiCalls: acc.apiCalls + execution.llmMetrics.apiCalls,
-        inputTokens: acc.inputTokens + execution.llmMetrics.inputTokens,
-        outputTokens: acc.outputTokens + execution.llmMetrics.outputTokens,
-      }),
-      { apiCalls: 0, inputTokens: 0, outputTokens: 0 }
-    );
   }
 
   getFinalResult(): { isValid: boolean; code: string; logs: LogEntry[] } {
@@ -322,6 +309,29 @@ export class StateManager {
     return this.stateExecutions;
   }
 
+  llmMetricSummary(): { [key: LLMName]: LlmMetrics } {
+    const metricsByLLM: { [key: LLMName]: LlmMetrics } = {};
+
+    for (const execution of this.stateExecutions) {
+      for (const metrics of execution.llmMetricsList) {
+        if (!metricsByLLM[metrics.llmName]) {
+          metricsByLLM[metrics.llmName] = {
+            apiCalls: 0,
+            inputTokens: 0,
+            outputTokens: 0,
+            llmName: metrics.llmName,
+          };
+        }
+
+        metricsByLLM[metrics.llmName].apiCalls += metrics.apiCalls;
+        metricsByLLM[metrics.llmName].inputTokens += metrics.inputTokens;
+        metricsByLLM[metrics.llmName].outputTokens += metrics.outputTokens;
+      }
+    }
+
+    return metricsByLLM;
+  }
+
   private getNextExecutionId(): number {
     return ++this.currentExecutionId;
   }
@@ -336,6 +346,11 @@ export class StateManager {
     return executionIndexes.flatMap((index) =>
       this.stateExecutions[index].getConversationMessages()
     );
+  }
+
+  private priceSoFar(): number {
+    const currentMetrics = this.llmMetricSummary();
+    return calculatePriceMultipleCalls(currentMetrics);
   }
 
   getRelevantPreviousConversationMessages(maxRecentExecutions = 3): Message[] {
