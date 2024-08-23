@@ -39,7 +39,7 @@ type SquiggleShape = {
   profile: [RunProfile, SerializedRunProfile];
   ast: [ASTNode, SerializedASTNode];
   type: [Type, SerializedType];
-  input: [FnInput<unknown>, SerializedFnInput];
+  input: [FnInput, SerializedFnInput];
 };
 
 const squiggleConfig: StoreConfig<SquiggleShape> = {

@@ -29,4 +29,6 @@ export class VDuration extends BaseValue<"Duration", number> {
   }
 }
 
-export const vDuration = (v: SDuration) => new VDuration(v);
+export function vDuration(v: SDuration) {
+  return new VDuration(v);
+}

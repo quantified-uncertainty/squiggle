@@ -1,20 +1,21 @@
 import { OrderedMap } from "immutable";
 
 import { ErrorMessage } from "../errors/messages.js";
+import { namedInput } from "../library/FrInput.js";
+import {
+  frAny,
+  frArray,
+  frBool,
+  frDictWithArbitraryKeys,
+  frNumber,
+  frString,
+  frTuple,
+  frTypedLambda,
+} from "../library/FrType.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { namedInput } from "../reducer/lambda/FnInput.js";
-import {
-  tAny,
-  tArray,
-  tBool,
-  tDictWithArbitraryKeys,
-  tNumber,
-  tString,
-  tTuple,
-  tTypedLambda,
-} from "../types/index.js";
+import { tAny, tString } from "../types/index.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { Value } from "../value/index.js";
 import { vString } from "../value/VString.js";
@@ -34,11 +35,11 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          tDictWithArbitraryKeys(tAny({ genericName: "A" })),
-          namedInput("key", tString),
-          namedInput("value", tAny({ genericName: "A" })),
+          frDictWithArbitraryKeys(frAny({ genericName: "A" })),
+          namedInput("key", frString),
+          namedInput("value", frAny({ genericName: "A" })),
         ],
-        tDictWithArbitraryKeys(tAny({ genericName: "A" })),
+        frDictWithArbitraryKeys(frAny({ genericName: "A" })),
         ([dict, key, value]) => dict.set(key, value)
       ),
     ],
@@ -49,8 +50,8 @@ export const library = [
     displaySection: "Queries",
     definitions: [
       makeDefinition(
-        [tDictWithArbitraryKeys(tAny()), namedInput("key", tString)],
-        tBool,
+        [frDictWithArbitraryKeys(frAny()), namedInput("key", frString)],
+        frBool,
         ([dict, key]) => dict.has(key)
       ),
     ],
@@ -61,8 +62,8 @@ export const library = [
     examples: [makeFnExample(`Dict.size({a: 1, b: 2})`)],
     definitions: [
       makeDefinition(
-        [tDictWithArbitraryKeys(tAny())],
-        tNumber,
+        [frDictWithArbitraryKeys(frAny())],
+        frNumber,
         ([dict]) => dict.size
       ),
     ],
@@ -75,10 +76,10 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          tDictWithArbitraryKeys(tAny({ genericName: "A" })),
-          namedInput("key", tString),
+          frDictWithArbitraryKeys(frAny({ genericName: "A" })),
+          namedInput("key", frString),
         ],
-        tDictWithArbitraryKeys(tAny({ genericName: "A" })),
+        frDictWithArbitraryKeys(frAny({ genericName: "A" })),
         ([dict, key]) => dict.delete(key)
       ),
     ],
@@ -95,8 +96,8 @@ Dict.merge(first, snd)`
     displaySection: "Transformations",
     definitions: [
       makeDefinition(
-        [tDictWithArbitraryKeys(tAny()), tDictWithArbitraryKeys(tAny())],
-        tDictWithArbitraryKeys(tAny()),
+        [frDictWithArbitraryKeys(frAny()), frDictWithArbitraryKeys(frAny())],
+        frDictWithArbitraryKeys(frAny()),
         ([d1, d2]) => ImmutableMap([...d1.entries(), ...d2.entries()])
       ),
     ],
@@ -113,8 +114,8 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
     displaySection: "Transformations",
     definitions: [
       makeDefinition(
-        [tArray(tDictWithArbitraryKeys(tAny()))],
-        tDictWithArbitraryKeys(tAny()),
+        [frArray(frDictWithArbitraryKeys(frAny()))],
+        frDictWithArbitraryKeys(frAny()),
         ([dicts]) => ImmutableMap(dicts.map((d) => [...d.entries()]).flat())
       ),
     ],
@@ -125,8 +126,8 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
     displaySection: "Queries",
     definitions: [
       makeDefinition(
-        [tDictWithArbitraryKeys(tAny())],
-        tArray(tString),
+        [frDictWithArbitraryKeys(frAny())],
+        frArray(frString),
         ([d1]) => [...d1.keys()]
       ),
     ],
@@ -137,8 +138,8 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
     displaySection: "Queries",
     definitions: [
       makeDefinition(
-        [tDictWithArbitraryKeys(tAny({ genericName: "A" }))],
-        tArray(tAny({ genericName: "A" })),
+        [frDictWithArbitraryKeys(frAny({ genericName: "A" }))],
+        frArray(frAny({ genericName: "A" })),
         ([d1]) => [...d1.values()]
       ),
     ],
@@ -149,8 +150,8 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
     displaySection: "Conversions",
     definitions: [
       makeDefinition(
-        [tDictWithArbitraryKeys(tAny({ genericName: "A" }))],
-        tArray(tTuple(tString, tAny({ genericName: "A" }))),
+        [frDictWithArbitraryKeys(frAny({ genericName: "A" }))],
+        frArray(frTuple(frString, frAny({ genericName: "A" }))),
         ([dict]) => [...dict.entries()]
       ),
     ],
@@ -168,8 +169,8 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
     displaySection: "Conversions",
     definitions: [
       makeDefinition(
-        [tArray(tTuple(tString, tAny({ genericName: "A" })))],
-        tDictWithArbitraryKeys(tAny({ genericName: "A" })),
+        [frArray(frTuple(frString, frAny({ genericName: "A" })))],
+        frDictWithArbitraryKeys(frAny({ genericName: "A" })),
         ([items]) => ImmutableMap(items)
       ),
     ],
@@ -181,16 +182,16 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
     definitions: [
       makeDefinition(
         [
-          tDictWithArbitraryKeys(tAny({ genericName: "A" })),
+          frDictWithArbitraryKeys(frAny({ genericName: "A" })),
           namedInput(
             "fn",
-            tTypedLambda(
+            frTypedLambda(
               [tAny({ genericName: "A" })],
               tAny({ genericName: "B" })
             )
           ),
         ],
-        tDictWithArbitraryKeys(tAny({ genericName: "B" })),
+        frDictWithArbitraryKeys(frAny({ genericName: "B" })),
         ([dict, lambda], reducer) => {
           return ImmutableMap(
             [...dict.entries()].map(([key, value]) => {
@@ -214,10 +215,10 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
     definitions: [
       makeDefinition(
         [
-          tDictWithArbitraryKeys(tAny({ genericName: "A" })),
-          namedInput("fn", tTypedLambda([tString], tString)),
+          frDictWithArbitraryKeys(frAny({ genericName: "A" })),
+          namedInput("fn", frTypedLambda([tString], tString)),
         ],
-        tDictWithArbitraryKeys(tAny({ genericName: "A" })),
+        frDictWithArbitraryKeys(frAny({ genericName: "A" })),
         ([dict, lambda], reducer) => {
           const mappedEntries: [string, Value][] = [];
           for (const [key, value] of dict.entries()) {
@@ -249,10 +250,10 @@ Dict.pick(data, ["a", "c"]) // {a: 1, c: 3}`
     definitions: [
       makeDefinition(
         [
-          tDictWithArbitraryKeys(tAny({ genericName: "A" })),
-          namedInput("keys", tArray(tString)),
+          frDictWithArbitraryKeys(frAny({ genericName: "A" })),
+          namedInput("keys", frArray(frString)),
         ],
-        tDictWithArbitraryKeys(tAny({ genericName: "A" })),
+        frDictWithArbitraryKeys(frAny({ genericName: "A" })),
         ([dict, keys]) => {
           const response: OrderedMap<string, Value> = OrderedMap<
             string,
@@ -283,10 +284,10 @@ Dict.omit(data, ["b", "d"]) // {a: 1, c: 3}`
     definitions: [
       makeDefinition(
         [
-          tDictWithArbitraryKeys(tAny({ genericName: "A" })),
-          namedInput("keys", tArray(tString)),
+          frDictWithArbitraryKeys(frAny({ genericName: "A" })),
+          namedInput("keys", frArray(frString)),
         ],
-        tDictWithArbitraryKeys(tAny({ genericName: "A" })),
+        frDictWithArbitraryKeys(frAny({ genericName: "A" })),
         ([dict, keys]) => {
           const response: OrderedMap<string, Value> = dict.withMutations(
             (result) => {

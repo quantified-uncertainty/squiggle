@@ -201,4 +201,6 @@ export class VPlot
   }
 }
 
-export const vPlot = (plot: Plot) => new VPlot(plot);
+export function vPlot(plot: Plot) {
+  return new VPlot(plot);
+}

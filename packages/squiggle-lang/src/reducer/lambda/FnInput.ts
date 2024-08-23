@@ -2,13 +2,12 @@ import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,
 } from "../../serialization/squiggle.js";
-import { UnwrapType } from "../../types/helpers.js";
 import { Type } from "../../types/Type.js";
 
-type Props<T> = {
+type Props = {
   name?: string;
   optional?: boolean;
-  type: Type<T>;
+  type: Type;
 };
 
 export type SerializedFnInput = {
@@ -20,12 +19,12 @@ export type SerializedFnInput = {
 // FnInput represents a single parameter of a function.
 // It's used both for builtin functions and for user-defined functions.
 // Inputs can be optional, and they can have names.
-export class FnInput<T> {
+export class FnInput {
   readonly name: string | undefined;
   readonly optional: boolean;
-  readonly type: Type<T>;
+  readonly type: Type;
 
-  constructor(props: Props<T>) {
+  constructor(props: Props) {
     this.name = props.name;
     this.optional = props.optional ?? false;
     this.type = props.type;
@@ -50,29 +49,11 @@ export class FnInput<T> {
   static deserialize(
     input: SerializedFnInput,
     visit: SquiggleDeserializationVisitor
-  ): FnInput<unknown> {
+  ): FnInput {
     return new FnInput({
       name: input.name,
       optional: input.optional,
       type: visit.type(input.type),
     });
   }
-}
-
-export function fnInput<const T extends Props<any>>(props: T) {
-  return new FnInput<UnwrapType<T["type"]>>(props);
-}
-
-export function optionalInput<T>(type: Type<T>) {
-  return new FnInput({
-    type,
-    optional: true,
-  });
-}
-
-export function namedInput<T>(name: string, type: Type<T>) {
-  return new FnInput({
-    type,
-    name,
-  });
 }

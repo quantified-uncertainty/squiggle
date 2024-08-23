@@ -24,4 +24,6 @@ export class VString extends BaseValue<"String", string> {
   }
 }
 
-export const vString = (v: string) => new VString(v);
+export function vString(v: string) {
+  return new VString(v);
+}

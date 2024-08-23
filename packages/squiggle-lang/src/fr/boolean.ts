@@ -1,6 +1,6 @@
+import { frBool } from "../library/FrType.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { tBool } from "../types/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Boolean",
@@ -13,7 +13,7 @@ export const library = [
   maker.make({
     name: "not",
     definitions: [
-      makeDefinition([tBool], tBool, ([x]) => {
+      makeDefinition([frBool], frBool, ([x]) => {
         // unary prefix !
         return !x;
       }),

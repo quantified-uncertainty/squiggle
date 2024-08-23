@@ -7,23 +7,12 @@ import { TDateRange } from "./TDateRange.js";
 import { TDict } from "./TDict.js";
 import { TDictWithArbitraryKeys } from "./TDictWithArbitraryKeys.js";
 import { TDist } from "./TDist.js";
-import { TDistOrNumber } from "./TDistOrNumber.js";
-import { TDomain } from "./TDomain.js";
 import { TIntrinsic, tNumber, tString } from "./TIntrinsic.js";
 import { TNumberRange } from "./TNumberRange.js";
-import { TOr } from "./TOr.js";
-import { TTagged } from "./TTagged.js";
 import { TTuple } from "./TTuple.js";
 import { InferredOutputType, TTypedLambda } from "./TTypedLambda.js";
 import { tUnion, TUnion } from "./TUnion.js";
 import { tAny, TAny, Type } from "./Type.js";
-
-// `T extends Type<infer U> ? U : never` is not enough for complex generic types.
-// So we infer from `unpack()` method instead.
-export type UnwrapType<T extends Type<any>> = Exclude<
-  ReturnType<T["unpack"]>,
-  undefined
->;
 
 // This is not a method on `TTypedLambda` because the signatures could be
 // gathered from a union of typed lambdas; see `NodeCall` for details.
@@ -95,32 +84,6 @@ export function typeCanBeAssigned(type1: Type, type2: Type): boolean {
     return true;
   }
 
-  if (type2 instanceof TTagged) {
-    // T :> Tagged<T>; `f(x: T)` can be called with `Tagged<T>`
-    return typeCanBeAssigned(type1, type2.itemType);
-  }
-
-  if (type1 instanceof TTagged) {
-    // Tagged<T> :> T; `f(x: Tagged<T>)` can be called with `T`
-    return typeCanBeAssigned(type1.itemType, type2);
-  }
-
-  if (type1 instanceof TOr) {
-    // number|string <= number is ok
-    return (
-      typeCanBeAssigned(type1.type1, type2) ||
-      typeCanBeAssigned(type1.type2, type2)
-    );
-  }
-
-  if (type2 instanceof TOr) {
-    // number <= number|string is ok
-    return (
-      typeCanBeAssigned(type1, type2.type1) ||
-      typeCanBeAssigned(type1, type2.type2)
-    );
-  }
-
   // TODO - this can be slow when we try to intersect two large unions
   if (type1 instanceof TUnion) {
     return type1.types.some((type) => typeCanBeAssigned(type, type2));
@@ -146,12 +109,15 @@ export function typeCanBeAssigned(type1: Type, type2: Type): boolean {
   }
 
   if (type1 instanceof TArray) {
-    return (
-      (type2 instanceof TArray &&
-        typeCanBeAssigned(type1.itemType, type2.itemType)) ||
-      (type2 instanceof TTuple &&
-        type2.types.every((type) => typeCanBeAssigned(type1.itemType, type)))
-    );
+    if (type2 instanceof TArray) {
+      return typeCanBeAssigned(type1.itemType, type2.itemType);
+    } else if (type2 instanceof TTuple) {
+      return type2.types.every((type) =>
+        typeCanBeAssigned(type1.itemType, type)
+      );
+    } else {
+      return false;
+    }
   }
 
   if (type1 instanceof TNumberRange) {
@@ -175,14 +141,14 @@ export function typeCanBeAssigned(type1: Type, type2: Type): boolean {
       return false;
     }
     // check all keys and values
-    for (const kv of type1.kvs) {
-      const vtype2 = type2.valueType(kv.key);
+    for (const kv of Object.entries(type1.shape)) {
+      const vtype2 = type2.valueType(kv[0]);
       if (vtype2) {
-        if (!typeCanBeAssigned(kv.type, vtype2)) {
+        if (!typeCanBeAssigned(kv[1].type, vtype2)) {
           return false;
         }
       } else {
-        if (!kv.optional) {
+        if (!kv[1].optional) {
           return false;
         }
       }
@@ -200,18 +166,6 @@ export function typeCanBeAssigned(type1: Type, type2: Type): boolean {
     );
   }
 
-  if (type1 instanceof TDistOrNumber) {
-    return (
-      type2 instanceof TDistOrNumber ||
-      type2 instanceof TDist ||
-      (type2 instanceof TIntrinsic && type2.valueType === "Number")
-    );
-  }
-
-  if (type1 instanceof TDomain && type2 instanceof TDomain) {
-    return typeCanBeAssigned(type1.type, type2.type);
-  }
-
   if (type1 instanceof TDictWithArbitraryKeys) {
     if (
       type2 instanceof TDictWithArbitraryKeys &&
@@ -220,10 +174,21 @@ export function typeCanBeAssigned(type1: Type, type2: Type): boolean {
       return true;
     }
 
-    // DictWithArbitraryKeys(Number) :> { foo: Number, bar: Number }
     if (type2 instanceof TDict) {
-      for (let i = 0; i < type2.kvs.length; i++) {
-        if (!typeCanBeAssigned(type1.itemType, type2.kvs[i].type)) {
+      /**
+       * Allow any dict with specific keys to be assigned to a
+       * DictWithArbitraryKeys, as long as the value types match.
+       *
+       * In TypeScript, it would be:
+       * ```
+       * function f(x: Record<string, number>) {}
+       *
+       * const y = { foo: 5, bar: 6 };
+       *
+       * f(y); // ok
+       */
+      for (const kv of Object.entries(type2.shape)) {
+        if (!typeCanBeAssigned(type1.itemType, kv[1].type)) {
           return false;
         }
       }
@@ -240,7 +205,20 @@ export function typeCanBeAssigned(type1: Type, type2: Type): boolean {
         )
       );
     } else if (type2 instanceof TArray) {
-      return type1.types.every((type, index) =>
+      /**
+       * Allow arrays to be assigned to tuples - otherwise we'd need something
+       * like TypeScript's `as const`.
+       *
+       * TypeScript example:
+       * ```
+       * function f(x: [number, number]) {}
+       *
+       * const a = [1, 2]; // number[], unless you use `as const`
+       *
+       * f(a); // in TypeScript, this would fail, but in Squiggle it should succeed
+       * ```
+       */
+      return type1.types.every((type) =>
         typeCanBeAssigned(type, type2.itemType)
       );
     } else {
@@ -319,6 +297,7 @@ export function makeUnionAndSimplify(types: Type[]): Type {
 }
 
 export function typesAreEqual(type1: Type, type2: Type): boolean {
+  // Compare object directly; AFAICT this is safe.
   return isEqual(type1, type2);
 }
 
@@ -336,6 +315,7 @@ export function getValueType(value: Value): Type {
   if (value.type === "Lambda") {
     return makeUnionAndSimplify(value.value.signatures());
   } else {
+    // There are no other types in stdlib. (should we fail fast here?)
     return tAny();
   }
 }

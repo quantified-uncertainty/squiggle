@@ -1,10 +1,10 @@
-import { Value, vNumber } from "../value/index.js";
+import { Value } from "../value/index.js";
 import { VNumber } from "../value/VNumber.js";
 import { Scale } from "../value/VScale.js";
 import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
-export class TNumberRange extends Type<number> {
+export class TNumberRange extends Type {
   constructor(
     public min: number,
     public max: number
@@ -14,14 +14,6 @@ export class TNumberRange extends Type<number> {
 
   check(v: Value): v is VNumber {
     return v.type === "Number" && v.value >= this.min && v.value <= this.max;
-  }
-
-  unpack(v: Value) {
-    return this.check(v) ? v.value : undefined;
-  }
-
-  pack(v: number): Value {
-    return vNumber(v);
   }
 
   serialize(): SerializedType {

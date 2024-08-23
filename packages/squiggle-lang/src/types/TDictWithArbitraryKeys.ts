@@ -1,11 +1,10 @@
 import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
-import { ImmutableMap } from "../utility/immutable.js";
-import { Value, vDict } from "../value/index.js";
+import { Value } from "../value/index.js";
 import { SerializedType } from "./serialize.js";
 import { TAny, Type } from "./Type.js";
 
-export class TDictWithArbitraryKeys<T> extends Type<ImmutableMap<string, T>> {
-  constructor(public itemType: Type<T>) {
+export class TDictWithArbitraryKeys extends Type {
+  constructor(public itemType: Type) {
     super();
   }
 
@@ -22,28 +21,6 @@ export class TDictWithArbitraryKeys<T> extends Type<ImmutableMap<string, T>> {
       }
     }
     return true;
-  }
-
-  unpack(v: Value) {
-    if (v.type !== "Dict") {
-      return undefined;
-    }
-    // TODO - skip loop and copying if itemType is `any`
-    let unpackedMap: ImmutableMap<string, T> = ImmutableMap();
-    for (const [key, value] of v.value.entries()) {
-      const unpackedItem = this.itemType.unpack(value);
-      if (unpackedItem === undefined) {
-        return undefined;
-      }
-      unpackedMap = unpackedMap.set(key, unpackedItem);
-    }
-    return unpackedMap;
-  }
-
-  pack(v: ImmutableMap<string, T>) {
-    return vDict(
-      ImmutableMap([...v.entries()].map(([k, v]) => [k, this.itemType.pack(v)]))
-    );
   }
 
   serialize(visit: SquiggleSerializationVisitor): SerializedType {
@@ -66,6 +43,6 @@ export class TDictWithArbitraryKeys<T> extends Type<ImmutableMap<string, T>> {
   }
 }
 
-export function tDictWithArbitraryKeys<T>(itemType: Type<T>) {
+export function tDictWithArbitraryKeys(itemType: Type) {
   return new TDictWithArbitraryKeys(itemType);
 }

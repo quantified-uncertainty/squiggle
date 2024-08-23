@@ -2,20 +2,20 @@ import { BaseDist } from "../dists/BaseDist.js";
 import { argumentError } from "../dists/DistError.js";
 import * as distOperations from "../dists/distOperations/index.js";
 import { ErrorMessage } from "../errors/messages.js";
+import { frInput } from "../library/FrInput.js";
+import {
+  frArray,
+  frDist,
+  frDistOrNumber,
+  frNumber,
+  frTuple,
+} from "../library/FrType.js";
 import {
   parseDistFromDistOrNumber,
   unwrapDistResult,
 } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { fnInput } from "../reducer/lambda/FnInput.js";
 import { Reducer } from "../reducer/Reducer.js";
-import {
-  tArray,
-  tDist,
-  tDistOrNumber,
-  tNumber,
-  tTuple,
-} from "../types/index.js";
 import * as E_A from "../utility/E_A.js";
 
 function mixtureWithGivenWeights(
@@ -42,10 +42,10 @@ function mixtureWithDefaultWeights(
 
 const asArrays = makeDefinition(
   [
-    tArray(tDistOrNumber),
-    fnInput({ name: "weights", type: tArray(tNumber), optional: true }),
+    frArray(frDistOrNumber),
+    frInput({ name: "weights", type: frArray(frNumber), optional: true }),
   ],
-  tDist,
+  frDist,
   ([dists, weights], reducer) => {
     if (weights) {
       if (dists.length !== weights.length) {
@@ -70,20 +70,20 @@ const asArrays = makeDefinition(
 );
 
 const asArguments = [
-  makeDefinition([tDistOrNumber], tDist, ([dist1], reducer) =>
+  makeDefinition([frDistOrNumber], frDist, ([dist1], reducer) =>
     mixtureWithDefaultWeights([dist1].map(parseDistFromDistOrNumber), reducer)
   ),
   makeDefinition(
     [
-      tDistOrNumber,
-      tDistOrNumber,
-      fnInput({
+      frDistOrNumber,
+      frDistOrNumber,
+      frInput({
         name: "weights",
-        type: tTuple(tNumber, tNumber),
+        type: frTuple(frNumber, frNumber),
         optional: true,
       }),
     ],
-    tDist,
+    frDist,
     ([dist1, dist2, weights], reducer) =>
       weights
         ? mixtureWithGivenWeights(
@@ -98,16 +98,16 @@ const asArguments = [
   ),
   makeDefinition(
     [
-      tDistOrNumber,
-      tDistOrNumber,
-      tDistOrNumber,
-      fnInput({
+      frDistOrNumber,
+      frDistOrNumber,
+      frDistOrNumber,
+      frInput({
         name: "weights",
-        type: tTuple(tNumber, tNumber, tNumber),
+        type: frTuple(frNumber, frNumber, frNumber),
         optional: true,
       }),
     ],
-    tDist,
+    frDist,
     ([dist1, dist2, dist3, weights], reducer) =>
       weights
         ? mixtureWithGivenWeights(
@@ -122,17 +122,17 @@ const asArguments = [
   ),
   makeDefinition(
     [
-      tDistOrNumber,
-      tDistOrNumber,
-      tDistOrNumber,
-      tDistOrNumber,
-      fnInput({
+      frDistOrNumber,
+      frDistOrNumber,
+      frDistOrNumber,
+      frDistOrNumber,
+      frInput({
         name: "weights",
-        type: tTuple(tNumber, tNumber, tNumber, tNumber),
+        type: frTuple(frNumber, frNumber, frNumber, frNumber),
         optional: true,
       }),
     ],
-    tDist,
+    frDist,
     ([dist1, dist2, dist3, dist4, weights], reducer) =>
       weights
         ? mixtureWithGivenWeights(
@@ -147,18 +147,18 @@ const asArguments = [
   ),
   makeDefinition(
     [
-      tDistOrNumber,
-      tDistOrNumber,
-      tDistOrNumber,
-      tDistOrNumber,
-      tDistOrNumber,
-      fnInput({
+      frDistOrNumber,
+      frDistOrNumber,
+      frDistOrNumber,
+      frDistOrNumber,
+      frDistOrNumber,
+      frInput({
         name: "weights",
-        type: tTuple(tNumber, tNumber, tNumber, tNumber, tNumber),
+        type: frTuple(frNumber, frNumber, frNumber, frNumber, frNumber),
         optional: true,
       }),
     ],
-    tDist,
+    frDist,
     ([dist1, dist2, dist3, dist4, dist5, weights], reducer) =>
       weights
         ? mixtureWithGivenWeights(

@@ -9,10 +9,10 @@ import * as LognormalJs from "../dists/SymbolicDist/Lognormal.js";
 import * as PointMassJs from "../dists/SymbolicDist/PointMass.js";
 import * as TriangularJs from "../dists/SymbolicDist/Triangular.js";
 import * as UniformJs from "../dists/SymbolicDist/Uniform.js";
+import { frDict, frNumber, frSymbolicDist } from "../library/FrType.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { tDict, tNumber, tSymbolicDist } from "../types/index.js";
 import * as Result from "../utility/result.js";
 import { CI_CONFIG, SymDistResult, unwrapSymDistResult } from "./distUtil.js";
 
@@ -22,14 +22,14 @@ const maker = new FnFactory({
 });
 
 function makeTwoArgsSymDist(fn: (v1: number, v2: number) => SymDistResult) {
-  return makeDefinition([tNumber, tNumber], tSymbolicDist, ([v1, v2]) => {
+  return makeDefinition([frNumber, frNumber], frSymbolicDist, ([v1, v2]) => {
     const result = fn(v1, v2);
     return unwrapSymDistResult(result);
   });
 }
 
 function makeOneArgSymDist(fn: (v: number) => SymDistResult) {
-  return makeDefinition([tNumber], tSymbolicDist, ([v]) => {
+  return makeDefinition([frNumber], frSymbolicDist, ([v]) => {
     const result = fn(v);
     return unwrapSymDistResult(result);
   });
@@ -41,8 +41,8 @@ function makeCISymDist<K1 extends string, K2 extends string>(
   fn: (low: number, high: number) => SymDistResult
 ) {
   return makeDefinition(
-    [tDict([lowKey, tNumber], [highKey, tNumber])],
-    tSymbolicDist,
+    [frDict([lowKey, frNumber], [highKey, frNumber])],
+    frSymbolicDist,
     ([dict]) => unwrapSymDistResult(fn(dict[lowKey], dict[highKey]))
   );
 }
@@ -54,8 +54,8 @@ function makeMeanStdevSymDist(
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
   return makeDefinition(
-    [tDict(["mean", tNumber], ["stdev", tNumber])],
-    tSymbolicDist,
+    [frDict(["mean", frNumber], ["stdev", frNumber])],
+    frSymbolicDist,
     ([{ mean, stdev }]) => unwrapSymDistResult(fn(mean, stdev))
   );
 }
@@ -181,7 +181,7 @@ export const library: FRFunction[] = [
     description:
       "Point mass distributions are already symbolic, so you can use the regular `pointMass` function.",
     definitions: [
-      makeDefinition([tNumber], tSymbolicDist, ([v]) => {
+      makeDefinition([frNumber], frSymbolicDist, ([v]) => {
         const result = PointMassJs.PointMass.make(v);
         return unwrapSymDistResult(result);
       }),
@@ -192,8 +192,8 @@ export const library: FRFunction[] = [
     examples: [makeFnExample("Sym.triangular(3, 5, 10)")],
     definitions: [
       makeDefinition(
-        [tNumber, tNumber, tNumber],
-        tSymbolicDist,
+        [frNumber, frNumber, frNumber],
+        frSymbolicDist,
         ([low, medium, high]) => {
           const result = TriangularJs.Triangular.make({ low, medium, high });
           return unwrapSymDistResult(result);

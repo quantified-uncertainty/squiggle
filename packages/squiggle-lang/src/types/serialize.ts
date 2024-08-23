@@ -3,7 +3,7 @@ import { SDate } from "../utility/SDate.js";
 import { tDate, tDuration, tPlot } from "./index.js";
 import { tArray } from "./TArray.js";
 import { TDateRange } from "./TDateRange.js";
-import { DetailedEntry, tDict } from "./TDict.js";
+import { DictShape, tDict } from "./TDict.js";
 import { tDictWithArbitraryKeys } from "./TDictWithArbitraryKeys.js";
 import {
   tDist,
@@ -11,12 +11,11 @@ import {
   tSampleSetDist,
   tSymbolicDist,
 } from "./TDist.js";
-import { tDistOrNumber } from "./TDistOrNumber.js";
-import { tDomain } from "./TDomain.js";
 import {
   IntrinsicValueType,
   tBool,
   tCalculator,
+  tDomain,
   tInput,
   tLambda,
   tNumber,
@@ -25,10 +24,7 @@ import {
   tString,
   tTableChart,
 } from "./TIntrinsic.js";
-import { tLambdaNand } from "./TLambdaNand.js";
 import { TNumberRange } from "./TNumberRange.js";
-import { tOr } from "./TOr.js";
-import { tTagged } from "./TTagged.js";
 import { tTuple } from "./TTuple.js";
 import { tTypedLambda } from "./TTypedLambda.js";
 import { tUnion } from "./TUnion.js";
@@ -47,9 +43,6 @@ export type SerializedType =
       genericName?: string;
     }
   | {
-      kind: "DistOrNumber";
-    }
-  | {
       kind: "Tuple";
       types: number[];
     }
@@ -58,21 +51,8 @@ export type SerializedType =
       itemType: number;
     }
   | {
-      kind: "WithTags";
-      itemType: number;
-    }
-  | {
-      kind: "Domain";
-      type: number;
-    }
-  | {
       kind: "DictWithArbitraryKeys";
       itemType: number;
-    }
-  | {
-      kind: "Or";
-      type1: number;
-      type2: number;
     }
   | {
       kind: "Union";
@@ -80,9 +60,12 @@ export type SerializedType =
     }
   | {
       kind: "Dict";
-      kvs: (Omit<DetailedEntry<string, Type<unknown>>, "type"> & {
-        type: number;
-      })[];
+      shape: Record<
+        string,
+        Omit<DictShape[string], "type"> & {
+          type: number;
+        }
+      >;
     }
   | {
       kind: "NumberRange";
@@ -99,10 +82,6 @@ export type SerializedType =
       distClass?: "Symbolic" | "PointSet" | "SampleSet";
     }
   | {
-      kind: "LambdaNand";
-      paramLengths: number[];
-    }
-  | {
       kind: "TypedLambda";
       inputs: number[];
       output: number;
@@ -111,7 +90,7 @@ export type SerializedType =
 export function deserializeType(
   type: SerializedType,
   visit: SquiggleDeserializationVisitor
-): Type<unknown> {
+): Type {
   switch (type.kind) {
     case "Intrinsic":
       switch (type.valueType) {
@@ -139,6 +118,8 @@ export function deserializeType(
           return tString;
         case "TableChart":
           return tTableChart;
+        case "Domain":
+          return tDomain;
         default:
           throw type.valueType satisfies never;
       }
@@ -150,27 +131,24 @@ export function deserializeType(
       return new TDateRange(SDate.fromMs(type.min), SDate.fromMs(type.max));
     case "Array":
       return tArray(visit.type(type.itemType));
-    case "WithTags":
-      return tTagged(visit.type(type.itemType));
     case "Tuple":
       return tTuple(...type.types.map((t) => visit.type(t)));
-    case "Or":
-      return tOr(visit.type(type.type1), visit.type(type.type2));
     case "Union":
       return tUnion(type.types.map(visit.type));
     case "Dict":
       return tDict(
-        ...type.kvs.map((kv) => ({
-          ...kv,
-          type: visit.type(kv.type),
-        }))
+        Object.fromEntries(
+          Object.entries(type.shape).map(([key, value]) => [
+            key,
+            {
+              ...value,
+              type: visit.type(value.type),
+            },
+          ])
+        )
       );
     case "DictWithArbitraryKeys":
       return tDictWithArbitraryKeys(visit.type(type.itemType));
-    case "DistOrNumber":
-      return tDistOrNumber;
-    case "Domain":
-      return tDomain(visit.type(type.type));
     case "Dist":
       return type.distClass === "PointSet"
         ? tPointSetDist
@@ -179,8 +157,6 @@ export function deserializeType(
           : type.distClass === "Symbolic"
             ? tSymbolicDist
             : tDist;
-    case "LambdaNand":
-      return tLambdaNand(type.paramLengths);
     case "TypedLambda":
       return tTypedLambda(
         type.inputs.map((input) => visit.input(input)),

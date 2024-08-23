@@ -1,4 +1,12 @@
 import * as SampleSetDist from "../dists/SampleSetDist/index.js";
+import { frInput, namedInput } from "../library/FrInput.js";
+import {
+  frArray,
+  frDist,
+  frNumber,
+  frSampleSetDist,
+  frTypedLambda,
+} from "../library/FrType.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
   chooseLambdaParamLength,
@@ -7,16 +15,11 @@ import {
   unwrapDistResult,
 } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { fnInput, namedInput } from "../reducer/lambda/FnInput.js";
+import { FnInput } from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { Reducer } from "../reducer/Reducer.js";
-import {
-  tArray,
-  tDist,
-  tNumber,
-  tSampleSetDist,
-  tTypedLambda,
-} from "../types/index.js";
+import { tArray } from "../types/TArray.js";
+import { tNumber } from "../types/TIntrinsic.js";
 import { Ok } from "../utility/result.js";
 import { Value } from "../value/index.js";
 import { vArray } from "../value/VArray.js";
@@ -28,8 +31,8 @@ const maker = new FnFactory({
 });
 
 const fromDist = makeDefinition(
-  [tDist],
-  tSampleSetDist,
+  [frDist],
+  frSampleSetDist,
   ([dist], { environment, rng }) =>
     unwrapDistResult(
       SampleSetDist.SampleSetDist.fromDist(dist, environment, rng)
@@ -37,8 +40,8 @@ const fromDist = makeDefinition(
 );
 
 const fromNumber = makeDefinition(
-  [tNumber],
-  tSampleSetDist,
+  [frNumber],
+  frSampleSetDist,
   ([number], reducer) =>
     unwrapDistResult(
       SampleSetDist.SampleSetDist.make(
@@ -48,8 +51,8 @@ const fromNumber = makeDefinition(
 );
 
 const fromList = makeDefinition(
-  [tArray(tNumber)],
-  tSampleSetDist,
+  [frArray(frNumber)],
+  frSampleSetDist,
   ([numbers]) => unwrapDistResult(SampleSetDist.SampleSetDist.make(numbers))
 );
 
@@ -62,12 +65,12 @@ const fromFn = (lambda: Lambda, reducer: Reducer, fn: (i: number) => Value[]) =>
 
 const fromFnDefinition = makeDefinition(
   [
-    tTypedLambda(
-      [fnInput({ name: "index", type: tNumber, optional: true })],
+    frTypedLambda(
+      [new FnInput({ name: "index", type: tNumber, optional: true })],
       tNumber
     ),
   ],
-  tSampleSetDist,
+  frSampleSetDist,
   ([lambda], reducer) => {
     const usedOptional = chooseLambdaParamLength([0, 1], lambda) === 1;
     return fromFn(
@@ -127,7 +130,7 @@ const baseLibrary = [
     description:
       "Gets the internal samples of a sampleSet distribution. This is separate from the ``sampleN()`` function, which would shuffle the samples. ``toList()`` maintains order and length.",
     definitions: [
-      makeDefinition([tSampleSetDist], tArray(tNumber), ([dist]) => {
+      makeDefinition([frSampleSetDist], frArray(frNumber), ([dist]) => {
         return dist.samples;
       }),
     ],
@@ -151,8 +154,8 @@ const baseLibrary = [
     description: `Transforms a sample set distribution by applying a function to each sample. Returns a new sample set distribution.`,
     definitions: [
       makeDefinition(
-        [tSampleSetDist, namedInput("fn", tTypedLambda([tNumber], tNumber))],
-        tSampleSetDist,
+        [frSampleSetDist, namedInput("fn", frTypedLambda([tNumber], tNumber))],
+        frSampleSetDist,
         ([dist, lambda], reducer) => {
           return unwrapDistResult(
             dist.samplesMap((r) =>
@@ -177,14 +180,14 @@ const baseLibrary = [
     definitions: [
       makeDefinition(
         [
-          tSampleSetDist,
-          tSampleSetDist,
-          fnInput({
+          frSampleSetDist,
+          frSampleSetDist,
+          frInput({
             name: "fn",
-            type: tTypedLambda([tNumber, tNumber], tNumber),
+            type: frTypedLambda([tNumber, tNumber], tNumber),
           }),
         ],
-        tSampleSetDist,
+        frSampleSetDist,
         ([dist1, dist2, lambda], reducer) => {
           return unwrapDistResult(
             SampleSetDist.map2({
@@ -214,12 +217,12 @@ const baseLibrary = [
     definitions: [
       makeDefinition(
         [
-          tSampleSetDist,
-          tSampleSetDist,
-          tSampleSetDist,
-          namedInput("fn", tTypedLambda([tNumber, tNumber, tNumber], tNumber)),
+          frSampleSetDist,
+          frSampleSetDist,
+          frSampleSetDist,
+          namedInput("fn", frTypedLambda([tNumber, tNumber, tNumber], tNumber)),
         ],
-        tSampleSetDist,
+        frSampleSetDist,
         ([dist1, dist2, dist3, lambda], reducer) => {
           return unwrapDistResult(
             SampleSetDist.map3({
@@ -256,10 +259,10 @@ const baseLibrary = [
     definitions: [
       makeDefinition(
         [
-          tArray(tSampleSetDist),
-          namedInput("fn", tTypedLambda([tArray(tNumber)], tNumber)),
+          frArray(frSampleSetDist),
+          namedInput("fn", frTypedLambda([tArray(tNumber)], tNumber)),
         ],
-        tSampleSetDist,
+        frSampleSetDist,
         ([dists, lambda], reducer) => {
           return unwrapDistResult(
             SampleSetDist.mapN({
@@ -292,15 +295,19 @@ const mkComparison = (
       makeFnExample(`SampleSet.${name}(4.0, SampleSet.fromDist(normal(6,2)))`),
     ],
     definitions: [
-      makeDefinition([tSampleSetDist, tNumber], tSampleSetDist, ([dist, f]) =>
-        unwrapDistResult(withFloat(dist, f))
-      ),
-      makeDefinition([tNumber, tSampleSetDist], tSampleSetDist, ([f, dist]) =>
-        unwrapDistResult(withFloat(dist, f))
+      makeDefinition(
+        [frSampleSetDist, frNumber],
+        frSampleSetDist,
+        ([dist, f]) => unwrapDistResult(withFloat(dist, f))
       ),
       makeDefinition(
-        [tSampleSetDist, tSampleSetDist],
-        tSampleSetDist,
+        [frNumber, frSampleSetDist],
+        frSampleSetDist,
+        ([f, dist]) => unwrapDistResult(withFloat(dist, f))
+      ),
+      makeDefinition(
+        [frSampleSetDist, frSampleSetDist],
+        frSampleSetDist,
         ([dist1, dist2]) => unwrapDistResult(withDist(dist1, dist2))
       ),
     ],

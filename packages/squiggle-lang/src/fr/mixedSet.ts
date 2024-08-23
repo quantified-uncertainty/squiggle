@@ -1,6 +1,6 @@
+import { frBool, frMixedSet, frNumber } from "../library/FrType.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { tBool, tMixedSet, tNumber } from "../types/index.js";
 import { MixedSet } from "../utility/MixedSet.js";
 
 const maker = new FnFactory({
@@ -29,7 +29,7 @@ export const library = [
   maker.make({
     name: "difference",
     definitions: [
-      makeDefinition([tMixedSet, tMixedSet], tMixedSet, ([m1, m2]) => {
+      makeDefinition([frMixedSet, frMixedSet], frMixedSet, ([m1, m2]) => {
         return toDict(fromDict(m1).difference(fromDict(m2)));
       }),
     ],
@@ -37,7 +37,7 @@ export const library = [
   maker.make({
     name: "intersection",
     definitions: [
-      makeDefinition([tMixedSet, tMixedSet], tMixedSet, ([m1, m2]) => {
+      makeDefinition([frMixedSet, frMixedSet], frMixedSet, ([m1, m2]) => {
         return toDict(fromDict(m1).intersection(fromDict(m2)));
       }),
     ],
@@ -45,7 +45,7 @@ export const library = [
   maker.make({
     name: "union",
     definitions: [
-      makeDefinition([tMixedSet, tMixedSet], tMixedSet, ([m1, m2]) => {
+      makeDefinition([frMixedSet, frMixedSet], frMixedSet, ([m1, m2]) => {
         return toDict(fromDict(m1).union(fromDict(m2)));
       }),
     ],
@@ -53,7 +53,7 @@ export const library = [
   maker.make({
     name: "isSubsetOf",
     definitions: [
-      makeDefinition([tMixedSet, tMixedSet], tBool, ([m1, m2]) => {
+      makeDefinition([frMixedSet, frMixedSet], frBool, ([m1, m2]) => {
         return fromDict(m1).isSubsetOf(fromDict(m2));
       }),
     ],
@@ -61,7 +61,7 @@ export const library = [
   maker.make({
     name: "isSupersetOf",
     definitions: [
-      makeDefinition([tMixedSet, tMixedSet], tBool, ([m1, m2]) => {
+      makeDefinition([frMixedSet, frMixedSet], frBool, ([m1, m2]) => {
         return fromDict(m1).isSupersetOf(fromDict(m2));
       }),
     ],
@@ -69,7 +69,7 @@ export const library = [
   maker.make({
     name: "isEqual",
     definitions: [
-      makeDefinition([tMixedSet, tMixedSet], tBool, ([m1, m2]) => {
+      makeDefinition([frMixedSet, frMixedSet], frBool, ([m1, m2]) => {
         return fromDict(m1).isEqual(fromDict(m2));
       }),
     ],
@@ -77,7 +77,7 @@ export const library = [
   maker.make({
     name: "isEmpty",
     definitions: [
-      makeDefinition([tMixedSet], tBool, ([m]) => {
+      makeDefinition([frMixedSet], frBool, ([m]) => {
         return fromDict(m).isEmpty();
       }),
     ],
@@ -86,7 +86,7 @@ export const library = [
     name: "min",
     description: "Returns the minimum value in the set",
     definitions: [
-      makeDefinition([tMixedSet], tNumber, ([m]) => {
+      makeDefinition([frMixedSet], frNumber, ([m]) => {
         const min = fromDict(m).min();
         if (min === undefined) {
           throw new Error("Set is Empty");
@@ -99,7 +99,7 @@ export const library = [
     name: "max",
     description: "Returns the maximum value in the set",
     definitions: [
-      makeDefinition([tMixedSet], tNumber, ([m]) => {
+      makeDefinition([frMixedSet], frNumber, ([m]) => {
         const max = fromDict(m).max();
         if (max === undefined) {
           throw new Error("Set is Empty");

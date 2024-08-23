@@ -10,6 +10,14 @@ import {
   binaryOperations,
 } from "../dists/distOperations/index.js";
 import * as PointMassJs from "../dists/SymbolicDist/PointMass.js";
+import { namedInput, optionalInput } from "../library/FrInput.js";
+import {
+  frArray,
+  frDist,
+  frDistOrNumber,
+  frNumber,
+  frString,
+} from "../library/FrType.js";
 import { FRFunction } from "../library/registry/core.js";
 import {
   FnFactory,
@@ -18,15 +26,7 @@ import {
 } from "../library/registry/helpers.js";
 import * as magicNumbers from "../magicNumbers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { namedInput, optionalInput } from "../reducer/lambda/FnInput.js";
 import { Reducer } from "../reducer/Reducer.js";
-import {
-  tArray,
-  tDist,
-  tDistOrNumber,
-  tNumber,
-  tString,
-} from "../types/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",
@@ -70,17 +70,17 @@ const makeOperationFns = (): FRFunction[] => {
       displaySection,
       requiresNamespace,
       definitions: [
-        makeDefinition([tDist, tNumber], tDist, ([dist, n], reducer) =>
+        makeDefinition([frDist, frNumber], frDist, ([dist, n], reducer) =>
           unwrapDistResult(
             op(dist, new PointMassJs.PointMass(n), reducerToOpts(reducer))
           )
         ),
-        makeDefinition([tNumber, tDist], tDist, ([n, dist], reducer) =>
+        makeDefinition([frNumber, frDist], frDist, ([n, dist], reducer) =>
           unwrapDistResult(
             op(new PointMassJs.PointMass(n), dist, reducerToOpts(reducer))
           )
         ),
-        makeDefinition([tDist, tDist], tDist, ([dist1, dist2], reducer) =>
+        makeDefinition([frDist, frDist], frDist, ([dist1, dist2], reducer) =>
           unwrapDistResult(op(dist1, dist2, reducerToOpts(reducer)))
         ),
       ],
@@ -106,8 +106,8 @@ export const library: FRFunction[] = [
 Produce a sparkline of length \`\`n\`\`. For example, \`▁▁▁▁▁▂▄▆▇██▇▆▄▂▁▁▁▁▁\`. These can be useful for testing or quick visualizations that can be copied and pasted into text.`,
     definitions: [
       makeDefinition(
-        [tDist, optionalInput(tNumber)],
-        tString,
+        [frDist, optionalInput(frNumber)],
+        frString,
         ([d, n], { environment }) =>
           unwrapDistResult(
             d.toSparkline(
@@ -165,8 +165,8 @@ Produce a sparkline of length \`\`n\`\`. For example, \`▁▁▁▁▁▂▄▆
     displaySection: "Basic Functions",
     definitions: [
       makeDefinition(
-        [tDist, namedInput("n", tNumber)],
-        tArray(tNumber),
+        [frDist, namedInput("n", frNumber)],
+        frArray(frNumber),
         ([dist, n], { rng }) => {
           return dist.sampleN(n | 0, rng);
         }
@@ -232,8 +232,8 @@ Produce a sparkline of length \`\`n\`\`. For example, \`▁▁▁▁▁▂▄▆
 Sample set distributions are truncated by filtering samples, but point set distributions are truncated using direct geometric manipulation. Uniform distributions are truncated symbolically. Symbolic but non-uniform distributions get converted to Point Set distributions.`,
     definitions: [
       makeDefinition(
-        [tDist, namedInput("left", tNumber), namedInput("right", tNumber)],
-        tDist,
+        [frDist, namedInput("left", frNumber), namedInput("right", frNumber)],
+        frDist,
         ([dist, left, right], { environment, rng }) =>
           unwrapDistResult(
             dist.truncate(left, right, { env: environment, rng })
@@ -268,7 +268,7 @@ Sample set distributions are truncated by filtering samples, but point set distr
     name: "sum",
     displaySection: "Algebra (List)",
     definitions: [
-      makeDefinition([tArray(tDistOrNumber)], tDist, ([dists], reducer) =>
+      makeDefinition([frArray(frDistOrNumber)], frDist, ([dists], reducer) =>
         unwrapDistResult(
           algebraicSum(
             dists.map(parseDistFromDistOrNumber),
@@ -282,7 +282,7 @@ Sample set distributions are truncated by filtering samples, but point set distr
     name: "product",
     displaySection: "Algebra (List)",
     definitions: [
-      makeDefinition([tArray(tDistOrNumber)], tDist, ([dists], reducer) =>
+      makeDefinition([frArray(frDistOrNumber)], frDist, ([dists], reducer) =>
         unwrapDistResult(
           algebraicProduct(
             dists.map(parseDistFromDistOrNumber),
@@ -297,8 +297,8 @@ Sample set distributions are truncated by filtering samples, but point set distr
     displaySection: "Algebra (List)",
     definitions: [
       makeDefinition(
-        [tArray(tDistOrNumber)],
-        tArray(tDist),
+        [frArray(frDistOrNumber)],
+        frArray(frDist),
         ([dists], reducer) =>
           unwrapDistResult(
             algebraicCumSum(
@@ -314,8 +314,8 @@ Sample set distributions are truncated by filtering samples, but point set distr
     displaySection: "Algebra (List)",
     definitions: [
       makeDefinition(
-        [tArray(tDistOrNumber)],
-        tArray(tDist),
+        [frArray(frDistOrNumber)],
+        frArray(frDist),
         ([dists], reducer) =>
           unwrapDistResult(
             algebraicCumProd(
@@ -379,8 +379,8 @@ Sample set distributions are truncated by filtering samples, but point set distr
     displaySection: "Algebra (List)",
     definitions: [
       makeDefinition(
-        [tArray(tDistOrNumber)],
-        tArray(tDist),
+        [frArray(frDistOrNumber)],
+        frArray(frDist),
         ([dists], reducer) =>
           unwrapDistResult(
             algebraicDiff(

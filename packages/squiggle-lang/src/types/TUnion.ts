@@ -3,23 +3,13 @@ import { Value } from "../value/index.js";
 import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
-// TODO - this only supports union types of 2 types. We should support more than
-// 2 types, but it's not clear how to implement pack/unpack for that.
-export class TUnion extends Type<Value> {
+export class TUnion extends Type {
   constructor(public types: Type[]) {
     super();
   }
 
   check(v: Value): boolean {
     return this.types.some((type) => type.check(v));
-  }
-
-  unpack(v: Value) {
-    return this.check(v) ? v : undefined;
-  }
-
-  pack(v: Value) {
-    return v;
   }
 
   serialize(visit: SquiggleSerializationVisitor): SerializedType {
@@ -31,6 +21,20 @@ export class TUnion extends Type<Value> {
 
   toString() {
     return this.types.map((t) => t.toString()).join("|");
+  }
+
+  override defaultFormInputCode() {
+    // This accounts for the case where types list is empty; should we catch this in the constructor instead?
+    return (
+      this.types.at(0)?.defaultFormInputCode() ?? super.defaultFormInputCode()
+    );
+  }
+
+  override defaultFormInputType() {
+    // TODO - is this ok? what if the first type is a checkbox and the second requries a text input?
+    return (
+      this.types.at(0)?.defaultFormInputType() ?? super.defaultFormInputType()
+    );
   }
 }
 

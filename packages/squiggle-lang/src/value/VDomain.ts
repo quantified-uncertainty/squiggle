@@ -16,7 +16,7 @@ import { vNumber, VNumber } from "./VNumber.js";
 export class VDomain extends BaseValue<"Domain", number> implements Indexable {
   readonly type = "Domain";
 
-  constructor(public value: Type<unknown>) {
+  constructor(public value: Type) {
     super();
   }
 
@@ -61,4 +61,6 @@ export class VDomain extends BaseValue<"Domain", number> implements Indexable {
   }
 }
 
-export const vDomain = (domain: Type<unknown>) => new VDomain(domain);
+export function vDomain(domain: Type) {
+  return new VDomain(domain);
+}

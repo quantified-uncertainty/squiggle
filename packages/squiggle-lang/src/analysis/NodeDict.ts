@@ -1,6 +1,6 @@
 import { KindNode, LocationRange } from "../ast/types.js";
 import { tAny, tDict, tDictWithArbitraryKeys } from "../types/index.js";
-import { Type } from "../types/Type.js";
+import { DictShape } from "../types/TDict.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeOneOfKinds } from "./index.js";
 import { ExpressionNode } from "./Node.js";
@@ -13,22 +13,28 @@ export class NodeDict extends ExpressionNode<"Dict"> {
     location: LocationRange,
     public elements: AnyDictEntryNode[]
   ) {
-    const kvTypes: [string, Type<unknown>][] = [];
+    const shape: DictShape = {};
     let staticKeys = true;
     for (const element of elements) {
       if (element instanceof NodeIdentifier) {
-        kvTypes.push([element.value, element.type]);
+        shape[element.value] = {
+          type: element.type,
+          optional: false,
+          deprecated: false,
+        };
       } else if (element.key instanceof NodeString) {
-        kvTypes.push([element.key.value, element.value.type]);
+        shape[element.key.value] = {
+          type: element.value.type,
+          optional: false,
+          deprecated: false,
+        };
       } else {
         staticKeys = false;
         break;
       }
     }
 
-    const type = staticKeys
-      ? tDict(...kvTypes)
-      : tDictWithArbitraryKeys(tAny());
+    const type = staticKeys ? tDict(shape) : tDictWithArbitraryKeys(tAny()); // TODO - union of all value types?
 
     super("Dict", location, type);
     this._init();

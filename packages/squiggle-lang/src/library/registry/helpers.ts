@@ -16,22 +16,24 @@ import {
   FnDefinition,
   makeDefinition,
 } from "../../reducer/lambda/FnDefinition.js";
-import { FnInput, namedInput } from "../../reducer/lambda/FnInput.js";
+import { FnInput } from "../../reducer/lambda/FnInput.js";
 import { Lambda } from "../../reducer/lambda/index.js";
 import { Reducer } from "../../reducer/Reducer.js";
-import {
-  tBool,
-  tDist,
-  tDistOrNumber,
-  tNumber,
-  tSampleSetDist,
-  tString,
-} from "../../types/index.js";
 import { Type } from "../../types/Type.js";
 import { upTo } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
 import { Value } from "../../value/index.js";
 import { FormInput } from "../../value/VInput.js";
+import { namedInput } from "../FrInput.js";
+import {
+  frBool,
+  frDist,
+  frDistOrNumber,
+  frNumber,
+  frSampleSetDist,
+  frString,
+  FrType,
+} from "../FrType.js";
 import { FRFunction } from "./core.js";
 
 type SimplifiedArgs = Omit<FRFunction, "nameSpace" | "requiresNamespace"> &
@@ -63,7 +65,7 @@ export class FnFactory {
   }: ArgsWithoutDefinitions & { fn: (x: number) => number }): FRFunction {
     return this.make({
       ...args,
-      definitions: [makeDefinition([tNumber], tNumber, ([x]) => fn(x))],
+      definitions: [makeDefinition([frNumber], frNumber, ([x]) => fn(x))],
     });
   }
 
@@ -76,7 +78,7 @@ export class FnFactory {
     return this.make({
       ...args,
       definitions: [
-        makeDefinition([tNumber, tNumber], tNumber, ([x, y]) => fn(x, y)),
+        makeDefinition([frNumber, frNumber], frNumber, ([x, y]) => fn(x, y)),
       ],
     });
   }
@@ -90,7 +92,7 @@ export class FnFactory {
     return this.make({
       ...args,
       definitions: [
-        makeDefinition([tNumber, tNumber], tBool, ([x, y]) => fn(x, y)),
+        makeDefinition([frNumber, frNumber], frBool, ([x, y]) => fn(x, y)),
       ],
     });
   }
@@ -104,7 +106,7 @@ export class FnFactory {
     return this.make({
       ...args,
       definitions: [
-        makeDefinition([tBool, tBool], tBool, ([x, y]) => fn(x, y)),
+        makeDefinition([frBool, frBool], frBool, ([x, y]) => fn(x, y)),
       ],
     });
   }
@@ -118,7 +120,7 @@ export class FnFactory {
     return this.make({
       ...args,
       definitions: [
-        makeDefinition([tString, tString], tBool, ([x, y]) => fn(x, y)),
+        makeDefinition([frString, frString], frBool, ([x, y]) => fn(x, y)),
       ],
     });
   }
@@ -132,7 +134,7 @@ export class FnFactory {
     return this.make({
       ...args,
       definitions: [
-        makeDefinition([tString, tString], tString, ([x, y]) => fn(x, y)),
+        makeDefinition([frString, frString], frString, ([x, y]) => fn(x, y)),
       ],
     });
   }
@@ -146,7 +148,7 @@ export class FnFactory {
     return this.make({
       ...args,
       definitions: [
-        makeDefinition([tDist], tString, ([dist], { environment }) =>
+        makeDefinition([frDist], frString, ([dist], { environment }) =>
           fn(dist, environment)
         ),
       ],
@@ -163,8 +165,8 @@ export class FnFactory {
       ...args,
       definitions: [
         makeDefinition(
-          [tDist, tNumber],
-          tString,
+          [frDist, frNumber],
+          frString,
           ([dist, n], { environment }) => fn(dist, n, environment)
         ),
       ],
@@ -180,7 +182,7 @@ export class FnFactory {
     return this.make({
       ...args,
       definitions: [
-        makeDefinition([tDist], tNumber, ([x], reducer) => fn(x, reducer)),
+        makeDefinition([frDist], frNumber, ([x], reducer) => fn(x, reducer)),
       ],
     });
   }
@@ -194,7 +196,7 @@ export class FnFactory {
     return this.make({
       ...args,
       definitions: [
-        makeDefinition([tDist], tBool, ([x], { environment }) =>
+        makeDefinition([frDist], frBool, ([x], { environment }) =>
           fn(x, environment)
         ),
       ],
@@ -210,7 +212,9 @@ export class FnFactory {
     return this.make({
       ...args,
       definitions: [
-        makeDefinition([tDist], tDist, ([dist], reducer) => fn(dist, reducer)),
+        makeDefinition([frDist], frDist, ([dist], reducer) =>
+          fn(dist, reducer)
+        ),
       ],
     });
   }
@@ -224,7 +228,7 @@ export class FnFactory {
     return this.make({
       ...args,
       definitions: [
-        makeDefinition([tDist, tNumber], tDist, ([dist, n], reducer) =>
+        makeDefinition([frDist, frNumber], frDist, ([dist, n], reducer) =>
           fn(dist, n, reducer)
         ),
       ],
@@ -241,8 +245,8 @@ export class FnFactory {
       ...args,
       definitions: [
         makeDefinition(
-          [tDist, tNumber],
-          tNumber,
+          [frDist, frNumber],
+          frNumber,
           ([dist, n], { environment }) => fn(dist, n, environment)
         ),
       ],
@@ -354,8 +358,8 @@ export function makeTwoArgsSamplesetDist(
   name2: string
 ) {
   return makeDefinition(
-    [namedInput(name1, tDistOrNumber), namedInput(name2, tDistOrNumber)],
-    tSampleSetDist,
+    [namedInput(name1, frDistOrNumber), namedInput(name2, frDistOrNumber)],
+    frSampleSetDist,
     ([v1, v2], reducer) => twoVarSample(v1, v2, reducer, fn)
   );
 }
@@ -365,8 +369,8 @@ export function makeOneArgSamplesetDist(
   name: string
 ) {
   return makeDefinition(
-    [namedInput(name, tDistOrNumber)],
-    tSampleSetDist,
+    [namedInput(name, frDistOrNumber)],
+    frSampleSetDist,
     ([v], reducer) => {
       const sampleFn = (a: number) =>
         Result.fmap2(
@@ -394,14 +398,14 @@ function createComparisonDefinition<T>(
   fnFactory: FnFactory,
   opName: string,
   comparisonFunction: (d1: T, d2: T) => boolean,
-  frType: Type<T>,
+  frType: FrType<T>,
   displaySection?: string
 ): FRFunction {
   return fnFactory.make({
     name: opName,
     displaySection,
     definitions: [
-      makeDefinition([frType, frType], tBool, ([d1, d2]) =>
+      makeDefinition([frType, frType], frBool, ([d1, d2]) =>
         comparisonFunction(d1, d2)
       ),
     ],
@@ -413,7 +417,7 @@ export function makeNumericComparisons<T>(
   smaller: (d1: T, d2: T) => boolean,
   larger: (d1: T, d2: T) => boolean,
   isEqual: (d1: T, d2: T) => boolean,
-  frType: Type<T>,
+  frType: FrType<T>,
   displaySection?: string
 ): FRFunction[] {
   return [
@@ -460,7 +464,7 @@ export const chooseLambdaParamLength = (
 // A helper to check if a list of frTypes would match inputs of a given length.
 // Non-trivial because of optional arguments.
 export const fnInputsMatchesLengths = (
-  inputs: FnInput<any>[],
+  inputs: FnInput[],
   lengths: number[]
 ): boolean => {
   const min = inputs.filter((i) => !i.optional).length;

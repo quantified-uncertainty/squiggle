@@ -55,4 +55,6 @@ export class VLambda extends BaseValue<"Lambda", number> implements Indexable {
   // deserialization is implemented in ./serialize.ts, because of circular import issues.
 }
 
-export const vLambda = (v: Lambda) => new VLambda(v);
+export function vLambda(v: Lambda) {
+  return new VLambda(v);
+}

@@ -1,11 +1,10 @@
 import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
-import { Value, vArray } from "../value/index.js";
-import { UnwrapType } from "./helpers.js";
+import { Value } from "../value/index.js";
 import { SerializedType } from "./serialize.js";
 import { TAny, Type } from "./Type.js";
 
-export class TArray<T> extends Type<readonly T[]> {
-  constructor(public itemType: Type<T>) {
+export class TArray extends Type {
+  constructor(public itemType: Type) {
     super();
   }
 
@@ -22,32 +21,6 @@ export class TArray<T> extends Type<readonly T[]> {
       }
     }
     return true;
-  }
-
-  unpack(v: Value): readonly T[] | undefined {
-    if (v.type !== "Array") {
-      return undefined;
-    }
-    if (this.itemType instanceof TAny) {
-      // special case, performance optimization
-      return v.value as readonly T[];
-    }
-
-    const unpackedArray: T[] = [];
-    for (const item of v.value) {
-      const unpackedItem = this.itemType.unpack(item);
-      if (unpackedItem === undefined) {
-        return undefined;
-      }
-      unpackedArray.push(unpackedItem);
-    }
-    return unpackedArray;
-  }
-
-  pack(v: readonly T[]) {
-    return this.itemType instanceof TAny
-      ? vArray(v as readonly Value[])
-      : vArray(v.map((item) => this.itemType.pack(item)));
   }
 
   serialize(visit: SquiggleSerializationVisitor): SerializedType {
@@ -70,6 +43,6 @@ export class TArray<T> extends Type<readonly T[]> {
   }
 }
 
-export function tArray<T extends Type<any>>(itemType: T) {
-  return new TArray<UnwrapType<T>>(itemType);
+export function tArray(itemType: Type) {
+  return new TArray(itemType);
 }

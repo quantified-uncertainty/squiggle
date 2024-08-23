@@ -1,34 +1,32 @@
 import mergeWith from "lodash/mergeWith.js";
 
 import { ErrorMessage } from "../errors/messages.js";
+import { frInput, namedInput, optionalInput } from "../library/FrInput.js";
+import {
+  frArray,
+  frBool,
+  frDict,
+  frDist,
+  frDistOrNumber,
+  frNumber,
+  frOr,
+  frPlot,
+  frSampleSetDist,
+  frScale,
+  frString,
+  frTagged,
+  frTypedLambda,
+} from "../library/FrType.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
   FnFactory,
   parseDistFromDistOrNumber,
 } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import {
-  fnInput,
-  namedInput,
-  optionalInput,
-} from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
-import {
-  tArray,
-  tBool,
-  tDict,
-  tDist,
-  tDistOrNumber,
-  tNumber,
-  tOr,
-  tPlot,
-  tSampleSetDist,
-  tScale,
-  tString,
-  tTypedLambda,
-  tWithTags,
-} from "../types/index.js";
 import { TDateRange } from "../types/TDateRange.js";
+import { tDist } from "../types/TDist.js";
+import { tNumber } from "../types/TIntrinsic.js";
 import { TNumberRange } from "../types/TNumberRange.js";
 import { Type } from "../types/Type.js";
 import { clamp, sort, uniq } from "../utility/E_A_Floats.js";
@@ -174,7 +172,7 @@ const numericFnDef = () => {
     };
   };
 
-  const fnType = tTypedLambda([tNumber], tNumber);
+  const fnType = frTypedLambda([tNumber], tNumber);
 
   return maker.make({
     name: "numericFn",
@@ -190,24 +188,24 @@ const numericFnDef = () => {
     definitions: [
       makeDefinition(
         [
-          namedInput("fn", tWithTags(fnType)),
-          fnInput({
+          namedInput("fn", frTagged(fnType)),
+          frInput({
             name: "params",
             optional: true,
-            type: tDict(
-              { key: "xScale", type: tScale, optional: true },
-              { key: "yScale", type: tScale, optional: true },
+            type: frDict(
+              { key: "xScale", type: frScale, optional: true },
+              { key: "yScale", type: frScale, optional: true },
               {
                 key: "title",
-                type: tString,
+                type: frString,
                 optional: true,
                 deprecated: true,
               },
-              { key: "xPoints", type: tArray(tNumber), optional: true }
+              { key: "xPoints", type: frArray(frNumber), optional: true }
             ),
           }),
         ],
-        tPlot,
+        frPlot,
         ([{ value, tags }, params]) => {
           const { xScale, yScale, title, xPoints } = params ?? {};
           return toPlot(
@@ -221,15 +219,15 @@ const numericFnDef = () => {
       ),
       makeDefinition(
         [
-          tDict(
+          frDict(
             ["fn", fnType],
-            { key: "xScale", type: tScale, optional: true },
-            { key: "yScale", type: tScale, optional: true },
-            { key: "title", type: tString, optional: true, deprecated: true },
-            { key: "xPoints", type: tArray(tNumber), optional: true }
+            { key: "xScale", type: frScale, optional: true },
+            { key: "yScale", type: frScale, optional: true },
+            { key: "title", type: frString, optional: true, deprecated: true },
+            { key: "xPoints", type: frArray(frNumber), optional: true }
           ),
         ],
-        tPlot,
+        frPlot,
         ([{ fn, xScale, yScale, title, xPoints }]) => {
           return toPlot(
             fn,
@@ -264,24 +262,24 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          namedInput("dist", tDist),
-          fnInput({
+          namedInput("dist", frDist),
+          frInput({
             name: "params",
-            type: tDict(
-              { key: "xScale", type: tScale, optional: true },
-              { key: "yScale", type: tScale, optional: true },
+            type: frDict(
+              { key: "xScale", type: frScale, optional: true },
+              { key: "yScale", type: frScale, optional: true },
               {
                 key: "title",
-                type: tString,
+                type: frString,
                 optional: true,
                 deprecated: true,
               },
-              { key: "showSummary", type: tBool, optional: true }
+              { key: "showSummary", type: frBool, optional: true }
             ),
             optional: true,
           }),
         ],
-        tPlot,
+        frPlot,
         ([dist, params]) => {
           const { xScale, yScale, title, showSummary } = params ?? {};
           return {
@@ -296,20 +294,20 @@ export const library = [
       ),
       makeDefinition(
         [
-          tDict(
-            ["dist", tDist],
-            { key: "xScale", type: tScale, optional: true },
-            { key: "yScale", type: tScale, optional: true },
+          frDict(
+            ["dist", frDist],
+            { key: "xScale", type: frScale, optional: true },
+            { key: "yScale", type: frScale, optional: true },
             {
               key: "title",
-              type: tString,
+              type: frString,
               optional: true,
               deprecated: true,
             },
-            { key: "showSummary", type: tBool, optional: true }
+            { key: "showSummary", type: frBool, optional: true }
           ),
         ],
-        tPlot,
+        frPlot,
         ([{ dist, xScale, yScale, title, showSummary }]) => {
           _assertYScaleNotDateScale(yScale);
           return {
@@ -346,31 +344,31 @@ export const library = [
         [
           namedInput(
             "dists",
-            tOr(
-              tArray(tDistOrNumber),
-              tArray(
-                tDict({ key: "name", type: tString, optional: true }, [
+            frOr(
+              frArray(frDistOrNumber),
+              frArray(
+                frDict({ key: "name", type: frString, optional: true }, [
                   "value",
-                  tDistOrNumber,
+                  frDistOrNumber,
                 ])
               )
             )
           ),
           optionalInput(
-            tDict(
-              { key: "xScale", type: tScale, optional: true },
-              { key: "yScale", type: tScale, optional: true },
+            frDict(
+              { key: "xScale", type: frScale, optional: true },
+              { key: "yScale", type: frScale, optional: true },
               {
                 key: "title",
-                type: tString,
+                type: frString,
                 optional: true,
                 deprecated: true,
               },
-              { key: "showSummary", type: tBool, optional: true }
+              { key: "showSummary", type: frBool, optional: true }
             )
           ),
         ],
-        tPlot,
+        frPlot,
         ([dists, params]) => {
           const { xScale, yScale, title, showSummary } = params ?? {};
           yScale && _assertYScaleNotDateScale(yScale);
@@ -402,23 +400,23 @@ export const library = [
       ),
       makeDefinition(
         [
-          tDict(
+          frDict(
             [
               "dists",
-              tArray(tDict(["name", tString], ["value", tDistOrNumber])),
+              frArray(frDict(["name", frString], ["value", frDistOrNumber])),
             ],
-            { key: "xScale", type: tScale, optional: true },
-            { key: "yScale", type: tScale, optional: true },
+            { key: "xScale", type: frScale, optional: true },
+            { key: "yScale", type: frScale, optional: true },
             {
               key: "title",
-              type: tString,
+              type: frString,
               optional: true,
               deprecated: true,
             },
-            { key: "showSummary", type: tBool, optional: true }
+            { key: "showSummary", type: frBool, optional: true }
           ),
         ],
-        tPlot,
+        frPlot,
         ([{ dists, xScale, yScale, title, showSummary }]) => {
           _assertYScaleNotDateScale(yScale);
 
@@ -461,25 +459,25 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          namedInput("fn", tWithTags(tTypedLambda([tNumber], tDist))),
-          fnInput({
+          namedInput("fn", frTagged(frTypedLambda([tNumber], tDist))),
+          frInput({
             name: "params",
-            type: tDict(
-              { key: "xScale", type: tScale, optional: true },
-              { key: "yScale", type: tScale, optional: true },
-              { key: "distXScale", type: tScale, optional: true },
+            type: frDict(
+              { key: "xScale", type: frScale, optional: true },
+              { key: "yScale", type: frScale, optional: true },
+              { key: "distXScale", type: frScale, optional: true },
               {
                 key: "title",
-                type: tString,
+                type: frString,
                 optional: true,
                 deprecated: true,
               },
-              { key: "xPoints", type: tArray(tNumber), optional: true }
+              { key: "xPoints", type: frArray(frNumber), optional: true }
             ),
             optional: true,
           }),
         ],
-        tPlot,
+        frPlot,
         ([{ value, tags }, params]) => {
           const domain = extractDomainFromOneArgFunction(value);
           const { xScale, yScale, distXScale, title, xPoints } = params ?? {};
@@ -498,16 +496,16 @@ export const library = [
       ),
       makeDefinition(
         [
-          tDict(
-            ["fn", tTypedLambda([tNumber], tDist)],
-            { key: "distXScale", type: tScale, optional: true },
-            { key: "xScale", type: tScale, optional: true },
-            { key: "yScale", type: tScale, optional: true },
-            { key: "title", type: tString, optional: true, deprecated: true },
-            { key: "xPoints", type: tArray(tNumber), optional: true }
+          frDict(
+            ["fn", frTypedLambda([tNumber], tDist)],
+            { key: "distXScale", type: frScale, optional: true },
+            { key: "xScale", type: frScale, optional: true },
+            { key: "yScale", type: frScale, optional: true },
+            { key: "title", type: frString, optional: true, deprecated: true },
+            { key: "xPoints", type: frArray(frNumber), optional: true }
           ),
         ],
-        tPlot,
+        frPlot,
         ([{ fn, xScale, yScale, distXScale, title, xPoints }]) => {
           _assertYScaleNotDateScale(yScale);
           const domain = extractDomainFromOneArgFunction(fn);
@@ -554,15 +552,15 @@ Plot.scatter({
     definitions: [
       makeDefinition(
         [
-          tDict(
-            ["xDist", tWithTags(tSampleSetDist)],
-            ["yDist", tWithTags(tSampleSetDist)],
-            { key: "xScale", type: tScale, optional: true },
-            { key: "yScale", type: tScale, optional: true },
-            { key: "title", type: tString, optional: true, deprecated: true }
+          frDict(
+            ["xDist", frTagged(frSampleSetDist)],
+            ["yDist", frTagged(frSampleSetDist)],
+            { key: "xScale", type: frScale, optional: true },
+            { key: "yScale", type: frScale, optional: true },
+            { key: "title", type: frString, optional: true, deprecated: true }
           ),
         ],
-        tPlot,
+        frPlot,
         ([{ xDist, yDist, xScale, yScale, title }]) => {
           _assertYScaleNotDateScale(yScale);
           const xTitle = xDist.tags.name();

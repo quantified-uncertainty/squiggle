@@ -63,4 +63,6 @@ export class VInput extends BaseValue<"Input", FormInput> {
   }
 }
 
-export const vInput = (input: FormInput) => new VInput(input);
+export function vInput(input: FormInput) {
+  return new VInput(input);
+}

@@ -2,10 +2,10 @@ import { BaseDist } from "../dists/BaseDist.js";
 import * as distOperations from "../dists/distOperations/index.js";
 import { Env } from "../dists/env.js";
 import { ErrorMessage } from "../errors/messages.js";
+import { frDict, frDist, frDistOrNumber, frNumber } from "../library/FrType.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { tDict, tDist, tDistOrNumber, tNumber } from "../types/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",
@@ -59,7 +59,7 @@ export const library = [
 
 Note that this can be very brittle. If the second distribution has probability mass at areas where the first doesn't, then the result will be infinite. Due to numeric approximations, some probability mass in point set distributions is rounded to zero, leading to infinite results with klDivergence.`,
     definitions: [
-      makeDefinition([tDist, tDist], tNumber, ([estimate, d], reducer) =>
+      makeDefinition([frDist, frDist], frNumber, ([estimate, d], reducer) =>
         runScoringDistAnswer(estimate, d, undefined, reducer.environment)
       ),
     ],
@@ -82,13 +82,13 @@ Note that this can be very brittle. If the second distribution has probability m
     definitions: [
       makeDefinition(
         [
-          tDict(["estimate", tDist], ["answer", tDistOrNumber], {
+          frDict(["estimate", frDist], ["answer", frDistOrNumber], {
             key: "prior",
-            type: tDist,
+            type: frDist,
             optional: true,
           }),
         ],
-        tNumber,
+        frNumber,
         ([{ estimate, answer, prior }], reducer) => {
           if (prior !== null) {
             if (answer instanceof BaseDist) {

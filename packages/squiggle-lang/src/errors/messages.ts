@@ -124,7 +124,7 @@ export class ErrorMessage extends Error {
     return new ErrorMessage(`Dict property not found: ${key}`);
   }
 
-  static dictPropertyNotFoundCompileError(key: string, dictType: TDict<any>) {
+  static dictPropertyNotFoundCompileError(key: string, dictType: TDict) {
     return new ErrorMessage(
       `Property ${key} doesn't exist in dict ${dictType}`
     );

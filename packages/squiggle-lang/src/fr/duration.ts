@@ -1,10 +1,10 @@
+import { frDuration, frNumber } from "../library/FrType.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
   FnFactory,
   makeNumericComparisons,
 } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { tDuration, tNumber } from "../types/index.js";
 import { SDuration } from "../utility/SDuration.js";
 import { unitNameToBuiltinFunctionName } from "./units.js";
 
@@ -22,7 +22,7 @@ const makeNumberToDurationFn = (
   maker.make({
     name,
     examples: [makeFnExample(`Duration.${name}(5)`)],
-    definitions: [makeDefinition([tNumber], tDuration, ([t]) => fn(t))],
+    definitions: [makeDefinition([frNumber], frDuration, ([t]) => fn(t))],
     isUnit,
     displaySection,
   });
@@ -36,7 +36,7 @@ const makeDurationToNumberFn = (
     name,
     examples: [makeFnExample(`Duration.${name}(5minutes)`)],
     displaySection,
-    definitions: [makeDefinition([tDuration], tNumber, ([t]) => fn(t))],
+    definitions: [makeDefinition([frDuration], frNumber, ([t]) => fn(t))],
   });
 
 export const library = [
@@ -64,7 +64,7 @@ export const library = [
     (d1, d2) => d1.smaller(d2),
     (d1, d2) => d1.larger(d2),
     (d1, d2) => d1.isEqual(d2),
-    tDuration,
+    frDuration,
     "Comparison"
   ),
   maker.make({
@@ -72,7 +72,7 @@ export const library = [
     examples: [makeFnExample("-5minutes")],
     displaySection: "Algebra",
     definitions: [
-      makeDefinition([tDuration], tDuration, ([d]) => d.multiply(-1)),
+      makeDefinition([frDuration], frDuration, ([d]) => d.multiply(-1)),
     ],
   }),
   maker.make({
@@ -80,7 +80,7 @@ export const library = [
     examples: [makeFnExample("5minutes + 10minutes")],
     displaySection: "Algebra",
     definitions: [
-      makeDefinition([tDuration, tDuration], tDuration, ([d1, d2]) =>
+      makeDefinition([frDuration, frDuration], frDuration, ([d1, d2]) =>
         d1.add(d2)
       ),
     ],
@@ -90,7 +90,7 @@ export const library = [
     examples: [makeFnExample("5minutes - 10minutes")],
     displaySection: "Algebra",
     definitions: [
-      makeDefinition([tDuration, tDuration], tDuration, ([d1, d2]) =>
+      makeDefinition([frDuration, frDuration], frDuration, ([d1, d2]) =>
         d1.subtract(d2)
       ),
     ],
@@ -100,10 +100,10 @@ export const library = [
     examples: [makeFnExample("5minutes * 10"), makeFnExample("10 * 5minutes")],
     displaySection: "Algebra",
     definitions: [
-      makeDefinition([tDuration, tNumber], tDuration, ([d1, d2]) =>
+      makeDefinition([frDuration, frNumber], frDuration, ([d1, d2]) =>
         d1.multiply(d2)
       ),
-      makeDefinition([tNumber, tDuration], tDuration, ([d1, d2]) =>
+      makeDefinition([frNumber, frDuration], frDuration, ([d1, d2]) =>
         d2.multiply(d1)
       ),
     ],
@@ -113,7 +113,7 @@ export const library = [
     displaySection: "Algebra",
     examples: [makeFnExample("5minutes / 2minutes")],
     definitions: [
-      makeDefinition([tDuration, tDuration], tNumber, ([d1, d2]) =>
+      makeDefinition([frDuration, frDuration], frNumber, ([d1, d2]) =>
         d1.divideBySDuration(d2)
       ),
     ],
@@ -123,7 +123,7 @@ export const library = [
     displaySection: "Algebra",
     examples: [makeFnExample("5minutes / 3")],
     definitions: [
-      makeDefinition([tDuration, tNumber], tDuration, ([d1, d2]) =>
+      makeDefinition([frDuration, frNumber], frDuration, ([d1, d2]) =>
         d1.divideByNumber(d2)
       ),
     ],

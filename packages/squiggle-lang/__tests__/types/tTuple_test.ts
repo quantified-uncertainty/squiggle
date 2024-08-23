@@ -1,12 +1,17 @@
 import { tNumber, tString, tTuple } from "../../src/types/index.js";
 import { vArray, vNumber, vString } from "../../src/value/index.js";
 
-describe("pack/unpack", () => {
+describe("check", () => {
   test("two elements", () => {
     const arr = [3, "foo"] as [number, string];
     const value = vArray([vNumber(arr[0]), vString(arr[1])]);
-    expect(tTuple(tNumber, tString).unpack(value)).toEqual(arr);
-    expect(tTuple(tNumber, tString).pack(arr)).toEqual(value);
+    expect(tTuple(tNumber, tString).check(value)).toBe(true);
+  });
+
+  test("two elements, wrong order", () => {
+    const arr = [3, "foo"] as [number, string];
+    const value = vArray([vString(arr[1]), vNumber(arr[0])]);
+    expect(tTuple(tNumber, tString).check(value)).toBe(false);
   });
 
   test("five elements", () => {
@@ -19,7 +24,6 @@ describe("pack/unpack", () => {
       vNumber(arr[4]),
     ]);
     const tuple = tTuple(tNumber, tString, tNumber, tNumber, tNumber);
-    expect(tuple.unpack(value)).toEqual(arr);
-    expect(tuple.pack(arr)).toEqual(value);
+    expect(tuple.check(value)).toBe(true);
   });
 });

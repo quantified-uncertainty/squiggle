@@ -1,37 +1,19 @@
 import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { Value } from "../value/index.js";
-import { vArray } from "../value/VArray.js";
 import { InputType } from "../value/VInput.js";
 import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
-export class TTuple<const T extends any[]> extends Type<
-  [...{ [K in keyof T]: T[K] }]
-> {
-  constructor(public types: [...{ [K in keyof T]: Type<T[K]> }]) {
+export class TTuple extends Type {
+  constructor(public types: Type[]) {
     super();
   }
 
   check(v: Value): boolean {
-    return this.unpack(v) !== undefined;
-  }
-
-  unpack(v: Value) {
     if (v.type !== "Array" || v.value.length !== this.types.length) {
-      return undefined;
+      return false;
     }
-
-    const items = this.types.map((type, index) => type.unpack(v.value[index]));
-
-    if (items.some((item) => item === undefined)) {
-      return undefined;
-    }
-
-    return items as T;
-  }
-
-  pack(values: unknown[]) {
-    return vArray(values.map((val, index) => this.types[index].pack(val)));
+    return this.types.every((type, i) => type.check(v.value[i]));
   }
 
   serialize(visit: SquiggleSerializationVisitor): SerializedType {
@@ -54,8 +36,6 @@ export class TTuple<const T extends any[]> extends Type<
   }
 }
 
-export function tTuple<const T extends any[]>(
-  ...types: [...{ [K in keyof T]: Type<T[K]> }]
-) {
+export function tTuple(...types: Type[]) {
   return new TTuple(types);
 }

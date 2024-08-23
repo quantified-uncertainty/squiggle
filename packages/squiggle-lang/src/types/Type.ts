@@ -3,7 +3,7 @@ import { type Value } from "../value/index.js";
 import { type InputType } from "../value/VInput.js";
 import { SerializedType } from "./serialize.js";
 
-export abstract class Type<T = unknown> {
+export abstract class Type {
   // Check if the given value is of this type.
   abstract check(v: Value): boolean;
 
@@ -18,8 +18,8 @@ export abstract class Type<T = unknown> {
   //
   // Fixing this would require a separate set of constructors for the input
   // parameters and output parameters in `FnDefinition`.
-  abstract unpack(v: Value): T | undefined;
-  abstract pack(v: T): Value;
+  // abstract unpack(v: Value): T | undefined;
+  // abstract pack(v: T): Value;
 
   // Types must be serializable, because values are serializable, and Domain
   // values (`VDomain`) refer to types.
@@ -36,21 +36,13 @@ export abstract class Type<T = unknown> {
   }
 }
 
-export class TAny extends Type<Value> {
+export class TAny extends Type {
   constructor(public genericName?: string) {
     super();
   }
 
   check() {
     return true;
-  }
-
-  unpack(v: Value) {
-    return v;
-  }
-
-  pack(v: Value) {
-    return v;
   }
 
   toString() {

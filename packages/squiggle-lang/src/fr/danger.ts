@@ -5,6 +5,17 @@ import jstat from "jstat";
 import { Binomial } from "../dists/SymbolicDist/Binomial.js";
 import * as PoissonJs from "../dists/SymbolicDist/Poisson.js";
 import { ErrorMessage } from "../errors/messages.js";
+import { frInput, namedInput } from "../library/FrInput.js";
+import {
+  frAny,
+  frArray,
+  frDate,
+  frLambda,
+  frNumber,
+  frOr,
+  frPointSetDist,
+  frString,
+} from "../library/FrType.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import {
   FnFactory,
@@ -12,19 +23,8 @@ import {
   makeTwoArgsSamplesetDist,
 } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { fnInput, namedInput } from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { Reducer } from "../reducer/Reducer.js";
-import {
-  tAny,
-  tArray,
-  tDate,
-  tLambda,
-  tNumber,
-  tOr,
-  tPointSetDist,
-  tString,
-} from "../types/index.js";
 import * as E_A from "../utility/E_A.js";
 import { SDate } from "../utility/SDate.js";
 import {
@@ -84,7 +84,7 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
     displaySection: "Javascript",
     description: `Converts a string to a number. If the string can't be converted, returns \`Parse Failed\`. Calls Javascript \`parseFloat\` under the hood.`,
     definitions: [
-      makeDefinition([tString], tOr(tNumber, tString), ([str]) => {
+      makeDefinition([frString], frOr(frNumber, frString), ([str]) => {
         const result = parseFloat(str);
         if (isNaN(result)) {
           return { tag: "2", value: "Parse Failed" };
@@ -103,7 +103,7 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
     requiresNamespace: true,
     displaySection: "Javascript",
     definitions: [
-      makeDefinition([], tDate, () => {
+      makeDefinition([], frDate, () => {
         return SDate.now();
       }),
     ],
@@ -128,8 +128,8 @@ Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 =
     examples: [makeFnExample(`Danger.binomial(1, 20, 0.5)`)],
     definitions: [
       makeDefinition(
-        [tNumber, tNumber, tNumber],
-        tNumber,
+        [frNumber, frNumber, frNumber],
+        frNumber,
         ([n, k, p]) => choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k)
       ),
     ],
@@ -204,102 +204,6 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
     innerPointsSum * weightForAnInnerPoint;
   return result;
 };
-const integrationLibrary: FRFunction[] = [
-  // Integral in terms of function, min, max, num points
-  // Note that execution time will be more predictable, because it
-  // will only depend on num points and the complexity of the function
-  maker.make({
-    name: "integrateFunctionBetweenWithNumIntegrationPoints",
-    requiresNamespace: false,
-    displaySection: "Integration",
-    examples: [
-      makeFnExample(
-        `Danger.integrateFunctionBetweenWithNumIntegrationPoints({|x| x+1}, 1, 10, 10)`
-      ),
-    ],
-    description: `Integrates the function \`f\` between \`min\` and \`max\`, and computes \`numIntegrationPoints\` in between to do so.
-
-Note that the function \`f\` has to take in and return numbers. To integrate a function which returns distributions, use:
-
-~~~squiggle
-auxiliaryF(x) = mean(f(x))
-
-Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, numIntegrationPoints)
-~~~
-`,
-    // For the example of integrating x => x+1 between 1 and 10,
-    // result should be close to 58.5
-    // [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
-    // https://www.wolframalpha.com/input?i=integrate+x%2B1+from+1+to+10
-    definitions: [
-      makeDefinition(
-        [
-          fnInput({ name: "f", type: tLambda }),
-          fnInput({ name: "min", type: tNumber }),
-          fnInput({ name: "max", type: tNumber }),
-          fnInput({ name: "numIntegrationPoints", type: tNumber }),
-        ],
-        tNumber,
-        ([lambda, min, max, numIntegrationPoints], reducer) => {
-          if (numIntegrationPoints === 0) {
-            throw ErrorMessage.otherError(
-              "Integration error 4 in Danger.integrate: Increment can't be 0."
-            );
-          }
-          return integrateFunctionBetweenWithNumIntegrationPoints(
-            lambda,
-            min,
-            max,
-            numIntegrationPoints,
-            reducer
-          );
-        }
-      ),
-    ],
-  }),
-  // Integral in terms of function, min, max, epsilon (distance between points)
-  // Execution time will be less predictable, because it
-  // will depend on min, max and epsilon together,
-  // as well and the complexity of the function
-  maker.make({
-    name: "integrateFunctionBetweenWithEpsilon",
-    requiresNamespace: false,
-    displaySection: "Integration",
-    examples: [
-      makeFnExample(
-        `Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 0.1)`
-      ),
-    ],
-    description: `Integrates the function \`f\` between \`min\` and \`max\`, and uses an interval of \`epsilon\` between integration points when doing so. This makes its runtime less predictable than \`integrateFunctionBetweenWithNumIntegrationPoints\`, because runtime will not only depend on \`epsilon\`, but also on \`min\` and \`max\`.
-
-Same caveats as \`integrateFunctionBetweenWithNumIntegrationPoints\` apply.`,
-    definitions: [
-      makeDefinition(
-        [
-          namedInput("f", tLambda),
-          namedInput("min", tNumber),
-          namedInput("max", tNumber),
-          namedInput("epsilon", tNumber),
-        ],
-        tNumber,
-        ([lambda, min, max, epsilon], reducer) => {
-          if (epsilon === 0) {
-            throw ErrorMessage.otherError(
-              "Integration error in Danger.integrate: Increment can't be 0."
-            );
-          }
-          return integrateFunctionBetweenWithNumIntegrationPoints(
-            lambda,
-            min,
-            max,
-            (max - min) / epsilon,
-            reducer
-          );
-        }
-      ),
-    ],
-  }),
-];
 
 const findBiggestElementIndex = (xs: number[]) =>
   xs.reduce((acc, newElement, index) => {
@@ -329,11 +233,11 @@ const diminishingReturnsLibrary = [
     definitions: [
       makeDefinition(
         [
-          namedInput("fs", tArray(tLambda)),
-          namedInput("funds", tNumber),
-          namedInput("approximateIncrement", tNumber),
+          namedInput("fs", frArray(frLambda)),
+          namedInput("funds", frNumber),
+          namedInput("approximateIncrement", frNumber),
         ],
-        tAny(),
+        frAny(),
         ([lambdas, funds, approximateIncrement], reducer) => {
           // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas.
           /*
@@ -482,8 +386,8 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
     description: `Returns all combinations of the input list taken r elements at a time.`,
     definitions: [
       makeDefinition(
-        [tArray(tAny({ genericName: "A" })), tNumber],
-        tArray(tArray(tAny({ genericName: "A" }))),
+        [frArray(frAny({ genericName: "A" })), frNumber],
+        frArray(frArray(frAny({ genericName: "A" }))),
         ([elements, n]) => {
           if (n > elements.length) {
             throw ErrorMessage.argumentError(
@@ -506,8 +410,8 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
     ],
     definitions: [
       makeDefinition(
-        [tArray(tAny({ genericName: "A" }))],
-        tArray(tArray(tAny({ genericName: "A" }))),
+        [frArray(frAny({ genericName: "A" }))],
+        frArray(frArray(frAny({ genericName: "A" }))),
         ([elements]) => {
           return allCombinations(elements);
         }
@@ -526,7 +430,7 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
       ),
     ],
     definitions: [
-      makeDefinition([tAny()], tAny(), ([v]) => {
+      makeDefinition([frAny()], frAny(), ([v]) => {
         return simpleValueToValue(simpleValueFromValue(v));
       }),
     ],
@@ -543,7 +447,7 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
       ),
     ],
     definitions: [
-      makeDefinition([tAny()], tString, ([v]) => {
+      makeDefinition([frAny()], frString, ([v]) => {
         return JSON.stringify(
           simpleValueToJson(removeLambdas(simpleValueFromValue(v)))
         );
@@ -555,7 +459,7 @@ Note: The Poisson distribution is a discrete distribution. When representing thi
     examples: [makeFnExample(`Danger.yTransform(PointSet(Sym.normal(5,2)))`)],
     displaySection: "Math",
     definitions: [
-      makeDefinition([tPointSetDist], tPointSetDist, ([dist]) => {
+      makeDefinition([frPointSetDist], frPointSetDist, ([dist]) => {
         return dist.yTransform();
       }),
     ],
@@ -567,7 +471,102 @@ export const library = [
   ...combinatoricsLibrary,
 
   //   // Integration
-  ...integrationLibrary,
+  ...[
+    // Integral in terms of function, min, max, num points
+    // Note that execution time will be more predictable, because it
+    // will only depend on num points and the complexity of the function
+    maker.make({
+      name: "integrateFunctionBetweenWithNumIntegrationPoints",
+      requiresNamespace: false,
+      displaySection: "Integration",
+      examples: [
+        makeFnExample(
+          `Danger.integrateFunctionBetweenWithNumIntegrationPoints({|x| x+1}, 1, 10, 10)`
+        ),
+      ],
+      description: `Integrates the function \`f\` between \`min\` and \`max\`, and computes \`numIntegrationPoints\` in between to do so.
+
+Note that the function \`f\` has to take in and return numbers. To integrate a function which returns distributions, use:
+
+~~~squiggle
+auxiliaryF(x) = mean(f(x))
+
+Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, numIntegrationPoints)
+~~~
+`,
+      // For the example of integrating x => x+1 between 1 and 10,
+      // result should be close to 58.5
+      // [x^2/2 + x]1_10 = (100/2 + 10) - (1/2 + 1) = 60 - 1.5 = 58.5
+      // https://www.wolframalpha.com/input?i=integrate+x%2B1+from+1+to+10
+      definitions: [
+        makeDefinition(
+          [
+            frInput({ name: "f", type: frLambda }),
+            frInput({ name: "min", type: frNumber }),
+            frInput({ name: "max", type: frNumber }),
+            frInput({ name: "numIntegrationPoints", type: frNumber }),
+          ],
+          frNumber,
+          ([lambda, min, max, numIntegrationPoints], reducer) => {
+            if (numIntegrationPoints === 0) {
+              throw ErrorMessage.otherError(
+                "Integration error 4 in Danger.integrate: Increment can't be 0."
+              );
+            }
+            return integrateFunctionBetweenWithNumIntegrationPoints(
+              lambda,
+              min,
+              max,
+              numIntegrationPoints,
+              reducer
+            );
+          }
+        ),
+      ],
+    }),
+    // Integral in terms of function, min, max, epsilon (distance between points)
+    // Execution time will be less predictable, because it
+    // will depend on min, max and epsilon together,
+    // as well and the complexity of the function
+    maker.make({
+      name: "integrateFunctionBetweenWithEpsilon",
+      requiresNamespace: false,
+      displaySection: "Integration",
+      examples: [
+        makeFnExample(
+          `Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 0.1)`
+        ),
+      ],
+      description: `Integrates the function \`f\` between \`min\` and \`max\`, and uses an interval of \`epsilon\` between integration points when doing so. This makes its runtime less predictable than \`integrateFunctionBetweenWithNumIntegrationPoints\`, because runtime will not only depend on \`epsilon\`, but also on \`min\` and \`max\`.
+
+Same caveats as \`integrateFunctionBetweenWithNumIntegrationPoints\` apply.`,
+      definitions: [
+        makeDefinition(
+          [
+            namedInput("f", frLambda),
+            namedInput("min", frNumber),
+            namedInput("max", frNumber),
+            namedInput("epsilon", frNumber),
+          ],
+          frNumber,
+          ([lambda, min, max, epsilon], reducer) => {
+            if (epsilon === 0) {
+              throw ErrorMessage.otherError(
+                "Integration error in Danger.integrate: Increment can't be 0."
+              );
+            }
+            return integrateFunctionBetweenWithNumIntegrationPoints(
+              lambda,
+              min,
+              max,
+              (max - min) / epsilon,
+              reducer
+            );
+          }
+        ),
+      ],
+    }),
+  ],
 
   // Diminishing marginal return functions
   ...diminishingReturnsLibrary,

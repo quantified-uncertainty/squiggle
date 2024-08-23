@@ -24,4 +24,6 @@ export class VNumber extends BaseValue<"Number", number> {
   }
 }
 
-export const vNumber = (v: number) => new VNumber(v);
+export function vNumber(v: number) {
+  return new VNumber(v);
+}

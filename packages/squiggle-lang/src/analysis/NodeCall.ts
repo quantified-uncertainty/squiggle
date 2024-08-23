@@ -84,7 +84,7 @@ export class NodeCall extends ExpressionNode<"Call"> {
     location: LocationRange,
     public fn: AnyTypedExpressionNode,
     public args: AnyTypedExpressionNode[],
-    type: Type<unknown>
+    type: Type
   ) {
     super("Call", location, type);
     this._init();

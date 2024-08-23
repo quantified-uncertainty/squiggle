@@ -1,12 +1,18 @@
 import { ErrorMessage } from "../errors/messages.js";
+import { namedInput } from "../library/FrInput.js";
+import {
+  frDate,
+  frDomain,
+  frDuration,
+  frNumber,
+  frString,
+} from "../library/FrType.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
   FnFactory,
   makeNumericComparisons,
 } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { namedInput } from "../reducer/lambda/FnInput.js";
-import { tDate, tDomain, tDuration, tNumber, tString } from "../types/index.js";
 import { TDateRange } from "../types/TDateRange.js";
 import { SDate } from "../utility/SDate.js";
 
@@ -21,7 +27,7 @@ export const library = [
     (d1, d2) => d1.smaller(d2),
     (d1, d2) => d1.larger(d2),
     (d1, d2) => d1.isEqual(d2),
-    tDate,
+    frDate,
     "Comparison"
   ),
   maker.make({
@@ -37,7 +43,7 @@ d3 = Date.make(2020.5)`,
     ],
     displaySection: "Constructors",
     definitions: [
-      makeDefinition([tString], tDate, ([str]) => {
+      makeDefinition([frString], frDate, ([str]) => {
         const result = SDate.fromString(str);
         if (!result.ok) {
           throw ErrorMessage.otherError(result.value);
@@ -47,16 +53,16 @@ d3 = Date.make(2020.5)`,
 
       makeDefinition(
         [
-          namedInput("year", tNumber),
-          namedInput("month", tNumber),
-          namedInput("day", tNumber),
+          namedInput("year", frNumber),
+          namedInput("month", frNumber),
+          namedInput("day", frNumber),
         ],
-        tDate,
+        frDate,
         ([yr, month, date]) => {
           return SDate.fromYearMonthDay(yr, month, date);
         }
       ),
-      makeDefinition([namedInput("year", tNumber)], tDate, ([yr]) => {
+      makeDefinition([namedInput("year", frNumber)], frDate, ([yr]) => {
         const year = SDate.fromYear(yr);
         if (!year.ok) {
           throw ErrorMessage.otherError(year.value);
@@ -72,7 +78,7 @@ d3 = Date.make(2020.5)`,
     requiresNamespace: true,
     displaySection: "Conversions",
     definitions: [
-      makeDefinition([tNumber], tDate, ([num]) => {
+      makeDefinition([frNumber], frDate, ([num]) => {
         return SDate.fromUnixS(num);
       }),
     ],
@@ -83,7 +89,7 @@ d3 = Date.make(2020.5)`,
     requiresNamespace: true,
     displaySection: "Conversions",
     definitions: [
-      makeDefinition([tDate], tNumber, ([date]) => {
+      makeDefinition([frDate], frNumber, ([date]) => {
         return date.toUnixS();
       }),
     ],
@@ -97,7 +103,9 @@ d3 = Date.make(2020.5)`,
     ],
     displaySection: "Algebra",
     definitions: [
-      makeDefinition([tDate, tDate], tDuration, ([d1, d2]) => d1.subtract(d2)),
+      makeDefinition([frDate, frDate], frDuration, ([d1, d2]) =>
+        d1.subtract(d2)
+      ),
     ],
   }),
   maker.make({
@@ -109,7 +117,7 @@ d3 = Date.make(2020.5)`,
     ],
     displaySection: "Algebra",
     definitions: [
-      makeDefinition([tDate, tDuration], tDate, ([d1, d2]) =>
+      makeDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
         d1.subtractDuration(d2)
       ),
     ],
@@ -124,10 +132,10 @@ d3 = Date.make(2020.5)`,
     ],
     displaySection: "Algebra",
     definitions: [
-      makeDefinition([tDate, tDuration], tDate, ([d1, d2]) =>
+      makeDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
         d1.addDuration(d2)
       ),
-      makeDefinition([tDuration, tDate], tDate, ([d1, d2]) =>
+      makeDefinition([frDuration, frDate], frDate, ([d1, d2]) =>
         d2.addDuration(d1)
       ),
     ],
@@ -139,8 +147,8 @@ d3 = Date.make(2020.5)`,
     displaySection: "Other",
     definitions: [
       makeDefinition(
-        [namedInput("min", tDate), namedInput("min", tDate)],
-        tDomain(tDate),
+        [namedInput("min", frDate), namedInput("min", frDate)],
+        frDomain,
         ([min, max]) => {
           return new TDateRange(min, max);
         }

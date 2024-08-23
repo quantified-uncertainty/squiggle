@@ -1,8 +1,4 @@
 import { fnInputsMatchesLengths } from "../library/registry/helpers.js";
-import {
-  InputOrType,
-  inputOrTypeToInput,
-} from "../reducer/lambda/FnDefinition.js";
 import { FnInput } from "../reducer/lambda/FnInput.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
@@ -28,12 +24,12 @@ export type InferredOutputType =
       kind: "no-match";
     };
 
-export class TTypedLambda extends Type<Lambda> {
+export class TTypedLambda extends Type {
   minInputs: number;
   maxInputs: number;
 
   constructor(
-    public inputs: FnInput<unknown>[],
+    public inputs: FnInput[],
     public output: Type
   ) {
     super();
@@ -93,34 +89,6 @@ export class TTypedLambda extends Type<Lambda> {
   }
 
   // Lambda-specific methods
-  validateAndUnpackArgs(args: Value[]): unknown[] | undefined {
-    if (args.length < this.minInputs || args.length > this.maxInputs) {
-      return; // args length mismatch
-    }
-
-    const unpackedArgs: any = []; // any, but that's ok, type safety is guaranteed by FnDefinition type
-    for (let i = 0; i < args.length; i++) {
-      const arg = args[i];
-
-      const unpackedArg = this.inputs[i].type.unpack(arg);
-      if (unpackedArg === undefined) {
-        // type mismatch
-        return;
-      }
-      unpackedArgs.push(unpackedArg);
-    }
-
-    // Fill in missing optional arguments with nulls.
-    // This is important, because empty optionals should be nulls, but without this they would be undefined.
-    if (unpackedArgs.length < this.maxInputs) {
-      unpackedArgs.push(
-        ...Array(this.maxInputs - unpackedArgs.length).fill(null)
-      );
-    }
-
-    return unpackedArgs;
-  }
-
   validateArgs(args: Value[]): result<
     Value[],
     | {
@@ -133,6 +101,9 @@ export class TTypedLambda extends Type<Lambda> {
   > {
     const argsLength = args.length;
     const parametersLength = this.inputs.length;
+
+    // TODO - we could check against minInputs/maxInputs, but user-defined
+    // functions don't support optional parameters yet, so it's not important.
     if (argsLength !== this.inputs.length) {
       return Err({
         kind: "arity",
@@ -178,11 +149,6 @@ export class TTypedLambda extends Type<Lambda> {
   }
 }
 
-// TODO - consistent naming
-export function tTypedLambda(
-  maybeInputs: InputOrType<unknown>[],
-  output: Type
-) {
-  const inputs = maybeInputs.map(inputOrTypeToInput);
+export function tTypedLambda(inputs: FnInput[], output: Type) {
   return new TTypedLambda(inputs, output);
 }

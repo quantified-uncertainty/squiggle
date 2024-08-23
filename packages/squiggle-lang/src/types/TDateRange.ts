@@ -1,11 +1,11 @@
 import { SDate } from "../utility/SDate.js";
-import { Value, vDate } from "../value/index.js";
+import { Value } from "../value/index.js";
 import { VDate } from "../value/VDate.js";
 import { Scale } from "../value/VScale.js";
 import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
-export class TDateRange extends Type<SDate> {
+export class TDateRange extends Type {
   constructor(
     public min: SDate,
     public max: SDate
@@ -19,14 +19,6 @@ export class TDateRange extends Type<SDate> {
         v.value.toMs() >= this.min.toMs() &&
         v.value.toMs() <= this.max.toMs()
     );
-  }
-
-  unpack(v: Value) {
-    return this.check(v) ? v.value : undefined;
-  }
-
-  pack(v: SDate): Value {
-    return vDate(v);
   }
 
   serialize(): SerializedType {

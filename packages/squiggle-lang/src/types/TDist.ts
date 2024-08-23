@@ -3,13 +3,13 @@ import { PointSetDist } from "../dists/PointSetDist.js";
 import { SampleSetDist } from "../dists/SampleSetDist/index.js";
 import { BaseSymbolicDist } from "../dists/SymbolicDist/BaseSymbolicDist.js";
 import { SymbolicDist } from "../dists/SymbolicDist/index.js";
-import { Value, vDist } from "../value/index.js";
+import { Value } from "../value/index.js";
 import { SerializedType } from "./serialize.js";
 import { Type } from "./Type.js";
 
 export type DistClass<T extends BaseDist> = { new (...args: any[]): T };
 
-export class TDist<T extends BaseDist> extends Type<T> {
+export class TDist<T extends BaseDist> extends Type {
   distClass?: DistClass<T>;
   defaultCode: string;
 
@@ -25,20 +25,9 @@ export class TDist<T extends BaseDist> extends Type<T> {
   }
 
   check(v: Value): boolean {
-    return this.unpack(v) !== undefined;
-  }
-
-  unpack(v: Value) {
-    if (v.type !== "Dist") return undefined;
-
-    if (this.distClass && !(v.value instanceof this.distClass))
-      return undefined;
-
-    return v.value as T;
-  }
-
-  pack(v: T) {
-    return vDist(v);
+    if (v.type !== "Dist") return false;
+    if (this.distClass && !(v.value instanceof this.distClass)) return false;
+    return true;
   }
 
   serialize(): SerializedType {

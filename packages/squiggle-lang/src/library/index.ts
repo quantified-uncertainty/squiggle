@@ -4,17 +4,17 @@ import { BuiltinLambda } from "../reducer/lambda/BuiltinLambda.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { Lambda } from "../reducer/lambda/index.js";
 import { Bindings } from "../reducer/Stack.js";
-import { tAny } from "../types/index.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { Value } from "../value/index.js";
 import { vLambda } from "../value/vLambda.js";
+import { frAny } from "./FrType.js";
 import { makeMathConstants } from "./math.js";
 import { getRegistry, makeSquiggleBindings } from "./registry/index.js";
 import { makeVersionConstant } from "./version.js";
 
 function makeLookupLambda(): Lambda {
   return new BuiltinLambda(INDEX_LOOKUP_FUNCTION, [
-    makeDefinition([tAny(), tAny()], tAny(), ([obj, key]) => {
+    makeDefinition([frAny(), frAny()], frAny(), ([obj, key]) => {
       if ("get" in obj) {
         return obj.get(key);
       } else {

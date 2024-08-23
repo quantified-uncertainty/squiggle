@@ -1,5 +1,5 @@
 import { KindNode, LocationRange } from "../ast/types.js";
-import { namedInput } from "../reducer/lambda/FnInput.js";
+import { FnInput } from "../reducer/lambda/FnInput.js";
 import { tAny, tTypedLambda } from "../types/index.js";
 import { AnalysisContext } from "./context.js";
 import { analyzeExpression, analyzeKind } from "./index.js";
@@ -20,11 +20,12 @@ export class NodeLambda extends ExpressionNode<"Lambda"> {
       "Lambda",
       location,
       tTypedLambda(
-        parameters.map((arg) =>
-          namedInput(
-            arg.variable.value,
-            tAny() // TODO - infer from parameter annotation
-          )
+        parameters.map(
+          (arg) =>
+            new FnInput({
+              name: arg.variable.value,
+              type: tAny(), // TODO - infer from parameter annotation
+            })
         ),
         body.type
       )

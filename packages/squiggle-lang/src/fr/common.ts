@@ -1,9 +1,16 @@
 import { ErrorMessage } from "../errors/messages.js";
+import { frInput } from "../library/FrInput.js";
+import {
+  frAny,
+  frBool,
+  frOr,
+  frString,
+  frTypedLambda,
+} from "../library/FrType.js";
 import { makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { fnInput } from "../reducer/lambda/FnInput.js";
-import { tAny, tBool, tOr, tString, tTypedLambda } from "../types/index.js";
+import { tAny } from "../types/Type.js";
 import { isEqual } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -16,7 +23,7 @@ export const library = [
     name: "equal",
     description: `Returns true if the two values passed in are equal, false otherwise. Does not work for Squiggle functions, but works for most other types.`,
     definitions: [
-      makeDefinition([tAny(), tAny()], tBool, ([a, b]) => {
+      makeDefinition([frAny(), frAny()], frBool, ([a, b]) => {
         return isEqual(a, b);
       }),
     ],
@@ -24,7 +31,7 @@ export const library = [
   maker.make({
     name: "unequal",
     definitions: [
-      makeDefinition([tAny(), tAny()], tBool, ([a, b]) => {
+      makeDefinition([frAny(), frAny()], frBool, ([a, b]) => {
         return !isEqual(a, b);
       }),
     ],
@@ -43,7 +50,7 @@ myFn = typeOf({|e| e})`,
       ),
     ],
     definitions: [
-      makeDefinition([tAny()], tString, ([value]) => {
+      makeDefinition([frAny()], frString, ([value]) => {
         return value.publicName;
       }),
     ],
@@ -54,10 +61,10 @@ myFn = typeOf({|e| e})`,
     definitions: [
       makeDefinition(
         [
-          tAny({ genericName: "A" }),
-          fnInput({ name: "message", type: tString, optional: true }),
+          frAny({ genericName: "A" }),
+          frInput({ name: "message", type: frString, optional: true }),
         ],
-        tAny({ genericName: "A" }),
+        frAny({ genericName: "A" }),
         ([value, message]) => {
           message ? console.log(message, value) : console.log(value);
           return value;
@@ -71,8 +78,8 @@ myFn = typeOf({|e| e})`,
       "Throws an error. You can use `try` to recover from this error.",
     definitions: [
       makeDefinition(
-        [fnInput({ name: "message", optional: true, type: tString })],
-        tAny(),
+        [frInput({ name: "message", optional: true, type: frString })],
+        frAny(),
         ([value]) => {
           throw ErrorMessage.userThrowError(
             value ?? "Common.throw() was called"
@@ -88,17 +95,17 @@ myFn = typeOf({|e| e})`,
     definitions: [
       makeDefinition(
         [
-          fnInput({
+          frInput({
             name: "fn",
-            type: tTypedLambda([], tAny({ genericName: "A" })),
+            type: frTypedLambda([], tAny({ genericName: "A" })),
           }),
-          fnInput({
+          frInput({
             name: "fallbackFn",
             // in the future, this function could be called with the error message
-            type: tTypedLambda([], tAny({ genericName: "B" })),
+            type: frTypedLambda([], tAny({ genericName: "B" })),
           }),
         ],
-        tOr(tAny({ genericName: "A" }), tAny({ genericName: "B" })),
+        frOr(frAny({ genericName: "A" }), frAny({ genericName: "B" })),
         ([fn, fallbackFn], reducer) => {
           try {
             return { tag: "1", value: reducer.call(fn, []) };

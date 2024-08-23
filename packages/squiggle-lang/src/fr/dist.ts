@@ -11,6 +11,14 @@ import * as PointMassJs from "../dists/SymbolicDist/PointMass.js";
 import * as TriangularJs from "../dists/SymbolicDist/Triangular.js";
 import * as UniformJs from "../dists/SymbolicDist/Uniform.js";
 import { ErrorMessage } from "../errors/messages.js";
+import { namedInput } from "../library/FrInput.js";
+import {
+  frDict,
+  frDist,
+  frNumber,
+  frSampleSetDist,
+  frSymbolicDist,
+} from "../library/FrType.js";
 import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import {
   FnFactory,
@@ -20,14 +28,6 @@ import {
   twoVarSample,
 } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { namedInput } from "../reducer/lambda/FnInput.js";
-import {
-  tDict,
-  tDist,
-  tNumber,
-  tSampleSetDist,
-  tSymbolicDist,
-} from "../types/index.js";
 import * as Result from "../utility/result.js";
 import { CI_CONFIG, unwrapSymDistResult } from "./distUtil.js";
 import { mixtureDefinitions } from "./mixture.js";
@@ -46,8 +46,8 @@ function makeCIDist<K1 extends string, K2 extends string>(
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
   return makeDefinition(
-    [tDict([lowKey, tNumber], [highKey, tNumber])],
-    tSampleSetDist,
+    [frDict([lowKey, frNumber], [highKey, frNumber])],
+    frSampleSetDist,
     ([dict], reducer) => twoVarSample(dict[lowKey], dict[highKey], reducer, fn)
   );
 }
@@ -59,8 +59,8 @@ function makeMeanStdevDist(
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
   return makeDefinition(
-    [tDict(["mean", tNumber], ["stdev", tNumber])],
-    tSampleSetDist,
+    [frDict(["mean", frNumber], ["stdev", frNumber])],
+    frSampleSetDist,
     ([{ mean, stdev }], reducer) => twoVarSample(mean, stdev, reducer, fn)
   );
 }
@@ -76,8 +76,8 @@ export const library: FRFunction[] = [
       makeFnExample("Dist.make(normal({p5: 4, p95: 10}))"),
     ],
     definitions: [
-      makeDefinition([tDist], tDist, ([dist]) => dist),
-      makeDefinition([tNumber], tSymbolicDist, ([v]) =>
+      makeDefinition([frDist], frDist, ([dist]) => dist),
+      makeDefinition([frNumber], frSymbolicDist, ([v]) =>
         unwrapSymDistResult(PointMassJs.PointMass.make(v))
       ),
     ],
@@ -288,11 +288,11 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
     definitions: [
       makeDefinition(
         [
-          namedInput("min", tNumber),
-          namedInput("mode", tNumber),
-          namedInput("max", tNumber),
+          namedInput("min", frNumber),
+          namedInput("mode", frNumber),
+          namedInput("max", frNumber),
         ],
-        tSampleSetDist,
+        frSampleSetDist,
         ([low, medium, high], reducer) => {
           const result = TriangularJs.Triangular.make({ low, medium, high });
           if (!result.ok) {

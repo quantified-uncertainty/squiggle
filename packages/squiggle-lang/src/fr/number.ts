@@ -1,12 +1,12 @@
 import { ErrorMessage } from "../errors/messages.js";
+import { namedInput } from "../library/FrInput.js";
+import { frArray, frBool, frDomain, frNumber } from "../library/FrType.js";
 import { makeFnExample } from "../library/registry/core.js";
 import {
   FnFactory,
   makeNumericComparisons,
 } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { namedInput } from "../reducer/lambda/FnInput.js";
-import { tArray, tBool, tDomain, tNumber } from "../types/index.js";
 import { TNumberRange } from "../types/TNumberRange.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 
@@ -25,7 +25,7 @@ function makeNumberArrayToNumberDefinition(
   fn: (arr: readonly number[]) => number,
   throwIfEmpty = true
 ) {
-  return makeDefinition([tArray(tNumber)], tNumber, ([arr]) => {
+  return makeDefinition([frArray(frNumber)], frNumber, ([arr]) => {
     throwIfEmpty && assertIsNotEmpty(arr);
     return fn(arr);
   });
@@ -35,7 +35,7 @@ function makeNumberArrayToNumberArrayDefinition(
   fn: (arr: readonly number[]) => number[],
   throwIfEmpty = true
 ) {
-  return makeDefinition([tArray(tNumber)], tArray(tNumber), ([arr]) => {
+  return makeDefinition([frArray(frNumber)], frArray(frNumber), ([arr]) => {
     throwIfEmpty && assertIsNotEmpty(arr);
     return fn(arr);
   });
@@ -47,7 +47,7 @@ export const library = [
     (d1, d2) => d1 < d2,
     (d1, d2) => d1 > d2,
     (d1, d2) => d1 === d2,
-    tNumber,
+    frNumber,
     "Comparison"
   ),
   maker.nn2n({
@@ -136,7 +136,7 @@ export const library = [
     displaySection: "Function (Number)",
     examples: [makeFnExample(`not(3.5)`)],
     definitions: [
-      makeDefinition([tNumber], tBool, ([x]) => {
+      makeDefinition([frNumber], frBool, ([x]) => {
         // unary prefix !
         return x === 0;
       }),
@@ -167,7 +167,7 @@ export const library = [
     examples: [makeFnExample(`min([3,5,2])`)],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => Math.min(...arr)),
-      makeDefinition([tNumber, tNumber], tNumber, ([a, b]) => {
+      makeDefinition([frNumber, frNumber], frNumber, ([a, b]) => {
         return Math.min(a, b);
       }),
     ],
@@ -178,7 +178,7 @@ export const library = [
     examples: [makeFnExample(`max([3,5,2])`)],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => Math.max(...arr)),
-      makeDefinition([tNumber, tNumber], tNumber, ([a, b]) => {
+      makeDefinition([frNumber, frNumber], frNumber, ([a, b]) => {
         return Math.max(a, b);
       }),
     ],
@@ -196,7 +196,7 @@ export const library = [
     examples: [makeFnExample(`quantile([1,5,10,40,2,4], 0.3)`)],
     displaySection: "Functions (List)",
     definitions: [
-      makeDefinition([tArray(tNumber), tNumber], tNumber, ([arr, i]) => {
+      makeDefinition([frArray(frNumber), frNumber], frNumber, ([arr, i]) => {
         assertIsNotEmpty(arr);
         return E_A_Floats.quantile(arr, i);
       }),
@@ -207,7 +207,7 @@ export const library = [
     examples: [makeFnExample(`median([1,5,10,40,2,4])`)],
     displaySection: "Functions (List)",
     definitions: [
-      makeDefinition([tArray(tNumber)], tNumber, ([arr]) => {
+      makeDefinition([frArray(frNumber)], frNumber, ([arr]) => {
         assertIsNotEmpty(arr);
         return E_A_Floats.quantile(arr, 0.5);
       }),
@@ -281,8 +281,8 @@ export const library = [
     examples: [makeFnExample("Number.rangeDomain(5, 10)")],
     definitions: [
       makeDefinition(
-        [namedInput("min", tNumber), namedInput("max", tNumber)],
-        tDomain(tNumber),
+        [namedInput("min", frNumber), namedInput("max", frNumber)],
+        frDomain,
         ([min, max]) => {
           return new TNumberRange(min, max);
         }

@@ -1,7 +1,7 @@
+import { namedInput } from "../library/FrInput.js";
+import { frAny, frArray, frString } from "../library/FrType.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
-import { namedInput } from "../reducer/lambda/FnInput.js";
-import { tAny, tArray, tString } from "../types/index.js";
 
 const maker = new FnFactory({
   nameSpace: "String",
@@ -13,16 +13,16 @@ export const library = [
     name: "make",
     description:
       "Converts any value to a string. Some information is often lost.",
-    definitions: [makeDefinition([tAny()], tString, ([x]) => x.toString())],
+    definitions: [makeDefinition([frAny()], frString, ([x]) => x.toString())],
   }),
   maker.make({
     name: "concat",
     requiresNamespace: false,
     definitions: [
-      makeDefinition([tString, tString], tString, ([a, b]) => {
+      makeDefinition([frString, frString], frString, ([a, b]) => {
         return a + b;
       }),
-      makeDefinition([tString, tAny()], tString, ([a, b]) => {
+      makeDefinition([frString, frAny()], frString, ([a, b]) => {
         return a + b.toString();
       }),
     ],
@@ -31,10 +31,10 @@ export const library = [
     name: "add",
     requiresNamespace: false,
     definitions: [
-      makeDefinition([tString, tString], tString, ([a, b]) => {
+      makeDefinition([frString, frString], frString, ([a, b]) => {
         return a + b;
       }),
-      makeDefinition([tString, tAny()], tString, ([a, b]) => {
+      makeDefinition([frString, frAny()], frString, ([a, b]) => {
         return a + b.toString();
       }),
     ],
@@ -43,8 +43,8 @@ export const library = [
     name: "split",
     definitions: [
       makeDefinition(
-        [tString, namedInput("separator", tString)],
-        tArray(tString),
+        [frString, namedInput("separator", frString)],
+        frArray(frString),
         ([str, mark]) => {
           return str.split(mark);
         }
