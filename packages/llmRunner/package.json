@@ -1,12 +1,11 @@
 {
-  "name": "chat",
+  "name": "squiggle-llm-runner",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "open": "tsx src/openrouter.mts",
     "lint": "next lint",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest && NODE_OPTIONS=--experimental-vm-modules"
   },
