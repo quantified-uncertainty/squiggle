@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import { getSquiggleAdvice } from "./getSquiggleAdvice";
+import { CodeState, codeStateErrorString } from "./stateManager";
 
 const SQUIGGLE_DOCS_PATH = path.join(
   process.cwd(),
@@ -23,7 +24,7 @@ const readTxtFileSync = (filePath: string) => {
 export const squiggleDocs = readTxtFileSync(SQUIGGLE_DOCS_PATH);
 
 // Used as context for Claude, and as first message for other LLMs.
-export const squiggleSystemContent: string = `You are an AI assistant specialized in generating Squiggle code. You must provide FIND/====/REPLACE blocks for any code you generate. Squiggle is a probabilistic programming language designed for estimation. Always respond with valid Squiggle code enclosed in triple backticks (\`\`\`). Do not give any more explanation, just provide the code and nothing else. Think through things, step by step.
+export const squiggleSystemContent: string = `You are an AI assistant specialized in generating Squiggle code.  Squiggle is a probabilistic programming language designed for estimation. Always respond with valid Squiggle code enclosed in triple backticks (\`\`\`). Do not give any more explanation, just provide the code and nothing else. Think through things, step by step.
 
 Write the entire code, don't truncate it. So don't ever use "...", just write out the entire code. The code output you produce should be directly runnable in Squiggle, it shouldn't need any changes from users.
 
@@ -38,7 +39,7 @@ export type PromptPair = {
 };
 
 export const generateNewSquiggleCodePrompt = (prompt: string): PromptPair => {
-  const fullPrompt = `You are an expert Squiggle code developer. Create concise, efficient Squiggle code based on the given prompt. You must provide FIND/====/REPLACE blocks for any code you generate. Follow these guidelines:
+  const fullPrompt = `You are an expert Squiggle code developer. Create concise, efficient Squiggle code based on the given prompt. Follow these guidelines:
 
 1. Analyze the prompt carefully to understand all key requirements.
 2. Generate functional, streamlined Squiggle code that addresses all main points of the prompt.
@@ -66,83 +67,60 @@ Generate your Squiggle code response based on the given prompt. Include only the
 
   return { fullPrompt, summarizedPrompt };
 };
+
 const changeFormat = `
 Response format:
-Provide your changes using SEARCH/REPLACE blocks as follows. You can use multiple SEARCH/REPLACE blocks if needed. 
+Provide your changes using SEARCH/REPLACE blocks as follows. You can use multiple SEARCH/REPLACE blocks if needed.
 
-IMPORTANT: Ensure that each SEARCH block is unique within the code. If you encounter potential duplicates, use a larger block of code in the SEARCH to ensure uniqueness.
+Think step-by-step and explain the needed changes in a few short sentences.
 
-Do not summarize code, with statements like "(rest of the code remains unchanged until the output results)". Write out the full diff. You can use multiple targeted difs in order to not need to write much code.
+1. Use <<<<<<< SEARCH to start the search section.
+2. Include only the exact lines to be replaced, with surrounding context if needed for uniqueness. Use the exact same text as in the original code, do not change it at all.
+3. Use ======= as a divider between search and replace sections.
+4. Provide the new or modified code in the replace section.
+5. Use >>>>>>> REPLACE to end the replace section.
+6. For new files, use an empty SEARCH section.
 
-<changes>
-<<<<<<< SEARCH
-// Unique block of code to be replaced
-=======
-// New code that fixes the error or improves the existing code
->>>>>>> REPLACE
-</changes>
+Every *SEARCH* section must *EXACTLY MATCH* the existing file content, character for character, including all comments, docstrings, etc.
+If the file contains code or other data wrapped/escaped in json/xml/quotes or other containers, you need to propose edits to the literal contents of the file, including the container markup.
+
+*SEARCH/REPLACE* blocks will replace *all* matching occurrences.
+Include enough lines to make the SEARCH blocks uniquely match the lines to change.
+
+Keep *SEARCH/REPLACE* blocks concise.
+Break large *SEARCH/REPLACE* blocks into a series of smaller blocks that each change a small portion of the file.
+Include just the changing lines, and a few surrounding lines if needed for uniqueness.
+Do not include long runs of unchanging lines in *SEARCH/REPLACE* blocks.
+
+To move code within a file, use 2 *SEARCH/REPLACE* blocks: 1 to delete it from its current location, 1 to insert it in the new location.
+
+Example:
 
 <explanation>
-Brief explanation of changes and why they were necessary (1-2 sentences max)
+Brief explanation of changes (1-2 sentences max)
 </explanation>
 
-Examples:
-
-1. Multiple changes (adding a comment and fixing a calculation):
-<changes>
+<edit>
 <<<<<<< SEARCH
-calculateArea(r) = {
   Math.PI * r * r
-}
 =======
-// Calculate the area of a circle given its radius
-calculateArea(r) = {
   Math.PI * r ** 2
-}
 >>>>>>> REPLACE
 <<<<<<< SEARCH
-calculateVolume(r, h) = {
-  Math.PI * r * r * h
-}
+  myFn(x) = {
 =======
-// Calculate the volume of a cylinder given its radius and height
-calculateVolume(r, h) = {
-  Math.PI * r ** 2 * h
-}
+  myFunction(x) = {
 >>>>>>> REPLACE
-</changes>
+</edit>
 
-<explanation>
-Added comments to explain the functions' purposes and corrected the power operation for radius in both area and volume calculations.
-</explanation>
-
-2. Larger block to ensure uniqueness:
-<changes>
-<<<<<<< SEARCH
-function processData(data) {
-  // Process the data
-  for (let i = 0; i < data.length; i++) {
-    data[i] = data[i] * 2;
-  }
-  return data;
-}
-=======
-function processData(data) {
-  // Process the data using map for better readability
-  return data.map(item => item * 2);
-}
->>>>>>> REPLACE
-</changes>
-
-<explanation>
-Replaced the for loop with a map function for cleaner and more functional code.
-</explanation>
+Do not include any code outside of SEARCH/REPLACE blocks. Ensure that the SEARCH section exactly matches the existing code.
 `;
 
 export const editExistingSquiggleCodePrompt = (
   existingCode: string,
-  error: string
+  codeState: CodeState
 ): PromptPair => {
+  const error = codeStateErrorString(codeState);
   const advice = getSquiggleAdvice(error, existingCode);
   const fullPrompt = `You are an expert Squiggle code debugger. Your task is solely to fix an error in the given Squiggle code. Follow these steps:
 
@@ -153,7 +131,9 @@ export const editExistingSquiggleCodePrompt = (
 5. If multiple solutions exist, choose the most efficient one.
 6. Explain the root cause of the error and your fix in a brief comment within the code.
 7. Ensure the new code is a standalone model that can replace the original entirely.
-8. Do not include explanations or comments outside the code.
+8. Do not include explanations or comments outside the SEARCH/REPLACE blocks.
+9. Look through the previous attempts at fixing the error. Do not repeat the same mistakes.
+10. Use the smallest possible SEARCH/REPLACE blocks. If you only want to change one line, use a block with just that line.
 
 Original code:
 <original_code>
@@ -180,15 +160,21 @@ ${changeFormat}
 
 export const adjustToFeedbackPrompt = (
   prompt: string,
+  currentCode: string,
   bindings: any,
   result: any
 ): PromptPair => {
   const fullPrompt = `You are an expert Squiggle code reviewer. Your task is to review and potentially improve Squiggle code based on the given prompt and previous output.
 
 Original prompt:
-<original_prompt>
+<original_code>
 ${prompt}
-</original_prompt>
+</original_code>
+
+Current code:
+<current_code>
+${currentCode}
+</current_code>
 
 Review the code and output. Consider these criteria:
 1. Does the code match the prompt? Does it need to be longer or shorter? Does it include the right components? When in doubt between the prompt and other criteria, follow the prompt.
@@ -198,6 +184,8 @@ Review the code and output. Consider these criteria:
 5. Check for unexpected results or failing tests.
 6. Add additional tests (using sTest) for uncovered failure points.
 7. Handle edge cases and implement error handling where necessary.
+8. Remove any comments that are not necessary - for example, ones explaining previous code changes.
+9. Look through the previous attempts at fixing the error. Do not repeat the same mistakes.
 
 If no adjustments are needed (this should be the common response), respond with:
 <response>

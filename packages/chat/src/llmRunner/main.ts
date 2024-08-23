@@ -34,12 +34,12 @@ export interface LlmConfig {
 }
 
 export const llmConfigDefault: LlmConfig = {
-  llmName: "Claude-Haiku",
-  // llmName: "Claude-Sonnet",
+  // llmName: "Claude-Haiku",
+  llmName: "Claude-Sonnet",
   // llmName: "GPT4-mini",
-  priceLimit: 0.1,
-  durationLimitMinutes: 3,
-  messagesInHistoryToKeep: 6,
+  priceLimit: 0.4,
+  durationLimitMinutes: 2,
+  messagesInHistoryToKeep: 3,
 };
 
 class SquiggleGenerator {
@@ -134,7 +134,7 @@ class SquiggleGenerator {
       case "runFailed":
         const promptPair = editExistingSquiggleCodePrompt(
           codeState.code,
-          codeState.error
+          codeState
         );
         const completion = await this.processLLMResponse(
           promptPair,
@@ -184,7 +184,12 @@ class SquiggleGenerator {
     }
 
     const completion = await this.processLLMResponse(
-      adjustToFeedbackPrompt(this.prompt, runResult.bindings, runResult.result),
+      adjustToFeedbackPrompt(
+        this.prompt,
+        codeState.code,
+        runResult.bindings,
+        runResult.result
+      ),
       stateExecution
     );
 

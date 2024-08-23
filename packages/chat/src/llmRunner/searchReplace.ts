@@ -34,7 +34,7 @@ function applySearchReplaceBlocks(
         if (!match) {
           return {
             success: false,
-            value: `Error: Search text not found: "${block.search}"`,
+            value: `Error: Search text not found: \n\`\`\`\n ${block.search}\n\`\`\`\n"`,
           };
         }
 

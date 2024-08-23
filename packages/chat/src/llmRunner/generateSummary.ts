@@ -7,6 +7,7 @@ import {
   CodeState,
   CodeStateLogEntry,
   ErrorLogEntry,
+  getLogEntryFullName,
   HighlightLogEntry,
   InfoLogEntry,
   LlmResponseLogEntry,
@@ -85,17 +86,17 @@ const generateErrorSummary = (executions: StateExecution[]): string => {
           log.entry.type === "error" || log.entry.type === "codeRunError"
       );
     if (errors.length > 0) {
-      errorSummary += `### Execution ${index + 1} (${State[execution.state]})\n`;
+      errorSummary += `### ❌ Execution ${index + 1} (${State[execution.state]})\n`;
       errors.forEach((error) => {
         if (error.entry.type === "error") {
-          errorSummary += `- ${error.entry.message}\n`;
+          errorSummary += `- 🔴 ${error.entry.message}\n`;
         } else if (error.entry.type === "codeRunError") {
-          errorSummary += `- ${error.entry.error}\n`;
+          errorSummary += `- 🔴 ${error.entry.error}\n`;
         }
       });
     }
   });
-  return errorSummary || "No errors encountered.\n";
+  return errorSummary || "✅ No errors encountered.\n";
 };
 
 const generateDetailedExecutionLogs = (
@@ -110,8 +111,8 @@ const generateDetailedExecutionLogs = (
       }, {})
     );
 
-    detailedLogs += `## Execution ${index + 1} - ${State[execution.state]} (Cost: $${totalCost.toFixed(4)})\n`;
-    detailedLogs += `- Duration: ${(execution.durationMs || 0) / 1000} seconds\n`;
+    detailedLogs += `\n## 🔄 Execution ${index + 1} - ${State[execution.state]} (Cost: $${totalCost.toFixed(4)})\n`;
+    detailedLogs += `- ⏱️ Duration: ${(execution.durationMs || 0) / 1000} seconds\n`;
 
     execution.llmMetricsList.forEach((metrics) => {
       const cost = calculatePriceMultipleCalls({ [metrics.llmName]: metrics });
@@ -124,12 +125,9 @@ const generateDetailedExecutionLogs = (
 
     detailedLogs += "### Logs:\n";
     execution.getLogs().forEach((log) => {
-      detailedLogs += `#### **${log.entry.type.toUpperCase()}:**\n`;
+      detailedLogs += `#### **${getLogEntryFullName(log.entry)}:**\n`;
       detailedLogs += `${getFullMessage(log)}`;
     });
-    detailedLogs += "<details><summary>Code At End</summary>\n\n";
-    detailedLogs += formatCodeState(execution.codeState);
-    detailedLogs += "\n</details>\n\n";
   });
   return detailedLogs;
 };
@@ -137,30 +135,26 @@ const generateDetailedExecutionLogs = (
 const getFullMessage = (log: TimestampedLogEntry): string => {
   switch (log.entry.type) {
     case "info":
+      return `${(log.entry as InfoLogEntry).message}`;
     case "warn":
+      return `${(log.entry as WarnLogEntry).message}`;
     case "error":
+      return `${(log.entry as ErrorLogEntry).message}`;
     case "success":
+      return `${(log.entry as SuccessLogEntry).message}`;
     case "highlight":
-      return (
-        log.entry as
-          | InfoLogEntry
-          | WarnLogEntry
-          | ErrorLogEntry
-          | SuccessLogEntry
-          | HighlightLogEntry
-      ).message;
+      return `${(log.entry as HighlightLogEntry).message}`;
     case "codeRunError":
-      return `Error: ${(log.entry as CodeRunErrorLogEntry).error}`;
+      return `${(log.entry as CodeRunErrorLogEntry).error}`;
     case "llmResponse":
       const llmResponse = log.entry as LlmResponseLogEntry;
-      return `LLM Response:
-<details>
+      return `<details>
   <summary>Content</summary>
 
 \`\`\`
 ${escapeMarkdown(llmResponse.content)}
 \`\`\`
-</details>
+</details>\n\n
 
 <details>
   <summary>Messages</summary>
@@ -168,7 +162,7 @@ ${escapeMarkdown(llmResponse.content)}
 \`\`\`json
 ${escapeMarkdown(JSON.stringify(llmResponse.messages, null, 2))}
 \`\`\`
-</details>
+</details>\n\n
 
 <details>
   <summary>Full Response</summary>
@@ -176,42 +170,55 @@ ${escapeMarkdown(JSON.stringify(llmResponse.messages, null, 2))}
 \`\`\`json
 ${escapeMarkdown(JSON.stringify(llmResponse.response, null, 2))}
 \`\`\`
-</details>\n`;
+</details>\n\n\n`;
     case "codeState":
       const codeState = (log.entry as CodeStateLogEntry).codeState;
-      switch (codeState.type) {
-        case "noCode":
-          return "Code state: No code generated";
-        case "formattingFailed":
-          return `Code state: Formatting failed
-Error: ${codeState.error}
-Code:
-${codeState.code}`;
-        case "runFailed":
-          return `Code state: Run failed
-Error: ${codeState.error}
-Code:
-${codeState.code}`;
-        case "success":
-          return `Code state: Success
-Code:
-${codeState.code}`;
-      }
+      return formatCodeState(codeState);
     default:
-      return "Unknown log type";
+      return "❓ Unknown log type";
   }
 };
 
 const formatCodeState = (codeState: CodeState): string => {
   switch (codeState.type) {
     case "noCode":
-      return "  No code generated\n";
+      return "💨 Code state: No code generated\n";
     case "formattingFailed":
-      return `**Formatting failed:**\n\`\`\`\n${codeState.error}\n\`\`\`\n**Code:**\n\`\`\`\n${codeState.code}\n\`\`\`\n`;
+      return `<details>
+  <summary>🔴 Code Update: [Error] - Formatting failed</summary>
+
+**Error:**
+\`\`\`
+${codeState.error}
+\`\`\`
+
+**Code:**
+\`\`\`
+${codeState.code}
+\`\`\`
+</details>\n\n`;
     case "runFailed":
-      return `**Run failed:**\n\`\`\`\n${codeState.error}\n\`\`\`\n**Code:**\n\`\`\`\n${codeState.code}\n\`\`\`\n`;
+      return `<details>
+  <summary>🔴 Code Update: [Error] - Run failed</summary>
+
+**Error:**
+\`\`\`
+${codeState.error.toStringWithDetails(codeState.project)}
+\`\`\`
+
+**Code:**
+\`\`\`
+${codeState.code}
+\`\`\`
+</details>\n\n`;
     case "success":
-      return `**Successful code:**\n\`\`\`\n${codeState.code}\n\`\`\`\n`;
+      return `<details>
+  <summary>✅ Code Update: [Success] - Code executed successfully</summary>
+
+\`\`\`
+${codeState.code}
+\`\`\`
+</details>\n\n`;
   }
 };
 

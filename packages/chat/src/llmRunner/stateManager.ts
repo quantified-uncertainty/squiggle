@@ -2,6 +2,8 @@
 
 import chalk from "chalk";
 
+import { SqError, SqProject } from "@quri/squiggle-lang";
+
 import {
   calculatePriceMultipleCalls,
   LlmMetrics,
@@ -18,6 +20,29 @@ export type LogEntry =
   | HighlightLogEntry
   | LlmResponseLogEntry
   | CodeStateLogEntry;
+
+export function getLogEntryFullName(entry: LogEntry): string {
+  switch (entry.type) {
+    case "info":
+      return "ℹ️ Information";
+    case "warn":
+      return "⚠️ Warning";
+    case "error":
+      return "🚫 System Error";
+    case "codeRunError":
+      return "❌ Code Run Error";
+    case "success":
+      return "✅ Success";
+    case "highlight":
+      return "🔆 Highlight";
+    case "llmResponse":
+      return "🤖 LLM Response";
+    case "codeState":
+      return "📄 Code State";
+    default:
+      return "❓ Unknown";
+  }
+}
 
 export type TimestampedLogEntry = {
   timestamp: Date;
@@ -82,8 +107,17 @@ export type CodeState =
       error: string;
       code: string;
     }
-  | { type: "runFailed"; code: string; error: string }
+  | { type: "runFailed"; code: string; error: SqError; project: SqProject }
   | { type: "success"; code: string };
+
+export function codeStateErrorString(codeState: CodeState): string {
+  if (codeState.type === "formattingFailed") {
+    return codeState.error;
+  } else if (codeState.type === "runFailed") {
+    return codeState.error.toStringWithDetails(codeState.project);
+  }
+  return "";
+}
 
 export interface StateHandler {
   execute: (stateExecution: StateExecution) => Promise<void>;

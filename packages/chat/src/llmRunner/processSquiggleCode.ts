@@ -145,7 +145,9 @@ type SqOutputSummary = {
 
 const runSquiggle = async (
   code: string
-): Promise<result<SqOutputSummary, string>> => {
+): Promise<
+  Promise<result<SqOutputSummary, { error: SqError; project: SqProject }>>
+> => {
   const project = SqProject.create({ linker: linker });
   project.setSource("wrapper", code);
   await project.run("wrapper");
@@ -160,9 +162,7 @@ const runSquiggle = async (
   } else {
     return {
       ok: false,
-      value:
-        "Squiggle Error: \n" +
-        (output.value as SqError).toStringWithDetails(project),
+      value: { error: output.value as SqError, project },
     };
   }
 };
@@ -209,20 +209,33 @@ function extractSquiggleCode(content: string): string {
   return match && match[1] ? match[1].trim() : "";
 }
 
+// Add this type guard function near the top of the file
+function isErrorResult(
+  value: SqOutputSummary | { error: SqError; project: SqProject }
+): value is { error: SqError; project: SqProject } {
+  return "error" in value && "project" in value;
+}
+
 export async function squiggleCodeToCodeStateViaRunningAndFormatting(
   code: string
 ): Promise<ProcessSquiggleResult> {
   // First, try running code and get errors
   const run = await runSquiggle(code);
   if (!run.ok) {
-    return {
-      codeState: {
-        type: "runFailed",
-        code: code,
-        error: run.value as string,
-      },
-      runResult: null,
-    };
+    if (isErrorResult(run.value)) {
+      return {
+        codeState: {
+          type: "runFailed",
+          code: code,
+          error: run.value.error,
+          project: run.value.project,
+        },
+        runResult: null,
+      };
+    } else {
+      // This should never happen, but we need to handle it for TypeScript
+      throw new Error("Unexpected error result structure");
+    }
   }
 
   // If that works, then try formatting code
