@@ -56,23 +56,6 @@ Replacement text
       expect(result.value).toContain("Error: Search text not found");
     });
 
-    it("should handle multiple matches", () => {
-      const originalText = "Hello, world! Hello, world!";
-      const promptResponse = `
-<<<<<<< SEARCH
-Hello, world!
-=======
-Goodbye, world!
->>>>>>> REPLACE
-      `;
-
-      const result = processSearchReplaceResponse(originalText, promptResponse);
-
-      expect(result.success).toBe(false);
-      expect(result.value).toContain(
-        "Error: Multiple matches found for search text"
-      );
-    });
     it("should handle multiple search/replace blocks", () => {
       const originalText = "Hello, world! How are you?";
       const promptResponse = `
@@ -206,6 +189,25 @@ Goodbye, world!
         '@name("Total Population Projection")'
       );
       expect(result.value).not.toContain('@name("📊 Test for Growth Rate")');
+    });
+
+    it("should handle empty SEARCH block and apply replacement to the top", () => {
+      const originalText = "Existing content.\nMore content.";
+      const promptResponse = `
+    <<<<<<< SEARCH
+    =======
+    New content at the top.
+    
+    >>>>>>> REPLACE
+        `;
+
+      const result = processSearchReplaceResponse(originalText, promptResponse);
+      console.log(result);
+
+      expect(result.success).toBe(true);
+      expect(result.value).toBe(
+        "New content at the top.\n\nExisting content.\nMore content."
+      );
     });
   });
 });

@@ -24,24 +24,26 @@ function applySearchReplaceBlocks(
 
   try {
     for (const block of blocks) {
-      const searchRegex = new RegExp(escapeRegExp(block.search), "g");
-      const matchCount = (updatedText.match(searchRegex) || []).length;
+      if (block.search === "") {
+        // If search is empty, prepend the replacement to the top
+        updatedText = block.replace + "\n\n" + updatedText;
+      } else {
+        const searchRegex = new RegExp(escapeRegExp(block.search), "");
+        const match = searchRegex.exec(updatedText);
 
-      if (matchCount === 0) {
-        return {
-          success: false,
-          value: `Error: Search text not found: "${block.search}"`,
-        };
+        if (!match) {
+          return {
+            success: false,
+            value: `Error: Search text not found: "${block.search}"`,
+          };
+        }
+
+        // Replace only the first occurrence
+        updatedText =
+          updatedText.slice(0, match.index) +
+          block.replace +
+          updatedText.slice(match.index + match[0].length);
       }
-
-      if (matchCount > 1) {
-        return {
-          success: false,
-          value: `Error: Multiple matches found for search text: "${block.search}". Please use a larger, more specific code block.`,
-        };
-      }
-
-      updatedText = updatedText.replace(searchRegex, block.replace);
     }
 
     return { success: true, value: updatedText };

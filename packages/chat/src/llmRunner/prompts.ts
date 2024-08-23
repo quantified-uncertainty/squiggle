@@ -23,7 +23,7 @@ const readTxtFileSync = (filePath: string) => {
 export const squiggleDocs = readTxtFileSync(SQUIGGLE_DOCS_PATH);
 
 // Used as context for Claude, and as first message for other LLMs.
-export const squiggleSystemContent: string = `You are an AI assistant specialized in generating Squiggle code. Squiggle is a probabilistic programming language designed for estimation. Always respond with valid Squiggle code enclosed in triple backticks (\`\`\`). Do not give any more explanation, just provide the code and nothing else. Think through things, step by step.
+export const squiggleSystemContent: string = `You are an AI assistant specialized in generating Squiggle code. You must provide FIND/====/REPLACE blocks for any code you generate. Squiggle is a probabilistic programming language designed for estimation. Always respond with valid Squiggle code enclosed in triple backticks (\`\`\`). Do not give any more explanation, just provide the code and nothing else. Think through things, step by step.
 
 Write the entire code, don't truncate it. So don't ever use "...", just write out the entire code. The code output you produce should be directly runnable in Squiggle, it shouldn't need any changes from users.
 
@@ -38,7 +38,7 @@ export type PromptPair = {
 };
 
 export const generateNewSquiggleCodePrompt = (prompt: string): PromptPair => {
-  const fullPrompt = `You are an expert Squiggle code developer. Create concise, efficient Squiggle code based on the given prompt. Follow these guidelines:
+  const fullPrompt = `You are an expert Squiggle code developer. Create concise, efficient Squiggle code based on the given prompt. You must provide FIND/====/REPLACE blocks for any code you generate. Follow these guidelines:
 
 1. Analyze the prompt carefully to understand all key requirements.
 2. Generate functional, streamlined Squiggle code that addresses all main points of the prompt.
