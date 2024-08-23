@@ -7,6 +7,11 @@ function extractSearchReplaceBlocks(
   const blocks: Array<{ search: string; replace: string }> = [];
   let match;
 
+  // Check for correct syntax
+  if (!/<<<<<<< SEARCH[\s\S]*=======[\s\S]*>>>>>>> REPLACE/.test(response)) {
+    throw new Error("SEARCH/REPLACE syntax not correctly formatted");
+  }
+
   while ((match = regex.exec(response)) !== null) {
     blocks.push({
       search: match[1].trim(),
@@ -16,6 +21,7 @@ function extractSearchReplaceBlocks(
 
   return blocks;
 }
+
 function applySearchReplaceBlocks(
   originalText: string,
   blocks: Array<{ search: string; replace: string }>
@@ -72,15 +78,22 @@ export function processSearchReplaceResponse(
     };
   }
 
-  const blocks = extractSearchReplaceBlocks(promptResponse);
+  try {
+    const blocks = extractSearchReplaceBlocks(promptResponse);
 
-  if (blocks.length === 0) {
+    if (blocks.length === 0) {
+      return {
+        success: false,
+        value: "No search/replace blocks found in the response",
+      };
+    }
+
+    // Apply all search/replace blocks
+    return applySearchReplaceBlocks(originalText, blocks);
+  } catch (error) {
     return {
       success: false,
-      value: "No search/replace blocks found in the response",
+      value: error.message,
     };
   }
-
-  // Apply all search/replace blocks
-  return applySearchReplaceBlocks(originalText, blocks);
 }

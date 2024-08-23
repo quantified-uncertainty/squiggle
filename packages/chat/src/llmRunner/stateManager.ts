@@ -84,6 +84,7 @@ export type LlmResponseLogEntry = {
   response: any; // JSON response
   content: string;
   messages: Message[];
+  prompt: string;
 };
 
 export type CodeStateLogEntry = {

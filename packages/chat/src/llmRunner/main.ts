@@ -219,6 +219,7 @@ class SquiggleGenerator {
         response: completion,
         content: completion.content,
         messages: messagesToSend,
+        prompt: promptPair.fullPrompt,
       });
 
       stateExecution.updateLlmMetrics({

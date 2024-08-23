@@ -157,6 +157,15 @@ ${escapeMarkdown(llmResponse.content)}
 </details>\n\n
 
 <details>
+  <summary>Prompt</summary>
+
+\`\`\`
+${escapeMarkdown(llmResponse.prompt)}
+\`\`\`
+</details>\n\n
+
+
+<details>
   <summary>Messages</summary>
 
 \`\`\`json

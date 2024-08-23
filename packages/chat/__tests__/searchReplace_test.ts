@@ -30,14 +30,16 @@ Goodbye, world!
 
     it("should handle no search/replace blocks", () => {
       const originalText = "Hello, world!";
-      const promptResponse = "This is a response without any blocks";
+      const promptResponse = `<<<<<<< SEARCH
+      Text that doesn't exist
+      =======
+      Other Text
+      >>>>>>> REPLACE`;
 
       const result = processSearchReplaceResponse(originalText, promptResponse);
 
       expect(result.success).toBe(false);
-      expect(result.value).toBe(
-        "No search/replace blocks found in the response"
-      );
+      expect(result.value).toContain("Error: Search text not found");
     });
 
     it("should handle search text not found", () => {
@@ -169,7 +171,6 @@ Replacement text
         `;
 
       const result = processSearchReplaceResponse(originalText, promptResponse);
-      console.log(result);
 
       expect(result.success).toBe(true);
       expect(result.value).toContain('@name("🏙️ Total Population Projection")');
@@ -202,11 +203,54 @@ Replacement text
         `;
 
       const result = processSearchReplaceResponse(originalText, promptResponse);
-      console.log(result);
 
       expect(result.success).toBe(true);
       expect(result.value).toBe(
         "New content at the top.\n\nExisting content.\nMore content."
+      );
+    });
+
+    it("should handle complex retirement simulation", () => {
+      const originalText = `
+import "hub:ozziegooen/sTest" as sTest
+
+@name("Test Suite")
+testSuite = sTest.describe(
+  "Retirement Simulation",
+  [
+    sTest.test(
+      "Annual expenses increase with age",
+      {|| 
+        sTest.expect(annualExpenses(60) > annualExpenses(30)).toBeTrue()
+      }
+    ),
+  ]
+)
+`;
+
+      const promptResponse = `
+<<<<<<< SEARCH
+    sTest.test(
+      "Annual expenses increase with age",
+      {|| 
+        sTest.expect(annualExpenses(60) > annualExpenses(30)).toBeTrue()
+      }
+    ),
+=======
+    sTest.test(
+      "Annual expenses increase with age",
+      {|| 
+        sTest.expect(mean(annualExpenses(60)) > mean(annualExpenses(30))).toBeTrue()
+      }
+    ),
+=======
+`;
+      const result = processSearchReplaceResponse(originalText, promptResponse);
+      console.log(result);
+
+      expect(result.success).toBe(false);
+      expect(result.value).toBe(
+        "SEARCH/REPLACE syntax not correctly formatted"
       );
     });
   });
