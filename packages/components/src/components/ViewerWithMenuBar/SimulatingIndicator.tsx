@@ -21,7 +21,7 @@ export const SimulatingIndicator: FC<{
       )}
     >
       {`simulation #${simulation.executionId} in ${showTime(
-        simulation.executionTime
+        simulation.output.executionTime
       )}`}
     </div>
   );

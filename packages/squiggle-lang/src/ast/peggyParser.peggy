@@ -58,18 +58,35 @@ decorator
       return h.nodeDecorator(name, args ?? [], location());
     }
 
+unitTypeSignature
+  = _ "::" _ body:infixUnitType
+    {
+      return h.nodeTypeSignature(body, location());
+    }
+
+infixUnitType
+  = head:exponentialUnitType _ tail:(@typeMultiplicativeOp _ @exponentialUnitType)*
+    { return h.makeInfixTypeChain(head, tail, location()); }
+  typeMultiplicativeOp "operator" = '*' / '/'
+
+exponentialUnitType
+  = unit:(identifier / float) _ "^" _ exponent:number
+    { return h.nodeExponentialUnitType(unit, exponent, location()); }
+  / unit:(identifier / float)
+    { return unit; }
+
 statement
   = letStatement
   / defunStatement
 
 letStatement
-  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier _ assignmentOp _nl value:innerBlockOrExpression
-    { return h.nodeLetStatement(decorators, variable, value, Boolean(exported), location()); }
+  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier unitTypeSignature:unitTypeSignature? _ assignmentOp _nl value:innerBlockOrExpression
+    { return h.nodeLetStatement(decorators, variable, unitTypeSignature, value, Boolean(exported), location()); }
 
 defunStatement
-  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier '(' _nl args:functionParameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
+  = decorators:decorator* exported:("export" __nl)? variable:dollarIdentifier '(' _nl args:functionParameters _nl ')' returnUnitType:unitTypeSignature? _ assignmentOp _nl body:innerBlockOrExpression
     {
-      const value = h.nodeLambda(args, body, location(), variable);
+      const value = h.nodeLambda(args, body, location(), variable, returnUnitType);
       return h.nodeDefunStatement(decorators, variable, value, Boolean(exported), location());
     }
 
@@ -77,9 +94,9 @@ defunStatement
 
 functionParameters = functionParameter|.., commaSeparator|
   functionParameter
-    = id:dollarIdentifier annotation:(_ ':' _nl @expression)?
+    = id:dollarIdentifier annotation:(_ ':' _nl @expression)? paramUnitType:unitTypeSignature?
       {
-        return annotation ? h.nodeIdentifierWithAnnotation(id.value, annotation, location()) : id;
+        return annotation ? h.nodeIdentifierWithAnnotation(id.value, annotation, paramUnitType, location()) : h.nodeIdentifierWithUnitType(id.value, paramUnitType, location());
       }
 
 /*
@@ -264,13 +281,13 @@ unitIdentifier 'identifier'
 dollarIdentifier 'identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
-escapeSeq 'escape sequence' 
+escapeSeq 'escape sequence'
   = "\\"
      @( esc:[^u]          { return h.parseEscapeSequence([esc], location(), error) }
       / esc:("u" . . . .) { return h.parseEscapeSequence(esc, location(), error) }
       )
 
-string 'string' 
+string 'string'
   = "'" characters:(!("'" / "\\") @. / escapeSeq)* "'" { return h.nodeString(characters.join(""), location()); }
   / '"' characters:(!('"' / "\\") @. / escapeSeq)* '"' { return h.nodeString(characters.join(""), location()); }
 
@@ -294,7 +311,7 @@ float 'number'
         exponent,
       }, location());
     }
-  
+
   floatSignificand
     = integer:intLiteral "." fractional:($d+)?
       {
@@ -336,13 +353,13 @@ valueConstructor
   / dictConstructor
 
 lambda
-  = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}'
+  = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}' returnUnitType:unitTypeSignature?
     {
       statements.push(finalExpression);
-      return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined);
+      return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined, returnUnitType);
     }
-  / '{' _nl '|' _nl args:functionParameters _nl '|' _nl finalExpression: expression  _nl '}'
-    { return h.nodeLambda(args, finalExpression, location(), undefined); }
+  / '{' _nl '|' _nl args:functionParameters _nl '|' _nl finalExpression: expression  _nl '}'  returnUnitType:unitTypeSignature?
+    { return h.nodeLambda(args, finalExpression, location(), undefined, returnUnitType); }
 
 arrayConstructor 'array'
   = '[' _nl ']'

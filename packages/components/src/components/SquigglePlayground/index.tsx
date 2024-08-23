@@ -30,7 +30,7 @@ export type ModelExport = {
 };
 
 /*
- * We don't support `project` or `continues` in the playground.
+ * We don't support `project` in the playground.
  * First, because playground will support multi-file mode by itself.
  * Second, because environment is configurable through playground settings and it should match the project.getEnvironment(), so this component owns the project to guarantee that.
  */
@@ -115,10 +115,9 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   });
 
   useEffect(() => {
-    simulation && onNewSimulation && onNewSimulation(simulation);
-    const _output = simulation?.output;
-    if (_output && _output.ok) {
-      const exports = _output.value.exports;
+    const exportsR = simulation?.output.getExports();
+    if (exportsR && exportsR.ok) {
+      const exports = exportsR.value;
       const _exports: ModelExport[] = exports.entries().map((e) => ({
         variableName: e[0],
         variableType: e[1].tag,

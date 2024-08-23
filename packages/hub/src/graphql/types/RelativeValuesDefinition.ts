@@ -91,7 +91,7 @@ export const RelativeValuesDefinition = builder.prismaNode(
               modelRevisionId: {
                 in: models
                   .map((model) => model.currentRevisionId)
-                  .filter((id): id is NonNullable<typeof id> => id !== null),
+                  .filter((id) => id !== null),
               },
               definitionId: definition.id,
             },

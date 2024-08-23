@@ -6,7 +6,7 @@ import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
 # Functions
 
-## Basic syntax
+## Basic Syntax
 
 <SquiggleEditor
   defaultCode={`myMultiply(t) = normal(t^2, t^1.2+.01)
@@ -49,6 +49,30 @@ You can manually set the range in the following ways:
 - With `Plot.numericFn` or `Plot.distFn` plots, using the `xScale` parameter
 - Through the chart's settings in the UI (look for a gear icon next to the variable name)
 - With parameter annotations (explained below)
+
+## Unit Types
+
+Like with [variables](/docs/Guides/LanguageFeatures#unit-type-annotations), you can declare unit types for function parameters:
+
+<SquiggleEditor defaultCode={`f(x :: unit) = x`} />
+
+You can also declare the unit type of the function's return value:
+
+<SquiggleEditor defaultCode={`convertMass(x :: lbs) :: kg = x * 2.2`} />
+
+If you pass a unit-typed variable to a function with no unit-type annotations, Squiggle will attempt to infer the unit type of the return value:
+
+<SquiggleEditor defaultCode={`id(x) = x
+a :: m/s = 10
+b = id(a)  // Squiggle infers that b has type m/s`} />
+
+Unit type checking only works for statically defined functions. In the example code below, `h` cannot be unit-type checked.
+
+<SquiggleEditor defaultCode={`f(x) = x
+g(x) = x
+condition = (1 == 2)
+h = (condition ? f : g)`} />
+
 ## Parameter Annotations
 
 Function parameters can be annotated with _domains_ to specify the range of valid input values.

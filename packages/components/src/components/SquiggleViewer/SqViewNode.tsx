@@ -48,7 +48,7 @@ class SqValueNode {
           ? new SqValueNode(this.root, path, this.traverseCalculatorEdge)
           : undefined;
       })
-      .filter((a): a is NonNullable<typeof a> => a !== undefined)
+      .filter((a) => a !== undefined)
       .filter((a) => !a.hasHiddenTag());
   }
 

@@ -24,13 +24,13 @@ function* getMarkerSubData(
   ast: ASTNode,
   path: SqValuePath
 ): Generator<MarkerDatum, void> {
-  switch (ast.type) {
+  switch (ast.kind) {
     case "Dict":
       // Assuming 'elements' is an array of { key: ASTNode, value: ASTNode | string }
       // and we only want to include ASTNode values
       for (const element of ast.elements) {
-        if (element.type === "Identifier") continue;
-        if (element.key.type !== "String") continue;
+        if (element.kind === "Identifier") continue;
+        if (element.key.kind !== "String") continue;
         const subPath = path.extend(SqValuePathEdge.fromKey(element.key.value));
         yield { ast: element.key, path: subPath };
         yield* getMarkerSubData(element.value, subPath);
@@ -54,14 +54,14 @@ function* getMarkerSubData(
 }
 
 function* getMarkerData(ast: ASTNode): Generator<MarkerDatum, void> {
-  if (ast.type !== "Program") {
+  if (ast.kind !== "Program") {
     return; // unexpected
   }
 
   nextStatement: for (const statement of ast.statements) {
     if (
-      statement.type === "DefunStatement" ||
-      statement.type === "LetStatement"
+      statement.kind === "DefunStatement" ||
+      statement.kind === "LetStatement"
     ) {
       for (const decorator of statement.decorators) {
         if (decorator.name.value === "hide") {
@@ -145,19 +145,20 @@ export function getMarkers(
   }
   const simulation = state.facet(simulationFacet);
 
-  const sqResult = simulation?.output;
+  const sqResult = simulation?.output.result;
   if (!sqResult?.ok) {
     return;
   }
 
   if (
-    sqResult.value.result.context?.runContext.source !== state.doc.toString()
+    sqResult.value.result.context?.runContext.module.code !==
+    state.doc.toString()
   ) {
     return; // autorun is off or the result is still rendering, can't show markers yet
   }
 
   // TODO - use AST for the current code state, and `sqResult` only for filtering
-  const ast = sqResult.value.bindings.context?.runContext.ast;
+  const ast = sqResult.value.bindings.context?.runContext.module.expectAst();
   if (!ast) {
     return;
   }

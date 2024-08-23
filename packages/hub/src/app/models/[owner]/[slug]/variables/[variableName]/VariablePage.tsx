@@ -1,7 +1,6 @@
 "use client";
 import clsx from "clsx";
 import { format } from "date-fns";
-import Link from "next/link";
 import { FC, useState } from "react";
 import { FaClock, FaMinusCircle } from "react-icons/fa";
 import { graphql, usePaginationFragment } from "react-relay";
@@ -10,6 +9,7 @@ import { FragmentRefs } from "relay-runtime";
 import { CheckIcon, XIcon } from "@quri/ui";
 
 import { LoadMore } from "@/components/LoadMore";
+import { Link } from "@/components/ui/Link";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { exportTypeIcon } from "@/lib/typeIcon";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";

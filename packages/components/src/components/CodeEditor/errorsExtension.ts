@@ -1,7 +1,12 @@
 import { linter } from "@codemirror/lint";
 import { Extension, Facet } from "@codemirror/state";
 
-import { SqCompileError, SqError, SqRuntimeError } from "@quri/squiggle-lang";
+import {
+  SqCompileError,
+  SqError,
+  SqImportError,
+  SqRuntimeError,
+} from "@quri/squiggle-lang";
 
 import { Simulation } from "../../lib/hooks/useSimulator.js";
 import { simulationErrors } from "../../lib/utility.js";
@@ -28,7 +33,11 @@ export function errorsExtension(): Extension {
         const diagnostics = errors
           .map((err) => {
             if (
-              !(err instanceof SqCompileError || err instanceof SqRuntimeError)
+              !(
+                err instanceof SqCompileError ||
+                err instanceof SqRuntimeError ||
+                err instanceof SqImportError
+              )
             ) {
               return undefined;
             }
@@ -42,8 +51,8 @@ export function errorsExtension(): Extension {
             };
           })
           .filter((err): err is NonNullable<typeof err> => {
-            return Boolean(
-              err && err.location && err.location.end.offset <= docLength
+            return (
+              !!err && err.location && err.location.end.offset <= docLength
             );
           })
           .map((err) => ({

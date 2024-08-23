@@ -6,7 +6,9 @@ import { userEvent } from "@testing-library/user-event";
 import { SquigglePlayground } from "../src/index.js";
 
 test("Autorun is default", async () => {
-  act(() => render(<SquigglePlayground defaultCode="70*30" />));
+  act(() =>
+    render(<SquigglePlayground defaultCode="70*30" runner="embedded" />)
+  );
   await waitFor(() =>
     expect(screen.getByTestId("dynamic-viewer-result")).toHaveTextContent(
       "2100"
@@ -16,7 +18,9 @@ test("Autorun is default", async () => {
 
 test("Autorun can be switched off", async () => {
   const user = userEvent.setup();
-  act(() => render(<SquigglePlayground defaultCode="70*30" />));
+  act(() =>
+    render(<SquigglePlayground defaultCode="70*30" runner="embedded" />)
+  );
 
   expect(screen.getByTestId("autorun-controls")).toHaveAttribute(
     "aria-checked",

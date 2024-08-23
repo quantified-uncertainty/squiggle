@@ -44,8 +44,7 @@ class CompileContext {
 
   // Externals will include:
   // 1. stdLib symbols
-  // 2. "continues"
-  // 3. imports
+  // 2. imports
   // Externals will be inlined in the resulting expression.
   constructor(public externals: Bindings) {
     // top-level scope
@@ -183,7 +182,7 @@ function compileToContent(
   ast: ASTNode,
   context: CompileContext
 ): expression.ExpressionContent {
-  switch (ast.type) {
+  switch (ast.kind) {
     case "Block": {
       if (ast.statements.length === 1) {
         // unwrap blocks; no need for extra scopes or Block expressions
@@ -193,8 +192,8 @@ function compileToContent(
       const statements: Expression[] = [];
       for (const astStatement of ast.statements) {
         if (
-          (astStatement.type === "LetStatement" ||
-            astStatement.type === "DefunStatement") &&
+          (astStatement.kind === "LetStatement" ||
+            astStatement.kind === "DefunStatement") &&
           astStatement.exported
         ) {
           throw new ICompileError(
@@ -216,8 +215,8 @@ function compileToContent(
         const statement = innerCompileAst(astStatement, context);
         statements.push(statement);
         if (
-          astStatement.type === "LetStatement" ||
-          astStatement.type === "DefunStatement"
+          astStatement.kind === "LetStatement" ||
+          astStatement.kind === "DefunStatement"
         ) {
           if (astStatement.exported) {
             const name = astStatement.variable.value;
@@ -295,9 +294,9 @@ function compileToContent(
       const parameters: expression.LambdaExpressionParameter[] = [];
       for (const astParameter of ast.args) {
         let parameter: expression.LambdaExpressionParameter;
-        if (astParameter.type === "Identifier") {
+        if (astParameter.kind === "Identifier") {
           parameter = { name: astParameter.value, annotation: undefined };
-        } else if (astParameter.type === "IdentifierWithAnnotation") {
+        } else if (astParameter.kind === "IdentifierWithAnnotation") {
           parameter = {
             name: astParameter.variable,
             annotation: innerCompileAst(astParameter.annotation, context),
@@ -305,7 +304,7 @@ function compileToContent(
         } else {
           // should never happen
           throw new ICompileError(
-            `Internal error: argument ${astParameter.type} is not an identifier`,
+            `Internal error: argument ${astParameter.kind} is not an identifier`,
             ast.location
           );
         }
@@ -352,12 +351,12 @@ function compileToContent(
       return expression.make(
         "Dict",
         ast.elements.map((kv) => {
-          if (kv.type === "KeyValue") {
+          if (kv.kind === "KeyValue") {
             return [
               innerCompileAst(kv.key, context),
               innerCompileAst(kv.value, context),
             ] as [Expression, Expression];
-          } else if (kv.type === "Identifier") {
+          } else if (kv.kind === "Identifier") {
             // shorthand
             const key = {
               ast: kv,
@@ -396,6 +395,14 @@ function compileToContent(
         innerCompileAst(ast.value, context),
       ]);
     }
+    case "UnitTypeSignature":
+    case "InfixUnitType":
+    case "ExponentialUnitType":
+      // should never happen
+      throw new ICompileError(
+        `Can't compile ${ast.kind} node of type signature`,
+        ast.location
+      );
     case "IdentifierWithAnnotation":
       // should never happen
       throw new ICompileError(

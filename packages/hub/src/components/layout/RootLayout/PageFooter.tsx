@@ -1,10 +1,10 @@
 "use client";
 import Image from "next/image";
-import Link from "next/link";
 import { FC } from "react";
 import { FaDiscord, FaGithub, FaRss } from "react-icons/fa";
 import { SiGraphql } from "react-icons/si";
 
+import { Link } from "@/components/ui/Link";
 import {
   DISCORD_URL,
   GITHUB_URL,

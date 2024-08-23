@@ -1,5 +1,5 @@
 import { REOther } from "../errors/messages.js";
-import { ImmutableMap } from "../utility/immutableMap.js";
+import { ImmutableMap } from "../utility/immutable.js";
 import { Value } from "../value/index.js";
 
 export type Bindings = ImmutableMap<string, Value>;

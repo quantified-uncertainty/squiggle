@@ -1,6 +1,5 @@
 import { type Env } from "./dists/env.js";
 import { registry } from "./library/registry/index.js";
-import { SqProject } from "./public/SqProject/index.js";
 
 export {
   SqDateValue,
@@ -27,6 +26,7 @@ export {
   SqCompileError,
   type SqError,
   SqFrame,
+  SqImportError,
   SqOtherError,
   SqRuntimeError,
 } from "./public/SqError.js";
@@ -90,24 +90,18 @@ export {
   type LocationRange as SqLocation,
 } from "./ast/types.js";
 export { defaultEnv as defaultEnvironment } from "./dists/env.js";
-export { type Env, SqProject };
+export { type Env };
 
-export { type SqLinker } from "./public/SqLinker.js";
-export { type SqOutput, type SqOutputResult } from "./public/types.js";
+export { makeSelfContainedLinker, type SqLinker } from "./public/SqLinker.js";
+export { SqProject } from "./public/SqProject/index.js";
+export { SqModule } from "./public/SqProject/SqModule.js";
+export { SqModuleOutput } from "./public/SqProject/SqModuleOutput.js";
+export {
+  type ProjectAction,
+  type ProjectEventListener,
+} from "./public/SqProject/types.js";
 
-export async function run(
-  code: string,
-  options?: {
-    environment?: Env;
-  }
-) {
-  const project = SqProject.create({
-    environment: options?.environment,
-  });
-  project.setSource("main", code);
-  await project.run("main");
-  return project.getOutput("main");
-}
+export { run } from "./run.js";
 
 export { sq } from "./sq.js";
 
@@ -141,9 +135,16 @@ export { generateSeed } from "./utility/seedGenerator.js";
 export {
   allRunnerNames,
   defaultRunnerName,
+  EmbeddedRunner,
+  EmbeddedWithSerializationRunner,
+  PoolRunner,
   runnerByName,
   type RunnerName,
+  RunnerPool,
+  WebWorkerRunner,
+  WithCacheLoaderRunner,
 } from "./runners/index.js";
 
-// Needs to be parameterized with the wrapped runner, so can't be obtained through `runnerByName`
-export { WithCacheLoaderRunner } from "./runners/WithCacheLoaderRunner.js";
+export { BaseRunner } from "./runners/BaseRunner.js";
+
+export { getStdLib } from "./library/index.js";
