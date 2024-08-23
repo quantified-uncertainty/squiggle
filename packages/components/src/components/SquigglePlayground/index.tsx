@@ -4,7 +4,7 @@ import { SqLinker, SqValuePath } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { usePlaygroundSettings } from "../../lib/hooks/usePlaygroundSettings.js";
-import { Simulation, useSimulator } from "../../lib/hooks/useSimulator.js";
+import { useSimulator } from "../../lib/hooks/useSimulator.js";
 import { useUncontrolledCode } from "../../lib/hooks/useUncontrolledCode.js";
 import {
   PartialPlaygroundSettings,
@@ -47,7 +47,6 @@ export type SquigglePlaygroundProps = {
   onCodeChange?(code: string): void;
   onOpenExport?: (sourceId: string, varName?: string) => void;
   onExportsChange?(exports: ModelExport[]): void;
-  onNewSimulation?(simulation: Simulation): void;
   /* When settings change */
   onSettingsChange?(settings: PlaygroundSettings): void;
   /* Height of the playground */
@@ -76,7 +75,6 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     linker,
     onExportsChange,
     onSettingsChange,
-    onNewSimulation,
     renderExtraControls,
     renderExtraDropdownItems,
     renderExtraModal,

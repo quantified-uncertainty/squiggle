@@ -18,8 +18,7 @@ async function getSamplesForSeed(seed?: string | undefined) {
   if (!Array.isArray(samples)) {
     throw new Error("Expected an array");
   }
-
-  return samples;
+  return samples as number[];
 }
 
 describe("seeds", () => {

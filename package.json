@@ -6,10 +6,7 @@
     "preinstall": "npx only-allow pnpm",
     "changeset-version": "cd packages/ops && turbo build && pnpm run changeset-version",
     "publish-all": "cd packages/ops && turbo build && pnpm run publish-all",
-    "post-publish": "cd packages/ops && turbo build && pnpm run post-publish",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "post-publish": "cd packages/ops && turbo build && pnpm run post-publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.5",
