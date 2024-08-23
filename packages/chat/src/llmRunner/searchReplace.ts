@@ -3,7 +3,7 @@ function extractSearchReplaceBlocks(
   response: string
 ): Array<{ search: string; replace: string }> {
   const regex =
-    /<changes>\s*<<<<<<< SEARCH\s*([\s\S]*?)\s*=======\s*([\s\S]*?)\s*>>>>>>> REPLACE\s*<\/changes>/g;
+    /<<<<<<< SEARCH\s*([\s\S]*?)\s*=======\s*([\s\S]*?)\s*>>>>>>> REPLACE/g;
   const blocks: Array<{ search: string; replace: string }> = [];
   let match;
 
@@ -16,8 +16,6 @@ function extractSearchReplaceBlocks(
 
   return blocks;
 }
-
-// 2. Apply search/replace blocks to a specific text
 function applySearchReplaceBlocks(
   originalText: string,
   blocks: Array<{ search: string; replace: string }>
@@ -55,11 +53,12 @@ function applySearchReplaceBlocks(
   }
 }
 
-// Helper function to escape special characters in a string for use in a regular expression
+// Make sure this helper function is defined
 function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+// The processSearchReplaceResponse function remains the same
 export function processSearchReplaceResponse(
   originalText: string,
   promptResponse: string
@@ -80,5 +79,6 @@ export function processSearchReplaceResponse(
     };
   }
 
+  // Apply all search/replace blocks
   return applySearchReplaceBlocks(originalText, blocks);
 }

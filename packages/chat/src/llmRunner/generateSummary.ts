@@ -1,8 +1,26 @@
 import fs from "fs";
 import path from "path";
 
-import { calculatePriceMultipleCalls } from "./llmHelper";
-import { CodeState, LogLevel, State, StateManager } from "./stateManager";
+import { calculatePriceMultipleCalls, LlmMetrics } from "./llmHelper";
+import {
+  CodeRunErrorLogEntry,
+  CodeState,
+  CodeStateLogEntry,
+  ErrorLogEntry,
+  HighlightLogEntry,
+  InfoLogEntry,
+  LlmResponseLogEntry,
+  State,
+  StateExecution,
+  StateManager,
+  SuccessLogEntry,
+  TimestampedLogEntry,
+  WarnLogEntry,
+} from "./stateManager";
+
+const escapeMarkdown = (text: string): string => {
+  return text.replace(/```/g, "\\`\\`\\`");
+};
 
 const generateSummary = (
   prompt: string,
@@ -31,7 +49,10 @@ const generateSummary = (
   return summary;
 };
 
-const generateOverview = (executions, metricsByLLM) => {
+const generateOverview = (
+  executions: StateExecution[],
+  metricsByLLM: Record<string, LlmMetrics>
+): string => {
   const totalTime = executions.reduce(
     (acc, exec) => acc + (exec.durationMs || 0),
     0
@@ -49,30 +70,37 @@ const generateOverview = (executions, metricsByLLM) => {
     overview += `  - Output Tokens: ${metrics.outputTokens}\n`;
   }
 
-  overview += `- Estimated Total Cost: $${estimatedCost.toFixed(6)}\n`;
+  overview += `- Estimated Total Cost: $${estimatedCost.toFixed(4)}\n`;
 
   return overview;
 };
-const generateErrorSummary = (executions) => {
+
+const generateErrorSummary = (executions: StateExecution[]): string => {
   let errorSummary = "";
   executions.forEach((execution, index) => {
     const errors = execution
       .getLogs()
       .filter(
-        (log) =>
-          log.level === LogLevel.ERROR || log.level === LogLevel.CODE_RUN_ERROR
+        (log): log is TimestampedLogEntry =>
+          log.entry.type === "error" || log.entry.type === "codeRunError"
       );
     if (errors.length > 0) {
       errorSummary += `### Execution ${index + 1} (${State[execution.state]})\n`;
       errors.forEach((error) => {
-        errorSummary += `- ${error.message}\n`;
+        if (error.entry.type === "error") {
+          errorSummary += `- ${error.entry.message}\n`;
+        } else if (error.entry.type === "codeRunError") {
+          errorSummary += `- ${error.entry.error}\n`;
+        }
       });
     }
   });
   return errorSummary || "No errors encountered.\n";
 };
 
-const generateDetailedExecutionLogs = (executions) => {
+const generateDetailedExecutionLogs = (
+  executions: StateExecution[]
+): string => {
   let detailedLogs = "";
   executions.forEach((execution, index) => {
     const totalCost = calculatePriceMultipleCalls(
@@ -82,7 +110,7 @@ const generateDetailedExecutionLogs = (executions) => {
       }, {})
     );
 
-    detailedLogs += `## Execution ${index + 1} - ${State[execution.state]} (Cost: $${totalCost.toFixed(6)})\n`;
+    detailedLogs += `## Execution ${index + 1} - ${State[execution.state]} (Cost: $${totalCost.toFixed(4)})\n`;
     detailedLogs += `- Duration: ${(execution.durationMs || 0) / 1000} seconds\n`;
 
     execution.llmMetricsList.forEach((metrics) => {
@@ -91,18 +119,87 @@ const generateDetailedExecutionLogs = (executions) => {
       detailedLogs += `  - API Calls: ${metrics.apiCalls}\n`;
       detailedLogs += `  - Input Tokens: ${metrics.inputTokens}\n`;
       detailedLogs += `  - Output Tokens: ${metrics.outputTokens}\n`;
-      detailedLogs += `  - Estimated Cost: $${cost.toFixed(6)}\n`;
+      detailedLogs += `  - Estimated Cost: $${cost.toFixed(4)}\n`;
     });
 
     detailedLogs += "### Logs:\n";
     execution.getLogs().forEach((log) => {
-      detailedLogs += `<details><summary>${LogLevel[log.level]}</summary>\n\n${log.message}\n\n</details>\n\n`;
+      detailedLogs += `#### **${log.entry.type.toUpperCase()}:**\n`;
+      detailedLogs += `${getFullMessage(log)}`;
     });
     detailedLogs += "<details><summary>Code At End</summary>\n\n";
     detailedLogs += formatCodeState(execution.codeState);
     detailedLogs += "\n</details>\n\n";
   });
   return detailedLogs;
+};
+
+const getFullMessage = (log: TimestampedLogEntry): string => {
+  switch (log.entry.type) {
+    case "info":
+    case "warn":
+    case "error":
+    case "success":
+    case "highlight":
+      return (
+        log.entry as
+          | InfoLogEntry
+          | WarnLogEntry
+          | ErrorLogEntry
+          | SuccessLogEntry
+          | HighlightLogEntry
+      ).message;
+    case "codeRunError":
+      return `Error: ${(log.entry as CodeRunErrorLogEntry).error}`;
+    case "llmResponse":
+      const llmResponse = log.entry as LlmResponseLogEntry;
+      return `LLM Response:
+<details>
+  <summary>Content</summary>
+
+\`\`\`
+${escapeMarkdown(llmResponse.content)}
+\`\`\`
+</details>
+
+<details>
+  <summary>Messages</summary>
+
+\`\`\`json
+${escapeMarkdown(JSON.stringify(llmResponse.messages, null, 2))}
+\`\`\`
+</details>
+
+<details>
+  <summary>Full Response</summary>
+
+\`\`\`json
+${escapeMarkdown(JSON.stringify(llmResponse.response, null, 2))}
+\`\`\`
+</details>\n`;
+    case "codeState":
+      const codeState = (log.entry as CodeStateLogEntry).codeState;
+      switch (codeState.type) {
+        case "noCode":
+          return "Code state: No code generated";
+        case "formattingFailed":
+          return `Code state: Formatting failed
+Error: ${codeState.error}
+Code:
+${codeState.code}`;
+        case "runFailed":
+          return `Code state: Run failed
+Error: ${codeState.error}
+Code:
+${codeState.code}`;
+        case "success":
+          return `Code state: Success
+Code:
+${codeState.code}`;
+      }
+    default:
+      return "Unknown log type";
+  }
 };
 
 const formatCodeState = (codeState: CodeState): string => {
@@ -132,7 +229,7 @@ const saveSummaryToFile = (summary: string): void => {
 };
 
 export const generateAndSaveSummary = (
-  prompt,
+  prompt: string,
   stateManager: StateManager
 ): void => {
   const summary = generateSummary(prompt, stateManager);

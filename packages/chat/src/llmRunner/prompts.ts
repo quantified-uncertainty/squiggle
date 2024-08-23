@@ -1,8 +1,14 @@
 import fs from "fs";
+import path from "path";
 
 import { getSquiggleAdvice } from "./getSquiggleAdvice";
 
-const SQUIGGLE_DOCS_PATH = "./src/llmScript/squiggleDocs.md";
+const SQUIGGLE_DOCS_PATH = path.join(
+  process.cwd(),
+  "src",
+  "llmRunner",
+  "squiggleDocs.md"
+);
 
 // Utility functions
 const readTxtFileSync = (filePath: string) => {

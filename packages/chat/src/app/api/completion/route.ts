@@ -1,4 +1,4 @@
-import { runSquiggleGenerator } from "../../../llmScript/main";
+import { runSquiggleGenerator } from "../../../llmRunner/main";
 import { AVAILABLE_MODELS } from "../../utils/llms";
 
 export const maxDuration = 30;

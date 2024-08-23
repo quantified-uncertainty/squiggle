@@ -6,7 +6,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/script.mts",
-    "src/llmScript/logger.ts",
+    "src/llmRunner/logger.ts",
   ],
   "exclude": ["node_modules"],
   "compilerOptions": {

@@ -22,21 +22,21 @@ type ModelConfig = {
 };
 
 const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
-  "GPT-4o": {
+  GPT4: {
     provider: "openrouter",
     model: "openai/gpt-4o-2024-08-06",
     inputRate: 0.0000025,
     outputRate: 0.00001,
     contextWindow: 128000,
   },
-  "GPT-4o-mini": {
+  "GPT4-mini": {
     provider: "openrouter",
     model: "openai/gpt-4o-mini-2024-07-18",
     inputRate: 0.00000015,
     outputRate: 0.0000006,
     contextWindow: 128000,
   },
-  "Claude-3.5-Sonnet": {
+  "Claude-Sonnet": {
     provider: "anthropic",
     model: "claude-3-5-sonnet-20240620",
     inputRate: 0.000003,
@@ -44,7 +44,7 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
     contextWindow: 200000,
     maxTokens: 8192,
   },
-  "Claude-3-Haiku": {
+  "Claude-Haiku": {
     provider: "anthropic",
     model: "claude-3-haiku-20240307",
     inputRate: 0.00000025,

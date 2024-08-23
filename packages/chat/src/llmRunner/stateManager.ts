@@ -9,45 +9,62 @@ import {
   Message,
 } from "./llmHelper";
 
-export enum LogLevel {
-  INFO,
-  WARN,
-  ERROR,
-  CODE_RUN_ERROR,
-  SUCCESS,
-  HIGHLIGHT,
-}
+export type LogEntry =
+  | InfoLogEntry
+  | WarnLogEntry
+  | ErrorLogEntry
+  | CodeRunErrorLogEntry
+  | SuccessLogEntry
+  | HighlightLogEntry
+  | LlmResponseLogEntry
+  | CodeStateLogEntry;
 
-function logWithLevel(message: string, level: LogLevel): void {
-  switch (level) {
-    case LogLevel.INFO:
-      console.log(chalk.blue(`[INFO] ${message}`));
-      break;
-    case LogLevel.WARN:
-      console.warn(chalk.yellow(`[WARN] ${message}`));
-      break;
-    case LogLevel.ERROR:
-      console.error(chalk.red(`[ERROR] ${message}`));
-      break;
-    case LogLevel.CODE_RUN_ERROR:
-      console.error(chalk.red.bold(`[CODE_RUN_ERROR] ${message}`));
-      break;
-    case LogLevel.SUCCESS:
-      console.log(chalk.green(`[SUCCESS] ${message}`));
-      break;
-    case LogLevel.HIGHLIGHT:
-      console.log(chalk.magenta(`[HIGHLIGHT] ${message}`));
-      break;
-    default:
-      console.log(`[${LogLevel[level]}] ${message}`);
-  }
-}
-
-export interface LogEntry {
-  message: string;
+export type TimestampedLogEntry = {
   timestamp: Date;
-  level: LogLevel;
-}
+  entry: LogEntry;
+};
+
+export type InfoLogEntry = {
+  type: "info";
+  message: string;
+};
+
+export type WarnLogEntry = {
+  type: "warn";
+  message: string;
+};
+
+export type ErrorLogEntry = {
+  type: "error";
+  message: string;
+};
+
+export type CodeRunErrorLogEntry = {
+  type: "codeRunError";
+  error: string;
+};
+
+export type SuccessLogEntry = {
+  type: "success";
+  message: string;
+};
+
+export type HighlightLogEntry = {
+  type: "highlight";
+  message: string;
+};
+
+export type LlmResponseLogEntry = {
+  type: "llmResponse";
+  response: any; // JSON response
+  content: string;
+  messages: Message[];
+};
+
+export type CodeStateLogEntry = {
+  type: "codeState";
+  codeState: CodeState;
+};
 
 export enum State {
   START,
@@ -75,7 +92,7 @@ export interface StateHandler {
 export class StateExecution {
   public nextState: State;
   public durationMs?: number;
-  private logs: LogEntry[] = [];
+  private logs: TimestampedLogEntry[] = [];
   private conversationMessages: Message[] = [];
   public llmMetricsList: LlmMetrics[] = [];
 
@@ -86,16 +103,41 @@ export class StateExecution {
     private readonly startTime: number = Date.now()
   ) {
     this.nextState = state;
+    this.logCodeState(codeState);
   }
 
-  log(message: string, level: LogLevel): void {
-    const logEntry: LogEntry = {
-      message,
-      timestamp: new Date(),
-      level,
-    };
-    logWithLevel(message, level);
-    this.logs.push(logEntry);
+  log(log: LogEntry): void {
+    this.logs.push({ timestamp: new Date(), entry: log });
+    this.displayLog(log);
+  }
+
+  private displayLog(log: LogEntry): void {
+    switch (log.type) {
+      case "info":
+        console.log(chalk.blue(`[INFO] ${log.message}`));
+        break;
+      case "warn":
+        console.warn(chalk.yellow(`[WARN] ${log.message}`));
+        break;
+      case "error":
+        console.error(chalk.red(`[ERROR] ${log.message}`));
+        break;
+      case "codeRunError":
+        console.error(chalk.red.bold(`[CODE_RUN_ERROR] ${log.error}`));
+        break;
+      case "success":
+        console.log(chalk.green(`[SUCCESS] ${log.message}`));
+        break;
+      case "highlight":
+        console.log(chalk.magenta(`[HIGHLIGHT] ${log.message}`));
+        break;
+      case "llmResponse":
+        console.log(chalk.cyan(`[LLM_RESPONSE] ${log.content}`));
+        break;
+      case "codeState":
+        console.log(chalk.gray(`[CODE_STATE] ${log.codeState.type}`));
+        break;
+    }
   }
 
   addConversationMessage(message: Message): void {
@@ -104,6 +146,7 @@ export class StateExecution {
 
   updateCodeState(codeState: CodeState): void {
     this.codeState = codeState;
+    this.logCodeState(codeState);
   }
 
   updateLlmMetrics(metrics: LlmMetrics): void {
@@ -118,7 +161,7 @@ export class StateExecution {
     this.durationMs = Date.now() - this.startTime;
   }
 
-  getLogs(): LogEntry[] {
+  getLogs(): TimestampedLogEntry[] {
     return this.logs;
   }
 
@@ -127,19 +170,12 @@ export class StateExecution {
   }
 
   criticalError(error: string) {
-    this.log(error, LogLevel.ERROR);
+    this.log({ type: "error", message: error });
     this.updateNextState(State.CRITICAL_ERROR);
   }
 
   logCodeState(codeState: CodeState) {
-    switch (codeState.type) {
-      case "success":
-      case "noCode":
-        return;
-      case "formattingFailed":
-      case "runFailed":
-        this.log(codeState.error, LogLevel.CODE_RUN_ERROR);
-    }
+    return this.log({ type: "codeState", codeState });
   }
 }
 
@@ -223,10 +259,7 @@ export class StateManager {
         );
       }
     } catch (error) {
-      stateExecution.log(
-        `Unexpected error in state ${State[stateExecution.state]}: ${error.message}`,
-        LogLevel.ERROR
-      );
+      stateExecution.log({ type: "error", message: error.message });
       stateExecution.updateNextState(State.CRITICAL_ERROR);
     }
 
@@ -246,7 +279,7 @@ export class StateManager {
     stateExecution: StateExecution;
   } {
     const stateExecution = this.createNewStateExecution();
-    stateExecution.log(reason, LogLevel.ERROR);
+    stateExecution.log({ type: "error", message: reason });
     stateExecution.updateNextState(State.CRITICAL_ERROR);
     stateExecution.complete();
 
@@ -270,7 +303,11 @@ export class StateManager {
     return currentState === State.DONE || currentState === State.CRITICAL_ERROR;
   }
 
-  getFinalResult(): { isValid: boolean; code: string; logs: LogEntry[] } {
+  getFinalResult(): {
+    isValid: boolean;
+    code: string;
+    logs: TimestampedLogEntry[];
+  } {
     const finalExecution = this.getCurrentStateExecution();
     if (!finalExecution) {
       throw new Error("No state executions found");
@@ -288,16 +325,7 @@ export class StateManager {
     };
   }
 
-  log(message: string, level: LogLevel) {
-    const currentExecution = this.getCurrentStateExecution();
-    if (currentExecution) {
-      currentExecution.log(message, level);
-    } else {
-      logWithLevel(message, level);
-    }
-  }
-
-  getLogs(): LogEntry[] {
+  getLogs(): TimestampedLogEntry[] {
     return this.stateExecutions.flatMap((r) => r.getLogs());
   }
 
