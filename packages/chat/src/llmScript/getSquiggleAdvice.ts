@@ -429,6 +429,26 @@ function checkInvalidCommas(code: string): string[] {
   return warnings;
 }
 
+// Function to check for diff artifacts
+function checkDiffArtifacts(code: string): string[] {
+  const warnings: string[] = [];
+  const lines = code.split("\n");
+  const diffPatterns = [/^<<<<<<< /, /^=======/, /^>>>>>>> /];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    for (const pattern of diffPatterns) {
+      if (pattern.test(line)) {
+        warnings.push(
+          `Line ${i + 1}: Diff artifact found: "${line.trim()}". Remove this line as it's not part of the actual code.`
+        );
+      }
+    }
+  }
+
+  return warnings;
+}
+
 // Main function to get Squiggle advice
 export function getSquiggleAdvice(errorMessage: string, code: string): string {
   let advice = "";
@@ -470,6 +490,14 @@ export function getSquiggleAdvice(errorMessage: string, code: string): string {
     advice += "Additional Warnings:\n" + elementWarnings.join("\n") + "\n\n";
     advice +=
       "Remember that Squiggle has its own syntax and conventions. It doesn't use explicit type annotations, and certain common programming constructs (like 'null' or 'undefined') are not valid. Use Squiggle-specific alternatives when needed.\n";
+  }
+
+  // Check for diff artifacts
+  const diffWarnings = checkDiffArtifacts(code);
+  if (diffWarnings.length > 0) {
+    advice += "Diff Artifact Warnings:\n" + diffWarnings.join("\n") + "\n\n";
+    advice +=
+      "These diff artifacts are likely leftover from a merge or conflict resolution. Remove them to ensure your code runs correctly.\n\n";
   }
 
   return advice.trim();

@@ -63,7 +63,7 @@ const generateErrorSummary = (executions) => {
           log.level === LogLevel.ERROR || log.level === LogLevel.CODE_RUN_ERROR
       );
     if (errors.length > 0) {
-      errorSummary += `## Execution ${index + 1} (${State[execution.state]})\n`;
+      errorSummary += `### Execution ${index + 1} (${State[execution.state]})\n`;
       errors.forEach((error) => {
         errorSummary += `- ${error.message}\n`;
       });
@@ -75,7 +75,14 @@ const generateErrorSummary = (executions) => {
 const generateDetailedExecutionLogs = (executions) => {
   let detailedLogs = "";
   executions.forEach((execution, index) => {
-    detailedLogs += `## Execution ${index + 1} - ${State[execution.state]}\n`;
+    const totalCost = calculatePriceMultipleCalls(
+      execution.llmMetricsList.reduce((acc, metrics) => {
+        acc[metrics.llmName] = metrics;
+        return acc;
+      }, {})
+    );
+
+    detailedLogs += `## Execution ${index + 1} - ${State[execution.state]} (Cost: $${totalCost.toFixed(6)})\n`;
     detailedLogs += `- Duration: ${(execution.durationMs || 0) / 1000} seconds\n`;
 
     execution.llmMetricsList.forEach((metrics) => {
@@ -89,11 +96,11 @@ const generateDetailedExecutionLogs = (executions) => {
 
     detailedLogs += "### Logs:\n";
     execution.getLogs().forEach((log) => {
-      detailedLogs += `#### **${LogLevel[log.level]}:** \n ${log.message}\n\n`;
+      detailedLogs += `<details><summary>${LogLevel[log.level]}</summary>\n\n${log.message}\n\n</details>\n\n`;
     });
-    detailedLogs += "### Code:\n";
+    detailedLogs += "<details><summary>Code At End</summary>\n\n";
     detailedLogs += formatCodeState(execution.codeState);
-    detailedLogs += "\n\n";
+    detailedLogs += "\n</details>\n\n";
   });
   return detailedLogs;
 };
