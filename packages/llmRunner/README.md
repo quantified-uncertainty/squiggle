@@ -23,6 +23,7 @@ Right now this application is still fairly basic and experimental.
 - Find ways of automating the process of adding new suggestions for fixes, based on data from the logs.
 - Have policies for dealing with repeated errors. This happens frequently with cheaper LLMs.
 - Have much better examples of Squiggle code, for the prompts. If there are enough examples, specific ones could be used for certain kinds of requests.
+- Sometimes the llm will return an invalid response. This sometimes gets added to the messages history, which then can contaminate future runs.
 
 ## Key Limitations
 
@@ -33,6 +34,18 @@ Right now this application is still fairly basic and experimental.
 - The system is made to generate new Squiggle, not fix improve or fix existing code.
 - There's no parallelization yet. That said, it's tricky to parallelize code improvements, especially without spending a lot of extra money.
 - This system doesn't return anything (outside the console.log statements) until the end of a run. So the user will be left hanging for a while.
+- The UI doesn't load the sTest library. (This will be fixed if/when we integrate with SquiggleHub.)
+
+## Key Future Features
+
+- Add web search capabilities, perhaps with Perplexity search, or similar.
+- Add an "edit" workflow, where the user can edit the code, and then re-run the code.
+- Integrate this deeper with the Squiggle Playground. Perhaps bugs can be automatically fixed in the background.
+- API access. For running all available actions.
+- Sensitivity analysis for Squiggle variables. Then, spend extra attention on the most important variables.
+- Specialized examples/features for certain types of Squiggle code. For example - relative value estimates, cost-effectiveness estimates, simulations, complex functions, standard library functions, etc.
+- Evals for the accuracy of Squiggle code, to the best of our ability.
+- Share the Markdown logs with the user, so they can be used for other purposes. Maybe these can be stored in s3 or similar.
 
 ## Recommended Environment Variables
 

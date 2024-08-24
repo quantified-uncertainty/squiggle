@@ -35,11 +35,12 @@ export interface LlmConfig {
 
 export const llmConfigDefault: LlmConfig = {
   // llmName: "Claude-Haiku",
-  llmName: "Claude-Sonnet",
+  // llmName: "Claude-Sonnet",
   // llmName: "GPT4-mini",
-  priceLimit: 0.4,
-  durationLimitMinutes: 2,
-  messagesInHistoryToKeep: 3,
+  llmName: "GPT4",
+  priceLimit: 0.2,
+  durationLimitMinutes: 1,
+  messagesInHistoryToKeep: 4,
 };
 
 class SquiggleGenerator {
