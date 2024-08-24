@@ -123,7 +123,7 @@ export const library = [
     displaySection: "Constructors",
     definitions: [
       makeDefinition(
-        [frArray(frDict(["x", frNumber], ["y", frNumber]))],
+        [frArray(frDict({ x: frNumber, y: frNumber }))],
         frPointSetDist,
         ([arr]) => {
           return new PointSetDist(
@@ -148,7 +148,7 @@ export const library = [
     displaySection: "Constructors",
     definitions: [
       makeDefinition(
-        [frArray(frDict(["x", frNumber], ["y", frNumber]))],
+        [frArray(frDict({ x: frNumber, y: frNumber }))],
         frPointSetDist,
         ([arr]) => {
           return new PointSetDist(

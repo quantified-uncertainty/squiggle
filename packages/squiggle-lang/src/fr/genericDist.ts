@@ -10,7 +10,7 @@ import {
   binaryOperations,
 } from "../dists/distOperations/index.js";
 import * as PointMassJs from "../dists/SymbolicDist/PointMass.js";
-import { namedInput, optionalInput } from "../library/FrInput.js";
+import { frOptionalInput, namedInput } from "../library/FrInput.js";
 import {
   frArray,
   frDist,
@@ -106,7 +106,7 @@ export const library: FRFunction[] = [
 Produce a sparkline of length \`\`n\`\`. For example, \`▁▁▁▁▁▂▄▆▇██▇▆▄▂▁▁▁▁▁\`. These can be useful for testing or quick visualizations that can be copied and pasted into text.`,
     definitions: [
       makeDefinition(
-        [frDist, optionalInput(frNumber)],
+        [frDist, frOptionalInput({ type: frNumber })],
         frString,
         ([d, n], { environment }) =>
           unwrapDistResult(

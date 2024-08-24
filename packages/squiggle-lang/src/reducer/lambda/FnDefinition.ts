@@ -15,12 +15,12 @@ import { Reducer } from "../Reducer.js";
  * So each builtin lambda, represented by `BuiltinLambda`, has a list of `FnDefinition`s.
  */
 
-// Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `Type` unpack logic.
-// It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
-// because of contravariance (we need to store all FnDefinitions in a generic array later on).
+// Internals of `FnDefinition` are not type-safe, but that's ok. We mostly care
+// about the match between `run` function and inputs/outputs, and that part is
+// checked by `makeDefinition`.
 export class FnDefinition {
-  inputs: FrInput<unknown>[];
-  output: FrType<unknown>;
+  inputs: FrInput<boolean>[];
+  output: FrType;
 
   signature: TTypedLambda;
   run: (args: unknown[], reducer: Reducer) => unknown;
@@ -32,8 +32,8 @@ export class FnDefinition {
   deprecated?: string;
 
   private constructor(props: {
-    inputs: FrInput<unknown>[];
-    output: FrType<unknown>;
+    inputs: FrInput<boolean>[];
+    output: FrType;
     run: (args: unknown[], reducer: Reducer) => unknown;
     isAssert?: boolean;
     deprecated?: string;
@@ -96,18 +96,10 @@ export class FnDefinition {
     return this.output.pack(this.run(unpackedArgs, reducer));
   }
 
-  static make<const MaybeInputTypes extends InputOrType<any>[], const Output>(
+  static make<const MaybeInputTypes extends AnyInputOrType[], const Output>(
     maybeInputs: MaybeInputTypes,
     output: FrType<Output>,
-    run: (
-      // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
-      args: [
-        ...{
-          [K in keyof MaybeInputTypes]: UnwrapInputOrType<MaybeInputTypes[K]>;
-        },
-      ],
-      reducer: Reducer
-    ) => Output,
+    run: InferRunFromInputsAndOutput<MaybeInputTypes, FrType<Output>>,
     params?: { deprecated?: string; isDecorator?: boolean }
   ) {
     const inputs = maybeInputs.map(frInputOrTypeToFrInput);
@@ -123,7 +115,7 @@ export class FnDefinition {
   }
 
   //Some definitions are just used to guard against ambiguous function calls, and should never be called.
-  static makeAssert<const MaybeInputTypes extends InputOrType<any>[]>(
+  static makeAssert<const MaybeInputTypes extends AnyInputOrType[]>(
     maybeInputs: MaybeInputTypes,
     errorMsg: string
   ) {
@@ -140,25 +132,44 @@ export class FnDefinition {
   }
 }
 
-type InputOrType<T> = FrInput<T> | FrType<T>;
+type AnyInputOrType = FrInput<any, any> | FrType<any>;
 
-type UnwrapInput<T extends FrInput<any>> =
-  T extends FrInput<infer U> ? U : never;
+type UnwrapInput<T extends FrInput<any, any>> =
+  T extends FrInput<infer O, infer U>
+    ? // intentionally avoid distributivity; if someone managed to create
+      // `FrInput<boolean>` by going around `frInput`/`frOptionalInput`, it would
+      // fail.
+      [O] extends [true]
+      ? U | null
+      : [O] extends [false]
+        ? U
+        : never
+    : never;
 
-type UnwrapInputOrType<T extends InputOrType<any>> =
-  T extends FrInput<any>
+type InferRunFromInputsAndOutput<
+  Inputs extends AnyInputOrType[],
+  Output extends FrType<any>,
+> = (
+  args: {
+    [K in keyof Inputs]: UnwrapInputOrType<Inputs[K]>;
+  },
+  reducer: Reducer
+) => UnwrapFrType<Output>;
+
+type UnwrapInputOrType<T extends AnyInputOrType> =
+  T extends FrInput<any, any>
     ? UnwrapInput<T>
     : T extends FrType<any>
       ? UnwrapFrType<T>
       : never;
 
-function frInputOrTypeToFrInput<T>(input: InputOrType<T>): FrInput<T> {
-  return input instanceof FrInput ? input : new FrInput({ type: input });
+function frInputOrTypeToFrInput(input: AnyInputOrType): FrInput<boolean> {
+  return input instanceof FrInput ? input : new FrInput({ type: input }, false);
 }
 
 // Trivial wrapper around `FnDefinition.make` to make it easier to use in the codebase.
 export function makeDefinition<
-  const InputTypes extends InputOrType<any>[],
+  const InputTypes extends AnyInputOrType[],
   const Output, // it's better to use Output and not OutputType; otherwise `run` return type will require `const` on strings
 >(
   // TODO - is there a more elegant way to type this?

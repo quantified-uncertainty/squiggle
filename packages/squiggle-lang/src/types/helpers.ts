@@ -73,12 +73,15 @@ export function inferOutputTypeByLambda(lambda: Lambda, argTypes: Type[]) {
   return inferOutputTypeByMultipleSignatures(lambda.signatures(), argTypes);
 }
 
-// Check whether the value of type `type2` can be used in place of a variable
-// marked with `type1`, usually as a lambda parameter.
-//
-// This doesn't guarantee that this substitution is safe at runtime; we
-// intentionally don't want to implement strict type checks, we just want to
-// make sure that there's a chance that the code won't fail.
+/**
+ * Check whether the value of type `type2` can be used in place of a variable
+ * marked with `type1`, usually as a lambda parameter.
+ *
+ * This doesn't guarantee that this substitution is safe at runtime, so this is
+ * not the same as checking for subtype/supertype relation; we intentionally
+ * don't want to implement strict type checks, we just want to make sure that
+ * there's a chance that the code won't fail.
+ */
 export function typeCanBeAssigned(type1: Type, type2: Type): boolean {
   if (type1 instanceof TAny || type2 instanceof TAny) {
     return true;

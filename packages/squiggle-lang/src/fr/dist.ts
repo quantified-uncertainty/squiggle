@@ -46,7 +46,7 @@ function makeCIDist<K1 extends string, K2 extends string>(
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
   return makeDefinition(
-    [frDict([lowKey, frNumber], [highKey, frNumber])],
+    [frDict({ [lowKey]: frNumber, [highKey]: frNumber })],
     frSampleSetDist,
     ([dict], reducer) => twoVarSample(dict[lowKey], dict[highKey], reducer, fn)
   );
@@ -59,7 +59,7 @@ function makeMeanStdevDist(
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
   return makeDefinition(
-    [frDict(["mean", frNumber], ["stdev", frNumber])],
+    [frDict({ mean: frNumber, stdev: frNumber })],
     frSampleSetDist,
     ([{ mean, stdev }], reducer) => twoVarSample(mean, stdev, reducer, fn)
   );

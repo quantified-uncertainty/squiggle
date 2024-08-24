@@ -74,15 +74,14 @@ export const library = [
           namedInput("data", frArray(frAny({ genericName: "A" }))),
           namedInput(
             "params",
-            frDict([
-              "columns",
-              frArray(
-                frDict(
-                  ["fn", frTypedLambda([tAny({ genericName: "A" })], tAny())],
-                  { key: "name", type: frString, optional: true }
-                )
+            frDict({
+              columns: frArray(
+                frDict({
+                  fn: frTypedLambda([tAny({ genericName: "A" })], tAny()),
+                  name: { type: frString, optional: true },
+                })
               ),
-            ])
+            })
           ),
         ],
         frTableChart,
@@ -99,18 +98,15 @@ export const library = [
       ),
       makeDefinition(
         [
-          frDict(
-            ["data", frArray(frAny({ genericName: "A" }))],
-            [
-              "columns",
-              frArray(
-                frDict(
-                  ["fn", frTypedLambda([tAny({ genericName: "A" })], tAny())],
-                  { key: "name", type: frString, optional: true }
-                )
-              ),
-            ]
-          ),
+          frDict({
+            data: frArray(frAny({ genericName: "A" })),
+            columns: frArray(
+              frDict({
+                fn: frTypedLambda([tAny({ genericName: "A" })], tAny()),
+                name: { type: frString, optional: true },
+              })
+            ),
+          }),
         ],
         frTableChart,
         ([{ data, columns }]) => {

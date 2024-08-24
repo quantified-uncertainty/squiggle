@@ -19,19 +19,19 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
-const commonDict = frDict(
-  { key: "min", type: frNumber, optional: true },
-  { key: "max", type: frNumber, optional: true },
-  { key: "tickFormat", type: frString, optional: true },
-  { key: "title", type: frString, optional: true }
-);
+const commonDict = frDict({
+  min: { type: frNumber, optional: true },
+  max: { type: frNumber, optional: true },
+  tickFormat: { type: frString, optional: true },
+  title: { type: frString, optional: true },
+});
 
-const dateDict = frDict(
-  { key: "min", type: frDate, optional: true },
-  { key: "max", type: frDate, optional: true },
-  { key: "tickFormat", type: frString, optional: true },
-  { key: "title", type: frString, optional: true }
-);
+const dateDict = frDict({
+  min: { type: frDate, optional: true },
+  max: { type: frDate, optional: true },
+  tickFormat: { type: frString, optional: true },
+  title: { type: frString, optional: true },
+});
 
 function checkMinMax(min: number | null, max: number | null) {
   if (min !== null && max !== null && max <= min) {
@@ -117,13 +117,13 @@ The default value for \`constant\` is \`${0.0001}\`.`, // I tried to set this to
     definitions: [
       makeDefinition(
         [
-          frDict(
-            { key: "min", type: frNumber, optional: true },
-            { key: "max", type: frNumber, optional: true },
-            { key: "tickFormat", type: frString, optional: true },
-            { key: "title", type: frString, optional: true },
-            { key: "constant", type: frNumber, optional: true }
-          ),
+          frDict({
+            min: { type: frNumber, optional: true },
+            max: { type: frNumber, optional: true },
+            tickFormat: { type: frString, optional: true },
+            title: { type: frString, optional: true },
+            constant: { type: frNumber, optional: true },
+          }),
         ],
         frScale,
         ([{ min, max, tickFormat, title, constant }]) => {
@@ -159,13 +159,13 @@ The default value for \`exponent\` is \`${0.1}\`.`,
     definitions: [
       makeDefinition(
         [
-          frDict(
-            { key: "min", type: frNumber, optional: true },
-            { key: "max", type: frNumber, optional: true },
-            { key: "tickFormat", type: frString, optional: true },
-            { key: "title", type: frString, optional: true },
-            { key: "exponent", type: frNumber, optional: true }
-          ),
+          frDict({
+            min: { type: frNumber, optional: true },
+            max: { type: frNumber, optional: true },
+            tickFormat: { type: frString, optional: true },
+            title: { type: frString, optional: true },
+            exponent: { type: frNumber, optional: true },
+          }),
         ],
         frScale,
         ([{ min, max, tickFormat, title, exponent }]) => {

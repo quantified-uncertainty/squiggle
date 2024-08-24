@@ -1,7 +1,7 @@
 import mergeWith from "lodash/mergeWith.js";
 
 import { ErrorMessage } from "../errors/messages.js";
-import { frInput, namedInput, optionalInput } from "../library/FrInput.js";
+import { frOptionalInput, namedInput } from "../library/FrInput.js";
 import {
   frArray,
   frBool,
@@ -30,7 +30,6 @@ import { tNumber } from "../types/TIntrinsic.js";
 import { TNumberRange } from "../types/TNumberRange.js";
 import { Type } from "../types/Type.js";
 import { clamp, sort, uniq } from "../utility/E_A_Floats.js";
-import { vDomain, VDomain } from "../value/VDomain.js";
 import { LabeledDistribution, Plot } from "../value/VPlot.js";
 import { Scale } from "../value/VScale.js";
 
@@ -67,22 +66,22 @@ export function assertValidMinMax(scale: Scale) {
   }
 }
 
-function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
+function createScale(scale: Scale | null, type: Type | undefined): Scale {
   /*
    * There are several possible combinations here:
-   * 1. Scale with min/max -> ignore domain, keep scale
-   * 2. Scale without min/max, domain defined -> copy min/max from domain
-   * 3. Scale without min/max, no domain -> keep scale
-   * 4. No scale and no domain -> default scale
+   * 1. Scale with min/max -> ignore type, keep scale
+   * 2. Scale without min/max, range type defined -> copy min/max from type
+   * 3. Scale without min/max, no range type -> keep scale
+   * 4. No scale and no range type -> default scale
    */
-  //TODO: It might be good to check if scale is outside the bounds of the domain, and throw an error then or something.
-  //TODO: It might also be good to check if the domain type matches the scale type, and throw an error if not.
+  //TODO: It might be good to check if scale is outside the bounds of the range type, and throw an error then or something.
+  //TODO: It might also be good to check if the range type matches the scale type, and throw an error if not.
 
   scale && assertValidMinMax(scale);
 
   const _defaultScale =
-    domain?.value instanceof TNumberRange || domain?.value instanceof TDateRange
-      ? domain.value.toDefaultScale()
+    type && (type instanceof TNumberRange || type instanceof TDateRange)
+      ? type.toDefaultScale()
       : defaultScale;
 
   // _defaultScale can have a lot of undefined values. These should be over-written.
@@ -96,24 +95,23 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
   return resultScale;
 }
 
-// This function both extract the domain and checks that the function has only one parameter.
-function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
+// This function both extracts the parameter type and checks that the function has a single-parameter signature.
+function extractTypeFromOneArgFunction(fn: Lambda): Type | undefined {
   const counts = fn.parameterCounts();
   if (!counts.includes(1)) {
     throw ErrorMessage.otherError(
-      `Unreachable: extractDomainFromOneArgFunction() called with function that doesn't have exactly one parameter.`
+      `Unreachable: extractFromOneArgFunction() called with function that doesn't have exactly one parameter.`
     );
   }
 
-  let domain: Type | undefined;
   if (fn.type === "UserDefinedLambda") {
-    domain = fn.signature.inputs[0]?.type;
+    // We could also verify the domain here, to be more confident that the function expects numeric args.
+    // But we might get other numeric domains besides `NumericRange`, so checking domain type here would be risky.
+    return fn.signature.inputs[0]?.type;
   } else {
-    domain = undefined;
+    // TODO - support builtin lambdas? but they never use range types yet
+    return undefined;
   }
-  // We could also verify a domain here, to be more confident that the function expects numeric args.
-  // But we might get other numeric domains besides `NumericRange`, so checking domain type here would be risky.
-  return domain ? vDomain(domain) : undefined;
 }
 
 const _assertYScaleNotDateScale = (yScale: Scale | null) => {
@@ -161,11 +159,11 @@ const numericFnDef = () => {
     xPoints: number[] | null
   ): Plot => {
     _assertYScaleNotDateScale(yScale);
-    const domain = extractDomainFromOneArgFunction(fn);
+    const type = extractTypeFromOneArgFunction(fn);
     return {
       type: "numericFn",
       fn,
-      xScale: createScale(xScale, domain),
+      xScale: createScale(xScale, type),
       yScale: yScale ?? defaultScale,
       title: title ?? undefined,
       xPoints: xPoints ?? undefined,
@@ -189,20 +187,18 @@ const numericFnDef = () => {
       makeDefinition(
         [
           namedInput("fn", frTagged(fnType)),
-          frInput({
+          frOptionalInput({
             name: "params",
-            optional: true,
-            type: frDict(
-              { key: "xScale", type: frScale, optional: true },
-              { key: "yScale", type: frScale, optional: true },
-              {
-                key: "title",
+            type: frDict({
+              xScale: { type: frScale, optional: true },
+              yScale: { type: frScale, optional: true },
+              title: {
                 type: frString,
                 optional: true,
                 deprecated: true,
               },
-              { key: "xPoints", type: frArray(frNumber), optional: true }
-            ),
+              xPoints: { type: frArray(frNumber), optional: true },
+            }),
           }),
         ],
         frPlot,
@@ -219,13 +215,13 @@ const numericFnDef = () => {
       ),
       makeDefinition(
         [
-          frDict(
-            ["fn", fnType],
-            { key: "xScale", type: frScale, optional: true },
-            { key: "yScale", type: frScale, optional: true },
-            { key: "title", type: frString, optional: true, deprecated: true },
-            { key: "xPoints", type: frArray(frNumber), optional: true }
-          ),
+          frDict({
+            fn: fnType,
+            xScale: { type: frScale, optional: true },
+            yScale: { type: frScale, optional: true },
+            title: { type: frString, optional: true, deprecated: true },
+            xPoints: { type: frArray(frNumber), optional: true },
+          }),
         ],
         frPlot,
         ([{ fn, xScale, yScale, title, xPoints }]) => {
@@ -263,20 +259,18 @@ export const library = [
       makeDefinition(
         [
           namedInput("dist", frDist),
-          frInput({
+          frOptionalInput({
             name: "params",
-            type: frDict(
-              { key: "xScale", type: frScale, optional: true },
-              { key: "yScale", type: frScale, optional: true },
-              {
-                key: "title",
+            type: frDict({
+              xScale: { type: frScale, optional: true },
+              yScale: { type: frScale, optional: true },
+              title: {
                 type: frString,
                 optional: true,
                 deprecated: true,
               },
-              { key: "showSummary", type: frBool, optional: true }
-            ),
-            optional: true,
+              showSummary: { type: frBool, optional: true },
+            }),
           }),
         ],
         frPlot,
@@ -294,18 +288,17 @@ export const library = [
       ),
       makeDefinition(
         [
-          frDict(
-            ["dist", frDist],
-            { key: "xScale", type: frScale, optional: true },
-            { key: "yScale", type: frScale, optional: true },
-            {
-              key: "title",
+          frDict({
+            dist: frDist,
+            xScale: { type: frScale, optional: true },
+            yScale: { type: frScale, optional: true },
+            title: {
               type: frString,
               optional: true,
               deprecated: true,
             },
-            { key: "showSummary", type: frBool, optional: true }
-          ),
+            showSummary: { type: frBool, optional: true },
+          }),
         ],
         frPlot,
         ([{ dist, xScale, yScale, title, showSummary }]) => {
@@ -347,26 +340,21 @@ export const library = [
             frOr(
               frArray(frDistOrNumber),
               frArray(
-                frDict({ key: "name", type: frString, optional: true }, [
-                  "value",
-                  frDistOrNumber,
-                ])
+                frDict({
+                  name: { type: frString, optional: true },
+                  value: frDistOrNumber,
+                })
               )
             )
           ),
-          optionalInput(
-            frDict(
-              { key: "xScale", type: frScale, optional: true },
-              { key: "yScale", type: frScale, optional: true },
-              {
-                key: "title",
-                type: frString,
-                optional: true,
-                deprecated: true,
-              },
-              { key: "showSummary", type: frBool, optional: true }
-            )
-          ),
+          frOptionalInput({
+            type: frDict({
+              xScale: { type: frScale, optional: true },
+              yScale: { type: frScale, optional: true },
+              title: { type: frString, optional: true, deprecated: true },
+              showSummary: { type: frBool, optional: true },
+            }),
+          }),
         ],
         frPlot,
         ([dists, params]) => {
@@ -400,21 +388,17 @@ export const library = [
       ),
       makeDefinition(
         [
-          frDict(
-            [
-              "dists",
-              frArray(frDict(["name", frString], ["value", frDistOrNumber])),
-            ],
-            { key: "xScale", type: frScale, optional: true },
-            { key: "yScale", type: frScale, optional: true },
-            {
-              key: "title",
+          frDict({
+            dists: frArray(frDict({ name: frString, value: frDistOrNumber })),
+            xScale: { type: frScale, optional: true },
+            yScale: { type: frScale, optional: true },
+            title: {
               type: frString,
               optional: true,
               deprecated: true,
             },
-            { key: "showSummary", type: frBool, optional: true }
-          ),
+            showSummary: { type: frBool, optional: true },
+          }),
         ],
         frPlot,
         ([{ dists, xScale, yScale, title, showSummary }]) => {
@@ -460,26 +444,24 @@ export const library = [
       makeDefinition(
         [
           namedInput("fn", frTagged(frTypedLambda([tNumber], tDist))),
-          frInput({
+          frOptionalInput({
             name: "params",
-            type: frDict(
-              { key: "xScale", type: frScale, optional: true },
-              { key: "yScale", type: frScale, optional: true },
-              { key: "distXScale", type: frScale, optional: true },
-              {
-                key: "title",
+            type: frDict({
+              xScale: { type: frScale, optional: true },
+              yScale: { type: frScale, optional: true },
+              distXScale: { type: frScale, optional: true },
+              title: {
                 type: frString,
                 optional: true,
                 deprecated: true,
               },
-              { key: "xPoints", type: frArray(frNumber), optional: true }
-            ),
-            optional: true,
+              xPoints: { type: frArray(frNumber), optional: true },
+            }),
           }),
         ],
         frPlot,
         ([{ value, tags }, params]) => {
-          const domain = extractDomainFromOneArgFunction(value);
+          const domain = extractTypeFromOneArgFunction(value);
           const { xScale, yScale, distXScale, title, xPoints } = params ?? {};
           yScale && _assertYScaleNotDateScale(yScale);
           const _xScale = createScale(xScale || null, domain);
@@ -496,19 +478,19 @@ export const library = [
       ),
       makeDefinition(
         [
-          frDict(
-            ["fn", frTypedLambda([tNumber], tDist)],
-            { key: "distXScale", type: frScale, optional: true },
-            { key: "xScale", type: frScale, optional: true },
-            { key: "yScale", type: frScale, optional: true },
-            { key: "title", type: frString, optional: true, deprecated: true },
-            { key: "xPoints", type: frArray(frNumber), optional: true }
-          ),
+          frDict({
+            fn: frTypedLambda([tNumber], tDist),
+            distXScale: { type: frScale, optional: true },
+            xScale: { type: frScale, optional: true },
+            yScale: { type: frScale, optional: true },
+            title: { type: frString, optional: true, deprecated: true },
+            xPoints: { type: frArray(frNumber), optional: true },
+          }),
         ],
         frPlot,
         ([{ fn, xScale, yScale, distXScale, title, xPoints }]) => {
           _assertYScaleNotDateScale(yScale);
-          const domain = extractDomainFromOneArgFunction(fn);
+          const domain = extractTypeFromOneArgFunction(fn);
           const _xScale = createScale(xScale, domain);
           return {
             type: "distFn",
@@ -552,13 +534,13 @@ Plot.scatter({
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["xDist", frTagged(frSampleSetDist)],
-            ["yDist", frTagged(frSampleSetDist)],
-            { key: "xScale", type: frScale, optional: true },
-            { key: "yScale", type: frScale, optional: true },
-            { key: "title", type: frString, optional: true, deprecated: true }
-          ),
+          frDict({
+            xDist: frTagged(frSampleSetDist),
+            yDist: frTagged(frSampleSetDist),
+            xScale: { type: frScale, optional: true },
+            yScale: { type: frScale, optional: true },
+            title: { type: frString, optional: true, deprecated: true },
+          }),
         ],
         frPlot,
         ([{ xDist, yDist, xScale, yScale, title }]) => {

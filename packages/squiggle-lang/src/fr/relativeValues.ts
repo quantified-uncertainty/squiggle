@@ -18,11 +18,11 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
-const relativeValuesShape = frDict(
-  ["ids", frArray(frString)],
-  ["fn", frTypedLambda([tString, tString], tTuple(tDist, tDist))],
-  { key: "title", type: frString, optional: true, deprecated: true }
-);
+const relativeValuesShape = frDict({
+  ids: frArray(frString),
+  fn: frTypedLambda([tString, tString], tTuple(tDist, tDist)),
+  title: { type: frString, optional: true, deprecated: true },
+});
 
 export const library = [
   maker.make({

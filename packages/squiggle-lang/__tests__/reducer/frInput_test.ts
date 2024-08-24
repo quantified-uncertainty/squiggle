@@ -1,4 +1,8 @@
-import { frInput, namedInput } from "../../src/library/FrInput.js";
+import {
+  frInput,
+  frOptionalInput,
+  namedInput,
+} from "../../src/library/FrInput.js";
 import { frNumber } from "../../src/library/FrType.js";
 
 describe("fnInput", () => {
@@ -8,10 +12,9 @@ describe("fnInput", () => {
   });
 
   test("named with optional", () => {
-    const input = frInput({
+    const input = frOptionalInput({
       name: "TestNumber",
       type: frNumber,
-      optional: true,
     });
     expect(input.toString()).toBe("TestNumber?: Number");
   });
@@ -22,7 +25,7 @@ describe("fnInput", () => {
   });
 
   test("unnamed with optional", () => {
-    const input = frInput({ type: frNumber, optional: true });
+    const input = frOptionalInput({ type: frNumber });
     expect(input.toString()).toBe("Number?");
   });
 });

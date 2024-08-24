@@ -1,5 +1,5 @@
 import { ErrorMessage } from "../errors/messages.js";
-import { frInput } from "../library/FrInput.js";
+import { frInput, frOptionalInput } from "../library/FrInput.js";
 import {
   frAny,
   frBool,
@@ -62,7 +62,7 @@ myFn = typeOf({|e| e})`,
       makeDefinition(
         [
           frAny({ genericName: "A" }),
-          frInput({ name: "message", type: frString, optional: true }),
+          frOptionalInput({ name: "message", type: frString }),
         ],
         frAny({ genericName: "A" }),
         ([value, message]) => {
@@ -78,7 +78,7 @@ myFn = typeOf({|e| e})`,
       "Throws an error. You can use `try` to recover from this error.",
     definitions: [
       makeDefinition(
-        [frInput({ name: "message", optional: true, type: frString })],
+        [frOptionalInput({ name: "message", type: frString })],
         frAny(),
         ([value]) => {
           throw ErrorMessage.userThrowError(

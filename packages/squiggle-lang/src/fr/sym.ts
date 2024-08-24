@@ -41,7 +41,7 @@ function makeCISymDist<K1 extends string, K2 extends string>(
   fn: (low: number, high: number) => SymDistResult
 ) {
   return makeDefinition(
-    [frDict([lowKey, frNumber], [highKey, frNumber])],
+    [frDict({ [lowKey]: frNumber, [highKey]: frNumber })],
     frSymbolicDist,
     ([dict]) => unwrapSymDistResult(fn(dict[lowKey], dict[highKey]))
   );
@@ -54,7 +54,7 @@ function makeMeanStdevSymDist(
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
   return makeDefinition(
-    [frDict(["mean", frNumber], ["stdev", frNumber])],
+    [frDict({ mean: frNumber, stdev: frNumber })],
     frSymbolicDist,
     ([{ mean, stdev }]) => unwrapSymDistResult(fn(mean, stdev))
   );

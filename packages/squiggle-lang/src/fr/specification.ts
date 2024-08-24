@@ -45,11 +45,11 @@ myEstimate(t: [Date(2020), Date(2030)]) = normal(10, 3)`,
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["name", frString],
-            ["documentation", frString],
-            ["validate", frLambda]
-          ),
+          frDict({
+            name: frString,
+            documentation: frString,
+            validate: frLambda,
+          }),
         ],
         frSpecification,
         ([{ name, documentation, validate }]) => ({

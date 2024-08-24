@@ -35,27 +35,19 @@ import { tAny, Type } from "./Type.js";
 
 export type SerializedType =
   | {
-      kind: "Intrinsic";
-      valueType: IntrinsicValueType;
-    }
-  | {
       kind: "Any";
       genericName?: string;
     }
   | {
-      kind: "Tuple";
-      types: number[];
+      kind: "Intrinsic";
+      valueType: IntrinsicValueType;
     }
   | {
       kind: "Array";
       itemType: number;
     }
   | {
-      kind: "DictWithArbitraryKeys";
-      itemType: number;
-    }
-  | {
-      kind: "Union";
+      kind: "Tuple";
       types: number[];
     }
   | {
@@ -66,6 +58,14 @@ export type SerializedType =
           type: number;
         }
       >;
+    }
+  | {
+      kind: "DictWithArbitraryKeys";
+      itemType: number;
+    }
+  | {
+      kind: "Union";
+      types: number[];
     }
   | {
       kind: "NumberRange";
@@ -92,6 +92,8 @@ export function deserializeType(
   visit: SquiggleDeserializationVisitor
 ): Type {
   switch (type.kind) {
+    case "Any":
+      return tAny({ genericName: type.genericName });
     case "Intrinsic":
       switch (type.valueType) {
         case "Bool":
@@ -123,18 +125,10 @@ export function deserializeType(
         default:
           throw type.valueType satisfies never;
       }
-    case "Any":
-      return tAny({ genericName: type.genericName });
-    case "NumberRange":
-      return new TNumberRange(type.min, type.max);
-    case "DateRange":
-      return new TDateRange(SDate.fromMs(type.min), SDate.fromMs(type.max));
     case "Array":
       return tArray(visit.type(type.itemType));
     case "Tuple":
       return tTuple(...type.types.map((t) => visit.type(t)));
-    case "Union":
-      return tUnion(type.types.map(visit.type));
     case "Dict":
       return tDict(
         Object.fromEntries(
@@ -149,6 +143,12 @@ export function deserializeType(
       );
     case "DictWithArbitraryKeys":
       return tDictWithArbitraryKeys(visit.type(type.itemType));
+    case "Union":
+      return tUnion(type.types.map(visit.type));
+    case "NumberRange":
+      return new TNumberRange(type.min, type.max);
+    case "DateRange":
+      return new TDateRange(SDate.fromMs(type.min), SDate.fromMs(type.max));
     case "Dist":
       return type.distClass === "PointSet"
         ? tPointSetDist

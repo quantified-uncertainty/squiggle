@@ -2,7 +2,7 @@ import { BaseDist } from "../dists/BaseDist.js";
 import { argumentError } from "../dists/DistError.js";
 import * as distOperations from "../dists/distOperations/index.js";
 import { ErrorMessage } from "../errors/messages.js";
-import { frInput } from "../library/FrInput.js";
+import { frOptionalInput } from "../library/FrInput.js";
 import {
   frArray,
   frDist,
@@ -43,7 +43,7 @@ function mixtureWithDefaultWeights(
 const asArrays = makeDefinition(
   [
     frArray(frDistOrNumber),
-    frInput({ name: "weights", type: frArray(frNumber), optional: true }),
+    frOptionalInput({ name: "weights", type: frArray(frNumber) }),
   ],
   frDist,
   ([dists, weights], reducer) => {
@@ -77,10 +77,9 @@ const asArguments = [
     [
       frDistOrNumber,
       frDistOrNumber,
-      frInput({
+      frOptionalInput({
         name: "weights",
         type: frTuple(frNumber, frNumber),
-        optional: true,
       }),
     ],
     frDist,
@@ -101,10 +100,9 @@ const asArguments = [
       frDistOrNumber,
       frDistOrNumber,
       frDistOrNumber,
-      frInput({
+      frOptionalInput({
         name: "weights",
         type: frTuple(frNumber, frNumber, frNumber),
-        optional: true,
       }),
     ],
     frDist,
@@ -126,10 +124,9 @@ const asArguments = [
       frDistOrNumber,
       frDistOrNumber,
       frDistOrNumber,
-      frInput({
+      frOptionalInput({
         name: "weights",
         type: frTuple(frNumber, frNumber, frNumber, frNumber),
-        optional: true,
       }),
     ],
     frDist,
@@ -152,10 +149,9 @@ const asArguments = [
       frDistOrNumber,
       frDistOrNumber,
       frDistOrNumber,
-      frInput({
+      frOptionalInput({
         name: "weights",
         type: frTuple(frNumber, frNumber, frNumber, frNumber, frNumber),
-        optional: true,
       }),
     ],
     frDist,

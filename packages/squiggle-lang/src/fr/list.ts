@@ -3,7 +3,7 @@ import minBy from "lodash/minBy.js";
 import sortBy from "lodash/sortBy.js";
 
 import { ErrorMessage } from "../errors/messages.js";
-import { frInput, namedInput } from "../library/FrInput.js";
+import { frOptionalInput, namedInput } from "../library/FrInput.js";
 import {
   frAny,
   frArray,
@@ -393,7 +393,7 @@ export const library = [
         [
           frArray(frAny({ genericName: "A" })),
           namedInput("startIndex", frNumber),
-          frInput({ name: "endIndex", type: frNumber, optional: true }),
+          frOptionalInput({ name: "endIndex", type: frNumber }),
         ],
         frArray(frAny({ genericName: "A" })),
         ([array, start, end]) => {
@@ -721,7 +721,7 @@ List.reduceWhile(
       makeDefinition(
         [
           frArray(frString),
-          frInput({ name: "separator", type: frString, optional: true }),
+          frOptionalInput({ name: "separator", type: frString }),
         ],
         frString,
         ([array, joinStr]) => array.join(joinStr ?? ",")

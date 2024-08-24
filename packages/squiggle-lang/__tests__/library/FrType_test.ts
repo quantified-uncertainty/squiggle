@@ -72,7 +72,7 @@ describe("frDict", () => {
         ["bar", vString(dict.bar)],
       ])
     );
-    const t = frDict(["foo", frNumber], ["bar", frString]);
+    const t = frDict({ foo: frNumber, bar: frString });
 
     expect(t.unpack(v)).toEqual(dict);
     expect(t.pack(dict)).toEqual(v);
@@ -89,10 +89,13 @@ describe("frDict", () => {
         ["bar", vString(dict.bar)],
       ])
     );
-    const t = frDict(["foo", frNumber], ["bar", frString], {
-      key: "baz",
-      type: frString,
-      optional: true,
+    const t = frDict({
+      foo: frNumber,
+      bar: frString,
+      baz: {
+        type: frString,
+        optional: true,
+      },
     });
 
     expect(t.unpack(v)).toEqual(dict);

@@ -15,6 +15,7 @@ import {
   tTuple,
   tTypedLambda,
 } from "../types/index.js";
+import { DictShape } from "../types/TDict.js";
 import {
   TDist,
   tPointSetDist,
@@ -87,7 +88,7 @@ import { fnInputsMatchesLengths } from "./registry/helpers.js";
  * because values can be tagged and we don't know when tag information should be
  * preserved.
  */
-export type FrType<T> = {
+export type FrType<T = unknown> = {
   type: Type;
   unpack: (value: Value) => T | undefined;
   pack: (value: T) => Value;
@@ -297,69 +298,52 @@ export function frTuple<T extends readonly FrType<any>[]>(
   };
 }
 
-type OptionalType<T extends FrType<unknown>> = FrType<UnwrapFrType<T> | null>;
-
-export type DetailedEntry<K extends string, V extends FrType<any>> = {
-  key: K;
+export type DetailedFrDictShapeEntry<V extends FrType<any>> = Partial<
+  Omit<DictShape[string], "type">
+> & {
   type: V;
-  optional?: boolean;
-  deprecated?: boolean;
 };
 
-type SimpleEntry<K extends string, V extends FrType<any>> = [K, V];
+type FrDictShapeEntry<V extends FrType<any>> = DetailedFrDictShapeEntry<V> | V;
 
-type DictEntry<K extends string, V extends FrType<any>> =
-  | DetailedEntry<K, V>
-  | SimpleEntry<K, V>;
+type BaseFrDictShape = Record<string, FrDictShapeEntry<FrType<any>>>;
 
-export type DictEntryKey<T extends DictEntry<any, any>> =
-  T extends DetailedEntry<infer K, any>
-    ? K
-    : T extends SimpleEntry<infer K, any>
-      ? K
+type DetailedFrDictShape = Record<string, DetailedFrDictShapeEntry<any>>;
+
+type UnwrapFrDictShape<T extends BaseFrDictShape> = {
+  [Key in keyof T]: T[Key] extends FrType<any>
+    ? UnwrapFrType<T[Key]>
+    : T[Key] extends DetailedFrDictShapeEntry<infer F>
+      ? T[Key]["optional"] extends true
+        ? UnwrapFrType<F> | null
+        : UnwrapFrType<F>
       : never;
-
-type DictEntryType<T extends DictEntry<any, any>> =
-  T extends DetailedEntry<any, infer Type>
-    ? T extends { optional: true }
-      ? OptionalType<Type>
-      : Type
-    : T extends SimpleEntry<any, infer Type>
-      ? Type
-      : never;
-
-type BaseKVList = DictEntry<any, FrType<any>>[];
-
-// The complex generic type here allows us to construct the correct type parameter based on the input types.
-type KVListToDict<KVList extends BaseKVList> = {
-  [Key in DictEntryKey<KVList[number]>]: UnwrapFrType<
-    DictEntryType<Extract<KVList[number], [Key, unknown] | { key: Key }>>
-  >;
 };
 
-export function frDict<const KVList extends BaseKVList>(
-  // TODO - array -> record
-  ...allKvs: [...{ [K in keyof KVList]: KVList[K] }]
-): FrType<KVListToDict<KVList>> {
-  const kvs = allKvs.map(
-    (kv): DetailedEntry<string, FrType<unknown>> =>
-      "key" in kv
-        ? kv
-        : {
-            key: kv[0],
-            type: kv[1],
+export function frDict<const Shape extends BaseFrDictShape>(
+  shape: Shape
+): FrType<UnwrapFrDictShape<Shape>> {
+  const detailedShape: DetailedFrDictShape = Object.fromEntries(
+    Object.entries(shape).map(([key, value]) => [
+      key,
+      value["type"] instanceof Type
+        ? {
+            type: value as FrType<any>,
             optional: false,
             deprecated: false,
           }
+        : (value as DetailedFrDictShapeEntry<any>),
+    ])
   );
+
   const type = tDict(
     Object.fromEntries(
-      kvs.map((kv) => [
-        kv.key,
+      Object.entries(detailedShape).map(([key, value]) => [
+        key,
         {
-          type: kv.type.type,
-          deprecated: kv.deprecated ?? false,
-          optional: kv.optional ?? false,
+          type: value.type.type,
+          deprecated: value.deprecated ?? false,
+          optional: value.optional ?? false,
         },
       ])
     )
@@ -368,49 +352,51 @@ export function frDict<const KVList extends BaseKVList>(
   return {
     type,
     unpack(v: Value) {
-      // extra keys are allowed
-
       if (v.type !== "Dict") {
         return undefined;
       }
       const r = v.value;
 
-      const result: { [k: string]: any } = {};
+      const result: { [k: string]: unknown } = {};
 
-      for (const kv of kvs) {
-        const subvalue = r.get(kv.key);
+      // extra keys are allowed but not unpacked
+      for (const [key, entry] of Object.entries(detailedShape)) {
+        const subvalue = r.get(key);
         if (subvalue === undefined) {
-          if (kv.optional) {
+          if (entry.optional) {
             // that's ok!
+            // result[key] = null; // TODO? this would match the behavior of `pack`
             continue;
           }
           return undefined;
         }
-        const unpackedSubvalue = kv.type.unpack(subvalue);
+        const unpackedSubvalue = entry.type.unpack(subvalue);
         if (unpackedSubvalue === undefined) {
           return undefined;
         }
-        result[kv.key] = unpackedSubvalue;
+        result[key] = unpackedSubvalue;
       }
-      return result as KVListToDict<KVList>; // that's ok, we've checked the types in the class type
+      return result as UnwrapFrDictShape<Shape>;
     },
 
-    pack(v: KVListToDict<KVList>) {
+    pack(v: UnwrapFrDictShape<Shape>) {
       return vDict(
         ImmutableMap(
-          kvs
-            .filter((kv) => !kv.optional || (v as any)[kv.key] !== null)
-            .map((kv) => [kv.key, kv.type.pack((v as any)[kv.key])])
+          Object.entries(detailedShape)
+            .filter(
+              ([key, entry]) => !entry.optional || (v as any)[key] !== null
+            )
+            .map(([key, entry]) => [key, entry.type.pack((v as any)[key])])
         )
       );
     },
   };
 }
 
-export const frMixedSet = frDict(
-  ["points", frArray(frNumber)],
-  ["segments", frArray(frTuple(frNumber, frNumber))]
-);
+export const frMixedSet = frDict({
+  points: frArray(frNumber),
+  segments: frArray(frTuple(frNumber, frNumber)),
+});
 
 export function frTypedLambda(
   maybeInputs: (FnInput | Type)[],

@@ -43,11 +43,11 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["name", frString],
-            { key: "description", type: frString, optional: true },
-            { key: "default", type: frOr(frNumber, frString), optional: true }
-          ),
+          frDict({
+            name: frString,
+            description: { type: frString, optional: true },
+            default: { type: frOr(frNumber, frString), optional: true },
+          }),
         ],
         frFormInput,
         ([vars]) => {
@@ -74,11 +74,11 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["name", frString],
-            { key: "description", type: frString, optional: true },
-            { key: "default", type: frOr(frNumber, frString), optional: true }
-          ),
+          frDict({
+            name: frString,
+            description: { type: frString, optional: true },
+            default: { type: frOr(frNumber, frString), optional: true },
+          }),
         ],
         frFormInput,
         ([vars]) => {
@@ -101,11 +101,11 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["name", frString],
-            { key: "description", type: frString, optional: true },
-            { key: "default", type: frBool, optional: true }
-          ),
+          frDict({
+            name: frString,
+            description: { type: frString, optional: true },
+            default: { type: frBool, optional: true },
+          }),
         ],
         frFormInput,
         ([vars]) => {
@@ -130,12 +130,12 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["name", frString],
-            ["options", frArray(frString)],
-            { key: "description", type: frString, optional: true },
-            { key: "default", type: frString, optional: true }
-          ),
+          frDict({
+            name: frString,
+            options: frArray(frString),
+            description: { type: frString, optional: true },
+            default: { type: frString, optional: true },
+          }),
         ],
         frFormInput,
         ([vars]) => {

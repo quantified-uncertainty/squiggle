@@ -1,6 +1,6 @@
 import maxBy from "lodash/maxBy.js";
 
-import { frInput } from "../library/FrInput.js";
+import { frOptionalInput } from "../library/FrInput.js";
 import {
   frArray,
   frBool,
@@ -90,14 +90,14 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["fn", frLambda],
-            { key: "title", type: frString, optional: true },
-            { key: "description", type: frString, optional: true },
-            { key: "inputs", type: frArray(frFormInput), optional: true },
-            { key: "autorun", type: frBool, optional: true },
-            { key: "sampleCount", type: frNumber, optional: true }
-          ),
+          frDict({
+            fn: frLambda,
+            title: { type: frString, optional: true },
+            description: { type: frString, optional: true },
+            inputs: { type: frArray(frFormInput), optional: true },
+            autorun: { type: frBool, optional: true },
+            sampleCount: { type: frNumber, optional: true },
+          }),
         ],
         frCalculator,
         ([{ fn, title, description, inputs, autorun, sampleCount }]) =>
@@ -113,16 +113,15 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
       makeDefinition(
         [
           frTagged(frLambda),
-          frInput({
+          frOptionalInput({
             name: "params",
-            optional: true,
-            type: frDict(
-              { key: "title", type: frString, optional: true },
-              { key: "description", type: frString, optional: true },
-              { key: "inputs", type: frArray(frFormInput), optional: true },
-              { key: "autorun", type: frBool, optional: true },
-              { key: "sampleCount", type: frNumber, optional: true }
-            ),
+            type: frDict({
+              title: { type: frString, optional: true },
+              description: { type: frString, optional: true },
+              inputs: { type: frArray(frFormInput), optional: true },
+              autorun: { type: frBool, optional: true },
+              sampleCount: { type: frNumber, optional: true },
+            }),
           }),
         ],
         frCalculator,

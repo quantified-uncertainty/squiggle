@@ -1,21 +1,20 @@
 import { FnInput } from "../reducer/lambda/FnInput.js";
-import { FrType, UnwrapFrType } from "./FrType.js";
+import { FrType } from "./FrType.js";
 
 type Props<T> = {
   name?: string;
-  optional?: boolean;
   type: FrType<T>;
 };
 
-export class FrInput<T> {
+export class FrInput<IsOptional extends boolean, Unpacked = unknown> {
   readonly name: string | undefined;
-  readonly optional: boolean;
-  readonly type: FrType<T>;
+  readonly optional: IsOptional;
+  readonly type: FrType<Unpacked>;
 
-  constructor(props: Props<T>) {
+  constructor(props: Props<Unpacked>, optional: IsOptional) {
     this.name = props.name;
-    this.optional = props.optional ?? false;
     this.type = props.type;
+    this.optional = optional;
   }
 
   toFnInput() {
@@ -31,20 +30,23 @@ export class FrInput<T> {
   }
 }
 
-export function frInput<const T extends Props<any>>(props: T) {
-  return new FrInput<UnwrapFrType<T["type"]>>(props);
+// `frInput` and `frOptionalInput` are separate, because we really care about type inference based on the optional flag.
+export function frInput<const T>(props: Props<T>) {
+  return new FrInput(props, false);
 }
 
-export function optionalInput<T>(type: FrType<T>) {
-  return new FrInput({
-    type,
-    optional: true,
-  });
+// If `frOptionalInput` is used, the function definition's parameter will be inferred to `T | null`.
+export function frOptionalInput<const T>(props: Props<T>) {
+  return new FrInput(props, true);
 }
 
+// shortcut for named input
 export function namedInput<T>(name: string, type: FrType<T>) {
-  return new FrInput({
-    type,
-    name,
-  });
+  return new FrInput(
+    {
+      type,
+      name,
+    },
+    false
+  );
 }
