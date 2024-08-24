@@ -331,35 +331,12 @@ testSuite = sTest.describe(
       {
         ||
         meanValue = mean(flightCost)
-        sTest.expect(meanValue).toBeLessThan(10k) && sTest.expect(meanValue).toBeGreaterThan(300)
+        sTest.expect(meanValue).toBeBetween(300, 10k)
       }
     ),
   ]
 )
 
-```
-
-## sTest Library
-
-### Available Matchers
-
-- `toBe(expected)`: Checks for exact equality
-- `toBeGreaterThan(expected)`: Checks if the actual value is greater than the expected
-- `toBeGreaterThanOrEqual(expected)`: Checks if the actual value is greater or equal than the expected
-- `toBeLessThan(expected)`: Checks if the actual value is less than the expected
-- `toBeLessThanOrEqual(expected)`: Checks if the actual value is less than or equal than the expected
-- `toBeTrue()`: Checks if the value is true
-- `toBeFalse()`: Checks if the value is false
-- `toBeCloseTo(expected, epsilon)`: Checks if the actual value is close to the expected value within a given epsilon.
-- `toBeBetween(low, high)`: Checks if the actual value is between the given low and high values (inclusive).
-
-```squiggle
-import "hub:ozziegooen/sTest" as sTest
-
-myTestSuite = sTest.describe("My Test Suite", [
-  sTest.test("First test", {|| sTest.expect(true).toBeTrue() && sTest.expect(false).toBeFalse()}),
-  sTest.test("Second test", {|| sTest.expect(5).toBeGreaterThan(3)})
-])
 ```
 
 # Language Features

@@ -35,9 +35,9 @@ export interface LlmConfig {
 
 export const llmConfigDefault: LlmConfig = {
   // llmName: "Claude-Haiku",
-  // llmName: "Claude-Sonnet",
+  llmName: "Claude-Sonnet",
   // llmName: "GPT4-mini",
-  llmName: "GPT4",
+  // llmName: "GPT4",
   priceLimit: 0.2,
   durationLimitMinutes: 1,
   messagesInHistoryToKeep: 4,
