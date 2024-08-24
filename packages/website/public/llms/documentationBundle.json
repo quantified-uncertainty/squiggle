@@ -3,23 +3,12 @@
     {
       "name": "Common",
       "description": "",
-      "functionNames": [
-        "equal",
-        "unequal",
-        "typeOf",
-        "inspect",
-        "throw",
-        "try"
-      ]
+      "functionNames": ["equal", "unequal", "typeOf", "inspect", "throw", "try"]
     },
     {
       "name": "Boolean",
       "description": "",
-      "functionNames": [
-        "or",
-        "and",
-        "not"
-      ]
+      "functionNames": ["or", "and", "not"]
     },
     {
       "name": "Date",
@@ -228,15 +217,7 @@
     {
       "name": "Math",
       "description": "Simple constants and functions for math in Squiggle.",
-      "functionNames": [
-        "sqrt",
-        "sin",
-        "cos",
-        "tan",
-        "asin",
-        "acos",
-        "atan"
-      ]
+      "functionNames": ["sqrt", "sin", "cos", "tan", "asin", "acos", "atan"]
     },
     {
       "name": "MixedSet",
@@ -256,13 +237,7 @@
     {
       "name": "Plot",
       "description": "",
-      "functionNames": [
-        "dist",
-        "dists",
-        "numericFn",
-        "distFn",
-        "scatter"
-      ]
+      "functionNames": ["dist", "dists", "numericFn", "distFn", "scatter"]
     },
     {
       "name": "Number",
@@ -305,44 +280,27 @@
     {
       "name": "Scale",
       "description": "Scales for plots.",
-      "functionNames": [
-        "linear",
-        "log",
-        "symlog",
-        "power",
-        "date"
-      ]
+      "functionNames": ["linear", "log", "symlog", "power", "date"]
     },
     {
       "name": "Spec",
       "description": "Function Specifications",
-      "functionNames": [
-        "make"
-      ]
+      "functionNames": ["make"]
     },
     {
       "name": "String",
       "description": "Functions for working with strings in Squiggle",
-      "functionNames": [
-        "make",
-        "concat",
-        "add",
-        "split"
-      ]
+      "functionNames": ["make", "concat", "add", "split"]
     },
     {
       "name": "Table",
       "description": "Tables are a simple date time type.",
-      "functionNames": [
-        "make"
-      ]
+      "functionNames": ["make"]
     },
     {
       "name": "System",
       "description": "",
-      "functionNames": [
-        "sampleCount"
-      ]
+      "functionNames": ["sampleCount"]
     },
     {
       "name": "Tag",
@@ -376,26 +334,17 @@
     {
       "name": "Calculator",
       "description": "The Calculator module helps you create custom calculators",
-      "functionNames": [
-        "make"
-      ]
+      "functionNames": ["make"]
     },
     {
       "name": "Input",
       "description": "Inputs are now only used for describing forms for calculators.",
-      "functionNames": [
-        "text",
-        "textArea",
-        "checkbox",
-        "select"
-      ]
+      "functionNames": ["text", "textArea", "checkbox", "select"]
     },
     {
       "name": "RelativeValues",
       "description": "",
-      "functionNames": [
-        "gridPlot"
-      ]
+      "functionNames": ["gridPlot"]
     },
     {
       "name": "Danger",
@@ -425,9 +374,7 @@
       "name": "equal",
       "namespace": "Common",
       "requiresNamespace": false,
-      "signatures": [
-        "(any, any) => Bool"
-      ],
+      "signatures": ["(any, any) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": "=="
@@ -439,9 +386,7 @@
       "name": "unequal",
       "namespace": "Common",
       "requiresNamespace": false,
-      "signatures": [
-        "(any, any) => Bool"
-      ],
+      "signatures": ["(any, any) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": "!="
@@ -452,9 +397,7 @@
       "name": "typeOf",
       "namespace": "Common",
       "requiresNamespace": false,
-      "signatures": [
-        "(any) => String"
-      ],
+      "signatures": ["(any) => String"],
       "isUnit": false,
       "description": "Returns the type of the value passed in as a string. This is useful when you want to treat a value differently depending on its type.",
       "examples": [
@@ -469,9 +412,7 @@
       "name": "inspect",
       "namespace": "Common",
       "requiresNamespace": false,
-      "signatures": [
-        "('A, message?: String) => 'A"
-      ],
+      "signatures": ["('A, message?: String) => 'A"],
       "isUnit": false,
       "description": "Runs Console.log() in the [Javascript developer console](https://www.digitalocean.com/community/tutorials/how-to-use-the-javascript-developer-console) and returns the value passed in."
     },
@@ -479,9 +420,7 @@
       "name": "throw",
       "namespace": "Common",
       "requiresNamespace": false,
-      "signatures": [
-        "(message: String?) => any"
-      ],
+      "signatures": ["(message: String?) => any"],
       "isUnit": false,
       "description": "Throws an error. You can use `try` to recover from this error."
     },
@@ -489,9 +428,7 @@
       "name": "try",
       "namespace": "Common",
       "requiresNamespace": false,
-      "signatures": [
-        "(fn: () => 'A, fallbackFn: () => 'B) => 'A|'B"
-      ],
+      "signatures": ["(fn: () => 'A, fallbackFn: () => 'B) => 'A|'B"],
       "isUnit": false,
       "description": "Try to run a function and return its result. If the function throws an error, return the result of the fallback function instead."
     },
@@ -499,9 +436,7 @@
       "name": "or",
       "namespace": "Boolean",
       "requiresNamespace": false,
-      "signatures": [
-        "(Bool, Bool) => Bool"
-      ],
+      "signatures": ["(Bool, Bool) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": "||"
@@ -512,9 +447,7 @@
       "name": "and",
       "namespace": "Boolean",
       "requiresNamespace": false,
-      "signatures": [
-        "(Bool, Bool) => Bool"
-      ],
+      "signatures": ["(Bool, Bool) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": "&&"
@@ -525,9 +458,7 @@
       "name": "not",
       "namespace": "Boolean",
       "requiresNamespace": false,
-      "signatures": [
-        "(Bool) => Bool"
-      ],
+      "signatures": ["(Bool) => Bool"],
       "shorthand": {
         "type": "unary",
         "symbol": "!"
@@ -556,9 +487,7 @@
       "name": "fromUnixTime",
       "namespace": "Date",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number) => Date"
-      ],
+      "signatures": ["(Number) => Date"],
       "isUnit": false,
       "examples": [
         {
@@ -572,9 +501,7 @@
       "name": "toUnixTime",
       "namespace": "Date",
       "requiresNamespace": true,
-      "signatures": [
-        "(Date) => Number"
-      ],
+      "signatures": ["(Date) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -588,9 +515,7 @@
       "name": "subtract",
       "namespace": "Date",
       "requiresNamespace": false,
-      "signatures": [
-        "(Date, Date) => Duration"
-      ],
+      "signatures": ["(Date, Date) => Duration"],
       "shorthand": {
         "type": "infix",
         "symbol": "-"
@@ -608,9 +533,7 @@
       "name": "subtract",
       "namespace": "Date",
       "requiresNamespace": false,
-      "signatures": [
-        "(Date, Date) => Duration"
-      ],
+      "signatures": ["(Date, Date) => Duration"],
       "shorthand": {
         "type": "infix",
         "symbol": "-"
@@ -628,10 +551,7 @@
       "name": "add",
       "namespace": "Date",
       "requiresNamespace": false,
-      "signatures": [
-        "(Date, Duration) => Date",
-        "(Duration, Date) => Date"
-      ],
+      "signatures": ["(Date, Duration) => Date", "(Duration, Date) => Date"],
       "shorthand": {
         "type": "infix",
         "symbol": "+"
@@ -654,9 +574,7 @@
       "name": "smaller",
       "namespace": "Date",
       "requiresNamespace": false,
-      "signatures": [
-        "(Date, Date) => Bool"
-      ],
+      "signatures": ["(Date, Date) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": "<"
@@ -667,9 +585,7 @@
       "name": "larger",
       "namespace": "Date",
       "requiresNamespace": false,
-      "signatures": [
-        "(Date, Date) => Bool"
-      ],
+      "signatures": ["(Date, Date) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": ">"
@@ -680,9 +596,7 @@
       "name": "smallerEq",
       "namespace": "Date",
       "requiresNamespace": false,
-      "signatures": [
-        "(Date, Date) => Bool"
-      ],
+      "signatures": ["(Date, Date) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": "<="
@@ -693,9 +607,7 @@
       "name": "largerEq",
       "namespace": "Date",
       "requiresNamespace": false,
-      "signatures": [
-        "(Date, Date) => Bool"
-      ],
+      "signatures": ["(Date, Date) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": ">="
@@ -706,9 +618,7 @@
       "name": "rangeDomain",
       "namespace": "Date",
       "requiresNamespace": true,
-      "signatures": [
-        "(min: Date, min: Date) => Domain"
-      ],
+      "signatures": ["(min: Date, min: Date) => Domain"],
       "isUnit": false,
       "examples": [
         {
@@ -722,9 +632,7 @@
       "name": "toList",
       "namespace": "Dict",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dict('A)) => List([String, 'A])"
-      ],
+      "signatures": ["(Dict('A)) => List([String, 'A])"],
       "isUnit": false,
       "examples": [
         {
@@ -738,9 +646,7 @@
       "name": "fromList",
       "namespace": "Dict",
       "requiresNamespace": true,
-      "signatures": [
-        "(List([String, 'A])) => Dict('A)"
-      ],
+      "signatures": ["(List([String, 'A])) => Dict('A)"],
       "isUnit": false,
       "examples": [
         {
@@ -754,9 +660,7 @@
       "name": "set",
       "namespace": "Dict",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dict('A), key: String, value: 'A) => Dict('A)"
-      ],
+      "signatures": ["(Dict('A), key: String, value: 'A) => Dict('A)"],
       "isUnit": false,
       "description": "Creates a new dictionary that includes the added element, while leaving the original dictionary unaltered.",
       "examples": [
@@ -771,9 +675,7 @@
       "name": "delete",
       "namespace": "Dict",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dict('A), key: String) => Dict('A)"
-      ],
+      "signatures": ["(Dict('A), key: String) => Dict('A)"],
       "isUnit": false,
       "description": "Creates a new dictionary that excludes the deleted element.",
       "examples": [
@@ -788,9 +690,7 @@
       "name": "merge",
       "namespace": "Dict",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dict(any), Dict(any)) => Dict(any)"
-      ],
+      "signatures": ["(Dict(any), Dict(any)) => Dict(any)"],
       "isUnit": false,
       "examples": [
         {
@@ -804,9 +704,7 @@
       "name": "mergeMany",
       "namespace": "Dict",
       "requiresNamespace": true,
-      "signatures": [
-        "(List(Dict(any))) => Dict(any)"
-      ],
+      "signatures": ["(List(Dict(any))) => Dict(any)"],
       "isUnit": false,
       "examples": [
         {
@@ -820,9 +718,7 @@
       "name": "map",
       "namespace": "Dict",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dict('A), fn: ('A) => 'B) => Dict('B)"
-      ],
+      "signatures": ["(Dict('A), fn: ('A) => 'B) => Dict('B)"],
       "isUnit": false,
       "examples": [
         {
@@ -836,9 +732,7 @@
       "name": "mapKeys",
       "namespace": "Dict",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dict('A), fn: (String) => String) => Dict('A)"
-      ],
+      "signatures": ["(Dict('A), fn: (String) => String) => Dict('A)"],
       "isUnit": false,
       "examples": [
         {
@@ -852,9 +746,7 @@
       "name": "omit",
       "namespace": "Dict",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dict('A), List(String)) => keys: Dict('A)"
-      ],
+      "signatures": ["(Dict('A), List(String)) => keys: Dict('A)"],
       "isUnit": false,
       "description": "Creates a new dictionary that excludes the omitted keys.",
       "examples": [
@@ -869,9 +761,7 @@
       "name": "has",
       "namespace": "Dict",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dict(any), key: String) => Bool"
-      ],
+      "signatures": ["(Dict(any), key: String) => Bool"],
       "isUnit": false,
       "examples": [
         {
@@ -885,9 +775,7 @@
       "name": "size",
       "namespace": "Dict",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dict(any)) => Number"
-      ],
+      "signatures": ["(Dict(any)) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -901,9 +789,7 @@
       "name": "keys",
       "namespace": "Dict",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dict(any)) => List(String)"
-      ],
+      "signatures": ["(Dict(any)) => List(String)"],
       "isUnit": false,
       "examples": [
         {
@@ -917,9 +803,7 @@
       "name": "values",
       "namespace": "Dict",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dict('A)) => List('A)"
-      ],
+      "signatures": ["(Dict('A)) => List('A)"],
       "isUnit": false,
       "examples": [
         {
@@ -933,9 +817,7 @@
       "name": "pick",
       "namespace": "Dict",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dict('A), keys: List(String)) => Dict('A)"
-      ],
+      "signatures": ["(Dict('A), keys: List(String)) => Dict('A)"],
       "isUnit": false,
       "description": "Creates a new dictionary that only includes the picked keys.",
       "examples": [
@@ -950,10 +832,7 @@
       "name": "make",
       "namespace": "Dist",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dist) => Dist",
-        "(Number) => SymbolicDist"
-      ],
+      "signatures": ["(Dist) => Dist", "(Number) => SymbolicDist"],
       "isUnit": false,
       "examples": [
         {
@@ -1106,9 +985,7 @@
       "name": "uniform",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(low: Dist|Number, high: Dist|Number) => SampleSetDist"
-      ],
+      "signatures": ["(low: Dist|Number, high: Dist|Number) => SampleSetDist"],
       "isUnit": false,
       "examples": [
         {
@@ -1192,9 +1069,7 @@
       "name": "to",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(p5: Dist|Number, p95: Dist|Number) => SampleSetDist"
-      ],
+      "signatures": ["(p5: Dist|Number, p95: Dist|Number) => SampleSetDist"],
       "shorthand": {
         "type": "infix",
         "symbol": "to"
@@ -1218,9 +1093,7 @@
       "name": "exponential",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(rate: Dist|Number) => SampleSetDist"
-      ],
+      "signatures": ["(rate: Dist|Number) => SampleSetDist"],
       "isUnit": false,
       "examples": [
         {
@@ -1234,9 +1107,7 @@
       "name": "bernoulli",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(p: Dist|Number) => SampleSetDist"
-      ],
+      "signatures": ["(p: Dist|Number) => SampleSetDist"],
       "isUnit": false,
       "examples": [
         {
@@ -1266,135 +1137,105 @@
       "name": "mean",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist) => Number"
-      ],
+      "signatures": ["(Dist) => Number"],
       "isUnit": false
     },
     {
       "name": "median",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist) => Number"
-      ],
+      "signatures": ["(Dist) => Number"],
       "isUnit": false
     },
     {
       "name": "stdev",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist) => Number"
-      ],
+      "signatures": ["(Dist) => Number"],
       "isUnit": false
     },
     {
       "name": "variance",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist) => Number"
-      ],
+      "signatures": ["(Dist) => Number"],
       "isUnit": false
     },
     {
       "name": "min",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist) => Number"
-      ],
+      "signatures": ["(Dist) => Number"],
       "isUnit": false
     },
     {
       "name": "max",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist) => Number"
-      ],
+      "signatures": ["(Dist) => Number"],
       "isUnit": false
     },
     {
       "name": "mode",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist) => Number"
-      ],
+      "signatures": ["(Dist) => Number"],
       "isUnit": false
     },
     {
       "name": "sample",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist) => Number"
-      ],
+      "signatures": ["(Dist) => Number"],
       "isUnit": false
     },
     {
       "name": "sampleN",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist, n: Number) => List(Number)"
-      ],
+      "signatures": ["(Dist, n: Number) => List(Number)"],
       "isUnit": false
     },
     {
       "name": "exp",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist) => Dist"
-      ],
+      "signatures": ["(Dist) => Dist"],
       "isUnit": false
     },
     {
       "name": "cdf",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist, Number) => Number"
-      ],
+      "signatures": ["(Dist, Number) => Number"],
       "isUnit": false
     },
     {
       "name": "pdf",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist, Number) => Number"
-      ],
+      "signatures": ["(Dist, Number) => Number"],
       "isUnit": false
     },
     {
       "name": "inv",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist, Number) => Number"
-      ],
+      "signatures": ["(Dist, Number) => Number"],
       "isUnit": false
     },
     {
       "name": "quantile",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist, Number) => Number"
-      ],
+      "signatures": ["(Dist, Number) => Number"],
       "isUnit": false
     },
     {
       "name": "truncate",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist, left: Number, right: Number) => Dist"
-      ],
+      "signatures": ["(Dist, left: Number, right: Number) => Dist"],
       "isUnit": false,
       "description": "Truncates both the left side and the right side of a distribution.\n\nSample set distributions are truncated by filtering samples, but point set distributions are truncated using direct geometric manipulation. Uniform distributions are truncated symbolically. Symbolic but non-uniform distributions get converted to Point Set distributions."
     },
@@ -1402,18 +1243,14 @@
       "name": "truncateLeft",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist, Number) => Dist"
-      ],
+      "signatures": ["(Dist, Number) => Dist"],
       "isUnit": false
     },
     {
       "name": "truncateRight",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist, Number) => Dist"
-      ],
+      "signatures": ["(Dist, Number) => Dist"],
       "isUnit": false
     },
     {
@@ -1517,18 +1354,14 @@
       "name": "log10",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist) => Dist"
-      ],
+      "signatures": ["(Dist) => Dist"],
       "isUnit": false
     },
     {
       "name": "unaryMinus",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist) => Dist"
-      ],
+      "signatures": ["(Dist) => Dist"],
       "shorthand": {
         "type": "unary",
         "symbol": "-"
@@ -1539,45 +1372,35 @@
       "name": "sum",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Dist|Number)) => Dist"
-      ],
+      "signatures": ["(List(Dist|Number)) => Dist"],
       "isUnit": false
     },
     {
       "name": "product",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Dist|Number)) => Dist"
-      ],
+      "signatures": ["(List(Dist|Number)) => Dist"],
       "isUnit": false
     },
     {
       "name": "cumsum",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Dist|Number)) => List(Dist)"
-      ],
+      "signatures": ["(List(Dist|Number)) => List(Dist)"],
       "isUnit": false
     },
     {
       "name": "cumprod",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Dist|Number)) => List(Dist)"
-      ],
+      "signatures": ["(List(Dist|Number)) => List(Dist)"],
       "isUnit": false
     },
     {
       "name": "diff",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Dist|Number)) => List(Dist)"
-      ],
+      "signatures": ["(List(Dist|Number)) => List(Dist)"],
       "isUnit": false
     },
     {
@@ -1639,9 +1462,7 @@
       "name": "normalize",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist) => Dist"
-      ],
+      "signatures": ["(Dist) => Dist"],
       "isUnit": false,
       "description": "Normalize a distribution. This means scaling it appropriately so that it's cumulative sum is equal to 1. This only impacts Point Set distributions, because those are the only ones that can be non-normlized."
     },
@@ -1649,9 +1470,7 @@
       "name": "isNormalized",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist) => Bool"
-      ],
+      "signatures": ["(Dist) => Bool"],
       "isUnit": false,
       "description": "Check if a distribution is normalized. This only impacts Point Set distributions, because those are the only ones that can be non-normlized. Most distributions are typically normalized, but there are some commands that could produce non-normalized distributions."
     },
@@ -1659,9 +1478,7 @@
       "name": "integralSum",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist) => Number"
-      ],
+      "signatures": ["(Dist) => Number"],
       "isUnit": false,
       "description": "Get the sum of the integral of a distribution. If the distribution is normalized, this will be 1.0. This is useful for understanding unnormalized distributions."
     },
@@ -1669,9 +1486,7 @@
       "name": "sparkline",
       "namespace": "Dist",
       "requiresNamespace": false,
-      "signatures": [
-        "(Dist, Number?) => String"
-      ],
+      "signatures": ["(Dist, Number?) => String"],
       "isUnit": false,
       "description": "\nProduce a sparkline of length ``n``. For example, `▁▁▁▁▁▂▄▆▇██▇▆▄▂▁▁▁▁▁`. These can be useful for testing or quick visualizations that can be copied and pasted into text."
     },
@@ -1679,9 +1494,7 @@
       "name": "klDivergence",
       "namespace": "Dist",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dist, Dist) => Number"
-      ],
+      "signatures": ["(Dist, Dist) => Number"],
       "isUnit": false,
       "description": "[Kullback–Leibler divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence) between two distributions.\n\nNote that this can be very brittle. If the second distribution has probability mass at areas where the first doesn't, then the result will be infinite. Due to numeric approximations, some probability mass in point set distributions is rounded to zero, leading to infinite results with klDivergence.",
       "examples": [
@@ -1753,9 +1566,7 @@
       "name": "fromDist",
       "namespace": "SampleSet",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dist) => SampleSetDist"
-      ],
+      "signatures": ["(Dist) => SampleSetDist"],
       "isUnit": false,
       "description": "Converts any distribution type into a sample set distribution.",
       "examples": [
@@ -1770,9 +1581,7 @@
       "name": "fromNumber",
       "namespace": "SampleSet",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number) => SampleSetDist"
-      ],
+      "signatures": ["(Number) => SampleSetDist"],
       "isUnit": false,
       "description": "Convert a number into a sample set distribution that contains ``n`` copies of that number. ``n`` refers to the model sample count.",
       "examples": [
@@ -1787,9 +1596,7 @@
       "name": "fromList",
       "namespace": "SampleSet",
       "requiresNamespace": true,
-      "signatures": [
-        "(List(Number)) => SampleSetDist"
-      ],
+      "signatures": ["(List(Number)) => SampleSetDist"],
       "isUnit": false,
       "description": "Convert a list of numbers into a sample set distribution.",
       "examples": [
@@ -1804,9 +1611,7 @@
       "name": "toList",
       "namespace": "SampleSet",
       "requiresNamespace": true,
-      "signatures": [
-        "(SampleSetDist) => List(Number)"
-      ],
+      "signatures": ["(SampleSetDist) => List(Number)"],
       "isUnit": false,
       "description": "Gets the internal samples of a sampleSet distribution. This is separate from the ``sampleN()`` function, which would shuffle the samples. ``toList()`` maintains order and length.",
       "examples": [
@@ -1821,9 +1626,7 @@
       "name": "fromFn",
       "namespace": "SampleSet",
       "requiresNamespace": true,
-      "signatures": [
-        "((index?: Number) => Number) => SampleSetDist"
-      ],
+      "signatures": ["((index?: Number) => Number) => SampleSetDist"],
       "isUnit": false,
       "description": "Convert a function into a sample set distribution by calling it ``n`` times.",
       "examples": [
@@ -1984,9 +1787,7 @@
       "name": "uniform",
       "namespace": "Sym",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number, Number) => SymbolicDist"
-      ],
+      "signatures": ["(Number, Number) => SymbolicDist"],
       "isUnit": false,
       "examples": [
         {
@@ -2022,9 +1823,7 @@
       "name": "cauchy",
       "namespace": "Sym",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number, Number) => SymbolicDist"
-      ],
+      "signatures": ["(Number, Number) => SymbolicDist"],
       "isUnit": false,
       "examples": [
         {
@@ -2038,9 +1837,7 @@
       "name": "gamma",
       "namespace": "Sym",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number, Number) => SymbolicDist"
-      ],
+      "signatures": ["(Number, Number) => SymbolicDist"],
       "isUnit": false,
       "examples": [
         {
@@ -2054,9 +1851,7 @@
       "name": "logistic",
       "namespace": "Sym",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number, Number) => SymbolicDist"
-      ],
+      "signatures": ["(Number, Number) => SymbolicDist"],
       "isUnit": false,
       "examples": [
         {
@@ -2070,9 +1865,7 @@
       "name": "exponential",
       "namespace": "Sym",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number) => SymbolicDist"
-      ],
+      "signatures": ["(Number) => SymbolicDist"],
       "isUnit": false,
       "examples": [
         {
@@ -2086,9 +1879,7 @@
       "name": "bernoulli",
       "namespace": "Sym",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number) => SymbolicDist"
-      ],
+      "signatures": ["(Number) => SymbolicDist"],
       "isUnit": false,
       "examples": [
         {
@@ -2102,9 +1893,7 @@
       "name": "pointMass",
       "namespace": "Sym",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number) => SymbolicDist"
-      ],
+      "signatures": ["(Number) => SymbolicDist"],
       "isUnit": false,
       "description": "Point mass distributions are already symbolic, so you can use the regular `pointMass` function.",
       "examples": [
@@ -2119,9 +1908,7 @@
       "name": "triangular",
       "namespace": "Sym",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number, Number, Number) => SymbolicDist"
-      ],
+      "signatures": ["(Number, Number, Number) => SymbolicDist"],
       "isUnit": false,
       "examples": [
         {
@@ -2135,10 +1922,7 @@
       "name": "make",
       "namespace": "PointSet",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dist) => PointSetDist",
-        "(Number) => PointSetDist"
-      ],
+      "signatures": ["(Dist) => PointSetDist", "(Number) => PointSetDist"],
       "isUnit": false,
       "examples": [
         {
@@ -2157,9 +1941,7 @@
       "name": "makeContinuous",
       "namespace": "PointSet",
       "requiresNamespace": true,
-      "signatures": [
-        "(List({x: Number, y: Number})) => PointSetDist"
-      ],
+      "signatures": ["(List({x: Number, y: Number})) => PointSetDist"],
       "isUnit": false,
       "examples": [
         {
@@ -2173,9 +1955,7 @@
       "name": "makeDiscrete",
       "namespace": "PointSet",
       "requiresNamespace": true,
-      "signatures": [
-        "(List({x: Number, y: Number})) => PointSetDist"
-      ],
+      "signatures": ["(List({x: Number, y: Number})) => PointSetDist"],
       "isUnit": false,
       "examples": [
         {
@@ -2189,9 +1969,7 @@
       "name": "fromDist",
       "namespace": "PointSet",
       "requiresNamespace": true,
-      "signatures": [
-        "(Dist) => PointSetDist"
-      ],
+      "signatures": ["(Dist) => PointSetDist"],
       "isUnit": false,
       "description": "Converts the distribution in question into a point set distribution. If the distribution is symbolic, then it does this by taking the quantiles. If the distribution is a sample set, then it uses a version of kernel density estimation to approximate the point set format. One complication of this latter process is that if there is a high proportion of overlapping samples (samples that are exactly the same as each other), it will convert these samples into discrete point masses. Eventually we'd like to add further methods to help adjust this process.",
       "examples": [
@@ -2206,9 +1984,7 @@
       "name": "fromNumber",
       "namespace": "PointSet",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number) => PointSetDist"
-      ],
+      "signatures": ["(Number) => PointSetDist"],
       "isUnit": false,
       "examples": [
         {
@@ -2222,9 +1998,7 @@
       "name": "downsample",
       "namespace": "PointSet",
       "requiresNamespace": true,
-      "signatures": [
-        "(PointSetDist, newLength: Number) => PointSetDist"
-      ],
+      "signatures": ["(PointSetDist, newLength: Number) => PointSetDist"],
       "isUnit": false,
       "examples": [
         {
@@ -2254,9 +2028,7 @@
       "name": "mapY",
       "namespace": "PointSet",
       "requiresNamespace": true,
-      "signatures": [
-        "(PointSetDist, fn: (Number) => Number) => PointSetDist"
-      ],
+      "signatures": ["(PointSetDist, fn: (Number) => Number) => PointSetDist"],
       "isUnit": false,
       "examples": [
         {
@@ -2270,9 +2042,7 @@
       "name": "fromMinutes",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number) => Duration"
-      ],
+      "signatures": ["(Number) => Duration"],
       "isUnit": false,
       "examples": [
         {
@@ -2286,9 +2056,7 @@
       "name": "fromHours",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number) => Duration"
-      ],
+      "signatures": ["(Number) => Duration"],
       "isUnit": false,
       "examples": [
         {
@@ -2302,9 +2070,7 @@
       "name": "fromDays",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number) => Duration"
-      ],
+      "signatures": ["(Number) => Duration"],
       "isUnit": false,
       "examples": [
         {
@@ -2318,9 +2084,7 @@
       "name": "fromYears",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number) => Duration"
-      ],
+      "signatures": ["(Number) => Duration"],
       "isUnit": false,
       "examples": [
         {
@@ -2334,9 +2098,7 @@
       "name": "toMinutes",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Duration) => Number"
-      ],
+      "signatures": ["(Duration) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -2350,9 +2112,7 @@
       "name": "toHours",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Duration) => Number"
-      ],
+      "signatures": ["(Duration) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -2366,9 +2126,7 @@
       "name": "toDays",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Duration) => Number"
-      ],
+      "signatures": ["(Duration) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -2382,9 +2140,7 @@
       "name": "toYears",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Duration) => Number"
-      ],
+      "signatures": ["(Duration) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -2398,9 +2154,7 @@
       "name": "unaryMinus",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Duration) => Duration"
-      ],
+      "signatures": ["(Duration) => Duration"],
       "shorthand": {
         "type": "unary",
         "symbol": "-"
@@ -2418,9 +2172,7 @@
       "name": "add",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Duration, Duration) => Duration"
-      ],
+      "signatures": ["(Duration, Duration) => Duration"],
       "shorthand": {
         "type": "infix",
         "symbol": "+"
@@ -2438,9 +2190,7 @@
       "name": "subtract",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Duration, Duration) => Duration"
-      ],
+      "signatures": ["(Duration, Duration) => Duration"],
       "shorthand": {
         "type": "infix",
         "symbol": "-"
@@ -2484,9 +2234,7 @@
       "name": "divide",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Duration, Duration) => Number"
-      ],
+      "signatures": ["(Duration, Duration) => Number"],
       "shorthand": {
         "type": "infix",
         "symbol": "/"
@@ -2504,9 +2252,7 @@
       "name": "divide",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Duration, Duration) => Number"
-      ],
+      "signatures": ["(Duration, Duration) => Number"],
       "shorthand": {
         "type": "infix",
         "symbol": "/"
@@ -2524,9 +2270,7 @@
       "name": "smaller",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Duration, Duration) => Bool"
-      ],
+      "signatures": ["(Duration, Duration) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": "<"
@@ -2537,9 +2281,7 @@
       "name": "larger",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Duration, Duration) => Bool"
-      ],
+      "signatures": ["(Duration, Duration) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": ">"
@@ -2550,9 +2292,7 @@
       "name": "smallerEq",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Duration, Duration) => Bool"
-      ],
+      "signatures": ["(Duration, Duration) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": "<="
@@ -2563,9 +2303,7 @@
       "name": "largerEq",
       "namespace": "Duration",
       "requiresNamespace": false,
-      "signatures": [
-        "(Duration, Duration) => Bool"
-      ],
+      "signatures": ["(Duration, Duration) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": ">="
@@ -2605,9 +2343,7 @@
       "name": "upTo",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(low: Number, high: Number) => List(Number)"
-      ],
+      "signatures": ["(low: Number, high: Number) => List(Number)"],
       "isUnit": false,
       "examples": [
         {
@@ -2621,9 +2357,7 @@
       "name": "reverse",
       "namespace": "List",
       "requiresNamespace": false,
-      "signatures": [
-        "(List('A)) => List('A)"
-      ],
+      "signatures": ["(List('A)) => List('A)"],
       "isUnit": false,
       "examples": [
         {
@@ -2637,9 +2371,7 @@
       "name": "concat",
       "namespace": "List",
       "requiresNamespace": false,
-      "signatures": [
-        "(List('A), List('A)) => List('A)"
-      ],
+      "signatures": ["(List('A), List('A)) => List('A)"],
       "isUnit": false,
       "examples": [
         {
@@ -2653,9 +2385,7 @@
       "name": "sortBy",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A), fn: ('A) => Number) => List('A)"
-      ],
+      "signatures": ["(List('A), fn: ('A) => Number) => List('A)"],
       "isUnit": false,
       "examples": [
         {
@@ -2669,9 +2399,7 @@
       "name": "append",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A), 'A) => List('A)"
-      ],
+      "signatures": ["(List('A), 'A) => List('A)"],
       "isUnit": false,
       "examples": [
         {
@@ -2702,9 +2430,7 @@
       "name": "flatten",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List(any)) => List(any)"
-      ],
+      "signatures": ["(List(any)) => List(any)"],
       "isUnit": false,
       "examples": [
         {
@@ -2718,9 +2444,7 @@
       "name": "shuffle",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A)) => List('A)"
-      ],
+      "signatures": ["(List('A)) => List('A)"],
       "isUnit": false,
       "examples": [
         {
@@ -2734,9 +2458,7 @@
       "name": "zip",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A), List('B)) => List(['A, 'B])"
-      ],
+      "signatures": ["(List('A), List('B)) => List(['A, 'B])"],
       "isUnit": false,
       "examples": [
         {
@@ -2750,9 +2472,7 @@
       "name": "unzip",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List(['A, 'B])) => [List('A), List('B)]"
-      ],
+      "signatures": ["(List(['A, 'B])) => [List('A), List('B)]"],
       "isUnit": false,
       "examples": [
         {
@@ -2783,9 +2503,7 @@
       "name": "uniq",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A)) => List('A)"
-      ],
+      "signatures": ["(List('A)) => List('A)"],
       "isUnit": false,
       "description": "Filters the list for unique elements. Works on select Squiggle types.",
       "examples": [
@@ -2800,9 +2518,7 @@
       "name": "uniqBy",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A), ('A) => 'B) => List('A)"
-      ],
+      "signatures": ["(List('A), ('A) => 'B) => List('A)"],
       "isUnit": false,
       "description": "Filters the list for unique elements. Works on select Squiggle types.",
       "examples": [
@@ -2817,9 +2533,7 @@
       "name": "filter",
       "namespace": "List",
       "requiresNamespace": false,
-      "signatures": [
-        "(List('A), fn: ('A) => Bool) => List('A)"
-      ],
+      "signatures": ["(List('A), fn: ('A) => Bool) => List('A)"],
       "isUnit": false,
       "examples": [
         {
@@ -2833,9 +2547,7 @@
       "name": "length",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List(any)) => Number"
-      ],
+      "signatures": ["(List(any)) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -2849,9 +2561,7 @@
       "name": "first",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A)) => 'A"
-      ],
+      "signatures": ["(List('A)) => 'A"],
       "isUnit": false,
       "examples": [
         {
@@ -2865,9 +2575,7 @@
       "name": "last",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A)) => 'A"
-      ],
+      "signatures": ["(List('A)) => 'A"],
       "isUnit": false,
       "examples": [
         {
@@ -2881,9 +2589,7 @@
       "name": "minBy",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A), fn: ('A) => Number) => 'A"
-      ],
+      "signatures": ["(List('A), fn: ('A) => Number) => 'A"],
       "isUnit": false,
       "examples": [
         {
@@ -2897,9 +2603,7 @@
       "name": "maxBy",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A), fn: ('A) => Number) => 'A"
-      ],
+      "signatures": ["(List('A), fn: ('A) => Number) => 'A"],
       "isUnit": false,
       "examples": [
         {
@@ -2913,9 +2617,7 @@
       "name": "every",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A), fn: ('A) => Bool) => Bool"
-      ],
+      "signatures": ["(List('A), fn: ('A) => Bool) => Bool"],
       "isUnit": false,
       "examples": [
         {
@@ -2929,9 +2631,7 @@
       "name": "some",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A), fn: ('A) => Bool) => Bool"
-      ],
+      "signatures": ["(List('A), fn: ('A) => Bool) => Bool"],
       "isUnit": false,
       "examples": [
         {
@@ -2945,9 +2645,7 @@
       "name": "find",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A), fn: ('A) => Bool) => 'A"
-      ],
+      "signatures": ["(List('A), fn: ('A) => Bool) => 'A"],
       "isUnit": false,
       "description": "Returns an error if there is no value found",
       "examples": [
@@ -2962,9 +2660,7 @@
       "name": "findIndex",
       "namespace": "List",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A), fn: ('A) => Bool) => Number"
-      ],
+      "signatures": ["(List('A), fn: ('A) => Bool) => Number"],
       "isUnit": false,
       "description": "Returns `-1` if there is no value found",
       "examples": [
@@ -2979,9 +2675,7 @@
       "name": "map",
       "namespace": "List",
       "requiresNamespace": false,
-      "signatures": [
-        "(List('A), ('A, index?: Number) => 'B) => List('B)"
-      ],
+      "signatures": ["(List('A), ('A, index?: Number) => 'B) => List('B)"],
       "isUnit": false,
       "examples": [
         {
@@ -3056,63 +2750,49 @@
       "name": "sqrt",
       "namespace": "Math",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false
     },
     {
       "name": "sin",
       "namespace": "Math",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false
     },
     {
       "name": "cos",
       "namespace": "Math",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false
     },
     {
       "name": "tan",
       "namespace": "Math",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false
     },
     {
       "name": "asin",
       "namespace": "Math",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false
     },
     {
       "name": "acos",
       "namespace": "Math",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false
     },
     {
       "name": "atan",
       "namespace": "Math",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false
     },
     {
@@ -3287,9 +2967,7 @@
       "name": "smaller",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number, Number) => Bool"
-      ],
+      "signatures": ["(Number, Number) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": "<"
@@ -3300,9 +2978,7 @@
       "name": "larger",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number, Number) => Bool"
-      ],
+      "signatures": ["(Number, Number) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": ">"
@@ -3313,9 +2989,7 @@
       "name": "smallerEq",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number, Number) => Bool"
-      ],
+      "signatures": ["(Number, Number) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": "<="
@@ -3326,9 +3000,7 @@
       "name": "largerEq",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number, Number) => Bool"
-      ],
+      "signatures": ["(Number, Number) => Bool"],
       "shorthand": {
         "type": "infix",
         "symbol": ">="
@@ -3339,9 +3011,7 @@
       "name": "add",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number, Number) => Number"
-      ],
+      "signatures": ["(Number, Number) => Number"],
       "shorthand": {
         "type": "infix",
         "symbol": "+"
@@ -3352,9 +3022,7 @@
       "name": "subtract",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number, Number) => Number"
-      ],
+      "signatures": ["(Number, Number) => Number"],
       "shorthand": {
         "type": "infix",
         "symbol": "-"
@@ -3365,9 +3033,7 @@
       "name": "multiply",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number, Number) => Number"
-      ],
+      "signatures": ["(Number, Number) => Number"],
       "shorthand": {
         "type": "infix",
         "symbol": "*"
@@ -3378,9 +3044,7 @@
       "name": "divide",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number, Number) => Number"
-      ],
+      "signatures": ["(Number, Number) => Number"],
       "shorthand": {
         "type": "infix",
         "symbol": "/"
@@ -3391,9 +3055,7 @@
       "name": "pow",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number, Number) => Number"
-      ],
+      "signatures": ["(Number, Number) => Number"],
       "shorthand": {
         "type": "infix",
         "symbol": "^"
@@ -3404,9 +3066,7 @@
       "name": "unaryMinus",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "shorthand": {
         "type": "unary",
         "symbol": "-"
@@ -3424,9 +3084,7 @@
       "name": "exp",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false,
       "description": "exponent",
       "examples": [
@@ -3441,9 +3099,7 @@
       "name": "log",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -3457,9 +3113,7 @@
       "name": "log10",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -3473,9 +3127,7 @@
       "name": "log2",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -3489,9 +3141,7 @@
       "name": "floor",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -3505,9 +3155,7 @@
       "name": "ceil",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -3521,9 +3169,7 @@
       "name": "abs",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false,
       "description": "absolute value",
       "examples": [
@@ -3538,9 +3184,7 @@
       "name": "round",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -3554,9 +3198,7 @@
       "name": "sum",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Number)) => Number"
-      ],
+      "signatures": ["(List(Number)) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -3570,9 +3212,7 @@
       "name": "product",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Number)) => Number"
-      ],
+      "signatures": ["(List(Number)) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -3586,9 +3226,7 @@
       "name": "cumprod",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Number)) => List(Number)"
-      ],
+      "signatures": ["(List(Number)) => List(Number)"],
       "isUnit": false,
       "description": "cumulative product",
       "examples": [
@@ -3603,9 +3241,7 @@
       "name": "diff",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Number)) => List(Number)"
-      ],
+      "signatures": ["(List(Number)) => List(Number)"],
       "isUnit": false,
       "examples": [
         {
@@ -3619,10 +3255,7 @@
       "name": "min",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Number)) => Number",
-        "(Number, Number) => Number"
-      ],
+      "signatures": ["(List(Number)) => Number", "(Number, Number) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -3636,10 +3269,7 @@
       "name": "max",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Number)) => Number",
-        "(Number, Number) => Number"
-      ],
+      "signatures": ["(List(Number)) => Number", "(Number, Number) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -3653,9 +3283,7 @@
       "name": "mean",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Number)) => Number"
-      ],
+      "signatures": ["(List(Number)) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -3669,9 +3297,7 @@
       "name": "quantile",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Number), Number) => Number"
-      ],
+      "signatures": ["(List(Number), Number) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -3685,9 +3311,7 @@
       "name": "median",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Number)) => Number"
-      ],
+      "signatures": ["(List(Number)) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -3701,9 +3325,7 @@
       "name": "geomean",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Number)) => Number"
-      ],
+      "signatures": ["(List(Number)) => Number"],
       "isUnit": false,
       "description": "geometric mean",
       "examples": [
@@ -3718,9 +3340,7 @@
       "name": "stdev",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Number)) => Number"
-      ],
+      "signatures": ["(List(Number)) => Number"],
       "isUnit": false,
       "description": "standard deviation",
       "examples": [
@@ -3735,9 +3355,7 @@
       "name": "variance",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Number)) => Number"
-      ],
+      "signatures": ["(List(Number)) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -3751,9 +3369,7 @@
       "name": "sort",
       "namespace": "Number",
       "requiresNamespace": false,
-      "signatures": [
-        "(List(Number)) => List(Number)"
-      ],
+      "signatures": ["(List(Number)) => List(Number)"],
       "isUnit": false,
       "examples": [
         {
@@ -3767,9 +3383,7 @@
       "name": "rangeDomain",
       "namespace": "Number",
       "requiresNamespace": true,
-      "signatures": [
-        "(min: Number, max: Number) => Domain"
-      ],
+      "signatures": ["(min: Number, max: Number) => Domain"],
       "isUnit": false,
       "examples": [
         {
@@ -3888,9 +3502,7 @@
       "name": "make",
       "namespace": "String",
       "requiresNamespace": true,
-      "signatures": [
-        "(any) => String"
-      ],
+      "signatures": ["(any) => String"],
       "isUnit": false,
       "description": "Converts any value to a string. Some information is often lost."
     },
@@ -3898,20 +3510,14 @@
       "name": "concat",
       "namespace": "String",
       "requiresNamespace": false,
-      "signatures": [
-        "(String, String) => String",
-        "(String, any) => String"
-      ],
+      "signatures": ["(String, String) => String", "(String, any) => String"],
       "isUnit": false
     },
     {
       "name": "add",
       "namespace": "String",
       "requiresNamespace": false,
-      "signatures": [
-        "(String, String) => String",
-        "(String, any) => String"
-      ],
+      "signatures": ["(String, String) => String", "(String, any) => String"],
       "shorthand": {
         "type": "infix",
         "symbol": "+"
@@ -3922,9 +3528,7 @@
       "name": "split",
       "namespace": "String",
       "requiresNamespace": true,
-      "signatures": [
-        "(String, separator: String) => List(String)"
-      ],
+      "signatures": ["(String, separator: String) => List(String)"],
       "isUnit": false
     },
     {
@@ -3952,9 +3556,7 @@
       "name": "sampleCount",
       "namespace": "System",
       "requiresNamespace": true,
-      "signatures": [
-        "() => Number"
-      ],
+      "signatures": ["() => Number"],
       "isUnit": false,
       "description": "The number of samples set in the current environment. This variable can be modified in the Squiggle playground settings."
     },
@@ -3962,9 +3564,7 @@
       "name": "name",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "('A, String) => 'A"
-      ],
+      "signatures": ["('A, String) => 'A"],
       "isUnit": false,
       "description": "Adds a user-facing name to a value. This is useful for documenting what a value represents, or how it was calculated.\n\n*Note: While names are shown in the sidebar, you still need to call variables by their regular variable names in code.*"
     },
@@ -3972,18 +3572,14 @@
       "name": "getName",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "(any) => String"
-      ],
+      "signatures": ["(any) => String"],
       "isUnit": false
     },
     {
       "name": "doc",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "('A, String) => 'A"
-      ],
+      "signatures": ["('A, String) => 'A"],
       "isUnit": false,
       "description": "Adds text documentation to a value. This is useful for documenting what a value represents or how it was calculated."
     },
@@ -3991,9 +3587,7 @@
       "name": "getDoc",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "(any) => String"
-      ],
+      "signatures": ["(any) => String"],
       "isUnit": false
     },
     {
@@ -4022,27 +3616,21 @@
       "name": "getShowAs",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "(any) => any"
-      ],
+      "signatures": ["(any) => any"],
       "isUnit": false
     },
     {
       "name": "getExportData",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "(any) => any"
-      ],
+      "signatures": ["(any) => any"],
       "isUnit": false
     },
     {
       "name": "spec",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "('A, Specification) => 'A"
-      ],
+      "signatures": ["('A, Specification) => 'A"],
       "isUnit": false,
       "description": "Adds a specification to a value. This is useful for documenting how a value was calculated, or what it represents."
     },
@@ -4050,9 +3638,7 @@
       "name": "getSpec",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "(any) => any"
-      ],
+      "signatures": ["(any) => any"],
       "isUnit": false
     },
     {
@@ -4083,10 +3669,7 @@
       "name": "hide",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "('A, Bool) => 'A",
-        "('A) => 'A"
-      ],
+      "signatures": ["('A, Bool) => 'A", "('A) => 'A"],
       "isUnit": false,
       "description": "Hides a value when displayed under Variables. This is useful for hiding intermediate values or helper functions that are used in calculations, but are not directly relevant to the user. Only hides top-level variables."
     },
@@ -4094,18 +3677,14 @@
       "name": "getHide",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "(any) => Bool"
-      ],
+      "signatures": ["(any) => Bool"],
       "isUnit": false
     },
     {
       "name": "startOpen",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "('A) => 'A"
-      ],
+      "signatures": ["('A) => 'A"],
       "isUnit": false,
       "description": "When the value is first displayed, it will begin open in the viewer. Refresh the page to reset."
     },
@@ -4113,9 +3692,7 @@
       "name": "startClosed",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "('A) => 'A"
-      ],
+      "signatures": ["('A) => 'A"],
       "isUnit": false,
       "description": "When the value is first displayed, it will begin collapsed in the viewer. Refresh the page to reset."
     },
@@ -4123,9 +3700,7 @@
       "name": "getStartOpenState",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "(any) => String"
-      ],
+      "signatures": ["(any) => String"],
       "isUnit": false,
       "description": "Returns the startOpenState of a value, which can be \"open\", \"closed\", or \"\" if no startOpenState is set. Set using `Tag.startOpen` and `Tag.startClosed`."
     },
@@ -4133,10 +3708,7 @@
       "name": "notebook",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A), Bool) => List('A)",
-        "(List('A)) => List('A)"
-      ],
+      "signatures": ["(List('A), Bool) => List('A)", "(List('A)) => List('A)"],
       "isUnit": false,
       "description": "Displays the list of values as a notebook. This means that element indices are hidden, and the values are displayed in a vertical list. Useful for displaying combinations of text and values.",
       "examples": [
@@ -4151,18 +3723,14 @@
       "name": "getNotebook",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "(any) => Bool"
-      ],
+      "signatures": ["(any) => Bool"],
       "isUnit": false
     },
     {
       "name": "location",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "('A) => 'A"
-      ],
+      "signatures": ["('A) => 'A"],
       "isUnit": false,
       "description": "Saves the location of a value. Note that this must be called at the point where the location is to be saved. If you use it in a helper function, it will save the location of the helper function, not the location where the helper function is called."
     },
@@ -4170,18 +3738,14 @@
       "name": "getLocation",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "(any) => any"
-      ],
+      "signatures": ["(any) => any"],
       "isUnit": false
     },
     {
       "name": "getAll",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "(any) => Dict(any)"
-      ],
+      "signatures": ["(any) => Dict(any)"],
       "isUnit": false,
       "description": "Returns a dictionary of all tags on a value."
     },
@@ -4189,9 +3753,7 @@
       "name": "omit",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "('A, List(String)) => 'A"
-      ],
+      "signatures": ["('A, List(String)) => 'A"],
       "isUnit": false,
       "description": "Returns a copy of the value with the specified tags removed."
     },
@@ -4199,9 +3761,7 @@
       "name": "clear",
       "namespace": "Tag",
       "requiresNamespace": true,
-      "signatures": [
-        "('A) => 'A"
-      ],
+      "signatures": ["('A) => 'A"],
       "isUnit": false,
       "description": "Returns a copy of the value with all tags removed."
     },
@@ -4321,9 +3881,7 @@
       "name": "json",
       "namespace": "Danger",
       "requiresNamespace": true,
-      "signatures": [
-        "(any) => any"
-      ],
+      "signatures": ["(any) => any"],
       "isUnit": false,
       "description": "Converts a value to a simpler form, similar to JSON. This is useful for debugging. Keeps functions and dates, but converts objects like distributions, calculators, and plots to combinations of dictionaries and lists.",
       "examples": [
@@ -4343,9 +3901,7 @@
       "name": "jsonString",
       "namespace": "Danger",
       "requiresNamespace": true,
-      "signatures": [
-        "(any) => String"
-      ],
+      "signatures": ["(any) => String"],
       "isUnit": false,
       "description": "Converts a value to a stringified JSON, similar to JSON.stringify() in Javasript. Replaces functions with dict summaries.",
       "examples": [
@@ -4365,9 +3921,7 @@
       "name": "parseFloat",
       "namespace": "Danger",
       "requiresNamespace": true,
-      "signatures": [
-        "(String) => Number|String"
-      ],
+      "signatures": ["(String) => Number|String"],
       "isUnit": false,
       "description": "Converts a string to a number. If the string can't be converted, returns `Parse Failed`. Calls Javascript `parseFloat` under the hood.",
       "examples": [
@@ -4382,9 +3936,7 @@
       "name": "now",
       "namespace": "Danger",
       "requiresNamespace": true,
-      "signatures": [
-        "() => Date"
-      ],
+      "signatures": ["() => Date"],
       "isUnit": false,
       "description": "Returns the current date. Internally calls ``Date.now()`` in JavaScript.  \n\n*Caution: This function, which returns the current date, produces varying outputs with each call. As a result, accurately estimating the value of functions that incorporate ``Danger.now()`` at past time points is challenging. In the future, we intend to implement a feature allowing the input of a simulated time via an environment variable to address this issue.*",
       "examples": [
@@ -4399,9 +3951,7 @@
       "name": "laplace",
       "namespace": "Danger",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number, Number) => Number"
-      ],
+      "signatures": ["(Number, Number) => Number"],
       "isUnit": false,
       "description": "Calculates the probability implied by [Laplace's rule of succession](https://en.wikipedia.org/wiki/Rule_of_succession)",
       "examples": [
@@ -4416,9 +3966,7 @@
       "name": "yTransform",
       "namespace": "Danger",
       "requiresNamespace": true,
-      "signatures": [
-        "(PointSetDist) => PointSetDist"
-      ],
+      "signatures": ["(PointSetDist) => PointSetDist"],
       "isUnit": false,
       "examples": [
         {
@@ -4432,9 +3980,7 @@
       "name": "factorial",
       "namespace": "Danger",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number) => Number"
-      ],
+      "signatures": ["(Number) => Number"],
       "isUnit": false,
       "examples": [
         {
@@ -4448,9 +3994,7 @@
       "name": "choose",
       "namespace": "Danger",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number, Number) => Number"
-      ],
+      "signatures": ["(Number, Number) => Number"],
       "isUnit": false,
       "description": "`Danger.choose(n,k)` returns `factorial(n) / (factorial(n - k) * factorial(k))`, i.e., the number of ways you can choose k items from n choices, without repetition. This function is also known as the [binomial coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient).",
       "examples": [
@@ -4465,9 +4009,7 @@
       "name": "binomial",
       "namespace": "Danger",
       "requiresNamespace": true,
-      "signatures": [
-        "(Number, Number, Number) => Number"
-      ],
+      "signatures": ["(Number, Number, Number) => Number"],
       "isUnit": false,
       "description": "`Danger.binomial(n, k, p)` returns `choose((n, k)) * pow(p, k) * pow(1 - p, n - k)`, i.e., the probability that an event of probability p will happen exactly k times in n draws.",
       "examples": [
@@ -4482,9 +4024,7 @@
       "name": "combinations",
       "namespace": "Danger",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A), Number) => List(List('A))"
-      ],
+      "signatures": ["(List('A), Number) => List(List('A))"],
       "isUnit": false,
       "description": "Returns all combinations of the input list taken r elements at a time.",
       "examples": [
@@ -4499,9 +4039,7 @@
       "name": "allCombinations",
       "namespace": "Danger",
       "requiresNamespace": true,
-      "signatures": [
-        "(List('A)) => List(List('A))"
-      ],
+      "signatures": ["(List('A)) => List(List('A))"],
       "isUnit": false,
       "description": "Returns all possible combinations of the elements in the input list.",
       "examples": [
@@ -4533,9 +4071,7 @@
       "name": "poissonDist",
       "namespace": "Danger",
       "requiresNamespace": true,
-      "signatures": [
-        "(rate: Dist|Number) => SampleSetDist"
-      ],
+      "signatures": ["(rate: Dist|Number) => SampleSetDist"],
       "isUnit": false,
       "description": "A Poisson distribution.\n\nNote: The Poisson distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as partially or fully continuous.  This is a visual mistake; if you inspect the underlying data, it should be discrete.",
       "examples": [
