@@ -1,5 +1,4 @@
 import { runSquiggleGenerator } from "../../../llmRunner/main";
-import { AVAILABLE_MODELS } from "../../utils/llms";
 
 export const maxDuration = 30;
 
@@ -21,14 +20,6 @@ export async function POST(req: Request) {
       throw new Error("Prompt is required");
     }
 
-    const selectedModel = AVAILABLE_MODELS.find(
-      (m) => m.backendTitle === backendTitle
-    );
-    if (!selectedModel) {
-      throw new Error("Invalid model selected");
-    }
-
-    // Ensure numPlaygrounds is between 1 and 5
     const playgroundCount = Math.max(
       1,
       Math.min(5, Number(numPlaygrounds) || 1)

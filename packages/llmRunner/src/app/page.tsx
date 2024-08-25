@@ -23,33 +23,6 @@ export interface ModelInfo {
   fullModelId: string;
 }
 
-export const AVAILABLE_MODELS: ModelInfo[] = [
-  {
-    presentedTitle: "GPT-3.5",
-    backendTitle: "gpt4-3.5-turbo",
-    company: "OpenAI",
-    fullModelId: "gpt-3.5-turbo",
-  },
-  {
-    presentedTitle: "GPT-4 Turbo",
-    backendTitle: "gpt4o",
-    company: "OpenAI",
-    fullModelId: "gpt-4o",
-  },
-  {
-    presentedTitle: "Claude 3 Haiku",
-    backendTitle: "haiku",
-    company: "Anthropic",
-    fullModelId: "claude-3-haiku-20240307",
-  },
-  {
-    presentedTitle: "Claude 3 Sonnet",
-    backendTitle: "sonnet",
-    company: "Anthropic",
-    fullModelId: "claude-3-5-sonnet-20240620",
-  },
-];
-
 // Schemas
 const squiggleSchema = z.object({
   code: z.string().describe("Squiggle code snippet"),
@@ -61,7 +34,6 @@ const squiggleResponseSchema = z.array(squiggleSchema);
 type Action = {
   id: string;
   prompt: string;
-  model: string;
   result?: string;
   code?: string;
   status: "loading" | "success" | "error";
@@ -101,9 +73,7 @@ const ActionComponent: React.FC<{ action: Action }> = ({ action }) => {
       </div>
       {expanded && (
         <div className="mt-2">
-          <p>
-            <strong>Model:</strong> {action.model}
-          </p>
+          <p>{action.prompt}</p>
           <p>
             <strong>Timestamp:</strong> {action.timestamp.toLocaleString()}
           </p>
@@ -130,9 +100,7 @@ export default function Home() {
   const [prompt, setPrompt] = useState(
     "Make a 1-line model, that is just 1 line in total, no comments, no decorators. Be creative."
   );
-  const [selectedModel, setSelectedModel] = useState<ModelInfo>(
-    AVAILABLE_MODELS[0]
-  );
+
   const [playgroundOpacity, setPlaygroundOpacity] = useState(100);
   const [actions, setActions] = useState<Action[]>([]);
   const [squiggleResponses, setSquiggleResponses] =
@@ -181,7 +149,6 @@ export default function Home() {
     const newAction: Action = {
       id: Date.now().toString(),
       prompt,
-      model: selectedModel.backendTitle,
       status: "loading",
       timestamp: new Date(),
     };
@@ -189,7 +156,6 @@ export default function Home() {
 
     submit({
       prompt,
-      model: selectedModel.backendTitle,
       previousPrompt: newAction.prompt,
       previousCode: newAction.code,
       previousResult: newAction.result,
@@ -203,13 +169,6 @@ export default function Home() {
     stop();
     setPlaygroundOpacity(100);
     updateLastAction("error", undefined, "Generation stopped by user");
-  };
-
-  const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newModel =
-      AVAILABLE_MODELS.find((m) => m.backendTitle === e.target.value) ||
-      AVAILABLE_MODELS[0];
-    setSelectedModel(newModel);
   };
 
   const handleNumPlaygroundsChange = (
