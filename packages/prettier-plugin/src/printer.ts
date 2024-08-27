@@ -294,6 +294,7 @@ export function createSquigglePrinter(
             "]",
           ]);
         case "Identifier":
+        case "UnitName":
           return node.value;
         case "LambdaParameter":
           return [
