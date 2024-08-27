@@ -90,6 +90,7 @@ export default function CreatePage() {
   const [selectedPlaygroundIndex, setSelectedPlaygroundIndex] = useState<
     number | null
   >(null);
+  const [selectedRunIndex, setSelectedRunIndex] = useState<number | null>(null);
 
   const { ref, height } = useAvailableHeight();
 
@@ -173,6 +174,7 @@ export default function CreatePage() {
   };
 
   const handleEditVersion = (index: number) => {
+    setSelectedRunIndex(null);
     setMode("edit");
     setSquiggleCode(squiggleResponses?.[index]?.code || "");
     setSelectedPlaygroundIndex(index);
@@ -185,10 +187,20 @@ export default function CreatePage() {
     }, 0);
   };
 
+  const handleSelectRun = (index: number) => {
+    setSelectedRunIndex(index);
+  };
+
+  const handleCloseSelectedRun = () => {
+    setSelectedRunIndex(null);
+  };
+
   return (
     <div className="flex h-screen text-sm">
       {/* Left column: Mode Toggle, Chat, Form, and Actions */}
-      <div className="flex w-1/5 flex-col px-2 py-2">
+      <div
+        className={`flex w-1/5 flex-col px-2 py-2 ${selectedRunIndex !== null ? "hidden" : ""}`}
+      >
         <div className="mb-4 flex">
           <button
             className={`flex-1 rounded-l p-2 ${
@@ -219,14 +231,20 @@ export default function CreatePage() {
           </div>
         ) : (
           <>
+            <div className="mb-2">
+              <h3 className="font-semibold"> Prompt</h3>
+            </div>
             <div className="mb-4 flex">
               <textarea
                 className="flex-grow rounded-l border p-2 text-sm"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Enter your prompt here"
+                placeholder="What changes would you like to make?"
                 rows={8}
               />
+            </div>
+            <div className="mb-2">
+              <h3 className="font-semibold">Squiggle Code</h3>
             </div>
             <div className="mb-4 flex">
               <textarea
@@ -276,41 +294,65 @@ export default function CreatePage() {
       </div>
       {/* Right column: SquigglePlaygrounds */}
       <div
-        className="w-4/5 px-2"
+        className={`px-2 ${selectedRunIndex !== null ? "w-full" : "w-4/5"}`}
         style={{ opacity: playgroundOpacity / 100, height: height || "auto" }}
         ref={ref}
       >
         {squiggleResponses &&
           squiggleResponses.map((response, index) => (
-            <div key={actions.at(-1)?.id + index} className="mb-4">
+            <div
+              key={actions.at(-1)?.id + index}
+              className={`mb-4 ${selectedRunIndex !== null && selectedRunIndex !== index ? "hidden" : ""}`}
+            >
               <div className="mb-2 flex items-center justify-between rounded bg-gray-100 p-2">
                 <div className="flex items-center space-x-2">
                   <span className="font-semibold">Run {index + 1}</span>
                   <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
-                    {(response.runTimeMs / 1000).toFixed(2)}s
+                    {response.runTimeMs.toFixed(2)}ms
                   </span>
                   <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-800">
-                    ${response.totalPrice.toFixed(3)}
+                    ${response.totalPrice.toFixed(4)}
                   </span>
                   <span className="rounded-full bg-purple-100 px-2 py-1 text-xs text-purple-800">
                     {response.llmRunCount} LLM runs
                   </span>
                 </div>
-                <button
-                  className="rounded bg-blue-500 px-4 py-2 text-white"
-                  onClick={() => handleEditVersion(index)}
-                >
-                  {squiggleResponses.length === 1
-                    ? "Edit"
-                    : "Edit this version"}
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    className="rounded bg-blue-500 px-4 py-2 text-white"
+                    onClick={() => handleEditVersion(index)}
+                  >
+                    {squiggleResponses.length === 1
+                      ? "Edit"
+                      : "Edit this version"}
+                  </button>
+                  {selectedRunIndex === null ? (
+                    <button
+                      className="rounded bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
+                      onClick={() => handleSelectRun(index)}
+                    >
+                      Full View
+                    </button>
+                  ) : (
+                    <button
+                      className="rounded bg-red-500 px-4 py-2 text-white"
+                      onClick={handleCloseSelectedRun}
+                    >
+                      Close
+                    </button>
+                  )}
+                </div>
               </div>
               <SquigglePlayground
                 key={response.code}
                 defaultCode={
                   response.code || "// Your Squiggle code will appear here"
                 }
-                height={height / numPlaygrounds - 40} // Subtract height for the new bar
+                height={
+                  selectedRunIndex === null
+                    ? height / numPlaygrounds - 40
+                    : height - 40
+                }
                 onNewSimulation={(simulation: Simulation) => {
                   updateLastAction(
                     simulation.output.ok ? "success" : "error",
