@@ -2,7 +2,6 @@ import { forwardRef, lazy } from "react";
 
 import { SqModuleOutput, SqProject } from "@quri/squiggle-lang";
 
-import { SquiggleErrorAlert } from "../../index.js";
 import {
   mainHeadName,
   renderedHeadName,
@@ -20,6 +19,7 @@ import {
   ViewerProvider,
 } from "../SquiggleViewer/ViewerProvider.js";
 import { ErrorBoundary } from "../ui/ErrorBoundary.js";
+import { SquiggleErrorListAlert } from "../ui/SquiggleErrorListAlert.js";
 import { Overlay } from "./Overlay.js";
 
 const ProjectStateViewer = lazy(() =>
@@ -65,7 +65,7 @@ export const ViewerBody = forwardRef<SquiggleViewerHandle, Props>(
       }
 
       if (!outputResult.ok) {
-        return <SquiggleErrorAlert error={outputResult.value} />;
+        return <SquiggleErrorListAlert errorList={outputResult.value} />;
       }
 
       const sqOutput = outputResult.value;

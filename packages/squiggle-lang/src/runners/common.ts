@@ -11,7 +11,7 @@ export function baseRun(params: RunParams): RunResult {
   }
   const typedAst = params.module.typedAst();
   if (!typedAst.ok) {
-    return Err(typedAst.value._value);
+    return Err(typedAst.value.map((v) => v._value));
   }
   const irResult = compileTypedAst({
     ast: typedAst.value,
@@ -33,6 +33,6 @@ export function baseRun(params: RunParams): RunResult {
   try {
     return Ok(reducer.evaluate(ir));
   } catch (e: unknown) {
-    return Err(reducer.errorFromException(e));
+    return Err([reducer.errorFromException(e)]);
   }
 }

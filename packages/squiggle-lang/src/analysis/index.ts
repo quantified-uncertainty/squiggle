@@ -201,20 +201,23 @@ function analyzeAstNode(node: ASTNode, context: AnalysisContext): TypedASTNode {
   }
 }
 
+export type TypedASTResult = result<TypedAST, ICompileError[]>;
+
 export function analyzeAst(
   ast: AST,
   builtins?: Bindings
-): result<TypedAST, ICompileError> {
+): result<TypedAST, ICompileError[]> {
   try {
     // TODO - adapt this code to new type checking
     unitTypeCheck(ast);
 
+    // TODO - collect errors during analysis and return them all; infer to `any` type instead of failing
     return Ok(NodeProgram.fromAst(ast, builtins ?? getStdLib()));
   } catch (e) {
     if (e instanceof ICompileError) {
-      return Err(e);
+      return Err([e]);
     } else {
-      return Err(new ICompileError(String(e), ast.location));
+      return Err([new ICompileError(String(e), ast.location)]);
     }
   }
 }

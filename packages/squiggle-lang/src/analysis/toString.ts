@@ -1,5 +1,3 @@
-import { ICompileError } from "../errors/IError.js";
-import { result } from "../utility/result.js";
 import {
   sExpr,
   SExpr,
@@ -7,7 +5,7 @@ import {
   sExprToString,
 } from "../utility/sExpr.js";
 import { ExpressionNode } from "./Node.js";
-import { TypedAST, TypedASTNode } from "./types.js";
+import { TypedASTNode } from "./types.js";
 
 type Options = SExprPrintOptions & { withTypes?: boolean };
 
@@ -136,14 +134,4 @@ export function typedAstNodeToString(
   };
 
   return sExprToString(toSExpr(node), printOptions);
-}
-
-export function typedAstResultToString(
-  r: result<TypedAST, ICompileError>,
-  options?: Options
-): string {
-  if (!r.ok) {
-    return r.value.toString();
-  }
-  return typedAstNodeToString(r.value, options);
 }

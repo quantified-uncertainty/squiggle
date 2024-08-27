@@ -19,7 +19,7 @@ export type ParseError = {
   message: string;
 };
 
-type ParseResult = result<AST, ICompileError>;
+export type ASTResult = result<AST, ICompileError[]>;
 
 function codeToFullLocationRange(
   code: string,
@@ -41,7 +41,7 @@ function codeToFullLocationRange(
   };
 }
 
-export function parse(expr: string, sourceId: string): ParseResult {
+export function parse(expr: string, sourceId: string): ASTResult {
   try {
     const comments: ASTCommentNode[] = [];
     const parsed: AST = peggyParse(expr, {
@@ -57,15 +57,15 @@ export function parse(expr: string, sourceId: string): ParseResult {
     return Result.Ok(parsed);
   } catch (e) {
     if (e instanceof PeggySyntaxError) {
-      return Result.Err(
-        new ICompileError((e as any).message, (e as any).location)
-      );
+      return Result.Err([
+        new ICompileError((e as any).message, (e as any).location),
+      ]);
     } else if (e instanceof ICompileError) {
-      return Result.Err(e);
+      return Result.Err([e]);
     } else {
-      return Result.Err(
-        new ICompileError(String(e), codeToFullLocationRange(expr, sourceId))
-      );
+      return Result.Err([
+        new ICompileError(String(e), codeToFullLocationRange(expr, sourceId)),
+      ]);
     }
   }
 }
@@ -189,7 +189,7 @@ export function astNodeToString(
 }
 
 export function astResultToString(
-  r: result<AST, ICompileError>,
+  r: result<AST, ICompileError[]>,
   options?: SExprPrintOptions
 ): string {
   if (!r.ok) {

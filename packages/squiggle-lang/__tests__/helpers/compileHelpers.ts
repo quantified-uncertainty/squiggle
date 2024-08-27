@@ -9,7 +9,7 @@ import { bind, result } from "../../src/utility/result.js";
 export function compileStringToIR(
   code: string,
   name = "test"
-): result<ProgramIR, ICompileError> {
+): result<ProgramIR, ICompileError[]> {
   return bind(
     bind(parse(code, name), (ast) => analyzeAst(ast)),
     (typedAst) => compileTypedAst({ ast: typedAst, imports: {} })

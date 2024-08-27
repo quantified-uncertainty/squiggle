@@ -1,12 +1,12 @@
 import { memo } from "react";
 
-import { result, SqError, SqValue } from "@quri/squiggle-lang";
+import { result, SqErrorList, SqValue } from "@quri/squiggle-lang";
 
 import { valueHasContext } from "../../lib/utility.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
 
-export type SqValueResult = result<SqValue, SqError>;
+export type SqValueResult = result<SqValue, SqErrorList>;
 
 // Unlike ValueViewer/ValueWithContextViewer, this just renders the raw widget, or displays an error.
 export const SquiggleValueResultChart = memo(function ValueResultViewer({

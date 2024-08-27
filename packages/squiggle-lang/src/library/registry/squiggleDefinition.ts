@@ -15,12 +15,17 @@ type SquiggleDefinition = {
 const stdlibSourceId = "@stdlib";
 
 // useful for debugging; should never happen outside of squiggle development
-function rethrowCompileError(error: ICompileError, code: string): never {
+function rethrowCompileError(errors: ICompileError[], code: string): never {
   throw new Error(
-    error.toString({
-      withLocation: true,
-      resolveSource: (sourceId) => (sourceId === stdlibSourceId ? code : ""),
-    })
+    errors
+      .map((error) =>
+        error.toString({
+          withLocation: true,
+          resolveSource: (sourceId) =>
+            sourceId === stdlibSourceId ? code : "",
+        })
+      )
+      .join("\n")
   );
 }
 

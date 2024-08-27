@@ -26,7 +26,10 @@ type SerializedRunOutput = {
   entrypoints: SerializedRunOutputEntrypoints;
 };
 
-export type SerializedRunResult = result<SerializedRunOutput, SerializedIError>;
+export type SerializedRunResult = result<
+  SerializedRunOutput,
+  SerializedIError[]
+>;
 
 export function serializeRunResult(result: RunResult): SerializedRunResult {
   if (result.ok) {
@@ -37,7 +40,7 @@ export function serializeRunResult(result: RunResult): SerializedRunResult {
       entrypoints: serializeRunOutputToStore(store, result.value),
     });
   } else {
-    return Err(serializeIError(result.value));
+    return Err(result.value.map((err) => serializeIError(err)));
   }
 }
 
@@ -49,8 +52,7 @@ export function deserializeRunResult(
 
     return Ok(deserializeRunOutputFromBundle(bundle, entrypoints));
   } else {
-    const error = deserializeIError(serializedResult.value);
-    return Err(error);
+    return Err(serializedResult.value.map(deserializeIError));
   }
 }
 

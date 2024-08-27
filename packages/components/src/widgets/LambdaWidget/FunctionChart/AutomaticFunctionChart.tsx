@@ -5,7 +5,7 @@ import {
   result,
   SqDateRangeDomain,
   SqDistFnPlot,
-  SqError,
+  SqErrorList,
   SqLambda,
   SqNumericFnPlot,
   SqNumericRangeDomain,
@@ -18,7 +18,7 @@ import {
 } from "../../../components/PlaygroundSettings.js";
 import { MessageAlert } from "../../../components/ui/Alert.js";
 import { ErrorBoundary } from "../../../components/ui/ErrorBoundary.js";
-import { SquiggleErrorAlert } from "../../../components/ui/SquiggleErrorAlert.js";
+import { SquiggleErrorListAlert } from "../../../components/ui/SquiggleErrorListAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
 
@@ -30,7 +30,7 @@ type AutomaticFunctionChartProps = {
 };
 
 // TODO - move to SquiggleErrorAlert with `collapsible` flag or other HOC, there's nothing specific about functions here
-const FunctionCallErrorAlert: FC<{ error: SqError }> = ({ error }) => {
+const FunctionCallErrorAlert: FC<{ error: SqErrorList }> = ({ error }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -42,7 +42,7 @@ const FunctionCallErrorAlert: FC<{ error: SqError }> = ({ error }) => {
         >
           {expanded ? "Hide" : "Show"} error details
         </span>
-        {expanded ? <SquiggleErrorAlert error={error} /> : null}
+        {expanded ? <SquiggleErrorListAlert errorList={error} /> : null}
       </div>
     </MessageAlert>
   );
@@ -52,7 +52,7 @@ function getInferredFnOutputType(
   domain: SqNumericRangeDomain | SqDateRangeDomain,
   fn: SqLambda,
   environment: Env
-): result<string, SqError> {
+): result<string, SqErrorList> {
   const result1 = fn.call([domain.minValue], environment);
   if (result1.ok) {
     return { ok: true, value: result1.value.tag };

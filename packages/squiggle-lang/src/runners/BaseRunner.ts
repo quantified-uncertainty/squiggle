@@ -12,7 +12,7 @@ export type RunParams = {
   imports: Record<string, Value>;
 };
 
-export type RunResult = result<RunOutput, ICompileError | IRuntimeError>;
+export type RunResult = result<RunOutput, (ICompileError | IRuntimeError)[]>;
 
 // Ideas for future methods:
 // - streaming top-level values from `Program`

@@ -28,9 +28,10 @@ export class NodeArray extends ExpressionNode<"Array"> {
   }
 
   static fromAst(node: KindNode<"Array">, context: AnalysisContext): NodeArray {
-    return new NodeArray(
-      node.location,
-      node.elements.map((element) => analyzeExpression(element, context))
+    const elements = node.elements.map((element) =>
+      analyzeExpression(element, context)
     );
+
+    return new NodeArray(node.location, elements);
   }
 }

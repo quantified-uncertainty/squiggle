@@ -22,7 +22,7 @@ export async function evaluateIRToResult(
 
 export async function evaluateStringToResult(
   code: string
-): Promise<result<Value, ICompileError | IRuntimeError>> {
+): Promise<result<Value, ICompileError[] | IRuntimeError>> {
   const irR = compileStringToIR(code, "main");
 
   if (irR.ok) {
@@ -39,8 +39,18 @@ const expectParseToBe = (expr: string, answer: string) => {
 };
 
 const resultToString = (
-  r: Result.result<Value, ICompileError | IRuntimeError>
-) => (r.ok ? r.value.toString() : `Error(${r.value.toString()})`);
+  r: Result.result<Value, ICompileError[] | IRuntimeError>
+) => {
+  if (r.ok) {
+    return r.value.toString();
+  }
+
+  if (Array.isArray(r.value)) {
+    return `Error(${r.value.map((e) => e.toString()).join("\n")})`;
+  } else {
+    return `Error(${r.value.toString()})`;
+  }
+};
 
 export const testParse = (code: string, answer: string) =>
   test(code, () => expectParseToBe(code, answer));

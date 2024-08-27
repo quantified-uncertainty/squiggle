@@ -3,6 +3,7 @@ import { ICompileError } from "../errors/IError.js";
 import { getStdLib } from "../library/index.js";
 import { Bindings } from "../reducer/Stack.js";
 import * as Result from "../utility/result.js";
+import { result } from "../utility/result.js";
 import { Value } from "../value/index.js";
 import { compileExpression } from "./compileExpression.js";
 import { compileImport } from "./compileImport.js";
@@ -56,6 +57,8 @@ function compileProgram(
   };
 }
 
+export type ProgramIRResult = result<ir.ProgramIR, ICompileError[]>;
+
 export function compileTypedAst({
   ast,
   stdlib,
@@ -64,7 +67,7 @@ export function compileTypedAst({
   ast: TypedAST;
   stdlib?: Bindings; // if not defined, default stdlib will be used
   imports: Record<string, Value>; // mapping of import strings (original paths) to values
-}): Result.result<ir.ProgramIR, ICompileError> {
+}): ProgramIRResult {
   try {
     const ir = compileProgram(
       ast,
@@ -73,7 +76,7 @@ export function compileTypedAst({
     return Result.Ok(ir);
   } catch (err) {
     if (err instanceof ICompileError) {
-      return Result.Err(err);
+      return Result.Err([err]);
     }
     throw err; // internal error, better to detect early (but maybe we should wrap this in IOtherError instead)
   }

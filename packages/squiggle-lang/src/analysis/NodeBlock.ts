@@ -27,7 +27,7 @@ export class NodeBlock extends ExpressionNode<"Block"> {
       const typedStatement = analyzeStatement(statement, context);
       statements.push(typedStatement);
 
-      // we're modifying context here but will refert `context.definitions` when the block is processed
+      // we're modifying context here but will revert `context.definitions` when the block is processed
       context.definitions = context.definitions.set(
         typedStatement.variable.value,
         typedStatement.variable

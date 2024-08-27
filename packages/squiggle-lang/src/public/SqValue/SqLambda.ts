@@ -6,7 +6,7 @@ import { TAny } from "../../types/Type.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
-import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
+import { SqErrorList, SqOtherError, SqRuntimeError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValue, wrapValue } from "./index.js";
 import { SqDomain, wrapDomain } from "./SqDomain.js";
@@ -48,13 +48,15 @@ export function runLambda(
   lambda: Lambda,
   values: Value[],
   env: Env
-): result<SqValue, SqError> {
+): result<SqValue, SqErrorList> {
   const reducer = new Reducer(env);
   try {
     const value = reducer.call(lambda, values);
     return Result.Ok(wrapValue(value) as SqValue);
   } catch (e) {
-    return Result.Err(new SqRuntimeError(reducer.errorFromException(e)));
+    return Result.Err(
+      new SqErrorList([new SqRuntimeError(reducer.errorFromException(e))])
+    );
   }
 }
 
@@ -87,13 +89,15 @@ export class SqLambda {
     return lambdaToSqLambdaSignatures(this._value);
   }
 
-  call(args: SqValue[], env?: Env): result<SqValue, SqError> {
+  call(args: SqValue[], env?: Env): result<SqValue, SqErrorList> {
     if (!env) {
       if (!this.context) {
         return Result.Err(
-          new SqOtherError(
-            "Programmatically constructed lambda call requires env argument"
-          )
+          new SqErrorList([
+            new SqOtherError(
+              "Programmatically constructed lambda call requires env argument"
+            ),
+          ])
         );
       }
       // default to environment that was used when this lambda was created

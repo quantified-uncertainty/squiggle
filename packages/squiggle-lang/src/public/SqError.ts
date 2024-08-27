@@ -177,3 +177,23 @@ export type SqError =
   | SqCompileError
   | SqImportError
   | SqOtherError;
+
+export class SqErrorList {
+  constructor(private _value: SqError[]) {
+    if (_value.length === 0) {
+      throw new Error("SqErrorList must have at least one error");
+    }
+  }
+
+  get errors() {
+    return this._value;
+  }
+
+  toString() {
+    return this._value.map((err) => err.toString()).join("\n");
+  }
+
+  toStringWithDetails() {
+    return this._value.map((err) => err.toStringWithDetails()).join("\n");
+  }
+}

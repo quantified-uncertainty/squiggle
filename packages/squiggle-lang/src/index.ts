@@ -26,6 +26,7 @@ export {
 export {
   SqCompileError,
   type SqError,
+  SqErrorList,
   SqFrame,
   SqImportError,
   SqOtherError,

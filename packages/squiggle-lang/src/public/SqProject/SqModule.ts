@@ -6,7 +6,7 @@ import { Env } from "../../dists/env.js";
 import { errMap, getExt, result } from "../../utility/result.js";
 import {
   SqCompileError,
-  SqError,
+  SqErrorList,
   SqImportError,
   SqOtherError,
 } from "../SqError.js";
@@ -40,7 +40,7 @@ type ImportModules =
     }
   | {
       type: "failed";
-      value: SqError;
+      value: SqErrorList;
     };
 
 type ImportOutputs =
@@ -53,8 +53,11 @@ type ImportOutputs =
     }
   | {
       type: "failed";
-      value: SqError;
+      value: SqErrorList;
     };
+
+type SqASTResult = result<AST, SqCompileError[]>;
+type SqTypedASTResult = result<TypedAST, SqCompileError[]>;
 
 export class SqModule {
   name: string;
@@ -62,8 +65,8 @@ export class SqModule {
   // key is module name, value is hash
   pins: Record<string, string>;
 
-  private _ast?: result<AST, SqCompileError>;
-  private _typedAst?: result<TypedAST, SqCompileError>;
+  private _ast?: SqASTResult;
+  private _typedAst?: SqTypedASTResult;
 
   constructor(params: {
     name: string;
@@ -79,9 +82,8 @@ export class SqModule {
   // TODO - separate imports parsing with a simplified grammar and do everything else in a worker.
   ast() {
     if (!this._ast) {
-      this._ast = errMap(
-        parse(this.code, this.name),
-        (e) => new SqCompileError(e)
+      this._ast = errMap(parse(this.code, this.name), (errors) =>
+        errors.map((e) => new SqCompileError(e))
       );
     }
     return this._ast;
@@ -91,9 +93,8 @@ export class SqModule {
     if (!this._typedAst) {
       const ast = this.ast();
       if (ast.ok) {
-        this._typedAst = errMap(
-          analyzeAst(ast.value),
-          (e) => new SqCompileError(e)
+        this._typedAst = errMap(analyzeAst(ast.value), (errors) =>
+          errors.map((e) => new SqCompileError(e))
         );
       } else {
         this._typedAst = ast;
@@ -170,7 +171,7 @@ export class SqModule {
     if (!ast.ok) {
       return {
         type: "failed",
-        value: ast.value,
+        value: new SqErrorList(ast.value),
       };
     }
 
@@ -186,10 +187,12 @@ export class SqModule {
       if (importedModuleData.type === "failed") {
         return {
           type: "failed",
-          value: new SqImportError(
-            new SqOtherError(importedModuleData.value),
-            importBinding
-          ),
+          value: new SqErrorList([
+            new SqImportError(
+              new SqOtherError(importedModuleData.value),
+              importBinding
+            ),
+          ]),
         };
       }
 
