@@ -14,7 +14,7 @@ import { getLibraryContent } from "./libraryConfig";
 import { processSearchReplaceResponse } from "./searchReplace";
 import { CodeState } from "./stateManager";
 
-const linker: SqLinker = {
+export const linker: SqLinker = {
   resolve: (name: string) => name,
   loadSource: async (sourceName: string) => getLibraryContent(sourceName),
 };

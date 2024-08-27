@@ -1,4 +1,9 @@
 import { runSquiggleGenerator } from "../../../llmRunner/main";
+import {
+  CreateRequestBody,
+  createRequestBodySchema,
+  squiggleResponseSchema,
+} from "../../utils/squiggleTypes";
 
 export const maxDuration = 30;
 
@@ -7,14 +12,8 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const {
-      prompt,
-      model: backendTitle,
-      previousPrompt,
-      previousCode,
-      previousResponse,
-      numPlaygrounds,
-    } = body;
+    const { prompt, numPlaygrounds, squiggleCode }: CreateRequestBody =
+      createRequestBodySchema.parse(body);
 
     if (!prompt) {
       throw new Error("Prompt is required");
@@ -25,6 +24,7 @@ export async function POST(req: Request) {
       Math.min(5, Number(numPlaygrounds) || 1)
     );
 
+    //TODO: Add squiggleCode to the prompt, if it exists
     // Run the Squiggle generator the specified number of times in parallel
     const squigglePromises = Array(playgroundCount)
       .fill(null)
@@ -41,7 +41,13 @@ export async function POST(req: Request) {
     const responses = squiggleResults.map((result) => ({
       code: result.code,
       isValid: result.isValid,
+      totalPrice: result.totalPrice,
+      runTimeMs: result.runTimeMs,
+      llmRunCount: result.llmRunCount,
     }));
+
+    // Validate the response using the schema
+    const validatedResponses = squiggleResponseSchema.parse(responses);
 
     // Handle client disconnection
     req.signal.addEventListener("abort", () => {
@@ -51,7 +57,7 @@ export async function POST(req: Request) {
     // Return the responses as a stream
     const stream = new ReadableStream({
       start(controller) {
-        controller.enqueue(JSON.stringify(responses));
+        controller.enqueue(JSON.stringify(validatedResponses));
         controller.close();
       },
     });

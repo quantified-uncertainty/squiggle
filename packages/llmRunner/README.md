@@ -24,6 +24,7 @@ Right now this application is still fairly basic and experimental.
 - Have policies for dealing with repeated errors. This happens frequently with cheaper LLMs.
 - Have much better examples of Squiggle code, for the prompts. If there are enough examples, specific ones could be used for certain kinds of requests.
 - Sometimes the llm will return an invalid response. This sometimes gets added to the messages history, which then can contaminate future runs.
+- Warnings if there are "to" statements that go at zero or below, or any triangular distributions.
 
 ## Key Limitations
 

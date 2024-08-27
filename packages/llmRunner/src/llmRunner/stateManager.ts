@@ -373,26 +373,31 @@ export class StateManager {
   }
 
   llmMetricSummary(): { [key: LLMName]: LlmMetrics } {
-    const metricsByLLM: { [key: LLMName]: LlmMetrics } = {};
+    return this.getStateExecutions().reduce(
+      (acc, execution) => {
+        execution.llmMetricsList.forEach((metrics) => {
+          if (!acc[metrics.llmName]) {
+            acc[metrics.llmName] = { ...metrics };
+          } else {
+            acc[metrics.llmName].apiCalls += metrics.apiCalls;
+            acc[metrics.llmName].inputTokens += metrics.inputTokens;
+            acc[metrics.llmName].outputTokens += metrics.outputTokens;
+          }
+        });
+        return acc;
+      },
+      {} as { [key: LLMName]: LlmMetrics }
+    );
+  }
 
-    for (const execution of this.stateExecutions) {
-      for (const metrics of execution.llmMetricsList) {
-        if (!metricsByLLM[metrics.llmName]) {
-          metricsByLLM[metrics.llmName] = {
-            apiCalls: 0,
-            inputTokens: 0,
-            outputTokens: 0,
-            llmName: metrics.llmName,
-          };
-        }
-
-        metricsByLLM[metrics.llmName].apiCalls += metrics.apiCalls;
-        metricsByLLM[metrics.llmName].inputTokens += metrics.inputTokens;
-        metricsByLLM[metrics.llmName].outputTokens += metrics.outputTokens;
-      }
-    }
-
-    return metricsByLLM;
+  getLlmMetrics(): { totalPrice: number; llmRunCount: number } {
+    const metricsSummary = this.llmMetricSummary();
+    const totalPrice = calculatePriceMultipleCalls(metricsSummary);
+    const llmRunCount = Object.values(metricsSummary).reduce(
+      (sum, metrics) => sum + metrics.apiCalls,
+      0
+    );
+    return { totalPrice, llmRunCount };
   }
 
   private getNextExecutionId(): number {

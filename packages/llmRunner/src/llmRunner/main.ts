@@ -315,6 +315,9 @@ export interface SquiggleResult {
   isValid: boolean;
   code: string;
   logs: TimestampedLogEntry[];
+  totalPrice: number;
+  runTimeMs: number;
+  llmRunCount: number;
 }
 
 export const runSquiggleGenerator = async (
@@ -322,12 +325,22 @@ export const runSquiggleGenerator = async (
   llmConfig: LlmConfig = llmConfigDefault
 ): Promise<SquiggleResult> => {
   const generator = new SquiggleGenerator(prompt, llmConfig);
+  const startTime = Date.now();
   try {
     await generator.run();
 
     generateAndSaveSummary(prompt, generator.stateManager);
 
-    return generator.stateManager.getFinalResult();
+    const endTime = Date.now();
+    const runTimeMs = endTime - startTime;
+    const { totalPrice, llmRunCount } = generator.stateManager.getLlmMetrics();
+
+    return {
+      ...generator.stateManager.getFinalResult(),
+      totalPrice,
+      runTimeMs,
+      llmRunCount,
+    };
   } catch (error) {
     const stateExecution = generator.stateManager.getCurrentStateExecution();
     stateExecution.criticalError(
