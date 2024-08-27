@@ -176,6 +176,13 @@ type NodeIdentifier = N<
   }
 >;
 
+type NodeUnitName = N<
+  "UnitName",
+  {
+    value: string;
+  }
+>;
+
 type NodeDecorator = N<
   "Decorator",
   {
@@ -284,6 +291,7 @@ export type ASTNode =
   | NodeUnitTypeSignature
   | NodeInfixUnitType
   | NodeExponentialUnitType
+  | NodeUnitName
   // identifiers
   | NodeIdentifier
   | NodeLambdaParameter
@@ -298,7 +306,7 @@ export type ASTCommentNode = {
   location: LocationRange;
 };
 
-type Kind = ASTNode["kind"];
+export type Kind = ASTNode["kind"];
 
 export type KindNode<T extends Kind> = Extract<ASTNode, { kind: T }>;
 
@@ -327,7 +335,7 @@ export const expressionKinds = [
 ] as const satisfies Kind[];
 
 export const unitTypeKinds = [
-  "Identifier",
+  "UnitName",
   "Float",
   "InfixUnitType",
   "ExponentialUnitType",

@@ -106,8 +106,8 @@ export const expressionKinds = [
 ] as const satisfies Kind[];
 
 export const unitTypeKinds = [
-  "Identifier",
   "Float",
+  "UnitName",
   "InfixUnitType",
   "ExponentialUnitType",
 ] as const satisfies Kind[];

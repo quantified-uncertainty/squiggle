@@ -181,7 +181,7 @@ function createTypeConstraint(node: ASTNode | null): TypeConstraint {
     case "UnitValue":
       // Can use a unitless literal in a type signature, e.g. `1/meters`.
       return empty_constraint();
-    case "Identifier":
+    case "UnitName":
       return {
         defined: true,
         variables: {},

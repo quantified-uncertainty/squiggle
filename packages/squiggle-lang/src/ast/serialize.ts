@@ -213,6 +213,7 @@ export function serializeAstNode(
     case "String":
     case "Boolean":
     case "Identifier":
+    case "UnitName":
       return node;
     default:
       throw node satisfies never;
@@ -375,10 +376,6 @@ export function deserializeAstNode(
         base: assertUnitType(visit.ast(node.base)),
         exponent: assertKind(visit.ast(node.exponent), "Float"),
       };
-    case "Identifier":
-      return {
-        ...node,
-      };
     case "LambdaParameter":
       return {
         ...node,
@@ -392,9 +389,11 @@ export function deserializeAstNode(
             ? assertKind(visit.ast(node.unitTypeSignature), "UnitTypeSignature")
             : null,
       };
+    case "Identifier":
     case "Float":
     case "String":
     case "Boolean":
+    case "UnitName":
       return node;
     default:
       throw node satisfies never;

@@ -417,3 +417,14 @@ export function parseEscapeSequence(
     }
   }
 }
+
+export function nodeUnitNameFromIdentifier(
+  identifier: ASTNode,
+  location: LocationRange
+): KindNode<"UnitName"> {
+  return {
+    kind: "UnitName",
+    value: assertKind(identifier, "Identifier").value,
+    location,
+  };
+}

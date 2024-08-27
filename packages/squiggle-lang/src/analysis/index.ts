@@ -28,6 +28,7 @@ import { NodeProgram } from "./NodeProgram.js";
 import { NodeString } from "./NodeString.js";
 import { NodeTernary } from "./NodeTernary.js";
 import { NodeUnaryCall } from "./NodeUnaryCall.js";
+import { NodeUnitName } from "./NodeUnitName.js";
 import { NodeUnitTypeSignature } from "./NodeUnitTypeSignature.js";
 import { NodeUnitValue } from "./NodeUnitValue.js";
 import {
@@ -193,6 +194,8 @@ function analyzeAstNode(node: ASTNode, context: AnalysisContext): TypedASTNode {
       return NodeInfixUnitType.fromAst(node, context);
     case "ExponentialUnitType":
       return NodeExponentialUnitType.fromAst(node, context);
+    case "UnitName":
+      return NodeUnitName.fromAst(node);
     default:
       return node satisfies never;
   }

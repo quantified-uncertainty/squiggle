@@ -64,10 +64,14 @@ infixUnitType
   typeMultiplicativeOp "operator" = '*' / '/'
 
 exponentialUnitType
-  = unit:(identifier / float) _ "^" _ exponent:float
+  = unit:(unitName / float) _ "^" _ exponent:float
     { return h.nodeExponentialUnitType(unit, exponent, location()); }
-  / unit:(identifier / float)
+  / unit:(unitName / float)
     { return unit; }
+
+unitName
+  = identifier:identifier
+    { return h.nodeUnitNameFromIdentifier(identifier, location()); }
 
 statement
   = letStatement

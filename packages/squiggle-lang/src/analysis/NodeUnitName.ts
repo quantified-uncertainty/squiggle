@@ -1,4 +1,4 @@
-import { LocationRange } from "../ast/types.js";
+import { KindNode, LocationRange } from "../ast/types.js";
 import { Node } from "./Node.js";
 
 export class NodeUnitName extends Node<"UnitName"> {
@@ -12,5 +12,9 @@ export class NodeUnitName extends Node<"UnitName"> {
 
   children() {
     return [];
+  }
+
+  static fromAst(node: KindNode<"UnitName">): NodeUnitName {
+    return new NodeUnitName(node.location, node.value);
   }
 }

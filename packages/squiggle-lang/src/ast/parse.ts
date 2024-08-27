@@ -167,6 +167,8 @@ export function astNodeToString(
             toSExpr
           )
         );
+      case "UnitValue":
+        return selfExpr([toSExpr(node.value), node.unit]);
       case "UnitTypeSignature":
         return selfExpr([toSExpr(node.body)]);
       case "InfixUnitType":
@@ -176,9 +178,8 @@ export function astNodeToString(
           toSExpr(node.base),
           node.exponent !== undefined ? toSExpr(node.exponent) : undefined,
         ]);
-      case "UnitValue":
-        return selfExpr([toSExpr(node.value), node.unit]);
-
+      case "UnitName":
+        return selfExpr([node.value]);
       default:
         throw new Error(`Unknown node: ${node satisfies never}`);
     }
