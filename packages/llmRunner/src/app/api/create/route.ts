@@ -1,4 +1,4 @@
-import { runSquiggleGenerator } from "../../../llmRunner/main";
+import { LlmConfig, SquiggleGenerator } from "../../../llmRunner/main";
 import {
   CreateRequestBody,
   createRequestBodySchema,
@@ -19,54 +19,47 @@ export async function POST(req: Request) {
       throw new Error("Prompt is required");
     }
 
-    const playgroundCount = Math.max(
-      1,
-      Math.min(5, Number(numPlaygrounds) || 1)
-    );
+    // Create a SquiggleGenerator instance
+    const llmConfig: LlmConfig = {
+      llmName: "Claude-Sonnet",
+      priceLimit: 0.2,
+      durationLimitMinutes: 1,
+      messagesInHistoryToKeep: 4,
+    };
+    const generator = new SquiggleGenerator(prompt, llmConfig);
 
-    //TODO: Add squiggleCode to the prompt, if it exists
-    // Run the Squiggle generator the specified number of times in parallel
-    const squigglePromises = Array(playgroundCount)
-      .fill(null)
-      .map(() => runSquiggleGenerator(prompt));
+    // Run the generator steps until completion
+    while (!(await generator.step())) {
+      if (req.signal.aborted) {
+        abortController.abort();
+        break;
+      }
+    }
 
-    const squiggleResults = await Promise.all(squigglePromises);
+    const { totalPrice, runTimeMs, llmRunCount, code, isValid } =
+      generator.getFinalResult();
 
-    // Log all responses
-    squiggleResults.forEach((result, index) => {
-      console.log(`Response ${index + 1}:`, result);
-    });
-
-    // Prepare the responses including all results
-    const responses = squiggleResults.map((result) => ({
-      code: result.code,
-      isValid: result.isValid,
-      totalPrice: result.totalPrice,
-      runTimeMs: result.runTimeMs,
-      llmRunCount: result.llmRunCount,
-    }));
+    const response = {
+      code,
+      isValid,
+      totalPrice,
+      runTimeMs,
+      llmRunCount,
+    };
 
     // Validate the response using the schema
-    const validatedResponses = squiggleResponseSchema.parse(responses);
+    const validatedResponse = squiggleResponseSchema.parse([response]);
 
     // Handle client disconnection
     req.signal.addEventListener("abort", () => {
       abortController.abort();
     });
 
-    // Return the responses as a stream
-    const stream = new ReadableStream({
-      start(controller) {
-        controller.enqueue(JSON.stringify(validatedResponses));
-        controller.close();
-      },
-    });
-
-    return new Response(stream, {
+    return new Response(JSON.stringify(validatedResponse), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    if (error === "AbortError") {
+    if (error.name === "AbortError") {
       return new Response("Generation stopped", { status: 499 });
     }
     console.error("Error in POST function:", error);

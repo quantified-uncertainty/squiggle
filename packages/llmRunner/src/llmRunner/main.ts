@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { generateAndSaveSummary } from "./generateSummary";
 import { LLMName, Message, runLLM } from "./llmHelper";
 import {
@@ -34,35 +33,70 @@ export interface LlmConfig {
 }
 
 export const llmConfigDefault: LlmConfig = {
-  // llmName: "Claude-Haiku",
   llmName: "Claude-Sonnet",
-  // llmName: "GPT4-mini",
-  // llmName: "GPT4",
   priceLimit: 0.2,
   durationLimitMinutes: 1,
   messagesInHistoryToKeep: 4,
 };
 
-class SquiggleGenerator {
+export interface SquiggleResult {
+  isValid: boolean;
+  code: string;
+  logs: TimestampedLogEntry[];
+  totalPrice: number;
+  runTimeMs: number;
+  llmRunCount: number;
+}
+
+export class SquiggleGenerator {
   public stateManager: StateManager;
   private prompt: string;
   private llmConfig: LlmConfig;
+  private startTime: number;
+  private isDone: boolean = false;
 
-  constructor(prompt: string, llmConfig: LlmConfig) {
+  constructor(prompt: string, llmConfig: LlmConfig = llmConfigDefault) {
     this.prompt = prompt;
     this.llmConfig = llmConfig;
     this.stateManager = new StateManager(
       this.llmConfig.priceLimit,
       this.llmConfig.durationLimitMinutes
     );
+
+    this.startTime = Date.now();
     this.registerStateHandlers();
   }
 
-  async run(): Promise<void> {
-    while (true) {
-      const { continueExecution } = await this.stateManager.step();
-      if (!continueExecution) break;
+  async step(): Promise<boolean> {
+    if (this.isDone) {
+      return true;
     }
+
+    const { continueExecution, stateExecution } =
+      await this.stateManager.step();
+
+    if (!continueExecution) {
+      this.isDone = true;
+      return true;
+    }
+
+    return false;
+  }
+
+  public getFinalResult(): SquiggleResult {
+    generateAndSaveSummary(this.prompt, this.stateManager);
+
+    const endTime = Date.now();
+    const runTimeMs = endTime - this.startTime;
+    const { totalPrice, llmRunCount } = this.stateManager.getLlmMetrics();
+
+    const finalResult: SquiggleResult = {
+      ...this.stateManager.getFinalResult(),
+      totalPrice,
+      runTimeMs,
+      llmRunCount,
+    };
+    return finalResult;
   }
 
   private registerStateHandlers() {
@@ -128,7 +162,6 @@ class SquiggleGenerator {
           message:
             "Unexpected code state in FIX_CODE_UNTIL_IT_RUNS. Doesn't have code. This should not be possible.",
         });
-        //TODO: Roll back to previous state with code.
         stateExecution.updateNextState(State.GENERATE_CODE);
         return;
       case "formattingFailed":
@@ -173,7 +206,7 @@ class SquiggleGenerator {
       return;
     }
 
-    const currentCode = codeState.code!;
+    const currentCode = codeState.code;
     const { codeState: newCodeState, runResult } =
       await squiggleCodeToCodeStateViaRunningAndFormatting(currentCode);
 
@@ -276,7 +309,6 @@ class SquiggleGenerator {
       return;
     }
 
-    // Only proceed with diff if there's actual content to process
     if (
       trimmedResponse.length > 0 &&
       !noAdjustmentRegex.test(trimmedResponse)
@@ -301,7 +333,6 @@ class SquiggleGenerator {
       stateExecution.updateCodeState(adjustedCodeState);
       stateExecution.updateNextState(codeStateNextState(adjustedCodeState));
     } else {
-      // If there's no content to process, consider it as no adjustment needed
       stateExecution.log({
         type: "info",
         message: "No adjustments provided, considering process complete",
@@ -311,43 +342,11 @@ class SquiggleGenerator {
   }
 }
 
-export interface SquiggleResult {
-  isValid: boolean;
-  code: string;
-  logs: TimestampedLogEntry[];
-  totalPrice: number;
-  runTimeMs: number;
-  llmRunCount: number;
-}
-
 export const runSquiggleGenerator = async (
   prompt: string,
   llmConfig: LlmConfig = llmConfigDefault
 ): Promise<SquiggleResult> => {
   const generator = new SquiggleGenerator(prompt, llmConfig);
-  const startTime = Date.now();
-  try {
-    await generator.run();
-
-    generateAndSaveSummary(prompt, generator.stateManager);
-
-    const endTime = Date.now();
-    const runTimeMs = endTime - startTime;
-    const { totalPrice, llmRunCount } = generator.stateManager.getLlmMetrics();
-
-    return {
-      ...generator.stateManager.getFinalResult(),
-      totalPrice,
-      runTimeMs,
-      llmRunCount,
-    };
-  } catch (error) {
-    const stateExecution = generator.stateManager.getCurrentStateExecution();
-    stateExecution.criticalError(
-      "runSquiggleGenerator error:" + error.toString()
-    );
-    generateAndSaveSummary(prompt, generator.stateManager);
-
-    throw error;
-  }
+  while (!(await generator.step())) {}
+  return generator.stateManager.getFinalResult() as SquiggleResult;
 };
