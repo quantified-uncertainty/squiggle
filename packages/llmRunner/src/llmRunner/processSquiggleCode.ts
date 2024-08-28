@@ -1,23 +1,28 @@
 #!/usr/bin/env node
 import {
+  EmbeddedRunner,
+  makeSelfContainedLinker,
   removeLambdas,
   result,
   simpleValueFromAny,
   SqError,
-  SqLinker,
   SqProject,
   summarizeSimpleValueWithoutLambda,
 } from "@quri/squiggle-lang";
 
 import { formatSquiggleCode } from "./formatSquiggleCode";
-import { getLibraryContent } from "./libraryConfig";
+import { libraryContents } from "./libraryConfig";
 import { processSearchReplaceResponse } from "./searchReplace";
 import { CodeState } from "./stateManager";
 
-export const linker: SqLinker = {
-  resolve: (name: string) => name,
-  loadSource: async (sourceName: string) => getLibraryContent(sourceName),
-};
+// export const linker: SqLinker = {
+//   resolve: (name: string) => name,
+//   loadModule: async (sourceName: string) => getLibraryContent(sourceName),
+// };
+
+export const linker = makeSelfContainedLinker(
+  Object.fromEntries(libraryContents)
+);
 
 function summarizeAny(json: any): string {
   return summarizeSimpleValueWithoutLambda(
@@ -37,21 +42,27 @@ const runSquiggle = async (
 ): Promise<
   Promise<result<SqOutputSummary, { error: SqError; project: SqProject }>>
 > => {
-  const project = SqProject.create({ linker: linker });
-  project.setSource("wrapper", code);
-  await project.run("wrapper");
-  const output = project.getOutput("wrapper");
+  const project = new SqProject({
+    linker: linker,
+    runner: new EmbeddedRunner(),
+  });
 
-  if (output.ok) {
+  project.setSimpleHead("main", code);
+  await project.waitForOutput("main");
+  const output = project.getOutput("main");
+
+  const endResult = output.getEndResult();
+  const bindings = output.getBindings();
+  if (endResult.ok && bindings.ok) {
     const outputJS: SqOutputSummary = {
-      result: summarizeAny(output.value.result.asJS()),
-      bindings: summarizeAny(output.value.bindings.asValue().asJS()),
+      result: summarizeAny(endResult.value.asJS()),
+      bindings: summarizeAny(bindings.value.asValue().asJS()),
     };
     return { ok: true, value: outputJS };
   } else {
     return {
       ok: false,
-      value: { error: output.value as SqError, project },
+      value: { error: endResult.value as SqError, project },
     };
   }
 };
