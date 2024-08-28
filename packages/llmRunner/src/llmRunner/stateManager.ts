@@ -115,7 +115,7 @@ export function codeStateErrorString(codeState: CodeState): string {
   if (codeState.type === "formattingFailed") {
     return codeState.error;
   } else if (codeState.type === "runFailed") {
-    return codeState.error.toStringWithDetails(codeState.project);
+    return codeState.error.toStringWithDetails();
   }
   return "";
 }

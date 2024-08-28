@@ -212,7 +212,7 @@ ${codeState.code}
 
 **Error:**
 \`\`\`
-${codeState.error.toStringWithDetails(codeState.project)}
+${codeState.error.toStringWithDetails()}
 \`\`\`
 
 **Code:**

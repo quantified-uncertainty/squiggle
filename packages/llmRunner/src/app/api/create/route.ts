@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       generator.getFinalResult();
 
     const response = {
-      code,
+      code: typeof code === "string" ? code : "",
       isValid,
       totalPrice,
       runTimeMs,
