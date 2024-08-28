@@ -87,6 +87,30 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
               );
             }
 
+            // Handle nested code blocks
+            if (
+              match &&
+              match[1] === "typescript" &&
+              String(children).includes("```")
+            ) {
+              return (
+                <div
+                  className={clsx(
+                    "code-block-wrapper overflow-hidden rounded",
+                    backgroundColor
+                  )}
+                >
+                  <div className="p-4">
+                    <pre>
+                      <code className="language-typescript">
+                        {String(children)}
+                      </code>
+                    </pre>
+                  </div>
+                </div>
+              );
+            }
+
             if (match && match[1] === "squigglePlayground") {
               const numLinesInText = String(children).match(/\n/g)?.length || 0;
               const linesToShow = Math.min(Math.max(numLinesInText, 4), 30);
@@ -118,13 +142,12 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
                 )}
               >
                 <div className="p-4">
-                  {match ? (
-                    <CodeSyntaxHighlighter {...rest} language={match[1]}>
-                      {String(children).replace(/\n$/, "")}
-                    </CodeSyntaxHighlighter>
-                  ) : (
-                    <code {...rest}>{children}</code>
-                  )}
+                  <CodeSyntaxHighlighter
+                    {...rest}
+                    language={match ? match[1] : "text"}
+                  >
+                    {String(children).replace(/\n$/, "")}
+                  </CodeSyntaxHighlighter>
                 </div>
               </div>
             );
