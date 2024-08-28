@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
-import { MarkdownViewer, SquigglePlayground } from "@quri/squiggle-components";
+import { MarkdownViewer } from "@quri/squiggle-components";
 
 import {
   Action,
@@ -19,6 +19,7 @@ import {
   squiggleResponseSchema,
 } from "../utils/squiggleTypes";
 import { useAvailableHeight } from "../utils/useAvailableHeight";
+import SquigglePlayground from "./SquigglePlayground";
 
 // Action Component
 const ActionComponent: React.FC<{ action: Action }> = ({ action }) => {
@@ -378,14 +379,13 @@ export default function CreatePage() {
                     </div>
                   </div>
                   <SquigglePlayground
-                    key={response.code}
-                    defaultCode={
-                      response.code || "// Your Squiggle code will appear here"
-                    }
                     height={
                       selectedRunIndex === null
                         ? height / numPlaygrounds - 40
                         : height - 40
+                    }
+                    defaultCode={
+                      response.code || "// Your Squiggle code will appear here"
                     }
                   />
                 </div>
