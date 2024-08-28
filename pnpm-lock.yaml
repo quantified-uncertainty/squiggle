@@ -135,6 +135,9 @@ importers:
       reactflow:
         specifier: ^11.11.4
         version: 11.11.4(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
+      rehype-raw:
+        specifier: ^7.0.0
+        version: 7.0.0
       remark-gfm:
         specifier: ^4.0.0
         version: 4.0.0
@@ -504,7 +507,7 @@ importers:
         version: 0.0.54(zod@3.23.8)
       '@anthropic-ai/sdk':
         specifier: ^0.27.0
-        version: 0.27.0
+        version: 0.27.1
       '@quri/prettier-plugin-squiggle':
         specifier: workspace:*
         version: link:../prettier-plugin
@@ -522,7 +525,7 @@ importers:
         version: 0.5.13(tailwindcss@3.4.3)
       ai:
         specifier: ^3.3.19
-        version: 3.3.19(openai@4.56.1)(react@18.3.1)(svelte@4.2.18)(vue@3.4.31)(zod@3.23.8)
+        version: 3.3.20(openai@4.56.1)(react@18.3.1)(svelte@4.2.18)(vue@3.4.31)(zod@3.23.8)
       axios:
         specifier: ^1.7.2
         version: 1.7.2
@@ -1316,8 +1319,8 @@ packages:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
 
-  /@anthropic-ai/sdk@0.27.0:
-    resolution: {integrity: sha512-DuksaCaCb0ENDAc1UHef341SRK6LQmPvey10+Q662Eo4rc8H2i/MKK/n6q/dJagqVkqJBoEEirrlMBLqIIhupw==}
+  /@anthropic-ai/sdk@0.27.1:
+    resolution: {integrity: sha512-AKFd/E8HO26+DOVPiZpEked3Pm2feA5d4gcX2FcJXr9veDkXbKO90hr2C7N2TL7mPIMwm040ldXlsIZQ416dHg==}
     dependencies:
       '@types/node': 18.19.31
       '@types/node-fetch': 2.6.11
@@ -9968,8 +9971,8 @@ packages:
       indent-string: 4.0.0
     dev: true
 
-  /ai@3.3.19(openai@4.56.1)(react@18.3.1)(svelte@4.2.18)(vue@3.4.31)(zod@3.23.8):
-    resolution: {integrity: sha512-Q3K3cubOYqLVK/5P6oWu5kjjPgAo4Lr+zzLZCCG0HX9b8QemgQCPmZGRNgLNf3a2y6m4NwpjJjAPYHPlb3ytwQ==}
+  /ai@3.3.20(openai@4.56.1)(react@18.3.1)(svelte@4.2.18)(vue@3.4.31)(zod@3.23.8):
+    resolution: {integrity: sha512-GKiL34BPVGgSEDkUlt8nyVRZkx1btnbXyw/bZKj1Jx5sCn/OY/qgiACzakhRzC/90UlxmrMsU1rZGW+Xr8+kFA==}
     engines: {node: '>=18'}
     peerDependencies:
       openai: ^4.42.0

@@ -12,7 +12,6 @@ import { useCallback, useEffect, useState } from "react";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
 
-import { Simulation } from "../../../../components/dist/src/lib/hooks/useSimulator";
 import {
   Action,
   CreateRequestBody,
@@ -353,13 +352,6 @@ export default function CreatePage() {
                     ? height / numPlaygrounds - 40
                     : height - 40
                 }
-                onNewSimulation={(simulation: Simulation) => {
-                  updateLastAction(
-                    simulation.output.ok ? "success" : "error",
-                    undefined,
-                    JSON.stringify(simulation.output, null, 2)
-                  );
-                }}
               />
             </div>
           ))}
