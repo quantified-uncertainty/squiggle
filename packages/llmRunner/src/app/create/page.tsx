@@ -379,6 +379,7 @@ export default function CreatePage() {
                     </div>
                   </div>
                   <SquigglePlayground
+                    key={response.code}
                     height={
                       selectedRunIndex === null
                         ? height / numPlaygrounds - 40
