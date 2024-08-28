@@ -19,10 +19,6 @@ import {
   WarnLogEntry,
 } from "./stateManager";
 
-const escapeMarkdown = (text: string): string => {
-  return text.replace(/```/g, "\\`\\`\\`");
-};
-
 export const generateSummary = (
   prompt: string,
   stateManager: StateManager
@@ -151,34 +147,34 @@ const getFullMessage = (log: TimestampedLogEntry): string => {
       return `<details>
   <summary>Content</summary>
 
-\`\`\`
-${escapeMarkdown(llmResponse.content)}
-\`\`\`
+\`\`\`\`
+${llmResponse.content}
+\`\`\`\`
 </details>\n\n
 
 <details>
   <summary>Prompt</summary>
 
-\`\`\`
-${escapeMarkdown(llmResponse.prompt)}
-\`\`\`
+\`\`\`\`
+${llmResponse.prompt}
+\`\`\`\`
 </details>\n\n
 
 
 <details>
   <summary>Messages</summary>
 
-\`\`\`json
-${escapeMarkdown(JSON.stringify(llmResponse.messages, null, 2))}
-\`\`\`
+\`\`\`\`json
+${JSON.stringify(llmResponse.messages, null, 2)}
+\`\`\`\`
 </details>\n\n
 
 <details>
   <summary>Full Response</summary>
 
-\`\`\`json
-${escapeMarkdown(JSON.stringify(llmResponse.response, null, 2))}
-\`\`\`
+\`\`\`\`json
+${JSON.stringify(llmResponse.response, null, 2)}
+\`\`\`\`
 </details>\n\n\n`;
     case "codeState":
       const codeState = (log.entry as CodeStateLogEntry).codeState;
@@ -202,7 +198,7 @@ ${codeState.error}
 \`\`\`
 
 **Code:**
-\`\`\`
+\`\`\`squiggleEditor
 ${codeState.code}
 \`\`\`
 </details>\n\n`;
@@ -216,7 +212,7 @@ ${codeState.error.toStringWithDetails()}
 \`\`\`
 
 **Code:**
-\`\`\`
+\`\`\`squiggleEditor
 ${codeState.code}
 \`\`\`
 </details>\n\n`;
@@ -224,7 +220,7 @@ ${codeState.code}
       return `<details>
   <summary>✅ Code Update: [Success] - Code executed successfully</summary>
 
-\`\`\`
+\`\`\`squiggleEditor
 ${codeState.code}
 \`\`\`
 </details>\n\n`;
