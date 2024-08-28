@@ -12,7 +12,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { prompt, numPlaygrounds, squiggleCode }: CreateRequestBody =
+    const { prompt, squiggleCode }: CreateRequestBody =
       createRequestBodySchema.parse(body);
 
     if (!prompt) {
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const { totalPrice, runTimeMs, llmRunCount, code, isValid } =
+    const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
       generator.getFinalResult();
 
     const response = {
@@ -45,6 +45,7 @@ export async function POST(req: Request) {
       totalPrice,
       runTimeMs,
       llmRunCount,
+      logSummary,
     };
 
     // Validate the response using the schema

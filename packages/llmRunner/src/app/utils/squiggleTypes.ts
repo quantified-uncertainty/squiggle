@@ -6,6 +6,7 @@ export const squiggleSchema = z.object({
   totalPrice: z.number(),
   runTimeMs: z.number(),
   llmRunCount: z.number(),
+  logSummary: z.string(),
 });
 
 export const squiggleResponseSchema = z.array(squiggleSchema);
@@ -17,6 +18,7 @@ export type Action = {
   prompt: string;
   result?: string;
   code?: string;
+  logSummary?: string;
   status: "loading" | "success" | "error";
   timestamp: Date;
 };

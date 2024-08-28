@@ -23,7 +23,7 @@ const escapeMarkdown = (text: string): string => {
   return text.replace(/```/g, "\\`\\`\\`");
 };
 
-const generateSummary = (
+export const generateSummary = (
   prompt: string,
   stateManager: StateManager
 ): string => {
@@ -231,7 +231,7 @@ ${codeState.code}
   }
 };
 
-const saveSummaryToFile = (summary: string): void => {
+export const saveSummaryToFile = (summary: string): void => {
   const logDir = path.join(process.cwd(), "logs");
   if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });

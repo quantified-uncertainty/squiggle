@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
-import { SquigglePlayground } from "@quri/squiggle-components";
+import { MarkdownViewer, SquigglePlayground } from "@quri/squiggle-components";
 
 import {
   Action,
@@ -72,6 +72,27 @@ const ActionComponent: React.FC<{ action: Action }> = ({ action }) => {
     </div>
   );
 };
+
+const LogsView: React.FC<{ onClose: () => void; logSummary: string }> = ({
+  onClose,
+  logSummary,
+}) => {
+  return (
+    <div className="h-full w-full bg-white p-4">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-xl font-bold">Logs</h2>
+        <button
+          className="rounded bg-red-500 px-4 py-2 text-white"
+          onClick={onClose}
+        >
+          Close
+        </button>
+      </div>
+      <MarkdownViewer md={logSummary} textSize="sm" />
+    </div>
+  );
+};
+
 // Main Component
 export default function CreatePage() {
   // State
@@ -86,10 +107,10 @@ export default function CreatePage() {
   const [squiggleResponses, setSquiggleResponses] =
     useState<SquiggleResponse | null>(null);
   const [numPlaygrounds, setNumPlaygrounds] = useState(1);
-  const [selectedPlaygroundIndex, setSelectedPlaygroundIndex] = useState<
-    number | null
-  >(null);
   const [selectedRunIndex, setSelectedRunIndex] = useState<number | null>(null);
+  const [selectedLogsIndex, setSelectedLogsIndex] = useState<number | null>(
+    null
+  );
 
   const { ref, height } = useAvailableHeight();
 
@@ -108,7 +129,7 @@ export default function CreatePage() {
           updateLastAction(
             "success",
             response.code,
-            `Response ${index + 1}\nPrice: $${response.totalPrice.toFixed(4)}\nTime: ${response.runTimeMs}ms\nLLM Runs: ${response.llmRunCount}`
+            `Response ${index + 1}\nPrice: $${response.totalPrice.toFixed(4)}\nTime: ${response.runTimeMs / 1000}s\nLLM Runs: ${response.llmRunCount}`
           )
         );
     }
@@ -130,6 +151,11 @@ export default function CreatePage() {
     },
     []
   );
+
+  const handleToggleLogs = (index: number | null) => {
+    setSelectedLogsIndex(index);
+    setSelectedRunIndex(null);
+  };
 
   // Event handlers
   const handleSubmit = () => {
@@ -176,8 +202,6 @@ export default function CreatePage() {
     setSelectedRunIndex(null);
     setMode("edit");
     setSquiggleCode(squiggleResponses?.[index]?.code || "");
-    setSelectedPlaygroundIndex(index);
-    // Focus on the prompt text field
     setTimeout(() => {
       const promptTextarea = document.getElementById("edit-prompt-textarea");
       if (promptTextarea) {
@@ -196,166 +220,184 @@ export default function CreatePage() {
 
   return (
     <div className="flex h-screen text-sm">
-      {/* Left column: Mode Toggle, Chat, Form, and Actions */}
-      <div
-        className={`flex w-1/5 flex-col px-2 py-2 ${selectedRunIndex !== null ? "hidden" : ""}`}
-      >
-        <div className="mb-4 flex">
-          <button
-            className={`flex-1 rounded-l p-2 ${
-              mode === "create" ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
-            onClick={() => setMode("create")}
+      {selectedLogsIndex === null ? (
+        <>
+          {/* Left column: Mode Toggle, Chat, Form, and Actions */}
+          <div
+            className={`flex w-1/5 flex-col px-2 py-2 ${selectedRunIndex !== null ? "hidden" : ""}`}
           >
-            Create
-          </button>
-          <button
-            className={`flex-1 rounded-r p-2 ${
-              mode === "edit" ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
-            onClick={() => setMode("edit")}
-          >
-            Edit
-          </button>
-        </div>
-        {mode === "create" ? (
-          <div className="mb-4 flex">
-            <textarea
-              className="flex-grow rounded-l border p-2 text-sm"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Enter your prompt here"
-              rows={10}
-            />
-          </div>
-        ) : (
-          <>
-            <div className="mb-2">
-              <h3 className="font-semibold"> Prompt</h3>
-            </div>
             <div className="mb-4 flex">
-              <textarea
-                className="flex-grow rounded-l border p-2 text-sm"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="What changes would you like to make?"
-                rows={8}
-              />
+              <button
+                className={`flex-1 rounded-l p-2 ${
+                  mode === "create" ? "bg-blue-500 text-white" : "bg-gray-200"
+                }`}
+                onClick={() => setMode("create")}
+              >
+                Create
+              </button>
+              <button
+                className={`flex-1 rounded-r p-2 ${
+                  mode === "edit" ? "bg-blue-500 text-white" : "bg-gray-200"
+                }`}
+                onClick={() => setMode("edit")}
+              >
+                Edit
+              </button>
             </div>
-            <div className="mb-2">
-              <h3 className="font-semibold">Squiggle Code</h3>
-            </div>
-            <div className="mb-4 flex">
-              <textarea
-                className="flex-grow rounded-l border p-2 text-sm"
-                value={squiggleCode}
-                onChange={(e) => setSquiggleCode(e.target.value)}
-                placeholder="Enter your Squiggle code here"
-                rows={12}
-              />
-            </div>
-          </>
-        )}
-        <div className="mb-4">
-          <select
-            className="w-full rounded border p-2"
-            value={numPlaygrounds}
-            onChange={handleNumPlaygroundsChange}
-          >
-            {[1, 2, 3, 4, 5].map((num) => (
-              <option key={num} value={num}>
-                {num} Run{num > 1 ? "s" : ""}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button
-          className="rounded-r bg-blue-500 px-4 py-2 text-sm text-white"
-          onClick={handleSubmit}
-          disabled={isLoading}
-        >
-          {isLoading ? "Generating..." : "Send"}
-        </button>
-        {isLoading && (
-          <button
-            className="mb-4 rounded bg-red-500 px-4 py-2 text-sm text-white"
-            onClick={handleStop}
-          >
-            Stop Generation
-          </button>
-        )}
-        <div className="flex-grow overflow-y-auto">
-          <h2 className="text-md mb-2 font-bold">Actions</h2>
-          {actions.map((action) => (
-            <ActionComponent key={action.id} action={action} />
-          ))}
-        </div>
-      </div>
-      {/* Right column: SquigglePlaygrounds */}
-      <div
-        className={`px-2 ${selectedRunIndex !== null ? "w-full" : "w-4/5"}`}
-        style={{ opacity: playgroundOpacity / 100, height: height || "auto" }}
-        ref={ref}
-      >
-        {squiggleResponses &&
-          squiggleResponses.map((response, index) => (
-            <div
-              key={actions.at(-1)?.id + index}
-              className={`mb-4 ${selectedRunIndex !== null && selectedRunIndex !== index ? "hidden" : ""}`}
-            >
-              <div className="mb-2 flex items-center justify-between rounded bg-gray-100 p-2">
-                <div className="flex items-center space-x-2">
-                  <span className="font-semibold">Run {index + 1}</span>
-                  <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
-                    {response.runTimeMs.toFixed(2)}ms
-                  </span>
-                  <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-800">
-                    ${response.totalPrice.toFixed(4)}
-                  </span>
-                  <span className="rounded-full bg-purple-100 px-2 py-1 text-xs text-purple-800">
-                    {response.llmRunCount} LLM runs
-                  </span>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    className="rounded bg-blue-500 px-4 py-2 text-white"
-                    onClick={() => handleEditVersion(index)}
-                  >
-                    {squiggleResponses.length === 1
-                      ? "Edit"
-                      : "Edit this version"}
-                  </button>
-                  {selectedRunIndex === null ? (
-                    <button
-                      className="rounded bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
-                      onClick={() => handleSelectRun(index)}
-                    >
-                      Full View
-                    </button>
-                  ) : (
-                    <button
-                      className="rounded bg-red-500 px-4 py-2 text-white"
-                      onClick={handleCloseSelectedRun}
-                    >
-                      Close
-                    </button>
-                  )}
-                </div>
+            {mode === "create" ? (
+              <div className="mb-4 flex">
+                <textarea
+                  className="flex-grow rounded-l border p-2 text-sm"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder="Enter your prompt here"
+                  rows={10}
+                />
               </div>
-              <SquigglePlayground
-                key={response.code}
-                defaultCode={
-                  response.code || "// Your Squiggle code will appear here"
-                }
-                height={
-                  selectedRunIndex === null
-                    ? height / numPlaygrounds - 40
-                    : height - 40
-                }
-              />
+            ) : (
+              <>
+                <div className="mb-2">
+                  <h3 className="font-semibold"> Prompt</h3>
+                </div>
+                <div className="mb-4 flex">
+                  <textarea
+                    className="flex-grow rounded-l border p-2 text-sm"
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder="What changes would you like to make?"
+                    rows={8}
+                  />
+                </div>
+                <div className="mb-2">
+                  <h3 className="font-semibold">Squiggle Code</h3>
+                </div>
+                <div className="mb-4 flex">
+                  <textarea
+                    className="flex-grow rounded-l border p-2 text-sm"
+                    value={squiggleCode}
+                    onChange={(e) => setSquiggleCode(e.target.value)}
+                    placeholder="Enter your Squiggle code here"
+                    rows={12}
+                  />
+                </div>
+              </>
+            )}
+            <div className="mb-4">
+              <select
+                className="w-full rounded border p-2"
+                value={numPlaygrounds}
+                onChange={handleNumPlaygroundsChange}
+              >
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <option key={num} value={num}>
+                    {num} Run{num > 1 ? "s" : ""}
+                  </option>
+                ))}
+              </select>
             </div>
-          ))}
-      </div>
+            <button
+              className="rounded-r bg-blue-500 px-4 py-2 text-sm text-white"
+              onClick={handleSubmit}
+              disabled={isLoading}
+            >
+              {isLoading ? "Generating..." : "Send"}
+            </button>
+            {isLoading && (
+              <button
+                className="mb-4 rounded bg-red-500 px-4 py-2 text-sm text-white"
+                onClick={handleStop}
+              >
+                Stop Generation
+              </button>
+            )}
+            <div className="flex-grow overflow-y-auto">
+              <h2 className="text-md mb-2 font-bold">Actions</h2>
+              {actions.map((action) => (
+                <ActionComponent key={action.id} action={action} />
+              ))}
+            </div>
+          </div>
+          {/* Right column: SquigglePlaygrounds */}
+          <div
+            className={`px-2 ${selectedRunIndex !== null ? "w-full" : "w-4/5"}`}
+            style={{
+              opacity: playgroundOpacity / 100,
+              height: height || "auto",
+            }}
+            ref={ref}
+          >
+            {squiggleResponses &&
+              squiggleResponses.map((response, index) => (
+                <div
+                  key={actions.at(-1)?.id + index}
+                  className={`mb-4 ${selectedRunIndex !== null && selectedRunIndex !== index ? "hidden" : ""}`}
+                >
+                  <div className="mb-2 flex items-center justify-between rounded bg-gray-100 p-2">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-semibold">Run {index + 1}</span>
+                      <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
+                        {response.runTimeMs.toFixed(2)}ms
+                      </span>
+                      <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-800">
+                        ${response.totalPrice.toFixed(4)}
+                      </span>
+                      <span className="rounded-full bg-purple-100 px-2 py-1 text-xs text-purple-800">
+                        {response.llmRunCount} LLM runs
+                      </span>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        className="rounded bg-blue-500 px-4 py-2 text-white"
+                        onClick={() => handleEditVersion(index)}
+                      >
+                        {squiggleResponses.length === 1
+                          ? "Edit"
+                          : "Edit this version"}
+                      </button>
+                      <button
+                        className="rounded bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
+                        onClick={() => handleToggleLogs(index)}
+                      >
+                        Open Logs
+                      </button>
+                      {selectedRunIndex === null ? (
+                        <button
+                          className="rounded bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
+                          onClick={() => handleSelectRun(index)}
+                        >
+                          Full View
+                        </button>
+                      ) : (
+                        <button
+                          className="rounded bg-red-500 px-4 py-2 text-white"
+                          onClick={handleCloseSelectedRun}
+                        >
+                          Close
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <SquigglePlayground
+                    key={response.code}
+                    defaultCode={
+                      response.code || "// Your Squiggle code will appear here"
+                    }
+                    height={
+                      selectedRunIndex === null
+                        ? height / numPlaygrounds - 40
+                        : height - 40
+                    }
+                  />
+                </div>
+              ))}
+          </div>
+        </>
+      ) : (
+        <LogsView
+          onClose={() => handleToggleLogs(null)}
+          logSummary={squiggleResponses?.[selectedLogsIndex]?.logSummary || ""}
+        />
+      )}
     </div>
   );
 }

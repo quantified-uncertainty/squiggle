@@ -1,4 +1,4 @@
-import { generateAndSaveSummary } from "./generateSummary";
+import { generateSummary, saveSummaryToFile } from "./generateSummary";
 import { LLMName, Message, runLLM } from "./llmHelper";
 import {
   completionContentToCodeState,
@@ -46,6 +46,7 @@ export interface SquiggleResult {
   totalPrice: number;
   runTimeMs: number;
   llmRunCount: number;
+  logSummary: string; // markdown
 }
 
 export class SquiggleGenerator {
@@ -84,7 +85,8 @@ export class SquiggleGenerator {
   }
 
   public getFinalResult(): SquiggleResult {
-    generateAndSaveSummary(this.prompt, this.stateManager);
+    const logSummary = generateSummary(this.prompt, this.stateManager);
+    saveSummaryToFile(logSummary);
 
     const endTime = Date.now();
     const runTimeMs = endTime - this.startTime;
@@ -95,6 +97,7 @@ export class SquiggleGenerator {
       totalPrice,
       runTimeMs,
       llmRunCount,
+      logSummary,
     };
     return finalResult;
   }
