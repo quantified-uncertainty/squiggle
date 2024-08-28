@@ -74,7 +74,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
           code({ node, className, children, ...rest }) {
             const match = /language-(\w+)/.exec(className || "");
             const isInline =
-              node && (node as any).properties["inline"] === "true";
+              node && (node as Element).properties["inline"] === "true";
 
             if (isInline) {
               return (
