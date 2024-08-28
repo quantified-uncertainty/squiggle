@@ -55,15 +55,13 @@ pianoTunersPerPiano = {
 In-between text
 
 \`\`\`squiggleEditor
-pianoTunersPerPiano = {
-  pianosPerPianoTuner = 2k to 50k
-  1 / pianosPerPianoTuner
-}
+foo = 23 to 50
 \`\`\`
 
 ---
 
 \`\`\`squigglePlayground
+// details of this playground
 pianoTunersPerPiano = {
   pianosPerPianoTuner = 2k to 50k
   1 / pianosPerPianoTuner
@@ -130,20 +128,23 @@ export const Details: Story = {
 # Quick React FAQ
 
 <details>
-  <summary>What is React?</summary>
+  <summary>Squiggle Editor</summary>
   
-  React is a JavaScript library for building user interfaces. It uses a component-based architecture and a virtual DOM for efficient rendering.
+  \`\`\`squiggleEditor
+foo = 23 to 50
+\`\`\`
 </details>
 
 <details>
-  <summary>How do I create a React app?</summary>
+  <summary>Squiggle Playground</summary>
   
-  Use Create React App:
-  \`\`\`
-  npx create-react-app my-app
-  cd my-app
-  npm start
-  \`\`\`
+  \`\`\`squigglePlayground
+// details of this playground
+pianoTunersPerPiano = {
+  pianosPerPianoTuner = 2k to 50k
+  1 / pianosPerPianoTuner
+}
+\`\`\`
 </details>
 
 <details>
