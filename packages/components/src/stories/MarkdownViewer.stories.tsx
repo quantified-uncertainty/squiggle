@@ -52,6 +52,24 @@ pianoTunersPerPiano = {
 }
 \`\`\`
 
+In-between text
+
+\`\`\`squiggleEditor
+pianoTunersPerPiano = {
+  pianosPerPianoTuner = 2k to 50k
+  1 / pianosPerPianoTuner
+}
+\`\`\`
+
+---
+
+\`\`\`squigglePlayground
+pianoTunersPerPiano = {
+  pianosPerPianoTuner = 2k to 50k
+  1 / pianosPerPianoTuner
+}
+\`\`\`
+
 ### Blockquotes
 
 > Markdown is a lightweight markup language with plain-text formatting syntax.
@@ -99,6 +117,59 @@ normal({ mean: 5, stdev: 2 })
 normal(5 to 10, normal(3, 2))
 normal({ mean: uniform(5, 9), stdev: 3 })
 \`\`\`
+`,
+  },
+};
+
+export const Details: Story = {
+  name: "Details Dropdown",
+
+  args: {
+    textSize: "sm",
+    md: `
+# Quick React FAQ
+
+<details>
+  <summary>What is React?</summary>
+  
+  React is a JavaScript library for building user interfaces. It uses a component-based architecture and a virtual DOM for efficient rendering.
+</details>
+
+<details>
+  <summary>How do I create a React app?</summary>
+  
+  Use Create React App:
+  \`\`\`
+  npx create-react-app my-app
+  cd my-app
+  npm start
+  \`\`\`
+</details>
+
+<details>
+  <summary>What are React Hooks?</summary>
+  
+  Hooks are functions that let you use state and other React features in functional components. Common hooks include useState and useEffect.
+</details>
+
+<details>
+  <summary>Can you show a simple React component?</summary>
+  
+  Here's a basic counter component:
+  \`\`\`jsx
+  import React, { useState } from 'react';
+
+  function Counter() {
+    const [count, setCount] = useState(0);
+    return (
+      <div>
+        <p>Count: {count}</p>
+        <button onClick={() => setCount(count + 1)}>Increment</button>
+      </div>
+    );
+  }
+  \`\`\`
+</details>
 `,
   },
 };
