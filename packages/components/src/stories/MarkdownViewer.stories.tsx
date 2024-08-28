@@ -174,3 +174,24 @@ pianoTunersPerPiano = {
 `,
   },
 };
+
+export const NestedCodeBlocks: Story = {
+  name: "Nested Code Blocks",
+
+  args: {
+    textSize: "sm",
+    md:
+      "````javascript\n" +
+      "```\n" +
+      "Here's a concise, one-line Squiggle model as requested:\n" +
+      "\n" +
+      "```squigglePlayground\n" +
+      "a = mx(normal(5,2), uniform(0,10), lognormal({p5: 1, p95: 20}))\n" +
+      "a\n" +
+      "```\n" +
+      "\n" +
+      "This single line creates a mixture distribution of three different probability distributions: a normal distribution, a uniform distribution, and a lognormal distribution. It's a simple yet potentially useful model for various scenarios where you might need to combine different types of uncertainty.\n" +
+      "```\n" +
+      "````",
+  },
+};
