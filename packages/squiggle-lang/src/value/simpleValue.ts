@@ -288,7 +288,12 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           return simpleValueFromAny(value.value);
         case "SampleSetDist": {
           const dist = value.value as SampleSetDist;
-          return [...dist.samples];
+          const fields: [string, SimpleValue][] = [
+            ["vType", "SampleSetDist"],
+            ["samples", [...dist.samples]],
+            ["summary", simpleValueFromAny(dist.summarize())],
+          ];
+          return ImmutableMap(fields);
         }
         default:
           return simpleValueFromAny(value.value);
