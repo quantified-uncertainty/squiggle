@@ -78,6 +78,7 @@ export class SquiggleGenerator {
 
     if (!continueExecution) {
       this.isDone = true;
+      saveSummaryToFile(generateSummary(this.prompt, this.stateManager));
       return true;
     }
 
@@ -86,8 +87,6 @@ export class SquiggleGenerator {
 
   public getFinalResult(): SquiggleResult {
     const logSummary = generateSummary(this.prompt, this.stateManager);
-    saveSummaryToFile(logSummary);
-
     const endTime = Date.now();
     const runTimeMs = endTime - this.startTime;
     const { totalPrice, llmRunCount } = this.stateManager.getLlmMetrics();

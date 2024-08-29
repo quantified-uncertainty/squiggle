@@ -337,7 +337,7 @@ export default function CreatePage() {
                     <div className="flex items-center space-x-2">
                       <span className="font-semibold">Run {index + 1}</span>
                       <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
-                        {response.runTimeMs.toFixed(2)}ms
+                        {(response.runTimeMs / 1000).toFixed(2)}s
                       </span>
                       <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-800">
                         ${response.totalPrice.toFixed(4)}
