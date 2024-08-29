@@ -15,6 +15,8 @@ export async function POST(req: Request) {
     const { prompt, squiggleCode }: CreateRequestBody =
       createRequestBodySchema.parse(body);
 
+    console.log("Inputs", prompt, squiggleCode);
+
     if (!prompt) {
       throw new Error("Prompt is required");
     }
@@ -26,7 +28,15 @@ export async function POST(req: Request) {
       durationLimitMinutes: 1,
       messagesInHistoryToKeep: 4,
     };
-    const generator = new SquiggleGenerator(prompt, llmConfig);
+
+    const type = squiggleCode && squiggleCode !== "" ? "Edit" : "Create";
+
+    const generator = new SquiggleGenerator(
+      type === "Create"
+        ? { type: "Create", prompt }
+        : { type: "Edit", prompt, code: squiggleCode },
+      llmConfig
+    );
 
     // Run the generator steps until completion
     while (!(await generator.step())) {

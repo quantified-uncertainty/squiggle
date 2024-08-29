@@ -117,6 +117,7 @@ const generateDetailedExecutionLogs = (
       detailedLogs += `  - Input Tokens: ${metrics.inputTokens}\n`;
       detailedLogs += `  - Output Tokens: ${metrics.outputTokens}\n`;
       detailedLogs += `  - Estimated Cost: $${cost.toFixed(4)}\n`;
+      detailedLogs += `  - Output tokens per second: ${(metrics.outputTokens / (execution.durationMs / 1000)).toFixed(2)}\n`;
     });
 
     detailedLogs += "### Logs:\n";

@@ -102,7 +102,6 @@ export default function CreatePage() {
     "Make a 1-line model, that is just 1 line in total, no comments, no decorators. Be creative."
   );
   const [squiggleCode, setSquiggleCode] = useState("");
-  const [editPrompt, setEditPrompt] = useState("");
   const [playgroundOpacity, setPlaygroundOpacity] = useState(100);
   const [actions, setActions] = useState<Action[]>([]);
   const [squiggleResponses, setSquiggleResponses] =
@@ -163,14 +162,14 @@ export default function CreatePage() {
     setPlaygroundOpacity(50);
     const newAction: Action = {
       id: Date.now().toString(),
-      prompt: mode === "create" ? prompt : editPrompt,
+      prompt,
       status: "loading",
       timestamp: new Date(),
     };
     setActions((prevActions) => [...prevActions, newAction]);
 
     const requestBody: CreateRequestBody = {
-      prompt: mode === "create" ? prompt : editPrompt,
+      prompt,
       previousPrompt: newAction.prompt,
       previousCode: newAction.code,
       previousResult: newAction.result,
@@ -178,13 +177,11 @@ export default function CreatePage() {
       squiggleCode: mode === "edit" ? squiggleCode : undefined,
     };
 
+    console.log("requestBody", requestBody);
+
     submit(requestBody);
 
-    if (mode === "create") {
-      setPrompt("");
-    } else {
-      setEditPrompt("");
-    }
+    setPrompt("");
   };
 
   const handleStop = () => {
@@ -283,19 +280,6 @@ export default function CreatePage() {
                 </div>
               </>
             )}
-            <div className="mb-4">
-              <select
-                className="w-full rounded border p-2"
-                value={numPlaygrounds}
-                onChange={handleNumPlaygroundsChange}
-              >
-                {[1, 2, 3, 4, 5].map((num) => (
-                  <option key={num} value={num}>
-                    {num} Run{num > 1 ? "s" : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
             <button
               className="rounded-r bg-blue-500 px-4 py-2 text-sm text-white"
               onClick={handleSubmit}

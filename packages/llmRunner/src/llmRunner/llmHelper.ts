@@ -8,7 +8,7 @@ import { squiggleSystemContent } from "./prompts";
 dotenv.config({ path: ".env.local" });
 
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: process.env["ANTHROPIC_API_KEY"],
 });
 
 // Model selection and pricing
@@ -73,7 +73,7 @@ export type LLMName = keyof typeof MODEL_CONFIGS;
 // Initialize OpenRouter client
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY,
+  apiKey: process.env["OPENROUTER_API_KEY"],
 });
 
 export type Message = {

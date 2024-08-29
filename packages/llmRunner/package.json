@@ -17,6 +17,7 @@
     "@ai-sdk/anthropic": "^0.0.48",
     "@ai-sdk/openai": "^0.0.54",
     "@anthropic-ai/sdk": "^0.27.0",
+    "@quri/configs": "workspace:*",
     "@quri/prettier-plugin-squiggle": "workspace:*",
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",

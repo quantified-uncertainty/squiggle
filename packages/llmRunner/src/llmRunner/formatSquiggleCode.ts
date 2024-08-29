@@ -1,6 +1,6 @@
 import * as prettier from "prettier/standalone";
 
-import * as prettierSquigglePlugin from "@quri/prettier-plugin-squiggle/standalone";
+import * as prettierSquigglePlugin from "@quri/prettier-plugin-squiggle";
 import { result } from "@quri/squiggle-lang";
 
 //This is moved in its own file, because the prettier plugin causes issues with the tests.

@@ -230,12 +230,6 @@ export class StateManager {
   }
 
   private registerDefaultHandlers() {
-    this.registerStateHandler(State.START, {
-      execute: async (stateExecution) => {
-        stateExecution.updateNextState(State.GENERATE_CODE);
-      },
-    });
-
     this.registerStateHandler(State.DONE, {
       execute: async (stateExecution) => {
         stateExecution.updateNextState(State.DONE);
