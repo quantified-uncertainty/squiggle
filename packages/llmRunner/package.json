@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest && NODE_OPTIONS=--experimental-vm-modules",
     "getCode": "tsx src/llmRunner/scripts/fetchSquiggleLibraries.ts",
-    "trySquiggleGenerator": "tsx src/llmRunner/scripts/trySquiggleGenerator.ts"
+    "createSquiggle": "tsx src/llmRunner/scripts/createSquiggle.ts",
+    "editSquiggle": "tsx src/llmRunner/scripts/editSquiggle.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^0.0.48",

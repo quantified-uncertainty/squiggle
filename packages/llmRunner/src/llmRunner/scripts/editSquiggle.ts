@@ -8,10 +8,16 @@ async function main() {
     messagesInHistoryToKeep: 4,
   };
 
-  const prompt =
-    "Generate a function that takes a list of numbers and returns the sum of the numbers";
+  const prompt = "Add interesting detail to this code.";
+  const initialCode = `
+  foo = 0 to 100
+  bar = 30
+  `;
 
-  const generator = new SquiggleGenerator(prompt, llmConfig);
+  const generator = new SquiggleGenerator(
+    { type: "Edit", prompt, code: initialCode },
+    llmConfig
+  );
 
   // Run the generator steps until completion
   while (!(await generator.step())) {}

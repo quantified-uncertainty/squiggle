@@ -49,15 +49,21 @@ export interface SquiggleResult {
   logSummary: string; // markdown
 }
 
+export type GeneratorInput =
+  | { type: "Create"; prompt: string }
+  | { type: "Edit"; prompt: string; code: string };
+
 export class SquiggleGenerator {
   public stateManager: StateManager;
   private prompt: string;
   private llmConfig: LlmConfig;
   private startTime: number;
   private isDone: boolean = false;
+  private input: GeneratorInput;
 
-  constructor(prompt: string, llmConfig: LlmConfig = llmConfigDefault) {
-    this.prompt = prompt;
+  constructor(input: GeneratorInput, llmConfig: LlmConfig = llmConfigDefault) {
+    this.input = input;
+    this.prompt = input.prompt;
     this.llmConfig = llmConfig;
     this.stateManager = new StateManager(
       this.llmConfig.priceLimit,
@@ -66,6 +72,25 @@ export class SquiggleGenerator {
 
     this.startTime = Date.now();
     this.registerStateHandlers();
+
+    if (input.type === "Create") {
+      this.stateManager.registerStateHandler(State.START, {
+        execute: async (stateExecution) => {
+          stateExecution.updateNextState(State.GENERATE_CODE);
+        },
+      });
+    } else {
+      this.stateManager.registerStateHandler(State.START, {
+        execute: async (stateExecution) => {
+          const { codeState } =
+            await squiggleCodeToCodeStateViaRunningAndFormatting(input.code);
+          this.stateManager
+            .getCurrentStateExecution()
+            .updateCodeState(codeState);
+          stateExecution.updateNextState(codeStateNextState(codeState));
+        },
+      });
+    }
   }
 
   async step(): Promise<boolean> {
@@ -345,10 +370,10 @@ export class SquiggleGenerator {
 }
 
 export const runSquiggleGenerator = async (
-  prompt: string,
+  input: GeneratorInput,
   llmConfig: LlmConfig = llmConfigDefault
 ): Promise<SquiggleResult> => {
-  const generator = new SquiggleGenerator(prompt, llmConfig);
+  const generator = new SquiggleGenerator(input, llmConfig);
   while (!(await generator.step())) {}
   return generator.stateManager.getFinalResult() as SquiggleResult;
 };
