@@ -143,3 +143,9 @@ export {
 export { BaseRunner } from "./runners/BaseRunner.js";
 
 export { getStdLib } from "./library/index.js";
+
+export {
+  type FormattedNumber,
+  make as makeFormattedNumber,
+  toString as formattedNumberToString,
+} from "./utility/FormattedNumber.js";
