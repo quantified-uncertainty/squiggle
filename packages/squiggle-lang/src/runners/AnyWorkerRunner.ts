@@ -18,17 +18,21 @@ export async function runWithWorker(
     externalsEntrypoint,
   } satisfies SquiggleWorkerJob);
 
-  return new Promise<RunResult>((resolve) => {
+  return new Promise<RunResult>((resolve, reject) => {
     worker.addEventListener(
       "message",
       (e: MessageEvent<SquiggleWorkerResponse>) => {
         if (e.data.type === "internal-error") {
-          throw new Error(`Internal worker error: ${e.data.payload}`);
+          reject(new Error(`Internal worker error: ${e.data.payload}`));
+          return;
         }
         if (e.data.type !== "result") {
-          throw new Error(
-            `Unexpected message ${JSON.stringify(e.data)} from worker`
+          reject(
+            new Error(
+              `Unexpected message ${JSON.stringify(e.data)} from worker`
+            )
           );
+          return;
         }
         const { payload } = e.data;
 

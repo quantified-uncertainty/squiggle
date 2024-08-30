@@ -253,7 +253,7 @@ export function nodeLambda(
 export function nodeLetStatement(
   decorators: KindNode<"Decorator">[],
   variable: KindNode<"Identifier">,
-  unitTypeSignature: KindNode<"UnitTypeSignature">,
+  unitTypeSignature: KindNode<"UnitTypeSignature"> | null,
   value: ASTNode,
   exported: boolean,
   location: LocationRange
@@ -264,7 +264,7 @@ export function nodeLetStatement(
     kind: "LetStatement",
     decorators,
     variable,
-    unitTypeSignature,
+    unitTypeSignature: unitTypeSignature ?? null,
     value: patchedValue,
     exported,
     location,

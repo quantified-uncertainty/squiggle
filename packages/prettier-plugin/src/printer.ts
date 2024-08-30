@@ -168,7 +168,8 @@ export function createSquigglePrinter(
             node.exported ? "export " : "",
             node.variable.value,
             node.unitTypeSignature
-              ? typedPath(node).call(print, "unitTypeSignature")
+              ? // @ts-ignore
+                [" :: ", typedPath(node).call(print, "unitTypeSignature")]
               : "",
             " = ",
             typedPath(node).call(print, "value"),
@@ -192,7 +193,7 @@ export function createSquigglePrinter(
             ]),
             node.value.returnUnitType
               ? // @ts-ignore
-                typedPath(node).call(print, "value", "returnUnitType")
+                [" :: ", typedPath(node).call(print, "value", "returnUnitType")]
               : "",
             " = ",
             typedPath(node).call(print, "value", "body"),
@@ -291,7 +292,7 @@ export function createSquigglePrinter(
             node.value,
             node.unitTypeSignature
               ? // @ts-ignore
-                typedPath(node).call(print, "unitTypeSignature")
+                [" :: ", typedPath(node).call(print, "unitTypeSignature")]
               : "",
           ]);
         case "IdentifierWithAnnotation":
@@ -340,7 +341,7 @@ export function createSquigglePrinter(
             "}",
             node.returnUnitType
               ? // @ts-ignore
-                typedPath(node).call(print, "returnUnitType")
+                [" :: ", typedPath(node).call(print, "returnUnitType")]
               : "",
           ]);
         case "Dict": {
@@ -374,7 +375,7 @@ export function createSquigglePrinter(
             path.call(print, "falseExpression"),
           ];
         case "UnitTypeSignature":
-          return group([" :: ", typedPath(node).call(print, "body")]);
+          return typedPath(node).call(print, "body");
         case "InfixUnitType":
           return group([
             typedPath(node).call(print, "args", 0),

@@ -23,6 +23,7 @@ export class RunnerPool {
         Boolean(thread.runner && !thread.job)
     );
     if (unusedThread) {
+      // TODO - try/catch, kill worker if it errors
       unusedThread.job = unusedThread.runner.run(params);
       const result = await unusedThread.job;
       unusedThread.job = undefined;

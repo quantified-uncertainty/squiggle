@@ -77,7 +77,9 @@ export function serializeAstNode(
         ...node,
         decorators: node.decorators.map(visit.ast),
         variable: visit.ast(node.variable),
-        unitTypeSignature: visit.ast(node.unitTypeSignature),
+        unitTypeSignature: node.unitTypeSignature
+          ? visit.ast(node.unitTypeSignature)
+          : null,
         value: visit.ast(node.value),
       };
     case "DefunStatement":
@@ -220,7 +222,7 @@ export function deserializeAstNode(
         ...node,
         imports: node.imports.map((item) => [
           visit.ast(item[0]) as KindNode<"String">,
-          visit.ast(item[0]) as KindNode<"Identifier">,
+          visit.ast(item[1]) as KindNode<"Identifier">,
         ]),
         statements: node.statements.map(visit.ast),
         symbols: Object.fromEntries(
@@ -240,9 +242,12 @@ export function deserializeAstNode(
         ...node,
         decorators: node.decorators.map(visit.ast) as KindNode<"Decorator">[],
         variable: visit.ast(node.variable) as KindNode<"Identifier">,
-        unitTypeSignature: visit.ast(
-          node.unitTypeSignature
-        ) as KindNode<"UnitTypeSignature">,
+        unitTypeSignature:
+          node.unitTypeSignature !== null
+            ? (visit.ast(
+                node.unitTypeSignature
+              ) as KindNode<"UnitTypeSignature">)
+            : null,
         value: visit.ast(node.value),
       };
     case "DefunStatement":

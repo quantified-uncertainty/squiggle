@@ -187,7 +187,7 @@ type LetOrDefun = {
 type NodeLetStatement = N<
   "LetStatement",
   LetOrDefun & {
-    unitTypeSignature: NodeTypeSignature;
+    unitTypeSignature: NodeTypeSignature | null;
     value: ASTNode;
   }
 >;

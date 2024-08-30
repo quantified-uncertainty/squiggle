@@ -170,7 +170,7 @@ function subConstraintToString(
 }
 
 /* Create a TypeConstraint object from a type signature. */
-function createTypeConstraint(node?: ASTNode): TypeConstraint {
+function createTypeConstraint(node: ASTNode | null): TypeConstraint {
   if (!node) {
     return no_constraint();
   }
