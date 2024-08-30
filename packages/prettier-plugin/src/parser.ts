@@ -8,7 +8,9 @@ export const squiggleParser: Parser<SquiggleNode> = {
   parse: (text) => {
     const parseResult = parse(text);
     if (!parseResult.ok) {
-      throw new Error(`Parse failed. ${parseResult.value}`);
+      throw new Error(
+        `Parse failed. ${parseResult.value.map((e) => e.toString()).join("\n")}`
+      );
     }
     return parseResult.value;
   },
