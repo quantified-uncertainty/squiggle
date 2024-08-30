@@ -13,6 +13,8 @@ import {
   DraggableEventHandler,
 } from "react-draggable";
 
+import { useInitialNonzeroWidth } from "../../lib/hooks/useInitialNonzeroWidth.js";
+
 const minConstraint = 20;
 
 type Props = {
@@ -26,14 +28,13 @@ export const ResizableTwoPanelLayout: FC<Props> = ({
   renderRight,
   height,
 }) => {
+  const { ref: containerRef, width: initialNonzeroWidth } =
+    useInitialNonzeroWidth();
   const [width, setWidth] = useState<number | undefined>();
 
-  const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (containerRef.current) {
-      setWidth(containerRef.current.offsetWidth / 2);
-    }
-  }, []); // Empty array means this effect runs once when the component mounts
+    initialNonzeroWidth && setWidth(initialNonzeroWidth / 2);
+  }, [initialNonzeroWidth]);
 
   // Most of the following code is adapted and simplified from https://github.com/react-grid-layout/react-resizable/blob/master/lib/Resizable.js.
   const slack = useRef<number>(0);
@@ -68,7 +69,6 @@ export const ResizableTwoPanelLayout: FC<Props> = ({
         if ("persist" in e) {
           e.persist();
         }
-        setWidth(newWidth);
       }
 
       if (handlerName === "onResizeStop") {
