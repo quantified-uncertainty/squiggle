@@ -168,7 +168,18 @@ export class SqModuleOutput {
     };
 
     const started = new Date();
-    const runResult = await params.runner.run(runParams);
+    let runResult;
+    try {
+      runResult = await params.runner.run(runParams);
+    } catch (e) {
+      return new SqModuleOutput({
+        module,
+        environment,
+        result: Err(new SqOtherError(String(e))),
+        executionTime: new Date().getTime() - started.getTime(),
+      });
+    }
+
     const executionTime = new Date().getTime() - started.getTime();
 
     // patch profile - add timings for import statements
