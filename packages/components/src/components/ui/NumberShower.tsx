@@ -26,7 +26,7 @@ class NumberShowerBuilder {
     this.precision = precision;
   }
 
-  convert() {
+  public convert() {
     const number = Math.abs(this.number);
     const response = this.evaluate(number);
     if (this.number < 0) {
@@ -35,7 +35,7 @@ class NumberShowerBuilder {
     return response;
   }
 
-  metricSystem(number: number, order: number) {
+  private metricSystem(number: number, order: number): string {
     const newNumber = number / orderOfMagnitudeNum(order);
     const precision = this.precision;
     return `${withXSigFigs(newNumber, precision)}`;

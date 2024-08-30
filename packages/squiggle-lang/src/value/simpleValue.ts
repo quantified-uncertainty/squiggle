@@ -3,6 +3,7 @@ import toPlainObject from "lodash/toPlainObject.js";
 import { SampleSetDist } from "../dists/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
 import { BaseLambda, Lambda } from "../reducer/lambda.js";
+import { compactTreeString } from "../utility/compactTreeString.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { SDate } from "../utility/SDate.js";
 import { Value } from "./index.js";
@@ -329,3 +330,7 @@ export function simpleValueToValue(value: SimpleValue): Value {
     return vVoid();
   }
 }
+
+export const compactString = compactTreeString<
+  SimpleValue | SimpleValueWithoutLambda
+>;
