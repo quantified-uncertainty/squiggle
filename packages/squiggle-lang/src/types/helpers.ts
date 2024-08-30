@@ -295,7 +295,7 @@ export function makeUnionAndSimplify(types: Type[]): Type {
     return uniqueTypes[0];
   }
 
-  // TODO - unwrap nested unions
+  // TODO - if `uniqueTypes` is too long, should we simplify it to `tAny` or a common parent type?
   return tUnion(uniqueTypes);
 }
 

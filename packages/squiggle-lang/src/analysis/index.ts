@@ -203,6 +203,12 @@ function analyzeAstNode(node: ASTNode, context: AnalysisContext): TypedASTNode {
 
 export type TypedASTResult = result<TypedAST, ICompileError[]>;
 
+/**
+ * Analysis does several things:
+ * 1. Type checking and type inference
+ * 2. Symbol resolution (see `NodeIdentifier.resolved`)
+ * 3. Populating `node.parent` fields for easier traversal
+ */
 export function analyzeAst(
   ast: AST,
   builtins?: Bindings
