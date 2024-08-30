@@ -8,26 +8,21 @@ export function useInitialNonzeroWidth() {
   const [width, setWidth] = useState<number | undefined>();
 
   useEffect(() => {
-    const updateWidth = () => {
-      if (ref.current) {
-        const currentWidth = ref.current.offsetWidth;
-        if (currentWidth > 0) {
-          setWidth(currentWidth);
-          return true;
-        }
+    if (!ref.current) return;
+
+    const updateWidth = (entries: ResizeObserverEntry[]) => {
+      const entry = entries[0];
+      if (entry && entry.contentRect.width > 0) {
+        setWidth(entry.contentRect.width);
       }
-      return false;
     };
 
-    if (!updateWidth()) {
-      const intervalId = setInterval(() => {
-        if (updateWidth()) {
-          clearInterval(intervalId);
-        }
-      }, 100);
+    const resizeObserver = new ResizeObserver(updateWidth);
+    resizeObserver.observe(ref.current);
 
-      return () => clearInterval(intervalId);
-    }
+    return () => {
+      resizeObserver.disconnect();
+    };
   }, []);
 
   return { ref, width };
