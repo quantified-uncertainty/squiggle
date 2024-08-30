@@ -228,6 +228,7 @@ export function deserializeAstNode(
     case "Program":
       return {
         ...node,
+
         imports: node.imports
           .map(visit.ast)
           .map((node) => assertKind(node, "Import")),
@@ -255,6 +256,7 @@ export function deserializeAstNode(
     case "LetStatement":
       return {
         ...node,
+
         decorators: node.decorators
           .map(visit.ast)
           .map((node) => assertKind(node, "Decorator")),
