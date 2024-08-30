@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { Element } from "hast";
 import React from "react";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { Node, Parent } from "unist";
@@ -11,7 +11,9 @@ import { SquiggleEditor } from "../components/SquiggleEditor.js";
 import { SquigglePlayground } from "../components/SquigglePlayground/index.js";
 import { CodeSyntaxHighlighter } from "./CodeSyntaxHighlighter.js";
 
-// Adds `inline` property to `code` elements, to distinguish between inline and block code snippets.
+// Remove leading and trailing newlines from a string. Useful for code blocks.
+const trimNewlines = (str: string) => str.replace(/^\n+|\n+$/g, "");
+
 function rehypeInlineCodeProperty() {
   return function (tree: Node) {
     visitParents(tree, "element", function (node: Node, parents: Parent[]) {
@@ -28,6 +30,11 @@ function rehypeInlineCodeProperty() {
   };
 }
 
+type CustomComponents = Components & {
+  squiggleplayground: React.ComponentType<{ children: string }>;
+  squiggleeditor: React.ComponentType<{ children: string }>;
+};
+
 type MarkdownViewerProps = {
   md: string;
   textSize: "sm" | "xs";
@@ -35,20 +42,6 @@ type MarkdownViewerProps = {
   className?: string;
   backgroundColor?: string;
 };
-const codeBlockStyles = `
-  .prose pre {
-    color: inherit;
-    background-color: transparent;
-    overflow-x: auto;
-    font-weight: 400;
-    margin: 0;
-    padding: 0;
-  }
-  .prose .code-block-wrapper {
-    margin-top: 1.7142857em;
-    margin-bottom: 1.7142857em;
-  }
-`;
 
 export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
   md,
@@ -57,26 +50,56 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
   textSize,
   backgroundColor = "bg-slate-50",
 }) => {
-  return (
-    <>
-      <style>{codeBlockStyles}</style>
-      <ReactMarkdown
-        className={clsx(
-          "prose",
-          className,
-          textColor || "prose-stone",
-          textSize === "sm" ? "text-sm" : "text-xs"
-        )}
-        rehypePlugins={[rehypeInlineCodeProperty, rehypeRaw]}
-        remarkPlugins={[remarkGfm]}
-        components={{
-          pre: ({ children }) => <React.Fragment>{children}</React.Fragment>,
-          code({ node, className, children, ...rest }) {
-            const match = /language-(\w+)/.exec(className || "");
-            const isInline =
-              node && (node as Element).properties["inline"] === "true";
+  const CustomSquigglePlayground = ({ children }: { children: string }) => {
+    const trimmedChildren = trimNewlines(children);
+    const numLines = (trimmedChildren.match(/\n/g) || []).length + 1;
+    const linesToShow = Math.min(Math.max(numLines, 4), 30);
+    const height = 31 + linesToShow * (textSize === "sm" ? 20 : 18); // This is fairly hacky, but it works for now.
+    return (
+      <div className="py-2">
+        <SquigglePlayground defaultCode={trimmedChildren} height={height} />
+      </div>
+    );
+  };
 
-            if (isInline) {
+  const CustomSquiggleEditor = ({ children }: { children: string }) => (
+    <div className="py-2">
+      <SquiggleEditor
+        defaultCode={trimNewlines(children)}
+        editorFontSize={textSize === "sm" ? 13 : 12}
+      />
+    </div>
+  );
+
+  return (
+    <ReactMarkdown
+      className={clsx(
+        "prose",
+        className,
+        textColor || "prose-stone",
+        textSize === "sm" ? "text-sm" : "text-xs"
+      )}
+      rehypePlugins={[rehypeInlineCodeProperty, rehypeRaw]}
+      remarkPlugins={[remarkGfm]}
+      components={
+        {
+          pre({ children }) {
+            return (
+              <pre
+                className={clsx(
+                  "not-prose my-1 rounded p-2 text-[.9em]",
+                  backgroundColor
+                )}
+              >
+                {children}
+              </pre>
+            );
+          },
+          code(props) {
+            const { node, children, className, ...rest } = props;
+            const match = /language-(\w+)/.exec(className || "");
+            const isInline = node && node.properties["inline"];
+            if (isInline === "true") {
               return (
                 <code
                   {...rest}
@@ -86,86 +109,31 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
                 </code>
               );
             }
-
-            // Handle nested code blocks
-            if (
-              match &&
-              match[1] === "typescript" &&
-              String(children).includes("```")
-            ) {
-              return (
-                <div
-                  className={clsx(
-                    "code-block-wrapper overflow-hidden rounded",
-                    backgroundColor
-                  )}
-                >
-                  <div className="p-4">
-                    <pre>
-                      <code className="language-typescript">
-                        {String(children)}
-                      </code>
-                    </pre>
-                  </div>
-                </div>
-              );
-            }
-
-            if (match && match[1] === "squigglePlayground") {
-              const numLinesInText = String(children).match(/\n/g)?.length || 0;
-              const linesToShow = Math.min(Math.max(numLinesInText, 4), 30);
-              const height = 31 + linesToShow * (textSize === "sm" ? 20 : 18);
-              return (
-                <div className="pb-4 pt-2">
-                  <SquigglePlayground
-                    defaultCode={String(children).replace(/\n$/, "")}
-                    height={height}
-                  />
-                </div>
-              );
-            } else if (match && match[1] === "squiggleEditor") {
-              return (
-                <div className="pb-4 pt-2">
-                  <SquiggleEditor
-                    defaultCode={String(children).replace(/\n$/, "")}
-                    editorFontSize={textSize === "sm" ? 13 : 12}
-                  />
-                </div>
-              );
-            }
-
-            return (
-              <div
-                className={clsx(
-                  "code-block-wrapper overflow-hidden rounded",
-                  backgroundColor
-                )}
-              >
-                <div className="p-4">
-                  <CodeSyntaxHighlighter
-                    {...rest}
-                    language={match ? match[1] : "text"}
-                  >
-                    {String(children).replace(/\n$/, "")}
-                  </CodeSyntaxHighlighter>
-                </div>
-              </div>
+            return match ? (
+              <CodeSyntaxHighlighter {...rest} language={match[1]}>
+                {String(children).replace(/\n$/, "")}
+              </CodeSyntaxHighlighter>
+            ) : (
+              <code {...rest}>{children}</code>
             );
           },
           details: ({ children, ...props }) => (
-            <details className="mb-4 rounded-lg border p-4" {...props}>
+            <details className="mb-2" {...props}>
               {children}
             </details>
           ),
           summary: ({ children }) => (
-            <summary className="cursor-pointer font-semibold">
+            <summary className="cursor-pointer select-none font-semibold">
               {children}
             </summary>
           ),
-        }}
-      >
-        {md}
-      </ReactMarkdown>
-    </>
+          // Custom Squiggle components
+          squiggleplayground: CustomSquigglePlayground,
+          squiggleeditor: CustomSquiggleEditor,
+        } as CustomComponents
+      }
+    >
+      {md}
+    </ReactMarkdown>
   );
 };
