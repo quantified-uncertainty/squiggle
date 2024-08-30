@@ -109,7 +109,7 @@ export const make = (
 };
 
 // formattedNumberToString({ type: "scientific", mantissa: "1.23", exponent: 6, isNegative: true }) returns "-1.23e6"
-export const toString = (formattedNumber: FormattedNumber): string => {
+export function toString(formattedNumber: FormattedNumber): string {
   const sign = formattedNumber.isNegative ? "-" : "";
   switch (formattedNumber.type) {
     case "basic":
@@ -121,13 +121,13 @@ export const toString = (formattedNumber: FormattedNumber): string => {
     default:
       throw new Error("Invalid formatted number type");
   }
-};
+}
 
 // formatToString(1234567, { precision: 3, forceScientific: true }) returns "1.23e6"
-export const makeAndToString = (
+export function makeAndToString(
   number: number,
   options: FormatterOptions = {}
-): string => {
+): string {
   const formattedNumber = make(number, options);
   return toString(formattedNumber);
-};
+}

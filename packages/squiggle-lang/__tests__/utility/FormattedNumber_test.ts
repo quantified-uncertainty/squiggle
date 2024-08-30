@@ -2,7 +2,7 @@ import {
   FormatterOptions,
   make,
   makeAndToString,
-} from "../../src/utility/FormattedNumber";
+} from "../../src/utility/formattedNumber.js";
 
 describe("FormattedNumber", () => {
   const makeTestCases: [number, ReturnType<typeof make>][] = [
