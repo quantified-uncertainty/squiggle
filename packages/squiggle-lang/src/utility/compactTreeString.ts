@@ -1,8 +1,11 @@
-import { makeAndToString } from "./FormattedNumber.js";
+import { numberToFormattedNumberString } from "./FormattedNumber.js";
 import { ImmutableMap } from "./immutable.js";
 
 function formatNumber(number: number): string {
-  return makeAndToString(number, { precision: 3, forceScientific: true });
+  return numberToFormattedNumberString(number, {
+    precision: 3,
+    forceScientific: true,
+  });
 }
 
 function formatNumberArray(numbers: number[]): string[] {

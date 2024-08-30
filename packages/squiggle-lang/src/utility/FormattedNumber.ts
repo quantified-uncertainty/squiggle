@@ -40,7 +40,7 @@ const formatNumberWithScale = (
 };
 
 // format(1234567, { precision: 3, forceScientific: true }) returns a FormattedNumber object
-export const make = (
+export const makeFormattedNumber = (
   number: number,
   options: FormatterOptions = {}
 ): FormattedNumber => {
@@ -109,7 +109,9 @@ export const make = (
 };
 
 // formattedNumberToString({ type: "scientific", mantissa: "1.23", exponent: 6, isNegative: true }) returns "-1.23e6"
-export function toString(formattedNumber: FormattedNumber): string {
+export function formattedNumberToString(
+  formattedNumber: FormattedNumber
+): string {
   const sign = formattedNumber.isNegative ? "-" : "";
   switch (formattedNumber.type) {
     case "basic":
@@ -124,10 +126,9 @@ export function toString(formattedNumber: FormattedNumber): string {
 }
 
 // formatToString(1234567, { precision: 3, forceScientific: true }) returns "1.23e6"
-export function makeAndToString(
+export function numberToFormattedNumberString(
   number: number,
   options: FormatterOptions = {}
 ): string {
-  const formattedNumber = make(number, options);
-  return toString(formattedNumber);
+  return formattedNumberToString(makeFormattedNumber(number, options));
 }

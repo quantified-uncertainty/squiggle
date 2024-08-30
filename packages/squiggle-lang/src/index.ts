@@ -146,6 +146,6 @@ export { getStdLib } from "./library/index.js";
 
 export {
   type FormattedNumber,
-  make as makeFormattedNumber,
-  toString as formattedNumberToString,
+  formattedNumberToString,
+  makeFormattedNumber,
 } from "./utility/FormattedNumber.js";

@@ -1,11 +1,11 @@
 import {
   FormatterOptions,
-  make,
-  makeAndToString,
+  makeFormattedNumber,
+  numberToFormattedNumberString,
 } from "../../src/utility/FormattedNumber.js";
 
 describe("FormattedNumber", () => {
-  const makeTestCases: [number, ReturnType<typeof make>][] = [
+  const makeTestCases: [number, ReturnType<typeof makeFormattedNumber>][] = [
     [123.45, { type: "basic", value: "120", isNegative: false }],
     [-123.45, { type: "basic", value: "120", isNegative: true }],
     [1234, { type: "basic", value: "1200", isNegative: false }],
@@ -30,7 +30,7 @@ describe("FormattedNumber", () => {
   const makeWithOptionsTestCases: [
     number,
     FormatterOptions,
-    ReturnType<typeof make>,
+    ReturnType<typeof makeFormattedNumber>,
   ][] = [
     [
       123.45,
@@ -80,13 +80,13 @@ describe("FormattedNumber", () => {
 
   describe("make", () => {
     test.each(makeTestCases)("make(%p) -> %p", (input, expected) => {
-      expect(make(input)).toEqual(expected);
+      expect(makeFormattedNumber(input)).toEqual(expected);
     });
 
     test.each(makeWithOptionsTestCases)(
       "make(%p, %p) -> %p",
       (input, options, expected) => {
-        expect(make(input, options)).toEqual(expected);
+        expect(makeFormattedNumber(input, options)).toEqual(expected);
       }
     );
   });
@@ -95,7 +95,7 @@ describe("FormattedNumber", () => {
     test.each(makeAndToStringTestCases)(
       "makeAndToString(%p) -> %p",
       (input, expected) => {
-        expect(makeAndToString(input as number)).toBe(expected);
+        expect(numberToFormattedNumberString(input as number)).toBe(expected);
       }
     );
   });
