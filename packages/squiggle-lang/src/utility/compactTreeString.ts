@@ -1,4 +1,4 @@
-import { makeAndToString } from "./formattedNumber.js";
+import { makeAndToString } from "./FormattedNumber.js";
 import { ImmutableMap } from "./immutable.js";
 
 function formatNumber(number: number): string {
