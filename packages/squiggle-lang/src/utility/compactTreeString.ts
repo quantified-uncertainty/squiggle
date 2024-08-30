@@ -12,13 +12,24 @@ function formatNumberArray(numbers: number[]): string[] {
 // Converts a tree structure into a compact string representation.
 // Useful for debugging, including sending to LLMs.
 // T can be SimpleValue or SimpleValueWithoutLambda
+interface CompactTreeOptions {
+  depth?: number;
+  maxDepth?: number;
+  maxArrayItems?: number;
+  maxDictItems?: number;
+}
+
 export function compactTreeString<T>(
   value: T,
-  depth: number = 0,
-  maxDepth: number = 5,
-  maxArrayItems: number = 5,
-  maxDictItems: number = 30
+  options: CompactTreeOptions = {}
 ): string {
+  const {
+    depth = 0,
+    maxDepth = 5,
+    maxArrayItems = 5,
+    maxDictItems = 30,
+  } = options;
+
   if (depth >= maxDepth) {
     return "...";
   }
@@ -37,13 +48,12 @@ export function compactTreeString<T>(
       items = formatNumberArray(value);
     } else {
       items = value.map((item) =>
-        compactTreeString(
-          item,
-          depth + 1,
+        compactTreeString(item, {
+          depth: depth + 1,
           maxDepth,
           maxArrayItems,
-          maxDictItems
-        )
+          maxDictItems,
+        })
       );
     }
     const ellipsis =
@@ -55,12 +65,15 @@ export function compactTreeString<T>(
     if (map.size === 0) {
       return "{}";
     }
-    const items = [...map.entries()]
-      .slice(0, maxDictItems)
-      .map(
-        ([key, val]) =>
-          `${key}: ${compactTreeString(val, depth + 1, maxDepth, maxArrayItems, maxDictItems)}`
-      );
+    const items = [...map.entries()].slice(0, maxDictItems).map(
+      ([key, val]) =>
+        `${key}: ${compactTreeString(val, {
+          depth: depth + 1,
+          maxDepth,
+          maxArrayItems,
+          maxDictItems,
+        })}`
+    );
     const ellipsis =
       map.size > maxDictItems ? `,\n${indent}  ...${map.size} total` : "";
     return `{\n${indent}  ${items.join(`,\n${indent}  `)}${ellipsis}\n${indent}}`;

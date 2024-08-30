@@ -331,6 +331,6 @@ export function simpleValueToValue(value: SimpleValue): Value {
   }
 }
 
-export const compactString = compactTreeString<
+export const compactString: typeof compactTreeString<
   SimpleValue | SimpleValueWithoutLambda
->;
+> = compactTreeString;

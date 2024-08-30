@@ -1,6 +1,5 @@
 import { compactTreeString } from "../../src/utility/compactTreeString.js";
 import {
-  compactString,
   removeLambdas,
   SimpleValue,
   simpleValueFromAny,
@@ -12,7 +11,11 @@ async function runAndSummarize(code: string): Promise<string> {
   const result = await testRun(code);
   const simpleValue: SimpleValue = simpleValueFromAny(result.result.asJS());
   const withoutLambdas: SimpleValueWithoutLambda = removeLambdas(simpleValue);
-  return compactString(withoutLambdas, 0, 4, 4, 4);
+  return compactTreeString(withoutLambdas, {
+    maxDepth: 4,
+    maxArrayItems: 4,
+    maxDictItems: 4,
+  });
 }
 
 describe("compactTreeString", () => {
