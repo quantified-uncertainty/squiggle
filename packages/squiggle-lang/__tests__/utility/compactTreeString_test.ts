@@ -63,8 +63,7 @@ describe("compactTreeString", () => {
     d: 4,
     ...15 total
   }
-}
-`);
+}`);
   });
 
   test("complex object", async () => {
@@ -75,45 +74,30 @@ describe("compactTreeString", () => {
           {x,y,z}`
     );
     expect(result).toBe(`{
-           vtype: "Dict",
-           value: {
-             x: {
-               vtype: "Dict",
-               value: {
-                 foo: {
-                   vtype: "Dict",
-                   value: {
-                     bar: {
-                       vType: "SampleSetDist",
-                       samples: [2.27158204570878, 1.92312606758186, 2.24918511608805, 3.26827328560333, 2.54064310270752, ...1000 total],
-                       summary: {
-                         mean: ...,
-                         p5: ...,
-                         p50: ...,
-                         p95: ...
-                       }
-                     }
-                   }
-                 }
-               }
-             },
-             y: {
-               vType: "SampleSetDist",
-               samples: [10422.1084010465, 6830.45370946499, 5277.15097588727, 7703.06187039825, 6293.52175481825, ...1000 total],
-               summary: {
-                 mean: 7195.86638546135,
-                 p5: 4845.18842622905,
-                 p50: 7029.61303004548,
-                 p95: 9840.27710007229
-               }
-             },
-             z: {
-               vType: "Lambda",
-               toString: "(f) => internal code",
-               paramenterString: "f"
-             }
-           }
-         }
-     }`);
+  vtype: "Dict",
+  value: {
+    x: {
+      vtype: "Dict",
+      value: {
+        foo: ...
+      }
+    },
+    y: {
+      vType: "SampleSetDist",
+      samples: [10400, 6830, 5280, 7700, ...1000 total],
+      summary: {
+        mean: ...,
+        p5: ...,
+        p50: ...,
+        p95: ...
+      }
+    },
+    z: {
+      vType: "Lambda",
+      toString: "(f) => internal code",
+      paramenterString: "f"
+    }
+  }
+}`);
   });
 });

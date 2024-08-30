@@ -64,7 +64,7 @@ export const make = (
 
   const magnitude = calculateOrderOfMagnitude(absNumber);
 
-  if (magnitude > -2 && magnitude < 4) {
+  if (magnitude > -2 && magnitude < 5) {
     return {
       type: "basic",
       value: formatNumberWithScale(absNumber, 0, precision),

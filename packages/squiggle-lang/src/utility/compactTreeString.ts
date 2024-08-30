@@ -9,6 +9,8 @@ function formatNumberArray(numbers: number[]): string[] {
   return numbers.map(formatNumber);
 }
 
+// Converts a tree structure into a compact string representation.
+// Useful for debugging, including sending to LLMs.
 // T can be SimpleValue or SimpleValueWithoutLambda
 export function compactTreeString<T>(
   value: T,
