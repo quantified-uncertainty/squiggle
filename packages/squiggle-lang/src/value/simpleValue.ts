@@ -4,6 +4,8 @@ import { SampleSetDist } from "../dists/SampleSetDist/index.js";
 import { REOther } from "../errors/messages.js";
 import { BaseLambda, Lambda } from "../reducer/lambda.js";
 import { compactTreeString } from "../utility/compactTreeString.js";
+import * as E_A_Floats from "../utility/E_A_Floats.js";
+import * as E_A_Sorted from "../utility/E_A_Sorted.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { SDate } from "../utility/SDate.js";
 import { Value } from "./index.js";
@@ -63,6 +65,30 @@ export function removeLambdas(value: SimpleValue): SimpleValueWithoutLambda {
   } else {
     return value;
   }
+}
+
+function summarizeSampleSetDist(dist: SampleSetDist) {
+  const keys: Array<
+    "mean" | "p50" | "p5" | "p25" | "p75" | "p95" | "stdev" | "min" | "max"
+  > = ["mean", "p5", "p50", "p95"];
+  const sorted = E_A_Floats.sort(dist.samples);
+  const allStats = {
+    mean: () => dist.mean(),
+    p50: () => E_A_Sorted.quantile(sorted, 0.5),
+    p5: () => E_A_Sorted.quantile(sorted, 0.05),
+    p25: () => E_A_Sorted.quantile(sorted, 0.25),
+    p75: () => E_A_Sorted.quantile(sorted, 0.75),
+    p95: () => E_A_Sorted.quantile(sorted, 0.95),
+    stdev: () => Math.sqrt(E_A_Floats.variance(dist.samples)),
+    min: () => dist.min(),
+    max: () => dist.max(),
+  };
+
+  return Object.fromEntries(
+    keys
+      .map((key) => [key, allStats[key]?.()])
+      .filter(([, value]) => value !== undefined)
+  );
 }
 
 export function simpleValueToJson(value: SimpleValueWithoutLambda): unknown {
@@ -292,7 +318,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           const fields: [string, SimpleValue][] = [
             ["vType", "SampleSetDist"],
             ["samples", [...dist.samples]],
-            ["summary", simpleValueFromAny(dist.summarize())],
+            ["summary", simpleValueFromAny(summarizeSampleSetDist(dist))],
           ];
           return ImmutableMap(fields);
         }
