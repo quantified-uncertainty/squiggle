@@ -34,15 +34,11 @@ describe("Peggy parse", () => {
     ][])("%s", (code, expected) => {
       const result = parse(code, "test");
       if (
-        !(
-          result.ok &&
-          result.value.kind === "Program" &&
-          result.value.statements.length === 1
-        )
+        !(result.ok && result.value.kind === "Program" && result.value.result)
       ) {
         throw new Error();
       }
-      const value = result.value.statements[0];
+      const value = result.value.result;
       if (value.kind !== "Float") {
         throw new Error();
       }
@@ -97,36 +93,36 @@ describe("Peggy parse", () => {
       "(Program (InfixCall - (InfixCall * 1 2) (InfixCall * 3 4)))"
     );
     testParse(
-      "1 * 2 .+ 3 * 4",
-      "(Program (InfixCall .+ (InfixCall * 1 2) (InfixCall * 3 4)))"
+      "mx(1) * 2 .+ mx(3) * 4",
+      "(Program (InfixCall .+ (InfixCall * (Call :mx 1) 2) (InfixCall * (Call :mx 3) 4)))"
     );
     testParse(
-      "1 * 2 .- 3 * 4",
-      "(Program (InfixCall .- (InfixCall * 1 2) (InfixCall * 3 4)))"
+      "mx(1) * 2 .- mx(3) * 4",
+      "(Program (InfixCall .- (InfixCall * (Call :mx 1) 2) (InfixCall * (Call :mx 3) 4)))"
     );
     testParse(
-      "1 * 2 + 3 .* 4",
-      "(Program (InfixCall + (InfixCall * 1 2) (InfixCall .* 3 4)))"
+      "1 * 2 + 3 .* mx(4)",
+      "(Program (InfixCall + (InfixCall * 1 2) (InfixCall .* 3 (Call :mx 4))))"
     );
     testParse(
       "1 * 2 + 3 / 4",
       "(Program (InfixCall + (InfixCall * 1 2) (InfixCall / 3 4)))"
     );
     testParse(
-      "1 * 2 + 3 ./ 4",
-      "(Program (InfixCall + (InfixCall * 1 2) (InfixCall ./ 3 4)))"
+      "1 * 2 + 3 ./ mx(4)",
+      "(Program (InfixCall + (InfixCall * 1 2) (InfixCall ./ 3 (Call :mx 4))))"
     );
     testParse(
-      "1 * 2 - 3 .* 4",
-      "(Program (InfixCall - (InfixCall * 1 2) (InfixCall .* 3 4)))"
+      "1 * 2 - 3 .* mx(4)",
+      "(Program (InfixCall - (InfixCall * 1 2) (InfixCall .* 3 (Call :mx 4))))"
     );
     testParse(
       "1 * 2 - 3 / 4",
       "(Program (InfixCall - (InfixCall * 1 2) (InfixCall / 3 4)))"
     );
     testParse(
-      "1 * 2 - 3 ./ 4",
-      "(Program (InfixCall - (InfixCall * 1 2) (InfixCall ./ 3 4)))"
+      "1 * 2 - 3 ./ mx(4)",
+      "(Program (InfixCall - (InfixCall * 1 2) (InfixCall ./ 3 (Call :mx 4))))"
     );
     testParse(
       "1 * 2 - 3 * 4^5",
@@ -137,7 +133,10 @@ describe("Peggy parse", () => {
       "(Program (InfixCall - (InfixCall * 1 2) (InfixCall * 3 (InfixCall ^ 4 (InfixCall ^ 5 6)))))"
     );
     testParse("2^3^4", "(Program (InfixCall ^ 2 (InfixCall ^ 3 4)))");
-    testParse("2 .^ 3 .^ 4", "(Program (InfixCall .^ 2 (InfixCall .^ 3 4)))");
+    testParse(
+      "mx(2) .^ mx(3) .^ mx(4)",
+      "(Program (InfixCall .^ (Call :mx 2) (InfixCall .^ (Call :mx 3) (Call :mx 4))))"
+    );
     testParse(
       "1 * -a[-2]",
       "(Program (InfixCall * 1 (UnaryCall - (BracketLookup :a (UnaryCall - 2)))))"
@@ -160,15 +159,15 @@ describe("Peggy parse", () => {
   describe("unit-typed variables", () => {
     testParse(
       "x :: kg = 1",
-      "(Program (LetStatement :x (UnitTypeSignature :kg) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature (UnitName kg)) 1))"
     );
     testParse(
       "x :: kg / m = 1",
-      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / :kg :m)) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (UnitName kg) (UnitName m))) 1))"
     );
     testParse(
       "x :: 1 / kg = 1",
-      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / 1 :kg)) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / 1 (UnitName kg))) 1))"
     );
     testParse(
       "x :: 1 = 2",
@@ -176,38 +175,38 @@ describe("Peggy parse", () => {
     );
     testParse(
       "x :: kg*m/s = 1",
-      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * :kg :m) :s)) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * (UnitName kg) (UnitName m)) (UnitName s))) 1))"
     );
     testParse(
       "x :: m/s/s = 1",
-      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType / :m :s) :s)) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType / (UnitName m) (UnitName s)) (UnitName s))) 1))"
     );
     testParse(
       "x :: m/s*kg/s = 1",
-      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * (InfixUnitType / :m :s) :kg) :s)) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * (InfixUnitType / (UnitName m) (UnitName s)) (UnitName kg)) (UnitName s))) 1))"
     );
     testParse(
       "x :: m^3 = 1",
-      "(Program (LetStatement :x (UnitTypeSignature (ExponentialUnitType :m 3)) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature (ExponentialUnitType (UnitName m) 3)) 1))"
     );
     testParse(
       "x :: kg*m^2/s^3 = 1",
-      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * :kg (ExponentialUnitType :m 2)) (ExponentialUnitType :s 3))) 1))"
+      "(Program (LetStatement :x (UnitTypeSignature (InfixUnitType / (InfixUnitType * (UnitName kg) (ExponentialUnitType (UnitName m) 2)) (ExponentialUnitType (UnitName s) 3))) 1))"
     );
   });
 
   describe("unit-typed functions", () => {
     testParse(
       "f(x :: kg) = y",
-      "(Program (DefunStatement :f (Lambda (Identifier x (UnitTypeSignature :kg)) :y)))"
+      "(Program (DefunStatement :f (Lambda (LambdaParameter x (UnitTypeSignature (UnitName kg))) :y)))"
     );
     testParse(
       "f(x) :: lbs = y",
-      "(Program (DefunStatement :f (Lambda :x :y (UnitTypeSignature :lbs))))"
+      "(Program (DefunStatement :f (Lambda :x :y (UnitTypeSignature (UnitName lbs)))))"
     );
     testParse(
       "f(x :: m, y :: s) :: m/s = x/y",
-      "(Program (DefunStatement :f (Lambda (Identifier x (UnitTypeSignature :m)) (Identifier y (UnitTypeSignature :s)) (InfixCall / :x :y) (UnitTypeSignature (InfixUnitType / :m :s)))))"
+      "(Program (DefunStatement :f (Lambda (LambdaParameter x (UnitTypeSignature (UnitName m))) (LambdaParameter y (UnitTypeSignature (UnitName s))) (InfixCall / :x :y) (UnitTypeSignature (InfixUnitType / (UnitName m) (UnitName s))))))"
     );
   });
 
@@ -220,7 +219,7 @@ describe("Peggy parse", () => {
 
     testParse(
       "annotated(x: [3,5]) = x",
-      "(Program (DefunStatement :annotated (Lambda (IdentifierWithAnnotation x (Array 3 5)) :x)))"
+      "(Program (DefunStatement :annotated (Lambda (LambdaParameter x (Array 3 5)) :x)))"
     );
   });
 

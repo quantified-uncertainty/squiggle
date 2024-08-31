@@ -71,7 +71,6 @@ export function useSquiggleEditorExtensions(
       showGutter: params.showGutter ?? false,
       lineWrapping: params.lineWrapping ?? true,
       project: params.project,
-      sourceId: params.sourceId,
       height: params.height ?? null,
       onChange: params.onChange,
       onSubmit: params.onSubmit ?? null,

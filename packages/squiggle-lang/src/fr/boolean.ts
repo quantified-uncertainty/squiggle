@@ -1,6 +1,6 @@
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frBool } from "../library/registry/frTypes.js";
+import { frBool } from "../library/FrType.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 
 const maker = new FnFactory({
   nameSpace: "Boolean",

@@ -1,8 +1,10 @@
-import { registry } from "../../src/library/registry/index.js";
-import { evaluateStringToResult } from "../../src/reducer/index.js";
+import { getRegistry } from "../../src/library/registry/index.js";
+import { evaluateStringToResult } from "../helpers/reducerHelpers.js";
 
 test.each(
-  registry.allExamplesWithFns().filter(({ example }) => example.useForTests)
+  getRegistry()
+    .allExamplesWithFns()
+    .filter(({ example }) => example.useForTests)
 )("tests of example $example", async ({ fn, example }) => {
   const result = await evaluateStringToResult(example.text);
 

@@ -1,18 +1,17 @@
 import { ICompileError } from "../errors/IError.js";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
-import { SExpr, SExprPrintOptions, sExprToString } from "../utility/sExpr.js";
+import {
+  sExpr,
+  SExpr,
+  SExprPrintOptions,
+  sExprToString,
+} from "../utility/sExpr.js";
 import {
   parse as peggyParse,
   SyntaxError as PeggySyntaxError,
 } from "./peggyParser.js";
-import {
-  AST,
-  type ASTCommentNode,
-  type ASTNode,
-  LocationRange,
-} from "./types.js";
-import { unitTypeCheck } from "./unitTypeChecker.js";
+import { AST, type ASTCommentNode, ASTNode, LocationRange } from "./types.js";
 
 export type ParseError = {
   type: "SyntaxError";
@@ -20,93 +19,133 @@ export type ParseError = {
   message: string;
 };
 
-type ParseResult = result<AST, ICompileError>;
+export type ASTResult = result<AST, ICompileError[]>;
 
-export function parse(expr: string, source: string): ParseResult {
+function codeToFullLocationRange(
+  code: string,
+  sourceId: string
+): LocationRange {
+  const lines = code.split("\n");
+  return {
+    start: {
+      line: 1,
+      column: 1,
+      offset: 0,
+    },
+    end: {
+      line: lines.length,
+      column: lines.at(-1)?.length ?? 1,
+      offset: code.length,
+    },
+    source: sourceId,
+  };
+}
+
+export function parse(expr: string, sourceId: string): ASTResult {
   try {
     const comments: ASTCommentNode[] = [];
     const parsed: AST = peggyParse(expr, {
-      grammarSource: source,
+      grammarSource: sourceId,
       comments,
     });
     if (parsed.kind !== "Program") {
       throw new Error("Expected parse to result in a Program node");
     }
-    unitTypeCheck(parsed);
+
     parsed.comments = comments;
+
     return Result.Ok(parsed);
   } catch (e) {
     if (e instanceof PeggySyntaxError) {
-      return Result.Err(
-        new ICompileError((e as any).message, (e as any).location)
-      );
+      return Result.Err([
+        new ICompileError((e as any).message, (e as any).location),
+      ]);
     } else if (e instanceof ICompileError) {
-      return Result.Err(e);
+      return Result.Err([e]);
     } else {
-      throw e;
+      return Result.Err([
+        new ICompileError(String(e), codeToFullLocationRange(expr, sourceId)),
+      ]);
     }
   }
 }
 
 // This function is just for the sake of tests.
 // For real generation of Squiggle code from AST try our prettier plugin.
-export function nodeToString(
+export function astNodeToString(
   node: ASTNode,
   printOptions: SExprPrintOptions = {}
 ): string {
   const toSExpr = (node: ASTNode): SExpr => {
-    const sExpr = (components: (SExpr | undefined)[]): SExpr => ({
+    const selfExpr = (components: (SExpr | null | undefined)[]): SExpr => ({
       name: node.kind,
       args: components,
     });
 
     switch (node.kind) {
-      case "Block":
       case "Program":
-        return sExpr(node.statements.map(toSExpr));
+        return selfExpr([
+          node.imports.length
+            ? sExpr(".imports", node.imports.map(toSExpr))
+            : undefined,
+          ...node.statements.map(toSExpr),
+          node.result ? toSExpr(node.result) : undefined,
+        ]);
+      case "Import":
+        return selfExpr([toSExpr(node.path), toSExpr(node.variable)]);
+      case "Block":
+        return selfExpr([
+          ...node.statements.map(toSExpr),
+          toSExpr(node.result),
+        ]);
       case "Array":
-        return sExpr(node.elements.map(toSExpr));
+        return selfExpr(node.elements.map(toSExpr));
       case "Dict":
-        return sExpr(node.elements.map(toSExpr));
+        return selfExpr(node.elements.map(toSExpr));
       case "Boolean":
         return String(node.value);
       case "Call":
-        return sExpr([node.fn, ...node.args].map(toSExpr));
+        return selfExpr([node.fn, ...node.args].map(toSExpr));
       case "InfixCall":
-        return sExpr([node.op, ...node.args.map(toSExpr)]);
+        return selfExpr([node.op, ...node.args.map(toSExpr)]);
       case "Pipe":
-        return sExpr([node.leftArg, node.fn, ...node.rightArgs].map(toSExpr));
+        return selfExpr(
+          [node.leftArg, node.fn, ...node.rightArgs].map(toSExpr)
+        );
       case "DotLookup":
-        return sExpr([toSExpr(node.arg), node.key]);
+        return selfExpr([toSExpr(node.arg), node.key]);
       case "BracketLookup":
-        return sExpr([node.arg, node.key].map(toSExpr));
+        return selfExpr([node.arg, node.key].map(toSExpr));
       case "UnaryCall":
-        return sExpr([node.op, toSExpr(node.arg)]);
+        return selfExpr([node.op, toSExpr(node.arg)]);
       case "Float":
-        // see also: "Float" branch in expression/compile.ts
+        // see also: "Float" branch in compiler/compile.ts
         return `${node.integer}${
           node.fractional === null ? "" : `.${node.fractional}`
         }${node.exponent === null ? "" : `e${node.exponent}`}`;
       case "Identifier":
-        if (node.unitTypeSignature) {
-          return sExpr([node.value, toSExpr(node.unitTypeSignature)]);
-        } else {
-          return `:${node.value}`;
+        return `:${node.value}`;
+      case "LambdaParameter":
+        if (!node.annotation && !node.unitTypeSignature) {
+          return `:${node.variable.value}`;
         }
-      case "IdentifierWithAnnotation":
-        return sExpr([node.variable, toSExpr(node.annotation)]);
+        return selfExpr([
+          node.variable.value,
+          node.annotation && toSExpr(node.annotation),
+          node.unitTypeSignature && toSExpr(node.unitTypeSignature),
+        ]);
       case "KeyValue":
-        return sExpr([node.key, node.value].map(toSExpr));
+        return selfExpr([node.key, node.value].map(toSExpr));
       case "Lambda":
-        return sExpr([
+        return selfExpr([
           ...node.args.map(toSExpr),
           toSExpr(node.body),
           node.returnUnitType ? toSExpr(node.returnUnitType) : undefined,
         ]);
       case "Decorator":
-        return sExpr([node.name, ...node.args].map(toSExpr));
+        return selfExpr([node.name, ...node.args].map(toSExpr));
       case "LetStatement":
-        return sExpr([
+        return selfExpr([
           toSExpr(node.variable),
           node.unitTypeSignature ? toSExpr(node.unitTypeSignature) : undefined,
           toSExpr(node.value),
@@ -114,7 +153,7 @@ export function nodeToString(
           ...node.decorators.map(toSExpr),
         ]);
       case "DefunStatement":
-        return sExpr([
+        return selfExpr([
           toSExpr(node.variable),
           toSExpr(node.value),
           node.exported ? "exported" : undefined,
@@ -123,23 +162,24 @@ export function nodeToString(
       case "String":
         return `'${node.value}'`; // TODO - quote?
       case "Ternary":
-        return sExpr(
+        return selfExpr(
           [node.condition, node.trueExpression, node.falseExpression].map(
             toSExpr
           )
         );
+      case "UnitValue":
+        return selfExpr([toSExpr(node.value), node.unit]);
       case "UnitTypeSignature":
-        return sExpr([toSExpr(node.body)]);
+        return selfExpr([toSExpr(node.body)]);
       case "InfixUnitType":
-        return sExpr([node.op, ...node.args.map(toSExpr)]);
+        return selfExpr([node.op, ...node.args.map(toSExpr)]);
       case "ExponentialUnitType":
-        return sExpr([
+        return selfExpr([
           toSExpr(node.base),
           node.exponent !== undefined ? toSExpr(node.exponent) : undefined,
         ]);
-      case "UnitValue":
-        return sExpr([toSExpr(node.value), node.unit]);
-
+      case "UnitName":
+        return selfExpr([node.value]);
       default:
         throw new Error(`Unknown node: ${node satisfies never}`);
     }
@@ -148,12 +188,12 @@ export function nodeToString(
   return sExprToString(toSExpr(node), printOptions);
 }
 
-export function nodeResultToString(
-  r: ParseResult,
-  printOptions?: SExprPrintOptions
+export function astResultToString(
+  r: result<AST, ICompileError[]>,
+  options?: SExprPrintOptions
 ): string {
   if (!r.ok) {
     return r.value.toString();
   }
-  return nodeToString(r.value, printOptions);
+  return astNodeToString(r.value, options);
 }

@@ -17,7 +17,7 @@ describe("Evaluate ternary operator", () => {
   testEvalToBe("false ? 1 : false ? 2 : 0", "0");
 
   // in functions
-  // I'm not sure what these tests are for, they were separated from the AST -> Expression tests
+  // I'm not sure what these tests are for, they were separated from the AST -> IR tests
   testEvalToBe("f(a) = a > 5 ? 1 : 0; f(6)", "1");
   testEvalToBe("f(a) = a > 5 ? a : 0; f(6)", "6");
   testEvalToBe("f(a) = a < 5 ? 1 : a; f(6)", "6");

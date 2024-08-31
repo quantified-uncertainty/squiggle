@@ -3,7 +3,7 @@
 // See this comment to deconfuse about what a frame is: https://github.com/quantified-uncertainty/squiggle/pull/1172#issuecomment-1264115038
 
 import { LocationRange } from "../ast/types.js";
-import { BaseLambda } from "./lambda.js";
+import { BaseLambda } from "./lambda/index.js";
 
 export class Frame {
   // Weird hack: without this, Frame class won't be a separate type from the plain JS Object type, since it doesn't have any meaningful methods.

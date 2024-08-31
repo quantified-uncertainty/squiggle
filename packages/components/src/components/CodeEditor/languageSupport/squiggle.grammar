@@ -45,7 +45,7 @@ LambdaParameter {
 }
 
 LambdaArgs {
-    () | LambdaParameter ("," LambdaParameter)*
+    "" | LambdaParameter ("," LambdaParameter)*
 }
 
 Decorator {
@@ -83,7 +83,15 @@ expressionWithoutParens[@isGroup="Expression"] {
             >
         "}"
     }
-    | Lambda { "{" ArgsOpen { "|" } LambdaArgs "|" blockContent "}" }
+    | Lambda {
+        "{"
+            (
+                ArgsOpen { "|" } LambdaArgs "|"
+                | "||" // special case - '||' would be parsed as a LogicOp token without this rule
+            )
+            blockContent
+        "}"
+    }
     | Identifier { identifier }
     | AccessExpr { expression !deref "." Field { identifier } }
     | Call { expression ~callOrDeclaration !call "(" commaSep<Argument { expression }> ")" }

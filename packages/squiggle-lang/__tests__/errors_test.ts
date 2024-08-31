@@ -1,9 +1,9 @@
-import { REOther } from "../src/errors/messages.js";
+import { ErrorMessage } from "../src/errors/messages.js";
 
 describe("errors", () => {
-  test("REOther", () => {
-    const error = new REOther("hello");
+  test("otherError", () => {
+    const error = ErrorMessage.otherError("hello");
     expect(error.toString()).toEqual("Error: hello");
-    expect(error.message).toEqual("hello");
+    expect(error.message).toEqual("Error: hello");
   });
 });

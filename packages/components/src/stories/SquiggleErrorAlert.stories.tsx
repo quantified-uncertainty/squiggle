@@ -18,7 +18,7 @@ async function getErrorFromCode(code: string) {
   if (output.result.ok) {
     throw new Error("Expected an error");
   }
-  return output.result.value;
+  return output.result.value.errors[0];
 }
 
 export const CompileError: Story = {

@@ -1,11 +1,7 @@
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import {
-  frAny,
-  frArray,
-  frNamed,
-  frString,
-} from "../library/registry/frTypes.js";
+import { namedInput } from "../library/FrInput.js";
+import { frAny, frArray, frString } from "../library/FrType.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 
 const maker = new FnFactory({
   nameSpace: "String",
@@ -47,7 +43,7 @@ export const library = [
     name: "split",
     definitions: [
       makeDefinition(
-        [frString, frNamed("separator", frString)],
+        [frString, namedInput("separator", frString)],
         frArray(frString),
         ([str, mark]) => {
           return str.split(mark);

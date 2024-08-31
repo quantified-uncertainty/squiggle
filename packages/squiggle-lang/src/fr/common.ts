@@ -1,16 +1,16 @@
-import { BaseErrorMessage, REThrow } from "../errors/messages.js";
-import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { ErrorMessage } from "../errors/messages.js";
+import { frInput, frOptionalInput } from "../library/FrInput.js";
 import {
   frAny,
   frBool,
-  frLambdaTyped,
-  frNamed,
-  frOptional,
   frOr,
   frString,
-} from "../library/registry/frTypes.js";
+  frTypedLambda,
+} from "../library/FrType.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { tAny } from "../types/Type.js";
 import { isEqual } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -60,7 +60,10 @@ myFn = typeOf({|e| e})`,
     description: `Runs Console.log() in the [Javascript developer console](https://www.digitalocean.com/community/tutorials/how-to-use-the-javascript-developer-console) and returns the value passed in.`,
     definitions: [
       makeDefinition(
-        [frAny({ genericName: "A" }), frNamed("message", frOptional(frString))],
+        [
+          frAny({ genericName: "A" }),
+          frOptionalInput({ name: "message", type: frString }),
+        ],
         frAny({ genericName: "A" }),
         ([value, message]) => {
           message ? console.log(message, value) : console.log(value);
@@ -75,14 +78,12 @@ myFn = typeOf({|e| e})`,
       "Throws an error. You can use `try` to recover from this error.",
     definitions: [
       makeDefinition(
-        [frOptional(frNamed("message", frString))],
+        [frOptionalInput({ name: "message", type: frString })],
         frAny(),
         ([value]) => {
-          if (value) {
-            throw new REThrow(value);
-          } else {
-            throw new REThrow("Common.throw() was called");
-          }
+          throw ErrorMessage.userThrowError(
+            value ?? "Common.throw() was called"
+          );
         }
       ),
     ],
@@ -94,16 +95,22 @@ myFn = typeOf({|e| e})`,
     definitions: [
       makeDefinition(
         [
-          frNamed("fn", frLambdaTyped([], frAny({ genericName: "A" }))),
-          // in the future, this function could be called with the error message
-          frNamed("fallbackFn", frLambdaTyped([], frAny({ genericName: "B" }))),
+          frInput({
+            name: "fn",
+            type: frTypedLambda([], tAny({ genericName: "A" })),
+          }),
+          frInput({
+            name: "fallbackFn",
+            // in the future, this function could be called with the error message
+            type: frTypedLambda([], tAny({ genericName: "B" })),
+          }),
         ],
         frOr(frAny({ genericName: "A" }), frAny({ genericName: "B" })),
         ([fn, fallbackFn], reducer) => {
           try {
             return { tag: "1", value: reducer.call(fn, []) };
           } catch (e) {
-            if (!(e instanceof BaseErrorMessage)) {
+            if (!(e instanceof ErrorMessage)) {
               // This doesn't looks like an error in user code, treat it as fatal
               throw e;
             }

@@ -1,18 +1,22 @@
-import { AST } from "../ast/types.js";
 import { Env } from "../dists/env.js";
+import { SqModule } from "../public/SqProject/SqModule.js";
 import {
   SquiggleBundle,
   SquiggleBundleEntrypoint,
   squiggleCodec,
 } from "../serialization/squiggle.js";
+import { Value } from "../value/index.js";
 import { baseRun } from "./common.js";
 import { SerializedRunResult, serializeRunResult } from "./serialization.js";
 
 export type SquiggleWorkerJob = {
+  module: {
+    name: string;
+    code: string;
+  };
   environment: Env;
-  ast: AST;
   bundle: SquiggleBundle;
-  externalsEntrypoint: SquiggleBundleEntrypoint<"value">;
+  imports: Record<string, SquiggleBundleEntrypoint<"value">>;
 };
 
 export type SquiggleWorkerResponse =
@@ -26,18 +30,22 @@ export type SquiggleWorkerResponse =
     };
 
 function processJob(job: SquiggleWorkerJob): SerializedRunResult {
-  const externals = squiggleCodec
-    .makeDeserializer(job.bundle)
-    .deserialize(job.externalsEntrypoint);
-
-  if (externals.type !== "Dict") {
-    throw new Error("Expected externals to be a dictionary");
+  const imports: Record<string, Value> = {};
+  const deserializer = squiggleCodec.makeDeserializer(job.bundle);
+  for (const [path, entrypoint] of Object.entries(job.imports)) {
+    imports[path] = deserializer.deserialize(entrypoint);
   }
 
+  const module = new SqModule({
+    name: job.module.name,
+    code: job.module.code,
+    // no pins, but that's fine
+  });
+
   const result = baseRun({
-    ast: job.ast,
+    module,
     environment: job.environment,
-    externals,
+    imports,
   });
 
   return serializeRunResult(result);

@@ -1,20 +1,21 @@
 import { OrderedMap } from "immutable";
 
-import { REArgumentError } from "../errors/messages.js";
-import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { ErrorMessage } from "../errors/messages.js";
+import { namedInput } from "../library/FrInput.js";
 import {
   frAny,
   frArray,
   frBool,
   frDictWithArbitraryKeys,
-  frLambdaTyped,
-  frNamed,
   frNumber,
   frString,
   frTuple,
-} from "../library/registry/frTypes.js";
+  frTypedLambda,
+} from "../library/FrType.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { tAny, tString } from "../types/index.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { Value } from "../value/index.js";
 import { vString } from "../value/VString.js";
@@ -35,8 +36,8 @@ export const library = [
       makeDefinition(
         [
           frDictWithArbitraryKeys(frAny({ genericName: "A" })),
-          frNamed("key", frString),
-          frNamed("value", frAny({ genericName: "A" })),
+          namedInput("key", frString),
+          namedInput("value", frAny({ genericName: "A" })),
         ],
         frDictWithArbitraryKeys(frAny({ genericName: "A" })),
         ([dict, key, value]) => dict.set(key, value)
@@ -49,7 +50,7 @@ export const library = [
     displaySection: "Queries",
     definitions: [
       makeDefinition(
-        [frDictWithArbitraryKeys(frAny()), frNamed("key", frString)],
+        [frDictWithArbitraryKeys(frAny()), namedInput("key", frString)],
         frBool,
         ([dict, key]) => dict.has(key)
       ),
@@ -76,7 +77,7 @@ export const library = [
       makeDefinition(
         [
           frDictWithArbitraryKeys(frAny({ genericName: "A" })),
-          frNamed("key", frString),
+          namedInput("key", frString),
         ],
         frDictWithArbitraryKeys(frAny({ genericName: "A" })),
         ([dict, key]) => dict.delete(key)
@@ -182,11 +183,11 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
       makeDefinition(
         [
           frDictWithArbitraryKeys(frAny({ genericName: "A" })),
-          frNamed(
+          namedInput(
             "fn",
-            frLambdaTyped(
-              [frAny({ genericName: "A" })],
-              frAny({ genericName: "B" })
+            frTypedLambda(
+              [tAny({ genericName: "A" })],
+              tAny({ genericName: "B" })
             )
           ),
         ],
@@ -215,7 +216,7 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
       makeDefinition(
         [
           frDictWithArbitraryKeys(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frString], frString)),
+          namedInput("fn", frTypedLambda([tString], tString)),
         ],
         frDictWithArbitraryKeys(frAny({ genericName: "A" })),
         ([dict, lambda], reducer) => {
@@ -226,7 +227,9 @@ Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}`
             if (mappedKey.type === "String") {
               mappedEntries.push([mappedKey.value, value]);
             } else {
-              throw new REArgumentError("mapKeys: lambda must return a string");
+              throw ErrorMessage.argumentError(
+                "mapKeys: lambda must return a string"
+              );
             }
           }
           return ImmutableMap(mappedEntries);
@@ -248,7 +251,7 @@ Dict.pick(data, ["a", "c"]) // {a: 1, c: 3}`
       makeDefinition(
         [
           frDictWithArbitraryKeys(frAny({ genericName: "A" })),
-          frNamed("keys", frArray(frString)),
+          namedInput("keys", frArray(frString)),
         ],
         frDictWithArbitraryKeys(frAny({ genericName: "A" })),
         ([dict, keys]) => {
@@ -282,9 +285,9 @@ Dict.omit(data, ["b", "d"]) // {a: 1, c: 3}`
       makeDefinition(
         [
           frDictWithArbitraryKeys(frAny({ genericName: "A" })),
-          frArray(frString),
+          namedInput("keys", frArray(frString)),
         ],
-        frNamed("keys", frDictWithArbitraryKeys(frAny({ genericName: "A" }))),
+        frDictWithArbitraryKeys(frAny({ genericName: "A" })),
         ([dict, keys]) => {
           const response: OrderedMap<string, Value> = dict.withMutations(
             (result) => {

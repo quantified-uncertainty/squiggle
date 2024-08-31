@@ -1,17 +1,16 @@
-import { REArgumentError } from "../errors/messages.js";
-import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { ErrorMessage } from "../errors/messages.js";
 import {
   frArray,
   frBool,
   frDict,
-  frInput,
+  frFormInput,
   frNumber,
-  frOptional,
   frOr,
   frString,
-} from "../library/registry/frTypes.js";
+} from "../library/FrType.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 
 const maker = new FnFactory({
   nameSpace: "Input",
@@ -44,13 +43,13 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["name", frString],
-            ["description", frOptional(frString)],
-            ["default", frOptional(frOr(frNumber, frString))]
-          ),
+          frDict({
+            name: frString,
+            description: { type: frString, optional: true },
+            default: { type: frOr(frNumber, frString), optional: true },
+          }),
         ],
-        frInput,
+        frFormInput,
         ([vars]) => {
           return {
             type: "text",
@@ -75,13 +74,13 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["name", frString],
-            ["description", frOptional(frString)],
-            ["default", frOptional(frOr(frNumber, frString))]
-          ),
+          frDict({
+            name: frString,
+            description: { type: frString, optional: true },
+            default: { type: frOr(frNumber, frString), optional: true },
+          }),
         ],
-        frInput,
+        frFormInput,
         ([vars]) => {
           return {
             type: "textArea",
@@ -102,13 +101,13 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["name", frString],
-            ["description", frOptional(frString)],
-            ["default", frOptional(frBool)]
-          ),
+          frDict({
+            name: frString,
+            description: { type: frString, optional: true },
+            default: { type: frBool, optional: true },
+          }),
         ],
-        frInput,
+        frFormInput,
         ([vars]) => {
           return {
             type: "checkbox",
@@ -131,14 +130,14 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["name", frString],
-            ["description", frOptional(frString)],
-            ["options", frArray(frString)],
-            ["default", frOptional(frString)]
-          ),
+          frDict({
+            name: frString,
+            options: frArray(frString),
+            description: { type: frString, optional: true },
+            default: { type: frString, optional: true },
+          }),
         ],
-        frInput,
+        frFormInput,
         ([vars]) => {
           //Throw error if options are empty, if default is not in options, or if options have duplicate
           const isEmpty = () => vars.options.length === 0;
@@ -148,13 +147,15 @@ export const library = [
             new Set(vars.options).size !== vars.options.length;
 
           if (isEmpty()) {
-            throw new REArgumentError("Options cannot be empty");
+            throw ErrorMessage.argumentError("Options cannot be empty");
           } else if (defaultNotInOptions()) {
-            throw new REArgumentError(
+            throw ErrorMessage.argumentError(
               "Default value must be one of the options provided"
             );
           } else if (hasDuplicates()) {
-            throw new REArgumentError("Options cannot have duplicate values");
+            throw ErrorMessage.argumentError(
+              "Options cannot have duplicate values"
+            );
           }
           return {
             type: "select",

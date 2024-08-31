@@ -1,8 +1,8 @@
 import { Env } from "../../dists/env.js";
-import { Lambda } from "../../reducer/lambda.js";
+import { Lambda } from "../../reducer/lambda/index.js";
 import * as Result from "../../utility/result.js";
 import { TableChart } from "../../value/VTableChart.js";
-import { SqError, SqOtherError } from "../SqError.js";
+import { SqErrorList, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValuePathEdge } from "../SqValuePath.js";
 import { SqValue, wrapValue } from "./index.js";
@@ -19,7 +19,7 @@ const getItem = (
   fn: SqLambda,
   env: Env,
   context?: SqValueContext
-): Result.result<SqValue, SqError> => {
+): Result.result<SqValue, SqErrorList> => {
   const response = fn.call([element], env);
   const newContext: SqValueContext | undefined = context?.extend(
     SqValuePathEdge.fromCellAddress(row, column)
@@ -28,7 +28,9 @@ const getItem = (
   if (response.ok && context) {
     return Result.Ok(wrapValue(response.value._value, newContext));
   } else if (response.ok) {
-    return Result.Err(new SqOtherError("Context creation for table failed."));
+    return Result.Err(
+      new SqErrorList([new SqOtherError("Context creation for table failed.")])
+    );
   } else {
     return response;
   }
@@ -44,7 +46,7 @@ export class SqTableChart {
     rowI: number,
     columnI: number,
     env: Env
-  ): Result.result<SqValue, SqError> {
+  ): Result.result<SqValue, SqErrorList> {
     return getItem(
       rowI,
       columnI,
@@ -55,7 +57,7 @@ export class SqTableChart {
     );
   }
 
-  items(env: Env): Result.result<SqValue, SqError>[][] {
+  items(env: Env): Result.result<SqValue, SqErrorList>[][] {
     const wrappedDataItems = this._value.data.map((r) =>
       wrapValue(r, this.context)
     );

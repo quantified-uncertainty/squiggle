@@ -1,11 +1,11 @@
-import { REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { Value } from "../value/index.js";
 
 export type Bindings = ImmutableMap<string, Value>;
 
 /*
- * Offsets on stack are resolved in `expression/compile.ts`, except for stdLib symbols, which are resolved in runtime.
+ * Offsets on stack are resolved in `compiler/compile.ts`, except for stdLib symbols, which are resolved in runtime.
  */
 export class Stack {
   private constructor(private stack: Value[] = []) {}
@@ -15,7 +15,7 @@ export class Stack {
   }
 
   outOfBounds(): never {
-    throw new REOther("Internal error: out of bounds stack index");
+    throw ErrorMessage.otherError("Internal error: out of bounds stack index");
   }
 
   get(offset: number): Value {

@@ -10,23 +10,22 @@ import {
   binaryOperations,
 } from "../dists/distOperations/index.js";
 import * as PointMassJs from "../dists/SymbolicDist/PointMass.js";
-import { FRFunction } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { frOptionalInput, namedInput } from "../library/FrInput.js";
 import {
   frArray,
   frDist,
   frDistOrNumber,
-  frNamed,
   frNumber,
-  frOptional,
   frString,
-} from "../library/registry/frTypes.js";
+} from "../library/FrType.js";
+import { FRFunction } from "../library/registry/core.js";
 import {
   FnFactory,
   parseDistFromDistOrNumber,
   unwrapDistResult,
 } from "../library/registry/helpers.js";
 import * as magicNumbers from "../magicNumbers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { Reducer } from "../reducer/Reducer.js";
 
 const maker = new FnFactory({
@@ -107,7 +106,7 @@ export const library: FRFunction[] = [
 Produce a sparkline of length \`\`n\`\`. For example, \`▁▁▁▁▁▂▄▆▇██▇▆▄▂▁▁▁▁▁\`. These can be useful for testing or quick visualizations that can be copied and pasted into text.`,
     definitions: [
       makeDefinition(
-        [frDist, frOptional(frNumber)],
+        [frDist, frOptionalInput({ type: frNumber })],
         frString,
         ([d, n], { environment }) =>
           unwrapDistResult(
@@ -166,7 +165,7 @@ Produce a sparkline of length \`\`n\`\`. For example, \`▁▁▁▁▁▂▄▆
     displaySection: "Basic Functions",
     definitions: [
       makeDefinition(
-        [frDist, frNamed("n", frNumber)],
+        [frDist, namedInput("n", frNumber)],
         frArray(frNumber),
         ([dist, n], { rng }) => {
           return dist.sampleN(n | 0, rng);
@@ -233,7 +232,7 @@ Produce a sparkline of length \`\`n\`\`. For example, \`▁▁▁▁▁▂▄▆
 Sample set distributions are truncated by filtering samples, but point set distributions are truncated using direct geometric manipulation. Uniform distributions are truncated symbolically. Symbolic but non-uniform distributions get converted to Point Set distributions.`,
     definitions: [
       makeDefinition(
-        [frDist, frNamed("left", frNumber), frNamed("right", frNumber)],
+        [frDist, namedInput("left", frNumber), namedInput("right", frNumber)],
         frDist,
         ([dist, left, right], { environment, rng }) =>
           unwrapDistResult(

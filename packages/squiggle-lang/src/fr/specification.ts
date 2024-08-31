@@ -1,12 +1,12 @@
-import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDict,
   frLambda,
   frSpecification,
   frString,
-} from "../library/registry/frTypes.js";
+} from "../library/FrType.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 
 const maker = new FnFactory({
   nameSpace: "Spec",
@@ -45,11 +45,11 @@ myEstimate(t: [Date(2020), Date(2030)]) = normal(10, 3)`,
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["name", frString],
-            ["documentation", frString],
-            ["validate", frLambda]
-          ),
+          frDict({
+            name: frString,
+            documentation: frString,
+            validate: frLambda,
+          }),
         ],
         frSpecification,
         ([{ name, documentation, validate }]) => ({

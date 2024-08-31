@@ -25,7 +25,8 @@ export class SampleSetDist extends BaseDist {
   readonly type = "SampleSetDist";
   readonly samples: readonly number[];
 
-  private constructor(samples: readonly number[]) {
+  // This is public because of `TDist` implementation, but please don't call it directly.
+  constructor(samples: readonly number[]) {
     super();
     this.samples = samples;
   }

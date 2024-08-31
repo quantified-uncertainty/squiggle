@@ -1,8 +1,11 @@
-import { testCompile, testCompileEnd } from "../helpers/compileHelpers.js";
+import {
+  testCompile,
+  testCompileLastStatement,
+} from "../helpers/compileHelpers.js";
 
 describe("Compile tags operator", () => {
   // single decorator
-  testCompileEnd(
+  testCompileLastStatement(
     `
     @hide
     x=5
@@ -11,7 +14,7 @@ describe("Compile tags operator", () => {
   );
 
   // multiple tags and application order
-  testCompileEnd(
+  testCompileLastStatement(
     `
     @hide
     @location
@@ -21,7 +24,7 @@ describe("Compile tags operator", () => {
   );
 
   // with parameters
-  testCompileEnd(
+  testCompileLastStatement(
     `
     @name("X")
     @doc("Doc")

@@ -5,9 +5,7 @@ it("Print IR", async () => {
   expect(result.exitCode).toBe(0);
   expect(result.stderr).toBe("");
   expect(stripAnsi(result.stdout)).toBe(`(Program
-  (.statements
-    (Call add 2 2)
-  )
+  (Call add 2 2)
 )
 `);
 });

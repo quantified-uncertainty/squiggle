@@ -1,5 +1,10 @@
+import { assertExpression } from "../compiler/serialize.js";
 import { getStdLib } from "../library/index.js";
-import { Lambda, UserDefinedLambda } from "../reducer/lambda.js";
+import { FnInput } from "../reducer/lambda/FnInput.js";
+import { Lambda } from "../reducer/lambda/index.js";
+import { UserDefinedLambda } from "../reducer/lambda/UserDefinedLambda.js";
+import { tAny } from "../types/index.js";
+import { TTypedLambda } from "../types/TTypedLambda.js";
 import { VDomain } from "../value/VDomain.js";
 import { VLambda } from "../value/vLambda.js";
 import { SerializedLambda } from "./serializeLambda.js";
@@ -34,21 +39,24 @@ export function deserializeLambda(
       return new UserDefinedLambda(
         value.name,
         value.captureIds.map((id) => visit.value(id)),
-        value.parameters.map((parameter) => {
-          let domain: VDomain | undefined;
-          if (parameter.domainId !== undefined) {
-            const shouldBeDomain = visit.value(parameter.domainId);
-            if (!(shouldBeDomain instanceof VDomain)) {
-              throw new Error("Serialized domain is not a domain");
+        new TTypedLambda(
+          value.inputs.map((input) => {
+            let domain: VDomain | undefined;
+            if (input.typeId !== undefined) {
+              const shouldBeDomain = visit.value(input.typeId);
+              if (!(shouldBeDomain instanceof VDomain)) {
+                throw new Error("Serialized domain is not a domain");
+              }
+              domain = shouldBeDomain;
             }
-            domain = shouldBeDomain;
-          }
-          return {
-            ...parameter,
-            domain,
-          };
-        }),
-        visit.expression(value.expressionId)
+            return new FnInput({
+              name: input.name ?? undefined,
+              type: domain?.value ?? tAny(),
+            });
+          }),
+          tAny()
+        ),
+        assertExpression(visit.ir(value.irId))
       );
   }
 }

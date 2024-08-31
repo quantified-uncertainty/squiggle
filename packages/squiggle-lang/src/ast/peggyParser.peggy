@@ -13,22 +13,19 @@ outerBlock
     statements:statementsList
     finalExpression:(statementSeparator @expression)?
     {
-      if (finalExpression) {
-        statements.push(finalExpression);
-      }
-      return h.nodeProgram(imports, statements, location());
+      return h.nodeProgram(imports, statements, finalExpression, location());
     }
   / imports:importStatementsList
     finalExpression:expression
-    { return h.nodeProgram(imports, [finalExpression], location()); }
+    { return h.nodeProgram(imports, [], finalExpression, location()); }
   / imports:importStatementsList
-    { return h.nodeProgram(imports, [], location()); }
+    { return h.nodeProgram(imports, [], null, location()); }
 
 importStatementsList = (@importStatement __nl)*
 
 importStatement
   = _nl 'import' __ file:string variable:(__ 'as' __ @identifier)
-    { return [file, variable]; }
+    { return h.nodeImport(file, variable, location()); }
 
 innerBlockOrExpression
   = quotedInnerBlock
@@ -37,18 +34,15 @@ innerBlockOrExpression
 quotedInnerBlock
   = '{' _nl
     statements:statementsList
-    finalExpression:(statementSeparator @expression) _nl
+    result:(statementSeparator @expression) _nl
     '}'
     {
-      if (finalExpression) {
-        statements.push(finalExpression);
-      }
-      return h.nodeBlock(statements, location());
+      return h.nodeBlock(statements, result, location());
     }
   / '{' _nl
-    finalExpression:expression _nl
+    result:expression _nl
     '}'
-    { return h.nodeBlock([finalExpression], location()); }
+    { return h.nodeBlock([], result, location()); }
 
 statementsList = statement|1.., statementSeparator|
 
@@ -70,10 +64,14 @@ infixUnitType
   typeMultiplicativeOp "operator" = '*' / '/'
 
 exponentialUnitType
-  = unit:(identifier / float) _ "^" _ exponent:number
+  = unit:(unitName / float) _ "^" _ exponent:float
     { return h.nodeExponentialUnitType(unit, exponent, location()); }
-  / unit:(identifier / float)
+  / unit:(unitName / float)
     { return unit; }
+
+unitName
+  = identifier:identifier
+    { return h.nodeUnitNameFromIdentifier(identifier, location()); }
 
 statement
   = letStatement
@@ -96,7 +94,7 @@ functionParameters = functionParameter|.., commaSeparator|
   functionParameter
     = id:dollarIdentifier annotation:(_ ':' _nl @expression)? paramUnitType:unitTypeSignature?
       {
-        return annotation ? h.nodeIdentifierWithAnnotation(id.value, annotation, paramUnitType, location()) : h.nodeIdentifierWithUnitType(id.value, paramUnitType, location());
+        return h.nodeLambdaParameter(id, annotation, paramUnitType, location());
       }
 
 /*
@@ -353,13 +351,26 @@ valueConstructor
   / dictConstructor
 
 lambda
-  = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}' returnUnitType:unitTypeSignature?
+  = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  result:(statementSeparator @expression)  _nl '}' returnUnitType:unitTypeSignature?
     {
-      statements.push(finalExpression);
-      return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined, returnUnitType);
+      return h.nodeLambda(
+        args,
+        h.nodeBlock(statements, result, location()),
+        location(),
+        undefined,
+        returnUnitType
+      );
     }
-  / '{' _nl '|' _nl args:functionParameters _nl '|' _nl finalExpression: expression  _nl '}'  returnUnitType:unitTypeSignature?
-    { return h.nodeLambda(args, finalExpression, location(), undefined, returnUnitType); }
+  / '{' _nl '|' _nl args:functionParameters _nl '|' _nl result:expression  _nl '}'  returnUnitType:unitTypeSignature?
+    {
+      return h.nodeLambda(
+        args,
+        result,
+        location(),
+        undefined,
+        returnUnitType
+      );
+    }
 
 arrayConstructor 'array'
   = '[' _nl ']'

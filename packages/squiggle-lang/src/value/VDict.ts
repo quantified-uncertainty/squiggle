@@ -1,4 +1,4 @@
-import { REDictPropertyNotFound, REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,
@@ -48,11 +48,11 @@ export class VDict
     if (key.type === "String") {
       const result = this.value.get(key.value);
       if (!result) {
-        throw new REDictPropertyNotFound("Dict property not found", key.value);
+        throw ErrorMessage.dictPropertyNotFoundError(key.value);
       }
       return result;
     } else {
-      throw new REOther("Can't access non-string key on a dict");
+      throw ErrorMessage.otherError("Can't access non-string key on a dict");
     }
   }
 

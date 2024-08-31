@@ -3,16 +3,16 @@ import {
   SerializedIError,
   serializeIError,
 } from "../errors/IError.js";
-import { result } from "../index.js";
+import { RunOutput } from "../reducer/Reducer.js";
 import {
   SquiggleBundle,
   SquiggleBundleEntrypoint,
   squiggleCodec,
   SquiggleSerializationStore,
 } from "../serialization/squiggle.js";
-import { Err, Ok } from "../utility/result.js";
+import { Err, Ok, result } from "../utility/result.js";
 import { VDict } from "../value/VDict.js";
-import { RunOutput, RunResult } from "./BaseRunner.js";
+import { RunResult } from "./BaseRunner.js";
 
 type SerializedRunOutputEntrypoints = {
   result: SquiggleBundleEntrypoint<"value">;
@@ -26,7 +26,10 @@ type SerializedRunOutput = {
   entrypoints: SerializedRunOutputEntrypoints;
 };
 
-export type SerializedRunResult = result<SerializedRunOutput, SerializedIError>;
+export type SerializedRunResult = result<
+  SerializedRunOutput,
+  SerializedIError[]
+>;
 
 export function serializeRunResult(result: RunResult): SerializedRunResult {
   if (result.ok) {
@@ -37,7 +40,7 @@ export function serializeRunResult(result: RunResult): SerializedRunResult {
       entrypoints: serializeRunOutputToStore(store, result.value),
     });
   } else {
-    return Err(serializeIError(result.value));
+    return Err(result.value.map((err) => serializeIError(err)));
   }
 }
 
@@ -49,8 +52,7 @@ export function deserializeRunResult(
 
     return Ok(deserializeRunOutputFromBundle(bundle, entrypoints));
   } else {
-    const error = deserializeIError(serializedResult.value);
-    return Err(error);
+    return Err(serializedResult.value.map(deserializeIError));
   }
 }
 

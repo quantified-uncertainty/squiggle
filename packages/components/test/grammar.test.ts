@@ -85,4 +85,16 @@ x = 5
       'Program(Pipe(Number,ControlOp,Call(Identifier,"(",Argument(Number),")")))'
     );
   });
+
+  test("Lambda with zero args", () => {
+    expect(parser.parse("f = {|| 1}").toString()).toBe(
+      'Program(LetStatement(VariableName,Equals,Lambda("{",Number,"}")))'
+    );
+  });
+
+  test("Defun with zero args", () => {
+    expect(parser.parse("f() = 1").toString()).toBe(
+      'Program(DefunStatement(VariableName,"(",LambdaArgs,")",Equals,Number))'
+    );
+  });
 });

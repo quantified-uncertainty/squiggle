@@ -1,6 +1,6 @@
 import isInteger from "lodash/isInteger.js";
 
-import { REArrayIndexNotFound, REOther } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,
@@ -33,7 +33,7 @@ export class VArray
   get(key: Value) {
     if (key.type === "Number") {
       if (!isInteger(key.value)) {
-        throw new REArrayIndexNotFound(
+        throw ErrorMessage.arrayIndexNotFoundError(
           "Array index must be an integer",
           key.value
         );
@@ -42,11 +42,14 @@ export class VArray
       if (index >= 0 && index < this.value.length) {
         return this.value[index];
       } else {
-        throw new REArrayIndexNotFound("Array index not found", index);
+        throw ErrorMessage.arrayIndexNotFoundError(
+          "Array index not found",
+          index
+        );
       }
     }
 
-    throw new REOther("Can't access non-numerical key on an array");
+    throw ErrorMessage.otherError("Can't access non-numerical key on an array");
   }
 
   isEqual(other: VArray) {

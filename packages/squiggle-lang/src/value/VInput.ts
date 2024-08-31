@@ -8,7 +8,7 @@ export type CommonInputArgs = {
   description?: string;
 };
 
-export type Input = CommonInputArgs &
+export type FormInput = CommonInputArgs &
   (
     | {
         type: "text";
@@ -30,10 +30,10 @@ export type Input = CommonInputArgs &
   );
 
 export type InputType = "text" | "textArea" | "checkbox" | "select";
-export class VInput extends BaseValue<"Input", Input> {
+export class VInput extends BaseValue<"Input", FormInput> {
   readonly type = "Input";
 
-  constructor(public value: Input) {
+  constructor(public value: FormInput) {
     super();
   }
 
@@ -54,13 +54,15 @@ export class VInput extends BaseValue<"Input", Input> {
     return lodashIsEqual(this.value, other.value);
   }
 
-  override serializePayload(): Input {
+  override serializePayload(): FormInput {
     return this.value;
   }
 
-  static deserialize(value: Input): VInput {
+  static deserialize(value: FormInput): VInput {
     return vInput(value);
   }
 }
 
-export const vInput = (input: Input) => new VInput(input);
+export function vInput(input: FormInput) {
+  return new VInput(input);
+}

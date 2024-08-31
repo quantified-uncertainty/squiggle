@@ -1,7 +1,7 @@
 import { Env } from "../../dists/env.js";
 import * as Result from "../../utility/result.js";
 import { Calculator } from "../../value/VCalculator.js";
-import { SqError, SqOtherError } from "../SqError.js";
+import { SqErrorList, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValuePathEdge } from "../SqValuePath.js";
 import { SqValue, wrapValue } from "./index.js";
@@ -14,7 +14,7 @@ export class SqCalculator {
     public context?: SqValueContext
   ) {}
 
-  run(_arguments: SqValue[], env: Env): Result.result<SqValue, SqError> {
+  run(_arguments: SqValue[], env: Env): Result.result<SqValue, SqErrorList> {
     const sqLambda = new SqLambda(this._value.fn, undefined);
     const response = sqLambda.call(_arguments, env);
 
@@ -22,7 +22,9 @@ export class SqCalculator {
 
     if (!newContext) {
       return Result.Err(
-        new SqOtherError("Context creation for calculator failed.")
+        new SqErrorList([
+          new SqOtherError("Context creation for calculator failed."),
+        ])
       );
     } else if (!response.ok) {
       return response;

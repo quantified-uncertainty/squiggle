@@ -1,7 +1,7 @@
 import { sq } from "../../src/index.js";
 import { testCompile } from "../helpers/compileHelpers.js";
 
-describe("References in compiled expressions", () => {
+describe("References in compiled IR", () => {
   testCompile("y=99; x={y=1; y}", [
     "(Assign y 99)",
     "(Assign x (Block (Assign y 1) (StackRef 0)))",

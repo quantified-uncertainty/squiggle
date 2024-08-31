@@ -1,6 +1,6 @@
+import { astNodeToString } from "../ast/parse.js";
+import { ASTNode } from "../ast/types.js";
 import { ICompileError } from "../errors/IError.js";
-import { nodeToString } from "./parse.js";
-import { ASTNode } from "./types.js";
 
 function swap(arr: any[], i: number, j: number): void {
   const temp = arr[i];
@@ -181,7 +181,7 @@ function createTypeConstraint(node: ASTNode | null): TypeConstraint {
     case "UnitValue":
       // Can use a unitless literal in a type signature, e.g. `1/meters`.
       return empty_constraint();
-    case "Identifier":
+    case "UnitName":
       return {
         defined: true,
         variables: {},
@@ -210,7 +210,7 @@ function createTypeConstraint(node: ASTNode | null): TypeConstraint {
       };
       if (floatNode?.fractional !== null || floatNode?.exponent !== null) {
         throw new ICompileError(
-          `Exponents in unit types must be integers, not ${nodeToString(node.exponent)}`,
+          `Exponents in unit types must be integers, not ${astNodeToString(node.exponent)}`,
           node.location
         );
       }
@@ -226,7 +226,7 @@ function createTypeConstraint(node: ASTNode | null): TypeConstraint {
       // This should never happen because a syntax error should've already
       // gotten raised by this point.
       throw new ICompileError(
-        `Unknown syntax in type signature: ${nodeToString(node)}`,
+        `Unknown syntax in type signature: ${astNodeToString(node)}`,
         node.location
       );
   }
@@ -393,14 +393,14 @@ function addTypeConstraint(
 
 /*
  * Get an identifier name from either an "Identifier" or
- * "IdentifierWithAnnotation" node.
+ * "LambdaParameter" node.
  */
 function getIdentifierName(node: ASTNode): string {
   switch (node.kind) {
     case "Identifier":
       return node.value;
-    case "IdentifierWithAnnotation":
-      return node.variable;
+    case "LambdaParameter":
+      return node.variable.value;
     default:
       throw new ICompileError(
         `Node must have type identifier, not ${node.kind}`,
@@ -521,7 +521,7 @@ function lambdaFindTypeConstraints(
         // params as `parameters`
         const substitutableConstraint = structuredClone(newReturnConstraint);
         for (let i = 0; i < node.args.length; i++) {
-          const paramName = (node.args[i] as { value: string }).value;
+          const paramName = (node.args[i].variable as { value: string }).value;
           const paramId = scopes.stack[scopes.stack.length - 1][paramName];
           if (paramId in substitutableConstraint.variables) {
             substitutableConstraint.parameters[i] =
@@ -562,26 +562,35 @@ function innerFindTypeConstraints(
   scopes: ScopeInfo
 ): TypeConstraint {
   switch (node.kind) {
-    case "Program":
-    case "Block": {
+    case "Program": {
       scopes.stack.push({ ...scopes.stack[scopes.stack.length - 1] });
 
-      let lastTypeConstraint = no_constraint();
       for (const statement of node.statements) {
-        lastTypeConstraint = innerFindTypeConstraints(
-          statement,
-          typeConstraints,
-          scopes
-        );
+        innerFindTypeConstraints(statement, typeConstraints, scopes);
+      }
+      if (node.result) {
+        innerFindTypeConstraints(node.result, typeConstraints, scopes);
       }
 
       scopes.stack.pop();
 
-      if (node.kind === "Program") {
-        return no_constraint();
-      } else {
-        return lastTypeConstraint;
+      return no_constraint();
+    }
+    case "Block": {
+      scopes.stack.push({ ...scopes.stack[scopes.stack.length - 1] });
+
+      for (const statement of node.statements) {
+        innerFindTypeConstraints(statement, typeConstraints, scopes);
       }
+      const lastTypeConstraint = innerFindTypeConstraints(
+        node.result,
+        typeConstraints,
+        scopes
+      );
+
+      scopes.stack.pop();
+
+      return lastTypeConstraint;
     }
     case "LetStatement":
       if (node.value.kind === "Lambda") {
@@ -695,8 +704,13 @@ function innerFindTypeConstraints(
     }
     case "Identifier":
       return identifierConstraint(node.value, node, scopes, "reference");
-    case "IdentifierWithAnnotation":
-      return identifierConstraint(node.variable, node, scopes, "reference");
+    case "LambdaParameter":
+      return identifierConstraint(
+        node.variable.value,
+        node,
+        scopes,
+        "reference"
+      );
     case "Float":
     case "UnitValue":
       return no_constraint();
@@ -894,7 +908,7 @@ function simpleCheckConstraints(
 
   for (const varId in unitTypes) {
     if (
-      !["Identifier", "IdentifierWithAnnotation"].includes(
+      !["Identifier", "LambdaParameter"].includes(
         scopes.variableNodes[varId].kind
       )
     ) {
