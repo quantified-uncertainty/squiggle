@@ -20,6 +20,6 @@ describe("SqValue.asJS", () => {
       await testRun('{ x: 5, y: [3, "foo", { dist: normal(5,2) } ] }')
     ).result.asJS();
 
-    expect((value as any).value.y[2].value.dist).toBeInstanceOf(Array);
+    expect((value as any).value.y[2].value.dist).toBeInstanceOf(Object);
   });
 });

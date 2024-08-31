@@ -3,6 +3,9 @@ import toPlainObject from "lodash/toPlainObject.js";
 import { SampleSetDist } from "../dists/SampleSetDist/index.js";
 import { ErrorMessage } from "../errors/messages.js";
 import { BaseLambda, Lambda } from "../reducer/lambda/index.js";
+import { compactTreeString } from "../utility/compactTreeString.js";
+import * as E_A_Floats from "../utility/E_A_Floats.js";
+import * as E_A_Sorted from "../utility/E_A_Sorted.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { SDate } from "../utility/SDate.js";
 import { Value } from "./index.js";
@@ -62,6 +65,30 @@ export function removeLambdas(value: SimpleValue): SimpleValueWithoutLambda {
   } else {
     return value;
   }
+}
+
+function summarizeSampleSetDist(dist: SampleSetDist) {
+  const keys: Array<
+    "mean" | "p50" | "p5" | "p25" | "p75" | "p95" | "stdev" | "min" | "max"
+  > = ["mean", "p5", "p50", "p95"];
+  const sorted = E_A_Floats.sort(dist.samples);
+  const allStats = {
+    mean: () => dist.mean(),
+    p50: () => E_A_Sorted.quantile(sorted, 0.5),
+    p5: () => E_A_Sorted.quantile(sorted, 0.05),
+    p25: () => E_A_Sorted.quantile(sorted, 0.25),
+    p75: () => E_A_Sorted.quantile(sorted, 0.75),
+    p95: () => E_A_Sorted.quantile(sorted, 0.95),
+    stdev: () => Math.sqrt(E_A_Floats.variance(dist.samples)),
+    min: () => dist.min(),
+    max: () => dist.max(),
+  };
+
+  return Object.fromEntries(
+    keys
+      .map((key) => [key, allStats[key]?.()])
+      .filter(([, value]) => value !== undefined)
+  );
 }
 
 export function simpleValueToJson(value: SimpleValueWithoutLambda): unknown {
@@ -288,7 +315,12 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           return simpleValueFromAny(value.value);
         case "SampleSetDist": {
           const dist = value.value as SampleSetDist;
-          return [...dist.samples];
+          const fields: [string, SimpleValue][] = [
+            ["vType", "SampleSetDist"],
+            ["samples", [...dist.samples]],
+            ["summary", simpleValueFromAny(summarizeSampleSetDist(dist))],
+          ];
+          return ImmutableMap(fields);
         }
         default:
           return simpleValueFromAny(value.value);
@@ -326,3 +358,7 @@ export function simpleValueToValue(value: SimpleValue): Value {
     return vVoid();
   }
 }
+
+export const compactString: typeof compactTreeString<
+  SimpleValue | SimpleValueWithoutLambda
+> = compactTreeString;
