@@ -1,8 +1,11 @@
-import { Lambda, UserDefinedLambdaParameter } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda/index.js";
+import { vDomain } from "../value/VDomain.js";
 import { SquiggleSerializationVisitor } from "./squiggle.js";
 
-type SerializedParameter = Omit<UserDefinedLambdaParameter, "domain"> & {
-  domainId?: number | undefined;
+// TODO - serialize other input fields, e.g. `optional`? not necessary for now
+type SerializedInput = {
+  name: string | null;
+  typeId?: number;
 };
 
 export type SerializedLambda =
@@ -13,8 +16,9 @@ export type SerializedLambda =
   | {
       type: "UserDefined";
       name?: string;
-      expressionId: number;
-      parameters: SerializedParameter[];
+      irId: number;
+      // TODO - serialize the entire signature (output)?
+      inputs: SerializedInput[];
       captureIds: number[];
     };
 
@@ -32,12 +36,10 @@ export function serializeLambda(
       return {
         type: "UserDefined",
         name: lambda.name,
-        expressionId: visit.expression(lambda.expression),
-        parameters: lambda.parameters.map((parameter) => ({
-          ...parameter,
-          domainId: parameter.domain
-            ? visit.value(parameter.domain)
-            : undefined,
+        irId: visit.ir(lambda.body),
+        inputs: lambda.signature.inputs.map((input) => ({
+          name: input.name ?? null,
+          typeId: input.type ? visit.value(vDomain(input.type)) : undefined,
         })),
         captureIds: lambda.captures.map((capture) => visit.value(capture)),
       };

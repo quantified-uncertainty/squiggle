@@ -7,7 +7,7 @@ import {
   result,
   SqDistFnPlot,
   SqDistributionsPlot,
-  SqError,
+  SqErrorList,
   SqOtherError,
   SqScale,
   SqValue,
@@ -256,14 +256,15 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
     xCount,
   });
   //TODO: This custom error handling is a bit hacky and should be improved.
-  const valueAtCursor: result<SqValue, SqError> | undefined = useMemo(() => {
-    return cursorX !== undefined
-      ? plot.fn.call([plot.xScale.numberToValue(cursorX)], environment)
-      : {
-          ok: false,
-          value: new SqOtherError("No cursor"), // will never happen, we check `cursorX` later
-        };
-  }, [plot.fn, environment, cursorX, plot.xScale]);
+  const valueAtCursor: result<SqValue, SqErrorList> | undefined =
+    useMemo(() => {
+      return cursorX !== undefined
+        ? plot.fn.call([plot.xScale.numberToValue(cursorX)], environment)
+        : {
+            ok: false,
+            value: new SqErrorList([new SqOtherError("No cursor")]), // will never happen, we check `cursorX` later
+          };
+    }, [plot.fn, environment, cursorX, plot.xScale]);
 
   const distChartAtCursor =
     valueAtCursor?.ok &&

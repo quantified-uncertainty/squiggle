@@ -1,6 +1,5 @@
-import { REArgumentError, REOther } from "../errors/messages.js";
-import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { ErrorMessage } from "../errors/messages.js";
+import { namedInput } from "../library/FrInput.js";
 import {
   frAny,
   frArray,
@@ -12,52 +11,36 @@ import {
   frDistOrNumber,
   frDuration,
   frLambda,
-  frLambdaTyped,
-  frNamed,
-  frNumber,
   frOr,
-  FrOrType,
   frPlot,
-  frSpecificationWithTags,
+  frSpecification,
   frString,
   frTableChart,
-  FRType,
-  frWithTags,
-} from "../library/registry/frTypes.js";
+  frTagged,
+  FrType,
+  frTypedLambda,
+} from "../library/FrType.js";
+import { makeFnExample } from "../library/registry/core.js";
 import {
   checkNumericTickFormat,
   FnFactory,
 } from "../library/registry/helpers.js";
-import { Lambda } from "../reducer/lambda.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { FnInput } from "../reducer/lambda/FnInput.js";
+import { tDist } from "../types/TDist.js";
+import { tDate, tDuration, tNumber } from "../types/TIntrinsic.js";
+import { tUnion } from "../types/TUnion.js";
 import { getOrThrow } from "../utility/result.js";
-import { Value } from "../value/index.js";
 import { ValueTags, ValueTagsType } from "../value/valueTags.js";
 import { exportData, location, toMap } from "../value/valueTagsUtils.js";
 import { vBool, VBool } from "../value/VBool.js";
+import { vSpecification } from "../value/VSpecification.js";
 import { vString } from "../value/VString.js";
 
 const maker = new FnFactory({
   nameSpace: "Tag",
   requiresNamespace: true,
 });
-
-//I could also see inlining this into the next function, either way is fine.
-function _ensureTypeUsingLambda<T1>(
-  outputType: FRType<T1>,
-  inputValue: FrOrType<T1, Lambda>,
-  runLambdaToGetType: (fn: Lambda) => Value
-): T1 {
-  if (inputValue.tag === "1") {
-    return inputValue.value;
-  }
-  const show = runLambdaToGetType(inputValue.value);
-  const unpack = outputType.unpack(show);
-  if (unpack) {
-    return unpack;
-  } else {
-    throw new Error("showAs must return correct type");
-  }
-}
 
 //This helps ensure that the tag name is a valid key of ValueTagsType, with the required type.
 type PickByValue<T, ValueType> = NonNullable<
@@ -72,11 +55,11 @@ type PickByValue<T, ValueType> = NonNullable<
 
 const booleanTagDefs = <T>(
   tagName: PickByValue<ValueTagsType, VBool>,
-  frType: FRType<T>
+  frType: FrType<T>
 ) => [
   makeDefinition(
-    [frWithTags(frType), frBool],
-    frWithTags(frType),
+    [frTagged(frType), frBool],
+    frTagged(frType),
     ([{ value, tags }, tagValue]) => ({
       value,
       tags: tags.merge({ [tagName]: vBool(tagValue) }),
@@ -84,8 +67,8 @@ const booleanTagDefs = <T>(
     { isDecorator: true }
   ),
   makeDefinition(
-    [frWithTags(frType)],
-    frWithTags(frType),
+    [frTagged(frType)],
+    frTagged(frType),
     ([{ value, tags }]) => ({
       value,
       tags: tags.merge({ [tagName]: vBool(true) }),
@@ -96,27 +79,35 @@ const booleanTagDefs = <T>(
 
 // This constructs definitions where the second argument is either a type T or a function that takes in the first argument and returns a type T.
 function decoratorWithInputOrFnInput<T>(
-  inputType: FRType<any>,
-  outputType: FRType<T>,
+  inputType: FrType<any>,
+  outputType: FrType<T>,
   toValueTagsFn: (arg: T) => ValueTagsType
 ) {
   return makeDefinition(
     [
-      frWithTags(inputType),
-      frOr(outputType, frLambdaTyped([inputType], outputType)),
-    ],
-    frWithTags(inputType),
-    ([{ value, tags }, newInput], reducer) => {
-      const runLambdaToGetType = (fn: Lambda) => {
-        //When we call the function, we pass in the tags as well, just in case they are asked for in the call.
-        const val = frWithTags(inputType).pack({ value: value, tags });
-        return reducer.call(fn, [val]);
-      };
-      const correctTypedInputValue: T = _ensureTypeUsingLambda(
+      frTagged(inputType),
+      frOr(
         outputType,
-        newInput,
-        runLambdaToGetType
-      );
+        frTypedLambda([new FnInput({ type: inputType.type })], outputType.type)
+      ),
+    ],
+    frTagged(inputType),
+    ([{ value, tags }, newInput], reducer) => {
+      let correctTypedInputValue: T;
+      if (newInput.tag === "1") {
+        correctTypedInputValue = newInput.value;
+      } else {
+        // When we call the function, we pass in the tags as well, just in case they are asked for in the call.
+        const val = frTagged(inputType).pack({ value, tags });
+        const show = reducer.call(newInput.value, [val]);
+        const unpack = outputType.unpack(show);
+        if (unpack !== undefined) {
+          correctTypedInputValue = unpack;
+        } else {
+          throw new Error("showAs must return correct type");
+        }
+      }
+
       return {
         value,
         tags: tags.merge(toValueTagsFn(correctTypedInputValue)),
@@ -126,7 +117,7 @@ function decoratorWithInputOrFnInput<T>(
   );
 }
 
-function showAsDef<T>(inputType: FRType<any>, outputType: FRType<T>) {
+function showAsDef<T>(inputType: FrType<any>, outputType: FrType<T>) {
   return decoratorWithInputOrFnInput(inputType, outputType, (result) => ({
     showAs: outputType.pack(result),
   }));
@@ -203,18 +194,18 @@ example2 = {|x| x + 1}`,
       ),
     ],
     definitions: [
-      showAsDef(frWithTags(frDist), frPlot),
+      showAsDef(frTagged(frDist), frPlot),
       showAsDef(frArray(frAny()), frTableChart),
       showAsDef(
-        frLambdaTyped([frNumber], frDistOrNumber),
+        frTypedLambda([tNumber], tUnion([tDist, tNumber])),
         frOr(frPlot, frCalculator)
       ),
       showAsDef(
-        frLambdaTyped([frDate], frDistOrNumber),
+        frTypedLambda([tDate], tUnion([tDist, tNumber])),
         frOr(frPlot, frCalculator)
       ),
       showAsDef(
-        frLambdaTyped([frDuration], frDistOrNumber),
+        frTypedLambda([tDuration], tUnion([tDist, tNumber])),
         frOr(frPlot, frCalculator)
       ),
       //The frLambda definition needs to come after the more narrow frLambdaTyped definitions.
@@ -234,7 +225,7 @@ example2 = {|x| x + 1}`,
     name: "getExportData",
     displaySection: "Tags",
     definitions: [
-      makeDefinition([frWithTags(frAny())], frAny(), ([{ tags }]) => {
+      makeDefinition([frTagged(frAny())], frAny(), ([{ tags }]) => {
         return exportData(tags) || vString("None");
       }),
     ],
@@ -245,20 +236,20 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [frWithTags(frAny({ genericName: "A" })), frSpecificationWithTags],
-        frWithTags(frAny({ genericName: "A" })),
-        ([{ value, tags }, spec]) => {
+        [frTagged(frAny({ genericName: "A" })), frTagged(frSpecification)],
+        frTagged(frAny({ genericName: "A" })),
+        ([{ value, tags }, { value: specValue, tags: specTags }]) => {
           if (tags.specification()) {
-            throw new REArgumentError(
+            throw ErrorMessage.argumentError(
               "Specification already exists. Be sure to use Tag.omit() first."
             );
           }
           return {
             value,
             tags: tags.merge({
-              specification: spec,
-              name: vString(spec.value.name),
-              doc: vString(spec.value.documentation),
+              specification: vSpecification(specValue).copyWithTags(specTags),
+              name: vString(specValue.name),
+              doc: vString(specValue.documentation),
             }),
           };
         },
@@ -270,7 +261,7 @@ example2 = {|x| x + 1}`,
     name: "getSpec",
     displaySection: "Tags",
     definitions: [
-      makeDefinition([frWithTags(frAny())], frAny(), ([value]) => {
+      makeDefinition([frTagged(frAny())], frAny(), ([value]) => {
         return value.tags?.value.specification || vString("None");
       }),
     ],
@@ -281,8 +272,8 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [frWithTags(frDistOrNumber), frNamed("numberFormat", frString)],
-        frWithTags(frDistOrNumber),
+        [frTagged(frDistOrNumber), namedInput("numberFormat", frString)],
+        frTagged(frDistOrNumber),
         ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
           return { value, tags: tags.merge({ numberFormat: vString(format) }) };
@@ -290,8 +281,8 @@ example2 = {|x| x + 1}`,
         { isDecorator: true }
       ),
       makeDefinition(
-        [frWithTags(frDuration), frNamed("numberFormat", frString)],
-        frWithTags(frDuration),
+        [frTagged(frDuration), namedInput("numberFormat", frString)],
+        frTagged(frDuration),
         ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
           return { value, tags: tags.merge({ numberFormat: vString(format) }) };
@@ -299,8 +290,8 @@ example2 = {|x| x + 1}`,
         { isDecorator: true }
       ),
       makeDefinition(
-        [frWithTags(frDate), frNamed("timeFormat", frString)],
-        frWithTags(frDate),
+        [frTagged(frDate), namedInput("timeFormat", frString)],
+        frTagged(frDate),
         ([{ value, tags }, format]) => {
           return { value, tags: tags.merge({ dateFormat: vString(format) }) };
         },
@@ -313,13 +304,13 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     examples: [],
     definitions: [
-      makeDefinition([frWithTags(frDistOrNumber)], frString, ([{ tags }]) => {
+      makeDefinition([frTagged(frDistOrNumber)], frString, ([{ tags }]) => {
         return tags?.numberFormat() || "None";
       }),
-      makeDefinition([frWithTags(frDuration)], frString, ([{ tags }]) => {
+      makeDefinition([frTagged(frDuration)], frString, ([{ tags }]) => {
         return tags?.numberFormat() || "None";
       }),
-      makeDefinition([frWithTags(frDate)], frString, ([{ tags }]) => {
+      makeDefinition([frTagged(frDate)], frString, ([{ tags }]) => {
         return tags?.dateFormat() || "None";
       }),
     ],
@@ -345,8 +336,8 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [frWithTags(frAny({ genericName: "A" }))],
-        frWithTags(frAny({ genericName: "A" })),
+        [frTagged(frAny({ genericName: "A" }))],
+        frTagged(frAny({ genericName: "A" })),
         ([{ value, tags }]) => ({
           value,
           tags: tags.merge({ startOpenState: vString("open") }),
@@ -361,8 +352,8 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [frWithTags(frAny({ genericName: "A" }))],
-        frWithTags(frAny({ genericName: "A" })),
+        [frTagged(frAny({ genericName: "A" }))],
+        frTagged(frAny({ genericName: "A" })),
         ([{ value, tags }]) => ({
           value,
           tags: tags.merge({ startOpenState: vString("closed") }),
@@ -377,7 +368,7 @@ example2 = {|x| x + 1}`,
     description: `Returns the startOpenState of a value, which can be "open", "closed", or "" if no startOpenState is set. Set using \`Tag.startOpen\` and \`Tag.startClosed\`.`,
     definitions: [
       makeDefinition(
-        [frWithTags(frAny())],
+        [frTagged(frAny())],
         frString,
         ([{ tags }]) => tags?.value.startOpenState?.value ?? ""
       ),
@@ -434,12 +425,12 @@ example2 = {|x| x + 1}`,
     displaySection: "Tags",
     definitions: [
       makeDefinition(
-        [frWithTags(frAny({ genericName: "A" }))],
-        frWithTags(frAny({ genericName: "A" })),
+        [frTagged(frAny({ genericName: "A" }))],
+        frTagged(frAny({ genericName: "A" })),
         ([{ value, tags }], { frameStack }) => {
           const location = frameStack.getTopFrame()?.location;
           if (!location) {
-            throw new REOther("Location is missing in call stack");
+            throw ErrorMessage.otherError("Location is missing in call stack");
           }
           return {
             value,
@@ -454,7 +445,7 @@ example2 = {|x| x + 1}`,
     name: "getLocation",
     displaySection: "Tags",
     definitions: [
-      makeDefinition([frWithTags(frAny())], frAny(), ([{ tags }]) => {
+      makeDefinition([frTagged(frAny())], frAny(), ([{ tags }]) => {
         return location(tags) || vString("None");
       }),
     ],
@@ -475,11 +466,13 @@ example2 = {|x| x + 1}`,
     displaySection: "Functions",
     definitions: [
       makeDefinition(
-        [frWithTags(frAny({ genericName: "A" })), frArray(frString)],
-        frWithTags(frAny({ genericName: "A" })),
+        [frTagged(frAny({ genericName: "A" })), frArray(frString)],
+        frTagged(frAny({ genericName: "A" })),
         ([{ tags, value }, parameterNames]) => {
           const newParams = tags.omitUsingStringKeys([...parameterNames]);
-          const _args = getOrThrow(newParams, (e) => new REArgumentError(e));
+          const _args = getOrThrow(newParams, (e) =>
+            ErrorMessage.argumentError(e)
+          );
           return { tags: _args, value };
         }
       ),
@@ -491,8 +484,8 @@ example2 = {|x| x + 1}`,
     description: "Returns a copy of the value with all tags removed.",
     definitions: [
       makeDefinition(
-        [frWithTags(frAny({ genericName: "A" }))],
-        frWithTags(frAny({ genericName: "A" })),
+        [frTagged(frAny({ genericName: "A" }))],
+        frTagged(frAny({ genericName: "A" })),
         ([{ value }]) => {
           return { value, tags: new ValueTags({}) };
         }

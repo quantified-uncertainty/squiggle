@@ -1,9 +1,9 @@
-import { REOther } from "../errors/messages.js";
-import { Lambda } from "../reducer/lambda.js";
+import { ErrorMessage } from "../errors/messages.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { BaseValue } from "./BaseValue.js";
-import { Value } from "./index.js";
+import { Value, vDomain } from "./index.js";
 import { Indexable } from "./mixins.js";
 import { vArray } from "./VArray.js";
 import { vDict } from "./VDict.js";
@@ -29,21 +29,23 @@ export class VLambda extends BaseValue<"Lambda", number> implements Indexable {
       switch (this.value.type) {
         case "UserDefinedLambda":
           return vArray(
-            this.value.parameters.map((parameter) => {
+            this.value.signature.inputs.map((input, i) => {
               const fields: [string, Value][] = [
-                ["name", vString(parameter.name)],
+                ["name", vString(input.name ?? `Input ${i + 1}`)],
               ];
-              if (parameter.domain) {
-                fields.push(["domain", parameter.domain]);
+              if (input.type) {
+                fields.push(["domain", vDomain(input.type)]);
               }
               return vDict(ImmutableMap(fields));
             })
           );
         case "BuiltinLambda":
-          throw new REOther("Can't access parameters on built in functions");
+          throw ErrorMessage.otherError(
+            "Can't access parameters on built in functions"
+          );
       }
     }
-    throw new REOther("No such field");
+    throw ErrorMessage.otherError("No such field");
   }
 
   override serializePayload(visit: SquiggleSerializationVisitor) {
@@ -53,4 +55,6 @@ export class VLambda extends BaseValue<"Lambda", number> implements Indexable {
   // deserialization is implemented in ./serialize.ts, because of circular import issues.
 }
 
-export const vLambda = (v: Lambda) => new VLambda(v);
+export function vLambda(v: Lambda) {
+  return new VLambda(v);
+}

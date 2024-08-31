@@ -1,6 +1,6 @@
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frNumber } from "../library/registry/frTypes.js";
+import { frNumber } from "../library/FrType.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 
 // Also, see version.ts for System.version.
 

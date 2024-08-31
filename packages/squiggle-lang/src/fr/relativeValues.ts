@@ -1,30 +1,28 @@
-import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
-  frDeprecated,
   frDict,
-  frLambdaTyped,
-  frNumber,
-  frOptional,
   frPlot,
   frString,
-} from "../library/registry/frTypes.js";
+  frTypedLambda,
+} from "../library/FrType.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeSquiggleDefinition } from "../library/registry/squiggleDefinition.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { Bindings } from "../reducer/Stack.js";
 import { sq } from "../sq.js";
+import { tDist, tString, tTuple } from "../types/index.js";
 
 const maker = new FnFactory({
   nameSpace: "RelativeValues",
   requiresNamespace: true,
 });
 
-const relativeValuesShape = frDict(
-  ["ids", frArray(frString)],
-  ["fn", frLambdaTyped([frString, frString], frArray(frNumber))],
-  ["title", frDeprecated(frOptional(frString))]
-);
+const relativeValuesShape = frDict({
+  ids: frArray(frString),
+  fn: frTypedLambda([tString, tString], tTuple(tDist, tDist)),
+  title: { type: frString, optional: true, deprecated: true },
+});
 
 export const library = [
   maker.make({

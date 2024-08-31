@@ -1,4 +1,4 @@
-import { evaluateStringToResult } from "../../src/reducer/index.js";
+import { evaluateStringToResult } from "../helpers/reducerHelpers.js";
 
 describe("stacktraces", () => {
   test("nested calls", async () => {
@@ -14,7 +14,7 @@ describe("stacktraces", () => {
     if (result.ok) {
       throw new Error("Expected code to fail");
     }
-    const error = result.value.toStringWithDetails();
+    const error = result.value.toString({ withStackTrace: true });
 
     expect(error).toBe(
       `Error: There are function matches for add(), but with different arguments:

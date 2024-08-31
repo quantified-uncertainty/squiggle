@@ -3,9 +3,9 @@ import { FC, useState } from "react";
 import {
   Env,
   result,
+  SqDateRangeDomain,
   SqDistFnPlot,
-  SqDomain,
-  SqError,
+  SqErrorList,
   SqLambda,
   SqNumericFnPlot,
   SqNumericRangeDomain,
@@ -18,7 +18,7 @@ import {
 } from "../../../components/PlaygroundSettings.js";
 import { MessageAlert } from "../../../components/ui/Alert.js";
 import { ErrorBoundary } from "../../../components/ui/ErrorBoundary.js";
-import { SquiggleErrorAlert } from "../../../components/ui/SquiggleErrorAlert.js";
+import { SquiggleErrorListAlert } from "../../../components/ui/SquiggleErrorListAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
 
@@ -30,7 +30,7 @@ type AutomaticFunctionChartProps = {
 };
 
 // TODO - move to SquiggleErrorAlert with `collapsible` flag or other HOC, there's nothing specific about functions here
-const FunctionCallErrorAlert: FC<{ error: SqError }> = ({ error }) => {
+const FunctionCallErrorAlert: FC<{ error: SqErrorList }> = ({ error }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -42,17 +42,17 @@ const FunctionCallErrorAlert: FC<{ error: SqError }> = ({ error }) => {
         >
           {expanded ? "Hide" : "Show"} error details
         </span>
-        {expanded ? <SquiggleErrorAlert error={error} /> : null}
+        {expanded ? <SquiggleErrorListAlert errorList={error} /> : null}
       </div>
     </MessageAlert>
   );
 };
 // Sees if it can get a valid result from either bounds of the domain.
 function getInferredFnOutputType(
-  domain: SqDomain,
+  domain: SqNumericRangeDomain | SqDateRangeDomain,
   fn: SqLambda,
   environment: Env
-): result<string, SqError> {
+): result<string, SqErrorList> {
   const result1 = fn.call([domain.minValue], environment);
   if (result1.ok) {
     return { ok: true, value: result1.value.tag };
@@ -90,9 +90,11 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
     .signatures()
     .find((s) => s.length === 1)?.[0]?.domain;
 
-  const xDomain = includedDomain
-    ? includedDomain
-    : SqNumericRangeDomain.fromMinMax(min, max);
+  const xDomain =
+    includedDomain instanceof SqNumericRangeDomain ||
+    includedDomain instanceof SqDateRangeDomain
+      ? includedDomain
+      : SqNumericRangeDomain.fromMinMax(min, max);
 
   const inferredOutputType = getInferredFnOutputType(xDomain, fn, environment);
 

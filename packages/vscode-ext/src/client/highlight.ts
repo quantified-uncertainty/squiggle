@@ -30,6 +30,7 @@ const populateTokensBuilder = (
       for (const child of node.statements) {
         populateTokensBuilder(tokensBuilder, child);
       }
+      populateTokensBuilder(tokensBuilder, node.result);
       break;
     case "LetStatement":
       tokensBuilder.push(

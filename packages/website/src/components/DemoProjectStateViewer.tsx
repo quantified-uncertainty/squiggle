@@ -112,7 +112,7 @@ const DemoProjectStateViewerTab: FC<{
     const originalRun = runner.run.bind(runner);
     runner.run = async (params) => {
       await pendingListRef.current?.addPending(
-        `Run ${params.ast.location.source}`
+        `Run ${params.module.expectAst().location.source}`
       );
       return originalRun(params);
     };

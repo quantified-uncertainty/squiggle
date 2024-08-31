@@ -14,7 +14,7 @@ export type CodeEditorProps = {
   onFocusByPath?: (path: SqValuePath) => void;
   height?: number | string;
   lineWrapping?: boolean;
-  sourceId: string;
+  sourceId: string; // TODO - remove this, it's not very useful since source ids in the new SqProject are not unique
   fontSize?: number;
   showGutter?: boolean;
   project: SqProject;

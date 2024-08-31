@@ -108,11 +108,11 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
       project.setEnvironment(args.environment);
     }
 
-    const rootModule = new SqModule({
+    const mainModule = new SqModule({
       name: sourceId,
       code: args.code,
     });
-    project.setHead(mainHeadName, { module: rootModule });
+    project.setHead(mainHeadName, { module: mainModule });
     forceUpdate(); // necessary for correct isStale
   }, [project, sourceId, forceUpdate, args.environment, args.code]);
 
@@ -126,9 +126,10 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
       if (!project.hasHead(mainHeadName)) {
         return;
       }
-      const rootModule = project.getHead(mainHeadName);
-      if (event.data.output.module.hash() === rootModule.hash()) {
-        project.setHead(renderedHeadName, event.data.output);
+      const mainModule = project.getHead(mainHeadName);
+      const computedModule = event.data.output.module;
+      if (computedModule.hash() === mainModule.hash()) {
+        project.setHead(renderedHeadName, { module: computedModule });
         setExecutionId((prev) => prev + 1);
       }
     };

@@ -1,8 +1,6 @@
 import { type AstPath, type Doc, type Printer } from "prettier";
 import * as doc from "prettier/doc";
 
-import { type ASTCommentNode, type ASTNode } from "@quri/squiggle-lang";
-
 import { PatchedASTNode, PrettierUtil, type SquiggleNode } from "./types.js";
 
 const { group, indent, softline, line, hardline, join, ifBreak } = doc.builders;
@@ -29,7 +27,6 @@ function getNodePrecedence(node: SquiggleNode): number {
     "^": 9,
     ".^": 9,
     "->": 10,
-    "|>": 10, // removed since 0.8.0
   };
   switch (node.kind) {
     case "Ternary":
@@ -50,9 +47,9 @@ function getNodePrecedence(node: SquiggleNode): number {
     case "Call":
       return 13;
     case "Block":
-      if (node.statements.length === 1) {
+      if (node.statements.length === 0) {
         // will be unwrapped by printer
-        return getNodePrecedence(node.statements[0]);
+        return getNodePrecedence(node.result);
       }
     default:
       return 100;
@@ -62,7 +59,7 @@ export function createSquigglePrinter(
   util: PrettierUtil
 ): Printer<SquiggleNode> {
   return {
-    print: (path, options, print) => {
+    print: (path, options, print): Doc => {
       const { node } = path;
       const typedPath = <T extends SquiggleNode>(_: T) => {
         return path as AstPath<T>;
@@ -86,19 +83,55 @@ export function createSquigglePrinter(
 
       switch (node.kind) {
         case "Program":
-          // TODO - preserve line breaks, break long lines
-          // TODO - comments will be moved to the end because imports is not a real AST, need to be fixed in squiggle-lang
           return group([
-            node.imports.map((_, i) => [
-              "import ",
-              typedPath(node).call(print, "imports", i, 0),
-              " as ",
-              typedPath(node).call(print, "imports", i, 1),
+            node.imports.map((imp, i) => [
+              typedPath(node).call(print, "imports", i),
               hardline,
+              util.isNextLineEmpty(
+                options.originalText,
+                imp.location.end.offset
+              )
+                ? hardline
+                : "",
             ]),
-            join(
+            node.statements.map((statement, i) => [
+              typedPath(node).call(print, "statements", i),
               hardline,
-              node.statements.map((statement, i) => [
+              // keep extra new lines
+              util.isNextLineEmpty(
+                options.originalText,
+                statement.location.end.offset
+              )
+                ? hardline
+                : "",
+            ]),
+            node.result
+              ? typedPath(
+                  node as typeof node & {
+                    result: NonNullable<(typeof node)["result"]>;
+                  }
+                ).call(print, "result")
+              : "",
+          ]);
+        case "Import":
+          return [
+            "import ",
+            typedPath(node).call(print, "path"),
+            " as ",
+            typedPath(node).call(print, "variable"),
+          ];
+        case "Block": {
+          if (
+            node.statements.length === 0 &&
+            !node.comments &&
+            !(node.result as PatchedASTNode).comments
+          ) {
+            return typedPath(node).call(print, "result");
+          }
+
+          const content = [
+            join(hardline, [
+              ...node.statements.map((statement, i) => [
                 typedPath(node).call(print, "statements", i),
                 // keep extra new lines
                 util.isNextLineEmpty(
@@ -107,37 +140,10 @@ export function createSquigglePrinter(
                 )
                   ? hardline
                   : "",
-              ])
-            ),
-            node.statements.length &&
-            ["LetStatement", "DefunStatement"].includes(
-              node.statements[node.statements.length - 1].kind
-            )
-              ? hardline // new line if final expression is a statement
-              : "",
-          ]);
-        case "Block": {
-          if (
-            node.statements.length === 1 &&
-            !node.comments &&
-            !(node.statements[0] as PatchedASTNode).comments
-          ) {
-            return typedPath(node).call(print, "statements", 0);
-          }
-
-          const content = join(
-            hardline,
-            node.statements.map((statement, i) => [
-              typedPath(node).call(print, "statements", i),
-              // keep extra new lines
-              util.isNextLineEmpty(
-                options.originalText,
-                statement.location.end.offset
-              )
-                ? hardline
-                : "",
-            ])
-          );
+              ]),
+              typedPath(node).call(print, "result"),
+            ]),
+          ];
 
           return node.isLambdaBody
             ? content
@@ -168,7 +174,8 @@ export function createSquigglePrinter(
             node.exported ? "export " : "",
             node.variable.value,
             node.unitTypeSignature
-              ? typedPath(node).call(print, "unitTypeSignature")
+              ? // @ts-ignore
+                [" :: ", typedPath(node).call(print, "unitTypeSignature")]
               : "",
             " = ",
             typedPath(node).call(print, "value"),
@@ -192,7 +199,7 @@ export function createSquigglePrinter(
             ]),
             node.value.returnUnitType
               ? // @ts-ignore
-                typedPath(node).call(print, "value", "returnUnitType")
+                [" :: ", typedPath(node).call(print, "value", "returnUnitType")]
               : "",
             " = ",
             typedPath(node).call(print, "value", "body"),
@@ -287,18 +294,19 @@ export function createSquigglePrinter(
             "]",
           ]);
         case "Identifier":
-          return group([
-            node.value,
+        case "UnitName":
+          return node.value;
+        case "LambdaParameter":
+          return [
+            typedPath(node).call(print, "variable"),
+            node.annotation
+              ? // @ts-ignore
+                [": ", typedPath(node).call(print, "annotation")]
+              : [],
             node.unitTypeSignature
               ? // @ts-ignore
-                typedPath(node).call(print, "unitTypeSignature")
-              : "",
-          ]);
-        case "IdentifierWithAnnotation":
-          return [
-            node.variable,
-            ": ",
-            typedPath(node).call(print, "annotation"),
+                [" :: ", typedPath(node).call(print, "unitTypeSignature")]
+              : [],
           ];
         case "KeyValue": {
           const key =
@@ -340,7 +348,7 @@ export function createSquigglePrinter(
             "}",
             node.returnUnitType
               ? // @ts-ignore
-                typedPath(node).call(print, "returnUnitType")
+                [" :: ", typedPath(node).call(print, "returnUnitType")]
               : "",
           ]);
         case "Dict": {
@@ -374,7 +382,7 @@ export function createSquigglePrinter(
             path.call(print, "falseExpression"),
           ];
         case "UnitTypeSignature":
-          return group([" :: ", typedPath(node).call(print, "body")]);
+          return typedPath(node).call(print, "body");
         case "InfixUnitType":
           return group([
             typedPath(node).call(print, "args", 0),
@@ -392,13 +400,14 @@ export function createSquigglePrinter(
         case "lineComment":
         case "blockComment":
           throw new Error("Didn't expect comment node in print()");
+        default:
+          throw new Error(`Unexpected node ${node satisfies never}`);
       }
     },
-    printComment: (path: AstPath<ASTCommentNode>) => {
+    printComment: (path) => {
       const commentNode = path.node;
       switch (commentNode.kind) {
         case "lineComment":
-          // I'm not sure why "hardline" at the end here is not necessary
           return ["//", commentNode.value];
         case "blockComment":
           return ["/*", commentNode.value, "*/"];
@@ -409,37 +418,41 @@ export function createSquigglePrinter(
     isBlockComment: (node) => {
       return node.kind === "blockComment";
     },
-    ...({
-      getCommentChildNodes: (node: ASTNode) => {
-        if (!node) {
-          return [];
-        }
-        switch (node.kind) {
-          case "Program":
-            return node.statements;
-          case "Block":
-            return node.statements;
-          case "Array":
-            return node.elements;
-          case "LetStatement":
-            return [node.variable, node.value];
-          case "DefunStatement":
-            return [node.value];
-          case "Call":
-            return [...node.args, node.fn];
-          case "Dict":
-            return node.elements;
-          case "Lambda":
-            return [...node.args, node.body];
-          case "KeyValue":
-            return [node.key, node.value];
-          default:
-            return undefined;
-        }
-      },
-      canAttachComment: (node: ASTNode) => {
-        return node && node.kind;
-      },
-    } as any),
+    getCommentChildNodes: (node) => {
+      if (!node) {
+        return [];
+      }
+      switch (node.kind) {
+        case "Program":
+          return [
+            ...node.imports,
+            ...node.statements,
+            ...(node.result ? [node.result] : []),
+          ];
+        case "Import":
+          return [node.path, node.variable];
+        case "Block":
+          return [...node.statements, node.result];
+        case "Array":
+          return node.elements;
+        case "LetStatement":
+          return [node.variable, node.value];
+        case "DefunStatement":
+          return [node.value];
+        case "Call":
+          return [...node.args, node.fn];
+        case "Dict":
+          return node.elements;
+        case "Lambda":
+          return [...node.args, node.body];
+        case "KeyValue":
+          return [node.key, node.value];
+        default:
+          return undefined;
+      }
+    },
+    canAttachComment: (node) => {
+      return Boolean(node && node.kind);
+    },
   };
 }

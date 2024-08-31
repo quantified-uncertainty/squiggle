@@ -1,11 +1,12 @@
 import { Env } from "../../dists/env.js";
 import { getStdLib } from "../../library/index.js";
-import { Lambda } from "../../reducer/lambda.js";
+import { Lambda } from "../../reducer/lambda/index.js";
 import { Reducer } from "../../reducer/Reducer.js";
+import { TAny } from "../../types/Type.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
-import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
+import { SqErrorList, SqOtherError, SqRuntimeError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValue, wrapValue } from "./index.js";
 import { SqDomain, wrapDomain } from "./SqDomain.js";
@@ -19,22 +20,25 @@ export type SqLambdaParameter = {
 type SqLambdaSignature = SqLambdaParameter[];
 
 function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
+  // TODO - just return `FnSignature`, no need to convert to `SqLambdaSignature`
   switch (lambda.type) {
     case "UserDefinedLambda":
       return [
-        lambda.parameters.map((param) => {
+        lambda.signature.inputs.map((input, i) => {
           return {
-            name: param.name,
-            domain: param.domain ? wrapDomain(param.domain.value) : undefined,
+            name: input.name ?? `Input ${i + 1}`,
+            domain: input.type ? wrapDomain(input.type) : undefined,
+            typeName:
+              input.type instanceof TAny ? undefined : input.type.toString(),
           };
         }),
       ];
     case "BuiltinLambda":
-      return lambda.signatures().map((def) =>
-        def.map((p, index) => ({
+      return lambda.signatures().map((signature) =>
+        signature.inputs.map((p, index) => ({
           name: index.toString(),
           domain: undefined,
-          typeName: p.display(),
+          typeName: p.type.toString(),
         }))
       );
   }
@@ -44,13 +48,15 @@ export function runLambda(
   lambda: Lambda,
   values: Value[],
   env: Env
-): result<SqValue, SqError> {
+): result<SqValue, SqErrorList> {
   const reducer = new Reducer(env);
   try {
     const value = reducer.call(lambda, values);
     return Result.Ok(wrapValue(value) as SqValue);
   } catch (e) {
-    return Result.Err(new SqRuntimeError(reducer.errorFromException(e)));
+    return Result.Err(
+      new SqErrorList([new SqRuntimeError(reducer.errorFromException(e))])
+    );
   }
 }
 
@@ -83,13 +89,15 @@ export class SqLambda {
     return lambdaToSqLambdaSignatures(this._value);
   }
 
-  call(args: SqValue[], env?: Env): result<SqValue, SqError> {
+  call(args: SqValue[], env?: Env): result<SqValue, SqErrorList> {
     if (!env) {
       if (!this.context) {
         return Result.Err(
-          new SqOtherError(
-            "Programmatically constructed lambda call requires env argument"
-          )
+          new SqErrorList([
+            new SqOtherError(
+              "Programmatically constructed lambda call requires env argument"
+            ),
+          ])
         );
       }
       // default to environment that was used when this lambda was created

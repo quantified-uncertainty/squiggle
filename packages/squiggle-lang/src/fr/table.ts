@@ -1,16 +1,16 @@
-import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { namedInput } from "../library/FrInput.js";
 import {
   frAny,
   frArray,
   frDict,
-  frLambdaTyped,
-  frNamed,
-  frOptional,
   frString,
   frTableChart,
-} from "../library/registry/frTypes.js";
+  frTypedLambda,
+} from "../library/FrType.js";
+import { makeFnExample } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { tAny } from "../types/Type.js";
 
 const maker = new FnFactory({
   nameSpace: "Table",
@@ -71,18 +71,17 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frNamed("data", frArray(frAny({ genericName: "A" }))),
-          frNamed(
+          namedInput("data", frArray(frAny({ genericName: "A" }))),
+          namedInput(
             "params",
-            frDict([
-              "columns",
-              frArray(
-                frDict(
-                  ["fn", frLambdaTyped([frAny({ genericName: "A" })], frAny())],
-                  ["name", frOptional(frString)]
-                )
+            frDict({
+              columns: frArray(
+                frDict({
+                  fn: frTypedLambda([tAny({ genericName: "A" })], tAny()),
+                  name: { type: frString, optional: true },
+                })
               ),
-            ])
+            })
           ),
         ],
         frTableChart,
@@ -99,18 +98,15 @@ export const library = [
       ),
       makeDefinition(
         [
-          frDict(
-            ["data", frArray(frAny({ genericName: "A" }))],
-            [
-              "columns",
-              frArray(
-                frDict(
-                  ["fn", frLambdaTyped([frAny({ genericName: "A" })], frAny())],
-                  ["name", frOptional(frString)]
-                )
-              ),
-            ]
-          ),
+          frDict({
+            data: frArray(frAny({ genericName: "A" })),
+            columns: frArray(
+              frDict({
+                fn: frTypedLambda([tAny({ genericName: "A" })], tAny()),
+                name: { type: frString, optional: true },
+              })
+            ),
+          }),
         ],
         frTableChart,
         ([{ data, columns }]) => {

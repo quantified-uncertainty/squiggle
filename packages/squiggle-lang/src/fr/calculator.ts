@@ -1,24 +1,23 @@
 import maxBy from "lodash/maxBy.js";
 
-import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { frOptionalInput } from "../library/FrInput.js";
 import {
   frArray,
   frBool,
   frCalculator,
   frDict,
-  frInput,
+  frFormInput,
   frLambda,
-  frNamed,
   frNumber,
-  frOptional,
   frString,
-  frWithTags,
-} from "../library/registry/frTypes.js";
-import { FnFactory, frTypeToInput } from "../library/registry/helpers.js";
-import { Lambda } from "../reducer/lambda.js";
+  frTagged,
+} from "../library/FrType.js";
+import { makeFnExample } from "../library/registry/core.js";
+import { FnFactory, typeToFormInput } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import { Calculator, vCalculator } from "../value/VCalculator.js";
-import { Input } from "../value/VInput.js";
+import { FormInput } from "../value/VInput.js";
 
 const maker = new FnFactory({
   nameSpace: "Calculator",
@@ -35,43 +34,24 @@ function validateCalculator(calc: Calculator): Calculator {
   }
 }
 
-function getDefaultInputs(lambda: Lambda): Input[] {
-  switch (lambda.type) {
-    case "BuiltinLambda": {
-      const longestSignature =
-        maxBy(lambda.signatures(), (s) => s.length) || [];
-      return longestSignature.map((sig, i) => {
-        const name = sig.varName ? sig.varName : `Input ${i + 1}`;
-        return frTypeToInput(sig, i, name);
-      });
-    }
-    case "UserDefinedLambda":
-      return lambda.getParameterNames().map((name) => ({
-        name,
-        type: "text",
-      }));
+function getDefaultInputs(lambda: Lambda): FormInput[] {
+  const longestSignature = maxBy(lambda.signatures(), (s) => s.inputs.length);
+  if (!longestSignature) {
+    throw new Error("No signatures found for lambda");
   }
+  return longestSignature.inputs.map((input, i) => {
+    const name = input.name ?? `Input ${i + 1}`;
+    return typeToFormInput(input.type, name);
+  });
 }
 
 export function lambdaToCalculator(lambda: Lambda): Calculator {
   const inputs = getDefaultInputs(lambda);
-  switch (lambda.type) {
-    case "BuiltinLambda": {
-      return {
-        fn: lambda,
-        inputs,
-        autorun: inputs.length !== 0,
-      };
-    }
-    case "UserDefinedLambda": {
-      const only0Params = lambda.parameters.length === 0;
-      return {
-        fn: lambda,
-        inputs,
-        autorun: only0Params,
-      };
-    }
-  }
+  return {
+    fn: lambda,
+    inputs,
+    autorun: inputs.length !== 0,
+  };
 }
 
 export const library = [
@@ -110,14 +90,14 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["fn", frLambda],
-            ["title", frOptional(frString)],
-            ["description", frOptional(frString)],
-            ["inputs", frOptional(frArray(frInput))],
-            ["autorun", frOptional(frBool)],
-            ["sampleCount", frOptional(frNumber)]
-          ),
+          frDict({
+            fn: frLambda,
+            title: { type: frString, optional: true },
+            description: { type: frString, optional: true },
+            inputs: { type: frArray(frFormInput), optional: true },
+            autorun: { type: frBool, optional: true },
+            sampleCount: { type: frNumber, optional: true },
+          }),
         ],
         frCalculator,
         ([{ fn, title, description, inputs, autorun, sampleCount }]) =>
@@ -132,19 +112,17 @@ For calculators that take a long time to run, we recommend setting \`autorun\` t
       ),
       makeDefinition(
         [
-          frWithTags(frLambda),
-          frNamed(
-            "params",
-            frOptional(
-              frDict(
-                ["title", frOptional(frString)],
-                ["description", frOptional(frString)],
-                ["inputs", frOptional(frArray(frInput))],
-                ["autorun", frOptional(frBool)],
-                ["sampleCount", frOptional(frNumber)]
-              )
-            )
-          ),
+          frTagged(frLambda),
+          frOptionalInput({
+            name: "params",
+            type: frDict({
+              title: { type: frString, optional: true },
+              description: { type: frString, optional: true },
+              inputs: { type: frArray(frFormInput), optional: true },
+              autorun: { type: frBool, optional: true },
+              sampleCount: { type: frNumber, optional: true },
+            }),
+          }),
         ],
         frCalculator,
         ([{ value, tags }, params]) => {

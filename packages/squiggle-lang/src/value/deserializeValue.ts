@@ -70,7 +70,7 @@ function deserializeValueWithoutTags(
     case "TableChart":
       return VTableChart.deserialize(node.payload, visit);
     case "Domain":
-      return VDomain.deserialize(node.payload);
+      return VDomain.deserialize(node.payload, visit);
     case "Specification":
       return VSpecification.deserialize(node.payload, visit);
     default:

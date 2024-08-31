@@ -1,19 +1,14 @@
-import { REArgumentError } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
+import { namedInput } from "../library/FrInput.js";
+import { frArray, frBool, frDomain, frNumber } from "../library/FrType.js";
 import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import {
-  frArray,
-  frBool,
-  frDomain,
-  frNamed,
-  frNumber,
-} from "../library/registry/frTypes.js";
 import {
   FnFactory,
   makeNumericComparisons,
 } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { TNumberRange } from "../types/TNumberRange.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
-import { NumericRangeDomain } from "../value/domain.js";
 
 const maker = new FnFactory({
   nameSpace: "Number",
@@ -22,7 +17,7 @@ const maker = new FnFactory({
 
 const assertIsNotEmpty = (arr: readonly number[]) => {
   if (arr.length === 0) {
-    throw new REArgumentError("List is empty");
+    throw ErrorMessage.argumentError("List is empty");
   }
 };
 
@@ -286,10 +281,10 @@ export const library = [
     examples: [makeFnExample("Number.rangeDomain(5, 10)")],
     definitions: [
       makeDefinition(
-        [frNamed("min", frNumber), frNamed("max", frNumber)],
+        [namedInput("min", frNumber), namedInput("max", frNumber)],
         frDomain,
         ([min, max]) => {
-          return new NumericRangeDomain(min, max);
+          return new TNumberRange(min, max);
         }
       ),
     ],

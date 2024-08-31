@@ -1,4 +1,4 @@
-import { Lambda } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,
@@ -63,4 +63,6 @@ export class VTableChart extends BaseValue<"TableChart", SerializedTableChart> {
   }
 }
 
-export const vTableChart = (v: TableChart) => new VTableChart(v);
+export function vTableChart(v: TableChart) {
+  return new VTableChart(v);
+}

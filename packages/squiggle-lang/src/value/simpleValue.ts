@@ -1,8 +1,8 @@
 import toPlainObject from "lodash/toPlainObject.js";
 
 import { SampleSetDist } from "../dists/SampleSetDist/index.js";
-import { REOther } from "../errors/messages.js";
-import { BaseLambda, Lambda } from "../reducer/lambda.js";
+import { ErrorMessage } from "../errors/messages.js";
+import { BaseLambda, Lambda } from "../reducer/lambda/index.js";
 import { compactTreeString } from "../utility/compactTreeString.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import * as E_A_Sorted from "../utility/E_A_Sorted.js";
@@ -326,7 +326,9 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           return simpleValueFromAny(value.value);
       }
     default:
-      throw new REOther(`Can't convert ${value.type} to simple value`);
+      throw ErrorMessage.otherError(
+        `Can't convert ${value.type} to simple value`
+      );
   }
 }
 

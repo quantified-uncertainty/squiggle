@@ -1,31 +1,25 @@
-import { ASTNode } from "../ast/types.js";
+import { TypedASTNode } from "../analysis/types.js";
 import { isBindingStatement } from "../ast/utils.js";
-import { Env } from "../dists/env.js";
-import { SqModule } from "../index.js";
+import { RunParams } from "../runners/BaseRunner.js";
 import { SqValuePath, SqValuePathEdge } from "./SqValuePath.js";
 
-// The common scenario is:
-// - you obtain `SqValue` somehow
-// - you need to know where it came from, so you query `value.context.runContext`.
-export type RunContext = {
-  module: SqModule;
-  environment: Env;
-};
-
 export class SqValueContext {
-  public runContext: RunContext;
+  // The common scenario is:
+  // - you obtain `SqValue` somehow
+  // - you need to know how it was produced, e.g. AST or the source code, so you query `value.context.runContext`.
+  public runContext: RunParams;
 
   /* Used for "focus in editor" feature in the playground, and for associating values with comments.
    * We try our best to find nested ASTs, but when the value is built dynamically, it's not always possible.
    * In that case, we store the outermost AST and set `valueAstIsPrecise` flag to `false`.
    */
-  public valueAst: ASTNode;
+  public valueAst: TypedASTNode;
   public valueAstIsPrecise: boolean;
   public path: SqValuePath;
 
   constructor(props: {
-    runContext: RunContext;
-    valueAst: ASTNode;
+    runContext: RunParams;
+    valueAst: TypedASTNode;
     valueAstIsPrecise: boolean;
     path: SqValuePath;
   }) {
@@ -39,7 +33,7 @@ export class SqValueContext {
     let ast = this.valueAst;
     const pathEdge = item.value;
 
-    let newAst: ASTNode | undefined;
+    let newAst: TypedASTNode | undefined;
     const itemisNotTableIndexOrCalculator =
       pathEdge.type !== "cellAddress" && pathEdge.type !== "calculator";
 
@@ -49,7 +43,7 @@ export class SqValueContext {
       // descend into trivial nodes
       while (true) {
         if (ast.kind === "Block") {
-          ast = ast.statements[ast.statements.length - 1];
+          ast = ast.result;
         } else if (ast.kind === "KeyValue") {
           ast = ast.value;
         } else if (isBindingStatement(ast)) {

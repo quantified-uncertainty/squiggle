@@ -19,9 +19,9 @@ import     "./foo3.squiggle" as foo3
 
     123`)
     ).toBe(`import "./foo.squiggle" as foo
-import "./foo2.squiggle" as foo2
+import "./foo2.squiggle" as foo2 // hello
+
 import "./foo3.squiggle" as foo3
-// hello
 
 123`);
   });

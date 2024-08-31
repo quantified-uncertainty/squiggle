@@ -1,4 +1,4 @@
-import { infixFunctions, typeFunctions, unaryFunctions } from "./operators.js";
+import { infixFunctions, unaryFunctions } from "./operators.js";
 
 /*
  *`Location` and `LocationRange` types are copy-pasted from Peggy, but
@@ -20,9 +20,9 @@ export type Location = {
 export type LocationRange = {
   /** Unlike in Peggy, this must be a string. */
   source: string;
-  /** Position at the beginning of the expression. */
+  /** Position at the beginning of the node. */
   start: Location;
-  /** Position after the end of the expression. */
+  /** Position after the end of the node. */
   end: Location;
 };
 
@@ -30,7 +30,7 @@ export type InfixOperator = keyof typeof infixFunctions;
 
 export type UnaryOperator = keyof typeof unaryFunctions;
 
-export type TypeOperator = keyof typeof typeFunctions;
+export type TypeOperator = "*" | "/";
 
 type N<T extends string, V extends object> = {
   kind: T;
@@ -39,21 +39,15 @@ type N<T extends string, V extends object> = {
 
 /*
  * Specific `Node*` types are mostly not exported, because they're easy to
- * obtain with `Extract<...>` (see `TypedNode` in `./peggyHelpers.ts`)
+ * obtain with `KindNode<"Name">` helper.
  */
-
-type NodeBlock = N<
-  "Block",
-  {
-    statements: ASTNode[];
-  }
->;
 
 type NodeProgram = N<
   "Program",
   {
-    imports: [NodeString, NodeIdentifier][];
-    statements: ASTNode[];
+    imports: NodeImport[];
+    statements: AnyStatementNode[];
+    result: AnyExpressionNode | null;
     // Var name -> statement node, for faster path resolution.
     // Not used for evaluation.
     // Note: symbols point to undecorated statements.
@@ -61,10 +55,26 @@ type NodeProgram = N<
   }
 >;
 
+type NodeBlock = N<
+  "Block",
+  {
+    statements: AnyStatementNode[];
+    result: AnyExpressionNode;
+  }
+>;
+
+type NodeImport = N<
+  "Import",
+  {
+    path: NodeString;
+    variable: NodeIdentifier;
+  }
+>;
+
 type NodeArray = N<
   "Array",
   {
-    elements: ASTNode[];
+    elements: AnyExpressionNode[];
   }
 >;
 
@@ -72,16 +82,13 @@ type NodeDict = N<
   "Dict",
   {
     elements: AnyNodeDictEntry[];
-    // Static key -> node, for faster path resolution.
-    // Not used for evaluation.
-    symbols: { [k in number | string]: AnyNodeDictEntry };
   }
 >;
 type NodeKeyValue = N<
   "KeyValue",
   {
-    key: ASTNode;
-    value: ASTNode;
+    key: AnyExpressionNode;
+    value: AnyExpressionNode;
   }
 >;
 export type AnyNodeDictEntry = NodeKeyValue | NodeIdentifier;
@@ -89,7 +96,7 @@ export type AnyNodeDictEntry = NodeKeyValue | NodeIdentifier;
 type NodeUnitValue = N<
   "UnitValue",
   {
-    value: ASTNode;
+    value: NodeFloat;
     unit: string;
   }
 >;
@@ -97,8 +104,8 @@ type NodeUnitValue = N<
 type NodeCall = N<
   "Call",
   {
-    fn: ASTNode;
-    args: ASTNode[];
+    fn: AnyExpressionNode;
+    args: AnyExpressionNode[];
   }
 >;
 
@@ -106,7 +113,7 @@ type NodeInfixCall = N<
   "InfixCall",
   {
     op: InfixOperator;
-    args: [ASTNode, ASTNode];
+    args: [AnyExpressionNode, AnyExpressionNode];
   }
 >;
 
@@ -114,23 +121,23 @@ type NodeUnaryCall = N<
   "UnaryCall",
   {
     op: UnaryOperator;
-    arg: ASTNode;
+    arg: AnyExpressionNode;
   }
 >;
 
 type NodePipe = N<
   "Pipe",
   {
-    leftArg: ASTNode;
-    fn: ASTNode;
-    rightArgs: ASTNode[];
+    leftArg: AnyExpressionNode;
+    fn: AnyExpressionNode;
+    rightArgs: AnyExpressionNode[];
   }
 >;
 
 type NodeDotLookup = N<
   "DotLookup",
   {
-    arg: ASTNode;
+    arg: AnyExpressionNode;
     key: string;
   }
 >;
@@ -138,8 +145,8 @@ type NodeDotLookup = N<
 type NodeBracketLookup = N<
   "BracketLookup",
   {
-    arg: ASTNode;
-    key: ASTNode;
+    arg: AnyExpressionNode;
+    key: AnyExpressionNode;
   }
 >;
 
@@ -153,12 +160,12 @@ type NodeFloat = N<
   }
 >;
 
-type NodeIdentifierWithAnnotation = N<
-  "IdentifierWithAnnotation",
+type NodeLambdaParameter = N<
+  "LambdaParameter",
   {
-    variable: string;
-    annotation: ASTNode;
-    unitTypeSignature?: NodeTypeSignature;
+    variable: NodeIdentifier;
+    annotation: AnyExpressionNode | null;
+    unitTypeSignature: NodeUnitTypeSignature | null;
   }
 >;
 
@@ -166,7 +173,13 @@ type NodeIdentifier = N<
   "Identifier",
   {
     value: string;
-    unitTypeSignature?: NodeTypeSignature;
+  }
+>;
+
+type NodeUnitName = N<
+  "UnitName",
+  {
+    value: string;
   }
 >;
 
@@ -174,7 +187,7 @@ type NodeDecorator = N<
   "Decorator",
   {
     name: NodeIdentifier;
-    args: ASTNode[];
+    args: AnyExpressionNode[];
   }
 >;
 
@@ -187,8 +200,8 @@ type LetOrDefun = {
 type NodeLetStatement = N<
   "LetStatement",
   LetOrDefun & {
-    unitTypeSignature: NodeTypeSignature;
-    value: ASTNode;
+    unitTypeSignature: NodeUnitTypeSignature | null;
+    value: AnyExpressionNode;
   }
 >;
 
@@ -202,11 +215,10 @@ type NodeDefunStatement = N<
 type NodeLambda = N<
   "Lambda",
   {
-    // Don't try to convert it to string[], ASTNode is intentional because we need locations.
-    args: ASTNode[];
-    body: ASTNode;
-    name?: string;
-    returnUnitType?: NodeTypeSignature;
+    args: NodeLambdaParameter[];
+    body: AnyExpressionNode;
+    name: string | null;
+    returnUnitType: NodeUnitTypeSignature | null;
   }
 >;
 
@@ -215,17 +227,17 @@ export type NamedNodeLambda = NodeLambda & Required<Pick<NodeLambda, "name">>;
 type NodeTernary = N<
   "Ternary",
   {
-    condition: ASTNode;
-    trueExpression: ASTNode;
-    falseExpression: ASTNode;
+    condition: AnyExpressionNode;
+    trueExpression: AnyExpressionNode;
+    falseExpression: AnyExpressionNode;
     syntax: "IfThenElse" | "C";
   }
 >;
 
-type NodeTypeSignature = N<
+type NodeUnitTypeSignature = N<
   "UnitTypeSignature",
   {
-    body: ASTNode;
+    body: AnyUnitTypeNode;
   }
 >;
 
@@ -233,15 +245,15 @@ type NodeInfixUnitType = N<
   "InfixUnitType",
   {
     op: TypeOperator;
-    args: [ASTNode, ASTNode];
+    args: [AnyUnitTypeNode, AnyUnitTypeNode];
   }
 >;
 
 type NodeExponentialUnitType = N<
   "ExponentialUnitType",
   {
-    base: ASTNode;
-    exponent: ASTNode;
+    base: AnyUnitTypeNode;
+    exponent: NodeFloat;
   }
 >;
 
@@ -252,6 +264,7 @@ type NodeBoolean = N<"Boolean", { value: boolean }>;
 export type ASTNode =
   // blocks
   | NodeProgram
+  | NodeImport
   | NodeBlock
   // statements
   | NodeLetStatement
@@ -275,23 +288,63 @@ export type ASTNode =
   // control flow - if/else
   | NodeTernary
   // type signature
-  | NodeTypeSignature
+  | NodeUnitTypeSignature
   | NodeInfixUnitType
   | NodeExponentialUnitType
+  | NodeUnitName
   // identifiers
   | NodeIdentifier
-  | NodeIdentifierWithAnnotation
+  | NodeLambdaParameter
   // basic values
   | NodeFloat
   | NodeString
   | NodeBoolean;
 
-export type AST = Extract<ASTNode, { kind: "Program" }> & {
-  comments: ASTCommentNode[];
-};
-
 export type ASTCommentNode = {
   kind: "lineComment" | "blockComment";
   value: string;
   location: LocationRange;
+};
+
+export type Kind = ASTNode["kind"];
+
+export type KindNode<T extends Kind> = Extract<ASTNode, { kind: T }>;
+
+export const statementKinds = [
+  "LetStatement",
+  "DefunStatement",
+] as const satisfies Kind[];
+
+export const expressionKinds = [
+  "Block",
+  "Lambda",
+  "Array",
+  "Dict",
+  "UnitValue",
+  "Call",
+  "InfixCall",
+  "UnaryCall",
+  "Pipe",
+  "DotLookup",
+  "BracketLookup",
+  "Ternary",
+  "Identifier",
+  "Float",
+  "String",
+  "Boolean",
+] as const satisfies Kind[];
+
+export const unitTypeKinds = [
+  "UnitName",
+  "Float",
+  "InfixUnitType",
+  "ExponentialUnitType",
+] as const satisfies Kind[];
+
+export type AnyStatementNode = KindNode<(typeof statementKinds)[number]>;
+export type AnyExpressionNode = KindNode<(typeof expressionKinds)[number]>;
+export type AnyUnitTypeNode = KindNode<(typeof unitTypeKinds)[number]>;
+
+export type AST = KindNode<"Program"> & {
+  comments: ASTCommentNode[];
 };

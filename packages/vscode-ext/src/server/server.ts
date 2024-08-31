@@ -44,20 +44,21 @@ async function validateSquiggleDocument(
 
   const parseResult = parse(text);
   if (!parseResult.ok) {
-    const location = parseResult.value.location();
-    diagnostics.push({
-      severity: DiagnosticSeverity.Error,
-      range: {
-        start: {
-          line: location.start.line - 1,
-          character: location.start.column - 1,
+    parseResult.value.forEach((error) => {
+      diagnostics.push({
+        severity: DiagnosticSeverity.Error,
+        range: {
+          start: {
+            line: error.location().start.line - 1,
+            character: error.location().start.column - 1,
+          },
+          end: {
+            line: error.location().end.line - 1,
+            character: error.location().end.column - 1,
+          },
         },
-        end: {
-          line: location.end.line - 1,
-          character: location.end.column - 1,
-        },
-      },
-      message: parseResult.value.toString(),
+        message: parseResult.value.toString(),
+      });
     });
   }
 

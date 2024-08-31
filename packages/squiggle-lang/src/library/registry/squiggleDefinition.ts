@@ -1,14 +1,33 @@
+import { analyzeAst } from "../../analysis/index.js";
 import { parse } from "../../ast/parse.js";
+import { compileTypedAst } from "../../compiler/index.js";
 import { defaultEnv } from "../../dists/env.js";
-import { compileAst } from "../../expression/compile.js";
+import { ICompileError } from "../../errors/IError.js";
 import { Reducer } from "../../reducer/Reducer.js";
 import { Bindings } from "../../reducer/Stack.js";
 import { Value } from "../../value/index.js";
 
-export type SquiggleDefinition = {
+type SquiggleDefinition = {
   name: string;
   value: Value;
 };
+
+const stdlibSourceId = "@stdlib";
+
+// useful for debugging; should never happen outside of squiggle development
+function rethrowCompileError(errors: ICompileError[], code: string): never {
+  throw new Error(
+    errors
+      .map((error) =>
+        error.toString({
+          withLocation: true,
+          resolveSource: (sourceId) =>
+            sourceId === stdlibSourceId ? code : "",
+        })
+      )
+      .join("\n")
+  );
+}
 
 export function makeSquiggleDefinition({
   builtins,
@@ -19,22 +38,31 @@ export function makeSquiggleDefinition({
   name: string;
   code: string;
 }): SquiggleDefinition {
-  const astResult = parse(code, "@stdlib");
+  const astResult = parse(code, stdlibSourceId);
   if (!astResult.ok) {
     // will be detected during tests, should never happen in runtime
     throw new Error(`Stdlib code ${code} is invalid`);
   }
 
-  const expressionResult = compileAst(astResult.value, builtins);
+  const typedAst = analyzeAst(astResult.value, builtins);
 
-  if (!expressionResult.ok) {
-    // fail fast
-    throw expressionResult.value;
+  if (!typedAst.ok) {
+    rethrowCompileError(typedAst.value, code);
+  }
+
+  const irResult = compileTypedAst({
+    ast: typedAst.value,
+    stdlib: builtins,
+    imports: {},
+  });
+
+  if (!irResult.ok) {
+    rethrowCompileError(irResult.value, code);
   }
 
   // TODO - do we need runtime env? That would mean that we'd have to build stdlib for each env separately.
   const reducer = new Reducer(defaultEnv);
-  const value = reducer.evaluate(expressionResult.value);
+  const { result: value } = reducer.evaluate(irResult.value);
 
   return { name, value };
 }

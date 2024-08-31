@@ -7,35 +7,34 @@ import { Env } from "../../dists/env.js";
 import * as SampleSetDist from "../../dists/SampleSetDist/index.js";
 import * as SymbolicDist from "../../dists/SymbolicDist/index.js";
 import { PointMass } from "../../dists/SymbolicDist/PointMass.js";
-import {
-  REArgumentError,
-  REDistributionError,
-  REOperationError,
-  REOther,
-} from "../../errors/messages.js";
+import { ErrorMessage } from "../../errors/messages.js";
 import {
   OtherOperationError,
   SampleMapNeedsNtoNFunction,
 } from "../../operationError.js";
-import { Lambda } from "../../reducer/lambda.js";
+import {
+  FnDefinition,
+  makeDefinition,
+} from "../../reducer/lambda/FnDefinition.js";
+import { FnInput } from "../../reducer/lambda/FnInput.js";
+import { Lambda } from "../../reducer/lambda/index.js";
 import { Reducer } from "../../reducer/Reducer.js";
+import { Type } from "../../types/Type.js";
 import { upTo } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
 import { Value } from "../../value/index.js";
-import { Input } from "../../value/VInput.js";
-import { FRFunction } from "./core.js";
-import { FnDefinition, makeDefinition } from "./fnDefinition.js";
+import { FormInput } from "../../value/VInput.js";
+import { namedInput } from "../FrInput.js";
 import {
   frBool,
   frDist,
   frDistOrNumber,
-  frNamed,
   frNumber,
   frSampleSetDist,
   frString,
-  FRType,
-  isOptional,
-} from "./frTypes.js";
+  FrType,
+} from "../FrType.js";
+import { FRFunction } from "./core.js";
 
 type SimplifiedArgs = Omit<FRFunction, "nameSpace" | "requiresNamespace"> &
   Partial<Pick<FRFunction, "nameSpace" | "requiresNamespace">>;
@@ -264,7 +263,7 @@ export class FnFactory {
 
 export function unwrapDistResult<T>(result: Result.result<T, DistError>): T {
   if (!result.ok) {
-    throw new REDistributionError(result.value);
+    throw ErrorMessage.distributionError(result.value);
   }
   return result.value;
 }
@@ -278,7 +277,7 @@ export function doNumberLambdaCall(
   if (value.type === "Number") {
     return value.value;
   }
-  throw new REOperationError(new SampleMapNeedsNtoNFunction());
+  throw ErrorMessage.operationError(new SampleMapNeedsNtoNFunction());
 }
 
 export function doBinaryLambdaCall(
@@ -290,7 +289,7 @@ export function doBinaryLambdaCall(
   if (value.type === "Bool") {
     return value.value;
   }
-  throw new REOther("Expected function to return a boolean value");
+  throw ErrorMessage.otherError("Expected function to return a boolean value");
 }
 
 export const parseDistFromDistOrNumber = (d: number | BaseDist): BaseDist =>
@@ -303,7 +302,7 @@ export function makeSampleSet(d: BaseDist, reducer: Reducer) {
     reducer.rng
   );
   if (!result.ok) {
-    throw new REDistributionError(result.value);
+    throw ErrorMessage.distributionError(result.value);
   }
   return result.value;
 }
@@ -343,11 +342,11 @@ export function twoVarSample(
   } else if (typeof v1 === "number" && typeof v2 === "number") {
     const result = fn(v1, v2);
     if (!result.ok) {
-      throw new REOther(result.value);
+      throw ErrorMessage.otherError(result.value);
     }
     return makeSampleSet(result.value, reducer);
   }
-  throw new REOther("Impossible branch");
+  throw ErrorMessage.otherError("Impossible branch");
 }
 
 export function makeTwoArgsSamplesetDist(
@@ -359,7 +358,7 @@ export function makeTwoArgsSamplesetDist(
   name2: string
 ) {
   return makeDefinition(
-    [frNamed(name1, frDistOrNumber), frNamed(name2, frDistOrNumber)],
+    [namedInput(name1, frDistOrNumber), namedInput(name2, frDistOrNumber)],
     frSampleSetDist,
     ([v1, v2], reducer) => twoVarSample(v1, v2, reducer, fn)
   );
@@ -370,7 +369,7 @@ export function makeOneArgSamplesetDist(
   name: string
 ) {
   return makeDefinition(
-    [frNamed(name, frDistOrNumber)],
+    [namedInput(name, frDistOrNumber)],
     frSampleSetDist,
     ([v], reducer) => {
       const sampleFn = (a: number) =>
@@ -386,11 +385,11 @@ export function makeOneArgSamplesetDist(
       } else if (typeof v === "number") {
         const result = fn(v);
         if (!result.ok) {
-          throw new REOther(result.value);
+          throw ErrorMessage.otherError(result.value);
         }
         return makeSampleSet(result.value, reducer);
       }
-      throw new REOther("Impossible branch");
+      throw ErrorMessage.otherError("Impossible branch");
     }
   );
 }
@@ -399,7 +398,7 @@ function createComparisonDefinition<T>(
   fnFactory: FnFactory,
   opName: string,
   comparisonFunction: (d1: T, d2: T) => boolean,
-  frType: FRType<T>,
+  frType: FrType<T>,
   displaySection?: string
 ): FRFunction {
   return fnFactory.make({
@@ -418,7 +417,7 @@ export function makeNumericComparisons<T>(
   smaller: (d1: T, d2: T) => boolean,
   larger: (d1: T, d2: T) => boolean,
   isEqual: (d1: T, d2: T) => boolean,
-  frType: FRType<T>,
+  frType: FrType<T>,
   displaySection?: string
 ): FRFunction[] {
   return [
@@ -464,49 +463,45 @@ export const chooseLambdaParamLength = (
 
 // A helper to check if a list of frTypes would match inputs of a given length.
 // Non-trivial because of optional arguments.
-export const frTypesMatchesLengths = (
-  inputs: FRType<any>[],
+export const fnInputsMatchesLengths = (
+  inputs: FnInput[],
   lengths: number[]
 ): boolean => {
-  const min = inputs.filter((i) => !isOptional(i)).length;
+  const min = inputs.filter((i) => !i.optional).length;
   const max = inputs.length;
   return intersection(upTo(min, max), lengths).length > 0;
 };
 
-export const frTypeToInput = (
-  frType: FRType<any>,
-  i: number,
-  name: string
-): Input => {
-  const type = frType.fieldType || "text";
-  switch (type) {
+export const typeToFormInput = (type: Type, name: string): FormInput => {
+  const formInputType = type.defaultFormInputType() || "text";
+  switch (formInputType) {
     case "text":
       return {
         name,
-        type,
-        typeName: frType.display(),
-        default: frType.default || "",
+        type: formInputType,
+        typeName: type.toString(),
+        default: type.defaultFormInputCode(),
       };
     case "textArea":
       return {
         name,
-        type,
-        typeName: frType.display(),
-        default: frType.default || "",
+        type: formInputType,
+        typeName: type.toString(),
+        default: type.defaultFormInputCode(),
       };
     case "checkbox":
       return {
         name,
-        type,
-        typeName: frType.display(),
-        default: frType.default === "true" ? true : false,
+        type: formInputType,
+        typeName: type.toString(),
+        default: type.defaultFormInputCode() === "true" ? true : false,
       };
     case "select":
       return {
         name,
-        type,
-        typeName: frType.display(),
-        default: frType.default || "",
+        type: formInputType,
+        typeName: type.toString(),
+        default: type.defaultFormInputCode(),
         options: [],
       };
   }
@@ -518,6 +513,6 @@ const d3TickFormatRegex =
 
 export function checkNumericTickFormat(tickFormat: string | null) {
   if (tickFormat && !d3TickFormatRegex.test(tickFormat)) {
-    throw new REArgumentError(`Tick format [${tickFormat}] is invalid.`);
+    throw ErrorMessage.argumentError(`Tick format [${tickFormat}] is invalid.`);
   }
 }

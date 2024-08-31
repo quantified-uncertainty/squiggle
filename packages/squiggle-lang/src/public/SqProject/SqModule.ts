@@ -1,10 +1,12 @@
+import { analyzeAst } from "../../analysis/index.js";
+import { TypedAST } from "../../analysis/types.js";
 import { parse } from "../../ast/parse.js";
 import { AST, LocationRange } from "../../ast/types.js";
 import { Env } from "../../dists/env.js";
-import { errMap, result } from "../../utility/result.js";
+import { errMap, getExt, result } from "../../utility/result.js";
 import {
   SqCompileError,
-  SqError,
+  SqErrorList,
   SqImportError,
   SqOtherError,
 } from "../SqError.js";
@@ -14,7 +16,8 @@ import { SqModuleOutput } from "./SqModuleOutput.js";
 import { getHash } from "./utils.js";
 
 export type Import = {
-  name: string;
+  path: string; // original import string in code
+  name: string; // import name resolved through `linker.resolve`
   hash: string | undefined;
   variable: string;
   location: LocationRange;
@@ -37,7 +40,7 @@ type ImportModules =
     }
   | {
       type: "failed";
-      value: SqError;
+      value: SqErrorList;
     };
 
 type ImportOutputs =
@@ -50,8 +53,11 @@ type ImportOutputs =
     }
   | {
       type: "failed";
-      value: SqError;
+      value: SqErrorList;
     };
+
+type SqASTResult = result<AST, SqCompileError[]>;
+type SqTypedASTResult = result<TypedAST, SqCompileError[]>;
 
 export class SqModule {
   name: string;
@@ -59,7 +65,8 @@ export class SqModule {
   // key is module name, value is hash
   pins: Record<string, string>;
 
-  private _ast?: result<AST, SqError>;
+  private _ast?: SqASTResult;
+  private _typedAst?: SqTypedASTResult;
 
   constructor(params: {
     name: string;
@@ -71,27 +78,39 @@ export class SqModule {
     this.pins = params.pins ?? {};
   }
 
-  // For now, parsing is done lazily but synchronously and on happens on the
-  // main thread. Parsing is usually fast enough and this makes the
-  // implementation simpler.
+  // Parsing is done lazily but synchronously and can happen on the main thread.
+  // TODO - separate imports parsing with a simplified grammar and do everything else in a worker.
   ast() {
     if (!this._ast) {
-      this._ast = errMap(
-        parse(this.code, this.name),
-        (e) => new SqCompileError(e)
+      this._ast = errMap(parse(this.code, this.name), (errors) =>
+        errors.map((e) => new SqCompileError(e))
       );
     }
     return this._ast;
   }
 
+  typedAst() {
+    if (!this._typedAst) {
+      const ast = this.ast();
+      if (ast.ok) {
+        this._typedAst = errMap(analyzeAst(ast.value), (errors) =>
+          errors.map((e) => new SqCompileError(e))
+        );
+      } else {
+        this._typedAst = ast;
+      }
+    }
+    return this._typedAst;
+  }
+
   // Useful when we're sure that AST is ok, e.g. when we obtain `SqModule` from `SqValueContext`.
   // Name is following the Rust conventions (https://doc.rust-lang.org/std/result/enum.Result.html#method.expect).
   expectAst(): AST {
-    const ast = this.ast();
-    if (!ast.ok) {
-      throw ast.value;
-    }
-    return ast.value;
+    return getExt(this.ast());
+  }
+
+  expectTypedAst(): TypedAST {
+    return getExt(this.typedAst());
   }
 
   getImports(linker: SqLinker): Import[] {
@@ -103,22 +122,22 @@ export class SqModule {
 
     const resolvedImports: Import[] = [];
 
-    for (const [file, variable] of program.imports) {
-      const name = linker.resolve(file.value, this.name);
+    for (const importNode of program.imports) {
+      const { path, variable } = importNode;
+      const name = linker.resolve(path.value, this.name);
       resolvedImports.push({
+        path: path.value,
         name,
         hash: this.pins[name],
         variable: variable.value,
-        // TODO - this is used for errors, but we should use the entire import statement;
-        // To fix this, we need to represent each import statement as an AST node.
-        location: file.location,
+        location: path.location,
       });
     }
 
     return resolvedImports;
   }
 
-  // TODO - cache the hash for performace
+  // TODO - cache the hash for performance
   hash(): string {
     return getHash(
       `module/${this.name}/` +
@@ -152,7 +171,7 @@ export class SqModule {
     if (!ast.ok) {
       return {
         type: "failed",
-        value: ast.value,
+        value: new SqErrorList(ast.value),
       };
     }
 
@@ -168,10 +187,12 @@ export class SqModule {
       if (importedModuleData.type === "failed") {
         return {
           type: "failed",
-          value: new SqImportError(
-            new SqOtherError(importedModuleData.value),
-            importBinding
-          ),
+          value: new SqErrorList([
+            new SqImportError(
+              new SqOtherError(importedModuleData.value),
+              importBinding
+            ),
+          ]),
         };
       }
 

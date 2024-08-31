@@ -1,16 +1,16 @@
-import { REOther } from "../errors/messages.js";
-import { Lambda } from "../reducer/lambda.js";
+import { ErrorMessage } from "../errors/messages.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,
 } from "../serialization/squiggle.js";
 import { BaseValue } from "./BaseValue.js";
 import { vLambda } from "./index.js";
-import { Input } from "./VInput.js";
+import { FormInput } from "./VInput.js";
 
 export type Calculator = {
   fn: Lambda;
-  inputs: readonly Input[];
+  inputs: readonly FormInput[];
   autorun: boolean;
   description?: string;
   title?: string;
@@ -24,7 +24,7 @@ type SerializedCalculator = Omit<Calculator, "fn"> & {
 export class VCalculator extends BaseValue<"Calculator", SerializedCalculator> {
   readonly type = "Calculator";
 
-  private error: REOther | null = null;
+  private error: ErrorMessage | null = null;
 
   constructor(public value: Calculator) {
     super();
@@ -48,10 +48,10 @@ export class VCalculator extends BaseValue<"Calculator", SerializedCalculator> {
   }
 
   private setError(message: string): void {
-    this.error = new REOther(message);
+    this.error = ErrorMessage.otherError(message);
   }
 
-  getError(): REOther | null {
+  getError(): ErrorMessage | null {
     return this.error;
   }
 

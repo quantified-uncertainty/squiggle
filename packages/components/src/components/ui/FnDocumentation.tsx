@@ -22,19 +22,18 @@ const StyleDefinition: FC<{ fullName: string; def: FnDefinition }> = ({
   fullName,
   def,
 }) => {
-  const isOptional = (t) => (t.isOptional === undefined ? false : t.isOptional);
   const primaryColor = "text-slate-900";
   const secondaryColor = "text-slate-400";
-  const inputs = def.inputs.map((t, index) => (
+  const inputs = def.signature.inputs.map((t, index) => (
     <span key={index}>
-      <span className={primaryColor}>{t.display()}</span>
-      {isOptional(t) ? <span className={primaryColor}>?</span> : ""}
-      {index !== def.inputs.length - 1 && (
+      <span className={primaryColor}>{t.type.toString()}</span>
+      {t.optional ? <span className={primaryColor}>?</span> : ""}
+      {index !== def.signature.inputs.length - 1 && (
         <span className={secondaryColor}>, </span>
       )}
     </span>
   ));
-  const output = def.output.display();
+  const output = def.signature.output.toString();
   return (
     <div>
       <span className="text-slate-500">{fullName}</span>

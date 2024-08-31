@@ -1,21 +1,20 @@
 import { BaseDist } from "../dists/BaseDist.js";
 import { argumentError } from "../dists/DistError.js";
 import * as distOperations from "../dists/distOperations/index.js";
-import { REDistributionError } from "../errors/messages.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { ErrorMessage } from "../errors/messages.js";
+import { frOptionalInput } from "../library/FrInput.js";
 import {
   frArray,
   frDist,
   frDistOrNumber,
-  frNamed,
   frNumber,
-  frOptional,
   frTuple,
-} from "../library/registry/frTypes.js";
+} from "../library/FrType.js";
 import {
   parseDistFromDistOrNumber,
   unwrapDistResult,
 } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { Reducer } from "../reducer/Reducer.js";
 import * as E_A from "../utility/E_A.js";
 
@@ -42,12 +41,15 @@ function mixtureWithDefaultWeights(
 }
 
 const asArrays = makeDefinition(
-  [frArray(frDistOrNumber), frNamed("weights", frOptional(frArray(frNumber)))],
+  [
+    frArray(frDistOrNumber),
+    frOptionalInput({ name: "weights", type: frArray(frNumber) }),
+  ],
   frDist,
   ([dists, weights], reducer) => {
     if (weights) {
       if (dists.length !== weights.length) {
-        throw new REDistributionError(
+        throw ErrorMessage.distributionError(
           argumentError(
             "Error, mixture call has different number of distributions and weights"
           )
@@ -75,7 +77,10 @@ const asArguments = [
     [
       frDistOrNumber,
       frDistOrNumber,
-      frNamed("weights", frOptional(frTuple(frNumber, frNumber))),
+      frOptionalInput({
+        name: "weights",
+        type: frTuple(frNumber, frNumber),
+      }),
     ],
     frDist,
     ([dist1, dist2, weights], reducer) =>
@@ -95,7 +100,10 @@ const asArguments = [
       frDistOrNumber,
       frDistOrNumber,
       frDistOrNumber,
-      frNamed("weights", frOptional(frTuple(frNumber, frNumber, frNumber))),
+      frOptionalInput({
+        name: "weights",
+        type: frTuple(frNumber, frNumber, frNumber),
+      }),
     ],
     frDist,
     ([dist1, dist2, dist3, weights], reducer) =>
@@ -116,10 +124,10 @@ const asArguments = [
       frDistOrNumber,
       frDistOrNumber,
       frDistOrNumber,
-      frNamed(
-        "weights",
-        frOptional(frTuple(frNumber, frNumber, frNumber, frNumber))
-      ),
+      frOptionalInput({
+        name: "weights",
+        type: frTuple(frNumber, frNumber, frNumber, frNumber),
+      }),
     ],
     frDist,
     ([dist1, dist2, dist3, dist4, weights], reducer) =>
@@ -141,10 +149,10 @@ const asArguments = [
       frDistOrNumber,
       frDistOrNumber,
       frDistOrNumber,
-      frNamed(
-        "weights",
-        frOptional(frTuple(frNumber, frNumber, frNumber, frNumber, frNumber))
-      ),
+      frOptionalInput({
+        name: "weights",
+        type: frTuple(frNumber, frNumber, frNumber, frNumber, frNumber),
+      }),
     ],
     frDist,
     ([dist1, dist2, dist3, dist4, dist5, weights], reducer) =>

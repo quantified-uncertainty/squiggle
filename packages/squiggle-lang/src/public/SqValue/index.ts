@@ -18,11 +18,7 @@ import { SqArray } from "./SqArray.js";
 import { SqCalculator } from "./SqCalculator.js";
 import { SqDict } from "./SqDict.js";
 import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
-import {
-  SqDateRangeDomain,
-  SqNumericRangeDomain,
-  wrapDomain,
-} from "./SqDomain.js";
+import { SqDomain, wrapDomain } from "./SqDomain.js";
 import { SqInput, wrapInput } from "./SqInput.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqDistributionsPlot, SqPlot, wrapPlot } from "./SqPlot.js";
@@ -412,7 +408,7 @@ export class SqVoidValue extends SqAbstractValue<"Void", null, null> {
 export class SqDomainValue extends SqAbstractValue<
   "Domain",
   unknown,
-  SqNumericRangeDomain | SqDateRangeDomain
+  SqDomain
 > {
   tag = "Domain" as const;
 

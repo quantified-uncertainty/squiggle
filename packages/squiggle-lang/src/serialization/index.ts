@@ -12,7 +12,7 @@ import { JsonValue } from "../utility/typeHelpers.js";
  * Squiggle-specific adaptation of it is in `./squiggle.ts`.
  *
  * Terminology:
- * - "Entity" is a type of data that can be serialized and deserialized (e.g. "value", "expression" for Squiggle); one multi-type codec can handle multiple entities.
+ * - "Entity" is a type of data that can be serialized and deserialized (e.g. "value", "ir" for Squiggle); one multi-type codec can handle multiple entities.
  * - "Node" is an instance of an entity type. I use "node" instead of "value" to avoid confusion with the "value" entity type.
  * - "Bundle" is a JSON-serializable object that contains serialized values.
  * - "Entrypoint" is a reference to a serialized value in a bundle. When you add a value to a bundle, you get an entrypoint that you can use to refer to this value later.

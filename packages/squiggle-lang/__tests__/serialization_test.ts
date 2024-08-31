@@ -1,4 +1,5 @@
 import { SampleSetDist } from "../src/dists/SampleSetDist/index.js";
+import { run } from "../src/run.js";
 import { squiggleCodec } from "../src/serialization/squiggle.js";
 import { isEqual, Value, vBool, vDist, vString } from "../src/value/index.js";
 import { vNumber } from "../src/value/VNumber.js";
@@ -32,7 +33,25 @@ describe("Serialization tests", () => {
       vDist(SampleSetDist.make([3, 1, 4, 1, 5, 9, 2, 6]).value as any)
     );
   });
-  // TODO - test lambdas
+
+  test("lambda", async () => {
+    const bindings = (
+      await run(`runTest() = {
+  t = 1
+  3
+}`)
+    ).getBindings();
+    if (!bindings.ok) {
+      throw bindings.value;
+    }
+
+    const lambda = bindings.value.get("runTest");
+    if (!lambda) {
+      throw new Error("No lambda");
+    }
+    const lambda2 = serializeAndDeserialize(lambda?._value);
+    expect(lambda2).toBeDefined();
+  });
 
   test("with tags", () => {
     let value = vNumber(5);

@@ -4,31 +4,42 @@ import { deserializeRunResult } from "./serialization.js";
 import { SquiggleWorkerJob, SquiggleWorkerResponse } from "./worker.js";
 
 export async function runWithWorker(
-  { environment, ast, externals }: RunParams,
+  { module, environment, imports }: RunParams,
   worker: Worker
 ): Promise<RunResult> {
+  const serializedImports: SquiggleWorkerJob["imports"] = {};
   const store = squiggleCodec.makeSerializer();
-  const externalsEntrypoint = store.serialize("value", externals);
+  for (const [path, value] of Object.entries(imports)) {
+    const entrypoint = store.serialize("value", value);
+    serializedImports[path] = entrypoint;
+  }
   const bundle = store.getBundle();
 
   worker.postMessage({
+    module: {
+      name: module.name,
+      code: module.code,
+    },
     environment,
-    ast,
     bundle,
-    externalsEntrypoint,
+    imports: serializedImports,
   } satisfies SquiggleWorkerJob);
 
-  return new Promise<RunResult>((resolve) => {
+  return new Promise<RunResult>((resolve, reject) => {
     worker.addEventListener(
       "message",
       (e: MessageEvent<SquiggleWorkerResponse>) => {
         if (e.data.type === "internal-error") {
-          throw new Error(`Internal worker error: ${e.data.payload}`);
+          reject(new Error(`Internal worker error: ${e.data.payload}`));
+          return;
         }
         if (e.data.type !== "result") {
-          throw new Error(
-            `Unexpected message ${JSON.stringify(e.data)} from worker`
+          reject(
+            new Error(
+              `Unexpected message ${JSON.stringify(e.data)} from worker`
+            )
           );
+          return;
         }
         const { payload } = e.data;
 
