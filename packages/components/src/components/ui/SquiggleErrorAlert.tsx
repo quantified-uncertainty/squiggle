@@ -93,7 +93,7 @@ const StackTrace: FC<{ error: SqRuntimeError }> = ({ error }) => {
 const ImportChain: FC<{ error: SqImportError }> = ({ error }) => {
   const frames = error.getFrameArray();
   return frames.length ? (
-    <WithHeader header="Import Chain">
+    <WithHeader header="Import Chain:">
       <div className="grid grid-cols-[minmax(60px,max-content),1fr] gap-x-4">
         {frames.map((frame, i) => (
           <ImportChainFrame frame={frame} key={i} />
@@ -103,32 +103,48 @@ const ImportChain: FC<{ error: SqImportError }> = ({ error }) => {
   ) : null;
 };
 
-export const SquiggleErrorAlert: FC<Props> = ({ error }) => {
-  function errorName(): string {
-    if (error instanceof SqCompileError) {
-      return "Compile Error";
-    } else if (error instanceof SqRuntimeError) {
-      return "Runtime Error";
-    } else if (error instanceof SqImportError) {
-      return "Import Error";
-    } else {
-      return "Error";
-    }
+function errorName(error: SqError): string {
+  if (error instanceof SqImportError) {
+    return errorName(error.wrappedError());
   }
+
+  if (error instanceof SqCompileError) {
+    return "Compile Error";
+  } else if (error instanceof SqRuntimeError) {
+    return "Runtime Error";
+  } else {
+    return "Error";
+  }
+}
+
+const SquiggleErrorAlertBody: FC<{
+  error: Exclude<SqError, { tag: "import" }>;
+}> = ({ error }) => {
   return (
-    <ErrorAlert heading={errorName()}>
-      <div className="space-y-4">
-        <div className="whitespace-pre-wrap">{error.toString()}</div>
-        {error instanceof SqRuntimeError ? (
-          <StackTrace error={error} />
-        ) : error instanceof SqImportError ? (
+    <div className="space-y-4">
+      <div className="whitespace-pre-wrap">{error.toString()}</div>
+      {error instanceof SqRuntimeError ? (
+        <StackTrace error={error} />
+      ) : error instanceof SqCompileError ? (
+        <WithHeader header="Location:">
+          <LocationLine location={error.location()} />
+        </WithHeader>
+      ) : null}
+    </div>
+  );
+};
+
+export const SquiggleErrorAlert: FC<Props> = ({ error }) => {
+  return (
+    <ErrorAlert heading={errorName(error)}>
+      {error instanceof SqImportError ? (
+        <div className="space-y-4">
+          <SquiggleErrorAlertBody error={error.wrappedError()} />
           <ImportChain error={error} />
-        ) : error instanceof SqCompileError ? (
-          <WithHeader header="Location:">
-            <LocationLine location={error.location()} />
-          </WithHeader>
-        ) : null}
-      </div>
+        </div>
+      ) : (
+        <SquiggleErrorAlertBody error={error} />
+      )}
     </ErrorAlert>
   );
 };

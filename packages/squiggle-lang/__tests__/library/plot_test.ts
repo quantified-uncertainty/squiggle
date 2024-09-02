@@ -1,6 +1,9 @@
-import { evaluateStringToResult } from "../../src/reducer/index.js";
 import { Plot } from "../../src/value/VPlot.js";
-import { testEvalToBe, testEvalToMatch } from "../helpers/reducerHelpers.js";
+import {
+  evaluateStringToResult,
+  testEvalToBe,
+  testEvalToMatch,
+} from "../helpers/reducerHelpers.js";
 
 async function testPlotResult<T extends Plot["type"]>(
   name: string,
@@ -11,7 +14,7 @@ async function testPlotResult<T extends Plot["type"]>(
   test(name, async () => {
     const result = await evaluateStringToResult(code);
     if (!result.ok) {
-      throw new Error("Expected ok result");
+      throw new Error(`Expected ok result, got: ${result.value}`);
     }
     if (result.value.type !== "Plot" || result.value.value.type !== type) {
       throw new Error("Expected numericFn plot");
@@ -43,15 +46,14 @@ describe("Plot", () => {
         fn: {|x| x * 5},
         xPoints: [10,20,40]
       })`,
-      "Plot for numeric function",
-      true
+      "Plot for numeric function"
     );
 
     testEvalToMatch(
       `Plot.numericFn({|x,y| x * 5})`,
       `Error(Error: There are function matches for Plot.numericFn(), but with different arguments:
-  Plot.numericFn(fn: (Number) => Number, params?: {xScale?: Scale, yScale?: Scale, title?: String, xPoints?: List(Number)}) => Plot
-Was given arguments: ((x,y) => internal code)`
+  Plot.numericFn(fn: (Number) => Number, params?: {xScale?: Scale, yScale?: Scale, xPoints?: List(Number)}) => Plot
+Was given arguments: ((x: any, y: any) => Duration|Number|Dist))`
     );
 
     testPlotResult(
@@ -139,8 +141,8 @@ Was given arguments: ((x,y) => internal code)`
     testEvalToMatch(
       `Plot.distFn({|x,y| x to x + y})`,
       `Error(Error: There are function matches for Plot.distFn(), but with different arguments:
-  Plot.distFn(fn: (Number) => Dist, params?: {xScale?: Scale, yScale?: Scale, distXScale?: Scale, title?: String, xPoints?: List(Number)}) => Plot
-Was given arguments: ((x,y) => internal code)`
+  Plot.distFn(fn: (Number) => Dist, params?: {xScale?: Scale, yScale?: Scale, distXScale?: Scale, xPoints?: List(Number)}) => Plot
+Was given arguments: ((x: any, y: any) => SampleSetDist))`
     );
   });
 
@@ -157,7 +159,7 @@ Was given arguments: ((x,y) => internal code)`
 
   testPlotResult(
     "default scale based on time domain",
-    `Plot.distFn({|t: [Date(1500), Date(1600)]| uniform(toYears(t)-Date(1500), 3)})`,
+    `Plot.distFn({|t: [Date(1500), Date(1600)]| uniform(toYears(t-Date(1500)), 300)})`,
     "distFn",
     (plot) => {
       expect(plot.xScale.method?.type).toBe("date");

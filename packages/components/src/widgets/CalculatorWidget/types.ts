@@ -1,4 +1,4 @@
-import { result, SqError, SqValue } from "@quri/squiggle-lang";
+import { result, SqErrorList, SqValue } from "@quri/squiggle-lang";
 
 import { SqValueWithContext } from "../../lib/utility.js";
 
@@ -13,7 +13,7 @@ export type SqCalculatorValueWithContext = Extract<
   { tag: "Calculator" }
 >;
 
-export type SqValueResult = result<SqValue, SqError>;
+export type SqValueResult = result<SqValue, SqErrorList>;
 
 /**
  * This type is used for backing up calculator state to ViewerContext.

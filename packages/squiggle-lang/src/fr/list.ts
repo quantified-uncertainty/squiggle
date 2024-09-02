@@ -2,32 +2,34 @@ import maxBy from "lodash/maxBy.js";
 import minBy from "lodash/minBy.js";
 import sortBy from "lodash/sortBy.js";
 
-import { REArgumentError, REOther } from "../errors/messages.js";
-import { makeFnExample } from "../library/registry/core.js";
-import {
-  makeAssertDefinition,
-  makeDefinition,
-} from "../library/registry/fnDefinition.js";
+import { ErrorMessage } from "../errors/messages.js";
+import { frOptionalInput, namedInput } from "../library/FrInput.js";
 import {
   frAny,
   frArray,
   frBool,
   frLambdaNand,
-  frLambdaTyped,
-  frNamed,
   frNumber,
-  frOptional,
   frSampleSetDist,
   frString,
   frTuple,
-} from "../library/registry/frTypes.js";
+  frTypedLambda,
+} from "../library/FrType.js";
+import { makeFnExample } from "../library/registry/core.js";
 import {
   chooseLambdaParamLength,
   doBinaryLambdaCall,
   FnFactory,
 } from "../library/registry/helpers.js";
-import { Lambda } from "../reducer/lambda.js";
+import {
+  FnDefinition,
+  makeDefinition,
+} from "../reducer/lambda/FnDefinition.js";
+import { FnInput } from "../reducer/lambda/FnInput.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import { Reducer } from "../reducer/Reducer.js";
+import { tBool, tNumber } from "../types/TIntrinsic.js";
+import { tAny } from "../types/Type.js";
 import { shuffle, unzip, zip } from "../utility/E_A.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { uniq, uniqBy, Value } from "../value/index.js";
@@ -87,7 +89,7 @@ export function _reduceWhile(
 
     const checkResult = reducer.call(condition, [newAcc]);
     if (checkResult.type !== "Bool") {
-      throw new REArgumentError(
+      throw ErrorMessage.argumentError(
         `Condition should return a boolean value, got: ${checkResult.type}`
       );
     }
@@ -102,20 +104,20 @@ export function _reduceWhile(
 
 const _assertInteger = (number: number) => {
   if (!Number.isInteger(number)) {
-    throw new REArgumentError(`Number ${number} must be an integer`);
+    throw ErrorMessage.argumentError(`Number ${number} must be an integer`);
   }
 };
 
 const _assertValidArrayLength = (number: number) => {
   if (number < 0) {
-    throw new REArgumentError("Expected non-negative number");
+    throw ErrorMessage.argumentError("Expected non-negative number");
   } else if (!Number.isInteger(number)) {
-    throw new REArgumentError("Number must be an integer");
+    throw ErrorMessage.argumentError("Number must be an integer");
   }
 };
 const _assertUnemptyArray = (array: readonly Value[]) => {
   if (array.length === 0) {
-    throw new REArgumentError("List must not be empty");
+    throw ErrorMessage.argumentError("List must not be empty");
   }
 };
 
@@ -133,7 +135,7 @@ function applyLambdaAndCheckNumber(
 ): number {
   const item = reducer.call(lambda, [element]);
   if (item.type !== "Number") {
-    throw new REArgumentError("Function must return a number");
+    throw ErrorMessage.argumentError("Function must return a number");
   }
   return item.value;
 }
@@ -154,18 +156,18 @@ export const library = [
     displaySection: "Constructors",
     description: `Creates an array of length \`count\`, with each element being \`value\`. If \`value\` is a function, it will be called \`count\` times, with the index as the argument.`,
     definitions: [
-      makeAssertDefinition(
+      FnDefinition.makeAssert(
         [frNumber, frLambdaNand([0, 1])],
         "Call with either 0 or 1 arguments, not both."
       ),
       makeDefinition(
         [
-          frNamed("count", frNumber),
-          frNamed(
+          namedInput("count", frNumber),
+          namedInput(
             "fn",
-            frLambdaTyped(
-              [frNamed("index", frOptional(frNumber))],
-              frAny({ genericName: "A" })
+            frTypedLambda(
+              [new FnInput({ name: "index", type: tNumber, optional: true })],
+              tAny({ genericName: "A" })
             )
           ),
         ],
@@ -181,8 +183,8 @@ export const library = [
       ),
       makeDefinition(
         [
-          frNamed("count", frNumber),
-          frNamed("value", frAny({ genericName: "A" })),
+          namedInput("count", frNumber),
+          namedInput("value", frAny({ genericName: "A" })),
         ],
         frArray(frAny({ genericName: "A" })),
         ([number, value]) => {
@@ -201,11 +203,11 @@ export const library = [
     displaySection: "Constructors",
     definitions: [
       makeDefinition(
-        [frNamed("low", frNumber), frNamed("high", frNumber)],
+        [namedInput("low", frNumber), namedInput("high", frNumber)],
         frArray(frNumber),
         ([low, high]) => {
           if (!Number.isInteger(low) || !Number.isInteger(high)) {
-            throw new REArgumentError(
+            throw ErrorMessage.argumentError(
               "Low and high values must both be integers"
             );
           }
@@ -294,7 +296,10 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
+          namedInput(
+            "fn",
+            frTypedLambda([tAny({ genericName: "A" })], tNumber)
+          ),
         ],
         frArray(frAny({ genericName: "A" })),
         ([array, lambda], reducer) => {
@@ -314,7 +319,10 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
+          namedInput(
+            "fn",
+            frTypedLambda([tAny({ genericName: "A" })], tNumber)
+          ),
         ],
         frAny({ genericName: "A" }),
         ([array, lambda], reducer) => {
@@ -324,7 +332,7 @@ export const library = [
           );
           if (!el) {
             //This should never be reached, because we checked that the array is not empty
-            throw new REOther("No element found");
+            throw ErrorMessage.otherError("No element found");
           }
           return el;
         }
@@ -340,7 +348,10 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
+          namedInput(
+            "fn",
+            frTypedLambda([tAny({ genericName: "A" })], tNumber)
+          ),
         ],
         frAny({ genericName: "A" }),
         ([array, lambda], reducer) => {
@@ -350,7 +361,7 @@ export const library = [
           );
           if (!el) {
             //This should never be reached, because we checked that the array is not empty
-            throw new REOther("No element found");
+            throw ErrorMessage.otherError("No element found");
           }
           return el;
         }
@@ -381,8 +392,8 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frNamed("startIndex", frNumber),
-          frNamed("endIndex", frOptional(frNumber)),
+          namedInput("startIndex", frNumber),
+          frOptionalInput({ name: "endIndex", type: frNumber }),
         ],
         frArray(frAny({ genericName: "A" })),
         ([array, start, end]) => {
@@ -423,9 +434,9 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frLambdaTyped(
-            [frAny({ genericName: "A" })],
-            frAny({ genericName: "B" })
+          frTypedLambda(
+            [tAny({ genericName: "A" })],
+            tAny({ genericName: "B" })
           ),
         ],
         frArray(frAny({ genericName: "A" })),
@@ -443,19 +454,19 @@ export const library = [
       makeFnExample("List.map([1,4,5], {|x,i| x+i+1})"),
     ],
     definitions: [
-      makeAssertDefinition(
+      FnDefinition.makeAssert(
         [frNumber, frLambdaNand([1, 2])],
         "Call with either 1 or 2 arguments, not both."
       ),
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frLambdaTyped(
+          frTypedLambda(
             [
-              frAny({ genericName: "A" }),
-              frNamed("index", frOptional(frNumber)),
+              tAny({ genericName: "A" }),
+              new FnInput({ name: "index", type: tNumber, optional: true }),
             ],
-            frAny({ genericName: "B" })
+            tAny({ genericName: "B" })
           ),
         ],
         frArray(frAny({ genericName: "B" })),
@@ -474,23 +485,33 @@ export const library = [
       "Applies `f` to each element of `arr`. The function `f` has two main paramaters, an accumulator and the next value from the array. It can also accept an optional third `index` parameter.",
     examples: [makeFnExample(`List.reduce([1,4,5], 2, {|acc, el| acc+el})`)],
     definitions: [
-      makeAssertDefinition(
-        [frNumber, frNamed("fn", frLambdaNand([2, 3]))],
+      FnDefinition.makeAssert(
+        [frNumber, namedInput("fn", frLambdaNand([2, 3]))],
         "Call with either 2 or 3 arguments, not both."
       ),
       makeDefinition(
         [
           frArray(frAny({ genericName: "B" })),
-          frNamed("initialValue", frAny({ genericName: "A" })),
-          frNamed(
+          namedInput("initialValue", frAny({ genericName: "A" })),
+          namedInput(
             "callbackFn",
-            frLambdaTyped(
+            frTypedLambda(
               [
-                frNamed("accumulator", frAny({ genericName: "A" })),
-                frNamed("currentValue", frAny({ genericName: "B" })),
-                frNamed("currentIndex", frOptional(frNumber)),
+                new FnInput({
+                  name: "accumulator",
+                  type: tAny({ genericName: "A" }),
+                }),
+                new FnInput({
+                  name: "currentValue",
+                  type: tAny({ genericName: "B" }),
+                }),
+                new FnInput({
+                  name: "currentIndex",
+                  type: tNumber,
+                  optional: true,
+                }),
               ],
-              frAny({ genericName: "A" })
+              tAny({ genericName: "A" })
             )
           ),
         ],
@@ -520,15 +541,21 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "B" })),
-          frNamed("initialValue", frAny({ genericName: "A" })),
-          frNamed(
+          namedInput("initialValue", frAny({ genericName: "A" })),
+          namedInput(
             "callbackFn",
-            frLambdaTyped(
+            frTypedLambda(
               [
-                frNamed("accumulator", frAny({ genericName: "A" })),
-                frNamed("currentValue", frAny({ genericName: "B" })),
+                new FnInput({
+                  name: "accumulator",
+                  type: tAny({ genericName: "A" }),
+                }),
+                new FnInput({
+                  name: "currentValue",
+                  type: tAny({ genericName: "B" }),
+                }),
               ],
-              frAny({ genericName: "A" })
+              tAny({ genericName: "A" })
             )
           ),
         ],
@@ -565,20 +592,26 @@ List.reduceWhile(
       makeDefinition(
         [
           frArray(frAny({ genericName: "B" })),
-          frNamed("initialValue", frAny({ genericName: "A" })),
-          frNamed(
+          namedInput("initialValue", frAny({ genericName: "A" })),
+          namedInput(
             "callbackFn",
-            frLambdaTyped(
+            frTypedLambda(
               [
-                frNamed("accumulator", frAny({ genericName: "A" })),
-                frNamed("currentValue", frAny({ genericName: "B" })),
+                new FnInput({
+                  name: "accumulator",
+                  type: tAny({ genericName: "A" }),
+                }),
+                new FnInput({
+                  name: "currentValue",
+                  type: tAny({ genericName: "B" }),
+                }),
               ],
-              frAny({ genericName: "A" })
+              tAny({ genericName: "A" })
             )
           ),
-          frNamed(
+          namedInput(
             "conditionFn",
-            frLambdaTyped([frAny({ genericName: "A" })], frBool)
+            frTypedLambda([tAny({ genericName: "A" })], tBool)
           ),
         ],
         frAny({ genericName: "A" }),
@@ -596,7 +629,7 @@ List.reduceWhile(
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
+          namedInput("fn", frTypedLambda([tAny({ genericName: "A" })], tBool)),
         ],
         frArray(frAny({ genericName: "A" })),
         ([array, lambda], reducer) =>
@@ -613,7 +646,7 @@ List.reduceWhile(
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
+          namedInput("fn", frTypedLambda([tAny({ genericName: "A" })], tBool)),
         ],
         frBool,
         ([array, lambda], reducer) =>
@@ -630,7 +663,7 @@ List.reduceWhile(
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
+          namedInput("fn", frTypedLambda([tAny({ genericName: "A" })], tBool)),
         ],
         frBool,
         ([array, lambda], reducer) =>
@@ -648,13 +681,13 @@ List.reduceWhile(
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
+          namedInput("fn", frTypedLambda([tAny({ genericName: "A" })], tBool)),
         ],
         frAny({ genericName: "A" }),
         ([array, lambda], reducer) => {
           const result = array.find(_binaryLambdaCheck1(lambda, reducer));
           if (!result) {
-            throw new REOther("No element found");
+            throw ErrorMessage.otherError("No element found");
           }
           return result;
         }
@@ -671,7 +704,7 @@ List.reduceWhile(
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
+          namedInput("fn", frTypedLambda([tAny({ genericName: "A" })], tBool)),
         ],
         frNumber,
         ([array, lambda], reducer) =>
@@ -686,7 +719,10 @@ List.reduceWhile(
     displaySection: "Modifications",
     definitions: [
       makeDefinition(
-        [frArray(frString), frNamed("separator", frOptional(frString))],
+        [
+          frArray(frString),
+          frOptionalInput({ name: "separator", type: frString }),
+        ],
         frString,
         ([array, joinStr]) => array.join(joinStr ?? ",")
       ),
@@ -737,7 +773,7 @@ List.reduceWhile(
         ),
         ([array1, array2]) => {
           if (array1.length !== array2.length) {
-            throw new REArgumentError("List lengths must be equal");
+            throw ErrorMessage.argumentError("List lengths must be equal");
           }
           return zip(array1, array2);
         }

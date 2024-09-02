@@ -44,10 +44,7 @@ function* getMarkerSubData(
       }
       break;
     case "Block": {
-      const lastNode = ast.statements.at(-1);
-      if (lastNode) {
-        yield* getMarkerSubData(lastNode, path);
-      }
+      yield* getMarkerSubData(ast.result, path);
       break;
     }
   }
@@ -59,35 +56,32 @@ function* getMarkerData(ast: ASTNode): Generator<MarkerDatum, void> {
   }
 
   nextStatement: for (const statement of ast.statements) {
-    if (
-      statement.kind === "DefunStatement" ||
-      statement.kind === "LetStatement"
-    ) {
-      for (const decorator of statement.decorators) {
-        if (decorator.name.value === "hide") {
-          break nextStatement;
-        }
+    for (const decorator of statement.decorators) {
+      if (decorator.name.value === "hide") {
+        break nextStatement;
       }
-      const name = statement.variable.value;
-      if (ast.symbols[name] !== statement) {
-        break; // skip, probably redefined later
-      }
-      const path = new SqValuePath({
-        root: "bindings",
-        edges: [SqValuePathEdge.fromKey(name)],
-      });
-      yield { ast: statement.variable, path };
-      yield* getMarkerSubData(statement.value, path);
-      break;
-    } else {
-      // end expression
-      const path = new SqValuePath({
-        root: "result",
-        edges: [],
-      });
-      yield { ast: statement, path };
-      yield* getMarkerSubData(statement, path);
     }
+    const name = statement.variable.value;
+    if (ast.symbols[name] !== statement) {
+      break; // skip, probably redefined later
+    }
+    const path = new SqValuePath({
+      root: "bindings",
+      edges: [SqValuePathEdge.fromKey(name)],
+    });
+    yield { ast: statement.variable, path };
+    yield* getMarkerSubData(statement.value, path);
+    break;
+  }
+
+  // end expression
+  if (ast.result) {
+    const path = new SqValuePath({
+      root: "result",
+      edges: [],
+    });
+    yield { ast: ast.result, path };
+    yield* getMarkerSubData(ast.result, path);
   }
 }
 

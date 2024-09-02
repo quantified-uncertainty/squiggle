@@ -17,7 +17,6 @@
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js && rm *.tsbuildinfo",
     "jest": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest && NODE_OPTIONS=--experimental-vm-modules SQUIGGLE_DEFAULT_RUNNER=embedded-with-serialization jest __tests__/SqProject",
-    "jest": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "pnpm run test --watchAll",
     "coverage:local": "pnpm run test --coverage && echo && echo 'Open ./coverage/lcov-report/index.html to see the detailed report.'",
     "coverage": "pnpm run test --coverage && codecov",
@@ -60,7 +59,7 @@
     "peggy": "^4.0.2",
     "prettier": "^3.2.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.3"
+    "typescript": "5.5.3"
   },
   "files": [
     "dist",

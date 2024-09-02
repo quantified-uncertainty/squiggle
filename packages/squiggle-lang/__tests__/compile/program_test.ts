@@ -1,7 +1,7 @@
 import { testCompile } from "../helpers/compileHelpers.js";
 
 describe("Compiling simple programs", () => {
-  testCompile("1", "(Program (.statements 1))", { mode: "full" });
+  testCompile("1", "(Program 1)", { mode: "full" });
 
   // Assignment and .bindings
   testCompile("x=1", "(Program (.statements (Assign x 1)) (.bindings (x 0)))", {
@@ -18,19 +18,19 @@ describe("Compiling simple programs", () => {
   // End expressions
   testCompile(
     "x=1; 2",
-    "(Program (.statements (Assign x 1) 2) (.bindings (x 0)))",
+    "(Program (.statements (Assign x 1)) (.bindings (x 0)) 2)",
     { mode: "full" }
   );
 
   // Stack refs in end expressions
   testCompile(
     "x=5; x",
-    "(Program (.statements (Assign x 5) (StackRef 0)) (.bindings (x 0)))",
+    "(Program (.statements (Assign x 5)) (.bindings (x 0)) (StackRef 0))",
     { mode: "full" }
   );
   testCompile(
     "x=5; y=6; x+y",
-    "(Program (.statements (Assign x 5) (Assign y 6) (Call add (StackRef 1) (StackRef 0))) (.bindings (x 1) (y 0)))",
+    "(Program (.statements (Assign x 5) (Assign y 6)) (.bindings (x 1) (y 0)) (Call add (StackRef 1) (StackRef 0)))",
     { mode: "full" }
   );
 
@@ -43,7 +43,7 @@ describe("Compiling simple programs", () => {
 
   testCompile(
     "x={a=1; a}; x",
-    "(Program (.statements (Assign x (Block (Assign a 1) (StackRef 0))) (StackRef 0)) (.bindings (x 0)))",
+    "(Program (.statements (Assign x (Block (Assign a 1) (StackRef 0)))) (.bindings (x 0)) (StackRef 0))",
     { mode: "full" }
   );
 

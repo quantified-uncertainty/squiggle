@@ -50,7 +50,7 @@ export function simulationErrors(simulation?: Simulation): SqError[] {
   } else if (simulation.output.result.ok) {
     return [];
   } else {
-    return [simulation.output.result.value];
+    return simulation.output.result.value.errors;
   }
 }
 

@@ -1,20 +1,20 @@
-import { REOther } from "../errors/messages.js";
-import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { ErrorMessage } from "../errors/messages.js";
+import { namedInput } from "../library/FrInput.js";
 import {
   frDate,
   frDomain,
   frDuration,
-  frNamed,
   frNumber,
   frString,
-} from "../library/registry/frTypes.js";
+} from "../library/FrType.js";
+import { makeFnExample } from "../library/registry/core.js";
 import {
   FnFactory,
   makeNumericComparisons,
 } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { TDateRange } from "../types/TDateRange.js";
 import { SDate } from "../utility/SDate.js";
-import { DateRangeDomain } from "../value/domain.js";
 
 const maker = new FnFactory({
   nameSpace: "Date",
@@ -46,26 +46,26 @@ d3 = Date.make(2020.5)`,
       makeDefinition([frString], frDate, ([str]) => {
         const result = SDate.fromString(str);
         if (!result.ok) {
-          throw new REOther(result.value);
+          throw ErrorMessage.otherError(result.value);
         }
         return result.value;
       }),
 
       makeDefinition(
         [
-          frNamed("year", frNumber),
-          frNamed("month", frNumber),
-          frNamed("day", frNumber),
+          namedInput("year", frNumber),
+          namedInput("month", frNumber),
+          namedInput("day", frNumber),
         ],
         frDate,
         ([yr, month, date]) => {
           return SDate.fromYearMonthDay(yr, month, date);
         }
       ),
-      makeDefinition([frNamed("year", frNumber)], frDate, ([yr]) => {
+      makeDefinition([namedInput("year", frNumber)], frDate, ([yr]) => {
         const year = SDate.fromYear(yr);
         if (!year.ok) {
-          throw new REOther(year.value);
+          throw ErrorMessage.otherError(year.value);
         }
         return year.value;
       }),
@@ -147,10 +147,10 @@ d3 = Date.make(2020.5)`,
     displaySection: "Other",
     definitions: [
       makeDefinition(
-        [frNamed("min", frDate), frNamed("min", frDate)],
+        [namedInput("min", frDate), namedInput("min", frDate)],
         frDomain,
         ([min, max]) => {
-          return new DateRangeDomain(min, max);
+          return new TDateRange(min, max);
         }
       ),
     ],

@@ -1,18 +1,17 @@
-import { REArgumentError, REOther } from "../errors/messages.js";
-import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { ErrorMessage } from "../errors/messages.js";
 import {
   frDate,
   frDict,
   frNumber,
-  frOptional,
   frScale,
   frString,
-} from "../library/registry/frTypes.js";
+} from "../library/FrType.js";
+import { makeFnExample } from "../library/registry/core.js";
 import {
   checkNumericTickFormat,
   FnFactory,
 } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { SDate } from "../utility/SDate.js";
 
 const maker = new FnFactory({
@@ -20,23 +19,23 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
-const commonDict = frDict(
-  ["min", frOptional(frNumber)],
-  ["max", frOptional(frNumber)],
-  ["tickFormat", frOptional(frString)],
-  ["title", frOptional(frString)]
-);
+const commonDict = frDict({
+  min: { type: frNumber, optional: true },
+  max: { type: frNumber, optional: true },
+  tickFormat: { type: frString, optional: true },
+  title: { type: frString, optional: true },
+});
 
-const dateDict = frDict(
-  ["min", frOptional(frDate)],
-  ["max", frOptional(frDate)],
-  ["tickFormat", frOptional(frString)],
-  ["title", frOptional(frString)]
-);
+const dateDict = frDict({
+  min: { type: frDate, optional: true },
+  max: { type: frDate, optional: true },
+  tickFormat: { type: frString, optional: true },
+  title: { type: frString, optional: true },
+});
 
 function checkMinMax(min: number | null, max: number | null) {
   if (min !== null && max !== null && max <= min) {
-    throw new REArgumentError(
+    throw ErrorMessage.argumentError(
       `Max must be greater than min, got: min=${min}, max=${max}`
     );
   }
@@ -44,7 +43,7 @@ function checkMinMax(min: number | null, max: number | null) {
 
 function checkMinMaxDates(min: SDate | null, max: SDate | null) {
   if (!!min && !!max && max.toMs() <= min.toMs()) {
-    throw new REArgumentError(
+    throw ErrorMessage.argumentError(
       `Max must be greater than min, got: min=${min.toString()}, max=${max.toString()}`
     );
   }
@@ -86,7 +85,9 @@ export const library = [
         frScale,
         ([{ min, max, tickFormat, title }]) => {
           if (min !== null && min <= 0) {
-            throw new REOther(`Min must be over 0 for log scale, got: ${min}`);
+            throw ErrorMessage.otherError(
+              `Min must be over 0 for log scale, got: ${min}`
+            );
           }
           checkMinMax(min, max);
           checkNumericTickFormat(tickFormat);
@@ -116,20 +117,20 @@ The default value for \`constant\` is \`${0.0001}\`.`, // I tried to set this to
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["min", frOptional(frNumber)],
-            ["max", frOptional(frNumber)],
-            ["tickFormat", frOptional(frString)],
-            ["title", frOptional(frString)],
-            ["constant", frOptional(frNumber)]
-          ),
+          frDict({
+            min: { type: frNumber, optional: true },
+            max: { type: frNumber, optional: true },
+            tickFormat: { type: frString, optional: true },
+            title: { type: frString, optional: true },
+            constant: { type: frNumber, optional: true },
+          }),
         ],
         frScale,
         ([{ min, max, tickFormat, title, constant }]) => {
           checkMinMax(min, max);
           checkNumericTickFormat(tickFormat);
           if (constant !== null && constant === 0) {
-            throw new REOther(`Symlog scale constant cannot be 0.`);
+            throw ErrorMessage.otherError(`Symlog scale constant cannot be 0.`);
           }
 
           return {
@@ -158,20 +159,22 @@ The default value for \`exponent\` is \`${0.1}\`.`,
     definitions: [
       makeDefinition(
         [
-          frDict(
-            ["min", frOptional(frNumber)],
-            ["max", frOptional(frNumber)],
-            ["tickFormat", frOptional(frString)],
-            ["title", frOptional(frString)],
-            ["exponent", frOptional(frNumber)]
-          ),
+          frDict({
+            min: { type: frNumber, optional: true },
+            max: { type: frNumber, optional: true },
+            tickFormat: { type: frString, optional: true },
+            title: { type: frString, optional: true },
+            exponent: { type: frNumber, optional: true },
+          }),
         ],
         frScale,
         ([{ min, max, tickFormat, title, exponent }]) => {
           checkMinMax(min, max);
           checkNumericTickFormat(tickFormat);
           if (exponent !== null && exponent <= 0) {
-            throw new REOther(`Power Scale exponent must be over 0.`);
+            throw ErrorMessage.otherError(
+              `Power Scale exponent must be over 0.`
+            );
           }
 
           return {

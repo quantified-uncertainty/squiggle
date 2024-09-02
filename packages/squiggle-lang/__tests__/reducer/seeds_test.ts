@@ -13,8 +13,7 @@ async function getSamplesForSeed(seed?: string | undefined) {
   if (!output.ok) {
     throw new Error("Run failed");
   }
-
-  const samples = output.value.result.asJS();
+  const samples = (output.value.result.asJS() as { samples: number[] }).samples;
   if (!Array.isArray(samples)) {
     throw new Error("Expected an array");
   }

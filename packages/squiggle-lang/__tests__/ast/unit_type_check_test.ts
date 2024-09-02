@@ -1,9 +1,9 @@
-import { parse as peggyParse } from "../../src/ast/peggyParser.js";
 import {
   exportedForTesting,
   TypeConstraint,
   VariableUnitTypes,
-} from "../../src/ast/unitTypeChecker.js";
+} from "../../src/analysis/unitTypeChecker.js";
+import { parse as peggyParse } from "../../src/ast/peggyParser.js";
 
 const {
   checkTypeConstraints,
@@ -31,9 +31,7 @@ function getUnitTypes(sourceCode: string): [VariableUnitTypes, IdNameMapping] {
   const node = peggyParse(sourceCode, { grammarSource: "test", comments: [] });
   const [typeConstraints, scopes] = findTypeConstraints(node);
   const idNameMapping = scopes.variableNodes
-    .filter((node) =>
-      ["Identifier", "IdentifierWithAnnotation"].includes(node.kind)
-    )
+    .filter((node) => ["Identifier", "LambdaParameter"].includes(node.kind))
     .map((node) => getIdentifierName(node));
   const unitTypes = checkTypeConstraints(typeConstraints, scopes);
   putUnitTypesOnAST(unitTypes, scopes);

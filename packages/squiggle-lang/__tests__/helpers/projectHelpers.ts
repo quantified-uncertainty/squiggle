@@ -1,14 +1,14 @@
 import { SqDict } from "../../src/index.js";
-import { SqError } from "../../src/public/SqError.js";
+import { SqErrorList } from "../../src/public/SqError.js";
 import { SqProject } from "../../src/public/SqProject/index.js";
 import { SqValue } from "../../src/public/SqValue/index.js";
 import { result } from "../../src/utility/result.js";
 
-export function valueResultToString(result: result<SqValue, SqError>) {
+export function valueResultToString(result: result<SqValue, SqErrorList>) {
   return `${result.ok ? "Ok" : "Error"}(${result.value.toString()})`;
 }
 
-export function dictResultToString(result: result<SqDict, SqError>) {
+export function dictResultToString(result: result<SqDict, SqErrorList>) {
   if (result.ok) {
     return result.value.toString();
   } else {

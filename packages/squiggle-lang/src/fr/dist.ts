@@ -10,17 +10,16 @@ import * as LognormalJs from "../dists/SymbolicDist/Lognormal.js";
 import * as PointMassJs from "../dists/SymbolicDist/PointMass.js";
 import * as TriangularJs from "../dists/SymbolicDist/Triangular.js";
 import * as UniformJs from "../dists/SymbolicDist/Uniform.js";
-import { REDistributionError } from "../errors/messages.js";
-import { FRFunction, makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { ErrorMessage } from "../errors/messages.js";
+import { namedInput } from "../library/FrInput.js";
 import {
   frDict,
   frDist,
-  frDistSymbolic,
-  frNamed,
   frNumber,
   frSampleSetDist,
-} from "../library/registry/frTypes.js";
+  frSymbolicDist,
+} from "../library/FrType.js";
+import { FRFunction, makeFnExample } from "../library/registry/core.js";
 import {
   FnFactory,
   makeOneArgSamplesetDist,
@@ -28,6 +27,7 @@ import {
   makeTwoArgsSamplesetDist,
   twoVarSample,
 } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import * as Result from "../utility/result.js";
 import { CI_CONFIG, unwrapSymDistResult } from "./distUtil.js";
 import { mixtureDefinitions } from "./mixture.js";
@@ -46,7 +46,7 @@ function makeCIDist<K1 extends string, K2 extends string>(
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
   return makeDefinition(
-    [frDict([lowKey, frNumber], [highKey, frNumber])],
+    [frDict({ [lowKey]: frNumber, [highKey]: frNumber })],
     frSampleSetDist,
     ([dict], reducer) => twoVarSample(dict[lowKey], dict[highKey], reducer, fn)
   );
@@ -59,7 +59,7 @@ function makeMeanStdevDist(
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
   return makeDefinition(
-    [frDict(["mean", frNumber], ["stdev", frNumber])],
+    [frDict({ mean: frNumber, stdev: frNumber })],
     frSampleSetDist,
     ([{ mean, stdev }], reducer) => twoVarSample(mean, stdev, reducer, fn)
   );
@@ -77,7 +77,7 @@ export const library: FRFunction[] = [
     ],
     definitions: [
       makeDefinition([frDist], frDist, ([dist]) => dist),
-      makeDefinition([frNumber], frDistSymbolic, ([v]) =>
+      makeDefinition([frNumber], frSymbolicDist, ([v]) =>
         unwrapSymDistResult(PointMassJs.PointMass.make(v))
       ),
     ],
@@ -241,11 +241,11 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
       makeTwoArgsSamplesetDist(
         (low, high) => {
           if (low >= high) {
-            throw new REDistributionError(
+            throw ErrorMessage.distributionError(
               argumentError("Low value must be less than high value")
             );
           } else if (low <= 0 || high <= 0) {
-            throw new REDistributionError(
+            throw ErrorMessage.distributionError(
               argumentError(
                 `The "to" function only accepts paramaters above 0. It's a shorthand for lognormal({p5:min, p95:max}), which is only valid with positive entries for then minimum and maximum. If you would like to use a normal distribution, which accepts values under 0, you can use it like this: normal({p5:${low}, p95:${high}}).`
               )
@@ -288,15 +288,15 @@ Note: If you want to pass in over 5 distributions, you must use the list syntax.
     definitions: [
       makeDefinition(
         [
-          frNamed("min", frNumber),
-          frNamed("mode", frNumber),
-          frNamed("max", frNumber),
+          namedInput("min", frNumber),
+          namedInput("mode", frNumber),
+          namedInput("max", frNumber),
         ],
         frSampleSetDist,
         ([low, medium, high], reducer) => {
           const result = TriangularJs.Triangular.make({ low, medium, high });
           if (!result.ok) {
-            throw new REDistributionError(otherError(result.value));
+            throw ErrorMessage.distributionError(otherError(result.value));
           }
           return makeSampleSet(result.value, reducer);
         }

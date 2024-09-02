@@ -16,7 +16,6 @@ export type CodemirrorReactProps = {
   showGutter: boolean;
   lineWrapping: boolean;
   project: SqProject;
-  sourceId: string;
   height: string | number | null;
   renderImportTooltip:
     | ((params: { project: SqProject; importId: string }) => ReactNode)
@@ -29,7 +28,6 @@ const defaultReactProps: CodemirrorReactProps = {
   showGutter: false,
   lineWrapping: true,
   project: new SqProject(),
-  sourceId: "fake",
   onChange: () => {},
   onSubmit: null,
   height: null,
@@ -62,7 +60,6 @@ export const projectFacet = makeReactPropFacet("project");
 export const heightFacet = makeReactPropFacet("height");
 export const onChangeFacet = makeReactPropFacet("onChange");
 export const onSubmitFacet = makeReactPropFacet("onSubmit");
-export const sourceIdFacet = makeReactPropFacet("sourceId");
 export const renderImportTooltipFacet = makeReactPropFacet(
   "renderImportTooltip"
 );
@@ -120,7 +117,6 @@ export function useReactPropsField(
       defineFacet(projectFacet, "project"),
       defineFacet(showGutterFacet, "showGutter"),
       defineFacet(simulationFacet, "simulation"),
-      defineFacet(sourceIdFacet, "sourceId"),
       defineFacet(renderImportTooltipFacet, "renderImportTooltip"),
     ],
   ];

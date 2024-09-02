@@ -1,14 +1,15 @@
-import { REOther } from "../errors/messages.js";
-import { INDEX_LOOKUP_FUNCTION } from "../expression/constants.js";
-import { BuiltinLambda, Lambda } from "../reducer/lambda.js";
+import { INDEX_LOOKUP_FUNCTION } from "../compiler/constants.js";
+import { ErrorMessage } from "../errors/messages.js";
+import { BuiltinLambda } from "../reducer/lambda/BuiltinLambda.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
+import { Lambda } from "../reducer/lambda/index.js";
 import { Bindings } from "../reducer/Stack.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { Value } from "../value/index.js";
 import { vLambda } from "../value/vLambda.js";
+import { frAny } from "./FrType.js";
 import { makeMathConstants } from "./math.js";
-import { makeDefinition } from "./registry/fnDefinition.js";
-import { frAny } from "./registry/frTypes.js";
-import { makeSquiggleBindings, registry } from "./registry/index.js";
+import { getRegistry, makeSquiggleBindings } from "./registry/index.js";
 import { makeVersionConstant } from "./version.js";
 
 function makeLookupLambda(): Lambda {
@@ -17,13 +18,15 @@ function makeLookupLambda(): Lambda {
       if ("get" in obj) {
         return obj.get(key);
       } else {
-        throw new REOther("Trying to access key on wrong value");
+        throw ErrorMessage.otherError("Trying to access key on wrong value");
       }
     }),
   ]);
 }
 
 function makeStdLib(): Bindings {
+  const registry = getRegistry();
+
   let res: Bindings = ImmutableMap<string, Value>().merge(
     // global constants
     makeMathConstants(),

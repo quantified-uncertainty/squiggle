@@ -1,8 +1,11 @@
 import toPlainObject from "lodash/toPlainObject.js";
 
 import { SampleSetDist } from "../dists/SampleSetDist/index.js";
-import { REOther } from "../errors/messages.js";
-import { BaseLambda, Lambda } from "../reducer/lambda.js";
+import { ErrorMessage } from "../errors/messages.js";
+import { BaseLambda, Lambda } from "../reducer/lambda/index.js";
+import { compactTreeString } from "../utility/compactTreeString.js";
+import * as E_A_Floats from "../utility/E_A_Floats.js";
+import * as E_A_Sorted from "../utility/E_A_Sorted.js";
 import { ImmutableMap } from "../utility/immutable.js";
 import { SDate } from "../utility/SDate.js";
 import { Value } from "./index.js";
@@ -62,6 +65,30 @@ export function removeLambdas(value: SimpleValue): SimpleValueWithoutLambda {
   } else {
     return value;
   }
+}
+
+function summarizeSampleSetDist(dist: SampleSetDist) {
+  const keys: Array<
+    "mean" | "p50" | "p5" | "p25" | "p75" | "p95" | "stdev" | "min" | "max"
+  > = ["mean", "p5", "p50", "p95"];
+  const sorted = E_A_Floats.sort(dist.samples);
+  const allStats = {
+    mean: () => dist.mean(),
+    p50: () => E_A_Sorted.quantile(sorted, 0.5),
+    p5: () => E_A_Sorted.quantile(sorted, 0.05),
+    p25: () => E_A_Sorted.quantile(sorted, 0.25),
+    p75: () => E_A_Sorted.quantile(sorted, 0.75),
+    p95: () => E_A_Sorted.quantile(sorted, 0.95),
+    stdev: () => Math.sqrt(E_A_Floats.variance(dist.samples)),
+    min: () => dist.min(),
+    max: () => dist.max(),
+  };
+
+  return Object.fromEntries(
+    keys
+      .map((key) => [key, allStats[key]?.()])
+      .filter(([, value]) => value !== undefined)
+  );
 }
 
 export function simpleValueToJson(value: SimpleValueWithoutLambda): unknown {
@@ -291,7 +318,7 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           const fields: [string, SimpleValue][] = [
             ["vType", "SampleSetDist"],
             ["samples", [...dist.samples]],
-            ["summary", simpleValueFromAny(dist.summarize())],
+            ["summary", simpleValueFromAny(summarizeSampleSetDist(dist))],
           ];
           return ImmutableMap(fields);
         }
@@ -299,7 +326,9 @@ export function simpleValueFromValue(value: Value): SimpleValue {
           return simpleValueFromAny(value.value);
       }
     default:
-      throw new REOther(`Can't convert ${value.type} to simple value`);
+      throw ErrorMessage.otherError(
+        `Can't convert ${value.type} to simple value`
+      );
   }
 }
 
@@ -330,102 +359,6 @@ export function simpleValueToValue(value: SimpleValue): Value {
   }
 }
 
-function isSimpleValueWithoutLambdaMap(
-  value: any
-): value is SimpleValueWithoutLambdaMap {
-  return value instanceof ImmutableMap;
-}
-
-function formatNumberArray(numbers: number[]): string[] {
-  const sigFigs = 15;
-
-  return numbers.map((num) => {
-    if (num === 0) return "0";
-
-    const absNum = Math.abs(num);
-    const log10 = Math.floor(Math.log10(absNum));
-
-    // Use scientific notation for very large or very small numbers
-    if (log10 < -3 || log10 > 6) {
-      const mantissa = num / Math.pow(10, log10);
-      let formatted = mantissa.toFixed(sigFigs - 1).replace(/\.?0+$/, "");
-      if (formatted === "1") {
-        return `1e${log10}`;
-      } else {
-        return `${formatted}e${log10}`;
-      }
-    } else {
-      // For numbers between 0.001 and 1,000,000, use fixed notation
-      let formatted = num
-        .toFixed(Math.max(0, sigFigs - log10 - 1))
-        .replace(/\.?0+$/, "");
-      if (formatted.includes(".")) {
-        formatted = formatted.replace(/(\.\d*[1-9])0+$/, "$1");
-      }
-      return formatted;
-    }
-  });
-}
-
-export function summarizeSimpleValueWithoutLambda(
-  value: SimpleValueWithoutLambda,
-  depth: number = 0,
-  maxDepth: number = 5,
-  maxArrayItems: number = 5,
-  maxDictItems: number = 30
-): string {
-  if (depth >= maxDepth) {
-    return "...";
-  }
-
-  const indent = "  ".repeat(depth);
-
-  if (Array.isArray(value)) {
-    if (value.length === 0) {
-      return "[]";
-    }
-    const allNumbers = value.every(
-      (item): item is number => typeof item === "number"
-    );
-    let items: string[];
-    if (allNumbers) {
-      items = formatNumberArray(value);
-    } else {
-      items = value.map((item) =>
-        summarizeSimpleValueWithoutLambda(
-          item,
-          depth + 1,
-          maxDepth,
-          maxArrayItems,
-          maxDictItems
-        )
-      );
-    }
-    const ellipsis =
-      value.length > maxArrayItems ? `, ...${value.length} total` : "";
-    return `[${items.slice(0, maxArrayItems).join(", ")}${ellipsis}]`;
-  }
-
-  if (isSimpleValueWithoutLambdaMap(value)) {
-    if (value.size === 0) {
-      return "{}";
-    }
-    const items = [...value.entries()]
-      .slice(0, maxDictItems)
-      .map(
-        ([key, val]) =>
-          `${key}: ${summarizeSimpleValueWithoutLambda(val, depth + 1, maxDepth, maxArrayItems, maxDictItems)}`
-      );
-    const ellipsis = value.size > maxArrayItems ? ", ..." : "";
-    return `{\n${indent}  ${items.join(`,\n${indent}  `)}${ellipsis}\n${indent}}`;
-  }
-
-  // Handle other types (string, number, boolean, null, undefined)
-  if (typeof value === "string") {
-    return `"${value}"`;
-  }
-  if (typeof value === "number") {
-    return formatNumberArray([value])[0];
-  }
-  return String(value);
-}
+export const compactString: typeof compactTreeString<
+  SimpleValue | SimpleValueWithoutLambda
+> = compactTreeString;

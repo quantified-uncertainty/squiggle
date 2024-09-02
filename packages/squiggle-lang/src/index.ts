@@ -1,5 +1,5 @@
 import { type Env } from "./dists/env.js";
-import { registry } from "./library/registry/index.js";
+import { getRegistry } from "./library/registry/index.js";
 
 export {
   SqDateValue,
@@ -12,7 +12,7 @@ export {
   SqVoidValue,
 } from "./public/SqValue/index.js"; // TODO - reexport other values too
 
-export { type FnDefinition } from "./library/registry/fnDefinition.js";
+export { FnDefinition } from "./reducer/lambda/FnDefinition.js";
 
 export { type FnDocumentation } from "./library/registry/core.js";
 export {
@@ -25,6 +25,7 @@ export {
 export {
   SqCompileError,
   type SqError,
+  SqErrorList,
   SqFrame,
   SqImportError,
   SqOtherError,
@@ -89,8 +90,10 @@ export {
   type ASTNode,
   type LocationRange as SqLocation,
 } from "./ast/types.js";
+export { type TypedASTNode } from "./analysis/types.js";
 export { defaultEnv as defaultEnvironment } from "./dists/env.js";
 export { type Env };
+export { Type } from "./types/Type.js";
 
 export { makeSelfContainedLinker, type SqLinker } from "./public/SqLinker.js";
 export { SqProject } from "./public/SqProject/index.js";
@@ -106,15 +109,15 @@ export { run } from "./run.js";
 export { sq } from "./sq.js";
 
 export function getFunctionDocumentation(name: string) {
-  return registry.getFunctionDocumentation(name);
+  return getRegistry().getFunctionDocumentation(name);
 }
 
 export function getAllFunctionNames() {
-  return registry.allNames();
+  return getRegistry().allNames();
 }
 
 export function getAllFunctionNamesWithNamespace(name: string) {
-  return registry
+  return getRegistry()
     .allFunctionsWithNamespace(name)
     .map((fn) => `${name}.${fn.name}`);
 }
@@ -124,11 +127,7 @@ export {
   SCALE_SYMLOG_DEFAULT_CONSTANT,
 } from "./value/VScale.js";
 
-export {
-  removeLambdas,
-  simpleValueFromAny,
-  summarizeSimpleValueWithoutLambda,
-} from "./value/simpleValue.js";
+export { removeLambdas, simpleValueFromAny } from "./value/simpleValue.js";
 
 export { generateSeed } from "./utility/seedGenerator.js";
 
@@ -148,3 +147,9 @@ export {
 export { BaseRunner } from "./runners/BaseRunner.js";
 
 export { getStdLib } from "./library/index.js";
+
+export {
+  type FormattedNumber,
+  formattedNumberToString,
+  makeFormattedNumber,
+} from "./utility/FormattedNumber.js";

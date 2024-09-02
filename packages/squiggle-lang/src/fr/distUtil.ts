@@ -1,6 +1,6 @@
 import { otherError } from "../dists/DistError.js";
 import * as SymbolicDist from "../dists/SymbolicDist/index.js";
-import { REDistributionError } from "../errors/messages.js";
+import { ErrorMessage } from "../errors/messages.js";
 import * as Result from "../utility/result.js";
 
 export const CI_CONFIG = [
@@ -15,7 +15,7 @@ export function unwrapSymDistResult(
   result: SymDistResult
 ): SymbolicDist.SymbolicDist {
   if (!result.ok) {
-    throw new REDistributionError(otherError(result.value));
+    throw ErrorMessage.distributionError(otherError(result.value));
   }
   return result.value;
 }

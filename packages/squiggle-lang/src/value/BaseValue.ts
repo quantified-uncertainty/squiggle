@@ -4,7 +4,7 @@ import { SerializedValue } from "./index.js";
 import { ValueTags, ValueTagsType } from "./valueTags.js";
 
 /*
-Value classes are shaped in a similar way and can work as discriminated unions thank to the `type` property.
+Value classes are shaped in a similar way and can work as discriminated unions thanks to the `type` property.
 
 `type` property is currently stored on instances; that creates some memory overhead, but it's hard to store it in prototype in a type-safe way.
 

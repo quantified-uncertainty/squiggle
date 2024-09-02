@@ -15,31 +15,31 @@ test("run with profile", async () => {
   const runs = result.value.profile?.runs;
 
   expect(runs).toEqual([
-    2, // every point in a defun statement runs at least twice: once for Assign and once for Lambda
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    4,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    3,
     0, // ";"
     0, // " "
-    1,
-    1,
-    1,
-    1,
-    5,
-    4,
-    5,
+    0,
+    0,
+    0,
+    0,
     4,
     3,
-    3,
-    3,
-    5,
     4,
-    5,
+    3,
+    2,
+    2,
+    2,
     4,
+    3,
+    4,
+    3,
     0,
   ]);
 });
@@ -65,6 +65,6 @@ s.x`
   const runs = result.value.profile?.runs;
 
   expect(runs).toEqual([
-    0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 4, 3, 3, 0,
+    0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 4, 3, 3, 0,
   ]);
 });

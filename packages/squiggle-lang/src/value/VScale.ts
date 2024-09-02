@@ -123,4 +123,6 @@ export class VScale extends BaseValue<"Scale", Scale> {
   }
 }
 
-export const vScale = (scale: Scale) => new VScale(scale);
+export function vScale(scale: Scale) {
+  return new VScale(scale);
+}

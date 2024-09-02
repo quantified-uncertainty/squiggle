@@ -2,15 +2,25 @@ import {
   SquiggleDeserializationVisitor,
   SquiggleSerializationVisitor,
 } from "../serialization/squiggle.js";
-import { ASTNode, LocationRange, NamedNodeLambda } from "./types.js";
-
-type KindNode<T extends ASTNode["kind"]> = Extract<ASTNode, { kind: T }>;
+import {
+  assertExpression,
+  assertKind,
+  assertOneOfKinds,
+  assertStatement,
+  assertUnitType,
+} from "./asserts.js";
+import {
+  AnyExpressionNode,
+  ASTNode,
+  KindNode,
+  LocationRange,
+} from "./types.js";
 
 /*
  * Derive serialized AST type from ASTNode automatically.
  */
 
-type SerializedNodeField<T> = T extends string | number | boolean | null
+type RequiredSerializedNodeField<T> = T extends string | number | boolean
   ? T
   : T extends {
         kind: ASTNode["kind"];
@@ -26,6 +36,10 @@ type SerializedNodeField<T> = T extends string | number | boolean | null
           : T extends Record<infer K, infer V>
             ? Record<K, SerializedNodeField<V>> // convert { string: ASTNode } to { string: number }
             : never;
+
+type SerializedNodeField<T> = T extends null
+  ? RequiredSerializedNodeField<NonNullable<T>> | null
+  : RequiredSerializedNodeField<T>;
 
 type KindNodeToSerializedNode<
   T extends ASTNode["kind"],
@@ -55,11 +69,9 @@ export function serializeAstNode(
     case "Program":
       return {
         ...node,
-        imports: node.imports.map((item) => [
-          visit.ast(item[0]),
-          visit.ast(item[1]),
-        ]),
+        imports: node.imports.map(visit.ast),
         statements: node.statements.map(visit.ast),
+        result: node.result ? visit.ast(node.result) : null,
         symbols: Object.fromEntries(
           Object.entries(node.symbols).map(([key, value]) => [
             key,
@@ -67,17 +79,26 @@ export function serializeAstNode(
           ])
         ),
       };
+    case "Import":
+      return {
+        ...node,
+        path: visit.ast(node.path),
+        variable: visit.ast(node.variable),
+      };
     case "Block":
       return {
         ...node,
         statements: node.statements.map(visit.ast),
+        result: visit.ast(node.result),
       };
     case "LetStatement":
       return {
         ...node,
         decorators: node.decorators.map(visit.ast),
         variable: visit.ast(node.variable),
-        unitTypeSignature: visit.ast(node.unitTypeSignature),
+        unitTypeSignature: node.unitTypeSignature
+          ? visit.ast(node.unitTypeSignature)
+          : null,
         value: visit.ast(node.value),
       };
     case "DefunStatement":
@@ -94,7 +115,7 @@ export function serializeAstNode(
         body: visit.ast(node.body),
         returnUnitType: node.returnUnitType
           ? visit.ast(node.returnUnitType)
-          : undefined,
+          : null,
       };
     case "Array":
       return {
@@ -105,12 +126,6 @@ export function serializeAstNode(
       return {
         ...node,
         elements: node.elements.map(visit.ast),
-        symbols: Object.fromEntries(
-          Object.entries(node.symbols).map(([key, value]) => [
-            key,
-            visit.ast(value),
-          ])
-        ),
       };
     case "KeyValue":
       return {
@@ -186,24 +201,19 @@ export function serializeAstNode(
         base: visit.ast(node.base),
         exponent: visit.ast(node.exponent),
       };
-    case "Identifier":
+    case "LambdaParameter":
       return {
         ...node,
-        unitTypeSignature: node.unitTypeSignature
-          ? visit.ast(node.unitTypeSignature)
-          : undefined,
-      };
-    case "IdentifierWithAnnotation":
-      return {
-        ...node,
-        annotation: visit.ast(node.annotation),
-        unitTypeSignature: node.unitTypeSignature
-          ? visit.ast(node.unitTypeSignature)
-          : undefined,
+        variable: visit.ast(node.variable),
+        annotation: node.annotation && visit.ast(node.annotation),
+        unitTypeSignature:
+          node.unitTypeSignature && visit.ast(node.unitTypeSignature),
       };
     case "Float":
     case "String":
     case "Boolean":
+    case "Identifier":
+    case "UnitName":
       return node;
     default:
       throw node satisfies never;
@@ -218,11 +228,12 @@ export function deserializeAstNode(
     case "Program":
       return {
         ...node,
-        imports: node.imports.map((item) => [
-          visit.ast(item[0]) as KindNode<"String">,
-          visit.ast(item[0]) as KindNode<"Identifier">,
-        ]),
-        statements: node.statements.map(visit.ast),
+
+        imports: node.imports
+          .map(visit.ast)
+          .map((node) => assertKind(node, "Import")),
+        statements: node.statements.map(visit.ast).map(assertStatement),
+        result: node.result ? assertExpression(visit.ast(node.result)) : null,
         symbols: Object.fromEntries(
           Object.entries(node.symbols).map(([key, value]) => [
             key,
@@ -230,147 +241,161 @@ export function deserializeAstNode(
           ])
         ),
       };
+    case "Import":
+      return {
+        ...node,
+        path: assertKind(visit.ast(node.path), "String"),
+        variable: assertKind(visit.ast(node.variable), "Identifier"),
+      };
     case "Block":
       return {
         ...node,
-        statements: node.statements.map(visit.ast),
+        statements: node.statements.map(visit.ast).map(assertStatement),
+        result: assertExpression(visit.ast(node.result)),
       };
     case "LetStatement":
       return {
         ...node,
-        decorators: node.decorators.map(visit.ast) as KindNode<"Decorator">[],
-        variable: visit.ast(node.variable) as KindNode<"Identifier">,
-        unitTypeSignature: visit.ast(
-          node.unitTypeSignature
-        ) as KindNode<"UnitTypeSignature">,
-        value: visit.ast(node.value),
+
+        decorators: node.decorators
+          .map(visit.ast)
+          .map((node) => assertKind(node, "Decorator")),
+        variable: assertKind(visit.ast(node.variable), "Identifier"),
+        unitTypeSignature: node.unitTypeSignature
+          ? assertKind(visit.ast(node.unitTypeSignature), "UnitTypeSignature")
+          : null,
+        value: assertExpression(visit.ast(node.value)),
       };
     case "DefunStatement":
       return {
         ...node,
-        decorators: node.decorators.map(visit.ast) as KindNode<"Decorator">[],
-        variable: visit.ast(node.variable) as KindNode<"Identifier">,
-        value: visit.ast(node.value) as NamedNodeLambda,
+        decorators: node.decorators
+          .map(visit.ast)
+          .map((node) => assertKind(node, "Decorator")),
+        variable: assertKind(visit.ast(node.variable), "Identifier"),
+        value: assertKind(visit.ast(node.value), "Lambda"),
       };
     case "Lambda":
       return {
         ...node,
-        args: node.args.map(visit.ast),
-        body: visit.ast(node.body),
+        args: node.args
+          .map(visit.ast)
+          .map((node) => assertKind(node, "LambdaParameter")),
+        body: assertExpression(visit.ast(node.body)),
         returnUnitType: node.returnUnitType
-          ? (visit.ast(node.returnUnitType) as KindNode<"UnitTypeSignature">)
-          : undefined,
+          ? assertKind(visit.ast(node.returnUnitType), "UnitTypeSignature")
+          : null,
       };
     case "Array":
       return {
         ...node,
-        elements: node.elements.map(visit.ast),
+        elements: node.elements.map(visit.ast).map(assertExpression),
       };
     case "Dict":
       return {
         ...node,
-        elements: node.elements.map(
-          (node) => visit.ast(node) as KindNode<"KeyValue" | "Identifier">
-        ),
-        symbols: Object.fromEntries(
-          Object.entries(node.symbols).map(([key, value]) => [
-            key,
-            visit.ast(value) as KindNode<"KeyValue" | "Identifier">,
-          ])
-        ),
+        elements: node.elements
+          .map(visit.ast)
+          .map((node) => assertOneOfKinds(node, ["KeyValue", "Identifier"])),
       };
     case "KeyValue":
       return {
         ...node,
-        key: visit.ast(node.key),
-        value: visit.ast(node.value),
+        key: visit.ast(node.key) as AnyExpressionNode,
+        value: visit.ast(node.value) as AnyExpressionNode,
       };
     case "UnitValue":
       return {
         ...node,
-        value: visit.ast(node.value),
+        value: visit.ast(node.value) as KindNode<"Float">,
       };
     case "Call":
       return {
         ...node,
-        fn: visit.ast(node.fn),
-        args: node.args.map(visit.ast),
+        fn: assertExpression(visit.ast(node.fn)),
+        args: node.args.map(visit.ast).map(assertExpression),
       };
     case "InfixCall":
       return {
         ...node,
-        args: [visit.ast(node.args[0]), visit.ast(node.args[1])],
+        args: [
+          assertExpression(visit.ast(node.args[0])),
+          assertExpression(visit.ast(node.args[1])),
+        ],
       };
     case "UnaryCall":
       return {
         ...node,
-        arg: visit.ast(node.arg),
+        arg: assertExpression(visit.ast(node.arg)),
       };
     case "Pipe":
       return {
         ...node,
-        leftArg: visit.ast(node.leftArg),
-        fn: visit.ast(node.fn),
-        rightArgs: node.rightArgs.map(visit.ast),
+        leftArg: assertExpression(visit.ast(node.leftArg)),
+        fn: assertExpression(visit.ast(node.fn)),
+        rightArgs: node.rightArgs.map(visit.ast).map(assertExpression),
       };
     case "Decorator":
       return {
         ...node,
-        name: visit.ast(node.name) as KindNode<"Identifier">,
-        args: node.args.map(visit.ast),
+        name: assertKind(visit.ast(node.name), "Identifier"),
+        args: node.args.map(visit.ast).map(assertExpression),
       };
     case "DotLookup":
       return {
         ...node,
-        arg: visit.ast(node.arg),
+        arg: assertExpression(visit.ast(node.arg)),
       };
     case "BracketLookup":
       return {
         ...node,
-        arg: visit.ast(node.arg),
-        key: visit.ast(node.key),
+        arg: assertExpression(visit.ast(node.arg)),
+        key: assertExpression(visit.ast(node.key)),
       };
     case "Ternary":
       return {
         ...node,
-        condition: visit.ast(node.condition),
-        trueExpression: visit.ast(node.trueExpression),
-        falseExpression: visit.ast(node.falseExpression),
+        condition: assertExpression(visit.ast(node.condition)),
+        trueExpression: assertExpression(visit.ast(node.trueExpression)),
+        falseExpression: assertExpression(visit.ast(node.falseExpression)),
       };
     case "UnitTypeSignature":
       return {
         ...node,
-        body: visit.ast(node.body),
+        body: assertUnitType(visit.ast(node.body)),
       };
     case "InfixUnitType":
       return {
         ...node,
-        args: [visit.ast(node.args[0]), visit.ast(node.args[1])],
+        args: [
+          assertUnitType(visit.ast(node.args[0])),
+          assertUnitType(visit.ast(node.args[1])),
+        ],
       };
     case "ExponentialUnitType":
       return {
         ...node,
-        base: visit.ast(node.base),
-        exponent: visit.ast(node.exponent),
+        base: assertUnitType(visit.ast(node.base)),
+        exponent: assertKind(visit.ast(node.exponent), "Float"),
+      };
+    case "LambdaParameter":
+      return {
+        ...node,
+        variable: assertKind(visit.ast(node.variable), "Identifier"),
+        annotation:
+          node.annotation !== null
+            ? assertExpression(visit.ast(node.annotation))
+            : null,
+        unitTypeSignature:
+          node.unitTypeSignature !== null
+            ? assertKind(visit.ast(node.unitTypeSignature), "UnitTypeSignature")
+            : null,
       };
     case "Identifier":
-      return {
-        ...node,
-        unitTypeSignature: node.unitTypeSignature
-          ? (visit.ast(node.unitTypeSignature) as KindNode<"UnitTypeSignature">)
-          : undefined,
-      };
-    case "IdentifierWithAnnotation":
-      return {
-        ...node,
-        annotation: visit.ast(node.annotation),
-        unitTypeSignature: node.unitTypeSignature
-          ? (visit.ast(node.unitTypeSignature) as KindNode<"UnitTypeSignature">)
-          : undefined,
-      };
     case "Float":
     case "String":
     case "Boolean":
+    case "UnitName":
       return node;
     default:
       throw node satisfies never;

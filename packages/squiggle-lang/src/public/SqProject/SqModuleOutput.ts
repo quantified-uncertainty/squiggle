@@ -1,20 +1,20 @@
-import { isBindingStatement } from "../../ast/utils.js";
 import { Env } from "../../dists/env.js";
 import { RunProfile } from "../../reducer/RunProfile.js";
 import { BaseRunner, RunParams } from "../../runners/BaseRunner.js";
-import { ImmutableMap } from "../../utility/immutable.js";
 import { Err, fmap, fmap2, Ok, result } from "../../utility/result.js";
-import { vDict, VDict } from "../../value/VDict.js";
+import { Value } from "../../value/index.js";
+import { VDict, vDictFromArray } from "../../value/VDict.js";
 import { vString } from "../../value/VString.js";
 import {
   SqError,
+  SqErrorList,
   SqImportError,
   SqOtherError,
   wrapIError,
 } from "../SqError.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqDict } from "../SqValue/SqDict.js";
-import { RunContext, SqValueContext } from "../SqValueContext.js";
+import { SqValueContext } from "../SqValueContext.js";
 import { SqValuePath, ValuePathRoot } from "../SqValuePath.js";
 import { ProjectState } from "./ProjectState.js";
 import { Import, SqModule } from "./SqModule.js";
@@ -28,7 +28,7 @@ export type OutputResult = result<
     exports: SqDict;
     profile: RunProfile | undefined;
   },
-  SqError
+  SqErrorList
 >;
 
 export class SqModuleOutput {
@@ -58,30 +58,30 @@ export class SqModuleOutput {
 
   // "result" word is overloaded, so we use "end result" for clarity.
   // TODO: it would also be good to rename "result" to "endResult" in the OutputResult and runners code for the same reason.
-  getEndResult(): result<SqValue, SqError> {
+  getEndResult(): result<SqValue, SqErrorList> {
     return fmap(this.result, (r) => r.result);
   }
 
-  getBindings(): result<SqDict, SqError> {
+  getBindings(): result<SqDict, SqErrorList> {
     return fmap(this.result, (r) => r.bindings);
   }
 
-  getExports(): result<SqDict, SqError> {
+  getExports(): result<SqDict, SqErrorList> {
     return fmap(this.result, (r) => r.exports);
   }
 
   // Helper method for "Find in Editor" feature
-  findValuePathByOffset(offset: number): result<SqValuePath, SqError> {
+  findValuePathByOffset(offset: number): result<SqValuePath, SqErrorList> {
     const ast = this.module.ast();
     if (!ast.ok) {
-      return ast;
+      return Err(new SqErrorList(ast.value));
     }
     const found = SqValuePath.findByAstOffset({
       ast: ast.value,
       offset,
     });
     if (!found) {
-      return Err(new SqOtherError("Not found"));
+      return Err(new SqErrorList([new SqOtherError("Not found")]));
     }
     return Ok(found);
   }
@@ -120,10 +120,7 @@ export class SqModuleOutput {
       return undefined;
     }
 
-    // AST is guaranteed to be ok, otherwise `getImportOutputs` would throw.
-    const ast = module.expectAst();
-
-    let importBindings = VDict.empty();
+    const importBindings: Record<string, Value> = {};
 
     // useful for profiling later
     const importsAndOutputs: {
@@ -143,18 +140,18 @@ export class SqModuleOutput {
           module,
           environment,
           result: Err(
-            new SqImportError(importOutput.result.value, importBinding)
+            new SqErrorList(
+              importOutput.result.value.errors.map(
+                (err) => new SqImportError(err, importBinding)
+              )
+            )
           ),
           executionTime: 0,
         });
       }
-      importBindings = importBindings.merge(
-        vDict(
-          ImmutableMap({
-            [importBinding.variable]: importOutput.result.value.exports._value,
-          })
-        )
-      );
+      importBindings[importBinding.path] =
+        importOutput.result.value.exports._value;
+
       importsAndOutputs.push({
         importBinding,
         importOutput,
@@ -162,13 +159,24 @@ export class SqModuleOutput {
     }
 
     const runParams: RunParams = {
-      ast,
+      module,
       environment,
-      externals: importBindings,
+      imports: importBindings,
     };
 
     const started = new Date();
-    const runResult = await params.runner.run(runParams);
+    let runResult;
+    try {
+      runResult = await params.runner.run(runParams);
+    } catch (e) {
+      return new SqModuleOutput({
+        module,
+        environment,
+        result: Err(new SqErrorList([new SqOtherError(String(e))])),
+        executionTime: new Date().getTime() - started.getTime(),
+      });
+    }
+
     const executionTime = new Date().getTime() - started.getTime();
 
     // patch profile - add timings for import statements
@@ -183,27 +191,22 @@ export class SqModuleOutput {
       }
     }
 
-    const context: RunContext = {
-      module,
-      environment,
-    };
-
     // upgrade result values from the runner to SqValues
     const result = fmap2(
       runResult,
       (runOutput) => {
-        const { result, bindings, exports } = runOutput;
-        const lastStatement = ast.statements.at(-1);
+        // AST is guaranteed to be ok, otherwise the run would fail.
+        // TODO: this will slow down the run, can we do this is parallel with the runner, or marshall the typed AST from the worker?
+        const ast = module.expectTypedAst();
 
-        const hasEndExpression =
-          !!lastStatement && !isBindingStatement(lastStatement);
+        const { result, bindings, exports } = runOutput;
 
         const newContext = (root: ValuePathRoot) => {
           const isResult = root === "result";
           return new SqValueContext({
-            runContext: context,
-            valueAst: isResult && hasEndExpression ? lastStatement : ast,
-            valueAstIsPrecise: isResult ? hasEndExpression : true,
+            runContext: runParams,
+            valueAst: isResult && ast.result ? ast.result : ast,
+            valueAstIsPrecise: isResult ? !!ast.result : true,
             path: new SqValuePath({
               root,
               edges: [],
@@ -223,11 +226,14 @@ export class SqModuleOutput {
             // In terms of context, exports are the same as bindings.
             "bindings"
           ),
-          imports: wrapSqDict(importBindings, "imports"),
+          imports: wrapSqDict(
+            vDictFromArray(Object.entries(importBindings)),
+            "imports"
+          ),
           profile: runOutput.profile,
         };
       },
-      (err) => wrapIError(err)
+      (errors) => new SqErrorList(errors.map((err) => wrapIError(err)))
     );
 
     return new SqModuleOutput({
@@ -246,7 +252,7 @@ export class SqModuleOutput {
     return new SqModuleOutput({
       module: params.module,
       environment: params.environment,
-      result: Err(params.error),
+      result: Err(new SqErrorList([params.error])),
       executionTime: 0,
     });
   }

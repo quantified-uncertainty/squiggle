@@ -1,6 +1,6 @@
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frBool, frMixedSet, frNumber } from "../library/registry/frTypes.js";
+import { frBool, frMixedSet, frNumber } from "../library/FrType.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { MixedSet } from "../utility/MixedSet.js";
 
 const maker = new FnFactory({

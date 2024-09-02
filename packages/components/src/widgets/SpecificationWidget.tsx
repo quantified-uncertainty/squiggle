@@ -1,15 +1,15 @@
 import clsx from "clsx";
 import { FC } from "react";
 
-import { SqError, SqSpecification } from "@quri/squiggle-lang";
+import { SqErrorList, SqSpecification } from "@quri/squiggle-lang";
 import { CheckIcon, CubeTransparentIcon, Dropdown, XIcon } from "@quri/ui";
 
-import { SquiggleErrorAlert } from "../index.js";
+import { SquiggleErrorListAlert } from "../components/ui/SquiggleErrorListAlert.js";
 import { SqValueWithContext } from "../lib/utility.js";
 import { widgetRegistry } from "./registry.js";
 
 export type SpecificationStatus =
-  | { type: "load-error"; error: SqError }
+  | { type: "load-error"; error: SqErrorList }
   | { type: "validation-success" }
   | { type: "validation-failure"; error: string };
 
@@ -60,7 +60,7 @@ const SpecificationDropdownContent: FC<{
         </div>
         {specificationStatus.type === "load-error" && (
           <div className="text-xs text-red-700">
-            <SquiggleErrorAlert error={specificationStatus.error} />
+            <SquiggleErrorListAlert errorList={specificationStatus.error} />
           </div>
         )}
         {specificationStatus.type === "validation-failure" && (

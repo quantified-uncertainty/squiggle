@@ -1,6 +1,6 @@
 import { clsx } from "clsx";
 
-import { result, SqError, SqValue } from "@quri/squiggle-lang";
+import { result, SqErrorList, SqValue } from "@quri/squiggle-lang";
 import { TableCellsIcon } from "@quri/ui";
 
 import { PlaygroundSettings } from "../components/PlaygroundSettings.js";
@@ -44,7 +44,7 @@ widgetRegistry.register("TableChart", {
     };
 
     const showItem = (
-      item: result<SqValue, SqError>,
+      item: result<SqValue, SqErrorList>,
       settings: PlaygroundSettings
     ) => {
       if (item.ok) {

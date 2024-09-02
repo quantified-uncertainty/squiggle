@@ -62,11 +62,13 @@ x = 1
   );
   await waitFor(() => screen.getByText(/simulation/));
 
-  const errorHeader = screen.getByText("Import Error");
-  expect(errorHeader).toBeDefined();
+  const importChainHeader = screen.getByText("Import Chain:");
+  expect(importChainHeader).toBeDefined();
 
-  expect(getByText(errorHeader.parentElement!, /column /)).toBeDefined();
-  expect(getByText(errorHeader.parentElement!, /column /).tagName).toBe("A");
+  expect(getByText(importChainHeader.parentElement!, /column /)).toBeDefined();
+  expect(getByText(importChainHeader.parentElement!, /column /).tagName).toBe(
+    "A"
+  );
 });
 
 test("Stacktrace lines for errors in imports are not clickable", async () => {
@@ -90,12 +92,12 @@ x = s1.f()
   );
   await waitFor(() => screen.getByText(/simulation/));
 
-  const errorHeader = screen.getByText("Runtime Error");
+  const errorHeader = screen.getByText("Compile Error"); // compilation error in import
   expect(errorHeader).toBeDefined();
 
   // error in main code - clickable
-  expect(getByText(errorHeader.parentElement!, /column 5/)).toBeDefined();
-  expect(getByText(errorHeader.parentElement!, /column 5/).tagName).toBe("A");
+  expect(getByText(errorHeader.parentElement!, /column 8/)).toBeDefined();
+  expect(getByText(errorHeader.parentElement!, /column 8/).tagName).toBe("A");
 
   // error in import - not clickable
   expect(getByText(errorHeader.parentElement!, /column 14/)).toBeDefined();

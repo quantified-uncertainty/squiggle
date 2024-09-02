@@ -1,4 +1,4 @@
-import { type ASTCommentNode, type ASTNode } from "@quri/squiggle-lang";
+import { type ASTCommentNode, ASTNode } from "@quri/squiggle-lang";
 
 // This doesn't patch children types (e.g. `node.statements[0]` is `ASTNode`, not `PatchedASTNode`)
 export type PatchedASTNode = (

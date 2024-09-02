@@ -1,6 +1,6 @@
-import { Input, vInput } from "../../value/VInput.js";
+import { FormInput, vInput } from "../../value/VInput.js";
 
-export const wrapInput = (value: Input): SqInput => {
+export const wrapInput = (value: FormInput): SqInput => {
   switch (value.type) {
     case "text":
       return new SqTextInput(value);
@@ -13,10 +13,10 @@ export const wrapInput = (value: Input): SqInput => {
   }
 };
 
-abstract class SqAbstractInput<T extends Input["type"]> {
+abstract class SqAbstractInput<T extends FormInput["type"]> {
   abstract tag: T;
 
-  constructor(public _value: Extract<Input, { type: T }>) {}
+  constructor(public _value: Extract<FormInput, { type: T }>) {}
 
   toString() {
     return vInput(this._value).toString();

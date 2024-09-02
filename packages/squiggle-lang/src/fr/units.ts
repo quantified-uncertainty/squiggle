@@ -1,9 +1,13 @@
+import { frNumber, frTagged } from "../library/FrType.js";
 import { makeFnExample } from "../library/registry/core.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frNumber, frWithTags } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../reducer/lambda/FnDefinition.js";
 import { ValueTags } from "../value/valueTags.js";
 import { vString } from "../value/VString.js";
+
+export function unitNameToBuiltinFunctionName(unitName: string) {
+  return `fromUnit_${unitName}`;
+}
 
 const maker = new FnFactory({
   nameSpace: "",
@@ -17,13 +21,13 @@ const makeUnitFn = (
   format?: string
 ) => {
   return maker.make({
-    name: "fromUnit_" + shortName,
+    name: unitNameToBuiltinFunctionName(shortName),
     description: `Unit conversion from ${fullName}.`,
     examples: [makeFnExample(`3${shortName} // ${3 * multiplier}`)],
     isUnit: true,
     definitions: [
       format
-        ? makeDefinition([frNumber], frWithTags(frNumber), ([x]) => {
+        ? makeDefinition([frNumber], frTagged(frNumber), ([x]) => {
             return {
               value: x * multiplier,
               tags: new ValueTags({ numberFormat: vString(format) }),
