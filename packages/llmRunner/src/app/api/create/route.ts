@@ -1,8 +1,8 @@
-import { LlmConfig, SquiggleGenerator } from "../../../llmRunner/main";
+import { LlmConfig, runSquiggleGenerator } from "../../../llmRunner/main";
 import {
   CreateRequestBody,
   createRequestBodySchema,
-  squiggleResponseSchema,
+  SquiggleResponse,
 } from "../../utils/squiggleTypes";
 
 export const maxDuration = 30;
@@ -29,42 +29,27 @@ export async function POST(req: Request) {
       messagesInHistoryToKeep: 4,
     };
 
-    const generator = new SquiggleGenerator(
-      squiggleCode
-        ? { type: "Edit", prompt, code: squiggleCode }
-        : { type: "Create", prompt },
-      llmConfig
-    );
-
-    // Run the generator steps until completion
-    while (!(await generator.step())) {
-      if (req.signal.aborted) {
-        abortController.abort();
-        break;
-      }
-    }
-
     const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
-      generator.getFinalResult();
+      await runSquiggleGenerator({
+        input: squiggleCode
+          ? { type: "Edit", prompt, code: squiggleCode }
+          : { type: "Create", prompt },
+        llmConfig,
+        abortSignal: req.signal,
+      });
 
-    const response = {
-      code: typeof code === "string" ? code : "",
-      isValid,
-      totalPrice,
-      runTimeMs,
-      llmRunCount,
-      logSummary,
-    };
+    const response: SquiggleResponse = [
+      {
+        code: typeof code === "string" ? code : "",
+        isValid,
+        totalPrice,
+        runTimeMs,
+        llmRunCount,
+        logSummary,
+      },
+    ];
 
-    // Validate the response using the schema
-    const validatedResponse = squiggleResponseSchema.parse([response]);
-
-    // Handle client disconnection
-    req.signal.addEventListener("abort", () => {
-      abortController.abort();
-    });
-
-    return new Response(JSON.stringify(validatedResponse), {
+    return new Response(JSON.stringify(response), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {

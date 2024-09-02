@@ -59,10 +59,20 @@ export class SquiggleGenerator {
   private llmConfig: LlmConfig;
   private startTime: number;
   private isDone: boolean = false;
+  private abortSignal?: AbortSignal; // TODO - unused
 
-  constructor(input: GeneratorInput, llmConfig: LlmConfig = llmConfigDefault) {
+  constructor({
+    input,
+    llmConfig,
+    abortSignal,
+  }: {
+    input: GeneratorInput;
+    llmConfig?: LlmConfig;
+    abortSignal?: AbortSignal;
+  }) {
     this.prompt = input.prompt;
-    this.llmConfig = llmConfig;
+    this.llmConfig = llmConfig ?? llmConfigDefault;
+    this.abortSignal = abortSignal;
     this.stateManager = new StateManager(
       this.llmConfig.priceLimit,
       this.llmConfig.durationLimitMinutes
@@ -107,7 +117,7 @@ export class SquiggleGenerator {
     return false;
   }
 
-  public getFinalResult(): SquiggleResult {
+  getFinalResult(): SquiggleResult {
     const logSummary = generateSummary(this.prompt, this.stateManager);
     const endTime = Date.now();
     const runTimeMs = endTime - this.startTime;
@@ -369,11 +379,15 @@ export class SquiggleGenerator {
   }
 }
 
-export const runSquiggleGenerator = async (
-  input: GeneratorInput,
-  llmConfig: LlmConfig = llmConfigDefault
-): Promise<SquiggleResult> => {
-  const generator = new SquiggleGenerator(input, llmConfig);
+export async function runSquiggleGenerator(params: {
+  input: GeneratorInput;
+  abortSignal?: AbortSignal;
+  llmConfig?: LlmConfig;
+}): Promise<SquiggleResult> {
+  const generator = new SquiggleGenerator(params);
+
+  // Run the generator steps until completion
   while (!(await generator.step())) {}
-  return generator.stateManager.getFinalResult() as SquiggleResult;
-};
+
+  return generator.getFinalResult();
+}
