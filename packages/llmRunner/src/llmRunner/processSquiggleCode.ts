@@ -5,9 +5,9 @@ import {
   removeLambdas,
   result,
   simpleValueFromAny,
-  SqError,
+  simpleValueToCompactString,
+  SqErrorList,
   SqProject,
-  summarizeSimpleValueWithoutLambda,
 } from "@quri/squiggle-lang";
 
 import { formatSquiggleCode } from "./formatSquiggleCode";
@@ -25,11 +25,7 @@ export const linker = makeSelfContainedLinker(
 );
 
 function summarizeAny(json: any): string {
-  return summarizeSimpleValueWithoutLambda(
-    removeLambdas(simpleValueFromAny(json)),
-    0,
-    6
-  );
+  return simpleValueToCompactString(removeLambdas(simpleValueFromAny(json)));
 }
 
 type SqOutputSummary = {
@@ -39,7 +35,9 @@ type SqOutputSummary = {
 
 const runSquiggle = async (
   code: string
-): Promise<result<SqOutputSummary, { error: SqError; project: SqProject }>> => {
+): Promise<
+  result<SqOutputSummary, { error: SqErrorList; project: SqProject }>
+> => {
   const project = new SqProject({
     linker: linker,
     runner: new EmbeddedRunner(),
@@ -59,7 +57,7 @@ const runSquiggle = async (
   } else {
     return {
       ok: false,
-      value: { error: endResult.value as SqError, project },
+      value: { error: endResult.value as SqErrorList, project },
     };
   }
 };
@@ -108,8 +106,8 @@ function extractSquiggleCode(content: string): string {
 
 // Add this type guard function near the top of the file
 function isErrorResult(
-  value: SqOutputSummary | { error: SqError; project: SqProject }
-): value is { error: SqError; project: SqProject } {
+  value: SqOutputSummary | { error: SqErrorList; project: SqProject }
+): value is { error: SqErrorList; project: SqProject } {
   return "error" in value && "project" in value;
 }
 
@@ -124,7 +122,7 @@ export async function squiggleCodeToCodeStateViaRunningAndFormatting(
         codeState: {
           type: "runFailed",
           code: code,
-          error: run.value.error,
+          error: run.value.error.errors[0],
           project: run.value.project,
         },
         runResult: null,

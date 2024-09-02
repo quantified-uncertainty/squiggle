@@ -127,7 +127,11 @@ export {
   SCALE_SYMLOG_DEFAULT_CONSTANT,
 } from "./value/VScale.js";
 
-export { removeLambdas, simpleValueFromAny } from "./value/simpleValue.js";
+export {
+  compactString as simpleValueToCompactString,
+  removeLambdas,
+  simpleValueFromAny,
+} from "./value/simpleValue.js";
 
 export { generateSeed } from "./utility/seedGenerator.js";
 
