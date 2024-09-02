@@ -262,9 +262,9 @@ Remember to check your spelling, ensure all variables are defined before use, an
 
 // Function to get advice for a specific error
 function getSquiggleErrorAdvice(errorKey: string): string {
-  return (
-    errorAdvice[errorKey] || "No specific advice available for this error."
-  );
+  return errorKey in errorAdvice
+    ? errorAdvice[errorKey as keyof typeof errorAdvice]
+    : "No specific advice available for this error.";
 }
 
 // Function to check for invalid Squiggle elements

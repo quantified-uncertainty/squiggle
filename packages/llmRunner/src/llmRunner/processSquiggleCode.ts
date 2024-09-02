@@ -39,17 +39,14 @@ type SqOutputSummary = {
 
 const runSquiggle = async (
   code: string
-): Promise<
-  Promise<result<SqOutputSummary, { error: SqError; project: SqProject }>>
-> => {
+): Promise<result<SqOutputSummary, { error: SqError; project: SqProject }>> => {
   const project = new SqProject({
     linker: linker,
     runner: new EmbeddedRunner(),
   });
 
   project.setSimpleHead("main", code);
-  await project.waitForOutput("main");
-  const output = project.getOutput("main");
+  const output = await project.waitForOutput("main");
 
   const endResult = output.getEndResult();
   const bindings = output.getBindings();
@@ -165,17 +162,22 @@ export async function completionContentToCodeState(
 
   let newCode: string;
 
-  if (inputFormat === "generation") {
-    newCode = extractSquiggleCode(completionContent);
-    if (newCode === "") {
-      return { okay: false, value: "Didn't get code from extraction" };
+  switch (inputFormat) {
+    case "generation": {
+      newCode = extractSquiggleCode(completionContent);
+      if (newCode === "") {
+        return { okay: false, value: "Didn't get code from extraction" };
+      }
+      break;
     }
-  } else if (inputFormat === "diff") {
-    const { okay, value } = diffToNewCode(completionContent, codeState);
-    if (!okay) {
-      return { okay: false, value: value };
+    case "diff": {
+      const { okay, value } = diffToNewCode(completionContent, codeState);
+      if (!okay) {
+        return { okay: false, value: value };
+      }
+      newCode = value;
+      break;
     }
-    newCode = value;
   }
 
   const { codeState: newCodeState } =

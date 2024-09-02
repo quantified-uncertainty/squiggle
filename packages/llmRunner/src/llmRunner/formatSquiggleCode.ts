@@ -16,7 +16,7 @@ export const formatSquiggleCode = async (
   } catch (error) {
     return {
       ok: false,
-      value: `Error formatting Squiggle code: ${error.message}`,
+      value: `Error formatting Squiggle code: ${error instanceof Error ? error.message : error}`,
     };
   }
 };

@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest && NODE_OPTIONS=--experimental-vm-modules",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "getCode": "tsx src/llmRunner/scripts/fetchSquiggleLibraries.ts",
     "createSquiggle": "tsx src/llmRunner/scripts/createSquiggle.ts",
     "editSquiggle": "tsx src/llmRunner/scripts/editSquiggle.ts"

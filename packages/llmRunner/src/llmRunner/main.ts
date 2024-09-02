@@ -59,10 +59,8 @@ export class SquiggleGenerator {
   private llmConfig: LlmConfig;
   private startTime: number;
   private isDone: boolean = false;
-  private input: GeneratorInput;
 
   constructor(input: GeneratorInput, llmConfig: LlmConfig = llmConfigDefault) {
-    this.input = input;
     this.prompt = input.prompt;
     this.llmConfig = llmConfig;
     this.stateManager = new StateManager(
@@ -85,7 +83,7 @@ export class SquiggleGenerator {
           const { codeState } =
             await squiggleCodeToCodeStateViaRunningAndFormatting(input.code);
           this.stateManager
-            .getCurrentStateExecution()
+            .getCurrentStateExecution()!
             .updateCodeState(codeState);
           stateExecution.updateNextState(codeStateNextState(codeState));
         },
@@ -98,8 +96,7 @@ export class SquiggleGenerator {
       return true;
     }
 
-    const { continueExecution, stateExecution } =
-      await this.stateManager.step();
+    const { continueExecution } = await this.stateManager.step();
 
     if (!continueExecution) {
       this.isDone = true;
@@ -154,19 +151,22 @@ export class SquiggleGenerator {
       promptPair,
       stateExecution
     );
-    const state = await completionContentToCodeState(
-      completion,
-      stateExecution.codeState,
-      "generation"
-    );
-    if (state.okay) {
-      stateExecution.updateCodeState(state.value);
-      stateExecution.updateNextState(codeStateNextState(state.value));
-    } else {
-      stateExecution.log({
-        type: "codeRunError",
-        error: state.value as string,
-      });
+
+    if (completion) {
+      const state = await completionContentToCodeState(
+        completion,
+        stateExecution.codeState,
+        "generation"
+      );
+      if (state.okay) {
+        stateExecution.updateCodeState(state.value);
+        stateExecution.updateNextState(codeStateNextState(state.value));
+      } else {
+        stateExecution.log({
+          type: "codeRunError",
+          error: state.value as string,
+        });
+      }
     }
   }
 
@@ -309,10 +309,10 @@ export class SquiggleGenerator {
       }
 
       return completion.content;
-    } catch (error: any) {
+    } catch (error) {
       stateExecution.log({
         type: "error",
-        message: `Error in processLLMResponse: ${error.message}`,
+        message: `Error in processLLMResponse: ${error instanceof Error ? error.message : error}`,
       });
       return null;
     }

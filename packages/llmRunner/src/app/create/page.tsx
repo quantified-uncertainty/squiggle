@@ -8,7 +8,7 @@ import {
   Loader,
   XCircle,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { MarkdownViewer } from "@quri/squiggle-components";
 
@@ -106,7 +106,8 @@ export default function CreatePage() {
   const [actions, setActions] = useState<Action[]>([]);
   const [squiggleResponses, setSquiggleResponses] =
     useState<SquiggleResponse | null>(null);
-  const [numPlaygrounds, setNumPlaygrounds] = useState(1);
+
+  const numPlaygrounds = 1;
   const [selectedRunIndex, setSelectedRunIndex] = useState<number | null>(null);
   const [selectedLogsIndex, setSelectedLogsIndex] = useState<number | null>(
     null
@@ -119,23 +120,20 @@ export default function CreatePage() {
     schema: squiggleResponseSchema,
   });
 
-  useEffect(() => {
-    if (object) {
-      setPlaygroundOpacity(100);
-      setSquiggleResponses(object.slice(0, numPlaygrounds));
-      object
-        .slice(0, numPlaygrounds)
-        .forEach((response, index) =>
-          updateLastAction(
-            "success",
-            response.code,
-            `Response ${index + 1}\nPrice: $${response.totalPrice.toFixed(4)}\nTime: ${response.runTimeMs / 1000}s\nLLM Runs: ${response.llmRunCount}`
-          )
-        );
-    }
-  }, [object, numPlaygrounds]);
+  const responses = useMemo(
+    () =>
+      object?.slice(0, numPlaygrounds).filter(
+        (response): response is SquiggleResponse[number] =>
+          // `useObject` can return partial objects, so we check that response is fully defined.
+          // This is mostly to satisfy TypeScript, because in practice /api/create always returns a fully defined response.
+          !!response &&
+          response.code !== undefined &&
+          response.logSummary !== undefined
+        // (we don't check for other fields but that's ok)
+      ) ?? [],
+    [object, numPlaygrounds]
+  );
 
-  // Helper functions
   const updateLastAction = useCallback(
     (status: Action["status"], code?: string, result?: string) => {
       setActions((prevActions) => {
@@ -152,6 +150,19 @@ export default function CreatePage() {
     []
   );
 
+  useEffect(() => {
+    setPlaygroundOpacity(100);
+    setSquiggleResponses(responses);
+    responses.forEach((response, index) =>
+      updateLastAction(
+        "success",
+        response.code,
+        `Response ${index + 1}\nPrice: $${response.totalPrice.toFixed(4)}\nTime: ${response.runTimeMs / 1000}s\nLLM Runs: ${response.llmRunCount}`
+      )
+    );
+  }, [responses, updateLastAction]);
+
+  // Helper functions
   const handleToggleLogs = (index: number | null) => {
     setSelectedLogsIndex(index);
     setSelectedRunIndex(null);
@@ -188,12 +199,6 @@ export default function CreatePage() {
     stop();
     setPlaygroundOpacity(100);
     updateLastAction("error", undefined, "Generation stopped by user");
-  };
-
-  const handleNumPlaygroundsChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setNumPlaygrounds(Number(e.target.value));
   };
 
   const handleEditVersion = (index: number) => {
@@ -255,7 +260,7 @@ export default function CreatePage() {
             ) : (
               <>
                 <div className="mb-2">
-                  <h3 className="font-semibold"> Prompt</h3>
+                  <h3 className="font-semibold">Prompt</h3>
                 </div>
                 <div className="mb-4 flex">
                   <textarea
@@ -314,7 +319,7 @@ export default function CreatePage() {
             {squiggleResponses &&
               squiggleResponses.map((response, index) => (
                 <div
-                  key={actions.at(-1)?.id + index}
+                  key={(actions.at(-1)?.id ?? "null") + index}
                   className={`mb-4 ${selectedRunIndex !== null && selectedRunIndex !== index ? "hidden" : ""}`}
                 >
                   <div className="mb-2 flex items-center justify-between rounded bg-gray-100 p-2">
@@ -365,9 +370,11 @@ export default function CreatePage() {
                   <SquigglePlayground
                     key={response.code}
                     height={
-                      selectedRunIndex === null
-                        ? height / numPlaygrounds - 40
-                        : height - 40
+                      height
+                        ? selectedRunIndex === null
+                          ? height / numPlaygrounds - 40
+                          : height - 40
+                        : 200
                     }
                     defaultCode={
                       response.code || "// Your Squiggle code will appear here"

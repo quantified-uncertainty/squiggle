@@ -172,6 +172,8 @@ export class StateExecution {
       case "codeState":
         console.log(chalk.gray(`[CODE_STATE] ${log.codeState.type}`));
         break;
+      default:
+        throw log satisfies never;
     }
   }
 
@@ -288,7 +290,10 @@ export class StateManager {
         );
       }
     } catch (error) {
-      stateExecution.log({ type: "error", message: error.message });
+      stateExecution.log({
+        type: "error",
+        message: error instanceof Error ? error.message : "unknown",
+      });
       stateExecution.updateNextState(State.CRITICAL_ERROR);
     }
 
@@ -344,8 +349,9 @@ export class StateManager {
 
     const isValid = finalExecution.nextState === State.DONE;
     const code =
-      finalExecution.codeState.type !== "noCode" &&
-      finalExecution.codeState.code;
+      finalExecution.codeState.type === "noCode"
+        ? ""
+        : finalExecution.codeState.code;
 
     return {
       isValid,
@@ -366,7 +372,7 @@ export class StateManager {
     return this.stateExecutions;
   }
 
-  llmMetricSummary(): { [key: LLMName]: LlmMetrics } {
+  llmMetricSummary(): Record<LLMName, LlmMetrics> {
     return this.getStateExecutions().reduce(
       (acc, execution) => {
         execution.llmMetricsList.forEach((metrics) => {
@@ -380,7 +386,7 @@ export class StateManager {
         });
         return acc;
       },
-      {} as { [key: LLMName]: LlmMetrics }
+      {} as Record<LLMName, LlmMetrics>
     );
   }
 

@@ -31,7 +31,9 @@ export const squiggleLibraries = librariesToImport.reduce(
       const content = getLibraryContent(`hub:${lib}`);
       acc[`hub:${lib}`] = content;
     } catch (error) {
-      console.error(`Failed to load library ${lib}: ${error.message}`);
+      console.error(
+        `Failed to load library ${lib}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
     return acc;
   },

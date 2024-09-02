@@ -21,7 +21,7 @@ type ModelConfig = {
   maxTokens?: number;
 };
 
-const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
+const MODEL_CONFIGS = {
   GPT4: {
     provider: "openrouter",
     model: "openai/gpt-4o-2024-08-06",
@@ -66,7 +66,7 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
     outputRate: 0.0000027,
     contextWindow: 131072,
   },
-};
+} as const satisfies Record<string, ModelConfig>;
 
 export type LLMName = keyof typeof MODEL_CONFIGS;
 
@@ -220,17 +220,18 @@ export interface LlmMetrics {
   apiCalls: number;
   inputTokens: number;
   outputTokens: number;
-  llmName?: LLMName;
+  llmName: LLMName;
 }
 
-export function calculatePriceMultipleCalls(metrics: {
-  [key: LLMName]: LlmMetrics;
-}): number {
+export function calculatePriceMultipleCalls(
+  metrics: Partial<Record<LLMName, LlmMetrics>>
+): number {
   let totalCost = 0;
 
-  for (const llmName in metrics) {
-    const { inputTokens, outputTokens } = metrics[llmName];
-    const modelConfig = MODEL_CONFIGS[llmName];
+  for (const [llmName, { inputTokens, outputTokens }] of Object.entries(
+    metrics
+  )) {
+    const modelConfig = MODEL_CONFIGS[llmName as LLMName];
 
     if (!modelConfig) {
       console.warn(`No pricing information found for LLM: ${llmName}`);

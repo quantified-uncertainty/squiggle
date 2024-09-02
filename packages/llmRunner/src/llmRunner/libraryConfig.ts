@@ -16,16 +16,10 @@ export const libraryContents = new Map(
   librariesToImport.map((lib) => {
     const filePath = getLibraryPath(lib);
     if (fs.existsSync(filePath)) {
-      try {
-        const content = fs.readFileSync(filePath, "utf8");
-        return [`hub:${lib}`, content];
-      } catch (error) {
-        console.error(`Failed to load library ${lib}: ${error.message}`);
-        return [`hub:${lib}`, null];
-      }
+      const content = fs.readFileSync(filePath, "utf8");
+      return [`hub:${lib}`, content];
     } else {
-      console.log(`Library file not found for ${lib}. It will be fetched.`);
-      return [`hub:${lib}`, null];
+      throw new Error(`Library file not found for ${lib}.`);
     }
   })
 );

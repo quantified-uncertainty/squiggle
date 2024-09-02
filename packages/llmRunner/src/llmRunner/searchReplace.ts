@@ -56,7 +56,7 @@ function applySearchReplaceBlocks(
   } catch (error) {
     return {
       success: false,
-      value: `Error applying search/replace blocks: ${error.message}`,
+      value: `Error applying search/replace blocks: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 }
@@ -93,7 +93,7 @@ export function processSearchReplaceResponse(
   } catch (error) {
     return {
       success: false,
-      value: error.message,
+      value: error instanceof Error ? error.message : String(error),
     };
   }
 }

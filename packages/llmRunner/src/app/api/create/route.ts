@@ -29,12 +29,10 @@ export async function POST(req: Request) {
       messagesInHistoryToKeep: 4,
     };
 
-    const type = squiggleCode && squiggleCode !== "" ? "Edit" : "Create";
-
     const generator = new SquiggleGenerator(
-      type === "Create"
-        ? { type: "Create", prompt }
-        : { type: "Edit", prompt, code: squiggleCode },
+      squiggleCode
+        ? { type: "Edit", prompt, code: squiggleCode }
+        : { type: "Create", prompt },
       llmConfig
     );
 
@@ -70,7 +68,7 @@ export async function POST(req: Request) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    if (error.name === "AbortError") {
+    if (error instanceof Error && error.name === "AbortError") {
       return new Response("Generation stopped", { status: 499 });
     }
     console.error("Error in POST function:", error);

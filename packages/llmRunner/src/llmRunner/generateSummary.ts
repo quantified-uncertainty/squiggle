@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-import { calculatePriceMultipleCalls, LlmMetrics } from "./llmHelper";
+import { calculatePriceMultipleCalls, LlmMetrics, LLMName } from "./llmHelper";
 import {
   CodeRunErrorLogEntry,
   CodeState,
@@ -101,10 +101,13 @@ const generateDetailedExecutionLogs = (
   let detailedLogs = "";
   executions.forEach((execution, index) => {
     const totalCost = calculatePriceMultipleCalls(
-      execution.llmMetricsList.reduce((acc, metrics) => {
-        acc[metrics.llmName] = metrics;
-        return acc;
-      }, {})
+      execution.llmMetricsList.reduce(
+        (acc, metrics) => {
+          acc[metrics.llmName] = metrics;
+          return acc;
+        },
+        {} as Record<LLMName, LlmMetrics>
+      )
     );
 
     detailedLogs += `\n## 🔄 Execution ${index + 1} - ${State[execution.state]} (Cost: $${totalCost.toFixed(4)})\n`;
@@ -117,7 +120,7 @@ const generateDetailedExecutionLogs = (
       detailedLogs += `  - Input Tokens: ${metrics.inputTokens}\n`;
       detailedLogs += `  - Output Tokens: ${metrics.outputTokens}\n`;
       detailedLogs += `  - Estimated Cost: $${cost.toFixed(4)}\n`;
-      detailedLogs += `  - Output tokens per second: ${(metrics.outputTokens / (execution.durationMs / 1000)).toFixed(2)}\n`;
+      detailedLogs += `  - Output tokens per second: ${(metrics.outputTokens / ((execution.durationMs ?? 0) / 1000)).toFixed(2)}\n`;
     });
 
     detailedLogs += "### Logs:\n";
