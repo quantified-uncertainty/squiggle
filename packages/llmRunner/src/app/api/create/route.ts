@@ -5,7 +5,7 @@ import {
   SquiggleResponse,
 } from "../../utils/squiggleTypes";
 
-export const maxDuration = 30;
+export const maxDuration = 180;
 
 export async function POST(req: Request) {
   const abortController = new AbortController();
