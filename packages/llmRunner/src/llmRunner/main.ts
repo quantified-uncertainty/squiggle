@@ -54,7 +54,7 @@ export interface SquiggleResult {
 
 export type GeneratorInput =
   | { type: "Create"; prompt: string }
-  | { type: "Edit"; prompt: string; code: string };
+  | { type: "Edit"; code: string };
 
 export class SquiggleGenerator {
   public stateManager: StateManager;
@@ -79,7 +79,7 @@ export class SquiggleGenerator {
     openaiApiKey?: string;
     anthropicApiKey?: string;
   }) {
-    this.prompt = input.prompt;
+    this.prompt = input.type === "Create" ? "" : input.code;
     this.llmConfig = llmConfig ?? llmConfigDefault;
     this.abortSignal = abortSignal;
     this.stateManager = new StateManager(

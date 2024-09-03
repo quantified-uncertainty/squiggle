@@ -24,7 +24,7 @@ export type Action = {
 };
 
 export const createRequestBodySchema = z.object({
-  prompt: z.string(),
+  prompt: z.string().optional(),
   previousPrompt: z.string().optional(),
   previousCode: z.string().optional(),
   previousResult: z.string().optional(),

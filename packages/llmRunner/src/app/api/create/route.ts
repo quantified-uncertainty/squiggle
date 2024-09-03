@@ -17,8 +17,8 @@ export async function POST(req: Request) {
 
     console.log("Inputs", prompt, squiggleCode);
 
-    if (!prompt) {
-      throw new Error("Prompt is required");
+    if (!prompt && !squiggleCode) {
+      throw new Error("Prompt or Squiggle code is required");
     }
 
     // Create a SquiggleGenerator instance
@@ -32,8 +32,8 @@ export async function POST(req: Request) {
     const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
       await runSquiggleGenerator({
         input: squiggleCode
-          ? { type: "Edit", prompt, code: squiggleCode }
-          : { type: "Create", prompt },
+          ? { type: "Edit", code: squiggleCode }
+          : { type: "Create", prompt: prompt ?? "" },
         llmConfig,
         abortSignal: req.signal,
         openaiApiKey: process.env["OPENROUTER_API_KEY"],
