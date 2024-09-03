@@ -11,8 +11,8 @@ import {
 } from "@quri/squiggle-lang";
 
 import { formatSquiggleCode } from "./formatSquiggleCode";
-import { libraryContents } from "./libraryConfig";
 import { processSearchReplaceResponse } from "./searchReplace";
+import { libraryContents } from "./squiggleLibraryHelpers";
 import { CodeState } from "./stateManager";
 
 // export const linker: SqLinker = {
