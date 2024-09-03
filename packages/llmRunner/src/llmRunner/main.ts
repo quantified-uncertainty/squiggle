@@ -1,3 +1,6 @@
+import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
+
 import { generateSummary, saveSummaryToFile } from "./generateSummary";
 import { LLMName, Message, runLLM } from "./llmHelper";
 import {
@@ -60,15 +63,21 @@ export class SquiggleGenerator {
   private startTime: number;
   private isDone: boolean = false;
   private abortSignal?: AbortSignal; // TODO - unused
+  private openaiClient?: OpenAI;
+  private anthropicClient?: Anthropic;
 
   constructor({
     input,
     llmConfig,
     abortSignal,
+    openaiApiKey,
+    anthropicApiKey,
   }: {
     input: GeneratorInput;
     llmConfig?: LlmConfig;
     abortSignal?: AbortSignal;
+    openaiApiKey?: string;
+    anthropicApiKey?: string;
   }) {
     this.prompt = input.prompt;
     this.llmConfig = llmConfig ?? llmConfigDefault;
@@ -80,6 +89,19 @@ export class SquiggleGenerator {
 
     this.startTime = Date.now();
     this.registerStateHandlers();
+
+    if (openaiApiKey) {
+      this.openaiClient = new OpenAI({
+        baseURL: "https://openrouter.ai/api/v1",
+        apiKey: openaiApiKey,
+      });
+    }
+
+    if (anthropicApiKey) {
+      this.anthropicClient = new Anthropic({
+        apiKey: anthropicApiKey,
+      });
+    }
 
     if (input.type === "Create") {
       this.stateManager.registerStateHandler(State.START, {
@@ -269,6 +291,20 @@ export class SquiggleGenerator {
     }
   }
 
+  private getOpenAIClient(): OpenAI {
+    if (!this.openaiClient) {
+      throw new Error("OpenAI client is not initialized");
+    }
+    return this.openaiClient;
+  }
+
+  private getAnthropicClient(): Anthropic {
+    if (!this.anthropicClient) {
+      throw new Error("Anthropic client is not initialized");
+    }
+    return this.anthropicClient;
+  }
+
   private async processLLMResponse(
     promptPair: PromptPair,
     stateExecution: StateExecution
@@ -283,7 +319,10 @@ export class SquiggleGenerator {
           content: promptPair.fullPrompt,
         },
       ];
-      const completion = await runLLM(messagesToSend, this.llmConfig.llmName);
+      const completion = await runLLM(messagesToSend, this.llmConfig.llmName, {
+        getOpenAIClient: () => this.getOpenAIClient(),
+        getAnthropicClient: () => this.getAnthropicClient(),
+      });
 
       stateExecution.log({
         type: "llmResponse",
@@ -383,7 +422,13 @@ export async function runSquiggleGenerator(params: {
   input: GeneratorInput;
   abortSignal?: AbortSignal;
   llmConfig?: LlmConfig;
+  openaiApiKey?: string;
+  anthropicApiKey?: string;
 }): Promise<SquiggleResult> {
+  if (!params.anthropicApiKey) {
+    throw new Error("Anthropic API key is required");
+  }
+
   const generator = new SquiggleGenerator(params);
 
   // Run the generator steps until completion

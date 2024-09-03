@@ -36,6 +36,8 @@ export async function POST(req: Request) {
           : { type: "Create", prompt },
         llmConfig,
         abortSignal: req.signal,
+        openaiApiKey: process.env["OPENROUTER_API_KEY"],
+        anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
       });
 
     const response: SquiggleResponse = [

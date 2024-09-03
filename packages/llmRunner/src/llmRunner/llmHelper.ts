@@ -1,15 +1,73 @@
 #!/usr/bin/env node
 import Anthropic from "@anthropic-ai/sdk";
-import dotenv from "dotenv";
 import OpenAI from "openai";
 
 import { squiggleSystemContent } from "./prompts";
 
-dotenv.config({ path: ".env.local" });
+// Remove dotenv config
+// dotenv.config({ path: ".env.local" });
 
-const anthropic = new Anthropic({
-  apiKey: process.env["ANTHROPIC_API_KEY"],
-});
+// Make anthropic and openai optional
+// let anthropic: Anthropic | undefined;
+// let openai: OpenAI | undefined;
+
+// Remove the initializeClients function if it's no longer needed
+
+// Modify the runLLM function signature
+export async function runLLM(
+  conversationHistory: Message[],
+  llmName: LLMName,
+  clients: {
+    getOpenAIClient: () => OpenAI;
+    getAnthropicClient: () => Anthropic;
+  }
+): Promise<StandardizedChatCompletion> {
+  const squiggleContext = squiggleSystemContent;
+  const selectedModelConfig = MODEL_CONFIGS[llmName];
+
+  try {
+    if (selectedModelConfig.provider === "anthropic") {
+      const anthropicClient = clients.getAnthropicClient();
+      const compressedMessages = compressAssistantMessages(conversationHistory);
+      const claudeMessages = convertToClaudeMessages(compressedMessages);
+
+      if (claudeMessages.length === 0) {
+        throw new Error("At least one message is required");
+      }
+
+      const completion =
+        await anthropicClient.beta.promptCaching.messages.create({
+          max_tokens: selectedModelConfig.maxTokens,
+          messages: claudeMessages,
+          model: selectedModelConfig.model,
+          system: [
+            {
+              text: squiggleContext,
+              type: "text",
+              cache_control: { type: "ephemeral" },
+            },
+          ],
+        });
+
+      return convertClaudeToStandardFormat(completion);
+    } else {
+      // Use OpenAI (OpenRouter)
+      const openaiClient = clients.getOpenAIClient();
+      const completion = await openaiClient.chat.completions.create({
+        model: selectedModelConfig.model,
+        messages: [
+          { role: "system", content: squiggleContext },
+          ...conversationHistory,
+        ],
+      });
+
+      return convertOpenAIToStandardFormat(completion);
+    }
+  } catch (error) {
+    console.error("Error in API call:", error);
+    throw error;
+  }
+}
 
 // Model selection and pricing
 type ModelConfig = {
@@ -71,10 +129,10 @@ const MODEL_CONFIGS = {
 export type LLMName = keyof typeof MODEL_CONFIGS;
 
 // Initialize OpenRouter client
-const openai = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env["OPENROUTER_API_KEY"],
-});
+// openai = new OpenAI({
+//   baseURL: "https://openrouter.ai/api/v1",
+//   apiKey: process.env["OPENROUTER_API_KEY"],
+// });
 
 export type Message = {
   role: "system" | "user" | "assistant";
@@ -155,67 +213,6 @@ function convertOpenAIToStandardFormat(
   };
 }
 
-export async function runLLM(
-  conversationHistory: Message[],
-  llmName: LLMName
-): Promise<StandardizedChatCompletion> {
-  const squiggleContext = squiggleSystemContent;
-  const selectedModelConfig = MODEL_CONFIGS[llmName];
-
-  try {
-    if (selectedModelConfig.provider === "anthropic") {
-      const compressedMessages = compressAssistantMessages(conversationHistory);
-      const claudeMessages = convertToClaudeMessages(compressedMessages);
-
-      if (claudeMessages.length === 0) {
-        throw new Error("At least one message is required");
-      }
-
-      const completion = await anthropic.beta.promptCaching.messages.create({
-        max_tokens: selectedModelConfig.maxTokens,
-        messages: claudeMessages,
-        model: selectedModelConfig.model,
-        system: [
-          {
-            text: squiggleContext,
-            type: "text",
-            cache_control: { type: "ephemeral" },
-          },
-        ],
-      });
-
-      return convertClaudeToStandardFormat(completion);
-    } else {
-      // Use OpenAI (OpenRouter)
-      const completion = await openai.chat.completions.create({
-        model: selectedModelConfig.model,
-        messages: [
-          { role: "system", content: squiggleContext },
-          ...conversationHistory,
-        ],
-      });
-
-      return convertOpenAIToStandardFormat(completion);
-    }
-  } catch (error) {
-    console.error("Error in API call:", error);
-    throw error;
-  }
-}
-
-function compressAssistantMessages(messages: Message[]): Message[] {
-  return messages.reduce((acc, current, index, array) => {
-    if (current.role !== "assistant") {
-      acc.push(current);
-    } else if (index === 0 || array[index - 1].role !== "assistant") {
-      acc.push(current);
-    } else {
-      acc[acc.length - 1].content += "\n\n" + current.content;
-    }
-    return acc;
-  }, [] as Message[]);
-}
-
 export interface LlmMetrics {
   apiCalls: number;
   inputTokens: number;
@@ -244,4 +241,17 @@ export function calculatePriceMultipleCalls(
   }
 
   return totalCost;
+}
+
+function compressAssistantMessages(messages: Message[]): Message[] {
+  return messages.reduce((acc, current, index, array) => {
+    if (current.role !== "assistant") {
+      acc.push(current);
+    } else if (index === 0 || array[index - 1].role !== "assistant") {
+      acc.push(current);
+    } else {
+      acc[acc.length - 1].content += "\n\n" + current.content;
+    }
+    return acc;
+  }, [] as Message[]);
 }
