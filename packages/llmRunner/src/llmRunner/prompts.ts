@@ -3,7 +3,7 @@ import path from "path";
 
 import { getSquiggleAdvice } from "./getSquiggleAdvice";
 import { libraryContents } from "./squiggleLibraryHelpers";
-import { CodeState, codeStateErrorString } from "./stateManager";
+import { CodeState, codeStateErrorString } from "./StateExecution";
 
 const SQUIGGLE_DOCS_PATH = path.join(
   process.cwd(),
@@ -35,7 +35,7 @@ ${squiggleDocs}
 
 ## Available libraries:
 
-${Array.from(libraryContents.entries())
+${[...libraryContents.entries()]
   .map(([name, content]) => `### Library ${name} \n\n ${content}`)
   .join("\n\n")}`;
 

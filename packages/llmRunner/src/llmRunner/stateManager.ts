@@ -1,220 +1,19 @@
-// stateManager.ts
-
 import chalk from "chalk";
-
-import { SqError, SqProject } from "@quri/squiggle-lang";
 
 import {
   calculatePriceMultipleCalls,
+  LLMClient,
   LlmMetrics,
   LLMName,
   Message,
-} from "./llmHelper";
-
-export type LogEntry =
-  | InfoLogEntry
-  | WarnLogEntry
-  | ErrorLogEntry
-  | CodeRunErrorLogEntry
-  | SuccessLogEntry
-  | HighlightLogEntry
-  | LlmResponseLogEntry
-  | CodeStateLogEntry;
-
-export function getLogEntryFullName(entry: LogEntry): string {
-  switch (entry.type) {
-    case "info":
-      return "ℹ️ Information";
-    case "warn":
-      return "⚠️ Warning";
-    case "error":
-      return "🚫 System Error";
-    case "codeRunError":
-      return "❌ Code Run Error";
-    case "success":
-      return "✅ Success";
-    case "highlight":
-      return "🔆 Highlight";
-    case "llmResponse":
-      return "🤖 LLM Response";
-    case "codeState":
-      return "📄 Code State";
-    default:
-      return "❓ Unknown";
-  }
-}
-
-export type TimestampedLogEntry = {
-  timestamp: Date;
-  entry: LogEntry;
-};
-
-export type InfoLogEntry = {
-  type: "info";
-  message: string;
-};
-
-export type WarnLogEntry = {
-  type: "warn";
-  message: string;
-};
-
-export type ErrorLogEntry = {
-  type: "error";
-  message: string;
-};
-
-export type CodeRunErrorLogEntry = {
-  type: "codeRunError";
-  error: string;
-};
-
-export type SuccessLogEntry = {
-  type: "success";
-  message: string;
-};
-
-export type HighlightLogEntry = {
-  type: "highlight";
-  message: string;
-};
-
-export type LlmResponseLogEntry = {
-  type: "llmResponse";
-  response: any; // JSON response
-  content: string;
-  messages: Message[];
-  prompt: string;
-};
-
-export type CodeStateLogEntry = {
-  type: "codeState";
-  codeState: CodeState;
-};
-
-export enum State {
-  START,
-  GENERATE_CODE,
-  FIX_CODE_UNTIL_IT_RUNS,
-  ADJUST_TO_FEEDBACK,
-  DONE,
-  CRITICAL_ERROR,
-}
-
-export type CodeState =
-  | { type: "noCode" }
-  | {
-      type: "formattingFailed";
-      error: string;
-      code: string;
-    }
-  | { type: "runFailed"; code: string; error: SqError; project: SqProject }
-  | { type: "success"; code: string };
-
-export function codeStateErrorString(codeState: CodeState): string {
-  if (codeState.type === "formattingFailed") {
-    return codeState.error;
-  } else if (codeState.type === "runFailed") {
-    return codeState.error.toStringWithDetails();
-  }
-  return "";
-}
-
-export interface StateHandler {
-  execute: (stateExecution: StateExecution) => Promise<void>;
-}
-
-export class StateExecution {
-  public nextState: State;
-  public durationMs?: number;
-  private logs: TimestampedLogEntry[] = [];
-  private conversationMessages: Message[] = [];
-  public llmMetricsList: LlmMetrics[] = [];
-
-  constructor(
-    public readonly stateExecutionId: number,
-    public readonly state: State,
-    public codeState: CodeState,
-    private readonly startTime: number = Date.now()
-  ) {
-    this.nextState = state;
-    this.logCodeState(codeState);
-  }
-
-  log(log: LogEntry): void {
-    this.logs.push({ timestamp: new Date(), entry: log });
-    this.displayLog(log);
-  }
-
-  private displayLog(log: LogEntry): void {
-    switch (log.type) {
-      case "info":
-        console.log(chalk.blue(`[INFO] ${log.message}`));
-        break;
-      case "warn":
-        console.warn(chalk.yellow(`[WARN] ${log.message}`));
-        break;
-      case "error":
-        console.error(chalk.red(`[ERROR] ${log.message}`));
-        break;
-      case "codeRunError":
-        console.error(chalk.red.bold(`[CODE_RUN_ERROR] ${log.error}`));
-        break;
-      case "success":
-        console.log(chalk.green(`[SUCCESS] ${log.message}`));
-        break;
-      case "highlight":
-        console.log(chalk.magenta(`[HIGHLIGHT] ${log.message}`));
-        break;
-      case "llmResponse":
-        console.log(chalk.cyan(`[LLM_RESPONSE] ${log.content}`));
-        break;
-      case "codeState":
-        console.log(chalk.gray(`[CODE_STATE] ${log.codeState.type}`));
-        break;
-      default:
-        throw log satisfies never;
-    }
-  }
-
-  addConversationMessage(message: Message): void {
-    this.conversationMessages.push(message);
-  }
-
-  updateCodeState(codeState: CodeState): void {
-    this.codeState = codeState;
-    this.logCodeState(codeState);
-  }
-
-  updateLlmMetrics(metrics: LlmMetrics): void {
-    this.llmMetricsList.push(metrics);
-  }
-
-  updateNextState(nextState: State): void {
-    this.nextState = nextState;
-  }
-
-  complete() {
-    this.durationMs = Date.now() - this.startTime;
-  }
-
-  getLogs(): TimestampedLogEntry[] {
-    return this.logs;
-  }
-
-  getConversationMessages(): Message[] {
-    return this.conversationMessages;
-  }
-
-  criticalError(error: string) {
-    this.log({ type: "error", message: error });
-    this.updateNextState(State.CRITICAL_ERROR);
-  }
-
-  logCodeState(codeState: CodeState) {
-    return this.log({ type: "codeState", codeState });
-  }
-}
+} from "./LLMClient";
+import { LlmConfig } from "./main";
+import {
+  State,
+  StateExecution,
+  StateHandler,
+  TimestampedLogEntry,
+} from "./StateExecution";
 
 export class StateManager {
   private stateExecutions: StateExecution[] = [];
@@ -224,11 +23,23 @@ export class StateManager {
   private durationLimitMs: number;
   private startTime: number;
 
-  constructor(priceLimit: number = 0.5, durationLimitMinutes: number = 5) {
+  public llmClient: LLMClient;
+
+  constructor(
+    public llmConfig: LlmConfig,
+    openaiApiKey?: string,
+    anthropicApiKey?: string
+  ) {
     this.registerDefaultHandlers();
-    this.priceLimit = priceLimit;
-    this.durationLimitMs = durationLimitMinutes * 1000 * 60;
+    this.priceLimit = llmConfig.priceLimit;
+    this.durationLimitMs = llmConfig.durationLimitMinutes * 1000 * 60;
     this.startTime = Date.now();
+
+    this.llmClient = new LLMClient(
+      llmConfig.llmName,
+      openaiApiKey,
+      anthropicApiKey
+    );
   }
 
   private registerDefaultHandlers() {
@@ -257,7 +68,8 @@ export class StateManager {
     const newExecution = new StateExecution(
       this.getNextExecutionId(),
       currentState,
-      initialCodeState
+      initialCodeState,
+      this
     );
     this.stateExecutions.push(newExecution);
     return newExecution;

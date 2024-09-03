@@ -1,23 +1,15 @@
 import fs from "fs";
 import path from "path";
 
-import { calculatePriceMultipleCalls, LlmMetrics, LLMName } from "./llmHelper";
+import { calculatePriceMultipleCalls, LlmMetrics, LLMName } from "./LLMClient";
 import {
-  CodeRunErrorLogEntry,
   CodeState,
-  CodeStateLogEntry,
-  ErrorLogEntry,
   getLogEntryFullName,
-  HighlightLogEntry,
-  InfoLogEntry,
-  LlmResponseLogEntry,
   State,
   StateExecution,
-  StateManager,
-  SuccessLogEntry,
   TimestampedLogEntry,
-  WarnLogEntry,
-} from "./stateManager";
+} from "./StateExecution";
+import { StateManager } from "./StateManager";
 
 export const generateSummary = (
   prompt: string,
@@ -78,8 +70,7 @@ const generateErrorSummary = (executions: StateExecution[]): string => {
     const errors = execution
       .getLogs()
       .filter(
-        (log): log is TimestampedLogEntry =>
-          log.entry.type === "error" || log.entry.type === "codeRunError"
+        (log) => log.entry.type === "error" || log.entry.type === "codeRunError"
       );
     if (errors.length > 0) {
       errorSummary += `### ❌ Execution ${index + 1} (${State[execution.state]})\n`;
@@ -135,19 +126,15 @@ const generateDetailedExecutionLogs = (
 const getFullMessage = (log: TimestampedLogEntry): string => {
   switch (log.entry.type) {
     case "info":
-      return `${(log.entry as InfoLogEntry).message}`;
     case "warn":
-      return `${(log.entry as WarnLogEntry).message}`;
     case "error":
-      return `${(log.entry as ErrorLogEntry).message}`;
     case "success":
-      return `${(log.entry as SuccessLogEntry).message}`;
     case "highlight":
-      return `${(log.entry as HighlightLogEntry).message}`;
+      return log.entry.message;
     case "codeRunError":
-      return `${(log.entry as CodeRunErrorLogEntry).error}`;
+      return log.entry.error;
     case "llmResponse":
-      const llmResponse = log.entry as LlmResponseLogEntry;
+      const llmResponse = log.entry;
       return `<details>
   <summary>Content</summary>
 
@@ -181,7 +168,7 @@ ${JSON.stringify(llmResponse.response, null, 2)}
 \`\`\`\`
 </details>\n\n\n`;
     case "codeState":
-      const codeState = (log.entry as CodeStateLogEntry).codeState;
+      const codeState = log.entry.codeState;
       return formatCodeState(codeState);
     default:
       return "❓ Unknown log type";

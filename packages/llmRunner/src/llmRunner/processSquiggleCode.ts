@@ -13,7 +13,7 @@ import {
 import { formatSquiggleCode } from "./formatSquiggleCode";
 import { processSearchReplaceResponse } from "./searchReplace";
 import { libraryContents } from "./squiggleLibraryHelpers";
-import { CodeState } from "./stateManager";
+import { CodeState } from "./StateExecution";
 
 export const linkerWithDefaultSquiggleLibs = makeSelfContainedLinker(
   Object.fromEntries(libraryContents)
