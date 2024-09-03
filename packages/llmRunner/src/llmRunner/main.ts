@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 
-import { generateSummary, saveSummaryToFile } from "./generateSummary";
+import { generateSummary } from "./generateSummary";
 import { LLMName, Message, runLLM } from "./llmHelper";
 import {
   completionContentToCodeState,
@@ -132,7 +132,7 @@ export class SquiggleGenerator {
 
     if (!continueExecution) {
       this.isDone = true;
-      saveSummaryToFile(generateSummary(this.prompt, this.stateManager));
+      // saveSummaryToFile(generateSummary(this.prompt, this.stateManager));
       return true;
     }
 
