@@ -229,6 +229,32 @@ sample everything.
   static deserialize(value: readonly number[]): SampleSetDist {
     return new SampleSetDist(value);
   }
+
+  summarize(
+    keys: Array<
+      "mean" | "p50" | "p5" | "p25" | "p75" | "p95" | "stdev" | "min" | "max"
+    > = ["mean", "p5", "p50", "p95"]
+  ) {
+    const sorted = E_A_Floats.sort(this.samples);
+    const allStats = {
+      mean: () => this.mean(),
+      p50: () => E_A_Sorted.quantile(sorted, 0.5),
+      p5: () => E_A_Sorted.quantile(sorted, 0.05),
+      p25: () => E_A_Sorted.quantile(sorted, 0.25),
+      p75: () => E_A_Sorted.quantile(sorted, 0.75),
+      p95: () => E_A_Sorted.quantile(sorted, 0.95),
+      stdev: () => Math.sqrt(E_A_Floats.variance(this.samples)),
+      min: () => this.min(),
+      max: () => this.max(),
+    };
+
+    // Return only the requested statistics
+    return Object.fromEntries(
+      keys
+        .map((key) => [key, allStats[key]?.()])
+        .filter(([, value]) => value !== undefined)
+    );
+  }
 }
 
 function buildSampleSetFromFn(

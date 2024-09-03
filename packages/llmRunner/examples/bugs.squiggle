@@ -1,0 +1,88 @@
+inputs = {
+  @name("🕒 Time to Fix (hours)")
+  timeToFix = lognormal({ p5: 2, p95: 20 })
+
+  @name("💰 Developer Hourly Rate ($)")
+  @format("($.2s")
+  devHourlyRate = normal(100, 10)
+
+  @name("👥 Users Affected (%)")
+  @format(".1%")
+  usersAffected = beta(2, 8)
+
+  @name("⏱️ Time Saved per User (minutes/week)")
+  timeSavedPerUser = lognormal({ p5: 1, p95: 30 })
+
+  @name("💻 Total Active Users")
+  totalActiveUsers = lognormal({ p5: 1000, p95: 10000 })
+
+  @name("🔄 Expected Lifespan of Fix (weeks)")
+  lifespanOfFix = lognormal({ p5: 4, p95: 52 })
+
+  {
+    timeToFix,
+    devHourlyRate,
+    usersAffected,
+    timeSavedPerUser,
+    totalActiveUsers,
+    lifespanOfFix,
+  }
+}
+
+netBenefit(inputs) = {
+  // Calculate costs and benefits
+  fixCost = inputs.timeToFix * inputs.devHourlyRate
+
+  weeklyBenefit = {
+    affectedUsers = inputs.totalActiveUsers * inputs.usersAffected
+    timeSavedHours = inputs.timeSavedPerUser / 60
+    affectedUsers * timeSavedHours * inputs.devHourlyRate
+  }
+
+  totalBenefit = weeklyBenefit * inputs.lifespanOfFix
+
+  netBenefit = totalBenefit - fixCost
+
+  @notebook
+  result = ["## Net Benefit", netBenefit]
+  result
+}
+
+// Create a calculator for user input
+calculator = Calculator(
+  {
+    |
+      timeToFix,
+      devHourlyRate,
+      usersAffected,
+      timeSavedPerUser,
+      totalActiveUsers,
+      lifespanOfFix
+    |
+    netBenefit(
+      {
+        timeToFix,
+        devHourlyRate,
+        usersAffected,
+        timeSavedPerUser,
+        totalActiveUsers,
+        lifespanOfFix,
+      }
+    )
+  },
+  {
+    title: "Bug Fix Cost-Benefit Calculator",
+    description: "Enter specific parameters to calculate the cost-benefit of fixing a bug",
+    inputs: [
+      Input.text({ name: "Time to Fix (hours)", default: "8" }),
+      Input.text({ name: "Developer Hourly Rate ($)", default: "100" }),
+      Input.text({ name: "Users Affected (%)", default: "20" }),
+      Input.text({ name: "Time Saved per User (minutes/week)", default: "10" }),
+      Input.text({ name: "Total Active Users", default: "5000" }),
+      Input.text({ name: "Expected Lifespan of Fix (weeks)", default: "26" }),
+    ],
+  }
+)
+
+// Display results
+calculator

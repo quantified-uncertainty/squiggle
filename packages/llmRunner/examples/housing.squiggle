@@ -1,0 +1,131 @@
+// Input section
+@name("Model Inputs")
+@doc("Key parameters for the housing development project")
+inputs = {
+  landCost: 1M to 2M,
+  constructionCost: 500k to 800k,
+  permitFees: 50k to 100k,
+  numberOfHomes: 10,
+  monthlyRentalIncome: 3k to 5k,
+  annualPropertyAppreciation: 2% to 5%,
+  annualSocialBenefit: 10k to 30k,
+  yearsToConsider: 30,
+}
+
+// Calculation section
+@name("Calculations")
+@doc("Core calculations for the cost-benefit analysis")
+calculations(i) = {
+  totalCostPerHome = i.landCost + i.constructionCost + i.permitFees
+  annualRentalIncome = i.numberOfHomes * i.monthlyRentalIncome * 12
+  totalCost = i.numberOfHomes * totalCostPerHome
+
+  annualAppreciation(year) = i.numberOfHomes * totalCostPerHome *
+    ((1 + i.annualPropertyAppreciation) ^ year -
+      (1 + i.annualPropertyAppreciation) ^ (year - 1))
+
+  annualBenefit(year) = annualRentalIncome + annualAppreciation(year) +
+    i.numberOfHomes * i.annualSocialBenefit
+
+  totalBenefit = List.upTo(1, i.yearsToConsider) -> List.map(annualBenefit)
+    -> List.reduce(
+      0,
+      {|acc, val| acc + val}
+    )
+
+  netBenefit = totalBenefit - totalCost
+  probPositiveNetBenefit = 1 - cdf(netBenefit, 0)
+
+  {
+    totalCostPerHome: totalCostPerHome,
+    annualRentalIncome: annualRentalIncome,
+    totalCost: totalCost,
+    totalBenefit: totalBenefit,
+    netBenefit: netBenefit,
+    probPositiveNetBenefit: probPositiveNetBenefit,
+  }
+}
+
+// Apply calculations to inputs
+@name("Results")
+@doc("Output of calculations based on input parameters")
+results = calculations(inputs)
+
+// Analysis section
+@name("Cost-Benefit Analysis")
+@doc("Detailed analysis of the housing development project")
+analysis = {
+  costsTable = Table.make(
+    [
+      { name: "Land Cost per Home", value: inputs.landCost },
+      { name: "Construction Cost per Home", value: inputs.constructionCost },
+      { name: "Permit Fees per Home", value: inputs.permitFees },
+      { name: "Total Cost per Home", value: results.totalCostPerHome },
+      { name: "Total Cost for 10 Homes", value: results.totalCost },
+    ],
+    {
+      columns: [
+        { name: "Item", fn: {|r| r.name} },
+        {
+          name: "Cost",
+          fn: {
+            |r|
+            Plot.dist(
+              r.value,
+              {
+                xScale: Scale.log({ tickFormat: "($.1s", min: 20k, max: 200M }),
+              }
+            )
+          },
+        },
+      ],
+    }
+  )
+
+  benefitTable = Table.make(
+    [
+      {
+        name: "Monthly Rental Income per Home",
+        value: inputs.monthlyRentalIncome,
+      },
+      {
+        name: "Annual Social Benefit per Home",
+        value: inputs.annualSocialBenefit,
+      },
+      { name: "Total Benefit over 30 years", value: results.totalBenefit },
+    ],
+    {
+      columns: [
+        { name: "Item", fn: {|r| r.name} },
+        {
+          name: "Value",
+          fn: {
+            |r|
+            Plot.dist(
+              r.value,
+              { xScale: Scale.linear({ tickFormat: "($.1s" }) }
+            )
+          },
+        },
+      ],
+    }
+  )
+
+  netBenefitPlot = Plot.dist(
+    results.netBenefit,
+    {
+      title: "Distribution of Net Benefit",
+      xScale: Scale.log({ tickFormat: "($.1s", min: 10M, max: 200M }),
+    }
+  )
+
+  {
+    title: "Cost-Benefit Analysis: Adding 10 Homes to Berkeley, CA",
+    costs: costsTable,
+    benefits: benefitTable,
+    netBenefit: netBenefitPlot,
+    probabilityOfPositiveNetBenefit: results.probPositiveNetBenefit,
+  }
+}
+
+analysis

@@ -22,7 +22,6 @@ export {
   SqTextAreaInput,
   SqTextInput,
 } from "./public/SqValue/SqInput.js";
-
 export {
   SqCompileError,
   type SqError,
@@ -127,6 +126,12 @@ export {
   SCALE_POWER_DEFAULT_CONSTANT,
   SCALE_SYMLOG_DEFAULT_CONSTANT,
 } from "./value/VScale.js";
+
+export {
+  compactString as simpleValueToCompactString,
+  removeLambdas,
+  simpleValueFromAny,
+} from "./value/simpleValue.js";
 
 export { generateSeed } from "./utility/seedGenerator.js";
 

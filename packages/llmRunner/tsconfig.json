@@ -1,0 +1,15 @@
+{
+  "extends": "@quri/configs/tsconfig.nextjs.json",
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "allowJs": true,
+    "skipLibCheck": true,
+    // "strict": false,
+    "plugins": [
+      {
+        "name": "next",
+      },
+    ],
+  },
+}
