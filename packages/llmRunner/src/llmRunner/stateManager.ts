@@ -268,7 +268,9 @@ export class StateManager {
     stateExecution: StateExecution;
   }> {
     if (Date.now() - this.startTime > this.durationLimitMs) {
-      return this.transitionToCriticalError("Duration limit exceeded");
+      return this.transitionToCriticalError(
+        `Duration limit of ${this.durationLimitMs / 1000} minutes exceeded`
+      );
     }
 
     if (this.priceSoFar() > this.priceLimit) {

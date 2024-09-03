@@ -292,14 +292,6 @@ export default function CreatePage() {
             >
               {isLoading ? "Generating..." : "Send"}
             </button>
-            {isLoading && (
-              <button
-                className="mb-4 rounded bg-red-500 px-4 py-2 text-sm text-white"
-                onClick={handleStop}
-              >
-                Stop Generation
-              </button>
-            )}
             <div className="flex-grow overflow-y-auto">
               <h2 className="text-md mb-2 font-bold">Actions</h2>
               {actions.map((action) => (

@@ -6,6 +6,8 @@ import {
   versionedSquigglePackages,
 } from "@quri/versioned-squiggle-components";
 
+import { linkerWithDefaultSquiggleLibs } from "../../llmRunner/processSquiggleCode";
+
 interface SquigglePlaygroundComponentProps {
   height: number;
   defaultCode: string;
@@ -18,7 +20,7 @@ export default function SquigglePlaygroundComponent({
   const [squiggle, setSquiggle] = useState<
     undefined | Awaited<ReturnType<typeof versionedSquigglePackages>>
   >();
-  const [version, setVersion] = useState<SquiggleVersion>("0.9.3"); // Later versions are often buggy
+  const [version, setVersion] = useState<SquiggleVersion>("dev"); // Later versions are often buggy
 
   const onVersionChange = (version: SquiggleVersion) => {
     setVersion(version);
@@ -40,6 +42,7 @@ export default function SquigglePlaygroundComponent({
     <squiggle.components.SquigglePlayground
       height={height}
       defaultCode={defaultCode}
+      linker={linkerWithDefaultSquiggleLibs}
       renderExtraControls={() => (
         <div className="flex h-full items-center justify-end gap-2">
           <SquigglePlaygroundVersionPicker
