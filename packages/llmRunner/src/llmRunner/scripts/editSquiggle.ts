@@ -8,7 +8,6 @@ async function main() {
     messagesInHistoryToKeep: 4,
   };
 
-  const prompt = "Add interesting detail to this code.";
   const initialCode = `
   foo = 0 to 100
   bar = 30
@@ -16,7 +15,7 @@ async function main() {
 
   const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
     await runSquiggleGenerator({
-      input: { type: "Edit", prompt, code: initialCode },
+      input: { type: "Edit", code: initialCode },
       llmConfig,
     });
 
