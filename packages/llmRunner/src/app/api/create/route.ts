@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     const llmConfig: LlmConfig = {
       llmName: "Claude-Sonnet",
       priceLimit: 0.2,
-      durationLimitMinutes: 1,
+      durationLimitMinutes: 2,
       messagesInHistoryToKeep: 4,
     };
 

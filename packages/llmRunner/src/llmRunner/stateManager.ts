@@ -269,7 +269,7 @@ export class StateManager {
   }> {
     if (Date.now() - this.startTime > this.durationLimitMs) {
       return this.transitionToCriticalError(
-        `Duration limit of ${this.durationLimitMs / 1000} minutes exceeded`
+        `Duration limit of ${this.durationLimitMs / 1000 / 60} minutes exceeded`
       );
     }
 
