@@ -180,7 +180,7 @@ export default function CreatePage() {
     setActions((prevActions) => [...prevActions, newAction]);
 
     const requestBody: CreateRequestBody = {
-      prompt,
+      prompt: mode === "create" ? prompt : undefined,
       previousPrompt: newAction.prompt,
       previousCode: newAction.code,
       previousResult: newAction.result,
@@ -244,7 +244,7 @@ export default function CreatePage() {
                 }`}
                 onClick={() => setMode("edit")}
               >
-                Edit
+                Fix
               </button>
             </div>
             {mode === "create" ? (
@@ -259,21 +259,6 @@ export default function CreatePage() {
               </div>
             ) : (
               <>
-                <div className="mb-2">
-                  <h3 className="font-semibold">Prompt</h3>
-                </div>
-                <div className="mb-4 flex">
-                  <textarea
-                    className="flex-grow rounded-l border p-2 text-sm"
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="What changes would you like to make?"
-                    rows={8}
-                  />
-                </div>
-                <div className="mb-2">
-                  <h3 className="font-semibold">Squiggle Code</h3>
-                </div>
                 <div className="mb-4 flex">
                   <textarea
                     className="flex-grow rounded-l border p-2 text-sm"
@@ -292,14 +277,6 @@ export default function CreatePage() {
             >
               {isLoading ? "Generating..." : "Send"}
             </button>
-            {isLoading && (
-              <button
-                className="mb-4 rounded bg-red-500 px-4 py-2 text-sm text-white"
-                onClick={handleStop}
-              >
-                Stop Generation
-              </button>
-            )}
             <div className="flex-grow overflow-y-auto">
               <h2 className="text-md mb-2 font-bold">Actions</h2>
               {actions.map((action) => (
@@ -341,8 +318,8 @@ export default function CreatePage() {
                         onClick={() => handleEditVersion(index)}
                       >
                         {squiggleResponses.length === 1
-                          ? "Edit"
-                          : "Edit this version"}
+                          ? "Fix"
+                          : "Fix this version"}
                       </button>
                       <button
                         className="rounded bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"

@@ -11,16 +11,11 @@ import {
 } from "@quri/squiggle-lang";
 
 import { formatSquiggleCode } from "./formatSquiggleCode";
-import { libraryContents } from "./libraryConfig";
 import { processSearchReplaceResponse } from "./searchReplace";
+import { libraryContents } from "./squiggleLibraryHelpers";
 import { CodeState } from "./stateManager";
 
-// export const linker: SqLinker = {
-//   resolve: (name: string) => name,
-//   loadModule: async (sourceName: string) => getLibraryContent(sourceName),
-// };
-
-export const linker = makeSelfContainedLinker(
+export const linkerWithDefaultSquiggleLibs = makeSelfContainedLinker(
   Object.fromEntries(libraryContents)
 );
 
@@ -39,7 +34,7 @@ const runSquiggle = async (
   result<SqOutputSummary, { error: SqErrorList; project: SqProject }>
 > => {
   const project = new SqProject({
-    linker: linker,
+    linker: linkerWithDefaultSquiggleLibs,
     runner: new EmbeddedRunner(),
   });
 

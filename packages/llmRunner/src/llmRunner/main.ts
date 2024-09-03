@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 
-import { generateSummary, saveSummaryToFile } from "./generateSummary";
+import { generateSummary } from "./generateSummary";
 import { LLMName, Message, runLLM } from "./llmHelper";
 import {
   completionContentToCodeState,
@@ -54,7 +54,7 @@ export interface SquiggleResult {
 
 export type GeneratorInput =
   | { type: "Create"; prompt: string }
-  | { type: "Edit"; prompt: string; code: string };
+  | { type: "Edit"; code: string };
 
 export class SquiggleGenerator {
   public stateManager: StateManager;
@@ -79,7 +79,7 @@ export class SquiggleGenerator {
     openaiApiKey?: string;
     anthropicApiKey?: string;
   }) {
-    this.prompt = input.prompt;
+    this.prompt = input.type === "Create" ? "" : input.code;
     this.llmConfig = llmConfig ?? llmConfigDefault;
     this.abortSignal = abortSignal;
     this.stateManager = new StateManager(
@@ -132,7 +132,7 @@ export class SquiggleGenerator {
 
     if (!continueExecution) {
       this.isDone = true;
-      saveSummaryToFile(generateSummary(this.prompt, this.stateManager));
+      // saveSummaryToFile(generateSummary(this.prompt, this.stateManager));
       return true;
     }
 
