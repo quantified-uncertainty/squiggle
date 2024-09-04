@@ -79,7 +79,7 @@ export class SquiggleGenerator {
     openaiApiKey?: string;
     anthropicApiKey?: string;
   }) {
-    this.prompt = input.type === "Create" ? "" : input.code;
+    this.prompt = input.type === "Create" ? input.prompt : "";
     this.llmConfig = llmConfig ?? llmConfigDefault;
     this.abortSignal = abortSignal;
     this.stateManager = new StateManager(

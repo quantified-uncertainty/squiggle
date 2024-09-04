@@ -45,6 +45,9 @@ export type PromptPair = {
 };
 
 export const generateNewSquiggleCodePrompt = (prompt: string): PromptPair => {
+  if (!prompt || prompt === "") {
+    throw new Error("Prompt is required");
+  }
   const fullPrompt = `You are an expert Squiggle code developer. Create concise, efficient Squiggle code based on the given prompt. Follow these guidelines:
 
 1. Analyze the prompt carefully to understand all key requirements.

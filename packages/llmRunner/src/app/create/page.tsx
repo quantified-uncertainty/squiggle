@@ -115,10 +115,12 @@ export default function CreatePage() {
 
   const { ref, height } = useAvailableHeight();
 
-  const { object, submit, isLoading, stop } = useObject({
+  const { object, submit, isLoading, stop, error } = useObject({
     api: "/api/create",
     schema: squiggleResponseSchema,
   });
+
+  const isReallyLoading = isLoading && !error;
 
   const responses = useMemo(
     () =>
@@ -151,16 +153,21 @@ export default function CreatePage() {
   );
 
   useEffect(() => {
-    setPlaygroundOpacity(100);
-    setSquiggleResponses(responses);
-    responses.forEach((response, index) =>
-      updateLastAction(
-        "success",
-        response.code,
-        `Response ${index + 1}\nPrice: $${response.totalPrice.toFixed(4)}\nTime: ${response.runTimeMs / 1000}s\nLLM Runs: ${response.llmRunCount}`
-      )
-    );
-  }, [responses, updateLastAction]);
+    if (error) {
+      setPlaygroundOpacity(100);
+      updateLastAction("error", undefined, `Error: ${error.toString()}`);
+    } else if (responses.length > 0) {
+      setPlaygroundOpacity(100);
+      setSquiggleResponses(responses);
+      responses.forEach((response, index) =>
+        updateLastAction(
+          "success",
+          response.code,
+          `Response ${index + 1}\nPrice: $${response.totalPrice.toFixed(4)}\nTime: ${response.runTimeMs / 1000}s\nLLM Runs: ${response.llmRunCount}`
+        )
+      );
+    }
+  }, [responses, updateLastAction, error]);
 
   // Helper functions
   const handleToggleLogs = (index: number | null) => {
@@ -181,10 +188,6 @@ export default function CreatePage() {
 
     const requestBody: CreateRequestBody = {
       prompt: mode === "create" ? prompt : undefined,
-      previousPrompt: newAction.prompt,
-      previousCode: newAction.code,
-      previousResult: newAction.result,
-      numPlaygrounds,
       squiggleCode: mode === "edit" ? squiggleCode : undefined,
     };
 
@@ -273,9 +276,9 @@ export default function CreatePage() {
             <button
               className="rounded-r bg-blue-500 px-4 py-2 text-sm text-white"
               onClick={handleSubmit}
-              disabled={isLoading}
+              disabled={isReallyLoading}
             >
-              {isLoading ? "Generating..." : "Send"}
+              {isReallyLoading ? "Generating..." : "Send"}
             </button>
             <div className="flex-grow overflow-y-auto">
               <h2 className="text-md mb-2 font-bold">Actions</h2>
