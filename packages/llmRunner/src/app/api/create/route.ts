@@ -5,7 +5,7 @@ import {
   SquiggleResponse,
 } from "../../utils/squiggleTypes";
 
-export const maxDuration = 180;
+export const maxDuration = 500;
 
 export async function POST(req: Request) {
   const abortController = new AbortController();
@@ -24,8 +24,8 @@ export async function POST(req: Request) {
     // Create a SquiggleGenerator instance
     const llmConfig: LlmConfig = {
       llmName: "Claude-Sonnet",
-      priceLimit: 0.2,
-      durationLimitMinutes: 2,
+      priceLimit: 0.3,
+      durationLimitMinutes: 4,
       messagesInHistoryToKeep: 4,
     };
 

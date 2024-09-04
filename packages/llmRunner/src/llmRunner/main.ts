@@ -37,7 +37,7 @@ export interface LlmConfig {
 
 export const llmConfigDefault: LlmConfig = {
   llmName: "Claude-Sonnet",
-  priceLimit: 0.2,
+  priceLimit: 0.3,
   durationLimitMinutes: 1,
   messagesInHistoryToKeep: 4,
 };
