@@ -1,4 +1,7 @@
-import { LlmConfig, runSquiggleGenerator } from "../../../llmRunner/main";
+import {
+  LlmConfig,
+  runSquiggleGenerator,
+} from "../../../llmRunner/squiggleGenerator";
 import {
   CreateRequestBody,
   createRequestBodySchema,

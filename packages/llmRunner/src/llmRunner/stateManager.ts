@@ -7,18 +7,13 @@ import {
   LLMName,
   Message,
 } from "./LLMClient";
-import { LlmConfig } from "./main";
-import {
-  State,
-  StateExecution,
-  StateHandler,
-  TimestampedLogEntry,
-} from "./StateExecution";
+import { LLMStep, State, StateHandler } from "./LLMStep";
+import { TimestampedLogEntry } from "./Logger";
+import { LlmConfig } from "./squiggleGenerator";
 
 export class StateManager {
-  private stateExecutions: StateExecution[] = [];
+  private steps: LLMStep[] = [];
   private stateHandlers: Map<State, StateHandler> = new Map();
-  private currentExecutionId: number = 0;
   private priceLimit: number;
   private durationLimitMs: number;
   private startTime: number;
@@ -50,8 +45,8 @@ export class StateManager {
     });
 
     this.registerStateHandler(State.CRITICAL_ERROR, {
-      execute: async (stateExecution) => {
-        stateExecution.updateNextState(State.CRITICAL_ERROR);
+      execute: async (step) => {
+        step.updateNextState(State.CRITICAL_ERROR);
       },
     });
   }
@@ -60,24 +55,18 @@ export class StateManager {
     this.stateHandlers.set(state, handler);
   }
 
-  private createNewStateExecution(): StateExecution {
-    const previousExecution = this.getCurrentStateExecution();
+  private createNewStateExecution(): LLMStep {
+    const previousExecution = this.getCurrentStep();
     const currentState = previousExecution?.nextState ?? State.START;
     const initialCodeState = previousExecution?.codeState ?? { type: "noCode" };
 
-    const newExecution = new StateExecution(
-      this.getNextExecutionId(),
-      currentState,
-      initialCodeState,
-      this
-    );
-    this.stateExecutions.push(newExecution);
+    const newExecution = new LLMStep(currentState, initialCodeState, this);
+    this.steps.push(newExecution);
     return newExecution;
   }
 
   async step(): Promise<{
     continueExecution: boolean;
-    stateExecution: StateExecution;
   }> {
     if (Date.now() - this.startTime > this.durationLimitMs) {
       return this.transitionToCriticalError(
@@ -104,11 +93,9 @@ export class StateManager {
         );
       }
     } catch (error) {
-      stateExecution.log({
-        type: "error",
-        message: error instanceof Error ? error.message : "unknown",
-      });
-      stateExecution.updateNextState(State.CRITICAL_ERROR);
+      stateExecution.criticalError(
+        error instanceof Error ? error.message : "unknown"
+      );
     }
 
     console.log(
@@ -118,18 +105,15 @@ export class StateManager {
 
     return {
       continueExecution: !this.isProcessComplete(),
-      stateExecution,
     };
   }
 
   private transitionToCriticalError(reason: string): {
     continueExecution: boolean;
-    stateExecution: StateExecution;
+    stateExecution: LLMStep;
   } {
     const stateExecution = this.createNewStateExecution();
-    stateExecution.log({ type: "error", message: reason });
-    stateExecution.updateNextState(State.CRITICAL_ERROR);
-    stateExecution.complete();
+    stateExecution.criticalError(reason);
 
     return {
       continueExecution: false,
@@ -137,13 +121,24 @@ export class StateManager {
     };
   }
 
-  getCurrentStateExecution(): StateExecution | undefined {
-    return this.stateExecutions.at(-1);
+  getSteps(): LLMStep[] {
+    return this.steps;
+  }
+
+  getCurrentStep(): LLMStep | undefined {
+    return this.steps.at(-1);
   }
 
   getCurrentState(): State {
-    const currentExecution = this.getCurrentStateExecution();
-    return currentExecution ? currentExecution.state : State.START;
+    return this.getCurrentStep()?.state ?? State.START;
+  }
+
+  getLogs(): TimestampedLogEntry[] {
+    return this.steps.flatMap((r) => r.getLogs());
+  }
+
+  getConversationMessages(): Message[] {
+    return this.steps.flatMap((r) => r.getConversationMessages());
   }
 
   isProcessComplete(): boolean {
@@ -156,16 +151,14 @@ export class StateManager {
     code: string;
     logs: TimestampedLogEntry[];
   } {
-    const finalExecution = this.getCurrentStateExecution();
-    if (!finalExecution) {
+    const finalStep = this.getCurrentStep();
+    if (!finalStep) {
       throw new Error("No state executions found");
     }
 
-    const isValid = finalExecution.nextState === State.DONE;
+    const isValid = finalStep.nextState === State.DONE;
     const code =
-      finalExecution.codeState.type === "noCode"
-        ? ""
-        : finalExecution.codeState.code;
+      finalStep.codeState.type === "noCode" ? "" : finalStep.codeState.code;
 
     return {
       isValid,
@@ -174,20 +167,8 @@ export class StateManager {
     };
   }
 
-  getLogs(): TimestampedLogEntry[] {
-    return this.stateExecutions.flatMap((r) => r.getLogs());
-  }
-
-  getConversationMessages(): Message[] {
-    return this.stateExecutions.flatMap((r) => r.getConversationMessages());
-  }
-
-  getStateExecutions(): StateExecution[] {
-    return this.stateExecutions;
-  }
-
   llmMetricSummary(): Record<LLMName, LlmMetrics> {
-    return this.getStateExecutions().reduce(
+    return this.getSteps().reduce(
       (acc, execution) => {
         execution.llmMetricsList.forEach((metrics) => {
           if (!acc[metrics.llmName]) {
@@ -214,19 +195,15 @@ export class StateManager {
     return { totalPrice, llmRunCount };
   }
 
-  private getNextExecutionId(): number {
-    return ++this.currentExecutionId;
-  }
-
   private findLastGenerateCodeIndex(): number {
-    return this.stateExecutions.findLastIndex(
+    return this.steps.findLastIndex(
       (execution) => execution.state === State.GENERATE_CODE
     );
   }
 
-  private getMessagesFromExecutions(executionIndexes: number[]): Message[] {
-    return executionIndexes.flatMap((index) =>
-      this.stateExecutions[index].getConversationMessages()
+  private getMessagesFromSteps(stepIndices: number[]): Message[] {
+    return stepIndices.flatMap((index) =>
+      this.steps[index].getConversationMessages()
     );
   }
 
@@ -235,12 +212,12 @@ export class StateManager {
     return calculatePriceMultipleCalls(currentMetrics);
   }
 
-  getRelevantPreviousConversationMessages(maxRecentExecutions = 3): Message[] {
-    const getRelevantExecutionIndexes = (
+  getRelevantPreviousConversationMessages(maxRecentSteps = 3): Message[] {
+    const getRelevantStepIndexes = (
       lastGenerateCodeIndex: number,
       maxRecentExecutions: number
     ): number[] => {
-      const endIndex = this.stateExecutions.length - 1;
+      const endIndex = this.steps.length - 1;
       const startIndex = Math.max(
         lastGenerateCodeIndex,
         endIndex - maxRecentExecutions + 1
@@ -255,10 +232,10 @@ export class StateManager {
     };
 
     const lastGenerateCodeIndex = this.findLastGenerateCodeIndex();
-    const relevantIndexes = getRelevantExecutionIndexes(
+    const relevantIndexes = getRelevantStepIndexes(
       lastGenerateCodeIndex,
-      maxRecentExecutions
+      maxRecentSteps
     );
-    return this.getMessagesFromExecutions(relevantIndexes);
+    return this.getMessagesFromSteps(relevantIndexes);
   }
 }

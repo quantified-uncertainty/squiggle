@@ -1,4 +1,4 @@
-import { LlmConfig, runSquiggleGenerator } from "../main";
+import { LlmConfig, runSquiggleGenerator } from "../squiggleGenerator";
 
 async function main() {
   const llmConfig: LlmConfig = {

@@ -2,21 +2,16 @@ import fs from "fs";
 import path from "path";
 
 import { calculatePriceMultipleCalls, LlmMetrics, LLMName } from "./LLMClient";
-import {
-  CodeState,
-  getLogEntryFullName,
-  State,
-  StateExecution,
-  TimestampedLogEntry,
-} from "./StateExecution";
+import { CodeState, LLMStep, State } from "./LLMStep";
+import { getLogEntryFullName, TimestampedLogEntry } from "./Logger";
 import { StateManager } from "./StateManager";
 
-export const generateSummary = (
+export function generateSummary(
   prompt: string,
   stateManager: StateManager
-): string => {
+): string {
   let summary = "";
-  const executions = stateManager.getStateExecutions();
+  const executions = stateManager.getSteps();
   const metricsByLLM = stateManager.llmMetricSummary();
 
   // Prompt
@@ -36,12 +31,12 @@ export const generateSummary = (
   summary += generateDetailedExecutionLogs(executions);
 
   return summary;
-};
+}
 
-const generateOverview = (
-  executions: StateExecution[],
+function generateOverview(
+  executions: LLMStep[],
   metricsByLLM: Record<string, LlmMetrics>
-): string => {
+): string {
   const totalTime = executions.reduce(
     (acc, exec) => acc + (exec.durationMs || 0),
     0
@@ -62,9 +57,9 @@ const generateOverview = (
   overview += `- Estimated Total Cost: $${estimatedCost.toFixed(4)}\n`;
 
   return overview;
-};
+}
 
-const generateErrorSummary = (executions: StateExecution[]): string => {
+function generateErrorSummary(executions: LLMStep[]): string {
   let errorSummary = "";
   executions.forEach((execution, index) => {
     const errors = execution
@@ -84,11 +79,9 @@ const generateErrorSummary = (executions: StateExecution[]): string => {
     }
   });
   return errorSummary || "✅ No errors encountered.\n";
-};
+}
 
-const generateDetailedExecutionLogs = (
-  executions: StateExecution[]
-): string => {
+function generateDetailedExecutionLogs(executions: LLMStep[]): string {
   let detailedLogs = "";
   executions.forEach((execution, index) => {
     const totalCost = calculatePriceMultipleCalls(
@@ -121,9 +114,9 @@ const generateDetailedExecutionLogs = (
     });
   });
   return detailedLogs;
-};
+}
 
-const getFullMessage = (log: TimestampedLogEntry): string => {
+function getFullMessage(log: TimestampedLogEntry): string {
   switch (log.entry.type) {
     case "info":
     case "warn":
@@ -173,9 +166,9 @@ ${JSON.stringify(llmResponse.response, null, 2)}
     default:
       return "❓ Unknown log type";
   }
-};
+}
 
-const formatCodeState = (codeState: CodeState): string => {
+function formatCodeState(codeState: CodeState): string {
   switch (codeState.type) {
     case "noCode":
       return "💨 Code state: No code generated\n";
@@ -216,9 +209,9 @@ ${codeState.code}
 \`\`\`
 </details>\n\n`;
   }
-};
+}
 
-export const saveSummaryToFile = (summary: string): void => {
+export function saveSummaryToFile(summary: string): void {
   const logDir = path.join(process.cwd(), "logs");
   if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
@@ -229,12 +222,4 @@ export const saveSummaryToFile = (summary: string): void => {
 
   fs.writeFileSync(logFile, summary);
   console.log(`Summary saved to ${logFile}`);
-};
-
-export const generateAndSaveSummary = (
-  prompt: string,
-  stateManager: StateManager
-): void => {
-  const summary = generateSummary(prompt, stateManager);
-  saveSummaryToFile(summary);
-};
+}

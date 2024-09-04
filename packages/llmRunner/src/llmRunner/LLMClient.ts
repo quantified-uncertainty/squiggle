@@ -71,7 +71,7 @@ function convertToClaudeMessages(history: Message[]): Anthropic.MessageParam[] {
   return history
     .filter((msg) => msg.role !== "system")
     .map((msg) => ({
-      role: msg.role as "user" | "assistant",
+      role: msg.role as Exclude<Message["role"], "system">,
       content: msg.content,
     }));
 }

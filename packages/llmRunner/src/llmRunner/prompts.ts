@@ -2,8 +2,8 @@ import fs from "fs";
 import path from "path";
 
 import { getSquiggleAdvice } from "./getSquiggleAdvice";
+import { CodeState, codeStateErrorString } from "./LLMStep";
 import { libraryContents } from "./squiggleLibraryHelpers";
-import { CodeState, codeStateErrorString } from "./StateExecution";
 
 const SQUIGGLE_DOCS_PATH = path.join(
   process.cwd(),
@@ -170,8 +170,8 @@ ${changeFormat}
 export const adjustToFeedbackPrompt = (
   prompt: string,
   currentCode: string,
-  bindings: any,
-  result: any
+  bindings: string,
+  result: string
 ): PromptPair => {
   const fullPrompt = `You are an expert Squiggle code reviewer. Your task is to review and potentially improve Squiggle code based on the given prompt and previous output.
 
@@ -211,8 +211,8 @@ Focus on improving clarity, efficiency, and adherence to requirements. Only reco
 
 Previous output:
 <previous_output>
-Variables: ${JSON.stringify(bindings, null, 2)}
-Result: ${JSON.stringify(result, null, 2)}
+Variables: "${bindings}"
+Result: "${result}"
 </previous_output>
 `;
 

@@ -11,9 +11,9 @@ import {
 } from "@quri/squiggle-lang";
 
 import { formatSquiggleCode } from "./formatSquiggleCode";
+import { CodeState } from "./LLMStep";
 import { processSearchReplaceResponse } from "./searchReplace";
 import { libraryContents } from "./squiggleLibraryHelpers";
-import { CodeState } from "./StateExecution";
 
 export const linkerWithDefaultSquiggleLibs = makeSelfContainedLinker(
   Object.fromEntries(libraryContents)
@@ -58,8 +58,8 @@ const runSquiggle = async (
 };
 
 interface SquiggleRunResult {
-  bindings: any;
-  result: any;
+  bindings: string;
+  result: string;
 }
 
 interface ProcessSquiggleResult {
