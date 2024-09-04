@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   SquigglePlaygroundVersionPicker,
@@ -6,7 +6,7 @@ import {
   versionedSquigglePackages,
 } from "@quri/versioned-squiggle-components";
 
-import { linkerWithDefaultSquiggleLibs } from "../../llmRunner/processSquiggleCode";
+import { linkerWithDefaultSquiggleLibs } from "../llmRunner/processSquiggleCode";
 
 interface SquigglePlaygroundComponentProps {
   height: number;
