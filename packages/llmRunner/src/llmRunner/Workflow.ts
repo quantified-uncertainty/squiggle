@@ -11,7 +11,7 @@ import { Inputs, LLMStepInstance, LLMStepTemplate, StepShape } from "./LLMStep";
 import { TimestampedLogEntry } from "./Logger";
 import { LlmConfig } from "./squiggleGenerator";
 
-export class StateManager {
+export class Workflow {
   private steps: LLMStepInstance[] = [];
   private priceLimit: number;
   private durationLimitMs: number;

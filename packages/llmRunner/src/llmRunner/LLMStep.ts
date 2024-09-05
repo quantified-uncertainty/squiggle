@@ -3,7 +3,7 @@ import { SqError, SqProject } from "@quri/squiggle-lang";
 import { LlmMetrics, Message } from "./LLMClient";
 import { LogEntry, Logger, TimestampedLogEntry } from "./Logger";
 import { PromptPair } from "./prompts";
-import { StateManager } from "./StateManager";
+import { Workflow } from "./Workflow";
 
 export type CodeState =
   | {
@@ -55,7 +55,7 @@ type ExecuteContext<Shape extends StepShape> = {
   ): void;
   queryLLM(promptPair: PromptPair): Promise<string | null>;
   log(log: LogEntry): void;
-  stateManager: StateManager; // TODO - shouldn't be exposed
+  workflow: Workflow; // TODO - shouldn't be exposed
 };
 
 export type Inputs<Shape extends StepShape<any, any>> = {
@@ -77,10 +77,10 @@ export class LLMStepTemplate<const Shape extends StepShape = StepShape> {
   ) {}
 
   instantiate(
-    stateManager: StateManager,
+    workflow: Workflow,
     inputs: Inputs<Shape>
   ): LLMStepInstance<Shape> {
-    return new LLMStepInstance(this, stateManager, inputs);
+    return new LLMStepInstance(this, workflow, inputs);
   }
 }
 
@@ -96,7 +96,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
 
   constructor(
     public readonly template: LLMStepTemplate<Shape>,
-    public readonly stateManager: StateManager,
+    public readonly workflow: Workflow,
     inputs: Inputs<Shape>
   ) {
     this.startTime = Date.now();
@@ -108,7 +108,55 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     return this.inputs[key];
   }
 
-  setOutput<K extends keyof Outputs<Shape>>(
+  getLogs(): TimestampedLogEntry[] {
+    return this.logger.logs;
+  }
+
+  getConversationMessages(): Message[] {
+    return this.conversationMessages;
+  }
+
+  async run() {
+    if (this.state !== "PENDING") {
+      return;
+    }
+
+    const limits = this.workflow.checkResourceLimits();
+    if (limits) {
+      this.criticalError(limits);
+      return;
+    }
+
+    const executeContext: ExecuteContext<Shape> = {
+      getInput: (key) => this.getInput(key),
+      setOutput: (key, value) => this.setOutput(key, value),
+      log: (log) => this.log(log),
+      queryLLM: (promptPair) => this.queryLLM(promptPair),
+      workflow: this.workflow,
+    };
+
+    try {
+      await this.template.execute(executeContext);
+    } catch (error) {
+      this.criticalError(
+        error instanceof Error ? error.message : String(error)
+      );
+      return;
+    }
+    this.complete();
+  }
+
+  getState() {
+    return this.state;
+  }
+
+  getAllOutputs() {
+    return this.outputs;
+  }
+
+  // private methods
+
+  private setOutput<K extends keyof Outputs<Shape>>(
     key: K,
     value: Outputs<Shape>[K]
   ): void {
@@ -116,20 +164,8 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     this.outputs[key] = value;
   }
 
-  log(log: LogEntry): void {
+  private log(log: LogEntry): void {
     this.logger.log(log);
-  }
-
-  addConversationMessage(message: Message): void {
-    this.conversationMessages.push(message);
-  }
-
-  getLogs(): TimestampedLogEntry[] {
-    return this.logger.logs;
-  }
-
-  getConversationMessages(): Message[] {
-    return this.conversationMessages;
   }
 
   private criticalError(error: string) {
@@ -147,19 +183,23 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     this.state = "DONE";
   }
 
+  private addConversationMessage(message: Message): void {
+    this.conversationMessages.push(message);
+  }
+
   private async queryLLM(promptPair: PromptPair): Promise<string | null> {
     try {
-      const manager = this.stateManager;
+      const workflow = this.workflow;
       const messagesToSend: Message[] = [
-        ...manager.getRelevantPreviousConversationMessages(
-          manager.llmConfig.messagesInHistoryToKeep
+        ...workflow.getRelevantPreviousConversationMessages(
+          workflow.llmConfig.messagesInHistoryToKeep
         ),
         {
           role: "user",
           content: promptPair.fullPrompt,
         },
       ];
-      const completion = await manager.llmClient.run(messagesToSend);
+      const completion = await workflow.llmClient.run(messagesToSend);
 
       this.log({
         type: "llmResponse",
@@ -173,7 +213,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
         apiCalls: 1,
         inputTokens: completion?.usage?.prompt_tokens ?? 0,
         outputTokens: completion?.usage?.completion_tokens ?? 0,
-        llmName: manager.llmConfig.llmName,
+        llmName: workflow.llmConfig.llmName,
       });
 
       if (!completion?.content) {
@@ -202,43 +242,5 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
       });
       return null;
     }
-  }
-
-  async run() {
-    if (this.state !== "PENDING") {
-      return;
-    }
-
-    const limits = this.stateManager.checkResourceLimits();
-    if (limits) {
-      this.criticalError(limits);
-      return;
-    }
-
-    const executeContext: ExecuteContext<Shape> = {
-      getInput: (key) => this.getInput(key),
-      setOutput: (key, value) => this.setOutput(key, value),
-      log: (log) => this.log(log),
-      queryLLM: (promptPair) => this.queryLLM(promptPair),
-      stateManager: this.stateManager,
-    };
-
-    try {
-      await this.template.execute(executeContext);
-    } catch (error) {
-      this.criticalError(
-        error instanceof Error ? error.message : String(error)
-      );
-      return;
-    }
-    this.complete();
-  }
-
-  getState() {
-    return this.state;
-  }
-
-  getAllOutputs() {
-    return this.outputs;
   }
 }

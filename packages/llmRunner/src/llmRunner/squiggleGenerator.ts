@@ -13,20 +13,20 @@ import {
   editExistingSquiggleCodePrompt,
   generateNewSquiggleCodePrompt,
 } from "./prompts";
-import { StateManager } from "./StateManager";
+import { Workflow } from "./Workflow";
 
 function addStepByCodeState(
-  manager: StateManager,
+  workflow: Workflow,
   codeState: CodeState,
   prompt: string
 ) {
   if (codeState.type === "success") {
-    manager.addStep(executeAdjustToFeedbackStep, {
+    workflow.addStep(executeAdjustToFeedbackStep, {
       prompt: { kind: "prompt", value: prompt },
       codeState: { kind: "codeState", value: codeState },
     });
   } else {
-    manager.addStep(fixCodeUntilItRunsStep, {
+    workflow.addStep(fixCodeUntilItRunsStep, {
       prompt: { kind: "prompt", value: prompt },
       codeState: { kind: "codeState", value: codeState },
     });
@@ -75,7 +75,7 @@ const codeGeneratorStep = new LLMStepTemplate(
     if (completion) {
       const state = await generationCompletionContentToCodeState(completion);
       if (state.okay) {
-        addStepByCodeState(context.stateManager, state.value, prompt);
+        addStepByCodeState(context.workflow, state.value, prompt);
         context.setOutput("code", { kind: "code", value: state.value.code });
       } else {
         context.log({
@@ -112,7 +112,7 @@ const fixCodeUntilItRunsStep = new LLMStepTemplate(
         codeState
       );
       if (nextState.okay) {
-        addStepByCodeState(context.stateManager, nextState.value, prompt);
+        addStepByCodeState(context.workflow, nextState.value, prompt);
         context.setOutput("code", {
           kind: "code",
           value: nextState.value.code,
@@ -193,7 +193,7 @@ const executeAdjustToFeedbackStep = new LLMStepTemplate(
           message: "FAIL: " + diffResponse.value,
         });
         // try again
-        context.stateManager.addStep(executeAdjustToFeedbackStep, {
+        context.workflow.addStep(executeAdjustToFeedbackStep, {
           prompt: { kind: "prompt", value: prompt },
           codeState: { kind: "codeState", value: codeState },
         });
@@ -205,7 +205,7 @@ const executeAdjustToFeedbackStep = new LLMStepTemplate(
         await squiggleCodeToCodeStateViaRunningAndFormatting(
           diffResponse.value
         );
-      addStepByCodeState(context.stateManager, adjustedCodeState, prompt);
+      addStepByCodeState(context.workflow, adjustedCodeState, prompt);
       context.setOutput("code", {
         kind: "code",
         value: adjustedCodeState.code,
@@ -234,12 +234,12 @@ const runAndFormatCodeStep = new LLMStepTemplate(
 
     const { codeState } =
       await squiggleCodeToCodeStateViaRunningAndFormatting(code);
-    addStepByCodeState(context.stateManager, codeState, prompt);
+    addStepByCodeState(context.workflow, codeState, prompt);
   }
 );
 
 export class SquiggleGenerator {
-  public stateManager: StateManager;
+  public workflow: Workflow;
   private prompt: string;
   private startTime: number;
   private abortSignal?: AbortSignal; // TODO - unused
@@ -259,7 +259,7 @@ export class SquiggleGenerator {
   }) {
     this.prompt = input.type === "Create" ? input.prompt : "";
     this.abortSignal = abortSignal;
-    this.stateManager = new StateManager(
+    this.workflow = new Workflow(
       llmConfig ?? llmConfigDefault,
       openaiApiKey,
       anthropicApiKey
@@ -272,11 +272,11 @@ export class SquiggleGenerator {
 
   private addFirstStep(input: GeneratorInput) {
     if (input.type === "Create") {
-      this.stateManager.addStep(codeGeneratorStep, {
+      this.workflow.addStep(codeGeneratorStep, {
         prompt: { kind: "prompt", value: this.prompt },
       });
     } else {
-      this.stateManager.addStep(runAndFormatCodeStep, {
+      this.workflow.addStep(runAndFormatCodeStep, {
         prompt: { kind: "prompt", value: this.prompt },
         code: { kind: "code", value: input.code },
       });
@@ -284,10 +284,10 @@ export class SquiggleGenerator {
   }
 
   async runNextStep(): Promise<boolean> {
-    const { continueExecution } = await this.stateManager.runNextStep();
+    const { continueExecution } = await this.workflow.runNextStep();
 
     if (!continueExecution) {
-      // saveSummaryToFile(generateSummary(this.prompt, this.stateManager));
+      // saveSummaryToFile(generateSummary(this.prompt, this.workflow));
       return true;
     }
 
@@ -295,13 +295,13 @@ export class SquiggleGenerator {
   }
 
   getFinalResult(): SquiggleResult {
-    const logSummary = generateSummary(this.prompt, this.stateManager);
+    const logSummary = generateSummary(this.prompt, this.workflow);
     const endTime = Date.now();
     const runTimeMs = endTime - this.startTime;
-    const { totalPrice, llmRunCount } = this.stateManager.getLlmMetrics();
+    const { totalPrice, llmRunCount } = this.workflow.getLlmMetrics();
 
     const finalResult: SquiggleResult = {
-      ...this.stateManager.getFinalResult(),
+      ...this.workflow.getFinalResult(),
       totalPrice,
       runTimeMs,
       llmRunCount,

@@ -4,15 +4,12 @@ import path from "path";
 import { calculatePriceMultipleCalls, LlmMetrics, LLMName } from "./LLMClient";
 import { CodeState, LLMStepInstance } from "./LLMStep";
 import { getLogEntryFullName, TimestampedLogEntry } from "./Logger";
-import { StateManager } from "./StateManager";
+import { Workflow } from "./Workflow";
 
-export function generateSummary(
-  prompt: string,
-  stateManager: StateManager
-): string {
+export function generateSummary(prompt: string, workflow: Workflow): string {
   let summary = "";
-  const executions = stateManager.getSteps();
-  const metricsByLLM = stateManager.llmMetricSummary();
+  const executions = workflow.getSteps();
+  const metricsByLLM = workflow.llmMetricSummary();
 
   // Prompt
   summary += "# 🔮 PROMPT\n";
