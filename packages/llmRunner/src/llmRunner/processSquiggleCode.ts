@@ -71,20 +71,16 @@ export function diffToNewCode(
   completionContentWithDiff: string,
   oldCodeState: CodeState
 ): { okay: boolean; value: string } {
-  if (oldCodeState.type === "noCode") {
-    return { okay: false, value: "Didn't find any codeState code" };
-  } else {
-    const response = processSearchReplaceResponse(
-      oldCodeState.code,
-      completionContentWithDiff
-    );
-    return response.success
-      ? { okay: true, value: response.value }
-      : {
-          okay: false,
-          value: "Search and Replace Failed: " + response.value,
-        };
-  }
+  const response = processSearchReplaceResponse(
+    oldCodeState.code,
+    completionContentWithDiff
+  );
+  return response.success
+    ? { okay: true, value: response.value }
+    : {
+        okay: false,
+        value: "Search and Replace Failed: " + response.value,
+      };
 }
 
 /*
@@ -144,41 +140,39 @@ export async function squiggleCodeToCodeStateViaRunningAndFormatting(
   };
 }
 
-export async function completionContentToCodeState(
-  completionContent: string,
-  codeState: CodeState,
-  inputFormat: "generation" | "diff"
+async function codeToCodeState(code: string): Promise<CodeState> {
+  const { codeState } =
+    await squiggleCodeToCodeStateViaRunningAndFormatting(code);
+  return codeState;
+}
+
+export async function generationCompletionContentToCodeState(
+  completionContent: string
 ): Promise<{ okay: true; value: CodeState } | { okay: false; value: string }> {
   if (completionContent === "") {
     return { okay: false, value: "Received empty completion content" };
   }
 
-  let newCode: string;
-
-  switch (inputFormat) {
-    case "generation": {
-      newCode = extractSquiggleCode(completionContent);
-      if (newCode === "") {
-        return { okay: false, value: "Didn't get code from extraction" };
-      }
-      break;
-    }
-    case "diff": {
-      const { okay, value } = diffToNewCode(completionContent, codeState);
-      if (!okay) {
-        return { okay: false, value: value };
-      }
-      newCode = value;
-      break;
-    }
+  let newCode = extractSquiggleCode(completionContent);
+  if (newCode === "") {
+    return { okay: false, value: "Didn't get code from extraction" };
   }
 
-  const { codeState: newCodeState } =
-    await squiggleCodeToCodeStateViaRunningAndFormatting(newCode);
+  return { okay: true, value: await codeToCodeState(newCode) };
+}
 
-  if (newCodeState.type === "noCode") {
-    return { okay: false, value: "No code returned" };
-  } else {
-    return { okay: true, value: newCodeState };
+export async function diffCompletionContentToCodeState(
+  completionContent: string,
+  codeState: CodeState
+): Promise<{ okay: true; value: CodeState } | { okay: false; value: string }> {
+  if (completionContent === "") {
+    return { okay: false, value: "Received empty completion content" };
   }
+
+  const { okay, value } = diffToNewCode(completionContent, codeState);
+  if (!okay) {
+    return { okay: false, value };
+  }
+
+  return { okay: true, value: await codeToCodeState(value) };
 }

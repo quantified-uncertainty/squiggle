@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import { calculatePriceMultipleCalls, LlmMetrics, LLMName } from "./LLMClient";
-import { CodeState, LLMStep, State } from "./LLMStep";
+import { CodeState, Kind, LLMStep } from "./LLMStep";
 import { getLogEntryFullName, TimestampedLogEntry } from "./Logger";
 import { StateManager } from "./StateManager";
 
@@ -68,7 +68,7 @@ function generateErrorSummary(executions: LLMStep[]): string {
         (log) => log.entry.type === "error" || log.entry.type === "codeRunError"
       );
     if (errors.length > 0) {
-      errorSummary += `### ❌ Execution ${index + 1} (${State[execution.state]})\n`;
+      errorSummary += `### ❌ Execution ${index + 1} (${Kind[execution.kind]})\n`;
       errors.forEach((error) => {
         if (error.entry.type === "error") {
           errorSummary += `- 🔴 ${error.entry.message}\n`;
@@ -94,7 +94,7 @@ function generateDetailedExecutionLogs(executions: LLMStep[]): string {
       )
     );
 
-    detailedLogs += `\n## 🔄 Execution ${index + 1} - ${State[execution.state]} (Cost: $${totalCost.toFixed(4)})\n`;
+    detailedLogs += `\n## 🔄 Execution ${index + 1} - ${Kind[execution.kind]} (Cost: $${totalCost.toFixed(4)})\n`;
     detailedLogs += `- ⏱️ Duration: ${(execution.durationMs || 0) / 1000} seconds\n`;
 
     execution.llmMetricsList.forEach((metrics) => {
@@ -170,8 +170,6 @@ ${JSON.stringify(llmResponse.response, null, 2)}
 
 function formatCodeState(codeState: CodeState): string {
   switch (codeState.type) {
-    case "noCode":
-      return "💨 Code state: No code generated\n";
     case "formattingFailed":
       return `<details>
   <summary>🔴 Code Update: [Error] - Formatting failed</summary>

@@ -1,10 +1,11 @@
 import { generateSummary } from "./generateSummary";
 import { LLMName } from "./LLMClient";
-import { CodeState, LLMStep, State, StateHandler } from "./LLMStep";
+import { CodeState, Kind, LLMStepDescription } from "./LLMStep";
 import { TimestampedLogEntry } from "./Logger";
 import {
-  completionContentToCodeState,
+  diffCompletionContentToCodeState,
   diffToNewCode,
+  generationCompletionContentToCodeState,
   squiggleCodeToCodeStateViaRunningAndFormatting,
 } from "./processSquiggleCode";
 import {
@@ -14,10 +15,16 @@ import {
 } from "./prompts";
 import { StateManager } from "./StateManager";
 
-function codeStateNextState(codeState: CodeState): State {
-  return codeState.type === "success"
-    ? State.ADJUST_TO_FEEDBACK
-    : State.FIX_CODE_UNTIL_IT_RUNS;
+function addStepByCodeState(
+  manager: StateManager,
+  codeState: CodeState,
+  prompt: string
+) {
+  if (codeState.type === "success") {
+    manager.addStep(makeExecuteAdjustToFeedbackStep(prompt, codeState));
+  } else {
+    manager.addStep(makeFixCodeUntilItRunsStep(prompt, codeState));
+  }
 }
 
 export interface LlmConfig {
@@ -48,21 +55,18 @@ export type GeneratorInput =
   | { type: "Create"; prompt: string }
   | { type: "Edit"; code: string };
 
-function makeCodeGeneratorStep(prompt: string): StateHandler {
+function makeCodeGeneratorStep(prompt: string): LLMStepDescription {
   return {
+    state: Kind.GENERATE_CODE,
     execute: async (step) => {
       const promptPair = generateNewSquiggleCodePrompt(prompt);
       const completion = await step.queryLLM(promptPair);
 
       if (completion) {
-        const state = await completionContentToCodeState(
-          completion,
-          step.codeState,
-          "generation"
-        );
+        const state = await generationCompletionContentToCodeState(completion);
         if (state.okay) {
-          step.updateCodeState(state.value);
-          step.updateNextState(codeStateNextState(state.value));
+          addStepByCodeState(step.stateManager, state.value, prompt);
+          return { code: state.value.code };
         } else {
           step.log({
             type: "codeRunError",
@@ -74,116 +78,51 @@ function makeCodeGeneratorStep(prompt: string): StateHandler {
   };
 }
 
-function makeFixCodeUntilItRunsStep(): StateHandler {
+function makeFixCodeUntilItRunsStep(
+  prompt: string,
+  codeState: Exclude<CodeState, { type: "success" }>
+): LLMStepDescription {
   return {
+    state: Kind.FIX_CODE_UNTIL_IT_RUNS,
     execute: async (step) => {
-      const { codeState } = step;
+      step.logCodeState(codeState);
+      const promptPair = editExistingSquiggleCodePrompt(
+        codeState.code,
+        codeState
+      );
 
-      switch (codeState.type) {
-        case "success":
+      const completion = await step.queryLLM(promptPair);
+      if (completion) {
+        const nextState = await diffCompletionContentToCodeState(
+          completion,
+          codeState
+        );
+        if (nextState.okay) {
+          addStepByCodeState(step.stateManager, nextState.value, prompt);
+          return { code: nextState.value.code };
+        } else {
           step.log({
-            type: "info",
-            message: "Code is already successful, moving to Feedback state",
+            type: "codeRunError",
+            error: nextState.value,
           });
-          step.updateNextState(State.ADJUST_TO_FEEDBACK);
-          return;
-        case "noCode":
-          step.log({
-            type: "error",
-            message:
-              "Unexpected code state in FIX_CODE_UNTIL_IT_RUNS. Doesn't have code. This should not be possible.",
-          });
-          step.updateNextState(State.GENERATE_CODE);
-          return;
-        case "formattingFailed":
-        case "runFailed":
-          const promptPair = editExistingSquiggleCodePrompt(
-            codeState.code,
-            codeState
-          );
-          const completion = await step.queryLLM(promptPair);
-          if (completion) {
-            const state = await completionContentToCodeState(
-              completion,
-              step.codeState,
-              "diff"
-            );
-            if (state.okay) {
-              step.updateCodeState(state.value);
-              step.updateNextState(codeStateNextState(state.value));
-            } else {
-              step.log({
-                type: "codeRunError",
-                error: state.value,
-              });
-            }
-          }
-          break;
+        }
       }
     },
   };
 }
 
-function makeExecuteAdjustToFeedbackStep(prompt: string): StateHandler {
-  const handleAdjustToFeedbackResponse = async (
-    completionContent: string,
-    step: LLMStep
-  ): Promise<void> => {
-    const trimmedResponse = completionContent.trim();
-    const noAdjustmentRegex =
-      /no\s+adjust(?:ment)?\s+needed|NO_ADJUSTMENT_NEEDED/i;
-    const isShortResponse = trimmedResponse.length <= 100;
-
-    if (noAdjustmentRegex.test(trimmedResponse) && isShortResponse) {
-      step.log({
-        type: "info",
-        message: "LLM determined no adjustment is needed",
-      });
-      step.updateNextState(State.DONE);
-      return;
-    }
-
-    if (
-      trimmedResponse.length > 0 &&
-      !noAdjustmentRegex.test(trimmedResponse)
-    ) {
-      const diffResponse = diffToNewCode(completionContent, step.codeState);
-      if (!diffResponse.okay) {
-        step.log({
-          type: "error",
-          message: "FAIL: " + diffResponse.value,
-        });
-        step.updateNextState(State.FIX_CODE_UNTIL_IT_RUNS);
-        return;
-      }
-
-      const { codeState: adjustedCodeState } =
-        await squiggleCodeToCodeStateViaRunningAndFormatting(
-          diffResponse.value
-        );
-      step.updateCodeState(adjustedCodeState);
-      step.updateNextState(codeStateNextState(adjustedCodeState));
-    } else {
-      step.log({
-        type: "info",
-        message: "No adjustments provided, considering process complete",
-      });
-      step.updateNextState(State.DONE);
-    }
-  };
-
+function makeExecuteAdjustToFeedbackStep(
+  prompt: string,
+  codeState: Extract<CodeState, { type: "success" }>
+): LLMStepDescription {
   return {
+    state: Kind.ADJUST_TO_FEEDBACK,
     execute: async (step) => {
-      const { codeState } = step;
-
-      if (codeState.type !== "success") {
-        step.criticalError(
-          "Entered Adjust To Feedback stage without a good code state"
-        );
-        return;
-      }
+      step.logCodeState(codeState);
 
       const currentCode = codeState.code;
+
+      // re-run and get result
       const { codeState: newCodeState, runResult } =
         await squiggleCodeToCodeStateViaRunningAndFormatting(currentCode);
 
@@ -203,8 +142,54 @@ function makeExecuteAdjustToFeedbackStep(prompt: string): StateHandler {
         )
       );
 
-      if (completion) {
-        await handleAdjustToFeedbackResponse(completion, step);
+      if (!completion) {
+        return;
+      }
+
+      // handle adjustment response
+
+      const trimmedResponse = completion.trim();
+      const noAdjustmentRegex =
+        /no\s+adjust(?:ment)?\s+needed|NO_ADJUSTMENT_NEEDED/i;
+      const isShortResponse = trimmedResponse.length <= 100;
+
+      if (noAdjustmentRegex.test(trimmedResponse) && isShortResponse) {
+        step.log({
+          type: "info",
+          message: "LLM determined no adjustment is needed",
+        });
+        return { code: codeState.code };
+      }
+
+      if (
+        trimmedResponse.length > 0 &&
+        !noAdjustmentRegex.test(trimmedResponse)
+      ) {
+        const diffResponse = diffToNewCode(completion, codeState);
+        if (!diffResponse.okay) {
+          step.log({
+            type: "error",
+            message: "FAIL: " + diffResponse.value,
+          });
+          // try again
+          step.stateManager.addStep(
+            makeExecuteAdjustToFeedbackStep(prompt, codeState)
+          );
+          return { code: codeState.code };
+        }
+
+        const { codeState: adjustedCodeState } =
+          await squiggleCodeToCodeStateViaRunningAndFormatting(
+            diffResponse.value
+          );
+        addStepByCodeState(step.stateManager, adjustedCodeState, prompt);
+        return { code: adjustedCodeState.code };
+      } else {
+        step.log({
+          type: "info",
+          message: "No adjustments provided, considering process complete",
+        });
+        return { code: codeState.code };
       }
     },
   };
@@ -239,11 +224,27 @@ export class SquiggleGenerator {
 
     this.startTime = Date.now();
 
-    this.registerStateHandlers(input);
+    this.addFirstStep(input);
   }
 
-  async step(): Promise<boolean> {
-    const { continueExecution } = await this.stateManager.step();
+  private addFirstStep(input: GeneratorInput) {
+    if (input.type === "Create") {
+      this.stateManager.addStep(makeCodeGeneratorStep(this.prompt));
+    } else {
+      this.stateManager.addStep({
+        state: Kind.START,
+        execute: async () => {
+          const { codeState } =
+            await squiggleCodeToCodeStateViaRunningAndFormatting(input.code);
+          addStepByCodeState(this.stateManager, codeState, this.prompt);
+          return { code: codeState.code };
+        },
+      });
+    }
+  }
+
+  async runNextStep(): Promise<boolean> {
+    const { continueExecution } = await this.stateManager.runNextStep();
 
     if (!continueExecution) {
       // saveSummaryToFile(generateSummary(this.prompt, this.stateManager));
@@ -268,40 +269,6 @@ export class SquiggleGenerator {
     };
     return finalResult;
   }
-
-  private registerStateHandlers(input: GeneratorInput) {
-    this.stateManager.registerStateHandler(
-      State.GENERATE_CODE,
-      makeCodeGeneratorStep(this.prompt)
-    );
-
-    this.stateManager.registerStateHandler(
-      State.FIX_CODE_UNTIL_IT_RUNS,
-      makeFixCodeUntilItRunsStep()
-    );
-
-    this.stateManager.registerStateHandler(
-      State.ADJUST_TO_FEEDBACK,
-      makeExecuteAdjustToFeedbackStep(this.prompt)
-    );
-
-    if (input.type === "Create") {
-      this.stateManager.registerStateHandler(State.START, {
-        execute: async (step) => {
-          step.updateNextState(State.GENERATE_CODE);
-        },
-      });
-    } else {
-      this.stateManager.registerStateHandler(State.START, {
-        execute: async (step) => {
-          const { codeState } =
-            await squiggleCodeToCodeStateViaRunningAndFormatting(input.code);
-          step.updateCodeState(codeState);
-          step.updateNextState(codeStateNextState(codeState));
-        },
-      });
-    }
-  }
 }
 
 export async function runSquiggleGenerator(params: {
@@ -318,7 +285,7 @@ export async function runSquiggleGenerator(params: {
   const generator = new SquiggleGenerator(params);
 
   // Run the generator steps until completion
-  while (!(await generator.step())) {}
+  while (!(await generator.runNextStep())) {}
 
   return generator.getFinalResult();
 }

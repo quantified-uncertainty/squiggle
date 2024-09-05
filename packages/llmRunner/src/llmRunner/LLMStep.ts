@@ -5,17 +5,15 @@ import { LogEntry, Logger, TimestampedLogEntry } from "./Logger";
 import { PromptPair } from "./prompts";
 import { StateManager } from "./StateManager";
 
-export enum State {
+export enum Kind {
   START,
   GENERATE_CODE,
   FIX_CODE_UNTIL_IT_RUNS,
   ADJUST_TO_FEEDBACK,
-  DONE,
   CRITICAL_ERROR,
 }
 
 export type CodeState =
-  | { type: "noCode" }
   | {
       type: "formattingFailed";
       error: string;
@@ -33,28 +31,34 @@ export function codeStateErrorString(codeState: CodeState): string {
   return "";
 }
 
-export interface StateHandler {
-  execute: (step: LLMStep) => Promise<void>;
-}
+export type LLMStepDescription = {
+  state: Kind; // basically "name", could be a string
+  execute: (step: LLMStep) => Promise<
+    // execute can produce code
+    | {
+        code: string;
+      }
+    | undefined
+  >;
+};
 
 // Workflow step that requests the LLM to generate code, fix code, etc.
 export class LLMStep {
-  public nextState: State;
   public durationMs?: number;
   private logger: Logger;
   private conversationMessages: Message[] = [];
   public llmMetricsList: LlmMetrics[] = [];
   private startTime: number;
+  private state: "PENDING" | "DONE" | "FAILED" = "PENDING";
+  private code: string | undefined;
 
   constructor(
-    public readonly state: State,
-    public codeState: CodeState,
-    public readonly stateManager: StateManager
+    public readonly kind: Kind,
+    public readonly stateManager: StateManager,
+    private execute: LLMStepDescription["execute"]
   ) {
     this.startTime = Date.now();
-    this.nextState = state;
     this.logger = new Logger();
-    this.logCodeState(codeState);
   }
 
   log(log: LogEntry): void {
@@ -63,19 +67,6 @@ export class LLMStep {
 
   addConversationMessage(message: Message): void {
     this.conversationMessages.push(message);
-  }
-
-  updateCodeState(codeState: CodeState): void {
-    this.codeState = codeState;
-    this.logCodeState(codeState);
-  }
-
-  updateNextState(nextState: State): void {
-    this.nextState = nextState;
-  }
-
-  complete() {
-    this.durationMs = Date.now() - this.startTime;
   }
 
   getLogs(): TimestampedLogEntry[] {
@@ -88,8 +79,17 @@ export class LLMStep {
 
   criticalError(error: string) {
     this.log({ type: "error", message: error });
-    this.updateNextState(State.CRITICAL_ERROR);
-    this.complete();
+    this.updateDuration();
+    this.state = "FAILED";
+  }
+
+  private updateDuration() {
+    this.durationMs = Date.now() - this.startTime;
+  }
+
+  private complete() {
+    this.updateDuration();
+    this.state = "DONE";
   }
 
   logCodeState(codeState: CodeState) {
@@ -151,5 +151,38 @@ export class LLMStep {
       });
       return null;
     }
+  }
+
+  async run() {
+    if (this.state !== "PENDING") {
+      return;
+    }
+
+    const limits = this.stateManager.checkResourceLimits();
+    if (limits) {
+      this.criticalError(limits);
+      return;
+    }
+
+    try {
+      const result = await this.execute(this);
+      if (result?.code) {
+        this.code = result.code;
+      }
+    } catch (error) {
+      this.criticalError(
+        error instanceof Error ? error.message : String(error)
+      );
+      return;
+    }
+    this.complete();
+  }
+
+  getState() {
+    return this.state;
+  }
+
+  getCode() {
+    return this.code;
   }
 }
