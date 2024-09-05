@@ -7,12 +7,12 @@ import {
   LLMName,
   Message,
 } from "./LLMClient";
-import { Kind, LLMStep, LLMStepDescription } from "./LLMStep";
+import { Inputs, LLMStepInstance, LLMStepTemplate, StepShape } from "./LLMStep";
 import { TimestampedLogEntry } from "./Logger";
 import { LlmConfig } from "./squiggleGenerator";
 
 export class StateManager {
-  private steps: LLMStep[] = [];
+  private steps: LLMStepInstance[] = [];
   private priceLimit: number;
   private durationLimitMs: number;
   private startTime: number;
@@ -35,13 +35,12 @@ export class StateManager {
     );
   }
 
-  addStep(stepDescription: LLMStepDescription): LLMStep {
-    const step = new LLMStep(
-      stepDescription.state,
-      this,
-      stepDescription.execute
-    );
-    this.steps.push(step);
+  addStep<S extends StepShape>(
+    template: LLMStepTemplate<S>,
+    inputs: Inputs<S>
+  ): LLMStepInstance<S> {
+    const step = template.instantiate(this, inputs);
+    this.steps.push(step as unknown as LLMStepInstance);
     return step;
   }
 
@@ -60,7 +59,7 @@ export class StateManager {
 
     await step.run();
 
-    console.log(chalk.cyan(`Finishing state ${Kind[step.kind]}`), step);
+    console.log(chalk.cyan(`Finishing state ${step.template.name}`), step);
 
     return {
       continueExecution: !this.isProcessComplete(),
@@ -78,11 +77,11 @@ export class StateManager {
     return undefined;
   }
 
-  getSteps(): LLMStep[] {
+  getSteps(): LLMStepInstance[] {
     return this.steps;
   }
 
-  private getCurrentStep(): LLMStep | undefined {
+  private getCurrentStep(): LLMStepInstance | undefined {
     return this.steps.at(-1);
   }
 
@@ -107,9 +106,20 @@ export class StateManager {
 
     const isValid = finalStep.getState() === "DONE";
 
+    // look for first code output
+    let code = "";
+    const outputs = finalStep.getAllOutputs();
+    for (const output of Object.values(outputs)) {
+      if (output?.kind === "code") {
+        code = output.value;
+      } else if (output?.kind === "codeState") {
+        code = output.value.code;
+      }
+    }
+
     return {
       isValid,
-      code: finalStep.getCode() ?? "",
+      code,
       logs: this.getLogs(),
     };
   }
@@ -154,9 +164,17 @@ export class StateManager {
   }
 
   getRelevantPreviousConversationMessages(maxRecentSteps = 3): Message[] {
-    const lastGenerateCodeIndex = this.steps.findLastIndex(
-      (execution) => execution.kind === Kind.GENERATE_CODE
-    );
+    const lastGenerateCodeIndex = this.steps.findLastIndex((step) => {
+      const hasCodeInput = Object.values(step.template.shape.inputs).some(
+        (kind) => kind === "code" || kind === "codeState"
+      );
+
+      const hasCodeOutput = Object.values(step.template.shape.outputs).some(
+        (kind) => kind === "code" || kind === "codeState"
+      );
+
+      return !hasCodeInput && hasCodeOutput;
+    });
 
     const getRelevantStepIndexes = (): number[] => {
       const endIndex = this.steps.length - 1;

@@ -5,14 +5,6 @@ import { LogEntry, Logger, TimestampedLogEntry } from "./Logger";
 import { PromptPair } from "./prompts";
 import { StateManager } from "./StateManager";
 
-export enum Kind {
-  START,
-  GENERATE_CODE,
-  FIX_CODE_UNTIL_IT_RUNS,
-  ADJUST_TO_FEEDBACK,
-  CRITICAL_ERROR,
-}
-
 export type CodeState =
   | {
       type: "formattingFailed";
@@ -31,34 +23,97 @@ export function codeStateErrorString(codeState: CodeState): string {
   return "";
 }
 
-export type LLMStepDescription = {
-  state: Kind; // basically "name", could be a string
-  execute: (step: LLMStep) => Promise<
-    // execute can produce code
-    | {
-        code: string;
-      }
-    | undefined
+export type Artifact =
+  | {
+      kind: "prompt";
+      value: string;
+    }
+  | {
+      kind: "code";
+      value: string;
+    }
+  | {
+      kind: "codeState";
+      value: CodeState;
+    };
+
+type ArtifactKind = Artifact["kind"];
+
+export type StepShape<
+  I extends Record<string, ArtifactKind> = Record<string, ArtifactKind>,
+  O extends Record<string, ArtifactKind> = Record<string, ArtifactKind>,
+> = {
+  inputs: I;
+  outputs: O;
+};
+
+type ExecuteContext<Shape extends StepShape> = {
+  getInput<K extends keyof Shape["inputs"]>(key: K): Inputs<Shape>[K];
+  setOutput<K extends keyof Shape["outputs"]>(
+    key: K,
+    value: Outputs<Shape>[K]
+  ): void;
+  queryLLM(promptPair: PromptPair): Promise<string | null>;
+  log(log: LogEntry): void;
+  stateManager: StateManager; // TODO - shouldn't be exposed
+};
+
+export type Inputs<Shape extends StepShape<any, any>> = {
+  [K in keyof Shape["inputs"]]: Extract<Artifact, { kind: Shape["inputs"][K] }>;
+};
+
+type Outputs<Shape extends StepShape<any, any>> = {
+  [K in keyof Shape["outputs"]]: Extract<
+    Artifact,
+    { kind: Shape["outputs"][K] }
   >;
 };
 
-// Workflow step that requests the LLM to generate code, fix code, etc.
-export class LLMStep {
+export class LLMStepTemplate<const Shape extends StepShape = StepShape> {
+  constructor(
+    public readonly name: string,
+    public readonly shape: Shape,
+    public readonly execute: (context: ExecuteContext<Shape>) => Promise<void>
+  ) {}
+
+  instantiate(
+    stateManager: StateManager,
+    inputs: Inputs<Shape>
+  ): LLMStepInstance<Shape> {
+    return new LLMStepInstance(this, stateManager, inputs);
+  }
+}
+
+export class LLMStepInstance<const Shape extends StepShape = StepShape> {
   public durationMs?: number;
   private logger: Logger;
   private conversationMessages: Message[] = [];
   public llmMetricsList: LlmMetrics[] = [];
   private startTime: number;
   private state: "PENDING" | "DONE" | "FAILED" = "PENDING";
-  private code: string | undefined;
+  private inputs: Inputs<Shape>;
+  private outputs: Partial<Outputs<Shape>> = {};
 
   constructor(
-    public readonly kind: Kind,
+    public readonly template: LLMStepTemplate<Shape>,
     public readonly stateManager: StateManager,
-    private execute: LLMStepDescription["execute"]
+    inputs: Inputs<Shape>
   ) {
     this.startTime = Date.now();
     this.logger = new Logger();
+    this.inputs = inputs;
+  }
+
+  getInput<K extends keyof Inputs<Shape>>(key: K): Inputs<Shape>[K] {
+    return this.inputs[key];
+  }
+
+  setOutput<K extends keyof Outputs<Shape>>(
+    key: K,
+    value: Outputs<Shape>[K]
+  ): void {
+    // TODO - check if output is already set?
+    this.outputs[key] = value;
   }
 
   log(log: LogEntry): void {
@@ -77,7 +132,7 @@ export class LLMStep {
     return this.conversationMessages;
   }
 
-  criticalError(error: string) {
+  private criticalError(error: string) {
     this.log({ type: "error", message: error });
     this.updateDuration();
     this.state = "FAILED";
@@ -92,11 +147,7 @@ export class LLMStep {
     this.state = "DONE";
   }
 
-  logCodeState(codeState: CodeState) {
-    return this.logger.log({ type: "codeState", codeState });
-  }
-
-  async queryLLM(promptPair: PromptPair): Promise<string | null> {
+  private async queryLLM(promptPair: PromptPair): Promise<string | null> {
     try {
       const manager = this.stateManager;
       const messagesToSend: Message[] = [
@@ -164,11 +215,16 @@ export class LLMStep {
       return;
     }
 
+    const executeContext: ExecuteContext<Shape> = {
+      getInput: (key) => this.getInput(key),
+      setOutput: (key, value) => this.setOutput(key, value),
+      log: (log) => this.log(log),
+      queryLLM: (promptPair) => this.queryLLM(promptPair),
+      stateManager: this.stateManager,
+    };
+
     try {
-      const result = await this.execute(this);
-      if (result?.code) {
-        this.code = result.code;
-      }
+      await this.template.execute(executeContext);
     } catch (error) {
       this.criticalError(
         error instanceof Error ? error.message : String(error)
@@ -182,7 +238,7 @@ export class LLMStep {
     return this.state;
   }
 
-  getCode() {
-    return this.code;
+  getAllOutputs() {
+    return this.outputs;
   }
 }

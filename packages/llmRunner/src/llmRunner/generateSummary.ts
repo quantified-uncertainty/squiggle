@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import { calculatePriceMultipleCalls, LlmMetrics, LLMName } from "./LLMClient";
-import { CodeState, Kind, LLMStep } from "./LLMStep";
+import { CodeState, LLMStepInstance } from "./LLMStep";
 import { getLogEntryFullName, TimestampedLogEntry } from "./Logger";
 import { StateManager } from "./StateManager";
 
@@ -34,7 +34,7 @@ export function generateSummary(
 }
 
 function generateOverview(
-  executions: LLMStep[],
+  executions: LLMStepInstance[],
   metricsByLLM: Record<string, LlmMetrics>
 ): string {
   const totalTime = executions.reduce(
@@ -59,16 +59,16 @@ function generateOverview(
   return overview;
 }
 
-function generateErrorSummary(executions: LLMStep[]): string {
+function generateErrorSummary(steps: LLMStepInstance[]): string {
   let errorSummary = "";
-  executions.forEach((execution, index) => {
-    const errors = execution
+  steps.forEach((step, index) => {
+    const errors = step
       .getLogs()
       .filter(
         (log) => log.entry.type === "error" || log.entry.type === "codeRunError"
       );
     if (errors.length > 0) {
-      errorSummary += `### ❌ Execution ${index + 1} (${Kind[execution.kind]})\n`;
+      errorSummary += `### ❌ Execution ${index + 1} (${step.template.name})\n`;
       errors.forEach((error) => {
         if (error.entry.type === "error") {
           errorSummary += `- 🔴 ${error.entry.message}\n`;
@@ -81,11 +81,11 @@ function generateErrorSummary(executions: LLMStep[]): string {
   return errorSummary || "✅ No errors encountered.\n";
 }
 
-function generateDetailedExecutionLogs(executions: LLMStep[]): string {
+function generateDetailedExecutionLogs(steps: LLMStepInstance[]): string {
   let detailedLogs = "";
-  executions.forEach((execution, index) => {
+  steps.forEach((step, index) => {
     const totalCost = calculatePriceMultipleCalls(
-      execution.llmMetricsList.reduce(
+      step.llmMetricsList.reduce(
         (acc, metrics) => {
           acc[metrics.llmName] = metrics;
           return acc;
@@ -94,21 +94,23 @@ function generateDetailedExecutionLogs(executions: LLMStep[]): string {
       )
     );
 
-    detailedLogs += `\n## 🔄 Execution ${index + 1} - ${Kind[execution.kind]} (Cost: $${totalCost.toFixed(4)})\n`;
-    detailedLogs += `- ⏱️ Duration: ${(execution.durationMs || 0) / 1000} seconds\n`;
+    detailedLogs += `\n## 🔄 Execution ${index + 1} - ${step.template.name} (Cost: $${totalCost.toFixed(4)})\n`;
+    detailedLogs += `- ⏱️ Duration: ${(step.durationMs || 0) / 1000} seconds\n`;
 
-    execution.llmMetricsList.forEach((metrics) => {
+    // TODO - add inputs and outputs
+
+    step.llmMetricsList.forEach((metrics) => {
       const cost = calculatePriceMultipleCalls({ [metrics.llmName]: metrics });
       detailedLogs += `- ${metrics.llmName}:\n`;
       detailedLogs += `  - API Calls: ${metrics.apiCalls}\n`;
       detailedLogs += `  - Input Tokens: ${metrics.inputTokens}\n`;
       detailedLogs += `  - Output Tokens: ${metrics.outputTokens}\n`;
       detailedLogs += `  - Estimated Cost: $${cost.toFixed(4)}\n`;
-      detailedLogs += `  - Output tokens per second: ${(metrics.outputTokens / ((execution.durationMs ?? 0) / 1000)).toFixed(2)}\n`;
+      detailedLogs += `  - Output tokens per second: ${(metrics.outputTokens / ((step.durationMs ?? 0) / 1000)).toFixed(2)}\n`;
     });
 
     detailedLogs += "### Logs:\n";
-    execution.getLogs().forEach((log) => {
+    step.getLogs().forEach((log) => {
       detailedLogs += `#### **${getLogEntryFullName(log.entry)}:**\n`;
       detailedLogs += `${getFullMessage(log)}`;
     });
