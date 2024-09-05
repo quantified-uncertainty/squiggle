@@ -1,7 +1,6 @@
 import chalk from "chalk";
 
 import { Message } from "./LLMClient";
-import { CodeState } from "./LLMStep";
 
 export type LogEntry =
   | InfoLogEntry
@@ -10,8 +9,7 @@ export type LogEntry =
   | CodeRunErrorLogEntry
   | SuccessLogEntry
   | HighlightLogEntry
-  | LlmResponseLogEntry
-  | CodeStateLogEntry;
+  | LlmResponseLogEntry;
 
 export function getLogEntryFullName(entry: LogEntry): string {
   switch (entry.type) {
@@ -29,8 +27,6 @@ export function getLogEntryFullName(entry: LogEntry): string {
       return "🔆 Highlight";
     case "llmResponse":
       return "🤖 LLM Response";
-    case "codeState":
-      return "📄 Code State";
     default:
       return `❓ Unknown (${entry satisfies never})`;
   }
@@ -59,8 +55,6 @@ function displayLog(log: LogEntry): void {
     case "llmResponse":
       console.log(chalk.cyan(`[LLM_RESPONSE] ${log.content}`));
       break;
-    case "codeState":
-      console.log(chalk.gray(`[CODE_STATE] ${log.codeState.type}`));
       break;
     default:
       throw log satisfies never;
@@ -108,11 +102,6 @@ type LlmResponseLogEntry = {
   content: string;
   messages: Message[];
   prompt: string;
-};
-
-type CodeStateLogEntry = {
-  type: "codeState";
-  codeState: CodeState;
 };
 
 export class Logger {

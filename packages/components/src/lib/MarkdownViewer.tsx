@@ -7,6 +7,8 @@ import remarkGfm from "remark-gfm";
 import { Node, Parent } from "unist";
 import { visitParents } from "unist-util-visit-parents";
 
+import { SqLinker, SqProject } from "@quri/squiggle-lang";
+
 import { SquiggleEditor } from "../components/SquiggleEditor.js";
 import { SquigglePlayground } from "../components/SquigglePlayground/index.js";
 import { CodeSyntaxHighlighter } from "./CodeSyntaxHighlighter.js";
@@ -34,6 +36,7 @@ type MarkdownViewerProps = {
   textColor?: "prose-stone" | "prose-slate";
   className?: string;
   backgroundColor?: string;
+  linker?: SqLinker;
 };
 const codeBlockStyles = `
   .prose pre {
@@ -56,6 +59,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
   textColor,
   textSize,
   backgroundColor = "bg-slate-50",
+  linker,
 }) => {
   return (
     <>
@@ -120,6 +124,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
                   <SquigglePlayground
                     defaultCode={String(children).replace(/\n$/, "")}
                     height={height}
+                    linker={linker}
                   />
                 </div>
               );
@@ -127,6 +132,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
               return (
                 <div className="pb-4 pt-2">
                   <SquiggleEditor
+                    project={linker ? new SqProject({ linker }) : undefined}
                     defaultCode={String(children).replace(/\n$/, "")}
                     editorFontSize={textSize === "sm" ? 13 : 12}
                   />

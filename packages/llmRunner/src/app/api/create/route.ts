@@ -11,8 +11,6 @@ import {
 export const maxDuration = 500;
 
 export async function POST(req: Request) {
-  const abortController = new AbortController();
-
   try {
     const body = await req.json();
     const { prompt, squiggleCode }: CreateRequestBody =

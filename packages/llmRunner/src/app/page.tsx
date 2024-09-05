@@ -1,17 +1,12 @@
 "use client";
 
 import { experimental_useObject as useObject } from "ai/react";
-import {
-  CheckCircle,
-  ChevronDown,
-  ChevronUp,
-  Loader,
-  XCircle,
-} from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { MarkdownViewer } from "@quri/squiggle-components";
 
+import { linkerWithDefaultSquiggleLibs } from "../llmRunner/processSquiggleCode";
+import { ActionComponent } from "./ActionComponent";
 import SquigglePlayground from "./SquigglePlayground";
 import {
   Action,
@@ -20,59 +15,6 @@ import {
   squiggleResponseSchema,
 } from "./utils/squiggleTypes";
 import { useAvailableHeight } from "./utils/useAvailableHeight";
-
-// Action Component
-const ActionComponent: React.FC<{ action: Action }> = ({ action }) => {
-  const [expanded, setExpanded] = useState(false);
-
-  const getStatusIcon = () => {
-    switch (action.status) {
-      case "loading":
-        return <Loader className="animate-spin" />;
-      case "success":
-        return <CheckCircle className="text-green-500" />;
-      case "error":
-        return <XCircle className="text-red-500" />;
-    }
-  };
-
-  return (
-    <div className="mb-2 rounded border p-2">
-      <div
-        className="flex cursor-pointer items-center justify-between"
-        onClick={() => setExpanded(!expanded)}
-      >
-        <div className="flex items-center space-x-2">
-          {getStatusIcon()}
-          <span className="font-medium">
-            {action.prompt.substring(0, 30)}...
-          </span>
-        </div>
-        {expanded ? <ChevronUp /> : <ChevronDown />}
-      </div>
-      {expanded && (
-        <div className="mt-2">
-          <p>{action.prompt}</p>
-          <p>
-            <strong>Timestamp:</strong> {action.timestamp.toLocaleString()}
-          </p>
-          <p>
-            <strong>Code:</strong>
-          </p>
-          <pre className="mt-1 rounded bg-gray-100 p-2">
-            {action.code || "No code generated"}
-          </pre>
-          <p>
-            <strong>Result:</strong>
-          </p>
-          <pre className="mt-1 rounded bg-gray-100 p-2">
-            {action.result || "No result yet"}
-          </pre>
-        </div>
-      )}
-    </div>
-  );
-};
 
 const LogsView: React.FC<{ onClose: () => void; logSummary: string }> = ({
   onClose,
@@ -89,12 +31,15 @@ const LogsView: React.FC<{ onClose: () => void; logSummary: string }> = ({
           Close
         </button>
       </div>
-      <MarkdownViewer md={logSummary} textSize="sm" />
+      <MarkdownViewer
+        md={logSummary}
+        textSize="sm"
+        linker={linkerWithDefaultSquiggleLibs}
+      />
     </div>
   );
 };
 
-// Main Component
 export default function CreatePage() {
   // State
   const [mode, setMode] = useState<"create" | "edit">("create");
@@ -190,8 +135,6 @@ export default function CreatePage() {
       prompt: mode === "create" ? prompt : undefined,
       squiggleCode: mode === "edit" ? squiggleCode : undefined,
     };
-
-    console.log("requestBody", requestBody);
 
     submit(requestBody);
 

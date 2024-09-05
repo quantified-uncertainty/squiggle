@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 
+import { Artifact } from "./Artifact";
 import { calculatePriceMultipleCalls, LlmMetrics, LLMName } from "./LLMClient";
 import { CodeState, LLMStepInstance } from "./LLMStep";
 import { getLogEntryFullName, TimestampedLogEntry } from "./Logger";
@@ -94,8 +95,6 @@ function generateDetailedExecutionLogs(steps: LLMStepInstance[]): string {
     detailedLogs += `\n## 🔄 Execution ${index + 1} - ${step.template.name} (Cost: $${totalCost.toFixed(4)})\n`;
     detailedLogs += `- ⏱️ Duration: ${(step.durationMs || 0) / 1000} seconds\n`;
 
-    // TODO - add inputs and outputs
-
     step.llmMetricsList.forEach((metrics) => {
       const cost = calculatePriceMultipleCalls({ [metrics.llmName]: metrics });
       detailedLogs += `- ${metrics.llmName}:\n`;
@@ -105,6 +104,19 @@ function generateDetailedExecutionLogs(steps: LLMStepInstance[]): string {
       detailedLogs += `  - Estimated Cost: $${cost.toFixed(4)}\n`;
       detailedLogs += `  - Output tokens per second: ${(metrics.outputTokens / ((step.durationMs ?? 0) / 1000)).toFixed(2)}\n`;
     });
+
+    detailedLogs += "### Inputs:\n";
+    for (const [key, artifact] of Object.entries(step.getInputs())) {
+      detailedLogs += `#### ${key}\n`;
+      detailedLogs += getFullArtifact(artifact);
+    }
+
+    detailedLogs += "### Outputs:\n";
+    for (const [key, artifact] of Object.entries(step.getAllOutputs())) {
+      if (!artifact) continue;
+      detailedLogs += `#### ${key}\n`;
+      detailedLogs += getFullArtifact(artifact);
+    }
 
     detailedLogs += "### Logs:\n";
     step.getLogs().forEach((log) => {
@@ -159,11 +171,31 @@ ${JSON.stringify(llmResponse.messages, null, 2)}
 ${JSON.stringify(llmResponse.response, null, 2)}
 \`\`\`\`
 </details>\n\n\n`;
-    case "codeState":
-      const codeState = log.entry.codeState;
-      return formatCodeState(codeState);
     default:
       return "❓ Unknown log type";
+  }
+}
+
+function getFullArtifact(artifact: Artifact) {
+  switch (artifact.kind) {
+    case "prompt":
+      return `ℹ️ Prompt
+\`\`\`
+${artifact.value}
+\`\`\`
+`;
+    case "code":
+      return `📄️ Code
+\`\`\`
+${artifact.value}
+\`\`\`
+`;
+    case "codeState":
+      return `📄️ Code State
+${formatCodeState(artifact.value)}
+`;
+    default:
+      return `❓ Unknown (${artifact satisfies never})`;
   }
 }
 

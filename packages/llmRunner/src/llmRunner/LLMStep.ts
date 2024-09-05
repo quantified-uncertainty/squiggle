@@ -1,5 +1,6 @@
 import { SqError, SqProject } from "@quri/squiggle-lang";
 
+import { Artifact, ArtifactKind } from "./Artifact";
 import { LlmMetrics, Message } from "./LLMClient";
 import { LogEntry, Logger, TimestampedLogEntry } from "./Logger";
 import { PromptPair } from "./prompts";
@@ -22,22 +23,6 @@ export function codeStateErrorString(codeState: CodeState): string {
   }
   return "";
 }
-
-export type Artifact =
-  | {
-      kind: "prompt";
-      value: string;
-    }
-  | {
-      kind: "code";
-      value: string;
-    }
-  | {
-      kind: "codeState";
-      value: CodeState;
-    };
-
-type ArtifactKind = Artifact["kind"];
 
 export type StepShape<
   I extends Record<string, ArtifactKind> = Record<string, ArtifactKind>,
@@ -152,6 +137,10 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
 
   getAllOutputs() {
     return this.outputs;
+  }
+
+  getInputs() {
+    return this.inputs;
   }
 
   // private methods
