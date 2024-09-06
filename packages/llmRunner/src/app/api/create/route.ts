@@ -5,10 +5,21 @@ import {
 import {
   CreateRequestBody,
   createRequestBodySchema,
-  SquiggleResponse,
 } from "../../utils/squiggleTypes";
 
 export const maxDuration = 500;
+
+// https://nextjs.org/docs/app/building-your-application/routing/route-handlers#streaming
+function iteratorToStream<T>(iterator: AsyncGenerator<T, void>) {
+  return new ReadableStream({
+    async pull(controller) {
+      for await (const value of iterator) {
+        controller.enqueue(JSON.stringify(value) + "\n");
+      }
+      controller.close();
+    },
+  });
+}
 
 export async function POST(req: Request) {
   try {
@@ -30,31 +41,17 @@ export async function POST(req: Request) {
       messagesInHistoryToKeep: 4,
     };
 
-    const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
-      await runSquiggleGenerator({
-        input: squiggleCode
-          ? { type: "Edit", code: squiggleCode }
-          : { type: "Create", prompt: prompt ?? "" },
-        llmConfig,
-        abortSignal: req.signal,
-        openaiApiKey: process.env["OPENROUTER_API_KEY"],
-        anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
-      });
-
-    const response: SquiggleResponse = [
-      {
-        code,
-        isValid,
-        totalPrice,
-        runTimeMs,
-        llmRunCount,
-        logSummary,
-      },
-    ];
-
-    return new Response(JSON.stringify(response), {
-      headers: { "Content-Type": "application/json" },
+    const generator = runSquiggleGenerator({
+      input: squiggleCode
+        ? { type: "Edit", code: squiggleCode }
+        : { type: "Create", prompt: prompt ?? "" },
+      llmConfig,
+      abortSignal: req.signal,
+      openaiApiKey: process.env["OPENROUTER_API_KEY"],
+      anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
     });
+
+    return new Response(iteratorToStream(generator));
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
       return new Response("Generation stopped", { status: 499 });

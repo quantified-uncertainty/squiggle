@@ -55,7 +55,7 @@ export const ActionComponent: FC<{ action: Action }> = ({ action }) => {
           <p>
             <strong>Result:</strong>
           </p>
-          <pre className="mt-1 rounded bg-gray-100 p-2">
+          <pre className="mt-1 overflow-x-auto rounded bg-gray-100 p-2">
             {action.result || "No result yet"}
           </pre>
         </div>

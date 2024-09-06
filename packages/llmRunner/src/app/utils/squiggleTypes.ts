@@ -1,17 +1,34 @@
 import { z } from "zod";
 
-export const squiggleSchema = z.object({
+const squiggleWorkflowResultSchema = z.object({
   code: z.string().describe("Squiggle code snippet"),
   isValid: z.boolean(),
   totalPrice: z.number(),
   runTimeMs: z.number(),
   llmRunCount: z.number(),
-  logSummary: z.string(),
+  logSummary: z.string(), // markdown
 });
 
-export const squiggleResponseSchema = z.array(squiggleSchema);
+const currentStepSchema = z.object({
+  step: z.string(),
+});
 
-export type SquiggleResponse = z.infer<typeof squiggleResponseSchema>;
+export const workflowMessageSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("finalResult"),
+    content: squiggleWorkflowResultSchema,
+  }),
+  z.object({
+    kind: z.literal("currentStep"),
+    content: currentStepSchema,
+  }),
+]);
+
+export type SquiggleWorkflowResult = z.infer<
+  typeof squiggleWorkflowResultSchema
+>;
+
+export type SquiggleWorkflowMessage = z.infer<typeof workflowMessageSchema>;
 
 export type Action = {
   id: string;

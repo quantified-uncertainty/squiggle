@@ -1,4 +1,4 @@
-import { LlmConfig, runSquiggleGenerator } from "../squiggleGenerator";
+import { LlmConfig, runSquiggleGeneratorToResult } from "../squiggleGenerator";
 
 async function main() {
   const llmConfig: LlmConfig = {
@@ -12,7 +12,7 @@ async function main() {
     "Generate a function that takes a list of numbers and returns the sum of the numbers";
 
   const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
-    await runSquiggleGenerator({
+    await runSquiggleGeneratorToResult({
       input: { type: "Create", prompt },
       llmConfig,
     });

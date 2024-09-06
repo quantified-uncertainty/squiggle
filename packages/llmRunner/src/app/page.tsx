@@ -1,8 +1,7 @@
 "use client";
 
-import { experimental_useObject as useObject } from "ai/react";
 import { clsx } from "clsx";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button, StyledTab } from "@quri/ui";
 
@@ -14,10 +13,91 @@ import SquigglePlayground from "./SquigglePlayground";
 import {
   Action,
   CreateRequestBody,
-  SquiggleResponse,
-  squiggleResponseSchema,
+  SquiggleWorkflowResult,
+  workflowMessageSchema,
 } from "./utils/squiggleTypes";
 import { useAvailableHeight } from "./utils/useAvailableHeight";
+
+function useSquiggleResponse() {
+  const [object, setObject] = useState<
+    | {
+        result?: SquiggleWorkflowResult;
+        currentStep?: string;
+      }
+    | undefined
+  >();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error>();
+
+  const stop = useCallback(() => {
+    // FIXME - cancel fetch
+  }, []);
+
+  const submit = useCallback(async (request: CreateRequestBody) => {
+    try {
+      setObject(undefined);
+      setError(undefined);
+      setIsLoading(true);
+      const response = await fetch("/api/create", {
+        method: "POST",
+        body: JSON.stringify(request),
+      });
+
+      if (!response.body) {
+        return; // FIXME: Handle this case
+      }
+
+      let buffer = "";
+      const reader = response.body
+        .pipeThrough(new TextDecoderStream())
+        .pipeThrough(
+          new TransformStream<string, string>({
+            transform(chunk, controller) {
+              buffer += chunk;
+              const lines = buffer.split("\n");
+
+              // Process all complete lines
+              for (let i = 0; i < lines.length - 1; i++) {
+                const line = lines[i].trim();
+                if (line) controller.enqueue(line);
+              }
+
+              // Keep the last (potentially incomplete) line in the buffer
+              buffer = lines[lines.length - 1];
+            },
+            flush(controller) {
+              // Process any remaining data in the buffer
+              if (buffer.trim()) controller.enqueue(buffer.trim());
+            },
+          })
+        )
+        .getReader();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // Parse the JSON string
+        const eventJson = JSON.parse(value);
+        const event = workflowMessageSchema.parse(eventJson);
+        if (event.kind === "finalResult") {
+          setObject((object) => ({ ...object, result: event.content }));
+        } else if (event.kind === "currentStep") {
+          setObject((object) => ({
+            ...object,
+            currentStep: event.content.step,
+          }));
+        }
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error : new Error("Unknown error"));
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  return { object, submit, isLoading, stop, error };
+}
 
 export default function CreatePage() {
   // State
@@ -28,37 +108,15 @@ export default function CreatePage() {
   const [squiggleCode, setSquiggleCode] = useState("");
   const [playgroundOpacity, setPlaygroundOpacity] = useState(100);
   const [actions, setActions] = useState<Action[]>([]);
-  const [squiggleResponses, setSquiggleResponses] =
-    useState<SquiggleResponse | null>(null);
 
-  const numPlaygrounds = 1;
-  const [selectedRunIndex, setSelectedRunIndex] = useState<number | null>(null);
-  const [selectedLogsIndex, setSelectedLogsIndex] = useState<number | null>(
-    null
-  );
+  const [collapsedSidebar, setCollapsedSidebar] = useState(false);
+  const [viewLogs, setViewLogs] = useState(false);
 
   const { ref, height } = useAvailableHeight();
 
-  const { object, submit, isLoading, stop, error } = useObject({
-    api: "/api/create",
-    schema: squiggleResponseSchema,
-  });
+  const { object, submit, isLoading, stop, error } = useSquiggleResponse();
 
   const isReallyLoading = isLoading && !error;
-
-  const responses = useMemo(
-    () =>
-      object?.slice(0, numPlaygrounds).filter(
-        (response): response is SquiggleResponse[number] =>
-          // `useObject` can return partial objects, so we check that response is fully defined.
-          // This is mostly to satisfy TypeScript, because in practice /api/create always returns a fully defined response.
-          !!response &&
-          response.code !== undefined &&
-          response.logSummary !== undefined
-        // (we don't check for other fields but that's ok)
-      ) ?? [],
-    [object, numPlaygrounds]
-  );
 
   const updateLastAction = useCallback(
     (status: Action["status"], code?: string, result?: string) => {
@@ -80,24 +138,16 @@ export default function CreatePage() {
     if (error) {
       setPlaygroundOpacity(100);
       updateLastAction("error", undefined, `Error: ${error.toString()}`);
-    } else if (responses.length > 0) {
+    } else if (object?.result) {
+      const { result } = object;
       setPlaygroundOpacity(100);
-      setSquiggleResponses(responses);
-      responses.forEach((response, index) =>
-        updateLastAction(
-          "success",
-          response.code,
-          `Response ${index + 1}\nPrice: $${response.totalPrice.toFixed(4)}\nTime: ${response.runTimeMs / 1000}s\nLLM Runs: ${response.llmRunCount}`
-        )
+      updateLastAction(
+        "success",
+        result.code,
+        `Price: $${result.totalPrice.toFixed(4)}\nTime: ${result.runTimeMs / 1000}s\nLLM Runs: ${result.llmRunCount}`
       );
     }
-  }, [responses, updateLastAction, error]);
-
-  // Helper functions
-  const handleToggleLogs = (index: number | null) => {
-    setSelectedLogsIndex(index);
-    setSelectedRunIndex(null);
-  };
+  }, [object, error, updateLastAction]);
 
   // Event handlers
   const handleSubmit = () => {
@@ -126,28 +176,26 @@ export default function CreatePage() {
     updateLastAction("error", undefined, "Generation stopped by user");
   };
 
-  const handleEditVersion = (index: number) => {
-    setSelectedRunIndex(null);
+  const editRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleEditVersion = () => {
+    setCollapsedSidebar(false);
     setMode("edit");
-    setSquiggleCode(squiggleResponses?.[index]?.code || "");
+    setSquiggleCode(object?.result?.code || "");
     setTimeout(() => {
-      const promptTextarea = document.getElementById("edit-prompt-textarea");
-      if (promptTextarea) {
-        (promptTextarea as HTMLTextAreaElement).focus();
-      }
+      editRef.current?.focus();
     }, 0);
   };
 
-  const handleSelectRun = (index: number) => setSelectedRunIndex(index);
-
-  const handleCloseSelectedRun = () => setSelectedRunIndex(null);
-
-  return selectedLogsIndex === null ? (
+  return viewLogs ? (
+    <LogsView
+      onClose={() => setViewLogs(false)}
+      logSummary={object?.result?.logSummary || ""}
+    />
+  ) : (
     <div className="flex h-screen">
       {/* Left column: Mode Toggle, Chat, Form, and Actions */}
-      <div
-        className={clsx("w-1/5 p-2", selectedRunIndex !== null ? "hidden" : "")}
-      >
+      <div className={clsx("w-1/5 p-2", collapsedSidebar && "hidden")}>
         <StyledTab.Group
           selectedIndex={mode === "edit" ? 1 : 0}
           onChange={(index) => setMode(index === 0 ? "create" : "edit")}
@@ -169,6 +217,7 @@ export default function CreatePage() {
               </StyledTab.Panel>
               <StyledTab.Panel>
                 <StyledTextArea
+                  ref={editRef}
                   value={squiggleCode}
                   onChange={(e) => setSquiggleCode(e.target.value)}
                   placeholder="Enter your Squiggle code here"
@@ -198,77 +247,56 @@ export default function CreatePage() {
       </div>
       {/* Right column: SquigglePlaygrounds */}
       <div
-        className={clsx("px-2", selectedRunIndex !== null ? "w-full" : "w-4/5")}
+        className={clsx("px-2", collapsedSidebar ? "w-full" : "w-4/5")}
         style={{
           opacity: playgroundOpacity / 100,
           height: height || "auto",
         }}
         ref={ref}
       >
-        {squiggleResponses &&
-          squiggleResponses.map((response, index) => (
-            <div
-              key={(actions.at(-1)?.id ?? "null") + index}
-              className={clsx(
-                "mb-4",
-                selectedRunIndex !== null &&
-                  selectedRunIndex !== index &&
-                  "hidden"
-              )}
-            >
-              <div className="mb-2 flex items-center justify-between rounded bg-gray-100 p-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold">Run {index + 1}</span>
-                  <Badge theme="blue">
-                    {(response.runTimeMs / 1000).toFixed(2)}s
-                  </Badge>
-                  <Badge theme="green">${response.totalPrice.toFixed(4)}</Badge>
-                  <Badge theme="purple">{response.llmRunCount} LLM runs</Badge>
-                </div>
-                <div className="flex gap-2">
+        {object?.result && (
+          <div className="mb-4">
+            <div className="mb-2 flex items-center justify-between rounded bg-gray-100 p-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold">Run</span>
+                <Badge theme="blue">
+                  {(object.result.runTimeMs / 1000).toFixed(2)}s
+                </Badge>
+                <Badge theme="green">
+                  ${object.result.totalPrice.toFixed(4)}
+                </Badge>
+                <Badge theme="purple">
+                  {object.result.llmRunCount} LLM runs
+                </Badge>
+              </div>
+              <div className="flex gap-2">
+                <Button theme="primary" onClick={() => handleEditVersion()}>
+                  Fix
+                </Button>
+                <Button onClick={() => setViewLogs(true)}>Open Logs</Button>
+                {collapsedSidebar ? (
                   <Button
                     theme="primary"
-                    onClick={() => handleEditVersion(index)}
+                    onClick={() => setCollapsedSidebar(false)}
                   >
-                    {squiggleResponses.length === 1
-                      ? "Fix"
-                      : "Fix this version"}
+                    Close
                   </Button>
-                  <Button onClick={() => handleToggleLogs(index)}>
-                    Open Logs
+                ) : (
+                  <Button onClick={() => setCollapsedSidebar(true)}>
+                    Full View
                   </Button>
-                  {selectedRunIndex === null ? (
-                    <Button onClick={() => handleSelectRun(index)}>
-                      Full View
-                    </Button>
-                  ) : (
-                    <Button theme="primary" onClick={handleCloseSelectedRun}>
-                      Close
-                    </Button>
-                  )}
-                </div>
+                )}
               </div>
-              <SquigglePlayground
-                key={response.code}
-                height={
-                  height
-                    ? selectedRunIndex === null
-                      ? height / numPlaygrounds - 40
-                      : height - 40
-                    : 200
-                }
-                defaultCode={
-                  response.code || "// Your Squiggle code will appear here"
-                }
-              />
             </div>
-          ))}
+            <SquigglePlayground
+              height={height ? height - 40 : 200}
+              defaultCode={
+                object.result.code || "// Your Squiggle code will appear here"
+              }
+            />
+          </div>
+        )}
       </div>
     </div>
-  ) : (
-    <LogsView
-      onClose={() => handleToggleLogs(null)}
-      logSummary={squiggleResponses?.[selectedLogsIndex]?.logSummary || ""}
-    />
   );
 }
