@@ -87,7 +87,7 @@ describe("compactTreeString", () => {
     },
     y: {
       vType: "SampleSetDist",
-      samples: [10400, 6830, 5280, 7700, ...1000 total],
+      samples: [1.04e4, 6830, 5280, 7700, ...1000 total],
       summary: {
         mean: ...,
         p5: ...,
