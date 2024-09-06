@@ -1,9 +1,11 @@
 import { clsx } from "clsx";
-import { forwardRef, TextareaHTMLAttributes } from "react";
-import TextareaAutosize from "react-textarea-autosize";
+import { forwardRef } from "react";
+import TextareaAutosize, {
+  TextareaAutosizeProps,
+} from "react-textarea-autosize";
 
 export type StyledTextAreaProps = Omit<
-  TextareaHTMLAttributes<HTMLTextAreaElement>,
+  TextareaAutosizeProps,
   "className" | "style"
 >;
 

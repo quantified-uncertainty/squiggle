@@ -31,6 +31,42 @@ export const Default: Story = {
   ),
 };
 
+export const Stretch: Story = {
+  render: () => (
+    <div className="w-1/2">
+      <StyledTab.Group>
+        <StyledTab.List stretch>
+          <StyledTab name="Code" icon={BoltIcon} />
+          <StyledTab name="Settings" icon={FireIcon} />
+        </StyledTab.List>
+        <div className="mt-2 border border-slate-200 p-2">
+          <StyledTab.Panels>
+            <StyledTab.Panel>Code panel</StyledTab.Panel>
+            <StyledTab.Panel>Settings panel</StyledTab.Panel>
+          </StyledTab.Panels>
+        </div>
+      </StyledTab.Group>
+    </div>
+  ),
+};
+
+export const Primary: Story = {
+  render: () => (
+    <StyledTab.Group>
+      <StyledTab.List theme="primary">
+        <StyledTab name="Code" icon={BoltIcon} />
+        <StyledTab name="Settings" icon={FireIcon} />
+      </StyledTab.List>
+      <div className="mt-2 border border-slate-200 p-2">
+        <StyledTab.Panels>
+          <StyledTab.Panel>Code panel</StyledTab.Panel>
+          <StyledTab.Panel>Settings panel</StyledTab.Panel>
+        </StyledTab.Panels>
+      </div>
+    </StyledTab.Group>
+  ),
+};
+
 export const JustRootComponents: Story = {
   render: () => (
     <StyledTab.ListDiv>

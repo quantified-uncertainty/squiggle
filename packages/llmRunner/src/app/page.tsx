@@ -1,12 +1,15 @@
 "use client";
 
 import { experimental_useObject as useObject } from "ai/react";
+import { clsx } from "clsx";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { MarkdownViewer } from "@quri/squiggle-components";
+import { Button, StyledTab } from "@quri/ui";
 
-import { linkerWithDefaultSquiggleLibs } from "../llmRunner/processSquiggleCode";
+import { StyledTextArea } from "../../../ui/dist/forms/styled/StyledTextArea";
 import { ActionComponent } from "./ActionComponent";
+import { Badge } from "./Badge";
+import { LogsView } from "./LogsView";
 import SquigglePlayground from "./SquigglePlayground";
 import {
   Action,
@@ -15,30 +18,6 @@ import {
   squiggleResponseSchema,
 } from "./utils/squiggleTypes";
 import { useAvailableHeight } from "./utils/useAvailableHeight";
-
-const LogsView: React.FC<{ onClose: () => void; logSummary: string }> = ({
-  onClose,
-  logSummary,
-}) => {
-  return (
-    <div className="h-full w-full bg-white p-4">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold">Logs</h2>
-        <button
-          className="rounded bg-red-500 px-4 py-2 text-white"
-          onClick={onClose}
-        >
-          Close
-        </button>
-      </div>
-      <MarkdownViewer
-        md={logSummary}
-        textSize="sm"
-        linker={linkerWithDefaultSquiggleLibs}
-      />
-    </div>
-  );
-};
 
 export default function CreatePage() {
   // State
@@ -159,160 +138,137 @@ export default function CreatePage() {
     }, 0);
   };
 
-  const handleSelectRun = (index: number) => {
-    setSelectedRunIndex(index);
-  };
+  const handleSelectRun = (index: number) => setSelectedRunIndex(index);
 
-  const handleCloseSelectedRun = () => {
-    setSelectedRunIndex(null);
-  };
+  const handleCloseSelectedRun = () => setSelectedRunIndex(null);
 
-  return (
-    <div className="flex h-screen text-sm">
-      {selectedLogsIndex === null ? (
-        <>
-          {/* Left column: Mode Toggle, Chat, Form, and Actions */}
-          <div
-            className={`flex w-1/5 flex-col px-2 py-2 ${selectedRunIndex !== null ? "hidden" : ""}`}
-          >
-            <div className="mb-4 flex">
-              <button
-                className={`flex-1 rounded-l p-2 ${
-                  mode === "create" ? "bg-blue-500 text-white" : "bg-gray-200"
-                }`}
-                onClick={() => setMode("create")}
-              >
-                Create
-              </button>
-              <button
-                className={`flex-1 rounded-r p-2 ${
-                  mode === "edit" ? "bg-blue-500 text-white" : "bg-gray-200"
-                }`}
-                onClick={() => setMode("edit")}
-              >
-                Fix
-              </button>
-            </div>
-            {mode === "create" ? (
-              <div className="mb-4 flex">
-                <textarea
-                  className="flex-grow rounded-l border p-2 text-sm"
+  return selectedLogsIndex === null ? (
+    <div className="flex h-screen">
+      {/* Left column: Mode Toggle, Chat, Form, and Actions */}
+      <div
+        className={clsx("w-1/5 p-2", selectedRunIndex !== null ? "hidden" : "")}
+      >
+        <StyledTab.Group
+          selectedIndex={mode === "edit" ? 1 : 0}
+          onChange={(index) => setMode(index === 0 ? "create" : "edit")}
+        >
+          <StyledTab.List stretch theme="primary">
+            <StyledTab name="Create" />
+            <StyledTab name="Fix" />
+          </StyledTab.List>
+          <div className="mb-4 mt-2">
+            <StyledTab.Panels>
+              <StyledTab.Panel>
+                <StyledTextArea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Enter your prompt here"
                   rows={10}
+                  minRows={10}
                 />
-              </div>
-            ) : (
-              <>
-                <div className="mb-4 flex">
-                  <textarea
-                    className="flex-grow rounded-l border p-2 text-sm"
-                    value={squiggleCode}
-                    onChange={(e) => setSquiggleCode(e.target.value)}
-                    placeholder="Enter your Squiggle code here"
-                    rows={12}
-                  />
-                </div>
-              </>
-            )}
-            <button
-              className="rounded-r bg-blue-500 px-4 py-2 text-sm text-white"
-              onClick={handleSubmit}
-              disabled={isReallyLoading}
+              </StyledTab.Panel>
+              <StyledTab.Panel>
+                <StyledTextArea
+                  value={squiggleCode}
+                  onChange={(e) => setSquiggleCode(e.target.value)}
+                  placeholder="Enter your Squiggle code here"
+                  rows={12}
+                  minRows={12}
+                />
+              </StyledTab.Panel>
+            </StyledTab.Panels>
+          </div>
+        </StyledTab.Group>
+        <Button
+          theme="primary"
+          wide
+          onClick={handleSubmit}
+          disabled={isReallyLoading}
+        >
+          {isReallyLoading ? "Generating..." : "Send"}
+        </Button>
+        <div className="mt-4 flex-grow overflow-y-auto">
+          <h2 className="mb-2 text-sm font-bold">Actions</h2>
+          <div className="flex flex-col space-y-2">
+            {actions.map((action) => (
+              <ActionComponent key={action.id} action={action} />
+            ))}
+          </div>
+        </div>
+      </div>
+      {/* Right column: SquigglePlaygrounds */}
+      <div
+        className={clsx("px-2", selectedRunIndex !== null ? "w-full" : "w-4/5")}
+        style={{
+          opacity: playgroundOpacity / 100,
+          height: height || "auto",
+        }}
+        ref={ref}
+      >
+        {squiggleResponses &&
+          squiggleResponses.map((response, index) => (
+            <div
+              key={(actions.at(-1)?.id ?? "null") + index}
+              className={clsx(
+                "mb-4",
+                selectedRunIndex !== null &&
+                  selectedRunIndex !== index &&
+                  "hidden"
+              )}
             >
-              {isReallyLoading ? "Generating..." : "Send"}
-            </button>
-            <div className="flex-grow overflow-y-auto">
-              <h2 className="text-md mb-2 font-bold">Actions</h2>
-              {actions.map((action) => (
-                <ActionComponent key={action.id} action={action} />
-              ))}
-            </div>
-          </div>
-          {/* Right column: SquigglePlaygrounds */}
-          <div
-            className={`px-2 ${selectedRunIndex !== null ? "w-full" : "w-4/5"}`}
-            style={{
-              opacity: playgroundOpacity / 100,
-              height: height || "auto",
-            }}
-            ref={ref}
-          >
-            {squiggleResponses &&
-              squiggleResponses.map((response, index) => (
-                <div
-                  key={(actions.at(-1)?.id ?? "null") + index}
-                  className={`mb-4 ${selectedRunIndex !== null && selectedRunIndex !== index ? "hidden" : ""}`}
-                >
-                  <div className="mb-2 flex items-center justify-between rounded bg-gray-100 p-2">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-semibold">Run {index + 1}</span>
-                      <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
-                        {(response.runTimeMs / 1000).toFixed(2)}s
-                      </span>
-                      <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-800">
-                        ${response.totalPrice.toFixed(4)}
-                      </span>
-                      <span className="rounded-full bg-purple-100 px-2 py-1 text-xs text-purple-800">
-                        {response.llmRunCount} LLM runs
-                      </span>
-                    </div>
-                    <div className="flex space-x-2">
-                      <button
-                        className="rounded bg-blue-500 px-4 py-2 text-white"
-                        onClick={() => handleEditVersion(index)}
-                      >
-                        {squiggleResponses.length === 1
-                          ? "Fix"
-                          : "Fix this version"}
-                      </button>
-                      <button
-                        className="rounded bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
-                        onClick={() => handleToggleLogs(index)}
-                      >
-                        Open Logs
-                      </button>
-                      {selectedRunIndex === null ? (
-                        <button
-                          className="rounded bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
-                          onClick={() => handleSelectRun(index)}
-                        >
-                          Full View
-                        </button>
-                      ) : (
-                        <button
-                          className="rounded bg-red-500 px-4 py-2 text-white"
-                          onClick={handleCloseSelectedRun}
-                        >
-                          Close
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <SquigglePlayground
-                    key={response.code}
-                    height={
-                      height
-                        ? selectedRunIndex === null
-                          ? height / numPlaygrounds - 40
-                          : height - 40
-                        : 200
-                    }
-                    defaultCode={
-                      response.code || "// Your Squiggle code will appear here"
-                    }
-                  />
+              <div className="mb-2 flex items-center justify-between rounded bg-gray-100 p-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold">Run {index + 1}</span>
+                  <Badge theme="blue">
+                    {(response.runTimeMs / 1000).toFixed(2)}s
+                  </Badge>
+                  <Badge theme="green">${response.totalPrice.toFixed(4)}</Badge>
+                  <Badge theme="purple">{response.llmRunCount} LLM runs</Badge>
                 </div>
-              ))}
-          </div>
-        </>
-      ) : (
-        <LogsView
-          onClose={() => handleToggleLogs(null)}
-          logSummary={squiggleResponses?.[selectedLogsIndex]?.logSummary || ""}
-        />
-      )}
+                <div className="flex gap-2">
+                  <Button
+                    theme="primary"
+                    onClick={() => handleEditVersion(index)}
+                  >
+                    {squiggleResponses.length === 1
+                      ? "Fix"
+                      : "Fix this version"}
+                  </Button>
+                  <Button onClick={() => handleToggleLogs(index)}>
+                    Open Logs
+                  </Button>
+                  {selectedRunIndex === null ? (
+                    <Button onClick={() => handleSelectRun(index)}>
+                      Full View
+                    </Button>
+                  ) : (
+                    <Button theme="primary" onClick={handleCloseSelectedRun}>
+                      Close
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <SquigglePlayground
+                key={response.code}
+                height={
+                  height
+                    ? selectedRunIndex === null
+                      ? height / numPlaygrounds - 40
+                      : height - 40
+                    : 200
+                }
+                defaultCode={
+                  response.code || "// Your Squiggle code will appear here"
+                }
+              />
+            </div>
+          ))}
+      </div>
     </div>
+  ) : (
+    <LogsView
+      onClose={() => handleToggleLogs(null)}
+      logSummary={squiggleResponses?.[selectedLogsIndex]?.logSummary || ""}
+    />
   );
 }
