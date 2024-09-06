@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
     const response: SquiggleResponse = [
       {
-        code: typeof code === "string" ? code : "",
+        code,
         isValid,
         totalPrice,
         runTimeMs,

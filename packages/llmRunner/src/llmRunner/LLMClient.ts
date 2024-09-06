@@ -225,7 +225,6 @@ export class LLMClient {
   async run(
     conversationHistory: Message[]
   ): Promise<StandardizedChatCompletion> {
-    const squiggleContext = squiggleSystemContent;
     const selectedModelConfig = MODEL_CONFIGS[this.llmName];
 
     try {
@@ -246,7 +245,7 @@ export class LLMClient {
             model: selectedModelConfig.model,
             system: [
               {
-                text: squiggleContext,
+                text: squiggleSystemContent,
                 type: "text",
                 cache_control: { type: "ephemeral" },
               },
@@ -260,7 +259,7 @@ export class LLMClient {
         const completion = await openaiClient.chat.completions.create({
           model: selectedModelConfig.model,
           messages: [
-            { role: "system", content: squiggleContext },
+            { role: "system", content: squiggleSystemContent },
             ...conversationHistory,
           ],
         });

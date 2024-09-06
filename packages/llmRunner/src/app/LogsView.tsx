@@ -1,10 +1,12 @@
 "use client";
+import { FC } from "react";
+
 import { MarkdownViewer } from "@quri/squiggle-components";
 import { Button } from "@quri/ui";
 
 import { linkerWithDefaultSquiggleLibs } from "../llmRunner/processSquiggleCode";
 
-export const LogsView: React.FC<{
+export const LogsView: FC<{
   onClose: () => void;
   logSummary: string;
 }> = ({ onClose, logSummary }) => {

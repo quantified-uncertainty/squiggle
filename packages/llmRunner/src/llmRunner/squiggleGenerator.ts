@@ -20,17 +20,16 @@ function addStepByCodeState(
   codeState: CodeState,
   prompt: string
 ) {
-  if (codeState.type === "success") {
-    workflow.addStep(executeAdjustToFeedbackStep, {
-      prompt: { kind: "prompt", value: prompt },
-      codeState: { kind: "codeState", value: codeState },
-    });
-  } else {
-    workflow.addStep(fixCodeUntilItRunsStep, {
-      prompt: { kind: "prompt", value: prompt },
-      codeState: { kind: "codeState", value: codeState },
-    });
-  }
+  const step =
+    codeState.type === "success"
+      ? // both of these steps take prompt+codeState
+        executeAdjustToFeedbackStep
+      : fixCodeUntilItRunsStep;
+
+  workflow.addStep(step, {
+    prompt: { kind: "prompt", value: prompt },
+    codeState: { kind: "codeState", value: codeState },
+  });
 }
 
 export interface LlmConfig {
