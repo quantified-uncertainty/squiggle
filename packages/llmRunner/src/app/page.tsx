@@ -1,7 +1,7 @@
 "use client";
 
 import { clsx } from "clsx";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 
 import { Button, StyledTab } from "@quri/ui";
 
@@ -18,14 +18,13 @@ import {
 } from "./utils/squiggleTypes";
 import { useAvailableHeight } from "./utils/useAvailableHeight";
 
+type SquiggleResponse = {
+  result?: SquiggleWorkflowResult;
+  currentStep?: string;
+};
+
 function useSquiggleResponse() {
-  const [object, setObject] = useState<
-    | {
-        result?: SquiggleWorkflowResult;
-        currentStep?: string;
-      }
-    | undefined
-  >();
+  const [object, setObject] = useState<SquiggleResponse | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
 
@@ -99,6 +98,64 @@ function useSquiggleResponse() {
   return { object, submit, isLoading, stop, error };
 }
 
+const ResponseViewer: FC<{
+  object: SquiggleResponse;
+  onFix: () => void;
+  onViewLogs: () => void;
+  expanded: boolean;
+  setExpanded: (expanded: boolean) => void;
+  inProgress: boolean;
+}> = ({ object, onFix, onViewLogs, expanded, setExpanded, inProgress }) => {
+  const { ref, height } = useAvailableHeight();
+
+  return (
+    <div
+      className="px-2"
+      style={{
+        opacity: inProgress ? 0.5 : 1,
+        height: height || "auto",
+      }}
+      ref={ref}
+    >
+      {object.result && (
+        <div>
+          <div className="mb-2 flex items-center justify-between rounded bg-gray-100 p-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">Run</span>
+              <Badge theme="blue">
+                {(object.result.runTimeMs / 1000).toFixed(2)}s
+              </Badge>
+              <Badge theme="green">
+                ${object.result.totalPrice.toFixed(4)}
+              </Badge>
+              <Badge theme="purple">{object.result.llmRunCount} LLM runs</Badge>
+            </div>
+            <div className="flex gap-2">
+              <Button theme="primary" onClick={() => onFix()}>
+                Fix
+              </Button>
+              <Button onClick={() => onViewLogs()}>Open Logs</Button>
+              {expanded ? (
+                <Button theme="primary" onClick={() => setExpanded(false)}>
+                  Close
+                </Button>
+              ) : (
+                <Button onClick={() => setExpanded(true)}>Full View</Button>
+              )}
+            </div>
+          </div>
+          <SquigglePlayground
+            height={height ? height - 60 : 200}
+            defaultCode={
+              object.result.code || "// Your Squiggle code will appear here"
+            }
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function CreatePage() {
   // State
   const [mode, setMode] = useState<"create" | "edit">("create");
@@ -106,13 +163,11 @@ export default function CreatePage() {
     "Make a 1-line model, that is just 1 line in total, no comments, no decorators. Be creative."
   );
   const [squiggleCode, setSquiggleCode] = useState("");
-  const [playgroundOpacity, setPlaygroundOpacity] = useState(100);
+  const [inProgress, setInProgress] = useState(false);
   const [actions, setActions] = useState<Action[]>([]);
 
   const [collapsedSidebar, setCollapsedSidebar] = useState(false);
   const [viewLogs, setViewLogs] = useState(false);
-
-  const { ref, height } = useAvailableHeight();
 
   const { object, submit, isLoading, stop, error } = useSquiggleResponse();
 
@@ -134,13 +189,18 @@ export default function CreatePage() {
     []
   );
 
+  const [renderedObject, setRenderedObject] = useState<
+    SquiggleResponse | undefined
+  >();
+
   useEffect(() => {
     if (error) {
-      setPlaygroundOpacity(100);
+      setInProgress(false);
       updateLastAction("error", undefined, `Error: ${error.toString()}`);
     } else if (object?.result) {
       const { result } = object;
-      setPlaygroundOpacity(100);
+      setInProgress(false);
+      setRenderedObject(object);
       updateLastAction(
         "success",
         result.code,
@@ -151,7 +211,7 @@ export default function CreatePage() {
 
   // Event handlers
   const handleSubmit = () => {
-    setPlaygroundOpacity(50);
+    setInProgress(true);
     const newAction: Action = {
       id: Date.now().toString(),
       prompt,
@@ -172,7 +232,7 @@ export default function CreatePage() {
 
   const handleStop = () => {
     stop();
-    setPlaygroundOpacity(100);
+    setInProgress(false);
     updateLastAction("error", undefined, "Generation stopped by user");
   };
 
@@ -181,7 +241,7 @@ export default function CreatePage() {
   const handleEditVersion = () => {
     setCollapsedSidebar(false);
     setMode("edit");
-    setSquiggleCode(object?.result?.code || "");
+    setSquiggleCode(renderedObject?.result?.code || "");
     setTimeout(() => {
       editRef.current?.focus();
     }, 0);
@@ -190,7 +250,7 @@ export default function CreatePage() {
   return viewLogs ? (
     <LogsView
       onClose={() => setViewLogs(false)}
-      logSummary={object?.result?.logSummary || ""}
+      logSummary={renderedObject?.result?.logSummary || ""}
     />
   ) : (
     <div className="flex h-screen">
@@ -245,58 +305,19 @@ export default function CreatePage() {
           </div>
         </div>
       </div>
-      {/* Right column: SquigglePlaygrounds */}
-      <div
-        className={clsx("px-2", collapsedSidebar ? "w-full" : "w-4/5")}
-        style={{
-          opacity: playgroundOpacity / 100,
-          height: height || "auto",
-        }}
-        ref={ref}
-      >
-        {object?.result && (
-          <div className="mb-4">
-            <div className="mb-2 flex items-center justify-between rounded bg-gray-100 p-2">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">Run</span>
-                <Badge theme="blue">
-                  {(object.result.runTimeMs / 1000).toFixed(2)}s
-                </Badge>
-                <Badge theme="green">
-                  ${object.result.totalPrice.toFixed(4)}
-                </Badge>
-                <Badge theme="purple">
-                  {object.result.llmRunCount} LLM runs
-                </Badge>
-              </div>
-              <div className="flex gap-2">
-                <Button theme="primary" onClick={() => handleEditVersion()}>
-                  Fix
-                </Button>
-                <Button onClick={() => setViewLogs(true)}>Open Logs</Button>
-                {collapsedSidebar ? (
-                  <Button
-                    theme="primary"
-                    onClick={() => setCollapsedSidebar(false)}
-                  >
-                    Close
-                  </Button>
-                ) : (
-                  <Button onClick={() => setCollapsedSidebar(true)}>
-                    Full View
-                  </Button>
-                )}
-              </div>
-            </div>
-            <SquigglePlayground
-              height={height ? height - 40 : 200}
-              defaultCode={
-                object.result.code || "// Your Squiggle code will appear here"
-              }
-            />
-          </div>
-        )}
-      </div>
+      {/* Right column: Menu and SquigglePlayground */}
+      {renderedObject && (
+        <div className="flex-1">
+          <ResponseViewer
+            object={renderedObject}
+            onFix={handleEditVersion}
+            onViewLogs={() => setViewLogs(true)}
+            expanded={collapsedSidebar}
+            setExpanded={setCollapsedSidebar}
+            inProgress={inProgress}
+          />
+        </div>
+      )}
     </div>
   );
 }
