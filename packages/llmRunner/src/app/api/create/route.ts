@@ -51,7 +51,13 @@ export async function POST(req: Request) {
       anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
     });
 
-    return new Response(iteratorToStream(generator));
+    return new Response(iteratorToStream(generator), {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
       return new Response("Generation stopped", { status: 499 });

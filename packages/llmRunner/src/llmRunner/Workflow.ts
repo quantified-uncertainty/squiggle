@@ -59,7 +59,7 @@ export class Workflow {
 
     await step.run();
 
-    console.log(chalk.cyan(`Finishing state ${step.template.name}`), step);
+    console.log(chalk.cyan(`Finishing state ${step.template.name}`));
 
     return {
       continueExecution: !this.isProcessComplete(),

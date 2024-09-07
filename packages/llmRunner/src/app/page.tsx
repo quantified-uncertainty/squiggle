@@ -1,22 +1,30 @@
 "use client";
 
 import { clsx } from "clsx";
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import {
+  FC,
+  Reducer,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 
 import { Button, StyledTab } from "@quri/ui";
 
 import { StyledTextArea } from "../../../ui/dist/forms/styled/StyledTextArea";
-import { ActionComponent } from "./ActionComponent";
 import { Badge } from "./Badge";
 import { LogsView } from "./LogsView";
 import SquigglePlayground from "./SquigglePlayground";
 import {
-  Action,
   CreateRequestBody,
   SquiggleWorkflowResult,
+  WorkflowDescription,
   workflowMessageSchema,
 } from "./utils/squiggleTypes";
 import { useAvailableHeight } from "./utils/useAvailableHeight";
+import { WorkflowRunComponent } from "./WorkflowRunComponent";
 
 type SquiggleResponse = {
   result?: SquiggleWorkflowResult;
@@ -52,6 +60,7 @@ function useSquiggleResponse() {
         .pipeThrough(
           new TransformStream<string, string>({
             transform(chunk, controller) {
+              console.log(chunk);
               buffer += chunk;
               const lines = buffer.split("\n");
 
@@ -96,6 +105,58 @@ function useSquiggleResponse() {
   }, []);
 
   return { object, submit, isLoading, stop, error };
+}
+
+function useWorkflowsReducer() {
+  type State = WorkflowDescription[];
+  type Action =
+    | {
+        type: "add";
+        payload: WorkflowDescription;
+      }
+    | {
+        type: "updateLast";
+        payload: Partial<WorkflowDescription>;
+      };
+
+  const reducer: Reducer<State, Action> = (state, action) => {
+    switch (action.type) {
+      case "add":
+        return [...state, action.payload];
+      case "updateLast":
+        return [
+          ...state.slice(0, -1),
+          { ...state[state.length - 1], ...action.payload },
+        ];
+      default:
+        return state;
+    }
+  };
+
+  const [state, dispatch] = useReducer(reducer, []);
+
+  const addWorkflow = useCallback((workflow: WorkflowDescription) => {
+    dispatch({
+      type: "add",
+      payload: workflow,
+    });
+  }, []);
+
+  const updateLastWorkflow = useCallback(
+    (workflowRun: Partial<WorkflowDescription>) => {
+      dispatch({
+        type: "updateLast",
+        payload: workflowRun,
+      });
+    },
+    []
+  );
+
+  return {
+    workflows: state,
+    addWorkflow,
+    updateLastWorkflow,
+  };
 }
 
 const ResponseViewer: FC<{
@@ -164,7 +225,8 @@ export default function CreatePage() {
   );
   const [squiggleCode, setSquiggleCode] = useState("");
   const [inProgress, setInProgress] = useState(false);
-  const [actions, setActions] = useState<Action[]>([]);
+
+  const { workflows, addWorkflow, updateLastWorkflow } = useWorkflowsReducer();
 
   const [collapsedSidebar, setCollapsedSidebar] = useState(false);
   const [viewLogs, setViewLogs] = useState(false);
@@ -173,22 +235,6 @@ export default function CreatePage() {
 
   const isReallyLoading = isLoading && !error;
 
-  const updateLastAction = useCallback(
-    (status: Action["status"], code?: string, result?: string) => {
-      setActions((prevActions) => {
-        const updatedActions = [...prevActions];
-        if (updatedActions.length > 0) {
-          const lastAction = updatedActions[updatedActions.length - 1];
-          lastAction.status = status;
-          if (code) lastAction.code = code;
-          if (result) lastAction.result = result;
-        }
-        return updatedActions;
-      });
-    },
-    []
-  );
-
   const [renderedObject, setRenderedObject] = useState<
     SquiggleResponse | undefined
   >();
@@ -196,29 +242,39 @@ export default function CreatePage() {
   useEffect(() => {
     if (error) {
       setInProgress(false);
-      updateLastAction("error", undefined, `Error: ${error.toString()}`);
-    } else if (object?.result) {
+      updateLastWorkflow({
+        status: "error",
+        result: `Error: ${error.toString()}`,
+      });
+    } else if (object) {
       const { result } = object;
-      setInProgress(false);
-      setRenderedObject(object);
-      updateLastAction(
-        "success",
-        result.code,
-        `Price: $${result.totalPrice.toFixed(4)}\nTime: ${result.runTimeMs / 1000}s\nLLM Runs: ${result.llmRunCount}`
-      );
+
+      if (result) {
+        setInProgress(false);
+        setRenderedObject(object);
+        updateLastWorkflow({
+          status: "success",
+          code: result.code,
+          result: `Price: $${result.totalPrice.toFixed(4)}\nTime: ${result.runTimeMs / 1000}s\nLLM Runs: ${result.llmRunCount}`,
+        });
+      } else {
+        updateLastWorkflow({
+          currentStep: object.currentStep,
+        });
+      }
     }
-  }, [object, error, updateLastAction]);
+  }, [object, error, updateLastWorkflow]);
 
   // Event handlers
   const handleSubmit = () => {
     setInProgress(true);
-    const newAction: Action = {
+    const newRun: WorkflowDescription = {
       id: Date.now().toString(),
       prompt,
       status: "loading",
       timestamp: new Date(),
     };
-    setActions((prevActions) => [...prevActions, newAction]);
+    addWorkflow(newRun);
 
     const requestBody: CreateRequestBody = {
       prompt: mode === "create" ? prompt : undefined,
@@ -233,7 +289,10 @@ export default function CreatePage() {
   const handleStop = () => {
     stop();
     setInProgress(false);
-    updateLastAction("error", undefined, "Generation stopped by user");
+    updateLastWorkflow({
+      status: "error",
+      result: "Generation stopped by user",
+    });
   };
 
   const editRef = useRef<HTMLTextAreaElement>(null);
@@ -299,8 +358,8 @@ export default function CreatePage() {
         <div className="mt-4 flex-grow overflow-y-auto">
           <h2 className="mb-2 text-sm font-bold">Actions</h2>
           <div className="flex flex-col space-y-2">
-            {actions.map((action) => (
-              <ActionComponent key={action.id} action={action} />
+            {workflows.map((workflow) => (
+              <WorkflowRunComponent key={workflow.id} workflow={workflow} />
             ))}
           </div>
         </div>

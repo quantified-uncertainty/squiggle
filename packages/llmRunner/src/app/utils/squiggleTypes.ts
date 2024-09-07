@@ -30,13 +30,15 @@ export type SquiggleWorkflowResult = z.infer<
 
 export type SquiggleWorkflowMessage = z.infer<typeof workflowMessageSchema>;
 
-export type Action = {
+// Client-side representation of a workflow.
+export type WorkflowDescription = {
   id: string;
   prompt: string;
   result?: string;
   code?: string;
   logSummary?: string;
   status: "loading" | "success" | "error";
+  currentStep?: string;
   timestamp: Date;
 };
 
