@@ -183,7 +183,7 @@ export const ValueWithContextViewer: FC<Props> = ({
                 ? "mb-2 px-0.5 py-1 focus:bg-indigo-50"
                 : "focus:bg-indigo-100"
             )}
-            onFocus={(_) => {
+            onMouseEnter={(_) => {
               scrollEditorToPath();
             }}
             onKeyDown={(event) => {
