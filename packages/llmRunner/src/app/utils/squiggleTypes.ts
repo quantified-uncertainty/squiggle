@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// Protocol for streaming workflow changes between server and client.
 const squiggleWorkflowResultSchema = z.object({
   code: z.string().describe("Squiggle code snippet"),
   isValid: z.boolean(),
@@ -33,14 +34,14 @@ export type SquiggleWorkflowMessage = z.infer<typeof workflowMessageSchema>;
 // Client-side representation of a workflow.
 export type WorkflowDescription = {
   id: string;
-  prompt: string;
-  result?: string;
-  code?: string;
-  logSummary?: string;
-  status: "loading" | "success" | "error";
-  currentStep?: string;
   timestamp: Date;
-};
+  request: CreateRequestBody;
+  currentStep?: string;
+} & (
+  | { status: "loading"; result?: undefined }
+  | { status: "finished"; result: SquiggleWorkflowResult }
+  | { status: "error"; result: string }
+);
 
 export const createRequestBodySchema = z.object({
   prompt: z.string().optional(),
