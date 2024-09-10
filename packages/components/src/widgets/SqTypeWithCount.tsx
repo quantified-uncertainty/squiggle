@@ -4,8 +4,8 @@ export const SqTypeWithCount: FC<{
   type: string;
   count: number;
 }> = ({ type, count }) => (
-  <div>
-    {type}
-    <span className="ml-0.5">{count}</span>
+  <div className="space-x-1 font-mono text-stone-400">
+    <span>{type}</span>
+    <span className="font-mono text-sm">{count}</span>
   </div>
 );

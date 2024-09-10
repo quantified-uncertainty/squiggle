@@ -42,7 +42,7 @@ widgetRegistry.register("Dist", {
       </div>
     );
   },
-  Graph(value) {
+  PreviewRightSide(value) {
     const dist = value.value;
     const environment = value.context.runContext.environment;
     const p05 = unwrapOrFailure(dist.inv(environment, 0.05));

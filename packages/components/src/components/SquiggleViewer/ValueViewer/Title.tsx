@@ -116,7 +116,7 @@ export const Title: FC<TitleProps> = (props) => {
       >
         {title}
       </div>
-      {showColon && <div className="font-mono text-gray-400">:</div>}
+      {showColon && <div className="font-mono text-stone-300">:</div>}
     </div>
   );
 };

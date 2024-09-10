@@ -3,13 +3,13 @@ import React, { FC } from "react";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { widgetRegistry } from "../../widgets/registry.js";
 
-export const SquiggleValueGraph: FC<{
+export const SquiggleValuePreviewRightSide: FC<{
   value: SqValueWithContext;
 }> = ({ value }) => {
   const widget = widgetRegistry.widgets.get(value.tag);
-  if (!widget?.Graph) {
+  if (!widget?.PreviewRightSide) {
     return null;
   }
 
-  return <widget.Graph value={value} />;
+  return <widget.PreviewRightSide value={value} />;
 };
