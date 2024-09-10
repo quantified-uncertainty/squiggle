@@ -40,7 +40,7 @@ const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
       <span>
         <CommentIcon
           size={13}
-          className="text-purple-100 group-hover:text-purple-300"
+          className="cursor-pointer text-slate-200 hover:text-slate-600 group-hover:text-slate-400"
         />
       </span>
     </TextTooltip>
@@ -214,7 +214,6 @@ export const ValueWithContextViewer: FC<Props> = ({
               />
 
               {!isOpen && <CommentIconForValue value={value} />}
-              {enableDropdownMenu && <SquiggleValueMenu value={value} />}
               {exportData && exportData.path.length < 2 && onOpenExport && (
                 <TextTooltip
                   text={
@@ -246,6 +245,7 @@ export const ValueWithContextViewer: FC<Props> = ({
                 </TextTooltip>
               )}
               <SpecificationDropdown value={value} />
+              {enableDropdownMenu && <SquiggleValueMenu value={value} />}
             </div>
             <div className="flex flex-grow items-end">
               {hasContent && (
@@ -257,11 +257,13 @@ export const ValueWithContextViewer: FC<Props> = ({
                 ></div>
               )}
             </div>
-            <div className={`flex items-end items-center space-x-2`}>
-              <div className="text-sm text-blue-700">
+            <div
+              className={`flex items-end items-center space-x-2 text-slate-600`}
+            >
+              <div className="text-sm">
                 {<SquiggleValuePreview value={value} />}
               </div>
-              <div className="flex w-[25px] items-center justify-center text-blue-600">
+              <div className="flex w-[25px] items-center justify-center">
                 {<SquiggleValuePreviewRightSide value={value} />}
               </div>
             </div>

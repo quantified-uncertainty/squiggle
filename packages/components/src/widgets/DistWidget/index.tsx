@@ -36,7 +36,7 @@ widgetRegistry.register("Dist", {
       <div className="flex flex-row items-center space-x-2">
         <div className="flex">
           {showNumber(p05)}
-          <span className="mx-1.5 opacity-40">to</span>
+          <span className="mx-1.5 text-slate-400">to</span>
           {showNumber(p95)}
         </div>
       </div>
