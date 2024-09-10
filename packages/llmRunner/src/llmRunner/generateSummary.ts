@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-import { Artifact } from "./Artifact";
+import { Artifact, ArtifactKind } from "./Artifact";
 import { calculatePriceMultipleCalls, LlmMetrics, LLMName } from "./LLMClient";
 import { CodeState, LLMStepInstance } from "./LLMStep";
 import { getLogEntryFullName, TimestampedLogEntry } from "./Logger";
@@ -36,7 +36,7 @@ function generateOverview(
   metricsByLLM: Record<string, LlmMetrics>
 ): string {
   const totalTime = executions.reduce(
-    (acc, exec) => acc + (exec.durationMs || 0),
+    (acc, exec) => acc + exec.getDuration(),
     0
   );
   const estimatedCost = calculatePriceMultipleCalls(metricsByLLM);
@@ -93,7 +93,7 @@ function generateDetailedExecutionLogs(steps: LLMStepInstance[]): string {
     );
 
     detailedLogs += `\n## 🔄 Execution ${index + 1} - ${step.template.name} (Cost: $${totalCost.toFixed(4)})\n`;
-    detailedLogs += `- ⏱️ Duration: ${(step.durationMs || 0) / 1000} seconds\n`;
+    detailedLogs += `- ⏱️ Duration: ${step.getDuration() / 1000} seconds\n`;
 
     step.llmMetricsList.forEach((metrics) => {
       const cost = calculatePriceMultipleCalls({ [metrics.llmName]: metrics });
@@ -102,20 +102,18 @@ function generateDetailedExecutionLogs(steps: LLMStepInstance[]): string {
       detailedLogs += `  - Input Tokens: ${metrics.inputTokens}\n`;
       detailedLogs += `  - Output Tokens: ${metrics.outputTokens}\n`;
       detailedLogs += `  - Estimated Cost: $${cost.toFixed(4)}\n`;
-      detailedLogs += `  - Output tokens per second: ${(metrics.outputTokens / ((step.durationMs ?? 0) / 1000)).toFixed(2)}\n`;
+      detailedLogs += `  - Output tokens per second: ${(metrics.outputTokens / (step.getDuration() / 1000)).toFixed(2)}\n`;
     });
 
     detailedLogs += "### Inputs:\n";
     for (const [key, artifact] of Object.entries(step.getInputs())) {
-      detailedLogs += `#### ${key}\n`;
-      detailedLogs += getFullArtifact(artifact);
+      detailedLogs += getFullArtifact(key, artifact);
     }
 
     detailedLogs += "### Outputs:\n";
     for (const [key, artifact] of Object.entries(step.getAllOutputs())) {
       if (!artifact) continue;
-      detailedLogs += `#### ${key}\n`;
-      detailedLogs += getFullArtifact(artifact);
+      detailedLogs += getFullArtifact(key, artifact);
     }
 
     detailedLogs += "### Logs:\n";
@@ -176,22 +174,30 @@ ${JSON.stringify(llmResponse.response, null, 2)}
   }
 }
 
-function getFullArtifact(artifact: Artifact) {
+function getFullArtifact(name: string, artifact: Artifact) {
+  const kindToEmoji: Record<ArtifactKind, string> = {
+    prompt: "✏️",
+    code: "📄️",
+    codeState: "🔧",
+  };
+
+  const header = `#### ${name} ${kindToEmoji[artifact.kind] ?? "❓"}`;
+
   switch (artifact.kind) {
     case "prompt":
-      return `ℹ️ Prompt
+      return `${header}
 \`\`\`
 ${artifact.value}
 \`\`\`
 `;
     case "code":
-      return `📄️ Code
+      return `${header}
 \`\`\`
 ${artifact.value}
 \`\`\`
 `;
     case "codeState":
-      return `📄️ Code State
+      return `${header}
 ${formatCodeState(artifact.value)}
 `;
     default:

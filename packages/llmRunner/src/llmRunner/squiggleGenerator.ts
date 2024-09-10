@@ -1,7 +1,4 @@
-import {
-  SquiggleWorkflowMessage,
-  SquiggleWorkflowResult,
-} from "../app/utils/squiggleTypes";
+import { SquiggleWorkflowResult } from "../app/utils/squiggleTypes";
 import { generateSummary } from "./generateSummary";
 import { LLMName } from "./LLMClient";
 import { CodeState, LLMStepTemplate } from "./LLMStep";
@@ -16,7 +13,7 @@ import {
   editExistingSquiggleCodePrompt,
   generateNewSquiggleCodePrompt,
 } from "./prompts";
-import { Workflow } from "./Workflow";
+import { Workflow, WorkflowEventListener, WorkflowEventType } from "./Workflow";
 
 function addStepByCodeState(
   workflow: Workflow,
@@ -303,30 +300,42 @@ export class SquiggleGenerator {
   }
 }
 
-export async function* runSquiggleGenerator(params: {
+type SquiggleEventHandlers = Partial<{
+  [K in WorkflowEventType]?: WorkflowEventListener<K>;
+}> & {
+  // fake squiggle-specific event
+  finishSquiggleWorkflow: (event: {
+    data: { result: SquiggleWorkflowResult };
+  }) => void;
+};
+
+export async function runSquiggleGenerator(params: {
   input: GeneratorInput;
   abortSignal?: AbortSignal;
   llmConfig?: LlmConfig;
   openaiApiKey?: string;
   anthropicApiKey?: string;
-}): AsyncGenerator<SquiggleWorkflowMessage, void> {
+  handlers: SquiggleEventHandlers;
+}): Promise<void> {
   if (!params.anthropicApiKey) {
     throw new Error("Anthropic API key is required");
   }
 
   const generator = new SquiggleGenerator(params);
 
-  // Run the generator steps until completion
-  while (!(await generator.runNextStep())) {
-    yield {
-      kind: "currentStep",
-      content: {
-        step: generator.workflow.getSteps().at(-1)?.template.name ?? "unknown",
-      },
-    };
+  for (const [eventType, listener] of Object.entries(params.handlers)) {
+    generator.workflow.addEventListener(
+      eventType as WorkflowEventType,
+      listener as WorkflowEventListener<WorkflowEventType>
+    );
   }
 
-  yield { kind: "finalResult", content: generator.getFinalResult() };
+  // Run the generator steps until completion
+  while (!(await generator.runNextStep())) {}
+
+  params.handlers.finishSquiggleWorkflow?.({
+    data: { result: generator.getFinalResult() },
+  });
 }
 
 export async function runSquiggleGeneratorToResult(params: {
@@ -337,11 +346,15 @@ export async function runSquiggleGeneratorToResult(params: {
   anthropicApiKey?: string;
 }): Promise<SquiggleWorkflowResult> {
   let finalResult: SquiggleWorkflowResult | undefined;
-  for await (const result of runSquiggleGenerator(params)) {
-    if (result.kind === "finalResult") {
-      finalResult = result.content;
-    }
-  }
+  await runSquiggleGenerator({
+    ...params,
+    handlers: {
+      finishSquiggleWorkflow: (event) => {
+        finalResult = event.data.result;
+      },
+    },
+  });
+
   if (!finalResult) {
     throw new Error("No final result");
   }

@@ -15,6 +15,20 @@ export type CodeState =
   | { type: "runFailed"; code: string; error: SqError; project: SqProject }
   | { type: "success"; code: string };
 
+type StepState =
+  | {
+      kind: "PENDING";
+    }
+  | {
+      kind: "DONE";
+      durationMs: number;
+    }
+  | {
+      kind: "FAILED";
+      durationMs: number;
+      error: string;
+    };
+
 export function codeStateErrorString(codeState: CodeState): string {
   if (codeState.type === "formattingFailed") {
     return codeState.error;
@@ -70,23 +84,20 @@ export class LLMStepTemplate<const Shape extends StepShape = StepShape> {
 }
 
 export class LLMStepInstance<const Shape extends StepShape = StepShape> {
-  public durationMs?: number;
   private logger: Logger;
   private conversationMessages: Message[] = [];
   public llmMetricsList: LlmMetrics[] = [];
   private startTime: number;
-  private state: "PENDING" | "DONE" | "FAILED" = "PENDING";
-  private inputs: Inputs<Shape>;
+  private state: StepState = { kind: "PENDING" };
   private outputs: Partial<Outputs<Shape>> = {};
 
   constructor(
     public readonly template: LLMStepTemplate<Shape>,
     public readonly workflow: Workflow,
-    inputs: Inputs<Shape>
+    private readonly inputs: Inputs<Shape>
   ) {
     this.startTime = Date.now();
     this.logger = new Logger();
-    this.inputs = inputs;
   }
 
   getInput<K extends keyof Inputs<Shape>>(key: K): Inputs<Shape>[K] {
@@ -102,7 +113,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
   }
 
   async run() {
-    if (this.state !== "PENDING") {
+    if (this.state.kind !== "PENDING") {
       return;
     }
 
@@ -135,6 +146,10 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     return this.state;
   }
 
+  getDuration() {
+    return this.state.kind === "PENDING" ? 0 : this.state.durationMs;
+  }
+
   getAllOutputs() {
     return this.outputs;
   }
@@ -159,17 +174,19 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
 
   private criticalError(error: string) {
     this.log({ type: "error", message: error });
-    this.updateDuration();
-    this.state = "FAILED";
+    this.state = {
+      kind: "FAILED",
+      durationMs: this.calculateDuration(),
+      error,
+    };
   }
 
-  private updateDuration() {
-    this.durationMs = Date.now() - this.startTime;
+  private calculateDuration() {
+    return Date.now() - this.startTime;
   }
 
   private complete() {
-    this.updateDuration();
-    this.state = "DONE";
+    this.state = { kind: "DONE", durationMs: this.calculateDuration() };
   }
 
   private addConversationMessage(message: Message): void {

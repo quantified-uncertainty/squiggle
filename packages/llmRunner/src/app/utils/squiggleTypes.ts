@@ -9,7 +9,7 @@ const squiggleWorkflowResultSchema = z.object({
   logSummary: z.string(), // markdown
 });
 
-const currentStepSchema = z.object({
+const stepNameSchema = z.object({
   step: z.string(),
 });
 
@@ -19,8 +19,8 @@ export const workflowMessageSchema = z.discriminatedUnion("kind", [
     content: squiggleWorkflowResultSchema,
   }),
   z.object({
-    kind: z.literal("currentStep"),
-    content: currentStepSchema,
+    kind: z.literal("startStep"),
+    content: stepNameSchema,
   }),
 ]);
 

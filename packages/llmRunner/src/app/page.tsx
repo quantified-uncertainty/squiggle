@@ -90,7 +90,7 @@ function useSquiggleResponse() {
         const event = workflowMessageSchema.parse(eventJson);
         if (event.kind === "finalResult") {
           setObject((object) => ({ ...object, result: event.content }));
-        } else if (event.kind === "currentStep") {
+        } else if (event.kind === "startStep") {
           setObject((object) => ({
             ...object,
             currentStep: event.content.step,
@@ -253,7 +253,7 @@ export default function CreatePage() {
         setInProgress(false);
         setRenderedObject(object);
         updateLastWorkflow({
-          status: "success",
+          status: result.isValid ? "success" : "error",
           code: result.code,
           result: `Price: $${result.totalPrice.toFixed(4)}\nTime: ${result.runTimeMs / 1000}s\nLLM Runs: ${result.llmRunCount}`,
         });

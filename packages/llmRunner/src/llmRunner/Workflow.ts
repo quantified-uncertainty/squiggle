@@ -11,6 +11,47 @@ import { Inputs, LLMStepInstance, LLMStepTemplate, StepShape } from "./LLMStep";
 import { TimestampedLogEntry } from "./Logger";
 import { LlmConfig } from "./squiggleGenerator";
 
+export type WorkflowEventShape =
+  | {
+      type: "addStep";
+      payload: {
+        step: LLMStepInstance;
+      };
+    }
+  | {
+      type: "startStep";
+      payload: {
+        step: LLMStepInstance;
+      };
+    }
+  | {
+      type: "finishStep";
+      payload: {
+        step: LLMStepInstance;
+      };
+    };
+
+export type WorkflowEventType = WorkflowEventShape["type"];
+
+export class WorkflowEvent<T extends WorkflowEventType> extends Event {
+  constructor(
+    type: T,
+    public data: Extract<WorkflowEventShape, { type: T }>["payload"]
+  ) {
+    super(type);
+  }
+}
+
+export type WorkflowEventListener<T extends WorkflowEventType> = (
+  event: WorkflowEvent<T>
+) => void;
+
+type WorkflowResult = {
+  isValid: boolean;
+  code: string;
+  logs: TimestampedLogEntry[];
+};
+
 export class Workflow {
   private steps: LLMStepInstance[] = [];
   private priceLimit: number;
@@ -39,27 +80,36 @@ export class Workflow {
     template: LLMStepTemplate<S>,
     inputs: Inputs<S>
   ): LLMStepInstance<S> {
-    const step = template.instantiate(this, inputs);
-    this.steps.push(step as unknown as LLMStepInstance);
+    // sorry for "any"; countervariance issues
+    const step: LLMStepInstance<any> = template.instantiate(this, inputs);
+    this.steps.push(step);
+    this.dispatchEvent({
+      type: "addStep",
+      payload: { step },
+    });
     return step;
   }
 
   async runNextStep(): Promise<{
     continueExecution: boolean;
   }> {
-    if (this.checkResourceLimits()) {
-      return { continueExecution: false };
-    }
-
     const step = this.getCurrentStep();
 
     if (!step) {
       return { continueExecution: false };
     }
 
+    this.dispatchEvent({
+      type: "startStep",
+      payload: { step },
+    });
     await step.run();
 
     console.log(chalk.cyan(`Finishing state ${step.template.name}`));
+    this.dispatchEvent({
+      type: "finishStep",
+      payload: { step },
+    });
 
     return {
       continueExecution: !this.isProcessComplete(),
@@ -90,31 +140,30 @@ export class Workflow {
   }
 
   private isProcessComplete(): boolean {
-    const currentStepState = this.getCurrentStep()?.getState();
-    return currentStepState !== "PENDING";
+    return this.getCurrentStep()?.getState().kind !== "PENDING";
   }
 
-  getFinalResult(): {
-    isValid: boolean;
-    code: string;
-    logs: TimestampedLogEntry[];
-  } {
+  getFinalResult(): WorkflowResult {
     const finalStep = this.getCurrentStep();
     if (!finalStep) {
       throw new Error("No steps found");
     }
 
-    const isValid = finalStep.getState() === "DONE";
+    const isValid = finalStep.getState().kind === "DONE";
 
-    // look for first code output
+    // look for first code output in the last step that generated any code
     let code = "";
-    const outputs = finalStep.getAllOutputs();
-    for (const output of Object.values(outputs)) {
-      if (output?.kind === "code") {
-        code = output.value;
-      } else if (output?.kind === "codeState") {
-        code = output.value.code;
+    for (let i = this.steps.length - 1; i >= 0; i--) {
+      const step = this.steps[i];
+      const outputs = step.getAllOutputs();
+      for (const output of Object.values(outputs)) {
+        if (output?.kind === "code") {
+          code = output.value;
+        } else if (output?.kind === "codeState") {
+          code = output.value.code;
+        }
       }
+      if (code) break;
     }
 
     return {
@@ -193,5 +242,32 @@ export class Workflow {
     const relevantIndexes = getRelevantStepIndexes();
 
     return this.getMessagesFromSteps(relevantIndexes);
+  }
+
+  // Event methods
+
+  private eventTarget = new EventTarget();
+
+  private dispatchEvent(shape: WorkflowEventShape) {
+    this.eventTarget.dispatchEvent(
+      new WorkflowEvent(shape.type, shape.payload)
+    );
+  }
+
+  addEventListener<T extends WorkflowEventType>(
+    type: T,
+    listener: WorkflowEventListener<T>
+  ) {
+    this.eventTarget.addEventListener(type, listener as (event: Event) => void);
+  }
+
+  removeEventListener<T extends WorkflowEventType>(
+    type: T,
+    listener: WorkflowEventListener<T>
+  ) {
+    this.eventTarget.removeEventListener(
+      type,
+      listener as (event: Event) => void
+    );
   }
 }

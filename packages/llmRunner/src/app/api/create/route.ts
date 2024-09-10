@@ -5,21 +5,8 @@ import {
 import {
   CreateRequestBody,
   createRequestBodySchema,
+  SquiggleWorkflowMessage,
 } from "../../utils/squiggleTypes";
-
-export const maxDuration = 500;
-
-// https://nextjs.org/docs/app/building-your-application/routing/route-handlers#streaming
-function iteratorToStream<T>(iterator: AsyncGenerator<T, void>) {
-  return new ReadableStream({
-    async pull(controller) {
-      for await (const value of iterator) {
-        controller.enqueue(JSON.stringify(value) + "\n");
-      }
-      controller.close();
-    },
-  });
-}
 
 export async function POST(req: Request) {
   try {
@@ -41,17 +28,42 @@ export async function POST(req: Request) {
       messagesInHistoryToKeep: 4,
     };
 
-    const generator = runSquiggleGenerator({
-      input: squiggleCode
-        ? { type: "Edit", code: squiggleCode }
-        : { type: "Create", prompt: prompt ?? "" },
-      llmConfig,
-      abortSignal: req.signal,
-      openaiApiKey: process.env["OPENROUTER_API_KEY"],
-      anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
+    const stream = new ReadableStream({
+      async pull(controller) {
+        const send = (message: SquiggleWorkflowMessage) => {
+          controller.enqueue(JSON.stringify(message) + "\n");
+        };
+
+        await runSquiggleGenerator({
+          input: squiggleCode
+            ? { type: "Edit", code: squiggleCode }
+            : { type: "Create", prompt: prompt ?? "" },
+          llmConfig,
+          abortSignal: req.signal,
+          openaiApiKey: process.env["OPENROUTER_API_KEY"],
+          anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
+          handlers: {
+            startStep: (event) => {
+              send({
+                kind: "startStep",
+                content: {
+                  step: event.data.step.template.name ?? "unknown",
+                },
+              });
+            },
+            finishSquiggleWorkflow: (event) => {
+              send({
+                kind: "finalResult",
+                content: event.data.result,
+              });
+            },
+          },
+        });
+        controller.close();
+      },
     });
 
-    return new Response(iteratorToStream(generator), {
+    return new Response(stream, {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
