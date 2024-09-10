@@ -89,7 +89,7 @@ export const Title: FC<TitleProps> = (props) => {
 
   const {
     title = pathToShortName(valuePath),
-    color = "text-orange-900",
+    color = "text-stone-600",
     icon = undefined,
     showColon = false,
     isFocusEnabled = true,

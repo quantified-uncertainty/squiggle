@@ -30,6 +30,24 @@ widgetRegistry.register("Dist", {
     const p05 = unwrapOrFailure(dist.inv(environment, 0.05));
     const p95 = unwrapOrFailure(dist.inv(environment, 0.95));
     const oneValue = p05 === p95;
+    return oneValue ? (
+      showNumber(p05)
+    ) : (
+      <div className="flex flex-row items-center space-x-2">
+        <div className="flex">
+          {showNumber(p05)}
+          <span className="mx-1.5 opacity-40">to</span>
+          {showNumber(p95)}
+        </div>
+      </div>
+    );
+  },
+  Graph(value) {
+    const dist = value.value;
+    const environment = value.context.runContext.environment;
+    const p05 = unwrapOrFailure(dist.inv(environment, 0.05));
+    const p95 = unwrapOrFailure(dist.inv(environment, 0.95));
+    const oneValue = p05 === p95;
 
     const distPlot = value.showAsPlot();
     const plot = SqDistributionsPlot.create({
@@ -38,23 +56,14 @@ widgetRegistry.register("Dist", {
       xScale: distPlot?.xScale ?? SqScale.linearDefault(),
       yScale: distPlot?.yScale ?? SqScale.linearDefault(),
     });
-    return oneValue ? (
-      showNumber(p05)
-    ) : (
-      <div className="flex flex-row items-center space-x-2">
-        <div className="flex">
-          {showNumber(p05)}
-          <span className="mx-1 opacity-60">to</span>
-          {showNumber(p95)}
-        </div>
-        <div className="flex w-14">
-          <DistributionsChart
-            plot={plot}
-            environment={value.context.runContext.environment}
-            height={14}
-          />
-        </div>
-      </div>
+    return (
+      !oneValue && (
+        <DistributionsChart
+          plot={plot}
+          environment={value.context.runContext.environment}
+          height={14}
+        />
+      )
     );
   },
   Menu(value) {

@@ -19,6 +19,7 @@ type Widget<T extends SqValueTag = SqValueTag> = {
     value: ValueByTag<T>;
   }>;
   heading?: (value: ValueByTag<T>) => string;
+  Graph?: FC<{ value: ValueByTag<T> }>;
 };
 
 type WidgetConfig<T extends SqValueTag = SqValueTag> = {
@@ -27,6 +28,7 @@ type WidgetConfig<T extends SqValueTag = SqValueTag> = {
     settings: PlaygroundSettings
   ): ReactNode;
   Preview?: (value: ValueByTag<T>) => ReactNode;
+  Graph?: (value: ValueByTag<T>) => ReactNode;
   Menu?: (value: ValueByTag<T>) => ReactNode;
   heading?: (value: ValueByTag<T>) => string;
 };
@@ -48,7 +50,7 @@ class WidgetRegistry {
     };
     widget.Chart.displayName = `${tag}Chart`;
 
-    const { Preview, Menu, heading } = config;
+    const { Preview, Graph, Menu, heading } = config;
 
     if (Preview) {
       widget.Preview = ({ value }) => {
@@ -58,6 +60,16 @@ class WidgetRegistry {
         return Preview(value as ValueByTag<T>);
       };
       widget.Preview.displayName = `${tag}Preview`;
+    }
+
+    if (Graph) {
+      widget.Graph = ({ value }) => {
+        if (value.tag !== tag) {
+          throw new Error(`${tag} widget used incorrectly`);
+        }
+        return Graph(value as ValueByTag<T>);
+      };
+      widget.Graph.displayName = `${tag}Graph`;
     }
 
     if (Menu) {

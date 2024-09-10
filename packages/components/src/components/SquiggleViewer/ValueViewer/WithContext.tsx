@@ -15,6 +15,7 @@ import { ErrorBoundary } from "../../ui/ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "../icons.js";
 import { useZoomedInSqValueKeyEvent } from "../keyboardNav/zoomedInSqValue.js";
 import { useZoomedOutSqValueKeyEvent } from "../keyboardNav/zoomedOutSqValue.js";
+import { SquiggleValueGraph } from "../SquiggleValueGraph.js";
 import { SquiggleValueMenu } from "../SquiggleValueMenu.js";
 import { SquiggleValuePreview } from "../SquiggleValuePreview.js";
 import { getValueComment, hasExtraContentToShow } from "../utils.js";
@@ -206,16 +207,6 @@ export const ValueWithContextViewer: FC<Props> = ({
                 }}
               />
 
-              {!isOpen && (
-                <div className="ml-2 text-sm text-blue-800">
-                  <SquiggleValuePreview value={value} />
-                </div>
-              )}
-              {!isOpen && <CommentIconForValue value={value} />}
-            </div>
-            <div className="inline-flex items-center space-x-2">
-              <SpecificationDropdown value={value} />
-              {enableDropdownMenu && <SquiggleValueMenu value={value} />}
               {exportData && exportData.path.length < 2 && onOpenExport && (
                 <TextTooltip
                   text={
@@ -246,6 +237,20 @@ export const ValueWithContextViewer: FC<Props> = ({
                   </div>
                 </TextTooltip>
               )}
+              <SpecificationDropdown value={value} />
+              {enableDropdownMenu && <SquiggleValueMenu value={value} />}
+              {!isOpen && <CommentIconForValue value={value} />}
+            </div>
+            <div className="flex flex-grow items-end">
+              <div className="mr-2 h-px w-full bg-slate-100"></div>
+            </div>
+            <div className={`flex items-end items-center space-x-2`}>
+              <div className="text-sm text-blue-700">
+                <SquiggleValuePreview value={value} />
+              </div>
+              <div className="flex w-[25px] items-center justify-center text-blue-600">
+                <SquiggleValueGraph value={value} />
+              </div>
             </div>
           </header>
         )}

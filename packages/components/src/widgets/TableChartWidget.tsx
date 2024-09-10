@@ -11,15 +11,13 @@ import { widgetRegistry } from "./registry.js";
 
 widgetRegistry.register("TableChart", {
   Preview: (value) => (
-    <div className="flex items-center space-x-1">
-      <TableCellsIcon size={14} className="flex opacity-60" />
-      <div>
-        {value.value.rowCount}
-        <span className="opacity-60">x</span>
-        {value.value.columnCount}
-      </div>
+    <div>
+      {value.value.rowCount}
+      <span className="opacity-60">x</span>
+      {value.value.columnCount}
     </div>
   ),
+  Graph: () => <TableCellsIcon size={14} className="flex opacity-40" />,
   Chart: (valueWithContext, settings) => {
     const environment = valueWithContext.context.runContext.environment;
     const value = valueWithContext.value;
