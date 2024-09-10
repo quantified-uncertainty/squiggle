@@ -7,7 +7,6 @@ import {
 
 import { showGutterFacet } from "../fields.js";
 import { extensionFromFacets } from "../utils.js";
-import { focusGutterExtension } from "./focusGutterExtension.js";
 
 export function gutterExtension(initialShowGutter: boolean) {
   return [
@@ -19,7 +18,6 @@ export function gutterExtension(initialShowGutter: boolean) {
           ? [
               highlightActiveLine(),
               highlightActiveLineGutter(),
-              focusGutterExtension(),
               lineNumbers(),
               foldGutter(),
             ]
