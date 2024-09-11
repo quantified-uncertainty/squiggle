@@ -11,7 +11,7 @@ import { widgetRegistry } from "./registry.js";
 
 widgetRegistry.register("TableChart", {
   Preview: (value) => (
-    <div className="flex items-center space-x-1">
+    <div className="flex items-center space-x-1 font-mono text-slate-400">
       <TableCellsIcon size={14} className="flex opacity-60" />
       <div>
         {value.value.rowCount}

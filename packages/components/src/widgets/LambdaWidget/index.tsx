@@ -8,9 +8,9 @@ import { AutomaticFunctionChart } from "./FunctionChart/AutomaticFunctionChart.j
 
 widgetRegistry.register("Lambda", {
   Preview: (value) => (
-    <div>
+    <div className="font-mono text-slate-400">
       fn(
-      <span className="opacity-60">
+      <span className="text-slate-600">
         {truncateStr(value.value.parameterString(), 15)}
       </span>
       )
