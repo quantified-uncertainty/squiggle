@@ -62,16 +62,6 @@ class WidgetRegistry {
       widget.Preview.displayName = `${tag}Preview`;
     }
 
-    if (PreviewRightSide) {
-      widget.PreviewRightSide = ({ value }) => {
-        if (value.tag !== tag) {
-          throw new Error(`${tag} widget used incorrectly`);
-        }
-        return PreviewRightSide(value as ValueByTag<T>);
-      };
-      widget.PreviewRightSide.displayName = `${tag}PreviewRightSide`;
-    }
-
     if (Menu) {
       widget.Menu = ({ value }) => {
         if (value.tag !== tag) {

@@ -251,7 +251,7 @@ export const ValueWithContextViewer: FC<Props> = ({
               {hasContent && (
                 <div
                   className={clsx(
-                    "mr-2 h-px w-full bg-stone-100",
+                    "mb-1 mr-2 h-px w-full bg-stone-200",
                     isOpen ? "opacity-0" : "opacity-100"
                   )}
                 ></div>

@@ -1,4 +1,9 @@
-import { SqDistributionsPlot, SqScale } from "@quri/squiggle-lang";
+import {
+  Env,
+  SqDistribution,
+  SqDistributionsPlot,
+  SqScale,
+} from "@quri/squiggle-lang";
 
 import { generateDistributionPlotSettings } from "../../components/PlaygroundSettings.js";
 import { ItemSettingsMenuItems } from "../../components/SquiggleViewer/ItemSettingsMenuItems.js";
@@ -12,6 +17,13 @@ import { DistributionsChart } from "./DistributionsChart.js";
 // Distributions should be smaller than the other charts.
 // Note that for distributions, this only applies to the internals, there's also extra margin and details.
 export const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.55;
+
+function getDistributionInfo(dist: SqDistribution, environment: Env) {
+  const p05 = unwrapOrFailure(dist.inv(environment, 0.05));
+  const p95 = unwrapOrFailure(dist.inv(environment, 0.95));
+  const oneValue = p05 === p95;
+  return { p05, p95, oneValue };
+}
 
 widgetRegistry.register("Dist", {
   Preview(value) {
@@ -27,9 +39,8 @@ widgetRegistry.register("Dist", {
       );
     };
 
-    const p05 = unwrapOrFailure(dist.inv(environment, 0.05));
-    const p95 = unwrapOrFailure(dist.inv(environment, 0.95));
-    const oneValue = p05 === p95;
+    const { p05, p95, oneValue } = getDistributionInfo(dist, environment);
+
     return oneValue ? (
       showNumber(p05)
     ) : (
@@ -45,9 +56,7 @@ widgetRegistry.register("Dist", {
   PreviewRightSide(value) {
     const dist = value.value;
     const environment = value.context.runContext.environment;
-    const p05 = unwrapOrFailure(dist.inv(environment, 0.05));
-    const p95 = unwrapOrFailure(dist.inv(environment, 0.95));
-    const oneValue = p05 === p95;
+    const { oneValue } = getDistributionInfo(dist, environment);
 
     const distPlot = value.showAsPlot();
     const plot = SqDistributionsPlot.create({

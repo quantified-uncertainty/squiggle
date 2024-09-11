@@ -89,7 +89,7 @@ export const Title: FC<TitleProps> = (props) => {
 
   const {
     title = pathToShortName(valuePath),
-    color = "text-stone-600",
+    color = "text-slate-600",
     icon = undefined,
     showColon = false,
     isFocusEnabled = true,
@@ -116,7 +116,7 @@ export const Title: FC<TitleProps> = (props) => {
       >
         {title}
       </div>
-      {showColon && <div className="font-mono text-stone-300">:</div>}
+      {showColon && <div className="font-mono text-slate-300">:</div>}
     </div>
   );
 };

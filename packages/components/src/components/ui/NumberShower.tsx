@@ -34,7 +34,7 @@ export const NumberShower: React.FC<NumberShowerProps> = ({
       );
     case "scientific":
       return (
-        <span>
+        <span className="whitespace-nowrap">
           {negativeSign}
           {numberWithPresentation.mantissa}{" "}
           <span>
