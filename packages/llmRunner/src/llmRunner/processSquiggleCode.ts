@@ -70,15 +70,15 @@ interface ProcessSquiggleResult {
 export function diffToNewCode(
   completionContentWithDiff: string,
   oldCodeState: CodeState
-): { okay: boolean; value: string } {
+): result<string, string> {
   const response = processSearchReplaceResponse(
     oldCodeState.code,
     completionContentWithDiff
   );
   return response.success
-    ? { okay: true, value: response.value }
+    ? { ok: true, value: response.value }
     : {
-        okay: false,
+        ok: false,
         value: "Search and Replace Failed: " + response.value,
       };
 }
@@ -112,7 +112,7 @@ export async function squiggleCodeToCodeStateViaRunningAndFormatting(
       return {
         codeState: {
           type: "runFailed",
-          code: code,
+          code,
           error: run.value.error.errors[0],
           project: run.value.project,
         },
@@ -148,31 +148,31 @@ async function codeToCodeState(code: string): Promise<CodeState> {
 
 export async function generationCompletionContentToCodeState(
   completionContent: string
-): Promise<{ okay: true; value: CodeState } | { okay: false; value: string }> {
+): Promise<result<CodeState, string>> {
   if (completionContent === "") {
-    return { okay: false, value: "Received empty completion content" };
+    return { ok: false, value: "Received empty completion content" };
   }
 
-  let newCode = extractSquiggleCode(completionContent);
+  const newCode = extractSquiggleCode(completionContent);
   if (newCode === "") {
-    return { okay: false, value: "Didn't get code from extraction" };
+    return { ok: false, value: "Didn't get code from extraction" };
   }
 
-  return { okay: true, value: await codeToCodeState(newCode) };
+  return { ok: true, value: await codeToCodeState(newCode) };
 }
 
 export async function diffCompletionContentToCodeState(
   completionContent: string,
   codeState: CodeState
-): Promise<{ okay: true; value: CodeState } | { okay: false; value: string }> {
+): Promise<result<CodeState, string>> {
   if (completionContent === "") {
-    return { okay: false, value: "Received empty completion content" };
+    return { ok: false, value: "Received empty completion content" };
   }
 
-  const { okay, value } = diffToNewCode(completionContent, codeState);
-  if (!okay) {
-    return { okay: false, value };
+  const { ok, value } = diffToNewCode(completionContent, codeState);
+  if (!ok) {
+    return { ok: false, value };
   }
 
-  return { okay: true, value: await codeToCodeState(value) };
+  return { ok: true, value: await codeToCodeState(value) };
 }

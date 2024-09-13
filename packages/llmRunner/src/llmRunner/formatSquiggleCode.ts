@@ -4,9 +4,9 @@ import * as prettierSquigglePlugin from "@quri/prettier-plugin-squiggle";
 import { result } from "@quri/squiggle-lang";
 
 //This is moved in its own file, because the prettier plugin causes issues with the tests.
-export const formatSquiggleCode = async (
+export async function formatSquiggleCode(
   code: string
-): Promise<result<string, string>> => {
+): Promise<result<string, string>> {
   try {
     const formatted = await prettier.format(code, {
       parser: "squiggle",
@@ -19,4 +19,4 @@ export const formatSquiggleCode = async (
       value: `Error formatting Squiggle code: ${error instanceof Error ? error.message : error}`,
     };
   }
-};
+}

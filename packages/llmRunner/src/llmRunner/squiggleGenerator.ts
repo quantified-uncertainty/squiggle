@@ -23,7 +23,7 @@ function addStepByCodeState(
   const step =
     codeState.type === "success"
       ? // both of these steps take prompt+codeState
-        executeAdjustToFeedbackStep
+        adjustToFeedbackStep
       : fixCodeUntilItRunsStep;
 
   workflow.addStep(step, {
@@ -50,7 +50,7 @@ export type GeneratorInput =
   | { type: "Create"; prompt: string }
   | { type: "Edit"; code: string };
 
-const codeGeneratorStep = new LLMStepTemplate(
+const generateCodeStep = new LLMStepTemplate(
   "GenerateCode",
   {
     inputs: { prompt: "prompt" },
@@ -63,7 +63,7 @@ const codeGeneratorStep = new LLMStepTemplate(
 
     if (completion) {
       const state = await generationCompletionContentToCodeState(completion);
-      if (state.okay) {
+      if (state.ok) {
         addStepByCodeState(context.workflow, state.value, prompt);
         context.setOutput("code", { kind: "code", value: state.value.code });
       } else {
@@ -100,7 +100,7 @@ const fixCodeUntilItRunsStep = new LLMStepTemplate(
         completion,
         codeState
       );
-      if (nextState.okay) {
+      if (nextState.ok) {
         addStepByCodeState(context.workflow, nextState.value, prompt);
         context.setOutput("code", {
           kind: "code",
@@ -116,7 +116,7 @@ const fixCodeUntilItRunsStep = new LLMStepTemplate(
   }
 );
 
-const executeAdjustToFeedbackStep = new LLMStepTemplate(
+const adjustToFeedbackStep = new LLMStepTemplate(
   "AdjustToFeedback",
   {
     inputs: {
@@ -138,8 +138,7 @@ const executeAdjustToFeedbackStep = new LLMStepTemplate(
       await squiggleCodeToCodeStateViaRunningAndFormatting(currentCode);
 
     if (newCodeState.type !== "success" || !runResult) {
-      throw new Error("Failed to process code in Adjust To Feedback stage");
-      return;
+      throw new Error("Failed to process code in AdjustToFeedback stage");
     }
 
     const completion = await context.queryLLM(
@@ -176,13 +175,13 @@ const executeAdjustToFeedbackStep = new LLMStepTemplate(
       !noAdjustmentRegex.test(trimmedResponse)
     ) {
       const diffResponse = diffToNewCode(completion, codeState);
-      if (!diffResponse.okay) {
+      if (!diffResponse.ok) {
         context.log({
           type: "error",
           message: "FAIL: " + diffResponse.value,
         });
         // try again
-        context.workflow.addStep(executeAdjustToFeedbackStep, {
+        context.workflow.addStep(adjustToFeedbackStep, {
           prompt: { kind: "prompt", value: prompt },
           codeState: { kind: "codeState", value: codeState },
         });
@@ -269,7 +268,7 @@ export async function runSquiggleGenerator(params: {
 
   // Add the initial step
   if (input.type === "Create") {
-    workflow.addStep(codeGeneratorStep, {
+    workflow.addStep(generateCodeStep, {
       prompt: { kind: "prompt", value: prompt },
     });
   } else {
