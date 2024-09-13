@@ -2,13 +2,14 @@
 import "../../../widgets/index.js";
 
 import { clsx } from "clsx";
-import { FC, useCallback, useRef } from "react";
+import React, { FC, useCallback, useRef } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { CommentIcon, LinkIcon, TextTooltip } from "@quri/ui";
 
 import { useForceUpdate } from "../../../lib/hooks/useForceUpdate.js";
 import { SqValueWithContext } from "../../../lib/utility.js";
+import { widgetRegistry } from "../../../widgets/registry.js";
 import { SpecificationDropdown } from "../../../widgets/SpecificationWidget.js";
 import { useProjectContext } from "../../ProjectProvider.js";
 import { ErrorBoundary } from "../../ui/ErrorBoundary.js";
@@ -17,6 +18,7 @@ import { useZoomedInSqValueKeyEvent } from "../keyboardNav/zoomedInSqValue.js";
 import { useZoomedOutSqValueKeyEvent } from "../keyboardNav/zoomedOutSqValue.js";
 import { SquiggleValueMenu } from "../SquiggleValueMenu.js";
 import { SquiggleValuePreview } from "../SquiggleValuePreview.js";
+import { SquiggleValuePreviewRightSide } from "../SquiggleValuePreviewRightSide.js";
 import { getValueComment, hasExtraContentToShow } from "../utils.js";
 import {
   useRegisterAsItemViewer,
@@ -34,16 +36,14 @@ const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
   const comment = getValueComment(value);
 
   return comment ? (
-    <div className="ml-3">
-      <TextTooltip text={comment} placement="bottom">
-        <span>
-          <CommentIcon
-            size={13}
-            className="text-purple-100 group-hover:text-purple-300"
-          />
-        </span>
-      </TextTooltip>
-    </div>
+    <TextTooltip text={comment} placement="bottom">
+      <span>
+        <CommentIcon
+          size={13}
+          className="cursor-pointer text-slate-200 hover:text-slate-600 group-hover:text-slate-400"
+        />
+      </span>
+    </TextTooltip>
   ) : null;
 };
 
@@ -167,6 +167,13 @@ export const ValueWithContextViewer: FC<Props> = ({
     }
   };
 
+  const getHasContent = () => {
+    const widget = widgetRegistry.widgets.get(value.tag);
+    return widget?.Preview || widget?.PreviewRightSide;
+  };
+
+  const hasContent = getHasContent();
+
   return (
     <ErrorBoundary>
       <div ref={containerRef}>
@@ -190,7 +197,7 @@ export const ValueWithContextViewer: FC<Props> = ({
               isZoomedIn ? focusedKeyEvent(event) : unfocusedKeyEvent(event);
             }}
           >
-            <div className="inline-flex items-center">
+            <div className="inline-flex items-center space-x-2">
               {collapsible && triangleToggle()}
               <Title
                 {...{
@@ -206,16 +213,7 @@ export const ValueWithContextViewer: FC<Props> = ({
                 }}
               />
 
-              {!isOpen && (
-                <div className="ml-2 text-sm text-blue-800">
-                  <SquiggleValuePreview value={value} />
-                </div>
-              )}
               {!isOpen && <CommentIconForValue value={value} />}
-            </div>
-            <div className="inline-flex items-center space-x-2">
-              <SpecificationDropdown value={value} />
-              {enableDropdownMenu && <SquiggleValueMenu value={value} />}
               {exportData && exportData.path.length < 2 && onOpenExport && (
                 <TextTooltip
                   text={
@@ -246,6 +244,28 @@ export const ValueWithContextViewer: FC<Props> = ({
                   </div>
                 </TextTooltip>
               )}
+              <SpecificationDropdown value={value} />
+              {enableDropdownMenu && <SquiggleValueMenu value={value} />}
+            </div>
+            <div className="flex flex-grow items-end">
+              {hasContent && (
+                <div
+                  className={clsx(
+                    "mb-1 mr-2 h-px w-full bg-stone-200",
+                    isOpen ? "opacity-0" : "opacity-100"
+                  )}
+                ></div>
+              )}
+            </div>
+            <div
+              className={`flex items-end items-center space-x-2 text-slate-600`}
+            >
+              <div className="text-sm">
+                {<SquiggleValuePreview value={value} />}
+              </div>
+              <div className="flex w-[25px] items-center justify-center">
+                {<SquiggleValuePreviewRightSide value={value} />}
+              </div>
             </div>
           </header>
         )}

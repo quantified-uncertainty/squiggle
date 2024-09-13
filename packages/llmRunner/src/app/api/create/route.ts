@@ -10,6 +10,9 @@ import {
   SquiggleWorkflowMessage,
 } from "../../utils/squiggleTypes";
 
+// https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#maxduration
+export const maxDuration = 300;
+
 function artifactToDescription(value: Artifact): ArtifactDescription {
   return {
     kind: value.kind === "codeState" ? "code" : value.kind,

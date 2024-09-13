@@ -6,9 +6,11 @@ import {
 
 describe("FormattedNumber", () => {
   const makeTestCases: [number, ReturnType<typeof makeFormattedNumber>][] = [
+    [0.01, { type: "basic", value: "0.01", isNegative: false }],
     [123.45, { type: "basic", value: "120", isNegative: false }],
     [-123.45, { type: "basic", value: "120", isNegative: true }],
     [1234, { type: "basic", value: "1200", isNegative: false }],
+    [1000, { type: "basic", value: "1000", isNegative: false }],
     [
       1234567,
       { type: "unit", mantissa: "1.2", symbol: "M", isNegative: false },
