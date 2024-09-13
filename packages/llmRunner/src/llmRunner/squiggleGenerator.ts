@@ -56,15 +56,14 @@ const generateCodeStep = new LLMStepTemplate(
     inputs: { prompt: "prompt" },
     outputs: { code: "code" },
   },
-  async (context) => {
-    const prompt = context.getInput("prompt").value;
-    const promptPair = generateNewSquiggleCodePrompt(prompt);
+  async (context, { prompt }) => {
+    const promptPair = generateNewSquiggleCodePrompt(prompt.value);
     const completion = await context.queryLLM(promptPair);
 
     if (completion) {
       const state = await generationCompletionContentToCodeState(completion);
       if (state.ok) {
-        addStepByCodeState(context.workflow, state.value, prompt);
+        addStepByCodeState(context.workflow, state.value, prompt.value);
         context.setOutput("code", { kind: "code", value: state.value.code });
       } else {
         context.log({
@@ -85,23 +84,17 @@ const fixCodeUntilItRunsStep = new LLMStepTemplate(
     },
     outputs: { code: "code" },
   },
-  async (context) => {
-    const prompt = context.getInput("prompt").value;
-    const codeState = context.getInput("codeState").value;
-
-    const promptPair = editExistingSquiggleCodePrompt(
-      codeState.code,
-      codeState
-    );
+  async (context, { prompt, codeState }) => {
+    const promptPair = editExistingSquiggleCodePrompt(codeState.value);
 
     const completion = await context.queryLLM(promptPair);
     if (completion) {
       const nextState = await diffCompletionContentToCodeState(
         completion,
-        codeState
+        codeState.value
       );
       if (nextState.ok) {
-        addStepByCodeState(context.workflow, nextState.value, prompt);
+        addStepByCodeState(context.workflow, nextState.value, prompt.value);
         context.setOutput("code", {
           kind: "code",
           value: nextState.value.code,
@@ -127,11 +120,8 @@ const adjustToFeedbackStep = new LLMStepTemplate(
       code: "code",
     },
   },
-  async (context) => {
-    const prompt = context.getInput("prompt").value;
-    const codeState = context.getInput("codeState").value;
-
-    const currentCode = codeState.code;
+  async (context, { prompt, codeState }) => {
+    const currentCode = codeState.value.code;
 
     // re-run and get result
     const { codeState: newCodeState, runResult } =
@@ -143,8 +133,8 @@ const adjustToFeedbackStep = new LLMStepTemplate(
 
     const completion = await context.queryLLM(
       adjustToFeedbackPrompt(
-        prompt,
-        codeState.code,
+        prompt.value,
+        codeState.value.code,
         runResult.bindings,
         runResult.result
       )
@@ -166,7 +156,7 @@ const adjustToFeedbackStep = new LLMStepTemplate(
         type: "info",
         message: "LLM determined no adjustment is needed",
       });
-      context.setOutput("code", { kind: "code", value: codeState.code });
+      context.setOutput("code", { kind: "code", value: codeState.value.code });
       return;
     }
 
@@ -174,7 +164,7 @@ const adjustToFeedbackStep = new LLMStepTemplate(
       trimmedResponse.length > 0 &&
       !noAdjustmentRegex.test(trimmedResponse)
     ) {
-      const diffResponse = diffToNewCode(completion, codeState);
+      const diffResponse = diffToNewCode(completion, codeState.value);
       if (!diffResponse.ok) {
         context.log({
           type: "error",
@@ -182,10 +172,13 @@ const adjustToFeedbackStep = new LLMStepTemplate(
         });
         // try again
         context.workflow.addStep(adjustToFeedbackStep, {
-          prompt: { kind: "prompt", value: prompt },
-          codeState: { kind: "codeState", value: codeState },
+          prompt: { kind: "prompt", value: prompt.value },
+          codeState: { kind: "codeState", value: codeState.value },
         });
-        context.setOutput("code", { kind: "code", value: codeState.code });
+        context.setOutput("code", {
+          kind: "code",
+          value: codeState.value.code,
+        });
         return;
       }
 
@@ -193,7 +186,7 @@ const adjustToFeedbackStep = new LLMStepTemplate(
         await squiggleCodeToCodeStateViaRunningAndFormatting(
           diffResponse.value
         );
-      addStepByCodeState(context.workflow, adjustedCodeState, prompt);
+      addStepByCodeState(context.workflow, adjustedCodeState, prompt.value);
       context.setOutput("code", {
         kind: "code",
         value: adjustedCodeState.code,
@@ -204,7 +197,7 @@ const adjustToFeedbackStep = new LLMStepTemplate(
         type: "info",
         message: "No adjustments provided, considering process complete",
       });
-      context.setOutput("code", { kind: "code", value: codeState.code });
+      context.setOutput("code", { kind: "code", value: codeState.value.code });
       return;
     }
   }
@@ -216,13 +209,11 @@ const runAndFormatCodeStep = new LLMStepTemplate(
     inputs: { code: "code", prompt: "prompt" },
     outputs: { codeState: "codeState" },
   },
-  async (context) => {
-    const code = context.getInput("code").value;
-    const prompt = context.getInput("prompt").value;
-
-    const { codeState } =
-      await squiggleCodeToCodeStateViaRunningAndFormatting(code);
-    addStepByCodeState(context.workflow, codeState, prompt);
+  async (context, { code, prompt }) => {
+    const { codeState } = await squiggleCodeToCodeStateViaRunningAndFormatting(
+      code.value
+    );
+    addStepByCodeState(context.workflow, codeState, prompt.value);
   }
 );
 
@@ -235,6 +226,7 @@ type SquiggleEventHandlers = Partial<{
   }) => void;
 };
 
+// Run Squiggle workflow and stream the results through the handlers
 export async function runSquiggleGenerator(params: {
   input: GeneratorInput;
   abortSignal?: AbortSignal;
@@ -259,6 +251,8 @@ export async function runSquiggleGenerator(params: {
   const startTime = Date.now();
 
   // Prepare event handlers
+  workflow.addEventListener("stepUpdated", ({ data: { step } }) => {});
+
   for (const [eventType, listener] of Object.entries(params.handlers)) {
     workflow.addEventListener(
       eventType as WorkflowEventType,
@@ -308,6 +302,7 @@ export async function runSquiggleGenerator(params: {
   }
 }
 
+// Run Squiggle workflow without streaming, only capture the final result
 export async function runSquiggleGeneratorToResult(params: {
   input: GeneratorInput;
   abortSignal?: AbortSignal;

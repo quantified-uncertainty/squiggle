@@ -126,11 +126,10 @@ Do not include any code outside of SEARCH/REPLACE blocks. Ensure that the SEARCH
 `;
 
 export const editExistingSquiggleCodePrompt = (
-  existingCode: string,
   codeState: CodeState
 ): PromptPair => {
   const error = codeStateErrorString(codeState);
-  const advice = getSquiggleAdvice(error, existingCode);
+  const advice = getSquiggleAdvice(error, codeState.code);
   const fullPrompt = `You are an expert Squiggle code debugger. Your task is solely to fix an error in the given Squiggle code. Follow these steps:
 
 1. Carefully analyze the original code and the error message.
@@ -146,7 +145,7 @@ export const editExistingSquiggleCodePrompt = (
 
 Original code:
 <original_code>
-${existingCode}
+${codeState.code}
 </original_code>
 
 Error message:

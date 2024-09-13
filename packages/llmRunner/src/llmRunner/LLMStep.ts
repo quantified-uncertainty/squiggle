@@ -72,7 +72,10 @@ export class LLMStepTemplate<const Shape extends StepShape = StepShape> {
   constructor(
     public readonly name: string,
     public readonly shape: Shape,
-    public readonly execute: (context: ExecuteContext<Shape>) => Promise<void>
+    public readonly execute: (
+      context: ExecuteContext<Shape>,
+      inputs: Inputs<Shape>
+    ) => Promise<void>
   ) {}
 
   instantiate(
@@ -134,7 +137,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     };
 
     try {
-      await this.template.execute(executeContext);
+      await this.template.execute(executeContext, this.inputs);
     } catch (error) {
       this.criticalError(
         error instanceof Error ? error.message : String(error)
