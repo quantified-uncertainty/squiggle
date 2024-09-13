@@ -3,6 +3,8 @@ import OpenAI from "openai";
 
 import { squiggleSystemContent } from "./prompts";
 
+console.log("squiggleSystemContent", squiggleSystemContent);
+
 // Model selection and pricing
 type ModelConfig = {
   provider: "anthropic" | "openrouter";

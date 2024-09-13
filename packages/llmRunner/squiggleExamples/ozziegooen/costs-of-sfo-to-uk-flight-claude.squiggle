@@ -1,0 +1,40 @@
+// Generated mostly with Anthropic's Claude
+
+// Flight details
+departureAirport = "SFO"
+destination = "London"
+flightDuration = 10 to 12 // hours
+
+// Ticket price
+ticketPrice = 500 to 600
+
+// Value of time
+valueOfTime = 50 to 80 // $/hour
+timeCost = flightDuration * valueOfTime
+
+// Jet lag recovery time
+jetLagRecovery = 1 to 3 // days
+
+// Environmental impact
+co2PerPassenger = normal(200, 50) // kg
+costPerTonCo2 = 100 // $/tonne
+environmentalCost = co2PerPassenger * costPerTonCo2 / 1000
+
+// Aggregate costs
+totalCost = ticketPrice + timeCost + jetLagRecovery * valueOfTime * 8 // 8 hours per day  + environmentalCost + socialValuePerTrip
+
+costsChart = Plot.dists(
+  {
+    title: "Costs of different aspects, of a flights from SFO -> London",
+    dists: [
+      { name: "Ticket", value: ticketPrice },
+      { name: "Time", value: timeCost },
+      { name: "Jet Lag", value: jetLagRecovery * valueOfTime * 8 },
+      { name: "Environmental", value: environmentalCost },
+      { name: "Total", value: totalCost },
+    ],
+    xScale: Scale.symlog({ min: -100, constant: 50 }),
+  }
+)
+
+costsChart

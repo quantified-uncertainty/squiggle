@@ -1,0 +1,78 @@
+wordsPerMinute = 110 to 150
+
+// cost per person
+// cost per event
+// cost per person per word
+// cost per event per word
+
+event(numberOfPeople, costPerHour, hours, hoursofPrep) = numberOfPeople *
+  costPerHour *
+  (hours + hoursofPrep)
+
+formatted(numberOfPeople, costPerHour, hours, hoursofPrep, wpm) = {
+  totalCost = event(numberOfPeople, costPerHour, hours, hoursofPrep)
+  data = [
+    {
+      name: "Full Event",
+      cost: totalCost,
+      costPerWord: totalCost / (wpm * hours * 60),
+    },
+    {
+      name: "Per Person",
+      cost: totalCost / numberOfPeople,
+      costPerWord: totalCost / (wpm * hours * 60) / numberOfPeople,
+    },
+  ]
+  table = data
+    -> Table(
+      {
+        columns: [
+          { name: "Name", fn: {|d| d.name} },
+          { name: "Cost (Total)", fn: {|d| d.cost} },
+          { name: "Cost per Word", fn: {|d| d.costPerWord} },
+        ],
+      }
+    )
+  bar = { totalCost: totalCost, wordsSpoken: wpm * hours * 60, table }
+  bar
+}
+
+a = formatted
+  -> Calculator(
+    {
+      description: "## Cost of Time Spent at Event
+*Note: This calulation assumes that uncertainty in value of time is independent of uncertainty in the hours spent. I guess this might be a bit negatively correlated, so keep this in mind.*",
+      inputs: [
+        Input.text({ name: "Number of Attendees", default: "5" }),
+        Input.text(
+          {
+            name: "Counterfactual Value of Time (per hour)",
+            default: "30 to 70",
+            description: "Use the mean, not median.",
+          }
+        ),
+        Input.text(
+          {
+            name: "Hours of event",
+            default: "1 to 5",
+            description: "Again, use the mean.",
+          }
+        ),
+        Input.text(
+          {
+            name: "Extra hours, for preparation, travel, and distractions",
+            default: "0.2 to 1.5",
+            description: "How much time did the mean attendee spend getting ready, traveling, and being distracted (interrupting other work), for this event?",
+          }
+        ),
+        Input.text(
+          {
+            name: "Words per Minute",
+            default: "120 to 150",
+            description: "Again, use the mean.",
+          }
+        ),
+      ],
+    }
+  )
+a

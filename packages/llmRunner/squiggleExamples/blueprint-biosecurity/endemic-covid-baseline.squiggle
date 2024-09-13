@@ -1,0 +1,140 @@
+/*
+Describe your code here
+*/
+
+// Case rate info
+annual_deaths = 60k to 150k
+//https://covid.cdc.gov/covid-data-tracker/#trends_totaldeaths_select_00 provisional cases in the last year: 65355
+//https://ourworldindata.org/covid-cases confirmed deaths over the last year 1.18m-1.12m = 60000
+//https://www.metaculus.com/questions/7546/deaths-from-covid-19-per-year-2022-2025-in-us/ 130k forecasted per year 2022 to 2025
+
+annual_hospitalisations = 800k to 850k
+//https://covid.cdc.gov/covid-data-tracker/#trends_cumulativehospitalizations_select_00 hospitalisations in the last year: 839988
+// as a sense check https://covid.cdc.gov/covid-data-tracker/#trends_weeklyhospitaladmissions_select_00 over the past year the weekly average is <20k, which matches this
+
+annual_cases = annual_deaths/(0.5 to 1.1)*100 to annual_hospitalisations/(1.1 to 2)*100
+//https://ourworldindata.org/covid-cases case fatality rate over the last year around 1.1% (for confirmed cases and deaths). This is probably an overestimate
+//for flu, 1.1% to 2% of cases lead to hospitalisation. https://www.cdc.gov/flu/about/burden/preliminary-in-season-estimates.htm. Workings https://docs.google.com/spreadsheets/d/1JWC-tObgjzV240o3VP--shWGI2qjUyzEloADOGgrpDM/edit#gid=0
+
+annual_icu = annual_hospitalisations*(15% to 25%)
+// https://covid.cdc.gov/covid-data-tracker/#hospitalizations-severity: 20% of those hospitalised for covid admitted to ICU
+
+long_term_symptoms = annual_cases*(5% to 15%)
+//arbitrarily adjusting range down from 5-40% to 5-15%, in case the rate has declined as covid has become less severe. Looking into this more would be good
+// https://academic.oup.com/fampra/article/39/1/159/6322429?login=false: 10% to 35% of cases for covid
+//https://www.nature.com/articles/s41467-023-43661-w "The crude prevalence of one or more symptom attributable to SARS-CoV-2 infection was 13.8% (13.2%,14.3%), 12.8% (11.9%,13.6%), and 16.3% (14.4%,18.2%) at 6, 12, and 18 months respectively. Following adjustment for potential confounders, these figures were 6.6% (6.3%, 6.9%), 6.5% (6.0%, 6.9%) and 10.4% (9.1%, 11.6%) respectively." Scotland, % of cases
+//https://www.cdc.gov/nchs/products/databriefs/db480.htm "In 2022, 6.9% of adults ever had Long COVID and 3.4% had Long COVID at the time of interview (currently have Long COVID)" Not obvious how to convert this to % of cases
+//https://www.thelancet.com/journals/eclinm/article/PIIS2589-5370%2822%2900491-6/fulltext "Our work shows that 45% of COVID-19 survivors, regardless of hospitalisation status, were experiencing a range of unresolved symptoms at ∼ 4 months. " Global review
+//https://www.cdc.gov/mmwr/volumes/72/wr/mm7232a3.htm "Data from surveys completed between June 1–13, 2022, and June 7–19, 2023, indicated that long COVID prevalence decreased from 7.5% (95% CI = 7.1–7.9) to 6.0% (95% CI = 5.7–6.3) among the overall U.S. adult population, irrespective of history of previous COVID-19, and from 18.9% (95% CI = 17.9–19.8) to 11.0% (95% CI = 10.4–11.6) among U.S. adults reporting previous COVID-19."
+//https://www.cdc.gov/nchs/covid19/pulse/long-covid.htm currently experiencing long covid as % of adults who ever had covid ranges from 9-19%. As % of all adults, from 5-8%
+//https://jamanetwork.com/journals/jama/fullarticle/2805540?guestAccessKey=1fbcad3a-e2ab-492f-8dcc-0288c178fb94&utm_source=For_The_Media&utm_medium=referral&utm_campaign=ftm_links&utm_content=tfl&utm_term=052523 "Among 2231 participants first infected on or after December 1, 2021, and enrolled within 30 days of infection, 224 (10% [95% CI, 8.8%-11%]) were PASC positive at 6 months."
+//https://www.nature.com/articles/s41579-022-00846-2 "Long COVID (sometimes referred to as ‘post-acute sequelae of COVID-19’) is a multisystemic condition comprising often severe symptoms that follow a severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2) infection. At least 65 million individuals around the world have long COVID, based on a conservative estimated incidence of 10% of infected people and more than 651 million documented COVID-19 cases worldwide1; the number is likely much higher due to many undocumented cases."
+
+// Valuation info: costs of ill health
+qaly = 250000
+// See https://docs.google.com/document/d/1csvUd9d96D-WmXcO8_jjXn0OjpIB-Xv-7Ne6FKgcL0A/edit
+
+qaly_percent = 0.71 to 0.84
+//https://ifp.org/weighing-the-cost-of-the-pandemic/ “For the low estimate, we instead assumed that the people killed had a lower life expectancy (10 years instead of 14.4) and worse health than a typical member of the population in their cohort (an average QALY value of 0.7 instead of 0.81).”
+// https://apps.who.int/gho/data/node.main.688: at birth, life expectancy in the US is 78.5 but healthy life expectancy is 66.1 (84%). At 60, this is 23.1/16.4, or 71%
+
+hrqol_sickness = 0.03 to 0.13
+// https://academic.oup.com/cid/article/75/1/e962/6542727 UK nonhospitalised cases. 8.8 QALDS lost for those without symptoms after 6 months. That's 0.0241 QALYs over 6 months, which works out at 0.048 HRQOL
+//https://hqlo.biomedcentral.com/articles/10.1186/s12955-024-02230-5 Table 4 HRQOL loss of 0.080 (0.032 to 0.128)
+
+duration_sickness = 7 to 14
+//https://www.hopkinsmedicine.org/health/conditions-and-diseases/coronavirus/diagnosed-with-covid-19-what-to-expect#:~:text=How%20long%20do%20COVID%20symptoms,%2C%20kidneys%2C%20lungs%20and%20brain. "Those with a mild case of COVID-19 usually recover in one to two weeks. "
+
+health_cost_sickness = hrqol_sickness*(duration_sickness/365)*qaly
+
+hrqol_hospitalisation = 0.15 to 0.3
+// https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8553121/ "The overall mean HRQoL scores of Acute Covid patients was 60.3 [34] and Long Covid patients ranged from 60.4 to 86.4" Acute range 0.6 to 0.8. See figure 4 for ICU variation
+//https://hqlo.biomedcentral.com/articles/10.1186/s12955-024-02230-5 Table 4 HRQOL loss of 0.15 (0.02 to 0.28)
+
+duration_hospitalisation = 3 to 20
+// https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9472334/: North America estimate 16 days, 95% CI 11 to 20
+// https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7808847/: NorthEastern Ohio for three months in 2019 mean 13.9, SD 9.1, median 12.6 (0.1 to 49.5)
+// https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8259605/: Delaware, 6 months in 2020: "The median LOS was 12.34 days (IQR: 8.68-20.10) and 5.72 days (IQR: 3.40-10.61) for ICU and non-ICU patients, respectively."
+//https://www.medrxiv.org/content/10.1101/2020.04.08.20057794v1.full.pdf: New York, a month in 2020 "Among hospitalized patients, the median length of stay among those with final discharge disposition (discharged alive or died) was 4.8 days (interquartile range, 3.3 to 7.6)"
+//https://link.springer.com/article/10.1007/s12325-021-01887-4: "Overall median hospital LOS, cost, and cost/day were 6 days, US$11,267, and $1772, respectively; overall median ICU LOS, cost, and cost/day were 5 days, $13,443, and $2902, respectively."
+
+health_cost_hospitalisation = hrqol_hospitalisation*(duration_hospitalisation/365)*qaly
+
+hrqol_icu = 0.3 to 0.5
+//https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8553121/ "The overall mean HRQoL scores of Acute Covid patients was 60.3 [34] and Long Covid patients ranged from 60.4 to 86.4" ICU range 0.5 to 0.7 HRQol score
+
+duration_icu = 4 to 20
+// https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7808847/: NorthEastern Ohio for three months in 2019 mean 7.4, SD 7.9, median 4.4 (0.1 to 46.9)
+// https://sccm.org/Communications/Critical-Care-Statistics: "ICU LOS has been estimated at 3.8 days in the United States. However, it varies depending on patient and ICU attributes."
+// https://www.sciencedirect.com/science/article/abs/pii/S0964339722000684 US median 6, IQR 3-12
+// https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9040412/ "Over the whole study period, the average length of ICU stays was longer in Ontario (17.2 days) compared to Québec (12.9 days; p-value <0.01)."
+// https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8259605/: Delaware, 6 months in 2020: "The median LOS was 12.34 days (IQR: 8.68-20.10) and 5.72 days (IQR: 3.40-10.61) for ICU and non-ICU patients, respectively."
+//https://link.springer.com/article/10.1007/s12325-021-01887-4: "Overall median hospital LOS, cost, and cost/day were 6 days, US$11,267, and $1772, respectively; overall median ICU LOS, cost, and cost/day were 5 days, $13,443, and $2902, respectively."
+
+health_cost_icu = hrqol_icu*(duration_icu/365)*qaly
+
+hrqol_long_term_symptoms = 0.05 to 0.3
+// https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8553121/ "The overall mean HRQoL scores of Acute Covid patients was 60.3 [34] and Long Covid patients ranged from 60.4 to 86.4"
+//https://hqlo.biomedcentral.com/articles/10.1186/s12955-024-02230-5 Table 4 HRQOL loss of 0.072 (0.042 to 0.103). For mild to moderate Covid cases. "In the survey, long COVID was defined according to the National Institute for Health and Care Excellence (NICE) as symptoms which cannot be explained by an alternative diagnosis or condition and which lasted or developed 12 weeks beyond the initial COVID-19 infection"
+// https://academic.oup.com/cid/article/75/1/e962/6542727 cases with symptoms at 6 months: 32.8 QALDs lost (24.2 to 37.6 95 CI). Over 6 months, that's 0.18 HRQOL (0.13 to 0.2)
+
+duration_long_term_symptoms = 56 to 365
+// https://raeng.org.uk/media/fupdixju/nera-social-cost-benefit-analysis.pdf 1 year. "we take a higher HRQoL to account for uncertainty (although is it not yet fully known and studies generally estimate HRQoL between 4-12 weeks)." In the spreadsheet
+//https://www.covid.gov/be-informed/longcovid/about#term "Long COVID is a patient created term broadly defined as signs, symptoms, and conditions that continue or develop after initial SARS-CoV-2 infection. The signs, symptoms, and conditions are present four weeks or more after the initial phase of infection"
+
+health_cost_long_term_illness = hrqol_long_term_symptoms*(duration_long_term_symptoms/365)*qaly
+
+average_yll = 8 to 17
+//https://bmcpublichealth.biomedcentral.com/articles/10.1186/s12889-021-12377-1/figures/1: 8
+//https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8877807/: 31.45 YLL per 1000 people, 1.84 deaths per 1000 people, so 17
+//https://www.nature.com/articles/s41598-021-83040-3#data-availability we could get this info from their data if we tried
+//https://www.pewresearch.org/short-reads/2021/06/16/americans-lost-more-years-of-life-to-covid-19-in-2020-than-to-all-accidents-combined-in-a-typical-year/"In 2020 alone, the coronavirus was responsible for about 380,000 deaths and roughly 5.5 million years of lost life in the United States, according to a Pew Research Center analysis of provisional data from the Centers for Disease Control and Prevention." 5500000/380000 is 14.5
+//https://raeng.org.uk/media/fupdixju/nera-social-cost-benefit-analysis.pdf 11-15 YLL
+
+// Sense check with endemic flu model by converting hrqols into QALY loss
+qaly_loss_sickness = hrqol_sickness*(duration_sickness/365)
+qaly_loss_hospitalisation = hrqol_hospitalisation*duration_hospitalisation/365
+qaly_loss_icu = hrqol_icu*duration_icu/365
+
+// Valuation info: costs of healthcare
+hospital_bed = 2000 to 3000
+//estimated based on 2022 CA OSHPD data
+//https://www.statista.com/statistics/630443/inpatient-day-hospital-costs-in-us-by-nonprofit-or-profit/#:~:text=In%202021%2C%20the%20average%20cost,at%20a%20for%2Dprofit%20hospital.: "In 2021, the average cost of an inpatient day at non-profit hospitals was 3,013 dollars, compared to 2,296 dollars at a for-profit hospital."
+//https://link.springer.com/article/10.1007/s12325-021-01887-4: "Overall median hospital LOS, cost, and cost/day were 6 days, US$11,267, and $1772, respectively; overall median ICU LOS, cost, and cost/day were 5 days, $13,443, and $2902, respectively."
+
+cost_hospitalisation = hospital_bed*duration_hospitalisation
+
+icu_bed = 2500 to 3500
+//estimated based on 2022 CA OSHPD data
+//https://link.springer.com/article/10.1007/s12325-021-01887-4: "Overall median hospital LOS, cost, and cost/day were 6 days, US$11,267, and $1772, respectively; overall median ICU LOS, cost, and cost/day were 5 days, $13,443, and $2902, respectively."
+//https://www.atsjournals.org/doi/10.1513/AnnalsATS.201506-366BC 2015, around $2000 per day in different kinds of ICU
+
+cost_icu_hospitalisation = icu_bed*duration_icu
+
+//Expected costs of ill health
+sickness_costs = health_cost_sickness*(annual_cases-annual_hospitalisations-long_term_symptoms)
+hospitalisation_costs = health_cost_hospitalisation*(annual_hospitalisations-annual_icu)
+icu_costs = health_cost_icu*(annual_icu)
+viv_check = sickness_costs + hospitalisation_costs + icu_costs
+death_costs = average_yll*annual_deaths*qaly*qaly_percent
+long_term_symptoms_costs = health_cost_long_term_illness*long_term_symptoms
+total_expected_costs_ill_health = sickness_costs+hospitalisation_costs+icu_costs+death_costs+long_term_symptoms_costs
+percent_sickness = sickness_costs/total_expected_costs_ill_health
+percent_hospitalisation = hospitalisation_costs/total_expected_costs_ill_health
+percent_icu = icu_costs/total_expected_costs_ill_health
+percent_death = death_costs/total_expected_costs_ill_health
+percent_long_term_symptoms = long_term_symptoms_costs/total_expected_costs_ill_health
+qaly_sickness = hrqol_sickness*(duration_sickness/365)*(annual_cases-annual_hospitalisations-long_term_symptoms)
+qaly_hospitalisation = hrqol_hospitalisation*(duration_hospitalisation/365)*(annual_hospitalisations-annual_icu)
+qaly_icu = hrqol_icu*(duration_icu/365)*(annual_icu)
+qaly_death = annual_deaths*average_yll*qaly_percent
+qaly_long_term_symptoms = hrqol_long_term_symptoms*(duration_long_term_symptoms/365)*long_term_symptoms
+total_qaly_costs = qaly_sickness+qaly_hospitalisation+qaly_icu+qaly_death+qaly_long_term_symptoms
+
+//Expected healthcare costs
+hospitalisation_healthcare_costs = cost_hospitalisation*annual_hospitalisations
+icu_healthcare_costs = cost_icu_hospitalisation*annual_icu
+total_expected_costs_heatlhcare = hospitalisation_healthcare_costs+icu_healthcare_costs
+
+// Total expected annual costs
+total_expected_costs = total_expected_costs_heatlhcare+total_expected_costs_ill_health

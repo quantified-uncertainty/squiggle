@@ -1,0 +1,906 @@
+@startOpen
+@name("Documentation: Start Here!")
+documentation = "This model contains the information necessary to support a forecasting competition to predict the ratings of upcoming movies on IMDB, Metacritic, and Rotten Tomatoes.
+
+To participate in the competition, write a function matching this signature:  
+```
+fn(
+  time: Date between 2024-04-01 and 2024-06-01,  
+  movieUrl: Metacritic movie ID like \"boy-kills-world\" or \"challengers\",
+  scoreType: One of [\"imdb\", \"metacritic\", \"rottenTomatoes\"]
+) => probability distribution
+```
+
+The function should output a probability distribution representing the predicted score for the given `movie` on the specified `scoreType` platform at the input `time`. 
+
+A few key points:
+- The function will only be scored once the first reviews are published for each movie. No need to handle pre-release periods.
+- IMDB and Metacritic scores range from 0-10. Rotten Tomatoes scores range from 0-100. 
+- Aim to output a continuous distribution like `Dist.normal()`. Other dist types will be auto-converted which may be suboptimal.
+- Performance will be evaluated using proper scoring rules that assess the accuracy and calibration of the predicted distributions.
+
+The model includes information on 60+ upcoming films, example functions to use as starting points, and useful helper functions. Get started by checking out:
+- `movies` - Release date, genre, studio and Metacritic URL for each movie 
+- `exampleFunctions` - Sample prediction functions to build on or take inspiration from
+- `scoreData` - Details on the different scoring platforms
+- `validateLib` - Check if your function outputs properly ranged distributions
+- `visualizations` - Interactively visualize your function's predictions
+
+Good luck! Enjoy nerding out on movies while leveling up your probabalistic forecasting skills. May the best cinephile win!"
+
+// https://www.metacritic.com/news/upcoming-movie-release-dates-schedule/
+
+@name("Upcoming Movie Data, from Apr 20 2024, from Metacritic")
+@doc(
+  "See: [Metacritic Upcoming Release Schedule](https://www.metacritic.com/news/upcoming-movie-release-dates-schedule/).
+I used Claude Haiku for parsing/filtering the HTML, because speed + length was important.
+
+Some interesting box office numbers are here, for future use: https://www.boxofficemojo.com/year/world/?ref_=bo_nb_in_tab"
+)
+@startClosed
+export movies = {
+  @startClosed
+  data = [
+    [
+      "Boy Kills World",
+      "boy-kills-world",
+      "2024-04-26",
+      "Lionsgate/Roadside Attractions",
+      "Action/Thriller",
+    ],
+    [
+      "Challengers",
+      "challengers",
+      "2024-04-26",
+      "Amazon MGM Studios",
+      "Drama/Sports",
+    ],
+    ["Unsung Hero", "unsung-hero", "2024-04-26", "Lionsgate", "Drama/Family"],
+    [
+      "Kingdom of the Planet of the Apes",
+      "kingdom-of-the-planet-of-the-apes",
+      "2024-05-10",
+      "20th Century Studios",
+      "Action/Sci-fi",
+    ],
+    [
+      "Furiosa: A Mad Max Saga",
+      "furiosa-a-mad-max-saga",
+      "2024-05-24",
+      "Warner Bros.",
+      "Action/Sci-fi/Thriller",
+    ],
+    [
+      "The Garfield Movie",
+      "the-garfield-movie",
+      "2024-05-24",
+      "Sony",
+      "Animation/Family",
+    ],
+    ["Sight", "sight", "2024-05-24", "Angel Studios", "Drama"],
+    ["Ezra", "ezra-2023", "2024-05-31", "Bleecker Street", "Comedy"],
+    [
+      "Bad Boys: Ride or Die",
+      "bad-boys-ride-or-die",
+      "2024-06-07",
+      "Sony",
+      "Action/Comedy",
+    ],
+    [
+      "Inside Out 2",
+      "inside-out-2",
+      "2024-06-14",
+      "Disney/Pixar",
+      "Animation/Family",
+    ],
+    ["The Watchers", "the-watchers", "2024-06-14", "Warner Bros.", "Horror"],
+    [
+      "The Bikeriders",
+      "the-bikeriders",
+      "2024-06-21",
+      "Focus Features",
+      "Drama",
+    ],
+    ["Janet Planet", "janet-planet", "2024-06-21", "A24", "Drama"],
+    ["Daddio", "daddio", "2024-06-28", "Sony Pictures Classics", "Drama"],
+    [
+      "Horizon: An American Saga Chapter 1",
+      "horizon-an-american-saga---chapter-1",
+      "2024-06-28",
+      "Warner Bros.",
+      "Western",
+    ],
+    [
+      "A Quiet Place: Day One",
+      "a-quiet-place-day-one",
+      "2024-06-28",
+      "Paramount",
+      "Horror/Thriller",
+    ],
+    ["MaXXXine", "maxxxine", "2024-07-05", "A24", "Horror"],
+    [
+      "Fly Me to the Moon",
+      "fly-me-to-the-moon",
+      "2024-07-12",
+      "Sony/Apple",
+      "Rom-com",
+    ],
+    ["Longlegs", "longlegs", "2024-07-12", "Neon", "Horror/Thriller"],
+    [
+      "Deadpool & Wolverine",
+      "deadpool-wolverine",
+      "2024-07-26",
+      "Disney/Marvel Studios",
+      "Action/Comedy/Sci-fi",
+    ],
+    ["Dìdi (弟弟)", "didi", "2024-07-26", "Focus Features", "Comedy/Drama"],
+    [
+      "The Fabulous Four",
+      "the-fabulous-four",
+      "2024-07-26",
+      "Bleecker Street",
+      "Comedy",
+    ],
+    [
+      "Harold and the Purple Crayon",
+      "harold-and-the-purple-crayon",
+      "2024-08-02",
+      "Sony",
+      "Animation/Family",
+    ],
+    [
+      "Borderlands",
+      "borderlands",
+      "2024-08-09",
+      "Lionsgate",
+      "Sci-fi/Action/Comedy",
+    ],
+    ["Cuckoo", "cuckoo", "2024-08-09", "Neon", "Horror/Thriller"],
+    ["The Fire Inside", "the-fire-inside", "2024-08-09", "MGM", "Drama/Sports"],
+    ["It Ends With Us", "it-ends-with-us", "2024-08-09", "Sony", "Drama"],
+    ["Trap", "trap", "2024-08-09", "Warner Bros.", "Horror/Thriller"],
+    [
+      "Alien: Romulus",
+      "alien-romulus",
+      "2024-08-16",
+      "20th Century Studios",
+      "Sci-fi/Horror",
+    ],
+    [
+      "Horizon: An American Saga Chapter 2",
+      "horizon-an-american-saga---chapter-2",
+      "2024-08-16",
+      "Warner Bros.",
+      "Western",
+    ],
+    [
+      "Ryan's World The Movie: Titan Universe Adventure",
+      "ryans-world-the-movie-titan-universe-adventure",
+      "2024-08-16",
+      "Falling Forward Films",
+      "Animation/Family",
+    ],
+    [
+      "Blink Twice",
+      "blink-twice",
+      "2024-08-23",
+      "Amazon MGM Studios",
+      "Drama/Thriller",
+    ],
+    [
+      "The Crow 2024",
+      "the-crow-2024",
+      "2024-08-23",
+      "Lionsgate",
+      "Action/Fantasy",
+    ],
+    ["The Forge", "the-forge", "2024-08-23", "Sony", "Drama"],
+    ["Slingshot", "slingshot", "2024-08-23", "Bleecker Street", "Sci-fi"],
+    [
+      "City of Dreams",
+      "city-of-dreams",
+      "2024-08-30",
+      "Roadside Attractions",
+      "Drama/Thriller",
+    ],
+    [
+      "Kraven the Hunter",
+      "kraven-the-hunter",
+      "2024-08-30",
+      "Sony",
+      "Action-adventure/Sci-fi",
+    ],
+    ["Reagan", "reagan", "2024-08-30", "ShowBiz Direct", "Drama/Biopic"],
+    [
+      "Beetlejuice Beetlejuice 2024 A.D.",
+      "beetlejuice-beetlejuice-2024-ad",
+      "2024-09-06",
+      "Warner Bros.",
+      "Fantasy/Horror/Comedy",
+    ],
+    [
+      "Speak No Evil",
+      "speak-no-evil",
+      "2024-09-13",
+      "Universal/Blumhouse",
+      "Horror",
+    ],
+    ["Lee", "lee", "2024-09-20", "Roadside Attractions/Vertical", "Drama"],
+    [
+      "Transformers One",
+      "transformers-one",
+      "2024-09-20",
+      "Paramount",
+      "Animation/Action/Sci-fi",
+    ],
+    [
+      "The Wild Robot",
+      "the-wild-robot",
+      "2024-09-20",
+      "Universal",
+      "Animation/Family",
+    ],
+    ["Wolfs", "wolfs", "2024-09-20", "Sony/Apple", "Action/Thriller"],
+    ["Never Let Go", "never-let-go", "2024-09-27", "Lionsgate", "Horror"],
+    [
+      "Joker: Folie á Deux",
+      "joker-folie-s-deux",
+      "2024-10-04",
+      "Warner Bros.",
+      "Drama/Thriller/Musical",
+    ],
+    ["White Bird", "white-bird", "2024-10-04", "Lionsgate", "Drama"],
+    [
+      "Piece by Piece",
+      "piece-by-piece",
+      "2024-10-11",
+      "Focus Features",
+      "Animation/Documentary",
+    ],
+    ["Smile 2", "smile-2", "2024-10-18", "Paramount", "Horror/Thriller"],
+    [
+      "Terrifier 3",
+      "terrifier-3",
+      "2024-10-25",
+      "Cineverse/Iconic Events",
+      "Horror",
+    ],
+    [
+      "Venom: The Last Dance",
+      "venom-the-last-dance",
+      "2024-10-25",
+      "Sony",
+      "Sci-fi/Action",
+    ],
+  ]
+
+  table = Table.make(
+    data
+      -> List.map(
+        {
+          |m|
+          {
+            name: m[0],
+            url: m[1],
+            releaseDate: Date(m[2]),
+            studio: m[3],
+            genre: m[4],
+          }
+        }
+      ),
+    {
+      columns: [
+        {
+          name: "Name/Link",
+          fn: {
+            |d|
+            "[" + d.name + "](https://www.metacritic.com/movie/" + d.url + ")"
+          },
+        },
+        { name: "ID", fn: {|d| d.url} },
+        {
+          name: "Release Date",
+          fn: {|d| d.releaseDate},
+          format: {|d| d.format("YYYY-MM-DD")},
+          sortValue: {|d| d.releaseDate},
+        },
+        { name: "Studio", fn: {|d| d.studio} },
+        { name: "Genre", fn: {|d| d.genre} },
+      ],
+      sortColumn: "Release Date",
+    }
+  )
+  { data, table }
+}
+
+@startClosed
+@name("Manifold Markets Comparison Questions")
+@doc(
+  "I found some questions on Manifold Markets that were similar to this. Here's a few of them. This is useful for seeing how one's Movie Function would perform on them."
+)
+manifoldComparisonQuestions = {
+  data = [
+    {
+      questionName: "Will \"Challengers\" (2024) have a Metacritic score >84?",
+      prediction: 0.37,
+      numberOfForecasters: 8,
+      params: {
+        movieUrl: "challengers",
+        date: 2024,
+        param: "metacritic",
+        query: {|e| 1 - cdf(e, 84)},
+      },
+    },
+    {
+      questionName: "Will \"Challengers\" (2024) have >94% critics score on Rotten Tomatoes?",
+      prediction: 0.97,
+      numberOfForecasters: 23,
+      params: {
+        movieUrl: "challengers",
+        date: 2024,
+        param: "rottenTomatoes",
+        query: {|e| 1 - cdf(e, 94)},
+      },
+    },
+    {
+      questionName: "Will \"Challengers\" (2024) have >86% critics score on Rotten Tomatoes?",
+      prediction: 0.97,
+      numberOfForecasters: 23,
+      params: {
+        movieUrl: "challengers",
+        date: 2024,
+        param: "rottenTomatoes",
+        query: {|e| 1 - cdf(e, 86)},
+      },
+    },
+    {
+      questionName: "Will \"Challengers\" (2024) have a Metacritic score >75?",
+      prediction: 0.94,
+      numberOfForecasters: 4,
+      params: {
+        movieUrl: "challengers",
+        date: 2024,
+        param: "metacritic",
+        query: {|e| 1 - cdf(e, 75)},
+      },
+    },
+  ]
+  { data, }
+}
+
+@name("Data about Score Types")
+@doc(
+  "The three score types are *IMDB*, *Metacritic*, and *Rotten Tomatoes*. The first two have scores that range from 0-10, and Rotten Tomatoes goes from 0 to 100. Included in this object is a `truncateScore` function, that takes in a probability distribution, and truncates out the parts not in the relevant range."
+)
+@startClosed
+export scoreData = {
+  @startOpen
+  types = ["imdb", "metacritic", "rottenTomatoes"]
+  @startClosed
+  range = { imdb: [0, 10], metacritic: [0, 100], rottenTomatoes: [0, 100] }
+  truncateScore(score, type) = truncate(score, range[type][0], range[type][1])
+
+  { types, range, truncateScore }
+}
+
+@startClosed
+@name("Internal Libraries")
+lib = {
+  randomlyPickFromList(list) = uniform(0, List.length(list) - 1) -> Dist.sample
+    -> Number.round
+    -> {|i| list[i]}
+
+  randomDateBetween(start, end) = {
+    duration = end - start
+    randomFraction = sample(uniform(0, 1))
+    start + duration * randomFraction
+  }
+
+  isCloseTo(a, b, tolerance) = abs(a - b) < tolerance
+
+  { randomlyPickFromList, randomDateBetween, isCloseTo }
+}
+
+@startClosed
+@name("Random Function Input Data Generation Libraries")
+randomNess = {
+  first = Date(2024, 4, 1)
+  last = Date(2024, 6, 1)
+
+  getMovie() = lib.randomlyPickFromList(movies.data)
+  getProperty() = lib.randomlyPickFromList(scoreData.types)
+  getDate() = lib.randomDateBetween(first, last)
+  getAll() = { movie: getMovie(), property: getProperty(), date: getDate() }
+
+  runOnFn(fn) = {
+    args = getAll()
+    result = fn(args.date, args.movie[1], args.property)
+    { args, result }
+  }
+
+  { getMovie, getProperty, getDate, getAll, runOnFn }
+}
+
+@startClosed
+validateLib = {
+  tryFnOnRandomResult(fn) = {
+    args = randomNess.getAll()
+    result = fn(args.date, args.movie[1], args.property)
+    { args, result }
+  }
+
+  verifyNTimes(fn, n) = {
+    responses = List.make(
+      n,
+      {
+        ||
+        run = tryFnOnRandomResult(fn)
+        resultSupport = PointSet.support(run.result).segments[0]
+        intendedRange = scoreData.range[run.args.property]
+        min = lib.isCloseTo(resultSupport[0], intendedRange[0], 0.1)
+        max = lib.isCloseTo(resultSupport[1], intendedRange[1], 0.1)
+        if min && max then false else {
+          error: "Mismatch between intendedRange and resultSupport",
+          intendedRange,
+          resultSupport,
+          result: run.result,
+        }
+      }
+    )
+    errorResponses = responses -> List.filter({|r| r != false})
+
+    { errorResponses, isValid: List.length(errorResponses) == 0 }
+  }
+
+  validate(fn) = {
+    verified = verifyNTimes(fn, 20)
+    verified.isValid ? "" : verified.errorResponses -> List.map({|v| v.error})
+      -> List.join(
+        "|"
+      )
+  }
+
+  validate
+}
+
+@name("Movie Predictions Specification")
+export spec = Spec.make(
+  {
+    name: "Movie Predictions Specification",
+    documentation: "",
+    validate: validateLib,
+  }
+)
+
+@name("Example Functions")
+exampleFunctions = {
+  @startClosed
+  @name("Prior Function for Movie Predictions Specification")
+  @spec(spec)
+  @location
+  priorsFn = {
+    perScoreType = {
+      imdb: scoreData.truncateScore(Sym.normal(6.5, 2), "imdb"),
+      metacritic: scoreData.truncateScore(Sym.normal(60, 20), "metacritic"),
+      rottenTomatoes: scoreData.truncateScore(
+        Sym.normal(60, 20),
+        "rottenTomatoes"
+      ),
+    }
+
+    fn(
+      time: [Date(2024, 4, 1), Date(2024, 6, 1)],
+      movie,
+      scoreType
+    ) = perScoreType[scoreType]
+    fn
+  }
+
+  @startClosed
+  @name("Simple Example Function for Movie Predictions Spec")
+  @spec(spec)
+  @location
+  simpleExample = {
+    perScoreType = {
+      imdb: scoreData.truncateScore(Sym.normal(6.5, 1), "imdb"),
+      metacritic: scoreData.truncateScore(Sym.normal(60, 3), "metacritic"),
+      rottenTomatoes: scoreData.truncateScore(
+        Sym.normal(50, 9),
+        "rottenTomatoes"
+      ),
+    }
+
+    fn(
+      time: [Date(2024, 4, 1), Date(2024, 6, 1)],
+      movie,
+      scoreType
+    ) = perScoreType[scoreType]
+    fn
+  }
+
+  @startClosed
+  @name("Complicated Example Function for Movie Predictions Spec")
+  @spec(spec)
+  @location
+  complicatedExample = {
+    baseScoreDistAttributes = {
+      imdb: { mean: 6.8, stdev: 1.2 },
+      metacritic: { mean: 72, stdev: 15 },
+      rottenTomatoes: { mean: 70, stdev: 20 },
+    }
+
+    adjustScore(mean, adjustment, scoreType) = if scoreType ==
+      "imdb" then mean + adjustment / 10 else if scoreType ==
+      "metacritic" then mean + adjustment else mean + adjustment * 1.2
+
+    adjustments = {
+      "boy-kills-world": { amount: -5, stdevMultiplier: 1.1 },
+      challengers: { amount: 25, stdevMultiplier: 0.8 },
+      "unsung-hero": { amount: 0, stdevMultiplier: 1 },
+      "kingdom-of-the-planet-of-the-apes": { amount: 5, stdevMultiplier: 1 },
+      "furiosa-a-mad-max-saga": { amount: 5, stdevMultiplier: 1 },
+      "the-garfield-movie": { amount: -10, stdevMultiplier: 1.2 },
+      sight: { amount: 0, stdevMultiplier: 1 },
+      "ezra-2023": { amount: 0, stdevMultiplier: 1 },
+      "bad-boys-ride-or-die": { amount: 0, stdevMultiplier: 1 },
+      "inside-out-2": { amount: 8, stdevMultiplier: 0.9 },
+      "the-watchers": { amount: -5, stdevMultiplier: 1.1 },
+      "the-bikeriders": { amount: 0, stdevMultiplier: 1 },
+      "janet-planet": { amount: 0, stdevMultiplier: 1 },
+      daddio: { amount: 0, stdevMultiplier: 1 },
+      "horizon-an-american-saga---chapter-1": { amount: 0, stdevMultiplier: 1 },
+      "a-quiet-place-day-one": { amount: 5, stdevMultiplier: 1 },
+      maxxxine: { amount: -5, stdevMultiplier: 1.1 },
+      "fly-me-to-the-moon": { amount: 0, stdevMultiplier: 1 },
+      longlegs: { amount: 0, stdevMultiplier: 1 },
+      "deadpool-wolverine": { amount: 10, stdevMultiplier: 0.9 },
+      didi: { amount: 0, stdevMultiplier: 1 },
+      "the-fabulous-four": { amount: 0, stdevMultiplier: 1 },
+      "harold-and-the-purple-crayon": { amount: 0, stdevMultiplier: 1 },
+      borderlands: { amount: 0, stdevMultiplier: 1 },
+      cuckoo: { amount: 0, stdevMultiplier: 1 },
+      "the-fire-inside": { amount: 0, stdevMultiplier: 1 },
+      "it-ends-with-us": { amount: 0, stdevMultiplier: 1 },
+      trap: { amount: 0, stdevMultiplier: 1 },
+      "alien-romulus": { amount: 5, stdevMultiplier: 1 },
+      "horizon-an-american-saga---chapter-2": { amount: 0, stdevMultiplier: 1 },
+      "ryans-world-the-movie-titan-universe-adventure": {
+        amount: -10,
+        stdevMultiplier: 1.2,
+      },
+      "blink-twice": { amount: 0, stdevMultiplier: 1 },
+      "the-crow-2024": { amount: -5, stdevMultiplier: 1.1 },
+      "the-forge": { amount: 0, stdevMultiplier: 1 },
+      slingshot: { amount: 0, stdevMultiplier: 1 },
+      "city-of-dreams": { amount: 0, stdevMultiplier: 1 },
+      "kraven-the-hunter": { amount: -8, stdevMultiplier: 1.2 },
+      reagan: { amount: 0, stdevMultiplier: 1 },
+      "beetlejuice-beetlejuice-2024-ad": { amount: 0, stdevMultiplier: 1 },
+      "speak-no-evil": { amount: -5, stdevMultiplier: 1.1 },
+      lee: { amount: 0, stdevMultiplier: 1 },
+      "transformers-one": { amount: 0, stdevMultiplier: 1 },
+      "the-wild-robot": { amount: 0, stdevMultiplier: 1 },
+      wolfs: { amount: 0, stdevMultiplier: 1 },
+      "never-let-go": { amount: 0, stdevMultiplier: 1 },
+      "joker-folie-s-deux": { amount: 10, stdevMultiplier: 0.9 },
+      "white-bird": { amount: 0, stdevMultiplier: 1 },
+      "piece-by-piece": { amount: 0, stdevMultiplier: 1 },
+      "smile-2": { amount: 0, stdevMultiplier: 1 },
+      "terrifier-3": { amount: -5, stdevMultiplier: 1.1 },
+      "venom-the-last-dance": { amount: 0, stdevMultiplier: 1 },
+    }
+
+    fn(time: [Date(2024, 4, 1), Date(2024, 6, 1)], movie, scoreType) = {
+      distAttributes = baseScoreDistAttributes[scoreType]
+      stdev = if scoreType == "imdb" then 1.2 else if scoreType ==
+        "metacritic" then 15 else 20
+
+      if Dict.has(adjustments, movie) then {
+        adjustment = adjustments[movie].amount
+        stdevMultiplier = adjustments[movie].stdevMultiplier
+        newMean = adjustScore(distAttributes.mean, adjustment, scoreType)
+        scoreData.truncateScore(
+          Sym.normal(newMean, distAttributes.stdev * stdevMultiplier),
+          scoreType
+        )
+      } else scoreData.truncateScore(
+        Sym.normal(distAttributes.mean, distAttributes.stdev),
+        scoreType
+      )
+    }
+
+    fn
+  }
+
+  { priorsFn, simpleExample, complicatedExample }
+}
+
+@name("Visualizations")
+visualizations = {
+  _movieDataWithUrls(movies) = movies.data
+    -> List.map(
+      {
+        |movieData|
+        { movie: movieData[1], name: movieData[0], url: movieData[1] }
+      }
+    )
+
+  @location
+  @startClosed
+  movieTable(date, scorePredictionFn) = {
+    movieData = _movieDataWithUrls(movies)
+
+    columns = List.concat(
+      [
+        {
+          name: "Name",
+          fn: {
+            |movie|
+            "[" + movie.name + "](https://www.metacritic.com/movie/" +
+              movie.url +
+              ")"
+          },
+          asMarkdown: true,
+        },
+      ],
+      scoreData.types
+        -> List.map(
+          {
+            |scoreType|
+            [
+              {
+                name: scoreType,
+                fn: {
+                  |movie|
+                  yourDist = scorePredictionFn(date, movie.movie, scoreType)
+                  priorDist = exampleFunctions.priorsFn(
+                    date,
+                    movie.movie,
+                    scoreType
+                  )
+
+                  Plot.dists(
+                    [
+                      { name: "prior", value: priorDist },
+                      { name: "prediction", value: yourDist },
+                    ],
+                    {
+                      xScale: Scale.linear(
+                        {
+                          min: scoreData.range[scoreType][0],
+                          max: scoreData.range[scoreType][1],
+                        }
+                      ),
+                      showSummary: false,
+                    }
+                  )
+                },
+              },
+              {
+                name: scoreType + " KL Divergence",
+                fn: {
+                  |movie|
+                  yourDist = scorePredictionFn(date, movie.movie, scoreType)
+                  priorDist = exampleFunctions.priorsFn(
+                    date,
+                    movie.movie,
+                    scoreType
+                  )
+                  Dist.klDivergence(priorDist, yourDist)
+                },
+              },
+            ]
+          }
+        )
+        -> List.flatten
+    )
+
+    Table.make(movieData, { columns: columns })
+  }
+
+  @location
+  @startClosed
+  manifoldComparisonTable(fn) = Table.make(
+    manifoldComparisonQuestions.data,
+    {
+      columns: [
+        { name: "Question", fn: {|q| q.questionName} },
+        { name: "Manifold Trader Count", fn: {|q| q.numberOfForecasters} },
+        { name: "Manifold Prediction", fn: {|q| q.prediction} },
+        {
+          name: "Your Prediction",
+          fn: {
+            |q|
+            date = Date(q.params.date, 6, 1)
+            dist = fn(date, q.params.movieUrl, q.params.param)
+            q.params.query(dist)
+          },
+        },
+      ],
+    }
+  )
+
+  calculator = Calculator.make(
+    {
+      |model, visualization|
+      fn = if Dict.has(
+        exampleFunctions,
+        model
+      ) then exampleFunctions[model] else exampleFunctions.priorsFn
+
+      allTables = { movieTable, manifoldComparisonTable }
+      visualizationFn = if Dict.has(
+        allTables,
+        visualization
+      ) then allTables[visualization] else allTables.movieTable
+
+      if visualization == "movieTable" then allTables.movieTable(
+        Date(2024, 6, 1),
+        fn
+      ) else allTables.manifoldComparisonTable(fn)
+    },
+    {
+      title: "Movie Score Prediction Visualization",
+      autorun: false,
+      inputs: [
+        Input.select(
+          {
+            name: "Model",
+            description: "Choose an example model",
+            options: ["priorsFn", "simpleExample", "complicatedExample"],
+            default: "priorsFn",
+          }
+        ),
+        Input.select(
+          {
+            name: "Visualization",
+            description: "Choose a visualization",
+            options: ["movieTable", "manifoldComparisonTable"],
+            default: "movieTable",
+          }
+        ),
+      ],
+    }
+  )
+
+  { movieTable, manifoldComparisonTable, calculator }
+}
+
+@name("Model-Specific Visualization")
+export modelVisualization(model) = {
+  _movieDataWithUrls(movies) = movies.data
+    -> List.map(
+      {
+        |movieData|
+        { movie: movieData[1], name: movieData[0], url: movieData[1] }
+      }
+    )
+
+  @location
+  @startClosed
+  movieTable(date, scorePredictionFn) = {
+    movieData = _movieDataWithUrls(movies)
+
+    columns = List.concat(
+      [
+        {
+          name: "Name",
+          fn: {
+            |movie|
+            "[" + movie.name + "](https://www.metacritic.com/movie/" +
+              movie.url +
+              ")"
+          },
+          asMarkdown: true,
+        },
+      ],
+      scoreData.types
+        -> List.map(
+          {
+            |scoreType|
+            [
+              {
+                name: scoreType,
+                fn: {
+                  |movie|
+                  yourDist = scorePredictionFn(date, movie.movie, scoreType)
+                  priorDist = exampleFunctions.priorsFn(
+                    date,
+                    movie.movie,
+                    scoreType
+                  )
+
+                  Plot.dists(
+                    [
+                      { name: "prior", value: priorDist },
+                      { name: "prediction", value: yourDist },
+                    ],
+                    {
+                      xScale: Scale.linear(
+                        {
+                          min: scoreData.range[scoreType][0],
+                          max: scoreData.range[scoreType][1],
+                        }
+                      ),
+                      showSummary: false,
+                    }
+                  )
+                },
+              },
+              {
+                name: scoreType + " KL Divergence",
+                fn: {
+                  |movie|
+                  yourDist = scorePredictionFn(date, movie.movie, scoreType)
+                  priorDist = exampleFunctions.priorsFn(
+                    date,
+                    movie.movie,
+                    scoreType
+                  )
+                  Dist.klDivergence(priorDist, yourDist)
+                },
+              },
+            ]
+          }
+        )
+        -> List.flatten
+    )
+
+    Table.make(movieData, { columns: columns })
+  }
+
+  @location
+  @startClosed
+  manifoldComparisonTable(fn) = Table.make(
+    manifoldComparisonQuestions.data,
+    {
+      columns: [
+        { name: "Question", fn: {|q| q.questionName} },
+        { name: "Manifold Trader Count", fn: {|q| q.numberOfForecasters} },
+        { name: "Manifold Prediction", fn: {|q| q.prediction} },
+        {
+          name: "Your Prediction",
+          fn: {
+            |q|
+            date = Date(q.params.date, 6, 1)
+            dist = fn(date, q.params.movieUrl, q.params.param)
+            q.params.query(dist)
+          },
+        },
+      ],
+    }
+  )
+
+  calculator = Calculator.make(
+    {
+      |visualization|
+
+      allTables = { movieTable, manifoldComparisonTable }
+      visualizationFn = if Dict.has(
+        allTables,
+        visualization
+      ) then allTables[visualization] else allTables.movieTable
+
+      if visualization == "movieTable" then allTables.movieTable(
+        Date(2024, 6, 1),
+        model
+      ) else allTables.manifoldComparisonTable(model)
+    },
+    {
+      title: "Movie Score Prediction Visualization",
+      autorun: false,
+      inputs: [
+        Input.select(
+          {
+            name: "Visualization",
+            description: "Choose a visualization",
+            options: ["movieTable", "manifoldComparisonTable"],
+            default: "movieTable",
+          }
+        ),
+      ],
+    }
+  )
+
+  { movieTable, manifoldComparisonTable, calculator }
+}

@@ -1,0 +1,105 @@
+/*
+How long does it take to read different books?
+How much does that cost, in counterfactual value, assuming that reading time is counterfactually valuable?
+
+This is a very simple table of estimates. Inspired by a previous Guesstimate model.
+*/
+@hide
+cost(wpm, valuePerHour, words) = {
+  wordsPerHour = wpm * 120
+  words * (valuePerHour / wordsPerHour)
+}
+
+@name("Book Word Counts")
+wordCounts = [
+  { name: "Harry Potter 1", v: 76k },
+  { name: "Animal Farm", v: 29k },
+  { name: "Random blog post, 500 to 2k words", v: 500 to 2k },
+  { name: "The Great Gatsby", v: 47k },
+  { name: "Pride and Prejudice", v: 119k },
+  { name: "To Kill a Mockingbird", v: 100k },
+  { name: "The Fellowship of the Ring", v: 177k },
+  { name: "1984", v: 88k },
+  { name: "The Catcher in the Rye", v: 73k },
+  { name: "WORM", v: 1.78M },
+]
+  -> Tag.showAs(
+    {
+      |d|
+      Table(
+        d,
+        {
+          columns: [
+            { name: "Book", fn: {|r| r.name} },
+            { name: "Word Count", fn: {|r| r.v} },
+          ],
+        }
+      )
+    }
+  )
+
+@hide
+dollarFormat = "$.2f"
+
+@hide
+table(readingSpeed, valueOfTimePerHour) = Table(
+  wordCounts,
+  {
+    columns: [
+      { name: "Name", fn: {|f| "**" + f.name + "**"} },
+      { name: "Word Count", fn: {|f| f.v} },
+      { name: "Hours to Read", fn: {|f| f.v / readingSpeed / 60} },
+      {
+        name: "Time Cost to Read",
+        fn: {
+          |f|
+          Plot.dist(
+            {
+              dist: cost(readingSpeed, Dist(valueOfTimePerHour), f.v),
+              showSummary: false,
+              xScale: Scale.symlog(
+                {
+                  min: 0.1,
+                  max: 10000,
+                  constant: 0.1,
+                  tickFormat: dollarFormat,
+                }
+              ),
+            }
+          )
+        },
+      },
+      {
+        name: "Time Cost to Read (mean)",
+        fn: {
+          |f|
+          cost(readingSpeed, Dist(valueOfTimePerHour), f.v) -> mean
+            -> Tag.format(
+              dollarFormat
+            )
+        },
+      },
+    ],
+  }
+)
+
+@name("Cost of Reading Various Books Calculator")
+export calc = Calculator(
+  table,
+  {
+    title: "Cost of Reading Various Books",
+    description: "This calculator estimates the time and value costs for reading different books. Users input their reading speed (words per minute) and perceived hourly value of time (in dollars). The value of time should be for that which the user would replace with reading.",
+    inputs: [
+      Input.text(
+        {
+          name: "Your Reading Speed (words per minute)",
+          default: "200 to 300",
+          description: "Most people read at around 250wpm. Top readers can read around 700wpm.",
+        }
+      ),
+      Input.text(
+        { name: "Your Value of Time per Hour (Dollars)", default: "10 to 30" }
+      ),
+    ],
+  }
+)

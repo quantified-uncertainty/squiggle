@@ -1,0 +1,107 @@
+/*
+ * Cost-effectiveness analysis for Uganda Community Farm's program to 
+ * buy sorghum seeds and supplies necessary to grow sorghum.
+ * 
+ * Some parts of this model are copy/pasted from
+ * https://squigglehub.org/models/mdickens/Uganda-Community-Farm-facility 
+ */
+
+// As of 2024-05-24
+ugx_to_usd = 1 / 3828
+hectares_to_acres = 2.471
+tonnes_to_kg = 1000
+
+// Coefficient of relative risk aversion. Higher = more risk averse. A coefficient of 1 corresponds to logarithmic utility of money, which is consistent with GiveWell's models.
+risk_aversion_coefficient = 1
+
+// Cost to grow crops. From Anthony's Q&A post, with correction on spray pump cost (per season instead of per year)
+input_cost_per_acre_per_season_usd = 6.8 + 10 + 2.5 + 8
+
+// Based on prices 2019–2024 according to Anthony, which is consistent with projected 2024 market price according to ReliefWeb:
+// https://reliefweb.int/report/uganda/uganda-wfp-vam-food-security-analysis-national-market-monitor-report-march-2024
+sorghum_price_per_kg_ugx = normal({ p25: 1050, p75: 1500 })
+
+// Number taken from Anthony's post. Roughly consistent with
+// https://ourworldindata.org/grapher/sorghum-yield?tab=chart&country=~UGA
+// Anthony's number is somewhat higher than OWID's number (700 kg/acre = 1.7 tonnes/hectare) but I'll use his number to be generous
+sorghum_harvest_kg_per_acre = normal(700, 100)
+sorghum_harvests_per_year = 2
+
+// Sugarcane has a yield ~60x higher than sorghum, idk how that works but it's what OWID says. And it's consistent with the fact that sorghum is way more expensive
+// https://ourworldindata.org/grapher/sugar-cane-yields?tab=chart&country=~UGA
+sugarcane_yield_kg_per_hectare_national_average = normal(70, 2) * tonnes_to_kg
+
+// Farmers near UCF probably have worse yields than the national average
+sugarcane_inefficient_farming_multiplier = normal({ p25: 0.8, p75: 0.9 })
+
+// According to Anthony, sugarcane takes 2 years to grow
+sugarcane_harvests_per_year = 0.5
+
+// Sugarcane price is very volatile
+// https://www.monitor.co.ug/uganda/news/national/sugarcane-prices-drop-by-shs110-000-in-busoga-4631166
+sugarcane_price_per_kg_ugx = normal({ p10: 96, p90: 240 })
+
+// Anthony wrote as if 1 farmer = 1 acre, which implies an income that's roughly consistent with poverty level in region.
+// Uganda Bureau of Stats reports avg 1.3 hectares per farmer, with 67% having less than 1 hectare:
+// https://www.ubos.org/wp-content/uploads/publications/05_2022Uganda_UBOS_StatRelease_AAS2019-Final.pdf
+// I'm assuming the farmers in Kamuli & Buyende mostly have smaller farms than that.
+hectares_per_farmer = lognormal({ p25: 0.5, p75: 1 })
+
+/* 
+ * Calculations
+ */
+
+sorghum_cost_per_acre_per_year_usd = input_cost_per_acre_per_season_usd * sorghum_harvests_per_year
+
+acres_per_farmer = hectares_per_farmer * hectares_to_acres
+sugarcane_yield_kg_per_hectare = sugarcane_yield_kg_per_hectare_national_average *
+  sugarcane_inefficient_farming_multiplier
+
+sugarcane_yield_kg_per_acre_per_year = sugarcane_yield_kg_per_hectare /
+  hectares_to_acres *
+  sugarcane_harvests_per_year
+sorghum_yield_kg_per_acre_per_year = sorghum_harvest_kg_per_acre *
+  sorghum_harvests_per_year
+
+sugarcane_revenue_per_acre_per_year_usd = sugarcane_yield_kg_per_acre_per_year *
+  sugarcane_price_per_kg_ugx *
+  ugx_to_usd
+sorghum_revenue_per_acre_per_year_usd = sorghum_yield_kg_per_acre_per_year *
+  sorghum_price_per_kg_ugx *
+  ugx_to_usd
+
+sugarcane_revenue_per_year_usd = sugarcane_revenue_per_acre_per_year_usd *
+  acres_per_farmer
+sorghum_revenue_per_year_usd = sorghum_revenue_per_acre_per_year_usd *
+  acres_per_farmer
+
+// Certainty-equivalent revenue is the amount of guaranteed revenue you'd accept instead of your current risky revenue. The riskier your actual revenue stream, the less it's worth.
+// This calculation uses an approximation to account for risk aversion. This approximation is commonly used for stock returns but idk if it's applicable here. Intuitively, it looks like this doesn't penalize risk enough, but maybe my intuition is wrong.
+sugarcane_certainty_equivalent_revenue = sugarcane_revenue_per_year_usd -
+  risk_aversion_coefficient * Dist.variance(sugarcane_revenue_per_year_usd) /
+    sugarcane_revenue_per_year_usd /
+    2
+sorghum_certainty_equivalent_revenue = sorghum_revenue_per_year_usd -
+  risk_aversion_coefficient * Dist.variance(sorghum_revenue_per_year_usd) /
+    sorghum_revenue_per_year_usd /
+    2
+
+// Technically shouldn't truncate, but a tiny part of the dist is below 0 which means we can't calculate the logarithm without truncating
+old_income = Dist.truncateLeft(sugarcane_certainty_equivalent_revenue, 0)
+new_income = Dist.truncateLeft(sorghum_certainty_equivalent_revenue, 0)
+
+// logc is short for log(consumption)
+logc_units_per_farmer_per_year = Dist.log(new_income) - Dist.log(old_income)
+
+logc_units_per_dollar = logc_units_per_farmer_per_year /
+  sorghum_cost_per_acre_per_year_usd
+
+// From GiveWell CEA: https://docs.google.com/spreadsheets/d/18ROI6dRdKsNfXg5gIyBa1_7eYOjowfbw5n65zkrLnvc/edit#gid=
+givedirectly_logc_units_per_dollar = 238 / 100000
+
+/* 
+ * Model Results
+ */
+
+cost_effectiveness_vs_givedirectly = logc_units_per_dollar /
+  givedirectly_logc_units_per_dollar

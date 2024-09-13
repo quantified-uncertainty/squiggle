@@ -1,0 +1,194 @@
+import "hub:ozziegooen/wells-riley-model" as wellsRileyModel
+import "hub:ozziegooen/room-model" as roomModel
+/*
+Demo for estimating the damage caused by virus
+
+One issue is that we might need to simulate the infected people. This means that there will only be a small probability that each person will be impacted. If we simulate this for each person, this will be limited.
+
+Note that one check to these results, is that they should roughly imply an equilibrium - the expected new cases should roughly match the suspected time average of new cases. 
+
+//For eventual calculators, we want people to vary:
+- Prevalence of disease. Can be separate for both, or similar. 2 vs. 10 vs. 20. per 100k.
+- Maybe the list of rooms, as a text box.
+- Maybe population of people. "City block", "Small Town", "Medium Town" -> Composition.
+
+- Timeline - A test case for demonstrating what calculators could be built for team and such.
+- If it can be done by November 6, that would be good. 
+
+*/
+
+quantumMeasures = { flu: 15 to 500, covid: 15 to 50 }
+
+// BY PERSON ---------------
+getGender = mx(0, 1)
+getAge = 15 to 70
+
+person() = {
+  gender: sample(getGender) > 0.5 ? "male" : "female",
+  age: sample(getAge),
+  lungCapacity: 0.4,
+}
+
+personCalculator = Calculator(person, { autorun: false })
+
+// POPULATIONS ---------------
+
+populationInfectionPercentages = { flu: 0.001, covid: 0.001 }
+
+// CITY ROOM LAYOUTS ---------------
+
+maker(numberOfRooms, populationInfectionPercentages, airChange) = {
+  rooms = List(
+    numberOfRooms,
+    {|| roomModel.make(populationInfectionPercentages)}
+  )
+  potentiallyInfectiousRooms = rooms
+    -> List.filter(
+      {|room| room.vulnerablePersonCount > 0}
+    )
+    -> map(
+      {
+        |room|
+        people = List(room.vulnerablePersonCount, person)
+          -> map(
+            {|person| Dict.set(person, "timeSpent", sample(room.timeSpent))}
+          )
+          -> map(
+            {
+              |person|
+              diseaseStats(diseaseName, changeInAir) = wellsRileyModel.model(
+                room.infectedPersonCounts[diseaseName],
+                person.timeSpent,
+                quantumMeasures[diseaseName],
+                person.lungCapacity,
+                room.averageAirChangePerHour * changeInAir,
+                room.volume
+              )
+              diseases = ["flu", "covid"]
+              person
+                -> Dict.set(
+                  "pDiseases",
+                  List.map(
+                    diseases,
+                    {
+                      |d|
+                      [
+                        d,
+                        {
+                          regular: diseaseStats(d, 1),
+                          withFilter: diseaseStats(d, airChange),
+                        },
+                      ]
+                    }
+                  )
+                    -> Dict.fromList
+                )
+            }
+          )
+        Dict.set(room, "people", people)
+      }
+    )
+
+  { rooms, potentiallyInfectiousRooms }
+}
+
+getAggregate(roomInfo) = {
+  rooms = roomInfo.rooms
+  potentiallyInfectiousRooms = roomInfo.potentiallyInfectiousRooms
+
+  personAggregate(population, fn) = population -> map({|r| map(r.people, fn)})
+    -> List.flatten
+    -> sum
+
+  diseaseAggregates(population, diseaseName) = {
+    withoutFiltration = personAggregate(
+      potentiallyInfectiousRooms,
+      {|p| p.pDiseases[diseaseName]["regular"]}
+    )
+    withFiltration = personAggregate(
+      potentiallyInfectiousRooms,
+      {|p| p.pDiseases[diseaseName]["withFilter"]}
+    )
+    {
+      withoutFiltration,
+      withFiltration,
+      filtrationBenefit: withoutFiltration - withFiltration,
+    }
+  }
+
+  timeTotalInfectious = personAggregate(
+    potentiallyInfectiousRooms,
+    {|p| p.timeSpent}
+  )
+
+  explanations = "
+  **potentiallyInfectiousRooms**:  
+A list of all the rooms with at least one infectious person. We only do analysis on these rooms, as the others have no chance of infections.  
+
+  **riskyInstances**:  
+  How many situations were there where a person was in a room with an infectious person?  
+  
+  **diseaseTotals**:  
+  On average, how many people would we expect to become infected? Without extra filtration, with extra filtration, and the difference of those two (how many cases did filtration prevent, in expectation?)
+  
+  **rooms**:  
+  The full list of rooms. These don't have as much information in them as with the infectedRooms, but still have some.
+  "
+  {
+    explanations,
+    potentiallyInfectiousRooms,
+    riskyInstances: potentiallyInfectiousRooms
+      -> map(
+        {|r| r.vulnerablePersonCount}
+      )
+      -> sum,
+    diseaseTotals: {
+      flu: diseaseAggregates(potentiallyInfectiousRooms, "flu"),
+      covid: diseaseAggregates(potentiallyInfectiousRooms, "covid"),
+    },
+    //timeTotalInfectious: "" + timeTotalInfectious + " Hours",
+    rooms,
+  }
+}
+
+export chanceCalculator = Calculator(
+  {
+    |rooms, flu, covid, airChange|
+    maker(rooms, { flu, covid }, airChange) -> getAggregate
+  },
+  {
+    title: "Expected Flu and COVID cases for N number of Room Sessions",
+    description: "Throughout the day, people will spend time in different rooms. In this calculator, we:
+1. Generate *N* rooms, each with a distribution of time spent in them, volume, number of people in them, etc.
+2. We sample them to determine which have infected people in them.
+3. For the rooms with infected people, we randomly generate people and durations that each stayed in the room.
+4. After steps (1-3), we use the *Wells Riley Model* to estimate the probability that that person, in that period, became sick.
+5. We calculate the total probabilities of people getting flu and COVID, for the entire set of periods and rooms. This gives a rough idea of how many people will get infected during this time.",
+    autorun: false,
+    inputs: [
+      Input.text(
+        {
+          name: "Number of Rooms",
+          description: "For each, we'll take one snapshot of N people who might have been in the room at a certain point. We'd then figure out how long each was in the room for. Note: This must be a number, it can't be a distribution.",
+          default: 100,
+        }
+      ),
+      Input.text(
+        {
+          name: "Population with Flu",
+          description: "What proportion of the population has the flu? 0.01 means 1%. You can type ratios, like '1/10k'. Note: This can be a distribution, like, '0.02 to 0.04'.",
+          default: 0.02,
+        }
+      ),
+      Input.text({ name: "Population with COVID", default: 0.03 }),
+      Input.text(
+        {
+          name: "Air Change with Filter",
+          description: "How much does the filter effectively increase the air change per hour? 1.5 means a 50% increase.",
+          default: "1.1 to 1.3",
+        }
+      ),
+    ],
+  }
+)
+chanceCalculator

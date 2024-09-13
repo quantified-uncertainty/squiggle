@@ -1,0 +1,156 @@
+import "hub:mlao-pdx/lib-common" as c
+/* 
+A quick and dirty hack to merge sort a list of basic strings.
+
+Relatively easy to strip and reuse for other sorting needs. 
+
+I'll come back later to clean-up and document.
+*/
+
+maxLength(lists) = lists
+  -> map(
+    {
+      |list|
+      List.length(
+        typeOf(list) == "String" ? String.split(list, "") : c.listIt(list)
+      )
+    }
+  )
+  -> max
+
+padUpTo(list, length, value) = List.slice(
+  concat(list, List(length, value)),
+  0,
+  length
+)
+
+merge(left, right, comparison) = {
+  /* Make sure paddingValue falls outside of any reaonable collationSequence length */
+  paddingValue = 9P
+  /* Make sure that each side ends in one or more padding values 
+  to ensure unequal length lists are BOTH fully processed. */
+  padLength = maxLength([left, right]) + 1
+  left = left
+    -> padUpTo(
+      padLength,
+      { sort: List(List.length(left[0].sort), paddingValue) }
+    )
+  right = right
+    -> padUpTo(
+      padLength,
+      { sort: List(List.length(right[0].sort), paddingValue) }
+    )
+
+  result = List.reduceWhile(
+    List(padLength * 2, {|_| _}),
+    { li: 0, ri: 0, sl: [] },
+    {
+      |acc, _|
+      comparison(left[acc.li], right[acc.ri]) ? {
+        li: acc.li + 1,
+        ri: acc.ri,
+        sl: left[acc.li] != paddingValue ? List.append(
+          acc.sl,
+          left[acc.li]
+        ) : acc.sl,
+      } : {
+        li: acc.li,
+        ri: acc.ri + 1,
+        sl: right[acc.ri] != paddingValue ? List.append(
+          acc.sl,
+          right[acc.ri]
+        ) : acc.sl,
+      }
+    },
+    {|acc| acc.li < padLength && acc.ri < padLength}
+  )
+
+  result.sl
+}
+
+mergeSort(list, comparison, tail) = if List.length(list) <= 1 then list else {
+  mid = floor(List.length(list) / 2)
+  left = tail(List.slice(list, 0, mid), comparison, tail)
+  right = tail(List.slice(list, mid, List.length(list)), comparison, tail)
+  merge(left, right, comparison)
+}
+
+indexString(value, collationIndices, undeterminedIndex) = String.split(
+  value,
+  ""
+)
+  -> map(
+    {
+      |char|
+      index = List.findIndex(collationIndices, {|position| position == char})
+      index == -1 ? undeterminedIndex : index
+    }
+  )
+
+@doc("<0 left is smaller, 0 equal, >0 right is smaller")
+compareStringIndices(x, y) = {
+  length = max(List.length(x.sort), List.length(y.sort))
+  List.zip(padUpTo(x.sort, length, 0), padUpTo(y.sort, length, 0))
+    -> reduce(
+      0,
+      {|result, item| result == 0 ? item[0] - item[1] : result}
+    )
+}
+
+@doc("Python string.printable.")
+@name("A string with the characters in default sorting order")
+export defaultCollation = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r"
+
+@doc(
+  "Sort a list of strings. 
+
+- **list**: A list of strings, where any non-string will be converted into a string.
+- **function**: An inline function that allows sorting to happen on a derivation of the list item.
+Defaults to the item itself when \"\" is passed as its value.
+- **collationSequence**: A string with the characters in desired sorting order. 
+Defaults to Python's string.printable when \"\" passed as its value.
+"
+)
+@name("stringSort(list, function, collationSequence) => List")
+export stringSort(list, function, collationSequence) = {
+  collationSequence = collationSequence ==
+    "" ? defaultCollation : collationSequence
+  collationIndices = String.split(concat("◊", collationSequence), "")
+  undeterminedIndex = List.length(collationIndices) + 1
+  function = function == "" ? {|_| _} : function
+
+  maxStringLength = maxLength(list)
+  list = list
+    -> map(
+      {
+        |_|
+        {
+          text: _,
+          sort: indexString(
+            typeOf(function(_)) != "String" ? String(function(_)) : function(_),
+            collationIndices,
+            undeterminedIndex
+          ),
+        }
+      }
+    )
+
+  comparison = {|l, r| compareStringIndices(l, r) < 0}
+  mergeSort(list, comparison, mergeSort) -> map({|_| _.text})
+}
+
+Calculator(
+  stringSort,
+  {
+    inputs: [
+      Input.text(
+        {
+          name: "list",
+          default: "[ [1, \"Foobar\"], [2, \"Bar\"], [3, \"Foo\"] ]",
+        }
+      ),
+      Input.text({ name: "function", default: "{|_| _[1]}" }),
+      Input.text({ name: "collationSequence", default: "\"\"" }),
+    ],
+  }
+)

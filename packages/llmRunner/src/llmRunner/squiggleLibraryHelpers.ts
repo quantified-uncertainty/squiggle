@@ -1,11 +1,11 @@
-import { libraryContents } from "./squiggleLibraryContents";
+import { squiggleLibraryContents } from "./squiggleLibraryContents";
 
-export { libraryContents };
+export { squiggleLibraryContents };
 
 export const librariesToImport = ["ozziegooen/sTest", "ozziegooen/helpers"];
 
 export function getLibraryBySourceName(sourceName: string): string {
-  const content = libraryContents.get(sourceName);
+  const content = squiggleLibraryContents.get(sourceName);
   if (content !== undefined) {
     if (content === null) {
       throw new Error(`Failed to load source ${sourceName}`);

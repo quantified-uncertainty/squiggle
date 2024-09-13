@@ -13,10 +13,10 @@ import {
 import { formatSquiggleCode } from "./formatSquiggleCode";
 import { CodeState } from "./LLMStep";
 import { processSearchReplaceResponse } from "./searchReplace";
-import { libraryContents } from "./squiggleLibraryHelpers";
+import { squiggleLibraryContents } from "./squiggleLibraryHelpers";
 
 export const linkerWithDefaultSquiggleLibs = makeSelfContainedLinker(
-  Object.fromEntries(libraryContents)
+  Object.fromEntries(squiggleLibraryContents)
 );
 
 function summarizeAny(json: any): string {

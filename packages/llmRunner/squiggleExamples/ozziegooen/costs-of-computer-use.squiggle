@@ -1,0 +1,80 @@
+@name("Charging efficiency")
+@doc("Power lost when charging")
+chargingEfficiency = 0.7 to 0.9
+
+// Calculate cost
+@hide
+costToCharge(batteryCapacity, electricityRate, chargingEfficiency) = {
+  loadInkWh = batteryCapacity / 1000
+  costPerkWh = electricityRate
+  chargeCost = loadInkWh * costPerkWh / chargingEfficiency
+  chargeCost
+}
+
+@hide
+dollarFormat = "$.2f"
+
+export calcCosts(
+  batteryCapacity,
+  electricityRate,
+  batteryCycles,
+  batteryCost,
+  hoursOfUsePerCycle,
+  perUnit
+) = {
+  byHours = perUnit == "Per Hour"
+  unitAdjustment(cost) = perUnit == "Per Hour" ? cost /
+    hoursOfUsePerCycle : cost
+  totalElectricityCostToCharge = costToCharge(
+    batteryCapacity,
+    electricityRate,
+    chargingEfficiency
+  )
+  batteryCostPerCycle = batteryCost / batteryCycles
+
+  Plot.dists(
+    {
+      xScale: Scale.linear({ tickFormat: "$.2" }),
+      dists: [
+        {
+          name: "Electricity Costs",
+          value: unitAdjustment(totalElectricityCostToCharge),
+          showSummary: false,
+        },
+        {
+          name: "Battery Costs",
+          value: unitAdjustment(batteryCostPerCycle),
+          showSummary: false,
+        },
+      ],
+    }
+  )
+}
+
+export calc = Calculator(
+  calcCosts,
+  {
+    title: "Costs of using a Laptop Computer Unplugged",
+    description: "When using a laptop unplugged, there is some damage done to the battery, and some cost of electricity usage. This calculator compares those two.",
+    inputs: [
+      Input.text(
+        {
+          name: "Battery Capacity, (Watt-Hours)",
+          default: "60",
+          description: "",
+        }
+      ),
+      Input.text({ name: "Electricity Rate", default: "0.2 to 0.3" }),
+      Input.text({ name: "Battery Cycles ", default: "1000 to 1500" }),
+      Input.text({ name: "Battery Cost ($)", default: "100 to 200" }),
+      Input.text({ name: "Hours of Use Per Cycle", default: "3 to 5" }),
+      Input.select(
+        {
+          name: "Unit to Show",
+          default: "Per Hour",
+          options: ["Per Hour", "Per Charge"],
+        }
+      ),
+    ],
+  }
+)

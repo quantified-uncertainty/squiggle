@@ -1,0 +1,177 @@
+/*
+A replication of this Guesstimate code:
+https://www.getguesstimate.com/models/10465
+
+This is a model of the expected value, in QALYs, to a random US citizen, due to Transformative AI.
+I expect that due to TAI, there's some probability (around .01% to 10%) that humans alive today will
+have a long-term positive outcome, meaning that they are sentient and experiencing welfare until roughly
+the end of the universe.
+
+There's also a chance that there will be an s-risk, and humans now will experience this same time, but
+suffering. This seems like a smaller chance though.
+
+This model uses a hyperbolic discount rate. However, on the bottom, we consider a situation where
+there is a chance of essentially having a discount rate of zero.
+*/
+@hide
+toLogScale = {|e| Plot.dist(e, { xScale: Scale.log() })}
+@hide
+toSymScale = {|e| Plot.dist(e, { xScale: Scale.symlog() })}
+@hide
+showLog(dist) = Tag.showAs(dist, toLogScale)
+@hide
+showSym(dist) = Tag.showAs(dist, {|e| Plot.dist(e, { xScale: Scale.symlog() })})
+
+@name("Key Variables")
+keyVariables = {
+  @name("Number of years you will exist in the Universe")
+  @doc("How long will we survive in the universe, in this sitaution?")
+  expectedYearsOfTheUniverse = showLog(100M to 100B)
+
+  @name("Your hyperbolic discount rate")
+  @doc("Quick estimate, feel free to change and see how that effects things.")
+  @showAs(toLogScale)
+  hyperbolicDiscountRate = 0.1% to 10%
+
+  @name("Chance you shouldn't discount future QALYs at all")
+  @showAs(toSymScale)
+  chanceDiscountingDoesntMakeSense = 0.1% to 5%
+
+  {
+    expectedYearsOfTheUniverse,
+    hyperbolicDiscountRate,
+    chanceDiscountingDoesntMakeSense,
+  }
+}
+
+@name("AGI Expectation, Post-Transformation")
+@doc(
+  "If we survive post-TAI, each year might be very positive (maybe 1k QALYs/year equivalent) or negative.
+I think that the odds and impact of the negative case are less than that of the positive case."
+)
+postTransformativeAgiExpectations = {
+  positiveChances = showLog(0.0001 to 0.1)
+  positive = {
+    probability: positiveChances,
+    perYearQALYs: showLog(1.2 to 1000),
+  }
+  negative = {
+    probability: showSym(positiveChances * (0.01 to 0.2)),
+    perYearQALYs: showSym(-(0.4 to 1000)),
+  }
+  inExpectation(r) = r.probability * r.perYearQALYs
+  withInExpectation(dict) = Dict.merge(
+    dict,
+    { expectation: inExpectation(dict) -> showSym }
+  )
+  {
+    positive: withInExpectation(positive),
+    negative: withInExpectation(negative),
+    net: {
+      expectation: (inExpectation(positive) + inExpectation(negative))
+        -> showSym,
+    },
+  }
+}
+
+@name("Outcome Table")
+@doc(
+  "Visualize the expected value per year of the negative, positive, and total (negative and positive combined) cases."
+)
+outcomeTable = Table(
+  Dict.toList(postTransformativeAgiExpectations),
+  {
+    columns: [
+      { name: "name", fn: {|e| e[0]} },
+      {
+        name: "probability",
+        fn: {|e| e[0] != "net" ? e[1].probability -> mean : ""},
+      },
+      { name: "EV:mean", fn: {|e| e[1].expectation -> mean} },
+      { name: "EV:p5", fn: {|e| inv(e[1].expectation, 0.05)} },
+      { name: "EV:p95", fn: {|e| inv(e[1].expectation, 0.95)} },
+      {
+        name: "dist",
+        fn: {
+          |e|
+          Plot.dist(
+            e[1].expectation,
+            {
+              xScale: Scale.symlog({ min: -50, max: 500, constant: 0.0000001 }),
+              showSummary: false,
+            }
+          )
+        },
+      },
+    ],
+  }
+)
+
+@name("Discount Rate Functions")
+@doc(
+  "This doesn't take into account that AGI might not happen for 10-100 years, in which case, everything should be discounted by that amount extra."
+)
+discountRateFn = {
+  rate(discountRate, year) = 1 / (1 + discountRate * year)
+
+  integral(discountRate, years) = {
+    discountInverse = 1 / discountRate
+    discountInverse * (log(discountInverse + years) - log(discountInverse))
+  }
+
+  generatePlots(_rate, maxValue) = {
+    xScale = Scale.symlog({ min: 1, max: maxValue })
+    {
+      rate: Plot.numericFn(
+        {
+          fn: {|t: [0, maxValue]| rate(_rate, t)},
+          xScale: xScale,
+          yScale: Scale.log(),
+        }
+      ),
+      integral: Plot.numericFn(
+        {
+          fn: {|t: [0, maxValue]| integral(_rate, t)},
+          xScale: xScale,
+          yScale: Scale.symlog({ constant: 1 }),
+        }
+      ),
+    }
+  }
+
+  calc = Calculator.make(
+    generatePlots,
+    {
+      inputs: [
+        Input.text({ name: "Discount Rate", default: 0.01 }),
+        Input.text({ name: "Max Year to Show", default: "100B" }),
+      ],
+    }
+  )
+
+  { rate: rate, integral: integral, calc }
+}
+
+@name("Total Expected Value with Hyperbolic Discounting")
+@doc(
+  "This assumes 100M to 100B years, with a hyperbolic Discount rate of 0.001 to 0.1"
+)
+totalExpectedValueWithDiscountRate = showSym(
+  discountRateFn.integral(
+    keyVariables.hyperbolicDiscountRate,
+    keyVariables.expectedYearsOfTheUniverse
+  ) *
+    postTransformativeAgiExpectations.net.expectation
+)
+
+@name("Total Expected Value with Uncertainty of Discounting")
+@doc(
+  "This assumes a small chance that there should be effectively a 0% discount rate"
+)
+totalExpectedValueWithDiscountingUncertainty = showSym(
+  totalExpectedValueWithDiscountRate +
+    keyVariables.chanceDiscountingDoesntMakeSense *
+      keyVariables.expectedYearsOfTheUniverse *
+      postTransformativeAgiExpectations.net.expectation
+)
+totalExpectedValueWithDiscountingUncertainty

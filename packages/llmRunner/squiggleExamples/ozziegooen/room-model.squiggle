@@ -1,0 +1,148 @@
+binomialSample(trials, probability) = trials == 0 ? 0 : List(
+  trials,
+  {|| sample(Sym.bernoulli(sample(Dist(probability))))}
+)
+  -> sum
+
+_mxChoose(fns, prob) = fns[mx(List.upTo(0, List.length(fns) - 1), prob)
+  -> sample
+  -> round]
+
+makeRoom(name, timeSpent, peopleCount, airChange, volume) = if name == "" ||
+  typeOf(name) != "String" then throw("Invalid name parameter") else {
+  ||
+  {
+    name: name,
+    timeSpent: Sym.lognormal(timeSpent),
+    peopleCount: Sym.lognormal(peopleCount),
+    averageAirChangePerHour: Sym.lognormal(airChange),
+    volume: Sym.lognormal(volume),
+  }
+}
+
+office = makeRoom(
+  "Office",
+  { p5: 5, p95: 10 },
+  { p5: 10, p95: 30 },
+  { p5: 1, p95: 6 },
+  { p5: 280, p95: 840 }
+)
+
+classRoom = makeRoom(
+  "Classroom",
+  { p5: 5, p95: 8 },
+  { p5: 15, p95: 35 },
+  { p5: 1, p95: 6 },
+  { p5: 195, p95: 315 }
+)
+
+gym = makeRoom(
+  "Gym",
+  { p5: 0.3, p95: 3 },
+  { p5: 10, p95: 60 },
+  { p5: 1, p95: 6 },
+  { p5: 200, p95: 1000 }
+)
+
+religiousService = makeRoom(
+  "Religious Service",
+  { p5: 0.3, p95: 3 },
+  { p5: 5, p95: 100 },
+  { p5: 1, p95: 6 },
+  { p5: 200, p95: 1000 }
+)
+
+publicTransit = makeRoom(
+  "Public Transit",
+  { p5: 0.3, p95: 3 },
+  { p5: 5, p95: 20 },
+  { p5: 1, p95: 6 },
+  { p5: 200, p95: 1000 }
+)
+
+restaurant = makeRoom(
+  "Restaurant",
+  { p5: 0.3, p95: 3 },
+  { p5: 5, p95: 50 },
+  { p5: 1, p95: 6 },
+  { p5: 200, p95: 1000 }
+)
+
+factory = makeRoom(
+  "Factory",
+  { p5: 0.3, p95: 3 },
+  { p5: 20, p95: 200 },
+  { p5: 1, p95: 6 },
+  { p5: 2000, p95: 10000 }
+)
+
+sampleIfDist(e) = typeOf(e) == "Distribution" ? sample(e) : e
+
+sampleRoomDists(r) = {
+  name: r.name,
+  timeSpent: r.timeSpent,
+  peopleCount: round(sample(r.peopleCount)),
+  averageAirChangePerHour: sample(r.averageAirChangePerHour),
+  volume: sample(r.volume),
+}
+
+@showAs({|room| Calculator.make({ fn: room() })})
+export room() = {
+  a = sample(uniform(0, 1))
+  _mxChoose(
+    [
+      office,
+      classRoom,
+      gym,
+      religiousService,
+      publicTransit,
+      restaurant,
+      factory,
+    ],
+    [0.4, 0.2, 0.05, 0.05, 0.3, 0.2, 0.1]
+  )
+}
+
+examplePopulationInfectionPercentages = {
+  flu: 0.01 to 0.04,
+  covid: 0.01 to 0.05,
+}
+
+addInfectedCountToRoom(room, populationInfectionPercentages) = {
+  infectedPersonCounts = Dict.map(
+    populationInfectionPercentages,
+    {|v| binomialSample(room.peopleCount, v)}
+  )
+  totalInfectedCount = sum(Dict.values(infectedPersonCounts))
+  vulnerablePersonCount = totalInfectedCount == 0 ? 0 : max(
+    [room.peopleCount - totalInfectedCount, 0]
+  )
+  Dict.merge(room, { infectedPersonCounts, vulnerablePersonCount })
+}
+
+export make(populationInfectionPercentages) = room()() -> sampleRoomDists
+  -> addInfectedCountToRoom(
+    populationInfectionPercentages
+  )
+
+//Sample, for testing
+m = make(examplePopulationInfectionPercentages)
+
+export calc = Calculator(
+  make,
+  {
+    title: "Random Room Generator Calc",
+    autorun: false,
+    inputs: [
+      Input.textArea(
+        {
+          name: "Disease Infection Rates",
+          default: "{
+  flu: 0.01 to 0.04,
+  covid: 0.01 to 0.05,
+}",
+        }
+      ),
+    ],
+  }
+)

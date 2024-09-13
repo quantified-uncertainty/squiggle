@@ -1,0 +1,42 @@
+/*
+Describe your code here
+*/
+
+//Risk reduction
+risk_reduction = 1% // placeholder
+
+//Baseline
+pandemic_data = {
+  pop: 8B,
+  pandemic_duration: 2 to 4,
+  x_risk_death_weighting: 1 to 100, // XPT supers imply 63 lives for every person alive now (13-503 25th-75th). p. 345. But they estimate much lower x risk
+  annual_bio_x_risk: (0.1% to 10%)/30, // BPP: 0.1% to 10% over 30 years. Could also add a factor by which this increases over time, but that would presumbaly be swamped by x risk increasing over time.
+  daly: 100k // I think this is OP's number
+}
+
+annual_baseline = {
+  severity = 100%
+  annual_expected_deaths = pandemic_data.pop*severity*pandemic_data.annual_bio_x_risk*pandemic_data.x_risk_death_weighting/pandemic_data.pandemic_duration
+  avg_yll = 40 to 70 // average age worldwide is 30. average life expectancy worldwide is 70. 
+  expected_yll = annual_expected_deaths*avg_yll
+  expected_yll*pandemic_data.daly
+  }
+
+//Discounting
+discount_rate = {
+  annual_x_risk = 0.13% // Ord implies (1/6-1/30))/100 = 0.13%
+  annual_p_TAI = 1.25% // Karnosky implies 50%/(2060-2020) = 1.25%
+  annual_x_risk+annual_p_TAI // this is an overestimate as there's overlap between x risk and TAI
+}
+
+counterfactual_probability = 1% to 10% // probability far-UVC reaches maturity
+counterfactual_years_in_future = 10 to 100 // number of years to maturity conditional on it happening
+speedup = 1 // placeholder
+
+discounted_baseline = annual_baseline*(1+discount_rate)^-(counterfactual_years_in_future-speedup)
+
+// Benefits
+benefit = discounted_baseline*counterfactual_probability*speedup*risk_reduction
+
+//WTP
+wtp = benefit/2000

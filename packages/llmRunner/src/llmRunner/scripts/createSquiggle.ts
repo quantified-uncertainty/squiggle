@@ -1,4 +1,9 @@
+import dotenv from "dotenv";
+
 import { LlmConfig, runSquiggleGenerator } from "../squiggleGenerator";
+
+// Load environment variables from .env file in the project root
+dotenv.config();
 
 async function main() {
   const llmConfig: LlmConfig = {
@@ -15,6 +20,7 @@ async function main() {
     await runSquiggleGenerator({
       input: { type: "Create", prompt },
       llmConfig,
+      anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
     });
 
   const response = {

@@ -3,7 +3,8 @@ import path from "path";
 
 import { getSquiggleAdvice } from "./getSquiggleAdvice";
 import { CodeState, codeStateErrorString } from "./LLMStep";
-import { libraryContents } from "./squiggleLibraryHelpers";
+import { squiggleExampleContents } from "./squiggleExampleContents";
+import { squiggleLibraryContents } from "./squiggleLibraryHelpers";
 
 const SQUIGGLE_DOCS_PATH = path.join(
   process.cwd(),
@@ -35,9 +36,17 @@ ${squiggleDocs}
 
 ## Available libraries:
 
-${[...libraryContents.entries()]
+${[...squiggleLibraryContents.entries()]
   .map(([name, content]) => `### Library ${name} \n\n ${content}`)
-  .join("\n\n")}`;
+  .join("\n\n")}
+  
+  
+## Further Examples:
+
+${[...squiggleExampleContents.entries()]
+  .map(([name, content]) => `### Example ${name} \n\n ${content}`)
+  .join("\n\n")}
+`;
 
 export type PromptPair = {
   fullPrompt: string;
@@ -56,7 +65,7 @@ export const generateNewSquiggleCodePrompt = (prompt: string): PromptPair => {
 4. Implement basic error handling and consider edge cases.
 5. Format your code using triple backticks with 'squiggle' specified.
 6. Make sure to follow the prompt.
-7. Add at least one test per complex function, using sTest, to test functionality, if the prompt requests more than 10 lines of code (explicitly or implicitly).
+7. Add at least one test per complex function, using sTest, to test functionality, if the prompt requests more than 10 lines of code (explicitly or implicitly). Do not write tests for simple functions or simple functionality. Keep test code simple and concise, so that you do not need to debug it.
 8. Undershoot what the prompt asks for, in scope, by around 40%. If the prompt asks for 100 lines, try to provide 60. Things will be expanded more in future steps. Refrain from using tags like @name, @doc, @format, etc. for styling.
 9. If the prompt requests changes to existing code, try to keep somewhat close to that code.
 

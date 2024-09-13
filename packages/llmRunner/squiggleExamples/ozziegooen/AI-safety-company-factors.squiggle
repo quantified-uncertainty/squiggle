@@ -1,0 +1,85 @@
+/*
+Experimental, in-progress model of AI safety compute, over time.
+*/
+
+startYear = 2023
+endYear = 2080
+yearRange = [startYear, endYear]
+
+transformative_ai_timelines(t: yearRange) = {
+  dist = mx(logistic(30, 10), logistic(30, 30), [0.9, 0.4]) -> truncateLeft(0)
+  chance_will_happen_at_all = 0.8
+  cdf(dist, t - startYear) * chance_will_happen_at_all
+}
+
+companies = [
+  { name: "OpenAI", safetyFactor: 1.1, shortFactor: 0.3, longFactor: 0.08 },
+  { name: "Anthropic", safetyFactor: 2, shortFactor: 0.2, longFactor: 0.008 },
+  {
+    name: "Alphabet (Not Deepmind)",
+    safetyFactor: 0.3,
+    shortFactor: 0.1,
+    longFactor: 0.01,
+  },
+  { name: "Deepmind", safetyFactor: 0.9, shortFactor: 0.3, longFactor: 0.08 },
+  { name: "Meta", safetyFactor: 0.4, shortFactor: 0.2, longFactor: 0.1 },
+  {
+    name: "US Government",
+    safetyFactor: 1.5,
+    shortFactor: 0.2,
+    longFactor: 0.25,
+  },
+  {
+    name: "Chinese Government",
+    safetyFactor: 1.3,
+    shortFactor: 0.2,
+    longFactor: 0.2,
+  },
+]
+
+// Starts at 0.3, ends at 0.9, over the t=0 to t=100 range
+logarithmicCurveOverTime(start, end, t) = {
+  duration = yearRange[1] - yearRange[0]
+  // Use logarithmic interpolation
+  // Use logarithmic interpolation
+  progress = log(1 + t) / log(1 + duration)
+
+  // Apply cubic easing curve
+  // Apply cubic easing curve
+  easedProgress = progress ^ 3
+  start + (end - start) * easedProgress
+
+}
+
+genericSafetyCurve(t: yearRange) = logarithmicCurveOverTime(
+  0.4,
+  0.8,
+  t - yearRange[0]
+)
+
+transform_probability(p, transform) = {
+  odds = p / (1 - p)
+  oPrime = odds * transform
+  pPrime = oPrime / (1 + oPrime)
+  pPrime
+}
+
+transformTest(transform: [0, 2]) = transform_probability(0.8, transform)
+table = Table(
+  companies,
+  {
+    columns: [
+      { name: "Name", fn: {|e| e.name} },
+      {
+        name: "SafetyChance",
+        fn: {
+          |e|
+          {
+            |t: yearRange|
+            transform_probability(genericSafetyCurve(t), e.safetyFactor)
+          }
+        },
+      },
+    ],
+  }
+)

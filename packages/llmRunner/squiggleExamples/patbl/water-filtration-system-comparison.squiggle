@@ -1,0 +1,65 @@
+Calculator.make({|resident_count, liters_per_day_per_resident, filtered_fraction, home_fraction, tap_gpm, apec_gpm, multipure_gpm, culligan_gpm|
+  annual_hours_spent_dispensing_water(gpm) = {
+    liters_per_gallon = 128/33.8
+    gallons_per_day_per_resident = liters_per_day_per_resident / liters_per_gallon
+    filtered_at_home_gallons_per_day_per_resident =
+      gallons_per_day_per_resident * home_fraction * filtered_fraction
+    filtered_gallons_dispensed_at_home_per_year = resident_count *
+      filtered_at_home_gallons_per_day_per_resident *
+      365.25
+    filtered_gallons_dispensed_at_home_per_year / gpm / 60
+  }
+  annual_hours_tap = annual_hours_spent_dispensing_water(tap_gpm)
+  
+  annual_hours_apec_reverse_osmosis = annual_hours_spent_dispensing_water(apec_gpm)
+  annual_hours_multipure = annual_hours_spent_dispensing_water(multipure_gpm)
+  annual_hours_culligan = annual_hours_spent_dispensing_water(culligan_gpm)
+
+  Table.make(
+  [
+    { name: "none", value: annual_hours_tap },
+    { name: "APEC ROES-PH75", value: annual_hours_apec_reverse_osmosis },
+    { name: "Multipure Aquaversa", value: annual_hours_multipure },
+    { name: "Culligan US-EZ-4", value: annual_hours_culligan },
+  ],
+  {
+    columns: [
+      { name: "filter type", fn: {|d| d.name } },
+      { name: "annual hours", fn: {|d| round(mean(d.value)) } },
+      { name: "extra hours compared to tap", fn: {|d| round(mean(d.value - annual_hours_tap)) }},
+      { name: "Dist", fn: {|d|d.value} },
+    ],
+  }
+)
+}, {
+  title: "annual at-home filtered-water consumption",
+  inputs: [
+    Input.text({ name: "number of residents", default: "12" }),
+    Input.text({ name: "liters of drinking water consumed per day per resident", default: "1 to 2.5" }),
+        Input.text({ name: "fraction of drunk water consumed at home (as opposed to at work, during travel, etc.)", default: "0.5 to 0.8"}),
+    Input.text({ name: "fraction of water drunk at home that's filtered", default: "0.4 to 0.9"}),
+    Input.text({
+      name: "gallons per minute from tap",
+      default: "1.2 to 1.7",
+      description: "I measured this. The downstairs kitchen faucet is about 1.3 gallons/minute; the upstairs one is more like 1.6 gallons/minute.",
+    }),
+    Input.text({
+      name: "gallons per minute from APEC ROES-PH75 (reverse osmosis)",
+      default: "0.25 to 0.5",
+      description: "No claim is made in the official product description. At https://www.amazon.com/ask/questions/Tx36UWEEXJ1H4UZ, the manufacturer claims a 0.5 GPM flow rate \"when the storage tank is full.\" (For what it's worth, a customer also responded saying that it takes about fifteen minutes to dispense a gallon.) I discounted the manufacturer's claim because (1) Various sources claim that reverse-osmosis systems are slow; (2) The claim was made in a response to a question from a customer on Amazon, not in an official specification; and (3) The Kinetico RO system costs $2k+ and claims 0.5 GPM. It makes a big deal of how fast it is (it's even in the name). I would expect a budget system to be slower.",
+    }),
+    Input.text({
+      name: "gallons per minute from Multipure Aquaversa",
+      default: "(0.75 * 0.8) to 0.75",
+      description: "The manufacturer claims 0.75 GPM on its website. Consumer Reports gave it 5/5 for flow rate.",
+    }),
+    Input.text({
+      name: "gallons per minute from Culligan US-EZ-4",
+      default: "(0.5 * 0.8) to 0.5",
+      description: "The manufacturer claims 0.5 GPM on its website. Consumer Reports gave it 4/5 for flow rate.
+",
+    }),
+  ],
+  sampleCount: 10k,
+})
+

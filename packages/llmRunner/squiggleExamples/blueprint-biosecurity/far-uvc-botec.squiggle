@@ -1,0 +1,94 @@
+// Context here: https://docs.google.com/document/d/119_ADMYWSBdzAdqXMuKepphpQqZxSY7yU7DDCYjD-sY/edit
+
+//Switches
+extinction_off = 1//0 is off, 1 is on
+non_exctinction_off = 1 //0 is off, 1 is on
+
+//Risk reduction
+pathogen_inactivation = {
+  k = 0.01 to 15 // a bit wider than the range here https://docs.google.com/spreadsheets/d/1lVr0aWTFvlcjG2Rp7GPKOan_ET2hwSBoy05Ap8KsUko/edit#gid=0
+fluence = 1 to 20 // 5 is current eye TLV. 20 is a guess. This is where I'd look for more: https://docs.google.com/spreadsheets/d/1MloCPdN72vSGUxUUeDeeqdW4b1wAT5RIRJW1AVl-AaI/edit#gid=0
+base_ACH = 1 to 15 // 1DS IAQ report: ASHRAE standards "approximately 1-2 ACH in residences and offices (though half of studied buildings fall below ASHRAE standards)." "high levels of eACH up to CDC hospital standards (8-12 eACH)". Assuming that base ACH might be much higher in a pandemic
+base_decay = 0.1 to 0.3 // no idea, these were the dummy numbers Richard used here https://docs.google.com/spreadsheets/d/1oOwXuZvLjiqf3zGoF7a2hKLv_3-ZZiISdTZ07RpsQIA/edit#gid=0
+  1-(base_ACH+base_decay)/(base_ACH+base_decay+(k*fluence*3.6))
+}
+
+risk_reduction_data = {
+  deployment_rate: 20% to 60%,
+  percent_aerosolised: 5% to 50%
+}
+
+risk_reduction = pathogen_inactivation*risk_reduction_data.deployment_rate*risk_reduction_data.percent_aerosolised
+
+//Baseline
+pandemic_data = {
+  pop: 8B,
+  pandemic_duration: 2 to 4,
+  x_risk_death_weighting: 1 to 100, // XPT supers imply 63 lives for every person alive now (13-503 25th-75th). p. 345. But they estimate much lower x risk
+ economic_multiplier: 2 to 100, // I think GWH uses 2 as a rule of thumb for non-existential pandemics. Seems like it could be a lot higher with civilizational collapse
+  annual_bio_x_risk: (0.1% to 10%)/30, // BPP: 0.1% to 10% over 30 years. XPT supers post XPT imply (0.01%+0.0018%)/(2100-2020) = 0.0001%. Ord implies (1/30)/100 = 0.03%. Could also add a factor by which this increases over time, but that would presumbaly be swamped by x risk increasing over time.
+  daly: 100k // I think this is OP's number
+}
+
+annual_extinction_baseline = {
+  severity = 100%
+  annual_expected_deaths = pandemic_data.pop*severity*pandemic_data.annual_bio_x_risk*pandemic_data.x_risk_death_weighting/pandemic_data.pandemic_duration
+  avg_yll = 40 to 70
+  expected_yll = annual_expected_deaths*avg_yll
+  expected_yll*pandemic_data.daly
+  }
+
+annual_catastrophe_baseline = {
+  severity = 10% to 99%
+  annual_p = (3%+0.85%)/(2100-2020) // XPT supers after XPT: 0.08%+1%. XPT domain experts: 3%+0.85%. https://static1.squarespace.com/static/635693acf15a3e2a14a56a4a/t/64f0a7838ccbf43b6b5ee40c/1693493128111/XPT.pdf, p. 66.
+  annual_expected_deaths = pandemic_data.pop*severity*annual_p*pandemic_data.economic_multiplier/pandemic_data.pandemic_duration
+  avg_yll = 10 to 40
+  expected_yll = annual_expected_deaths*avg_yll
+  expected_yll*pandemic_data.daly
+  }
+  
+annual_Spanish_flu_baseline = {
+  severity = 3%
+  annual_p = 0.02% to 0.89% // "https://www.pnas.org/doi/epdf/10.1073/pnas.2105482118: Spanish flu exceedance 0.11%-0.89% from 1600 to present. https://pubmed.ncbi.nlm.nih.gov/30212163/: 'The annual probability of an influenza pandemic’s meeting or exceeding the global mortality rate of the 1918 Spanish flu pandemic (111–555 deaths per 10,000 persons) is less than 0.02 percent."
+  annual_expected_deaths = pandemic_data.pop*severity*annual_p*pandemic_data.economic_multiplier/pandemic_data.pandemic_duration
+  avg_yll = 10 to 20
+  expected_yll = annual_expected_deaths*avg_yll
+  expected_yll*pandemic_data.daly
+  }
+
+annual_endemic_baseline = {
+  expected_yll = 125M to 159M //https://vizhub.healthdata.org/gbd-results/?params=gbd-api-2019-permalink/f05fb4c2c2eff1b51312420333435c4e
+  expected_yll*pandemic_data.daly
+  }
+
+undiscounted_baseline = annual_extinction_baseline*extinction_off+annual_catastrophe_baseline*non_exctinction_off+annual_Spanish_flu_baseline*non_exctinction_off+annual_endemic_baseline*non_exctinction_off
+
+annual_baseline_breakdown = {
+  extinction: annual_extinction_baseline/undiscounted_baseline,
+  catastrophe: annual_catastrophe_baseline/undiscounted_baseline,
+  spanish_flu: annual_Spanish_flu_baseline/undiscounted_baseline,
+  endemic: annual_endemic_baseline/undiscounted_baseline
+}
+
+//Discounting
+discount_rate = {
+  annual_x_risk = 0.13% // Ord implies (1/6-1/30))/100 = 0.13%
+  annual_p_TAI = 1.25% // Karnosky implies 50%/(2060-2020) = 1.25%
+  annual_x_risk+annual_p_TAI // this is an overestimate as there's overlap between x risk and TAI
+}
+
+years_to_point_x = 10 to 100
+probability_point_x = 30% to 70% // probability far-UVC ever reaches point x
+
+discounted_baseline = undiscounted_baseline*(1+discount_rate)^-years_to_point_x
+
+// Results
+wtp_one_year_speedup = (discounted_baseline*risk_reduction*probability_point_x)/2000
+
+costs = 10M // this is just a placeholder for a grant amount
+
+speedup_required = (2000*costs)/(discounted_baseline*risk_reduction*probability_point_x)
+
+speedup = 0.5 to 5 // this is just a placeholder for an estimated speedup from a grant
+
+bcr = (risk_reduction*discounted_baseline*speedup*probability_point_x)/(costs)

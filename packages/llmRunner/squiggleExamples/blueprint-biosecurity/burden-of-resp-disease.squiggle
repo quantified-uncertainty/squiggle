@@ -1,0 +1,111 @@
+// This is an uncertainty analysis of the annual burden of respiratory disease from long range aeorosol transmission in the US. See this documentation for why we have chosen these parameter values: https://docs.google.com/document/d/1Tnyb5WHn727QrFKknFiMyqSm68fYG8tTlgfHedjzT98/edit
+
+//Background parameters
+@name("QALY value")
+qaly = 750k
+@name("QALY adjustment")
+qaly_adjustment = normal(0.7,0.2)
+
+@name("Long range aerosol transmission rates")
+aeorol_rates = {
+  flu: 20% to 80%,
+  lris_uris: 10% to 50%,
+  non_flu_lris_uris: 2.5% to 15%,
+  covid: 20% to 80%
+}
+
+@name("Annual years of life lost (YLLs)")
+ylls = {
+  lris: 1061123.68 to 1220901.28,
+  uris: 3473.37 to 3897.31,
+  covid: (60402 to 127k)*(4 to 10) // annual deaths * averae YLL
+}
+
+@name("Annual years lived with disability (YLDs)")
+ylds = {
+  lris: 5781.43 to 11476.39,
+  uris: 176624.98 to 438816.65,
+  covid: (191957.23 to 1089479.34)*((60402 to 127k)/(474400.13 to 494812.01))/(1.5 to 4) // YLDs in 2021 * (expected annual deaths/deaths in 2021)/ (pandemic years 1.5 to 4 times worse than endemic years)
+}
+
+@name("Productivity estimates")
+prod_ests = {
+  flu: (4.8B to 13.6B)*1.32,
+  non_flu_lris_uris: (31.2B to 48B)*(22.5B/40B)*1.76 // range for all costs * (productivity median cost / total median cost) * 1.76 conversion to 2024 dollars
+}
+
+// Mortality burden
+@name("LRI mortality burden")
+lri_mortality = ylls.lris*aeorol_rates.lris_uris*qaly*qaly_adjustment
+
+@name("URI mortality burden")
+uri_mortality = ylls.uris*aeorol_rates.lris_uris*qaly*qaly_adjustment
+
+@name("Covid-19 mortality burden")
+covid_mortality = ylls.covid*aeorol_rates.covid*qaly*qaly_adjustment
+
+@name("Total mortality burden")
+mortality = lri_mortality+uri_mortality+covid_mortality
+
+// Illness burden
+@name("LRI illness burden")
+lri_illness = ylds.lris*aeorol_rates.lris_uris*qaly
+
+@name("URI illness burden")
+uri_illness = ylds.uris*aeorol_rates.lris_uris*qaly
+
+@name("Covid-19 illness burden")
+covid_illness = ylds.covid*aeorol_rates.covid*qaly
+
+@name("Total illness burden")
+illness = lri_illness+uri_illness+covid_illness
+
+// Productivity burden
+@name("Influenza productivity burden")
+flu_productivity = prod_ests.flu*aeorol_rates.flu
+
+@name("Non-influenza LRI/URI productivity burden")
+non_flu_lri_uri_productivity = prod_ests.non_flu_lris_uris*aeorol_rates.non_flu_lris_uris
+
+@name("Covid-19 productivity burden")
+covid_productivity = (prod_ests.flu+prod_ests.non_flu_lris_uris)*(ylds.covid/(ylds.lris+ylds.uris))*aeorol_rates.covid // sum of other productivity costs * (Covid-19 YLDs/other YLDs) * Covid-19 long range aerosolization rate
+
+@name("Total productivity burden")
+productivity = flu_productivity+non_flu_lri_uri_productivity+covid_productivity
+
+// Healthcare costs burden
+@name("Influenza healthcare costs burden")
+flu_healthcare = (1.5B to 11.7B)*1.32*aeorol_rates.flu
+
+@name("Non-influenza LRI/URI healthcare costs burden")
+non_flu_lri_uri_healthcare = (31.2B to 48B)*(17B/40B)*1.76*aeorol_rates.non_flu_lris_uris
+
+@name("Covid-19 healthcare costs burden")
+covid_healthcare = (137B to 379B)*aeorol_rates.covid
+
+@name("Total healthcare costs burden")
+healthcare = flu_healthcare+non_flu_lri_uri_healthcare+covid_healthcare
+
+// Total burden
+@name("Total addressable burden of respiratory disease")
+total_burden = mortality+illness+productivity+healthcare
+
+Table.make(
+  [ 
+    { name: "Mortality burden", value: mortality},
+    { name: "Illness burden", value: illness },
+    { name: "Productivity burden", value: productivity },
+    { name: "Healthcare costs burden", value: healthcare  },
+    { name: "Total addressable burden of respiratory disease", value: total_burden },
+  ],
+  {
+    columns: [
+      { name: "Name", fn: {|d|d.name} },
+      { name: "5th %", fn: {|d|quantile(d.value,5%)} },
+      { name: "Median", fn: {|d|quantile(d.value,50%)} },
+      { name: "Mean", fn: {|d|mean(d.value)} },
+      { name: "95th %", fn: {|d|quantile(d.value,95%)} },
+      { name: "Dist.", fn: {|d|d.value} },
+    ],
+  }
+)
