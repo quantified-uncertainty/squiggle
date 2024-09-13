@@ -71,9 +71,17 @@ export async function POST(req: Request) {
                   id: event.data.step.id,
                   state: event.data.step.getState().kind,
                   outputs: Object.fromEntries(
-                    Object.entries(event.data.step.getInputs()).map(
-                      ([key, value]) => [key, artifactToDescription(value)]
-                    )
+                    Object.entries(event.data.step.getOutputs())
+                      .filter(
+                        (
+                          pair
+                        ): pair is [string, NonNullable<(typeof pair)[1]>] =>
+                          pair[1] !== undefined
+                      )
+                      .map(([key, value]) => [
+                        key,
+                        artifactToDescription(value),
+                      ])
                   ),
                 },
               });

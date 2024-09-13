@@ -13,9 +13,8 @@ const ArtifactDisplay: FC<{ name: string; artifact: ArtifactDescription }> = ({
   return (
     <Tooltip
       render={() => {
-        console.log("render tooltip");
         return (
-          <div className="max-w-80 rounded border bg-white px-3 py-2 text-xs shadow-lg">
+          <div className="max-h-80 max-w-md overflow-y-auto rounded border bg-white px-3 py-2 text-xs shadow-lg">
             <div className="mb-1 font-medium">{name}</div>
             {artifact.kind === "code" ? (
               <pre className="whitespace-pre-wrap">{artifact.value}</pre>
@@ -39,7 +38,7 @@ const ArtifactDisplay: FC<{ name: string; artifact: ArtifactDescription }> = ({
 
 export const StepNode: FC<NodeProps<StepDescription>> = ({ data }) => {
   return (
-    <div className="relative w-56 rounded border border-slate-800 p-2.5">
+    <div className="relative w-56 rounded border border-slate-800 bg-white p-2.5">
       <Handle type="target" position={Position.Top} isConnectable={false} />
       <Handle type="source" position={Position.Bottom} isConnectable={false} />
       <div className="flex flex-col gap-0.5">
