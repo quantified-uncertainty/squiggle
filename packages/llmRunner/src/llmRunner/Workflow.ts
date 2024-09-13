@@ -9,7 +9,7 @@ import {
 } from "./LLMClient";
 import { Inputs, LLMStepInstance, LLMStepTemplate, StepShape } from "./LLMStep";
 import { TimestampedLogEntry } from "./Logger";
-import { LlmConfig } from "./squiggleGenerator";
+import { LlmConfig } from "./squiggleWorkflow";
 
 export type WorkflowEventShape =
   | {

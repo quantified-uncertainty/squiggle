@@ -1,8 +1,8 @@
 import { Artifact } from "../../../llmRunner/Artifact";
 import {
   LlmConfig,
-  runSquiggleGenerator,
-} from "../../../llmRunner/squiggleGenerator";
+  runSquiggleWorkflow,
+} from "../../../llmRunner/squiggleWorkflow";
 import {
   ArtifactDescription,
   CreateRequestBody,
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
           controller.enqueue(JSON.stringify(message) + "\n");
         };
 
-        await runSquiggleGenerator({
+        await runSquiggleWorkflow({
           input: squiggleCode
             ? { type: "Edit", code: squiggleCode }
             : { type: "Create", prompt: prompt ?? "" },

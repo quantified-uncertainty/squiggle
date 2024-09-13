@@ -80,44 +80,37 @@ async function runSquiggle(
   }
 }
 
-// Add this type guard function near the top of the file
-function isErrorResult(
-  value: SqOutputSummary | { error: SqErrorList; project: SqProject }
-): value is { error: SqErrorList; project: SqProject } {
-  return "error" in value && "project" in value;
-}
-
 export async function codeToCodeState(code: string): Promise<CodeState> {
-  // First, try running code and get errors
-  const run = await runSquiggle(code);
+  // First, let's try to format the code.
+  // If it fails we still attempt to run it, but because we format it first we
+  // can be sure that run output matches the formatted version.
+  const formattedCode = await formatSquiggleCode(code);
+
+  const codeToRun = formattedCode.ok ? formattedCode.value : code;
+
+  // Now let's run the code and get result or errors
+  const run = await runSquiggle(codeToRun);
   if (!run.ok) {
-    if (isErrorResult(run.value)) {
-      return {
-        type: "runFailed",
-        code,
-        error: run.value.error.errors[0],
-        project: run.value.project,
-      };
-    } else {
-      // This should never happen, but we need to handle it for TypeScript
-      throw new Error("Unexpected error result structure");
-    }
+    return {
+      type: "runFailed",
+      code,
+      error: run.value.error.errors[0],
+      project: run.value.project,
+    };
   }
 
-  // If that works, then try formatting code
-  const formattedCode = await formatSquiggleCode(code);
-  if (!formattedCode.ok) {
+  if (formattedCode.ok) {
+    return {
+      type: "success",
+      code: codeToRun,
+      result: run.value,
+    };
+  } else {
+    // that's weird, formatting failed but running succeeded
     return {
       type: "formattingFailed",
       code,
       error: formattedCode.value,
     };
   }
-
-  // If both formatting and running succeed
-  return {
-    type: "success",
-    code: formattedCode.value,
-    result: run.value,
-  };
 }
