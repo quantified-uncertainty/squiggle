@@ -15,7 +15,7 @@ export type CodeState =
   | { type: "runFailed"; code: string; error: SqError; project: SqProject }
   | { type: "success"; code: string };
 
-type StepState =
+export type StepState =
   | {
       kind: "PENDING";
     }
@@ -84,6 +84,7 @@ export class LLMStepTemplate<const Shape extends StepShape = StepShape> {
 }
 
 export class LLMStepInstance<const Shape extends StepShape = StepShape> {
+  public id: string;
   private logger: Logger;
   private conversationMessages: Message[] = [];
   public llmMetricsList: LlmMetrics[] = [];
@@ -97,6 +98,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     private readonly inputs: Inputs<Shape>
   ) {
     this.startTime = Date.now();
+    this.id = crypto.randomUUID();
     this.logger = new Logger();
   }
 

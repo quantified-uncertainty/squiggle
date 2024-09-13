@@ -17,6 +17,7 @@
     "@ai-sdk/anthropic": "^0.0.48",
     "@ai-sdk/openai": "^0.0.54",
     "@anthropic-ai/sdk": "^0.27.0",
+    "@dagrejs/dagre": "^1.1.3",
     "@quri/configs": "workspace:*",
     "@quri/prettier-plugin-squiggle": "workspace:*",
     "@quri/squiggle-components": "workspace:*",
@@ -34,6 +35,7 @@
     "openai": "^4.56.1",
     "react": "^18",
     "react-dom": "^18",
+    "reactflow": "^11.11.4",
     "ts-node": "^10.9.2",
     "tsx": "^4.11.0",
     "zod": "^3.23.8"

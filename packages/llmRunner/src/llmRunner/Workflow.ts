@@ -13,19 +13,19 @@ import { LlmConfig } from "./squiggleGenerator";
 
 export type WorkflowEventShape =
   | {
-      type: "addStep";
+      type: "stepAdded";
       payload: {
         step: LLMStepInstance;
       };
     }
   | {
-      type: "startStep";
+      type: "stepStarted";
       payload: {
         step: LLMStepInstance;
       };
     }
   | {
-      type: "finishStep";
+      type: "stepUpdated";
       payload: {
         step: LLMStepInstance;
       };
@@ -84,7 +84,7 @@ export class Workflow {
     const step: LLMStepInstance<any> = template.instantiate(this, inputs);
     this.steps.push(step);
     this.dispatchEvent({
-      type: "addStep",
+      type: "stepAdded",
       payload: { step },
     });
     return step;
@@ -100,14 +100,15 @@ export class Workflow {
     }
 
     this.dispatchEvent({
-      type: "startStep",
+      // should we fire this after `run()` is called?
+      type: "stepStarted",
       payload: { step },
     });
     await step.run();
 
     console.log(chalk.cyan(`Finishing state ${step.template.name}`));
     this.dispatchEvent({
-      type: "finishStep",
+      type: "stepUpdated",
       payload: { step },
     });
 

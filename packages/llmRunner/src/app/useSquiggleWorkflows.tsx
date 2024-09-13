@@ -1,6 +1,8 @@
 import { Reducer, useCallback, useReducer } from "react";
 
+import { StepState } from "../llmRunner/LLMStep";
 import {
+  ArtifactDescription,
   CreateRequestBody,
   SquiggleWorkflowResult,
   WorkflowDescription,
@@ -29,10 +31,25 @@ type Action =
       };
     }
   | {
-      type: "startStep";
+      type: "addStep";
       payload: {
-        id: string;
-        step: string;
+        workflowId: string;
+        step: {
+          id: string;
+          name: string;
+          state: StepState["kind"];
+          inputs: Record<string, ArtifactDescription>;
+        };
+      };
+    }
+  | {
+      type: "updateStep";
+      payload: {
+        workflowId: string;
+        step: {
+          id: string;
+          state: StepState["kind"];
+        };
       };
     }
   | {
@@ -64,14 +81,36 @@ const reducer: Reducer<State, Action> = (state, action) => {
             : workflow;
         }),
       };
-    case "startStep":
+    case "addStep":
       return {
         ...state,
         workflows: state.workflows.map((workflow) => {
-          if (workflow.id === action.payload.id) {
+          if (workflow.id === action.payload.workflowId) {
             return {
               ...workflow,
-              currentStep: action.payload.step,
+              currentStep: action.payload.step.name,
+              steps: [...workflow.steps, action.payload.step],
+            };
+          } else {
+            return workflow;
+          }
+        }),
+      };
+    case "updateStep":
+      return {
+        ...state,
+        workflows: state.workflows.map((workflow) => {
+          if (workflow.id === action.payload.workflowId) {
+            return {
+              ...workflow,
+              steps: workflow.steps.map((step) => {
+                return step.id === action.payload.step.id
+                  ? {
+                      ...step,
+                      state: action.payload.step.state,
+                    }
+                  : step;
+              }),
             };
           } else {
             return workflow;
@@ -122,6 +161,7 @@ export function useSquiggleWorkflows() {
         request,
         status: "loading",
         timestamp: new Date(),
+        steps: [],
       },
     });
 
@@ -141,7 +181,6 @@ export function useSquiggleWorkflows() {
         .pipeThrough(
           new TransformStream<string, string>({
             transform(chunk, controller) {
-              console.log(chunk);
               buffer += chunk;
               const lines = buffer.split("\n");
 
@@ -182,12 +221,21 @@ export function useSquiggleWorkflows() {
             });
             break;
           }
-          case "startStep":
+          case "stepAdded":
             dispatch({
-              type: "startStep",
+              type: "addStep",
               payload: {
-                id,
-                step: event.content.step,
+                workflowId: id,
+                step: event.content,
+              },
+            });
+            break;
+          case "stepUpdated":
+            dispatch({
+              type: "updateStep",
+              payload: {
+                workflowId: id,
+                step: event.content,
               },
             });
             break;

@@ -14,8 +14,6 @@ export async function POST(req: Request) {
     const { prompt, squiggleCode }: CreateRequestBody =
       createRequestBodySchema.parse(body);
 
-    console.log("Inputs", prompt, squiggleCode);
-
     if (!prompt && !squiggleCode) {
       throw new Error("Prompt or Squiggle code is required");
     }
@@ -43,11 +41,37 @@ export async function POST(req: Request) {
           openaiApiKey: process.env["OPENROUTER_API_KEY"],
           anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
           handlers: {
-            startStep: (event) => {
+            stepAdded: (event) => {
               send({
-                kind: "startStep",
+                kind: "stepAdded",
                 content: {
-                  step: event.data.step.template.name ?? "unknown",
+                  id: event.data.step.id,
+                  name: event.data.step.template.name ?? "unknown",
+                  state: "PENDING",
+                  inputs: Object.fromEntries(
+                    Object.entries(event.data.step.getInputs()).map(
+                      ([key, value]) => [
+                        key,
+                        {
+                          kind:
+                            value.kind === "codeState" ? "code" : value.kind,
+                          value:
+                            value.kind === "codeState"
+                              ? value.value.code
+                              : value.value,
+                        },
+                      ]
+                    )
+                  ),
+                },
+              });
+            },
+            stepUpdated: (event) => {
+              send({
+                kind: "stepUpdated",
+                content: {
+                  id: event.data.step.id,
+                  state: event.data.step.getState().kind,
                 },
               });
             },

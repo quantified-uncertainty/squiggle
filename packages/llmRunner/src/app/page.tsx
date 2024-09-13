@@ -47,7 +47,6 @@ export default function CreatePage() {
             onFix={handleEditVersion}
             expanded={collapsedSidebar}
             setExpanded={setCollapsedSidebar}
-            inProgress={selectedWorkflow.status === "loading"}
           />
         </div>
       )}

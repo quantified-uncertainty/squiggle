@@ -4,7 +4,7 @@ import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { Button, StyledTab, StyledTextArea } from "@quri/ui";
 
 import { CreateRequestBody, WorkflowDescription } from "./utils/squiggleTypes";
-import { WorkflowRunComponent } from "./WorkflowRunComponent";
+import { WorkflowSummaryItem } from "./WorkflowSummaryItem";
 
 export const Sidebar = forwardRef<
   {
@@ -37,7 +37,6 @@ export const Sidebar = forwardRef<
     },
   }));
 
-  // Event handlers
   const handleSubmit = () => {
     const requestBody: CreateRequestBody = {
       prompt: mode === "create" ? prompt : undefined,
@@ -49,8 +48,6 @@ export const Sidebar = forwardRef<
   };
 
   const editRef = useRef<HTMLTextAreaElement>(null);
-
-  const isReallyLoading = workflows.at(-1)?.status === "loading";
 
   return (
     <div>
@@ -86,19 +83,14 @@ export const Sidebar = forwardRef<
           </StyledTab.Panels>
         </div>
       </StyledTab.Group>
-      <Button
-        theme="primary"
-        wide
-        onClick={handleSubmit}
-        disabled={isReallyLoading}
-      >
-        {isReallyLoading ? "Generating..." : "Send"}
+      <Button theme="primary" wide onClick={handleSubmit}>
+        Send
       </Button>
       <div className="mt-4 flex-grow overflow-y-auto">
         <h2 className="mb-2 text-sm font-bold">Actions</h2>
         <div className="flex flex-col space-y-2">
           {workflows.map((workflow) => (
-            <WorkflowRunComponent
+            <WorkflowSummaryItem
               key={workflow.id}
               workflow={workflow}
               onSelect={() => selectWorkflow(workflow.id)}

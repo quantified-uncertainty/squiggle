@@ -6,8 +6,9 @@ import { FC } from "react";
 import { CheckCircleIcon, ErrorIcon, RefreshIcon } from "@quri/ui";
 
 import { WorkflowDescription } from "./utils/squiggleTypes";
+import { WorkflowStatusIcon } from "./WorkflowStatusIcon";
 
-export const WorkflowRunComponent: FC<{
+export const WorkflowSummaryItem: FC<{
   workflow: WorkflowDescription;
   onSelect: () => void;
   isSelected: boolean;
@@ -36,7 +37,9 @@ export const WorkflowRunComponent: FC<{
       onClick={isSelected ? undefined : onSelect}
     >
       <div className="flex items-center space-x-2 overflow-hidden">
-        <div className="shrink-0">{getStatusIcon()}</div>
+        <div className="shrink-0">
+          <WorkflowStatusIcon workflow={workflow} />
+        </div>
         <div className="truncate font-medium">{workflow.request.prompt}</div>
       </div>
       {workflow.status === "loading" && (

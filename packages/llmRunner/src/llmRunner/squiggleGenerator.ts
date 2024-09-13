@@ -227,79 +227,6 @@ const runAndFormatCodeStep = new LLMStepTemplate(
   }
 );
 
-export class SquiggleGenerator {
-  public workflow: Workflow;
-  private prompt: string;
-  private startTime: number;
-  private abortSignal?: AbortSignal; // TODO - unused
-
-  constructor({
-    input,
-    llmConfig,
-    abortSignal,
-    openaiApiKey,
-    anthropicApiKey,
-  }: {
-    input: GeneratorInput;
-    llmConfig?: LlmConfig;
-    abortSignal?: AbortSignal;
-    openaiApiKey?: string;
-    anthropicApiKey?: string;
-  }) {
-    this.prompt = input.type === "Create" ? input.prompt : "";
-    this.abortSignal = abortSignal;
-    this.workflow = new Workflow(
-      llmConfig ?? llmConfigDefault,
-      openaiApiKey,
-      anthropicApiKey
-    );
-
-    this.startTime = Date.now();
-
-    this.addFirstStep(input);
-  }
-
-  private addFirstStep(input: GeneratorInput) {
-    if (input.type === "Create") {
-      this.workflow.addStep(codeGeneratorStep, {
-        prompt: { kind: "prompt", value: this.prompt },
-      });
-    } else {
-      this.workflow.addStep(runAndFormatCodeStep, {
-        prompt: { kind: "prompt", value: this.prompt },
-        code: { kind: "code", value: input.code },
-      });
-    }
-  }
-
-  async runNextStep(): Promise<boolean> {
-    const { continueExecution } = await this.workflow.runNextStep();
-
-    if (!continueExecution) {
-      // saveSummaryToFile(generateSummary(this.prompt, this.workflow));
-      return true;
-    }
-
-    return false;
-  }
-
-  getFinalResult(): SquiggleWorkflowResult {
-    const logSummary = generateSummary(this.prompt, this.workflow);
-    const endTime = Date.now();
-    const runTimeMs = endTime - this.startTime;
-    const { totalPrice, llmRunCount } = this.workflow.getLlmMetrics();
-
-    const finalResult: SquiggleWorkflowResult = {
-      ...this.workflow.getFinalResult(),
-      totalPrice,
-      runTimeMs,
-      llmRunCount,
-      logSummary,
-    };
-    return finalResult;
-  }
-}
-
 type SquiggleEventHandlers = Partial<{
   [K in WorkflowEventType]?: WorkflowEventListener<K>;
 }> & {
@@ -321,21 +248,65 @@ export async function runSquiggleGenerator(params: {
     throw new Error("Anthropic API key is required");
   }
 
-  const generator = new SquiggleGenerator(params);
+  const input = params.input;
 
+  const prompt = input.type === "Create" ? input.prompt : "";
+  const workflow = new Workflow(
+    params.llmConfig ?? llmConfigDefault,
+    params.openaiApiKey,
+    params.anthropicApiKey
+  );
+
+  const startTime = Date.now();
+
+  // Prepare event handlers
   for (const [eventType, listener] of Object.entries(params.handlers)) {
-    generator.workflow.addEventListener(
+    workflow.addEventListener(
       eventType as WorkflowEventType,
       listener as WorkflowEventListener<WorkflowEventType>
     );
   }
 
-  // Run the generator steps until completion
-  while (!(await generator.runNextStep())) {}
+  // Add the initial step
+  if (input.type === "Create") {
+    workflow.addStep(codeGeneratorStep, {
+      prompt: { kind: "prompt", value: prompt },
+    });
+  } else {
+    workflow.addStep(runAndFormatCodeStep, {
+      prompt: { kind: "prompt", value: prompt },
+      code: { kind: "code", value: input.code },
+    });
+  }
 
-  params.handlers.finishSquiggleWorkflow?.({
-    data: { result: generator.getFinalResult() },
-  });
+  // Run the generator steps until completion
+  while (true) {
+    const { continueExecution } = await workflow.runNextStep();
+
+    if (!continueExecution) {
+      // saveSummaryToFile(generateSummary(this.prompt, this.workflow));
+      break;
+    }
+  }
+
+  // Prepare and dispatch final result
+  {
+    const logSummary = generateSummary(prompt, workflow);
+    const endTime = Date.now();
+    const runTimeMs = endTime - startTime;
+    const { totalPrice, llmRunCount } = workflow.getLlmMetrics();
+
+    const result: SquiggleWorkflowResult = {
+      ...workflow.getFinalResult(),
+      totalPrice,
+      runTimeMs,
+      llmRunCount,
+      logSummary,
+    };
+    params.handlers.finishSquiggleWorkflow?.({
+      data: { result },
+    });
+  }
 }
 
 export async function runSquiggleGeneratorToResult(params: {
