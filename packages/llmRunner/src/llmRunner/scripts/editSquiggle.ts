@@ -1,13 +1,6 @@
-import { LlmConfig, runSquiggleWorkflowToResult } from "../squiggleWorkflow";
+import { runSquiggleWorkflowToResult } from "../squiggleWorkflow";
 
 async function main() {
-  const llmConfig: LlmConfig = {
-    llmName: "Claude-Sonnet",
-    priceLimit: 0.2,
-    durationLimitMinutes: 1,
-    messagesInHistoryToKeep: 4,
-  };
-
   const initialCode = `
   foo = 0 to 100
   bar = 30
@@ -16,7 +9,6 @@ async function main() {
   const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
     await runSquiggleWorkflowToResult({
       input: { type: "Edit", code: initialCode },
-      llmConfig,
     });
 
   const response = {

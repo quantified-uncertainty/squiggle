@@ -1,8 +1,6 @@
 import { Artifact } from "../../../llmRunner/Artifact";
-import {
-  LlmConfig,
-  runSquiggleWorkflow,
-} from "../../../llmRunner/squiggleWorkflow";
+import { runSquiggleWorkflow } from "../../../llmRunner/squiggleWorkflow";
+import { LlmConfig } from "../../../llmRunner/Workflow";
 import {
   ArtifactDescription,
   CreateRequestBody,

@@ -10,7 +10,20 @@ import {
 } from "./LLMClient";
 import { Inputs, LLMStepInstance, LLMStepTemplate, StepShape } from "./LLMStep";
 import { TimestampedLogEntry } from "./Logger";
-import { LlmConfig } from "./squiggleWorkflow";
+
+export interface LlmConfig {
+  llmName: LLMName;
+  priceLimit: number;
+  durationLimitMinutes: number;
+  messagesInHistoryToKeep: number;
+}
+
+export const llmConfigDefault: LlmConfig = {
+  llmName: "Claude-Sonnet",
+  priceLimit: 0.3,
+  durationLimitMinutes: 1,
+  messagesInHistoryToKeep: 4,
+};
 
 export type WorkflowEventShape =
   | {
@@ -66,7 +79,7 @@ export class Workflow {
   public llmClient: LLMClient;
 
   constructor(
-    public llmConfig: LlmConfig,
+    public llmConfig: LlmConfig = llmConfigDefault,
     openaiApiKey?: string,
     anthropicApiKey?: string
   ) {

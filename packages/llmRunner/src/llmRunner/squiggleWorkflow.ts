@@ -1,26 +1,16 @@
 import { SquiggleWorkflowResult } from "../app/utils/squiggleTypes";
 import { Artifact } from "./Artifact";
 import { generateSummary } from "./generateSummary";
-import { LLMName } from "./LLMClient";
 import { adjustToFeedbackStep } from "./steps/adjustToFeedbackStep";
 import { fixCodeUntilItRunsStep } from "./steps/fixCodeUntilItRunsStep";
 import { generateCodeStep } from "./steps/generateCodeStep";
 import { runAndFormatCodeStep } from "./steps/runAndFormatCodeStep";
-import { Workflow, WorkflowEventListener, WorkflowEventType } from "./Workflow";
-
-export interface LlmConfig {
-  llmName: LLMName;
-  priceLimit: number;
-  durationLimitMinutes: number;
-  messagesInHistoryToKeep: number;
-}
-
-export const llmConfigDefault: LlmConfig = {
-  llmName: "Claude-Sonnet",
-  priceLimit: 0.3,
-  durationLimitMinutes: 1,
-  messagesInHistoryToKeep: 4,
-};
+import {
+  LlmConfig,
+  Workflow,
+  WorkflowEventListener,
+  WorkflowEventType,
+} from "./Workflow";
 
 export type GeneratorInput =
   | { type: "Create"; prompt: string }
@@ -56,7 +46,7 @@ export async function runSquiggleWorkflow(params: {
   };
 
   const workflow = new Workflow(
-    params.llmConfig ?? llmConfigDefault,
+    params.llmConfig,
     params.openaiApiKey,
     params.anthropicApiKey
   );
