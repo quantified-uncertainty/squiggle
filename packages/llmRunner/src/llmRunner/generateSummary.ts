@@ -111,7 +111,7 @@ function generateDetailedExecutionLogs(steps: LLMStepInstance[]): string {
     }
 
     detailedLogs += "### Outputs:\n";
-    for (const [key, artifact] of Object.entries(step.getAllOutputs())) {
+    for (const [key, artifact] of Object.entries(step.getOutputs())) {
       if (!artifact) continue;
       detailedLogs += getFullArtifact(key, artifact);
     }

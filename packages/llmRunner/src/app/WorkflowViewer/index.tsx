@@ -66,20 +66,22 @@ const FinishedWorkflowViewer: FC<Props<"finished">> = ({
             </div>
           )}
         />
-        <StyledTab.Panels>
-          <StyledTab.Panel>
-            <SquigglePlayground
-              height={usedHeight}
-              defaultCode={workflow.result.code}
-            />
-          </StyledTab.Panel>
-          <StyledTab.Panel>
-            <WorkflowGraph workflow={workflow} height={usedHeight} />
-          </StyledTab.Panel>
-          <StyledTab.Panel>
-            <LogsView logSummary={workflow.result.logSummary || ""} />
-          </StyledTab.Panel>
-        </StyledTab.Panels>
+        <div ref={ref}>
+          <StyledTab.Panels>
+            <StyledTab.Panel>
+              <SquigglePlayground
+                height={usedHeight}
+                defaultCode={workflow.result.code}
+              />
+            </StyledTab.Panel>
+            <StyledTab.Panel>
+              <WorkflowGraph workflow={workflow} height={usedHeight} />
+            </StyledTab.Panel>
+            <StyledTab.Panel>
+              <LogsView logSummary={workflow.result.logSummary || ""} />
+            </StyledTab.Panel>
+          </StyledTab.Panels>
+        </div>
       </div>
     </StyledTab.Group>
   );

@@ -152,7 +152,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     return this.state.kind === "PENDING" ? 0 : this.state.durationMs;
   }
 
-  getAllOutputs() {
+  getOutputs() {
     return this.outputs;
   }
 

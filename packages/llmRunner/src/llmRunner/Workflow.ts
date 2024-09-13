@@ -156,7 +156,7 @@ export class Workflow {
     let code = "";
     for (let i = this.steps.length - 1; i >= 0; i--) {
       const step = this.steps[i];
-      const outputs = step.getAllOutputs();
+      const outputs = step.getOutputs();
       for (const output of Object.values(outputs)) {
         if (output?.kind === "code") {
           code = output.value;

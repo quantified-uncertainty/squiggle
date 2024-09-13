@@ -24,19 +24,21 @@ const artifactSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 
-export type ArtifactDescription = z.infer<typeof artifactSchema>;
-
-const stepAddedSchema = z.object({
+const stepSchema = z.object({
   id: z.string(),
   name: z.string(),
   state: stepStateSchema,
   inputs: z.record(z.string(), artifactSchema),
+  outputs: z.record(z.string(), artifactSchema),
 });
 
-const stepUpdatedSchema = z.object({
-  id: z.string(),
-  state: stepStateSchema,
-});
+export type StepDescription = z.infer<typeof stepSchema>;
+
+export type ArtifactDescription = z.infer<typeof artifactSchema>;
+
+const stepAddedSchema = stepSchema.omit({ state: true, outputs: true });
+
+const stepUpdatedSchema = stepSchema.partial().required({ id: true });
 
 export const workflowMessageSchema = z.discriminatedUnion("kind", [
   z.object({
@@ -58,12 +60,6 @@ export type SquiggleWorkflowResult = z.infer<
 >;
 
 export type SquiggleWorkflowMessage = z.infer<typeof workflowMessageSchema>;
-
-export type StepDescription = {
-  id: string;
-  name: string;
-  state: z.infer<typeof stepStateSchema>;
-};
 
 // Client-side representation of a workflow.
 export type WorkflowDescription = {

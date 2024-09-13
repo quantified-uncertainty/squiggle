@@ -1,5 +1,5 @@
 import Dagre from "@dagrejs/dagre";
-import { FC, ReactNode, useMemo } from "react";
+import { FC, useMemo } from "react";
 import ReactFlow, {
   Background,
   BackgroundVariant,
@@ -8,35 +8,22 @@ import ReactFlow, {
   type Node,
 } from "reactflow";
 
-import { StepStatusIcon } from "../StepStatusIcon";
-import { WorkflowDescription } from "../utils/squiggleTypes";
-
-type NodeData = {
-  label: ReactNode;
-  tooltip?: () => ReactNode;
-  className?: string;
-  noTargetHandle?: boolean;
-  noSourceHandle?: boolean;
-};
+import { StepDescription, WorkflowDescription } from "../utils/squiggleTypes";
+import { StepNode } from "./StepNode";
 
 type DagreNode = Omit<
-  Node<NodeData>,
+  Node<StepDescription>,
   "position" // position will be overwritten by Dagre
 > & { width: number; height: number }; // width and height are required by Dagre
 
 type DagreEdge = Edge & { minlen?: number };
 
-function makeNode({
-  id,
-  ...data
-}: {
-  id: string;
-} & NodeData): DagreNode {
+function makeNode(step: StepDescription): DagreNode {
   return {
-    id,
-    type: "custom",
-    data,
-    width: 150,
+    id: step.id,
+    type: "step",
+    data: step,
+    width: 200,
     height: 80,
   };
 }
@@ -97,17 +84,7 @@ export const WorkflowGraph: FC<{
 
     for (let i = 0; i < workflow.steps.length; i++) {
       const step = workflow.steps[i];
-      nodes.push(
-        makeNode({
-          id: step.id,
-          label: (
-            <div className="flex items-center gap-1">
-              <StepStatusIcon step={step} />
-              <div>{step.name}</div>
-            </div>
-          ),
-        })
-      );
+      nodes.push(makeNode(step));
       if (i > 0) {
         edges.push(makeEdge(workflow.steps[i - 1].id, step.id));
       }
@@ -124,6 +101,9 @@ export const WorkflowGraph: FC<{
           edges={edges}
           nodesConnectable={false}
           nodesDraggable={false}
+          nodeTypes={{
+            step: StepNode,
+          }}
         >
           <Background color="#eee" variant={BackgroundVariant.Cross} />
         </ReactFlow>

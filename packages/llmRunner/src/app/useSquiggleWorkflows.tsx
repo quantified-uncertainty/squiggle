@@ -1,10 +1,9 @@
 import { Reducer, useCallback, useReducer } from "react";
 
-import { StepState } from "../llmRunner/LLMStep";
 import {
-  ArtifactDescription,
   CreateRequestBody,
   SquiggleWorkflowResult,
+  StepDescription,
   WorkflowDescription,
   workflowMessageSchema,
 } from "./utils/squiggleTypes";
@@ -13,6 +12,8 @@ type State = {
   workflows: WorkflowDescription[];
   selected: number | undefined;
 };
+
+type StepDescriptionPatch = Partial<StepDescription> & { id: string };
 
 type Action =
   | {
@@ -34,22 +35,15 @@ type Action =
       type: "addStep";
       payload: {
         workflowId: string;
-        step: {
-          id: string;
-          name: string;
-          state: StepState["kind"];
-          inputs: Record<string, ArtifactDescription>;
-        };
+        step: StepDescriptionPatch &
+          Pick<StepDescription, "id" | "name" | "inputs">;
       };
     }
   | {
       type: "updateStep";
       payload: {
         workflowId: string;
-        step: {
-          id: string;
-          state: StepState["kind"];
-        };
+        step: StepDescriptionPatch;
       };
     }
   | {
@@ -89,8 +83,15 @@ const reducer: Reducer<State, Action> = (state, action) => {
             return {
               ...workflow,
               currentStep: action.payload.step.name,
-              steps: [...workflow.steps, action.payload.step],
-            };
+              steps: [
+                ...workflow.steps,
+                {
+                  outputs: {},
+                  state: "PENDING",
+                  ...action.payload.step,
+                },
+              ],
+            } satisfies WorkflowDescription;
           } else {
             return workflow;
           }
@@ -107,11 +108,11 @@ const reducer: Reducer<State, Action> = (state, action) => {
                 return step.id === action.payload.step.id
                   ? {
                       ...step,
-                      state: action.payload.step.state,
+                      ...action.payload.step,
                     }
                   : step;
               }),
-            };
+            } satisfies WorkflowDescription;
           } else {
             return workflow;
           }

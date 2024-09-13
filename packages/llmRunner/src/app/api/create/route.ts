@@ -1,12 +1,21 @@
+import { Artifact } from "../../../llmRunner/Artifact";
 import {
   LlmConfig,
   runSquiggleGenerator,
 } from "../../../llmRunner/squiggleGenerator";
 import {
+  ArtifactDescription,
   CreateRequestBody,
   createRequestBodySchema,
   SquiggleWorkflowMessage,
 } from "../../utils/squiggleTypes";
+
+function artifactToDescription(value: Artifact): ArtifactDescription {
+  return {
+    kind: value.kind === "codeState" ? "code" : value.kind,
+    value: value.kind === "codeState" ? value.value.code : value.value,
+  };
+}
 
 export async function POST(req: Request) {
   try {
@@ -47,20 +56,9 @@ export async function POST(req: Request) {
                 content: {
                   id: event.data.step.id,
                   name: event.data.step.template.name ?? "unknown",
-                  state: "PENDING",
                   inputs: Object.fromEntries(
                     Object.entries(event.data.step.getInputs()).map(
-                      ([key, value]) => [
-                        key,
-                        {
-                          kind:
-                            value.kind === "codeState" ? "code" : value.kind,
-                          value:
-                            value.kind === "codeState"
-                              ? value.value.code
-                              : value.value,
-                        },
-                      ]
+                      ([key, value]) => [key, artifactToDescription(value)]
                     )
                   ),
                 },
@@ -72,6 +70,11 @@ export async function POST(req: Request) {
                 content: {
                   id: event.data.step.id,
                   state: event.data.step.getState().kind,
+                  outputs: Object.fromEntries(
+                    Object.entries(event.data.step.getInputs()).map(
+                      ([key, value]) => [key, artifactToDescription(value)]
+                    )
+                  ),
                 },
               });
             },
