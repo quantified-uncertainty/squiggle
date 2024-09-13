@@ -228,7 +228,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     } catch (error) {
       this.log({
         type: "error",
-        message: `Error in processLLMResponse: ${error instanceof Error ? error.message : error}`,
+        message: `Error in queryLLM: ${error instanceof Error ? error.message : error}`,
       });
       return null;
     }

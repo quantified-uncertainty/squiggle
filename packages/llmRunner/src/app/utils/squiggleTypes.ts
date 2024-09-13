@@ -1,14 +1,16 @@
 import { z } from "zod";
 
+import { workflowResultSchema } from "../../llmRunner/Workflow";
+
 // Protocol for streaming workflow changes between server and client.
-const squiggleWorkflowResultSchema = z.object({
-  code: z.string().describe("Squiggle code snippet"),
-  isValid: z.boolean(),
-  totalPrice: z.number(),
-  runTimeMs: z.number(),
-  llmRunCount: z.number(),
+
+const squiggleWorkflowResultSchema = workflowResultSchema.extend({
   logSummary: z.string(), // markdown
 });
+
+export type SquiggleWorkflowResult = z.infer<
+  typeof squiggleWorkflowResultSchema
+>;
 
 const stepStateSchema = z.enum(["PENDING", "DONE", "FAILED"]);
 
@@ -54,10 +56,6 @@ export const workflowMessageSchema = z.discriminatedUnion("kind", [
     content: stepUpdatedSchema,
   }),
 ]);
-
-export type SquiggleWorkflowResult = z.infer<
-  typeof squiggleWorkflowResultSchema
->;
 
 export type SquiggleWorkflowMessage = z.infer<typeof workflowMessageSchema>;
 

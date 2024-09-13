@@ -61,8 +61,6 @@ export async function runSquiggleWorkflow(params: {
     params.anthropicApiKey
   );
 
-  const startTime = Date.now();
-
   // Prepare event handlers
   for (const [eventType, listener] of Object.entries(params.handlers)) {
     workflow.addEventListener(
@@ -71,12 +69,13 @@ export async function runSquiggleWorkflow(params: {
     );
   }
 
-  // Controller - add steps based on the current step's outputs
+  // Controller - add steps based on the outputs of completed steps
   workflow.addEventListener("stepUpdated", ({ data: { step } }) => {
     if (step.getState().kind !== "DONE") {
       return;
     }
 
+    // output name is hardcoded, should we scan all outputs?
     const codeState = step.getOutputs()["codeState"];
     if (codeState?.kind !== "codeState") {
       return;
@@ -98,32 +97,22 @@ export async function runSquiggleWorkflow(params: {
     });
   }
 
-  // Run the generator steps until completion
-  while (true) {
-    const { continueExecution } = await workflow.runNextStep();
+  // Run
+  await workflow.runUntilComplete();
 
-    if (!continueExecution) {
-      // saveSummaryToFile(generateSummary(this.prompt, this.workflow));
-      break;
-    }
-  }
+  // saveSummaryToFile(generateSummary(prompt, workflow));
 
   // Prepare and dispatch final result
   {
     const logSummary = generateSummary(prompt.value, workflow);
-    const endTime = Date.now();
-    const runTimeMs = endTime - startTime;
-    const { totalPrice, llmRunCount } = workflow.getLlmMetrics();
 
-    const result: SquiggleWorkflowResult = {
-      ...workflow.getFinalResult(),
-      totalPrice,
-      runTimeMs,
-      llmRunCount,
-      logSummary,
-    };
     params.handlers.finishSquiggleWorkflow?.({
-      data: { result },
+      data: {
+        result: {
+          ...workflow.getFinalResult(),
+          logSummary,
+        },
+      },
     });
   }
 }

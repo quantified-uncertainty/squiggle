@@ -76,6 +76,7 @@ export const adjustToFeedbackStep = new LLMStepTemplate(
     );
 
     if (!completion) {
+      // failed
       return;
     }
 

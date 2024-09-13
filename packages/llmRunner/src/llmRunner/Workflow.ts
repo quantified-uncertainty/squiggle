@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { z } from "zod";
 
 import {
   calculatePriceMultipleCalls,
@@ -46,11 +47,15 @@ export type WorkflowEventListener<T extends WorkflowEventType> = (
   event: WorkflowEvent<T>
 ) => void;
 
-type WorkflowResult = {
-  isValid: boolean;
-  code: string;
-  logs: TimestampedLogEntry[];
-};
+export const workflowResultSchema = z.object({
+  code: z.string().describe("Squiggle code snippet"),
+  isValid: z.boolean(),
+  totalPrice: z.number(),
+  runTimeMs: z.number(),
+  llmRunCount: z.number(),
+});
+
+export type WorkflowResult = z.infer<typeof workflowResultSchema>;
 
 export class Workflow {
   private steps: LLMStepInstance[] = [];
@@ -117,6 +122,15 @@ export class Workflow {
     };
   }
 
+  async runUntilComplete() {
+    while (true) {
+      const { continueExecution } = await this.runNextStep();
+      if (!continueExecution) {
+        break;
+      }
+    }
+  }
+
   checkResourceLimits(): string | undefined {
     if (Date.now() - this.startTime > this.durationLimitMs) {
       return `Duration limit of ${this.durationLimitMs / 1000 / 60} minutes exceeded`;
@@ -167,10 +181,16 @@ export class Workflow {
       if (code) break;
     }
 
+    const endTime = Date.now();
+    const runTimeMs = endTime - this.startTime;
+    const { totalPrice, llmRunCount } = this.getLlmMetrics();
+
     return {
-      isValid,
       code,
-      logs: this.getLogs(),
+      isValid,
+      totalPrice,
+      runTimeMs,
+      llmRunCount,
     };
   }
 
