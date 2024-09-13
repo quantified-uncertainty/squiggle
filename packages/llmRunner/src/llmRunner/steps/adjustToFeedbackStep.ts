@@ -2,7 +2,6 @@ import { CodeState, codeToCodeState } from "../CodeState";
 import { LLMStepTemplate } from "../LLMStep";
 import { diffToNewCode } from "../processSquiggleCode";
 import { changeFormatPrompt, PromptPair } from "../prompts";
-import { addStepByCodeState } from "./utils";
 
 function adjustToFeedbackPrompt(
   prompt: string,
@@ -91,7 +90,6 @@ export const adjustToFeedbackStep = new LLMStepTemplate(
         type: "info",
         message: "LLM determined no adjustment is needed",
       });
-      context.setOutput("codeState", codeState);
       return;
     }
 
@@ -106,16 +104,11 @@ export const adjustToFeedbackStep = new LLMStepTemplate(
           message: "FAIL: " + diffResponse.value,
         });
         // try again
-        context.workflow.addStep(adjustToFeedbackStep, {
-          prompt: { kind: "prompt", value: prompt.value },
-          codeState: { kind: "codeState", value: codeState.value },
-        });
         context.setOutput("codeState", codeState);
         return;
       }
 
       const adjustedCodeState = await codeToCodeState(diffResponse.value);
-      addStepByCodeState(context.workflow, adjustedCodeState, prompt.value);
       context.setOutput("codeState", {
         kind: "codeState",
         value: adjustedCodeState,
@@ -126,7 +119,6 @@ export const adjustToFeedbackStep = new LLMStepTemplate(
         type: "info",
         message: "No adjustments provided, considering process complete",
       });
-      context.setOutput("codeState", codeState);
       return;
     }
   }

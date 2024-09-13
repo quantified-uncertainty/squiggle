@@ -34,7 +34,7 @@ type ExecuteContext<Shape extends StepShape> = {
   ): void;
   queryLLM(promptPair: PromptPair): Promise<string | null>;
   log(log: LogEntry): void;
-  workflow: Workflow; // TODO - shouldn't be exposed
+  // workflow: Workflow; // intentionally not exposed, but if you need it, add it here
 };
 
 export type Inputs<Shape extends StepShape<any, any>> = {
@@ -113,7 +113,6 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
       setOutput: (key, value) => this.setOutput(key, value),
       log: (log) => this.log(log),
       queryLLM: (promptPair) => this.queryLLM(promptPair),
-      workflow: this.workflow,
     };
 
     try {

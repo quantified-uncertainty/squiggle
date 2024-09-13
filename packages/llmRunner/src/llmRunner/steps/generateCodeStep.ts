@@ -1,7 +1,6 @@
 import { LLMStepTemplate } from "../LLMStep";
 import { generationCompletionContentToCodeState } from "../processSquiggleCode";
 import { PromptPair } from "../prompts";
-import { addStepByCodeState } from "./utils";
 
 export const generateNewSquiggleCodePrompt = (prompt: string): PromptPair => {
   if (!prompt || prompt === "") {
@@ -40,7 +39,7 @@ export const generateCodeStep = new LLMStepTemplate(
   "GenerateCode",
   {
     inputs: { prompt: "prompt" },
-    outputs: { code: "code" },
+    outputs: { codeState: "codeState" },
   },
   async (context, { prompt }) => {
     const promptPair = generateNewSquiggleCodePrompt(prompt.value);
@@ -49,8 +48,10 @@ export const generateCodeStep = new LLMStepTemplate(
     if (completion) {
       const state = await generationCompletionContentToCodeState(completion);
       if (state.ok) {
-        addStepByCodeState(context.workflow, state.value, prompt.value);
-        context.setOutput("code", { kind: "code", value: state.value.code });
+        context.setOutput("codeState", {
+          kind: "codeState",
+          value: state.value,
+        });
       } else {
         context.log({
           type: "codeRunError",

@@ -1,15 +1,17 @@
 import { codeToCodeState } from "../CodeState";
 import { LLMStepTemplate } from "../LLMStep";
-import { addStepByCodeState } from "./utils";
 
 export const runAndFormatCodeStep = new LLMStepTemplate(
   "RunAndFormatCode",
   {
-    inputs: { code: "code", prompt: "prompt" },
+    inputs: { code: "code" },
     outputs: { codeState: "codeState" },
   },
-  async (context, { code, prompt }) => {
+  async (context, { code }) => {
     const codeState = await codeToCodeState(code.value);
-    addStepByCodeState(context.workflow, codeState, prompt.value);
+    context.setOutput("codeState", {
+      kind: "codeState",
+      value: codeState,
+    });
   }
 );

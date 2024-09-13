@@ -3,7 +3,6 @@ import { getSquiggleAdvice } from "../getSquiggleAdvice";
 import { LLMStepTemplate } from "../LLMStep";
 import { diffCompletionContentToCodeState } from "../processSquiggleCode";
 import { changeFormatPrompt, PromptPair } from "../prompts";
-import { addStepByCodeState } from "./utils";
 
 function editExistingSquiggleCodePrompt(codeState: CodeState): PromptPair {
   const error = codeStateErrorString(codeState);
@@ -51,7 +50,7 @@ export const fixCodeUntilItRunsStep = new LLMStepTemplate(
       prompt: "prompt",
       codeState: "codeState",
     },
-    outputs: { code: "code" },
+    outputs: { codeState: "codeState" },
   },
   async (context, { prompt, codeState }) => {
     const promptPair = editExistingSquiggleCodePrompt(codeState.value);
@@ -63,10 +62,9 @@ export const fixCodeUntilItRunsStep = new LLMStepTemplate(
         codeState.value
       );
       if (nextState.ok) {
-        addStepByCodeState(context.workflow, nextState.value, prompt.value);
-        context.setOutput("code", {
-          kind: "code",
-          value: nextState.value.code,
+        context.setOutput("codeState", {
+          kind: "codeState",
+          value: nextState.value,
         });
       } else {
         context.log({
