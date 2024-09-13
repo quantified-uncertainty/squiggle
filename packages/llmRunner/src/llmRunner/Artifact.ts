@@ -1,4 +1,4 @@
-import { CodeState } from "./LLMStep";
+import { CodeState } from "./CodeState";
 
 export type Artifact =
   | {

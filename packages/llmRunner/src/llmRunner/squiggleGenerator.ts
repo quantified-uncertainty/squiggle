@@ -1,12 +1,12 @@
 import { SquiggleWorkflowResult } from "../app/utils/squiggleTypes";
+import { CodeState, codeToCodeState } from "./CodeState";
 import { generateSummary } from "./generateSummary";
 import { LLMName } from "./LLMClient";
-import { CodeState, LLMStepTemplate } from "./LLMStep";
+import { LLMStepTemplate } from "./LLMStep";
 import {
   diffCompletionContentToCodeState,
   diffToNewCode,
   generationCompletionContentToCodeState,
-  squiggleCodeToCodeStateViaRunningAndFormatting,
 } from "./processSquiggleCode";
 import {
   adjustToFeedbackPrompt,
@@ -20,16 +20,17 @@ function addStepByCodeState(
   codeState: CodeState,
   prompt: string
 ) {
-  const step =
-    codeState.type === "success"
-      ? // both of these steps take prompt+codeState
-        adjustToFeedbackStep
-      : fixCodeUntilItRunsStep;
-
-  workflow.addStep(step, {
-    prompt: { kind: "prompt", value: prompt },
-    codeState: { kind: "codeState", value: codeState },
-  });
+  if (codeState.type === "success") {
+    workflow.addStep(adjustToFeedbackStep, {
+      prompt: { kind: "prompt", value: prompt },
+      codeState: { kind: "codeState", value: codeState },
+    });
+  } else {
+    workflow.addStep(fixCodeUntilItRunsStep, {
+      prompt: { kind: "prompt", value: prompt },
+      codeState: { kind: "codeState", value: codeState },
+    });
+  }
 }
 
 export interface LlmConfig {
@@ -117,17 +118,16 @@ const adjustToFeedbackStep = new LLMStepTemplate(
       codeState: "codeState",
     },
     outputs: {
-      code: "code",
+      codeState: "codeState",
     },
   },
   async (context, { prompt, codeState }) => {
     const currentCode = codeState.value.code;
 
     // re-run and get result
-    const { codeState: newCodeState, runResult } =
-      await squiggleCodeToCodeStateViaRunningAndFormatting(currentCode);
+    const newCodeState = await codeToCodeState(currentCode);
 
-    if (newCodeState.type !== "success" || !runResult) {
+    if (newCodeState.type !== "success") {
       throw new Error("Failed to process code in AdjustToFeedback stage");
     }
 
@@ -135,8 +135,8 @@ const adjustToFeedbackStep = new LLMStepTemplate(
       adjustToFeedbackPrompt(
         prompt.value,
         codeState.value.code,
-        runResult.bindings,
-        runResult.result
+        newCodeState.result.bindings,
+        newCodeState.result.result
       )
     );
 
@@ -156,7 +156,7 @@ const adjustToFeedbackStep = new LLMStepTemplate(
         type: "info",
         message: "LLM determined no adjustment is needed",
       });
-      context.setOutput("code", { kind: "code", value: codeState.value.code });
+      context.setOutput("codeState", codeState);
       return;
     }
 
@@ -175,21 +175,15 @@ const adjustToFeedbackStep = new LLMStepTemplate(
           prompt: { kind: "prompt", value: prompt.value },
           codeState: { kind: "codeState", value: codeState.value },
         });
-        context.setOutput("code", {
-          kind: "code",
-          value: codeState.value.code,
-        });
+        context.setOutput("codeState", codeState);
         return;
       }
 
-      const { codeState: adjustedCodeState } =
-        await squiggleCodeToCodeStateViaRunningAndFormatting(
-          diffResponse.value
-        );
+      const adjustedCodeState = await codeToCodeState(diffResponse.value);
       addStepByCodeState(context.workflow, adjustedCodeState, prompt.value);
-      context.setOutput("code", {
-        kind: "code",
-        value: adjustedCodeState.code,
+      context.setOutput("codeState", {
+        kind: "codeState",
+        value: adjustedCodeState,
       });
       return;
     } else {
@@ -197,7 +191,7 @@ const adjustToFeedbackStep = new LLMStepTemplate(
         type: "info",
         message: "No adjustments provided, considering process complete",
       });
-      context.setOutput("code", { kind: "code", value: codeState.value.code });
+      context.setOutput("codeState", codeState);
       return;
     }
   }
@@ -210,9 +204,7 @@ const runAndFormatCodeStep = new LLMStepTemplate(
     outputs: { codeState: "codeState" },
   },
   async (context, { code, prompt }) => {
-    const { codeState } = await squiggleCodeToCodeStateViaRunningAndFormatting(
-      code.value
-    );
+    const codeState = await codeToCodeState(code.value);
     addStepByCodeState(context.workflow, codeState, prompt.value);
   }
 );

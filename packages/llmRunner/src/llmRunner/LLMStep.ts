@@ -1,19 +1,8 @@
-import { SqError, SqProject } from "@quri/squiggle-lang";
-
 import { Artifact, ArtifactKind } from "./Artifact";
 import { LlmMetrics, Message } from "./LLMClient";
 import { LogEntry, Logger, TimestampedLogEntry } from "./Logger";
 import { PromptPair } from "./prompts";
 import { Workflow } from "./Workflow";
-
-export type CodeState =
-  | {
-      type: "formattingFailed";
-      error: string;
-      code: string;
-    }
-  | { type: "runFailed"; code: string; error: SqError; project: SqProject }
-  | { type: "success"; code: string };
 
 export type StepState =
   | {
@@ -28,15 +17,6 @@ export type StepState =
       durationMs: number;
       error: string;
     };
-
-export function codeStateErrorString(codeState: CodeState): string {
-  if (codeState.type === "formattingFailed") {
-    return codeState.error;
-  } else if (codeState.type === "runFailed") {
-    return codeState.error.toStringWithDetails();
-  }
-  return "";
-}
 
 export type StepShape<
   I extends Record<string, ArtifactKind> = Record<string, ArtifactKind>,

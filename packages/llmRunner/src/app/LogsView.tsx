@@ -3,7 +3,7 @@ import { FC } from "react";
 
 import { MarkdownViewer } from "@quri/squiggle-components";
 
-import { linkerWithDefaultSquiggleLibs } from "../llmRunner/processSquiggleCode";
+import { linkerWithDefaultSquiggleLibs } from "../llmRunner/CodeState";
 
 export const LogsView: FC<{
   logSummary: string;

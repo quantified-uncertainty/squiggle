@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
 
+import { CodeState, codeStateErrorString } from "./CodeState";
 import { getSquiggleAdvice } from "./getSquiggleAdvice";
-import { CodeState, codeStateErrorString } from "./LLMStep";
 import { libraryContents } from "./squiggleLibraryHelpers";
 
 const SQUIGGLE_DOCS_PATH = path.join(
