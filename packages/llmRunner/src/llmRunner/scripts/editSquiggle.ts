@@ -8,7 +8,7 @@ async function main() {
 
   const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
     await runSquiggleWorkflowToResult({
-      input: { type: "Edit", code: initialCode },
+      input: { type: "Edit", source: initialCode },
     });
 
   const response = {

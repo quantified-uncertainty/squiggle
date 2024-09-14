@@ -28,9 +28,13 @@ const artifactSchema = z.discriminatedUnion("kind", [
     value: z.string(),
   }),
   z.object({
-    // codeState is simplified to code in the current protocol
+    kind: z.literal("source"),
+    value: z.string(),
+  }),
+  z.object({
     kind: z.literal("code"),
     value: z.string(),
+    ok: z.boolean(),
   }),
 ]);
 

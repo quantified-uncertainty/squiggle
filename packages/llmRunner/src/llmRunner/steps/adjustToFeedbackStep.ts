@@ -1,11 +1,11 @@
-import { CodeState, codeToCodeState } from "../CodeState";
+import { Code, codeStringToCode } from "../CodeState";
 import { LLMStepTemplate } from "../LLMStep";
 import { diffToNewCode } from "../processSquiggleCode";
 import { changeFormatPrompt, PromptPair } from "../prompts";
 
 function adjustToFeedbackPrompt(
   prompt: string,
-  codeState: Extract<CodeState, { type: "success" }>
+  code: Extract<Code, { type: "success" }>
 ): PromptPair {
   const fullPrompt = `You are an expert Squiggle code reviewer. Your task is to review and potentially improve Squiggle code based on the given prompt and previous output.
 
@@ -16,7 +16,7 @@ ${prompt}
 
 Current code:
 <current_code>
-${codeState.code}
+${code.source}
 </current_code>
 
 Review the code and output. Consider these criteria:
@@ -45,8 +45,8 @@ Focus on improving clarity, efficiency, and adherence to requirements. Only reco
 
 Previous output:
 <previous_output>
-Variables: "${codeState.result.bindings}"
-Result: "${codeState.result.result}"
+Variables: "${code.result.bindings}"
+Result: "${code.result.result}"
 </previous_output>
 `;
 
@@ -60,19 +60,19 @@ export const adjustToFeedbackStep = new LLMStepTemplate(
   {
     inputs: {
       prompt: "prompt",
-      codeState: "codeState",
+      code: "code",
     },
     outputs: {
-      codeState: "codeState",
+      code: "code",
     },
   },
-  async (context, { prompt, codeState }) => {
-    if (codeState.value.type !== "success") {
+  async (context, { prompt, code }) => {
+    if (code.value.type !== "success") {
       throw new Error("Failed to process code in AdjustToFeedback stage");
     }
 
     const completion = await context.queryLLM(
-      adjustToFeedbackPrompt(prompt.value, codeState.value)
+      adjustToFeedbackPrompt(prompt.value, code.value)
     );
 
     if (!completion) {
@@ -98,21 +98,21 @@ export const adjustToFeedbackStep = new LLMStepTemplate(
       trimmedResponse.length > 0 &&
       !noAdjustmentRegex.test(trimmedResponse)
     ) {
-      const diffResponse = diffToNewCode(completion, codeState.value);
+      const diffResponse = diffToNewCode(completion, code.value);
       if (!diffResponse.ok) {
         context.log({
           type: "error",
           message: "FAIL: " + diffResponse.value,
         });
         // try again
-        context.setOutput("codeState", codeState);
+        context.setOutput("code", code);
         return;
       }
 
-      const adjustedCodeState = await codeToCodeState(diffResponse.value);
-      context.setOutput("codeState", {
-        kind: "codeState",
-        value: adjustedCodeState,
+      const adjustedCode = await codeStringToCode(diffResponse.value);
+      context.setOutput("code", {
+        kind: "code",
+        value: adjustedCode,
       });
       return;
     } else {

@@ -1,5 +1,5 @@
 import { LLMStepTemplate } from "../LLMStep";
-import { generationCompletionContentToCodeState } from "../processSquiggleCode";
+import { generationCompletionContentToCode } from "../processSquiggleCode";
 import { PromptPair } from "../prompts";
 
 export const generateNewSquiggleCodePrompt = (prompt: string): PromptPair => {
@@ -39,17 +39,17 @@ export const generateCodeStep = new LLMStepTemplate(
   "GenerateCode",
   {
     inputs: { prompt: "prompt" },
-    outputs: { codeState: "codeState" },
+    outputs: { code: "code" },
   },
   async (context, { prompt }) => {
     const promptPair = generateNewSquiggleCodePrompt(prompt.value);
     const completion = await context.queryLLM(promptPair);
 
     if (completion) {
-      const state = await generationCompletionContentToCodeState(completion);
+      const state = await generationCompletionContentToCode(completion);
       if (state.ok) {
-        context.setOutput("codeState", {
-          kind: "codeState",
+        context.setOutput("code", {
+          kind: "code",
           value: state.value,
         });
       } else {

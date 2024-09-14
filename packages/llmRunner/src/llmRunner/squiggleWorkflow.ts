@@ -14,7 +14,7 @@ import {
 
 export type SquiggleWorkflowInput =
   | { type: "Create"; prompt: string }
-  | { type: "Edit"; code: string };
+  | { type: "Edit"; source: string };
 
 type SquiggleEventHandlers = Partial<{
   [K in WorkflowEventType]?: WorkflowEventListener<K>;
@@ -70,15 +70,15 @@ export async function runSquiggleWorkflow(
     }
 
     // output name is hardcoded, should we scan all outputs?
-    const codeState = step.getOutputs()["codeState"];
-    if (codeState?.kind !== "codeState") {
+    const code = step.getOutputs()["code"];
+    if (code?.kind !== "code") {
       return;
     }
 
-    if (codeState.value.type === "success") {
-      workflow.addStep(adjustToFeedbackStep, { prompt, codeState });
+    if (code.value.type === "success") {
+      workflow.addStep(adjustToFeedbackStep, { prompt, code });
     } else {
-      workflow.addStep(fixCodeUntilItRunsStep, { prompt, codeState });
+      workflow.addStep(fixCodeUntilItRunsStep, { prompt, code });
     }
   });
 
@@ -103,7 +103,7 @@ export async function runSquiggleWorkflow(
     workflow.addStep(generateCodeStep, { prompt });
   } else {
     workflow.addStep(runAndFormatCodeStep, {
-      code: { kind: "code", value: input.code },
+      source: { kind: "source", value: input.source },
     });
   }
 

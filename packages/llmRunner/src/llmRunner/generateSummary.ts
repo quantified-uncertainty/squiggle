@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import { Artifact, ArtifactKind } from "./Artifact";
-import { CodeState } from "./CodeState";
+import { Code } from "./CodeState";
 import { calculatePriceMultipleCalls, LlmMetrics, LLMName } from "./LLMClient";
 import { LLMStepInstance } from "./LLMStep";
 import { getLogEntryFullName, TimestampedLogEntry } from "./Logger";
@@ -175,8 +175,8 @@ ${JSON.stringify(llmResponse.response, null, 2)}
 function getFullArtifact(name: string, artifact: Artifact) {
   const kindToEmoji: Record<ArtifactKind, string> = {
     prompt: "✏️",
-    code: "📄️",
-    codeState: "🔧",
+    source: "📄️",
+    code: "🔧",
   };
 
   const header = `#### ${name} ${kindToEmoji[artifact.kind] ?? "❓"}`;
@@ -188,35 +188,35 @@ function getFullArtifact(name: string, artifact: Artifact) {
 ${artifact.value}
 \`\`\`
 `;
-    case "code":
+    case "source":
       return `${header}
 \`\`\`
 ${artifact.value}
 \`\`\`
 `;
-    case "codeState":
+    case "code":
       return `${header}
-${formatCodeState(artifact.value)}
+${formatCode(artifact.value)}
 `;
     default:
       return `❓ Unknown (${artifact satisfies never})`;
   }
 }
 
-function formatCodeState(codeState: CodeState): string {
-  switch (codeState.type) {
+function formatCode(code: Code): string {
+  switch (code.type) {
     case "formattingFailed":
       return `<details>
   <summary>🔴 Code Update: [Error] - Formatting failed</summary>
 
 **Error:**
 \`\`\`
-${codeState.error}
+${code.error}
 \`\`\`
 
 **Code:**
 \`\`\`squiggleEditor
-${codeState.code}
+${code.source}
 \`\`\`
 </details>\n\n`;
     case "runFailed":
@@ -225,12 +225,12 @@ ${codeState.code}
 
 **Error:**
 \`\`\`
-${codeState.error.toStringWithDetails()}
+${code.error.toStringWithDetails()}
 \`\`\`
 
 **Code:**
 \`\`\`squiggleEditor
-${codeState.code}
+${code.source}
 \`\`\`
 </details>\n\n`;
     case "success":
@@ -238,7 +238,7 @@ ${codeState.code}
   <summary>✅ Code Update: [Success] - Code executed successfully</summary>
 
 \`\`\`squiggleEditor
-${codeState.code}
+${code.source}
 \`\`\`
 </details>\n\n`;
   }

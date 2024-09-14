@@ -1,17 +1,17 @@
-import { codeToCodeState } from "../CodeState";
+import { codeStringToCode } from "../CodeState";
 import { LLMStepTemplate } from "../LLMStep";
 
 export const runAndFormatCodeStep = new LLMStepTemplate(
   "RunAndFormatCode",
   {
-    inputs: { code: "code" },
-    outputs: { codeState: "codeState" },
+    inputs: { source: "source" },
+    outputs: { code: "code" },
   },
-  async (context, { code }) => {
-    const codeState = await codeToCodeState(code.value);
-    context.setOutput("codeState", {
-      kind: "codeState",
-      value: codeState,
+  async (context, { source }) => {
+    const code = await codeStringToCode(source.value);
+    context.setOutput("code", {
+      kind: "code",
+      value: code,
     });
   }
 );

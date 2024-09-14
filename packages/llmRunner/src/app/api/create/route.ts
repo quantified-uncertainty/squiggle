@@ -12,10 +12,26 @@ import {
 export const maxDuration = 300;
 
 function artifactToDescription(value: Artifact): ArtifactDescription {
-  return {
-    kind: value.kind === "codeState" ? "code" : value.kind,
-    value: value.kind === "codeState" ? value.value.code : value.value,
-  };
+  switch (value.kind) {
+    case "source":
+      return {
+        kind: "source",
+        value: value.value,
+      };
+    case "code":
+      return {
+        kind: "code",
+        value: value.value.source,
+        ok: value.value.type === "success",
+      };
+    case "prompt":
+      return {
+        kind: "prompt",
+        value: value.value,
+      };
+    default:
+      throw new Error(`Unknown artifact ${value satisfies never}`);
+  }
 }
 
 export async function POST(req: Request) {
@@ -44,7 +60,7 @@ export async function POST(req: Request) {
 
         await runSquiggleWorkflow({
           input: squiggleCode
-            ? { type: "Edit", code: squiggleCode }
+            ? { type: "Edit", source: squiggleCode }
             : { type: "Create", prompt: prompt ?? "" },
           llmConfig,
           abortSignal: req.signal,

@@ -17,27 +17,31 @@ export const linkerWithDefaultSquiggleLibs = makeSelfContainedLinker(
   Object.fromEntries(libraryContents)
 );
 
-export type CodeState =
+// Evaluated code; source + result or error.
+// Previously called CodeState.
+// "ExecutedCode" or similar names would be too clunky; we often pass around
+// "code + results" when we have both, so short name is more convenient.
+export type Code =
   | {
       type: "formattingFailed";
       error: string;
-      code: string;
+      source: string;
     }
-  | { type: "runFailed"; code: string; error: SqError; project: SqProject }
+  | { type: "runFailed"; source: string; error: SqError; project: SqProject }
   | {
       type: "success";
-      code: string;
+      source: string;
       result: {
         bindings: string;
         result: string;
       };
     };
 
-export function codeStateErrorString(codeState: CodeState): string {
-  if (codeState.type === "formattingFailed") {
-    return codeState.error;
-  } else if (codeState.type === "runFailed") {
-    return codeState.error.toStringWithDetails();
+export function codeErrorString(code: Code): string {
+  if (code.type === "formattingFailed") {
+    return code.error;
+  } else if (code.type === "runFailed") {
+    return code.error.toStringWithDetails();
   }
   return "";
 }
@@ -80,7 +84,7 @@ async function runSquiggle(
   }
 }
 
-export async function codeToCodeState(code: string): Promise<CodeState> {
+export async function codeStringToCode(code: string): Promise<Code> {
   // First, let's try to format the code.
   // If it fails we still attempt to run it, but because we format it first we
   // can be sure that run output matches the formatted version.
@@ -93,7 +97,7 @@ export async function codeToCodeState(code: string): Promise<CodeState> {
   if (!run.ok) {
     return {
       type: "runFailed",
-      code,
+      source: code,
       error: run.value.error.errors[0],
       project: run.value.project,
     };
@@ -102,14 +106,14 @@ export async function codeToCodeState(code: string): Promise<CodeState> {
   if (formattedCode.ok) {
     return {
       type: "success",
-      code: codeToRun,
+      source: codeToRun,
       result: run.value,
     };
   } else {
     // that's weird, formatting failed but running succeeded
     return {
       type: "formattingFailed",
-      code,
+      source: code,
       error: formattedCode.value,
     };
   }

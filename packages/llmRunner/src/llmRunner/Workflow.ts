@@ -173,10 +173,10 @@ export class Workflow {
       const step = this.steps[i];
       const outputs = step.getOutputs();
       for (const output of Object.values(outputs)) {
-        if (output?.kind === "code") {
+        if (output?.kind === "source") {
           code = output.value;
-        } else if (output?.kind === "codeState") {
-          code = output.value.code;
+        } else if (output?.kind === "code") {
+          code = output.value.source;
         }
       }
       if (code) break;
@@ -237,11 +237,11 @@ export class Workflow {
   getRelevantPreviousConversationMessages(maxRecentSteps = 3): Message[] {
     const lastGenerateCodeIndex = this.steps.findLastIndex((step) => {
       const hasCodeInput = Object.values(step.template.shape.inputs).some(
-        (kind) => kind === "code" || kind === "codeState"
+        (kind) => kind === "source" || kind === "code"
       );
 
       const hasCodeOutput = Object.values(step.template.shape.outputs).some(
-        (kind) => kind === "code" || kind === "codeState"
+        (kind) => kind === "source" || kind === "code"
       );
 
       return !hasCodeInput && hasCodeOutput;

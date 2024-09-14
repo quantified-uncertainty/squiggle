@@ -1,14 +1,14 @@
 import { result } from "@quri/squiggle-lang";
 
-import { CodeState, codeToCodeState } from "./CodeState";
+import { Code, codeStringToCode } from "./CodeState";
 import { processSearchReplaceResponse } from "./searchReplace";
 
 export function diffToNewCode(
   completionContentWithDiff: string,
-  oldCodeState: CodeState
+  oldCodeState: Code
 ): result<string, string> {
   const response = processSearchReplaceResponse(
-    oldCodeState.code,
+    oldCodeState.source,
     completionContentWithDiff
   );
   return response.success
@@ -20,44 +20,47 @@ export function diffToNewCode(
 }
 
 /*
- * Extracts Squiggle code from the content string.
+ * Extracts Squiggle source code from the content string.
  */
-function extractSquiggleCode(content: string): string {
+function extractSquiggleSource(content: string): string {
   if (!content || typeof content !== "string") {
-    console.error("Invalid content provided to extractSquiggleCode:", content);
+    console.error(
+      "Invalid content provided to extractSquiggleSource:",
+      content
+    );
     return "";
   }
   const match = content.match(/```squiggle([\s\S]*?)```/);
   return match && match[1] ? match[1].trim() : "";
 }
 
-export async function generationCompletionContentToCodeState(
+export async function generationCompletionContentToCode(
   completionContent: string
-): Promise<result<CodeState, string>> {
+): Promise<result<Code, string>> {
   if (completionContent === "") {
     return { ok: false, value: "Received empty completion content" };
   }
 
-  const newCode = extractSquiggleCode(completionContent);
+  const newCode = extractSquiggleSource(completionContent);
   if (newCode === "") {
     return { ok: false, value: "Didn't get code from extraction" };
   }
 
-  return { ok: true, value: await codeToCodeState(newCode) };
+  return { ok: true, value: await codeStringToCode(newCode) };
 }
 
-export async function diffCompletionContentToCodeState(
+export async function diffCompletionContentToCode(
   completionContent: string,
-  codeState: CodeState
-): Promise<result<CodeState, string>> {
+  code: Code
+): Promise<result<Code, string>> {
   if (completionContent === "") {
     return { ok: false, value: "Received empty completion content" };
   }
 
-  const { ok, value } = diffToNewCode(completionContent, codeState);
+  const { ok, value } = diffToNewCode(completionContent, code);
   if (!ok) {
     return { ok: false, value };
   }
 
-  return { ok: true, value: await codeToCodeState(value) };
+  return { ok: true, value: await codeStringToCode(value) };
 }

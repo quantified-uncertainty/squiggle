@@ -1,12 +1,12 @@
-import { CodeState, codeStateErrorString } from "../CodeState";
+import { Code, codeErrorString } from "../CodeState";
 import { getSquiggleAdvice } from "../getSquiggleAdvice";
 import { LLMStepTemplate } from "../LLMStep";
-import { diffCompletionContentToCodeState } from "../processSquiggleCode";
+import { diffCompletionContentToCode } from "../processSquiggleCode";
 import { changeFormatPrompt, PromptPair } from "../prompts";
 
-function editExistingSquiggleCodePrompt(codeState: CodeState): PromptPair {
-  const error = codeStateErrorString(codeState);
-  const advice = getSquiggleAdvice(error, codeState.code);
+function editExistingSquiggleCodePrompt(code: Code): PromptPair {
+  const error = codeErrorString(code);
+  const advice = getSquiggleAdvice(error, code.source);
   const fullPrompt = `You are an expert Squiggle code debugger. Your task is solely to fix an error in the given Squiggle code. Follow these steps:
 
 1. Carefully analyze the original code and the error message.
@@ -22,7 +22,7 @@ function editExistingSquiggleCodePrompt(codeState: CodeState): PromptPair {
 
 Original code:
 <original_code>
-${codeState.code}
+${code.source}
 </original_code>
 
 Error message:
@@ -48,22 +48,22 @@ export const fixCodeUntilItRunsStep = new LLMStepTemplate(
   {
     inputs: {
       prompt: "prompt",
-      codeState: "codeState",
+      code: "code",
     },
-    outputs: { codeState: "codeState" },
+    outputs: { code: "code" },
   },
-  async (context, { prompt, codeState }) => {
-    const promptPair = editExistingSquiggleCodePrompt(codeState.value);
+  async (context, { prompt, code }) => {
+    const promptPair = editExistingSquiggleCodePrompt(code.value);
 
     const completion = await context.queryLLM(promptPair);
     if (completion) {
-      const nextState = await diffCompletionContentToCodeState(
+      const nextState = await diffCompletionContentToCode(
         completion,
-        codeState.value
+        code.value
       );
       if (nextState.ok) {
-        context.setOutput("codeState", {
-          kind: "codeState",
+        context.setOutput("code", {
+          kind: "code",
           value: nextState.value,
         });
       } else {

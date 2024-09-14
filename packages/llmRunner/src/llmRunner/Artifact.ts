@@ -1,4 +1,4 @@
-import { CodeState } from "./CodeState";
+import { Code } from "./CodeState";
 
 export type Artifact =
   | {
@@ -6,12 +6,12 @@ export type Artifact =
       value: string;
     }
   | {
-      kind: "code";
+      kind: "source";
       value: string;
     }
   | {
-      kind: "codeState";
-      value: CodeState;
+      kind: "code";
+      value: Code;
     };
 
 export type ArtifactKind = Artifact["kind"];
@@ -20,10 +20,10 @@ export function getArtifactFullName(artifact: Artifact): string {
   switch (artifact.kind) {
     case "prompt":
       return "ℹ️ Prompt";
+    case "source":
+      return "📄 Source";
     case "code":
       return "📄 Code";
-    case "codeState":
-      return "📄 Code State";
     default:
       return `❓ Unknown (${artifact satisfies never})`;
   }
