@@ -1,73 +1,7 @@
-#!/usr/bin/env node
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 
 import { squiggleSystemContent } from "./prompts";
-
-// Remove dotenv config
-// dotenv.config({ path: ".env.local" });
-
-// Make anthropic and openai optional
-// let anthropic: Anthropic | undefined;
-// let openai: OpenAI | undefined;
-
-// Remove the initializeClients function if it's no longer needed
-
-// Modify the runLLM function signature
-export async function runLLM(
-  conversationHistory: Message[],
-  llmName: LLMName,
-  clients: {
-    getOpenAIClient: () => OpenAI;
-    getAnthropicClient: () => Anthropic;
-  }
-): Promise<StandardizedChatCompletion> {
-  const squiggleContext = squiggleSystemContent;
-  const selectedModelConfig = MODEL_CONFIGS[llmName];
-
-  try {
-    if (selectedModelConfig.provider === "anthropic") {
-      const anthropicClient = clients.getAnthropicClient();
-      const compressedMessages = compressAssistantMessages(conversationHistory);
-      const claudeMessages = convertToClaudeMessages(compressedMessages);
-
-      if (claudeMessages.length === 0) {
-        throw new Error("At least one message is required");
-      }
-
-      const completion =
-        await anthropicClient.beta.promptCaching.messages.create({
-          max_tokens: selectedModelConfig.maxTokens,
-          messages: claudeMessages,
-          model: selectedModelConfig.model,
-          system: [
-            {
-              text: squiggleContext,
-              type: "text",
-              cache_control: { type: "ephemeral" },
-            },
-          ],
-        });
-
-      return convertClaudeToStandardFormat(completion);
-    } else {
-      // Use OpenAI (OpenRouter)
-      const openaiClient = clients.getOpenAIClient();
-      const completion = await openaiClient.chat.completions.create({
-        model: selectedModelConfig.model,
-        messages: [
-          { role: "system", content: squiggleContext },
-          ...conversationHistory,
-        ],
-      });
-
-      return convertOpenAIToStandardFormat(completion);
-    }
-  } catch (error) {
-    console.error("Error in API call:", error);
-    throw error;
-  }
-}
 
 // Model selection and pricing
 type ModelConfig = {
@@ -128,12 +62,6 @@ const MODEL_CONFIGS = {
 
 export type LLMName = keyof typeof MODEL_CONFIGS;
 
-// Initialize OpenRouter client
-// openai = new OpenAI({
-//   baseURL: "https://openrouter.ai/api/v1",
-//   apiKey: process.env["OPENROUTER_API_KEY"],
-// });
-
 export type Message = {
   role: "system" | "user" | "assistant";
   content: string;
@@ -143,7 +71,7 @@ function convertToClaudeMessages(history: Message[]): Anthropic.MessageParam[] {
   return history
     .filter((msg) => msg.role !== "system")
     .map((msg) => ({
-      role: msg.role as "user" | "assistant",
+      role: msg.role as Exclude<Message["role"], "system">,
       content: msg.content,
     }));
 }
@@ -254,4 +182,93 @@ function compressAssistantMessages(messages: Message[]): Message[] {
     }
     return acc;
   }, [] as Message[]);
+}
+
+// Wrapper around OpenAI and Anthropic clients; injects Squiggle context into the conversation.
+export class LLMClient {
+  private openaiClient?: OpenAI;
+  private anthropicClient?: Anthropic;
+
+  constructor(
+    public llmName: LLMName,
+    openaiApiKey?: string,
+    anthropicApiKey?: string
+  ) {
+    if (openaiApiKey) {
+      this.openaiClient = new OpenAI({
+        baseURL: "https://openrouter.ai/api/v1",
+        apiKey: openaiApiKey,
+      });
+    }
+
+    if (anthropicApiKey) {
+      this.anthropicClient = new Anthropic({
+        apiKey: anthropicApiKey,
+      });
+    }
+  }
+
+  getOpenAIClient(): OpenAI {
+    if (!this.openaiClient) {
+      throw new Error("OpenAI client is not initialized");
+    }
+    return this.openaiClient;
+  }
+
+  getAnthropicClient(): Anthropic {
+    if (!this.anthropicClient) {
+      throw new Error("Anthropic client is not initialized");
+    }
+    return this.anthropicClient;
+  }
+
+  async run(
+    conversationHistory: Message[]
+  ): Promise<StandardizedChatCompletion> {
+    const selectedModelConfig = MODEL_CONFIGS[this.llmName];
+
+    try {
+      if (selectedModelConfig.provider === "anthropic") {
+        const anthropicClient = this.getAnthropicClient();
+        const compressedMessages =
+          compressAssistantMessages(conversationHistory);
+        const claudeMessages = convertToClaudeMessages(compressedMessages);
+
+        if (claudeMessages.length === 0) {
+          throw new Error("At least one message is required");
+        }
+
+        const completion =
+          await anthropicClient.beta.promptCaching.messages.create({
+            max_tokens: selectedModelConfig.maxTokens,
+            messages: claudeMessages,
+            model: selectedModelConfig.model,
+            system: [
+              {
+                text: squiggleSystemContent,
+                type: "text",
+                cache_control: { type: "ephemeral" },
+              },
+            ],
+          });
+
+        return convertClaudeToStandardFormat(completion);
+      } else {
+        // Use OpenAI (OpenRouter)
+        const openaiClient = this.getOpenAIClient();
+        const completion = await openaiClient.chat.completions.create({
+          model: selectedModelConfig.model,
+          messages: [
+            { role: "system", content: squiggleSystemContent },
+            ...conversationHistory,
+          ],
+        });
+
+        return convertOpenAIToStandardFormat(completion);
+      }
+    } catch (error) {
+      console.error("Error in API call:", error);
+      throw error;
+    }
+  }
 }

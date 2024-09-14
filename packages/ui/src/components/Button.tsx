@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import { FC, PropsWithChildren } from "react";
 
-type ButtonTheme = "default" | "primary";
+type ButtonTheme = "default" | "primary" | "alert";
 
 export type ButtonProps = PropsWithChildren<{
   onClick?: () => void;
@@ -36,14 +36,19 @@ export const Button: FC<ButtonProps> = ({
     <button
       className={clsx(
         "border text-sm font-medium",
-        theme === "primary"
-          ? "border-green-900 bg-green-700 text-white"
-          : "border-slate-300 bg-slate-100 text-gray-600",
+        theme === "primary" && "border-green-900 bg-green-700 text-white",
+        theme === "default" && "border-slate-300 bg-slate-100 text-gray-600",
+        theme === "alert" && "border-red-600 bg-red-500 text-white",
+
         disabled
           ? "opacity-60"
-          : theme === "primary"
-            ? "hover:border-green-800 hover:bg-green-800 hover:text-white"
-            : "hover:bg-slate-200 hover:text-gray-900",
+          : [
+              theme === "primary" &&
+                "hover:border-green-800 hover:bg-green-800",
+              theme === "default" && "hover:bg-slate-200 hover:text-gray-900",
+              theme === "alert" && "hover:bg-red-600",
+            ],
+
         wide && "w-full",
         size === "medium" && "h-8 rounded-md",
         size === "small" && "h-6 rounded-sm",

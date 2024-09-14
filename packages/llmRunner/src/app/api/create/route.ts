@@ -1,21 +1,30 @@
-import { LlmConfig, runSquiggleGenerator } from "../../../llmRunner/main";
+import { Artifact } from "../../../llmRunner/Artifact";
 import {
+  LlmConfig,
+  runSquiggleGenerator,
+} from "../../../llmRunner/squiggleGenerator";
+import {
+  ArtifactDescription,
   CreateRequestBody,
   createRequestBodySchema,
-  SquiggleResponse,
+  SquiggleWorkflowMessage,
 } from "../../utils/squiggleTypes";
 
+// https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#maxduration
 export const maxDuration = 300;
 
-export async function POST(req: Request) {
-  const abortController = new AbortController();
+function artifactToDescription(value: Artifact): ArtifactDescription {
+  return {
+    kind: value.kind === "codeState" ? "code" : value.kind,
+    value: value.kind === "codeState" ? value.value.code : value.value,
+  };
+}
 
+export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { prompt, squiggleCode }: CreateRequestBody =
       createRequestBodySchema.parse(body);
-
-    console.log("Inputs", prompt, squiggleCode);
 
     if (!prompt && !squiggleCode) {
       throw new Error("Prompt or Squiggle code is required");
@@ -29,30 +38,75 @@ export async function POST(req: Request) {
       messagesInHistoryToKeep: 4,
     };
 
-    const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
-      await runSquiggleGenerator({
-        input: squiggleCode
-          ? { type: "Edit", code: squiggleCode }
-          : { type: "Create", prompt: prompt ?? "" },
-        llmConfig,
-        abortSignal: req.signal,
-        openaiApiKey: process.env["OPENROUTER_API_KEY"],
-        anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
-      });
+    const stream = new ReadableStream({
+      async pull(controller) {
+        const send = (message: SquiggleWorkflowMessage) => {
+          controller.enqueue(JSON.stringify(message) + "\n");
+        };
 
-    const response: SquiggleResponse = [
-      {
-        code: typeof code === "string" ? code : "",
-        isValid,
-        totalPrice,
-        runTimeMs,
-        llmRunCount,
-        logSummary,
+        await runSquiggleGenerator({
+          input: squiggleCode
+            ? { type: "Edit", code: squiggleCode }
+            : { type: "Create", prompt: prompt ?? "" },
+          llmConfig,
+          abortSignal: req.signal,
+          openaiApiKey: process.env["OPENROUTER_API_KEY"],
+          anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
+          handlers: {
+            stepAdded: (event) => {
+              send({
+                kind: "stepAdded",
+                content: {
+                  id: event.data.step.id,
+                  name: event.data.step.template.name ?? "unknown",
+                  inputs: Object.fromEntries(
+                    Object.entries(event.data.step.getInputs()).map(
+                      ([key, value]) => [key, artifactToDescription(value)]
+                    )
+                  ),
+                },
+              });
+            },
+            stepUpdated: (event) => {
+              send({
+                kind: "stepUpdated",
+                content: {
+                  id: event.data.step.id,
+                  state: event.data.step.getState().kind,
+                  outputs: Object.fromEntries(
+                    Object.entries(event.data.step.getOutputs())
+                      .filter(
+                        (
+                          pair
+                        ): pair is [string, NonNullable<(typeof pair)[1]>] =>
+                          pair[1] !== undefined
+                      )
+                      .map(([key, value]) => [
+                        key,
+                        artifactToDescription(value),
+                      ])
+                  ),
+                },
+              });
+            },
+            finishSquiggleWorkflow: (event) => {
+              send({
+                kind: "finalResult",
+                content: event.data.result,
+              });
+            },
+          },
+        });
+        controller.close();
       },
-    ];
+    });
 
-    return new Response(JSON.stringify(response), {
-      headers: { "Content-Type": "application/json" },
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
     });
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {

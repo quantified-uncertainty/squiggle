@@ -19,6 +19,13 @@ export const Primary: Story = {
   },
 };
 
+export const Alert: Story = {
+  args: {
+    children: "Button",
+    theme: "alert",
+  },
+};
+
 export const Disabled: Story = {
   args: {
     children: "Button",

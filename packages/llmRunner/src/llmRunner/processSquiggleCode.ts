@@ -11,9 +11,9 @@ import {
 } from "@quri/squiggle-lang";
 
 import { formatSquiggleCode } from "./formatSquiggleCode";
+import { CodeState } from "./LLMStep";
 import { processSearchReplaceResponse } from "./searchReplace";
 import { libraryContents } from "./squiggleLibraryHelpers";
-import { CodeState } from "./stateManager";
 
 export const linkerWithDefaultSquiggleLibs = makeSelfContainedLinker(
   Object.fromEntries(libraryContents)
@@ -58,8 +58,8 @@ const runSquiggle = async (
 };
 
 interface SquiggleRunResult {
-  bindings: any;
-  result: any;
+  bindings: string;
+  result: string;
 }
 
 interface ProcessSquiggleResult {
@@ -70,21 +70,17 @@ interface ProcessSquiggleResult {
 export function diffToNewCode(
   completionContentWithDiff: string,
   oldCodeState: CodeState
-): { okay: boolean; value: string } {
-  if (oldCodeState.type === "noCode") {
-    return { okay: false, value: "Didn't find any codeState code" };
-  } else {
-    const response = processSearchReplaceResponse(
-      oldCodeState.code,
-      completionContentWithDiff
-    );
-    return response.success
-      ? { okay: true, value: response.value }
-      : {
-          okay: false,
-          value: "Search and Replace Failed: " + response.value,
-        };
-  }
+): result<string, string> {
+  const response = processSearchReplaceResponse(
+    oldCodeState.code,
+    completionContentWithDiff
+  );
+  return response.success
+    ? { ok: true, value: response.value }
+    : {
+        ok: false,
+        value: "Search and Replace Failed: " + response.value,
+      };
 }
 
 /*
@@ -116,7 +112,7 @@ export async function squiggleCodeToCodeStateViaRunningAndFormatting(
       return {
         codeState: {
           type: "runFailed",
-          code: code,
+          code,
           error: run.value.error.errors[0],
           project: run.value.project,
         },
@@ -144,41 +140,39 @@ export async function squiggleCodeToCodeStateViaRunningAndFormatting(
   };
 }
 
-export async function completionContentToCodeState(
-  completionContent: string,
-  codeState: CodeState,
-  inputFormat: "generation" | "diff"
-): Promise<{ okay: true; value: CodeState } | { okay: false; value: string }> {
+async function codeToCodeState(code: string): Promise<CodeState> {
+  const { codeState } =
+    await squiggleCodeToCodeStateViaRunningAndFormatting(code);
+  return codeState;
+}
+
+export async function generationCompletionContentToCodeState(
+  completionContent: string
+): Promise<result<CodeState, string>> {
   if (completionContent === "") {
-    return { okay: false, value: "Received empty completion content" };
+    return { ok: false, value: "Received empty completion content" };
   }
 
-  let newCode: string;
-
-  switch (inputFormat) {
-    case "generation": {
-      newCode = extractSquiggleCode(completionContent);
-      if (newCode === "") {
-        return { okay: false, value: "Didn't get code from extraction" };
-      }
-      break;
-    }
-    case "diff": {
-      const { okay, value } = diffToNewCode(completionContent, codeState);
-      if (!okay) {
-        return { okay: false, value: value };
-      }
-      newCode = value;
-      break;
-    }
+  const newCode = extractSquiggleCode(completionContent);
+  if (newCode === "") {
+    return { ok: false, value: "Didn't get code from extraction" };
   }
 
-  const { codeState: newCodeState } =
-    await squiggleCodeToCodeStateViaRunningAndFormatting(newCode);
+  return { ok: true, value: await codeToCodeState(newCode) };
+}
 
-  if (newCodeState.type === "noCode") {
-    return { okay: false, value: "No code returned" };
-  } else {
-    return { okay: true, value: newCodeState };
+export async function diffCompletionContentToCodeState(
+  completionContent: string,
+  codeState: CodeState
+): Promise<result<CodeState, string>> {
+  if (completionContent === "") {
+    return { ok: false, value: "Received empty completion content" };
   }
+
+  const { ok, value } = diffToNewCode(completionContent, codeState);
+  if (!ok) {
+    return { ok: false, value };
+  }
+
+  return { ok: true, value: await codeToCodeState(value) };
 }

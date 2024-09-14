@@ -1,31 +1,16 @@
 import fs from "fs";
 import path from "path";
 
-import { calculatePriceMultipleCalls, LlmMetrics, LLMName } from "./llmHelper";
-import {
-  CodeRunErrorLogEntry,
-  CodeState,
-  CodeStateLogEntry,
-  ErrorLogEntry,
-  getLogEntryFullName,
-  HighlightLogEntry,
-  InfoLogEntry,
-  LlmResponseLogEntry,
-  State,
-  StateExecution,
-  StateManager,
-  SuccessLogEntry,
-  TimestampedLogEntry,
-  WarnLogEntry,
-} from "./stateManager";
+import { Artifact, ArtifactKind } from "./Artifact";
+import { calculatePriceMultipleCalls, LlmMetrics, LLMName } from "./LLMClient";
+import { CodeState, LLMStepInstance } from "./LLMStep";
+import { getLogEntryFullName, TimestampedLogEntry } from "./Logger";
+import { Workflow } from "./Workflow";
 
-export const generateSummary = (
-  prompt: string,
-  stateManager: StateManager
-): string => {
+export function generateSummary(prompt: string, workflow: Workflow): string {
   let summary = "";
-  const executions = stateManager.getStateExecutions();
-  const metricsByLLM = stateManager.llmMetricSummary();
+  const executions = workflow.getSteps();
+  const metricsByLLM = workflow.llmMetricSummary();
 
   // Prompt
   summary += "# 🔮 PROMPT\n";
@@ -44,14 +29,14 @@ export const generateSummary = (
   summary += generateDetailedExecutionLogs(executions);
 
   return summary;
-};
+}
 
-const generateOverview = (
-  executions: StateExecution[],
+function generateOverview(
+  executions: LLMStepInstance[],
   metricsByLLM: Record<string, LlmMetrics>
-): string => {
+): string {
   const totalTime = executions.reduce(
-    (acc, exec) => acc + (exec.durationMs || 0),
+    (acc, exec) => acc + exec.getDuration(),
     0
   );
   const estimatedCost = calculatePriceMultipleCalls(metricsByLLM);
@@ -70,19 +55,18 @@ const generateOverview = (
   overview += `- Estimated Total Cost: $${estimatedCost.toFixed(4)}\n`;
 
   return overview;
-};
+}
 
-const generateErrorSummary = (executions: StateExecution[]): string => {
+function generateErrorSummary(steps: LLMStepInstance[]): string {
   let errorSummary = "";
-  executions.forEach((execution, index) => {
-    const errors = execution
+  steps.forEach((step, index) => {
+    const errors = step
       .getLogs()
       .filter(
-        (log): log is TimestampedLogEntry =>
-          log.entry.type === "error" || log.entry.type === "codeRunError"
+        (log) => log.entry.type === "error" || log.entry.type === "codeRunError"
       );
     if (errors.length > 0) {
-      errorSummary += `### ❌ Execution ${index + 1} (${State[execution.state]})\n`;
+      errorSummary += `### ❌ Execution ${index + 1} (${step.template.name})\n`;
       errors.forEach((error) => {
         if (error.entry.type === "error") {
           errorSummary += `- 🔴 ${error.entry.message}\n`;
@@ -93,15 +77,13 @@ const generateErrorSummary = (executions: StateExecution[]): string => {
     }
   });
   return errorSummary || "✅ No errors encountered.\n";
-};
+}
 
-const generateDetailedExecutionLogs = (
-  executions: StateExecution[]
-): string => {
+function generateDetailedExecutionLogs(steps: LLMStepInstance[]): string {
   let detailedLogs = "";
-  executions.forEach((execution, index) => {
+  steps.forEach((step, index) => {
     const totalCost = calculatePriceMultipleCalls(
-      execution.llmMetricsList.reduce(
+      step.llmMetricsList.reduce(
         (acc, metrics) => {
           acc[metrics.llmName] = metrics;
           return acc;
@@ -110,44 +92,51 @@ const generateDetailedExecutionLogs = (
       )
     );
 
-    detailedLogs += `\n## 🔄 Execution ${index + 1} - ${State[execution.state]} (Cost: $${totalCost.toFixed(4)})\n`;
-    detailedLogs += `- ⏱️ Duration: ${(execution.durationMs || 0) / 1000} seconds\n`;
+    detailedLogs += `\n## 🔄 Execution ${index + 1} - ${step.template.name} (Cost: $${totalCost.toFixed(4)})\n`;
+    detailedLogs += `- ⏱️ Duration: ${step.getDuration() / 1000} seconds\n`;
 
-    execution.llmMetricsList.forEach((metrics) => {
+    step.llmMetricsList.forEach((metrics) => {
       const cost = calculatePriceMultipleCalls({ [metrics.llmName]: metrics });
       detailedLogs += `- ${metrics.llmName}:\n`;
       detailedLogs += `  - API Calls: ${metrics.apiCalls}\n`;
       detailedLogs += `  - Input Tokens: ${metrics.inputTokens}\n`;
       detailedLogs += `  - Output Tokens: ${metrics.outputTokens}\n`;
       detailedLogs += `  - Estimated Cost: $${cost.toFixed(4)}\n`;
-      detailedLogs += `  - Output tokens per second: ${(metrics.outputTokens / ((execution.durationMs ?? 0) / 1000)).toFixed(2)}\n`;
+      detailedLogs += `  - Output tokens per second: ${(metrics.outputTokens / (step.getDuration() / 1000)).toFixed(2)}\n`;
     });
 
+    detailedLogs += "### Inputs:\n";
+    for (const [key, artifact] of Object.entries(step.getInputs())) {
+      detailedLogs += getFullArtifact(key, artifact);
+    }
+
+    detailedLogs += "### Outputs:\n";
+    for (const [key, artifact] of Object.entries(step.getOutputs())) {
+      if (!artifact) continue;
+      detailedLogs += getFullArtifact(key, artifact);
+    }
+
     detailedLogs += "### Logs:\n";
-    execution.getLogs().forEach((log) => {
+    step.getLogs().forEach((log) => {
       detailedLogs += `#### **${getLogEntryFullName(log.entry)}:**\n`;
       detailedLogs += `${getFullMessage(log)}`;
     });
   });
   return detailedLogs;
-};
+}
 
-const getFullMessage = (log: TimestampedLogEntry): string => {
+function getFullMessage(log: TimestampedLogEntry): string {
   switch (log.entry.type) {
     case "info":
-      return `${(log.entry as InfoLogEntry).message}`;
     case "warn":
-      return `${(log.entry as WarnLogEntry).message}`;
     case "error":
-      return `${(log.entry as ErrorLogEntry).message}`;
     case "success":
-      return `${(log.entry as SuccessLogEntry).message}`;
     case "highlight":
-      return `${(log.entry as HighlightLogEntry).message}`;
+      return log.entry.message;
     case "codeRunError":
-      return `${(log.entry as CodeRunErrorLogEntry).error}`;
+      return log.entry.error;
     case "llmResponse":
-      const llmResponse = log.entry as LlmResponseLogEntry;
+      const llmResponse = log.entry;
       return `<details>
   <summary>Content</summary>
 
@@ -180,18 +169,44 @@ ${JSON.stringify(llmResponse.messages, null, 2)}
 ${JSON.stringify(llmResponse.response, null, 2)}
 \`\`\`\`
 </details>\n\n\n`;
-    case "codeState":
-      const codeState = (log.entry as CodeStateLogEntry).codeState;
-      return formatCodeState(codeState);
     default:
       return "❓ Unknown log type";
   }
-};
+}
 
-const formatCodeState = (codeState: CodeState): string => {
+function getFullArtifact(name: string, artifact: Artifact) {
+  const kindToEmoji: Record<ArtifactKind, string> = {
+    prompt: "✏️",
+    code: "📄️",
+    codeState: "🔧",
+  };
+
+  const header = `#### ${name} ${kindToEmoji[artifact.kind] ?? "❓"}`;
+
+  switch (artifact.kind) {
+    case "prompt":
+      return `${header}
+\`\`\`
+${artifact.value}
+\`\`\`
+`;
+    case "code":
+      return `${header}
+\`\`\`
+${artifact.value}
+\`\`\`
+`;
+    case "codeState":
+      return `${header}
+${formatCodeState(artifact.value)}
+`;
+    default:
+      return `❓ Unknown (${artifact satisfies never})`;
+  }
+}
+
+function formatCodeState(codeState: CodeState): string {
   switch (codeState.type) {
-    case "noCode":
-      return "💨 Code state: No code generated\n";
     case "formattingFailed":
       return `<details>
   <summary>🔴 Code Update: [Error] - Formatting failed</summary>
@@ -229,9 +244,9 @@ ${codeState.code}
 \`\`\`
 </details>\n\n`;
   }
-};
+}
 
-export const saveSummaryToFile = (summary: string): void => {
+export function saveSummaryToFile(summary: string): void {
   const logDir = path.join(process.cwd(), "logs");
   if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
@@ -242,12 +257,4 @@ export const saveSummaryToFile = (summary: string): void => {
 
   fs.writeFileSync(logFile, summary);
   console.log(`Summary saved to ${logFile}`);
-};
-
-export const generateAndSaveSummary = (
-  prompt: string,
-  stateManager: StateManager
-): void => {
-  const summary = generateSummary(prompt, stateManager);
-  saveSummaryToFile(summary);
-};
+}

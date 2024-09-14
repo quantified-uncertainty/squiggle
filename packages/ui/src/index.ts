@@ -40,6 +40,7 @@ export { StyledColorInput } from "./forms/styled/StyledColorInput.js";
 export { StyledInput } from "./forms/styled/StyledInput.js";
 export { StyledTextArea } from "./forms/styled/StyledTextArea.js";
 
+export { CheckCircleIcon } from "./icons/CheckCircleIcon.js";
 export { DotsHorizontalIcon } from "./icons/DotsHorizontalIcon.js";
 export { EditIcon } from "./icons/EditIcon.js";
 export { EmptyIcon } from "./icons/EmptyIcon.js";
@@ -57,8 +58,10 @@ export {
   BookOpenIcon,
   CalculatorIcon,
   CheckIcon,
+  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ChevronUpIcon,
   ClipboardCopyIcon,
   CodeBracketIcon,
   CodeBracketSquareIcon,
