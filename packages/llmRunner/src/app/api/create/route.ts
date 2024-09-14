@@ -65,7 +65,7 @@ export async function POST(req: Request) {
                 },
               });
             },
-            stepUpdated: (event) => {
+            stepFinished: (event) => {
               send({
                 kind: "stepUpdated",
                 content: {

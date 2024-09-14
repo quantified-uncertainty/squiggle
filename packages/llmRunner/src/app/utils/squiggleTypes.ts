@@ -1,8 +1,16 @@
 import { z } from "zod";
 
-import { workflowResultSchema } from "../../llmRunner/Workflow";
-
 // Protocol for streaming workflow changes between server and client.
+
+export const workflowResultSchema = z.object({
+  code: z.string().describe("Squiggle code snippet"),
+  isValid: z.boolean(),
+  totalPrice: z.number(),
+  runTimeMs: z.number(),
+  llmRunCount: z.number(),
+});
+
+export type WorkflowResult = z.infer<typeof workflowResultSchema>;
 
 const squiggleWorkflowResultSchema = workflowResultSchema.extend({
   logSummary: z.string(), // markdown

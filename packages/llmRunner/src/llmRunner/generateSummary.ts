@@ -10,7 +10,7 @@ import { Workflow } from "./Workflow";
 
 export function generateSummary(prompt: string, workflow: Workflow): string {
   let summary = "";
-  const executions = workflow.getSteps();
+  const steps = workflow.getSteps();
   const metricsByLLM = workflow.llmMetricSummary();
 
   // Prompt
@@ -19,30 +19,27 @@ export function generateSummary(prompt: string, workflow: Workflow): string {
 
   // Overview
   summary += "# 📊 SUMMARY OVERVIEW\n";
-  summary += generateOverview(executions, metricsByLLM);
+  summary += generateOverview(steps, metricsByLLM);
 
   // Error Summary
   summary += "# 🚨 ERROR SUMMARY\n";
-  summary += generateErrorSummary(executions);
+  summary += generateErrorSummary(steps);
 
-  // Detailed Execution Summaries
-  summary += "# 🔍 DETAILED EXECUTION LOGS\n";
-  summary += generateDetailedExecutionLogs(executions);
+  // Detailed Step Summaries
+  summary += "# 🔍 DETAILED STEP LOGS\n";
+  summary += generateDetailedStepLogs(steps);
 
   return summary;
 }
 
 function generateOverview(
-  executions: LLMStepInstance[],
+  steps: LLMStepInstance[],
   metricsByLLM: Record<string, LlmMetrics>
 ): string {
-  const totalTime = executions.reduce(
-    (acc, exec) => acc + exec.getDuration(),
-    0
-  );
+  const totalTime = steps.reduce((acc, exec) => acc + exec.getDuration(), 0);
   const estimatedCost = calculatePriceMultipleCalls(metricsByLLM);
 
-  let overview = `- Total Executions: ${executions.length}\n`;
+  let overview = `- Total Steps: ${steps.length}\n`;
   overview += `- Total Time: ${(totalTime / 1000).toFixed(2)} seconds\n`;
 
   for (const llmName in metricsByLLM) {
@@ -67,7 +64,7 @@ function generateErrorSummary(steps: LLMStepInstance[]): string {
         (log) => log.entry.type === "error" || log.entry.type === "codeRunError"
       );
     if (errors.length > 0) {
-      errorSummary += `### ❌ Execution ${index + 1} (${step.template.name})\n`;
+      errorSummary += `### ❌ Step ${index + 1} (${step.template.name})\n`;
       errors.forEach((error) => {
         if (error.entry.type === "error") {
           errorSummary += `- 🔴 ${error.entry.message}\n`;
@@ -80,7 +77,7 @@ function generateErrorSummary(steps: LLMStepInstance[]): string {
   return errorSummary || "✅ No errors encountered.\n";
 }
 
-function generateDetailedExecutionLogs(steps: LLMStepInstance[]): string {
+function generateDetailedStepLogs(steps: LLMStepInstance[]): string {
   let detailedLogs = "";
   steps.forEach((step, index) => {
     const totalCost = calculatePriceMultipleCalls(
@@ -93,7 +90,7 @@ function generateDetailedExecutionLogs(steps: LLMStepInstance[]): string {
       )
     );
 
-    detailedLogs += `\n## 🔄 Execution ${index + 1} - ${step.template.name} (Cost: $${totalCost.toFixed(4)})\n`;
+    detailedLogs += `\n## 🔄 Step ${index + 1} - ${step.template.name} (Cost: $${totalCost.toFixed(4)})\n`;
     detailedLogs += `- ⏱️ Duration: ${step.getDuration() / 1000} seconds\n`;
 
     step.llmMetricsList.forEach((metrics) => {

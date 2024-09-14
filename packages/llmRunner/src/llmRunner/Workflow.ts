@@ -1,6 +1,6 @@
 import chalk from "chalk";
-import { z } from "zod";
 
+import { WorkflowResult } from "../app/utils/squiggleTypes";
 import {
   calculatePriceMultipleCalls,
   LLMClient,
@@ -39,10 +39,14 @@ export type WorkflowEventShape =
       };
     }
   | {
-      type: "stepUpdated";
+      type: "stepFinished";
       payload: {
         step: LLMStepInstance;
       };
+    }
+  | {
+      type: "allStepsFinished";
+      payload?: undefined;
     };
 
 export type WorkflowEventType = WorkflowEventShape["type"];
@@ -59,16 +63,6 @@ export class WorkflowEvent<T extends WorkflowEventType> extends Event {
 export type WorkflowEventListener<T extends WorkflowEventType> = (
   event: WorkflowEvent<T>
 ) => void;
-
-export const workflowResultSchema = z.object({
-  code: z.string().describe("Squiggle code snippet"),
-  isValid: z.boolean(),
-  totalPrice: z.number(),
-  runTimeMs: z.number(),
-  llmRunCount: z.number(),
-});
-
-export type WorkflowResult = z.infer<typeof workflowResultSchema>;
 
 export class Workflow {
   private steps: LLMStepInstance[] = [];
@@ -108,13 +102,11 @@ export class Workflow {
     return step;
   }
 
-  async runNextStep(): Promise<{
-    continueExecution: boolean;
-  }> {
+  private async runNextStep(): Promise<void> {
     const step = this.getCurrentStep();
 
     if (!step) {
-      return { continueExecution: false };
+      return;
     }
 
     this.dispatchEvent({
@@ -124,24 +116,20 @@ export class Workflow {
     });
     await step.run();
 
-    console.log(chalk.cyan(`Finishing state ${step.template.name}`));
+    console.log(chalk.cyan(`Finishing step ${step.template.name}`));
     this.dispatchEvent({
-      type: "stepUpdated",
+      type: "stepFinished",
       payload: { step },
     });
-
-    return {
-      continueExecution: !this.isProcessComplete(),
-    };
   }
 
   async runUntilComplete() {
-    while (true) {
-      const { continueExecution } = await this.runNextStep();
-      if (!continueExecution) {
-        break;
-      }
+    while (!this.isProcessComplete()) {
+      await this.runNextStep();
     }
+    this.dispatchEvent({
+      type: "allStepsFinished",
+    });
   }
 
   checkResourceLimits(): string | undefined {
@@ -209,8 +197,8 @@ export class Workflow {
 
   llmMetricSummary(): Record<LLMName, LlmMetrics> {
     return this.getSteps().reduce(
-      (acc, execution) => {
-        execution.llmMetricsList.forEach((metrics) => {
+      (acc, step) => {
+        step.llmMetricsList.forEach((metrics) => {
           if (!acc[metrics.llmName]) {
             acc[metrics.llmName] = { ...metrics };
           } else {
