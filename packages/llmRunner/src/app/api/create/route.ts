@@ -107,6 +107,7 @@ export async function POST(req: Request) {
                         artifactToDescription(value),
                       ])
                   ),
+                  messages: event.data.step.getConversationMessages(),
                 },
               });
             },

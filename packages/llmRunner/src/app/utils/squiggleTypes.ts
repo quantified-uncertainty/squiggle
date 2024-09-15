@@ -2,25 +2,7 @@ import { z } from "zod";
 
 // Protocol for streaming workflow changes between server and client.
 
-export const workflowResultSchema = z.object({
-  code: z.string().describe("Squiggle code snippet"),
-  isValid: z.boolean(),
-  totalPrice: z.number(),
-  runTimeMs: z.number(),
-  llmRunCount: z.number(),
-});
-
-export type WorkflowResult = z.infer<typeof workflowResultSchema>;
-
-const squiggleWorkflowResultSchema = workflowResultSchema.extend({
-  logSummary: z.string(), // markdown
-});
-
-export type SquiggleWorkflowResult = z.infer<
-  typeof squiggleWorkflowResultSchema
->;
-
-const stepStateSchema = z.enum(["PENDING", "DONE", "FAILED"]);
+// ArtifactDescription type
 
 const commonArtifactFields = {
   id: z.string(),
@@ -46,21 +28,63 @@ const artifactSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 
+export type ArtifactDescription = z.infer<typeof artifactSchema>;
+
+// StepDescription type
+
+const stepStateSchema = z.enum(["PENDING", "DONE", "FAILED"]);
+
+const messageSchema = z.object({
+  role: z.enum(["system", "user", "assistant"]),
+  content: z.string(),
+});
+
+export type MessageDescription = z.infer<typeof messageSchema>;
+
 const stepSchema = z.object({
   id: z.string(),
   name: z.string(),
   state: stepStateSchema,
   inputs: z.record(z.string(), artifactSchema),
   outputs: z.record(z.string(), artifactSchema),
+  messages: z.array(messageSchema),
 });
 
 export type StepDescription = z.infer<typeof stepSchema>;
 
-export type ArtifactDescription = z.infer<typeof artifactSchema>;
+// SquiggleWorkflowResult type
 
-const stepAddedSchema = stepSchema.omit({ state: true, outputs: true });
+export const workflowResultSchema = z.object({
+  code: z.string().describe("Squiggle code snippet"),
+  isValid: z.boolean(),
+  totalPrice: z.number(),
+  runTimeMs: z.number(),
+  llmRunCount: z.number(),
+});
 
-const stepUpdatedSchema = stepSchema.partial().required({ id: true });
+export type WorkflowResult = z.infer<typeof workflowResultSchema>;
+
+const squiggleWorkflowResultSchema = workflowResultSchema.extend({
+  logSummary: z.string(), // markdown
+});
+
+export type SquiggleWorkflowResult = z.infer<
+  typeof squiggleWorkflowResultSchema
+>;
+
+// Messages that incrementally update the WorkflowDescription
+
+const stepAddedSchema = stepSchema.omit({
+  state: true,
+  outputs: true,
+  messages: true,
+});
+
+const stepUpdatedSchema = stepSchema.partial().required({
+  id: true,
+  messages: true,
+  outputs: true,
+});
 
 export const workflowMessageSchema = z.discriminatedUnion("kind", [
   z.object({
@@ -79,7 +103,8 @@ export const workflowMessageSchema = z.discriminatedUnion("kind", [
 
 export type SquiggleWorkflowMessage = z.infer<typeof workflowMessageSchema>;
 
-// Client-side representation of a workflow.
+// Client-side representation of a workflow
+
 export type WorkflowDescription = {
   id: string;
   timestamp: Date;
@@ -91,6 +116,8 @@ export type WorkflowDescription = {
   | { status: "finished"; result: SquiggleWorkflowResult }
   | { status: "error"; result: string }
 );
+
+// /api/create request shape
 
 export const createRequestBodySchema = z.object({
   prompt: z.string().optional(),
