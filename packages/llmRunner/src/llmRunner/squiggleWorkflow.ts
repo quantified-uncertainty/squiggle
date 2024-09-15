@@ -1,5 +1,5 @@
 import { SquiggleWorkflowResult } from "../app/utils/squiggleTypes";
-import { Artifact } from "./Artifact";
+import { PromptArtifact, SourceArtifact } from "./Artifact";
 import { generateSummary } from "./generateSummary";
 import { adjustToFeedbackStep } from "./steps/adjustToFeedbackStep";
 import { fixCodeUntilItRunsStep } from "./steps/fixCodeUntilItRunsStep";
@@ -40,10 +40,9 @@ export async function runSquiggleWorkflow(
 ): Promise<void> {
   const { input } = params;
 
-  const prompt: Artifact = {
-    kind: "prompt",
-    value: input.type === "Create" ? input.prompt : "",
-  };
+  const prompt = new PromptArtifact(
+    input.type === "Create" ? input.prompt : ""
+  );
 
   const workflow = new Workflow(
     params.llmConfig,
@@ -103,7 +102,7 @@ export async function runSquiggleWorkflow(
     workflow.addStep(generateCodeStep, { prompt });
   } else {
     workflow.addStep(runAndFormatCodeStep, {
-      source: { kind: "source", value: input.source },
+      source: new SourceArtifact(input.source),
     });
   }
 

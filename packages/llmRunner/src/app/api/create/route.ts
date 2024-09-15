@@ -12,20 +12,27 @@ import {
 export const maxDuration = 300;
 
 function artifactToDescription(value: Artifact): ArtifactDescription {
+  const commonArtifactFields = {
+    id: value.id,
+    createdBy: value.createdBy?.id,
+  };
   switch (value.kind) {
     case "source":
       return {
+        ...commonArtifactFields,
         kind: "source",
         value: value.value,
       };
     case "code":
       return {
+        ...commonArtifactFields,
         kind: "code",
         value: value.value.source,
         ok: value.value.type === "success",
       };
     case "prompt":
       return {
+        ...commonArtifactFields,
         kind: "prompt",
         value: value.value,
       };

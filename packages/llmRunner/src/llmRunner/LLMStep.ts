@@ -1,4 +1,4 @@
-import { Artifact, ArtifactKind } from "./Artifact";
+import { Artifact, ArtifactKind, BaseArtifact, makeArtifact } from "./Artifact";
 import { LlmMetrics, Message } from "./LLMClient";
 import { LogEntry, Logger, TimestampedLogEntry } from "./Logger";
 import { PromptPair } from "./prompts";
@@ -27,10 +27,9 @@ export type StepShape<
 };
 
 type ExecuteContext<Shape extends StepShape> = {
-  getInput<K extends keyof Shape["inputs"]>(key: K): Inputs<Shape>[K];
-  setOutput<K extends keyof Shape["outputs"]>(
+  setOutput<K extends Extract<keyof Shape["outputs"], string>>(
     key: K,
-    value: Outputs<Shape>[K]
+    value: Outputs<Shape>[K] | Outputs<Shape>[K]["value"] // can be either the artifact or the value inside the artifact
   ): void;
   queryLLM(promptPair: PromptPair): Promise<string | null>;
   log(log: LogEntry): void;
@@ -85,10 +84,6 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     this.logger = new Logger();
   }
 
-  getInput<K extends keyof Inputs<Shape>>(key: K): Inputs<Shape>[K] {
-    return this.inputs[key];
-  }
-
   getLogs(): TimestampedLogEntry[] {
     return this.logger.logs;
   }
@@ -109,7 +104,6 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     }
 
     const executeContext: ExecuteContext<Shape> = {
-      getInput: (key) => this.getInput(key),
       setOutput: (key, value) => this.setOutput(key, value),
       log: (log) => this.log(log),
       queryLLM: (promptPair) => this.queryLLM(promptPair),
@@ -144,12 +138,24 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
 
   // private methods
 
-  private setOutput<K extends keyof Outputs<Shape>>(
+  private setOutput<K extends Extract<keyof Shape["outputs"], string>>(
     key: K,
-    value: Outputs<Shape>[K]
+    value: Outputs<Shape>[K] | Outputs<Shape>[K]["value"]
   ): void {
-    // TODO - check if output is already set?
-    this.outputs[key] = value;
+    if (key in this.outputs) {
+      this.criticalError(`Output ${key} is already set`);
+      return;
+    }
+
+    if (value instanceof BaseArtifact) {
+      // already existing artifact - probably passed through from another step
+      this.outputs[key] = value;
+    } else {
+      const kind = this.template.shape.outputs[
+        key
+      ] as Outputs<Shape>[K]["kind"];
+      this.outputs[key] = makeArtifact(kind, value as any, this) as any;
+    }
   }
 
   private log(log: LogEntry): void {

@@ -48,10 +48,7 @@ export const generateCodeStep = new LLMStepTemplate(
     if (completion) {
       const state = await generationCompletionContentToCode(completion);
       if (state.ok) {
-        context.setOutput("code", {
-          kind: "code",
-          value: state.value,
-        });
+        context.setOutput("code", state.value);
       } else {
         context.log({
           type: "codeRunError",

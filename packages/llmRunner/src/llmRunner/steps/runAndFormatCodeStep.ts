@@ -9,9 +9,6 @@ export const runAndFormatCodeStep = new LLMStepTemplate(
   },
   async (context, { source }) => {
     const code = await codeStringToCode(source.value);
-    context.setOutput("code", {
-      kind: "code",
-      value: code,
-    });
+    context.setOutput("code", code);
   }
 );

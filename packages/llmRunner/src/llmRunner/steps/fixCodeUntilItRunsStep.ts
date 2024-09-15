@@ -62,10 +62,7 @@ export const fixCodeUntilItRunsStep = new LLMStepTemplate(
         code.value
       );
       if (nextState.ok) {
-        context.setOutput("code", {
-          kind: "code",
-          value: nextState.value,
-        });
+        context.setOutput("code", nextState.value);
       } else {
         context.log({
           type: "codeRunError",

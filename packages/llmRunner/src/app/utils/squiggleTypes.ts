@@ -22,16 +22,24 @@ export type SquiggleWorkflowResult = z.infer<
 
 const stepStateSchema = z.enum(["PENDING", "DONE", "FAILED"]);
 
+const commonArtifactFields = {
+  id: z.string(),
+  createdBy: z.string().optional(),
+};
+
 const artifactSchema = z.discriminatedUnion("kind", [
   z.object({
+    ...commonArtifactFields,
     kind: z.literal("prompt"),
     value: z.string(),
   }),
   z.object({
+    ...commonArtifactFields,
     kind: z.literal("source"),
     value: z.string(),
   }),
   z.object({
+    ...commonArtifactFields,
     kind: z.literal("code"),
     value: z.string(),
     ok: z.boolean(),

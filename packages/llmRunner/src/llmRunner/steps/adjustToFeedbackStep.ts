@@ -110,10 +110,7 @@ export const adjustToFeedbackStep = new LLMStepTemplate(
       }
 
       const adjustedCode = await codeStringToCode(diffResponse.value);
-      context.setOutput("code", {
-        kind: "code",
-        value: adjustedCode,
-      });
+      context.setOutput("code", adjustedCode);
       return;
     } else {
       context.log({
