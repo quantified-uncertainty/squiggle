@@ -44,8 +44,11 @@ function artifactToDescription(value: Artifact): ArtifactDescription {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { prompt, squiggleCode }: CreateRequestBody =
-      createRequestBodySchema.parse(body);
+    const {
+      prompt,
+      squiggleCode,
+      model: llmName = "Claude-Sonnet",
+    }: CreateRequestBody = createRequestBodySchema.parse(body);
 
     if (!prompt && !squiggleCode) {
       throw new Error("Prompt or Squiggle code is required");
@@ -53,7 +56,7 @@ export async function POST(req: Request) {
 
     // Create a SquiggleGenerator instance
     const llmConfig: LlmConfig = {
-      llmName: "Claude-Sonnet",
+      llmName,
       priceLimit: 0.3,
       durationLimitMinutes: 4,
       messagesInHistoryToKeep: 4,

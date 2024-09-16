@@ -1,6 +1,7 @@
 import { Artifact, ArtifactKind, BaseArtifact, makeArtifact } from "./Artifact";
-import { LlmMetrics, Message } from "./LLMClient";
+import { calculatePriceMultipleCalls, LlmMetrics, Message } from "./LLMClient";
 import { LogEntry, Logger, TimestampedLogEntry } from "./Logger";
+import { LLMName } from "./modelConfigs";
 import { PromptPair } from "./prompts";
 import { Workflow } from "./Workflow";
 
@@ -134,6 +135,20 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
 
   getInputs() {
     return this.inputs;
+  }
+
+  getTotalCost() {
+    const totalCost = calculatePriceMultipleCalls(
+      this.llmMetricsList.reduce(
+        (acc, metrics) => {
+          acc[metrics.llmName] = metrics;
+          return acc;
+        },
+        {} as Record<LLMName, LlmMetrics>
+      )
+    );
+
+    return totalCost;
   }
 
   // private methods

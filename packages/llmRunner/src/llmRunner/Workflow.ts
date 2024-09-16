@@ -5,11 +5,11 @@ import {
   calculatePriceMultipleCalls,
   LLMClient,
   LlmMetrics,
-  LLMName,
   Message,
 } from "./LLMClient";
 import { Inputs, LLMStepInstance, LLMStepTemplate, StepShape } from "./LLMStep";
 import { TimestampedLogEntry } from "./Logger";
+import { LLMName } from "./modelConfigs";
 
 export interface LlmConfig {
   llmName: LLMName;

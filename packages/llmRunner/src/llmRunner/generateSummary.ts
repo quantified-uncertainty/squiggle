@@ -3,15 +3,13 @@ import path from "path";
 
 import { Artifact, ArtifactKind } from "./Artifact";
 import { Code } from "./CodeState";
-import { calculatePriceMultipleCalls, LlmMetrics, LLMName } from "./LLMClient";
-import { LLMStepInstance } from "./LLMStep";
+import { calculatePriceMultipleCalls } from "./LLMClient";
 import { getLogEntryFullName, TimestampedLogEntry } from "./Logger";
 import { Workflow } from "./Workflow";
 
 export function generateSummary(prompt: string, workflow: Workflow): string {
   let summary = "";
   const steps = workflow.getSteps();
-  const metricsByLLM = workflow.llmMetricSummary();
 
   // Prompt
   summary += "# 🔮 PROMPT\n";
@@ -19,31 +17,30 @@ export function generateSummary(prompt: string, workflow: Workflow): string {
 
   // Overview
   summary += "# 📊 SUMMARY OVERVIEW\n";
-  summary += generateOverview(steps, metricsByLLM);
+  summary += generateOverview(workflow);
 
   // Error Summary
   summary += "# 🚨 ERROR SUMMARY\n";
-  summary += generateErrorSummary(steps);
+  summary += generateErrorSummary(workflow);
 
   // Detailed Step Summaries
   summary += "# 🔍 DETAILED STEP LOGS\n";
-  summary += generateDetailedStepLogs(steps);
+  summary += generateDetailedStepLogs(workflow);
 
   return summary;
 }
 
-function generateOverview(
-  steps: LLMStepInstance[],
-  metricsByLLM: Record<string, LlmMetrics>
-): string {
+function generateOverview(workflow: Workflow): string {
+  const steps = workflow.getSteps();
+  const metricsByLLM = workflow.llmMetricSummary();
+
   const totalTime = steps.reduce((acc, exec) => acc + exec.getDuration(), 0);
   const estimatedCost = calculatePriceMultipleCalls(metricsByLLM);
 
   let overview = `- Total Steps: ${steps.length}\n`;
   overview += `- Total Time: ${(totalTime / 1000).toFixed(2)} seconds\n`;
 
-  for (const llmName in metricsByLLM) {
-    const metrics = metricsByLLM[llmName];
+  for (const [llmName, metrics] of Object.entries(metricsByLLM)) {
     overview += `- ${llmName}:\n`;
     overview += `  - API Calls: ${metrics.apiCalls}\n`;
     overview += `  - Input Tokens: ${metrics.inputTokens}\n`;
@@ -55,8 +52,11 @@ function generateOverview(
   return overview;
 }
 
-function generateErrorSummary(steps: LLMStepInstance[]): string {
+function generateErrorSummary(workflow: Workflow): string {
+  const steps = workflow.getSteps();
+
   let errorSummary = "";
+
   steps.forEach((step, index) => {
     const errors = step
       .getLogs()
@@ -77,18 +77,11 @@ function generateErrorSummary(steps: LLMStepInstance[]): string {
   return errorSummary || "✅ No errors encountered.\n";
 }
 
-function generateDetailedStepLogs(steps: LLMStepInstance[]): string {
+function generateDetailedStepLogs(workflow: Workflow): string {
   let detailedLogs = "";
+  const steps = workflow.getSteps();
   steps.forEach((step, index) => {
-    const totalCost = calculatePriceMultipleCalls(
-      step.llmMetricsList.reduce(
-        (acc, metrics) => {
-          acc[metrics.llmName] = metrics;
-          return acc;
-        },
-        {} as Record<LLMName, LlmMetrics>
-      )
-    );
+    const totalCost = step.getTotalCost();
 
     detailedLogs += `\n## 🔄 Step ${index + 1} - ${step.template.name} (Cost: $${totalCost.toFixed(4)})\n`;
     detailedLogs += `- ⏱️ Duration: ${step.getDuration() / 1000} seconds\n`;
@@ -117,7 +110,7 @@ function generateDetailedStepLogs(steps: LLMStepInstance[]): string {
     detailedLogs += "### Logs:\n";
     step.getLogs().forEach((log) => {
       detailedLogs += `#### **${getLogEntryFullName(log.entry)}:**\n`;
-      detailedLogs += `${getFullMessage(log)}`;
+      detailedLogs += getFullMessage(log);
     });
   });
   return detailedLogs;

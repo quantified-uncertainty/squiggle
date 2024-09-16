@@ -1,104 +1,132 @@
 "use client";
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
-import { Button, StyledTab, StyledTextArea } from "@quri/ui";
+import { forwardRef, useImperativeHandle, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 
+import {
+  Button,
+  SelectStringFormField,
+  StyledTab,
+  TextAreaFormField,
+} from "@quri/ui";
+
+import { LLMName, MODEL_CONFIGS } from "../llmRunner/modelConfigs";
 import { CreateRequestBody, WorkflowDescription } from "./utils/squiggleTypes";
 import { WorkflowSummaryItem } from "./WorkflowSummaryItem";
 
-export const Sidebar = forwardRef<
-  {
-    edit: (code: string) => void;
-  },
-  {
-    submitWorkflow: (requestBody: CreateRequestBody) => void;
-    selectWorkflow: (id: string) => void;
-    selectedWorkflow: WorkflowDescription | undefined;
-    workflows: WorkflowDescription[];
-  }
->(function Sidebar(
+type Handle = {
+  edit: (code: string) => void;
+};
+
+type Props = {
+  submitWorkflow: (requestBody: CreateRequestBody) => void;
+  selectWorkflow: (id: string) => void;
+  selectedWorkflow: WorkflowDescription | undefined;
+  workflows: WorkflowDescription[];
+};
+
+type FormShape = {
+  prompt: string;
+  squiggleCode: string;
+  model: LLMName;
+};
+
+export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
   { submitWorkflow, selectWorkflow, selectedWorkflow, workflows },
   ref
 ) {
-  const [squiggleCode, setSquiggleCode] = useState("");
+  const form = useForm<FormShape>({
+    defaultValues: {
+      prompt:
+        "Make a 1-line model, that is just 1 line in total, no comments, no decorators. Be creative.",
+      squiggleCode: "",
+      model: "Claude-Sonnet",
+    },
+  });
 
   const [mode, setMode] = useState<"create" | "edit">("create");
-  const [prompt, setPrompt] = useState(
-    "Make a 1-line model, that is just 1 line in total, no comments, no decorators. Be creative."
-  );
 
   useImperativeHandle(ref, () => ({
     edit: (code: string) => {
       setMode("edit");
-      setSquiggleCode(code);
+      form.setValue("squiggleCode", code);
       setTimeout(() => {
-        editRef.current?.focus();
+        form.setFocus("squiggleCode");
       }, 0);
     },
   }));
 
-  const handleSubmit = () => {
-    const requestBody: CreateRequestBody = {
-      prompt: mode === "create" ? prompt : undefined,
-      squiggleCode: mode === "edit" ? squiggleCode : undefined,
-    };
+  const handleSubmit = form.handleSubmit(
+    async ({ prompt, squiggleCode, model }, event) => {
+      const requestBody: CreateRequestBody = {
+        prompt: mode === "create" ? prompt : undefined,
+        squiggleCode: mode === "edit" ? squiggleCode : undefined,
+        model,
+      };
 
-    submitWorkflow(requestBody);
-    setPrompt("");
-  };
-
-  const editRef = useRef<HTMLTextAreaElement>(null);
+      submitWorkflow(requestBody);
+      form.setValue("prompt", "");
+    }
+  );
 
   return (
-    <div>
-      <StyledTab.Group
-        selectedIndex={mode === "edit" ? 1 : 0}
-        onChange={(index) => setMode(index === 0 ? "create" : "edit")}
-      >
-        <StyledTab.List stretch theme="primary">
-          <StyledTab name="Create" />
-          <StyledTab name="Fix" />
-        </StyledTab.List>
-        <div className="mb-4 mt-2">
-          <StyledTab.Panels>
-            <StyledTab.Panel>
-              <StyledTextArea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Enter your prompt here"
-                rows={10}
-                minRows={10}
+    <FormProvider {...form}>
+      <div className="flex flex-col space-y-4">
+        <StyledTab.Group
+          selectedIndex={mode === "edit" ? 1 : 0}
+          onChange={(index) => setMode(index === 0 ? "create" : "edit")}
+        >
+          <StyledTab.List stretch theme="primary">
+            <StyledTab name="Create" />
+            <StyledTab name="Fix" />
+          </StyledTab.List>
+          <div className="mt-2">
+            <StyledTab.Panels>
+              <StyledTab.Panel>
+                <TextAreaFormField<FormShape>
+                  name="prompt"
+                  label="Prompt"
+                  placeholder="Enter your prompt here"
+                  rows={10}
+                  minRows={10}
+                />
+              </StyledTab.Panel>
+              <StyledTab.Panel>
+                <TextAreaFormField<FormShape>
+                  name="squiggleCode"
+                  label="Squiggle Code"
+                  placeholder="Enter your Squiggle code here"
+                  rows={12}
+                  minRows={12}
+                />
+              </StyledTab.Panel>
+            </StyledTab.Panels>
+          </div>
+        </StyledTab.Group>
+        <SelectStringFormField<FormShape, LLMName>
+          name="model"
+          label="Model"
+          size="small"
+          options={Object.keys(MODEL_CONFIGS) as LLMName[]}
+          required
+        />
+        <Button theme="primary" wide onClick={handleSubmit}>
+          Send
+        </Button>
+        <div className="flex-grow overflow-y-auto">
+          <h2 className="mb-2 text-sm font-bold">Actions</h2>
+          <div className="flex flex-col space-y-2">
+            {workflows.map((workflow) => (
+              <WorkflowSummaryItem
+                key={workflow.id}
+                workflow={workflow}
+                onSelect={() => selectWorkflow(workflow.id)}
+                isSelected={workflow.id === selectedWorkflow?.id}
               />
-            </StyledTab.Panel>
-            <StyledTab.Panel>
-              <StyledTextArea
-                ref={editRef}
-                value={squiggleCode}
-                onChange={(e) => setSquiggleCode(e.target.value)}
-                placeholder="Enter your Squiggle code here"
-                rows={12}
-                minRows={12}
-              />
-            </StyledTab.Panel>
-          </StyledTab.Panels>
-        </div>
-      </StyledTab.Group>
-      <Button theme="primary" wide onClick={handleSubmit}>
-        Send
-      </Button>
-      <div className="mt-4 flex-grow overflow-y-auto">
-        <h2 className="mb-2 text-sm font-bold">Actions</h2>
-        <div className="flex flex-col space-y-2">
-          {workflows.map((workflow) => (
-            <WorkflowSummaryItem
-              key={workflow.id}
-              workflow={workflow}
-              onSelect={() => selectWorkflow(workflow.id)}
-              isSelected={workflow.id === selectedWorkflow?.id}
-            />
-          ))}
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </FormProvider>
   );
 });
