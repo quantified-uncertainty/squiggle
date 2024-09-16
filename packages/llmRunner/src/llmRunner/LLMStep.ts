@@ -191,6 +191,9 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
   }
 
   private complete() {
+    if (this.state.kind === "FAILED") {
+      return;
+    }
     this.state = { kind: "DONE", durationMs: this.calculateDuration() };
   }
 
@@ -247,10 +250,9 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
 
       return completion.content;
     } catch (error) {
-      this.log({
-        type: "error",
-        message: `Error in queryLLM: ${error instanceof Error ? error.message : error}`,
-      });
+      this.criticalError(
+        `Error in queryLLM: ${error instanceof Error ? error.message : error}`
+      );
       return null;
     }
   }
