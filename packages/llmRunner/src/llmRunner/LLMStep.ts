@@ -1,19 +1,9 @@
-import { SqError, SqProject } from "@quri/squiggle-lang";
-
-import { Artifact, ArtifactKind } from "./Artifact";
-import { LlmMetrics, Message } from "./LLMClient";
+import { Artifact, ArtifactKind, BaseArtifact, makeArtifact } from "./Artifact";
+import { calculatePriceMultipleCalls, LlmMetrics, Message } from "./LLMClient";
 import { LogEntry, Logger, TimestampedLogEntry } from "./Logger";
+import { LLMName } from "./modelConfigs";
 import { PromptPair } from "./prompts";
 import { Workflow } from "./Workflow";
-
-export type CodeState =
-  | {
-      type: "formattingFailed";
-      error: string;
-      code: string;
-    }
-  | { type: "runFailed"; code: string; error: SqError; project: SqProject }
-  | { type: "success"; code: string };
 
 export type StepState =
   | {
@@ -29,15 +19,6 @@ export type StepState =
       error: string;
     };
 
-export function codeStateErrorString(codeState: CodeState): string {
-  if (codeState.type === "formattingFailed") {
-    return codeState.error;
-  } else if (codeState.type === "runFailed") {
-    return codeState.error.toStringWithDetails();
-  }
-  return "";
-}
-
 export type StepShape<
   I extends Record<string, ArtifactKind> = Record<string, ArtifactKind>,
   O extends Record<string, ArtifactKind> = Record<string, ArtifactKind>,
@@ -47,14 +28,13 @@ export type StepShape<
 };
 
 type ExecuteContext<Shape extends StepShape> = {
-  getInput<K extends keyof Shape["inputs"]>(key: K): Inputs<Shape>[K];
-  setOutput<K extends keyof Shape["outputs"]>(
+  setOutput<K extends Extract<keyof Shape["outputs"], string>>(
     key: K,
-    value: Outputs<Shape>[K]
+    value: Outputs<Shape>[K] | Outputs<Shape>[K]["value"] // can be either the artifact or the value inside the artifact
   ): void;
   queryLLM(promptPair: PromptPair): Promise<string | null>;
   log(log: LogEntry): void;
-  workflow: Workflow; // TODO - shouldn't be exposed
+  // workflow: Workflow; // intentionally not exposed, but if you need it, add it here
 };
 
 export type Inputs<Shape extends StepShape<any, any>> = {
@@ -72,7 +52,10 @@ export class LLMStepTemplate<const Shape extends StepShape = StepShape> {
   constructor(
     public readonly name: string,
     public readonly shape: Shape,
-    public readonly execute: (context: ExecuteContext<Shape>) => Promise<void>
+    public readonly execute: (
+      context: ExecuteContext<Shape>,
+      inputs: Inputs<Shape>
+    ) => Promise<void>
   ) {}
 
   instantiate(
@@ -102,10 +85,6 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     this.logger = new Logger();
   }
 
-  getInput<K extends keyof Inputs<Shape>>(key: K): Inputs<Shape>[K] {
-    return this.inputs[key];
-  }
-
   getLogs(): TimestampedLogEntry[] {
     return this.logger.logs;
   }
@@ -126,15 +105,13 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     }
 
     const executeContext: ExecuteContext<Shape> = {
-      getInput: (key) => this.getInput(key),
       setOutput: (key, value) => this.setOutput(key, value),
       log: (log) => this.log(log),
       queryLLM: (promptPair) => this.queryLLM(promptPair),
-      workflow: this.workflow,
     };
 
     try {
-      await this.template.execute(executeContext);
+      await this.template.execute(executeContext, this.inputs);
     } catch (error) {
       this.criticalError(
         error instanceof Error ? error.message : String(error)
@@ -160,14 +137,40 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     return this.inputs;
   }
 
+  getTotalCost() {
+    const totalCost = calculatePriceMultipleCalls(
+      this.llmMetricsList.reduce(
+        (acc, metrics) => {
+          acc[metrics.llmName] = metrics;
+          return acc;
+        },
+        {} as Record<LLMName, LlmMetrics>
+      )
+    );
+
+    return totalCost;
+  }
+
   // private methods
 
-  private setOutput<K extends keyof Outputs<Shape>>(
+  private setOutput<K extends Extract<keyof Shape["outputs"], string>>(
     key: K,
-    value: Outputs<Shape>[K]
+    value: Outputs<Shape>[K] | Outputs<Shape>[K]["value"]
   ): void {
-    // TODO - check if output is already set?
-    this.outputs[key] = value;
+    if (key in this.outputs) {
+      this.criticalError(`Output ${key} is already set`);
+      return;
+    }
+
+    if (value instanceof BaseArtifact) {
+      // already existing artifact - probably passed through from another step
+      this.outputs[key] = value;
+    } else {
+      const kind = this.template.shape.outputs[
+        key
+      ] as Outputs<Shape>[K]["kind"];
+      this.outputs[key] = makeArtifact(kind, value as any, this) as any;
+    }
   }
 
   private log(log: LogEntry): void {
@@ -188,6 +191,9 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
   }
 
   private complete() {
+    if (this.state.kind === "FAILED") {
+      return;
+    }
     this.state = { kind: "DONE", durationMs: this.calculateDuration() };
   }
 
@@ -244,10 +250,9 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
 
       return completion.content;
     } catch (error) {
-      this.log({
-        type: "error",
-        message: `Error in processLLMResponse: ${error instanceof Error ? error.message : error}`,
-      });
+      this.criticalError(
+        `Error in queryLLM: ${error instanceof Error ? error.message : error}`
+      );
       return null;
     }
   }

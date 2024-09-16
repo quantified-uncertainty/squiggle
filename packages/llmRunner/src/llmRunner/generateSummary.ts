@@ -2,15 +2,14 @@ import fs from "fs";
 import path from "path";
 
 import { Artifact, ArtifactKind } from "./Artifact";
-import { calculatePriceMultipleCalls, LlmMetrics, LLMName } from "./LLMClient";
-import { CodeState, LLMStepInstance } from "./LLMStep";
+import { Code } from "./CodeState";
+import { calculatePriceMultipleCalls } from "./LLMClient";
 import { getLogEntryFullName, TimestampedLogEntry } from "./Logger";
 import { Workflow } from "./Workflow";
 
 export function generateSummary(prompt: string, workflow: Workflow): string {
   let summary = "";
-  const executions = workflow.getSteps();
-  const metricsByLLM = workflow.llmMetricSummary();
+  const steps = workflow.getSteps();
 
   // Prompt
   summary += "# 🔮 PROMPT\n";
@@ -18,34 +17,30 @@ export function generateSummary(prompt: string, workflow: Workflow): string {
 
   // Overview
   summary += "# 📊 SUMMARY OVERVIEW\n";
-  summary += generateOverview(executions, metricsByLLM);
+  summary += generateOverview(workflow);
 
   // Error Summary
   summary += "# 🚨 ERROR SUMMARY\n";
-  summary += generateErrorSummary(executions);
+  summary += generateErrorSummary(workflow);
 
-  // Detailed Execution Summaries
-  summary += "# 🔍 DETAILED EXECUTION LOGS\n";
-  summary += generateDetailedExecutionLogs(executions);
+  // Detailed Step Summaries
+  summary += "# 🔍 DETAILED STEP LOGS\n";
+  summary += generateDetailedStepLogs(workflow);
 
   return summary;
 }
 
-function generateOverview(
-  executions: LLMStepInstance[],
-  metricsByLLM: Record<string, LlmMetrics>
-): string {
-  const totalTime = executions.reduce(
-    (acc, exec) => acc + exec.getDuration(),
-    0
-  );
+function generateOverview(workflow: Workflow): string {
+  const steps = workflow.getSteps();
+  const metricsByLLM = workflow.llmMetricSummary();
+
+  const totalTime = steps.reduce((acc, exec) => acc + exec.getDuration(), 0);
   const estimatedCost = calculatePriceMultipleCalls(metricsByLLM);
 
-  let overview = `- Total Executions: ${executions.length}\n`;
+  let overview = `- Total Steps: ${steps.length}\n`;
   overview += `- Total Time: ${(totalTime / 1000).toFixed(2)} seconds\n`;
 
-  for (const llmName in metricsByLLM) {
-    const metrics = metricsByLLM[llmName];
+  for (const [llmName, metrics] of Object.entries(metricsByLLM)) {
     overview += `- ${llmName}:\n`;
     overview += `  - API Calls: ${metrics.apiCalls}\n`;
     overview += `  - Input Tokens: ${metrics.inputTokens}\n`;
@@ -57,8 +52,11 @@ function generateOverview(
   return overview;
 }
 
-function generateErrorSummary(steps: LLMStepInstance[]): string {
+function generateErrorSummary(workflow: Workflow): string {
+  const steps = workflow.getSteps();
+
   let errorSummary = "";
+
   steps.forEach((step, index) => {
     const errors = step
       .getLogs()
@@ -66,7 +64,7 @@ function generateErrorSummary(steps: LLMStepInstance[]): string {
         (log) => log.entry.type === "error" || log.entry.type === "codeRunError"
       );
     if (errors.length > 0) {
-      errorSummary += `### ❌ Execution ${index + 1} (${step.template.name})\n`;
+      errorSummary += `### ❌ Step ${index + 1} (${step.template.name})\n`;
       errors.forEach((error) => {
         if (error.entry.type === "error") {
           errorSummary += `- 🔴 ${error.entry.message}\n`;
@@ -79,20 +77,13 @@ function generateErrorSummary(steps: LLMStepInstance[]): string {
   return errorSummary || "✅ No errors encountered.\n";
 }
 
-function generateDetailedExecutionLogs(steps: LLMStepInstance[]): string {
+function generateDetailedStepLogs(workflow: Workflow): string {
   let detailedLogs = "";
+  const steps = workflow.getSteps();
   steps.forEach((step, index) => {
-    const totalCost = calculatePriceMultipleCalls(
-      step.llmMetricsList.reduce(
-        (acc, metrics) => {
-          acc[metrics.llmName] = metrics;
-          return acc;
-        },
-        {} as Record<LLMName, LlmMetrics>
-      )
-    );
+    const totalCost = step.getTotalCost();
 
-    detailedLogs += `\n## 🔄 Execution ${index + 1} - ${step.template.name} (Cost: $${totalCost.toFixed(4)})\n`;
+    detailedLogs += `\n## 🔄 Step ${index + 1} - ${step.template.name} (Cost: $${totalCost.toFixed(4)})\n`;
     detailedLogs += `- ⏱️ Duration: ${step.getDuration() / 1000} seconds\n`;
 
     step.llmMetricsList.forEach((metrics) => {
@@ -119,7 +110,7 @@ function generateDetailedExecutionLogs(steps: LLMStepInstance[]): string {
     detailedLogs += "### Logs:\n";
     step.getLogs().forEach((log) => {
       detailedLogs += `#### **${getLogEntryFullName(log.entry)}:**\n`;
-      detailedLogs += `${getFullMessage(log)}`;
+      detailedLogs += getFullMessage(log);
     });
   });
   return detailedLogs;
@@ -177,8 +168,8 @@ ${JSON.stringify(llmResponse.response, null, 2)}
 function getFullArtifact(name: string, artifact: Artifact) {
   const kindToEmoji: Record<ArtifactKind, string> = {
     prompt: "✏️",
-    code: "📄️",
-    codeState: "🔧",
+    source: "📄️",
+    code: "🔧",
   };
 
   const header = `#### ${name} ${kindToEmoji[artifact.kind] ?? "❓"}`;
@@ -190,35 +181,35 @@ function getFullArtifact(name: string, artifact: Artifact) {
 ${artifact.value}
 \`\`\`
 `;
-    case "code":
+    case "source":
       return `${header}
 \`\`\`
 ${artifact.value}
 \`\`\`
 `;
-    case "codeState":
+    case "code":
       return `${header}
-${formatCodeState(artifact.value)}
+${formatCode(artifact.value)}
 `;
     default:
       return `❓ Unknown (${artifact satisfies never})`;
   }
 }
 
-function formatCodeState(codeState: CodeState): string {
-  switch (codeState.type) {
+function formatCode(code: Code): string {
+  switch (code.type) {
     case "formattingFailed":
       return `<details>
   <summary>🔴 Code Update: [Error] - Formatting failed</summary>
 
 **Error:**
 \`\`\`
-${codeState.error}
+${code.error}
 \`\`\`
 
 **Code:**
 \`\`\`squiggleEditor
-${codeState.code}
+${code.source}
 \`\`\`
 </details>\n\n`;
     case "runFailed":
@@ -227,12 +218,12 @@ ${codeState.code}
 
 **Error:**
 \`\`\`
-${codeState.error.toStringWithDetails()}
+${code.error.toStringWithDetails()}
 \`\`\`
 
 **Code:**
 \`\`\`squiggleEditor
-${codeState.code}
+${code.source}
 \`\`\`
 </details>\n\n`;
     case "success":
@@ -240,7 +231,7 @@ ${codeState.code}
   <summary>✅ Code Update: [Success] - Code executed successfully</summary>
 
 \`\`\`squiggleEditor
-${codeState.code}
+${code.source}
 \`\`\`
 </details>\n\n`;
   }

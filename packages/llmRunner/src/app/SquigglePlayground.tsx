@@ -6,7 +6,7 @@ import {
   versionedSquigglePackages,
 } from "@quri/versioned-squiggle-components";
 
-import { linkerWithDefaultSquiggleLibs } from "../llmRunner/processSquiggleCode";
+import { linkerWithDefaultSquiggleLibs } from "../llmRunner/CodeState";
 
 interface SquigglePlaygroundComponentProps {
   height: number;

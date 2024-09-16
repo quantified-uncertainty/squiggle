@@ -82,11 +82,12 @@ export const WorkflowGraph: FC<{
     const nodes: DagreNode[] = [];
     const edges: DagreEdge[] = [];
 
-    for (let i = 0; i < workflow.steps.length; i++) {
-      const step = workflow.steps[i];
+    for (const step of workflow.steps) {
       nodes.push(makeNode(step));
-      if (i > 0) {
-        edges.push(makeEdge(workflow.steps[i - 1].id, step.id));
+      for (const input of Object.values(step.inputs)) {
+        if (input.createdBy) {
+          edges.push(makeEdge(input.createdBy, step.id));
+        }
       }
     }
 

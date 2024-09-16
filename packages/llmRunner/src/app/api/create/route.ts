@@ -1,8 +1,6 @@
 import { Artifact } from "../../../llmRunner/Artifact";
-import {
-  LlmConfig,
-  runSquiggleGenerator,
-} from "../../../llmRunner/squiggleGenerator";
+import { runSquiggleWorkflow } from "../../../llmRunner/squiggleWorkflow";
+import { LlmConfig } from "../../../llmRunner/Workflow";
 import {
   ArtifactDescription,
   CreateRequestBody,
@@ -14,17 +12,43 @@ import {
 export const maxDuration = 300;
 
 function artifactToDescription(value: Artifact): ArtifactDescription {
-  return {
-    kind: value.kind === "codeState" ? "code" : value.kind,
-    value: value.kind === "codeState" ? value.value.code : value.value,
+  const commonArtifactFields = {
+    id: value.id,
+    createdBy: value.createdBy?.id,
   };
+  switch (value.kind) {
+    case "source":
+      return {
+        ...commonArtifactFields,
+        kind: "source",
+        value: value.value,
+      };
+    case "code":
+      return {
+        ...commonArtifactFields,
+        kind: "code",
+        value: value.value.source,
+        ok: value.value.type === "success",
+      };
+    case "prompt":
+      return {
+        ...commonArtifactFields,
+        kind: "prompt",
+        value: value.value,
+      };
+    default:
+      throw new Error(`Unknown artifact ${value satisfies never}`);
+  }
 }
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { prompt, squiggleCode }: CreateRequestBody =
-      createRequestBodySchema.parse(body);
+    const {
+      prompt,
+      squiggleCode,
+      model: llmName = "Claude-Sonnet",
+    }: CreateRequestBody = createRequestBodySchema.parse(body);
 
     if (!prompt && !squiggleCode) {
       throw new Error("Prompt or Squiggle code is required");
@@ -32,7 +56,7 @@ export async function POST(req: Request) {
 
     // Create a SquiggleGenerator instance
     const llmConfig: LlmConfig = {
-      llmName: "Claude-Sonnet",
+      llmName,
       priceLimit: 0.3,
       durationLimitMinutes: 4,
       messagesInHistoryToKeep: 4,
@@ -44,9 +68,9 @@ export async function POST(req: Request) {
           controller.enqueue(JSON.stringify(message) + "\n");
         };
 
-        await runSquiggleGenerator({
+        await runSquiggleWorkflow({
           input: squiggleCode
-            ? { type: "Edit", code: squiggleCode }
+            ? { type: "Edit", source: squiggleCode }
             : { type: "Create", prompt: prompt ?? "" },
           llmConfig,
           abortSignal: req.signal,
@@ -67,7 +91,7 @@ export async function POST(req: Request) {
                 },
               });
             },
-            stepUpdated: (event) => {
+            stepFinished: (event) => {
               send({
                 kind: "stepUpdated",
                 content: {
@@ -86,6 +110,7 @@ export async function POST(req: Request) {
                         artifactToDescription(value),
                       ])
                   ),
+                  messages: event.data.step.getConversationMessages(),
                 },
               });
             },

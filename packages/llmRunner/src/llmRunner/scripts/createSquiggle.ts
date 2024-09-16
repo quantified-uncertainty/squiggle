@@ -1,20 +1,12 @@
-import { LlmConfig, runSquiggleGeneratorToResult } from "../squiggleGenerator";
+import { runSquiggleWorkflowToResult } from "../squiggleWorkflow";
 
 async function main() {
-  const llmConfig: LlmConfig = {
-    llmName: "Claude-Sonnet",
-    priceLimit: 0.2,
-    durationLimitMinutes: 1,
-    messagesInHistoryToKeep: 4,
-  };
-
   const prompt =
     "Generate a function that takes a list of numbers and returns the sum of the numbers";
 
   const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
-    await runSquiggleGeneratorToResult({
+    await runSquiggleWorkflowToResult({
       input: { type: "Create", prompt },
-      llmConfig,
     });
 
   const response = {

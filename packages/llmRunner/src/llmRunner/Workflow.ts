@@ -1,15 +1,29 @@
 import chalk from "chalk";
 
+import { WorkflowResult } from "../app/utils/squiggleTypes";
 import {
   calculatePriceMultipleCalls,
   LLMClient,
   LlmMetrics,
-  LLMName,
   Message,
 } from "./LLMClient";
 import { Inputs, LLMStepInstance, LLMStepTemplate, StepShape } from "./LLMStep";
 import { TimestampedLogEntry } from "./Logger";
-import { LlmConfig } from "./squiggleGenerator";
+import { LLMName } from "./modelConfigs";
+
+export interface LlmConfig {
+  llmName: LLMName;
+  priceLimit: number;
+  durationLimitMinutes: number;
+  messagesInHistoryToKeep: number;
+}
+
+export const llmConfigDefault: LlmConfig = {
+  llmName: "Claude-Sonnet",
+  priceLimit: 0.3,
+  durationLimitMinutes: 1,
+  messagesInHistoryToKeep: 4,
+};
 
 export type WorkflowEventShape =
   | {
@@ -25,10 +39,14 @@ export type WorkflowEventShape =
       };
     }
   | {
-      type: "stepUpdated";
+      type: "stepFinished";
       payload: {
         step: LLMStepInstance;
       };
+    }
+  | {
+      type: "allStepsFinished";
+      payload?: undefined;
     };
 
 export type WorkflowEventType = WorkflowEventShape["type"];
@@ -46,12 +64,6 @@ export type WorkflowEventListener<T extends WorkflowEventType> = (
   event: WorkflowEvent<T>
 ) => void;
 
-type WorkflowResult = {
-  isValid: boolean;
-  code: string;
-  logs: TimestampedLogEntry[];
-};
-
 export class Workflow {
   private steps: LLMStepInstance[] = [];
   private priceLimit: number;
@@ -61,7 +73,7 @@ export class Workflow {
   public llmClient: LLMClient;
 
   constructor(
-    public llmConfig: LlmConfig,
+    public llmConfig: LlmConfig = llmConfigDefault,
     openaiApiKey?: string,
     anthropicApiKey?: string
   ) {
@@ -90,13 +102,11 @@ export class Workflow {
     return step;
   }
 
-  async runNextStep(): Promise<{
-    continueExecution: boolean;
-  }> {
+  private async runNextStep(): Promise<void> {
     const step = this.getCurrentStep();
 
     if (!step) {
-      return { continueExecution: false };
+      return;
     }
 
     this.dispatchEvent({
@@ -106,15 +116,20 @@ export class Workflow {
     });
     await step.run();
 
-    console.log(chalk.cyan(`Finishing state ${step.template.name}`));
+    console.log(chalk.cyan(`Finishing step ${step.template.name}`));
     this.dispatchEvent({
-      type: "stepUpdated",
+      type: "stepFinished",
       payload: { step },
     });
+  }
 
-    return {
-      continueExecution: !this.isProcessComplete(),
-    };
+  async runUntilComplete() {
+    while (!this.isProcessComplete()) {
+      await this.runNextStep();
+    }
+    this.dispatchEvent({
+      type: "allStepsFinished",
+    });
   }
 
   checkResourceLimits(): string | undefined {
@@ -158,26 +173,32 @@ export class Workflow {
       const step = this.steps[i];
       const outputs = step.getOutputs();
       for (const output of Object.values(outputs)) {
-        if (output?.kind === "code") {
+        if (output?.kind === "source") {
           code = output.value;
-        } else if (output?.kind === "codeState") {
-          code = output.value.code;
+        } else if (output?.kind === "code") {
+          code = output.value.source;
         }
       }
       if (code) break;
     }
 
+    const endTime = Date.now();
+    const runTimeMs = endTime - this.startTime;
+    const { totalPrice, llmRunCount } = this.getLlmMetrics();
+
     return {
-      isValid,
       code,
-      logs: this.getLogs(),
+      isValid,
+      totalPrice,
+      runTimeMs,
+      llmRunCount,
     };
   }
 
   llmMetricSummary(): Record<LLMName, LlmMetrics> {
     return this.getSteps().reduce(
-      (acc, execution) => {
-        execution.llmMetricsList.forEach((metrics) => {
+      (acc, step) => {
+        step.llmMetricsList.forEach((metrics) => {
           if (!acc[metrics.llmName]) {
             acc[metrics.llmName] = { ...metrics };
           } else {
@@ -216,11 +237,11 @@ export class Workflow {
   getRelevantPreviousConversationMessages(maxRecentSteps = 3): Message[] {
     const lastGenerateCodeIndex = this.steps.findLastIndex((step) => {
       const hasCodeInput = Object.values(step.template.shape.inputs).some(
-        (kind) => kind === "code" || kind === "codeState"
+        (kind) => kind === "source" || kind === "code"
       );
 
       const hasCodeOutput = Object.values(step.template.shape.outputs).some(
-        (kind) => kind === "code" || kind === "codeState"
+        (kind) => kind === "source" || kind === "code"
       );
 
       return !hasCodeInput && hasCodeOutput;

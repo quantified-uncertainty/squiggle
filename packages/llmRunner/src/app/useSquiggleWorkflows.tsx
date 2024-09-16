@@ -87,6 +87,7 @@ const reducer: Reducer<State, Action> = (state, action) => {
                 ...workflow.steps,
                 {
                   outputs: {},
+                  messages: [],
                   state: "PENDING",
                   ...action.payload.step,
                 },
