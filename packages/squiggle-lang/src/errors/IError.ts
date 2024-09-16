@@ -123,10 +123,6 @@ export class IRuntimeError extends Error {
     );
   }
 
-  getTopFrame(): StackTraceFrame | undefined {
-    return this.stackTrace.frames.at(-1);
-  }
-
   getFrameArray(): StackTraceFrame[] {
     return this.stackTrace.frames;
   }
