@@ -1,3 +1,4 @@
+import { LocationRange } from "../ast/types.js";
 import { ICompileError, IError, IRuntimeError } from "../errors/IError.js";
 import { StackTraceFrame } from "../reducer/StackTrace.js";
 import { Import } from "./SqProject/SqModule.js";
@@ -52,18 +53,13 @@ export class SqRuntimeError extends SqAbstractError<"runtime"> {
     });
   }
 
-  private getTopFrame(): SqFrame | undefined {
-    const frame = this._value.getTopFrame();
-    return frame ? new SqFrame(frame) : undefined;
-  }
-
   getFrameArray(): SqFrame[] {
     const frames = this._value.getFrameArray();
     return frames.map((frame) => new SqFrame(frame));
   }
 
-  location() {
-    return this.getTopFrame()?.location();
+  location(): LocationRange | undefined {
+    return this._value.stackTrace.getTopLocation();
   }
 }
 
