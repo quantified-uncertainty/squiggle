@@ -12,7 +12,7 @@ import {
 
 import { LLMName, MODEL_CONFIGS } from "../llmRunner/modelConfigs";
 import { CreateRequestBody, WorkflowDescription } from "./utils/squiggleTypes";
-import { WorkflowSummaryItem } from "./WorkflowSummaryItem";
+import { WorkflowSummaryList } from "./WorkflowSummaryList";
 
 type Handle = {
   edit: (code: string) => void;
@@ -115,16 +115,11 @@ export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
         </Button>
         <div className="flex-grow overflow-y-auto">
           <h2 className="mb-2 text-sm font-bold">Actions</h2>
-          <div className="flex flex-col space-y-2">
-            {workflows.map((workflow) => (
-              <WorkflowSummaryItem
-                key={workflow.id}
-                workflow={workflow}
-                onSelect={() => selectWorkflow(workflow.id)}
-                isSelected={workflow.id === selectedWorkflow?.id}
-              />
-            ))}
-          </div>
+          <WorkflowSummaryList
+            workflows={workflows}
+            selectedWorkflow={selectedWorkflow}
+            selectWorkflow={selectWorkflow}
+          />
         </div>
       </div>
     </FormProvider>
