@@ -62,17 +62,10 @@ export const workflowResultSchema = z.object({
   totalPrice: z.number(),
   runTimeMs: z.number(),
   llmRunCount: z.number(),
-});
-
-export type WorkflowResult = z.infer<typeof workflowResultSchema>;
-
-const squiggleWorkflowResultSchema = workflowResultSchema.extend({
   logSummary: z.string(), // markdown
 });
 
-export type SquiggleWorkflowResult = z.infer<
-  typeof squiggleWorkflowResultSchema
->;
+export type WorkflowResult = z.infer<typeof workflowResultSchema>;
 
 // Messages that incrementally update the SerializedWorkflow
 
@@ -91,7 +84,7 @@ const stepUpdatedSchema = stepSchema.partial().required({
 export const workflowMessageSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("finalResult"),
-    content: squiggleWorkflowResultSchema,
+    content: workflowResultSchema,
   }),
   z.object({
     kind: z.literal("stepAdded"),
@@ -115,6 +108,6 @@ export type SerializedWorkflow = {
   currentStep?: string;
 } & (
   | { status: "loading"; result?: undefined }
-  | { status: "finished"; result: SquiggleWorkflowResult }
+  | { status: "finished"; result: WorkflowResult }
   | { status: "error"; result: string }
 );

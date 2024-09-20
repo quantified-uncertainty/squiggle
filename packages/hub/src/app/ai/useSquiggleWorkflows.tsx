@@ -3,8 +3,8 @@ import { Reducer, useCallback, useReducer } from "react";
 import {
   SerializedStep,
   SerializedWorkflow,
-  SquiggleWorkflowResult,
   workflowMessageSchema,
+  WorkflowResult,
 } from "@quri/squiggle-ai";
 
 import { CreateRequestBody, requestToInput } from "./utils";
@@ -29,7 +29,7 @@ type Action =
       type: "finish";
       payload: {
         id: string;
-        result: SquiggleWorkflowResult;
+        result: WorkflowResult;
       };
     }
   | {

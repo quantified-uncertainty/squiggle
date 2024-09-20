@@ -3,14 +3,14 @@
 import { clsx } from "clsx";
 import { useRef, useState } from "react";
 
-import { SquiggleWorkflowResult } from "@quri/squiggle-ai";
+import { WorkflowResult } from "@quri/squiggle-ai";
 
 import { Sidebar } from "./Sidebar";
 import { useSquiggleWorkflows } from "./useSquiggleWorkflows";
 import { WorkflowViewer } from "./WorkflowViewer";
 
 export type SquiggleResponse = {
-  result?: SquiggleWorkflowResult;
+  result?: WorkflowResult;
   currentStep?: string;
 };
 

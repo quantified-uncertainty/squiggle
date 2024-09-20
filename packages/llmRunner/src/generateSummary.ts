@@ -7,13 +7,8 @@ import { calculatePriceMultipleCalls } from "./LLMClient.js";
 import { getLogEntryFullName, TimestampedLogEntry } from "./Logger.js";
 import { Workflow } from "./Workflow.js";
 
-export function generateSummary(prompt: string, workflow: Workflow): string {
+export function generateSummary(workflow: Workflow): string {
   let summary = "";
-  const steps = workflow.getSteps();
-
-  // Prompt
-  summary += "# 🔮 PROMPT\n";
-  summary += `${prompt}\n\n`;
 
   // Overview
   summary += "# 📊 SUMMARY OVERVIEW\n";

@@ -1,17 +1,15 @@
 import { ReadableStream } from "stream/web";
 
 import { PromptArtifact, SourceArtifact } from "../Artifact.js";
-import { generateSummary } from "../generateSummary.js";
 import { adjustToFeedbackStep } from "../steps/adjustToFeedbackStep.js";
 import { fixCodeUntilItRunsStep } from "../steps/fixCodeUntilItRunsStep.js";
 import { generateCodeStep } from "../steps/generateCodeStep.js";
 import { runAndFormatCodeStep } from "../steps/runAndFormatCodeStep.js";
 import { serializeArtifact } from "../streaming.js";
-import { SquiggleWorkflowMessage, SquiggleWorkflowResult } from "../types.js";
+import { SquiggleWorkflowMessage, WorkflowResult } from "../types.js";
 import {
   LlmConfig,
   Workflow,
-  WorkflowEvent,
   WorkflowEventListener,
   WorkflowEventType,
 } from "../Workflow.js";
@@ -30,16 +28,6 @@ type RunWorkflowParams = {
     [K in WorkflowEventType]?: WorkflowEventListener<K>;
   }>;
 };
-
-function allStepsFinishedEventToFinalResult(
-  event: WorkflowEvent<"allStepsFinished">,
-  prompt: string
-): SquiggleWorkflowResult {
-  return {
-    ...event.workflow.getFinalResult(),
-    logSummary: generateSummary(prompt, event.workflow),
-  };
-}
 
 // Run Squiggle workflow and stream the results through the handlers
 export async function runSquiggleWorkflow(
@@ -107,18 +95,15 @@ export async function runSquiggleWorkflow(
 // Run Squiggle workflow without streaming, only capture the final result
 export async function runSquiggleWorkflowToResult(
   params: Omit<RunWorkflowParams, "handlers">
-): Promise<SquiggleWorkflowResult> {
-  let finalResult: SquiggleWorkflowResult | undefined;
+): Promise<WorkflowResult> {
+  let finalResult: WorkflowResult | undefined;
   await runSquiggleWorkflow({
     ...params,
     handlers: {
       allStepsFinished: (event) => {
         // saveSummaryToFile(generateSummary(prompt, workflow));
 
-        finalResult = allStepsFinishedEventToFinalResult(
-          event,
-          params.input.prompt ?? ""
-        );
+        finalResult = event.workflow.getFinalResult();
       },
     },
   });
@@ -178,10 +163,7 @@ export function runSquiggleWorkflowToStream(
 
             send({
               kind: "finalResult",
-              content: allStepsFinishedEventToFinalResult(
-                event,
-                params.input.prompt ?? ""
-              ),
+              content: event.workflow.getFinalResult(),
             });
           },
         },

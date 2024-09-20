@@ -4,8 +4,8 @@ export {
   type SerializedMessage,
   type SerializedStep,
   type SerializedWorkflow,
-  type SquiggleWorkflowResult,
   workflowMessageSchema,
+  type WorkflowResult,
 } from "./types.js";
 
 export { llmLinker } from "./Code.js";

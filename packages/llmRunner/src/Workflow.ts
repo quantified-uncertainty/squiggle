@@ -1,5 +1,6 @@
 import chalk from "chalk";
 
+import { generateSummary } from "./generateSummary.js";
 import {
   calculatePriceMultipleCalls,
   LLMClient,
@@ -198,6 +199,7 @@ export class Workflow {
       totalPrice,
       runTimeMs,
       llmRunCount,
+      logSummary: generateSummary(this),
     };
   }
 
