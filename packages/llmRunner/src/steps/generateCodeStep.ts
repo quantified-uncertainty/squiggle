@@ -1,6 +1,6 @@
 import { LLMStepTemplate } from "../LLMStep.js";
-import { generationCompletionContentToCode } from "../processSquiggleCode.js";
 import { PromptPair } from "../prompts.js";
+import { generationCompletionContentToCode } from "../squiggle/processSquiggleCode.js";
 
 export const generateNewSquiggleCodePrompt = (prompt: string): PromptPair => {
   if (!prompt || prompt === "") {

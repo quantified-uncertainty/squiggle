@@ -1,6 +1,6 @@
 import { result } from "@quri/squiggle-lang";
 
-import { Code, codeStringToCode } from "./CodeState.js";
+import { Code, codeStringToCode } from "../Code.js";
 import { processSearchReplaceResponse } from "./searchReplace.js";
 
 export function diffToNewCode(

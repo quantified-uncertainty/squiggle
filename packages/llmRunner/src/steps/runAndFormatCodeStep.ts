@@ -1,4 +1,4 @@
-import { codeStringToCode } from "../CodeState.js";
+import { codeStringToCode } from "../Code.js";
 import { LLMStepTemplate } from "../LLMStep.js";
 
 export const runAndFormatCodeStep = new LLMStepTemplate(

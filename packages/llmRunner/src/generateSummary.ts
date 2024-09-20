@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import { Artifact, ArtifactKind } from "./Artifact.js";
-import { Code } from "./CodeState.js";
+import { Code } from "./Code.js";
 import { calculatePriceMultipleCalls } from "./LLMClient.js";
 import { getLogEntryFullName, TimestampedLogEntry } from "./Logger.js";
 import { Workflow } from "./Workflow.js";

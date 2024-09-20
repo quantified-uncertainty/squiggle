@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { libraryContents } from "./squiggleLibraryHelpers.js";
+import { libraryContents } from "./squiggle/squiggleLibraryContents.js";
 
 const SQUIGGLE_DOCS_PATH = path.join(
   path.dirname(fileURLToPath(import.meta.url)),

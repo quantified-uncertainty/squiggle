@@ -10,8 +10,8 @@ import {
   SqProject,
 } from "@quri/squiggle-lang";
 
-import { formatSquiggleCode } from "./formatSquiggleCode.js";
-import { libraryContents } from "./squiggleLibraryHelpers.js";
+import { formatSquiggleCode } from "./squiggle/formatSquiggleCode.js";
+import { libraryContents } from "./squiggle/squiggleLibraryContents.js";
 
 export const llmLinker = makeSelfContainedLinker(
   Object.fromEntries(libraryContents)

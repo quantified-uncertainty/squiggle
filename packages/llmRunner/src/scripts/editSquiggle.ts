@@ -1,4 +1,4 @@
-import { runSquiggleWorkflowToResult } from "../squiggleWorkflow.js";
+import { runSquiggleWorkflowToResult } from "../workflows/squiggleWorkflow.js";
 
 async function main() {
   const initialCode = `

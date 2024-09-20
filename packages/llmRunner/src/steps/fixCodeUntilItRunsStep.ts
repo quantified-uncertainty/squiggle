@@ -1,8 +1,8 @@
-import { Code, codeErrorString } from "../CodeState.js";
-import { getSquiggleAdvice } from "../getSquiggleAdvice.js";
+import { Code, codeErrorString } from "../Code.js";
 import { LLMStepTemplate } from "../LLMStep.js";
-import { diffCompletionContentToCode } from "../processSquiggleCode.js";
 import { changeFormatPrompt, PromptPair } from "../prompts.js";
+import { getSquiggleAdvice } from "../squiggle/getSquiggleAdvice.js";
+import { diffCompletionContentToCode } from "../squiggle/processSquiggleCode.js";
 
 function editExistingSquiggleCodePrompt(code: Code): PromptPair {
   const error = codeErrorString(code);

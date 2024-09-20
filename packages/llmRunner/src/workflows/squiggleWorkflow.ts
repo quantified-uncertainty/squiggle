@@ -1,20 +1,20 @@
 import { ReadableStream } from "stream/web";
 
-import { PromptArtifact, SourceArtifact } from "./Artifact.js";
-import { generateSummary } from "./generateSummary.js";
-import { adjustToFeedbackStep } from "./steps/adjustToFeedbackStep.js";
-import { fixCodeUntilItRunsStep } from "./steps/fixCodeUntilItRunsStep.js";
-import { generateCodeStep } from "./steps/generateCodeStep.js";
-import { runAndFormatCodeStep } from "./steps/runAndFormatCodeStep.js";
-import { serializeArtifact } from "./streaming.js";
-import { SquiggleWorkflowMessage, SquiggleWorkflowResult } from "./types.js";
+import { PromptArtifact, SourceArtifact } from "../Artifact.js";
+import { generateSummary } from "../generateSummary.js";
+import { adjustToFeedbackStep } from "../steps/adjustToFeedbackStep.js";
+import { fixCodeUntilItRunsStep } from "../steps/fixCodeUntilItRunsStep.js";
+import { generateCodeStep } from "../steps/generateCodeStep.js";
+import { runAndFormatCodeStep } from "../steps/runAndFormatCodeStep.js";
+import { serializeArtifact } from "../streaming.js";
+import { SquiggleWorkflowMessage, SquiggleWorkflowResult } from "../types.js";
 import {
   LlmConfig,
   Workflow,
   WorkflowEvent,
   WorkflowEventListener,
   WorkflowEventType,
-} from "./Workflow.js";
+} from "../Workflow.js";
 
 export type SquiggleWorkflowInput =
   | { type: "Create"; prompt: string }

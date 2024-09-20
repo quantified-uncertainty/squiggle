@@ -1,9 +1,4 @@
-// Utility types
-type ErrorPattern = {
-  pattern: RegExp;
-  advice: string;
-};
-
+// Utility type
 type InvalidElement = {
   check: (line: string) => boolean;
   getMessage: (lineNumber: number) => string;

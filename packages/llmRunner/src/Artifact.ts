@@ -1,4 +1,4 @@
-import { Code } from "./CodeState.js";
+import { Code } from "./Code.js";
 import { LLMStepInstance } from "./LLMStep.js";
 
 export class BaseArtifact<T extends string, V> {

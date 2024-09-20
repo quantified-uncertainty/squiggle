@@ -1,7 +1,7 @@
-import { Code, codeStringToCode } from "../CodeState.js";
+import { Code, codeStringToCode } from "../Code.js";
 import { LLMStepTemplate } from "../LLMStep.js";
-import { diffToNewCode } from "../processSquiggleCode.js";
 import { changeFormatPrompt, PromptPair } from "../prompts.js";
+import { diffToNewCode } from "../squiggle/processSquiggleCode.js";
 
 function adjustToFeedbackPrompt(
   prompt: string,

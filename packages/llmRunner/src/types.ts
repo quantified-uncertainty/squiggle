@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { type SquiggleWorkflowInput } from "./squiggleWorkflow.js";
+import { type SquiggleWorkflowInput } from "./workflows/squiggleWorkflow.js";
 
 // Protocol for streaming workflow changes between server and client.
 

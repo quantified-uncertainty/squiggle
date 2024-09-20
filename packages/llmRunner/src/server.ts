@@ -3,4 +3,4 @@ export {
   runSquiggleWorkflow,
   runSquiggleWorkflowToStream,
   SquiggleWorkflowInput,
-} from "./squiggleWorkflow.js";
+} from "./workflows/squiggleWorkflow.js";
