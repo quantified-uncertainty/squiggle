@@ -19,7 +19,7 @@ export const WorkflowSummaryItem: FC<{
         return <RefreshIcon className="animate-spin" />;
       case "finished":
         return workflow.result.isValid ? (
-          <CheckCircleIcon className="text-green-500" />
+          <CheckCircleIcon className="text-emerald-500" />
         ) : (
           <ErrorIcon className="text-red-500" />
         );
