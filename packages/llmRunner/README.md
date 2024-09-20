@@ -4,7 +4,7 @@ This is a simple TS application that allows you to write and debug Squiggle code
 
 Note that it can take 20s-2min to get a response from the LLM.
 
-The key file is 'src/llmRunner/main.ts'. This file contains the key default parameters for the LLMs, and the run settings. It's also the key entry point for LLM functionality.
+The key file is 'src/squiggleWorkflow.ts'. This file contains the key default parameters for the LLMs, and the run settings. It's also the key entry point for LLM functionality.
 
 After runs are complete, the results are saved to the 'logs' folder. These are saved as Markdown files. It's recommended to use the VSCode Markdown Preview plugin or similar to view the results. In these logs, note the "expand" arrows on the left of some items - these can be clicked to expand the item and see more details.
 
@@ -55,32 +55,4 @@ Make a `.env.local` file with the following environment variables:
 ```
 ANTHROPIC_API_KEY= // needed for using Claude models
 OPENROUTER_API_KEY= // needed for using OpenRouter models
-```
-
-## Running the Next.js App
-
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Testing the Next.js App
-
-```bash
-pnpm test
 ```

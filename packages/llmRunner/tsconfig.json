@@ -1,15 +1,10 @@
 {
-  "extends": "@quri/configs/tsconfig.nextjs.json",
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"],
+  "extends": "@quri/configs/tsconfig.base.json",
   "compilerOptions": {
-    "allowJs": true,
-    "skipLibCheck": true,
-    // "strict": false,
-    "plugins": [
-      {
-        "name": "next",
-      },
-    ],
+    "rootDir": "src",
+    "outDir": "dist",
+    "lib": ["esnext"],
   },
+  "include": ["src/**/*"],
+  // "references": [{ "path": "../squiggle-lang" }],
 }

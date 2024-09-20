@@ -1,4 +1,4 @@
-import { processSearchReplaceResponse } from "../src/llmRunner/searchReplace";
+import { processSearchReplaceResponse } from "../src/searchReplace";
 
 describe("searchReplace", () => {
   describe("processSearchReplaceResponse", () => {
