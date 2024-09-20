@@ -1,15 +1,15 @@
-import { runSquiggleWorkflowToResult } from "../workflows/squiggleWorkflow.js";
+import { SquiggleWorkflow } from "../workflows/SquiggleWorkflow.js";
 
 async function main() {
   const prompt =
     "Generate a function that takes a list of numbers and returns the sum of the numbers";
 
   const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
-    await runSquiggleWorkflowToResult({
+    await new SquiggleWorkflow({
       input: { type: "Create", prompt },
       openaiApiKey: process.env["OPENROUTER_API_KEY"],
       anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
-    });
+    }).runToResult();
 
   const response = {
     code: typeof code === "string" ? code : "",

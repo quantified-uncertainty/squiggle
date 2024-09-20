@@ -4,7 +4,7 @@ This is a simple TS application that allows you to write and debug Squiggle code
 
 Note that it can take 20s-2min to get a response from the LLM.
 
-The key file is 'src/squiggleWorkflow.ts'. This file contains the key default parameters for the LLMs, and the run settings. It's also the key entry point for LLM functionality.
+The key file is 'src/workflows/SquiggleWorkflow.ts'. This file contains the key default parameters for the LLMs, and the run settings. It's also the key entry point for LLM functionality.
 
 After runs are complete, the results are saved to the 'logs' folder. These are saved as Markdown files. It's recommended to use the VSCode Markdown Preview plugin or similar to view the results. In these logs, note the "expand" arrows on the left of some items - these can be clicked to expand the item and see more details.
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { type SquiggleWorkflowInput } from "./workflows/squiggleWorkflow.js";
+import { type SquiggleWorkflowInput } from "./workflows/SquiggleWorkflow.js";
 
 // Protocol for streaming workflow changes between server and client.
 
@@ -96,14 +96,14 @@ export const workflowMessageSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 
-export type SquiggleWorkflowMessage = z.infer<typeof workflowMessageSchema>;
+export type WorkflowMessage = z.infer<typeof workflowMessageSchema>;
 
 // Client-side representation of a workflow
 
 export type SerializedWorkflow = {
   id: string;
   timestamp: Date;
-  input: SquiggleWorkflowInput;
+  input: SquiggleWorkflowInput; // FIXME - SquiggleWorkflow-specific
   steps: SerializedStep[];
   currentStep?: string;
 } & (

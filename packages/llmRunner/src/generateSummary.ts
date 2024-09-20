@@ -5,7 +5,7 @@ import { Artifact, ArtifactKind } from "./Artifact.js";
 import { Code } from "./Code.js";
 import { calculatePriceMultipleCalls } from "./LLMClient.js";
 import { getLogEntryFullName, TimestampedLogEntry } from "./Logger.js";
-import { Workflow } from "./Workflow.js";
+import { Workflow } from "./workflows/Workflow.js";
 
 export function generateSummary(workflow: Workflow): string {
   let summary = "";

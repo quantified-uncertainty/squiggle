@@ -1,21 +1,21 @@
 import chalk from "chalk";
 
-import { generateSummary } from "./generateSummary.js";
+import { generateSummary } from "../generateSummary.js";
 import {
   calculatePriceMultipleCalls,
   LLMClient,
   LlmMetrics,
   Message,
-} from "./LLMClient.js";
+} from "../LLMClient.js";
 import {
   Inputs,
   LLMStepInstance,
   LLMStepTemplate,
   StepShape,
-} from "./LLMStep.js";
-import { TimestampedLogEntry } from "./Logger.js";
-import { LLMName } from "./modelConfigs.js";
-import { WorkflowResult } from "./types.js";
+} from "../LLMStep.js";
+import { TimestampedLogEntry } from "../Logger.js";
+import { LLMName } from "../modelConfigs.js";
+import { WorkflowResult } from "../types.js";
 
 export interface LlmConfig {
   llmName: LLMName;
@@ -71,6 +71,15 @@ export type WorkflowEventListener<T extends WorkflowEventType> = (
   event: WorkflowEvent<T>
 ) => void;
 
+/**
+ * This class is responsible for managing the steps in a workflow.
+ *
+ * It does not make any assumptions about the steps themselves, it just
+ * provides a way to add them and interact with them.
+ *
+ * See `ControlledWorkflow` for a common base class that controls the workflow
+ * by injecting new steps based on events.
+ */
 export class Workflow {
   private steps: LLMStepInstance[] = [];
   private priceLimit: number;

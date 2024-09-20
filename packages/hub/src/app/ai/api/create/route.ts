@@ -1,5 +1,5 @@
 import { LlmConfig } from "@quri/squiggle-ai";
-import { runSquiggleWorkflowToStream } from "@quri/squiggle-ai/server";
+import { SquiggleWorkflow } from "@quri/squiggle-ai/server";
 
 import { createRequestBodySchema, requestToInput } from "../../utils";
 
@@ -23,13 +23,13 @@ export async function POST(req: Request) {
       messagesInHistoryToKeep: 4,
     };
 
-    const stream = runSquiggleWorkflowToStream({
+    const stream = new SquiggleWorkflow({
       llmConfig,
       input: requestToInput(request),
       abortSignal: req.signal,
       openaiApiKey: process.env["OPENROUTER_API_KEY"],
       anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
-    });
+    }).runAsStream();
 
     return new Response(stream as ReadableStream, {
       headers: {

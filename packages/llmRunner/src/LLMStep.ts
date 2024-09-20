@@ -12,7 +12,7 @@ import {
 import { LogEntry, Logger, TimestampedLogEntry } from "./Logger.js";
 import { LLMName } from "./modelConfigs.js";
 import { PromptPair } from "./prompts.js";
-import { Workflow } from "./Workflow.js";
+import { Workflow } from "./workflows/Workflow.js";
 
 export type StepState =
   | {

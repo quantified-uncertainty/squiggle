@@ -1,4 +1,4 @@
-import { runSquiggleWorkflowToResult } from "../workflows/squiggleWorkflow.js";
+import { SquiggleWorkflow } from "../workflows/SquiggleWorkflow.js";
 
 async function main() {
   const initialCode = `
@@ -7,11 +7,11 @@ async function main() {
   `;
 
   const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
-    await runSquiggleWorkflowToResult({
+    await new SquiggleWorkflow({
       input: { type: "Edit", source: initialCode },
       openaiApiKey: process.env["OPENROUTER_API_KEY"],
       anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
-    });
+    }).runToResult();
 
   const response = {
     code: typeof code === "string" ? code : "",
