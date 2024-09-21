@@ -1,0 +1,59 @@
+{
+  "name": "@quri/squiggle-ai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
+  "scripts": {
+    "build": "pnpm run build:ts",
+    "build:ts": "tsc -b",
+    "dev": "tsc -b -w",
+    "lint": "prettier --check .",
+    "format": "prettier --write .",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "getCode": "tsx src/scripts/fetchSquiggleLibraries.ts",
+    "createSquiggle": "tsx src/scripts/createSquiggle.ts",
+    "editSquiggle": "tsx src/scripts/editSquiggle.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.0",
+    "@quri/configs": "workspace:*",
+    "@quri/prettier-plugin-squiggle": "workspace:*",
+    "@quri/squiggle-lang": "workspace:*",
+    "@quri/versioned-squiggle-components": "workspace:*",
+    "axios": "^1.7.2",
+    "chalk": "^5.3.0",
+    "clsx": "^2.1.1",
+    "next": "14.2.4",
+    "openai": "^4.56.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.11.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.12.8",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.4",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "default": "./dist/server.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "files"
+  ]
+}
