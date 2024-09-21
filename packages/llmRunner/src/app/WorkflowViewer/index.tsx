@@ -9,7 +9,7 @@ import SquigglePlayground from "../SquigglePlayground";
 import { StepDescription, WorkflowDescription } from "../utils/squiggleTypes";
 import { useAvailableHeight } from "../utils/useAvailableHeight";
 import { Header } from "./Header";
-import { WorkflowGraph } from "./WorkflowGraph";
+import { WorkflowActions } from "./WorkflowActions";
 
 export type Props<
   T extends WorkflowDescription["status"] = WorkflowDescription["status"],
@@ -56,7 +56,7 @@ const FinishedWorkflowViewer: FC<Props<"finished">> = ({
             <div className="flex gap-2">
               <StyledTab.List>
                 <StyledTab name="Playground" />
-                <StyledTab name="Graph" />
+                <StyledTab name="Actions" />
                 <StyledTab name="Logs" />
               </StyledTab.List>
               <Button
@@ -77,7 +77,7 @@ const FinishedWorkflowViewer: FC<Props<"finished">> = ({
               />
             </StyledTab.Panel>
             <StyledTab.Panel>
-              <WorkflowGraph workflow={workflow} height={usedHeight} />
+              <WorkflowActions workflow={workflow} height={usedHeight} />
             </StyledTab.Panel>
             <StyledTab.Panel>
               <LogsView logSummary={workflow.result.logSummary || ""} />
@@ -109,7 +109,7 @@ const LoadingWorkflowViewer: FC<Props<"loading">> = ({
         renderRight={() => null}
       />
       <div ref={ref}>
-        <WorkflowGraph
+        <WorkflowActions
           workflow={workflow}
           height={usedHeight}
           onNodeClick={onNodeClick}

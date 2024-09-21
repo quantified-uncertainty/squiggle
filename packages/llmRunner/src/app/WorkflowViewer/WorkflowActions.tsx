@@ -4,7 +4,7 @@ import { StepDescription, WorkflowDescription } from "../utils/squiggleTypes";
 import { StepNode } from "./StepNode";
 import { SelectedNodeSideView } from "./StepNodeSideView";
 
-export const WorkflowGraph: FC<{
+export const WorkflowActions: FC<{
   workflow: WorkflowDescription;
   height: number;
   onNodeClick?: (node: StepDescription) => void;
