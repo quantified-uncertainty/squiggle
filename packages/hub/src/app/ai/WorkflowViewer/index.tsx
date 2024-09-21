@@ -1,6 +1,7 @@
 "use client";
 import { FC } from "react";
 
+import { SerializedStep, SerializedWorkflow } from "@quri/squiggle-ai";
 import { Button, StyledTab } from "@quri/ui";
 
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
@@ -12,9 +13,9 @@ import { Header } from "./Header";
 import { WorkflowActions } from "./WorkflowActions";
 
 export type Props<
-  T extends WorkflowDescription["status"] = WorkflowDescription["status"],
+  T extends SerializedWorkflow["status"] = SerializedWorkflow["status"],
 > = {
-  workflow: Extract<WorkflowDescription, { status: T }>;
+  workflow: Extract<SerializedWorkflow, { status: T }>;
   onFix: (code: string) => void;
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
@@ -113,7 +114,7 @@ const LoadingWorkflowViewer: FC<Props<"loading">> = ({
 };
 
 interface NodeInfoProps {
-  node: StepDescription;
+  node: SerializedStep;
 }
 
 export const NodeInfo: React.FC<NodeInfoProps> = ({ node }) => {

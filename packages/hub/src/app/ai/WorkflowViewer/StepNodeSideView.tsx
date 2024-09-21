@@ -1,15 +1,15 @@
 import { FC, useMemo } from "react";
 
+import { SerializedArtifact, SerializedStep } from "@quri/squiggle-ai";
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@quri/ui";
 
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 
 import { SquigglePlaygroundForWorkflow } from "../SquigglePlaygroundForWorkflow";
-import { ArtifactDescription, StepDescription } from "../utils/squiggleTypes";
 import { ArtifactDisplay, ArtifactMessages } from "./StepNodeHelpers";
 
 export const SelectedNodeSideView: FC<{
-  selectedNode: StepDescription;
+  selectedNode: SerializedStep;
   onClose: () => void;
   onSelectPreviousNode: () => void;
   onSelectNextNode: () => void;
@@ -18,7 +18,7 @@ export const SelectedNodeSideView: FC<{
 
   const selectedNodeCodeOutput = useMemo(() => {
     return Object.values(selectedNode.outputs).find(
-      (output): output is ArtifactDescription & { kind: "code" } =>
+      (output): output is SerializedArtifact & { kind: "code" } =>
         output.kind === "code"
     );
   }, [selectedNode]);

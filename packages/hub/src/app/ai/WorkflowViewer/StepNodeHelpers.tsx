@@ -1,15 +1,11 @@
 import clsx from "clsx";
 import { FC } from "react";
 
+import { SerializedArtifact, SerializedMessage } from "@quri/squiggle-ai";
 import { CodeBracketIcon, CommentIcon, Tooltip } from "@quri/ui";
 
-import {
-  ArtifactDescription,
-  MessageDescription,
-} from "../utils/squiggleTypes";
-
 export const ArtifactIcon: FC<{
-  artifact: ArtifactDescription;
+  artifact: SerializedArtifact;
   size: number;
 }> = ({ artifact, size }) => {
   const getBgColor = () => {
@@ -45,7 +41,7 @@ export const ArtifactIcon: FC<{
 
 export const ArtifactDisplay: FC<{
   name: string;
-  artifact: ArtifactDescription;
+  artifact: SerializedArtifact;
   size: number;
   showArtifactName: boolean;
 }> = ({ name, artifact, size, showArtifactName }) => {
@@ -77,7 +73,7 @@ export const ArtifactDisplay: FC<{
   );
 };
 
-export const ArtifactMessages: FC<{ messages: MessageDescription[] }> = ({
+export const ArtifactMessages: FC<{ messages: SerializedMessage[] }> = ({
   messages,
 }) => (
   <div className="space-y-4 text-sm">
