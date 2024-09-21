@@ -23,7 +23,7 @@ export const SelectedNodeSideView: FC<{
     );
   }, [selectedNode]);
 
-  const maxPrimaryHeight = height ? height * 0.8 : 400;
+  const maxPrimaryHeight = height ? height - 180 : 400;
 
   return (
     <div
@@ -102,7 +102,7 @@ export const SelectedNodeSideView: FC<{
               </h3>
               <div className="flex-grow overflow-hidden border border-slate-200">
                 <SquigglePlayground
-                  height={maxPrimaryHeight - 30}
+                  height={maxPrimaryHeight}
                   defaultCode={selectedNodeCodeOutput.value}
                   linker={linkerWithDefaultSquiggleLibs}
                 />
@@ -116,7 +116,7 @@ export const SelectedNodeSideView: FC<{
               </h3>
               <div
                 className="flex-grow overflow-y-auto"
-                style={{ maxHeight: maxPrimaryHeight - 30 }}
+                style={{ maxHeight: maxPrimaryHeight }}
               >
                 <ArtifactMessages messages={selectedNode.messages} />
               </div>

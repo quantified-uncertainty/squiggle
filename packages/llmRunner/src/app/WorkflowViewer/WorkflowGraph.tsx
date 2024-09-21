@@ -34,7 +34,6 @@ function makeEdge(
     target,
     minlen: opts.minlen,
     type: "smoothstep",
-    // Remove inline styles as they're now in the global CSS
   };
 }
 

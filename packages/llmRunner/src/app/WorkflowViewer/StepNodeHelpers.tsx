@@ -1,19 +1,12 @@
 import clsx from "clsx";
 import { FC } from "react";
-import { type Node } from "reactflow";
 
 import { CodeBracketIcon, CommentIcon, Tooltip } from "@quri/ui";
 
 import {
   ArtifactDescription,
   MessageDescription,
-  StepDescription,
 } from "../utils/squiggleTypes";
-
-type DagreNode = Omit<Node<StepDescription>, "position"> & {
-  width: number;
-  height: number;
-};
 
 export const ArtifactIcon: FC<{
   artifact: ArtifactDescription;
@@ -106,9 +99,6 @@ export const ArtifactMessages: FC<{ messages: MessageDescription[] }> = ({
             )}
           >
             {message.role === "user" ? "User" : "Assistant"}
-          </span>
-          <span className="text-xs text-gray-500">
-            {/* Add timestamp here if available */}
           </span>
         </header>
         <div className="whitespace-pre-wrap break-words">{message.content}</div>
