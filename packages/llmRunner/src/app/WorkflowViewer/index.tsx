@@ -6,7 +6,7 @@ import { Button, StyledTab } from "@quri/ui";
 import { Badge } from "../Badge";
 import { LogsView } from "../LogsView";
 import SquigglePlayground from "../SquigglePlayground";
-import { WorkflowDescription } from "../utils/squiggleTypes";
+import { StepDescription, WorkflowDescription } from "../utils/squiggleTypes";
 import { useAvailableHeight } from "../utils/useAvailableHeight";
 import { Header } from "./Header";
 import { WorkflowGraph } from "./WorkflowGraph";
@@ -18,6 +18,7 @@ export type Props<
   onFix: (code: string) => void;
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
+  onNodeClick: (node: StepDescription) => void;
 };
 
 const FinishedWorkflowViewer: FC<Props<"finished">> = ({
@@ -25,6 +26,7 @@ const FinishedWorkflowViewer: FC<Props<"finished">> = ({
   onFix,
   expanded,
   setExpanded,
+  onNodeClick,
 }) => {
   const { ref, height } = useAvailableHeight();
 
@@ -91,6 +93,7 @@ const LoadingWorkflowViewer: FC<Props<"loading">> = ({
   workflow,
   expanded,
   setExpanded,
+  onNodeClick,
 }) => {
   const { ref, height } = useAvailableHeight();
 
@@ -106,21 +109,41 @@ const LoadingWorkflowViewer: FC<Props<"loading">> = ({
         renderRight={() => null}
       />
       <div ref={ref}>
-        <WorkflowGraph workflow={workflow} height={usedHeight} />
+        <WorkflowGraph
+          workflow={workflow}
+          height={usedHeight}
+          onNodeClick={onNodeClick}
+        />
       </div>
     </div>
   );
 };
 
+interface NodeInfoProps {
+  node: StepDescription;
+}
+
+export const NodeInfo: React.FC<NodeInfoProps> = ({ node }) => {
+  return (
+    <div>
+      <h3 className="mb-2 font-bold">{node.name}</h3>
+    </div>
+  );
+};
+
 export const WorkflowViewer: FC<Props> = ({ workflow, ...props }) => {
-  switch (workflow.status) {
-    case "finished":
-      return <FinishedWorkflowViewer {...props} workflow={workflow} />;
-    case "loading":
-      return <LoadingWorkflowViewer {...props} workflow={workflow} />;
-    case "error":
-      return <div className="text-red-700">{workflow.result}</div>;
-    default:
-      throw workflow satisfies never;
-  }
+  const renderWorkflowContent = () => {
+    switch (workflow.status) {
+      case "finished":
+        return <FinishedWorkflowViewer {...props} workflow={workflow} />;
+      case "loading":
+        return <LoadingWorkflowViewer {...props} workflow={workflow} />;
+      case "error":
+        return <div className="text-red-700">{workflow.result}</div>;
+      default:
+        throw workflow satisfies never;
+    }
+  };
+
+  return renderWorkflowContent();
 };

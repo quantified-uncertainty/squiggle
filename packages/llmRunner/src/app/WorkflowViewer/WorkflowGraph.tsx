@@ -1,9 +1,10 @@
 import Dagre from "@dagrejs/dagre";
-import { FC, useMemo } from "react";
+import { FC, useMemo, useState } from "react";
 import ReactFlow, { type Edge, MarkerType, type Node } from "reactflow";
 
 import { StepDescription, WorkflowDescription } from "../utils/squiggleTypes";
 import { StepNode } from "./StepNode";
+import { SelectedNodeSideView } from "./StepNodeSideView";
 
 type DagreNode = Omit<Node<StepDescription>, "position"> & {
   width: number;
@@ -18,7 +19,7 @@ function makeNode(step: StepDescription): DagreNode {
     type: "step",
     data: step,
     width: 300,
-    height: 80,
+    height: 50,
   };
 }
 
@@ -42,7 +43,12 @@ function layoutGraph(
   dagreEdges: DagreEdge[]
 ): { nodes: Node[]; edges: Edge[] } {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: "TB", ranksep: 18, nodesep: 50, edgesep: 10 });
+  g.setGraph({
+    rankdir: "TD",
+    ranksep: 1,
+    nodesep: 1,
+    edgesep: 0,
+  });
   dagreNodes.forEach((node) => g.setNode(node.id, node));
   dagreEdges.forEach((edge) =>
     g.setEdge(edge.source, edge.target, { minlen: edge.minlen ?? 2 })
@@ -61,7 +67,12 @@ function layoutGraph(
 export const WorkflowGraph: FC<{
   workflow: WorkflowDescription;
   height: number;
-}> = ({ workflow, height }) => {
+  onNodeClick?: (node: StepDescription) => void;
+}> = ({ workflow, height, onNodeClick }) => {
+  const [selectedNodeIndex, setSelectedNodeIndex] = useState<number | null>(
+    null
+  );
+
   const { nodes, edges }: { nodes: Node[]; edges: Edge[] } = useMemo(() => {
     const nodes: DagreNode[] = [];
     const edges: DagreEdge[] = [];
@@ -75,6 +86,23 @@ export const WorkflowGraph: FC<{
     }
     return layoutGraph(nodes, edges);
   }, [workflow.steps]);
+
+  const selectPreviousNode = () => {
+    if (selectedNodeIndex !== null && selectedNodeIndex > 0) {
+      setSelectedNodeIndex(selectedNodeIndex - 1);
+      onNodeClick?.(workflow.steps[selectedNodeIndex - 1]);
+    }
+  };
+
+  const selectNextNode = () => {
+    if (
+      selectedNodeIndex !== null &&
+      selectedNodeIndex < workflow.steps.length - 1
+    ) {
+      setSelectedNodeIndex(selectedNodeIndex + 1);
+      onNodeClick?.(workflow.steps[selectedNodeIndex + 1]);
+    }
+  };
 
   return (
     <>
@@ -90,8 +118,10 @@ export const WorkflowGraph: FC<{
           stroke: #94a3b8; /* Tailwind slate-400 */
         }
       `}</style>
-      <div style={{ height }} className="overflow-hidden rounded-lg shadow-lg">
-        <div className="flex h-full w-full flex-col bg-slate-50">
+      <div style={{ height }} className="flex overflow-hidden bg-slate-50">
+        <div
+          className={`flex flex-col ${selectedNodeIndex !== null ? "w-1/3" : "w-full"}`}
+        >
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -100,17 +130,32 @@ export const WorkflowGraph: FC<{
             nodeTypes={{
               step: StepNode,
             }}
+            onNodeClick={(_, node) => {
+              const index = workflow.steps.findIndex(
+                (step) => step.id === node.id
+              );
+              setSelectedNodeIndex(index);
+              onNodeClick?.(node.data);
+            }}
             defaultEdgeOptions={{
               type: "smoothstep",
               markerEnd: {
                 type: MarkerType.ArrowClosed,
                 color: "#cbd5e1", // Tailwind slate-300
-                width: 10,
-                height: 10,
+                width: 8,
+                height: 8,
               },
             }}
           />
         </div>
+        {selectedNodeIndex !== null && (
+          <SelectedNodeSideView
+            selectedNode={workflow.steps[selectedNodeIndex]}
+            onClose={() => setSelectedNodeIndex(null)}
+            onSelectPreviousNode={selectPreviousNode}
+            onSelectNextNode={selectNextNode}
+          />
+        )}
       </div>
     </>
   );

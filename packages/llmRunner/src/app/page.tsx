@@ -29,7 +29,12 @@ export default function CreatePage() {
   return (
     <div className="flex h-screen">
       {/* Left column: Mode Toggle, Chat, Form, and list of Workflows */}
-      <div className={clsx("w-1/5 p-2", collapsedSidebar && "hidden")}>
+      <div
+        className={clsx(
+          "mr-2 w-1/5 border-r border-slate-200 p-2",
+          collapsedSidebar && "hidden"
+        )}
+      >
         <Sidebar
           submitWorkflow={submitWorkflow}
           selectWorkflow={selectWorkflow}
