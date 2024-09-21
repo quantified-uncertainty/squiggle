@@ -60,6 +60,8 @@ export abstract class ControlledWorkflow {
       start: async (controller) => {
         addStreamingListeners(this.workflow, controller);
 
+        this.workflow.prepareToStart();
+
         // Important! `configure` should be called after all event listeners are set up.
         // We want to capture `stepAdded` events.
         this.configure();

@@ -33,6 +33,10 @@ export const llmConfigDefault: LlmConfig = {
 
 export type WorkflowEventShape =
   | {
+      type: "workflowStarted";
+      payload?: undefined;
+    }
+  | {
       type: "stepAdded";
       payload: {
         step: LLMStepInstance;
@@ -84,9 +88,10 @@ export class Workflow {
   private steps: LLMStepInstance[] = [];
   private priceLimit: number;
   private durationLimitMs: number;
-  private startTime: number;
 
   public llmClient: LLMClient;
+  public id: string;
+  public startTime: number;
 
   constructor(
     public llmConfig: LlmConfig = llmConfigDefault,
@@ -95,13 +100,23 @@ export class Workflow {
   ) {
     this.priceLimit = llmConfig.priceLimit;
     this.durationLimitMs = llmConfig.durationLimitMinutes * 1000 * 60;
+
     this.startTime = Date.now();
+    this.id = crypto.randomUUID();
 
     this.llmClient = new LLMClient(
       llmConfig.llmName,
       openaiApiKey,
       anthropicApiKey
     );
+  }
+
+  // This is a hook that ControlledWorkflow can use to prepare the workflow.
+  // It's a bit of a hack; we need to dispatch this event after we configured the event handlers,
+  // but before we add any steps.
+  // So we can't do this neither in the constructor nor in `runUntilComplete`.
+  prepareToStart() {
+    this.dispatchEvent({ type: "workflowStarted" });
   }
 
   addStep<S extends StepShape>(
@@ -143,9 +158,8 @@ export class Workflow {
     while (!this.isProcessComplete()) {
       await this.runNextStep();
     }
-    this.dispatchEvent({
-      type: "allStepsFinished",
-    });
+
+    this.dispatchEvent({ type: "allStepsFinished" });
   }
 
   checkResourceLimits(): string | undefined {

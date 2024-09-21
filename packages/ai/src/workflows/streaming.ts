@@ -10,6 +10,7 @@ import {
   WorkflowMessage,
   workflowMessageSchema,
 } from "../types.js";
+import { type SquiggleWorkflowInput } from "./SquiggleWorkflow.js";
 import { Workflow } from "./Workflow.js";
 
 export function serializeArtifact(value: Artifact): SerializedArtifact {
@@ -57,6 +58,16 @@ export function addStreamingListeners(
   const send = (message: WorkflowMessage) => {
     controller.enqueue(JSON.stringify(message) + "\n");
   };
+
+  workflow.addEventListener("workflowStarted", (event) => {
+    send({
+      kind: "workflowStarted",
+      content: {
+        id: event.workflow.id,
+        timestamp: event.workflow.startTime,
+      },
+    });
+  });
 
   workflow.addEventListener("stepAdded", (event) => {
     send({
@@ -110,13 +121,26 @@ export function addStreamingListeners(
  * Note: we pass the reader object here instead of the stream itself, because
  * this function is used in the frontend; so we can't import "stream/web" here.
  */
-export async function decodeWorkflowFromReader(
-  reader: ReadableStreamDefaultReader<string>,
-  // This matches the functional version of `useState` state setter.
+export async function decodeWorkflowFromReader({
+  reader,
+  input,
+  addWorkflow,
+  setWorkflow,
+}: {
+  reader: ReadableStreamDefaultReader<string>;
+  // FIXME - this shouldn't be necessary, but we need to inject the input to
+  // SerializedWorkflow, and it's not stored on the original Workflow yet, so
+  // it's not present in the stream data.
+  // In the future, we should store input parameters in the Workflow object.
+  input: SquiggleWorkflowInput;
+  // This adds an initial version of the workflow.
+  addWorkflow: (workflow: SerializedWorkflow) => Promise<void>;
+  // This signature might look complicated, but it matches the functional
+  // version of `useState` state setter.
   setWorkflow: (
     cb: (workflow: SerializedWorkflow) => SerializedWorkflow
-  ) => void
-) {
+  ) => Promise<void>;
+}) {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const { done, value } = await reader.read();
@@ -124,11 +148,24 @@ export async function decodeWorkflowFromReader(
 
     // Parse the JSON string
     const eventJson = JSON.parse(value);
+
+    // Note that these are streaming events.
+    // They are easy to confuse with workflow events.
     const event = workflowMessageSchema.parse(eventJson);
 
     switch (event.kind) {
+      case "workflowStarted": {
+        await addWorkflow({
+          id: event.content.id,
+          timestamp: new Date(event.content.timestamp),
+          input,
+          steps: [],
+          status: "loading",
+        });
+        break;
+      }
       case "finalResult": {
-        setWorkflow((workflow) => ({
+        await setWorkflow((workflow) => ({
           ...workflow,
           status: "finished",
           result: event.content,
@@ -136,7 +173,7 @@ export async function decodeWorkflowFromReader(
         break;
       }
       case "stepAdded":
-        setWorkflow((workflow) => ({
+        await setWorkflow((workflow) => ({
           ...workflow,
           currentStep: event.content.name,
           steps: [
@@ -151,7 +188,7 @@ export async function decodeWorkflowFromReader(
         }));
         break;
       case "stepUpdated":
-        setWorkflow((workflow) => ({
+        await setWorkflow((workflow) => ({
           ...workflow,
           steps: workflow.steps.map((step) => {
             return step.id === event.content.id

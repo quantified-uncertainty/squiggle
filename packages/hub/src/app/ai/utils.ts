@@ -39,3 +39,31 @@ export function requestToInput(
     ? { type: "Edit", source: request.squiggleCode }
     : { type: "Create", prompt: request.prompt ?? "" };
 }
+
+// Convert a ReadableStream (`response.body` from `fetch()`) to a line-by-line reader.
+export function bodyToLineReader(stream: ReadableStream<string>) {
+  let buffer = "";
+  return stream
+    .pipeThrough(
+      new TransformStream<string, string>({
+        transform(chunk, controller) {
+          buffer += chunk;
+          const lines = buffer.split("\n");
+
+          // Process all complete lines
+          for (let i = 0; i < lines.length - 1; i++) {
+            const line = lines[i].trim();
+            if (line) controller.enqueue(line);
+          }
+
+          // Keep the last (potentially incomplete) line in the buffer
+          buffer = lines[lines.length - 1];
+        },
+        flush(controller) {
+          // Process any remaining data in the buffer
+          if (buffer.trim()) controller.enqueue(buffer.trim());
+        },
+      })
+    )
+    .getReader();
+}
