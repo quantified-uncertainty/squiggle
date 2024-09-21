@@ -1,8 +1,8 @@
-import { processSearchReplaceResponse } from "../src/searchReplace";
+import { processSearchReplaceResponse } from "../src/squiggle/searchReplace.js";
 
 describe("searchReplace", () => {
   describe("processSearchReplaceResponse", () => {
-    it("should successfully replace text", () => {
+    test("should successfully replace text", () => {
       const originalText = "Hello, world!";
       const promptResponse = `
 <<<<<<< SEARCH
@@ -18,7 +18,7 @@ Goodbye, world!
       expect(result.value).toBe("Goodbye, world!");
     });
 
-    it("should handle empty prompt response", () => {
+    test("should handle empty prompt response", () => {
       const originalText = "Hello, world!";
       const promptResponse = "";
 
@@ -28,7 +28,7 @@ Goodbye, world!
       expect(result.value).toBe("Empty response received");
     });
 
-    it("should handle no search/replace blocks", () => {
+    test("should handle no search/replace blocks", () => {
       const originalText = "Hello, world!";
       const promptResponse = `<<<<<<< SEARCH
       Text that doesn't exist
@@ -42,7 +42,7 @@ Goodbye, world!
       expect(result.value).toContain("Error: Search text not found");
     });
 
-    it("should handle search text not found", () => {
+    test("should handle search text not found", () => {
       const originalText = "Hello, world!";
       const promptResponse = `
 <<<<<<< SEARCH
@@ -58,7 +58,7 @@ Replacement text
       expect(result.value).toContain("Error: Search text not found");
     });
 
-    it("should handle multiple search/replace blocks", () => {
+    test("should handle multiple search/replace blocks", () => {
       const originalText = "Hello, world! How are you?";
       const promptResponse = `
       <<<<<<< SEARCH
@@ -80,7 +80,7 @@ Replacement text
       expect(result.value).toBe("Goodbye, universe! How's it going?");
     });
 
-    it("should handle multiple search/replace blocks with complex changes", () => {
+    test("should handle multiple search/replace blocks with complex changes", () => {
       const originalText = `
     @name("Total Population Projection")
     totalPopulationProjection = List.upTo(2023, 2043)
@@ -192,7 +192,7 @@ Replacement text
       expect(result.value).not.toContain('@name("📊 Test for Growth Rate")');
     });
 
-    it("should handle empty SEARCH block and apply replacement to the top", () => {
+    test("should handle empty SEARCH block and apply replacement to the top", () => {
       const originalText = "Existing content.\nMore content.";
       const promptResponse = `
     <<<<<<< SEARCH
@@ -210,7 +210,7 @@ Replacement text
       );
     });
 
-    it("should handle complex retirement simulation", () => {
+    test("should handle complex retirement simulation", () => {
       const originalText = `
 import "hub:ozziegooen/sTest" as sTest
 
