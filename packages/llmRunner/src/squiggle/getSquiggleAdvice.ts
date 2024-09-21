@@ -397,14 +397,12 @@ function checkInvalidCommas(code: string): string[] {
   const warnings: string[] = [];
   const lines = code.split("\n");
   let inBlock = false;
-  let blockStartLine = 0;
 
   for (let i = 0; i < lines.length; i++) {
     const trimmedLine = lines[i].trim();
 
     if (trimmedLine.endsWith("{")) {
       inBlock = true;
-      blockStartLine = i + 1;
     }
 
     if (trimmedLine === "}") {

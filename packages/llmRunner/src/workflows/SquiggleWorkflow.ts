@@ -54,7 +54,6 @@ export class SquiggleWorkflow extends ControlledWorkflow {
         });
       } else {
         this.workflow.addStep(fixCodeUntilItRunsStep, {
-          prompt: this.prompt,
           code,
         });
       }

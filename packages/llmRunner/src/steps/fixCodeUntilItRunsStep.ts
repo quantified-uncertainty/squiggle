@@ -47,12 +47,11 @@ export const fixCodeUntilItRunsStep = new LLMStepTemplate(
   "FixCodeUntilItRuns",
   {
     inputs: {
-      prompt: "prompt",
       code: "code",
     },
     outputs: { code: "code" },
   },
-  async (context, { prompt, code }) => {
+  async (context, { code }) => {
     const promptPair = editExistingSquiggleCodePrompt(code.value);
 
     const completion = await context.queryLLM(promptPair);

@@ -121,7 +121,7 @@ function getFullMessage(log: TimestampedLogEntry): string {
       return log.entry.message;
     case "codeRunError":
       return log.entry.error;
-    case "llmResponse":
+    case "llmResponse": {
       const llmResponse = log.entry;
       return `<details>
   <summary>Content</summary>
@@ -155,6 +155,7 @@ ${JSON.stringify(llmResponse.messages, null, 2)}
 ${JSON.stringify(llmResponse.response, null, 2)}
 \`\`\`\`
 </details>\n\n\n`;
+    }
     default:
       return "❓ Unknown log type";
   }
