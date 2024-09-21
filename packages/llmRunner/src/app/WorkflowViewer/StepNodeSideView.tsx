@@ -23,6 +23,8 @@ export const SelectedNodeSideView: FC<{
     );
   }, [selectedNode]);
 
+  const maxPrimaryHeight = height ? height * 0.8 : 400;
+
   return (
     <div
       className="relative flex-1 overflow-y-auto border-l border-slate-200 bg-white p-4"
@@ -92,23 +94,35 @@ export const SelectedNodeSideView: FC<{
             </div>
           </div>
         </div>
-        {selectedNodeCodeOutput && (
-          <div className="mt-4 border border-slate-200">
-            <SquigglePlayground
-              height={height ? height * 0.6 : 400}
-              defaultCode={selectedNodeCodeOutput.value}
-              linker={linkerWithDefaultSquiggleLibs}
-            />
-          </div>
-        )}
-        {selectedNode.messages.length > 0 && (
-          <div>
-            <h3 className="mb-2 text-sm font-medium text-slate-500">
-              Messages:
-            </h3>
-            <ArtifactMessages messages={selectedNode.messages} />
-          </div>
-        )}
+        <div className="mt-4 flex gap-4">
+          {selectedNodeCodeOutput && (
+            <div className="flex flex-grow flex-col">
+              <h3 className="mb-2 text-sm font-medium text-slate-500">
+                Output Code:
+              </h3>
+              <div className="flex-grow overflow-hidden border border-slate-200">
+                <SquigglePlayground
+                  height={maxPrimaryHeight - 30} // Subtract the height of the title
+                  defaultCode={selectedNodeCodeOutput.value}
+                  linker={linkerWithDefaultSquiggleLibs}
+                />
+              </div>
+            </div>
+          )}
+          {selectedNode.messages.length > 0 && (
+            <div className="flex w-1/4 min-w-[200px] flex-col">
+              <h3 className="mb-2 text-sm font-medium text-slate-500">
+                Messages:
+              </h3>
+              <div
+                className="flex-grow overflow-y-auto"
+                style={{ maxHeight: maxPrimaryHeight - 30 }} // Subtract the height of the title
+              >
+                <ArtifactMessages messages={selectedNode.messages} />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

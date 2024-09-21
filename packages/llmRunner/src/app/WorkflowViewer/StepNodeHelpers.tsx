@@ -87,11 +87,31 @@ export const ArtifactDisplay: FC<{
 export const ArtifactMessages: FC<{ messages: MessageDescription[] }> = ({
   messages,
 }) => (
-  <div className="space-y-2 text-xs">
+  <div className="space-y-4 text-sm">
     {messages.map((message, index) => (
-      <div key={index}>
-        <header className="font-bold">{message.role}:</header>
-        <pre className="whitespace-pre-wrap">{message.content}</pre>
+      <div
+        key={index}
+        className={clsx(
+          "rounded-lg p-3 shadow-sm",
+          message.role === "user" ? "bg-blue-50" : "bg-green-50"
+        )}
+      >
+        <header className="mb-1 flex items-center">
+          <span
+            className={clsx(
+              "mr-2 rounded-full px-2 py-1 text-xs font-semibold",
+              message.role === "user"
+                ? "bg-blue-200 text-blue-800"
+                : "bg-green-200 text-green-800"
+            )}
+          >
+            {message.role === "user" ? "User" : "Assistant"}
+          </span>
+          <span className="text-xs text-gray-500">
+            {/* Add timestamp here if available */}
+          </span>
+        </header>
+        <div className="whitespace-pre-wrap break-words">{message.content}</div>
       </div>
     ))}
   </div>
