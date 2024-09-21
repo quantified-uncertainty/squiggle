@@ -1,22 +1,26 @@
+import clsx from "clsx";
 import { FC, MouseEvent } from "react";
-import { Handle, NodeProps, Position } from "reactflow";
 
 import { StepStatusIcon } from "../StepStatusIcon";
 import { StepDescription } from "../utils/squiggleTypes";
 import { ArtifactDisplay } from "./StepNodeHelpers";
 
-export const StepNode: FC<
-  NodeProps<StepDescription> & {
-    onClick?: (event: MouseEvent<HTMLDivElement>) => void;
-  }
-> = ({ data, onClick }) => {
+export const StepNode: FC<{
+  data: StepDescription;
+  onClick?: (event: MouseEvent<HTMLDivElement>) => void;
+  isSelected?: boolean;
+  index: number;
+}> = ({ data, onClick, isSelected, index }) => {
   return (
     <div
-      className="relative w-64 rounded-lg border bg-white px-4 py-1 shadow-lg transition-colors hover:bg-slate-50"
+      className={clsx(
+        "w-full cursor-pointer rounded-md border px-4 py-2 shadow-sm transition-colors",
+        isSelected
+          ? "border-emerald-300 bg-emerald-100 hover:bg-emerald-200"
+          : "border-slate-200 bg-slate-100 hover:bg-slate-300"
+      )}
       onClick={onClick}
     >
-      <Handle type="target" position={Position.Top} isConnectable={false} />
-      <Handle type="source" position={Position.Bottom} isConnectable={false} />
       <div className="flex flex-col">
         <div className="mb-1 flex items-center justify-between">
           <div className="flex items-center gap-1">
@@ -25,7 +29,8 @@ export const StepNode: FC<
                 <StepStatusIcon step={data} />
               </div>
             )}
-            <div className="text-slate-60 font-mono text-sm font-semibold">
+            <div className="font-mono text-sm font-semibold text-slate-600">
+              <span className="mr-1 text-slate-400">{index + 1}.</span>
               {data.name}
             </div>
           </div>
