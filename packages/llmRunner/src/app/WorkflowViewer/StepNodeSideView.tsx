@@ -102,7 +102,7 @@ export const SelectedNodeSideView: FC<{
               </h3>
               <div className="flex-grow overflow-hidden border border-slate-200">
                 <SquigglePlayground
-                  height={maxPrimaryHeight - 30} // Subtract the height of the title
+                  height={maxPrimaryHeight - 30}
                   defaultCode={selectedNodeCodeOutput.value}
                   linker={linkerWithDefaultSquiggleLibs}
                 />
@@ -110,13 +110,13 @@ export const SelectedNodeSideView: FC<{
             </div>
           )}
           {selectedNode.messages.length > 0 && (
-            <div className="flex w-1/4 min-w-[200px] flex-col">
+            <div className="flex w-1/4 min-w-[50px] flex-col">
               <h3 className="mb-2 text-sm font-medium text-slate-500">
                 Messages:
               </h3>
               <div
                 className="flex-grow overflow-y-auto"
-                style={{ maxHeight: maxPrimaryHeight - 30 }} // Subtract the height of the title
+                style={{ maxHeight: maxPrimaryHeight - 30 }}
               >
                 <ArtifactMessages messages={selectedNode.messages} />
               </div>
