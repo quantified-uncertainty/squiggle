@@ -87,8 +87,6 @@ export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
                   name="prompt"
                   label="Prompt"
                   placeholder="Enter your prompt here"
-                  rows={10}
-                  minRows={10}
                 />
               </StyledTab.Panel>
               <StyledTab.Panel>
@@ -96,8 +94,6 @@ export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
                   name="squiggleCode"
                   label="Squiggle Code"
                   placeholder="Enter your Squiggle code here"
-                  rows={12}
-                  minRows={12}
                 />
               </StyledTab.Panel>
             </StyledTab.Panels>

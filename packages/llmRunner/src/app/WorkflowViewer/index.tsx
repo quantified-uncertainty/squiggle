@@ -18,7 +18,6 @@ export type Props<
   onFix: (code: string) => void;
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
-  onNodeClick: (node: StepDescription) => void;
 };
 
 const FinishedWorkflowViewer: FC<Props<"finished">> = ({
@@ -26,7 +25,6 @@ const FinishedWorkflowViewer: FC<Props<"finished">> = ({
   onFix,
   expanded,
   setExpanded,
-  onNodeClick,
 }) => {
   const { ref, height } = useAvailableHeight();
 
@@ -93,7 +91,6 @@ const LoadingWorkflowViewer: FC<Props<"loading">> = ({
   workflow,
   expanded,
   setExpanded,
-  onNodeClick,
 }) => {
   const { ref, height } = useAvailableHeight();
 
@@ -109,11 +106,7 @@ const LoadingWorkflowViewer: FC<Props<"loading">> = ({
         renderRight={() => null}
       />
       <div ref={ref}>
-        <WorkflowActions
-          workflow={workflow}
-          height={usedHeight}
-          onNodeClick={onNodeClick}
-        />
+        <WorkflowActions workflow={workflow} height={usedHeight} />
       </div>
     </div>
   );
