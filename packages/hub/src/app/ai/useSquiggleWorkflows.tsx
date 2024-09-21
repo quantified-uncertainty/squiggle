@@ -1,270 +1,114 @@
-import { Reducer, useCallback, useReducer } from "react";
+import { useCallback, useState } from "react";
 
 import {
-  SerializedStep,
+  decodeWorkflowFromReader,
   SerializedWorkflow,
-  workflowMessageSchema,
-  WorkflowResult,
 } from "@quri/squiggle-ai";
 
 import { CreateRequestBody, requestToInput } from "./utils";
 
-type State = {
-  workflows: SerializedWorkflow[];
-  selected: number | undefined;
-};
+// Convert a ReadableStream (`response.body` from `fetch()`) to a line-by-line reader.
+function bodyToLineReader(stream: ReadableStream<Uint8Array>) {
+  let buffer = "";
+  return stream
+    .pipeThrough(new TextDecoderStream())
+    .pipeThrough(
+      new TransformStream<string, string>({
+        transform(chunk, controller) {
+          buffer += chunk;
+          const lines = buffer.split("\n");
 
-type StepDescriptionPatch = Partial<SerializedStep> & { id: string };
-
-type Action =
-  | {
-      type: "select";
-      payload: string;
-    }
-  | {
-      type: "add";
-      payload: SerializedWorkflow;
-    }
-  | {
-      type: "finish";
-      payload: {
-        id: string;
-        result: WorkflowResult;
-      };
-    }
-  | {
-      type: "addStep";
-      payload: {
-        workflowId: string;
-        step: StepDescriptionPatch &
-          Pick<SerializedStep, "id" | "name" | "inputs">;
-      };
-    }
-  | {
-      type: "updateStep";
-      payload: {
-        workflowId: string;
-        step: StepDescriptionPatch;
-      };
-    }
-  | {
-      type: "error";
-      payload: {
-        id: string;
-        error: string;
-      };
-    };
-
-const reducer: Reducer<State, Action> = (state, action) => {
-  switch (action.type) {
-    case "add":
-      return {
-        ...state,
-        workflows: [...state.workflows, action.payload],
-        selected: state.workflows.length,
-      };
-    case "finish":
-      return {
-        ...state,
-        workflows: state.workflows.map((workflow) => {
-          return workflow.id === action.payload.id
-            ? {
-                ...workflow,
-                status: "finished",
-                result: action.payload.result,
-              }
-            : workflow;
-        }),
-      };
-    case "addStep":
-      return {
-        ...state,
-        workflows: state.workflows.map((workflow) => {
-          if (workflow.id === action.payload.workflowId) {
-            return {
-              ...workflow,
-              currentStep: action.payload.step.name,
-              steps: [
-                ...workflow.steps,
-                {
-                  outputs: {},
-                  messages: [],
-                  state: "PENDING",
-                  ...action.payload.step,
-                },
-              ],
-            } satisfies SerializedWorkflow;
-          } else {
-            return workflow;
+          // Process all complete lines
+          for (let i = 0; i < lines.length - 1; i++) {
+            const line = lines[i].trim();
+            if (line) controller.enqueue(line);
           }
-        }),
-      };
-    case "updateStep":
-      return {
-        ...state,
-        workflows: state.workflows.map((workflow) => {
-          if (workflow.id === action.payload.workflowId) {
-            return {
-              ...workflow,
-              steps: workflow.steps.map((step) => {
-                return step.id === action.payload.step.id
-                  ? {
-                      ...step,
-                      ...action.payload.step,
-                    }
-                  : step;
-              }),
-            } satisfies SerializedWorkflow;
-          } else {
-            return workflow;
-          }
-        }),
-      };
-    case "error":
-      return {
-        ...state,
-        workflows: state.workflows.map((workflow) => {
-          return workflow.id === action.payload.id
-            ? {
-                ...workflow,
-                status: "error",
-                result: action.payload.error,
-              }
-            : workflow;
-        }),
-      };
-    case "select": {
-      const index = state.workflows.findIndex(
-        (workflow) => workflow.id === action.payload
-      );
-      return {
-        ...state,
-        selected: index === -1 ? undefined : index,
-      };
-    }
-    default:
-      return state;
-  }
-};
+
+          // Keep the last (potentially incomplete) line in the buffer
+          buffer = lines[lines.length - 1];
+        },
+        flush(controller) {
+          // Process any remaining data in the buffer
+          if (buffer.trim()) controller.enqueue(buffer.trim());
+        },
+      })
+    )
+    .getReader();
+}
 
 export function useSquiggleWorkflows() {
-  const [state, dispatch] = useReducer(reducer, {
-    workflows: [],
-    selected: undefined,
-  });
+  const [workflows, setWorkflows] = useState<SerializedWorkflow[]>([]);
+  const [selected, setSelected] = useState<number | undefined>(undefined);
 
-  const submitWorkflow = useCallback(async (request: CreateRequestBody) => {
-    const id = Date.now().toString();
-    dispatch({
-      type: "add",
-      payload: {
-        id,
-        input: requestToInput(request),
-        status: "loading",
-        timestamp: new Date(),
-        steps: [],
-      },
-    });
+  const updateWorkflow = useCallback(
+    (
+      id: string,
+      update: (workflow: SerializedWorkflow) => SerializedWorkflow
+    ) => {
+      setWorkflows((workflows) =>
+        workflows.map((workflow) => {
+          return workflow.id === id ? update(workflow) : workflow;
+        })
+      );
+    },
+    []
+  );
 
-    try {
-      const response = await fetch("/ai/api/create", {
-        method: "POST",
-        body: JSON.stringify(request),
-      });
-
-      if (!response.body) {
-        return; // FIXME: Handle this case
-      }
-
-      let buffer = "";
-      const reader = response.body
-        .pipeThrough(new TextDecoderStream())
-        .pipeThrough(
-          new TransformStream<string, string>({
-            transform(chunk, controller) {
-              buffer += chunk;
-              const lines = buffer.split("\n");
-
-              // Process all complete lines
-              for (let i = 0; i < lines.length - 1; i++) {
-                const line = lines[i].trim();
-                if (line) controller.enqueue(line);
-              }
-
-              // Keep the last (potentially incomplete) line in the buffer
-              buffer = lines[lines.length - 1];
-            },
-            flush(controller) {
-              // Process any remaining data in the buffer
-              if (buffer.trim()) controller.enqueue(buffer.trim());
-            },
-          })
-        )
-        .getReader();
-
-      // Listen for events
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        // Parse the JSON string
-        const eventJson = JSON.parse(value);
-        const event = workflowMessageSchema.parse(eventJson);
-
-        switch (event.kind) {
-          case "finalResult": {
-            dispatch({
-              type: "finish",
-              payload: {
-                id,
-                result: event.content,
-              },
-            });
-            break;
-          }
-          case "stepAdded":
-            dispatch({
-              type: "addStep",
-              payload: {
-                workflowId: id,
-                step: event.content,
-              },
-            });
-            break;
-          case "stepUpdated":
-            dispatch({
-              type: "updateStep",
-              payload: {
-                workflowId: id,
-                step: event.content,
-              },
-            });
-            break;
-        }
-      }
-    } catch (error) {
-      dispatch({
-        type: "error",
-        payload: {
+  const submitWorkflow = useCallback(
+    async (request: CreateRequestBody) => {
+      const id = Date.now().toString();
+      setWorkflows((workflows) => [
+        ...workflows,
+        {
           id,
-          error: `Error: ${error instanceof Error ? error.toString() : "Unknown error"}`,
+          input: requestToInput(request),
+          status: "loading",
+          timestamp: new Date(),
+          steps: [],
         },
-      });
-    }
-  }, []);
+      ]);
+      setSelected(workflows.length - 1);
+
+      try {
+        const response = await fetch("/ai/api/create", {
+          method: "POST",
+          body: JSON.stringify(request),
+        });
+
+        if (!response.body) {
+          throw new Error("No response body");
+        }
+
+        const reader = bodyToLineReader(response.body);
+
+        await decodeWorkflowFromReader(
+          reader as ReadableStreamDefaultReader, // frontend types don't precisely match Node.js types
+          (update) => updateWorkflow(id, update)
+        );
+      } catch (error) {
+        updateWorkflow(id, (workflow) => ({
+          ...workflow,
+          status: "error",
+          result: `Error: ${error instanceof Error ? error.toString() : "Unknown error"}`,
+        }));
+      }
+    },
+    [updateWorkflow, workflows.length]
+  );
 
   const selectedWorkflow =
-    state.selected === undefined ? undefined : state.workflows[state.selected];
+    selected === undefined ? undefined : workflows[selected];
 
-  const selectWorkflow = useCallback((id: string) => {
-    dispatch({
-      type: "select",
-      payload: id,
-    });
-  }, []);
+  const selectWorkflow = useCallback(
+    (id: string) => {
+      const index = workflows.findIndex((workflow) => workflow.id === id);
+      setSelected(index === -1 ? undefined : index);
+    },
+    [workflows]
+  );
 
   return {
-    workflows: state.workflows,
+    workflows,
     selectedWorkflow,
     submitWorkflow,
     selectWorkflow,

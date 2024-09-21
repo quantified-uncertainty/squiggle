@@ -1,7 +1,7 @@
 import { ReadableStream } from "stream/web";
 
-import { serializeArtifact } from "../streaming.js";
-import { WorkflowMessage, WorkflowResult } from "../types.js";
+import { WorkflowResult } from "../types.js";
+import { addStreamingListeners } from "./streaming.js";
 import { LlmConfig, Workflow } from "./Workflow.js";
 
 /**
@@ -58,50 +58,7 @@ export abstract class ControlledWorkflow {
 
     const stream = new ReadableStream<string>({
       start: async (controller) => {
-        const send = (message: WorkflowMessage) => {
-          controller.enqueue(JSON.stringify(message) + "\n");
-        };
-
-        this.workflow.addEventListener("stepAdded", (event) => {
-          send({
-            kind: "stepAdded",
-            content: {
-              id: event.data.step.id,
-              name: event.data.step.template.name ?? "unknown",
-              inputs: Object.fromEntries(
-                Object.entries(event.data.step.getInputs()).map(
-                  ([key, value]) => [key, serializeArtifact(value)]
-                )
-              ),
-            },
-          });
-        });
-        this.workflow.addEventListener("stepFinished", (event) => {
-          send({
-            kind: "stepUpdated",
-            content: {
-              id: event.data.step.id,
-              state: event.data.step.getState().kind,
-              outputs: Object.fromEntries(
-                Object.entries(event.data.step.getOutputs())
-                  .filter(
-                    (pair): pair is [string, NonNullable<(typeof pair)[1]>] =>
-                      pair[1] !== undefined
-                  )
-                  .map(([key, value]) => [key, serializeArtifact(value)])
-              ),
-              messages: event.data.step.getConversationMessages(),
-            },
-          });
-        });
-        this.workflow.addEventListener("allStepsFinished", (event) => {
-          // saveSummaryToFile(generateSummary(prompt, workflow));
-
-          send({
-            kind: "finalResult",
-            content: event.workflow.getFinalResult(),
-          });
-        });
+        addStreamingListeners(this.workflow, controller);
 
         // Important! `configure` should be called after all event listeners are set up.
         // We want to capture `stepAdded` events.
