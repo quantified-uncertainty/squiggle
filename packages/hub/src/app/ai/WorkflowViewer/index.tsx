@@ -1,7 +1,6 @@
 "use client";
 import { FC } from "react";
 
-import { SerializedWorkflow } from "@quri/squiggle-ai";
 import { Button, StyledTab } from "@quri/ui";
 
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
@@ -10,12 +9,12 @@ import { Badge } from "../Badge";
 import { LogsView } from "../LogsView";
 import { SquigglePlaygroundForWorkflow } from "../SquigglePlaygroundForWorkflow";
 import { Header } from "./Header";
-import { WorkflowGraph } from "./WorkflowGraph";
+import { WorkflowActions } from "./WorkflowActions";
 
 export type Props<
-  T extends SerializedWorkflow["status"] = SerializedWorkflow["status"],
+  T extends WorkflowDescription["status"] = WorkflowDescription["status"],
 > = {
-  workflow: Extract<SerializedWorkflow, { status: T }>;
+  workflow: Extract<WorkflowDescription, { status: T }>;
   onFix: (code: string) => void;
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
@@ -55,7 +54,7 @@ const FinishedWorkflowViewer: FC<Props<"finished">> = ({
             <div className="flex gap-2">
               <StyledTab.List>
                 <StyledTab name="Playground" />
-                <StyledTab name="Graph" />
+                <StyledTab name="Actions" />
                 <StyledTab name="Logs" />
               </StyledTab.List>
               <Button
@@ -76,7 +75,7 @@ const FinishedWorkflowViewer: FC<Props<"finished">> = ({
               />
             </StyledTab.Panel>
             <StyledTab.Panel>
-              <WorkflowGraph workflow={workflow} height={usedHeight} />
+              <WorkflowActions workflow={workflow} height={usedHeight} />
             </StyledTab.Panel>
             <StyledTab.Panel>
               <LogsView logSummary={workflow.result.logSummary || ""} />
@@ -107,21 +106,37 @@ const LoadingWorkflowViewer: FC<Props<"loading">> = ({
         renderRight={() => null}
       />
       <div ref={ref}>
-        <WorkflowGraph workflow={workflow} height={usedHeight} />
+        <WorkflowActions workflow={workflow} height={usedHeight} />
       </div>
     </div>
   );
 };
 
+interface NodeInfoProps {
+  node: StepDescription;
+}
+
+export const NodeInfo: React.FC<NodeInfoProps> = ({ node }) => {
+  return (
+    <div>
+      <h3 className="mb-2 font-bold">{node.name}</h3>
+    </div>
+  );
+};
+
 export const WorkflowViewer: FC<Props> = ({ workflow, ...props }) => {
-  switch (workflow.status) {
-    case "finished":
-      return <FinishedWorkflowViewer {...props} workflow={workflow} />;
-    case "loading":
-      return <LoadingWorkflowViewer {...props} workflow={workflow} />;
-    case "error":
-      return <div className="text-red-700">{workflow.result}</div>;
-    default:
-      throw workflow satisfies never;
-  }
+  const renderWorkflowContent = () => {
+    switch (workflow.status) {
+      case "finished":
+        return <FinishedWorkflowViewer {...props} workflow={workflow} />;
+      case "loading":
+        return <LoadingWorkflowViewer {...props} workflow={workflow} />;
+      case "error":
+        return <div className="text-red-700">{workflow.result}</div>;
+      default:
+        throw workflow satisfies never;
+    }
+  };
+
+  return renderWorkflowContent();
 };

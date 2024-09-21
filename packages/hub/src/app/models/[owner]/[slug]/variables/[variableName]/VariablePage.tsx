@@ -26,7 +26,7 @@ import { VariablePageQuery } from "@/__generated__/VariablePageQuery.graphql";
 const buildStatusIcon = (status: string) => {
   switch (status) {
     case "Success":
-      return <CheckIcon className="text-green-700 opacity-30" />;
+      return <CheckIcon className="text-emerald-700 opacity-30" />;
     case "Failure":
       return <XIcon className="text-red-500" />;
     case "Pending":
