@@ -1,17 +1,24 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 
-import { StepDescription, WorkflowDescription } from "../utils/squiggleTypes";
+import { SerializedStep, SerializedWorkflow } from "@quri/squiggle-ai";
+
 import { StepNode } from "./StepNode";
 import { SelectedNodeSideView } from "./StepNodeSideView";
 
 export const WorkflowActions: FC<{
-  workflow: WorkflowDescription;
+  workflow: SerializedWorkflow;
   height: number;
-  onNodeClick?: (node: StepDescription) => void;
+  onNodeClick?: (node: SerializedStep) => void;
 }> = ({ workflow, height, onNodeClick }) => {
-  const [selectedNodeIndex, setSelectedNodeIndex] = useState<number | null>(
-    null
-  );
+  const [selectedNodeIndex, setSelectedNodeIndex] = useState<number | null>(0);
+  const prevStepsLengthRef = useRef(workflow.steps.length);
+
+  useEffect(() => {
+    if (workflow.steps.length > prevStepsLengthRef.current) {
+      setSelectedNodeIndex(workflow.steps.length - 2); // We want to select the last step, which is the one that just got finished. The new step won't have a result to show yet.
+    }
+    prevStepsLengthRef.current = workflow.steps.length;
+  }, [workflow.steps]);
 
   const selectPreviousNode = () => {
     if (selectedNodeIndex !== null && selectedNodeIndex > 0) {
@@ -34,6 +41,7 @@ export const WorkflowActions: FC<{
     <div style={{ height }} className="flex">
       <div className={`w-70 flex flex-col`}>
         <div className="flex flex-col items-center space-y-2 p-2">
+          {workflow.id}
           {workflow.steps.map((step, index) => (
             <StepNode
               data={step}
