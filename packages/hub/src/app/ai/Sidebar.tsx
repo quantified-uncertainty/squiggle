@@ -3,7 +3,7 @@
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { LLMName, MODEL_CONFIGS, SerializedWorkflow } from "@quri/squiggle-ai";
+import { LlmId, MODEL_CONFIGS, SerializedWorkflow } from "@quri/squiggle-ai";
 import {
   Button,
   SelectStringFormField,
@@ -28,7 +28,7 @@ type Props = {
 type FormShape = {
   prompt: string;
   squiggleCode: string;
-  model: LLMName;
+  model: LlmId;
 };
 
 export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
@@ -61,7 +61,7 @@ export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
       const requestBody: CreateRequestBody = {
         prompt: mode === "create" ? prompt : undefined,
         squiggleCode: mode === "edit" ? squiggleCode : undefined,
-        model,
+        model: model as LlmId,
       };
 
       submitWorkflow(requestBody);
@@ -103,15 +103,17 @@ export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
             </StyledTab.Panels>
           </div>
         </StyledTab.Group>
-        <SelectStringFormField<FormShape, LLMName>
+        <SelectStringFormField<FormShape, LlmId>
           name="model"
           label="Model"
           size="small"
-          options={Object.keys(MODEL_CONFIGS) as LLMName[]}
+          options={MODEL_CONFIGS.filter(
+            (model) => model.provider === "anthropic"
+          ).map((model) => model.id)}
           required
         />
         <Button theme="primary" wide onClick={handleSubmit}>
-          Send
+          Start Workflow
         </Button>
         <div className="flex-grow overflow-y-auto">
           <h2 className="mb-2 text-sm font-bold">Actions</h2>

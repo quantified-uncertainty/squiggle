@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import {
-  LLMName,
+  LlmName,
   MODEL_CONFIGS,
   type SquiggleWorkflowInput,
 } from "@quri/squiggle-ai";
@@ -22,12 +22,12 @@ type UnionToTuple<T> =
     ? [...UnionToTuple<Exclude<T, W>>, W]
     : [];
 
-type ModelKeys = UnionToTuple<LLMName>;
+type ModelKeys = UnionToTuple<LlmName>;
 
 export const createRequestBodySchema = z.object({
   prompt: z.string().optional(),
   squiggleCode: z.string().optional(),
-  model: z.enum(Object.keys(MODEL_CONFIGS) as ModelKeys).optional(),
+  model: z.enum(MODEL_CONFIGS.map((model) => model.id)).optional(),
 });
 
 export type CreateRequestBody = z.infer<typeof createRequestBodySchema>;
