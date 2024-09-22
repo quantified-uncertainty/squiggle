@@ -116,7 +116,7 @@ export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
           Start Workflow
         </Button>
         <div className="flex-grow overflow-y-auto">
-          <h2 className="mb-2 text-sm font-bold">Actions</h2>
+          <h2 className="mb-2 text-sm font-bold">Workflows</h2>
           <WorkflowSummaryList
             workflows={workflows}
             selectedWorkflow={selectedWorkflow}
