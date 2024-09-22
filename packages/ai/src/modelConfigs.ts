@@ -10,6 +10,7 @@ type ModelConfig = {
   id: string;
 };
 
+// After some discussion, we decided to store this as an array of objects instead of a record. This is because it can be a pain to iterate and filter over records, and there aren't any significant performance benefits to using a record for this data.
 export const MODEL_CONFIGS = [
   {
     id: "GPT4",

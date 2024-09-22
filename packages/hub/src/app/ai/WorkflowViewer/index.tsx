@@ -1,7 +1,7 @@
 "use client";
 import { FC } from "react";
 
-import { SerializedStep, SerializedWorkflow } from "@quri/squiggle-ai";
+import { SerializedWorkflow } from "@quri/squiggle-ai";
 import { Button, StyledTab } from "@quri/ui";
 
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
@@ -12,7 +12,7 @@ import { SquigglePlaygroundForWorkflow } from "../SquigglePlaygroundForWorkflow"
 import { Header } from "./Header";
 import { WorkflowActions } from "./WorkflowActions";
 
-export type Props<
+type WorkflowViewerProps<
   T extends SerializedWorkflow["status"] = SerializedWorkflow["status"],
 > = {
   workflow: Extract<SerializedWorkflow, { status: T }>;
@@ -21,15 +21,14 @@ export type Props<
   setExpanded: (expanded: boolean) => void;
 };
 
-const FinishedWorkflowViewer: FC<Props<"finished">> = ({
+const FinishedWorkflowViewer: FC<WorkflowViewerProps<"finished">> = ({
   workflow,
   onFix,
   expanded,
   setExpanded,
 }) => {
   const { ref, height } = useAvailableHeight();
-
-  const usedHeight = height ?? 200;
+  const usedHeight = height ? height : 200;
 
   return (
     <StyledTab.Group>
@@ -88,14 +87,13 @@ const FinishedWorkflowViewer: FC<Props<"finished">> = ({
   );
 };
 
-const LoadingWorkflowViewer: FC<Props<"loading">> = ({
+const LoadingWorkflowViewer: FC<WorkflowViewerProps<"loading">> = ({
   workflow,
   expanded,
   setExpanded,
 }) => {
   const { ref, height } = useAvailableHeight();
-
-  const usedHeight = height ?? 200;
+  const usedHeight = height ? height : 200;
 
   return (
     <div className="mt-2 flex flex-col gap-2">
@@ -113,31 +111,18 @@ const LoadingWorkflowViewer: FC<Props<"loading">> = ({
   );
 };
 
-interface NodeInfoProps {
-  node: SerializedStep;
-}
-
-export const NodeInfo: React.FC<NodeInfoProps> = ({ node }) => {
-  return (
-    <div>
-      <h3 className="mb-2 font-bold">{node.name}</h3>
-    </div>
-  );
-};
-
-export const WorkflowViewer: FC<Props> = ({ workflow, ...props }) => {
-  const renderWorkflowContent = () => {
-    switch (workflow.status) {
-      case "finished":
-        return <FinishedWorkflowViewer {...props} workflow={workflow} />;
-      case "loading":
-        return <LoadingWorkflowViewer {...props} workflow={workflow} />;
-      case "error":
-        return <div className="text-red-700">{workflow.result}</div>;
-      default:
-        throw workflow satisfies never;
-    }
-  };
-
-  return renderWorkflowContent();
+export const WorkflowViewer: FC<WorkflowViewerProps> = ({
+  workflow,
+  ...props
+}) => {
+  switch (workflow.status) {
+    case "finished":
+      return <FinishedWorkflowViewer {...props} workflow={workflow} />;
+    case "loading":
+      return <LoadingWorkflowViewer {...props} workflow={workflow} />;
+    case "error":
+      return <div className="text-red-700">{workflow.result}</div>;
+    default:
+      throw workflow satisfies never;
+  }
 };

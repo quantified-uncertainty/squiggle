@@ -6,22 +6,29 @@ import { SerializedStep } from "@quri/squiggle-ai";
 import { StepStatusIcon } from "../StepStatusIcon";
 import { ArtifactDisplay } from "./StepNodeHelpers";
 
-export const StepNode: FC<{
+type StepNodeProps = {
   data: SerializedStep;
   onClick?: (event: MouseEvent<HTMLDivElement>) => void;
   isSelected?: boolean;
-  index: number;
-}> = ({ data, onClick, isSelected, index }) => {
+  stepNumber: number;
+};
+
+const getStepNodeClassName = (isSelected: boolean) =>
+  clsx(
+    "w-full cursor-pointer rounded-md border px-4 py-2 shadow-sm transition-colors",
+    isSelected
+      ? "border-emerald-300 bg-emerald-100 hover:bg-emerald-200"
+      : "border-slate-200 bg-slate-100 hover:bg-slate-300"
+  );
+
+export const StepNode: FC<StepNodeProps> = ({
+  data,
+  onClick,
+  isSelected = false,
+  stepNumber,
+}) => {
   return (
-    <div
-      className={clsx(
-        "w-full cursor-pointer rounded-md border px-4 py-2 shadow-sm transition-colors",
-        isSelected
-          ? "border-emerald-300 bg-emerald-100 hover:bg-emerald-200"
-          : "border-slate-200 bg-slate-100 hover:bg-slate-300"
-      )}
-      onClick={onClick}
-    >
+    <div className={getStepNodeClassName(isSelected)} onClick={onClick}>
       <div className="flex flex-col">
         <div className="mb-1 flex items-center justify-between">
           <div className="flex items-center gap-1">
@@ -31,7 +38,7 @@ export const StepNode: FC<{
               </div>
             )}
             <div className="font-mono text-sm font-semibold text-slate-600">
-              <span className="mr-1 text-slate-400">{index + 1}.</span>
+              <span className="mr-1 text-slate-400">{stepNumber}.</span>
               {data.name}
             </div>
           </div>

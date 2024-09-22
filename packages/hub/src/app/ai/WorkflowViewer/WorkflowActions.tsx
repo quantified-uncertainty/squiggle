@@ -1,3 +1,4 @@
+import { isNumber } from "lodash";
 import { FC, useEffect, useRef, useState } from "react";
 
 import { SerializedStep, SerializedWorkflow } from "@quri/squiggle-ai";
@@ -37,11 +38,13 @@ export const WorkflowActions: FC<{
     }
   };
 
+  const hasSelectedNode =
+    isNumber(selectedNodeIndex) && workflow.steps[selectedNodeIndex];
+
   return (
     <div style={{ height }} className="flex">
       <div className={`w-70 flex flex-col`}>
         <div className="flex flex-col items-center space-y-2 p-2">
-          {workflow.id}
           {workflow.steps.map((step, index) => (
             <StepNode
               data={step}
@@ -50,13 +53,13 @@ export const WorkflowActions: FC<{
                 onNodeClick?.(step);
               }}
               isSelected={selectedNodeIndex === index}
-              index={index}
+              stepNumber={index + 1}
               key={step.id}
             />
           ))}
         </div>
       </div>
-      {selectedNodeIndex !== null && (
+      {hasSelectedNode && (
         <SelectedNodeSideView
           selectedNode={workflow.steps[selectedNodeIndex]}
           onClose={() => setSelectedNodeIndex(null)}
