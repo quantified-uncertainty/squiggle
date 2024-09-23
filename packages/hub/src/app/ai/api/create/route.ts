@@ -59,13 +59,12 @@ export async function POST(req: Request) {
             "Internal error: setWorkflow called before addWorkflow"
           );
         }
+        workflow = update(workflow);
         await prisma.aiWorkflow.update({
           where: {
             id: workflow.id,
           },
-          data: {
-            workflow: update(workflow),
-          },
+          data: { workflow },
         });
       },
     });
