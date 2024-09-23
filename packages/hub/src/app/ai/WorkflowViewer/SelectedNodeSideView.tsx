@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { FC, useMemo } from "react";
 
 import { SerializedArtifact, SerializedStep } from "@quri/squiggle-ai";
@@ -6,13 +7,57 @@ import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@quri/ui";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 
 import { SquigglePlaygroundForWorkflow } from "../SquigglePlaygroundForWorkflow";
-import { ArtifactDisplay, ArtifactMessages } from "./StepNodeHelpers";
+import { ArtifactDisplay } from "./ArtifactDisplay";
+import { ArtifactMessages } from "./ArtifactMessages";
+
+const NavButton: FC<{
+  onClick?: () => void;
+  icon: React.ElementType;
+  label: string;
+}> = ({ onClick, icon: Icon, label }) => {
+  return (
+    <button
+      onClick={onClick}
+      className={clsx(
+        "mr-2",
+        onClick
+          ? "text-slate-400 hover:text-slate-600"
+          : "cursor-default text-slate-200"
+      )}
+      aria-label={label}
+    >
+      <Icon size={20} />
+    </button>
+  );
+};
+
+const ArtifactList: FC<{
+  title: string;
+  artifacts: Record<string, SerializedArtifact>;
+}> = ({ title, artifacts }) => {
+  return (
+    <div>
+      <h3 className="mb-2 text-sm font-medium text-slate-500">{title}</h3>
+      <div className="flex flex-wrap gap-2">
+        {Object.entries(artifacts).map(([key, value]) => (
+          <ArtifactDisplay
+            key={key}
+            name={key}
+            artifact={value}
+            size={12}
+            showArtifactName={true}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export const SelectedNodeSideView: FC<{
   selectedNode: SerializedStep;
   onClose: () => void;
-  onSelectPreviousNode: () => void;
-  onSelectNextNode: () => void;
+  onSelectPreviousNode?: () => void;
+  onSelectNextNode?: () => void;
 }> = ({ selectedNode, onClose, onSelectPreviousNode, onSelectNextNode }) => {
   const { ref, height } = useAvailableHeight();
 
@@ -36,20 +81,16 @@ export const SelectedNodeSideView: FC<{
           {selectedNode.name}
         </h2>
         <div className="flex items-center">
-          <button
+          <NavButton
             onClick={onSelectPreviousNode}
-            className="mr-2 text-slate-400 hover:text-slate-600"
-            aria-label="Previous Node"
-          >
-            <ChevronLeftIcon size={20} />
-          </button>
-          <button
+            label="Previous Node"
+            icon={ChevronLeftIcon}
+          />
+          <NavButton
             onClick={onSelectNextNode}
-            className="mr-2 text-slate-400 hover:text-slate-600"
-            aria-label="Next Node"
-          >
-            <ChevronRightIcon size={20} />
-          </button>
+            label="Next Node"
+            icon={ChevronRightIcon}
+          />
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600"
@@ -62,36 +103,10 @@ export const SelectedNodeSideView: FC<{
       <div className="space-y-4">
         <div className="flex gap-4">
           <div className="flex-1">
-            <h3 className="mb-0.5 text-xs font-medium text-slate-500">
-              Inputs:
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(selectedNode.inputs).map(([key, value]) => (
-                <ArtifactDisplay
-                  key={key}
-                  name={key}
-                  artifact={value}
-                  size={12}
-                  showArtifactName={true}
-                />
-              ))}
-            </div>
+            <ArtifactList title="Inputs" artifacts={selectedNode.inputs} />
           </div>
           <div className="flex-1">
-            <h3 className="mb-0.5 text-xs font-medium text-slate-500">
-              Outputs:
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(selectedNode.outputs).map(([key, value]) => (
-                <ArtifactDisplay
-                  key={key}
-                  name={key}
-                  artifact={value}
-                  size={12}
-                  showArtifactName={true}
-                />
-              ))}
-            </div>
+            <ArtifactList title="Outputs" artifacts={selectedNode.outputs} />
           </div>
         </div>
         <div className="mt-4 flex gap-4">

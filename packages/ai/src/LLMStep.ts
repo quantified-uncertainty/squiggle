@@ -150,7 +150,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     const totalCost = calculatePriceMultipleCalls(
       this.llmMetricsList.reduce(
         (acc, metrics) => {
-          acc[metrics.LlmId] = metrics;
+          acc[metrics.llmId] = metrics;
           return acc;
         },
         {} as Record<LlmId, LlmMetrics>
@@ -236,7 +236,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
         apiCalls: 1,
         inputTokens: completion?.usage?.prompt_tokens ?? 0,
         outputTokens: completion?.usage?.completion_tokens ?? 0,
-        LlmId: workflow.llmConfig.llmId,
+        llmId: workflow.llmConfig.llmId,
       });
 
       if (!completion?.content) {

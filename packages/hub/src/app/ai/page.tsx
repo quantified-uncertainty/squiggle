@@ -1,56 +1,42 @@
-"use client";
+import {
+  SerializedWorkflow,
+  serializedWorkflowSchema,
+} from "@quri/squiggle-ai";
 
-import { clsx } from "clsx";
-import { useRef, useState } from "react";
+import { prisma } from "@/prisma";
+import { getUserOrRedirect } from "@/server/helpers";
 
-import { WorkflowResult } from "@quri/squiggle-ai";
+import { AiDashboard } from "./AiDashboard";
 
-import { Sidebar } from "./Sidebar";
-import { useSquiggleWorkflows } from "./useSquiggleWorkflows";
-import { WorkflowViewer } from "./WorkflowViewer";
+export default async function AiPage() {
+  const user = await getUserOrRedirect();
 
-export type SquiggleResponse = {
-  result?: WorkflowResult;
-  currentStep?: string;
-};
+  const rows = await prisma.aiWorkflow.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    where: {
+      user: { email: user.email },
+    },
+  });
 
-export default function CreatePage() {
-  const { workflows, submitWorkflow, selectedWorkflow, selectWorkflow } =
-    useSquiggleWorkflows();
+  const workflows = rows.map((row) => {
+    try {
+      return serializedWorkflowSchema.parse(row.workflow);
+    } catch (e) {
+      return {
+        id: row.id,
+        timestamp: row.createdAt.getTime(),
+        status: "error",
+        input: {
+          type: "Create",
+          prompt: "[unknown workflow]",
+        },
+        steps: [],
+        result: "Invalid workflow format in the database",
+      } satisfies SerializedWorkflow;
+    }
+  });
 
-  const [collapsedSidebar, setCollapsedSidebar] = useState(false);
-
-  const sidebarRef = useRef<{ edit: (code: string) => void }>(null);
-
-  const handleEditVersion = (code: string) => {
-    setCollapsedSidebar(false);
-    sidebarRef.current?.edit(code);
-  };
-
-  return (
-    <div className="flex">
-      {/* Left column: Mode Toggle, Chat, Form, and list of Workflows */}
-      <div className={clsx("w-1/5 p-2", collapsedSidebar && "hidden")}>
-        <Sidebar
-          submitWorkflow={submitWorkflow}
-          selectWorkflow={selectWorkflow}
-          selectedWorkflow={selectedWorkflow}
-          workflows={workflows}
-          ref={sidebarRef}
-        />
-      </div>
-      {/* Right column: Menu and SquigglePlayground */}
-      {selectedWorkflow && (
-        <div className="flex-1">
-          <WorkflowViewer
-            key={selectedWorkflow.id}
-            workflow={selectedWorkflow}
-            onFix={handleEditVersion}
-            expanded={collapsedSidebar}
-            setExpanded={setCollapsedSidebar}
-          />
-        </div>
-      )}
-    </div>
-  );
+  return <AiDashboard initialWorkflows={workflows} />;
 }

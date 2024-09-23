@@ -4,7 +4,7 @@ import { FC, MouseEvent } from "react";
 import { SerializedStep } from "@quri/squiggle-ai";
 
 import { StepStatusIcon } from "../StepStatusIcon";
-import { ArtifactDisplay } from "./StepNodeHelpers";
+import { ArtifactDisplay } from "./ArtifactDisplay";
 
 type StepNodeProps = {
   data: SerializedStep;

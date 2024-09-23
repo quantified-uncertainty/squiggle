@@ -1,14 +1,15 @@
+import { z } from "zod";
+
 import { PromptArtifact, SourceArtifact } from "../Artifact.js";
 import { adjustToFeedbackStep } from "../steps/adjustToFeedbackStep.js";
 import { fixCodeUntilItRunsStep } from "../steps/fixCodeUntilItRunsStep.js";
 import { generateCodeStep } from "../steps/generateCodeStep.js";
 import { runAndFormatCodeStep } from "../steps/runAndFormatCodeStep.js";
+import { squiggleWorkflowInputSchema } from "../types.js";
 import { ControlledWorkflow } from "./ControlledWorkflow.js";
 import { LlmConfig } from "./Workflow.js";
 
-export type SquiggleWorkflowInput =
-  | { type: "Create"; prompt: string }
-  | { type: "Edit"; source: string; prompt?: string };
+export type SquiggleWorkflowInput = z.infer<typeof squiggleWorkflowInputSchema>;
 
 /**
  * This is a basic workflow for generating Squiggle code.
