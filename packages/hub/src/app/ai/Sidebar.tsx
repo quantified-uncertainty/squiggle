@@ -1,6 +1,12 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { LlmId, MODEL_CONFIGS, SerializedWorkflow } from "@quri/squiggle-ai";
@@ -45,6 +51,14 @@ export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
   });
 
   const [mode, setMode] = useState<"create" | "edit">("create");
+  const prevWorkflowsLengthRef = useRef(workflows.length);
+
+  useEffect(() => {
+    if (workflows.length > prevWorkflowsLengthRef.current) {
+      selectWorkflow(workflows[workflows.length - 1].id);
+      prevWorkflowsLengthRef.current = workflows.length;
+    }
+  }, [workflows, selectWorkflow]);
 
   useImperativeHandle(ref, () => ({
     edit: (code: string) => {
@@ -68,6 +82,11 @@ export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
       form.setValue("prompt", "");
     }
   );
+
+  const [prompt, squiggleCode] = form.watch(["prompt", "squiggleCode"]);
+
+  const isSubmitDisabled =
+    mode === "create" ? !prompt?.trim() : !squiggleCode?.trim();
 
   return (
     <FormProvider {...form}>
@@ -112,7 +131,12 @@ export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
           ).map((model) => model.id)}
           required
         />
-        <Button theme="primary" wide onClick={handleSubmit}>
+        <Button
+          theme="primary"
+          wide
+          onClick={handleSubmit}
+          disabled={isSubmitDisabled}
+        >
           Start Workflow
         </Button>
         <div className="flex-grow overflow-y-auto">
