@@ -68,7 +68,7 @@ export const MODEL_CONFIGS = [
     contextWindow: 131072,
     name: "Llama 3.1",
   },
-] as const;
+] as const satisfies ModelConfig[];
 
 export type LlmId = (typeof MODEL_CONFIGS)[number]["id"];
 export type LlmName = (typeof MODEL_CONFIGS)[number]["name"];

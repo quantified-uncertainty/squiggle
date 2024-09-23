@@ -30,7 +30,7 @@ export const AiDashboard: FC<{ initialWorkflows: SerializedWorkflow[] }> = ({
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex">
       {/* Left column: Mode Toggle, Chat, Form, and list of Workflows */}
       <div className={clsx("w-1/5 p-2", collapsedSidebar && "hidden")}>
         <Sidebar

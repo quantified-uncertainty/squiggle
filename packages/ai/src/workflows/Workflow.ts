@@ -230,12 +230,12 @@ export class Workflow {
     return this.getSteps().reduce(
       (acc, step) => {
         step.llmMetricsList.forEach((metrics) => {
-          if (!acc[metrics.LlmId]) {
-            acc[metrics.LlmId] = { ...metrics };
+          if (!acc[metrics.llmId]) {
+            acc[metrics.llmId] = { ...metrics };
           } else {
-            acc[metrics.LlmId].apiCalls += metrics.apiCalls;
-            acc[metrics.LlmId].inputTokens += metrics.inputTokens;
-            acc[metrics.LlmId].outputTokens += metrics.outputTokens;
+            acc[metrics.llmId].apiCalls += metrics.apiCalls;
+            acc[metrics.llmId].inputTokens += metrics.inputTokens;
+            acc[metrics.llmId].outputTokens += metrics.outputTokens;
           }
         });
         return acc;

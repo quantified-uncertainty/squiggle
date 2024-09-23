@@ -87,7 +87,7 @@ export interface LlmMetrics {
   apiCalls: number;
   inputTokens: number;
   outputTokens: number;
-  LlmId: LlmId;
+  llmId: LlmId;
 }
 
 export function calculatePriceMultipleCalls(
@@ -95,13 +95,13 @@ export function calculatePriceMultipleCalls(
 ): number {
   let totalCost = 0;
 
-  for (const [LlmId, { inputTokens, outputTokens }] of Object.entries(
+  for (const [llmId, { inputTokens, outputTokens }] of Object.entries(
     metrics
   )) {
-    const modelConfig = MODEL_CONFIGS.find((model) => model.id === LlmId);
+    const modelConfig = MODEL_CONFIGS.find((model) => model.id === llmId);
 
     if (!modelConfig) {
-      console.warn(`No pricing information found for LLM: ${LlmId}`);
+      console.warn(`No pricing information found for LLM: ${llmId}`);
       continue;
     }
 
@@ -132,7 +132,7 @@ export class LLMClient {
   private anthropicClient?: Anthropic;
 
   constructor(
-    public LlmId: LlmId,
+    public llmId: LlmId,
     openaiApiKey?: string,
     anthropicApiKey?: string
   ) {
@@ -168,11 +168,11 @@ export class LLMClient {
     conversationHistory: Message[]
   ): Promise<StandardizedChatCompletion> {
     const selectedModelConfig = MODEL_CONFIGS.find(
-      (model) => model.id === this.LlmId
+      (model) => model.id === this.llmId
     );
 
     if (!selectedModelConfig) {
-      throw new Error(`No model config found for LLM: ${this.LlmId}`);
+      throw new Error(`No model config found for LLM: ${this.llmId}`);
     }
 
     try {
