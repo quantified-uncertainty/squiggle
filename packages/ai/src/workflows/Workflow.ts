@@ -133,6 +133,14 @@ export class Workflow {
     return step;
   }
 
+  repeatPreviousStep() {
+    const previousStep = this.steps.at(-1);
+    if (!previousStep) {
+      return;
+    }
+    this.addStep(previousStep.template, previousStep.inputs);
+  }
+
   private async runNextStep(): Promise<void> {
     const step = this.getCurrentStep();
 

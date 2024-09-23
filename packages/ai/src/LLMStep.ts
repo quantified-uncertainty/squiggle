@@ -77,6 +77,7 @@ export class LLMStepTemplate<const Shape extends StepShape = StepShape> {
 
 export class LLMStepInstance<const Shape extends StepShape = StepShape> {
   public id: string;
+  public inputs: Inputs<Shape>;
   private logger: Logger;
   private conversationMessages: Message[] = [];
   public llmMetricsList: LlmMetrics[] = [];
@@ -87,11 +88,12 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
   constructor(
     public readonly template: LLMStepTemplate<Shape>,
     public readonly workflow: Workflow,
-    private readonly inputs: Inputs<Shape>
+    inputs: Inputs<Shape>
   ) {
     this.startTime = Date.now();
     this.id = crypto.randomUUID();
     this.logger = new Logger();
+    this.inputs = inputs;
   }
 
   getLogs(): TimestampedLogEntry[] {
