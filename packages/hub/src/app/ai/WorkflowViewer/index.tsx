@@ -10,9 +10,9 @@ import { Badge } from "../Badge";
 import { LogsView } from "../LogsView";
 import { SquigglePlaygroundForWorkflow } from "../SquigglePlaygroundForWorkflow";
 import { Header } from "./Header";
-import { WorkflowGraph } from "./WorkflowGraph";
+import { WorkflowActions } from "./WorkflowActions";
 
-export type Props<
+type WorkflowViewerProps<
   T extends SerializedWorkflow["status"] = SerializedWorkflow["status"],
 > = {
   workflow: Extract<SerializedWorkflow, { status: T }>;
@@ -21,15 +21,14 @@ export type Props<
   setExpanded: (expanded: boolean) => void;
 };
 
-const FinishedWorkflowViewer: FC<Props<"finished">> = ({
+const FinishedWorkflowViewer: FC<WorkflowViewerProps<"finished">> = ({
   workflow,
   onFix,
   expanded,
   setExpanded,
 }) => {
   const { ref, height } = useAvailableHeight();
-
-  const usedHeight = height ?? 200;
+  const usedHeight = height ? height : 200;
 
   return (
     <StyledTab.Group>
@@ -55,7 +54,7 @@ const FinishedWorkflowViewer: FC<Props<"finished">> = ({
             <div className="flex gap-2">
               <StyledTab.List>
                 <StyledTab name="Playground" />
-                <StyledTab name="Graph" />
+                <StyledTab name="Actions" />
                 <StyledTab name="Logs" />
               </StyledTab.List>
               <Button
@@ -76,7 +75,7 @@ const FinishedWorkflowViewer: FC<Props<"finished">> = ({
               />
             </StyledTab.Panel>
             <StyledTab.Panel>
-              <WorkflowGraph workflow={workflow} height={usedHeight} />
+              <WorkflowActions workflow={workflow} height={usedHeight} />
             </StyledTab.Panel>
             <StyledTab.Panel>
               <LogsView logSummary={workflow.result.logSummary || ""} />
@@ -88,14 +87,13 @@ const FinishedWorkflowViewer: FC<Props<"finished">> = ({
   );
 };
 
-const LoadingWorkflowViewer: FC<Props<"loading">> = ({
+const LoadingWorkflowViewer: FC<WorkflowViewerProps<"loading">> = ({
   workflow,
   expanded,
   setExpanded,
 }) => {
   const { ref, height } = useAvailableHeight();
-
-  const usedHeight = height ?? 200;
+  const usedHeight = height ? height : 200;
 
   return (
     <div className="mt-2 flex flex-col gap-2">
@@ -107,13 +105,16 @@ const LoadingWorkflowViewer: FC<Props<"loading">> = ({
         renderRight={() => null}
       />
       <div ref={ref}>
-        <WorkflowGraph workflow={workflow} height={usedHeight} />
+        <WorkflowActions workflow={workflow} height={usedHeight} />
       </div>
     </div>
   );
 };
 
-export const WorkflowViewer: FC<Props> = ({ workflow, ...props }) => {
+export const WorkflowViewer: FC<WorkflowViewerProps> = ({
+  workflow,
+  ...props
+}) => {
   switch (workflow.status) {
     case "finished":
       return <FinishedWorkflowViewer {...props} workflow={workflow} />;

@@ -10,7 +10,7 @@ import {
   Message,
 } from "./LLMClient.js";
 import { LogEntry, Logger, TimestampedLogEntry } from "./Logger.js";
-import { LLMName } from "./modelConfigs.js";
+import { LlmId } from "./modelConfigs.js";
 import { PromptPair } from "./prompts.js";
 import { Workflow } from "./workflows/Workflow.js";
 
@@ -150,10 +150,10 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     const totalCost = calculatePriceMultipleCalls(
       this.llmMetricsList.reduce(
         (acc, metrics) => {
-          acc[metrics.llmName] = metrics;
+          acc[metrics.LlmId] = metrics;
           return acc;
         },
-        {} as Record<LLMName, LlmMetrics>
+        {} as Record<LlmId, LlmMetrics>
       )
     );
 
@@ -236,7 +236,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
         apiCalls: 1,
         inputTokens: completion?.usage?.prompt_tokens ?? 0,
         outputTokens: completion?.usage?.completion_tokens ?? 0,
-        llmName: workflow.llmConfig.llmName,
+        LlmId: workflow.llmConfig.llmId,
       });
 
       if (!completion?.content) {

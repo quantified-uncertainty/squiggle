@@ -28,7 +28,7 @@ export default function CreatePage() {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex">
       {/* Left column: Mode Toggle, Chat, Form, and list of Workflows */}
       <div className={clsx("w-1/5 p-2", collapsedSidebar && "hidden")}>
         <Sidebar

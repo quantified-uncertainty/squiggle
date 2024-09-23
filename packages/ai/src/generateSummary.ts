@@ -35,8 +35,8 @@ function generateOverview(workflow: Workflow): string {
   let overview = `- Total Steps: ${steps.length}\n`;
   overview += `- Total Time: ${(totalTime / 1000).toFixed(2)} seconds\n`;
 
-  for (const [llmName, metrics] of Object.entries(metricsByLLM)) {
-    overview += `- ${llmName}:\n`;
+  for (const [LlmId, metrics] of Object.entries(metricsByLLM)) {
+    overview += `- ${LlmId}:\n`;
     overview += `  - API Calls: ${metrics.apiCalls}\n`;
     overview += `  - Input Tokens: ${metrics.inputTokens}\n`;
     overview += `  - Output Tokens: ${metrics.outputTokens}\n`;
@@ -82,8 +82,8 @@ function generateDetailedStepLogs(workflow: Workflow): string {
     detailedLogs += `- ⏱️ Duration: ${step.getDuration() / 1000} seconds\n`;
 
     step.llmMetricsList.forEach((metrics) => {
-      const cost = calculatePriceMultipleCalls({ [metrics.llmName]: metrics });
-      detailedLogs += `- ${metrics.llmName}:\n`;
+      const cost = calculatePriceMultipleCalls({ [metrics.LlmId]: metrics });
+      detailedLogs += `- ${metrics.LlmId}:\n`;
       detailedLogs += `  - API Calls: ${metrics.apiCalls}\n`;
       detailedLogs += `  - Input Tokens: ${metrics.inputTokens}\n`;
       detailedLogs += `  - Output Tokens: ${metrics.outputTokens}\n`;

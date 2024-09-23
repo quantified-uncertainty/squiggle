@@ -85,7 +85,7 @@ const ModelRevisionItem: FC<{
         <div className="text-xs text-slate-700">{`Build Time: ${revision.lastBuild.runSeconds.toFixed(2)}s`}</div>
       )}
       {revision.variableRevisions.length > 0 ? (
-        <div className="text-xs text-green-700">
+        <div className="text-xs text-emerald-700">
           {`${revision.variableRevisions.length} variables`}
         </div>
       ) : null}

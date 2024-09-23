@@ -1,4 +1,4 @@
-import { LlmConfig } from "@quri/squiggle-ai";
+import { LlmConfig, LlmId } from "@quri/squiggle-ai";
 import { SquiggleWorkflow } from "@quri/squiggle-ai/server";
 
 import { createRequestBodySchema, requestToInput } from "../../utils";
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
     // Create a SquiggleGenerator instance
     const llmConfig: LlmConfig = {
-      llmName: request.model ?? "Claude-Sonnet",
+      llmId: (request.model as LlmId) ?? "Claude-Sonnet",
       priceLimit: 0.3,
       durationLimitMinutes: 4,
       messagesInHistoryToKeep: 4,

@@ -1,9 +1,15 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { LLMName, MODEL_CONFIGS, SerializedWorkflow } from "@quri/squiggle-ai";
+import { LlmId, MODEL_CONFIGS, SerializedWorkflow } from "@quri/squiggle-ai";
 import {
   Button,
   SelectStringFormField,
@@ -28,7 +34,7 @@ type Props = {
 type FormShape = {
   prompt: string;
   squiggleCode: string;
-  model: LLMName;
+  model: LlmId;
 };
 
 export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
@@ -45,6 +51,14 @@ export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
   });
 
   const [mode, setMode] = useState<"create" | "edit">("create");
+  const prevWorkflowsLengthRef = useRef(workflows.length);
+
+  useEffect(() => {
+    if (workflows.length > prevWorkflowsLengthRef.current) {
+      selectWorkflow(workflows[workflows.length - 1].id);
+      prevWorkflowsLengthRef.current = workflows.length;
+    }
+  }, [workflows, selectWorkflow]);
 
   useImperativeHandle(ref, () => ({
     edit: (code: string) => {
@@ -61,13 +75,18 @@ export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
       const requestBody: CreateRequestBody = {
         prompt: mode === "create" ? prompt : undefined,
         squiggleCode: mode === "edit" ? squiggleCode : undefined,
-        model,
+        model: model as LlmId,
       };
 
       submitWorkflow(requestBody);
       form.setValue("prompt", "");
     }
   );
+
+  const [prompt, squiggleCode] = form.watch(["prompt", "squiggleCode"]);
+
+  const isSubmitDisabled =
+    mode === "create" ? !prompt?.trim() : !squiggleCode?.trim();
 
   return (
     <FormProvider {...form}>
@@ -103,18 +122,25 @@ export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
             </StyledTab.Panels>
           </div>
         </StyledTab.Group>
-        <SelectStringFormField<FormShape, LLMName>
+        <SelectStringFormField<FormShape, LlmId>
           name="model"
           label="Model"
           size="small"
-          options={Object.keys(MODEL_CONFIGS) as LLMName[]}
+          options={MODEL_CONFIGS.filter(
+            (model) => model.provider === "anthropic"
+          ).map((model) => model.id)}
           required
         />
-        <Button theme="primary" wide onClick={handleSubmit}>
-          Send
+        <Button
+          theme="primary"
+          wide
+          onClick={handleSubmit}
+          disabled={isSubmitDisabled}
+        >
+          Start Workflow
         </Button>
         <div className="flex-grow overflow-y-auto">
-          <h2 className="mb-2 text-sm font-bold">Actions</h2>
+          <h2 className="mb-2 text-sm font-bold">Workflows</h2>
           <WorkflowSummaryList
             workflows={workflows}
             selectedWorkflow={selectedWorkflow}

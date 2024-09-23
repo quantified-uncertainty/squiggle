@@ -1,124 +1,59 @@
 import clsx from "clsx";
-import { FC } from "react";
-import { Handle, NodeProps, Position } from "reactflow";
+import { FC, MouseEvent } from "react";
 
-import {
-  SerializedArtifact,
-  SerializedMessage,
-  SerializedStep,
-} from "@quri/squiggle-ai";
-import { CodeBracketIcon, DocumentTextIcon, EditIcon, Tooltip } from "@quri/ui";
+import { SerializedStep } from "@quri/squiggle-ai";
 
 import { StepStatusIcon } from "../StepStatusIcon";
+import { ArtifactDisplay } from "./StepNodeHelpers";
 
-const ArtifactIcon: FC<{ artifact: SerializedArtifact }> = ({ artifact }) => {
-  switch (artifact.kind) {
-    case "source":
-      return <CodeBracketIcon size={14} />;
-    case "prompt":
-      return <EditIcon size={14} />;
-    case "code":
-      return (
-        <CodeBracketIcon
-          size={14}
-          className={clsx(artifact.ok ? "text-green-500" : "text-red-500")}
-        />
-      );
-    default:
-      return <div>❓ {artifact satisfies never}</div>;
-  }
+type StepNodeProps = {
+  data: SerializedStep;
+  onClick?: (event: MouseEvent<HTMLDivElement>) => void;
+  isSelected?: boolean;
+  stepNumber: number;
 };
 
-const ArtifactDisplay: FC<{ name: string; artifact: SerializedArtifact }> = ({
-  name,
-  artifact,
-}) => {
-  return (
-    <Tooltip
-      render={() => {
-        return (
-          <div className="max-h-80 max-w-md overflow-y-auto rounded border bg-white px-3 py-2 text-xs shadow-lg">
-            <div className="mb-1 font-medium">{name}</div>
-            {artifact.kind === "source" || artifact.kind === "code" ? (
-              <pre className="whitespace-pre-wrap">{artifact.value}</pre>
-            ) : (
-              <div>{artifact.value}</div>
-            )}
-          </div>
-        );
-      }}
-    >
-      <div className="p-0.5 text-gray-400 hover:bg-slate-100 hover:text-gray-700">
-        <ArtifactIcon artifact={artifact} />
-      </div>
-    </Tooltip>
+const getStepNodeClassName = (isSelected: boolean) =>
+  clsx(
+    "w-full cursor-pointer rounded-md border px-4 py-2 shadow-sm transition-colors",
+    isSelected
+      ? "border-emerald-300 bg-emerald-100 hover:bg-emerald-200"
+      : "border-slate-200 bg-slate-100 hover:bg-slate-300"
   );
-};
 
-const MessagesTooltip: FC<{ messages: SerializedMessage[] }> = ({
-  messages,
+export const StepNode: FC<StepNodeProps> = ({
+  data,
+  onClick,
+  isSelected = false,
+  stepNumber,
 }) => {
   return (
-    <Tooltip
-      render={() => {
-        return (
-          <div className="max-h-80 max-w-md overflow-y-auto rounded border bg-white px-3 py-2 text-xs shadow-lg">
-            <div className="space-y-2">
-              {messages.map((message, index) => {
-                return (
-                  <div key={index}>
-                    <header className="font-bold">{message.role}:</header>
-                    <pre className="whitespace-pre-wrap">{message.content}</pre>
-                  </div>
-                );
-              })}
+    <div className={getStepNodeClassName(isSelected)} onClick={onClick}>
+      <div className="flex flex-col">
+        <div className="mb-1 flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            {data.state !== "DONE" && (
+              <div className="shrink-0">
+                <StepStatusIcon step={data} />
+              </div>
+            )}
+            <div className="font-mono text-sm font-semibold text-slate-600">
+              <span className="mr-1 text-slate-400">{stepNumber}.</span>
+              {data.name}
             </div>
           </div>
-        );
-      }}
-    >
-      <div className="p-0.5 text-gray-400 hover:bg-slate-100 hover:text-gray-700">
-        <DocumentTextIcon size={14} />
-      </div>
-    </Tooltip>
-  );
-};
-
-export const StepNode: FC<NodeProps<SerializedStep>> = ({ data }) => {
-  return (
-    <div className="relative w-56 rounded border border-slate-800 bg-white p-2.5">
-      <Handle type="target" position={Position.Top} isConnectable={false} />
-      <Handle type="source" position={Position.Bottom} isConnectable={false} />
-      <div className="flex flex-col gap-0.5">
-        <div className="flex items-center gap-1">
-          <div className="text-xs font-medium text-slate-700">In:</div>
-          {Object.entries(data.inputs).map(([key, value]) => (
-            <ArtifactDisplay key={key} name={key} artifact={value} />
-          ))}
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="shrink-0">
-            <StepStatusIcon step={data} />
+          <div className="flex items-center gap-2">
+            {Object.entries(data.outputs).map(([key, value]) => (
+              <ArtifactDisplay
+                key={key}
+                name={key}
+                artifact={value}
+                size={12}
+                showArtifactName={false}
+              />
+            ))}
           </div>
-          <div className="text-sm text-slate-700">{data.name}</div>
         </div>
-        {Object.keys(data.outputs).length || data.messages.length ? (
-          <div className="flex justify-between">
-            {Object.keys(data.outputs).length ? (
-              <div className="flex items-center gap-1">
-                <div className="text-xs font-medium text-slate-700">Out:</div>
-                {Object.entries(data.outputs).map(([key, value]) => (
-                  <ArtifactDisplay key={key} name={key} artifact={value} />
-                ))}
-              </div>
-            ) : (
-              <div />
-            )}
-            {data.messages.length ? (
-              <MessagesTooltip messages={data.messages} />
-            ) : null}
-          </div>
-        ) : null}
       </div>
     </div>
   );
