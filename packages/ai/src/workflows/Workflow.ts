@@ -14,18 +14,18 @@ import {
   StepShape,
 } from "../LLMStep.js";
 import { TimestampedLogEntry } from "../Logger.js";
-import { LLMName } from "../modelConfigs.js";
+import { LlmId } from "../modelConfigs.js";
 import { WorkflowResult } from "../types.js";
 
 export interface LlmConfig {
-  llmName: LLMName;
+  llmId: LlmId;
   priceLimit: number;
   durationLimitMinutes: number;
   messagesInHistoryToKeep: number;
 }
 
 export const llmConfigDefault: LlmConfig = {
-  llmName: "Claude-Sonnet",
+  llmId: "Claude-Sonnet",
   priceLimit: 0.3,
   durationLimitMinutes: 1,
   messagesInHistoryToKeep: 4,
@@ -105,7 +105,7 @@ export class Workflow {
     this.id = crypto.randomUUID();
 
     this.llmClient = new LLMClient(
-      llmConfig.llmName,
+      llmConfig.llmId,
       openaiApiKey,
       anthropicApiKey
     );
@@ -226,21 +226,21 @@ export class Workflow {
     };
   }
 
-  llmMetricSummary(): Record<LLMName, LlmMetrics> {
+  llmMetricSummary(): Record<LlmId, LlmMetrics> {
     return this.getSteps().reduce(
       (acc, step) => {
         step.llmMetricsList.forEach((metrics) => {
-          if (!acc[metrics.llmName]) {
-            acc[metrics.llmName] = { ...metrics };
+          if (!acc[metrics.LlmId]) {
+            acc[metrics.LlmId] = { ...metrics };
           } else {
-            acc[metrics.llmName].apiCalls += metrics.apiCalls;
-            acc[metrics.llmName].inputTokens += metrics.inputTokens;
-            acc[metrics.llmName].outputTokens += metrics.outputTokens;
+            acc[metrics.LlmId].apiCalls += metrics.apiCalls;
+            acc[metrics.LlmId].inputTokens += metrics.inputTokens;
+            acc[metrics.LlmId].outputTokens += metrics.outputTokens;
           }
         });
         return acc;
       },
-      {} as Record<LLMName, LlmMetrics>
+      {} as Record<LlmId, LlmMetrics>
     );
   }
 

@@ -1,18 +1,12 @@
 import {
   SerializedWorkflow,
   serializedWorkflowSchema,
-  WorkflowResult,
 } from "@quri/squiggle-ai";
 
 import { prisma } from "@/prisma";
 import { getUserOrRedirect } from "@/server/helpers";
 
 import { AiDashboard } from "./AiDashboard";
-
-export type SquiggleResponse = {
-  result?: WorkflowResult;
-  currentStep?: string;
-};
 
 export default async function AiPage() {
   const user = await getUserOrRedirect();

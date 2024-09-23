@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 
-import { LLMName, MODEL_CONFIGS } from "./modelConfigs.js";
+import { LlmId, MODEL_CONFIGS } from "./modelConfigs.js";
 import { squiggleSystemContent } from "./prompts.js";
 
 export type Message = {
@@ -87,21 +87,21 @@ export interface LlmMetrics {
   apiCalls: number;
   inputTokens: number;
   outputTokens: number;
-  llmName: LLMName;
+  LlmId: LlmId;
 }
 
 export function calculatePriceMultipleCalls(
-  metrics: Partial<Record<LLMName, LlmMetrics>>
+  metrics: Partial<Record<LlmId, LlmMetrics>>
 ): number {
   let totalCost = 0;
 
-  for (const [llmName, { inputTokens, outputTokens }] of Object.entries(
+  for (const [LlmId, { inputTokens, outputTokens }] of Object.entries(
     metrics
   )) {
-    const modelConfig = MODEL_CONFIGS[llmName as LLMName];
+    const modelConfig = MODEL_CONFIGS.find((model) => model.id === LlmId);
 
     if (!modelConfig) {
-      console.warn(`No pricing information found for LLM: ${llmName}`);
+      console.warn(`No pricing information found for LLM: ${LlmId}`);
       continue;
     }
 
@@ -132,7 +132,7 @@ export class LLMClient {
   private anthropicClient?: Anthropic;
 
   constructor(
-    public llmName: LLMName,
+    public LlmId: LlmId,
     openaiApiKey?: string,
     anthropicApiKey?: string
   ) {
@@ -167,7 +167,13 @@ export class LLMClient {
   async run(
     conversationHistory: Message[]
   ): Promise<StandardizedChatCompletion> {
-    const selectedModelConfig = MODEL_CONFIGS[this.llmName];
+    const selectedModelConfig = MODEL_CONFIGS.find(
+      (model) => model.id === this.LlmId
+    );
+
+    if (!selectedModelConfig) {
+      throw new Error(`No model config found for LLM: ${this.LlmId}`);
+    }
 
     try {
       if (selectedModelConfig.provider === "anthropic") {

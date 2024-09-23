@@ -6,7 +6,7 @@ import { FC, PropsWithChildren } from "react";
 import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { isModelRoute } from "@/routes";
+import { isAiRoute, isModelRoute } from "@/routes";
 
 import { PageFooter } from "../components/layout/RootLayout/PageFooter";
 import { PageMenu } from "../components/layout/RootLayout/PageMenu";
@@ -27,7 +27,7 @@ const InnerRootLayout: FC<PropsWithChildren> = ({ children }) => {
 
   const pathname = usePathname();
 
-  const showFooter = !isModelRoute(pathname);
+  const showFooter = !isModelRoute(pathname) && !isAiRoute(pathname);
 
   return (
     <div className={"flex min-h-screen flex-col bg-white"}>
