@@ -1,3 +1,4 @@
+import { orderBy } from "lodash";
 import { FC } from "react";
 
 import { SerializedWorkflow } from "@quri/squiggle-ai";
@@ -9,9 +10,11 @@ export const WorkflowSummaryList: FC<{
   selectedWorkflow: SerializedWorkflow | undefined;
   selectWorkflow: (id: string) => void;
 }> = ({ workflows, selectedWorkflow, selectWorkflow }) => {
+  const sortedWorkflows = orderBy(workflows, ["timestamp"], ["asc"]);
+
   return (
     <div className="flex flex-col space-y-2">
-      {workflows.map((workflow) => (
+      {sortedWorkflows.map((workflow) => (
         <WorkflowSummaryItem
           key={workflow.id}
           workflow={workflow}
