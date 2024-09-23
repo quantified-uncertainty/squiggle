@@ -157,7 +157,7 @@ export async function decodeWorkflowFromReader({
       case "workflowStarted": {
         await addWorkflow({
           id: event.content.id,
-          timestamp: new Date(event.content.timestamp),
+          timestamp: event.content.timestamp,
           input,
           steps: [],
           status: "loading",

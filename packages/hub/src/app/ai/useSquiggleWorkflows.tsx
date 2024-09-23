@@ -8,8 +8,9 @@ import {
 
 import { bodyToLineReader, CreateRequestBody, requestToInput } from "./utils";
 
-export function useSquiggleWorkflows() {
-  const [workflows, setWorkflows] = useState<SerializedWorkflow[]>([]);
+export function useSquiggleWorkflows(initialWorkflows: SerializedWorkflow[]) {
+  const [workflows, setWorkflows] =
+    useState<SerializedWorkflow[]>(initialWorkflows);
   const [selected, setSelected] = useState<number | undefined>(undefined);
 
   const updateWorkflow = useCallback(
@@ -28,10 +29,11 @@ export function useSquiggleWorkflows() {
 
   const addMockWorkflow = useCallback(
     (input: SquiggleWorkflowInput) => {
+      // This will be replaced with a real workflow once we receive the first message from the server.
       const id = `loading-${Date.now().toString()}`;
       const workflow: SerializedWorkflow = {
         id,
-        timestamp: new Date(),
+        timestamp: new Date().getTime(),
         status: "loading",
         input,
         steps: [],
@@ -68,14 +70,14 @@ export function useSquiggleWorkflows() {
         await decodeWorkflowFromReader({
           reader: reader as ReadableStreamDefaultReader, // frontend types don't precisely match Node.js types
           input: requestToInput(request),
-          addWorkflow: (workflow) => {
+          addWorkflow: async (workflow) => {
             // Replace the mock workflow with the real workflow.
             setWorkflows((workflows) =>
               workflows.map((w) => (w.id === id ? workflow : w))
             );
             id = workflow.id;
           },
-          setWorkflow: (update) => updateWorkflow(id, update),
+          setWorkflow: async (update) => updateWorkflow(id, update),
         });
       } catch (error) {
         updateWorkflow(id, (workflow) => ({

@@ -4,6 +4,7 @@ export {
   type SerializedMessage,
   type SerializedStep,
   type SerializedWorkflow,
+  serializedWorkflowSchema,
   workflowMessageSchema,
   type WorkflowResult,
 } from "./types.js";

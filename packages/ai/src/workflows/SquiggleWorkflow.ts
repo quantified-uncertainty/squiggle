@@ -5,20 +5,9 @@ import { adjustToFeedbackStep } from "../steps/adjustToFeedbackStep.js";
 import { fixCodeUntilItRunsStep } from "../steps/fixCodeUntilItRunsStep.js";
 import { generateCodeStep } from "../steps/generateCodeStep.js";
 import { runAndFormatCodeStep } from "../steps/runAndFormatCodeStep.js";
+import { squiggleWorkflowInputSchema } from "../types.js";
 import { ControlledWorkflow } from "./ControlledWorkflow.js";
 import { LlmConfig } from "./Workflow.js";
-
-export const squiggleWorkflowInputSchema = z.discriminatedUnion("type", [
-  z.object({
-    type: z.literal("Create"),
-    prompt: z.string(),
-  }),
-  z.object({
-    type: z.literal("Edit"),
-    source: z.string(),
-    prompt: z.string().optional(),
-  }),
-]);
 
 export type SquiggleWorkflowInput = z.infer<typeof squiggleWorkflowInputSchema>;
 

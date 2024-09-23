@@ -1,6 +1,17 @@
 import { z } from "zod";
 
-import { type SquiggleWorkflowInput } from "./workflows/SquiggleWorkflow.js";
+// This could be defined in SquiggleWorkflow.ts, but it would cause a dependency on server-only modules.
+export const squiggleWorkflowInputSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("Create"),
+    prompt: z.string(),
+  }),
+  z.object({
+    type: z.literal("Edit"),
+    source: z.string(),
+    prompt: z.string().optional(),
+  }),
+]);
 
 // Protocol for streaming workflow changes between server and client.
 
@@ -112,14 +123,30 @@ export type WorkflowMessage = z.infer<typeof workflowMessageSchema>;
 
 // Client-side representation of a workflow
 
-export type SerializedWorkflow = {
-  id: string;
-  timestamp: Date;
-  input: SquiggleWorkflowInput; // FIXME - SquiggleWorkflow-specific
-  steps: SerializedStep[];
-  currentStep?: string;
-} & (
-  | { status: "loading"; result?: undefined }
-  | { status: "finished"; result: WorkflowResult }
-  | { status: "error"; result: string }
-);
+const commonWorkflowFields = {
+  id: z.string(),
+  timestamp: z.number(), // milliseconds since epoch
+  input: squiggleWorkflowInputSchema, // FIXME - SquiggleWorkflow-specific
+  steps: z.array(stepSchema),
+  currentStep: z.string().optional(),
+};
+
+export const serializedWorkflowSchema = z.discriminatedUnion("status", [
+  z.object({
+    ...commonWorkflowFields,
+    status: z.literal("loading"),
+    result: z.undefined(),
+  }),
+  z.object({
+    ...commonWorkflowFields,
+    status: z.literal("finished"),
+    result: workflowResultSchema,
+  }),
+  z.object({
+    ...commonWorkflowFields,
+    status: z.literal("error"),
+    result: z.string(),
+  }),
+]);
+
+export type SerializedWorkflow = z.infer<typeof serializedWorkflowSchema>;
