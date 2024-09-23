@@ -121,7 +121,17 @@ export const WorkflowViewer: FC<WorkflowViewerProps> = ({
     case "loading":
       return <LoadingWorkflowViewer {...props} workflow={workflow} />;
     case "error":
-      return <div className="text-red-700">{workflow.result}</div>;
+      return (
+        <div className="mt-2 rounded-md border border-red-300 bg-red-50 p-4">
+          <h3 className="mb-2 text-lg font-semibold text-red-800">
+            Server Error
+          </h3>
+          <p className="mb-4 text-red-700">{workflow.result}</p>
+          <p className="text-sm text-red-600">
+            Please try refreshing the page or attempt your action again.
+          </p>
+        </div>
+      );
     default:
       throw workflow satisfies never;
   }

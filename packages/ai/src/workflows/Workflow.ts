@@ -133,7 +133,7 @@ export class Workflow {
     return step;
   }
 
-  repeatPreviousStep() {
+  addDuplicateOfPreviousStep() {
     const previousStep = this.steps.at(-1);
     if (!previousStep) {
       return;
