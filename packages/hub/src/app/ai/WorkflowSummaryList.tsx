@@ -13,7 +13,7 @@ export const WorkflowSummaryList: FC<{
   const sortedWorkflows = orderBy(workflows, ["timestamp"], ["asc"]);
 
   return (
-    <div className="flex flex-col space-y-2">
+    <div className="flex max-h-[400px] flex-col space-y-2 overflow-y-auto pr-2">
       {sortedWorkflows.map((workflow) => (
         <WorkflowSummaryItem
           key={workflow.id}

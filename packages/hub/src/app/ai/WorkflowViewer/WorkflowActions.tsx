@@ -10,7 +10,9 @@ export const WorkflowActions: FC<{
   height: number;
   onNodeClick?: (node: SerializedStep) => void;
 }> = ({ workflow, height, onNodeClick }) => {
-  const [selectedNodeIndex, setSelectedNodeIndex] = useState<number | null>(0);
+  const [selectedNodeIndex, setSelectedNodeIndex] = useState<number | null>(
+    workflow.steps.length - 1
+  );
   const prevStepsLengthRef = useRef(workflow.steps.length);
 
   useEffect(() => {
