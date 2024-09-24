@@ -1,6 +1,8 @@
 import axios from "axios";
 import fs from "fs/promises";
-import path from "path";
+import path, { dirname } from "path";
+import prettier from "prettier";
+import { fileURLToPath } from "url";
 
 export const librariesToImport = ["ozziegooen/sTest", "ozziegooen/helpers"];
 
@@ -26,13 +28,18 @@ function getQuery(owner: string, slug: string) {
   `;
 }
 
-export function getLibraryPath(libName: string): string {
+function getLibraryPath(libName: string): string {
   const [author, name] = libName.split("/");
   return path.join(
     "squiggleLibraries",
     author || "ozziegooen",
     `${name || libName}.squiggle`
   );
+}
+
+function getScriptPath() {
+  const __filename = fileURLToPath(import.meta.url);
+  return dirname(__filename);
 }
 
 async function fetchSquiggleCode(owner: string, slug: string) {
@@ -61,19 +68,26 @@ async function fetchAllLibraries() {
   }
 }
 
-// We save the files into a TS file, so that Vercel could read them.
-async function saveToTsFile(contents: (string | null)[], fileName: string) {
+async function saveToTsFile(
+  contents: string,
+  variableName: string,
+  fileName: string
+) {
   const fileContent = `// This file is auto-generated. Do not edit manually.
-export const squiggleLibraryContents = new Map([
-${contents.filter(Boolean).join(",\n")}
-]);
+export const ${variableName} = ${contents};
 `;
 
-  const outputPath = path.join(__dirname, "..", fileName);
-  await fs.writeFile(outputPath, fileContent);
-  console.log(`${fileName} has been generated successfully.`);
+  const prettierConfig = await prettier.resolveConfig(process.cwd());
+  const formattedContent = await prettier.format(fileContent, {
+    ...prettierConfig,
+    parser: "typescript",
+  });
+
+  const outputPath = path.join(getScriptPath(), "..", fileName);
+  await fs.writeFile(outputPath, formattedContent);
+  console.log(`${fileName} has been generated and formatted successfully.`);
 }
-// New function to generate squiggleLibraryContents.ts.
+
 async function generateLibraryContents() {
   const contents = await Promise.all(
     librariesToImport.map(async (lib) => {
@@ -88,13 +102,33 @@ async function generateLibraryContents() {
     })
   );
 
-  await saveToTsFile(contents, "squiggleLibraryContents.ts");
+  await saveToTsFile(
+    `new Map([${contents.filter(Boolean).join(",\n")}]);`,
+    "LIBRARY_CONTENTS",
+    "squiggle/squiggleLibraryContents.ts"
+  );
 }
 
-// Run the fetching process and generate LibraryContents.ts
+function getDocsPath(): string {
+  return path.join(getScriptPath(), "..", "..", "files", "squiggleDocs.md");
+}
+
+async function generateReadme() {
+  const docsPath = getDocsPath();
+  const readmeContent = await fs.readFile(docsPath, "utf8");
+
+  await saveToTsFile(
+    `${JSON.stringify(readmeContent)}`,
+    "README",
+    "squiggle/README.ts"
+  );
+}
+
+// We save the files into TS files, so that Vercel could read them.
 async function main() {
   await fetchAllLibraries();
   await generateLibraryContents();
+  await generateReadme();
 }
 
 main().catch((error) => {

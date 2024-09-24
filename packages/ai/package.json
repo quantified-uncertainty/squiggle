@@ -13,7 +13,7 @@
     "lint": "prettier --check .",
     "format": "prettier --write .",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "getCode": "tsx src/scripts/fetchSquiggleLibraries.ts",
+    "prepareSquiggleFiles": "tsx src/scripts/prepareSquiggleFiles.ts",
     "createSquiggle": "tsx src/scripts/createSquiggle.ts",
     "editSquiggle": "tsx src/scripts/editSquiggle.ts"
   },

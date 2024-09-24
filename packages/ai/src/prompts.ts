@@ -1,27 +1,5 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-import { libraryContents } from "./squiggle/squiggleLibraryContents.js";
-
-const SQUIGGLE_DOCS_PATH = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "files",
-  "squiggleDocs.md"
-);
-
-// Utility functions
-function readTxtFileSync(filePath: string) {
-  try {
-    return fs.readFileSync(filePath, "utf8");
-  } catch (err) {
-    console.error(`Error reading file: ${err}`);
-    throw err;
-  }
-}
-// Load Squiggle docs
-export const squiggleDocs = readTxtFileSync(SQUIGGLE_DOCS_PATH);
+import { README } from "./squiggle/README.js";
+import { LIBRARY_CONTENTS } from "./squiggle/squiggleLibraryContents.js";
 
 // Used as context for Claude, and as first message for other LLMs.
 export const squiggleSystemContent: string = `You are an AI assistant specialized in generating Squiggle code. Squiggle is a probabilistic programming language designed for estimation. Always respond with valid Squiggle code enclosed in triple backticks (\`\`\`). Do not give any more explanation, just provide the code and nothing else. Think through things, step by step.
@@ -30,11 +8,11 @@ Write the entire code, don't truncate it. So don't ever use "...", just write ou
 
 Here's the full Squiggle Documentation. It's important that all of the functions you use are contained here. Check this before finishing your work.
 
-${squiggleDocs}
+${README}
 
 ## Available libraries:
 
-${[...libraryContents.entries()]
+${[...LIBRARY_CONTENTS.entries()]
   .map(([name, content]) => `### Library ${name} \n\n ${content}`)
   .join("\n\n")}`;
 
