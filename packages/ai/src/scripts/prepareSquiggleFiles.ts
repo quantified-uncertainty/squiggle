@@ -67,12 +67,13 @@ async function fetchAllLibraries() {
   }
 }
 
-// We save the files into a TS file, so that Vercel could read them.
-async function saveToTsFile(contents: (string | null)[], fileName: string) {
+async function saveToTsFile(
+  contents: string,
+  variableName: string,
+  fileName: string
+) {
   const fileContent = `// This file is auto-generated. Do not edit manually.
-export const LIBRARY_CONTENTS = new Map([
-${contents.filter(Boolean).join(",\n")}
-]);
+export const ${variableName} = ${contents};
 `;
 
   const outputPath = path.join(getScriptPath(), "..", fileName);
@@ -80,7 +81,6 @@ ${contents.filter(Boolean).join(",\n")}
   console.log(`${fileName} has been generated successfully.`);
 }
 
-// New function to generate squiggleLibraryContents.ts.
 async function generateLibraryContents() {
   const contents = await Promise.all(
     librariesToImport.map(async (lib) => {
@@ -95,27 +95,29 @@ async function generateLibraryContents() {
     })
   );
 
-  await saveToTsFile(contents, "squiggle/squiggleLibraryContents.ts");
+  await saveToTsFile(
+    `new Map([${contents.filter(Boolean).join(",\n")}]);`,
+    "LIBRARY_CONTENTS",
+    "squiggle/squiggleLibraryContents.ts"
+  );
 }
 
 function getDocsPath(): string {
   return path.join(getScriptPath(), "..", "..", "files", "squiggleDocs.md");
 }
 
-// New function to generate README.ts
 async function generateReadme() {
   const docsPath = getDocsPath();
   const readmeContent = await fs.readFile(docsPath, "utf8");
 
-  // Wrap the content in a TypeScript variable
-  const wrappedContent = `export const README = ${JSON.stringify(readmeContent)};`;
-
-  const outputPath = path.join(getScriptPath(), "..", "squiggle", "README.ts");
-  await fs.writeFile(outputPath, wrappedContent);
-  console.log("README.ts has been generated successfully.");
+  await saveToTsFile(
+    `${JSON.stringify(readmeContent)}`,
+    "README",
+    "squiggle/README.ts"
+  );
 }
 
-// Update the main function to include generating README.ts
+// We save the files into TS files, so that Vercel could read them.
 async function main() {
   await fetchAllLibraries();
   await generateLibraryContents();
