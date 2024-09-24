@@ -1,6 +1,7 @@
 import axios from "axios";
 import fs from "fs/promises";
-import path from "path";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
 
 export const librariesToImport = ["ozziegooen/sTest", "ozziegooen/helpers"];
 
@@ -26,13 +27,18 @@ function getQuery(owner: string, slug: string) {
   `;
 }
 
-export function getLibraryPath(libName: string): string {
+function getLibraryPath(libName: string): string {
   const [author, name] = libName.split("/");
   return path.join(
     "squiggleLibraries",
     author || "ozziegooen",
     `${name || libName}.squiggle`
   );
+}
+
+function getScriptPath() {
+  const __filename = fileURLToPath(import.meta.url);
+  return dirname(__filename);
 }
 
 async function fetchSquiggleCode(owner: string, slug: string) {
@@ -64,15 +70,16 @@ async function fetchAllLibraries() {
 // We save the files into a TS file, so that Vercel could read them.
 async function saveToTsFile(contents: (string | null)[], fileName: string) {
   const fileContent = `// This file is auto-generated. Do not edit manually.
-export const squiggleLibraryContents = new Map([
+export const LIBRARY_CONTENTS = new Map([
 ${contents.filter(Boolean).join(",\n")}
 ]);
 `;
 
-  const outputPath = path.join(__dirname, "..", fileName);
+  const outputPath = path.join(getScriptPath(), "..", fileName);
   await fs.writeFile(outputPath, fileContent);
   console.log(`${fileName} has been generated successfully.`);
 }
+
 // New function to generate squiggleLibraryContents.ts.
 async function generateLibraryContents() {
   const contents = await Promise.all(
@@ -88,13 +95,31 @@ async function generateLibraryContents() {
     })
   );
 
-  await saveToTsFile(contents, "squiggleLibraryContents.ts");
+  await saveToTsFile(contents, "squiggle/squiggleLibraryContents.ts");
 }
 
-// Run the fetching process and generate LibraryContents.ts
+function getDocsPath(): string {
+  return path.join(getScriptPath(), "..", "..", "files", "squiggleDocs.md");
+}
+
+// New function to generate README.ts
+async function generateReadme() {
+  const docsPath = getDocsPath();
+  const readmeContent = await fs.readFile(docsPath, "utf8");
+
+  // Wrap the content in a TypeScript variable
+  const wrappedContent = `export const README = ${JSON.stringify(readmeContent)};`;
+
+  const outputPath = path.join(getScriptPath(), "..", "squiggle", "README.ts");
+  await fs.writeFile(outputPath, wrappedContent);
+  console.log("README.ts has been generated successfully.");
+}
+
+// Update the main function to include generating README.ts
 async function main() {
   await fetchAllLibraries();
   await generateLibraryContents();
+  await generateReadme();
 }
 
 main().catch((error) => {

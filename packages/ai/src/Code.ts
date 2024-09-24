@@ -11,10 +11,10 @@ import {
 } from "@quri/squiggle-lang";
 
 import { formatSquiggleCode } from "./squiggle/formatSquiggleCode.js";
-import { libraryContents } from "./squiggle/squiggleLibraryContents.js";
+import { LIBRARY_CONTENTS } from "./squiggle/squiggleLibraryContents.js";
 
 export const llmLinker = makeSelfContainedLinker(
-  Object.fromEntries(libraryContents)
+  Object.fromEntries(LIBRARY_CONTENTS)
 );
 
 // Evaluated code; source + result or error.
