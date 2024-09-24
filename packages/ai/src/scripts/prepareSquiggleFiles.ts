@@ -1,6 +1,7 @@
 import axios from "axios";
 import fs from "fs/promises";
 import path, { dirname } from "path";
+import prettier from "prettier";
 import { fileURLToPath } from "url";
 
 export const librariesToImport = ["ozziegooen/sTest", "ozziegooen/helpers"];
@@ -76,9 +77,15 @@ async function saveToTsFile(
 export const ${variableName} = ${contents};
 `;
 
+  const prettierConfig = await prettier.resolveConfig(process.cwd());
+  const formattedContent = await prettier.format(fileContent, {
+    ...prettierConfig,
+    parser: "typescript",
+  });
+
   const outputPath = path.join(getScriptPath(), "..", fileName);
-  await fs.writeFile(outputPath, fileContent);
-  console.log(`${fileName} has been generated successfully.`);
+  await fs.writeFile(outputPath, formattedContent);
+  console.log(`${fileName} has been generated and formatted successfully.`);
 }
 
 async function generateLibraryContents() {
