@@ -11,7 +11,6 @@ import { LlmConfig } from "./Workflow.js";
 
 export type SquiggleWorkflowInput = z.infer<typeof squiggleWorkflowInputSchema>;
 
-const MAX_RETRIES = 5;
 /**
  * This is a basic workflow for generating Squiggle code.
  *
@@ -42,34 +41,16 @@ export class SquiggleWorkflow extends ControlledWorkflow {
       const code = step.getOutputs()["code"];
       const state = step.getState();
 
-      if (this.handleFailedState(state)) return;
+      if (state.kind === "FAILED") {
+        if (state.errorType === "MINOR") {
+          this.workflow.addRetryOfPreviousStep();
+        }
+        return true;
+      }
       if (!this.isValidCodeOutput(code)) return;
 
       this.addNextStep(code);
     });
-  }
-
-  private handleFailedState(state: any): boolean {
-    if (state.kind === "FAILED") {
-      if (state.errorType === "MINOR") {
-        if (this.retryCount() < MAX_RETRIES) {
-          this.workflow.addRetryOfPreviousStep();
-        }
-      }
-      return true;
-    }
-    return false;
-  }
-
-  private retryCount(): number {
-    const steps = this.workflow.getSteps();
-    const currentRetryingStepId = steps.at(-1)?.retryingStep?.id;
-
-    if (!currentRetryingStepId) return 0;
-
-    return steps.filter(
-      (step) => step.retryingStep?.id === currentRetryingStepId
-    ).length;
   }
 
   private isValidCodeOutput(code: any): boolean {
