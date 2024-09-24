@@ -1,16 +1,18 @@
-// 1. Convert the prompt response into an array of objects
 function extractSearchReplaceBlocks(
   response: string
 ): Array<{ search: string; replace: string }> {
+  const validationResult = validateResponse(response);
+  if (!validationResult.isValid) {
+    throw new Error(
+      "SEARCH/REPLACE error: " + validationResult.error ||
+        "SEARCH/REPLACE error: syntax not correctly formatted"
+    );
+  }
+
   const regex =
     /<<<<<<< SEARCH\s*([\s\S]*?)\s*=======\s*([\s\S]*?)\s*>>>>>>> REPLACE/g;
   const blocks: Array<{ search: string; replace: string }> = [];
   let match;
-
-  // Check for correct syntax
-  if (!/<<<<<<< SEARCH[\s\S]*=======[\s\S]*>>>>>>> REPLACE/.test(response)) {
-    throw new Error("SEARCH/REPLACE syntax not correctly formatted");
-  }
 
   while ((match = regex.exec(response)) !== null) {
     blocks.push({
@@ -96,4 +98,37 @@ export function processSearchReplaceResponse(
       value: error instanceof Error ? error.message : String(error),
     };
   }
+}
+
+// New function to validate the overall structure of the response
+function validateResponse(response: string): {
+  isValid: boolean;
+  error?: string;
+} {
+  const trimmedResponse = response.trim();
+  const searchBlocks = (trimmedResponse.match(/<<<<<<< SEARCH/g) || []).length;
+  const replaceBlocks = (trimmedResponse.match(/>>>>>>> REPLACE/g) || [])
+    .length;
+  const separators = (trimmedResponse.match(/=======/g) || []).length;
+
+  // Check if the number of SEARCH, REPLACE, and separator blocks match
+  if (searchBlocks !== replaceBlocks || searchBlocks !== separators) {
+    return {
+      isValid: false,
+      error: `Mismatched block count: SEARCH (${searchBlocks}), REPLACE (${replaceBlocks}), separators (${separators})`,
+    };
+  }
+
+  // Check if the blocks are in the correct order
+  const regex = /<<<<<<< SEARCH[\s\S]*?=======[\s\S]*?>>>>>>> REPLACE/g;
+  const validBlocks = trimmedResponse.match(regex);
+
+  if (validBlocks === null || validBlocks.length !== searchBlocks) {
+    return {
+      isValid: false,
+      error: "Blocks are not in the correct order or format",
+    };
+  }
+
+  return { isValid: true };
 }
