@@ -141,26 +141,21 @@ export class Workflow {
   }
 
   addRetryOfPreviousStep() {
-    // If the last step is retrying, we want to retry the step it's retrying. If it's not retrying, we want to retry that last step.
-    const retryingStep = this.steps.at(-1)?.retryingStep || this.steps.at(-1);
-    if (!retryingStep) {
+    const lastStep = this.steps.at(-1);
+    if (!lastStep) return;
+
+    const retryingStep = lastStep.retryingStep || lastStep;
+    const retryAttempts = this.getCurrentRetryAttempts(retryingStep.id);
+
+    if (retryAttempts >= MAX_RETRIES) {
       return;
     }
-    if (this.getCurrentRetryAttempts() >= MAX_RETRIES) {
-      return;
-    }
+
     this.addStep(retryingStep.template, retryingStep.inputs, retryingStep);
   }
 
-  public getCurrentRetryAttempts(): number {
-    const steps = this.getSteps();
-    const currentRetryingStepId = steps.at(-1)?.retryingStep?.id;
-
-    if (!currentRetryingStepId) return 0;
-
-    return steps.filter(
-      (step) => step.retryingStep?.id === currentRetryingStepId
-    ).length;
+  public getCurrentRetryAttempts(stepId: string): number {
+    return this.steps.filter((step) => step.retryingStep?.id === stepId).length;
   }
 
   private async runNextStep(): Promise<void> {
