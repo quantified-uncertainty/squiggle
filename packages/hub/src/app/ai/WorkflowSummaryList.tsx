@@ -10,7 +10,7 @@ export const WorkflowSummaryList: FC<{
   selectedWorkflow: SerializedWorkflow | undefined;
   selectWorkflow: (id: string) => void;
 }> = ({ workflows, selectedWorkflow, selectWorkflow }) => {
-  const sortedWorkflows = orderBy(workflows, ["timestamp"], ["asc"]);
+  const sortedWorkflows = orderBy(workflows, ["timestamp"], ["desc"]);
 
   return (
     <div className="flex max-h-[400px] flex-col space-y-2 overflow-y-auto pr-2">

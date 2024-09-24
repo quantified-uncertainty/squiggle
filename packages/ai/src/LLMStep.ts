@@ -14,6 +14,8 @@ import { LlmId } from "./modelConfigs.js";
 import { PromptPair } from "./prompts.js";
 import { Workflow } from "./workflows/Workflow.js";
 
+export type ErrorType = "CRITICAL" | "MINOR";
+
 export type StepState =
   | {
       kind: "PENDING";
@@ -24,8 +26,9 @@ export type StepState =
     }
   | {
       kind: "FAILED";
+      errorType: ErrorType;
       durationMs: number;
-      error: string;
+      message: string;
     };
 
 export type StepShape<
@@ -43,6 +46,7 @@ type ExecuteContext<Shape extends StepShape> = {
   ): void;
   queryLLM(promptPair: PromptPair): Promise<string | null>;
   log(log: LogEntry): void;
+  fail(errorType: ErrorType, message: string): void;
   // workflow: Workflow; // intentionally not exposed, but if you need it, add it here
 };
 
@@ -69,9 +73,10 @@ export class LLMStepTemplate<const Shape extends StepShape = StepShape> {
 
   instantiate(
     workflow: Workflow,
-    inputs: Inputs<Shape>
+    inputs: Inputs<Shape>,
+    retryingStep?: LLMStepInstance<Shape> | undefined
   ): LLMStepInstance<Shape> {
-    return new LLMStepInstance(this, workflow, inputs);
+    return new LLMStepInstance(this, workflow, inputs, retryingStep);
   }
 }
 
@@ -88,7 +93,8 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
   constructor(
     public readonly template: LLMStepTemplate<Shape>,
     public readonly workflow: Workflow,
-    inputs: Inputs<Shape>
+    inputs: Inputs<Shape>,
+    public retryingStep?: LLMStepInstance<Shape> | undefined
   ) {
     this.startTime = Date.now();
     this.id = crypto.randomUUID();
@@ -98,6 +104,10 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
 
   getLogs(): TimestampedLogEntry[] {
     return this.logger.logs;
+  }
+
+  isRetrying(): boolean {
+    return !!this.retryingStep;
   }
 
   getConversationMessages(): Message[] {
@@ -111,7 +121,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
 
     const limits = this.workflow.checkResourceLimits();
     if (limits) {
-      this.criticalError(limits);
+      this.fail("CRITICAL", limits);
       return;
     }
 
@@ -119,17 +129,24 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
       setOutput: (key, value) => this.setOutput(key, value),
       log: (log) => this.log(log),
       queryLLM: (promptPair) => this.queryLLM(promptPair),
+      fail: (errorType, message) => this.fail(errorType, message),
     };
 
     try {
       await this.template.execute(executeContext, this.inputs);
     } catch (error) {
-      this.criticalError(
+      this.fail(
+        "MINOR",
         error instanceof Error ? error.message : String(error)
       );
       return;
     }
-    this.complete();
+
+    const hasFailed = (this.state as StepState).kind === "FAILED";
+
+    if (!hasFailed) {
+      this.state = { kind: "DONE", durationMs: this.calculateDuration() };
+    }
   }
 
   getState() {
@@ -169,7 +186,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     value: Outputs<Shape>[K] | Outputs<Shape>[K]["value"]
   ): void {
     if (key in this.outputs) {
-      this.criticalError(`Output ${key} is already set`);
+      this.fail("MINOR", `Output ${key} is already set`);
       return;
     }
 
@@ -188,24 +205,18 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     this.logger.log(log);
   }
 
-  private criticalError(error: string) {
-    this.log({ type: "error", message: error });
+  private fail(errorType: ErrorType, message: string) {
+    this.log({ type: "error", message });
     this.state = {
       kind: "FAILED",
       durationMs: this.calculateDuration(),
-      error,
+      errorType,
+      message,
     };
   }
 
   private calculateDuration() {
     return Date.now() - this.startTime;
-  }
-
-  private complete() {
-    if (this.state.kind === "FAILED") {
-      return;
-    }
-    this.state = { kind: "DONE", durationMs: this.calculateDuration() };
   }
 
   private addConversationMessage(message: Message): void {
@@ -261,7 +272,8 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
 
       return completion.content;
     } catch (error) {
-      this.criticalError(
+      this.fail(
+        "MINOR",
         `Error in queryLLM: ${error instanceof Error ? error.message : error}`
       );
       return null;

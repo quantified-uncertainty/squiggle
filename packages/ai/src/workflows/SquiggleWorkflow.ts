@@ -11,6 +11,7 @@ import { LlmConfig } from "./Workflow.js";
 
 export type SquiggleWorkflowInput = z.infer<typeof squiggleWorkflowInputSchema>;
 
+const MAX_RETRIES = 5;
 /**
  * This is a basic workflow for generating Squiggle code.
  *
@@ -39,27 +40,53 @@ export class SquiggleWorkflow extends ControlledWorkflow {
   protected configureControllerLoop(): void {
     this.workflow.addEventListener("stepFinished", ({ data: { step } }) => {
       const code = step.getOutputs()["code"];
+      const state = step.getState();
 
-      const hasCompleted = step.getState().kind === "DONE";
-      // output name is hardcoded, should we scan all outputs?
-      const hasCode = code?.kind === "code";
+      if (this.handleFailedState(state)) return;
+      if (!this.isValidCodeOutput(code)) return;
 
-      if (!hasCompleted) {
-        // find previous good step and run that one.
-        this.workflow.addDuplicateOfPreviousStep();
-      } else if (!hasCode) {
-        return;
-      } else if (code.value.type === "success") {
-        this.workflow.addStep(adjustToFeedbackStep, {
-          prompt: this.prompt,
-          code,
-        });
-      } else {
-        this.workflow.addStep(fixCodeUntilItRunsStep, {
-          code,
-        });
-      }
+      this.addNextStep(code);
     });
+  }
+
+  private handleFailedState(state: any): boolean {
+    if (state.kind === "FAILED") {
+      if (state.errorType === "MINOR") {
+        if (this.retryCount() < MAX_RETRIES) {
+          this.workflow.addRetryOfPreviousStep();
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
+  private retryCount(): number {
+    const steps = this.workflow.getSteps();
+    const currentRetryingStepId = steps.at(-1)?.retryingStep?.id;
+
+    if (!currentRetryingStepId) return 0;
+
+    return steps.filter(
+      (step) => step.retryingStep?.id === currentRetryingStepId
+    ).length;
+  }
+
+  private isValidCodeOutput(code: any): boolean {
+    return code?.kind === "code";
+  }
+
+  private addNextStep(code: any): void {
+    if (code.value.type === "success") {
+      this.workflow.addStep(adjustToFeedbackStep, {
+        prompt: this.prompt,
+        code,
+      });
+    } else {
+      this.workflow.addStep(fixCodeUntilItRunsStep, {
+        code,
+      });
+    }
   }
 
   protected configureInitialSteps(): void {
