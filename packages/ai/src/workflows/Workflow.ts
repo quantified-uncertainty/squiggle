@@ -279,10 +279,8 @@ export class Workflow {
     return { totalPrice, llmRunCount };
   }
 
-  private getMessagesFromSteps(stepIndices: number[]): Message[] {
-    return stepIndices.flatMap((index) =>
-      this.steps[index].getConversationMessages()
-    );
+  private getMessagesFromSteps(steps: LLMStepInstance[]): Message[] {
+    return steps.flatMap((step) => step.getConversationMessages());
   }
 
   private priceSoFar(): number {
@@ -290,36 +288,27 @@ export class Workflow {
     return calculatePriceMultipleCalls(currentMetrics);
   }
 
+  // We might want to add the generation step that failed.
   getRelevantPreviousConversationMessages(maxRecentSteps = 3): Message[] {
-    const lastGenerateCodeIndex = this.steps.findLastIndex((step) => {
-      const hasCodeInput = Object.values(step.template.shape.inputs).some(
-        (kind) => kind === "source" || kind === "code"
-      );
+    const lastGenerateCodeIndex = this.steps.findLastIndex(
+      (step) => step.isGenerationStep() && step.isDone()
+    );
 
-      const hasCodeOutput = Object.values(step.template.shape.outputs).some(
-        (kind) => kind === "source" || kind === "code"
-      );
+    if (lastGenerateCodeIndex === -1) {
+      return [];
+    }
 
-      return !hasCodeInput && hasCodeOutput;
-    });
+    const remainingSteps = this.steps
+      .slice(lastGenerateCodeIndex + 1)
+      .filter((step) => step.isDone());
 
-    const getRelevantStepIndexes = (): number[] => {
-      const endIndex = this.steps.length - 1;
-      const startIndex = Math.max(
-        lastGenerateCodeIndex,
-        endIndex - maxRecentSteps + 1
-      );
-      return [
-        lastGenerateCodeIndex,
-        ...Array.from(
-          { length: endIndex - startIndex + 1 },
-          (_, i) => startIndex + i
-        ),
-      ].filter((index, i, arr) => index >= 0 && arr.indexOf(index) === i);
-    };
-    const relevantIndexes = getRelevantStepIndexes();
+    // We always include the last generation step, and then at most `maxRecentSteps - 1` other steps.
+    let remainingNSteps = [
+      this.steps[lastGenerateCodeIndex],
+      ...remainingSteps.slice(-(maxRecentSteps - 1)),
+    ];
 
-    return this.getMessagesFromSteps(relevantIndexes);
+    return this.getMessagesFromSteps(remainingNSteps);
   }
 
   // Event methods
