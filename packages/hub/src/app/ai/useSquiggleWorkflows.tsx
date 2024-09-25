@@ -83,7 +83,7 @@ export function useSquiggleWorkflows(initialWorkflows: SerializedWorkflow[]) {
         updateWorkflow(id, (workflow) => ({
           ...workflow,
           status: "error",
-          result: `Error: ${error instanceof Error ? error.toString() : "Unknown error"}`,
+          result: `Server error: ${error instanceof Error ? error.toString() : "Unknown error"}.`,
         }));
       }
     },

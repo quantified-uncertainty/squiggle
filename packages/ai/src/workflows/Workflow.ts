@@ -84,6 +84,8 @@ export type WorkflowEventListener<T extends WorkflowEventType> = (
  * See `ControlledWorkflow` for a common base class that controls the workflow
  * by injecting new steps based on events.
  */
+
+const MAX_RETRIES = 5;
 export class Workflow {
   private steps: LLMStepInstance[] = [];
   private priceLimit: number;
@@ -121,16 +123,39 @@ export class Workflow {
 
   addStep<S extends StepShape>(
     template: LLMStepTemplate<S>,
-    inputs: Inputs<S>
+    inputs: Inputs<S>,
+    options?: { retryingStep?: LLMStepInstance<S> }
   ): LLMStepInstance<S> {
     // sorry for "any"; countervariance issues
-    const step: LLMStepInstance<any> = template.instantiate(this, inputs);
+    const step: LLMStepInstance<any> = template.instantiate(
+      this,
+      inputs,
+      options?.retryingStep
+    );
     this.steps.push(step);
     this.dispatchEvent({
       type: "stepAdded",
       payload: { step },
     });
     return step;
+  }
+
+  addRetryOfPreviousStep() {
+    const lastStep = this.steps.at(-1);
+    if (!lastStep) return;
+
+    const retryingStep = lastStep.retryingStep || lastStep;
+    const retryAttempts = this.getCurrentRetryAttempts(retryingStep.id);
+
+    if (retryAttempts >= MAX_RETRIES) {
+      return;
+    }
+
+    this.addStep(retryingStep.template, retryingStep.inputs, { retryingStep });
+  }
+
+  public getCurrentRetryAttempts(stepId: string): number {
+    return this.steps.filter((step) => step.retryingStep?.id === stepId).length;
   }
 
   private async runNextStep(): Promise<void> {

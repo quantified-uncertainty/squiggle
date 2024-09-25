@@ -38,15 +38,17 @@ export class SquiggleWorkflow extends ControlledWorkflow {
 
   protected configureControllerLoop(): void {
     this.workflow.addEventListener("stepFinished", ({ data: { step } }) => {
-      if (step.getState().kind !== "DONE") {
-        return;
+      const code = step.getOutputs()["code"];
+      const state = step.getState();
+
+      if (state.kind === "FAILED") {
+        if (state.errorType === "MINOR") {
+          this.workflow.addRetryOfPreviousStep();
+        }
+        return true;
       }
 
-      // output name is hardcoded, should we scan all outputs?
-      const code = step.getOutputs()["code"];
-      if (code?.kind !== "code") {
-        return;
-      }
+      if (code === undefined || code.kind !== "code") return;
 
       if (code.value.type === "success") {
         this.workflow.addStep(adjustToFeedbackStep, {

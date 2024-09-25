@@ -56,16 +56,17 @@ export const fixCodeUntilItRunsStep = new LLMStepTemplate(
 
     const completion = await context.queryLLM(promptPair);
     if (completion) {
-      const nextState = await diffCompletionContentToCode(
+      const newCodeResult = await diffCompletionContentToCode(
         completion,
         code.value
       );
-      if (nextState.ok) {
-        context.setOutput("code", nextState.value);
+      if (newCodeResult.ok) {
+        context.setOutput("code", newCodeResult.value);
       } else {
+        context.fail("MINOR", newCodeResult.value);
         context.log({
           type: "codeRunError",
-          error: nextState.value,
+          error: newCodeResult.value,
         });
       }
     }
