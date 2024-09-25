@@ -106,7 +106,7 @@ export async function codeStringToCode(code: string): Promise<Code> {
   if (formattedCode.ok) {
     return {
       type: "success",
-      source: codeToRun,
+      source: formattedCode.value,
       result: run.value,
     };
   } else {
