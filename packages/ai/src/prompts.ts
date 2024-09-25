@@ -1,4 +1,5 @@
 import { README } from "./squiggle/README.js";
+import { addLineNumbers } from "./squiggle/searchReplace.js";
 import { LIBRARY_CONTENTS } from "./squiggle/squiggleLibraryContents.js";
 
 // Used as context for Claude, and as first message for other LLMs.
@@ -50,6 +51,19 @@ Your response **must** include:
 
 **Example:**
 
+Input (with line numbers):
+<original_code_with_line_numbers>
+${addLineNumbers(`calculateCircleArea(r) = {
+  Math.PI * r * r;
+}
+myFn(x) = {
+  x * 2;
+}
+`)}
+</original_code_with_line_numbers>
+
+Output:
+
 <explanation>
 Fixed exponentiation and function naming for clarity
 </explanation>
@@ -61,9 +75,9 @@ Fixed exponentiation and function naming for clarity
   Math.PI * r ** 2
 >>>>>>> REPLACE
 <<<<<<< SEARCH
-  myFn(x) = {
+myFn(x) = {
 =======
-  myFunction(x) = {
+myFunction(x) = {
 >>>>>>> REPLACE
 </edit>
 `;
