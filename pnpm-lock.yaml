@@ -27,8 +27,8 @@ importers:
   packages/ai:
     dependencies:
       '@anthropic-ai/sdk':
-        specifier: ^0.27.0
-        version: 0.27.1
+        specifier: ^0.27.3
+        version: 0.27.3
       '@quri/configs':
         specifier: workspace:*
         version: link:../configs
@@ -57,8 +57,8 @@ importers:
         specifier: 14.2.4
         version: 14.2.4(@babel/core@7.25.2)(react-dom@18.3.1)(react@18.3.1)
       openai:
-        specifier: ^4.56.1
-        version: 4.57.0(zod@3.23.8)
+        specifier: ^4.64.0
+        version: 4.64.0(zod@3.23.8)
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.12.8)(typescript@5.5.4)
@@ -1156,8 +1156,8 @@ packages:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
 
-  /@anthropic-ai/sdk@0.27.1:
-    resolution: {integrity: sha512-AKFd/E8HO26+DOVPiZpEked3Pm2feA5d4gcX2FcJXr9veDkXbKO90hr2C7N2TL7mPIMwm040ldXlsIZQ416dHg==}
+  /@anthropic-ai/sdk@0.27.3:
+    resolution: {integrity: sha512-IjLt0gd3L4jlOfilxVXTifn42FnVffMgDC04RJK1KDZpmkBWLv0XC92MVVmkxrFZNS/7l3xWgP/I3nqtX1sQHw==}
     dependencies:
       '@types/node': 18.19.31
       '@types/node-fetch': 2.6.11
@@ -9471,6 +9471,7 @@ packages:
 
   /@types/qs@6.9.15:
     resolution: {integrity: sha512-uXHQKES6DQKKCLh441Xv/dwxOq1TVS3JPUMlEqoEglvlhR6Mxnlew/Xq/LRVHpLyk7iK3zODe1qYHIMltO7XGg==}
+    dev: true
 
   /@types/range-parser@1.2.7:
     resolution: {integrity: sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==}
@@ -18815,8 +18816,8 @@ packages:
       is-wsl: 2.2.0
     dev: false
 
-  /openai@4.57.0(zod@3.23.8):
-    resolution: {integrity: sha512-JnwBSIYqiZ3jYjB5f2in8hQ0PRA092c6m+/6dYB0MzK0BEbn+0dioxZsPLBm5idJbg9xzLNOiGVm2OSuhZ+BdQ==}
+  /openai@4.64.0(zod@3.23.8):
+    resolution: {integrity: sha512-+o4vDKn2xzNMeR71rFMCPLr2penpwoALgRoJyIboIBOlkKjw+SoRiBOlO9ss1diXM4Elv01L/iliyr2oqY/l+A==}
     hasBin: true
     peerDependencies:
       zod: ^3.23.8
@@ -18826,13 +18827,11 @@ packages:
     dependencies:
       '@types/node': 18.19.31
       '@types/node-fetch': 2.6.11
-      '@types/qs': 6.9.15
       abort-controller: 3.0.0
       agentkeepalive: 4.5.0
       form-data-encoder: 1.7.2
       formdata-node: 4.4.1
       node-fetch: 2.7.0
-      qs: 6.12.1
       zod: 3.23.8
     transitivePeerDependencies:
       - encoding
