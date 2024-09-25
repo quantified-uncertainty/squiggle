@@ -131,11 +131,6 @@ Replacement text
     @name("📊 Growth Rate Validation Test")
     growthRateTest = sTest.test("Growth rate should be within reasonable bounds", {
     >>>>>>> REPLACE
-      ||
-      meanValue = mean(growthRate)
-      sTest.expect(meanValue).toBeGreaterThan(0) && sTest.expect(meanValue).toBeLessThan(0.05)
-    }
-    >>>>>>> REPLACE
     <<<<<<< SEARCH
     totalPopulationProjection = List.upTo(2023, 2043)
       -> List.map({|year| {year: year, population: projectedPopulation(Date(year))}})
@@ -250,7 +245,7 @@ testSuite = sTest.describe(
 
       expect(result.success).toBe(false);
       expect(result.value).toBe(
-        "SEARCH/REPLACE syntax not correctly formatted"
+        "SEARCH/REPLACE error: Mismatched block count: SEARCH (1), REPLACE (0), separators (2)"
       );
     });
   });
