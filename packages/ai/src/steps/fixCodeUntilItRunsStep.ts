@@ -3,7 +3,7 @@ import { LLMStepTemplate } from "../LLMStep.js";
 import { changeFormatPrompt, PromptPair } from "../prompts.js";
 import { getSquiggleAdvice } from "../squiggle/getSquiggleAdvice.js";
 import { diffCompletionContentToCode } from "../squiggle/processSquiggleCode.js";
-import { addLineNumbers } from "./stepsHelpers.js";
+import { addLineNumbers } from "../squiggle/searchReplace.js";
 
 function editExistingSquiggleCodePrompt(code: Code): PromptPair {
   const error = codeErrorString(code);
