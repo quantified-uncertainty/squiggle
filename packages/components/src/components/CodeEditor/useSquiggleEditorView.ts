@@ -17,8 +17,10 @@ import {
   syntaxHighlighting,
 } from "@codemirror/language";
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
-import { EditorState } from "@codemirror/state";
+import { EditorState, StateField } from "@codemirror/state";
 import {
+  Decoration,
+  DecorationSet,
   drawSelection,
   dropCursor,
   EditorView,
@@ -32,7 +34,7 @@ import {
   useConfigureCodemirrorView,
 } from "./codemirrorHooks.js";
 import { errorsExtension } from "./errorsExtension.js";
-import { showGutterFacet, useReactPropsField } from "./fields.js";
+import { useReactPropsField } from "./fields.js";
 import { formatSquiggleExtension } from "./formatSquiggleExtension.js";
 import { gutterExtension } from "./gutter/gutterExtension.js";
 import { CodeEditorProps } from "./index.js";
@@ -46,14 +48,34 @@ import { themeExtension } from "./themeExtension.js";
 import { tooltipsExtension } from "./tooltips/index.js";
 import { viewNodeExtension } from "./viewNodeExtension.js";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function debugExtension() {
-  // Print state or specific fields on changes.
-  return EditorView.updateListener.of(({ state }) => {
-    // eslint-disable-next-line no-console
-    console.log(state.facet(showGutterFacet));
-  });
-}
+const flashHighlightField = StateField.define<DecorationSet>({
+  create() {
+    return Decoration.none;
+  },
+  update(highlights, tr) {
+    console.log("Update flash highlight field", highlights, tr.effects);
+    highlights = highlights.map(tr.changes);
+    let newHighlight: DecorationSet | null = null;
+    for (let e of tr.effects) {
+      if (e.value && "from" in e.value && "to" in e.value) {
+        // Create a new highlight, replacing any existing one
+        newHighlight = Decoration.set([
+          Decoration.mark({ class: "cm-flash-highlight" }).range(
+            e.value.from,
+            e.value.to
+          ),
+        ]);
+      } else if (e.value === null) {
+        // Remove all highlights when e.value is null
+        newHighlight = Decoration.none;
+      }
+    }
+    // If a new highlight was created or all highlights were removed, use it
+    // Otherwise, keep the existing highlights
+    return newHighlight !== null ? newHighlight : highlights;
+  },
+  provide: (f) => EditorView.decorations.from(f),
+});
 
 export function useSquiggleEditorExtensions(
   view: EditorView | undefined,
@@ -87,6 +109,7 @@ export function useSquiggleEditorExtensions(
       // uncomment for local debugging:
       // debugExtension(),
       highlightSpecialChars(),
+      flashHighlightField,
       history(),
       drawSelection(),
       dropCursor(),
@@ -128,6 +151,7 @@ export function useSquiggleEditorExtensions(
         height: params.height,
       }),
       tooltipsExtension(),
+      flashHighlightField,
     ];
 
     return [

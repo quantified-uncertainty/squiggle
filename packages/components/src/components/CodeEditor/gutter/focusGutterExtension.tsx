@@ -176,6 +176,7 @@ export function getMarkers(
   return markers;
 }
 
+// TODO: This seems to be broken now. Only finding a small subset of the lines that should be highlighted.
 export function focusGutterExtension(): Extension {
   const markersFacet = Facet.define<
     RangeSet<GutterMarker>,
