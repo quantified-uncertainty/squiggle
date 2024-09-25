@@ -178,6 +178,22 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     return totalCost;
   }
 
+  isGenerationStep() {
+    const stepHasCodeInput = Object.values(this.template.shape.inputs).some(
+      (kind) => kind === "source" || kind === "code"
+    );
+
+    const stepHasCodeOutput = Object.values(this.template.shape.outputs).some(
+      (kind) => kind === "source" || kind === "code"
+    );
+
+    return !stepHasCodeInput && stepHasCodeOutput;
+  }
+
+  isDone() {
+    return this.state.kind === "DONE";
+  }
+
   // private methods
 
   private setOutput<K extends Extract<keyof Shape["outputs"], string>>(

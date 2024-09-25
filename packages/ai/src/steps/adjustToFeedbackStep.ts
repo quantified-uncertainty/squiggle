@@ -9,45 +9,44 @@ function adjustToFeedbackPrompt(
 ): PromptPair {
   const fullPrompt = `You are an expert Squiggle code reviewer. Your task is to review and potentially improve Squiggle code based on the given prompt and previous output.
 
-Original prompt:
-<original_code>
+<original_prompt>
 ${prompt}
+</original_prompt>
+
+<original_code>
+${code.source}
 </original_code>
 
-Current code:
-<current_code>
-${code.source}
-</current_code>
-
-Review the code and output. Consider these criteria:
-1. Does the code match the prompt? Does it need to be longer or shorter? Does it include the right components? When in doubt between the prompt and other criteria, follow the prompt.
-2. Use descriptive variable names (e.g., "human_lifespan" instead of "hl").
-3. Include a brief summary comment at the top (use // for one line, /* ... */ for multiple lines).
-4. Add appropriate @name, @doc, @format, and other tags. Use @name and @doc where variable names aren't easily understood. @name is preffered to @doc, but if there's a lot of key information to add, use @doc as well. 
-5. Check for unexpected results or failing tests.
-6. Add additional tests (using sTest) for uncovered failure points.
-7. Handle edge cases and implement error handling where necessary.
-8. Remove any comments that are not necessary - for example, ones explaining previous code changes.
-9. Look through the previous attempts at fixing the error. Do not repeat the same mistakes.
-
-If no adjustments are needed (this should be the common response), respond with:
-<response>
-NO_ADJUSTMENT_NEEDED
-</response>
-
-If adjustments are strongly needed, provide the full adjusted code and a brief explanation:
-
-${changeFormatPrompt}
-
-Aim for concise, effective code that meets all requirements and handles edge cases. Pay special attention to any important errors in the variables or result, and recommend changes if you notice any. However, there should be a fairly low bar for responding with NO_ADJUSTMENT_NEEDED. If you do recommend changes, provide your best recommendation, all things considered.
-
-Focus on improving clarity, efficiency, and adherence to requirements. Only recommend changes for substantial improvements or to fix important issues.
-
-Previous output:
 <previous_output>
 Variables: "${code.result.bindings}"
 Result: "${code.result.result}"
 </previous_output>
+
+Please review the code and output according to the following criteria:
+
+1. **Prompt Adherence**: Does the code fully address the prompt? Should it be shorter or longer? Are all required components included? In case of ambiguity between the prompt and other criteria, prioritize the prompt.
+2. **Variable Naming**: Use clear and descriptive variable names (e.g., \`human_lifespan\` instead of \`hl\`).
+3. **Comments**: Add a brief summary comment at the top of the code. Use \`//\` for single-line comments and \`/* ... */\` for multi-line comments.
+4. **Tags**: Use \`@name\`, \`@doc\`, \`@format\`, and other relevant tags for variables (but not for files). Prefer \`@name\` for concise descriptions; use \`@doc\` when further details are necessary.
+5. **Error Detection**: Look for unexpected results or failed tests.
+6. **Tests**: If the code is complex and lacks basic tests, add appropriate tests using \`sTest\` to handle uncovered failure points. Do not add tests if there are already tests in the code.
+7. **Edge Cases**: Ensure that edge cases are handled and add simple error handling where appropriate.
+8. **Remove Redundant Comments**: Delete any comments that no longer serve a purpose (e.g., comments explaining previous changes).
+9. **Sensitivity Analysis**: Do not add sensitivity analysis functions.
+
+If no adjustments are required (this should be the usual outcome), respond with:
+
+<response>
+NO_ADJUSTMENT_NEEDED
+</response>
+
+If significant adjustments are necessary, provide the fully adjusted code and a brief explanation (6-20 words).
+
+Your goal is to ensure the code is concise, effective, and meets all requirements while addressing edge cases. Pay particular attention to errors in variable definitions or results, and suggest changes where needed. However, default to **NO_ADJUSTMENT_NEEDED** unless there is a strong reason for revision.
+
+Focus on improving clarity, efficiency, and adherence to the requirements. Only recommend changes for meaningful improvements or fixing critical issues.
+
+${changeFormatPrompt}
 `;
 
   const summarizedPrompt = `Review and potentially improve Squiggle code for: ${prompt.substring(0, 150)}${prompt.length > 150 ? "..." : ""}. Consider variable names, comments, tags, tests, and edge cases.`;

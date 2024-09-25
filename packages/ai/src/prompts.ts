@@ -1,4 +1,5 @@
 import { README } from "./squiggle/README.js";
+import { addLineNumbers } from "./squiggle/searchReplace.js";
 import { LIBRARY_CONTENTS } from "./squiggle/squiggleLibraryContents.js";
 
 // Used as context for Claude, and as first message for other LLMs.
@@ -22,37 +23,49 @@ export type PromptPair = {
 };
 
 export const changeFormatPrompt = `
-Response format:
-Provide your changes using SEARCH/REPLACE blocks as follows. You can use multiple SEARCH/REPLACE blocks if needed.
+**Response Format:**
 
-Think step-by-step and explain the needed changes in a few short sentences.
+Your response **must** include:
 
-1. Use <<<<<<< SEARCH to start the search section.
-2. Include only the exact lines to be replaced, with surrounding context if needed for uniqueness. Use the exact same text as in the original code, do not change it at all.
-3. Use ======= as a single divider between search and replace sections.
-4. Provide the new or modified code in the replace section.
-5. Use >>>>>>> REPLACE to end the replace section.
-6. For new files, use an empty SEARCH section.
+1. **Brief Explanation**: A very short explanation (4-15 words) of the root cause of the error and your fix, placed inside an \`<explanation>\` block.
 
-Every *SEARCH* section must *EXACTLY MATCH* the existing file content, character for character, including all comments, docstrings, etc.
-If the file contains code or other data wrapped/escaped in json/xml/quotes or other containers, you need to propose edits to the literal contents of the file, including the container markup.
+2. **Minimal Code Change Block**: The smallest possible code change needed to fix the error, provided inside an \`<edit>\` block.
 
-*SEARCH/REPLACE* blocks will replace *all* matching occurrences.
-Include enough lines to make the SEARCH blocks uniquely match the lines to change.
+**Instructions:**
 
-IMPORTANT: Ensure that each SEARCH/REPLACE block is properly formatted with line breaks for readability. Do not put the entire block on a single line.
+- Do **not** include any content outside the \`<explanation>\` and \`<edit>\` blocks.
 
-Keep *SEARCH/REPLACE* blocks concise.
-Break large *SEARCH/REPLACE* blocks into a series of smaller blocks that each change a small portion of the file.
-Include just the changing lines, and a few surrounding lines if needed for uniqueness.
-Do not include long runs of unchanging lines in *SEARCH/REPLACE* blocks.
+- In the \`<edit>\` block:
+  - Start with \`<<<<<<< SEARCH\`.
+  - Include **only** the exact lines to be replaced from the original code. Copy them exactly, including comments and whitespace.
+  - Use \`=======\` as a divider.
+  - Provide the corrected code in the replace section.
+  - End with \`>>>>>>> REPLACE\`.
+  - Ensure the **SEARCH** section matches the original code **exactly**.
+  - Keep the code change minimal—avoid adding extra code or making unrelated changes.
+  - **Every** \`SEARCH\` section must **exactly match** the existing file content, character for character, including all comments, docstrings, etc.
+  - \`SEARCH/REPLACE\` blocks will replace **all** matching occurrences. Include enough lines to make the \`SEARCH\` blocks uniquely match the lines to change.
+  - To move code within a file, use 2 \`SEARCH/REPLACE\` blocks: one to delete it from its current location, and one to insert it in the new location.
 
-To move code within a file, use 2 *SEARCH/REPLACE* blocks: 1 to delete it from its current location, 1 to insert it in the new location.
+- Do **not** include explanations or comments outside the specified blocks.
 
-Example of correct format:
+**Example:**
+
+Input (with line numbers):
+<original_code_with_line_numbers>
+${addLineNumbers(`calculateCircleArea(r) = {
+  Math.PI * r * r;
+}
+myFn(x) = {
+  x * 2;
+}
+`)}
+</original_code_with_line_numbers>
+
+Output:
 
 <explanation>
-Brief explanation of changes (1-2 sentences max)
+Fixed exponentiation and function naming for clarity
 </explanation>
 
 <edit>
@@ -62,11 +75,9 @@ Brief explanation of changes (1-2 sentences max)
   Math.PI * r ** 2
 >>>>>>> REPLACE
 <<<<<<< SEARCH
-  myFn(x) = {
+myFn(x) = {
 =======
-  myFunction(x) = {
+myFunction(x) = {
 >>>>>>> REPLACE
 </edit>
-
-Do not include any code outside of SEARCH/REPLACE blocks. Ensure that the SEARCH section exactly matches the existing code.
 `;

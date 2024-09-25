@@ -1,3 +1,24 @@
+const separator = "||";
+const lineNumberDigits = 3;
+
+export function addLineNumbers(code: string): string {
+  return code
+    .split("\n")
+    .map(
+      (line, index) =>
+        `${(index + 1).toString().padStart(lineNumberDigits, "0")}${separator}${line}`
+    )
+    .join("\n");
+}
+
+function regexHasLineNumbers(text: string): boolean {
+  const lineNumberRegex = new RegExp(
+    `^\\d{${lineNumberDigits}}${escapeRegExp(separator)}`,
+    "m"
+  );
+  return lineNumberRegex.test(text);
+}
+
 function extractSearchReplaceBlocks(
   response: string
 ): Array<{ search: string; replace: string }> {
@@ -77,6 +98,14 @@ export function processSearchReplaceResponse(
     return {
       success: false,
       value: "Empty response received",
+    };
+  }
+
+  if (regexHasLineNumbers(promptResponse)) {
+    console.log("regexHasLineNumbers", promptResponse);
+    return {
+      success: false,
+      value: "Response contains line numbers, which is not allowed",
     };
   }
 

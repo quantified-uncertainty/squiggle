@@ -248,5 +248,23 @@ testSuite = sTest.describe(
         "SEARCH/REPLACE error: Mismatched block count: SEARCH (1), REPLACE (0), separators (2)"
       );
     });
+
+    test("should reject response with line numbers", () => {
+      const originalText = "Hello, world!";
+      const promptResponse = `
+001||<<<<<<< SEARCH
+002||Hello, world!
+003||=======
+004||Goodbye, world!
+|>>>>>>> REPLACE
+    `;
+
+      const result = processSearchReplaceResponse(originalText, promptResponse);
+
+      expect(result.success).toBe(false);
+      expect(result.value).toBe(
+        "Response contains line numbers, which is not allowed"
+      );
+    });
   });
 });
