@@ -7,9 +7,13 @@ export const squiggleWorkflowInputSchema = z.discriminatedUnion("type", [
     prompt: z.string(),
   }),
   z.object({
+    type: z.literal("FixBugs"),
+    source: z.string(),
+  }),
+  z.object({
     type: z.literal("Edit"),
     source: z.string(),
-    prompt: z.string().optional(),
+    prompt: z.string(),
   }),
 ]);
 

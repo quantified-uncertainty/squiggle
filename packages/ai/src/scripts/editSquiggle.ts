@@ -8,7 +8,7 @@ async function main() {
 
   const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
     await new SquiggleWorkflow({
-      input: { type: "Edit", source: initialCode },
+      input: { type: "FixBugs", source: initialCode },
       openaiApiKey: process.env["OPENROUTER_API_KEY"],
       anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
     }).runToResult();
