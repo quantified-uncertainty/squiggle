@@ -7,7 +7,7 @@ import { diffCompletionContentToCode } from "../squiggle/processSquiggleCode.js"
 function addLineNumbers(code: string): string {
   return code
     .split("\n")
-    .map((line, index) => `${(index + 1).toString().padStart(3, "0")}:${line}`)
+    .map((line, index) => `${(index + 1).toString().padStart(3, "0")}||${line}`)
     .join("\n");
 }
 
@@ -27,7 +27,7 @@ function editExistingSquiggleCodePrompt(code: Code): PromptPair {
 9. Look through the previous attempts at fixing the error. Do not repeat the same mistakes.
 10. Use the smallest possible SEARCH/REPLACE blocks. If you only want to change one line, use a block with just that line.
 
-Original code:
+Original code (with line numbers):
 <original_code>
 ${addLineNumbers(code.source)}
 </original_code>
