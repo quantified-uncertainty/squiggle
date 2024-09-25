@@ -5,11 +5,10 @@ import { SquiggleWorkflow } from "../workflows/SquiggleWorkflow.js";
 config();
 
 async function main() {
-  const initialCode = `
-  foo = 0 to 100
-  bar = 30
-  foo
-  bar
+  const initialCode = `foo = 0 to 100
+bar = 30
+foo
+bar
   `;
 
   const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =

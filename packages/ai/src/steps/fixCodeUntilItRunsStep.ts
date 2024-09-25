@@ -4,6 +4,13 @@ import { changeFormatPrompt, PromptPair } from "../prompts.js";
 import { getSquiggleAdvice } from "../squiggle/getSquiggleAdvice.js";
 import { diffCompletionContentToCode } from "../squiggle/processSquiggleCode.js";
 
+function addLineNumbers(code: string): string {
+  return code
+    .split("\n")
+    .map((line, index) => `${(index + 1).toString().padStart(3, "0")}:${line}`)
+    .join("\n");
+}
+
 function editExistingSquiggleCodePrompt(code: Code): PromptPair {
   const error = codeErrorString(code);
   const advice = getSquiggleAdvice(error, code.source);
@@ -22,7 +29,7 @@ function editExistingSquiggleCodePrompt(code: Code): PromptPair {
 
 Original code:
 <original_code>
-${code.source}
+${addLineNumbers(code.source)}
 </original_code>
 
 Error message:
