@@ -13,6 +13,26 @@ type ModelConfig = {
 // After some discussion, we decided to store this as an array of objects instead of a record. This is because it can be a pain to iterate and filter over records, and there aren't any significant performance benefits to using a record for this data.
 export const MODEL_CONFIGS = [
   {
+    id: "o1-preview",
+    provider: "openrouter",
+    model: "openai/o1-preview",
+    inputRate: 0.000015,
+    outputRate: 0.00006,
+    contextWindow: 128000,
+    maxTokens: 32768,
+    name: "o1 Preview",
+  },
+  {
+    id: "o1-mini",
+    provider: "openrouter",
+    model: "openai/o1-mini-2024-09-12",
+    inputRate: 0.000003,
+    outputRate: 0.000012,
+    contextWindow: 128000,
+    maxTokens: 65536,
+    name: "o1 Mini",
+  },
+  {
     id: "GPT4",
     provider: "openrouter",
     model: "openai/gpt-4o-2024-08-06",
