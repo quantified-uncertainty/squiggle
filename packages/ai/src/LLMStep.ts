@@ -82,7 +82,6 @@ export class LLMStepTemplate<const Shape extends StepShape = StepShape> {
 
 export class LLMStepInstance<const Shape extends StepShape = StepShape> {
   public id: string;
-  public inputs: Inputs<Shape>;
   private logger: Logger;
   private conversationMessages: Message[] = [];
   public llmMetricsList: LlmMetrics[] = [];
@@ -93,7 +92,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
   constructor(
     public readonly template: LLMStepTemplate<Shape>,
     public readonly workflow: Workflow,
-    inputs: Inputs<Shape>,
+    public readonly inputs: Inputs<Shape>,
     public retryingStep?: LLMStepInstance<Shape> | undefined
   ) {
     this.startTime = Date.now();
@@ -186,7 +185,10 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     value: Outputs<Shape>[K] | Outputs<Shape>[K]["value"]
   ): void {
     if (key in this.outputs) {
-      this.fail("MINOR", `Output ${key} is already set`);
+      this.fail(
+        "CRITICAL",
+        `Output ${key} is already set. This is a bug with the workflow code.`
+      );
       return;
     }
 

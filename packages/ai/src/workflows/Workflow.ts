@@ -124,13 +124,13 @@ export class Workflow {
   addStep<S extends StepShape>(
     template: LLMStepTemplate<S>,
     inputs: Inputs<S>,
-    retryingStep?: LLMStepInstance<S>
+    options?: { retryingStep?: LLMStepInstance<S> }
   ): LLMStepInstance<S> {
     // sorry for "any"; countervariance issues
     const step: LLMStepInstance<any> = template.instantiate(
       this,
       inputs,
-      retryingStep
+      options?.retryingStep
     );
     this.steps.push(step);
     this.dispatchEvent({
@@ -151,7 +151,7 @@ export class Workflow {
       return;
     }
 
-    this.addStep(retryingStep.template, retryingStep.inputs, retryingStep);
+    this.addStep(retryingStep.template, retryingStep.inputs, { retryingStep });
   }
 
   public getCurrentRetryAttempts(stepId: string): number {

@@ -47,27 +47,20 @@ export class SquiggleWorkflow extends ControlledWorkflow {
         }
         return true;
       }
-      if (!this.isValidCodeOutput(code)) return;
 
-      this.addNextStep(code);
+      if (code === undefined || code.kind !== "code") return;
+
+      if (code.value.type === "success") {
+        this.workflow.addStep(adjustToFeedbackStep, {
+          prompt: this.prompt,
+          code,
+        });
+      } else {
+        this.workflow.addStep(fixCodeUntilItRunsStep, {
+          code,
+        });
+      }
     });
-  }
-
-  private isValidCodeOutput(code: any): boolean {
-    return code?.kind === "code";
-  }
-
-  private addNextStep(code: any): void {
-    if (code.value.type === "success") {
-      this.workflow.addStep(adjustToFeedbackStep, {
-        prompt: this.prompt,
-        code,
-      });
-    } else {
-      this.workflow.addStep(fixCodeUntilItRunsStep, {
-        code,
-      });
-    }
   }
 
   protected configureInitialSteps(): void {
