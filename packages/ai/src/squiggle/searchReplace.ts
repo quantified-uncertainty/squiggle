@@ -102,7 +102,6 @@ export function processSearchReplaceResponse(
   }
 
   if (regexHasLineNumbers(promptResponse)) {
-    console.log("regexHasLineNumbers", promptResponse);
     return {
       success: false,
       value: "Response contains line numbers, which is not allowed",
