@@ -53,6 +53,14 @@ function applySearchReplaceBlocks(
 
   try {
     for (const block of blocks) {
+      // Check if search and replace are identical
+      if (block.search === block.replace) {
+        return {
+          success: false,
+          value: `Error: Search and replace texts are identical: \n\`\`\`\n${block.search}\n\`\`\``,
+        };
+      }
+
       if (block.search === "") {
         // If search is empty, prepend the replacement to the top
         updatedText = block.replace + "\n\n" + updatedText;
@@ -63,7 +71,7 @@ function applySearchReplaceBlocks(
         if (!match) {
           return {
             success: false,
-            value: `Error: Search text not found: \n\`\`\`\n ${block.search}\n\`\`\`\n"`,
+            value: `Error: Search text not found: \n\`\`\`\n${block.search}\n\`\`\``,
           };
         }
 
