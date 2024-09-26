@@ -1,3 +1,9 @@
+/**
+ * This file contains functions to help diagnose and fix common errors in Squiggle code. It takes in error messages and attempts to suggest fixes for them.
+ *
+ * This code is not tested. It is used mainly to help guide the LLM in finding and fixing errors, in situations where the LLM has shown a tendency to make the same mistakes over and over again.
+ */
+
 // Error patterns
 const getSquiggleErrorPatterns = {
   MULTIPLE_RETURNS_TOP_LEVEL:

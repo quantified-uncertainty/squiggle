@@ -1,3 +1,11 @@
+/**
+ * This file contains functions to check for common warnings in Squiggle code.
+ * It includes checks for invalid Squiggle elements, import statements, annotations, comments, and more.
+ * The warnings are then converted to a single string for easy display.
+ *
+ * This code is not tested. It is used mainly to help guide the LLM in finding and fixing errors, in situations where the LLM has shown a tendency to make the same mistakes over and over again.
+ */
+
 // Utility type
 type InvalidElement = {
   check: (line: string) => boolean;
