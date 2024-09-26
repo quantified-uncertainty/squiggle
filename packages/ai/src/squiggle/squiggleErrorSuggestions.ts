@@ -1,8 +1,8 @@
-// Utility type
-type InvalidElement = {
-  check: (line: string) => boolean;
-  getMessage: (lineNumber: number) => string;
-};
+/**
+ * This file contains functions to help diagnose and fix common errors in Squiggle code. It takes in error messages and attempts to suggest fixes for them.
+ *
+ * This code is not tested. It is used mainly to help guide the LLM in finding and fixing errors, in situations where the LLM has shown a tendency to make the same mistakes over and over again.
+ */
 
 // Error patterns
 const getSquiggleErrorPatterns = {
@@ -256,241 +256,22 @@ Remember to check your spelling, ensure all variables are defined before use, an
 };
 
 // Function to get advice for a specific error
-function getSquiggleErrorAdvice(errorKey: string): string {
+function _getSquiggleErrorSuggestions(errorKey: string): string {
   return errorKey in errorAdvice
     ? errorAdvice[errorKey as keyof typeof errorAdvice]
     : "No specific advice available for this error.";
 }
 
-// Function to check for invalid Squiggle elements
-function getInvalidSquiggleElements(): InvalidElement[] {
-  const commonUndefinedElements = [
-    "List.sum",
-    "List.map2",
-    "List.keys",
-    "List.sample",
-    "List.sampleN",
-    "List.repeat",
-    "Number.parseFloat",
-    "Duration.toMonths",
-  ];
-  return [
-    {
-      check: (line: string) => /\b(null|nil|undefined)\b/.test(line),
-      getMessage: (lineNumber: number) =>
-        `Line ${lineNumber}: The use of 'null', 'nil', or 'undefined' is not valid in Squiggle. Use an empty string, false, or a custom 'None' value for representing absence of a value.`,
-    },
-    {
-      check: (line: string) => {
-        if (line.trim().startsWith("@")) return false;
-        const withoutStrings = line.replace(/"(?:[^"\\]|\\.)*"/g, '""');
-        return /\b\w+\s*:\s*[A-Z]\w+(?:\s*[,)]|$)/.test(withoutStrings);
-      },
-      getMessage: (lineNumber: number) =>
-        `Line ${lineNumber}: Type annotation like 'variableName: Type' is not valid in Squiggle. Squiggle uses structural typing and doesn't require explicit type annotations.`,
-    },
-    {
-      check: (line: string) => {
-        return commonUndefinedElements.some(
-          (element) =>
-            new RegExp(`\\b${element}\\b`).test(line) &&
-            !line.includes(`${element} is not defined`)
-        );
-      },
-      getMessage: (lineNumber: number) =>
-        `Line ${lineNumber}: A common function or object (like List.sum, Number.parseFloat, etc.) is used but not defined in Squiggle. Check for typos or missing imports. Some functions might have different names or implementations in Squiggle.`,
-    },
-    {
-      check: (line: string) => /\bDate\.now\b/.test(line),
-      getMessage: (lineNumber: number) =>
-        `Line ${lineNumber}: 'Date.now' is not available in Squiggle. Use 'Danger.now' instead for the current timestamp. Be cautious with time-dependent calculations as they may produce varying results.`,
-    },
-  ];
-}
-
-// Function to check for invalid Squiggle elements
-function checkInvalidSquiggleElements(code: string): string[] {
-  const warnings: string[] = [];
-  const lines = code.split("\n");
-  const invalidElements = getInvalidSquiggleElements();
-
-  lines.forEach((line, index) => {
-    const lineNumber = index + 1;
-    invalidElements.forEach((element) => {
-      if (element.check(line)) {
-        warnings.push(element.getMessage(lineNumber));
-      }
-    });
-  });
-
-  return warnings;
-}
-
-// Function to check if import statements are at the top
-function checkImportStatementsAreOnTop(code: string): string[] {
-  const warnings: string[] = [];
-  const lines = code.split("\n");
-  let foundNonImport = false;
-
-  for (let i = 0; i < lines.length; i++) {
-    const trimmedLine = lines[i].trim();
-
-    if (trimmedLine === "" || trimmedLine.startsWith("//")) {
-      continue;
-    }
-
-    if (!foundNonImport && !trimmedLine.startsWith("import")) {
-      foundNonImport = true;
-    }
-
-    if (trimmedLine.startsWith("import")) {
-      if (foundNonImport) {
-        warnings.push(
-          `Line ${i + 1}: Import statement found after non-import code. Move all imports to the top of the file for better organization and to avoid potential errors.`
-        );
-      }
-    }
-  }
-
-  return warnings;
-}
-
-// Function to check annotations and comments
-function checkAnnotationsAndComments(code: string): string[] {
-  const warnings: string[] = [];
-  const lines = code.split("\n");
-  let lastAnnotationLine = -1;
-  let lastAnnotationName = "";
-
-  for (let i = 0; i < lines.length; i++) {
-    const trimmedLine = lines[i].trim();
-
-    if (trimmedLine.startsWith("@")) {
-      if (lastAnnotationLine !== -1 && i - lastAnnotationLine > 1) {
-        warnings.push(
-          `Lines ${lastAnnotationLine + 1}-${i}: Comments or blank lines found between annotations. Keep annotations together for clarity and to ensure they apply to the intended variable.`
-        );
-      }
-      lastAnnotationLine = i;
-      lastAnnotationName = trimmedLine.split("(")[0].substring(1);
-    } else if (lastAnnotationLine !== -1 && trimmedLine.includes("=")) {
-      lastAnnotationLine = -1;
-      lastAnnotationName = "";
-    } else if (
-      lastAnnotationLine !== -1 &&
-      trimmedLine !== "" &&
-      !trimmedLine.startsWith("//")
-    ) {
-      warnings.push(
-        `Line ${i + 1}: Annotation '${lastAnnotationName}' is not followed by a variable declaration. In Squiggle, annotations should refer to specific variables, not the entire file or block of code.`
-      );
-      lastAnnotationLine = -1;
-      lastAnnotationName = "";
-    }
-  }
-
-  return warnings;
-}
-
-// Function to check for invalid commas
-function checkInvalidCommas(code: string): string[] {
-  const warnings: string[] = [];
-  const lines = code.split("\n");
-  let inBlock = false;
-
-  for (let i = 0; i < lines.length; i++) {
-    const trimmedLine = lines[i].trim();
-
-    if (trimmedLine.endsWith("{")) {
-      inBlock = true;
-    }
-
-    if (trimmedLine === "}") {
-      inBlock = false;
-    }
-
-    if (inBlock) {
-      const assignmentMatch = trimmedLine.match(/^(\w+)\s*=.*,\s*$/);
-      if (assignmentMatch) {
-        warnings.push(
-          `Line ${i + 1}: Invalid comma at the end of variable assignment '${assignmentMatch[1]}' inside a block. In Squiggle, variable assignments within blocks should not end with commas. Remove the trailing comma to fix this issue.`
-        );
-      }
-    }
-  }
-
-  return warnings;
-}
-
-// Function to check for diff artifacts
-function checkDiffArtifacts(code: string): string[] {
-  const warnings: string[] = [];
-  const lines = code.split("\n");
-  const diffPatterns = [/^<<<<<<< /, /^=======/, /^>>>>>>> /];
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    for (const pattern of diffPatterns) {
-      if (pattern.test(line)) {
-        warnings.push(
-          `Line ${i + 1}: Diff artifact found: "${line.trim()}". Remove this line as it's not part of the actual code.`
-        );
-      }
-    }
-  }
-
-  return warnings;
-}
-
 // Main function to get Squiggle advice
-export function getSquiggleAdvice(errorMessage: string, code: string): string {
+export function getSquiggleErrorSuggestions(errorMessage: string): string {
   let advice = "";
 
   // Check for error-based advice
   for (const [errorKey, pattern] of Object.entries(getSquiggleErrorPatterns)) {
     if (pattern.test(errorMessage)) {
-      advice += getSquiggleErrorAdvice(errorKey) + "\n\n";
+      advice += _getSquiggleErrorSuggestions(errorKey) + "\n\n";
       break;
     }
-  }
-
-  // Check for import statement issues
-  const importWarnings = checkImportStatementsAreOnTop(code);
-  if (importWarnings.length > 0) {
-    advice +=
-      "Import Statement Warnings:\n" + importWarnings.join("\n") + "\n\n";
-  }
-
-  // Check for invalid commas
-  const commaWarnings = checkInvalidCommas(code);
-  if (commaWarnings.length > 0) {
-    advice +=
-      "Invalid Comma Usage Warnings:\n" + commaWarnings.join("\n") + "\n\n";
-  }
-
-  // Check for annotation and comment issues
-  const annotationWarnings = checkAnnotationsAndComments(code);
-  if (annotationWarnings.length > 0) {
-    advice +=
-      "Annotation and Comment Warnings:\n" +
-      annotationWarnings.join("\n") +
-      "\n\n";
-  }
-
-  // Check for invalid elements in the code
-  const elementWarnings = checkInvalidSquiggleElements(code);
-  if (elementWarnings.length > 0) {
-    advice += "Additional Warnings:\n" + elementWarnings.join("\n") + "\n\n";
-    advice +=
-      "Remember that Squiggle has its own syntax and conventions. It doesn't use explicit type annotations, and certain common programming constructs (like 'null' or 'undefined') are not valid. Use Squiggle-specific alternatives when needed.\n";
-  }
-
-  // Check for diff artifacts
-  const diffWarnings = checkDiffArtifacts(code);
-  if (diffWarnings.length > 0) {
-    advice += "Diff Artifact Warnings:\n" + diffWarnings.join("\n") + "\n\n";
-    advice +=
-      "These diff artifacts are likely leftover from a merge or conflict resolution. Remove them to ensure your code runs correctly.\n\n";
   }
 
   return advice.trim();
