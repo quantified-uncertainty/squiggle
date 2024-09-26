@@ -1,9 +1,29 @@
 import { Code, codeErrorString } from "../Code.js";
 import { LLMStepTemplate } from "../LLMStep.js";
 import { changeFormatPrompt, PromptPair } from "../prompts.js";
-import { getSquiggleAdvice } from "../squiggle/getSquiggleAdvice.js";
 import { diffCompletionContentToCode } from "../squiggle/processSquiggleCode.js";
 import { addLineNumbers } from "../squiggle/searchReplace.js";
+import { getSquiggleWarningsAsString } from "../squiggle/squiggleCodeWarnings.js";
+import { getSquiggleErrorSuggestions } from "../squiggle/squiggleErrorSuggestions.js";
+
+export function getSquiggleAdvice(errorMessage: string, code: string): string {
+  const errorAdvice = getSquiggleErrorSuggestions(errorMessage);
+  const warningsAdvice = getSquiggleWarningsAsString(code);
+
+  const sections = [];
+
+  if (errorAdvice) {
+    sections.push("## Error Information\n\n" + errorAdvice);
+  }
+
+  if (warningsAdvice) {
+    sections.push("## Code Warnings\n\n" + warningsAdvice);
+  }
+
+  return sections.length > 0
+    ? sections.join("\n\n")
+    : "No errors or warnings found.";
+}
 
 function editExistingSquiggleCodePrompt(code: Code): PromptPair {
   const error = codeErrorString(code);

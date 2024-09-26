@@ -250,20 +250,20 @@ Remember to check your spelling, ensure all variables are defined before use, an
 };
 
 // Function to get advice for a specific error
-function _getSquiggleErrorAdvice(errorKey: string): string {
+function _getSquiggleErrorSuggestions(errorKey: string): string {
   return errorKey in errorAdvice
     ? errorAdvice[errorKey as keyof typeof errorAdvice]
     : "No specific advice available for this error.";
 }
 
 // Main function to get Squiggle advice
-export function getSquiggleErrorAdvice(errorMessage: string): string {
+export function getSquiggleErrorSuggestions(errorMessage: string): string {
   let advice = "";
 
   // Check for error-based advice
   for (const [errorKey, pattern] of Object.entries(getSquiggleErrorPatterns)) {
     if (pattern.test(errorMessage)) {
-      advice += _getSquiggleErrorAdvice(errorKey) + "\n\n";
+      advice += _getSquiggleErrorSuggestions(errorKey) + "\n\n";
       break;
     }
   }
