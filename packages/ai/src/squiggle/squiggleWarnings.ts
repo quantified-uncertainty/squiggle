@@ -11,7 +11,8 @@ type WarningType =
   | "CHECK_INVALID_SQUIGGLE_ELEMENTS"
   | "CHECK_DIFF_ARTIFACTS"
   | "CHECK_CAPITALIZED_VARIABLE_NAMES"
-  | "CHECK_IF_WITHOUT_ELSE";
+  | "CHECK_IF_WITHOUT_ELSE"
+  | "CHECK_MULTIPLE_EXPECTS";
 
 type Warning = {
   type: WarningType;
@@ -266,6 +267,43 @@ export function checkIfWithoutElse(code: string): Warning[] {
   return warnings;
 }
 
+// Function to check for multiple expects in a block
+export function checkMultipleExpects(code: string): Warning[] {
+  const warnings: Warning[] = [];
+  const lines = code.split("\n");
+  let inBlock = false;
+  let expectCount = 0;
+  let blockStartLine = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    const trimmedLine = lines[i].trim();
+
+    if (trimmedLine.endsWith("{||")) {
+      inBlock = true;
+      expectCount = 0;
+      blockStartLine = i + 1;
+    }
+
+    if (trimmedLine === "})") {
+      inBlock = false;
+    }
+
+    if (inBlock && /\w+\.expect\(/.test(trimmedLine)) {
+      expectCount++;
+      if (expectCount > 1) {
+        warnings.push({
+          type: "CHECK_MULTIPLE_EXPECTS",
+          lineNumber: i + 1,
+          message: `Lines ${blockStartLine}-${i + 1}: Multiple return '.expect()' calls found in a single block. In Squiggle, you can only return one statement at the end of a block.`,
+        });
+        break;
+      }
+    }
+  }
+
+  return warnings;
+}
+
 type WarningCheck = {
   check: (code: string) => Warning[];
   additionalAdvice?: string;
@@ -309,6 +347,11 @@ export function getSquiggleWarnings(
       check: checkIfWithoutElse,
       additionalAdvice:
         "In Squiggle, 'if' statements must always have an 'else' clause. Add an 'else' clause to fix this issue.",
+    },
+    {
+      check: checkMultipleExpects,
+      additionalAdvice:
+        "In Squiggle, you can only return one .expect() at the end of a block, as you're only allowed one return statement.",
     },
   ];
 
