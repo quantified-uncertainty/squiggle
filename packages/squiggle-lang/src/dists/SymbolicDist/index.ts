@@ -1,8 +1,9 @@
+import { JsonValue } from "@quri/serializer";
+
 import * as Operation from "../../operation.js";
 import { OperationError } from "../../operationError.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
-import { JsonValue } from "../../utility/typeHelpers.js";
 import { BaseSymbolicDist } from "./BaseSymbolicDist.js";
 import { Bernoulli } from "./Bernoulli.js";
 import { Beta } from "./Beta.js";

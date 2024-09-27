@@ -1,5 +1,6 @@
+import { JsonValue } from "@quri/serializer";
+
 import { LocationRange } from "../ast/types.js";
-import { JsonValue } from "../utility/typeHelpers.js";
 import { FrameStack } from "./FrameStack.js";
 
 export class StackTraceFrame {

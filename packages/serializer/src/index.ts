@@ -1,27 +1,10 @@
-import { JsonValue } from "../utility/typeHelpers.js";
-
-/**
- * This file contains a generic serialization system.
- *
- * Features:
- * - type-safe
- * - supports multiple data types
- * - can serialize any DAG (directed acyclic graph) and deduplicate values
- * - can serialize multiple values in a single bundle, and deserialize them back based on "entrypoints"
- *
- * Squiggle-specific adaptation of it is in `./squiggle.ts`.
- *
- * Terminology:
- * - "Entity" is a type of data that can be serialized and deserialized (e.g. "value", "ir" for Squiggle); one multi-type codec can handle multiple entities.
- * - "Node" is an instance of an entity type. I use "node" instead of "value" to avoid confusion with the "value" entity type.
- * - "Bundle" is a JSON-serializable object that contains serialized values.
- * - "Entrypoint" is a reference to a serialized value in a bundle. When you add a value to a bundle, you get an entrypoint that you can use to refer to this value later.
- * - "Visitor" is an helper object that can serialize or deserialize nested nodes.
- *
- * To make things easier to understand, you can experiment with running Squiggle code with `embedded-with-serialization` runner and `PRINT_SERIALIZED_BUNDLE=1` enabled.
- * It will print a JSON-serialized bundle to the console.
- * Example: `PRINT_SERIALIZED_BUNDLE=1 pnpm --silent cli run -r embedded-with-serialization -e 'x=2+2;y=[x,x];z()=x'`
- */
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly JsonValue[]
+  | { [key: string]: JsonValue };
 
 /**
  * This is a main type of serializer-deserializer ("codec") system.
@@ -207,4 +190,19 @@ export class DeserializationStore<Shape extends BaseShape> {
   ): Node<Shape, EntityType> {
     return this.deserializationVisitor[entrypoint.entityType](entrypoint.pos);
   }
+}
+
+type Codec<Shape extends BaseShape> = {
+  makeSerializer: () => SerializationStore<Shape>;
+  makeDeserializer: (bundle: Bundle<Shape>) => DeserializationStore<Shape>;
+};
+
+export function makeCodec<Shape extends BaseShape>(
+  config: StoreConfig<Shape>
+): Codec<Shape> {
+  return {
+    makeSerializer: () => new SerializationStore(config),
+    makeDeserializer: (bundle: Bundle<Shape>) =>
+      new DeserializationStore(bundle, config),
+  } satisfies Codec<Shape>;
 }

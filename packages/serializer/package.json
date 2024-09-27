@@ -1,0 +1,42 @@
+{
+  "name": "@quri/serializer",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "Quantified Uncertainty Research Institute",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quantified-uncertainty/squiggle.git",
+    "directory": "packages/serializer"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "lint": "prettier --check . && eslint src",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@babel/preset-typescript": "^7.24.1",
+    "@jest/globals": "^29.7.0",
+    "@quri/configs": "workspace:*",
+    "@types/jest": "^29.5.12",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "5.5.4"
+  },
+  "files": [
+    "dist",
+    "src",
+    "!**/tsconfig*.tsbuildinfo"
+  ],
+  "type": "module",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  }
+}
