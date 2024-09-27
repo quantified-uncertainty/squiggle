@@ -25,6 +25,10 @@ export function isAiRoute(url: string) {
   return url.match("^/ai(/.*)?$");
 }
 
+export function aiRoute() {
+  return "/ai";
+}
+
 //Triggers on the model route and all subroutes
 export function isModelSubroute(url: string) {
   return url.match("^/models/[^/]+/[^/]+");

@@ -4,6 +4,7 @@ import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import {
+  BoltIcon,
   BookOpenIcon,
   DotsHorizontalIcon,
   Dropdown,
@@ -18,7 +19,7 @@ import {
 import { Link } from "@/components/ui/Link";
 import { useUsername } from "@/hooks/useUsername";
 import { SQUIGGLE_DOCS_URL } from "@/lib/common";
-import { aboutRoute, newModelRoute } from "@/routes";
+import { aboutRoute, aiRoute, newModelRoute } from "@/routes";
 
 import { GlobalSearch } from "../../GlobalSearch";
 import { DesktopUserControls } from "./DesktopUserControls";
@@ -46,6 +47,10 @@ const DocsMenuLink: FC<MenuLinkModeProps> = (props) => (
     title="Docs"
     external
   />
+);
+
+const AiMenuLink: FC<MenuLinkModeProps> = (props) => (
+  <PageMenuLink {...props} href={aiRoute()} icon={BoltIcon} title="AI" />
 );
 
 const NewModelMenuLink: FC<MenuLinkModeProps> = (props) => {
@@ -94,6 +99,7 @@ const DesktopMenu: FC<MenuProps> = ({ queryRef }) => {
           >
             <DropdownWithArrow text="Groups" />
           </Dropdown>
+          <AiMenuLink mode="desktop" />
         </>
       ) : null}
       <DesktopUserControls />
