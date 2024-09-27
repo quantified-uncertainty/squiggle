@@ -12,19 +12,19 @@ export type JsonValue =
  * Other types are derived from it.
  */
 export type BaseShape = Record<
-  string, // entity name
+  string, // entity type name
   [
-    unknown, // node type
-    JsonValue, // serialized node type
+    unknown, // entity type in typescript (e.g. a class)
+    JsonValue, // serialized entity type
   ]
 >;
 
-export type Node<
+export type Entity<
   Shape extends BaseShape,
   Name extends keyof Shape,
 > = Shape[Name][0];
 
-export type SerializedNode<
+export type SerializedEntity<
   Shape extends BaseShape,
   Name extends keyof Shape,
 > = Shape[Name][1];
@@ -38,5 +38,5 @@ export type BundleEntrypoint<
 };
 
 export type Bundle<Shape extends BaseShape> = {
-  [EntityType in keyof Shape]: SerializedNode<Shape, EntityType>[];
+  [EntityType in keyof Shape]: SerializedEntity<Shape, EntityType>[];
 };

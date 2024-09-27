@@ -1,14 +1,14 @@
 import { CodecConfig } from "./codec.js";
-import { BaseShape, Bundle, BundleEntrypoint, Node } from "./types.js";
+import { BaseShape, Bundle, BundleEntrypoint, Entity } from "./types.js";
 
 // This is an object that's passed to deserialization functions to deserialize a nested node.
 export type DeserializationVisitor<Shape extends BaseShape> = {
-  [EntityName in keyof Shape]: (id: number) => Node<Shape, EntityName>;
+  [EntityName in keyof Shape]: (id: number) => Entity<Shape, EntityName>;
 };
 
 export class DeserializationStore<Shape extends BaseShape> {
   visited: {
-    [EntityType in keyof Shape]: Node<Shape, EntityType>[];
+    [EntityType in keyof Shape]: Entity<Shape, EntityType>[];
   };
   deserializationVisitor: DeserializationVisitor<Shape>;
 
@@ -47,7 +47,7 @@ export class DeserializationStore<Shape extends BaseShape> {
 
   deserialize<const EntityType extends keyof Shape>(
     entrypoint: BundleEntrypoint<Shape, EntityType>
-  ): Node<Shape, EntityType> {
+  ): Entity<Shape, EntityType> {
     return this.deserializationVisitor[entrypoint.entityType](entrypoint.pos);
   }
 }

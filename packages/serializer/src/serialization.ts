@@ -3,22 +3,22 @@ import {
   BaseShape,
   Bundle,
   BundleEntrypoint,
-  Node,
-  SerializedNode,
+  Entity,
+  SerializedEntity,
 } from "./types.js";
 
 class EntitySerializationStore<
   Shape extends BaseShape,
   EntityType extends keyof Shape,
 > {
-  index: Map<Node<Shape, EntityType>, number> = new Map();
+  index: Map<Entity<Shape, EntityType>, number> = new Map();
   // this is an array with serialized values themselves
-  data: SerializedNode<Shape, EntityType>[] = [];
+  data: SerializedEntity<Shape, EntityType>[] = [];
 
   constructor(private config: EntityCodec<Shape, EntityType>) {}
 
   serialize(
-    node: Node<Shape, EntityType>,
+    node: Entity<Shape, EntityType>,
     visitor: SerializationVisitor<Shape>
   ) {
     const cachedId = this.index.get(node);
@@ -67,7 +67,7 @@ export class SerializationStore<Shape extends BaseShape> {
 
   serialize<EntityType extends keyof Shape>(
     entityType: EntityType,
-    node: Node<Shape, EntityType>
+    node: Entity<Shape, EntityType>
   ): BundleEntrypoint<Shape, EntityType> {
     const pos = this.stores[entityType].serialize(
       node,
@@ -89,5 +89,5 @@ export class SerializationStore<Shape extends BaseShape> {
 // This is an object that's passed to serialization functions to serialize a nested node.
 // Note how it returns a number (id), not `DeserializedNode` - we always store nodes themselves in a bundle, and refer to them by index.
 export type SerializationVisitor<Shape extends BaseShape> = {
-  [EntityName in keyof Shape]: (node: Node<Shape, EntityName>) => number;
+  [EntityType in keyof Shape]: (node: Entity<Shape, EntityType>) => number;
 };

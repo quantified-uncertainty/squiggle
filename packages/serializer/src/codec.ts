@@ -3,30 +3,30 @@ import {
   DeserializationVisitor,
 } from "./deserialization.js";
 import { SerializationStore, SerializationVisitor } from "./serialization.js";
-import { BaseShape, Bundle, Node, SerializedNode } from "./types.js";
+import { BaseShape, Bundle, Entity, SerializedEntity } from "./types.js";
 
-// This config is used to describe how an entity type should be serialized and deserialized.
+// This type describes a single entry in CodecConfig.
 export type EntityCodec<
   Shape extends BaseShape,
   EntityType extends keyof Shape,
 > = {
   serialize: (
-    node: Node<Shape, EntityType>,
+    node: Entity<Shape, EntityType>,
     visitor: SerializationVisitor<Shape>
-  ) => SerializedNode<Shape, EntityType>;
+  ) => SerializedEntity<Shape, EntityType>;
   deserialize: (
-    serializedNode: SerializedNode<Shape, EntityType>,
+    serializedNode: SerializedEntity<Shape, EntityType>,
     visitor: DeserializationVisitor<Shape>
-  ) => Node<Shape, EntityType>;
+  ) => Entity<Shape, EntityType>;
+};
+
+export type CodecConfig<Shape extends BaseShape> = {
+  [EntityType in keyof Shape]: EntityCodec<Shape, EntityType>;
 };
 
 type Codec<Shape extends BaseShape> = {
   makeSerializer: () => SerializationStore<Shape>;
   makeDeserializer: (bundle: Bundle<Shape>) => DeserializationStore<Shape>;
-};
-
-export type CodecConfig<Shape extends BaseShape> = {
-  [EntityType in keyof Shape]: EntityCodec<Shape, EntityType>;
 };
 
 /*
