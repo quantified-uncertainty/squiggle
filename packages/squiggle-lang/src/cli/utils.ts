@@ -2,7 +2,8 @@ import { Command, InvalidArgumentError } from "@commander-js/extra-typings";
 import { format as formatDate } from "date-fns/format";
 import fs from "fs";
 
-import { JsonValue } from "../utility/typeHelpers.js";
+import { JsonValue } from "@quri/serializer";
+
 import { blue, bold, green, yellow } from "./colors.js";
 
 export function loadSrc({

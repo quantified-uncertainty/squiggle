@@ -1,8 +1,9 @@
+import { JsonValue } from "@quri/serializer";
+
 import {
   deserializeOperationError,
   OperationError,
 } from "../operationError.js";
-import { JsonValue } from "../utility/typeHelpers.js";
 import { XYShapeError } from "../XYShape.js";
 
 type SimpleError<S extends string> = { type: S };

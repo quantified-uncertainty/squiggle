@@ -30,6 +30,7 @@
     "cli": "node ./dist/cli/index.js"
   },
   "dependencies": {
+    "@quri/serializer": "workspace:*",
     "@commander-js/extra-typings": "^12.1.0",
     "commander": "^12.1.0",
     "immutable": "^4.3.6",

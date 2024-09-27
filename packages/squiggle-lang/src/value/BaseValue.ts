@@ -1,5 +1,6 @@
+import { JsonValue } from "@quri/serializer";
+
 import { SquiggleSerializationVisitor } from "../serialization/squiggle.js";
-import { JsonValue } from "../utility/typeHelpers.js";
 import { SerializedValue } from "./index.js";
 import { ValueTags, ValueTagsType } from "./valueTags.js";
 

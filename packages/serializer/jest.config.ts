@@ -7,7 +7,6 @@ const config: Config = {
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
-  testTimeout: 15000, // github actions can be slow
 };
 
 export default config;

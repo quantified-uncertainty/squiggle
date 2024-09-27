@@ -1,10 +1,11 @@
+import { JsonValue } from "@quri/serializer";
+
 import * as magicNumbers from "../../magicNumbers.js";
 import { ContinuousShape } from "../../PointSet/Continuous.js";
 import { PRNG } from "../../rng/index.js";
 import * as E_A_Floats from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
-import { JsonValue } from "../../utility/typeHelpers.js";
 import * as XYShape from "../../XYShape.js";
 import { BaseDist } from "../BaseDist.js";
 import { DistError, xyShapeDistError } from "../DistError.js";
@@ -15,7 +16,7 @@ export type PointsetXSelection = "Linear" | "ByWeight";
 
 export abstract class BaseSymbolicDist<
   SymbolicType extends string,
-  Args extends JsonValue,
+  Args extends JsonValue, // symbolic dist args must be serializable
 > extends BaseDist {
   type = "SymbolicDist";
   abstract symbolicType: SymbolicType;
