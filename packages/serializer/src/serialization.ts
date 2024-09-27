@@ -1,4 +1,4 @@
-import { EntityCodec, StoreConfig } from "./codec.js";
+import { CodecConfig, EntityCodec } from "./codec.js";
 import {
   BaseShape,
   Bundle,
@@ -43,7 +43,7 @@ export class SerializationStore<Shape extends BaseShape> {
   stores: EntityStores<Shape>;
   serializationVisitor: SerializationVisitor<Shape>;
 
-  constructor(config: StoreConfig<Shape>) {
+  constructor(config: CodecConfig<Shape>) {
     this.stores = Object.fromEntries(
       Object.keys(config).map((entityType: keyof typeof config) => [
         entityType,

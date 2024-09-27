@@ -1,4 +1,4 @@
-import { StoreConfig } from "./codec.js";
+import { CodecConfig } from "./codec.js";
 import { BaseShape, Bundle, BundleEntrypoint, Node } from "./types.js";
 
 // This is an object that's passed to deserialization functions to deserialize a nested node.
@@ -14,7 +14,7 @@ export class DeserializationStore<Shape extends BaseShape> {
 
   constructor(
     public bundle: Bundle<Shape>,
-    config: StoreConfig<Shape>
+    config: CodecConfig<Shape>
   ) {
     this.visited = Object.fromEntries(
       Object.keys(config).map((entityType: keyof typeof config) => [

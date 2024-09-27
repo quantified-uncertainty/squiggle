@@ -1,5 +1,3 @@
-// StoreConfig is the primary config for the multi-entity codec. See `squiggleConfig` in `./squiggle.ts` for how it's used.
-
 import {
   DeserializationStore,
   DeserializationVisitor,
@@ -27,13 +25,21 @@ type Codec<Shape extends BaseShape> = {
   makeDeserializer: (bundle: Bundle<Shape>) => DeserializationStore<Shape>;
 };
 
-// It will infer correct parameter types for `serialize` and `deserialize` methods, based on the `Shape` type.
-export type StoreConfig<Shape extends BaseShape> = {
+export type CodecConfig<Shape extends BaseShape> = {
   [EntityType in keyof Shape]: EntityCodec<Shape, EntityType>;
 };
 
+/*
+ * CodecConfig is the primary config for the multi-entity codec.
+ *
+ * The usual way to create a codec is to call `makeCodec` with an explicit Shape type parameter, and pass the config object to it, inlined.
+ *
+ * Then it will infer correct parameter types for `serialize` and `deserialize` methods, based on the `Shape` type.
+ *
+ * See `serialization/squiggle.ts` in squiggle-lang for an example how to use this.
+ */
 export function makeCodec<Shape extends BaseShape>(
-  config: StoreConfig<Shape>
+  config: CodecConfig<Shape>
 ): Codec<Shape> {
   return {
     makeSerializer: () => new SerializationStore(config),
