@@ -6,7 +6,7 @@ description: Squiggle AI
 
 Squiggle AI is a tool that allows you to interact with Squiggle code using natural language. It is powered by a large language model (LLM) that can understand and generate human-like text.
 
-Squiggle AI is hosted on SquiggleHub, and you can access it [here](https://squiggle.dev/ai). You must be logged in to SquiggleHub to use it. 
+Squiggle AI is hosted on SquiggleHub, and you can access it [here](https://squigglehub.org/ai). You must be logged in to SquiggleHub to use it. 
 
 ![Squiggle AI](/img/squiggleAI.png)
 
