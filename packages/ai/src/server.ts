@@ -3,3 +3,7 @@ export {
   SquiggleWorkflow,
   SquiggleWorkflowInput,
 } from "./workflows/SquiggleWorkflow.js";
+
+export { Workflow } from "./workflows/Workflow.js";
+
+export { makeAiCodec } from "./serialization.js";

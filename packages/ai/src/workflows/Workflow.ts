@@ -13,14 +13,15 @@ import {
   AiDeserializationVisitor,
   AiSerializationVisitor,
 } from "../serialization.js";
-import { ClientWorkflowResult } from "../types.js";
+import { ClientWorkflow, ClientWorkflowResult } from "../types.js";
+import { stepToClientStep } from "./streaming.js";
 
-export interface LlmConfig {
+export type LlmConfig = {
   llmId: LlmId;
   priceLimit: number;
   durationLimitMinutes: number;
   messagesInHistoryToKeep: number;
-}
+};
 
 export const llmConfigDefault: LlmConfig = {
   llmId: "Claude-Sonnet",
@@ -85,21 +86,22 @@ export type WorkflowEventListener<T extends WorkflowEventType> = (
 
 const MAX_RETRIES = 5;
 export class Workflow {
-  private steps: LLMStepInstance[];
-
-  public llmConfig: LlmConfig;
-  public llmClient: LLMClient;
   public id: string;
+  public llmConfig: LlmConfig;
   public startTime: number;
 
+  private steps: LLMStepInstance[];
+
+  public llmClient: LLMClient;
+
   private constructor(params: {
-    id?: string;
-    steps?: LLMStepInstance[];
-    llmConfig?: LlmConfig;
+    id: string;
+    steps: LLMStepInstance[];
+    llmConfig: LlmConfig;
     openaiApiKey?: string;
     anthropicApiKey?: string;
   }) {
-    this.llmConfig = params.llmConfig ?? llmConfigDefault;
+    this.llmConfig = params.llmConfig;
     this.startTime = Date.now();
     this.id = params.id ?? crypto.randomUUID();
     this.steps = params.steps ?? [];
@@ -116,7 +118,13 @@ export class Workflow {
     openaiApiKey?: string,
     anthropicApiKey?: string
   ) {
-    return new Workflow({ llmConfig, openaiApiKey, anthropicApiKey });
+    return new Workflow({
+      id: crypto.randomUUID(),
+      steps: [],
+      llmConfig,
+      openaiApiKey,
+      anthropicApiKey,
+    });
   }
 
   // This is a hook that ControlledWorkflow can use to prepare the workflow.
@@ -133,11 +141,13 @@ export class Workflow {
     options?: { retryingStep?: LLMStepInstance<S> }
   ): LLMStepInstance<S> {
     // sorry for "any"; countervariance issues
-    const step: LLMStepInstance<any> = template.instantiate(
-      this,
+    const step: LLMStepInstance<any> = LLMStepInstance.create({
+      template,
       inputs,
-      options?.retryingStep
-    );
+      retryingStep: options?.retryingStep,
+      workflow: this,
+    });
+
     this.steps.push(step);
     this.dispatchEvent({
       type: "stepAdded",
@@ -357,33 +367,50 @@ export class Workflow {
     return {
       id: this.id,
       stepIds: this.steps.map(visitor.step),
+      llmConfig: this.llmConfig,
     };
   }
 
   static deserialize({
     node,
     visitor,
-    llmConfig,
     openaiApiKey,
     anthropicApiKey,
   }: {
     node: SerializedWorkflow;
     visitor: AiDeserializationVisitor;
-    llmConfig: LlmConfig;
     openaiApiKey?: string;
     anthropicApiKey?: string;
   }): Workflow {
     return new Workflow({
       id: node.id,
+      llmConfig: node.llmConfig,
       steps: node.stepIds.map(visitor.step),
-      llmConfig,
       openaiApiKey,
       anthropicApiKey,
     });
+  }
+
+  // Client-side representation
+  asClientWorkflow(): ClientWorkflow {
+    return {
+      id: this.id,
+      timestamp: this.startTime,
+      steps: this.steps.map(stepToClientStep),
+      currentStep: this.getCurrentStep()?.id,
+      ...(this.isProcessComplete()
+        ? {
+            status: "finished",
+            result: this.getFinalResult(),
+          }
+        : { status: "loading" }),
+      input: { type: "Create", prompt: "FIXME - not serialized" },
+    };
   }
 }
 
 export type SerializedWorkflow = {
   id: string;
+  llmConfig: LlmConfig;
   stepIds: number[];
 };

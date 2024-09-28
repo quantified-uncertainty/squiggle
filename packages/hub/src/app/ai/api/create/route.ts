@@ -1,25 +1,50 @@
 import { getServerSession } from "next-auth";
 
-import {
-  ClientWorkflow,
-  decodeWorkflowFromReader,
-  LlmConfig,
-  SquiggleWorkflowInput,
-} from "@quri/squiggle-ai";
-import { SquiggleWorkflow } from "@quri/squiggle-ai/server";
+import { LlmConfig } from "@quri/squiggle-ai";
+import { SquiggleWorkflow, Workflow } from "@quri/squiggle-ai/server";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { getSelf, isSignedIn } from "@/graphql/helpers/userHelpers";
 import { prisma } from "@/prisma";
 
-import {
-  bodyToLineReader,
-  createRequestBodySchema,
-  requestToInput,
-} from "../../utils";
+import { getAiCodec, V2WorkflowData } from "../../serverUtils";
+import { createRequestBodySchema, requestToInput } from "../../utils";
 
 // https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#maxduration
 export const maxDuration = 300;
+
+async function upsertWorkflow(
+  user: Awaited<ReturnType<typeof getSelf>>,
+  workflow: Workflow
+) {
+  const codec = getAiCodec();
+  const serializer = codec.makeSerializer();
+  const entrypoint = serializer.serialize("workflow", workflow);
+  const bundle = serializer.getBundle();
+
+  const v2Workflow: V2WorkflowData = {
+    entrypoint,
+    bundle,
+  };
+
+  await prisma.aiWorkflow.upsert({
+    where: {
+      id: workflow.id,
+    },
+    update: {
+      format: 2,
+      workflow: v2Workflow,
+    },
+    create: {
+      id: workflow.id,
+      user: {
+        connect: { id: user.id },
+      },
+      format: 2,
+      workflow: v2Workflow,
+    },
+  });
+}
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -30,46 +55,6 @@ export async function POST(req: Request) {
 
   const user = await getSelf(session);
 
-  let workflow: ClientWorkflow;
-
-  const streamToDatabase = (
-    stream: ReadableStream<string>,
-    input: SquiggleWorkflowInput
-  ) => {
-    decodeWorkflowFromReader({
-      reader: bodyToLineReader(stream) as ReadableStreamDefaultReader,
-      input,
-      addWorkflow: async (newWorkflow) => {
-        await prisma.aiWorkflow.create({
-          data: {
-            id: newWorkflow.id,
-            user: {
-              connect: {
-                id: user.id,
-              },
-            },
-            workflow: newWorkflow,
-          },
-        });
-        workflow = newWorkflow;
-      },
-      setWorkflow: async (update) => {
-        if (!workflow) {
-          throw new Error(
-            "Internal error: setWorkflow called before addWorkflow"
-          );
-        }
-        workflow = update(workflow);
-        await prisma.aiWorkflow.update({
-          where: {
-            id: workflow.id,
-          },
-          data: { workflow },
-        });
-      },
-    });
-  };
-
   try {
     const body = await req.json();
     const request = createRequestBodySchema.parse(body);
@@ -78,7 +63,7 @@ export async function POST(req: Request) {
       throw new Error("Prompt or Squiggle code is required");
     }
 
-    // Create a SquiggleGenerator instance
+    // Create a SquiggleWorkflow instance
     const llmConfig: LlmConfig = {
       llmId: request.model ?? "Claude-Sonnet",
       priceLimit: 0.15,
@@ -87,19 +72,25 @@ export async function POST(req: Request) {
     };
 
     const input = requestToInput(request);
-    const stream = new SquiggleWorkflow({
+    const openaiApiKey = process.env["OPENAI_API_KEY"];
+    const anthropicApiKey = process.env["ANTHROPIC_API_KEY"];
+
+    const squiggleWorkflow = new SquiggleWorkflow({
       llmConfig,
       input,
       abortSignal: req.signal,
-      openaiApiKey: process.env["OPENAI_API_KEY"],
-      anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
-    }).runAsStream();
+      openaiApiKey,
+      anthropicApiKey,
+    });
 
-    const [responseStream, dbStream] = stream.tee();
+    // save workflow to the database on each update
+    squiggleWorkflow.workflow.addEventListener("stepFinished", ({ workflow }) =>
+      upsertWorkflow(user, workflow)
+    );
 
-    streamToDatabase(dbStream as ReadableStream<string>, input);
+    const stream = squiggleWorkflow.runAsStream();
 
-    return new Response(responseStream as ReadableStream, {
+    return new Response(stream as ReadableStream, {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",

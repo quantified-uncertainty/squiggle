@@ -8,11 +8,7 @@ import {
   SerializedArtifact,
 } from "./Artifact.js";
 import { LLMStepInstance, SerializedStep } from "./LLMStepInstance.js";
-import {
-  LlmConfig,
-  SerializedWorkflow,
-  Workflow,
-} from "./workflows/Workflow.js";
+import { SerializedWorkflow, Workflow } from "./workflows/Workflow.js";
 
 type AiShape = {
   workflow: [Workflow, SerializedWorkflow];
@@ -24,11 +20,11 @@ export type AiSerializationVisitor = SerializationVisitor<AiShape>;
 
 export type AiDeserializationVisitor = DeserializationVisitor<AiShape>;
 
-export function codecFactory(
-  llmConfig: LlmConfig,
-  openaiApiKey?: string,
-  anthropicApiKey?: string
-) {
+export function makeAiCodec(params: {
+  // we don't want to serialize these secrets, so we parameterize the codec with them
+  openaiApiKey?: string;
+  anthropicApiKey?: string;
+}) {
   return makeCodec<AiShape>({
     workflow: {
       serialize: (node, visitor) => node.serialize(visitor),
@@ -36,9 +32,8 @@ export function codecFactory(
         Workflow.deserialize({
           node,
           visitor,
-          llmConfig,
-          openaiApiKey,
-          anthropicApiKey,
+          openaiApiKey: params.openaiApiKey,
+          anthropicApiKey: params.anthropicApiKey,
         }),
     },
     step: {

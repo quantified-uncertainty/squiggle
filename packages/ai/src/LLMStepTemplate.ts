@@ -1,8 +1,6 @@
 import { Artifact, ArtifactKind } from "./Artifact.js";
-import { LLMStepInstance } from "./LLMStepInstance.js";
 import { LogEntry } from "./Logger.js";
 import { PromptPair } from "./prompts.js";
-import { Workflow } from "./workflows/Workflow.js";
 
 export type ErrorType = "CRITICAL" | "MINOR";
 
@@ -61,17 +59,4 @@ export class LLMStepTemplate<const Shape extends StepShape = StepShape> {
       inputs: Inputs<Shape>
     ) => Promise<void>
   ) {}
-
-  instantiate(
-    workflow: Workflow,
-    inputs: Inputs<Shape>,
-    retryingStep?: LLMStepInstance<Shape> | undefined
-  ): LLMStepInstance<Shape> {
-    return LLMStepInstance.create({
-      template: this,
-      inputs,
-      retryingStep,
-      workflow,
-    });
-  }
 }

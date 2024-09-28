@@ -4,6 +4,7 @@ import { prisma } from "@/prisma";
 import { getUserOrRedirect } from "@/server/helpers";
 
 import { AiDashboard } from "./AiDashboard";
+import { getAiCodec, v2WorkflowDataSchema } from "./serverUtils";
 
 export default async function AiPage() {
   const user = await getUserOrRedirect();
@@ -17,9 +18,25 @@ export default async function AiPage() {
     },
   });
 
-  const workflows = rows.map((row) => {
+  const workflows: ClientWorkflow[] = rows.map((row) => {
     try {
-      return clientWorkflowSchema.parse(row.workflow);
+      switch (row.format) {
+        case 1:
+          return clientWorkflowSchema.parse(row.workflow);
+        case 2: {
+          const { bundle, entrypoint } = v2WorkflowDataSchema.parse(
+            row.workflow
+          );
+          const codec = getAiCodec();
+          const deserializer = codec.makeDeserializer(bundle);
+          const workflow = deserializer.deserialize(entrypoint);
+          console.log(workflow.asClientWorkflow().steps);
+
+          return workflow.asClientWorkflow();
+        }
+        default:
+          throw new Error(`Unknown workflow format: ${row.format}`);
+      }
     } catch (e) {
       return {
         id: row.id,

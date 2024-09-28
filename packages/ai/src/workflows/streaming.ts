@@ -4,16 +4,18 @@ import {
 } from "stream/web";
 
 import { Artifact } from "../Artifact.js";
+import { type LLMStepInstance } from "../LLMStepInstance.js";
 import {
   ClientArtifact,
+  ClientStep,
   ClientWorkflow,
   StreamingMessage,
   streamingMessageSchema,
 } from "../types.js";
 import { type SquiggleWorkflowInput } from "./SquiggleWorkflow.js";
-import { Workflow } from "./Workflow.js";
+import { type Workflow } from "./Workflow.js";
 
-export function serializeArtifact(value: Artifact): ClientArtifact {
+function artifactToClientArtifact(value: Artifact): ClientArtifact {
   const commonArtifactFields = {
     id: value.id,
     createdBy: value.createdBy?.id,
@@ -41,6 +43,29 @@ export function serializeArtifact(value: Artifact): ClientArtifact {
     default:
       throw new Error(`Unknown artifact ${value satisfies never}`);
   }
+}
+
+export function stepToClientStep(step: LLMStepInstance): ClientStep {
+  return {
+    id: step.id,
+    name: step.template.name ?? "unknown",
+    state: step.getState().kind,
+    inputs: Object.fromEntries(
+      Object.entries(step.getInputs()).map(([key, value]) => [
+        key,
+        artifactToClientArtifact(value),
+      ])
+    ),
+    outputs: Object.fromEntries(
+      Object.entries(step.getOutputs())
+        .filter(
+          (pair): pair is [string, NonNullable<(typeof pair)[1]>] =>
+            pair[1] !== undefined
+        )
+        .map(([key, value]) => [key, artifactToClientArtifact(value)])
+    ),
+    messages: step.getConversationMessages(),
+  };
 }
 
 /**
@@ -78,7 +103,7 @@ export function addStreamingListeners(
         inputs: Object.fromEntries(
           Object.entries(event.data.step.getInputs()).map(([key, value]) => [
             key,
-            serializeArtifact(value),
+            artifactToClientArtifact(value),
           ])
         ),
       },
@@ -96,7 +121,7 @@ export function addStreamingListeners(
               (pair): pair is [string, NonNullable<(typeof pair)[1]>] =>
                 pair[1] !== undefined
             )
-            .map(([key, value]) => [key, serializeArtifact(value)])
+            .map(([key, value]) => [key, artifactToClientArtifact(value)])
         ),
         messages: event.data.step.getConversationMessages(),
       },
@@ -151,6 +176,8 @@ export async function decodeWorkflowFromReader({
 
     // Note that these are streaming events.
     // They are easy to confuse with workflow events.
+    // The difference is that streaming events are sent over the wire, and so they contain JSON data.
+    // Workflow events are internal to the server and so they contain non-JSON data (such as LLMStepInstance references).
     const event = streamingMessageSchema.parse(eventJson);
 
     switch (event.kind) {
