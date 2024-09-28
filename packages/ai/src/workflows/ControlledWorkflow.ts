@@ -1,6 +1,6 @@
 import { ReadableStream } from "stream/web";
 
-import { WorkflowResult } from "../types.js";
+import { ClientWorkflowResult } from "../types.js";
 import { addStreamingListeners } from "./streaming.js";
 import { LlmConfig, Workflow } from "./Workflow.js";
 
@@ -29,7 +29,7 @@ export abstract class ControlledWorkflow {
     openaiApiKey?: string;
     anthropicApiKey?: string;
   }) {
-    this.workflow = new Workflow(
+    this.workflow = Workflow.create(
       params.llmConfig,
       params.openaiApiKey,
       params.anthropicApiKey
@@ -75,7 +75,7 @@ export abstract class ControlledWorkflow {
   }
 
   // Run workflow without streaming, only capture the final result
-  async runToResult(): Promise<WorkflowResult> {
+  async runToResult(): Promise<ClientWorkflowResult> {
     this.startOrThrow();
     this.configure();
 

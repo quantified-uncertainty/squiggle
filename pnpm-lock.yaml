@@ -35,6 +35,9 @@ importers:
       '@quri/prettier-plugin-squiggle':
         specifier: workspace:*
         version: link:../prettier-plugin
+      '@quri/serializer':
+        specifier: workspace:*
+        version: link:../serializer
       '@quri/squiggle-lang':
         specifier: workspace:*
         version: link:../squiggle-lang

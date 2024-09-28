@@ -5,15 +5,15 @@ import {
 
 import { Artifact } from "../Artifact.js";
 import {
-  SerializedArtifact,
-  SerializedWorkflow,
-  WorkflowMessage,
-  workflowMessageSchema,
+  ClientArtifact,
+  ClientWorkflow,
+  StreamingMessage,
+  streamingMessageSchema,
 } from "../types.js";
 import { type SquiggleWorkflowInput } from "./SquiggleWorkflow.js";
 import { Workflow } from "./Workflow.js";
 
-export function serializeArtifact(value: Artifact): SerializedArtifact {
+export function serializeArtifact(value: Artifact): ClientArtifact {
   const commonArtifactFields = {
     id: value.id,
     createdBy: value.createdBy?.id,
@@ -55,7 +55,7 @@ export function addStreamingListeners(
   workflow: Workflow,
   controller: ReadableStreamController<string>
 ) {
-  const send = (message: WorkflowMessage) => {
+  const send = (message: StreamingMessage) => {
     controller.enqueue(JSON.stringify(message) + "\n");
   };
 
@@ -134,11 +134,11 @@ export async function decodeWorkflowFromReader({
   // In the future, we should store input parameters in the Workflow object.
   input: SquiggleWorkflowInput;
   // This adds an initial version of the workflow.
-  addWorkflow: (workflow: SerializedWorkflow) => Promise<void>;
+  addWorkflow: (workflow: ClientWorkflow) => Promise<void>;
   // This signature might look complicated, but it matches the functional
   // version of `useState` state setter.
   setWorkflow: (
-    cb: (workflow: SerializedWorkflow) => SerializedWorkflow
+    cb: (workflow: ClientWorkflow) => ClientWorkflow
   ) => Promise<void>;
 }) {
   // eslint-disable-next-line no-constant-condition
@@ -151,7 +151,7 @@ export async function decodeWorkflowFromReader({
 
     // Note that these are streaming events.
     // They are easy to confuse with workflow events.
-    const event = workflowMessageSchema.parse(eventJson);
+    const event = streamingMessageSchema.parse(eventJson);
 
     switch (event.kind) {
       case "workflowStarted": {

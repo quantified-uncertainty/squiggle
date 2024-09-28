@@ -3,12 +3,12 @@
 import clsx from "clsx";
 import { FC } from "react";
 
-import { SerializedWorkflow } from "@quri/squiggle-ai";
+import { ClientWorkflow } from "@quri/squiggle-ai";
 
 import { WorkflowStatusIcon } from "./WorkflowStatusIcon";
 
 export const WorkflowSummaryItem: FC<{
-  workflow: SerializedWorkflow;
+  workflow: ClientWorkflow;
   onSelect: () => void;
   isSelected: boolean;
 }> = ({ workflow, onSelect, isSelected }) => {

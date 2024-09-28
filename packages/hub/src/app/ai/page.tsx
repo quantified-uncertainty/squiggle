@@ -1,7 +1,4 @@
-import {
-  SerializedWorkflow,
-  serializedWorkflowSchema,
-} from "@quri/squiggle-ai";
+import { ClientWorkflow, clientWorkflowSchema } from "@quri/squiggle-ai";
 
 import { prisma } from "@/prisma";
 import { getUserOrRedirect } from "@/server/helpers";
@@ -22,7 +19,7 @@ export default async function AiPage() {
 
   const workflows = rows.map((row) => {
     try {
-      return serializedWorkflowSchema.parse(row.workflow);
+      return clientWorkflowSchema.parse(row.workflow);
     } catch (e) {
       return {
         id: row.id,
@@ -34,7 +31,7 @@ export default async function AiPage() {
         },
         steps: [],
         result: "Invalid workflow format in the database",
-      } satisfies SerializedWorkflow;
+      } satisfies ClientWorkflow;
     }
   });
 

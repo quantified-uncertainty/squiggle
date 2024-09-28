@@ -1,9 +1,9 @@
 import clsx from "clsx";
 import { FC } from "react";
 
-import { SerializedMessage } from "@quri/squiggle-ai";
+import { ClientMessage } from "@quri/squiggle-ai";
 
-const Message: FC<{ message: SerializedMessage }> = ({ message }) => {
+const Message: FC<{ message: ClientMessage }> = ({ message }) => {
   const isUser = message.role === "user";
   return (
     <div
@@ -27,7 +27,7 @@ const Message: FC<{ message: SerializedMessage }> = ({ message }) => {
   );
 };
 
-export const ArtifactMessages: FC<{ messages: SerializedMessage[] }> = ({
+export const ArtifactMessages: FC<{ messages: ClientMessage[] }> = ({
   messages,
 }) => (
   <div className="space-y-4 text-sm">

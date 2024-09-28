@@ -1,23 +1,20 @@
 import { useCallback, useState } from "react";
 
 import {
+  ClientWorkflow,
   decodeWorkflowFromReader,
-  SerializedWorkflow,
   SquiggleWorkflowInput,
 } from "@quri/squiggle-ai";
 
 import { bodyToLineReader, CreateRequestBody, requestToInput } from "./utils";
 
-export function useSquiggleWorkflows(initialWorkflows: SerializedWorkflow[]) {
+export function useSquiggleWorkflows(initialWorkflows: ClientWorkflow[]) {
   const [workflows, setWorkflows] =
-    useState<SerializedWorkflow[]>(initialWorkflows);
+    useState<ClientWorkflow[]>(initialWorkflows);
   const [selected, setSelected] = useState<number | undefined>(undefined);
 
   const updateWorkflow = useCallback(
-    (
-      id: string,
-      update: (workflow: SerializedWorkflow) => SerializedWorkflow
-    ) => {
+    (id: string, update: (workflow: ClientWorkflow) => ClientWorkflow) => {
       setWorkflows((workflows) =>
         workflows.map((workflow) => {
           return workflow.id === id ? update(workflow) : workflow;
@@ -31,7 +28,7 @@ export function useSquiggleWorkflows(initialWorkflows: SerializedWorkflow[]) {
     (input: SquiggleWorkflowInput) => {
       // This will be replaced with a real workflow once we receive the first message from the server.
       const id = `loading-${Date.now().toString()}`;
-      const workflow: SerializedWorkflow = {
+      const workflow: ClientWorkflow = {
         id,
         timestamp: new Date().getTime(),
         status: "loading",

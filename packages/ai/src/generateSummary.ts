@@ -206,7 +206,7 @@ ${code.source}
 
 **Error:**
 \`\`\`
-${code.error.toStringWithDetails()}
+${code.error}
 \`\`\`
 
 **Code:**

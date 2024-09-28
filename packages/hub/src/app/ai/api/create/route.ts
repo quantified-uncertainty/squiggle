@@ -1,9 +1,9 @@
 import { getServerSession } from "next-auth";
 
 import {
+  ClientWorkflow,
   decodeWorkflowFromReader,
   LlmConfig,
-  SerializedWorkflow,
   SquiggleWorkflowInput,
 } from "@quri/squiggle-ai";
 import { SquiggleWorkflow } from "@quri/squiggle-ai/server";
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
   const user = await getSelf(session);
 
-  let workflow: SerializedWorkflow;
+  let workflow: ClientWorkflow;
 
   const streamToDatabase = (
     stream: ReadableStream<string>,

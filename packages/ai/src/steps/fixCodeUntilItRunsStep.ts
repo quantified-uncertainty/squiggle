@@ -1,5 +1,5 @@
 import { Code, codeErrorString } from "../Code.js";
-import { LLMStepTemplate } from "../LLMStep.js";
+import { LLMStepTemplate } from "../LLMStepTemplate.js";
 import { changeFormatPrompt, PromptPair } from "../prompts.js";
 import { diffCompletionContentToCode } from "../squiggle/processSquiggleCode.js";
 import { addLineNumbers } from "../squiggle/searchReplace.js";

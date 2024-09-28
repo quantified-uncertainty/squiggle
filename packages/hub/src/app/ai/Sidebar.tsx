@@ -9,7 +9,7 @@ import {
 } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { LlmId, MODEL_CONFIGS, SerializedWorkflow } from "@quri/squiggle-ai";
+import { ClientWorkflow, LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 import {
   Button,
   SelectStringFormField,
@@ -27,8 +27,8 @@ type Handle = {
 type Props = {
   submitWorkflow: (requestBody: CreateRequestBody) => void;
   selectWorkflow: (id: string) => void;
-  selectedWorkflow: SerializedWorkflow | undefined;
-  workflows: SerializedWorkflow[];
+  selectedWorkflow: ClientWorkflow | undefined;
+  workflows: ClientWorkflow[];
 };
 
 type FormShape = {

@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { FC, useMemo } from "react";
 
-import { SerializedArtifact, SerializedStep } from "@quri/squiggle-ai";
+import { ClientArtifact, ClientStep } from "@quri/squiggle-ai";
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@quri/ui";
 
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
@@ -33,7 +33,7 @@ const NavButton: FC<{
 
 const ArtifactList: FC<{
   title: string;
-  artifacts: Record<string, SerializedArtifact>;
+  artifacts: Record<string, ClientArtifact>;
 }> = ({ title, artifacts }) => {
   return (
     <div>
@@ -54,7 +54,7 @@ const ArtifactList: FC<{
 };
 
 export const SelectedNodeSideView: FC<{
-  selectedNode: SerializedStep;
+  selectedNode: ClientStep;
   onClose: () => void;
   onSelectPreviousNode?: () => void;
   onSelectNextNode?: () => void;
@@ -63,7 +63,7 @@ export const SelectedNodeSideView: FC<{
 
   const selectedNodeCodeOutput = useMemo(() => {
     return Object.values(selectedNode.outputs).find(
-      (output): output is SerializedArtifact & { kind: "code" } =>
+      (output): output is ClientArtifact & { kind: "code" } =>
         output.kind === "code"
     );
   }, [selectedNode]);

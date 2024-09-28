@@ -5,15 +5,15 @@ import {
   LlmMetrics,
   Message,
 } from "../LLMClient.js";
-import {
-  Inputs,
-  LLMStepInstance,
-  LLMStepTemplate,
-  StepShape,
-} from "../LLMStep.js";
+import { LLMStepInstance } from "../LLMStepInstance.js";
+import { Inputs, LLMStepTemplate, StepShape } from "../LLMStepTemplate.js";
 import { TimestampedLogEntry } from "../Logger.js";
 import { LlmId } from "../modelConfigs.js";
-import { WorkflowResult } from "../types.js";
+import {
+  AiDeserializationVisitor,
+  AiSerializationVisitor,
+} from "../serialization.js";
+import { ClientWorkflowResult } from "../types.js";
 
 export interface LlmConfig {
   llmId: LlmId;
@@ -85,30 +85,38 @@ export type WorkflowEventListener<T extends WorkflowEventType> = (
 
 const MAX_RETRIES = 5;
 export class Workflow {
-  private steps: LLMStepInstance[] = [];
-  private priceLimit: number;
-  private durationLimitMs: number;
+  private steps: LLMStepInstance[];
 
+  public llmConfig: LlmConfig;
   public llmClient: LLMClient;
   public id: string;
   public startTime: number;
 
-  constructor(
-    public llmConfig: LlmConfig = llmConfigDefault,
+  private constructor(params: {
+    id?: string;
+    steps?: LLMStepInstance[];
+    llmConfig?: LlmConfig;
+    openaiApiKey?: string;
+    anthropicApiKey?: string;
+  }) {
+    this.llmConfig = params.llmConfig ?? llmConfigDefault;
+    this.startTime = Date.now();
+    this.id = params.id ?? crypto.randomUUID();
+    this.steps = params.steps ?? [];
+
+    this.llmClient = new LLMClient(
+      this.llmConfig.llmId,
+      params.openaiApiKey,
+      params.anthropicApiKey
+    );
+  }
+
+  static create(
+    llmConfig: LlmConfig = llmConfigDefault,
     openaiApiKey?: string,
     anthropicApiKey?: string
   ) {
-    this.priceLimit = llmConfig.priceLimit;
-    this.durationLimitMs = llmConfig.durationLimitMinutes * 1000 * 60;
-
-    this.startTime = Date.now();
-    this.id = crypto.randomUUID();
-
-    this.llmClient = new LLMClient(
-      llmConfig.llmId,
-      openaiApiKey,
-      anthropicApiKey
-    );
+    return new Workflow({ llmConfig, openaiApiKey, anthropicApiKey });
   }
 
   // This is a hook that ControlledWorkflow can use to prepare the workflow.
@@ -168,7 +176,7 @@ export class Workflow {
       type: "stepStarted",
       payload: { step },
     });
-    await step.run();
+    await step.run(this);
 
     this.dispatchEvent({
       type: "stepFinished",
@@ -185,12 +193,15 @@ export class Workflow {
   }
 
   checkResourceLimits(): string | undefined {
-    if (Date.now() - this.startTime > this.durationLimitMs) {
-      return `Duration limit of ${this.durationLimitMs / 1000 / 60} minutes exceeded`;
+    if (
+      Date.now() - this.startTime >
+      this.llmConfig.durationLimitMinutes * 1000 * 60
+    ) {
+      return `Duration limit of ${this.llmConfig.durationLimitMinutes} minutes exceeded`;
     }
 
-    if (this.priceSoFar() > this.priceLimit) {
-      return `Price limit of $${this.priceLimit.toFixed(2)} exceeded`;
+    if (this.priceSoFar() > this.llmConfig.priceLimit) {
+      return `Price limit of $${this.llmConfig.priceLimit.toFixed(2)} exceeded`;
     }
     return undefined;
   }
@@ -215,7 +226,7 @@ export class Workflow {
     return this.getCurrentStep()?.getState().kind !== "PENDING";
   }
 
-  getFinalResult(): WorkflowResult {
+  getFinalResult(): ClientWorkflowResult {
     const finalStep = this.getCurrentStep();
     if (!finalStep) {
       throw new Error("No steps found");
@@ -242,13 +253,15 @@ export class Workflow {
     const runTimeMs = endTime - this.startTime;
     const { totalPrice, llmRunCount } = this.getLlmMetrics();
 
+    const logSummary = generateSummary(this);
+
     return {
       code,
       isValid,
       totalPrice,
       runTimeMs,
       llmRunCount,
-      logSummary: generateSummary(this),
+      logSummary,
     };
   }
 
@@ -304,7 +317,7 @@ export class Workflow {
       .filter((step) => step.isDone());
 
     // We always include the last generation step, and then at most `maxRecentSteps - 1` other steps.
-    let remainingNSteps = [
+    const remainingNSteps = [
       this.steps[lastGenerateCodeIndex],
       ...remainingSteps.slice(-(maxRecentSteps - 1)),
     ];
@@ -338,4 +351,39 @@ export class Workflow {
       listener as (event: Event) => void
     );
   }
+
+  // Serialization/deserialization
+  serialize(visitor: AiSerializationVisitor): SerializedWorkflow {
+    return {
+      id: this.id,
+      stepIds: this.steps.map(visitor.step),
+    };
+  }
+
+  static deserialize({
+    node,
+    visitor,
+    llmConfig,
+    openaiApiKey,
+    anthropicApiKey,
+  }: {
+    node: SerializedWorkflow;
+    visitor: AiDeserializationVisitor;
+    llmConfig: LlmConfig;
+    openaiApiKey?: string;
+    anthropicApiKey?: string;
+  }): Workflow {
+    return new Workflow({
+      id: node.id,
+      steps: node.stepIds.map(visitor.step),
+      llmConfig,
+      openaiApiKey,
+      anthropicApiKey,
+    });
+  }
 }
+
+export type SerializedWorkflow = {
+  id: string;
+  stepIds: number[];
+};

@@ -1,13 +1,13 @@
 import clsx from "clsx";
 import { FC, MouseEvent } from "react";
 
-import { SerializedStep } from "@quri/squiggle-ai";
+import { ClientStep } from "@quri/squiggle-ai";
 
 import { StepStatusIcon } from "../StepStatusIcon";
 import { ArtifactDisplay } from "./ArtifactDisplay";
 
 type StepNodeProps = {
-  data: SerializedStep;
+  data: ClientStep;
   onClick?: (event: MouseEvent<HTMLDivElement>) => void;
   isSelected?: boolean;
   stepNumber: number;

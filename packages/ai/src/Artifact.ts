@@ -1,5 +1,5 @@
 import { Code } from "./Code.js";
-import { LLMStepInstance } from "./LLMStep.js";
+import { LLMStepInstance } from "./LLMStepInstance.js";
 
 export class BaseArtifact<T extends string, V> {
   public readonly id: string;
@@ -76,5 +76,51 @@ export function makeArtifact<T extends ArtifactKind>(
       ) as Extract<Artifact, { kind: T }>;
     default:
       throw kind satisfies never;
+  }
+}
+
+type ArtifactKindToSerialized<K extends Artifact["kind"]> =
+  K extends Artifact["kind"]
+    ? {
+        id: string;
+        kind: K;
+        value: ArtifactValue<K>;
+      }
+    : never;
+
+export type SerializedArtifact = ArtifactKindToSerialized<Artifact["kind"]>;
+
+export function serializeArtifact(artifact: Artifact): SerializedArtifact {
+  switch (artifact.kind) {
+    case "prompt":
+    case "source":
+      return {
+        id: artifact.id,
+        kind: artifact.kind,
+        value: artifact.value,
+      };
+    case "code":
+      // copy-pasted but type-safe
+      return {
+        id: artifact.id,
+        kind: artifact.kind,
+        value: artifact.value,
+      };
+    default:
+      throw artifact satisfies never;
+  }
+}
+
+export function deserializeArtifact(serialized: SerializedArtifact): Artifact {
+  switch (serialized.kind) {
+    case "prompt":
+      // TODO - pass in createdBy somehow
+      return new PromptArtifact(serialized.value, undefined);
+    case "source":
+      return new SourceArtifact(serialized.value, undefined);
+    case "code":
+      return new CodeArtifact(serialized.value, undefined);
+    default:
+      throw serialized satisfies never;
   }
 }

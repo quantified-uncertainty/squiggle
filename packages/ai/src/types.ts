@@ -15,7 +15,7 @@ export const squiggleWorkflowInputSchema = z.discriminatedUnion("type", [
 
 // Protocol for streaming workflow changes between server and client.
 
-// SerializedArtifact type
+// ClientArtifact type
 
 const commonArtifactFields = {
   id: z.string(),
@@ -41,9 +41,9 @@ const artifactSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 
-export type SerializedArtifact = z.infer<typeof artifactSchema>;
+export type ClientArtifact = z.infer<typeof artifactSchema>;
 
-// SerializedStep type
+// ClientStep type
 
 const stepStateSchema = z.enum(["PENDING", "DONE", "FAILED"]);
 
@@ -52,7 +52,7 @@ const messageSchema = z.object({
   content: z.string(),
 });
 
-export type SerializedMessage = z.infer<typeof messageSchema>;
+export type ClientMessage = z.infer<typeof messageSchema>;
 
 const stepSchema = z.object({
   id: z.string(),
@@ -63,9 +63,9 @@ const stepSchema = z.object({
   messages: z.array(messageSchema),
 });
 
-export type SerializedStep = z.infer<typeof stepSchema>;
+export type ClientStep = z.infer<typeof stepSchema>;
 
-// Messages that incrementally update the SerializedWorkflow.
+// Messages that incrementally update the ClientWorkflow.
 // They are using for streaming updates from the server to the client.
 // They are similar to Workflow events, but not exactly the same. They must be JSON-serializable.
 // See `addStreamingListeners` in workflows/streaming.ts for how they are used.
@@ -89,7 +89,7 @@ const stepUpdatedSchema = stepSchema.partial().required({
 
 // WorkflowResult type
 
-export const workflowResultSchema = z.object({
+export const clientWorkflowResultSchema = z.object({
   code: z.string().describe("Squiggle code snippet"),
   isValid: z.boolean(),
   totalPrice: z.number(),
@@ -98,16 +98,16 @@ export const workflowResultSchema = z.object({
   logSummary: z.string(), // markdown
 });
 
-export type WorkflowResult = z.infer<typeof workflowResultSchema>;
+export type ClientWorkflowResult = z.infer<typeof clientWorkflowResultSchema>;
 
-export const workflowMessageSchema = z.discriminatedUnion("kind", [
+export const streamingMessageSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("workflowStarted"),
     content: workflowStartedSchema,
   }),
   z.object({
     kind: z.literal("finalResult"),
-    content: workflowResultSchema,
+    content: clientWorkflowResultSchema,
   }),
   z.object({
     kind: z.literal("stepAdded"),
@@ -119,11 +119,11 @@ export const workflowMessageSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 
-export type WorkflowMessage = z.infer<typeof workflowMessageSchema>;
+export type StreamingMessage = z.infer<typeof streamingMessageSchema>;
 
 // Client-side representation of a workflow
 
-const commonWorkflowFields = {
+const commonClientWorkflowFields = {
   id: z.string(),
   timestamp: z.number(), // milliseconds since epoch
   input: squiggleWorkflowInputSchema, // FIXME - SquiggleWorkflow-specific
@@ -131,22 +131,22 @@ const commonWorkflowFields = {
   currentStep: z.string().optional(),
 };
 
-export const serializedWorkflowSchema = z.discriminatedUnion("status", [
+export const clientWorkflowSchema = z.discriminatedUnion("status", [
   z.object({
-    ...commonWorkflowFields,
+    ...commonClientWorkflowFields,
     status: z.literal("loading"),
     result: z.undefined(),
   }),
   z.object({
-    ...commonWorkflowFields,
+    ...commonClientWorkflowFields,
     status: z.literal("finished"),
-    result: workflowResultSchema,
+    result: clientWorkflowResultSchema,
   }),
   z.object({
-    ...commonWorkflowFields,
+    ...commonClientWorkflowFields,
     status: z.literal("error"),
     result: z.string(),
   }),
 ]);
 
-export type SerializedWorkflow = z.infer<typeof serializedWorkflowSchema>;
+export type ClientWorkflow = z.infer<typeof clientWorkflowSchema>;

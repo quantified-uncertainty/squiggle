@@ -1,6 +1,6 @@
 import { FC, ReactNode } from "react";
 
-import { SerializedWorkflow } from "@quri/squiggle-ai";
+import { ClientWorkflow } from "@quri/squiggle-ai";
 import { Button } from "@quri/ui";
 
 import { WorkflowStatusIcon } from "../WorkflowStatusIcon";
@@ -9,7 +9,7 @@ import { WorkflowStatusIcon } from "../WorkflowStatusIcon";
 export const Header: FC<{
   renderLeft: () => ReactNode;
   renderRight: () => ReactNode;
-  workflow: SerializedWorkflow;
+  workflow: ClientWorkflow;
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
 }> = ({ renderLeft, renderRight, workflow, expanded, setExpanded }) => {
