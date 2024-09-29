@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 
-import { SquiggleWorkflow } from "../workflows/SquiggleWorkflow.js";
+import { SquiggleWorkflow } from "../../workflows/SquiggleWorkflow.js";
 
 config();
 

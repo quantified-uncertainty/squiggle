@@ -1,32 +1,11 @@
-import axios from "axios";
 import fs from "fs/promises";
 import path, { dirname } from "path";
 import prettier from "prettier";
 import { fileURLToPath } from "url";
 
+import { fetchCodeFromGraphQL } from "./squiggleHubHelpers.js";
+
 export const librariesToImport = ["ozziegooen/sTest", "ozziegooen/helpers"];
-
-const GRAPHQL_URL = "https://squigglehub.org/api/graphql";
-
-function getQuery(owner: string, slug: string) {
-  return `
-  query MyQuery {
-    model(input: {owner: "${owner}", slug: "${slug}"}) {
-      ... on Model {
-        id
-        currentRevision {
-          content {
-            ... on SquiggleSnippet {
-              id
-              code
-            }
-          }
-        }
-      }
-    }
-  }
-  `;
-}
 
 function getLibraryPath(libName: string): string {
   const [author, name] = libName.split("/");
@@ -44,9 +23,7 @@ function getScriptPath() {
 
 async function fetchSquiggleCode(owner: string, slug: string) {
   try {
-    const query = getQuery(owner, slug);
-    const response = await axios.post(GRAPHQL_URL, { query });
-    const code = response.data.data.model.currentRevision.content.code;
+    const code = await fetchCodeFromGraphQL(owner, slug);
 
     const filePath = getLibraryPath(`${owner}/${slug}`);
     const dirPath = path.dirname(filePath);
