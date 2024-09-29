@@ -45,36 +45,6 @@ export const examplesToImport = [
       "Make a file that organizes a specification to help people predict the critical success of movies.",
   },
   {
-    id: "blueprint-biosecurity/burden-of-resp-disease",
-    prompt: "Estimate the burden of respiratory disease. ",
-  },
-  {
-    id: "blueprint-biosecurity/endemic-covid-baseline",
-    prompt: "Estimate the baseline of endemic covid. ",
-  },
-  {
-    id: "blueprint-biosecurity/far-uvc-botec",
-    prompt:
-      "Estimate the burden of far ultraviolet radiation on human health. ",
-  },
-  {
-    id: "blueprint-biosecurity/DALY-x-risk-BOTEC",
-    prompt: "Estimate the DALYs from x-risk. ",
-  },
-  {
-    id: "ASRS-Resilience/Volcanic-Cooling-Events-GeoMean-of-Odds-Approach",
-    prompt:
-      "Estimate the impact of volcanic cooling events on global temperature.",
-  },
-  {
-    id: "mdickens/Uganda-Community-Farm-sorghum",
-    prompt: "Estimate the yield of sorghum in Uganda.",
-  },
-  {
-    id: "mlao-pdx/stringSort",
-    prompt: "Implement a string sorting algorithm.",
-  },
-  {
     id: "patbl/water-filtration-system-comparison",
     prompt: "Compare the cost of different water filtration systems.",
   },
