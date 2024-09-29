@@ -1,6 +1,6 @@
 // Model selection and pricing
 type ModelConfig = {
-  provider: "anthropic" | "openrouter";
+  provider: "anthropic" | "openai";
   model: string;
   inputRate: number;
   outputRate: number;
@@ -14,8 +14,8 @@ type ModelConfig = {
 export const MODEL_CONFIGS = [
   {
     id: "o1-preview",
-    provider: "openrouter",
-    model: "openai/o1-preview",
+    provider: "openai",
+    model: "o1-preview",
     inputRate: 0.000015,
     outputRate: 0.00006,
     contextWindow: 128000,
@@ -24,8 +24,8 @@ export const MODEL_CONFIGS = [
   },
   {
     id: "o1-mini",
-    provider: "openrouter",
-    model: "openai/o1-mini-2024-09-12",
+    provider: "openai",
+    model: "o1-mini-2024-09-12",
     inputRate: 0.000003,
     outputRate: 0.000012,
     contextWindow: 128000,
@@ -34,17 +34,27 @@ export const MODEL_CONFIGS = [
   },
   {
     id: "GPT4",
-    provider: "openrouter",
-    model: "openai/gpt-4o-2024-08-06",
+    provider: "openai",
+    model: "gpt-4o-2024-08-06",
     inputRate: 0.0000025,
     outputRate: 0.00001,
     contextWindow: 128000,
     name: "GPT-4o",
   },
   {
+    id: "GPT4-Fine-Tuned",
+    provider: "openai",
+    model:
+      "ft:gpt-4o-2024-08-06:quantified-uncertainty-research-institute:squiggle-v02:ACWwi8V1",
+    inputRate: 0.00000375,
+    outputRate: 0.000015,
+    contextWindow: 128000,
+    name: "GPT-40 Fine-Tuned",
+  },
+  {
     id: "GPT4-mini",
-    provider: "openrouter",
-    model: "openai/gpt-4o-mini-2024-07-18",
+    provider: "openai",
+    model: "gpt-4o-mini-2024-07-18",
     inputRate: 0.00000015,
     outputRate: 0.0000006,
     contextWindow: 128000,
@@ -69,24 +79,6 @@ export const MODEL_CONFIGS = [
     contextWindow: 200000,
     maxTokens: 4096,
     name: "Claude Haiku",
-  },
-  {
-    id: "DeepSeek-Coder-V2",
-    provider: "openrouter",
-    model: "deepseek/deepseek-coder",
-    inputRate: 0.00000014,
-    outputRate: 0.00000028,
-    contextWindow: 128000,
-    name: "DeepSeek Coder V2",
-  },
-  {
-    id: "Llama-3.1",
-    provider: "openrouter",
-    model: "meta-llama/llama-3.1-405b-instruct",
-    inputRate: 0.0000027,
-    outputRate: 0.0000027,
-    contextWindow: 131072,
-    name: "Llama 3.1",
   },
 ] as const satisfies ModelConfig[];
 

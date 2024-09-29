@@ -81,8 +81,8 @@ export async function POST(req: Request) {
     // Create a SquiggleGenerator instance
     const llmConfig: LlmConfig = {
       llmId: request.model ?? "Claude-Sonnet",
-      priceLimit: 0.3,
-      durationLimitMinutes: 4,
+      priceLimit: 0.5,
+      durationLimitMinutes: 2,
       messagesInHistoryToKeep: 4,
     };
 
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
       llmConfig,
       input,
       abortSignal: req.signal,
-      openaiApiKey: process.env["OPENROUTER_API_KEY"],
+      openaiApiKey: process.env["OPENAI_API_KEY"],
       anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
     }).runAsStream();
 
