@@ -84,9 +84,9 @@ export const library = [
       makeFnExample(`mod(10, -3)`),
     ],
     description:
-      "modulo. Note that there is no '%' operator in Squiggle for this operation..",
+      "modulo. This is the same as the '%' operator in Python. Note that there is no '%' operator in Squiggle for this operation.",
     fn: (x, y) => {
-      return ((x % y) + y) % y; //See: https://stackoverflow.com/questions/4467539/javascript-modulo-gives-a-negative-result-for-negative-numbers
+      return x - y * Math.floor(x / y);
     },
   }),
   maker.n2n({

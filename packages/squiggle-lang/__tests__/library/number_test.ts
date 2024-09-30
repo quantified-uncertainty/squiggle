@@ -39,6 +39,6 @@ describe("Numbers", () => {
   testEvalToBe("Number.mod(15, 4)", "3");
   testEvalToBe("mod(-10, 3)", "2");
   testEvalToBe("mod(-5, 3)", "1");
-  testEvalToBe("mod(5, -3)", "2");
-  testEvalToBe("mod(-5, -3)", "1");
+  testEvalToBe("mod(5, -3)", "-1");
+  testEvalToBe("mod(-5, -3)", "-2");
 });
