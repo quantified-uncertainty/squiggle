@@ -201,7 +201,6 @@ export class LLMClient {
 
         return convertClaudeToStandardFormat(completion);
       } else {
-        // Use OpenAI (OpenRouter)
         const openaiClient = this.getOpenAIClient();
         const completion = await openaiClient.chat.completions.create({
           model: selectedModelConfig.model,
