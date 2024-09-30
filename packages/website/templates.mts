@@ -215,7 +215,17 @@ Raw functions and distributions are plotted with default parameters, while plot 
       { name: "Utils" },
     ],
     description: "Squiggle numbers are Javascript floats.",
-    intro: "Squiggle numbers are Javascript floats.",
+    intro: `Squiggle numbers are Javascript floats.
+
+## Constants
+
+| Variable Name     | Number Name                                   | Value               |
+|-------------------|-----------------------------------------------|---------------------|
+| \`Number.MIN_VALUE\`| The smallest positive numeric value representable in JavaScript   | 5e-324                   |
+| \`Number.MAX_VALUE\`| The largest positive numeric value representable in JavaScript    | 1.7976931348623157e+308  |
+
+## Functions
+    `,
   },
   {
     name: "Scale",

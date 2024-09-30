@@ -8,7 +8,7 @@ import { ImmutableMap } from "../utility/immutable.js";
 import { Value } from "../value/index.js";
 import { vLambda } from "../value/vLambda.js";
 import { frAny } from "./FrType.js";
-import { makeMathConstants } from "./math.js";
+import { makeNumbericConstants } from "./numericConstants.js";
 import { getRegistry, makeSquiggleBindings } from "./registry/index.js";
 import { makeVersionConstant } from "./version.js";
 
@@ -29,7 +29,7 @@ function makeStdLib(): Bindings {
 
   let res: Bindings = ImmutableMap<string, Value>().merge(
     // global constants
-    makeMathConstants(),
+    makeNumbericConstants(),
     makeVersionConstant(),
     // field lookups
     [[INDEX_LOOKUP_FUNCTION, vLambda(makeLookupLambda())]],
