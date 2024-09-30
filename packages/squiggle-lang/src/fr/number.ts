@@ -75,6 +75,20 @@ export const library = [
     displaySection: "Algebra (Number)",
     fn: (x, y) => Math.pow(x, y),
   }),
+  maker.nn2n({
+    name: "mod",
+    displaySection: "Algebra (Number)",
+    examples: [
+      makeFnExample(`mod(10, 3)`),
+      makeFnExample(`mod(-10, 3)`),
+      makeFnExample(`mod(10, -3)`),
+    ],
+    description:
+      "modulo. This is the same as the '%' operator in Python. Note that there is no '%' operator in Squiggle for this operation.",
+    fn: (x, y) => {
+      return x - y * Math.floor(x / y);
+    },
+  }),
   maker.n2n({
     name: "unaryMinus",
     displaySection: "Functions (Number)",
