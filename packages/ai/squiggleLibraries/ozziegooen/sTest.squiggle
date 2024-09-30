@@ -45,6 +45,8 @@ SquiggleJest is a simple testing library for Squiggle, inspired by Jest for Java
 - `toBeFalse()`: Checks if the value is false
 - `toBeCloseTo(expected, epsilon)`: Checks if the actual value is close to the expected value within a given epsilon.
 - `toBeBetween(low, high)`: Checks if the actual value is between the given low and high values (inclusive).
+- `toThrowAnyError(() => any)`: Checks to see if any error was thrown.
+- `toNotThrow(() => any)`: Checks that no error was thrown.
 
 ## Examples
 
@@ -85,6 +87,10 @@ describe(\"My Distribution\", [
 
 These examples demonstrate how to use SquiggleJest to test various aspects of your Squiggle models, from simple functions to complex models with distributions.
 "
+
+keyword = "____FAILED____"
+
+fnThrewError(fn) = try(fn, {|| "____FAILED____"}) == keyword
 
 @startClosed
 createExpectation(actual) = {
@@ -136,6 +142,18 @@ createExpectation(actual) = {
   },
   toBeTrue: {|| if !actual then "Expected true but got " + actual else true},
   toBeFalse: {|| if actual then "Expected false but got " + actual else true},
+  toThrowAnyError: {
+    ||
+    if fnThrewError(
+      actual
+    ) then true else "Expected to throw an error, but no error was thrown"
+  },
+  toNotThrow: {
+    ||
+    if !fnThrewError(
+      actual
+    ) then true else "Expected not to throw an error, but an error was thrown"
+  },
 }
 
 runTest(test) = {
@@ -275,6 +293,25 @@ comparisonTests = describe(
     test(
       "2^53 - 1 is the largest integer precisely representable in IEEE 754",
       {|| expect(2 ^ 53 - 1).toBe(9007199254740991)}
+    ),
+  ]
+)
+
+errorTests = describe(
+  "Error Throwing Tests",
+  [
+    test(
+      "throws any error",
+      {|| expect({|| throw("SomeError")}).toThrowAnyError()}
+    ),
+    test("doesn't throw any error", {|| expect({|| 2 + 2}).toNotThrow()}),
+    test(
+      "fails when expecting an error but none is thrown",
+      {|| expect({|| 2 + 2}).toThrowAnyError()}
+    ),
+    test(
+      "fails when expecting no error but one is thrown",
+      {|| expect({|| throw("UnexpectedError")}).toNotThrow()}
     ),
   ]
 )
