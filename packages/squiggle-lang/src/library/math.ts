@@ -13,6 +13,8 @@ const availableNumbers: [string, number][] = [
   ["Math.sqrt1_2", Math.SQRT1_2],
   ["Math.phi", 1.618033988749895],
   ["Math.tau", 6.283185307179586],
+  ["Number.maxValue", Number.MAX_VALUE],
+  ["Number.minValue", Number.MIN_VALUE],
 ];
 
 export function makeMathConstants(): ImmutableMap<string, Value> {
