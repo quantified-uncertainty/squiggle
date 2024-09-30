@@ -14,7 +14,7 @@ bar
   const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
     await new SquiggleWorkflow({
       input: { type: "Edit", source: initialCode },
-      openaiApiKey: process.env["OPENAIAPI_KEY"],
+      openaiApiKey: process.env["OPENAI_API_KEY"],
       anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
     }).runToResult();
 
