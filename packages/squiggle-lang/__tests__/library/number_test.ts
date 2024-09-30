@@ -34,4 +34,11 @@ describe("Numbers", () => {
   testEvalToBe("Number.cumprod([1,5,3])", "[1,5,15]");
   testEvalToBe("Number.diff([1])", "[]");
   testEvalToBe("Number.diff([1,5,3])", "[4,-2]");
+  testEvalToBe("Number.mod(10, 3)", "1");
+  testEvalToBe("mod(10, 3)", "1");
+  testEvalToBe("Number.mod(15, 4)", "3");
+  testEvalToBe("mod(-10, 3)", "2");
+  testEvalToBe("mod(-5, 3)", "1");
+  testEvalToBe("mod(5, -3)", "2");
+  testEvalToBe("mod(-5, -3)", "1");
 });
