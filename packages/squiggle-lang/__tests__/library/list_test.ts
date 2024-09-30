@@ -308,4 +308,21 @@ describe("List functions", () => {
     testEvalToBe("List.unzip([[1,3],[2,4],[5,6]])", "[[1,2,5],[3,4,6]]");
     testEvalToBe("List.unzip([])", "[[],[]]");
   });
+
+  describe("sample", () => {
+    testEvalToBe("List.sample([1, 2, 3, 4, 5]) -> typeOf", '"Number"');
+    testEvalToBe(
+      "List.sample([])",
+      "Error(Argument Error: List must not be empty)"
+    );
+  });
+
+  describe("sampleN", () => {
+    testEvalToBe("List.sampleN([1, 2, 3, 4, 5], 3) -> List.length", "3");
+    testEvalToBe("List.sampleN([1, 2, 3], 0)", "[]");
+    testEvalToBe(
+      "List.sampleN([], 2)",
+      "Error(Argument Error: List must not be empty)"
+    );
+  });
 });

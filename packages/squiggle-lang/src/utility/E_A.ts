@@ -119,3 +119,27 @@ export function isEqual<T>(arr1: readonly T[], arr2: readonly T[]): boolean {
 
   return true;
 }
+
+export function sample<T>(array: readonly T[], rng: PRNG): T {
+  const index = Math.floor(rng() * array.length);
+  return array[index];
+}
+
+export function sampleN<T>(array: readonly T[], n: number, rng: PRNG): T[] {
+  const size = Math.max(0, Math.floor(n));
+  if (size === 0) return [];
+  if (size >= array.length) return shuffle(array, rng);
+
+  const result: T[] = [];
+  const indices = new Set<number>();
+
+  while (indices.size < size) {
+    const index = Math.floor(rng() * array.length);
+    if (!indices.has(index)) {
+      indices.add(index);
+      result.push(array[index]);
+    }
+  }
+
+  return result;
+}
