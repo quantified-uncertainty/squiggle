@@ -30,7 +30,7 @@ import { Lambda } from "../reducer/lambda/index.js";
 import { Reducer } from "../reducer/Reducer.js";
 import { tBool, tNumber } from "../types/TIntrinsic.js";
 import { tAny } from "../types/Type.js";
-import { shuffle, unzip, zip } from "../utility/E_A.js";
+import { sample, sampleN, shuffle, unzip, zip } from "../utility/E_A.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { uniq, uniqBy, Value } from "../value/index.js";
 import { vNumber } from "../value/VNumber.js";
@@ -797,6 +797,38 @@ List.reduceWhile(
           frArray(frAny({ genericName: "B" }))
         ),
         ([array]) => unzip(array)
+      ),
+    ],
+  }),
+  maker.make({
+    name: "sample",
+    requiresNamespace: true,
+    examples: [makeFnExample(`List.sample([1,4,5])`)],
+    displaySection: "Queries",
+    definitions: [
+      makeDefinition(
+        [frArray(frAny({ genericName: "A" }))],
+        frAny({ genericName: "A" }),
+        ([array], { rng }) => {
+          _assertUnemptyArray(array);
+          return sample(array, rng);
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "sampleN",
+    requiresNamespace: true,
+    examples: [makeFnExample(`List.sampleN([1,4,5], 2)`)],
+    displaySection: "Queries",
+    definitions: [
+      makeDefinition(
+        [frArray(frAny({ genericName: "A" })), namedInput("n", frNumber)],
+        frArray(frAny({ genericName: "A" })),
+        ([array, n], { rng }) => {
+          _assertUnemptyArray(array);
+          return sampleN(array, n, rng);
+        }
       ),
     ],
   }),
