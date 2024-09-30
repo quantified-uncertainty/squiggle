@@ -107,12 +107,20 @@ myFn = typeOf({|e| e})`,
         ],
         frOr(frAny({ genericName: "A" }), frAny({ genericName: "B" })),
         ([fn, fallbackFn], reducer) => {
+          const stackSize = reducer.stack.size();
+          const frameStackSize = reducer.frameStack.frames.length;
+
           try {
             return { tag: "1", value: reducer.call(fn, []) };
           } catch (e) {
             if (!(e instanceof ErrorMessage)) {
               // This doesn't looks like an error in user code, treat it as fatal
               throw e;
+            }
+
+            reducer.stack.shrink(stackSize);
+            while (reducer.frameStack.frames.length > frameStackSize) {
+              reducer.frameStack.pop();
             }
             return { tag: "2", value: reducer.call(fallbackFn, []) };
           }

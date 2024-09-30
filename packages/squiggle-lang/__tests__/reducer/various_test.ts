@@ -119,4 +119,25 @@ describe("eval", () => {
       testEvalToBe("1->{f:{|x|x+2}}['f']", "3");
     });
   });
+
+  // https://github.com/quantified-uncertainty/squiggle/issues/3391
+  describe("captures and try/catch", () => {
+    testEvalToBe(
+      `
+      keyword = "____FAILED____"
+
+fnThrewError(fn) = {
+  foo = try(fn, {|| "____FAILED____"})
+  foo
+}
+
+badExample(fn) = {
+  a = fnThrewError({|| throw("ads")})
+  a == keyword
+}
+badExample({|| throw("Error")})
+`,
+      "true"
+    );
+  });
 });
