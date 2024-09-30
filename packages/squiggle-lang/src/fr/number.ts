@@ -86,7 +86,7 @@ export const library = [
     description:
       "modulo. Note that there is no '%' operator in Squiggle for this operation..",
     fn: (x, y) => {
-      return ((x % y) + y) % y;
+      return ((x % y) + y) % y; //See: https://stackoverflow.com/questions/4467539/javascript-modulo-gives-a-negative-result-for-negative-numbers
     },
   }),
   maker.n2n({
