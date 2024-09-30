@@ -17,6 +17,6 @@ const availableNumbers: [string, number][] = [
   ["Number.minValue", Number.MIN_VALUE],
 ];
 
-export function makeMathConstants(): ImmutableMap<string, Value> {
+export function makeNumbericConstants(): ImmutableMap<string, Value> {
   return ImmutableMap(availableNumbers.map(([name, v]) => [name, vNumber(v)]));
 }
