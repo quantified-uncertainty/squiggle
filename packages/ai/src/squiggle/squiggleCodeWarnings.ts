@@ -9,7 +9,7 @@
 // Utility type
 type InvalidElement = {
   check: (line: string) => boolean;
-  getMessage: (lineNumber: number) => string;
+  getMessage: (lineNumber: number, line: string) => string;
 };
 
 type WarningType =
@@ -20,7 +20,8 @@ type WarningType =
   | "CHECK_DIFF_ARTIFACTS"
   | "CHECK_CAPITALIZED_VARIABLE_NAMES"
   | "CHECK_IF_WITHOUT_ELSE"
-  | "CHECK_MULTIPLE_EXPECTS";
+  | "CHECK_MULTIPLE_EXPECTS"
+  | "CHECK_ADJACENT_EXPECT_STATEMENTS";
 
 type Warning = {
   type: WarningType;
@@ -44,8 +45,11 @@ function getInvalidSquiggleElements(): InvalidElement[] {
   return [
     {
       check: (line: string) => /\b(null|nil|undefined)\b/.test(line),
-      getMessage: (lineNumber: number) =>
-        `Line ${lineNumber}: The use of 'null', 'nil', or 'undefined' is not valid in Squiggle. Use an empty string, false, or a custom 'None' value for representing absence of a value.`,
+      getMessage: (lineNumber: number, line: string) => {
+        const match = line.match(/\b(null|nil|undefined)\b/);
+        const value = match ? match[1] : "null, nil, or undefined";
+        return `Line ${lineNumber}: The use of '${value}' is not valid in Squiggle. Use an empty string, false, or a custom 'None' value for representing absence of a value.`;
+      },
     },
     {
       check: (line: string) => {
@@ -53,8 +57,11 @@ function getInvalidSquiggleElements(): InvalidElement[] {
         const withoutStrings = line.replace(/"(?:[^"\\]|\\.)*"/g, '""');
         return /\b\w+\s*:\s*[A-Z]\w+(?:\s*[,)]|$)/.test(withoutStrings);
       },
-      getMessage: (lineNumber: number) =>
-        `Line ${lineNumber}: Type annotation like 'variableName: Type' is not valid in Squiggle. Squiggle uses structural typing and doesn't require explicit type annotations.`,
+      getMessage: (lineNumber: number, line: string) => {
+        const match = line.match(/\b(\w+\s*:\s*[A-Z]\w+)/);
+        const annotation = match ? match[1] : "variableName: Type";
+        return `Line ${lineNumber}: Type annotation '${annotation}' is not valid in Squiggle. Squiggle uses structural typing and doesn't support explicit type annotations.`;
+      },
     },
     {
       check: (line: string) => {
@@ -64,13 +71,33 @@ function getInvalidSquiggleElements(): InvalidElement[] {
             !line.includes(`${element} is not defined`)
         );
       },
-      getMessage: (lineNumber: number) =>
-        `Line ${lineNumber}: A common function or object (like List.sum, Number.parseFloat, etc.) is used but not defined in Squiggle. Check for typos or missing imports. Some functions might have different names or implementations in Squiggle.`,
+      getMessage: (lineNumber: number, line: string) => {
+        const element = commonUndefinedElements.find((el) =>
+          new RegExp(`\\b${el}\\b`).test(line)
+        );
+        return `Line ${lineNumber}: The function or object '${element}' is used but not defined in Squiggle. Check for typos or missing imports. Some functions might have different names or implementations in Squiggle.`;
+      },
     },
     {
       check: (line: string) => /\bDate\.now\b/.test(line),
-      getMessage: (lineNumber: number) =>
+      getMessage: (lineNumber: number, line: string) =>
         `Line ${lineNumber}: 'Date.now' is not available in Squiggle. Use 'Danger.now' instead for the current timestamp. Be cautious with time-dependent calculations as they may produce varying results.`,
+    },
+    {
+      check: (line: string) =>
+        /\b(Infinity|INFINITY|NegativeInfinity|NEGATIVE_INFINITY)\b/.test(line),
+      getMessage: (lineNumber: number, line: string) => {
+        const match = line.match(
+          /\b(Infinity|INFINITY|NegativeInfinity|NEGATIVE_INFINITY)\b/
+        );
+        const value = match ? match[1] : "Infinity constant";
+        return `Line ${lineNumber}: The ${value} constant is not valid in Squiggle. You can use Number.MAX_VALUE or Number.MIN_VALUE instead.`;
+      },
+    },
+    {
+      check: (line: string) => /=>/.test(line),
+      getMessage: (lineNumber: number, line: string) =>
+        `Line ${lineNumber}: The arrow function syntax "=>" is not allowed in Squiggle. Use the standard function declaration syntax instead. If you want to write a lambda function, you can do this: {|x| x + 1 }`,
     },
   ];
 }
@@ -88,7 +115,7 @@ export function checkInvalidSquiggleElements(code: string): Warning[] {
         warnings.push({
           type: "CHECK_INVALID_SQUIGGLE_ELEMENTS",
           lineNumber: lineNumber,
-          message: element.getMessage(lineNumber),
+          message: element.getMessage(lineNumber, line),
         });
       }
     });
@@ -312,6 +339,33 @@ export function checkMultipleExpects(code: string): Warning[] {
   return warnings;
 }
 
+// Function to check for adjacent expect statements
+export function checkAdjacentExpectStatements(code: string): Warning[] {
+  const warnings: Warning[] = [];
+  const lines = code.split("\n");
+  let lastExpectLine = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    const trimmedLine = lines[i].trim();
+    if (
+      trimmedLine.startsWith("expect") ||
+      trimmedLine.startsWith("sTest.expect(") ||
+      trimmedLine.startsWith("test.expect")
+    ) {
+      if (lastExpectLine !== -1 && i - lastExpectLine === 1) {
+        warnings.push({
+          type: "CHECK_ADJACENT_EXPECT_STATEMENTS",
+          lineNumber: i + 1,
+          message: `Lines ${lastExpectLine + 1}-${i + 1}: Adjacent expect statements found. Only one expect statement is allowed per test block.`,
+        });
+      }
+      lastExpectLine = i;
+    }
+  }
+
+  return warnings;
+}
+
 type WarningCheck = {
   check: (code: string) => Warning[];
   additionalAdvice?: string;
@@ -360,6 +414,11 @@ export function getSquiggleWarnings(
       check: checkMultipleExpects,
       additionalAdvice:
         "In Squiggle, you can only return one .expect() at the end of a block, as you're only allowed one return statement.",
+    },
+    {
+      check: checkAdjacentExpectStatements,
+      additionalAdvice:
+        "Separate expect statements with at least one blank line to improve code readability and organization.",
     },
   ];
 
