@@ -82,7 +82,7 @@ export async function POST(req: Request) {
     const llmConfig: LlmConfig = {
       llmId: request.model ?? "Claude-Sonnet",
       priceLimit: 0.3,
-      durationLimitMinutes: 4,
+      durationLimitMinutes: 3,
       messagesInHistoryToKeep: 4,
     };
 
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
       llmConfig,
       input,
       abortSignal: req.signal,
-      openaiApiKey: process.env["OPENROUTER_API_KEY"],
+      openaiApiKey: process.env["OPENAI_API_KEY"],
       anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
     }).runAsStream();
 
