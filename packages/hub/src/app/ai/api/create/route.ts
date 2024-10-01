@@ -82,7 +82,7 @@ export async function POST(req: Request) {
     const llmConfig: LlmConfig = {
       llmId: request.model ?? "Claude-Sonnet",
       priceLimit: 0.3,
-      durationLimitMinutes: 4,
+      durationLimitMinutes: 3,
       messagesInHistoryToKeep: 4,
     };
 
