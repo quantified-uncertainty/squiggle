@@ -8,6 +8,7 @@ type ModelConfig = {
   maxTokens?: number;
   name: string;
   id: string;
+  allowsSystemPrompt: boolean;
 };
 
 // After some discussion, we decided to store this as an array of objects instead of a record. This is because it can be a pain to iterate and filter over records, and there aren't any significant performance benefits to using a record for this data.
@@ -21,6 +22,7 @@ export const MODEL_CONFIGS = [
     contextWindow: 128000,
     maxTokens: 32768,
     name: "o1 Preview",
+    allowsSystemPrompt: false,
   },
   {
     id: "o1-mini",
@@ -31,6 +33,7 @@ export const MODEL_CONFIGS = [
     contextWindow: 128000,
     maxTokens: 65536,
     name: "o1 Mini",
+    allowsSystemPrompt: false,
   },
   {
     id: "GPT4",
@@ -40,6 +43,7 @@ export const MODEL_CONFIGS = [
     outputRate: 0.00001,
     contextWindow: 128000,
     name: "GPT-4o",
+    allowsSystemPrompt: true,
   },
   {
     id: "GPT4-mini",
@@ -49,6 +53,7 @@ export const MODEL_CONFIGS = [
     outputRate: 0.0000006,
     contextWindow: 128000,
     name: "GPT-4o mini",
+    allowsSystemPrompt: true,
   },
   {
     id: "Claude-Sonnet",
@@ -59,6 +64,7 @@ export const MODEL_CONFIGS = [
     contextWindow: 200000,
     maxTokens: 8192,
     name: "Claude Sonnet 3.5",
+    allowsSystemPrompt: true,
   },
   {
     id: "Claude-Haiku",
@@ -69,6 +75,7 @@ export const MODEL_CONFIGS = [
     contextWindow: 200000,
     maxTokens: 4096,
     name: "Claude Haiku",
+    allowsSystemPrompt: true,
   },
   {
     id: "DeepSeek-Coder-V2",
@@ -78,6 +85,7 @@ export const MODEL_CONFIGS = [
     outputRate: 0.00000028,
     contextWindow: 128000,
     name: "DeepSeek Coder V2",
+    allowsSystemPrompt: true,
   },
   {
     id: "Llama-3.1",
@@ -87,6 +95,7 @@ export const MODEL_CONFIGS = [
     outputRate: 0.0000027,
     contextWindow: 131072,
     name: "Llama 3.1",
+    allowsSystemPrompt: true,
   },
 ] as const satisfies ModelConfig[];
 

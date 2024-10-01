@@ -138,7 +138,6 @@ export class LLMClient {
   ) {
     if (openaiApiKey) {
       this.openaiClient = new OpenAI({
-        baseURL: "https://openrouter.ai/api/v1",
         apiKey: openaiApiKey,
       });
     }
@@ -202,14 +201,26 @@ export class LLMClient {
 
         return convertClaudeToStandardFormat(completion);
       } else {
-        // Use OpenAI (OpenRouter)
         const openaiClient = this.getOpenAIClient();
+        const messages = selectedModelConfig.allowsSystemPrompt
+          ? [
+              { role: "system", content: squiggleSystemContent },
+              ...conversationHistory,
+            ]
+          : [
+              {
+                role: "user",
+                content: `Here are the basics of Squiggle. Read them, and then say 'Okay'. ${squiggleSystemContent}`,
+              },
+              { role: "assistant", content: "Okay." },
+              ...conversationHistory,
+            ];
         const completion = await openaiClient.chat.completions.create({
           model: selectedModelConfig.model,
-          messages: [
-            { role: "system", content: squiggleSystemContent },
-            ...conversationHistory,
-          ],
+          messages: messages.map((msg) => ({
+            role: msg.role as "system" | "user" | "assistant",
+            content: msg.content,
+          })),
         });
 
         return convertOpenAIToStandardFormat(completion);

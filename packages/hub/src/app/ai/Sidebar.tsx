@@ -127,7 +127,7 @@ export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
           label="Model"
           size="small"
           options={MODEL_CONFIGS.filter(
-            (model) => model.provider === "anthropic"
+            (model) => true // model.provider === "anthropic"
           ).map((model) => model.id)}
           required
         />
