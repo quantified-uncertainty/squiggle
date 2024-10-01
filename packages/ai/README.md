@@ -10,6 +10,13 @@ The key file is 'src/workflows/SquiggleWorkflow.ts'. This file contains the defi
 
 After runs are complete, the results are saved to the 'logs' folder. These are saved as Markdown files. It's recommended to use the VSCode Markdown Preview plugin or similar to view the results. In these logs, note the "expand" arrows on the left of some items - these can be clicked to expand the item and see more details.
 
+## Use
+Right now, Squiggle AI is primarily called in Squiggle Hub. You can see the corresponding route [here](https://github.com/quantified-uncertainty/squiggle/blob/main/packages/hub/src/app/ai/api/create/route.ts). 
+
+You can also call this via the command line. Look at src/scripts/tests/create.ts for an example.
+
+Contact us if you'd like additional guidance.
+
 ## Potential Improvements
 
 - If a long run gets interrupted, return the last _working_ state. Right now it just returns the last state, which may be invalid.
