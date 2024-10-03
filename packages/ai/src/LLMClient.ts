@@ -105,8 +105,8 @@ export function calculatePriceMultipleCalls(
       continue;
     }
 
-    const inputCost = inputTokens * modelConfig.inputRate;
-    const outputCost = outputTokens * modelConfig.outputRate;
+    const inputCost = (inputTokens * modelConfig.inputRate) / 1_000_000;
+    const outputCost = (outputTokens * modelConfig.outputRate) / 1_000_000;
     totalCost += inputCost + outputCost;
   }
 
