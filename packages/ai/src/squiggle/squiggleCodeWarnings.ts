@@ -91,7 +91,7 @@ function getInvalidSquiggleElements(): InvalidElement[] {
           /\b(Infinity|INFINITY|NegativeInfinity|NEGATIVE_INFINITY)\b/
         );
         const value = match ? match[1] : "Infinity constant";
-        return `Line ${lineNumber}: The ${value} constant is not valid in Squiggle. You can use Number.MAX_VALUE or Number.MIN_VALUE instead.`;
+        return `Line ${lineNumber}: The ${value} constant is not valid in Squiggle. You can use Number.maxValue or Number.minValue instead.`;
       },
     },
     {
