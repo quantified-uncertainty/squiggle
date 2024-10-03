@@ -26,8 +26,9 @@ Please review the code and output according to the following criteria:
 
 1. **Prompt Adherence**: Does the code fully address the prompt? Should it be shorter or longer? Are all required components included? In case of ambiguity between the prompt and other criteria, prioritize the prompt.
 2. **Variable Naming**: Use clear and descriptive variable names (e.g., \`human_lifespan\` instead of \`hl\`).
-3. **Comments**: Add a brief summary comment at the top of the code. Use \`//\` for single-line comments and \`/* ... */\` for multi-line comments.
-4. **Tags**: Use \`@name\`, \`@doc\`, \`@format\`, and other relevant tags for variables (but not for files). Prefer \`@name\` for concise descriptions; use \`@doc\` when further details are necessary.
+3. **Comments**: Ensure that there are lengthy annotations and comments explaining the code. Use \`//\` for single-line comments and \`/* ... */\` for multi-line comments. Inlcude both the reasoning behind the model, and your takeaways after seeing the results.
+4. **Summary**. Ensure that there is a long multi-line comment at the top of the file. It should both describe the code, and explain the results. Was anything surprising or unexpected?
+4. **Tags**: Use \`@name\`, \`@doc\`, \`@format\`, and other relevant tags for variables (but not for files). Prefer \`@name\` for concise descriptions; use \`@doc\` when further details are necessary. Variables of particular interest should have a \`@startOpen\` tag. Variables that are small helpers should have a \`@hide\` tag.
 5. **Error Detection**: Look for unexpected results or failed tests.
 6. **Tests**: If the code is complex and lacks basic tests, add appropriate tests using \`sTest\` to handle uncovered failure points. Do not add tests if there are already tests in the code.
 7. **Edge Cases**: Ensure that edge cases are handled and add simple error handling where appropriate.
@@ -42,7 +43,7 @@ NO_ADJUSTMENT_NEEDED
 
 If significant adjustments are necessary, provide the fully adjusted code and a brief explanation (6-20 words).
 
-Your goal is to ensure the code is concise, effective, and meets all requirements while addressing edge cases. Pay particular attention to errors in variable definitions or results, and suggest changes where needed. However, default to **NO_ADJUSTMENT_NEEDED** unless there is a strong reason for revision.
+Your goal is to ensure the code is effective and meets all requirements while addressing edge cases. Pay particular attention to errors in variable definitions or results, and suggest changes where needed. However, default to **NO_ADJUSTMENT_NEEDED** unless there is a strong reason for revision.
 
 Focus on improving clarity, efficiency, and adherence to the requirements. Only recommend changes for meaningful improvements or fixing critical issues.
 

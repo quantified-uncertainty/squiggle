@@ -43,8 +43,17 @@ export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
 ) {
   const form = useForm<FormShape>({
     defaultValues: {
-      prompt:
-        "Make a 1-line model, that is just 1 line in total, no comments, no decorators. Be creative.",
+      prompt: `Create a cost-benefit analysis for a new bubble tea store in Berkeley. Model over 5 years. 
+
+Include:
+- Setup and monthly operating costs
+- Revenue streams
+- Market factors and risks (including failure probability)
+
+Outputs:
+- Key costs and benefits table
+- Cumulative failure probability
+- Charts: monthly costs, benefits, net value over time`,
       squiggleCode: "",
       model: "Claude-Sonnet",
     },

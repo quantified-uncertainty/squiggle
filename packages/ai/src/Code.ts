@@ -90,14 +90,15 @@ export async function codeStringToCode(code: string): Promise<Code> {
   // can be sure that run output matches the formatted version.
   const formattedCode = await formatSquiggleCode(code);
 
-  const codeToRun = formattedCode.ok ? formattedCode.value : code;
+  const runningCode = formattedCode.ok ? formattedCode.value : code;
 
   // Now let's run the code and get result or errors
-  const run = await runSquiggle(codeToRun);
+  const run = await runSquiggle(runningCode);
+
   if (!run.ok) {
     return {
       type: "runFailed",
-      source: code,
+      source: runningCode,
       error: run.value.error.errors[0],
       project: run.value.project,
     };
@@ -106,14 +107,14 @@ export async function codeStringToCode(code: string): Promise<Code> {
   if (formattedCode.ok) {
     return {
       type: "success",
-      source: formattedCode.value,
+      source: runningCode,
       result: run.value,
     };
   } else {
     // that's weird, formatting failed but running succeeded
     return {
       type: "formattingFailed",
-      source: code,
+      source: runningCode,
       error: formattedCode.value,
     };
   }
