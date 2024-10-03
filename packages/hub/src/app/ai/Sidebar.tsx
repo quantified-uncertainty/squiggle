@@ -136,7 +136,7 @@ Outputs:
           label="Model"
           size="small"
           options={MODEL_CONFIGS.filter(
-            (model) => true // model.provider === "anthropic"
+            (model) => model.provider === "anthropic"
           ).map((model) => model.id)}
           required
         />
