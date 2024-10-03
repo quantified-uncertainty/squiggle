@@ -112,6 +112,9 @@ export class ItemStore {
         if (this.state[childPathString]) {
           continue; // shouldn't happen, if parent state is not initialized, child state won't be initialized either
         }
+        if (child.tags.startOpenState() === "open") {
+          continue;
+        }
         this.state[childPathString] = {
           ...defaultLocalItemState,
           collapsed: true,
