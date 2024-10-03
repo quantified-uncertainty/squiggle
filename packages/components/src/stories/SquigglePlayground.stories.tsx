@@ -326,6 +326,10 @@ export const Tagged: Story = {
   args: {
     defaultCode: `z = 34 -> Tag.format(".1f")
 
+@startOpen
+@location
+s = 4 to 10
+
 @name("My favorite Dist")
 @doc("This is a long description")
 @format("$.2")
@@ -338,16 +342,37 @@ fn = {|e| e}
 @hide
 bar =  [x, fn]
 
-@startOpen
-@location
-s = 4 to 10
-
 @startClosed
 @showAs(Plot.numericFn)
 @name("My favorite Fn2")
 fn2 = {|e| e} 
 
 y = x -> Tag.getAll`,
+  },
+};
+
+export const StartOpen: Story = {
+  name: "StartOpen",
+  args: {
+    defaultCode: `@startOpen
+@name("Documentation")
+documentation = "
+# SquiggleJest Testing Library
+
+SquiggleJest is a simple testing library for Squiggle, inspired by Jest for JavaScript. It provides a way to write and run tests for your Squiggle models and functions.
+"
+
+var2 = 1
+var3 = 3
+var4 = 4
+var5 = 5
+var6 = 6
+var7 = 7
+var8 = 8
+var9 = 9
+var10 = 10
+var11 = 11
+`,
   },
 };
 
