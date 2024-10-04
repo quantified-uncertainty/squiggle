@@ -4,6 +4,7 @@ import {
   testEvalError,
   testEvalToBe,
   testParse,
+  testParseComments,
 } from "../helpers/reducerHelpers.js";
 
 describe("Peggy parse", () => {
@@ -285,6 +286,16 @@ describe("Peggy parse", () => {
     );
     testParse("/* comment * with * stars */ 1", "(Program 1)");
     testParse("/* /* */ 1", "(Program 1)");
+
+    testParseComments(
+      `foo() = {
+        foo = 5
+        // myComment
+        bar = 4
+        bar
+      }`,
+      [" myComment"]
+    );
   });
 
   describe("ternary operator", () => {

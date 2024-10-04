@@ -32,9 +32,18 @@ export async function evaluateStringToResult(
   }
 }
 
+const expectParseCommentsToBe = (expr: string, comments: string[]) => {
+  const result = parse(expr, "test");
+  if (result?.value && "comments" in result.value) {
+    expect(result.value.comments.map((c) => c.value)).toEqual(comments);
+  } else {
+    fail("Parsing failed or result does not contain comments");
+  }
+};
+
 const expectParseToBe = (expr: string, answer: string) => {
-  expect(astResultToString(parse(expr, "test"), { pretty: false })).toBe(
-    answer
+  expect(answer).toBe(
+    astResultToString(parse(expr, "test"), { pretty: false })
   );
 };
 
@@ -51,6 +60,9 @@ const resultToString = (
     return `Error(${r.value.toString()})`;
   }
 };
+
+export const testParseComments = (code: string, comments: string[]) =>
+  test(code, () => expectParseCommentsToBe(code, comments));
 
 export const testParse = (code: string, answer: string) =>
   test(code, () => expectParseToBe(code, answer));

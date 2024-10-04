@@ -401,20 +401,20 @@ _ 'whitespace'
   = whiteSpaceCharactersOrComment*
 
 _nl 'whitespace'
-  = (whiteSpaceCharactersOrComment / commentOrNewLine)*
+  = (whiteSpaceCharacters / delimitedComment / newLine)*
 
 __ 'whitespace'
   = whiteSpaceCharactersOrComment+
 
 __nl 'whitespace'
-  = (whiteSpaceCharactersOrComment / commentOrNewLine)+
+  = (whiteSpaceCharacters / delimitedComment / newLine)+
 
 statementSeparator ';'
   = _ (';' / commentOrNewLine)+ _nl
 
 commaSeparator ',' = _ ',' _nl
 
-commentOrNewLine = finalComment? newLine
+commentOrNewLine = finalComment / newLine
   newLine "newline" = [\n\r]
 
 finalComment "line comment"
