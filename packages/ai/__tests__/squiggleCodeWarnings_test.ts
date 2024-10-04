@@ -140,33 +140,6 @@ Costs are provided per **full battery cycle** and per **hour of use**.",
           description: "E.g., A 14-inch M1 MacBook Pro has ~60 Wh battery.",
         }
       ),
-      Input.text(
-        {
-          name: "Electricity Rate ($ per kWh)",
-          description: "E.g., In California, this was ~$0.20 in 2022.",
-          default: "0.2 to 0.3",
-        }
-      ),
-      Input.text(
-        {
-          name: "Battery Lifespan (Cycles)",
-          description: "Number of full charge cycles before battery replacement is needed.",
-          default: "1000 to 1500",
-        }
-      ),
-      Input.text(
-        {
-          name: "Battery Replacement Cost ($)",
-          description: "Include both monetary cost and inconvenience factor.",
-          default: "100 to 200",
-        }
-      ),
-      Input.text(
-        {
-          name: "Battery Life per Charge (Hours)",
-          description: "Typical usage time on a single charge.",
-          default: "3 to 5",
-        }
       ),
     ],
   }
