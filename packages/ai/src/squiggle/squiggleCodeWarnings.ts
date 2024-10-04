@@ -254,16 +254,19 @@ export function checkDiffArtifacts(code: string): Warning[] {
 export function checkCapitalizedVariableNames(code: string): Warning[] {
   const warnings: Warning[] = [];
   const lines = code.split("\n");
-  const capitalizedVarPattern = /^([A-Z][a-zA-Z0-9]*)\s*=/;
+  const capitalizedVarPattern = /^([A-Z][a-zA-Z0-9_]*)\s*(?:=|->|\()/;
 
   for (let i = 0; i < lines.length; i++) {
     const trimmedLine = lines[i].trim();
     const match = trimmedLine.match(capitalizedVarPattern);
     if (match) {
+      const relevantText =
+        trimmedLine.split(/=|->|\(/)[0].trim() +
+        (trimmedLine.includes("(") ? "(" : "=");
       warnings.push({
         type: "CHECK_CAPITALIZED_VARIABLE_NAMES",
         lineNumber: i + 1,
-        message: `Line ${i + 1}: Variable '${match[1]}' is declared with a capitalized name.`,
+        message: `Line ${i + 1}: Variable '${match[1]}' is declared with a capitalized name. Found: "${relevantText}"`,
       });
     }
   }

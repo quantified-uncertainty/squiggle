@@ -241,7 +241,6 @@ testSuite = sTest.describe(
 =======
 `;
       const result = processSearchReplaceResponse(originalText, promptResponse);
-      console.log(result);
 
       expect(result.success).toBe(false);
       expect(result.value).toBe(
