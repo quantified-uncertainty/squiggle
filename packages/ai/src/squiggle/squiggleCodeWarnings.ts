@@ -278,25 +278,24 @@ export function checkCapitalizedVariableNames(code: string): Warning[] {
 export function checkIfWithoutElse(code: string): Warning[] {
   const warnings: Warning[] = [];
   const lines = code.split("\n");
-  const ifPattern = /^\s*if\s+.*\s+then\s+/;
-  const elsePattern = /^\s*else\s+/;
+  const ifPattern = /^\s*(\w+\s*=\s*)?if\s+/;
 
   for (let i = 0; i < lines.length; i++) {
     const trimmedLine = lines[i].trim();
     if (ifPattern.test(trimmedLine)) {
-      let hasElse = false;
-      // Check the next few lines for an else statement
-      for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
-        if (elsePattern.test(lines[j].trim())) {
-          hasElse = true;
-          break;
-        }
+      let hasElse = trimmedLine.includes("else");
+
+      // Check the next two lines for 'else' if not found on the current line
+      for (let j = 1; j <= 2 && !hasElse && i + j < lines.length; j++) {
+        const nextLine = lines[i + j].trim();
+        hasElse = nextLine.includes("else");
       }
+
       if (!hasElse) {
         warnings.push({
           type: "CHECK_IF_WITHOUT_ELSE",
           lineNumber: i + 1,
-          message: `Line ${i + 1}: 'if' statement without a corresponding 'else'.`,
+          message: `Line ${i + 1}: 'if' statement without a corresponding 'else'. In Squiggle, every 'if' must have an 'else' clause.`,
         });
       }
     }

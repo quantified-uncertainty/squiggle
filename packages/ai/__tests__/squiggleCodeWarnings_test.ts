@@ -52,7 +52,7 @@ simulateExtinctionRisk() = {
     P_Misalignment = P_Misalignment_0 * exp(-K_align * E_align(t))
   })
 }
-    `;
+      `;
       const warnings = checkCapitalizedVariableNames(code);
       expect(warnings.length).toBe(5);
       expect(warnings[0].message).toContain(
@@ -149,16 +149,51 @@ Costs are provided per **full battery cycle** and per **hour of use**.",
       expect(warnings.length).toBe(0);
     });
   });
+
   describe("checkIfWithoutElse", () => {
     it("should detect if statements without else", () => {
       const code = `
-        if x > 5 then y = 10
+        z = if x > 5 then 10
       `;
       const warnings = checkIfWithoutElse(code);
       expect(warnings.length).toBe(1);
       expect(warnings[0].message).toContain(
         "'if' statement without a corresponding 'else'"
       );
+    });
+
+    it("should detect if statements without else, on next line", () => {
+      const code = `if year < 2023 then
+    throw("Year must be 2023 or later")
+
+      `;
+      const warnings = checkIfWithoutElse(code);
+      expect(warnings.length).toBe(1);
+      expect(warnings[0].message).toContain(
+        "'if' statement without a corresponding 'else'"
+      );
+    });
+
+    it("should not detect if statements with else", () => {
+      const code = `
+        x = if x > 5 then 10 else 20
+      `;
+      const warnings = checkIfWithoutElse(code);
+      expect(warnings.length).toBe(0);
+    });
+
+    it("should handle multiple if statements correctly", () => {
+      const code = `a = 3
+b = 5
+aa = if a > b then 5 else 10
+ab = if a > b then a
+      `;
+      const warnings = checkIfWithoutElse(code);
+      expect(warnings.length).toBe(1);
+      expect(warnings[0].message).toContain(
+        "'if' statement without a corresponding 'else'"
+      );
+      expect(warnings[0].lineNumber).toBe(4); // Assuming line numbers start at 1
     });
   });
 
@@ -187,6 +222,38 @@ Costs are provided per **full battery cycle** and per **hour of use**.",
       const warnings = checkAdjacentExpectStatements(code);
       expect(warnings.length).toBe(1);
       expect(warnings[0].message).toContain("Adjacent expect statements found");
+    });
+
+    it("should not detect non-adjacent expect statements", () => {
+      const code = `
+        expect(x).toBe(5)
+
+        expect(y).toBe(10)
+      `;
+      const warnings = checkAdjacentExpectStatements(code);
+      expect(warnings.length).toBe(0);
+    });
+
+    it("should handle multiple adjacent expect statements correctly", () => {
+      const code = `
+        expect(a).toBe(1)
+        expect(b).toBe(2)
+        expect(c).toBe(3)
+      `;
+      const warnings = checkAdjacentExpectStatements(code);
+      expect(warnings.length).toBe(2);
+      expect(warnings[0].message).toContain("Adjacent expect statements found");
+      expect(warnings[1].message).toContain("Adjacent expect statements found");
+    });
+
+    it("should handle mixed expect and non-expect lines", () => {
+      const code = `
+        expect(a).toBe(1)
+        const b = 2
+        expect(c).toBe(3)
+      `;
+      const warnings = checkAdjacentExpectStatements(code);
+      expect(warnings.length).toBe(0);
     });
   });
 });
