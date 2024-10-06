@@ -81,8 +81,8 @@ export async function POST(req: Request) {
     // Create a SquiggleGenerator instance
     const llmConfig: LlmConfig = {
       llmId: request.model ?? "Claude-Sonnet",
-      priceLimit: 0.3,
-      durationLimitMinutes: 3,
+      priceLimit: 0.15,
+      durationLimitMinutes: 2,
       messagesInHistoryToKeep: 4,
     };
 
