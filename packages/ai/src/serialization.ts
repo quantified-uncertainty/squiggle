@@ -8,15 +8,10 @@ import {
   SerializedArtifact,
 } from "./Artifact.js";
 import { LLMStepInstance, SerializedStep } from "./LLMStepInstance.js";
-import {
-  SerializedWorkflowInstance,
-  WorkflowInstance,
-} from "./workflows/ControlledWorkflow.js";
 import { SerializedWorkflow, Workflow } from "./workflows/Workflow.js";
 
 type AiShape = {
-  workflow: [Workflow, SerializedWorkflow];
-  workflowInstance: [WorkflowInstance<any>, SerializedWorkflowInstance];
+  workflow: [Workflow<any>, SerializedWorkflow];
   step: [LLMStepInstance, SerializedStep];
   artifact: [Artifact, SerializedArtifact];
 };
@@ -35,16 +30,6 @@ export function makeAiCodec(params: {
       serialize: (node, visitor) => node.serialize(visitor),
       deserialize: (node, visitor) =>
         Workflow.deserialize({
-          node,
-          visitor,
-          openaiApiKey: params.openaiApiKey,
-          anthropicApiKey: params.anthropicApiKey,
-        }),
-    },
-    workflowInstance: {
-      serialize: (node, visitor) => node.serialize(visitor),
-      deserialize: (node, visitor) =>
-        WorkflowInstance.deserialize({
           node,
           visitor,
           openaiApiKey: params.openaiApiKey,

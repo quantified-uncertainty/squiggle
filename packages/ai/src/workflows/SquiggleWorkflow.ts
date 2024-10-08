@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { PromptArtifact } from "../Artifact.js";
+import { IOShape } from "../LLMStepTemplate.js";
 import { adjustToFeedbackStep } from "../steps/adjustToFeedbackStep.js";
 import { fixCodeUntilItRunsStep } from "../steps/fixCodeUntilItRunsStep.js";
 import { generateCodeStep } from "../steps/generateCodeStep.js";
@@ -12,7 +13,10 @@ import { Workflow } from "./Workflow.js";
 export type SquiggleWorkflowInput = z.infer<typeof squiggleWorkflowInputSchema>;
 
 // Shared between create and edit workflows
-function fixAdjustRetryLoop(workflow: Workflow, prompt: PromptArtifact) {
+function fixAdjustRetryLoop<Shape extends IOShape>(
+  workflow: Workflow<Shape>,
+  prompt: PromptArtifact
+) {
   workflow.addEventListener("stepFinished", ({ data: { step } }) => {
     const code = step.getOutputs()["code"];
     const state = step.getState();

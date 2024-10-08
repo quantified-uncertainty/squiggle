@@ -32,7 +32,13 @@ export function useSquiggleWorkflows(initialWorkflows: ClientWorkflow[]) {
         id,
         timestamp: new Date().getTime(),
         status: "loading",
-        input,
+        inputs: {
+          prompt: {
+            id: "prompt",
+            kind: "prompt",
+            value: input.prompt ?? "[FIX]",
+          },
+        },
         steps: [],
       };
       setWorkflows((workflows) => [...workflows, workflow]);
@@ -66,7 +72,6 @@ export function useSquiggleWorkflows(initialWorkflows: ClientWorkflow[]) {
 
         await decodeWorkflowFromReader({
           reader: reader as ReadableStreamDefaultReader, // frontend types don't precisely match Node.js types
-          input: requestToInput(request),
           addWorkflow: async (workflow) => {
             // Replace the mock workflow with the real workflow.
             setWorkflows((workflows) =>

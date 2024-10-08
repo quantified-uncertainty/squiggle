@@ -21,7 +21,7 @@ export const maxDuration = 300;
 
 async function upsertWorkflow(
   user: Awaited<ReturnType<typeof getSelf>>,
-  workflow: Workflow
+  workflow: Workflow<any>
 ) {
   const codec = getAiCodec();
   const serializer = codec.makeSerializer();
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
           });
 
     // save workflow to the database on each update
-    squiggleWorkflow.workflow.addEventListener("stepFinished", ({ workflow }) =>
+    squiggleWorkflow.addEventListener("stepFinished", ({ workflow }) =>
       upsertWorkflow(user, workflow)
     );
 

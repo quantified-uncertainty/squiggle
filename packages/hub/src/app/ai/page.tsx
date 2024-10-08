@@ -41,12 +41,9 @@ export default async function AiPage() {
         id: row.id,
         timestamp: row.createdAt.getTime(),
         status: "error",
-        input: {
-          type: "Create",
-          prompt: "[unknown workflow]",
-        },
+        inputs: {},
         steps: [],
-        result: "Invalid workflow format in the database",
+        result: `Invalid workflow format in the database: ${e}`,
       } satisfies ClientWorkflow;
     }
   });

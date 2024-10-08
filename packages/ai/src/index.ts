@@ -9,6 +9,8 @@ export {
   streamingMessageSchema,
 } from "./types.js";
 
+export type { IOShape } from "./LLMStepTemplate.js";
+
 export { llmLinker } from "./Code.js";
 
 export { type LlmId, type LlmName, MODEL_CONFIGS } from "./modelConfigs.js";

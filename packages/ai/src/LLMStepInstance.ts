@@ -75,7 +75,7 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
     template: LLMStepInstance<Shape>["template"];
     inputs: LLMStepInstance<Shape>["inputs"];
     retryingStep: LLMStepInstance<Shape>["retryingStep"];
-    workflow: Workflow;
+    workflow: Workflow<any>;
   }): LLMStepInstance<Shape> {
     return new LLMStepInstance<Shape>({
       id: crypto.randomUUID(),
@@ -101,7 +101,7 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
     return this.conversationMessages;
   }
 
-  async _run(workflow: Workflow) {
+  async _run<WorkflowShape extends IOShape>(workflow: Workflow<WorkflowShape>) {
     if (this.state.kind !== "PENDING") {
       return;
     }
@@ -137,7 +137,7 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
     }
   }
 
-  async run(workflow: Workflow) {
+  async run<WorkflowShape extends IOShape>(workflow: Workflow<WorkflowShape>) {
     this.log(
       {
         type: "info",
@@ -209,10 +209,13 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
 
   // private methods
 
-  private setOutput<K extends Extract<keyof Shape["outputs"], string>>(
+  private setOutput<
+    K extends Extract<keyof Shape["outputs"], string>,
+    WorkflowShape extends IOShape,
+  >(
     key: K,
     value: Outputs<Shape>[K] | Outputs<Shape>[K]["value"],
-    workflow: Workflow
+    workflow: Workflow<WorkflowShape>
   ): void {
     if (key in this.outputs) {
       this.fail(
@@ -234,14 +237,21 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
     }
   }
 
-  private log(log: LogEntry, workflow: Workflow): void {
+  private log<WorkflowShape extends IOShape>(
+    log: LogEntry,
+    workflow: Workflow<WorkflowShape>
+  ): void {
     this.logger.log(log, {
       workflowId: workflow.id,
       stepIndex: this.sequentialId,
     });
   }
 
-  private fail(errorType: ErrorType, message: string, workflow: Workflow) {
+  private fail<WorkflowShape extends IOShape>(
+    errorType: ErrorType,
+    message: string,
+    workflow: Workflow<WorkflowShape>
+  ) {
     this.log({ type: "error", message }, workflow);
     this.state = {
       kind: "FAILED",
@@ -259,9 +269,9 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
     this.conversationMessages.push(message);
   }
 
-  private async queryLLM(
+  private async queryLLM<WorkflowShape extends IOShape>(
     promptPair: PromptPair,
-    workflow: Workflow
+    workflow: Workflow<WorkflowShape>
   ): Promise<string | null> {
     try {
       const messagesToSend: Message[] = [

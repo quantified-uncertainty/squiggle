@@ -7,7 +7,7 @@ import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@quri/ui";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 
 import { SquigglePlaygroundForWorkflow } from "../SquigglePlaygroundForWorkflow";
-import { ArtifactDisplay } from "./ArtifactDisplay";
+import { ArtifactList } from "./ArtifactList";
 import { ArtifactMessages } from "./ArtifactMessages";
 
 const NavButton: FC<{
@@ -28,28 +28,6 @@ const NavButton: FC<{
     >
       <Icon size={20} />
     </button>
-  );
-};
-
-const ArtifactList: FC<{
-  title: string;
-  artifacts: Record<string, ClientArtifact>;
-}> = ({ title, artifacts }) => {
-  return (
-    <div>
-      <h3 className="mb-2 text-sm font-medium text-slate-500">{title}</h3>
-      <div className="flex flex-wrap gap-2">
-        {Object.entries(artifacts).map(([key, value]) => (
-          <ArtifactDisplay
-            key={key}
-            name={key}
-            artifact={value}
-            size={12}
-            showArtifactName={true}
-          />
-        ))}
-      </div>
-    </div>
   );
 };
 

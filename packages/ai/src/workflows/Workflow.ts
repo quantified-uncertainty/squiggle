@@ -1,3 +1,5 @@
+import { ReadableStream } from "stream/web";
+
 import { generateSummary } from "../generateSummary.js";
 import {
   calculatePriceMultipleCalls,
@@ -14,7 +16,16 @@ import {
   AiSerializationVisitor,
 } from "../serialization.js";
 import { ClientWorkflow, ClientWorkflowResult } from "../types.js";
-import { stepToClientStep } from "./streaming.js";
+import {
+  WorkflowInstanceParams,
+  WorkflowTemplate,
+} from "./ControlledWorkflow.js";
+import { getWorkflowTemplateByName } from "./registry.js";
+import {
+  addStreamingListeners,
+  artifactToClientArtifact,
+  stepToClientStep,
+} from "./streaming.js";
 
 export type LlmConfig = {
   llmId: LlmId;
@@ -38,19 +49,19 @@ export type WorkflowEventShape =
   | {
       type: "stepAdded";
       payload: {
-        step: LLMStepInstance;
+        step: LLMStepInstance<IOShape>;
       };
     }
   | {
       type: "stepStarted";
       payload: {
-        step: LLMStepInstance;
+        step: LLMStepInstance<IOShape>;
       };
     }
   | {
       type: "stepFinished";
       payload: {
-        step: LLMStepInstance;
+        step: LLMStepInstance<IOShape>;
       };
     }
   | {
@@ -60,19 +71,23 @@ export type WorkflowEventShape =
 
 export type WorkflowEventType = WorkflowEventShape["type"];
 
-export class WorkflowEvent<T extends WorkflowEventType> extends Event {
+export class WorkflowEvent<
+  T extends WorkflowEventType,
+  Shape extends IOShape,
+> extends Event {
   constructor(
     type: T,
-    public workflow: Workflow,
+    public workflow: Workflow<Shape>,
     public data: Extract<WorkflowEventShape, { type: T }>["payload"]
   ) {
     super(type);
   }
 }
 
-export type WorkflowEventListener<T extends WorkflowEventType> = (
-  event: WorkflowEvent<T>
-) => void;
+export type WorkflowEventListener<
+  T extends WorkflowEventType,
+  Shape extends IOShape,
+> = (event: WorkflowEvent<T, Shape>) => void;
 
 /**
  * This class is responsible for managing the steps in a workflow.
@@ -85,25 +100,26 @@ export type WorkflowEventListener<T extends WorkflowEventType> = (
  */
 
 const MAX_RETRIES = 5;
-export class Workflow {
+export class Workflow<Shape extends IOShape = IOShape> {
   public id: string;
+  public readonly template: WorkflowTemplate<Shape>;
+  public readonly inputs: Inputs<Shape>;
+  private started: boolean = false;
+
   public llmConfig: LlmConfig;
   public startTime: number;
 
-  private steps: LLMStepInstance[];
+  private steps: LLMStepInstance<IOShape>[];
 
   public llmClient: LLMClient;
 
-  private constructor(params: {
-    id: string;
-    steps: LLMStepInstance[];
-    llmConfig: LlmConfig;
-    openaiApiKey?: string;
-    anthropicApiKey?: string;
-  }) {
-    this.llmConfig = params.llmConfig;
-    this.startTime = Date.now();
+  constructor(params: WorkflowInstanceParams<Shape>) {
     this.id = params.id ?? crypto.randomUUID();
+    this.template = params.template;
+    this.inputs = params.inputs;
+
+    this.llmConfig = params.llmConfig ?? llmConfigDefault;
+    this.startTime = Date.now();
     this.steps = params.steps ?? [];
 
     this.llmClient = new LLMClient(
@@ -113,26 +129,52 @@ export class Workflow {
     );
   }
 
-  static create(
-    llmConfig: LlmConfig = llmConfigDefault,
-    openaiApiKey?: string,
-    anthropicApiKey?: string
-  ) {
-    return new Workflow({
-      id: crypto.randomUUID(),
-      steps: [],
-      llmConfig,
-      openaiApiKey,
-      anthropicApiKey,
-    });
+  private startOrThrow() {
+    if (this.started) {
+      throw new Error("Workflow already started");
+    }
+    this.started = true;
   }
 
-  // This is a hook that ControlledWorkflow can use to prepare the workflow.
-  // It's a bit of a hack; we need to dispatch this event after we configured the event handlers,
-  // but before we add any steps.
-  // So we can't do this neither in the constructor nor in `runUntilComplete`.
-  prepareToStart() {
-    this.dispatchEvent({ type: "workflowStarted" });
+  private configure() {
+    // we configure the controller loop first, so it has a chance to react to its initial step
+    this.template.configureControllerLoop(this, this.inputs);
+    this.template.configureInitialSteps(this, this.inputs);
+  }
+
+  // Run workflow to the ReadableStream, appropriate for streaming in Next.js routes
+  runAsStream(): ReadableStream<string> {
+    this.startOrThrow();
+
+    const stream = new ReadableStream<string>({
+      start: async (controller) => {
+        addStreamingListeners(this, controller);
+
+        // We need to dispatch this event after we configured the event
+        // handlers, but before we add any steps.
+        this.dispatchEvent({ type: "workflowStarted" });
+
+        // Important! `configure` should be called after all event listeners are
+        // set up. We want to capture `stepAdded` events.
+        this.configure();
+
+        await this.runUntilComplete();
+        controller.close();
+      },
+    });
+
+    return stream;
+  }
+
+  // Run workflow without streaming, only capture the final result
+  async runToResult(): Promise<ClientWorkflowResult> {
+    this.startOrThrow();
+    this.configure();
+
+    await this.runUntilComplete();
+
+    // saveSummaryToFile(generateSummary(workflow));
+    return this.getFinalResult();
   }
 
   addStep<S extends IOShape>(
@@ -140,7 +182,7 @@ export class Workflow {
     inputs: Inputs<S>,
     options?: { retryingStep?: LLMStepInstance<S> }
   ): LLMStepInstance<S> {
-    // sorry for "any"; countervariance issues
+    // sorry for "any"; contravariance issues
     const step: LLMStepInstance<any> = LLMStepInstance.create({
       template,
       inputs,
@@ -347,14 +389,14 @@ export class Workflow {
 
   addEventListener<T extends WorkflowEventType>(
     type: T,
-    listener: WorkflowEventListener<T>
+    listener: WorkflowEventListener<T, Shape>
   ) {
     this.eventTarget.addEventListener(type, listener as (event: Event) => void);
   }
 
   removeEventListener<T extends WorkflowEventType>(
     type: T,
-    listener: WorkflowEventListener<T>
+    listener: WorkflowEventListener<T, Shape>
   ) {
     this.eventTarget.removeEventListener(
       type,
@@ -366,6 +408,13 @@ export class Workflow {
   serialize(visitor: AiSerializationVisitor): SerializedWorkflow {
     return {
       id: this.id,
+      templateName: this.template.name,
+      inputIds: Object.fromEntries(
+        Object.entries(this.inputs).map(([key, input]) => [
+          key,
+          visitor.artifact(input),
+        ])
+      ),
       stepIds: this.steps.map(visitor.step),
       llmConfig: this.llmConfig,
     };
@@ -381,9 +430,16 @@ export class Workflow {
     visitor: AiDeserializationVisitor;
     openaiApiKey?: string;
     anthropicApiKey?: string;
-  }): Workflow {
+  }): Workflow<IOShape> {
     return new Workflow({
       id: node.id,
+      template: getWorkflowTemplateByName(node.templateName),
+      inputs: Object.fromEntries(
+        Object.entries(node.inputIds).map(([key, id]) => [
+          key,
+          visitor.artifact(id),
+        ])
+      ),
       llmConfig: node.llmConfig,
       steps: node.stepIds.map(visitor.step),
       openaiApiKey,
@@ -404,13 +460,20 @@ export class Workflow {
             result: this.getFinalResult(),
           }
         : { status: "loading" }),
-      input: { type: "Create", prompt: "FIXME - not serialized" },
+      inputs: Object.fromEntries(
+        Object.entries(this.inputs).map(([key, value]) => [
+          key,
+          artifactToClientArtifact(value),
+        ])
+      ),
     };
   }
 }
 
 export type SerializedWorkflow = {
   id: string;
+  templateName: string;
+  inputIds: Record<string, number>;
   llmConfig: LlmConfig;
   stepIds: number[];
 };

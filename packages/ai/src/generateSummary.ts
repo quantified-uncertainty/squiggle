@@ -4,10 +4,13 @@ import path from "path";
 import { Artifact, ArtifactKind } from "./Artifact.js";
 import { Code } from "./Code.js";
 import { calculatePriceMultipleCalls } from "./LLMClient.js";
+import { IOShape } from "./LLMStepTemplate.js";
 import { getLogEntryFullName, TimestampedLogEntry } from "./Logger.js";
 import { Workflow } from "./workflows/Workflow.js";
 
-export function generateSummary(workflow: Workflow): string {
+export function generateSummary<Shape extends IOShape>(
+  workflow: Workflow<Shape>
+): string {
   let summary = "";
 
   // Overview
@@ -25,7 +28,9 @@ export function generateSummary(workflow: Workflow): string {
   return summary;
 }
 
-function generateOverview(workflow: Workflow): string {
+function generateOverview<Shape extends IOShape>(
+  workflow: Workflow<Shape>
+): string {
   const steps = workflow.getSteps();
   const metricsByLLM = workflow.llmMetricSummary();
 
@@ -47,7 +52,9 @@ function generateOverview(workflow: Workflow): string {
   return overview;
 }
 
-function generateErrorSummary(workflow: Workflow): string {
+function generateErrorSummary<Shape extends IOShape>(
+  workflow: Workflow<Shape>
+): string {
   const steps = workflow.getSteps();
 
   let errorSummary = "";
@@ -66,7 +73,9 @@ function generateErrorSummary(workflow: Workflow): string {
   return errorSummary || "✅ No errors encountered.\n";
 }
 
-function generateDetailedStepLogs(workflow: Workflow): string {
+function generateDetailedStepLogs<Shape extends IOShape>(
+  workflow: Workflow<Shape>
+): string {
   let detailedLogs = "";
   const steps = workflow.getSteps();
   steps.forEach((step, index) => {

@@ -73,6 +73,7 @@ export type ClientStep = z.infer<typeof stepSchema>;
 const workflowStartedSchema = z.object({
   id: z.string(),
   timestamp: z.number(),
+  inputs: z.record(z.string(), artifactSchema),
 });
 
 const stepAddedSchema = stepSchema.omit({
@@ -126,7 +127,7 @@ export type StreamingMessage = z.infer<typeof streamingMessageSchema>;
 const commonClientWorkflowFields = {
   id: z.string(),
   timestamp: z.number(), // milliseconds since epoch
-  input: squiggleWorkflowInputSchema, // FIXME - SquiggleWorkflow-specific
+  inputs: z.record(z.string(), artifactSchema),
   steps: z.array(stepSchema),
   currentStep: z.string().optional(),
 };

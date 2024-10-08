@@ -5,6 +5,7 @@ import {
 
 import { Artifact } from "../Artifact.js";
 import { type LLMStepInstance } from "../LLMStepInstance.js";
+import { IOShape } from "../LLMStepTemplate.js";
 import {
   ClientArtifact,
   ClientStep,
@@ -12,10 +13,9 @@ import {
   StreamingMessage,
   streamingMessageSchema,
 } from "../types.js";
-import { type SquiggleWorkflowInput } from "./SquiggleWorkflow.js";
 import { type Workflow } from "./Workflow.js";
 
-function artifactToClientArtifact(value: Artifact): ClientArtifact {
+export function artifactToClientArtifact(value: Artifact): ClientArtifact {
   const commonArtifactFields = {
     id: value.id,
     createdBy: value.createdBy?.id,
@@ -76,8 +76,8 @@ export function stepToClientStep(step: LLMStepInstance): ClientStep {
  * `ControlledWorkflow.runAsStream()` relies on this function; see its
  * implementation for more details.
  */
-export function addStreamingListeners(
-  workflow: Workflow,
+export function addStreamingListeners<Shape extends IOShape>(
+  workflow: Workflow<Shape>,
   controller: ReadableStreamController<string>
 ) {
   const send = (message: StreamingMessage) => {
@@ -90,6 +90,12 @@ export function addStreamingListeners(
       content: {
         id: event.workflow.id,
         timestamp: event.workflow.startTime,
+        inputs: Object.fromEntries(
+          Object.entries(event.workflow.inputs).map(([key, value]) => [
+            key,
+            artifactToClientArtifact(value),
+          ])
+        ),
       },
     });
   });
@@ -148,16 +154,10 @@ export function addStreamingListeners(
  */
 export async function decodeWorkflowFromReader({
   reader,
-  input,
   addWorkflow,
   setWorkflow,
 }: {
   reader: ReadableStreamDefaultReader<string>;
-  // FIXME - this shouldn't be necessary, but we need to inject the input to
-  // SerializedWorkflow, and it's not stored on the original Workflow yet, so
-  // it's not present in the stream data.
-  // In the future, we should store input parameters in the Workflow object.
-  input: SquiggleWorkflowInput;
   // This adds an initial version of the workflow.
   addWorkflow: (workflow: ClientWorkflow) => Promise<void>;
   // This signature might look complicated, but it matches the functional
@@ -185,7 +185,7 @@ export async function decodeWorkflowFromReader({
         await addWorkflow({
           id: event.content.id,
           timestamp: event.content.timestamp,
-          input,
+          inputs: event.content.inputs,
           steps: [],
           status: "loading",
         });
