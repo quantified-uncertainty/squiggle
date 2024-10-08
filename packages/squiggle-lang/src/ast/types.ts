@@ -26,6 +26,16 @@ export type LocationRange = {
   end: Location;
 };
 
+/*
+ * Peggy options that we expect to pass. This type exists mostly as
+ * documentation, since inline JS fragments in the parser are not checked by
+ * TypeScript.
+ */
+export type ParseOptions = {
+  grammarSource: string;
+  addComment: (comment: ASTCommentNode) => void;
+};
+
 export type InfixOperator = keyof typeof infixFunctions;
 
 export type UnaryOperator = keyof typeof unaryFunctions;

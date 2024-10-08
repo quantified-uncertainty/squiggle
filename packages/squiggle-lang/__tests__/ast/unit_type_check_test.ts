@@ -3,7 +3,7 @@ import {
   TypeConstraint,
   VariableUnitTypes,
 } from "../../src/analysis/unitTypeChecker.js";
-import { parse as peggyParse } from "../../src/ast/peggyParser.js";
+import { parse } from "../../src/ast/parse.js";
 
 const {
   checkTypeConstraints,
@@ -15,11 +15,19 @@ const {
 
 type IdNameMapping = string[];
 
+function _findTypeConstraints(sourceCode: string) {
+  const node = parse(sourceCode, "test");
+  if (!node.ok) {
+    throw new Error("Parse failed");
+  }
+  return findTypeConstraints(node.value);
+}
+
 function findTypeConstraintsHelper(
   sourceCode: string
 ): [TypeConstraint[], IdNameMapping] {
-  const node = peggyParse(sourceCode, { grammarSource: "test", comments: [] });
-  const [typeConstraints, scopes] = findTypeConstraints(node);
+  const [typeConstraints, scopes] = _findTypeConstraints(sourceCode);
+
   const plainConstraints = typeConstraints.map((pair) => pair[0]);
   const idNameMapping = scopes.variableNodes.map(
     (node) => (node as { value: string }).value
@@ -28,8 +36,8 @@ function findTypeConstraintsHelper(
 }
 
 function getUnitTypes(sourceCode: string): [VariableUnitTypes, IdNameMapping] {
-  const node = peggyParse(sourceCode, { grammarSource: "test", comments: [] });
-  const [typeConstraints, scopes] = findTypeConstraints(node);
+  const [typeConstraints, scopes] = _findTypeConstraints(sourceCode);
+
   const idNameMapping = scopes.variableNodes
     .filter((node) => ["Identifier", "LambdaParameter"].includes(node.kind))
     .map((node) => getIdentifierName(node));
