@@ -144,11 +144,6 @@ describe("Peggy parse", () => {
     );
   });
 
-  describe("multi-line", () => {
-    testParse("x=1; 2", "(Program (LetStatement :x 1) 2)");
-    testParse("x=1; y=2", "(Program (LetStatement :x 1) (LetStatement :y 2))");
-  });
-
   describe("variables", () => {
     testParse("x = 1", "(Program (LetStatement :x 1))");
     testParse("x", "(Program :x)");
@@ -684,9 +679,40 @@ describe("Parsing new line", () => {
  `,
     "(Program (InfixCall + (Pipe (Pipe (Pipe :a :b) :c) :d) :e))"
   );
+
+  // allow new lines in `a to b` since 0.10.0
+  testParse(
+    `2
+to
+3`,
+    "(Program (InfixCall to 2 3))"
+  );
+
   describe("strings", () => {
     testParse(`"test\\"\\'\\u1234-\\b\\n"`, "(Program 'test\"'\u1234-\b\n')");
     testParse(`'test\\"\\'\\u1234-\\b\\n'`, "(Program 'test\"'\u1234-\b\n')");
     testEvalError("'\\h'");
+  });
+
+  describe("statement separators", () => {
+    testParse("x=1; 2", "(Program (LetStatement :x 1) 2)");
+
+    testParse("x=1; y=2", "(Program (LetStatement :x 1) (LetStatement :y 2))");
+    testParse(
+      "x=1   ; y=2",
+      "(Program (LetStatement :x 1) (LetStatement :y 2))"
+    );
+    testParse(
+      "x=1   ;; ;y=2",
+      "(Program (LetStatement :x 1) (LetStatement :y 2))"
+    );
+
+    // whitespace before semicolon on new line allowed since 0.10.0
+    testParse(
+      `x = 1
+ ;
+y = 2`,
+      "(Program (LetStatement :x 1) (LetStatement :y 2))"
+    );
   });
 });
