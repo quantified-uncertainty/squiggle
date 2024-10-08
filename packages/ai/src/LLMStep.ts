@@ -158,7 +158,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
     const completionMessage =
       this.state.kind === "PENDING"
         ? `Step "${this.template.name}" completed with status: ${this.state.kind}`
-        : `Step "${this.template.name}" completed with status: ${this.state.kind}, in ${this.state.durationMs}ms`;
+        : `Step "${this.template.name}" completed with status: ${this.state.kind}, in ${this.state.durationMs / 1000}s`;
 
     this.log({
       type: "info",
