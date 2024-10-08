@@ -5,7 +5,7 @@
 }}
 
 start
-  = _nl start:outerBlock _nl finalComment?
+  = _nl start:outerBlock _nl lineComment? // not just `_nl`, because last line doesn't need to end in new line
     { return start; }
 
 outerBlock
@@ -24,7 +24,7 @@ outerBlock
 importStatementsList = (@importStatement __nl)*
 
 importStatement
-  = _nl 'import' __ file:string variable:(__ 'as' __ @identifier)
+  = _nl 'import' __nl file:string variable:(__nl 'as' __nl @identifier)
     { return h.nodeImport(file, variable, location()); }
 
 innerBlockOrExpression
@@ -146,7 +146,7 @@ relational
   relationalOp "operator" = '<=' / '<' / '>=' / '>'
 
 credibleInterval
-  = head:additive tail:(__ @credibleIntervalOp __nl @additive)*
+  = head:additive tail:(__nl @credibleIntervalOp __nl @additive)*
     { return h.makeInfixChain(head, tail, location()); }
   credibleIntervalOp "operator" = 'to'
 
@@ -397,36 +397,36 @@ dictConstructor 'dict'
 
 // Separators
 
-_ 'whitespace'
-  = whiteSpaceCharactersOrComment*
-
-_nl 'whitespace'
-  = (whiteSpaceCharacters / delimitedComment / newLine)*
-
-__ 'whitespace'
-  = whiteSpaceCharactersOrComment+
-
-__nl 'whitespace'
-  = (whiteSpaceCharacters / delimitedComment / newLine)+
-
 statementSeparator ';'
-  = _ (';' / commentOrNewLine)+ _nl
+  = (_ ';' / _ newLineWithPossibleComment)+ _nl
 
 commaSeparator ',' = _ ',' _nl
 
-commentOrNewLine = finalComment / newLine
+// optional whitespace without line breaks (line breaks are still allowed inside block comments)
+_ 'whitespace'
+  = whiteSpaceCharactersOrComment*
+
+// optional whitespace with possible line breaks and comments
+_nl 'whitespace'
+  = (whiteSpaceCharactersOrComment / newLineWithPossibleComment)*
+
+// required whitespace with possible line breaks and comments
+__nl 'whitespace'
+  = (whiteSpaceCharactersOrComment / newLineWithPossibleComment)+
+
+newLineWithPossibleComment = lineComment? newLine
   newLine "newline" = [\n\r]
 
-finalComment "line comment"
-  = _ ('//') comment:($([^\r\n]*))
-    { options.comments.push(h.lineComment(comment, location())); }
+lineComment "line comment"
+  = '//' comment:($([^\r\n]*))
+    { options.addComment(h.lineComment(comment, location())); }
 
-whiteSpaceCharactersOrComment = whiteSpaceCharacters / delimitedComment
+whiteSpaceCharactersOrComment = whiteSpaceCharacters / blockComment
 
-  delimitedComment  "comment"
+  blockComment "comment"
     = '/*' comment:($(
         ([^*] / [*][^/])*
       )) '*/'
-      { options.comments.push(h.blockComment(comment, location())); }
+      { options.addComment(h.blockComment(comment, location())); }
 
   whiteSpaceCharacters = [ \t]

@@ -11,7 +11,13 @@ import {
   parse as peggyParse,
   SyntaxError as PeggySyntaxError,
 } from "./peggyParser.js";
-import { AST, type ASTCommentNode, ASTNode, LocationRange } from "./types.js";
+import {
+  AST,
+  type ASTCommentNode,
+  ASTNode,
+  LocationRange,
+  ParseOptions,
+} from "./types.js";
 
 export type ParseError = {
   type: "SyntaxError";
@@ -43,16 +49,21 @@ function codeToFullLocationRange(
 
 export function parse(expr: string, sourceId: string): ASTResult {
   try {
-    const comments: ASTCommentNode[] = [];
+    const comments = new Map<string, ASTCommentNode>();
+
     const parsed: AST = peggyParse(expr, {
       grammarSource: sourceId,
-      comments,
-    });
+      addComment: (comment) => {
+        // deduplicate comments - Peggy can backtrack, so we can't collect comments in an array
+        const key = `${comment.location.start.offset}-${comment.location.end.offset}`;
+        comments.set(key, comment);
+      },
+    } satisfies ParseOptions);
     if (parsed.kind !== "Program") {
       throw new Error("Expected parse to result in a Program node");
     }
 
-    parsed.comments = comments;
+    parsed.comments = [...comments.values()];
 
     return Result.Ok(parsed);
   } catch (e) {
