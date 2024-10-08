@@ -1,5 +1,3 @@
-import chalk from "chalk";
-
 import { generateSummary } from "../generateSummary.js";
 import {
   calculatePriceMultipleCalls,
@@ -172,7 +170,6 @@ export class Workflow {
     });
     await step.run();
 
-    console.log(chalk.cyan(`Finishing step ${step.template.name}`));
     this.dispatchEvent({
       type: "stepFinished",
       payload: { step },

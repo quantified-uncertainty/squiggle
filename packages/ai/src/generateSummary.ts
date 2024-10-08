@@ -53,18 +53,12 @@ function generateErrorSummary(workflow: Workflow): string {
   let errorSummary = "";
 
   steps.forEach((step, index) => {
-    const errors = step
-      .getLogs()
-      .filter(
-        (log) => log.entry.type === "error" || log.entry.type === "codeRunError"
-      );
+    const errors = step.getLogs().filter((log) => log.entry.type === "error");
     if (errors.length > 0) {
       errorSummary += `### ❌ Step ${index + 1} (${step.template.name})\n`;
       errors.forEach((error) => {
         if (error.entry.type === "error") {
           errorSummary += `- 🔴 ${error.entry.message}\n`;
-        } else if (error.entry.type === "codeRunError") {
-          errorSummary += `- 🔴 ${error.entry.error}\n`;
         }
       });
     }
@@ -119,8 +113,6 @@ function getFullMessage(log: TimestampedLogEntry): string {
     case "success":
     case "highlight":
       return log.entry.message;
-    case "codeRunError":
-      return log.entry.error;
     case "llmResponse": {
       const llmResponse = log.entry;
       return `<details>

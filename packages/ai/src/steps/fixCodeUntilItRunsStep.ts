@@ -82,10 +82,6 @@ export const fixCodeUntilItRunsStep = new LLMStepTemplate(
         context.setOutput("code", newCodeResult.value);
       } else {
         context.fail("MINOR", newCodeResult.value);
-        context.log({
-          type: "codeRunError",
-          error: newCodeResult.value,
-        });
       }
     }
   }
