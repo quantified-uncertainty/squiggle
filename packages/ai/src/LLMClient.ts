@@ -179,7 +179,8 @@ export class LLMClient {
     try {
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(
-          () => reject(new Error(`API call timed out after ${TIMEOUT_MS}ms`)),
+          () =>
+            reject(new Error(`API call timed out after ${TIMEOUT_MS / 1000}s`)),
           TIMEOUT_MS
         )
       );

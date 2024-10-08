@@ -199,6 +199,10 @@ export class Workflow {
     return this.steps;
   }
 
+  getStepCount(): number {
+    return this.steps.length;
+  }
+
   private getCurrentStep(): LLMStepInstance | undefined {
     return this.steps.at(-1);
   }

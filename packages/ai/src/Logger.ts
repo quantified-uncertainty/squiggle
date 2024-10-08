@@ -32,7 +32,7 @@ export function getLogEntryFullName(entry: LogEntry): string {
 const logTypes = {
   info: { fn: console.log, color: chalk.white, maxLines: Infinity },
   warn: { fn: console.warn, color: chalk.yellow, maxLines: Infinity },
-  error: { fn: console.error, color: chalk.red, maxLines: 5, allRed: true },
+  error: { fn: console.error, color: chalk.red, maxLines: 5 },
   success: { fn: console.log, color: chalk.green, maxLines: Infinity },
   highlight: { fn: console.log, color: chalk.magenta, maxLines: Infinity },
   llmResponse: { fn: console.log, color: chalk.cyan, maxLines: 3 },
@@ -123,21 +123,15 @@ type LlmResponseLogEntry = {
 };
 
 export class Logger {
-  private workflowId: string;
-  private stepIndex: number;
   logs: TimestampedLogEntry[] = [];
 
-  constructor(workflowId: string, stepIndex: number) {
-    this.workflowId = workflowId;
-    this.stepIndex = stepIndex;
-  }
+  constructor(
+    private workflowId: string,
+    private stepIndex: number
+  ) {}
 
   log(log: LogEntry): void {
     this.logs.push({ timestamp: new Date(), entry: log });
     displayLog(log, this.workflowId, this.stepIndex);
-  }
-
-  setStepIndex(stepIndex: number): void {
-    this.stepIndex = stepIndex;
   }
 }

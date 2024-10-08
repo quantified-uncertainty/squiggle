@@ -97,7 +97,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
   ) {
     this.startTime = Date.now();
     this.id = crypto.randomUUID();
-    this.logger = new Logger(this.workflow.id, this.workflow.getSteps().length);
+    this.logger = new Logger(this.workflow.id, this.workflow.getStepCount());
     this.inputs = inputs;
   }
 
@@ -153,12 +153,12 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
       type: "info",
       message: `Step "${this.template.name}" started`,
     });
+
     await this._run();
 
-    const completionMessage =
-      this.state.kind === "PENDING"
-        ? `Step "${this.template.name}" completed with status: ${this.state.kind}`
-        : `Step "${this.template.name}" completed with status: ${this.state.kind}, in ${this.state.durationMs / 1000}s`;
+    const completionMessage = `Step "${this.template.name}" completed with status: ${this.state.kind}${
+      this.state.kind !== "PENDING" && `, in ${this.state.durationMs / 1000}s`
+    }`;
 
     this.log({
       type: "info",
