@@ -1,4 +1,9 @@
+---
+description: Squiggle Style Guide
+---
+
 # Squiggle Style Guide
+Note: This document is highly opinionated and was written specifically for LLMs to read. However, humans might also find it useful.
 
 ## Limitations
 
@@ -21,6 +26,7 @@
 - Use a @format() tag, like ".0%" to format percentages.
 - If using a distribution, remember that it shouldn't go outside of 0% and 100%. You can use beta distributions or truncate() to keep values in the correct range.
 - If you do use a beta distribution, keep in mind that there's no ({p5, p95}) format. You can use beta(alpha:number, beta:number) or beta({mean: number, stdev: number}) to create a beta distribution.
+- Write percentages as "5%" instead of "0.05". It's more readable.
 
 ### Domains
 
@@ -318,6 +324,47 @@ summary = [
 ]
 ```
 
+## Plots
+
+- Plots are a good way of displaying the output of a model.
+- Use Scale.symlog() and Scale.log() whenever you think the data is highly skewed. This is very common with distributions.
+- Use Scale.symlog() instead of Scale.log() when you are unsure if the data is above or below 0. Scale.log() fails on negative values.
+- Function plots use plots equally spaced on the x-axis. This means they can fail if only integers are accepted. In these cases, it can be safer just not to use the plot, or to use a scatter plot. 
+- When plotting 2-8 distributions over the same x-axis, it's a good idea to use Plot.dists(). For example, if you want to compare 5 different costs of a treatment, or 3 different adoption rates of a technology, this can be a good way to display the data.
+- When plotting distributions in tables or if you want to display multiple distributions under each other, and you don't want to use Plot.dists, it's a good idea to have them all use the same x-axis scale, with custom min and max values. This is a good way to make sure that the x-axis scale is consistent across all distributions.
+
+
+Here's an example of how to display multiple distributions over the same x-axis, with a custom x-axis range:
+```squiggle
+strategies = [
+  { n: "AI Ethics", c: 1M to 5M, b: 5M to 20M },
+  { n: "Alignment Research", c: 2M to 10M, b: 10M to 50M },
+  ...
+]
+
+rangeOfDists(dists) = {
+  min: Number.min(List.map(dists, {|d| Dist.quantile(d, 0.05)})),
+  max: Number.max(List.map(dists, {|d| Dist.quantile(d, 0.95)})),
+}
+
+plotOfResults(fn) = {
+  |r|
+  range = List.map(strategies, fn) -> rangeOfDists
+  Plot.dist(fn(r), { xScale: Scale.linear(range) })
+}
+
+table = Table.make(
+  strategies,
+  {
+    columns: [
+      { name: "Strategy", fn: {|r| r.name} },
+      { name: "Cost", fn: plotOfResults({|r| r.c}) },
+      { name: "Benefit", fn: plotOfResults({|r| r.b}) },
+    ],
+  }
+)
+```
+
 ## Tests
 
 - Use `sTest` to test squiggle code.
@@ -338,11 +385,18 @@ describe = sTest.describe
 
 @hide
 test = sTest.test
+
+tests = describe(
+  "Coffee Consumption Model Tests",
+  [
+    // ...tests
+  ]
+)
 ```
 
 ## Summary Notebook
 
-- For models over 5 lines long, include a summary notebook at the end of the file using the @notebook tag.
+- For models over 5 lines long, you might want to include a summary notebook at the end of the file using the @notebook tag.
 - Aim for a summary length of approximately (N^0.6) \* 1.2 lines, where N is the number of lines in the model.
 - Use the following structure:
   1. Model description
