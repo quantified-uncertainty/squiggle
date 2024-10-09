@@ -4,6 +4,8 @@ import OpenAI from "openai";
 import { LlmId, MODEL_CONFIGS } from "./modelConfigs.js";
 import { squiggleSystemContent } from "./prompts.js";
 
+const TIMEOUT_MS = 60000;
+
 export type Message = {
   role: "system" | "user" | "assistant";
   content: string;
@@ -175,6 +177,14 @@ export class LLMClient {
     }
 
     try {
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(
+          () =>
+            reject(new Error(`API call timed out after ${TIMEOUT_MS / 1000}s`)),
+          TIMEOUT_MS
+        )
+      );
+
       if (selectedModelConfig.provider === "anthropic") {
         const anthropicClient = this.getAnthropicClient();
         const compressedMessages =
@@ -185,8 +195,8 @@ export class LLMClient {
           throw new Error("At least one message is required");
         }
 
-        const completion =
-          await anthropicClient.beta.promptCaching.messages.create({
+        const completionPromise =
+          anthropicClient.beta.promptCaching.messages.create({
             max_tokens: selectedModelConfig.maxTokens,
             messages: claudeMessages,
             model: selectedModelConfig.model,
@@ -199,7 +209,11 @@ export class LLMClient {
             ],
           });
 
-        return convertClaudeToStandardFormat(completion);
+        const completion = await Promise.race([
+          completionPromise,
+          timeoutPromise,
+        ]);
+        return convertClaudeToStandardFormat(completion as Anthropic.Message);
       } else {
         const openaiClient = this.getOpenAIClient();
         const messages = selectedModelConfig.allowsSystemPrompt
@@ -215,7 +229,7 @@ export class LLMClient {
               { role: "assistant", content: "Okay." },
               ...conversationHistory,
             ];
-        const completion = await openaiClient.chat.completions.create({
+        const completionPromise = openaiClient.chat.completions.create({
           model: selectedModelConfig.model,
           messages: messages.map((msg) => ({
             role: msg.role as "system" | "user" | "assistant",
@@ -223,7 +237,13 @@ export class LLMClient {
           })),
         });
 
-        return convertOpenAIToStandardFormat(completion);
+        const completion = await Promise.race([
+          completionPromise,
+          timeoutPromise,
+        ]);
+        return convertOpenAIToStandardFormat(
+          completion as OpenAI.Chat.Completions.ChatCompletion
+        );
       }
     } catch (error) {
       console.error("Error in API call:", error);

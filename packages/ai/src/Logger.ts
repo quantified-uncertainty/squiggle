@@ -6,7 +6,6 @@ export type LogEntry =
   | InfoLogEntry
   | WarnLogEntry
   | ErrorLogEntry
-  | CodeRunErrorLogEntry
   | SuccessLogEntry
   | HighlightLogEntry
   | LlmResponseLogEntry;
@@ -19,8 +18,6 @@ export function getLogEntryFullName(entry: LogEntry): string {
       return "⚠️ Warning";
     case "error":
       return "🚫 System Error";
-    case "codeRunError":
-      return "❌ Code Run Error";
     case "success":
       return "✅ Success";
     case "highlight":
@@ -32,32 +29,58 @@ export function getLogEntryFullName(entry: LogEntry): string {
   }
 }
 
-function displayLog(log: LogEntry): void {
-  switch (log.type) {
-    case "info":
-      console.log(chalk.blue(`[INFO] ${log.message}`));
-      break;
-    case "warn":
-      console.warn(chalk.yellow(`[WARN] ${log.message}`));
-      break;
-    case "error":
-      console.error(chalk.red(`[ERROR] ${log.message}`));
-      break;
-    case "codeRunError":
-      console.error(chalk.red.bold(`[CODE_RUN_ERROR] ${log.error}`));
-      break;
-    case "success":
-      console.log(chalk.green(`[SUCCESS] ${log.message}`));
-      break;
-    case "highlight":
-      console.log(chalk.magenta(`[HIGHLIGHT] ${log.message}`));
-      break;
-    case "llmResponse":
-      console.log(chalk.cyan(`[LLM_RESPONSE] ${log.content}`));
-      break;
-      break;
-    default:
-      throw log satisfies never;
+const logTypes = {
+  info: { fn: console.log, color: chalk.white, maxLines: Infinity },
+  warn: { fn: console.warn, color: chalk.yellow, maxLines: Infinity },
+  error: { fn: console.error, color: chalk.red, maxLines: 5 },
+  success: { fn: console.log, color: chalk.green, maxLines: Infinity },
+  highlight: { fn: console.log, color: chalk.magenta, maxLines: Infinity },
+  llmResponse: { fn: console.log, color: chalk.cyan, maxLines: 3 },
+};
+
+function displayLog(
+  log: LogEntry,
+  workflowId: string,
+  stepIndex: number
+): void {
+  const prefix = chalk.gray(`[workflow:${workflowId}, step:${stepIndex}]`);
+  const indent = "  "; // Two spaces for indentation
+
+  function formatMessage(message: string, maxLines: number = Infinity): string {
+    const lines = message.split("\n");
+    const truncated = lines.slice(0, maxLines);
+    if (lines.length > maxLines) {
+      truncated.push("...");
+    }
+    return truncated
+      .map((line, index) => (index === 0 ? line : indent + line))
+      .join("\n");
+  }
+
+  function logWithColor(
+    logFn: typeof console.log,
+    type: string,
+    color: (text: string) => string,
+    message: string,
+    maxLines: number = Infinity
+  ) {
+    logFn(
+      `${prefix} ${chalk.gray(`[${color(type)}] ${formatMessage(message, maxLines)}`)}`
+    );
+  }
+
+  const logType = logTypes[log.type as keyof typeof logTypes];
+  if (logType) {
+    const message = "message" in log ? log.message : log.content;
+    logWithColor(
+      logType.fn,
+      log.type.toUpperCase(),
+      logType.color,
+      message,
+      logType.maxLines
+    );
+  } else {
+    console.log(`${prefix} Unknown log type: ${log.type}`);
   }
 }
 
@@ -81,11 +104,6 @@ type ErrorLogEntry = {
   message: string;
 };
 
-type CodeRunErrorLogEntry = {
-  type: "codeRunError";
-  error: string;
-};
-
 type SuccessLogEntry = {
   type: "success";
   message: string;
@@ -107,8 +125,13 @@ type LlmResponseLogEntry = {
 export class Logger {
   logs: TimestampedLogEntry[] = [];
 
+  constructor(
+    private workflowId: string,
+    private stepIndex: number
+  ) {}
+
   log(log: LogEntry): void {
     this.logs.push({ timestamp: new Date(), entry: log });
-    displayLog(log);
+    displayLog(log, this.workflowId, this.stepIndex);
   }
 }

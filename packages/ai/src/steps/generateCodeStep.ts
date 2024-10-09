@@ -52,8 +52,8 @@ export const generateCodeStep = new LLMStepTemplate(
         context.setOutput("code", state.value);
       } else {
         context.log({
-          type: "codeRunError",
-          error: state.value,
+          type: "error",
+          message: state.value,
         });
       }
     }
