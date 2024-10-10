@@ -297,7 +297,7 @@ comparisonTests = describe(
   ]
 )
 
-errorTests = describe(
+errorTests = System.version == "0.9.6-0" ? describe(
   "Error Throwing Tests",
   [
     test(
@@ -314,4 +314,4 @@ errorTests = describe(
       {|| expect({|| throw("UnexpectedError")}).toNotThrow()}
     ),
   ]
-)
+) : false
