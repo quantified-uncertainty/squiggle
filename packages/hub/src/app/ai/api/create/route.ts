@@ -14,7 +14,7 @@ import { getSelf, isSignedIn } from "@/graphql/helpers/userHelpers";
 import { prisma } from "@/prisma";
 
 import { getAiCodec, V2WorkflowData } from "../../serverUtils";
-import { createRequestBodySchema, requestToInput } from "../../utils";
+import { aiRequestBodySchema } from "../../utils";
 
 // https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#maxduration
 export const maxDuration = 300;
@@ -63,11 +63,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const request = createRequestBodySchema.parse(body);
-
-    if (!request.prompt && !request.squiggleCode) {
-      throw new Error("Prompt or Squiggle code is required");
-    }
+    const request = aiRequestBodySchema.parse(body);
 
     // Create a SquiggleWorkflow instance
     const llmConfig: LlmConfig = {
@@ -77,16 +73,15 @@ export async function POST(req: Request) {
       messagesInHistoryToKeep: 4,
     };
 
-    const input = requestToInput(request);
     const openaiApiKey = process.env["OPENAI_API_KEY"];
     const anthropicApiKey = process.env["ANTHROPIC_API_KEY"];
 
     const squiggleWorkflow =
-      input.type === "Create"
+      request.kind === "create"
         ? createSquiggleWorkflowTemplate.instantiate({
             llmConfig,
             inputs: {
-              prompt: new PromptArtifact(input.prompt),
+              prompt: new PromptArtifact(request.prompt),
             },
             abortSignal: req.signal,
             openaiApiKey,
@@ -95,7 +90,7 @@ export async function POST(req: Request) {
         : fixSquiggleWorkflowTemplate.instantiate({
             llmConfig,
             inputs: {
-              source: new SourceArtifact(input.source),
+              source: new SourceArtifact(request.squiggleCode),
             },
             abortSignal: req.signal,
             openaiApiKey,

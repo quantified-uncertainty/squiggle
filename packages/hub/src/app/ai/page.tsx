@@ -24,6 +24,13 @@ export default async function AiPage() {
         case 1:
           return clientWorkflowSchema.parse(row.workflow);
         case 2: {
+          /*
+           * Here we go from SerializedWorkflow to Workflow to ClientWorkflow.
+           *
+           * TODO: Instead, we could go directly from SerializedWorkflow to
+           * ClientWorkflow (useful especially if workflow implementation is
+           * deprecated, so we can't resume it but still want to show it).
+           */
           const { bundle, entrypoint } = v2WorkflowDataSchema.parse(
             row.workflow
           );

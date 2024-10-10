@@ -1,18 +1,5 @@
 import { z } from "zod";
 
-// This could be defined in SquiggleWorkflow.ts, but it would cause a dependency on server-only modules.
-export const squiggleWorkflowInputSchema = z.discriminatedUnion("type", [
-  z.object({
-    type: z.literal("Create"),
-    prompt: z.string(),
-  }),
-  z.object({
-    type: z.literal("Edit"),
-    source: z.string(),
-    prompt: z.string().optional(),
-  }),
-]);
-
 // Protocol for streaming workflow changes between server and client.
 
 // ClientArtifact type

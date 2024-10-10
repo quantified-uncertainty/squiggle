@@ -1,12 +1,8 @@
 import { useCallback, useState } from "react";
 
-import {
-  ClientWorkflow,
-  decodeWorkflowFromReader,
-  SquiggleWorkflowInput,
-} from "@quri/squiggle-ai";
+import { ClientWorkflow, decodeWorkflowFromReader } from "@quri/squiggle-ai";
 
-import { bodyToLineReader, CreateRequestBody, requestToInput } from "./utils";
+import { AiRequestBody, bodyToLineReader } from "./utils";
 
 export function useSquiggleWorkflows(initialWorkflows: ClientWorkflow[]) {
   const [workflows, setWorkflows] =
@@ -25,7 +21,7 @@ export function useSquiggleWorkflows(initialWorkflows: ClientWorkflow[]) {
   );
 
   const addMockWorkflow = useCallback(
-    (input: SquiggleWorkflowInput) => {
+    (request: AiRequestBody) => {
       // This will be replaced with a real workflow once we receive the first message from the server.
       const id = `loading-${Date.now().toString()}`;
       const workflow: ClientWorkflow = {
@@ -36,7 +32,7 @@ export function useSquiggleWorkflows(initialWorkflows: ClientWorkflow[]) {
           prompt: {
             id: "prompt",
             kind: "prompt",
-            value: input.prompt ?? "[FIX]",
+            value: request.kind === "create" ? request.prompt : "[FIX]",
           },
         },
         steps: [],
@@ -49,12 +45,10 @@ export function useSquiggleWorkflows(initialWorkflows: ClientWorkflow[]) {
   );
 
   const submitWorkflow = useCallback(
-    async (request: CreateRequestBody) => {
-      const input = requestToInput(request);
-
+    async (request: AiRequestBody) => {
       // Add a mock workflow to show loading state while we wait for the server to respond.
       // It will be replaced by the real workflow once we receive the first message from the server.
-      let id = addMockWorkflow(requestToInput(request)).id;
+      let id = addMockWorkflow(request).id;
 
       try {
         const response = await fetch("/ai/api/create", {

@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 
 import { SourceArtifact } from "../../Artifact.js";
-import { fixSquiggleWorkflowTemplate } from "../../workflows/SquiggleWorkflow.js";
+import { fixSquiggleWorkflowTemplate } from "../../workflows/fixSquiggleWorkflowTemplate.js";
 
 config();
 
