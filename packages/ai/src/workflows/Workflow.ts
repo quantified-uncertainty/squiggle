@@ -6,7 +6,7 @@ import {
   Message,
 } from "../LLMClient.js";
 import { LLMStepInstance } from "../LLMStepInstance.js";
-import { Inputs, LLMStepTemplate, StepShape } from "../LLMStepTemplate.js";
+import { Inputs, IOShape, LLMStepTemplate } from "../LLMStepTemplate.js";
 import { TimestampedLogEntry } from "../Logger.js";
 import { LlmId } from "../modelConfigs.js";
 import {
@@ -135,7 +135,7 @@ export class Workflow {
     this.dispatchEvent({ type: "workflowStarted" });
   }
 
-  addStep<S extends StepShape>(
+  addStep<S extends IOShape>(
     template: LLMStepTemplate<S>,
     inputs: Inputs<S>,
     options?: { retryingStep?: LLMStepInstance<S> }

@@ -19,7 +19,7 @@ export type StepState =
       message: string;
     };
 
-export type StepShape<
+export type IOShape<
   I extends Record<string, ArtifactKind> = Record<string, ArtifactKind>,
   O extends Record<string, ArtifactKind> = Record<string, ArtifactKind>,
 > = {
@@ -27,11 +27,11 @@ export type StepShape<
   outputs: O;
 };
 
-export type Inputs<Shape extends StepShape<any, any>> = {
+export type Inputs<Shape extends IOShape<any, any>> = {
   [K in keyof Shape["inputs"]]: Extract<Artifact, { kind: Shape["inputs"][K] }>;
 };
 
-export type Outputs<Shape extends StepShape<any, any>> = {
+export type Outputs<Shape extends IOShape<any, any>> = {
   [K in keyof Shape["outputs"]]: Extract<
     Artifact,
     { kind: Shape["outputs"][K] }
@@ -40,7 +40,7 @@ export type Outputs<Shape extends StepShape<any, any>> = {
 
 // ExecuteContext is the context that's available to the step implementation.
 // We intentionally don't pass the reference to the step implementation, so that steps won't mess with their internal state.
-export type ExecuteContext<Shape extends StepShape> = {
+export type ExecuteContext<Shape extends IOShape> = {
   setOutput<K extends Extract<keyof Shape["outputs"], string>>(
     key: K,
     value: Outputs<Shape>[K] | Outputs<Shape>[K]["value"] // can be either the artifact or the value inside the artifact
@@ -50,7 +50,7 @@ export type ExecuteContext<Shape extends StepShape> = {
   fail(errorType: ErrorType, message: string): void;
 };
 
-export class LLMStepTemplate<const Shape extends StepShape = StepShape> {
+export class LLMStepTemplate<const Shape extends IOShape = IOShape> {
   constructor(
     public readonly name: string,
     public readonly shape: Shape,

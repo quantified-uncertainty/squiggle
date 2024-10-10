@@ -1,7 +1,13 @@
 import { getServerSession } from "next-auth";
 
 import { LlmConfig } from "@quri/squiggle-ai";
-import { SquiggleWorkflow, Workflow } from "@quri/squiggle-ai/server";
+import {
+  createSquiggleWorkflowTemplate,
+  fixSquiggleWorkflowTemplate,
+  PromptArtifact,
+  SourceArtifact,
+  Workflow,
+} from "@quri/squiggle-ai/server";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { getSelf, isSignedIn } from "@/graphql/helpers/userHelpers";
@@ -75,13 +81,26 @@ export async function POST(req: Request) {
     const openaiApiKey = process.env["OPENAI_API_KEY"];
     const anthropicApiKey = process.env["ANTHROPIC_API_KEY"];
 
-    const squiggleWorkflow = new SquiggleWorkflow({
-      llmConfig,
-      input,
-      abortSignal: req.signal,
-      openaiApiKey,
-      anthropicApiKey,
-    });
+    const squiggleWorkflow =
+      input.type === "Create"
+        ? createSquiggleWorkflowTemplate.instantiate({
+            llmConfig,
+            inputs: {
+              prompt: new PromptArtifact(input.prompt),
+            },
+            abortSignal: req.signal,
+            openaiApiKey,
+            anthropicApiKey,
+          })
+        : fixSquiggleWorkflowTemplate.instantiate({
+            llmConfig,
+            inputs: {
+              source: new SourceArtifact(input.source),
+            },
+            abortSignal: req.signal,
+            openaiApiKey,
+            anthropicApiKey,
+          });
 
     // save workflow to the database on each update
     squiggleWorkflow.workflow.addEventListener("stepFinished", ({ workflow }) =>

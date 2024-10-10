@@ -8,9 +8,9 @@ import {
   ErrorType,
   ExecuteContext,
   Inputs,
+  IOShape,
   LLMStepTemplate,
   Outputs,
-  StepShape,
   StepState,
 } from "./LLMStepTemplate.js";
 import { LogEntry, Logger, TimestampedLogEntry } from "./Logger.js";
@@ -23,7 +23,7 @@ import {
 import { getStepTemplateByName } from "./steps/registry.js";
 import { Workflow } from "./workflows/Workflow.js";
 
-interface Params<Shape extends StepShape> {
+interface Params<Shape extends IOShape> {
   id: string;
   sequentialId: number;
   template: LLMStepTemplate<Shape>;
@@ -36,7 +36,7 @@ interface Params<Shape extends StepShape> {
   llmMetricsList: LlmMetrics[];
 }
 
-export class LLMStepInstance<const Shape extends StepShape = StepShape> {
+export class LLMStepInstance<const Shape extends IOShape = IOShape> {
   public id: Params<Shape>["id"];
   public sequentialId: number;
   public readonly template: Params<Shape>["template"];
@@ -71,7 +71,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
   }
 
   // Create a new, PENDING step instance
-  static create<Shape extends StepShape>(params: {
+  static create<Shape extends IOShape>(params: {
     template: LLMStepInstance<Shape>["template"];
     inputs: LLMStepInstance<Shape>["inputs"];
     retryingStep: LLMStepInstance<Shape>["retryingStep"];
@@ -379,7 +379,7 @@ export class LLMStepInstance<const Shape extends StepShape = StepShape> {
 }
 
 export type SerializedStep = Omit<
-  Params<StepShape>,
+  Params<IOShape>,
   // TODO - serialize retryingStep reference
   "inputs" | "outputs" | "template" | "retryingStep"
 > & {

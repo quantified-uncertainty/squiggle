@@ -30,7 +30,6 @@ export default async function AiPage() {
           const codec = getAiCodec();
           const deserializer = codec.makeDeserializer(bundle);
           const workflow = deserializer.deserialize(entrypoint);
-          console.log(workflow.asClientWorkflow().steps);
 
           return workflow.asClientWorkflow();
         }

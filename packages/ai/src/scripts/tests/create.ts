@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 
-import { SquiggleWorkflow } from "../../workflows/SquiggleWorkflow.js";
+import { PromptArtifact } from "../../Artifact.js";
+import { createSquiggleWorkflowTemplate } from "../../workflows/SquiggleWorkflow.js";
 
 config();
 
@@ -9,11 +10,15 @@ async function main() {
     "Generate a function that takes a list of numbers and returns the sum of the numbers";
 
   const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
-    await new SquiggleWorkflow({
-      input: { type: "Create", prompt },
-      openaiApiKey: process.env["OPENAI_API_KEY"],
-      anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
-    }).runToResult();
+    await createSquiggleWorkflowTemplate
+      .instantiate({
+        inputs: {
+          prompt: new PromptArtifact(prompt),
+        },
+        openaiApiKey: process.env["OPENAI_API_KEY"],
+        anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
+      })
+      .runToResult();
 
   const response = {
     code: typeof code === "string" ? code : "",
