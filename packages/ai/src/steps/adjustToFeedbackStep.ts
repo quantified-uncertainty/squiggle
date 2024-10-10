@@ -1,5 +1,5 @@
 import { Code, codeStringToCode } from "../Code.js";
-import { LLMStepTemplate } from "../LLMStep.js";
+import { LLMStepTemplate } from "../LLMStepTemplate.js";
 import { changeFormatPrompt, PromptPair } from "../prompts.js";
 import { diffToNewCode } from "../squiggle/processSquiggleCode.js";
 

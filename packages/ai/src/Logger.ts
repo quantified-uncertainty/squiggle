@@ -10,6 +10,11 @@ export type LogEntry =
   | HighlightLogEntry
   | LlmResponseLogEntry;
 
+export type LoggerContext = {
+  workflowId: string;
+  stepIndex: number;
+};
+
 export function getLogEntryFullName(entry: LogEntry): string {
   switch (entry.type) {
     case "info":
@@ -125,13 +130,8 @@ type LlmResponseLogEntry = {
 export class Logger {
   logs: TimestampedLogEntry[] = [];
 
-  constructor(
-    private workflowId: string,
-    private stepIndex: number
-  ) {}
-
-  log(log: LogEntry): void {
+  log(log: LogEntry, context: LoggerContext): void {
     this.logs.push({ timestamp: new Date(), entry: log });
-    displayLog(log, this.workflowId, this.stepIndex);
+    displayLog(log, context.workflowId, context.stepIndex);
   }
 }

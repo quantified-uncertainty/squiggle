@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-import {
-  LlmId,
-  MODEL_CONFIGS,
-  type SquiggleWorkflowInput,
-} from "@quri/squiggle-ai";
+import { LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 
 // SquiggleWorkflow input
 
@@ -24,21 +20,24 @@ type UnionToTuple<T> =
 
 type ModelKeys = UnionToTuple<LlmId>;
 
-export const createRequestBodySchema = z.object({
-  prompt: z.string().optional(),
-  squiggleCode: z.string().optional(),
+const commonRequestFields = {
   model: z.enum(MODEL_CONFIGS.map((model) => model.id) as ModelKeys).optional(),
-});
+};
 
-export type CreateRequestBody = z.infer<typeof createRequestBodySchema>;
+export const aiRequestBodySchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("create"),
+    ...commonRequestFields,
+    prompt: z.string(),
+  }),
+  z.object({
+    kind: z.literal("edit"),
+    ...commonRequestFields,
+    squiggleCode: z.string(),
+  }),
+]);
 
-export function requestToInput(
-  request: CreateRequestBody
-): SquiggleWorkflowInput {
-  return request.squiggleCode
-    ? { type: "Edit", source: request.squiggleCode }
-    : { type: "Create", prompt: request.prompt ?? "" };
-}
+export type AiRequestBody = z.infer<typeof aiRequestBodySchema>;
 
 // Convert a ReadableStream (`response.body` from `fetch()`) to a line-by-line reader.
 export function bodyToLineReader(stream: ReadableStream<string>) {

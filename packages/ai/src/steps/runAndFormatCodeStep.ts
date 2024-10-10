@@ -1,5 +1,5 @@
 import { codeStringToCode } from "../Code.js";
-import { LLMStepTemplate } from "../LLMStep.js";
+import { LLMStepTemplate } from "../LLMStepTemplate.js";
 
 export const runAndFormatCodeStep = new LLMStepTemplate(
   "RunAndFormatCode",

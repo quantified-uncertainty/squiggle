@@ -1,13 +1,13 @@
 import { orderBy } from "lodash";
 import { FC } from "react";
 
-import { SerializedWorkflow } from "@quri/squiggle-ai";
+import { ClientWorkflow } from "@quri/squiggle-ai";
 
 import { WorkflowSummaryItem } from "./WorkflowSummaryItem";
 
 export const WorkflowSummaryList: FC<{
-  workflows: SerializedWorkflow[];
-  selectedWorkflow: SerializedWorkflow | undefined;
+  workflows: ClientWorkflow[];
+  selectedWorkflow: ClientWorkflow | undefined;
   selectWorkflow: (id: string) => void;
 }> = ({ workflows, selectedWorkflow, selectWorkflow }) => {
   const sortedWorkflows = orderBy(workflows, ["timestamp"], ["desc"]);

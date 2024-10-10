@@ -85,12 +85,12 @@ function convertOpenAIToStandardFormat(
   };
 }
 
-export interface LlmMetrics {
+export type LlmMetrics = {
   apiCalls: number;
   inputTokens: number;
   outputTokens: number;
   llmId: LlmId;
-}
+};
 
 export function calculatePriceMultipleCalls(
   metrics: Partial<Record<LlmId, LlmMetrics>>

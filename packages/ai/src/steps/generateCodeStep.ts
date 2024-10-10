@@ -1,4 +1,4 @@
-import { LLMStepTemplate } from "../LLMStep.js";
+import { LLMStepTemplate } from "../LLMStepTemplate.js";
 import { PromptPair } from "../prompts.js";
 import { generationCompletionContentToCode } from "../squiggle/processSquiggleCode.js";
 

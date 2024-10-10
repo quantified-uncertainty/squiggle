@@ -1,7 +1,7 @@
 "use client";
 import { FC } from "react";
 
-import { SerializedWorkflow } from "@quri/squiggle-ai";
+import { ClientWorkflow } from "@quri/squiggle-ai";
 import { Button, StyledTab } from "@quri/ui";
 
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
@@ -13,9 +13,9 @@ import { Header } from "./Header";
 import { WorkflowActions } from "./WorkflowActions";
 
 type WorkflowViewerProps<
-  T extends SerializedWorkflow["status"] = SerializedWorkflow["status"],
+  T extends ClientWorkflow["status"] = ClientWorkflow["status"],
 > = {
-  workflow: Extract<SerializedWorkflow, { status: T }>;
+  workflow: Extract<ClientWorkflow, { status: T }>;
   onFix: (code: string) => void;
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;

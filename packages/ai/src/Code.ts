@@ -5,7 +5,6 @@ import {
   result,
   simpleValueFromAny,
   simpleValueToCompactString,
-  SqError,
   SqErrorList,
   SqProject,
 } from "@quri/squiggle-lang";
@@ -27,7 +26,7 @@ export type Code =
       error: string;
       source: string;
     }
-  | { type: "runFailed"; source: string; error: SqError; project: SqProject }
+  | { type: "runFailed"; source: string; error: string }
   | {
       type: "success";
       source: string;
@@ -41,7 +40,7 @@ export function codeErrorString(code: Code): string {
   if (code.type === "formattingFailed") {
     return code.error;
   } else if (code.type === "runFailed") {
-    return code.error.toStringWithDetails();
+    return code.error;
   }
   return "";
 }
@@ -99,8 +98,7 @@ export async function codeStringToCode(code: string): Promise<Code> {
     return {
       type: "runFailed",
       source: runningCode,
-      error: run.value.error.errors[0],
-      project: run.value.project,
+      error: run.value.error.errors[0].toStringWithDetails(),
     };
   }
 

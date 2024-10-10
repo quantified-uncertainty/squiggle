@@ -1,13 +1,13 @@
 import clsx from "clsx";
 import { FC, ReactNode } from "react";
 
-import { SerializedArtifact } from "@quri/squiggle-ai";
+import { ClientArtifact } from "@quri/squiggle-ai";
 import { CodeBracketIcon, CommentIcon, Tooltip } from "@quri/ui";
 
 type ArtifactKind = "source" | "prompt" | "code";
 type ArtifactIconSize = number;
 
-function getArtifactColor(artifact: SerializedArtifact): string {
+function getArtifactColor(artifact: ClientArtifact): string {
   if (artifact.kind === "code" && !artifact.ok) {
     return "bg-red-300";
   }
@@ -32,7 +32,7 @@ function getArtifactIcon(kind: ArtifactKind, size: number): ReactNode {
 }
 
 export const ArtifactIcon: FC<{
-  artifact: SerializedArtifact;
+  artifact: ClientArtifact;
   size: ArtifactIconSize;
 }> = ({ artifact, size }) => {
   const bgColor = getArtifactColor(artifact);
@@ -46,7 +46,7 @@ export const ArtifactIcon: FC<{
 
 export const ArtifactDisplay: FC<{
   name: string;
-  artifact: SerializedArtifact;
+  artifact: ClientArtifact;
   size: ArtifactIconSize;
   showArtifactName?: boolean;
 }> = ({ name, artifact, size, showArtifactName = false }) => {
