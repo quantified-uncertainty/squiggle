@@ -1,12 +1,12 @@
 import { LLMStepInstance } from "../LLMStepInstance.js";
 import { Inputs, IOShape } from "../LLMStepTemplate.js";
-import { LlmConfig, Workflow } from "./Workflow.js";
+import { type LlmConfig, Workflow } from "./Workflow.js";
 
 export type WorkflowInstanceParams<Shape extends IOShape> = {
   id: string;
   template: WorkflowTemplate<Shape>;
   inputs: Inputs<Shape>;
-  steps: LLMStepInstance<IOShape>[];
+  steps: LLMStepInstance<IOShape, Shape>[];
   abortSignal?: AbortSignal; // TODO
   llmConfig?: LlmConfig;
   openaiApiKey?: string;
@@ -18,7 +18,7 @@ export type WorkflowInstanceParams<Shape extends IOShape> = {
  *
  * It works similarly to LLMStepTemplate, but for workflows.
  */
-export class WorkflowTemplate<Shape extends IOShape> {
+export class WorkflowTemplate<const Shape extends IOShape> {
   public readonly name: string;
 
   public configureControllerLoop: (

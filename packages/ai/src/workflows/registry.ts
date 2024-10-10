@@ -1,6 +1,6 @@
-import { WorkflowTemplate } from "./ControlledWorkflow.js";
 import { createSquiggleWorkflowTemplate } from "./createSquiggleWorkflowTemplate.js";
 import { fixSquiggleWorkflowTemplate } from "./fixSquiggleWorkflowTemplate.js";
+import { type WorkflowTemplate } from "./WorkflowTemplate.js";
 
 export function getWorkflowTemplateByName(name: string) {
   const workflows: Record<string, WorkflowTemplate<any>> = Object.fromEntries(

@@ -73,7 +73,7 @@ export function stepToClientStep(step: LLMStepInstance): ClientStep {
  *
  * Results are streamed as JSON-encoded lines.
  *
- * `ControlledWorkflow.runAsStream()` relies on this function; see its
+ * `Workflow.runAsStream()` relies on this function; see its
  * implementation for more details.
  */
 export function addStreamingListeners<Shape extends IOShape>(

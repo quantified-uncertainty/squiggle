@@ -6,8 +6,6 @@ The example frontend that uses it is implemented in [Squiggle Hub](https://squig
 
 Note that it can take 20s-2min to run a workflow and get a response from the LLM.
 
-The key file is 'src/workflows/SquiggleWorkflow.ts'. This file contains the definition of a common workflow. It can be used with or without streaming to run the workflow with the given parameters; see `ControlledWorkflow` class API for more details.
-
 After runs are complete, the results are saved to the 'logs' folder. These are saved as Markdown files. It's recommended to use the VSCode Markdown Preview plugin or similar to view the results. In these logs, note the "expand" arrows on the left of some items - these can be clicked to expand the item and see more details.
 
 ## Use

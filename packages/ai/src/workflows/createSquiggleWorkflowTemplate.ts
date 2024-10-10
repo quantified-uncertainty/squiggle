@@ -1,6 +1,6 @@
 import { generateCodeStep } from "../steps/generateCodeStep.js";
-import { WorkflowTemplate } from "./ControlledWorkflow.js";
 import { fixAdjustRetryLoop } from "./controllers.js";
+import { WorkflowTemplate } from "./WorkflowTemplate.js";
 
 /**
  * This is a basic workflow for generating Squiggle code.

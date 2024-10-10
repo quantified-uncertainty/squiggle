@@ -1,7 +1,7 @@
 import { PromptArtifact } from "../Artifact.js";
 import { runAndFormatCodeStep } from "../steps/runAndFormatCodeStep.js";
-import { WorkflowTemplate } from "./ControlledWorkflow.js";
 import { fixAdjustRetryLoop } from "./controllers.js";
+import { WorkflowTemplate } from "./WorkflowTemplate.js";
 
 export const fixSquiggleWorkflowTemplate = new WorkflowTemplate<{
   inputs: {

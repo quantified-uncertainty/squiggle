@@ -23,7 +23,7 @@ import {
 import { getStepTemplateByName } from "./steps/registry.js";
 import { Workflow } from "./workflows/Workflow.js";
 
-interface Params<Shape extends IOShape> {
+export type StepParams<Shape extends IOShape> = {
   id: string;
   sequentialId: number;
   template: LLMStepTemplate<Shape>;
@@ -34,25 +34,35 @@ interface Params<Shape extends IOShape> {
   startTime: number;
   conversationMessages: Message[];
   llmMetricsList: LlmMetrics[];
-}
+};
 
-export class LLMStepInstance<const Shape extends IOShape = IOShape> {
-  public id: Params<Shape>["id"];
-  public sequentialId: number;
-  public readonly template: Params<Shape>["template"];
+export class LLMStepInstance<
+  const Shape extends IOShape = IOShape,
+  const WorkflowShape extends IOShape = IOShape,
+> {
+  public id: StepParams<Shape>["id"];
+  public sequentialId: StepParams<Shape>["sequentialId"];
+  public readonly template: StepParams<Shape>["template"];
 
-  private state: Params<Shape>["state"];
-  private outputs: Params<Shape>["outputs"];
-  public readonly inputs: Params<Shape>["inputs"];
+  private state: StepParams<Shape>["state"];
+  private outputs: StepParams<Shape>["outputs"];
+  public readonly inputs: StepParams<Shape>["inputs"];
 
-  public retryingStep?: Params<Shape>["retryingStep"];
+  public retryingStep?: StepParams<Shape>["retryingStep"];
 
-  private startTime: Params<Shape>["startTime"];
+  private startTime: StepParams<Shape>["startTime"];
+  private conversationMessages: StepParams<Shape>["conversationMessages"];
+  public llmMetricsList: StepParams<Shape>["llmMetricsList"];
+
+  // These two fields are not serialized
   private logger: Logger;
-  private conversationMessages: Params<Shape>["conversationMessages"];
-  public llmMetricsList: Params<Shape>["llmMetricsList"];
+  private workflow: Workflow<WorkflowShape>;
 
-  private constructor(params: Params<Shape>) {
+  private constructor(
+    params: StepParams<Shape> & {
+      workflow: Workflow<WorkflowShape>;
+    }
+  ) {
     this.id = params.id;
     this.sequentialId = params.sequentialId;
 
@@ -67,17 +77,18 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
     this.inputs = params.inputs;
     this.retryingStep = params.retryingStep;
 
+    this.workflow = params.workflow;
     this.logger = new Logger();
   }
 
   // Create a new, PENDING step instance
-  static create<Shape extends IOShape>(params: {
+  static create<Shape extends IOShape, WorkflowShape extends IOShape>(params: {
     template: LLMStepInstance<Shape>["template"];
     inputs: LLMStepInstance<Shape>["inputs"];
     retryingStep: LLMStepInstance<Shape>["retryingStep"];
-    workflow: Workflow<any>;
-  }): LLMStepInstance<Shape> {
-    return new LLMStepInstance<Shape>({
+    workflow: Workflow<WorkflowShape>;
+  }): LLMStepInstance<Shape, WorkflowShape> {
+    return new LLMStepInstance<Shape, WorkflowShape>({
       id: crypto.randomUUID(),
       sequentialId: params.workflow.getStepCount(),
       conversationMessages: [],
@@ -101,22 +112,22 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
     return this.conversationMessages;
   }
 
-  async _run<WorkflowShape extends IOShape>(workflow: Workflow<WorkflowShape>) {
+  async _run() {
     if (this.state.kind !== "PENDING") {
       return;
     }
 
-    const limits = workflow.checkResourceLimits();
+    const limits = this.workflow.checkResourceLimits();
     if (limits) {
-      this.fail("CRITICAL", limits, workflow);
+      this.fail("CRITICAL", limits);
       return;
     }
 
     const executeContext: ExecuteContext<Shape> = {
-      setOutput: (key, value) => this.setOutput(key, value, workflow),
-      log: (log) => this.log(log, workflow),
-      queryLLM: (promptPair) => this.queryLLM(promptPair, workflow),
-      fail: (errorType, message) => this.fail(errorType, message, workflow),
+      setOutput: (key, value) => this.setOutput(key, value),
+      log: (log) => this.log(log),
+      queryLLM: (promptPair) => this.queryLLM(promptPair),
+      fail: (errorType, message) => this.fail(errorType, message),
     };
 
     try {
@@ -124,8 +135,7 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
     } catch (error) {
       this.fail(
         "MINOR",
-        error instanceof Error ? error.message : String(error),
-        workflow
+        error instanceof Error ? error.message : String(error)
       );
       return;
     }
@@ -137,28 +147,22 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
     }
   }
 
-  async run<WorkflowShape extends IOShape>(workflow: Workflow<WorkflowShape>) {
-    this.log(
-      {
-        type: "info",
-        message: `Step "${this.template.name}" started`,
-      },
-      workflow
-    );
+  async run() {
+    this.log({
+      type: "info",
+      message: `Step "${this.template.name}" started`,
+    });
 
-    await this._run(workflow);
+    await this._run();
 
     const completionMessage = `Step "${this.template.name}" completed with status: ${this.state.kind}${
       this.state.kind !== "PENDING" && `, in ${this.state.durationMs / 1000}s`
     }`;
 
-    this.log(
-      {
-        type: "info",
-        message: completionMessage,
-      },
-      workflow
-    );
+    this.log({
+      type: "info",
+      message: completionMessage,
+    });
   }
 
   getState() {
@@ -209,19 +213,14 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
 
   // private methods
 
-  private setOutput<
-    K extends Extract<keyof Shape["outputs"], string>,
-    WorkflowShape extends IOShape,
-  >(
+  private setOutput<K extends Extract<keyof Shape["outputs"], string>>(
     key: K,
-    value: Outputs<Shape>[K] | Outputs<Shape>[K]["value"],
-    workflow: Workflow<WorkflowShape>
+    value: Outputs<Shape>[K] | Outputs<Shape>[K]["value"]
   ): void {
     if (key in this.outputs) {
       this.fail(
         "CRITICAL",
-        `Output ${key} is already set. This is a bug with the workflow code.`,
-        workflow
+        `Output ${key} is already set. This is a bug with the workflow code.`
       );
       return;
     }
@@ -237,22 +236,15 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
     }
   }
 
-  private log<WorkflowShape extends IOShape>(
-    log: LogEntry,
-    workflow: Workflow<WorkflowShape>
-  ): void {
+  private log(log: LogEntry): void {
     this.logger.log(log, {
-      workflowId: workflow.id,
+      workflowId: this.workflow.id,
       stepIndex: this.sequentialId,
     });
   }
 
-  private fail<WorkflowShape extends IOShape>(
-    errorType: ErrorType,
-    message: string,
-    workflow: Workflow<WorkflowShape>
-  ) {
-    this.log({ type: "error", message }, workflow);
+  private fail(errorType: ErrorType, message: string) {
+    this.log({ type: "error", message });
     this.state = {
       kind: "FAILED",
       durationMs: this.calculateDuration(),
@@ -269,48 +261,39 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
     this.conversationMessages.push(message);
   }
 
-  private async queryLLM<WorkflowShape extends IOShape>(
-    promptPair: PromptPair,
-    workflow: Workflow<WorkflowShape>
-  ): Promise<string | null> {
+  private async queryLLM(promptPair: PromptPair): Promise<string | null> {
     try {
       const messagesToSend: Message[] = [
-        ...workflow.getRelevantPreviousConversationMessages(
-          workflow.llmConfig.messagesInHistoryToKeep
+        ...this.workflow.getRelevantPreviousConversationMessages(
+          this.workflow.llmConfig.messagesInHistoryToKeep
         ),
         {
           role: "user",
           content: promptPair.fullPrompt,
         },
       ];
-      const completion = await workflow.llmClient.run(messagesToSend);
+      const completion = await this.workflow.llmClient.run(messagesToSend);
 
-      this.log(
-        {
-          type: "llmResponse",
-          response: completion,
-          content: completion.content,
-          messages: messagesToSend,
-          prompt: promptPair.fullPrompt,
-        },
-        workflow
-      );
+      this.log({
+        type: "llmResponse",
+        response: completion,
+        content: completion.content,
+        messages: messagesToSend,
+        prompt: promptPair.fullPrompt,
+      });
 
       this.llmMetricsList.push({
         apiCalls: 1,
         inputTokens: completion?.usage?.prompt_tokens ?? 0,
         outputTokens: completion?.usage?.completion_tokens ?? 0,
-        llmId: workflow.llmConfig.llmId,
+        llmId: this.workflow.llmConfig.llmId,
       });
 
       if (!completion?.content) {
-        this.log(
-          {
-            type: "error",
-            message: "Received an empty response from the API",
-          },
-          workflow
-        );
+        this.log({
+          type: "error",
+          message: "Received an empty response from the API",
+        });
         return null;
       } else {
         this.addConversationMessage({
@@ -328,8 +311,7 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
     } catch (error) {
       this.fail(
         "MINOR",
-        `Error in queryLLM: ${error instanceof Error ? error.message : error}`,
-        workflow
+        `Error in queryLLM: ${error instanceof Error ? error.message : error}`
       );
       return null;
     }
@@ -337,34 +319,33 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
 
   // Serialization/deserialization
 
-  serialize(visitor: AiSerializationVisitor): SerializedStep {
+  // StepParams don't contain the workflow reference, to to avoid circular dependencies
+  toParams(): StepParams<any> {
     return {
       id: this.id,
       sequentialId: this.sequentialId,
-      templateName: this.template.name,
+      template: this.template,
       state: this.state,
+      inputs: this.inputs,
+      outputs: this.outputs,
+      retryingStep: this.retryingStep,
       startTime: this.startTime,
       conversationMessages: this.conversationMessages,
       llmMetricsList: this.llmMetricsList,
-      inputIds: Object.fromEntries(
-        Object.entries(this.inputs).map(([key, input]) => [
-          key,
-          visitor.artifact(input),
-        ])
-      ),
-      outputIds: Object.fromEntries(
-        Object.entries(this.outputs).map(([key, output]) => [
-          key,
-          visitor.artifact(output),
-        ])
-      ),
     };
+  }
+
+  static fromParams(
+    params: StepParams<any>,
+    workflow: Workflow<any>
+  ): LLMStepInstance<any, any> {
+    return new LLMStepInstance({ ...params, workflow });
   }
 
   static deserialize(
     { templateName, inputIds, outputIds, ...params }: SerializedStep,
     visitor: AiDeserializationVisitor
-  ): LLMStepInstance {
+  ): StepParams<any> {
     const template: LLMStepTemplate<any> = getStepTemplateByName(templateName);
     const inputs = Object.fromEntries(
       Object.entries(inputIds).map(([name, inputId]) => [
@@ -379,17 +360,45 @@ export class LLMStepInstance<const Shape extends IOShape = IOShape> {
       ])
     );
 
-    return new LLMStepInstance({
+    return {
       ...params,
       template,
       inputs,
       outputs,
-    });
+    };
   }
 }
 
+export function serializeStepParams(
+  params: StepParams<IOShape>,
+  visitor: AiSerializationVisitor
+) {
+  return {
+    id: params.id,
+    sequentialId: params.sequentialId,
+    templateName: params.template.name,
+    state: params.state,
+    startTime: params.startTime,
+    conversationMessages: params.conversationMessages,
+    llmMetricsList: params.llmMetricsList,
+    inputIds: Object.fromEntries(
+      Object.entries(params.inputs).map(([key, input]) => [
+        key,
+        visitor.artifact(input),
+      ])
+    ),
+    outputIds: Object.fromEntries(
+      Object.entries(params.outputs)
+        .map(([key, output]) =>
+          output ? [key, visitor.artifact(output)] : undefined
+        )
+        .filter((x) => x !== undefined)
+    ),
+  };
+}
+
 export type SerializedStep = Omit<
-  Params<IOShape>,
+  StepParams<IOShape>,
   // TODO - serialize retryingStep reference
   "inputs" | "outputs" | "template" | "retryingStep"
 > & {

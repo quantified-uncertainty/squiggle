@@ -7,12 +7,19 @@ import {
   serializeArtifact,
   SerializedArtifact,
 } from "./Artifact.js";
-import { LLMStepInstance, SerializedStep } from "./LLMStepInstance.js";
+import {
+  LLMStepInstance,
+  SerializedStep,
+  serializeStepParams,
+  StepParams,
+} from "./LLMStepInstance.js";
+import { getWorkflowTemplateByName } from "./workflows/registry.js";
 import { SerializedWorkflow, Workflow } from "./workflows/Workflow.js";
 
 type AiShape = {
   workflow: [Workflow<any>, SerializedWorkflow];
-  step: [LLMStepInstance, SerializedStep];
+  // we serialize StepParams instead of LLMStepInstance to avoid circular dependencies; steps reference workflows
+  step: [StepParams<any>, SerializedStep];
   artifact: [Artifact, SerializedArtifact];
 };
 
@@ -34,10 +41,11 @@ export function makeAiCodec(params: {
           visitor,
           openaiApiKey: params.openaiApiKey,
           anthropicApiKey: params.anthropicApiKey,
+          getWorkflowTemplateByName,
         }),
     },
     step: {
-      serialize: (node, visitor) => node.serialize(visitor),
+      serialize: (node, visitor) => serializeStepParams(node, visitor),
       deserialize: (node, visitor) =>
         LLMStepInstance.deserialize(node, visitor),
     },

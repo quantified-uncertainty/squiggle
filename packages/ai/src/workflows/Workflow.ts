@@ -17,15 +17,14 @@ import {
 } from "../serialization.js";
 import { ClientWorkflow, ClientWorkflowResult } from "../types.js";
 import {
-  WorkflowInstanceParams,
-  WorkflowTemplate,
-} from "./ControlledWorkflow.js";
-import { getWorkflowTemplateByName } from "./registry.js";
-import {
   addStreamingListeners,
   artifactToClientArtifact,
   stepToClientStep,
 } from "./streaming.js";
+import {
+  type WorkflowInstanceParams,
+  type WorkflowTemplate,
+} from "./WorkflowTemplate.js";
 
 export type LlmConfig = {
   llmId: LlmId;
@@ -49,19 +48,19 @@ export type WorkflowEventShape =
   | {
       type: "stepAdded";
       payload: {
-        step: LLMStepInstance<IOShape>;
+        step: LLMStepInstance;
       };
     }
   | {
       type: "stepStarted";
       payload: {
-        step: LLMStepInstance<IOShape>;
+        step: LLMStepInstance;
       };
     }
   | {
       type: "stepFinished";
       payload: {
-        step: LLMStepInstance<IOShape>;
+        step: LLMStepInstance;
       };
     }
   | {
@@ -94,9 +93,6 @@ export type WorkflowEventListener<
  *
  * It does not make any assumptions about the steps themselves, it just
  * provides a way to add them and interact with them.
- *
- * See `ControlledWorkflow` for a common base class that controls the workflow
- * by injecting new steps based on events.
  */
 
 const MAX_RETRIES = 5;
@@ -109,7 +105,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
   public llmConfig: LlmConfig;
   public startTime: number;
 
-  private steps: LLMStepInstance<IOShape>[];
+  private steps: LLMStepInstance<IOShape, Shape>[];
 
   public llmClient: LLMClient;
 
@@ -181,9 +177,9 @@ export class Workflow<Shape extends IOShape = IOShape> {
     template: LLMStepTemplate<S>,
     inputs: Inputs<S>,
     options?: { retryingStep?: LLMStepInstance<S> }
-  ): LLMStepInstance<S> {
+  ): LLMStepInstance<S, Shape> {
     // sorry for "any"; contravariance issues
-    const step: LLMStepInstance<any> = LLMStepInstance.create({
+    const step: LLMStepInstance<any, Shape> = LLMStepInstance.create({
       template,
       inputs,
       retryingStep: options?.retryingStep,
@@ -193,7 +189,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
     this.steps.push(step);
     this.dispatchEvent({
       type: "stepAdded",
-      payload: { step },
+      payload: { step: step as LLMStepInstance },
     });
     return step;
   }
@@ -209,7 +205,9 @@ export class Workflow<Shape extends IOShape = IOShape> {
       return;
     }
 
-    this.addStep(retryingStep.template, retryingStep.inputs, { retryingStep });
+    this.addStep(retryingStep.template, retryingStep.inputs, {
+      retryingStep: retryingStep as LLMStepInstance,
+    });
   }
 
   public getCurrentRetryAttempts(stepId: string): number {
@@ -226,13 +224,13 @@ export class Workflow<Shape extends IOShape = IOShape> {
     this.dispatchEvent({
       // should we fire this after `run()` is called?
       type: "stepStarted",
-      payload: { step },
+      payload: { step: step as LLMStepInstance },
     });
-    await step.run(this);
+    await step.run();
 
     this.dispatchEvent({
       type: "stepFinished",
-      payload: { step },
+      payload: { step: step as LLMStepInstance },
     });
   }
 
@@ -258,7 +256,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
     return undefined;
   }
 
-  getSteps(): LLMStepInstance[] {
+  getSteps(): LLMStepInstance<IOShape, Shape>[] {
     return this.steps;
   }
 
@@ -266,7 +264,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
     return this.steps.length;
   }
 
-  private getCurrentStep(): LLMStepInstance | undefined {
+  private getCurrentStep(): LLMStepInstance<IOShape, Shape> | undefined {
     return this.steps.at(-1);
   }
 
@@ -345,7 +343,9 @@ export class Workflow<Shape extends IOShape = IOShape> {
     return { totalPrice, llmRunCount };
   }
 
-  private getMessagesFromSteps(steps: LLMStepInstance[]): Message[] {
+  private getMessagesFromSteps(
+    steps: LLMStepInstance<IOShape, Shape>[]
+  ): Message[] {
     return steps.flatMap((step) => step.getConversationMessages());
   }
 
@@ -415,7 +415,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
           visitor.artifact(input),
         ])
       ),
-      stepIds: this.steps.map(visitor.step),
+      stepIds: this.steps.map((step) => visitor.step(step.toParams())),
       llmConfig: this.llmConfig,
     };
   }
@@ -425,13 +425,16 @@ export class Workflow<Shape extends IOShape = IOShape> {
     visitor,
     openaiApiKey,
     anthropicApiKey,
+    getWorkflowTemplateByName,
   }: {
     node: SerializedWorkflow;
     visitor: AiDeserializationVisitor;
     openaiApiKey?: string;
     anthropicApiKey?: string;
+    // can't be imported from workflow registry because of circular dependency
+    getWorkflowTemplateByName: (name: string) => WorkflowTemplate<any>;
   }): Workflow<IOShape> {
-    return new Workflow({
+    const workflow = new Workflow({
       id: node.id,
       template: getWorkflowTemplateByName(node.templateName),
       inputs: Object.fromEntries(
@@ -441,10 +444,17 @@ export class Workflow<Shape extends IOShape = IOShape> {
         ])
       ),
       llmConfig: node.llmConfig,
-      steps: node.stepIds.map(visitor.step),
+      steps: [],
       openaiApiKey,
       anthropicApiKey,
     });
+
+    // restore steps and create back references from steps to workflow
+    workflow.steps = node.stepIds
+      .map(visitor.step)
+      .map((params) => LLMStepInstance.fromParams(params, workflow));
+
+    return workflow;
   }
 
   // Client-side representation
@@ -452,7 +462,9 @@ export class Workflow<Shape extends IOShape = IOShape> {
     return {
       id: this.id,
       timestamp: this.startTime,
-      steps: this.steps.map(stepToClientStep),
+      steps: this.steps.map((step) =>
+        stepToClientStep(step as LLMStepInstance)
+      ),
       currentStep: this.getCurrentStep()?.id,
       ...(this.isProcessComplete()
         ? {

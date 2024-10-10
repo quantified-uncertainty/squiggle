@@ -55,7 +55,7 @@ type ArtifactValue<T extends ArtifactKind> = Extract<
 export function makeArtifact<T extends ArtifactKind>(
   kind: T,
   value: ArtifactValue<T>,
-  createdBy: LLMStepInstance<any>
+  createdBy: LLMStepInstance<any, any>
 ): Extract<Artifact, { kind: T }> {
   // sorry for the type casting, TypeScript is not smart enough to infer the type
   switch (kind) {
