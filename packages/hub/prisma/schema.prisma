@@ -394,7 +394,7 @@ model AiWorkflow {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
-  // v1: SerializedWorkflow
+  // v1: ClientWorkflow
   // v2: normalized bundle
   format Int @default(2)
 
