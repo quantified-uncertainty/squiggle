@@ -1,8 +1,6 @@
-# Squiggle Documentation
+# Squiggle Language Guidelines
 
-Squiggle is a very simple language. Don't try using language primitives/constructs you don't see below, or that aren't in our documentation. They are likely to fail.
-
-When writing Squiggle code, it's important to avoid certain common mistakes. Also, pay attention to the included Style Guide.
+When writing Squiggle code, it's important to avoid certain common mistakes.
 
 ### Syntax and Structure
 
@@ -12,6 +10,7 @@ When writing Squiggle code, it's important to avoid certain common mistakes. Als
 4. The last value in a block/function is returned (no "return" keyword).
 5. Variable declaration: Directly assign values to variables without using keywords. For example, use `foo = 3` instead of `let foo = 3`.
 6. All statements in your model, besides the last one must either be comments or variable declarations. You can't do, `4 \n 5 \n 6` Similarly, you can't do, `Calculator() ... Table()` - instead, you need to set everything but the last item to a variable.
+7. There's no mod operator (%). Use `Number.mod()` instead.
 
 ### Function Definitions and Use
 
@@ -264,9 +263,6 @@ analysis = {
     probabilityOfPositiveNetBenefit: results.probPositiveNetBenefit,
   }
 }
-
-analysis
-
 ```
 
 ```squiggle
@@ -304,25 +300,25 @@ f(t: [Date(2020), Date(2040)]) = {
 }
 ```
 
-```squiggle
+````squiggle
 import "hub:ozziegooen/sTest" as sTest
-@name("💰 Expected Cost")
-@format("($.2s")
+@name("💰 Expected Cost ($)")
+@format("$.2s")
 flightCost = normal({ mean: 600, stdev: 100 })
 
-@name("🥇 Expected Benefit")
-@format("($.2s")
+@name("🥇 Expected Benefit ($)")
+@format("$.2s")
 benefitEstimate = normal({ mean: 1500, stdev: 300 })
 
-@name("📊 Net Benefit")
-@format("($.2s")
+@name("📊 Net Benefit ($)")
+@format("$.2s")
 netBenefit = benefitEstimate - flightCost
 
 @name("🚦 Test Suite")
 @doc(
   "Test suite to validate various aspects of the flight cost and benefits model using sTest."
 )
-testSuite = sTest.describe(
+tests = sTest.describe(
   "Flight to London Test Suite",
   [
     // Test for reasonable flight costs
@@ -337,380 +333,7 @@ testSuite = sTest.describe(
   ]
 )
 
-```
-
-# Language Features
-
-## Program Structure
-
-A Squiggle program consists of a series of definitions (for example, `x = 5`, `f(x) = x * x`). This can optionally conclude with an _end expression_.
-
-If an end expression is provided, it becomes the evaluated output of the program, and only this result will be displayed in the viewer. Otherwise, all top-level variable definitions will be displayed.
-
-```squiggle
-x = 5
-y = 10
-x + y
-```
-
-```squiggle
-x = 5
-y = 10
-```
-
-## Immutability
-
-All variables in Squiggle are immutable, similar to other functional programming languages like OCaml or Haskell.
-
-In the case of container types (lists and dictionaries), this implies that an operation such as myList[3] = 10 is not permitted. Instead, we recommend using `List.map`, `List.reduce` or other [List functions](/docs/Api/List).
-
-In case of basic types such as numbers or strings, the impact of immutability is more subtle.
-
-Consider this code:
-
-```squiggle
-x = 5
-x = x + 5
-```
-
-While it appears that the value of x has changed, what actually occurred is the creation of a new variable with the same name, which [shadowed](https://en.wikipedia.org/wiki/Variable_shadowing) the previous x variable.
-
-In most cases, shadowing behaves identically to what you'd expect in languages like JavaScript or Python.
-
-One case where shadowing matters is closures:
-
-```squiggle
-x = 5
-argPlusX(y) = x + y
-
-x = x + 5
-
-argPlusX(5)
-```
-
-In the above example, the `argPlusX` function captures the value of `x` from line 1, not the newly shadowed `x` from line 4. As a result, `argPlusX(5)` returns 10, not 15.
-
-## Blocks
-
-Blocks are special expressions in Squiggle that can contain any number of local definitions and end with an expression.
-
-```squiggle
-x = { 5 } // same as "x = 5"
-y = {
-  t = 10 // local variable, won't be available outside of the block body
-  5 * t // end expression
-}
-```
-
-## Conditionals
-
-If/then/else statements in Squiggle are values too.
-
-```squiggle
-x = 5
-if x<8 then 10 else 3
-```
-
-See [Control flow](/docs/Guides/ControlFlow) for more details and examples.
-
-## Comments
-
-```squiggle
-// This is a single-line comment\n
-/*
-This is a multiple
--line comment.
-*/
-foo = 5
-```
-
-## Pipes
-
-Squiggle features [data-first](https://www.javierchavarri.com/data-first-and-data-last-a-comparison/) pipes. Functions in the standard library are organized to make this convenient.
-
-```squiggle
-normal(5,2) -> truncateLeft(3) -> SampleSet.fromDist -> SampleSet.map({|r| r + 10})
-```
-
-## Standard Library
-
-Squiggle features a simple [standard libary](/docs/Api/Dist).
-
-Most functions are namespaced under their respective types to keep functionality distinct. Certain popular functions are usable without their namespaces.
-
-For example,
-
-```squiggle
-a = List.upTo(0, 5000) -> SampleSet.fromList // namespaces required
-b = normal(5,2) // namespace not required
-c = 5 to 10 // namespace not required
-```
-
-## Simple Error Handling
-
-Squiggle supports the functions [throw](/docs/Api/Common#throw) and [try](/docs/Api/Common#try) for simple error handling. It does not yet have proper error types.
-
-# Gotchas
-
-## Point Set Distributions Conversions
-
-Point Set conversions are done with [kernel density estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation), which is lossy. This might be particularly noticeable in cases where distributions should be entirely above zero.
-
-In this example, we see that the median of this (highly skewed) distribution is positive when it's in a Sample Set format, but negative when it's converted to a Point Set format.
-
-```squiggle
-dist = SampleSet.fromDist(5 to 100000000)
-{
-    sampleSetMedian: quantile(dist, .5),
-    pointSetMedian: quantile(PointSet.fromDist(dist), .5),
-    dist: dist
-}
-```
-
----
-
-This can be particularly confusing for visualizations. Visualizations automatically convert distributions into Point Set formats. Therefore, they might often show negative values, even if the underlying distribution is fully positive.
-
-We plan to later support more configuration of kernel density estimation, and for visualiations of Sample Set distributions to instead use histograms.
-
-## Sample Set Correlations
-
-Correlations with Sample Set distributions are a bit complicated. Monte Carlo generations with Squiggle are ordered. The first sample in one Sample Set distribution will correspond to the first sample in a distribution that comes from a resulting Monte Carlo generation. Therefore, Sample Set distributions in a chain of Monte Carlo generations are likely to all be correlated with each other. This connection breaks if any node changes to the Point Set or Symbolic format.
-
-In this example, we subtract all three types of distributions by themselves. Notice that the Sample Set distribution returns 0. The other two return the result of subtracting one normal distribution from a separate uncorrelated distribution. These results are clearly very different to each other.
-
-```squiggle
-sampleSetDist = normal(5, 2)
-pointSetDist = sampleSetDist -> PointSet.fromDist
-symbolicDist = Sym.normal(5, 2)
-[
-  sampleSetDist - sampleSetDist,
-  pointSetDist - pointSetDist,
-  symbolicDist - symbolicDist,
-]
-```
-
-# Functions
-
-## Basic syntax
-
-```squiggle
-myMultiply(t) = normal(t^2, t^1.2+.01)
-myMultiply
-```
-
-In Squiggle, function definitions are treated as values. There's no explicit `return` statement; the result of the last expression in the function body is returned.
-If you need to define local variables in functions, you can use blocks. The last expression in the block is the value of the block:
-
-```squiggle
-multiplyBySix(x) = {
-  doubleX = x * 2
-  doubleX * 3
-  }
-```
-
-## Anonymous Functions
-
-In Squiggle, you can define anonymous functions using the `{|...| ...}` syntax. For example, `myMultiply(x, y) = x * y` and `myMultiply = {|x, y| x * y}` are equivalent.
-
-Squiggle functions are first-class values, meaning you can assign them to variables, pass them as arguments to other functions, and return them from other functions.
-
-```squiggle
-{|t| normal(t^2, t^1.2+.01)}
-```
-
-## Function Visualization
-
-The Squiggle viewer can automatically visualize functions that take a single number as input and return either a number or a distribution, without the need for manual plots:
-
-1. `(number) => number`
-2. `(number) => distribution`
-
-```squiggle
-numberToNumber(x) = x * x
-numberToDistribution(x) = normal(x + 1, 3)
-placeholderFunction(x, y) = x + y
-```
-
-When Squiggle visualizes a function, it automatically selects a range of input values to use.
-The default range of input values is 0 to 10.
-
-You can manually set the range in the following ways:
-
-- With `Plot.numericFn` or `Plot.distFn` plots, using the `xScale` parameter
-- Through the chart's settings in the UI (look for a gear icon next to the variable name)
-- With parameter annotations (explained below)
-
-## Parameter Annotations
-
-Function parameters can be annotated with _domains_ to specify the range of valid input values.
-
-Examples:
-
-- `x: Number.rangeDomain(5, 10)`
-- `x: [5, 10]` — shortcut for `Number.rangeDomain(...)`
-
-Annotations help to document possible values that can be passed as a parameter's value.
-
-Annotations will affect the parameter range used in the function's chart. For more control over function charts, you can use the [Plot module API](/docs/Api/Plot).
-
-Domains are checked on function calls; `f(x: [1,2]) = x; f(3)` will fail.
-
-We plan to support other kinds of domains in the future; for now, only numeric ranges are supported.
-
-```squiggle
-yearToValue(year: [2020, 2100]) = 1.04 ^ (year - 2020)
-```
-
-### Annotation Reflection
-
-```squiggle
-myMultiply(x: [1, 20]) = x * x
-myMultiply.parameters[0]
-```
-
-Domains and parameter names can be accessed by the `fn.parameters` property.
-
-# Control Flow
-
-This page documents control flow. Squiggle has if/else statements, but not for loops. But for for loops, you can use reduce/map constructs instead, which are also documented here.
-
-## Conditionals
-
-### If-else
-
-```squiggle
-if condition then result else alternative
-```
-
-```squiggle
-x = 10
-if x == 1 then 1 else 2
-```
-
-### If-else as a ternary operator
-
-```squiggle
-test ? result : alternative;
-```
-
-```squiggle
-x = 10
-x == 0 ? 1 : 2
-```
-
-### Tips and tricks
-
-#### Use brackets and parenthesis to organize control flow
-
-```squiggle
-x = 10
-if x == 1 then {
-  1
-} else {
-  2
-}
-```
-
-or
-
-```squiggle
-x = 10
-y = 20
-if x == 1 then {
-  (
-    if y == 0 then {
-      1
-    } else {
-      2
-    }
-  )
-} else {
-  3
-}
-```
-
-This is overkill for simple examples becomes useful when the control conditions are more complex.
-
-#### Save the result to a variable
-
-Assigning a value inside an if/else flow isn't possible:
-
-```squiggle
-x = 10
-y = 20
-if x == 1 then {
-  y = 1
-} else {
-  y = 2 * x
-}
-```
-
-Instead, you can do this:
-
-```squiggle
-x = 10
-y = 20
-y = if x == 1 then {
-  1
-} else {
-  2 * x
-}
-```
-
-Likewise, for assigning more than one value, you can't do this:
-
-```squiggle
-y = 0
-z = 0
-if x == 1 then {
-  y = 2
-} else {
-  z = 4
-}
-```
-
-Instead, do:
-
-```squiggle
-x = 10
-result = if x == 1 then {
-  {y: 2, z: 0}
-} else {
-  {y: 0, z: 4}
-}
-y = result.y
-z = result.z
-```
-
-## For loops
-
-For loops aren't supported in Squiggle. Instead, use a [map](/docs/Api/List#map) or a [reduce](/docs/Api/List#reduce) function.
-
-Instead of:
-
-```js
-xs = [];
-for (i = 0; i < 10; i++) {
-  xs[i] = f(x);
-}
-```
-
-do:
-
-```squiggle
-f(x) = 2*x
-xs = List.upTo(0,10)
-ys = List.map(xs, {|x| f(x)})
-```
-
----
-
-## description: Squiggle Style Guide
-
 # Squiggle Style Guide
-
-Note: This document is highly opinionated and was written specifically for LLMs to read. However, humans might also find it useful.
 
 ## Limitations
 
@@ -748,7 +371,7 @@ f(t: [-Number.maxValue, Number.maxValue]) + 1
 
 // Do this
 f(t) = t + 1
-```
+````
 
 ## Structure and Naming Conventions
 
@@ -1128,11 +751,901 @@ summary = [
   ]
 ```
 
+# Roadmap
+
+Squiggle is still young. The main first goal is to become stable (to reach version 1.0). Right now we think it is useable to use for small projects, but do note that there are very likely some math bugs and performance problems.
+
+If you have preferences or suggestions for our roadmap, please say so! Post your thoughts in the Github discussion or in the Discord.
+
+Note that our short-term roadmap changes frequently, and is not captured here.
+
+## Programming Language Features
+
+- A simple type system
+- Optional and default paramaters for functions
+- Much better code editor integration
+
+## Distribution Features
+
+There are many important distribution types that Squiggle doesn't yet support. Some key functions we'd like include:
+
+[Metalog Distribution](https://en.wikipedia.org/wiki/Metalog_distribution)  
+Add the Metalog distribution, and some convenient methods for generating these distributions. This might be a bit tricky because we might need or build a library to fit data. There's no Metalog javascript library yet, this would be pretty useful. There's already a Metalog library in Python, so that one could be used for inspiration.
+
+`Distribution.smoothen(p)`  
+Takes a distribution and smoothens it. For example, [Elicit Forecast](https://forecast.elicit.org/) does something like this, with uniform distributions.
+
+## Major Future Additions
+
+**An interface to interpret & score Squiggle files**  
+Squiggle functions need to be aggregated and scored. This should be done outside one Squiggle file. Maybe this should also be done in Squiggle, or maybe it should be done using Javascript.
+
+My guess is that there should eventually be some way for people to declare that some of their Squiggle values are meant to be formally declared, to be scored and similar by others. Then other programs can read these files, and either use the values, or score them.
+
+Of course, we'd also need good math for how the scoring should work, exactly.
+
+This interface should also be able to handle changing Squiggle values. This is because people would be likely to want to update their functions over time, and that should be taken into account for scoring.
+
+**Importance & quality scores**  
+Workflows/functionality to declare the importance and coveredness of each part of the paramater space. For example, some subsets of the paramater space of a function might be much more important to get right than others. Similarly, the analyst might be much more certain about some parts than others. Ideally. they could decline sections.
+
+**Static / sensitivity analysis**  
+Guesstimate has Sensitivity analysis that's pretty useful. This could be quite feasible to add, though it will likely require some thinking.
+
+**Randomness seeds**  
+Right now, Monte Carlo simulations are totally random. It would be nicer to be able to enter a seed somehow in order to control the randomness. Or, with the same seed, the function should always return the same values. This would make debugging and similar easier.
+
+**Caching/memoization**  
+There are many performance improvements that Squiggle could have. We'll get to some of them eventually.
+
+# Language Features
+
+## Program Structure
+
+A Squiggle program consists of a series of definitions (for example, `x = 5`, `f(x) = x * x`). This can optionally conclude with an _end expression_.
+
+If an end expression is provided, it becomes the evaluated output of the program, and only this result will be displayed in the viewer. Otherwise, all top-level variable definitions will be displayed.
+
+```squiggle
+x = 5
+y = 10
+x + y
+```
+
+```squiggle
+x = 5
+y = 10
+```
+
+## Immutability
+
+All variables in Squiggle are immutable, similar to other functional programming languages like OCaml or Haskell.
+
+In the case of container types (lists and dictionaries), this implies that an operation such as myList[3] = 10 is not permitted. Instead, we recommend using `List.map`, `List.reduce` or other [List functions](/docs/Api/List).
+
+In case of basic types such as numbers or strings, the impact of immutability is more subtle.
+
+Consider this code:
+
+```squiggle
+x = 5
+x = x + 5
+```
+
+While it appears that the value of x has changed, what actually occurred is the creation of a new variable with the same name, which [shadowed](https://en.wikipedia.org/wiki/Variable_shadowing) the previous x variable.
+
+In most cases, shadowing behaves identically to what you'd expect in languages like JavaScript or Python.
+
+One case where shadowing matters is closures:
+
+```squiggle
+x = 5
+argPlusX(y) = x + y
+
+x = x + 5
+
+argPlusX(5)
+```
+
+In the above example, the `argPlusX` function captures the value of `x` from line 1, not the newly shadowed `x` from line 4. As a result, `argPlusX(5)` returns 10, not 15.
+
+## Unit Type Annotations
+
+Variable declarations may optionally be annotated with _unit types_, such as `kilograms` or `dollars`. Unit types are declared with `::`, for example:
+
+```squiggle
+distance :: meters = 100
+```
+
+A unit type can be any identifier, and you don't have to define a unit type before you use it.
+
+You can also create composite unit types using `*` (multiplication), `/` (division), and '^' (exponentiation). For example:
+
+```squiggle
+raceDistance :: m = 100
+usainBoltTime :: s = 9.58
+usainBoltSpeed :: m/s = raceDistance / usainBoltTime
+```
+
+You can use any number of `*` and `/` operators in a unit type, but you cannot use parentheses. Unit type operators follow standard order of operations: `*` and `/` are left-associative and have the same precedence, and `^` has higher precedence.
+
+The following unit types are all equivalent: `kg*m/s^2`, `kg*m/s/s`, `m/s*kg/s`, `m/s^2*kg`, `kg*m^2/m/s/s`.
+
+For unitless types, you may use a number in the unit type annotation (by convention you should use the number `1`):
+
+```squiggle
+springConstant :: 1 = 10
+inverseTime :: 1/s = 20
+```
+
+If you use unit type annotations, Squiggle will enforce that variables must have consistent unit types.
+
+If a variable does not have a unit type annotation, Squiggle will attempt to infer its unit type. If the unit type can't be inferred, the variable is treated as any type.
+
+Inline unit type annotations are not currently supported (for example, `x = (y :: meters)`).
+
+Operators and functions obey the following semantics:
+
+- Multiplying or dividing two unit-typed variables multiplies or divides their unit types (respectively).
+- Raising a unit-typed variable to a power produces a result of any unit type (i.e., the result is not type-checked).
+- Most binary operators, including `+`, `-`, and comparison operators (`==`, `>=`, etc.), require that both arguments have the same unit type.
+- Built-in functions can take any unit type and return any unit type.
+
+## Blocks
+
+Blocks are special expressions in Squiggle that can contain any number of local definitions and end with an expression.
+
+```squiggle
+x = { 5 } // same as "x = 5"
+y = {
+  t = 10 // local variable, won't be available outside of the block body
+  5 * t // end expression
+}
+```
+
+## Conditionals
+
+If/then/else statements in Squiggle are values too.
+
+```squiggle
+x = 5
+if x<8 then 10 else 3
+```
+
+See [Control flow](/docs/Guides/ControlFlow) for more details and examples.
+
+## Comments
+
+```squiggle
+// This is a single-line comment\n
+/*
+This is a multiple
+-line comment.
+*/
+foo = 5
+```
+
+## Pipes
+
+Squiggle features [data-first](https://www.javierchavarri.com/data-first-and-data-last-a-comparison/) pipes. Functions in the standard library are organized to make this convenient.
+
+```squiggle
+normal(5,2) -> truncateLeft(3) -> SampleSet.fromDist -> SampleSet.map({|r| r + 10})
+```
+
+## Standard Library
+
+Squiggle features a simple [standard libary](/docs/Api/Dist).
+
+Most functions are namespaced under their respective types to keep functionality distinct. Certain popular functions are usable without their namespaces.
+
+For example,
+
+```squiggle
+a = List.upTo(0, 5000) -> SampleSet.fromList // namespaces required
+b = normal(5,2) // namespace not required
+c = 5 to 10 // namespace not required
+```
+
+## Simple Error Handling
+
+Squiggle supports the functions [throw](/docs/Api/Common#throw) and [try](/docs/Api/Common#try) for simple error handling. It does not yet have proper error types.
+
+# Gotchas
+
+## Point Set Distributions Conversions
+
+Point Set conversions are done with [kernel density estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation), which is lossy. This might be particularly noticeable in cases where distributions should be entirely above zero.
+
+In this example, we see that the median of this (highly skewed) distribution is positive when it's in a Sample Set format, but negative when it's converted to a Point Set format.
+
+```squiggle
+dist = SampleSet.fromDist(5 to 100000000)
+{
+    sampleSetMedian: quantile(dist, .5),
+    pointSetMedian: quantile(PointSet.fromDist(dist), .5),
+    dist: dist
+}
+```
+
+---
+
+This can be particularly confusing for visualizations. Visualizations automatically convert distributions into Point Set formats. Therefore, they might often show negative values, even if the underlying distribution is fully positive.
+
+We plan to later support more configuration of kernel density estimation, and for visualiations of Sample Set distributions to instead use histograms.
+
+## Sample Set Correlations
+
+Correlations with Sample Set distributions are a bit complicated. Monte Carlo generations with Squiggle are ordered. The first sample in one Sample Set distribution will correspond to the first sample in a distribution that comes from a resulting Monte Carlo generation. Therefore, Sample Set distributions in a chain of Monte Carlo generations are likely to all be correlated with each other. This connection breaks if any node changes to the Point Set or Symbolic format.
+
+In this example, we subtract all three types of distributions by themselves. Notice that the Sample Set distribution returns 0. The other two return the result of subtracting one normal distribution from a separate uncorrelated distribution. These results are clearly very different to each other.
+
+```squiggle
+sampleSetDist = normal(5, 2)
+pointSetDist = sampleSetDist -> PointSet.fromDist
+symbolicDist = Sym.normal(5, 2)
+[
+  sampleSetDist - sampleSetDist,
+  pointSetDist - pointSetDist,
+  symbolicDist - symbolicDist,
+]
+```
+
+# Functions
+
+## Basic Syntax
+
+```squiggle
+myMultiply(t) = normal(t^2, t^1.2+.01)
+myMultiply
+```
+
+In Squiggle, function definitions are treated as values. There's no explicit `return` statement; the result of the last expression in the function body is returned.
+If you need to define local variables in functions, you can use blocks. The last expression in the block is the value of the block:
+
+```squiggle
+multiplyBySix(x) = {
+  doubleX = x * 2
+  doubleX * 3
+  }
+```
+
+## Anonymous Functions
+
+In Squiggle, you can define anonymous functions using the `{|...| ...}` syntax. For example, `myMultiply(x, y) = x * y` and `myMultiply = {|x, y| x * y}` are equivalent.
+
+Squiggle functions are first-class values, meaning you can assign them to variables, pass them as arguments to other functions, and return them from other functions.
+
+```squiggle
+{|t| normal(t^2, t^1.2+.01)}
+```
+
+## Function Visualization
+
+The Squiggle viewer can automatically visualize functions that take a single number as input and return either a number or a distribution, without the need for manual plots:
+
+1. `(number) => number`
+2. `(number) => distribution`
+
+```squiggle
+numberToNumber(x) = x * x
+numberToDistribution(x) = normal(x + 1, 3)
+placeholderFunction(x, y) = x + y
+```
+
+When Squiggle visualizes a function, it automatically selects a range of input values to use.
+The default range of input values is 0 to 10.
+
+You can manually set the range in the following ways:
+
+- With `Plot.numericFn` or `Plot.distFn` plots, using the `xScale` parameter
+- Through the chart's settings in the UI (look for a gear icon next to the variable name)
+- With parameter annotations (explained below)
+
+## Unit Types
+
+Like with [variables](/docs/Guides/LanguageFeatures#unit-type-annotations), you can declare unit types for function parameters:
+
+```squiggle
+f(x :: unit) = x
+```
+
+You can also declare the unit type of the function's return value:
+
+```squiggle
+convertMass(x :: lbs) :: kg = x * 2.2
+```
+
+If you pass a unit-typed variable to a function with no unit-type annotations, Squiggle will attempt to infer the unit type of the return value:
+
+```squiggle
+id(x) = x
+a :: m/s = 10
+b = id(a)  // Squiggle infers that b has type m/s
+```
+
+Unit type checking only works for statically defined functions. In the example code below, `h` cannot be unit-type checked.
+
+```squiggle
+f(x) = x
+g(x) = x
+condition = (1 == 2)
+h = (condition ? f : g)
+```
+
+## Parameter Annotations
+
+Function parameters can be annotated with _domains_ to specify the range of valid input values.
+
+Examples:
+
+- `x: Number.rangeDomain(5, 10)`
+- `x: [5, 10]` — shortcut for `Number.rangeDomain(...)`
+
+Annotations help to document possible values that can be passed as a parameter's value.
+
+Annotations will affect the parameter range used in the function's chart. For more control over function charts, you can use the [Plot module API](/docs/Api/Plot).
+
+Domains are checked on function calls; `f(x: [1,2]) = x; f(3)` will fail.
+
+We plan to support other kinds of domains in the future; for now, only numeric ranges are supported.
+
+```squiggle
+yearToValue(year: [2020, 2100]) = 1.04 ^ (year - 2020)
+```
+
+### Annotation Reflection
+
+```squiggle
+myMultiply(x: [1, 20]) = x * x
+myMultiply.parameters[0]
+```
+
+Domains and parameter names can be accessed by the `fn.parameters` property.
+
+# Distribution Functions
+
+## Standard Operations
+
+Here are the ways we combine distributions.
+
+### Addition
+
+A horizontal right shift. The addition operation represents the distribution of the sum of
+the value of one random sample chosen from the first distribution and the value one random sample
+chosen from the second distribution.
+
+```squiggle
+dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 + dist2
+```
+
+### Subtraction
+
+A horizontal left shift. The subtraction operation represents the distribution of the value of
+one random sample chosen from the first distribution minus the value of one random sample chosen
+from the second distribution.
+
+```squiggle
+dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 - dist2
+```
+
+### Multiplication
+
+A proportional scaling. The multiplication operation represents the distribution of the multiplication of
+the value of one random sample chosen from the first distribution times the value one random sample
+chosen from the second distribution.
+
+```squiggle
+dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 * dist2
+```
+
+We also provide concatenation of two distributions as a syntax sugar for `*`
+
+```squiggle
+dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 / dist2
+```
+
+### Exponentiation
+
+A projection over a contracted x-axis. The exponentiation operation represents the distribution of
+the exponentiation of the value of one random sample chosen from the first distribution to the power of
+the value one random sample chosen from the second distribution.
+
+```squiggle
+(0.1 to 1) ^ beta(2, 3)
+```
+
+### The base `e` exponential
+
+```squiggle
+dist = triangular(1,2,3)
+exp(dist)
+```
+
+### Logarithms
+
+A projection over a stretched x-axis.
+
+```squiggle
+dist = triangular(1,2,3)
+log(dist)
+```
+
+```squiggle
+log10(5 to 10)
+```
+
+Base `x`
+
+```squiggle
+log(5 to 10, 2)
+```
+
+## Pointwise Operations
+
+### Pointwise addition
+
+For every point on the x-axis, operate the corresponding points in the y axis of the pdf.
+
+**Pointwise operations are done with `PointSetDist` internals rather than `SampleSetDist` internals**.
+
+```squiggle
+Sym.lognormal({p5: 1, p95: 3}) .+ Sym.triangular(5,6,7)
+```
+
+### Pointwise multiplication
+
+```squiggle
+Sym.lognormal({p5: 1, p95: 5}) .* Sym.uniform(1,8)
+```
+
+## Standard Functions
+
+### Probability density function
+
+The `pdf(dist, x)` function returns the density of a distribution at the
+given point x.
+
+<SquiggleEditor defaultCode="pdf(normal(0,1),0)" />
+
+#### Validity
+
+- `x` must be a scalar
+- `dist` must be a distribution
+
+### Cumulative density function
+
+The `cdf(dist, x)` gives the cumulative probability of the distribution
+or all values lower than x. It is the inverse of `quantile`.
+
+<SquiggleEditor defaultCode="cdf(normal(0,1),0)" />
+
+#### Validity
+
+- `x` must be a scalar
+- `dist` must be a distribution
+
+### Quantile
+
+The `quantile(dist, prob)` gives the value x for which the sum of the probability for all values
+lower than x is equal to prob. It is the inverse of `cdf`. In the literature, it
+is also known as the quantiles function. In the optional `summary statistics` panel which appears
+beneath distributions, the numbers beneath 5%, 10%, 25% etc are the quantiles of that distribution
+for those precentage values.
+
+<SquiggleEditor defaultCode="quantile(normal(0,1),0.5)" />
+
+#### Validity
+
+- `prob` must be a scalar (please only put it in `(0,1)`)
+- `dist` must be a distribution
+
+### Mean
+
+The `mean(distribution)` function gives the mean (expected value) of a distribution.
+
+<SquiggleEditor defaultCode="mean(normal(5, 10))" />
+
+### Sampling a distribution
+
+The `sample(distribution)` samples a given distribution.
+
+<SquiggleEditor defaultCode="sample(normal(0, 10))" />
+
+## Converting between distribution formats
+
+We can convert any distribution into the `SampleSet` format
+
+<SquiggleEditor defaultCode="SampleSet.fromDist(normal(5, 10))" />
+
+Or the `PointSet` format
+
+<SquiggleEditor defaultCode="PointSet.fromDist(normal(5, 10))" />
+
+#### Validity
+
+- Second argument to `SampleSet.fromDist` must be a number.
+
+## Normalization
+
+Some distribution operations (like horizontal shift) return an unnormalized distriibution.
+
+We provide a `normalize` function
+
+<SquiggleEditor defaultCode="normalize((0.1 to 1) + triangular(0.1, 1, 10))" />
+
+#### Validity - Input to `normalize` must be a dist
+
+We provide a predicate `isNormalized`, for when we have simple control flow
+
+<SquiggleEditor defaultCode="isNormalized((0.1 to 1) * triangular(0.1, 1, 10))" />
+
+#### Validity
+
+- Input to `isNormalized` must be a dist
+
+## `inspect`
+
+You may like to debug by right clicking your browser and using the _inspect_ functionality on the webpage, and viewing the _console_ tab. Then, wrap your squiggle output with `inspect` to log an internal representation.
+
+<SquiggleEditor defaultCode="inspect(SampleSet.fromDist(0.1 to 1))" />
+
+Save for a logging side effect, `inspect` does nothing to input and returns it.
+
+## Truncate
+
+You can cut off from the left
+
+<SquiggleEditor defaultCode="truncateLeft(Sym.normal(5,3), 6)" />
+
+You can cut off from the right
+
+<SquiggleEditor defaultCode="truncateRight(Sym.normal(5,3), 6)" />
+
+You can cut off from both sides
+
+<SquiggleEditor defaultCode="truncate(Sym.normal(5,3), 1, 7)" />
+
+# Distribution Creation
+
+## Normal
+
+```squiggle
+normal(mean: number, stdev: number)
+normal({mean: number, stdev: number})
+normal({p5: number, p95: number})
+normal({p10: number, p90: number})
+normal({p25: number, p75: number})
+```
+
+Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distribution) with the given mean and standard deviation.
+
+<Tabs items={["normal(5,1)", "normal(1B, 1B)"]}>
+<Tab>
+
+```squiggle
+normalMean = 10
+normalStdDev = 2
+logOfLognormal = log(lognormal(normalMean, normalStdDev))
+[logOfLognormal, normal(normalMean, normalStdDev)]
+
+```
+
+</details>
+
+## To
+
+```squiggle
+(5thPercentile: number) to (95thPercentile: number)
+to(5thPercentile: number, 95thPercentile: number)
+```
+
+The `to` function is an easy way to generate lognormal distributions using predicted _5th_ and _95th_ percentiles. It's the same as `lognormal({p5, p95})`, but easier to write and read.
+
+<Tabs items={["5 to 10", "to(5, 10)", "1 to 10000"]}>
+<Tab>
+
+```squiggle
+hours_the_project_will_take = 5 to 20
+chance_of_doing_anything = 0.8
+mx(hours_the_project_will_take, 0, [chance_of_doing_anything, 1 - chance_of_doing_anything])
+
+```
+
+</details>
+
+<details>
+  <summary>🔒 Model Uncertainty Safeguarding</summary>
+  One technique several <a href="https://www.foretold.io/">Foretold.io</a> users used is to combine their main guess, with a
+  "just-in-case distribution". This latter distribution would have very low weight, but would be
+  very wide, just in case they were dramatically off for some weird reason.
+```squiggle
+forecast = 3 to 30
+chance_completely_wrong = 0.05
+forecast_if_completely_wrong = normal({p5:-100, p95:200})
+mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_completely_wrong])
+````
+
+</details>
+## SampleSet.fromList
+
+```squiggle
+SampleSet.fromList(samples:number[])
+```
+
+Creates a sample set distribution using an array of samples.
+
+Samples are converted into PDFs automatically using [kernel density estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation) and an approximated bandwidth. This is an approximation and can be error-prone.
+
+```squiggle
+PointSet.makeContinuous([
+  { x: 0, y: 0.1 },
+  { x: 1, y: 0.2 },
+  { x: 2, y: 0.15 },
+  { x: 3, y: 0.1 }
+])
+```
+
+<Callout type="warning">
+  **Caution!**  
+  Distributions made with ``makeContinuous`` are not automatically normalized. We suggest normalizing them manually using the ``normalize`` function.
+</Callout>
+
+### Arguments
+
+- `points`: An array of at least 3 coordinates.
+
+## PointSet.makeDiscrete
+
+```squiggle
+PointSet.makeDiscrete(points:{x: number, y: number})
+```
+
+Creates a discrete point set distribution using a list of points.
+
+```squiggle
+PointSet.makeDiscrete([
+  { x: 0, y: 0.2 },
+  { x: 1, y: 0.3 },
+  { x: 2, y: 0.4 },
+  { x: 3, y: 0.1 }
+])
+```
+
+### Arguments
+
+- `points`: An array of at least 1 coordinate.
+
+# Debugging
+
+Interactive visualizations are a primary tool for understanding Squiggle code, but there are some additional techniques that can improve the debugging process. Here are some tips and tricks:
+
+## Basic Console Logging
+
+- **Built-in Inspection:** Utilize the [`inspect()`](/docs/Api/BuiltIn#inspect) function to log any variable to the console. This function provides a detailed view of the variable's current state and is useful for tracking values throughout your code.
+- **Variable Settings Toggle:** Click on the variable menu in the Squiggle interface and select "Log to JS Console".
+
+## `Window.squiggleOutput`
+
+Squiggle pushes its output to `window.squiggleOutput`. Like with the outputs of `inspect`, you can see this in the [JS developer console](https://www.digitalocean.com/community/tutorials/how-to-use-the-javascript-developer-console).
+
+## `Danger.json`
+
+You can call [`Danger.json()`](/docs/Api/Danger#json) see variables in a format similar to JSON. This is useful for seeing all aspects of complex types like distributions.
+
+```squiggle
+sampleSet = 30 to 50
+pointSet = Sym.normal(5, 2)
+plot = Plot.dists([sampleSet, pointSet])
+fn(e) = e
+{
+  json: Danger.json([sampleSet, pointSet, plot, fn]),
+  jsonString: Danger.jsonString([pointSet, fn]),
+}
+```
+
+## Profiling
+
+In the playground configuration panel, you can enable the "Performance Profiler" checkbox. This will highlight the code in the editor according to how much time was spend on each expression.
+
+Caveats:
+
+- The code will execute slightly slower in profiler mode
+- Imports won't be profiled correctly (but slow calls of imported functions will be highlighted)
+- If the code is fast, you'll randomly get highlighted and unhighlighted results, because time measurement is imprecise
+
+If you're using Squiggle components in React, you can enable the profiler for any component that supports the `environment` prop with `environment={profile: true}`:
+
+```squiggle
+dist = normal(0, 1)
+list = List.upTo(1, 100000) -> List.length
+```
+
+# Control Flow
+
+This page documents control flow. Squiggle has if/else statements, but not for loops. But for for loops, you can use reduce/map constructs instead, which are also documented here.
+
+## Conditionals
+
+### If-else
+
+```squiggle
+if condition then result else alternative
+```
+
+```squiggle
+x = 10
+if x == 1 then 1 else 2
+```
+
+### If-else as a ternary operator
+
+```squiggle
+test ? result : alternative;
+```
+
+```squiggle
+x = 10
+x == 0 ? 1 : 2
+```
+
+### Tips and tricks
+
+#### Use brackets and parenthesis to organize control flow
+
+```squiggle
+x = 10
+if x == 1 then {
+  1
+} else {
+  2
+}
+```
+
+or
+
+```squiggle
+x = 10
+y = 20
+if x == 1 then {
+  (
+    if y == 0 then {
+      1
+    } else {
+      2
+    }
+  )
+} else {
+  3
+}
+```
+
+This is overkill for simple examples becomes useful when the control conditions are more complex.
+
+#### Save the result to a variable
+
+Assigning a value inside an if/else flow isn't possible:
+
+```squiggle
+x = 10
+y = 20
+if x == 1 then {
+  y = 1
+} else {
+  y = 2 * x
+}
+```
+
+Instead, you can do this:
+
+```squiggle
+x = 10
+y = 20
+y = if x == 1 then {
+  1
+} else {
+  2 * x
+}
+```
+
+Likewise, for assigning more than one value, you can't do this:
+
+```squiggle
+y = 0
+z = 0
+if x == 1 then {
+  y = 2
+} else {
+  z = 4
+}
+```
+
+Instead, do:
+
+```squiggle
+x = 10
+result = if x == 1 then {
+  {y: 2, z: 0}
+} else {
+  {y: 0, z: 4}
+}
+y = result.y
+z = result.z
+```
+
+## For loops
+
+For loops aren't supported in Squiggle. Instead, use a [map](/docs/Api/List#map) or a [reduce](/docs/Api/List#reduce) function.
+
+Instead of:
+
+```js
+xs = [];
+for (i = 0; i < 10; i++) {
+  xs[i] = f(x);
+}
+```
+
+do:
+
+```squiggle
+f(x) = 2*x
+xs = List.upTo(0,10)
+ys = List.map(xs, {|x| f(x)})
+```
+
+# Known Bugs
+
+Much of the Squiggle math is imprecise. This can cause significant errors, so watch out.
+
+Below are a few specific examples to watch for. We'll work on improving these over time and adding much better warnings and error management.
+
+You can see an updated list of known language bugs [here](https://github.com/quantified-uncertainty/squiggle/issues?q=is%3Aopen+is%3Aissue+label%3ABug+label%3ALanguage).
+
+## Operations on very small or large numbers, silently round to 0 and 1
+
+Squiggle is poor at dealing with very small or large numbers, given fundamental limitations of floating point precision.
+See [this Github Issue](https://github.com/quantified-uncertainty/squiggle/issues/834).
+
+## Mixtures of distributions with very different means
+
+If you take the pointwise mixture of two distributions with very different means, then the value of that gets fairly warped.
+
+In the following case, the mean of the mixture should be equal to the sum of the means of the parts. These are shown as the first two displayed variables. These variables diverge as the underlying distributions change.
+
+```squiggle
+dist1 = {value: normal(1,1), weight: 1}
+dist2 = {value: normal(100000000000,1), weight: 1}
+totalWeight = dist1.weight + dist2.weight
+distMixture = mixture(dist1.value, dist2.value, [dist1.weight, dist2.weight])
+mixtureMean = mean(distMixture)
+separateMeansCombined = (mean(dist1.value) * (dist1.weight) +  mean(dist2.value) * (dist2.weight))/totalWeight
+[mixtureMean, separateMeansCombined, distMixture]
+```
+
+## Means of Sample Set Distributions
+
+The means of sample set distributions can vary dramatically, especially as the numbers get high.
+
+```squiggle
+symbolicDist = 5 to 50333333
+sampleSetDist = SampleSet.fromDist(symbolicDist)
+[mean(symbolicDist), mean(sampleSetDist), symbolicDist, sampleSetDist]
+```
+
 # Basic Types
 
 ## Numbers
 
-Squiggle numbers are built directly on [Javascript numbers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number). They can be integers or floats, and support all the usual arithmetic operations.
+Squiggle numbers are built directly on [Javascript numbers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number). They can be integers or floats, and support all the usual arithmetic operations.  
 [Number API](/docs/Api/Number)
 
 Numbers support a few scientific notation suffixes.
@@ -1169,7 +1682,7 @@ f = false
 
 ## Strings
 
-Strings can be created with either single or double quotes.
+Strings can be created with either single or double quotes.  
 [String API](/docs/Api/String)
 
 ```squiggle
@@ -1201,7 +1714,7 @@ There are [3 internal representation formats for distributions](docs/Discussions
 
 Squiggle lists can contain items of any type, similar to lists in Python. You can access individual list elements with `[number]` notation, starting from `0`.
 
-Squiggle is an immutable language, so you cannot modify lists in-place. Instead, you can use functions such as `List.map` or `List.reduce` to create new lists.
+Squiggle is an immutable language, so you cannot modify lists in-place. Instead, you can use functions such as `List.map` or `List.reduce` to create new lists.  
 [List API](/docs/Api/List)
 
 ```squiggle
@@ -1212,7 +1725,7 @@ bar = myList[3][1] // "bar"
 
 ## Dictionaries
 
-Squiggle dictionaries work similarly to Python dictionaries or Javascript objects. Like lists, they can contain values of any type. Keys must be strings.
+Squiggle dictionaries work similarly to Python dictionaries or Javascript objects. Like lists, they can contain values of any type. Keys must be strings.  
 [Dictionary API](/docs/Api/Dictionary)
 
 ```squiggle
@@ -1253,7 +1766,7 @@ myFn = typeOf({|e| e})
 Common.inspect: ('A, message?: String) => 'A
 Runs Console.log() in the [Javascript developer console](https://www.digitalocean.com/community/tutorials/how-to-use-the-javascript-developer-console) and returns the value passed in.
 
-Common.throw: (message: String?) => any
+Common.throw: (message?: String) => any
 Throws an error. You can use `try` to recover from this error.
 
 Common.try: (fn: () => 'A, fallbackFn: () => 'B) => 'A|'B
@@ -1383,7 +1896,7 @@ Dict.map({a: 1, b: 2}, {|x| x + 1})
 Dict.mapKeys: (Dict('A), fn: (String) => String) => Dict('A)
 Dict.mapKeys({a: 1, b: 2, c: 5}, {|x| concat(x, "-foobar")})
 
-Dict.omit: (Dict('A), List(String)) => keys: Dict('A)
+Dict.omit: (Dict('A), keys: List(String)) => Dict('A)
 Creates a new dictionary that excludes the omitted keys.
 data = { a: 1, b: 2, c: 3, d: 4 }
 Dict.omit(data, ["b", "d"]) // {a: 1, c: 3}
@@ -1985,6 +2498,12 @@ List.findIndex: (List('A), fn: ('A) => Bool) => Number
 Returns `-1` if there is no value found
 List.findIndex([1,4,5], {|el| el>3 })
 
+List.sample: (List('A)) => 'A
+List.sample([1,4,5])
+
+List.sampleN: (List('A), n: Number) => List('A)
+List.sampleN([1,4,5], 2)
+
 ## Functional Transformations
 
 List.map: (List('A), ('A, index?: Number) => 'B) => List('B)
@@ -2167,6 +2686,15 @@ import { SquiggleEditor } from "../../../components/SquiggleEditor";
 
 Squiggle numbers are Javascript floats.
 
+## Constants
+
+| Variable Name     | Number Name                                                     | Value                   |
+| ----------------- | --------------------------------------------------------------- | ----------------------- |
+| `Number.minValue` | The smallest positive numeric value representable in JavaScript | 5e-324                  |
+| `Number.maxValue` | The largest positive numeric value representable in JavaScript  | 1.7976931348623157e+308 |
+
+## Functions
+
 ## Comparison
 
 Number.smaller <: (Number, Number) => Bool
@@ -2188,6 +2716,12 @@ Number.multiply \*: (Number, Number) => Number
 Number.divide /: (Number, Number) => Number
 
 Number.pow ^: (Number, Number) => Number
+
+Number.mod: (Number, Number) => Number
+modulo. This is the same as the '%' operator in Python. Note that there is no '%' operator in Squiggle for this operation.
+mod(10, 3)
+mod(-10, 3)
+mod(10, -3)
 
 ## Functions (Number)
 
@@ -2323,7 +2857,7 @@ import { SquiggleEditor } from "../../../components/SquiggleEditor";
 
 Function specifications (Specs) are an experimental feature in Squiggle. They are used to specify the structure of functions and verify that they match that structure. They are used primarily as a tag for functions.
 
-Spec.make: ({name: String, documentation: String, validate: Function}) => Specification
+Spec.make: ({name: String, documentation: String, validate: Lambda}) => Specification
 Create a specification.
 @startClosed
 validate(fn) = {
@@ -2499,11 +3033,11 @@ Adds text documentation to a value. This is useful for documenting what a value 
 
 Tag.getDoc: (any) => String
 
-Tag.showAs: (Dist, Plot|(Dist) => Plot) => Dist, (List(any), Table|(List(any)) => Table) => List(any), ((Number) => Dist|Number, Plot|Calculator|((Number) => Dist|Number) => Plot|Calculator) => (Number) => Dist|Number, ((Date) => Dist|Number, Plot|Calculator|((Date) => Dist|Number) => Plot|Calculator) => (Date) => Dist|Number, ((Duration) => Dist|Number, Plot|Calculator|((Duration) => Dist|Number) => Plot|Calculator) => (Duration) => Dist|Number, (Function, Calculator|(Function) => Calculator) => Function
+Tag.showAs: (Dist, Plot|(Dist) => Plot) => Dist, (List(any), Table|(List(any)) => Table) => List(any), ((Number) => Dist|Number, Plot|Calculator|((Number) => Dist|Number) => Plot|Calculator) => (Number) => Dist|Number, ((Date) => Dist|Number, Plot|Calculator|((Date) => Dist|Number) => Plot|Calculator) => (Date) => Dist|Number, ((Duration) => Dist|Number, Plot|Calculator|((Duration) => Dist|Number) => Plot|Calculator) => (Duration) => Dist|Number, (Lambda, Calculator|(Lambda) => Calculator) => Lambda
 Overrides the default visualization for a value.
 `showAs()` can take either a visualization, or a function that calls the value and returns a visualization.
 
-Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, `Number` can be used with Dates and Durations as well.
+Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, `Number` can be used with Dates and Durations as well.  
 | **Input Type** | **Visualization Types** |
 | ----------------------------------- | ------------------------------------- |
 | **Distribution** | `Plot.dist` |
@@ -2600,7 +3134,7 @@ The Calculator module allows you to make custom calculators for functions. This 
 
 Calculators can be useful for debugging functions or to present functions to end users.
 
-Calculator.make: ({fn: Function, title?: String, description?: String, inputs?: List(Input), autorun?: Bool, sampleCount?: Number}) => Calculator, (Function, params?: {title?: String, description?: String, inputs?: List(Input), autorun?: Bool, sampleCount?: Number}) => Calculator
+Calculator.make: ({fn: Lambda, title?: String, description?: String, inputs?: List(Input), autorun?: Bool, sampleCount?: Number}) => Calculator, (Lambda, params?: {title?: String, description?: String, inputs?: List(Input), autorun?: Bool, sampleCount?: Number}) => Calculator
 
 `Calculator.make` takes in a function, a description, and a list of inputs. The function should take in the same number of arguments as the number of inputs, and the arguments should be of the same type as the default value of the input.
 
@@ -2651,7 +3185,7 @@ Input.checkbox: ({name: String, description?: String, default?: Bool}) => Input
 Creates a checkbox input. Used for Squiggle booleans.
 Input.checkbox({ name: "IsTrue?", default: true })
 
-Input.select: ({name: String, description?: String, options: List(String), default?: String}) => Input
+Input.select: ({name: String, options: List(String), description?: String, default?: String}) => Input
 Creates a dropdown input. Used for Squiggle strings.
 Input.select({ name: "Name", default: "Sue", options: ["John", "Mary", "Sue"] })
 
@@ -2666,7 +3200,7 @@ import { SquiggleEditor } from "../../../components/SquiggleEditor";
 
 _Warning: Relative value functions are particularly experimental and subject to change._
 
-RelativeValues.gridPlot: ({ids: List(String), fn: (String, String) => List(Number)}) => Plot
+RelativeValues.gridPlot: ({ids: List(String), fn: (String, String) => [Dist, Dist]}) => Plot
 RelativeValues.gridPlot({
 ids: ["foo", "bar"],
 fn: {|id1, id2| [SampleSet.fromDist(2 to 5), SampleSet.fromDist(3 to 6)]},
@@ -2780,7 +3314,7 @@ Danger.poissonDist(10)
 
 ## Integration
 
-Danger.integrateFunctionBetweenWithNumIntegrationPoints: (f: Function, min: Number, max: Number, numIntegrationPoints: Number) => Number
+Danger.integrateFunctionBetweenWithNumIntegrationPoints: (f: Lambda, min: Number, max: Number, numIntegrationPoints: Number) => Number
 Integrates the function `f` between `min` and `max`, and computes `numIntegrationPoints` in between to do so.
 
 Note that the function `f` has to take in and return numbers. To integrate a function which returns distributions, use:
@@ -2793,7 +3327,7 @@ Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, nu
 
 Danger.integrateFunctionBetweenWithNumIntegrationPoints({|x| x+1}, 1, 10, 10)
 
-Danger.integrateFunctionBetweenWithEpsilon: (f: Function, min: Number, max: Number, epsilon: Number) => Number
+Danger.integrateFunctionBetweenWithEpsilon: (f: Lambda, min: Number, max: Number, epsilon: Number) => Number
 Integrates the function `f` between `min` and `max`, and uses an interval of `epsilon` between integration points when doing so. This makes its runtime less predictable than `integrateFunctionBetweenWithNumIntegrationPoints`, because runtime will not only depend on `epsilon`, but also on `min` and `max`.
 
 Same caveats as `integrateFunctionBetweenWithNumIntegrationPoints` apply.
@@ -2801,7 +3335,7 @@ Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 0.1)
 
 ## Optimization
 
-Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions: (fs: List(Function), funds: Number, approximateIncrement: Number) => any
+Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions: (fs: List(Lambda), funds: Number, approximateIncrement: Number) => any
 Computes the optimal allocation of $`funds` between `f1` and `f2`. For the answer given to be correct, `f1` and `f2` will have to be decreasing, i.e., if `x > y`, then `f_i(x) < f_i(y)`.
 Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(
 [
@@ -2811,11 +3345,3 @@ Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(
 100,
 0.01
 )
-
-```
-
-```
-
-```
-
-```

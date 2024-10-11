@@ -96,7 +96,8 @@ const allDocumentationItems = () => {
     .join("\n\n\n");
 };
 
-const promptPageRaw = readFile("./public/llms/prompt.txt");
+const promptPageRaw = readFile("./public/llms/prompt.md");
+const styleGuideRaw = readFile("./public/llms/styleGuide.md");
 const documentationBundlePage = async () => {
   const targetFilename = "./public/llms/documentationBundle.txt";
 
@@ -105,6 +106,7 @@ This file is auto-generated from the documentation files in the Squiggle reposit
 --- \n\n
 `;
 
+  // We're not using this anymore, but leaving it here in case we want it again.
   const getGrammarContent = async () => {
     const grammarFiles = await glob("../squiggle-lang/src/**/*.peggy");
     return readFile(grammarFiles[0]);
@@ -123,14 +125,17 @@ This file is auto-generated from the documentation files in the Squiggle reposit
   };
 
   console.log("Compiling documentation bundle page...");
-  const grammarContent = await getGrammarContent();
+  // const grammarContent = await getGrammarContent();
   const guideContent = await getGuideContent();
   const apiContent = allDocumentationItems();
   // const content = guideContent;
   const content =
     header +
     promptPageRaw +
-    `## Peggy Grammar \n\n ${grammarContent} \n\n --- \n\n ` +
+    "\n\n" +
+    styleGuideRaw +
+    "\n\n" +
+    // `## Peggy Grammar \n\n ${grammarContent} \n\n --- \n\n ` +
     convertSquiggleEditorTags(guideContent) +
     apiContent;
   fs.writeFile(targetFilename, content, (err) => {
@@ -153,7 +158,7 @@ notes: "This Doc is generated using a script, do not edit directly!"
 
 The following is a prompt that we use to help LLMs, like GPT and Claude, write Squiggle code. This would ideally be provided with the full documentation, for example with [this document](/llms/documentationBundle.txt). 
 
-You can read this document in plaintext [here](/llms/prompt.txt).
+You can read this document in plaintext [here](/llms/prompt.md).
 
 ---
 

@@ -1,9 +1,4 @@
----
-description: Squiggle Style Guide
----
-
 # Squiggle Style Guide
-Note: This document is highly opinionated and was written specifically for LLMs to read. However, humans might also find it useful.
 
 ## Limitations
 
@@ -329,12 +324,12 @@ summary = [
 - Plots are a good way of displaying the output of a model.
 - Use Scale.symlog() and Scale.log() whenever you think the data is highly skewed. This is very common with distributions.
 - Use Scale.symlog() instead of Scale.log() when you are unsure if the data is above or below 0. Scale.log() fails on negative values.
-- Function plots use plots equally spaced on the x-axis. This means they can fail if only integers are accepted. In these cases, it can be safer just not to use the plot, or to use a scatter plot. 
+- Function plots use plots equally spaced on the x-axis. This means they can fail if only integers are accepted. In these cases, it can be safer just not to use the plot, or to use a scatter plot.
 - When plotting 2-8 distributions over the same x-axis, it's a good idea to use Plot.dists(). For example, if you want to compare 5 different costs of a treatment, or 3 different adoption rates of a technology, this can be a good way to display the data.
 - When plotting distributions in tables or if you want to display multiple distributions under each other, and you don't want to use Plot.dists, it's a good idea to have them all use the same x-axis scale, with custom min and max values. This is a good way to make sure that the x-axis scale is consistent across all distributions.
 
-
 Here's an example of how to display multiple distributions over the same x-axis, with a custom x-axis range:
+
 ```squiggle
 strategies = [
   { n: "AI Ethics", c: 1M to 5M, b: 5M to 20M },
