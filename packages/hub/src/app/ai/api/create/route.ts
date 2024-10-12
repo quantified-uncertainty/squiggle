@@ -53,6 +53,14 @@ async function upsertWorkflow(
   });
 }
 
+async function updateWorkflowLog(workflow: Workflow<any>) {
+  const result = workflow.getFinalResult();
+  await prisma.aiWorkflow.update({
+    where: { id: workflow.id },
+    data: { markdown: result.logSummary },
+  });
+}
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 
@@ -98,9 +106,22 @@ export async function POST(req: Request) {
             anthropicApiKey,
           });
 
-    // save workflow to the database on each update
+    // Save workflow to the database on each update.
     squiggleWorkflow.addEventListener("stepFinished", ({ workflow }) =>
       upsertWorkflow(user, workflow)
+    );
+
+    /*
+     * We save the markdown log after all steps are finished. This means that if
+     * the workflow fails or this route dies, there'd be no log summary. Should
+     * we save the log summary after each step? It'd be more expensive but more
+     * robust.
+     * (this important only in case we decide to roll back our fully
+     * deserializable workflows; if deserialization works well then this doesn't
+     * matter, the log is redundant)
+     */
+    squiggleWorkflow.addEventListener("allStepsFinished", ({ workflow }) =>
+      updateWorkflowLog(workflow)
     );
 
     const stream = squiggleWorkflow.runAsStream();
