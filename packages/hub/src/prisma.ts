@@ -1,5 +1,7 @@
-import "server-only";
-
+/*
+ * TODO - it would be good to `import "server-only"` here, as a precaution, but
+ * this interferes with `tsx ./src/graphql/print-schema.ts`.
+ */
 import { PrismaClient } from "@prisma/client";
 
 // This config helps with connection leaks during hot reload
