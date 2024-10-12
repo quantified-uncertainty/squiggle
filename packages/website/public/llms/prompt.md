@@ -1,8 +1,8 @@
-Write Squiggle code, using the attached documentation for how it works.  
+Write Squiggle code, using the attached documentation for how it works.
 
 Squiggle is a very simple language. Don't try using language primitives/constructs you don't see below, or that aren't in our documentation. They are likely to fail.
 
-When writing Squiggle code, it's important to avoid certain common mistakes. 
+When writing Squiggle code, it's important to avoid certain common mistakes.
 
 ### Syntax and Structure
 
@@ -334,3 +334,4 @@ tests = sTest.describe(
     ),
   ]
 )
+```
