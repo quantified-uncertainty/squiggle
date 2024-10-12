@@ -59,3 +59,75 @@ When using `createSquiggle` and `editSquiggle` scripts, you should define the fo
 ANTHROPIC_API_KEY= // needed for using Claude models
 OPENAI_API_KEY= // needed for using OpenAI models
 ```
+
+## Internals
+
+### Concepts
+
+#### WorkflowTemplate
+
+A description of a multi-step **workflow** that would transform its **inputs** into its **outputs** by going through several **steps**.
+
+Each workflow template has a name, and all templates should be registered in `src/workflows/registry.ts`, so that we can deserialize them by name.
+
+Workflows can have inputs, which are **artifacts**.
+
+#### Workflow
+
+An instance of `WorkflowTemplate` that describes a single living workflow.
+
+Workflows incrementally run their steps and inject new steps into themselves based on the outcomes of previous steps.
+
+#### Controller loop
+
+Each `WorkflowTemplate` configures the workflow with a specific "controller loop": one or more event handlers that add new workflow steps based on events (usually `stepFinished` events) that have happened.
+
+Controller loop don't exist as objects; it's just a handle for the part of the codebase that configures the loop.
+
+The configuration happens in `configureControllerLoop` function in `WorkflowTemplate` definitions.
+
+#### Artifacts
+
+Artifacts are objects that are passed between steps. Both workflows and steps have artifacts as inputs or outputs.
+
+Each artifact has a type, which determines its "shape" (prompt, code, etc).
+
+Artifacts have unique identifiers, so that we can detect when one step is using the output of another step without explicitly connecting them.
+
+#### LLMStepTemplate
+
+Step templates describe a behavior of a single step in a workflow.
+
+Similar to `WorkflowTemplate`, each step template has a name, and all step templates should be registered in `src/steps/registry.ts`.
+
+For now, all steps are "LLM" steps. This might change in the future.
+
+#### LLMStepInstance
+
+An instance of a `LLMStepTemplate`. Step instances have specific inputs and outputs, a state ("PENDING", "DONE", or "FAILED"), and a conversation history.
+
+### Serialization formats
+
+Workflows have two different serialization formats:
+
+#### SerializedWorkflow
+
+`SerializedWorkflow` is used for storing workflows in the database. `SerializedWorkflow` can be fully reconstructed into a `Workflow` object.
+
+`SerializedWorkflow` format is based on `@quri/serializer`, which normalizes the data. The format is not optimized to be human-readable: all object references are transformed into IDs.
+
+#### ClientWorkflow
+
+`ClientWorkflow`: used for representing workflows in the frontend.
+
+`Workflow` objects include server-only code, so we can't have them on the frontend directly, and we send `ClientWorkflow` objects to the frontend.
+
+The advantage of this format is that it's simpler, and it can be incrementally updated by streaming messages as the workflow runs.
+
+### Streaming
+
+You can convert `Workflow` to a stream of JSON-encoded messages by using `workflow.runAsStream()`.
+
+Then you can decode the stream into a `ClientWorkflow` by using `decodeWorkflowFromReader`.
+
+See Squiggle Hub code for details on this.
