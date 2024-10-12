@@ -31,7 +31,6 @@ When writing Squiggle code, it's important to avoid certain common mistakes.
 
 1. Conditional Statements: There are no case or switch statements. Use if/else for conditional logic.
 2. There aren't for loops or mutation. Use immutable code, and List.map / List.reduce / List.reduceWhile.
-3. Remember to use `Number.sum` and `Number.product`, instead of using Reduce in those cases.
 
 ### List and Dictionary Operations
 
@@ -41,24 +40,18 @@ When writing Squiggle code, it's important to avoid certain common mistakes.
 ### Randomness and Distribution Handling
 
 1. There's no random() function. Use alternatives like sample(uniform(0,1)).
-2. When representing percentages, use "5%" instead of "0.05" for readability.
-3. The `to` syntax only works for >0 values. "4 to 10", not "0 to 10".
+2. The `to` syntax only works for >0 values. "4 to 10", not "0 to 10".
 
 ### Units and Scales
 
 1. The only "units" are k/m/n/M/t/B, for different orders of magnitude, and "%" for percentage (which is equal to 0.01).
-2. If you make a table that contains a column of similar distributions, use a scale to ensure consistent min and max.
-3. Scale.symlog() has support for negative values, Scale.log() doesn't. Scale.symlog() is often a better choice for this reason, though Scale.log() is better when you are sure values are above 0.
-4. Do use Scale.symlog() and Scale.log() on dists/plots that might need it. Many do!
 
 ### Documentation and Comments
 
 1. Tags like @name and @doc apply to the following variable, not the full file.
 2. If you use a domain for Years, try to use the Date domain, and pass in Date objects, like Date(2022) instead of 2022.
 
----
-
-This format provides a clear and organized view of the guidelines for writing Squiggle code.
+## Examples
 
 Here's are some simple example Squiggle programs:
 

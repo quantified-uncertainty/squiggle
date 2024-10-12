@@ -93,8 +93,9 @@ inputs = {
 
 ### Unit Annotation
 
-- Squiggle does not support units directly, but you can add them to `@name()`, `@doc()` tags, and add them to comments.
+- You can add unit descriptions to `@name()`, `@doc()` tags, and add them to comments.
 - In addition to regular units (like "population"), add other key variables; like the date or the type of variable. For example, use "Number of Humans (Population, 2023)" instead of just "Number of Humans". It's important to be precise and detailed when annotating variables.
+- Squiggle does support units directly, using the syntax `foo :: unit`. However, this is not recommended to use, because this is still a beta feature.
 - Show units in parentheses after the variable name, when the variable name is not obvious. For example, use "Age (years)" instead of just "Age". In comments, use the "(units)" format.
   Examples:
 
@@ -160,6 +161,7 @@ annualBudget = 1200  // Unclear if it's 1200 or 1.2 trillion
 ```
 
 - There's no need to use @format on regular numbers. The default formatting is fairly sophistated.
+- Remember to use `Number.sum` and `Number.product`, instead of using Reduce in those cases.
 
 ### Lists of Structured Data
 
