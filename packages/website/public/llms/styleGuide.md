@@ -1,34 +1,30 @@
 # Squiggle Style Guide
 
-## Limitations
-
-- There are floating point errors at high numbers (1e50 and above) and very small numbers (1e-10 and below). If you need to work with these, use logarithms if possible.
-
 ## Data and Calculations
 
 ### Estimations
 
 - When using the "to" format, like "3 to 10", remember that this represents the 5th and 95th percentile. This is a very large range. Be paranoid about being overconfident and too narrow in your estimates.
 - One good technique, when you think there's a chance that you might be very wrong about a variable, is to use a mixture that contains a very wide distribution. For example, `mx([300 to 400, 50 to 5000], [0.9, 0.1])`, or `mx([50k to 60k, 1k to 1M], [0.95, 0.05])`. This way if you are caught by surprise, the wide distribution will still give you a reasonable outcome.
-- Be wary of using the uniform or the PERT distributions. The uniform distribution is mainly good for physical simulations.
+- Be wary of using the uniform or the triangular distributions. These are mainly good for physical simulations, not to represent uncertainty over many real life variables.
 - If the outcome of a model is an extreme probability (<0.01 or >0.99), be suspicious of the result. It should be very rare for an intervention to have an extreme effect or have an extreme impact on the probability of an event.
-- Be paranoid about the uncertainty ranges of your variables. If you are dealing with a highly speculative variable, the answer might have 2-8 orders of magnitude of uncertainty, like "100 to 100K". If you are dealing with a variable that's fairly certain, the answer might have 2-4 sig figs of uncertainty. Be focused on being accurate and not overconfident, not on impressing people.
-- Be careful with sigmoid functions. Sigmoid curves with distributions can have very little uncertainty in the middle, and very high uncertainty at the tails. If you are unsure about these values, consider using a mixture distribution. For example, this curve has very high certainty in the middle, and very high uncertainty at the tails: `adoption_rate(t: inputs.t) = 1 / (1 + exp(-normal(0.1, 0.08) * (t - 30)))`
+- Be paranoid about the uncertainty ranges of your variables. If you are dealing with a highly speculative variable, the answer might have 2-8 orders of magnitude of uncertainty, like `100 to 100K`. If you are dealing with a variable that's fairly certain, the answer might have 2-4 sig figs of uncertainty. Be focused on being accurate and not overconfident, not on impressing people.
+- Be careful with sigmoid functions. Sigmoid curves with distributions can have very little uncertainty in the middle, and very high uncertainty at the tails. If you are unsure about these values, consider using a mixture distribution. For example, this curve has very high certainty in the middle, and very high uncertainty at the tails: `adoption_rate(t) = 1 / (1 + exp(-normal(0.1, 0.08) * (t - 30)))`
 - Make sure to flag any variables that are highly speculative. Use @doc() to explain that the variable is speculative and to give a sense of the uncertainty. Explain your reasoning, but also warn the reader that the variable is speculative.
 
 ### Percentages / Probabilities
 
-- Use a @format() tag, like ".0%" to format percentages.
+- Use a `@format()` tag, like `.0%` to format percentages.
 - If using a distribution, remember that it shouldn't go outside of 0% and 100%. You can use beta distributions or truncate() to keep values in the correct range.
-- If you do use a beta distribution, keep in mind that there's no ({p5, p95}) format. You can use beta(alpha:number, beta:number) or beta({mean: number, stdev: number}) to create a beta distribution.
-- Write percentages as "5%" instead of "0.05". It's more readable.
+- If you do use a beta distribution, keep in mind that there's no `({p5, p95})` format. You can use `beta(alpha:number, beta:number)` or `beta({mean: number, stdev: number})` to create a beta distribution.
+- Write percentages as `5%` instead of `0.05`. It's more readable.
 
 ### Domains
 
-- Prefer using domains to throwing errors, when trying to restrict a variable. For example, don't write, "if year < 2023 then throw("Year must be 2023 or later")". Instead, write f(t: [2023, 2050]).
+- Prefer using domains to throwing errors, when trying to restrict a variable. For example, don't write, `if year < 2023 then throw("Year must be 2023 or later")`. Instead, write `f(t: [2023, 2050])`.
 - Err on the side of using domains in cases where you are unsure about the bounds of a function, instead of using if/throw or other error handling methods.
-- If you only want to set a min or max value, use a domain with Number.maxValue or -Number.maxValue as the other bound.
-- Do not use a domain with a complete range, like [-Number.maxValue, Number.maxValue]. This is redundant. Instead, just leave out the domain, like "foo(f)".
+- If you only want to set a min or max value, use a domain with `Number.maxValue` or `-Number.maxValue` as the other bound.
+- Do not use a domain with a complete range, like `[-Number.maxValue, Number.maxValue]`. This is redundant. Instead, just leave out the domain, like `f(t)`.
 
 ```squiggle
 // Do not use this
@@ -51,11 +47,11 @@ inputs = {
   age = 34
 
   @name("Hourly Wage ($/hr)")
-  hourly_wage = 100
+  hourlyWage = 100
 
   @name("Coffee Price ($/cup)")
-  coffee_price = 1
-  {age, hourly_wage, health_value, coffee_price}
+  coffeePrice = 1
+  {age, hourlyWage, coffeePrice}
 }
 ```
 
@@ -65,10 +61,10 @@ Note: You cannot use tags within dicts like the following:
 // This is not valid. Do not do this.
 inputs = {
   @name("Age (years)")
-  age = 34,
+  age: 34,
 
   @name("Hourly Wage ($/hr)")
-  hourly_wage: 100,
+  hourlyWage: 100,
 }
 ```
 
@@ -87,9 +83,9 @@ inputs = {
 
 ### Naming Conventions
 
-- Use snake_case for variable names.
+- Use camelCase for variable names.
 - All variable names must start with a lowercase letter.
-- In functions, input parameters that aren't obvious should have semantic names. For example, instead of "nb" use "net_benefit".
+- In functions, input parameters that aren't obvious should have semantic names. For example, instead of `nb` use `net_benefit`.
 
 ### Dictionaries
 
@@ -97,26 +93,26 @@ inputs = {
 
 ### Unit Annotation
 
-- Squiggle does not support units directly, but you can add them to '@name()', '@doc()' tags, and add them to comments.
+- Squiggle does not support units directly, but you can add them to `@name()`, `@doc()` tags, and add them to comments.
 - In addition to regular units (like "population"), add other key variables; like the date or the type of variable. For example, use "Number of Humans (Population, 2023)" instead of just "Number of Humans". It's important to be precise and detailed when annotating variables.
 - Show units in parentheses after the variable name, when the variable name is not obvious. For example, use "Age (years)" instead of just "Age". In comments, use the "(units)" format.
   Examples:
 
 ```squiggle
 @name("Number of Humans (2023)")
-number_of_humans = 7.8B
+numberOfHumans = 7.8B
 
 @name("Net Benefit ($)")
-net_benefit = 100M
+netBenefit = 100M
 
 @name("Temperature (°C)")
 temperature = 22
 
 @name("Piano Tuners in New York City (2023)")
 tuners = {
-    pianos_per_piano_tuners = 100 to 1k // (pianos per tuner)
-    pianos_in_nyc = 1k to 50k // (pianos)
-    pianos_in_nyc / pianos_per_piano_tuners
+    pianosPerTuner = 100 to 1k // (pianos per tuner)
+    pianosInNYC = 1k to 50k // (pianos)
+    pianosInNYC / pianosPerTuner
 }
 ```
 
@@ -124,10 +120,10 @@ tuners = {
 
 ```squiggle
 @name("Distance to Mars (km)")
-distance_mars = 225e6
+distanceMars = 225e6
 
 @name("Distance to Venus (km)")
-distance_venus = 170e6
+distanceVenus = 170e6
 ```
 
 ### Numbers
@@ -140,27 +136,27 @@ Don't use the code:
 
 ```squiggle
 @name("US Population (millions)")
-us_population = 331.9
+usPopulation = 331.9
 ```
 
 Instead, use:
 
 ```squiggle
 @name("US Population")
-us_population = 331.9M
+usPopulation = 331.9M
 ```
 
 More examples:
 
 ```squiggle
 // Correct representations
-world_population = 7.8B
-annual_budget = 1.2T
-distance_to_sun = 149.6e6  // 149.6 million kilometers
+worldPopulation = 7.8B
+annualBudget = 1.2T
+distanceToSun = 149.6e6  // 149.6 million kilometers
 
 // Incorrect representations (avoid these)
-world_population = 7800  // Unclear if it's 7800 or 7.8 billion
-annual_budget = 1200  // Unclear if it's 1200 or 1.2 trillion
+worldPopulation = 7800  // Unclear if it's 7800 or 7.8 billion
+annualBudget = 1200  // Unclear if it's 1200 or 1.2 trillion
 ```
 
 - There's no need to use @format on regular numbers. The default formatting is fairly sophistated.
@@ -184,7 +180,7 @@ instead of:
 You can use lists instead when you have a very long list of items (20+), very few keys, and/or are generating data using functions.
 
 - Tables are a great way to display structured data.
-- You can use the '@showAs' tag to display a table if the table can show all the data. If this takes a lot of formatting work, you can move that to a helper function. Note that helper functions must be placed before the '@showAs' tag.
+- You can use the '@showAs' tag to display a table if the table can show all the data. If this takes a lot of formatting work, you can move that to a helper function. Note that helper functions must be placed before the '@showAs' tag. The `ozziegooen/helpers` library has a `dictsToTable` function that can help convert lists of dictionaries into tables.
 
 For example:
 
@@ -236,13 +232,17 @@ add(number, distribution) -> distribution
 - The `@format()` tag is not usable with dictionaries, functions, or lists. It is usable with variable assignments. Examples:
 
 ```squiggle
-net_benefit(costs, benefits) = benefits - costs // not valid for @format()
-net_benefit = benefits - costs // valid for @format()
+netBenefit(costs, benefits) = benefits - costs // not valid for @format()
+netBenefit = benefits - costs // valid for @format()
 ```
 
 - This mainly makes sense for dollar amounts, percentages, and dates. ".0%" is a decent format for percentages, and "$,.0f" can be used for dollars.
 - Choose the number of decimal places based on the stdev of the distribution or size of the number.
 - Do not use "()" instead of "-" for negative numbers. So, do not use "($,.0f" for negative numbers, use "$,.0f" instead.
+
+## Limitations
+
+- There is no bignum type. There are floating point errors at high numbers (1e50 and above) and very small numbers (1e-10 and below). If you need to work with these, use logarithms if possible.
 
 ## Comments
 
@@ -271,8 +271,8 @@ net_benefit = benefits - costs // valid for @format()
 summary = [
 "This model evaluates the cost-effectiveness of coffee consumption for a 34-year-old male, considering productivity benefits, health effects, and financial costs.",
 {
-   optimal_cups,
-   result.net_benefit,
+   optimalCups,
+   result.netBenefit,
 },
 ]
 ```
@@ -411,7 +411,7 @@ Example: (For a model with 300 lines)
 summary = [
   "## Summary
   This model evaluates the cost-effectiveness of coffee consumption for a 34-year-old male, considering productivity benefits, health effects, and financial costs.",
-  {inputs, final_answer},
+  {inputs, finalAnswer},
   ...
   ]
 ```
