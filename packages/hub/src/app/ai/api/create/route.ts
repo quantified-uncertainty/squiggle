@@ -12,8 +12,9 @@ import {
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { getSelf, isSignedIn } from "@/graphql/helpers/userHelpers";
 import { prisma } from "@/prisma";
+import { getAiCodec } from "@/server/ai/utils";
+import { V2WorkflowData } from "@/server/ai/v2_0";
 
-import { getAiCodec, V2WorkflowData } from "../../serverUtils";
 import { aiRequestBodySchema } from "../../utils";
 
 // https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#maxduration
@@ -38,7 +39,7 @@ async function upsertWorkflow(
       id: workflow.id,
     },
     update: {
-      format: 2,
+      format: "V2_0",
       workflow: v2Workflow,
     },
     create: {
@@ -46,7 +47,7 @@ async function upsertWorkflow(
       user: {
         connect: { id: user.id },
       },
-      format: 2,
+      format: "V2_0",
       workflow: v2Workflow,
     },
   });
