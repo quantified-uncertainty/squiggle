@@ -1,23 +1,16 @@
 import { useCallback, useState } from "react";
 
-import {
-  decodeWorkflowFromReader,
-  SerializedWorkflow,
-  SquiggleWorkflowInput,
-} from "@quri/squiggle-ai";
+import { ClientWorkflow, decodeWorkflowFromReader } from "@quri/squiggle-ai";
 
-import { bodyToLineReader, CreateRequestBody, requestToInput } from "./utils";
+import { AiRequestBody, bodyToLineReader } from "./utils";
 
-export function useSquiggleWorkflows(initialWorkflows: SerializedWorkflow[]) {
+export function useSquiggleWorkflows(initialWorkflows: ClientWorkflow[]) {
   const [workflows, setWorkflows] =
-    useState<SerializedWorkflow[]>(initialWorkflows);
+    useState<ClientWorkflow[]>(initialWorkflows);
   const [selected, setSelected] = useState<number | undefined>(undefined);
 
   const updateWorkflow = useCallback(
-    (
-      id: string,
-      update: (workflow: SerializedWorkflow) => SerializedWorkflow
-    ) => {
+    (id: string, update: (workflow: ClientWorkflow) => ClientWorkflow) => {
       setWorkflows((workflows) =>
         workflows.map((workflow) => {
           return workflow.id === id ? update(workflow) : workflow;
@@ -28,14 +21,20 @@ export function useSquiggleWorkflows(initialWorkflows: SerializedWorkflow[]) {
   );
 
   const addMockWorkflow = useCallback(
-    (input: SquiggleWorkflowInput) => {
+    (request: AiRequestBody) => {
       // This will be replaced with a real workflow once we receive the first message from the server.
       const id = `loading-${Date.now().toString()}`;
-      const workflow: SerializedWorkflow = {
+      const workflow: ClientWorkflow = {
         id,
         timestamp: new Date().getTime(),
         status: "loading",
-        input,
+        inputs: {
+          prompt: {
+            id: "prompt",
+            kind: "prompt",
+            value: request.kind === "create" ? request.prompt : "[FIX]",
+          },
+        },
         steps: [],
       };
       setWorkflows((workflows) => [...workflows, workflow]);
@@ -46,12 +45,10 @@ export function useSquiggleWorkflows(initialWorkflows: SerializedWorkflow[]) {
   );
 
   const submitWorkflow = useCallback(
-    async (request: CreateRequestBody) => {
-      const input = requestToInput(request);
-
+    async (request: AiRequestBody) => {
       // Add a mock workflow to show loading state while we wait for the server to respond.
       // It will be replaced by the real workflow once we receive the first message from the server.
-      let id = addMockWorkflow(requestToInput(request)).id;
+      let id = addMockWorkflow(request).id;
 
       try {
         const response = await fetch("/ai/api/create", {
@@ -69,7 +66,6 @@ export function useSquiggleWorkflows(initialWorkflows: SerializedWorkflow[]) {
 
         await decodeWorkflowFromReader({
           reader: reader as ReadableStreamDefaultReader, // frontend types don't precisely match Node.js types
-          input: requestToInput(request),
           addWorkflow: async (workflow) => {
             // Replace the mock workflow with the real workflow.
             setWorkflows((workflows) =>

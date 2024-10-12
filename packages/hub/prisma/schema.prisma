@@ -385,6 +385,11 @@ model Searchable {
   groupId String? @unique
 }
 
+enum AiWorkflowFormat {
+  V1_0 // ClientWorkflow JSON, legacy format - can't be deserialized back to Workflow
+  V2_0 // SerializedWorkflow JSON, can be deserialized back to Workflow and resumed
+}
+
 model AiWorkflow {
   id String @id @default(cuid())
 
@@ -394,6 +399,11 @@ model AiWorkflow {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
-  // SerializedWorkflow
+  // TODO - upgrade to V2_0
+  format AiWorkflowFormat @default(V1_0)
+
   workflow Json
+
+  // TODO - remove default
+  markdown String @default("")
 }

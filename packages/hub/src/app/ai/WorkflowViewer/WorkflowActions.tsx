@@ -1,14 +1,14 @@
 import { FC, useEffect, useRef, useState } from "react";
 
-import { SerializedStep, SerializedWorkflow } from "@quri/squiggle-ai";
+import { ClientStep, ClientWorkflow } from "@quri/squiggle-ai";
 
 import { SelectedNodeSideView } from "./SelectedNodeSideView";
 import { StepNode } from "./StepNode";
 
 export const WorkflowActions: FC<{
-  workflow: SerializedWorkflow;
+  workflow: ClientWorkflow;
   height: number;
-  onNodeClick?: (node: SerializedStep) => void;
+  onNodeClick?: (node: ClientStep) => void;
 }> = ({ workflow, height, onNodeClick }) => {
   const [selectedNodeIndex, setSelectedNodeIndex] = useState<number | null>(
     workflow.steps.length - 1

@@ -1,13 +1,13 @@
 import clsx from "clsx";
 import { FC, useMemo } from "react";
 
-import { SerializedArtifact, SerializedStep } from "@quri/squiggle-ai";
+import { ClientArtifact, ClientStep } from "@quri/squiggle-ai";
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@quri/ui";
 
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 
 import { SquigglePlaygroundForWorkflow } from "../SquigglePlaygroundForWorkflow";
-import { ArtifactDisplay } from "./ArtifactDisplay";
+import { ArtifactList } from "./ArtifactList";
 import { ArtifactMessages } from "./ArtifactMessages";
 
 const NavButton: FC<{
@@ -31,30 +31,8 @@ const NavButton: FC<{
   );
 };
 
-const ArtifactList: FC<{
-  title: string;
-  artifacts: Record<string, SerializedArtifact>;
-}> = ({ title, artifacts }) => {
-  return (
-    <div>
-      <h3 className="mb-2 text-sm font-medium text-slate-500">{title}</h3>
-      <div className="flex flex-wrap gap-2">
-        {Object.entries(artifacts).map(([key, value]) => (
-          <ArtifactDisplay
-            key={key}
-            name={key}
-            artifact={value}
-            size={12}
-            showArtifactName={true}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
 export const SelectedNodeSideView: FC<{
-  selectedNode: SerializedStep;
+  selectedNode: ClientStep;
   onClose: () => void;
   onSelectPreviousNode?: () => void;
   onSelectNextNode?: () => void;
@@ -63,7 +41,7 @@ export const SelectedNodeSideView: FC<{
 
   const selectedNodeCodeOutput = useMemo(() => {
     return Object.values(selectedNode.outputs).find(
-      (output): output is SerializedArtifact & { kind: "code" } =>
+      (output): output is ClientArtifact & { kind: "code" } =>
         output.kind === "code"
     );
   }, [selectedNode]);

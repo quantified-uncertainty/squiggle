@@ -3,12 +3,13 @@
 import clsx from "clsx";
 import { FC } from "react";
 
-import { SerializedWorkflow } from "@quri/squiggle-ai";
+import { ClientWorkflow } from "@quri/squiggle-ai";
 
+import { WorkflowName } from "./WorkflowName";
 import { WorkflowStatusIcon } from "./WorkflowStatusIcon";
 
 export const WorkflowSummaryItem: FC<{
-  workflow: SerializedWorkflow;
+  workflow: ClientWorkflow;
   onSelect: () => void;
   isSelected: boolean;
 }> = ({ workflow, onSelect, isSelected }) => {
@@ -24,7 +25,9 @@ export const WorkflowSummaryItem: FC<{
         <div className="shrink-0">
           <WorkflowStatusIcon workflow={workflow} />
         </div>
-        <div className="truncate font-medium">{workflow.input.prompt}</div>
+        <div className="truncate font-medium">
+          <WorkflowName workflow={workflow} />
+        </div>
       </div>
       {workflow.status === "loading" && (
         <div className="mt-2">

@@ -1,25 +1,65 @@
 import { getServerSession } from "next-auth";
 
+import { LlmConfig } from "@quri/squiggle-ai";
 import {
-  decodeWorkflowFromReader,
-  LlmConfig,
-  SerializedWorkflow,
-  SquiggleWorkflowInput,
-} from "@quri/squiggle-ai";
-import { SquiggleWorkflow } from "@quri/squiggle-ai/server";
+  createSquiggleWorkflowTemplate,
+  fixSquiggleWorkflowTemplate,
+  PromptArtifact,
+  SourceArtifact,
+  Workflow,
+} from "@quri/squiggle-ai/server";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { getSelf, isSignedIn } from "@/graphql/helpers/userHelpers";
 import { prisma } from "@/prisma";
+import { getAiCodec } from "@/server/ai/utils";
+import { V2WorkflowData } from "@/server/ai/v2_0";
 
-import {
-  bodyToLineReader,
-  createRequestBodySchema,
-  requestToInput,
-} from "../../utils";
+import { aiRequestBodySchema } from "../../utils";
 
 // https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#maxduration
 export const maxDuration = 300;
+
+async function upsertWorkflow(
+  user: Awaited<ReturnType<typeof getSelf>>,
+  workflow: Workflow<any>
+) {
+  const codec = getAiCodec();
+  const serializer = codec.makeSerializer();
+  const entrypoint = serializer.serialize("workflow", workflow);
+  const bundle = serializer.getBundle();
+
+  const v2Workflow: V2WorkflowData = {
+    entrypoint,
+    bundle,
+  };
+
+  await prisma.aiWorkflow.upsert({
+    where: {
+      id: workflow.id,
+    },
+    update: {
+      format: "V2_0",
+      workflow: v2Workflow,
+    },
+    create: {
+      id: workflow.id,
+      user: {
+        connect: { id: user.id },
+      },
+      format: "V2_0",
+      workflow: v2Workflow,
+    },
+  });
+}
+
+async function updateWorkflowLog(workflow: Workflow<any>) {
+  const result = workflow.getFinalResult();
+  await prisma.aiWorkflow.update({
+    where: { id: workflow.id },
+    data: { markdown: result.logSummary },
+  });
+}
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -30,55 +70,11 @@ export async function POST(req: Request) {
 
   const user = await getSelf(session);
 
-  let workflow: SerializedWorkflow;
-
-  const streamToDatabase = (
-    stream: ReadableStream<string>,
-    input: SquiggleWorkflowInput
-  ) => {
-    decodeWorkflowFromReader({
-      reader: bodyToLineReader(stream) as ReadableStreamDefaultReader,
-      input,
-      addWorkflow: async (newWorkflow) => {
-        await prisma.aiWorkflow.create({
-          data: {
-            id: newWorkflow.id,
-            user: {
-              connect: {
-                id: user.id,
-              },
-            },
-            workflow: newWorkflow,
-          },
-        });
-        workflow = newWorkflow;
-      },
-      setWorkflow: async (update) => {
-        if (!workflow) {
-          throw new Error(
-            "Internal error: setWorkflow called before addWorkflow"
-          );
-        }
-        workflow = update(workflow);
-        await prisma.aiWorkflow.update({
-          where: {
-            id: workflow.id,
-          },
-          data: { workflow },
-        });
-      },
-    });
-  };
-
   try {
     const body = await req.json();
-    const request = createRequestBodySchema.parse(body);
+    const request = aiRequestBodySchema.parse(body);
 
-    if (!request.prompt && !request.squiggleCode) {
-      throw new Error("Prompt or Squiggle code is required");
-    }
-
-    // Create a SquiggleGenerator instance
+    // Create a SquiggleWorkflow instance
     const llmConfig: LlmConfig = {
       llmId: request.model ?? "Claude-Sonnet",
       priceLimit: 0.15,
@@ -86,20 +82,51 @@ export async function POST(req: Request) {
       messagesInHistoryToKeep: 4,
     };
 
-    const input = requestToInput(request);
-    const stream = new SquiggleWorkflow({
-      llmConfig,
-      input,
-      abortSignal: req.signal,
-      openaiApiKey: process.env["OPENAI_API_KEY"],
-      anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
-    }).runAsStream();
+    const openaiApiKey = process.env["OPENAI_API_KEY"];
+    const anthropicApiKey = process.env["ANTHROPIC_API_KEY"];
 
-    const [responseStream, dbStream] = stream.tee();
+    const squiggleWorkflow =
+      request.kind === "create"
+        ? createSquiggleWorkflowTemplate.instantiate({
+            llmConfig,
+            inputs: {
+              prompt: new PromptArtifact(request.prompt),
+            },
+            abortSignal: req.signal,
+            openaiApiKey,
+            anthropicApiKey,
+          })
+        : fixSquiggleWorkflowTemplate.instantiate({
+            llmConfig,
+            inputs: {
+              source: new SourceArtifact(request.squiggleCode),
+            },
+            abortSignal: req.signal,
+            openaiApiKey,
+            anthropicApiKey,
+          });
 
-    streamToDatabase(dbStream as ReadableStream<string>, input);
+    // Save workflow to the database on each update.
+    squiggleWorkflow.addEventListener("stepFinished", ({ workflow }) =>
+      upsertWorkflow(user, workflow)
+    );
 
-    return new Response(responseStream as ReadableStream, {
+    /*
+     * We save the markdown log after all steps are finished. This means that if
+     * the workflow fails or this route dies, there'd be no log summary. Should
+     * we save the log summary after each step? It'd be more expensive but more
+     * robust.
+     * (this important only in case we decide to roll back our fully
+     * deserializable workflows; if deserialization works well then this doesn't
+     * matter, the log is redundant)
+     */
+    squiggleWorkflow.addEventListener("allStepsFinished", ({ workflow }) =>
+      updateWorkflowLog(workflow)
+    );
+
+    const stream = squiggleWorkflow.runAsStream();
+
+    return new Response(stream as ReadableStream, {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",

@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 
-import { SquiggleWorkflow } from "../../workflows/SquiggleWorkflow.js";
+import { SourceArtifact } from "../../Artifact.js";
+import { fixSquiggleWorkflowTemplate } from "../../workflows/fixSquiggleWorkflowTemplate.js";
 
 config();
 
@@ -138,11 +139,13 @@ sTest.describe(
 ) `;
 
   const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } =
-    await new SquiggleWorkflow({
-      input: { type: "Edit", source: initialCode },
-      openaiApiKey: process.env["OPENAI_API_KEY"],
-      anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
-    }).runToResult();
+    await fixSquiggleWorkflowTemplate
+      .instantiate({
+        inputs: { source: new SourceArtifact(initialCode) },
+        openaiApiKey: process.env["OPENAI_API_KEY"],
+        anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
+      })
+      .runToResult();
 
   const response = {
     code: typeof code === "string" ? code : "",

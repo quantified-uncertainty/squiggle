@@ -9,7 +9,7 @@ import {
 } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { LlmId, MODEL_CONFIGS, SerializedWorkflow } from "@quri/squiggle-ai";
+import { ClientWorkflow, LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 import {
   Button,
   SelectStringFormField,
@@ -17,7 +17,7 @@ import {
   TextAreaFormField,
 } from "@quri/ui";
 
-import { CreateRequestBody } from "./utils";
+import { AiRequestBody } from "./utils";
 import { WorkflowSummaryList } from "./WorkflowSummaryList";
 
 type Handle = {
@@ -25,10 +25,10 @@ type Handle = {
 };
 
 type Props = {
-  submitWorkflow: (requestBody: CreateRequestBody) => void;
+  submitWorkflow: (requestBody: AiRequestBody) => void;
   selectWorkflow: (id: string) => void;
-  selectedWorkflow: SerializedWorkflow | undefined;
-  workflows: SerializedWorkflow[];
+  selectedWorkflow: ClientWorkflow | undefined;
+  workflows: ClientWorkflow[];
 };
 
 type FormShape = {
@@ -80,12 +80,19 @@ Outputs:
   }));
 
   const handleSubmit = form.handleSubmit(
-    async ({ prompt, squiggleCode, model }, event) => {
-      const requestBody: CreateRequestBody = {
-        prompt: mode === "create" ? prompt : undefined,
-        squiggleCode: mode === "edit" ? squiggleCode : undefined,
-        model: model as LlmId,
-      };
+    async ({ prompt, squiggleCode, model }) => {
+      const requestBody: AiRequestBody =
+        mode === "create"
+          ? {
+              kind: "create",
+              prompt,
+              model: model as LlmId,
+            }
+          : {
+              kind: "edit",
+              squiggleCode,
+              model: model as LlmId,
+            };
 
       submitWorkflow(requestBody);
       form.setValue("prompt", "");

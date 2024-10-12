@@ -4,16 +4,18 @@ import {
 } from "stream/web";
 
 import { Artifact } from "../Artifact.js";
+import { type LLMStepInstance } from "../LLMStepInstance.js";
+import { IOShape } from "../LLMStepTemplate.js";
 import {
-  SerializedArtifact,
-  SerializedWorkflow,
-  WorkflowMessage,
-  workflowMessageSchema,
+  ClientArtifact,
+  ClientStep,
+  ClientWorkflow,
+  StreamingMessage,
+  streamingMessageSchema,
 } from "../types.js";
-import { type SquiggleWorkflowInput } from "./SquiggleWorkflow.js";
-import { Workflow } from "./Workflow.js";
+import { type Workflow } from "./Workflow.js";
 
-export function serializeArtifact(value: Artifact): SerializedArtifact {
+export function artifactToClientArtifact(value: Artifact): ClientArtifact {
   const commonArtifactFields = {
     id: value.id,
     createdBy: value.createdBy?.id,
@@ -43,19 +45,42 @@ export function serializeArtifact(value: Artifact): SerializedArtifact {
   }
 }
 
+export function stepToClientStep(step: LLMStepInstance): ClientStep {
+  return {
+    id: step.id,
+    name: step.template.name ?? "unknown",
+    state: step.getState().kind,
+    inputs: Object.fromEntries(
+      Object.entries(step.getInputs()).map(([key, value]) => [
+        key,
+        artifactToClientArtifact(value),
+      ])
+    ),
+    outputs: Object.fromEntries(
+      Object.entries(step.getOutputs())
+        .filter(
+          (pair): pair is [string, NonNullable<(typeof pair)[1]>] =>
+            pair[1] !== undefined
+        )
+        .map(([key, value]) => [key, artifactToClientArtifact(value)])
+    ),
+    messages: step.getConversationMessages(),
+  };
+}
+
 /**
  * Add listeners to a workflow to stream the results as a ReadableStream.
  *
  * Results are streamed as JSON-encoded lines.
  *
- * `ControlledWorkflow.runAsStream()` relies on this function; see its
+ * `Workflow.runAsStream()` relies on this function; see its
  * implementation for more details.
  */
-export function addStreamingListeners(
-  workflow: Workflow,
+export function addStreamingListeners<Shape extends IOShape>(
+  workflow: Workflow<Shape>,
   controller: ReadableStreamController<string>
 ) {
-  const send = (message: WorkflowMessage) => {
+  const send = (message: StreamingMessage) => {
     controller.enqueue(JSON.stringify(message) + "\n");
   };
 
@@ -65,6 +90,12 @@ export function addStreamingListeners(
       content: {
         id: event.workflow.id,
         timestamp: event.workflow.startTime,
+        inputs: Object.fromEntries(
+          Object.entries(event.workflow.inputs).map(([key, value]) => [
+            key,
+            artifactToClientArtifact(value),
+          ])
+        ),
       },
     });
   });
@@ -78,7 +109,7 @@ export function addStreamingListeners(
         inputs: Object.fromEntries(
           Object.entries(event.data.step.getInputs()).map(([key, value]) => [
             key,
-            serializeArtifact(value),
+            artifactToClientArtifact(value),
           ])
         ),
       },
@@ -96,7 +127,7 @@ export function addStreamingListeners(
               (pair): pair is [string, NonNullable<(typeof pair)[1]>] =>
                 pair[1] !== undefined
             )
-            .map(([key, value]) => [key, serializeArtifact(value)])
+            .map(([key, value]) => [key, artifactToClientArtifact(value)])
         ),
         messages: event.data.step.getConversationMessages(),
       },
@@ -123,22 +154,16 @@ export function addStreamingListeners(
  */
 export async function decodeWorkflowFromReader({
   reader,
-  input,
   addWorkflow,
   setWorkflow,
 }: {
   reader: ReadableStreamDefaultReader<string>;
-  // FIXME - this shouldn't be necessary, but we need to inject the input to
-  // SerializedWorkflow, and it's not stored on the original Workflow yet, so
-  // it's not present in the stream data.
-  // In the future, we should store input parameters in the Workflow object.
-  input: SquiggleWorkflowInput;
   // This adds an initial version of the workflow.
-  addWorkflow: (workflow: SerializedWorkflow) => Promise<void>;
+  addWorkflow: (workflow: ClientWorkflow) => Promise<void>;
   // This signature might look complicated, but it matches the functional
   // version of `useState` state setter.
   setWorkflow: (
-    cb: (workflow: SerializedWorkflow) => SerializedWorkflow
+    cb: (workflow: ClientWorkflow) => ClientWorkflow
   ) => Promise<void>;
 }) {
   // eslint-disable-next-line no-constant-condition
@@ -151,14 +176,16 @@ export async function decodeWorkflowFromReader({
 
     // Note that these are streaming events.
     // They are easy to confuse with workflow events.
-    const event = workflowMessageSchema.parse(eventJson);
+    // The difference is that streaming events are sent over the wire, and so they contain JSON data.
+    // Workflow events are internal to the server and so they contain non-JSON data (such as LLMStepInstance references).
+    const event = streamingMessageSchema.parse(eventJson);
 
     switch (event.kind) {
       case "workflowStarted": {
         await addWorkflow({
           id: event.content.id,
           timestamp: event.content.timestamp,
-          input,
+          inputs: event.content.inputs,
           steps: [],
           status: "loading",
         });

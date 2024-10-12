@@ -3,18 +3,18 @@
 import { clsx } from "clsx";
 import { FC, useRef, useState } from "react";
 
-import { SerializedWorkflow, WorkflowResult } from "@quri/squiggle-ai";
+import { ClientWorkflow, ClientWorkflowResult } from "@quri/squiggle-ai";
 
 import { Sidebar } from "./Sidebar";
 import { useSquiggleWorkflows } from "./useSquiggleWorkflows";
 import { WorkflowViewer } from "./WorkflowViewer";
 
 export type SquiggleResponse = {
-  result?: WorkflowResult;
+  result?: ClientWorkflowResult;
   currentStep?: string;
 };
 
-export const AiDashboard: FC<{ initialWorkflows: SerializedWorkflow[] }> = ({
+export const AiDashboard: FC<{ initialWorkflows: ClientWorkflow[] }> = ({
   initialWorkflows,
 }) => {
   const { workflows, submitWorkflow, selectedWorkflow, selectWorkflow } =
