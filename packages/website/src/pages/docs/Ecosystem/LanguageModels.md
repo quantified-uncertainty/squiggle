@@ -17,7 +17,7 @@ This bot often produces poor results, or fails to properly call the server, so i
 
 ## Document with all documentation
 
-[All Squiggle Documentation, in One Document](/llms/documentationBundle.txt)
+[All Squiggle Documentation, in One Document](/llms/documentationBundle.md)
 
 ## Instructions for use with Claude
 

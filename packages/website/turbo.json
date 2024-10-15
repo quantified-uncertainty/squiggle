@@ -7,10 +7,9 @@
         "*.tsbuildinfo",
         ".next",
         "!.next/cache",
-        "public/llms/documentationBundle.txt",
-        "src/pages/docs/Ecosystem/LLMPrompt.md",
-        "src/pages/docs/Api/*",
-        "src/pages/docs/Ecosystem/LLMPrompt.md"
+        "public/llms/documentationBundle.md",
+        "src/pages/docs/Ecosystem/BasicPrompt.md",
+        "src/pages/docs/Api/*"
       ]
     },
     "lint": {

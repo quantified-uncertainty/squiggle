@@ -99,12 +99,7 @@ const allDocumentationItems = () => {
 const basicPrompt = readFile("./public/llms/basicPrompt.md");
 const styleGuideRaw = readFile("./public/llms/styleGuide.md");
 const documentationBundlePage = async () => {
-  const targetFilename = "./public/llms/documentationBundle.txt";
-
-  const header = `# Squiggle Documentation, One Page
-This file is auto-generated from the documentation files in the Squiggle repository. It includes our Peggy Grammar. It is meant to be given to an LLM. It is not meant to be read by humans.
---- \n\n
-`;
+  const targetFilename = "./public/llms/documentationBundle.md";
 
   // We're not using this anymore, but leaving it here in case we want it again.
   const getGrammarContent = async () => {
@@ -135,7 +130,6 @@ This file is auto-generated from the documentation files in the Squiggle reposit
   const guideContent = await getGuideContent();
   const apiContent = allDocumentationItems();
   const content =
-    header +
     basicPrompt +
     "\n\n" +
     styleGuideRaw +
@@ -161,7 +155,7 @@ notes: "This Doc is generated using a script, do not edit directly!"
 
 # LLM Basic Prompt Example
 
-The following is a prompt that we use to help LLMs, like GPT and Claude, write Squiggle code. This would ideally be provided with the full documentation, for example with [this document](/llms/documentationBundle.txt). 
+The following is a prompt that we use to help LLMs, like GPT and Claude, write Squiggle code. This would ideally be provided with the full documentation, for example with [this document](/llms/documentationBundle.md). 
 
 You can read this document in plaintext [here](/llms/BasicPrompt.md).
 
