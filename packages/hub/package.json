@@ -50,7 +50,7 @@
     "immutable": "^4.3.6",
     "invariant": "^2.2.4",
     "lodash": "^4.17.21",
-    "next": "^14.2.3",
+    "next": "^14.2.15",
     "next-auth": "^4.24.7",
     "nodemailer": "^6.9.13",
     "pako": "^2.1.0",
