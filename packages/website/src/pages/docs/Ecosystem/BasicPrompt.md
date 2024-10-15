@@ -5,9 +5,9 @@ notes: "This Doc is generated using a script, do not edit directly!"
 
 # LLM Basic Prompt Example
 
-The following is a prompt that we use to help LLMs, like GPT and Claude, write Squiggle code. This would ideally be provided with the full documentation, for example with [this document](/llms/documentationBundle.md). 
+The following is a prompt that we use to help LLMs, like GPT and Claude, write Squiggle code. This would ideally be provided with the full documentation, for example with [this document](/llms/documentationBundle.markdown). 
 
-You can read this document in plaintext [here](/llms/BasicPrompt.md).
+You can read this document in plaintext [here](/llms/BasicPrompt.markdown).
 
 ---
 
