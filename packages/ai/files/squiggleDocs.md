@@ -1,4 +1,12 @@
-# Squiggle Language Guidelines
+# Squiggle Documentation, One Page
+
+This file is auto-generated from the documentation files in the Squiggle repository. It includes our Peggy Grammar. It is meant to be given to an LLM. It is not meant to be read by humans.
+
+---
+
+Write Squiggle code, using the attached documentation for how it works.
+
+Squiggle is a very simple language. Don't try using language primitives/constructs you don't see below, or that aren't in our documentation. They are likely to fail.
 
 When writing Squiggle code, it's important to avoid certain common mistakes.
 
@@ -29,7 +37,6 @@ When writing Squiggle code, it's important to avoid certain common mistakes.
 
 1. Conditional Statements: There are no case or switch statements. Use if/else for conditional logic.
 2. There aren't for loops or mutation. Use immutable code, and List.map / List.reduce / List.reduceWhile.
-3. Remember to use `Number.sum` and `Number.product`, instead of using Reduce in those cases.
 
 ### List and Dictionary Operations
 
@@ -39,24 +46,18 @@ When writing Squiggle code, it's important to avoid certain common mistakes.
 ### Randomness and Distribution Handling
 
 1. There's no random() function. Use alternatives like sample(uniform(0,1)).
-2. When representing percentages, use "5%" instead of "0.05" for readability.
-3. The `to` syntax only works for >0 values. "4 to 10", not "0 to 10".
+2. The `to` syntax only works for >0 values. "4 to 10", not "0 to 10".
 
 ### Units and Scales
 
 1. The only "units" are k/m/n/M/t/B, for different orders of magnitude, and "%" for percentage (which is equal to 0.01).
-2. If you make a table that contains a column of similar distributions, use a scale to ensure consistent min and max.
-3. Scale.symlog() has support for negative values, Scale.log() doesn't. Scale.symlog() is often a better choice for this reason, though Scale.log() is better when you are sure values are above 0.
-4. Do use Scale.symlog() and Scale.log() on dists/plots that might need it. Many do!
 
 ### Documentation and Comments
 
 1. Tags like @name and @doc apply to the following variable, not the full file.
 2. If you use a domain for Years, try to use the Date domain, and pass in Date objects, like Date(2022) instead of 2022.
 
----
-
-This format provides a clear and organized view of the guidelines for writing Squiggle code.
+## Examples
 
 Here's are some simple example Squiggle programs:
 
@@ -300,7 +301,7 @@ f(t: [Date(2020), Date(2040)]) = {
 }
 ```
 
-````squiggle
+```squiggle
 import "hub:ozziegooen/sTest" as sTest
 @name("💰 Expected Cost ($)")
 @format("$.2s")
@@ -332,12 +333,9 @@ tests = sTest.describe(
     ),
   ]
 )
+```
 
 # Squiggle Style Guide
-
-## Limitations
-
-- There are floating point errors at high numbers (1e50 and above) and very small numbers (1e-10 and below). If you need to work with these, use logarithms if possible.
 
 ## Data and Calculations
 
@@ -345,25 +343,25 @@ tests = sTest.describe(
 
 - When using the "to" format, like "3 to 10", remember that this represents the 5th and 95th percentile. This is a very large range. Be paranoid about being overconfident and too narrow in your estimates.
 - One good technique, when you think there's a chance that you might be very wrong about a variable, is to use a mixture that contains a very wide distribution. For example, `mx([300 to 400, 50 to 5000], [0.9, 0.1])`, or `mx([50k to 60k, 1k to 1M], [0.95, 0.05])`. This way if you are caught by surprise, the wide distribution will still give you a reasonable outcome.
-- Be wary of using the uniform or the PERT distributions. The uniform distribution is mainly good for physical simulations.
+- Be wary of using the uniform or the triangular distributions. These are mainly good for physical simulations, not to represent uncertainty over many real life variables.
 - If the outcome of a model is an extreme probability (<0.01 or >0.99), be suspicious of the result. It should be very rare for an intervention to have an extreme effect or have an extreme impact on the probability of an event.
-- Be paranoid about the uncertainty ranges of your variables. If you are dealing with a highly speculative variable, the answer might have 2-8 orders of magnitude of uncertainty, like "100 to 100K". If you are dealing with a variable that's fairly certain, the answer might have 2-4 sig figs of uncertainty. Be focused on being accurate and not overconfident, not on impressing people.
-- Be careful with sigmoid functions. Sigmoid curves with distributions can have very little uncertainty in the middle, and very high uncertainty at the tails. If you are unsure about these values, consider using a mixture distribution. For example, this curve has very high certainty in the middle, and very high uncertainty at the tails: `adoption_rate(t: inputs.t) = 1 / (1 + exp(-normal(0.1, 0.08) * (t - 30)))`
+- Be paranoid about the uncertainty ranges of your variables. If you are dealing with a highly speculative variable, the answer might have 2-8 orders of magnitude of uncertainty, like `100 to 100K`. If you are dealing with a variable that's fairly certain, the answer might have 2-4 sig figs of uncertainty. Be focused on being accurate and not overconfident, not on impressing people.
+- Be careful with sigmoid functions. Sigmoid curves with distributions can have very little uncertainty in the middle, and very high uncertainty at the tails. If you are unsure about these values, consider using a mixture distribution. For example, this curve has very high certainty in the middle, and very high uncertainty at the tails: `adoption_rate(t) = 1 / (1 + exp(-normal(0.1, 0.08) * (t - 30)))`
 - Make sure to flag any variables that are highly speculative. Use @doc() to explain that the variable is speculative and to give a sense of the uncertainty. Explain your reasoning, but also warn the reader that the variable is speculative.
 
 ### Percentages / Probabilities
 
-- Use a @format() tag, like ".0%" to format percentages.
+- Use a `@format()` tag, like `.0%` to format percentages.
 - If using a distribution, remember that it shouldn't go outside of 0% and 100%. You can use beta distributions or truncate() to keep values in the correct range.
-- If you do use a beta distribution, keep in mind that there's no ({p5, p95}) format. You can use beta(alpha:number, beta:number) or beta({mean: number, stdev: number}) to create a beta distribution.
-- Write percentages as "5%" instead of "0.05". It's more readable.
+- If you do use a beta distribution, keep in mind that there's no `({p5, p95})` format. You can use `beta(alpha:number, beta:number)` or `beta({mean: number, stdev: number})` to create a beta distribution.
+- Write percentages as `5%` instead of `0.05`. It's more readable.
 
 ### Domains
 
-- Prefer using domains to throwing errors, when trying to restrict a variable. For example, don't write, "if year < 2023 then throw("Year must be 2023 or later")". Instead, write f(t: [2023, 2050]).
+- Prefer using domains to throwing errors, when trying to restrict a variable. For example, don't write, `if year < 2023 then throw("Year must be 2023 or later")`. Instead, write `f(t: [2023, 2050])`.
 - Err on the side of using domains in cases where you are unsure about the bounds of a function, instead of using if/throw or other error handling methods.
-- If you only want to set a min or max value, use a domain with Number.maxValue or -Number.maxValue as the other bound.
-- Do not use a domain with a complete range, like [-Number.maxValue, Number.maxValue]. This is redundant. Instead, just leave out the domain, like "foo(f)".
+- If you only want to set a min or max value, use a domain with `Number.maxValue` or `-Number.maxValue` as the other bound.
+- Do not use a domain with a complete range, like `[-Number.maxValue, Number.maxValue]`. This is redundant. Instead, just leave out the domain, like `f(t)`.
 
 ```squiggle
 // Do not use this
@@ -371,7 +369,7 @@ f(t: [-Number.maxValue, Number.maxValue]) + 1
 
 // Do this
 f(t) = t + 1
-````
+```
 
 ## Structure and Naming Conventions
 
@@ -386,11 +384,11 @@ inputs = {
   age = 34
 
   @name("Hourly Wage ($/hr)")
-  hourly_wage = 100
+  hourlyWage = 100
 
   @name("Coffee Price ($/cup)")
-  coffee_price = 1
-  {age, hourly_wage, health_value, coffee_price}
+  coffeePrice = 1
+  {age, hourlyWage, coffeePrice}
 }
 ```
 
@@ -400,10 +398,10 @@ Note: You cannot use tags within dicts like the following:
 // This is not valid. Do not do this.
 inputs = {
   @name("Age (years)")
-  age = 34,
+  age: 34,
 
   @name("Hourly Wage ($/hr)")
-  hourly_wage: 100,
+  hourlyWage: 100,
 }
 ```
 
@@ -422,9 +420,9 @@ inputs = {
 
 ### Naming Conventions
 
-- Use snake_case for variable names.
+- Use camelCase for variable names.
 - All variable names must start with a lowercase letter.
-- In functions, input parameters that aren't obvious should have semantic names. For example, instead of "nb" use "net_benefit".
+- In functions, input parameters that aren't obvious should have semantic names. For example, instead of `nb` use `net_benefit`.
 
 ### Dictionaries
 
@@ -432,26 +430,27 @@ inputs = {
 
 ### Unit Annotation
 
-- Squiggle does not support units directly, but you can add them to '@name()', '@doc()' tags, and add them to comments.
+- You can add unit descriptions to `@name()`, `@doc()` tags, and add them to comments.
 - In addition to regular units (like "population"), add other key variables; like the date or the type of variable. For example, use "Number of Humans (Population, 2023)" instead of just "Number of Humans". It's important to be precise and detailed when annotating variables.
+- Squiggle does support units directly, using the syntax `foo :: unit`. However, this is not recommended to use, because this is still a beta feature.
 - Show units in parentheses after the variable name, when the variable name is not obvious. For example, use "Age (years)" instead of just "Age". In comments, use the "(units)" format.
   Examples:
 
 ```squiggle
 @name("Number of Humans (2023)")
-number_of_humans = 7.8B
+numberOfHumans = 7.8B
 
 @name("Net Benefit ($)")
-net_benefit = 100M
+netBenefit = 100M
 
 @name("Temperature (°C)")
 temperature = 22
 
 @name("Piano Tuners in New York City (2023)")
 tuners = {
-    pianos_per_piano_tuners = 100 to 1k // (pianos per tuner)
-    pianos_in_nyc = 1k to 50k // (pianos)
-    pianos_in_nyc / pianos_per_piano_tuners
+    pianosPerTuner = 100 to 1k // (pianos per tuner)
+    pianosInNYC = 1k to 50k // (pianos)
+    pianosInNYC / pianosPerTuner
 }
 ```
 
@@ -459,10 +458,10 @@ tuners = {
 
 ```squiggle
 @name("Distance to Mars (km)")
-distance_mars = 225e6
+distanceMars = 225e6
 
 @name("Distance to Venus (km)")
-distance_venus = 170e6
+distanceVenus = 170e6
 ```
 
 ### Numbers
@@ -475,30 +474,31 @@ Don't use the code:
 
 ```squiggle
 @name("US Population (millions)")
-us_population = 331.9
+usPopulation = 331.9
 ```
 
 Instead, use:
 
 ```squiggle
 @name("US Population")
-us_population = 331.9M
+usPopulation = 331.9M
 ```
 
 More examples:
 
 ```squiggle
 // Correct representations
-world_population = 7.8B
-annual_budget = 1.2T
-distance_to_sun = 149.6e6  // 149.6 million kilometers
+worldPopulation = 7.8B
+annualBudget = 1.2T
+distanceToSun = 149.6e6  // 149.6 million kilometers
 
 // Incorrect representations (avoid these)
-world_population = 7800  // Unclear if it's 7800 or 7.8 billion
-annual_budget = 1200  // Unclear if it's 1200 or 1.2 trillion
+worldPopulation = 7800  // Unclear if it's 7800 or 7.8 billion
+annualBudget = 1200  // Unclear if it's 1200 or 1.2 trillion
 ```
 
 - There's no need to use @format on regular numbers. The default formatting is fairly sophistated.
+- Remember to use `Number.sum` and `Number.product`, instead of using Reduce in those cases.
 
 ### Lists of Structured Data
 
@@ -519,7 +519,7 @@ instead of:
 You can use lists instead when you have a very long list of items (20+), very few keys, and/or are generating data using functions.
 
 - Tables are a great way to display structured data.
-- You can use the '@showAs' tag to display a table if the table can show all the data. If this takes a lot of formatting work, you can move that to a helper function. Note that helper functions must be placed before the '@showAs' tag.
+- You can use the '@showAs' tag to display a table if the table can show all the data. If this takes a lot of formatting work, you can move that to a helper function. Note that helper functions must be placed before the '@showAs' tag. The `ozziegooen/helpers` library has a `dictsToTable` function that can help convert lists of dictionaries into tables.
 
 For example:
 
@@ -571,13 +571,17 @@ add(number, distribution) -> distribution
 - The `@format()` tag is not usable with dictionaries, functions, or lists. It is usable with variable assignments. Examples:
 
 ```squiggle
-net_benefit(costs, benefits) = benefits - costs // not valid for @format()
-net_benefit = benefits - costs // valid for @format()
+netBenefit(costs, benefits) = benefits - costs // not valid for @format()
+netBenefit = benefits - costs // valid for @format()
 ```
 
 - This mainly makes sense for dollar amounts, percentages, and dates. ".0%" is a decent format for percentages, and "$,.0f" can be used for dollars.
 - Choose the number of decimal places based on the stdev of the distribution or size of the number.
 - Do not use "()" instead of "-" for negative numbers. So, do not use "($,.0f" for negative numbers, use "$,.0f" instead.
+
+## Limitations
+
+- There is no bignum type. There are floating point errors at high numbers (1e50 and above) and very small numbers (1e-10 and below). If you need to work with these, use logarithms if possible.
 
 ## Comments
 
@@ -606,8 +610,8 @@ net_benefit = benefits - costs // valid for @format()
 summary = [
 "This model evaluates the cost-effectiveness of coffee consumption for a 34-year-old male, considering productivity benefits, health effects, and financial costs.",
 {
-   optimal_cups,
-   result.net_benefit,
+   optimalCups,
+   result.netBenefit,
 },
 ]
 ```
@@ -746,57 +750,10 @@ Example: (For a model with 300 lines)
 summary = [
   "## Summary
   This model evaluates the cost-effectiveness of coffee consumption for a 34-year-old male, considering productivity benefits, health effects, and financial costs.",
-  {inputs, final_answer},
+  {inputs, finalAnswer},
   ...
   ]
 ```
-
-# Roadmap
-
-Squiggle is still young. The main first goal is to become stable (to reach version 1.0). Right now we think it is useable to use for small projects, but do note that there are very likely some math bugs and performance problems.
-
-If you have preferences or suggestions for our roadmap, please say so! Post your thoughts in the Github discussion or in the Discord.
-
-Note that our short-term roadmap changes frequently, and is not captured here.
-
-## Programming Language Features
-
-- A simple type system
-- Optional and default paramaters for functions
-- Much better code editor integration
-
-## Distribution Features
-
-There are many important distribution types that Squiggle doesn't yet support. Some key functions we'd like include:
-
-[Metalog Distribution](https://en.wikipedia.org/wiki/Metalog_distribution)  
-Add the Metalog distribution, and some convenient methods for generating these distributions. This might be a bit tricky because we might need or build a library to fit data. There's no Metalog javascript library yet, this would be pretty useful. There's already a Metalog library in Python, so that one could be used for inspiration.
-
-`Distribution.smoothen(p)`  
-Takes a distribution and smoothens it. For example, [Elicit Forecast](https://forecast.elicit.org/) does something like this, with uniform distributions.
-
-## Major Future Additions
-
-**An interface to interpret & score Squiggle files**  
-Squiggle functions need to be aggregated and scored. This should be done outside one Squiggle file. Maybe this should also be done in Squiggle, or maybe it should be done using Javascript.
-
-My guess is that there should eventually be some way for people to declare that some of their Squiggle values are meant to be formally declared, to be scored and similar by others. Then other programs can read these files, and either use the values, or score them.
-
-Of course, we'd also need good math for how the scoring should work, exactly.
-
-This interface should also be able to handle changing Squiggle values. This is because people would be likely to want to update their functions over time, and that should be taken into account for scoring.
-
-**Importance & quality scores**  
-Workflows/functionality to declare the importance and coveredness of each part of the paramater space. For example, some subsets of the paramater space of a function might be much more important to get right than others. Similarly, the analyst might be much more certain about some parts than others. Ideally. they could decline sections.
-
-**Static / sensitivity analysis**  
-Guesstimate has Sensitivity analysis that's pretty useful. This could be quite feasible to add, though it will likely require some thinking.
-
-**Randomness seeds**  
-Right now, Monte Carlo simulations are totally random. It would be nicer to be able to enter a seed somehow in order to control the randomness. Or, with the same seed, the function should always return the same values. This would make debugging and similar easier.
-
-**Caching/memoization**  
-There are many performance improvements that Squiggle could have. We'll get to some of them eventually.
 
 # Language Features
 
@@ -1330,15 +1287,13 @@ Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distributio
 
 <Tabs items={["normal(5,1)", "normal(1B, 1B)"]}>
 <Tab>
-
 ```squiggle
 normalMean = 10
 normalStdDev = 2
 logOfLognormal = log(lognormal(normalMean, normalStdDev))
 [logOfLognormal, normal(normalMean, normalStdDev)]
 
-```
-
+````
 </details>
 
 ## To
@@ -1346,20 +1301,18 @@ logOfLognormal = log(lognormal(normalMean, normalStdDev))
 ```squiggle
 (5thPercentile: number) to (95thPercentile: number)
 to(5thPercentile: number, 95thPercentile: number)
-```
+````
 
 The `to` function is an easy way to generate lognormal distributions using predicted _5th_ and _95th_ percentiles. It's the same as `lognormal({p5, p95})`, but easier to write and read.
 
 <Tabs items={["5 to 10", "to(5, 10)", "1 to 10000"]}>
 <Tab>
-
 ```squiggle
 hours_the_project_will_take = 5 to 20
 chance_of_doing_anything = 0.8
 mx(hours_the_project_will_take, 0, [chance_of_doing_anything, 1 - chance_of_doing_anything])
 
-```
-
+````
 </details>
 
 <details>
@@ -1423,51 +1376,6 @@ PointSet.makeDiscrete([
 ### Arguments
 
 - `points`: An array of at least 1 coordinate.
-
-# Debugging
-
-Interactive visualizations are a primary tool for understanding Squiggle code, but there are some additional techniques that can improve the debugging process. Here are some tips and tricks:
-
-## Basic Console Logging
-
-- **Built-in Inspection:** Utilize the [`inspect()`](/docs/Api/BuiltIn#inspect) function to log any variable to the console. This function provides a detailed view of the variable's current state and is useful for tracking values throughout your code.
-- **Variable Settings Toggle:** Click on the variable menu in the Squiggle interface and select "Log to JS Console".
-
-## `Window.squiggleOutput`
-
-Squiggle pushes its output to `window.squiggleOutput`. Like with the outputs of `inspect`, you can see this in the [JS developer console](https://www.digitalocean.com/community/tutorials/how-to-use-the-javascript-developer-console).
-
-## `Danger.json`
-
-You can call [`Danger.json()`](/docs/Api/Danger#json) see variables in a format similar to JSON. This is useful for seeing all aspects of complex types like distributions.
-
-```squiggle
-sampleSet = 30 to 50
-pointSet = Sym.normal(5, 2)
-plot = Plot.dists([sampleSet, pointSet])
-fn(e) = e
-{
-  json: Danger.json([sampleSet, pointSet, plot, fn]),
-  jsonString: Danger.jsonString([pointSet, fn]),
-}
-```
-
-## Profiling
-
-In the playground configuration panel, you can enable the "Performance Profiler" checkbox. This will highlight the code in the editor according to how much time was spend on each expression.
-
-Caveats:
-
-- The code will execute slightly slower in profiler mode
-- Imports won't be profiled correctly (but slow calls of imported functions will be highlighted)
-- If the code is fast, you'll randomly get highlighted and unhighlighted results, because time measurement is imprecise
-
-If you're using Squiggle components in React, you can enable the profiler for any component that supports the `environment` prop with `environment={profile: true}`:
-
-```squiggle
-dist = normal(0, 1)
-list = List.upTo(1, 100000) -> List.length
-```
 
 # Control Flow
 

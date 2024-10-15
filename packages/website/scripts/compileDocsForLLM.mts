@@ -96,7 +96,7 @@ const allDocumentationItems = () => {
     .join("\n\n\n");
 };
 
-const promptPageRaw = readFile("./public/llms/prompt.md");
+const basicPrompt = readFile("./public/llms/basicPrompt.md");
 const styleGuideRaw = readFile("./public/llms/styleGuide.md");
 const documentationBundlePage = async () => {
   const targetFilename = "./public/llms/documentationBundle.txt";
@@ -115,12 +115,18 @@ This file is auto-generated from the documentation files in the Squiggle reposit
   const getGuideContent = async () => {
     const documentationFiles = await glob("./src/pages/docs/Guides/*.{md,mdx}");
     return Promise.all(
-      documentationFiles.map(async (filePath) => {
-        const content = readFile(filePath);
-        const withoutHeaders = removeHeaderLines(content);
-        const convertedContent = convertSquiggleEditorTags(withoutHeaders);
-        return convertedContent;
-      })
+      documentationFiles
+        .filter(
+          (filePath) =>
+            !filePath.endsWith("Roadmap.md") &&
+            !filePath.endsWith("Debugging.mdx")
+        )
+        .map(async (filePath) => {
+          const content = readFile(filePath);
+          const withoutHeaders = removeHeaderLines(content);
+          const convertedContent = convertSquiggleEditorTags(withoutHeaders);
+          return convertedContent;
+        })
     ).then((contents) => contents.join("\n\n\n"));
   };
 
@@ -128,10 +134,9 @@ This file is auto-generated from the documentation files in the Squiggle reposit
   // const grammarContent = await getGrammarContent();
   const guideContent = await getGuideContent();
   const apiContent = allDocumentationItems();
-  // const content = guideContent;
   const content =
     header +
-    promptPageRaw +
+    basicPrompt +
     "\n\n" +
     styleGuideRaw +
     "\n\n" +
@@ -148,25 +153,25 @@ This file is auto-generated from the documentation files in the Squiggle reposit
 };
 
 const promptPage = async () => {
-  console.log("Compiling prompt page...");
+  console.log("Compiling basic prompt page...");
   const introduction = `---
 description: LLM Prompt Example
 notes: "This Doc is generated using a script, do not edit directly!"
 ---
 
-# LLM Prompt Example
+# LLM Basic Prompt Example
 
 The following is a prompt that we use to help LLMs, like GPT and Claude, write Squiggle code. This would ideally be provided with the full documentation, for example with [this document](/llms/documentationBundle.txt). 
 
-You can read this document in plaintext [here](/llms/prompt.md).
+You can read this document in plaintext [here](/llms/BasicPrompt.md).
 
 ---
 
 `;
-  const target = "./src/pages/docs/Ecosystem/LLMPrompt.md";
+  const target = "./src/pages/docs/Ecosystem/BasicPrompt.md";
   fs.writeFile(
     target,
-    introduction + promptPageRaw.replace(/\`squiggle/g, "`js"),
+    introduction + basicPrompt.replace(/\`squiggle/g, "`js"),
     (err) => {
       if (err) {
         console.error(err);
