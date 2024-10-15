@@ -17,7 +17,9 @@ This bot often produces poor results, or fails to properly call the server, so i
 
 ## Document with all documentation
 
-[All Squiggle Documentation, in One Document](/llms/documentationBundle.md)
+[All Squiggle Documentation, in One Document](/llms/documentationBundle.markdown)
+
+If you want a shorter prompt, you can use [this shorter prompt](/llms/BasicPrompt.markdown).
 
 ## Instructions for use with Claude
 
