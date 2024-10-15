@@ -7,7 +7,9 @@
         "*.tsbuildinfo",
         ".next",
         "!.next/cache",
-        "public/llms/documentationBundle.md",
+        "public/llms/documentationBundle.markdown",
+        "public/llms/styleGuide.markdown",
+        "public/llms/BasicPrompt.markdown",
         "src/pages/docs/Ecosystem/BasicPrompt.md",
         "src/pages/docs/Api/*"
       ]

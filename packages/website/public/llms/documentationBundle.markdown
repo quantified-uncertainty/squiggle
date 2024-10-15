@@ -1281,13 +1281,15 @@ Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distributio
 
 <Tabs items={["normal(5,1)", "normal(1B, 1B)"]}>
 <Tab>
+
 ```squiggle
 normalMean = 10
 normalStdDev = 2
 logOfLognormal = log(lognormal(normalMean, normalStdDev))
 [logOfLognormal, normal(normalMean, normalStdDev)]
 
-````
+```
+
 </details>
 
 ## To
@@ -1295,18 +1297,20 @@ logOfLognormal = log(lognormal(normalMean, normalStdDev))
 ```squiggle
 (5thPercentile: number) to (95thPercentile: number)
 to(5thPercentile: number, 95thPercentile: number)
-````
+```
 
 The `to` function is an easy way to generate lognormal distributions using predicted _5th_ and _95th_ percentiles. It's the same as `lognormal({p5, p95})`, but easier to write and read.
 
 <Tabs items={["5 to 10", "to(5, 10)", "1 to 10000"]}>
 <Tab>
+
 ```squiggle
 hours_the_project_will_take = 5 to 20
 chance_of_doing_anything = 0.8
 mx(hours_the_project_will_take, 0, [chance_of_doing_anything, 1 - chance_of_doing_anything])
 
-````
+```
+
 </details>
 
 <details>
