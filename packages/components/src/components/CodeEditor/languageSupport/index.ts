@@ -59,8 +59,8 @@ export function getLezerParser({
         VariableName: t.constant(t.variableName),
         [[
           "Import/*/VariableName",
-          "Program/*/LetStatement/VariableName",
-          "Program/*/DefunStatement/VariableName",
+          "Program/LetStatement/VariableName",
+          "Program/DefunStatement/VariableName",
         ].join(" ")]: [hoverableTag, t.constant(t.variableName)],
         Identifier: t.variableName,
         Field: t.variableName,
