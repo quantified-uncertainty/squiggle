@@ -5,6 +5,7 @@ import { FnDocumentation } from "@quri/squiggle-lang";
 
 import { ModulePage, modulePages } from "../templates.mjs";
 import { generateModuleContent } from "./generateModuleContent.mjs";
+import { writeFile } from "./utils";
 
 const directoryPath = `./src/pages/docs/Api`;
 if (!fs.existsSync(directoryPath)) {
@@ -27,23 +28,17 @@ function toMarkdown(documentation: FnDocumentation) {
 `;
 }
 
-const generateModulePage = async (
+async function generateModulePage(
   { name, description, intro, sections }: ModulePage,
   itemFn = toMarkdown
-) => {
+) {
   const content = generateModuleContent(
     { name, description, intro, sections },
     itemFn
   );
 
-  fs.writeFile(targetFilename(name), content, (err) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    console.log(`Content written to ${targetFilename(name)}`);
-  });
-};
+  writeFile(targetFilename(name), content);
+}
 
 const generateMetaPage = async ({ pages }: { pages: ModulePage[] }) => {
   function convertToKeyValuePairs(names: string[]): { [key: string]: string } {
@@ -62,13 +57,7 @@ const generateMetaPage = async ({ pages }: { pages: ModulePage[] }) => {
     2
   )}`;
 
-  fs.writeFile(fileName, content, (err) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    console.log(`Content written to ${targetFilename(fileName)}`);
-  });
+  writeFile(fileName, content);
 };
 
 for (const modulePage of modulePages) {

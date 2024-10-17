@@ -329,6 +329,7 @@ tests = sTest.describe(
 )
 ```
 
+
 # Squiggle Style Guide
 
 ## Data and Calculations
@@ -749,11 +750,12 @@ summary = [
   ]
 ```
 
+
 # Language Features
 
 ## Program Structure
 
-A Squiggle program consists of a series of definitions (for example, `x = 5`, `f(x) = x * x`). This can optionally conclude with an _end expression_.
+A Squiggle program consists of a series of definitions (for example, `x = 5`, `f(x) = x * x`). This can optionally conclude with an *end expression*.
 
 If an end expression is provided, it becomes the evaluated output of the program, and only this result will be displayed in the viewer. Otherwise, all top-level variable definitions will be displayed.
 
@@ -802,7 +804,7 @@ In the above example, the `argPlusX` function captures the value of `x` from lin
 
 ## Unit Type Annotations
 
-Variable declarations may optionally be annotated with _unit types_, such as `kilograms` or `dollars`. Unit types are declared with `::`, for example:
+Variable declarations may optionally be annotated with *unit types*, such as `kilograms` or `dollars`. Unit types are declared with `::`, for example:
 
 ```squiggle
 distance :: meters = 100
@@ -902,6 +904,8 @@ c = 5 to 10 // namespace not required
 
 Squiggle supports the functions [throw](/docs/Api/Common#throw) and [try](/docs/Api/Common#try) for simple error handling. It does not yet have proper error types.
 
+
+
 # Gotchas
 
 ## Point Set Distributions Conversions
@@ -942,6 +946,8 @@ symbolicDist = Sym.normal(5, 2)
 ]
 ```
 
+
+
 # Functions
 
 ## Basic Syntax
@@ -966,7 +972,6 @@ multiplyBySix(x) = {
 In Squiggle, you can define anonymous functions using the `{|...| ...}` syntax. For example, `myMultiply(x, y) = x * y` and `myMultiply = {|x, y| x * y}` are equivalent.
 
 Squiggle functions are first-class values, meaning you can assign them to variables, pass them as arguments to other functions, and return them from other functions.
-
 ```squiggle
 {|t| normal(t^2, t^1.2+.01)}
 ```
@@ -1053,6 +1058,8 @@ myMultiply.parameters[0]
 ```
 
 Domains and parameter names can be accessed by the `fn.parameters` property.
+
+
 
 # Distribution Functions
 
@@ -1265,6 +1272,8 @@ You can cut off from both sides
 
 <SquiggleEditor defaultCode="truncate(Sym.normal(5,3), 1, 7)" />
 
+
+
 # Distribution Creation
 
 ## Normal
@@ -1280,16 +1289,13 @@ normal({p25: number, p75: number})
 Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distribution) with the given mean and standard deviation.
 
 <Tabs items={["normal(5,1)", "normal(1B, 1B)"]}>
-<Tab>
-
-```squiggle
+  <Tabs.Tab>
+    ```squiggle
 normalMean = 10
 normalStdDev = 2
 logOfLognormal = log(lognormal(normalMean, normalStdDev))
 [logOfLognormal, normal(normalMean, normalStdDev)]
-
 ```
-
 </details>
 
 ## To
@@ -1299,18 +1305,15 @@ logOfLognormal = log(lognormal(normalMean, normalStdDev))
 to(5thPercentile: number, 95thPercentile: number)
 ```
 
-The `to` function is an easy way to generate lognormal distributions using predicted _5th_ and _95th_ percentiles. It's the same as `lognormal({p5, p95})`, but easier to write and read.
+The `to` function is an easy way to generate lognormal distributions using predicted _5th_ and _95th_ percentiles. It's the same as ``lognormal({p5, p95})``, but easier to write and read.
 
 <Tabs items={["5 to 10", "to(5, 10)", "1 to 10000"]}>
-<Tab>
-
-```squiggle
+  <Tabs.Tab>
+    ```squiggle
 hours_the_project_will_take = 5 to 20
 chance_of_doing_anything = 0.8
 mx(hours_the_project_will_take, 0, [chance_of_doing_anything, 1 - chance_of_doing_anything])
-
 ```
-
 </details>
 
 <details>
@@ -1323,7 +1326,7 @@ forecast = 3 to 30
 chance_completely_wrong = 0.05
 forecast_if_completely_wrong = normal({p5:-100, p95:200})
 mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_completely_wrong])
-````
+```
 
 </details>
 ## SampleSet.fromList
@@ -1332,7 +1335,7 @@ mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_co
 SampleSet.fromList(samples:number[])
 ```
 
-Creates a sample set distribution using an array of samples.
+Creates a sample set distribution using an array of samples.  
 
 Samples are converted into PDFs automatically using [kernel density estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation) and an approximated bandwidth. This is an approximation and can be error-prone.
 
@@ -1374,6 +1377,8 @@ PointSet.makeDiscrete([
 ### Arguments
 
 - `points`: An array of at least 1 coordinate.
+
+
 
 # Control Flow
 
@@ -1508,6 +1513,8 @@ xs = List.upTo(0,10)
 ys = List.map(xs, {|x| f(x)})
 ```
 
+
+
 # Known Bugs
 
 Much of the Squiggle math is imprecise. This can cause significant errors, so watch out.
@@ -1546,6 +1553,8 @@ symbolicDist = 5 to 50333333
 sampleSetDist = SampleSet.fromDist(symbolicDist)
 [mean(symbolicDist), mean(sampleSetDist), symbolicDist, sampleSetDist]
 ```
+
+
 
 # Basic Types
 
@@ -1609,7 +1618,6 @@ d
 ```
 
 See these pages for more information on distributions:
-
 - [Distribution Creation](/docs/Guides/DistributionCreation)
 - [Distribution Functions Guide](/docs/Guides/Functions)
 - [Distribution API](/docs/Api/Dist)
@@ -1618,7 +1626,7 @@ There are [3 internal representation formats for distributions](docs/Discussions
 
 ## Lists
 
-Squiggle lists can contain items of any type, similar to lists in Python. You can access individual list elements with `[number]` notation, starting from `0`.
+Squiggle lists can contain items of any type, similar to lists in Python. You can access individual list elements with `[number]` notation, starting from `0`. 
 
 Squiggle is an immutable language, so you cannot modify lists in-place. Instead, you can use functions such as `List.map` or `List.reduce` to create new lists.  
 [List API](/docs/Api/List)
@@ -1629,6 +1637,7 @@ first = myList[0] // 1
 bar = myList[3][1] // "bar"
 ```
 
+
 ## Dictionaries
 
 Squiggle dictionaries work similarly to Python dictionaries or Javascript objects. Like lists, they can contain values of any type. Keys must be strings.  
@@ -1638,6 +1647,7 @@ Squiggle dictionaries work similarly to Python dictionaries or Javascript object
 d = {dist: triangular(0, 1, 2), weight: 0.25, innerDict: {foo: "bar"}}
 ```
 
+
 ## Other types
 
 Other Squiggle types include:
@@ -1646,21 +1656,21 @@ Other Squiggle types include:
 - [Plots](/docs/Api/Plot)
 - [Scales](/docs/Api/Plot#scales)
 - [Domains](#parameter-annotations)---
-  description:
-
+description: 
 ---
-
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Common
-
 Functions that work on many different types of values. Also see the experimental [JSON functions](/docs/Api/Danger#json).
 
 Common.equal ==: (any, any) => Bool
 Returns true if the two values passed in are equal, false otherwise. Does not work for Squiggle functions, but works for most other types.
 
+
 Common.unequal !=: (any, any) => Bool
+
 
 Common.typeOf: (any) => String
 Returns the type of the value passed in as a string. This is useful when you want to treat a value differently depending on its type.
@@ -1669,48 +1679,58 @@ myBool = typeOf(true)
 myDist = typeOf(5 to 10)
 myFn = typeOf({|e| e})
 
+
 Common.inspect: ('A, message?: String) => 'A
 Runs Console.log() in the [Javascript developer console](https://www.digitalocean.com/community/tutorials/how-to-use-the-javascript-developer-console) and returns the value passed in.
+
 
 Common.throw: (message?: String) => any
 Throws an error. You can use `try` to recover from this error.
 
+
 Common.try: (fn: () => 'A, fallbackFn: () => 'B) => 'A|'B
 Try to run a function and return its result. If the function throws an error, return the result of the fallback function instead.
 
+
+
 ---
-
-## description:
-
+description: 
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Boolean
 
+
+
 Boolean.or ||: (Bool, Bool) => Bool
+
 
 Boolean.and &&: (Bool, Bool) => Bool
 
+
 Boolean.not !: (Bool) => Bool
 
+
+
 ---
-
-## description: Dates are a simple date time type.
-
+description: Dates are a simple date time type.
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Date
-
 A simple date type. Dates are stored as milliseconds since the epoch. They are immutable, and all functions that modify dates return a new date. Used with [Duration](./Duration) values.
 
     Dates can be useful for modeling values that change over time. Below is a simple example of a function that returns a normal distribution that changes over time, based on the number of years passed since 2020.
-
 <SquiggleEditor
 defaultCode={`f(t: [Date(2020), Date(2040)]) = {
   yearsPassed = toYears(t - Date(2020))
   normal({mean: yearsPassed ^ 2, stdev: yearsPassed^1.3+1})
 }`}/>
+    
 
 ## Constructors
 
@@ -1719,6 +1739,7 @@ d1 = Date.make("2020-05-12")
 d2 = Date.make(2020, 5, 10)
 d3 = Date.make(2020.5)
 
+
 ## Conversions
 
 Date.fromUnixTime: (Number) => Date
@@ -1726,6 +1747,7 @@ Date.fromUnixTime(1589222400)
 
 Date.toUnixTime: (Date) => Number
 Date.toUnixTime(Date.make(2020, 5, 12))
+
 
 ## Algebra
 
@@ -1739,6 +1761,7 @@ Date.add +: (Date, Duration) => Date, (Duration, Date) => Date
 Date.make(2020, 5, 12) + 20years
 20years + Date.make(2020, 5, 12)
 
+
 ## Comparison
 
 Date.smaller <: (Date, Date) => Bool
@@ -1749,20 +1772,22 @@ Date.smallerEq <=: (Date, Date) => Bool
 
 Date.largerEq >=: (Date, Date) => Bool
 
+
 ## Other
 
 Date.rangeDomain: (min: Date, min: Date) => Domain
 Date.rangeDomain(Date(2000), Date(2010))
 
+
+
 ---
-
-## description: Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.
-
+description: Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Dict
-
 Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.
 
 ## Conversions
@@ -1772,9 +1797,10 @@ Dict.toList({a: 1, b: 2})
 
 Dict.fromList: (List([String, 'A])) => Dict('A)
 Dict.fromList([
-["foo", 3],
-["bar", 20],
-]) // {foo: 3, bar: 20}
+      ["foo", 3],
+      ["bar", 20],
+    ]) // {foo: 3, bar: 20}
+
 
 ## Transformations
 
@@ -1807,6 +1833,7 @@ Creates a new dictionary that excludes the omitted keys.
 data = { a: 1, b: 2, c: 3, d: 4 }
 Dict.omit(data, ["b", "d"]) // {a: 1, c: 3}
 
+
 ## Queries
 
 Dict.has: (Dict(any), key: String) => Bool
@@ -1826,21 +1853,22 @@ Creates a new dictionary that only includes the picked keys.
 data = { a: 1, b: 2, c: 3, d: 4 }
 Dict.pick(data, ["a", "c"]) // {a: 1, c: 3}
 
+
+
 ---
-
-## description: Distributions are the flagship data type in Squiggle. The distribution type is a generic data type that contains one of three different formats of distributions.
-
+description: Distributions are the flagship data type in Squiggle. The distribution type is a generic data type that contains one of three different formats of distributions.
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Dist
-
 Distributions are the flagship data type in Squiggle. The distribution type is a generic data type that contains one of three different formats of distributions.
 
 These subtypes are [point set](/docs/api/DistPointSet), [sample set](/docs/api/DistSampleSet), and [symbolic](/docs/api/Sym). The first two of these have a few custom functions that only work on them. You can read more about the differences between these formats [here](/docs/Discussions/Three-Formats-Of-Distributions).
 
 Several functions below only can work on particular distribution formats. For example, scoring and pointwise math requires the point set format. When this happens, the types are automatically converted to the correct format. These conversions are lossy.
-
+    
 Distributions are created as [sample sets](/DistSampleSet) by default. To create a symbolic distribution, use `Sym.` namespace: `Sym.normal`, `Sym.beta` and so on.
 
 ## Distributions
@@ -1854,8 +1882,8 @@ Dist.make(5)
 Dist.make(normal({p5: 4, p95: 10}))
 
 Dist.mixture: (List(Dist|Number), weights?: List(Number)) => Dist, (Dist|Number) => Dist, (Dist|Number, Dist|Number, weights?: [Number, Number]) => Dist, (Dist|Number, Dist|Number, Dist|Number, weights?: [Number, Number, Number]) => Dist, (Dist|Number, Dist|Number, Dist|Number, Dist|Number, weights?: [Number, Number, Number, Number]) => Dist, (Dist|Number, Dist|Number, Dist|Number, Dist|Number, Dist|Number, weights?: [Number, Number, Number, Number, Number]) => Dist
-The `mixture` function takes a list of distributions and a list of weights, and returns a new distribution that is a mixture of the distributions in the list. The weights should be positive numbers that sum to 1. If no weights are provided, the function will assume that all distributions have equal weight.
-
+The ``mixture`` function takes a list of distributions and a list of weights, and returns a new distribution that is a mixture of the distributions in the list. The weights should be positive numbers that sum to 1. If no weights are provided, the function will assume that all distributions have equal weight.
+    
 Note: If you want to pass in over 5 distributions, you must use the list syntax.
 mixture(1,normal(5,2))
 mixture(normal(5,2), normal(10,2), normal(15,2), [0.3, 0.5, 0.2])
@@ -1909,6 +1937,7 @@ bernoulli(0.5)
 Dist.triangular: (min: Number, mode: Number, max: Number) => SampleSetDist
 triangular(3, 5, 10)
 
+
 ## Basic Functions
 
 Dist.mean: (Dist) => Number
@@ -1948,11 +1977,12 @@ Dist.truncateLeft: (Dist, Number) => Dist
 
 Dist.truncateRight: (Dist, Number) => Dist
 
+
 ## Algebra (Dist)
 
 Dist.add +: (Dist, Number) => Dist, (Number, Dist) => Dist, (Dist, Dist) => Dist
 
-Dist.multiply \*: (Dist, Number) => Dist, (Number, Dist) => Dist, (Dist, Dist) => Dist
+Dist.multiply *: (Dist, Number) => Dist, (Number, Dist) => Dist, (Dist, Dist) => Dist
 
 Dist.subtract -: (Dist, Number) => Dist, (Number, Dist) => Dist, (Dist, Dist) => Dist
 
@@ -1968,6 +1998,7 @@ Dist.log10: (Dist) => Dist
 
 Dist.unaryMinus -: (Dist) => Dist
 
+
 ## Algebra (List)
 
 Dist.sum: (List(Dist|Number)) => Dist
@@ -1980,11 +2011,12 @@ Dist.cumprod: (List(Dist|Number)) => List(Dist)
 
 Dist.diff: (List(Dist|Number)) => List(Dist)
 
+
 ## Pointwise Algebra
 
 Pointwise arithmetic operations cover the standard arithmetic operations, but work in a different way than the regular operations. These operate on the y-values of the distributions instead of the x-values. A pointwise addition would add the y-values of two distributions.
 
-The infixes `.+`,`.-`, `.*`, `./`, `.^` are supported for their respective operations. `Mixture` works using pointwise addition.
+The infixes `.+`,`.-`, `.*`, `./`, `.^` are supported for their respective operations. `Mixture` works using pointwise addition. 
 
 Pointwise operations work on Point Set distributions, so will convert other distributions to Point Set ones first. Pointwise arithmetic operations typically return unnormalized or completely invalid distributions. For example, the operation{" "} <code>normal(5,2) .- uniform(10,12)</code> results in a distribution-like object with negative probability mass.
 
@@ -1997,6 +2029,7 @@ Dist.dotSubtract: (Dist, Number) => Dist, (Number, Dist) => Dist, (Dist, Dist) =
 Dist.dotDivide: (Dist, Number) => Dist, (Number, Dist) => Dist, (Dist, Dist) => Dist
 
 Dist.dotPow: (Dist, Number) => Dist, (Number, Dist) => Dist, (Dist, Dist) => Dist
+
 
 ## Normalization
 
@@ -2013,11 +2046,13 @@ Check if a distribution is normalized. This only impacts Point Set distributions
 Dist.integralSum: (Dist) => Number
 Get the sum of the integral of a distribution. If the distribution is normalized, this will be 1.0. This is useful for understanding unnormalized distributions.
 
+
 ## Utility
 
 Dist.sparkline: (Dist, Number?) => String
 
-Produce a sparkline of length `n`. For example, `▁▁▁▁▁▂▄▆▇██▇▆▄▂▁▁▁▁▁`. These can be useful for testing or quick visualizations that can be copied and pasted into text.
+Produce a sparkline of length ``n``. For example, `▁▁▁▁▁▂▄▆▇██▇▆▄▂▁▁▁▁▁`. These can be useful for testing or quick visualizations that can be copied and pasted into text.
+
 
 ## Scoring
 
@@ -2031,20 +2066,20 @@ Dist.logScore: ({estimate: Dist, answer: Dist|Number, prior?: Dist}) => Number
 A log loss score. Often that often acts as a [scoring rule](https://en.wikipedia.org/wiki/Scoring_rule). Useful when evaluating the accuracy of a forecast.
 
     Note that it is fairly slow.
-
 Dist.logScore({estimate: Sym.normal(5,2), answer: Sym.normal(5.2,1), prior: Sym.normal(5.5,3)})
 Dist.logScore({estimate: Sym.normal(5,2), answer: Sym.normal(5.2,1)})
 Dist.logScore({estimate: Sym.normal(5,2), answer: 4.5})
 
+
+
 ---
-
-## description: Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers.
-
+description: Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers.
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # SampleSet
-
 Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers. It's useful to distinguish point set distributions from arbitrary lists of numbers to make it clear which functions are applicable.
 
 Monte Carlo calculations typically result in sample set distributions.
@@ -2059,6 +2094,7 @@ SampleSet(5)
 SampleSet.make([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])
 SampleSet.make({|i| sample(normal(5,2))})
 
+
 ## Conversions
 
 SampleSet.fromDist: (Dist) => SampleSetDist
@@ -2066,7 +2102,7 @@ Converts any distribution type into a sample set distribution.
 SampleSet.fromDist(Sym.normal(5,2))
 
 SampleSet.fromNumber: (Number) => SampleSetDist
-Convert a number into a sample set distribution that contains `n` copies of that number. `n` refers to the model sample count.
+Convert a number into a sample set distribution that contains ``n`` copies of that number. ``n`` refers to the model sample count.
 SampleSet.fromNumber(3)
 
 SampleSet.fromList: (List(Number)) => SampleSetDist
@@ -2074,12 +2110,13 @@ Convert a list of numbers into a sample set distribution.
 SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])
 
 SampleSet.toList: (SampleSetDist) => List(Number)
-Gets the internal samples of a sampleSet distribution. This is separate from the `sampleN()` function, which would shuffle the samples. `toList()` maintains order and length.
+Gets the internal samples of a sampleSet distribution. This is separate from the ``sampleN()`` function, which would shuffle the samples. ``toList()`` maintains order and length.
 SampleSet.toList(SampleSet.fromDist(normal(5,2)))
 
 SampleSet.fromFn: ((index?: Number) => Number) => SampleSetDist
-Convert a function into a sample set distribution by calling it `n` times.
+Convert a function into a sample set distribution by calling it ``n`` times.
 SampleSet.fromFn({|i| sample(normal(5,2))})
+
 
 ## Transformations
 
@@ -2090,38 +2127,39 @@ SampleSet.map(SampleSet.fromDist(normal(5,2)), {|x| x + 1})
 SampleSet.map2: (SampleSetDist, SampleSetDist, fn: (Number, Number) => Number) => SampleSetDist
 Transforms two sample set distributions by applying a function to each pair of samples. Returns a new sample set distribution.
 SampleSet.map2(
-SampleSet.fromDist(normal(5,2)),
-SampleSet.fromDist(normal(5,2)),
-{|x, y| x + y}
+  SampleSet.fromDist(normal(5,2)),
+  SampleSet.fromDist(normal(5,2)),
+  {|x, y| x + y}
 )
 
 SampleSet.map3: (SampleSetDist, SampleSetDist, SampleSetDist, fn: (Number, Number, Number) => Number) => SampleSetDist
 SampleSet.map3(
-SampleSet.fromDist(normal(5,2)),
-SampleSet.fromDist(normal(5,2)),
-SampleSet.fromDist(normal(5,2)),
-{|x, y, z| max([x,y,z])}
+  SampleSet.fromDist(normal(5,2)),
+  SampleSet.fromDist(normal(5,2)),
+  SampleSet.fromDist(normal(5,2)),
+  {|x, y, z| max([x,y,z])}
 )
 
 SampleSet.mapN: (List(SampleSetDist), fn: (List(Number)) => Number) => SampleSetDist
 SampleSet.mapN(
-[
-SampleSet.fromDist(normal(5,2)),
-SampleSet.fromDist(normal(5,2)),
-SampleSet.fromDist(normal(5,2))
-],
-max
+  [
+    SampleSet.fromDist(normal(5,2)),
+    SampleSet.fromDist(normal(5,2)),
+    SampleSet.fromDist(normal(5,2))
+  ],
+  max
 )
 
+
+
 ---
-
-## description: The Sym module provides functions to create some common symbolic distributions.
-
+description: The Sym module provides functions to create some common symbolic distributions.
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Sym
-
 Symbolic Distributions. All these functions match the functions for creating sample set distributions, but produce symbolic distributions instead. Symbolic distributions won't capture correlations, but are more performant than sample distributions.
 
 Sym.normal: (Number, Number) => SymbolicDist, ({p5: Number, p95: Number}) => SymbolicDist, ({p10: Number, p90: Number}) => SymbolicDist, ({p25: Number, p75: Number}) => SymbolicDist, ({mean: Number, stdev: Number}) => SymbolicDist
@@ -2131,6 +2169,7 @@ Sym.normal({ p10: 4, p90: 10 })
 Sym.normal({ p25: 4, p75: 10 })
 Sym.normal({ mean: 5, stdev: 2 })
 
+
 Sym.lognormal: (Number, Number) => SymbolicDist, ({p5: Number, p95: Number}) => SymbolicDist, ({p10: Number, p90: Number}) => SymbolicDist, ({p25: Number, p75: Number}) => SymbolicDist, ({mean: Number, stdev: Number}) => SymbolicDist
 Sym.lognormal(0.5, 0.8)
 Sym.lognormal({ p5: 4, p95: 10 })
@@ -2138,44 +2177,54 @@ Sym.lognormal({ p10: 4, p90: 10 })
 Sym.lognormal({ p25: 4, p75: 10 })
 Sym.lognormal({ mean: 5, stdev: 2 })
 
+
 Sym.uniform: (Number, Number) => SymbolicDist
 Sym.uniform(10, 12)
+
 
 Sym.beta: (Number, Number) => SymbolicDist, ({mean: Number, stdev: Number}) => SymbolicDist
 Sym.beta(20, 25)
 Sym.beta({ mean: 0.39, stdev: 0.1 })
 
+
 Sym.cauchy: (Number, Number) => SymbolicDist
 Sym.cauchy(5, 1)
+
 
 Sym.gamma: (Number, Number) => SymbolicDist
 Sym.gamma(5, 1)
 
+
 Sym.logistic: (Number, Number) => SymbolicDist
 Sym.logistic(5, 1)
+
 
 Sym.exponential: (Number) => SymbolicDist
 Sym.exponential(2)
 
+
 Sym.bernoulli: (Number) => SymbolicDist
 Sym.bernoulli(0.5)
+
 
 Sym.pointMass: (Number) => SymbolicDist
 Point mass distributions are already symbolic, so you can use the regular `pointMass` function.
 pointMass(0.5)
 
+
 Sym.triangular: (Number, Number, Number) => SymbolicDist
 Sym.triangular(3, 5, 10)
 
+
+
 ---
-
-## description: Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
-
+description: Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # PointSet
-
 Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
 
 One complication is that it's possible to represent invalid probability distributions in the point set format. For example, you can represent shapes with negative values, or shapes that are not normalized.
@@ -2188,19 +2237,20 @@ PointSet(3)
 
 PointSet.makeContinuous: (List({x: Number, y: Number})) => PointSetDist
 PointSet.makeContinuous([
-{x: 0, y: 0.2},
-{x: 1, y: 0.7},
-{x: 2, y: 0.8},
-{x: 3, y: 0.2}
+  {x: 0, y: 0.2},
+  {x: 1, y: 0.7},
+  {x: 2, y: 0.8},
+  {x: 3, y: 0.2}
 ])
 
 PointSet.makeDiscrete: (List({x: Number, y: Number})) => PointSetDist
 PointSet.makeDiscrete([
-{x: 0, y: 0.2},
-{x: 1, y: 0.7},
-{x: 2, y: 0.8},
-{x: 3, y: 0.2}
+  {x: 0, y: 0.2},
+  {x: 1, y: 0.7},
+  {x: 2, y: 0.8},
+  {x: 3, y: 0.2}
 ])
+
 
 ## Conversions
 
@@ -2217,28 +2267,32 @@ PointSet.downsample(PointSet.fromDist(normal(5,2)), 50)
 PointSet.support: (PointSetDist) => {points: List(Number), segments: List([Number, Number])}
 PointSet.support(PointSet.fromDist(normal(5,2)))
 
+
 ## Transformations
 
 PointSet.mapY: (PointSetDist, fn: (Number) => Number) => PointSetDist
 PointSet.mapY(mx(Sym.normal(5,2)), {|x| x + 1})
 
+
+
 ---
-
-## description: Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
-
+description: Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Duration
-
 Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc. Durations are typically used with [Date](./Date) values.
 
+
 | **Unit Name** | **Example** | **Convert Number to Duration** | **Convert Duration to Number** |
-| ------------- | ----------- | ------------------------------ | ------------------------------ |
-| Minute        | `5minutes`  | `fromMinutes(number)`          | `toMinutes(duration)`          |
-| Hour          | `5hour`     | `fromHours(number)`            | `toHours(duration)`            |
-| Day           | `5days`     | `fromDays(number)`             | `toDays(duration)`             |
-| Year          | `5years`    | `fromYears(number)`            | `toYears(duration)`            |
+|---------------|----------------------------|--------------------------------------------|--------------------------------------------|
+| Minute        | `5minutes`                   | `fromMinutes(number)`                      | `toMinutes(duration)`                      |
+| Hour          | `5hour`                     | `fromHours(number)`                        | `toHours(duration)`                        |
+| Day           | `5days`                      | `fromDays(number)`                         | `toDays(duration)`                         |
+| Year          | `5years`                     | `fromYears(number)`                        | `toYears(duration)`                        |
+
 
 ## Constructors
 
@@ -2254,6 +2308,7 @@ Duration.fromDays(5)
 Duration.fromYears: (Number) => Duration
 Duration.fromYears(5)
 
+
 ## Conversions
 
 Duration.toMinutes: (Duration) => Number
@@ -2268,6 +2323,7 @@ Duration.toDays(5minutes)
 Duration.toYears: (Duration) => Number
 Duration.toYears(5minutes)
 
+
 ## Algebra
 
 Duration.unaryMinus -: (Duration) => Duration
@@ -2279,15 +2335,16 @@ Duration.add +: (Duration, Duration) => Duration
 Duration.subtract -: (Duration, Duration) => Duration
 5minutes - 10minutes
 
-Duration.multiply _: (Duration, Number) => Duration, (Number, Duration) => Duration
-5minutes _ 10
-10 \* 5minutes
+Duration.multiply *: (Duration, Number) => Duration, (Number, Duration) => Duration
+5minutes * 10
+10 * 5minutes
 
 Duration.divide /: (Duration, Duration) => Number
 5minutes / 2minutes
 
 Duration.divide /: (Duration, Duration) => Number
 5minutes / 2minutes
+
 
 ## Comparison
 
@@ -2299,15 +2356,16 @@ Duration.smallerEq <=: (Duration, Duration) => Bool
 
 Duration.largerEq >=: (Duration, Duration) => Bool
 
+
+
 ---
-
-## description: Lists are a simple data structure that can hold any type of value. They are similar to arrays in Javascript or lists in Python.
-
+description: Lists are a simple data structure that can hold any type of value. They are similar to arrays in Javascript or lists in Python.
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # List
-
 Lists are a simple data structure that can hold any type of value. They are similar to arrays in Javascript or lists in Python.
 
 ```squiggle
@@ -2326,6 +2384,7 @@ List.make(2, {|index| index+1})
 
 List.upTo: (low: Number, high: Number) => List(Number)
 List.upTo(1,4)
+
 
 ## Modifications
 
@@ -2356,10 +2415,11 @@ List.zip([1,3,4,20], [2,4,5,6])
 List.unzip: (List(['A, 'B])) => [List('A), List('B)]
 List.unzip([[1,2], [2,3], [4,5]])
 
+
 ## Filtering
 
 List.slice: (List('A), startIndex: Number, endIndex?: Number) => List('A)
-Returns a copy of the list, between the selected `start` and `end`, end not included. Directly uses the [Javascript implementation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice) underneath.
+Returns a copy of the list, between the selected ``start`` and ``end``, end not included. Directly uses the [Javascript implementation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice) underneath.
 List.slice([1,2,5,10],1,3)
 
 List.uniq: (List('A)) => List('A)
@@ -2372,6 +2432,7 @@ List.uniqBy([[1,5], [3,5], [5,7]], {|x| x[1]})
 
 List.filter: (List('A), fn: ('A) => Bool) => List('A)
 List.filter([1,4,5], {|x| x>3})
+
 
 ## Queries
 
@@ -2410,6 +2471,7 @@ List.sample([1,4,5])
 List.sampleN: (List('A), n: Number) => List('A)
 List.sampleN([1,4,5], 2)
 
+
 ## Functional Transformations
 
 List.map: (List('A), ('A, index?: Number) => 'B) => List('B)
@@ -2426,67 +2488,78 @@ List.reduceReverse([1,4,5], 2, {|acc, el| acc-el})
 
 List.reduceWhile: (List('B), initialValue: 'A, callbackFn: (accumulator: 'A, currentValue: 'B) => 'A, conditionFn: ('A) => Bool) => 'A
 Works like `reduce`, but stops when the condition is no longer met. This is useful, in part, for simulating processes that need to stop based on the process state.
-
+    
 // Adds first two elements, returns `11`.
 List.reduceWhile([5, 6, 7], 0, {|acc, curr| acc + curr}, {|acc| acc < 15})
 
 // Adds first two elements, returns `{ x: 11 }`.
 List.reduceWhile(
-[5, 6, 7],
-{ x: 0 },
-{|acc, curr| { x: acc.x + curr }},
-{|acc| acc.x < 15}
+  [5, 6, 7],
+  { x: 0 },
+  {|acc, curr| { x: acc.x + curr }},
+  {|acc| acc.x < 15}
 )
 
+
+
+
 ---
-
-## description: Simple constants and functions for math in Squiggle.
-
+description: Simple constants and functions for math in Squiggle.
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Math
 
 ## Constants
 
-| Variable Name  | Number Name                                                                       | Value                |
-| -------------- | --------------------------------------------------------------------------------- | -------------------- |
-| `Math.e`       | Euler's number                                                                    | ≈ 2.718281828459045  |
-| `Math.ln2`     | Natural logarithm of 2                                                            | ≈ 0.6931471805599453 |
-| `Math.ln10`    | Natural logarithm of 10                                                           | ≈ 2.302585092994046  |
-| `Math.log2e`   | Base 2 logarithm of E                                                             | ≈ 1.4426950408889634 |
-| `Math.log10e`  | Base 10 logarithm of E                                                            | ≈ 0.4342944819032518 |
-| `Math.pi`      | Pi - ratio of the circumference to the diameter of a circle                       | ≈ 3.141592653589793  |
-| `Math.sqrt1_2` | Square root of 1/2                                                                | ≈ 0.7071067811865476 |
-| `Math.sqrt2`   | Square root of 2                                                                  | ≈ 1.4142135623730951 |
-| `Math.phi`     | Phi is the golden ratio.                                                          | 1.618033988749895    |
-| `Math.tau`     | Tau is the ratio constant of a circle's circumference to radius, equal to 2 \* pi | 6.283185307179586    |
+| Variable Name    | Number Name                                                                      | Value                |
+|------------------|----------------------------------------------------------------------------------|----------------------|
+| `Math.e`       | Euler's number                                                                   | ≈ 2.718281828459045  |
+| `Math.ln2`     | Natural logarithm of 2                                                           | ≈ 0.6931471805599453 |
+| `Math.ln10`    | Natural logarithm of 10                                                          | ≈ 2.302585092994046  |
+| `Math.log2e`   | Base 2 logarithm of E                                                            | ≈ 1.4426950408889634 |
+| `Math.log10e`  | Base 10 logarithm of E                                                           | ≈ 0.4342944819032518 |
+| `Math.pi`      | Pi - ratio of the circumference to the diameter of a circle                      | ≈ 3.141592653589793  |
+| `Math.sqrt1_2` | Square root of 1/2                                                               | ≈ 0.7071067811865476 |
+| `Math.sqrt2`   | Square root of 2                                                                 | ≈ 1.4142135623730951 |
+| `Math.phi`     | Phi is the golden ratio.                                                         | 1.618033988749895    |
+| `Math.tau`     | Tau is the ratio constant of a circle's circumference to radius, equal to 2 * pi | 6.283185307179586    |
 
 ## Functions
+  
 
 Math.sqrt: (Number) => Number
 
+
 Math.sin: (Number) => Number
+
 
 Math.cos: (Number) => Number
 
+
 Math.tan: (Number) => Number
+
 
 Math.asin: (Number) => Number
 
+
 Math.acos: (Number) => Number
+
 
 Math.atan: (Number) => Number
 
+
+
 ---
-
-## description:
-
+description: 
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # MixedSet
-
 The MixedSet module offers functionality for creating mixed sets, which are sets that can contain both discrete and continuous values. Discrete values are represented as points, while continuous values are represented as ranges. Mixed sets are particularly useful for describing the support of mixed probability distributions.
 
 The majority of set functions in the MixedSet module are designed to mirror the [upcomming set functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set) in Javascript.
@@ -2497,109 +2570,124 @@ Currently, there is no dedicated MixedSet object type. Instead, mixed sets are i
 
 MixedSet.difference: ({points: List(Number), segments: List([Number, Number])}, {points: List(Number), segments: List([Number, Number])}) => {points: List(Number), segments: List([Number, Number])}
 
+
 MixedSet.intersection: ({points: List(Number), segments: List([Number, Number])}, {points: List(Number), segments: List([Number, Number])}) => {points: List(Number), segments: List([Number, Number])}
+
 
 MixedSet.union: ({points: List(Number), segments: List([Number, Number])}, {points: List(Number), segments: List([Number, Number])}) => {points: List(Number), segments: List([Number, Number])}
 
+
 MixedSet.isSubsetOf: ({points: List(Number), segments: List([Number, Number])}, {points: List(Number), segments: List([Number, Number])}) => Bool
+
 
 MixedSet.isSupersetOf: ({points: List(Number), segments: List([Number, Number])}, {points: List(Number), segments: List([Number, Number])}) => Bool
 
+
 MixedSet.isEqual: ({points: List(Number), segments: List([Number, Number])}, {points: List(Number), segments: List([Number, Number])}) => Bool
 
+
 MixedSet.isEmpty: ({points: List(Number), segments: List([Number, Number])}) => Bool
+
 
 MixedSet.min: ({points: List(Number), segments: List([Number, Number])}) => Number
 Returns the minimum value in the set
 
+
 MixedSet.max: ({points: List(Number), segments: List([Number, Number])}) => Number
 Returns the maximum value in the set
 
+
+
 ---
-
-## description:
-
+description: 
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Plot
-
 The Plot module provides functions to create plots of distributions and functions.
 
 Raw functions and distributions are plotted with default parameters, while plot objects created by functions from this module give you more control over chart parameters and access to more complex charts.
 
 Plot.dist: (dist: Dist, params?: {xScale?: Scale, yScale?: Scale, showSummary?: Bool}) => Plot
 Plot.dist(
-normal(5, 2),
-{
-xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title" }),
-showSummary: true,
-}
+  normal(5, 2),
+  {
+    xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title" }),
+    showSummary: true,
+  }
 )
+
 
 Plot.dists: (dists: List(Dist|Number)|List({name?: String, value: Dist|Number}), {xScale?: Scale, yScale?: Scale, showSummary?: Bool}?) => Plot
 Plot.dists(
 {
-dists: [
-{ name: "First Dist", value: normal(0, 1) },
-{ name: "Second Dist", value: uniform(2, 4) },
-],
-xScale: Scale.symlog({ min: -2, max: 5 }),
+  dists: [
+    { name: "First Dist", value: normal(0, 1) },
+    { name: "Second Dist", value: uniform(2, 4) },
+  ],
+  xScale: Scale.symlog({ min: -2, max: 5 }),
 }
 )
+
 
 Plot.numericFn: (fn: (Number) => Number, params?: {xScale?: Scale, yScale?: Scale, xPoints?: List(Number)}) => Plot
 Plot.numericFn(
-{|t|t ^ 2},
-{ xScale: Scale.log({ min: 1, max: 100 }), points: 10 }
+  {|t|t ^ 2},
+  { xScale: Scale.log({ min: 1, max: 100 }), points: 10 }
 )
+
 
 Plot.distFn: (fn: (Number) => Dist, params?: {xScale?: Scale, yScale?: Scale, distXScale?: Scale, xPoints?: List(Number)}) => Plot
 Plot.distFn(
-{|t|normal(t, 2) \* normal(5, 3)},
-{
-xScale: Scale.log({ min: 3, max: 100, title: "Time (years)" }),
-yScale: Scale.linear({ title: "Value" }),
-distXScale: Scale.linear({ tickFormat: "#x" }),
-}
+  {|t|normal(t, 2) * normal(5, 3)},
+  {
+    xScale: Scale.log({ min: 3, max: 100, title: "Time (years)" }),
+    yScale: Scale.linear({ title: "Value" }),
+    distXScale: Scale.linear({ tickFormat: "#x" }),
+  }
 )
+
 
 Plot.scatter: ({xDist: SampleSetDist, yDist: SampleSetDist, xScale?: Scale, yScale?: Scale}) => Plot
 xDist = SampleSet.fromDist(2 to 5)
-yDist = normal({p5:-3, p95:3}) _ 5 - xDist ^ 2
+yDist = normal({p5:-3, p95:3}) * 5 - xDist ^ 2
 Plot.scatter({
-xDist: xDist,
-yDist: yDist,
-xScale: Scale.log({min: 1.5}),
+  xDist: xDist,
+  yDist: yDist,
+  xScale: Scale.log({min: 1.5}),
 })
 xDist = SampleSet.fromDist(normal({p5:-2, p95:5}))
-yDist = normal({p5:-3, p95:3}) _ 5 - xDist
+yDist = normal({p5:-3, p95:3}) * 5 - xDist
 Plot.scatter({
-xDist: xDist,
-yDist: yDist,
-xScale: Scale.symlog({title: "X Axis Title"}),
-yScale: Scale.symlog({title: "Y Axis Title"}),
+  xDist: xDist,
+  yDist: yDist,
+  xScale: Scale.symlog({title: "X Axis Title"}),
+  yScale: Scale.symlog({title: "Y Axis Title"}),
 })
 
+
+
 ---
-
-## description: Squiggle numbers are Javascript floats.
-
+description: Squiggle numbers are Javascript floats.
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Number
-
 Squiggle numbers are Javascript floats.
 
 ## Constants
 
-| Variable Name     | Number Name                                                     | Value                   |
-| ----------------- | --------------------------------------------------------------- | ----------------------- |
-| `Number.minValue` | The smallest positive numeric value representable in JavaScript | 5e-324                  |
-| `Number.maxValue` | The largest positive numeric value representable in JavaScript  | 1.7976931348623157e+308 |
+| Variable Name     | Number Name                                   | Value               |
+|-------------------|-----------------------------------------------|---------------------|
+| `Number.minValue`| The smallest positive numeric value representable in JavaScript   | 5e-324                   |
+| `Number.maxValue`| The largest positive numeric value representable in JavaScript    | 1.7976931348623157e+308  |
 
 ## Functions
+    
 
 ## Comparison
 
@@ -2611,13 +2699,14 @@ Number.smallerEq <=: (Number, Number) => Bool
 
 Number.largerEq >=: (Number, Number) => Bool
 
+
 ## Algebra (Number)
 
 Number.add +: (Number, Number) => Number
 
 Number.subtract -: (Number, Number) => Number
 
-Number.multiply \*: (Number, Number) => Number
+Number.multiply *: (Number, Number) => Number
 
 Number.divide /: (Number, Number) => Number
 
@@ -2628,6 +2717,7 @@ modulo. This is the same as the '%' operator in Python. Note that there is no '%
 mod(10, 3)
 mod(-10, 3)
 mod(10, -3)
+
 
 ## Functions (Number)
 
@@ -2660,6 +2750,7 @@ abs(3.5)
 Number.round: (Number) => Number
 round(3.5)
 
+
 ## Algebra (List)
 
 Number.sum: (List(Number)) => Number
@@ -2674,6 +2765,7 @@ cumprod([3,5,2,3,5])
 
 Number.diff: (List(Number)) => List(Number)
 diff([3,5,2,3,5])
+
 
 ## Functions (List)
 
@@ -2706,20 +2798,22 @@ variance([3,5,2,3,5])
 Number.sort: (List(Number)) => List(Number)
 sort([3,5,2,3,5])
 
+
 ## Utils
 
 Number.rangeDomain: (min: Number, max: Number) => Domain
 Number.rangeDomain(5, 10)
 
+
+
 ---
-
-## description: Scales for plots.
-
+description: Scales for plots.
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Scale
-
 Chart axes in [plots](./Plot.mdx) can be scaled using the following functions. Each scale function accepts optional min and max value. Power scale accepts an extra exponent parameter.
 
 Squiggle uses D3 for the tick formats. You can read about d3 tick formats [here](https://github.com/d3/d3-format).
@@ -2736,7 +2830,7 @@ Scale.symlog: ({min?: Number, max?: Number, tickFormat?: String, title?: String,
 Symmetric log scale. Useful for plotting data that includes zero or negative values.
 
 The function accepts an additional `constant` parameter, used as follows: `Scale.symlog({constant: 0.1})`. This parameter allows you to allocate more pixel space to data with lower or higher absolute values. By adjusting this constant, you effectively control the scale's focus, shifting it between smaller and larger values. For more detailed information on this parameter, refer to the [D3 Documentation](https://d3js.org/d3-scale/symlog).
-
+    
 The default value for `constant` is `0.0001`.
 Scale.symlog({ min: -10, max: 10 })
 
@@ -2746,191 +2840,199 @@ Power scale. Accepts an extra `exponent` parameter, like, `Scale.power({exponent
 The default value for `exponent` is `0.1`.
 Scale.power({ min: 1, max: 100, exponent: 0.1 })
 
+
 ## Date Scales
 
 Scale.date: ({min?: Date, max?: Date, tickFormat?: String, title?: String}) => Scale, () => Scale
 Only works on Date values. Is a linear scale under the hood.
 Scale.date({ min: Date(2022), max: Date(2025) })
 
+
+
 ---
-
-## description: Function Specifications
-
+description: Function Specifications
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Spec
-
 Function specifications (Specs) are an experimental feature in Squiggle. They are used to specify the structure of functions and verify that they match that structure. They are used primarily as a tag for functions.
 
 Spec.make: ({name: String, documentation: String, validate: Lambda}) => Specification
 Create a specification.
 @startClosed
 validate(fn) = {
-hasErrors = List.upTo(2020, 2030)
--> List.some(
-{|e| typeOf(fn(Date(e))) != "Distribution"}
-)
-hasErrors ? "Some results aren't distributions" : ""
+  hasErrors = List.upTo(2020, 2030)
+    -> List.some(
+      {|e| typeOf(fn(Date(e))) != "Distribution"}
+    )
+  hasErrors ? "Some results aren't distributions" : ""
 }
 
 spec = Spec.make(
-{
-name: "Stock market over time",
-documentation: "A distribution of stock market values over time.",
-validate: validate,
-}
+  {
+    name: "Stock market over time",
+    documentation: "A distribution of stock market values over time.",
+    validate: validate,
+  }
 )
 
 @spec(spec)
 myEstimate(t: [Date(2020), Date(2030)]) = normal(10, 3)
 
+
+
 ---
-
-## description: Functions for working with strings in Squiggle
-
+description: Functions for working with strings in Squiggle
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # String
-
 Strings support all JSON escape sequences, with addition of escaped single-quotes (for single-quoted strings)
 
-```squiggle
+~~~squiggle
 a = "'\" NUL:\u0000"
 b = '\'" NUL:\u0000'
-```
+~~~
 
 String.make: (any) => String
 Converts any value to a string. Some information is often lost.
 
+
 String.concat: (String, String) => String, (String, any) => String
+
 
 String.add +: (String, String) => String, (String, any) => String
 
+
 String.split: (String, separator: String) => List(String)
 
+
+
 ---
-
-## description: Tables are a simple date time type.
-
+description: Tables are a simple date time type.
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Table
-
 The Table module allows you to make simple tables for displaying data.
 
 Table.make: (data: List('A), params: {columns: List({fn: ('A) => any, name?: String})}) => Table
 Table.make(
-[
-{ name: "First Dist", value: normal(0, 1) },
-{ name: "Second Dist", value: uniform(2, 4) },
-{ name: "Third Dist", value: uniform(5, 6) },
-],
-{
-columns: [
-{ name: "Name", fn: {|d|d.name} },
-{ name: "Mean", fn: {|d|mean(d.value)} },
-{ name: "Std Dev", fn: {|d|variance(d.value)} },
-{ name: "Dist", fn: {|d|d.value} },
-],
-}
+  [
+    { name: "First Dist", value: normal(0, 1) },
+    { name: "Second Dist", value: uniform(2, 4) },
+    { name: "Third Dist", value: uniform(5, 6) },
+  ],
+  {
+    columns: [
+      { name: "Name", fn: {|d|d.name} },
+      { name: "Mean", fn: {|d|mean(d.value)} },
+      { name: "Std Dev", fn: {|d|variance(d.value)} },
+      { name: "Dist", fn: {|d|d.value} },
+    ],
+  }
 )
 Table.make(
-[
-{ name: "First Dist", value: Sym.lognormal({ p5: 1, p95: 10 }) },
-{ name: "Second Dist", value: Sym.lognormal({ p5: 5, p95: 30 }) },
-{ name: "Third Dist", value: Sym.lognormal({ p5: 50, p95: 90 }) },
-],
-{
-columns: [
-{ name: "Name", fn: {|d|d.name} },
-{
-name: "Plot",
-fn: {
-|d|
-Plot.dist(
-{
-dist: d.value,
-xScale: Scale.log({ min: 0.5, max: 100 }),
-showSummary: false,
-}
+  [
+    { name: "First Dist", value: Sym.lognormal({ p5: 1, p95: 10 }) },
+    { name: "Second Dist", value: Sym.lognormal({ p5: 5, p95: 30 }) },
+    { name: "Third Dist", value: Sym.lognormal({ p5: 50, p95: 90 }) },
+  ],
+  {
+    columns: [
+      { name: "Name", fn: {|d|d.name} },
+      {
+        name: "Plot",
+        fn: {
+          |d|
+          Plot.dist(
+            {
+              dist: d.value,
+              xScale: Scale.log({ min: 0.5, max: 100 }),
+              showSummary: false,
+            }
+          )
+        },
+      },
+    ],
+  }
 )
-},
-},
-],
-}
-)
+
+
 
 ---
-
-## description:
-
+description: 
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # System
-
 ## Constants
 
 ### System.version
-
 Returns the current version of Squiggle.
 
 ## Functions
 
+
 System.sampleCount: () => Number
 The number of samples set in the current environment. This variable can be modified in the Squiggle playground settings.
 
+
+
 ---
-
-## description: The Tag module handles tags, which allow the additions of metadata to Squiggle variables.
-
+description: The Tag module handles tags, which allow the additions of metadata to Squiggle variables.
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Tag
-
 Tags are metadata that can be added to Squiggle variables. They are used to add additional information to variables, such as names, descriptions, and visualization options. While tags can be accessed at runtime, they are primarily meant for use with the Squiggle Playground and other visualizations.
 Tags can be added to variables either by using their name `Tag.get[Name]` or by using decorators.
 
 ## List of Tags
-
-| Tag Name      | Description                                                                                |
-| ------------- | ------------------------------------------------------------------------------------------ |
-| `name`        | Change the default display name for the variable, in the playground.                       |
-| `doc`         | Adds documentation to the variable in the playground.                                      |
-| `showAs`      | Change the default view for the value when displayed.                                      |
-| `format`      | Format a number, date, or duration when displayed.                                         |
-| `notebook`    | Formats lists as notebooks.                                                                |
-| `hide`        | Don't show the variable in the playground                                                  |
-| `startOpen`   | Start the variable open in the playground                                                  |
-| `startClosed` | Start the variable closed in the playground                                                |
-| `location`    | Store the proper location. Helps when you want to locate code corresponding to a variable. |
-| `exportData`  | Metadata about exported variables. Cannot be added manually.                               |
+| Tag Name    | Description |
+| --------- | ----------- |
+| `name` | Change the default display name for the variable, in the playground.       |
+| `doc` | Adds documentation to the variable in the playground.       |
+| `showAs` | Change the default view for the value when displayed. |
+| `format` | Format a number, date, or duration when displayed. |
+| `notebook` | Formats lists as notebooks. |
+| `hide` | Don't show the variable in the playground |
+| `startOpen` | Start the variable open in the playground |
+| `startClosed` | Start the variable closed in the playground |
+| `location` | Store the proper location. Helps when you want to locate code corresponding to a variable. |
+| `exportData` | Metadata about exported variables. Cannot be added manually. |
 
 ## Example
-
 <SquiggleEditor
 defaultCode={`@name("My Great Function") // Decorator syntax to add a name tag
 @doc("This is an example function.")
 @showAs(Calculator) // Show this as a simple calculator in the Playground
 exampleFn(f) = f^2
-
+  
 myVarTags = Tag.getAll(exampleFn)
-
+  
 docs = Tag.getDoc(exampleFn)
-
+  
 @hide // Hide this variable in the Playground
 helperFn(f) = f `}/>
+
 
 ## Tags
 
 Tag.name: ('A, String) => 'A
 Adds a user-facing name to a value. This is useful for documenting what a value represents, or how it was calculated.
 
-_Note: While names are shown in the sidebar, you still need to call variables by their regular variable names in code._
+*Note: While names are shown in the sidebar, you still need to call variables by their regular variable names in code.*
 
 Tag.getName: (any) => String
 
@@ -2944,13 +3046,13 @@ Overrides the default visualization for a value.
 `showAs()` can take either a visualization, or a function that calls the value and returns a visualization.
 
 Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, `Number` can be used with Dates and Durations as well.  
-| **Input Type** | **Visualization Types** |
+| **Input Type**                      | **Visualization Types**               |
 | ----------------------------------- | ------------------------------------- |
-| **Distribution** | `Plot.dist` |
-| **List** | `Table` |
-| **`(Number -> Number)` Function** | `Plot.numericFn`, `Calculator` |
-| **`(Number -> Dist)` Function** | `Plot.distFn`, `Calculator` |
-| **Function** | `Calculator` |
+| **Distribution**                    | `Plot.dist`                         |
+| **List**                            | `Table`                             |
+| **`(Number -> Number)` Function** | `Plot.numericFn`, `Calculator`    |
+| **`(Number -> Dist)` Function**   | `Plot.distFn`, `Calculator`       |
+| **Function**                        | `Calculator`                        |
 
 example1 = ({|x| x + 1}) -> Tag.showAs(Calculator)
 @showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
@@ -2987,26 +3089,26 @@ Returns the startOpenState of a value, which can be "open", "closed", or "" if n
 Tag.notebook: (List('A), Bool) => List('A), (List('A)) => List('A)
 Displays the list of values as a notebook. This means that element indices are hidden, and the values are displayed in a vertical list. Useful for displaying combinations of text and values.
 Calculator.make(
-{|f, contents| f ? Tag.notebook(contents) : contents},
-{
-description: "Shows the contents as a notebook if the checkbox is checked.",
-inputs: [
-Input.checkbox({ name: "Show as Notebook", default: true }),
-Input.textArea(
-{
-name: "Contents to show",
-default: "[
-\"## Distribution 1\",
-normal(5, 2),
-\"## Distribution 1\",
-normal(20, 1),
-\"This is an opening section. Here is more text.
+  {|f, contents| f ? Tag.notebook(contents) : contents},
+  {
+    description: "Shows the contents as a notebook if the checkbox is checked.",
+    inputs: [
+      Input.checkbox({ name: "Show as Notebook", default: true }),
+      Input.textArea(
+        {
+          name: "Contents to show",
+          default: "[
+  \"## Distribution 1\",
+  normal(5, 2),
+  \"## Distribution 1\",
+  normal(20, 1),
+  \"This is an opening section. Here is more text.
 \",
 ]",
-}
-),
-],
-}
+        }
+      ),
+    ],
+  }
 )
 
 Tag.getNotebook: (any) => Bool
@@ -3015,6 +3117,7 @@ Tag.location: ('A) => 'A
 Saves the location of a value. Note that this must be called at the point where the location is to be saved. If you use it in a helper function, it will save the location of the helper function, not the location where the helper function is called.
 
 Tag.getLocation: (any) => any
+
 
 ## Functions
 
@@ -3027,12 +3130,14 @@ Returns a copy of the value with the specified tags removed.
 Tag.clear: ('A) => 'A
 Returns a copy of the value with all tags removed.
 
+
+
 ---
-
-## description: The Calculator module helps you create custom calculators
-
+description: The Calculator module helps you create custom calculators
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Calculator
 
@@ -3040,39 +3145,41 @@ The Calculator module allows you to make custom calculators for functions. This 
 
 Calculators can be useful for debugging functions or to present functions to end users.
 
+
 Calculator.make: ({fn: Lambda, title?: String, description?: String, inputs?: List(Input), autorun?: Bool, sampleCount?: Number}) => Calculator, (Lambda, params?: {title?: String, description?: String, inputs?: List(Input), autorun?: Bool, sampleCount?: Number}) => Calculator
 
 `Calculator.make` takes in a function, a description, and a list of inputs. The function should take in the same number of arguments as the number of inputs, and the arguments should be of the same type as the default value of the input.
 
 Inputs are created using the `Input` module. The Input module has a few different functions for creating different types of inputs.
-
+    
 For calculators that take a long time to run, we recommend setting `autorun` to `false`. This will create a button that the user can click to run the calculator.
-
+    
 Calculator.make(
 {|text, textArea, select, checkbox| text + textArea},
 {
-title: "My example calculator",
-inputs: [
-Input.text({ name: "text", default: "20" }),
-Input.textArea({ name: "textArea", default: "50 to 80" }),
-Input.select({ name: "select", default: "second", options: ["first", "second", "third"] }),
-Input.checkbox({ name: "checkbox", default: true }),
-],
-sampleCount: 10k,
+  title: "My example calculator",
+  inputs: [
+    Input.text({ name: "text", default: "20" }),
+    Input.textArea({ name: "textArea", default: "50 to 80" }),
+    Input.select({ name: "select", default: "second", options: ["first", "second", "third"] }),
+    Input.checkbox({ name: "checkbox", default: true }),
+  ],
+  sampleCount: 10k,
 })
 // When a calculator is created with only a function, it will guess the inputs based on the function's parameters. It won't provide default values if it's a user-written function.
 
-({|x| x \* 5}) -> Calculator
+({|x| x * 5}) -> Calculator
+
+
 
 ---
-
-## description: Inputs are now only used for describing forms for calculators.
-
+description: Inputs are now only used for describing forms for calculators.
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Input
-
 Inputs are now only used for describing forms for [calculators](./Calculator.mdx).
 
 Input.text: ({name: String, description?: String, default?: Number|String}) => Input
@@ -3080,52 +3187,59 @@ Creates a single-line input. This input can be used for all Squiggle types.
 Input.text({ name: "First", default: "John" })
 Input.text({ name: "Number of X in Y", default: '20 to 300' })
 
+
 Input.textArea: ({name: String, description?: String, default?: Number|String}) => Input
 Creates a multi-line input, sized with the provided input. This input can be used for all Squiggle types.
 Input.textArea({ name: "people", default: '{
-"John": 20 to 50,
-"Mary": 30 to 90,
+  "John": 20 to 50, 
+  "Mary": 30 to 90,
 }' })
+
 
 Input.checkbox: ({name: String, description?: String, default?: Bool}) => Input
 Creates a checkbox input. Used for Squiggle booleans.
 Input.checkbox({ name: "IsTrue?", default: true })
 
+
 Input.select: ({name: String, options: List(String), description?: String, default?: String}) => Input
 Creates a dropdown input. Used for Squiggle strings.
 Input.select({ name: "Name", default: "Sue", options: ["John", "Mary", "Sue"] })
 
+
+
 ---
-
-## description:
-
+description: 
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # RelativeValues
-
-_Warning: Relative value functions are particularly experimental and subject to change._
+*Warning: Relative value functions are particularly experimental and subject to change.*
 
 RelativeValues.gridPlot: ({ids: List(String), fn: (String, String) => [Dist, Dist]}) => Plot
 RelativeValues.gridPlot({
-ids: ["foo", "bar"],
-fn: {|id1, id2| [SampleSet.fromDist(2 to 5), SampleSet.fromDist(3 to 6)]},
+  ids: ["foo", "bar"],
+  fn: {|id1, id2| [SampleSet.fromDist(2 to 5), SampleSet.fromDist(3 to 6)]},
 })
 
+
+
 ---
-
-## description: Newer experimental functions which are less stable than Squiggle as a whole
-
+description: Newer experimental functions which are less stable than Squiggle as a whole
+---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor } from "../../../components/SquiggleEditor";
+import { SquiggleEditor }  from "../../../components/SquiggleEditor";
+
 
 # Danger
+The Danger library contains newer experimental functions which are less stable than Squiggle as a whole. They are not recommended for production use, but are useful for testing out new ideas., 
 
-The Danger library contains newer experimental functions which are less stable than Squiggle as a whole. They are not recommended for production use, but are useful for testing out new ideas.,
 
 ## JSON
 
-The JSON module provides JSON-like objects in Squiggle. `Danger.json` is mainly useful for debugging, and `Danger.jsonString` is useful for sending data to other systems. A simple example is shown below.
+
+The JSON module provides JSON-like objects in Squiggle. ``Danger.json`` is mainly useful for debugging, and ``Danger.jsonString`` is useful for sending data to other systems. A simple example is shown below.
 
 We have custom serializers for different Squiggle objects. Note that this API is unstable and might change over time.
 
@@ -3137,11 +3251,11 @@ fn(e) = e
 
 @notebook
 result = [
-"### Danger.json()",
-Danger.json([sampleSet, pointSet, plot, fn]),
-"### Danger.jsonString",
-// We don't show sampleSet or plot below because they would be too large, but feel free to try that out
-Danger.jsonString([pointSet, fn]),
+  "### Danger.json()",
+  Danger.json([sampleSet, pointSet, plot, fn]),
+  "### Danger.jsonString",
+  // We don't show sampleSet or plot below because they would be too large, but feel free to try that out
+  Danger.jsonString([pointSet, fn]),
 ]
 result
 `}/>
@@ -3156,6 +3270,7 @@ Converts a value to a stringified JSON, similar to JSON.stringify() in Javasript
 Danger.jsonString({a: 1, b: 2})
 Danger.jsonString([2 to 5, Sym.normal(5, 2), Calculator({|x| x + 1})])
 
+
 ## Javascript
 
 Near 1-1 matches of Javascript functions.
@@ -3165,10 +3280,11 @@ Converts a string to a number. If the string can't be converted, returns `Parse 
 Danger.parseFloat('10.3')
 
 Danger.now: () => Date
-Returns the current date. Internally calls `Date.now()` in JavaScript.
+Returns the current date. Internally calls ``Date.now()`` in JavaScript.  
 
-_Caution: This function, which returns the current date, produces varying outputs with each call. As a result, accurately estimating the value of functions that incorporate `Danger.now()` at past time points is challenging. In the future, we intend to implement a feature allowing the input of a simulated time via an environment variable to address this issue._
+*Caution: This function, which returns the current date, produces varying outputs with each call. As a result, accurately estimating the value of functions that incorporate ``Danger.now()`` at past time points is challenging. In the future, we intend to implement a feature allowing the input of a simulated time via an environment variable to address this issue.*
 Danger.now()
+
 
 ## Math
 
@@ -3176,10 +3292,11 @@ Danger.laplace: (Number, Number) => Number
 Calculates the probability implied by [Laplace's rule of succession](https://en.wikipedia.org/wiki/Rule_of_succession)
 trials = 10
 successes = 1
-Danger.laplace(successes, trials) // (successes + 1) / (trials + 2) = 2 / 12 = 0.1666
+Danger.laplace(successes, trials) //  (successes + 1) / (trials + 2)  = 2 / 12 = 0.1666
 
 Danger.yTransform: (PointSetDist) => PointSetDist
 Danger.yTransform(PointSet(Sym.normal(5,2)))
+
 
 ## Combinatorics
 
@@ -3202,12 +3319,13 @@ Danger.allCombinations: (List('A)) => List(List('A))
 Returns all possible combinations of the elements in the input list.
 Danger.allCombinations([1, 2, 3]) // [[1], [2], [3], [1, 2], [1, 3], [2, 3], [1, 2, 3]]
 
+
 ## Distributions
 
 Danger.binomialDist: (numberOfTrials: Dist|Number, probabilityOfSuccess: Dist|Number) => SampleSetDist
 A binomial distribution.
 
-`n` must be above 0, and `p` must be between 0 and 1.
+``n`` must be above 0, and ``p`` must be between 0 and 1. 
 
 Note: The binomial distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as partially or fully continuous. This is a visual mistake; if you inspect the underlying data, it should be discrete.
 Danger.binomialDist(8, 0.5)
@@ -3215,8 +3333,9 @@ Danger.binomialDist(8, 0.5)
 Danger.poissonDist: (rate: Dist|Number) => SampleSetDist
 A Poisson distribution.
 
-Note: The Poisson distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as partially or fully continuous. This is a visual mistake; if you inspect the underlying data, it should be discrete.
+Note: The Poisson distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as partially or fully continuous.  This is a visual mistake; if you inspect the underlying data, it should be discrete.
 Danger.poissonDist(10)
+
 
 ## Integration
 
@@ -3225,11 +3344,11 @@ Integrates the function `f` between `min` and `max`, and computes `numIntegratio
 
 Note that the function `f` has to take in and return numbers. To integrate a function which returns distributions, use:
 
-```squiggle
+~~~squiggle
 auxiliaryF(x) = mean(f(x))
 
 Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, numIntegrationPoints)
-```
+~~~
 
 Danger.integrateFunctionBetweenWithNumIntegrationPoints({|x| x+1}, 1, 10, 10)
 
@@ -3239,15 +3358,16 @@ Integrates the function `f` between `min` and `max`, and uses an interval of `ep
 Same caveats as `integrateFunctionBetweenWithNumIntegrationPoints` apply.
 Danger.integrateFunctionBetweenWithEpsilon({|x| x+1}, 1, 10, 0.1)
 
+
 ## Optimization
 
 Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions: (fs: List(Lambda), funds: Number, approximateIncrement: Number) => any
 Computes the optimal allocation of $`funds` between `f1` and `f2`. For the answer given to be correct, `f1` and `f2` will have to be decreasing, i.e., if `x > y`, then `f_i(x) < f_i(y)`.
 Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(
-[
-{|x| x+1},
-{|y| 10}
-],
-100,
-0.01
+  [
+    {|x| x+1},
+    {|y| 10}
+  ],
+  100,
+  0.01
 )

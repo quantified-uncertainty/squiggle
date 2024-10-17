@@ -1,41 +1,11 @@
 #!/usr/bin/env node
-import fs from "fs";
 import { glob } from "glob";
 
 import { FnDocumentation } from "@quri/squiggle-lang";
 
 import { modulePages } from "../templates.mjs";
 import { generateModuleContent } from "./generateModuleContent.mjs";
-
-const readFile = (fileName: string) => {
-  return fs.readFileSync(fileName, "utf-8");
-};
-
-function moduleItemToJson({
-  name,
-  description,
-  nameSpace,
-  requiresNamespace,
-  examples,
-  signatures,
-  shorthand,
-  isUnit,
-}: FnDocumentation) {
-  return JSON.stringify(
-    {
-      name,
-      description,
-      nameSpace,
-      requiresNamespace,
-      examples,
-      signatures,
-      shorthand,
-      isUnit,
-    },
-    null,
-    2
-  );
-}
+import { readFile, writeFile } from "./utils";
 
 function moduleItemToCompressedFormat({
   name,
@@ -90,11 +60,11 @@ function removeHeaderLines(content: string): string {
   return content;
 }
 
-const allDocumentationItems = () => {
+function allDocumentationItems() {
   return modulePages
     .map((page) => generateModuleContent(page, moduleItemToCompressedFormat))
     .join("\n\n\n");
-};
+}
 
 const basicPrompt = readFile("./public/llms/basicPrompt.markdown");
 const styleGuideRaw = readFile("./public/llms/styleGuide.markdown");
@@ -137,13 +107,8 @@ const documentationBundlePage = async () => {
     // `## Peggy Grammar \n\n ${grammarContent} \n\n --- \n\n ` +
     convertSquiggleEditorTags(guideContent) +
     apiContent;
-  fs.writeFile(targetFilename, content, (err) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    console.log(`Content written to ${targetFilename}`);
-  });
+
+  writeFile(targetFilename, content);
 };
 
 const promptPage = async () => {
@@ -163,17 +128,7 @@ You can read this document in plaintext [here](/llms/BasicPrompt.markdown).
 
 `;
   const target = "./src/pages/docs/Ecosystem/BasicPrompt.md";
-  fs.writeFile(
-    target,
-    introduction + basicPrompt.replace(/\`squiggle/g, "`js"),
-    (err) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      console.log(`Content written to ${target}`);
-    }
-  );
+  writeFile(target, introduction + basicPrompt.replace(/\`squiggle/g, "`js"));
 };
 
 async function main() {

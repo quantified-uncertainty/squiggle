@@ -6,6 +6,7 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
+    "**/*.mts",
     "**/*.tsx",
     "src/**/*.mdx",
     "scripts/generateModulePages.mts",
