@@ -2,7 +2,7 @@
 description: Various ways to create Squiggle distributions
 ---
 
-import { Callout, Tabs, Tab } from "nextra/components";
+import { Callout, Tabs } from "nextra/components";
 
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
@@ -21,12 +21,12 @@ normal({p25: number, p75: number})
 Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distribution) with the given mean and standard deviation.
 
 <Tabs items={["normal(5,1)", "normal(1B, 1B)"]}>
-  <Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="normal(5, 1)" />
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="normal(1B, 1B)" />
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 
@@ -78,19 +78,19 @@ to(5thPercentile: number, 95thPercentile: number)
 The `to` function is an easy way to generate lognormal distributions using predicted _5th_ and _95th_ percentiles. It's the same as ``lognormal({p5, p95})``, but easier to write and read.
 
 <Tabs items={["5 to 10", "to(5, 10)", "1 to 10000"]}>
-  <Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="5 to 10" />
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     <code>5 to 10</code> does the same thing as <code>to(5,10)</code>.
     <SquiggleEditor defaultCode="to(5,10)" />
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     It's very easy to generate distributions with very long tails. These can be
     impossible to see without changing view settings. (These settings are
     available in the Playground, but not this smaller editor component)
     <SquiggleEditor defaultCode="1 to 10000" />
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Arguments
@@ -164,18 +164,18 @@ with values at 1 and 2. Therefore, this is the same as `mixture(pointMass(1),poi
     "dotAdd(normal(5,2), 6)"
   ]}
 >
-  <Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="pointMass(3)" />
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="mixture(1,3,5)" />
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="normal(5,2) * 6" />
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="dotAdd(normal(5,2), 6)" />
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Arguments
@@ -201,24 +201,24 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
     "beta({mean: 0.39, stdev: 0.1})",
   ]}
 >
-  <Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="Sym.beta(10,20)" />
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="Sym.beta(1000, 2000)" />
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="Sym.beta(1, 10)" />
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="Sym.beta(10, 1)" />
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="Sym.beta(0.8, 0.8)" />
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="Sym.beta({mean: 0.39, stdev: 0.1})" />
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Arguments
@@ -242,18 +242,18 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
         "beta(0.9, 0.9)",
       ]}
     >
-      <Tab>
+      <Tabs.Tab>
         <SquiggleEditor defaultCode="Sym.beta(0.3, 0.3)" />
-      </Tab>
-      <Tab>
+      </Tabs.Tab>
+      <Tabs.Tab>
         <SquiggleEditor defaultCode="Sym.beta(0.5, 0.5)" />
-      </Tab>
-      <Tab>
+      </Tabs.Tab>
+      <Tabs.Tab>
         <SquiggleEditor defaultCode="Sym.beta(.8,.8)" />
-      </Tab>
-      <Tab>
+      </Tabs.Tab>
+      <Tabs.Tab>
         <SquiggleEditor defaultCode="Sym.beta(.9,.9)" />
-      </Tab>
+      </Tabs.Tab>
     </Tabs>
   </details>
 </Callout>
@@ -279,18 +279,18 @@ The `mixture` mixes combines multiple distributions to create a mixture. You can
     "Array of Distributions Input",
   ]}
 >
-  <Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="mixture(1 to 2, 5 to 8, 9 to 10)" />
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="mixture(1 to 2, 5 to 8, 9 to 10, [0.1, 0.1, 0.8])" />
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="mixture(1 to 5, 8 to 10, 1, 3, 20)" />
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     <SquiggleEditor defaultCode="mx([1 to 2, exponential(1)], [1,1])" />
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Arguments

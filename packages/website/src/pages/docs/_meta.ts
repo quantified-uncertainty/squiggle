@@ -1,4 +1,4 @@
-{
+export default {
   "index": "Introduction",
   "Guides": "Guides",
   "Ecosystem": "Ecosystem",

@@ -1,4 +1,4 @@
-{
+export default {
   "DistributionCreation": "Distribution Creation",
   "DistributionFunctions": "Distribution Functions",
   "BasicTypes": "Basic Types",
@@ -9,4 +9,4 @@
   "Gotchas": "Gotchas",
   "Debugging": "Debugging",
   "Roadmap": "Roadmap"
-}
+};
