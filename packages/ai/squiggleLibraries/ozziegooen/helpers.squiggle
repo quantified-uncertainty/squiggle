@@ -6,17 +6,22 @@ expect = sTest.expect
 @hide
 describe = sTest.describe
 
+@hide
+styleSquiggleCode(code) = "
+```squiggle
+" + code + "
+```"
+
 @doc(
   "
-  round(num, n)
+  round(num, n) -> string
   
-  Rounds the number `num` to `n` decimal places.
-  
-  Example:
-  round(3.14159, 2) -> \"3.14\"
-"
+  Rounds the number `num` to `n` decimal places." +
+    styleSquiggleCode("round(3.14159, 2) -> \"3.14\"")
 )
-export round(num, n) = {
+export round(num, n) = if typeOf(num) != "Number" then throw(
+  "Was given a " + typeOf(num) + ", must be given a Number"
+) else {
   asString = String.make(num)
   splitString = String.split(asString, "")
   if List.findIndex(splitString, {|r| r == "e"}) != -1 then {
@@ -63,19 +68,20 @@ roundTests = describe(
       "rounds a negative number",
       {|| expect(round(-2.7182, 2)).toBe("-2.71")}
     ),
+    test(
+      "throws when given distribution",
+      {|| expect({|| round(1 to 10, 2)}).toThrowAnyError()}
+    ),
   ]
 )
 
 @doc(
   "
-  formatTime(hours)
+  formatTime(hours) -> string
   
   Converts a number of hours to a formatted string indicating time in 
-  seconds, minutes, hours, days, months, or years.
-  
-  Example:
-  formatTime(1) -> \"**1** hours\"
-  "
+  seconds, minutes, hours, days, months, or years. Bolds the result." +
+    styleSquiggleCode("formatTime(1) -> \"**1** hours\"")
 )
 export formatTime(hours) = {
   secondsInMinute = 60
@@ -129,16 +135,16 @@ formatTimeTests = describe(
 )
 
 @doc(
-  "## Linear or Quadratic Interpolation
-```squiggle
-@import('hub:ozziegooen/helpers' as h)
+  "## Linear or Quadratic Interpolation" +
+    styleSquiggleCode(
+      "@import('hub:ozziegooen/helpers' as h)
 
-h.interpolate([{x: 0, y:10}, {x:10, y:20}], 'linear')(4) -> 15
-h.interpolate([{x: 0, y:10}, {x:10, y:20}], 'quadratic')(4) -> 11.6
+h.interpolate([{x: 0, y:10}, {x:10, y:20}], 'linear')(4) // 15
+h.interpolate([{x: 0, y:10}, {x:10, y:20}], 'quadratic')(4) // 11.6
 
 //makes a graph
-foo(t:[0,30]) = h.interpolate([{x: 0, y:10}, {x:10, y:20}, {x:20, y:10}], 'quadratic')(t) 
-"
+foo(t:[0,30]) = h.interpolate([{x: 0, y:10}, {x:10, y:20}, {x:20, y:10}], 'quadratic')(t)"
+    )
 )
 export interpolate(points, type) = {
   sortedPoints = List.sortBy(points, {|f| f.x}) //TODO: Sort, somehow
@@ -163,7 +169,6 @@ export interpolate(points, type) = {
             c = leftPoint.y + a * leftPoint.x ^ 2
             a * x ^ 2 + b * x + c
           } else { foo: "Invalid interpolate type" }
-
         } else if x > sortedPoints[i - 1].x then sortedPoints[List.length(
           sortedPoints
         ) -
@@ -230,7 +235,7 @@ interpolationTests = describe(
 )
 
 //myShape = [{ x: 4, y: 10 }, { x: 20, y: 40 }, { x: 30, y: 20 }]
-
+@hide
 plot(fn, xPoints) = Plot.numericFn(
   fn,
   {
@@ -287,6 +292,20 @@ You have to enter data in the format of x and y values, as shown below, then get
   }
 )
 
+@doc(
+  "
+  distributionListRange(dists, lowQuantile, highQuantile)
+  
+  Returns a range that is the minimum and maximum of the low and high quantiles of the distributions in the list." +
+    styleSquiggleCode(
+      "distributionListRange([dist1, dist2, dist3], 0.05, 0.95) -> {min: 1, max: 10}"
+    )
+)
+export distributionListRange(dists, lowQuantile, highQuantile) = {
+  min: Number.min(List.map(dists, {|d| Dist.quantile(d, lowQuantile)})),
+  max: Number.max(List.map(dists, {|d| Dist.quantile(d, highQuantile)})),
+}
+
 @startOpen
 @notebook
 readme = [
@@ -303,24 +322,10 @@ To use the functions from this library in your projects, import it as follows:
 ```
 ## Functions Overview
 
-### round
-Rounds a given number to a specified number of decimal places.
-
-Example:
-
-```squiggle
-h.round(3.423, 2) // Returns: \"3.42\"
-```",
+### round",
   Tag.getDoc(round),
   "---",
-  "### formatTime
-Converts a given number of hours into a human-readable time format, such as seconds, minutes, hours, days, months, or years.
-
-Example:
-
-```squiggle
-h.formatTime(4.23) // Enter the number of hours and format the result
-```",
+  "### formatTime",
   Tag.getDoc(formatTime),
   "---",
   "### interpolate
@@ -341,4 +346,7 @@ h.interpolate([{x: 0, y: 10}, {x: 10, y: 20}], 'quadratic')(4) // Returns: 11.6
 ### Interpolation Calculator
 This tool helps visualize and compare the results of linear and quadratic interpolations for a given set of data points. Below is an example use case integrated with the library.",
   interpolationCalculator,
+  "---",
+  "### distributionListRange",
+  Tag.getDoc(distributionListRange),
 ]

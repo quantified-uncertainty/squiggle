@@ -3,5 +3,5 @@ export default {
   "Tooling": "Tooling",
   "Gallery": "Gallery",
   "LanguageModels": "Language Models",
-  "LLMPrompt": "LLM Prompt"
+  "BasicPrompt": "Basic LLM Prompt"
 };

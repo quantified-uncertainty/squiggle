@@ -34,6 +34,7 @@ Please review the code and output according to the following criteria:
 7. **Edge Cases**: Ensure that edge cases are handled and add simple error handling where appropriate.
 8. **Remove Redundant Comments**: Delete any comments that no longer serve a purpose (e.g., comments explaining previous changes).
 9. **Sensitivity Analysis**: Do not add sensitivity analysis functions.
+10. **Style Guide**: Follow the included Squiggle Style Guide.
 
 If no adjustments are required (this should be the usual outcome), respond with:
 
