@@ -55,8 +55,12 @@ const generateMetaPage = async ({ pages }: { pages: ModulePage[] }) => {
   }
 
   const names = pages.map((p) => p.name);
-  const fileName = `${directoryPath}/_meta.json`;
-  const content = JSON.stringify(convertToKeyValuePairs(names), null, 2);
+  const fileName = `${directoryPath}/_meta.ts`;
+  const content = `export default ${JSON.stringify(
+    convertToKeyValuePairs(names),
+    null,
+    2
+  )}`;
 
   fs.writeFile(fileName, content, (err) => {
     if (err) {

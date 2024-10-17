@@ -10,24 +10,24 @@
     "post-publish": "node ./dist/scripts/post-publish.js"
   },
   "devDependencies": {
-    "@babel/plugin-syntax-typescript": "^7.24.6",
+    "@babel/plugin-syntax-typescript": "^7.25.7",
     "@changesets/get-github-info": "^0.6.0",
     "@changesets/types": "^6.0.0",
     "@quri/configs": "workspace:*",
     "@types/babel__core": "^7.20.5",
-    "@types/lodash": "^4.14.202",
-    "@types/node": "^20.12.7",
-    "tsx": "^4.11.0",
-    "typescript": "^5.5.3"
+    "@types/lodash": "^4.17.10",
+    "@types/node": "^20.16.11",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
   },
   "dependencies": {
-    "@babel/core": "^7.24.6",
-    "@babel/parser": "^7.24.6",
+    "@babel/core": "^7.25.8",
+    "@babel/parser": "^7.25.8",
     "lodash": "^4.17.21",
     "mdast-util-to-string": "^4.0.0",
     "remark-parse": "^11.0.0",
     "remark-stringify": "^11.0.0",
-    "unified": "^11.0.4",
+    "unified": "^11.0.5",
     "zod": "^3.23.8"
   }
 }

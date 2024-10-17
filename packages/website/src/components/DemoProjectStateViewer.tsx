@@ -1,4 +1,4 @@
-import { Tab, Tabs } from "nextra/components";
+import { Tabs } from "nextra/components";
 import { FC, forwardRef, useImperativeHandle, useRef, useState } from "react";
 
 import { ProjectStateViewer } from "@quri/squiggle-components";
@@ -145,14 +145,14 @@ export const DemoProjectStateViewer: FC<{
   return (
     <Tabs items={["Manual", "Automatic"]}>
       {[true, false].map((manual) => (
-        <Tab key={String(manual)}>
+        <Tabs.Tab key={String(manual)}>
           <DemoProjectStateViewerTab
             modules={modules}
             headName={headName}
             headModule={headModule}
             manual={manual}
           />
-        </Tab>
+        </Tabs.Tab>
       ))}
     </Tabs>
   );

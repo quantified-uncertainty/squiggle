@@ -98,7 +98,7 @@ export const PlaygroundPage: FC<{ version: string | null }> = (props) => {
 
   return (
     <div
-      className="min-h-[calc(100vh-var(--nextra-navbar-height)-200px)]"
+      className="min-h-[calc(100vh-var(--nextra-navbar-height)-200px)] bg-white"
       ref={ref}
     >
       {
