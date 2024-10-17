@@ -34,6 +34,7 @@
     "shiki": "^0.14.7"
   },
   "devDependencies": {
+    "@mdx-js/typescript-plugin": "^0.0.6",
     "@quri/configs": "workspace:*",
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@types/pako": "^2.0.3",

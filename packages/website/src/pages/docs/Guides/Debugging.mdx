@@ -41,7 +41,12 @@ Caveats:
 If you're using Squiggle components in React, you can enable the profiler for any component that supports the `environment` prop with `environment={profile: true}`:
 
 <SquiggleEditor
-  environment={{ profile: true }}
+  environment={{
+    profile: true,
+    xyPointLength: 1000,
+    sampleCount: 1000,
+    seed: 'doc-example',
+  }}
   defaultCode={`dist = normal(0, 1)
 list = List.upTo(1, 100000) -> List.length
 `}
