@@ -66,7 +66,7 @@ function allDocumentationItems() {
     .join("\n\n\n");
 }
 
-const basicPrompt = readFile("./public/llms/basicPrompt.markdown");
+const basicPrompt = readFile("./src/mdx/basicPrompt.mdx");
 const styleGuideRaw = readFile("./public/llms/styleGuide.markdown");
 const documentationBundlePage = async () => {
   const targetFilename = "./public/llms/documentationBundle.markdown";
@@ -111,29 +111,8 @@ const documentationBundlePage = async () => {
   writeFile(targetFilename, content);
 };
 
-const promptPage = async () => {
-  console.log("Compiling basic prompt page...");
-  const introduction = `---
-description: LLM Prompt Example
-notes: "This Doc is generated using a script, do not edit directly!"
----
-
-# LLM Basic Prompt Example
-
-The following is a prompt that we use to help LLMs, like GPT and Claude, write Squiggle code. This would ideally be provided with the full documentation, for example with [this document](/llms/documentationBundle.markdown). 
-
-You can read this document in plaintext [here](/llms/BasicPrompt.markdown).
-
----
-
-`;
-  const target = "./src/pages/docs/Ecosystem/BasicPrompt.md";
-  writeFile(target, introduction + basicPrompt.replace(/\`squiggle/g, "`js"));
-};
-
 async function main() {
   await documentationBundlePage();
-  await promptPage();
 }
 
 main();

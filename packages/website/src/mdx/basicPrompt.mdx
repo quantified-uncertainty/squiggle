@@ -1,16 +1,3 @@
----
-description: LLM Prompt Example
-notes: "This Doc is generated using a script, do not edit directly!"
----
-
-# LLM Basic Prompt Example
-
-The following is a prompt that we use to help LLMs, like GPT and Claude, write Squiggle code. This would ideally be provided with the full documentation, for example with [this document](/llms/documentationBundle.markdown). 
-
-You can read this document in plaintext [here](/llms/BasicPrompt.markdown).
-
----
-
 Write Squiggle code, using the attached documentation for how it works.
 
 Squiggle is a very simple language. Don't try using language primitives/constructs you don't see below, or that aren't in our documentation. They are likely to fail.
@@ -29,8 +16,8 @@ When writing Squiggle code, it's important to avoid certain common mistakes.
 
 ### Function Definitions and Use
 
-1. Anonymous Functions: Use {|e| e} syntax for anonymous functions.
-2. Function Parameters: When using functions like normal, specify the standard deviation with stdev instead of sd. For example, use normal({mean: 0.3, stdev: 0.1}) instead of normal({mean: 0.3, sd: 0.1}).
+1. Anonymous Functions: Use \{|e| e\} syntax for anonymous functions.
+2. Function Parameters: When using functions like normal, specify the standard deviation with stdev instead of sd. For example, use `normal({mean: 0.3, stdev: 0.1})` instead of `normal({mean: 0.3, sd: 0.1})`.
 3. There's no recursion.
 4. You can't call functions that accept ranges, with distributions. No, `({|foo: [1,20]| foo}) (4 to 5)`.
 
@@ -68,7 +55,7 @@ When writing Squiggle code, it's important to avoid certain common mistakes.
 
 Here's are some simple example Squiggle programs:
 
-```js
+```squiggle
 //Model for Piano Tuners in New York Over Time
 
 @name("🌆 Population of New York in 2022")
@@ -104,7 +91,7 @@ totalTunersAtTime(t: domain) = populationAtTime(t) *
 meanTunersAtTime(t: domain) = mean(totalTunersAtTime(t))
 ```
 
-```js
+```squiggle
 calculator = Calculator(
   {|a, b, c, d| [a, b, c, d]},
   {
@@ -139,7 +126,7 @@ calculator = Calculator(
 
 ```
 
-```js
+```squiggle
 // Cost-benefit analysis for a housing addition in berkeley
 
 // Input section
@@ -273,7 +260,7 @@ analysis = {
 }
 ```
 
-```js
+```squiggle
 x = 10
 result = if x == 1 then {
   {y: 2, z: 0}
@@ -284,12 +271,12 @@ y = result.y
 z = result.z
 ```
 
-```js
+```squiggle
 @showAs({|f| Plot.numericFn(f, { xScale: Scale.log({ min: 1, max: 100 }) })})
 fn(t) = t ^ 2
 ```
 
-```js
+```squiggle
 plot = {|t| normal(t, 2) * normal(5, 3)}
   -> Plot.distFn(
     {
@@ -301,14 +288,14 @@ plot = {|t| normal(t, 2) * normal(5, 3)}
   )
 ```
 
-```js
+```squiggle
 f(t: [Date(2020), Date(2040)]) = {
   yearsPassed = toYears(t - Date(2020))
   normal({mean: yearsPassed ^ 2, stdev: yearsPassed^1.3+1})
 }
 ```
 
-```js
+```squiggle
 import "hub:ozziegooen/sTest" as sTest
 @name("💰 Expected Cost ($)")
 @format("$.2s")
