@@ -25,6 +25,10 @@ export default async function Page({
       <DocsTitle>{page.data.title || page.file.name}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
+        {/*
+         * Note that default components includes `Callout` but not `Tabs`.
+         * See https://fumadocs.vercel.app/docs/ui/components for the full list of components.
+         */}
         <MDX components={{ ...defaultMdxComponents }} />
       </DocsBody>
     </DocsPage>

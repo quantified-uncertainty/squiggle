@@ -4,6 +4,7 @@ description: Various ways to create Squiggle distributions
 ---
 
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
@@ -51,10 +52,8 @@ you take the log of our lognormal distribution. They can be difficult to directl
 
 [Wikipedia](https://en.wikipedia.org/wiki/Log-normal_distribution)
 
-<details>
-  <summary>
-    ❓ Understanding <strong>mu</strong> and <strong>sigma</strong>
-  </summary>  
+<Accordions type="single">
+  <Accordion title="❓ Understanding mu and sigma">
   The log of <code>lognormal(mu, sigma)</code> is a normal distribution with
   mean <code>mu</code>
   and standard deviation <code>sigma</code>. For example, these two distributions
@@ -65,7 +64,8 @@ normalStdDev = 2
 logOfLognormal = log(lognormal(normalMean, normalStdDev))
 [logOfLognormal, normal(normalMean, normalStdDev)]`}
   />
-</details>
+  </Accordion>
+</Accordions>
 
 ## To
 
