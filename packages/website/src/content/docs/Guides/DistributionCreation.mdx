@@ -3,7 +3,7 @@ title: Distribution Creation
 description: Various ways to create Squiggle distributions
 ---
 
-import { Callout, Tabs } from "nextra/components";
+import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
@@ -19,13 +19,13 @@ normal({p25: number, p75: number})
 
 Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distribution) with the given mean and standard deviation.
 
-<Tabs items={["normal(5,1)", "normal(1B, 1B)"]}>
-  <Tabs.Tab>
+<Tabs items={["normal(5, 1)", "normal(1B, 1B)"]}>
+  <Tab value="normal(5, 1)">
     <SquiggleEditor defaultCode="normal(5, 1)" />
-  </Tabs.Tab>
-  <Tabs.Tab>
+  </Tab>
+  <Tab value="normal(1B, 1B)">
     <SquiggleEditor defaultCode="normal(1B, 1B)" />
-  </Tabs.Tab>
+  </Tab>
 </Tabs>
 
 
@@ -77,19 +77,19 @@ to(5thPercentile: number, 95thPercentile: number)
 The `to` function is an easy way to generate lognormal distributions using predicted _5th_ and _95th_ percentiles. It's the same as ``lognormal({p5, p95})``, but easier to write and read.
 
 <Tabs items={["5 to 10", "to(5, 10)", "1 to 10000"]}>
-  <Tabs.Tab>
+  <Tab value="5 to 10">
     <SquiggleEditor defaultCode="5 to 10" />
-  </Tabs.Tab>
-  <Tabs.Tab>
+  </Tab>
+  <Tab value="to(5, 10)">
     <code>5 to 10</code> does the same thing as <code>to(5,10)</code>.
     <SquiggleEditor defaultCode="to(5,10)" />
-  </Tabs.Tab>
-  <Tabs.Tab>
+  </Tab>
+  <Tab value="1 to 10000">
     It's very easy to generate distributions with very long tails. These can be
     impossible to see without changing view settings. (These settings are
     available in the Playground, but not this smaller editor component)
     <SquiggleEditor defaultCode="1 to 10000" />
-  </Tabs.Tab>
+  </Tab>
 </Tabs>
 
 ### Arguments
@@ -97,15 +97,13 @@ The `to` function is an easy way to generate lognormal distributions using predi
 - `5thPercentile`: number
 - `95thPercentile`: number, greater than `5thPercentile`
 
-<Callout>
-  **Tip**  
+<Callout title="Tip">
   "<strong>To</strong>" is a great way to generate probability distributions very
   quickly from your intuitions. It's easy to write and easy to read. It's
   often a good place to begin an estimate.
 </Callout>
 
-<Callout type="warning">
-  **Caution**  
+<Callout type="warn" title="Caution">
   If you haven't tried [calibration
   training](https://www.lesswrong.com/posts/LdFbx9oqtKAAwtKF3/list-of-probability-calibration-exercises),
   you're likely to be overconfident. We recommend doing calibration training
@@ -127,8 +125,7 @@ Creates a [uniform distribution](<https://en.wikipedia.org/wiki/Uniform_distribu
 - `low`: Number
 - `high`: Number greater than `low`
 
-<Callout type="warning">
-  **Caution**  
+<Callout type="warn" title="Caution">
   While uniform distributions are very simple to understand, we find it rare
   to find uncertainties that actually look like this. Before using a uniform
   distribution, think hard about if you are really 100% confident that the
@@ -163,18 +160,18 @@ with values at 1 and 2. Therefore, this is the same as `mixture(pointMass(1),poi
     "dotAdd(normal(5,2), 6)"
   ]}
 >
-  <Tabs.Tab>
+  <Tab value="pointMass(3)">
     <SquiggleEditor defaultCode="pointMass(3)" />
-  </Tabs.Tab>
-  <Tabs.Tab>
+  </Tab>
+  <Tab value="mixture(1,3,5)">
     <SquiggleEditor defaultCode="mixture(1,3,5)" />
-  </Tabs.Tab>
-  <Tabs.Tab>
+  </Tab>
+  <Tab value="normal(5,2) * 6">
     <SquiggleEditor defaultCode="normal(5,2) * 6" />
-  </Tabs.Tab>
-  <Tabs.Tab>
+  </Tab>
+  <Tab value="dotAdd(normal(5,2), 6)">
     <SquiggleEditor defaultCode="dotAdd(normal(5,2), 6)" />
-  </Tabs.Tab>
+  </Tab>
 </Tabs>
 
 ### Arguments
@@ -200,24 +197,24 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
     "beta({mean: 0.39, stdev: 0.1})",
   ]}
 >
-  <Tabs.Tab>
+  <Tab value="beta(10,20)">
     <SquiggleEditor defaultCode="Sym.beta(10,20)" />
-  </Tabs.Tab>
-  <Tabs.Tab>
+  </Tab>
+  <Tab value="beta(1000, 2000)">
     <SquiggleEditor defaultCode="Sym.beta(1000, 2000)" />
-  </Tabs.Tab>
-  <Tabs.Tab>
+  </Tab>
+  <Tab value="beta(1, 10)">
     <SquiggleEditor defaultCode="Sym.beta(1, 10)" />
-  </Tabs.Tab>
-  <Tabs.Tab>
+  </Tab>
+  <Tab value="beta(10, 1)">
     <SquiggleEditor defaultCode="Sym.beta(10, 1)" />
-  </Tabs.Tab>
-  <Tabs.Tab>
+  </Tab>
+  <Tab value="beta(0.8, 0.8)">
     <SquiggleEditor defaultCode="Sym.beta(0.8, 0.8)" />
-  </Tabs.Tab>
-  <Tabs.Tab>
+  </Tab>
+  <Tab value="beta({mean: 0.39, stdev: 0.1})">
     <SquiggleEditor defaultCode="Sym.beta({mean: 0.39, stdev: 0.1})" />
-  </Tabs.Tab>
+  </Tab>
 </Tabs>
 
 ### Arguments
@@ -225,8 +222,7 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
 - `alpha`: Number greater than zero
 - `beta`: Number greater than zero
 
-<Callout type="warning">
-  **Caution with small numbers**  
+<Callout type="warn" title="Caution with small numbers">
   Squiggle struggles to show beta distributions when either alpha or beta are
   below 1.0. This is because the tails at ~0.0 and ~1.0 are very high. Using a
   log scale for the y-axis helps here.
@@ -241,18 +237,18 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
         "beta(0.9, 0.9)",
       ]}
     >
-      <Tabs.Tab>
+      <Tab value="beta(0.3, 0.3)">
         <SquiggleEditor defaultCode="Sym.beta(0.3, 0.3)" />
-      </Tabs.Tab>
-      <Tabs.Tab>
+      </Tab>
+      <Tab value="beta(0.5, 0.5)">
         <SquiggleEditor defaultCode="Sym.beta(0.5, 0.5)" />
-      </Tabs.Tab>
-      <Tabs.Tab>
-        <SquiggleEditor defaultCode="Sym.beta(.8,.8)" />
-      </Tabs.Tab>
-      <Tabs.Tab>
-        <SquiggleEditor defaultCode="Sym.beta(.9,.9)" />
-      </Tabs.Tab>
+      </Tab>
+      <Tab value="beta(0.8, 0.8)">
+        <SquiggleEditor defaultCode="Sym.beta(0.8, 0.8)" />
+      </Tab>
+      <Tab value="beta(0.9, 0.9)">
+        <SquiggleEditor defaultCode="Sym.beta(0.9, 0.9)" />
+      </Tab>
     </Tabs>
   </details>
 </Callout>
@@ -278,18 +274,18 @@ The `mixture` mixes combines multiple distributions to create a mixture. You can
     "Array of Distributions Input",
   ]}
 >
-  <Tabs.Tab>
+  <Tab value="Simple">
     <SquiggleEditor defaultCode="mixture(1 to 2, 5 to 8, 9 to 10)" />
-  </Tabs.Tab>
-  <Tabs.Tab>
+  </Tab>
+  <Tab value="With Weights">
     <SquiggleEditor defaultCode="mixture(1 to 2, 5 to 8, 9 to 10, [0.1, 0.1, 0.8])" />
-  </Tabs.Tab>
-  <Tabs.Tab>
+  </Tab>
+  <Tab value="With Continuous and Discrete Inputs">
     <SquiggleEditor defaultCode="mixture(1 to 5, 8 to 10, 1, 3, 20)" />
-  </Tabs.Tab>
-  <Tabs.Tab>
+  </Tab>
+  <Tab value="Array of Distributions Input">
     <SquiggleEditor defaultCode="mx([1 to 2, exponential(1)], [1,1])" />
-  </Tabs.Tab>
+  </Tab>
 </Tabs>
 
 ### Arguments
@@ -362,8 +358,7 @@ Creates a continuous point set distribution using a list of points.
 ])`}
 />
 
-<Callout type="warning">
-  **Caution!**  
+<Callout type="warn" title="Caution!">
   Distributions made with ``makeContinuous`` are not automatically normalized. We suggest normalizing them manually using the ``normalize`` function.
 </Callout>
 
