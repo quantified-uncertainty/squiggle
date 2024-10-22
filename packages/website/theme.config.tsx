@@ -4,9 +4,6 @@ import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
 import { Footer } from "./src/components/Footer";
 
 export default {
-  project: {
-    link: "https://github.com/quantified-uncertainty/squiggle",
-  },
   head: () => {
     const { asPath } = useRouter();
     const { title } = useConfig();
@@ -27,11 +24,6 @@ export default {
   },
   footer: {
     component: Footer,
-  },
-  // squiggle components are not compatible with dark mode yet, see https://github.com/quantified-uncertainty/squiggle/issues/1192
-  darkMode: false,
-  nextThemes: {
-    forcedTheme: "light",
   },
   color: {
     hue: 17,

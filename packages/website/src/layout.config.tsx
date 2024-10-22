@@ -1,4 +1,4 @@
-import { type HomeLayoutProps } from "fumadocs-ui/home-layout";
+import { type HomeLayoutProps } from "fumadocs-ui/layouts/home";
 import Image from "next/image";
 
 /**
@@ -9,6 +9,7 @@ import Image from "next/image";
  * Docs Layout: app/docs/layout.tsx
  */
 export const baseOptions: HomeLayoutProps = {
+  disableThemeSwitch: true,
   nav: {
     title: (
       <div className="flex gap-2 text-base">

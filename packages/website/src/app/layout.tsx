@@ -1,3 +1,4 @@
+import "katex/dist/katex.css";
 import "@quri/squiggle-components/common.css";
 import "../styles/main.css";
 
@@ -9,7 +10,16 @@ export default function Layout({ children }: PropsWithChildren) {
   return (
     <html lang="en">
       <body>
-        <RootProvider>{children}</RootProvider>
+        <RootProvider
+          theme={{
+            // squiggle components are not compatible with dark mode yet, see
+            // https://github.com/quantified-uncertainty/squiggle/issues/1192
+            // see also: `disableThemeSwitch` in `layout.config.tsx`
+            forcedTheme: "light",
+          }}
+        >
+          {children}
+        </RootProvider>
         <Analytics />
       </body>
     </html>

@@ -1,4 +1,4 @@
-import { HomeLayout } from "fumadocs-ui/home-layout";
+import { HomeLayout } from "fumadocs-ui/layouts/home";
 import type { PropsWithChildren } from "react";
 
 import { Footer } from "@/components/Footer";
@@ -8,7 +8,9 @@ import { baseOptions } from "../../layout.config";
 export default function Layout({ children }: PropsWithChildren) {
   return (
     <div className="flex min-h-screen flex-col justify-between">
-      <HomeLayout {...baseOptions}>{children}</HomeLayout>
+      <HomeLayout {...baseOptions}>
+        <div className="mt-2">{children}</div>
+      </HomeLayout>
       <Footer />
     </div>
   );
