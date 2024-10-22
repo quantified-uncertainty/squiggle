@@ -1,3 +1,5 @@
+import { getGithubLastEdit } from "fumadocs-core/server";
+import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import {
   DocsBody,
@@ -10,6 +12,15 @@ import { notFound } from "next/navigation";
 
 import { source } from "@/app/source";
 
+function docsPathToGitHub(path: string) {
+  return {
+    owner: "quantified-uncertainty",
+    repo: "squiggle",
+    sha: "main",
+    path: `packages/website/content/docs/${path}`,
+  };
+}
+
 export default async function Page({
   params,
 }: {
@@ -20,16 +31,36 @@ export default async function Page({
 
   const MDX = page.data.body;
 
+  const lastEdit = await getGithubLastEdit(docsPathToGitHub(page.file.path));
+
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
+    <DocsPage
+      toc={page.data.toc}
+      tableOfContent={{
+        style: "clerk",
+      }}
+      lastUpdate={lastEdit ? new Date(lastEdit) : undefined}
+      editOnGithub={docsPathToGitHub(page.file.path)}
+      full={page.data.full}
+    >
       <DocsTitle>{page.data.title || page.file.name}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        {/*
-         * Note that default components includes `Callout` but not `Tabs`.
-         * See https://fumadocs.vercel.app/docs/ui/components for the full list of components.
-         */}
-        <MDX components={{ ...defaultMdxComponents }} />
+        <MDX
+          components={{
+            /*
+             * Note that default components includes `Callout` but not `Tabs`.
+             * See https://fumadocs.vercel.app/docs/ui/components for the full list of components.
+             */
+            ...defaultMdxComponents,
+            // https://fumadocs.vercel.app/docs/ui/mdx/codeblock#usage
+            pre: ({ ref: _ref, ...props }) => (
+              <CodeBlock {...props}>
+                <Pre>{props.children}</Pre>
+              </CodeBlock>
+            ),
+          }}
+        />
       </DocsBody>
     </DocsPage>
   );

@@ -7,6 +7,8 @@ import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 import { z } from "zod";
 
+import squiggleGrammar from "@quri/squiggle-textmate-grammar/dist/squiggle.tmLanguage.json" assert { type: "json" };
+
 const dir = "src/content/docs";
 
 export const docs = defineCollections({
@@ -49,6 +51,19 @@ export default defineConfig({
   mdxOptions: {
     // https://fumadocs.vercel.app/docs/ui/math#add-plugins
     remarkPlugins: [remarkMath],
+    rehypeCodeOptions: {
+      langs: [
+        // ...BUNDLED_LANGUAGES,
+        "javascript",
+        {
+          name: "squiggle",
+          ...squiggleGrammar,
+        },
+      ],
+      themes: {
+        light: "github-light",
+      },
+    },
     rehypePlugins: (v) => [rehypeKatex, ...v],
   },
 });

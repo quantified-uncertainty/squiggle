@@ -1,4 +1,5 @@
 import { HomeLayout } from "fumadocs-ui/layouts/home";
+import { Metadata } from "next";
 import type { PropsWithChildren } from "react";
 
 import { Footer } from "@/components/Footer";
@@ -15,3 +16,9 @@ export default function Layout({ children }: PropsWithChildren) {
     </div>
   );
 }
+
+export const metadata: Metadata = {
+  title: "Squiggle",
+  description:
+    "A simple programming language for intuitive probabilistic estimation",
+};

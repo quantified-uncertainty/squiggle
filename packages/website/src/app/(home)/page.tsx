@@ -7,6 +7,7 @@ const HomepageHeader: FC = () => {
   return (
     <header className="bg-[#fff6ed] p-8">
       <div className="flex flex-col items-center">
+        {/* TODO: next/image */}
         <img alt="Squiggle logo" src="/img/squiggle-logo.png" width={70} />
         <h1 className="font-lato text-[4rem] font-black text-[#e6484f]">
           Squiggle
@@ -22,7 +23,7 @@ const HomepageHeader: FC = () => {
 
 export default function HomePage() {
   return (
-    <div className="min-h-[calc(100vh-var(--nextra-navbar-height)-200px)]">
+    <div>
       <HomepageHeader />
       <main>
         <HomepageFeatures />
