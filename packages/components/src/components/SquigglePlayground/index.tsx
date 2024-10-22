@@ -1,3 +1,4 @@
+"use client";
 import React, { CSSProperties, useCallback, useEffect, useRef } from "react";
 
 import { SqLinker, SqValuePath } from "@quri/squiggle-lang";

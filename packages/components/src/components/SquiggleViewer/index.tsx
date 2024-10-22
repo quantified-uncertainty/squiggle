@@ -1,3 +1,4 @@
+"use client";
 import { FC, forwardRef, memo } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";

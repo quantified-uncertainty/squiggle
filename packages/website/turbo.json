@@ -10,8 +10,8 @@
         "public/llms/documentationBundle.markdown",
         "public/llms/styleGuide.markdown",
         "public/llms/BasicPrompt.markdown",
-        "src/pages/docs/Ecosystem/BasicPrompt.md",
-        "src/pages/docs/Api/*"
+        "src/content/docs/Ecosystem/BasicPrompt.md",
+        "src/content/docs/Api/*"
       ]
     },
     "lint": {

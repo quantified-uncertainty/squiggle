@@ -1,3 +1,4 @@
+"use client";
 import { Tabs } from "nextra/components";
 import { FC, forwardRef, useImperativeHandle, useRef, useState } from "react";
 

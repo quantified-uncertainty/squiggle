@@ -16,8 +16,8 @@ When writing Squiggle code, it's important to avoid certain common mistakes.
 
 ### Function Definitions and Use
 
-1. Anonymous Functions: Use {|e| e} syntax for anonymous functions.
-2. Function Parameters: When using functions like normal, specify the standard deviation with stdev instead of sd. For example, use normal({mean: 0.3, stdev: 0.1}) instead of normal({mean: 0.3, sd: 0.1}).
+1. Anonymous Functions: Use \{|e| e\} syntax for anonymous functions.
+2. Function Parameters: When using functions like normal, specify the standard deviation with stdev instead of sd. For example, use `normal({mean: 0.3, stdev: 0.1})` instead of `normal({mean: 0.3, sd: 0.1})`.
 3. There's no recursion.
 4. You can't call functions that accept ranges, with distributions. No, `({|foo: [1,20]| foo}) (4 to 5)`.
 

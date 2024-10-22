@@ -1,6 +1,6 @@
 # Website
 
-This website is built using [Nextra](https://nextra.site/), a Next.js-based site generation framework.
+This website is built using [Fumadocs](https://fumadocs.vercel.app/), a Next.js-based documentation framework.
 
 # Build for development
 
@@ -26,8 +26,12 @@ Build static website:
 npx turbo build
 ```
 
-Clean up the build artefacts:
+## Learn More
 
-```sh
-pnpm clean
-```
+To learn more about Next.js and Fumadocs, take a look at the following
+resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
+  features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Fumadocs](https://fumadocs.vercel.app) - learn about Fumadocs

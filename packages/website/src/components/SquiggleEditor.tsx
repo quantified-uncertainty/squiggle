@@ -1,3 +1,4 @@
+"use client";
 import { FC } from "react";
 
 import { SquiggleEditor as OriginalSquiggleEditor } from "@quri/squiggle-components";

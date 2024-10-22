@@ -1,4 +1,5 @@
-import React, { FC, HTMLAttributes, useEffect, useState } from "react";
+"use client";
+import { FC, HTMLAttributes, useEffect, useState } from "react";
 import {
   type BundledLanguage,
   bundledLanguages,

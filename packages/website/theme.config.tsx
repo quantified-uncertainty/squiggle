@@ -1,24 +1,9 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import Image from "next/image";
 import { useRouter } from "next/router";
 import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
 
 import { Footer } from "./src/components/Footer";
 
 export default {
-  logo: (
-    <div className="flex gap-2">
-      <Image
-        src="/img/squiggle-logo.png"
-        width={24}
-        height={24}
-        alt="Squiggle logo"
-      />
-      <span style={{ color: "#cd5835" }} className="font-lato font-black">
-        Squiggle
-      </span>
-    </div>
-  ),
   project: {
     link: "https://github.com/quantified-uncertainty/squiggle",
   },

@@ -1,7 +1,20 @@
 {
   "extends": "@quri/configs/tsconfig.nextjs.json",
   "compilerOptions": {
-    "plugins": [{ "name": " @mdx-js/typescript-plugin" }],
+    "plugins": [
+      {
+        "name": " @mdx-js/typescript-plugin"
+      },
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
@@ -13,8 +26,9 @@
     "scripts/generateModuleContent.mts",
     "scripts/compileDocsForLLM.mts",
     "templates.mts",
+    ".next/types/**/*.ts"
   ],
   "mdx": {
-    "checkMdx": true,
-  },
+    "checkMdx": true
+  }
 }

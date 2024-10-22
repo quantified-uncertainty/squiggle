@@ -7,7 +7,7 @@ import { ModulePage, modulePages } from "../templates.mjs";
 import { generateModuleContent } from "./generateModuleContent.mjs";
 import { writeFile } from "./utils";
 
-const directoryPath = `./src/pages/docs/Api`;
+const directoryPath = `./src/content/docs/Api`;
 if (!fs.existsSync(directoryPath)) {
   fs.mkdirSync(directoryPath, { recursive: true });
 }
