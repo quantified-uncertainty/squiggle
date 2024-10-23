@@ -76,6 +76,11 @@ export function generateMetadata({ params }: { params: { slug?: string[] } }) {
   if (!page) notFound();
 
   return {
-    title: page.data.title,
+    title: `${page.data.title} | Squiggle`,
+    description: page.data.description,
+    openGraph: {
+      title: `${page.data.title} | Squiggle`,
+      description: page.data.description,
+    },
   } satisfies Metadata;
 }

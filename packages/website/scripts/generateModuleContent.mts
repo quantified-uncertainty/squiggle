@@ -54,13 +54,12 @@ export function generateModuleContent(
   }
 
   const content = `---
+title: ${name}
 description: ${description}
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# ${name}
 ${intro}
 
 ${functionSection}`;

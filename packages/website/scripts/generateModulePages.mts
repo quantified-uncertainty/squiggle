@@ -40,25 +40,19 @@ async function generateModulePage(
   writeFile(targetFilename(name), content);
 }
 
-const generateMetaPage = async ({ pages }: { pages: ModulePage[] }) => {
-  function convertToKeyValuePairs(names: string[]): { [key: string]: string } {
-    const keyValuePairs: { [key: string]: string } = {};
-    names.forEach((name) => {
-      keyValuePairs[name] = name;
-    });
-    return keyValuePairs;
-  }
-
-  const names = pages.map((p) => p.name);
-  const fileName = `${directoryPath}/_meta.ts`;
-  const content = `export default ${JSON.stringify(
-    convertToKeyValuePairs(names),
+async function generateMetaPage({ pages }: { pages: ModulePage[] }) {
+  const fileName = `${directoryPath}/meta.json`;
+  const content = JSON.stringify(
+    {
+      title: "API",
+      pages: pages.map((p) => p.name),
+    },
     null,
     2
-  )}`;
+  );
 
   writeFile(fileName, content);
-};
+}
 
 for (const modulePage of modulePages) {
   await generateModulePage(modulePage, toMarkdown);

@@ -751,8 +751,6 @@ summary = [
 ```
 
 
-# Language Features
-
 ## Program Structure
 
 A Squiggle program consists of a series of definitions (for example, `x = 5`, `f(x) = x * x`). This can optionally conclude with an *end expression*.
@@ -906,8 +904,6 @@ Squiggle supports the functions [throw](/docs/Api/Common#throw) and [try](/docs/
 
 
 
-# Gotchas
-
 ## Point Set Distributions Conversions
 
 Point Set conversions are done with [kernel density estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation), which is lossy. This might be particularly noticeable in cases where distributions should be entirely above zero.
@@ -947,8 +943,6 @@ symbolicDist = Sym.normal(5, 2)
 ```
 
 
-
-# Functions
 
 ## Basic Syntax
 
@@ -1060,8 +1054,6 @@ myMultiply.parameters[0]
 Domains and parameter names can be accessed by the `fn.parameters` property.
 
 
-
-# Distribution Functions
 
 ## Standard Operations
 
@@ -1274,8 +1266,6 @@ You can cut off from both sides
 
 
 
-# Distribution Creation
-
 ## Normal
 
 ```squiggle
@@ -1288,15 +1278,16 @@ normal({p25: number, p75: number})
 
 Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distribution) with the given mean and standard deviation.
 
-<Tabs items={["normal(5,1)", "normal(1B, 1B)"]}>
-  <Tabs.Tab>
+<Tabs items={["normal(5, 1)", "normal(1B, 1B)"]}>
+  <Tab value="normal(5, 1)">
     ```squiggle
 normalMean = 10
 normalStdDev = 2
 logOfLognormal = log(lognormal(normalMean, normalStdDev))
 [logOfLognormal, normal(normalMean, normalStdDev)]
 ```
-</details>
+  </Accordion>
+</Accordions>
 
 ## To
 
@@ -1308,7 +1299,7 @@ to(5thPercentile: number, 95thPercentile: number)
 The `to` function is an easy way to generate lognormal distributions using predicted _5th_ and _95th_ percentiles. It's the same as ``lognormal({p5, p95})``, but easier to write and read.
 
 <Tabs items={["5 to 10", "to(5, 10)", "1 to 10000"]}>
-  <Tabs.Tab>
+  <Tab value="5 to 10">
     ```squiggle
 hours_the_project_will_take = 5 to 20
 chance_of_doing_anything = 0.8
@@ -1348,8 +1339,7 @@ PointSet.makeContinuous([
 ])
 ```
 
-<Callout type="warning">
-  **Caution!**  
+<Callout type="warn" title="Caution!">
   Distributions made with ``makeContinuous`` are not automatically normalized. We suggest normalizing them manually using the ``normalize`` function.
 </Callout>
 
@@ -1379,10 +1369,6 @@ PointSet.makeDiscrete([
 - `points`: An array of at least 1 coordinate.
 
 
-
-# Control Flow
-
-This page documents control flow. Squiggle has if/else statements, but not for loops. But for for loops, you can use reduce/map constructs instead, which are also documented here.
 
 ## Conditionals
 
@@ -1515,14 +1501,6 @@ ys = List.map(xs, {|x| f(x)})
 
 
 
-# Known Bugs
-
-Much of the Squiggle math is imprecise. This can cause significant errors, so watch out.
-
-Below are a few specific examples to watch for. We'll work on improving these over time and adding much better warnings and error management.
-
-You can see an updated list of known language bugs [here](https://github.com/quantified-uncertainty/squiggle/issues?q=is%3Aopen+is%3Aissue+label%3ABug+label%3ALanguage).
-
 ## Operations on very small or large numbers, silently round to 0 and 1
 
 Squiggle is poor at dealing with very small or large numbers, given fundamental limitations of floating point precision.
@@ -1555,8 +1533,6 @@ sampleSetDist = SampleSet.fromDist(symbolicDist)
 ```
 
 
-
-# Basic Types
 
 ## Numbers
 
@@ -1655,14 +1631,14 @@ Other Squiggle types include:
 - [Functions](/docs/Guides/Functions)
 - [Plots](/docs/Api/Plot)
 - [Scales](/docs/Api/Plot#scales)
-- [Domains](#parameter-annotations)---
+- [Domains](#parameter-annotations)
+---
+title: Common
 description: 
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# Common
 Functions that work on many different types of values. Also see the experimental [JSON functions](/docs/Api/Danger#json).
 
 Common.equal ==: (any, any) => Bool
@@ -1694,13 +1670,11 @@ Try to run a function and return its result. If the function throws an error, re
 
 
 ---
+title: Boolean
 description: 
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
-
-
-# Boolean
 
 
 
@@ -1715,14 +1689,13 @@ Boolean.not !: (Bool) => Bool
 
 
 ---
+title: Date
 description: Dates are a simple date time type.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# Date
-A simple date type. Dates are stored as milliseconds since the epoch. They are immutable, and all functions that modify dates return a new date. Used with [Duration](./Duration) values.
+Dates are stored as milliseconds since the epoch. They are immutable, and all functions that modify dates return a new date. Used with [Duration](./Duration) values.
 
     Dates can be useful for modeling values that change over time. Below is a simple example of a function that returns a normal distribution that changes over time, based on the number of years passed since 2020.
 <SquiggleEditor
@@ -1781,14 +1754,13 @@ Date.rangeDomain(Date(2000), Date(2010))
 
 
 ---
+title: Dict
 description: Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
 
-# Dict
-Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.
 
 ## Conversions
 
@@ -1856,14 +1828,11 @@ Dict.pick(data, ["a", "c"]) // {a: 1, c: 3}
 
 
 ---
+title: Dist
 description: Distributions are the flagship data type in Squiggle. The distribution type is a generic data type that contains one of three different formats of distributions.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
-
-
-# Dist
-Distributions are the flagship data type in Squiggle. The distribution type is a generic data type that contains one of three different formats of distributions.
 
 These subtypes are [point set](/docs/api/DistPointSet), [sample set](/docs/api/DistSampleSet), and [symbolic](/docs/api/Sym). The first two of these have a few custom functions that only work on them. You can read more about the differences between these formats [here](/docs/Discussions/Three-Formats-Of-Distributions).
 
@@ -2073,14 +2042,13 @@ Dist.logScore({estimate: Sym.normal(5,2), answer: 4.5})
 
 
 ---
+title: SampleSet
 description: Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# SampleSet
-Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers. It's useful to distinguish point set distributions from arbitrary lists of numbers to make it clear which functions are applicable.
+It's useful to distinguish point set distributions from arbitrary lists of numbers to make it clear which functions are applicable.
 
 Monte Carlo calculations typically result in sample set distributions.
 
@@ -2153,14 +2121,13 @@ SampleSet.mapN(
 
 
 ---
+title: Sym
 description: The Sym module provides functions to create some common symbolic distributions.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# Sym
-Symbolic Distributions. All these functions match the functions for creating sample set distributions, but produce symbolic distributions instead. Symbolic distributions won't capture correlations, but are more performant than sample distributions.
+All these functions match the functions for creating sample set distributions, but produce symbolic distributions instead. Symbolic distributions won't capture correlations, but are more performant than sample distributions.
 
 Sym.normal: (Number, Number) => SymbolicDist, ({p5: Number, p95: Number}) => SymbolicDist, ({p10: Number, p90: Number}) => SymbolicDist, ({p25: Number, p75: Number}) => SymbolicDist, ({mean: Number, stdev: Number}) => SymbolicDist
 Sym.normal(5, 1)
@@ -2218,14 +2185,11 @@ Sym.triangular(3, 5, 10)
 
 
 ---
+title: PointSet
 description: Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
-
-
-# PointSet
-Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
 
 One complication is that it's possible to represent invalid probability distributions in the point set format. For example, you can represent shapes with negative values, or shapes that are not normalized.
 
@@ -2276,15 +2240,13 @@ PointSet.mapY(mx(Sym.normal(5,2)), {|x| x + 1})
 
 
 ---
+title: Duration
 description: Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# Duration
-Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc. Durations are typically used with [Date](./Date) values.
-
+Durations are typically used with [Date](./Date) values.
 
 | **Unit Name** | **Example** | **Convert Number to Duration** | **Convert Duration to Number** |
 |---------------|----------------------------|--------------------------------------------|--------------------------------------------|
@@ -2359,16 +2321,15 @@ Duration.largerEq >=: (Duration, Duration) => Bool
 
 
 ---
+title: List
 description: Lists are a simple data structure that can hold any type of value. They are similar to arrays in Javascript or lists in Python.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
 
-# List
-Lists are a simple data structure that can hold any type of value. They are similar to arrays in Javascript or lists in Python.
-
 ```squiggle
+// Example list
 myList = [1, 2, 3, normal(5,2), "hello"]
 ```
 
@@ -2504,13 +2465,12 @@ List.reduceWhile(
 
 
 ---
+title: Math
 description: Simple constants and functions for math in Squiggle.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# Math
 
 ## Constants
 
@@ -2553,14 +2513,13 @@ Math.atan: (Number) => Number
 
 
 ---
-description: 
+title: MixedSet
+description: The MixedSet module offers functionality for creating mixed sets, which are sets that can contain both discrete and continuous values.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# MixedSet
-The MixedSet module offers functionality for creating mixed sets, which are sets that can contain both discrete and continuous values. Discrete values are represented as points, while continuous values are represented as ranges. Mixed sets are particularly useful for describing the support of mixed probability distributions.
+Discrete values are represented as points, while continuous values are represented as ranges. Mixed sets are particularly useful for describing the support of mixed probability distributions.
 
 The majority of set functions in the MixedSet module are designed to mirror the [upcomming set functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set) in Javascript.
 
@@ -2599,14 +2558,11 @@ Returns the maximum value in the set
 
 
 ---
-description: 
+title: Plot
+description: The Plot module provides functions to create plots of distributions and functions.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
-
-
-# Plot
-The Plot module provides functions to create plots of distributions and functions.
 
 Raw functions and distributions are plotted with default parameters, while plot objects created by functions from this module give you more control over chart parameters and access to more complex charts.
 
@@ -2670,14 +2626,11 @@ Plot.scatter({
 
 
 ---
+title: Number
 description: Squiggle numbers are Javascript floats.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
-
-
-# Number
-Squiggle numbers are Javascript floats.
 
 ## Constants
 
@@ -2807,13 +2760,12 @@ Number.rangeDomain(5, 10)
 
 
 ---
+title: Scale
 description: Scales for plots.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# Scale
 Chart axes in [plots](./Plot.mdx) can be scaled using the following functions. Each scale function accepts optional min and max value. Power scale accepts an extra exponent parameter.
 
 Squiggle uses D3 for the tick formats. You can read about d3 tick formats [here](https://github.com/d3/d3-format).
@@ -2850,13 +2802,12 @@ Scale.date({ min: Date(2022), max: Date(2025) })
 
 
 ---
+title: Spec
 description: Function Specifications
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# Spec
 Function specifications (Specs) are an experimental feature in Squiggle. They are used to specify the structure of functions and verify that they match that structure. They are used primarily as a tag for functions.
 
 Spec.make: ({name: String, documentation: String, validate: Lambda}) => Specification
@@ -2884,13 +2835,12 @@ myEstimate(t: [Date(2020), Date(2030)]) = normal(10, 3)
 
 
 ---
+title: String
 description: Functions for working with strings in Squiggle
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# String
 Strings support all JSON escape sequences, with addition of escaped single-quotes (for single-quoted strings)
 
 ~~~squiggle
@@ -2913,13 +2863,12 @@ String.split: (String, separator: String) => List(String)
 
 
 ---
+title: Table
 description: Tables are a simple date time type.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# Table
 The Table module allows you to make simple tables for displaying data.
 
 Table.make: (data: List('A), params: {columns: List({fn: ('A) => any, name?: String})}) => Table
@@ -2967,13 +2916,12 @@ Table.make(
 
 
 ---
+title: System
 description: 
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# System
 ## Constants
 
 ### System.version
@@ -2988,13 +2936,12 @@ The number of samples set in the current environment. This variable can be modif
 
 
 ---
+title: Tag
 description: The Tag module handles tags, which allow the additions of metadata to Squiggle variables.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# Tag
 Tags are metadata that can be added to Squiggle variables. They are used to add additional information to variables, such as names, descriptions, and visualization options. While tags can be accessed at runtime, they are primarily meant for use with the Squiggle Playground and other visualizations.
 Tags can be added to variables either by using their name `Tag.get[Name]` or by using decorators.
 
@@ -3133,13 +3080,12 @@ Returns a copy of the value with all tags removed.
 
 
 ---
+title: Calculator
 description: The Calculator module helps you create custom calculators
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# Calculator
 
 The Calculator module allows you to make custom calculators for functions. This is a form that's tied to a specific Squiggle function, where the inputs to the form are passed to that function, and the output of the function gets shown on the bottom.
 
@@ -3173,13 +3119,12 @@ Calculator.make(
 
 
 ---
+title: Input
 description: Inputs are now only used for describing forms for calculators.
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# Input
 Inputs are now only used for describing forms for [calculators](./Calculator.mdx).
 
 Input.text: ({name: String, description?: String, default?: Number|String}) => Input
@@ -3208,13 +3153,12 @@ Input.select({ name: "Name", default: "Sue", options: ["John", "Mary", "Sue"] })
 
 
 ---
+title: RelativeValues
 description: 
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# RelativeValues
 *Warning: Relative value functions are particularly experimental and subject to change.*
 
 RelativeValues.gridPlot: ({ids: List(String), fn: (String, String) => [Dist, Dist]}) => Plot
@@ -3226,13 +3170,12 @@ RelativeValues.gridPlot({
 
 
 ---
+title: Danger
 description: Newer experimental functions which are less stable than Squiggle as a whole
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# Danger
 The Danger library contains newer experimental functions which are less stable than Squiggle as a whole. They are not recommended for production use, but are useful for testing out new ideas., 
 
 

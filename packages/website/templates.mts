@@ -16,13 +16,12 @@ export const modulePages: ModulePage[] = [
   {
     name: "Boolean",
     description: "",
-    intro: `
-`,
+    intro: "",
   },
   {
-    description: "Dates are a simple date time type.",
     name: "Date",
-    intro: `A simple date type. Dates are stored as milliseconds since the epoch. They are immutable, and all functions that modify dates return a new date. Used with [Duration](./Duration) values.
+    description: "Dates are a simple date time type.",
+    intro: `Dates are stored as milliseconds since the epoch. They are immutable, and all functions that modify dates return a new date. Used with [Duration](./Duration) values.
 
     Dates can be useful for modeling values that change over time. Below is a simple example of a function that returns a normal distribution that changes over time, based on the number of years passed since 2020.
 <SquiggleEditor
@@ -41,22 +40,20 @@ defaultCode={\`f(t: [Date(2020), Date(2040)]) = {
   },
   {
     name: "Dict",
+    description:
+      "Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.",
+    intro: "",
     sections: [
       { name: "Conversions" },
       { name: "Transformations" },
       { name: "Queries" },
     ],
-    description:
-      "Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.",
-    intro: `Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.`,
   },
   {
     name: "Dist",
     description:
       "Distributions are the flagship data type in Squiggle. The distribution type is a generic data type that contains one of three different formats of distributions.",
-    intro: `Distributions are the flagship data type in Squiggle. The distribution type is a generic data type that contains one of three different formats of distributions.
-
-These subtypes are [point set](/docs/api/DistPointSet), [sample set](/docs/api/DistSampleSet), and [symbolic](/docs/api/Sym). The first two of these have a few custom functions that only work on them. You can read more about the differences between these formats [here](/docs/Discussions/Three-Formats-Of-Distributions).
+    intro: `These subtypes are [point set](/docs/api/DistPointSet), [sample set](/docs/api/DistSampleSet), and [symbolic](/docs/api/Sym). The first two of these have a few custom functions that only work on them. You can read more about the differences between these formats [here](/docs/Discussions/Three-Formats-Of-Distributions).
 
 Several functions below only can work on particular distribution formats. For example, scoring and pointwise math requires the point set format. When this happens, the types are automatically converted to the correct format. These conversions are lossy.
     
@@ -91,24 +88,24 @@ The only functions that do not return normalized distributions are the pointwise
   },
   {
     name: "SampleSet",
+    description:
+      "Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers.",
+    intro: `It's useful to distinguish point set distributions from arbitrary lists of numbers to make it clear which functions are applicable.
+
+Monte Carlo calculations typically result in sample set distributions.
+
+All regular distribution function work on sample set distributions. In addition, there are several functions that only work on sample set distributions.`,
     sections: [
       { name: "Constructors" },
       { name: "Conversions" },
       { name: "Transformations" },
     ],
-    description:
-      "Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers.",
-    intro: `Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers. It's useful to distinguish point set distributions from arbitrary lists of numbers to make it clear which functions are applicable.
-
-Monte Carlo calculations typically result in sample set distributions.
-
-All regular distribution function work on sample set distributions. In addition, there are several functions that only work on sample set distributions.`,
   },
   {
     name: "Sym",
     description:
       "The Sym module provides functions to create some common symbolic distributions.",
-    intro: `Symbolic Distributions. All these functions match the functions for creating sample set distributions, but produce symbolic distributions instead. Symbolic distributions won't capture correlations, but are more performant than sample distributions.`,
+    intro: `All these functions match the functions for creating sample set distributions, but produce symbolic distributions instead. Symbolic distributions won't capture correlations, but are more performant than sample distributions.`,
   },
   {
     name: "PointSet",
@@ -119,9 +116,7 @@ All regular distribution function work on sample set distributions. In addition,
     ],
     description:
       "Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.",
-    intro: `Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
-
-One complication is that it's possible to represent invalid probability distributions in the point set format. For example, you can represent shapes with negative values, or shapes that are not normalized.`,
+    intro: `One complication is that it's possible to represent invalid probability distributions in the point set format. For example, you can represent shapes with negative values, or shapes that are not normalized.`,
   },
   {
     name: "Duration",
@@ -133,8 +128,7 @@ One complication is that it's possible to represent invalid probability distribu
       { name: "Algebra" },
       { name: "Comparison" },
     ],
-    intro: `Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc. Durations are typically used with [Date](./Date) values.
-
+    intro: `Durations are typically used with [Date](./Date) values.
 
 | **Unit Name** | **Example** | **Convert Number to Duration** | **Convert Duration to Number** |
 |---------------|----------------------------|--------------------------------------------|--------------------------------------------|
@@ -148,6 +142,13 @@ One complication is that it's possible to represent invalid probability distribu
     name: "List",
     description:
       "Lists are a simple data structure that can hold any type of value. They are similar to arrays in Javascript or lists in Python.",
+    intro: `
+\`\`\`squiggle
+// Example
+myList = [1, 2, 3, normal(5,2), "hello"]
+\`\`\`
+
+Lists are immutable, meaning that they cannot be modified. Instead, all list functions return a new list.`,
     sections: [
       { name: "Constructors" },
       { name: "Modifications" },
@@ -155,13 +156,6 @@ One complication is that it's possible to represent invalid probability distribu
       { name: "Queries" },
       { name: "Functional Transformations" },
     ],
-    intro: `Lists are a simple data structure that can hold any type of value. They are similar to arrays in Javascript or lists in Python.
-
-\`\`\`squiggle
-myList = [1, 2, 3, normal(5,2), "hello"]
-\`\`\`
-
-Lists are immutable, meaning that they cannot be modified. Instead, all list functions return a new list.`,
   },
 
   {
@@ -188,8 +182,9 @@ Lists are immutable, meaning that they cannot be modified. Instead, all list fun
   },
   {
     name: "MixedSet",
-    description: "",
-    intro: `The MixedSet module offers functionality for creating mixed sets, which are sets that can contain both discrete and continuous values. Discrete values are represented as points, while continuous values are represented as ranges. Mixed sets are particularly useful for describing the support of mixed probability distributions.
+    description:
+      "The MixedSet module offers functionality for creating mixed sets, which are sets that can contain both discrete and continuous values.",
+    intro: `Discrete values are represented as points, while continuous values are represented as ranges. Mixed sets are particularly useful for describing the support of mixed probability distributions.
 
 The majority of set functions in the MixedSet module are designed to mirror the [upcomming set functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set) in Javascript.
 
@@ -199,25 +194,14 @@ Currently, there is no dedicated MixedSet object type. Instead, mixed sets are i
   },
   {
     name: "Plot",
-    description: "",
-    intro: `The Plot module provides functions to create plots of distributions and functions.
-
-Raw functions and distributions are plotted with default parameters, while plot objects created by functions from this module give you more control over chart parameters and access to more complex charts.`,
+    description:
+      "The Plot module provides functions to create plots of distributions and functions.",
+    intro: `Raw functions and distributions are plotted with default parameters, while plot objects created by functions from this module give you more control over chart parameters and access to more complex charts.`,
   },
   {
     name: "Number",
-    sections: [
-      { name: "Comparison" },
-      { name: "Algebra (Number)" },
-      { name: "Functions (Number)" },
-      { name: "Algebra (List)" },
-      { name: "Functions (List)" },
-      { name: "Utils" },
-    ],
     description: "Squiggle numbers are Javascript floats.",
-    intro: `Squiggle numbers are Javascript floats.
-
-## Constants
+    intro: `## Constants
 
 | Variable Name     | Number Name                                   | Value               |
 |-------------------|-----------------------------------------------|---------------------|
@@ -226,14 +210,22 @@ Raw functions and distributions are plotted with default parameters, while plot 
 
 ## Functions
     `,
+    sections: [
+      { name: "Comparison" },
+      { name: "Algebra (Number)" },
+      { name: "Functions (Number)" },
+      { name: "Algebra (List)" },
+      { name: "Functions (List)" },
+      { name: "Utils" },
+    ],
   },
   {
     name: "Scale",
     description: "Scales for plots.",
-    sections: [{ name: "Numeric Scales" }, { name: "Date Scales" }],
     intro: `Chart axes in [plots](./Plot.mdx) can be scaled using the following functions. Each scale function accepts optional min and max value. Power scale accepts an extra exponent parameter.
 
 Squiggle uses D3 for the tick formats. You can read about d3 tick formats [here](https://github.com/d3/d3-format).`,
+    sections: [{ name: "Numeric Scales" }, { name: "Date Scales" }],
   },
   {
     name: "Spec",
@@ -271,7 +263,6 @@ Returns the current version of Squiggle.
     name: "Tag",
     description:
       "The Tag module handles tags, which allow the additions of metadata to Squiggle variables.",
-    sections: [{ name: "Tags" }, { name: "Functions" }],
     intro: `Tags are metadata that can be added to Squiggle variables. They are used to add additional information to variables, such as names, descriptions, and visualization options. While tags can be accessed at runtime, they are primarily meant for use with the Squiggle Playground and other visualizations.
 Tags can be added to variables either by using their name \`Tag.get[Name]\` or by using decorators.
 
@@ -303,6 +294,7 @@ docs = Tag.getDoc(exampleFn)
 @hide // Hide this variable in the Playground
 helperFn(f) = f \`}/>
 `,
+    sections: [{ name: "Tags" }, { name: "Functions" }],
   },
 
   {
@@ -332,6 +324,8 @@ Calculators can be useful for debugging functions or to present functions to end
     name: "Danger",
     description:
       "Newer experimental functions which are less stable than Squiggle as a whole",
+    intro: `The Danger library contains newer experimental functions which are less stable than Squiggle as a whole. They are not recommended for production use, but are useful for testing out new ideas., 
+`,
     sections: [
       {
         name: "JSON",
@@ -367,7 +361,5 @@ result
       { name: "Integration" },
       { name: "Optimization" },
     ],
-    intro: `The Danger library contains newer experimental functions which are less stable than Squiggle as a whole. They are not recommended for production use, but are useful for testing out new ideas., 
-`,
   },
 ];
