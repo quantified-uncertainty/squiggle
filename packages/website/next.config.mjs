@@ -1,5 +1,6 @@
 import { createMDX } from "fumadocs-mdx/next";
 
+// Note: createMDX enables (experimental) turbo by default
 export default createMDX()({
   reactStrictMode: true,
   async redirects() {
