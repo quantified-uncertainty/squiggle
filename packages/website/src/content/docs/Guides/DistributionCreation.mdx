@@ -227,10 +227,10 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
   below 1.0. This is because the tails at ~0.0 and ~1.0 are very high. Using a
   log scale for the y-axis helps here.
 
-  <details>
-    <summary>Examples</summary>
-    <Tabs
-      items={[
+  <Accordions type="single">
+    <Accordion title="Examples">
+      <Tabs
+        items={[
         "beta(0.3, 0.3)",
         "beta(0.5, 0.5)",
         "beta(0.8, 0.8)",
@@ -248,9 +248,10 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
       </Tab>
       <Tab value="beta(0.9, 0.9)">
         <SquiggleEditor defaultCode="Sym.beta(0.9, 0.9)" />
-      </Tab>
-    </Tabs>
-  </details>
+        </Tab>
+      </Tabs>
+    </Accordion>
+  </Accordions>
 </Callout>
 
 <SquiggleEditor defaultCode="Sym.triangular(1, 2, 4)" />
@@ -299,24 +300,23 @@ The `mixture` mixes combines multiple distributions to create a mixture. You can
 
 ### Special Use Cases of Mixtures
 
-<details>
-  <summary>🕐 Zero or Continuous</summary>
-  One common reason to have mixtures of continous and discrete distributions is to handle the special case of 0.
-  Say I want to model the time I will spend on some upcoming project. I think I have an 80% chance of doing it.  
+<Accordions type="multiple">
+  <Accordion title="🕐 Zero or Continuous">
+    One common reason to have mixtures of continous and discrete distributions is to handle the special case of 0.
+    Say I want to model the time I will spend on some upcoming project. I think I have an 80% chance of doing it.  
 
   In this case, I have a 20% chance of spending 0 time with it. I might estimate my hours with,
   <SquiggleEditor
     defaultCode={`hours_the_project_will_take = 5 to 20
 chance_of_doing_anything = 0.8
 mx(hours_the_project_will_take, 0, [chance_of_doing_anything, 1 - chance_of_doing_anything])`}
-  />
-</details>
+    />
+  </Accordion>
 
-<details>
-  <summary>🔒 Model Uncertainty Safeguarding</summary>
-  One technique several <a href="https://www.foretold.io/">Foretold.io</a> users used is to combine their main guess, with a
-  "just-in-case distribution". This latter distribution would have very low weight, but would be
-  very wide, just in case they were dramatically off for some weird reason.
+  <Accordion title="🔒 Model Uncertainty Safeguarding">
+    One technique several [Foretold.io](https://www.foretold.io/) users used is to combine their main guess, with a
+    "just-in-case distribution". This latter distribution would have very low weight, but would be
+    very wide, just in case they were dramatically off for some weird reason.
 <SquiggleEditor
   defaultCode={`forecast = 3 to 30
 chance_completely_wrong = 0.05
@@ -324,7 +324,9 @@ forecast_if_completely_wrong = normal({p5:-100, p95:200})
 mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_completely_wrong])`}
 />
 
-</details>
+  </Accordion>
+</Accordions>
+
 ## SampleSet.fromList
 
 ```squiggle

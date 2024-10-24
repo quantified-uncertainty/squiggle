@@ -1305,13 +1305,12 @@ hours_the_project_will_take = 5 to 20
 chance_of_doing_anything = 0.8
 mx(hours_the_project_will_take, 0, [chance_of_doing_anything, 1 - chance_of_doing_anything])
 ```
-</details>
+  </Accordion>
 
-<details>
-  <summary>🔒 Model Uncertainty Safeguarding</summary>
-  One technique several <a href="https://www.foretold.io/">Foretold.io</a> users used is to combine their main guess, with a
-  "just-in-case distribution". This latter distribution would have very low weight, but would be
-  very wide, just in case they were dramatically off for some weird reason.
+  <Accordion title="🔒 Model Uncertainty Safeguarding">
+    One technique several [Foretold.io](https://www.foretold.io/) users used is to combine their main guess, with a
+    "just-in-case distribution". This latter distribution would have very low weight, but would be
+    very wide, just in case they were dramatically off for some weird reason.
 ```squiggle
 forecast = 3 to 30
 chance_completely_wrong = 0.05
@@ -1319,7 +1318,9 @@ forecast_if_completely_wrong = normal({p5:-100, p95:200})
 mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_completely_wrong])
 ```
 
-</details>
+  </Accordion>
+</Accordions>
+
 ## SampleSet.fromList
 
 ```squiggle
@@ -2329,7 +2330,7 @@ import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
 
 ```squiggle
-// Example list
+// Example
 myList = [1, 2, 3, normal(5,2), "hello"]
 ```
 
