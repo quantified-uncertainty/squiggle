@@ -3,8 +3,9 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { CodeSyntaxHighlighter } from "../lib/CodeSyntaxHighlighter.js";
 
 /**
- * The number shower is a simple component to display a number.
- * It uses the symbols "K", "M", "B", and "T", to represent thousands, millions, billions, and trillions. Outside of that range, it uses scientific notation.
+ * Highlighting for Squiggle or Javascript code, implemented using [Shiki](https://shiki.matsu.io/).
+ *
+ * See also: `<MarkdownViewer>`, which relies on this component for code blocks.
  */
 const meta = {
   component: CodeSyntaxHighlighter,
@@ -18,14 +19,14 @@ export const Squiggle: Story = {
   args: {
     language: "squiggle",
     children: `/* This is a comment */
-const foo = "bar";
-normal(5, 1)
-normal({ p5: 4, p95: 10 })
-normal({ p10: 5, p95: 9 })
-normal({ p25: 5, p75: 9 })
-normal({ mean: 5, stdev: 2 })
-normal(5 to 10, normal(3, 2))
-normal({ mean: uniform(5, 9), stdev: 3 })
+foo = "bar"
+d1 = normal(5, 1)
+d2 = normal({ p5: 4, p95: 10 })
+d3 = normal({ p10: 5, p95: 9 })
+d4 = normal({ p25: 5, p75: 9 })
+d5 = normal({ mean: 5, stdev: 2 })
+d6 = normal(5 to 10, normal(3, 2))
+d7 = normal({ mean: uniform(5, 9), stdev: 3 })
 `,
   },
 };
@@ -36,10 +37,11 @@ export const JS: Story = {
   args: {
     language: "javascript",
     children: `const meta = {
-        component: CodeSyntaxHighlighter,
-      } satisfies Meta<typeof CodeSyntaxHighlighter>;
-      export default meta;
-      type Story = StoryObj<typeof meta>;
+  component: CodeSyntaxHighlighter,
+} satisfies Meta<typeof CodeSyntaxHighlighter>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
 `,
   },
 };
