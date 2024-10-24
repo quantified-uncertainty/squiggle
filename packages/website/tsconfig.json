@@ -3,18 +3,16 @@
   "compilerOptions": {
     "plugins": [
       {
-        "name": " @mdx-js/typescript-plugin"
+        "name": " @mdx-js/typescript-plugin",
       },
       {
-        "name": "next"
-      }
+        "name": "next",
+      },
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"],
     },
-    "strictNullChecks": true
+    "strictNullChecks": true,
   },
   "include": [
     "next-env.d.ts",
@@ -26,9 +24,9 @@
     "scripts/generateModuleContent.mts",
     "scripts/compileDocsForLLM.mts",
     "templates.mts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
   ],
   "mdx": {
-    "checkMdx": true
-  }
+    "checkMdx": true,
+  },
 }
