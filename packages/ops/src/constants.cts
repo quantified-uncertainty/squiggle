@@ -3,7 +3,7 @@
 export const REPO = "quantified-uncertainty/squiggle";
 
 export const WEBSITE_CHANGELOG_ROOT =
-  "packages/website/src/pages/docs/Changelog";
+  "packages/website/src/content/docs/Changelog";
 
 // Versions of all these packages should be synced thanks to `fixed` field in `.changeset/config.json`.
 // TODO - extract from changeset config.
