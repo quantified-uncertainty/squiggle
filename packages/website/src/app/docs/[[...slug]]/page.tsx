@@ -1,4 +1,3 @@
-import { getGithubLastEdit } from "fumadocs-core/server";
 import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import {
@@ -32,15 +31,12 @@ export default async function Page({
 
   const MDX = page.data.body;
 
-  const lastEdit = await getGithubLastEdit(docsPathToGitHub(page.file.path));
-
   return (
     <DocsPage
       toc={page.data.toc}
       tableOfContent={{
         style: "clerk",
       }}
-      lastUpdate={lastEdit ? new Date(lastEdit) : undefined}
       editOnGithub={docsPathToGitHub(page.file.path)}
       full={page.data.full}
     >
