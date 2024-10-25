@@ -3,7 +3,7 @@
 import { fromByteArray, toByteArray } from "base64-js";
 import { useSearchParams } from "next/navigation";
 import { deflate, inflate } from "pako";
-import { use, useState } from "react";
+import { FC, use, useState } from "react";
 
 import {
   defaultSquiggleVersion,
@@ -55,7 +55,7 @@ function updateUrl(data: Partial<Data>, version: SquiggleVersion) {
   );
 }
 
-export default function PlaygroundPage() {
+export const ClientPlayground: FC = () => {
   const params = useSearchParams();
 
   const hashData = getHashData();
@@ -119,4 +119,4 @@ export default function PlaygroundPage() {
       />
     </div>
   );
-}
+};
