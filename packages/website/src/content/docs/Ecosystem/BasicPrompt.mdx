@@ -12,4 +12,9 @@ You can read this document in plaintext [here](https://raw.githubusercontent.com
 
 ---
 
-<BasicPrompt />
+{/* Doing this through imported component will break table of contents, but it's
+fine for now. */}
+{/* Note: you must pass `components` prop to the component; otherwise,
+`<CodeBlock>` for Squiggle examples won't be rendered properly. See
+https://github.com/fuma-nama/fumadocs/discussions/904 for details. */}
+<BasicPrompt components={props.components} />

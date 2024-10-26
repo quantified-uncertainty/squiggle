@@ -1,6 +1,8 @@
 import { createMDX } from "fumadocs-mdx/next";
 
-// Note: createMDX enables (experimental) turbo by default
+// `createMDX` recompiles MDX docs based on `./source.config.ts`.
+// See https://fumadocs.vercel.app/docs/mdx/plugin for details.
+// Note: it enables turbopack by default.
 export default createMDX()({
   reactStrictMode: true,
   async redirects() {

@@ -34,14 +34,14 @@ export default async function Page({
   return (
     <DocsPage
       toc={page.data.toc}
-      tableOfContent={{
-        style: "clerk",
-      }}
       editOnGithub={docsPathToGitHub(page.file.path)}
+      lastUpdate={page.data.lastModified}
       full={page.data.full}
     >
       <DocsTitle>{page.data.title || page.file.name}</DocsTitle>
-      <DocsDescription>{page.data.description}</DocsDescription>
+      {page.data.description && (
+        <DocsDescription>{page.data.description}</DocsDescription>
+      )}
       <DocsBody>
         <MDX
           components={{

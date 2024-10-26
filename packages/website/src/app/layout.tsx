@@ -8,7 +8,9 @@ import { PropsWithChildren } from "react";
 
 export default function Layout({ children }: PropsWithChildren) {
   return (
-    <html lang="en">
+    // `suppressHydrationWarning` is required by fumadocs, recommended by docs and default generated examples
+    // Fumadocs injects "light theme" styles on HTML element.
+    <html lang="en" suppressHydrationWarning>
       <body>
         <RootProvider
           theme={{
