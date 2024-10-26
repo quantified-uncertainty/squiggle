@@ -78,9 +78,7 @@ const documentationBundlePage = async () => {
   };
 
   const getGuideContent = async () => {
-    const documentationFiles = await glob(
-      "./src/content/docs/Guides/*.{md,mdx}"
-    );
+    const documentationFiles = await glob("./content/docs/Guides/*.{md,mdx}");
     return Promise.all(
       documentationFiles
         .filter(

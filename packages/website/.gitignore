@@ -3,6 +3,6 @@
 
 # These files are generated.
 # They must be also listed in ./turbo.json build outputs.
-/src/content/docs/Api/*
-/src/content/docs/Ecosystem/LLMPrompt.md
+/content/docs/Api/*
+/content/docs/Ecosystem/LLMPrompt.md
 /public/llms/documentationBundle.txt

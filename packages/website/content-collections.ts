@@ -8,7 +8,7 @@ import remarkMath from "remark-math";
 
 import squiggleGrammar from "@quri/squiggle-textmate-grammar/dist/squiggle.tmLanguage.json" assert { type: "json" };
 
-const directory = "src/content/docs";
+const directory = "content/docs";
 
 export const docs = defineCollection({
   name: "doc",
@@ -42,12 +42,7 @@ export const docs = defineCollection({
     // We had this when we used fumadocs-mdx, but there's no direct analog in content-collections.
 
     const title =
-      mdx.title ||
-      mdx._meta.filePath
-        .split("/")
-        .at(-1)!
-        .replace(/\.mdx?/, "")
-        .replace("-", " ");
+      mdx.title || mdx._meta.fileName.replace(/\.mdx?/, "").replace("-", " ");
 
     return {
       ...mdx,
