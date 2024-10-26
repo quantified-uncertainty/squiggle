@@ -25,6 +25,7 @@ export const Footer: FC = () => {
   );
   return (
     <div className="bg-gray-100">
+      <hr />
       <div className="mx-auto flex max-w-[90rem] justify-center px-8 py-12 text-gray-600 md:justify-start">
         <div className="mx-auto mt-auto flex flex-1">
           <div className="px-3 pb-4">{externalLinkSection}</div>
