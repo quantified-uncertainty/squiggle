@@ -1,4 +1,5 @@
-import React, { FC, HTMLAttributes, useEffect, useState } from "react";
+"use client";
+import { FC, HTMLAttributes, useEffect, useState } from "react";
 import {
   type BundledLanguage,
   bundledLanguages,
@@ -58,7 +59,7 @@ export const CodeSyntaxHighlighter: FC<
     "children"
   >
 > = ({ children, language, theme, ...rest }) => {
-  const [html, setHtml] = useState(children);
+  const [html, setHtml] = useState<string | undefined>();
 
   // Syntax-highlighted blocks will start unstyled, that's fine.
   useEffect(() => {
@@ -69,11 +70,14 @@ export const CodeSyntaxHighlighter: FC<
     })();
   });
 
-  return (
-    <pre
+  return html ? (
+    // This must be a div, shiki creates its own `<pre>`, and we don't want nested `<pre>`s, to avoid styling issues.
+    <div
       className="*:!bg-inherit" // shiki themes add background color, so we have to override it
       dangerouslySetInnerHTML={{ __html: html }}
       {...rest}
     />
+  ) : (
+    <pre {...rest}>{children}</pre>
   );
 };

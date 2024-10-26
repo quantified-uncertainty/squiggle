@@ -1,33 +1,10 @@
-import nextra from "nextra";
-import { BUNDLED_LANGUAGES, getHighlighter } from "shiki";
+import { createMDX } from "fumadocs-mdx/next";
 
-import squiggleGrammar from "@quri/squiggle-textmate-grammar/dist/squiggle.tmLanguage.json" assert { type: "json" };
-
-// not documented in nextra yet, but explained here: https://github.com/shuding/nextra/issues/555
-const rehypePrettyCodeOptions = {
-  getHighlighter: (options) => {
-    return getHighlighter({
-      ...options,
-      langs: [
-        ...BUNDLED_LANGUAGES,
-        {
-          id: "squiggle",
-          scopeName: "source.squiggle",
-          grammar: squiggleGrammar,
-        },
-      ],
-    });
-  },
-};
-
-const withNextra = nextra({
-  theme: "nextra-theme-docs",
-  themeConfig: "./theme.config.tsx",
-  mdxOptions: { rehypePrettyCodeOptions },
-  latex: true,
-});
-
-export default withNextra({
+// `createMDX` recompiles MDX docs based on `./source.config.ts`.
+// See https://fumadocs.vercel.app/docs/mdx/plugin for details.
+// Note: it enables turbopack by default.
+export default createMDX()({
+  reactStrictMode: true,
   async redirects() {
     return [
       // permanent redirects might be cached forever which is scary, let's use 307 for now

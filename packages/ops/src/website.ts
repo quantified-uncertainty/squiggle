@@ -56,16 +56,19 @@ function combineChangelogs(changelogs: PackageChangelog[]): {
 }
 
 async function updateChangelogMeta(version: string) {
-  const metaFilename = `${WEBSITE_CHANGELOG_ROOT}/_meta.ts`;
+  const metaFilename = `${WEBSITE_CHANGELOG_ROOT}/meta.json`;
 
   const metaJson = JSON.parse(await readFile(metaFilename, "utf-8"));
   const versionName = `v${version}`;
   await writeFile(
     metaFilename,
-    `export default ${JSON.stringify({
-      [versionName]: versionName,
+    JSON.stringify({
       ...metaJson,
-    })};`
+      pages: [
+        versionName,
+        ...metaJson.pages.filter((v: string) => v !== versionName),
+      ],
+    })
   );
 }
 export async function generateWebsiteChangelog(packageDirs: string[]) {

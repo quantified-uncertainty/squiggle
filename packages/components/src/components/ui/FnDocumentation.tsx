@@ -186,6 +186,7 @@ export const FnDocumentation: FC<{
                 </div>
               ) : (
                 <MarkdownViewer
+                  backgroundColor="bg-slate-100"
                   className="max-width-[200px]"
                   key={i}
                   md={`\`\`\`squiggle\n${text}\n\`\`\``}

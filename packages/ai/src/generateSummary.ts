@@ -108,7 +108,7 @@ function generateDetailedStepLogs<Shape extends IOShape>(
     detailedLogs += "### Logs:\n";
     step.getLogs().forEach((log) => {
       detailedLogs += `#### **${getLogEntryFullName(log.entry)}:**\n`;
-      detailedLogs += getFullMessage(log);
+      detailedLogs += getFullMessage(log) + "\n";
     });
   });
   return detailedLogs;
@@ -124,38 +124,30 @@ function getFullMessage(log: TimestampedLogEntry): string {
       return log.entry.message;
     case "llmResponse": {
       const llmResponse = log.entry;
-      return `<details>
-  <summary>Content</summary>
+      return `##### Content
 
 \`\`\`\`
 ${llmResponse.content}
 \`\`\`\`
-</details>\n\n
 
-<details>
-  <summary>Prompt</summary>
+##### Prompt
 
 \`\`\`\`
 ${llmResponse.prompt}
 \`\`\`\`
-</details>\n\n
 
-
-<details>
-  <summary>Messages</summary>
+##### Messages
 
 \`\`\`\`json
 ${JSON.stringify(llmResponse.messages, null, 2)}
 \`\`\`\`
-</details>\n\n
 
-<details>
-  <summary>Full Response</summary>
+##### Full Response
 
 \`\`\`\`json
 ${JSON.stringify(llmResponse.response, null, 2)}
 \`\`\`\`
-</details>\n\n\n`;
+`;
     }
     default:
       return "❓ Unknown log type";
@@ -196,8 +188,7 @@ ${formatCode(artifact.value)}
 function formatCode(code: Code): string {
   switch (code.type) {
     case "formattingFailed":
-      return `<details>
-  <summary>🔴 Code Update: [Error] - Formatting failed</summary>
+      return `🔴 Code Update: [Error] - Formatting failed
 
 **Error:**
 \`\`\`
@@ -208,10 +199,10 @@ ${code.error}
 \`\`\`squiggleEditor
 ${code.source}
 \`\`\`
-</details>\n\n`;
+
+`;
     case "runFailed":
-      return `<details>
-  <summary>🔴 Code Update: [Error] - Run failed</summary>
+      return `🔴 Code Update: [Error] - Run failed
 
 **Error:**
 \`\`\`
@@ -222,15 +213,14 @@ ${code.error}
 \`\`\`squiggleEditor
 ${code.source}
 \`\`\`
-</details>\n\n`;
+`;
     case "success":
-      return `<details>
-  <summary>✅ Code Update: [Success] - Code executed successfully</summary>
+      return `✅ Code Update: [Success] - Code executed successfully
 
 \`\`\`squiggleEditor
 ${code.source}
 \`\`\`
-</details>\n\n`;
+`;
   }
 }
 

@@ -5,8 +5,9 @@ import { FnDocumentation } from "@quri/squiggle-lang";
 
 import { ModulePage, modulePages } from "../templates.mjs";
 import { generateModuleContent } from "./generateModuleContent.mjs";
+import { writeFile } from "./utils";
 
-const directoryPath = `./src/pages/docs/Api`;
+const directoryPath = `./src/content/docs/Api`;
 if (!fs.existsSync(directoryPath)) {
   fs.mkdirSync(directoryPath, { recursive: true });
 }
@@ -27,49 +28,31 @@ function toMarkdown(documentation: FnDocumentation) {
 `;
 }
 
-const generateModulePage = async (
+async function generateModulePage(
   { name, description, intro, sections }: ModulePage,
   itemFn = toMarkdown
-) => {
+) {
   const content = generateModuleContent(
     { name, description, intro, sections },
     itemFn
   );
 
-  fs.writeFile(targetFilename(name), content, (err) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    console.log(`Content written to ${targetFilename(name)}`);
-  });
-};
+  writeFile(targetFilename(name), content);
+}
 
-const generateMetaPage = async ({ pages }: { pages: ModulePage[] }) => {
-  function convertToKeyValuePairs(names: string[]): { [key: string]: string } {
-    const keyValuePairs: { [key: string]: string } = {};
-    names.forEach((name) => {
-      keyValuePairs[name] = name;
-    });
-    return keyValuePairs;
-  }
-
-  const names = pages.map((p) => p.name);
-  const fileName = `${directoryPath}/_meta.ts`;
-  const content = `export default ${JSON.stringify(
-    convertToKeyValuePairs(names),
+async function generateMetaPage({ pages }: { pages: ModulePage[] }) {
+  const fileName = `${directoryPath}/meta.json`;
+  const content = JSON.stringify(
+    {
+      title: "API",
+      pages: pages.map((p) => p.name),
+    },
     null,
     2
-  )}`;
+  );
 
-  fs.writeFile(fileName, content, (err) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    console.log(`Content written to ${targetFilename(fileName)}`);
-  });
-};
+  writeFile(fileName, content);
+}
 
 for (const modulePage of modulePages) {
   await generateModulePage(modulePage, toMarkdown);

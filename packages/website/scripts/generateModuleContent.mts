@@ -24,9 +24,8 @@ export function generateModuleContent(
   { name, description, intro, sections }: ModulePage,
   itemFn = toMarkdown
 ) {
-  // const itemFn = toJSON;
   const namespaceNames = getAllFunctionNamesWithNamespace(name);
-  let fnDocumentationItems = namespaceNames
+  const fnDocumentationItems = namespaceNames
     .map(getFunctionDocumentation)
     .filter((fn): fn is FnDocumentation => Boolean(fn && !fn.isUnit));
 
@@ -55,13 +54,12 @@ export function generateModuleContent(
   }
 
   const content = `---
+title: ${name}
 description: ${description}
 ---
 import { FnDocumentationFromName } from "@quri/squiggle-components";
 import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
-
-# ${name}
 ${intro}
 
 ${functionSection}`;

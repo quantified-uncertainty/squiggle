@@ -1,41 +1,11 @@
 #!/usr/bin/env node
-import fs from "fs";
 import { glob } from "glob";
 
 import { FnDocumentation } from "@quri/squiggle-lang";
 
 import { modulePages } from "../templates.mjs";
 import { generateModuleContent } from "./generateModuleContent.mjs";
-
-const readFile = (fileName: string) => {
-  return fs.readFileSync(fileName, "utf-8");
-};
-
-function moduleItemToJson({
-  name,
-  description,
-  nameSpace,
-  requiresNamespace,
-  examples,
-  signatures,
-  shorthand,
-  isUnit,
-}: FnDocumentation) {
-  return JSON.stringify(
-    {
-      name,
-      description,
-      nameSpace,
-      requiresNamespace,
-      examples,
-      signatures,
-      shorthand,
-      isUnit,
-    },
-    null,
-    2
-  );
-}
+import { readFile, writeFile } from "./utils";
 
 function moduleItemToCompressedFormat({
   name,
@@ -90,13 +60,13 @@ function removeHeaderLines(content: string): string {
   return content;
 }
 
-const allDocumentationItems = () => {
+function allDocumentationItems() {
   return modulePages
     .map((page) => generateModuleContent(page, moduleItemToCompressedFormat))
     .join("\n\n\n");
-};
+}
 
-const basicPrompt = readFile("./public/llms/basicPrompt.markdown");
+const basicPrompt = readFile("./src/mdx/basicPrompt.mdx");
 const styleGuideRaw = readFile("./public/llms/styleGuide.markdown");
 const documentationBundlePage = async () => {
   const targetFilename = "./public/llms/documentationBundle.markdown";
@@ -108,7 +78,9 @@ const documentationBundlePage = async () => {
   };
 
   const getGuideContent = async () => {
-    const documentationFiles = await glob("./src/pages/docs/Guides/*.{md,mdx}");
+    const documentationFiles = await glob(
+      "./src/content/docs/Guides/*.{md,mdx}"
+    );
     return Promise.all(
       documentationFiles
         .filter(
@@ -137,48 +109,12 @@ const documentationBundlePage = async () => {
     // `## Peggy Grammar \n\n ${grammarContent} \n\n --- \n\n ` +
     convertSquiggleEditorTags(guideContent) +
     apiContent;
-  fs.writeFile(targetFilename, content, (err) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    console.log(`Content written to ${targetFilename}`);
-  });
-};
 
-const promptPage = async () => {
-  console.log("Compiling basic prompt page...");
-  const introduction = `---
-description: LLM Prompt Example
-notes: "This Doc is generated using a script, do not edit directly!"
----
-
-# LLM Basic Prompt Example
-
-The following is a prompt that we use to help LLMs, like GPT and Claude, write Squiggle code. This would ideally be provided with the full documentation, for example with [this document](/llms/documentationBundle.markdown). 
-
-You can read this document in plaintext [here](/llms/BasicPrompt.markdown).
-
----
-
-`;
-  const target = "./src/pages/docs/Ecosystem/BasicPrompt.md";
-  fs.writeFile(
-    target,
-    introduction + basicPrompt.replace(/\`squiggle/g, "`js"),
-    (err) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      console.log(`Content written to ${target}`);
-    }
-  );
+  writeFile(targetFilename, content);
 };
 
 async function main() {
   await documentationBundlePage();
-  await promptPage();
 }
 
 main();

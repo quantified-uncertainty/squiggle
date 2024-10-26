@@ -3,8 +3,11 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { MarkdownViewer } from "../lib/MarkdownViewer.js";
 
 /**
- * The number shower is a simple component to display a number.
- * It uses the symbols "K", "M", "B", and "T", to represent thousands, millions, billions, and trillions. Outside of that range, it uses scientific notation.
+ * MarkdownViewer is a component that renders Markdown content, with some custom
+ * styling and support for Squiggle code blocks and embedded Squiggle components.
+ *
+ * It's used for rendering docstrings, calculator descriptions, and builtin
+ * function documentation.
  */
 const meta = {
   component: MarkdownViewer,
@@ -28,45 +31,7 @@ This is a *Markdown* example. Markdown allows you to write using an easy-to-read
 2. **Flexibility**: Suitable for many types of documentation.
 3. **Compatibility**: Works on any platform.
 
-### Code Blocks
-Inline \`code\` has \`back-ticks\` around it.
-
-Block code "fences":
-
-\`\`\`
-Sample text here...
-\`\`\`
-
-Syntax highlighting:
-
-\`\`\`javascript
-function helloWorld() {
-  console.log("Hello, world!");
-}
-\`\`\`
-
-\`\`\`squiggle
-pianoTunersPerPiano = {
-  pianosPerPianoTuner = 2k to 50k
-  1 / pianosPerPianoTuner
-}
-\`\`\`
-
-In-between text
-
-\`\`\`squiggleEditor
-foo = 23 to 50
-\`\`\`
-
----
-
-\`\`\`squigglePlayground
-// details of this playground
-pianoTunersPerPiano = {
-  pianosPerPianoTuner = 2k to 50k
-  1 / pianosPerPianoTuner
-}
-\`\`\`
+## Basic Markdown styles
 
 ### Blockquotes
 
@@ -88,6 +53,51 @@ pianoTunersPerPiano = {
 
 ![Markdown Logo](https://markdown-here.com/img/icon256.png)
 
+## Code Blocks
+
+Inline \`code\` has \`back-ticks\` around it.
+
+### Block code "fences"
+
+\`\`\`
+Sample text here...
+\`\`\`
+
+### JavaScript syntax highlighting:
+
+\`\`\`javascript
+function helloWorld() {
+  console.log("Hello, world!");
+}
+\`\`\`
+
+### Squiggle syntax highlighting
+
+\`\`\`squiggle
+pianoTunersPerPiano = {
+  pianosPerPianoTuner = 2k to 50k
+  1 / pianosPerPianoTuner
+}
+\`\`\`
+
+## Squiggle components
+
+### Squiggle Editor
+
+\`\`\`squiggleEditor
+foo = 23 to 50
+\`\`\`
+
+### Squiggle Playground
+
+\`\`\`squigglePlayground
+// details of this playground
+pianoTunersPerPiano = {
+  pianosPerPianoTuner = 2k to 50k
+  1 / pianosPerPianoTuner
+}
+\`\`\`
+
 `,
   },
 };
@@ -101,7 +111,7 @@ export const Custom: Story = {
 Overrides the default display type for a value. Different value types can be displayed in different ways. Distributions can be displayed using distribution plots. Arrays can be displayed using tables. Certain single-parameter functions can be displayed \`Plot.numericFn()\` or \`Plot.distFn()\`. All functions can be displayed using calculators.
 
 \`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization. You can use it like,
-\`\`\`js
+\`\`\`squiggle
 {|x| x + 1} -> Tag.showAs(Calculator)
 \`\`\`
 
@@ -116,82 +126,5 @@ normal(5 to 10, normal(3, 2))
 normal({ mean: uniform(5, 9), stdev: 3 })
 \`\`\`
 `,
-  },
-};
-
-export const Details: Story = {
-  name: "Details Dropdown",
-
-  args: {
-    textSize: "sm",
-    md: `
-# Quick React FAQ
-
-<details>
-  <summary>Squiggle Editor</summary>
-  
-  \`\`\`squiggleEditor
-foo = 23 to 50
-\`\`\`
-</details>
-
-<details>
-  <summary>Squiggle Playground</summary>
-  
-  \`\`\`squigglePlayground
-// details of this playground
-pianoTunersPerPiano = {
-  pianosPerPianoTuner = 2k to 50k
-  1 / pianosPerPianoTuner
-}
-\`\`\`
-</details>
-
-<details>
-  <summary>What are React Hooks?</summary>
-  
-  Hooks are functions that let you use state and other React features in functional components. Common hooks include useState and useEffect.
-</details>
-
-<details>
-  <summary>Can you show a simple React component?</summary>
-  
-  Here's a basic counter component:
-  \`\`\`jsx
-  import React, { useState } from 'react';
-
-  function Counter() {
-    const [count, setCount] = useState(0);
-    return (
-      <div>
-        <p>Count: {count}</p>
-        <button onClick={() => setCount(count + 1)}>Increment</button>
-      </div>
-    );
-  }
-  \`\`\`
-</details>
-`,
-  },
-};
-
-export const NestedCodeBlocks: Story = {
-  name: "Nested Code Blocks",
-
-  args: {
-    textSize: "sm",
-    md:
-      "````javascript\n" +
-      "```\n" +
-      "Here's a concise, one-line Squiggle model as requested:\n" +
-      "\n" +
-      "```squigglePlayground\n" +
-      "a = mx(normal(5,2), uniform(0,10), lognormal({p5: 1, p95: 20}))\n" +
-      "a\n" +
-      "```\n" +
-      "\n" +
-      "This single line creates a mixture distribution of three different probability distributions: a normal distribution, a uniform distribution, and a lognormal distribution. It's a simple yet potentially useful model for various scenarios where you might need to combine different types of uncertainty.\n" +
-      "```\n" +
-      "````",
   },
 };

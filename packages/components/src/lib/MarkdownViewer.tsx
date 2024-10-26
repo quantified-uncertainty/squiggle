@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { Element } from "hast";
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { Node, Parent } from "unist";
 import { visitParents } from "unist-util-visit-parents";
@@ -38,140 +37,94 @@ type MarkdownViewerProps = {
   backgroundColor?: string;
   linker?: SqLinker;
 };
-const codeBlockStyles = `
-  .prose pre {
-    color: inherit;
-    background-color: transparent;
-    overflow-x: auto;
-    font-weight: 400;
-    margin: 0;
-    padding: 0;
-  }
-  .prose .code-block-wrapper {
-    margin-top: 1.7142857em;
-    margin-bottom: 1.7142857em;
-  }
-`;
 
 export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
   md,
   className,
-  textColor,
+  textColor = "prose-stone",
   textSize,
   backgroundColor = "bg-slate-50",
   linker,
 }) => {
   return (
-    <>
-      <style>{codeBlockStyles}</style>
-      <ReactMarkdown
-        className={clsx(
-          "prose",
-          className,
-          textColor || "prose-stone",
-          textSize === "sm" ? "text-sm" : "text-xs"
-        )}
-        rehypePlugins={[rehypeInlineCodeProperty, rehypeRaw]}
-        remarkPlugins={[remarkGfm]}
-        components={{
-          pre: ({ children }) => <React.Fragment>{children}</React.Fragment>,
-          code({ node, className, children, ...rest }) {
-            const match = /language-(\w+)/.exec(className || "");
-            const isInline =
-              node && (node as Element).properties["inline"] === "true";
+    /*
+     * Note: don't try to replace react-markdown with remark-react if you need
+     * more flexibility, it doesn't work as of Oct 2024;
+     * see https://github.com/remarkjs/react-remark/issues/54.
+     */
+    <ReactMarkdown
+      className={clsx(
+        "prose",
+        className,
+        textColor,
+        textSize === "sm" ? "text-sm" : "text-xs"
+      )}
+      rehypePlugins={[rehypeInlineCodeProperty]}
+      remarkPlugins={[remarkGfm]}
+      components={{
+        pre: ({ children }) => <React.Fragment>{children}</React.Fragment>,
+        code({ node, className, children, ...rest }) {
+          const isInline =
+            node && (node as Element).properties["inline"] === "true";
 
-            if (isInline) {
-              return (
-                <code
-                  {...rest}
-                  className="not-prose break-words rounded-sm border border-black border-opacity-[0.04] bg-black bg-opacity-[0.03] px-1 py-0.5 font-mono text-[.9em]"
-                >
-                  {children}
-                </code>
-              );
-            }
-
-            // Handle nested code blocks
-            if (
-              match &&
-              match[1] === "typescript" &&
-              String(children).includes("```")
-            ) {
-              return (
-                <div
-                  className={clsx(
-                    "code-block-wrapper overflow-hidden rounded",
-                    backgroundColor
-                  )}
-                >
-                  <div className="p-4">
-                    <pre>
-                      <code className="language-typescript">
-                        {String(children)}
-                      </code>
-                    </pre>
-                  </div>
-                </div>
-              );
-            }
-
-            if (match && match[1] === "squigglePlayground") {
-              const numLinesInText = String(children).match(/\n/g)?.length || 0;
-              const linesToShow = Math.min(Math.max(numLinesInText, 4), 30);
-              const height = 31 + linesToShow * (textSize === "sm" ? 20 : 18);
-              return (
-                <div className="pb-4 pt-2">
-                  <SquigglePlayground
-                    defaultCode={String(children).replace(/\n$/, "")}
-                    height={height}
-                    linker={linker}
-                  />
-                </div>
-              );
-            } else if (match && match[1] === "squiggleEditor") {
-              return (
-                <div className="pb-4 pt-2">
-                  <SquiggleEditor
-                    project={linker ? new SqProject({ linker }) : undefined}
-                    defaultCode={String(children).replace(/\n$/, "")}
-                    editorFontSize={textSize === "sm" ? 13 : 12}
-                  />
-                </div>
-              );
-            }
-
+          if (isInline) {
             return (
-              <div
-                className={clsx(
-                  "code-block-wrapper overflow-hidden rounded",
-                  backgroundColor
-                )}
+              <code
+                {...rest}
+                className="not-prose break-words rounded-sm border border-black border-opacity-[0.04] bg-black bg-opacity-[0.03] px-1 py-0.5 font-mono text-[.9em]"
               >
-                <div className="p-4">
-                  <CodeSyntaxHighlighter
-                    {...rest}
-                    language={match ? match[1] : "text"}
-                  >
-                    {String(children).replace(/\n$/, "")}
-                  </CodeSyntaxHighlighter>
-                </div>
+                {children}
+              </code>
+            );
+          }
+
+          const match = /language-(\w+)/.exec(className || "");
+
+          // Turn special code blocks into Squiggle components.
+          if (match && match[1] === "squigglePlayground") {
+            const numLinesInText = String(children).match(/\n/g)?.length || 0;
+            const linesToShow = Math.min(Math.max(numLinesInText, 4), 30);
+            const height = 31 + linesToShow * (textSize === "sm" ? 20 : 18);
+            return (
+              <div className="pb-4 pt-2">
+                <SquigglePlayground
+                  defaultCode={String(children).replace(/\n$/, "")}
+                  height={height}
+                  linker={linker}
+                />
               </div>
             );
-          },
-          details: ({ children, ...props }) => (
-            <details className="mb-4 rounded-lg border p-4" {...props}>
-              {children}
-            </details>
-          ),
-          summary: ({ children }) => (
-            <summary className="cursor-pointer font-semibold">
-              {children}
-            </summary>
-          ),
-        }}
-      >
-        {md}
-      </ReactMarkdown>
-    </>
+          } else if (match && match[1] === "squiggleEditor") {
+            return (
+              <div className="pb-4 pt-2">
+                <SquiggleEditor
+                  project={linker ? new SqProject({ linker }) : undefined}
+                  defaultCode={String(children).replace(/\n$/, "")}
+                  editorFontSize={textSize === "sm" ? 13 : 12}
+                />
+              </div>
+            );
+          }
+
+          return (
+            <div
+              className={clsx(
+                "not-prose my-6 overflow-hidden rounded p-4 text-[10.7px] [&_pre]:!overflow-x-auto",
+                backgroundColor
+              )}
+            >
+              <CodeSyntaxHighlighter
+                {...rest}
+                language={match ? match[1] : "text"}
+              >
+                {String(children).replace(/\n$/, "")}
+              </CodeSyntaxHighlighter>
+            </div>
+          );
+        },
+      }}
+    >
+      {md}
+    </ReactMarkdown>
   );
 };

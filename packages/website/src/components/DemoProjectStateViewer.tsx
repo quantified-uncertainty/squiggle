@@ -1,4 +1,5 @@
-import { Tabs } from "nextra/components";
+"use client";
+import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 import { FC, forwardRef, useImperativeHandle, useRef, useState } from "react";
 
 import { ProjectStateViewer } from "@quri/squiggle-components";
@@ -142,17 +143,18 @@ export const DemoProjectStateViewer: FC<{
   headName: string;
   headModule: string;
 }> = ({ modules, headName, headModule }) => {
+  const tabs = ["Manual", "Automatic"];
   return (
-    <Tabs items={["Manual", "Automatic"]}>
-      {[true, false].map((manual) => (
-        <Tabs.Tab key={String(manual)}>
+    <Tabs items={tabs}>
+      {tabs.map((tab) => (
+        <Tab key={tab} value={tab}>
           <DemoProjectStateViewerTab
             modules={modules}
             headName={headName}
             headModule={headModule}
-            manual={manual}
+            manual={tab === "Manual"}
           />
-        </Tabs.Tab>
+        </Tab>
       ))}
     </Tabs>
   );

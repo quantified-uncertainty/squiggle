@@ -1,3 +1,4 @@
+"use client";
 import { FC, useRef } from "react";
 
 import { useUncontrolledCode } from "../lib/hooks/index.js";

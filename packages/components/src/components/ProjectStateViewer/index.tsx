@@ -1,3 +1,4 @@
+"use client";
 import Dagre from "@dagrejs/dagre";
 import { FC, useEffect, useMemo } from "react";
 import {

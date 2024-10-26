@@ -1,0 +1,16 @@
+{
+  "title": "Guides",
+  "pages": [
+    "DistributionCreation",
+    "DistributionFunctions",
+    "BasicTypes",
+    "Functions",
+    "LanguageFeatures",
+    "ControlFlow",
+    "Bugs",
+    "Gotchas",
+    "Debugging",
+    "Roadmap",
+    "..."
+  ]
+}
