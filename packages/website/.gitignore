@@ -1,5 +1,5 @@
 /.next
-/.source
+/.content-collections
 
 # These files are generated.
 # They must be also listed in ./turbo.json build outputs.

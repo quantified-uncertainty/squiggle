@@ -57,8 +57,6 @@ export function generateModuleContent(
 title: ${name}
 description: ${description}
 ---
-import { FnDocumentationFromName } from "@quri/squiggle-components";
-import { SquiggleEditor }  from "../../../components/SquiggleEditor";
 
 ${intro}
 

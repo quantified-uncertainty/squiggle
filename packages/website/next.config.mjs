@@ -1,9 +1,7 @@
-import { createMDX } from "fumadocs-mdx/next";
+import { withContentCollections } from "@content-collections/next";
 
-// `createMDX` recompiles MDX docs based on `./source.config.ts`.
-// See https://fumadocs.vercel.app/docs/mdx/plugin for details.
-// Note: it enables turbopack by default.
-export default createMDX()({
+// See https://fumadocs.vercel.app/docs/headless/content-collections for docs.
+export default withContentCollections({
   reactStrictMode: true,
   async redirects() {
     return [

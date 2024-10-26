@@ -16,6 +16,11 @@
     "build": "pnpm run gen && next build"
   },
   "dependencies": {
+    "@content-collections/cli": "^0.1.5",
+    "@content-collections/core": "^0.7.2",
+    "@content-collections/mdx": "^0.2.0",
+    "@content-collections/next": "^0.2.3",
+    "@fumadocs/content-collections": "^1.1.5",
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
     "@quri/ui": "workspace:*",
@@ -24,7 +29,6 @@
     "base64-js": "^1.5.1",
     "clsx": "^2.1.1",
     "fumadocs-core": "14.0.2",
-    "fumadocs-mdx": "11.0.0",
     "fumadocs-ui": "14.0.2",
     "katex": "^0.16.11",
     "next": "^15.0.1",
