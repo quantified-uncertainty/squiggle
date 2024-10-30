@@ -3,10 +3,12 @@ import {
   createMetaSchema,
   transformMDX,
 } from "@fumadocs/content-collections/configuration";
-import rehypeKatex from "rehype-katex";
-import remarkMath from "remark-math";
 
-import squiggleGrammar from "@quri/squiggle-textmate-grammar/dist/squiggle.tmLanguage.json" assert { type: "json" };
+import { apiDocs } from "@/content/collections/apiDocs.js";
+import { rawApiDocs } from "@/content/collections/rawApiDocs";
+import { mdxOptions } from "@/content/collections/utils";
+
+// Config for https://www.content-collections.dev/.
 
 const directory = "content/docs";
 
@@ -19,24 +21,7 @@ export const docs = defineCollection({
     description: z.string().optional().nullable(),
   }),
   transform: async (doc, context) => {
-    const mdx = await transformMDX(doc, context, {
-      // https://fumadocs.vercel.app/docs/ui/math#add-plugins
-      remarkPlugins: [remarkMath],
-      rehypeCodeOptions: {
-        langs: [
-          // ...BUNDLED_LANGUAGES,
-          "javascript",
-          {
-            name: "squiggle",
-            ...squiggleGrammar,
-          },
-        ],
-        themes: {
-          light: "github-light",
-        },
-      },
-      rehypePlugins: (v) => [rehypeKatex, ...v],
-    });
+    const mdx = await transformMDX(doc, context, mdxOptions);
 
     // TODO - lastModifiedTime from git or github?
     // We had this when we used fumadocs-mdx, but there's no direct analog in content-collections.
@@ -61,5 +46,5 @@ export const meta = defineCollection({
 });
 
 export default defineConfig({
-  collections: [docs, meta],
+  collections: [docs, meta, apiDocs, rawApiDocs],
 });

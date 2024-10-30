@@ -17,14 +17,8 @@
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.mts",
-    "**/*.tsx",
-    "src/**/*.mdx",
-    "scripts/generateModulePages.mts",
-    "scripts/generateModuleContent.mts",
-    "scripts/compileDocsForLLM.mts",
-    "templates.mts",
+    "src/**/*",
+    "content/**/*.mdx",
     ".next/types/**/*.ts",
   ],
   "mdx": {

@@ -1,0 +1,11 @@
+---
+description: The MixedSet module offers functionality for creating mixed sets, which are sets that can contain both discrete and continuous values.
+---
+
+Discrete values are represented as points, while continuous values are represented as ranges. Mixed sets are particularly useful for describing the support of mixed probability distributions.
+
+The majority of set functions in the MixedSet module are designed to mirror the [upcomming set functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set) in Javascript.
+
+The primary purpose of mixed sets in Squiggle is to facilitate scoring. For instance, by utilizing mixed sets, you can easily determine if one distribution covers the support of another distribution. If it doesn't, it may be prone to receiving a score of negative infinity.
+
+Currently, there is no dedicated MixedSet object type. Instead, mixed sets are implemented as dictionaries, where discrete values are stored as points and continuous values are stored as segments.

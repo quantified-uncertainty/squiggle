@@ -15,9 +15,9 @@ This bot often produces poor results, or fails to properly call the server, so i
 
 ## Document with all documentation
 
-[All Squiggle Documentation, in One Document](/llms/documentationBundle.markdown)
+[All Squiggle Documentation, in One Document](/api/documentation-bundle)
 
-If you want a shorter prompt, you can use [this shorter prompt](https://raw.githubusercontent.com/quantified-uncertainty/squiggle/refs/heads/main/packages/website/src/mdx/basicPrompt.mdx).
+If you want a shorter prompt, you can use [this shorter prompt](./BasicPrompt.mdx).
 
 ## Instructions for use with Claude
 

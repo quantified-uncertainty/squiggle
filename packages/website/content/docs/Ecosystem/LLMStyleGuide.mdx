@@ -7,7 +7,7 @@
 - When using the "to" format, like "3 to 10", remember that this represents the 5th and 95th percentile. This is a very large range. Be paranoid about being overconfident and too narrow in your estimates.
 - One good technique, when you think there's a chance that you might be very wrong about a variable, is to use a mixture that contains a very wide distribution. For example, `mx([300 to 400, 50 to 5000], [0.9, 0.1])`, or `mx([50k to 60k, 1k to 1M], [0.95, 0.05])`. This way if you are caught by surprise, the wide distribution will still give you a reasonable outcome.
 - Be wary of using the uniform or the triangular distributions. These are mainly good for physical simulations, not to represent uncertainty over many real life variables.
-- If the outcome of a model is an extreme probability (<0.01 or >0.99), be suspicious of the result. It should be very rare for an intervention to have an extreme effect or have an extreme impact on the probability of an event.
+- If the outcome of a model is an extreme probability (\<0.01 or >0.99), be suspicious of the result. It should be very rare for an intervention to have an extreme effect or have an extreme impact on the probability of an event.
 - Be paranoid about the uncertainty ranges of your variables. If you are dealing with a highly speculative variable, the answer might have 2-8 orders of magnitude of uncertainty, like `100 to 100K`. If you are dealing with a variable that's fairly certain, the answer might have 2-4 sig figs of uncertainty. Be focused on being accurate and not overconfident, not on impressing people.
 - Be careful with sigmoid functions. Sigmoid curves with distributions can have very little uncertainty in the middle, and very high uncertainty at the tails. If you are unsure about these values, consider using a mixture distribution. For example, this curve has very high certainty in the middle, and very high uncertainty at the tails: `adoption_rate(t) = 1 / (1 + exp(-normal(0.1, 0.08) * (t - 30)))`
 - Make sure to flag any variables that are highly speculative. Use @doc() to explain that the variable is speculative and to give a sense of the uncertainty. Explain your reasoning, but also warn the reader that the variable is speculative.
@@ -89,7 +89,7 @@ inputs = {
 
 ### Dictionaries
 
-- In dictionaries, if a key name is the same as a variable name, use the variable name directly. For example, instead of {value: value}, just use {value}. If there's only one key, you can type it with a comma, like this: {value,}.
+- In dictionaries, if a key name is the same as a variable name, use the variable name directly. For example, instead of `{value: value}`, just use `{value}`. If there's only one key, you can type it with a comma, like this: `{value,}`.
 
 ### Unit Annotation
 

@@ -1,13 +1,13 @@
-#!/usr/bin/env node
 import {
   FnDocumentation,
   getAllFunctionNamesWithNamespace,
   getFunctionDocumentation,
 } from "@quri/squiggle-lang";
 
-import { ModulePage, ModulePageSection } from "../templates.mjs";
+import { type ApiModuleDoc } from "./collections/apiDocs";
+import { docTitleFromMeta } from "./collections/utils";
 
-//We need to escape the curly braces in the markdown for .jsx files.
+// We need to escape the curly braces in the markdown for .jsx files.
 function escapedStr(str: string) {
   return str.replace(/{/g, "\\{").replace(/}/g, "\\}");
 }
@@ -20,16 +20,20 @@ function toMarkdown(documentation: FnDocumentation) {
   `;
 }
 
-export function generateModuleContent(
-  { name, description, intro, sections }: ModulePage,
+export function generateApiFunctionSection(
+  doc: ApiModuleDoc,
   itemFn = toMarkdown
 ) {
-  const namespaceNames = getAllFunctionNamesWithNamespace(name);
+  const title = docTitleFromMeta(doc._meta);
+
+  const namespaceNames = getAllFunctionNamesWithNamespace(title);
   const fnDocumentationItems = namespaceNames
     .map(getFunctionDocumentation)
     .filter((fn): fn is FnDocumentation => Boolean(fn && !fn.isUnit));
 
-  const processSection = (section: ModulePageSection) => {
+  const processSection = (
+    section: NonNullable<ApiModuleDoc["sections"]>[number]
+  ) => {
     const sectionFnDocumentationItems = fnDocumentationItems.filter(
       ({ displaySection }) => displaySection === section.name
     );
@@ -47,19 +51,11 @@ export function generateModuleContent(
   };
 
   let functionSection;
-  if (sections && sections.length > 0) {
-    functionSection = sections.map(processSection).join("\n\n");
+  if (doc.sections && doc.sections.length > 0) {
+    functionSection = doc.sections.map(processSection).join("\n\n");
   } else {
     functionSection = fnDocumentationItems.map(itemFn).join("\n\n");
   }
 
-  const content = `---
-title: ${name}
-description: ${description}
----
-
-${intro}
-
-${functionSection}`;
-  return content;
+  return functionSection;
 }

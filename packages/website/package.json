@@ -11,8 +11,7 @@
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
     "gen:docsForLLM": "tsx scripts/compileDocsForLLM.mts",
-    "gen:modulePages": "tsx scripts/generateModulePages.mts",
-    "gen": "pnpm run gen:modulePages && pnpm run gen:docsForLLM",
+    "gen": "pnpm run gen:docsForLLM",
     "build": "pnpm run gen && next build"
   },
   "dependencies": {
