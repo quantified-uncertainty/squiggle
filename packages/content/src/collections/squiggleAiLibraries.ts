@@ -42,63 +42,6 @@ export async function fetchCodeFromGraphQL(
   return code;
 }
 
-export function getGroupModelsQuery(groupSlug: string) {
-  return {
-    query: `
-      query GetGroupModels($groupSlug: String!) {
-        group(slug: $groupSlug) {
-          ... on Group {
-            id
-            models(first: 50) {
-              edges {
-                node {
-                  currentRevision {
-                    content {
-                      ... on SquiggleSnippet {
-                        code
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
-    variables: { groupSlug },
-  };
-}
-
-export async function fetchGroupModels(groupSlug: string): Promise<string[]> {
-  try {
-    const query = getGroupModelsQuery(groupSlug);
-    const response = await fetch(GRAPHQL_URL, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: JSON.stringify(query),
-    });
-
-    if (response.status === 200) {
-      const json = await response.json();
-      const models = (json as any).data.group.models.edges;
-      console.log(`Fetched ${models.length} models from group ${groupSlug}`);
-
-      return models.map(
-        (model: { node: { currentRevision: { content: { code: string } } } }) =>
-          model.node.currentRevision.content.code
-      );
-    } else {
-      throw new Error(`Error fetching group models: ${response.statusText}`);
-    }
-  } catch (error) {
-    console.error("Error fetching group models:", error);
-    throw error;
-  }
-}
-
 export const squiggleAiLibraries = defineCollection({
   name: "squiggleAiLibraries",
   directory: "content/squiggleAiLibraries",
