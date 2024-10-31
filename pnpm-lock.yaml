@@ -350,6 +350,61 @@ importers:
 
   packages/configs: {}
 
+  packages/content:
+    dependencies:
+      '@content-collections/cli':
+        specifier: ^0.1.5
+        version: 0.1.5(@content-collections/core@0.7.2(typescript@5.6.3))
+      '@content-collections/core':
+        specifier: ^0.7.2
+        version: 0.7.2(typescript@5.6.3)
+      '@content-collections/mdx':
+        specifier: ^0.2.0
+        version: 0.2.0(@content-collections/core@0.7.2(typescript@5.6.3))(acorn@8.13.0)(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025)
+      '@fumadocs/content-collections':
+        specifier: ^1.1.5
+        version: 1.1.5(@content-collections/core@0.7.2(typescript@5.6.3))(@content-collections/mdx@0.2.0(@content-collections/core@0.7.2(typescript@5.6.3))(acorn@8.13.0)(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025))(fumadocs-core@14.0.2(@types/react@18.3.11))
+      '@quri/squiggle-lang':
+        specifier: workspace:*
+        version: link:../squiggle-lang
+      '@types/node':
+        specifier: ^22.8.4
+        version: 22.8.4
+      rehype-katex:
+        specifier: ^7.0.1
+        version: 7.0.1
+      remark-math:
+        specifier: ^6.0.0
+        version: 6.0.0
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@mdx-js/typescript-plugin':
+        specifier: ^0.0.6
+        version: 0.0.6
+      '@quri/configs':
+        specifier: workspace:*
+        version: link:../configs
+      '@quri/squiggle-textmate-grammar':
+        specifier: workspace:*
+        version: link:../textmate-grammar
+      '@types/mdx':
+        specifier: ^2.0.13
+        version: 2.0.13
+      eslint:
+        specifier: ^8.57.0
+        version: 8.57.1
+      prettier:
+        specifier: ^3.2.5
+        version: 3.3.3
+      tsx:
+        specifier: ^4.11.0
+        version: 4.19.1
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+
   packages/hub:
     dependencies:
       '@next-auth/prisma-adapter':
@@ -642,7 +697,7 @@ importers:
         version: 29.5.13
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.7.8)(babel-plugin-macros@3.1.0)
+        version: 29.7.0(@types/node@22.8.4)(babel-plugin-macros@3.1.0)
       typescript:
         specifier: ^5.6.3
         version: 5.6.3
@@ -848,13 +903,13 @@ importers:
         version: 8.3.6(@storybook/test@8.3.6(storybook@8.3.6))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.6)(typescript@5.6.3)
       '@storybook/react-vite':
         specifier: ^8.0.9
-        version: 8.3.6(@storybook/test@8.3.6(storybook@8.3.6))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.24.0)(storybook@8.3.6)(typescript@5.6.3)(vite@5.4.9(@types/node@22.7.8))(webpack-sources@3.2.3)
+        version: 8.3.6(@storybook/test@8.3.6(storybook@8.3.6))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.24.0)(storybook@8.3.6)(typescript@5.6.3)(vite@5.4.9(@types/node@22.8.4))(webpack-sources@3.2.3)
       '@storybook/testing-library':
         specifier: ^0.2.2
         version: 0.2.2
       '@tailwindcss/forms':
         specifier: ^0.5.7
-        version: 0.5.9(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))
+        version: 0.5.9(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.11
@@ -902,13 +957,13 @@ importers:
         version: 8.3.6
       tailwindcss:
         specifier: ^3.4.14
-        version: 3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3))
+        version: 3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3))
       typescript:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
         specifier: ^5.2.11
-        version: 5.4.9(@types/node@22.7.8)
+        version: 5.4.9(@types/node@22.8.4)
 
   packages/versioned-components:
     dependencies:
@@ -923,10 +978,10 @@ importers:
         version: link:../ui
       '@tailwindcss/forms':
         specifier: ^0.5.7
-        version: 0.5.9(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))
+        version: 0.5.9(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))
       '@tailwindcss/typography':
         specifier: ^0.5.13
-        version: 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))
+        version: 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))
       glob:
         specifier: ^10.3.12
         version: 10.4.5
@@ -935,25 +990,25 @@ importers:
         version: 4.17.21
       squiggle-components-0.8.5:
         specifier: npm:@quri/squiggle-components@0.8.5
-        version: '@quri/squiggle-components@0.8.5(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))'
+        version: '@quri/squiggle-components@0.8.5(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))'
       squiggle-components-0.8.6:
         specifier: npm:@quri/squiggle-components@0.8.6
-        version: '@quri/squiggle-components@0.8.6(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))'
+        version: '@quri/squiggle-components@0.8.6(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))'
       squiggle-components-0.9.0:
         specifier: npm:@quri/squiggle-components@0.9.0
-        version: '@quri/squiggle-components@0.9.0(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))'
+        version: '@quri/squiggle-components@0.9.0(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))'
       squiggle-components-0.9.2:
         specifier: npm:@quri/squiggle-components@0.9.2
-        version: '@quri/squiggle-components@0.9.2(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))'
+        version: '@quri/squiggle-components@0.9.2(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))'
       squiggle-components-0.9.3:
         specifier: npm:@quri/squiggle-components@0.9.3
-        version: '@quri/squiggle-components@0.9.3(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))'
+        version: '@quri/squiggle-components@0.9.3(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))'
       squiggle-components-0.9.4:
         specifier: npm:@quri/squiggle-components@0.9.4
-        version: '@quri/squiggle-components@0.9.4(@emotion/is-prop-valid@1.3.1)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))'
+        version: '@quri/squiggle-components@0.9.4(@emotion/is-prop-valid@1.3.1)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))'
       squiggle-components-0.9.5:
         specifier: npm:@quri/squiggle-components@0.9.5
-        version: '@quri/squiggle-components@0.9.5(@emotion/is-prop-valid@1.3.1)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))'
+        version: '@quri/squiggle-components@0.9.5(@emotion/is-prop-valid@1.3.1)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))'
       squiggle-lang-0.8.5:
         specifier: npm:@quri/squiggle-lang@0.8.5
         version: '@quri/squiggle-lang@0.8.5'
@@ -1008,7 +1063,7 @@ importers:
         version: 18.3.1(react@18.3.1)
       tailwindcss:
         specifier: ^3.4.14
-        version: 3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3))
+        version: 3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3))
       typescript:
         specifier: ^5.6.3
         version: 5.6.3
@@ -1085,21 +1140,12 @@ importers:
 
   packages/website:
     dependencies:
-      '@content-collections/cli':
-        specifier: ^0.1.5
-        version: 0.1.5(@content-collections/core@0.7.2(typescript@5.6.3))
-      '@content-collections/core':
-        specifier: ^0.7.2
-        version: 0.7.2(typescript@5.6.3)
-      '@content-collections/mdx':
-        specifier: ^0.2.0
-        version: 0.2.0(@content-collections/core@0.7.2(typescript@5.6.3))(acorn@8.13.0)(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025)
-      '@content-collections/next':
-        specifier: ^0.2.3
-        version: 0.2.3(@content-collections/core@0.7.2(typescript@5.6.3))(next@15.0.1(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025))
       '@fumadocs/content-collections':
         specifier: ^1.1.5
         version: 1.1.5(@content-collections/core@0.7.2(typescript@5.6.3))(@content-collections/mdx@0.2.0(@content-collections/core@0.7.2(typescript@5.6.3))(acorn@8.13.0)(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025))(fumadocs-core@14.0.2(@types/react@18.3.11))
+      '@quri/content':
+        specifier: workspace:*
+        version: link:../content
       '@quri/squiggle-components':
         specifier: workspace:*
         version: link:../components
@@ -1126,7 +1172,7 @@ importers:
         version: 14.0.2(@types/react@18.3.11)
       fumadocs-ui:
         specifier: 14.0.2
-        version: 14.0.2(@types/react-dom@18.3.1)(@types/react@18.3.11)(next@15.0.1(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025))(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025)(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3))
+        version: 14.0.2(@types/react-dom@18.3.1)(@types/react@18.3.11)(next@15.0.1(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025))(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025)(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3))
       katex:
         specifier: ^0.16.11
         version: 0.16.11
@@ -1191,9 +1237,6 @@ importers:
       eslint-config-next:
         specifier: ^14.2.3
         version: 14.2.15(eslint@8.57.1)(typescript@5.6.3)
-      glob:
-        specifier: ^10.3.12
-        version: 10.4.5
       postcss:
         specifier: ^8.4.38
         version: 8.4.47
@@ -1202,7 +1245,7 @@ importers:
         version: 3.3.3
       tailwindcss:
         specifier: ^3.4.14
-        version: 3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3))
+        version: 3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3))
       tsx:
         specifier: ^4.11.0
         version: 4.19.1
@@ -2139,12 +2182,6 @@ packages:
       '@content-collections/core': 0.x
       react: '>= 18'
       react-dom: '>= 18'
-
-  '@content-collections/next@0.2.3':
-    resolution: {integrity: sha512-8rteKhfu8sJOtQAzVt4iMkgbCso2yzfTzq6kXFYNW6HwDJzaFjLeHiIO4Pa6oFOCh3w9CApFdloTAKWzQJKpHQ==}
-    peerDependencies:
-      '@content-collections/core': 0.x
-      next: ^12 || ^13 || ^14 || ^15
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -5101,6 +5138,9 @@ packages:
 
   '@types/node@22.7.8':
     resolution: {integrity: sha512-a922jJy31vqR5sk+kAdIENJjHblqcZ4RmERviFsER4WJcEONqxKcjNOlk0q7OUfrF5sddT+vng070cdfMlrPLg==}
+
+  '@types/node@22.8.4':
+    resolution: {integrity: sha512-SpNNxkftTJOPk0oN+y2bIqurEXHTA2AOZ3EJDDKeJ5VzkvvORSvmQXGQarcOzWV1ac7DCaPBEdMDxBsM+d8jWw==}
 
   '@types/pako@2.0.3':
     resolution: {integrity: sha512-bq0hMV9opAcrmE0Byyo0fY3Ew4tgOevJmQ9grUhpXQhYfyLJ1Kqg3P33JT5fdbT2AjeAjR51zqqVjAL/HMkx7Q==}
@@ -12909,12 +12949,6 @@ snapshots:
       - acorn
       - supports-color
 
-  '@content-collections/next@0.2.3(@content-collections/core@0.7.2(typescript@5.6.3))(next@15.0.1(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025))':
-    dependencies:
-      '@content-collections/core': 0.7.2(typescript@5.6.3)
-      '@content-collections/integrations': 0.2.1(@content-collections/core@0.7.2(typescript@5.6.3))
-      next: 15.0.1(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025)
-
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
@@ -13019,7 +13053,7 @@ snapshots:
   '@esbuild-plugins/node-resolve@0.2.2(esbuild@0.21.5)':
     dependencies:
       '@types/resolve': 1.20.6
-      debug: 4.3.7
+      debug: 4.3.7(supports-color@5.5.0)
       esbuild: 0.21.5
       escape-string-regexp: 4.0.0
       resolve: 1.22.8
@@ -13318,7 +13352,7 @@ snapshots:
   '@eslint/eslintrc@2.1.4':
     dependencies:
       ajv: 6.12.6
-      debug: 4.3.7
+      debug: 4.3.7(supports-color@5.5.0)
       espree: 9.6.1
       globals: 13.24.0
       ignore: 5.3.2
@@ -13722,7 +13756,7 @@ snapshots:
   '@graphql-tools/optimize@2.0.0(graphql@16.9.0)':
     dependencies:
       graphql: 16.9.0
-      tslib: 2.6.3
+      tslib: 2.8.0
 
   '@graphql-tools/prisma-loader@8.0.4(@types/node@20.16.14)(graphql@16.9.0)':
     dependencies:
@@ -13755,7 +13789,7 @@ snapshots:
       '@ardatan/relay-compiler': 12.0.0(graphql@16.9.0)
       '@graphql-tools/utils': 10.5.4(graphql@16.9.0)
       graphql: 16.9.0
-      tslib: 2.6.3
+      tslib: 2.8.0
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -13847,7 +13881,7 @@ snapshots:
   '@humanwhocodes/config-array@0.13.0':
     dependencies:
       '@humanwhocodes/object-schema': 2.0.3
-      debug: 4.3.7
+      debug: 4.3.7(supports-color@5.5.0)
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -14157,13 +14191,13 @@ snapshots:
     optionalDependencies:
       typescript: 5.6.3
 
-  '@joshwooding/vite-plugin-react-docgen-typescript@0.3.0(typescript@5.6.3)(vite@5.4.9(@types/node@22.7.8))':
+  '@joshwooding/vite-plugin-react-docgen-typescript@0.3.0(typescript@5.6.3)(vite@5.4.9(@types/node@22.8.4))':
     dependencies:
       glob: 7.2.3
       glob-promise: 4.2.2(glob@7.2.3)
       magic-string: 0.27.0
       react-docgen-typescript: 2.2.2(typescript@5.6.3)
-      vite: 5.4.9(@types/node@22.7.8)
+      vite: 5.4.9(@types/node@22.8.4)
     optionalDependencies:
       typescript: 5.6.3
 
@@ -14634,7 +14668,7 @@ snapshots:
       '@quri/squiggle-lang': 0.9.5
       prettier: 3.3.3
 
-  '@quri/squiggle-components@0.8.5(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))':
+  '@quri/squiggle-components@0.8.5(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))':
     dependencies:
       '@codemirror/autocomplete': 6.18.1(@codemirror/language@6.10.3)(@codemirror/state@6.4.1)(@codemirror/view@6.34.1)(@lezer/common@1.2.3)
       '@codemirror/commands': 6.7.1
@@ -14652,7 +14686,7 @@ snapshots:
       '@quri/squiggle-lang': 0.8.5
       '@quri/ui': 0.1.4(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-hook/size': 2.1.2(react@18.3.1)
-      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))
+      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))
       '@types/d3': 7.4.3
       clsx: 2.1.1
       codemirror: 6.0.1(@lezer/common@1.2.3)
@@ -14673,7 +14707,7 @@ snapshots:
       - supports-color
       - tailwindcss
 
-  '@quri/squiggle-components@0.8.6(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))':
+  '@quri/squiggle-components@0.8.6(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))':
     dependencies:
       '@codemirror/autocomplete': 6.18.1(@codemirror/language@6.10.3)(@codemirror/state@6.4.1)(@codemirror/view@6.34.1)(@lezer/common@1.2.3)
       '@codemirror/commands': 6.7.1
@@ -14691,7 +14725,7 @@ snapshots:
       '@quri/squiggle-lang': 0.8.6
       '@quri/ui': 0.1.5(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-hook/size': 2.1.2(react@18.3.1)
-      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))
+      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))
       '@types/d3': 7.4.3
       clsx: 2.1.1
       codemirror: 6.0.1(@lezer/common@1.2.3)
@@ -14713,7 +14747,7 @@ snapshots:
       - supports-color
       - tailwindcss
 
-  '@quri/squiggle-components@0.9.0(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))':
+  '@quri/squiggle-components@0.9.0(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))':
     dependencies:
       '@codemirror/autocomplete': 6.18.1(@codemirror/language@6.10.3)(@codemirror/state@6.4.1)(@codemirror/view@6.34.1)(@lezer/common@1.2.3)
       '@codemirror/commands': 6.7.1
@@ -14731,7 +14765,7 @@ snapshots:
       '@quri/squiggle-lang': 0.9.0
       '@quri/ui': 0.2.0(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-hook/size': 2.1.2(react@18.3.1)
-      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))
+      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))
       '@types/d3': 7.4.3
       clsx: 2.1.1
       codemirror: 6.0.1(@lezer/common@1.2.3)
@@ -14751,7 +14785,7 @@ snapshots:
       - supports-color
       - tailwindcss
 
-  '@quri/squiggle-components@0.9.2(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))':
+  '@quri/squiggle-components@0.9.2(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))':
     dependencies:
       '@codemirror/autocomplete': 6.18.1(@codemirror/language@6.10.3)(@codemirror/state@6.4.1)(@codemirror/view@6.34.1)(@lezer/common@1.2.3)
       '@codemirror/commands': 6.7.1
@@ -14770,7 +14804,7 @@ snapshots:
       '@quri/squiggle-textmate-grammar': 0.9.2
       '@quri/ui': 0.2.1(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-hook/size': 2.1.2(react@18.3.1)
-      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))
+      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))
       clsx: 2.1.1
       codemirror: 6.0.1(@lezer/common@1.2.3)
       d3: 7.9.0
@@ -14793,7 +14827,7 @@ snapshots:
       - supports-color
       - tailwindcss
 
-  '@quri/squiggle-components@0.9.3(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))':
+  '@quri/squiggle-components@0.9.3(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))':
     dependencies:
       '@codemirror/autocomplete': 6.18.1(@codemirror/language@6.10.3)(@codemirror/state@6.4.1)(@codemirror/view@6.34.1)(@lezer/common@1.2.3)
       '@codemirror/commands': 6.7.1
@@ -14812,7 +14846,7 @@ snapshots:
       '@quri/squiggle-textmate-grammar': 0.9.3
       '@quri/ui': 0.2.1(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-hook/size': 2.1.2(react@18.3.1)
-      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))
+      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))
       clsx: 2.1.1
       codemirror: 6.0.1(@lezer/common@1.2.3)
       d3: 7.9.0
@@ -14835,7 +14869,7 @@ snapshots:
       - supports-color
       - tailwindcss
 
-  '@quri/squiggle-components@0.9.4(@emotion/is-prop-valid@1.3.1)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))':
+  '@quri/squiggle-components@0.9.4(@emotion/is-prop-valid@1.3.1)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))':
     dependencies:
       '@codemirror/autocomplete': 6.18.1(@codemirror/language@6.10.3)(@codemirror/state@6.4.1)(@codemirror/view@6.34.1)(@lezer/common@1.2.3)
       '@codemirror/commands': 6.7.1
@@ -14853,7 +14887,7 @@ snapshots:
       '@quri/squiggle-lang': 0.9.4
       '@quri/squiggle-textmate-grammar': 0.9.4
       '@quri/ui': 0.2.2(@emotion/is-prop-valid@1.3.1)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))
+      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))
       clsx: 2.1.1
       codemirror: 6.0.1(@lezer/common@1.2.3)
       d3: 7.9.0
@@ -14876,7 +14910,7 @@ snapshots:
       - supports-color
       - tailwindcss
 
-  '@quri/squiggle-components@0.9.5(@emotion/is-prop-valid@1.3.1)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))':
+  '@quri/squiggle-components@0.9.5(@emotion/is-prop-valid@1.3.1)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))':
     dependencies:
       '@codemirror/autocomplete': 6.18.1(@codemirror/language@6.10.3)(@codemirror/state@6.4.1)(@codemirror/view@6.34.1)(@lezer/common@1.2.3)
       '@codemirror/commands': 6.7.1
@@ -14894,7 +14928,7 @@ snapshots:
       '@quri/squiggle-lang': 0.9.5
       '@quri/squiggle-textmate-grammar': 0.9.5
       '@quri/ui': 0.2.2(@emotion/is-prop-valid@1.3.1)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))
+      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))
       clsx: 2.1.1
       codemirror: 6.0.1(@lezer/common@1.2.3)
       d3: 7.9.0
@@ -15969,7 +16003,7 @@ snapshots:
       - supports-color
       - webpack-sources
 
-  '@storybook/builder-vite@8.3.6(storybook@8.3.6)(typescript@5.6.3)(vite@5.4.9(@types/node@22.7.8))(webpack-sources@3.2.3)':
+  '@storybook/builder-vite@8.3.6(storybook@8.3.6)(typescript@5.6.3)(vite@5.4.9(@types/node@22.8.4))(webpack-sources@3.2.3)':
     dependencies:
       '@storybook/csf-plugin': 8.3.6(storybook@8.3.6)(webpack-sources@3.2.3)
       '@types/find-cache-dir': 3.2.1
@@ -15981,7 +16015,7 @@ snapshots:
       magic-string: 0.30.10
       storybook: 8.3.6
       ts-dedent: 2.2.0
-      vite: 5.4.9(@types/node@22.7.8)
+      vite: 5.4.9(@types/node@22.8.4)
     optionalDependencies:
       typescript: 5.6.3
     transitivePeerDependencies:
@@ -16075,11 +16109,11 @@ snapshots:
       - vite-plugin-glimmerx
       - webpack-sources
 
-  '@storybook/react-vite@8.3.6(@storybook/test@8.3.6(storybook@8.3.6))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.24.0)(storybook@8.3.6)(typescript@5.6.3)(vite@5.4.9(@types/node@22.7.8))(webpack-sources@3.2.3)':
+  '@storybook/react-vite@8.3.6(@storybook/test@8.3.6(storybook@8.3.6))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.24.0)(storybook@8.3.6)(typescript@5.6.3)(vite@5.4.9(@types/node@22.8.4))(webpack-sources@3.2.3)':
     dependencies:
-      '@joshwooding/vite-plugin-react-docgen-typescript': 0.3.0(typescript@5.6.3)(vite@5.4.9(@types/node@22.7.8))
+      '@joshwooding/vite-plugin-react-docgen-typescript': 0.3.0(typescript@5.6.3)(vite@5.4.9(@types/node@22.8.4))
       '@rollup/pluginutils': 5.1.0(rollup@4.24.0)
-      '@storybook/builder-vite': 8.3.6(storybook@8.3.6)(typescript@5.6.3)(vite@5.4.9(@types/node@22.7.8))(webpack-sources@3.2.3)
+      '@storybook/builder-vite': 8.3.6(storybook@8.3.6)(typescript@5.6.3)(vite@5.4.9(@types/node@22.8.4))(webpack-sources@3.2.3)
       '@storybook/react': 8.3.6(@storybook/test@8.3.6(storybook@8.3.6))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.6)(typescript@5.6.3)
       find-up: 5.0.0
       magic-string: 0.30.10
@@ -16089,7 +16123,7 @@ snapshots:
       resolve: 1.22.8
       storybook: 8.3.6
       tsconfig-paths: 4.2.0
-      vite: 5.4.9(@types/node@22.7.8)
+      vite: 5.4.9(@types/node@22.8.4)
     transitivePeerDependencies:
       - '@preact/preset-vite'
       - '@storybook/test'
@@ -16162,10 +16196,10 @@ snapshots:
       '@swc/counter': 0.1.3
       tslib: 2.8.0
 
-  '@tailwindcss/forms@0.5.9(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))':
+  '@tailwindcss/forms@0.5.9(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))':
     dependencies:
       mini-svg-data-uri: 1.4.4
-      tailwindcss: 3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3))
+      tailwindcss: 3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3))
 
   '@tailwindcss/typography@0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@20.16.14)(typescript@5.6.3)))':
     dependencies:
@@ -16175,13 +16209,13 @@ snapshots:
       postcss-selector-parser: 6.0.10
       tailwindcss: 3.4.14(ts-node@10.9.2(@types/node@20.16.14)(typescript@5.6.3))
 
-  '@tailwindcss/typography@0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))':
+  '@tailwindcss/typography@0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))':
     dependencies:
       lodash.castarray: 4.4.0
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       postcss-selector-parser: 6.0.10
-      tailwindcss: 3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3))
+      tailwindcss: 3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3))
 
   '@tanstack/react-virtual@3.10.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -16537,6 +16571,10 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
+  '@types/node@22.8.4':
+    dependencies:
+      undici-types: 6.19.8
+
   '@types/pako@2.0.3': {}
 
   '@types/parse-json@4.0.2': {}
@@ -16630,7 +16668,7 @@ snapshots:
       '@typescript-eslint/types': 7.18.0
       '@typescript-eslint/typescript-estree': 7.18.0(typescript@5.6.3)
       '@typescript-eslint/visitor-keys': 7.18.0
-      debug: 4.3.7
+      debug: 4.3.7(supports-color@5.5.0)
       eslint: 8.57.1
     optionalDependencies:
       typescript: 5.6.3
@@ -16646,7 +16684,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/typescript-estree': 7.18.0(typescript@5.6.3)
       '@typescript-eslint/utils': 7.18.0(eslint@8.57.1)(typescript@5.6.3)
-      debug: 4.3.7
+      debug: 4.3.7(supports-color@5.5.0)
       eslint: 8.57.1
       ts-api-utils: 1.3.0(typescript@5.6.3)
     optionalDependencies:
@@ -16660,7 +16698,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 7.18.0
       '@typescript-eslint/visitor-keys': 7.18.0
-      debug: 4.3.7
+      debug: 4.3.7(supports-color@5.5.0)
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.5
@@ -17871,6 +17909,21 @@ snapshots:
       - supports-color
       - ts-node
 
+  create-jest@29.7.0(@types/node@22.8.4)(babel-plugin-macros@3.1.0):
+    dependencies:
+      '@jest/types': 29.6.3
+      chalk: 4.1.2
+      exit: 0.1.2
+      graceful-fs: 4.2.11
+      jest-config: 29.7.0(@types/node@22.8.4)(babel-plugin-macros@3.1.0)
+      jest-util: 29.7.0
+      prompts: 2.4.2
+    transitivePeerDependencies:
+      - '@types/node'
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
   create-require@1.1.1: {}
 
   crelt@1.0.5: {}
@@ -18177,10 +18230,6 @@ snapshots:
       ms: 2.0.0
 
   debug@3.2.7:
-    dependencies:
-      ms: 2.1.3
-
-  debug@4.3.7:
     dependencies:
       ms: 2.1.3
 
@@ -18759,7 +18808,7 @@ snapshots:
   eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
-      debug: 4.3.7
+      debug: 4.3.7(supports-color@5.5.0)
       enhanced-resolve: 5.17.1
       eslint: 8.57.1
       eslint-module-utils: 2.12.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
@@ -18881,7 +18930,7 @@ snapshots:
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.3
-      debug: 4.3.7
+      debug: 4.3.7(supports-color@5.5.0)
       doctrine: 3.0.0
       escape-string-regexp: 4.0.0
       eslint-scope: 7.2.2
@@ -19302,7 +19351,7 @@ snapshots:
       - sass
       - supports-color
 
-  fumadocs-ui@14.0.2(@types/react-dom@18.3.1)(@types/react@18.3.11)(next@15.0.1(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025))(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025)(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)):
+  fumadocs-ui@14.0.2(@types/react-dom@18.3.1)(@types/react@18.3.11)(next@15.0.1(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025))(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025)(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)):
     dependencies:
       '@radix-ui/react-accordion': 1.2.1(@types/react-dom@18.3.1)(@types/react@18.3.11)(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025)
       '@radix-ui/react-collapsible': 1.1.1(@types/react-dom@18.3.1)(@types/react@18.3.11)(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025)
@@ -19313,7 +19362,7 @@ snapshots:
       '@radix-ui/react-scroll-area': 1.2.0(@types/react-dom@18.3.1)(@types/react@18.3.11)(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025)
       '@radix-ui/react-slot': 1.1.0(@types/react@18.3.11)(react@19.0.0-rc-cae764ce-20241025)
       '@radix-ui/react-tabs': 1.1.1(@types/react-dom@18.3.1)(@types/react@18.3.11)(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025)
-      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)))
+      '@tailwindcss/typography': 0.5.15(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)))
       class-variance-authority: 0.7.0
       cmdk: 1.0.0(@types/react-dom@18.3.1)(@types/react@18.3.11)(react-dom@19.0.0-rc-cae764ce-20241025(react@19.0.0-rc-cae764ce-20241025))(react@19.0.0-rc-cae764ce-20241025)
       fumadocs-core: 14.0.2(@types/react@18.3.11)
@@ -19326,7 +19375,7 @@ snapshots:
     optionalDependencies:
       '@algolia/client-search': 4.24.0
       algoliasearch: 4.24.0
-      tailwindcss: 3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3))
+      tailwindcss: 3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3))
     transitivePeerDependencies:
       - '@babel/core'
       - '@opentelemetry/api'
@@ -19499,7 +19548,7 @@ snapshots:
   graphql-tag@2.12.6(graphql@16.9.0):
     dependencies:
       graphql: 16.9.0
-      tslib: 2.6.3
+      tslib: 2.8.0
 
   graphql-ws@5.16.0(graphql@16.9.0):
     dependencies:
@@ -20277,9 +20326,9 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest-cli@29.7.0(@types/node@22.7.8)(babel-plugin-macros@3.1.0):
+  jest-cli@29.7.0(@types/node@22.7.8)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.14)(typescript@5.6.3))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3))
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
       chalk: 4.1.2
@@ -20296,16 +20345,16 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest-cli@29.7.0(@types/node@22.7.8)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)):
+  jest-cli@29.7.0(@types/node@22.8.4)(babel-plugin-macros@3.1.0):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.14)(typescript@5.6.3))
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
       chalk: 4.1.2
-      create-jest: 29.7.0(@types/node@22.7.8)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3))
+      create-jest: 29.7.0(@types/node@22.8.4)(babel-plugin-macros@3.1.0)
       exit: 0.1.2
       import-local: 3.2.0
-      jest-config: 29.7.0(@types/node@22.7.8)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3))
+      jest-config: 29.7.0(@types/node@22.8.4)(babel-plugin-macros@3.1.0)
       jest-util: 29.7.0
       jest-validate: 29.7.0
       yargs: 17.7.2
@@ -20404,6 +20453,36 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.7.8
       ts-node: 10.9.2(@types/node@22.7.8)(typescript@5.6.3)
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+
+  jest-config@29.7.0(@types/node@22.8.4)(babel-plugin-macros@3.1.0):
+    dependencies:
+      '@babel/core': 7.25.9
+      '@jest/test-sequencer': 29.7.0
+      '@jest/types': 29.6.3
+      babel-jest: 29.7.0(@babel/core@7.25.9)
+      chalk: 4.1.2
+      ci-info: 3.9.0
+      deepmerge: 4.3.1
+      glob: 7.2.3
+      graceful-fs: 4.2.11
+      jest-circus: 29.7.0(babel-plugin-macros@3.1.0)
+      jest-environment-node: 29.7.0
+      jest-get-type: 29.6.3
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-runner: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      micromatch: 4.0.8
+      parse-json: 5.2.0
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-json-comments: 3.1.1
+    optionalDependencies:
+      '@types/node': 22.8.4
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -20650,24 +20729,24 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest@29.7.0(@types/node@22.7.8)(babel-plugin-macros@3.1.0):
-    dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.14)(typescript@5.6.3))
-      '@jest/types': 29.6.3
-      import-local: 3.2.0
-      jest-cli: 29.7.0(@types/node@22.7.8)(babel-plugin-macros@3.1.0)
-    transitivePeerDependencies:
-      - '@types/node'
-      - babel-plugin-macros
-      - supports-color
-      - ts-node
-
   jest@29.7.0(@types/node@22.7.8)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)):
     dependencies:
       '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3))
       '@jest/types': 29.6.3
       import-local: 3.2.0
       jest-cli: 29.7.0(@types/node@22.7.8)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3))
+    transitivePeerDependencies:
+      - '@types/node'
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
+  jest@29.7.0(@types/node@22.8.4)(babel-plugin-macros@3.1.0):
+    dependencies:
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@20.16.14)(typescript@5.6.3))
+      '@jest/types': 29.6.3
+      import-local: 3.2.0
+      jest-cli: 29.7.0(@types/node@22.8.4)(babel-plugin-macros@3.1.0)
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
@@ -21794,7 +21873,7 @@ snapshots:
   micromark@4.0.0:
     dependencies:
       '@types/debug': 4.1.12
-      debug: 4.3.7
+      debug: 4.3.7(supports-color@5.5.0)
       decode-named-character-reference: 1.0.2
       devlop: 1.1.0
       micromark-core-commonmark: 2.0.1
@@ -22480,13 +22559,13 @@ snapshots:
       postcss: 8.4.47
       ts-node: 10.9.2(@types/node@20.16.14)(typescript@5.6.3)
 
-  postcss-load-config@4.0.2(postcss@8.4.47)(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)):
+  postcss-load-config@4.0.2(postcss@8.4.47)(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)):
     dependencies:
       lilconfig: 3.1.2
       yaml: 2.6.0
     optionalDependencies:
       postcss: 8.4.47
-      ts-node: 10.9.2(@types/node@22.7.8)(typescript@5.6.3)
+      ts-node: 10.9.2(@types/node@22.8.4)(typescript@5.6.3)
 
   postcss-load-config@5.0.2(jiti@2.3.3)(postcss@8.4.47):
     dependencies:
@@ -24001,7 +24080,7 @@ snapshots:
     transitivePeerDependencies:
       - ts-node
 
-  tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3)):
+  tailwindcss@3.4.14(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3)):
     dependencies:
       '@alloc/quick-lru': 5.2.0
       arg: 5.0.2
@@ -24020,7 +24099,7 @@ snapshots:
       postcss: 8.4.47
       postcss-import: 15.1.0(postcss@8.4.47)
       postcss-js: 4.0.1(postcss@8.4.47)
-      postcss-load-config: 4.0.2(postcss@8.4.47)(ts-node@10.9.2(@types/node@22.7.8)(typescript@5.6.3))
+      postcss-load-config: 4.0.2(postcss@8.4.47)(ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3))
       postcss-nested: 6.2.0(postcss@8.4.47)
       postcss-selector-parser: 6.1.2
       resolve: 1.22.8
@@ -24201,6 +24280,25 @@ snapshots:
       typescript: 5.6.3
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
+
+  ts-node@10.9.2(@types/node@22.8.4)(typescript@5.6.3):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.9
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.3
+      '@types/node': 22.8.4
+      acorn: 8.13.0
+      acorn-walk: 8.3.4
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 5.6.3
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optional: true
 
   tsconfig-paths@3.15.0:
     dependencies:
@@ -24633,13 +24731,13 @@ snapshots:
       '@types/node': 20.16.14
       fsevents: 2.3.3
 
-  vite@5.4.9(@types/node@22.7.8):
+  vite@5.4.9(@types/node@22.8.4):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.47
       rollup: 4.24.0
     optionalDependencies:
-      '@types/node': 22.7.8
+      '@types/node': 22.8.4
       fsevents: 2.3.3
 
   vscode-jsonrpc@8.2.0: {}

@@ -4,8 +4,8 @@ import {
   getFunctionDocumentation,
 } from "@quri/squiggle-lang";
 
-import { type ApiModuleDoc } from "./collections/apiDocs";
-import { docTitleFromMeta } from "./collections/utils";
+import { type ApiModuleDoc } from "./collections/apiDocs.js";
+import { docTitleFromMeta } from "./collections/utils.js";
 
 // We need to escape the curly braces in the markdown for .jsx files.
 function escapedStr(str: string) {
@@ -39,7 +39,7 @@ export function generateApiFunctionSection(
     );
     if (sectionFnDocumentationItems.length === 0) {
       throw new Error(
-        `Error: No functions in section: ${name} ${section.name}. You likely made an error in the section name.`
+        `Error: No functions in section: ${title} ${section.name}. You likely made an error in the section name.`
       );
     }
 

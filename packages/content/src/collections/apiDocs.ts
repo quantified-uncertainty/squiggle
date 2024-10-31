@@ -2,8 +2,8 @@ import { defineCollection, Schema } from "@content-collections/core";
 import { transformMDX } from "@fumadocs/content-collections/configuration";
 import { z as zod } from "zod";
 
-import { generateApiFunctionSection } from "../apiUtils";
-import { docTitleFromMeta, mdxOptions } from "./utils";
+import { generateApiFunctionSection } from "../apiUtils.js";
+import { docTitleFromMeta, mdxOptions } from "./utils.js";
 
 export function getApiDocSchema(z: typeof zod) {
   return {

@@ -1,4 +1,4 @@
-import { getDocumentationBundle } from "@/content/prompts";
+import { getDocumentationBundle } from "@quri/content";
 
 export async function GET() {
   return new Response(await getDocumentationBundle());

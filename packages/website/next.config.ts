@@ -1,7 +1,4 @@
-import { withContentCollections } from "@content-collections/next";
-
-// See https://fumadocs.vercel.app/docs/headless/content-collections for docs.
-export default withContentCollections({
+export default {
   reactStrictMode: true,
   async redirects() {
     return [
@@ -24,4 +21,4 @@ export default withContentCollections({
       },
     ];
   },
-});
+} satisfies NextConfig;

@@ -1,8 +1,11 @@
-import { allDocs, allMetas, allRawApiDocs } from "content-collections";
-
 import { FnDocumentation } from "@quri/squiggle-lang";
 
-import { generateApiFunctionSection } from "./apiUtils";
+import {
+  allDocs,
+  allMetas,
+  allRawApiDocs,
+} from "../.content-collections/generated/index.js";
+import { generateApiFunctionSection } from "./apiUtils.js";
 
 function moduleItemToCompressedFormat({
   name,

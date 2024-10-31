@@ -1,0 +1,11 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": [".content-collections"]
+    },
+    "lint": {
+      "dependsOn": ["@quri/squiggle-textmate-grammar#build"]
+    }
+  }
+}

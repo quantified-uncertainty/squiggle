@@ -11,18 +11,14 @@
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
     "gen:docsForLLM": "tsx scripts/compileDocsForLLM.mts",
-    "gen": "pnpm run gen:docsForLLM",
-    "build": "pnpm run gen && next build"
+    "build": "next build"
   },
   "dependencies": {
-    "@content-collections/cli": "^0.1.5",
-    "@content-collections/core": "^0.7.2",
-    "@content-collections/mdx": "^0.2.0",
-    "@content-collections/next": "^0.2.3",
     "@fumadocs/content-collections": "^1.1.5",
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
     "@quri/ui": "workspace:*",
+    "@quri/content": "workspace:*",
     "@quri/versioned-squiggle-components": "workspace:*",
     "@vercel/analytics": "^1.3.1",
     "base64-js": "^1.5.1",
@@ -52,7 +48,6 @@
     "autoprefixer": "^10.4.19",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.3",
-    "glob": "^10.3.12",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
     "tailwindcss": "^3.4.14",

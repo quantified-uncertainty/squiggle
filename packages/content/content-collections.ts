@@ -4,9 +4,9 @@ import {
   transformMDX,
 } from "@fumadocs/content-collections/configuration";
 
-import { apiDocs } from "@/content/collections/apiDocs.js";
-import { rawApiDocs } from "@/content/collections/rawApiDocs";
-import { mdxOptions } from "@/content/collections/utils";
+import { apiDocs } from "@/collections/apiDocs.js";
+import { rawApiDocs } from "@/collections/rawApiDocs.js";
+import { mdxOptions } from "@/collections/utils.js";
 
 // Config for https://www.content-collections.dev/.
 

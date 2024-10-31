@@ -1,7 +1,7 @@
 import { defineCollection } from "@content-collections/core";
 
-import { getApiDocSchema } from "./apiDocs";
-import { docTitleFromMeta } from "./utils";
+import { getApiDocSchema } from "./apiDocs.js";
+import { docTitleFromMeta } from "./utils.js";
 
 /*
  * Collection of API docs, for AI prompt consumption.

@@ -1,8 +1,1 @@
 /.next
-/.content-collections
-
-# These files are generated.
-# They must be also listed in ./turbo.json build outputs.
-/content/docs/Api/*
-/content/docs/Ecosystem/LLMPrompt.md
-/public/llms/documentationBundle.txt
