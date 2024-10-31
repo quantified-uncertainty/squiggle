@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "content-collections watch",
-    "lint": "prettier --check",
+    "lint": "prettier --check .",
     "format": "prettier --write .",
     "build": "tsc -b && content-collections build && cp -r .content-collections dist/"
   },
