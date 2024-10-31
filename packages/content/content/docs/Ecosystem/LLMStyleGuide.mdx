@@ -1,16 +1,22 @@
-# Squiggle Style Guide
+---
+title: Style Guide
+---
+
+This is a style guide for how to write good Squiggle code. It's mostly designed to help LLMs write good Squiggle code, but could be useful for humans as well.
+
+---
 
 ## Data and Calculations
 
 ### Estimations
 
-- When using the "to" format, like "3 to 10", remember that this represents the 5th and 95th percentile. This is a very large range. Be paranoid about being overconfident and too narrow in your estimates.
+- When using the `to` format, like `3 to 10`, remember that this represents the 5th and 95th percentile. This is a very large range. Be paranoid about being overconfident and too narrow in your estimates.
 - One good technique, when you think there's a chance that you might be very wrong about a variable, is to use a mixture that contains a very wide distribution. For example, `mx([300 to 400, 50 to 5000], [0.9, 0.1])`, or `mx([50k to 60k, 1k to 1M], [0.95, 0.05])`. This way if you are caught by surprise, the wide distribution will still give you a reasonable outcome.
 - Be wary of using the uniform or the triangular distributions. These are mainly good for physical simulations, not to represent uncertainty over many real life variables.
-- If the outcome of a model is an extreme probability (\<0.01 or >0.99), be suspicious of the result. It should be very rare for an intervention to have an extreme effect or have an extreme impact on the probability of an event.
+- If the outcome of a model is an extreme probability (less than 0.01 or more than 0.99), be suspicious of the result. It should be very rare for an intervention to have an extreme effect or have an extreme impact on the probability of an event.
 - Be paranoid about the uncertainty ranges of your variables. If you are dealing with a highly speculative variable, the answer might have 2-8 orders of magnitude of uncertainty, like `100 to 100K`. If you are dealing with a variable that's fairly certain, the answer might have 2-4 sig figs of uncertainty. Be focused on being accurate and not overconfident, not on impressing people.
 - Be careful with sigmoid functions. Sigmoid curves with distributions can have very little uncertainty in the middle, and very high uncertainty at the tails. If you are unsure about these values, consider using a mixture distribution. For example, this curve has very high certainty in the middle, and very high uncertainty at the tails: `adoption_rate(t) = 1 / (1 + exp(-normal(0.1, 0.08) * (t - 30)))`
-- Make sure to flag any variables that are highly speculative. Use @doc() to explain that the variable is speculative and to give a sense of the uncertainty. Explain your reasoning, but also warn the reader that the variable is speculative.
+- Make sure to flag any variables that are highly speculative. Use `@doc()` to explain that the variable is speculative and to give a sense of the uncertainty. Explain your reasoning, but also warn the reader that the variable is speculative.
 
 ### Percentages / Probabilities
 
@@ -182,7 +188,7 @@ instead of:
 You can use lists instead when you have a very long list of items (20+), very few keys, and/or are generating data using functions.
 
 - Tables are a great way to display structured data.
-- You can use the '@showAs' tag to display a table if the table can show all the data. If this takes a lot of formatting work, you can move that to a helper function. Note that helper functions must be placed before the '@showAs' tag. The `ozziegooen/helpers` library has a `dictsToTable` function that can help convert lists of dictionaries into tables.
+- You can use the `@showAs` tag to display a table if the table can show all the data. If this takes a lot of formatting work, you can move that to a helper function. Note that helper functions must be placed before the `@showAs` tag. The `ozziegooen/helpers` library has a `dictsToTable` function that can help convert lists of dictionaries into tables.
 
 For example:
 
@@ -214,9 +220,9 @@ strategies = [
 
 ### @name, @doc, @hide, @showAs
 
-- Use `@name` for simple descriptions and shortened units. Use `@doc` for further details (especially for detailing types, units, and key assumptions), when necessary. It's fine to use both @name and @doc on the same variable - but if so, don't repeat the name in the doc; instead use the doc() for additional information only.
-- In `@name`, add units wherever it might be confusing, like "@name("Ball Speed (m/s)"). If the units are complex or still not obvious, add more detail in the @doc().
-- For complex and important functions, use `@name` to name the function, and `@doc` to describe the arguments and return values. @doc should represent a docstring for the function. For example:
+- Use `@name` for simple descriptions and shortened units. Use `@doc` for further details (especially for detailing types, units, and key assumptions), when necessary. It's fine to use both `@name` and `@doc` on the same variable - but if so, don't repeat the name in the doc; instead use the doc() for additional information only.
+- In `@name`, add units wherever it might be confusing, like `"@name("Ball Speed (m/s)")`. If the units are complex or still not obvious, add more detail in the `@doc()`.
+- For complex and important functions, use `@name` to name the function, and `@doc` to describe the arguments and return values. `@doc` should represent a docstring for the function. For example:
 
 ```
 @doc("Adds a number and a distribution.
@@ -238,9 +244,9 @@ netBenefit(costs, benefits) = benefits - costs // not valid for @format()
 netBenefit = benefits - costs // valid for @format()
 ```
 
-- This mainly makes sense for dollar amounts, percentages, and dates. ".0%" is a decent format for percentages, and "$,.0f" can be used for dollars.
+- This mainly makes sense for dollar amounts, percentages, and dates. `.0%` is a decent format for percentages, and `$,.0f` can be used for dollars.
 - Choose the number of decimal places based on the stdev of the distribution or size of the number.
-- Do not use "()" instead of "-" for negative numbers. So, do not use "($,.0f" for negative numbers, use "$,.0f" instead.
+- Do not use `()` instead of `-` for negative numbers. So, do not use `($,.0f` for negative numbers, use `$,.0f` instead.
 
 ## Limitations
 
@@ -324,11 +330,11 @@ summary = [
 ## Plots
 
 - Plots are a good way of displaying the output of a model.
-- Use Scale.symlog() and Scale.log() whenever you think the data is highly skewed. This is very common with distributions.
-- Use Scale.symlog() instead of Scale.log() when you are unsure if the data is above or below 0. Scale.log() fails on negative values.
+- Use `Scale.symlog()` and `Scale.log()` whenever you think the data is highly skewed. This is very common with distributions.
+- Use `Scale.symlog()` instead of `Scale.log()` when you are unsure if the data is above or below 0. `Scale.log()` fails on negative values.
 - Function plots use plots equally spaced on the x-axis. This means they can fail if only integers are accepted. In these cases, it can be safer just not to use the plot, or to use a scatter plot.
-- When plotting 2-8 distributions over the same x-axis, it's a good idea to use Plot.dists(). For example, if you want to compare 5 different costs of a treatment, or 3 different adoption rates of a technology, this can be a good way to display the data.
-- When plotting distributions in tables or if you want to display multiple distributions under each other, and you don't want to use Plot.dists, it's a good idea to have them all use the same x-axis scale, with custom min and max values. This is a good way to make sure that the x-axis scale is consistent across all distributions.
+- When plotting 2-8 distributions over the same x-axis, it's a good idea to use `Plot.dists()`. For example, if you want to compare 5 different costs of a treatment, or 3 different adoption rates of a technology, this can be a good way to display the data.
+- When plotting distributions in tables or if you want to display multiple distributions under each other, and you don't want to use `Plot.dists`, it's a good idea to have them all use the same x-axis scale, with custom min and max values. This is a good way to make sure that the x-axis scale is consistent across all distributions.
 
 Here's an example of how to display multiple distributions over the same x-axis, with a custom x-axis range:
 
@@ -393,7 +399,7 @@ tests = describe(
 
 ## Summary Notebook
 
-- For models over 5 lines long, you might want to include a summary notebook at the end of the file using the @notebook tag.
+- For models over 5 lines long, you might want to include a summary notebook at the end of the file using the `@notebook` tag.
 - Aim for a summary length of approximately (N^0.6) \* 1.2 lines, where N is the number of lines in the model.
 - Use the following structure:
   1. Model description

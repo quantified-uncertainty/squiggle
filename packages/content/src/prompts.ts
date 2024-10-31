@@ -57,78 +57,98 @@ function allDocumentationItems() {
     .join("\n\n\n");
 }
 
-function getGuideContent() {
-  const docs = allDocs.filter(
-    (doc) =>
-      doc._meta.directory === "Guides" &&
-      !["Roadmap", "Debugging"].includes(doc.title)
-  );
+function getDocsInDirectory(directory: string) {
+  const docs = allDocs.filter((doc) => doc._meta.directory === directory);
 
   // Sort docs by the order of the pages in the Guides metadata.
   // This matches Fumadocs behavior, which we assume is the most natural ordering both for humans and LLMs.
   const sortedPageNames = allMetas
-    .filter((meta) => meta._meta.directory === "Guides")
+    .filter((meta) => meta._meta.directory === directory)
     .at(0)?.pages;
 
   if (!sortedPageNames) {
-    throw new Error("Failed to extract page names from Guides metadata");
+    throw new Error(`Failed to extract page names from ${directory} metadata`);
   }
 
   docs.sort(
     (a, b) =>
-      sortedPageNames.findIndex((p) => `Guides/${p}` === a._meta.path) -
-      sortedPageNames.findIndex((p) => `Guides/${p}` === b._meta.path)
+      sortedPageNames.findIndex((p) => `${directory}/${p}` === a._meta.path) -
+      sortedPageNames.findIndex((p) => `${directory}/${p}` === b._meta.path)
   );
 
-  return docs
-    .map((doc) => {
-      return `# ${doc.title}
-
-${doc.description}
-${doc.content}
-`;
-    })
-    .join("\n\n\n");
+  return docs;
 }
 
-function getBasicPrompt() {
-  const promptDoc = allDocs.find(
-    (doc) => doc._meta.filePath === "Ecosystem/BasicPrompt.mdx"
+function docToSimplfiiedMarkdown(
+  doc: (typeof allDocs)[number],
+  opts: {
+    removePrelude?: boolean;
+    skipDescription?: boolean;
+    skipTitle?: boolean;
+  } = {
+    removePrelude: false,
+    skipDescription: false,
+    skipTitle: false,
+  }
+) {
+  let content = doc.content;
+  if (opts?.removePrelude) {
+    content = content.split("---")[1];
+    if (!content) {
+      throw new Error(`Failed to extract content from ${doc.title}`);
+    }
+  }
+
+  return (
+    (opts.skipTitle ? "" : `# ${doc.title}\n\n`) +
+    (opts.skipDescription ? "" : `${doc.description}\n`) +
+    `${content}\n`
   );
-  if (!promptDoc) {
-    throw new Error("Basic Prompt not found");
-  }
-
-  const prompt = promptDoc.content.split("---")[1];
-
-  if (!prompt) {
-    throw new Error("Failed to extract prompt from Basic Prompt doc");
-  }
-
-  return prompt;
 }
 
-function getLLMStyleGuide() {
-  const filename = "Ecosystem/LLMStyleGuide.mdx";
+function getGuideContent() {
+  const docs = getDocsInDirectory("Guides").filter(
+    (doc) => !["Roadmap", "Debugging"].includes(doc.title)
+  );
+
+  return docs.map((doc) => docToSimplfiiedMarkdown(doc)).join("\n\n\n");
+}
+
+function getDocByFilename(filename: string) {
   const doc = allDocs.find((doc) => doc._meta.filePath === filename);
   if (!doc) {
     throw new Error(`${filename} not found`);
   }
 
-  return doc.content;
+  return doc;
+}
+
+function getBasicPrompt() {
+  const doc = getDocByFilename("Ecosystem/BasicPrompt.mdx");
+  return docToSimplfiiedMarkdown(doc, {
+    removePrelude: true,
+    skipDescription: true,
+    skipTitle: true,
+  });
+}
+
+function getLLMStyleGuide() {
+  const doc = getDocByFilename("Ecosystem/LLMStyleGuide.mdx");
+  return docToSimplfiiedMarkdown(doc, { removePrelude: true });
 }
 
 export async function getDocumentationBundle() {
   console.log("Compiling documentation bundle page...");
 
   const basicPrompt = getBasicPrompt();
-  const styleGuideRaw = getLLMStyleGuide();
+  const styleGuide = getLLMStyleGuide();
   const guideContent = getGuideContent();
   const apiContent = allDocumentationItems();
+
   const content =
     basicPrompt +
     "\n\n" +
-    styleGuideRaw +
+    styleGuide +
     "\n\n" +
     convertSquiggleEditorTags(guideContent) +
     "\n\n---\n\n" +
