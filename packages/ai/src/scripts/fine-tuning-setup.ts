@@ -43,7 +43,7 @@ async function saveModelsToJSON(
   outputPath: string
 ): Promise<void> {
   try {
-    const jsonData = models.map((code, index) => ({
+    const jsonData = models.map((code) => ({
       prompt: code.prompt,
       code: code.response,
     }));

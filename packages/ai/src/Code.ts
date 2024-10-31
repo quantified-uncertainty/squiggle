@@ -1,3 +1,4 @@
+import { allSquiggleAiLibraries } from "@quri/content";
 import {
   EmbeddedRunner,
   makeSelfContainedLinker,
@@ -10,10 +11,11 @@ import {
 } from "@quri/squiggle-lang";
 
 import { formatSquiggleCode } from "./squiggle/formatSquiggleCode.js";
-import { LIBRARY_CONTENTS } from "./squiggle/squiggleLibraryContents.js";
 
 export const llmLinker = makeSelfContainedLinker(
-  Object.fromEntries(LIBRARY_CONTENTS)
+  Object.fromEntries(
+    allSquiggleAiLibraries.map(({ importName, code }) => [importName, code])
+  )
 );
 
 // Evaluated code; source + result or error.
