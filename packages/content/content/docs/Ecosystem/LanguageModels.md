@@ -17,7 +17,7 @@ This bot often produces poor results, or fails to properly call the server, so i
 
 [All Squiggle Documentation, in One Document](/api/documentation-bundle)
 
-If you want a shorter prompt, you can use [this shorter prompt](./BasicPrompt.mdx).
+If you want a shorter prompt, you can use [this shorter prompt](./BasicPrompt).
 
 ## Instructions for use with Claude
 
