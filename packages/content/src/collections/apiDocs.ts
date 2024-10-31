@@ -25,9 +25,10 @@ export type ApiModuleDoc = Schema<
 >;
 
 /*
- * Collection for `/docs/API` documentation pages.
+ * Collection for `/docs/Api` documentation pages.
  *
- * Automatically adds functions documentation to the page based on builtin documentation from squiggle-lang.
+ * Automatically adds functions documentation to the page based on builtin
+ * documentation from `squiggle-lang` function registry.
  *
  * Note that there's no `meta.json` file for fumadocs in this collection; since
  * it's a single file, it's easier to generate it in `app/source.ts`.
