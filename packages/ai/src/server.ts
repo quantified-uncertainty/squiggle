@@ -7,3 +7,5 @@ export { Workflow } from "./workflows/Workflow.js";
 export { makeAiCodec } from "./serialization.js";
 
 export { CodeArtifact, PromptArtifact, SourceArtifact } from "./Artifact.js";
+
+export { squiggleSystemPrompt } from "./prompts.js";

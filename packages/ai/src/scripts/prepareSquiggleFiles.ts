@@ -86,26 +86,10 @@ async function generateLibraryContents() {
   );
 }
 
-function getDocsPath(): string {
-  return path.join(getScriptPath(), "..", "..", "files", "squiggleDocs.md");
-}
-
-async function generateReadme() {
-  const docsPath = getDocsPath();
-  const readmeContent = await fs.readFile(docsPath, "utf8");
-
-  await saveToTsFile(
-    `${JSON.stringify(readmeContent)}`,
-    "README",
-    "squiggle/README.ts"
-  );
-}
-
 // We save the files into TS files, so that Vercel could read them.
 async function main() {
   await fetchAllLibraries();
   await generateLibraryContents();
-  await generateReadme();
 }
 
 main().catch((error) => {
