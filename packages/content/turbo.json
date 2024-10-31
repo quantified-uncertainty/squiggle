@@ -2,7 +2,7 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "outputs": [".content-collections"]
+      "outputs": [".content-collections", "dist"]
     },
     "lint": {
       "dependsOn": ["@quri/squiggle-textmate-grammar#build"]
