@@ -2,6 +2,8 @@
 
 This website is built using [Fumadocs](https://fumadocs.vercel.app/), a Next.js-based documentation framework.
 
+The documentation itself comes from `@quri/content` package (`/packages/content` in this repo), organized with [Content Collections](https://www.content-collections.dev/).
+
 # Build for development
 
 We assume you ran `pnpm i`.
