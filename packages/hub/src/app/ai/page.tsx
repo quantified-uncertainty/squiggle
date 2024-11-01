@@ -1,5 +1,3 @@
-import { ClientWorkflow } from "@quri/squiggle-ai";
-
 import { prisma } from "@/prisma";
 import { getUserOrRedirect } from "@/server/helpers";
 
@@ -14,11 +12,10 @@ export default async function AiPage() {
     where: {
       user: { email: user.email },
     },
+    take: 20,
   });
 
-  const workflows: ClientWorkflow[] = rows.map((row) =>
-    decodeDbWorkflowToClientWorkflow(row)
-  );
+  const workflows = rows.map((row) => decodeDbWorkflowToClientWorkflow(row));
 
   return <AiDashboard initialWorkflows={workflows} />;
 }
