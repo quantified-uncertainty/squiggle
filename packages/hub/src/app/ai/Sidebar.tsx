@@ -17,6 +17,8 @@ import {
   TextAreaFormField,
 } from "@quri/ui";
 
+import { LoadMoreViaSearchParam } from "@/components/LoadMoreViaSearchParam";
+
 import { AiRequestBody } from "./utils";
 import { WorkflowSummaryList } from "./WorkflowSummaryList";
 
@@ -29,6 +31,7 @@ type Props = {
   selectWorkflow: (id: string) => void;
   selectedWorkflow: ClientWorkflow | undefined;
   workflows: ClientWorkflow[];
+  hasMoreWorkflows: boolean;
 };
 
 type FormShape = {
@@ -38,7 +41,13 @@ type FormShape = {
 };
 
 export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
-  { submitWorkflow, selectWorkflow, selectedWorkflow, workflows },
+  {
+    submitWorkflow,
+    selectWorkflow,
+    selectedWorkflow,
+    workflows,
+    hasMoreWorkflows,
+  },
   ref
 ) {
   const form = useForm<FormShape>({
@@ -162,6 +171,7 @@ Outputs:
             selectedWorkflow={selectedWorkflow}
             selectWorkflow={selectWorkflow}
           />
+          {hasMoreWorkflows && <LoadMoreViaSearchParam />}
         </div>
       </div>
     </FormProvider>

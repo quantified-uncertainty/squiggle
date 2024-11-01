@@ -1,13 +1,25 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { ClientWorkflow, decodeWorkflowFromReader } from "@quri/squiggle-ai";
 
 import { AiRequestBody, bodyToLineReader } from "./utils";
 
-export function useSquiggleWorkflows(initialWorkflows: ClientWorkflow[]) {
+export function useSquiggleWorkflows(preloadedWorkflows: ClientWorkflow[]) {
   const [workflows, setWorkflows] =
-    useState<ClientWorkflow[]>(initialWorkflows);
+    useState<ClientWorkflow[]>(preloadedWorkflows);
   const [selected, setSelected] = useState<number | undefined>(undefined);
+
+  // `preloadedWorkflows` can change when the user presses the "load more" button
+  useEffect(() => {
+    setWorkflows((list) => {
+      if (list === preloadedWorkflows) return list;
+      const knownWorkflows = new Set(list.map((w) => w.id));
+      const newWorkflows = preloadedWorkflows.filter(
+        (w) => !knownWorkflows.has(w.id)
+      );
+      return [...list, ...newWorkflows];
+    });
+  }, [preloadedWorkflows]);
 
   const updateWorkflow = useCallback(
     (id: string, update: (workflow: ClientWorkflow) => ClientWorkflow) => {
@@ -20,29 +32,26 @@ export function useSquiggleWorkflows(initialWorkflows: ClientWorkflow[]) {
     []
   );
 
-  const addMockWorkflow = useCallback(
-    (request: AiRequestBody) => {
-      // This will be replaced with a real workflow once we receive the first message from the server.
-      const id = `loading-${Date.now().toString()}`;
-      const workflow: ClientWorkflow = {
-        id,
-        timestamp: new Date().getTime(),
-        status: "loading",
-        inputs: {
-          prompt: {
-            id: "prompt",
-            kind: "prompt",
-            value: request.kind === "create" ? request.prompt : "[FIX]",
-          },
+  const addMockWorkflow = useCallback((request: AiRequestBody) => {
+    // This will be replaced with a real workflow once we receive the first message from the server.
+    const id = `loading-${Date.now().toString()}`;
+    const workflow: ClientWorkflow = {
+      id,
+      timestamp: new Date().getTime(),
+      status: "loading",
+      inputs: {
+        prompt: {
+          id: "prompt",
+          kind: "prompt",
+          value: request.kind === "create" ? request.prompt : "[FIX]",
         },
-        steps: [],
-      };
-      setWorkflows((workflows) => [...workflows, workflow]);
-      setSelected(workflows.length); // select the new workflow
-      return workflow;
-    },
-    [workflows.length]
-  );
+      },
+      steps: [],
+    };
+    setWorkflows((workflows) => [workflow, ...workflows]);
+    setSelected(0);
+    return workflow;
+  }, []);
 
   const submitWorkflow = useCallback(
     async (request: AiRequestBody) => {

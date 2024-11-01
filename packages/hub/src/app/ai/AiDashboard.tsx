@@ -1,6 +1,6 @@
 "use client";
 
-import { clsx } from "clsx";
+import clsx from "clsx";
 import { FC, useRef, useState } from "react";
 
 import { ClientWorkflow, ClientWorkflowResult } from "@quri/squiggle-ai";
@@ -14,9 +14,15 @@ export type SquiggleResponse = {
   currentStep?: string;
 };
 
-export const AiDashboard: FC<{ initialWorkflows: ClientWorkflow[] }> = ({
+type Props = {
+  initialWorkflows: ClientWorkflow[];
+  hasMoreWorkflows: boolean;
+};
+
+export const AiDashboard: FC<Props> = ({
   initialWorkflows,
-}) => {
+  hasMoreWorkflows,
+}: Props) => {
   const { workflows, submitWorkflow, selectedWorkflow, selectWorkflow } =
     useSquiggleWorkflows(initialWorkflows);
 
@@ -38,6 +44,7 @@ export const AiDashboard: FC<{ initialWorkflows: ClientWorkflow[] }> = ({
           selectWorkflow={selectWorkflow}
           selectedWorkflow={selectedWorkflow}
           workflows={workflows}
+          hasMoreWorkflows={hasMoreWorkflows}
           ref={sidebarRef}
         />
       </div>

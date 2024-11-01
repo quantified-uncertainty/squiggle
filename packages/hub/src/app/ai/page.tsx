@@ -1,24 +1,24 @@
-import { ClientWorkflow } from "@quri/squiggle-ai";
+import { z } from "zod";
 
-import { prisma } from "@/prisma";
-import { getUserOrRedirect } from "@/server/helpers";
+import { numberInString } from "@/lib/zodUtils";
+import { loadWorkflows } from "@/server/ai/data";
 
-import { decodeDbWorkflowToClientWorkflow } from "../../server/ai/storage";
 import { AiDashboard } from "./AiDashboard";
 
-export default async function AiPage() {
-  const user = await getUserOrRedirect();
+export default async function SessionsPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const { limit } = z
+    .object({
+      limit: numberInString.optional(),
+    })
+    .parse(searchParams);
 
-  const rows = await prisma.aiWorkflow.findMany({
-    orderBy: { createdAt: "desc" },
-    where: {
-      user: { email: user.email },
-    },
-  });
+  const { workflows, hasMore } = await loadWorkflows({ limit });
 
-  const workflows: ClientWorkflow[] = rows.map((row) =>
-    decodeDbWorkflowToClientWorkflow(row)
+  return (
+    <AiDashboard initialWorkflows={workflows} hasMoreWorkflows={hasMore} />
   );
-
-  return <AiDashboard initialWorkflows={workflows} />;
 }
