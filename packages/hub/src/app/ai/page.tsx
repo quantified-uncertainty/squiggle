@@ -1,21 +1,24 @@
-import { prisma } from "@/prisma";
-import { getUserOrRedirect } from "@/server/helpers";
+import { z } from "zod";
 
-import { decodeDbWorkflowToClientWorkflow } from "../../server/ai/storage";
+import { numberInString } from "@/lib/zodUtils";
+import { loadWorkflows } from "@/server/ai/data";
+
 import { AiDashboard } from "./AiDashboard";
 
-export default async function AiPage() {
-  const user = await getUserOrRedirect();
+export default async function SessionsPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const { limit } = z
+    .object({
+      limit: numberInString.optional(),
+    })
+    .parse(searchParams);
 
-  const rows = await prisma.aiWorkflow.findMany({
-    orderBy: { createdAt: "desc" },
-    where: {
-      user: { email: user.email },
-    },
-    take: 20,
-  });
+  const { workflows, hasMore } = await loadWorkflows({ limit });
 
-  const workflows = rows.map((row) => decodeDbWorkflowToClientWorkflow(row));
-
-  return <AiDashboard initialWorkflows={workflows} />;
+  return (
+    <AiDashboard initialWorkflows={workflows} hasMoreWorkflows={hasMore} />
+  );
 }
