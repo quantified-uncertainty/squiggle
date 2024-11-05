@@ -69,7 +69,7 @@ export const MODEL_CONFIGS = [
   {
     id: "Claude-Sonnet",
     provider: "anthropic",
-    model: "claude-3-5-sonnet-20240620",
+    model: "claude-3-5-sonnet-latest",
     inputRate: 3,
     outputRate: 15,
     contextWindow: 200000,
@@ -80,12 +80,12 @@ export const MODEL_CONFIGS = [
   {
     id: "Claude-Haiku",
     provider: "anthropic",
-    model: "claude-3-haiku-20240307",
-    inputRate: 0.25,
-    outputRate: 1.25,
+    model: "claude-3-5-haiku-latest",
+    inputRate: 1.0,
+    outputRate: 3.0,
     contextWindow: 200000,
-    maxTokens: 4096,
-    name: "Claude Haiku",
+    maxTokens: 8192,
+    name: "Claude Haiku 3.5",
     allowsSystemPrompt: true,
   },
 ] as const satisfies ModelConfig[];
