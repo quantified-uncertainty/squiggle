@@ -3,45 +3,39 @@
   "folders": [
     {
       "name": "squiggle",
-      "path": ".."
-    },
-    {
-      "name": "relative-values",
-      "path": "../packages/relative-values"
+      "path": "..",
     },
     {
       "name": "vscode-ext",
-      "path": "../packages/vscode-ext"
+      "path": "../packages/vscode-ext",
     },
     {
       "name": "cli",
-      "path": "../packages/cli"
+      "path": "../packages/cli",
     },
     {
       "name": "squiggle-lang",
-      "path": "../packages/squiggle-lang"
+      "path": "../packages/squiggle-lang",
     },
     {
       "name": "components",
-      "path": "../packages/components"
+      "path": "../packages/components",
     },
     {
       "name": "website",
-      "path": "../packages/website"
+      "path": "../packages/website",
     },
     {
-      "name": "api-server",
-      "path": "../packages/api-server"
-    }
+      "name": "content",
+      "path": "../packages/content",
+    },
   ],
   "settings": {
     "jest.disabledWorkspaceFolders": [
       "squiggle",
-      "relative-values",
       "vscode-ext",
       "cli",
       "website",
-      "api-server"
     ],
     "jest.jestCommandLine": "yarn test",
     "files.associations": {

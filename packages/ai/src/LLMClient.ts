@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 
 import { LlmId, MODEL_CONFIGS } from "./modelConfigs.js";
-import { squiggleSystemContent } from "./prompts.js";
+import { squiggleSystemPrompt } from "./prompts.js";
 
 const TIMEOUT_MS = 60000;
 
@@ -202,7 +202,7 @@ export class LLMClient {
             model: selectedModelConfig.model,
             system: [
               {
-                text: squiggleSystemContent,
+                text: squiggleSystemPrompt,
                 type: "text",
                 cache_control: { type: "ephemeral" },
               },
@@ -218,13 +218,13 @@ export class LLMClient {
         const openaiClient = this.getOpenAIClient();
         const messages = selectedModelConfig.allowsSystemPrompt
           ? [
-              { role: "system", content: squiggleSystemContent },
+              { role: "system", content: squiggleSystemPrompt },
               ...conversationHistory,
             ]
           : [
               {
                 role: "user",
-                content: `Here are the basics of Squiggle. Read them, and then say 'Okay'. ${squiggleSystemContent}`,
+                content: `Here are the basics of Squiggle. Read them, and then say 'Okay'. ${squiggleSystemPrompt}`,
               },
               { role: "assistant", content: "Okay." },
               ...conversationHistory,

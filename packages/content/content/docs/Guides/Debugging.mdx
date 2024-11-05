@@ -1,0 +1,49 @@
+---
+description: Tips for debugging Squiggle code
+---
+
+Interactive visualizations are a primary tool for understanding Squiggle code, but there are some additional techniques that can improve the debugging process. Here are some tips and tricks:
+
+## Basic Console Logging
+  - **Built-in Inspection:** Utilize the [``inspect()``](/docs/Api/BuiltIn#inspect) function to log any variable to the console. This function provides a detailed view of the variable's current state and is useful for tracking values throughout your code.  
+  - **Variable Settings Toggle:** Click on the variable menu in the Squiggle interface and select "Log to JS Console". 
+
+## ``Window.squiggleOutput``
+Squiggle pushes its output to ``window.squiggleOutput``. Like with the outputs of ``inspect``, you can see this in the [JS developer console](https://www.digitalocean.com/community/tutorials/how-to-use-the-javascript-developer-console).
+
+## ``Danger.json``
+You can call [``Danger.json()``](/docs/Api/Danger#json) see variables in a format similar to JSON. This is useful for seeing all aspects of complex types like distributions.
+
+<SquiggleEditor
+  defaultCode={`sampleSet = 30 to 50
+pointSet = Sym.normal(5, 2)
+plot = Plot.dists([sampleSet, pointSet])
+fn(e) = e
+{
+  json: Danger.json([sampleSet, pointSet, plot, fn]),
+  jsonString: Danger.jsonString([pointSet, fn]),
+}`}
+/>
+
+## Profiling
+
+In the playground configuration panel, you can enable the "Performance Profiler" checkbox. This will highlight the code in the editor according to how much time was spend on each expression.
+
+Caveats:
+- The code will execute slightly slower in profiler mode
+- Imports won't be profiled correctly (but slow calls of imported functions will be highlighted)
+- If the code is fast, you'll randomly get highlighted and unhighlighted results, because time measurement is imprecise
+
+If you're using Squiggle components in React, you can enable the profiler for any component that supports the `environment` prop with `environment={profile: true}`:
+
+<SquiggleEditor
+  environment={{
+    profile: true,
+    xyPointLength: 1000,
+    sampleCount: 1000,
+    seed: 'doc-example',
+  }}
+  defaultCode={`dist = normal(0, 1)
+list = List.upTo(1, 100000) -> List.length
+`}
+/>

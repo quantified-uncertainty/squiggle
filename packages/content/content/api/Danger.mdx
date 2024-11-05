@@ -1,0 +1,35 @@
+---
+description: Newer experimental functions which are less stable than Squiggle as a whole
+sections:
+- name: JSON
+  description: |
+    The JSON module provides JSON-like objects in Squiggle. `Danger.json` is mainly useful for debugging, and `Danger.jsonString` is useful for sending data to other systems. A simple example is shown below.
+
+    We have custom serializers for different Squiggle objects. Note that this API is unstable and might change over time.
+
+    <SquiggleEditor
+    defaultCode={`sampleSet = 30 to 50
+    pointSet = Sym.normal(5, 2)
+    plot = Plot.dists([sampleSet, pointSet])
+    fn(e) = e
+
+    @notebook
+    result = [
+    "### Danger.json()",
+    Danger.json([sampleSet, pointSet, plot, fn]),
+    "### Danger.jsonString",
+    // We don't show sampleSet or plot below because they would be too large, but feel free to try that out
+    Danger.jsonString([pointSet, fn]),
+    ]
+    result
+    `}/>
+- name: Javascript
+  description: Near 1-1 matches of Javascript functions.
+- name: Math
+- name: Combinatorics
+- name: Distributions
+- name: Integration
+- name: Optimization
+---
+
+The Danger library contains newer experimental functions which are less stable than Squiggle as a whole. They are not recommended for production use, but are useful for testing out new ideas.

@@ -2,17 +2,7 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "outputs": [
-        "dist",
-        "*.tsbuildinfo",
-        ".next",
-        "!.next/cache",
-        "public/llms/documentationBundle.markdown",
-        "public/llms/styleGuide.markdown",
-        "public/llms/BasicPrompt.markdown",
-        "src/content/docs/Ecosystem/BasicPrompt.md",
-        "src/content/docs/Api/*"
-      ]
+      "outputs": ["dist", "*.tsbuildinfo", ".next", "!.next/cache"]
     },
     "lint": {
       "dependsOn": ["@quri/squiggle-textmate-grammar#build"]

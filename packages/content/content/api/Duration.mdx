@@ -1,0 +1,17 @@
+---
+description: Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
+sections:
+- name: Constructors
+- name: Conversions
+- name: Algebra
+- name: Comparison
+---
+
+Durations are typically used with [Date](./Date) values.
+
+| **Unit Name** | **Example** | **Convert Number to Duration** | **Convert Duration to Number** |
+|---------------|-------------|--------------------------------|--------------------------------|
+| Minute        | `5minutes`  | `fromMinutes(number)`          | `toMinutes(duration)`          |
+| Hour          | `5hour`     | `fromHours(number)`            | `toHours(duration)`            |
+| Day           | `5days`     | `fromDays(number)`             | `toDays(duration)`             |
+| Year          | `5years`    | `fromYears(number)`            | `toYears(duration)`            |
