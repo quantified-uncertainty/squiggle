@@ -85,7 +85,7 @@ export const MODEL_CONFIGS = [
     outputRate: 3.0,
     contextWindow: 200000,
     maxTokens: 8192,
-    name: "Claude Haiku",
+    name: "Claude Haiku 3.5",
     allowsSystemPrompt: true,
   },
 ] as const satisfies ModelConfig[];
