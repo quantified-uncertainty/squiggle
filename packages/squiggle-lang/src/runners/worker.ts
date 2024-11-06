@@ -65,7 +65,7 @@ addEventListener("message", (e: MessageEvent<SquiggleWorkerJob>) => {
   } catch (e) {
     postTypedMessage({
       type: "internal-error",
-      payload: e instanceof Error ? (e.stack ?? String(e)) : String(e),
+      payload: e instanceof Error ? e.stack ?? String(e) : String(e),
     });
   }
 });

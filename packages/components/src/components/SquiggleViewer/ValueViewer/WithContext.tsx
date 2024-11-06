@@ -121,7 +121,7 @@ export const ValueWithContextViewer: FC<Props> = ({
   // root header is always hidden (unless forced, but we probably won't need it)
   const headerVisibility = props.header ?? (isRoot ? "hide" : "normal");
   const collapsible =
-    headerVisibility === "hide" ? false : (props.collapsible ?? true);
+    headerVisibility === "hide" ? false : props.collapsible ?? true;
   const size = props.size ?? "normal";
   const enableDropdownMenu = viewerType !== "tooltip";
 
