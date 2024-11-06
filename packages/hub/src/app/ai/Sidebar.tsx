@@ -73,7 +73,7 @@ Outputs:
 
   useEffect(() => {
     if (workflows.length > prevWorkflowsLengthRef.current) {
-      selectWorkflow(workflows[workflows.length - 1].id);
+      selectWorkflow(workflows[0].id);
       prevWorkflowsLengthRef.current = workflows.length;
     }
   }, [workflows, selectWorkflow]);
@@ -120,7 +120,7 @@ Outputs:
           selectedIndex={mode === "edit" ? 1 : 0}
           onChange={(index) => setMode(index === 0 ? "create" : "edit")}
         >
-          <StyledTab.List stretch theme="primary">
+          <StyledTab.List stretch>
             <StyledTab name="Create" />
             <StyledTab name="Fix" />
           </StyledTab.List>
@@ -156,12 +156,7 @@ Outputs:
           ).map((model) => model.id)}
           required
         />
-        <Button
-          theme="primary"
-          wide
-          onClick={handleSubmit}
-          disabled={isSubmitDisabled}
-        >
+        <Button wide onClick={handleSubmit} disabled={isSubmitDisabled}>
           Start Workflow
         </Button>
         <div className="flex-grow overflow-y-auto">

@@ -7,6 +7,7 @@ import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@quri/ui";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 
 import { SquigglePlaygroundForWorkflow } from "../SquigglePlaygroundForWorkflow";
+import { stepNames } from "../utils";
 import { ArtifactList } from "./ArtifactList";
 import { ArtifactMessages } from "./ArtifactMessages";
 
@@ -50,13 +51,13 @@ export const SelectedNodeSideView: FC<{
 
   return (
     <div
-      className="relative flex-1 overflow-y-auto border-l border-slate-200 bg-white p-4"
+      className="relative flex-1 overflow-y-auto bg-white p-4"
       key={selectedNode.id}
       ref={ref}
     >
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-mono text-lg font-semibold text-slate-700">
-          {selectedNode.name}
+        <h2 className="text-lg font-semibold text-slate-600">
+          {stepNames[selectedNode.name] || selectedNode.name}
         </h2>
         <div className="flex items-center">
           <NavButton
@@ -102,7 +103,7 @@ export const SelectedNodeSideView: FC<{
             </div>
           )}
           {selectedNode.messages.length > 0 && (
-            <div className="flex w-1/4 min-w-[50px] flex-col">
+            <div className="flex w-1/4 min-w-[350px] flex-col">
               <h3 className="mb-2 text-sm font-medium text-slate-500">
                 Messages:
               </h3>

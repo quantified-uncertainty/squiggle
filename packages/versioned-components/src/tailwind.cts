@@ -30,7 +30,7 @@ function getVersionedSquiggleContent() {
   return extraContent;
 }
 
-export function getTailwindConfig(partialConfig: Config) {
+export function getTailwindConfig(partialConfig: Config): Config {
   return merge(
     {
       content: getVersionedSquiggleContent(),

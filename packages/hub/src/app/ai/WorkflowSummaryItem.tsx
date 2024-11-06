@@ -16,8 +16,8 @@ export const WorkflowSummaryItem: FC<{
   return (
     <div
       className={clsx(
-        "rounded border p-2 text-sm",
-        isSelected ? "bg-gray-100" : "cursor-pointer"
+        "w-full border-b p-2 text-sm",
+        isSelected ? "bg-gray-100" : "cursor-pointer hover:bg-slate-50"
       )}
       onClick={isSelected ? undefined : onSelect}
     >
