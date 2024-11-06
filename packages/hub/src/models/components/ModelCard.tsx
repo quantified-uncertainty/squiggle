@@ -157,12 +157,6 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
         updatedAtTimestamp && (
           <UpdatedStatus key="updated-status" time={updatedAtTimestamp} />
         ),
-        buildStatus === "Failure" && (
-          <BuildFailedBadge key="build-failed-badge" />
-        ),
-        lastBuild?.runSeconds && buildStatus !== "Failure" && (
-          <RunTime key="run-time" seconds={lastBuild.runSeconds} />
-        ),
       ]}
     />
   );
