@@ -15,10 +15,8 @@ type StepNodeProps = {
 
 const getStepNodeClassName = (isSelected: boolean) =>
   clsx(
-    "w-full cursor-pointer rounded-md border px-4 py-2 shadow-sm transition-colors",
-    isSelected
-      ? "border-slate-300 bg-slate-300"
-      : "border-slate-200 bg-slate-100 hover:bg-slate-400"
+    "w-full cursor-pointer px-4 py-1.5 transition-colors",
+    isSelected ? "bg-slate-200" : "bg-slate-50 hover:bg-slate-100"
   );
 
 export const StepNode: FC<StepNodeProps> = ({
@@ -29,18 +27,16 @@ export const StepNode: FC<StepNodeProps> = ({
 }) => {
   return (
     <div className={getStepNodeClassName(isSelected)} onClick={onClick}>
-      <div className="flex flex-col">
-        <div className="mb-1 flex items-center justify-between gap-1">
-          <div className="font-mono text-sm font-semibold text-slate-600">
-            <span className="mr-1">{stepNumber}.</span>
-            {stepNames[data.name] || data.name}
-          </div>
-          {data.state !== "DONE" && (
-            <div className="shrink-0">
-              <StepStatusIcon step={data} />
-            </div>
-          )}
+      <div className="flex items-center justify-between gap-1">
+        <div className="text-sm font-medium text-slate-600">
+          <span className="mr-1 text-slate-400">{stepNumber}.</span>
+          {stepNames[data.name] || data.name}
         </div>
+        {data.state !== "DONE" && (
+          <div className="shrink-0">
+            <StepStatusIcon step={data} />
+          </div>
+        )}
       </div>
     </div>
   );

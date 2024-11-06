@@ -54,7 +54,7 @@ export const WorkflowActions: FC<{
   return (
     <div style={{ height }} className="flex">
       <div className="w-70">
-        <div className="flex flex-col items-center space-y-2 p-2">
+        <div className="overflow-hidden rounded-lg">
           {workflow.steps.map((step, index) => (
             <StepNode
               data={step}

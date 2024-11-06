@@ -8,14 +8,14 @@ export const WorkflowStatusIcon: FC<{ workflow: ClientWorkflow }> = ({
 }) => {
   switch (workflow.status) {
     case "loading":
-      return <RefreshIcon className="animate-spin text-gray-500" />;
+      return <RefreshIcon className="animate-spin text-gray-500" size={16} />;
     case "finished":
       return workflow.result.isValid ? (
-        <CheckCircleIcon className="text-emerald-500" />
+        <CheckCircleIcon className="text-emerald-400" size={16} />
       ) : (
-        <ErrorIcon className="text-red-500" />
+        <ErrorIcon className="text-red-400" size={16} />
       );
     case "error":
-      return <ErrorIcon className="text-red-500" />;
+      return <ErrorIcon className="text-red-400" size={16} />;
   }
 };
