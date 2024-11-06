@@ -66,3 +66,10 @@ export function bodyToLineReader(stream: ReadableStream<string>) {
     )
     .getReader();
 }
+
+// Human-readable names for the steps in the workflow
+export const stepNames: Record<string, string> = {
+  GenerateCode: "Generate",
+  FixCodeUntilItRuns: "Fix",
+  AdjustToFeedback: "Improve",
+};

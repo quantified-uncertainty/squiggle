@@ -4,7 +4,7 @@ import { FC, MouseEvent } from "react";
 import { ClientStep } from "@quri/squiggle-ai";
 
 import { StepStatusIcon } from "../StepStatusIcon";
-import { ArtifactDisplay } from "./ArtifactDisplay";
+import { stepNames } from "../utils";
 
 type StepNodeProps = {
   data: ClientStep;
@@ -17,8 +17,8 @@ const getStepNodeClassName = (isSelected: boolean) =>
   clsx(
     "w-full cursor-pointer rounded-md border px-4 py-2 shadow-sm transition-colors",
     isSelected
-      ? "border-emerald-300 bg-emerald-100 hover:bg-emerald-200"
-      : "border-slate-200 bg-slate-100 hover:bg-slate-300"
+      ? "border-slate-300 bg-slate-300"
+      : "border-slate-200 bg-slate-100 hover:bg-slate-400"
   );
 
 export const StepNode: FC<StepNodeProps> = ({
@@ -30,29 +30,16 @@ export const StepNode: FC<StepNodeProps> = ({
   return (
     <div className={getStepNodeClassName(isSelected)} onClick={onClick}>
       <div className="flex flex-col">
-        <div className="mb-1 flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            {data.state !== "DONE" && (
-              <div className="shrink-0">
-                <StepStatusIcon step={data} />
-              </div>
-            )}
-            <div className="font-mono text-sm font-semibold text-slate-600">
-              <span className="mr-1 text-slate-400">{stepNumber}.</span>
-              {data.name}
+        <div className="mb-1 flex items-center justify-between gap-1">
+          <div className="font-mono text-sm font-semibold text-slate-600">
+            <span className="mr-1">{stepNumber}.</span>
+            {stepNames[data.name] || data.name}
+          </div>
+          {data.state !== "DONE" && (
+            <div className="shrink-0">
+              <StepStatusIcon step={data} />
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {Object.entries(data.outputs).map(([key, value]) => (
-              <ArtifactDisplay
-                key={key}
-                name={key}
-                artifact={value}
-                size={12}
-                showArtifactName={false}
-              />
-            ))}
-          </div>
+          )}
         </div>
       </div>
     </div>
