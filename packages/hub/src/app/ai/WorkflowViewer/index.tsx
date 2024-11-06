@@ -2,11 +2,10 @@
 import { FC } from "react";
 
 import { ClientWorkflow } from "@quri/squiggle-ai";
-import { Button, StyledTab } from "@quri/ui";
+import { StyledTab } from "@quri/ui";
 
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 
-import { Badge } from "../Badge";
 import { LogsView } from "../LogsView";
 import { SquigglePlaygroundForWorkflow } from "../SquigglePlaygroundForWorkflow";
 import { Header } from "./Header";
@@ -16,16 +15,30 @@ type WorkflowViewerProps<
   T extends ClientWorkflow["status"] = ClientWorkflow["status"],
 > = {
   workflow: Extract<ClientWorkflow, { status: T }>;
-  onFix: (code: string) => void;
-  expanded: boolean;
-  setExpanded: (expanded: boolean) => void;
+};
+
+const StatsDisplay = ({
+  runTimeMs,
+  totalPrice,
+  llmRunCount,
+}: {
+  runTimeMs: number;
+  totalPrice: number;
+  llmRunCount: number;
+}) => {
+  return (
+    <div className="flex items-center space-x-2 text-sm text-gray-500">
+      <span>{(runTimeMs / 1000).toFixed(2)}s</span>
+      <span className="text-gray-300">|</span>
+      <span>${totalPrice.toFixed(2)}</span>
+      <span className="text-gray-300">|</span>
+      <span>{llmRunCount} LLM runs</span>
+    </div>
+  );
 };
 
 const FinishedWorkflowViewer: FC<WorkflowViewerProps<"finished">> = ({
   workflow,
-  onFix,
-  expanded,
-  setExpanded,
 }) => {
   const { ref, height } = useAvailableHeight();
   const usedHeight = height ? height : 200;
@@ -35,20 +48,12 @@ const FinishedWorkflowViewer: FC<WorkflowViewerProps<"finished">> = ({
       <div className="mt-2 flex flex-col gap-2">
         <Header
           workflow={workflow}
-          expanded={expanded}
-          setExpanded={setExpanded}
           renderLeft={() => (
-            <>
-              <Badge theme="blue">
-                {(workflow.result.runTimeMs / 1000).toFixed(2)}s
-              </Badge>
-              <Badge theme="green">
-                ${workflow.result.totalPrice.toFixed(4)}
-              </Badge>
-              <Badge theme="purple">
-                {workflow.result.llmRunCount} LLM runs
-              </Badge>
-            </>
+            <StatsDisplay
+              runTimeMs={workflow.result.runTimeMs}
+              totalPrice={workflow.result.totalPrice}
+              llmRunCount={workflow.result.llmRunCount}
+            />
           )}
           renderRight={() => (
             <div className="flex gap-2">
@@ -57,12 +62,6 @@ const FinishedWorkflowViewer: FC<WorkflowViewerProps<"finished">> = ({
                 <StyledTab name="Actions" />
                 <StyledTab name="Logs" />
               </StyledTab.List>
-              <Button
-                theme="primary"
-                onClick={() => onFix(workflow.result.code)}
-              >
-                Fix
-              </Button>
             </div>
           )}
         />
@@ -89,8 +88,6 @@ const FinishedWorkflowViewer: FC<WorkflowViewerProps<"finished">> = ({
 
 const LoadingWorkflowViewer: FC<WorkflowViewerProps<"loading">> = ({
   workflow,
-  expanded,
-  setExpanded,
 }) => {
   const { ref, height } = useAvailableHeight();
   const usedHeight = height ? height : 200;
@@ -99,8 +96,6 @@ const LoadingWorkflowViewer: FC<WorkflowViewerProps<"loading">> = ({
     <div className="mt-2 flex flex-col gap-2">
       <Header
         workflow={workflow}
-        expanded={expanded}
-        setExpanded={setExpanded}
         renderLeft={() => null}
         renderRight={() => null}
       />
