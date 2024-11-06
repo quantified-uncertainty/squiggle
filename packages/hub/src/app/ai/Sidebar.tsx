@@ -73,7 +73,7 @@ Outputs:
 
   useEffect(() => {
     if (workflows.length > prevWorkflowsLengthRef.current) {
-      selectWorkflow(workflows[workflows.length - 1].id);
+      selectWorkflow(workflows[0].id);
       prevWorkflowsLengthRef.current = workflows.length;
     }
   }, [workflows, selectWorkflow]);
