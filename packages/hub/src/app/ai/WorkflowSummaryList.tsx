@@ -10,7 +10,7 @@ export const WorkflowSummaryList: FC<{
   selectWorkflow: (id: string) => void;
 }> = ({ workflows, selectedWorkflow, selectWorkflow }) => {
   return (
-    <div className="flex max-h-[400px] flex-col space-y-2 overflow-y-auto pr-2">
+    <div className="flex max-h-[400px] w-full flex-col overflow-y-auto rounded-md border border-slate-200">
       {workflows.map((workflow) => (
         <WorkflowSummaryItem
           key={workflow.id}
