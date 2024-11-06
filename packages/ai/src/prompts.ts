@@ -24,60 +24,84 @@ export type PromptPair = {
 
 export const changeFormatPrompt = `
 **Response Format:**
-
 Your response **must** include:
-
 1. **Brief Explanation**: A very short explanation (4-15 words) of the root cause of the error and your fix, placed inside an \`<explanation>\` block.
-
 2. **Minimal Code Change Block**: The smallest possible code change needed to fix the error, provided inside an \`<edit>\` block.
 
 **Instructions:**
-
 - Do **not** include any content outside the \`<explanation>\` and \`<edit>\` blocks.
-
 - In the \`<edit>\` block:
-  - Start with \`<<<<<<< SEARCH\`.
-  - Include **only** the exact lines to be replaced from the original code. Copy them exactly, including comments and whitespace.
-  - Use \`=======\` as a divider.
-  - Provide the corrected code in the replace section.
-  - End with \`>>>>>>> REPLACE\`.
-  - Ensure the **SEARCH** section matches the original code **exactly**.
-  - Keep the code change minimal—avoid adding extra code or making unrelated changes.
-  - **Every** \`SEARCH\` section must **exactly match** the existing file content, character for character, including all comments, docstrings, etc.
-  - \`SEARCH/REPLACE\` blocks will replace **all** matching occurrences. Include enough lines to make the \`SEARCH\` blocks uniquely match the lines to change.
-  - To move code within a file, use 2 \`SEARCH/REPLACE\` blocks: one to delete it from its current location, and one to insert it in the new location.
+  - For each change, create a separate SEARCH/REPLACE block:
+    - Start with \`<<<<<<< SEARCH\`
+    - Include the exact lines to be replaced
+    - Use \`=======\` as a divider
+    - Provide the corrected code
+    - End with \`>>>>>>> REPLACE\`
+  - **Critical for Moving Code:**
+    - When moving code, you need TWO separate SEARCH/REPLACE blocks in this order:
+      1. First block REMOVES the code from its original location
+      2. Second block ADDS it to its new location
+    - Include enough surrounding context in each block to uniquely identify the location
+    - Remember that blocks are processed in order, so removal must come before addition
+  - The SEARCH section must match existing code exactly, including whitespace and comments
+  - SEARCH/REPLACE blocks replace ALL matching occurrences, so make them unique!
 
 - Do **not** include explanations or comments outside the specified blocks.
 
-**Example:**
+**Examples:**
 
-Input (with line numbers):
+1. Simple Fix:
 <original_code_with_line_numbers>
-${addLineNumbers(`calculateCircleArea(r) = {
-  Math.PI * r * r;
-}
-myFn(x) = {
-  x * 2;
-}
+${addLineNumbers(`@name("💰 Expected Cost ($)")
+@format("$.2s")
+flightCost = normal({ mean: 600, stdev: 100 })
 `)}
 </original_code_with_line_numbers>
 
-Output:
-
 <explanation>
-Fixed exponentiation and function naming for clarity
+Updated normal distribution parameters for better accuracy
 </explanation>
-
 <edit>
 <<<<<<< SEARCH
-  Math.PI * r * r
+flightCost = normal({ mean: 600, stdev: 100 })
 =======
-  Math.PI * r ** 2
->>>>>>> REPLACE
-<<<<<<< SEARCH
-myFn(x) = {
-=======
-myFunction(x) = {
+flightCost = normal({ mean: 650, stdev: 120 })
 >>>>>>> REPLACE
 </edit>
+
+2. Moving Code (with two blocks):
+<original_code_with_line_numbers>
+${addLineNumbers(`@name("💰 Expected Cost ($)")
+@format("$.2s")
+flightCost = normal({ mean: 600, stdev: 100 })
+@name("🥇 Expected Benefit ($)")
+@format("$.2s")
+benefitEstimate = normal({ mean: 1500, stdev: 300 })
+
+import "hub:ozziegooen/sTest" as sTest`)}
+</original_code_with_line_numbers>
+
+<explanation>
+Move import statement to top of file
+</explanation>
+<edit>
+<<<<<<< SEARCH
+import "hub:ozziegooen/sTest" as sTest
+=======
+>>>>>>> REPLACE
+
+<<<<<<< SEARCH
+@name("💰 Expected Cost ($)")
+=======
+import "hub:ozziegooen/sTest" as sTest
+
+@name("💰 Expected Cost ($)")
+>>>>>>> REPLACE
+</edit>
+
+Key Points for Code Movement:
+- First block removes code from original location
+- Second block adds code to new location
+- Each block includes enough context to be unique
+- Order matters: remove first, then add
 `;
