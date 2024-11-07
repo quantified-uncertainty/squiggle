@@ -335,6 +335,10 @@ s = 4 to 10
 @format("$.2")
 x = 5 to 10
 
+@name("My favorite Number")
+@doc("This is a long description")
+num = 50
+
 @showAs(Plot.numericFn)
 @name("My favorite Fn")
 fn = {|e| e}
