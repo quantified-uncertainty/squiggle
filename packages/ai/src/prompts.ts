@@ -23,7 +23,6 @@ export type PromptPair = {
 };
 
 export const changeFormatPrompt = `
-**Response Format:**
 Your response **must** include:
 1. **Brief Explanation**: A very short explanation (4-15 words) of the root cause of the error and your fix, placed inside an \`<explanation>\` block.
 2. **Minimal Code Change Block**: The smallest possible code change needed to fix the error, provided inside an \`<edit>\` block.
@@ -98,10 +97,4 @@ import "hub:ozziegooen/sTest" as sTest
 @name("💰 Expected Cost ($)")
 >>>>>>> REPLACE
 </edit>
-
-Key Points for Code Movement:
-- First block removes code from original location
-- Second block adds code to new location
-- Each block includes enough context to be unique
-- Order matters: remove first, then add
 `;

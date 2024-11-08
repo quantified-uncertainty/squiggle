@@ -180,7 +180,6 @@ export class Workflow<Shape extends IOShape = IOShape> {
     options?: { retryingStep?: LLMStepInstance<S> }
   ): LLMStepInstance<S, Shape> {
     // sorry for "any"; contravariance issues
-    console.log("Adding step", template.name);
     const step: LLMStepInstance<any, Shape> = LLMStepInstance.create({
       template,
       inputs,

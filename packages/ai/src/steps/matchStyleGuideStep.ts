@@ -1,13 +1,31 @@
+import { getLLMStyleGuide } from "@quri/content";
+
 import { Code, codeStringToCode } from "../Code.js";
 import { LLMStepTemplate } from "../LLMStepTemplate.js";
 import { changeFormatPrompt, PromptPair } from "../prompts.js";
 import { diffToNewCode } from "../squiggle/processSquiggleCode.js";
 
+const styleGuideText: string = await getLLMStyleGuide();
+
 function matchStyleGuidePrompt(
   prompt: string,
   code: Extract<Code, { type: "success" }>
 ): PromptPair {
-  const fullPrompt = `You are an expert Squiggle code reviewer. Your task is to review and potentially improve Squiggle code based on the given prompt and previous output.
+  const fullPrompt = `You are an expert Squiggle code reviewer focused on enforcing style guide compliance and code quality standards. Please review the code and output and suggest changes to match the style guide.
+
+**No Adjustments**
+If no adjustments are recommended, respond with:
+
+<response>
+NO_ADJUSTMENT_NEEDED
+</response>
+
+In this is the case, do not provide any code or explanation.
+
+**Adjustments**
+If adjustments are advised, provide the fully adjusted code and a very brief explanation (4-10 words). 
+
+Your goal is to ensure the code is effective and meets all requirements while addressing edge cases. Pay particular attention to errors in variable definitions or results, and suggest changes where needed.
 
 <original_prompt>
 ${prompt}
@@ -22,24 +40,14 @@ Variables: "${code.result.bindings}"
 Result: "${code.result.result}"
 </previous_output>
 
-Please review the code and output and make sure it matches the attached style guide. Also, make sure it is fully compliant with the prompt.
-
-If no adjustments are required (this should be the usual outcome), respond with:
-
-<response>
-NO_ADJUSTMENT_NEEDED
-</response>
-
-If significant adjustments are necessary, provide the fully adjusted code and a brief explanation (6-20 words).
-
-Your goal is to ensure the code is effective and meets all requirements while addressing edge cases. Pay particular attention to errors in variable definitions or results, and suggest changes where needed. However, default to **NO_ADJUSTMENT_NEEDED** unless there is a strong reason for revision.
-
-Focus on improving clarity, efficiency, and adherence to the requirements. Only recommend changes for meaningful improvements or fixing critical issues.
-
+**Response Format (for changes)**
 ${changeFormatPrompt}
+
+** Style Guide **
+${styleGuideText}
 `;
 
-  const summarizedPrompt = `Review and potentially improve Squiggle code for: ${prompt.substring(0, 150)}${prompt.length > 150 ? "..." : ""}. Consider variable names, comments, tags, tests, and edge cases.`;
+  const summarizedPrompt = `Review and potentially improve Squiggle code for: ${prompt.substring(0, 150)}${prompt.length > 150 ? "..." : ""}. Match the corresponding style guide.`;
 
   return { fullPrompt, summarizedPrompt };
 }

@@ -7,7 +7,7 @@ function adjustToFeedbackPrompt(
   prompt: string,
   code: Extract<Code, { type: "success" }>
 ): PromptPair {
-  const fullPrompt = `You are an expert in mathematical modeling and validation. Your task is to review the model results and suggest improvements if the outputs don't make logical sense.
+  const fullPrompt = `You are an expert in mathematical modeling and validation. Your task is to review the model results and suggest changes if the outputs seem incorrect or if there are test cases that fail.
 
 <original_prompt>
 ${prompt}
@@ -24,25 +24,22 @@ Result: "${code.result.result}"
 
 Please validate the model results with these considerations:
 1. **Mathematical Soundness**: Are the calculations logically consistent with the model's assumptions and principles?
-2. **Range Check**: Are outputs within reasonable bounds? Not all surprising results are wrong.
-3. **Error Cases**: Does the model appropriately handle zeros, negatives, and extreme values?
+2. **Range Check**: Are outputs within reasonable bounds? Does the model produce surprising results or results that seem implausible or overconfident?
+3. **Test Cases**: Do all of the test cases pass? If not, suggest fixes in the code or the test cases. If the test case is complex, failing, and will be difficult to fix, delete it.
 
 Remember:
-- Only suggest fixes for clear mathematical or logical errors
-- If outputs are surprising but mathematically valid, do not adjust the model
+- Suggest fixes for mathematical errors, test cases, and results that seem implausible or overconfident. Do not suggest fixes for style changes or documentation.
+- If outputs are surprising but mathematically reasonable upon consideration, do not adjust the model
 - Default to trusting the model unless you find specific flaws
 
 If the model is mathematically sound (most cases), respond with:
 <response>
 NO_ADJUSTMENT_NEEDED
 </response>
+In this case, do not provide any code or explanation.
 
-If you find genuine mathematical errors, provide:
-1. The corrected code
-2. A brief explanation (6-20 words) identifying the specific flaw fixed
-
-Focus solely on mathematical correctness, not style or optimization.
-
+If you find genuine changes, provide the following format:
+**Response Format (for changes):**
 ${changeFormatPrompt}
 `;
 

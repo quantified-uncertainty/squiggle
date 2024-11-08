@@ -53,7 +53,6 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
   prompt: PromptArtifact
 ) {
   workflow.addEventListener("stepFinished", ({ data: { step } }) => {
-    console.log("Step finished, 56-----------");
     const codeArtifact = step.getOutputs()["code"] as Artifact | undefined;
     if (codeArtifact && codeArtifact.kind !== "code") {
       throw new Error("Impossible state");
@@ -70,7 +69,6 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
     }
 
     const templateName = workflow.currentStepTemplateName();
-    console.log("Current step template name", templateName);
 
     switch (templateName) {
       case undefined:
@@ -79,7 +77,6 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
         if (!code) {
           throw new Error("Impossible state");
         }
-        console.log("Handling successful code");
         handleSuccessfulCode(workflow, prompt, code, adjustToFeedbackStep);
         break;
       }
@@ -101,6 +98,8 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
       case "MatchStyleGuide":
         handleCodeStep(workflow, prompt, code, matchStyleGuideStep, undefined);
         break;
+      default:
+        throw new Error(`Unknown step template name: ${templateName}`);
     }
   });
 }
