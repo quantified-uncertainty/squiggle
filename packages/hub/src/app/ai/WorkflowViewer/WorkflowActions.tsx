@@ -72,7 +72,6 @@ export const WorkflowActions: FC<{
       {hasSelectedNode && (
         <SelectedNodeSideView
           selectedNode={workflow.steps[selectedNodeIndex]}
-          onClose={() => setSelectedNodeIndex(null)}
           onSelectPreviousNode={selectPreviousNode}
           onSelectNextNode={selectNextNode}
         />
