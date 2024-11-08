@@ -1,5 +1,6 @@
 import { ReadableStream } from "stream/web";
 
+import { CodeArtifact } from "../Artifact.js";
 import { generateSummary } from "../generateSummary.js";
 import {
   calculatePriceMultipleCalls,
@@ -179,6 +180,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
     options?: { retryingStep?: LLMStepInstance<S> }
   ): LLMStepInstance<S, Shape> {
     // sorry for "any"; contravariance issues
+    console.log("Adding step", template.name);
     const step: LLMStepInstance<any, Shape> = LLMStepInstance.create({
       template,
       inputs,
@@ -268,12 +270,34 @@ export class Workflow<Shape extends IOShape = IOShape> {
     return this.steps.at(-1);
   }
 
+  currentStepTemplateName(): string | undefined {
+    const step = this.getCurrentStep();
+    return step?.template.name;
+  }
+
   getLogs(): TimestampedLogEntry[] {
     return this.steps.flatMap((r) => r.getLogs());
   }
 
   private isProcessComplete(): boolean {
     return this.getCurrentStep()?.getState().kind !== "PENDING";
+  }
+
+  getRecentValidCode(): CodeArtifact | undefined {
+    let code: CodeArtifact | undefined;
+
+    // look for first code output in the last step that generated any code
+    for (let i = this.steps.length - 1; i >= 0; i--) {
+      const step = this.steps[i];
+      const outputs = step.getOutputs();
+      for (const output of Object.values(outputs)) {
+        if (output?.kind === "code") {
+          code = output;
+        }
+      }
+      if (code) break;
+    }
+    return code;
   }
 
   getFinalResult(): ClientWorkflowResult {
@@ -284,21 +308,6 @@ export class Workflow<Shape extends IOShape = IOShape> {
 
     const isValid = finalStep.getState().kind === "DONE";
 
-    // look for first code output in the last step that generated any code
-    let code = "";
-    for (let i = this.steps.length - 1; i >= 0; i--) {
-      const step = this.steps[i];
-      const outputs = step.getOutputs();
-      for (const output of Object.values(outputs)) {
-        if (output?.kind === "source") {
-          code = output.value;
-        } else if (output?.kind === "code") {
-          code = output.value.source;
-        }
-      }
-      if (code) break;
-    }
-
     const endTime = Date.now();
     const runTimeMs = endTime - this.startTime;
     const { totalPrice, llmRunCount } = this.getLlmMetrics();
@@ -306,7 +315,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
     const logSummary = generateSummary(this);
 
     return {
-      code,
+      code: this.getRecentValidCode()?.value.source || "",
       isValid,
       totalPrice,
       runTimeMs,

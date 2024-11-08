@@ -3,11 +3,11 @@ import { LLMStepTemplate } from "../LLMStepTemplate.js";
 import { changeFormatPrompt, PromptPair } from "../prompts.js";
 import { diffToNewCode } from "../squiggle/processSquiggleCode.js";
 
-function adjustToFeedbackPrompt(
+function matchStyleGuidePrompt(
   prompt: string,
   code: Extract<Code, { type: "success" }>
 ): PromptPair {
-  const fullPrompt = `You are an expert in mathematical modeling and validation. Your task is to review the model results and suggest improvements if the outputs don't make logical sense.
+  const fullPrompt = `You are an expert Squiggle code reviewer. Your task is to review and potentially improve Squiggle code based on the given prompt and previous output.
 
 <original_prompt>
 ${prompt}
@@ -22,37 +22,30 @@ Variables: "${code.result.bindings}"
 Result: "${code.result.result}"
 </previous_output>
 
-Please validate the model results with these considerations:
-1. **Mathematical Soundness**: Are the calculations logically consistent with the model's assumptions and principles?
-2. **Range Check**: Are outputs within reasonable bounds? Not all surprising results are wrong.
-3. **Error Cases**: Does the model appropriately handle zeros, negatives, and extreme values?
+Please review the code and output and make sure it matches the attached style guide. Also, make sure it is fully compliant with the prompt.
 
-Remember:
-- Only suggest fixes for clear mathematical or logical errors
-- If outputs are surprising but mathematically valid, do not adjust the model
-- Default to trusting the model unless you find specific flaws
+If no adjustments are required (this should be the usual outcome), respond with:
 
-If the model is mathematically sound (most cases), respond with:
 <response>
 NO_ADJUSTMENT_NEEDED
 </response>
 
-If you find genuine mathematical errors, provide:
-1. The corrected code
-2. A brief explanation (6-20 words) identifying the specific flaw fixed
+If significant adjustments are necessary, provide the fully adjusted code and a brief explanation (6-20 words).
 
-Focus solely on mathematical correctness, not style or optimization.
+Your goal is to ensure the code is effective and meets all requirements while addressing edge cases. Pay particular attention to errors in variable definitions or results, and suggest changes where needed. However, default to **NO_ADJUSTMENT_NEEDED** unless there is a strong reason for revision.
+
+Focus on improving clarity, efficiency, and adherence to the requirements. Only recommend changes for meaningful improvements or fixing critical issues.
 
 ${changeFormatPrompt}
 `;
 
-  const summarizedPrompt = `Validate mathematical model results for: ${prompt.substring(0, 150)}${prompt.length > 150 ? "..." : ""}. Check for logical consistency and numerical accuracy.`;
+  const summarizedPrompt = `Review and potentially improve Squiggle code for: ${prompt.substring(0, 150)}${prompt.length > 150 ? "..." : ""}. Consider variable names, comments, tags, tests, and edge cases.`;
 
   return { fullPrompt, summarizedPrompt };
 }
 
-export const adjustToFeedbackStep = new LLMStepTemplate(
-  "AdjustToFeedback",
+export const matchStyleGuideStep = new LLMStepTemplate(
+  "MatchStyleGuide",
   {
     inputs: {
       prompt: "prompt",
@@ -68,7 +61,7 @@ export const adjustToFeedbackStep = new LLMStepTemplate(
     }
 
     const completion = await context.queryLLM(
-      adjustToFeedbackPrompt(prompt.value, code.value)
+      matchStyleGuidePrompt(prompt.value, code.value)
     );
 
     if (!completion) {
