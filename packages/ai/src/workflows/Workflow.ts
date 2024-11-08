@@ -9,7 +9,12 @@ import {
   Message,
 } from "../LLMClient.js";
 import { LLMStepInstance } from "../LLMStepInstance.js";
-import { Inputs, IOShape, LLMStepTemplate } from "../LLMStepTemplate.js";
+import {
+  Inputs,
+  IOShape,
+  LLMStepTemplate,
+  Outputs,
+} from "../LLMStepTemplate.js";
 import { TimestampedLogEntry } from "../Logger.js";
 import { LlmId } from "../modelConfigs.js";
 import {
@@ -211,6 +216,38 @@ export class Workflow<Shape extends IOShape = IOShape> {
     });
   }
 
+  addRule<TemplateShape extends IOShape, ProduceShape extends IOShape>({
+    after: template,
+    guard,
+    produce,
+  }: {
+    after: LLMStepTemplate<TemplateShape>;
+    guard: (outputs: Partial<Outputs<TemplateShape>>) => boolean;
+    produce: (
+      outputs: Partial<Outputs<TemplateShape>>
+    ) => [LLMStepTemplate<ProduceShape>, Inputs<ProduceShape>];
+  }) {
+    this.addEventListener("stepFinished", ({ data: { step } }) => {
+      const state = step.getState();
+      if (state.kind !== "DONE") {
+        return;
+      }
+
+      if (!step.instanceOf(template)) {
+        return;
+      }
+
+      if (!guard(step.getOutputs())) {
+        return;
+      }
+
+      const outputs = step.getOutputs();
+
+      const [nextTemplate, nextInputs] = produce(outputs);
+      this.addStep(nextTemplate, nextInputs);
+    });
+  }
+
   public getCurrentRetryAttempts(stepId: string): number {
     return this.steps.filter((step) => step.retryingStep?.id === stepId).length;
   }
@@ -267,11 +304,6 @@ export class Workflow<Shape extends IOShape = IOShape> {
 
   private getCurrentStep(): LLMStepInstance<IOShape, Shape> | undefined {
     return this.steps.at(-1);
-  }
-
-  currentStepTemplateName(): string | undefined {
-    const step = this.getCurrentStep();
-    return step?.template.name;
   }
 
   getLogs(): TimestampedLogEntry[] {
