@@ -40,7 +40,6 @@ function handleSuccessfulCode(
   code: CodeArtifact,
   nextStep: typeof adjustToFeedbackStep
 ) {
-  console.log("Handling successful code");
   if (code.value.type !== "success") {
     workflow.addStep(fixCodeUntilItRunsStep, { code });
   } else {
@@ -84,6 +83,7 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
         if (!code) {
           throw new Error("Impossible state");
         }
+        // TODO: Jump to next step if code is valid
         handleSuccessfulCode(workflow, prompt, code, adjustToFeedbackStep);
         break;
       case "AdjustToFeedback":

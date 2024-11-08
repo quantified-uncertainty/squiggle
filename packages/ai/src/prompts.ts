@@ -44,6 +44,7 @@ Your response **must** include:
     - Remember that blocks are processed in order, so removal must come before addition
   - The SEARCH section must match existing code exactly, including whitespace and comments
   - SEARCH/REPLACE blocks replace ALL matching occurrences, so make them unique!
+  - When code contains newlines, include those exact newlines in both SEARCH and REPLACE sections
 
 - Do **not** include explanations or comments outside the specified blocks.
 
