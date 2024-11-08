@@ -36,6 +36,7 @@ export const EditModelPage: FC<{
     `,
     query
   );
+
   const model = extractFromGraphqlErrorUnion(result, "Model");
   const typename = model.currentRevision.content.__typename;
 

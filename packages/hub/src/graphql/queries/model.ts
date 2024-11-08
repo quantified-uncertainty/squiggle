@@ -2,6 +2,7 @@ import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
 import { NotFoundError } from "../errors/NotFoundError";
+import { modelWhereHasAccess } from "../helpers/modelHelpers";
 
 builder.queryField("model", (t) =>
   t.prismaFieldWithInput({
@@ -13,13 +14,14 @@ builder.queryField("model", (t) =>
     errors: {
       types: [NotFoundError],
     },
-    async resolve(query, _, { input }) {
+    async resolve(query, _, { input }, { session }) {
       const model = await prisma.model.findFirst({
         ...query,
         where: {
           slug: input.slug,
           owner: { slug: input.owner },
-          // no need to check access - will be checked by Model authScopes
+          // intentionally checking access - see https://github.com/quantified-uncertainty/squiggle/issues/3414
+          ...modelWhereHasAccess(session),
         },
       });
       if (!model) {
