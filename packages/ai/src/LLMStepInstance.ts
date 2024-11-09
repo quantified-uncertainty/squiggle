@@ -30,7 +30,6 @@ export type StepParams<Shape extends IOShape> = {
   state: StepState;
   inputs: Inputs<Shape>;
   outputs: Partial<Outputs<Shape>>;
-  retryingStep?: LLMStepInstance<Shape>;
   startTime: number;
   conversationMessages: Message[];
   llmMetricsList: LlmMetrics[];
@@ -50,8 +49,6 @@ export class LLMStepInstance<
   public readonly _outputs: StepParams<Shape>["outputs"];
 
   public readonly inputs: StepParams<Shape>["inputs"];
-
-  public retryingStep?: StepParams<Shape>["retryingStep"];
 
   private startTime: StepParams<Shape>["startTime"];
   private conversationMessages: StepParams<Shape>["conversationMessages"];
@@ -78,7 +75,6 @@ export class LLMStepInstance<
 
     this.template = params.template;
     this.inputs = params.inputs;
-    this.retryingStep = params.retryingStep;
 
     this.workflow = params.workflow;
     this.logger = new Logger();
@@ -88,7 +84,6 @@ export class LLMStepInstance<
   static create<Shape extends IOShape, WorkflowShape extends IOShape>(params: {
     template: LLMStepInstance<Shape>["template"];
     inputs: LLMStepInstance<Shape>["inputs"];
-    retryingStep: LLMStepInstance<Shape>["retryingStep"];
     workflow: Workflow<WorkflowShape>;
   }): LLMStepInstance<Shape, WorkflowShape> {
     return new LLMStepInstance<Shape, WorkflowShape>({
@@ -111,10 +106,6 @@ export class LLMStepInstance<
 
   getLogs(): TimestampedLogEntry[] {
     return this.logger.logs;
-  }
-
-  isRetrying(): boolean {
-    return !!this.retryingStep;
   }
 
   getConversationMessages(): Message[] {
@@ -337,7 +328,6 @@ export class LLMStepInstance<
       state: this.state,
       inputs: this.inputs,
       outputs: this._outputs,
-      retryingStep: this.retryingStep,
       startTime: this.startTime,
       conversationMessages: this.conversationMessages,
       llmMetricsList: this.llmMetricsList,
@@ -408,8 +398,7 @@ export function serializeStepParams(
 
 export type SerializedStep = Omit<
   StepParams<IOShape>,
-  // TODO - serialize retryingStep reference
-  "inputs" | "outputs" | "template" | "retryingStep"
+  "inputs" | "outputs" | "template"
 > & {
   templateName: string;
   inputIds: Record<string, number>;

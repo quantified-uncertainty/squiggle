@@ -6,76 +6,100 @@ import { generateCodeStep } from "../steps/generateCodeStep.js";
 import { matchStyleGuideStep } from "../steps/matchStyleGuideStep.js";
 import { Workflow } from "./Workflow.js";
 
-function retryMinorFailures(workflow: Workflow<any>) {
-  workflow.addEventListener("stepFinished", ({ data: { step } }) => {
-    const state = step.getState();
-    if (state.kind !== "FAILED" || state.errorType !== "MINOR") {
-      return;
-    }
-    workflow.addRetryOfPreviousStep();
-  });
-}
+const MAX_RETRIES = 5;
 
 export function fixAdjustRetryLoop<Shape extends IOShape>(
   workflow: Workflow<Shape>,
   prompt: PromptArtifact
 ) {
-  // GENERATE
-  workflow.addRule({
-    after: generateCodeStep,
-    guard: ({ code }) => !!code && code.value.type !== "success",
-    produce: ({ code }) => [fixCodeUntilItRunsStep, { code: code! }],
-  });
+  workflow.addLinearRule((step, h) => {
+    // process bad states
+    {
+      const state = step.getState();
+      if (state.kind === "FAILED") {
+        if (state.errorType === "MINOR") {
+          if (h.recentFailedRepeats(fixCodeUntilItRunsStep) > MAX_RETRIES) {
+            return h.finish(); // give up
+          }
+          return h.repeat();
+        }
 
-  workflow.addRule({
-    after: generateCodeStep,
-    guard: ({ code }) => !!code && code.value.type === "success",
-    produce: ({ code }) => [adjustToFeedbackStep, { prompt, code: code! }],
-  });
-
-  // FIX
-  workflow.addRule({
-    after: fixCodeUntilItRunsStep,
-    guard: ({ code }) => !!code && code.value.type !== "success",
-    produce: ({ code }) => [fixCodeUntilItRunsStep, { code: code! }],
-  });
-
-  workflow.addRule({
-    after: fixCodeUntilItRunsStep,
-    guard: ({ code }) => !!code && code.value.type === "success",
-    produce: ({ code }) => [adjustToFeedbackStep, { prompt, code: code! }],
-  });
-
-  // ADJUST
-  // adjust has three legs:
-  // - no code means no need for adjustment, apply style guide
-  // - successful code means we're adjusting and need to adjust again
-  // - failed code means we need to fix the code before we can adjust again
-  workflow.addRule({
-    after: adjustToFeedbackStep,
-    guard: ({ code }) => !code,
-    produce: () => {
-      const code = workflow.getRecentValidCode();
-      if (!code) {
-        throw new Error("Impossible state");
+        return h.fatal(
+          `Step ${step.template.name} failed with error type ${state.errorType}`
+        );
       }
-      return [matchStyleGuideStep, { prompt, code }];
-    },
-  });
 
-  // repeat adjust while it continues to adjust
-  workflow.addRule({
-    after: adjustToFeedbackStep,
-    guard: ({ code }) => !!code && code.value.type === "success",
-    produce: ({ code }) => [adjustToFeedbackStep, { prompt, code: code! }],
-  });
+      if (state.kind !== "DONE") {
+        return h.fatal(
+          `Impossible, step ${step.template.name} is not done: ${state.kind}`
+        );
+      }
+    }
 
-  // fix code if adjust fails
-  workflow.addRule({
-    after: adjustToFeedbackStep,
-    guard: ({ code }) => !!code && code.value.type !== "success",
-    produce: ({ code }) => [fixCodeUntilItRunsStep, { code: code! }],
-  });
+    // GENERATE
+    if (step.instanceOf(generateCodeStep)) {
+      const { code } = step.getOutputs();
+      if (!code) {
+        return h.fatal("Impossible state, generate didn't return code");
+      }
+      if (code.value.type !== "success") {
+        return h.step(fixCodeUntilItRunsStep, { code });
+      }
+      return h.step(adjustToFeedbackStep, { prompt, code });
+    }
 
-  retryMinorFailures(workflow);
+    // FIX
+    if (step.instanceOf(fixCodeUntilItRunsStep)) {
+      const { code } = step.getOutputs();
+      if (!code) {
+        return h.fatal("Impossible state, generate didn't return code");
+      }
+      if (code.value.type !== "success") {
+        return h.step(fixCodeUntilItRunsStep, { code });
+      }
+
+      return h.step(adjustToFeedbackStep, { prompt, code });
+    }
+
+    // ADJUST
+    if (step.instanceOf(adjustToFeedbackStep)) {
+      const { code } = step.getOutputs();
+
+      // no code means no need for adjustment, apply style guide
+      if (!code) {
+        const code = workflow.getRecentValidCode();
+        if (!code) {
+          return h.fatal("Impossible state");
+        }
+        return h.step(matchStyleGuideStep, { prompt, code });
+      }
+
+      // repeat adjust while it continues to adjust
+      if (code.value.type === "success") {
+        return h.step(adjustToFeedbackStep, { prompt, code });
+      }
+
+      // failed code means we need to fix the code before we can adjust again
+      return h.step(fixCodeUntilItRunsStep, { code });
+    }
+
+    // MATCH STYLE GUIDE
+    if (step.instanceOf(matchStyleGuideStep)) {
+      const { code } = step.getOutputs();
+      if (!code) {
+        // style guide has decided that no changes are needed, we are done
+        return h.finish();
+      }
+
+      // repeat style guide while it continues to iterate
+      if (code.value.type === "success") {
+        return h.step(matchStyleGuideStep, { prompt, code });
+      }
+
+      // failed code means we need to go back to fixing
+      return h.step(fixCodeUntilItRunsStep, { code });
+    }
+
+    return h.fatal("Unknown step");
+  });
 }

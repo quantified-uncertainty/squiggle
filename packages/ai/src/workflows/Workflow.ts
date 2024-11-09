@@ -9,12 +9,7 @@ import {
   Message,
 } from "../LLMClient.js";
 import { LLMStepInstance } from "../LLMStepInstance.js";
-import {
-  Inputs,
-  IOShape,
-  LLMStepTemplate,
-  Outputs,
-} from "../LLMStepTemplate.js";
+import { Inputs, IOShape, LLMStepTemplate } from "../LLMStepTemplate.js";
 import { TimestampedLogEntry } from "../Logger.js";
 import { LlmId } from "../modelConfigs.js";
 import {
@@ -27,6 +22,10 @@ import {
   artifactToClientArtifact,
   stepToClientStep,
 } from "./streaming.js";
+import {
+  NextStepAction,
+  WorkflowGuardHelpers,
+} from "./WorkflowGuardHelpers.js";
 import {
   type WorkflowInstanceParams,
   type WorkflowTemplate,
@@ -46,7 +45,7 @@ export const llmConfigDefault: LlmConfig = {
   messagesInHistoryToKeep: 4,
 };
 
-export type WorkflowEventShape =
+export type WorkflowEventShape<WorkflowShape extends IOShape> =
   | {
       type: "workflowStarted";
       payload?: undefined;
@@ -54,19 +53,19 @@ export type WorkflowEventShape =
   | {
       type: "stepAdded";
       payload: {
-        step: LLMStepInstance;
+        step: LLMStepInstance<IOShape, WorkflowShape>;
       };
     }
   | {
       type: "stepStarted";
       payload: {
-        step: LLMStepInstance;
+        step: LLMStepInstance<IOShape, WorkflowShape>;
       };
     }
   | {
       type: "stepFinished";
       payload: {
-        step: LLMStepInstance;
+        step: LLMStepInstance<IOShape, WorkflowShape>;
       };
     }
   | {
@@ -74,7 +73,7 @@ export type WorkflowEventShape =
       payload?: undefined;
     };
 
-export type WorkflowEventType = WorkflowEventShape["type"];
+export type WorkflowEventType = WorkflowEventShape<any>["type"];
 
 export class WorkflowEvent<
   T extends WorkflowEventType,
@@ -83,7 +82,7 @@ export class WorkflowEvent<
   constructor(
     type: T,
     public workflow: Workflow<Shape>,
-    public data: Extract<WorkflowEventShape, { type: T }>["payload"]
+    public data: Extract<WorkflowEventShape<Shape>, { type: T }>["payload"]
   ) {
     super(type);
   }
@@ -101,7 +100,6 @@ export type WorkflowEventListener<
  * provides a way to add them and interact with them.
  */
 
-const MAX_RETRIES = 5;
 export class Workflow<Shape extends IOShape = IOShape> {
   public id: string;
   public readonly template: WorkflowTemplate<Shape>;
@@ -179,77 +177,57 @@ export class Workflow<Shape extends IOShape = IOShape> {
     return this.getFinalResult();
   }
 
+  getPreviousStep(
+    step: LLMStepInstance<any, Shape>
+  ): LLMStepInstance<any, Shape> | undefined {
+    const index = this.steps.indexOf(step);
+    if (index < 1) {
+      return undefined;
+    }
+    return this.steps[index - 1];
+  }
+
   addStep<S extends IOShape>(
     template: LLMStepTemplate<S>,
-    inputs: Inputs<S>,
-    options?: { retryingStep?: LLMStepInstance<S> }
+    inputs: Inputs<S>
   ): LLMStepInstance<S, Shape> {
     // sorry for "any"; contravariance issues
     const step: LLMStepInstance<any, Shape> = LLMStepInstance.create({
       template,
       inputs,
-      retryingStep: options?.retryingStep,
       workflow: this,
     });
 
     this.steps.push(step);
     this.dispatchEvent({
       type: "stepAdded",
-      payload: { step: step as LLMStepInstance },
+      payload: { step },
     });
     return step;
   }
 
-  addRetryOfPreviousStep() {
-    const lastStep = this.steps.at(-1);
-    if (!lastStep) return;
-
-    const retryingStep = lastStep.retryingStep || lastStep;
-    const retryAttempts = this.getCurrentRetryAttempts(retryingStep.id);
-
-    if (retryAttempts >= MAX_RETRIES) {
-      return;
-    }
-
-    this.addStep(retryingStep.template, retryingStep.inputs, {
-      retryingStep: retryingStep as LLMStepInstance,
-    });
-  }
-
-  addRule<TemplateShape extends IOShape, ProduceShape extends IOShape>({
-    after: template,
-    guard,
-    produce,
-  }: {
-    after: LLMStepTemplate<TemplateShape>;
-    guard: (outputs: Partial<Outputs<TemplateShape>>) => boolean;
+  addLinearRule(
     produce: (
-      outputs: Partial<Outputs<TemplateShape>>
-    ) => [LLMStepTemplate<ProduceShape>, Inputs<ProduceShape>];
-  }) {
+      step: LLMStepInstance<IOShape, Shape>,
+      helpers: WorkflowGuardHelpers<Shape>
+    ) => NextStepAction
+  ) {
     this.addEventListener("stepFinished", ({ data: { step } }) => {
-      const state = step.getState();
-      if (state.kind !== "DONE") {
-        return;
+      const result = produce(step, new WorkflowGuardHelpers(this, step));
+      switch (result.kind) {
+        case "repeat":
+          this.addStep(step.template, step.inputs);
+          break;
+        case "step":
+          this.addStep(result.step, result.inputs);
+          break;
+        case "finish":
+          // no new steps to add
+          break;
+        case "fatal":
+          throw new Error(result.message);
       }
-
-      if (!step.instanceOf(template)) {
-        return;
-      }
-
-      if (!guard(step.getOutputs())) {
-        return;
-      }
-
-      const outputs = step.getOutputs();
-
-      const [nextTemplate, nextInputs] = produce(outputs);
-      this.addStep(nextTemplate, nextInputs);
     });
-  }
-
-  public getCurrentRetryAttempts(stepId: string): number {
-    return this.steps.filter((step) => step.retryingStep?.id === stepId).length;
   }
 
   private async runNextStep(): Promise<void> {
@@ -262,13 +240,13 @@ export class Workflow<Shape extends IOShape = IOShape> {
     this.dispatchEvent({
       // should we fire this after `run()` is called?
       type: "stepStarted",
-      payload: { step: step as LLMStepInstance },
+      payload: { step },
     });
     await step.run();
 
     this.dispatchEvent({
       type: "stepFinished",
-      payload: { step: step as LLMStepInstance },
+      payload: { step },
     });
   }
 
@@ -421,7 +399,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
 
   private eventTarget = new EventTarget();
 
-  private dispatchEvent(shape: WorkflowEventShape) {
+  private dispatchEvent(shape: WorkflowEventShape<Shape>) {
     this.eventTarget.dispatchEvent(
       new WorkflowEvent(shape.type, this, shape.payload)
     );
