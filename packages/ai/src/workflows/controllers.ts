@@ -1,4 +1,4 @@
-import { PromptArtifact } from "../Artifact.js";
+import { CodeArtifact, PromptArtifact } from "../Artifact.js";
 import { IOShape } from "../LLMStepTemplate.js";
 import { adjustToFeedbackStep } from "../steps/adjustToFeedbackStep.js";
 import { fixCodeUntilItRunsStep } from "../steps/fixCodeUntilItRunsStep.js";
@@ -16,66 +16,98 @@ function retryMinorFailures(workflow: Workflow<any>) {
   });
 }
 
-export function fixAdjustRetryLoop<Shape extends IOShape>(
+function codeRuns(code: CodeArtifact | undefined) {
+  return !!code && code.value.type === "success";
+}
+
+function codeDoesntRun(code: CodeArtifact | undefined) {
+  return !!code && code.value.type !== "success";
+}
+
+function generateCodeStepSteps<Shape extends IOShape>(
   workflow: Workflow<Shape>,
   prompt: PromptArtifact
 ) {
-  // GENERATE
+  const thisStep = generateCodeStep;
+  const nextStep = adjustToFeedbackStep;
+
   workflow.addRule({
-    after: generateCodeStep,
-    guard: ({ code }) => !!code && code.value.type !== "success",
+    after: thisStep,
+    guard: ({ code }) => codeRuns(code),
+    produce: ({ code }) => [nextStep, { prompt, code: code! }],
+  });
+
+  workflow.addRule({
+    after: thisStep,
+    guard: ({ code }) => codeDoesntRun(code),
     produce: ({ code }) => [fixCodeUntilItRunsStep, { code: code! }],
   });
+}
+
+function fixCodeUntilItRunsStepSteps<Shape extends IOShape>(
+  workflow: Workflow<Shape>,
+  prompt: PromptArtifact
+) {
+  const thisStep = fixCodeUntilItRunsStep;
+  const nextStep = adjustToFeedbackStep;
 
   workflow.addRule({
-    after: generateCodeStep,
-    guard: ({ code }) => !!code && code.value.type === "success",
-    produce: ({ code }) => [adjustToFeedbackStep, { prompt, code: code! }],
-  });
-
-  // FIX
-  workflow.addRule({
-    after: fixCodeUntilItRunsStep,
-    guard: ({ code }) => !!code && code.value.type !== "success",
-    produce: ({ code }) => [fixCodeUntilItRunsStep, { code: code! }],
+    after: thisStep,
+    guard: ({ code }) => codeRuns(code),
+    produce: ({ code }) => [nextStep, { prompt, code: code! }],
   });
 
   workflow.addRule({
-    after: fixCodeUntilItRunsStep,
-    guard: ({ code }) => !!code && code.value.type === "success",
-    produce: ({ code }) => [adjustToFeedbackStep, { prompt, code: code! }],
+    after: thisStep,
+    guard: ({ code }) => codeDoesntRun(code),
+    produce: ({ code }) => [thisStep, { code: code! }],
   });
+}
 
-  // ADJUST
+function adjustToFeedbackStepSteps<Shape extends IOShape>(
+  workflow: Workflow<Shape>,
+  prompt: PromptArtifact
+) {
+  const thisStep = adjustToFeedbackStep;
+  const nextStep = matchStyleGuideStep;
+
   // adjust has three legs:
   // - no code means no need for adjustment, apply style guide
   // - successful code means we're adjusting and need to adjust again
   // - failed code means we need to fix the code before we can adjust again
   workflow.addRule({
-    after: adjustToFeedbackStep,
+    after: thisStep,
     guard: ({ code }) => !code,
     produce: () => {
       const code = workflow.getRecentValidCode();
       if (!code) {
         throw new Error("Impossible state");
       }
-      return [matchStyleGuideStep, { prompt, code }];
+      return [nextStep, { prompt, code }];
     },
   });
 
   // repeat adjust while it continues to adjust
   workflow.addRule({
-    after: adjustToFeedbackStep,
-    guard: ({ code }) => !!code && code.value.type === "success",
-    produce: ({ code }) => [adjustToFeedbackStep, { prompt, code: code! }],
+    after: thisStep,
+    guard: ({ code }) => codeRuns(code),
+    produce: ({ code }) => [thisStep, { prompt, code: code! }],
   });
 
   // fix code if adjust fails
   workflow.addRule({
-    after: adjustToFeedbackStep,
-    guard: ({ code }) => !!code && code.value.type !== "success",
+    after: thisStep,
+    guard: ({ code }) => codeDoesntRun(code),
     produce: ({ code }) => [fixCodeUntilItRunsStep, { code: code! }],
   });
+}
 
+export function fixAdjustRetryLoop<Shape extends IOShape>(
+  workflow: Workflow<Shape>,
+  prompt: PromptArtifact
+) {
+  generateCodeStepSteps(workflow, prompt);
+  fixCodeUntilItRunsStepSteps(workflow, prompt);
+  adjustToFeedbackStepSteps(workflow, prompt);
   retryMinorFailures(workflow);
 }
