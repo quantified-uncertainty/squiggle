@@ -7,6 +7,9 @@ import { matchStyleGuideStep } from "../steps/matchStyleGuideStep.js";
 import { Workflow } from "./Workflow.js";
 
 const MAX_RETRIES = 5;
+const MAX_ADJUSTS = 3;
+const MAX_STYLE_GUIDES = 2;
+const MAX_FIXES = 3;
 
 export function fixAdjustRetryLoop<Shape extends IOShape>(
   workflow: Workflow<Shape>,
@@ -67,16 +70,18 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
 
       // no code means no need for adjustment, apply style guide
       if (!code) {
-        const code = workflow.getRecentValidCode();
-        if (!code) {
-          return h.fatal("Impossible state");
-        }
-        return h.step(matchStyleGuideStep, { prompt, code });
+        return h.step(matchStyleGuideStep, { prompt, code: step.inputs.code });
       }
 
-      // repeat adjust while it continues to adjust
+      // is the code valid?
       if (code.value.type === "success") {
-        return h.step(adjustToFeedbackStep, { prompt, code });
+        if (h.totalRepeats(step.template) < MAX_ADJUSTS) {
+          // keep adjusting...
+          return h.step(adjustToFeedbackStep, { prompt, code });
+        } else {
+          // we've adjusted enough, apply style guide
+          return h.step(matchStyleGuideStep, { prompt, code });
+        }
       }
 
       // failed code means we need to fix the code before we can adjust again
@@ -91,13 +96,23 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
         return h.finish();
       }
 
-      // repeat style guide while it continues to iterate
+      // repeat style guide while it continues to iterate and we haven't exhausted the style guide budget
       if (code.value.type === "success") {
-        return h.step(matchStyleGuideStep, { prompt, code });
+        if (h.totalRepeats(step.template) < MAX_STYLE_GUIDES) {
+          return h.step(matchStyleGuideStep, { prompt, code });
+        } else {
+          // we've applied the style guide enough and the code is valid, we are done
+          return h.finish();
+        }
       }
 
       // failed code means we need to go back to fixing
-      return h.step(fixCodeUntilItRunsStep, { code });
+      if (h.totalRepeats(fixCodeUntilItRunsStep) < MAX_FIXES) {
+        return h.step(fixCodeUntilItRunsStep, { code });
+      } else {
+        // there must be some valid code in the history, let's hope it's good enough, we are done
+        return h.finish();
+      }
     }
 
     return h.fatal("Unknown step");
