@@ -13,6 +13,10 @@ function matchStyleGuidePrompt(
 ): PromptPair {
   const fullPrompt = `You are an expert Squiggle code reviewer focused on enforcing style guide compliance and code quality standards. Please review the code and output and suggest changes to match the style guide.
 
+If the code is over 10 lines long, make sure there is a valid "summary" document with a @notebook and @startOpen tag.
+
+Have a very low bar for suggest improvements.
+
 **No Adjustments**
 If no adjustments are recommended, respond with:
 
@@ -24,8 +28,6 @@ In this is the case, do not provide any code or explanation.
 
 **Adjustments**
 If adjustments are advised, provide the fully adjusted code and a very brief explanation (4-10 words). 
-
-Your goal is to ensure the code is effective and meets all requirements while addressing edge cases. Pay particular attention to errors in variable definitions or results, and suggest changes where needed.
 
 <original_prompt>
 ${prompt}

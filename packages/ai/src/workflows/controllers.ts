@@ -42,7 +42,6 @@ function getNextIntendedState<Shape extends IOShape>(
       ? h.step(matchStyleGuideStep, { prompt, code })
       : null,
   ].filter((r) => !!r);
-
   return nextSteps.length ? nextSteps[0] : h.finish();
 }
 

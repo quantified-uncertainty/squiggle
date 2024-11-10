@@ -31,6 +31,7 @@ Remember:
 - Suggest fixes for mathematical errors, test cases, and results that seem implausible or overconfident. Do not suggest fixes for style changes or documentation.
 - If outputs are surprising but mathematically reasonable upon consideration, do not adjust the model
 - Default to trusting the model unless you find specific flaws
+- If the model produces a surprisingly confident result, consider whether it is overconfident and whether it is reasonable. For example, if you're doing a cost-benefit analysis, and the chances of an action being positive are less than 2% or greater than 98%, consider whether it is reasonable. Many speculative results are overconfident.
 
 If the model is mathematically sound (most cases), respond with:
 <response>

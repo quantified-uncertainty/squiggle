@@ -17,7 +17,65 @@ export const generateNewSquiggleCodePrompt = (prompt: string): PromptPair => {
 7. Add at least one test per complex function, using sTest, to test functionality, if the prompt requests more than 10 lines of code (explicitly or implicitly). Assign sTest.describe() blocks to variables, like this: \`function1_tests = sTest.describe(...)\`. Note that you cannot use multiple sTest.expect() calls in a single test() block.
 8. If the prompt requests changes to existing code, try to keep somewhat close to that code.
 9. Use \`@name\` annotations for concise descriptions; use \`@doc\` when further details are necessary.
-10. Write a comment at the top of the code that summarizes the code and its purpose.
+10. In Squiggle, you can write dicts like:
+\`\`\`squiggle
+initialCosts = {
+  rentDeposit: 5k to 15k,
+  equipmentCost: 20k to 40k,
+}
+\`\`\`
+If you want to do calculations with these values and return a dict, then use a block that returns a dict.
+
+\`\`\`squiggle
+initialCosts = {
+  rentDeposit = 5k to 15k
+  equipmentCost = 20k to 40k
+  total = rentDeposit + equipmentCost
+  {subcosts: {rentDeposit, equipmentCost}, total}
+}
+\`\`\`
+
+The following will not work, because this is a block, and it must return a value at the end:
+\`\`\`squiggle
+initialCosts = {
+  rentDeposit = 5k to 15k
+  equipmentCost = 20k to 40k
+  total = rentDeposit + equipmentCost
+}
+\`\`\`
+
+The following will not work, because this is a dict, and dicts can't refer to internal values:
+\`\`\`squiggle
+initialCosts = {
+  rentDeposit: 5k to 15k
+  equipmentCost: 20k to 40k
+  total: rentDeposit + equipmentCost
+}
+\`\`\`
+
+If you want to tag any of these values, you must use the block format, like this:
+\`\`\`squiggle
+initialCosts = {
+  @name("rent deposit")
+  @format("$,.0f")
+  rentDeposit = 5k to 15k
+
+  @format("$,.0f")
+  @name("equipment cost")
+  equipmentCost = 20k to 40k
+
+  @format("$,.0f")
+  total = rentDeposit + equipmentCost
+  {subcosts: {rentDeposit, equipmentCost}, total}
+}
+\`\`\`
+If you want to use tags in dicts, you can do so like this. However, this can get messy.
+\`\`\`squiggle
+initialCosts = {
+  rentDeposit = 5k to 15k -> Tag.format("$,.0f")
+  ...
+}
+\`\`\`
 
 Prompt:
 <prompt>
