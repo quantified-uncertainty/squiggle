@@ -71,5 +71,7 @@ export function bodyToLineReader(stream: ReadableStream<string>) {
 export const stepNames: Record<string, string> = {
   GenerateCode: "Generate",
   FixCodeUntilItRuns: "Fix",
-  AdjustToFeedback: "Improve",
+  AdjustToFeedback: "Update Estimates",
+  MatchStyleGuide: "Document",
+  RunAndFormatCode: "Prepare",
 };

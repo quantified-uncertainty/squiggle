@@ -292,25 +292,35 @@ export class Workflow<Shape extends IOShape = IOShape> {
     return this.getCurrentStep()?.getState().kind !== "PENDING";
   }
 
-  getRecentValidCode(): CodeArtifact | undefined {
-    let code: CodeArtifact | undefined;
+  getRecentStepWithSuccessCode(): LLMStepInstance<IOShape, Shape> | undefined {
+    let recentStep: LLMStepInstance<IOShape, Shape> | undefined;
 
     // look for first code output in the last step that generated any code
     for (let i = this.steps.length - 1; i >= 0; i--) {
       const step = this.steps[i];
       const outputs = step.getOutputs();
       for (const output of Object.values(outputs)) {
-        if (output?.kind === "code") {
-          code = output;
+        if (output?.kind === "code" && output.value.type === "success") {
+          recentStep = step;
         }
       }
-      if (code) break;
+      if (recentStep) break;
     }
-    return code;
+    return recentStep;
+  }
+
+  getRecentSuccessCode(): CodeArtifact | undefined {
+    const recentStep = this.getRecentStepWithSuccessCode();
+    if (!recentStep) {
+      return undefined;
+    }
+    return Object.values(recentStep.getOutputs()).find(
+      (output): output is CodeArtifact => output?.kind === "code"
+    );
   }
 
   getFinalResult(): ClientWorkflowResult {
-    const finalStep = this.getCurrentStep();
+    const finalStep = this.getRecentStepWithSuccessCode();
     if (!finalStep) {
       throw new Error("No steps found");
     }
@@ -324,7 +334,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
     const logSummary = generateSummary(this);
 
     return {
-      code: this.getRecentValidCode()?.value.source || "",
+      code: this.getRecentSuccessCode()?.value.source || "",
       isValid,
       totalPrice,
       runTimeMs,

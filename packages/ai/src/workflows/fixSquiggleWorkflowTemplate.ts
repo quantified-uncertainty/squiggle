@@ -13,7 +13,11 @@ export const fixSquiggleWorkflowTemplate = new WorkflowTemplate<{
   configureControllerLoop(workflow) {
     // TODO - cache the prompt artifact once? maybe even as a global variable
     // (but it's better to just refactor steps to make the prompt optional, somehow)
-    fixAdjustRetryLoop(workflow, new PromptArtifact(""));
+    fixAdjustRetryLoop(workflow, new PromptArtifact(""), {
+      maxMinorErrors: 5,
+      maxAdjustToFeedbackRuns: 0,
+      maxMatchStyleGuideRuns: 0,
+    });
   },
   configureInitialSteps(workflow, inputs) {
     workflow.addStep(runAndFormatCodeStep, { source: inputs.source });
