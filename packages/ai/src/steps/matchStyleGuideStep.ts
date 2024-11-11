@@ -15,6 +15,8 @@ function matchStyleGuidePrompt(
 
 If the code is over 10 lines long, make sure there is a valid "summary" document with a @notebook and @startOpen tag.
 
+Pay extra attention to documenting variables and factors that are uncertain or might change depending on context (for example, a parameter that would be high for old or poor people, but low for rich people). Add @doc tags to variables that are uncertain or might change depending on context, and add information into the notebook summary about these.
+
 Have a very low bar for suggest improvements.
 
 **No Adjustments**

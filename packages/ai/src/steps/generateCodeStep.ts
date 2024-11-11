@@ -17,7 +17,10 @@ export const generateNewSquiggleCodePrompt = (prompt: string): PromptPair => {
 7. Add at least one test per complex function, using sTest, to test functionality, if the prompt requests more than 10 lines of code (explicitly or implicitly). Assign sTest.describe() blocks to variables, like this: \`function1_tests = sTest.describe(...)\`. Note that you cannot use multiple sTest.expect() calls in a single test() block.
 8. If the prompt requests changes to existing code, try to keep somewhat close to that code.
 9. Use \`@name\` annotations for concise descriptions; use \`@doc\` when further details are necessary.
-10. In Squiggle, you can write dicts like:
+
+**Dicts vs. Blocks**
+## Dictionaries and Blocks
+In Squiggle, you can write dicts like:
 \`\`\`squiggle
 initialCosts = {
   rentDeposit: 5k to 15k,
@@ -32,6 +35,14 @@ initialCosts = {
   equipmentCost = 20k to 40k
   total = rentDeposit + equipmentCost
   {subcosts: {rentDeposit, equipmentCost}, total}
+}
+\`\`\`
+
+If you want to return a dict with only one variable, you must use a trailing comma:
+\`\`\`squiggle
+initialCosts = {
+  total = 25k to 55k
+  {total,}
 }
 \`\`\`
 
