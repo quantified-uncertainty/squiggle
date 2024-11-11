@@ -22,6 +22,8 @@ type ModelKeys = UnionToTuple<LlmId>;
 
 const commonRequestFields = {
   model: z.enum(MODEL_CONFIGS.map((model) => model.id) as ModelKeys).optional(),
+  numericSteps: z.number(),
+  styleGuideSteps: z.number(),
 };
 
 export const aiRequestBodySchema = z.discriminatedUnion("kind", [

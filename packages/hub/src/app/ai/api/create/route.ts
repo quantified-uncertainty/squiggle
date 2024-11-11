@@ -80,6 +80,8 @@ export async function POST(req: Request) {
       priceLimit: 0.3,
       durationLimitMinutes: 2,
       messagesInHistoryToKeep: 4,
+      numericSteps: request.numericSteps,
+      styleGuideSteps: request.styleGuideSteps,
     };
 
     const openaiApiKey = process.env["OPENAI_API_KEY"];

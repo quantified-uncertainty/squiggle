@@ -15,8 +15,8 @@ export const fixSquiggleWorkflowTemplate = new WorkflowTemplate<{
     // (but it's better to just refactor steps to make the prompt optional, somehow)
     fixAdjustRetryLoop(workflow, new PromptArtifact(""), {
       maxMinorErrors: 5,
-      maxAdjustToFeedbackRuns: 0,
-      maxMatchStyleGuideRuns: 0,
+      maxAdjustToFeedbackRuns: workflow.llmConfig.numericSteps ?? 0,
+      maxMatchStyleGuideRuns: workflow.llmConfig.styleGuideSteps ?? 0,
     });
   },
   configureInitialSteps(workflow, inputs) {

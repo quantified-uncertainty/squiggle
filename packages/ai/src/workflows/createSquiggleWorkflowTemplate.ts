@@ -19,8 +19,8 @@ export const createSquiggleWorkflowTemplate = new WorkflowTemplate<{
   configureControllerLoop(workflow, inputs) {
     fixAdjustRetryLoop(workflow, inputs.prompt, {
       maxMinorErrors: 5,
-      maxAdjustToFeedbackRuns: 3,
-      maxMatchStyleGuideRuns: 2,
+      maxAdjustToFeedbackRuns: workflow.llmConfig.numericSteps ?? 0,
+      maxMatchStyleGuideRuns: workflow.llmConfig.styleGuideSteps ?? 0,
     });
   },
   configureInitialSteps(workflow, inputs) {

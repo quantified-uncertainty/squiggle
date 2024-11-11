@@ -12,9 +12,11 @@ import { FormProvider, useForm } from "react-hook-form";
 import { ClientWorkflow, LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 import {
   Button,
+  NumberFormField,
   SelectStringFormField,
   StyledTab,
   TextAreaFormField,
+  TextTooltip,
 } from "@quri/ui";
 
 import { LoadMoreViaSearchParam } from "@/components/LoadMoreViaSearchParam";
@@ -38,6 +40,8 @@ type FormShape = {
   prompt: string;
   squiggleCode: string;
   model: LlmId;
+  numericSteps: number;
+  styleGuideSteps: number;
 };
 
 export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
@@ -65,6 +69,8 @@ Outputs:
 - Charts: monthly costs, benefits, net value over time`,
       squiggleCode: "",
       model: "Claude-Sonnet",
+      numericSteps: 3,
+      styleGuideSteps: 2,
     },
   });
 
@@ -89,18 +95,22 @@ Outputs:
   }));
 
   const handleSubmit = form.handleSubmit(
-    async ({ prompt, squiggleCode, model }) => {
+    async ({ prompt, squiggleCode, model, numericSteps, styleGuideSteps }) => {
       const requestBody: AiRequestBody =
         mode === "create"
           ? {
               kind: "create",
               prompt,
               model: model as LlmId,
+              numericSteps,
+              styleGuideSteps,
             }
           : {
               kind: "edit",
               squiggleCode,
               model: model as LlmId,
+              numericSteps,
+              styleGuideSteps,
             };
 
       submitWorkflow(requestBody);
@@ -118,7 +128,10 @@ Outputs:
       <div className="flex flex-col space-y-4">
         <StyledTab.Group
           selectedIndex={mode === "edit" ? 1 : 0}
-          onChange={(index) => setMode(index === 0 ? "create" : "edit")}
+          onChange={(index) => {
+            const newMode = index === 0 ? "create" : "edit";
+            setMode(newMode);
+          }}
         >
           <StyledTab.List stretch>
             <StyledTab name="Create" />
@@ -147,15 +160,50 @@ Outputs:
             </StyledTab.Panels>
           </div>
         </StyledTab.Group>
-        <SelectStringFormField<FormShape, LlmId>
-          name="model"
-          label="Model"
-          size="small"
-          options={MODEL_CONFIGS.filter(
-            (model) => model.provider === "anthropic"
-          ).map((model) => model.id)}
-          required
-        />
+        {mode === "create" && (
+          <div className="mt-2 flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Model</span>
+              <span className="w-40">
+                <SelectStringFormField<FormShape, LlmId>
+                  name="model"
+                  size="small"
+                  options={MODEL_CONFIGS.filter(
+                    (model) => model.provider === "anthropic"
+                  ).map((model) => model.id)}
+                  required
+                />
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <TextTooltip
+                text="Maximum number of steps to enhance the model's numerical calculations and reasoning."
+                placement="bottom"
+              >
+                <span className="cursor-help text-sm">Numeric Step Count</span>
+              </TextTooltip>
+              <span className="w-16">
+                <NumberFormField<FormShape> name="numericSteps" size="small" />
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <TextTooltip
+                text="Maximum number of steps to improve the model's documentation and formatting."
+                placement="bottom"
+              >
+                <span className="cursor-help text-sm">
+                  Documentation Step Count
+                </span>
+              </TextTooltip>
+              <span className="w-16">
+                <NumberFormField<FormShape>
+                  name="styleGuideSteps"
+                  size="small"
+                />
+              </span>
+            </div>
+          </div>
+        )}
         <Button wide onClick={handleSubmit} disabled={isSubmitDisabled}>
           Start Workflow
         </Button>
