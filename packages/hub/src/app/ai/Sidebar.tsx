@@ -161,26 +161,15 @@ Outputs:
           </div>
         </StyledTab.Group>
         {mode === "create" && (
-          <div className="mt-2 flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Model</span>
-              <span className="w-40">
-                <SelectStringFormField<FormShape, LlmId>
-                  name="model"
-                  size="small"
-                  options={MODEL_CONFIGS.filter(
-                    (model) => model.provider === "anthropic"
-                  ).map((model) => model.id)}
-                  required
-                />
-              </span>
-            </div>
+          <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <TextTooltip
-                text="Maximum number of steps to enhance the model's numerical calculations and reasoning."
+                text="Enhance the model's numerical calculations and reasoning."
                 placement="bottom"
               >
-                <span className="cursor-help text-sm">Numeric Step Count</span>
+                <span className="cursor-help text-sm underline decoration-dotted">
+                  Numeric Steps
+                </span>
               </TextTooltip>
               <span className="w-16">
                 <NumberFormField<FormShape> name="numericSteps" size="small" />
@@ -188,11 +177,11 @@ Outputs:
             </div>
             <div className="flex items-center justify-between">
               <TextTooltip
-                text="Maximum number of steps to improve the model's documentation and formatting."
+                text="Improve the model's documentation and formatting."
                 placement="bottom"
               >
-                <span className="cursor-help text-sm">
-                  Documentation Step Count
+                <span className="cursor-help text-sm underline decoration-dotted">
+                  Documentation Steps
                 </span>
               </TextTooltip>
               <span className="w-16">
@@ -204,6 +193,26 @@ Outputs:
             </div>
           </div>
         )}
+        <div className="flex items-center justify-between">
+          <TextTooltip
+            text="Choose the LLM to use. Sonnet is much better than Haiku, but is around 3x more expensive. We use the latest versions of Sonnet 3.5 and Haiku 3.5."
+            placement="bottom"
+          >
+            <span className="cursor-help text-sm underline decoration-dotted">
+              Model
+            </span>
+          </TextTooltip>
+          <span className="w-40">
+            <SelectStringFormField<FormShape, LlmId>
+              name="model"
+              size="small"
+              options={MODEL_CONFIGS.filter(
+                (model) => model.provider === "anthropic"
+              ).map((model) => model.id)}
+              required
+            />
+          </span>
+        </div>
         <Button wide onClick={handleSubmit} disabled={isSubmitDisabled}>
           Start Workflow
         </Button>
