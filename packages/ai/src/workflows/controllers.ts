@@ -12,10 +12,11 @@ import {
   WorkflowGuardHelpers,
 } from "./WorkflowGuardHelpers.js";
 
+const MAX_MINOR_ERRORS = 5;
+
 type config = {
-  maxMinorErrors: number;
-  maxAdjustToFeedbackRuns: number;
-  maxMatchStyleGuideRuns: number;
+  maxNumericSteps: number;
+  maxStyleGuideSteps: number;
 };
 
 // Error Messages
@@ -38,11 +39,11 @@ function getNextIntendedState<Shape extends IOShape>(
   const nextSteps = [
     // Only check AdjustToFeedback if it's intended and has runs remaining
     intendedStep === "AdjustToFeedback" &&
-    h.totalRepeats(adjustToFeedbackStep) < config.maxAdjustToFeedbackRuns
+    h.totalRepeats(adjustToFeedbackStep) < config.maxNumericSteps
       ? h.step(adjustToFeedbackStep, { prompt, code })
       : null,
     // Always check MatchStyleGuide
-    h.totalRepeats(matchStyleGuideStep) < config.maxMatchStyleGuideRuns
+    h.totalRepeats(matchStyleGuideStep) < config.maxStyleGuideSteps
       ? h.step(matchStyleGuideStep, { prompt, code })
       : null,
   ].filter((r) => !!r);
@@ -59,9 +60,7 @@ function handleFailedState<Shape extends IOShape>(
 
   if (state.kind === "FAILED") {
     if (state.errorType === "MINOR") {
-      if (
-        h.recentFailedRepeats(fixCodeUntilItRunsStep) > config.maxMinorErrors
-      ) {
+      if (h.recentFailedRepeats(fixCodeUntilItRunsStep) > MAX_MINOR_ERRORS) {
         return h.finish(); // Give up after max minor errors
       }
       return h.repeat();
@@ -81,9 +80,12 @@ function handleFailedState<Shape extends IOShape>(
 
 export function fixAdjustRetryLoop<Shape extends IOShape>(
   workflow: Workflow<Shape>,
-  prompt: PromptArtifact,
-  config: config
+  prompt: PromptArtifact
 ) {
+  const config = {
+    maxNumericSteps: workflow.llmConfig.numericSteps,
+    maxStyleGuideSteps: workflow.llmConfig.styleGuideSteps,
+  };
   workflow.addLinearRule((step, h) => {
     // process bad states
     const failedState = handleFailedState(step, h, config);

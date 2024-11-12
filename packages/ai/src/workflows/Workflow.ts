@@ -36,8 +36,8 @@ export type LlmConfig = {
   priceLimit: number;
   durationLimitMinutes: number;
   messagesInHistoryToKeep: number;
-  numericSteps?: number;
-  styleGuideSteps?: number;
+  numericSteps: number;
+  styleGuideSteps: number;
 };
 
 export const llmConfigDefault: LlmConfig = {
