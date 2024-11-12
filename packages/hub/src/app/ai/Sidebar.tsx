@@ -109,8 +109,8 @@ Outputs:
               kind: "edit",
               squiggleCode,
               model: model as LlmId,
-              numericSteps,
-              styleGuideSteps,
+              numericSteps: 0,
+              styleGuideSteps: 0,
             };
 
       submitWorkflow(requestBody);
