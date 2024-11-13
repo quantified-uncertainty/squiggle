@@ -106,6 +106,10 @@ function generateDetailedStepLogs<Shape extends IOShape>(
     }
 
     detailedLogs += "### Logs:\n";
+    if (step.getLogs().length === 0) {
+      detailedLogs +=
+        "⚠️ Logs are only available during the active session. They are not persisted and will be cleared after refreshing the page.\n";
+    }
     step.getLogs().forEach((log) => {
       detailedLogs += `#### **${getLogEntryFullName(log.entry)}:**\n`;
       detailedLogs += getFullMessage(log) + "\n";
