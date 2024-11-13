@@ -44,9 +44,9 @@ widgetRegistry.register("Array", {
     );
   },
   Chart: (value) => {
-    const values = useMemo(() => value.value.getValues(), [value]);
+    const values: SqValue[] = useMemo(() => value.value.getValues(), [value]);
 
-    const compressedValues = useMemo(() => {
+    const compressedValues: SqValue[] = useMemo(() => {
       if (!isNotebook(value)) return values;
       return compressStringValues(values);
     }, [values, value]);
