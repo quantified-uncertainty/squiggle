@@ -288,9 +288,11 @@ summary = [
 This format will use the variable tags to display the variables, and it's simple to use without making errors. If you want to display a variable that's already a dictionary, you don't need to do anything special.
 
 - String concatenation (+) is allowed, but be hesitant to do this with non-string variables. Most non-string variables don't display well in the default string representation. If you want to display a variable, consider using a custom function or formatter to convert it to a string first. Note that tags are shown in the default string representation, so you should remove them (`Tag.clear(variable)`) before displaying.
+- Make sure to format Squiggle numbers and Squiggle dates when used in notbooks. For example, "String(45.235, "%.2")".
+- To convert distributions into strings, use scripts like `String(Dist.inv(dist, 0.05), ",.2f") + " to " + String(Dist.inv(dist, 0.95), ",.2f")`.
 - Separate items in the list will be displayed with blank lines between them. This will break many kinds of formatting, like lists. Only do this in order to display full variables that you want to show.
 - Use markdown formatting for headers, lists, and other structural elements.
-- Use bold text to highlight key outputs. Like, "The optimal number of coffee cups per day is **" + Tag.clear(optimal_cups) + "**".
+- Use bold text to highlight key outputs. Like, "The optimal number of coffee cups per day is **" + String(optimal_cups, ",.2f") + "**".
 
 Example: (For a model with 300 lines)
 
@@ -307,8 +309,8 @@ summary = [
   - The model does not take into account the quality of sleep, which is critical.
   "
   "## Outputs
-  The optimal number of coffee cups per day: **" + Tag.clear(optimal_cups) + "**
-  The net benefit at optimal consumption: **" + result.net_benefit + "**",
+  The optimal number of coffee cups per day: **" + String(optimal_cups, ",.2f") + "**
+  The net benefit at optimal consumption: **" + String(result.net_benefit, ",.2f") + "**",
   "## Key Findings
   - Moderate amounts of coffee consumption seem surprisingly beneficial.
   - Productivity boost from coffee shows steeply diminishing returns as consumption increases, as would be expected.
