@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { ComponentProps } from "react";
 
 import { MarkdownViewer } from "../lib/MarkdownViewer.js";
 
@@ -9,7 +10,7 @@ import { MarkdownViewer } from "../lib/MarkdownViewer.js";
  * It's used for rendering docstrings, calculator descriptions, and builtin
  * function documentation.
  */
-const meta = {
+const meta: Meta<ComponentProps<typeof MarkdownViewer>> = {
   component: MarkdownViewer,
 } as const satisfies Meta<typeof MarkdownViewer>;
 export default meta;
