@@ -11,12 +11,13 @@ This is a style guide for how to write good Squiggle code. It's mostly designed 
 ### Estimations
 
 - When using the `to` format, like `3 to 10`, remember that this represents the 5th and 95th percentile. This is a very large range. Be paranoid about being overconfident and too narrow in your estimates.
-- One good technique, when you think there's a chance that you might be very wrong about a variable, is to use a mixture that contains a very wide distribution. For example, `mx([300 to 400, 50 to 5000], [0.9, 0.1])`, or `mx([50k to 60k, 1k to 1M], [0.95, 0.05])`. This way if you are caught by surprise, the wide distribution will still give you a reasonable outcome.
+- One good technique, when you think there's a chance that you might be very wrong about a variable, is to use a mixture that contains a very wide distribution. For example, `mx([300 to 400, 50 to 5000], [0.9, 0.1])`, or `mx([50k to 60k, 1k to 1M], [0.95, 0.05])`. This way if you are caught by surprise, the wide distribution will still give you a reasonable outcome. This technique should be used in cases of particularly high uncertainty.
 - Be wary of using the uniform or the triangular distributions. These are mainly good for physical simulations, not to represent uncertainty over many real life variables.
 - If the outcome of a model is an extreme probability (less than 0.05 or more than 0.95), be suspicious of the result. It should be very rare for an intervention to have an extreme effect or have an extreme impact on the probability of an event.
 - Be paranoid about the uncertainty ranges of your variables. If you are dealing with a highly speculative variable, the answer might have 2-8 orders of magnitude of uncertainty, like `100 to 100K`. If you are dealing with a variable that's fairly certain, the answer might have 2-4 sig figs of uncertainty. Be focused on being accurate and not overconfident.
 - Break down key variables that are uncertain, significant, and divisible into components. For instance, when analyzing a business's costs and benefits, if labor expenses represent a major portion of total costs, decompose them into specific elements like wages, benefits, recruitment costs, and staffing levels.
 - Be careful with sigmoid functions. Sigmoid curves with distributions can have very little uncertainty in the middle, and very high uncertainty at the tails. If you are unsure about these values, consider using a mixture distribution. For example, this curve has very high certainty in the middle, and very high uncertainty at the tails: `adoption_rate(t) = 1 / (1 + exp(-normal(0.1, 0.08) * (t - 30)))`
+- If a variable cannot be negative, make sure an appropriate distribution is used. Lognormal distributions are often a good choice. If you use something symetric like a normal distribution, you can truncate it to be positive. For example, `truncateLeft(normal(3, 2), 0)` will be a positive distribution.
 - Make sure to flag any variables that are speculative. Use `@doc()` to explain that the variable is speculative and to give a sense of the uncertainty. Explain your reasoning, but also warn the reader that the variable is speculative. For example:
 
 ```squiggle
@@ -243,6 +244,18 @@ add(number, distribution) -> distribution
 
 - Variables that are small function helpers, and that won't be interesting or useful to view the output of, should get a `@hide` tag. Key inputs and outputs should not have this tag.
 - Use `@showAs` to format large lists, as tables and to show plots for dists and functions where appropriate.
+- Tags are only useful when variables are externally accessible. If a function is only used internally inside a block, then don't use a tag. In these cases, regular comments are preferred.
+
+For example:
+```squiggle
+cost = {
+  @name("Coffee") // This variable is not exported, so no use for tags.
+  coffee = 10 to 15,
+  maintenance = 100 to 200,
+  total = coffee + maintenance
+  total // This is the only output of the function.
+}
+```
 
 ### `@format()`
 
@@ -298,7 +311,7 @@ summary = [
 This format will use the variable tags to display the variables, and it's simple to use without making errors. If you want to display a variable that's already a dictionary, you don't need to do anything special.
 
 - String concatenation (+) is allowed, but be hesitant to do this with non-string variables. Most non-string variables don't display well in the default string representation. If you want to display a variable, consider using a custom function or formatter to convert it to a string first. Note that tags are shown in the default string representation, so you should remove them (`Tag.clear(variable)`) before displaying.
-- Make sure to format Squiggle numbers and Squiggle dates when used in notbooks. For example, "String(45.235, "%.2")".
+- Make sure to format Squiggle numbers and Squiggle dates when used in notebooks. For example, "String(45.235, "%.2")".
 - To convert distributions into strings, use scripts like `String(Dist.inv(dist, 0.05), ",.2f") + " to " + String(Dist.inv(dist, 0.95), ",.2f")`.
 - Separate items in the list will be displayed with blank lines between them. This will break many kinds of formatting, like lists. Only do this in order to display full variables that you want to show.
 

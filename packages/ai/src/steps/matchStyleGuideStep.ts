@@ -4,6 +4,7 @@ import { Code, codeStringToCode } from "../Code.js";
 import { LLMStepTemplate } from "../LLMStepTemplate.js";
 import { changeFormatPrompt, PromptPair } from "../prompts.js";
 import { diffToNewCode } from "../squiggle/processSquiggleCode.js";
+import { addLineNumbers } from "../squiggle/searchReplace.js";
 
 const styleGuideText: string = await getLLMStyleGuide();
 
@@ -38,7 +39,7 @@ ${prompt}
 </original_prompt>
 
 <original_code>
-${code.source}
+${addLineNumbers(code.source)}
 </original_code>
 
 <previous_output>

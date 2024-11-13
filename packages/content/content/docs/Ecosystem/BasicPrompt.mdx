@@ -74,11 +74,37 @@ initialCosts = {
 }
 ```
 
-For single-value dictionary returns, add a trailing comma:
+For single-value dictionary returns, add a trailing comma. However, this pattern should be done rarely. It's often better to either return all the components inside a *components* dictionary or similar, or just return the value directly.
+
+Example with trailing comma:
 ```squiggle
 initialCosts = {
-  total = 25k to 55k
+  rentDeposit = 5k to 15k
+  equipmentCost = 20k to 40k
+  total = rentDeposit + equipmentCost
   {total,}
+}
+```
+Prefer this instead:
+```squiggle
+initialCostTotal = {
+  rentDeposit = 5k to 15k
+  equipmentCost = 20k to 40k
+  {
+    components: {
+      rentDeposit,
+      equipmentCost
+    },
+    total: rentDeposit + equipmentCost
+  }
+}
+```
+Or, if you really want to return a single value:
+```squiggle
+initialCostTotal = {
+  rentDeposit = 5k to 15k
+  equipmentCost = 20k to 40k
+  rentDeposit + equipmentCost
 }
 ```
 
@@ -94,7 +120,7 @@ initialCosts = {
   rentDeposit = 5k to 15k
   equipmentCost = 20k to 40k
   total = rentDeposit + equipmentCost
-  {subcosts: {rentDeposit, equipmentCost}, total}
+  {components: {rentDeposit, equipmentCost}, total}
 }
 ```
 
@@ -113,9 +139,11 @@ initialCosts = {
   @format("$,.0f")
   total = rentDeposit + equipmentCost
 
-  {subcosts: {rentDeposit, equipmentCost}, total}
+  {components: {rentDeposit, equipmentCost}, total}
 }
 ```
+
+Don't add tags to variables that are only used internally. The tags are only useful when variables are externally accessible.
 
 ### Common Mistakes to Avoid
 
@@ -148,21 +176,44 @@ Here's are some simple example Squiggle programs:
 
 ```squiggle
 //Model for Piano Tuners in New York Over Time
+inputs = {
+  @name("🌆 Population of New York in 2022")
+  @doc(
+    "Population estimate is highly uncertain due to:
+- Recent migration patterns post-COVID
+- Census undercounting in some neighborhoods
+- Illegal immigration estimates
+- Different definitions of metro area boundaries
 
-@name("🌆 Population of New York in 2022")
-@doc("I'm really not sure here, this is a quick guess.")
-populationOfNewYork2022 = 8.1M to 8.4M
+Base estimate is 8.1-8.4M with 10% chance of more extreme values 7-9.5M."
+  )
+  populationOfNewYork2022 = mx([8.1M to 8.4M, 7M to 9.5M], [0.9, 0.1])
 
-@name("🎹 Percentage of Population with Pianos")
-@format(".1%")
-proportionOfPopulationWithPianos = 0.2% to 1%
+  @name("🎹 Percentage of Population with Pianos")
+  @doc(
+    "This estimate is highly uncertain and could vary significantly by neighborhood wealth, cultural factors, and changing music habits over time. The number of digital pianos vs traditional pianos adds additional uncertainty."
+  )
+  @format(".1%")
+  proportionOfPopulationWithPianos = 0.2% to 1%
 
-@name("🔧 Number of Piano Tuners per Piano")
-pianoTunersPerPiano = {
-  pianosPerPianoTuner = 2k to 50k
-  1 / pianosPerPianoTuner
+  @name("🔧 Number of Piano Tuners per Piano")
+  @doc(
+    "This ratio is highly uncertain and could vary based on:
+- Piano tuner productivity and work patterns
+- Competition and market dynamics
+- Geographic density of pianos
+- Mix of professional venues vs home users"
+  )
+  pianoTunersPerPiano = {
+    pianosPerPianoTuner = 2k to 50k // (pianos per tuner)
+    1 / pianosPerPianoTuner
+  }
+  {
+    populationOfNewYork2022,
+    proportionOfPopulationWithPianos,
+    pianoTunersPerPiano,
+  }
 }
-
 //We only mean to make an estimate for the next 10 years.
 @hide
 domain = [Date(2024), Date(2034)]
@@ -171,15 +222,77 @@ domain = [Date(2024), Date(2034)]
 populationAtTime(t: domain) = {
   dateDiff = Duration.toYears(t - Date(2024))
   averageYearlyPercentageChange = normal({ p5: -1%, p95: 5% }) // We're expecting NYC to continuously grow with an mean of roughly between -1% and +4% per year
-  populationOfNewYork2022 * (averageYearlyPercentageChange + 1) ^ dateDiff
+  inputs.populationOfNewYork2022 *
+    (averageYearlyPercentageChange + 1) ^ dateDiff
 }
 
 @name("Total Tuners, at Time")
 totalTunersAtTime(t: domain) = populationAtTime(t) *
-  proportionOfPopulationWithPianos *
-  pianoTunersPerPiano
+  inputs.proportionOfPopulationWithPianos *
+  inputs.pianoTunersPerPiano
 
 meanTunersAtTime(t: domain) = mean(totalTunersAtTime(t))
+
+@notebook
+@startOpen
+summary = [
+  "## Summary
+  This model estimates the number of piano tuners needed in New York City over time. The estimates are highly uncertain due to complex population dynamics, changing piano ownership patterns, and varying tuning requirements.
+
+Key findings:
+- Population estimates show significant uncertainty, ranging from **" +
+    String(Dist.inv(inputs.populationOfNewYork2022, 0.05), ",.0f") +
+    "** to **" +
+    String(Dist.inv(inputs.populationOfNewYork2022, 0.95), ",.0f") +
+    "** people
+- Piano ownership rates vary widely by neighborhood and socioeconomic status
+- The ratio of pianos to tuners has high uncertainty due to varying work patterns",
+  "## Key Variables",
+  "- Population: **" +
+    String(Dist.inv(inputs.populationOfNewYork2022, 0.05), ",.0f") +
+    " to " +
+    String(Dist.inv(inputs.populationOfNewYork2022, 0.95), ",.0f") +
+    "** people",
+  "- Piano ownership: **" +
+    String(mean(inputs.proportionOfPopulationWithPianos) * 100, ".1%") +
+    "** of population",
+  "## Results for 2024",
+  "- Piano ownership: **" +
+    String(
+      Dist.inv(inputs.proportionOfPopulationWithPianos, 0.05) * 100,
+      ".1%"
+    ) +
+    " to " +
+    String(
+      Dist.inv(inputs.proportionOfPopulationWithPianos, 0.95) * 100,
+      ".1%"
+    ) +
+    "** of population",
+  "- Piano tuners needed: **" +
+    String(Dist.inv(totalTunersAtTime(Date(2024)), 0.05), ",.0f") +
+    "** to **" +
+    String(Dist.inv(totalTunersAtTime(Date(2024)), 0.95), ",.0f") +
+    "**",
+  "## Major Uncertainties
+  - The proportion of households with pianos could change significantly with wealth distribution and cultural shifts
+  - Population growth estimates are highly uncertain, especially given recent migration patterns
+  - Piano tuning requirements vary widely between professional venues and casual home users
+  - Digital piano adoption could significantly impact future demand
+  
+  ## Results
+  The model suggests there will likely be between **" +
+    String(Dist.inv(totalTunersAtTime(Date(2024)), 0.05), ",.0f") +
+    "** and **" +
+    String(Dist.inv(totalTunersAtTime(Date(2024)), 0.95), ",.0f") +
+    "** piano tuners needed in 2024.
+    
+  ## Model Caveats
+  - This is a simplified model that assumes piano tuners work full-time
+  - Market inefficiencies and geographic distribution aren't considered
+  - The model doesn't account for part-time tuners or those with multiple jobs
+  - Local economic conditions could significantly impact these estimates",
+]
+
 ```
 
 ```squiggle
@@ -218,140 +331,6 @@ calculator = Calculator(
 ```
 
 ```squiggle
-// Cost-benefit analysis for a housing addition in berkeley
-
-// Input section
-@name("Model Inputs")
-@doc("Key parameters for the housing development project")
-inputs = {
-  landCost: 1M to 2M,
-  constructionCost: 500k to 800k,
-  permitFees: 50k to 100k,
-  numberOfHomes: 10,
-  monthlyRentalIncome: 3k to 5k,
-  annualPropertyAppreciation: 2% to 5%,
-  annualSocialBenefit: 10k to 30k,
-  yearsToConsider: 30,
-}
-
-// Calculation section
-@name("Calculations")
-@doc("Core calculations for the cost-benefit analysis")
-calculations(i) = {
-  totalCostPerHome = i.landCost + i.constructionCost + i.permitFees
-  annualRentalIncome = i.numberOfHomes * i.monthlyRentalIncome * 12
-  totalCost = i.numberOfHomes * totalCostPerHome
-
-  annualAppreciation(year) = i.numberOfHomes * totalCostPerHome *
-    ((1 + i.annualPropertyAppreciation) ^ year -
-      (1 + i.annualPropertyAppreciation) ^ (year - 1))
-
-  annualBenefit(year) = annualRentalIncome + annualAppreciation(year) +
-    i.numberOfHomes * i.annualSocialBenefit
-
-  totalBenefit = List.upTo(1, i.yearsToConsider) -> List.map(annualBenefit)
-    -> List.reduce(
-      0,
-      {|acc, val| acc + val}
-    )
-
-  netBenefit = totalBenefit - totalCost
-  probPositiveNetBenefit = 1 - cdf(netBenefit, 0)
-
-  {
-    totalCostPerHome: totalCostPerHome,
-    annualRentalIncome: annualRentalIncome,
-    totalCost: totalCost,
-    totalBenefit: totalBenefit,
-    netBenefit: netBenefit,
-    probPositiveNetBenefit: probPositiveNetBenefit,
-  }
-}
-
-// Apply calculations to inputs
-@name("Results")
-@doc("Output of calculations based on input parameters")
-results = calculations(inputs)
-
-// Analysis section
-@name("Cost-Benefit Analysis")
-@doc("Detailed analysis of the housing development project")
-analysis = {
-  costsTable = Table.make(
-    [
-      { name: "Land Cost per Home", value: inputs.landCost },
-      { name: "Construction Cost per Home", value: inputs.constructionCost },
-      { name: "Permit Fees per Home", value: inputs.permitFees },
-      { name: "Total Cost per Home", value: results.totalCostPerHome },
-      { name: "Total Cost for 10 Homes", value: results.totalCost },
-    ],
-    {
-      columns: [
-        { name: "Item", fn: {|r| r.name} },
-        {
-          name: "Cost",
-          fn: {
-            |r|
-            Plot.dist(
-              r.value,
-              {
-                xScale: Scale.log({ tickFormat: "($.1s", min: 20k, max: 200M }),
-              }
-            )
-          },
-        },
-      ],
-    }
-  )
-
-  benefitTable = Table.make(
-    [
-      {
-        name: "Monthly Rental Income per Home",
-        value: inputs.monthlyRentalIncome,
-      },
-      {
-        name: "Annual Social Benefit per Home",
-        value: inputs.annualSocialBenefit,
-      },
-      { name: "Total Benefit over 30 years", value: results.totalBenefit },
-    ],
-    {
-      columns: [
-        { name: "Item", fn: {|r| r.name} },
-        {
-          name: "Value",
-          fn: {
-            |r|
-            Plot.dist(
-              r.value,
-              { xScale: Scale.linear({ tickFormat: "($.1s" }) }
-            )
-          },
-        },
-      ],
-    }
-  )
-
-  netBenefitPlot = Plot.dist(
-    results.netBenefit,
-    {
-      title: "Distribution of Net Benefit",
-      xScale: Scale.log({ tickFormat: "($.1s", min: 10M, max: 200M }),
-    }
-  )
-
-  {
-    title: "Cost-Benefit Analysis: Adding 10 Homes to Berkeley, CA",
-    costs: costsTable,
-    benefits: benefitTable,
-    netBenefit: netBenefitPlot,
-    probabilityOfPositiveNetBenefit: results.probPositiveNetBenefit,
-  }
-}
-```
-
-```squiggle
 x = 10
 result = if x == 1 then {
   {y: 2, z: 0}
@@ -386,36 +365,123 @@ f(t: [Date(2020), Date(2040)]) = {
 }
 ```
 
+
 ```squiggle
 import "hub:ozziegooen/sTest" as sTest
-@name("💰 Expected Cost ($)")
-@format("$.2s")
-flightCost = normal({ mean: 600, stdev: 100 })
 
-@name("🥇 Expected Benefit ($)")
-@format("$.2s")
-benefitEstimate = normal({ mean: 1500, stdev: 300 })
+@name("Blinds Impact Model")
+inputs = {
+  @name("Hours of sleep improvement per night (minutes)")
+  @doc(
+    "How many extra minutes of quality sleep we'd get from better darkness. High uncertainty - could be minimal for people with good existing curtains, or significant for light-sensitive individuals."
+  )
+  sleepImprovement = mx([5 to 20, normal({ p5: 0, p95: 60 })], [0.8, 0.2])
 
-@name("📊 Net Benefit ($)")
-@format("$.2s")
-netBenefit = benefitEstimate - flightCost
+  @name("% of nights where blinds help")
+  @doc(
+    "We won't get the benefit every night, and sometimes existing curtains would have been fine"
+  )
+  nightsHelped = 40% to 80%
 
-@name("🚦 Test Suite")
-@doc(
-  "Test suite to validate various aspects of the flight cost and benefits model using sTest."
-)
-tests = sTest.describe(
-  "Flight to London Test Suite",
+  @name("Productivity multiplier from better sleep")
+  @doc(
+    "How much more productive we are the next day when we get better sleep. Per hour of extra sleep."
+  )
+  productivityMultiplier = 1.01 to 1.05
+
+  @name("Hours of productive work per day")
+  @doc(
+    "This varies significantly by profession and work style. Knowledge workers may have 4-6 truly productive hours, while manual laborers may have 6-8."
+  )
+  productiveHours = 4 to 8
+
+  @name("Days worked per year")
+  @doc(
+    "Accounts for weekends, holidays, vacation, and sick days. May be lower for contractors or higher for workaholics."
+  )
+  workDays = 200 to 250
+
+  {
+    sleepImprovement,
+    nightsHelped,
+    productivityMultiplier,
+    productiveHours,
+    workDays,
+  }
+}
+
+@name("Annual Impact")
+impact = {
+  minutesPerNight = inputs.sleepImprovement
+  hoursPerNight = minutesPerNight / 60
+  nightsPerYear = 365 * inputs.nightsHelped
+
+  productivityIncrease = inputs.productivityMultiplier - 1
+  dailyHoursImproved = inputs.productiveHours * productivityIncrease *
+    hoursPerNight
+
+  annualProductiveHoursGained = truncate(
+    dailyHoursImproved * inputs.workDays,
+    0,
+    Number.maxValue
+  )
+  { annualProductiveHoursGained, }
+}
+
+blinds_tests = sTest.describe(
+  "Blinds Model Tests",
   [
-    // Test for reasonable flight costs
     sTest.test(
-      "Flight cost should be reasonable",
+      "annual impact is positive",
       {
         ||
-        meanValue = mean(flightCost)
-        sTest.expect(meanValue).toBeBetween(300, 10k)
+        sTest.expect(mean(impact.annualProductiveHoursGained)).toBeGreaterThan(
+          0
+        )
+      }
+    ),
+    sTest.test(
+      "annual impact is reasonable",
+      {
+        ||
+        sTest.expect(mean(impact.annualProductiveHoursGained)).toBeLessThan(50)
       }
     ),
   ]
 )
+
+@notebook
+@startOpen
+summary = [
+  "## Dark Blinds Impact Analysis",
+  "Installing dark blinds could lead to **" +
+    String(mean(impact.annualProductiveHoursGained), ",.0f") +
+    "** additional productive hours per year (Reference range: " +
+    String(quantile(impact.annualProductiveHoursGained, 0.05), ",.0f") +
+    " to " +
+    String(quantile(impact.annualProductiveHoursGained, 0.95), ",.0f") +
+    " hours, with " +
+    String(mean(impact.annualProductiveHoursGained), ",.0f") +
+    " hours expected).",
+  impact.annualProductiveHoursGained,
+  "## Key Assumptions & Uncertainties
+- Sleep improvement varies significantly by individual circumstances (light sensitivity, current sleep quality)
+- The effectiveness depends heavily on existing window coverings
+- Productivity gains from better sleep are speculative and highly personal
+- Work patterns (productive hours, days worked) vary considerably by profession
+
+## Model Components
+The model accounts for:
+- Daily sleep improvement potential
+- Percentage of nights where blinds would help
+- Individual productivity response to better sleep 
+- Available productive hours to be improved
+- Working days per year
+
+## Notable Considerations
+- This model assumes the person has a relatively normal sleep schedule and light exposure
+- Results may vary significantly for night shift workers or those in different latitudes
+- The small magnitude of improvement might compound significantly over years
+- The investment may be particularly valuable for knowledge workers where small cognitive improvements have outsized impacts",
+]
 ```
