@@ -18,17 +18,45 @@ export const generateNewSquiggleCodePrompt = (prompt: string): PromptPair => {
 8. If the prompt requests changes to existing code, try to keep somewhat close to that code.
 9. Use \`@name\` annotations for concise descriptions; use \`@doc\` when further details are necessary.
 
-**Dicts vs. Blocks**
 ## Dictionaries and Blocks
-In Squiggle, you can write dicts like:
+In Squiggle, you can create dictionaries using two different syntaxes, each with distinct capabilities:
+
+### Simple Dictionaries
+Use this syntax for basic key-value pairs without internal calculations:
 \`\`\`squiggle
 initialCosts = {
   rentDeposit: 5k to 15k,
   equipmentCost: 20k to 40k,
 }
 \`\`\`
-If you want to do calculations with these values and return a dict, then use a block that returns a dict.
 
+For single-value dictionary returns, add a trailing comma. However, this pattern should be done rarely. It's often better to just return the value directly.
+
+Example with trailing comma:
+\`\`\`squiggle
+initialCosts = {
+  rentDeposit = 5k to 15k
+  equipmentCost = 20k to 40k
+  total = rentDeposit + equipmentCost
+  {total,}
+}
+\`\`\`
+Prefer this instead:
+\`\`\`squiggle
+initialCostTotal = {
+  rentDeposit = 5k to 15k
+  equipmentCost = 20k to 40k
+  rentDeposit + equipmentCost 
+}
+\`\`\`
+
+### Blocks
+Use blocks when you need to:
+- Perform calculations with dictionary values
+- Add metadata tags
+- Reference values within the dictionary
+
+Basic block example:
 \`\`\`squiggle
 initialCosts = {
   rentDeposit = 5k to 15k
@@ -38,55 +66,50 @@ initialCosts = {
 }
 \`\`\`
 
-If you want to return a dict with only one variable, you must use a trailing comma:
-\`\`\`squiggle
-initialCosts = {
-  total = 25k to 55k
-  {total,}
-}
-\`\`\`
-
-The following will not work, because this is a block, and it must return a value at the end:
-\`\`\`squiggle
-initialCosts = {
-  rentDeposit = 5k to 15k
-  equipmentCost = 20k to 40k
-  total = rentDeposit + equipmentCost
-}
-\`\`\`
-
-The following will not work, because this is a dict, and dicts can't refer to internal values:
-\`\`\`squiggle
-initialCosts = {
-  rentDeposit: 5k to 15k
-  equipmentCost: 20k to 40k
-  total: rentDeposit + equipmentCost
-}
-\`\`\`
-
-If you want to tag any of these values, you must use the block format, like this:
+### Adding Tags
+The recommended way to add tags is using block syntax:
 \`\`\`squiggle
 initialCosts = {
   @name("rent deposit")
   @format("$,.0f")
   rentDeposit = 5k to 15k
 
-  @format("$,.0f")
   @name("equipment cost")
+  @format("$,.0f")
   equipmentCost = 20k to 40k
 
   @format("$,.0f")
   total = rentDeposit + equipmentCost
+
   {subcosts: {rentDeposit, equipmentCost}, total}
 }
 \`\`\`
-If you want to use tags in dicts, you can do so like this. However, this can get messy.
+
+Don't add tags to variables that are only used internally. The tags are only useful when variables are externally accessible.
+
+### Common Mistakes to Avoid
+
+1. Missing return value in blocks:
 \`\`\`squiggle
+// Won't work - blocks must return a value
 initialCosts = {
-  rentDeposit = 5k to 15k -> Tag.format("$,.0f")
-  ...
+  rentDeposit = 5k to 15k
+  equipmentCost = 20k to 40k
+  total = rentDeposit + equipmentCost
 }
 \`\`\`
+
+2. Internal references in simple dictionaries:
+\`\`\`squiggle
+// Won't work - simple dicts can't reference internal values
+initialCosts = {
+  rentDeposit: 5k to 15k,
+  equipmentCost: 20k to 40k,
+  total: rentDeposit + equipmentCost
+}
+\`\`\`
+
+While you can use arrow syntax for tags in dictionary blocks (\`->Tag.format("$,.0f")\`), it's generally clearer to use the \`@tag\` syntax shown above.
 
 Prompt:
 <prompt>
