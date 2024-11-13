@@ -22,6 +22,8 @@ type ModelKeys = UnionToTuple<LlmId>;
 
 const commonRequestFields = {
   model: z.enum(MODEL_CONFIGS.map((model) => model.id) as ModelKeys).optional(),
+  numericSteps: z.number(),
+  styleGuideSteps: z.number(),
 };
 
 export const aiRequestBodySchema = z.discriminatedUnion("kind", [
@@ -71,5 +73,7 @@ export function bodyToLineReader(stream: ReadableStream<string>) {
 export const stepNames: Record<string, string> = {
   GenerateCode: "Generate",
   FixCodeUntilItRuns: "Fix",
-  AdjustToFeedback: "Improve",
+  AdjustToFeedback: "Update Estimates",
+  MatchStyleGuide: "Document",
+  RunAndFormatCode: "Prepare",
 };

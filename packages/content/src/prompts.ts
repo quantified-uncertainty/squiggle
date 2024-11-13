@@ -132,7 +132,7 @@ function getBasicPrompt() {
   });
 }
 
-function getLLMStyleGuide() {
+export async function getLLMStyleGuide() {
   const doc = getDocByFilename("Ecosystem/LLMStyleGuide.mdx");
   return docToSimplfiiedMarkdown(doc, { removePrelude: true });
 }
@@ -141,7 +141,7 @@ export async function getDocumentationBundle() {
   console.log("Compiling documentation bundle page...");
 
   const basicPrompt = getBasicPrompt();
-  const styleGuide = getLLMStyleGuide();
+  const styleGuide = await getLLMStyleGuide();
   const guideContent = getGuideContent();
   const apiContent = allDocumentationItems();
 

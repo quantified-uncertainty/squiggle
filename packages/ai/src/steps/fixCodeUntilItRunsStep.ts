@@ -60,6 +60,7 @@ ${error}
 ${advice || "No specific advice provided."}
 </advice>
 
+**Response Format:**
 ${changeFormatPrompt}
 `;
 

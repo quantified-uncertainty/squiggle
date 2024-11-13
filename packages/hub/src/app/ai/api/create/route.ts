@@ -77,9 +77,11 @@ export async function POST(req: Request) {
     // Create a SquiggleWorkflow instance
     const llmConfig: LlmConfig = {
       llmId: request.model ?? "Claude-Sonnet",
-      priceLimit: 0.15,
+      priceLimit: 0.3,
       durationLimitMinutes: 2,
       messagesInHistoryToKeep: 4,
+      numericSteps: request.numericSteps,
+      styleGuideSteps: request.styleGuideSteps,
     };
 
     const openaiApiKey = process.env["OPENAI_API_KEY"];
