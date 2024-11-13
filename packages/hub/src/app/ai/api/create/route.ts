@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { getServerSession } from "next-auth";
 
 import { LlmConfig } from "@quri/squiggle-ai";
