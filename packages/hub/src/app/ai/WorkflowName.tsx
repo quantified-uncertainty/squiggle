@@ -5,8 +5,10 @@ import { ClientWorkflow } from "@quri/squiggle-ai";
 export const WorkflowName: FC<{ workflow: ClientWorkflow }> = ({
   workflow,
 }) => {
-  return "prompt" in workflow.inputs &&
-    workflow.inputs["prompt"].kind === "prompt"
-    ? workflow.inputs["prompt"].value
-    : workflow.id;
+  const { inputs } = workflow;
+
+  if (inputs["prompt"]?.kind === "prompt") return inputs["prompt"].value;
+  if (inputs["source"]?.kind === "source") return inputs["source"].value;
+
+  return workflow.id;
 };

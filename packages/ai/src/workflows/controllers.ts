@@ -1,117 +1,150 @@
-import { PromptArtifact } from "../Artifact.js";
+import { CodeArtifact, PromptArtifact } from "../Artifact.js";
+import { LLMStepInstance } from "../LLMStepInstance.js";
 import { IOShape } from "../LLMStepTemplate.js";
 import { adjustToFeedbackStep } from "../steps/adjustToFeedbackStep.js";
 import { fixCodeUntilItRunsStep } from "../steps/fixCodeUntilItRunsStep.js";
 import { generateCodeStep } from "../steps/generateCodeStep.js";
 import { matchStyleGuideStep } from "../steps/matchStyleGuideStep.js";
+import { runAndFormatCodeStep } from "../steps/runAndFormatCodeStep.js";
 import { Workflow } from "./Workflow.js";
+import {
+  NextStepAction,
+  WorkflowGuardHelpers,
+} from "./WorkflowGuardHelpers.js";
 
-const MAX_RETRIES = 5;
-const MAX_ADJUSTS = 3;
-const MAX_STYLE_GUIDES = 2;
-const MAX_FIXES = 3;
+const MAX_MINOR_ERRORS = 5;
+
+type config = {
+  maxNumericSteps: number;
+  maxStyleGuideSteps: number;
+};
+
+// Error Messages
+const ERROR_MESSAGES = {
+  FAILED_STEP: (stepName: string, errorType: string) =>
+    `Step ${stepName} failed with error type ${errorType}`,
+  NOT_DONE: (stepName: string, state: string) =>
+    `Impossible, step ${stepName} is not done: ${state}`,
+  NO_CODE: "Impossible state, generate didn't return code",
+  UNKNOWN_STEP: "Unknown step",
+};
+
+// Helper function to handle failed states
+function handleFailedState<Shape extends IOShape>(
+  step: LLMStepInstance<IOShape, Shape>,
+  h: WorkflowGuardHelpers<Shape>,
+  config: config
+): NextStepAction | undefined {
+  const state = step.getState();
+
+  if (state.kind === "FAILED") {
+    if (state.errorType === "MINOR") {
+      if (h.recentFailedRepeats(fixCodeUntilItRunsStep) > MAX_MINOR_ERRORS) {
+        return h.finish(); // Give up after max minor errors
+      }
+      return h.repeat();
+    }
+
+    return h.fatal(
+      ERROR_MESSAGES.FAILED_STEP(step.template.name, state.errorType)
+    );
+  }
+
+  if (state.kind !== "DONE") {
+    return h.fatal(ERROR_MESSAGES.NOT_DONE(step.template.name, state.kind));
+  }
+
+  return undefined;
+}
 
 export function fixAdjustRetryLoop<Shape extends IOShape>(
   workflow: Workflow<Shape>,
   prompt: PromptArtifact
 ) {
+  const config = {
+    maxNumericSteps: workflow.llmConfig.numericSteps,
+    maxStyleGuideSteps: workflow.llmConfig.styleGuideSteps,
+  };
   workflow.addLinearRule((step, h) => {
-    // process bad states
-    {
-      const state = step.getState();
-      if (state.kind === "FAILED") {
-        if (state.errorType === "MINOR") {
-          if (h.recentFailedRepeats(fixCodeUntilItRunsStep) > MAX_RETRIES) {
-            return h.finish(); // give up
-          }
-          return h.repeat();
-        }
-
-        return h.fatal(
-          `Step ${step.template.name} failed with error type ${state.errorType}`
-        );
-      }
-
-      if (state.kind !== "DONE") {
-        return h.fatal(
-          `Impossible, step ${step.template.name} is not done: ${state.kind}`
-        );
-      }
+    function getNextIntendedState<Shape extends IOShape>(
+      intendedStep: "AdjustToFeedback" | "MatchStyleGuide",
+      code: CodeArtifact
+    ): NextStepAction {
+      const nextSteps = [
+        // Only check AdjustToFeedback if it's intended and has runs remaining
+        intendedStep === "AdjustToFeedback" &&
+        h.totalRepeats(adjustToFeedbackStep) < config.maxNumericSteps
+          ? h.step(adjustToFeedbackStep, { prompt, code })
+          : null,
+        // Always check MatchStyleGuide
+        h.totalRepeats(matchStyleGuideStep) < config.maxStyleGuideSteps
+          ? h.step(matchStyleGuideStep, { prompt, code })
+          : null,
+      ].filter((r) => !!r);
+      return nextSteps.length ? nextSteps[0] : h.finish();
     }
 
-    // GENERATE
+    // process bad states
+    const failedState = handleFailedState(step, h, config);
+    if (failedState) return failedState;
+
+    function fixCodeOrAdjustToFeedback(
+      code: CodeArtifact | undefined
+    ): NextStepAction {
+      if (!code) {
+        return h.fatal(ERROR_MESSAGES.NO_CODE);
+      }
+      if (code.value.type !== "success") {
+        return h.step(fixCodeUntilItRunsStep, { code });
+      }
+      return getNextIntendedState("AdjustToFeedback", code);
+    }
+
+    // generateCodeStep
     if (step.instanceOf(generateCodeStep)) {
       const { code } = step.getOutputs();
-      if (!code) {
-        return h.fatal("Impossible state, generate didn't return code");
-      }
-      if (code.value.type !== "success") {
-        return h.step(fixCodeUntilItRunsStep, { code });
-      }
-      return h.step(adjustToFeedbackStep, { prompt, code });
+      return fixCodeOrAdjustToFeedback(code);
     }
 
-    // FIX
+    // runAndFormatCodeStep
+    if (step.instanceOf(runAndFormatCodeStep)) {
+      const { code } = step.getOutputs();
+      return fixCodeOrAdjustToFeedback(code);
+    }
+
+    // fixCodeUntilItRunsStep
     if (step.instanceOf(fixCodeUntilItRunsStep)) {
       const { code } = step.getOutputs();
-      if (!code) {
-        return h.fatal("Impossible state, generate didn't return code");
-      }
-      if (code.value.type !== "success") {
-        return h.step(fixCodeUntilItRunsStep, { code });
-      }
-
-      return h.step(adjustToFeedbackStep, { prompt, code });
+      return fixCodeOrAdjustToFeedback(code);
     }
 
-    // ADJUST
+    // adjustToFeedbackStep
     if (step.instanceOf(adjustToFeedbackStep)) {
       const { code } = step.getOutputs();
 
       // no code means no need for adjustment, apply style guide
       if (!code) {
-        return h.step(matchStyleGuideStep, { prompt, code: step.inputs.code });
+        return getNextIntendedState("MatchStyleGuide", step.inputs.code);
       }
 
-      // is the code valid?
       if (code.value.type === "success") {
-        if (h.totalRepeats(step.template) < MAX_ADJUSTS) {
-          // keep adjusting...
-          return h.step(adjustToFeedbackStep, { prompt, code });
-        } else {
-          // we've adjusted enough, apply style guide
-          return h.step(matchStyleGuideStep, { prompt, code });
-        }
+        return getNextIntendedState("AdjustToFeedback", code);
+      } else {
+        return h.step(fixCodeUntilItRunsStep, { code });
       }
-
-      // failed code means we need to fix the code before we can adjust again
-      return h.step(fixCodeUntilItRunsStep, { code });
     }
 
-    // MATCH STYLE GUIDE
+    // matchStyleGuideStep
     if (step.instanceOf(matchStyleGuideStep)) {
       const { code } = step.getOutputs();
       if (!code) {
-        // style guide has decided that no changes are needed, we are done
         return h.finish();
       }
 
-      // repeat style guide while it continues to iterate and we haven't exhausted the style guide budget
       if (code.value.type === "success") {
-        if (h.totalRepeats(step.template) < MAX_STYLE_GUIDES) {
-          return h.step(matchStyleGuideStep, { prompt, code });
-        } else {
-          // we've applied the style guide enough and the code is valid, we are done
-          return h.finish();
-        }
-      }
-
-      // failed code means we need to go back to fixing
-      if (h.totalRepeats(fixCodeUntilItRunsStep) < MAX_FIXES) {
-        return h.step(fixCodeUntilItRunsStep, { code });
+        return getNextIntendedState("MatchStyleGuide", code);
       } else {
-        // there must be some valid code in the history, let's hope it's good enough, we are done
-        return h.finish();
+        return h.step(fixCodeUntilItRunsStep, { code });
       }
     }
 

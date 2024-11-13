@@ -1,6 +1,5 @@
 import { ReadableStream } from "stream/web";
 
-import { CodeArtifact } from "../Artifact.js";
 import { generateSummary } from "../generateSummary.js";
 import {
   calculatePriceMultipleCalls,
@@ -36,6 +35,8 @@ export type LlmConfig = {
   priceLimit: number;
   durationLimitMinutes: number;
   messagesInHistoryToKeep: number;
+  numericSteps: number;
+  styleGuideSteps: number;
 };
 
 export const llmConfigDefault: LlmConfig = {
@@ -43,6 +44,8 @@ export const llmConfigDefault: LlmConfig = {
   priceLimit: 0.3,
   durationLimitMinutes: 1,
   messagesInHistoryToKeep: 4,
+  numericSteps: 3,
+  styleGuideSteps: 2,
 };
 
 export type WorkflowEventShape<WorkflowShape extends IOShape> =
@@ -292,30 +295,43 @@ export class Workflow<Shape extends IOShape = IOShape> {
     return this.getCurrentStep()?.getState().kind !== "PENDING";
   }
 
-  getRecentValidCode(): CodeArtifact | undefined {
-    let code: CodeArtifact | undefined;
+  // Returns the most recent step with successful code, or just the most recent step with any code if no successful code is found
+  getRecentStepWithCode():
+    | { step: LLMStepInstance<IOShape, Shape>; code: string }
+    | undefined {
+    let stepWithAnyCode:
+      | { step: LLMStepInstance<IOShape, Shape>; code: string }
+      | undefined;
 
-    // look for first code output in the last step that generated any code
+    // Single pass through steps from most recent to oldest
     for (let i = this.steps.length - 1; i >= 0; i--) {
       const step = this.steps[i];
       const outputs = step.getOutputs();
+
       for (const output of Object.values(outputs)) {
         if (output?.kind === "code") {
-          code = output;
+          // If we find successful code, return immediately
+          if (output.value.type === "success") {
+            return { step, code: output.value.source };
+          }
+          // Otherwise store the first step with any code
+          if (!stepWithAnyCode) {
+            stepWithAnyCode = { step, code: output.value.source };
+          }
         }
       }
-      if (code) break;
     }
-    return code;
+
+    return stepWithAnyCode;
   }
 
   getFinalResult(): ClientWorkflowResult {
-    const finalStep = this.getCurrentStep();
+    const finalStep = this.getRecentStepWithCode();
     if (!finalStep) {
       throw new Error("No steps found");
     }
 
-    const isValid = finalStep.getState().kind === "DONE";
+    const isValid = finalStep.step.getState().kind === "DONE";
 
     const endTime = Date.now();
     const runTimeMs = endTime - this.startTime;
@@ -324,7 +340,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
     const logSummary = generateSummary(this);
 
     return {
-      code: this.getRecentValidCode()?.value.source || "",
+      code: finalStep.code,
       isValid,
       totalPrice,
       runTimeMs,

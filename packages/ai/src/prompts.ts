@@ -45,6 +45,7 @@ Your response **must** include:
   - The SEARCH section must match existing code exactly, including whitespace and comments
   - SEARCH/REPLACE blocks replace ALL matching occurrences, so make them unique!
   - When code contains newlines, include those exact newlines in both SEARCH and REPLACE sections
+  - **Important for Context:** When modifying code at the beginning or end of a file, include enough surrounding context in the SEARCH block to ensure the change happens in the correct location. This is especially important when adding new code to the end of a document.
 
 - Do **not** include explanations or comments outside the specified blocks.
 
