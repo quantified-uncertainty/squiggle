@@ -11,7 +11,7 @@ import { MarkdownViewer } from "../lib/MarkdownViewer.js";
  */
 const meta = {
   component: MarkdownViewer,
-} satisfies Meta<typeof MarkdownViewer>;
+} as const satisfies Meta<typeof MarkdownViewer>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
