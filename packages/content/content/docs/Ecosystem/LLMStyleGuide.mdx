@@ -13,10 +13,20 @@ This is a style guide for how to write good Squiggle code. It's mostly designed 
 - When using the `to` format, like `3 to 10`, remember that this represents the 5th and 95th percentile. This is a very large range. Be paranoid about being overconfident and too narrow in your estimates.
 - One good technique, when you think there's a chance that you might be very wrong about a variable, is to use a mixture that contains a very wide distribution. For example, `mx([300 to 400, 50 to 5000], [0.9, 0.1])`, or `mx([50k to 60k, 1k to 1M], [0.95, 0.05])`. This way if you are caught by surprise, the wide distribution will still give you a reasonable outcome.
 - Be wary of using the uniform or the triangular distributions. These are mainly good for physical simulations, not to represent uncertainty over many real life variables.
-- If the outcome of a model is an extreme probability (less than 0.01 or more than 0.99), be suspicious of the result. It should be very rare for an intervention to have an extreme effect or have an extreme impact on the probability of an event.
-- Be paranoid about the uncertainty ranges of your variables. If you are dealing with a highly speculative variable, the answer might have 2-8 orders of magnitude of uncertainty, like `100 to 100K`. If you are dealing with a variable that's fairly certain, the answer might have 2-4 sig figs of uncertainty. Be focused on being accurate and not overconfident, not on impressing people.
+- If the outcome of a model is an extreme probability (less than 0.05 or more than 0.95), be suspicious of the result. It should be very rare for an intervention to have an extreme effect or have an extreme impact on the probability of an event.
+- Be paranoid about the uncertainty ranges of your variables. If you are dealing with a highly speculative variable, the answer might have 2-8 orders of magnitude of uncertainty, like `100 to 100K`. If you are dealing with a variable that's fairly certain, the answer might have 2-4 sig figs of uncertainty. Be focused on being accurate and not overconfident.
+- Break down key variables that are uncertain, significant, and divisible into components. For instance, when analyzing a business's costs and benefits, if labor expenses represent a major portion of total costs, decompose them into specific elements like wages, benefits, recruitment costs, and staffing levels.
 - Be careful with sigmoid functions. Sigmoid curves with distributions can have very little uncertainty in the middle, and very high uncertainty at the tails. If you are unsure about these values, consider using a mixture distribution. For example, this curve has very high certainty in the middle, and very high uncertainty at the tails: `adoption_rate(t) = 1 / (1 + exp(-normal(0.1, 0.08) * (t - 30)))`
-- Make sure to flag any variables that are highly speculative. Use `@doc()` to explain that the variable is speculative and to give a sense of the uncertainty. Explain your reasoning, but also warn the reader that the variable is speculative.
+- Make sure to flag any variables that are speculative. Use `@doc()` to explain that the variable is speculative and to give a sense of the uncertainty. Explain your reasoning, but also warn the reader that the variable is speculative. For example:
+
+```squiggle
+@doc("This variable is particularly uncertain. I'm presuming that the true value is around 50%, but it could easily be 10% or 90%. This depends a lot on the value of productivity, which is highly uncertain.")
+```
+
+Or,
+```squiggle
+@doc("This assumes that the model is for an average American. If the person is older, has a lower hourly wage, this number could be much lower.")
+```
 
 ### Percentages / Probabilities
 
@@ -289,52 +299,39 @@ This format will use the variable tags to display the variables, and it's simple
 
 - String concatenation (+) is allowed, but be hesitant to do this with non-string variables. Most non-string variables don't display well in the default string representation. If you want to display a variable, consider using a custom function or formatter to convert it to a string first. Note that tags are shown in the default string representation, so you should remove them (`Tag.clear(variable)`) before displaying.
 - Separate items in the list will be displayed with blank lines between them. This will break many kinds of formatting, like lists. Only do this in order to display full variables that you want to show.
+
+Don't do:
+
+```squiggle
+summary = [
+  "- Point 1",
+  "- Point 2",
+  "- Point 3",
+]
+```
+
+Instead, do:
+
+```squiggle
+summary = [
+  "- Point 1
+- Point 2
+- Point 3",
+]
+```
+
 - Use markdown formatting for headers, lists, and other structural elements.
 - Use bold text to highlight key outputs. Like, "The optimal number of coffee cups per day is **" + Tag.clear(optimal_cups) + "**".
 
-Example: (For a model with 300 lines)
-
-```squiggle
-@notebook
-@startOpen
-summary = [
-  "## Summary
-  This model evaluates the cost-effectiveness of coffee consumption for a 34-year-old male, considering productivity benefits, health effects, and financial costs.",
-  {inputs, final_answer},
-  "## Major Assumptions & Uncertainties
-  - The model places a very high value on productivity. If you think that productivity is undervalued, coffee consumption may be underrated.
-  - The model only includes 3 main factors: productivity, cost, and health. It does not take into account other factors, like addiction, which is a major factor in coffee consumption.
-  - The model does not take into account the quality of sleep, which is critical.
-  "
-  "## Outputs
-  The optimal number of coffee cups per day: **" + Tag.clear(optimal_cups) + "**
-  The net benefit at optimal consumption: **" + result.net_benefit + "**",
-  "## Key Findings
-  - Moderate amounts of coffee consumption seem surprisingly beneficial.
-  - Productivity boost from coffee shows steeply diminishing returns as consumption increases, as would be expected.
-  - The financial cost of coffee is the critical factor in determining optimal consumption.
-  ## Detailed Analysis
-  The model incorporates several key factors:
-  1. Productivity boost: Modeled with diminishing returns as coffee consumption increases.
-  2. Health impact: Considers both potential benefits and risks of coffee consumption.
-  3. Financial cost: Accounts for the direct cost of purchasing coffee.
-  4. Monetary values: Includes estimates for the value of time (hourly wage) and health (QALY value).
-
-  The optimal consumption level is determined by maximizing the net benefit, which is the sum of monetized productivity and health benefits minus the financial cost.
-
-  It's important to note that this model is based on general estimates and may not apply to all individuals. Factors such as personal health conditions, caffeine sensitivity, and lifestyle choices could significantly alter the optimal consumption for a specific person.
-  "
-]
-```
 
 ## Plots
 
 - Plots are a good way of displaying the output of a model.
 - Use `Scale.symlog()` and `Scale.log()` whenever you think the data is highly skewed. This is very common with distributions.
-- Use `Scale.symlog()` instead of `Scale.log()` when you are unsure if the data is above or below 0. `Scale.log()` fails on negative values.
+- Use `Scale.symlog()` instead of `Scale.log()` when you are unsure if the data is above or below 0. `Scale.log()` is preferred when you know the data is always positive, but `Scale.symlog()` is if some data is or might be negative.
 - Function plots use plots equally spaced on the x-axis. This means they can fail if only integers are accepted. In these cases, it can be safer just not to use the plot, or to use a scatter plot.
 - When plotting 2-8 distributions over the same x-axis, it's a good idea to use `Plot.dists()`. For example, if you want to compare 5 different costs of a treatment, or 3 different adoption rates of a technology, this can be a good way to display the data.
-- When plotting distributions in tables or if you want to display multiple distributions under each other, and you don't want to use `Plot.dists`, it's a good idea to have them all use the same x-axis scale, with custom min and max values. This is a good way to make sure that the x-axis scale is consistent across all distributions.
+- When plotting distributions in tables or if you want to display multiple distributions under each other, and you don't want to use `Plot.dists`, it's a good idea to have them all use the same x-axis scale, with custom min and max values. This is a good way to make sure that the x-axis scale is consistent across all distributions. But again, it only makes sense if you have a small number of distributions and they use the same rough scale and x-axis.
 
 Here's an example of how to display multiple distributions over the same x-axis, with a custom x-axis range:
 
@@ -410,6 +407,7 @@ tests = describe(
   6. Important notes or caveats (if over 100 lines long)
 - The summary notebook should be the last thing in the file. It should be a variable called `summary`.
 - Draw attention to anything that surprised you, or that you think is important. Also, flag major assumptions and uncertainties.
+- There should be a mix of paragraphs and bullet points.
 
 Example: (For a model with 300 lines)
 
@@ -418,8 +416,32 @@ Example: (For a model with 300 lines)
 @startOpen
 summary = [
   "## Summary
-  This model evaluates the cost-effectiveness of coffee consumption for a 34-year-old male, considering productivity benefits, health effects, and financial costs.",
-  {inputs, finalAnswer},
-  ...
-  ]
+  This model evaluates the cost-effectiveness of coffee consumption for a 34-year-old male, considering productivity benefits, health effects, and financial costs. It finds that moderate coffee consumption is surprisingly beneficial, with diminishing returns as consumption increases. The financial cost of coffee is the critical factor in determining optimal consumption.
+
+Note that this model rests on several speculative assumptions. Of particular importance is the value of productivity. If you think that productivity is undervalued, coffee consumption may be underrated.
+  {inputs, final_answer},
+  "## Major Assumptions & Uncertainties
+  - The model places a very high value on productivity. If you think that productivity is undervalued, coffee consumption may be underrated.
+  - The model only includes 3 main factors: productivity, cost, and health. It does not take into account other factors, like addiction, which is a major factor in coffee consumption.
+  - The model does not take into account the quality of sleep, which is critical.
+  "
+  "## Outputs
+  The optimal number of coffee cups per day: **" + Tag.clear(optimal_cups) + "**
+  The net benefit at optimal consumption: **" + result.net_benefit + "**",
+  "## Key Findings
+  - Moderate amounts of coffee consumption seem surprisingly beneficial.
+  - Productivity boost from coffee shows steeply diminishing returns as consumption increases, as would be expected.
+  - The financial cost of coffee is the critical factor in determining optimal consumption.
+  ## Detailed Analysis
+  The model incorporates several key factors:
+  1. Productivity boost: Modeled with diminishing returns as coffee consumption increases.
+  2. Health impact: Considers both potential benefits and risks of coffee consumption.
+  3. Financial cost: Accounts for the direct cost of purchasing coffee.
+  4. Monetary values: Includes estimates for the value of time (hourly wage) and health (QALY value).
+
+  The optimal consumption level is determined by maximizing the net benefit, which is the sum of monetized productivity and health benefits minus the financial cost.
+
+  It's important to note that this model is based on general estimates and may not apply to all individuals. Factors such as personal health conditions, caffeine sensitivity, and lifestyle choices could significantly alter the optimal consumption for a specific person.
+  "
+]
 ```

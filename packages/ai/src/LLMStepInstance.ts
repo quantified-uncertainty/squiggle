@@ -30,7 +30,6 @@ export type StepParams<Shape extends IOShape> = {
   state: StepState;
   inputs: Inputs<Shape>;
   outputs: Partial<Outputs<Shape>>;
-  retryingStep?: LLMStepInstance<Shape>;
   startTime: number;
   conversationMessages: Message[];
   llmMetricsList: LlmMetrics[];
@@ -45,10 +44,11 @@ export class LLMStepInstance<
   public readonly template: StepParams<Shape>["template"];
 
   private state: StepParams<Shape>["state"];
-  private outputs: StepParams<Shape>["outputs"];
-  public readonly inputs: StepParams<Shape>["inputs"];
 
-  public retryingStep?: StepParams<Shape>["retryingStep"];
+  // must be public for `instanceOf` type guard to work
+  public readonly _outputs: StepParams<Shape>["outputs"];
+
+  public readonly inputs: StepParams<Shape>["inputs"];
 
   private startTime: StepParams<Shape>["startTime"];
   private conversationMessages: StepParams<Shape>["conversationMessages"];
@@ -71,11 +71,10 @@ export class LLMStepInstance<
 
     this.startTime = params.startTime;
     this.state = params.state;
-    this.outputs = params.outputs;
+    this._outputs = params.outputs;
 
     this.template = params.template;
     this.inputs = params.inputs;
-    this.retryingStep = params.retryingStep;
 
     this.workflow = params.workflow;
     this.logger = new Logger();
@@ -85,7 +84,6 @@ export class LLMStepInstance<
   static create<Shape extends IOShape, WorkflowShape extends IOShape>(params: {
     template: LLMStepInstance<Shape>["template"];
     inputs: LLMStepInstance<Shape>["inputs"];
-    retryingStep: LLMStepInstance<Shape>["retryingStep"];
     workflow: Workflow<WorkflowShape>;
   }): LLMStepInstance<Shape, WorkflowShape> {
     return new LLMStepInstance<Shape, WorkflowShape>({
@@ -100,12 +98,14 @@ export class LLMStepInstance<
     });
   }
 
-  getLogs(): TimestampedLogEntry[] {
-    return this.logger.logs;
+  instanceOf<TemplateShape extends IOShape>(
+    template: LLMStepTemplate<TemplateShape>
+  ): this is LLMStepInstance<TemplateShape, WorkflowShape> {
+    return this.template.name === template.name;
   }
 
-  isRetrying(): boolean {
-    return !!this.retryingStep;
+  getLogs(): TimestampedLogEntry[] {
+    return this.logger.logs;
   }
 
   getConversationMessages(): Message[] {
@@ -173,8 +173,8 @@ export class LLMStepInstance<
     return this.state.kind === "PENDING" ? 0 : this.state.durationMs;
   }
 
-  getOutputs() {
-    return this.outputs;
+  getOutputs(): this["_outputs"] {
+    return this._outputs;
   }
 
   getInputs() {
@@ -217,7 +217,7 @@ export class LLMStepInstance<
     key: K,
     value: Outputs<Shape>[K] | Outputs<Shape>[K]["value"]
   ): void {
-    if (key in this.outputs) {
+    if (key in this._outputs) {
       this.fail(
         "CRITICAL",
         `Output ${key} is already set. This is a bug with the workflow code.`
@@ -227,12 +227,12 @@ export class LLMStepInstance<
 
     if (value instanceof BaseArtifact) {
       // already existing artifact - probably passed through from another step
-      this.outputs[key] = value;
+      this._outputs[key] = value;
     } else {
       const kind = this.template.shape.outputs[
         key
       ] as Outputs<Shape>[K]["kind"];
-      this.outputs[key] = makeArtifact(kind, value as any, this) as any;
+      this._outputs[key] = makeArtifact(kind, value as any, this) as any;
     }
   }
 
@@ -327,8 +327,7 @@ export class LLMStepInstance<
       template: this.template,
       state: this.state,
       inputs: this.inputs,
-      outputs: this.outputs,
-      retryingStep: this.retryingStep,
+      outputs: this._outputs,
       startTime: this.startTime,
       conversationMessages: this.conversationMessages,
       llmMetricsList: this.llmMetricsList,
@@ -399,8 +398,7 @@ export function serializeStepParams(
 
 export type SerializedStep = Omit<
   StepParams<IOShape>,
-  // TODO - serialize retryingStep reference
-  "inputs" | "outputs" | "template" | "retryingStep"
+  "inputs" | "outputs" | "template"
 > & {
   templateName: string;
   inputIds: Record<string, number>;

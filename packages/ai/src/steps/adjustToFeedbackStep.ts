@@ -26,11 +26,13 @@ Please validate the model results with these considerations:
 1. **Mathematical Soundness**: Are the calculations logically consistent with the model's assumptions and principles?
 2. **Range Check**: Are outputs within reasonable bounds? Does the model produce surprising results or results that seem implausible or overconfident?
 3. **Test Cases**: Do all of the test cases pass? If not, suggest fixes in the code or the test cases. If the test case is complex, failing, and will be difficult to fix, delete it.
+4. **Importance**: Are the the most important variables and factors getting adequate attention? Consider decomposing these into subcalculations and adding more detail to the summary.
 
 Remember:
 - Suggest fixes for mathematical errors, test cases, and results that seem implausible or overconfident. Do not suggest fixes for style changes or documentation.
 - If outputs are surprising but mathematically reasonable upon consideration, do not adjust the model
 - Default to trusting the model unless you find specific flaws
+- If the model produces a surprisingly confident result, consider whether it is overconfident and whether it is reasonable. For example, if you're doing a cost-benefit analysis, and the chances of an action being positive are less than 2% or greater than 98%, consider whether it is reasonable. Many speculative results are overconfident.
 
 If the model is mathematically sound (most cases), respond with:
 <response>

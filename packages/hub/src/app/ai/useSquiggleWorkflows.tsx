@@ -43,7 +43,7 @@ export function useSquiggleWorkflows(preloadedWorkflows: ClientWorkflow[]) {
         prompt: {
           id: "prompt",
           kind: "prompt",
-          value: request.kind === "create" ? request.prompt : "[FIX]",
+          value: request.kind === "create" ? request.prompt : "Improving...",
         },
       },
       steps: [],
