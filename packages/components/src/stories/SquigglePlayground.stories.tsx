@@ -251,6 +251,9 @@ Here is more text.",
   " ### This is an opening section
 Here is more text.
 ",
+  "- bullet 1",
+  "- bullet 2",
+  "- bullet 3",
 ]
 
 notebook = notNotebook -> Tag.notebook
