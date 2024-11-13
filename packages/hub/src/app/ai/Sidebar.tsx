@@ -1,5 +1,6 @@
 "use client";
 
+import _ from "lodash";
 import {
   forwardRef,
   useEffect,
@@ -96,21 +97,23 @@ Outputs:
 
   const handleSubmit = form.handleSubmit(
     async ({ prompt, squiggleCode, model, numericSteps, styleGuideSteps }) => {
+      const numericStepsNumber = _.toNumber(numericSteps) || 0;
+      const styleGuideStepsNumber = _.toNumber(styleGuideSteps) || 0;
       const requestBody: AiRequestBody =
         mode === "create"
           ? {
               kind: "create",
               prompt,
               model: model as LlmId,
-              numericSteps,
-              styleGuideSteps,
+              numericSteps: numericStepsNumber,
+              styleGuideSteps: styleGuideStepsNumber,
             }
           : {
               kind: "edit",
               squiggleCode,
               model: model as LlmId,
-              numericSteps,
-              styleGuideSteps,
+              numericSteps: numericStepsNumber,
+              styleGuideSteps: styleGuideStepsNumber,
             };
 
       submitWorkflow(requestBody);
@@ -163,8 +166,9 @@ Outputs:
                   name="squiggleCode"
                   label="Squiggle Code"
                   placeholder="Enter your Squiggle code here"
-                  rows={12}
-                  minRows={12}
+                  rows={8}
+                  minRows={6}
+                  maxRows={20}
                 />
               </StyledTab.Panel>
             </StyledTab.Panels>
