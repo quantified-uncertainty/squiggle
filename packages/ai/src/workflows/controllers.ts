@@ -29,27 +29,6 @@ const ERROR_MESSAGES = {
   UNKNOWN_STEP: "Unknown step",
 };
 
-function getNextIntendedState<Shape extends IOShape>(
-  h: WorkflowGuardHelpers<Shape>,
-  intendedStep: "AdjustToFeedback" | "MatchStyleGuide",
-  prompt: PromptArtifact,
-  code: CodeArtifact,
-  config: config
-): NextStepAction {
-  const nextSteps = [
-    // Only check AdjustToFeedback if it's intended and has runs remaining
-    intendedStep === "AdjustToFeedback" &&
-    h.totalRepeats(adjustToFeedbackStep) < config.maxNumericSteps
-      ? h.step(adjustToFeedbackStep, { prompt, code })
-      : null,
-    // Always check MatchStyleGuide
-    h.totalRepeats(matchStyleGuideStep) < config.maxStyleGuideSteps
-      ? h.step(matchStyleGuideStep, { prompt, code })
-      : null,
-  ].filter((r) => !!r);
-  return nextSteps.length ? nextSteps[0] : h.finish();
-}
-
 // Helper function to handle failed states
 function handleFailedState<Shape extends IOShape>(
   step: LLMStepInstance<IOShape, Shape>,
@@ -87,6 +66,24 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
     maxStyleGuideSteps: workflow.llmConfig.styleGuideSteps,
   };
   workflow.addLinearRule((step, h) => {
+    function getNextIntendedState<Shape extends IOShape>(
+      intendedStep: "AdjustToFeedback" | "MatchStyleGuide",
+      code: CodeArtifact
+    ): NextStepAction {
+      const nextSteps = [
+        // Only check AdjustToFeedback if it's intended and has runs remaining
+        intendedStep === "AdjustToFeedback" &&
+        h.totalRepeats(adjustToFeedbackStep) < config.maxNumericSteps
+          ? h.step(adjustToFeedbackStep, { prompt, code })
+          : null,
+        // Always check MatchStyleGuide
+        h.totalRepeats(matchStyleGuideStep) < config.maxStyleGuideSteps
+          ? h.step(matchStyleGuideStep, { prompt, code })
+          : null,
+      ].filter((r) => !!r);
+      return nextSteps.length ? nextSteps[0] : h.finish();
+    }
+
     // process bad states
     const failedState = handleFailedState(step, h, config);
     if (failedState) return failedState;
@@ -100,7 +97,7 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
       if (code.value.type !== "success") {
         return h.step(fixCodeUntilItRunsStep, { code });
       }
-      return getNextIntendedState(h, "AdjustToFeedback", prompt, code, config);
+      return getNextIntendedState("AdjustToFeedback", code);
     }
 
     // generateCodeStep
@@ -127,23 +124,11 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
 
       // no code means no need for adjustment, apply style guide
       if (!code) {
-        return getNextIntendedState(
-          h,
-          "MatchStyleGuide",
-          prompt,
-          step.inputs.code,
-          config
-        );
+        return getNextIntendedState("MatchStyleGuide", step.inputs.code);
       }
 
       if (code.value.type === "success") {
-        return getNextIntendedState(
-          h,
-          "AdjustToFeedback",
-          prompt,
-          code,
-          config
-        );
+        return getNextIntendedState("AdjustToFeedback", code);
       } else {
         return h.step(fixCodeUntilItRunsStep, { code });
       }
@@ -157,7 +142,7 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
       }
 
       if (code.value.type === "success") {
-        return getNextIntendedState(h, "MatchStyleGuide", prompt, code, config);
+        return getNextIntendedState("MatchStyleGuide", code);
       } else {
         return h.step(fixCodeUntilItRunsStep, { code });
       }
