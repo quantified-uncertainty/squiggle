@@ -35,10 +35,7 @@ function* getModernWorkflows(
     if (row.format !== "V2_0") {
       continue;
     }
-    if (JSON.stringify(row.workflow).match(/MatchStyleGuide/)) {
-      // not supported yet
-      continue;
-    }
+
     const { bundle, entrypoint } = v2WorkflowDataSchema.parse(row.workflow);
     const codec = getAiCodec();
     const deserializer = codec.makeDeserializer(bundle);
@@ -54,7 +51,12 @@ export async function getTypeStats() {
 
   const typeStats: Record<string, Record<string, number>> = {};
 
-  const stepNames = ["GenerateCode", "AdjustToFeedback", "FixCodeUntilItRuns"];
+  const stepNames = [
+    "GenerateCode",
+    "AdjustToFeedback",
+    "FixCodeUntilItRuns",
+    "MatchStyleGuide",
+  ];
 
   for (const stepName of stepNames) {
     typeStats[stepName] = {};
