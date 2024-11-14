@@ -9,7 +9,7 @@ overrides:
 
 patchedDependencies:
   react-select:
-    hash: vyab3ly3abwpwnnlilsrsbv2pq
+    hash: pok3nxq32ihaf3qpdecuz4j5ea
     path: patches/react-select.patch
 
 importers:
@@ -519,7 +519,7 @@ importers:
         version: 16.2.0(react@18.3.1)
       react-select:
         specifier: ^5.8.0
-        version: 5.8.0(patch_hash=vyab3ly3abwpwnnlilsrsbv2pq)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 5.8.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       relay-runtime:
         specifier: ^16.2.0
         version: 16.2.0
@@ -886,7 +886,7 @@ importers:
         version: 7.50.0(react@18.3.1)
       react-select:
         specifier: ^5.8.0
-        version: 5.8.0(patch_hash=vyab3ly3abwpwnnlilsrsbv2pq)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 5.8.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-textarea-autosize:
         specifier: 8.5.4
         version: 8.5.4(@types/react@18.3.3)(react@18.3.1)
@@ -17360,7 +17360,7 @@ snapshots:
       react-colorful: 5.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
       react-hook-form: 7.50.0(react@18.3.1)
-      react-select: 5.8.0(patch_hash=vyab3ly3abwpwnnlilsrsbv2pq)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-select: 5.8.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-textarea-autosize: 8.5.2(@types/react@18.3.3)(react@18.3.1)
       react-use: 17.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     transitivePeerDependencies:
@@ -17376,7 +17376,7 @@ snapshots:
       react-colorful: 5.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
       react-hook-form: 7.50.0(react@18.3.1)
-      react-select: 5.8.0(patch_hash=vyab3ly3abwpwnnlilsrsbv2pq)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-select: 5.8.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-textarea-autosize: 8.5.3(@types/react@18.3.3)(react@18.3.1)
       react-use: 17.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     transitivePeerDependencies:
@@ -17392,7 +17392,7 @@ snapshots:
       react-colorful: 5.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
       react-hook-form: 7.50.0(react@18.3.1)
-      react-select: 5.8.0(patch_hash=vyab3ly3abwpwnnlilsrsbv2pq)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-select: 5.8.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-textarea-autosize: 8.5.3(@types/react@18.3.3)(react@18.3.1)
       react-use: 17.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     transitivePeerDependencies:
@@ -17408,7 +17408,7 @@ snapshots:
       react-colorful: 5.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
       react-hook-form: 7.50.0(react@18.3.1)
-      react-select: 5.8.0(patch_hash=vyab3ly3abwpwnnlilsrsbv2pq)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-select: 5.8.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-textarea-autosize: 8.5.3(@types/react@18.3.3)(react@18.3.1)
       react-use: 17.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     transitivePeerDependencies:
@@ -17424,7 +17424,7 @@ snapshots:
       react-colorful: 5.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
       react-hook-form: 7.50.0(react@18.3.1)
-      react-select: 5.8.0(patch_hash=vyab3ly3abwpwnnlilsrsbv2pq)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-select: 5.8.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-textarea-autosize: 8.5.3(@types/react@18.3.3)(react@18.3.1)
       react-use: 17.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     transitivePeerDependencies:
@@ -26623,7 +26623,7 @@ snapshots:
     transitivePeerDependencies:
       - react-dom
 
-  react-select@5.8.0(patch_hash=vyab3ly3abwpwnnlilsrsbv2pq)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-select@5.8.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.23.9
       '@emotion/cache': 11.11.0
