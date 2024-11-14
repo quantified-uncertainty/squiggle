@@ -18,6 +18,9 @@
   "pnpm": {
     "overrides": {
       "@headlessui/react": "^2.2.0"
+    },
+    "patchedDependencies": {
+      "react-select": "patches/react-select.patch"
     }
   },
   "version": "0.0.1-0",
