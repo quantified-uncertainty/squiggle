@@ -1,6 +1,4 @@
 export default function NotFound() {
-  // Note: Next.js (13.4.9) in dev mode doesn't reload this page correctly.
-  // Restart `next dev` process if you edit this component.
   return (
     <div className="grid flex-1 place-items-center">
       <div className="flex h-10 items-center gap-4">

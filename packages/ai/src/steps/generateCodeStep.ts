@@ -17,7 +17,99 @@ export const generateNewSquiggleCodePrompt = (prompt: string): PromptPair => {
 7. Add at least one test per complex function, using sTest, to test functionality, if the prompt requests more than 10 lines of code (explicitly or implicitly). Assign sTest.describe() blocks to variables, like this: \`function1_tests = sTest.describe(...)\`. Note that you cannot use multiple sTest.expect() calls in a single test() block.
 8. If the prompt requests changes to existing code, try to keep somewhat close to that code.
 9. Use \`@name\` annotations for concise descriptions; use \`@doc\` when further details are necessary.
-10. Write a comment at the top of the code that summarizes the code and its purpose.
+
+## Dictionaries and Blocks
+In Squiggle, you can create dictionaries using two different syntaxes, each with distinct capabilities:
+
+### Simple Dictionaries
+Use this syntax for basic key-value pairs without internal calculations:
+\`\`\`squiggle
+initialCosts = {
+  rentDeposit: 5k to 15k,
+  equipmentCost: 20k to 40k,
+}
+\`\`\`
+
+For single-value dictionary returns, add a trailing comma. However, this pattern should be done rarely. It's often better to just return the value directly.
+
+Example with trailing comma:
+\`\`\`squiggle
+initialCosts = {
+  rentDeposit = 5k to 15k
+  equipmentCost = 20k to 40k
+  total = rentDeposit + equipmentCost
+  {total,}
+}
+\`\`\`
+Prefer this instead:
+\`\`\`squiggle
+initialCostTotal = {
+  rentDeposit = 5k to 15k
+  equipmentCost = 20k to 40k
+  rentDeposit + equipmentCost 
+}
+\`\`\`
+
+### Blocks
+Use blocks when you need to:
+- Perform calculations with dictionary values
+- Add metadata tags
+- Reference values within the dictionary
+
+Basic block example:
+\`\`\`squiggle
+initialCosts = {
+  rentDeposit = 5k to 15k
+  equipmentCost = 20k to 40k
+  total = rentDeposit + equipmentCost
+  {subcosts: {rentDeposit, equipmentCost}, total}
+}
+\`\`\`
+
+### Adding Tags
+The recommended way to add tags is using block syntax:
+\`\`\`squiggle
+initialCosts = {
+  @name("rent deposit")
+  @format("$,.0f")
+  rentDeposit = 5k to 15k
+
+  @name("equipment cost")
+  @format("$,.0f")
+  equipmentCost = 20k to 40k
+
+  @format("$,.0f")
+  total = rentDeposit + equipmentCost
+
+  {subcosts: {rentDeposit, equipmentCost}, total}
+}
+\`\`\`
+
+Don't add tags to variables that are only used internally. The tags are only useful when variables are externally accessible.
+
+### Common Mistakes to Avoid
+
+1. Missing return value in blocks:
+\`\`\`squiggle
+// Won't work - blocks must return a value
+initialCosts = {
+  rentDeposit = 5k to 15k
+  equipmentCost = 20k to 40k
+  total = rentDeposit + equipmentCost
+}
+\`\`\`
+
+2. Internal references in simple dictionaries:
+\`\`\`squiggle
+// Won't work - simple dicts can't reference internal values
+initialCosts = {
+  rentDeposit: 5k to 15k,
+  equipmentCost: 20k to 40k,
+  total: rentDeposit + equipmentCost
+}
+\`\`\`
+
+While you can use arrow syntax for tags in dictionary blocks (\`->Tag.format("$,.0f")\`), it's generally clearer to use the \`@tag\` syntax shown above.
 
 Prompt:
 <prompt>

@@ -335,6 +335,10 @@ s = 4 to 10
 @format("$.2")
 x = 5 to 10
 
+@name("My favorite Number")
+@doc("This is a long description")
+num = 50
+
 @showAs(Plot.numericFn)
 @name("My favorite Fn")
 fn = {|e| e}
@@ -350,7 +354,58 @@ fn2 = {|e| e}
 y = x -> Tag.getAll`,
   },
 };
+export const LongExample: Story = {
+  name: "Long example",
+  args: {
+    defaultCode: `
+@name("💰 Surgery Cost ($)")
+@doc(
+  "Includes surgery, hospital stay, PT, and follow-up care. Based on US average costs as of 2023."
+)
+surgeryCost = 20k to 50k
 
+@name("🏥 Surgery Success Rate")
+@doc(
+  "Probability of significant improvement in mobility and pain reduction. Based on meta-analyses of similar cases."
+)
+@format(".0%")
+successRate = beta({ mean: 0.75, stdev: 0.1 })
+
+@name("⚕️ QALY Value ($)")
+@doc("Value of one quality-adjusted life year")
+qalyValue = 100k to 200k
+
+@name("👨 Patient Age (years)")
+@doc("Age of patient considering surgery. Model assumes working age adult.")
+@doc(
+  "Default age of 45 chosen as typical for this surgery type. Based on medical literature."
+)
+initialAge = 45
+patientAge = if initialAge < 18 then throw(
+  "Patient age must be at least 18"
+) else if initialAge > 90 then throw(
+  "Patient age must be under 90"
+) else initialAge
+
+@name("⏳ Years of Benefit")
+@doc("Expected years of benefit if surgery is successful")
+yearsBenefit = 85 - patientAge -> {|years| normal(years, years / 10)}
+
+@name("🏃‍♂️ Quality of Life Improvement")
+@doc("QALY improvement per year if successful")
+@format(".0%")
+qalyImprovement = beta({ mean: 0.15, stdev: 0.05 })
+
+@name("Expected Value Calculation")
+expectedValue = {
+  totalQALYs = yearsBenefit * qalyImprovement * successRate
+  benefitValue = totalQALYs * qalyValue
+  netBenefit = benefitValue - surgeryCost
+  { totalQALYs, benefitValue, netBenefit }
+}
+`,
+  },
+};
 export const StartOpen: Story = {
   name: "StartOpen",
   args: {

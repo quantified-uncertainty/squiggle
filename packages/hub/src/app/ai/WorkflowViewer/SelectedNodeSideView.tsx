@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { FC, useMemo } from "react";
 
 import { ClientArtifact, ClientStep } from "@quri/squiggle-ai";
-import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@quri/ui";
+import { ChevronLeftIcon, ChevronRightIcon } from "@quri/ui";
 
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 
@@ -34,10 +34,9 @@ const NavButton: FC<{
 
 export const SelectedNodeSideView: FC<{
   selectedNode: ClientStep;
-  onClose: () => void;
   onSelectPreviousNode?: () => void;
   onSelectNextNode?: () => void;
-}> = ({ selectedNode, onClose, onSelectPreviousNode, onSelectNextNode }) => {
+}> = ({ selectedNode, onSelectPreviousNode, onSelectNextNode }) => {
   const { ref, height } = useAvailableHeight();
 
   const selectedNodeCodeOutput = useMemo(() => {
@@ -70,13 +69,6 @@ export const SelectedNodeSideView: FC<{
             label="Next Node"
             icon={ChevronRightIcon}
           />
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600"
-            aria-label="Close"
-          >
-            <XIcon size={20} />
-          </button>
         </div>
       </div>
       <div className="space-y-4">

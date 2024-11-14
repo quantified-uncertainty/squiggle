@@ -17,9 +17,10 @@ export function TextAreaFormField<
   placeholder,
   rows,
   minRows,
+  maxRows,
   ...fieldProps
 }: CommonStringFieldProps<TValues, TName> &
-  Pick<StyledTextAreaProps, "placeholder" | "rows" | "minRows">) {
+  Pick<StyledTextAreaProps, "placeholder" | "rows" | "minRows" | "maxRows">) {
   return (
     <FormField {...fieldProps}>
       {(inputProps) => (
@@ -28,6 +29,7 @@ export function TextAreaFormField<
           placeholder={placeholder}
           rows={rows}
           minRows={minRows}
+          maxRows={maxRows}
         />
       )}
     </FormField>

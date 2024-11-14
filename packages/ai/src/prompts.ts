@@ -23,7 +23,6 @@ export type PromptPair = {
 };
 
 export const changeFormatPrompt = `
-**Response Format:**
 Your response **must** include:
 1. **Brief Explanation**: A very short explanation (4-15 words) of the root cause of the error and your fix, placed inside an \`<explanation>\` block.
 2. **Minimal Code Change Block**: The smallest possible code change needed to fix the error, provided inside an \`<edit>\` block.
@@ -45,6 +44,8 @@ Your response **must** include:
     - Remember that blocks are processed in order, so removal must come before addition
   - The SEARCH section must match existing code exactly, including whitespace and comments
   - SEARCH/REPLACE blocks replace ALL matching occurrences, so make them unique!
+  - When code contains newlines, include those exact newlines in both SEARCH and REPLACE sections
+  - **Important for Context:** When modifying code at the beginning or end of a file, include enough surrounding context in the SEARCH block to ensure the change happens in the correct location. This is especially important when adding new code to the end of a document.
 
 - Do **not** include explanations or comments outside the specified blocks.
 
@@ -98,10 +99,4 @@ import "hub:ozziegooen/sTest" as sTest
 @name("💰 Expected Cost ($)")
 >>>>>>> REPLACE
 </edit>
-
-Key Points for Code Movement:
-- First block removes code from original location
-- Second block adds code to new location
-- Each block includes enough context to be unique
-- Order matters: remove first, then add
 `;
