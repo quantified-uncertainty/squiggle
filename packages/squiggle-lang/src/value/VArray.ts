@@ -31,30 +31,34 @@ export class VArray
 
     // Argument of type '[number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, ... 38 more ..., number]' is not assignable to parameter of type '[number]'.
 
-    // These are not precise, since we can't know the length of the stringified representation of the last element.
-    // But it's good enough for our purposes.
-    const maxTotalLength = 150;
-    const maxBits = 20;
+    // We want to limit both the string length and the number of items.
+    // (To see why max items is not enough, consider a list that consists of long strings, or complex dicts)
+    const maxTotalLengthBeforeTruncation = 150;
+    const maxItemsBeforeTruncation = 20;
+    const separator = ", ";
 
-    const bits: string[] = [];
-    let bitsTotalLength = 0;
+    const strings: string[] = [];
+    let totalLength = 0;
     for (let i = 0; i < this.value.length; i++) {
-      const bit = this.value[i].toString();
-      bits.push(bit);
-      bitsTotalLength += bit.length;
+      const str = this.value[i].toString();
+      strings.push(str);
+      totalLength += str.length;
       if (
-        (bitsTotalLength > maxTotalLength || bits.length > maxBits) &&
-        i < this.value.length - 2 // at least one bit to skip
+        (totalLength >=
+          maxTotalLengthBeforeTruncation + strings.length * separator.length ||
+          strings.length >= maxItemsBeforeTruncation) &&
+        i < this.value.length - 2 // at least one item to skip
       ) {
         // skip all items except the last one
         // example: for [0,1,2,3,4] we will get [0,1,2,"... 1 more ...",4]
         // so we skip 5 - (2 + 2) = 1 element
-        bits.push(`... ${this.value.length - (i + 2)} more ...`);
-        bits.push(this.value[this.value.length - 1].toString());
+        strings.push(`... ${this.value.length - (i + 2)} more ...`);
+        // always add the last item
+        strings.push(this.value[this.value.length - 1].toString());
         break;
       }
     }
-    return "[" + bits.join(", ") + "]";
+    return "[" + strings.join(separator) + "]";
   }
 
   get(key: Value) {
