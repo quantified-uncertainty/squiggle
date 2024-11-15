@@ -13,7 +13,7 @@ describe("SqLambda", () => {
     );
 
     expect(result.ok).toBe(true);
-    expect(result.value.toString()).toBe("[1,2,3,4,5]");
+    expect(result.value.toString()).toBe("[1, 2, 3, 4, 5]");
   });
 
   test("createFromStdlibName for squiggle definition", () => {

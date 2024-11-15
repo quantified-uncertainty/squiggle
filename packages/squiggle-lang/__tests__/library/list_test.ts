@@ -14,11 +14,11 @@ describe("List functions", () => {
   });
 
   describe("make", () => {
-    testEvalToBe("List(2, 5)", "[5,5]");
-    testEvalToBe("List.make(3, 'HI')", '["HI","HI","HI"]');
-    testEvalToBe("List.make(3, {|e| e})", "[0,1,2]");
-    testEvalToBe("List.make(3, {|| 1})", "[1,1,1]");
-    testEvalToBe("List.make(3, {|index| 1 + index})", "[1,2,3]");
+    testEvalToBe("List(2, 5)", "[5, 5]");
+    testEvalToBe("List.make(3, 'HI')", '["HI", "HI", "HI"]');
+    testEvalToBe("List.make(3, {|e| e})", "[0, 1, 2]");
+    testEvalToBe("List.make(3, {|| 1})", "[1, 1, 1]");
+    testEvalToBe("List.make(3, {|index| 1 + index})", "[1, 2, 3]");
     testEvalToBe(
       "List.make(3.5, 'HI')",
       "Error(Argument Error: Number must be an integer)"
@@ -31,7 +31,7 @@ describe("List functions", () => {
   });
 
   describe("upTo", () => {
-    testEvalToBe("List.upTo(1,3)", "[1,2,3]");
+    testEvalToBe("List.upTo(1,3)", "[1, 2, 3]");
     testEvalToBe(
       "List.upTo(1.5,3)",
       "Error(Argument Error: Low and high values must both be integers)"
@@ -56,19 +56,19 @@ describe("List functions", () => {
   });
 
   describe("concat", () => {
-    testEvalToBe("List.concat([1, 2, 3], [4, 5, 6])", "[1,2,3,4,5,6]");
-    testEvalToBe("List.concat([], [1, 2, 3])", "[1,2,3]");
-    testEvalToBe("List.concat(['cake'], [1, 2, 3])", '["cake",1,2,3]');
+    testEvalToBe("List.concat([1, 2, 3], [4, 5, 6])", "[1, 2, 3, 4, 5, 6]");
+    testEvalToBe("List.concat([], [1, 2, 3])", "[1, 2, 3]");
+    testEvalToBe("List.concat(['cake'], [1, 2, 3])", '["cake", 1, 2, 3]');
   });
 
   describe("sortBy", () => {
     testEvalToBe(
       "arr=[5, 2, 3, 1, 4]; List.sortBy(arr, {|n| n})",
-      "[1,2,3,4,5]"
+      "[1, 2, 3, 4, 5]"
     );
     testEvalToBe(
       "arr=[{a: 3}, {a: 1}, {a: 2}]; List.sortBy(arr, {|obj| obj.a})",
-      "[{a: 1},{a: 2},{a: 3}]"
+      "[{a: 1}, {a: 2}, {a: 3}]"
     );
     testEvalToBe(
       "arr=[{a: '3'}, {a: '1'}, {a: '2'}]; List.sortBy(arr, {|obj| obj.a})",
@@ -78,8 +78,8 @@ describe("List functions", () => {
     // Edge cases
     testEvalToBe("arr=[]; List.sortBy(arr, {|n| n})", "[]"); // Empty array
     testEvalToBe("arr=[1]; List.sortBy(arr, {|n| n})", "[1]"); // Single-element array
-    testEvalToBe("arr=[3, 2, 1]; List.sortBy(arr, {|n| -n})", "[3,2,1]"); // Descending order
-    testEvalToBe("arr=[1, 2, 3]; List.sortBy(arr, {|n| 0})", "[1,2,3]"); // Lambda function always returns the same value
+    testEvalToBe("arr=[3, 2, 1]; List.sortBy(arr, {|n| -n})", "[3, 2, 1]"); // Descending order
+    testEvalToBe("arr=[1, 2, 3]; List.sortBy(arr, {|n| 0})", "[1, 2, 3]"); // Lambda function always returns the same value
   });
 
   describe("minBy", () => {
@@ -107,39 +107,39 @@ describe("List functions", () => {
   });
 
   describe("reverse", () => {
-    testEvalToBe("List.reverse([3,5,8])", "[8,5,3]");
+    testEvalToBe("List.reverse([3, 5, 8])", "[8, 5, 3]");
     testEvalToBe("List.reverse([])", "[]");
   });
 
   describe("append", () => {
-    testEvalToBe("List.append([3,5,8], 8)", "[3,5,8,8]");
+    testEvalToBe("List.append([3, 5, 8], 8)", "[3, 5, 8, 8]");
     testEvalToBe("List.append([], 8)", "[8]");
   });
 
   describe("map", () => {
-    testEvalToBe("arr=[1,2,3]; map(arr, {|x| x*2})", "[2,4,6]");
+    testEvalToBe("arr=[1,2,3]; map(arr, {|x| x*2})", "[2, 4, 6]");
     testEvalToBe(
       "double(x)=2*x; arr=[1,2,3]; List.map(arr, double)",
-      "[2,4,6]"
+      "[2, 4, 6]"
     );
-    testEvalToBe("double(x)=2*x; arr=[1,2,3]; map(arr, double)", "[2,4,6]");
+    testEvalToBe("double(x)=2*x; arr=[1,2,3]; map(arr, double)", "[2, 4, 6]");
 
     // wrong arg types
     testEvalError("addone(x)=x+1; map(2, addone)");
     testEvalError("addone(x)=x+1; map(2, {x: addone})");
 
     // two-arg callback
-    testEvalToBe("[10,20,30] -> List.map({|x,i|x+i+1})", "[11,22,33]");
+    testEvalToBe("[10, 20, 30] -> List.map({|x,i|x+i+1})", "[11, 22, 33]");
     testEvalToBe("List.map([[1]], Number.sum)", "[1]");
   });
 
   describe("slice", () => {
-    testEvalToBe("List.slice([1,2,3,4,5,6], 2)", "[3,4,5,6]");
-    testEvalToBe("List.slice([1,2,3,4,5,6], 2, 4)", "[3,4]");
-    testEvalToBe("List.slice([1,2,3,4,5,6], 8, 3)", "[]");
+    testEvalToBe("List.slice([1, 2, 3, 4, 5, 6], 2)", "[3, 4, 5, 6]");
+    testEvalToBe("List.slice([1, 2, 3, 4, 5, 6], 2, 4)", "[3, 4]");
+    testEvalToBe("List.slice([1, 2, 3, 4, 5, 6], 8, 3)", "[]");
     testEvalToBe("List.slice([], 8, 3)", "[]");
-    testEvalToBe("List.slice([1,2,3,4,5,6], -4)", "[3,4,5,6]");
-    testEvalToBe("List.slice([1,2,3,4,5,6], 2, -1)", "[3,4,5]");
+    testEvalToBe("List.slice([1, 2, 3, 4, 5, 6], -4)", "[3, 4, 5, 6]");
+    testEvalToBe("List.slice([1, 2, 3, 4, 5, 6], 2, -1)", "[3, 4, 5]");
     testEvalToBe(
       "List.slice([], 3.5, 3)",
       "Error(Argument Error: Number 3.5 must be an integer)"
@@ -147,34 +147,34 @@ describe("List functions", () => {
   });
 
   describe("uniq", () => {
-    testEvalToBe("arr=[1,2,3,1,2,3]; List.uniq(arr)", "[1,2,3]");
-    testEvalToBe("arr=[1,'1']; List.uniq(arr)", '[1,"1"]');
+    testEvalToBe("arr=[1, 2, 3, 1, 2, 3]; List.uniq(arr)", "[1, 2, 3]");
+    testEvalToBe("arr=[1, '1']; List.uniq(arr)", '[1, "1"]');
     testEvalToBe(
       "arr=[1,1, 'test', 'test', false, false, true]; List.uniq(arr)",
-      '[1,"test",false,true]'
+      '[1, "test", false, true]'
     );
     testEvalToBe(
       "arr=[1,2,normal(50,1)]; List.uniq(arr)",
-      "[1,2,Sample Set Distribution]"
+      "[1, 2, Sample Set Distribution]"
     );
   });
 
   describe("uniqBy", () => {
     testEvalToBe(
       "arr=[1.2, 1.6, 2.3, 2.8]; List.uniqBy(arr, floor)",
-      "[1.2,2.3]"
+      "[1.2, 2.3]"
     );
     testEvalToBe(
       "arr=[{a: 1, b: 2}, {a: 1, b: 3}, {a:2, b:5}]; List.uniqBy(arr, {|e| e.a})",
-      "[{a: 1, b: 2},{a: 2, b: 5}]"
+      "[{a: 1, b: 2}, {a: 2, b: 5}]"
     );
     testEvalToBe(
       "arr=[{a: normal(5,2), b: 2}, {a: 1, b: 3}, {a:2, b:5}]; List.uniqBy(arr, {|e| e.a})",
-      "[{a: Sample Set Distribution, b: 2},{a: 1, b: 3},{a: 2, b: 5}]"
+      "[{a: Sample Set Distribution, b: 2}, {a: 1, b: 3}, {a: 2, b: 5}]"
     );
     testEvalToBe(
       "arr=[{a: normal(5,2), b: 2}, {a: 1, b: 3}, {a:2, b:3}]; List.uniqBy(arr, {|e| e.b})",
-      "[{a: Sample Set Distribution, b: 2},{a: 1, b: 3}]"
+      "[{a: Sample Set Distribution, b: 2}, {a: 1, b: 3}]"
     );
   });
 
@@ -243,11 +243,11 @@ describe("List functions", () => {
   });
 
   describe("reverse", () => {
-    testEvalToBe("arr=[1,2,3]; List.reverse(arr)", "[3,2,1]");
+    testEvalToBe("arr=[1,2,3]; List.reverse(arr)", "[3, 2, 1]");
   });
 
   describe("filter", () => {
-    testEvalToBe("arr=[1,2,3]; List.filter(arr,{|e| e > 1})", "[2,3]");
+    testEvalToBe("arr=[1,2,3]; List.filter(arr,{|e| e > 1})", "[2, 3]");
     testEvalToBe("arr=[1,2,3]; List.filter(arr,{|e| e > 5})", "[]");
   });
 
@@ -283,19 +283,19 @@ describe("List functions", () => {
   });
 
   describe("flatten", () => {
-    testEvalToBe("List.flatten([[1,2], [3,4]])", "[1,2,3,4]");
-    testEvalToBe("List.flatten([[1,2], [3,[4,5]]])", "[1,2,3,[4,5]]");
+    testEvalToBe("List.flatten([[1, 2], [3, 4]])", "[1, 2, 3, 4]");
+    testEvalToBe("List.flatten([[1, 2], [3, [4, 5]]])", "[1, 2, 3, [4, 5]]");
     testEvalToBe("List.flatten([])", "[]");
-    testEvalToBe("List.flatten([[],[],[]])", "[]");
+    testEvalToBe("List.flatten([[], [], []])", "[]");
   });
 
   describe("zip", () => {
-    testEvalToBe("List.zip([1,2], [3,4])", "[[1,3],[2,4]]");
+    testEvalToBe("List.zip([1, 2], [3, 4])", "[[1, 3], [2, 4]]");
     testEvalToBe(
-      "List.zip([1,2,4], [3,4])",
+      "List.zip([1, 2, 4], [3, 4])",
       "Error(Argument Error: List lengths must be equal)"
     );
-    testEvalToBe("List.zip([1,2], [3,[4,5]])", "[[1,3],[2,[4,5]]]");
+    testEvalToBe("List.zip([1, 2], [3, [4, 5]])", "[[1, 3], [2, [4, 5]]]");
     testEvalToBe(
       "List.zip([1,2], [3,[4,5], [5]])",
       "Error(Argument Error: List lengths must be equal)"
@@ -304,9 +304,9 @@ describe("List functions", () => {
   });
 
   describe("unzip", () => {
-    testEvalToBe("List.unzip([[1,3],[2,4]])", "[[1,2],[3,4]]");
-    testEvalToBe("List.unzip([[1,3],[2,4],[5,6]])", "[[1,2,5],[3,4,6]]");
-    testEvalToBe("List.unzip([])", "[[],[]]");
+    testEvalToBe("List.unzip([[1,3],[2,4]])", "[[1, 2], [3, 4]]");
+    testEvalToBe("List.unzip([[1,3],[2,4],[5,6]])", "[[1, 2, 5], [3, 4, 6]]");
+    testEvalToBe("List.unzip([])", "[[], []]");
   });
 
   describe("sample", () => {

@@ -20,7 +20,7 @@ describe("eval", () => {
     testEvalToBe("!true", "false");
     testEvalToBe("1 + -1", "0");
     testEvalToBe('"hello"', '"hello"');
-    testEvalToBe("concat([3,4], [5,6,7])", "[3,4,5,6,7]");
+    testEvalToBe("concat([3,4], [5,6,7])", "[3, 4, 5, 6, 7]");
     testEvalToBe("log(10)", "2.302585092994046");
     testEvalToBe("Math.cos(10)", "-0.8390715290764524");
     // most library tests are in __tests__/library/
@@ -39,8 +39,8 @@ describe("eval", () => {
     test("empty array", async () => {
       await expectEvalToBe("[]", "[]");
     });
-    testEvalToBe("[1, 2, 3]", "[1,2,3]");
-    testEvalToBe("['hello', 'world']", '["hello","world"]');
+    testEvalToBe("[1, 2, 3]", "[1, 2, 3]");
+    testEvalToBe("['hello', 'world']", '["hello", "world"]');
     testEvalToBe("([0,1,2])[1]", "1");
     testDescriptionEvalToBe(
       "index not found",
@@ -48,13 +48,13 @@ describe("eval", () => {
       "Error(Array index not found: 10)"
     );
     test("trailing comma", async () => {
-      await expectEvalToBe(`[3,4,]`, "[3,4]");
+      await expectEvalToBe(`[3,4,]`, "[3, 4]");
       await expectEvalToBe(
         `[
         3,
         4,
       ]`,
-        "[3,4]"
+        "[3, 4]"
       );
     });
   });
