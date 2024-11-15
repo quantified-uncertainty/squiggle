@@ -62,6 +62,12 @@ export async function getTypeStats() {
     typeStats[stepName] = {};
     for (const workflow of workflows) {
       for (const step of extractSteps(workflow, stepName)) {
+        const state = step.getState();
+        if (state.kind === "FAILED") {
+          typeStats[stepName]["FAILED"] =
+            (typeStats[stepName]["FAILED"] ?? 0) + 1;
+          continue;
+        }
         const code = step.getOutputs()["code"];
         if (code && code instanceof CodeArtifact) {
           typeStats[stepName][code.value.type] =
@@ -74,16 +80,16 @@ export async function getTypeStats() {
   return typeStats;
 }
 
-export async function getCodeErrors() {
-  type CodeError = {
-    error: string;
-    date: Date;
-    stepName: string;
-  };
+export type StepError = {
+  error: string;
+  date: Date;
+  stepName: string;
+};
 
+export async function getCodeErrors() {
   const rows = await loadWorkflows();
 
-  const errors: CodeError[] = [];
+  const errors: StepError[] = [];
   for (const workflow of getModernWorkflows(rows)) {
     for (const step of workflow.getSteps()) {
       const code = step.getOutputs()["code"];
@@ -95,6 +101,26 @@ export async function getCodeErrors() {
         errors.push({
           error: code.value.error,
           // step.startTime is private
+          date: new Date(step.toParams().startTime),
+          stepName: step.template.name,
+        });
+      }
+    }
+  }
+
+  return errors;
+}
+
+export async function getStepErrors() {
+  const rows = await loadWorkflows();
+
+  const errors: StepError[] = [];
+  for (const workflow of getModernWorkflows(rows)) {
+    for (const step of workflow.getSteps()) {
+      const state = step.getState();
+      if (state.kind === "FAILED") {
+        errors.push({
+          error: state.message,
           date: new Date(step.toParams().startTime),
           stepName: step.template.name,
         });

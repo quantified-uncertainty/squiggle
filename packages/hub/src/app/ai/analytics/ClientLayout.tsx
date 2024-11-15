@@ -11,7 +11,8 @@ export const AiAnalyticsClientLayout = ({ children }: PropsWithChildren) => {
       <div className="mb-4 flex items-center gap-2">
         <StyledTabLink.List>
           <StyledTabLink name="Statistics" href="/ai/analytics" />
-          <StyledTabLink name="All Errors" href="/ai/analytics/code-errors" />
+          <StyledTabLink name="Code Errors" href="/ai/analytics/code-errors" />
+          <StyledTabLink name="Step Errors" href="/ai/analytics/step-errors" />
         </StyledTabLink.List>
       </div>
       <div>{children}</div>

@@ -8,16 +8,16 @@ export default async function () {
   return (
     <div className="space-y-4">
       {Object.entries(typeStats).map(([stepName, typeCounts]) => (
-        <div key={stepName}>
-          <H2>{stepName}</H2>
-          <div className="grid w-40 grid-cols-2">
-            {Object.entries(typeCounts).map(([type, count]) => (
-              <Fragment key={type}>
-                <span>{type}</span>
-                <span>{count}</span>
-              </Fragment>
-            ))}
+        <div key={stepName} className="grid grid-cols-2 gap-4">
+          <div className="col-span-2">
+            <H2>{stepName}</H2>
           </div>
+          {Object.entries(typeCounts).map(([type, count]) => (
+            <Fragment key={type}>
+              <span>{type}</span>
+              <span>{count}</span>
+            </Fragment>
+          ))}
         </div>
       ))}
     </div>
