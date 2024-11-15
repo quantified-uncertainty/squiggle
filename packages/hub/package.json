@@ -13,16 +13,17 @@
     "start": "__NEXT_PRIVATE_PREBUNDLED_REACT=next next start",
     "gen:prisma": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma generate",
     "gen:relay": "relay-compiler",
-    "gen:schema": "tsx ./src/graphql/print-schema.ts",
+    "gen:schema": "pnpm build:esbuild && node ./dist/scripts/print-schema.mjs",
     "gen": "pnpm gen:prisma && pnpm gen:schema && pnpm gen:relay",
     "gen:watch": "nodemon --watch src --ext ts,tsx,prisma --exec 'pnpm run gen'",
+    "build:esbuild": "node ./esbuild.cjs",
     "build:ts": "pnpm gen && tsc",
-    "bundle": "node ./esbuild.js && cp ../../node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/*.node ./dist",
+    "bundle": "pnpm build:esbuild && cp ../../node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/*.node ./dist",
     "build": "pnpm gen && __NEXT_PRIVATE_PREBUNDLED_REACT=next next build",
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
     "test:manual": "dotenv -e .env.test -- jest -i",
-    "build-last-revision": "tsx src/scripts/buildRecentModelRevision/main.ts"
+    "build-last-revision": "pnpm build:esbuild && node ./dist/scripts/buildRecentModelRevision/main.mjs"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
