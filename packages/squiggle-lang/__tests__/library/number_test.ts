@@ -27,13 +27,13 @@ describe("Numbers", () => {
   testEvalToBe("Number.quantile([0,5,10,15,20], 0.25)", "5");
   testEvalToBe("Number.median([0,5,10,15,20])", "10");
   testEvalToBe("Number.sort([])", "[]");
-  testEvalToBe("Number.sort([10,0,15,5])", "[0,5,10,15]");
+  testEvalToBe("Number.sort([10,0,15,5])", "[0, 5, 10, 15]");
   testEvalToBe("Number.cumsum([])", "[]");
-  testEvalToBe("Number.cumsum([1,5,3])", "[1,6,9]");
+  testEvalToBe("Number.cumsum([1,5,3])", "[1, 6, 9]");
   testEvalToBe("Number.cumprod([])", "[]");
-  testEvalToBe("Number.cumprod([1,5,3])", "[1,5,15]");
+  testEvalToBe("Number.cumprod([1,5,3])", "[1, 5, 15]");
   testEvalToBe("Number.diff([1])", "[]");
-  testEvalToBe("Number.diff([1,5,3])", "[4,-2]");
+  testEvalToBe("Number.diff([1,5,3])", "[4, -2]");
   testEvalToBe("Number.mod(10, 3)", "1");
   testEvalToBe("mod(10, 3)", "1");
   testEvalToBe("Number.mod(15, 4)", "3");
