@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { ComponentType } from "react";
 
 import { NumberFormField } from "../../index.js";
 import { formDecorator } from "./withRHF.js";
@@ -7,7 +8,11 @@ const meta = {
   component: NumberFormField,
   decorators: [
     formDecorator,
-    (Story: any) => <div className="w-96">{Story()}</div>,
+    (Story: ComponentType) => (
+      <div className="w-96">
+        <Story />
+      </div>
+    ),
   ],
 } satisfies Meta<typeof NumberFormField>;
 export default meta;
