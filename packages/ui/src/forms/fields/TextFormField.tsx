@@ -20,7 +20,6 @@ export function TextFormField<
     <FormField {...fieldProps}>
       {(inputProps) => (
         <StyledInput
-          type="text"
           {...inputProps}
           placeholder={placeholder}
           size={size}

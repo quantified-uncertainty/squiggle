@@ -17,7 +17,6 @@ import {
   SelectStringFormField,
   StyledTab,
   TextAreaFormField,
-  TextTooltip,
 } from "@quri/ui";
 
 import { LoadMoreViaSearchParam } from "@/components/LoadMoreViaSearchParam";
@@ -175,53 +174,36 @@ Outputs:
           </div>
         </StyledTab.Group>
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <TextTooltip
-              text="Enhance the model's numerical calculations and reasoning."
-              placement="bottom"
-            >
-              <span className="cursor-help text-sm underline decoration-dotted">
-                Numeric Steps
-              </span>
-            </TextTooltip>
-            <span className="w-16">
-              <NumberFormField<FormShape> name="numericSteps" size="small" />
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <TextTooltip
-              text="Improve the model's documentation and formatting."
-              placement="bottom"
-            >
-              <span className="cursor-help text-sm underline decoration-dotted">
-                Documentation Steps
-              </span>
-            </TextTooltip>
-            <span className="w-16">
-              <NumberFormField<FormShape> name="styleGuideSteps" size="small" />
-            </span>
-          </div>
+          <NumberFormField<FormShape>
+            name="numericSteps"
+            label="Numeric Steps"
+            tooltip="Enhance the model's numerical calculations and reasoning."
+            inputWidth="w-16"
+            size="small"
+            layout="row"
+            rules={{ min: 0 }}
+          />
+          <NumberFormField<FormShape>
+            name="styleGuideSteps"
+            label="Documentation Steps"
+            tooltip="Improve the model's documentation and formatting."
+            inputWidth="w-16"
+            size="small"
+            layout="row"
+            rules={{ min: 0 }}
+          />
         </div>
-        <div className="flex items-center justify-between">
-          <TextTooltip
-            text="Choose the LLM to use. Sonnet is much better than Haiku, but is around 3x more expensive. We use the latest versions of Sonnet 3.5 and Haiku 3.5."
-            placement="bottom"
-          >
-            <span className="cursor-help text-sm underline decoration-dotted">
-              Model
-            </span>
-          </TextTooltip>
-          <span className="w-40">
-            <SelectStringFormField<FormShape, LlmId>
-              name="model"
-              size="small"
-              options={MODEL_CONFIGS.filter(
-                (model) => model.provider === "anthropic"
-              ).map((model) => model.id)}
-              required
-            />
-          </span>
-        </div>
+        <SelectStringFormField<FormShape, LlmId>
+          label="Model"
+          tooltip="Choose the LLM to use. Sonnet is much better than Haiku, but is around 3x more expensive. We use the latest versions of Sonnet 3.5 and Haiku 3.5."
+          layout="row"
+          name="model"
+          size="small"
+          options={MODEL_CONFIGS.filter(
+            (model) => model.provider === "anthropic"
+          ).map((model) => model.id)}
+          required
+        />
         <Button wide onClick={handleSubmit} disabled={isSubmitDisabled}>
           Start Workflow
         </Button>

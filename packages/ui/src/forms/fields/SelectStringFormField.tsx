@@ -22,7 +22,7 @@ export function SelectStringFormField<
   options,
   size = "normal",
   ...props
-}: Pick<FormFieldLayoutProps, "label" | "description"> & {
+}: FormFieldLayoutProps & {
   name: TName;
   size?: Size;
   options: NonNullable<TValueType>[];

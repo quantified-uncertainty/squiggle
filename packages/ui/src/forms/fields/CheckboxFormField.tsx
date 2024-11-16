@@ -9,7 +9,10 @@ export function CheckboxFormField<
   TName extends FieldPath<TValues> = FieldPath<TValues>,
 >({ ...fieldProps }: CommonUnknownFieldProps<TValues, TName>) {
   return (
-    <ControlledFormField {...fieldProps} inlineLabel>
+    <ControlledFormField
+      {...fieldProps}
+      layout={fieldProps.layout ?? "reverse-row"}
+    >
       {({ value, onChange }) => (
         <StyledCheckbox checked={value} onChange={onChange} />
       )}

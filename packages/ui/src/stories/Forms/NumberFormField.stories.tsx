@@ -5,7 +5,10 @@ import { formDecorator } from "./withRHF.js";
 
 const meta = {
   component: NumberFormField,
-  decorators: [formDecorator],
+  decorators: [
+    formDecorator,
+    (Story: any) => <div className="w-96">{Story()}</div>,
+  ],
 } satisfies Meta<typeof NumberFormField>;
 export default meta;
 type Story = StoryObj<typeof NumberFormField>;
@@ -28,5 +31,27 @@ export const WithValidation: Story = {
       max: 0,
       required: true,
     },
+  },
+};
+
+export const Small: Story = {
+  args: {
+    ...Default.args,
+    size: "small",
+  },
+};
+
+export const WithTooltip: Story = {
+  args: {
+    ...Default.args,
+    tooltip: "Tooltip text",
+  },
+};
+
+export const RowLayout: Story = {
+  args: {
+    ...Default.args,
+    tooltip: "Tooltip text",
+    layout: "row",
   },
 };

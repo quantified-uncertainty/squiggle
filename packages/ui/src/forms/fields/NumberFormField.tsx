@@ -2,7 +2,10 @@ import { FieldPathByValue, FieldValues } from "react-hook-form";
 
 import { ControlledFormField } from "../common/ControlledFormField.js";
 import { CommonNumberFieldProps } from "../common/types.js";
-import { StyledInput, type StyledInputProps } from "../styled/StyledInput.js";
+import {
+  getInputClassName,
+  type StyledInputProps,
+} from "../styled/StyledInput.js";
 
 export function NumberFormField<
   TValues extends FieldValues,
@@ -13,6 +16,7 @@ export function NumberFormField<
 >({
   placeholder,
   rules = {},
+  inputWidth,
   ...fieldProps
 }: CommonNumberFieldProps<TValues, TName> &
   Pick<StyledInputProps, "size" | "placeholder">) {
@@ -23,7 +27,11 @@ export function NumberFormField<
     <ControlledFormField {...fieldProps} rules={rules}>
       {({ onChange, onBlur, value }) => {
         return (
-          <StyledInput
+          <input
+            className={getInputClassName(
+              fieldProps.size ?? "normal",
+              inputWidth
+            )}
             // type="number" is kinda broken in Firefox.
             // See also: https://news.ycombinator.com/item?id=32852643
             // We implement something number-like manually here.

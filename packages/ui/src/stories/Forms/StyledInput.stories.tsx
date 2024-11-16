@@ -12,14 +12,6 @@ export const Default: Story = {
   },
 };
 
-export const Number: Story = {
-  args: {
-    name: "fieldName",
-    type: "number",
-    defaultValue: "123",
-  },
-};
-
 export const WithPlaceholder: Story = {
   args: {
     name: "fieldName",

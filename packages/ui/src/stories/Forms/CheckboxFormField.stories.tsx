@@ -3,6 +3,11 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { CheckboxFormField } from "../../index.js";
 import { formDecorator } from "./withRHF.js";
 
+/**
+ * Checkbox form field.
+ *
+ * Defaults to `reverse-row` layout (label on the right).
+ */
 const meta = {
   component: CheckboxFormField,
   decorators: [formDecorator],
@@ -23,5 +28,12 @@ export const Required: Story = {
     rules: {
       required: true,
     },
+  },
+};
+
+export const InverseLayout: Story = {
+  args: {
+    ...Default.args,
+    layout: "row",
   },
 };
