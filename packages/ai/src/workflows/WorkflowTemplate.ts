@@ -1,6 +1,6 @@
 import { LLMStepInstance } from "../LLMStepInstance.js";
 import { Inputs, IOShape, PreparedStep } from "../LLMStepTemplate.js";
-import { type LlmConfig, Workflow } from "./Workflow.js";
+import { type LlmConfig, StepTransitionRule, Workflow } from "./Workflow.js";
 
 export type WorkflowInstanceParams<Shape extends IOShape> = {
   id: string;
@@ -21,23 +21,19 @@ export type WorkflowInstanceParams<Shape extends IOShape> = {
 export class WorkflowTemplate<const Shape extends IOShape> {
   readonly name: string;
 
-  configureControllerLoop: (
-    workflow: Workflow<Shape>,
-    inputs: Inputs<Shape>
-  ) => void;
-
+  getTransitionRule: (workflow: Workflow<Shape>) => StepTransitionRule<Shape>;
   getInitialStep: (workflow: Workflow<Shape>) => PreparedStep<any>;
 
   // TODO - shape parameter
   constructor(params: {
     name: string;
     // TODO - do we need two separate functions? we always call them together
-    configureControllerLoop: WorkflowTemplate<Shape>["configureControllerLoop"];
+    getTransitionRule: WorkflowTemplate<Shape>["getTransitionRule"];
     getInitialStep: WorkflowTemplate<Shape>["getInitialStep"];
   }) {
     this.name = params.name;
     this.getInitialStep = params.getInitialStep;
-    this.configureControllerLoop = params.configureControllerLoop;
+    this.getTransitionRule = params.getTransitionRule;
   }
 
   instantiate(

@@ -96,6 +96,11 @@ export type WorkflowEventListener<
   Shape extends IOShape,
 > = (event: WorkflowEvent<T, Shape>) => void;
 
+export type StepTransitionRule<Shape extends IOShape> = (
+  step: LLMStepInstance<IOShape, Shape>,
+  helpers: WorkflowGuardHelpers<Shape>
+) => NextStepAction;
+
 /**
  * This class is responsible for managing the steps in a workflow.
  *
@@ -140,9 +145,31 @@ export class Workflow<Shape extends IOShape = IOShape> {
   }
 
   private configure() {
-    // we configure the controller loop first, so it has a chance to react to its initial step
-    this.template.configureControllerLoop(this, this.inputs);
+    // configure the controller loop
+    {
+      const transitionRule = this.template.getTransitionRule(this);
+      this.addEventListener("stepFinished", ({ data: { step } }) => {
+        const result = transitionRule(
+          step,
+          new WorkflowGuardHelpers(this, step)
+        );
+        switch (result.kind) {
+          case "repeat":
+            this.addStep(step.template.prepare(step.inputs));
+            break;
+          case "step":
+            this.addStep(result.step.prepare(result.inputs));
+            break;
+          case "finish":
+            // no new steps to add
+            break;
+          case "fatal":
+            throw new Error(result.message);
+        }
+      });
+    }
 
+    // add the first step
     const initialStep = this.template.getInitialStep(this);
     this.addStep(initialStep);
   }
@@ -209,30 +236,6 @@ export class Workflow<Shape extends IOShape = IOShape> {
       payload: { step },
     });
     return step;
-  }
-
-  addLinearRule(
-    produce: (
-      step: LLMStepInstance<IOShape, Shape>,
-      helpers: WorkflowGuardHelpers<Shape>
-    ) => NextStepAction
-  ) {
-    this.addEventListener("stepFinished", ({ data: { step } }) => {
-      const result = produce(step, new WorkflowGuardHelpers(this, step));
-      switch (result.kind) {
-        case "repeat":
-          this.addStep(step.template.prepare(step.inputs));
-          break;
-        case "step":
-          this.addStep(result.step.prepare(result.inputs));
-          break;
-        case "finish":
-          // no new steps to add
-          break;
-        case "fatal":
-          throw new Error(result.message);
-      }
-    });
   }
 
   private async runNextStep(): Promise<void> {

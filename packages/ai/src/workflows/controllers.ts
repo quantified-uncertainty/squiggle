@@ -6,7 +6,7 @@ import { fixCodeUntilItRunsStep } from "../steps/fixCodeUntilItRunsStep.js";
 import { generateCodeStep } from "../steps/generateCodeStep.js";
 import { matchStyleGuideStep } from "../steps/matchStyleGuideStep.js";
 import { runAndFormatCodeStep } from "../steps/runAndFormatCodeStep.js";
-import { Workflow } from "./Workflow.js";
+import { StepTransitionRule, Workflow } from "./Workflow.js";
 import {
   NextStepAction,
   WorkflowGuardHelpers,
@@ -54,12 +54,12 @@ function handleFailedState<Shape extends IOShape>(
 export function fixAdjustRetryLoop<Shape extends IOShape>(
   workflow: Workflow<Shape>,
   prompt: PromptArtifact
-) {
+): StepTransitionRule<Shape> {
   const config = {
     maxNumericSteps: workflow.llmConfig.numericSteps,
     maxStyleGuideSteps: workflow.llmConfig.styleGuideSteps,
   };
-  workflow.addLinearRule((step, h) => {
+  return (step, h) => {
     function getNextIntendedState(
       intendedStep: "AdjustToFeedback" | "MatchStyleGuide",
       code: CodeArtifact
@@ -143,5 +143,5 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
     }
 
     return h.fatal("Unknown step");
-  });
+  };
 }
