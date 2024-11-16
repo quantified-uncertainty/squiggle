@@ -15,7 +15,7 @@ export const fixSquiggleWorkflowTemplate = new WorkflowTemplate<{
     // (but it's better to just refactor steps to make the prompt optional, somehow)
     fixAdjustRetryLoop(workflow, new PromptArtifact(""));
   },
-  configureInitialSteps(workflow, inputs) {
-    workflow.addStep(runAndFormatCodeStep, { source: inputs.source });
+  getInitialStep(workflow) {
+    return runAndFormatCodeStep.prepare({ source: workflow.inputs.source });
   },
 });

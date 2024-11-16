@@ -8,7 +8,7 @@ import {
   Message,
 } from "../LLMClient.js";
 import { LLMStepInstance } from "../LLMStepInstance.js";
-import { Inputs, IOShape, LLMStepTemplate } from "../LLMStepTemplate.js";
+import { Inputs, IOShape, PreparedStep } from "../LLMStepTemplate.js";
 import { TimestampedLogEntry } from "../Logger.js";
 import { LlmId } from "../modelConfigs.js";
 import {
@@ -142,7 +142,9 @@ export class Workflow<Shape extends IOShape = IOShape> {
   private configure() {
     // we configure the controller loop first, so it has a chance to react to its initial step
     this.template.configureControllerLoop(this, this.inputs);
-    this.template.configureInitialSteps(this, this.inputs);
+
+    const initialStep = this.template.getInitialStep(this);
+    this.addStep(initialStep);
   }
 
   // Run workflow to the ReadableStream, appropriate for streaming in Next.js routes
@@ -190,14 +192,14 @@ export class Workflow<Shape extends IOShape = IOShape> {
     return this.steps[index - 1];
   }
 
-  addStep<S extends IOShape>(
-    template: LLMStepTemplate<S>,
-    inputs: Inputs<S>
+  private addStep<S extends IOShape>(
+    prepatedStep: PreparedStep<S>
   ): LLMStepInstance<S, Shape> {
-    // sorry for "any"; contravariance issues
+    // `any` is necessary because of countervariance issues.
+    // But that's not important because `PreparedStep` was already strictly typed.
     const step: LLMStepInstance<any, Shape> = LLMStepInstance.create({
-      template,
-      inputs,
+      template: prepatedStep.template,
+      inputs: prepatedStep.inputs,
       workflow: this,
     });
 
@@ -219,10 +221,10 @@ export class Workflow<Shape extends IOShape = IOShape> {
       const result = produce(step, new WorkflowGuardHelpers(this, step));
       switch (result.kind) {
         case "repeat":
-          this.addStep(step.template, step.inputs);
+          this.addStep(step.template.prepare(step.inputs));
           break;
         case "step":
-          this.addStep(result.step, result.inputs);
+          this.addStep(result.step.prepare(result.inputs));
           break;
         case "finish":
           // no new steps to add

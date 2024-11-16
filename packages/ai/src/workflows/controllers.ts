@@ -14,11 +14,6 @@ import {
 
 const MAX_MINOR_ERRORS = 5;
 
-type config = {
-  maxNumericSteps: number;
-  maxStyleGuideSteps: number;
-};
-
 // Error Messages
 const ERROR_MESSAGES = {
   FAILED_STEP: (stepName: string, errorType: string) =>
@@ -32,8 +27,7 @@ const ERROR_MESSAGES = {
 // Helper function to handle failed states
 function handleFailedState<Shape extends IOShape>(
   step: LLMStepInstance<IOShape, Shape>,
-  h: WorkflowGuardHelpers<Shape>,
-  config: config
+  h: WorkflowGuardHelpers<Shape>
 ): NextStepAction | undefined {
   const state = step.getState();
 
@@ -66,7 +60,7 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
     maxStyleGuideSteps: workflow.llmConfig.styleGuideSteps,
   };
   workflow.addLinearRule((step, h) => {
-    function getNextIntendedState<Shape extends IOShape>(
+    function getNextIntendedState(
       intendedStep: "AdjustToFeedback" | "MatchStyleGuide",
       code: CodeArtifact
     ): NextStepAction {
@@ -85,7 +79,7 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
     }
 
     // process bad states
-    const failedState = handleFailedState(step, h, config);
+    const failedState = handleFailedState(step, h);
     if (failedState) return failedState;
 
     function fixCodeOrAdjustToFeedback(

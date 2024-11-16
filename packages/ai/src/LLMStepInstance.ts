@@ -56,7 +56,7 @@ export class LLMStepInstance<
 
   // These two fields are not serialized
   private logger: Logger;
-  private workflow: Workflow<WorkflowShape>;
+  public workflow: Workflow<WorkflowShape>;
 
   private constructor(
     params: StepParams<Shape> & {

@@ -50,6 +50,33 @@ export type ExecuteContext<Shape extends IOShape> = {
   fail(errorType: ErrorType, message: string): void;
 };
 
+/*
+ * This is a type that's used to prepare the step for execution. `PreparedStep`
+ * will be converted by `Workflow.addStep()` to `LLMStepInstance`.
+ *
+ * Notes:
+ * 1) We can't just use LLMStepInstance here, this would cause nasty circular
+ * dependencies (sometimes even Node.js crashes! seriously).
+ * 2) We can't use a pair of template and inputs, because their generic
+ * parameters must be synchronized, and TypeScript can't express that. So we
+ * need to produce a PreparedStep from a template method.
+ *
+ * So, in total, we have three related types:
+ * - `LLMStepTemplate`
+ * - `LLMStepInstance`
+ * - `PreparedStep`
+ *
+ * (And also `StepParams` and `SerializedStep` in `LLMStepInstance`...)
+ *
+ * If this sounds messy, it is. I really tried to find other approaches, but
+ * fixing this would require giving up on `Shape` generic parameters, which has
+ * its own issues.
+ */
+export type PreparedStep<Shape extends IOShape> = {
+  template: LLMStepTemplate<Shape>;
+  inputs: Inputs<Shape>;
+};
+
 export class LLMStepTemplate<const Shape extends IOShape = IOShape> {
   constructor(
     public readonly name: string,
@@ -59,4 +86,11 @@ export class LLMStepTemplate<const Shape extends IOShape = IOShape> {
       inputs: Inputs<Shape>
     ) => Promise<void>
   ) {}
+
+  prepare(inputs: Inputs<Shape>): PreparedStep<Shape> {
+    return {
+      template: this,
+      inputs,
+    };
+  }
 }
