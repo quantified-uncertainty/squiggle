@@ -26,18 +26,12 @@ const Query = graphql`
 export type SelectUserOption =
   SelectUserQuery$data["users"]["edges"][number]["node"];
 
-export function SelectUser<
-  TValues extends FieldValues,
-  TName extends FieldPathByValue<
-    TValues,
-    SelectUserOption | null
-  > = FieldPathByValue<TValues, SelectUserOption | null>,
->({
+export function SelectUser<TValues extends FieldValues>({
   name,
   label,
   required = true,
 }: {
-  name: TName;
+  name: FieldPathByValue<TValues, SelectUserOption | null>;
   label?: string;
   required?: boolean;
 }) {

@@ -11,15 +11,15 @@ describe("Dist", () => {
   );
   testEvalToBe(
     "cumsum([Dist.make(1), Dist.make(5), Dist.make(3)])",
-    "[PointMass(1),PointMass(6),PointMass(9)]"
+    "[PointMass(1), PointMass(6), PointMass(9)]"
   );
   testEvalToBe(
     "cumprod([Dist.make(1),Dist.make(5),Dist.make(3)])",
-    "[PointMass(1),PointMass(5),PointMass(15)]"
+    "[PointMass(1), PointMass(5), PointMass(15)]"
   );
   testEvalToBe(
     "diff([Dist.make(1),Dist.make(5),Dist.make(3)])",
-    "[PointMass(4),PointMass(-2)]"
+    "[PointMass(4), PointMass(-2)]"
   );
   testEvalToBe(
     "Dist.logScore({estimate: mx(Sym.normal(5,2), Sym.uniform(-1000, 1000), [.5, .5]), answer: Sym.normal(5.2,2.2)})",

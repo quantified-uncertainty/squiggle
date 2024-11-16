@@ -28,7 +28,7 @@ describe("Various SampleSet functions", () => {
   );
   testEvalToBe(
     "addOne(t)=t+1; SampleSet.toList(SampleSet.map(SampleSet.fromList([1,2,3,4,5,6]), addOne))",
-    "[2,3,4,5,6,7]"
+    "[2, 3, 4, 5, 6, 7]"
   );
   testEvalToBe(
     "SampleSet.fromList([1, 2, 3])",
@@ -46,17 +46,17 @@ describe("mapN", () => {
   // equal length
   testEvalToBe(
     sq`SampleSet.mapN([SampleSet.fromList([1,2,3,4,5,6]), SampleSet.fromList([6,5,4,3,2,1])], {|x| x[0] > x[1] ? x[0] : x[1]}) -> SampleSet.toList`,
-    "[6,5,4,4,5,6]"
+    "[6, 5, 4, 4, 5, 6]"
   );
 
   // unequal length
   testEvalToBe(
     sq`SampleSet.mapN([SampleSet.fromList([1,2,3,4,5,6]), SampleSet.fromList([6,5,4,3,2,1,1,1])], {|x| x[0] > x[1] ? x[0] : x[1]}) -> SampleSet.toList`,
-    "[6,5,4,4,5,6]"
+    "[6, 5, 4, 4, 5, 6]"
   );
   testEvalToBe(
     sq`SampleSet.mapN([SampleSet.fromList([1,2,3,4,5,6,1,1]), SampleSet.fromList([6,5,4,3,2,1])], {|x| x[0] > x[1] ? x[0] : x[1]}) -> SampleSet.toList`,
-    "[6,5,4,4,5,6]"
+    "[6, 5, 4, 4, 5, 6]"
   );
 });
 

@@ -23,10 +23,11 @@ export async function loadPageQuery<TQuery extends OperationType = never>(
   node: ConcreteRequest,
   variables: VariablesOf<TQuery>
 ): Promise<SerializablePreloadedQuery<TQuery>> {
+  const cookie = (await headers()).get("cookie");
   const response = await networkFetch(
     node.params,
     variables,
-    headers().get("cookie") ?? undefined
+    cookie ?? undefined
   );
   return {
     params: node.params,

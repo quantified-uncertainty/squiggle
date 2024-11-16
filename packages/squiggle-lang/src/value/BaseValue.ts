@@ -42,6 +42,9 @@ export abstract class BaseValue<
     return this.copyWithTags(this.tags?.merge(args) ?? new ValueTags(args));
   }
 
+  // This method should be implemented by specific value classes.
+  // It's allowed to lose some information in the process, e.g. when converting a number to a string,
+  // or when the array is too long.
   protected abstract valueToString(): string;
 
   toString() {
