@@ -1,6 +1,3 @@
-import fs from "fs";
-import path from "path";
-
 import { Artifact, ArtifactKind } from "./Artifact.js";
 import { Code } from "./Code.js";
 import { calculatePriceMultipleCalls } from "./LLMClient.js";
@@ -226,17 +223,4 @@ ${code.source}
 \`\`\`
 `;
   }
-}
-
-export function saveSummaryToFile(summary: string): void {
-  const logDir = path.join(process.cwd(), "logs");
-  if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir, { recursive: true });
-  }
-
-  const timestamp = new Date().toISOString().replace(/:/g, "-");
-  const logFile = path.join(logDir, `squiggle_summary_${timestamp}.md`);
-
-  fs.writeFileSync(logFile, summary);
-  console.log(`Summary saved to ${logFile}`);
 }

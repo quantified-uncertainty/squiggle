@@ -134,8 +134,6 @@ export function addStreamingListeners<Shape extends IOShape>(
     });
   });
   workflow.addEventListener("allStepsFinished", (event) => {
-    // saveSummaryToFile(generateSummary(prompt, workflow));
-
     send({
       kind: "finalResult",
       content: event.workflow.getFinalResult(),

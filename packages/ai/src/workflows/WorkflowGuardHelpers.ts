@@ -31,10 +31,10 @@ addRule({
 Where totalRepeats counts the number of template runs in the entire history, while receptRepeats counts the number of immediate repeats in the step -> parent -> parent chain. (I'm stubborn and still trying to make it parallelism-agnostic, so thinking in terms of graphs, not lists). 
 */
 export class WorkflowGuardHelpers<Shape extends IOShape> {
-  constructor(
-    private readonly workflow: Workflow<Shape>,
-    private readonly _step: LLMStepInstance<any, Shape>
-  ) {}
+  private workflow: Workflow<Shape>;
+  constructor(private readonly _step: LLMStepInstance<any, Shape>) {
+    this.workflow = _step.workflow;
+  }
 
   totalRepeats(template: LLMStepTemplate<any>) {
     return this.workflow.getSteps().filter((step) => step.instanceOf(template))
@@ -43,20 +43,20 @@ export class WorkflowGuardHelpers<Shape extends IOShape> {
 
   recentRepeats(template: LLMStepTemplate<any>) {
     let count = -1;
-    let step = this.workflow.getPreviousStep(this._step);
+    let step = this._step.getPreviousStep();
     while (step?.instanceOf(template)) {
       count++;
-      step = this.workflow.getPreviousStep(step);
+      step = step.getPreviousStep();
     }
     return count;
   }
 
   recentFailedRepeats(template: LLMStepTemplate<any>) {
     let count = -1;
-    let step = this.workflow.getPreviousStep(this._step);
+    let step = this._step.getPreviousStep();
     while (step?.instanceOf(template) && step.getState().kind === "FAILED") {
       count++;
-      step = this.workflow.getPreviousStep(step);
+      step = step.getPreviousStep();
     }
     return count;
   }

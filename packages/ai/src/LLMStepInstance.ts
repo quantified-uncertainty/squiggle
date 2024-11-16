@@ -211,6 +211,16 @@ export class LLMStepInstance<
     return this.state.kind === "DONE";
   }
 
+  getPreviousStep() {
+    const steps = this.workflow.getSteps();
+    const index = steps.indexOf(this as LLMStepInstance<any, WorkflowShape>);
+    if (index < 1) {
+      // first step or not found
+      return undefined;
+    }
+    return steps[index - 1];
+  }
+
   // private methods
 
   private setOutput<K extends Extract<keyof Shape["outputs"], string>>(

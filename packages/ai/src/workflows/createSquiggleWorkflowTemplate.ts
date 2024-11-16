@@ -16,8 +16,8 @@ export const createSquiggleWorkflowTemplate = new WorkflowTemplate<{
   outputs: Record<string, never>;
 }>({
   name: "CreateSquiggle",
-  getTransitionRule: (workflow) =>
-    fixAdjustRetryLoop(workflow, workflow.inputs.prompt),
   getInitialStep: (workflow) =>
     generateCodeStep.prepare({ prompt: workflow.inputs.prompt }),
+  getTransitionRule: (workflow) =>
+    fixAdjustRetryLoop(workflow, workflow.inputs.prompt),
 });

@@ -21,15 +21,16 @@ export type WorkflowInstanceParams<Shape extends IOShape> = {
 export class WorkflowTemplate<const Shape extends IOShape> {
   readonly name: string;
 
-  getTransitionRule: (workflow: Workflow<Shape>) => StepTransitionRule<Shape>;
   getInitialStep: (workflow: Workflow<Shape>) => PreparedStep<any>;
+  getTransitionRule: (workflow: Workflow<Shape>) => StepTransitionRule<Shape>;
 
   // TODO - shape parameter
   constructor(params: {
     name: string;
-    // TODO - do we need two separate functions? we always call them together
-    getTransitionRule: WorkflowTemplate<Shape>["getTransitionRule"];
+    // This function will be called to obtain the first step of the workflow.
     getInitialStep: WorkflowTemplate<Shape>["getInitialStep"];
+    // This function will be called to obtain the next step of the workflow based on the current step.
+    getTransitionRule: WorkflowTemplate<Shape>["getTransitionRule"];
   }) {
     this.name = params.name;
     this.getInitialStep = params.getInitialStep;

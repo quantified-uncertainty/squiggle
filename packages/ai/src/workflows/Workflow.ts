@@ -112,12 +112,12 @@ export class Workflow<Shape extends IOShape = IOShape> {
   public id: string;
   public readonly template: WorkflowTemplate<Shape>;
   public readonly inputs: Inputs<Shape>;
-  private started: boolean = false;
 
   public llmConfig: LlmConfig;
   public startTime: number;
 
   private steps: LLMStepInstance<IOShape, Shape>[];
+  private transitionRule: StepTransitionRule<Shape>;
 
   public llmClient: LLMClient;
 
@@ -135,40 +135,17 @@ export class Workflow<Shape extends IOShape = IOShape> {
       params.openaiApiKey,
       params.anthropicApiKey
     );
+
+    this.transitionRule = params.template.getTransitionRule(this);
   }
 
   private startOrThrow() {
-    if (this.started) {
+    // This function just inserts the first step.
+    // Previously we had a `started` flag, but that wasn't very useful.
+    // But if we ever implement resumable workflows, we'll need to change this.
+    if (this.steps.length) {
       throw new Error("Workflow already started");
     }
-    this.started = true;
-  }
-
-  private configure() {
-    // configure the controller loop
-    {
-      const transitionRule = this.template.getTransitionRule(this);
-      this.addEventListener("stepFinished", ({ data: { step } }) => {
-        const result = transitionRule(
-          step,
-          new WorkflowGuardHelpers(this, step)
-        );
-        switch (result.kind) {
-          case "repeat":
-            this.addStep(step.template.prepare(step.inputs));
-            break;
-          case "step":
-            this.addStep(result.step.prepare(result.inputs));
-            break;
-          case "finish":
-            // no new steps to add
-            break;
-          case "fatal":
-            throw new Error(result.message);
-        }
-      });
-    }
-
     // add the first step
     const initialStep = this.template.getInitialStep(this);
     this.addStep(initialStep);
@@ -186,10 +163,6 @@ export class Workflow<Shape extends IOShape = IOShape> {
         // handlers, but before we add any steps.
         this.dispatchEvent({ type: "workflowStarted" });
 
-        // Important! `configure` should be called after all event listeners are
-        // set up. We want to capture `stepAdded` events.
-        this.configure();
-
         await this.runUntilComplete();
         controller.close();
       },
@@ -201,22 +174,10 @@ export class Workflow<Shape extends IOShape = IOShape> {
   // Run workflow without streaming, only capture the final result
   async runToResult(): Promise<ClientWorkflowResult> {
     this.startOrThrow();
-    this.configure();
 
     await this.runUntilComplete();
 
-    // saveSummaryToFile(generateSummary(workflow));
     return this.getFinalResult();
-  }
-
-  getPreviousStep(
-    step: LLMStepInstance<any, Shape>
-  ): LLMStepInstance<any, Shape> | undefined {
-    const index = this.steps.indexOf(step);
-    if (index < 1) {
-      return undefined;
-    }
-    return this.steps[index - 1];
   }
 
   private addStep<S extends IOShape>(
@@ -241,7 +202,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
   private async runNextStep(): Promise<void> {
     const step = this.getCurrentStep();
 
-    if (!step) {
+    if (!step || step.getState().kind !== "PENDING") {
       return;
     }
 
@@ -256,9 +217,31 @@ export class Workflow<Shape extends IOShape = IOShape> {
       type: "stepFinished",
       payload: { step },
     });
+
+    // apply the transition rule, produce the next step in PENDING state
+    // this code is inlined in this method, which guarantees that we always have one pending step
+    // (until the transition rule decides to finish)
+    const result = this.transitionRule(step, new WorkflowGuardHelpers(step));
+    switch (result.kind) {
+      case "repeat":
+        this.addStep(step.template.prepare(step.inputs));
+        break;
+      case "step":
+        this.addStep(result.step.prepare(result.inputs));
+        break;
+      case "finish":
+        // no new steps to add
+        break;
+      case "fatal":
+        throw new Error(result.message);
+    }
   }
 
   async runUntilComplete() {
+    if (!this.steps.length) {
+      throw new Error("Workflow not started");
+    }
+
     while (!this.isProcessComplete()) {
       await this.runNextStep();
     }
@@ -319,10 +302,8 @@ export class Workflow<Shape extends IOShape = IOShape> {
           if (output.value.type === "success") {
             return { step, code: output.value.source };
           }
-          // Otherwise store the first step with any code
-          if (!stepWithAnyCode) {
-            stepWithAnyCode = { step, code: output.value.source };
-          }
+          // Store the first step with any code
+          stepWithAnyCode ??= { step, code: output.value.source };
         }
       }
     }
