@@ -26,7 +26,7 @@ export function FormField<
   rules,
   label,
   description,
-  inlineLabel,
+  layout,
   standaloneLabel,
   children,
 }: FormFieldProps<TValues, TName>) {
@@ -34,7 +34,7 @@ export function FormField<
     <FieldLayout
       label={label}
       description={description}
-      inlineLabel={inlineLabel}
+      layout={layout}
       standaloneLabel={standaloneLabel}
     >
       <FormInput name={name} rules={rules}>
@@ -48,6 +48,6 @@ export function FormField<
  * Usage example:
  *
  * <FormField name="slug" label="Slug" description="Model slug">{
- *     props => <StyledInput type="text" {...props} />
+ *     props => <StyledInput {...props} />
  * }</FormField>
  */

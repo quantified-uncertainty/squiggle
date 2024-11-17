@@ -75,8 +75,6 @@ export function SelectFormField<
     TValue
   >,
 >({
-  label,
-  description,
   name,
   options,
   required = false,
@@ -90,7 +88,8 @@ export function SelectFormField<
   placeholder,
   optionToFieldValue: maybeOptionToFieldValue,
   fieldValueToOption: maybeFieldValueToOption,
-}: Pick<FormFieldLayoutProps, "label" | "description"> & {
+  ...layoutProps
+}: FormFieldLayoutProps & {
   name: TName;
   required?: boolean;
   disabled?: boolean;
@@ -153,9 +152,8 @@ export function SelectFormField<
     >
       <ControlledFormField<TValues, TValue, TName>
         name={name}
-        label={label}
-        description={description}
         rules={{ required }}
+        {...layoutProps}
       >
         {({ name, value, onChange }) => {
           /* `selectValue` can be null while `value` is not null.

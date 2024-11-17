@@ -34,19 +34,11 @@ export function ControlledFormField<
 >({
   name,
   rules,
-  label,
-  description,
-  inlineLabel,
-  standaloneLabel,
   children,
+  ...layoutProps
 }: ControlledFormFieldProps<TValues, TValueType, TName>) {
   return (
-    <FieldLayout
-      label={label}
-      description={description}
-      inlineLabel={inlineLabel}
-      standaloneLabel={standaloneLabel}
-    >
+    <FieldLayout {...layoutProps}>
       <ControlledFormInput name={name} rules={rules}>
         {children}
       </ControlledFormInput>
@@ -58,6 +50,6 @@ export function ControlledFormField<
  * Usage example:
  *
  * <FormField name="slug" label="Slug" description="Model slug">{
- *     props => <StyledInput type="text" {...props} />
+ *     props => <StyledInput {...props} />
  * }</FormField>
  */

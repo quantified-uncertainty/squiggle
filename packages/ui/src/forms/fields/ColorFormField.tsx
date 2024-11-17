@@ -12,7 +12,10 @@ export function ColorFormField<
   >,
 >({ ...fieldProps }: CommonStringFieldProps<TValues, TName>) {
   return (
-    <ControlledFormField<TValues, string, TName> {...fieldProps} inlineLabel>
+    <ControlledFormField<TValues, string, TName>
+      {...fieldProps}
+      layout="reverse-row"
+    >
       {({ value, onChange }) => (
         <StyledColorInput value={value} onChange={onChange} />
       )}

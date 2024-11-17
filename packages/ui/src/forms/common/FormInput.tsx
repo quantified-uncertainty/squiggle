@@ -36,6 +36,6 @@ export function FormInput<
 /* Usage example:
  *
  * <FormInput name="foo">
- *   {(props) => <StyledInput type="text" {...props} />}
+ *   {(props) => <StyledInput {...props} />}
  * </FormInput>
  */
