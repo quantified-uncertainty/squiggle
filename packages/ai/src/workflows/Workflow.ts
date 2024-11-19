@@ -114,6 +114,8 @@ export class Workflow<Shape extends IOShape = IOShape> {
   public readonly inputs: Inputs<Shape>;
 
   public llmConfig: LlmConfig;
+  // This field is somewhat broken - it's set to `Date.now()`, even when the workflow was deserialized from the database.
+  // It's better to use `steps[0].startTime` as the start time, if you're sure that the workflow has already started and so it has at least one step.
   public startTime: number;
 
   private steps: LLMStepInstance<IOShape, Shape>[];
@@ -322,8 +324,20 @@ export class Workflow<Shape extends IOShape = IOShape> {
 
     const isValid = finalStep.step.getState().kind === "DONE";
 
-    const endTime = Date.now();
-    const runTimeMs = endTime - this.startTime;
+    const lastStep = this.steps.at(-1);
+    if (!lastStep) {
+      throw new Error("No steps found");
+    }
+
+    const lastStepState = finalStep.step.getState();
+    if (lastStepState.kind === "PENDING") {
+      throw new Error("Last step is still pending");
+    }
+
+    const startTime = this.steps[0].startTime;
+    const endTime = lastStep.startTime + lastStepState.durationMs;
+    const runTimeMs = endTime - startTime;
+
     const { totalPrice, llmRunCount } = this.getLlmMetrics();
 
     const logSummary = generateSummary(this);
