@@ -14,8 +14,14 @@ export function decodeDbWorkflowToClientWorkflow(
     switch (row.format) {
       case "V1_0":
         return decodeV1_0JsonToClientWorkflow(row.workflow);
-      case "V2_0":
-        return decodeV2_0JsonToClientWorkflow(row.workflow);
+      case "V2_0": {
+        const clientWorkflow = decodeV2_0JsonToClientWorkflow(row.workflow);
+        // serialized workflow doesn't include full logs, but we store them in the database
+        if (clientWorkflow.status === "finished") {
+          clientWorkflow.result.logSummary = row.markdown;
+        }
+        return clientWorkflow;
+      }
       default:
         throw new Error(
           `Unknown workflow format: ${row.format satisfies never}`

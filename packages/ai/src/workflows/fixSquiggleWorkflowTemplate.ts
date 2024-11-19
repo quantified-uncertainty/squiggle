@@ -1,6 +1,6 @@
 import { PromptArtifact } from "../Artifact.js";
 import { runAndFormatCodeStep } from "../steps/runAndFormatCodeStep.js";
-import { fixAdjustRetryLoop } from "./controllers.js";
+import { getDefaultTransitionRule } from "./controllers.js";
 import { WorkflowTemplate } from "./WorkflowTemplate.js";
 
 export const fixSquiggleWorkflowTemplate = new WorkflowTemplate<{
@@ -15,6 +15,6 @@ export const fixSquiggleWorkflowTemplate = new WorkflowTemplate<{
   getTransitionRule: (workflow) => {
     // TODO - cache the prompt artifact once? maybe even as a global variable
     // (but it's better to just refactor steps to make the prompt optional, somehow)
-    return fixAdjustRetryLoop(workflow, new PromptArtifact(""));
+    return getDefaultTransitionRule(workflow, new PromptArtifact(""));
   },
 });

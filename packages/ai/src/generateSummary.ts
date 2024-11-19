@@ -96,10 +96,15 @@ function generateDetailedStepLogs<Shape extends IOShape>(
       detailedLogs += getFullArtifact(key, artifact);
     }
 
-    detailedLogs += "### Outputs:\n";
-    for (const [key, artifact] of Object.entries(step.getOutputs())) {
-      if (!artifact) continue;
-      detailedLogs += getFullArtifact(key, artifact);
+    {
+      const state = step.getState();
+      if (state.kind === "DONE") {
+        detailedLogs += "### Outputs:\n";
+        for (const [key, artifact] of Object.entries(state.outputs)) {
+          if (!artifact) continue;
+          detailedLogs += getFullArtifact(key, artifact);
+        }
+      }
     }
 
     detailedLogs += "### Logs:\n";

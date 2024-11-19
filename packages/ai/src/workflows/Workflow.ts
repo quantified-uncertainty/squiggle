@@ -294,9 +294,12 @@ export class Workflow<Shape extends IOShape = IOShape> {
     // Single pass through steps from most recent to oldest
     for (let i = this.steps.length - 1; i >= 0; i--) {
       const step = this.steps[i];
-      const outputs = step.getOutputs();
+      const stepState = step.getState();
+      if (stepState.kind !== "DONE") {
+        continue;
+      }
 
-      for (const output of Object.values(outputs)) {
+      for (const output of Object.values(stepState.outputs)) {
         if (output?.kind === "code") {
           // If we find successful code, return immediately
           if (output.value.type === "success") {

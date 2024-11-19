@@ -1,6 +1,6 @@
 import { CodeArtifact, PromptArtifact } from "../Artifact.js";
 import { LLMStepInstance } from "../LLMStepInstance.js";
-import { IOShape } from "../LLMStepTemplate.js";
+import { IOShape, StepState } from "../LLMStepTemplate.js";
 import { adjustToFeedbackStep } from "../steps/adjustToFeedbackStep.js";
 import { fixCodeUntilItRunsStep } from "../steps/fixCodeUntilItRunsStep.js";
 import { generateCodeStep } from "../steps/generateCodeStep.js";
@@ -44,14 +44,21 @@ function handleFailedState<Shape extends IOShape>(
     );
   }
 
-  if (state.kind !== "DONE") {
-    return h.fatal(ERROR_MESSAGES.NOT_DONE(step.template.name, state.kind));
-  }
-
   return undefined;
 }
 
-export function fixAdjustRetryLoop<Shape extends IOShape>(
+// assumes that the step is done
+function getOutputs<Shape extends IOShape, WorkflowShape extends IOShape>(
+  step: LLMStepInstance<Shape, WorkflowShape>
+): Extract<StepState<Shape>, { kind: "DONE" }>["outputs"] {
+  const state = step.getState();
+  if (state.kind !== "DONE") {
+    throw new Error(ERROR_MESSAGES.NOT_DONE(step.template.name, state.kind));
+  }
+  return state.outputs;
+}
+
+export function getDefaultTransitionRule<Shape extends IOShape>(
   workflow: Workflow<Shape>,
   prompt: PromptArtifact
 ): StepTransitionRule<Shape> {
@@ -59,11 +66,12 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
     maxNumericSteps: workflow.llmConfig.numericSteps,
     maxStyleGuideSteps: workflow.llmConfig.styleGuideSteps,
   };
+
   return (step, h) => {
-    function getNextIntendedState(
+    const getNextIntendedState = (
       intendedStep: "AdjustToFeedback" | "MatchStyleGuide",
       code: CodeArtifact
-    ): NextStepAction {
+    ): NextStepAction => {
       const nextSteps = [
         // Only check AdjustToFeedback if it's intended and has runs remaining
         intendedStep === "AdjustToFeedback" &&
@@ -76,45 +84,40 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
           : null,
       ].filter((r) => !!r);
       return nextSteps.length ? nextSteps[0] : h.finish();
-    }
+    };
 
     // process bad states
     const failedState = handleFailedState(step, h);
     if (failedState) return failedState;
 
-    function fixCodeOrAdjustToFeedback(
-      code: CodeArtifact | undefined
-    ): NextStepAction {
-      if (!code) {
-        return h.fatal(ERROR_MESSAGES.NO_CODE);
-      }
+    const fixCodeOrAdjustToFeedback = (code: CodeArtifact): NextStepAction => {
       if (code.value.type !== "success") {
         return h.step(fixCodeUntilItRunsStep, { code });
       }
       return getNextIntendedState("AdjustToFeedback", code);
-    }
+    };
 
     // generateCodeStep
     if (step.instanceOf(generateCodeStep)) {
-      const { code } = step.getOutputs();
+      const { code } = getOutputs(step);
       return fixCodeOrAdjustToFeedback(code);
     }
 
     // runAndFormatCodeStep
     if (step.instanceOf(runAndFormatCodeStep)) {
-      const { code } = step.getOutputs();
+      const { code } = getOutputs(step);
       return fixCodeOrAdjustToFeedback(code);
     }
 
     // fixCodeUntilItRunsStep
     if (step.instanceOf(fixCodeUntilItRunsStep)) {
-      const { code } = step.getOutputs();
+      const { code } = getOutputs(step);
       return fixCodeOrAdjustToFeedback(code);
     }
 
     // adjustToFeedbackStep
     if (step.instanceOf(adjustToFeedbackStep)) {
-      const { code } = step.getOutputs();
+      const { code } = getOutputs(step);
 
       // no code means no need for adjustment, apply style guide
       if (!code) {
@@ -130,7 +133,7 @@ export function fixAdjustRetryLoop<Shape extends IOShape>(
 
     // matchStyleGuideStep
     if (step.instanceOf(matchStyleGuideStep)) {
-      const { code } = step.getOutputs();
+      const { code } = getOutputs(step);
       if (!code) {
         return h.finish();
       }
