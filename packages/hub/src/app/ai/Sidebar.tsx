@@ -117,7 +117,6 @@ Outputs:
             };
 
       submitWorkflow(requestBody);
-      form.setValue("prompt", "");
     }
   );
 
