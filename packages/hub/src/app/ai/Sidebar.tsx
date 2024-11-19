@@ -70,8 +70,8 @@ Outputs:
 - Charts: monthly costs, benefits, net value over time`,
       squiggleCode: "",
       model: "Claude-Sonnet",
-      numericSteps: 3,
-      styleGuideSteps: 2,
+      numericSteps: 1,
+      styleGuideSteps: 1,
     },
   });
 
