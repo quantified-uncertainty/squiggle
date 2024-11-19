@@ -48,10 +48,11 @@ export type Outputs<Shape extends IOShape<any, any>> = {
   [K in keyof Shape["outputs"]]: AllowedOutputValue<Shape["outputs"][K]>;
 };
 
+// What the step implementation returns.
 type StepExecuteResult<Shape extends IOShape> = {
-  [K in keyof Shape["outputs"]]:
-    | AllowedOutputValue<Shape["outputs"][K]>
-    | NonNullable<AllowedOutputValue<Shape["outputs"][K]>>["value"];
+  [K in keyof Shape["outputs"]]:  // for any output field...
+    | AllowedOutputValue<Shape["outputs"][K]> // ...return either the artifact object...
+    | NonNullable<AllowedOutputValue<Shape["outputs"][K]>>["value"]; // or its value, as a shorthand
 };
 
 // ExecuteContext is the context that's available to the step implementation.
