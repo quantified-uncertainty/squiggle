@@ -57,7 +57,10 @@ export class LLMStepInstance<
 
   public readonly inputs: StepParams<Shape>["inputs"];
 
-  private startTime: StepParams<Shape>["startTime"];
+  // This is the moment step was _created_, not when it was run.
+  // But it shouldn't matter, for now; workflows run steps immediately.
+  public startTime: StepParams<Shape>["startTime"];
+
   private conversationMessages: StepParams<Shape>["conversationMessages"];
   public llmMetricsList: StepParams<Shape>["llmMetricsList"];
 
@@ -117,10 +120,16 @@ export class LLMStepInstance<
     return this.conversationMessages;
   }
 
-  async _run() {
+  // Runs the PENDING step; its state will be updated to DONE or FAILED.
+  async run() {
     if (this._state.kind !== "PENDING") {
       return;
     }
+
+    this.log({
+      type: "info",
+      message: `Step "${this.template.name}" started`,
+    });
 
     const limits = this.workflow.checkResourceLimits();
     if (limits) {
@@ -128,14 +137,19 @@ export class LLMStepInstance<
       return;
     }
 
+    // Prepare the execution context, which will be passed to the step implementation.
     const executeContext: ExecuteContext = {
       log: (log) => this.log(log),
       queryLLM: (promptPair) => this.queryLLM(promptPair),
       fail: (errorType, message) => {
+        // `context.fail` throws instead of proxying to `this.fail`. This allows
+        // us to simplify the return signature of step implementations -
+        // `context.fail` is `never`, so we don't need to return anything.
         throw new FailError(errorType, message);
       },
     };
 
+    // Run the step implementation; catch all errors and turn them into FAILED states.
     try {
       const result = await this.template.execute(executeContext, this.inputs);
 
@@ -174,15 +188,6 @@ export class LLMStepInstance<
         );
       }
     }
-  }
-
-  async run() {
-    this.log({
-      type: "info",
-      message: `Step "${this.template.name}" started`,
-    });
-
-    await this._run();
 
     const completionMessage = `Step "${this.template.name}" completed with status: ${this._state.kind}${
       this._state.kind !== "PENDING" && `, in ${this._state.durationMs / 1000}s`
