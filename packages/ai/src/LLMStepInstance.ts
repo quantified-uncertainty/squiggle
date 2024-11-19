@@ -369,18 +369,22 @@ export class LLMStepInstance<
         visitor.artifact(inputId),
       ])
     );
-    const state: StepState<any> =
-      serializedState.kind === "DONE"
-        ? {
-            ...serializedState,
-            // TODO - remove outputIds
-            outputs: Object.fromEntries(
-              Object.entries(legacyOutputIds ?? serializedState.outputIds).map(
-                ([name, outputId]) => [name, visitor.artifact(outputId)]
-              )
-            ),
-          }
-        : serializedState;
+
+    let state: StepState<any>;
+
+    if (serializedState.kind === "DONE") {
+      const { outputIds, ...serializedStateWithoutOutputs } = serializedState;
+      state = {
+        ...serializedStateWithoutOutputs,
+        outputs: Object.fromEntries(
+          Object.entries(legacyOutputIds ?? outputIds).map(
+            ([name, outputId]) => [name, visitor.artifact(outputId)]
+          )
+        ),
+      };
+    } else {
+      state = serializedState;
+    }
 
     return {
       ...params,
@@ -436,6 +440,8 @@ export type SerializedStep = Omit<
 > & {
   templateName: string;
   inputIds: Record<string, number>;
+  // Legacy - in the modern format we store outputs on SerializedState, but we still support this field for old workflows.
+  // Can be removed if we deserialize and serialize again all workflows in the existing database.
   outputIds?: Record<string, number>;
   state: SerializedState<IOShape>;
 };
