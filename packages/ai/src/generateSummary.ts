@@ -1,6 +1,3 @@
-import fs from "fs";
-import path from "path";
-
 import { Artifact, ArtifactKind } from "./Artifact.js";
 import { Code } from "./Code.js";
 import { calculatePriceMultipleCalls } from "./LLMClient.js";
@@ -99,10 +96,15 @@ function generateDetailedStepLogs<Shape extends IOShape>(
       detailedLogs += getFullArtifact(key, artifact);
     }
 
-    detailedLogs += "### Outputs:\n";
-    for (const [key, artifact] of Object.entries(step.getOutputs())) {
-      if (!artifact) continue;
-      detailedLogs += getFullArtifact(key, artifact);
+    {
+      const state = step.getState();
+      if (state.kind === "DONE") {
+        detailedLogs += "### Outputs:\n";
+        for (const [key, artifact] of Object.entries(state.outputs)) {
+          if (!artifact) continue;
+          detailedLogs += getFullArtifact(key, artifact);
+        }
+      }
     }
 
     detailedLogs += "### Logs:\n";
@@ -226,17 +228,4 @@ ${code.source}
 \`\`\`
 `;
   }
-}
-
-export function saveSummaryToFile(summary: string): void {
-  const logDir = path.join(process.cwd(), "logs");
-  if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir, { recursive: true });
-  }
-
-  const timestamp = new Date().toISOString().replace(/:/g, "-");
-  const logFile = path.join(logDir, `squiggle_summary_${timestamp}.md`);
-
-  fs.writeFileSync(logFile, summary);
-  console.log(`Summary saved to ${logFile}`);
 }

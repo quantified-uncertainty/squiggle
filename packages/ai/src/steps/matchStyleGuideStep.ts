@@ -67,7 +67,7 @@ export const matchStyleGuideStep = new LLMStepTemplate(
       code: "code",
     },
     outputs: {
-      code: "code",
+      code: "code?",
     },
   },
   async (context, { prompt, code }) => {
@@ -81,7 +81,7 @@ export const matchStyleGuideStep = new LLMStepTemplate(
 
     if (!completion) {
       // failed
-      return;
+      return context.fail("MINOR", "No completion");
     }
 
     // handle adjustment response
@@ -95,7 +95,7 @@ export const matchStyleGuideStep = new LLMStepTemplate(
         type: "info",
         message: "LLM determined no adjustment is needed",
       });
-      return;
+      return { code: undefined };
     }
 
     if (
@@ -109,19 +109,17 @@ export const matchStyleGuideStep = new LLMStepTemplate(
           message: "FAIL: " + diffResponse.value,
         });
         // try again
-        context.setOutput("code", code);
-        return;
+        return { code };
       }
 
       const adjustedCode = await codeStringToCode(diffResponse.value);
-      context.setOutput("code", adjustedCode);
-      return;
+      return { code: adjustedCode };
     } else {
       context.log({
         type: "info",
         message: "No adjustments provided, considering process complete",
       });
-      return;
+      return { code: undefined };
     }
   }
 );

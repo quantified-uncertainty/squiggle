@@ -1,5 +1,5 @@
 import { generateCodeStep } from "../steps/generateCodeStep.js";
-import { fixAdjustRetryLoop } from "./controllers.js";
+import { getDefaultTransitionRule } from "./controllers.js";
 import { WorkflowTemplate } from "./WorkflowTemplate.js";
 
 /**
@@ -16,10 +16,8 @@ export const createSquiggleWorkflowTemplate = new WorkflowTemplate<{
   outputs: Record<string, never>;
 }>({
   name: "CreateSquiggle",
-  configureControllerLoop(workflow, inputs) {
-    fixAdjustRetryLoop(workflow, inputs.prompt);
-  },
-  configureInitialSteps(workflow, inputs) {
-    workflow.addStep(generateCodeStep, { prompt: inputs.prompt });
-  },
+  getInitialStep: (workflow) =>
+    generateCodeStep.prepare({ prompt: workflow.inputs.prompt }),
+  getTransitionRule: (workflow) =>
+    getDefaultTransitionRule(workflow, workflow.inputs.prompt),
 });

@@ -45,6 +45,22 @@ export function artifactToClientArtifact(value: Artifact): ClientArtifact {
   }
 }
 
+function getClientOutputs<Shape extends IOShape, WorkflowShape extends IOShape>(
+  step: LLMStepInstance<Shape, WorkflowShape>
+): Record<string, ClientArtifact> {
+  const stepState = step.getState();
+  return stepState.kind === "DONE"
+    ? Object.fromEntries(
+        Object.entries(stepState.outputs)
+          .filter(
+            (pair): pair is [string, NonNullable<(typeof pair)[1]>] =>
+              pair[1] !== undefined
+          )
+          .map(([key, value]) => [key, artifactToClientArtifact(value)])
+      )
+    : {};
+}
+
 export function stepToClientStep(step: LLMStepInstance): ClientStep {
   return {
     id: step.id,
@@ -56,14 +72,7 @@ export function stepToClientStep(step: LLMStepInstance): ClientStep {
         artifactToClientArtifact(value),
       ])
     ),
-    outputs: Object.fromEntries(
-      Object.entries(step.getOutputs())
-        .filter(
-          (pair): pair is [string, NonNullable<(typeof pair)[1]>] =>
-            pair[1] !== undefined
-        )
-        .map(([key, value]) => [key, artifactToClientArtifact(value)])
-    ),
+    outputs: getClientOutputs(step),
     messages: step.getConversationMessages(),
   };
 }
@@ -121,21 +130,12 @@ export function addStreamingListeners<Shape extends IOShape>(
       content: {
         id: event.data.step.id,
         state: event.data.step.getState().kind,
-        outputs: Object.fromEntries(
-          Object.entries(event.data.step.getOutputs())
-            .filter(
-              (pair): pair is [string, NonNullable<(typeof pair)[1]>] =>
-                pair[1] !== undefined
-            )
-            .map(([key, value]) => [key, artifactToClientArtifact(value)])
-        ),
+        outputs: getClientOutputs(event.data.step),
         messages: event.data.step.getConversationMessages(),
       },
     });
   });
   workflow.addEventListener("allStepsFinished", (event) => {
-    // saveSummaryToFile(generateSummary(prompt, workflow));
-
     send({
       kind: "finalResult",
       content: event.workflow.getFinalResult(),

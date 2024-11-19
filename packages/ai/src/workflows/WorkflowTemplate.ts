@@ -1,6 +1,6 @@
 import { LLMStepInstance } from "../LLMStepInstance.js";
-import { Inputs, IOShape } from "../LLMStepTemplate.js";
-import { type LlmConfig, Workflow } from "./Workflow.js";
+import { Inputs, IOShape, PreparedStep } from "../LLMStepTemplate.js";
+import { type LlmConfig, StepTransitionRule, Workflow } from "./Workflow.js";
 
 export type WorkflowInstanceParams<Shape extends IOShape> = {
   id: string;
@@ -19,27 +19,22 @@ export type WorkflowInstanceParams<Shape extends IOShape> = {
  * It works similarly to LLMStepTemplate, but for workflows.
  */
 export class WorkflowTemplate<const Shape extends IOShape> {
-  public readonly name: string;
+  readonly name: string;
 
-  public configureControllerLoop: (
-    workflow: Workflow<Shape>,
-    inputs: Inputs<Shape>
-  ) => void;
-  public configureInitialSteps: (
-    workflow: Workflow<Shape>,
-    inputs: Inputs<Shape>
-  ) => void;
+  getInitialStep: (workflow: Workflow<Shape>) => PreparedStep<any>;
+  getTransitionRule: (workflow: Workflow<Shape>) => StepTransitionRule<Shape>;
 
   // TODO - shape parameter
   constructor(params: {
     name: string;
-    // TODO - do we need two separate functions? we always call them together
-    configureControllerLoop: WorkflowTemplate<Shape>["configureControllerLoop"];
-    configureInitialSteps: WorkflowTemplate<Shape>["configureInitialSteps"];
+    // This function will be called to obtain the first step of the workflow.
+    getInitialStep: WorkflowTemplate<Shape>["getInitialStep"];
+    // This function will be called to obtain the next step of the workflow based on the current step.
+    getTransitionRule: WorkflowTemplate<Shape>["getTransitionRule"];
   }) {
     this.name = params.name;
-    this.configureInitialSteps = params.configureInitialSteps;
-    this.configureControllerLoop = params.configureControllerLoop;
+    this.getInitialStep = params.getInitialStep;
+    this.getTransitionRule = params.getTransitionRule;
   }
 
   instantiate(
