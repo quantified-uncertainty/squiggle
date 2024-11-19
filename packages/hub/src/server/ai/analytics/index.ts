@@ -68,7 +68,10 @@ export async function getTypeStats() {
             (typeStats[stepName]["FAILED"] ?? 0) + 1;
           continue;
         }
-        const code = step.getOutputs()["code"];
+        if (state.kind !== "DONE") {
+          continue;
+        }
+        const code = state.outputs["code"];
         if (code && code instanceof CodeArtifact) {
           typeStats[stepName][code.value.type] =
             (typeStats[stepName][code.value.type] ?? 0) + 1;
@@ -92,7 +95,11 @@ export async function getCodeErrors() {
   const errors: StepError[] = [];
   for (const workflow of getModernWorkflows(rows)) {
     for (const step of workflow.getSteps()) {
-      const code = step.getOutputs()["code"];
+      const state = step.getState();
+      if (state.kind !== "DONE") {
+        continue;
+      }
+      const code = state.outputs["code"];
       if (
         code &&
         code instanceof CodeArtifact &&

@@ -140,6 +140,8 @@ export class LLMStepInstance<
       const result = await this.template.execute(executeContext, this.inputs);
 
       const outputs = {} as Outputs<Shape>; // will be filled in below
+
+      // This code is unfortunately full of `as any`, caused by `Object.keys` limitations in TypeScript.
       Object.keys(result).forEach((key: keyof typeof result) => {
         const value = result[key];
         if (value instanceof BaseArtifact) {

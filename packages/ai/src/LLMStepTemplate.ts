@@ -93,6 +93,23 @@ export class LLMStepTemplate<const Shape extends IOShape = IOShape> {
   constructor(
     public readonly name: string,
     public readonly shape: Shape,
+    /**
+     * This function is the main API for implementing steps.
+     *
+     * It takes the context and inputs, and returns the outputs.
+     *
+     * The returned value must match the template's shape. For example, if the
+     * shape has `{ outputs: { result: 'code' }}`, then the result must be an
+     * object with a `result` property that's either a code artifact, or a value
+     * of such artifact.
+     *
+     * It's possible to use optional outputs, but only if the shape has `?` in
+     * the output kind. In this case, you must return `{ result: undefined }`.
+     *
+     * See the individual step implementations in `./steps/*.ts` for examples.
+     *
+     * If the step has failed, you can call `context.fail()` to stop execution.
+     */
     public readonly execute: (
       context: ExecuteContext,
       inputs: Inputs<Shape>
