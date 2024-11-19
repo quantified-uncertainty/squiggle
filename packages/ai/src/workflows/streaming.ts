@@ -140,6 +140,7 @@ export function addStreamingListeners<Shape extends IOShape>(
       kind: "finalResult",
       content: event.workflow.getFinalResult(),
     });
+    controller.close();
   });
 }
 

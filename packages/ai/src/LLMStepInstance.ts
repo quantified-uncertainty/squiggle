@@ -404,23 +404,28 @@ export function serializeStepParams(
   params: StepParams<IOShape>,
   visitor: AiSerializationVisitor
 ): SerializedStep {
+  let serializedState: SerializedState<IOShape>;
+  if (params.state.kind === "DONE") {
+    const { outputs, ...stateWithoutOutputs } = params.state;
+    serializedState = {
+      ...stateWithoutOutputs,
+      outputIds: Object.fromEntries(
+        Object.entries(outputs)
+          .map(([key, output]) =>
+            output ? [key, visitor.artifact(output)] : undefined
+          )
+          .filter((x) => x !== undefined)
+      ),
+    };
+  } else {
+    serializedState = params.state;
+  }
+
   return {
     id: params.id,
     sequentialId: params.sequentialId,
     templateName: params.template.name,
-    state:
-      params.state.kind === "DONE"
-        ? {
-            ...params.state,
-            outputIds: Object.fromEntries(
-              Object.entries(params.state.outputs)
-                .map(([key, output]) =>
-                  output ? [key, visitor.artifact(output)] : undefined
-                )
-                .filter((x) => x !== undefined)
-            ),
-          }
-        : params.state,
+    state: serializedState,
     startTime: params.startTime,
     conversationMessages: params.conversationMessages,
     llmMetricsList: params.llmMetricsList,

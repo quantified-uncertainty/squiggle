@@ -148,6 +148,9 @@ export class Workflow<Shape extends IOShape = IOShape> {
     if (this.steps.length) {
       throw new Error("Workflow already started");
     }
+
+    this.dispatchEvent({ type: "workflowStarted" });
+
     // add the first step
     const initialStep = this.template.getInitialStep(this);
     this.addStep(initialStep);
@@ -155,18 +158,13 @@ export class Workflow<Shape extends IOShape = IOShape> {
 
   // Run workflow to the ReadableStream, appropriate for streaming in Next.js routes
   runAsStream(): ReadableStream<string> {
-    this.startOrThrow();
-
     const stream = new ReadableStream<string>({
       start: async (controller) => {
         addStreamingListeners(this, controller);
 
-        // We need to dispatch this event after we configured the event
-        // handlers, but before we add any steps.
-        this.dispatchEvent({ type: "workflowStarted" });
+        this.startOrThrow();
 
         await this.runUntilComplete();
-        controller.close();
       },
     });
 
