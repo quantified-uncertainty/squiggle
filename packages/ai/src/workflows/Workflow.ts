@@ -316,32 +316,32 @@ export class Workflow<Shape extends IOShape = IOShape> {
 
   getFinalResult(): ClientWorkflowResult {
     const finalStep = this.getRecentStepWithCode();
-    if (!finalStep) {
-      throw new Error("No steps found");
-    }
+    const isValid = finalStep?.step.getState().kind === "DONE";
 
-    const isValid = finalStep.step.getState().kind === "DONE";
-
+    // compute run time
+    let runTimeMs: number;
     const lastStep = this.steps.at(-1);
     if (!lastStep) {
       throw new Error("No steps found");
     }
 
-    const lastStepState = finalStep.step.getState();
-    if (lastStepState.kind === "PENDING") {
-      throw new Error("Last step is still pending");
-    }
+    {
+      const lastStepState = lastStep.getState();
+      if (lastStepState.kind === "PENDING") {
+        throw new Error("Last step is still pending");
+      }
 
-    const startTime = this.steps[0].startTime;
-    const endTime = lastStep.startTime + lastStepState.durationMs;
-    const runTimeMs = endTime - startTime;
+      const startTime = this.steps[0].startTime;
+      const endTime = lastStep.startTime + lastStepState.durationMs;
+      runTimeMs = endTime - startTime;
+    }
 
     const { totalPrice, llmRunCount } = this.getLlmMetrics();
 
     const logSummary = generateSummary(this);
 
     return {
-      code: finalStep.code,
+      code: finalStep?.code ?? "",
       isValid,
       totalPrice,
       runTimeMs,
