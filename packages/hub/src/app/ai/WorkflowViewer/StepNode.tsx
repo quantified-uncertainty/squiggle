@@ -32,7 +32,7 @@ export const StepNode: FC<StepNodeProps> = ({
           <span className="mr-1 text-slate-400">{stepNumber}.</span>
           {stepNames[data.name] || data.name}
         </div>
-        {data.state !== "DONE" && (
+        {data.state.kind !== "DONE" && (
           <div className="shrink-0">
             <StepStatusIcon step={data} />
           </div>

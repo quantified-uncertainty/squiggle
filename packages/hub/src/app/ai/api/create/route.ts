@@ -85,7 +85,10 @@ export async function POST(req: Request) {
     };
 
     const openaiApiKey = process.env["OPENAI_API_KEY"];
-    const anthropicApiKey = process.env["ANTHROPIC_API_KEY"];
+    const anthropicApiKey =
+      request.anthropicApiKey || process.env["ANTHROPIC_API_KEY"];
+
+    console.log({ anthropicApiKey });
 
     const squiggleWorkflow =
       request.kind === "create"

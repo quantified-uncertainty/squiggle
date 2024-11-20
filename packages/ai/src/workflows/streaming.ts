@@ -5,7 +5,7 @@ import {
 
 import { Artifact } from "../Artifact.js";
 import { type LLMStepInstance } from "../LLMStepInstance.js";
-import { IOShape } from "../LLMStepTemplate.js";
+import { IOShape, StepState } from "../LLMStepTemplate.js";
 import {
   ClientArtifact,
   ClientStep,
@@ -45,34 +45,37 @@ export function artifactToClientArtifact(value: Artifact): ClientArtifact {
   }
 }
 
-function getClientOutputs<Shape extends IOShape, WorkflowShape extends IOShape>(
-  step: LLMStepInstance<Shape, WorkflowShape>
-): Record<string, ClientArtifact> {
-  const stepState = step.getState();
-  return stepState.kind === "DONE"
-    ? Object.fromEntries(
-        Object.entries(stepState.outputs)
+function getClientState<Shape extends IOShape>(
+  state: StepState<Shape>
+): ClientStep["state"] {
+  if (state.kind === "DONE") {
+    return {
+      kind: "DONE",
+      outputs: Object.fromEntries(
+        Object.entries(state.outputs)
           .filter(
             (pair): pair is [string, NonNullable<(typeof pair)[1]>] =>
               pair[1] !== undefined
           )
           .map(([key, value]) => [key, artifactToClientArtifact(value)])
-      )
-    : {};
+      ),
+    };
+  } else {
+    return state;
+  }
 }
 
 export function stepToClientStep(step: LLMStepInstance): ClientStep {
   return {
     id: step.id,
     name: step.template.name ?? "unknown",
-    state: step.getState().kind,
+    state: getClientState(step.getState()),
     inputs: Object.fromEntries(
       Object.entries(step.getInputs()).map(([key, value]) => [
         key,
         artifactToClientArtifact(value),
       ])
     ),
-    outputs: getClientOutputs(step),
     messages: step.getConversationMessages(),
   };
 }
@@ -129,8 +132,7 @@ export function addStreamingListeners<Shape extends IOShape>(
       kind: "stepUpdated",
       content: {
         id: event.data.step.id,
-        state: event.data.step.getState().kind,
-        outputs: getClientOutputs(event.data.step),
+        state: getClientState(event.data.step.getState()),
         messages: event.data.step.getConversationMessages(),
       },
     });
@@ -207,9 +209,8 @@ export async function decodeWorkflowFromReader({
           steps: [
             ...workflow.steps,
             {
-              outputs: {},
               messages: [],
-              state: "PENDING",
+              state: { kind: "PENDING" },
               ...event.content,
             },
           ],

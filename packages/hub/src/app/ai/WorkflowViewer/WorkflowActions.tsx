@@ -1,16 +1,15 @@
 import { FC, useEffect, useRef, useState } from "react";
 
-import { ClientStep, ClientWorkflow } from "@quri/squiggle-ai";
+import { ClientWorkflow } from "@quri/squiggle-ai";
 
-import { SelectedNodeSideView } from "./SelectedNodeSideView";
+import { ClientStepView } from "./ClientStepView";
 import { StepNode } from "./StepNode";
 
-export const WorkflowActions: FC<{
+export const WorkflowSteps: FC<{
   workflow: ClientWorkflow;
   height: number;
-  onNodeClick?: (node: ClientStep) => void;
-}> = ({ workflow, height, onNodeClick }) => {
-  const [selectedNodeIndex, setSelectedNodeIndex] = useState<number | null>(
+}> = ({ workflow, height }) => {
+  const [selectedStepIndex, setSelectedStepIndex] = useState<number | null>(
     workflow.steps.length - 1
   );
   const prevStepsLengthRef = useRef(workflow.steps.length);
@@ -22,8 +21,8 @@ export const WorkflowActions: FC<{
 
     // select the last non-pending step
     for (let i = workflow.steps.length - 1; i >= 0; i--) {
-      if (workflow.steps[i].state !== "PENDING") {
-        setSelectedNodeIndex(i);
+      if (workflow.steps[i].state.kind !== "PENDING") {
+        setSelectedStepIndex(i);
         break;
       }
     }
@@ -31,24 +30,22 @@ export const WorkflowActions: FC<{
     prevStepsLengthRef.current = workflow.steps.length;
   }, [workflow.steps]);
 
-  const selectPreviousNode =
-    selectedNodeIndex !== null && selectedNodeIndex > 0
+  const selectPreviousStep =
+    selectedStepIndex !== null && selectedStepIndex > 0
       ? () => {
-          setSelectedNodeIndex(selectedNodeIndex - 1);
-          onNodeClick?.(workflow.steps[selectedNodeIndex - 1]);
+          setSelectedStepIndex(selectedStepIndex - 1);
         }
       : undefined;
 
-  const selectNextNode =
-    selectedNodeIndex !== null && selectedNodeIndex < workflow.steps.length - 1
+  const selectNextStep =
+    selectedStepIndex !== null && selectedStepIndex < workflow.steps.length - 1
       ? () => {
-          setSelectedNodeIndex(selectedNodeIndex + 1);
-          onNodeClick?.(workflow.steps[selectedNodeIndex + 1]);
+          setSelectedStepIndex(selectedStepIndex + 1);
         }
       : undefined;
 
-  const hasSelectedNode = !(
-    selectedNodeIndex === null || !workflow.steps[selectedNodeIndex]
+  const hasSelectedStep = !(
+    selectedStepIndex === null || !workflow.steps[selectedStepIndex]
   );
 
   return (
@@ -58,22 +55,19 @@ export const WorkflowActions: FC<{
           {workflow.steps.map((step, index) => (
             <StepNode
               data={step}
-              onClick={() => {
-                setSelectedNodeIndex(index);
-                onNodeClick?.(step);
-              }}
-              isSelected={selectedNodeIndex === index}
+              onClick={() => setSelectedStepIndex(index)}
+              isSelected={selectedStepIndex === index}
               stepNumber={index + 1}
               key={step.id}
             />
           ))}
         </div>
       </div>
-      {hasSelectedNode && (
-        <SelectedNodeSideView
-          selectedNode={workflow.steps[selectedNodeIndex]}
-          onSelectPreviousNode={selectPreviousNode}
-          onSelectNextNode={selectNextNode}
+      {hasSelectedStep && (
+        <ClientStepView
+          step={workflow.steps[selectedStepIndex]}
+          onSelectPreviousStep={selectPreviousStep}
+          onSelectNextStep={selectNextStep}
         />
       )}
     </div>

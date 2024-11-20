@@ -9,7 +9,7 @@ import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { LogsView } from "../LogsView";
 import { SquigglePlaygroundForWorkflow } from "../SquigglePlaygroundForWorkflow";
 import { Header } from "./Header";
-import { WorkflowActions } from "./WorkflowActions";
+import { WorkflowSteps } from "./WorkflowActions";
 
 type WorkflowViewerProps<
   T extends ClientWorkflow["status"] = ClientWorkflow["status"],
@@ -74,7 +74,7 @@ const FinishedWorkflowViewer: FC<WorkflowViewerProps<"finished">> = ({
               />
             </StyledTab.Panel>
             <StyledTab.Panel>
-              <WorkflowActions workflow={workflow} height={usedHeight} />
+              <WorkflowSteps workflow={workflow} height={usedHeight} />
             </StyledTab.Panel>
             <StyledTab.Panel>
               <LogsView logSummary={workflow.result.logSummary || ""} />
@@ -100,7 +100,7 @@ const LoadingWorkflowViewer: FC<WorkflowViewerProps<"loading">> = ({
         renderRight={() => null}
       />
       <div ref={ref}>
-        <WorkflowActions workflow={workflow} height={usedHeight} />
+        <WorkflowSteps workflow={workflow} height={usedHeight} />
       </div>
     </div>
   );
