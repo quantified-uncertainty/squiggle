@@ -209,6 +209,7 @@ Outputs:
             name="anthropicApiKey"
             label="Anthropic API Key"
             tooltip="Anthropic API key for using Claude."
+            placeholder="Optional"
             size="small"
             layout="row"
           />
