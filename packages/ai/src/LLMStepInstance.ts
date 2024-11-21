@@ -1,9 +1,6 @@
 import { ArtifactKind, BaseArtifact, makeArtifact } from "./Artifact.js";
-import {
-  calculatePriceMultipleCalls,
-  LlmMetrics,
-  Message,
-} from "./LLMClient.js";
+import { calculatePriceMultipleCalls } from "./LLMClient/index.js";
+import { LlmMetrics, Message } from "./LLMClient/types.js";
 import {
   ErrorType,
   ExecuteContext,

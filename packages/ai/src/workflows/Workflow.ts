@@ -1,12 +1,8 @@
 import { ReadableStream } from "stream/web";
 
 import { generateSummary } from "../generateSummary.js";
-import {
-  calculatePriceMultipleCalls,
-  LLMClient,
-  LlmMetrics,
-  Message,
-} from "../LLMClient.js";
+import { calculatePriceMultipleCalls, LLMClient } from "../LLMClient/index.js";
+import { LlmMetrics, Message } from "../LLMClient/types.js";
 import { LLMStepInstance } from "../LLMStepInstance.js";
 import { Inputs, IOShape, PreparedStep } from "../LLMStepTemplate.js";
 import { TimestampedLogEntry } from "../Logger.js";
