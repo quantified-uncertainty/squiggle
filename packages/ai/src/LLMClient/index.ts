@@ -1,5 +1,6 @@
 import { LlmId, MODEL_CONFIGS } from "../modelConfigs.js";
 import { AnthropicProvider } from "./AnthropicProvider.js";
+import { LLMError } from "./LLMError.js";
 import { OpenAIProvider } from "./OpenAIProvider.js";
 import { LlmMetrics, Message, StandardizedChatCompletion } from "./types.js";
 
@@ -72,7 +73,12 @@ export class LLMClient {
       const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(
           () =>
-            reject(new Error(`API call timed out after ${TIMEOUT_MS / 1000}s`)),
+            reject(
+              new LLMError(
+                `API call timed out after ${TIMEOUT_MS / 1000}s`,
+                "timeout"
+              )
+            ),
           TIMEOUT_MS
         )
       );

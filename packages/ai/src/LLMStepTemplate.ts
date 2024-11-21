@@ -2,6 +2,8 @@ import { Artifact, ArtifactKind } from "./Artifact.js";
 import { LogEntry } from "./Logger.js";
 import { PromptPair } from "./prompts.js";
 
+// "CRITICAL" is fatal and will stop the workflow.
+// "MINOR" is non-fatal and will usually cause step retries (depending on the controller implementation).
 export type ErrorType = "CRITICAL" | "MINOR";
 
 export type StepState<Shape extends IOShape> =
@@ -58,7 +60,7 @@ type StepExecuteResult<Shape extends IOShape> = {
 // ExecuteContext is the context that's available to the step implementation.
 // We intentionally don't pass the reference to the step implementation, so that steps won't mess with their internal state.
 export type ExecuteContext = {
-  queryLLM(promptPair: PromptPair): Promise<string | null>;
+  queryLLM(promptPair: PromptPair): Promise<string>;
   log(log: LogEntry): void;
   fail(errorType: ErrorType, message: string): never;
 };

@@ -71,11 +71,6 @@ export const adjustToFeedbackStep = new LLMStepTemplate(
       adjustToFeedbackPrompt(prompt.value, code.value)
     );
 
-    if (!completion) {
-      // failed
-      return context.fail("CRITICAL", "LLM failed to provide a response");
-    }
-
     // handle adjustment response
     const trimmedResponse = completion.trim();
     const noAdjustmentRegex =

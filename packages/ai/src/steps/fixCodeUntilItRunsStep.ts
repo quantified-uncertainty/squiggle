@@ -86,10 +86,6 @@ export const fixCodeUntilItRunsStep = new LLMStepTemplate(
     const promptPair = editExistingSquiggleCodePrompt(code.value);
 
     const completion = await context.queryLLM(promptPair);
-    if (!completion) {
-      // failed
-      return context.fail("CRITICAL", "LLM failed to provide a response");
-    }
 
     const newCodeResult = await diffCompletionContentToCode(
       completion,
