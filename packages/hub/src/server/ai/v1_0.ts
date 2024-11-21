@@ -65,7 +65,6 @@ const commonV1WorkflowFields = {
   timestamp: z.number(), // milliseconds since epoch
   input: v1InputSchema,
   steps: z.array(v1StepSchema),
-  currentStep: z.string().optional(),
 };
 
 const v1WorkflowResultSchema = z.object({

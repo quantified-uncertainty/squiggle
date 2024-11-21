@@ -103,7 +103,7 @@ function saveWorkflowToDbOnUpdates(
   user: Awaited<ReturnType<typeof getSelf>>
 ) {
   // Save workflow to the database on each update.
-  workflow.addEventListener("stepFinished", () => {
+  workflow.addEventListener("stepAdded", () => {
     upsertWorkflow(user, workflow);
   });
 

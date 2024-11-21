@@ -93,7 +93,14 @@ export function addStreamingListeners<Shape extends IOShape>(
   controller: ReadableStreamController<string>
 ) {
   const send = (message: StreamingMessage) => {
-    controller.enqueue(JSON.stringify(message) + "\n");
+    try {
+      controller.enqueue(JSON.stringify(message) + "\n");
+    } catch (error) {
+      // If the connection to the client is lost, we don't want to throw errors,
+      // just to make sure it doesn't interfere with the workflow.
+      // (I'm not sure if this is important; these are happening in event handlers which shouldn't affect the main process)
+      console.error("Error sending message to stream", error);
+    }
   };
 
   workflow.addEventListener("workflowStarted", (event) => {
@@ -142,7 +149,11 @@ export function addStreamingListeners<Shape extends IOShape>(
       kind: "finalResult",
       content: event.workflow.getFinalResult(),
     });
-    controller.close();
+    try {
+      controller.close();
+    } catch (error) {
+      console.error("Error closing stream", error);
+    }
   });
 }
 
@@ -205,7 +216,6 @@ export async function decodeWorkflowFromReader({
       case "stepAdded":
         await setWorkflow((workflow) => ({
           ...workflow,
-          currentStep: event.content.name,
           steps: [
             ...workflow.steps,
             {

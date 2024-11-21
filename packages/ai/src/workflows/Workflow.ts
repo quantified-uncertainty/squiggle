@@ -56,12 +56,6 @@ export type WorkflowEventShape<WorkflowShape extends IOShape> =
       };
     }
   | {
-      type: "stepStarted";
-      payload: {
-        step: LLMStepInstance<IOShape, WorkflowShape>;
-      };
-    }
-  | {
       type: "stepFinished";
       payload: {
         step: LLMStepInstance<IOShape, WorkflowShape>;
@@ -177,13 +171,13 @@ export class Workflow<Shape extends IOShape = IOShape> {
   }
 
   private addStep<S extends IOShape>(
-    prepatedStep: PreparedStep<S>
+    preparedStep: PreparedStep<S>
   ): LLMStepInstance<S, Shape> {
-    // `any` is necessary because of countervariance issues.
+    // `any` is necessary because of contravariance issues.
     // But that's not important because `PreparedStep` was already strictly typed.
     const step: LLMStepInstance<any, Shape> = LLMStepInstance.create({
-      template: prepatedStep.template,
-      inputs: prepatedStep.inputs,
+      template: preparedStep.template,
+      inputs: preparedStep.inputs,
       workflow: this,
     });
 
@@ -202,11 +196,6 @@ export class Workflow<Shape extends IOShape = IOShape> {
       return;
     }
 
-    this.dispatchEvent({
-      // should we fire this after `run()` is called?
-      type: "stepStarted",
-      payload: { step },
-    });
     await step.run();
 
     this.dispatchEvent({
@@ -496,7 +485,6 @@ export class Workflow<Shape extends IOShape = IOShape> {
       steps: this.steps.map((step) =>
         stepToClientStep(step as LLMStepInstance)
       ),
-      currentStep: this.getCurrentStep()?.id,
       ...(this.isProcessComplete()
         ? {
             status: "finished",

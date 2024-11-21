@@ -126,7 +126,6 @@ const commonClientWorkflowFields = {
   timestamp: z.number(), // milliseconds since epoch
   inputs: z.record(z.string(), artifactSchema),
   steps: z.array(stepSchema),
-  currentStep: z.string().optional(),
 };
 
 export const clientWorkflowSchema = z.discriminatedUnion("status", [

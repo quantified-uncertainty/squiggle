@@ -2,16 +2,11 @@
 
 import { FC, useRef } from "react";
 
-import { ClientWorkflow, ClientWorkflowResult } from "@quri/squiggle-ai";
+import { ClientWorkflow } from "@quri/squiggle-ai";
 
 import { Sidebar } from "./Sidebar";
 import { useSquiggleWorkflows } from "./useSquiggleWorkflows";
 import { WorkflowViewer } from "./WorkflowViewer";
-
-export type SquiggleResponse = {
-  result?: ClientWorkflowResult;
-  currentStep?: string;
-};
 
 type Props = {
   initialWorkflows: ClientWorkflow[];

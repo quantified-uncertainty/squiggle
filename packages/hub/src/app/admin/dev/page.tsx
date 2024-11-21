@@ -26,10 +26,19 @@ export default async function () {
       <div className="space-y-4">
         <H2>Prisma logs</H2>
         <div>
-          These buttons will enable/disable console logs from Prisma.
-          <br />
-          Logs are on by default in dev mode, but you might want to disable them
-          if you have other logs.
+          <p>These buttons will enable/disable console logs from Prisma.</p>
+          <p>
+            Logs are on by default in dev mode, but you might want to disable
+            them if you have other logs.
+          </p>
+          <p>
+            {
+              "These buttons don't work immediately, seemingly because Next.js can have multiple processes or threads? But they do work eventually."
+            }
+          </p>
+          <p>
+            The state is not persisted between <code>next dev</code> runs.
+          </p>
         </div>
         <form action={disablePrismaLogs}>
           <Button type="submit">Disable Prisma logs</Button>

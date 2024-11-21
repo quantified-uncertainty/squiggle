@@ -1,5 +1,3 @@
-"use client";
-
 import clsx from "clsx";
 import { FC } from "react";
 
@@ -31,7 +29,7 @@ export const WorkflowSummaryItem: FC<{
       </div>
       {workflow.status === "loading" && (
         <div className="mt-2">
-          <p>{workflow.currentStep}</p>
+          <p>{workflow.steps.at(-1)?.name}</p>
         </div>
       )}
     </div>
