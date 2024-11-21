@@ -1,5 +1,3 @@
-import { getServerSession } from "next-auth";
-
 import { LlmConfig } from "@quri/squiggle-ai";
 import {
   createSquiggleWorkflowTemplate,
@@ -9,11 +7,11 @@ import {
   Workflow,
 } from "@quri/squiggle-ai/server";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { getSelf, isSignedIn } from "@/graphql/helpers/userHelpers";
 import { prisma } from "@/prisma";
 import { getAiCodec } from "@/server/ai/utils";
 import { V2WorkflowData } from "@/server/ai/v2_0";
+import { getServerSession } from "@/server/helpers";
 
 import { aiRequestBodySchema } from "../../utils";
 
@@ -62,7 +60,7 @@ async function updateWorkflowLog(workflow: Workflow<any>) {
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession();
 
   if (!isSignedIn(session)) {
     return new Response("Unauthorized", { status: 401 });
@@ -87,8 +85,6 @@ export async function POST(req: Request) {
     const openaiApiKey = process.env["OPENAI_API_KEY"];
     const anthropicApiKey =
       request.anthropicApiKey || process.env["ANTHROPIC_API_KEY"];
-
-    console.log({ anthropicApiKey });
 
     const squiggleWorkflow =
       request.kind === "create"

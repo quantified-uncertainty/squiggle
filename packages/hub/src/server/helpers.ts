@@ -3,6 +3,7 @@
  * TODO: unify these with `graphql/helpers/*`
  * (see https://github.com/quantified-uncertainty/squiggle/issues/3154, we plan to migrate away from GraphQL)
  */
+import "server-only";
 
 import { getServerSession as getNextAuthServerSession } from "next-auth";
 import { redirect } from "next/navigation";
