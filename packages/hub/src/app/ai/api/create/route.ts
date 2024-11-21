@@ -13,7 +13,7 @@ import { getAiCodec } from "@/server/ai/utils";
 import { V2WorkflowData } from "@/server/ai/v2_0";
 import { getServerSession } from "@/server/helpers";
 
-import { aiRequestBodySchema } from "../../utils";
+import { AiRequestBody, aiRequestBodySchema } from "../../utils";
 
 // https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#maxduration
 export const maxDuration = 300;
@@ -59,6 +59,68 @@ async function updateWorkflowLog(workflow: Workflow<any>) {
   });
 }
 
+function aiRequestToWorkflow(request: AiRequestBody) {
+  // Create a SquiggleWorkflow instance
+  const llmConfig: LlmConfig = {
+    llmId: request.model ?? "Claude-Sonnet",
+    priceLimit: 0.3,
+    durationLimitMinutes: 2,
+    messagesInHistoryToKeep: 4,
+    numericSteps: request.numericSteps,
+    styleGuideSteps: request.styleGuideSteps,
+  };
+
+  const openaiApiKey = process.env["OPENAI_API_KEY"];
+  const anthropicApiKey =
+    request.anthropicApiKey || process.env["ANTHROPIC_API_KEY"];
+
+  const workflow =
+    request.kind === "create"
+      ? createSquiggleWorkflowTemplate.instantiate({
+          llmConfig,
+          inputs: {
+            prompt: new PromptArtifact(request.prompt),
+          },
+          // abortSignal: req.signal,
+          openaiApiKey,
+          anthropicApiKey,
+        })
+      : fixSquiggleWorkflowTemplate.instantiate({
+          llmConfig,
+          inputs: {
+            source: new SourceArtifact(request.squiggleCode),
+          },
+          // abortSignal: req.signal,
+          openaiApiKey,
+          anthropicApiKey,
+        });
+
+  return workflow;
+}
+
+function saveWorkflowToDbOnUpdates(
+  workflow: Workflow<any>,
+  user: Awaited<ReturnType<typeof getSelf>>
+) {
+  // Save workflow to the database on each update.
+  workflow.addEventListener("stepFinished", () => {
+    upsertWorkflow(user, workflow);
+  });
+
+  /*
+   * We save the markdown log after all steps are finished. This means that if
+   * the workflow fails or this route dies, there'd be no log summary. Should
+   * we save the log summary after each step? It'd be more expensive but more
+   * robust.
+   * (this important only in case we decide to roll back our fully
+   * deserializable workflows; if deserialization works well then this doesn't
+   * matter, the log is redundant)
+   */
+  workflow.addEventListener("allStepsFinished", () => {
+    updateWorkflowLog(workflow);
+  });
+}
+
 export async function POST(req: Request) {
   const session = await getServerSession();
 
@@ -72,60 +134,11 @@ export async function POST(req: Request) {
     const body = await req.json();
     const request = aiRequestBodySchema.parse(body);
 
-    // Create a SquiggleWorkflow instance
-    const llmConfig: LlmConfig = {
-      llmId: request.model ?? "Claude-Sonnet",
-      priceLimit: 0.3,
-      durationLimitMinutes: 2,
-      messagesInHistoryToKeep: 4,
-      numericSteps: request.numericSteps,
-      styleGuideSteps: request.styleGuideSteps,
-    };
+    const workflow = aiRequestToWorkflow(request);
 
-    const openaiApiKey = process.env["OPENAI_API_KEY"];
-    const anthropicApiKey =
-      request.anthropicApiKey || process.env["ANTHROPIC_API_KEY"];
+    saveWorkflowToDbOnUpdates(workflow, user);
 
-    const squiggleWorkflow =
-      request.kind === "create"
-        ? createSquiggleWorkflowTemplate.instantiate({
-            llmConfig,
-            inputs: {
-              prompt: new PromptArtifact(request.prompt),
-            },
-            abortSignal: req.signal,
-            openaiApiKey,
-            anthropicApiKey,
-          })
-        : fixSquiggleWorkflowTemplate.instantiate({
-            llmConfig,
-            inputs: {
-              source: new SourceArtifact(request.squiggleCode),
-            },
-            abortSignal: req.signal,
-            openaiApiKey,
-            anthropicApiKey,
-          });
-
-    // Save workflow to the database on each update.
-    squiggleWorkflow.addEventListener("stepFinished", ({ workflow }) =>
-      upsertWorkflow(user, workflow)
-    );
-
-    /*
-     * We save the markdown log after all steps are finished. This means that if
-     * the workflow fails or this route dies, there'd be no log summary. Should
-     * we save the log summary after each step? It'd be more expensive but more
-     * robust.
-     * (this important only in case we decide to roll back our fully
-     * deserializable workflows; if deserialization works well then this doesn't
-     * matter, the log is redundant)
-     */
-    squiggleWorkflow.addEventListener("allStepsFinished", ({ workflow }) =>
-      updateWorkflowLog(workflow)
-    );
-
-    const stream = squiggleWorkflow.runAsStream();
+    const stream = workflow.runAsStream();
 
     return new Response(stream as ReadableStream, {
       headers: {

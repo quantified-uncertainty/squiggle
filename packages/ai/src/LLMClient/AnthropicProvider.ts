@@ -4,16 +4,6 @@ import { MODEL_CONFIGS } from "../modelConfigs.js";
 import { squiggleSystemPrompt } from "../prompts.js";
 import { Message, StandardizedChatCompletion } from "./types.js";
 
-function extractTextContent(content: Anthropic.ContentBlock[]): string {
-  return content
-    .filter(
-      (block): block is Extract<Anthropic.ContentBlock, { type: "text" }> =>
-        block.type === "text"
-    )
-    .map((block) => block.text)
-    .join("\n");
-}
-
 function convertToClaudeMessages(history: Message[]): Anthropic.MessageParam[] {
   return history
     .filter((msg) => msg.role !== "system")
@@ -34,6 +24,16 @@ function compressAssistantMessages(messages: Message[]): Message[] {
     }
     return acc;
   }, [] as Message[]);
+}
+
+function extractTextContent(content: Anthropic.ContentBlock[]): string {
+  return content
+    .filter(
+      (block): block is Extract<Anthropic.ContentBlock, { type: "text" }> =>
+        block.type === "text"
+    )
+    .map((block) => block.text)
+    .join("\n");
 }
 
 function convertClaudeToStandardFormat(

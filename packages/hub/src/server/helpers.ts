@@ -17,7 +17,7 @@ export async function getServerSession() {
   return getNextAuthServerSession(authOptions);
 }
 
-export async function getUserOrRedirect() {
+export async function getSessionUserOrRedirect() {
   const session = await getServerSession();
   if (!isSignedIn(session)) {
     redirect("/api/auth/signin"); // TODO - callbackUrl
@@ -28,7 +28,7 @@ export async function getUserOrRedirect() {
 
 export async function checkRootUser() {
   // TODO - unify with src/graphql/helpers
-  const sessionUser = await getUserOrRedirect();
+  const sessionUser = await getSessionUserOrRedirect();
   const user = await prisma.user.findUniqueOrThrow({
     where: { email: sessionUser.email },
   });
