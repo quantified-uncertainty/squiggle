@@ -1,6 +1,6 @@
 import chalk from "chalk";
 
-import { Message } from "./LLMClient.js";
+import { Message } from "./LLMClient/types.js";
 
 export type LogEntry =
   | InfoLogEntry

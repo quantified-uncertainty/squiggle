@@ -4,16 +4,16 @@ import "@/styles/main.css";
 
 import { Analytics } from "@vercel/analytics/react";
 import { Metadata } from "next";
-import { getServerSession } from "next-auth";
 import { PropsWithChildren } from "react";
 
-import { authOptions } from "./api/auth/[...nextauth]/authOptions";
+import { getServerSession } from "@/server/helpers";
+
 import { RootLayout } from "./RootLayout";
 
 export default async function ServerRootLayout({
   children,
 }: PropsWithChildren) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession();
 
   return (
     <html>

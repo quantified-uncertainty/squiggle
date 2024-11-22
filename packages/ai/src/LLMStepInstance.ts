@@ -1,9 +1,7 @@
 import { ArtifactKind, BaseArtifact, makeArtifact } from "./Artifact.js";
-import {
-  calculatePriceMultipleCalls,
-  LlmMetrics,
-  Message,
-} from "./LLMClient.js";
+import { calculatePriceMultipleCalls } from "./LLMClient/index.js";
+import { LLMError } from "./LLMClient/LLMError.js";
+import { LlmMetrics, Message } from "./LLMClient/types.js";
 import {
   ErrorType,
   ExecuteContext,
@@ -183,7 +181,9 @@ export class LLMStepInstance<
         this.fail(error.type, error.message);
       } else {
         this.fail(
-          "MINOR", // TODO - critical?
+          // Steps are responsible for handling their own errors.
+          // If the step throws anything other than a FailError, we assume it's an error in step implementation.
+          "CRITICAL",
           error instanceof Error ? error.message : String(error)
         );
       }
@@ -278,7 +278,7 @@ export class LLMStepInstance<
     this.conversationMessages.push(message);
   }
 
-  private async queryLLM(promptPair: PromptPair): Promise<string | null> {
+  private async queryLLM(promptPair: PromptPair): Promise<string> {
     try {
       const messagesToSend: Message[] = [
         ...this.workflow.getRelevantPreviousConversationMessages(
@@ -307,11 +307,10 @@ export class LLMStepInstance<
       });
 
       if (!completion?.content) {
-        this.log({
-          type: "error",
-          message: "Received an empty response from the API",
-        });
-        return null;
+        throw new FailError(
+          "CRITICAL",
+          "Received an empty response from the API"
+        );
       } else {
         this.addConversationMessage({
           role: "user",
@@ -326,11 +325,21 @@ export class LLMStepInstance<
 
       return completion.content;
     } catch (error) {
-      this.fail(
-        "MINOR",
-        `Error in queryLLM: ${error instanceof Error ? error.message : error}`
-      );
-      return null;
+      if (error instanceof LLMError) {
+        if (error.kind === "timeout") {
+          // retry timeouts
+          throw new FailError("MINOR", error.message);
+        } else {
+          // fail the workflow on all other LLM errors
+          throw new FailError("CRITICAL", error.message);
+        }
+      } else {
+        // LLMClient shouldn't throw anything other than LLMError.
+        throw new FailError(
+          "CRITICAL",
+          error instanceof Error ? error.message : String(error)
+        );
+      }
     }
   }
 

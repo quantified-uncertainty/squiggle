@@ -17,6 +17,7 @@ import {
   SelectStringFormField,
   StyledTab,
   TextAreaFormField,
+  TextFormField,
 } from "@quri/ui";
 
 import { LoadMoreViaSearchParam } from "@/components/LoadMoreViaSearchParam";
@@ -42,6 +43,7 @@ type FormShape = {
   model: LlmId;
   numericSteps: number;
   styleGuideSteps: number;
+  anthropicApiKey: string;
 };
 
 export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
@@ -71,6 +73,7 @@ Outputs:
       model: "Claude-Sonnet",
       numericSteps: 1,
       styleGuideSteps: 1,
+      anthropicApiKey: "",
     },
   });
 
@@ -95,24 +98,35 @@ Outputs:
   }));
 
   const handleSubmit = form.handleSubmit(
-    async ({ prompt, squiggleCode, model, numericSteps, styleGuideSteps }) => {
-      const numericStepsNumber = _.toNumber(numericSteps) || 0;
-      const styleGuideStepsNumber = _.toNumber(styleGuideSteps) || 0;
+    async ({
+      prompt,
+      squiggleCode,
+      model,
+      numericSteps,
+      styleGuideSteps,
+      anthropicApiKey,
+    }) => {
+      const commonRequestFields: Pick<
+        AiRequestBody,
+        "model" | "numericSteps" | "styleGuideSteps" | "anthropicApiKey"
+      > = {
+        model: model as LlmId,
+        numericSteps,
+        styleGuideSteps,
+        anthropicApiKey,
+      };
+
       const requestBody: AiRequestBody =
         mode === "create"
           ? {
               kind: "create",
               prompt,
-              model: model as LlmId,
-              numericSteps: numericStepsNumber,
-              styleGuideSteps: styleGuideStepsNumber,
+              ...commonRequestFields,
             }
           : {
               kind: "edit",
               squiggleCode,
-              model: model as LlmId,
-              numericSteps: numericStepsNumber,
-              styleGuideSteps: styleGuideStepsNumber,
+              ...commonRequestFields,
             };
 
       submitWorkflow(requestBody);
@@ -180,7 +194,7 @@ Outputs:
             inputWidth="w-16"
             size="small"
             layout="row"
-            rules={{ min: 0 }}
+            rules={{ min: 0, required: true }}
           />
           <NumberFormField<FormShape>
             name="styleGuideSteps"
@@ -189,7 +203,15 @@ Outputs:
             inputWidth="w-16"
             size="small"
             layout="row"
-            rules={{ min: 0 }}
+            rules={{ min: 0, required: true }}
+          />
+          <TextFormField<FormShape>
+            name="anthropicApiKey"
+            label="Anthropic API Key"
+            tooltip="Anthropic API key for using Claude."
+            placeholder="Optional"
+            size="small"
+            layout="row"
           />
         </div>
         <SelectStringFormField<FormShape, LlmId>

@@ -1,10 +1,8 @@
 import { createYoga } from "graphql-yoga";
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 import { schema } from "@/graphql/schema";
-
-import { authOptions } from "../auth/[...nextauth]/authOptions";
+import { getServerSession } from "@/server/helpers";
 
 const yoga = createYoga({
   graphqlEndpoint: "/api/graphql",
@@ -13,7 +11,7 @@ const yoga = createYoga({
     // There's some magic involved here;
     // getServerSession() obtains request data through Next.js cookies() and headers() functions
     // See also: https://github.com/nextauthjs/next-auth/issues/7355
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     return { session };
   },
 });

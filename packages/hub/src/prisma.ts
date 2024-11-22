@@ -4,35 +4,56 @@
  */
 import { PrismaClient } from "@prisma/client";
 
-// This config helps with connection leaks during hot reload
-// (which we don't have in server.ts yet, but might in the future.)
-
 declare global {
   // allow global `var` declarations
   // eslint-disable-next-line no-var
+  var _prismaConfig: PrismaConfig;
   var _prisma: PrismaClient | undefined;
 }
 
-export const prisma =
-  global._prisma ||
-  new PrismaClient({
-    log: process.env.NODE_ENV === "test" ? [] : ["query"],
-    // Uncomment the following and `prisma.$on` code below if you need to log query params for debugging.
-    // Enabling it causes duplicate log lines on code reloads, so it's not enabled by default.
-    // log: [
-    //   {
-    //     emit: "event",
-    //     level: "query",
-    //   },
-    // ],
+type PrismaConfig = {
+  logs: "none" | "query" | "query-with-params";
+};
+
+global._prismaConfig = {
+  logs: process.env.NODE_ENV === "test" ? "none" : "query",
+};
+
+function makePrisma() {
+  const config = global._prismaConfig;
+  const prisma = new PrismaClient({
+    log:
+      config.logs === "none"
+        ? []
+        : config.logs === "query"
+          ? ["query"]
+          : [
+              {
+                emit: "event",
+                level: "query",
+              },
+            ],
   });
 
-// // Prisma types are weird, using `any`
-// (prisma as any).$on("query", async (e: any) => {
-//   if (process.env.NODE_ENV === "test") {
-//     return; // logs are too verbose for jest
-//   }
-//   console.log(`${e.query} ${e.params}`);
-// });
+  // FIXME - query-with-params mode causes duplicate log lines on code reloads.
+  (prisma as any).$on("query", async (e: any) => {
+    console.log(`${e.query} ${e.params}`);
+  });
 
+  return prisma;
+}
+
+export let prisma = global._prisma || makePrisma();
+
+// Single prisma instance for the entire app, in dev mode.
+// This helps with connection leaks during hot reloads.
 if (process.env.NODE_ENV !== "production") global._prisma = prisma;
+
+// This will work only in dev mode, and will be invoked only in dev mode.
+export async function resetPrisma(config: PrismaConfig) {
+  if (process.env.NODE_ENV === "production") return;
+  global._prismaConfig = config;
+  await prisma.$disconnect();
+  prisma = makePrisma();
+  global._prisma = prisma;
+}

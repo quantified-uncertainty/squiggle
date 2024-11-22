@@ -32,7 +32,20 @@ export type ClientArtifact = z.infer<typeof artifactSchema>;
 
 // ClientStep type
 
-const stepStateSchema = z.enum(["PENDING", "DONE", "FAILED"]);
+export const stepStateSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("PENDING"),
+  }),
+  z.object({
+    kind: z.literal("DONE"),
+    outputs: z.record(z.string(), artifactSchema),
+  }),
+  z.object({
+    kind: z.literal("FAILED"),
+    message: z.string(),
+    errorType: z.enum(["CRITICAL", "MINOR"]),
+  }),
+]);
 
 const messageSchema = z.object({
   role: z.enum(["system", "user", "assistant"]),
@@ -46,7 +59,6 @@ const stepSchema = z.object({
   name: z.string(),
   state: stepStateSchema,
   inputs: z.record(z.string(), artifactSchema),
-  outputs: z.record(z.string(), artifactSchema),
   messages: z.array(messageSchema),
 });
 
@@ -65,14 +77,12 @@ const workflowStartedSchema = z.object({
 
 const stepAddedSchema = stepSchema.omit({
   state: true,
-  outputs: true,
   messages: true,
 });
 
 const stepUpdatedSchema = stepSchema.partial().required({
   id: true,
   messages: true,
-  outputs: true,
 });
 
 // WorkflowResult type
@@ -116,7 +126,6 @@ const commonClientWorkflowFields = {
   timestamp: z.number(), // milliseconds since epoch
   inputs: z.record(z.string(), artifactSchema),
   steps: z.array(stepSchema),
-  currentStep: z.string().optional(),
 };
 
 export const clientWorkflowSchema = z.discriminatedUnion("status", [

@@ -79,11 +79,6 @@ export const matchStyleGuideStep = new LLMStepTemplate(
       matchStyleGuidePrompt(prompt.value, code.value)
     );
 
-    if (!completion) {
-      // failed
-      return context.fail("MINOR", "No completion");
-    }
-
     // handle adjustment response
     const trimmedResponse = completion.trim();
     const noAdjustmentRegex =

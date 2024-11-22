@@ -1,18 +1,12 @@
 "use client";
 
-import clsx from "clsx";
 import { FC, useRef } from "react";
 
-import { ClientWorkflow, ClientWorkflowResult } from "@quri/squiggle-ai";
+import { ClientWorkflow } from "@quri/squiggle-ai";
 
 import { Sidebar } from "./Sidebar";
 import { useSquiggleWorkflows } from "./useSquiggleWorkflows";
 import { WorkflowViewer } from "./WorkflowViewer";
-
-export type SquiggleResponse = {
-  result?: ClientWorkflowResult;
-  currentStep?: string;
-};
 
 type Props = {
   initialWorkflows: ClientWorkflow[];
@@ -31,7 +25,7 @@ export const AiDashboard: FC<Props> = ({
   return (
     <div className="flex">
       {/* Left column: Mode Toggle, Chat, Form, and list of Workflows */}
-      <div className={clsx("w-1/5 p-2")}>
+      <div className="w-1/5 p-2">
         <Sidebar
           submitWorkflow={submitWorkflow}
           selectWorkflow={selectWorkflow}

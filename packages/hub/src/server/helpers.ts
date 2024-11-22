@@ -3,6 +3,7 @@
  * TODO: unify these with `graphql/helpers/*`
  * (see https://github.com/quantified-uncertainty/squiggle/issues/3154, we plan to migrate away from GraphQL)
  */
+import "server-only";
 
 import { getServerSession as getNextAuthServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -16,7 +17,7 @@ export async function getServerSession() {
   return getNextAuthServerSession(authOptions);
 }
 
-export async function getUserOrRedirect() {
+export async function getSessionUserOrRedirect() {
   const session = await getServerSession();
   if (!isSignedIn(session)) {
     redirect("/api/auth/signin"); // TODO - callbackUrl
@@ -27,7 +28,7 @@ export async function getUserOrRedirect() {
 
 export async function checkRootUser() {
   // TODO - unify with src/graphql/helpers
-  const sessionUser = await getUserOrRedirect();
+  const sessionUser = await getSessionUserOrRedirect();
   const user = await prisma.user.findUniqueOrThrow({
     where: { email: sessionUser.email },
   });

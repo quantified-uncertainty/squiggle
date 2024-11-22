@@ -1,12 +1,8 @@
 import { ReadableStream } from "stream/web";
 
 import { generateSummary } from "../generateSummary.js";
-import {
-  calculatePriceMultipleCalls,
-  LLMClient,
-  LlmMetrics,
-  Message,
-} from "../LLMClient.js";
+import { calculatePriceMultipleCalls, LLMClient } from "../LLMClient/index.js";
+import { LlmMetrics, Message } from "../LLMClient/types.js";
 import { LLMStepInstance } from "../LLMStepInstance.js";
 import { Inputs, IOShape, PreparedStep } from "../LLMStepTemplate.js";
 import { TimestampedLogEntry } from "../Logger.js";
@@ -55,12 +51,6 @@ export type WorkflowEventShape<WorkflowShape extends IOShape> =
     }
   | {
       type: "stepAdded";
-      payload: {
-        step: LLMStepInstance<IOShape, WorkflowShape>;
-      };
-    }
-  | {
-      type: "stepStarted";
       payload: {
         step: LLMStepInstance<IOShape, WorkflowShape>;
       };
@@ -181,13 +171,13 @@ export class Workflow<Shape extends IOShape = IOShape> {
   }
 
   private addStep<S extends IOShape>(
-    prepatedStep: PreparedStep<S>
+    preparedStep: PreparedStep<S>
   ): LLMStepInstance<S, Shape> {
-    // `any` is necessary because of countervariance issues.
+    // `any` is necessary because of contravariance issues.
     // But that's not important because `PreparedStep` was already strictly typed.
     const step: LLMStepInstance<any, Shape> = LLMStepInstance.create({
-      template: prepatedStep.template,
-      inputs: prepatedStep.inputs,
+      template: preparedStep.template,
+      inputs: preparedStep.inputs,
       workflow: this,
     });
 
@@ -206,11 +196,6 @@ export class Workflow<Shape extends IOShape = IOShape> {
       return;
     }
 
-    this.dispatchEvent({
-      // should we fire this after `run()` is called?
-      type: "stepStarted",
-      payload: { step },
-    });
     await step.run();
 
     this.dispatchEvent({
@@ -316,32 +301,32 @@ export class Workflow<Shape extends IOShape = IOShape> {
 
   getFinalResult(): ClientWorkflowResult {
     const finalStep = this.getRecentStepWithCode();
-    if (!finalStep) {
-      throw new Error("No steps found");
-    }
+    const isValid = finalStep?.step.getState().kind === "DONE";
 
-    const isValid = finalStep.step.getState().kind === "DONE";
-
+    // compute run time
+    let runTimeMs: number;
     const lastStep = this.steps.at(-1);
     if (!lastStep) {
       throw new Error("No steps found");
     }
 
-    const lastStepState = finalStep.step.getState();
-    if (lastStepState.kind === "PENDING") {
-      throw new Error("Last step is still pending");
-    }
+    {
+      const lastStepState = lastStep.getState();
+      if (lastStepState.kind === "PENDING") {
+        throw new Error("Last step is still pending");
+      }
 
-    const startTime = this.steps[0].startTime;
-    const endTime = lastStep.startTime + lastStepState.durationMs;
-    const runTimeMs = endTime - startTime;
+      const startTime = this.steps[0].startTime;
+      const endTime = lastStep.startTime + lastStepState.durationMs;
+      runTimeMs = endTime - startTime;
+    }
 
     const { totalPrice, llmRunCount } = this.getLlmMetrics();
 
     const logSummary = generateSummary(this);
 
     return {
-      code: finalStep.code,
+      code: finalStep?.code ?? "",
       isValid,
       totalPrice,
       runTimeMs,
@@ -500,7 +485,6 @@ export class Workflow<Shape extends IOShape = IOShape> {
       steps: this.steps.map((step) =>
         stepToClientStep(step as LLMStepInstance)
       ),
-      currentStep: this.getCurrentStep()?.id,
       ...(this.isProcessComplete()
         ? {
             status: "finished",

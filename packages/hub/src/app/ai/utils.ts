@@ -24,6 +24,7 @@ const commonRequestFields = {
   model: z.enum(MODEL_CONFIGS.map((model) => model.id) as ModelKeys).optional(),
   numericSteps: z.number(),
   styleGuideSteps: z.number(),
+  anthropicApiKey: z.string().optional(),
 };
 
 export const aiRequestBodySchema = z.discriminatedUnion("kind", [

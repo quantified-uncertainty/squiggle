@@ -32,40 +32,43 @@ const NavButton: FC<{
   );
 };
 
-export const SelectedNodeSideView: FC<{
-  selectedNode: ClientStep;
-  onSelectPreviousNode?: () => void;
-  onSelectNextNode?: () => void;
-}> = ({ selectedNode, onSelectPreviousNode, onSelectNextNode }) => {
+export const ClientStepView: FC<{
+  step: ClientStep;
+  onSelectPreviousStep?: () => void;
+  onSelectNextStep?: () => void;
+}> = ({ step, onSelectPreviousStep, onSelectNextStep }) => {
   const { ref, height } = useAvailableHeight();
 
   const selectedNodeCodeOutput = useMemo(() => {
-    return Object.values(selectedNode.outputs).find(
+    if (step.state.kind !== "DONE") {
+      return undefined;
+    }
+    return Object.values(step.state.outputs).find(
       (output): output is ClientArtifact & { kind: "code" } =>
         output.kind === "code"
     );
-  }, [selectedNode]);
+  }, [step]);
 
   const maxPrimaryHeight = height ? height - 180 : 400;
 
   return (
     <div
       className="relative flex-1 overflow-y-auto bg-white p-4"
-      key={selectedNode.id}
+      key={step.id}
       ref={ref}
     >
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-slate-600">
-          {stepNames[selectedNode.name] || selectedNode.name}
+          {stepNames[step.name] || step.name}
         </h2>
         <div className="flex items-center">
           <NavButton
-            onClick={onSelectPreviousNode}
+            onClick={onSelectPreviousStep}
             label="Previous Node"
             icon={ChevronLeftIcon}
           />
           <NavButton
-            onClick={onSelectNextNode}
+            onClick={onSelectNextStep}
             label="Next Node"
             icon={ChevronRightIcon}
           />
@@ -74,12 +77,22 @@ export const SelectedNodeSideView: FC<{
       <div className="space-y-4">
         <div className="flex gap-4">
           <div className="flex-1">
-            <ArtifactList title="Inputs" artifacts={selectedNode.inputs} />
+            <ArtifactList title="Inputs" artifacts={step.inputs} />
           </div>
-          <div className="flex-1">
-            <ArtifactList title="Outputs" artifacts={selectedNode.outputs} />
-          </div>
+          {step.state.kind === "DONE" && (
+            <div className="flex-1">
+              <ArtifactList title="Outputs" artifacts={step.state.outputs} />
+            </div>
+          )}
         </div>
+        {step.state.kind === "FAILED" && (
+          <div className="rounded-md border border-red-300 bg-red-50 p-4">
+            <h3 className="mb-2 text-lg font-semibold text-red-800">Error</h3>
+            <pre className="mb-4 whitespace-pre-wrap text-xs text-red-700">
+              {step.state.message}
+            </pre>
+          </div>
+        )}
         <div className="mt-4 flex gap-4">
           {selectedNodeCodeOutput && (
             <div className="flex flex-grow flex-col">
@@ -94,7 +107,7 @@ export const SelectedNodeSideView: FC<{
               </div>
             </div>
           )}
-          {selectedNode.messages.length > 0 && (
+          {step.messages.length > 0 && (
             <div className="flex w-1/4 min-w-[350px] flex-col">
               <h3 className="mb-2 text-sm font-medium text-slate-500">
                 Messages:
@@ -103,7 +116,7 @@ export const SelectedNodeSideView: FC<{
                 className="flex-grow overflow-y-auto"
                 style={{ maxHeight: maxPrimaryHeight }}
               >
-                <ArtifactMessages messages={selectedNode.messages} />
+                <ArtifactMessages messages={step.messages} />
               </div>
             </div>
           )}

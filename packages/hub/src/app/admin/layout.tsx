@@ -1,4 +1,3 @@
-import { getServerSession } from "next-auth";
 import { PropsWithChildren } from "react";
 
 import { LockIcon } from "@quri/ui";
@@ -7,11 +6,10 @@ import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { H1 } from "@/components/ui/Headers";
 import { isRootEmail } from "@/graphql/helpers/userHelpers";
-
-import { authOptions } from "../api/auth/[...nextauth]/authOptions";
+import { getServerSession } from "@/server/helpers";
 
 export default async function AdminLayout({ children }: PropsWithChildren) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession();
 
   const email = session?.user.email;
 
