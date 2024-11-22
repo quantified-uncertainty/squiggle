@@ -8,13 +8,13 @@ import { AiDashboard } from "./AiDashboard";
 export default async function SessionsPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { limit } = z
     .object({
       limit: numberInString.optional(),
     })
-    .parse(searchParams);
+    .parse(await searchParams);
 
   const { workflows, hasMore } = await loadWorkflows({ limit });
 
