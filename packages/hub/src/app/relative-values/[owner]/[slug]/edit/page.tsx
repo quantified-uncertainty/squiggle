@@ -10,12 +10,13 @@ import { EditRelativeValuesDefinition } from "./EditRelativeValuesDefinition";
 export default async function Page({
   params,
 }: {
-  params: { owner: string; slug: string };
+  params: Promise<{ owner: string; slug: string }>;
 }) {
+  const { owner, slug } = await params;
   const query = await loadPageQuery<RelativeValuesDefinitionPageQuery>(
     QueryNode,
     {
-      input: { owner: params.owner, slug: params.slug },
+      input: { owner, slug },
     }
   );
 

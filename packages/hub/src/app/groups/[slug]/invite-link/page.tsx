@@ -7,12 +7,13 @@ import QueryNode, {
 } from "@/__generated__/AcceptGroupInvitePageQuery.graphql";
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 export default async function OuterAcceptGroupInvitePage({ params }: Props) {
+  const { slug } = await params;
   const query = await loadPageQuery<AcceptGroupInvitePageQuery>(QueryNode, {
-    slug: params.slug,
+    slug,
   });
 
   return <AcceptGroupInvitePage query={query} />;

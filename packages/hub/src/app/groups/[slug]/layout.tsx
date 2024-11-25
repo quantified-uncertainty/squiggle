@@ -11,12 +11,13 @@ import QueryNode, {
 } from "@/__generated__/GroupLayoutQuery.graphql";
 
 type Props = PropsWithChildren<{
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }>;
 
 export default async function OuterGroupLayout({ params, children }: Props) {
+  const { slug } = await params;
   const query = await loadPageQuery<GroupLayoutQuery>(QueryNode, {
-    slug: params.slug,
+    slug,
   });
 
   return (
@@ -26,6 +27,7 @@ export default async function OuterGroupLayout({ params, children }: Props) {
   );
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  return { title: params.slug };
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  return { title: slug };
 }

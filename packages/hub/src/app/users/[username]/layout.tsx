@@ -11,15 +11,16 @@ import QueryNode, {
 } from "@/__generated__/UserLayoutQuery.graphql";
 
 type Props = {
-  params: { username: string };
+  params: Promise<{ username: string }>;
 };
 
 export default async function OuterUserLayout({
   params,
   children,
 }: PropsWithChildren<Props>) {
+  const { username } = await params;
   const query = await loadPageQuery<UserLayoutQuery>(QueryNode, {
-    username: params.username,
+    username,
   });
 
   return (
@@ -29,6 +30,7 @@ export default async function OuterUserLayout({
   );
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  return { title: params.username };
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { username } = await params;
+  return { title: username };
 }

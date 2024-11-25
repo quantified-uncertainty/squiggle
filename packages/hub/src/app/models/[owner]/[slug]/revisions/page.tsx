@@ -10,10 +10,11 @@ import QueryNode, {
 export default async function ModelPage({
   params,
 }: {
-  params: { owner: string; slug: string };
+  params: Promise<{ owner: string; slug: string }>;
 }) {
+  const { owner, slug } = await params;
   const query = await loadPageQuery<ModelRevisionsListQuery>(QueryNode, {
-    input: { owner: params.owner, slug: params.slug },
+    input: { owner, slug },
   });
 
   return (

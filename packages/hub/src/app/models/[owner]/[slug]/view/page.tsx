@@ -7,12 +7,13 @@ import QueryNode, {
 } from "@/__generated__/ViewModelPageQuery.graphql";
 
 type Props = {
-  params: { owner: string; slug: string };
+  params: Promise<{ owner: string; slug: string }>;
 };
 
 export default async function OuterModelPage({ params }: Props) {
+  const { owner, slug } = await params;
   const query = await loadPageQuery<ViewModelPageQuery>(QueryNode, {
-    input: { owner: params.owner, slug: params.slug },
+    input: { owner, slug },
   });
 
   return (

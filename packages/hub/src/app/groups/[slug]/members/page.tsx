@@ -7,12 +7,13 @@ import QueryNode, {
 } from "@/__generated__/GroupMembersPageQuery.graphql";
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 export default async function OuterGroupMembersPage({ params }: Props) {
+  const { slug } = await params;
   const query = await loadPageQuery<GroupMembersPageQuery>(QueryNode, {
-    slug: params.slug,
+    slug,
   });
 
   return <GroupMembersPage query={query} />;

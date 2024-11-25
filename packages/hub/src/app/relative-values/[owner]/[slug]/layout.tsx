@@ -10,16 +10,18 @@ import QueryNode, {
 } from "@/__generated__/DefinitionLayoutQuery.graphql";
 
 type Props = PropsWithChildren<{
-  params: { owner: string; slug: string };
+  params: Promise<{ owner: string; slug: string }>;
 }>;
 
 export default async function Layout({ params, children }: Props) {
+  const { owner, slug } = await params;
   const query = await loadPageQuery<DefinitionLayoutQuery>(QueryNode, {
-    input: { owner: params.owner, slug: params.slug },
+    input: { owner, slug },
   });
   return <DefinitionLayout queryRef={query}>{children}</DefinitionLayout>;
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  return { title: `${params.owner}/${params.slug}` };
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { owner, slug } = await params;
+  return { title: `${owner}/${slug}` };
 }
