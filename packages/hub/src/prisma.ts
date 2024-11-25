@@ -36,9 +36,11 @@ function makePrisma() {
   });
 
   // FIXME - query-with-params mode causes duplicate log lines on code reloads.
-  (prisma as any).$on("query", async (e: any) => {
-    console.log(`${e.query} ${e.params}`);
-  });
+  if (config.logs === "query-with-params") {
+    (prisma as any).$on("query", async (e: any) => {
+      console.log(`${e.query} ${e.params}`);
+    });
+  }
 
   return prisma;
 }
