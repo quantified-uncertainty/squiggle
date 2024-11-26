@@ -9,6 +9,7 @@ type Props = {
   title: string;
   icon?: FC<IconProps>;
   close: () => void;
+  prefetch?: boolean;
 };
 
 export const DropdownMenuNextLinkItem: FC<Props> = ({
@@ -16,9 +17,10 @@ export const DropdownMenuNextLinkItem: FC<Props> = ({
   href,
   icon,
   close,
+  prefetch,
 }) => {
   return (
-    <Link href={href} onClick={close}>
+    <Link href={href} onClick={close} prefetch={prefetch}>
       <DropdownMenuItemLayout icon={icon} title={title} />
     </Link>
   );

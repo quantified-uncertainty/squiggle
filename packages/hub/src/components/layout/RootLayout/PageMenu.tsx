@@ -64,6 +64,7 @@ const NewModelMenuLink: FC<MenuLinkModeProps> = (props) => {
       href={newModelRoute()}
       icon={PlusIcon}
       title="New Model"
+      prefetch
     />
   );
 };
