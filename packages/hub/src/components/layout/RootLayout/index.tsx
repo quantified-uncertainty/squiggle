@@ -23,6 +23,7 @@ const InnerRootLayout: FC<PropsWithChildren> = ({ children }) => {
         <Link className="font-semibold text-slate-300" href="/">
           Squiggle Hub
         </Link>
+        {/* Top menu is not essential for fetching and rendering other content, so we render it in a Suspense boundary */}
         <Suspense fallback={null}>
           <WrappedPageMenu />
         </Suspense>

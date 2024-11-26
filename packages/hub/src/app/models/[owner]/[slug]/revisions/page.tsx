@@ -1,4 +1,3 @@
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { loadPageQuery } from "@/relay/loadPageQuery";
 
 import { ModelRevisionsList } from "./ModelRevisionsList";
@@ -17,9 +16,5 @@ export default async function ModelPage({
     input: { owner, slug },
   });
 
-  return (
-    <NarrowPageLayout>
-      <ModelRevisionsList query={query} />
-    </NarrowPageLayout>
-  );
+  return <ModelRevisionsList query={query} />;
 }
