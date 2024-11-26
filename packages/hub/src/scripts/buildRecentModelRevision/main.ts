@@ -18,7 +18,7 @@ async function runWorker(
 ): Promise<WorkerOutput> {
   return new Promise((resolve, _) => {
     console.log("Spawning worker process for Revision ID: " + revisionId);
-    const worker = spawn("node", [__dirname + "/worker.js"], {
+    const worker = spawn("node", [__dirname + "/worker.mjs"], {
       stdio: ["pipe", "pipe", "pipe", "ipc"],
     });
 
