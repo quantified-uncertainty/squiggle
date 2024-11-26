@@ -1,5 +1,4 @@
 "use client";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
@@ -44,8 +43,6 @@ const Mutation = graphql`
 export const EditRelativeValuesDefinition: FC<{
   query: SerializablePreloadedQuery<QueryType>;
 }> = ({ query }) => {
-  useSession({ required: true });
-
   const [{ relativeValuesDefinition: result }] = usePageQuery(
     RelativeValuesDefinitionPageQuery,
     query

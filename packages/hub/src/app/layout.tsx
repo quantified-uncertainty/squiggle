@@ -6,19 +6,15 @@ import { Analytics } from "@vercel/analytics/react";
 import { Metadata } from "next";
 import { PropsWithChildren } from "react";
 
-import { auth } from "@/auth";
-
-import { RootLayout } from "./RootLayout";
+import { RootLayout } from "../components/layout/RootLayout";
 
 export default async function ServerRootLayout({
   children,
 }: PropsWithChildren) {
-  const session = await auth();
-
   return (
     <html>
       <body>
-        <RootLayout session={session}>{children}</RootLayout>
+        <RootLayout>{children}</RootLayout>
         <Analytics />
       </body>
     </html>

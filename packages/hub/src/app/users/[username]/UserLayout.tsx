@@ -7,7 +7,6 @@ import { Button, PlusIcon, UserIcon } from "@quri/ui";
 
 import { H1 } from "@/components/ui/Headers";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
-import { useUsername } from "@/hooks/useUsername";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
@@ -35,6 +34,7 @@ const Query = graphql`
       }
       ... on User {
         username
+        isMe
         # fields for count (empty/non-empty)
         # TODO: implement "totalCount" field instead
         models(first: 1) {
@@ -97,8 +97,7 @@ export const UserLayout: FC<
 
   const user = extractFromGraphqlErrorUnion(result, "User");
 
-  const myUsername = useUsername();
-  const isMe = user.username === myUsername;
+  const isMe = user.isMe;
 
   return (
     <div className="space-y-8">

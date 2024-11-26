@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { graphql } from "relay-runtime";
@@ -36,8 +35,6 @@ const Mutation = graphql`
 `;
 
 export const NewDefinition: FC = () => {
-  useSession({ required: true });
-
   const router = useRouter();
 
   const [runMutation] = useAsyncMutation<NewDefinitionMutation>({

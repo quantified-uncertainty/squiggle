@@ -1,5 +1,4 @@
 "use client";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { FormProvider } from "react-hook-form";
@@ -32,8 +31,6 @@ const Mutation = graphql`
 `;
 
 export const NewGroup: FC = () => {
-  useSession({ required: true });
-
   const router = useRouter();
 
   type FormShape = {

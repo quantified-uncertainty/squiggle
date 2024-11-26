@@ -1,4 +1,3 @@
-"use client";
 import Image from "next/image";
 import { FC } from "react";
 import { FaDiscord, FaGithub, FaRss } from "react-icons/fa";

@@ -1,4 +1,3 @@
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
   BaseSyntheticEvent,
@@ -137,8 +136,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
   modelRef,
   forceVersionPicker,
 }) => {
-  const { data: session } = useSession();
-
   const model = useFragment(
     graphql`
       fragment EditSquiggleSnippetModel on Model {
@@ -456,7 +453,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     }: {
       importId: string;
     }) => (
-      <ReactRoot session={session}>
+      <ReactRoot>
         <ImportTooltip importId={importId} />
       </ReactRoot>
     );

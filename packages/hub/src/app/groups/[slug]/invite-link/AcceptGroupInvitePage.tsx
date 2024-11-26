@@ -1,5 +1,4 @@
 "use client";
-import { useSession } from "next-auth/react";
 import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { FC, useEffect } from "react";
 import { graphql } from "relay-runtime";
@@ -22,8 +21,6 @@ import { AcceptGroupInvitePageQuery } from "@/__generated__/AcceptGroupInvitePag
 export const AcceptGroupInvitePage: FC<{
   query: SerializablePreloadedQuery<AcceptGroupInvitePageQuery>;
 }> = ({ query }) => {
-  useSession({ required: true });
-
   const [{ result }] = usePageQuery(
     graphql`
       query AcceptGroupInvitePageQuery($slug: String!) {

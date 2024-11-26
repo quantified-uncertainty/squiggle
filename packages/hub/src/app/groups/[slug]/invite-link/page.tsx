@@ -1,3 +1,4 @@
+import { WithAuth } from "@/components/WithAuth";
 import { loadPageQuery } from "@/relay/loadPageQuery";
 
 import { AcceptGroupInvitePage } from "./AcceptGroupInvitePage";
@@ -10,11 +11,19 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
-export default async function OuterAcceptGroupInvitePage({ params }: Props) {
+async function InnerPage({ params }: Props) {
   const { slug } = await params;
   const query = await loadPageQuery<AcceptGroupInvitePageQuery>(QueryNode, {
     slug,
   });
 
   return <AcceptGroupInvitePage query={query} />;
+}
+
+export default async function ({ params }: Props) {
+  return (
+    <WithAuth>
+      <InnerPage params={params} />
+    </WithAuth>
+  );
 }

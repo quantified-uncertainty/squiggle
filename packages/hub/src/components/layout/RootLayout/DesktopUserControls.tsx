@@ -1,15 +1,16 @@
+import { Session } from "next-auth";
 import { signIn } from "next-auth/react";
 import { FC } from "react";
 
 import { Button, Dropdown, DropdownMenu } from "@quri/ui";
 
-import { useUsername } from "@/hooks/useUsername";
-
 import { DropdownWithArrow } from "./DropdownWithArrow";
 import { UserControlsMenu } from "./UserControlsMenu";
 
-export const DesktopUserControls: FC = () => {
-  const username = useUsername();
+export const DesktopUserControls: FC<{ session: Session | null }> = ({
+  session,
+}) => {
+  const username = session?.user?.username;
 
   return username ? (
     <div className="flex items-center gap-2">

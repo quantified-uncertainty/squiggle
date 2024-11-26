@@ -727,6 +727,7 @@ type UpdateSquiggleSnippetResult {
 type User implements Node & Owner {
   groups(after: String, before: String, first: Int, last: Int): GroupConnection!
   id: ID!
+  isMe: Boolean!
   isRoot: Boolean!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   relativeValuesDefinitions(after: String, before: String, first: Int, last: Int): RelativeValuesDefinitionConnection!

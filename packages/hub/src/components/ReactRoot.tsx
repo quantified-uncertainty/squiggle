@@ -1,6 +1,4 @@
 "use client";
-import { Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
 import { FC, PropsWithChildren } from "react";
 import { RelayEnvironmentProvider } from "react-relay";
 
@@ -13,21 +11,16 @@ import { ExitConfirmationWrapper } from "./ExitConfirmationWrapper";
 
 // This component is used in the app's root layout to configure all common providers and wrappers.
 // It's also useful when you want to mount a separate React root. One example is CodeMirror tooltips, which are mounted as separate DOM elements.
-export const ReactRoot: FC<PropsWithChildren<{ session: Session | null }>> = ({
-  session,
-  children,
-}) => {
+export const ReactRoot: FC<PropsWithChildren> = ({ children }) => {
   const environment = getCurrentEnvironment();
 
   return (
-    <SessionProvider session={session}>
-      <RelayEnvironmentProvider environment={environment}>
-        <ExitConfirmationWrapper>
-          <WithToasts>
-            <ErrorBoundary>{children}</ErrorBoundary>
-          </WithToasts>
-        </ExitConfirmationWrapper>
-      </RelayEnvironmentProvider>
-    </SessionProvider>
+    <RelayEnvironmentProvider environment={environment}>
+      <ExitConfirmationWrapper>
+        <WithToasts>
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </WithToasts>
+      </ExitConfirmationWrapper>
+    </RelayEnvironmentProvider>
   );
 };

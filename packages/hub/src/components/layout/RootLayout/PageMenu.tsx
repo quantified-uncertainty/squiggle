@@ -1,6 +1,8 @@
-import { signIn, useSession } from "next-auth/react";
+"use client";
+import { Session } from "next-auth";
+import { signIn } from "next-auth/react";
 import { FC, useState } from "react";
-import { useFragment } from "react-relay";
+import { useFragment, useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import {
@@ -16,8 +18,6 @@ import {
   UserCircleIcon,
 } from "@quri/ui";
 
-import { Link } from "@/components/ui/Link";
-import { useUsername } from "@/hooks/useUsername";
 import { SQUIGGLE_DOCS_URL } from "@/lib/common";
 import { aboutRoute, aiRoute, newModelRoute } from "@/routes";
 
@@ -30,12 +30,9 @@ import { useForceChooseUsername } from "./useForceChooseUsername";
 import { UserControlsMenu } from "./UserControlsMenu";
 
 import { PageMenu$key } from "@/__generated__/PageMenu.graphql";
+import { PageMenuQuery } from "@/__generated__/PageMenuQuery.graphql";
 
 const AboutMenuLink: FC<MenuLinkModeProps> = (props) => {
-  const { data: session } = useSession();
-  if (session) {
-    return null;
-  }
   return <PageMenuLink {...props} href={aboutRoute()} title="About" />;
 };
 
@@ -54,10 +51,6 @@ const AiMenuLink: FC<MenuLinkModeProps> = (props) => (
 );
 
 const NewModelMenuLink: FC<MenuLinkModeProps> = (props) => {
-  const { data: session } = useSession();
-  if (!session) {
-    return null;
-  }
   return (
     <PageMenuLink
       {...props}
@@ -78,15 +71,15 @@ const fragment = graphql`
 
 type MenuProps = {
   queryRef: PageMenu$key;
+  session: Session | null;
 };
 
-const DesktopMenu: FC<MenuProps> = ({ queryRef }) => {
-  const { data: session } = useSession();
+const DesktopMenu: FC<MenuProps> = ({ queryRef, session }) => {
   const menu = useFragment(fragment, queryRef);
   return (
     <div className="flex items-center gap-4">
       <GlobalSearch />
-      <AboutMenuLink mode="desktop" />
+      {!session && <AboutMenuLink mode="desktop" />}
       <DocsMenuLink mode="desktop" />
       {session ? (
         <>
@@ -103,15 +96,15 @@ const DesktopMenu: FC<MenuProps> = ({ queryRef }) => {
           <AiMenuLink mode="desktop" />
         </>
       ) : null}
-      <DesktopUserControls />
+      <DesktopUserControls session={session} />
     </div>
   );
 };
 
-const MobileMenu: FC<MenuProps> = ({ queryRef }) => {
+const MobileMenu: FC<MenuProps> = ({ queryRef, session }) => {
   const menu = useFragment(fragment, queryRef);
 
-  const username = useUsername();
+  const username = session?.user?.username;
   const [open, setOpen] = useState(false);
 
   const Icon = username ? UserCircleIcon : DotsHorizontalIcon;
@@ -137,8 +130,8 @@ const MobileMenu: FC<MenuProps> = ({ queryRef }) => {
           <div className="fixed inset-y-0 right-0 z-20 overflow-y-auto overflow-x-hidden bg-white shadow-xl">
             <DropdownMenu>
               <DropdownMenuHeader>Menu</DropdownMenuHeader>
-              <NewModelMenuLink mode="mobile" close={close} />
-              <AboutMenuLink mode="mobile" close={close} />
+              {session && <NewModelMenuLink mode="mobile" close={close} />}
+              {!session && <AboutMenuLink mode="mobile" close={close} />}
               <DocsMenuLink mode="mobile" close={close} />
               {username ? (
                 <>
@@ -168,20 +161,29 @@ const MobileMenu: FC<MenuProps> = ({ queryRef }) => {
   );
 };
 
-export const PageMenu: FC<MenuProps> = ({ queryRef }) => {
-  useForceChooseUsername();
+export const PageMenu: FC<{ session: Session | null }> = ({ session }) => {
+  // TODO - if redirecting, return a custom menu; right now we render the
+  // confused version where "New Model" button is visible, but "Sign In" button
+  // is visible too
+  useForceChooseUsername(session);
+
+  const queryRef = useLazyLoadQuery<PageMenuQuery>(
+    graphql`
+      query PageMenuQuery($signedIn: Boolean!) {
+        ...PageMenu @arguments(signedIn: $signedIn)
+      }
+    `,
+    { signedIn: !!session }
+  );
 
   return (
-    <div className="flex h-10 items-center justify-between bg-gray-800 px-8">
-      <Link className="font-semibold text-slate-300" href="/">
-        Squiggle Hub
-      </Link>
+    <>
       <div className="hidden md:block">
-        <DesktopMenu queryRef={queryRef} />
+        <DesktopMenu queryRef={queryRef} session={session} />
       </div>
       <div className="block md:hidden">
-        <MobileMenu queryRef={queryRef} />
+        <MobileMenu queryRef={queryRef} session={session} />
       </div>
-    </div>
+    </>
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
-import { useSession } from "next-auth/react";
+import { Session } from "next-auth";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { FormProvider } from "react-hook-form";
@@ -11,11 +11,9 @@ import { Button } from "@quri/ui";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useMutationForm } from "@/hooks/useMutationForm";
 
-export const ChooseUsername: FC = () => {
-  const { data: session, update: updateSession } = useSession({
-    required: true,
-  });
-
+export const ChooseUsername: FC<{ session: Session | null }> = ({
+  session,
+}) => {
   const router = useRouter();
   if (session?.user.username) {
     router.replace("/");
@@ -47,8 +45,7 @@ export const ChooseUsername: FC = () => {
     expectedTypename: "Me",
     formDataToVariables: (data) => ({ username: data.username }),
     onCompleted: () => {
-      updateSession();
-      router.replace("/");
+      router.refresh();
     },
     blockOnSuccess: true,
   });

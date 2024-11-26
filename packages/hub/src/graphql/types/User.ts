@@ -138,5 +138,9 @@ export const User = builder.prismaNode("User", {
       },
       resolve: async (user) => isRootUser(user),
     }),
+    isMe: t.boolean({
+      resolve: async (user, _, { session }) =>
+        !!(user.email && user.email === session?.user.email),
+    }),
   }),
 });

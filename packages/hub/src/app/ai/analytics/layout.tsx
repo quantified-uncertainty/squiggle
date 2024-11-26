@@ -1,10 +1,13 @@
 import { PropsWithChildren } from "react";
 
-import { checkRootUser } from "@/server/helpers";
+import { WithAuth } from "@/components/WithAuth";
 
 import { AiAnalyticsClientLayout } from "./ClientLayout";
 
 export default async function ({ children }: PropsWithChildren) {
-  await checkRootUser();
-  return <AiAnalyticsClientLayout>{children}</AiAnalyticsClientLayout>;
+  return (
+    <WithAuth rootOnly>
+      <AiAnalyticsClientLayout>{children}</AiAnalyticsClientLayout>
+    </WithAuth>
+  );
 }
