@@ -1,9 +1,7 @@
 "use client";
-import { useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { FC, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { FC, useState } from "react";
 import { FormProvider } from "react-hook-form";
-import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { generateSeed } from "@quri/squiggle-lang";
@@ -14,10 +12,9 @@ import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useMutationForm } from "@/hooks/useMutationForm";
-import { modelRoute, newModelRoute } from "@/routes";
+import { modelRoute } from "@/routes";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
-import { NewModelPageQuery } from "@/__generated__/NewModelPageQuery.graphql";
 
 const defaultCode = `/*
 Describe your code here
@@ -32,35 +29,12 @@ type FormShape = {
   isPrivate: boolean;
 };
 
-export const NewModel: FC = () => {
-  useSession({ required: true });
-
-  const searchParams = useSearchParams();
-
-  const { group: initialGroup } = useLazyLoadQuery<NewModelPageQuery>(
-    graphql`
-      query NewModelPageQuery($groupSlug: String!, $groupSlugIsSet: Boolean!) {
-        group(slug: $groupSlug) @include(if: $groupSlugIsSet) {
-          ... on Group {
-            id
-            slug
-            myMembership {
-              id
-            }
-          }
-        }
-      }
-    `,
-    {
-      groupSlug: searchParams.get("group") ?? "",
-      groupSlugIsSet: Boolean(searchParams.get("group")),
-    }
-  );
+export const NewModel: FC<{ initialGroup: SelectGroupOption | null }> = ({
+  initialGroup,
+}) => {
+  const [group] = useState(initialGroup);
 
   const router = useRouter();
-  useEffect(() => {
-    router.replace(newModelRoute()); // clean up group=... param
-  }, [router]);
 
   const { form, onSubmit, inFlight } = useMutationForm<
     FormShape,
@@ -70,7 +44,7 @@ export const NewModel: FC = () => {
     mode: "onChange",
     defaultValues: {
       // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
-      group: initialGroup?.myMembership ? initialGroup : null,
+      group,
       isPrivate: false,
     },
     mutation: graphql`
