@@ -5,7 +5,7 @@ import { z } from "zod";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { SelectGroupOption } from "@/components/SelectGroup";
 import { getCurrentEnvironment } from "@/relay/environment";
-import { getSessionUserOrRedirect } from "@/server/helpers";
+import { getSessionUserOrRedirect } from "@/server/userHelpers";
 
 import { NewModel } from "./NewModel";
 

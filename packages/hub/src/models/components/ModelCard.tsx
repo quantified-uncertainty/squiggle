@@ -45,11 +45,6 @@ const Fragment = graphql`
         ... on SquiggleSnippet {
           id
           code
-          version
-          seed
-          autorunMode
-          sampleCount
-          xyPointLength
         }
       }
       relativeValuesExports {
