@@ -29,7 +29,7 @@ export const RelativeValuesDefinitionList: FC<Props> = ({
       <div className="grid grid-cols-2 gap-4">
         {page.items.map((definition) => (
           <RelativeValuesDefinitionCard
-            key={definition.slug}
+            key={definition.id}
             definition={definition}
             showOwner={showOwner}
           />

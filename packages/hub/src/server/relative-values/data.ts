@@ -29,6 +29,7 @@ type DbDefinitionCard = NonNullable<
 
 export function dbDefinitionToDefinitionCard(dbDefinition: DbDefinitionCard) {
   return {
+    id: dbDefinition.id,
     slug: dbDefinition.slug,
     owner: {
       slug: dbDefinition.owner.slug,
