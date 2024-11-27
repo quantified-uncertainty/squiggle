@@ -1,53 +1,41 @@
 "use client";
 
 import { FC } from "react";
-import { graphql, useFragment } from "react-relay";
 
 import { LoadMore } from "@/components/LoadMore";
+import { usePaginator } from "@/hooks/usePaginator";
+import { Paginated } from "@/server/models/data";
+import { RelativeValuesDefinitionCardData } from "@/server/relative-values/data";
 
 import { RelativeValuesDefinitionCard } from "./RelativeValuesDefinitionCard";
 
-import { RelativeValuesDefinitionList$key } from "@/__generated__/RelativeValuesDefinitionList.graphql";
-
-const Fragment = graphql`
-  fragment RelativeValuesDefinitionList on RelativeValuesDefinitionConnection {
-    edges {
-      node {
-        id
-        ...RelativeValuesDefinitionCard
-      }
-    }
-    pageInfo {
-      hasNextPage
-    }
-  }
-`;
-
 type Props = {
-  connectionRef: RelativeValuesDefinitionList$key;
-  loadNext(count: number): unknown;
+  page: Paginated<RelativeValuesDefinitionCardData>;
   showOwner?: boolean;
 };
 
 export const RelativeValuesDefinitionList: FC<Props> = ({
-  connectionRef,
-  loadNext,
+  page: initialPage,
   showOwner,
 }) => {
-  const connection = useFragment(Fragment, connectionRef);
+  const page = usePaginator(initialPage);
+
+  if (!page.items.length) {
+    return <div className="text-slate-500">No definitions to show.</div>;
+  }
 
   return (
     <div>
       <div className="grid grid-cols-2 gap-4">
-        {connection.edges.map((edge) => (
+        {page.items.map((definition) => (
           <RelativeValuesDefinitionCard
-            key={edge.node.id}
-            definitionRef={edge.node}
+            key={definition.slug}
+            definition={definition}
             showOwner={showOwner}
           />
         ))}
       </div>
-      {connection.pageInfo.hasNextPage && <LoadMore loadNext={loadNext} />}
+      {page.loadNext && <LoadMore loadNext={page.loadNext} />}
     </div>
   );
 };

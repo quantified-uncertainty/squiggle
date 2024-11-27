@@ -1,33 +1,18 @@
 import { FC } from "react";
-import { useFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
 import { EntityCard, UpdatedStatus } from "@/components/EntityCard";
 import { relativeValuesRoute } from "@/routes";
-
-import { RelativeValuesDefinitionCard$key } from "@/__generated__/RelativeValuesDefinitionCard.graphql";
-
-const Fragment = graphql`
-  fragment RelativeValuesDefinitionCard on RelativeValuesDefinition {
-    slug
-    updatedAtTimestamp
-    owner {
-      slug
-    }
-  }
-`;
+import { RelativeValuesDefinitionCardData } from "@/server/relative-values/data";
 
 type Props = {
-  definitionRef: RelativeValuesDefinitionCard$key;
+  definition: RelativeValuesDefinitionCardData;
   showOwner?: boolean;
 };
 
 export const RelativeValuesDefinitionCard: FC<Props> = ({
-  definitionRef,
+  definition,
   showOwner = true,
 }) => {
-  const definition = useFragment(Fragment, definitionRef);
-
   return (
     <EntityCard
       href={relativeValuesRoute({
@@ -39,7 +24,7 @@ export const RelativeValuesDefinitionCard: FC<Props> = ({
       slug={definition.slug}
       menuItems={
         <>
-          <UpdatedStatus time={definition.updatedAtTimestamp} />
+          <UpdatedStatus time={definition.updatedAt.getTime()} />
         </>
       }
     />

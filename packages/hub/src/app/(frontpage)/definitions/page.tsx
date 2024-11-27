@@ -1,13 +1,8 @@
-import { loadPageQuery } from "@/relay/loadPageQuery";
+import { RelativeValuesDefinitionList } from "@/relative-values/components/RelativeValuesDefinitionList";
+import { loadDefinitionCards } from "@/server/relative-values/data";
 
-import { DefinitionsPage } from "./DefinitionsPage";
+export default async function DefinitionsPage() {
+  const page = await loadDefinitionCards();
 
-import QueryNode, {
-  DefinitionsPageQuery,
-} from "@/__generated__/DefinitionsPageQuery.graphql";
-
-export default async function OuterDefinitionsPage() {
-  const query = await loadPageQuery<DefinitionsPageQuery>(QueryNode, {});
-
-  return <DefinitionsPage query={query} />;
+  return <RelativeValuesDefinitionList page={page} />;
 }
