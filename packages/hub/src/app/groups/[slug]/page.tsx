@@ -1,5 +1,5 @@
 import { ModelList } from "@/models/components/ModelList";
-import { hasGroupMembership } from "@/server/groupHelpers";
+import { hasGroupMembership } from "@/server/groups/data";
 import { loadModelCards } from "@/server/models/data";
 
 type Props = {

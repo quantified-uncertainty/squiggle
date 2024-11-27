@@ -1,13 +1,8 @@
-import { loadPageQuery } from "@/relay/loadPageQuery";
-
-import { GroupsPage } from "./GroupsPage";
-
-import QueryNode, {
-  GroupsPageQuery,
-} from "@/__generated__/GroupsPageQuery.graphql";
+import { GroupList } from "@/groups/components/GroupList";
+import { loadGroupCards } from "@/server/groups/data";
 
 export default async function OuterGroupsPage() {
-  const query = await loadPageQuery<GroupsPageQuery>(QueryNode, {});
+  const page = await loadGroupCards();
 
-  return <GroupsPage query={query} />;
+  return <GroupList page={page} />;
 }
