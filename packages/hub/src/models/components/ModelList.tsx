@@ -1,7 +1,7 @@
 "use client";
 import { FC } from "react";
 
-import { ModelCardData } from "@/server/modelHelpers";
+import { ModelCardData } from "@/server/models/data";
 
 import { ModelCard } from "./ModelCard";
 

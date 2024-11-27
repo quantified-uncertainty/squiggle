@@ -453,7 +453,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     }: {
       importId: string;
     }) => (
-      <ReactRoot>
+      <ReactRoot confirmationWrapper={false}>
         <ImportTooltip importId={importId} />
       </ReactRoot>
     );

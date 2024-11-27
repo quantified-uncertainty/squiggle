@@ -17,7 +17,7 @@ import {
   VariablesDropdown,
 } from "@/lib/VariablesDropdown";
 import { modelRoute, ownerRoute } from "@/routes";
-import { ModelCardData } from "@/server/modelHelpers";
+import { ModelCardData } from "@/server/models/data";
 
 type Props = {
   model: ModelCardData;

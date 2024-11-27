@@ -1,7 +1,7 @@
 import { ModelList } from "@/models/components/ModelList";
-import { loadModelCards } from "@/server/modelHelpers";
+import { loadModelCards } from "@/server/models/data";
 
-export default async function OuterFrontPage() {
+export default async function FrontPage() {
   const { models } = await loadModelCards();
 
   return (

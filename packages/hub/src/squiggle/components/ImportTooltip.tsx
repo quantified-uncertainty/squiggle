@@ -1,12 +1,12 @@
 import clsx from "clsx";
-import { FC } from "react";
-import { graphql, useLazyLoadQuery } from "react-relay";
+import { FC, useEffect, useState } from "react";
+import Skeleton from "react-loading-skeleton";
 
 import { ModelCard } from "@/models/components/ModelCard";
+import { loadModelCardAction } from "@/server/models/actions";
+import { ModelCardData } from "@/server/models/data";
 
 import { parseSourceId } from "./linker";
-
-import { ImportTooltipQuery } from "@/__generated__/ImportTooltipQuery.graphql";
 
 type Props = {
   importId: string;
@@ -15,28 +15,15 @@ type Props = {
 export const ImportTooltip: FC<Props> = ({ importId }) => {
   const { owner, slug } = parseSourceId(importId);
 
-  const { model } = useLazyLoadQuery<ImportTooltipQuery>(
-    graphql`
-      query ImportTooltipQuery($input: QueryModelInput!) {
-        model(input: $input) {
-          __typename
-          ... on Model {
-            ...ModelCard
-          }
-        }
-      }
-    `,
-    { input: { owner, slug } }
+  const [model, setModel] = useState<ModelCardData | "loading" | null>(
+    "loading"
   );
 
-  if (model.__typename !== "Model") {
-    return (
-      <div>
-        {"Couldn't load "}
-        {owner}/{slug}
-      </div>
-    );
-  }
+  useEffect(() => {
+    // TODO - this is done with a server action, so it's not cached.
+    // A route would be better.
+    loadModelCardAction({ owner, slug }).then(setModel);
+  }, []);
 
   return (
     <div
@@ -46,7 +33,15 @@ export const ImportTooltip: FC<Props> = ({ importId }) => {
         "text-base"
       )}
     >
-      <ModelCard modelRef={model} />
+      {model === "loading" ? (
+        <Skeleton height={160} />
+      ) : model ? (
+        <ModelCard model={model} />
+      ) : (
+        <div className="grid h-40 place-items-center text-xs">
+          Model not found.
+        </div>
+      )}
     </div>
   );
 };

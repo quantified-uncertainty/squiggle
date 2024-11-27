@@ -1,10 +1,6 @@
-import { loadPageQuery } from "@/relay/loadPageQuery";
-
-import { GroupPage } from "./GroupPage";
-
-import QueryNode, {
-  GroupPageQuery,
-} from "@/__generated__/GroupPageQuery.graphql";
+import { ModelList } from "@/models/components/ModelList";
+import { hasGroupMembership } from "@/server/groupHelpers";
+import { loadModelCards } from "@/server/models/data";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -12,9 +8,27 @@ type Props = {
 
 export default async function OuterGroupPage({ params }: Props) {
   const { slug } = await params;
-  const query = await loadPageQuery<GroupPageQuery>(QueryNode, {
-    slug,
-  });
 
-  return <GroupPage query={query} />;
+  const { models } = await loadModelCards({
+    ownerSlug: slug,
+  });
+  const isMember = await hasGroupMembership(slug);
+
+  return (
+    <div>
+      {models.length ? (
+        <ModelList
+          models={models}
+          // loadNext={loadNext}
+          showOwner={false}
+        />
+      ) : (
+        <div className="text-slate-500">
+          {isMember
+            ? "This group doesn't have any models."
+            : "This group does not have any public models."}
+        </div>
+      )}
+    </div>
+  );
 }
