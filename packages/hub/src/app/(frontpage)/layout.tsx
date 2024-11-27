@@ -16,7 +16,7 @@ export default function FrontPageLayout({ children }: PropsWithChildren) {
         <StyledTabLink name="Definitions" href={definitionsRoute()} prefetch />
         <StyledTabLink name="Groups" href={groupsRoute()} prefetch />
       </StyledTabLinkList>
-      <div className="mt-4">{children}</div>
+      <div className="mt-8">{children}</div>
     </NarrowPageLayout>
   );
 }
