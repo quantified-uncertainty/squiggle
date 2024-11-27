@@ -1,4 +1,3 @@
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { loadPageQuery } from "@/relay/loadPageQuery";
 
 import { FrontPage } from "./FrontPage";
@@ -10,9 +9,5 @@ import QueryNode, {
 export default async function OuterFrontPage() {
   const query = await loadPageQuery<FrontPageQuery>(QueryNode, {});
 
-  return (
-    <NarrowPageLayout>
-      <FrontPage query={query} />
-    </NarrowPageLayout>
-  );
+  return <FrontPage query={query} />;
 }

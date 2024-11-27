@@ -148,6 +148,18 @@ export function userVariablesRoute({ username }: { username: string }) {
   return `/users/${username}/variables`;
 }
 
+export function groupsRoute() {
+  return "/groups";
+}
+
+export function definitionsRoute() {
+  return "/definitions";
+}
+
+export function variablesRoute() {
+  return "/variables";
+}
+
 export function groupRoute({ slug }: { slug: string }) {
   return `/groups/${slug}`;
 }
