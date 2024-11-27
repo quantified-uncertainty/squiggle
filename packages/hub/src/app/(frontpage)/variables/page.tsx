@@ -1,13 +1,8 @@
-import { loadPageQuery } from "@/relay/loadPageQuery";
-
-import { VariablesPage } from "./VariablesPage";
-
-import QueryNode, {
-  VariablesPageQuery,
-} from "@/__generated__/VariablesPageQuery.graphql";
+import { loadVariableCards } from "@/server/variables/data";
+import { VariableList } from "@/variables/components/VariableList";
 
 export default async function OuterVariablesPage() {
-  const query = await loadPageQuery<VariablesPageQuery>(QueryNode, {});
+  const variables = await loadVariableCards();
 
-  return <VariablesPage query={query} />;
+  return <VariableList page={variables} />;
 }

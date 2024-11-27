@@ -55,11 +55,13 @@ export async function loadDefinitionCards(
     select: definitionCardSelect,
     orderBy: { updatedAt: "desc" },
     cursor: params.cursor ? { id: params.cursor } : undefined,
-    where: {
-      owner: {
-        slug: params.username,
-      },
-    },
+    where: params.username
+      ? {
+          owner: {
+            slug: params.username,
+          },
+        }
+      : undefined,
     take: limit + 1,
   });
 

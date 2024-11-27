@@ -6,7 +6,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 
 // duplicates code in graphql/helpers/modelHelpers.ts
-async function modelWhereHasAccess(): Promise<Prisma.ModelWhereInput[]> {
+export async function modelWhereHasAccess(): Promise<Prisma.ModelWhereInput[]> {
   const session = await auth();
   const orParts: Prisma.ModelWhereInput[] = [{ isPrivate: false }];
   if (session) {

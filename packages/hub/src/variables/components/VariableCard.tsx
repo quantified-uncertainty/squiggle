@@ -1,6 +1,4 @@
 import { FC } from "react";
-import { useFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
 import { MarkdownViewer } from "@quri/squiggle-components";
 import { CodeBracketSquareIcon } from "@quri/ui";
@@ -16,39 +14,13 @@ import {
 import { Link } from "@/components/ui/Link";
 import { exportTypeIcon } from "@/lib/typeIcon";
 import { modelRoute, variableRoute } from "@/routes";
-
-import { VariableCard$key } from "@/__generated__/VariableCard.graphql";
-
-const Fragment = graphql`
-  fragment VariableCard on Variable {
-    id
-    variableName
-    currentRevision {
-      id
-      title
-      docstring
-      variableType
-      modelRevision {
-        createdAtTimestamp
-      }
-    }
-    owner {
-      slug
-    }
-    model {
-      slug
-      isPrivate
-    }
-  }
-`;
+import { VariableCardData } from "@/server/variables/data";
 
 type Props = {
-  variableRef: VariableCard$key;
+  variable: VariableCardData;
 };
 
-export const VariableCard: FC<Props> = ({ variableRef }) => {
-  const variable = useFragment(Fragment, variableRef);
-
+export const VariableCard: FC<Props> = ({ variable }) => {
   const currentRevision = variable.currentRevision;
 
   if (!currentRevision) {
@@ -59,7 +31,7 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
 
   // This will have problems with markdown tags, but I looked into markdown-truncation packages, and they can get complicated. Will try this for now.
 
-  const { createdAtTimestamp } = currentRevision.modelRevision;
+  const { createdAt } = currentRevision.modelRevision;
 
   return (
     <div className="flex flex-col">
@@ -70,7 +42,7 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
             href={variableRoute({
               modelSlug: variable.model.slug,
               variableName: variable.variableName,
-              owner: variable.owner.slug,
+              owner: variable.model.owner.slug,
             })}
           >
             {variable.currentRevision?.title || variable.variableName}
@@ -80,12 +52,12 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
           <a
             className={entityCardBadgeCss(true)}
             href={modelRoute({
-              owner: variable.owner.slug,
+              owner: variable.model.owner.slug,
               slug: variable.model.slug,
             })}
           >
             <CodeBracketSquareIcon size={12} className="mr-1" />
-            {`${variable.owner.slug}/${variable.model.slug}`}
+            {`${variable.model.owner.slug}/${variable.model.slug}`}
           </a>
         </div>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
@@ -95,7 +67,7 @@ export const VariableCard: FC<Props> = ({ variableRef }) => {
                 <Icon size={10} className="mr-1" />
                 {currentRevision.variableType}
               </EntityCardBadge>,
-              <UpdatedStatus time={createdAtTimestamp} key={"updated-at"} />,
+              <UpdatedStatus time={createdAt.getTime()} key={"updated-at"} />,
               variable.model.isPrivate && <PrivateBadge key={"is-private"} />,
             ]}
           />

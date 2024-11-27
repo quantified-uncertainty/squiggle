@@ -1,43 +1,30 @@
 "use client";
 import { FC } from "react";
-import { graphql, useFragment } from "react-relay";
 
 import { LoadMore } from "@/components/LoadMore";
+import { usePaginator } from "@/hooks/usePaginator";
+import { Paginated } from "@/server/models/data";
+import { VariableCardData } from "@/server/variables/data";
 
 import { VariableCard } from "./VariableCard";
 
-import { VariableList$key } from "@/__generated__/VariableList.graphql";
-
-const Fragment = graphql`
-  fragment VariableList on VariableConnection {
-    edges {
-      node {
-        id
-        ...VariableCard
-      }
-    }
-    pageInfo {
-      hasNextPage
-    }
-  }
-`;
-
 type Props = {
-  connectionRef: VariableList$key;
-  loadNext(count: number): unknown;
+  page: Paginated<VariableCardData>;
 };
 
-export const VariableList: FC<Props> = ({ connectionRef, loadNext }) => {
-  const connection = useFragment(Fragment, connectionRef);
+export const VariableList: FC<Props> = ({ page: initialPage }) => {
+  const page = usePaginator(initialPage);
 
-  return (
+  return page.items.length === 0 ? (
+    <div>No variables found.</div>
+  ) : (
     <div>
       <div className="grid gap-x-4 gap-y-8 md:grid-cols-2">
-        {connection.edges.map((edge) => (
-          <VariableCard key={edge.node.id} variableRef={edge.node} />
+        {page.items.map((variable) => (
+          <VariableCard key={variable.id} variable={variable} />
         ))}
       </div>
-      {connection.pageInfo.hasNextPage && <LoadMore loadNext={loadNext} />}
+      {page.loadNext && <LoadMore loadNext={page.loadNext} />}
     </div>
   );
 };
