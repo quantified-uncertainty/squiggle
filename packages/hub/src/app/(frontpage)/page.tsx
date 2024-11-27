@@ -1,13 +1,14 @@
-import { loadPageQuery } from "@/relay/loadPageQuery";
-
-import { FrontPage } from "./FrontPage";
-
-import QueryNode, {
-  FrontPageQuery,
-} from "@/__generated__/FrontPageQuery.graphql";
+import { ModelList } from "@/models/components/ModelList";
+import { loadModelCards } from "@/server/modelHelpers";
 
 export default async function OuterFrontPage() {
-  const query = await loadPageQuery<FrontPageQuery>(QueryNode, {});
+  const { models } = await loadModelCards();
 
-  return <FrontPage query={query} />;
+  return (
+    <ModelList
+      models={models}
+      showOwner={true}
+      // loadNext={loadNext}
+    />
+  );
 }

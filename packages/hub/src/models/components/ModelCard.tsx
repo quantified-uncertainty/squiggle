@@ -1,6 +1,4 @@
 import { FC } from "react";
-import { useFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
 import { CodeSyntaxHighlighter, NumberShower } from "@quri/squiggle-components";
 import { XIcon } from "@quri/ui";
@@ -19,50 +17,10 @@ import {
   VariablesDropdown,
 } from "@/lib/VariablesDropdown";
 import { modelRoute, ownerRoute } from "@/routes";
-
-import { ModelCard$key } from "@/__generated__/ModelCard.graphql";
-
-const Fragment = graphql`
-  fragment ModelCard on Model {
-    id
-    slug
-    updatedAtTimestamp
-    owner {
-      __typename
-      slug
-    }
-    isPrivate
-    variables {
-      variableName
-      currentRevision {
-        variableType
-        title
-      }
-    }
-    currentRevision {
-      content {
-        __typename
-        ... on SquiggleSnippet {
-          id
-          code
-        }
-      }
-      relativeValuesExports {
-        variableName
-        definition {
-          slug
-        }
-      }
-      buildStatus
-      lastBuild {
-        runSeconds
-      }
-    }
-  }
-`;
+import { ModelCardData } from "@/server/modelHelpers";
 
 type Props = {
-  modelRef: ModelCard$key;
+  model: ModelCardData;
   showOwner?: boolean;
 };
 
@@ -99,16 +57,9 @@ const RunTime: FC<{ seconds: number }> = ({ seconds }) => (
   </div>
 );
 
-export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
-  const model = useFragment(Fragment, modelRef);
-  const {
-    owner,
-    slug,
-    updatedAtTimestamp,
-    isPrivate,
-    variables,
-    currentRevision,
-  } = model;
+export const ModelCard: FC<Props> = ({ model, showOwner = true }) => {
+  const { owner, slug, updatedAt, isPrivate, variables, currentRevision } =
+    model;
 
   const variableRevisions: VariableRevision[] = variables.map((v) => ({
     variableName: v.variableName,
@@ -128,9 +79,11 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
     variableRevisions,
     relativeValuesExports
   );
-  const { buildStatus, lastBuild, content } = currentRevision;
-  const body =
-    content.__typename === "SquiggleSnippet" ? content.code : undefined;
+  const {
+    // buildStatus, lastBuild,
+    squiggleSnippet,
+  } = currentRevision;
+  const body = squiggleSnippet?.code;
 
   const menuItems = (
     <InterspersedMenuItemsWithDots
@@ -149,8 +102,8 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
           </VariablesDropdown>
         ),
         isPrivate && <PrivateBadge key="private-badge" />,
-        updatedAtTimestamp && (
-          <UpdatedStatus key="updated-status" time={updatedAtTimestamp} />
+        updatedAt && (
+          <UpdatedStatus key="updated-status" time={updatedAt.getTime()} />
         ),
       ]}
     />
