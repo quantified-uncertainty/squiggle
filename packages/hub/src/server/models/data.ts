@@ -130,21 +130,29 @@ type DbModelCard = NonNullable<
 
 export type ModelCardData = ReturnType<typeof dbModelToModelCard>;
 
+export type Paginated<T> = {
+  items: T[];
+  loadMore?: (limit: number) => Promise<Paginated<T>>;
+};
+
 export async function loadModelCards(
-  filters: {
+  params: {
     ownerSlug?: string;
+    cursor?: string;
+    limit?: number;
   } = {}
-) {
-  const limit = 20;
+): Promise<Paginated<ModelCardData>> {
+  const limit = params.limit ?? 20;
 
   const dbModels = await prisma.model.findMany({
     select: modelCardSelect,
     orderBy: { updatedAt: "desc" },
+    cursor: params.cursor ? { id: params.cursor } : undefined,
     where: {
-      ...(filters.ownerSlug
+      ...(params.ownerSlug
         ? {
             owner: {
-              slug: filters.ownerSlug,
+              slug: params.ownerSlug,
             },
           }
         : {}),
@@ -155,9 +163,16 @@ export async function loadModelCards(
 
   const models = dbModels.map(dbModelToModelCard);
 
+  const nextCursor = models[models.length - 1]?.id;
+
+  async function loadMore(limit: number) {
+    "use server";
+    return loadModelCards({ ...params, cursor: nextCursor, limit });
+  }
+
   return {
-    models: limit ? models.slice(0, limit) : models,
-    hasMore: limit ? models.length > limit : false,
+    items: models.slice(0, limit),
+    loadMore: models.length > limit ? loadMore : undefined,
   };
 }
 

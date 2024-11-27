@@ -9,19 +9,15 @@ type Props = {
 export default async function OuterGroupPage({ params }: Props) {
   const { slug } = await params;
 
-  const { models } = await loadModelCards({
+  const page = await loadModelCards({
     ownerSlug: slug,
   });
   const isMember = await hasGroupMembership(slug);
 
   return (
     <div>
-      {models.length ? (
-        <ModelList
-          models={models}
-          // loadNext={loadNext}
-          showOwner={false}
-        />
+      {page.items.length ? (
+        <ModelList page={page} showOwner={false} />
       ) : (
         <div className="text-slate-500">
           {isMember

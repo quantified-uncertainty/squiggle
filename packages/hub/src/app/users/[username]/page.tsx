@@ -9,18 +9,14 @@ type Props = {
 
 export default async function UserPage({ params }: Props) {
   const { username } = await params;
-  const { models } = await loadModelCards({
+  const page = await loadModelCards({
     ownerSlug: username,
   });
 
   return (
     <div>
-      {models.length ? (
-        <ModelList
-          models={models}
-          // loadNext={loadNext}
-          showOwner={false}
-        />
+      {page.items.length ? (
+        <ModelList page={page} showOwner={false} />
       ) : (
         <div className="text-slate-500">No models to show.</div>
       )}

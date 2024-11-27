@@ -1,21 +1,20 @@
 "use client";
 import { FC } from "react";
 
-import { ModelCardData } from "@/server/models/data";
+import { LoadMore } from "@/components/LoadMore";
+import { usePaginator } from "@/hooks/usePaginator";
+import { ModelCardData, Paginated } from "@/server/models/data";
 
 import { ModelCard } from "./ModelCard";
 
 type Props = {
-  models: ModelCardData[];
-  // loadNext(count: number): unknown;
+  page: Paginated<ModelCardData>;
   showOwner?: boolean;
 };
 
-export const ModelList: FC<Props> = ({
-  models,
-  // loadNext,
-  showOwner,
-}) => {
+export const ModelList: FC<Props> = ({ page, showOwner }) => {
+  const { items: models, loadNext } = usePaginator(page);
+
   return (
     <div>
       <div className="grid gap-y-8">
@@ -23,7 +22,7 @@ export const ModelList: FC<Props> = ({
           <ModelCard key={model.id} model={model} showOwner={showOwner} />
         ))}
       </div>
-      {/* {connection.pageInfo.hasNextPage && <LoadMore loadNext={loadNext} />} */}
+      {loadNext && <LoadMore loadNext={loadNext} />}
     </div>
   );
 };
