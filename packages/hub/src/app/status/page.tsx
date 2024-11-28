@@ -1,21 +1,29 @@
 import { Metadata } from "next";
+import { FC } from "react";
 
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { loadPageQuery } from "@/relay/loadPageQuery";
+import { getGlobalStatistics } from "@/server/globalStatistics";
 
-import { StatusPage } from "./StatusPage";
-
-import QueryNode, {
-  StatusPageQuery,
-} from "@/__generated__/StatusPageQuery.graphql";
+const StatRow: FC<{ name: string; value: number }> = ({ name, value }) => (
+  <tr className="border">
+    <td className="p-4 font-bold">{name}</td>
+    <td className="p-4">{value}</td>
+  </tr>
+);
 
 export default async function OuterFrontPage() {
-  const query = await loadPageQuery<StatusPageQuery>(QueryNode, {});
+  const stats = await getGlobalStatistics();
 
   return (
-    <NarrowPageLayout>
-      <StatusPage query={query} />
-    </NarrowPageLayout>
+    <table className="mt-8 table-auto bg-white">
+      <tbody>
+        <StatRow name="Users" value={stats.users} />
+        <StatRow name="Models" value={stats.models} />
+        <StatRow
+          name="Relative Values Definitions"
+          value={stats.relativeValuesDefinitions}
+        />
+      </tbody>
+    </table>
   );
 }
 
