@@ -23,7 +23,6 @@ import "./mutations/createGroup";
 import "./mutations/createRelativeValuesDefinition";
 import "./mutations/createReusableGroupInviteToken";
 import "./mutations/deleteMembership";
-import "./mutations/deleteModel";
 import "./mutations/deleteRelativeValuesDefinition";
 import "./mutations/deleteReusableGroupInviteToken";
 import "./mutations/addUserToGroup";

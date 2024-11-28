@@ -38,7 +38,7 @@ export async function getWriteableModel({
   slug,
   include,
 }: {
-  session: Session;
+  session: Session; // FIXME - SignedInSession?
   owner: string;
   slug: string;
   include?: Prisma.ModelInclude;
