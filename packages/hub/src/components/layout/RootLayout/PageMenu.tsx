@@ -19,7 +19,7 @@ import {
 
 import { SQUIGGLE_DOCS_URL } from "@/lib/common";
 import { aboutRoute, aiRoute, newModelRoute } from "@/routes";
-import { GroupCardData } from "@/server/groups/data";
+import { GroupCardDTO } from "@/server/groups/data/card";
 import { Paginated } from "@/server/types";
 
 import { GlobalSearch } from "../../GlobalSearch";
@@ -61,7 +61,7 @@ const NewModelMenuLink: FC<MenuLinkModeProps> = (props) => {
 };
 
 type MenuProps = {
-  groups: Paginated<GroupCardData>;
+  groups: Paginated<GroupCardDTO>;
   session: Session | null;
 };
 

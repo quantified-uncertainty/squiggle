@@ -2,7 +2,7 @@ import { FC, PropsWithChildren, Suspense } from "react";
 
 import { auth } from "@/auth";
 import { Link } from "@/components/ui/Link";
-import { loadGroupCards } from "@/server/groups/data";
+import { loadGroupCards } from "@/server/groups/data/card";
 
 import { ReactRoot } from "../../ReactRoot";
 import { PageFooterIfNecessary } from "./PageFooterIfNecessary";

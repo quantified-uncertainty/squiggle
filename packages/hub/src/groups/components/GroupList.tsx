@@ -3,13 +3,13 @@ import { FC } from "react";
 
 import { LoadMore } from "@/components/LoadMore";
 import { usePaginator } from "@/hooks/usePaginator";
-import { GroupCardData } from "@/server/groups/data";
+import { GroupCardDTO } from "@/server/groups/data/card";
 import { Paginated } from "@/server/types";
 
 import { GroupCard } from "./GroupCard";
 
 type Props = {
-  page: Paginated<GroupCardData>;
+  page: Paginated<GroupCardDTO>;
 };
 
 export const GroupList: FC<Props> = ({ page: initialPage }) => {

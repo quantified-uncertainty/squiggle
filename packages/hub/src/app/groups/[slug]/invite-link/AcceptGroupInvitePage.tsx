@@ -1,5 +1,5 @@
 "use client";
-import { redirect, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FC, useEffect } from "react";
 import { graphql } from "relay-runtime";
 
@@ -7,41 +7,15 @@ import { useToast } from "@quri/ui";
 
 import { MutationButton } from "@/components/ui/MutationButton";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
-import { usePageQuery } from "@/relay/usePageQuery";
 import { groupRoute } from "@/routes";
-
-import { useIsGroupMember } from "../hooks";
+import { GroupCardDTO } from "@/server/groups/data/card";
 
 import { AcceptGroupInvitePage_ValidateMutation } from "@/__generated__/AcceptGroupInvitePage_ValidateMutation.graphql";
 import { AcceptGroupInvitePageMutation } from "@/__generated__/AcceptGroupInvitePageMutation.graphql";
-import { AcceptGroupInvitePageQuery } from "@/__generated__/AcceptGroupInvitePageQuery.graphql";
 
 export const AcceptGroupInvitePage: FC<{
-  query: SerializablePreloadedQuery<AcceptGroupInvitePageQuery>;
-}> = ({ query }) => {
-  const [{ result }] = usePageQuery(
-    graphql`
-      query AcceptGroupInvitePageQuery($slug: String!) {
-        result: group(slug: $slug) {
-          __typename
-          ... on Group {
-            slug
-            ...hooks_useIsGroupMember
-          }
-        }
-      }
-    `,
-    query
-  );
-  const group = extractFromGraphqlErrorUnion(result, "Group");
-  const isGroupMember = useIsGroupMember(group);
-
-  if (isGroupMember) {
-    redirect(groupRoute({ slug: group.slug }));
-  }
-
+  group: GroupCardDTO;
+}> = ({ group }) => {
   const params = useSearchParams();
   const inviteToken = params.get("token");
   if (!inviteToken) {

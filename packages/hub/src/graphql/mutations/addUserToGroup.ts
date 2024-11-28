@@ -6,7 +6,6 @@ import { builder } from "../builder";
 import { MembershipRoleType, UserGroupMembership } from "../types/Group";
 import { validateSlug } from "../utils";
 
-// Adapted from `inviteUserToGroup`.
 builder.mutationField("addUserToGroup", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("AddUserToGroupResult", {

@@ -1,7 +1,6 @@
 import { graphql, useFragment } from "react-relay";
 
 import { hooks_useIsGroupAdmin$key } from "@/__generated__/hooks_useIsGroupAdmin.graphql";
-import { hooks_useIsGroupMember$key } from "@/__generated__/hooks_useIsGroupMember.graphql";
 
 export function useIsGroupAdmin(groupRef: hooks_useIsGroupAdmin$key) {
   const { myMembership } = useFragment(
@@ -16,18 +15,4 @@ export function useIsGroupAdmin(groupRef: hooks_useIsGroupAdmin$key) {
     groupRef
   );
   return myMembership?.role === "Admin";
-}
-
-export function useIsGroupMember(groupRef: hooks_useIsGroupMember$key) {
-  const { myMembership } = useFragment(
-    graphql`
-      fragment hooks_useIsGroupMember on Group {
-        myMembership {
-          id
-        }
-      }
-    `,
-    groupRef
-  );
-  return Boolean(myMembership);
 }

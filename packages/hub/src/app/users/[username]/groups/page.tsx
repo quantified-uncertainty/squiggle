@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 import { GroupList } from "@/groups/components/GroupList";
-import { loadGroupCards } from "@/server/groups/data";
+import { loadGroupCards } from "@/server/groups/data/card";
 
 type Props = {
   params: Promise<{ username: string }>;

@@ -2,10 +2,10 @@ import { FC } from "react";
 
 import { EntityCard, UpdatedStatus } from "@/components/EntityCard";
 import { groupRoute } from "@/routes";
-import { GroupCardData } from "@/server/groups/data";
+import { GroupCardDTO } from "@/server/groups/data/card";
 
 type Props = {
-  group: GroupCardData;
+  group: GroupCardDTO;
 };
 
 export const GroupCard: FC<Props> = ({ group }) => {

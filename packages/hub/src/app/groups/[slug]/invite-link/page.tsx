@@ -1,5 +1,10 @@
+import { notFound, redirect } from "next/navigation";
+
 import { WithAuth } from "@/components/WithAuth";
 import { loadPageQuery } from "@/relay/loadPageQuery";
+import { groupRoute } from "@/routes";
+import { loadGroupCard } from "@/server/groups/data/card";
+import { hasGroupMembership } from "@/server/groups/data/helpers";
 
 import { AcceptGroupInvitePage } from "./AcceptGroupInvitePage";
 
@@ -17,7 +22,16 @@ async function InnerPage({ params }: Props) {
     slug,
   });
 
-  return <AcceptGroupInvitePage query={query} />;
+  const group = await loadGroupCard(slug);
+  if (!group) {
+    notFound();
+  }
+  const isMember = await hasGroupMembership(slug);
+  if (isMember) {
+    redirect(groupRoute({ slug: group.slug }));
+  }
+
+  return <AcceptGroupInvitePage group={group} />;
 }
 
 export default async function ({ params }: Props) {

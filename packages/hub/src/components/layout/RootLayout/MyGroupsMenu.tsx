@@ -4,11 +4,11 @@ import { DropdownMenuHeader, GroupIcon, PlusIcon } from "@quri/ui";
 
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 import { groupRoute, newGroupRoute } from "@/routes";
-import { GroupCardData } from "@/server/groups/data";
+import { GroupCardDTO } from "@/server/groups/data/card";
 import { Paginated } from "@/server/types";
 
 type Props = {
-  groups: Paginated<GroupCardData>;
+  groups: Paginated<GroupCardDTO>;
   close: () => void;
 };
 
