@@ -1,46 +1,30 @@
 import { FC } from "react";
-import { graphql, useFragment } from "react-relay";
 
 import { DropdownMenuHeader, GroupIcon, PlusIcon } from "@quri/ui";
 
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 import { groupRoute, newGroupRoute } from "@/routes";
-
-import { MyGroupsMenu$key } from "@/__generated__/MyGroupsMenu.graphql";
+import { GroupCardData } from "@/server/groups/data";
+import { Paginated } from "@/server/models/data";
 
 type Props = {
-  groupsRef: MyGroupsMenu$key;
+  groups: Paginated<GroupCardData>;
   close: () => void;
 };
 
-export const MyGroupsMenu: FC<Props> = ({ groupsRef, close }) => {
-  const groups = useFragment(
-    graphql`
-      fragment MyGroupsMenu on Query {
-        result: groups(input: { myOnly: true }) {
-          edges {
-            node {
-              id
-              slug
-            }
-          }
-        }
-      }
-    `,
-    groupsRef
-  );
+export const MyGroupsMenu: FC<Props> = ({ groups, close }) => {
   return (
     <>
       <DropdownMenuHeader>My Groups</DropdownMenuHeader>
 
-      {groups.result.edges.length ? (
+      {groups.items.length ? (
         <>
-          {groups.result.edges.map((edge) => (
+          {groups.items.map((group) => (
             <DropdownMenuNextLinkItem
-              key={edge.node.id}
-              href={groupRoute({ slug: edge.node.slug })}
+              key={group.id}
+              href={groupRoute({ slug: group.slug })}
               icon={GroupIcon}
-              title={edge.node.slug}
+              title={group.slug}
               close={close}
             />
           ))}
@@ -52,7 +36,7 @@ export const MyGroupsMenu: FC<Props> = ({ groupsRef, close }) => {
         title="New Group"
         close={close}
       />
-      {/* TODO: "...show all" link is hasNextPage is true */}
+      {/* TODO: "...show all" link is loadNext is true */}
     </>
   );
 };

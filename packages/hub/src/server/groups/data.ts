@@ -14,7 +14,7 @@ export async function hasGroupMembership(groupSlug: string) {
     return false;
   }
 
-  const group = await prisma.group.findFirstOrThrow({
+  const group = await prisma.group.findFirst({
     select: { id: true },
     where: {
       asOwner: { slug: groupSlug },

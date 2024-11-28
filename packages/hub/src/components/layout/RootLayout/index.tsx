@@ -2,6 +2,7 @@ import { FC, PropsWithChildren, Suspense } from "react";
 
 import { auth } from "@/auth";
 import { Link } from "@/components/ui/Link";
+import { loadGroupCards } from "@/server/groups/data";
 
 import { ReactRoot } from "../../ReactRoot";
 import { PageFooterIfNecessary } from "./PageFooterIfNecessary";
@@ -12,8 +13,12 @@ const WrappedPageMenu: FC = async () => {
   // `<PageMenu />`, sequentially.  We could select all relevant session data
   // through GraphQL, or avoid GraphQL queries altogether.
   const session = await auth();
+  const username = session?.user?.username;
+  const groups = username
+    ? await loadGroupCards({ username: session?.user?.username })
+    : { items: [] };
 
-  return <PageMenu session={session} />;
+  return <PageMenu session={session} groups={groups} />;
 };
 
 const InnerRootLayout: FC<PropsWithChildren> = ({ children }) => {

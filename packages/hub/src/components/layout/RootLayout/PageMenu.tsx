@@ -2,8 +2,6 @@
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { FC, useState } from "react";
-import { useFragment, useLazyLoadQuery } from "react-relay";
-import { graphql } from "relay-runtime";
 
 import {
   BoltIcon,
@@ -21,6 +19,8 @@ import {
 
 import { SQUIGGLE_DOCS_URL } from "@/lib/common";
 import { aboutRoute, aiRoute, newModelRoute } from "@/routes";
+import { GroupCardData } from "@/server/groups/data";
+import { Paginated } from "@/server/models/data";
 
 import { GlobalSearch } from "../../GlobalSearch";
 import { DesktopUserControls } from "./DesktopUserControls";
@@ -29,9 +29,6 @@ import { MyGroupsMenu } from "./MyGroupsMenu";
 import { MenuLinkModeProps, PageMenuLink } from "./PageMenuLink";
 import { useForceChooseUsername } from "./useForceChooseUsername";
 import { UserControlsMenu } from "./UserControlsMenu";
-
-import { PageMenu$key } from "@/__generated__/PageMenu.graphql";
-import { PageMenuQuery } from "@/__generated__/PageMenuQuery.graphql";
 
 const AboutMenuLink: FC<MenuLinkModeProps> = (props) => {
   return <PageMenuLink {...props} href={aboutRoute()} title="About" />;
@@ -63,20 +60,12 @@ const NewModelMenuLink: FC<MenuLinkModeProps> = (props) => {
   );
 };
 
-const fragment = graphql`
-  fragment PageMenu on Query
-  @argumentDefinitions(signedIn: { type: "Boolean!" }) {
-    ...MyGroupsMenu @include(if: $signedIn)
-  }
-`;
-
 type MenuProps = {
-  queryRef: PageMenu$key;
+  groups: Paginated<GroupCardData>;
   session: Session | null;
 };
 
-const DesktopMenu: FC<MenuProps> = ({ queryRef, session }) => {
-  const menu = useFragment(fragment, queryRef);
+const DesktopMenu: FC<MenuProps> = ({ groups, session }) => {
   return (
     <div className="flex items-center gap-4">
       <GlobalSearch />
@@ -88,7 +77,7 @@ const DesktopMenu: FC<MenuProps> = ({ queryRef, session }) => {
           <Dropdown
             render={({ close }) => (
               <DropdownMenu>
-                <MyGroupsMenu groupsRef={menu} close={close} />
+                <MyGroupsMenu groups={groups} close={close} />
               </DropdownMenu>
             )}
           >
@@ -102,9 +91,7 @@ const DesktopMenu: FC<MenuProps> = ({ queryRef, session }) => {
   );
 };
 
-const MobileMenu: FC<MenuProps> = ({ queryRef, session }) => {
-  const menu = useFragment(fragment, queryRef);
-
+const MobileMenu: FC<MenuProps> = ({ groups, session }) => {
   const username = session?.user?.username;
   const [open, setOpen] = useState(false);
 
@@ -136,7 +123,7 @@ const MobileMenu: FC<MenuProps> = ({ queryRef, session }) => {
               <DocsMenuLink mode="mobile" close={close} />
               {username ? (
                 <>
-                  <MyGroupsMenu groupsRef={menu} close={close} />
+                  <MyGroupsMenu groups={groups} close={close} />
                   <UserControlsMenu
                     mode="mobile"
                     username={username}
@@ -162,20 +149,11 @@ const MobileMenu: FC<MenuProps> = ({ queryRef, session }) => {
   );
 };
 
-export const PageMenu: FC<{ session: Session | null }> = ({ session }) => {
+export const PageMenu: FC<MenuProps> = ({ session, groups }) => {
   // TODO - if redirecting, return a custom menu; right now we render the
   // confused version where "New Model" button is visible, but "Sign In" button
   // is visible too
   const { shouldChoose } = useForceChooseUsername(session);
-
-  const queryRef = useLazyLoadQuery<PageMenuQuery>(
-    graphql`
-      query PageMenuQuery($signedIn: Boolean!) {
-        ...PageMenu @arguments(signedIn: $signedIn)
-      }
-    `,
-    { signedIn: !!session }
-  );
 
   if (shouldChoose) {
     return (
@@ -186,10 +164,10 @@ export const PageMenu: FC<{ session: Session | null }> = ({ session }) => {
   return (
     <>
       <div className="hidden md:block">
-        <DesktopMenu queryRef={queryRef} session={session} />
+        <DesktopMenu groups={groups} session={session} />
       </div>
       <div className="block md:hidden">
-        <MobileMenu queryRef={queryRef} session={session} />
+        <MobileMenu groups={groups} session={session} />
       </div>
     </>
   );
