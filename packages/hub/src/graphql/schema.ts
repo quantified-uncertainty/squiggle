@@ -14,7 +14,6 @@ import "./queries/relativeValuesDefinitions";
 import "./queries/runSquiggle";
 import "./queries/search";
 import "./queries/userByUsername";
-import "./mutations/acceptReusableGroupInviteToken";
 import "./mutations/adminUpdateModelVersion";
 import "./mutations/adminRebuildSearchIndex";
 import "./mutations/buildRelativeValuesCache";
@@ -32,7 +31,6 @@ import "./mutations/updateGroupInviteRole";
 import "./mutations/updateMembershipRole";
 import "./mutations/updateRelativeValuesDefinition";
 import "./mutations/updateSquiggleSnippetModel";
-import "./mutations/validateReusableGroupInviteToken";
 
 import { builder } from "./builder";
 

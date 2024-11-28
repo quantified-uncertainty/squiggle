@@ -1,108 +1,35 @@
 "use client";
-import { useRouter, useSearchParams } from "next/navigation";
-import { FC, useEffect } from "react";
-import { graphql } from "relay-runtime";
+import { useRouter } from "next/navigation";
+import { FC } from "react";
 
 import { useToast } from "@quri/ui";
 
-import { MutationButton } from "@/components/ui/MutationButton";
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
+import { ServerActionButton } from "@/components/ui/ServerActionButton";
 import { groupRoute } from "@/routes";
+import { acceptReusableGroupInviteTokenAction } from "@/server/groups/actions/acceptReusableGroupInviteTokenAction";
 import { GroupCardDTO } from "@/server/groups/data/card";
-
-import { AcceptGroupInvitePage_ValidateMutation } from "@/__generated__/AcceptGroupInvitePage_ValidateMutation.graphql";
-import { AcceptGroupInvitePageMutation } from "@/__generated__/AcceptGroupInvitePageMutation.graphql";
 
 export const AcceptGroupInvitePage: FC<{
   group: GroupCardDTO;
-}> = ({ group }) => {
-  const params = useSearchParams();
-  const inviteToken = params.get("token");
-  if (!inviteToken) {
-    throw new Error("Token is missing");
-  }
-
-  const [validateMutation] = useAsyncMutation<
-    AcceptGroupInvitePage_ValidateMutation,
-    "ValidateReusableGroupInviteTokenResult"
-  >({
-    mutation: graphql`
-      mutation AcceptGroupInvitePage_ValidateMutation(
-        $input: MutationValidateReusableGroupInviteTokenInput!
-      ) {
-        result: validateReusableGroupInviteToken(input: $input) {
-          __typename
-          ... on BaseError {
-            message
-          }
-          ... on ValidateReusableGroupInviteTokenResult {
-            ok
-          }
-        }
-      }
-    `,
-    expectedTypename: "ValidateReusableGroupInviteTokenResult",
-  });
-
+  inviteToken: string;
+}> = ({ group, inviteToken }) => {
   const toast = useToast();
   const router = useRouter();
-
-  useEffect(() => {
-    validateMutation({
-      variables: {
-        input: {
-          groupSlug: group.slug,
-          inviteToken,
-        },
-      },
-      onCompleted({ ok }) {
-        if (!ok) {
-          toast("Invalid token", "error");
-          router.replace(groupRoute({ slug: group.slug }));
-        }
-      },
-    });
-  }, []);
 
   return (
     <div>
       <p className="mb-4">{`You've been invited to join ${group.slug} group.`}</p>
-      <MutationButton<
-        AcceptGroupInvitePageMutation,
-        "AcceptReusableGroupInviteTokenResult"
-      >
-        mutation={graphql`
-          mutation AcceptGroupInvitePageMutation(
-            $input: MutationAcceptReusableGroupInviteTokenInput!
-          ) {
-            result: acceptReusableGroupInviteToken(input: $input) {
-              __typename
-              ... on BaseError {
-                message
-              }
-              ... on AcceptReusableGroupInviteTokenResult {
-                __typename
-                membership {
-                  group {
-                    id
-                    slug
-                    ...hooks_useIsGroupMember
-                  }
-                }
-              }
-            }
-          }
-        `}
-        expectedTypename="AcceptReusableGroupInviteTokenResult"
-        variables={{
-          input: {
-            groupSlug: group.slug,
-            inviteToken,
-          },
-        }}
+      <ServerActionButton
         title="Join this group"
         theme="primary"
-        onCompleted={() => toast("Joined", "confirmation")}
+        action={async () => {
+          await acceptReusableGroupInviteTokenAction({
+            groupSlug: group.slug,
+            inviteToken,
+          });
+          toast("Joined", "confirmation");
+          router.push(groupRoute({ slug: group.slug }));
+        }}
       />
     </div>
   );

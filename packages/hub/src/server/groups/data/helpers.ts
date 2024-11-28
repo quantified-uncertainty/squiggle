@@ -2,6 +2,7 @@ import { MembershipRole } from "@prisma/client";
 
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
+import { getSessionUserOrRedirect } from "@/server/users/auth";
 
 import { getMyGroup } from "./card";
 
@@ -43,4 +44,25 @@ export async function loadInviteForMe(
     id: invite.id,
     role: invite.role,
   };
+}
+
+export async function validateReusableGroupInviteToken(input: {
+  groupSlug: string;
+  inviteToken: string;
+}) {
+  await getSessionUserOrRedirect();
+
+  const group = await prisma.group.findFirstOrThrow({
+    where: {
+      asOwner: {
+        slug: input.groupSlug,
+      },
+    },
+  });
+
+  if (group.reusableInviteToken !== input.inviteToken) {
+    return false;
+  }
+
+  return true;
 }
