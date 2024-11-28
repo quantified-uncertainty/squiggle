@@ -75,6 +75,7 @@ const modelCardSelect = {
         select: {
           id: true,
           code: true,
+          version: true,
         },
       },
       relativeValuesExports: {
