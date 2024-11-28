@@ -2,7 +2,7 @@ import "server-only";
 
 import { prisma } from "@/prisma";
 
-import { getSessionUserOrRedirect } from "../userHelpers";
+import { getSessionUserOrRedirect } from "../users/auth";
 import { decodeDbWorkflowToClientWorkflow } from "./storage";
 
 export async function loadWorkflows({

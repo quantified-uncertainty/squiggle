@@ -1,6 +1,6 @@
 "use client";
 import { Session } from "next-auth";
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { FC, useState } from "react";
 import { useFragment, useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
@@ -8,6 +8,7 @@ import { graphql } from "relay-runtime";
 import {
   BoltIcon,
   BookOpenIcon,
+  Button,
   DotsHorizontalIcon,
   Dropdown,
   DropdownMenu,
@@ -165,7 +166,7 @@ export const PageMenu: FC<{ session: Session | null }> = ({ session }) => {
   // TODO - if redirecting, return a custom menu; right now we render the
   // confused version where "New Model" button is visible, but "Sign In" button
   // is visible too
-  useForceChooseUsername(session);
+  const { shouldChoose } = useForceChooseUsername(session);
 
   const queryRef = useLazyLoadQuery<PageMenuQuery>(
     graphql`
@@ -175,6 +176,12 @@ export const PageMenu: FC<{ session: Session | null }> = ({ session }) => {
     `,
     { signedIn: !!session }
   );
+
+  if (shouldChoose) {
+    return (
+      <Button onClick={() => signOut({ redirectTo: "/" })}>Sign Out</Button>
+    );
+  }
 
   return (
     <>

@@ -7,7 +7,7 @@ import { CodeArtifact, Workflow } from "@quri/squiggle-ai/server";
 import { prisma } from "@/prisma";
 import { getAiCodec } from "@/server/ai/utils";
 import { v2WorkflowDataSchema } from "@/server/ai/v2_0";
-import { checkRootUser } from "@/server/userHelpers";
+import { checkRootUser } from "@/server/users/auth";
 
 async function loadWorkflows() {
   await checkRootUser();

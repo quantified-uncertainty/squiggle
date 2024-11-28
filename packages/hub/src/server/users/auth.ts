@@ -10,7 +10,7 @@ import { redirect } from "next/navigation";
 import { isRootEmail, isSignedIn } from "@/graphql/helpers/userHelpers";
 import { prisma } from "@/prisma";
 
-import { auth } from "../auth";
+import { auth } from "../../auth";
 
 export async function getSessionUserOrRedirect() {
   const session = await auth();

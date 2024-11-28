@@ -1,56 +1,35 @@
 "use client";
-import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
-import { Session } from "next-auth";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { FormProvider } from "react-hook-form";
-import { graphql } from "relay-runtime";
+import { FormProvider, useForm } from "react-hook-form";
 
 import { Button } from "@quri/ui";
 
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { useMutationForm } from "@/hooks/useMutationForm";
+import { setUsername } from "@/server/users/actions";
 
-export const ChooseUsername: FC<{ session: Session | null }> = ({
-  session,
-}) => {
+export const ChooseUsername: FC = () => {
   const router = useRouter();
-  if (session?.user.username) {
-    router.replace("/");
-  }
 
   type FormShape = {
     username: string;
   };
 
-  const { form, onSubmit, inFlight } = useMutationForm<
-    FormShape,
-    ChooseUsernameMutation,
-    "Me"
-  >({
-    mode: "onChange",
-    mutation: graphql`
-      mutation ChooseUsernameMutation($username: String!) {
-        result: setUsername(username: $username) {
-          __typename
-          ... on BaseError {
-            message
-          }
-          ... on Me {
-            email
-          }
-        }
-      }
-    `,
-    expectedTypename: "Me",
-    formDataToVariables: (data) => ({ username: data.username }),
-    onCompleted: () => {
-      router.refresh();
-    },
-    blockOnSuccess: true,
+  const form = useForm<FormShape>();
+
+  const onSubmit = form.handleSubmit(async (data) => {
+    const result = await setUsername(data);
+    if (result.ok) {
+      router.replace("/");
+    } else {
+      form.setError("username", { message: result.error });
+    }
   });
 
-  const disabled = inFlight || !form.formState.isValid;
+  const disabled =
+    form.formState.isSubmitting ||
+    form.formState.isSubmitSuccessful ||
+    !form.formState.isValid;
 
   return (
     <form onSubmit={onSubmit}>

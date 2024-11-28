@@ -5,6 +5,7 @@ import NextAuth, { NextAuthConfig } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 import GithubProvider from "next-auth/providers/github";
 import { Provider } from "next-auth/providers/index";
+import { cache } from "react";
 
 import { indexUserId } from "@/graphql/helpers/searchHelpers";
 import { prisma } from "@/prisma";
@@ -62,4 +63,9 @@ function buildAuthConfig(): NextAuthConfig {
   return config;
 }
 
-export const { auth, handlers, signIn, signOut } = NextAuth(buildAuthConfig());
+const nextAuth = NextAuth(buildAuthConfig());
+export const { handlers, signIn, signOut } = nextAuth;
+
+// current next-auth v5 beta doesn't cache the session, unsure if intentionally
+// note: this is React builtin cache, so it's per-request
+export const auth = cache(nextAuth.auth);
