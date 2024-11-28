@@ -31,7 +31,7 @@ export async function getMyGroup(
   return dbGroupToGroupCard(group);
 }
 
-export async function hasGroupMembership(groupSlug: string): boolean {
+export async function hasGroupMembership(groupSlug: string): Promise<boolean> {
   return !!(await getMyGroup(groupSlug));
 }
 
