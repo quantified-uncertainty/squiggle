@@ -1,6 +1,5 @@
 "use client";
 import { FC, useState } from "react";
-import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import {
@@ -14,35 +13,16 @@ import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
 import { H2 } from "@/components/ui/Headers";
 import { MutationButton } from "@/components/ui/MutationButton";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
-import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRoute } from "@/routes";
+import { ModelByVersion } from "@/server/models/data/byVersion";
 
 import { UpgradeableModel } from "./UpgradeableModel";
 
-import { UpgradeVersionsPage_List$key } from "@/__generated__/UpgradeVersionsPage_List.graphql";
 import { UpgradeVersionsPage_updateMutation } from "@/__generated__/UpgradeVersionsPage_updateMutation.graphql";
-import { UpgradeVersionsPageQuery } from "@/__generated__/UpgradeVersionsPageQuery.graphql";
 
 const ModelList: FC<{
-  modelsRef: UpgradeVersionsPage_List$key;
-  reload: () => void;
-}> = ({ modelsRef, reload }) => {
-  const models = useFragment(
-    graphql`
-      fragment UpgradeVersionsPage_List on Model @relay(plural: true) {
-        id
-        slug
-        owner {
-          id
-          slug
-        }
-        ...UpgradeableModel_Ref
-      }
-    `,
-    modelsRef
-  );
-
+  models: ModelByVersion["models"];
+}> = ({ models }) => {
   const [pos, setPos] = useState(0);
 
   if (!models.length) return null;
@@ -85,11 +65,8 @@ const ModelList: FC<{
               }
             }
           `}
-          updater={(store) => {
-            // reload() from usePageQuery doesn't work for some reason
-            store.get(model.id)?.invalidateRecord();
-            reload();
-            // window.location.reload();
+          updater={() => {
+            window.location.reload();
           }}
           variables={{
             input: {
@@ -110,32 +87,15 @@ const ModelList: FC<{
           Next &rarr;
         </Button>
       </div>
-      <UpgradeableModel modelRef={model} />
+      <UpgradeableModel model={model} />
     </div>
   );
 };
 
 export const UpgradeVersionsPage: FC<{
-  query: SerializablePreloadedQuery<UpgradeVersionsPageQuery>;
-}> = ({ query }) => {
-  // TODO - this fetches all models even if we show just one, can we optimize it?
-  const [{ modelsByVersion }, { reload }] = usePageQuery(
-    graphql`
-      query UpgradeVersionsPageQuery {
-        modelsByVersion {
-          version
-          count
-          privateCount
-          models {
-            ...UpgradeVersionsPage_List
-          }
-        }
-      }
-    `,
-    query
-  );
-
-  type Entry = (typeof upgradeableModelsByVersion)[number];
+  modelsByVersion: ModelByVersion[];
+}> = ({ modelsByVersion }) => {
+  type Entry = (typeof modelsByVersion)[number];
 
   const upgradeableModelsByVersion = modelsByVersion.filter(
     (entry) =>
@@ -206,9 +166,7 @@ export const UpgradeVersionsPage: FC<{
           </Button>
         </Dropdown>
       </div>
-      {selectedEntry ? (
-        <ModelList modelsRef={selectedEntry.models} reload={reload} />
-      ) : null}
+      {selectedEntry ? <ModelList models={selectedEntry.models} /> : null}
     </div>
   );
 };

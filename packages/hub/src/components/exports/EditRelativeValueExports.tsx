@@ -1,7 +1,5 @@
-"use client";
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
-import { graphql, useFragment } from "react-relay";
 
 import { Button, TextFormField } from "@quri/ui";
 
@@ -9,6 +7,7 @@ import {
   modelForRelativeValuesExportRoute,
   relativeValuesRoute,
 } from "@/routes";
+import { ModelFullDTO } from "@/server/models/data/full";
 
 import { SelectOwner, SelectOwnerOption } from "../SelectOwner";
 import { FormModal } from "../ui/FormModal";
@@ -20,7 +19,6 @@ import {
   SelectRelativeValuesDefinitionOption,
 } from "./SelectRelativeValuesDefinition";
 
-import { EditRelativeValueExports_Model$key } from "@/__generated__/EditRelativeValueExports_Model.graphql";
 import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 
 const CreateVariableWithDefinitionModal: FC<{
@@ -90,22 +88,9 @@ const CreateVariableWithDefinitionModal: FC<{
 
 const ExportItem: FC<{
   item: RelativeValuesExportInput;
-  modelRef: EditRelativeValueExports_Model$key;
+  model: ModelFullDTO;
   remove: () => void;
-}> = ({ item, modelRef, remove }) => {
-  const model = useFragment(
-    graphql`
-      fragment EditRelativeValueExports_Model on Model {
-        id
-        slug
-        owner {
-          slug
-        }
-      }
-    `,
-    modelRef
-  );
-
+}> = ({ item, model, remove }) => {
   return (
     <div className="flex items-center gap-2">
       <div className="text-sm">
@@ -139,14 +124,14 @@ type Props = {
   append: (item: RelativeValuesExportInput) => void;
   remove: (id: number) => void;
   items: RelativeValuesExportInput[];
-  modelRef: EditRelativeValueExports_Model$key;
+  model: ModelFullDTO;
 };
 
 export const EditRelativeValueExports: FC<Props> = ({
   append,
   remove,
   items,
-  modelRef,
+  model,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -158,7 +143,7 @@ export const EditRelativeValueExports: FC<Props> = ({
           <ExportItem
             key={i}
             item={item}
-            modelRef={modelRef}
+            model={model}
             remove={() => remove(i)}
           />
         ))}

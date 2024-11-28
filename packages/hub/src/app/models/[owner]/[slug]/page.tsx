@@ -1,13 +1,10 @@
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import Skeleton from "react-loading-skeleton";
 
-import { loadPageQuery } from "@/relay/loadPageQuery";
+import { loadModelFull } from "@/server/models/data/full";
 
-import { EditModelPage } from "./EditModelPage";
-
-import QueryNode, {
-  EditModelPageQuery,
-} from "@/__generated__/EditModelPageQuery.graphql";
+import { EditSquiggleSnippetModel } from "./EditSquiggleSnippetModel";
 
 type Props = {
   params: Promise<{ owner: string; slug: string }>;
@@ -15,15 +12,23 @@ type Props = {
 
 async function InnerPage({ params }: Props) {
   const { owner, slug } = await params;
-  const query = await loadPageQuery<EditModelPageQuery>(QueryNode, {
-    input: { owner, slug },
-  });
 
-  return (
-    <div className="bg-white">
-      <EditModelPage query={query} />
-    </div>
-  );
+  const model = await loadModelFull({ owner, slug });
+  if (!model) {
+    notFound();
+  }
+
+  const { contentType } = model.currentRevision;
+  switch (contentType) {
+    case "SquiggleSnippet":
+      return (
+        <div className="bg-white">
+          <EditSquiggleSnippetModel model={model} />
+        </div>
+      );
+    default:
+      return <div>Unknown model type {contentType}</div>;
+  }
 }
 
 const Loading = () => {

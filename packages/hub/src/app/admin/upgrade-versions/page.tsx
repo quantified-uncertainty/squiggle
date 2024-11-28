@@ -1,18 +1,17 @@
 import { Metadata } from "next";
 
-import { loadPageQuery } from "@/relay/loadPageQuery";
+import { loadModelsByVersion } from "@/server/models/data/byVersion";
+import { checkRootUser } from "@/server/users/auth";
 
 import { UpgradeVersionsPage } from "./UpgradeVersionsPage";
 
-import QueryNode, {
-  UpgradeVersionsPageQuery,
-} from "@/__generated__/UpgradeVersionsPageQuery.graphql";
-
 export default async function OuterUpgradeVersionsPage() {
-  // permissions are checked in ./layout.tsx
-  const query = await loadPageQuery<UpgradeVersionsPageQuery>(QueryNode, {});
+  await checkRootUser();
 
-  return <UpgradeVersionsPage query={query} />;
+  // TODO - this fetches all models even if we show just one, can we optimize it?
+  const data = await loadModelsByVersion();
+
+  return <UpgradeVersionsPage modelsByVersion={data} />;
 }
 
 export const metadata: Metadata = {

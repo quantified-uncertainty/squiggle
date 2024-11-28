@@ -1,7 +1,6 @@
 "use client";
-import { FC, use } from "react";
-import { useFragment, useLazyLoadQuery } from "react-relay";
-import { graphql } from "relay-runtime";
+import { FC, use, useEffect, useState } from "react";
+import Skeleton from "react-loading-skeleton";
 
 import {
   defaultSquiggleVersion,
@@ -11,69 +10,25 @@ import {
 } from "@quri/versioned-squiggle-components";
 
 import { EditSquiggleSnippetModel } from "@/app/models/[owner]/[slug]/EditSquiggleSnippetModel";
-import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import { loadModelFullAction } from "@/server/models/actions/loadModelFullAction";
+import { ModelByVersion } from "@/server/models/data/byVersion";
+import { ModelFullDTO } from "@/server/models/data/full";
 import { sqProjectWithHubLinker } from "@/squiggle/components/linker";
 
-import { UpgradeableModel_Ref$key } from "@/__generated__/UpgradeableModel_Ref.graphql";
-import { UpgradeableModelQuery } from "@/__generated__/UpgradeableModelQuery.graphql";
-
-export const UpgradeableModel: FC<{
-  modelRef: UpgradeableModel_Ref$key;
-}> = ({ modelRef }) => {
-  const incompleteModel = useFragment(
-    graphql`
-      fragment UpgradeableModel_Ref on Model {
-        id
-        slug
-        owner {
-          id
-          slug
-        }
-      }
-    `,
-    modelRef
-  );
-
-  const result = useLazyLoadQuery<UpgradeableModelQuery>(
-    graphql`
-      query UpgradeableModelQuery($input: QueryModelInput!) {
-        model(input: $input) {
-          __typename
-          ... on Model {
-            id
-            currentRevision {
-              content {
-                __typename
-                ... on SquiggleSnippet {
-                  id
-                  code
-                  version
-                  seed
-                }
-              }
-            }
-            ...EditSquiggleSnippetModel
-          }
-        }
-      }
-    `,
-    {
-      input: {
-        slug: incompleteModel.slug,
-        owner: incompleteModel.owner.slug,
-      },
-    }
-  );
-
-  const model = extractFromGraphqlErrorUnion(result.model, "Model");
-
+const InnerUpgradeableModel: FC<{
+  model: ModelFullDTO;
+}> = ({ model }) => {
   const currentRevision = model.currentRevision;
 
-  if (currentRevision.content.__typename !== "SquiggleSnippet") {
+  if (currentRevision.contentType !== "SquiggleSnippet") {
     throw new Error("Wrong content type");
   }
 
-  const version = useAdjustSquiggleVersion(currentRevision.content.version);
+  const code = currentRevision.squiggleSnippet.code;
+
+  const version = useAdjustSquiggleVersion(
+    currentRevision.squiggleSnippet.version
+  );
   const updatedVersion = defaultSquiggleVersion;
 
   const squiggle = use(versionedSquigglePackages(version));
@@ -90,12 +45,9 @@ export const UpgradeableModel: FC<{
       <div className="grid grid-cols-2">
         <div className={headerClasses}>{version}</div>
         <div className={headerClasses}>{updatedVersion}</div>
-        <squiggle.components.SquiggleChart
-          code={currentRevision.content.code}
-          project={project}
-        />
+        <squiggle.components.SquiggleChart code={code} project={project} />
         <updatedSquiggle.components.SquiggleChart
-          code={currentRevision.content.code}
+          code={code}
           project={updatedProject}
         />
       </div>
@@ -104,9 +56,36 @@ export const UpgradeableModel: FC<{
     return (
       <EditSquiggleSnippetModel
         key={model.id}
-        modelRef={model}
+        model={model}
         forceVersionPicker
       />
     );
   }
+};
+
+export const UpgradeableModel: FC<{
+  model: ModelByVersion["models"][number];
+}> = ({ model: incompleteModel }) => {
+  const [model, setModel] = useState<ModelFullDTO | "loading" | null>(
+    "loading"
+  );
+
+  useEffect(() => {
+    // TODO - this is done with a server action, so it's not cached.
+    // A route would be better.
+    loadModelFullAction({
+      owner: incompleteModel.owner.slug,
+      slug: incompleteModel.slug,
+    }).then(setModel);
+  }, []);
+
+  if (model === "loading") {
+    return <Skeleton height={160} />;
+  }
+
+  if (!model) {
+    return <div>Model not found</div>;
+  }
+
+  return <InnerUpgradeableModel model={model} />;
 };

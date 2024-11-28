@@ -7,6 +7,7 @@ import { prisma } from "@/prisma";
 import { Paginated } from "../../types";
 import { modelWhereHasAccess } from "./authHelpers";
 
+// FIXME - explicit ModelCardDTO
 function toDTO(dbModel: DbModelCard) {
   function check(model: DbModelCard): asserts model is Omit<
     DbModelCard,
@@ -40,7 +41,7 @@ function toDTO(dbModel: DbModelCard) {
   };
 }
 
-const modelCardSelect = {
+const select = {
   id: true,
   slug: true,
   updatedAt: true,
@@ -103,11 +104,7 @@ const modelCardSelect = {
 } satisfies Prisma.ModelSelect;
 
 type DbModelCard = NonNullable<
-  Awaited<
-    ReturnType<
-      typeof prisma.model.findFirst<{ select: typeof modelCardSelect }>
-    >
-  >
+  Awaited<ReturnType<typeof prisma.model.findFirst<{ select: typeof select }>>>
 >;
 
 export type ModelCardDTO = ReturnType<typeof toDTO>;
@@ -122,7 +119,7 @@ export async function loadModelCards(
   const limit = params.limit ?? 20;
 
   const dbModels = await prisma.model.findMany({
-    select: modelCardSelect,
+    select,
     orderBy: { updatedAt: "desc" },
     cursor: params.cursor ? { id: params.cursor } : undefined,
     where: {
@@ -161,9 +158,9 @@ export async function loadModelCard({
   slug: string;
 }): Promise<ModelCardDTO | null> {
   const dbModel = await prisma.model.findFirst({
-    select: modelCardSelect,
+    select: select,
     where: {
-      slug: slug,
+      slug,
       owner: { slug: owner },
       OR: await modelWhereHasAccess(),
     },

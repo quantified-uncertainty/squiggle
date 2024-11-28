@@ -1,3 +1,4 @@
+"use client";
 import { useRouter } from "next/navigation";
 import {
   BaseSyntheticEvent,
@@ -8,7 +9,7 @@ import {
   useState,
 } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { graphql, useFragment } from "react-relay";
+import { graphql } from "react-relay";
 
 import {
   ButtonWithDropdown,
@@ -29,7 +30,6 @@ import {
   useAdjustSquiggleVersion,
   versionedSquigglePackages,
   versionSupportsDropdownMenu,
-  versionSupportsExports,
   versionSupportsImportTooltip,
   versionSupportsOnOpenExport,
 } from "@quri/versioned-squiggle-components";
@@ -41,8 +41,8 @@ import { FormModal } from "@/components/ui/FormModal";
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/constants";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { useMutationForm } from "@/hooks/useMutationForm";
-import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { modelRoute, variableRoute } from "@/routes";
+import { ModelFullDTO } from "@/server/models/data/full";
 import { ImportTooltip } from "@/squiggle/components/ImportTooltip";
 import {
   getHubLinker,
@@ -57,7 +57,6 @@ import {
   useDraftLocator,
 } from "./SquiggleSnippetDraftDialog";
 
-import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
 import {
   EditSquiggleSnippetModelMutation,
   RelativeValuesExportInput,
@@ -128,69 +127,18 @@ const SaveButton: FC<{ onSubmit: OnSubmit; disabled: boolean }> = ({
 type Props = {
   // We have to pass the entire model here and not just content;
   // it's too hard to split the editing form into "content-type-specific" part and "generic model fields" part.
-  modelRef: EditSquiggleSnippetModel$key;
+  model: ModelFullDTO;
   forceVersionPicker?: boolean;
 };
 
 export const EditSquiggleSnippetModel: FC<Props> = ({
-  modelRef,
+  model,
   forceVersionPicker,
 }) => {
-  const model = useFragment(
-    graphql`
-      fragment EditSquiggleSnippetModel on Model {
-        id
-        slug
-        isEditable
-        ...EditRelativeValueExports_Model
-        ...SquiggleSnippetDraftDialog_Model
-        owner {
-          slug
-        }
-        lastRevisionWithBuild {
-          lastBuild {
-            runSeconds
-          }
-        }
-        currentRevision {
-          id
-          content {
-            __typename
-            ... on SquiggleSnippet {
-              id
-              code
-              version
-              seed
-              autorunMode
-              sampleCount
-              xyPointLength
-            }
-          }
-          exportNames
-          relativeValuesExports {
-            id
-            variableName
-            definition {
-              slug
-              owner {
-                slug
-              }
-            }
-          }
-        }
-      }
-    `,
-    modelRef
-  );
   const revision = model.currentRevision;
   const router = useRouter();
 
-  const content = extractFromGraphqlErrorUnion(
-    revision.content,
-    "SquiggleSnippet"
-  );
-
-  const lastBuildSpeed = model.lastRevisionWithBuild?.lastBuild?.runSeconds;
+  const content = revision.squiggleSnippet;
 
   const seed = content.seed;
 
@@ -320,7 +268,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
   // Automatically turn off autorun, if the last build speed was > 5s. Note that this does not stop in the case of memory errors or similar.
   const autorunMode =
     content.autorunMode ||
-    (lastBuildSpeed ? (lastBuildSpeed > 5 ? false : true) : true);
+    (model.lastBuildSeconds
+      ? model.lastBuildSeconds > 5
+        ? false
+        : true
+      : true);
 
   // Build props for versioned SquigglePlayground first, since they might depend on the version we use,
   // and we want to populate them incrementally.
@@ -328,7 +280,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     typeof squiggle.components.SquigglePlayground
   >[0] = {
     defaultCode,
-    autorunMode: autorunMode,
+    autorunMode,
     sourceId: serializeSourceId({
       owner: model.owner.slug,
       slug: model.slug,
@@ -377,7 +329,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
                   onSubmit();
                 }}
                 items={variablesWithDefinitionsFields}
-                modelRef={model}
+                model={model}
               />
             </div>
           ),
@@ -408,14 +360,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           />
         </>
       ) : null;
-  }
-
-  if (
-    versionSupportsExports.propsByVersion<"SquigglePlayground">(
-      squiggle.version,
-      playgroundProps
-    )
-  ) {
   }
 
   playgroundProps.environment = {
