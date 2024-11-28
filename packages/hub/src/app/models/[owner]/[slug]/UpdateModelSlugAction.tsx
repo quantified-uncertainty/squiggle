@@ -1,7 +1,5 @@
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { useFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
 import { EditIcon } from "@quri/ui";
 
@@ -9,36 +7,18 @@ import { ServerActionModalAction } from "@/components/ui/ServerActionModalAction
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { modelRoute } from "@/routes";
 import { updateModelSlugAction } from "@/server/models/actions/updateModelSlugAction";
+import { ModelCardData } from "@/server/models/data";
 
 import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
 
-import { UpdateModelSlugAction$key } from "@/__generated__/UpdateModelSlugAction.graphql";
-
 type Props = {
-  model: UpdateModelSlugAction$key;
+  model: ModelCardData;
   close(): void;
 };
 
 type FormShape = { slug: string };
 
-export const UpdateModelSlugAction: FC<Props> = ({
-  model: modelKey,
-  close,
-}) => {
-  const model = useFragment(
-    graphql`
-      fragment UpdateModelSlugAction on Model {
-        slug
-        owner {
-          __typename
-          id
-          slug
-        }
-      }
-    `,
-    modelKey
-  );
-
+export const UpdateModelSlugAction: FC<Props> = ({ model, close }) => {
   const router = useRouter();
 
   return (

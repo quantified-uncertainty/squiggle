@@ -33,7 +33,6 @@ import "./mutations/inviteUserToGroup";
 import "./mutations/reactToGroupInvite";
 import "./mutations/updateGroupInviteRole";
 import "./mutations/updateMembershipRole";
-import "./mutations/updateModelPrivacy";
 import "./mutations/updateRelativeValuesDefinition";
 import "./mutations/updateSquiggleSnippetModel";
 import "./mutations/validateReusableGroupInviteToken";

@@ -1,13 +1,13 @@
 import { useRouter } from "next/navigation";
 import { FC, useCallback } from "react";
-import { useFragment, useMutation } from "react-relay";
+import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { DropdownMenuAsyncActionItem, TrashIcon, useToast } from "@quri/ui";
 
 import { ownerRoute } from "@/routes";
+import { ModelCardData } from "@/server/models/data";
 
-import { DeleteModelAction$key } from "@/__generated__/DeleteModelAction.graphql";
 import { DeleteModelActionMutation } from "@/__generated__/DeleteModelActionMutation.graphql";
 
 const Mutation = graphql`
@@ -22,25 +22,11 @@ const Mutation = graphql`
 `;
 
 type Props = {
-  model: DeleteModelAction$key;
+  model: ModelCardData;
   close(): void;
 };
 
-export const DeleteModelAction: FC<Props> = ({ model: modelKey, close }) => {
-  const model = useFragment(
-    graphql`
-      fragment DeleteModelAction on Model {
-        slug
-        owner {
-          __typename
-          id
-          slug
-        }
-      }
-    `,
-    modelKey
-  );
-
+export const DeleteModelAction: FC<Props> = ({ model, close }) => {
   const router = useRouter();
 
   const [mutation] = useMutation<DeleteModelActionMutation>(Mutation);

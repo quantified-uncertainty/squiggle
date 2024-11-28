@@ -1,7 +1,5 @@
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { useFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
 import { RightArrowIcon } from "@quri/ui";
 
@@ -9,33 +7,18 @@ import { SelectOwner, SelectOwnerOption } from "@/components/SelectOwner";
 import { ServerActionModalAction } from "@/components/ui/ServerActionModalAction";
 import { modelRoute } from "@/routes";
 import { moveModelAction } from "@/server/models/actions/moveModelAction";
+import { ModelCardData } from "@/server/models/data";
 
 import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
-
-import { MoveModelAction$key } from "@/__generated__/MoveModelAction.graphql";
 
 type FormShape = { owner: SelectOwnerOption };
 
 type Props = {
-  model: MoveModelAction$key;
+  model: ModelCardData;
   close(): void;
 };
 
-export const MoveModelAction: FC<Props> = ({ model: modelKey, close }) => {
-  const model = useFragment(
-    graphql`
-      fragment MoveModelAction on Model {
-        slug
-        owner {
-          __typename
-          id
-          slug
-        }
-      }
-    `,
-    modelKey
-  );
-
+export const MoveModelAction: FC<Props> = ({ model, close }) => {
   const router = useRouter();
 
   return (

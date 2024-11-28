@@ -1,9 +1,11 @@
 import { RelativeValuesDefinition } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 
 import { squiggleVersions } from "@quri/versioned-squiggle-components";
 
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
+import { modelRoute } from "@/routes";
 
 import { getWriteableModel } from "../helpers/modelHelpers";
 import { getSelf } from "../helpers/userHelpers";
@@ -176,6 +178,8 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
 
         return updatedModel;
       });
+
+      revalidatePath(modelRoute({ owner: input.owner, slug: input.slug }));
 
       return { model };
     },

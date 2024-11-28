@@ -1,84 +1,31 @@
 "use client";
 
 import { FC, PropsWithChildren } from "react";
-import { graphql } from "relay-runtime";
 
 import { CodeBracketSquareIcon, RectangleStackIcon, ShareIcon } from "@quri/ui";
 
 import { EntityLayout } from "@/components/EntityLayout";
 import { EntityTab } from "@/components/ui/EntityTab";
-import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import {
   totalImportLength,
   type VariableRevision,
   VariablesDropdown,
 } from "@/lib/VariablesDropdown";
-import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
-import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRevisionsRoute, modelRoute } from "@/routes";
+import { ModelCardData } from "@/server/models/data";
+import { getExportedVariableNames } from "@/server/models/utils";
 
-import { useFixModelUrlCasing } from "./FixModelUrlCasing";
 import { ModelAccessControls } from "./ModelAccessControls";
 import { ModelEntityNodes } from "./ModelEntityNodes";
 import { ModelSettingsButton } from "./ModelSettingsButton";
-
-import { ModelLayoutQuery } from "@/__generated__/ModelLayoutQuery.graphql";
-
-// Note that we have to do two GraphQL queries on most model pages: one for layout.tsx, and one for page.tsx.
-const Query = graphql`
-  query ModelLayoutQuery($input: QueryModelInput!) {
-    result: model(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on NotFoundError {
-        message
-      }
-      ... on Model {
-        id
-        slug
-        isEditable
-        owner {
-          __typename
-          slug
-        }
-        ...FixModelUrlCasing
-        ...ModelAccessControls
-        ...ModelSettingsButton
-        variables {
-          id
-          variableName
-          currentRevision {
-            variableType
-            title
-          }
-        }
-        currentRevision {
-          id
-          exportNames
-          relativeValuesExports {
-            id
-            variableName
-            definition {
-              slug
-            }
-          }
-        }
-      }
-    }
-  }
-`;
+import { useFixModelUrlCasing } from "./useFixModelUrlCasing";
 
 export const ModelLayout: FC<
   PropsWithChildren<{
-    query: SerializablePreloadedQuery<ModelLayoutQuery>;
+    model: ModelCardData;
+    isEditable: boolean;
   }>
-> = ({ query, children }) => {
-  const [{ result }] = usePageQuery(Query, query);
-
-  const model = extractFromGraphqlErrorUnion(result, "Model");
-
+> = ({ model, isEditable, children }) => {
   useFixModelUrlCasing(model);
 
   const modelUrl = modelRoute({ owner: model.owner.slug, slug: model.slug });
@@ -87,19 +34,20 @@ export const ModelLayout: FC<
     slug: model.slug,
   });
 
-  const variableRevisions: VariableRevision[] =
-    model.currentRevision.exportNames.map((name) => {
-      const matchingVariable = model.variables.find(
-        (e) => e.variableName === name
-      );
+  const variableRevisions: VariableRevision[] = getExportedVariableNames(
+    model.currentRevision.squiggleSnippet?.code ?? ""
+  ).map((name) => {
+    const matchingVariable = model.variables.find(
+      (e) => e.variableName === name
+    );
 
-      return {
-        variableName: name,
-        variableType:
-          matchingVariable?.currentRevision?.variableType || undefined,
-        title: matchingVariable?.currentRevision?.title || undefined,
-      };
-    });
+    return {
+      variableName: name,
+      variableType:
+        matchingVariable?.currentRevision?.variableType || undefined,
+      title: matchingVariable?.currentRevision?.title || undefined,
+    };
+  });
 
   const relativeValuesExports = model.currentRevision.relativeValuesExports.map(
     ({ variableName, definition: { slug } }) => ({
@@ -117,7 +65,7 @@ export const ModelLayout: FC<
     <EntityLayout
       nodes={<ModelEntityNodes owner={model.owner} />}
       isFluid={true}
-      headerLeft={<ModelAccessControls modelRef={model} />}
+      headerLeft={<ModelAccessControls model={model} isEditable={isEditable} />}
       headerRight={
         <EntityTab.List>
           <EntityTab.Link
@@ -150,7 +98,7 @@ export const ModelLayout: FC<
             icon={RectangleStackIcon}
             href={modelRevisionsUrl}
           />
-          {model.isEditable ? <ModelSettingsButton model={model} /> : null}
+          {isEditable ? <ModelSettingsButton model={model} /> : null}
         </EntityTab.List>
       }
     >

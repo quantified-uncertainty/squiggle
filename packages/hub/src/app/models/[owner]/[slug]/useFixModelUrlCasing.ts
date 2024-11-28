@@ -1,25 +1,11 @@
 import { usePathname, useRouter } from "next/navigation";
-import { useFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
 import { patchModelRoute } from "@/routes";
+import { ModelCardData } from "@/server/models/data";
 
-import { FixModelUrlCasing$key } from "@/__generated__/FixModelUrlCasing.graphql";
-
-export const FixModelUrlCasingFragment = graphql`
-  fragment FixModelUrlCasing on Model {
-    id
-    slug
-    owner {
-      slug
-    }
-  }
-`;
-
-export function useFixModelUrlCasing(modelRef: FixModelUrlCasing$key) {
+export function useFixModelUrlCasing(model: ModelCardData) {
   const router = useRouter();
   const pathname = usePathname();
-  const model = useFragment(FixModelUrlCasingFragment, modelRef);
 
   const patchedPathname = patchModelRoute({
     pathname,

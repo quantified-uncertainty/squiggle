@@ -46,12 +46,17 @@ function dbModelToModelCard(dbModel: DbModelCard) {
   check(dbModel);
 
   const ownerToGraphqlCompatible = (owner: {
+    id: string;
     slug: string;
     user: { id: string } | null;
     group: { id: string } | null;
   }) => {
     const __typename = owner.user ? "User" : "Group";
-    return { slug: owner.slug, __typename };
+    return {
+      id: owner.id,
+      slug: owner.slug,
+      __typename,
+    };
   };
 
   return {
@@ -66,6 +71,7 @@ const modelCardSelect = {
   updatedAt: true,
   owner: {
     select: {
+      id: true,
       slug: true,
       user: {
         select: { id: true },
@@ -197,4 +203,34 @@ export async function loadModelCard({
   }
 
   return dbModelToModelCard(dbModel);
+}
+
+export async function isModelEditable(model: ModelCardData): Promise<boolean> {
+  const session = await auth();
+  if (!session?.user.email) {
+    return false;
+  }
+  return Boolean(
+    await prisma.owner.count({
+      where: {
+        id: model.owner.id,
+        OR: [
+          {
+            user: { email: session.user.email },
+          },
+          {
+            group: {
+              memberships: {
+                some: {
+                  user: {
+                    email: session.user.email,
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+    })
+  );
 }

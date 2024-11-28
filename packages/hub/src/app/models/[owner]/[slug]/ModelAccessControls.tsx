@@ -1,112 +1,84 @@
 "use client";
 import { clsx } from "clsx";
-import { FC } from "react";
-import { graphql, useFragment } from "react-relay";
+import { FC, useEffect, useState, useTransition } from "react";
 
 import {
   Dropdown,
   DropdownMenu,
-  DropdownMenuAsyncActionItem,
+  DropdownMenuActionItem,
   GlobeIcon,
   LockIcon,
+  RefreshIcon,
 } from "@quri/ui";
 
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-
-import { ModelAccessControls$key } from "@/__generated__/ModelAccessControls.graphql";
-import { ModelAccessControlsMutation } from "@/__generated__/ModelAccessControlsMutation.graphql";
-
-export const Fragment = graphql`
-  fragment ModelAccessControls on Model {
-    id
-    slug
-    isPrivate
-    isEditable
-    owner {
-      slug
-    }
-  }
-`;
+import { updateModelPrivacyAction } from "@/server/models/actions/updateModelPrivacyAction";
+import { ModelCardData } from "@/server/models/data";
 
 function getIconComponent(isPrivate: boolean) {
   return isPrivate ? LockIcon : GlobeIcon;
 }
 
-export const Mutation = graphql`
-  mutation ModelAccessControlsMutation(
-    $input: MutationUpdateModelPrivacyInput!
-  ) {
-    result: updateModelPrivacy(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on UpdateModelPrivacyResult {
-        model {
-          id
-          isPrivate
-        }
-      }
-    }
-  }
-`;
-
-export const UpdateModelPrivacyAction: FC<{
-  modelRef: ModelAccessControls$key;
-  close(): void;
-}> = ({ modelRef, close }) => {
-  const model = useFragment(Fragment, modelRef);
-  const [runMutation] = useAsyncMutation<ModelAccessControlsMutation>({
-    mutation: Mutation,
-    expectedTypename: "UpdateModelPrivacyResult",
-  });
-
-  const act = () =>
-    runMutation({
-      variables: {
-        input: {
-          owner: model.owner.slug,
-          slug: model.slug,
-          isPrivate: !model.isPrivate,
-        },
-      },
+const UpdatePrivacyAction: FC<{
+  model: ModelCardData;
+  close: () => void;
+}> = ({ model, close }) => {
+  const [initialIsPrivate] = useState(model.isPrivate);
+  const [isPending, startTransition] = useTransition();
+  const act = () => {
+    startTransition(async () => {
+      await updateModelPrivacyAction({
+        owner: model.owner.slug,
+        slug: model.slug,
+        isPrivate: !model.isPrivate,
+      });
     });
+  };
+
+  // We can't just call `close()` in the transition; server action finishes before it sends back the revalidated UI.
+  // This is an ugly workaround; see also: https://github.com/vercel/next.js/discussions/53206
+  // Discussion in QURI Slack: https://quri.slack.com/archives/C059EEU0HMM/p1732810277978719
+  useEffect(() => {
+    if (model.isPrivate !== initialIsPrivate) {
+      close();
+    }
+  }, [model.isPrivate, initialIsPrivate, close]);
 
   return (
-    <DropdownMenuAsyncActionItem
+    <DropdownMenuActionItem
       title={model.isPrivate ? "Make public" : "Make private"}
-      icon={getIconComponent(!model.isPrivate)}
+      icon={isPending ? RefreshIcon : getIconComponent(!model.isPrivate)}
+      acting={isPending}
       onClick={act}
-      close={close}
     />
   );
 };
 
-export const ModelAccessControls: FC<{ modelRef: ModelAccessControls$key }> = ({
-  modelRef,
-}) => {
-  const model = useFragment(Fragment, modelRef);
+export const ModelAccessControls: FC<{
+  model: ModelCardData;
+  isEditable: boolean;
+}> = ({ model, isEditable }) => {
+  const { isPrivate } = model;
 
-  const Icon = getIconComponent(model.isPrivate);
+  const Icon = getIconComponent(isPrivate);
 
   const body = (
     // TODO: copy-pasted from CacheMenu from relative-values, extract to <InvisibleMaybeDropdown> or something
     <div
       className={clsx(
         "flex items-center rounded-sm px-2 py-1 text-sm text-gray-500",
-        model.isEditable && "cursor-pointer hover:bg-slate-200"
+        isEditable && "cursor-pointer hover:bg-slate-200"
       )}
     >
       <Icon className="mr-1 text-gray-500" size={14} />
-      {model.isPrivate ? "Private" : "Public"}
+      {isPrivate ? "Private" : "Public"}
     </div>
   );
 
-  return model.isEditable ? (
+  return isEditable ? (
     <Dropdown
       render={({ close }) => (
         <DropdownMenu>
-          <UpdateModelPrivacyAction modelRef={modelRef} close={close} />
+          <UpdatePrivacyAction model={model} close={close} />
         </DropdownMenu>
       )}
     >
