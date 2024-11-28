@@ -65,7 +65,6 @@ const commonV1WorkflowFields = {
   timestamp: z.number(), // milliseconds since epoch
   input: v1InputSchema,
   steps: z.array(v1StepSchema),
-  currentStep: z.string().optional(),
 };
 
 const v1WorkflowResultSchema = z.object({
@@ -98,22 +97,34 @@ export const v1WorkflowSchema = z.discriminatedUnion("status", [
 export function decodeV1_0JsonToClientWorkflow(
   json: Prisma.JsonValue
 ): ClientWorkflow {
-  const v1Workflow = v1WorkflowSchema.parse(json);
+  // `input` doesn't exist in the new ClientWorkflow shape, so we need to pull it out
+  const { input, ...v1Workflow } = v1WorkflowSchema.parse(json);
 
+  // upgrading legacy workflow to new client workflow shape
   return {
     ...v1Workflow,
+    steps: v1Workflow.steps.map(({ outputs, ...step }) => ({
+      ...step,
+      // modern steps in ClientWorkflow store state as an object
+      state:
+        step.state === "DONE"
+          ? ({ kind: "DONE", outputs } as const)
+          : step.state === "FAILED"
+            ? { kind: "FAILED", errorType: "CRITICAL", message: "Unknown" }
+            : { kind: "PENDING" },
+    })),
     inputs:
-      v1Workflow.input.type === "Create"
+      input.type === "Create"
         ? {
             prompt: {
-              value: v1Workflow.input.prompt,
+              value: input.prompt,
               kind: "prompt",
               id: `${v1Workflow.id}-prompt`,
             },
           }
         : {
             source: {
-              value: v1Workflow.input.source,
+              value: input.source,
               kind: "source",
               id: `${v1Workflow.id}-source`,
             },

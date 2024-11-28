@@ -1,6 +1,6 @@
 import { Artifact, ArtifactKind } from "./Artifact.js";
 import { Code } from "./Code.js";
-import { calculatePriceMultipleCalls } from "./LLMClient.js";
+import { calculatePriceMultipleCalls } from "./LLMClient/index.js";
 import { IOShape } from "./LLMStepTemplate.js";
 import { getLogEntryFullName, TimestampedLogEntry } from "./Logger.js";
 import { Workflow } from "./workflows/Workflow.js";

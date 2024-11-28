@@ -2,7 +2,7 @@ import "server-only";
 
 import { prisma } from "@/prisma";
 
-import { getUserOrRedirect } from "../helpers";
+import { getSessionUserOrRedirect } from "../helpers";
 import { decodeDbWorkflowToClientWorkflow } from "./storage";
 
 export async function loadWorkflows({
@@ -10,12 +10,12 @@ export async function loadWorkflows({
 }: {
   limit?: number;
 } = {}) {
-  const user = await getUserOrRedirect();
+  const sessionUser = await getSessionUserOrRedirect();
 
   const rows = await prisma.aiWorkflow.findMany({
     orderBy: { createdAt: "desc" },
     where: {
-      user: { email: user.email },
+      user: { email: sessionUser.email },
     },
     take: limit + 1,
   });

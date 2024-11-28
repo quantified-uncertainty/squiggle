@@ -1,5 +1,5 @@
 // Model selection and pricing
-type ModelConfig = {
+export type ModelConfig = {
   provider: "anthropic" | "openai";
   model: string;
   inputRate: number;

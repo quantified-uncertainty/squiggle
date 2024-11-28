@@ -138,10 +138,6 @@ export const generateCodeStep = new LLMStepTemplate(
     const promptPair = generateNewSquiggleCodePrompt(prompt.value);
     const completion = await context.queryLLM(promptPair);
 
-    if (!completion) {
-      return context.fail("MINOR", "No completion");
-    }
-
     const state = await generationCompletionContentToCode(completion);
     if (state.ok) {
       return { code: state.value };

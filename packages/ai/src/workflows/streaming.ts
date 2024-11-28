@@ -5,7 +5,7 @@ import {
 
 import { Artifact } from "../Artifact.js";
 import { type LLMStepInstance } from "../LLMStepInstance.js";
-import { IOShape } from "../LLMStepTemplate.js";
+import { IOShape, StepState } from "../LLMStepTemplate.js";
 import {
   ClientArtifact,
   ClientStep,
@@ -45,34 +45,37 @@ export function artifactToClientArtifact(value: Artifact): ClientArtifact {
   }
 }
 
-function getClientOutputs<Shape extends IOShape, WorkflowShape extends IOShape>(
-  step: LLMStepInstance<Shape, WorkflowShape>
-): Record<string, ClientArtifact> {
-  const stepState = step.getState();
-  return stepState.kind === "DONE"
-    ? Object.fromEntries(
-        Object.entries(stepState.outputs)
+function getClientState<Shape extends IOShape>(
+  state: StepState<Shape>
+): ClientStep["state"] {
+  if (state.kind === "DONE") {
+    return {
+      kind: "DONE",
+      outputs: Object.fromEntries(
+        Object.entries(state.outputs)
           .filter(
             (pair): pair is [string, NonNullable<(typeof pair)[1]>] =>
               pair[1] !== undefined
           )
           .map(([key, value]) => [key, artifactToClientArtifact(value)])
-      )
-    : {};
+      ),
+    };
+  } else {
+    return state;
+  }
 }
 
 export function stepToClientStep(step: LLMStepInstance): ClientStep {
   return {
     id: step.id,
     name: step.template.name ?? "unknown",
-    state: step.getState().kind,
+    state: getClientState(step.getState()),
     inputs: Object.fromEntries(
       Object.entries(step.getInputs()).map(([key, value]) => [
         key,
         artifactToClientArtifact(value),
       ])
     ),
-    outputs: getClientOutputs(step),
     messages: step.getConversationMessages(),
   };
 }
@@ -90,7 +93,14 @@ export function addStreamingListeners<Shape extends IOShape>(
   controller: ReadableStreamController<string>
 ) {
   const send = (message: StreamingMessage) => {
-    controller.enqueue(JSON.stringify(message) + "\n");
+    try {
+      controller.enqueue(JSON.stringify(message) + "\n");
+    } catch (error) {
+      // If the connection to the client is lost, we don't want to throw errors,
+      // just to make sure it doesn't interfere with the workflow.
+      // (I'm not sure if this is important; these are happening in event handlers which shouldn't affect the main process)
+      console.error("Error sending message to stream", error);
+    }
   };
 
   workflow.addEventListener("workflowStarted", (event) => {
@@ -129,8 +139,7 @@ export function addStreamingListeners<Shape extends IOShape>(
       kind: "stepUpdated",
       content: {
         id: event.data.step.id,
-        state: event.data.step.getState().kind,
-        outputs: getClientOutputs(event.data.step),
+        state: getClientState(event.data.step.getState()),
         messages: event.data.step.getConversationMessages(),
       },
     });
@@ -140,7 +149,11 @@ export function addStreamingListeners<Shape extends IOShape>(
       kind: "finalResult",
       content: event.workflow.getFinalResult(),
     });
-    controller.close();
+    try {
+      controller.close();
+    } catch (error) {
+      console.error("Error closing stream", error);
+    }
   });
 }
 
@@ -203,13 +216,11 @@ export async function decodeWorkflowFromReader({
       case "stepAdded":
         await setWorkflow((workflow) => ({
           ...workflow,
-          currentStep: event.content.name,
           steps: [
             ...workflow.steps,
             {
-              outputs: {},
               messages: [],
-              state: "PENDING",
+              state: { kind: "PENDING" },
               ...event.content,
             },
           ],
