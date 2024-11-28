@@ -24,7 +24,6 @@ import "./mutations/clearRelativeValuesCache";
 import "./mutations/createGroup";
 import "./mutations/createRelativeValuesDefinition";
 import "./mutations/createReusableGroupInviteToken";
-import "./mutations/createSquiggleSnippetModel";
 import "./mutations/deleteMembership";
 import "./mutations/deleteModel";
 import "./mutations/deleteRelativeValuesDefinition";

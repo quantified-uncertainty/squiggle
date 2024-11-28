@@ -13,8 +13,9 @@ import { useToast } from "@quri/ui";
  */
 export function useServerActionForm<
   FormShape extends FieldValues = never,
-  ActionVariables = never,
-  ActionResult = never,
+  const Action extends (input: any) => Promise<any> = never,
+  ActionVariables = Parameters<Action>[0],
+  ActionResult = Awaited<ReturnType<Action>>,
 >({
   defaultValues,
   mode,
@@ -45,9 +46,11 @@ export function useServerActionForm<
           onCompleted?.(result);
         } catch (error) {
           toast(String(error), "error");
+          // important to rethrow; otherwise form will have `isSubmitting` set to true, which can make it disabled if `blockOnSuccess` is enabled
+          throw error;
         }
       })(event),
-    [form, formDataToVariables, onCompleted, action]
+    [form, formDataToVariables, onCompleted, action, toast]
   );
 
   return {

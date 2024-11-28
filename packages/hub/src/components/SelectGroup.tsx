@@ -31,6 +31,10 @@ export function SelectGroup<
   const loadOptions = async (
     inputValue: string
   ): Promise<SelectGroupOption[]> => {
+    if (typeof window === "undefined") {
+      return [];
+    }
+
     const result = await fetch(
       `/api/find-owners?${new URLSearchParams({
         search: inputValue,

@@ -8,12 +8,9 @@ import { useServerActionForm } from "@/hooks/useServerActionForm";
 
 type CommonProps<
   TFormShape extends FieldValues,
-  ActionVariables,
-  ActionResult,
+  Action extends (input: any) => Promise<any>,
 > = Pick<
-  Parameters<
-    typeof useServerActionForm<TFormShape, ActionVariables, ActionResult>
-  >[0],
+  Parameters<typeof useServerActionForm<TFormShape, Action>>[0],
   | "formDataToVariables"
   | "defaultValues"
   | "action"
@@ -27,8 +24,7 @@ type CommonProps<
 
 function ServerActionFormModal<
   TFormShape extends FieldValues,
-  const ActionVariables,
-  const ActionResult,
+  Action extends (input: any) => Promise<any>,
 >({
   formDataToVariables,
   initialFocus,
@@ -39,14 +35,10 @@ function ServerActionFormModal<
   close,
   title,
   children,
-}: PropsWithChildren<CommonProps<TFormShape, ActionVariables, ActionResult>> & {
+}: PropsWithChildren<CommonProps<TFormShape, Action>> & {
   title: string;
 }): ReactNode {
-  const { form, onSubmit, inFlight } = useServerActionForm<
-    TFormShape,
-    ActionVariables,
-    ActionResult
-  >({
+  const { form, onSubmit, inFlight } = useServerActionForm<TFormShape, Action>({
     mode: "onChange",
     defaultValues,
     action,
@@ -81,11 +73,7 @@ export function ServerActionModalAction<
   icon,
   children,
   ...modalProps
-}: CommonProps<
-  TFormShape,
-  Parameters<Action>[0],
-  Awaited<ReturnType<Action>>
-> & {
+}: CommonProps<TFormShape, Action> & {
   modalTitle: string;
   title: string;
   icon?: FC<IconProps>;
@@ -96,11 +84,7 @@ export function ServerActionModalAction<
       title={title}
       icon={icon}
       render={() => (
-        <ServerActionFormModal<
-          TFormShape,
-          Parameters<Action>[0],
-          Awaited<ReturnType<Action>>
-        >
+        <ServerActionFormModal<TFormShape, Action>
           // Note that we pass the same `close` that's responsible for closing the dropdown.
           {...modalProps}
           title={modalTitle}

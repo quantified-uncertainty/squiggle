@@ -2,7 +2,6 @@
 import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
 import { FormProvider } from "react-hook-form";
-import { graphql } from "relay-runtime";
 
 import { generateSeed } from "@quri/squiggle-lang";
 import { Button, CheckboxFormField } from "@quri/ui";
@@ -11,10 +10,9 @@ import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
 import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { useMutationForm } from "@/hooks/useMutationForm";
+import { useServerActionForm } from "@/hooks/useServerActionForm";
 import { modelRoute } from "@/routes";
-
-import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
+import { createSquiggleSnippetModelAction } from "@/server/models/actions/createSquiggleSnippetModelAction";
 
 const defaultCode = `/*
 Describe your code here
@@ -36,10 +34,9 @@ export const NewModel: FC<{ initialGroup: SelectGroupOption | null }> = ({
 
   const router = useRouter();
 
-  const { form, onSubmit, inFlight } = useMutationForm<
+  const { form, onSubmit, inFlight } = useServerActionForm<
     FormShape,
-    NewModelMutation,
-    "CreateSquiggleSnippetModelResult"
+    typeof createSquiggleSnippetModelAction
   >({
     mode: "onChange",
     defaultValues: {
@@ -47,38 +44,15 @@ export const NewModel: FC<{ initialGroup: SelectGroupOption | null }> = ({
       group,
       isPrivate: false,
     },
-    mutation: graphql`
-      mutation NewModelMutation(
-        $input: MutationCreateSquiggleSnippetModelInput!
-      ) {
-        result: createSquiggleSnippetModel(input: $input) {
-          __typename
-          ... on BaseError {
-            message
-          }
-          ... on CreateSquiggleSnippetModelResult {
-            model {
-              id
-              slug
-              owner {
-                slug
-              }
-            }
-          }
-        }
-      }
-    `,
-    expectedTypename: "CreateSquiggleSnippetModelResult",
     blockOnSuccess: true,
+    action: createSquiggleSnippetModelAction,
     formDataToVariables: (data) => ({
-      input: {
-        slug: data.slug ?? "", // shouldn't happen but satisfies Typescript
-        groupSlug: data.group?.slug,
-        isPrivate: data.isPrivate,
-        code: defaultCode,
-        version: defaultSquiggleVersion,
-        seed: generateSeed(),
-      },
+      slug: data.slug ?? "", // shouldn't happen but satisfies Typescript
+      groupSlug: data.group?.slug,
+      isPrivate: data.isPrivate,
+      code: defaultCode,
+      version: defaultSquiggleVersion,
+      seed: generateSeed(),
     }),
     onCompleted: (result) => {
       router.push(
