@@ -6,7 +6,7 @@ import { graphql } from "relay-runtime";
 import { DropdownMenuAsyncActionItem, TrashIcon, useToast } from "@quri/ui";
 
 import { ownerRoute } from "@/routes";
-import { ModelCardData } from "@/server/models/data";
+import { ModelCardDTO } from "@/server/models/data/card";
 
 import { DeleteModelActionMutation } from "@/__generated__/DeleteModelActionMutation.graphql";
 
@@ -22,7 +22,7 @@ const Mutation = graphql`
 `;
 
 type Props = {
-  model: ModelCardData;
+  model: ModelCardDTO;
   close(): void;
 };
 

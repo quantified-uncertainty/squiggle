@@ -5,7 +5,7 @@ import { DropdownMenuHeader, GroupIcon, PlusIcon } from "@quri/ui";
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 import { groupRoute, newGroupRoute } from "@/routes";
 import { GroupCardData } from "@/server/groups/data";
-import { Paginated } from "@/server/models/data";
+import { Paginated } from "@/server/types";
 
 type Props = {
   groups: Paginated<GroupCardData>;

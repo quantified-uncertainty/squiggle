@@ -7,14 +7,14 @@ import { SelectOwner, SelectOwnerOption } from "@/components/SelectOwner";
 import { ServerActionModalAction } from "@/components/ui/ServerActionModalAction";
 import { modelRoute } from "@/routes";
 import { moveModelAction } from "@/server/models/actions/moveModelAction";
-import { ModelCardData } from "@/server/models/data";
+import { ModelCardDTO } from "@/server/models/data/card";
 
 import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
 
 type FormShape = { owner: SelectOwnerOption };
 
 type Props = {
-  model: ModelCardData;
+  model: ModelCardDTO;
   close(): void;
 };
 

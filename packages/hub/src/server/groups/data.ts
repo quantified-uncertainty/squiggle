@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 
-import { Paginated } from "../models/data";
+import { Paginated } from "../types";
 
 export async function getMyGroup(
   groupSlug: string

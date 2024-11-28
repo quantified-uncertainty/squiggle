@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/prisma";
 
-import { Paginated } from "../models/data";
+import { Paginated } from "../types";
 
 const definitionCardSelect = {
   id: true,

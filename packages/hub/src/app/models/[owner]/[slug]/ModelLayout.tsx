@@ -12,7 +12,7 @@ import {
   VariablesDropdown,
 } from "@/lib/VariablesDropdown";
 import { modelRevisionsRoute, modelRoute } from "@/routes";
-import { ModelCardData } from "@/server/models/data";
+import { ModelCardDTO } from "@/server/models/data/card";
 import { getExportedVariableNames } from "@/server/models/utils";
 
 import { ModelAccessControls } from "./ModelAccessControls";
@@ -22,7 +22,7 @@ import { useFixModelUrlCasing } from "./useFixModelUrlCasing";
 
 export const ModelLayout: FC<
   PropsWithChildren<{
-    model: ModelCardData;
+    model: ModelCardDTO;
     isEditable: boolean;
   }>
 > = ({ model, isEditable, children }) => {

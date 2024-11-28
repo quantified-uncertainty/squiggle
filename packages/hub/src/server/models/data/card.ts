@@ -2,37 +2,12 @@ import "server-only";
 
 import { Prisma } from "@prisma/client";
 
-import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 
-// duplicates code in graphql/helpers/modelHelpers.ts
-export async function modelWhereHasAccess(): Promise<Prisma.ModelWhereInput[]> {
-  const session = await auth();
-  const orParts: Prisma.ModelWhereInput[] = [{ isPrivate: false }];
-  if (session) {
-    orParts.push({
-      owner: {
-        OR: [
-          {
-            user: { email: session.user.email },
-          },
-          {
-            group: {
-              memberships: {
-                some: {
-                  user: { email: session.user.email },
-                },
-              },
-            },
-          },
-        ],
-      },
-    });
-  }
-  return orParts;
-}
+import { Paginated } from "../../types";
+import { modelWhereHasAccess } from "./authHelpers";
 
-function dbModelToModelCard(dbModel: DbModelCard) {
+function toDTO(dbModel: DbModelCard) {
   function check(model: DbModelCard): asserts model is Omit<
     DbModelCard,
     "currentRevision"
@@ -134,12 +109,7 @@ type DbModelCard = NonNullable<
   >
 >;
 
-export type ModelCardData = ReturnType<typeof dbModelToModelCard>;
-
-export type Paginated<T> = {
-  items: T[];
-  loadMore?: (limit: number) => Promise<Paginated<T>>;
-};
+export type ModelCardDTO = ReturnType<typeof toDTO>;
 
 export async function loadModelCards(
   params: {
@@ -147,7 +117,7 @@ export async function loadModelCards(
     cursor?: string;
     limit?: number;
   } = {}
-): Promise<Paginated<ModelCardData>> {
+): Promise<Paginated<ModelCardDTO>> {
   const limit = params.limit ?? 20;
 
   const dbModels = await prisma.model.findMany({
@@ -167,7 +137,7 @@ export async function loadModelCards(
     take: limit + 1,
   });
 
-  const models = dbModels.map(dbModelToModelCard);
+  const models = dbModels.map(toDTO);
 
   const nextCursor = models[models.length - 1]?.id;
 
@@ -188,7 +158,7 @@ export async function loadModelCard({
 }: {
   owner: string;
   slug: string;
-}): Promise<ModelCardData | null> {
+}): Promise<ModelCardDTO | null> {
   const dbModel = await prisma.model.findFirst({
     select: modelCardSelect,
     where: {
@@ -202,35 +172,5 @@ export async function loadModelCard({
     return null;
   }
 
-  return dbModelToModelCard(dbModel);
-}
-
-export async function isModelEditable(model: ModelCardData): Promise<boolean> {
-  const session = await auth();
-  if (!session?.user.email) {
-    return false;
-  }
-  return Boolean(
-    await prisma.owner.count({
-      where: {
-        id: model.owner.id,
-        OR: [
-          {
-            user: { email: session.user.email },
-          },
-          {
-            group: {
-              memberships: {
-                some: {
-                  user: {
-                    email: session.user.email,
-                  },
-                },
-              },
-            },
-          },
-        ],
-      },
-    })
-  );
+  return toDTO(dbModel);
 }

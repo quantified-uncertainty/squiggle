@@ -3,7 +3,7 @@ import { FC } from "react";
 
 import { LoadMore } from "@/components/LoadMore";
 import { usePaginator } from "@/hooks/usePaginator";
-import { Paginated } from "@/server/models/data";
+import { Paginated } from "@/server/types";
 import { VariableCardData } from "@/server/variables/data";
 
 import { VariableCard } from "./VariableCard";

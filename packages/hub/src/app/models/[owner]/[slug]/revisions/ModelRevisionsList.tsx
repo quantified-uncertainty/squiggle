@@ -1,62 +1,21 @@
 "use client";
-import { ModelRevisionsListQuery } from "@gen/ModelRevisionsListQuery.graphql";
 import { format } from "date-fns";
 import { FC } from "react";
-import { useFragment, usePaginationFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
 import { LoadMore } from "@/components/LoadMore";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { UsernameLink } from "@/components/UsernameLink";
+import { usePaginator } from "@/hooks/usePaginator";
 import { commonDateFormat } from "@/lib/common";
-import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
-import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRevisionRoute } from "@/routes";
-
-import { ModelRevisionsList$key } from "@/__generated__/ModelRevisionsList.graphql";
-import { ModelRevisionsList_model$key } from "@/__generated__/ModelRevisionsList_model.graphql";
-import { ModelRevisionsList_revision$key } from "@/__generated__/ModelRevisionsList_revision.graphql";
+import { ModelCardDTO } from "@/server/models/data/card";
+import { ModelRevisionDTO } from "@/server/models/data/revisions";
+import { Paginated } from "@/server/types";
 
 const ModelRevisionItem: FC<{
-  modelRef: ModelRevisionsList_model$key;
-  revisionRef: ModelRevisionsList_revision$key;
-}> = ({ modelRef, revisionRef }) => {
-  const revision = useFragment(
-    graphql`
-      fragment ModelRevisionsList_revision on ModelRevision {
-        id
-        createdAtTimestamp
-        buildStatus
-        author {
-          username
-        }
-        comment
-        variableRevisions {
-          id
-        }
-        lastBuild {
-          errors
-          runSeconds
-        }
-      }
-    `,
-    revisionRef
-  );
-
-  const model = useFragment(
-    graphql`
-      fragment ModelRevisionsList_model on Model {
-        id
-        slug
-        owner {
-          slug
-        }
-      }
-    `,
-    modelRef
-  );
-
+  model: ModelCardDTO;
+  revision: ModelRevisionDTO;
+}> = ({ model, revision }) => {
   return (
     <div key={revision.id}>
       <div>
@@ -67,7 +26,7 @@ const ModelRevisionItem: FC<{
             revisionId: revision.id,
           })}
         >
-          {format(new Date(revision.createdAtTimestamp), commonDateFormat)}
+          {format(revision.createdAt, commonDateFormat)}
         </StyledLink>
         {revision.author ? (
           <>
@@ -94,66 +53,23 @@ const ModelRevisionItem: FC<{
 };
 
 export const ModelRevisionsList: FC<{
-  query: SerializablePreloadedQuery<ModelRevisionsListQuery>;
-}> = ({ query }) => {
-  const [{ model: result }] = usePageQuery(
-    graphql`
-      query ModelRevisionsListQuery($input: QueryModelInput!) {
-        model(input: $input) {
-          __typename
-          ... on Model {
-            id
-            ...ModelRevisionsList_model
-            ...ModelRevisionsList
-          }
-        }
-      }
-    `,
-    query
-  );
-
-  const modelRef = extractFromGraphqlErrorUnion(result, "Model");
-
-  const {
-    data: { revisions },
-    loadNext,
-  } = usePaginationFragment<ModelRevisionsListQuery, ModelRevisionsList$key>(
-    graphql`
-      fragment ModelRevisionsList on Model
-      @argumentDefinitions(
-        cursor: { type: "String" }
-        count: { type: "Int", defaultValue: 20 }
-      )
-      @refetchable(queryName: "ModelRevisionsListPaginationQuery") {
-        revisions(first: $count, after: $cursor)
-          @connection(key: "ModelRevisionsList_revisions") {
-          edges {
-            node {
-              id
-              ...ModelRevisionsList_revision
-            }
-          }
-          pageInfo {
-            hasNextPage
-          }
-        }
-      }
-    `,
-    modelRef
-  );
+  page: Paginated<ModelRevisionDTO>;
+  model: ModelCardDTO;
+}> = ({ page: initialPage, model }) => {
+  const { items: revisions, loadNext } = usePaginator(initialPage);
 
   return (
     <div>
       <div className="space-y-2">
-        {revisions.edges.map((edge) => (
+        {revisions.map((revision) => (
           <ModelRevisionItem
-            key={edge.node.id}
-            revisionRef={edge.node}
-            modelRef={modelRef}
+            key={revision.id}
+            model={model}
+            revision={revision}
           />
         ))}
       </div>
-      {revisions.pageInfo.hasNextPage && <LoadMore loadNext={loadNext} />}
+      {loadNext && <LoadMore loadNext={loadNext} />}
     </div>
   );
 };

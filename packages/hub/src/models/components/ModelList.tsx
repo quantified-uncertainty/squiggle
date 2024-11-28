@@ -3,12 +3,13 @@ import { FC } from "react";
 
 import { LoadMore } from "@/components/LoadMore";
 import { usePaginator } from "@/hooks/usePaginator";
-import { ModelCardData, Paginated } from "@/server/models/data";
+import { ModelCardDTO } from "@/server/models/data/card";
+import { Paginated } from "@/server/types";
 
 import { ModelCard } from "./ModelCard";
 
 type Props = {
-  page: Paginated<ModelCardData>;
+  page: Paginated<ModelCardDTO>;
   showOwner?: boolean;
 };
 

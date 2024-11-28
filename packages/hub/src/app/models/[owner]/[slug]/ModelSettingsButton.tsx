@@ -4,14 +4,14 @@ import { FC } from "react";
 import { Cog8ToothIcon, Dropdown, DropdownMenu } from "@quri/ui";
 
 import { EntityTab } from "@/components/ui/EntityTab";
-import { ModelCardData } from "@/server/models/data";
+import { ModelCardDTO } from "@/server/models/data/card";
 
 import { DeleteModelAction } from "./DeleteModelAction";
 import { MoveModelAction } from "./MoveModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 
 export const ModelSettingsButton: FC<{
-  model: ModelCardData;
+  model: ModelCardDTO;
 }> = ({ model }) => {
   return (
     <Dropdown

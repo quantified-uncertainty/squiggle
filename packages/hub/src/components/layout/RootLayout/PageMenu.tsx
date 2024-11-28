@@ -20,7 +20,7 @@ import {
 import { SQUIGGLE_DOCS_URL } from "@/lib/common";
 import { aboutRoute, aiRoute, newModelRoute } from "@/routes";
 import { GroupCardData } from "@/server/groups/data";
-import { Paginated } from "@/server/models/data";
+import { Paginated } from "@/server/types";
 
 import { GlobalSearch } from "../../GlobalSearch";
 import { DesktopUserControls } from "./DesktopUserControls";

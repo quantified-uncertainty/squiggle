@@ -2,7 +2,8 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PropsWithChildren, Suspense } from "react";
 
-import { isModelEditable, loadModelCard } from "@/server/models/data";
+import { loadModelCard } from "@/server/models/data/card";
+import { isModelEditable } from "@/server/models/data/helpers";
 
 import { FallbackModelLayout } from "./FallbackLayout";
 import { ModelLayout } from "./ModelLayout";

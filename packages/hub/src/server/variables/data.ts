@@ -4,7 +4,8 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/prisma";
 
-import { modelWhereHasAccess, Paginated } from "../models/data";
+import { modelWhereHasAccess } from "../models/data/authHelpers";
+import { Paginated } from "../types";
 
 const variableCardSelect = {
   id: true,

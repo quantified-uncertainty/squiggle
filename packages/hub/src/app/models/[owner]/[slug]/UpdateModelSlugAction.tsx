@@ -7,12 +7,12 @@ import { ServerActionModalAction } from "@/components/ui/ServerActionModalAction
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { modelRoute } from "@/routes";
 import { updateModelSlugAction } from "@/server/models/actions/updateModelSlugAction";
-import { ModelCardData } from "@/server/models/data";
+import { ModelCardDTO } from "@/server/models/data/card";
 
 import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
 
 type Props = {
-  model: ModelCardData;
+  model: ModelCardDTO;
   close(): void;
 };
 

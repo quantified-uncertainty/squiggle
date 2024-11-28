@@ -12,14 +12,14 @@ import {
 } from "@quri/ui";
 
 import { updateModelPrivacyAction } from "@/server/models/actions/updateModelPrivacyAction";
-import { ModelCardData } from "@/server/models/data";
+import { ModelCardDTO } from "@/server/models/data/card";
 
 function getIconComponent(isPrivate: boolean) {
   return isPrivate ? LockIcon : GlobeIcon;
 }
 
 const UpdatePrivacyAction: FC<{
-  model: ModelCardData;
+  model: ModelCardDTO;
   close: () => void;
 }> = ({ model, close }) => {
   const [initialIsPrivate] = useState(model.isPrivate);
@@ -54,7 +54,7 @@ const UpdatePrivacyAction: FC<{
 };
 
 export const ModelAccessControls: FC<{
-  model: ModelCardData;
+  model: ModelCardDTO;
   isEditable: boolean;
 }> = ({ model, isEditable }) => {
   const { isPrivate } = model;

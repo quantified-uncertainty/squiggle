@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 import { ModelList } from "@/models/components/ModelList";
-import { loadModelCards } from "@/server/models/data";
+import { loadModelCards } from "@/server/models/data/card";
 
 type Props = {
   params: Promise<{ username: string }>;

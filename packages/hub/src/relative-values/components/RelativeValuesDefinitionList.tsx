@@ -4,8 +4,8 @@ import { FC } from "react";
 
 import { LoadMore } from "@/components/LoadMore";
 import { usePaginator } from "@/hooks/usePaginator";
-import { Paginated } from "@/server/models/data";
 import { RelativeValuesDefinitionCardData } from "@/server/relative-values/data";
+import { Paginated } from "@/server/types";
 
 import { RelativeValuesDefinitionCard } from "./RelativeValuesDefinitionCard";
 

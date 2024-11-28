@@ -4,7 +4,7 @@ import Skeleton from "react-loading-skeleton";
 
 import { ModelCard } from "@/models/components/ModelCard";
 import { loadModelCardAction } from "@/server/models/actions/loadModelCardAction";
-import { ModelCardData } from "@/server/models/data";
+import { ModelCardDTO } from "@/server/models/data/card";
 
 import { parseSourceId } from "./linker";
 
@@ -15,7 +15,7 @@ type Props = {
 export const ImportTooltip: FC<Props> = ({ importId }) => {
   const { owner, slug } = parseSourceId(importId);
 
-  const [model, setModel] = useState<ModelCardData | "loading" | null>(
+  const [model, setModel] = useState<ModelCardDTO | "loading" | null>(
     "loading"
   );
 

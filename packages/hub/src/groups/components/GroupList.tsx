@@ -4,7 +4,7 @@ import { FC } from "react";
 import { LoadMore } from "@/components/LoadMore";
 import { usePaginator } from "@/hooks/usePaginator";
 import { GroupCardData } from "@/server/groups/data";
-import { Paginated } from "@/server/models/data";
+import { Paginated } from "@/server/types";
 
 import { GroupCard } from "./GroupCard";
 

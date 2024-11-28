@@ -1,6 +1,6 @@
 import { ModelList } from "@/models/components/ModelList";
 import { hasGroupMembership } from "@/server/groups/data";
-import { loadModelCards } from "@/server/models/data";
+import { loadModelCards } from "@/server/models/data/card";
 
 type Props = {
   params: Promise<{ slug: string }>;

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Paginated } from "@/server/models/data";
+import { Paginated } from "@/server/types";
 
 export function usePaginator<T>(initialPage: Paginated<T>): {
   items: T[];

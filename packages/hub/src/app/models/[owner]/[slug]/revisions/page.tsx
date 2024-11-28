@@ -1,10 +1,9 @@
-import { loadPageQuery } from "@/relay/loadPageQuery";
+import { notFound } from "next/navigation";
+
+import { loadModelCard } from "@/server/models/data/card";
+import { loadModelRevisions } from "@/server/models/data/revisions";
 
 import { ModelRevisionsList } from "./ModelRevisionsList";
-
-import QueryNode, {
-  ModelRevisionsListQuery,
-} from "@/__generated__/ModelRevisionsListQuery.graphql";
 
 export default async function ModelPage({
   params,
@@ -12,9 +11,11 @@ export default async function ModelPage({
   params: Promise<{ owner: string; slug: string }>;
 }) {
   const { owner, slug } = await params;
-  const query = await loadPageQuery<ModelRevisionsListQuery>(QueryNode, {
-    input: { owner, slug },
-  });
+  const page = await loadModelRevisions({ owner, slug });
+  const model = await loadModelCard({ owner, slug });
+  if (!model) {
+    notFound();
+  }
 
-  return <ModelRevisionsList query={query} />;
+  return <ModelRevisionsList page={page} model={model} />;
 }

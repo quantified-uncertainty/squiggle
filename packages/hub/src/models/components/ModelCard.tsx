@@ -17,10 +17,10 @@ import {
   VariablesDropdown,
 } from "@/lib/VariablesDropdown";
 import { modelRoute, ownerRoute } from "@/routes";
-import { ModelCardData } from "@/server/models/data";
+import { ModelCardDTO } from "@/server/models/data/card";
 
 type Props = {
-  model: ModelCardData;
+  model: ModelCardDTO;
   showOwner?: boolean;
 };
 
