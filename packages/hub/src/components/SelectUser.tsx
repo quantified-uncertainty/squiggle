@@ -1,30 +1,13 @@
 "use client";
 import { FieldPathByValue, FieldValues } from "react-hook-form";
-import { useRelayEnvironment } from "react-relay";
-import { fetchQuery, graphql } from "relay-runtime";
+import { z } from "zod";
 
 import { SelectFormField } from "@quri/ui";
 
-import {
-  SelectUserQuery,
-  SelectUserQuery$data,
-} from "@/__generated__/SelectUserQuery.graphql";
-
-const Query = graphql`
-  query SelectUserQuery($input: UsersQueryInput!) {
-    users(input: $input) {
-      edges {
-        node {
-          id
-          username
-        }
-      }
-    }
-  }
-`;
-
-export type SelectUserOption =
-  SelectUserQuery$data["users"]["edges"][number]["node"];
+export type SelectUserOption = {
+  id: string;
+  slug: string;
+};
 
 export function SelectUser<TValues extends FieldValues>({
   name,
@@ -35,22 +18,26 @@ export function SelectUser<TValues extends FieldValues>({
   label?: string;
   required?: boolean;
 }) {
-  const environment = useRelayEnvironment();
-
   const loadOptions = async (
     inputValue: string
   ): Promise<SelectUserOption[]> => {
-    const result = await fetchQuery<SelectUserQuery>(environment, Query, {
-      input: {
-        usernameContains: inputValue,
-      },
-    }).toPromise();
+    const result = await fetch(
+      `/api/find-owners?${new URLSearchParams({
+        search: inputValue,
+        mode: "all-users",
+      })}`
+    ).then((r) => r.json());
 
-    if (!result) {
-      return [];
-    }
+    const data = z
+      .array(
+        z.object({
+          id: z.string(),
+          slug: z.string(),
+        })
+      )
+      .parse(result);
 
-    return result.users.edges.map((edge) => edge.node);
+    return data;
   };
 
   return (
@@ -60,7 +47,7 @@ export function SelectUser<TValues extends FieldValues>({
       required={required}
       async
       loadOptions={loadOptions}
-      renderOption={(user) => user.username}
+      renderOption={(user) => user.slug}
     />
   );
 }

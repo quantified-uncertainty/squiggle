@@ -15,7 +15,6 @@ import "./queries/relativeValuesDefinitions";
 import "./queries/runSquiggle";
 import "./queries/search";
 import "./queries/userByUsername";
-import "./queries/users";
 import "./mutations/acceptReusableGroupInviteToken";
 import "./mutations/adminUpdateModelVersion";
 import "./mutations/adminRebuildSearchIndex";

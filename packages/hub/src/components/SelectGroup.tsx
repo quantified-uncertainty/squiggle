@@ -1,30 +1,13 @@
 "use client";
 import { FieldPathByValue, FieldValues } from "react-hook-form";
-import { useRelayEnvironment } from "react-relay";
-import { fetchQuery, graphql } from "relay-runtime";
+import { z } from "zod";
 
 import { SelectFormField } from "@quri/ui";
 
-import {
-  SelectGroupQuery,
-  SelectGroupQuery$data,
-} from "@/__generated__/SelectGroupQuery.graphql";
-
-const Query = graphql`
-  query SelectGroupQuery($input: GroupsQueryInput!) {
-    groups(input: $input) {
-      edges {
-        node {
-          id
-          slug
-        }
-      }
-    }
-  }
-`;
-
-export type SelectGroupOption =
-  SelectGroupQuery$data["groups"]["edges"][number]["node"];
+export type SelectGroupOption = {
+  id: string;
+  slug: string;
+};
 
 export function SelectGroup<
   TValues extends FieldValues,
@@ -45,23 +28,26 @@ export function SelectGroup<
   required?: boolean;
   myOnly?: boolean;
 }) {
-  const environment = useRelayEnvironment();
-
   const loadOptions = async (
     inputValue: string
   ): Promise<SelectGroupOption[]> => {
-    const result = await fetchQuery<SelectGroupQuery>(environment, Query, {
-      input: {
-        slugContains: inputValue,
-        myOnly,
-      },
-    }).toPromise();
+    const result = await fetch(
+      `/api/find-owners?${new URLSearchParams({
+        search: inputValue,
+        mode: myOnly ? "my-groups" : "all-groups",
+      })}`
+    ).then((r) => r.json());
 
-    if (!result) {
-      return [];
-    }
+    const data = z
+      .array(
+        z.object({
+          id: z.string(),
+          slug: z.string(),
+        })
+      )
+      .parse(result);
 
-    return result.groups.edges.map((edge) => edge.node);
+    return data;
   };
 
   return (

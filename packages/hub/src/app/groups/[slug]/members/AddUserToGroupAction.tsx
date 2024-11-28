@@ -63,7 +63,7 @@ export const AddUserToGroupAction: FC<Props> = ({ groupRef, close }) => {
       formDataToVariables={(data) => ({
         input: {
           group: group.slug,
-          username: data.user.username,
+          username: data.user.slug,
           role: data.role,
         },
         connections: [

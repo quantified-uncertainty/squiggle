@@ -17,7 +17,7 @@ export const moveModelAction = makeServerAction(
   async (input) => {
     const session = await getSessionOrRedirect();
 
-    let model = await getWriteableModel({
+    const model = await getWriteableModel({
       owner: input.oldOwner,
       slug: input.slug,
       session,
