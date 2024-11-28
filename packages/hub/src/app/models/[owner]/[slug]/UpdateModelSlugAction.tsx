@@ -5,36 +5,14 @@ import { graphql } from "relay-runtime";
 
 import { EditIcon } from "@quri/ui";
 
-import { MutationModalAction } from "@/components/ui/MutationModalAction";
+import { ServerActionModalAction } from "@/components/ui/ServerActionModalAction";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { modelRoute } from "@/routes";
+import { updateModelSlugAction } from "@/server/models/actions/updateModelSlugAction";
 
 import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
 
 import { UpdateModelSlugAction$key } from "@/__generated__/UpdateModelSlugAction.graphql";
-import { UpdateModelSlugActionMutation } from "@/__generated__/UpdateModelSlugActionMutation.graphql";
-
-const Mutation = graphql`
-  mutation UpdateModelSlugActionMutation(
-    $input: MutationUpdateModelSlugInput!
-  ) {
-    result: updateModelSlug(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on UpdateModelSlugResult {
-        model {
-          id
-          slug
-          owner {
-            slug
-          }
-        }
-      }
-    }
-  }
-`;
 
 type Props = {
   model: UpdateModelSlugAction$key;
@@ -64,21 +42,14 @@ export const UpdateModelSlugAction: FC<Props> = ({
   const router = useRouter();
 
   return (
-    <MutationModalAction<
-      UpdateModelSlugActionMutation,
-      FormShape,
-      "UpdateModelSlugResult"
-    >
+    <ServerActionModalAction<FormShape, typeof updateModelSlugAction>
       title="Rename"
       icon={EditIcon}
-      mutation={Mutation}
-      expectedTypename="UpdateModelSlugResult"
+      action={updateModelSlugAction}
       formDataToVariables={(data) => ({
-        input: {
-          owner: model.owner.slug,
-          oldSlug: model.slug,
-          newSlug: data.slug,
-        },
+        owner: model.owner.slug,
+        oldSlug: model.slug,
+        newSlug: data.slug,
       })}
       onCompleted={({ model: newModel }) => {
         draftUtils.rename(
@@ -102,6 +73,6 @@ export const UpdateModelSlugAction: FC<Props> = ({
           <SlugFormField<FormShape> name="slug" label="New slug" />
         </div>
       )}
-    </MutationModalAction>
+    </ServerActionModalAction>
   );
 };

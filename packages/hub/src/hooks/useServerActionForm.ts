@@ -1,6 +1,8 @@
 import { BaseSyntheticEvent, useCallback } from "react";
 import { FieldValues, useForm, UseFormProps } from "react-hook-form";
 
+import { useToast } from "@quri/ui";
+
 /**
  * This hook ties together `useForm` and server actions.
  *
@@ -32,12 +34,18 @@ export function useServerActionForm<
 } & Pick<UseFormProps<FormShape>, "defaultValues" | "mode">) {
   const form = useForm<FormShape>({ defaultValues, mode });
 
+  const toast = useToast();
+
   const onSubmit = useCallback(
     (event?: BaseSyntheticEvent) =>
       form.handleSubmit(async (formData) => {
         // TODO - transition?
-        const result = await action(formDataToVariables(formData));
-        onCompleted?.(result);
+        try {
+          const result = await action(formDataToVariables(formData));
+          onCompleted?.(result);
+        } catch (error) {
+          toast(String(error), "error");
+        }
       })(event),
     [form, formDataToVariables, onCompleted, action]
   );
