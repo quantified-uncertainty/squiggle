@@ -7,15 +7,17 @@ import { prisma } from "@/prisma";
 
 import { Paginated } from "../models/data";
 
-export async function hasGroupMembership(groupSlug: string) {
+export async function getMyGroup(
+  groupSlug: string
+): Promise<GroupCardData | null> {
   const session = await auth();
   const userId = session?.user.id;
   if (!userId) {
-    return false;
+    return null;
   }
 
   const group = await prisma.group.findFirst({
-    select: { id: true },
+    select: groupCardSelect,
     where: {
       asOwner: { slug: groupSlug },
       memberships: {
@@ -23,7 +25,14 @@ export async function hasGroupMembership(groupSlug: string) {
       },
     },
   });
-  return !!group;
+  if (!group) {
+    return null;
+  }
+  return dbGroupToGroupCard(group);
+}
+
+export async function hasGroupMembership(groupSlug: string): boolean {
+  return !!(await getMyGroup(groupSlug));
 }
 
 const groupCardSelect = {

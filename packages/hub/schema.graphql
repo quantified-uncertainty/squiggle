@@ -236,10 +236,6 @@ type ModelsByVersion {
   version: String!
 }
 
-type MoveModelResult {
-  model: Model!
-}
-
 type Mutation {
   acceptReusableGroupInviteToken(input: MutationAcceptReusableGroupInviteTokenInput!): MutationAcceptReusableGroupInviteTokenResult!
   addUserToGroup(input: MutationAddUserToGroupInput!): MutationAddUserToGroupResult!
@@ -269,13 +265,10 @@ type Mutation {
   """Disable a reusable invite token for a group."""
   deleteReusableGroupInviteToken(input: MutationDeleteReusableGroupInviteTokenInput!): MutationDeleteReusableGroupInviteTokenResult!
   inviteUserToGroup(input: MutationInviteUserToGroupInput!): MutationInviteUserToGroupResult!
-  moveModel(input: MutationMoveModelInput!): MutationMoveModelResult!
   reactToGroupInvite(input: MutationReactToGroupInviteInput!): MutationReactToGroupInviteResult!
-  setUsername(username: String!): MutationSetUsernameResult!
   updateGroupInviteRole(input: MutationUpdateGroupInviteRoleInput!): MutationUpdateGroupInviteRoleResult!
   updateMembershipRole(input: MutationUpdateMembershipRoleInput!): MutationUpdateMembershipRoleResult!
   updateModelPrivacy(input: MutationUpdateModelPrivacyInput!): MutationUpdateModelPrivacyResult!
-  updateModelSlug(input: MutationUpdateModelSlugInput!): MutationUpdateModelSlugResult!
   updateRelativeValuesDefinition(input: MutationUpdateRelativeValuesDefinitionInput!): MutationUpdateRelativeValuesDefinitionResult!
   updateSquiggleSnippetModel(input: MutationUpdateSquiggleSnippetModelInput!): MutationUpdateSquiggleSnippetModelResult!
   validateReusableGroupInviteToken(input: MutationValidateReusableGroupInviteTokenInput!): MutationValidateReusableGroupInviteTokenResult!
@@ -403,22 +396,12 @@ input MutationInviteUserToGroupInput {
 
 union MutationInviteUserToGroupResult = BaseError | InviteUserToGroupResult | ValidationError
 
-input MutationMoveModelInput {
-  newOwner: String!
-  oldOwner: String!
-  slug: String!
-}
-
-union MutationMoveModelResult = BaseError | MoveModelResult | NotFoundError | ValidationError
-
 input MutationReactToGroupInviteInput {
   action: GroupInviteReaction!
   inviteId: String!
 }
 
 union MutationReactToGroupInviteResult = BaseError | ReactToGroupInviteResult
-
-union MutationSetUsernameResult = BaseError | Me | ValidationError
 
 input MutationUpdateGroupInviteRoleInput {
   inviteId: String!
@@ -442,14 +425,6 @@ input MutationUpdateModelPrivacyInput {
 }
 
 union MutationUpdateModelPrivacyResult = BaseError | UpdateModelPrivacyResult
-
-input MutationUpdateModelSlugInput {
-  newSlug: String!
-  oldSlug: String!
-  owner: String!
-}
-
-union MutationUpdateModelSlugResult = BaseError | UpdateModelSlugResult
 
 input MutationUpdateRelativeValuesDefinitionInput {
   clusters: [RelativeValuesClusterInput!]!
@@ -516,7 +491,6 @@ type Query {
   runSquiggle(code: String!, seed: String): SquiggleOutput!
   search(after: String, before: String, first: Int, last: Int, text: String!): QuerySearchResult!
   userByUsername(username: String!): QueryUserByUsernameResult!
-  users(after: String, before: String, first: Int, input: UsersQueryInput, last: Int): QueryUsersConnection!
   variable(input: QueryVariableInput!): QueryVariableResult!
   variables(after: String, before: String, first: Int, input: VariableQueryInput, last: Int): VariableConnection!
 }
@@ -545,16 +519,6 @@ type QuerySearchConnection {
 union QuerySearchResult = BaseError | QuerySearchConnection
 
 union QueryUserByUsernameResult = BaseError | NotFoundError | User
-
-type QueryUsersConnection {
-  edges: [QueryUsersConnectionEdge!]!
-  pageInfo: PageInfo!
-}
-
-type QueryUsersConnectionEdge {
-  cursor: String!
-  node: User!
-}
 
 input QueryVariableInput {
   owner: String!
@@ -712,10 +676,6 @@ type UpdateModelPrivacyResult {
   model: Model!
 }
 
-type UpdateModelSlugResult {
-  model: Model!
-}
-
 type UpdateRelativeValuesDefinitionResult {
   definition: RelativeValuesDefinition!
 }
@@ -758,10 +718,6 @@ type UserGroupMembershipConnection {
 type UserGroupMembershipEdge {
   cursor: String!
   node: UserGroupMembership!
-}
-
-input UsersQueryInput {
-  usernameContains: String
 }
 
 type ValidateReusableGroupInviteTokenResult {
