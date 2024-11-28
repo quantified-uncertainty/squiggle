@@ -32,7 +32,6 @@ import "./mutations/deleteRelativeValuesDefinition";
 import "./mutations/deleteReusableGroupInviteToken";
 import "./mutations/addUserToGroup";
 import "./mutations/inviteUserToGroup";
-import "./mutations/moveModel";
 import "./mutations/reactToGroupInvite";
 import "./mutations/updateGroupInviteRole";
 import "./mutations/updateMembershipRole";

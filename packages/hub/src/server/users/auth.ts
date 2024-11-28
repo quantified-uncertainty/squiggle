@@ -12,13 +12,17 @@ import { prisma } from "@/prisma";
 
 import { auth } from "../../auth";
 
-export async function getSessionUserOrRedirect() {
+export async function getSessionOrRedirect() {
   const session = await auth();
   if (!isSignedIn(session)) {
     redirect("/api/auth/signin"); // TODO - callbackUrl
   }
 
-  return session.user;
+  return session;
+}
+
+export async function getSessionUserOrRedirect() {
+  return (await getSessionOrRedirect()).user;
 }
 
 export async function checkRootUser() {

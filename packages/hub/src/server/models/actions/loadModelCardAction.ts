@@ -1,7 +1,7 @@
 "use server";
-import { loadModelCard, ModelCardData } from "./data";
+import { loadModelCard, ModelCardData } from "../data";
 
-// used in ImportTooltip
+// data-fetching action, used in ImportTooltip
 export async function loadModelCardAction({
   owner,
   slug,

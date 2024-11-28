@@ -3,7 +3,7 @@ import { FC, useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 
 import { ModelCard } from "@/models/components/ModelCard";
-import { loadModelCardAction } from "@/server/models/actions";
+import { loadModelCardAction } from "@/server/models/actions/loadModelCardAction";
 import { ModelCardData } from "@/server/models/data";
 
 import { parseSourceId } from "./linker";
