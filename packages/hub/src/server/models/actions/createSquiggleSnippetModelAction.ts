@@ -4,9 +4,9 @@ import { z } from "zod";
 
 import { rethrowOnConstraint } from "@/graphql/errors/common";
 import { getWriteableOwner } from "@/graphql/helpers/ownerHelpers";
-import { indexModelId } from "@/graphql/helpers/searchHelpers";
 import { getSelf } from "@/graphql/helpers/userHelpers";
 import { prisma } from "@/prisma";
+import { indexModelId } from "@/server/search/helpers";
 import { getSessionOrRedirect } from "@/server/users/auth";
 import { makeServerAction, zSlug } from "@/server/utils";
 

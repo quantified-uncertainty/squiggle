@@ -7,8 +7,8 @@ import GithubProvider from "next-auth/providers/github";
 import { Provider } from "next-auth/providers/index";
 import { cache } from "react";
 
-import { indexUserId } from "@/graphql/helpers/searchHelpers";
 import { prisma } from "@/prisma";
+import { indexUserId } from "@/server/search/helpers";
 
 function buildAuthConfig(): NextAuthConfig {
   const providers: Provider[] = [];

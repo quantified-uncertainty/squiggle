@@ -1,9 +1,9 @@
 import { prisma } from "@/prisma";
 
+import { indexGroupId } from "../../server/search/helpers";
 import { builder } from "../builder";
 import { rethrowOnConstraint } from "../errors/common";
 import { Group } from "../types/Group";
-import { indexGroupId } from "../helpers/searchHelpers";
 
 builder.mutationField("createGroup", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({

@@ -1,6 +1,6 @@
 import { builder } from "@/graphql/builder";
 
-import { rebuildSearchableTable } from "../helpers/searchHelpers";
+import { rebuildSearchableTable } from "../../server/search/helpers";
 
 builder.mutationField("adminRebuildSearchIndex", (t) =>
   t.withAuth({ signedIn: true }).field({

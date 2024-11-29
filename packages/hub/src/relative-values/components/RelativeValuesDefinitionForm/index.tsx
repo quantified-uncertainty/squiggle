@@ -1,5 +1,3 @@
-"use client";
-
 import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 

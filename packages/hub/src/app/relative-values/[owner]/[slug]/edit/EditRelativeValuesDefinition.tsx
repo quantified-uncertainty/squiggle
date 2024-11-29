@@ -1,9 +1,8 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { graphql, useFragment } from "react-relay";
+import { useFragment } from "react-relay";
 
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { RelativeValuesDefinitionForm } from "@/relative-values/components/RelativeValuesDefinitionForm";
 import { FormShape } from "@/relative-values/components/RelativeValuesDefinitionForm/FormShape";
@@ -11,34 +10,16 @@ import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/comp
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { relativeValuesRoute } from "@/routes";
+import { updateRelativeValuesDefinitionAction } from "@/server/relative-values/actions/updateRelativeValuesDefinitionAction";
 
 import {
   RelativeValuesDefinitionPageFragment,
   RelativeValuesDefinitionPageQuery,
 } from "../RelativeValuesDefinitionPage";
 
-import { EditRelativeValuesDefinitionMutation } from "@/__generated__/EditRelativeValuesDefinitionMutation.graphql";
 import { RelativeValuesDefinitionPage$key } from "@/__generated__/RelativeValuesDefinitionPage.graphql";
 import { RelativeValuesDefinitionPageQuery as QueryType } from "@/__generated__/RelativeValuesDefinitionPageQuery.graphql";
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
-
-const Mutation = graphql`
-  mutation EditRelativeValuesDefinitionMutation(
-    $input: MutationUpdateRelativeValuesDefinitionInput!
-  ) {
-    result: updateRelativeValuesDefinition(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on UpdateRelativeValuesDefinitionResult {
-        definition {
-          id
-        }
-      }
-    }
-  }
-`;
 
 export const EditRelativeValuesDefinition: FC<{
   query: SerializablePreloadedQuery<QueryType>;
@@ -64,34 +45,27 @@ export const EditRelativeValuesDefinition: FC<{
     definition.currentRevision
   );
 
-  const [saveMutation] = useAsyncMutation<EditRelativeValuesDefinitionMutation>(
-    {
-      mutation: Mutation,
-      expectedTypename: "UpdateRelativeValuesDefinitionResult",
-    }
-  );
-
   const save = async (data: FormShape) => {
-    await saveMutation({
-      variables: {
-        input: {
-          slug: definition.slug,
-          owner: definition.owner.slug,
-          title: data.title,
-          items: data.items,
-          clusters: data.clusters,
-          recommendedUnit: data.recommendedUnit,
-        },
-      },
-      onCompleted() {
-        router.push(
-          relativeValuesRoute({
-            owner: definition.owner.slug,
-            slug: definition.slug,
-          })
-        );
-      },
+    await updateRelativeValuesDefinitionAction({
+      slug: definition.slug,
+      owner: definition.owner.slug,
+      title: data.title,
+      items: data.items.map((item) => ({
+        ...item,
+        clusterId: item.clusterId ?? undefined,
+      })),
+      clusters: data.clusters.map((cluster) => ({
+        ...cluster,
+        recommendedUnit: cluster.recommendedUnit || undefined,
+      })),
+      recommendedUnit: data.recommendedUnit || undefined,
     });
+    router.push(
+      relativeValuesRoute({
+        owner: definition.owner.slug,
+        slug: definition.slug,
+      })
+    );
   };
 
   return (
