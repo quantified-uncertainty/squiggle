@@ -13,7 +13,6 @@ import "./mutations/buildRelativeValuesCache";
 import "./mutations/cancelGroupInvite";
 import "./mutations/clearRelativeValuesCache";
 import "./mutations/createGroup";
-import "./mutations/deleteRelativeValuesDefinition";
 import "./mutations/updateSquiggleSnippetModel";
 
 import { builder } from "./builder";
