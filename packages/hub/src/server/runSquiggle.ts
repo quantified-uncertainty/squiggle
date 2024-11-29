@@ -1,3 +1,5 @@
+import "server-only";
+
 import { Prisma } from "@prisma/client";
 import crypto from "crypto";
 
@@ -10,11 +12,8 @@ import {
 } from "@quri/squiggle-lang";
 
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/constants";
-import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 import { parseSourceId } from "@/squiggle/components/linker";
-
-import { NotFoundError } from "../errors/NotFoundError";
 
 function getKey(code: string, seed: string): string {
   return crypto
@@ -44,51 +43,6 @@ type SquiggleOutput = {
     }
 );
 
-const SquiggleOutputObj = builder
-  .interfaceRef<SquiggleOutput>("SquiggleOutput")
-  .implement({
-    fields: (t) => ({
-      isCached: t.exposeBoolean("isCached"),
-    }),
-  });
-
-builder.objectType(
-  builder.objectRef<Extract<SquiggleOutput, { isOk: true }>>(
-    "SquiggleOkOutput"
-  ),
-  {
-    name: "SquiggleOkOutput",
-    interfaces: [SquiggleOutputObj],
-    isTypeOf: (value) => (value as SquiggleOutput).isOk,
-    fields: (t) => ({
-      resultJSON: t.string({
-        resolve(obj) {
-          return JSON.stringify(obj.resultJSON);
-        },
-      }),
-      bindingsJSON: t.string({
-        resolve(obj) {
-          return JSON.stringify(obj.bindingsJSON);
-        },
-      }),
-    }),
-  }
-);
-
-builder.objectType(
-  builder.objectRef<Extract<SquiggleOutput, { isOk: false }>>(
-    "SquiggleErrorOutput"
-  ),
-  {
-    name: "SquiggleErrorOutput",
-    interfaces: [SquiggleOutputObj],
-    isTypeOf: (value) => !(value as SquiggleOutput).isOk,
-    fields: (t) => ({
-      errorString: t.exposeString("errorString"),
-    }),
-  }
-);
-
 export const squiggleLinker: SqLinker = {
   resolve(name) {
     return name;
@@ -110,14 +64,14 @@ export const squiggleLinker: SqLinker = {
     });
 
     if (!model) {
-      throw new NotFoundError();
+      throw new Error("Not found");
     }
 
     const content = model?.currentRevision?.squiggleSnippet;
     if (content) {
       return new SqModule({ name: sourceId, code: content.code });
     } else {
-      throw new NotFoundError();
+      throw new Error("Not found");
     }
   },
 };
@@ -199,17 +153,3 @@ export async function runSquiggleWithCache(
 
   return result;
 }
-
-builder.queryField("runSquiggle", (t) =>
-  t.field({
-    type: SquiggleOutputObj,
-    args: {
-      code: t.arg.string({ required: true }),
-      seed: t.arg.string({ required: false }),
-    },
-    async resolve(_, { code, seed }) {
-      const result = await runSquiggleWithCache(code, seed || "DEFAULT_SEED");
-      return result;
-    },
-  })
-);

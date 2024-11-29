@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { runSquiggleWithCache } from "@/graphql/queries/runSquiggle";
+import { runSquiggleWithCache } from "@/server/runSquiggle";
 
 export async function POST(req: NextRequest) {
   // Assuming 'code' is sent in the request body and is a string
