@@ -1,11 +1,14 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import Skeleton from "react-loading-skeleton";
 
+import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { loadModelCard } from "@/server/models/data/cards";
 import { loadModelRevisions } from "@/server/models/data/revisions";
 
 import { ModelRevisionsList } from "./ModelRevisionsList";
 
-export default async function ModelPage({
+async function InnerRevisionsPage({
   params,
 }: {
   params: Promise<{ owner: string; slug: string }>;
@@ -18,4 +21,19 @@ export default async function ModelPage({
   }
 
   return <ModelRevisionsList page={page} model={model} />;
+}
+
+export default async function ModelPage({
+  params,
+}: {
+  params: Promise<{ owner: string; slug: string }>;
+}) {
+  return (
+    <NarrowPageLayout>
+      <div className="mb-2 mt-4 font-medium">Revision history</div>
+      <Suspense fallback={<Skeleton count={10} height={24} />}>
+        <InnerRevisionsPage params={params} />
+      </Suspense>
+    </NarrowPageLayout>
+  );
 }

@@ -20,10 +20,6 @@ const InnerUpgradeableModel: FC<{
 }> = ({ model }) => {
   const currentRevision = model.currentRevision;
 
-  if (currentRevision.contentType !== "SquiggleSnippet") {
-    throw new Error("Wrong content type");
-  }
-
   const code = currentRevision.squiggleSnippet.code;
 
   const version = useAdjustSquiggleVersion(

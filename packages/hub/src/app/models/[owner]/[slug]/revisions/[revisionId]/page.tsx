@@ -1,10 +1,14 @@
-import { loadPageQuery } from "@/relay/loadPageQuery";
+import { format } from "date-fns";
+import { notFound } from "next/navigation";
+
+import { CommentIcon } from "@quri/ui";
+
+import { StyledLink } from "@/components/ui/StyledLink";
+import { commonDateFormat } from "@/lib/common";
+import { modelRoute } from "@/routes";
+import { loadModelRevisionFull } from "@/server/models/data/fullRevision";
 
 import { ModelRevisionView } from "./ModelRevisionView";
-
-import QueryNode, {
-  ModelRevisionViewQuery,
-} from "@/__generated__/ModelRevisionViewQuery.graphql";
 
 export default async function ModelPage({
   params,
@@ -12,10 +16,44 @@ export default async function ModelPage({
   params: Promise<{ owner: string; slug: string; revisionId: string }>;
 }) {
   const { owner, slug, revisionId } = await params;
-  const query = await loadPageQuery<ModelRevisionViewQuery>(QueryNode, {
-    input: { owner, slug },
+
+  const revision = await loadModelRevisionFull({
+    owner,
+    slug,
     revisionId,
   });
 
-  return <ModelRevisionView query={query} />;
+  if (!revision) {
+    notFound();
+  }
+
+  const modelUrl = modelRoute({
+    owner,
+    slug,
+  });
+
+  return (
+    <div>
+      <div className="border-b border-gray-300">
+        <div className="space-y-1 px-8 pb-4 pt-4">
+          <div className="text-sm">
+            <span className="text-slate-500">Version from</span>{" "}
+            {format(revision.createdAt, commonDateFormat)}.{" "}
+            <span className="text-slate-500">Squiggle</span>{" "}
+            {revision.squiggleSnippet.version}.
+          </div>
+          <div className="text-sm">
+            <StyledLink href={modelUrl}>Go to latest version</StyledLink>
+          </div>
+          {revision.comment ? (
+            <div className="flex items-center gap-2">
+              <CommentIcon size={14} className="text-slate-400" />
+              <div className="text-sm">{revision.comment}</div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+      <ModelRevisionView revision={revision} />
+    </div>
+  );
 }

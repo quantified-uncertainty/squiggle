@@ -6,6 +6,11 @@ import { prisma } from "@/prisma";
 import { controlsOwnerId } from "@/server/owners/auth";
 
 import { modelWhereHasAccess } from "./authHelpers";
+import {
+  ModelRevisionFullDTO,
+  modelRevisionFullToDTO,
+  selectModelRevisionFull,
+} from "./fullRevision";
 
 const select = {
   id: true,
@@ -17,35 +22,7 @@ const select = {
     },
   },
   currentRevision: {
-    select: {
-      contentType: true,
-      squiggleSnippet: {
-        select: {
-          id: true,
-          code: true,
-          version: true,
-          seed: true,
-          autorunMode: true,
-          sampleCount: true,
-          xyPointLength: true,
-        },
-      },
-      relativeValuesExports: {
-        select: {
-          variableName: true,
-          definition: {
-            select: {
-              slug: true,
-              owner: {
-                select: {
-                  slug: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+    select: selectModelRevisionFull,
   },
 } satisfies Prisma.ModelSelect;
 
@@ -60,27 +37,7 @@ export type ModelFullDTO = {
     id: string;
     slug: string;
   };
-  currentRevision: {
-    contentType: "SquiggleSnippet";
-    squiggleSnippet: {
-      id: string;
-      code: string;
-      version: string;
-      seed: string;
-      autorunMode: boolean | null;
-      sampleCount: number | null;
-      xyPointLength: number | null;
-    };
-    relativeValuesExports: {
-      variableName: string;
-      definition: {
-        slug: string;
-        owner: {
-          slug: string;
-        };
-      };
-    }[];
-  };
+  currentRevision: ModelRevisionFullDTO;
   isEditable: boolean;
   lastBuildSeconds: number | null;
 };
@@ -130,11 +87,7 @@ async function toDTO(row: Row): Promise<ModelFullDTO> {
       id: row.owner.id,
       slug: row.owner.slug,
     },
-    currentRevision: {
-      contentType: row.currentRevision.contentType,
-      squiggleSnippet: row.currentRevision.squiggleSnippet,
-      relativeValuesExports: row.currentRevision.relativeValuesExports,
-    },
+    currentRevision: await modelRevisionFullToDTO(row.currentRevision),
     isEditable: await controlsOwnerId(row.owner.id),
     lastBuildSeconds,
   };

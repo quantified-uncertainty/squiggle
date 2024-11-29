@@ -139,6 +139,9 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
   const router = useRouter();
 
   const content = revision.squiggleSnippet;
+  if (!content) {
+    throw new Error("Unknown model type");
+  }
 
   const seed = content.seed;
 

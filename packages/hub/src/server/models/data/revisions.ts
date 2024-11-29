@@ -101,7 +101,6 @@ export async function loadModelRevisions(params: {
   const limit = params.limit ?? 20;
 
   const dbRevisions = await prisma.modelRevision.findMany({
-    select,
     where: {
       model: {
         slug: params.slug,
@@ -110,6 +109,8 @@ export async function loadModelRevisions(params: {
       },
     },
     cursor: params.cursor ? { id: params.cursor } : undefined,
+    orderBy: { createdAt: "desc" },
+    select,
     take: limit + 1,
   });
 

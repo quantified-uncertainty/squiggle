@@ -64,6 +64,7 @@ export async function loadGroupMembers(params: {
       },
     },
     select,
+    orderBy: { createdAt: "asc" },
     take: limit + 1,
   });
 
