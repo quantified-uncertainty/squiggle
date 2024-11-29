@@ -1,15 +1,10 @@
+import { MembershipRole } from "@prisma/client";
 import { FC } from "react";
-import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { MutationAction } from "@/components/ui/MutationAction";
-
-import { SetMembershipRoleAction_Group$key } from "@/__generated__/SetMembershipRoleAction_Group.graphql";
-import { SetMembershipRoleAction_Membership$key } from "@/__generated__/SetMembershipRoleAction_Membership.graphql";
-import {
-  MembershipRole,
-  SetMembershipRoleActionMutation,
-} from "@/__generated__/SetMembershipRoleActionMutation.graphql";
+import { ServerActionDropdownAction } from "@/components/ui/ServerActionDropdownAction";
+import { updateMembershipRoleAction } from "@/server/groups/actions/updateMembershipRoleAction";
+import { GroupMemberDTO } from "@/server/groups/data/members";
 
 const Mutation = graphql`
   mutation SetMembershipRoleActionMutation(
@@ -31,56 +26,29 @@ const Mutation = graphql`
 `;
 
 type Props = {
-  groupRef: SetMembershipRoleAction_Group$key;
-  membershipRef: SetMembershipRoleAction_Membership$key;
+  membership: GroupMemberDTO;
+  groupSlug: string;
   role: MembershipRole;
-  close: () => void;
+  update: (membership: GroupMemberDTO) => void;
 };
 
 export const SetMembershipRoleAction: FC<Props> = ({
-  groupRef,
-  membershipRef,
+  membership,
+  groupSlug,
   role,
-  close,
+  update,
 }) => {
-  const group = useFragment(
-    graphql`
-      fragment SetMembershipRoleAction_Group on Group {
-        id
-        slug
-      }
-    `,
-    groupRef
-  );
-
-  const membership = useFragment(
-    graphql`
-      fragment SetMembershipRoleAction_Membership on UserGroupMembership {
-        id
-        user {
-          slug
-        }
-      }
-    `,
-    membershipRef
-  );
-
   return (
-    <MutationAction<
-      SetMembershipRoleActionMutation,
-      "UpdateMembershipRoleResult"
-    >
-      mutation={Mutation}
-      variables={{
-        input: {
+    <ServerActionDropdownAction
+      act={async () => {
+        const newMembership = await updateMembershipRoleAction({
           user: membership.user.slug,
-          group: group.slug,
+          group: groupSlug,
           role,
-        },
+        });
+        update(newMembership);
       }}
-      expectedTypename="UpdateMembershipRoleResult"
       title={role}
-      close={close}
     />
   );
 };

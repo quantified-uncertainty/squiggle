@@ -43,7 +43,6 @@ export const UpdateModelSlugAction: FC<Props> = ({ model, close }) => {
       submitText="Save"
       modalTitle={`Rename ${model.owner.slug}/${model.slug}`}
       initialFocus="slug"
-      close={close}
     >
       {() => (
         <div>

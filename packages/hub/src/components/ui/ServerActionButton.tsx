@@ -17,6 +17,7 @@ export function ServerActionButton({
   action: () => Promise<any>;
   title: string;
 } & Pick<Parameters<typeof Button>[0], "theme" | "size">): ReactNode {
+  // TODO - pending based on invariant, similar to ServerActionDropdownAction
   const [, formAction, isPending] = useActionState(async () => {
     await action();
   }, undefined);

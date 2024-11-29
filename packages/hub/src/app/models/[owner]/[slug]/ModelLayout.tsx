@@ -15,8 +15,8 @@ import { modelRevisionsRoute, modelRoute } from "@/routes";
 import { ModelCardDTO } from "@/server/models/data/card";
 import { getExportedVariableNames } from "@/server/models/utils";
 
-import { ModelAccessControls } from "./ModelAccessControls";
 import { ModelEntityNodes } from "./ModelEntityNodes";
+import { ModelPrivacyControls } from "./ModelPrivacyControls";
 import { ModelSettingsButton } from "./ModelSettingsButton";
 import { useFixModelUrlCasing } from "./useFixModelUrlCasing";
 
@@ -65,7 +65,9 @@ export const ModelLayout: FC<
     <EntityLayout
       nodes={<ModelEntityNodes owner={model.owner} />}
       isFluid={true}
-      headerLeft={<ModelAccessControls model={model} isEditable={isEditable} />}
+      headerLeft={
+        <ModelPrivacyControls model={model} isEditable={isEditable} />
+      }
       headerRight={
         <EntityTab.List>
           <EntityTab.Link

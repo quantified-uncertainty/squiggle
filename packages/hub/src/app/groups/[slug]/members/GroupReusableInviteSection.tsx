@@ -1,34 +1,24 @@
+"use client";
 import { FC, useEffect, useMemo, useState } from "react";
 import Skeleton from "react-loading-skeleton";
-import { useFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
 import { ClipboardCopyIcon, TextTooltip, useToast } from "@quri/ui";
 
 import { H2 } from "@/components/ui/Headers";
-import { MutationButton } from "@/components/ui/MutationButton";
+import { ServerActionButton } from "@/components/ui/ServerActionButton";
 import { groupInviteLink } from "@/routes";
-
-import { GroupReusableInviteSection$key } from "@/__generated__/GroupReusableInviteSection.graphql";
-import { GroupReusableInviteSection_CreateMutation } from "@/__generated__/GroupReusableInviteSection_CreateMutation.graphql";
-import { GroupReusableInviteSection_DeleteMutation } from "@/__generated__/GroupReusableInviteSection_DeleteMutation.graphql";
+import { createReusableGroupInviteTokenAction } from "@/server/groups/actions/createReusableGroupInviteTokenAction";
+import { deleteReusableGroupInviteTokenAction } from "@/server/groups/actions/deleteReusableGroupInviteTokenAction";
 
 type Props = {
-  groupRef: GroupReusableInviteSection$key;
+  groupSlug: string;
+  reusableInviteToken: string | null;
 };
 
-export const GroupReusableInviteSection: FC<Props> = ({ groupRef }) => {
-  const group = useFragment(
-    graphql`
-      fragment GroupReusableInviteSection on Group {
-        id
-        slug
-        reusableInviteToken
-      }
-    `,
-    groupRef
-  );
-
+export const GroupReusableInviteSection: FC<Props> = ({
+  groupSlug,
+  reusableInviteToken,
+}) => {
   const toast = useToast();
 
   // Necessary for SSR and to avoid hydration errors
@@ -36,12 +26,12 @@ export const GroupReusableInviteSection: FC<Props> = ({ groupRef }) => {
   useEffect(() => setOrigin(window.location.origin), []);
 
   const inviteLink = useMemo(() => {
-    if (!group.reusableInviteToken) {
+    if (!reusableInviteToken) {
       return undefined;
     }
     const routeArgs = {
-      groupSlug: group.slug,
-      inviteToken: group.reusableInviteToken,
+      groupSlug: groupSlug,
+      inviteToken: reusableInviteToken,
     };
     const fullLink = groupInviteLink(routeArgs);
     const blurredLink = groupInviteLink({ ...routeArgs, blur: true });
@@ -50,7 +40,7 @@ export const GroupReusableInviteSection: FC<Props> = ({ groupRef }) => {
       full: `${origin}${fullLink}`,
       blurred: `${origin}${blurredLink}`,
     };
-  }, [group.reusableInviteToken, group.slug, origin]);
+  }, [reusableInviteToken, groupSlug, origin]);
 
   const copy = () => {
     if (!inviteLink) {
@@ -82,63 +72,19 @@ export const GroupReusableInviteSection: FC<Props> = ({ groupRef }) => {
         )
       ) : null}
       <div className="mt-4 flex gap-2">
-        <MutationButton<
-          GroupReusableInviteSection_CreateMutation,
-          "CreateReusableGroupInviteTokenResult"
-        >
-          mutation={graphql`
-            mutation GroupReusableInviteSection_CreateMutation(
-              $input: MutationCreateReusableGroupInviteTokenInput!
-            ) {
-              result: createReusableGroupInviteToken(input: $input) {
-                __typename
-                ... on BaseError {
-                  message
-                }
-                ... on CreateReusableGroupInviteTokenResult {
-                  group {
-                    reusableInviteToken
-                  }
-                }
-              }
-            }
-          `}
-          expectedTypename="CreateReusableGroupInviteTokenResult"
-          variables={{
-            input: { slug: group.slug },
-          }}
+        <ServerActionButton
+          action={() =>
+            createReusableGroupInviteTokenAction({ slug: groupSlug })
+          }
           title={
-            group.reusableInviteToken
-              ? "Reset Invite Link"
-              : "Create Invite Link"
+            reusableInviteToken ? "Reset Invite Link" : "Create Invite Link"
           }
         />
-        {group.reusableInviteToken ? (
-          <MutationButton<
-            GroupReusableInviteSection_DeleteMutation,
-            "DeleteReusableGroupInviteTokenResult"
-          >
-            mutation={graphql`
-              mutation GroupReusableInviteSection_DeleteMutation(
-                $input: MutationDeleteReusableGroupInviteTokenInput!
-              ) {
-                result: deleteReusableGroupInviteToken(input: $input) {
-                  __typename
-                  ... on BaseError {
-                    message
-                  }
-                  ... on DeleteReusableGroupInviteTokenResult {
-                    group {
-                      reusableInviteToken
-                    }
-                  }
-                }
-              }
-            `}
-            expectedTypename="DeleteReusableGroupInviteTokenResult"
-            variables={{
-              input: { slug: group.slug },
-            }}
+        {reusableInviteToken ? (
+          <ServerActionButton
+            action={() =>
+              deleteReusableGroupInviteTokenAction({ slug: groupSlug })
+            }
             title="Delete Invite Link"
           />
         ) : null}

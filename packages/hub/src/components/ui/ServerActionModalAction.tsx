@@ -1,7 +1,11 @@
 import { FC, PropsWithChildren, ReactNode } from "react";
 import { FieldPath, FieldValues } from "react-hook-form";
 
-import { DropdownMenuModalActionItem, IconProps } from "@quri/ui";
+import {
+  DropdownMenuModalActionItem,
+  IconProps,
+  useCloseDropdown,
+} from "@quri/ui";
 
 import { FormModal } from "@/components/ui/FormModal";
 import { useServerActionForm } from "@/hooks/useServerActionForm";
@@ -19,7 +23,6 @@ type CommonProps<
 > & {
   initialFocus?: FieldPath<TFormShape>;
   submitText: string;
-  close: () => void;
 };
 
 function ServerActionFormModal<
@@ -32,12 +35,14 @@ function ServerActionFormModal<
   submitText,
   action,
   onCompleted,
-  close,
   title,
   children,
 }: PropsWithChildren<CommonProps<TFormShape, Action>> & {
   title: string;
 }): ReactNode {
+  // Note that we use the same `close` that's responsible for closing the dropdown.
+  const close = useCloseDropdown();
+
   const { form, onSubmit, inFlight } = useServerActionForm<TFormShape, Action>({
     mode: "onChange",
     defaultValues,
@@ -85,7 +90,6 @@ export function ServerActionModalAction<
       icon={icon}
       render={() => (
         <ServerActionFormModal<TFormShape, Action>
-          // Note that we pass the same `close` that's responsible for closing the dropdown.
           {...modalProps}
           title={modalTitle}
         >

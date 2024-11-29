@@ -7,7 +7,7 @@ import { getSessionUserOrRedirect } from "@/server/users/auth";
 
 import { NewModel } from "./NewModel";
 
-export default async function OuterNewModelPage({
+export default async function NewModelPage({
   searchParams,
 }: {
   searchParams: Promise<{

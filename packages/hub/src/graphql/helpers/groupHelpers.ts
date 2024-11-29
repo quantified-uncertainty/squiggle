@@ -91,32 +91,3 @@ export async function getMyMembership({
   });
   return myMembership;
 }
-
-// also returns true if user is not an admin
-export async function groupHasAdminsBesidesUser({
-  groupSlug,
-  userSlug,
-}: {
-  groupSlug: string;
-  userSlug: string;
-}) {
-  return Boolean(
-    await prisma.userGroupMembership.count({
-      where: {
-        group: {
-          asOwner: {
-            slug: groupSlug,
-          },
-        },
-        NOT: {
-          user: {
-            asOwner: {
-              slug: userSlug,
-            },
-          },
-        },
-        role: "Admin",
-      },
-    })
-  );
-}

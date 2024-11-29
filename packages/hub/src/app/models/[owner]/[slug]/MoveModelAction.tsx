@@ -47,7 +47,6 @@ export const MoveModelAction: FC<Props> = ({ model, close }) => {
       }}
       icon={RightArrowIcon}
       action={moveModelAction}
-      close={close}
       initialFocus="owner"
       blockOnSuccess
     >
