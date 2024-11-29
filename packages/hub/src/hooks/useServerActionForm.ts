@@ -14,6 +14,7 @@ import { useToast } from "@quri/ui";
 export function useServerActionForm<
   FormShape extends FieldValues = never,
   const Action extends (input: any) => Promise<any> = never,
+  ExtraData extends Record<string, any> = Record<string, never>,
   ActionVariables = Parameters<Action>[0],
   ActionResult = Awaited<ReturnType<Action>>,
 >({
@@ -28,7 +29,10 @@ export function useServerActionForm<
   // See also: https://stackoverflow.com/questions/72111571/typescript-exact-return-type-of-function
   // This could be solved by converting the return type to generic, but I expect that the lack of partial type parameters in TypeScript
   // would get in the way, so I won't even try.
-  formDataToVariables: (data: FormShape) => ActionVariables;
+  formDataToVariables: (
+    data: FormShape,
+    extraData?: ExtraData
+  ) => ActionVariables;
   action: (input: ActionVariables) => Promise<ActionResult>;
   onCompleted?: (result: ActionResult) => void | Promise<void>;
   blockOnSuccess?: boolean;
@@ -38,11 +42,11 @@ export function useServerActionForm<
   const toast = useToast();
 
   const onSubmit = useCallback(
-    (event?: BaseSyntheticEvent) =>
+    (event?: BaseSyntheticEvent, extraData?: ExtraData) =>
       form.handleSubmit(async (formData) => {
         // TODO - transition?
         try {
-          const result = await action(formDataToVariables(formData));
+          const result = await action(formDataToVariables(formData, extraData));
           onCompleted?.(result);
         } catch (error) {
           toast(String(error), "error");

@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { graphql } from "react-relay";
 
 import {
   ButtonWithDropdown,
@@ -21,6 +20,7 @@ import {
   LinkIcon,
   TextAreaFormField,
   TextTooltip,
+  useToast,
 } from "@quri/ui";
 import {
   checkSquiggleVersion,
@@ -40,8 +40,9 @@ import { ReactRoot } from "@/components/ReactRoot";
 import { FormModal } from "@/components/ui/FormModal";
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/constants";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
-import { useMutationForm } from "@/hooks/useMutationForm";
+import { useServerActionForm } from "@/hooks/useServerActionForm";
 import { modelRoute, variableRoute } from "@/routes";
+import { updateSquiggleSnippetModelAction } from "@/server/models/actions/updateSquiggleSnippetModelAction";
 import { ModelFullDTO } from "@/server/models/data/full";
 import { ImportTooltip } from "@/squiggle/components/ImportTooltip";
 import {
@@ -57,14 +58,15 @@ import {
   useDraftLocator,
 } from "./SquiggleSnippetDraftDialog";
 
-import {
-  EditSquiggleSnippetModelMutation,
-  RelativeValuesExportInput,
-} from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
-
 export type SquiggleSnippetFormShape = {
   code: string;
-  relativeValuesExports: RelativeValuesExportInput[];
+  relativeValuesExports: {
+    variableName: string;
+    definition: {
+      owner: string;
+      slug: string;
+    };
+  }[];
 };
 
 type OnSubmit = (
@@ -143,6 +145,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     throw new Error("Unknown model type");
   }
 
+  const toast = useToast();
+
   const seed = content.seed;
 
   const initialFormValues: SquiggleSnippetFormShape = useMemo(() => {
@@ -158,51 +162,32 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     };
   }, [content, revision.relativeValuesExports]);
 
-  const { form, onSubmit, inFlight } = useMutationForm<
+  const { form, onSubmit, inFlight } = useServerActionForm<
     SquiggleSnippetFormShape,
-    EditSquiggleSnippetModelMutation,
-    "UpdateSquiggleSnippetResult",
+    typeof updateSquiggleSnippetModelAction,
     { comment: string }
   >({
     defaultValues: initialFormValues,
-    mutation: graphql`
-      mutation EditSquiggleSnippetModelMutation(
-        $input: MutationUpdateSquiggleSnippetModelInput!
-      ) {
-        result: updateSquiggleSnippetModel(input: $input) {
-          __typename
-          ... on BaseError {
-            message
-          }
-          ... on UpdateSquiggleSnippetResult {
-            model {
-              ...EditSquiggleSnippetModel
-            }
-          }
-        }
-      }
-    `,
-    expectedTypename: "UpdateSquiggleSnippetResult",
-    formDataToVariables: (formData, extraData) => ({
-      input: {
-        content: {
-          code: formData.code,
-          version,
-          seed: seed,
-          autorunMode: content.autorunMode,
-          sampleCount: content.sampleCount,
-          xyPointLength: content.xyPointLength,
-        },
-        relativeValuesExports: formData.relativeValuesExports,
-        comment: extraData?.comment,
-        slug: model.slug,
-        owner: model.owner.slug,
-      },
-    }),
-    confirmation: "Saved",
-    onCompleted() {
+    action: async (variables) => {
+      const result = await updateSquiggleSnippetModelAction(variables);
+      toast("Saved", "confirmation");
       draftUtils.discard(draftLocator);
+      return result;
     },
+    formDataToVariables: (formData, extraData) => ({
+      content: {
+        code: formData.code,
+        version,
+        seed: seed,
+        autorunMode: content.autorunMode,
+        sampleCount: content.sampleCount,
+        xyPointLength: content.xyPointLength,
+      },
+      relativeValuesExports: formData.relativeValuesExports,
+      comment: extraData?.comment,
+      slug: model.slug,
+      owner: model.owner.slug,
+    }),
   });
 
   // could version picker be part of the form?

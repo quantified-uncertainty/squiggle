@@ -10,9 +10,8 @@ import "./queries/userByUsername";
 import "./mutations/adminUpdateModelVersion";
 import "../server/search/actions/adminRebuildSearchIndexAction";
 import "../server/relative-values/actions/buildRelativeValuesCacheAction";
-import "./mutations/cancelGroupInvite";
 import "../server/relative-values/actions/clearRelativeValuesCacheAction";
-import "./mutations/updateSquiggleSnippetModel";
+import "../server/models/actions/updateSquiggleSnippetModelAction";
 
 import { builder } from "./builder";
 
