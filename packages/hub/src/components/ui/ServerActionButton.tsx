@@ -1,6 +1,7 @@
+"use client";
 import { ReactNode, useActionState } from "react";
 
-import { Button } from "@quri/ui";
+import { Button, useToast } from "@quri/ui";
 
 /*
  * Props for this component include:
@@ -13,13 +14,19 @@ export function ServerActionButton({
   // button props
   theme,
   size,
+  confirmation,
 }: {
   action: () => Promise<any>;
   title: string;
+  confirmation?: string;
 } & Pick<Parameters<typeof Button>[0], "theme" | "size">): ReactNode {
+  const toast = useToast();
   // TODO - pending based on invariant, similar to ServerActionDropdownAction
   const [, formAction, isPending] = useActionState(async () => {
     await action();
+    if (confirmation) {
+      toast(confirmation, "confirmation");
+    }
   }, undefined);
 
   return (

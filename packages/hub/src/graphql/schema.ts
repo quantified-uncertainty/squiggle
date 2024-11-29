@@ -8,7 +8,7 @@ import "./queries/relativeValuesDefinition";
 import "./queries/relativeValuesDefinitions";
 import "./queries/userByUsername";
 import "./mutations/adminUpdateModelVersion";
-import "./mutations/adminRebuildSearchIndex";
+import "../server/search/actions/adminRebuildSearchIndexAction";
 import "./mutations/buildRelativeValuesCache";
 import "./mutations/cancelGroupInvite";
 import "./mutations/clearRelativeValuesCache";
