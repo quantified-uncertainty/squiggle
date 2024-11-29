@@ -1,31 +1,13 @@
-import { graphql, useFragment } from "react-relay";
-
-import { SearchResultUser$key } from "@/__generated__/SearchResultUser.graphql";
+import { SearchResultComponent } from "./SearchResult";
 import { SearchResultBox } from "./SearchResultBox";
-import { SearchResultComponent, useEdgeFragment } from "./SearchResult";
-import { Snippet } from "./Snippet";
 import { SearchResultTitle } from "./SearchResultTItle";
+import { Snippet } from "./Snippet";
 
-export const SearchResultUser: SearchResultComponent<SearchResultUser$key> = ({
-  fragment,
-  edgeFragment,
-}) => {
-  const edge = useEdgeFragment(edgeFragment);
-
-  // Unused, because `SearchEdge.slugSnippet` is better than `User.username`.
-  useFragment(
-    graphql`
-      fragment SearchResultUser on User {
-        username
-      }
-    `,
-    fragment
-  );
-
+export const SearchResultUser: SearchResultComponent<"User"> = ({ item }) => {
   return (
     <SearchResultBox name="User">
       <SearchResultTitle>
-        <Snippet>{edge.slugSnippet}</Snippet>
+        <Snippet>{item.slugSnippet}</Snippet>
       </SearchResultTitle>
     </SearchResultBox>
   );

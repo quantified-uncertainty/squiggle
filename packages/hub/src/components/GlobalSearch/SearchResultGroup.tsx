@@ -1,31 +1,13 @@
-import { FC } from "react";
-import { graphql, useFragment } from "react-relay";
-
-import { SearchResultGroup$key } from "@/__generated__/SearchResultGroup.graphql";
+import { SearchResultComponent } from "./SearchResult";
 import { SearchResultBox } from "./SearchResultBox";
-import { SearchResultComponent, useEdgeFragment } from "./SearchResult";
-import { Snippet } from "./Snippet";
 import { SearchResultTitle } from "./SearchResultTItle";
+import { Snippet } from "./Snippet";
 
-export const SearchResultGroup: SearchResultComponent<
-  SearchResultGroup$key
-> = ({ fragment, edgeFragment }) => {
-  const edge = useEdgeFragment(edgeFragment);
-
-  // Unused, because `SearchEdge.slugSnippet` is better than `Group.slug`.
-  useFragment(
-    graphql`
-      fragment SearchResultGroup on Group {
-        slug
-      }
-    `,
-    fragment
-  );
-
+export const SearchResultGroup: SearchResultComponent<"Group"> = ({ item }) => {
   return (
     <SearchResultBox name="Group">
       <SearchResultTitle>
-        <Snippet>{edge.slugSnippet}</Snippet>
+        <Snippet>{item.slugSnippet}</Snippet>
       </SearchResultTitle>
     </SearchResultBox>
   );

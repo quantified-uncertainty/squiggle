@@ -1,6 +1,10 @@
 import { FC } from "react";
-import { graphql, useFragment } from "react-relay";
 import { components, type OptionProps } from "react-select";
+
+import {
+  SearchResultItem,
+  TypedSearchResultItem,
+} from "@/app/api/search/schema";
 
 import { Link } from "../ui/Link";
 import { SearchOption } from "./";
@@ -9,65 +13,36 @@ import { SearchResultModel } from "./SearchResultModel";
 import { SearchResultRelativeValuesDefinition } from "./SearchResultRelativeValuesDefinition";
 import { SearchResultUser } from "./SearchResultUser";
 
-import { SearchResult$key } from "@/__generated__/SearchResult.graphql";
-import { SearchResultEdge$key } from "@/__generated__/SearchResultEdge.graphql";
-
-export function useEdgeFragment(edgeFragment: SearchResultEdge$key) {
-  return useFragment(
-    graphql`
-      fragment SearchResultEdge on SearchEdge {
-        slugSnippet
-        textSnippet
-      }
-    `,
-    edgeFragment
-  );
-}
-
-export type SearchResultComponent<T> = FC<{
-  fragment: T;
-  edgeFragment: SearchResultEdge$key;
+export type SearchResultComponent<
+  T extends SearchResultItem["object"]["type"],
+> = FC<{
+  item: TypedSearchResultItem<T>;
 }>;
 
 const OkSearchResult: FC<{
-  fragment: SearchResult$key;
-  edgeFragment: SearchResultEdge$key;
-}> = ({ fragment: objectRef, edgeFragment }) => {
-  const object = useFragment(
-    graphql`
-      fragment SearchResult on SearchableObject {
-        __typename
-        ...SearchResultModel
-        ...SearchResultRelativeValuesDefinition
-        ...SearchResultUser
-        ...SearchResultGroup
-      }
-    `,
-    objectRef
-  );
-
-  switch (object.__typename) {
+  item: SearchResultItem;
+}> = ({ item }) => {
+  switch (item.object.type) {
     case "Model":
       return (
-        <SearchResultModel fragment={object} edgeFragment={edgeFragment} />
+        <SearchResultModel item={item as TypedSearchResultItem<"Model">} />
       );
     case "RelativeValuesDefinition":
       return (
         <SearchResultRelativeValuesDefinition
-          fragment={object}
-          edgeFragment={edgeFragment}
+          item={item as TypedSearchResultItem<"RelativeValuesDefinition">}
         />
       );
     case "User":
-      return <SearchResultUser fragment={object} edgeFragment={edgeFragment} />;
+      return <SearchResultUser item={item as TypedSearchResultItem<"User">} />;
     case "Group":
       return (
-        <SearchResultGroup fragment={object} edgeFragment={edgeFragment} />
+        <SearchResultGroup item={item as TypedSearchResultItem<"Group">} />
       );
     default:
       return (
         <div>
-          Unknown result type: <strong>{object.__typename}</strong>
+          Unknown result type: <strong>{item.object satisfies never}</strong>
         </div>
       );
   }
@@ -78,14 +53,11 @@ export const SearchResult: FC<OptionProps<SearchOption, false>> = ({
   ...props
 }) => {
   switch (props.data.type) {
-    case "object":
+    case "ok":
       return (
         <components.Option {...props}>
-          <Link href={props.data.link}>
-            <OkSearchResult
-              fragment={props.data.object}
-              edgeFragment={props.data.edge}
-            />
+          <Link href={props.data.item.link}>
+            <OkSearchResult item={props.data.item} />
           </Link>
         </components.Option>
       );

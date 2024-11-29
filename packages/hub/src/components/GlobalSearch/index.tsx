@@ -2,7 +2,6 @@
 import { clsx } from "clsx";
 import { useRouter } from "next/navigation";
 import { FC, useRef } from "react";
-import { fetchQuery, graphql, useRelayEnvironment } from "react-relay";
 import {
   components,
   DropdownIndicatorProps,
@@ -12,43 +11,14 @@ import AsyncSelect from "react-select/async";
 
 import { SearchIcon, useGlobalShortcut } from "@quri/ui";
 
+import { SearchResultItem, searchResultSchema } from "@/app/api/search/schema";
+
 import { SearchResult } from "./SearchResult";
-
-import { GlobalSearchQuery } from "@/__generated__/GlobalSearchQuery.graphql";
-import { SearchResult$key } from "@/__generated__/SearchResult.graphql";
-import { SearchResultEdge$key } from "@/__generated__/SearchResultEdge.graphql";
-
-export const Query = graphql`
-  query GlobalSearchQuery($text: String!) {
-    result: search(text: $text) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on QuerySearchConnection {
-        edges {
-          cursor
-          ...SearchResultEdge
-          node {
-            id
-            link
-            object {
-              ...SearchResult
-            }
-          }
-        }
-      }
-    }
-  }
-`;
 
 export type SearchOption =
   | {
-      type: "object";
-      id: string;
-      link: string;
-      edge: SearchResultEdge$key;
-      object: SearchResult$key;
+      type: "ok";
+      item: SearchResultItem;
     }
   | {
       type: "error";
@@ -64,36 +34,27 @@ const DropdownIndicator = (props: DropdownIndicatorProps<SearchOption>) => {
 };
 
 export const GlobalSearch: FC = () => {
-  const environment = useRelayEnvironment();
   const router = useRouter();
 
   const loadOptions = async (text: string): Promise<SearchOption[]> => {
-    const result = await fetchQuery<GlobalSearchQuery>(environment, Query, {
-      text,
-    }).toPromise();
-    if (!result) return [];
-    if (result.result.__typename === "BaseError") {
+    try {
+      const result = await fetch(
+        `/api/search?${new URLSearchParams({ query: text })}`
+      ).then((r) => r.json());
+
+      const parsed = searchResultSchema.parse(result);
+      return parsed.map((item) => ({
+        type: "ok",
+        item,
+      }));
+    } catch (e) {
       return [
         {
           type: "error",
-          message: result.result.message,
-        },
-      ];
-    } else if (result.result.__typename !== "QuerySearchConnection") {
-      return [
-        {
-          type: "error",
-          message: "Unknown error",
+          message: String(e),
         },
       ];
     }
-    return result.result.edges.map((edge) => ({
-      type: "object",
-      id: edge.node.id,
-      link: edge.node.link,
-      edge,
-      object: edge.node.object,
-    }));
   };
 
   // https://github.com/JedWatson/react-select/discussions/4669#discussioncomment-1994888
@@ -124,17 +85,17 @@ export const GlobalSearch: FC = () => {
       openMenuOnClick={false}
       placeholder="Search..."
       getOptionValue={(option) =>
-        option.type === "error" ? "error" : option.id
+        option.type === "error" ? "error" : option.item.id
       }
       getOptionLabel={(option) =>
-        option.type === "error" ? "error" : option.id
+        option.type === "error" ? "error" : option.item.id
       }
       onKeyDown={(event) => {
         event.key === "Escape" && ref.current?.blur();
       }}
       onChange={(option) => {
-        if (option?.type === "object") {
-          router.push(option.link);
+        if (option?.type === "ok") {
+          router.push(option.item.link);
         }
       }}
       controlShouldRenderValue={false}
