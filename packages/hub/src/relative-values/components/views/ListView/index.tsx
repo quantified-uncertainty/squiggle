@@ -19,11 +19,9 @@ import {
 import { ColumnHeader } from "./ColumnHeader";
 import { ItemSideBar } from "./sidebar";
 
-import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
-
 type TableProps = {
   model: ModelEvaluator;
-  items: RelativeValuesDefinitionRevision$data["items"];
+  items: Item[];
   showDescriptions: boolean;
   recommendedUnit: Item;
   sidebarItems: [Item, Item] | undefined;

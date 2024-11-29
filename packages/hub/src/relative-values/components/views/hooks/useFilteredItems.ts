@@ -1,14 +1,14 @@
 import { useMemo } from "react";
 
-import { AxisConfig } from "../RelativeValuesProvider";
+import { Item } from "@/relative-values/types";
 
-import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
+import { AxisConfig } from "../RelativeValuesProvider";
 
 export const useFilteredItems = ({
   items,
   config,
 }: {
-  items: RelativeValuesDefinitionRevision$data["items"];
+  items: Item[];
   config: AxisConfig;
 }) => {
   return useMemo(() => {

@@ -7,11 +7,10 @@ import { squiggleVersions } from "@quri/versioned-squiggle-components";
 
 import { prisma } from "@/prisma";
 import { modelRoute } from "@/routes";
-import { getSessionOrRedirect } from "@/server/users/auth";
+import { getSelf, getSessionOrRedirect } from "@/server/users/auth";
 import { makeServerAction, zSlug } from "@/server/utils";
 
 import { getWriteableModel } from "../../../graphql/helpers/modelHelpers";
-import { getSelf } from "../../../graphql/helpers/userHelpers";
 
 export const updateSquiggleSnippetModelAction = makeServerAction(
   z.object({
@@ -145,7 +144,6 @@ export const updateSquiggleSnippetModelAction = makeServerAction(
         data: {
           currentRevisionId: revision.id,
         },
-        // TODO - optimize with queryFromInfo, https://pothos-graphql.dev/docs/plugins/prisma#optimized-queries-without-tprismafield
       });
 
       return updatedModel;

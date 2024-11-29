@@ -2,13 +2,11 @@
 
 import { z } from "zod";
 
-import { rethrowOnConstraint } from "@/graphql/errors/common";
-import { getWriteableOwner } from "@/graphql/helpers/ownerHelpers";
-import { getSelf } from "@/graphql/helpers/userHelpers";
 import { prisma } from "@/prisma";
+import { getWriteableOwner } from "@/server/owners/auth";
 import { indexModelId } from "@/server/search/helpers";
-import { getSessionOrRedirect } from "@/server/users/auth";
-import { makeServerAction, zSlug } from "@/server/utils";
+import { getSelf, getSessionOrRedirect } from "@/server/users/auth";
+import { makeServerAction, rethrowOnConstraint, zSlug } from "@/server/utils";
 
 export const createSquiggleSnippetModelAction = makeServerAction(
   z.object({

@@ -10,7 +10,7 @@ import { modelForRelativeValuesExportRoute } from "@/routes";
 import { getSessionOrRedirect } from "@/server/users/auth";
 import { makeServerAction } from "@/server/utils";
 
-import { getRelativeValuesExportForWriteableModel } from "../../../graphql/types/RelativeValuesExport";
+import { getRelativeValuesExportForWriteableModel } from "../utils";
 
 export const buildRelativeValuesCacheAction = makeServerAction(
   z.object({

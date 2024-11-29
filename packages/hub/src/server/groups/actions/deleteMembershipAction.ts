@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { getMembership, getMyMembership } from "@/graphql/helpers/groupHelpers";
 import { prisma } from "@/prisma";
 import { groupMembersRoute } from "@/routes";
+import { getMembership, getMyMembership } from "@/server/groups/groupHelpers";
 import { getSessionOrRedirect } from "@/server/users/auth";
 import { makeServerAction, zSlug } from "@/server/utils";
 
@@ -22,7 +22,6 @@ export const deleteMembershipAction = makeServerAction(
     // somewhat repetitive compared to `updateMembershipRole`, but with slightly different error messages
     const myMembership = await getMyMembership({
       groupSlug: input.group,
-      session,
     });
 
     if (!myMembership) {

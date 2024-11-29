@@ -1,13 +1,10 @@
-import { fetchQuery, graphql } from "relay-runtime";
+import { z } from "zod";
 
 import { SqLinker, SqModule } from "@quri/squiggle-lang";
-import { versionSupportsSqProjectV2 } from "@quri/versioned-squiggle-components";
-
-import { getCurrentEnvironment } from "@/relay/environment";
-
-import { versionedSquigglePackages } from "../../../../versioned-components/dist/src/versionedSquigglePackages";
-
-import { linkerQuery } from "@/__generated__/linkerQuery.graphql";
+import {
+  versionedSquigglePackages,
+  versionSupportsSqProjectV2,
+} from "@quri/versioned-squiggle-components";
 
 type ParsedSourceId = {
   owner: string;
@@ -45,46 +42,18 @@ const linker: SqLinker = {
   async loadModule(sourceId: string) {
     const { owner, slug } = parseSourceId(sourceId);
 
-    const environment = getCurrentEnvironment();
+    const data = await fetch(
+      `/api/get-source?owner=${owner}&slug=${slug}`
+    ).then((res) => res.json());
 
-    const result = await fetchQuery<linkerQuery>(
-      environment,
-      graphql`
-        query linkerQuery($input: QueryModelInput!) {
-          model(input: $input) {
-            __typename
-            ... on Model {
-              id
-              currentRevision {
-                content {
-                  __typename
-                  ... on SquiggleSnippet {
-                    code
-                  }
-                }
-              }
-            }
-          }
-        }
-      `,
-      {
-        input: { owner, slug },
-      }
-      // toPromise is discouraged by Relay docs, but should be fine if we don't do any streaming
-    ).toPromise();
-
-    if (!result || result.model.__typename !== "Model") {
-      throw new Error(`Failed to fetch sources for ${sourceId}`);
-    }
-
-    const content = result.model.currentRevision.content;
-    if (content.__typename !== "SquiggleSnippet") {
-      throw new Error(`${sourceId} is not a SquiggleSnippet`);
+    const parsed = z.object({ code: z.string() }).safeParse(data);
+    if (!parsed.success) {
+      throw new Error(`Failed to fetch source for ${sourceId}`);
     }
 
     return new SqModule({
       name: sourceId,
-      code: content.code,
+      code: parsed.data.code,
     });
   },
 };

@@ -6,7 +6,7 @@ import { auth } from "@/auth";
 import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { H1 } from "@/components/ui/Headers";
-import { isRootEmail } from "@/graphql/helpers/userHelpers";
+import { isRootEmail } from "@/server/users/auth";
 
 export default async function AdminLayout({ children }: PropsWithChildren) {
   const session = await auth();

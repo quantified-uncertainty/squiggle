@@ -1,7 +1,5 @@
-/*
- * TODO - it would be good to `import "server-only"` here, as a precaution, but
- * this interferes with `tsx ./src/graphql/print-schema.ts`.
- */
+import "server-only";
+
 import { PrismaClient } from "@prisma/client";
 
 declare global {

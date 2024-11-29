@@ -1,6 +1,12 @@
-import { VariableRevisionInput } from "@/graphql/types/VariableRevision";
 import { prisma } from "@/prisma";
 import { runSquiggle } from "@/server/runSquiggle";
+
+export type VariableRevisionInput = {
+  variableName: string;
+  variableType: string;
+  title?: string;
+  docstring: string;
+};
 
 export type WorkerRunMessage = {
   type: "run";

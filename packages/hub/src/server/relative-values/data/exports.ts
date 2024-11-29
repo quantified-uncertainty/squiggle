@@ -1,8 +1,7 @@
 import { Prisma } from "@prisma/client";
 
-import { auth } from "@/auth";
-import { modelWhereHasAccess } from "@/graphql/helpers/modelHelpers";
 import { prisma } from "@/prisma";
+import { modelWhereHasAccess } from "@/server/models/data/authHelpers";
 
 import { RelativeValuesDefinitionFullDTO } from "./full";
 
@@ -55,7 +54,6 @@ function toDTO(
 export async function loadRelativeValuesExportCardsFromDefinition(
   definition: RelativeValuesDefinitionFullDTO
 ): Promise<RelativeValuesExportCardDTO[]> {
-  const session = await auth();
   const models = await prisma.model.findMany({
     where: {
       currentRevision: {
@@ -65,7 +63,7 @@ export async function loadRelativeValuesExportCardsFromDefinition(
           },
         },
       },
-      ...modelWhereHasAccess(session),
+      OR: await modelWhereHasAccess(),
     },
   });
 

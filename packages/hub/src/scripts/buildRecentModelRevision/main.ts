@@ -1,9 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { spawn } from "node:child_process";
 
-import { createVariableRevision } from "@/graphql/types/VariableRevision";
-
-import { NotFoundError } from "../../graphql/errors/NotFoundError";
+import { createVariableRevision } from "./createVariableRevision";
 import { WorkerOutput, WorkerRunMessage } from "./worker";
 
 const TIMEOUT_SECONDS = 60; // 60 seconds
@@ -104,7 +102,7 @@ async function buildRecentModelVersion(): Promise<void> {
     }
 
     if (!model?.currentRevisionId || !model.currentRevision?.squiggleSnippet) {
-      throw new NotFoundError(
+      throw new Error(
         `Unexpected Error: Model revision didn't have needed information. This should never happen.`
       );
     }

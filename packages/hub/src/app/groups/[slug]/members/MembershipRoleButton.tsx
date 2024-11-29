@@ -1,3 +1,4 @@
+import { type MembershipRole } from "@prisma/client";
 import { FC } from "react";
 
 import { Button, Dropdown, DropdownMenu } from "@quri/ui";
@@ -5,8 +6,6 @@ import { Button, Dropdown, DropdownMenu } from "@quri/ui";
 import { GroupMemberDTO } from "@/server/groups/data/members";
 
 import { SetMembershipRoleAction } from "./SetMembershipRoleAction";
-
-import { MembershipRole } from "@/__generated__/MembershipRoleButton_Membership.graphql";
 
 type Props = {
   groupSlug: string;

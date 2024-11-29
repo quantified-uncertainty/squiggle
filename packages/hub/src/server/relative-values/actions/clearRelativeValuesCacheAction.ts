@@ -5,9 +5,9 @@ import { z } from "zod";
 import { prisma } from "@/prisma";
 import { modelForRelativeValuesExportRoute } from "@/routes";
 
-import { getRelativeValuesExportForWriteableModel } from "../../../graphql/types/RelativeValuesExport";
 import { getSessionOrRedirect } from "../../users/auth";
 import { makeServerAction } from "../../utils";
+import { getRelativeValuesExportForWriteableModel } from "../utils";
 
 export const clearRelativeValuesCacheAction = makeServerAction(
   z.object({

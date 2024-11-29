@@ -3,8 +3,8 @@
 import { z } from "zod";
 
 import { getWriteableModel } from "@/graphql/helpers/modelHelpers";
-import { getWriteableOwnerBySlug } from "@/graphql/helpers/ownerHelpers";
 import { prisma } from "@/prisma";
+import { getWriteableOwnerBySlug } from "@/server/owners/auth";
 import { getSessionOrRedirect } from "@/server/users/auth";
 import { makeServerAction, zSlug } from "@/server/utils";
 

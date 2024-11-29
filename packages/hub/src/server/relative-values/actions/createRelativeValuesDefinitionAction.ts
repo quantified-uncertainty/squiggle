@@ -1,7 +1,7 @@
 "use server";
 
-import { getWriteableOwnerBySlug } from "@/graphql/helpers/ownerHelpers";
 import { prisma } from "@/prisma";
+import { getWriteableOwnerBySlug } from "@/server/owners/auth";
 import { indexDefinitionId } from "@/server/search/helpers";
 import { getSessionOrRedirect } from "@/server/users/auth";
 import { makeServerAction, rethrowOnConstraint } from "@/server/utils";

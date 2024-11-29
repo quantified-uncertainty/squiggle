@@ -4,12 +4,12 @@ import { FC } from "react";
 import { LoadMore } from "@/components/LoadMore";
 import { usePaginator } from "@/hooks/usePaginator";
 import { Paginated } from "@/server/types";
-import { VariableCardData } from "@/server/variables/data";
+import { VariableCardDTO } from "@/server/variables/data/variableCards";
 
 import { VariableCard } from "./VariableCard";
 
 type Props = {
-  page: Paginated<VariableCardData>;
+  page: Paginated<VariableCardDTO>;
 };
 
 export const VariableList: FC<Props> = ({ page: initialPage }) => {

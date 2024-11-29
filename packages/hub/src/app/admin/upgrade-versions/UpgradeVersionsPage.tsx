@@ -1,6 +1,5 @@
 "use client";
 import { FC, useState } from "react";
-import { graphql } from "relay-runtime";
 
 import {
   Button,
@@ -11,14 +10,13 @@ import {
 import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
 
 import { H2 } from "@/components/ui/Headers";
-import { MutationButton } from "@/components/ui/MutationButton";
+import { ServerActionButton } from "@/components/ui/ServerActionButton";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { modelRoute } from "@/routes";
+import { adminUpdateModelVersionAction } from "@/server/models/actions/adminUpdateModelVersionAction";
 import { ModelByVersion } from "@/server/models/data/byVersion";
 
 import { UpgradeableModel } from "./UpgradeableModel";
-
-import { UpgradeVersionsPage_updateMutation } from "@/__generated__/UpgradeVersionsPage_updateMutation.graphql";
 
 const ModelList: FC<{
   models: ModelByVersion["models"];
@@ -43,36 +41,13 @@ const ModelList: FC<{
             {model.owner.slug}/{model.slug}
           </StyledLink>
         </div>
-        <MutationButton<
-          UpgradeVersionsPage_updateMutation,
-          "AdminUpdateModelVersionResult"
-        >
-          expectedTypename="AdminUpdateModelVersionResult"
-          mutation={graphql`
-            mutation UpgradeVersionsPage_updateMutation(
-              $input: MutationAdminUpdateModelVersionInput!
-            ) {
-              result: adminUpdateModelVersion(input: $input) {
-                __typename
-                ... on BaseError {
-                  message
-                }
-                ... on AdminUpdateModelVersionResult {
-                  model {
-                    ...EditSquiggleSnippetModel
-                  }
-                }
-              }
-            }
-          `}
-          updater={() => {
-            window.location.reload();
-          }}
-          variables={{
-            input: {
+        <ServerActionButton
+          action={async () => {
+            await adminUpdateModelVersionAction({
               modelId: model.id,
               version: defaultSquiggleVersion,
-            },
+            });
+            window.location.reload();
           }}
           title={`Upgrade to ${defaultSquiggleVersion}`}
           theme="primary"

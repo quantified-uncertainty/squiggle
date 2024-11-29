@@ -89,6 +89,21 @@ export function variableRoute({
   return `${modelUrl}/variables/${variableName}`;
 }
 
+export function variableRevisionRoute({
+  owner,
+  modelSlug,
+  variableName,
+  revisionId,
+}: {
+  owner: string;
+  modelSlug: string;
+  variableName: string;
+  revisionId: string;
+}) {
+  const modelUrl = modelRoute({ owner, slug: modelSlug });
+  return `${modelUrl}/variables/${variableName}/revisions/${revisionId}`;
+}
+
 export function modelViewRoute({
   username,
   slug,
@@ -181,22 +196,6 @@ export function newDefinitionRoute() {
 
 export function newGroupRoute() {
   return "/new/group";
-}
-
-export function graphqlAPIRoute() {
-  return graphqlPlaygroundRoute();
-}
-
-export function graphqlPlaygroundRoute(query?: string) {
-  const paramsString =
-    query === undefined
-      ? ""
-      : "?" +
-        new URLSearchParams({
-          query,
-        }).toString();
-
-  return `/api/graphql${paramsString}`;
 }
 
 export function aboutRoute() {

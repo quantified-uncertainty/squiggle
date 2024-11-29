@@ -66,8 +66,6 @@ Another note is that with the correct setup, out of `pnpm gen:prisma`, `pnpm gen
 
 ## Other notes
 
-[How to load GraphQL data in Next.js pages](/docs/relay-pages.md)
-
 [Common workflow for updating Prisma schema](https://www.prisma.io/docs/orm/prisma-migrate/workflows/prototyping-your-schema)
 
 # Deployment
@@ -79,13 +77,3 @@ Squiggle Hub is deployed on [Vercel](https://vercel.com/) automatically when the
 The production database is migrated by [this GitHub Action](https://github.com/quantified-uncertainty/squiggle/blob/main/.github/workflows/prisma-migrate-prod.yml).
 
 **Important: it should be invoked _before_ merging any PR that changes the schema.**
-
-## Debugging
-
-If you get an error like:
-
-```
-PothosSchemaError [GraphQLError]: Ref ObjectRef<ModelRevisionRun> has not been implemented
-```
-
-Make sure that any new files in `src/graphql/types` have been added to `src/schema.ts`, or something that references that.

@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 
 import { Button, TextFormField } from "@quri/ui";
 
+import { RelativeValuesExportInput } from "@/app/models/[owner]/[slug]/EditSquiggleSnippetModel";
 import {
   modelForRelativeValuesExportRoute,
   relativeValuesRoute,
@@ -16,8 +17,6 @@ import { H2 } from "../ui/Headers";
 import { StyledDefinitionLink } from "../ui/StyledDefinitionLink";
 import { StyledLink } from "../ui/StyledLink";
 import { SelectRelativeValuesDefinition } from "./SelectRelativeValuesDefinition";
-
-import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 
 const CreateVariableWithDefinitionModal: FC<{
   close: () => void;

@@ -2,10 +2,9 @@
 import { z } from "zod";
 
 import { prisma } from "@/prisma";
+import { getWriteableOwnerBySlug } from "@/server/owners/auth";
 import { getSessionOrRedirect } from "@/server/users/auth";
 import { makeServerAction, zSlug } from "@/server/utils";
-
-import { getWriteableOwnerBySlug } from "../../../graphql/helpers/ownerHelpers";
 
 export const deleteRelativeValuesDefinitionAction = makeServerAction(
   z.object({

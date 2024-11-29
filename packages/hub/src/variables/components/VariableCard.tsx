@@ -14,10 +14,10 @@ import {
 import { Link } from "@/components/ui/Link";
 import { exportTypeIcon } from "@/lib/typeIcon";
 import { modelRoute, variableRoute } from "@/routes";
-import { VariableCardData } from "@/server/variables/data";
+import { VariableCardDTO } from "@/server/variables/data/variableCards";
 
 type Props = {
-  variable: VariableCardData;
+  variable: VariableCardDTO;
 };
 
 export const VariableCard: FC<Props> = ({ variable }) => {

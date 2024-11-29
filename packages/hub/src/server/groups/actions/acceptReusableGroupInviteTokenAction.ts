@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { getMyMembership } from "@/graphql/helpers/groupHelpers";
 import { prisma } from "@/prisma";
 import { groupMembersRoute } from "@/routes";
+import { getMyMembership } from "@/server/groups/groupHelpers";
 import { getSessionOrRedirect } from "@/server/users/auth";
 import { makeServerAction, zSlug } from "@/server/utils";
 
@@ -34,7 +34,6 @@ export const acceptReusableGroupInviteTokenAction = makeServerAction(
 
     const myMembership = await getMyMembership({
       groupSlug: input.groupSlug,
-      session,
     });
     if (myMembership) {
       throw new Error("You're already a member of this group");

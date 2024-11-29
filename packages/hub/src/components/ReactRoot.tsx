@@ -1,11 +1,9 @@
 "use client";
 import { FC, PropsWithChildren } from "react";
-import { RelayEnvironmentProvider } from "react-relay";
 
 import { WithToasts } from "@quri/ui";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { getCurrentEnvironment } from "@/relay/environment";
 
 import { ExitConfirmationWrapper } from "./ExitConfirmationWrapper";
 
@@ -22,8 +20,6 @@ export const ReactRoot: FC<Props> = ({
   children,
   confirmationWrapper = true,
 }) => {
-  const environment = getCurrentEnvironment();
-
   let content = (
     <WithToasts>
       <ErrorBoundary>{children}</ErrorBoundary>
@@ -34,9 +30,5 @@ export const ReactRoot: FC<Props> = ({
     content = <ExitConfirmationWrapper>{content}</ExitConfirmationWrapper>;
   }
 
-  return (
-    <RelayEnvironmentProvider environment={environment}>
-      {content}
-    </RelayEnvironmentProvider>
-  );
+  return content;
 };

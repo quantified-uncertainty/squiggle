@@ -1,9 +1,9 @@
 "use server";
 import { prisma } from "@/prisma";
+import { getWriteableOwnerBySlug } from "@/server/owners/auth";
 import { getSessionOrRedirect } from "@/server/users/auth";
 import { makeServerAction } from "@/server/utils";
 
-import { getWriteableOwnerBySlug } from "../../../graphql/helpers/ownerHelpers";
 import { inputSchema, validateRelativeValuesDefinition } from "./common";
 
 export const updateRelativeValuesDefinitionAction = makeServerAction(

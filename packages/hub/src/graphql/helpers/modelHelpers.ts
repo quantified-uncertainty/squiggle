@@ -3,35 +3,6 @@ import { Session } from "next-auth";
 
 import { prisma } from "@/prisma";
 
-import { NotFoundError } from "../errors/NotFoundError";
-
-export function modelWhereHasAccess(
-  session: Session | null
-): Prisma.ModelWhereInput {
-  const orParts: Prisma.ModelWhereInput[] = [{ isPrivate: false }];
-  if (session) {
-    orParts.push({
-      owner: {
-        OR: [
-          {
-            user: { email: session.user.email },
-          },
-          {
-            group: {
-              memberships: {
-                some: {
-                  user: { email: session.user.email },
-                },
-              },
-            },
-          },
-        ],
-      },
-    });
-  }
-  return { OR: orParts };
-}
-
 export async function getWriteableModel({
   session,
   owner,
@@ -68,10 +39,8 @@ export async function getWriteableModel({
     include,
   });
   if (!model) {
-    // FIXME - this will happen if permissions are not sufficient
-    // It would be better to throw a custom PermissionError
-    // (Note that we should throw PermissionError only if model is readable, but not writeable; otherwise it should still be "Can't find")
-    throw new NotFoundError("Can't find model");
+    // this might happen if permissions are not sufficient
+    throw new Error("Can't find model");
   }
   return model;
 }

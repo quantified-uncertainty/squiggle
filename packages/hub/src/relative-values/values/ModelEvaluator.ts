@@ -8,6 +8,8 @@ import {
   SqStringValue,
 } from "@quri/squiggle-lang";
 
+import { RelativeValuesExportFullDTO } from "@/server/relative-values/data/fullExport";
+
 import { cartesianProduct } from "../lib/utils";
 import {
   RelativeValue,
@@ -15,8 +17,6 @@ import {
   RelativeValuesCacheRecord,
   relativeValueSchema,
 } from "./types";
-
-import { RelativeValuesExport$data } from "@/__generated__/RelativeValuesExport.graphql";
 
 export const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {
   return items
@@ -101,7 +101,7 @@ export class ModelEvaluator {
   static async create(
     modelCode: string,
     variableName: string,
-    cache?: RelativeValuesExport$data["cache"]
+    cache?: RelativeValuesExportFullDTO["cache"]
   ): Promise<result<ModelEvaluator, string>> {
     // TODO - versioned-components
     const project = new SqProject({

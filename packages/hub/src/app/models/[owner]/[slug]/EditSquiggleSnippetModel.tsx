@@ -69,6 +69,9 @@ export type SquiggleSnippetFormShape = {
   }[];
 };
 
+export type RelativeValuesExportInput =
+  SquiggleSnippetFormShape["relativeValuesExports"][number];
+
 type OnSubmit = (
   event?: BaseSyntheticEvent,
   extraData?: { comment: string }

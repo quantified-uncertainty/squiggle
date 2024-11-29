@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { loadVariableCards } from "@/server/variables/data";
+import { loadVariableCards } from "@/server/variables/data/variableCards";
 import { VariableList } from "@/variables/components/VariableList";
 
 type Props = {

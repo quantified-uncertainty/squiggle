@@ -6,10 +6,6 @@ generator client {
   previewFeatures = ["postgresqlExtensions", "fullTextSearch"]
 }
 
-generator pothos {
-  provider = "prisma-pothos-types"
-}
-
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")

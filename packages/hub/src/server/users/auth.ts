@@ -1,13 +1,9 @@
-/*
- * Helper functions for server-side React components
- * TODO: unify these with `graphql/helpers/*`
- * (see https://github.com/quantified-uncertainty/squiggle/issues/3154, we plan to migrate away from GraphQL)
- */
 import "server-only";
 
+import { User } from "@prisma/client";
+import { Session } from "next-auth";
 import { redirect } from "next/navigation";
 
-import { isRootEmail, isSignedIn } from "@/graphql/helpers/userHelpers";
 import { prisma } from "@/prisma";
 
 import { auth } from "../../auth";
@@ -26,7 +22,6 @@ export async function getSessionUserOrRedirect() {
 }
 
 export async function checkRootUser() {
-  // TODO - unify with src/graphql/helpers
   const sessionUser = await getSessionUserOrRedirect();
   const user = await prisma.user.findUniqueOrThrow({
     where: { email: sessionUser.email },
@@ -34,4 +29,31 @@ export async function checkRootUser() {
   if (!(user.email && user.emailVerified && isRootEmail(user.email))) {
     throw new Error("Unauthorized");
   }
+}
+
+export type SignedInSession = Session & {
+  user: NonNullable<Session["user"]> & { email: string };
+};
+
+export function isSignedIn(
+  session: Session | null
+): session is SignedInSession {
+  return Boolean(session?.user.email);
+}
+
+export async function getSelf(session: SignedInSession) {
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { email: session.user.email },
+  });
+  return user;
+}
+
+const ROOT_EMAILS = (process.env["ROOT_EMAILS"] ?? "").split(",");
+
+export function isRootEmail(email: string) {
+  return ROOT_EMAILS.includes(email);
+}
+
+export async function isRootUser(user: User) {
+  return Boolean(user.email && user.emailVerified && isRootEmail(user.email));
 }

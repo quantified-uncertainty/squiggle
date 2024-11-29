@@ -5,7 +5,7 @@ import { Paginated } from "@/server/types";
 
 import { modelWhereHasAccess } from "./authHelpers";
 
-const select = {
+export const selectModelRevision = {
   id: true,
   createdAt: true,
   author: {
@@ -37,9 +37,13 @@ const select = {
 
 type BuildStatus = "Success" | "Failure" | "Pending" | "Skipped";
 
-export type DbModelRevision = NonNullable<
+type DbModelRevision = NonNullable<
   Awaited<
-    ReturnType<typeof prisma.modelRevision.findFirst<{ select: typeof select }>>
+    ReturnType<
+      typeof prisma.modelRevision.findFirst<{
+        select: typeof selectModelRevision;
+      }>
+    >
   >
 >;
 
@@ -67,7 +71,9 @@ function buildToDTO(build: DbModelRevisionBuild): ModelRevisionBuildDTO {
   };
 }
 
-function revisionToDTO(dbRevision: DbModelRevision): ModelRevisionDTO {
+export function modelRevisionToDTO(
+  dbRevision: DbModelRevision
+): ModelRevisionDTO {
   const lastBuild = dbRevision.builds[0];
   let buildStatus: BuildStatus = "Pending";
   if (lastBuild) {
@@ -110,7 +116,7 @@ export async function loadModelRevisions(params: {
     },
     cursor: params.cursor ? { id: params.cursor } : undefined,
     orderBy: { createdAt: "desc" },
-    select,
+    select: selectModelRevision,
     take: limit + 1,
   });
 
@@ -121,7 +127,7 @@ export async function loadModelRevisions(params: {
     return loadModelRevisions({ ...params, cursor: nextCursor, limit });
   }
 
-  const revisions = dbRevisions.map(revisionToDTO);
+  const revisions = dbRevisions.map(modelRevisionToDTO);
 
   return {
     items: revisions.slice(0, limit),

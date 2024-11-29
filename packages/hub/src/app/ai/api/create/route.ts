@@ -8,9 +8,9 @@ import {
 } from "@quri/squiggle-ai/server";
 
 import { auth } from "@/auth";
-import { getSelf, isSignedIn } from "@/graphql/helpers/userHelpers";
 import { prisma } from "@/prisma";
 import { workflowToV2_0Json } from "@/server/ai/v2_0";
+import { getSelf, isSignedIn } from "@/server/users/auth";
 
 import { AiRequestBody, aiRequestBodySchema } from "../../utils";
 
