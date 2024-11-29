@@ -3,6 +3,10 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/prisma";
+import {
+  selectTypedOwner,
+  toTypedOwnerDTO,
+} from "@/server/owners/data/typedOwner";
 
 import { Paginated } from "../../types";
 import { modelWhereHasAccess } from "./authHelpers";
@@ -21,23 +25,10 @@ function toDTO(dbModel: DbModelCard) {
   }
   check(dbModel);
 
-  const ownerToGraphqlCompatible = (owner: {
-    id: string;
-    slug: string;
-    user: { id: string } | null;
-    group: { id: string } | null;
-  }) => {
-    const __typename = owner.user ? "User" : "Group";
-    return {
-      id: owner.id,
-      slug: owner.slug,
-      __typename,
-    };
-  };
-
   return {
+    // FIXME - process each field separately
     ...dbModel,
-    owner: ownerToGraphqlCompatible(dbModel.owner),
+    owner: toTypedOwnerDTO(dbModel.owner),
   };
 }
 
@@ -46,16 +37,7 @@ const select = {
   slug: true,
   updatedAt: true,
   owner: {
-    select: {
-      id: true,
-      slug: true,
-      user: {
-        select: { id: true },
-      },
-      group: {
-        select: { id: true },
-      },
-    },
+    select: selectTypedOwner,
   },
   isPrivate: true,
   variables: {
@@ -71,6 +53,7 @@ const select = {
   },
   currentRevision: {
     select: {
+      id: true,
       contentType: true,
       squiggleSnippet: {
         select: {

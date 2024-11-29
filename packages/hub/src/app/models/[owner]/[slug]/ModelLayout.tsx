@@ -12,7 +12,7 @@ import {
   VariablesDropdown,
 } from "@/lib/VariablesDropdown";
 import { modelRevisionsRoute, modelRoute } from "@/routes";
-import { ModelCardDTO } from "@/server/models/data/card";
+import { ModelCardDTO } from "@/server/models/data/cards";
 import { getExportedVariableNames } from "@/server/models/utils";
 
 import { ModelEntityNodes } from "./ModelEntityNodes";

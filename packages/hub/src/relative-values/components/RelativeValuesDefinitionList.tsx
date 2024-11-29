@@ -4,13 +4,13 @@ import { FC } from "react";
 
 import { LoadMore } from "@/components/LoadMore";
 import { usePaginator } from "@/hooks/usePaginator";
-import { RelativeValuesDefinitionCardData } from "@/server/relative-values/data";
+import { RelativeValuesDefinitionCardDTO } from "@/server/relative-values/data/cards";
 import { Paginated } from "@/server/types";
 
 import { RelativeValuesDefinitionCard } from "./RelativeValuesDefinitionCard";
 
 type Props = {
-  page: Paginated<RelativeValuesDefinitionCardData>;
+  page: Paginated<RelativeValuesDefinitionCardDTO>;
   showOwner?: boolean;
 };
 

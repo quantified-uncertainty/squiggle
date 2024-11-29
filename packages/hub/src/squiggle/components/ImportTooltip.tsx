@@ -4,7 +4,7 @@ import Skeleton from "react-loading-skeleton";
 
 import { ModelCard } from "@/models/components/ModelCard";
 import { loadModelCardAction } from "@/server/models/actions/loadModelCardAction";
-import { ModelCardDTO } from "@/server/models/data/card";
+import { ModelCardDTO } from "@/server/models/data/cards";
 
 import { parseSourceId } from "./linker";
 

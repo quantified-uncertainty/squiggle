@@ -5,7 +5,7 @@ import { DropdownMenuAsyncActionItem, TrashIcon, useToast } from "@quri/ui";
 
 import { ownerRoute } from "@/routes";
 import { deleteModelAction } from "@/server/models/actions/deleteModelAction";
-import { ModelCardDTO } from "@/server/models/data/card";
+import { ModelCardDTO } from "@/server/models/data/cards";
 
 type Props = {
   model: ModelCardDTO;

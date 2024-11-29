@@ -8,7 +8,7 @@ import { UsernameLink } from "@/components/UsernameLink";
 import { usePaginator } from "@/hooks/usePaginator";
 import { commonDateFormat } from "@/lib/common";
 import { modelRevisionRoute } from "@/routes";
-import { ModelCardDTO } from "@/server/models/data/card";
+import { ModelCardDTO } from "@/server/models/data/cards";
 import { ModelRevisionDTO } from "@/server/models/data/revisions";
 import { Paginated } from "@/server/types";
 

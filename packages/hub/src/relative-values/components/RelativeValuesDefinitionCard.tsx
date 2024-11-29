@@ -2,10 +2,10 @@ import { FC } from "react";
 
 import { EntityCard, UpdatedStatus } from "@/components/EntityCard";
 import { relativeValuesRoute } from "@/routes";
-import { RelativeValuesDefinitionCardData } from "@/server/relative-values/data";
+import { RelativeValuesDefinitionCardDTO } from "@/server/relative-values/data/cards";
 
 type Props = {
-  definition: RelativeValuesDefinitionCardData;
+  definition: RelativeValuesDefinitionCardDTO;
   showOwner?: boolean;
 };
 

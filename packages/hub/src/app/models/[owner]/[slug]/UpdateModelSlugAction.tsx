@@ -7,7 +7,7 @@ import { ServerActionModalAction } from "@/components/ui/ServerActionModalAction
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { modelRoute } from "@/routes";
 import { updateModelSlugAction } from "@/server/models/actions/updateModelSlugAction";
-import { ModelCardDTO } from "@/server/models/data/card";
+import { ModelCardDTO } from "@/server/models/data/cards";
 
 import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
 

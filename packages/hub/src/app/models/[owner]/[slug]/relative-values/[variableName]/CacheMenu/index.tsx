@@ -1,7 +1,6 @@
 "use client";
 import { clsx } from "clsx";
 import { FC, ReactElement } from "react";
-import { useFragment } from "react-relay";
 
 import {
   CheckIcon,
@@ -11,29 +10,24 @@ import {
   XIcon,
 } from "@quri/ui";
 
-import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
+import { CloseDropdownOnInvariantChange } from "@/components/ui/CloseDropdownOnInvariantChange";
+import { RelativeValuesDefinitionFullDTO } from "@/server/relative-values/data/full";
+import { RelativeValuesExportFullDTO } from "@/server/relative-values/data/fullExport";
 
 import { BuildRelativeValuesCacheAction } from "./BuildRelativeValuesCacheAction";
 import { ClearRelativeValuesCacheAction } from "./ClearRelativeValuesCacheAction";
 
-import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
-import { RelativeValuesExport$data } from "@/__generated__/RelativeValuesExport.graphql";
-
 export const CacheMenu: FC<{
-  relativeValuesExport: RelativeValuesExport$data;
+  relativeValuesExport: RelativeValuesExportFullDTO;
+  definitionRevision: RelativeValuesDefinitionFullDTO["currentRevision"];
   isEditable: boolean;
-}> = ({ relativeValuesExport, isEditable }) => {
-  const definition = useFragment<RelativeValuesDefinitionRevision$key>(
-    RelativeValuesDefinitionRevisionFragment,
-    relativeValuesExport.definition.currentRevision
-  );
-
+}> = ({ relativeValuesExport, definitionRevision, isEditable }) => {
   const isEmpty = relativeValuesExport.cache.length === 0;
 
   const fullyCached =
     !isEmpty &&
     relativeValuesExport.cache.length >=
-      definition.items.length * definition.items.length;
+      definitionRevision.items.length * definitionRevision.items.length;
 
   const internals = (
     <div
@@ -58,26 +52,28 @@ export const CacheMenu: FC<{
 
   const withDropdown = (internals: ReactElement) => (
     <Dropdown
-      render={({ close }) => {
+      render={() => {
         return (
           <DropdownMenu>
+            <CloseDropdownOnInvariantChange
+              invariant={relativeValuesExport.cache.length}
+            />
             <DropdownMenuHeader>
               {isEmpty
                 ? "Not cached"
                 : `${relativeValuesExport.cache.length}/${
-                    definition.items.length * definition.items.length
+                    definitionRevision.items.length *
+                    definitionRevision.items.length
                   } pairs cached`}
             </DropdownMenuHeader>
             {!fullyCached && (
               <BuildRelativeValuesCacheAction
-                exportId={relativeValuesExport.id}
-                close={close}
+                relativeValuesExport={relativeValuesExport}
               />
             )}
             {isEmpty ? null : (
               <ClearRelativeValuesCacheAction
-                exportId={relativeValuesExport.id}
-                close={close}
+                relativeValuesExport={relativeValuesExport}
               />
             )}
           </DropdownMenu>

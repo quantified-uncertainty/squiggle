@@ -4,7 +4,7 @@ import { FC } from "react";
 import { Cog8ToothIcon, Dropdown, DropdownMenu } from "@quri/ui";
 
 import { EntityTab } from "@/components/ui/EntityTab";
-import { ModelCardDTO } from "@/server/models/data/card";
+import { ModelCardDTO } from "@/server/models/data/cards";
 
 import { DeleteModelAction } from "./DeleteModelAction";
 import { MoveModelAction } from "./MoveModelAction";

@@ -1,7 +1,7 @@
 import { usePathname, useRouter } from "next/navigation";
 
 import { patchModelRoute } from "@/routes";
-import { ModelCardDTO } from "@/server/models/data/card";
+import { ModelCardDTO } from "@/server/models/data/cards";
 
 export function useFixModelUrlCasing(model: ModelCardDTO) {
   const router = useRouter();

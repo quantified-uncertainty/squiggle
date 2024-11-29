@@ -1,10 +1,9 @@
-import QueryNode, {
-  RelativeValuesDefinitionPageQuery,
-} from "@gen/RelativeValuesDefinitionPageQuery.graphql";
+import { notFound } from "next/navigation";
 
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { WithAuth } from "@/components/WithAuth";
-import { loadPageQuery } from "@/relay/loadPageQuery";
+import { controlsOwnerId } from "@/server/owners/auth";
+import { loadRelativeValuesDefinitionFull } from "@/server/relative-values/data/full";
+import { getSessionUserOrRedirect } from "@/server/users/auth";
 
 import { EditRelativeValuesDefinition } from "./EditRelativeValuesDefinition";
 
@@ -12,26 +11,23 @@ type Props = {
   params: Promise<{ owner: string; slug: string }>;
 };
 
-async function InnerPage({ params }: Props) {
+export default async function Page({ params }: Props) {
+  // if we're not signed in, we can't edit
+  await getSessionUserOrRedirect();
+
   const { owner, slug } = await params;
-  const query = await loadPageQuery<RelativeValuesDefinitionPageQuery>(
-    QueryNode,
-    {
-      input: { owner, slug },
-    }
-  );
+  const definition = await loadRelativeValuesDefinitionFull({ owner, slug });
+  if (!definition) {
+    notFound();
+  }
+
+  if (!(await controlsOwnerId(definition.owner.id))) {
+    throw new Error("Unauthorized");
+  }
 
   return (
     <NarrowPageLayout>
-      <EditRelativeValuesDefinition query={query} />
+      <EditRelativeValuesDefinition definition={definition} />
     </NarrowPageLayout>
-  );
-}
-
-export default async function Page({ params }: Props) {
-  return (
-    <WithAuth>
-      <InnerPage params={params} />
-    </WithAuth>
   );
 }

@@ -6,7 +6,7 @@ import {
   versionedSquigglePackages,
 } from "@quri/versioned-squiggle-components";
 
-import { ModelCardDTO } from "@/server/models/data/card";
+import { ModelCardDTO } from "@/server/models/data/cards";
 import { sqProjectWithHubLinker } from "@/squiggle/components/linker";
 
 type Props = {

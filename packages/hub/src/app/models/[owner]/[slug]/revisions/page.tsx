@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { loadModelCard } from "@/server/models/data/card";
+import { loadModelCard } from "@/server/models/data/cards";
 import { loadModelRevisions } from "@/server/models/data/revisions";
 
 import { ModelRevisionsList } from "./ModelRevisionsList";

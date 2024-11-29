@@ -3,17 +3,20 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/prisma";
+import {
+  selectTypedOwner,
+  toTypedOwnerDTO,
+  TypedOwner,
+} from "@/server/owners/data/typedOwner";
 
-import { Paginated } from "../types";
+import { Paginated } from "../../types";
 
-const definitionCardSelect = {
+export const definitionCardSelect = {
   id: true,
   slug: true,
   updatedAt: true,
   owner: {
-    select: {
-      slug: true,
-    },
+    select: selectTypedOwner,
   },
 } satisfies Prisma.RelativeValuesDefinitionSelect;
 
@@ -27,19 +30,26 @@ type DbDefinitionCard = NonNullable<
   >
 >;
 
-export function dbDefinitionToDefinitionCard(dbDefinition: DbDefinitionCard) {
+type DefinitionCardDTO = {
+  id: string;
+  slug: string;
+  owner: TypedOwner;
+  updatedAt: Date;
+};
+
+export function toDefinitionCardDTO(
+  dbDefinition: DbDefinitionCard
+): DefinitionCardDTO {
   return {
     id: dbDefinition.id,
     slug: dbDefinition.slug,
-    owner: {
-      slug: dbDefinition.owner.slug,
-    },
+    owner: toTypedOwnerDTO(dbDefinition.owner),
     updatedAt: dbDefinition.updatedAt,
   };
 }
 
-export type RelativeValuesDefinitionCardData = ReturnType<
-  typeof dbDefinitionToDefinitionCard
+export type RelativeValuesDefinitionCardDTO = ReturnType<
+  typeof toDefinitionCardDTO
 >;
 
 export async function loadDefinitionCards(
@@ -48,7 +58,7 @@ export async function loadDefinitionCards(
     cursor?: string;
     limit?: number;
   } = {}
-): Promise<Paginated<RelativeValuesDefinitionCardData>> {
+): Promise<Paginated<RelativeValuesDefinitionCardDTO>> {
   const limit = params.limit ?? 20;
 
   const dbDefinitions = await prisma.relativeValuesDefinition.findMany({
@@ -65,7 +75,7 @@ export async function loadDefinitionCards(
     take: limit + 1,
   });
 
-  const definitions = dbDefinitions.map(dbDefinitionToDefinitionCard);
+  const definitions = dbDefinitions.map(toDefinitionCardDTO);
 
   const nextCursor = definitions[definitions.length - 1]?.id;
 
@@ -78,4 +88,21 @@ export async function loadDefinitionCards(
     items: definitions.slice(0, limit),
     loadMore: definitions.length > limit ? loadMore : undefined,
   };
+}
+
+export async function loadRelativeValuesDefinitionCard(params: {
+  owner: string;
+  slug: string;
+}): Promise<RelativeValuesDefinitionCardDTO | null> {
+  const dbDefinition = await prisma.relativeValuesDefinition.findFirst({
+    select: definitionCardSelect,
+    where: {
+      owner: {
+        slug: params.owner,
+      },
+      slug: params.slug,
+    },
+  });
+
+  return dbDefinition ? toDefinitionCardDTO(dbDefinition) : null;
 }

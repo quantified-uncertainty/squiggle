@@ -1,6 +1,5 @@
 "use client";
 import { FC, PropsWithChildren } from "react";
-import { graphql } from "relay-runtime";
 
 import {
   Cog8ToothIcon,
@@ -13,54 +12,25 @@ import {
 import { EntityInfo } from "@/components/EntityInfo";
 import { EntityLayout, EntityNode } from "@/components/EntityLayout";
 import { EntityTab } from "@/components/ui/EntityTab";
-import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
-import { usePageQuery } from "@/relay/usePageQuery";
 import {
   ownerRoute,
   relativeValuesEditRoute,
   relativeValuesRoute,
 } from "@/routes";
+import { RelativeValuesDefinitionCardDTO } from "@/server/relative-values/data/cards";
 
 import { DeleteDefinitionAction } from "./DeleteRelativeValuesDefinitionAction";
 
-import { DefinitionLayoutQuery } from "@/__generated__/DefinitionLayoutQuery.graphql";
-
 type Props = PropsWithChildren<{
-  queryRef: SerializablePreloadedQuery<DefinitionLayoutQuery>;
+  definition: RelativeValuesDefinitionCardDTO;
+  isEditable: boolean;
 }>;
 
-export const DefinitionLayout: FC<Props> = ({ queryRef, children }) => {
-  const [{ result }] = usePageQuery(
-    graphql`
-      query DefinitionLayoutQuery($input: QueryRelativeValuesDefinitionInput!) {
-        result: relativeValuesDefinition(input: $input) {
-          __typename
-          ... on BaseError {
-            message
-          }
-          ... on NotFoundError {
-            message
-          }
-          ... on RelativeValuesDefinition {
-            id
-            slug
-            isEditable
-            owner {
-              __typename
-              slug
-            }
-          }
-        }
-      }
-    `,
-    queryRef
-  );
-
-  const definition = extractFromGraphqlErrorUnion(
-    result,
-    "RelativeValuesDefinition"
-  );
+export const DefinitionLayout: FC<Props> = ({
+  definition,
+  isEditable,
+  children,
+}) => {
   const slug = definition.slug;
 
   const nodes: EntityNode[] = [
@@ -76,7 +46,7 @@ export const DefinitionLayout: FC<Props> = ({ queryRef, children }) => {
     <EntityLayout
       nodes={<EntityInfo nodes={nodes} />}
       headerRight={
-        definition.isEditable ? (
+        isEditable ? (
           <EntityTab.List>
             <EntityTab.Link
               name="View"

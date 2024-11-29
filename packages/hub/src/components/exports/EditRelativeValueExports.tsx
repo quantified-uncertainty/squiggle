@@ -8,16 +8,14 @@ import {
   relativeValuesRoute,
 } from "@/routes";
 import { ModelFullDTO } from "@/server/models/data/full";
+import { FindRelativeValuesForSelectResult } from "@/server/relative-values/data/findRelativeValuesForSelect";
 
 import { SelectOwner, SelectOwnerOption } from "../SelectOwner";
 import { FormModal } from "../ui/FormModal";
 import { H2 } from "../ui/Headers";
 import { StyledDefinitionLink } from "../ui/StyledDefinitionLink";
 import { StyledLink } from "../ui/StyledLink";
-import {
-  SelectRelativeValuesDefinition,
-  SelectRelativeValuesDefinitionOption,
-} from "./SelectRelativeValuesDefinition";
+import { SelectRelativeValuesDefinition } from "./SelectRelativeValuesDefinition";
 
 import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 
@@ -28,7 +26,7 @@ const CreateVariableWithDefinitionModal: FC<{
   type FormShape = {
     variableName: string;
     owner: SelectOwnerOption | null;
-    definition: SelectRelativeValuesDefinitionOption | null;
+    definition: FindRelativeValuesForSelectResult | null;
   };
 
   type ValidatedFormShape = {
