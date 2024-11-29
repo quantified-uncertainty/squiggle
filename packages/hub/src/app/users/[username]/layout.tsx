@@ -1,14 +1,25 @@
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { PropsWithChildren } from "react";
 
+import { UserIcon } from "@quri/ui";
+
+import { auth } from "@/auth";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { loadPageQuery } from "@/relay/loadPageQuery";
+import { H1 } from "@/components/ui/Headers";
+import {
+  StyledTabLink,
+  StyledTabLinkList,
+} from "@/components/ui/StyledTabLink";
+import {
+  userDefinitionsRoute,
+  userGroupsRoute,
+  userRoute,
+  userVariablesRoute,
+} from "@/routes";
+import { loadLayoutUser } from "@/server/users/data/layoutUser";
 
-import { UserLayout } from "./UserLayout";
-
-import QueryNode, {
-  UserLayoutQuery,
-} from "@/__generated__/UserLayoutQuery.graphql";
+import { NewModelButton } from "./NewModelButton";
 
 type Props = {
   params: Promise<{ username: string }>;
@@ -19,13 +30,53 @@ export default async function OuterUserLayout({
   children,
 }: PropsWithChildren<Props>) {
   const { username } = await params;
-  const query = await loadPageQuery<UserLayoutQuery>(QueryNode, {
-    username,
-  });
+  const user = await loadLayoutUser(username);
+  if (!user) {
+    notFound();
+  }
+  const session = await auth();
+  const isMe = user.id === session?.user.id;
 
   return (
     <NarrowPageLayout>
-      <UserLayout query={query}>{children}</UserLayout>
+      <div className="space-y-8">
+        <H1 size="large">
+          <div className="flex items-center">
+            <UserIcon className="mr-2 opacity-50" />
+            {user.username}
+          </div>
+        </H1>
+        <div className="flex items-center gap-4">
+          <StyledTabLinkList>
+            {isMe || user.hasModels ? (
+              <StyledTabLink
+                name="Models"
+                href={userRoute({ username: user.username })}
+              />
+            ) : null}
+            {isMe || user.hasVariables ? (
+              <StyledTabLink
+                name="Variables"
+                href={userVariablesRoute({ username: user.username })}
+              />
+            ) : null}
+            {isMe || user.hasDefinitions ? (
+              <StyledTabLink
+                name="Definitions"
+                href={userDefinitionsRoute({ username: user.username })}
+              />
+            ) : null}
+            {isMe || user.hasGroups ? (
+              <StyledTabLink
+                name="Groups"
+                href={userGroupsRoute({ username: user.username })}
+              />
+            ) : null}
+          </StyledTabLinkList>
+          {isMe && <NewModelButton />}
+        </div>
+        <div>{children}</div>
+      </div>
     </NarrowPageLayout>
   );
 }

@@ -39,6 +39,6 @@ await (async () => {
 `,
     },
     outfile: `./dist/scripts/${name}.mjs`,
-    external: ["server-only"],
+    external: ["server-only", "@opentelemetry/api"],
   });
 }

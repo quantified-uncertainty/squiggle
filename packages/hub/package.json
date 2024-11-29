@@ -23,7 +23,7 @@
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
     "test:manual": "dotenv -e .env.test -- jest -i",
-    "build-last-revision": "pnpm build:esbuild && node ./dist/scripts/buildRecentModelRevision/main.mjs"
+    "build-last-revision": "pnpm build:esbuild && NODE_OPTIONS=--conditions=react-server node ./dist/scripts/buildRecentModelRevision/main.mjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
@@ -66,6 +66,7 @@
     "relay-runtime": "^16.2.0",
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.0",
+    "server-only": "^0.0.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
