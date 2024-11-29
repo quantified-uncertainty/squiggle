@@ -18,21 +18,21 @@ export function usePaginator<T>(initialPage: Paginated<T>): FullPaginated<T> {
   const [{ items, loadMore }, setPage] = useState(initialPage);
 
   const append = useCallback((newItem: T) => {
-    setPage(({ items }) => ({
+    setPage(({ items, loadMore }) => ({
       items: [...items, newItem],
       loadMore,
     }));
   }, []);
 
   const remove = useCallback((compare: (item: T) => boolean) => {
-    setPage(({ items }) => ({
+    setPage(({ items, loadMore }) => ({
       items: items.filter((i) => !compare(i)),
       loadMore,
     }));
   }, []);
 
   const update = useCallback((update: (item: T) => T) => {
-    setPage(({ items }) => {
+    setPage(({ items, loadMore }) => {
       const newItems = {
         items: items.map(update),
         loadMore,
