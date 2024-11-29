@@ -12,7 +12,6 @@ import "../server/search/actions/adminRebuildSearchIndexAction";
 import "./mutations/buildRelativeValuesCache";
 import "./mutations/cancelGroupInvite";
 import "./mutations/clearRelativeValuesCache";
-import "./mutations/createGroup";
 import "./mutations/updateSquiggleSnippetModel";
 
 import { builder } from "./builder";

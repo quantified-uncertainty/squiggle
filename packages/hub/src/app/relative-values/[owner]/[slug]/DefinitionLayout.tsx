@@ -92,12 +92,11 @@ export const DefinitionLayout: FC<Props> = ({ queryRef, children }) => {
               })}
             />
             <Dropdown
-              render={({ close }) => (
+              render={() => (
                 <DropdownMenu>
                   <DeleteDefinitionAction
                     owner={definition.owner.slug}
                     slug={slug}
-                    close={close}
                   />
                 </DropdownMenu>
               )}

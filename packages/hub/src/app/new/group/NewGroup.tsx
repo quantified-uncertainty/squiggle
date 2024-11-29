@@ -2,33 +2,14 @@
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { FormProvider } from "react-hook-form";
-import { graphql } from "relay-runtime";
 
 import { Button } from "@quri/ui";
 
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { useMutationForm } from "@/hooks/useMutationForm";
+import { useServerActionForm } from "@/hooks/useServerActionForm";
 import { groupRoute } from "@/routes";
-
-import { NewGroupMutation } from "@/__generated__/NewGroupMutation.graphql";
-
-const Mutation = graphql`
-  mutation NewGroupMutation($input: MutationCreateGroupInput!) {
-    result: createGroup(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on CreateGroupResult {
-        group {
-          id
-          slug
-        }
-      }
-    }
-  }
-`;
+import { createGroupAction } from "@/server/groups/actions/createGroupAction";
 
 export const NewGroup: FC = () => {
   const router = useRouter();
@@ -37,23 +18,19 @@ export const NewGroup: FC = () => {
     slug: string | undefined;
   };
 
-  const { form, onSubmit, inFlight } = useMutationForm<
+  const { form, onSubmit, inFlight } = useServerActionForm<
     FormShape,
-    NewGroupMutation,
-    "CreateGroupResult"
+    typeof createGroupAction
   >({
     defaultValues: {},
     mode: "onChange",
-    mutation: Mutation,
-    expectedTypename: "CreateGroupResult",
     blockOnSuccess: true,
     formDataToVariables: (data) => ({
-      input: {
-        slug: data.slug ?? "", // shouldn't happen, but satisfies TypeScript
-      },
+      slug: data.slug ?? "", // shouldn't happen, but satisfies TypeScript
     }),
+    action: createGroupAction,
     onCompleted(result) {
-      router.push(groupRoute({ slug: result.group.slug }));
+      router.push(groupRoute({ slug: result.slug }));
     },
   });
 
