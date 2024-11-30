@@ -13,7 +13,7 @@ import { EditSquiggleSnippetModel } from "@/app/models/[owner]/[slug]/EditSquigg
 import { loadModelFullAction } from "@/models/actions/loadModelFullAction";
 import { ModelByVersion } from "@/models/data/byVersion";
 import { ModelFullDTO } from "@/models/data/full";
-import { sqProjectWithHubLinker } from "@/squiggle/components/linker";
+import { sqProjectWithHubLinker } from "@/squiggle/linker";
 
 const InnerUpgradeableModel: FC<{
   model: ModelFullDTO;

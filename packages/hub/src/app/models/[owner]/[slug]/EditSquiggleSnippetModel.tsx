@@ -49,7 +49,7 @@ import {
   getHubLinker,
   parseSourceId,
   serializeSourceId,
-} from "@/squiggle/components/linker";
+} from "@/squiggle/linker";
 
 import {
   Draft,

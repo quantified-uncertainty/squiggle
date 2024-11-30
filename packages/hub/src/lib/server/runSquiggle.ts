@@ -11,7 +11,7 @@ import {
 
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/lib/constants";
 import { prisma } from "@/lib/server/prisma";
-import { parseSourceId } from "@/squiggle/components/linker";
+import { parseSourceId } from "@/squiggle/linker";
 
 function getKey(code: string, seed: string): string {
   return crypto

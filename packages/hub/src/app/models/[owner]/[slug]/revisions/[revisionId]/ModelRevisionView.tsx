@@ -8,7 +8,7 @@ import {
 } from "@quri/versioned-squiggle-components";
 
 import { ModelRevisionFullDTO } from "@/models/data/fullRevision";
-import { getHubLinker } from "@/squiggle/components/linker";
+import { getHubLinker } from "@/squiggle/linker";
 
 export const ModelRevisionView: FC<{
   revision: ModelRevisionFullDTO;

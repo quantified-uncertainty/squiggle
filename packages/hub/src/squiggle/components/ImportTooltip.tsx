@@ -6,7 +6,7 @@ import { loadModelCardAction } from "@/models/actions/loadModelCardAction";
 import { ModelCard } from "@/models/components/ModelCard";
 import { ModelCardDTO } from "@/models/data/cards";
 
-import { parseSourceId } from "./linker";
+import { parseSourceId } from "../linker";
 
 type Props = {
   importId: string;

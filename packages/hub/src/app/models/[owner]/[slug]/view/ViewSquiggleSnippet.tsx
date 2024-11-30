@@ -7,7 +7,7 @@ import {
 } from "@quri/versioned-squiggle-components";
 
 import { ModelCardDTO } from "@/models/data/cards";
-import { sqProjectWithHubLinker } from "@/squiggle/components/linker";
+import { sqProjectWithHubLinker } from "@/squiggle/linker";
 
 type Props = {
   data: NonNullable<ModelCardDTO["currentRevision"]["squiggleSnippet"]>;

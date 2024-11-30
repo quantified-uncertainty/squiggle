@@ -8,7 +8,7 @@ import {
   versionSupportsSqPathV2,
 } from "@quri/versioned-squiggle-components";
 
-import { sqProjectWithHubLinker } from "@/squiggle/components/linker";
+import { sqProjectWithHubLinker } from "@/squiggle/linker";
 import { VariableRevisionFullDTO } from "@/variables/data/fullVariableRevision";
 
 type SquiggleProps = {
