@@ -2,7 +2,7 @@ import {
   loadGroupMembers,
   loadMyMembership,
   loadReusableInviteToken,
-} from "@/server/groups/data/members";
+} from "@/groups/data/members";
 
 import { GroupMemberList } from "./GroupMemberList";
 import { GroupReusableInviteSection } from "./GroupReusableInviteSection";

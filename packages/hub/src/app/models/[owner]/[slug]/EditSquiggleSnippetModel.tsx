@@ -38,12 +38,12 @@ import { useExitConfirmation } from "@/components/ExitConfirmationWrapper/hooks"
 import { EditRelativeValueExports } from "@/components/exports/EditRelativeValueExports";
 import { ReactRoot } from "@/components/ReactRoot";
 import { FormModal } from "@/components/ui/FormModal";
-import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/constants";
-import { useAvailableHeight } from "@/hooks/useAvailableHeight";
-import { useServerActionForm } from "@/hooks/useServerActionForm";
-import { modelRoute, variableRoute } from "@/routes";
-import { updateSquiggleSnippetModelAction } from "@/server/models/actions/updateSquiggleSnippetModelAction";
-import { ModelFullDTO } from "@/server/models/data/full";
+import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/lib/constants";
+import { useAvailableHeight } from "@/lib/hooks/useAvailableHeight";
+import { useServerActionForm } from "@/lib/hooks/useServerActionForm";
+import { modelRoute, variableRoute } from "@/lib/routes";
+import { updateSquiggleSnippetModelAction } from "@/models/actions/updateSquiggleSnippetModelAction";
+import { ModelFullDTO } from "@/models/data/full";
 import { ImportTooltip } from "@/squiggle/components/ImportTooltip";
 import {
   getHubLinker,

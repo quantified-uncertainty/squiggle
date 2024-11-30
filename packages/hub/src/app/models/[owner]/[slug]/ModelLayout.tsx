@@ -6,14 +6,14 @@ import { CodeBracketSquareIcon, RectangleStackIcon, ShareIcon } from "@quri/ui";
 
 import { EntityLayout } from "@/components/EntityLayout";
 import { EntityTab } from "@/components/ui/EntityTab";
+import { modelRevisionsRoute, modelRoute } from "@/lib/routes";
+import { getExportedVariableNames } from "@/models/clientUtils";
+import { ModelCardDTO } from "@/models/data/cards";
 import {
   totalImportLength,
   type VariableRevision,
   VariablesDropdown,
-} from "@/lib/VariablesDropdown";
-import { modelRevisionsRoute, modelRoute } from "@/routes";
-import { ModelCardDTO } from "@/server/models/data/cards";
-import { getExportedVariableNames } from "@/server/models/utils";
+} from "@/variables/components/VariablesDropdown";
 
 import { ModelEntityNodes } from "./ModelEntityNodes";
 import { ModelPrivacyControls } from "./ModelPrivacyControls";

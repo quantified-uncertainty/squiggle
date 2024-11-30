@@ -4,7 +4,7 @@ import { FC } from "react";
 
 import { Button, PlusIcon } from "@quri/ui";
 
-import { newDefinitionRoute, newGroupRoute, newModelRoute } from "@/routes";
+import { newDefinitionRoute, newGroupRoute, newModelRoute } from "@/lib/routes";
 
 export const NewModelButton: FC = () => {
   const segment = useSelectedLayoutSegment();

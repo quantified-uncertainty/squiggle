@@ -11,13 +11,13 @@ import {
   UpdatedStatus,
 } from "@/components/EntityCard";
 import { Link } from "@/components/ui/Link";
+import { modelRoute, ownerRoute } from "@/lib/routes";
+import { ModelCardDTO } from "@/models/data/cards";
 import {
   totalImportLength,
   VariableRevision,
   VariablesDropdown,
-} from "@/lib/VariablesDropdown";
-import { modelRoute, ownerRoute } from "@/routes";
-import { ModelCardDTO } from "@/server/models/data/cards";
+} from "@/variables/components/VariablesDropdown";
 
 type Props = {
   model: ModelCardDTO;

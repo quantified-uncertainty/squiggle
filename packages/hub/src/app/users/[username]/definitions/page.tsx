@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 import { RelativeValuesDefinitionList } from "@/relative-values/components/RelativeValuesDefinitionList";
-import { loadDefinitionCards } from "@/server/relative-values/data/cards";
+import { loadDefinitionCards } from "@/relative-values/data/cards";
 
 type Props = {
   params: Promise<{ username: string }>;

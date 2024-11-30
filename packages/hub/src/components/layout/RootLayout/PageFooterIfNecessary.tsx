@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { FC } from "react";
 
-import { isAiRoute, isModelRoute } from "@/routes";
+import { isAiRoute, isModelRoute } from "@/lib/routes";
 
 import { PageFooter } from "./PageFooter";
 

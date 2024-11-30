@@ -11,8 +11,8 @@ import {
 } from "@quri/ui";
 
 import { CloseDropdownOnInvariantChange } from "@/components/ui/CloseDropdownOnInvariantChange";
-import { RelativeValuesDefinitionFullDTO } from "@/server/relative-values/data/full";
-import { RelativeValuesExportFullDTO } from "@/server/relative-values/data/fullExport";
+import { RelativeValuesDefinitionFullDTO } from "@/relative-values/data/full";
+import { RelativeValuesExportFullDTO } from "@/relative-values/data/fullExport";
 
 import { BuildRelativeValuesCacheAction } from "./BuildRelativeValuesCacheAction";
 import { ClearRelativeValuesCacheAction } from "./ClearRelativeValuesCacheAction";

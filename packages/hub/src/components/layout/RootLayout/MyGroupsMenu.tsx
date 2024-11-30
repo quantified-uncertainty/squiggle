@@ -3,9 +3,9 @@ import { FC } from "react";
 import { DropdownMenuHeader, GroupIcon, PlusIcon } from "@quri/ui";
 
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
-import { groupRoute, newGroupRoute } from "@/routes";
-import { GroupCardDTO } from "@/server/groups/data/card";
-import { Paginated } from "@/server/types";
+import { GroupCardDTO } from "@/groups/data/groupCards";
+import { groupRoute, newGroupRoute } from "@/lib/routes";
+import { Paginated } from "@/lib/types";
 
 type Props = {
   groups: Paginated<GroupCardDTO>;

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
-import { loadModelsByVersion } from "@/server/models/data/byVersion";
-import { checkRootUser } from "@/server/users/auth";
+import { loadModelsByVersion } from "@/models/data/byVersion";
+import { checkRootUser } from "@/users/auth";
 
 import { UpgradeVersionsPage } from "./UpgradeVersionsPage";
 

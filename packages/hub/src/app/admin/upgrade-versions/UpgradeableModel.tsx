@@ -10,9 +10,9 @@ import {
 } from "@quri/versioned-squiggle-components";
 
 import { EditSquiggleSnippetModel } from "@/app/models/[owner]/[slug]/EditSquiggleSnippetModel";
-import { loadModelFullAction } from "@/server/models/actions/loadModelFullAction";
-import { ModelByVersion } from "@/server/models/data/byVersion";
-import { ModelFullDTO } from "@/server/models/data/full";
+import { loadModelFullAction } from "@/models/actions/loadModelFullAction";
+import { ModelByVersion } from "@/models/data/byVersion";
+import { ModelFullDTO } from "@/models/data/full";
 import { sqProjectWithHubLinker } from "@/squiggle/components/linker";
 
 const InnerUpgradeableModel: FC<{

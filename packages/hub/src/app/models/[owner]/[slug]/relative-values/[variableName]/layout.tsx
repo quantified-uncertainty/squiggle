@@ -4,11 +4,11 @@ import { PropsWithChildren } from "react";
 import { LinkIcon, ScaleIcon } from "@quri/ui";
 
 import { StyledLink } from "@/components/ui/StyledLink";
-import { relativeValuesRoute } from "@/routes";
-import { loadModelCard } from "@/server/models/data/cards";
-import { isModelEditable } from "@/server/models/data/helpers";
-import { loadRelativeValuesDefinitionFull } from "@/server/relative-values/data/full";
-import { loadRelativeValuesExportFullFromModelRevision } from "@/server/relative-values/data/fullExport";
+import { relativeValuesRoute } from "@/lib/routes";
+import { loadModelCard } from "@/models/data/cards";
+import { isModelEditable } from "@/models/data/helpers";
+import { loadRelativeValuesDefinitionFull } from "@/relative-values/data/full";
+import { loadRelativeValuesExportFullFromModelRevision } from "@/relative-values/data/fullExport";
 
 import { CacheMenu } from "./CacheMenu";
 import { RelativeValuesModelLayout } from "./RelativeValuesModelLayout";

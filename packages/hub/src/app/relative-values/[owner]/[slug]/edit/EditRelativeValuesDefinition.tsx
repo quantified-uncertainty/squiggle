@@ -2,11 +2,11 @@
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 
+import { relativeValuesRoute } from "@/lib/routes";
+import { updateRelativeValuesDefinitionAction } from "@/relative-values/actions/updateRelativeValuesDefinitionAction";
 import { RelativeValuesDefinitionForm } from "@/relative-values/components/RelativeValuesDefinitionForm";
 import { FormShape } from "@/relative-values/components/RelativeValuesDefinitionForm/FormShape";
-import { relativeValuesRoute } from "@/routes";
-import { updateRelativeValuesDefinitionAction } from "@/server/relative-values/actions/updateRelativeValuesDefinitionAction";
-import { RelativeValuesDefinitionFullDTO } from "@/server/relative-values/data/full";
+import { RelativeValuesDefinitionFullDTO } from "@/relative-values/data/full";
 
 export const EditRelativeValuesDefinition: FC<{
   definition: RelativeValuesDefinitionFullDTO;

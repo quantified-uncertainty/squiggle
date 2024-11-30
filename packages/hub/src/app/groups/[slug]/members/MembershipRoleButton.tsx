@@ -3,7 +3,7 @@ import { FC } from "react";
 
 import { Button, Dropdown, DropdownMenu } from "@quri/ui";
 
-import { GroupMemberDTO } from "@/server/groups/data/members";
+import { GroupMemberDTO } from "@/groups/data/members";
 
 import { SetMembershipRoleAction } from "./SetMembershipRoleAction";
 

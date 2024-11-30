@@ -17,10 +17,10 @@ import {
   UserCircleIcon,
 } from "@quri/ui";
 
-import { SQUIGGLE_DOCS_URL } from "@/lib/common";
-import { aboutRoute, aiRoute, newModelRoute } from "@/routes";
-import { GroupCardDTO } from "@/server/groups/data/card";
-import { Paginated } from "@/server/types";
+import { GroupCardDTO } from "@/groups/data/groupCards";
+import { SQUIGGLE_DOCS_URL } from "@/lib/constants";
+import { aboutRoute, aiRoute, newModelRoute } from "@/lib/routes";
+import { Paginated } from "@/lib/types";
 
 import { GlobalSearch } from "../../GlobalSearch";
 import { DesktopUserControls } from "./DesktopUserControls";

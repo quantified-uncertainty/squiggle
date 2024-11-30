@@ -2,8 +2,8 @@ import { FC, PropsWithChildren, useState } from "react";
 
 import { Button, Modal } from "@quri/ui";
 
-import { useClientOnlyRender } from "@/hooks/useClientOnlyRender";
-import { ModelFullDTO } from "@/server/models/data/full";
+import { useClientOnlyRender } from "@/lib/hooks/useClientOnlyRender";
+import { ModelFullDTO } from "@/models/data/full";
 
 import { SquiggleSnippetFormShape } from "./EditSquiggleSnippetModel";
 

@@ -1,6 +1,6 @@
+import { hasGroupMembership } from "@/groups/data/helpers";
 import { ModelList } from "@/models/components/ModelList";
-import { hasGroupMembership } from "@/server/groups/data/helpers";
-import { loadModelCards } from "@/server/models/data/cards";
+import { loadModelCards } from "@/models/data/cards";
 
 type Props = {
   params: Promise<{ slug: string }>;

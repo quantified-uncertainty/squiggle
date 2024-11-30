@@ -10,11 +10,11 @@ import { CheckIcon, XIcon } from "@quri/ui";
 
 import { LoadMore } from "@/components/LoadMore";
 import { Link } from "@/components/ui/Link";
-import { usePaginator } from "@/hooks/usePaginator";
+import { usePaginator } from "@/lib/hooks/usePaginator";
+import { variableRevisionRoute } from "@/lib/routes";
 import { exportTypeIcon } from "@/lib/typeIcon";
-import { variableRevisionRoute } from "@/routes";
-import { Paginated } from "@/server/types";
-import { VariableRevisionDTO } from "@/server/variables/data/variableRevisions";
+import { Paginated } from "@/lib/types";
+import { VariableRevisionDTO } from "@/variables/data/variableRevisions";
 
 const buildStatusIcon = (status: string) => {
   switch (status) {

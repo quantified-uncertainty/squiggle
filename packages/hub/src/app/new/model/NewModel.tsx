@@ -10,9 +10,9 @@ import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
 import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { useServerActionForm } from "@/hooks/useServerActionForm";
-import { modelRoute } from "@/routes";
-import { createSquiggleSnippetModelAction } from "@/server/models/actions/createSquiggleSnippetModelAction";
+import { useServerActionForm } from "@/lib/hooks/useServerActionForm";
+import { modelRoute } from "@/lib/routes";
+import { createSquiggleSnippetModelAction } from "@/models/actions/createSquiggleSnippetModelAction";
 
 const defaultCode = `/*
 Describe your code here

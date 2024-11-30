@@ -5,8 +5,8 @@ import { DropdownMenu } from "@quri/ui";
 import { Card } from "@/components/ui/Card";
 import { DotsDropdown } from "@/components/ui/DotsDropdown";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { userRoute } from "@/routes";
-import { GroupMemberDTO } from "@/server/groups/data/members";
+import { GroupMemberDTO } from "@/groups/data/members";
+import { userRoute } from "@/lib/routes";
 
 import { DeleteMembershipAction } from "./DeleteMembershipAction";
 import { MembershipRoleButton } from "./MembershipRoleButton";

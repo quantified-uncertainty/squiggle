@@ -2,7 +2,7 @@ import { Session } from "next-auth";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { chooseUsernameRoute } from "@/routes";
+import { chooseUsernameRoute } from "@/lib/routes";
 
 export function useForceChooseUsername(session: Session | null) {
   const pathname = usePathname();

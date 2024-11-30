@@ -2,9 +2,9 @@ import clsx from "clsx";
 import { FC, useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 
+import { loadModelCardAction } from "@/models/actions/loadModelCardAction";
 import { ModelCard } from "@/models/components/ModelCard";
-import { loadModelCardAction } from "@/server/models/actions/loadModelCardAction";
-import { ModelCardDTO } from "@/server/models/data/cards";
+import { ModelCardDTO } from "@/models/data/cards";
 
 import { parseSourceId } from "./linker";
 

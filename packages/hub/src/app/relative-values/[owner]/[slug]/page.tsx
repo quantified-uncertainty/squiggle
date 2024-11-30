@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
-import { loadRelativeValuesExportCardsFromDefinition } from "@/server/relative-values/data/exports";
-import { loadRelativeValuesDefinitionFull } from "@/server/relative-values/data/full";
+import { loadRelativeValuesExportCardsFromDefinition } from "@/relative-values/data/exports";
+import { loadRelativeValuesDefinitionFull } from "@/relative-values/data/full";
 
 import { RelativeValuesDefinitionPage } from "./RelativeValuesDefinitionPage";
 

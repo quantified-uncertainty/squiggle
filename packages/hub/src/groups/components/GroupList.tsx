@@ -2,9 +2,9 @@
 import { FC } from "react";
 
 import { LoadMore } from "@/components/LoadMore";
-import { usePaginator } from "@/hooks/usePaginator";
-import { GroupCardDTO } from "@/server/groups/data/card";
-import { Paginated } from "@/server/types";
+import { GroupCardDTO } from "@/groups/data/groupCards";
+import { usePaginator } from "@/lib/hooks/usePaginator";
+import { Paginated } from "@/lib/types";
 
 import { GroupCard } from "./GroupCard";
 

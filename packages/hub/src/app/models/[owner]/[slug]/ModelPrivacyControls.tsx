@@ -5,8 +5,8 @@ import { FC } from "react";
 import { Dropdown, DropdownMenu, GlobeIcon, LockIcon } from "@quri/ui";
 
 import { ServerActionDropdownAction } from "@/components/ui/ServerActionDropdownAction";
-import { updateModelPrivacyAction } from "@/server/models/actions/updateModelPrivacyAction";
-import { ModelCardDTO } from "@/server/models/data/cards";
+import { updateModelPrivacyAction } from "@/models/actions/updateModelPrivacyAction";
+import { ModelCardDTO } from "@/models/data/cards";
 
 function getIconComponent(isPrivate: boolean) {
   return isPrivate ? LockIcon : GlobeIcon;

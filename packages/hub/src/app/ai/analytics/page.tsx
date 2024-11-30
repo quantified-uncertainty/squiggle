@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 
+import { getTypeStats } from "@/ai/data/analytics";
 import { H2 } from "@/components/ui/Headers";
-import { getTypeStats } from "@/server/ai/analytics";
 
 export default async function () {
   const typeStats = await getTypeStats();

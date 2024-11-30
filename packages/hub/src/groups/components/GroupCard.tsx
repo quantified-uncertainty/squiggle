@@ -1,8 +1,8 @@
 import { FC } from "react";
 
 import { EntityCard, UpdatedStatus } from "@/components/EntityCard";
-import { groupRoute } from "@/routes";
-import { GroupCardDTO } from "@/server/groups/data/card";
+import { GroupCardDTO } from "@/groups/data/groupCards";
+import { groupRoute } from "@/lib/routes";
 
 type Props = {
   group: GroupCardDTO;

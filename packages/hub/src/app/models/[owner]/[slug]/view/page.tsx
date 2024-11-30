@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { ViewSquiggleSnippet } from "@/app/models/[owner]/[slug]/view/ViewSquiggleSnippet";
-import { loadModelCard } from "@/server/models/data/cards";
+import { loadModelCard } from "@/models/data/cards";
 
 type Props = {
   params: Promise<{ owner: string; slug: string }>;

@@ -2,12 +2,12 @@ import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 
 import { WithAuth } from "@/components/WithAuth";
-import { groupRoute } from "@/routes";
-import { loadGroupCard } from "@/server/groups/data/card";
+import { loadGroupCard } from "@/groups/data/groupCards";
 import {
   hasGroupMembership,
   validateReusableGroupInviteToken,
-} from "@/server/groups/data/helpers";
+} from "@/groups/data/helpers";
+import { groupRoute } from "@/lib/routes";
 
 import { AcceptGroupInvitePage } from "./AcceptGroupInvitePage";
 

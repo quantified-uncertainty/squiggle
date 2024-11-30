@@ -1,5 +1,5 @@
-import { prisma } from "@/prisma";
-import { runSquiggle } from "@/server/runSquiggle";
+import { prisma } from "@/lib/server/prisma";
+import { runSquiggle } from "@/lib/server/runSquiggle";
 
 export type VariableRevisionInput = {
   variableName: string;

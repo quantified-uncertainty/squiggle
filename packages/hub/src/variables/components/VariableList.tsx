@@ -2,9 +2,9 @@
 import { FC } from "react";
 
 import { LoadMore } from "@/components/LoadMore";
-import { usePaginator } from "@/hooks/usePaginator";
-import { Paginated } from "@/server/types";
-import { VariableCardDTO } from "@/server/variables/data/variableCards";
+import { usePaginator } from "@/lib/hooks/usePaginator";
+import { Paginated } from "@/lib/types";
+import { VariableCardDTO } from "@/variables/data/variableCards";
 
 import { VariableCard } from "./VariableCard";
 

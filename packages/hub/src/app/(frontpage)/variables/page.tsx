@@ -1,5 +1,5 @@
-import { loadVariableCards } from "@/server/variables/data/variableCards";
 import { VariableList } from "@/variables/components/VariableList";
+import { loadVariableCards } from "@/variables/data/variableCards";
 
 export default async function OuterVariablesPage() {
   const variables = await loadVariableCards();

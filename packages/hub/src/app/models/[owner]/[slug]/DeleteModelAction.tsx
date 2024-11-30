@@ -3,9 +3,9 @@ import { FC } from "react";
 
 import { DropdownMenuAsyncActionItem, TrashIcon, useToast } from "@quri/ui";
 
-import { ownerRoute } from "@/routes";
-import { deleteModelAction } from "@/server/models/actions/deleteModelAction";
-import { ModelCardDTO } from "@/server/models/data/cards";
+import { ownerRoute } from "@/lib/routes";
+import { deleteModelAction } from "@/models/actions/deleteModelAction";
+import { ModelCardDTO } from "@/models/data/cards";
 
 type Props = {
   model: ModelCardDTO;

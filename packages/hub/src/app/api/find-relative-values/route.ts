@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-import { findRelativeValuesForSelect } from "@/server/relative-values/data/findRelativeValuesForSelect";
+import { findRelativeValuesForSelect } from "@/relative-values/data/findRelativeValuesForSelect";
 
 // We're not calling this as a server actions because it'd be too slow (server actions are sequential).
 // TODO: it'd be good to use tRPC for this.

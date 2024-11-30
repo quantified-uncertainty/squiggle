@@ -6,9 +6,9 @@ import Skeleton from "react-loading-skeleton";
 import { result } from "@quri/squiggle-lang";
 
 import { RelativeValuesProvider } from "@/relative-values/components/views/RelativeValuesProvider";
+import { RelativeValuesDefinitionFullDTO } from "@/relative-values/data/full";
+import { RelativeValuesExportFullDTO } from "@/relative-values/data/fullExport";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
-import { RelativeValuesDefinitionFullDTO } from "@/server/relative-values/data/full";
-import { RelativeValuesExportFullDTO } from "@/server/relative-values/data/fullExport";
 
 export const RelativeValuesModelLayout: FC<
   PropsWithChildren<{

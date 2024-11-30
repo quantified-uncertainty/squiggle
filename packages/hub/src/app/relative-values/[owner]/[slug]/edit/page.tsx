@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { controlsOwnerId } from "@/server/owners/auth";
-import { loadRelativeValuesDefinitionFull } from "@/server/relative-values/data/full";
-import { getSessionUserOrRedirect } from "@/server/users/auth";
+import { controlsOwnerId } from "@/owners/data/auth";
+import { loadRelativeValuesDefinitionFull } from "@/relative-values/data/full";
+import { getSessionUserOrRedirect } from "@/users/auth";
 
 import { EditRelativeValuesDefinition } from "./EditRelativeValuesDefinition";
 

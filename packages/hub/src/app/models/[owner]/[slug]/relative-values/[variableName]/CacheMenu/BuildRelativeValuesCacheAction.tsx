@@ -4,8 +4,8 @@ import { FC } from "react";
 import { RefreshIcon, useToast } from "@quri/ui";
 
 import { ServerActionDropdownAction } from "@/components/ui/ServerActionDropdownAction";
-import { buildRelativeValuesCacheAction } from "@/server/relative-values/actions/buildRelativeValuesCacheAction";
-import { RelativeValuesExportFullDTO } from "@/server/relative-values/data/fullExport";
+import { buildRelativeValuesCacheAction } from "@/relative-values/actions/buildRelativeValuesCacheAction";
+import { RelativeValuesExportFullDTO } from "@/relative-values/data/fullExport";
 
 export const BuildRelativeValuesCacheAction: FC<{
   relativeValuesExport: RelativeValuesExportFullDTO;

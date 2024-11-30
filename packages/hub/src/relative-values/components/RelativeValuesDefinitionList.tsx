@@ -3,9 +3,9 @@
 import { FC } from "react";
 
 import { LoadMore } from "@/components/LoadMore";
-import { usePaginator } from "@/hooks/usePaginator";
-import { RelativeValuesDefinitionCardDTO } from "@/server/relative-values/data/cards";
-import { Paginated } from "@/server/types";
+import { usePaginator } from "@/lib/hooks/usePaginator";
+import { Paginated } from "@/lib/types";
+import { RelativeValuesDefinitionCardDTO } from "@/relative-values/data/cards";
 
 import { RelativeValuesDefinitionCard } from "./RelativeValuesDefinitionCard";
 

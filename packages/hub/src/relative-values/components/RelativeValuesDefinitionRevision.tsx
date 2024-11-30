@@ -3,7 +3,7 @@ import { FC, Fragment } from "react";
 import { StyledTab, StyledTextArea } from "@quri/ui";
 
 import { H2 } from "@/components/ui/Headers";
-import { RelativeValuesDefinitionFullDTO } from "@/server/relative-values/data/full";
+import { RelativeValuesDefinitionFullDTO } from "@/relative-values/data/full";
 
 import { ClusterInfo } from "./common/ClusterInfo";
 

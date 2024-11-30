@@ -1,7 +1,7 @@
 import { z } from "zod";
 
+import { loadWorkflows } from "@/ai/data/loadWorkflows";
 import { numberInString } from "@/lib/zodUtils";
-import { loadWorkflows } from "@/server/ai/data";
 
 import { AiDashboard } from "./AiDashboard";
 

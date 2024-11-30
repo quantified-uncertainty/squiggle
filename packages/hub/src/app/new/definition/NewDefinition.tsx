@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import { FC } from "react";
 
 import { H1 } from "@/components/ui/Headers";
+import { relativeValuesRoute } from "@/lib/routes";
+import { createRelativeValuesDefinitionAction } from "@/relative-values/actions/createRelativeValuesDefinitionAction";
 import { RelativeValuesDefinitionForm } from "@/relative-values/components/RelativeValuesDefinitionForm";
 import { FormShape } from "@/relative-values/components/RelativeValuesDefinitionForm/FormShape";
-import { relativeValuesRoute } from "@/routes";
-import { createRelativeValuesDefinitionAction } from "@/server/relative-values/actions/createRelativeValuesDefinitionAction";
 
 export const NewDefinition: FC = () => {
   const router = useRouter();

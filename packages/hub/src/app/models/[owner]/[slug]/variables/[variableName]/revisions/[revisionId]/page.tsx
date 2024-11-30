@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { loadVariableRevisionFull } from "@/server/variables/data/fullVariableRevision";
+import { loadVariableRevisionFull } from "@/variables/data/fullVariableRevision";
 
 import { VariableRevisionPage } from "./VariableRevisionPage";
 

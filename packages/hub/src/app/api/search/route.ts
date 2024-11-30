@@ -2,14 +2,14 @@ import { Searchable as PrismaSearchable } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-import { auth } from "@/auth";
-import { prisma } from "@/prisma";
 import {
   groupRoute,
   modelRoute,
   relativeValuesRoute,
   userRoute,
-} from "@/routes";
+} from "@/lib/routes";
+import { auth } from "@/lib/server/auth";
+import { prisma } from "@/lib/server/prisma";
 
 import { SearchResult } from "./schema";
 

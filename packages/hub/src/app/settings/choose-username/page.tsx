@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { getSessionUserOrRedirect } from "@/server/users/auth";
+import { getSessionUserOrRedirect } from "@/users/auth";
 
 import { ChooseUsername } from "./ChooseUsername";
 

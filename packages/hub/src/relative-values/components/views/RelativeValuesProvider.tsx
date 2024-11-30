@@ -3,8 +3,8 @@ import { FC, PropsWithChildren, Reducer } from "react";
 
 import { generateProvider } from "@quri/ui";
 
+import { RelativeValuesDefinitionFullDTO } from "@/relative-values/data/full";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
-import { RelativeValuesDefinitionFullDTO } from "@/server/relative-values/data/full";
 
 import { Filter } from "./types";
 

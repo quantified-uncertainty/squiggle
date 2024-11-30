@@ -10,9 +10,9 @@ import {
   StyledTabLink,
   StyledTabLinkList,
 } from "@/components/ui/StyledTabLink";
-import { groupMembersRoute, groupRoute } from "@/routes";
-import { loadGroupCard } from "@/server/groups/data/card";
-import { hasGroupMembership } from "@/server/groups/data/helpers";
+import { loadGroupCard } from "@/groups/data/groupCards";
+import { hasGroupMembership } from "@/groups/data/helpers";
+import { groupMembersRoute, groupRoute } from "@/lib/routes";
 
 import { NewModelButton } from "./NewModelButton";
 

@@ -7,7 +7,7 @@ import {
   versionedSquigglePackages,
 } from "@quri/versioned-squiggle-components";
 
-import { ModelRevisionFullDTO } from "@/server/models/data/fullRevision";
+import { ModelRevisionFullDTO } from "@/models/data/fullRevision";
 import { getHubLinker } from "@/squiggle/components/linker";
 
 export const ModelRevisionView: FC<{

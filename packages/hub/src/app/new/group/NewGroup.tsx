@@ -7,9 +7,9 @@ import { Button } from "@quri/ui";
 
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { useServerActionForm } from "@/hooks/useServerActionForm";
-import { groupRoute } from "@/routes";
-import { createGroupAction } from "@/server/groups/actions/createGroupAction";
+import { createGroupAction } from "@/groups/actions/createGroupAction";
+import { useServerActionForm } from "@/lib/hooks/useServerActionForm";
+import { groupRoute } from "@/lib/routes";
 
 export const NewGroup: FC = () => {
   const router = useRouter();

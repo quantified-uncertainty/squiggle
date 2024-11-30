@@ -14,7 +14,7 @@ import {
   modelRoute,
   ownerRoute,
   variableRoute,
-} from "@/routes";
+} from "@/lib/routes";
 
 function hasTypename(owner: {
   __typename?: string;

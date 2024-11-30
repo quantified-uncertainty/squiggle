@@ -3,7 +3,7 @@ import { FC } from "react";
 
 import { DropdownMenuAsyncActionItem, TrashIcon, useToast } from "@quri/ui";
 
-import { deleteRelativeValuesDefinitionAction } from "@/server/relative-values/actions/deleteRelativeValuesDefinitionAction";
+import { deleteRelativeValuesDefinitionAction } from "@/relative-values/actions/deleteRelativeValuesDefinitionAction";
 
 type Props = {
   owner: string;

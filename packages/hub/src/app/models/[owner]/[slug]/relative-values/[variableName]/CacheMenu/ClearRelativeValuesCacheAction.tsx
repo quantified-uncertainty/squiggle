@@ -4,8 +4,8 @@ import { FC } from "react";
 import { TrashIcon, useToast } from "@quri/ui";
 
 import { ServerActionDropdownAction } from "@/components/ui/ServerActionDropdownAction";
-import { clearRelativeValuesCacheAction } from "@/server/relative-values/actions/clearRelativeValuesCacheAction";
-import { RelativeValuesExportFullDTO } from "@/server/relative-values/data/fullExport";
+import { clearRelativeValuesCacheAction } from "@/relative-values/actions/clearRelativeValuesCacheAction";
+import { RelativeValuesExportFullDTO } from "@/relative-values/data/fullExport";
 
 export const ClearRelativeValuesCacheAction: FC<{
   relativeValuesExport: RelativeValuesExportFullDTO;

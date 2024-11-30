@@ -2,9 +2,9 @@
 import { FC } from "react";
 
 import { LoadMore } from "@/components/LoadMore";
-import { usePaginator } from "@/hooks/usePaginator";
-import { ModelCardDTO } from "@/server/models/data/cards";
-import { Paginated } from "@/server/types";
+import { usePaginator } from "@/lib/hooks/usePaginator";
+import { Paginated } from "@/lib/types";
+import { ModelCardDTO } from "@/models/data/cards";
 
 import { ModelCard } from "./ModelCard";
 

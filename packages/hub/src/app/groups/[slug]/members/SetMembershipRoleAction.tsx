@@ -2,8 +2,8 @@ import { MembershipRole } from "@prisma/client";
 import { FC } from "react";
 
 import { ServerActionDropdownAction } from "@/components/ui/ServerActionDropdownAction";
-import { updateMembershipRoleAction } from "@/server/groups/actions/updateMembershipRoleAction";
-import { GroupMemberDTO } from "@/server/groups/data/members";
+import { updateMembershipRoleAction } from "@/groups/actions/updateMembershipRoleAction";
+import { GroupMemberDTO } from "@/groups/data/members";
 
 type Props = {
   membership: GroupMemberDTO;

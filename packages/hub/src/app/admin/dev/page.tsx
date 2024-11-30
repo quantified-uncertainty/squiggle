@@ -4,7 +4,7 @@ import { Button } from "@quri/ui";
 
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { H2 } from "@/components/ui/Headers";
-import { resetPrisma } from "@/prisma";
+import { resetPrisma } from "@/lib/server/prisma";
 
 export default async function () {
   if (process.env.NODE_ENV !== "development") {

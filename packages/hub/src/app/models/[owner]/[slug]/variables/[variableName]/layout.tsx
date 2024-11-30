@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react";
 
-import { loadVariableRevisions } from "@/server/variables/data/variableRevisions";
+import { loadVariableRevisions } from "@/variables/data/variableRevisions";
 
 import { VariableRevisionsPanel } from "./VariableRevisionsPanel";
 

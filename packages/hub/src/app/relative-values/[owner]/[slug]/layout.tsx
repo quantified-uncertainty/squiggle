@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PropsWithChildren } from "react";
 
-import { controlsOwnerId } from "@/server/owners/auth";
-import { loadRelativeValuesDefinitionCard } from "@/server/relative-values/data/cards";
+import { controlsOwnerId } from "@/owners/data/auth";
+import { loadRelativeValuesDefinitionCard } from "@/relative-values/data/cards";
 
 import { DefinitionLayout } from "./DefinitionLayout";
 

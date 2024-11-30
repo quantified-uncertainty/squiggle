@@ -1,0 +1,56 @@
+"use server";
+import crypto from "crypto";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+import { groupMembersRoute } from "@/lib/routes";
+import { prisma } from "@/lib/server/prisma";
+import { makeServerAction } from "@/lib/server/utils";
+import { zSlug } from "@/lib/zodUtils";
+
+import { loadMyMembership } from "../data/members";
+
+/*
+ * Create or replace a reusable invite token for a group, available as
+ * \`reusableInviteToken\` field on group object.
+ *
+ * You must be an admin of the group to call this mutation. Previous invite
+ * token, if it existed, will stop working.
+ */
+export const createReusableGroupInviteTokenAction = makeServerAction(
+  z.object({
+    slug: zSlug,
+  }),
+  async (input): Promise<void> => {
+    const myMembership = await loadMyMembership({ groupSlug: input.slug });
+    if (!myMembership) {
+      throw new Error("Not a member of this group");
+    }
+    if (myMembership.role !== "Admin") {
+      throw new Error("Only group admins can delete reusable invite tokens");
+    }
+
+    const group = await prisma.group.findFirstOrThrow({
+      where: {
+        asOwner: {
+          slug: input.slug,
+        },
+      },
+    });
+
+    const token = crypto.randomBytes(30).toString("hex");
+
+    await prisma.group.update({
+      where: {
+        id: group.id,
+      },
+      data: {
+        // old token will be overwritten, that's fine
+        reusableInviteToken: token,
+      },
+      select: { id: true },
+    });
+
+    revalidatePath(groupMembersRoute({ slug: input.slug }));
+  }
+);

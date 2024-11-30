@@ -5,8 +5,8 @@ import { PlusIcon, SelectStringFormField } from "@quri/ui";
 
 import { SelectUser, SelectUserOption } from "@/components/SelectUser";
 import { ServerActionModalAction } from "@/components/ui/ServerActionModalAction";
-import { addUserToGroupAction } from "@/server/groups/actions/addUserToGroupAction";
-import { GroupMemberDTO } from "@/server/groups/data/members";
+import { addUserToGroupAction } from "@/groups/actions/addUserToGroupAction";
+import { GroupMemberDTO } from "@/groups/data/members";
 
 type Props = {
   groupSlug: string;

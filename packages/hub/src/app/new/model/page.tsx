@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import { z } from "zod";
 
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { getMyGroup } from "@/server/groups/data/card";
-import { getSessionUserOrRedirect } from "@/server/users/auth";
+import { getMyGroup } from "@/groups/data/groupCards";
+import { getSessionUserOrRedirect } from "@/users/auth";
 
 import { NewModel } from "./NewModel";
 

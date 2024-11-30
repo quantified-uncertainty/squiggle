@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { FC } from "react";
 
-import { getGlobalStatistics } from "@/server/globalStatistics";
+import { getGlobalStatistics } from "@/lib/server/globalStatistics";
 
 const StatRow: FC<{ name: string; value: number }> = ({ name, value }) => (
   <tr className="border">

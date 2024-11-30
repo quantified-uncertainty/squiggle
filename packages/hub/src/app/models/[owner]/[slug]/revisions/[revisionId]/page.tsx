@@ -4,9 +4,9 @@ import { notFound } from "next/navigation";
 import { CommentIcon } from "@quri/ui";
 
 import { StyledLink } from "@/components/ui/StyledLink";
-import { commonDateFormat } from "@/lib/common";
-import { modelRoute } from "@/routes";
-import { loadModelRevisionFull } from "@/server/models/data/fullRevision";
+import { commonDateFormat } from "@/lib/constants";
+import { modelRoute } from "@/lib/routes";
+import { loadModelRevisionFull } from "@/models/data/fullRevision";
 
 import { ModelRevisionView } from "./ModelRevisionView";
 

@@ -3,8 +3,8 @@ import { Suspense } from "react";
 import Skeleton from "react-loading-skeleton";
 
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { loadModelCard } from "@/server/models/data/cards";
-import { loadModelRevisions } from "@/server/models/data/revisions";
+import { loadModelCard } from "@/models/data/cards";
+import { loadModelRevisions } from "@/models/data/revisions";
 
 import { ModelRevisionsList } from "./ModelRevisionsList";
 

@@ -5,12 +5,12 @@ import { FC } from "react";
 import { LoadMore } from "@/components/LoadMore";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { UsernameLink } from "@/components/UsernameLink";
-import { usePaginator } from "@/hooks/usePaginator";
-import { commonDateFormat } from "@/lib/common";
-import { modelRevisionRoute } from "@/routes";
-import { ModelCardDTO } from "@/server/models/data/cards";
-import { ModelRevisionDTO } from "@/server/models/data/revisions";
-import { Paginated } from "@/server/types";
+import { commonDateFormat } from "@/lib/constants";
+import { usePaginator } from "@/lib/hooks/usePaginator";
+import { modelRevisionRoute } from "@/lib/routes";
+import { Paginated } from "@/lib/types";
+import { ModelCardDTO } from "@/models/data/cards";
+import { ModelRevisionDTO } from "@/models/data/revisions";
 
 const ModelRevisionItem: FC<{
   model: ModelCardDTO;

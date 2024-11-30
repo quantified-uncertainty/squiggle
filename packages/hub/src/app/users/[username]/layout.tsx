@@ -4,7 +4,6 @@ import { PropsWithChildren } from "react";
 
 import { UserIcon } from "@quri/ui";
 
-import { auth } from "@/auth";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { H1 } from "@/components/ui/Headers";
 import {
@@ -16,8 +15,9 @@ import {
   userGroupsRoute,
   userRoute,
   userVariablesRoute,
-} from "@/routes";
-import { loadLayoutUser } from "@/server/users/data/layoutUser";
+} from "@/lib/routes";
+import { auth } from "@/lib/server/auth";
+import { loadLayoutUser } from "@/users/data/layoutUser";
 
 import { NewModelButton } from "./NewModelButton";
 

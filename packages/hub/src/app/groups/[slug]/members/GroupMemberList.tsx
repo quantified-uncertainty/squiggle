@@ -6,9 +6,9 @@ import { DropdownMenu } from "@quri/ui";
 import { LoadMore } from "@/components/LoadMore";
 import { DotsDropdown } from "@/components/ui/DotsDropdown";
 import { H2 } from "@/components/ui/Headers";
-import { usePaginator } from "@/hooks/usePaginator";
-import { GroupMemberDTO } from "@/server/groups/data/members";
-import { Paginated } from "@/server/types";
+import { GroupMemberDTO } from "@/groups/data/members";
+import { usePaginator } from "@/lib/hooks/usePaginator";
+import { Paginated } from "@/lib/types";
 
 import { AddUserToGroupAction } from "./AddUserToGroupAction";
 import { GroupMemberCard } from "./GroupMemberCard";

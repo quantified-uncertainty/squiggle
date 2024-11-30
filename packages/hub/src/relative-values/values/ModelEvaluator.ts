@@ -8,7 +8,7 @@ import {
   SqStringValue,
 } from "@quri/squiggle-lang";
 
-import { RelativeValuesExportFullDTO } from "@/server/relative-values/data/fullExport";
+import { RelativeValuesExportFullDTO } from "@/relative-values/data/fullExport";
 
 import { cartesianProduct } from "../lib/utils";
 import {

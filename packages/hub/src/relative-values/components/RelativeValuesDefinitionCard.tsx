@@ -1,8 +1,8 @@
 import { FC } from "react";
 
 import { EntityCard, UpdatedStatus } from "@/components/EntityCard";
-import { relativeValuesRoute } from "@/routes";
-import { RelativeValuesDefinitionCardDTO } from "@/server/relative-values/data/cards";
+import { relativeValuesRoute } from "@/lib/routes";
+import { RelativeValuesDefinitionCardDTO } from "@/relative-values/data/cards";
 
 type Props = {
   definition: RelativeValuesDefinitionCardDTO;

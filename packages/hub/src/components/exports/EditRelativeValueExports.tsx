@@ -7,9 +7,9 @@ import { RelativeValuesExportInput } from "@/app/models/[owner]/[slug]/EditSquig
 import {
   modelForRelativeValuesExportRoute,
   relativeValuesRoute,
-} from "@/routes";
-import { ModelFullDTO } from "@/server/models/data/full";
-import { FindRelativeValuesForSelectResult } from "@/server/relative-values/data/findRelativeValuesForSelect";
+} from "@/lib/routes";
+import { ModelFullDTO } from "@/models/data/full";
+import { FindRelativeValuesForSelectResult } from "@/relative-values/data/findRelativeValuesForSelect";
 
 import { SelectOwner, SelectOwnerOption } from "../SelectOwner";
 import { FormModal } from "../ui/FormModal";

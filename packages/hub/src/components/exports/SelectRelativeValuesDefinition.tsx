@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { SelectFormField } from "@quri/ui";
 
-import { FindRelativeValuesForSelectResult } from "@/server/relative-values/data/findRelativeValuesForSelect";
+import { FindRelativeValuesForSelectResult } from "@/relative-values/data/findRelativeValuesForSelect";
 
 import { SelectOwnerOption } from "../SelectOwner";
 

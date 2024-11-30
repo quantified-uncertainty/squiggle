@@ -6,9 +6,9 @@ import { ClipboardCopyIcon, TextTooltip, useToast } from "@quri/ui";
 
 import { H2 } from "@/components/ui/Headers";
 import { ServerActionButton } from "@/components/ui/ServerActionButton";
-import { groupInviteLink } from "@/routes";
-import { createReusableGroupInviteTokenAction } from "@/server/groups/actions/createReusableGroupInviteTokenAction";
-import { deleteReusableGroupInviteTokenAction } from "@/server/groups/actions/deleteReusableGroupInviteTokenAction";
+import { createReusableGroupInviteTokenAction } from "@/groups/actions/createReusableGroupInviteTokenAction";
+import { deleteReusableGroupInviteTokenAction } from "@/groups/actions/deleteReusableGroupInviteTokenAction";
+import { groupInviteLink } from "@/lib/routes";
 
 type Props = {
   groupSlug: string;

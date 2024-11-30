@@ -3,8 +3,8 @@ import { FC } from "react";
 import { TrashIcon } from "@quri/ui";
 
 import { ServerActionDropdownAction } from "@/components/ui/ServerActionDropdownAction";
-import { deleteMembershipAction } from "@/server/groups/actions/deleteMembershipAction";
-import { GroupMemberDTO } from "@/server/groups/data/members";
+import { deleteMembershipAction } from "@/groups/actions/deleteMembershipAction";
+import { GroupMemberDTO } from "@/groups/data/members";
 
 type Props = {
   groupSlug: string;

@@ -5,10 +5,10 @@ import { LockIcon } from "@quri/ui";
 
 import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
+import { modelForRelativeValuesExportRoute } from "@/lib/routes";
 import { RelativeValuesDefinitionRevision } from "@/relative-values/components/RelativeValuesDefinitionRevision";
-import { modelForRelativeValuesExportRoute } from "@/routes";
-import { RelativeValuesExportCardDTO } from "@/server/relative-values/data/exports";
-import { RelativeValuesDefinitionFullDTO } from "@/server/relative-values/data/full";
+import { RelativeValuesExportCardDTO } from "@/relative-values/data/exports";
+import { RelativeValuesDefinitionFullDTO } from "@/relative-values/data/full";
 
 const ExportItem: FC<{
   modelExport: RelativeValuesExportCardDTO;

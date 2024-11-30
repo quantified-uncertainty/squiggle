@@ -6,7 +6,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { Button } from "@quri/ui";
 
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { setUsername } from "@/server/users/actions";
+import { setUsername } from "@/users/actions";
 
 export const ChooseUsername: FC = () => {
   const router = useRouter();

@@ -8,8 +8,8 @@ import {
   versionSupportsSqPathV2,
 } from "@quri/versioned-squiggle-components";
 
-import { VariableRevisionFullDTO } from "@/server/variables/data/fullVariableRevision";
 import { sqProjectWithHubLinker } from "@/squiggle/components/linker";
+import { VariableRevisionFullDTO } from "@/variables/data/fullVariableRevision";
 
 type SquiggleProps = {
   variableName: string;

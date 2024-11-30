@@ -5,9 +5,9 @@ import { RightArrowIcon } from "@quri/ui";
 
 import { SelectOwner, SelectOwnerOption } from "@/components/SelectOwner";
 import { ServerActionModalAction } from "@/components/ui/ServerActionModalAction";
-import { modelRoute } from "@/routes";
-import { moveModelAction } from "@/server/models/actions/moveModelAction";
-import { ModelCardDTO } from "@/server/models/data/cards";
+import { modelRoute } from "@/lib/routes";
+import { moveModelAction } from "@/models/actions/moveModelAction";
+import { ModelCardDTO } from "@/models/data/cards";
 
 import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
 

@@ -8,7 +8,7 @@ import {
 } from "@quri/ui";
 
 import { FormModal } from "@/components/ui/FormModal";
-import { useServerActionForm } from "@/hooks/useServerActionForm";
+import { useServerActionForm } from "@/lib/hooks/useServerActionForm";
 
 type CommonProps<
   TFormShape extends FieldValues,

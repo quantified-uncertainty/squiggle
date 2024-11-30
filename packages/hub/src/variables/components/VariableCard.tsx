@@ -12,9 +12,9 @@ import {
   UpdatedStatus,
 } from "@/components/EntityCard";
 import { Link } from "@/components/ui/Link";
+import { modelRoute, variableRoute } from "@/lib/routes";
 import { exportTypeIcon } from "@/lib/typeIcon";
-import { modelRoute, variableRoute } from "@/routes";
-import { VariableCardDTO } from "@/server/variables/data/variableCards";
+import { VariableCardDTO } from "@/variables/data/variableCards";
 
 type Props = {
   variable: VariableCardDTO;

@@ -12,9 +12,9 @@ import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
 import { H2 } from "@/components/ui/Headers";
 import { ServerActionButton } from "@/components/ui/ServerActionButton";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { modelRoute } from "@/routes";
-import { adminUpdateModelVersionAction } from "@/server/models/actions/adminUpdateModelVersionAction";
-import { ModelByVersion } from "@/server/models/data/byVersion";
+import { modelRoute } from "@/lib/routes";
+import { adminUpdateModelVersionAction } from "@/models/actions/adminUpdateModelVersionAction";
+import { ModelByVersion } from "@/models/data/byVersion";
 
 import { UpgradeableModel } from "./UpgradeableModel";
 

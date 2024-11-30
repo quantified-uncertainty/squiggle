@@ -5,7 +5,7 @@ import {
   StyledTabLink,
   StyledTabLinkList,
 } from "@/components/ui/StyledTabLink";
-import { definitionsRoute, groupsRoute, variablesRoute } from "@/routes";
+import { definitionsRoute, groupsRoute, variablesRoute } from "@/lib/routes";
 
 export default function FrontPageLayout({ children }: PropsWithChildren) {
   return (

@@ -8,9 +8,13 @@ import {
   GITHUB_URL,
   NEWSLETTER_URL,
   QURI_DONATE_URL,
-} from "@/lib/common";
+} from "@/lib/constants";
+import {
+  aboutRoute,
+  privacyPolicyRoute,
+  termsOfServiceRoute,
+} from "@/lib/routes";
 import logoPic from "@/public/logo.png";
-import { aboutRoute, privacyPolicyRoute, termsOfServiceRoute } from "@/routes";
 
 const linkClasses = "items-center flex hover:text-gray-900";
 

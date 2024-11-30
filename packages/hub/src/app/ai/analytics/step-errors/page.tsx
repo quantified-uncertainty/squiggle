@@ -1,4 +1,4 @@
-import { getStepErrors } from "@/server/ai/analytics";
+import { getStepErrors } from "@/ai/data/analytics";
 
 import { StepErrorList } from "../StepErrorList";
 

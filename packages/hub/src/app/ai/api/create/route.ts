@@ -7,10 +7,10 @@ import {
   Workflow,
 } from "@quri/squiggle-ai/server";
 
-import { auth } from "@/auth";
-import { prisma } from "@/prisma";
-import { workflowToV2_0Json } from "@/server/ai/v2_0";
-import { getSelf, isSignedIn } from "@/server/users/auth";
+import { workflowToV2_0Json } from "@/ai/data/v2_0";
+import { auth } from "@/lib/server/auth";
+import { prisma } from "@/lib/server/prisma";
+import { getSelf, isSignedIn } from "@/users/auth";
 
 import { AiRequestBody, aiRequestBodySchema } from "../../utils";
 

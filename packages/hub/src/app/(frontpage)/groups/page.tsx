@@ -1,5 +1,5 @@
 import { GroupList } from "@/groups/components/GroupList";
-import { loadGroupCards } from "@/server/groups/data/card";
+import { loadGroupCards } from "@/groups/data/groupCards";
 
 export default async function OuterGroupsPage() {
   const page = await loadGroupCards();

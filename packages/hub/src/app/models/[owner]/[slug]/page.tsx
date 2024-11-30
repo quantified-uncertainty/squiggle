@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import Skeleton from "react-loading-skeleton";
 
-import { loadModelFull } from "@/server/models/data/full";
+import { loadModelFull } from "@/models/data/full";
 
 import { EditSquiggleSnippetModel } from "./EditSquiggleSnippetModel";
 

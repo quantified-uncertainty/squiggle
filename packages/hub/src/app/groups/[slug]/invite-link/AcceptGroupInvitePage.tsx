@@ -5,9 +5,9 @@ import { FC } from "react";
 import { useToast } from "@quri/ui";
 
 import { ServerActionButton } from "@/components/ui/ServerActionButton";
-import { groupRoute } from "@/routes";
-import { acceptReusableGroupInviteTokenAction } from "@/server/groups/actions/acceptReusableGroupInviteTokenAction";
-import { GroupCardDTO } from "@/server/groups/data/card";
+import { acceptReusableGroupInviteTokenAction } from "@/groups/actions/acceptReusableGroupInviteTokenAction";
+import { GroupCardDTO } from "@/groups/data/groupCards";
+import { groupRoute } from "@/lib/routes";
 
 export const AcceptGroupInvitePage: FC<{
   group: GroupCardDTO;

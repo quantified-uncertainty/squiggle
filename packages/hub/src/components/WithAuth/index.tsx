@@ -1,8 +1,8 @@
 import { FC, PropsWithChildren } from "react";
 
-import { auth } from "@/auth";
-import { prisma } from "@/prisma";
-import { isRootEmail, isSignedIn } from "@/server/users/auth";
+import { auth } from "@/lib/server/auth";
+import { prisma } from "@/lib/server/prisma";
+import { isRootEmail, isSignedIn } from "@/users/auth";
 
 import { RedirectToLogin } from "./RedirectToLogin";
 

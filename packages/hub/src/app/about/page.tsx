@@ -9,7 +9,7 @@ import {
   GITHUB_URL,
   NEWSLETTER_URL,
   QURI_DONATE_URL,
-} from "@/lib/common";
+} from "@/lib/constants";
 
 const markdown = `
 # About Squiggle Hub

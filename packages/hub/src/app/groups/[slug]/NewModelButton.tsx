@@ -4,7 +4,7 @@ import { FC } from "react";
 
 import { Button, PlusIcon } from "@quri/ui";
 
-import { newModelRoute } from "@/routes";
+import { newModelRoute } from "@/lib/routes";
 
 // TODO - this could be a server component, if we had `<LinkButton>` component
 export const NewModelButton: FC<{ group: string }> = ({ group }) => {

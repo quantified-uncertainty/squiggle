@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
-import { loadVariableCards } from "@/server/variables/data/variableCards";
 import { VariableList } from "@/variables/components/VariableList";
+import { loadVariableCards } from "@/variables/data/variableCards";
 
 type Props = {
   params: Promise<{ username: string }>;

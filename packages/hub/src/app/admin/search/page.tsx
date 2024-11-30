@@ -1,7 +1,7 @@
 import { H2 } from "@/components/ui/Headers";
 import { ServerActionButton } from "@/components/ui/ServerActionButton";
-import { adminRebuildSearchIndexAction } from "@/server/search/actions/adminRebuildSearchIndexAction";
-import { checkRootUser } from "@/server/users/auth";
+import { adminRebuildSearchIndexAction } from "@/search/actions/adminRebuildSearchIndexAction";
+import { checkRootUser } from "@/users/auth";
 
 export default async function AdminSearchPage() {
   await checkRootUser();

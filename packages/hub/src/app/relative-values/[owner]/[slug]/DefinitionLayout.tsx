@@ -16,8 +16,8 @@ import {
   ownerRoute,
   relativeValuesEditRoute,
   relativeValuesRoute,
-} from "@/routes";
-import { RelativeValuesDefinitionCardDTO } from "@/server/relative-values/data/cards";
+} from "@/lib/routes";
+import { RelativeValuesDefinitionCardDTO } from "@/relative-values/data/cards";
 
 import { DeleteDefinitionAction } from "./DeleteRelativeValuesDefinitionAction";
 
