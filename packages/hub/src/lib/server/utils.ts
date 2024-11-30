@@ -1,4 +1,8 @@
 import { Prisma } from "@prisma/client";
+import {
+  createSafeActionClient,
+  DEFAULT_SERVER_ERROR_MESSAGE,
+} from "next-safe-action";
 import { z } from "zod";
 
 export type DeepReadonly<T> = T extends (infer R)[]
@@ -25,6 +29,20 @@ export function makeServerAction<T, R>(
   };
 }
 
+export class ActionError extends Error {}
+
+export const actionClient = createSafeActionClient({
+  handleServerError(e) {
+    console.error("Action error:", e.message);
+
+    if (e instanceof ActionError) {
+      return e.message;
+    }
+
+    return DEFAULT_SERVER_ERROR_MESSAGE;
+  },
+});
+
 // Rethrows Prisma constraint error (usually happens on create operations) with a nicer error message.
 export async function rethrowOnConstraint<T>(
   cb: () => Promise<T>,
@@ -44,7 +62,8 @@ export async function rethrowOnConstraint<T>(
         e.meta?.["target"].join(",") === handler.target.join(",")
       ) {
         // TODO - throw more specific error
-        throw new Error(handler.error);
+        // TODO - should this even be an ActionError? `handler.error` is still not very readable
+        throw new ActionError(handler.error);
       }
     }
     throw e;

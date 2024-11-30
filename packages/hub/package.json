@@ -41,6 +41,7 @@
     "lodash": "^4.17.21",
     "next": "^15.0.3",
     "next-auth": "5.0.0-beta.25",
+    "next-safe-action": "^7.9.9",
     "nodemailer": "^6.9.13",
     "pako": "^2.1.0",
     "react": "19.0.0-rc-66855b96-20241106",

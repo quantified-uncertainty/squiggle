@@ -1,25 +1,14 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useAction } from "next-safe-action/hooks";
 import { FC, useState } from "react";
-import { FormProvider } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 
-import { generateSeed } from "@quri/squiggle-lang";
-import { Button, CheckboxFormField } from "@quri/ui";
-import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
+import { Button, CheckboxFormField, useToast } from "@quri/ui";
 
 import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { useServerActionForm } from "@/lib/hooks/useServerActionForm";
-import { modelRoute } from "@/lib/routes";
-import { createSquiggleSnippetModelAction } from "@/models/actions/createSquiggleSnippetModelAction";
-
-const defaultCode = `/*
-Describe your code here
-*/
-
-a = normal(2, 5)
-`;
+import { createModelAction } from "@/models/actions/createModelAction";
 
 type FormShape = {
   slug: string | undefined;
@@ -32,36 +21,42 @@ export const NewModel: FC<{ initialGroup: SelectGroupOption | null }> = ({
 }) => {
   const [group] = useState(initialGroup);
 
-  const router = useRouter();
+  const toast = useToast();
 
-  const { form, onSubmit, inFlight } = useServerActionForm<
-    FormShape,
-    typeof createSquiggleSnippetModelAction
-  >({
+  const { executeAsync, status } = useAction(createModelAction, {
+    onError: ({ error, ...rest }) => {
+      console.trace("onError", error, rest);
+      if (error.serverError) {
+        toast(error.serverError, "error");
+        return;
+      }
+
+      const slugError = error.validationErrors?.slug?._errors?.[0];
+      if (slugError) {
+        form.setError("slug", {
+          message: slugError,
+        });
+      } else {
+        toast("Internal error", "error");
+      }
+    },
+  });
+
+  const form = useForm<FormShape>({
     mode: "onChange",
     defaultValues: {
       // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
       group,
       isPrivate: false,
     },
-    blockOnSuccess: true,
-    action: createSquiggleSnippetModelAction,
-    formDataToVariables: (data) => ({
+  });
+
+  const onSubmit = form.handleSubmit(async (data) => {
+    await executeAsync({
       slug: data.slug ?? "", // shouldn't happen but satisfies Typescript
       groupSlug: data.group?.slug,
       isPrivate: data.isPrivate,
-      code: defaultCode,
-      version: defaultSquiggleVersion,
-      seed: generateSeed(),
-    }),
-    onCompleted: (result) => {
-      router.push(
-        modelRoute({
-          owner: result.model.owner.slug,
-          slug: result.model.slug,
-        })
-      );
-    },
+    });
   });
 
   return (
@@ -86,7 +81,11 @@ export const NewModel: FC<{ initialGroup: SelectGroupOption | null }> = ({
         </div>
         <Button
           onClick={onSubmit}
-          disabled={!form.formState.isValid || inFlight}
+          disabled={
+            !form.formState.isValid ||
+            form.formState.isSubmitting ||
+            status === "hasSucceeded"
+          }
           theme="primary"
         >
           Create
