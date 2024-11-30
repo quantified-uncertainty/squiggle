@@ -41,8 +41,9 @@
   "types": "./dist/index.d.ts",
   "source": "./src/index.ts",
   "peerDependencies": {
-    "react": "^18",
-    "react-dom": "^18"
+    "react": "^18 | ^19",
+    "react-dom": "^18 | ^19",
+    "react-hook-form": "^7.53.2"
   },
   "dependencies": {
     "@floating-ui/react": "^0.26.16",
@@ -50,7 +51,6 @@
     "clsx": "^2.1.1",
     "framer-motion": "^11.0.3",
     "react-colorful": "^5.6.1",
-    "react-hook-form": "^7.50.0",
     "react-select": "^5.8.0",
     "react-textarea-autosize": "8.5.4",
     "react-use": "^17.5.0"
@@ -77,8 +77,9 @@
     "postcss-cli": "^11.0.0",
     "prettier": "^3.3.3",
     "prop-types": "^15.8.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.3.1",
+    "react": "19.0.0-rc-66855b96-20241106",
+    "react-dom": "19.0.0-rc-66855b96-20241106",
+    "react-hook-form": "^7.53.2",
     "rollup-plugin-node-builtins": "^2.1.2",
     "storybook": "^8.1.5",
     "tailwindcss": "^3.4.14",
