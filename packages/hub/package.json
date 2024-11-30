@@ -9,7 +9,7 @@
     "db:migrate:dev": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate dev",
     "db:migrate": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate deploy",
     "db:reset": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate reset",
-    "dev": "next dev -p 3001",
+    "dev": "next dev -p 3001 --turbo",
     "start": "__NEXT_PRIVATE_PREBUNDLED_REACT=next next start",
     "gen:prisma": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma generate --no-hints",
     "gen:relay": "relay-compiler",
@@ -26,7 +26,7 @@
     "build-last-revision": "pnpm build:esbuild && node ./dist/scripts/buildRecentModelRevision/main.mjs"
   },
   "dependencies": {
-    "@next-auth/prisma-adapter": "^1.0.7",
+    "@auth/prisma-adapter": "^2.7.4",
     "@pothos/core": "^3.41.1",
     "@pothos/plugin-errors": "^3.11.1",
     "@pothos/plugin-prisma": "^3.65.2",
@@ -51,8 +51,8 @@
     "immutable": "^4.3.6",
     "invariant": "^2.2.4",
     "lodash": "^4.17.21",
-    "next": "^14.2.15",
-    "next-auth": "^4.24.7",
+    "next": "^15.0.3",
+    "next-auth": "5.0.0-beta.25",
     "nodemailer": "^6.9.13",
     "pako": "^2.1.0",
     "react": "^18.2.0",

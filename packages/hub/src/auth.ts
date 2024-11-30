@@ -1,5 +1,7 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { AuthOptions } from "next-auth";
+import "server-only";
+
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import NextAuth, { NextAuthConfig } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 import GithubProvider from "next-auth/providers/github";
 import { Provider } from "next-auth/providers/index";
@@ -7,7 +9,7 @@ import { Provider } from "next-auth/providers/index";
 import { indexUserId } from "@/graphql/helpers/searchHelpers";
 import { prisma } from "@/prisma";
 
-function buildAuthOptions() {
+function buildAuthConfig(): NextAuthConfig {
   const providers: Provider[] = [];
 
   const { SENDGRID_KEY, EMAIL_FROM } = process.env;
@@ -31,7 +33,7 @@ function buildAuthOptions() {
     );
   }
 
-  const authOptions: AuthOptions = {
+  const config: NextAuthConfig = {
     adapter: PrismaAdapter(prisma),
     providers,
     callbacks: {
@@ -50,12 +52,14 @@ function buildAuthOptions() {
     },
     events: {
       async createUser({ user }) {
-        await indexUserId(user.id);
+        if (user.id) {
+          await indexUserId(user.id);
+        }
       },
     },
   };
 
-  return authOptions;
+  return config;
 }
 
-export const authOptions = buildAuthOptions();
+export const { auth, handlers, signIn, signOut } = NextAuth(buildAuthConfig());

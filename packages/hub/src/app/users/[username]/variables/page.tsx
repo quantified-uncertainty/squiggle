@@ -9,17 +9,19 @@ import QueryNode, {
 } from "@/__generated__/UserVariablesPageQuery.graphql";
 
 type Props = {
-  params: { username: string };
+  params: Promise<{ username: string }>;
 };
 
 export default async function OuterUserVariablesPage({ params }: Props) {
+  const { username } = await params;
   const query = await loadPageQuery<UserVariablesPageQuery>(QueryNode, {
-    username: params.username,
+    username,
   });
 
   return <UserVariablesPage query={query} />;
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  return { title: params.username };
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { username } = await params;
+  return { title: username };
 }

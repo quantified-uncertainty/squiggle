@@ -12,20 +12,21 @@ export default async function Layout({
   params,
   children,
 }: PropsWithChildren<{
-  params: { owner: string; slug: string; variableName: string };
+  params: Promise<{ owner: string; slug: string; variableName: string }>;
 }>) {
+  const { owner, slug, variableName } = await params;
   const query = await loadPageQuery<RelativeValuesModelLayoutQuery>(QueryNode, {
     input: {
-      owner: params.owner,
-      slug: params.slug,
+      owner,
+      slug,
     },
     forRelativeValues: {
-      variableName: params.variableName,
+      variableName,
     },
   });
 
   return (
-    <RelativeValuesModelLayout query={query} variableName={params.variableName}>
+    <RelativeValuesModelLayout query={query} variableName={variableName}>
       {children}
     </RelativeValuesModelLayout>
   );

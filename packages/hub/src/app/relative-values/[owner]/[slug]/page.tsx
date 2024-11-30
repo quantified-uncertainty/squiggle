@@ -7,14 +7,15 @@ import { loadPageQuery } from "@/relay/loadPageQuery";
 import { RelativeValuesDefinitionPage } from "./RelativeValuesDefinitionPage";
 
 type Props = {
-  params: { owner: string; slug: string };
+  params: Promise<{ owner: string; slug: string }>;
 };
 
 export default async function OuterDefinitionPage({ params }: Props) {
+  const { owner, slug } = await params;
   const query = await loadPageQuery<RelativeValuesDefinitionPageQuery>(
     QueryNode,
     {
-      input: { owner: params.owner, slug: params.slug },
+      input: { owner, slug },
     }
   );
 

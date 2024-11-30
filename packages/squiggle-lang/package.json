@@ -10,9 +10,10 @@
     "directory": "packages/squiggle-lang"
   },
   "scripts": {
-    "build": "pnpm run build:peggy && pnpm run build:ts",
+    "build": "pnpm run build:peggy && pnpm run build:ts && pnpm run build:worker",
     "build:peggy": "peggy --cache --format es ./src/ast/peggyParser.peggy",
     "build:ts": "tsc -b",
+    "build:worker": "esbuild src/runners/worker.ts --bundle --minify --platform=browser --outfile=dist/runners/esbuild-worker.cjs",
     "dev": "tsc -b -w",
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js && rm *.tsbuildinfo",
     "jest": "NODE_OPTIONS=--experimental-vm-modules jest",
@@ -59,6 +60,7 @@
     "@typescript-eslint/parser": "^7.11.0",
     "codecov": "^3.8.3",
     "date-fns": "^4.1.0",
+    "esbuild": "^0.24.0",
     "eslint": "^8.57.1",
     "fast-check": "^3.19.0",
     "jest": "^29.7.0",

@@ -5,20 +5,15 @@
  */
 import "server-only";
 
-import { getServerSession as getNextAuthServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { isRootEmail, isSignedIn } from "@/graphql/helpers/userHelpers";
 import { prisma } from "@/prisma";
 
-import { authOptions } from "../app/api/auth/[...nextauth]/authOptions";
-
-export async function getServerSession() {
-  return getNextAuthServerSession(authOptions);
-}
+import { auth } from "../auth";
 
 export async function getSessionUserOrRedirect() {
-  const session = await getServerSession();
+  const session = await auth();
   if (!isSignedIn(session)) {
     redirect("/api/auth/signin"); // TODO - callbackUrl
   }

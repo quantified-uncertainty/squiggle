@@ -13,11 +13,7 @@ const SIGNATURE_ERROR = "Signature errors (total)";
 const LONG_ERROR = "Long errors";
 const NOT_DEFINED_ERROR = "Undefined variable";
 
-export default async function ({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
+export default async function () {
   const errors = await getCodeErrors();
 
   // pre-initialized to follow the right key order

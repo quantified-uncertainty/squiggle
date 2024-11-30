@@ -7,11 +7,11 @@ import {
   Workflow,
 } from "@quri/squiggle-ai/server";
 
+import { auth } from "@/auth";
 import { getSelf, isSignedIn } from "@/graphql/helpers/userHelpers";
 import { prisma } from "@/prisma";
 import { getAiCodec } from "@/server/ai/utils";
 import { V2WorkflowData } from "@/server/ai/v2_0";
-import { getServerSession } from "@/server/helpers";
 
 import { AiRequestBody, aiRequestBodySchema } from "../../utils";
 
@@ -122,7 +122,7 @@ function saveWorkflowToDbOnUpdates(
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession();
+  const session = await auth();
 
   if (!isSignedIn(session)) {
     return new Response("Unauthorized", { status: 401 });
