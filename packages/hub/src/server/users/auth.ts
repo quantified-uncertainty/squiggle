@@ -1,5 +1,3 @@
-import "server-only";
-
 import { User } from "@prisma/client";
 import { Session } from "next-auth";
 import { redirect } from "next/navigation";

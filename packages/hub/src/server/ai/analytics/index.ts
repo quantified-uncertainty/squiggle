@@ -1,5 +1,3 @@
-import "server-only";
-
 import * as Prisma from "@prisma/client";
 
 import { CodeArtifact, Workflow } from "@quri/squiggle-ai/server";

@@ -1,5 +1,3 @@
-import "server-only";
-
 import { FC, PropsWithChildren } from "react";
 
 import { auth } from "@/auth";

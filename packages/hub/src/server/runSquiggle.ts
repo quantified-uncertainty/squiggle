@@ -1,5 +1,3 @@
-import "server-only";
-
 import { Prisma } from "@prisma/client";
 import crypto from "crypto";
 

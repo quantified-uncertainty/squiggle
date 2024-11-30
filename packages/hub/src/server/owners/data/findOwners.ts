@@ -1,5 +1,3 @@
-import "server-only";
-
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 

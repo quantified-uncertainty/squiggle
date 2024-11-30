@@ -1,5 +1,3 @@
-import "server-only";
-
 import { prisma } from "@/prisma";
 import { checkRootUser } from "@/server/users/auth";
 
