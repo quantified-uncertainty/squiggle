@@ -1,17 +1,21 @@
 "use client";
 
-import { FC } from "react";
+import { FC, PropsWithChildren } from "react";
 
 import { EntityLayout } from "@/components/EntityLayout";
 
 import { ModelEntityNodes } from "./ModelEntityNodes";
 
-type Props = {
+type Props = PropsWithChildren<{
   username: string;
   slug: string;
-};
+}>;
 
-export const FallbackModelLayout: FC<Props> = ({ username, slug }) => {
+export const FallbackModelLayout: FC<Props> = ({
+  username,
+  slug,
+  children,
+}) => {
   return (
     <EntityLayout
       // Note that we don't pass `__typename` here.
@@ -25,6 +29,8 @@ export const FallbackModelLayout: FC<Props> = ({ username, slug }) => {
           }}
         />
       }
-    />
+    >
+      {children}
+    </EntityLayout>
   );
 };

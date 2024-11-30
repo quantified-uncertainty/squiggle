@@ -31,7 +31,13 @@ async function LoadedLayout({ params, children }: Props) {
 export default async function Layout({ params, children }: Props) {
   const { owner, slug } = await params;
   return (
-    <Suspense fallback={<FallbackModelLayout username={owner} slug={slug} />}>
+    <Suspense
+      fallback={
+        <FallbackModelLayout username={owner} slug={slug}>
+          {children}
+        </FallbackModelLayout>
+      }
+    >
       <LoadedLayout params={params}>{children}</LoadedLayout>
     </Suspense>
   );

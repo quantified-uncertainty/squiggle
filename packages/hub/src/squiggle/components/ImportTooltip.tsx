@@ -23,7 +23,7 @@ export const ImportTooltip: FC<Props> = ({ importId }) => {
     // TODO - this is done with a server action, so it's not cached.
     // A route would be better.
     loadModelCardAction({ owner, slug }).then(setModel);
-  }, []);
+  }, [owner, slug]);
 
   return (
     <div
