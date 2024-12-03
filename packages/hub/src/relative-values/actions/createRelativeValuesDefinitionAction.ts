@@ -1,11 +1,11 @@
 "use server";
 
-import { prisma } from "@/lib/server/prisma";
 import {
   actionClient,
   ActionError,
-  rethrowOnConstraint,
-} from "@/lib/server/utils";
+  failValidationOnConstraint,
+} from "@/lib/server/actionClient";
+import { prisma } from "@/lib/server/prisma";
 import { getWriteableOwnerBySlug } from "@/owners/data/auth";
 import { indexDefinitionId } from "@/search/helpers";
 import { getSessionOrRedirect } from "@/users/auth";
@@ -36,7 +36,7 @@ export const createRelativeValuesDefinitionAction = actionClient
       });
 
       const definition = await prisma.$transaction(async (tx) => {
-        const definition = await rethrowOnConstraint(
+        const definition = await failValidationOnConstraint(
           () =>
             tx.relativeValuesDefinition.create({
               data: {
@@ -62,8 +62,14 @@ export const createRelativeValuesDefinitionAction = actionClient
               },
             }),
           {
-            target: ["slug", "ownerId"],
-            error: `The definition ${input.slug} already exists on this account`,
+            schema: inputSchema,
+            handlers: [
+              {
+                constraint: ["slug", "ownerId"],
+                input: "slug",
+                error: `The definition ${input.slug} already exists on this account`,
+              },
+            ],
           }
         );
 

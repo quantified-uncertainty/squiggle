@@ -1,7 +1,7 @@
 import { Model, Prisma } from "@prisma/client";
 
+import { ActionError } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { ActionError } from "@/lib/server/utils";
 import { getSessionOrRedirect } from "@/users/auth";
 
 import { modelWhereHasAccess } from "./data/authHelpers";

@@ -6,8 +6,8 @@ import { z } from "zod";
 import { squiggleVersions } from "@quri/versioned-squiggle-components";
 
 import { modelRoute } from "@/lib/routes";
+import { actionClient, ActionError } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { actionClient, ActionError } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 import { getSelf, getSessionOrRedirect } from "@/users/auth";
 

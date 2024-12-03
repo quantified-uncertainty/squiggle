@@ -1,8 +1,8 @@
 "use server";
 import { z } from "zod";
 
+import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { actionClient } from "@/lib/server/utils";
 import { checkRootUser, getSelf, getSessionOrRedirect } from "@/users/auth";
 
 // Admin-only query for upgrading model versions

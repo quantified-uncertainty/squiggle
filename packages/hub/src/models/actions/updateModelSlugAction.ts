@@ -1,10 +1,12 @@
 "use server";
 
-import { returnValidationErrors } from "next-safe-action";
 import { z } from "zod";
 
+import {
+  actionClient,
+  failValidationOnConstraint,
+} from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { actionClient } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 import { getWriteableModel } from "@/models/utils";
 
@@ -44,26 +46,31 @@ export const updateModelSlugAction = actionClient
       };
     }
 
-    try {
-      const newModel = await prisma.model.update({
-        where: { id: model.id },
-        data: { slug: input.slug },
-        select: {
-          slug: true,
-          owner: {
-            select: {
-              slug: true,
+    const newModel = await failValidationOnConstraint(
+      () =>
+        prisma.model.update({
+          where: { id: model.id },
+          data: { slug: input.slug },
+          select: {
+            slug: true,
+            owner: {
+              select: {
+                slug: true,
+              },
             },
           },
-        },
-      });
+        }),
+      {
+        schema,
+        handlers: [
+          {
+            constraint: ["slug"],
+            input: "slug",
+            error: `Model ${input.slug} already exists`,
+          },
+        ],
+      }
+    );
 
-      return { model: newModel };
-    } catch {
-      returnValidationErrors(schema, {
-        slug: {
-          _errors: [`Model ${input.slug} already exists`],
-        },
-      });
-    }
+    return { model: newModel };
   });

@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 
-import { actionClient } from "@/lib/server/utils";
+import { actionClient } from "@/lib/server/actionClient";
 import { checkRootUser } from "@/users/auth";
 
 import { rebuildSearchableTable } from "../helpers";

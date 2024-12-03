@@ -1,6 +1,6 @@
 "use server";
+import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { actionClient } from "@/lib/server/utils";
 import { getWriteableOwnerBySlug } from "@/owners/data/auth";
 import { getSessionOrRedirect } from "@/users/auth";
 

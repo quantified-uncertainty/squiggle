@@ -3,8 +3,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { modelForRelativeValuesExportRoute } from "@/lib/routes";
+import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { actionClient } from "@/lib/server/utils";
 import { getRelativeValuesExportForWriteableModel } from "@/relative-values/utils";
 
 export const clearRelativeValuesCacheAction = actionClient

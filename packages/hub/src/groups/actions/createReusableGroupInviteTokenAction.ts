@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { groupMembersRoute } from "@/lib/routes";
+import { actionClient, ActionError } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { actionClient, ActionError } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 
 import { loadMyMembership } from "../data/members";

@@ -7,8 +7,11 @@ import { generateSeed } from "@quri/squiggle-lang";
 import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
 
 import { modelRoute } from "@/lib/routes";
+import {
+  actionClient,
+  failValidationOnConstraint,
+} from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { actionClient } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 import { getWriteableOwner } from "@/owners/data/auth";
 import { indexModelId } from "@/search/helpers";
@@ -50,26 +53,30 @@ export const createModelAction = actionClient
     const model = await prisma.$transaction(async (tx) => {
       const owner = await getWriteableOwner(session, input.groupSlug);
 
-      // nested create is not possible here;
-      // similar problem is described here: https://github.com/prisma/prisma/discussions/14937,
-      // seems to be caused by multiple Model -> ModelRevision relations
-      let model: { id: string };
-      try {
-        model = await tx.model.create({
-          data: {
-            slug,
-            ownerId: owner.id,
-            isPrivate: input.isPrivate,
-          },
-          select: { id: true },
-        });
-      } catch {
-        returnValidationErrors(schema, {
-          slug: {
-            _errors: [`Model ${input.slug} already exists on this account`],
-          },
-        });
-      }
+      const model = await failValidationOnConstraint(
+        () =>
+          // nested create is not possible here;
+          // similar problem is described here: https://github.com/prisma/prisma/discussions/14937,
+          // seems to be caused by multiple Model -> ModelRevision relations
+          tx.model.create({
+            data: {
+              slug,
+              ownerId: owner.id,
+              isPrivate: input.isPrivate,
+            },
+            select: { id: true },
+          }),
+        {
+          schema,
+          handlers: [
+            {
+              constraint: ["slug", "ownerId"],
+              input: "slug",
+              error: `Model ${input.slug} already exists on this account`,
+            },
+          ],
+        }
+      );
 
       const self = await getSelf(session);
 

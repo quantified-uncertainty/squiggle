@@ -1,7 +1,7 @@
 "use server";
 import { z } from "zod";
 
-import { actionClient } from "@/lib/server/utils";
+import { actionClient } from "@/lib/server/actionClient";
 import { zSlug } from "@/lib/zodUtils";
 
 import { loadModelCard, ModelCardDTO } from "../data/cards";

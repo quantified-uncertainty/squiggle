@@ -2,8 +2,8 @@
 
 import { z } from "zod";
 
+import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { actionClient } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 import { getWriteableModel } from "@/models/utils";
 

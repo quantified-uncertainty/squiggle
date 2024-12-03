@@ -1,10 +1,12 @@
 "use server";
 
-import { returnValidationErrors } from "next-safe-action";
 import { z } from "zod";
 
+import {
+  actionClient,
+  failValidationOnConstraint,
+} from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { actionClient } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 import { getWriteableModel } from "@/models/utils";
 import { getWriteableOwnerBySlug } from "@/owners/data/auth";
@@ -31,22 +33,29 @@ export const moveModelAction = actionClient
 
     const newOwner = await getWriteableOwnerBySlug(session, input.owner.slug);
 
-    try {
-      const newModel = await prisma.model.update({
-        where: { id: model.id },
-        data: { ownerId: newOwner.id },
-        select: {
-          slug: true,
-          owner: true,
-        },
-      });
-      return { model: newModel };
-    } catch {
-      returnValidationErrors(schema, {
-        // `owner`, not `owner.slug` - the select name from the RHF point of view is just `owner`
-        owner: {
-          _errors: [`Model ${input.slug} already exists on the target account`],
-        },
-      });
-    }
+    const newModel = await failValidationOnConstraint(
+      () =>
+        prisma.model.update({
+          where: { id: model.id },
+          data: { ownerId: newOwner.id },
+          select: {
+            slug: true,
+            owner: true,
+          },
+        }),
+      {
+        schema,
+        handlers: [
+          {
+            constraint: ["slug", "ownerId"],
+            // `owner`, not `owner{ slug }` - the select name from the RHF point of view is just `owner`.
+            // (`rethrowOnConstraint` doesn't support nested keys, so we're lucky this is possible)
+            input: "owner",
+            error: `Model ${input.owner.slug} already exists on the target account`,
+          },
+        ],
+      }
+    );
+
+    return { model: newModel };
   });
