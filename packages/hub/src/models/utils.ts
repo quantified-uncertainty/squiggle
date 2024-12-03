@@ -1,19 +1,22 @@
 import { Model, Prisma } from "@prisma/client";
-import { Session } from "next-auth";
 
 import { prisma } from "@/lib/server/prisma";
+import { ActionError } from "@/lib/server/utils";
+import { getSessionOrRedirect } from "@/users/auth";
+
+import { modelWhereHasAccess } from "./data/authHelpers";
 
 export async function getWriteableModel({
-  session,
   owner,
   slug,
   include,
 }: {
-  session: Session; // FIXME - SignedInSession?
   owner: string;
   slug: string;
   include?: Prisma.ModelInclude;
 }): Promise<Model> {
+  const session = await getSessionOrRedirect();
+
   // Note: `findUnique` would be safer, but then we won't be able to use nested queries
   const model = await prisma.model.findFirst({
     where: {
@@ -38,9 +41,30 @@ export async function getWriteableModel({
     },
     include,
   });
+
   if (!model) {
-    // this might happen if permissions are not sufficient
-    throw new Error("Can't find model");
+    // we're going to fail, but how?
+
+    // does the model exist?
+    const modelExists = !!(await prisma.model.findFirst({
+      select: {
+        id: true,
+      },
+      where: {
+        slug,
+        owner: {
+          slug: owner,
+        },
+        OR: await modelWhereHasAccess(),
+      },
+    }));
+
+    if (modelExists) {
+      throw new ActionError("Can't edit model");
+    } else {
+      throw new ActionError("Can't find model");
+    }
   }
+
   return model;
 }

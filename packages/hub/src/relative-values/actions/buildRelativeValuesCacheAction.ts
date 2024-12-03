@@ -8,7 +8,6 @@ import { makeServerAction } from "@/lib/server/utils";
 import { cartesianProduct } from "@/relative-values/lib/utils";
 import { relativeValuesItemsSchema } from "@/relative-values/types";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
-import { getSessionOrRedirect } from "@/users/auth";
 
 import { getRelativeValuesExportForWriteableModel } from "../utils";
 
@@ -17,14 +16,11 @@ export const buildRelativeValuesCacheAction = makeServerAction(
     exportId: z.string(),
   }),
   async (input): Promise<void> => {
-    const session = await getSessionOrRedirect();
-
     const exportId = input.exportId;
 
     const relativeValuesExport = await getRelativeValuesExportForWriteableModel(
       {
         exportId,
-        session,
       }
     );
 

@@ -1,14 +1,10 @@
-import { Session } from "next-auth";
-
 import { prisma } from "@/lib/server/prisma";
 import { getWriteableModel } from "@/models/utils";
 
 export async function getRelativeValuesExportForWriteableModel({
   exportId,
-  session,
 }: {
   exportId: string;
-  session: Session;
 }) {
   const relativeValuesExport =
     await prisma.relativeValuesExport.findUniqueOrThrow({
@@ -36,7 +32,6 @@ export async function getRelativeValuesExportForWriteableModel({
 
   // checking permissions
   await getWriteableModel({
-    session,
     owner: relativeValuesExport.modelRevision.model.owner.slug,
     slug: relativeValuesExport.modelRevision.model.slug,
   });

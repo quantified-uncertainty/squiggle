@@ -1,7 +1,6 @@
 "use server";
 
 import { returnValidationErrors } from "next-safe-action";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { generateSeed } from "@quri/squiggle-lang";
@@ -33,100 +32,93 @@ const schema = z.object({
 export const createModelAction = actionClient
   .schema(schema)
   .action(async ({ parsedInput: input }) => {
-    try {
-      const slug = input.slug;
-      if (!slug) {
+    const slug = input.slug;
+    if (!slug) {
+      returnValidationErrors(schema, {
+        slug: {
+          _errors: ["Slug is required"],
+        },
+      });
+    }
+
+    const session = await getSessionOrRedirect();
+
+    const seed = generateSeed();
+    const version = defaultSquiggleVersion;
+    const code = defaultCode;
+
+    const model = await prisma.$transaction(async (tx) => {
+      const owner = await getWriteableOwner(session, input.groupSlug);
+
+      // nested create is not possible here;
+      // similar problem is described here: https://github.com/prisma/prisma/discussions/14937,
+      // seems to be caused by multiple Model -> ModelRevision relations
+      let model: { id: string };
+      try {
+        model = await tx.model.create({
+          data: {
+            slug,
+            ownerId: owner.id,
+            isPrivate: input.isPrivate,
+          },
+          select: { id: true },
+        });
+      } catch {
         returnValidationErrors(schema, {
           slug: {
-            _errors: ["Slug is required"],
+            _errors: [`Model ${input.slug} already exists on this account`],
           },
         });
       }
 
-      const session = await getSessionOrRedirect();
+      const self = await getSelf(session);
 
-      const seed = generateSeed();
-      const version = defaultSquiggleVersion;
-      const code = defaultCode;
-
-      const model = await prisma.$transaction(async (tx) => {
-        const owner = await getWriteableOwner(session, input.groupSlug);
-
-        // nested create is not possible here;
-        // similar problem is described here: https://github.com/prisma/prisma/discussions/14937,
-        // seems to be caused by multiple Model -> ModelRevision relations
-        let model: { id: string };
-        try {
-          model = await tx.model.create({
-            data: {
-              slug,
-              ownerId: owner.id,
-              isPrivate: input.isPrivate,
-            },
-            select: { id: true },
-          });
-        } catch {
-          returnValidationErrors(schema, {
-            slug: {
-              _errors: [`Model ${input.slug} already exists on this account`],
-            },
-          });
-        }
-
-        const self = await getSelf(session);
-
-        const revision = await tx.modelRevision.create({
-          data: {
-            squiggleSnippet: {
-              create: {
-                code,
-                version,
-                seed,
-              },
-            },
-            author: {
-              connect: { id: self.id },
-            },
-            contentType: "SquiggleSnippet",
-            model: {
-              connect: {
-                id: model.id,
-              },
+      const revision = await tx.modelRevision.create({
+        data: {
+          squiggleSnippet: {
+            create: {
+              code,
+              version,
+              seed,
             },
           },
-        });
-
-        return await tx.model.update({
-          where: {
-            id: model.id,
+          author: {
+            connect: { id: self.id },
           },
-          data: {
-            currentRevisionId: revision.id,
-          },
-          select: {
-            id: true,
-            slug: true,
-            owner: {
-              select: {
-                slug: true,
-              },
+          contentType: "SquiggleSnippet",
+          model: {
+            connect: {
+              id: model.id,
             },
           },
-        });
+        },
       });
 
-      await indexModelId(model.id);
+      return await tx.model.update({
+        where: {
+          id: model.id,
+        },
+        data: {
+          currentRevisionId: revision.id,
+        },
+        select: {
+          id: true,
+          slug: true,
+          owner: {
+            select: {
+              slug: true,
+            },
+          },
+        },
+      });
+    });
 
-      redirect(
-        modelRoute({
-          owner: model.owner.slug,
-          slug: model.slug,
-        })
-      );
+    await indexModelId(model.id);
 
-      return { model };
-    } catch (e) {
-      console.log("action error", e instanceof Error && e.message);
-      throw e;
-    }
+    return {
+      url: modelRoute({
+        owner: model.owner.slug,
+        slug: model.slug,
+      }),
+    };
   });

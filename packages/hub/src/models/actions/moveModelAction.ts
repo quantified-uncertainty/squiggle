@@ -21,7 +21,6 @@ export const moveModelAction = makeServerAction(
     const model = await getWriteableModel({
       owner: input.oldOwner,
       slug: input.slug,
-      session,
     });
 
     const newOwner = await getWriteableOwnerBySlug(session, input.newOwner);

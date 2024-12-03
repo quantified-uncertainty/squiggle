@@ -1,5 +1,6 @@
 "use client";
 import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
@@ -22,10 +23,17 @@ export const NewModel: FC<{ initialGroup: SelectGroupOption | null }> = ({
   const [group] = useState(initialGroup);
 
   const toast = useToast();
+  const router = useRouter();
 
   const { executeAsync, status } = useAction(createModelAction, {
-    onError: ({ error, ...rest }) => {
-      console.trace("onError", error, rest);
+    onSuccess: ({ data }) => {
+      if (data) {
+        // redirect in action is incompatible with https://github.com/TheEdoRan/next-safe-action/issues/303
+        // (and might a bad idea anyway, returning an url is more verbose but more flexible for reuse)
+        router.push(data.url);
+      }
+    },
+    onError: ({ error }) => {
       if (error.serverError) {
         toast(error.serverError, "error");
         return;

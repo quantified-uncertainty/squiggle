@@ -38,9 +38,9 @@ export const updateSquiggleSnippetModelAction = makeServerAction(
   }),
   async (input) => {
     const session = await getSessionOrRedirect();
+
     const existingModel = await getWriteableModel({
       slug: input.slug,
-      session,
       owner: input.owner,
     });
 

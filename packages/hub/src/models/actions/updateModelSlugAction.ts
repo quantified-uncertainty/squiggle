@@ -6,7 +6,6 @@ import { prisma } from "@/lib/server/prisma";
 import { makeServerAction } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 import { getWriteableModel } from "@/models/utils";
-import { getSessionOrRedirect } from "@/users/auth";
 
 export const updateModelSlugAction = makeServerAction(
   z.object({
@@ -15,12 +14,9 @@ export const updateModelSlugAction = makeServerAction(
     newSlug: zSlug,
   }),
   async (input) => {
-    const session = await getSessionOrRedirect();
-
     const model = await getWriteableModel({
       owner: input.owner,
       slug: input.oldSlug,
-      session,
     });
 
     const newModel = await prisma.model.update({

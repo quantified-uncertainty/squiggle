@@ -8,7 +8,6 @@ import { prisma } from "@/lib/server/prisma";
 import { makeServerAction } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 import { getWriteableModel } from "@/models/utils";
-import { getSessionOrRedirect } from "@/users/auth";
 
 export const updateModelPrivacyAction = makeServerAction(
   z.object({
@@ -17,12 +16,9 @@ export const updateModelPrivacyAction = makeServerAction(
     isPrivate: z.boolean(),
   }),
   async (input) => {
-    const session = await getSessionOrRedirect();
-
     const model = await getWriteableModel({
       slug: input.slug,
       owner: input.owner,
-      session,
     });
 
     const newModel = await prisma.model.update({

@@ -19,7 +19,7 @@ export const ModelSettingsButton: FC<{
         <DropdownMenu>
           <UpdateModelSlugAction model={model} close={close} />
           <MoveModelAction model={model} close={close} />
-          <DeleteModelAction model={model} close={close} />
+          <DeleteModelAction model={model} />
         </DropdownMenu>
       )}
     >

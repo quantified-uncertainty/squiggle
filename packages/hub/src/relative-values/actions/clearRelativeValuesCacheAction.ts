@@ -6,20 +6,16 @@ import { modelForRelativeValuesExportRoute } from "@/lib/routes";
 import { prisma } from "@/lib/server/prisma";
 import { makeServerAction } from "@/lib/server/utils";
 import { getRelativeValuesExportForWriteableModel } from "@/relative-values/utils";
-import { getSessionOrRedirect } from "@/users/auth";
 
 export const clearRelativeValuesCacheAction = makeServerAction(
   z.object({
     exportId: z.string(),
   }),
   async (input): Promise<void> => {
-    const session = await getSessionOrRedirect();
-
     const exportId = input.exportId;
 
     await getRelativeValuesExportForWriteableModel({
       exportId,
-      session,
     });
 
     await prisma.relativeValuesPairCache.deleteMany({
