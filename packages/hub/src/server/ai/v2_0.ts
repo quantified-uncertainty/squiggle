@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { ClientWorkflow } from "@quri/squiggle-ai";
+import { Workflow } from "@quri/squiggle-ai/server";
 
 import { getAiCodec } from "./utils";
 
@@ -18,6 +19,15 @@ export const v2WorkflowDataSchema = z.object({
 });
 
 export type V2WorkflowData = z.infer<typeof v2WorkflowDataSchema>;
+
+export function workflowToV2_0Json(workflow: Workflow<any>): V2WorkflowData {
+  const codec = getAiCodec();
+  const serializer = codec.makeSerializer();
+  const entrypoint = serializer.serialize("workflow", workflow);
+  const bundle = serializer.getBundle();
+
+  return { entrypoint, bundle };
+}
 
 export function decodeV2_0JsonToClientWorkflow(
   json: Prisma.JsonValue
