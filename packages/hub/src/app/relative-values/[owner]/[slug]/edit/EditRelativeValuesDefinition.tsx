@@ -5,7 +5,6 @@ import { FC } from "react";
 import { relativeValuesRoute } from "@/lib/routes";
 import { updateRelativeValuesDefinitionAction } from "@/relative-values/actions/updateRelativeValuesDefinitionAction";
 import { RelativeValuesDefinitionForm } from "@/relative-values/components/RelativeValuesDefinitionForm";
-import { FormShape } from "@/relative-values/components/RelativeValuesDefinitionForm/FormShape";
 import { RelativeValuesDefinitionFullDTO } from "@/relative-values/data/full";
 
 export const EditRelativeValuesDefinition: FC<{
@@ -15,31 +14,9 @@ export const EditRelativeValuesDefinition: FC<{
 
   const revision = definition.currentRevision;
 
-  const save = async (data: FormShape) => {
-    await updateRelativeValuesDefinitionAction({
-      slug: definition.slug,
-      owner: definition.owner.slug,
-      title: data.title,
-      items: data.items.map((item) => ({
-        ...item,
-        clusterId: item.clusterId ?? undefined,
-      })),
-      clusters: data.clusters.map((cluster) => ({
-        ...cluster,
-        recommendedUnit: cluster.recommendedUnit || undefined,
-      })),
-      recommendedUnit: data.recommendedUnit || undefined,
-    });
-    router.push(
-      relativeValuesRoute({
-        owner: definition.owner.slug,
-        slug: definition.slug,
-      })
-    );
-  };
-
   return (
     <RelativeValuesDefinitionForm
+      withoutSlug
       defaultValues={{
         slug: "", // unused but necessary for types
         title: revision.title,
@@ -53,8 +30,29 @@ export const EditRelativeValuesDefinition: FC<{
         })),
         recommendedUnit: revision.recommendedUnit ?? null,
       }}
-      withoutSlug
-      save={save}
+      action={updateRelativeValuesDefinitionAction}
+      formDataToInput={(data) => ({
+        slug: definition.slug,
+        owner: definition.owner.slug,
+        title: data.title,
+        items: data.items.map((item) => ({
+          ...item,
+          clusterId: item.clusterId ?? undefined,
+        })),
+        clusters: data.clusters.map((cluster) => ({
+          ...cluster,
+          recommendedUnit: cluster.recommendedUnit || undefined,
+        })),
+        recommendedUnit: data.recommendedUnit || undefined,
+      })}
+      onCompleted={(data) => {
+        router.push(
+          relativeValuesRoute({
+            owner: data.owner,
+            slug: data.slug,
+          })
+        );
+      }}
     />
   );
 };

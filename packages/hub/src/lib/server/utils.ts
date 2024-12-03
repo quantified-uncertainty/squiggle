@@ -3,31 +3,6 @@ import {
   createSafeActionClient,
   DEFAULT_SERVER_ERROR_MESSAGE,
 } from "next-safe-action";
-import { z } from "zod";
-
-export type DeepReadonly<T> = T extends (infer R)[]
-  ? DeepReadonlyArray<R>
-  : T extends object
-    ? DeepReadonlyObject<T>
-    : T;
-
-interface DeepReadonlyArray<T> extends ReadonlyArray<DeepReadonly<T>> {}
-
-type DeepReadonlyObject<T> = {
-  readonly [P in keyof T]: DeepReadonly<T[P]>;
-};
-
-export function makeServerAction<T, R>(
-  schema: z.ZodType<T>,
-  handler: (input: T) => Promise<R>
-) {
-  return async (
-    data: DeepReadonly<T> // data type is unknown/unsafe, but we will validate it immediately
-  ) => {
-    const input = schema.parse(data);
-    return handler(input);
-  };
-}
 
 export class ActionError extends Error {}
 

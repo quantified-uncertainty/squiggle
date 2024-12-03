@@ -1,8 +1,9 @@
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 
-import { DropdownMenuAsyncActionItem, TrashIcon, useToast } from "@quri/ui";
+import { TrashIcon, useToast } from "@quri/ui";
 
+import { SafeActionDropdownAction } from "@/components/ui/SafeActionDropdownAction";
 import { deleteRelativeValuesDefinitionAction } from "@/relative-values/actions/deleteRelativeValuesDefinitionAction";
 
 type Props = {
@@ -16,10 +17,11 @@ export const DeleteDefinitionAction: FC<Props> = ({ owner, slug }) => {
   const toast = useToast();
 
   return (
-    <DropdownMenuAsyncActionItem
+    <SafeActionDropdownAction
       title="Delete"
-      onClick={async () => {
-        await deleteRelativeValuesDefinitionAction({ owner, slug });
+      action={deleteRelativeValuesDefinitionAction}
+      input={{ owner, slug }}
+      onSuccess={() => {
         toast("Definition deleted", "confirmation");
         router.push("/");
       }}

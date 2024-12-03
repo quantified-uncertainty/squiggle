@@ -1,7 +1,7 @@
 import { MembershipRole } from "@prisma/client";
 import { FC } from "react";
 
-import { ServerActionDropdownAction } from "@/components/ui/ServerActionDropdownAction";
+import { SafeActionDropdownAction } from "@/components/ui/SafeActionDropdownAction";
 import { updateMembershipRoleAction } from "@/groups/actions/updateMembershipRoleAction";
 import { GroupMemberDTO } from "@/groups/data/members";
 
@@ -19,13 +19,14 @@ export const SetMembershipRoleAction: FC<Props> = ({
   update,
 }) => {
   return (
-    <ServerActionDropdownAction
-      act={async () => {
-        const newMembership = await updateMembershipRoleAction({
-          user: membership.user.slug,
-          group: groupSlug,
-          role,
-        });
+    <SafeActionDropdownAction
+      action={updateMembershipRoleAction}
+      input={{
+        user: membership.user.slug,
+        group: groupSlug,
+        role,
+      }}
+      onSuccess={(newMembership) => {
         update(newMembership);
       }}
       title={role}

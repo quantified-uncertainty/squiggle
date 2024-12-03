@@ -4,26 +4,29 @@ import { MembershipRole } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/server/prisma";
-import { makeServerAction } from "@/lib/server/utils";
+import { actionClient, ActionError } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 import { getSessionOrRedirect } from "@/users/auth";
 
 import { groupHasAdminsBesidesUser } from "../data/helpers";
 import {
-  GroupMemberDTO,
   loadMembership,
   loadMyMembership,
   membershipSelect,
   membershipToDTO,
 } from "../data/members";
 
-export const updateMembershipRoleAction = makeServerAction(
-  z.object({
-    group: zSlug,
-    user: zSlug,
-    role: z.enum(Object.keys(MembershipRole) as [keyof typeof MembershipRole]),
-  }),
-  async (input): Promise<GroupMemberDTO> => {
+export const updateMembershipRoleAction = actionClient
+  .schema(
+    z.object({
+      group: zSlug,
+      user: zSlug,
+      role: z.enum(
+        Object.keys(MembershipRole) as [keyof typeof MembershipRole]
+      ),
+    })
+  )
+  .action(async ({ parsedInput: input }) => {
     const session = await getSessionOrRedirect();
     // somewhat repetitive compared to `deleteMembership`, but with slightly different error messages
 
@@ -32,11 +35,11 @@ export const updateMembershipRoleAction = makeServerAction(
     });
 
     if (!myMembership) {
-      throw new Error("You're not a member of this group");
+      throw new ActionError("You're not a member of this group");
     }
 
     if (input.user !== session.user.username && myMembership.role !== "Admin") {
-      throw new Error("Only admins can update other members roles");
+      throw new ActionError("Only admins can update other members roles");
     }
 
     const membershipToUpdate = await loadMembership({
@@ -45,7 +48,7 @@ export const updateMembershipRoleAction = makeServerAction(
     });
 
     if (!membershipToUpdate) {
-      throw new Error(`${input.user} is not a member of ${input.group}`);
+      throw new ActionError(`${input.user} is not a member of ${input.group}`);
     }
 
     if (membershipToUpdate.role === input.role) {
@@ -58,7 +61,7 @@ export const updateMembershipRoleAction = makeServerAction(
         userSlug: input.user,
       }))
     ) {
-      throw new Error(
+      throw new ActionError(
         `Can't change the role, ${input.user} is the last admin of ${input.group}`
       );
     }
@@ -70,5 +73,4 @@ export const updateMembershipRoleAction = makeServerAction(
     });
 
     return membershipToDTO(updatedMembership);
-  }
-);
+  });

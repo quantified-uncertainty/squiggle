@@ -4,7 +4,7 @@ import { FC } from "react";
 
 import { Dropdown, DropdownMenu, GlobeIcon, LockIcon } from "@quri/ui";
 
-import { ServerActionDropdownAction } from "@/components/ui/ServerActionDropdownAction";
+import { SafeActionDropdownAction } from "@/components/ui/SafeActionDropdownAction";
 import { updateModelPrivacyAction } from "@/models/actions/updateModelPrivacyAction";
 import { ModelCardDTO } from "@/models/data/cards";
 
@@ -16,13 +16,12 @@ const UpdatePrivacyAction: FC<{
   model: ModelCardDTO;
 }> = ({ model }) => {
   return (
-    <ServerActionDropdownAction
-      act={async () => {
-        await updateModelPrivacyAction({
-          owner: model.owner.slug,
-          slug: model.slug,
-          isPrivate: !model.isPrivate,
-        });
+    <SafeActionDropdownAction
+      action={updateModelPrivacyAction}
+      input={{
+        owner: model.owner.slug,
+        slug: model.slug,
+        isPrivate: !model.isPrivate,
       }}
       title={model.isPrivate ? "Make public" : "Make private"}
       icon={getIconComponent(!model.isPrivate)}

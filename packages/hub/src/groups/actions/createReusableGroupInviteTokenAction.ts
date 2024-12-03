@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { groupMembersRoute } from "@/lib/routes";
 import { prisma } from "@/lib/server/prisma";
-import { makeServerAction } from "@/lib/server/utils";
+import { actionClient, ActionError } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 
 import { loadMyMembership } from "../data/members";
@@ -17,17 +17,21 @@ import { loadMyMembership } from "../data/members";
  * You must be an admin of the group to call this mutation. Previous invite
  * token, if it existed, will stop working.
  */
-export const createReusableGroupInviteTokenAction = makeServerAction(
-  z.object({
-    slug: zSlug,
-  }),
-  async (input): Promise<void> => {
+export const createReusableGroupInviteTokenAction = actionClient
+  .schema(
+    z.object({
+      slug: zSlug,
+    })
+  )
+  .action(async ({ parsedInput: input }): Promise<void> => {
     const myMembership = await loadMyMembership({ groupSlug: input.slug });
     if (!myMembership) {
-      throw new Error("Not a member of this group");
+      throw new ActionError("You're not a member of this group");
     }
     if (myMembership.role !== "Admin") {
-      throw new Error("Only group admins can delete reusable invite tokens");
+      throw new ActionError(
+        "Only group admins can create reusable invite tokens"
+      );
     }
 
     const group = await prisma.group.findFirstOrThrow({
@@ -52,5 +56,4 @@ export const createReusableGroupInviteTokenAction = makeServerAction(
     });
 
     revalidatePath(groupMembersRoute({ slug: input.slug }));
-  }
-);
+  });

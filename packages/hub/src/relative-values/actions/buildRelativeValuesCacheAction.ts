@@ -4,20 +4,20 @@ import { z } from "zod";
 
 import { modelForRelativeValuesExportRoute } from "@/lib/routes";
 import { prisma } from "@/lib/server/prisma";
-import { makeServerAction } from "@/lib/server/utils";
+import { actionClient, ActionError } from "@/lib/server/utils";
 import { cartesianProduct } from "@/relative-values/lib/utils";
 import { relativeValuesItemsSchema } from "@/relative-values/types";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
 
 import { getRelativeValuesExportForWriteableModel } from "../utils";
 
-export const buildRelativeValuesCacheAction = makeServerAction(
-  z.object({
-    exportId: z.string(),
-  }),
-  async (input): Promise<void> => {
-    const exportId = input.exportId;
-
+export const buildRelativeValuesCacheAction = actionClient
+  .schema(
+    z.object({
+      exportId: z.string(),
+    })
+  )
+  .action(async ({ parsedInput: { exportId } }): Promise<void> => {
     const relativeValuesExport = await getRelativeValuesExportForWriteableModel(
       {
         exportId,
@@ -27,12 +27,12 @@ export const buildRelativeValuesCacheAction = makeServerAction(
     const { modelRevision } = relativeValuesExport;
 
     if (modelRevision.contentType !== "SquiggleSnippet") {
-      throw new Error("Unsupported model revision content type");
+      throw new ActionError("Unsupported model revision content type");
     }
 
     const squiggleSnippet = modelRevision.squiggleSnippet;
     if (!squiggleSnippet) {
-      throw new Error("Model content not found");
+      throw new ActionError("Model content not found");
     }
 
     const evaluatorResult = await ModelEvaluator.create(
@@ -40,7 +40,7 @@ export const buildRelativeValuesCacheAction = makeServerAction(
       relativeValuesExport.variableName
     );
     if (!evaluatorResult.ok) {
-      throw new Error(
+      throw new ActionError(
         `Failed to create evaluator: ${evaluatorResult.value.toString()}`
       );
     }
@@ -48,7 +48,7 @@ export const buildRelativeValuesCacheAction = makeServerAction(
 
     const definitionRevision = relativeValuesExport.definition.currentRevision;
     if (!definitionRevision) {
-      throw new Error("Definition revision not found");
+      throw new ActionError("Definition revision not found");
     }
 
     const items = relativeValuesItemsSchema.parse(definitionRevision.items);
@@ -95,9 +95,6 @@ export const buildRelativeValuesCacheAction = makeServerAction(
       },
     });
 
-    // sleep
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     revalidatePath(
       modelForRelativeValuesExportRoute({
         owner: relativeValuesExport.modelRevision.model.owner.slug,
@@ -105,5 +102,4 @@ export const buildRelativeValuesCacheAction = makeServerAction(
         variableName: relativeValuesExport.variableName,
       })
     );
-  }
-);
+  });

@@ -1,12 +1,15 @@
 "use client";
-import { InferSafeActionFnInput } from "next-safe-action";
+import {
+  InferSafeActionFnInput,
+  InferSafeActionFnResult,
+} from "next-safe-action";
 import { HookSafeActionFn, useAction } from "next-safe-action/hooks";
 import { ReactNode } from "react";
 
 import { Button, useToast } from "@quri/ui";
 
 export function SafeActionButton<
-  const T extends HookSafeActionFn<any, any, any, any, any, any>,
+  const Action extends HookSafeActionFn<any, any, any, any, any, any>,
 >({
   action,
   input,
@@ -17,9 +20,11 @@ export function SafeActionButton<
   theme,
   size,
 }: {
-  action: T;
+  action: Action;
   input: InferSafeActionFnInput<typeof action>["clientInput"];
-  onSuccess?: () => void;
+  onSuccess?: (
+    data: NonNullable<InferSafeActionFnResult<typeof action>["data"]>
+  ) => void;
   title: string;
   confirmation?: string;
 } & Pick<Parameters<typeof Button>[0], "theme" | "size">): ReactNode {
@@ -27,10 +32,12 @@ export function SafeActionButton<
 
   const { execute, isPending } = useAction(action, {
     onSuccess: ({ data }) => {
-      if (data && confirmation) {
-        toast(confirmation, "confirmation");
+      if (data) {
+        if (confirmation) {
+          toast(confirmation, "confirmation");
+        }
+        onSuccess?.(data);
       }
-      onSuccess?.();
     },
     onError: ({ error }) => {
       toast(

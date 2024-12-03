@@ -4,7 +4,7 @@ import { MembershipRole } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/server/prisma";
-import { makeServerAction } from "@/lib/server/utils";
+import { actionClient, ActionError } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 import { getSessionOrRedirect } from "@/users/auth";
 
@@ -14,13 +14,17 @@ import {
   membershipToDTO,
 } from "../data/members";
 
-export const addUserToGroupAction = makeServerAction(
-  z.object({
-    group: zSlug,
-    username: zSlug,
-    role: z.enum(Object.keys(MembershipRole) as [keyof typeof MembershipRole]),
-  }),
-  async (input): Promise<GroupMemberDTO> => {
+export const addUserToGroupAction = actionClient
+  .schema(
+    z.object({
+      group: zSlug,
+      username: zSlug,
+      role: z.enum(
+        Object.keys(MembershipRole) as [keyof typeof MembershipRole]
+      ),
+    })
+  )
+  .action(async ({ parsedInput: input }): Promise<GroupMemberDTO> => {
     const session = await getSessionOrRedirect();
 
     const membership = await prisma.$transaction(async (tx) => {
@@ -30,7 +34,7 @@ export const addUserToGroupAction = makeServerAction(
         },
       });
       if (!groupOwner) {
-        throw new Error(`Group ${input.group} not found`);
+        throw new ActionError(`Group ${input.group} not found`);
       }
 
       const requestedUser = await tx.user.findFirst({
@@ -42,7 +46,7 @@ export const addUserToGroupAction = makeServerAction(
       });
 
       if (!requestedUser) {
-        throw new Error(`User ${input.username} not found`);
+        throw new ActionError(`User ${input.username} not found`);
       }
 
       // We perform all checks one by one because that allows more precise error reporting.
@@ -59,7 +63,7 @@ export const addUserToGroupAction = makeServerAction(
         },
       });
       if (!isAdmin) {
-        throw new Error(`You're not an admin of ${input.group} group`);
+        throw new ActionError(`You're not an admin of ${input.group} group`);
       }
 
       const alreadyAMember = await tx.group.count({
@@ -71,7 +75,7 @@ export const addUserToGroupAction = makeServerAction(
         },
       });
       if (alreadyAMember) {
-        throw new Error(
+        throw new ActionError(
           `${input.username} is already a member of ${input.group}`
         );
       }
@@ -103,5 +107,4 @@ export const addUserToGroupAction = makeServerAction(
     });
 
     return membershipToDTO(membership);
-  }
-);
+  });

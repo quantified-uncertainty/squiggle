@@ -3,7 +3,7 @@ import { FC } from "react";
 
 import { TrashIcon, useToast } from "@quri/ui";
 
-import { ServerActionDropdownAction } from "@/components/ui/ServerActionDropdownAction";
+import { SafeActionDropdownAction } from "@/components/ui/SafeActionDropdownAction";
 import { clearRelativeValuesCacheAction } from "@/relative-values/actions/clearRelativeValuesCacheAction";
 import { RelativeValuesExportFullDTO } from "@/relative-values/data/fullExport";
 
@@ -14,13 +14,12 @@ export const ClearRelativeValuesCacheAction: FC<{
   const toast = useToast();
 
   return (
-    <ServerActionDropdownAction
+    <SafeActionDropdownAction
       title="Clear cache"
       icon={TrashIcon}
-      act={async () => {
-        await clearRelativeValuesCacheAction({
-          exportId: relativeValuesExport.id,
-        });
+      action={clearRelativeValuesCacheAction}
+      input={{ exportId: relativeValuesExport.id }}
+      onSuccess={() => {
         toast("Cache cleared", "confirmation");
       }}
       invariant={1} // close is controlled by the parent

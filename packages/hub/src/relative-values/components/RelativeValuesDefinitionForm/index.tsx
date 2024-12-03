@@ -1,9 +1,14 @@
-import { FC } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import {
+  InferSafeActionFnInput,
+  InferSafeActionFnResult,
+} from "next-safe-action";
+import { HookSafeActionFn } from "next-safe-action/hooks";
+import { FormProvider } from "react-hook-form";
 
 import { Button, StyledTab, TextFormField } from "@quri/ui";
 
 import { SlugFormField } from "@/components/ui/SlugFormField";
+import { useSafeActionForm } from "@/lib/hooks/useSafeActionForm";
 
 import { FormShape } from "./FormShape";
 import { FormSectionHeader, HTMLForm } from "./HTMLForm";
@@ -15,15 +20,31 @@ type Props = {
   save: (data: FormShape) => Promise<void>;
 };
 
-export const RelativeValuesDefinitionForm: FC<Props> = ({
+export function RelativeValuesDefinitionForm<
+  Action extends HookSafeActionFn<any, any, any, any, any, any>,
+>({
   defaultValues,
   withoutSlug,
-  save,
-}) => {
-  const form = useForm<FormShape>({ defaultValues });
-
-  const onSubmit = form.handleSubmit(async (data) => {
-    await save(data);
+  action,
+  formDataToInput,
+  onCompleted,
+}: {
+  defaultValues?: FormShape;
+  withoutSlug?: boolean;
+  action: Action;
+  formDataToInput: (
+    data: FormShape
+  ) => InferSafeActionFnInput<Action>["clientInput"];
+  onCompleted?: (
+    data: NonNullable<InferSafeActionFnResult<Action>["data"]>
+  ) => void;
+}) {
+  const { form, onSubmit, inFlight } = useSafeActionForm({
+    mode: "onChange",
+    defaultValues,
+    action,
+    formDataToVariables: formDataToInput,
+    onCompleted,
   });
 
   return (
@@ -63,11 +84,11 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
           </StyledTab.Group>
         </div>
         <div className="mt-4">
-          <Button onClick={onSubmit} theme="primary">
+          <Button onClick={onSubmit} disabled={inFlight} theme="primary">
             Save
           </Button>
         </div>
       </form>
     </FormProvider>
   );
-};
+}

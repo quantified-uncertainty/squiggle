@@ -2,17 +2,19 @@
 import { z } from "zod";
 
 import { prisma } from "@/lib/server/prisma";
-import { makeServerAction } from "@/lib/server/utils";
+import { actionClient } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 import { getWriteableOwnerBySlug } from "@/owners/data/auth";
 import { getSessionOrRedirect } from "@/users/auth";
 
-export const deleteRelativeValuesDefinitionAction = makeServerAction(
-  z.object({
-    owner: zSlug,
-    slug: zSlug,
-  }),
-  async (input) => {
+export const deleteRelativeValuesDefinitionAction = actionClient
+  .schema(
+    z.object({
+      owner: zSlug,
+      slug: zSlug,
+    })
+  )
+  .action(async ({ parsedInput: input }): Promise<"ok"> => {
     const session = await getSessionOrRedirect();
 
     const owner = await getWriteableOwnerBySlug(session, input.owner);
@@ -25,5 +27,5 @@ export const deleteRelativeValuesDefinitionAction = makeServerAction(
         },
       },
     });
-  }
-);
+    return "ok";
+  });

@@ -22,7 +22,14 @@ export const ImportTooltip: FC<Props> = ({ importId }) => {
   useEffect(() => {
     // TODO - this is done with a server action, so it's not cached.
     // A route would be better.
-    loadModelCardAction({ owner, slug }).then(setModel);
+    loadModelCardAction({ owner, slug }).then((result) => {
+      if (result?.data) {
+        setModel(result.data);
+      } else {
+        // TODO - handle errors
+        setModel(null);
+      }
+    });
   }, [owner, slug]);
 
   return (

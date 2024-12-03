@@ -2,7 +2,7 @@ import { FC } from "react";
 
 import { TrashIcon } from "@quri/ui";
 
-import { ServerActionDropdownAction } from "@/components/ui/ServerActionDropdownAction";
+import { SafeActionDropdownAction } from "@/components/ui/SafeActionDropdownAction";
 import { deleteMembershipAction } from "@/groups/actions/deleteMembershipAction";
 import { GroupMemberDTO } from "@/groups/data/members";
 
@@ -18,16 +18,15 @@ export const DeleteMembershipAction: FC<Props> = ({
   remove,
 }) => {
   return (
-    <ServerActionDropdownAction
+    <SafeActionDropdownAction
       title="Delete from group"
       icon={TrashIcon}
-      act={async () => {
-        await deleteMembershipAction({
-          group: groupSlug,
-          username: membership.user.slug,
-        });
-        remove(membership);
+      action={deleteMembershipAction}
+      input={{
+        group: groupSlug,
+        username: membership.user.slug,
       }}
+      onSuccess={() => remove(membership)}
     />
   );
 };

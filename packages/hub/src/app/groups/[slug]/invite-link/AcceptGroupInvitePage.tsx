@@ -4,7 +4,7 @@ import { FC } from "react";
 
 import { useToast } from "@quri/ui";
 
-import { ServerActionButton } from "@/components/ui/ServerActionButton";
+import { SafeActionButton } from "@/components/ui/SafeActionButton";
 import { acceptReusableGroupInviteTokenAction } from "@/groups/actions/acceptReusableGroupInviteTokenAction";
 import { GroupCardDTO } from "@/groups/data/groupCards";
 import { groupRoute } from "@/lib/routes";
@@ -19,16 +19,17 @@ export const AcceptGroupInvitePage: FC<{
   return (
     <div>
       <p className="mb-4">{`You've been invited to join ${group.slug} group.`}</p>
-      <ServerActionButton
+      <SafeActionButton
         title="Join this group"
         theme="primary"
-        action={async () => {
-          await acceptReusableGroupInviteTokenAction({
-            groupSlug: group.slug,
-            inviteToken,
-          });
+        action={acceptReusableGroupInviteTokenAction}
+        onSuccess={() => {
           toast("Joined", "confirmation");
           router.push(groupRoute({ slug: group.slug }));
+        }}
+        input={{
+          groupSlug: group.slug,
+          inviteToken,
         }}
       />
     </div>

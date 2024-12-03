@@ -8,7 +8,7 @@ import { Button } from "@quri/ui";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { createGroupAction } from "@/groups/actions/createGroupAction";
-import { useServerActionForm } from "@/lib/hooks/useServerActionForm";
+import { useSafeActionForm } from "@/lib/hooks/useSafeActionForm";
 import { groupRoute } from "@/lib/routes";
 
 export const NewGroup: FC = () => {
@@ -18,7 +18,7 @@ export const NewGroup: FC = () => {
     slug: string | undefined;
   };
 
-  const { form, onSubmit, inFlight } = useServerActionForm<
+  const { form, onSubmit, inFlight } = useSafeActionForm<
     FormShape,
     typeof createGroupAction
   >({

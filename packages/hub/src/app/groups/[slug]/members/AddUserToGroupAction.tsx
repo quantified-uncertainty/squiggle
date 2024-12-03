@@ -4,7 +4,7 @@ import { FC } from "react";
 import { PlusIcon, SelectStringFormField } from "@quri/ui";
 
 import { SelectUser, SelectUserOption } from "@/components/SelectUser";
-import { ServerActionModalAction } from "@/components/ui/ServerActionModalAction";
+import { SafeActionModalAction } from "@/components/ui/SafeActionModalAction";
 import { addUserToGroupAction } from "@/groups/actions/addUserToGroupAction";
 import { GroupMemberDTO } from "@/groups/data/members";
 
@@ -17,13 +17,12 @@ type FormShape = { user: SelectUserOption; role: MembershipRole };
 
 export const AddUserToGroupAction: FC<Props> = ({ groupSlug, append }) => {
   return (
-    <ServerActionModalAction<FormShape, typeof addUserToGroupAction>
+    <SafeActionModalAction<FormShape, typeof addUserToGroupAction>
       title="Add"
       icon={PlusIcon}
-      action={async (data) => {
-        const membership = await addUserToGroupAction(data);
+      action={addUserToGroupAction}
+      onCompleted={(membership) => {
         append(membership);
-        return membership;
       }}
       defaultValues={{ role: "Member" }}
       formDataToVariables={(data) => ({
@@ -45,6 +44,6 @@ export const AddUserToGroupAction: FC<Props> = ({ groupSlug, append }) => {
           />
         </div>
       )}
-    </ServerActionModalAction>
+    </SafeActionModalAction>
   );
 };

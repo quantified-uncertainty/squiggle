@@ -6,22 +6,24 @@ import { z } from "zod";
 import { getMyMembership } from "@/groups/helpers";
 import { groupMembersRoute } from "@/lib/routes";
 import { prisma } from "@/lib/server/prisma";
-import { makeServerAction } from "@/lib/server/utils";
+import { actionClient, ActionError } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 import { getSessionOrRedirect } from "@/users/auth";
 
 import { validateReusableGroupInviteToken } from "../data/helpers";
 
-export const acceptReusableGroupInviteTokenAction = makeServerAction(
-  z.object({
-    groupSlug: zSlug,
-    inviteToken: z.string(),
-  }),
-  async (input) => {
+export const acceptReusableGroupInviteTokenAction = actionClient
+  .schema(
+    z.object({
+      groupSlug: zSlug,
+      inviteToken: z.string(),
+    })
+  )
+  .action(async ({ parsedInput: input }) => {
     const session = await getSessionOrRedirect();
 
     if (!(await validateReusableGroupInviteToken(input))) {
-      throw new Error("Invalid token");
+      throw new ActionError("Invalid token");
     }
 
     const group = await prisma.group.findFirstOrThrow({
@@ -37,7 +39,7 @@ export const acceptReusableGroupInviteTokenAction = makeServerAction(
       groupSlug: input.groupSlug,
     });
     if (myMembership) {
-      throw new Error("You're already a member of this group");
+      throw new ActionError("You're already a member of this group");
     }
 
     await prisma.userGroupMembership.create({
@@ -57,5 +59,4 @@ export const acceptReusableGroupInviteTokenAction = makeServerAction(
     });
 
     revalidatePath(groupMembersRoute({ slug: input.groupSlug }));
-  }
-);
+  });

@@ -5,7 +5,7 @@ import Skeleton from "react-loading-skeleton";
 import { ClipboardCopyIcon, TextTooltip, useToast } from "@quri/ui";
 
 import { H2 } from "@/components/ui/Headers";
-import { ServerActionButton } from "@/components/ui/ServerActionButton";
+import { SafeActionButton } from "@/components/ui/SafeActionButton";
 import { createReusableGroupInviteTokenAction } from "@/groups/actions/createReusableGroupInviteTokenAction";
 import { deleteReusableGroupInviteTokenAction } from "@/groups/actions/deleteReusableGroupInviteTokenAction";
 import { groupInviteLink } from "@/lib/routes";
@@ -72,19 +72,17 @@ export const GroupReusableInviteSection: FC<Props> = ({
         )
       ) : null}
       <div className="mt-4 flex gap-2">
-        <ServerActionButton
-          action={() =>
-            createReusableGroupInviteTokenAction({ slug: groupSlug })
-          }
+        <SafeActionButton
+          action={createReusableGroupInviteTokenAction}
+          input={{ slug: groupSlug }}
           title={
             reusableInviteToken ? "Reset Invite Link" : "Create Invite Link"
           }
         />
         {reusableInviteToken ? (
-          <ServerActionButton
-            action={() =>
-              deleteReusableGroupInviteTokenAction({ slug: groupSlug })
-            }
+          <SafeActionButton
+            action={deleteReusableGroupInviteTokenAction}
+            input={{ slug: groupSlug }}
             title="Delete Invite Link"
           />
         ) : null}

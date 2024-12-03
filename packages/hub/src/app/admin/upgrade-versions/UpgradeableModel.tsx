@@ -72,7 +72,13 @@ export const UpgradeableModel: FC<{
     loadModelFullAction({
       owner: incompleteModel.owner.slug,
       slug: incompleteModel.slug,
-    }).then(setModel);
+    }).then((result) => {
+      if (result?.data) {
+        setModel(result.data);
+      } else {
+        setModel(null);
+      }
+    });
   }, []);
 
   if (model === "loading") {

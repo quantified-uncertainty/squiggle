@@ -104,6 +104,7 @@ export class ModelEvaluator {
     cache?: RelativeValuesExportFullDTO["cache"]
   ): Promise<result<ModelEvaluator, string>> {
     // TODO - versioned-components
+    // TODO - support hub imports
     const project = new SqProject({
       linker: makeSelfContainedLinker({
         wrapper: `

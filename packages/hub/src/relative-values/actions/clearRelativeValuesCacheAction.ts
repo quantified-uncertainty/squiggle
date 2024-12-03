@@ -4,16 +4,16 @@ import { z } from "zod";
 
 import { modelForRelativeValuesExportRoute } from "@/lib/routes";
 import { prisma } from "@/lib/server/prisma";
-import { makeServerAction } from "@/lib/server/utils";
+import { actionClient } from "@/lib/server/utils";
 import { getRelativeValuesExportForWriteableModel } from "@/relative-values/utils";
 
-export const clearRelativeValuesCacheAction = makeServerAction(
-  z.object({
-    exportId: z.string(),
-  }),
-  async (input): Promise<void> => {
-    const exportId = input.exportId;
-
+export const clearRelativeValuesCacheAction = actionClient
+  .schema(
+    z.object({
+      exportId: z.string(),
+    })
+  )
+  .action(async ({ parsedInput: { exportId } }): Promise<void> => {
     await getRelativeValuesExportForWriteableModel({
       exportId,
     });
@@ -49,5 +49,4 @@ export const clearRelativeValuesCacheAction = makeServerAction(
         variableName: relativeValuesExport.variableName,
       })
     );
-  }
-);
+  });
