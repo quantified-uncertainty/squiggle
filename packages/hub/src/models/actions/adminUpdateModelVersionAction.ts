@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { checkRootUser, getSelf, getSessionOrRedirect } from "@/users/auth";
+import { checkRootUser } from "@/users/auth";
 
 // Admin-only query for upgrading model versions
 export const adminUpdateModelVersionAction = actionClient
@@ -14,10 +14,7 @@ export const adminUpdateModelVersionAction = actionClient
     })
   )
   .action(async ({ parsedInput: input }) => {
-    await checkRootUser();
-    const session = await getSessionOrRedirect();
-
-    const self = await getSelf(session);
+    const self = await checkRootUser();
 
     const model = await prisma.$transaction(async (tx) => {
       let model = await prisma.model.findUniqueOrThrow({
@@ -55,7 +52,7 @@ export const adminUpdateModelVersionAction = actionClient
             connect: { id: model.id },
           },
           author: {
-            connect: { email: self.email! },
+            connect: { email: self.email },
           },
           comment: `Automated upgrade from ${model.currentRevision.squiggleSnippet.version} to ${input.version}`,
           relativeValuesExports: {

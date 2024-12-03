@@ -18,6 +18,7 @@ export async function getSessionUserOrRedirect() {
   return (await getSessionOrRedirect()).user;
 }
 
+// Checks if the user is a root user. If so, returns the user.
 export async function checkRootUser() {
   const sessionUser = await getSessionUserOrRedirect();
   const user = await prisma.user.findUniqueOrThrow({
@@ -26,6 +27,7 @@ export async function checkRootUser() {
   if (!(user.email && user.emailVerified && isRootEmail(user.email))) {
     throw new Error("Unauthorized");
   }
+  return user as User & { email: NonNullable<User["email"]> };
 }
 
 export type SignedInSession = Session & {
