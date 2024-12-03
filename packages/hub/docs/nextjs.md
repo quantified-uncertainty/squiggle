@@ -1,5 +1,23 @@
 # Notes on Next.js
 
+## Conventions
+
+### Component files
+
+- store single use components in `src/app`, next to their `page.tsx` and `layout.tsx`
+- if the component is shared between multiple pages, store it in `src/{topic}/components/`, where `{topic}` is something like "models" or "relative-values"
+- if the component doesn't have an obvious topic, e.g. if it's a generic UI component, store it in `src/components/`
+
+### Actions
+
+- store actions in `src/{topic}/actions/`, where `{topic}` is something like "models" or "relative-values"
+- name actions like this: `doSomethingAction`
+
+### Data loading
+
+- all data loading functions that expose data to the frontend should go in `src/{topic}/data/`
+- data loading functions should sanitize the data that they select from the database, to avoid security issues
+
 ## Loading pages
 
 Avoid generic `loading.tsx` files. Thoughtful loading states are good, but the generic top-level loading state was harmful:
