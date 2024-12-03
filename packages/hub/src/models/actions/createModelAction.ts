@@ -13,7 +13,7 @@ import {
 } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
 import { zSlug } from "@/lib/zodUtils";
-import { getWriteableOwner } from "@/owners/data/auth";
+import { getWriteableOwnerOrSelf } from "@/owners/data/auth";
 import { indexModelId } from "@/search/helpers";
 import { getSelf, getSessionOrRedirect } from "@/users/auth";
 
@@ -51,7 +51,7 @@ export const createModelAction = actionClient
     const code = defaultCode;
 
     const model = await prisma.$transaction(async (tx) => {
-      const owner = await getWriteableOwner(session, input.groupSlug);
+      const owner = await getWriteableOwnerOrSelf(input.groupSlug);
 
       const model = await failValidationOnConstraint(
         () =>

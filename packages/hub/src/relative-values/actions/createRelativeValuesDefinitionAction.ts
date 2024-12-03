@@ -2,13 +2,11 @@
 
 import {
   actionClient,
-  ActionError,
   failValidationOnConstraint,
 } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { getWriteableOwnerBySlug } from "@/owners/data/auth";
+import { getWriteableOwnerOrSelf } from "@/owners/data/auth";
 import { indexDefinitionId } from "@/search/helpers";
-import { getSessionOrRedirect } from "@/users/auth";
 
 import { inputSchema, validateRelativeValuesDefinition } from "./common";
 
@@ -21,13 +19,7 @@ export const createRelativeValuesDefinitionAction = actionClient
       owner: string;
       slug: string;
     }> => {
-      const session = await getSessionOrRedirect();
-      const ownerSlug = input.owner ?? session.user.username;
-      if (!ownerSlug) {
-        // shouldn't happen unless this is an username-less user
-        throw new ActionError("Owner slug or username is required");
-      }
-      const owner = await getWriteableOwnerBySlug(session, ownerSlug);
+      const owner = await getWriteableOwnerOrSelf(input.owner);
 
       validateRelativeValuesDefinition({
         items: input.items,

@@ -5,7 +5,6 @@ import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
 import { zSlug } from "@/lib/zodUtils";
 import { getWriteableOwnerBySlug } from "@/owners/data/auth";
-import { getSessionOrRedirect } from "@/users/auth";
 
 export const deleteRelativeValuesDefinitionAction = actionClient
   .schema(
@@ -15,9 +14,7 @@ export const deleteRelativeValuesDefinitionAction = actionClient
     })
   )
   .action(async ({ parsedInput: input }): Promise<"ok"> => {
-    const session = await getSessionOrRedirect();
-
-    const owner = await getWriteableOwnerBySlug(session, input.owner);
+    const owner = await getWriteableOwnerBySlug(input.owner);
 
     await prisma.relativeValuesDefinition.delete({
       where: {

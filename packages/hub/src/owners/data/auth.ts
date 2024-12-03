@@ -1,7 +1,6 @@
-import { Session } from "next-auth";
-
 import { auth } from "@/lib/server/auth";
 import { prisma } from "@/lib/server/prisma";
+import { getSessionOrRedirect } from "@/users/auth";
 
 export async function controlsOwnerId(ownerId: string): Promise<boolean> {
   const session = await auth();
@@ -34,7 +33,9 @@ export async function controlsOwnerId(ownerId: string): Promise<boolean> {
   );
 }
 
-export async function getWriteableOwnerBySlug(session: Session, slug: string) {
+export async function getWriteableOwnerBySlug(slug: string) {
+  const session = await getSessionOrRedirect();
+
   const owner = await prisma.owner.findFirst({
     where: {
       slug,
@@ -65,11 +66,11 @@ export async function getWriteableOwnerBySlug(session: Session, slug: string) {
   return owner;
 }
 
-// deprecated, need to migrate to getWriteableOwnerBySlug everywhere
-export async function getWriteableOwner(
-  session: Session,
+export async function getWriteableOwnerOrSelf(
   groupSlug?: string | null | undefined
 ) {
+  const session = await getSessionOrRedirect();
+
   const owner = await prisma.owner.findFirst({
     where: {
       ...(groupSlug

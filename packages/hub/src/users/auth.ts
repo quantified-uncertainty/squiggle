@@ -31,13 +31,19 @@ export async function checkRootUser() {
 }
 
 export type SignedInSession = Session & {
-  user: NonNullable<Session["user"]> & { email: string };
+  user: NonNullable<Session["user"]> & {
+    email: NonNullable<Session["user"]["email"]>;
+    username: NonNullable<Session["user"]["username"]>;
+  };
 };
 
 export function isSignedIn(
   session: Session | null
 ): session is SignedInSession {
-  return Boolean(session?.user.email);
+  // Note: username is not set initially, when the user first signs in.
+  // `useForceChooseUsername` hook will redirect the user to the choose username page if necessary.
+  // The server components and server actions involved in that shouldn't rely on this function to check if the user is signed in.
+  return Boolean(session?.user.email && session.user.username);
 }
 
 export async function getSelf(session: SignedInSession) {

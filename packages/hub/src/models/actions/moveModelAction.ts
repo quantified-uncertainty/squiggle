@@ -10,7 +10,6 @@ import { prisma } from "@/lib/server/prisma";
 import { zSlug } from "@/lib/zodUtils";
 import { getWriteableModel } from "@/models/utils";
 import { getWriteableOwnerBySlug } from "@/owners/data/auth";
-import { getSessionOrRedirect } from "@/users/auth";
 
 const schema = z.object({
   oldOwner: zSlug,
@@ -24,14 +23,12 @@ const schema = z.object({
 export const moveModelAction = actionClient
   .schema(schema)
   .action(async ({ parsedInput: input }) => {
-    const session = await getSessionOrRedirect();
-
     const model = await getWriteableModel({
       owner: input.oldOwner,
       slug: input.slug,
     });
 
-    const newOwner = await getWriteableOwnerBySlug(session, input.owner.slug);
+    const newOwner = await getWriteableOwnerBySlug(input.owner.slug);
 
     const newModel = await failValidationOnConstraint(
       () =>
