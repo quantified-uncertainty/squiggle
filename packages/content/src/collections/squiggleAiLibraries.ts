@@ -1,33 +1,34 @@
 import { defineCollection } from "@content-collections/core";
+import { z } from "zod";
 
-const GRAPHQL_URL = "https://squigglehub.org/api/graphql";
+const SERVER = "https://squigglehub.org";
 
-export function getQuery(owner: string, slug: string) {
+function getGraphqlQuery(owner: string, slug: string) {
   return `
-  query GetModelCode {
-    model(input: {owner: "${owner}", slug: "${slug}"}) {
-      ... on Model {
-        id
-        currentRevision {
-          content {
-            ... on SquiggleSnippet {
-              id
-              code
+    query GetModelCode {
+      model(input: {owner: "${owner}", slug: "${slug}"}) {
+        ... on Model {
+          id
+          currentRevision {
+            content {
+              ... on SquiggleSnippet {
+                id
+                code
+              }
             }
           }
         }
       }
     }
-  }
-  `;
+    `;
 }
 
-export async function fetchCodeFromGraphQL(
+export async function fetchCodeFromHubLegacy(
   owner: string,
   slug: string
 ): Promise<string> {
-  const query = getQuery(owner, slug);
-  const response = await fetch(GRAPHQL_URL, {
+  const query = getGraphqlQuery(owner, slug);
+  const response = await fetch("https://squigglehub.org/api/graphql", {
     headers: {
       "Content-Type": "application/json",
     },
@@ -42,6 +43,29 @@ export async function fetchCodeFromGraphQL(
   return code;
 }
 
+// copy-pasted from squiggle/packages/ai/src/scripts/squiggleHubHelpers.ts
+export async function fetchCodeFromHub(
+  owner: string,
+  slug: string
+): Promise<string> {
+  try {
+    const data = await fetch(
+      `${SERVER}/api/get-source?${new URLSearchParams({
+        owner,
+        slug,
+      })}`
+    ).then((res) => res.json());
+    const parsed = z.object({ code: z.string() }).safeParse(data);
+    if (!parsed.success) {
+      throw new Error(`Failed to fetch source for ${owner}/${slug}`);
+    }
+
+    return parsed.data.code;
+  } catch (e) {
+    return await fetchCodeFromHubLegacy(owner, slug);
+  }
+}
+
 export const squiggleAiLibraries = defineCollection({
   name: "squiggleAiLibraries",
   directory: "content/squiggleAiLibraries",
@@ -52,7 +76,7 @@ export const squiggleAiLibraries = defineCollection({
     slug: z.string(),
   }),
   transform: async (data) => {
-    const code = await fetchCodeFromGraphQL(data.owner, data.slug);
+    const code = await fetchCodeFromHub(data.owner, data.slug);
     const importName = `hub:${data.owner}/${data.slug}`;
 
     return { ...data, importName, code };

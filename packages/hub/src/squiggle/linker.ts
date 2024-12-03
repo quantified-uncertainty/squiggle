@@ -43,7 +43,7 @@ const linker: SqLinker = {
     const { owner, slug } = parseSourceId(sourceId);
 
     const data = await fetch(
-      `/api/get-source?owner=${owner}&slug=${slug}`
+      `/api/get-source?${new URLSearchParams({ owner, slug })}`
     ).then((res) => res.json());
 
     const parsed = z.object({ code: z.string() }).safeParse(data);
