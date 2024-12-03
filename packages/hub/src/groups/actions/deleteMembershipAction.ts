@@ -22,7 +22,7 @@ export const deleteMembershipAction = actionClient
   .action(async ({ parsedInput: input }): Promise<"ok"> => {
     const session = await getSessionOrRedirect();
 
-    // somewhat repetitive compared to `updateMembershipRole`, but with slightly different error messages
+    // somewhat repetitive compared to `updateMembershipRoleAction`, but with slightly different error messages
     const myMembership = await getMyMembership({
       groupSlug: input.group,
     });
