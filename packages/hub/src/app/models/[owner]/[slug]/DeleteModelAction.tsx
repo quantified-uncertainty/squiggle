@@ -24,7 +24,7 @@ export const DeleteModelAction: FC<Props> = ({ model }) => {
 
   const closeDropdown = useCloseDropdown();
 
-  const { execute, status } = useAction(deleteModelAction, {
+  const { execute, isPending } = useAction(deleteModelAction, {
     onSuccess: ({ data }) => {
       if (data) {
         router.push(ownerRoute(model.owner));
@@ -47,7 +47,7 @@ export const DeleteModelAction: FC<Props> = ({ model }) => {
           slug: model.slug,
         });
       }}
-      acting={status === "executing"}
+      acting={isPending}
       icon={TrashIcon}
     />
   );

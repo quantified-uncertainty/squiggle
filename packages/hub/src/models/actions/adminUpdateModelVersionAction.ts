@@ -2,16 +2,18 @@
 import { z } from "zod";
 
 import { prisma } from "@/lib/server/prisma";
-import { makeServerAction } from "@/lib/server/utils";
+import { actionClient } from "@/lib/server/utils";
 import { checkRootUser, getSelf, getSessionOrRedirect } from "@/users/auth";
 
 // Admin-only query for upgrading model versions
-export const adminUpdateModelVersionAction = makeServerAction(
-  z.object({
-    modelId: z.string(),
-    version: z.string(),
-  }),
-  async (input) => {
+export const adminUpdateModelVersionAction = actionClient
+  .schema(
+    z.object({
+      modelId: z.string(),
+      version: z.string(),
+    })
+  )
+  .action(async ({ parsedInput: input }) => {
     await checkRootUser();
     const session = await getSessionOrRedirect();
 
@@ -86,5 +88,4 @@ export const adminUpdateModelVersionAction = makeServerAction(
     });
 
     return { model };
-  }
-);
+  });

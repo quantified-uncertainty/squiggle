@@ -25,7 +25,7 @@ export const NewModel: FC<{ initialGroup: SelectGroupOption | null }> = ({
   const toast = useToast();
   const router = useRouter();
 
-  const { executeAsync, status } = useAction(createModelAction, {
+  const { executeAsync, isPending } = useAction(createModelAction, {
     onSuccess: ({ data }) => {
       if (data) {
         // redirect in action is incompatible with https://github.com/TheEdoRan/next-safe-action/issues/303
@@ -89,11 +89,7 @@ export const NewModel: FC<{ initialGroup: SelectGroupOption | null }> = ({
         </div>
         <Button
           onClick={onSubmit}
-          disabled={
-            !form.formState.isValid ||
-            form.formState.isSubmitting ||
-            status === "hasSucceeded"
-          }
+          disabled={!form.formState.isValid || isPending}
           theme="primary"
         >
           Create

@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
 
 import {
@@ -10,7 +11,7 @@ import {
 import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
 
 import { H2 } from "@/components/ui/Headers";
-import { ServerActionButton } from "@/components/ui/ServerActionButton";
+import { SafeActionButton } from "@/components/ui/SafeActionButton";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { modelRoute } from "@/lib/routes";
 import { adminUpdateModelVersionAction } from "@/models/actions/adminUpdateModelVersionAction";
@@ -21,6 +22,8 @@ import { UpgradeableModel } from "./UpgradeableModel";
 const ModelList: FC<{
   models: ModelByVersion["models"];
 }> = ({ models }) => {
+  const router = useRouter();
+
   const [pos, setPos] = useState(0);
 
   if (!models.length) return null;
@@ -41,14 +44,13 @@ const ModelList: FC<{
             {model.owner.slug}/{model.slug}
           </StyledLink>
         </div>
-        <ServerActionButton
-          action={async () => {
-            await adminUpdateModelVersionAction({
-              modelId: model.id,
-              version: defaultSquiggleVersion,
-            });
-            window.location.reload();
+        <SafeActionButton
+          action={adminUpdateModelVersionAction}
+          input={{
+            modelId: model.id,
+            version: defaultSquiggleVersion,
           }}
+          onSuccess={() => router.refresh()}
           title={`Upgrade to ${defaultSquiggleVersion}`}
           theme="primary"
         />
