@@ -107,6 +107,6 @@ export function useSafeActionForm<
   return {
     form,
     onSubmit,
-    inFlight: blockOnSuccess ? hasSucceeded : isPending,
+    inFlight: blockOnSuccess ? isPending || hasSucceeded : isPending,
   };
 }

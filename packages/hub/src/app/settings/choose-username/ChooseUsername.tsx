@@ -1,12 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
 
 import { Button } from "@quri/ui";
 
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { setUsername } from "@/users/actions";
+import { useSafeActionForm } from "@/lib/hooks/useSafeActionForm";
+import { setUsernameAction } from "@/users/actions/setUsernameAction";
 
 export const ChooseUsername: FC = () => {
   const router = useRouter();
@@ -15,21 +16,17 @@ export const ChooseUsername: FC = () => {
     username: string;
   };
 
-  const form = useForm<FormShape>();
-
-  const onSubmit = form.handleSubmit(async (data) => {
-    const result = await setUsername(data);
-    if (result.ok) {
+  const { form, onSubmit, inFlight } = useSafeActionForm<
+    FormShape,
+    typeof setUsernameAction
+  >({
+    action: setUsernameAction,
+    onCompleted: () => {
       router.replace("/");
-    } else {
-      form.setError("username", { message: result.error });
-    }
+    },
+    formDataToVariables: (data) => ({ username: data.username }),
+    blockOnSuccess: true,
   });
-
-  const disabled =
-    form.formState.isSubmitting ||
-    form.formState.isSubmitSuccessful ||
-    !form.formState.isValid;
 
   return (
     <form onSubmit={onSubmit}>
@@ -43,7 +40,7 @@ export const ChooseUsername: FC = () => {
                 label="Pick a username"
                 size="small"
               />
-              <Button onClick={onSubmit} disabled={disabled} theme="primary">
+              <Button onClick={onSubmit} disabled={inFlight} theme="primary">
                 Save
               </Button>
             </div>
