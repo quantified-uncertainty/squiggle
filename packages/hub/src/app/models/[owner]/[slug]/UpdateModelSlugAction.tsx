@@ -3,7 +3,7 @@ import { FC } from "react";
 
 import { EditIcon } from "@quri/ui";
 
-import { ServerActionModalAction } from "@/components/ui/ServerActionModalAction";
+import { SafeActionModalAction } from "@/components/ui/SafeActionModalAction";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { modelRoute } from "@/lib/routes";
 import { updateModelSlugAction } from "@/models/actions/updateModelSlugAction";
@@ -22,14 +22,15 @@ export const UpdateModelSlugAction: FC<Props> = ({ model, close }) => {
   const router = useRouter();
 
   return (
-    <ServerActionModalAction<FormShape, typeof updateModelSlugAction>
+    <SafeActionModalAction<FormShape, typeof updateModelSlugAction>
       title="Rename"
       icon={EditIcon}
       action={updateModelSlugAction}
+      defaultValues={{ slug: model.slug }}
       formDataToVariables={(data) => ({
         owner: model.owner.slug,
         oldSlug: model.slug,
-        newSlug: data.slug,
+        slug: data.slug,
       })}
       onCompleted={({ model: newModel }) => {
         draftUtils.rename(
@@ -52,6 +53,6 @@ export const UpdateModelSlugAction: FC<Props> = ({ model, close }) => {
           <SlugFormField<FormShape> name="slug" label="New slug" />
         </div>
       )}
-    </ServerActionModalAction>
+    </SafeActionModalAction>
   );
 };

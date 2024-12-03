@@ -7,36 +7,38 @@ import { squiggleVersions } from "@quri/versioned-squiggle-components";
 
 import { modelRoute } from "@/lib/routes";
 import { prisma } from "@/lib/server/prisma";
-import { makeServerAction } from "@/lib/server/utils";
+import { actionClient, ActionError } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 import { getSelf, getSessionOrRedirect } from "@/users/auth";
 
 import { getWriteableModel } from "../utils";
 
-export const updateSquiggleSnippetModelAction = makeServerAction(
-  z.object({
-    owner: zSlug,
-    slug: zSlug,
-    relativeValuesExports: z.array(
-      z.object({
-        variableName: z.string(),
-        definition: z.object({
-          owner: zSlug,
-          slug: zSlug,
-        }),
-      })
-    ),
-    content: z.object({
-      code: z.string(),
-      version: z.string(),
-      seed: z.string(),
-      autorunMode: z.boolean().nullable(),
-      sampleCount: z.number().nullable(),
-      xyPointLength: z.number().nullable(),
-    }),
-    comment: z.string().optional(),
-  }),
-  async (input) => {
+export const updateSquiggleSnippetModelAction = actionClient
+  .schema(
+    z.object({
+      owner: zSlug,
+      slug: zSlug,
+      relativeValuesExports: z.array(
+        z.object({
+          variableName: z.string(),
+          definition: z.object({
+            owner: zSlug,
+            slug: zSlug,
+          }),
+        })
+      ),
+      content: z.object({
+        code: z.string(),
+        version: z.string(),
+        seed: z.string(),
+        autorunMode: z.boolean().nullable(),
+        sampleCount: z.number().nullable(),
+        xyPointLength: z.number().nullable(),
+      }),
+      comment: z.string().optional(),
+    })
+  )
+  .action(async ({ parsedInput: input }) => {
     const session = await getSessionOrRedirect();
 
     const existingModel = await getWriteableModel({
@@ -46,7 +48,7 @@ export const updateSquiggleSnippetModelAction = makeServerAction(
 
     const version = input.content.version;
     if (!(squiggleVersions as readonly string[]).includes(version)) {
-      throw new Error(`Unknown Squiggle version ${version}`);
+      throw new ActionError(`Unknown Squiggle version ${version}`);
     }
 
     const relativeValuesExports = input.relativeValuesExports ?? [];
@@ -90,7 +92,7 @@ export const updateSquiggleSnippetModelAction = makeServerAction(
           ?.get(pair.definition.slug);
 
         if (!definition) {
-          throw new Error(
+          throw new ActionError(
             `Definition with owner ${pair.definition.owner}, slug ${pair.definition.slug} not found`
           );
         }
@@ -153,5 +155,4 @@ export const updateSquiggleSnippetModelAction = makeServerAction(
     revalidatePath(modelRoute({ owner: input.owner, slug: input.slug }));
 
     return { model };
-  }
-);
+  });

@@ -1,33 +1,69 @@
 "use server";
 
+import { returnValidationErrors } from "next-safe-action";
 import { z } from "zod";
 
 import { prisma } from "@/lib/server/prisma";
-import { makeServerAction } from "@/lib/server/utils";
+import { actionClient } from "@/lib/server/utils";
 import { zSlug } from "@/lib/zodUtils";
 import { getWriteableModel } from "@/models/utils";
 
-export const updateModelSlugAction = makeServerAction(
-  z.object({
-    owner: zSlug,
-    oldSlug: zSlug,
-    newSlug: zSlug,
-  }),
-  async (input) => {
+const schema = z.object({
+  owner: zSlug,
+  oldSlug: zSlug,
+  slug: zSlug,
+});
+
+export const updateModelSlugAction = actionClient
+  .schema(schema)
+  .outputSchema(
+    z.object({
+      model: z.object({
+        slug: zSlug,
+        owner: z.object({
+          slug: zSlug,
+        }),
+      }),
+    })
+  )
+  .action(async ({ parsedInput: input }) => {
     const model = await getWriteableModel({
       owner: input.owner,
       slug: input.oldSlug,
     });
 
-    const newModel = await prisma.model.update({
-      where: { id: model.id },
-      data: { slug: input.newSlug },
-      select: {
-        slug: true,
-        owner: true,
-      },
-    });
+    if (model.slug === input.slug) {
+      // no need to do anything
+      return {
+        model: {
+          slug: model.slug,
+          owner: {
+            slug: input.owner,
+          },
+        },
+      };
+    }
 
-    return { model: newModel };
-  }
-);
+    try {
+      const newModel = await prisma.model.update({
+        where: { id: model.id },
+        data: { slug: input.slug },
+        select: {
+          slug: true,
+          owner: {
+            select: {
+              slug: true,
+            },
+          },
+        },
+      });
+
+      return { model: newModel };
+    } catch {
+      returnValidationErrors(schema, {
+        slug: {
+          _errors: [`Model ${input.slug} already exists`],
+        },
+      });
+    }
+  });

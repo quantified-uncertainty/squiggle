@@ -4,7 +4,7 @@ import { FC } from "react";
 import { RightArrowIcon } from "@quri/ui";
 
 import { SelectOwner, SelectOwnerOption } from "@/components/SelectOwner";
-import { ServerActionModalAction } from "@/components/ui/ServerActionModalAction";
+import { SafeActionModalAction } from "@/components/ui/SafeActionModalAction";
 import { modelRoute } from "@/lib/routes";
 import { moveModelAction } from "@/models/actions/moveModelAction";
 import { ModelCardDTO } from "@/models/data/cards";
@@ -15,14 +15,13 @@ type FormShape = { owner: SelectOwnerOption };
 
 type Props = {
   model: ModelCardDTO;
-  close(): void;
 };
 
-export const MoveModelAction: FC<Props> = ({ model, close }) => {
+export const MoveModelAction: FC<Props> = ({ model }) => {
   const router = useRouter();
 
   return (
-    <ServerActionModalAction<FormShape, typeof moveModelAction>
+    <SafeActionModalAction<FormShape, typeof moveModelAction>
       title="Change Owner"
       modalTitle={`Change owner for ${model.owner.slug}/${model.slug}`}
       submitText="Save"
@@ -31,9 +30,10 @@ export const MoveModelAction: FC<Props> = ({ model, close }) => {
         // so we have to explicitly recast
         owner: model.owner as SelectOwnerOption,
       }}
+      action={moveModelAction}
       formDataToVariables={(data) => ({
         oldOwner: model.owner.slug,
-        newOwner: data.owner.slug,
+        owner: { slug: data.owner.slug },
         slug: model.slug,
       })}
       onCompleted={({ model: newModel }) => {
@@ -46,7 +46,6 @@ export const MoveModelAction: FC<Props> = ({ model, close }) => {
         );
       }}
       icon={RightArrowIcon}
-      action={moveModelAction}
       initialFocus="owner"
       blockOnSuccess
     >
@@ -58,6 +57,6 @@ export const MoveModelAction: FC<Props> = ({ model, close }) => {
           <SelectOwner<FormShape> name="owner" label="New owner" myOnly />
         </div>
       )}
-    </ServerActionModalAction>
+    </SafeActionModalAction>
   );
 };

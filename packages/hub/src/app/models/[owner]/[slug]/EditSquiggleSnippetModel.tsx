@@ -40,7 +40,7 @@ import { ReactRoot } from "@/components/ReactRoot";
 import { FormModal } from "@/components/ui/FormModal";
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/lib/constants";
 import { useAvailableHeight } from "@/lib/hooks/useAvailableHeight";
-import { useServerActionForm } from "@/lib/hooks/useServerActionForm";
+import { useSafeActionForm } from "@/lib/hooks/useSafeActionForm";
 import { modelRoute, variableRoute } from "@/lib/routes";
 import { updateSquiggleSnippetModelAction } from "@/models/actions/updateSquiggleSnippetModelAction";
 import { ModelFullDTO } from "@/models/data/full";
@@ -97,6 +97,7 @@ const SaveDialog: FC<{ onSubmit: OnSubmit; close: () => void }> = ({
       title="Save with comment"
       form={form}
       close={close}
+      inFlight={form.formState.isSubmitting}
       submitText="Save"
     >
       <TextAreaFormField<SaveFormShape> name="comment" label="Comment" />
@@ -165,23 +166,22 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     };
   }, [content, revision.relativeValuesExports]);
 
-  const { form, onSubmit, inFlight } = useServerActionForm<
+  const { form, onSubmit, inFlight } = useSafeActionForm<
     SquiggleSnippetFormShape,
     typeof updateSquiggleSnippetModelAction,
     { comment: string }
   >({
     defaultValues: initialFormValues,
-    action: async (variables) => {
-      const result = await updateSquiggleSnippetModelAction(variables);
+    action: updateSquiggleSnippetModelAction,
+    onCompleted: () => {
       toast("Saved", "confirmation");
       draftUtils.discard(draftLocator);
-      return result;
     },
     formDataToVariables: (formData, extraData) => ({
       content: {
         code: formData.code,
         version,
-        seed: seed,
+        seed,
         autorunMode: content.autorunMode,
         sampleCount: content.sampleCount,
         xyPointLength: content.xyPointLength,
