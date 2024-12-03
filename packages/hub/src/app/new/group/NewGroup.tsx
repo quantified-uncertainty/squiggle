@@ -25,11 +25,11 @@ export const NewGroup: FC = () => {
     defaultValues: {},
     mode: "onChange",
     blockOnSuccess: true,
-    formDataToVariables: (data) => ({
+    formDataToInput: (data) => ({
       slug: data.slug ?? "", // shouldn't happen, but satisfies TypeScript
     }),
     action: createGroupAction,
-    onCompleted(result) {
+    onSuccess(result) {
       router.push(groupRoute({ slug: result.slug }));
     },
   });

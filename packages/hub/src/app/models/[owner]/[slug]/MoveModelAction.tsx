@@ -31,12 +31,12 @@ export const MoveModelAction: FC<Props> = ({ model }) => {
         owner: model.owner as SelectOwnerOption,
       }}
       action={moveModelAction}
-      formDataToVariables={(data) => ({
+      formDataToInput={(data) => ({
         oldOwner: model.owner.slug,
         owner: { slug: data.owner.slug },
         slug: model.slug,
       })}
-      onCompleted={({ model: newModel }) => {
+      onSuccess={({ model: newModel }) => {
         draftUtils.rename(
           modelToDraftLocator(model),
           modelToDraftLocator(newModel)

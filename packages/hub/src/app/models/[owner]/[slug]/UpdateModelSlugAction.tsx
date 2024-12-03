@@ -27,12 +27,12 @@ export const UpdateModelSlugAction: FC<Props> = ({ model, close }) => {
       icon={EditIcon}
       action={updateModelSlugAction}
       defaultValues={{ slug: model.slug }}
-      formDataToVariables={(data) => ({
+      formDataToInput={(data) => ({
         owner: model.owner.slug,
         oldSlug: model.slug,
         slug: data.slug,
       })}
-      onCompleted={({ model: newModel }) => {
+      onSuccess={({ model: newModel }) => {
         draftUtils.rename(
           modelToDraftLocator(model),
           modelToDraftLocator(newModel)

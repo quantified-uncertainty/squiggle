@@ -12,6 +12,8 @@
 
 - store actions in `src/{topic}/actions/`, where `{topic}` is something like "models" or "relative-values"
 - name actions like this: `doSomethingAction`
+- use `next-safe-action` to define all actions
+- return _something_ from actions, even if it's just `"ok"`; some wrappers check whether `data` on the action is defined
 
 ### Data loading
 

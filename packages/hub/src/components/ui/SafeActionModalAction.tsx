@@ -16,10 +16,10 @@ type CommonProps<
   Action extends HookSafeActionFn<any, any, any, any, any, any>,
 > = Pick<
   Parameters<typeof useSafeActionForm<TFormShape, Action>>[0],
-  | "formDataToVariables"
+  | "formDataToInput"
   | "defaultValues"
   | "action"
-  | "onCompleted"
+  | "onSuccess"
   | "blockOnSuccess"
 > & {
   initialFocus?: FieldPath<TFormShape>;
@@ -30,12 +30,12 @@ function SafeActionFormModal<
   TFormShape extends FieldValues,
   const Action extends HookSafeActionFn<any, any, any, any, any, any>,
 >({
-  formDataToVariables,
+  formDataToInput,
   initialFocus,
   defaultValues,
   submitText,
   action,
-  onCompleted,
+  onSuccess,
   title,
   children,
 }: PropsWithChildren<CommonProps<TFormShape, Action>> & {
@@ -48,9 +48,9 @@ function SafeActionFormModal<
     mode: "onChange",
     defaultValues,
     action,
-    formDataToVariables,
-    async onCompleted(data) {
-      onCompleted?.(data);
+    formDataToInput,
+    async onSuccess(data) {
+      onSuccess?.(data);
       closeDropdown();
     },
   });

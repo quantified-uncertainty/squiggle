@@ -27,7 +27,7 @@ export function RelativeValuesDefinitionForm<
   withoutSlug,
   action,
   formDataToInput,
-  onCompleted,
+  onSuccess,
 }: {
   defaultValues?: FormShape;
   withoutSlug?: boolean;
@@ -35,7 +35,7 @@ export function RelativeValuesDefinitionForm<
   formDataToInput: (
     data: FormShape
   ) => InferSafeActionFnInput<Action>["clientInput"];
-  onCompleted?: (
+  onSuccess?: (
     data: NonNullable<InferSafeActionFnResult<Action>["data"]>
   ) => void;
 }) {
@@ -43,8 +43,8 @@ export function RelativeValuesDefinitionForm<
     mode: "onChange",
     defaultValues,
     action,
-    formDataToVariables: formDataToInput,
-    onCompleted,
+    formDataToInput: formDataToInput,
+    onSuccess,
   });
 
   return (

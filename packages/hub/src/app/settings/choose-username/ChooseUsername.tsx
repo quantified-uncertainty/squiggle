@@ -21,10 +21,10 @@ export const ChooseUsername: FC = () => {
     typeof setUsernameAction
   >({
     action: setUsernameAction,
-    onCompleted: () => {
+    onSuccess: () => {
       router.replace("/");
     },
-    formDataToVariables: (data) => ({ username: data.username }),
+    formDataToInput: (data) => ({ username: data.username }),
     blockOnSuccess: true,
   });
 

@@ -25,17 +25,17 @@ export function useSafeActionForm<
   defaultValues,
   mode,
   action,
-  onCompleted,
-  formDataToVariables,
+  onSuccess,
+  formDataToInput,
   blockOnSuccess,
 }: {
   // This is unfortunately not strictly type-safe: if you return extra variables that are not needed for mutation, TypeScript won't complain.
   // See also: https://stackoverflow.com/questions/72111571/typescript-exact-return-type-of-function
   // This could be solved by converting the return type to generic, but I expect that the lack of partial type parameters in TypeScript
   // would get in the way, so I won't even try.
-  formDataToVariables: (data: FormShape, extraData?: ExtraData) => ActionInput;
+  formDataToInput: (data: FormShape, extraData?: ExtraData) => ActionInput;
   action: Action;
-  onCompleted?: (
+  onSuccess?: (
     result: NonNullable<InferSafeActionFnResult<Action>["data"]>
   ) => void | Promise<void>;
   blockOnSuccess?: boolean;
@@ -49,7 +49,7 @@ export function useSafeActionForm<
   const { executeAsync, isPending, hasSucceeded } = useAction(action, {
     onSuccess: ({ data }) => {
       if (data) {
-        onCompleted?.(data);
+        onSuccess?.(data);
       }
     },
     onError: ({ error }) => {
@@ -94,14 +94,12 @@ export function useSafeActionForm<
   const onSubmit = useCallback(
     (event?: BaseSyntheticEvent, extraData?: ExtraData) =>
       form.handleSubmit(async (formData) => {
-        const result = await executeAsync(
-          formDataToVariables(formData, extraData)
-        );
+        const result = await executeAsync(formDataToInput(formData, extraData));
         if (result?.serverError || result?.validationErrors) {
           throw new Error("Action failed");
         }
       })(event),
-    [form, formDataToVariables, executeAsync]
+    [form, formDataToInput, executeAsync]
   );
 
   return {

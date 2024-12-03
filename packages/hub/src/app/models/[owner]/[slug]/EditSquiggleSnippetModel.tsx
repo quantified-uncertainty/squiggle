@@ -173,11 +173,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
   >({
     defaultValues: initialFormValues,
     action: updateSquiggleSnippetModelAction,
-    onCompleted: () => {
+    onSuccess: () => {
       toast("Saved", "confirmation");
       draftUtils.discard(draftLocator);
     },
-    formDataToVariables: (formData, extraData) => ({
+    formDataToInput: (formData, extraData) => ({
       content: {
         code: formData.code,
         version,

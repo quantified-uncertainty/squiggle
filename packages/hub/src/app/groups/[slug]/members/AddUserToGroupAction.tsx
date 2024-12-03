@@ -21,11 +21,11 @@ export const AddUserToGroupAction: FC<Props> = ({ groupSlug, append }) => {
       title="Add"
       icon={PlusIcon}
       action={addUserToGroupAction}
-      onCompleted={(membership) => {
+      onSuccess={(membership) => {
         append(membership);
       }}
       defaultValues={{ role: "Member" }}
-      formDataToVariables={(data) => ({
+      formDataToInput={(data) => ({
         group: groupSlug,
         username: data.user.slug,
         role: data.role,

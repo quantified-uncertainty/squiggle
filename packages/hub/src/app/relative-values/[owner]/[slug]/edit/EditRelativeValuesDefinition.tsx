@@ -45,7 +45,7 @@ export const EditRelativeValuesDefinition: FC<{
         })),
         recommendedUnit: data.recommendedUnit || undefined,
       })}
-      onCompleted={(data) => {
+      onSuccess={(data) => {
         router.push(
           relativeValuesRoute({
             owner: data.owner,
