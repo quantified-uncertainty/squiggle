@@ -156,10 +156,10 @@ export async function POST(req: Request) {
 
     saveWorkflowToDbOnUpdates(workflow);
 
-    const stream = workflow.runAsStream();
-
     // this is async but we don't need to wait for it
     createDbWorkflow(workflow, user);
+
+    const stream = workflow.runAsStream();
 
     return new Response(stream as ReadableStream, {
       headers: {
