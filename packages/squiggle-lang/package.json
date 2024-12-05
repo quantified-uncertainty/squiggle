@@ -13,7 +13,7 @@
     "build": "pnpm run build:peggy && pnpm run build:ts && pnpm run build:worker",
     "build:peggy": "peggy --cache --format es ./src/ast/peggyParser.peggy",
     "build:ts": "tsc -b",
-    "build:worker": "esbuild src/runners/worker.ts --bundle --minify --platform=browser --outfile=dist/runners/esbuild-worker.cjs",
+    "build:worker": "esbuild src/runners/worker.ts --bundle --minify --platform=browser --format=esm --outfile=dist/runners/esbuild-worker.js",
     "dev": "tsc -b -w",
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js && rm *.tsbuildinfo",
     "jest": "NODE_OPTIONS=--experimental-vm-modules jest",
