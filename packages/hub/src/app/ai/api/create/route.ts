@@ -154,10 +154,9 @@ export async function POST(req: Request) {
 
     const workflow = aiRequestToWorkflow(request);
 
-    saveWorkflowToDbOnUpdates(workflow);
+    await createDbWorkflow(workflow, user);
 
-    // this is async but we don't need to wait for it
-    createDbWorkflow(workflow, user);
+    saveWorkflowToDbOnUpdates(workflow);
 
     const stream = workflow.runAsStream();
 
