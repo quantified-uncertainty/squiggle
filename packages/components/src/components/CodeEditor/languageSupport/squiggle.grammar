@@ -56,9 +56,25 @@ Decorator {
     )
 }
 
-LetStatement { Decorator* export? VariableName { identifier } "=" expression }
+UnitTypeSignature {
+    "::" InfixUnitType
+}
 
-DefunStatement { Decorator* export? VariableName { identifier } ~callOrDeclaration "(" LambdaArgs ")" "=" expression }
+UnitName { identifier }
+
+ExponentialUnitType {
+    UnitName
+    | UnitName "^" Number
+}
+
+InfixUnitType {
+    ExponentialUnitType
+    | ExponentialUnitType ( ArithOp<"/"> | ArithOp<"*"> ) InfixUnitType
+}
+
+LetStatement { Decorator* export? VariableName { identifier } UnitTypeSignature? "=" expression }
+
+DefunStatement { Decorator* export? VariableName { identifier } ~callOrDeclaration "(" LambdaArgs ")" UnitTypeSignature? "=" expression }
 
 statement[@isGroup="Statement"] {
     LetStatement
@@ -91,6 +107,7 @@ expressionWithoutParens[@isGroup="Expression"] {
             )
             blockContent
         "}"
+        // UnitTypeSignature on anon lambdas is not supported yet - hard to do with Lezer
     }
     | Identifier { identifier }
     | AccessExpr { expression !deref "." Field { identifier } }

@@ -63,6 +63,7 @@ export function getLezerParser({
           "Program/DefunStatement/VariableName",
         ].join(" ")]: [hoverableTag, t.constant(t.variableName)],
         Identifier: t.variableName,
+        UnitName: t.variableName,
         Field: t.variableName,
         LambdaParameterName: t.variableName,
         ...(hoverableImports
