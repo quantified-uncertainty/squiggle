@@ -1,24 +1,19 @@
 import { Metadata } from "next";
 
-import { loadPageQuery } from "@/relay/loadPageQuery";
-
-import { UserDefinitionsPage } from "./UserDefinitionsPage";
-
-import QueryNode, {
-  UserDefinitionsPageQuery,
-} from "@/__generated__/UserDefinitionsPageQuery.graphql";
+import { RelativeValuesDefinitionList } from "@/relative-values/components/RelativeValuesDefinitionList";
+import { loadDefinitionCards } from "@/relative-values/data/cards";
 
 type Props = {
   params: Promise<{ username: string }>;
 };
 
-export default async function OuterUserDefinitionsPage({ params }: Props) {
+export default async function UserDefinitionsPage({ params }: Props) {
   const { username } = await params;
-  const query = await loadPageQuery<UserDefinitionsPageQuery>(QueryNode, {
+  const page = await loadDefinitionCards({
     username,
   });
 
-  return <UserDefinitionsPage query={query} />;
+  return <RelativeValuesDefinitionList page={page} showOwner={false} />;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

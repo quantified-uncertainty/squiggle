@@ -3,11 +3,10 @@ import { FC, PropsWithChildren, Reducer } from "react";
 
 import { generateProvider } from "@quri/ui";
 
+import { RelativeValuesDefinitionFullDTO } from "@/relative-values/data/full";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
 
 import { Filter } from "./types";
-
-import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 
 export type Axis = "rows" | "columns";
 
@@ -27,7 +26,7 @@ export type AxisConfig = {
 
 type ViewContextShape = {
   evaluator: ModelEvaluator;
-  definition: RelativeValuesDefinitionRevision$data;
+  definition: RelativeValuesDefinitionFullDTO["currentRevision"];
   gridMode: GridMode;
   axisConfig: { [k in Axis]: AxisConfig };
 };
@@ -167,7 +166,7 @@ const {
 
 export const RelativeValuesProvider: FC<
   PropsWithChildren<{
-    definition: RelativeValuesDefinitionRevision$data;
+    definition: RelativeValuesDefinitionFullDTO["currentRevision"];
     evaluator: ModelEvaluator;
   }>
 > = ({ evaluator, definition, children }) => {

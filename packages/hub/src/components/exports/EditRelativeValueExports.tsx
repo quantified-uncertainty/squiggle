@@ -1,27 +1,22 @@
-"use client";
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
-import { graphql, useFragment } from "react-relay";
 
 import { Button, TextFormField } from "@quri/ui";
 
+import { RelativeValuesExportInput } from "@/app/models/[owner]/[slug]/EditSquiggleSnippetModel";
 import {
   modelForRelativeValuesExportRoute,
   relativeValuesRoute,
-} from "@/routes";
+} from "@/lib/routes";
+import { ModelFullDTO } from "@/models/data/full";
+import { FindRelativeValuesForSelectResult } from "@/relative-values/data/findRelativeValuesForSelect";
 
 import { SelectOwner, SelectOwnerOption } from "../SelectOwner";
 import { FormModal } from "../ui/FormModal";
 import { H2 } from "../ui/Headers";
 import { StyledDefinitionLink } from "../ui/StyledDefinitionLink";
 import { StyledLink } from "../ui/StyledLink";
-import {
-  SelectRelativeValuesDefinition,
-  SelectRelativeValuesDefinitionOption,
-} from "./SelectRelativeValuesDefinition";
-
-import { EditRelativeValueExports_Model$key } from "@/__generated__/EditRelativeValueExports_Model.graphql";
-import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
+import { SelectRelativeValuesDefinition } from "./SelectRelativeValuesDefinition";
 
 const CreateVariableWithDefinitionModal: FC<{
   close: () => void;
@@ -30,7 +25,7 @@ const CreateVariableWithDefinitionModal: FC<{
   type FormShape = {
     variableName: string;
     owner: SelectOwnerOption | null;
-    definition: SelectRelativeValuesDefinitionOption | null;
+    definition: FindRelativeValuesForSelectResult | null;
   };
 
   type ValidatedFormShape = {
@@ -90,22 +85,9 @@ const CreateVariableWithDefinitionModal: FC<{
 
 const ExportItem: FC<{
   item: RelativeValuesExportInput;
-  modelRef: EditRelativeValueExports_Model$key;
+  model: ModelFullDTO;
   remove: () => void;
-}> = ({ item, modelRef, remove }) => {
-  const model = useFragment(
-    graphql`
-      fragment EditRelativeValueExports_Model on Model {
-        id
-        slug
-        owner {
-          slug
-        }
-      }
-    `,
-    modelRef
-  );
-
+}> = ({ item, model, remove }) => {
   return (
     <div className="flex items-center gap-2">
       <div className="text-sm">
@@ -139,14 +121,14 @@ type Props = {
   append: (item: RelativeValuesExportInput) => void;
   remove: (id: number) => void;
   items: RelativeValuesExportInput[];
-  modelRef: EditRelativeValueExports_Model$key;
+  model: ModelFullDTO;
 };
 
 export const EditRelativeValueExports: FC<Props> = ({
   append,
   remove,
   items,
-  modelRef,
+  model,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -158,7 +140,7 @@ export const EditRelativeValueExports: FC<Props> = ({
           <ExportItem
             key={i}
             item={item}
-            modelRef={modelRef}
+            model={model}
             remove={() => remove(i)}
           />
         ))}

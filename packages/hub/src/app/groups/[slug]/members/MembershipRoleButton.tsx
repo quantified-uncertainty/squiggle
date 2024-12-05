@@ -1,57 +1,34 @@
+import { type MembershipRole } from "@prisma/client";
 import { FC } from "react";
-import { useFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
 import { Button, Dropdown, DropdownMenu } from "@quri/ui";
 
+import { GroupMemberDTO } from "@/groups/data/members";
+
 import { SetMembershipRoleAction } from "./SetMembershipRoleAction";
 
-import { MembershipRoleButton_Group$key } from "@/__generated__/MembershipRoleButton_Group.graphql";
-import {
-  MembershipRole,
-  MembershipRoleButton_Membership$key,
-} from "@/__generated__/MembershipRoleButton_Membership.graphql";
-
 type Props = {
-  membershipRef: MembershipRoleButton_Membership$key;
-  groupRef: MembershipRoleButton_Group$key;
+  groupSlug: string;
+  membership: GroupMemberDTO;
+  update: (membership: GroupMemberDTO) => void;
 };
 
 export const MembershipRoleButton: FC<Props> = ({
-  membershipRef,
-  groupRef,
+  membership,
+  groupSlug,
+  update,
 }) => {
-  const group = useFragment(
-    graphql`
-      fragment MembershipRoleButton_Group on Group {
-        ...SetMembershipRoleAction_Group
-      }
-    `,
-    groupRef
-  );
-
-  const membership = useFragment(
-    graphql`
-      fragment MembershipRoleButton_Membership on UserGroupMembership {
-        id
-        role
-        ...SetMembershipRoleAction_Membership
-      }
-    `,
-    membershipRef
-  );
-
   return (
     <Dropdown
-      render={({ close }) => (
+      render={() => (
         <DropdownMenu>
           {(["Admin", "Member"] satisfies MembershipRole[]).map((role) => (
             <SetMembershipRoleAction
               key={role}
-              membershipRef={membership}
-              groupRef={group}
-              close={close}
+              membership={membership}
+              groupSlug={groupSlug}
               role={role}
+              update={update}
             />
           ))}
         </DropdownMenu>

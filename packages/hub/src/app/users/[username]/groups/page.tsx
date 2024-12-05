@@ -1,12 +1,7 @@
 import { Metadata } from "next";
 
-import { loadPageQuery } from "@/relay/loadPageQuery";
-
-import { UserGroupsPage } from "./UserGroupsPage";
-
-import QueryNode, {
-  UserGroupsPageQuery,
-} from "@/__generated__/UserGroupsPageQuery.graphql";
+import { GroupList } from "@/groups/components/GroupList";
+import { loadGroupCards } from "@/groups/data/groupCards";
 
 type Props = {
   params: Promise<{ username: string }>;
@@ -14,11 +9,17 @@ type Props = {
 
 export default async function OuterUserGroupsPage({ params }: Props) {
   const { username } = await params;
-  const query = await loadPageQuery<UserGroupsPageQuery>(QueryNode, {
-    username,
-  });
+  const page = await loadGroupCards({ username });
 
-  return <UserGroupsPage query={query} />;
+  return (
+    <div>
+      {page.items.length ? (
+        <GroupList page={page} />
+      ) : (
+        <div className="text-slate-500">No groups to show.</div>
+      )}
+    </div>
+  );
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

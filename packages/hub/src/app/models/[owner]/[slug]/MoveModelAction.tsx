@@ -1,88 +1,42 @@
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { useFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
 import { RightArrowIcon } from "@quri/ui";
 
 import { SelectOwner, SelectOwnerOption } from "@/components/SelectOwner";
-import { MutationModalAction } from "@/components/ui/MutationModalAction";
-import { modelRoute } from "@/routes";
+import { SafeActionModalAction } from "@/components/ui/SafeActionModalAction";
+import { modelRoute } from "@/lib/routes";
+import { moveModelAction } from "@/models/actions/moveModelAction";
+import { ModelCardDTO } from "@/models/data/cards";
 
 import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
-
-import { MoveModelAction$key } from "@/__generated__/MoveModelAction.graphql";
-import { MoveModelActionMutation } from "@/__generated__/MoveModelActionMutation.graphql";
-
-const Mutation = graphql`
-  mutation MoveModelActionMutation($input: MutationMoveModelInput!) {
-    result: moveModel(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on MoveModelResult {
-        model {
-          id
-          slug
-          owner {
-            __typename
-            id
-            slug
-          }
-        }
-      }
-    }
-  }
-`;
 
 type FormShape = { owner: SelectOwnerOption };
 
 type Props = {
-  model: MoveModelAction$key;
-  close(): void;
+  model: ModelCardDTO;
 };
 
-export const MoveModelAction: FC<Props> = ({ model: modelKey, close }) => {
-  const model = useFragment(
-    graphql`
-      fragment MoveModelAction on Model {
-        slug
-        owner {
-          __typename
-          id
-          slug
-        }
-      }
-    `,
-    modelKey
-  );
-
+export const MoveModelAction: FC<Props> = ({ model }) => {
   const router = useRouter();
 
   return (
-    <MutationModalAction<MoveModelActionMutation, FormShape, "MoveModelResult">
-      mutation={Mutation}
-      expectedTypename="MoveModelResult"
-      formDataToVariables={(data) => ({
-        input: {
-          oldOwner: model.owner.slug,
-          newOwner: data.owner.slug,
-          slug: model.slug,
-        },
-      })}
-      initialFocus="owner"
+    <SafeActionModalAction<FormShape, typeof moveModelAction>
+      title="Change Owner"
+      modalTitle={`Change owner for ${model.owner.slug}/${model.slug}`}
+      submitText="Save"
       defaultValues={{
         // __typename from fragment is string, while SelectOwner requires 'User' | 'Group' union,
         // so we have to explicitly recast
         owner: model.owner as SelectOwnerOption,
       }}
-      submitText="Save"
-      close={close}
-      title="Change Owner"
-      icon={RightArrowIcon}
-      modalTitle={`Change owner for ${model.owner.slug}/${model.slug}`}
-      onCompleted={({ model: newModel }) => {
+      action={moveModelAction}
+      formDataToInput={(data) => ({
+        oldOwner: model.owner.slug,
+        owner: { slug: data.owner.slug },
+        slug: model.slug,
+      })}
+      onSuccess={({ model: newModel }) => {
         draftUtils.rename(
           modelToDraftLocator(model),
           modelToDraftLocator(newModel)
@@ -91,6 +45,9 @@ export const MoveModelAction: FC<Props> = ({ model: modelKey, close }) => {
           modelRoute({ owner: newModel.owner.slug, slug: newModel.slug })
         );
       }}
+      icon={RightArrowIcon}
+      initialFocus="owner"
+      blockOnSuccess
     >
       {() => (
         <div className="mb-4">
@@ -100,6 +57,6 @@ export const MoveModelAction: FC<Props> = ({ model: modelKey, close }) => {
           <SelectOwner<FormShape> name="owner" label="New owner" myOnly />
         </div>
       )}
-    </MutationModalAction>
+    </SafeActionModalAction>
   );
 };

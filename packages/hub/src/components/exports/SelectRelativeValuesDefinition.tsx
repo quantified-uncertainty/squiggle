@@ -1,36 +1,14 @@
 import { FC, useEffect } from "react";
 import { FieldPathByValue, FieldValues, useFormContext } from "react-hook-form";
-import { useRelayEnvironment } from "react-relay";
-import { fetchQuery, graphql } from "relay-runtime";
+import { z } from "zod";
 
 import { SelectFormField } from "@quri/ui";
 
+import { FindRelativeValuesForSelectResult } from "@/relative-values/data/findRelativeValuesForSelect";
+
 import { SelectOwnerOption } from "../SelectOwner";
 
-import {
-  SelectRelativeValuesDefinitionQuery,
-  SelectRelativeValuesDefinitionQuery$data,
-} from "@/__generated__/SelectRelativeValuesDefinitionQuery.graphql";
-
-const Query = graphql`
-  query SelectRelativeValuesDefinitionQuery(
-    $input: RelativeValuesDefinitionsQueryInput!
-  ) {
-    relativeValuesDefinitions(input: $input) {
-      edges {
-        node {
-          id
-          slug
-        }
-      }
-    }
-  }
-`;
-
-export type SelectRelativeValuesDefinitionOption =
-  SelectRelativeValuesDefinitionQuery$data["relativeValuesDefinitions"]["edges"][number]["node"];
-
-const DefinitionInfo: FC<{ option: SelectRelativeValuesDefinitionOption }> = ({
+const DefinitionInfo: FC<{ option: FindRelativeValuesForSelectResult }> = ({
   option,
 }) => <div>{option.slug}</div>;
 
@@ -41,36 +19,40 @@ export function SelectRelativeValuesDefinition<
   label,
   ownerFieldName,
 }: {
-  name: FieldPathByValue<TValues, SelectRelativeValuesDefinitionOption | null>;
+  name: FieldPathByValue<TValues, FindRelativeValuesForSelectResult | null>;
   label?: string;
   ownerFieldName: FieldPathByValue<TValues, SelectOwnerOption | null>;
 }) {
   const { watch, resetField } = useFormContext<TValues>();
-  const environment = useRelayEnvironment();
   const owner: SelectOwnerOption | null = watch(ownerFieldName);
 
   const loadOptions = async (
     inputValue: string
-  ): Promise<SelectRelativeValuesDefinitionOption[]> => {
+  ): Promise<FindRelativeValuesForSelectResult[]> => {
     if (!owner) {
       return [];
     }
-    const result = await fetchQuery<SelectRelativeValuesDefinitionQuery>(
-      environment,
-      Query,
-      {
-        input: {
-          owner: owner.slug,
-          slugContains: inputValue,
-        },
-      }
-    ).toPromise();
+    const result = await fetch(
+      `/api/find-relative-values?${new URLSearchParams({
+        owner: owner.slug,
+        slugContains: inputValue,
+      })}`
+    ).then((r) => r.json());
+
+    const data = z
+      .array(
+        z.object({
+          id: z.string(),
+          slug: z.string(),
+        })
+      )
+      .parse(result);
 
     if (!result) {
       return [];
     }
 
-    return result.relativeValuesDefinitions.edges.map((edge) => edge.node);
+    return result;
   };
 
   useEffect(() => {
@@ -78,7 +60,7 @@ export function SelectRelativeValuesDefinition<
   }, [name, owner, resetField]);
 
   return (
-    <SelectFormField<TValues, SelectRelativeValuesDefinitionOption | null>
+    <SelectFormField<TValues, FindRelativeValuesForSelectResult | null>
       key={owner?.slug ?? " "} // re-render the component when owner changes; this helps with default select options on initial open
       name={name}
       label={label}

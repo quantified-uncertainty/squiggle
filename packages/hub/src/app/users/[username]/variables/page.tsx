@@ -1,12 +1,7 @@
 import { Metadata } from "next";
 
-import { loadPageQuery } from "@/relay/loadPageQuery";
-
-import { UserVariablesPage } from "./UserVariablesPage";
-
-import QueryNode, {
-  UserVariablesPageQuery,
-} from "@/__generated__/UserVariablesPageQuery.graphql";
+import { VariableList } from "@/variables/components/VariableList";
+import { loadVariableCards } from "@/variables/data/variableCards";
 
 type Props = {
   params: Promise<{ username: string }>;
@@ -14,11 +9,9 @@ type Props = {
 
 export default async function OuterUserVariablesPage({ params }: Props) {
   const { username } = await params;
-  const query = await loadPageQuery<UserVariablesPageQuery>(QueryNode, {
-    username,
-  });
+  const variables = await loadVariableCards({ ownerSlug: username });
 
-  return <UserVariablesPage query={query} />;
+  return <VariableList page={variables} />;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

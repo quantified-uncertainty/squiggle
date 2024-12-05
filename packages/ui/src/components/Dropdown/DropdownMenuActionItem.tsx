@@ -14,10 +14,11 @@ export const DropdownMenuActionItem: FC<ActionItemProps> = ({
   title,
   icon,
   onClick,
+  acting,
 }) => {
   return (
     <div onClick={onClick}>
-      <DropdownMenuItemLayout icon={icon} title={title} />
+      <DropdownMenuItemLayout icon={icon} title={title} acting={acting} />
     </div>
   );
 };

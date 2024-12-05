@@ -47,7 +47,7 @@ export const ForcePlot: FC<{
     id: string;
     x: number;
     y: number;
-    clusterId: string | null;
+    clusterId: string | null | undefined;
     name: string;
   };
 

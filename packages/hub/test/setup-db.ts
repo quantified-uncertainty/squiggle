@@ -1,4 +1,4 @@
-import { prisma } from "@/prisma";
+import { prisma } from "@/lib/server/prisma";
 
 if (!process.env["DATABASE_URL"]?.includes("quri-test")) {
   throw new Error("Expected quri-test database, probable misconfiguration");

@@ -1,65 +1,31 @@
 import { useRouter } from "next/navigation";
-import { FC, useCallback } from "react";
-import { useMutation } from "react-relay";
-import { graphql } from "relay-runtime";
+import { FC } from "react";
 
-import { DropdownMenuAsyncActionItem, TrashIcon, useToast } from "@quri/ui";
+import { TrashIcon, useToast } from "@quri/ui";
 
-import { DeleteRelativeValuesDefinitionActionMutation } from "@/__generated__/DeleteRelativeValuesDefinitionActionMutation.graphql";
-
-const Mutation = graphql`
-  mutation DeleteRelativeValuesDefinitionActionMutation(
-    $input: MutationDeleteRelativeValuesDefinitionInput!
-  ) {
-    result: deleteRelativeValuesDefinition(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-    }
-  }
-`;
+import { SafeActionDropdownAction } from "@/components/ui/SafeActionDropdownAction";
+import { deleteRelativeValuesDefinitionAction } from "@/relative-values/actions/deleteRelativeValuesDefinitionAction";
 
 type Props = {
   owner: string;
   slug: string;
-  close(): void;
 };
 
-export const DeleteDefinitionAction: FC<Props> = ({ owner, slug, close }) => {
+export const DeleteDefinitionAction: FC<Props> = ({ owner, slug }) => {
   const router = useRouter();
-
-  const [mutation] =
-    useMutation<DeleteRelativeValuesDefinitionActionMutation>(Mutation);
 
   const toast = useToast();
 
-  const onClick = useCallback((): Promise<void> => {
-    return new Promise(() => {
-      mutation({
-        variables: { input: { owner, slug } },
-        onCompleted(response) {
-          if (response.result.__typename === "BaseError") {
-            toast(response.result.message, "error");
-            close();
-          } else {
-            router.push("/");
-          }
-        },
-        onError(e) {
-          toast(e.toString(), "error");
-          close();
-        },
-      });
-    });
-  }, [mutation, owner, slug, close, router, toast]);
-
   return (
-    <DropdownMenuAsyncActionItem
+    <SafeActionDropdownAction
       title="Delete"
-      onClick={onClick}
+      action={deleteRelativeValuesDefinitionAction}
+      input={{ owner, slug }}
+      onSuccess={() => {
+        toast("Definition deleted", "confirmation");
+        router.push("/");
+      }}
       icon={TrashIcon}
-      close={close}
     />
   );
 };

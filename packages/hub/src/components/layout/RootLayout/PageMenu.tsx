@@ -1,11 +1,12 @@
-import { signIn, useSession } from "next-auth/react";
+"use client";
+import { Session } from "next-auth";
+import { signIn, signOut } from "next-auth/react";
 import { FC, useState } from "react";
-import { useFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
 import {
   BoltIcon,
   BookOpenIcon,
+  Button,
   DotsHorizontalIcon,
   Dropdown,
   DropdownMenu,
@@ -16,10 +17,10 @@ import {
   UserCircleIcon,
 } from "@quri/ui";
 
-import { Link } from "@/components/ui/Link";
-import { useUsername } from "@/hooks/useUsername";
-import { SQUIGGLE_DOCS_URL } from "@/lib/common";
-import { aboutRoute, aiRoute, newModelRoute } from "@/routes";
+import { GroupCardDTO } from "@/groups/data/groupCards";
+import { SQUIGGLE_DOCS_URL } from "@/lib/constants";
+import { aboutRoute, aiRoute, newModelRoute } from "@/lib/routes";
+import { Paginated } from "@/lib/types";
 
 import { GlobalSearch } from "../../GlobalSearch";
 import { DesktopUserControls } from "./DesktopUserControls";
@@ -29,13 +30,7 @@ import { MenuLinkModeProps, PageMenuLink } from "./PageMenuLink";
 import { useForceChooseUsername } from "./useForceChooseUsername";
 import { UserControlsMenu } from "./UserControlsMenu";
 
-import { PageMenu$key } from "@/__generated__/PageMenu.graphql";
-
 const AboutMenuLink: FC<MenuLinkModeProps> = (props) => {
-  const { data: session } = useSession();
-  if (session) {
-    return null;
-  }
   return <PageMenuLink {...props} href={aboutRoute()} title="About" />;
 };
 
@@ -54,38 +49,27 @@ const AiMenuLink: FC<MenuLinkModeProps> = (props) => (
 );
 
 const NewModelMenuLink: FC<MenuLinkModeProps> = (props) => {
-  const { data: session } = useSession();
-  if (!session) {
-    return null;
-  }
   return (
     <PageMenuLink
       {...props}
       href={newModelRoute()}
       icon={PlusIcon}
       title="New Model"
+      prefetch
     />
   );
 };
 
-const fragment = graphql`
-  fragment PageMenu on Query
-  @argumentDefinitions(signedIn: { type: "Boolean!" }) {
-    ...MyGroupsMenu @include(if: $signedIn)
-  }
-`;
-
 type MenuProps = {
-  queryRef: PageMenu$key;
+  groups: Paginated<GroupCardDTO>;
+  session: Session | null;
 };
 
-const DesktopMenu: FC<MenuProps> = ({ queryRef }) => {
-  const { data: session } = useSession();
-  const menu = useFragment(fragment, queryRef);
+const DesktopMenu: FC<MenuProps> = ({ groups, session }) => {
   return (
     <div className="flex items-center gap-4">
       <GlobalSearch />
-      <AboutMenuLink mode="desktop" />
+      {!session && <AboutMenuLink mode="desktop" />}
       <DocsMenuLink mode="desktop" />
       {session ? (
         <>
@@ -93,7 +77,7 @@ const DesktopMenu: FC<MenuProps> = ({ queryRef }) => {
           <Dropdown
             render={({ close }) => (
               <DropdownMenu>
-                <MyGroupsMenu groupsRef={menu} close={close} />
+                <MyGroupsMenu groups={groups} close={close} />
               </DropdownMenu>
             )}
           >
@@ -102,15 +86,13 @@ const DesktopMenu: FC<MenuProps> = ({ queryRef }) => {
           <AiMenuLink mode="desktop" />
         </>
       ) : null}
-      <DesktopUserControls />
+      <DesktopUserControls session={session} />
     </div>
   );
 };
 
-const MobileMenu: FC<MenuProps> = ({ queryRef }) => {
-  const menu = useFragment(fragment, queryRef);
-
-  const username = useUsername();
+const MobileMenu: FC<MenuProps> = ({ groups, session }) => {
+  const username = session?.user?.username;
   const [open, setOpen] = useState(false);
 
   const Icon = username ? UserCircleIcon : DotsHorizontalIcon;
@@ -136,12 +118,12 @@ const MobileMenu: FC<MenuProps> = ({ queryRef }) => {
           <div className="fixed inset-y-0 right-0 z-20 overflow-y-auto overflow-x-hidden bg-white shadow-xl">
             <DropdownMenu>
               <DropdownMenuHeader>Menu</DropdownMenuHeader>
-              <NewModelMenuLink mode="mobile" close={close} />
-              <AboutMenuLink mode="mobile" close={close} />
+              {session && <NewModelMenuLink mode="mobile" close={close} />}
+              {!session && <AboutMenuLink mode="mobile" close={close} />}
               <DocsMenuLink mode="mobile" close={close} />
               {username ? (
                 <>
-                  <MyGroupsMenu groupsRef={menu} close={close} />
+                  <MyGroupsMenu groups={groups} close={close} />
                   <UserControlsMenu
                     mode="mobile"
                     username={username}
@@ -167,20 +149,26 @@ const MobileMenu: FC<MenuProps> = ({ queryRef }) => {
   );
 };
 
-export const PageMenu: FC<MenuProps> = ({ queryRef }) => {
-  useForceChooseUsername();
+export const PageMenu: FC<MenuProps> = ({ session, groups }) => {
+  // TODO - if redirecting, return a custom menu; right now we render the
+  // confused version where "New Model" button is visible, but "Sign In" button
+  // is visible too
+  const { shouldChoose } = useForceChooseUsername(session);
+
+  if (shouldChoose) {
+    return (
+      <Button onClick={() => signOut({ redirectTo: "/" })}>Sign Out</Button>
+    );
+  }
 
   return (
-    <div className="flex h-10 items-center justify-between bg-gray-800 px-8">
-      <Link className="font-semibold text-slate-300" href="/">
-        Squiggle Hub
-      </Link>
+    <>
       <div className="hidden md:block">
-        <DesktopMenu queryRef={queryRef} />
+        <DesktopMenu groups={groups} session={session} />
       </div>
       <div className="block md:hidden">
-        <MobileMenu queryRef={queryRef} />
+        <MobileMenu groups={groups} session={session} />
       </div>
-    </div>
+    </>
   );
 };

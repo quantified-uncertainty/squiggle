@@ -1,10 +1,9 @@
-import { loadPageQuery } from "@/relay/loadPageQuery";
+import { notFound } from "next/navigation";
 
-import { VariablePage } from "./VariablePage";
+import { loadVariableRevisionFull } from "@/variables/data/fullVariableRevision";
+import { loadVariableCard } from "@/variables/data/variableCards";
 
-import QueryNode, {
-  VariablePageQuery,
-} from "@/__generated__/VariablePageQuery.graphql";
+import { VariableRevisionPage } from "./revisions/[revisionId]/VariableRevisionPage";
 
 type Props = {
   params: Promise<{ owner: string; slug: string; variableName: string }>;
@@ -12,17 +11,32 @@ type Props = {
 
 export default async function OuterVariablePage({ params }: Props) {
   const { owner, slug, variableName } = await params;
-  const query = await loadPageQuery<VariablePageQuery>(QueryNode, {
-    input: {
-      owner,
-      slug,
-      variableName,
-    },
+
+  const variable = await loadVariableCard({
+    owner,
+    slug,
+    variableName,
   });
+
+  if (!variable?.currentRevision) {
+    // "currentRevision" check won't happen, layout won't render the page if it's null
+    notFound();
+  }
+
+  const revision = await loadVariableRevisionFull({
+    owner,
+    slug,
+    variableName,
+    revisionId: variable.currentRevision.id,
+  });
+
+  if (!revision) {
+    notFound();
+  }
 
   return (
     <div className="px-8 py-4">
-      <VariablePage query={query} params={await params} />
+      <VariableRevisionPage revision={revision} />
     </div>
   );
 }

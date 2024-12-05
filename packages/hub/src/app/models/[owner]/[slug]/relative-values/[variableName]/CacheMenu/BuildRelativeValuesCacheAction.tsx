@@ -1,57 +1,28 @@
 "use client";
 import { FC } from "react";
-import { graphql } from "react-relay";
 
-import { DropdownMenuAsyncActionItem, RefreshIcon } from "@quri/ui";
+import { RefreshIcon, useToast } from "@quri/ui";
 
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-
-import { BuildRelativeValuesCacheActionMutation } from "@/__generated__/BuildRelativeValuesCacheActionMutation.graphql";
-
-export const Mutation = graphql`
-  mutation BuildRelativeValuesCacheActionMutation(
-    $input: MutationBuildRelativeValuesCacheInput!
-  ) {
-    result: buildRelativeValuesCache(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on BuildRelativeValuesCacheResult {
-        relativeValuesExport {
-          id
-          cache {
-            firstItem
-            secondItem
-            resultJSON
-            errorString
-          }
-        }
-      }
-    }
-  }
-`;
+import { SafeActionDropdownAction } from "@/components/ui/SafeActionDropdownAction";
+import { buildRelativeValuesCacheAction } from "@/relative-values/actions/buildRelativeValuesCacheAction";
+import { RelativeValuesExportFullDTO } from "@/relative-values/data/fullExport";
 
 export const BuildRelativeValuesCacheAction: FC<{
-  exportId: string;
-  close(): void;
-}> = ({ exportId, close }) => {
+  relativeValuesExport: RelativeValuesExportFullDTO;
+}> = ({ relativeValuesExport }) => {
   // TODO - fill cache in ModelEvaluator and re-render
-  const [runMutation] =
-    useAsyncMutation<BuildRelativeValuesCacheActionMutation>({
-      mutation: Mutation,
-      confirmation: "Cache filled",
-      expectedTypename: "BuildRelativeValuesCacheResult",
-    });
-
-  const act = () => runMutation({ variables: { input: { exportId } } });
+  const toast = useToast();
 
   return (
-    <DropdownMenuAsyncActionItem
+    <SafeActionDropdownAction
       title="Fill cache"
       icon={RefreshIcon}
-      onClick={act}
-      close={close}
+      action={buildRelativeValuesCacheAction}
+      input={{ exportId: relativeValuesExport.id }}
+      onSuccess={() => {
+        toast("Cache filled", "confirmation");
+      }}
+      invariant={1} // close is controlled by the parent
     />
   );
 };

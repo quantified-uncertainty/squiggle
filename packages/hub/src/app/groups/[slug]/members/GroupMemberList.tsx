@@ -1,57 +1,44 @@
-import { FC } from "react";
-import { usePaginationFragment } from "react-relay";
-import { graphql } from "relay-runtime";
+"use client";
+import { FC, useCallback } from "react";
 
 import { DropdownMenu } from "@quri/ui";
 
 import { LoadMore } from "@/components/LoadMore";
 import { DotsDropdown } from "@/components/ui/DotsDropdown";
 import { H2 } from "@/components/ui/Headers";
+import { GroupMemberDTO } from "@/groups/data/members";
+import { usePaginator } from "@/lib/hooks/usePaginator";
+import { Paginated } from "@/lib/types";
 
-import { useIsGroupAdmin } from "../hooks";
 import { AddUserToGroupAction } from "./AddUserToGroupAction";
 import { GroupMemberCard } from "./GroupMemberCard";
 
-import { GroupMemberList$key } from "@/__generated__/GroupMemberList.graphql";
-import { GroupMemberListPaginationQuery } from "@/__generated__/GroupMemberListPaginationQuery.graphql";
-
-const fragment = graphql`
-  fragment GroupMemberList on Group
-  @argumentDefinitions(
-    cursor: { type: "String" }
-    count: { type: "Int", defaultValue: 20 }
-  )
-  @refetchable(queryName: "GroupMemberListPaginationQuery") {
-    ...hooks_useIsGroupAdmin
-    ...AddUserToGroupAction_group
-    ...GroupMemberCard_group
-
-    memberships(first: $count, after: $cursor)
-      @connection(key: "GroupMemberList_memberships") {
-      edges {
-        node {
-          id
-          ...GroupMemberCard
-        }
-      }
-      pageInfo {
-        hasNextPage
-      }
-    }
-  }
-`;
-
 type Props = {
-  groupRef: GroupMemberList$key;
+  groupSlug: string;
+  page: Paginated<GroupMemberDTO>;
+  isAdmin: boolean;
 };
 
-export const GroupMemberList: FC<Props> = ({ groupRef }) => {
-  const { data: group, loadNext } = usePaginationFragment<
-    GroupMemberListPaginationQuery,
-    GroupMemberList$key
-  >(fragment, groupRef);
+export const GroupMemberList: FC<Props> = ({
+  groupSlug,
+  page: initialPage,
+  isAdmin,
+}) => {
+  const page = usePaginator(initialPage);
 
-  const isAdmin = useIsGroupAdmin(group);
+  const updateMembership = useCallback(
+    (membership: GroupMemberDTO) => {
+      page.update((item) => (item.id === membership.id ? membership : item));
+    },
+    [page]
+  );
+
+  const removeMembership = useCallback(
+    (membership: GroupMemberDTO) => {
+      page.remove((item) => item.id === membership.id);
+    },
+    [page]
+  );
 
   return (
     <div>
@@ -59,26 +46,30 @@ export const GroupMemberList: FC<Props> = ({ groupRef }) => {
         <H2>Members</H2>
         {isAdmin && (
           <DotsDropdown>
-            {({ close }) => (
+            {() => (
               <DropdownMenu>
-                <AddUserToGroupAction groupRef={group} close={close} />
+                <AddUserToGroupAction
+                  groupSlug={groupSlug}
+                  append={page.append}
+                />
               </DropdownMenu>
             )}
           </DotsDropdown>
         )}
       </div>
       <div className="mt-2 space-y-2">
-        {group.memberships.edges.map(({ node: membership }) => (
+        {page.items.map((membership) => (
           <GroupMemberCard
             key={membership.id}
-            groupRef={group}
-            membershipRef={membership}
+            groupSlug={groupSlug}
+            isAdmin={isAdmin}
+            membership={membership}
+            remove={removeMembership}
+            update={updateMembership}
           />
         ))}
       </div>
-      {group.memberships.pageInfo.hasNextPage && (
-        <LoadMore loadNext={loadNext} />
-      )}
+      {page.loadNext && <LoadMore loadNext={page.loadNext} />}
     </div>
   );
 };

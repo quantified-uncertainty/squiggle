@@ -1,80 +1,37 @@
+import { MembershipRole } from "@prisma/client";
 import { FC } from "react";
-import { useFragment } from "react-relay";
-import { ConnectionHandler, graphql } from "relay-runtime";
 
 import { PlusIcon, SelectStringFormField } from "@quri/ui";
 
 import { SelectUser, SelectUserOption } from "@/components/SelectUser";
-import { MutationModalAction } from "@/components/ui/MutationModalAction";
-
-import { AddUserToGroupAction_group$key } from "@/__generated__/AddUserToGroupAction_group.graphql";
-import { AddUserToGroupActionMutation } from "@/__generated__/AddUserToGroupActionMutation.graphql";
-import { MembershipRole } from "@/__generated__/SetMembershipRoleActionMutation.graphql";
-
-const Mutation = graphql`
-  mutation AddUserToGroupActionMutation(
-    $input: MutationAddUserToGroupInput!
-    $connections: [ID!]!
-  ) {
-    result: addUserToGroup(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on AddUserToGroupResult {
-        membership
-          @appendNode(
-            connections: $connections
-            edgeTypeName: "UserGroupMembershipEdge"
-          ) {
-          ...GroupMemberCard
-        }
-      }
-    }
-  }
-`;
+import { SafeActionModalAction } from "@/components/ui/SafeActionModalAction";
+import { addUserToGroupAction } from "@/groups/actions/addUserToGroupAction";
+import { GroupMemberDTO } from "@/groups/data/members";
 
 type Props = {
-  groupRef: AddUserToGroupAction_group$key;
-  close: () => void;
+  groupSlug: string;
+  append: (item: GroupMemberDTO) => void;
 };
 
 type FormShape = { user: SelectUserOption; role: MembershipRole };
 
-export const AddUserToGroupAction: FC<Props> = ({ groupRef, close }) => {
-  const group = useFragment(
-    graphql`
-      fragment AddUserToGroupAction_group on Group {
-        id
-        slug
-      }
-    `,
-    groupRef
-  );
-
+export const AddUserToGroupAction: FC<Props> = ({ groupSlug, append }) => {
   return (
-    <MutationModalAction<AddUserToGroupActionMutation, FormShape>
+    <SafeActionModalAction<FormShape, typeof addUserToGroupAction>
       title="Add"
       icon={PlusIcon}
-      close={close}
-      mutation={Mutation}
-      expectedTypename="AddUserToGroupResult"
+      action={addUserToGroupAction}
+      onSuccess={(membership) => {
+        append(membership);
+      }}
       defaultValues={{ role: "Member" }}
-      formDataToVariables={(data) => ({
-        input: {
-          group: group.slug,
-          username: data.user.username,
-          role: data.role,
-        },
-        connections: [
-          ConnectionHandler.getConnectionID(
-            group.id,
-            "GroupMemberList_memberships"
-          ),
-        ],
+      formDataToInput={(data) => ({
+        group: groupSlug,
+        username: data.user.slug,
+        role: data.role,
       })}
       submitText="Add"
-      modalTitle={`Add to group ${group.slug}`}
+      modalTitle={`Add to group ${groupSlug}`}
     >
       {() => (
         <div className="space-y-2">
@@ -87,6 +44,6 @@ export const AddUserToGroupAction: FC<Props> = ({ groupRef, close }) => {
           />
         </div>
       )}
-    </MutationModalAction>
+    </SafeActionModalAction>
   );
 };

@@ -1,10 +1,11 @@
-import { loadPageQuery } from "@/relay/loadPageQuery";
+import {
+  loadGroupMembers,
+  loadMyMembership,
+  loadReusableInviteToken,
+} from "@/groups/data/members";
 
-import { GroupMembersPage } from "./GroupMembersPage";
-
-import QueryNode, {
-  GroupMembersPageQuery,
-} from "@/__generated__/GroupMembersPageQuery.graphql";
+import { GroupMemberList } from "./GroupMemberList";
+import { GroupReusableInviteSection } from "./GroupReusableInviteSection";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -12,9 +13,26 @@ type Props = {
 
 export default async function OuterGroupMembersPage({ params }: Props) {
   const { slug } = await params;
-  const query = await loadPageQuery<GroupMembersPageQuery>(QueryNode, {
-    slug,
-  });
+  const members = await loadGroupMembers({ groupSlug: slug });
 
-  return <GroupMembersPage query={query} />;
+  const myMembership = await loadMyMembership({ groupSlug: slug });
+  const isAdmin = myMembership?.role === "Admin";
+
+  return (
+    <div className="space-y-8">
+      <section>
+        <GroupMemberList groupSlug={slug} page={members} isAdmin={isAdmin} />
+      </section>
+      {isAdmin && (
+        <section>
+          <GroupReusableInviteSection
+            groupSlug={slug}
+            reusableInviteToken={await loadReusableInviteToken({
+              groupSlug: slug,
+            })}
+          />
+        </section>
+      )}
+    </div>
+  );
 }

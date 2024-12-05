@@ -1,79 +1,54 @@
+import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
-import { FC, useCallback } from "react";
-import { useFragment, useMutation } from "react-relay";
-import { graphql } from "relay-runtime";
+import { FC } from "react";
 
-import { DropdownMenuAsyncActionItem, TrashIcon, useToast } from "@quri/ui";
+import {
+  DropdownMenuActionItem,
+  TrashIcon,
+  useCloseDropdown,
+  useToast,
+} from "@quri/ui";
 
-import { ownerRoute } from "@/routes";
-
-import { DeleteModelAction$key } from "@/__generated__/DeleteModelAction.graphql";
-import { DeleteModelActionMutation } from "@/__generated__/DeleteModelActionMutation.graphql";
-
-const Mutation = graphql`
-  mutation DeleteModelActionMutation($input: MutationDeleteModelInput!) {
-    deleteModel(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-    }
-  }
-`;
+import { ownerRoute } from "@/lib/routes";
+import { deleteModelAction } from "@/models/actions/deleteModelAction";
+import { ModelCardDTO } from "@/models/data/cards";
 
 type Props = {
-  model: DeleteModelAction$key;
-  close(): void;
+  model: ModelCardDTO;
 };
 
-export const DeleteModelAction: FC<Props> = ({ model: modelKey, close }) => {
-  const model = useFragment(
-    graphql`
-      fragment DeleteModelAction on Model {
-        slug
-        owner {
-          __typename
-          id
-          slug
-        }
-      }
-    `,
-    modelKey
-  );
-
+export const DeleteModelAction: FC<Props> = ({ model }) => {
   const router = useRouter();
-
-  const [mutation] = useMutation<DeleteModelActionMutation>(Mutation);
 
   const toast = useToast();
 
-  const onClick = useCallback((): Promise<void> => {
-    return new Promise((resolve) => {
-      mutation({
-        variables: { input: { owner: model.owner.slug, slug: model.slug } },
-        onCompleted(response) {
-          if (response.deleteModel.__typename === "BaseError") {
-            toast(response.deleteModel.message, "error");
-            resolve();
-          } else {
-            // TODO - this is risky, what if we add more error types to GraphQL schema?
-            router.push(ownerRoute(model.owner));
-          }
-        },
-        onError(e) {
-          toast(e.toString(), "error");
-          resolve();
-        },
-      });
-    });
-  }, [mutation, model.owner, model.slug, router, toast]);
+  const closeDropdown = useCloseDropdown();
+
+  const { execute, isPending } = useAction(deleteModelAction, {
+    onSuccess: ({ data }) => {
+      if (data) {
+        router.push(ownerRoute(model.owner));
+      }
+      // we're going to redirect, so no need to close the dropdown
+      // TODO - keep the action in "acting" state while redirecting
+    },
+    onError: ({ error }) => {
+      toast(error.serverError ?? "Internal error", "error");
+      closeDropdown();
+    },
+  });
 
   return (
-    <DropdownMenuAsyncActionItem
+    <DropdownMenuActionItem
       title="Delete"
-      onClick={onClick}
+      onClick={() => {
+        execute({
+          owner: model.owner.slug,
+          slug: model.slug,
+        });
+      }}
+      acting={isPending}
       icon={TrashIcon}
-      close={close}
     />
   );
 };

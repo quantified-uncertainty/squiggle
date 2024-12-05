@@ -16,3 +16,11 @@ export const numberInString = z.string().transform((val, ctx) => {
   }
   return parsed;
 });
+
+export const zSlug = z.string().regex(/^\w[\w\-]*$/, {
+  message: "Must be alphanumerical",
+});
+
+export const zColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, {
+  message: "Must be a valid hex color",
+});

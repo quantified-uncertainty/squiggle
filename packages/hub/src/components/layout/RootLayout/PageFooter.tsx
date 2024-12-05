@@ -1,8 +1,6 @@
-"use client";
 import Image from "next/image";
 import { FC } from "react";
 import { FaDiscord, FaGithub, FaRss } from "react-icons/fa";
-import { SiGraphql } from "react-icons/si";
 
 import { Link } from "@/components/ui/Link";
 import {
@@ -10,14 +8,13 @@ import {
   GITHUB_URL,
   NEWSLETTER_URL,
   QURI_DONATE_URL,
-} from "@/lib/common";
-import logoPic from "@/public/logo.png";
+} from "@/lib/constants";
 import {
   aboutRoute,
-  graphqlPlaygroundRoute,
   privacyPolicyRoute,
   termsOfServiceRoute,
-} from "@/routes";
+} from "@/lib/routes";
+import logoPic from "@/public/logo.png";
 
 const linkClasses = "items-center flex hover:text-gray-900";
 
@@ -73,10 +70,6 @@ export const PageFooter: FC = () => {
       <a href={NEWSLETTER_URL} className={linkClasses}>
         <FaRss size="1em" className="mr-2" />
         Newsletter
-      </a>
-      <a href={graphqlPlaygroundRoute()} className={linkClasses}>
-        <SiGraphql size="1em" className="mr-2" />
-        API
       </a>
     </div>
   );

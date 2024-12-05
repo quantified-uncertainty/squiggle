@@ -24,7 +24,12 @@ export function FormInput<
   TValues extends FieldValues,
   TFieldName extends FieldPath<TValues> = FieldPath<TValues>,
 >({ name, rules, children }: Props<TValues, TFieldName>) {
-  const { register } = useFormContext<TValues>();
+  const formContext = useFormContext<TValues>();
+  if (!formContext) {
+    throw new Error("FormInput must be used within a FormProvider");
+  }
+
+  const { register } = formContext;
 
   return (
     <WithRHFError<TValues, TFieldName> name={name}>

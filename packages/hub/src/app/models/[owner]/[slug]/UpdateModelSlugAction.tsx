@@ -1,86 +1,38 @@
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { useFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
 import { EditIcon } from "@quri/ui";
 
-import { MutationModalAction } from "@/components/ui/MutationModalAction";
+import { SafeActionModalAction } from "@/components/ui/SafeActionModalAction";
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { modelRoute } from "@/routes";
+import { modelRoute } from "@/lib/routes";
+import { updateModelSlugAction } from "@/models/actions/updateModelSlugAction";
+import { ModelCardDTO } from "@/models/data/cards";
 
 import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
 
-import { UpdateModelSlugAction$key } from "@/__generated__/UpdateModelSlugAction.graphql";
-import { UpdateModelSlugActionMutation } from "@/__generated__/UpdateModelSlugActionMutation.graphql";
-
-const Mutation = graphql`
-  mutation UpdateModelSlugActionMutation(
-    $input: MutationUpdateModelSlugInput!
-  ) {
-    result: updateModelSlug(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on UpdateModelSlugResult {
-        model {
-          id
-          slug
-          owner {
-            slug
-          }
-        }
-      }
-    }
-  }
-`;
-
 type Props = {
-  model: UpdateModelSlugAction$key;
+  model: ModelCardDTO;
   close(): void;
 };
 
 type FormShape = { slug: string };
 
-export const UpdateModelSlugAction: FC<Props> = ({
-  model: modelKey,
-  close,
-}) => {
-  const model = useFragment(
-    graphql`
-      fragment UpdateModelSlugAction on Model {
-        slug
-        owner {
-          __typename
-          id
-          slug
-        }
-      }
-    `,
-    modelKey
-  );
-
+export const UpdateModelSlugAction: FC<Props> = ({ model, close }) => {
   const router = useRouter();
 
   return (
-    <MutationModalAction<
-      UpdateModelSlugActionMutation,
-      FormShape,
-      "UpdateModelSlugResult"
-    >
+    <SafeActionModalAction<FormShape, typeof updateModelSlugAction>
       title="Rename"
       icon={EditIcon}
-      mutation={Mutation}
-      expectedTypename="UpdateModelSlugResult"
-      formDataToVariables={(data) => ({
-        input: {
-          owner: model.owner.slug,
-          oldSlug: model.slug,
-          newSlug: data.slug,
-        },
+      action={updateModelSlugAction}
+      defaultValues={{ slug: model.slug }}
+      formDataToInput={(data) => ({
+        owner: model.owner.slug,
+        oldSlug: model.slug,
+        slug: data.slug,
       })}
-      onCompleted={({ model: newModel }) => {
+      onSuccess={({ model: newModel }) => {
         draftUtils.rename(
           modelToDraftLocator(model),
           modelToDraftLocator(newModel)
@@ -92,7 +44,6 @@ export const UpdateModelSlugAction: FC<Props> = ({
       submitText="Save"
       modalTitle={`Rename ${model.owner.slug}/${model.slug}`}
       initialFocus="slug"
-      close={close}
     >
       {() => (
         <div>
@@ -102,6 +53,6 @@ export const UpdateModelSlugAction: FC<Props> = ({
           <SlugFormField<FormShape> name="slug" label="New slug" />
         </div>
       )}
-    </MutationModalAction>
+    </SafeActionModalAction>
   );
 };

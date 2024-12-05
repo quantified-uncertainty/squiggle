@@ -1,7 +1,7 @@
 import { FC, Fragment } from "react";
 
+import { type StepError } from "@/ai/data/analytics";
 import { H2 } from "@/components/ui/Headers";
-import { type StepError } from "@/server/ai/analytics";
 
 export const StepErrorList: FC<{
   errors: StepError[];

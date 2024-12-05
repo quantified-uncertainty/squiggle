@@ -1,47 +1,12 @@
 "use client";
 import { FC } from "react";
 import { FieldPathByValue, FieldValues } from "react-hook-form";
-import { useRelayEnvironment } from "react-relay";
-import { fetchQuery, graphql } from "relay-runtime";
+import { z } from "zod";
 
 import { SelectFormField } from "@quri/ui";
 
 import { ownerIcon } from "@/lib/ownerIcon";
 
-import { SelectOwnerQuery } from "@/__generated__/SelectOwnerQuery.graphql";
-
-const Query = graphql`
-  query SelectOwnerQuery($search: String!, $myOnly: Boolean!) {
-    me @include(if: $myOnly) {
-      asUser {
-        __typename
-        id
-        slug
-      }
-    }
-    users(input: { usernameContains: $search }) @skip(if: $myOnly) {
-      edges {
-        node {
-          __typename
-          id
-          slug
-        }
-      }
-    }
-    groups(input: { slugContains: $search, myOnly: $myOnly }) {
-      edges {
-        node {
-          __typename
-          id
-          slug
-        }
-      }
-    }
-  }
-`;
-
-// Note: we can't wrap this in a fragment because it's not possible to call `useFragment`
-// in SelectFormField callbacks.
 export type SelectOwnerOption = {
   __typename: "User" | "Group";
   id: string;
@@ -75,29 +40,27 @@ export function SelectOwner<
   required?: boolean;
   myOnly?: boolean;
 }) {
-  const environment = useRelayEnvironment();
-
   const loadOptions = async (
     inputValue: string
   ): Promise<SelectOwnerOption[]> => {
-    const result = await fetchQuery<SelectOwnerQuery>(environment, Query, {
-      search: inputValue,
-      myOnly,
-    }).toPromise();
+    const result = await fetch(
+      `/api/find-owners?${new URLSearchParams({
+        search: inputValue,
+        mode: myOnly ? "my" : "all",
+      })}`
+    ).then((r) => r.json());
 
-    if (!result) {
-      return [];
-    }
+    const data = z
+      .array(
+        z.object({
+          __typename: z.enum(["User", "Group"]),
+          id: z.string(),
+          slug: z.string(),
+        })
+      )
+      .parse(result);
 
-    const options: SelectOwnerOption[] = [];
-    if (result.me) {
-      options.push(result.me.asUser);
-    }
-    if (result.users) {
-      options.push(...(result.users.edges.map((edge) => edge.node) ?? []));
-    }
-    options.push(...result.groups.edges.map((edge) => edge.node));
-    return options;
+    return data;
   };
 
   return (

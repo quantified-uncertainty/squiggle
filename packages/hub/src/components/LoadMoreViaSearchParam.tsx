@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { useUpdateSearchParams } from "@/hooks/useUpdateSearchParams";
+import { useUpdateSearchParams } from "@/lib/hooks/useUpdateSearchParams";
 
 import { LoadMore } from "./LoadMore";
 

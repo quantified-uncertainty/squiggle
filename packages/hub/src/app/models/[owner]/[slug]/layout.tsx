@@ -1,14 +1,12 @@
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { PropsWithChildren, Suspense } from "react";
 
-import { loadPageQuery } from "@/relay/loadPageQuery";
+import { loadModelCard } from "@/models/data/cards";
+import { isModelEditable } from "@/models/data/helpers";
 
 import { FallbackModelLayout } from "./FallbackLayout";
 import { ModelLayout } from "./ModelLayout";
-
-import ModelLayoutQueryNode, {
-  ModelLayoutQuery,
-} from "@/__generated__/ModelLayoutQuery.graphql";
 
 type Props = PropsWithChildren<{
   params: Promise<{ owner: string; slug: string }>;
@@ -16,17 +14,30 @@ type Props = PropsWithChildren<{
 
 async function LoadedLayout({ params, children }: Props) {
   const { owner, slug } = await params;
-  const query = await loadPageQuery<ModelLayoutQuery>(ModelLayoutQueryNode, {
-    input: { owner, slug },
-  });
+  const model = await loadModelCard({ owner, slug });
+  if (!model) {
+    notFound();
+  }
 
-  return <ModelLayout query={query}>{children}</ModelLayout>;
+  const isEditable = await isModelEditable(model);
+
+  return (
+    <ModelLayout model={model} isEditable={isEditable}>
+      {children}
+    </ModelLayout>
+  );
 }
 
 export default async function Layout({ params, children }: Props) {
   const { owner, slug } = await params;
   return (
-    <Suspense fallback={<FallbackModelLayout username={owner} slug={slug} />}>
+    <Suspense
+      fallback={
+        <FallbackModelLayout username={owner} slug={slug}>
+          {children}
+        </FallbackModelLayout>
+      }
+    >
       <LoadedLayout params={params}>{children}</LoadedLayout>
     </Suspense>
   );

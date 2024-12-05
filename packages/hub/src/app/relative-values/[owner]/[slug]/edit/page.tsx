@@ -1,28 +1,33 @@
-import QueryNode, {
-  RelativeValuesDefinitionPageQuery,
-} from "@gen/RelativeValuesDefinitionPageQuery.graphql";
+import { notFound } from "next/navigation";
 
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { loadPageQuery } from "@/relay/loadPageQuery";
+import { controlsOwnerId } from "@/owners/data/auth";
+import { loadRelativeValuesDefinitionFull } from "@/relative-values/data/full";
+import { getSessionUserOrRedirect } from "@/users/auth";
 
 import { EditRelativeValuesDefinition } from "./EditRelativeValuesDefinition";
 
-export default async function Page({
-  params,
-}: {
+type Props = {
   params: Promise<{ owner: string; slug: string }>;
-}) {
+};
+
+export default async function Page({ params }: Props) {
+  // if we're not signed in, we can't edit
+  await getSessionUserOrRedirect();
+
   const { owner, slug } = await params;
-  const query = await loadPageQuery<RelativeValuesDefinitionPageQuery>(
-    QueryNode,
-    {
-      input: { owner, slug },
-    }
-  );
+  const definition = await loadRelativeValuesDefinitionFull({ owner, slug });
+  if (!definition) {
+    notFound();
+  }
+
+  if (!(await controlsOwnerId(definition.owner.id))) {
+    throw new Error("Unauthorized");
+  }
 
   return (
     <NarrowPageLayout>
-      <EditRelativeValuesDefinition query={query} />
+      <EditRelativeValuesDefinition definition={definition} />
     </NarrowPageLayout>
   );
 }

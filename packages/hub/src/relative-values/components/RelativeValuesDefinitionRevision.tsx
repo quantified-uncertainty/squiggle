@@ -1,45 +1,19 @@
 import { FC, Fragment } from "react";
-import { useFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
 import { StyledTab, StyledTextArea } from "@quri/ui";
 
 import { H2 } from "@/components/ui/Headers";
+import { RelativeValuesDefinitionFullDTO } from "@/relative-values/data/full";
 
 import { ClusterInfo } from "./common/ClusterInfo";
 
-import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
-
-export const RelativeValuesDefinitionRevisionFragment = graphql`
-  fragment RelativeValuesDefinitionRevision on RelativeValuesDefinitionRevision {
-    title
-    clusters {
-      id
-      color
-      recommendedUnit
-    }
-    items {
-      id
-      name
-      description
-      clusterId
-    }
-    recommendedUnit
-  }
-`;
-
 type Props = {
-  dataRef: RelativeValuesDefinitionRevision$key;
+  revision: RelativeValuesDefinitionFullDTO["currentRevision"];
 };
 
 export const RelativeValuesDefinitionRevision: FC<Props> = ({
-  dataRef: definitionRef,
+  revision: content,
 }) => {
-  const content = useFragment(
-    RelativeValuesDefinitionRevisionFragment,
-    definitionRef
-  );
-
   const clusters = Object.fromEntries(
     content.clusters.map((cluster) => [cluster.id, cluster])
   );

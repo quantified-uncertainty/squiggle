@@ -9,8 +9,7 @@ import {
   GITHUB_URL,
   NEWSLETTER_URL,
   QURI_DONATE_URL,
-} from "@/lib/common";
-import { graphqlPlaygroundRoute } from "@/routes";
+} from "@/lib/constants";
 
 const markdown = `
 # About Squiggle Hub
@@ -27,7 +26,6 @@ Squiggle Hub is made by the [Quantified Uncertainty Research Institute](https://
 
 ## Key Links
 - [Squiggle](https://www.squiggle-language.com/)  
-- [Squiggle API](${graphqlPlaygroundRoute()})  
 - [Squiggle Discord](${DISCORD_URL})  
 - [Squiggle Github](${GITHUB_URL})  
 - [Squiggle Github Discussion (For Ideas and Issues)](${GITHUB_DISCUSSION_URL})  
@@ -35,9 +33,6 @@ Squiggle Hub is made by the [Quantified Uncertainty Research Institute](https://
 
 ## Licensing
 Squiggle Hub, along with Squiggle, is available for free use, with the code being open-source and licensed under MIT. Access it [here](https://github.com/quantified-uncertainty/squiggle).
-
-## Squiggle Hub API
-Developed using a GraphQL API, Squiggle Hub can be accessed [here](${graphqlPlaygroundRoute()}). The API is recommended for querying. If you want to run mutations, reach out to us via [Discord](${DISCORD_URL}). Squiggle's JavaScript implementation is available on [NPM](https://www.npmjs.com/package/squiggle-lang). There are several [integrations](https://www.squiggle-language.com/docs/Integrations) like VS Code and Observable.
 
 ## Feature: Relative Values
 Squiggle Hub currently supports experimental [relative values](https://forum.effectivealtruism.org/posts/EFEwBvuDrTLDndqCt/relative-value-functions-a-flexible-new-format-for-value), with future improvements planned.

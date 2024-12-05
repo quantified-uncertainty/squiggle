@@ -1,43 +1,28 @@
 "use client";
 import { FC } from "react";
-import { graphql, useFragment } from "react-relay";
 
 import { LoadMore } from "@/components/LoadMore";
+import { GroupCardDTO } from "@/groups/data/groupCards";
+import { usePaginator } from "@/lib/hooks/usePaginator";
+import { Paginated } from "@/lib/types";
 
 import { GroupCard } from "./GroupCard";
 
-import { GroupList$key } from "@/__generated__/GroupList.graphql";
-
-const Fragment = graphql`
-  fragment GroupList on GroupConnection {
-    edges {
-      node {
-        id
-        ...GroupCard
-      }
-    }
-    pageInfo {
-      hasNextPage
-    }
-  }
-`;
-
 type Props = {
-  connectionRef: GroupList$key;
-  loadNext(count: number): unknown;
+  page: Paginated<GroupCardDTO>;
 };
 
-export const GroupList: FC<Props> = ({ connectionRef, loadNext }) => {
-  const connection = useFragment(Fragment, connectionRef);
+export const GroupList: FC<Props> = ({ page: initialPage }) => {
+  const page = usePaginator(initialPage);
 
   return (
     <div>
       <div className="grid gap-4 md:grid-cols-2">
-        {connection.edges.map((edge) => (
-          <GroupCard key={edge.node.id} groupRef={edge.node} />
+        {page.items.map((group) => (
+          <GroupCard key={group.id} group={group} />
         ))}
       </div>
-      {connection.pageInfo.hasNextPage && <LoadMore loadNext={loadNext} />}
+      {page.loadNext && <LoadMore loadNext={page.loadNext} />}
     </div>
   );
 };

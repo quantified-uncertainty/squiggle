@@ -1,62 +1,28 @@
 "use strict";
 import { FC } from "react";
-import { graphql } from "react-relay";
 
-import { DropdownMenuAsyncActionItem, TrashIcon } from "@quri/ui";
+import { TrashIcon, useToast } from "@quri/ui";
 
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-
-import { ClearRelativeValuesCacheActionMutation } from "@/__generated__/ClearRelativeValuesCacheActionMutation.graphql";
-
-export const Mutation = graphql`
-  mutation ClearRelativeValuesCacheActionMutation(
-    $input: MutationClearRelativeValuesCacheInput!
-  ) {
-    result: clearRelativeValuesCache(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on ClearRelativeValuesCacheResult {
-        relativeValuesExport {
-          id
-          cache {
-            firstItem
-            secondItem
-            resultJSON
-            errorString
-          }
-        }
-      }
-    }
-  }
-`;
+import { SafeActionDropdownAction } from "@/components/ui/SafeActionDropdownAction";
+import { clearRelativeValuesCacheAction } from "@/relative-values/actions/clearRelativeValuesCacheAction";
+import { RelativeValuesExportFullDTO } from "@/relative-values/data/fullExport";
 
 export const ClearRelativeValuesCacheAction: FC<{
-  exportId: string;
-  close(): void;
-}> = ({ exportId, close }) => {
+  relativeValuesExport: RelativeValuesExportFullDTO;
+}> = ({ relativeValuesExport }) => {
   // TODO - clear cache in ModelEvaluator and re-render
-  const [runMutation] =
-    useAsyncMutation<ClearRelativeValuesCacheActionMutation>({
-      mutation: Mutation,
-      confirmation: "Cache cleared",
-      expectedTypename: "ClearRelativeValuesCacheResult",
-    });
-
-  const act = () =>
-    runMutation({
-      variables: {
-        input: { exportId },
-      },
-    });
+  const toast = useToast();
 
   return (
-    <DropdownMenuAsyncActionItem
+    <SafeActionDropdownAction
       title="Clear cache"
       icon={TrashIcon}
-      onClick={act}
-      close={close}
+      action={clearRelativeValuesCacheAction}
+      input={{ exportId: relativeValuesExport.id }}
+      onSuccess={() => {
+        toast("Cache cleared", "confirmation");
+      }}
+      invariant={1} // close is controlled by the parent
     />
   );
 };

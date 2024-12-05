@@ -38,16 +38,7 @@ The basic loop is:
 
 ## Notes on changing the schema
 
-`pnpm run gen` is a pipeline with three steps:
-
-1. First, `gen:prisma` generates `@prisma/client` from `prisma/schema.prisma`.
-2. Then `gen:schema` generates `schema.graphql` from our GraphQL server code in `src/graphql/`.
-3. Finally, `gen:relay` runs [relay-compiler](https://relay.dev/docs/guides/compiler/), which generates `src/__generated__` files based on `schema.graphql`.
-
-So:
-
-- for the database schema, `prisma/schema.prisma` is the source of truth
-- for the GraphQL schema, the TypeScript code in `src/graphql/` is the source of truth, while `schema.graphql` is auto-generated (but it still should be committed to the repo)
+`pnpm run gen` generates `@prisma/client` from `prisma/schema.prisma`.
 
 If it looks like VS Code doesn't see your latest changes, try this:
 
@@ -56,17 +47,7 @@ If it looks like VS Code doesn't see your latest changes, try this:
 
 Note: the "Restart TS Server" step is necessary because `@prisma/client` code is out of the main source tree, and VS Code won't notice that it has updated. But restarting TS Server is slow, so a better solution is to keep `@prisma/client` source code open (open `src/prisma.ts`, then "Go to definition" on `PrismaClient`). Then VS Code will watch it for changes.
 
-For Relay-generated files under `src/__generated__`, VS Code usually detects the changes automatically.
-
-Another note is that with the correct setup, out of `pnpm gen:prisma`, `pnpm gen:schema` and `pnpm gen:relay` pipeline steps, only `gen:schema` is necessary:
-
-- `@prisma/client` will be regenerated on `prisma db push` or `prisma migrate dev`
-- `gen:schema`, which calls the `src/graphql/print-schema.ts` script, doesn't have the watch mode, so it _is_ necessary to call it after you edit any `src/graphql/` code
-- `gen:relay` (`relay-compiler`) will run in watch mode if you use [Relay GraphQL extension](https://marketplace.visualstudio.com/items?itemName=meta.relay) and enable `relay.autoStartCompiler` option in VS Code settings
-
 ## Other notes
-
-[How to load GraphQL data in Next.js pages](/docs/relay-pages.md)
 
 [Common workflow for updating Prisma schema](https://www.prisma.io/docs/orm/prisma-migrate/workflows/prototyping-your-schema)
 
@@ -79,13 +60,3 @@ Squiggle Hub is deployed on [Vercel](https://vercel.com/) automatically when the
 The production database is migrated by [this GitHub Action](https://github.com/quantified-uncertainty/squiggle/blob/main/.github/workflows/prisma-migrate-prod.yml).
 
 **Important: it should be invoked _before_ merging any PR that changes the schema.**
-
-## Debugging
-
-If you get an error like:
-
-```
-PothosSchemaError [GraphQLError]: Ref ObjectRef<ModelRevisionRun> has not been implemented
-```
-
-Make sure that any new files in `src/graphql/types` have been added to `src/schema.ts`, or something that references that.

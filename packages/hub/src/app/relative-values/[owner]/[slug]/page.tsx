@@ -1,8 +1,7 @@
-import QueryNode, {
-  RelativeValuesDefinitionPageQuery,
-} from "@gen/RelativeValuesDefinitionPageQuery.graphql";
+import { notFound } from "next/navigation";
 
-import { loadPageQuery } from "@/relay/loadPageQuery";
+import { loadRelativeValuesExportCardsFromDefinition } from "@/relative-values/data/exports";
+import { loadRelativeValuesDefinitionFull } from "@/relative-values/data/full";
 
 import { RelativeValuesDefinitionPage } from "./RelativeValuesDefinitionPage";
 
@@ -12,12 +11,19 @@ type Props = {
 
 export default async function OuterDefinitionPage({ params }: Props) {
   const { owner, slug } = await params;
-  const query = await loadPageQuery<RelativeValuesDefinitionPageQuery>(
-    QueryNode,
-    {
-      input: { owner, slug },
-    }
-  );
+  const definition = await loadRelativeValuesDefinitionFull({ owner, slug });
 
-  return <RelativeValuesDefinitionPage query={query} />;
+  if (!definition) {
+    notFound();
+  }
+
+  const modelExports =
+    await loadRelativeValuesExportCardsFromDefinition(definition);
+
+  return (
+    <RelativeValuesDefinitionPage
+      definition={definition}
+      modelExports={modelExports}
+    />
+  );
 }

@@ -1,30 +1,15 @@
 "use client";
-import { useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { FC, useEffect } from "react";
-import { FormProvider } from "react-hook-form";
-import { useLazyLoadQuery } from "react-relay";
-import { graphql } from "relay-runtime";
+import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
+import { FC, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 
-import { generateSeed } from "@quri/squiggle-lang";
-import { Button, CheckboxFormField } from "@quri/ui";
-import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
+import { Button, CheckboxFormField, useToast } from "@quri/ui";
 
 import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { useMutationForm } from "@/hooks/useMutationForm";
-import { modelRoute, newModelRoute } from "@/routes";
-
-import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
-import { NewModelPageQuery } from "@/__generated__/NewModelPageQuery.graphql";
-
-const defaultCode = `/*
-Describe your code here
-*/
-
-a = normal(2, 5)
-`;
+import { createModelAction } from "@/models/actions/createModelAction";
 
 type FormShape = {
   slug: string | undefined;
@@ -32,88 +17,54 @@ type FormShape = {
   isPrivate: boolean;
 };
 
-export const NewModel: FC = () => {
-  useSession({ required: true });
+export const NewModel: FC<{ initialGroup: SelectGroupOption | null }> = ({
+  initialGroup,
+}) => {
+  const [group] = useState(initialGroup);
 
-  const searchParams = useSearchParams();
-
-  const { group: initialGroup } = useLazyLoadQuery<NewModelPageQuery>(
-    graphql`
-      query NewModelPageQuery($groupSlug: String!, $groupSlugIsSet: Boolean!) {
-        group(slug: $groupSlug) @include(if: $groupSlugIsSet) {
-          ... on Group {
-            id
-            slug
-            myMembership {
-              id
-            }
-          }
-        }
-      }
-    `,
-    {
-      groupSlug: searchParams.get("group") ?? "",
-      groupSlugIsSet: Boolean(searchParams.get("group")),
-    }
-  );
-
+  const toast = useToast();
   const router = useRouter();
-  useEffect(() => {
-    router.replace(newModelRoute()); // clean up group=... param
-  }, [router]);
 
-  const { form, onSubmit, inFlight } = useMutationForm<
-    FormShape,
-    NewModelMutation,
-    "CreateSquiggleSnippetModelResult"
-  >({
+  const { executeAsync, isPending } = useAction(createModelAction, {
+    onSuccess: ({ data }) => {
+      if (data) {
+        // redirect in action is incompatible with https://github.com/TheEdoRan/next-safe-action/issues/303
+        // (and might a bad idea anyway, returning an url is more verbose but more flexible for reuse)
+        router.push(data.url);
+      }
+    },
+    onError: ({ error }) => {
+      if (error.serverError) {
+        toast(error.serverError, "error");
+        return;
+      }
+
+      const slugError = error.validationErrors?.slug?._errors?.[0];
+      if (slugError) {
+        form.setError("slug", {
+          message: slugError,
+        });
+      } else {
+        toast("Internal error", "error");
+      }
+    },
+  });
+
+  const form = useForm<FormShape>({
     mode: "onChange",
     defaultValues: {
       // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
-      group: initialGroup?.myMembership ? initialGroup : null,
+      group,
       isPrivate: false,
     },
-    mutation: graphql`
-      mutation NewModelMutation(
-        $input: MutationCreateSquiggleSnippetModelInput!
-      ) {
-        result: createSquiggleSnippetModel(input: $input) {
-          __typename
-          ... on BaseError {
-            message
-          }
-          ... on CreateSquiggleSnippetModelResult {
-            model {
-              id
-              slug
-              owner {
-                slug
-              }
-            }
-          }
-        }
-      }
-    `,
-    expectedTypename: "CreateSquiggleSnippetModelResult",
-    blockOnSuccess: true,
-    formDataToVariables: (data) => ({
-      input: {
-        slug: data.slug ?? "", // shouldn't happen but satisfies Typescript
-        groupSlug: data.group?.slug,
-        isPrivate: data.isPrivate,
-        code: defaultCode,
-        version: defaultSquiggleVersion,
-        seed: generateSeed(),
-      },
-    }),
-    onCompleted: (result) => {
-      router.push(
-        modelRoute({
-          owner: result.model.owner.slug,
-          slug: result.model.slug,
-        })
-      );
-    },
+  });
+
+  const onSubmit = form.handleSubmit(async (data) => {
+    await executeAsync({
+      slug: data.slug ?? "", // shouldn't happen but satisfies Typescript
+      groupSlug: data.group?.slug,
+      isPrivate: data.isPrivate,
+    });
   });
 
   return (
@@ -138,7 +89,7 @@ export const NewModel: FC = () => {
         </div>
         <Button
           onClick={onSubmit}
-          disabled={!form.formState.isValid || inFlight}
+          disabled={!form.formState.isValid || isPending}
           theme="primary"
         >
           Create

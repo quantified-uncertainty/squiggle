@@ -1,84 +1,36 @@
-import axios from "axios";
+import { z } from "zod";
 
-export const librariesToImport = ["ozziegooen/sTest", "ozziegooen/helpers"];
+const SERVER = "https://squigglehub.org";
 
-const GRAPHQL_URL = "https://squigglehub.org/api/graphql";
-
-export function getQuery(owner: string, slug: string) {
-  return `
-  query GetModelCode {
-    model(input: {owner: "${owner}", slug: "${slug}"}) {
-      ... on Model {
-        id
-        currentRevision {
-          content {
-            ... on SquiggleSnippet {
-              id
-              code
-            }
-          }
-        }
-      }
-    }
-  }
-  `;
-}
-
-export async function fetchCodeFromGraphQL(
+export async function fetchCodeFromHub(
   owner: string,
   slug: string
 ): Promise<string> {
-  const query = getQuery(owner, slug);
-  const response = await axios.post(GRAPHQL_URL, { query });
-  return response.data.data.model.currentRevision.content.code;
-}
+  const data = await fetch(
+    `${SERVER}/api/get-source?${new URLSearchParams({
+      owner,
+      slug,
+    })}`
+  ).then((res) => res.json());
+  const parsed = z.object({ code: z.string() }).safeParse(data);
+  if (!parsed.success) {
+    throw new Error(`Failed to fetch source for ${owner}/${slug}`);
+  }
 
-export function getGroupModelsQuery(groupSlug: string) {
-  return {
-    query: `
-      query GetGroupModels($groupSlug: String!) {
-        group(slug: $groupSlug) {
-          ... on Group {
-            id
-            models(first: 50) {
-              edges {
-                node {
-                  currentRevision {
-                    content {
-                      ... on SquiggleSnippet {
-                        code
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
-    variables: { groupSlug },
-  };
+  return parsed.data.code;
 }
 
 export async function fetchGroupModels(groupSlug: string): Promise<string[]> {
-  try {
-    const query = getGroupModelsQuery(groupSlug);
-    const response = await axios.post(GRAPHQL_URL, query);
+  const data = await fetch(
+    `${SERVER}/api/get-group-models?${new URLSearchParams({ slug: groupSlug })}`
+  ).then((res) => res.json());
 
-    if (response.status === 200) {
-      const models = response.data.data.group.models.edges;
-      console.log(`Fetched ${models.length} models from group ${groupSlug}`);
-
-      return models.map(
-        (model: { node: { currentRevision: { content: { code: string } } } }) =>
-          model.node.currentRevision.content.code
-      );
-    } else {
-      throw new Error(`Error fetching group models: ${response.statusText}`);
-    }
-  } catch (error) {
-    console.error("Error fetching group models:", error);
-    throw error;
+  const parsed = z
+    .object({ models: z.array(z.object({ slug: z.string() })) })
+    .safeParse(data);
+  if (!parsed.success) {
+    throw new Error(`Failed to fetch group models for ${groupSlug}`);
   }
+
+  return parsed.data.models.map((item) => item.slug);
 }

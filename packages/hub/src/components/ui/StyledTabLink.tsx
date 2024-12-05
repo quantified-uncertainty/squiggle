@@ -11,6 +11,7 @@ type StyledTabLinkProps = {
   href: string;
   icon?: FC<IconProps>;
   selected?: (pathname: string, href: string) => boolean;
+  prefetch?: boolean;
 };
 
 type StyledTabLinkType = React.FC<StyledTabLinkProps> & {
@@ -22,15 +23,19 @@ export const StyledTabLink: StyledTabLinkType = ({
   href,
   icon: Icon,
   selected,
+  prefetch,
 }) => {
   const pathname = usePathname();
   const isSelected = selected ? selected(pathname, href) : pathname === href;
 
   return (
-    <Link href={href}>
+    <Link href={href} prefetch={prefetch}>
       <StyledTab.Button isSelected={isSelected} name={name} icon={Icon} />
     </Link>
   );
 };
 
-StyledTabLink.List = StyledTab.ListDiv;
+const StyledTabLinkList = StyledTab.ListDiv;
+StyledTabLink.List = StyledTabLinkList;
+
+export { StyledTabLinkList };

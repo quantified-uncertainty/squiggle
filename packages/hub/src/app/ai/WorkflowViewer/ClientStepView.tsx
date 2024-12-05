@@ -4,7 +4,7 @@ import { FC, useMemo } from "react";
 import { ClientArtifact, ClientStep } from "@quri/squiggle-ai";
 import { ChevronLeftIcon, ChevronRightIcon } from "@quri/ui";
 
-import { useAvailableHeight } from "@/hooks/useAvailableHeight";
+import { useAvailableHeight } from "@/lib/hooks/useAvailableHeight";
 
 import { SquigglePlaygroundForWorkflow } from "../SquigglePlaygroundForWorkflow";
 import { stepNames } from "../utils";

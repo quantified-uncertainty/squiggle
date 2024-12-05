@@ -4,7 +4,7 @@ import { FC } from "react";
 import { ClientWorkflow } from "@quri/squiggle-ai";
 import { StyledTab } from "@quri/ui";
 
-import { useAvailableHeight } from "@/hooks/useAvailableHeight";
+import { useAvailableHeight } from "@/lib/hooks/useAvailableHeight";
 
 import { LogsView } from "../LogsView";
 import { SquigglePlaygroundForWorkflow } from "../SquigglePlaygroundForWorkflow";

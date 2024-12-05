@@ -1,93 +1,32 @@
 import { FC } from "react";
-import { useFragment } from "react-relay";
-import { ConnectionHandler, graphql } from "relay-runtime";
 
-import { DropdownMenuAsyncActionItem, TrashIcon } from "@quri/ui";
+import { TrashIcon } from "@quri/ui";
 
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-
-import { DeleteMembershipAction_Group$key } from "@/__generated__/DeleteMembershipAction_Group.graphql";
-import { DeleteMembershipAction_Membership$key } from "@/__generated__/DeleteMembershipAction_Membership.graphql";
-import { DeleteMembershipActionMutation } from "@/__generated__/DeleteMembershipActionMutation.graphql";
-
-const Mutation = graphql`
-  mutation DeleteMembershipActionMutation(
-    $input: MutationDeleteMembershipInput!
-  ) {
-    result: deleteMembership(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on DeleteMembershipResult {
-        ok
-      }
-    }
-  }
-`;
+import { SafeActionDropdownAction } from "@/components/ui/SafeActionDropdownAction";
+import { deleteMembershipAction } from "@/groups/actions/deleteMembershipAction";
+import { GroupMemberDTO } from "@/groups/data/members";
 
 type Props = {
-  groupRef: DeleteMembershipAction_Group$key;
-  membershipRef: DeleteMembershipAction_Membership$key;
-  close: () => void;
+  groupSlug: string;
+  membership: GroupMemberDTO;
+  remove: (item: GroupMemberDTO) => void;
 };
 
 export const DeleteMembershipAction: FC<Props> = ({
-  groupRef,
-  membershipRef,
-  close,
+  groupSlug,
+  membership,
+  remove,
 }) => {
-  const [runMutation] = useAsyncMutation<DeleteMembershipActionMutation>({
-    mutation: Mutation,
-    expectedTypename: "DeleteMembershipResult",
-  });
-
-  const group = useFragment(
-    graphql`
-      fragment DeleteMembershipAction_Group on Group {
-        id
-        slug
-      }
-    `,
-    groupRef
-  );
-
-  const membership = useFragment(
-    graphql`
-      fragment DeleteMembershipAction_Membership on UserGroupMembership {
-        id
-        user {
-          slug
-        }
-      }
-    `,
-    membershipRef
-  );
-
-  const act = async () => {
-    await runMutation({
-      variables: {
-        input: { group: group.slug, user: membership.user.slug },
-      },
-      updater: (store) => {
-        const groupRecord = store.get(group.id);
-        if (!groupRecord) return;
-        const connectionRecord = ConnectionHandler.getConnection(
-          groupRecord,
-          "GroupMemberList_memberships"
-        );
-        if (!connectionRecord) return;
-        ConnectionHandler.deleteNode(connectionRecord, membership.id);
-      },
-    });
-  };
-
   return (
-    <DropdownMenuAsyncActionItem
+    <SafeActionDropdownAction
       title="Delete from group"
       icon={TrashIcon}
-      onClick={act}
-      close={close}
+      action={deleteMembershipAction}
+      input={{
+        group: groupSlug,
+        username: membership.user.slug,
+      }}
+      onSuccess={() => remove(membership)}
     />
   );
 };

@@ -1,86 +1,35 @@
+import { MembershipRole } from "@prisma/client";
 import { FC } from "react";
-import { useFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
-import { MutationAction } from "@/components/ui/MutationAction";
-
-import { SetMembershipRoleAction_Group$key } from "@/__generated__/SetMembershipRoleAction_Group.graphql";
-import { SetMembershipRoleAction_Membership$key } from "@/__generated__/SetMembershipRoleAction_Membership.graphql";
-import {
-  MembershipRole,
-  SetMembershipRoleActionMutation,
-} from "@/__generated__/SetMembershipRoleActionMutation.graphql";
-
-const Mutation = graphql`
-  mutation SetMembershipRoleActionMutation(
-    $input: MutationUpdateMembershipRoleInput!
-  ) {
-    result: updateMembershipRole(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on UpdateMembershipRoleResult {
-        membership {
-          id
-          role
-        }
-      }
-    }
-  }
-`;
+import { SafeActionDropdownAction } from "@/components/ui/SafeActionDropdownAction";
+import { updateMembershipRoleAction } from "@/groups/actions/updateMembershipRoleAction";
+import { GroupMemberDTO } from "@/groups/data/members";
 
 type Props = {
-  groupRef: SetMembershipRoleAction_Group$key;
-  membershipRef: SetMembershipRoleAction_Membership$key;
+  membership: GroupMemberDTO;
+  groupSlug: string;
   role: MembershipRole;
-  close: () => void;
+  update: (membership: GroupMemberDTO) => void;
 };
 
 export const SetMembershipRoleAction: FC<Props> = ({
-  groupRef,
-  membershipRef,
+  membership,
+  groupSlug,
   role,
-  close,
+  update,
 }) => {
-  const group = useFragment(
-    graphql`
-      fragment SetMembershipRoleAction_Group on Group {
-        id
-        slug
-      }
-    `,
-    groupRef
-  );
-
-  const membership = useFragment(
-    graphql`
-      fragment SetMembershipRoleAction_Membership on UserGroupMembership {
-        id
-        user {
-          slug
-        }
-      }
-    `,
-    membershipRef
-  );
-
   return (
-    <MutationAction<
-      SetMembershipRoleActionMutation,
-      "UpdateMembershipRoleResult"
-    >
-      mutation={Mutation}
-      variables={{
-        input: {
-          user: membership.user.slug,
-          group: group.slug,
-          role,
-        },
+    <SafeActionDropdownAction
+      action={updateMembershipRoleAction}
+      input={{
+        user: membership.user.slug,
+        group: groupSlug,
+        role,
       }}
-      expectedTypename="UpdateMembershipRoleResult"
+      onSuccess={(newMembership) => {
+        update(newMembership);
+      }}
       title={role}
-      close={close}
     />
   );
 };

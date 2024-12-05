@@ -21,6 +21,7 @@ type Props = {
   href: string;
   icon?: FC<IconProps>;
   external?: boolean;
+  prefetch?: boolean;
 } & MenuLinkModeProps;
 
 export const PageMenuLink: FC<Props> = ({
@@ -30,6 +31,7 @@ export const PageMenuLink: FC<Props> = ({
   icon,
   href,
   external,
+  prefetch,
 }) => {
   const Icon = icon;
   return mode === "desktop" ? (
@@ -37,6 +39,7 @@ export const PageMenuLink: FC<Props> = ({
       className="select-none rounded-md px-2 py-1 text-sm text-white hover:bg-slate-700"
       href={href}
       target={external ? "_blank" : undefined}
+      prefetch={prefetch}
     >
       {Icon && <Icon className="mr-1 inline-block text-slate-400" size={14} />}
       {title}
@@ -47,6 +50,7 @@ export const PageMenuLink: FC<Props> = ({
       icon={icon ?? EmptyIcon}
       title={title}
       close={close}
+      prefetch={prefetch}
     />
   );
 };

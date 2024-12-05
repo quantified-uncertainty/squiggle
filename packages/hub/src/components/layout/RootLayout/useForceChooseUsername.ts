@@ -1,17 +1,22 @@
-import { useSession } from "next-auth/react";
+import { Session } from "next-auth";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-import { chooseUsernameRoute } from "@/routes";
+import { chooseUsernameRoute } from "@/lib/routes";
 
-export function useForceChooseUsername() {
-  const { data: session } = useSession();
+export function useForceChooseUsername(session: Session | null) {
+  const pathname = usePathname();
+  const router = useRouter();
 
-  if (
-    session?.user &&
-    !session?.user.username &&
-    !window.location.href.includes(chooseUsernameRoute())
-  ) {
-    // Next's redirect() is broken for components included from the root layout
-    // https://github.com/vercel/next.js/issues/42556 (it's closed but not really solved)
-    window.location.href = chooseUsernameRoute();
-  }
+  const shouldChoose = session?.user && !session.user.username;
+  const shouldRedirect =
+    shouldChoose && !pathname.includes(chooseUsernameRoute());
+
+  useEffect(() => {
+    if (shouldRedirect) {
+      router.push(chooseUsernameRoute());
+    }
+  }, [shouldRedirect, router]);
+
+  return { shouldRedirect, shouldChoose };
 }

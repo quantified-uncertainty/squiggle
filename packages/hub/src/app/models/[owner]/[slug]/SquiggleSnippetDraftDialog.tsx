@@ -1,13 +1,11 @@
 import { FC, PropsWithChildren, useState } from "react";
-import { graphql, useFragment } from "react-relay";
 
 import { Button, Modal } from "@quri/ui";
 
-import { useClientOnlyRender } from "@/hooks/useClientOnlyRender";
+import { useClientOnlyRender } from "@/lib/hooks/useClientOnlyRender";
+import { ModelFullDTO } from "@/models/data/full";
 
 import { SquiggleSnippetFormShape } from "./EditSquiggleSnippetModel";
-
-import { SquiggleSnippetDraftDialog_Model$key } from "@/__generated__/SquiggleSnippetDraftDialog_Model.graphql";
 
 export type Draft = {
   formState: SquiggleSnippetFormShape;
@@ -98,22 +96,7 @@ export const draftUtils = {
   },
 };
 
-export function useDraftLocator(
-  modelRef: SquiggleSnippetDraftDialog_Model$key
-) {
-  const model = useFragment(
-    graphql`
-      fragment SquiggleSnippetDraftDialog_Model on Model {
-        id
-        slug
-        owner {
-          slug
-        }
-      }
-    `,
-    modelRef
-  );
-
+export function useDraftLocator(model: ModelFullDTO) {
   const draftLocator: DraftLocator = {
     ownerSlug: model.owner.slug,
     modelSlug: model.slug,

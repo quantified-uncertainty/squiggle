@@ -1,52 +1,29 @@
 "use client";
 import { FC } from "react";
-import { graphql, useFragment } from "react-relay";
 
 import { LoadMore } from "@/components/LoadMore";
+import { usePaginator } from "@/lib/hooks/usePaginator";
+import { Paginated } from "@/lib/types";
+import { ModelCardDTO } from "@/models/data/cards";
 
 import { ModelCard } from "./ModelCard";
 
-import { ModelList$key } from "@/__generated__/ModelList.graphql";
-
-const Fragment = graphql`
-  fragment ModelList on ModelConnection {
-    edges {
-      node {
-        id
-        ...ModelCard
-      }
-    }
-    pageInfo {
-      hasNextPage
-    }
-  }
-`;
-
 type Props = {
-  connectionRef: ModelList$key;
-  loadNext(count: number): unknown;
+  page: Paginated<ModelCardDTO>;
   showOwner?: boolean;
 };
 
-export const ModelList: FC<Props> = ({
-  connectionRef,
-  loadNext,
-  showOwner,
-}) => {
-  const connection = useFragment(Fragment, connectionRef);
+export const ModelList: FC<Props> = ({ page, showOwner }) => {
+  const { items: models, loadNext } = usePaginator(page);
 
   return (
     <div>
       <div className="grid gap-y-8">
-        {connection.edges.map((edge) => (
-          <ModelCard
-            key={edge.node.id}
-            modelRef={edge.node}
-            showOwner={showOwner}
-          />
+        {models.map((model) => (
+          <ModelCard key={model.id} model={model} showOwner={showOwner} />
         ))}
       </div>
-      {connection.pageInfo.hasNextPage && <LoadMore loadNext={loadNext} />}
+      {loadNext && <LoadMore loadNext={loadNext} />}
     </div>
   );
 };

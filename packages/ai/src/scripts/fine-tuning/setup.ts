@@ -1,9 +1,6 @@
 import * as fs from "fs";
 
-import {
-  fetchCodeFromGraphQL,
-  fetchGroupModels,
-} from "../squiggleHubHelpers.js";
+import { fetchCodeFromHub, fetchGroupModels } from "../squiggleHubHelpers.js";
 import { examplesToImport } from "./favoriteExamples.js";
 
 interface ProcessedModel {
@@ -98,7 +95,7 @@ async function processFavoriteExamples(): Promise<ProcessedModel[]> {
   for (const example of examplesToImport) {
     const [owner, slug] = example.id.split("/");
     try {
-      const code = await fetchCodeFromGraphQL(owner, slug);
+      const code = await fetchCodeFromHub(owner, slug);
       processedExamples.push({
         prompt: example.prompt,
         response: code.trim(),

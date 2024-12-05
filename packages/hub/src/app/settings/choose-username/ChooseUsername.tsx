@@ -1,59 +1,32 @@
 "use client";
-import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { FormProvider } from "react-hook-form";
-import { graphql } from "relay-runtime";
 
 import { Button } from "@quri/ui";
 
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { useMutationForm } from "@/hooks/useMutationForm";
+import { useSafeActionForm } from "@/lib/hooks/useSafeActionForm";
+import { setUsernameAction } from "@/users/actions/setUsernameAction";
 
 export const ChooseUsername: FC = () => {
-  const { data: session, update: updateSession } = useSession({
-    required: true,
-  });
-
   const router = useRouter();
-  if (session?.user.username) {
-    router.replace("/");
-  }
 
   type FormShape = {
     username: string;
   };
 
-  const { form, onSubmit, inFlight } = useMutationForm<
+  const { form, onSubmit, inFlight } = useSafeActionForm<
     FormShape,
-    ChooseUsernameMutation,
-    "Me"
+    typeof setUsernameAction
   >({
-    mode: "onChange",
-    mutation: graphql`
-      mutation ChooseUsernameMutation($username: String!) {
-        result: setUsername(username: $username) {
-          __typename
-          ... on BaseError {
-            message
-          }
-          ... on Me {
-            email
-          }
-        }
-      }
-    `,
-    expectedTypename: "Me",
-    formDataToVariables: (data) => ({ username: data.username }),
-    onCompleted: () => {
-      updateSession();
+    action: setUsernameAction,
+    onSuccess: () => {
       router.replace("/");
     },
+    formDataToInput: (data) => ({ username: data.username }),
     blockOnSuccess: true,
   });
-
-  const disabled = inFlight || !form.formState.isValid;
 
   return (
     <form onSubmit={onSubmit}>
@@ -67,7 +40,7 @@ export const ChooseUsername: FC = () => {
                 label="Pick a username"
                 size="small"
               />
-              <Button onClick={onSubmit} disabled={disabled} theme="primary">
+              <Button onClick={onSubmit} disabled={inFlight} theme="primary">
                 Save
               </Button>
             </div>

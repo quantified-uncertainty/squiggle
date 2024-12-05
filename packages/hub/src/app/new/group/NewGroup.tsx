@@ -1,62 +1,36 @@
 "use client";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { FormProvider } from "react-hook-form";
-import { graphql } from "relay-runtime";
 
 import { Button } from "@quri/ui";
 
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { useMutationForm } from "@/hooks/useMutationForm";
-import { groupRoute } from "@/routes";
-
-import { NewGroupMutation } from "@/__generated__/NewGroupMutation.graphql";
-
-const Mutation = graphql`
-  mutation NewGroupMutation($input: MutationCreateGroupInput!) {
-    result: createGroup(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on CreateGroupResult {
-        group {
-          id
-          slug
-        }
-      }
-    }
-  }
-`;
+import { createGroupAction } from "@/groups/actions/createGroupAction";
+import { useSafeActionForm } from "@/lib/hooks/useSafeActionForm";
+import { groupRoute } from "@/lib/routes";
 
 export const NewGroup: FC = () => {
-  useSession({ required: true });
-
   const router = useRouter();
 
   type FormShape = {
     slug: string | undefined;
   };
 
-  const { form, onSubmit, inFlight } = useMutationForm<
+  const { form, onSubmit, inFlight } = useSafeActionForm<
     FormShape,
-    NewGroupMutation,
-    "CreateGroupResult"
+    typeof createGroupAction
   >({
     defaultValues: {},
     mode: "onChange",
-    mutation: Mutation,
-    expectedTypename: "CreateGroupResult",
     blockOnSuccess: true,
-    formDataToVariables: (data) => ({
-      input: {
-        slug: data.slug ?? "", // shouldn't happen, but satisfies TypeScript
-      },
+    formDataToInput: (data) => ({
+      slug: data.slug ?? "", // shouldn't happen, but satisfies TypeScript
     }),
-    onCompleted(result) {
-      router.push(groupRoute({ slug: result.group.slug }));
+    action: createGroupAction,
+    onSuccess(result) {
+      router.push(groupRoute({ slug: result.slug }));
     },
   });
 

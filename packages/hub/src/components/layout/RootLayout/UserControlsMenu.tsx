@@ -10,7 +10,7 @@ import {
 } from "@quri/ui";
 
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
-import { newDefinitionRoute, userRoute } from "@/routes";
+import { newDefinitionRoute, userRoute } from "@/lib/routes";
 
 type Props = {
   close: () => void;
