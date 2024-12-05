@@ -24,8 +24,11 @@ export class WebWorkerRunner extends AnyWorkerRunner {
      *
      * But, for now, it seems like it's working.
      */
-    const url = new URL("./esbuild-worker.cjs", import.meta.url);
-    this.worker = new Worker(url);
+
+    // Note: the version below is configured to work for pre-turbopack next.js in dev and prod.
+    this.worker = new Worker(new URL("./esbuild-worker.js", import.meta.url), {
+      type: "module",
+    });
   }
 
   async getWorker(): Promise<Worker> {
