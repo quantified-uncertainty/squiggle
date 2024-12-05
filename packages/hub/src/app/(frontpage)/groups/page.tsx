@@ -6,3 +6,5 @@ export default async function OuterGroupsPage() {
 
   return <GroupList page={page} />;
 }
+
+export const dynamic = "force-dynamic";

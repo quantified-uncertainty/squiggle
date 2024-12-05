@@ -6,3 +6,5 @@ export default async function DefinitionsPage() {
 
   return <RelativeValuesDefinitionList page={page} />;
 }
+
+export const dynamic = "force-dynamic";

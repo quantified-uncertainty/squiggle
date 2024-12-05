@@ -30,3 +30,5 @@ export default async function OuterFrontPage() {
 export const metadata: Metadata = {
   title: "Status",
 };
+
+export const dynamic = "force-dynamic";
