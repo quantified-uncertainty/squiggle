@@ -16,7 +16,7 @@ export function useForceChooseUsername(session: Session | null) {
     if (shouldRedirect) {
       router.push(chooseUsernameRoute());
     }
-  }, [shouldRedirect]);
+  }, [shouldRedirect, router]);
 
   return { shouldRedirect, shouldChoose };
 }

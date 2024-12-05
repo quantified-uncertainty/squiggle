@@ -79,7 +79,7 @@ export const UpgradeableModel: FC<{
         setModel(null);
       }
     });
-  }, []);
+  }, [incompleteModel]);
 
   if (model === "loading") {
     return <Skeleton height={160} />;

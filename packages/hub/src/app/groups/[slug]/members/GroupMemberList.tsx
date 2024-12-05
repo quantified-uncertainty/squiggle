@@ -30,14 +30,14 @@ export const GroupMemberList: FC<Props> = ({
     (membership: GroupMemberDTO) => {
       page.update((item) => (item.id === membership.id ? membership : item));
     },
-    [page.update]
+    [page]
   );
 
   const removeMembership = useCallback(
     (membership: GroupMemberDTO) => {
       page.remove((item) => item.id === membership.id);
     },
-    [page.remove]
+    [page]
   );
 
   return (
