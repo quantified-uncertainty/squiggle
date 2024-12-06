@@ -1,13 +1,13 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { getSessionUserOrRedirect } from "@/users/auth";
+import { auth } from "@/lib/server/auth";
 
 import { ChooseUsername } from "./ChooseUsername";
 
 export default async function OuterChooseUsernamePage() {
-  const sessionUser = await getSessionUserOrRedirect();
-  if (sessionUser.username) {
+  const session = await auth();
+  if (!session?.user.email || session.user.username) {
     redirect("/");
   }
 
