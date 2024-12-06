@@ -22,7 +22,8 @@ export const ChooseUsername: FC = () => {
   >({
     action: setUsernameAction,
     onSuccess: () => {
-      router.replace("/");
+      // this is enough - `page.tsx` will notice that the username is set now, and redirect to the home page
+      router.refresh();
     },
     formDataToInput: (data) => ({ username: data.username }),
     blockOnSuccess: true,
