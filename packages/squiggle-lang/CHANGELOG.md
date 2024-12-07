@@ -1,5 +1,25 @@
 # @quri/squiggle-lang
 
+## 0.10.0
+
+- Partial compile-time type checking and inference ([#3333](https://github.com/quantified-uncertainty/squiggle/pull/3333))
+
+- Fix stack unwind in `try()` function ([#3394](https://github.com/quantified-uncertainty/squiggle/pull/3394))
+
+- Experimental: unit type annotations ([#3323](https://github.com/quantified-uncertainty/squiggle/pull/3323))
+
+- `String.make` supports d3 format strings for numbers and dates ([#3435](https://github.com/quantified-uncertainty/squiggle/pull/3435))
+
+- Fix minor parser quirks; allow line breaks in import statements and "a to b" expressions ([#3406](https://github.com/quantified-uncertainty/squiggle/pull/3406))
+
+* Added List.sample and List.sampleN ([#3398](https://github.com/quantified-uncertainty/squiggle/pull/3398))
+
+* Added `Number.mod` function ([#3396](https://github.com/quantified-uncertainty/squiggle/pull/3396))
+
+* Truncate long lists when converting to strings ([#3440](https://github.com/quantified-uncertainty/squiggle/pull/3440))
+
+* Added `Number.maxValue` and `Number.minValue` ([#3397](https://github.com/quantified-uncertainty/squiggle/pull/3397))
+
 ## 0.9.5
 
 - Profiler mode ([#3268](https://github.com/quantified-uncertainty/squiggle/pull/3268))

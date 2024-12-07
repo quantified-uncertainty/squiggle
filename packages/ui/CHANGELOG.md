@@ -1,5 +1,11 @@
 # @quri/ui
 
+## 0.2.3
+
+- support `tooltip` prop in all form fields ([#3442](https://github.com/quantified-uncertainty/squiggle/pull/3442))
+
+- support `layout` prop in form fields, remove `inlineLabel` prop ([#3442](https://github.com/quantified-uncertainty/squiggle/pull/3442))
+
 ## 0.2.2
 
 - Add `CubeTransparentIcon` icon

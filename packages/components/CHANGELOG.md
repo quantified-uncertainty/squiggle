@@ -1,5 +1,13 @@
 # @quri/squiggle-components
 
+## 0.10.0
+
+- Most viewer items begin in collapsed state ([#3425](https://github.com/quantified-uncertainty/squiggle/pull/3425))
+
+- Improve viewer UI ([#3364](https://github.com/quantified-uncertainty/squiggle/pull/3364))
+
+- Fix error location reporting in editor ([#3368](https://github.com/quantified-uncertainty/squiggle/pull/3368))
+
 ## 0.9.5
 
 - Profiler mode ([#3268](https://github.com/quantified-uncertainty/squiggle/pull/3268))

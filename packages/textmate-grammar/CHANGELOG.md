@@ -1,5 +1,9 @@
 # @quri/squiggle-textmate-grammar
 
+## 0.10.0
+
+Use 0.10.0 Squiggle. No extension-specific changes.
+
 ## 0.9.5
 
 - More robust support for "export" keyword ([#3264](https://github.com/quantified-uncertainty/squiggle/pull/3264))

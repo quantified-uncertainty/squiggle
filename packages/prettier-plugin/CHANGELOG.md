@@ -1,5 +1,9 @@
 # @quri/prettier-plugin-squiggle
 
+## 0.10.0
+
+Compatible with Squiggle 0.10.0. No extension-specific changes.
+
 ## 0.9.5
 
 Compatible with Squiggle 0.9.5. No extension-specific changes.
