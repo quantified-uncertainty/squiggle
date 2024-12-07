@@ -13,6 +13,7 @@ export type SquiggleLangPackageTypes = {
   "0.9.3": GetImportType<typeof import("squiggle-lang-0.9.3")>;
   "0.9.4": GetImportType<typeof import("squiggle-lang-0.9.4")>;
   "0.9.5": GetImportType<typeof import("squiggle-lang-0.9.5")>;
+  "0.10.0": GetImportType<typeof import("squiggle-lang-0.10.0")>;
   dev: GetImportType<typeof import("@quri/squiggle-lang")>;
 };
 export async function squiggleLangByVersion<T extends SquiggleVersion>(
@@ -50,6 +51,10 @@ export async function squiggleLangByVersion<T extends SquiggleVersion>(
     case "0.9.5":
       return (await import(
         "squiggle-lang-0.9.5"
+      )) as unknown as SquiggleLangPackageTypes[T];
+    case "0.10.0":
+      return (await import(
+        "squiggle-lang-0.10.0"
       )) as unknown as SquiggleLangPackageTypes[T];
     case "dev":
       return (await import(
