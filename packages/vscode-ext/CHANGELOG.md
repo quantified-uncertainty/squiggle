@@ -2,6 +2,8 @@
 
 ## 0.10.0
 
+Use 0.10.0 Squiggle. No extension-specific changes.
+
 ## 0.9.5
 
 Use 0.9.5 Squiggle. No extension-specific changes.
@@ -20,9 +22,9 @@ Use 0.9.2 Squiggle. No extension-specific changes.
 
 ## 0.9.0
 
-* Use 0.9.0 Squiggle
+- Use 0.9.0 Squiggle
 
-* Convert webview implementation to TypeScript
+- Convert webview implementation to TypeScript
 
 ## 0.8.6
 
