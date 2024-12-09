@@ -39,7 +39,9 @@ export const CalculatorResult: FC<Props> = ({
   >(() => savedState?.calculatorResult);
 
   const runCalculator = useCallback(() => {
-    !autorun && processAllFieldCodes();
+    if (!autorun) {
+      processAllFieldCodes();
+    }
     const parameters: SqValue[] = [];
 
     // Unpack all input values.
@@ -59,7 +61,9 @@ export const CalculatorResult: FC<Props> = ({
 
   //runCalculator is updated every time that the inputResults or calculator changes, after which this will trigger.
   useEffect(() => {
-    autorun && runCalculator();
+    if (autorun) {
+      runCalculator();
+    }
   }, [runCalculator, autorun]);
 
   // Back up calculatorResult to ViewerContext.

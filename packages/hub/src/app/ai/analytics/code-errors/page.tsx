@@ -13,7 +13,7 @@ const SIGNATURE_ERROR = "Signature errors (total)";
 const LONG_ERROR = "Long errors";
 const NOT_DEFINED_ERROR = "Undefined variable";
 
-export default async function () {
+export default async function CodeErrorsPage() {
   const errors = await getCodeErrors();
 
   // pre-initialized to follow the right key order

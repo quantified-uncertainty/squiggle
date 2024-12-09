@@ -26,7 +26,7 @@ export function useConfigureCodemirrorView(
       view?.destroy();
     };
     // we initialize the view only once; no need for deps
-    // eslint-disable-next-line @wogns3623/better-exhaustive-deps/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setViewDom = useCallback(

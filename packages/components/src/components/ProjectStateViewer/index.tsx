@@ -260,7 +260,9 @@ function useNodesAndEdges({
     }
 
     return layoutGraph(nodes, edges);
-    // eslint-disable-next-line @wogns3623/better-exhaustive-deps/exhaustive-deps
+
+    // `project.state` dependency is necessary;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headTooltips, project, project.state]);
   return { nodes, edges };
 }

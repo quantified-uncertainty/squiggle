@@ -80,7 +80,7 @@ function getInvalidSquiggleElements(): InvalidElement[] {
     },
     {
       check: (line: string) => /\bDate\.now\b/.test(line),
-      getMessage: (lineNumber: number, line: string) =>
+      getMessage: (lineNumber: number) =>
         `Line ${lineNumber}: 'Date.now' is not available in Squiggle. Use 'Danger.now' instead for the current timestamp. Be cautious with time-dependent calculations as they may produce varying results.`,
     },
     {
@@ -96,7 +96,7 @@ function getInvalidSquiggleElements(): InvalidElement[] {
     },
     {
       check: (line: string) => /=>/.test(line),
-      getMessage: (lineNumber: number, line: string) =>
+      getMessage: (lineNumber: number) =>
         `Line ${lineNumber}: The arrow function syntax "=>" is not allowed in Squiggle. Use the standard function declaration syntax instead. If you want to write a lambda function, you can do this: {|x| x + 1 }`,
     },
   ];
