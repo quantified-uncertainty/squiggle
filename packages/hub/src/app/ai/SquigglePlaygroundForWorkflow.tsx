@@ -42,7 +42,7 @@ export function SquigglePlaygroundForWorkflow({
     <squiggle.components.SquigglePlayground
       height={height}
       defaultCode={defaultCode}
-      linker={llmLinker}
+      linker={llmLinker as any}
       renderExtraControls={() => (
         <div className="flex h-full items-center justify-end gap-2">
           <SquigglePlaygroundVersionPicker

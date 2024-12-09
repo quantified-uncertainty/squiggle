@@ -115,3 +115,15 @@ export const versionSupportsSqProjectV2 = excludeVersions([
   "0.9.4",
   "0.9.5",
 ]);
+
+// Useful if you need to write a function that takes `squiggle` object that was previously guarded.
+export type GuardedSquigglePackages<
+  Guard extends CompositeGuard<SquiggleVersion>,
+> = SquigglePackages<Guard extends CompositeGuard<infer T> ? T : never>;
+
+// Useful if you need to write a function that takes `squiggle` object that was previously guarded, and the guard check fails.
+export type AntiGuardedSquigglePackages<
+  Guard extends CompositeGuard<SquiggleVersion>,
+> = SquigglePackages<
+  Guard extends CompositeGuard<infer T> ? Exclude<SquiggleVersion, T> : never
+>;

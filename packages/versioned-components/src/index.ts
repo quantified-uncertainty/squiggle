@@ -1,6 +1,9 @@
 export { SquigglePlaygroundVersionPicker } from "./SquigglePlaygroundVersionPicker.js";
 export { SquiggleVersionShower } from "./SquiggleVersionShower.js";
-export { versionedSquigglePackages } from "./versionedSquigglePackages.js";
+export {
+  type SquigglePackages,
+  versionedSquigglePackages,
+} from "./versionedSquigglePackages.js";
 
 export {
   checkSquiggleVersion,
@@ -20,3 +23,8 @@ export {
 } from "./predicates.js";
 
 export { useAdjustSquiggleVersion } from "./hooks.js";
+
+export type {
+  AntiGuardedSquigglePackages,
+  GuardedSquigglePackages,
+} from "./predicates.js";

@@ -3,7 +3,9 @@
 // squiggle-components are not RSC-friendly
 import { FC } from "react";
 import { type SqLinker as SqLinkerV1 } from "squiggle-lang-0.9.5";
-import { type SqLinker as SqLinkerV2 } from "@quri/squiggle-lang";
+
+import { type SqLinker as SqLinkerDev } from "@quri/squiggle-lang";
+
 import { SquiggleLangPackageTypes } from "./versionedSquiggleLang.js";
 import { SquiggleVersion } from "./versions.js";
 
@@ -11,6 +13,13 @@ import { SquiggleVersion } from "./versions.js";
  * We extend components props to allow any version of `SqProject` and other common squiggle-lang classes.
  * This makes them less type-safe, but matching squiggle-lang object versions with components verisons is almost impossible without this.
  */
+
+type SqLinkerV2 = Omit<SqLinkerDev, "loadModule"> & {
+  // Relax the type of `loadModule` - various versions of `SqModule` return type
+  // are not compatible, even if they're identical
+  // (because of "Types have separate declarations of a private property '_ast'" error.)
+  loadModule: (sourceId: string, hash?: string) => Promise<unknown>;
+};
 
 type AnySqProject = InstanceType<
   SquiggleLangPackageTypes[SquiggleVersion]["SqProject"]
