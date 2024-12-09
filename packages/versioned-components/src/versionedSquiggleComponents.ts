@@ -4,7 +4,7 @@
 import { FC } from "react";
 import { type SqLinker as SqLinkerV1 } from "squiggle-lang-0.9.5";
 
-import { type SqLinker as SqLinkerV2 } from "@quri/squiggle-lang";
+import { type SqLinker as SqLinkerDev } from "@quri/squiggle-lang";
 
 import { SquiggleLangPackageTypes } from "./versionedSquiggleLang.js";
 import { SquiggleVersion } from "./versions.js";
@@ -14,6 +14,13 @@ import { SquiggleVersion } from "./versions.js";
  * This makes them less type-safe, but matching squiggle-lang object versions with components verisons is almost impossible without this.
  */
 
+type SqLinkerV2 = Omit<SqLinkerDev, "loadModule"> & {
+  // Relax the type of `loadModule` - various versions of `SqModule` return type
+  // are not compatible, even if they're identical
+  // (because of "Types have separate declarations of a private property '_ast'" error.)
+  loadModule: (sourceId: string, hash?: string) => Promise<unknown>;
+};
+
 type AnySqProject = InstanceType<
   SquiggleLangPackageTypes[SquiggleVersion]["SqProject"]
 >;
@@ -21,7 +28,6 @@ type AnySqValuePath = InstanceType<
   SquiggleLangPackageTypes[SquiggleVersion]["SqValuePath"]
 >;
 type AnySqLinker = SqLinkerV1 | SqLinkerV2;
-
 type PatchSqType<Prop> = Prop extends AnySqProject
   ? AnySqProject
   : Prop extends AnySqValuePath
@@ -29,7 +35,6 @@ type PatchSqType<Prop> = Prop extends AnySqProject
     : Prop extends AnySqLinker
       ? AnySqLinker
       : Prop;
-
 type PatchSqTypesInProps<Props> =
   Props extends Record<string, unknown>
     ? { [k in keyof Props]: PatchSqType<Props[k]> }
@@ -55,6 +60,7 @@ export type SquiggleComponentsPackageTypes = {
   "0.9.3": GetImportType<typeof import("squiggle-components-0.9.3")>;
   "0.9.4": GetImportType<typeof import("squiggle-components-0.9.4")>;
   "0.9.5": GetImportType<typeof import("squiggle-components-0.9.5")>;
+  "0.10.0": GetImportType<typeof import("squiggle-components-0.10.0")>;
   dev: GetImportType<typeof import("@quri/squiggle-components")>;
 };
 export async function squiggleComponentsByVersion<T extends SquiggleVersion>(
@@ -90,6 +96,10 @@ export async function squiggleComponentsByVersion<T extends SquiggleVersion>(
     case "0.9.5":
       return (await import(
         "squiggle-components-0.9.5"
+      )) as unknown as SquiggleComponentsPackageTypes[T];
+    case "0.10.0":
+      return (await import(
+        "squiggle-components-0.10.0"
       )) as unknown as SquiggleComponentsPackageTypes[T];
     case "dev":
       return (await import(
