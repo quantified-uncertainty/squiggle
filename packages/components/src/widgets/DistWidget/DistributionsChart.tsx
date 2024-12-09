@@ -380,16 +380,15 @@ const InnerDistributionsChart: FC<{
         }
       }
 
-      {
-        showCursorLine &&
-          drawCursorLines({
-            frame,
-            cursor,
-            x: {
-              scale: xScale,
-              format: plot.xScale.tickFormat,
-            },
-          });
+      if (showCursorLine) {
+        drawCursorLines({
+          frame,
+          cursor,
+          x: {
+            scale: xScale,
+            format: plot.xScale.tickFormat,
+          },
+        });
       }
 
       if (verticalLine) {

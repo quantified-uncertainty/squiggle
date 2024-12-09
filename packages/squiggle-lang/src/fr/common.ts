@@ -66,7 +66,11 @@ myFn = typeOf({|e| e})`,
         ],
         frAny({ genericName: "A" }),
         ([value, message]) => {
-          message ? console.log(message, value) : console.log(value);
+          if (message) {
+            console.log(message, value);
+          } else {
+            console.log(value);
+          }
           return value;
         }
       ),

@@ -52,7 +52,7 @@ async function InnerPage({ params, searchParams }: Props) {
   return <AcceptGroupInvitePage group={group} inviteToken={inviteToken} />;
 }
 
-export default async function (props: Props) {
+export default async function InviteLinkPage(props: Props) {
   return (
     <WithAuth>
       <InnerPage {...props} />

@@ -412,7 +412,7 @@ export function parseEscapeSequence(
   } else {
     try {
       return JSON.parse(`"\\${char.join("")}"`);
-    } catch (e) {
+    } catch {
       error(`Incorrect escape sequence: ${char.join("")}`, location);
     }
   }

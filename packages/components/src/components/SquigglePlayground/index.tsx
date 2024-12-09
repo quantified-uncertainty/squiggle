@@ -123,9 +123,9 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
         title: e[1].tags.name() ? e[1].tags.name() : e[1].title() || "",
         docstring: e[1].context?.docstring() || "",
       }));
-      onExportsChange && onExportsChange(_exports);
+      onExportsChange?.(_exports);
     } else {
-      onExportsChange && onExportsChange([]);
+      onExportsChange?.([]);
     }
   }, [simulation, onExportsChange]);
 

@@ -92,7 +92,9 @@ widgetRegistry.register("TableChart", {
                         if (event.key === "Enter" && item.ok) {
                           event.preventDefault();
                           const path = item.value.context?.path;
-                          path && zoomedIn(path);
+                          if (path) {
+                            zoomedIn(path);
+                          }
                         }
                       }}
                       className={clsx(

@@ -74,7 +74,7 @@ const Cell: FC<{
         <RelativeValueCell item={item} showMedian={true} />
       </CellBox>
     );
-  } catch (e) {
+  } catch {
     return <ErrorCell />;
   }
 };

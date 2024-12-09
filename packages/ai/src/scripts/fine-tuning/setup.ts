@@ -35,24 +35,24 @@ async function fetchAndProcessGroupModels(
   return rawModels.map(processModel);
 }
 
-async function saveModelsToJSON(
-  models: ProcessedModel[],
-  outputPath: string
-): Promise<void> {
-  try {
-    const jsonData = models.map((code, index) => ({
-      prompt: code.prompt,
-      code: code.response,
-    }));
+// async function saveModelsToJSON(
+//   models: ProcessedModel[],
+//   outputPath: string
+// ): Promise<void> {
+//   try {
+//     const jsonData = models.map((code, index) => ({
+//       prompt: code.prompt,
+//       code: code.response,
+//     }));
 
-    const jsonString = JSON.stringify(jsonData, null, 2);
-    await fs.promises.writeFile(outputPath, jsonString, "utf-8");
-    console.log(`Successfully saved ${models.length} models to ${outputPath}`);
-  } catch (error) {
-    console.error("Error saving models to JSON:", error);
-    throw error;
-  }
-}
+//     const jsonString = JSON.stringify(jsonData, null, 2);
+//     await fs.promises.writeFile(outputPath, jsonString, "utf-8");
+//     console.log(`Successfully saved ${models.length} models to ${outputPath}`);
+//   } catch (error) {
+//     console.error("Error saving models to JSON:", error);
+//     throw error;
+//   }
+// }
 
 function formatModelsForFineTuning(models: ProcessedModel[]): string {
   const formattedData = models.map((model) => ({

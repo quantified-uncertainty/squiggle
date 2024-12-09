@@ -77,7 +77,9 @@ function createScale(scale: Scale | null, type: Type | undefined): Scale {
   //TODO: It might be good to check if scale is outside the bounds of the range type, and throw an error then or something.
   //TODO: It might also be good to check if the range type matches the scale type, and throw an error if not.
 
-  scale && assertValidMinMax(scale);
+  if (scale) {
+    assertValidMinMax(scale);
+  }
 
   const _defaultScale =
     type && (type instanceof TNumberRange || type instanceof TDateRange)
@@ -359,7 +361,10 @@ export const library = [
         frPlot,
         ([dists, params]) => {
           const { xScale, yScale, title, showSummary } = params ?? {};
-          yScale && _assertYScaleNotDateScale(yScale);
+          if (yScale) {
+            _assertYScaleNotDateScale(yScale);
+          }
+
           const distributions: LabeledDistribution[] = [];
           if (dists.tag === "2") {
             dists.value.forEach(({ name, value }, index) => {
@@ -463,7 +468,10 @@ export const library = [
         ([{ value, tags }, params]) => {
           const domain = extractTypeFromOneArgFunction(value);
           const { xScale, yScale, distXScale, title, xPoints } = params ?? {};
-          yScale && _assertYScaleNotDateScale(yScale);
+          if (yScale) {
+            _assertYScaleNotDateScale(yScale);
+          }
+
           const _xScale = createScale(xScale || null, domain);
           return {
             fn: value,

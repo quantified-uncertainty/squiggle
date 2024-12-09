@@ -2,7 +2,7 @@ import { getStepErrors } from "@/ai/data/analytics";
 
 import { StepErrorList } from "../StepErrorList";
 
-export default async function () {
+export default async function StepErrorsPage() {
   const errors = await getStepErrors();
 
   const stats: Record<string, number> = {};

@@ -32,7 +32,7 @@ function moduleItemToCompressedFormat({
 
 function convertSquiggleEditorTags(input: string): string {
   // Replace opening tags and everything up to the closing />
-  let result = input.replace(
+  const result = input.replace(
     /<SquiggleEditor[\s\S]*?defaultCode=\{`([\s\S]*?)`\}\s*\/>/g,
     (match, codeContent) => {
       return "```squiggle\n" + codeContent.trim() + "\n```";

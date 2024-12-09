@@ -3,7 +3,7 @@ import { Fragment } from "react";
 import { getTypeStats } from "@/ai/data/analytics";
 import { H2 } from "@/components/ui/Headers";
 
-export default async function () {
+export default async function AiAnalyticsPage() {
   const typeStats = await getTypeStats();
   return (
     <div className="space-y-4">

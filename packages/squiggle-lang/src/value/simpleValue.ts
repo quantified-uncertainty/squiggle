@@ -295,8 +295,14 @@ export function simpleValueFromValue(value: Value): SimpleValue {
         ["tickFormat", value.value.tickFormat || ""],
         ["title", value.value.title || ""],
       ];
-      value.value.min && fields.push(["min", value.value.min]);
-      value.value.max && fields.push(["max", value.value.max]);
+
+      if (value.value.min) {
+        fields.push(["min", value.value.min]);
+      }
+      if (value.value.max) {
+        fields.push(["max", value.value.max]);
+      }
+
       switch (method?.type) {
         case "symlog":
           fields.push(["constant", method.constant || null]);
