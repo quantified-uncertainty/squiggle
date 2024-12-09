@@ -1,3 +1,5 @@
+import { StateEffect, StateField } from "@codemirror/state";
+import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
 import { forwardRef, ReactNode, useImperativeHandle } from "react";
 
 import { SqLocation, SqProject, SqValuePath } from "@quri/squiggle-lang";
@@ -5,6 +7,38 @@ import { SqLocation, SqProject, SqValuePath } from "@quri/squiggle-lang";
 import { Simulation } from "../../lib/hooks/useSimulator.js";
 import { formatSquiggle } from "./formatSquiggleExtension.js";
 import { useSquiggleEditorView } from "./useSquiggleEditorView.js";
+
+const flashHighlight = StateEffect.define<{
+  from: number;
+  to: number;
+} | null>();
+
+const flashHighlightField = StateField.define<DecorationSet>({
+  create() {
+    return Decoration.none;
+  },
+  update(highlights, tr) {
+    highlights = highlights.map(tr.changes);
+    for (let e of tr.effects) {
+      if (e.is(flashHighlight)) {
+        if (e.value) {
+          highlights = highlights.update({
+            add: [
+              Decoration.mark({ class: "cm-flash-highlight" }).range(
+                e.value.from,
+                e.value.to
+              ),
+            ],
+          });
+        } else {
+          highlights = Decoration.none;
+        }
+      }
+    }
+    return highlights;
+  },
+  provide: (f) => EditorView.decorations.from(f),
+});
 
 export type CodeEditorProps = {
   defaultValue: string;
@@ -37,13 +71,18 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   function CodeEditor(props, ref) {
     const { view, ref: editorRef } = useSquiggleEditorView(props);
 
-    const scrollTo = (location: SqLocation, focus: boolean) => {
+    const scrollTo = (location: SqLocation, flash: boolean) => {
       if (!view) return;
+
       view.dispatch({
-        selection: { anchor: location.start.offset, head: location.end.offset },
         scrollIntoView: true,
+        effects: true
+          ? flashHighlight.of({
+              from: location.start.offset,
+              to: location.end.offset,
+            })
+          : undefined,
       });
-      focus && view.focus();
     };
 
     useImperativeHandle(ref, () => ({
@@ -57,3 +96,11 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     );
   }
 );
+
+const style = document.createElement("style");
+style.textContent = `
+  .cm-flash-highlight {
+    background-color: #ff9999;
+  }
+`;
+document.head.appendChild(style);
