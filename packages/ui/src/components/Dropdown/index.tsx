@@ -45,15 +45,7 @@ export const Dropdown: FC<Props> = ({
 
   const arrowRef = useRef<HTMLDivElement | null>(null);
 
-  const {
-    x,
-    y,
-    strategy,
-    // placement,
-    refs,
-    // middlewareData,
-    context,
-  } = useFloating({
+  const { x, y, strategy, refs, context } = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen,
     placement: suggestedPlacement,
@@ -67,13 +59,6 @@ export const Dropdown: FC<Props> = ({
     click,
     dismiss,
   ]);
-
-  // const staticSide = {
-  //   top: "bottom",
-  //   right: "left",
-  //   bottom: "top",
-  //   left: "right",
-  // }[placement.split("-")[0] as Side];
 
   const closeDropdown = useCallback(() => {
     setIsOpen(false);
@@ -93,20 +78,6 @@ export const Dropdown: FC<Props> = ({
           {...getFloatingProps()}
         >
           {render({ close: closeDropdown })}
-          {/* {
-            // arrow is disabled for now - has rendering issues
-            false && (
-              <div
-                ref={arrowRef}
-                style={{
-                  left: middlewareData.arrow?.x ?? "",
-                  top: middlewareData.arrow?.y ?? "",
-                  [staticSide]: "-0.25rem",
-                }}
-                className="absolute h-2 w-2 rotate-45 bg-white"
-              />
-            )
-          } */}
         </div>
       </div>
     </FloatingPortal>
