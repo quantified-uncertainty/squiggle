@@ -38,7 +38,7 @@ jobs:
         run: pnpm install
 
       - name: Build changelog script
-        working-directory: packages/ops
+        working-directory: internal/ops
         run: pnpm turbo build
 
       # if there are existing changesets, PR will be created.

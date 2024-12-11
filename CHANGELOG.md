@@ -1,1 +1,1 @@
-See the [Changelog.mdx page](./packages/website/docs/Changelog.mdx) for the changelog.
+See the [Changelog.mdx page](./internal/content/content/docs/index.mdx) for the changelog.

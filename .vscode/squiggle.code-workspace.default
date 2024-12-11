@@ -10,10 +10,6 @@
       "path": "../packages/vscode-ext",
     },
     {
-      "name": "cli",
-      "path": "../packages/cli",
-    },
-    {
       "name": "squiggle-lang",
       "path": "../packages/squiggle-lang",
     },
@@ -23,11 +19,15 @@
     },
     {
       "name": "website",
-      "path": "../packages/website",
+      "path": "../apps/website",
+    },
+    {
+      "name": "hub",
+      "path": "../apps/hub",
     },
     {
       "name": "content",
-      "path": "../packages/content",
+      "path": "../internal/content",
     },
   ],
   "settings": {

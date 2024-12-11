@@ -24,7 +24,7 @@ function docsPathToGitHub(path: string) {
     owner: "quantified-uncertainty",
     repo: "squiggle",
     sha: "main",
-    path: `packages/content/content/docs/${path}`,
+    path: `internal/content/content/docs/${path}`,
   };
 }
 

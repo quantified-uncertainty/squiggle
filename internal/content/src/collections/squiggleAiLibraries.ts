@@ -43,7 +43,7 @@ export async function fetchCodeFromHubLegacy(
   return code;
 }
 
-// copy-pasted from squiggle/packages/ai/src/scripts/squiggleHubHelpers.ts
+// copy-pasted from squiggle/internal/ai/src/scripts/squiggleHubHelpers.ts
 export async function fetchCodeFromHub(
   owner: string,
   slug: string

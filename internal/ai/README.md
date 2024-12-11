@@ -2,7 +2,7 @@
 
 This is a collection of functions and scripts that allow you to write and debug Squiggle code using a variety of LLMs.
 
-The example frontend that uses it is implemented in [Squiggle Hub](https://squigglehub.org/ai); see [app/ai files](https://github.com/quantified-uncertainty/squiggle/tree/main/packages/hub/src/app/ai) for details.
+The example frontend that uses it is implemented in [Squiggle Hub](https://squigglehub.org/ai); see [app/ai files](https://github.com/quantified-uncertainty/squiggle/tree/main/apps/hub/src/app/ai) for details.
 
 Note that it can take 20s-2min to run a workflow and get a response from the LLM.
 
@@ -10,7 +10,7 @@ After runs are complete, the results are saved to the 'logs' folder. These are s
 
 ## Use
 
-Right now, Squiggle AI is primarily called in Squiggle Hub. You can see the corresponding route [here](https://github.com/quantified-uncertainty/squiggle/blob/main/packages/hub/src/app/ai/api/create/route.ts).
+Right now, Squiggle AI is primarily called in Squiggle Hub. You can see the corresponding route [here](https://github.com/quantified-uncertainty/squiggle/blob/main/apps/hub/src/app/ai/api/create/route.ts).
 
 You can also call this via the command line. Look at src/scripts/tests/create.ts for an example.
 

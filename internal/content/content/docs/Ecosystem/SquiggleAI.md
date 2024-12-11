@@ -33,7 +33,7 @@ The fact that Squiggle is a new language means that more fixes are generally req
 
 Squiggle AI currently uses Claude Sonnet 3.5 for all operations. It makes use of [prompt caching](https://www.anthropic.com/news/prompt-caching) to cache a lot of information (around 20k tokens) about the Squiggle language. LLM queries typically cost around $0.002 to $0.02 each to run \- more in the case of large models or long execution runs.
 
-You can see most of the prompts used [here](https://github.com/quantified-uncertainty/squiggle/blob/main/packages/llmRunner/src/llmRunner/prompts.ts).
+You can see most of the prompts used [here](https://github.com/quantified-uncertainty/squiggle/blob/main/internal/ai/src/prompts.ts).
 
 ## Key Run Stages
 

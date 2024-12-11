@@ -26,17 +26,29 @@ A simple programming language for probabilistic estimation that runs on Javascri
 
 ## Packages
 
-This monorepo has several packages that can be used for various purposes. All
-the packages can be found in `packages`.
+This monorepo has several packages that can be used for various purposes.
+
+### Public packages
+
+All packages that are published to npm can be found in `packages`.
 
 - `@quri/squiggle-lang` in `packages/squiggle-lang` contains the core language, particularly
   an interface to parse Squiggle expressions and return descriptions of distributions
   or results.
 - `@quri/squiggle-ui` in `packages/ui` has React components for common QURI projects.
 - `@quri/squiggle-components` in `packages/components` contains React components particularly meant to be used with Squiggle visualizations.
-- `packages/website` is the main documentation website for Squiggle. It is hosted at `squiggle-language.com`.
-- `packages/hub` is the code behind [Squiggle Hub](https://squigglehub.org).
-- `packages/vscode-ext` is the VS Code extension for writing estimation functions.
+- `packages/vscode-ext` is the VS Code extension for writing estimation functions. It's not published to npm, but it's published to the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle).
+
+### Applications
+
+Applications (usually built with Next.js) can be found in `apps`.
+
+- `apps/website` is the main documentation website for Squiggle. It is hosted at `squiggle-language.com`.
+- `apps/hub` is the code behind [Squiggle Hub](https://squigglehub.org).
+
+### Internal packages
+
+Internal packages (not published to npm) can be found in `internal`.
 
 # Develop
 

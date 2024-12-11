@@ -108,7 +108,7 @@ module.exports = {
 };
 ```
 
-You'll also need to include wrapped styles for forms. See `scoped-forms.css` in packages/website to learn how to do that.
+You'll also need to include wrapped styles for forms. See `scoped-forms.css` in `apps/website` to learn how to do that.
 
 Then, add `<TailwindProvider>...</TailwindProvider>` on top of your app (it can be imported from `@quri/ui` package). It will:
 
