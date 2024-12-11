@@ -26,7 +26,9 @@ function makeNumberArrayToNumberDefinition(
   throwIfEmpty = true
 ) {
   return makeDefinition([frArray(frNumber)], frNumber, ([arr]) => {
-    throwIfEmpty && assertIsNotEmpty(arr);
+    if (throwIfEmpty) {
+      assertIsNotEmpty(arr);
+    }
     return fn(arr);
   });
 }
@@ -36,7 +38,9 @@ function makeNumberArrayToNumberArrayDefinition(
   throwIfEmpty = true
 ) {
   return makeDefinition([frArray(frNumber)], frArray(frNumber), ([arr]) => {
-    throwIfEmpty && assertIsNotEmpty(arr);
+    if (throwIfEmpty) {
+      assertIsNotEmpty(arr);
+    }
     return fn(arr);
   });
 }

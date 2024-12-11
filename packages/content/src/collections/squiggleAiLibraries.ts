@@ -61,7 +61,7 @@ export async function fetchCodeFromHub(
     }
 
     return parsed.data.code;
-  } catch (e) {
+  } catch {
     return await fetchCodeFromHubLegacy(owner, slug);
   }
 }

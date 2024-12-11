@@ -283,7 +283,10 @@ export function useSetCollapsed() {
       ...state,
       collapsed: isCollapsed,
     }));
-    options?.skipUpdate || itemStore.forceUpdate(path);
+
+    if (!options?.skipUpdate) {
+      itemStore.forceUpdate(path);
+    }
   };
 }
 

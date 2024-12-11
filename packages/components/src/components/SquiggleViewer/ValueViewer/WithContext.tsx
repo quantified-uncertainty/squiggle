@@ -194,7 +194,11 @@ export const ValueWithContextViewer: FC<Props> = ({
               scrollEditorToPath();
             }}
             onKeyDown={(event) => {
-              isZoomedIn ? focusedKeyEvent(event) : unfocusedKeyEvent(event);
+              if (isZoomedIn) {
+                focusedKeyEvent(event);
+              } else {
+                unfocusedKeyEvent(event);
+              }
             }}
           >
             <div className="inline-flex items-center space-x-2">

@@ -170,16 +170,13 @@ export function viewerTabToValue(
   }
 }
 
-const selectableViewerTabs = [
-  "Imports",
-  "Variables",
-  "Exports",
-  "Result",
-  "Dependency Graph",
-  "AST",
-] as const;
-
-export type SelectableViewerTab = (typeof selectableViewerTabs)[number];
+export type SelectableViewerTab =
+  | "Imports"
+  | "Variables"
+  | "Exports"
+  | "Result"
+  | "Dependency Graph"
+  | "AST";
 
 export function viewerTabsToShow(
   outputResult: SqModuleOutput["result"]

@@ -6,7 +6,7 @@ import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { H2 } from "@/components/ui/Headers";
 import { resetPrisma } from "@/lib/server/prisma";
 
-export default async function () {
+export default async function DevPage() {
   if (process.env.NODE_ENV !== "development") {
     notFound();
   }
