@@ -10,12 +10,12 @@ import tailwindSquiggle from "@quri/squiggle-components/tailwind-plugin";
 
 // Generated paths will be absolute and fully symlink-resolved.
 function getVersionedSquiggleContent() {
-  // relative to this file; this file will be located in `./dist/src/tailwind.js`
+  // relative to this file; this file will be located in `./dist/tailwind.js`
   const srcGlobs = [
-    "../../../../node_modules/.pnpm/@quri+ui@*/node_modules/@quri/ui/src",
-    "../../node_modules/squiggle-components-*/src",
-    "../../../ui/src",
-    "../../../components/src",
+    "../../../node_modules/.pnpm/@quri+ui@*/node_modules/@quri/ui/src",
+    "../node_modules/squiggle-components-*/src",
+    "../../../packages/ui/src",
+    "../../../packages/components/src",
   ];
 
   const resolvedGlobs = srcGlobs.map((dir) => path.resolve(__dirname, dir));
