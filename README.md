@@ -48,7 +48,7 @@ Applications (usually built with Next.js) can be found in `apps`.
 
 ### Internal packages
 
-Internal packages (not published to npm) can be found in `internal`.
+Internal packages (not published to npm) can be found in `internal-packages`.
 
 # Develop
 

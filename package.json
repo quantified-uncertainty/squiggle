@@ -2,11 +2,11 @@
   "private": true,
   "name": "squiggle",
   "scripts": {
-    "nodeclean": "rm -r node_modules && rm -r {apps,packages,internal}/*/node_modules",
+    "nodeclean": "rm -r node_modules && rm -r {apps,packages,internal-packages}/*/node_modules",
     "preinstall": "npx only-allow pnpm",
-    "changeset-version": "cd internal/ops && turbo build && pnpm run changeset-version",
-    "publish-all": "cd internal/ops && turbo build && pnpm run publish-all",
-    "post-publish": "cd internal/ops && turbo build && pnpm run post-publish"
+    "changeset-version": "cd internal-packages/ops && turbo build && pnpm run changeset-version",
+    "publish-all": "cd internal-packages/ops && turbo build && pnpm run publish-all",
+    "post-publish": "cd internal-packages/ops && turbo build && pnpm run post-publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.5",

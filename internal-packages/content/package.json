@@ -1,11 +1,9 @@
 {
   "name": "@quri/content",
   "type": "module",
-  "version": "1.0.0",
   "private": true,
-  "license": "MIT",
   "engines": {
-    "node": ">=20.x"
+    "node": "=20.x"
   },
   "scripts": {
     "dev": "content-collections watch",

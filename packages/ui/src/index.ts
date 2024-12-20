@@ -1,4 +1,4 @@
-export { Button } from "./components/Button.js";
+export { Button, type ButtonProps } from "./components/Button.js";
 export { ButtonWithDropdown } from "./components/ButtonWithDropdown.js";
 export { Modal } from "./components/Modal.js";
 export { StyledTab } from "./components/StyledTab.js";

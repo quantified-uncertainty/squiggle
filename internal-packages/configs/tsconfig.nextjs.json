@@ -8,10 +8,11 @@
     "noEmit": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    // Next.js doesn't support project references, and enabling `composite` leads to warnings in `next build`
+    // enabling `composite` leads to warnings in `next build`
     "composite": false,
     "incremental": true,
-    // since noEmit is enabled, declarations are not useful
+    "rootDir": "${configDir}",
+    // since `noEmit` is enabled, declarations are not useful
     "declaration": false,
     "declarationMap": false,
     // enforced by Next.js

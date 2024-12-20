@@ -1,6 +1,7 @@
 ---
 title: Squiggle AI
 ---
+
 ![Squiggle AI](https://squigglehub.org/ai)
 
 Squiggle AI is a tool that allows you to write and improve Squiggle code using natural language. It's hosted on SquiggleHub, where you must be logged in to use it.
@@ -13,7 +14,7 @@ Squiggle AI is a tool that allows you to write and improve Squiggle code using n
 4. For tricky calculations or estimates, you might want to first add [O1] or other expensive language models. Then copy & paste the results into Squiggle AI.
 5. Run 2-4 workflows for the same prompt. Different prompts often lead to very different outputs.
 6. Begin with 0 numeric steps and 0 documentation steps. You can easily add these later.
-7. Be sure to review all key assumptions and to adjust critical parameters. 
+7. Be sure to review all key assumptions and to adjust critical parameters.
 
 ## Limitations
 
@@ -25,7 +26,7 @@ Squiggle AI is a tool that allows you to write and improve Squiggle code using n
 
 ## Performance and Costs
 
-LLMs, while powerful, can be slow and expensive. Short runs typically take 10-30s and cost \$0.01 to \$0.05, while longer runs can take 1-3 minutes and cost \$0.10 to \$0.30. 
+LLMs, while powerful, can be slow and expensive. Short runs typically take 10-30s and cost \$0.01 to \$0.05, while longer runs can take 1-3 minutes and cost \$0.10 to \$0.30.
 
 The fact that Squiggle is a new language means that more fixes are generally required than would be the case for popular languages.
 
@@ -33,7 +34,7 @@ The fact that Squiggle is a new language means that more fixes are generally req
 
 Squiggle AI currently uses Claude Sonnet 3.5 for all operations. It makes use of [prompt caching](https://www.anthropic.com/news/prompt-caching) to cache a lot of information (around 20k tokens) about the Squiggle language. LLM queries typically cost around $0.002 to $0.02 each to run \- more in the case of large models or long execution runs.
 
-You can see most of the prompts used [here](https://github.com/quantified-uncertainty/squiggle/blob/main/internal/ai/src/prompts.ts).
+You can see most of the prompts used [here](https://github.com/quantified-uncertainty/squiggle/blob/main/internal-packages/ai/src/prompts.ts).
 
 ## Key Run Stages
 
@@ -45,7 +46,9 @@ There are four main stages to writing Squiggle with LLMs. Each has its own LLM p
 4. **Document**: Recommends improvements to match the style guide. This typically means improving variable annotation and model documentation, but it sometimes also means adjusting variables or code organization.
 
 ## Future Functionality
+
 Ideas for future features include:
+
 1. Web searches: Allowing Squiggle AI to do background research on variables using services like Perplexity or specific APIs like those of Metaforecast and Manifold.
 2. LLM forecasting integration: Developing a dedicated system for estimating specific parameters to improve accuracy.
 3. API & Local support: Expanding support for API requests and possibly providing a local-only solution.

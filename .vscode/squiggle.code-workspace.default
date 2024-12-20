@@ -27,7 +27,7 @@
     },
     {
       "name": "content",
-      "path": "../internal/content",
+      "path": "../internal-packages/content",
     },
   ],
   "settings": {

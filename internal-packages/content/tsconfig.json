@@ -6,15 +6,11 @@
         "name": " @mdx-js/typescript-plugin",
       },
     ],
-    "paths": {
-      "@/*": ["./src/*"],
-    },
     "lib": ["esnext"],
     "strictNullChecks": true,
     "rootDir": ".",
-    "outDir": "dist",
   },
-  "include": ["src/**/*", "content/**/*.mdx"],
+  "include": ["src/**/*", "content/**/*.mdx", "./content-collections.ts"],
   "mdx": {
     "checkMdx": true,
   },

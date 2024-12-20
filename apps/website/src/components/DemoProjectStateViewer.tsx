@@ -4,6 +4,7 @@ import { FC, forwardRef, useImperativeHandle, useRef, useState } from "react";
 
 import { ProjectStateViewer } from "@quri/squiggle-components";
 import {
+  BaseRunner,
   makeSelfContainedLinker,
   runnerByName,
   SqLinker,
@@ -11,7 +12,6 @@ import {
 } from "@quri/squiggle-lang";
 import { Button } from "@quri/ui";
 
-import { BaseRunner } from "../../../squiggle-lang/dist/runners/BaseRunner";
 import { Resettable } from "./Resettable";
 
 type Handle = {

@@ -28,20 +28,19 @@
   "files": [
     "dist",
     "src",
-    "!**/tsconfig*.tsbuildinfo",
-    "!dist/tests"
+    "!**/tsconfig*.tsbuildinfo"
   ],
   "type": "module",
   "source": "./src/index.ts",
-  "types": "./dist/types/src/index.d.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types/src/index.d.ts",
-      "default": "./dist/esm/src/index.js"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./standalone": {
-      "types": "./dist/types/src/standalone.d.ts",
-      "default": "./dist/esm/src/standalone.js"
+      "types": "./dist/standalone.d.ts",
+      "default": "./dist/standalone.js"
     }
   }
 }

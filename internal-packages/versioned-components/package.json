@@ -1,6 +1,6 @@
 {
   "name": "@quri/versioned-squiggle-components",
-  "version": "0.9.6",
+  "version": "0.10.0",
   "private": true,
   "scripts": {
     "build:ts": "tsc -b",
@@ -56,14 +56,14 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
-      "default": "./dist/src/index.js"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./tailwind": {
-      "types": "./dist/src/tailwind.d.cts",
-      "default": "./dist/src/tailwind.cjs"
+      "types": "./dist/tailwind.d.cts",
+      "default": "./dist/tailwind.cjs"
     }
   },
-  "module": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts"
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts"
 }

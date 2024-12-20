@@ -1,7 +1,7 @@
 import { defineCollection } from "@content-collections/core";
 import { transformMDX } from "@fumadocs/content-collections/configuration";
 
-import { mdxOptions } from "@/collections/utils.js";
+import { mdxOptions } from "./utils.js";
 
 /*
  * Collection for `/docs` documentation pages.

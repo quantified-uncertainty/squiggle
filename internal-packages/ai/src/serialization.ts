@@ -1,6 +1,9 @@
-import { DeserializationVisitor, makeCodec } from "@quri/serializer";
+import {
+  DeserializationVisitor,
+  makeCodec,
+  SerializationVisitor,
+} from "@quri/serializer";
 
-import { SerializationVisitor } from "../../serializer/dist/serialization.js";
 import {
   Artifact,
   deserializeArtifact,

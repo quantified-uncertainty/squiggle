@@ -1,8 +1,6 @@
 import { FC } from "react";
 
-import { Button } from "@quri/ui";
-
-import { ButtonProps } from "../../../ui/dist/components/Button";
+import { Button, type ButtonProps } from "@quri/ui";
 
 type Props = {
   loadNext: (count: number) => void;

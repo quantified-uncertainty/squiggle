@@ -1,13 +1,11 @@
 .direnv
 packages/components/storybook-static
 packages/components/grammar/generated
-node_modules
-packages/*/node_modules
-apps/*/node_modules
-internal/*/node_modules
+**/node_modules
 packages/squiggle-lang/coverage/
 packages/vscode-ext/media/vendor/
 packages/squiggle-lang/.nyc_output/
+
 packages/*/dist
-result
-packages/prettier-plugin/test/files/
+internal-packages/*/dist
+apps/*/dist
