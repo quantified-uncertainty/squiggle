@@ -49,8 +49,8 @@ export const MoveModelAction: FC<Props> = ({ model }) => {
               modelRoute({ owner: newModel.owner.slug, slug: newModel.slug })
             );
           }}
+          closeOnSuccess={false}
           initialFocus="owner"
-          blockOnSuccess
         >
           <div className="mb-4">
             <div className="mb-4">

@@ -43,6 +43,7 @@ export const UpdateModelSlugAction: FC<Props> = ({ model }) => {
               modelRoute({ owner: newModel.owner.slug, slug: newModel.slug })
             );
           }}
+          closeOnSuccess={false}
           submitText="Save"
           title={`Rename ${model.owner.slug}/${model.slug}`}
           initialFocus="slug"

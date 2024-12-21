@@ -40,6 +40,7 @@ ${workflow.result.code}`,
         // (and might a bad idea anyway, returning a url is more verbose but more flexible for reuse)
         router.push(data.url);
       }}
+      closeOnSuccess={false}
     >
       <NewModelFormBody />
     </SafeActionFormModal>
