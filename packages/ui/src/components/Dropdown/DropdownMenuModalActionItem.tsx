@@ -1,16 +1,17 @@
 "use client";
 import { FC, ReactNode, useState } from "react";
 
+import { useCloseDropdown } from "./DropdownContext.js";
 import { DropdownMenuActionItem } from "./DropdownMenuActionItem.js";
 import { ItemLayoutProps } from "./DropdownMenuItemLayout.js";
 
 type Props = ItemLayoutProps & {
-  render(): ReactNode;
+  render: ({ close }: { close: () => void }) => ReactNode;
 };
 
 /*
  * This component doesn't close the dropdown when modal is displayed.
- * Instead, you should close the dropdown manually by passing `useCloseDropdown()` result to Modal's `close` prop.
+ * Instead, you should close the dropdown manually by passing `useCloseDropdown()` result to Modal's `close` prop, or by using `close` prop from `render` function.
  */
 export const DropdownMenuModalActionItem: FC<Props> = ({
   title,
@@ -18,6 +19,7 @@ export const DropdownMenuModalActionItem: FC<Props> = ({
   render,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const closeDropdown = useCloseDropdown();
 
   return (
     <>
@@ -26,7 +28,7 @@ export const DropdownMenuModalActionItem: FC<Props> = ({
         onClick={() => setIsOpen(true)}
         icon={icon}
       />
-      {isOpen && render()}
+      {isOpen && render({ close: closeDropdown })}
     </>
   );
 };
