@@ -19,6 +19,7 @@ export function SafeActionFormModal<
   initialFocus,
   submitText,
   children,
+  close,
 }: Pick<
   Parameters<typeof useSafeActionForm<TFormShape, Action>>[0],
   | "formDataToInput"

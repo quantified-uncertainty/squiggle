@@ -28,6 +28,7 @@ const schema = z.object({
   groupSlug: zSlug.optional(),
   slug: zSlug.optional(),
   isPrivate: z.boolean(),
+  code: z.string().optional(),
 });
 
 // This action is tightly coupled with the form in NewModel.tsx.
@@ -48,7 +49,7 @@ export const createModelAction = actionClient
 
     const seed = generateSeed();
     const version = defaultSquiggleVersion;
-    const code = defaultCode;
+    const code = input.code ?? defaultCode;
 
     const model = await prisma.$transaction(async (tx) => {
       const owner = await getWriteableOwnerOrSelf(input.groupSlug);
