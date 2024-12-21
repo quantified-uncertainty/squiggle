@@ -1,11 +1,8 @@
 .DS_Store
 .cpuprofile
-npm-debug.log
 *.cache
-.idea
 /dist
 *.coverage
-_coverage
 coverage
 .nyc_output/
 src/ast/peggyParser.js

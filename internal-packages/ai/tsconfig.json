@@ -1,0 +1,6 @@
+{
+  "extends": "@quri/configs/tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["esnext"],
+  },
+}

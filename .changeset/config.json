@@ -20,5 +20,5 @@
     "@quri/content",
     "@quri/squiggle-ai"
   ],
-  "changelog": "../packages/ops/dist/changelog.cjs"
+  "changelog": "../internal-packages/ops/dist/changelog.cjs"
 }

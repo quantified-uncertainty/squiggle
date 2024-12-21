@@ -1,8 +1,10 @@
 {
   "extends": "@quri/configs/tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
+    "noEmit": true,
+    "rootDir": ".",
+    "tsBuildInfoFile": "dist/check.tsbuildinfo",
   },
-  "include": ["src/**/*"],
+  "include": ["test/**/*", "*.ts"],
+  "references": [{ "path": "./tsconfig.build.json" }],
 }

@@ -16,13 +16,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Reset
-        working-directory: ./packages/hub
+        working-directory: ./apps/hub
         env:
           DATABASE_URL: "${{ secrets.DATABASE_DIRECT_URL }}"
         run: npx prisma migrate reset --force

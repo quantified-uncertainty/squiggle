@@ -1,0 +1,39 @@
+{
+  "name": "@quri/content",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": "=20.x"
+  },
+  "scripts": {
+    "dev": "content-collections watch",
+    "lint": "pnpm lint:prettier && pnpm eslint",
+    "lint:prettier": "prettier --check .",
+    "eslint": "ESLINT_USE_FLAT_CONFIG=false NODE_NO_WARNINGS=1 eslint src",
+    "format": "prettier --write .",
+    "build": "content-collections build && tsc -b && cp -r .content-collections dist/"
+  },
+  "dependencies": {
+    "@content-collections/cli": "^0.1.5",
+    "@content-collections/core": "^0.7.2",
+    "@fumadocs/content-collections": "^1.1.5",
+    "@quri/squiggle-lang": "workspace:*",
+    "@types/node": "^22.8.4",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@mdx-js/typescript-plugin": "^0.0.6",
+    "@quri/configs": "workspace:*",
+    "@quri/squiggle-textmate-grammar": "workspace:*",
+    "@types/mdx": "^2.0.13",
+    "eslint": "^9.16.0",
+    "prettier": "^3.3.3",
+    "tsx": "^4.11.0",
+    "typescript": "^5.6.3"
+  },
+  "exports": {
+    ".": "./dist/src/index.js"
+  }
+}

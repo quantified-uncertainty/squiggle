@@ -2,13 +2,14 @@
 
 We welcome contributions from developers, especially people in React/TypeScript, and interpreters/parsers. We also are keen to hear issues filed by users!
 
-Squiggle is currently in "Early Access" mode.
+Squiggle is currently in "Beta" mode.
 
 # Quick links
 
 - [Squiggle documentation](https://www.squiggle-language.com/docs/Overview)
-- The team presently communicates via the **EA Forecasting and Epistemics** slack (channels `#squiggle-dev` and `#squiggle-ops`). You can track down an invite by reaching out to Ozzie Gooen
-- You can email `slava@quantifieduncertainty.org` if you need assistance in onboarding or if you have questions
+- The team presently communicates via the **EA Forecasting and Epistemics** slack (channel `#squiggle-dev`). You can track down an invite by reaching out to Ozzie Gooen
+- You can email `slava@quantifieduncertainty.org` (Slava Matyuhin on Slack) if you need assistance in onboarding or if you have questions
+- Alternatively, you can join the public [Discord](https://discord.gg/nsTnQTgtG6), or ask in GitHub issues
 
 # Bug reports
 
@@ -16,12 +17,7 @@ Anyone (with a GitHub account) can file an issue at any time. Please allow [Slav
 
 # Project structure
 
-Squiggle is a **monorepo** with several **packages**.
-
-- **components** is where we improve reactive interfacing with Squiggle
-- **squiggle-lang** is where the magic happens: probability distributions, the interpreter, etc.
-- **website** is the site [squiggle-language.com](https://www.squiggle-language.com)
-- **vscode-ext** is the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=qURI.vscode-squiggle)
+This is a **monorepo**. See [README.md](README.md) for more details on the structure.
 
 # VS Code
 
@@ -33,11 +29,11 @@ We use Vercel, and it should only concern Slava and Ozzie.
 
 # Development environment, building, testing, dev server
 
-You'll need [pnpm](https://pnpm.io/).
+You'll need [pnpm](https://pnpm.io/) and [turbo](https://turbo.build/repo/docs).
 
 Being a monorepo, where packages are connected by dependency, it's important to follow `README.md`s closely. Each package has its own `README.md`, which is where the bulk of information is.
 
-We aspire for `ci.yaml` and `README.md`s to be in one-to-one correspondence.
+We aspire for `ci.yml` and `README.md`s to be in one-to-one correspondence.
 
 # Try not to push directly to `main`
 

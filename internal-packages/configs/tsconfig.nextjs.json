@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "es2021",
+    "moduleResolution": "bundler",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "noEmit": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    // enabling `composite` leads to warnings in `next build`
+    "composite": false,
+    "incremental": true,
+    "rootDir": "${configDir}",
+    // since `noEmit` is enabled, declarations are not useful
+    "declaration": false,
+    "declarationMap": false,
+    // enforced by Next.js
+    "allowJs": true
+  },
+  // otherwise `next dev` would enforce it
+  "exclude": ["node_modules"]
+}

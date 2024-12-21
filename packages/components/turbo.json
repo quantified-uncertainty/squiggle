@@ -5,7 +5,7 @@
       "outputs": ["dist", "src/components/CodeEditor/languageSupport/generated"]
     },
     "build:ts": {
-      "dependsOn": ["build:lezer"]
+      "dependsOn": ["^build", "build:lezer"]
     },
     "build:lezer": {
       "outputs": ["src/components/CodeEditor/languageSupport/generated"]

@@ -1,8 +1,6 @@
 {
   "extends": "@quri/configs/tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
+    "tsBuildInfoFile": "dist/build.tsbuildinfo",
   },
-  "include": ["src/**/*"],
 }

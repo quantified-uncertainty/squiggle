@@ -1,13 +1,7 @@
 {
   "extends": "@quri/configs/tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "noImplicitAny": false // waiting for https://github.com/lezer-parser/lezer/issues/41 to be fixed
-  },
-  "include": ["src/**/*"],
-  "references": [
-    { "path": "../squiggle-lang" },
-    { "path": "../ui" },
-    { "path": "../prettier-plugin" }
-  ]
+    "noImplicitAny": false, // waiting for https://github.com/lezer-parser/lezer/issues/41 to be fixed
+    "tsBuildInfoFile": "dist/build.tsbuildinfo"
+  }
 }

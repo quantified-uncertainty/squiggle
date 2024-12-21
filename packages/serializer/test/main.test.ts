@@ -1,4 +1,4 @@
-import { makeCodec } from "../src";
+import { makeCodec } from "../src/index.js";
 
 // This test doubles as an example of how to use the serializer.
 
@@ -14,7 +14,7 @@ import { makeCodec } from "../src";
  */
 class Basic {
   // This is a marker property so that { x: 1 } is not allowed in place of Basic(1).
-  public _tag: "BASIC";
+  public _tag = "BASIC" as const;
 
   constructor(public x: number) {}
 }
@@ -32,7 +32,7 @@ type SerializedBasic = {
  * The codec definition below will demonstrate how to recurse into other types with `visitor`.
  */
 class Ref {
-  public _tag: "REF";
+  public _tag = "REF" as const;
 
   constructor(
     public y: string,
@@ -51,7 +51,7 @@ type SerializedRef = {
  * What if we want to serialize a tree of objects, where each object may be of a different type?
  */
 class Deep {
-  public _tag: "DEEP";
+  public _tag = "DEEP" as const;
 
   constructor(
     public x: number,

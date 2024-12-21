@@ -1,0 +1,17 @@
+{
+  "extends": "@quri/configs/tsconfig.base.json",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": " @mdx-js/typescript-plugin",
+      },
+    ],
+    "lib": ["esnext"],
+    "strictNullChecks": true,
+    "rootDir": ".",
+  },
+  "include": ["src/**/*", "content/**/*.mdx", "./content-collections.ts"],
+  "mdx": {
+    "checkMdx": true,
+  },
+}

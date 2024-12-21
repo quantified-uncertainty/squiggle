@@ -7,6 +7,7 @@
     { "flags": "scripts" },
     {},
     "^@quri",
+    "^#",
     "^@/(?!__generated__)",
     "^\\.",
     "^\\@/__generated__"

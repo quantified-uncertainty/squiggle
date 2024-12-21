@@ -17,13 +17,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Run cleanup script
-        working-directory: ./packages/ops
+        working-directory: ./internal-packages/ops
         env:
           VERCEL_API_TOKEN: "${{ secrets.VERCEL_API_TOKEN }}"
         run: npx tsx ./scripts/cleanup-vercel-deployments.ts
