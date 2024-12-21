@@ -41,7 +41,7 @@ export const ChooseUsername: FC = () => {
                 label="Pick a username"
                 size="small"
               />
-              <Button onClick={onSubmit} disabled={inFlight} theme="primary">
+              <Button type="submit" theme="primary" disabled={inFlight}>
                 Save
               </Button>
             </div>

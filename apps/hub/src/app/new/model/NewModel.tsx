@@ -88,9 +88,9 @@ export const NewModel: FC<{ initialGroup: SelectGroupOption | null }> = ({
           <CheckboxFormField<FormShape> label="Private" name="isPrivate" />
         </div>
         <Button
-          onClick={onSubmit}
-          disabled={!form.formState.isValid || isPending}
+          type="submit"
           theme="primary"
+          disabled={!form.formState.isValid || isPending}
         >
           Create
         </Button>
