@@ -1,14 +1,14 @@
 "use client";
-import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
 
-import { Button, CheckboxFormField, useToast } from "@quri/ui";
+import { Button, CheckboxFormField } from "@quri/ui";
 
 import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
+import { useSafeActionForm } from "@/lib/hooks/useSafeActionForm";
 import { createModelAction } from "@/models/actions/createModelAction";
 
 type FormShape = {
@@ -22,49 +22,30 @@ export const NewModel: FC<{ initialGroup: SelectGroupOption | null }> = ({
 }) => {
   const [group] = useState(initialGroup);
 
-  const toast = useToast();
   const router = useRouter();
 
-  const { executeAsync, isPending } = useAction(createModelAction, {
-    onSuccess: ({ data }) => {
-      if (data) {
-        // redirect in action is incompatible with https://github.com/TheEdoRan/next-safe-action/issues/303
-        // (and might a bad idea anyway, returning an url is more verbose but more flexible for reuse)
-        router.push(data.url);
-      }
-    },
-    onError: ({ error }) => {
-      if (error.serverError) {
-        toast(error.serverError, "error");
-        return;
-      }
-
-      const slugError = error.validationErrors?.slug?._errors?.[0];
-      if (slugError) {
-        form.setError("slug", {
-          message: slugError,
-        });
-      } else {
-        toast("Internal error", "error");
-      }
-    },
-  });
-
-  const form = useForm<FormShape>({
+  const { form, onSubmit, inFlight } = useSafeActionForm<
+    FormShape,
+    typeof createModelAction
+  >({
     mode: "onChange",
     defaultValues: {
       // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
       group,
       isPrivate: false,
     },
-  });
-
-  const onSubmit = form.handleSubmit(async (data) => {
-    await executeAsync({
+    formDataToInput: (data) => ({
       slug: data.slug ?? "", // shouldn't happen but satisfies Typescript
       groupSlug: data.group?.slug,
       isPrivate: data.isPrivate,
-    });
+    }),
+    action: createModelAction,
+    blockOnSuccess: true,
+    onSuccess: (data) => {
+      // Note: redirect in server action would be incompatible with https://github.com/TheEdoRan/next-safe-action/issues/303
+      // (and might a bad idea anyway, returning a url is more verbose but more flexible for reuse)
+      router.push(data.url);
+    },
   });
 
   return (
@@ -83,14 +64,14 @@ export const NewModel: FC<{ initialGroup: SelectGroupOption | null }> = ({
             description="Optional. Models owned by a group are editable by all members of the group."
             name="group"
             required={false}
-            myOnly={true}
+            myOnly
           />
           <CheckboxFormField<FormShape> label="Private" name="isPrivate" />
         </div>
         <Button
           type="submit"
           theme="primary"
-          disabled={!form.formState.isValid || isPending}
+          disabled={!form.formState.isValid || inFlight}
         >
           Create
         </Button>
