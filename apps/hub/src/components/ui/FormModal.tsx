@@ -43,7 +43,7 @@ export function FormModal<TFieldValues extends FieldValues>({
           <Modal.Body>{children}</Modal.Body>
           <Modal.Footer>
             <Button
-              onClick={onSubmit}
+              type="submit"
               theme="primary"
               disabled={!form.formState.isValid || inFlight}
             >

@@ -11,9 +11,6 @@ import { useToast } from "@quri/ui";
 /**
  * This hook ties together `useForm` and server actions.
  *
- * See also:
- * - `<SafeActionModalAction>` if your form is available through a Dropdown menu
- *
  * All generic type parameters to this function default to `never`, so you'll have to set them explicitly to pass type checks.
  */
 export function useSafeActionForm<
@@ -53,12 +50,15 @@ export function useSafeActionForm<
       }
     },
     onError: ({ error }) => {
+      // TODO - call `setError("root...")` on non-field errors, then `isSubmitSuccessful` will be false (we don't rely on it right now but it could be useful)
+      // See also: https://github.com/react-hook-form/react-hook-form/issues/11084#issuecomment-1773029108
+
       if (error.serverError) {
         toast(String(error.serverError), "error");
         return;
       }
 
-      // validation errors?
+      // validation errors? forward them to the form
       if (error.validationErrors) {
         // TODO - support top-level global validation error
 
@@ -87,18 +87,17 @@ export function useSafeActionForm<
         }
       }
 
+      // Some other error
       toast("Internal error", "error");
     },
   });
 
   const onSubmit = useCallback(
     (event?: BaseSyntheticEvent, extraData?: ExtraData) =>
-      form.handleSubmit(async (formData) => {
-        const result = await executeAsync(formDataToInput(formData, extraData));
-        if (result?.serverError || result?.validationErrors) {
-          throw new Error("Action failed");
-        }
-      })(event),
+      form.handleSubmit(
+        async (formData) =>
+          await executeAsync(formDataToInput(formData, extraData))
+      )(event),
     [form, formDataToInput, executeAsync]
   );
 

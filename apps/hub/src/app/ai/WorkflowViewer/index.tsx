@@ -9,6 +9,7 @@ import { useAvailableHeight } from "@/lib/hooks/useAvailableHeight";
 import { LogsView } from "../LogsView";
 import { SquigglePlaygroundForWorkflow } from "../SquigglePlaygroundForWorkflow";
 import { Header } from "./Header";
+import { PublishWorkflowButton } from "./PublishWorkflowButton";
 import { WorkflowSteps } from "./WorkflowSteps";
 
 type WorkflowViewerProps<
@@ -56,7 +57,8 @@ const FinishedWorkflowViewer: FC<WorkflowViewerProps<"finished">> = ({
             />
           )}
           renderRight={() => (
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              <PublishWorkflowButton workflow={workflow} />
               <StyledTab.List>
                 <StyledTab name="Playground" />
                 <StyledTab name="Steps" />

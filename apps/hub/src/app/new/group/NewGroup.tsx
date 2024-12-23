@@ -47,9 +47,9 @@ export const NewGroup: FC = () => {
           />
         </div>
         <Button
-          onClick={onSubmit}
-          disabled={!form.formState.isValid || inFlight}
+          type="submit"
           theme="primary"
+          disabled={!form.formState.isValid || inFlight}
         >
           Create
         </Button>

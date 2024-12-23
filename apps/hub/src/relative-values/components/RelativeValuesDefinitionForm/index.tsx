@@ -43,7 +43,7 @@ export function RelativeValuesDefinitionForm<
     mode: "onChange",
     defaultValues,
     action,
-    formDataToInput: formDataToInput,
+    formDataToInput,
     onSuccess,
   });
 
@@ -84,7 +84,7 @@ export function RelativeValuesDefinitionForm<
           </StyledTab.Group>
         </div>
         <div className="mt-4">
-          <Button onClick={onSubmit} disabled={inFlight} theme="primary">
+          <Button type="submit" theme="primary" disabled={inFlight}>
             Save
           </Button>
         </div>
