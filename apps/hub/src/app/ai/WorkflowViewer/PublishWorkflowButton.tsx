@@ -25,7 +25,7 @@ ${workflow.result.code}`;
 
   return (
     <SafeActionFormModal<NewModelFormShape, typeof createModelAction>
-      title="Publish Workflow"
+      title="Publish Model"
       action={createModelAction}
       close={close}
       defaultValues={{
@@ -38,7 +38,7 @@ ${workflow.result.code}`;
         groupSlug: data.group?.slug,
         isPrivate: data.isPrivate,
       })}
-      submitText="Publish"
+      submitText="Save"
       onSuccess={(data) => {
         // Note: redirect in server action would be incompatible with https://github.com/TheEdoRan/next-safe-action/issues/303
         // (and might a bad idea anyway, returning a url is more verbose but more flexible for reuse)
@@ -57,7 +57,7 @@ export const PublishWorkflowButton: FC<Props> = ({ workflow }) => {
   return (
     <>
       <Button theme="primary" size="small" onClick={() => setIsOpen(true)}>
-        Publish
+        Save Model
       </Button>
       {isOpen && (
         <PublishWorkflowModal
