@@ -8,6 +8,9 @@ type Props = {
   param?: string;
 };
 
+// Currently unused, you should prefer to use paginator pattern (pass around an
+// action closure that can load new data) which doesn't use search params, in
+// most cases.
 export const LoadMoreViaSearchParam: FC<Props> = ({ param = "limit" }) => {
   const updateSearchParams = useUpdateSearchParams();
 

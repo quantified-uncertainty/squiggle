@@ -39,11 +39,13 @@ export const stepStateSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("DONE"),
     outputs: z.record(z.string(), artifactSchema),
+    durationMs: z.number(),
   }),
   z.object({
     kind: z.literal("FAILED"),
     message: z.string(),
     errorType: z.enum(["CRITICAL", "MINOR"]),
+    durationMs: z.number(),
   }),
 ]);
 
@@ -60,6 +62,7 @@ const stepSchema = z.object({
   state: stepStateSchema,
   inputs: z.record(z.string(), artifactSchema),
   messages: z.array(messageSchema),
+  startTime: z.number(),
 });
 
 export type ClientStep = z.infer<typeof stepSchema>;

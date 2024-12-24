@@ -2,23 +2,24 @@
 
 import { FC, useRef } from "react";
 
-import { ClientWorkflow } from "@quri/squiggle-ai";
+import { AiWorkflow } from "@/ai/data/loadWorkflows";
+import { usePaginator } from "@/lib/hooks/usePaginator";
+import { Paginated } from "@/lib/types";
 
 import { Sidebar } from "./Sidebar";
 import { useSquiggleWorkflows } from "./useSquiggleWorkflows";
 import { WorkflowViewer } from "./WorkflowViewer";
 
 type Props = {
-  initialWorkflows: ClientWorkflow[];
-  hasMoreWorkflows: boolean;
+  initialWorkflows: Paginated<AiWorkflow>;
 };
 
-export const AiDashboard: FC<Props> = ({
-  initialWorkflows,
-  hasMoreWorkflows,
-}: Props) => {
+export const AiDashboard: FC<Props> = ({ initialWorkflows }: Props) => {
+  const { items: unpaginatedWorkflows, loadNext } =
+    usePaginator(initialWorkflows);
+
   const { workflows, submitWorkflow, selectedWorkflow, selectWorkflow } =
-    useSquiggleWorkflows(initialWorkflows);
+    useSquiggleWorkflows(unpaginatedWorkflows);
 
   const sidebarRef = useRef<{ edit: (code: string) => void }>(null);
 
@@ -31,7 +32,7 @@ export const AiDashboard: FC<Props> = ({
           selectWorkflow={selectWorkflow}
           selectedWorkflow={selectedWorkflow}
           workflows={workflows}
-          hasMoreWorkflows={hasMoreWorkflows}
+          loadNext={loadNext}
           ref={sidebarRef}
         />
       </div>
@@ -39,8 +40,8 @@ export const AiDashboard: FC<Props> = ({
       {selectedWorkflow && (
         <div className="min-w-0 flex-1 overflow-x-auto">
           <WorkflowViewer
-            key={selectedWorkflow.id}
-            workflow={selectedWorkflow}
+            key={selectedWorkflow.workflow.id}
+            workflow={selectedWorkflow.workflow}
           />
         </div>
       )}

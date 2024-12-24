@@ -10,7 +10,7 @@ import {
 } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { ClientWorkflow, LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
+import { LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 import {
   Button,
   NumberFormField,
@@ -20,7 +20,7 @@ import {
   TextFormField,
 } from "@quri/ui";
 
-import { LoadMoreViaSearchParam } from "@/components/LoadMoreViaSearchParam";
+import { AiWorkflow } from "@/ai/data/loadWorkflows";
 
 import { AiRequestBody } from "./utils";
 import { WorkflowSummaryList } from "./WorkflowSummaryList";
@@ -32,9 +32,9 @@ type Handle = {
 type Props = {
   submitWorkflow: (requestBody: AiRequestBody) => void;
   selectWorkflow: (id: string) => void;
-  selectedWorkflow: ClientWorkflow | undefined;
-  workflows: ClientWorkflow[];
-  hasMoreWorkflows: boolean;
+  selectedWorkflow: AiWorkflow | undefined;
+  workflows: AiWorkflow[];
+  loadNext?: (count: number) => void;
 };
 
 type FormShape = {
@@ -47,13 +47,7 @@ type FormShape = {
 };
 
 export const Sidebar = forwardRef<Handle, Props>(function Sidebar(
-  {
-    submitWorkflow,
-    selectWorkflow,
-    selectedWorkflow,
-    workflows,
-    hasMoreWorkflows,
-  },
+  { submitWorkflow, selectWorkflow, selectedWorkflow, workflows, loadNext },
   ref
 ) {
   const form = useForm<FormShape>({
@@ -82,7 +76,7 @@ Outputs:
 
   useEffect(() => {
     if (workflows.length > prevWorkflowsLengthRef.current) {
-      selectWorkflow(workflows[0].id);
+      selectWorkflow(workflows[0].workflow.id);
       prevWorkflowsLengthRef.current = workflows.length;
     }
   }, [workflows, selectWorkflow]);
@@ -228,15 +222,12 @@ Outputs:
         <Button wide onClick={handleSubmit} disabled={isSubmitDisabled}>
           Start Workflow
         </Button>
-        <div className="flex-grow overflow-y-auto">
-          <h2 className="mb-2 text-sm font-bold">Workflows</h2>
-          <WorkflowSummaryList
-            workflows={workflows}
-            selectedWorkflow={selectedWorkflow}
-            selectWorkflow={selectWorkflow}
-          />
-          {hasMoreWorkflows && <LoadMoreViaSearchParam />}
-        </div>
+        <WorkflowSummaryList
+          workflows={workflows}
+          loadNext={loadNext}
+          selectedWorkflow={selectedWorkflow}
+          selectWorkflow={selectWorkflow}
+        />
       </div>
     </FormProvider>
   );

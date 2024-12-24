@@ -1,8 +1,11 @@
 import { FC, PropsWithChildren, Suspense } from "react";
 
+import { AdminControls } from "@/components/admin/AdminControls";
+import { AdminProvider } from "@/components/admin/AdminProvider";
 import { Link } from "@/components/ui/Link";
 import { loadGroupCards } from "@/groups/data/groupCards";
 import { auth } from "@/lib/server/auth";
+import { isAdminUser } from "@/users/auth";
 
 import { ReactRoot } from "../../ReactRoot";
 import { PageFooterIfNecessary } from "./PageFooterIfNecessary";
@@ -18,16 +21,21 @@ const WrappedPageMenu: FC = async () => {
     ? await loadGroupCards({ username: session?.user?.username })
     : { items: [] };
 
-  return <PageMenu session={session} groups={groups} />;
+  const isAdmin = session?.user ? isAdminUser(session.user) : false;
+
+  return <PageMenu session={session} groups={groups} isAdmin={isAdmin} />;
 };
 
 const InnerRootLayout: FC<PropsWithChildren> = ({ children }) => {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <div className="flex h-10 items-center justify-between bg-gray-800 px-8">
-        <Link className="font-semibold text-slate-300" href="/">
-          Squiggle Hub
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link className="font-semibold text-slate-300" href="/">
+            Squiggle Hub
+          </Link>
+          <AdminControls />
+        </div>
         {/* Top menu is not essential for fetching and rendering other content, so we render it in a Suspense boundary */}
         <Suspense fallback={null}>
           <WrappedPageMenu />
@@ -49,7 +57,10 @@ const InnerRootLayout: FC<PropsWithChildren> = ({ children }) => {
 export const RootLayout: FC<PropsWithChildren> = ({ children }) => {
   return (
     <ReactRoot>
-      <InnerRootLayout>{children}</InnerRootLayout>
+      {/* TODO - find a way to include AdminProvider in ReactRoot (this would require loading the session in ReactRoot) */}
+      <AdminProvider>
+        <InnerRootLayout>{children}</InnerRootLayout>
+      </AdminProvider>
     </ReactRoot>
   );
 };

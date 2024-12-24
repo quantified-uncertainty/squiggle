@@ -1,7 +1,7 @@
 "use client";
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
-import { FC, useState } from "react";
+import { FC, use, useEffect, useState } from "react";
 
 import {
   BoltIcon,
@@ -17,6 +17,7 @@ import {
   UserCircleIcon,
 } from "@quri/ui";
 
+import { AdminContext } from "@/components/admin/AdminProvider";
 import { GroupCardDTO } from "@/groups/data/groupCards";
 import { SQUIGGLE_DOCS_URL } from "@/lib/constants";
 import { aboutRoute, aiRoute, newModelRoute } from "@/lib/routes";
@@ -63,6 +64,7 @@ const NewModelMenuLink: FC<MenuLinkModeProps> = (props) => {
 type MenuProps = {
   groups: Paginated<GroupCardDTO>;
   session: Session | null;
+  isAdmin: boolean;
 };
 
 const DesktopMenu: FC<MenuProps> = ({ groups, session }) => {
@@ -149,11 +151,19 @@ const MobileMenu: FC<MenuProps> = ({ groups, session }) => {
   );
 };
 
-export const PageMenu: FC<MenuProps> = ({ session, groups }) => {
+export const PageMenu: FC<MenuProps> = (props) => {
   // TODO - if redirecting, return a custom menu; right now we render the
   // confused version where "New Model" button is visible, but "Sign In" button
   // is visible too
-  const { shouldChoose } = useForceChooseUsername(session);
+  const { shouldChoose } = useForceChooseUsername(props.session);
+
+  const { setIsAdmin } = use(AdminContext);
+
+  useEffect(() => {
+    if (props.isAdmin) {
+      setIsAdmin(true);
+    }
+  }, [props.isAdmin, setIsAdmin]);
 
   if (shouldChoose) {
     return (
@@ -164,10 +174,10 @@ export const PageMenu: FC<MenuProps> = ({ session, groups }) => {
   return (
     <>
       <div className="hidden md:block">
-        <DesktopMenu groups={groups} session={session} />
+        <DesktopMenu {...props} />
       </div>
       <div className="block md:hidden">
-        <MobileMenu groups={groups} session={session} />
+        <MobileMenu {...props} />
       </div>
     </>
   );

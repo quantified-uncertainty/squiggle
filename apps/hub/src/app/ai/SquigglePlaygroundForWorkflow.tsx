@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { llmLinker } from "@quri/squiggle-ai";
 import {
+  defaultSquiggleVersion,
   SquigglePlaygroundVersionPicker,
   type SquiggleVersion,
   versionedSquigglePackages,
@@ -20,7 +21,9 @@ export function SquigglePlaygroundForWorkflow({
   const [squiggle, setSquiggle] = useState<
     undefined | Awaited<ReturnType<typeof versionedSquigglePackages>>
   >();
-  const [version, setVersion] = useState<SquiggleVersion>("dev"); // Later versions are often buggy
+  const [version, setVersion] = useState<SquiggleVersion>(
+    defaultSquiggleVersion
+  );
 
   const onVersionChange = (version: SquiggleVersion) => {
     setVersion(version);
@@ -42,7 +45,7 @@ export function SquigglePlaygroundForWorkflow({
     <squiggle.components.SquigglePlayground
       height={height}
       defaultCode={defaultCode}
-      linker={llmLinker as any}
+      linker={llmLinker}
       renderExtraControls={() => (
         <div className="flex h-full items-center justify-end gap-2">
           <SquigglePlaygroundVersionPicker
