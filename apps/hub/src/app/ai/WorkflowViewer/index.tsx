@@ -3,13 +3,14 @@ import { format } from "date-fns";
 import { Children, FC } from "react";
 
 import { ClientWorkflow } from "@quri/squiggle-ai";
-import { StyledTab } from "@quri/ui";
+import { ErrorIcon, StyledTab } from "@quri/ui";
 
 import { commonDateFormat } from "@/lib/constants";
 import { useAvailableHeight } from "@/lib/hooks/useAvailableHeight";
 
 import { LogsView } from "../LogsView";
 import { SquigglePlaygroundForWorkflow } from "../SquigglePlaygroundForWorkflow";
+import { isWorkflowOutdated } from "../WorkflowSummaryList/WorkflowStatusIcon";
 import { Header } from "./Header";
 import { PublishWorkflowButton } from "./PublishWorkflowButton";
 import { WorkflowSteps } from "./WorkflowSteps";
@@ -106,7 +107,19 @@ const LoadingWorkflowViewer: FC<WorkflowViewerProps<"loading">> = ({
             <WorkflowDate workflow={workflow} />
           </LineSeparatedList>
         )}
-        renderRight={() => null}
+        renderRight={() => {
+          if (isWorkflowOutdated(workflow)) {
+            return (
+              <div className="flex items-center gap-1">
+                <ErrorIcon className="text-red-400" size={16} />
+                <span className="text-sm font-medium text-red-400">
+                  Timed Out
+                </span>
+              </div>
+            );
+          }
+          return null;
+        }}
       />
       <div ref={ref}>
         <WorkflowSteps workflow={workflow} height={usedHeight} />

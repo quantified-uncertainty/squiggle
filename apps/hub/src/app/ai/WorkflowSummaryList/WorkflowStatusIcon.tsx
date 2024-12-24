@@ -3,14 +3,18 @@ import { FC } from "react";
 import { ClientWorkflow } from "@quri/squiggle-ai";
 import { CheckCircleIcon, ErrorIcon, RefreshIcon } from "@quri/ui";
 
+export const maxWorkflowLoadingAge = 300; // 5 minutes
+
+export function isWorkflowOutdated(workflow: ClientWorkflow): boolean {
+  const ageInSeconds = (new Date().getTime() - workflow.timestamp) / 1000;
+  return ageInSeconds > maxWorkflowLoadingAge;
+}
+
 function getWorkflowStatusForIcon(
   workflow: ClientWorkflow
 ): ClientWorkflow["status"] {
-  const ageInSeconds = (new Date().getTime() - workflow.timestamp) / 1000;
-  const maxLoadingAge = 300;
-
   if (workflow.status === "loading") {
-    return ageInSeconds < maxLoadingAge ? "loading" : "error";
+    return isWorkflowOutdated(workflow) ? "error" : "loading";
   }
 
   if (workflow.status === "finished" && !workflow.result.isValid) {
