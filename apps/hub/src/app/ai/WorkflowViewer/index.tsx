@@ -1,9 +1,11 @@
 "use client";
-import { FC } from "react";
+import { format } from "date-fns";
+import { Children, FC } from "react";
 
 import { ClientWorkflow } from "@quri/squiggle-ai";
 import { StyledTab } from "@quri/ui";
 
+import { commonDateFormat } from "@/lib/constants";
 import { useAvailableHeight } from "@/lib/hooks/useAvailableHeight";
 
 import { LogsView } from "../LogsView";
@@ -18,24 +20,24 @@ type WorkflowViewerProps<
   workflow: Extract<ClientWorkflow, { status: T }>;
 };
 
-const StatsDisplay = ({
-  runTimeMs,
-  totalPrice,
-  llmRunCount,
-}: {
-  runTimeMs: number;
-  totalPrice: number;
-  llmRunCount: number;
-}) => {
+const LineSeparatedList: FC<{ children: React.ReactNode }> = ({ children }) => {
+  const childrenArray = Children.toArray(children);
   return (
-    <div className="flex items-center space-x-2 text-sm text-gray-500">
-      <span>{(runTimeMs / 1000).toFixed(2)}s</span>
-      <span className="text-gray-300">|</span>
-      <span>${totalPrice.toFixed(2)}</span>
-      <span className="text-gray-300">|</span>
-      <span>{llmRunCount} LLM runs</span>
+    <div className="flex items-center gap-2 text-sm text-gray-500">
+      {childrenArray.flatMap((child, index) => [
+        index > 0 && (
+          <div key={`${index}-separator`} className="text-gray-300">
+            |
+          </div>
+        ),
+        <div key={index}>{child}</div>,
+      ])}
     </div>
   );
+};
+
+const WorkflowDate: FC<{ workflow: ClientWorkflow }> = ({ workflow }) => {
+  return <span>{format(workflow.timestamp, commonDateFormat)}</span>;
 };
 
 const FinishedWorkflowViewer: FC<WorkflowViewerProps<"finished">> = ({
@@ -50,11 +52,12 @@ const FinishedWorkflowViewer: FC<WorkflowViewerProps<"finished">> = ({
         <Header
           workflow={workflow}
           renderLeft={() => (
-            <StatsDisplay
-              runTimeMs={workflow.result.runTimeMs}
-              totalPrice={workflow.result.totalPrice}
-              llmRunCount={workflow.result.llmRunCount}
-            />
+            <LineSeparatedList>
+              <span>{(workflow.result.runTimeMs / 1000).toFixed(2)}s</span>
+              <span>${workflow.result.totalPrice.toFixed(2)}</span>
+              <span>{workflow.result.llmRunCount} LLM runs</span>
+              <WorkflowDate workflow={workflow} />
+            </LineSeparatedList>
           )}
           renderRight={() => (
             <div className="flex items-center gap-2">
@@ -98,7 +101,11 @@ const LoadingWorkflowViewer: FC<WorkflowViewerProps<"loading">> = ({
     <div className="mt-2 flex flex-col gap-2">
       <Header
         workflow={workflow}
-        renderLeft={() => null}
+        renderLeft={() => (
+          <LineSeparatedList>
+            <WorkflowDate workflow={workflow} />
+          </LineSeparatedList>
+        )}
         renderRight={() => null}
       />
       <div ref={ref}>
