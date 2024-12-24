@@ -32,7 +32,7 @@ const NavButton: FC<{
   );
 };
 
-export const ClientStepView: FC<{
+export const StepView: FC<{
   step: ClientStep;
   onSelectPreviousStep?: () => void;
   onSelectNextStep?: () => void;

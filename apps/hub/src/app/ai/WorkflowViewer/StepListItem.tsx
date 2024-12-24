@@ -6,8 +6,8 @@ import { ClientStep } from "@quri/squiggle-ai";
 import { StepStatusIcon } from "../StepStatusIcon";
 import { stepNames } from "../utils";
 
-type StepNodeProps = {
-  data: ClientStep;
+type Props = {
+  step: ClientStep;
   onClick?: (event: MouseEvent<HTMLDivElement>) => void;
   isSelected?: boolean;
   stepNumber: number;
@@ -19,8 +19,8 @@ const getStepNodeClassName = (isSelected: boolean) =>
     isSelected ? "bg-slate-200" : "bg-slate-50 hover:bg-slate-100"
   );
 
-export const StepNode: FC<StepNodeProps> = ({
-  data,
+export const StepListItem: FC<Props> = ({
+  step,
   onClick,
   isSelected = false,
   stepNumber,
@@ -30,11 +30,11 @@ export const StepNode: FC<StepNodeProps> = ({
       <div className="flex items-center justify-between gap-1">
         <div className="text-sm font-medium text-slate-600">
           <span className="mr-1 text-slate-400">{stepNumber}.</span>
-          {stepNames[data.name] || data.name}
+          {stepNames[step.name] || step.name}
         </div>
-        {data.state.kind !== "DONE" && (
+        {step.state.kind !== "DONE" && (
           <div className="shrink-0">
-            <StepStatusIcon step={data} />
+            <StepStatusIcon step={step} />
           </div>
         )}
       </div>
