@@ -60,10 +60,6 @@ export async function getSelf(session: SignedInSession) {
 // (e.g. `RootLayout`, `ReactRoot`).
 const ADMIN_EMAILS = (process.env["ROOT_EMAILS"] ?? "").split(",");
 
-function isAdminEmail(email: string) {
-  return ADMIN_EMAILS.includes(email);
-}
-
-export async function isAdminUser(user: NonNullable<Session["user"]>) {
-  return Boolean(user.email && isAdminEmail(user.email));
+export function isAdminUser(user: NonNullable<Session["user"]>) {
+  return Boolean(user.email && ADMIN_EMAILS.includes(user.email));
 }

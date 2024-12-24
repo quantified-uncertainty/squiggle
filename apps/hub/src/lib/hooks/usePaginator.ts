@@ -32,14 +32,10 @@ export function usePaginator<T>(initialPage: Paginated<T>): FullPaginated<T> {
   }, []);
 
   const update = useCallback((update: (item: T) => T) => {
-    setPage(({ items, loadMore }) => {
-      const newItems = {
-        items: items.map(update),
-        loadMore,
-      };
-      console.log(newItems);
-      return newItems;
-    });
+    setPage(({ items, loadMore }) => ({
+      items: items.map(update),
+      loadMore,
+    }));
   }, []);
 
   return {

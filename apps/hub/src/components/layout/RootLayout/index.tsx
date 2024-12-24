@@ -21,7 +21,7 @@ const WrappedPageMenu: FC = async () => {
     ? await loadGroupCards({ username: session?.user?.username })
     : { items: [] };
 
-  const isAdmin = session?.user ? await isAdminUser(session.user) : false;
+  const isAdmin = session?.user ? isAdminUser(session.user) : false;
 
   return <PageMenu session={session} groups={groups} isAdmin={isAdmin} />;
 };
