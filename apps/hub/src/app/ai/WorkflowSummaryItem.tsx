@@ -10,12 +10,14 @@ export const WorkflowSummaryItem: FC<{
   workflow: ClientWorkflow;
   onSelect: () => void;
   isSelected: boolean;
-}> = ({ workflow, onSelect, isSelected }) => {
+  isLast?: boolean;
+}> = ({ workflow, onSelect, isSelected, isLast }) => {
   return (
     <div
       className={clsx(
         "w-full border-b p-2 text-sm",
-        isSelected ? "bg-gray-100" : "cursor-pointer hover:bg-slate-50"
+        isSelected ? "bg-gray-100" : "cursor-pointer hover:bg-slate-50",
+        isLast && "border-b-0"
       )}
       onClick={isSelected ? undefined : onSelect}
     >

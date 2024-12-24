@@ -11,12 +11,13 @@ export const WorkflowSummaryList: FC<{
 }> = ({ workflows, selectedWorkflow, selectWorkflow }) => {
   return (
     <div className="flex max-h-[400px] w-full flex-col overflow-y-auto rounded-md border border-slate-200">
-      {workflows.map((workflow) => (
+      {workflows.map((workflow, index) => (
         <WorkflowSummaryItem
           key={workflow.id}
           workflow={workflow}
           onSelect={() => selectWorkflow(workflow.id)}
           isSelected={workflow.id === selectedWorkflow?.id}
+          isLast={index === workflows.length - 1}
         />
       ))}
     </div>
