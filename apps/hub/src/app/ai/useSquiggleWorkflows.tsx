@@ -20,6 +20,8 @@ export function useSquiggleWorkflows(preloadedWorkflows: ClientWorkflow[]) {
       return [...workflows, ...newWorkflows].sort(
         (a, b) => b.timestamp - a.timestamp
       );
+      // TODO - remove the workflows that are no longer in `preloadedWorkflows`
+      // (This can happen when `allUsers` root mode becomes disabled)
     });
   }, [preloadedWorkflows]);
 

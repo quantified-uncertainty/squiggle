@@ -29,11 +29,6 @@ export const WorkflowSummaryItem: FC<{
           <WorkflowName workflow={workflow} />
         </div>
       </div>
-      {workflow.status === "loading" && (
-        <div className="mt-2">
-          <p>{workflow.steps.at(-1)?.name}</p>
-        </div>
-      )}
     </div>
   );
 };
