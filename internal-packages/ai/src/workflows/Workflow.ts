@@ -104,8 +104,6 @@ export class Workflow<Shape extends IOShape = IOShape> {
   public readonly inputs: Inputs<Shape>;
 
   public llmConfig: LlmConfig;
-  // This field is somewhat broken - it's set to `Date.now()`, even when the workflow was deserialized from the database.
-  // It's better to use `steps[0].startTime` as the start time, if you're sure that the workflow has already started and so it has at least one step.
   public startTime: number;
 
   private steps: LLMStepInstance<IOShape, Shape>[];
@@ -119,7 +117,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
     this.inputs = params.inputs;
 
     this.llmConfig = params.llmConfig ?? llmConfigDefault;
-    this.startTime = Date.now();
+    this.startTime = params.steps.at(0)?.startTime ?? Date.now();
     this.steps = params.steps ?? [];
 
     this.llmClient = new LLMClient(
@@ -473,6 +471,10 @@ export class Workflow<Shape extends IOShape = IOShape> {
     workflow.steps = node.stepIds
       .map(visitor.step)
       .map((params) => LLMStepInstance.fromParams(params, workflow));
+
+    if (workflow.steps.length) {
+      workflow.startTime = workflow.steps[0].startTime;
+    }
 
     return workflow;
   }

@@ -58,9 +58,16 @@ export const StepView: FC<{
       ref={ref}
     >
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-600">
-          {stepNames[step.name] || step.name}
-        </h2>
+        <div className="flex items-baseline gap-4">
+          <h2 className="text-lg font-semibold text-slate-600">
+            {stepNames[step.name] || step.name}
+          </h2>
+          {step.state.kind === "PENDING" ? null : (
+            <div className="text-sm text-gray-500">
+              {(step.state.durationMs / 1000).toFixed(2)}s
+            </div>
+          )}
+        </div>
         <div className="flex items-center">
           <NavButton
             onClick={onSelectPreviousStep}

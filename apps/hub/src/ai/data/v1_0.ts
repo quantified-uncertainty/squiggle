@@ -108,10 +108,20 @@ export function decodeV1_0JsonToClientWorkflow(
       // modern steps in ClientWorkflow store state as an object
       state:
         step.state === "DONE"
-          ? ({ kind: "DONE", outputs } as const)
+          ? ({
+              kind: "DONE",
+              outputs,
+              durationMs: 0, // old workflow steps don't have durationMs
+            } as const)
           : step.state === "FAILED"
-            ? { kind: "FAILED", errorType: "CRITICAL", message: "Unknown" }
+            ? {
+                kind: "FAILED",
+                errorType: "CRITICAL",
+                message: "Unknown",
+                durationMs: 0, // old workflow steps don't have durationMs
+              }
             : { kind: "PENDING" },
+      startTime: v1Workflow.timestamp, // old workflow steps don't have start times
     })),
     inputs:
       input.type === "Create"
