@@ -11,13 +11,15 @@ export function useSquiggleWorkflows(preloadedWorkflows: ClientWorkflow[]) {
 
   // `preloadedWorkflows` can change when the user presses the "load more" button
   useEffect(() => {
-    setWorkflows((list) => {
-      if (list === preloadedWorkflows) return list;
-      const knownWorkflows = new Set(list.map((w) => w.id));
+    setWorkflows((workflows) => {
+      if (workflows === preloadedWorkflows) return workflows;
+      const knownIds = new Set(workflows.map((w) => w.id));
       const newWorkflows = preloadedWorkflows.filter(
-        (w) => !knownWorkflows.has(w.id)
+        (w) => !knownIds.has(w.id)
       );
-      return [...list, ...newWorkflows];
+      return [...workflows, ...newWorkflows].sort(
+        (a, b) => b.timestamp - a.timestamp
+      );
     });
   }, [preloadedWorkflows]);
 

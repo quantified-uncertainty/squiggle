@@ -20,8 +20,6 @@ import {
   TextFormField,
 } from "@quri/ui";
 
-import { LoadMoreViaSearchParam } from "@/components/LoadMoreViaSearchParam";
-
 import { AiRequestBody } from "./utils";
 import { WorkflowSummaryList } from "./WorkflowSummaryList";
 
@@ -228,15 +226,12 @@ Outputs:
         <Button wide onClick={handleSubmit} disabled={isSubmitDisabled}>
           Start Workflow
         </Button>
-        <div className="flex-grow overflow-y-auto">
-          <h2 className="mb-2 text-sm font-bold">Workflows</h2>
-          <WorkflowSummaryList
-            workflows={workflows}
-            selectedWorkflow={selectedWorkflow}
-            selectWorkflow={selectWorkflow}
-          />
-          {hasMoreWorkflows && <LoadMoreViaSearchParam />}
-        </div>
+        <WorkflowSummaryList
+          workflows={workflows}
+          hasMoreWorkflows={hasMoreWorkflows}
+          selectedWorkflow={selectedWorkflow}
+          selectWorkflow={selectWorkflow}
+        />
       </div>
     </FormProvider>
   );
