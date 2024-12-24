@@ -24,7 +24,7 @@ export async function checkRootUser() {
   const user = await prisma.user.findUniqueOrThrow({
     where: { email: sessionUser.email },
   });
-  if (!(user.email && user.emailVerified && isRootEmail(user.email))) {
+  if (!isRootUser(user)) {
     throw new Error("Unauthorized");
   }
   return user as User & { email: NonNullable<User["email"]> };
@@ -55,7 +55,7 @@ export async function getSelf(session: SignedInSession) {
 
 const ROOT_EMAILS = (process.env["ROOT_EMAILS"] ?? "").split(",");
 
-export function isRootEmail(email: string) {
+function isRootEmail(email: string) {
   return ROOT_EMAILS.includes(email);
 }
 

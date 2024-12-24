@@ -3,19 +3,11 @@ import { PropsWithChildren } from "react";
 import { LockIcon } from "@quri/ui";
 
 import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding";
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { H1 } from "@/components/ui/Headers";
-import { auth } from "@/lib/server/auth";
-import { isRootEmail } from "@/users/auth";
+import { checkRootUser } from "@/users/auth";
 
 export default async function AdminLayout({ children }: PropsWithChildren) {
-  const session = await auth();
-
-  const email = session?.user.email;
-
-  if (!email || !isRootEmail(email)) {
-    return <NarrowPageLayout>Access denied.</NarrowPageLayout>;
-  }
+  await checkRootUser();
 
   return (
     <div>
