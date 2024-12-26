@@ -1,70 +1,143 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { FC, useState } from "react";
+import clsx from "clsx";
+import { FC, useEffect, useState } from "react";
 
 import {
   Button,
+  CheckIcon,
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
+  RefreshIcon,
+  XIcon,
 } from "@quri/ui";
-import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
+import {
+  checkSquiggleVersion,
+  defaultSquiggleVersion,
+} from "@quri/versioned-squiggle-components";
+import { compareVersions } from "@quri/versioned-squiggle-components/compareVersions";
 
 import { H2 } from "@/components/ui/Headers";
 import { SafeActionButton } from "@/components/ui/SafeActionButton";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { modelRoute } from "@/lib/routes";
 import { adminUpdateModelVersionAction } from "@/models/actions/adminUpdateModelVersionAction";
 import { ModelByVersion } from "@/models/data/byVersion";
 
-import { UpgradeableModel } from "./UpgradeableModel";
+const ComparedCode: FC<{
+  modelId: string;
+  version: string;
+  code: string;
+}> = ({ modelId, version, code }) => {
+  const [status, setStatus] = useState<
+    "loading" | "success" | "error" | "upgraded"
+  >("loading");
+
+  useEffect(() => {
+    if (!checkSquiggleVersion(version)) {
+      setStatus("error");
+      return;
+    }
+
+    compareVersions({
+      version1: version,
+      version2: defaultSquiggleVersion,
+      code: code,
+    }).then((result) => {
+      if (result) {
+        setStatus("error");
+      } else {
+        setStatus("success");
+      }
+    });
+  }, [version, code]);
+
+  const commonClasses = "w-6 h-6";
+  switch (status) {
+    case "loading":
+      return (
+        <RefreshIcon
+          className={clsx(commonClasses, "animate-spin text-gray-400")}
+        />
+      );
+    case "success":
+      return (
+        <div className="flex gap-1">
+          <CheckIcon className={clsx(commonClasses, "text-green-500")} />
+          <SafeActionButton
+            action={adminUpdateModelVersionAction}
+            input={{
+              modelId: modelId,
+              version: defaultSquiggleVersion,
+            }}
+            onSuccess={() => setStatus("upgraded")}
+            theme="primary"
+            size="small"
+          >
+            Upgrade to {defaultSquiggleVersion}
+          </SafeActionButton>
+        </div>
+      );
+    case "upgraded":
+      return <CheckIcon className={clsx(commonClasses, "text-green-500")} />;
+
+    case "error":
+      return <XIcon className={clsx(commonClasses, "text-red-500")} />;
+  }
+};
+
+const ComparedModel: FC<{
+  model: ModelByVersion["models"][number];
+}> = ({ model }) => {
+  const squiggleSnippet = model.currentRevision?.squiggleSnippet;
+
+  if (!squiggleSnippet) {
+    return null;
+  }
+
+  const version = squiggleSnippet.version;
+
+  return (
+    <div className="col-span-2 grid grid-cols-subgrid gap-2">
+      <StyledLink
+        href={`/admin/upgrade-versions/compare?owner=${model.owner.slug}&slug=${model.slug}`}
+      >
+        {model.owner.slug}/{model.slug}
+      </StyledLink>
+      <ComparedCode
+        modelId={model.id}
+        version={version}
+        code={squiggleSnippet.code}
+      />
+    </div>
+  );
+};
 
 const ModelList: FC<{
   models: ModelByVersion["models"];
 }> = ({ models }) => {
-  const router = useRouter();
-
-  const [pos, setPos] = useState(0);
+  const limitStep = 10;
+  const [limit, setLimit] = useState(limitStep);
 
   if (!models.length) return null;
-  const usedPos = Math.min(pos, models.length - 1);
-  const model = models[usedPos];
 
   return (
     <div>
-      <div className="flex items-center gap-2">
-        <div>
-          Model:{" "}
-          <StyledLink
-            href={modelRoute({
-              owner: model.owner.slug,
-              slug: model.slug,
-            })}
-          >
-            {model.owner.slug}/{model.slug}
-          </StyledLink>
-        </div>
-        <SafeActionButton
-          action={adminUpdateModelVersionAction}
-          input={{
-            modelId: model.id,
-            version: defaultSquiggleVersion,
-          }}
-          onSuccess={() => router.refresh()}
-          title={`Upgrade to ${defaultSquiggleVersion}`}
-          theme="primary"
-        />
-        <Button onClick={() => setPos(usedPos - 1)} disabled={usedPos <= 0}>
-          &larr; Prev
-        </Button>
-        <Button
-          onClick={() => setPos(usedPos + 1)}
-          disabled={usedPos >= models.length - 1}
-        >
-          Next &rarr;
-        </Button>
+      <p className="pb-4 text-xs">
+        {`In the list below, you'll see the green checkmark if the model's output is identical to the output of the new version. If not, you'll see a red X, but you can go to the model's "compare" page to see the difference and upgrade it manually.`}
+      </p>
+      <div
+        className="grid gap-2"
+        style={{ gridTemplateColumns: "repeat(2, max-content)" }}
+      >
+        {models.slice(0, limit).map((model) => (
+          <ComparedModel model={model} key={model.id} />
+        ))}
       </div>
-      <UpgradeableModel model={model} />
+      {models.length > limit ? (
+        <Button onClick={() => setLimit((limit) => limit + limitStep)}>
+          Show more
+        </Button>
+      ) : null}
     </div>
   );
 };
@@ -100,7 +173,7 @@ export const UpgradeVersionsPage: FC<{
     getEntryByVersion(defaultSquiggleVersion)?.models.length ?? 0;
 
   return (
-    <div>
+    <div className="container mx-auto">
       <H2>Upgrade model versions</H2>
       <div>
         <p className="text-xs">
@@ -143,7 +216,11 @@ export const UpgradeVersionsPage: FC<{
           </Button>
         </Dropdown>
       </div>
-      {selectedEntry ? <ModelList models={selectedEntry.models} /> : null}
+      {selectedEntry ? (
+        <div className="mt-4">
+          <ModelList models={selectedEntry.models} />
+        </div>
+      ) : null}
     </div>
   );
 };

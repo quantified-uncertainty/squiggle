@@ -4,7 +4,7 @@ import {
   InferSafeActionFnResult,
 } from "next-safe-action";
 import { HookSafeActionFn, useAction } from "next-safe-action/hooks";
-import { ReactNode } from "react";
+import { PropsWithChildren, ReactNode } from "react";
 
 import { Button, useToast } from "@quri/ui";
 
@@ -13,21 +13,22 @@ export function SafeActionButton<
 >({
   action,
   input,
-  title,
   confirmation,
   onSuccess,
   // button props
   theme,
   size,
-}: {
-  action: Action;
-  input: InferSafeActionFnInput<typeof action>["clientInput"];
-  onSuccess?: (
-    data: NonNullable<InferSafeActionFnResult<typeof action>["data"]>
-  ) => void;
-  title: string;
-  confirmation?: string;
-} & Pick<Parameters<typeof Button>[0], "theme" | "size">): ReactNode {
+  children,
+}: PropsWithChildren<
+  {
+    action: Action;
+    input: InferSafeActionFnInput<typeof action>["clientInput"];
+    onSuccess?: (
+      data: NonNullable<InferSafeActionFnResult<typeof action>["data"]>
+    ) => void;
+    confirmation?: string;
+  } & Pick<Parameters<typeof Button>[0], "theme" | "size">
+>): ReactNode {
   const toast = useToast();
 
   const { execute, isPending } = useAction(action, {
@@ -50,7 +51,7 @@ export function SafeActionButton<
   return (
     <form action={() => execute(input)}>
       <Button type="submit" disabled={isPending} theme={theme} size={size}>
-        {title}
+        {children}
       </Button>
     </form>
   );

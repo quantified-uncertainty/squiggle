@@ -1,6 +1,5 @@
 "use client";
-import { FC, use, useEffect, useState } from "react";
-import Skeleton from "react-loading-skeleton";
+import { FC, use } from "react";
 
 import {
   defaultSquiggleVersion,
@@ -10,12 +9,10 @@ import {
 } from "@quri/versioned-squiggle-components";
 
 import { EditSquiggleSnippetModel } from "@/app/models/[owner]/[slug]/EditSquiggleSnippetModel";
-import { loadModelFullAction } from "@/models/actions/loadModelFullAction";
-import { ModelByVersion } from "@/models/data/byVersion";
 import { ModelFullDTO } from "@/models/data/full";
 import { sqProjectWithHubLinker } from "@/squiggle/linker";
 
-const InnerUpgradeableModel: FC<{
+export const UpgradeableModel: FC<{
   model: ModelFullDTO;
 }> = ({ model }) => {
   const currentRevision = model.currentRevision;
@@ -33,7 +30,7 @@ const InnerUpgradeableModel: FC<{
   const project = sqProjectWithHubLinker(squiggle);
   const updatedProject = sqProjectWithHubLinker(updatedSquiggle);
 
-  // TODO - starting from 0.9.5, we will be able to compare serialized outputs for the new and old verison.
+  // TODO - compare outputs with compareVersions
 
   if (versionSupportsSquiggleChart.plain(version)) {
     const headerClasses = "py-1 px-2 m-1 bg-slate-200 font-medium";
@@ -57,37 +54,4 @@ const InnerUpgradeableModel: FC<{
       />
     );
   }
-};
-
-export const UpgradeableModel: FC<{
-  model: ModelByVersion["models"][number];
-}> = ({ model: incompleteModel }) => {
-  const [model, setModel] = useState<ModelFullDTO | "loading" | null>(
-    "loading"
-  );
-
-  useEffect(() => {
-    // TODO - this is done with a server action, so it's not cached.
-    // A route would be better.
-    loadModelFullAction({
-      owner: incompleteModel.owner.slug,
-      slug: incompleteModel.slug,
-    }).then((result) => {
-      if (result?.data) {
-        setModel(result.data);
-      } else {
-        setModel(null);
-      }
-    });
-  }, [incompleteModel]);
-
-  if (model === "loading") {
-    return <Skeleton height={160} />;
-  }
-
-  if (!model) {
-    return <div>Model not found</div>;
-  }
-
-  return <InnerUpgradeableModel model={model} />;
 };

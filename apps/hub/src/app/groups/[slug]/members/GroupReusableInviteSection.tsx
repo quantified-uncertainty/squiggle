@@ -75,16 +75,16 @@ export const GroupReusableInviteSection: FC<Props> = ({
         <SafeActionButton
           action={createReusableGroupInviteTokenAction}
           input={{ slug: groupSlug }}
-          title={
-            reusableInviteToken ? "Reset Invite Link" : "Create Invite Link"
-          }
-        />
+        >
+          {reusableInviteToken ? "Reset Invite Link" : "Create Invite Link"}
+        </SafeActionButton>
         {reusableInviteToken ? (
           <SafeActionButton
             action={deleteReusableGroupInviteTokenAction}
             input={{ slug: groupSlug }}
-            title="Delete Invite Link"
-          />
+          >
+            Delete Invite Link
+          </SafeActionButton>
         ) : null}
       </div>
     </div>
