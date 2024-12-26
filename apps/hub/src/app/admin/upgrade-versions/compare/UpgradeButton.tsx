@@ -12,6 +12,14 @@ export const UpgradeButton: FC<{
   model: ModelFullDTO;
 }> = ({ model }) => {
   const router = useRouter();
+
+  if (
+    model.currentRevision.contentType === "SquiggleSnippet" &&
+    model.currentRevision.squiggleSnippet.version === defaultSquiggleVersion
+  ) {
+    return null;
+  }
+
   return (
     <SafeActionButton
       action={adminUpdateModelVersionAction}

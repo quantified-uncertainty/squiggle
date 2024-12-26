@@ -175,17 +175,6 @@ export const UpgradeVersionsPage: FC<{
   return (
     <div className="container mx-auto">
       <H2>Upgrade model versions</H2>
-      <div>
-        <p className="text-xs">
-          Check models with their current version and the new version, then
-          press the upgrade button if everything is ok.
-        </p>
-        <p className="text-xs">
-          <strong>
-            {`Code edits won't be saved, "Upgrade" button bumps only the model's version.`}
-          </strong>
-        </p>
-      </div>
       <div className="mt-2 text-sm">
         <div>Dev models: {devCount}</div>
         <div>
