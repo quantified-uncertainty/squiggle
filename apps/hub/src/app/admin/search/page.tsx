@@ -12,10 +12,11 @@ export default async function AdminSearchPage() {
       <SafeActionButton
         action={adminRebuildSearchIndexAction}
         input={{}}
-        title="Rebuild"
         confirmation="Index updated"
         theme="primary"
-      />
+      >
+        Rebuild
+      </SafeActionButton>
     </div>
   );
 }

@@ -20,7 +20,6 @@ export const AcceptGroupInvitePage: FC<{
     <div>
       <p className="mb-4">{`You've been invited to join ${group.slug} group.`}</p>
       <SafeActionButton
-        title="Join this group"
         theme="primary"
         action={acceptReusableGroupInviteTokenAction}
         onSuccess={() => {
@@ -31,7 +30,9 @@ export const AcceptGroupInvitePage: FC<{
           groupSlug: group.slug,
           inviteToken,
         }}
-      />
+      >
+        Join this group
+      </SafeActionButton>
     </div>
   );
 };

@@ -16,7 +16,9 @@
     "@quri/ui": "workspace:*",
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.13",
+    "commander": "^12.1.0",
     "glob": "^10.3.12",
+    "json-diff": "^1.0.6",
     "lodash": "^4.17.21",
     "squiggle-components-0.10.0": "npm:@quri/squiggle-components@0.10.0",
     "squiggle-components-0.8.5": "npm:@quri/squiggle-components@0.8.5",
@@ -36,8 +38,11 @@
     "squiggle-lang-0.9.5": "npm:@quri/squiggle-lang@0.9.5"
   },
   "devDependencies": {
+    "@commander-js/extra-typings": "^12.1.0",
     "@quri/configs": "workspace:*",
+    "@types/json-diff": "^1.0.3",
     "@types/lodash": "^4.14.202",
+    "@types/node": "^22.10.2",
     "@types/react": "^18.3.3",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",
@@ -62,6 +67,10 @@
     "./tailwind": {
       "types": "./dist/tailwind.d.cts",
       "default": "./dist/tailwind.cjs"
+    },
+    "./compareVersions": {
+      "types": "./dist/compareVersions.d.ts",
+      "default": "./dist/compareVersions.js"
     }
   },
   "module": "./dist/index.js",
