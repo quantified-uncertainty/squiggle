@@ -1,23 +1,32 @@
+import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 
 import { ClientWorkflow, decodeWorkflowFromReader } from "@quri/squiggle-ai";
 
+import { AiWorkflow } from "@/ai/data/loadWorkflows";
+
 import { AiRequestBody, bodyToLineReader } from "./utils";
 
-export function useSquiggleWorkflows(preloadedWorkflows: ClientWorkflow[]) {
-  const [workflows, setWorkflows] =
-    useState<ClientWorkflow[]>(preloadedWorkflows);
+export function useSquiggleWorkflows(preloadedWorkflows: AiWorkflow[]) {
+  const [workflows, setWorkflows] = useState<AiWorkflow[]>(preloadedWorkflows);
   const [selected, setSelected] = useState<number | undefined>(undefined);
+
+  const session = useSession();
 
   // `preloadedWorkflows` can change when the user presses the "load more" button
   useEffect(() => {
-    setWorkflows((list) => {
-      if (list === preloadedWorkflows) return list;
-      const knownWorkflows = new Set(list.map((w) => w.id));
+    setWorkflows((workflows) => {
+      if (workflows === preloadedWorkflows) return workflows;
+      const knownIds = new Set(workflows.map((w) => w.workflow.id));
       const newWorkflows = preloadedWorkflows.filter(
-        (w) => !knownWorkflows.has(w.id)
+        (w) => !knownIds.has(w.workflow.id)
       );
-      return [...list, ...newWorkflows];
+      return [...workflows, ...newWorkflows].sort(
+        (a, b) => b.workflow.timestamp - a.workflow.timestamp
+      );
+      // TODO - remove the workflows that are no longer in `preloadedWorkflows`?
+      // This can happen when `allUsers` root mode becomes disabled.
+      // OTOH, if we have a mock workflow in the list, this could be confusing.
     });
   }, [preloadedWorkflows]);
 
@@ -25,39 +34,50 @@ export function useSquiggleWorkflows(preloadedWorkflows: ClientWorkflow[]) {
     (id: string, update: (workflow: ClientWorkflow) => ClientWorkflow) => {
       setWorkflows((workflows) =>
         workflows.map((workflow) => {
-          return workflow.id === id ? update(workflow) : workflow;
+          return workflow.workflow.id === id
+            ? { ...workflow, workflow: update(workflow.workflow) }
+            : workflow;
         })
       );
     },
     []
   );
 
-  const addMockWorkflow = useCallback((request: AiRequestBody) => {
-    // This will be replaced with a real workflow once we receive the first message from the server.
-    const id = `loading-${Date.now().toString()}`;
-    const workflow: ClientWorkflow = {
-      id,
-      timestamp: new Date().getTime(),
-      status: "loading",
-      inputs: {
-        prompt: {
-          id: "prompt",
-          kind: "prompt",
-          value: request.kind === "create" ? request.prompt : "Improving...",
+  const addMockWorkflow = useCallback(
+    (request: AiRequestBody) => {
+      // This will be replaced with the real workflow once we receive the first message from the server.
+      const id = `loading-${Date.now().toString()}`;
+      const workflow: AiWorkflow = {
+        workflow: {
+          id,
+          timestamp: new Date().getTime(),
+          status: "loading",
+          inputs: {
+            prompt: {
+              id: "prompt",
+              kind: "prompt",
+              value:
+                request.kind === "create" ? request.prompt : "Improving...",
+            },
+          },
+          steps: [],
         },
-      },
-      steps: [],
-    };
-    setWorkflows((workflows) => [workflow, ...workflows]);
-    setSelected(0);
-    return workflow;
-  }, []);
+        author: {
+          username: session.data?.user?.name ?? "Unknown",
+        },
+      };
+      setWorkflows((workflows) => [workflow, ...workflows]);
+      setSelected(0);
+      return workflow;
+    },
+    [session]
+  );
 
   const submitWorkflow = useCallback(
     async (request: AiRequestBody) => {
       // Add a mock workflow to show loading state while we wait for the server to respond.
-      // It will be replaced by the real workflow once we receive the first message from the server.
-      let id = addMockWorkflow(request).id;
+      // It will be replaced with the real workflow once we receive the first message from the server.
+      let id = addMockWorkflow(request).workflow.id;
 
       try {
         const response = await fetch("/ai/api/create", {
@@ -78,7 +98,9 @@ export function useSquiggleWorkflows(preloadedWorkflows: ClientWorkflow[]) {
           addWorkflow: async (workflow) => {
             // Replace the mock workflow with the real workflow.
             setWorkflows((workflows) =>
-              workflows.map((w) => (w.id === id ? workflow : w))
+              workflows.map((w) =>
+                w.workflow.id === id ? { ...w, workflow } : w
+              )
             );
             id = workflow.id;
           },
@@ -100,7 +122,9 @@ export function useSquiggleWorkflows(preloadedWorkflows: ClientWorkflow[]) {
 
   const selectWorkflow = useCallback(
     (id: string) => {
-      const index = workflows.findIndex((workflow) => workflow.id === id);
+      const index = workflows.findIndex(
+        (workflow) => workflow.workflow.id === id
+      );
       setSelected(index === -1 ? undefined : index);
     },
     [workflows]

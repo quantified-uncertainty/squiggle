@@ -21,12 +21,14 @@ export async function getSessionUserOrRedirect() {
 // Checks if the user is a root user. If so, returns the user.
 export async function checkRootUser() {
   const sessionUser = await getSessionUserOrRedirect();
+  if (!isAdminUser(sessionUser)) {
+    throw new Error("Unauthorized");
+  }
+
+  // TODO - is this necessary? we usually don't need to load the user from the database.
   const user = await prisma.user.findUniqueOrThrow({
     where: { email: sessionUser.email },
   });
-  if (!(user.email && user.emailVerified && isRootEmail(user.email))) {
-    throw new Error("Unauthorized");
-  }
   return user as User & { email: NonNullable<User["email"]> };
 }
 
@@ -53,12 +55,11 @@ export async function getSelf(session: SignedInSession) {
   return user;
 }
 
-const ROOT_EMAILS = (process.env["ROOT_EMAILS"] ?? "").split(",");
+// Env var is called "ROOT_EMAILS" for historical reasons.
+// All other APIs are called "admin" to avoid the confusion because we also use the word "root" in another sense, in React components.
+// (e.g. `RootLayout`, `ReactRoot`).
+const ADMIN_EMAILS = (process.env["ROOT_EMAILS"] ?? "").split(",");
 
-export function isRootEmail(email: string) {
-  return ROOT_EMAILS.includes(email);
-}
-
-export async function isRootUser(user: User) {
-  return Boolean(user.email && user.emailVerified && isRootEmail(user.email));
+export function isAdminUser(user: NonNullable<Session["user"]>) {
+  return Boolean(user.email && ADMIN_EMAILS.includes(user.email));
 }

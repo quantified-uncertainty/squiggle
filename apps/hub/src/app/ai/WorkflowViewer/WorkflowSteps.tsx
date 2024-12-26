@@ -2,8 +2,8 @@ import { FC, useEffect, useRef, useState } from "react";
 
 import { ClientWorkflow } from "@quri/squiggle-ai";
 
-import { ClientStepView } from "./ClientStepView";
-import { StepNode } from "./StepNode";
+import { StepListItem } from "./StepListItem";
+import { StepView } from "./StepView";
 
 export const WorkflowSteps: FC<{
   workflow: ClientWorkflow;
@@ -53,8 +53,8 @@ export const WorkflowSteps: FC<{
       <div className="w-70">
         <div className="overflow-hidden rounded-lg">
           {workflow.steps.map((step, index) => (
-            <StepNode
-              data={step}
+            <StepListItem
+              step={step}
               onClick={() => setSelectedStepIndex(index)}
               isSelected={selectedStepIndex === index}
               stepNumber={index + 1}
@@ -64,7 +64,7 @@ export const WorkflowSteps: FC<{
         </div>
       </div>
       {hasSelectedStep && (
-        <ClientStepView
+        <StepView
           step={workflow.steps[selectedStepIndex]}
           onSelectPreviousStep={selectPreviousStep}
           onSelectNextStep={selectNextStep}

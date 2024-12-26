@@ -51,6 +51,7 @@ function getClientState<Shape extends IOShape>(
   if (state.kind === "DONE") {
     return {
       kind: "DONE",
+      durationMs: state.durationMs,
       outputs: Object.fromEntries(
         Object.entries(state.outputs)
           .filter(
@@ -77,6 +78,7 @@ export function stepToClientStep(step: LLMStepInstance): ClientStep {
       ])
     ),
     messages: step.getConversationMessages(),
+    startTime: step.startTime,
   };
 }
 
@@ -125,6 +127,7 @@ export function addStreamingListeners<Shape extends IOShape>(
       content: {
         id: event.data.step.id,
         name: event.data.step.template.name ?? "unknown",
+        startTime: event.data.step.startTime,
         inputs: Object.fromEntries(
           Object.entries(event.data.step.getInputs()).map(([key, value]) => [
             key,

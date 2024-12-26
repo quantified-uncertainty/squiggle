@@ -4,6 +4,9 @@ import { ClientStep } from "@quri/squiggle-ai";
 import { CheckCircleIcon, ErrorIcon, RefreshIcon, TextTooltip } from "@quri/ui";
 
 export const StepStatusIcon: FC<{ step: ClientStep }> = ({ step }) => {
+  const ageInSeconds = (new Date().getTime() - step.startTime) / 1000;
+  const maxLoadingAge = 300;
+
   switch (step.state.kind) {
     case "PENDING":
       return <RefreshIcon className="animate-spin text-gray-400" size={16} />;
