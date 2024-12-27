@@ -187,11 +187,6 @@ export x=1`,
 export const ManyTypes: Story = {
   name: "Many types",
   args: {
-    linker,
-    onOpenExport: (sourceId, varName) => {
-      // eslint-disable-next-line no-console
-      console.log("Clicked Export with params", sourceId, varName);
-    },
     defaultCode: `import "hub:source1" as s1  
 import "source2" as s2
 
@@ -231,6 +226,16 @@ export varScatter = Plot.scatter({
 `,
     height: 800,
   },
+  render: (args) => (
+    <Component
+      {...args}
+      linker={linker}
+      onOpenExport={(sourceId, varName) => {
+        // eslint-disable-next-line no-console
+        console.log("Clicked Export with params", sourceId, varName);
+      }}
+    />
+  ),
 };
 
 export const SpecialList: Story = {

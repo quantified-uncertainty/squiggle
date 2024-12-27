@@ -4,16 +4,16 @@ import {
   XCircleIcon,
 } from "@heroicons/react/solid/esm/index.js";
 import { clsx } from "clsx";
-import * as React from "react";
+import { Children, ComponentProps, FC, ReactElement, ReactNode } from "react";
 
-export const Alert: React.FC<{
+export const Alert: FC<{
   heading: string;
   backgroundColor: string;
   headingColor: string;
   bodyColor: string;
-  icon: (props: React.ComponentProps<"svg">) => JSX.Element;
+  icon: (props: ComponentProps<"svg">) => ReactElement;
   iconColor: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }> = ({
   heading = "Error",
   backgroundColor,
@@ -37,7 +37,7 @@ export const Alert: React.FC<{
           <header className={clsx("text-sm font-medium", headingColor)}>
             {heading}
           </header>
-          {children && React.Children.count(children) ? (
+          {children && Children.count(children) ? (
             <div className={clsx("mt-1 text-sm", bodyColor)}>{children}</div>
           ) : null}
         </div>
@@ -46,9 +46,9 @@ export const Alert: React.FC<{
   );
 };
 
-export const ErrorAlert: React.FC<{
+export const ErrorAlert: FC<{
   heading: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }> = (props) => (
   <Alert
     {...props}
@@ -60,9 +60,9 @@ export const ErrorAlert: React.FC<{
   />
 );
 
-export const MessageAlert: React.FC<{
+export const MessageAlert: FC<{
   heading: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }> = (props) => (
   <Alert
     {...props}
@@ -74,9 +74,9 @@ export const MessageAlert: React.FC<{
   />
 );
 
-export const SuccessAlert: React.FC<{
+export const SuccessAlert: FC<{
   heading: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }> = (props) => (
   <Alert
     {...props}

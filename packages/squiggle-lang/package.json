@@ -41,7 +41,7 @@
     "jstat": "^1.9.6",
     "lodash": "^4.17.21",
     "open": "^10.1.0",
-    "react": "^18.2.0",
+    "react": "^19.0.0",
     "web-worker": "^1.2.0"
   },
   "devDependencies": {
@@ -55,7 +55,7 @@
     "@types/jest": "^29.5.12",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.12.7",
-    "@types/react": "^18.3.3",
+    "@types/react": "^19.0.2",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",
     "codecov": "^3.8.3",

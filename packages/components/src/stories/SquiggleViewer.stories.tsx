@@ -15,10 +15,12 @@ type Story = StoryObj<typeof meta>;
 
 const output = await run("[1, { dist: 2 to 3 }]");
 
-if (!output.result.ok) {
-  throw new Error("Expected an ok result");
-}
-
 export const Basic: Story = {
-  args: { value: output.result.value.result },
+  render: () => {
+    if (!output.result.ok) {
+      throw new Error("Expected an ok result");
+    }
+
+    return <Component value={output.result.value.result} />;
+  },
 };
