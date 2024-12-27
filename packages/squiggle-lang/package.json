@@ -71,6 +71,7 @@
   },
   "files": [
     "dist",
+    "bin",
     "src",
     "!**/tsconfig*.tsbuildinfo",
     "!**/__tests__"
@@ -84,6 +85,6 @@
     "./runners/WebWorkerRunner": "./dist/runners/WebWorkerRunner.js"
   },
   "bin": {
-    "squiggle": "./dist/cli/index.js"
+    "squiggle": "./bin/squiggle.js"
   }
 }
