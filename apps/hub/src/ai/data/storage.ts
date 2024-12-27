@@ -31,10 +31,18 @@ export function decodeDbWorkflowToClientWorkflow(
     return {
       id: row.id,
       timestamp: row.createdAt.getTime(),
-      status: "error",
+      status: "finished",
       inputs: {},
       steps: [],
-      result: `Invalid workflow format in the database: ${e}`,
+      result: {
+        code: "",
+        isValid: false,
+        totalPrice: 0,
+        runTimeMs: 0,
+        llmRunCount: 0,
+        logSummary: "",
+        error: `Invalid workflow format in the database: ${e}`,
+      },
     } satisfies ClientWorkflow;
   }
 }

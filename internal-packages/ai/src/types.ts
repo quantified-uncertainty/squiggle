@@ -93,6 +93,7 @@ const stepUpdatedSchema = stepSchema.partial().required({
 export const clientWorkflowResultSchema = z.object({
   code: z.string().describe("Squiggle code snippet"),
   isValid: z.boolean(),
+  error: z.string().optional(),
   totalPrice: z.number(),
   runTimeMs: z.number(),
   llmRunCount: z.number(),
@@ -141,11 +142,6 @@ export const clientWorkflowSchema = z.discriminatedUnion("status", [
     ...commonClientWorkflowFields,
     status: z.literal("finished"),
     result: clientWorkflowResultSchema,
-  }),
-  z.object({
-    ...commonClientWorkflowFields,
-    status: z.literal("error"),
-    result: z.string(),
   }),
 ]);
 

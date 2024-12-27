@@ -105,7 +105,7 @@ function aiRequestToWorkflow(request: AiRequestBody) {
   const llmConfig: LlmConfig = {
     llmId: request.model ?? "Claude-Sonnet",
     priceLimit: 0.3,
-    durationLimitMinutes: 2,
+    durationLimitMinutes: 0.01,
     messagesInHistoryToKeep: 4,
     numericSteps: request.numericSteps,
     styleGuideSteps: request.styleGuideSteps,
