@@ -17,7 +17,8 @@
   },
   "pnpm": {
     "overrides": {
-      "@headlessui/react": "^2.2.0"
+      "@headlessui/react": "^2.2.0",
+      "react-reconciler": "^0.31.0"
     },
     "patchedDependencies": {
       "react-select": "patches/react-select.patch"

@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import compact from "lodash/compact.js";
-import { FC, useMemo } from "react";
+import { FC, ReactElement, useMemo } from "react";
 
 import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 import { CodeBracketIcon } from "@quri/ui";
@@ -30,7 +30,7 @@ type StandardProps = {
   color?: string;
   textSize?: string;
   font?: string;
-  icon?: JSX.Element;
+  icon?: ReactElement;
   showColon?: boolean;
   isFocusEnabled?: boolean;
 };

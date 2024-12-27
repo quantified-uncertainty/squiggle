@@ -1,6 +1,6 @@
 "use client";
 import { clsx } from "clsx";
-import { ComponentType, FC, ReactNode } from "react";
+import { ComponentType, FC, ReactElement, ReactNode } from "react";
 
 import { TextTooltip } from "@quri/ui";
 
@@ -23,7 +23,7 @@ export const ToolbarItem: FC<Props> = ({
   tooltipText,
   children,
 }) => {
-  const withTooltip = (jsx: JSX.Element) => (
+  const withTooltip = (jsx: ReactElement) => (
     <TextTooltip text={tooltipText || ""} placement="bottom" offset={5}>
       {jsx}
     </TextTooltip>

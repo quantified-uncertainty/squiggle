@@ -212,7 +212,7 @@ function useDrawDistFunctionChart({
   const d3ref = useRef<{
     frame: CartesianFrame;
     xScale: d3.ScaleContinuousNumeric<number, number, never>;
-  }>();
+  }>(null);
 
   // Convert canvas coordinates to plot coordniates
   const cursorX: number | undefined = useMemo(() => {
