@@ -8,6 +8,7 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
+  LockIcon,
   RefreshIcon,
   XIcon,
 } from "@quri/ui";
@@ -98,11 +99,16 @@ const ComparedModel: FC<{
 
   return (
     <div className="col-span-2 grid grid-cols-subgrid gap-2">
-      <StyledLink
-        href={`/admin/upgrade-versions/compare?owner=${model.owner.slug}&slug=${model.slug}`}
-      >
-        {model.owner.slug}/{model.slug}
-      </StyledLink>
+      <div className="flex items-center gap-1">
+        <StyledLink
+          href={`/admin/upgrade-versions/compare?owner=${model.owner.slug}&slug=${model.slug}`}
+        >
+          {model.owner.slug}/{model.slug}
+        </StyledLink>
+        {model.isPrivate ? (
+          <LockIcon className="h-4 w-4 text-gray-600" />
+        ) : null}
+      </div>
       <ComparedCode
         modelId={model.id}
         version={version}
@@ -149,17 +155,14 @@ export const UpgradeVersionsPage: FC<{
 
   const upgradeableModelsByVersion = modelsByVersion.filter(
     (entry) =>
-      entry.version !== "dev" &&
-      entry.version !== defaultSquiggleVersion &&
-      entry.count > 0
+      entry.version !== "dev" && entry.version !== defaultSquiggleVersion
   );
 
   const [selectedVersion, setSelectedVersion] = useState(
     upgradeableModelsByVersion.at(0)?.version
   );
 
-  const getEntryTitle = (entry: Entry) =>
-    `${entry.version} (${entry.count} models, ${entry.privateCount} private)`;
+  const getEntryTitle = (entry: Entry) => `${entry.version} (${entry.count})`;
 
   const getEntryByVersion = (version: string): Entry | undefined =>
     modelsByVersion.find((entry) => entry.version === version);
