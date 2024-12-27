@@ -63,7 +63,7 @@ export function useSquiggleWorkflows(preloadedWorkflows: AiWorkflow[]) {
           steps: [],
         },
         author: {
-          username: session.data?.user?.name ?? "Unknown",
+          username: session.data?.user?.username ?? "Unknown",
         },
       };
       setWorkflows((workflows) => [workflow, ...workflows]);
@@ -109,8 +109,16 @@ export function useSquiggleWorkflows(preloadedWorkflows: AiWorkflow[]) {
       } catch (error) {
         updateWorkflow(id, (workflow) => ({
           ...workflow,
-          status: "error",
-          result: `Server error: ${error instanceof Error ? error.toString() : "Unknown error"}.`,
+          status: "finished",
+          result: {
+            code: "",
+            isValid: false,
+            totalPrice: 0,
+            runTimeMs: 0,
+            llmRunCount: 0,
+            logSummary: "",
+            error: `Server error: ${error instanceof Error ? error.toString() : "Unknown error"}.`,
+          },
         }));
       }
     },

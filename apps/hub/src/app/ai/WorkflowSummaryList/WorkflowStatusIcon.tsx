@@ -12,7 +12,7 @@ export function isWorkflowOutdated(workflow: ClientWorkflow): boolean {
 
 function getWorkflowStatusForIcon(
   workflow: ClientWorkflow
-): ClientWorkflow["status"] {
+): "loading" | "finished" | "error" {
   if (workflow.status === "loading") {
     return isWorkflowOutdated(workflow) ? "error" : "loading";
   }
@@ -36,5 +36,7 @@ export const WorkflowStatusIcon: FC<{ workflow: ClientWorkflow }> = ({
       return <CheckCircleIcon className="text-emerald-400" size={16} />;
     case "error":
       return <ErrorIcon className="text-red-400" size={16} />;
+    default:
+      throw new Error(status satisfies never);
   }
 };

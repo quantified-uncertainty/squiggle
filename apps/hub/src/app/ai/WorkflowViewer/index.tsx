@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { Children, FC } from "react";
 
 import { ClientWorkflow } from "@quri/squiggle-ai";
-import { ErrorIcon, StyledTab } from "@quri/ui";
+import { ErrorIcon, StyledTab, TextTooltip } from "@quri/ui";
 
 import { commonDateFormat } from "@/lib/constants";
 import { useAvailableHeight } from "@/lib/hooks/useAvailableHeight";
@@ -53,12 +53,26 @@ const FinishedWorkflowViewer: FC<WorkflowViewerProps<"finished">> = ({
         <Header
           workflow={workflow}
           renderLeft={() => (
-            <LineSeparatedList>
-              <span>{(workflow.result.runTimeMs / 1000).toFixed(2)}s</span>
-              <span>${workflow.result.totalPrice.toFixed(2)}</span>
-              <span>{workflow.result.llmRunCount} LLM runs</span>
-              <WorkflowDate workflow={workflow} />
-            </LineSeparatedList>
+            <div className="flex items-center gap-2">
+              <LineSeparatedList>
+                <span>{(workflow.result.runTimeMs / 1000).toFixed(2)}s</span>
+                <span>${workflow.result.totalPrice.toFixed(2)}</span>
+                <span>{workflow.result.llmRunCount} LLM runs</span>
+                <WorkflowDate workflow={workflow} />
+              </LineSeparatedList>
+              {workflow.result.error ? (
+                <div className="flex items-center gap-1">
+                  <TextTooltip text={workflow.result.error}>
+                    <span>
+                      <ErrorIcon
+                        className="cursor-pointer text-red-400"
+                        size={16}
+                      />
+                    </span>
+                  </TextTooltip>
+                </div>
+              ) : null}
+            </div>
           )}
           renderRight={() => (
             <div className="flex items-center gap-2">
@@ -137,18 +151,6 @@ export const WorkflowViewer: FC<WorkflowViewerProps> = ({
       return <FinishedWorkflowViewer {...props} workflow={workflow} />;
     case "loading":
       return <LoadingWorkflowViewer {...props} workflow={workflow} />;
-    case "error":
-      return (
-        <div className="mt-2 rounded-md border border-red-300 bg-red-50 p-4">
-          <h3 className="mb-2 text-lg font-semibold text-red-800">
-            Server Error
-          </h3>
-          <p className="mb-4 text-red-700">{workflow.result}</p>
-          <p className="text-sm text-red-600">
-            Please try refreshing the page or attempt your action again.
-          </p>
-        </div>
-      );
     default:
       throw workflow satisfies never;
   }

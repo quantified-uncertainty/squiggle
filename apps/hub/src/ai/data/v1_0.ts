@@ -94,16 +94,15 @@ export const v1WorkflowSchema = z.discriminatedUnion("status", [
   }),
 ]);
 
+// upgrading legacy workflow to new client workflow shape
 export function decodeV1_0JsonToClientWorkflow(
   json: Prisma.JsonValue
 ): ClientWorkflow {
   // `input` doesn't exist in the new ClientWorkflow shape, so we need to pull it out
   const { input, ...v1Workflow } = v1WorkflowSchema.parse(json);
 
-  // upgrading legacy workflow to new client workflow shape
-  return {
-    ...v1Workflow,
-    steps: v1Workflow.steps.map(({ outputs, ...step }) => ({
+  const steps: ClientWorkflow["steps"] = v1Workflow.steps.map(
+    ({ outputs, ...step }) => ({
       ...step,
       // modern steps in ClientWorkflow store state as an object
       state:
@@ -122,22 +121,47 @@ export function decodeV1_0JsonToClientWorkflow(
               }
             : { kind: "PENDING" },
       startTime: v1Workflow.timestamp, // old workflow steps don't have start times
-    })),
-    inputs:
-      input.type === "Create"
-        ? {
-            prompt: {
-              value: input.prompt,
-              kind: "prompt",
-              id: `${v1Workflow.id}-prompt`,
-            },
-          }
-        : {
-            source: {
-              value: input.source,
-              kind: "source",
-              id: `${v1Workflow.id}-source`,
-            },
+    })
+  );
+
+  const inputs: ClientWorkflow["inputs"] =
+    input.type === "Create"
+      ? {
+          prompt: {
+            value: input.prompt,
+            kind: "prompt",
+            id: `${v1Workflow.id}-prompt`,
           },
+        }
+      : {
+          source: {
+            value: input.source,
+            kind: "source",
+            id: `${v1Workflow.id}-source`,
+          },
+        };
+
+  if (v1Workflow.status === "error") {
+    return {
+      ...v1Workflow,
+      status: "finished",
+      result: {
+        code: "",
+        isValid: false,
+        totalPrice: 0,
+        runTimeMs: 0,
+        llmRunCount: 0,
+        logSummary: "",
+        error: v1Workflow.result,
+      },
+      steps,
+      inputs,
+    };
+  }
+
+  return {
+    ...v1Workflow,
+    steps,
+    inputs,
   };
 }

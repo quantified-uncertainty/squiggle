@@ -145,6 +145,6 @@ export function getDefaultTransitionRule<Shape extends IOShape>(
       }
     }
 
-    return h.fatal("Unknown step");
+    return h.fatal(ERROR_MESSAGES.UNKNOWN_STEP);
   };
 }

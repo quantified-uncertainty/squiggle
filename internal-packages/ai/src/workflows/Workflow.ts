@@ -111,10 +111,13 @@ export class Workflow<Shape extends IOShape = IOShape> {
 
   public llmClient: LLMClient;
 
+  public error?: string;
+
   constructor(params: WorkflowInstanceParams<Shape>) {
     this.id = params.id ?? crypto.randomUUID();
     this.template = params.template;
     this.inputs = params.inputs;
+    this.error = params.error ?? undefined;
 
     this.llmConfig = params.llmConfig ?? llmConfigDefault;
     this.startTime = params.steps.at(0)?.startTime ?? Date.now();
@@ -201,9 +204,9 @@ export class Workflow<Shape extends IOShape = IOShape> {
       payload: { step },
     });
 
-    // apply the transition rule, produce the next step in PENDING state
-    // this code is inlined in this method, which guarantees that we always have one pending step
-    // (until the transition rule decides to finish)
+    // Apply the transition rule, produce the next step in PENDING state or stop the workflow.
+    // This code is inlined in this method, which guarantees that we always have one pending step
+    // (until the transition rule decides to finish).
     const result = this.transitionRule(step, new WorkflowGuardHelpers(step));
     switch (result.kind) {
       case "repeat":
@@ -213,10 +216,11 @@ export class Workflow<Shape extends IOShape = IOShape> {
         this.addStep(result.step.prepare(result.inputs));
         break;
       case "finish":
-        // no new steps to add
+        // no new steps to add, we're done
         break;
       case "fatal":
-        throw new Error(result.message);
+        this.error = result.message;
+        break;
     }
   }
 
@@ -299,7 +303,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
 
   getFinalResult(): ClientWorkflowResult {
     const finalStep = this.getRecentStepWithCode();
-    const isValid = finalStep?.step.getState().kind === "DONE";
+    const isValid = finalStep?.step.getState().kind === "DONE" && !this.error;
 
     // compute run time
     let runTimeMs: number;
@@ -326,6 +330,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
     return {
       code: finalStep?.code ?? "",
       isValid,
+      error: this.error,
       totalPrice,
       runTimeMs,
       llmRunCount,
@@ -427,6 +432,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
     return {
       id: this.id,
       templateName: this.template.name,
+      error: this.error ?? null,
       inputIds: Object.fromEntries(
         Object.entries(this.inputs).map(([key, input]) => [
           key,
@@ -454,6 +460,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
   }): Workflow<IOShape> {
     const workflow = new Workflow({
       id: node.id,
+      error: node.error ?? undefined,
       template: getWorkflowTemplateByName(node.templateName),
       inputs: Object.fromEntries(
         Object.entries(node.inputIds).map(([key, id]) => [
@@ -509,4 +516,5 @@ export type SerializedWorkflow = {
   inputIds: Record<string, number>;
   llmConfig: LlmConfig;
   stepIds: number[];
+  error: string | null;
 };
