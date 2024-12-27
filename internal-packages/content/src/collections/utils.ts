@@ -3,7 +3,7 @@ import { TransformOptions } from "@fumadocs/content-collections/configuration";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 
-import squiggleGrammar from "@quri/squiggle-textmate-grammar/dist/squiggle.tmLanguage.json" assert { type: "json" };
+import squiggleGrammar from "@quri/squiggle-textmate-grammar/dist/squiggle.tmLanguage.json" with { type: "json" };
 
 export const mdxOptions: TransformOptions = {
   // https://fumadocs.vercel.app/docs/ui/math#add-plugins

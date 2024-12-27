@@ -1,6 +1,8 @@
+import formsPlugin from "@tailwindcss/forms";
+
 const config = {
   content: ["./src/**/*.tsx"],
-  plugins: [require("@tailwindcss/forms")],
+  plugins: [formsPlugin],
 };
 
 export default config;
