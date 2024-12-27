@@ -63,7 +63,7 @@ export function useSquiggleWorkflows(preloadedWorkflows: AiWorkflow[]) {
           steps: [],
         },
         author: {
-          username: session.data?.user?.name ?? "Unknown",
+          username: session.data?.user?.username ?? "Unknown",
         },
       };
       setWorkflows((workflows) => [workflow, ...workflows]);
