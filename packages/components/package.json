@@ -2,9 +2,6 @@
   "name": "@quri/squiggle-components",
   "version": "0.10.1-0",
   "license": "MIT",
-  "engines": {
-    "node": "20.x"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/quantified-uncertainty/squiggle.git",
