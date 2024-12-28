@@ -2,9 +2,9 @@ import "server-only";
 
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { NextAuthConfig } from "next-auth";
-import EmailProvider from "next-auth/providers/email";
 import GithubProvider from "next-auth/providers/github";
 import { Provider } from "next-auth/providers/index";
+import Resend from "next-auth/providers/resend";
 import { cache } from "react";
 
 import { prisma } from "@/lib/server/prisma";
@@ -13,13 +13,14 @@ import { indexUserId } from "@/search/helpers";
 function buildAuthConfig(): NextAuthConfig {
   const providers: Provider[] = [];
 
-  const { SENDGRID_KEY, EMAIL_FROM } = process.env;
+  const { AUTH_RESEND_KEY, EMAIL_FROM } = process.env;
 
-  if (SENDGRID_KEY && EMAIL_FROM) {
+  if (AUTH_RESEND_KEY && EMAIL_FROM) {
     providers.push(
-      EmailProvider({
-        server: `smtp://apikey:${SENDGRID_KEY}@smtp.sendgrid.net:587`,
+      Resend({
+        apiKey: AUTH_RESEND_KEY,
         from: EMAIL_FROM,
+        name: "Email",
       })
     );
   }

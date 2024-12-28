@@ -88,9 +88,6 @@ importers:
       next-safe-action:
         specifier: ^7.9.9
         version: 7.9.9(next@15.0.3(@babel/core@7.26.0)(babel-plugin-macros@3.1.0)(react-dom@19.0.0-rc-66855b96-20241106(react@19.0.0-rc-66855b96-20241106))(react@19.0.0-rc-66855b96-20241106))(react-dom@19.0.0-rc-66855b96-20241106(react@19.0.0-rc-66855b96-20241106))(react@19.0.0-rc-66855b96-20241106)(zod@3.23.8)
-      nodemailer:
-        specifier: ^6.9.13
-        version: 6.9.13
       pako:
         specifier: ^2.1.0
         version: 2.1.0
@@ -20155,7 +20152,8 @@ snapshots:
 
   node-releases@2.0.18: {}
 
-  nodemailer@6.9.13: {}
+  nodemailer@6.9.13:
+    optional: true
 
   nodemon@3.1.0:
     dependencies:
