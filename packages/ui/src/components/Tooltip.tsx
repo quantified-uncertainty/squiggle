@@ -12,11 +12,11 @@ import {
   useRole,
 } from "@floating-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { cloneElement, FC, ReactNode, useState } from "react";
+import { cloneElement, FC, ReactElement, ReactNode, useState } from "react";
 
 type Props = {
   render: () => ReactNode;
-  children: JSX.Element;
+  children: ReactElement;
   placement?: Placement;
   offset?: number;
 };
@@ -46,7 +46,10 @@ export const Tooltip: FC<Props> = ({
     <>
       {cloneElement(
         children,
-        getReferenceProps({ ref: refs.setReference, ...children.props })
+        getReferenceProps({
+          ref: refs.setReference,
+          ...(children as ReactElement<Record<string, unknown>>).props,
+        })
       )}
       <AnimatePresence>
         {isOpen && (

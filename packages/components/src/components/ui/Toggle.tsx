@@ -1,8 +1,8 @@
 import { RefreshIcon } from "@heroicons/react/solid/esm/index.js";
 import { clsx } from "clsx";
-import React from "react";
+import { ComponentProps, FC, ReactElement } from "react";
 
-type IconType = (props: React.ComponentProps<"svg">) => JSX.Element;
+type IconType = (props: ComponentProps<"svg">) => ReactElement;
 
 type Props = {
   status: boolean;
@@ -12,7 +12,7 @@ type Props = {
   spinIcon?: boolean;
 };
 
-export const Toggle: React.FC<Props> = ({
+export const Toggle: FC<Props> = ({
   status,
   onChange,
   texts: [onText, offText],

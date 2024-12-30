@@ -3,6 +3,7 @@ import { clsx } from "clsx";
 import { motion } from "framer-motion";
 import {
   createContext,
+  FC,
   forwardRef,
   PropsWithChildren,
   useContext,
@@ -22,7 +23,7 @@ const ModalContext = createContext<ModalContextShape>({
   close: () => undefined,
 });
 
-const Overlay: React.FC = () => {
+const Overlay: FC = () => {
   const { close } = useContext(ModalContext);
   return (
     <motion.div
@@ -34,7 +35,7 @@ const Overlay: React.FC = () => {
   );
 };
 
-const ModalHeader: React.FC<PropsWithChildren> = ({ children }) => {
+const ModalHeader: FC<PropsWithChildren> = ({ children }) => {
   const { close } = useContext(ModalContext);
   return (
     <header className="flex items-center justify-between border-b border-gray-200 py-3 pl-5 pr-4 font-bold">
@@ -51,17 +52,18 @@ const ModalHeader: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 // TODO - get rid of forwardRef, support `focus` and `{...hotkeys}` via smart props
-const ModalBody = forwardRef<HTMLDivElement, JSX.IntrinsicElements["div"]>(
-  function ModalBody(props, ref) {
-    return <div ref={ref} className="overflow-auto px-5 py-3" {...props} />;
-  }
-);
+const ModalBody = forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(function ModalBody(props, ref) {
+  return <div ref={ref} className="overflow-auto px-5 py-3" {...props} />;
+});
 
-const ModalFooter: React.FC<PropsWithChildren> = ({ children }) => (
+const ModalFooter: FC<PropsWithChildren> = ({ children }) => (
   <div className="border-t border-gray-200 px-5 py-3">{children}</div>
 );
 
-const ModalWindow: React.FC<
+const ModalWindow: FC<
   PropsWithChildren<{
     container?: HTMLElement;
   }>
@@ -141,7 +143,7 @@ const ModalWindow: React.FC<
   );
 };
 
-type ModalType = React.FC<
+type ModalType = FC<
   PropsWithChildren<{
     // if specified, modal will be positioned over the visible part of the container, if it's not too small
     container?: HTMLElement;

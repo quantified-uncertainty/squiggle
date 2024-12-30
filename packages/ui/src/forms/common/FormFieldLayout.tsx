@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren, ReactElement } from "react";
 
 import { TextTooltip } from "../../components/TextTooltip.js";
 
@@ -24,7 +24,7 @@ export const FieldLayout: FC<PropsWithChildren<FormFieldLayoutProps>> = ({
   const OuterTag = standaloneLabel ? "div" : "label";
   const InnerTag = standaloneLabel ? "label" : "div";
 
-  let labelEl: JSX.Element | null = null;
+  let labelEl: ReactElement<Record<string, unknown>> | null = null;
   if (label) {
     labelEl = (
       <InnerTag

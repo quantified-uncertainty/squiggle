@@ -84,7 +84,8 @@ export const ResizableTwoPanelLayout: FC<Props> = ({
       <div className={clsx("relative", !width && "w-1/2")} style={{ width }}>
         {renderLeft()}
         <DraggableCore
-          nodeRef={handleRef}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          nodeRef={handleRef as any} // react-draggable is old and its types are wrong
           onStop={resizeHandler("onResizeStop")}
           onStart={resizeHandler("onResizeStart")}
           onDrag={resizeHandler("onResize")}
