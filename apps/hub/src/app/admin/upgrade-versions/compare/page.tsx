@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 
+import { LockIcon } from "@quri/ui";
+
 import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { modelRoute } from "@/lib/routes";
@@ -15,7 +17,7 @@ type Props = {
 export default async function CompareVersionsPage({ searchParams }: Props) {
   const { owner, slug } = await searchParams;
 
-  const model = await loadModelFull({ owner, slug });
+  const model = await loadModelFull({ owner, slug, asAdmin: true });
   if (!model) {
     notFound();
   }
@@ -36,6 +38,9 @@ export default async function CompareVersionsPage({ searchParams }: Props) {
             >
               {model.owner.slug}/{model.slug}
             </StyledLink>
+            {model.isPrivate ? (
+              <LockIcon className="ml-1 inline-block h-4 w-4 text-gray-600" />
+            ) : null}
           </div>
           <UpgradeButton model={model} />
         </div>

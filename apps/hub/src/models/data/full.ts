@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/server/prisma";
 import { controlsOwnerId } from "@/owners/data/auth";
+import { checkRootUser } from "@/users/auth";
 
 import { modelWhereHasAccess } from "./authHelpers";
 import {
@@ -13,6 +14,7 @@ import {
 const select = {
   id: true,
   slug: true,
+  isPrivate: true,
   owner: {
     select: {
       id: true,
@@ -36,6 +38,7 @@ export type ModelFullDTO = {
     slug: string;
   };
   currentRevision: ModelRevisionFullDTO;
+  isPrivate: boolean;
   isEditable: boolean;
   lastBuildSeconds: number | null;
 };
@@ -87,6 +90,7 @@ async function toDTO(row: Row): Promise<ModelFullDTO> {
     },
     currentRevision: await modelRevisionFullToDTO(row.currentRevision),
     isEditable: await controlsOwnerId(row.owner.id),
+    isPrivate: row.isPrivate,
     lastBuildSeconds,
   };
 }
@@ -94,16 +98,21 @@ async function toDTO(row: Row): Promise<ModelFullDTO> {
 export async function loadModelFull({
   owner,
   slug,
+  asAdmin = false,
 }: {
   owner: string;
   slug: string;
+  asAdmin?: boolean;
 }): Promise<ModelFullDTO | null> {
+  if (asAdmin) {
+    await checkRootUser();
+  }
   const row = await prisma.model.findFirst({
     select,
     where: {
       slug: slug,
       owner: { slug: owner },
-      OR: await modelWhereHasAccess(),
+      OR: asAdmin ? undefined : await modelWhereHasAccess(),
     },
   });
 
