@@ -17,6 +17,7 @@ export type SquiggleEditorProps = {
   defaultCode?: string;
   onCodeChange?(code: string): void;
   editorFontSize?: number;
+  editorHeight?: number | "100%"; // 100% makes sense only if you have a parent with a height.
   // environment comes from StandaloneExecutionProps
 } & (StandaloneExecutionProps | ProjectExecutionProps) &
   Omit<PartialPlaygroundSettings, "environment">;
@@ -27,6 +28,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   project: propsProject,
   environment,
   editorFontSize,
+  editorHeight,
   ...defaultSettings
 }) => {
   const { settings, randomizeSeed } = usePlaygroundSettings({
@@ -66,6 +68,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           defaultValue={defaultCode ?? ""}
           onChange={setCode}
           fontSize={editorFontSize}
+          height={editorHeight}
           showGutter={false}
           project={project}
           simulation={simulation}

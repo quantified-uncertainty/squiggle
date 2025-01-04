@@ -111,7 +111,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
     );
 
     const renderBody = () => (
-      <div data-testid="squiggle-editor" style={{ display: "contents" }}>
+      <div data-testid="squiggle-editor" className="min-h-0">
         <CodeEditor
           ref={editorRef}
           // it's important to pass `code` and not `defaultCode` here;

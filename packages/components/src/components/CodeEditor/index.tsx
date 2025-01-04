@@ -12,7 +12,7 @@ export type CodeEditorProps = {
   onSubmit?: () => void;
   // can be used as a hotkey (Cmd+Option+V, see `useViewNodeExtension`) or as an action for gutter markers
   onFocusByPath?: (path: SqValuePath) => void;
-  height?: number | string;
+  height?: number | "100%";
   lineWrapping?: boolean;
   sourceId: string; // TODO - remove this, it's not very useful since source ids in the new SqProject are not unique
   fontSize?: number;
@@ -55,7 +55,11 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     }));
 
     return (
-      <div style={{ fontSize: props.fontSize || "13px" }} ref={editorRef} />
+      <div
+        style={{ fontSize: props.fontSize || "13px" }}
+        className={props.height === "100%" ? "h-full max-h-full" : ""}
+        ref={editorRef}
+      />
     );
   }
 );
