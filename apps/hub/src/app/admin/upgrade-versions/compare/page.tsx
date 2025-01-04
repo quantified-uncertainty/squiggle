@@ -17,7 +17,7 @@ type Props = {
 export default async function CompareVersionsPage({ searchParams }: Props) {
   const { owner, slug } = await searchParams;
 
-  const model = await loadModelFull({ owner, slug, asAdmin: true });
+  const model = await loadModelFull({ owner, slug });
   if (!model) {
     notFound();
   }

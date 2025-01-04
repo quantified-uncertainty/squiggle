@@ -2,7 +2,6 @@ import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/server/prisma";
 import { controlsOwnerId } from "@/owners/data/auth";
-import { checkRootUser } from "@/users/auth";
 
 import { modelWhereHasAccess } from "./authHelpers";
 import {
@@ -98,21 +97,16 @@ async function toDTO(row: Row): Promise<ModelFullDTO> {
 export async function loadModelFull({
   owner,
   slug,
-  asAdmin = false,
 }: {
   owner: string;
   slug: string;
-  asAdmin?: boolean;
 }): Promise<ModelFullDTO | null> {
-  if (asAdmin) {
-    await checkRootUser();
-  }
   const row = await prisma.model.findFirst({
     select,
     where: {
       slug: slug,
       owner: { slug: owner },
-      OR: asAdmin ? undefined : await modelWhereHasAccess(),
+      OR: await modelWhereHasAccess(),
     },
   });
 
