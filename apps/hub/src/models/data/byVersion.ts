@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/server/prisma";
 import { checkRootUser } from "@/users/auth";
 
-// Admin-only, for listing models in /admin UI
+// Admin-only, for listing models in /admin/upgrade-versions UI
 export async function loadModelsByVersion() {
   await checkRootUser();
 
+  // no DTO but that's fine for admin-only
   const models = await prisma.model.findMany({
     include: {
       currentRevision: {
@@ -29,13 +30,11 @@ export async function loadModelsByVersion() {
 
     versions.add(version);
 
+    groupedModels[version] ??= [];
+    groupedModels[version].push(model);
     if (model.isPrivate) {
       privateStats[version] ??= 0;
       privateStats[version]++;
-    } else {
-      // don't expose private models, they won't be available for loading anyway
-      groupedModels[version] ??= [];
-      groupedModels[version].push(model);
     }
   }
   return [...versions.values()].map((version) => ({

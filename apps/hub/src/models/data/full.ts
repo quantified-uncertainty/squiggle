@@ -13,6 +13,7 @@ import {
 const select = {
   id: true,
   slug: true,
+  isPrivate: true,
   owner: {
     select: {
       id: true,
@@ -36,6 +37,7 @@ export type ModelFullDTO = {
     slug: string;
   };
   currentRevision: ModelRevisionFullDTO;
+  isPrivate: boolean;
   isEditable: boolean;
   lastBuildSeconds: number | null;
 };
@@ -87,6 +89,7 @@ async function toDTO(row: Row): Promise<ModelFullDTO> {
     },
     currentRevision: await modelRevisionFullToDTO(row.currentRevision),
     isEditable: await controlsOwnerId(row.owner.id),
+    isPrivate: row.isPrivate,
     lastBuildSeconds,
   };
 }
