@@ -34,36 +34,33 @@ export function PanelWithToolbar<const ModalNames extends string[]>({
 
   const modal = modalName ? renderModal?.(modalName) : undefined;
 
-  //We want to center the title, so need similarly-widthed items on either side
-  const modalHeader = modal && (
+  const header = modal ? (
+    // We want to center the title, so need similarly-widthed items on either side
     <div className="flex h-full gap-2">
-      <ToolbarItem
-        className="w-20 flex-shrink-0 flex-grow-0"
-        onClick={closeModal}
-      >
+      <ToolbarItem className="w-20 shrink-0 grow-0" onClick={closeModal}>
         &larr; Back
       </ToolbarItem>
-      <div className="flex-shrink flex-grow self-center text-center text-sm font-semibold text-slate-600">
+      <div className="shrink grow self-center text-center text-sm font-semibold text-slate-600">
         {modal.title}
       </div>
-      <div className="invisible w-20 flex-shrink-0 flex-grow-0"></div>
+      <div className="invisible w-20 shrink-0 grow-0"></div>
+    </div>
+  ) : (
+    <div className="grid h-full place-items-stretch">
+      {renderToolbar({ openModal })}
     </div>
   );
 
   return (
     <div className="flex h-full flex-col">
-      <div className="mb-1 h-8 overflow-hidden border-b border-slate-200 bg-slate-50 px-4">
-        {modal ? (
-          modalHeader
-        ) : (
-          <div className="grid h-full place-items-stretch">
-            {renderToolbar({ openModal })}
-          </div>
-        )}
+      <div className="mb-1 h-8 shrink-0 overflow-hidden border-b border-slate-200 bg-slate-50 px-4">
+        {header}
       </div>
-      <div className="grid flex-1 place-items-stretch overflow-auto">
-        {modal ? <div className="px-4 py-4"> {modal.body} </div> : renderBody()}
-      </div>
+      {modal ? (
+        <div className="overflow-auto px-4 py-4">{modal.body}</div>
+      ) : (
+        renderBody()
+      )}
     </div>
   );
 }
