@@ -6,6 +6,11 @@ const nextConfig = {
   },
   redirects: async () => [
     {
+      source: "/playground",
+      destination: "https://squiggle-language.com/playground",
+      permanent: false, // we might host the playground on squiggle hub in the future
+    },
+    {
       source: "/users/:username/models/:slug*",
       destination: "/models/:username/:slug*",
       permanent: true,
