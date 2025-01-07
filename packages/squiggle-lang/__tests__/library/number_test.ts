@@ -42,3 +42,10 @@ describe("Numbers", () => {
   testEvalToBe("mod(5, -3)", "-1");
   testEvalToBe("mod(-5, -3)", "-2");
 });
+
+describe("Operators", () => {
+  testEvalToBe("2 + 3", "5");
+
+  // https://github.com/quantified-uncertainty/squiggle/issues/1336
+  testEvalToBe("add(x, y) = x * y; 2 + 3", "5");
+});
