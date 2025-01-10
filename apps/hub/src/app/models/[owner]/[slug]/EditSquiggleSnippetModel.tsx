@@ -106,13 +106,14 @@ const SaveDialog: FC<{ onSubmit: OnSubmit; close: () => void }> = ({
   );
 };
 
-const SaveButton: FC<{ onSubmit: OnSubmit; disabled: boolean }> = ({
-  onSubmit,
-  disabled,
-}) => {
+const SaveButton: FC<{
+  onSubmit: OnSubmit;
+  disabled: boolean;
+  unsaved: boolean;
+}> = ({ onSubmit, disabled, unsaved }) => {
   return (
     <ButtonWithDropdown
-      theme="primary"
+      theme={unsaved ? "primary" : "default"}
       size="small"
       onClick={onSubmit}
       disabled={disabled}
@@ -314,7 +315,15 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           </TextTooltip>
         )}
         {model.isEditable && (
-          <SaveButton onSubmit={onSubmit} disabled={inFlight} />
+          <SaveButton
+            onSubmit={onSubmit}
+            disabled={inFlight}
+            unsaved={
+              form.getValues("code") !== content.code ||
+              version !== content.version
+              // TODO - compare other fields?
+            }
+          />
         )}
       </div>
     ),
