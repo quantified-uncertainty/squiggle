@@ -6,19 +6,15 @@ import {
   use,
   useCallback,
   useMemo,
+  useRef,
   useState,
 } from "react";
-import { FormProvider, useFieldArray, useForm } from "react-hook-form";
+import { FormProvider, useFieldArray } from "react-hook-form";
 
 import {
-  ButtonWithDropdown,
-  CommentIcon,
-  DropdownMenu,
   DropdownMenuActionItem,
   DropdownMenuHeader,
-  DropdownMenuModalActionItem,
   LinkIcon,
-  TextAreaFormField,
   TextTooltip,
   useGlobalShortcut,
   useToast,
@@ -38,7 +34,6 @@ import {
 import { useExitConfirmation } from "@/components/ExitConfirmationWrapper/hooks";
 import { EditRelativeValueExports } from "@/components/exports/EditRelativeValueExports";
 import { ReactRoot } from "@/components/ReactRoot";
-import { FormModal } from "@/components/ui/FormModal";
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/lib/constants";
 import { useAvailableHeight } from "@/lib/hooks/useAvailableHeight";
 import { useSafeActionForm } from "@/lib/hooks/useSafeActionForm";
@@ -52,6 +47,7 @@ import {
   serializeSourceId,
 } from "@/squiggle/linker";
 
+import { SaveButton, SaveButtonHandle } from "./SaveButton";
 import {
   Draft,
   draftUtils,
@@ -73,64 +69,10 @@ export type SquiggleSnippetFormShape = {
 export type RelativeValuesExportInput =
   SquiggleSnippetFormShape["relativeValuesExports"][number];
 
-type OnSubmit = (
+export type OnSubmit = (
   event?: BaseSyntheticEvent,
   extraData?: { comment: string }
 ) => Promise<void>;
-
-const SaveDialog: FC<{ onSubmit: OnSubmit; close: () => void }> = ({
-  onSubmit,
-  close,
-}) => {
-  type SaveFormShape = {
-    comment: string;
-  };
-  const form = useForm<SaveFormShape>();
-
-  const handleSubmit = form.handleSubmit(async ({ comment }, event) => {
-    await onSubmit(event, { comment });
-    close();
-  });
-
-  return (
-    <FormModal
-      onSubmit={handleSubmit}
-      title="Save with comment"
-      form={form}
-      close={close}
-      inFlight={form.formState.isSubmitting}
-      submitText="Save"
-    >
-      <TextAreaFormField<SaveFormShape> name="comment" label="Comment" />
-    </FormModal>
-  );
-};
-
-const SaveButton: FC<{
-  onSubmit: OnSubmit;
-  disabled: boolean;
-  unsaved: boolean;
-}> = ({ onSubmit, disabled, unsaved }) => {
-  return (
-    <ButtonWithDropdown
-      theme={unsaved ? "primary" : "default"}
-      size="small"
-      onClick={onSubmit}
-      disabled={disabled}
-      renderDropdown={({ close }) => (
-        <DropdownMenu>
-          <DropdownMenuModalActionItem
-            title="Save with comment..."
-            icon={CommentIcon}
-            render={() => <SaveDialog onSubmit={onSubmit} close={close} />}
-          />
-        </DropdownMenu>
-      )}
-    >
-      Save
-    </ButtonWithDropdown>
-  );
-};
 
 type Props = {
   // We have to pass the entire model here and not just content;
@@ -224,18 +166,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     )
   );
 
-  useGlobalShortcut(
-    {
-      metaKey: true,
-      key: "s",
-    },
-    () => {
-      if (model.isEditable) {
-        onSubmit();
-      }
-    }
-  );
-
   // We don't want to control SquigglePlayground, it's uncontrolled by design.
   // Instead, we reset the `defaultCode` that we pass to it when version is changed or draft is restored.
   const [defaultCode, setDefaultCode] = useState(content.code);
@@ -265,6 +195,32 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
   };
 
   const { height, ref } = useAvailableHeight();
+
+  const saveButtonRef = useRef<SaveButtonHandle>(null);
+  useGlobalShortcut(
+    {
+      metaKey: true,
+      key: "s",
+    },
+    () => {
+      if (model.isEditable) {
+        onSubmit();
+      }
+    }
+  );
+
+  useGlobalShortcut(
+    {
+      metaKey: true,
+      shiftKey: true,
+      key: "s",
+    },
+    () => {
+      if (model.isEditable) {
+        saveButtonRef.current?.openSaveDialog();
+      }
+    }
+  );
 
   const checkedVersion = useAdjustSquiggleVersion(version);
 
@@ -316,6 +272,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
         )}
         {model.isEditable && (
           <SaveButton
+            ref={saveButtonRef}
             onSubmit={onSubmit}
             disabled={inFlight}
             unsaved={
