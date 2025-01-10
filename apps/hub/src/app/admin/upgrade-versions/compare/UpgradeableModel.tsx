@@ -8,8 +8,8 @@ import {
   versionSupportsSquiggleChart,
 } from "@quri/versioned-squiggle-components";
 
-import { EditSquiggleSnippetModel } from "@/app/models/[owner]/[slug]/EditSquiggleSnippetModel";
 import { ModelFullDTO } from "@/models/data/full";
+import { EditSquiggleSnippetModel } from "@/squiggle/components/EditSquiggleSnippetModel";
 import { sqProjectWithHubLinker } from "@/squiggle/linker";
 
 export const UpgradeableModel: FC<{

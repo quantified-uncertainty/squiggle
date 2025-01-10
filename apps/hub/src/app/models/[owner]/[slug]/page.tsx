@@ -4,7 +4,7 @@ import Skeleton from "react-loading-skeleton";
 
 import { loadModelFull } from "@/models/data/full";
 
-import { EditSquiggleSnippetModel } from "./EditSquiggleSnippetModel";
+import { EditSquiggleSnippetModel } from "../../../../squiggle/components/EditSquiggleSnippetModel";
 
 type Props = {
   params: Promise<{ owner: string; slug: string }>;
