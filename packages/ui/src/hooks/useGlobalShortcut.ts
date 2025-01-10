@@ -11,8 +11,8 @@ export type Shortcut = {
 //TODO: Make sure that keyboard shortcut only works when exact modifiers are pressed. This means checking for altKey and controlKey as well.
 function eventMatchesShortcut(event: KeyboardEvent, shortcut: Shortcut) {
   if (
-    (shortcut.shiftKey && !event.shiftKey) ||
-    (shortcut.metaKey && !event.metaKey) ||
+    (shortcut.shiftKey ?? false) !== event.shiftKey ||
+    (shortcut.metaKey ?? false) !== event.metaKey ||
     event.key.toLowerCase() !== shortcut.key.toLowerCase()
   ) {
     return false;
@@ -41,6 +41,7 @@ export function useGlobalShortcuts(shortcuts: [Shortcut, () => void][]) {
     // memoize it to prevent unnecessary effect executions. That said, this should run quickly anyway.
   }, [shortcuts]);
 }
+
 export function useGlobalShortcut(shortcut: Shortcut, act: () => void) {
   // Explicitly type the memoized value to ensure it's recognized as an array of [Shortcut, () => void] tuples
   const shortcuts = useMemo<[Shortcut, () => void][]>(
