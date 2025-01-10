@@ -20,6 +20,7 @@ import {
   LinkIcon,
   TextAreaFormField,
   TextTooltip,
+  useGlobalShortcut,
   useToast,
 } from "@quri/ui";
 import {
@@ -220,6 +221,18 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       () => form.getValues("code") !== content.code,
       [form, content.code]
     )
+  );
+
+  useGlobalShortcut(
+    {
+      metaKey: true,
+      key: "s",
+    },
+    () => {
+      if (model.isEditable) {
+        onSubmit();
+      }
+    }
   );
 
   // We don't want to control SquigglePlayground, it's uncontrolled by design.
