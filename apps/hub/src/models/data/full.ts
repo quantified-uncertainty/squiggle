@@ -57,6 +57,7 @@ async function toDTO(row: Row): Promise<ModelFullDTO> {
       select: {
         builds: {
           select: {
+            // be careful with selecting errors here - potential security risk, build script doesn't take `isPrivate` into account
             runSeconds: true,
           },
         },

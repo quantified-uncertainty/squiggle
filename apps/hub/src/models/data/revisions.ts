@@ -20,7 +20,7 @@ export const selectModelRevision = {
   // used for `buildStatus` and `lastBuild`
   builds: {
     select: {
-      errors: true,
+      errors: true, // selected for `buildStatus`
       runSeconds: true,
     },
     orderBy: {
@@ -51,7 +51,7 @@ type DbModelRevisionBuild = DbModelRevision["builds"][number];
 
 type ModelRevisionBuildDTO = {
   runSeconds: number;
-  errors: string[];
+  // no errors here - potential security risk, build script doesn't take `isPrivate` into account
 };
 
 export type ModelRevisionDTO = {
@@ -67,7 +67,6 @@ export type ModelRevisionDTO = {
 function buildToDTO(build: DbModelRevisionBuild): ModelRevisionBuildDTO {
   return {
     runSeconds: build.runSeconds,
-    errors: build.errors,
   };
 }
 
