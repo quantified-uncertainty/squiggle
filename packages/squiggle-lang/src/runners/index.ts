@@ -39,12 +39,10 @@ export function runnerByName(name: RunnerName, threads: number = 1) {
   if (threads === 1) {
     return makeRunner();
   } else {
-    return new PoolRunner(
-      new RunnerPool({
-        makeRunner,
-        maxThreads: threads,
-      })
-    );
+    return new PoolRunner({
+      makeRunner,
+      maxThreads: threads,
+    });
   }
 }
 
