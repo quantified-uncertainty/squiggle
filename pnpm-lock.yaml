@@ -9,9 +9,9 @@ overrides:
   react-reconciler: ^0.31.0
 
 patchedDependencies:
-  react-select:
-    hash: pok3nxq32ihaf3qpdecuz4j5ea
-    path: patches/react-select.patch
+  react-select@5.9.0:
+    hash: wq67jk5fcdm5ibgcxfd7dcf7iq
+    path: patches/react-select@5.9.0.patch
 
 importers:
 
@@ -112,7 +112,7 @@ importers:
         version: 9.0.1(@types/react@19.0.2)(react@19.0.0)
       react-select:
         specifier: ^5.9.0
-        version: 5.9.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        version: 5.9.0(patch_hash=wq67jk5fcdm5ibgcxfd7dcf7iq)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       remark-breaks:
         specifier: ^4.0.0
         version: 4.0.0
@@ -1056,7 +1056,7 @@ importers:
         version: 5.6.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-select:
         specifier: ^5.9.0
-        version: 5.9.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        version: 5.9.0(patch_hash=wq67jk5fcdm5ibgcxfd7dcf7iq)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-textarea-autosize:
         specifier: 8.5.4
         version: 8.5.4(@types/react@19.0.2)(react@19.0.0)
@@ -13612,7 +13612,7 @@ snapshots:
       react-colorful: 5.6.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-dom: 19.0.0(react@19.0.0)
       react-hook-form: 7.53.2(react@19.0.0)
-      react-select: 5.9.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react-select: 5.9.0(patch_hash=wq67jk5fcdm5ibgcxfd7dcf7iq)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-textarea-autosize: 8.5.2(@types/react@19.0.2)(react@19.0.0)
       react-use: 17.5.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
     transitivePeerDependencies:
@@ -13629,7 +13629,7 @@ snapshots:
       react-colorful: 5.6.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-dom: 19.0.0(react@19.0.0)
       react-hook-form: 7.53.2(react@19.0.0)
-      react-select: 5.9.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react-select: 5.9.0(patch_hash=wq67jk5fcdm5ibgcxfd7dcf7iq)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-textarea-autosize: 8.5.3(@types/react@19.0.2)(react@19.0.0)
       react-use: 17.5.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
     transitivePeerDependencies:
@@ -13646,7 +13646,7 @@ snapshots:
       react-colorful: 5.6.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-dom: 19.0.0(react@19.0.0)
       react-hook-form: 7.53.2(react@19.0.0)
-      react-select: 5.9.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react-select: 5.9.0(patch_hash=wq67jk5fcdm5ibgcxfd7dcf7iq)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-textarea-autosize: 8.5.3(@types/react@19.0.2)(react@19.0.0)
       react-use: 17.5.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
     transitivePeerDependencies:
@@ -13663,7 +13663,7 @@ snapshots:
       react-colorful: 5.6.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-dom: 19.0.0(react@19.0.0)
       react-hook-form: 7.53.2(react@19.0.0)
-      react-select: 5.9.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react-select: 5.9.0(patch_hash=wq67jk5fcdm5ibgcxfd7dcf7iq)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-textarea-autosize: 8.5.3(@types/react@19.0.2)(react@19.0.0)
       react-use: 17.5.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
     transitivePeerDependencies:
@@ -13680,7 +13680,7 @@ snapshots:
       react-colorful: 5.6.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-dom: 19.0.0(react@19.0.0)
       react-hook-form: 7.53.2(react@19.0.0)
-      react-select: 5.9.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react-select: 5.9.0(patch_hash=wq67jk5fcdm5ibgcxfd7dcf7iq)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-textarea-autosize: 8.5.3(@types/react@19.0.2)(react@19.0.0)
       react-use: 17.5.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
     transitivePeerDependencies:
@@ -13698,7 +13698,7 @@ snapshots:
       react-colorful: 5.6.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-dom: 19.0.0(react@19.0.0)
       react-hook-form: 7.53.2(react@19.0.0)
-      react-select: 5.9.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react-select: 5.9.0(patch_hash=wq67jk5fcdm5ibgcxfd7dcf7iq)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-textarea-autosize: 8.5.4(@types/react@19.0.2)(react@19.0.0)
       react-use: 17.5.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
     transitivePeerDependencies:
@@ -20843,7 +20843,7 @@ snapshots:
     transitivePeerDependencies:
       - react-dom
 
-  react-select@5.9.0(patch_hash=pok3nxq32ihaf3qpdecuz4j5ea)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
+  react-select@5.9.0(patch_hash=wq67jk5fcdm5ibgcxfd7dcf7iq)(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
       '@babel/runtime': 7.26.0
       '@emotion/cache': 11.14.0

@@ -21,7 +21,7 @@
       "react-reconciler": "^0.31.0"
     },
     "patchedDependencies": {
-      "react-select": "patches/react-select.patch"
+      "react-select@5.9.0": "patches/react-select@5.9.0.patch"
     }
   },
   "version": "0.0.1-0",
