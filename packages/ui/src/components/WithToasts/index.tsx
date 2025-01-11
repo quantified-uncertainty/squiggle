@@ -1,5 +1,6 @@
 "use client";
 import { clsx } from "clsx";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   createContext,
   FC,
@@ -7,6 +8,7 @@ import {
   Reducer,
   useCallback,
   useContext,
+  useEffect,
   useReducer,
 } from "react";
 
@@ -60,20 +62,34 @@ const Toast: FC<{ toast: ToastShape }> = ({ toast }) => {
     });
   };
 
+  useEffect(() => {
+    if (toast.type === "confirmation") {
+      setTimeout(() => {
+        remove();
+      }, 5000);
+    }
+  }, [remove]);
+
   return (
-    <div
+    <motion.div
+      layout="position"
+      transition={{ duration: 0.15 }}
       className={clsx(
         "flex items-center gap-2",
-        "cursor-pointer rounded border bg-white px-8 py-4 text-sm shadow-lg",
-        toast.type === "error" && "text-red-700",
-        toast.type === "confirmation" && "text-slate-700"
+        "cursor-pointer rounded border px-8 py-4 text-sm shadow-lg",
+        toast.type === "error" && "bg-red-50 text-red-900",
+        toast.type === "confirmation" && "bg-white text-slate-700"
       )}
       onClick={remove}
     >
-      {toast.type === "error" && <ErrorIcon size={16} />}
-      {toast.type === "confirmation" && <CheckCircleIcon size={16} />}
+      {toast.type === "error" && (
+        <ErrorIcon size={16} className="text-red-400" />
+      )}
+      {toast.type === "confirmation" && (
+        <CheckCircleIcon size={16} className="text-green-600" />
+      )}
       <div>{toast.text}</div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -102,10 +118,13 @@ export const WithToasts: FC<PropsWithChildren> = ({ children }) => {
   return (
     <Context.Provider value={dispatch}>
       <div>{children}</div>
+      {/* <motion.div layout className="fixed bottom-4 right-4 z-50 space-y-2"> */}
       <div className="fixed bottom-4 right-4 z-50 space-y-2">
-        {state.toasts.map((toast) => (
-          <Toast key={toast.id} toast={toast} />
-        ))}
+        <AnimatePresence>
+          {state.toasts.map((toast) => (
+            <Toast key={toast.id} toast={toast} />
+          ))}
+        </AnimatePresence>
       </div>
     </Context.Provider>
   );

@@ -8,8 +8,10 @@ import { SafeActionFormModal } from "@/components/ui/SafeActionFormModal";
 import { modelRoute } from "@/lib/routes";
 import { moveModelAction } from "@/models/actions/moveModelAction";
 import { ModelCardDTO } from "@/models/data/cards";
-
-import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
+import {
+  draftUtils,
+  modelToDraftLocator,
+} from "@/squiggle/components/SquiggleSnippetDraftDialog";
 
 type FormShape = { owner: SelectOwnerOption };
 

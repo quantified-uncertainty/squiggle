@@ -3,13 +3,13 @@ import { useForm } from "react-hook-form";
 
 import { Button, TextFormField } from "@quri/ui";
 
-import { RelativeValuesExportInput } from "@/app/models/[owner]/[slug]/EditSquiggleSnippetModel";
 import {
   modelForRelativeValuesExportRoute,
   relativeValuesRoute,
 } from "@/lib/routes";
 import { ModelFullDTO } from "@/models/data/full";
 import { FindRelativeValuesForSelectResult } from "@/relative-values/data/findRelativeValuesForSelect";
+import { RelativeValuesExportInput } from "@/squiggle/components/EditSquiggleSnippetModel";
 
 import { SelectOwner, SelectOwnerOption } from "../SelectOwner";
 import { FormModal } from "../ui/FormModal";

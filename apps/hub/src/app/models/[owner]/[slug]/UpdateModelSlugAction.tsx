@@ -8,8 +8,10 @@ import { SlugFormField } from "@/components/ui/SlugFormField";
 import { modelRoute } from "@/lib/routes";
 import { updateModelSlugAction } from "@/models/actions/updateModelSlugAction";
 import { ModelCardDTO } from "@/models/data/cards";
-
-import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
+import {
+  draftUtils,
+  modelToDraftLocator,
+} from "@/squiggle/components/SquiggleSnippetDraftDialog";
 
 type Props = {
   model: ModelCardDTO;
