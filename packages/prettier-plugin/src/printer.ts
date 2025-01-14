@@ -429,6 +429,8 @@ export function createSquigglePrinter(
             ...node.statements,
             ...(node.result ? [node.result] : []),
           ];
+        case "Decorator":
+          return [node.name, ...node.args];
         case "Import":
           return [node.path, node.variable];
         case "Block":
@@ -436,7 +438,7 @@ export function createSquigglePrinter(
         case "Array":
           return node.elements;
         case "LetStatement":
-          return [node.variable, node.value];
+          return [...node.decorators, node.variable, node.value];
         case "DefunStatement":
           return [node.value];
         case "Call":
