@@ -65,7 +65,9 @@ export function useGetSubvalueByPath() {
 }
 
 export function getValueComment(value: SqValueWithContext): string | undefined {
-  const _value = value.context.docstring() || value.tags.doc();
+  // `@doc` is preferred over `/** */`.
+  // See also: https://github.com/quantified-uncertainty/squiggle/issues/3320
+  const _value = value.tags.doc() || value.context.docstring();
   return _value && _value.length > 0 ? _value : undefined;
 }
 
