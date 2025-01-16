@@ -1,6 +1,7 @@
 import { Env } from "../../dists/env.js";
 import { getStdLib } from "../../library/index.js";
 import { Lambda } from "../../reducer/lambda/index.js";
+import { UserDefinedLambdaDomainError } from "../../reducer/lambda/UserDefinedLambda.js";
 import { Reducer } from "../../reducer/Reducer.js";
 import { TAny } from "../../types/Type.js";
 import * as Result from "../../utility/result.js";
@@ -54,9 +55,14 @@ export function runLambda(
     const value = reducer.call(lambda, values);
     return Result.Ok(wrapValue(value) as SqValue);
   } catch (e) {
-    return Result.Err(
-      new SqErrorList([new SqRuntimeError(reducer.errorFromException(e))])
-    );
+    const error =
+      e instanceof UserDefinedLambdaDomainError
+        ? new SqOtherError(
+            `Argument #${e.idx + 1}, ${values[e.idx].toString()}, is not in the domain of the lambda`
+          )
+        : new SqRuntimeError(reducer.errorFromException(e));
+
+    return Result.Err(new SqErrorList([error]));
   }
 }
 
