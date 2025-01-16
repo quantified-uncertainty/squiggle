@@ -1,0 +1,118 @@
+---
+title: Runners and Serialization
+description: Runners provide a pluggable way to evaluate Squiggle code in different environments.
+---
+
+Users of squiggle-lang JS APIs usually run Squiggle with `SqProject`, which can take a runner:
+
+```typescript
+const project = new SqProject({
+  runner: new WebWorkerRunner(),
+});
+```
+
+Runner is an object that implements the runner interface, and converts `RunParams` (Squiggle module, environment, and evaluated imports) to a `RunResult` (the result of the evaluation).
+
+`@quri/squiggle-lang` exports a number of built-in runners, which are described below.
+
+## Built-in Runners
+
+### EmbeddedRunner
+
+This is a legacy runner that runs Squiggle code in the main thread.
+
+Its main downside is that Squiggle execution is synchronous, so it blocks the main thread. This is a problem for web applications, where we want to be able to run Squiggle code without blocking the UI.
+
+### WebWorkerRunner
+
+This runner runs Squiggle code in a Web Worker.
+
+This runner is only available in the browser.
+
+#### Next.js warnings
+
+When used with [Turbopack](https://turbo.build/pack) in the latest Next.js, you might see these errors in the console:
+
+```
+ ⚠ ./packages/squiggle-lang/dist/runners/WebWorkerRunner.js:8:23
+error TP1001 new Worker(./esbuild-worker.js relative, {"type": "module"}) is not statically analyse-able
+   6 |         }
+   7 |         super();
+>  8 |         this.worker = new Worker(new URL("./esbuild-worker.js", import.meta.url), {
+     |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  9 |             type: "module",
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 10 |         });
+     | ^^^^^^^^^^^
+  11 |     }
+  12 |     async getWorker() {
+  13 |         return this.worker;
+```
+
+As far as we can tell, these errors are benign and do not affect the functionality of the runner.
+
+#### Performance notes
+
+Starting with Squiggle 0.10.0, this runner (wrapped with `PoolRunner`) is used by default in Squiggle React components.
+
+It fixes most of UI freezes that were caused by long-running Squiggle evaluations.
+
+Freezes can still occur in some cases:
+- When component rendering is slow, e.g. you try to render hundreds of distribution charts simultaneously
+- when the _output_ of the model is large, and serialization/deserialization of outputs itself becomes costly; for example, [List.upTo(1,300000) -> sum](https://www.squiggle-language.com/playground?v=0.10.0#code=eNqrVkpJTUsszSlxzk9JVbJS8sksLtErLQjJ1zDUMTYAAU0FXTuF4tJcpVoAQ6cNXg%3D%3D) is fast, while [List.upTo(1, 50000)](https://www.squiggle-language.com/playground?v=0.10.0#code=eNqrVkpJTUsszSlxzk9JVbJS8sksLtErLQjJ1zDUMTUAAk2lWgDi9Qsw) is slow.
+
+### NodeWorkerRunner
+
+This runner runs Squiggle code in a Node.js worker.
+
+This runner is only available in Node.js environment.
+
+### PoolRunner
+
+This runner runs Squiggle code in a pool of other runners.
+
+It is parameterized by two arguments:
+
+- `makeRunner`: a function that creates a new runner.
+- `maxWorkers`: the maximum number of workers to run in parallel.
+
+If all runners are busy, the pool will block the caller until a runner is available.
+
+```ts
+const project = new SqProject({
+  runner: new PoolRunner({
+            makeRunner: () => new WebWorkerRunner(),
+            maxWorkers: 10,
+  }),
+});
+```
+
+## Serialization
+
+### Reversible Serialization
+
+Most runners, with the exception of `EmbeddedRunner`, marshall their outputs back to the main thread in serialized form.
+
+Serializing and deserializing Squiggle outputs is somewhat complicated, because:
+
+- values can reference other values, so we need to serialize the entire value graph (in general, Squiggle values are not trees, DAGs, directed acyclic graphs)
+- values can include lambdas, for which we have to serialize their ASTs and captured variables
+
+To do this, we rely on the [@quri/serialization](https://www.npmjs.com/package/@quri/serializer) package, which does most of the heavy lifting.
+
+**Important:** serialized values are not compatible across Squiggle versions.
+
+### Simple Value Serialization
+
+Full reversible serialization is reliable, but its serialized form is not human-readable.
+
+To address this, we provide a simple serialization format that is human-readable, but not reversible.
+
+This serialization format is available:
+
+- via `Danger.json` and `Danger.jsonString` functions in Squiggle language.
+- via `simpleValueFromAny` function in `@quri/squiggle-lang` package JS API.
+
+This serialization format is unstable and generally should not be relied upon for long-term storage.
+
+But it can be useful for debugging or for interacting with LLMs (when you want to show a human-readable summary of a Squiggle value).

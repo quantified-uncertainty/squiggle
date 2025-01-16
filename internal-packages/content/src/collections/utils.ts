@@ -11,6 +11,7 @@ export const mdxOptions: TransformOptions = {
   rehypeCodeOptions: {
     langs: [
       "javascript",
+      "typescript",
       {
         name: "squiggle",
         ...squiggleGrammar,

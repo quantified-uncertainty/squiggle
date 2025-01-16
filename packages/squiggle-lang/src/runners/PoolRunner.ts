@@ -5,6 +5,11 @@ type RunnerPoolThread = {
   job: Promise<RunResult> | undefined;
 };
 
+type RunnerPoolParams = {
+  makeRunner: () => BaseRunner;
+  maxThreads?: number;
+};
+
 export class RunnerPool {
   private makeRunner: () => BaseRunner;
 
@@ -12,7 +17,7 @@ export class RunnerPool {
 
   threads: RunnerPoolThread[] = [];
 
-  constructor(params: { makeRunner: () => BaseRunner; maxThreads?: number }) {
+  constructor(params: RunnerPoolParams) {
     this.makeRunner = params.makeRunner;
     this.maxThreads = params.maxThreads ?? 1;
   }
@@ -42,8 +47,11 @@ export class RunnerPool {
 }
 
 export class PoolRunner extends BaseRunner {
-  constructor(public pool: RunnerPool) {
+  public pool: RunnerPool;
+
+  constructor(params: RunnerPoolParams) {
     super();
+    this.pool = new RunnerPool(params);
   }
 
   async run(params: RunParams): Promise<RunResult> {
