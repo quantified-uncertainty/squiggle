@@ -23,7 +23,7 @@ export const Link = forwardRef<
 
   const patchedOnClick = useMemo(() => {
     return (e: React.MouseEvent<HTMLAnchorElement>) => {
-      if (!isConfirmationActive()) {
+      if (!isConfirmationActive() || e.metaKey || e.ctrlKey) {
         return onClick?.(e);
       }
       confirmNavigation(e.currentTarget.href);
