@@ -41,13 +41,14 @@ resource "heroku_app" "backend" {
 }
 
 resource "vercel_project" "main" {
-  name      = "metaforecast"
-  framework = "nextjs"
+  name           = "metaforecast"
+  framework      = "nextjs"
+  root_directory = "apps/metaforecast"
 
   git_repository = {
-    repo              = "quantified-uncertainty/metaforecast"
+    repo              = "quantified-uncertainty/squiggle"
     type              = "github"
-    production_branch = "master"
+    production_branch = "main"
   }
 
   environment = concat([

@@ -1,9 +1,3 @@
-## Move to Squiggle monorepo
-
-**This repository is deprecated.**
-
-To make things easier to maintain by [QURI](https://quantifieduncertainty.org/) team, we moved Metaforecast source code to [Squiggle monorepo](https://github.com/quantified-uncertainty/squiggle). Refer to [apps/metaforecast](https://github.com/quantified-uncertainty/squiggle/tree/main/apps/metaforecast) for the latest source code.
-
 ## What this is
 
 [Metaforecast](https://metaforecast.org) is a search engine for probabilities from various prediction markes and forecasting platforms. Try searching "Trump", "China" or "Semiconductors".
@@ -17,8 +11,8 @@ This repository includes the source code for both the website and the library th
 ### 1. Download this repository
 
 ```
-$ git clone https://github.com/quantified-uncertainty/metaforecast
-$ cd metaforecast
+$ git clone https://github.com/quantified-uncertainty/squiggle
+$ cd apps/metaforecast
 $ pnpm install
 ```
 
@@ -36,24 +30,24 @@ After installing and building (`pnpm run build`) the application, `pnpm run cli`
 
 ![](./public/screenshot-cli.png)
 
-`npm run next-dev` starts a Next.js dev server with the website on `http://localhost:3000`.
+`pnpm run dev` starts a Next.js dev server with the website on `http://localhost:3000`.
 
 So overall this would look like
 
 ```
-$ git clone https://github.com/quantified-uncertainty/metaforecast
-$ cd metaforecast
+$ git clone https://github.com/quantified-uncertainty/squiggle
+$ cd apps/metaforecast
 $ pnpm install
 $ pnpm run build
 $ pnpm run cli
-$ pnpm run next-dev
+$ pnpm run dev
 ```
 
 ### 4. Example: download the metaforecasts database
 
 ```
-$ git clone https://github.com/quantified-uncertainty/metaforecast
-$ cd metaforecast
+$ git clone https://github.com/quantified-uncertainty/squiggle
+$ cd apps/metaforecast
 $ pnpm install
 $ node src/backend/manual/manualDownload.js
 ```

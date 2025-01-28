@@ -3,10 +3,6 @@
   "version": "2.0.0",
   "private": true,
   "description": "Get forecasts from various platforms",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/quantified-uncertainty/metaforecast.git"
-  },
   "engines": {
     "node": ">=20.x"
   },
@@ -17,9 +13,9 @@
   "author": "Nuño Sempere",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/quantified-uncertainty/metaforecast/"
+    "url": "https://github.com/quantified-uncertainty/squiggle/issues"
   },
-  "homepage": "https://github.com/quantified-uncertainty/metaforecast#readme",
+  "homepage": "https://metaforecast.org",
   "scripts": {
     "cli": "NODE_NO_WARNINGS=1 tsx src/backend/cli/index.ts",
     "setCookies": "./src/backend/manual/setCookies.sh",
