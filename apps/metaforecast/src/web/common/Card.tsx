@@ -1,7 +1,7 @@
 import { FC, PropsWithChildren } from "react";
 
 const CardTitle: FC<PropsWithChildren> = ({ children }) => (
-  <div className="text-gray-800 text-lg font-medium">{children}</div>
+  <div className="text-lg font-medium text-gray-800">{children}</div>
 );
 
 interface Props {
@@ -19,7 +19,7 @@ export const Card: CardType = ({
   highlightOnHover = true,
 }) => (
   <div
-    className={`h-full bg-white rounded-md shadow ${
+    className={`h-full rounded-md bg-white shadow ${
       highlightOnHover ? "hover:bg-gray-100" : ""
     } ${large ? "p-5 sm:p-10" : "px-4 py-3"}`}
   >

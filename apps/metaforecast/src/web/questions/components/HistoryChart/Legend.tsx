@@ -31,7 +31,7 @@ const LegendItem: React.FC<{ item: Item; onHighlight: () => void }> = ({
   return (
     <>
       <div
-        className="flex items-center cursor-pointer"
+        className="flex cursor-pointer items-center"
         onMouseOver={onHover}
         onMouseLeave={() => setShowTooltip(false)}
         ref={reference}
@@ -40,7 +40,7 @@ const LegendItem: React.FC<{ item: Item; onHighlight: () => void }> = ({
           <circle cx="4" cy="4" r="4" fill={item.color} />
         </svg>
         <div
-          className="text-xs sm:text-sm sm:whitespace-nowrap sm:text-ellipsis sm:overflow-hidden sm:max-w-160"
+          className="sm:max-w-160 text-xs sm:overflow-hidden sm:text-ellipsis sm:whitespace-nowrap sm:text-sm"
           ref={textRef}
         >
           {item.name}
@@ -50,7 +50,7 @@ const LegendItem: React.FC<{ item: Item; onHighlight: () => void }> = ({
         ? (() => {
             return (
               <div
-                className={`absolute text-xs p-2 border border-gray-300 rounded bg-white ${
+                className={`absolute rounded border border-gray-300 bg-white p-2 text-xs ${
                   showTooltip ? "" : "hidden"
                 }`}
                 ref={floating}

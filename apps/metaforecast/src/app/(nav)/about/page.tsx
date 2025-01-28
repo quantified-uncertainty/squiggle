@@ -1,5 +1,4 @@
 import React from "react";
-
 import ReactMarkdown from "react-markdown";
 import gfm from "remark-gfm";
 
@@ -30,11 +29,9 @@ Also note that, whatever other redeeming features they might have, prediction ma
 export default function AboutPage() {
   return (
     <Card highlightOnHover={false} large={true}>
-      <ReactMarkdown
-        remarkPlugins={[gfm]}
-        children={readmeMarkdownText}
-        className="max-w-prose mx-auto"
-      />
+      <ReactMarkdown remarkPlugins={[gfm]} className="mx-auto max-w-prose">
+        {readmeMarkdownText}
+      </ReactMarkdown>
     </Card>
   );
 }

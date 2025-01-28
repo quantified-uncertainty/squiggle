@@ -39,7 +39,7 @@ const Handle: FC<{
 }> = ({ handle: { id, value, percent }, getHandleProps, displayFunction }) => {
   return (
     <>
-      <div className="justify-center text-center text-gray-600 text-xs">
+      <div className="justify-center text-center text-xs text-gray-600">
         {displayFunction(value)}
       </div>
       <div

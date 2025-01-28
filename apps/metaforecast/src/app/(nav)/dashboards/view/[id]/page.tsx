@@ -15,13 +15,13 @@ const DashboardMetadata: React.FC<{ dashboard: DashboardFragment }> = ({
 }) => (
   <div>
     {dashboard.title ? (
-      <h1 className="text-4xl text-center text-gray-600 mt-2 mb-2">
+      <h1 className="mb-2 mt-2 text-center text-4xl text-gray-600">
         {dashboard.title}
       </h1>
     ) : null}
 
     {dashboard.creator ? (
-      <p className="text-lg text-center text-gray-600 mt-2 mb-2">
+      <p className="mb-2 mt-2 text-center text-lg text-gray-600">
         Created by:{" "}
         {dashboard.creator === "Clay Graubard" ? (
           <>
@@ -40,15 +40,14 @@ const DashboardMetadata: React.FC<{ dashboard: DashboardFragment }> = ({
     ) : null}
 
     {dashboard.description ? (
-      <p className="text-lg text-center text-gray-600 mt-2 mb-2">
+      <p className="mb-2 mt-2 text-center text-lg text-gray-600">
         {dashboard.description}
       </p>
     ) : null}
   </div>
 );
 
-/* Body */
-export default async function ({
+export default async function DashboardsViewPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -65,9 +64,9 @@ export default async function ({
   }
 
   return (
-    <div className="flex flex-col my-8 space-y-8">
+    <div className="my-8 flex flex-col space-y-8">
       <DashboardMetadata dashboard={dashboard} />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <QuestionCardsList results={dashboard.questions} />
       </div>
 

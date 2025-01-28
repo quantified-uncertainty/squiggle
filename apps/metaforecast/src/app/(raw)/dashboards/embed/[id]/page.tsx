@@ -4,7 +4,7 @@ import { QuestionCardsList } from "@/app/(nav)/QuestionCardsList";
 import { DashboardByIdDocument } from "@/web/dashboards/queries.generated";
 import { getUrqlRscClient } from "@/web/urql";
 
-export default async function ({
+export default async function DashboardEmbedPage({
   params,
   searchParams,
 }: {
@@ -31,19 +31,19 @@ export default async function ({
   const numCols = !rawNumCols
     ? undefined
     : Number(rawNumCols) < 5
-    ? Number(rawNumCols)
-    : 4;
+      ? Number(rawNumCols)
+      : 4;
 
   return (
-    <div className="mb-4 mt-3 flex flex-row justify-left items-center">
-      <div className="mx-2 place-self-left">
+    <div className="justify-left mb-4 mt-3 flex flex-row items-center">
+      <div className="place-self-left mx-2">
         <div
           // FIXME - concatenated tailwind classes are unreliable
           className={`grid grid-cols-${numCols || 1} sm:grid-cols-${
             numCols || 1
           } md:grid-cols-${numCols || 2} lg:grid-cols-${
             numCols || 3
-          } gap-4 mb-6`}
+          } mb-6 gap-4`}
         >
           <QuestionCardsList results={dashboard.questions} />
         </div>

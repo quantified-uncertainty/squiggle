@@ -1,8 +1,7 @@
 "use client";
-import { FC, PropsWithChildren, useEffect, useRef, useState } from "react";
-
 import domtoimage from "dom-to-image"; // https://github.com/tsayen/dom-to-image
 import { Resizable } from "re-resizable";
+import { FC, PropsWithChildren, useEffect, useRef, useState } from "react";
 
 import { Button } from "../../common/Button";
 import { CopyParagraph } from "../../common/CopyParagraph";
@@ -28,7 +27,7 @@ const domToImageWrapper = async (node: HTMLDivElement) => {
   return image;
 };
 
-const ImageSource: React.FC<{ question: QuestionFragment; imgSrc: string }> = ({
+const ImageSource: FC<{ question: QuestionFragment; imgSrc: string }> = ({
   question,
   imgSrc,
 }) => {
@@ -66,7 +65,7 @@ const MetaculusEmbed: React.FC<{ question: QuestionFragment }> = ({
   if (question.platform.id !== "metaculus") return null;
 
   const iframeURL = generateMetaculusIframeURL(question);
-  return <iframe className="w-full h-80" src={iframeURL} />;
+  return <iframe className="h-80 w-full" src={iframeURL} />;
 };
 
 const MetaculusSource: FC<{
@@ -86,8 +85,8 @@ const GrayContainer: FC<PropsWithChildren<{ title: string }>> = ({
   title,
   children,
 }) => (
-  <div className="bg-gray-100 p-2 space-y-1">
-    <div className="uppercase text-xs font-bold tracking-wide text-gray-600">
+  <div className="space-y-1 bg-gray-100 p-2">
+    <div className="text-xs font-bold uppercase tracking-wide text-gray-600">
       {title}:
     </div>
     <div>{children}</div>
@@ -159,7 +158,7 @@ export const CaptureQuestion: React.FC<Props> = ({ question }) => {
   }
 
   return (
-    <div className="space-y-2 flex flex-col">
+    <div className="flex flex-col space-y-2">
       <GrayContainer title="Resizable preview">
         <Resizable
           minWidth={320}
@@ -169,7 +168,7 @@ export const CaptureQuestion: React.FC<Props> = ({ question }) => {
           <div ref={containerRef}>
             <QuestionCard
               container={(children) => (
-                <div className="px-4 py-3 bg-white">{children}</div>
+                <div className="bg-white px-4 py-3">{children}</div>
               )}
               question={question}
               showTimeStamp={true}

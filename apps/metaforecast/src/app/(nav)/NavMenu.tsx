@@ -1,10 +1,10 @@
 "use client";
 
-import { FC } from 'react';
+import { FC } from "react";
 
-import clsx from 'clsx';
-import Link from 'next/link';
-import { useSelectedLayoutSegment } from 'next/navigation';
+import clsx from "clsx";
+import Link from "next/link";
+import { useSelectedLayoutSegment } from "next/navigation";
 
 type MenuItem = {
   segment: string | null;
@@ -41,10 +41,10 @@ export const NavMenu: FC = () => {
           passHref
           key={item.segment || "_null"}
           className={clsx(
-            "no-underline py-4 px-2 text-sm sm:text-lg font-medium cursor-pointer border-b-2",
+            "cursor-pointer border-b-2 px-2 py-4 text-sm font-medium no-underline sm:text-lg",
             segment === item.segment
-              ? "text-blue-700 border-blue-700"
-              : "text-gray-400 hover:text-blue-500 hover:border-blue-500 border-transparent"
+              ? "border-blue-700 text-blue-700"
+              : "border-transparent text-gray-400 hover:border-blue-500 hover:text-blue-500"
           )}
         >
           {item.title}

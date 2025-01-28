@@ -6,7 +6,7 @@ export const CopyText: FC<{
   displayText: string;
 }> = ({ text, displayText }) => (
   <div
-    className="flex items-center justify-center p-4 space-x-3 border rounded border-blue-400 hover:border-transparent bg-transparent hover:bg-blue-300 text-sm font-medium text-blue-400 hover:text-white cursor-pointer"
+    className="flex cursor-pointer items-center justify-center space-x-3 rounded border border-blue-400 bg-transparent p-4 text-sm font-medium text-blue-400 hover:border-transparent hover:bg-blue-300 hover:text-white"
     onClick={(e) => {
       e.preventDefault();
       navigator.clipboard.writeText(text);

@@ -5,7 +5,7 @@ import { QuestionInfoRow } from "@/web/questions/components/QuestionInfoRow";
 import { QuestionPageDocument } from "@/web/questions/queries.generated";
 import { getUrqlRscClient } from "@/web/urql";
 
-export default async function ({
+export default async function QuestionEmbedPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -21,8 +21,8 @@ export default async function ({
   }
 
   return (
-    <div className="block bg-white min-h-screen">
-      <div className="flex flex-col p-2 w-full h-12/12">
+    <div className="block min-h-screen bg-white">
+      <div className="h-12/12 flex w-full flex-col p-2">
         <div className="mb-1 mt-1">
           <QuestionInfoRow question={question} />
         </div>

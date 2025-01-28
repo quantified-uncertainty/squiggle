@@ -1,10 +1,10 @@
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren } from "react";
 
-import { Card } from '@/web/common/Card';
+import { Card } from "@/web/common/Card";
 
-export default function ({ children }: PropsWithChildren) {
+export default function QuestionLayout({ children }: PropsWithChildren) {
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="mx-auto max-w-4xl">
       <Card highlightOnHover={false} large>
         {children}
       </Card>

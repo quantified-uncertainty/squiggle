@@ -8,8 +8,14 @@ envSecret: metaforecast-env
 
 jobs:
   scheduler:
-    command: ['./node_modules/.bin/ts-node', '-T', 'src/backend/flow/doEverythingForScheduler.ts']
-    schedule: '0 3 * * *' # every day at 3am
+    command:
+      [
+        "./node_modules/.bin/ts-node",
+        "-T",
+        "src/backend/flow/doEverythingForScheduler.ts",
+      ]
+    schedule: "0 3 * * *" # every day at 3am
   frontpage:
-    command: ['./node_modules/.bin/ts-node', '-T', 'src/backend/index.ts', 'frontpage']
-    schedule: '0 6 * * *' # every day at 6am
+    command:
+      ["./node_modules/.bin/ts-node", "-T", "src/backend/index.ts", "frontpage"]
+    schedule: "0 6 * * *" # every day at 6am

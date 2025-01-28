@@ -19,7 +19,7 @@ const TableRow: FC<PropsWithChildren<{ title: string }>> = ({
   <tr className="border-b">
     <th
       scope="row"
-      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+      className="whitespace-nowrap px-6 py-4 font-medium text-gray-900"
     >
       {title}
     </th>
@@ -29,8 +29,8 @@ const TableRow: FC<PropsWithChildren<{ title: string }>> = ({
 
 export const IndicatorsTable: React.FC<Props> = ({ question }) => (
   <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table className="w-full text-sm text-left text-gray-500">
-      <thead className="text-xs text-gray-700 uppercase bg-gray-100">
+    <table className="w-full text-left text-sm text-gray-500">
+      <thead className="bg-gray-100 text-xs uppercase text-gray-700">
         <tr>
           <th scope="col" className="px-6 py-3">
             Indicator

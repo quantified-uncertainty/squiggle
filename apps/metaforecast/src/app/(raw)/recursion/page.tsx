@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect } from "react";
 
-export default function () {
+export default function RecursionPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";

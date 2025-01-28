@@ -141,8 +141,8 @@ export const polymarket: Platform = {
       liquidity > 1000 && volume > 10000
         ? 4
         : liquidity > 500 && volume > 1000
-        ? 3
-        : 2;
+          ? 3
+          : 2;
     let starsDecimal = average([nuno()]);
     // , eli(data), misha(data)])
 

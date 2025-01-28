@@ -1,14 +1,11 @@
-import React from 'react';
+import React from "react";
 
-import {
-  getPlatforms,
-  getPlatformsConfig,
-} from '@/backend/platforms/registry';
+import { getPlatforms, getPlatformsConfig } from "@/backend/platforms/registry";
 
-import { searchParamsToQuery } from './common';
-import { SearchForm } from './SearchForm';
-import { SearchScreen } from './SearchScreen';
-import { SearchUIProvider } from './SearchUIProvider';
+import { searchParamsToQuery } from "./common";
+import { SearchForm } from "./SearchForm";
+import { SearchScreen } from "./SearchScreen";
+import { SearchUIProvider } from "./SearchUIProvider";
 
 export default async function IndexPage({
   searchParams: searchParamsPromise,

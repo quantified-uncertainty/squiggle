@@ -3,7 +3,7 @@ import { getUrqlRscClient } from "@/web/urql";
 
 import { PlatformsStatusDocument } from "./queries.generated";
 
-export default async function () {
+export default async function StatusPage() {
   const client = getUrqlRscClient();
 
   const data =
@@ -28,7 +28,7 @@ export default async function () {
           a problem.
         </p>
       </Card>
-      <table className="table-auto border-collapse border border-gray-200 bg-white mx-auto mb-10">
+      <table className="mx-auto mb-10 table-auto border-collapse border border-gray-200 bg-white">
         <thead>
           <tr className="bg-gray-100">
             <th className="border border-gray-200 p-4">Platform</th>

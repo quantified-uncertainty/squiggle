@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC } from "react";
 
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: "small" | "normal";
@@ -9,7 +9,7 @@ export const Button: FC<Props> = ({ children, size = "normal", ...rest }) => {
   return (
     <button
       {...rest}
-      className={`bg-blue-500 cursor-pointer rounded-md shadow text-white hover:bg-blue-600 active:bg-gray-700 ${padding}`}
+      className={`cursor-pointer rounded-md bg-blue-500 text-white shadow hover:bg-blue-600 active:bg-gray-700 ${padding}`}
     >
       {children}
     </button>

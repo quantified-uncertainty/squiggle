@@ -4,7 +4,7 @@ export const formatProbability = (probability: number) => {
     percentage < 1
       ? "< 1%"
       : percentage > 99
-      ? "> 99%"
-      : percentage.toFixed(0) + "%";
+        ? "> 99%"
+        : percentage.toFixed(0) + "%";
   return percentageCapped;
 };

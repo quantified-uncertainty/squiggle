@@ -1,15 +1,12 @@
-import {
-  cacheExchange,
-  fetchExchange,
-} from 'urql';
+import { cacheExchange, fetchExchange } from "urql";
 
-import customScalarsExchange from '@atmina/urql-custom-scalars-exchange';
-import { createClient } from '@urql/core';
-import { SSRExchange } from '@urql/next';
-import { registerUrql } from '@urql/next/rsc';
+import customScalarsExchange from "@atmina/urql-custom-scalars-exchange";
+import { createClient } from "@urql/core";
+import { SSRExchange } from "@urql/next";
+import { registerUrql } from "@urql/next/rsc";
 
-import schema from '../graphql/introspection.json';
-import { getBasePath } from './utils';
+import schema from "../graphql/introspection.json";
+import { getBasePath } from "./utils";
 
 export const graphqlEndpoint = `${getBasePath()}/api/graphql`;
 

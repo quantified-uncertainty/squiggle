@@ -116,8 +116,8 @@ export const kalshi: Platform = {
       data.qualityindicators.shares_volume > 10000
         ? 4
         : data.qualityindicators.shares_volume > 2000
-        ? 3
-        : 2;
+          ? 3
+          : 2;
     // let eli = (data) => data.interest > 10000 ? 5 : 4
     // let misha = (data) => 4
     let starsDecimal = average([nuno()]);

@@ -17,8 +17,8 @@ export const ButtonsForStars: React.FC<Props> = ({ onChange, value }) => {
     }`;
 
   return (
-    <div className="flex-1 flex-col justify-center items-center w-full">
-      <div className="grid grid-rows-1 grid-cols-6 items-center content-center text-gray-500 w-full">
+    <div className="w-full flex-1 flex-col items-center justify-center">
+      <div className="grid w-full grid-cols-6 grid-rows-1 content-center items-center text-gray-500">
         <div className={setStyle(0)}> </div>
         <button className={setStyle(1)} onClick={() => onChangeInner(1)}>
           1+ ★

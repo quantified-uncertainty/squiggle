@@ -10,7 +10,7 @@ export const QuestionTitle: React.FC<Props> = ({
   question,
   linkToMetaforecast,
 }) => (
-  <h1 className="sm:text-3xl text-lg">
+  <h1 className="text-lg sm:text-3xl">
     <a
       className="text-black no-underline hover:text-gray-700"
       href={

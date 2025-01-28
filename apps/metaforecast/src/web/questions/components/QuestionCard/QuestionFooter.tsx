@@ -165,7 +165,7 @@ export const QuestionFooter: FC<{
       <div
         className={`${
           expandFooterToFullWidth ? "place-self-center" : "self-center"
-        }  col-span-1 font-bold`}
+        } col-span-1 font-bold`}
       >
         {question.platform.label
           .replace("Good Judgment Open", "GJOpen")
@@ -175,7 +175,7 @@ export const QuestionFooter: FC<{
       <div
         className={`${
           expandFooterToFullWidth
-            ? "justify-self-end mr-4"
+            ? "mr-4 justify-self-end"
             : "justify-self-center"
         } col-span-1`}
       >

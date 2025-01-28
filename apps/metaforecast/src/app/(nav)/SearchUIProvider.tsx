@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  FC,
-  PropsWithChildren,
-  useState,
-} from 'react';
+import { createContext, FC, PropsWithChildren, useState } from "react";
 
 export const SearchUIContext = createContext<{
   showId: boolean;

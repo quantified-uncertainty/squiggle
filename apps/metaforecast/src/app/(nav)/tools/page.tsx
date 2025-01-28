@@ -27,7 +27,7 @@ const ToolCard: FC<Tool> = (tool) => {
   const inner = (
     <Card>
       <div className="grid content-start gap-3">
-        <div className="text-gray-800 text-lg font-medium">{tool.title}</div>
+        <div className="text-lg font-medium text-gray-800">{tool.title}</div>
         <div className="text-gray-500">{tool.description}</div>
         {tool.img && (
           <Image
@@ -106,7 +106,7 @@ export default function ToolsPage() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-8 place-content-stretch">
+    <div className="mb-8 grid grid-cols-1 place-content-stretch gap-4 md:grid-cols-2 lg:grid-cols-2">
       {tools.map((tool, i) => (
         <ToolCard {...tool} key={i} />
       ))}

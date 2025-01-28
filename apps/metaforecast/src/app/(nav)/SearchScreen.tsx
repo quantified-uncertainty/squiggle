@@ -1,21 +1,15 @@
-import {
-  FC,
-  Suspense,
-} from 'react';
+import { FC, Suspense } from "react";
 
-import Skeleton from 'react-loading-skeleton';
+import Skeleton from "react-loading-skeleton";
 
-import { Card } from '@/web/common/Card';
-import { QuestionFragment } from '@/web/fragments.generated';
-import { getUrqlRscClient } from '@/web/urql';
+import { Card } from "@/web/common/Card";
+import { QuestionFragment } from "@/web/fragments.generated";
+import { getUrqlRscClient } from "@/web/urql";
 
-import { SearchQuery } from './common';
-import {
-  FrontpageDocument,
-  SearchDocument,
-} from './queries.generated';
-import { QuestionCardsList } from './QuestionCardsList';
-import { ShowMore } from './ShowMore';
+import { SearchQuery } from "./common";
+import { FrontpageDocument, SearchDocument } from "./queries.generated";
+import { QuestionCardsList } from "./QuestionCardsList";
+import { ShowMore } from "./ShowMore";
 
 type SearchResult = {
   results: QuestionFragment[];
@@ -78,7 +72,7 @@ async function getResults(searchQuery: SearchQuery): Promise<SearchResult> {
 
 const LoadingSearchResultsList: FC = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       {[...Array(9)].map((_, index) => (
         <Card key={index}>
           <Skeleton count={5} />
@@ -96,7 +90,7 @@ const SearchResultsList: FC<SearchResult> = ({ results, hasMore }) => {
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <QuestionCardsList results={results.slice(0, roundedLength)} />
       </div>
 

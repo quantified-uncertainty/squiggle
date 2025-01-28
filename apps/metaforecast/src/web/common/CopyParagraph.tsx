@@ -20,7 +20,7 @@ export const CopyParagraph: React.FC<{ text: string; buttonText: string }> = ({
   return (
     <div className="flex flex-col items-stretch">
       <p
-        className="bg-gray-100 cursor-pointer px-3 py-2 rounded-md shadow text-gray-700 font-mono text-sm"
+        className="cursor-pointer rounded-md bg-gray-100 px-3 py-2 font-mono text-sm text-gray-700 shadow"
         onClick={(e) => {
           e.preventDefault();
           navigator.clipboard.writeText(text);

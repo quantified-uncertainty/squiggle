@@ -1,9 +1,9 @@
 import { FC, PropsWithChildren } from "react";
 
 export const LineHeader: FC<PropsWithChildren> = ({ children }) => (
-  <h3 className="flex items-center justify-center w-full">
-    <span aria-hidden="true" className="flex-grow bg-gray-300 rounded h-0.5" />
-    <span className="mx-3 text-md font-medium text-center">{children}</span>
-    <span aria-hidden="true" className="flex-grow bg-gray-300 rounded h-0.5" />
+  <h3 className="flex w-full items-center justify-center">
+    <span aria-hidden="true" className="h-0.5 flex-grow rounded bg-gray-300" />
+    <span className="text-md mx-3 text-center font-medium">{children}</span>
+    <span aria-hidden="true" className="h-0.5 flex-grow rounded bg-gray-300" />
   </h3>
 );

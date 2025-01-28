@@ -1,4 +1,7 @@
-import { FullQuestionOption, isFullQuestionOption } from "../../../common/types";
+import {
+  FullQuestionOption,
+  isFullQuestionOption,
+} from "../../../common/types";
 import { QuestionFragment } from "../../fragments.generated";
 import { isQuestionBinary } from "../../utils";
 import { formatProbability } from "../utils";
@@ -101,8 +104,8 @@ const OptionRow: React.FC<OptionProps> = ({ option, mode, textMode }) => {
       <div
         className={`flex-none rounded-md text-center ${
           mode === "primary"
-            ? "text-sm md:text-lg text-normal text-white px-2 py-0.5 font-bold"
-            : "text-sm w-14 py-0.5"
+            ? "text-normal px-2 py-0.5 text-sm font-bold text-white md:text-lg"
+            : "w-14 py-0.5 text-sm"
         } ${
           mode === "primary"
             ? primaryForecastColor(option.probability)
@@ -113,7 +116,7 @@ const OptionRow: React.FC<OptionProps> = ({ option, mode, textMode }) => {
       </div>
       <div
         className={`leading-snug ${
-          mode === "primary" ? "text-sm md:text-lg text-normal" : "text-sm"
+          mode === "primary" ? "text-normal text-sm md:text-lg" : "text-sm"
         } ${
           mode === "primary" ? textColor(option.probability) : "text-gray-700"
         }`}

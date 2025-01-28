@@ -6,11 +6,7 @@ import { QuestionFragment } from "@/web/fragments.generated";
 import { QuestionCard } from "@/web/questions/components/QuestionCard";
 import { getUrqlRscClient } from "@/web/urql";
 
-interface Props {
-  results: QuestionFragment[];
-}
-
-export default async function ({
+export default async function SecretEmbedPage({
   searchParams: searchParamsPromise,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -46,7 +42,7 @@ export default async function ({
   const result = results.length ? results[0] : null;
 
   return (
-    <div className="mb-4 mt-8 flex flex-row justify-center items-center">
+    <div className="mb-4 mt-8 flex flex-row items-center justify-center">
       <div className="w-6/12 place-self-center">
         <div>
           <div id="secretEmbed">

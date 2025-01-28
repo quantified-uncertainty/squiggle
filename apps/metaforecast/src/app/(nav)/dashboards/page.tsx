@@ -6,7 +6,7 @@ import { LineHeader } from "../../../web/common/LineHeader";
 import { CreateDashboardDocument } from "../../../web/dashboards/queries.generated";
 import { DashboardCreator } from "../../../web/display/DashboardCreator";
 
-export default function () {
+export default function DashboardsPage() {
   const router = useRouter();
   const [createDashboardResult, createDashboard] = useMutation(
     CreateDashboardDocument
@@ -29,7 +29,7 @@ export default function () {
   };
 
   return (
-    <div className="flex flex-col my-8 space-y-8">
+    <div className="my-8 flex flex-col space-y-8">
       <LineHeader>Create a dashboard!</LineHeader>
 
       <div className="self-center">

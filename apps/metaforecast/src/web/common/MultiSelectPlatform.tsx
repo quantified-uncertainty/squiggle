@@ -20,17 +20,17 @@ const colorStyles: StylesConfig<Option> = {
       backgroundColor: isDisabled
         ? undefined
         : isSelected
-        ? data.color
-        : isFocused
-        ? color.alpha(0.1).css()
-        : undefined,
+          ? data.color
+          : isFocused
+            ? color.alpha(0.1).css()
+            : undefined,
       color: isDisabled
         ? "#ccc"
         : isSelected
-        ? chroma.contrast(color, "white") > 2
-          ? "white"
-          : "black"
-        : data.color,
+          ? chroma.contrast(color, "white") > 2
+            ? "white"
+            : "black"
+          : data.color,
       cursor: isDisabled ? "not-allowed" : "default",
 
       ":active": {

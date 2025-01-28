@@ -1,22 +1,58 @@
 // Copy this file to squiggle.code-workspace if you want to use multi-root repo and to use Jest VS Code extension.
 {
   "folders": [
+    // root
     {
       "name": "squiggle",
       "path": "..",
     },
+    // packages
     {
-      "name": "vscode-ext",
-      "path": "../packages/vscode-ext",
+      "name": "prettier-plugin",
+      "path": "../packages/prettier-plugin",
+    },
+    {
+      "name": "serializer",
+      "path": "../packages/serializer",
     },
     {
       "name": "squiggle-lang",
       "path": "../packages/squiggle-lang",
     },
     {
+      "name": "textmate-grammar",
+      "path": "../packages/textmate-grammar",
+    },
+    {
+      "name": "ui",
+      "path": "../packages/ui",
+    },
+    {
       "name": "components",
       "path": "../packages/components",
     },
+    // internal packages
+    {
+      "name": "ai",
+      "path": "../internal-packages/ai",
+    },
+    {
+      "name": "configs",
+      "path": "../internal-packages/configs",
+    },
+    {
+      "name": "content",
+      "path": "../internal-packages/content",
+    },
+    {
+      "name": "ops",
+      "path": "../internal-packages/ops",
+    },
+    {
+      "name": "versioned-components",
+      "path": "../internal-packages/versioned-components",
+    },
+    // apps
     {
       "name": "website",
       "path": "../apps/website",
@@ -26,8 +62,8 @@
       "path": "../apps/hub",
     },
     {
-      "name": "content",
-      "path": "../internal-packages/content",
+      "name": "metaforecast",
+      "path": "../apps/metaforecast",
     },
   ],
   "settings": {

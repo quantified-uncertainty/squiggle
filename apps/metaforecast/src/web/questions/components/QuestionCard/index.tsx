@@ -91,7 +91,7 @@ export const QuestionCard: FC<Props> = ({
   const isBinary = isQuestionBinary(question);
 
   return container(
-    <div className="h-full flex flex-col space-y-4">
+    <div className="flex h-full flex-col space-y-4">
       <div className="flex-grow space-y-4">
         {showIdToggle ? (
           <div className="mx-10">
@@ -103,7 +103,7 @@ export const QuestionCard: FC<Props> = ({
             <Link
               href={`/questions/${question.id}`}
               passHref
-              className="float-right block ml-2 mt-1.5"
+              className="float-right ml-2 mt-1.5 block"
             >
               <FaExpand
                 size="18"

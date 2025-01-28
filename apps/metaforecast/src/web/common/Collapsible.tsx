@@ -23,7 +23,7 @@ export const Collapsible: FC<{
       <div>
         <a
           href="#"
-          className="decoration-dashed inline-flex items-center"
+          className="inline-flex items-center decoration-dashed"
           onClick={collapse}
         >
           {title} <FaCaretDown />
@@ -35,7 +35,7 @@ export const Collapsible: FC<{
     return (
       <a
         href="#"
-        className="decoration-dashed inline-flex items-center"
+        className="inline-flex items-center decoration-dashed"
         onClick={expand}
       >
         {title} <FaCaretRight />

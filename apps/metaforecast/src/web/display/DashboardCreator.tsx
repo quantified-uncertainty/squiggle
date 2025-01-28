@@ -51,7 +51,7 @@ Your old input was: ${value}`;
 
   return (
     <form onSubmit={handleSubmitInner}>
-      <div className="flex flex-col items-center space-y-5 max-w-2xl">
+      <div className="flex max-w-2xl flex-col items-center space-y-5">
         <textarea value={value} onChange={handleChange} rows={8} cols={50} />
         <Button
           disabled={acting}

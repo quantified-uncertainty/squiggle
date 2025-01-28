@@ -16,9 +16,7 @@
     "removeStopWords": true,
     "unretrievableAttributes": null,
     "optionalWords": null,
-    "queryLanguages": [
-      "en"
-    ],
+    "queryLanguages": ["en"],
     "attributesForFaceting": null,
     "attributesToSnippet": null,
     "attributesToHighlight": [],
@@ -52,9 +50,7 @@
       "singleWordSynonym",
       "multiWordsSynonym"
     ],
-    "indexLanguages": [
-      "en"
-    ]
+    "indexLanguages": ["en"]
   },
   "rules": [],
   "synonyms": []

@@ -1,9 +1,9 @@
-import Skeleton from 'react-loading-skeleton';
+import Skeleton from "react-loading-skeleton";
 
-export default function () {
+export default function QuestionLoading() {
   return (
     <div>
-      <h1 className="sm:text-3xl text-lg">
+      <h1 className="text-lg sm:text-3xl">
         <Skeleton />
       </h1>
       <Skeleton height={400} />
