@@ -1,0 +1,7 @@
+query PlatformsStatus {
+  result: platforms {
+    id
+    label
+    lastUpdated
+  }
+}

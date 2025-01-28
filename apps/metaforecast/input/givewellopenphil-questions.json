@@ -1,0 +1,3751 @@
+[
+  {
+    "id": "givewellopenphil-2021-0",
+    "title": "OFTW moves more than $2.5 million to GiveWell top charities in 2020",
+    "url": "https://www.givewell.org/about/impact/one-for-the-world/july-2018-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: One for the World — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],  
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-1",
+    "title": "Conditioned on it still being active, OFTW moves more than $5 million to GiveWell top charities in 2023",
+    "url": "https://www.givewell.org/about/impact/one-for-the-world/july-2018-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: One for the World — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-2",
+    "title": "One for the World — General Support. We renew our support to OFTW after one year",
+    "url": "https://www.givewell.org/about/impact/one-for-the-world/july-2018-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: One for the World — General Support. Resolution: September 2019",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-3",
+    "title": "One for the World — General Support. We renew our support to OFTW after two years",
+    "url": "https://www.givewell.org/about/impact/one-for-the-world/july-2018-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: One for the World — General Support. Resolution: September 2020",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-4",
+    "title": "Zusha! is recommended as a top charity by year-end 2017",
+    "url": "https://www.givewell.org/charities/gui2de/january-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Georgetown University Initiative on Innovation, Development, and Evaluation — Zusha! Road Safety Campaign",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-5",
+    "title": "Zusha! appears more cost-effective than AMF",
+    "url": "https://www.givewell.org/charities/gui2de/january-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Georgetown University Initiative on Innovation, Development, and Evaluation — Zusha! Road Safety Campaign. Resolution: By year-end 2017",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-6",
+    "title": "Zusha! appears roughly as cost-effective as AMF",
+    "url": "https://www.givewell.org/charities/gui2de/january-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Georgetown University Initiative on Innovation, Development, and Evaluation — Zusha! Road Safety Campaign. Resolution: By year-end 2017",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-7",
+    "title": "Zusha! appears less cost-effective than AMF (but is still a top charity recommendation)",
+    "url": "https://www.givewell.org/charities/gui2de/january-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Georgetown University Initiative on Innovation, Development, and Evaluation — Zusha! Road Safety Campaign. Resolution: By year-end 2017",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-8",
+    "title": "Good Ventures gives additional funding to Charity Science: Health in one year",
+    "url": "https://www.givewell.org/charities/charity-science/charity-science-health/november-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Charity Science: Health — General Support. Resolution: 2017",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.19999999999999996,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-9",
+    "title": "Charity Science: Health becomes (or creates) a GiveWell top charity by giving season 2019",
+    "url": "https://www.givewell.org/charities/charity-science/charity-science-health/november-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Charity Science: Health — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-10",
+    "title": "We will recommend another GiveWell Incubation Grant to Charity Science Health by August 2018",
+    "url": "https://www.givewell.org/charities/charity-science/charity-science-health/july-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Charity Science: Health — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.19999999999999996,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-11",
+    "title": "Charity Science Health will be a GiveWell top charity by the end of 2019",
+    "url": "https://www.givewell.org/charities/charity-science/charity-science-health/july-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Charity Science: Health — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-12",
+    "title": "Good Ventures gives Results for Development a second grant of approximately the same size in 12 months",
+    "url": "https://www.givewell.org/charities/results-for-development/may-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Results for Development — Childhood Pneumonia Treatment Scale-Up. Resolution: 2017",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.30000000000000004,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-13",
+    "title": "Results for Development — Childhood Pneumonia Treatment Scale-Up. Results for Development is a top charity by the end of 2019",
+    "url": "https://www.givewell.org/charities/results-for-development/may-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Results for Development — Childhood Pneumonia Treatment Scale-Up",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-14",
+    "title": "New Incentives increases vaccination rates by >17 percentage points and this is detected by the RCT",
+    "url": "https://www.givewell.org/charities/new-incentives/november-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (November 2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 1,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-15",
+    "title": "New Incentives increases vaccination rates by >17 percentage points and this is not detected by the RCT",
+    "url": "https://www.givewell.org/charities/new-incentives/november-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Actual estimate was \"small probability, close to 0%\". Associated grant: New Incentives — General Support (November 2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 1,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-16",
+    "title": "New Incentives increases vaccination rates by between 6 and 17 percentage points and this is detected by the RCT",
+    "url": "https://www.givewell.org/charities/new-incentives/november-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (November 2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.55,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.44999999999999996,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-17",
+    "title": "New Incentives increases vaccination rates by between 6 and 17 percentage points and this is either not detected by the RCT or is unclear",
+    "url": "https://www.givewell.org/charities/new-incentives/november-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (November 2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-18",
+    "title": "New Incentives increases vaccination rates by <6 percentage points and we either conclude as much or are uncertain enough that we choose not to pursue New Incentives further",
+    "url": "https://www.givewell.org/charities/new-incentives/november-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (November 2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-19",
+    "title": "New Incentives increases vaccination rates by <6 percentage points and we falsely believe it is higher and do pursue New Incentives further",
+    "url": "https://www.givewell.org/charities/new-incentives/november-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (November 2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-20",
+    "title": "After seeing the RCT results, we are significantly uncertain about whether or not to recommend New Incentives as a top charity",
+    "url": "https://www.givewell.org/charities/new-incentives/november-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (November 2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.2,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-21",
+    "title": "GiveWell estimates that New Incentives is >3x as cost-effective as GiveDirectly",
+    "url": "https://www.givewell.org/charities/new-incentives/november-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (November 2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-22",
+    "title": "GiveWell estimates that New Incentives is >2x as cost-effective as AMF:",
+    "url": "https://www.givewell.org/charities/new-incentives/november-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Actual estimate was \"<10%\". Associated grant: New Incentives — General Support (November 2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.07,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9299999999999999,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-23",
+    "title": "New Incentives becomes a top charity by November 2020",
+    "url": "https://www.givewell.org/charities/new-incentives/november-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (November 2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-24",
+    "title": "New Incentives is a top charity in 2016",
+    "url": "https://www.givewell.org/charities/new-incentives/march-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (2016)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-25",
+    "title": "New Incentives is a top charity in 2017",
+    "url": "https://www.givewell.org/charities/new-incentives/march-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (2016)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.13,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.87,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-26",
+    "title": "New Incentives is a top charity in 2018",
+    "url": "https://www.givewell.org/charities/new-incentives/march-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (2016)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-27",
+    "title": "Our 2017 cost-effectiveness estimate for New Incentives is at least twice as good as our 2017 estimate for unconditional cash transfers",
+    "url": "https://www.givewell.org/charities/new-incentives/march-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (2016)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.67,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.32999999999999996,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-28",
+    "title": "Our 2017 cost-effectiveness estimate for New Incentives is at least five times as good as our 2017 estimate for unconditional cash transfers",
+    "url": "https://www.givewell.org/charities/new-incentives/march-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (2016)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-29",
+    "title": "Our 2017 cost-effectiveness estimate for New Incentives is at least ten times as good as our 2017 estimate for unconditional cash transfers",
+    "url": "https://www.givewell.org/charities/new-incentives/march-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (2016)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-30",
+    "title": "New Incentives brings in at least $250,000 from a funder other than Good Ventures and the Lampert Family Foundation by the end of 2018",
+    "url": "https://www.givewell.org/charities/new-incentives/march-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (2016)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-31",
+    "title": "New Incentives still operates in 2019",
+    "url": "https://www.givewell.org/charities/new-incentives/march-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (2016)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-32",
+    "title": "We provide funding for an RCT of New Incentives' program",
+    "url": "https://www.givewell.org/charities/new-incentives/april-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (April 2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.30000000000000004,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-33",
+    "title": "New Incentives is a top charity at the end of 2019",
+    "url": "https://www.givewell.org/charities/new-incentives/april-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (April 2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-34",
+    "title": "No Lean Season is a top charity at the end of giving season 2017",
+    "url": "https://www.givewell.org/charities/evidence-action/december-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — No Lean Season (December 2016 grant)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-35",
+    "title": "We find a significant error in Evidence Action's financial documents in 2018",
+    "url": "https://www.givewell.org/charities/evidence-action/april-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — Strengthen Operations (2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-36",
+    "title": "An Evidence Action Beta program other than No Lean Season becomes a top charity by the end of 2021",
+    "url": "https://www.givewell.org/charities/evidence-action/april-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — Strengthen Operations (2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-37",
+    "title": "The Deworm the World Initiative's room for more funding (including execution levels 1 and 2) exceeds $10 million as of November 2018",
+    "url": "https://www.givewell.org/charities/evidence-action/april-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — Strengthen Operations (2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-38",
+    "title": "GiveWell Incubation Grants provides at least $250,000 to an Evidence Action Beta program other than No Lean Season by the end of 2018",
+    "url": "https://www.givewell.org/charities/evidence-action/april-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — Strengthen Operations (2017)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-39",
+    "title": "No Lean Season (or a related organization) is a top charity in 2017",
+    "url": "https://www.givewell.org/evidence-action/march-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — No Lean Season (March 2016 grant)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-40",
+    "title": "No Lean Season (or a related organization) is a top charity in 2018",
+    "url": "https://www.givewell.org/evidence-action/march-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — No Lean Season (March 2016 grant)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.2,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-41",
+    "title": "No Lean Season (or a related organization) is a top charity in 2019",
+    "url": "https://www.givewell.org/evidence-action/march-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — No Lean Season (March 2016 grant)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-42",
+    "title": "Our 2016 cost-effectiveness estimate for No Lean Season is at least five times as good as cash transfers",
+    "url": "https://www.givewell.org/evidence-action/march-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — No Lean Season (March 2016 grant)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-43",
+    "title": "Our 2016 cost-effectiveness estimate for No Lean Season is less than twice as good as cash transfers",
+    "url": "https://www.givewell.org/evidence-action/march-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — No Lean Season (March 2016 grant)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-44",
+    "title": "Our 2016 cost-effectiveness estimate for No Lean Season is at least ten times as good as cash transfers",
+    "url": "https://www.givewell.org/evidence-action/march-2016-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — No Lean Season (March 2016 grant)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-45",
+    "title": "The study detects an effect that is too small relative to the cost of implementing the intervention for it to be worth scaling up",
+    "url": "https://www.givewell.org/international/charities/ipa/may-2016-grant#Risks_of_the_grant_and_internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Mindset Engagement in Cash Transfers",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-46",
+    "title": "Innovations for Poverty Action — Mindset Engagement in Cash Transfers. The study yields a result that we're not confident in",
+    "url": "https://www.givewell.org/international/charities/ipa/may-2016-grant#Risks_of_the_grant_and_internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Mindset Engagement in Cash Transfers",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-47",
+    "title": "Innovations for Poverty Action — Mindset Engagement in Cash Transfers. The study detects an effect that would be worth scaling up, but we are unable to find an implementer interested in doing so",
+    "url": "https://www.givewell.org/international/charities/ipa/may-2016-grant#Risks_of_the_grant_and_internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "(for instance, if GiveDirectly were to decide not to incorporate the intervention because it is too time-intensive or diverts attention from other activities, or because GiveDirectly interprets the study's results differently than we do). Associated grant: Innovations for Poverty Action — Mindset Engagement in Cash Transfers",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.08,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.92,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-48",
+    "title": "Innovations for Poverty Action — Mindset Engagement in Cash Transfers. The intervention has no measurable effect, and we could have predicted this prior to the study by surveying the existing literature more thoroughly",
+    "url": "https://www.givewell.org/international/charities/ipa/may-2016-grant#Risks_of_the_grant_and_internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Mindset Engagement in Cash Transfers",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.08,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.92,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-49",
+    "title": "GiveWell’s best guess is that Evidence Action’s intervention increases coverage relative to the counterfactual in the first year of Phase 2 of the program by at least 4 percentage points",
+    "url": "https://www.givewell.org/research/incubation-grants/december-2018-evidence-action-beta-iron-folic-acid-phase-2#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Associated grant: Evidence Action Beta — Iron and Folic Acid Supplementation (\"Phase 2\")",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-50",
+    "title": "GiveWell’s best guess is that Evidence Action’s intervention increases coverage relative to the counterfactual in the second year of Phase 2 of the program by at least 8 percentage points (cumulatively)",
+    "url": "https://www.givewell.org/research/incubation-grants/december-2018-evidence-action-beta-iron-folic-acid-phase-2#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Associated grant: Evidence Action Beta — Iron and Folic Acid Supplementation (\"Phase 2\")",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-51",
+    "title": "Evidence Action requests funding for Phase 3 of this program because it believes Phase 2 to have been successful",
+    "url": "https://www.givewell.org/research/incubation-grants/december-2018-evidence-action-beta-iron-folic-acid-phase-2#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Associated grant: Evidence Action Beta — Iron and Folic Acid Supplementation (\"Phase 2\")",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-52",
+    "title": "Estimates of anemia rates from the India National Family Health Survey in an average of 5 randomly chosen non-Evidence Action-supported states do not show anemia declining by more than 2 percentage points per year over the last 5 years (e.g., due to iron fortification or other changes)",
+    "url": "https://www.givewell.org/research/incubation-grants/december-2018-evidence-action-beta-iron-folic-acid-phase-2#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Associated grant: Evidence Action Beta — Iron and Folic Acid Supplementation (\"Phase 2\")",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.19999999999999996,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-53",
+    "title": "Evidence Action ultimately spends at least $15 million total on IFA technical assistance that we retrospectively model as 10x as effective (or more) than cash transfers (using our January 2018 CEA as a baseline)",
+    "url": "https://www.givewell.org/research/incubation-grants/december-2018-evidence-action-beta-iron-folic-acid-phase-2#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Associated grant: Evidence Action Beta — Iron and Folic Acid Supplementation (\"Phase 2\")",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-54",
+    "title": "The KLPS-4 survey significantly positively updates us [GiveWell] on deworming, i.e. finds a result that increases our estimated cost-effectiveness for deworming by at least 2x",
+    "url": "https://www.givewell.org/research/incubation-grants/uc-berkeley/april-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: UC Berkeley — KLPS-4 Survey",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-55",
+    "title": "The KLPS-4 survey significantly negatively updates us [GiveWell] on deworming, i.e. finds a result that decreases our estimated cost-effectiveness for deworming by at least 2x",
+    "url": "https://www.givewell.org/research/incubation-grants/uc-berkeley/april-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: UC Berkeley — KLPS-4 Survey",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-56",
+    "title": "This grant does not lead to any new top charities.",
+    "url": "https://www.givewell.org/research/incubation-grants/july-2018-evidence-action-beta-incubator#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action Beta — Incubator Program. Resolution: December 2023",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.3,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-57",
+    "title": "The Beta incubator leads to a new top charity that is 1-2x the cost-effectiveness of our marginal spending on current top charities.",
+    "url": "https://www.givewell.org/research/incubation-grants/july-2018-evidence-action-beta-incubator#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action Beta — Incubator Program. Resolution: December 2023",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.55,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.44999999999999996,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-58",
+    "title": "The Beta incubator leads to a new top charity that's >2x as cost-effective as our marginal spending on current top charities",
+    "url": "https://www.givewell.org/research/incubation-grants/july-2018-evidence-action-beta-incubator#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action Beta — Incubator Program. Resolution: December 2023",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-59",
+    "title": "The Beta incubator program has impacts that lead us to make a public case that it was extremely cost-effective overall",
+    "url": "https://www.givewell.org/research/incubation-grants/july-2018-evidence-action-beta-incubator#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "(i.e., it resulted in at least $10 million in spending at 15x the cost-effectiveness of cash transfers or more). Associated grant: Evidence Action Beta — Incubator Program. Resolution: December 2023",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-60",
+    "title": "Our marginal spending on top charities will be 2.5x as cost-effective as cash or less (using our current cost-effectiveness estimate for cash)",
+    "url": "https://www.givewell.org/research/incubation-grants/july-2018-evidence-action-beta-incubator#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action Beta — Incubator Program. Resolution: December 2023",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-61",
+    "title": "Following its RCT, we estimate that New Incentives is at least 5x as cost-effective as 2018 cash transfers via GiveDirectly.",
+    "url": "https://www.givewell.org/research/incubation-grants/IDinsight-embedded-givewell-team-2018#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: IDinsight — Embedded GiveWell Team (2018)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-62",
+    "title": "Following its RCT, we estimate that Charity Science Health is at least 5x as cost-effective as 2018 cash transfers via GiveDirectly.",
+    "url": "https://www.givewell.org/research/incubation-grants/IDinsight-embedded-givewell-team-2018#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: IDinsight — Embedded GiveWell Team (2018)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.3,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-63",
+    "title": "By end of 2018, we model the marginal cost-effectiveness of giving to our top charities at roughly 2x cash.",
+    "url": "https://www.givewell.org/research/incubation-grants/IDinsight-embedded-givewell-team-2018#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: IDinsight — Embedded GiveWell Team (2018)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-64",
+    "title": "We publish a blog post on IDinsight's work on AMF's monitoring.",
+    "url": "https://www.givewell.org/research/incubation-grants/IDinsight-embedded-givewell-team-2018#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: IDinsight — Embedded GiveWell Team (2018). Resolution: February 2019",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.30000000000000004,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-65",
+    "title": "Evidence Action raises a total of $6,120,000 in donations from institutional donors by the end of 2022",
+    "url": "https://www.givewell.org/research/incubation-grants/march-2019-evidence-action#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — Strengthen Operations (2019)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-66",
+    "title": "Evidence Action raises a total of $40,800,000 in donations from institutional donors by the end of 2024",
+    "url": "https://www.givewell.org/research/incubation-grants/march-2019-evidence-action#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — Strengthen Operations (2019)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-67",
+    "title": "The Indian government will allow Evidence Action to accept foreign donations to the Evidence Action India Foundation by the end of 2023",
+    "url": "https://www.givewell.org/research/incubation-grants/march-2019-evidence-action#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — Strengthen Operations (2019)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-68",
+    "title": "Evidence Action will have hired a Chief Program Officer and at least one other leader by the end of 2019.",
+    "url": "https://www.givewell.org/research/incubation-grants/march-2019-evidence-action#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — Strengthen Operations (2019)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-69",
+    "title": "Evidence Action will have hired all new full-time positions for the fundraising function and senior leadership by the end of 2020",
+    "url": "https://www.givewell.org/research/incubation-grants/march-2019-evidence-action#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — Strengthen Operations (2019)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-70",
+    "title": "Evidence Action will have finalized a strategy on its approach to compensation by the end of 2020",
+    "url": "https://www.givewell.org/research/incubation-grants/march-2019-evidence-action#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action — Strengthen Operations (2019)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-71",
+    "title": "New Incentives is a top charity and is ≥ 3x as cost-effective as cash",
+    "url": "https://www.givewell.org/research/incubation-grants/IDinsight-new-incentives-august-2019#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: IDinsight — Endline Evaluation of New Incentives RCT. Resolution: November 2020",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-72",
+    "title": "New Incentives is a top charity and is ≥ 5x as cost-effective as cash",
+    "url": "https://www.givewell.org/research/incubation-grants/IDinsight-new-incentives-august-2019#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: IDinsight — Endline Evaluation of New Incentives RCT. Resolution: November 2020",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-73",
+    "title": "New Incentives is a top charity and is ≥ 7.5x as cost-effective as cash",
+    "url": "https://www.givewell.org/research/incubation-grants/IDinsight-new-incentives-august-2019#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: IDinsight — Endline Evaluation of New Incentives RCT. Resolution: November 2020",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.23,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.77,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-74",
+    "title": "New Incentives is a top charity and is ≥ 10x as cost-effective as cash",
+    "url": "https://www.givewell.org/research/incubation-grants/IDinsight-new-incentives-august-2019#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: IDinsight — Endline Evaluation of New Incentives RCT. Resolution: November 2020",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-75",
+    "title": "The RCT results are inconclusive, such that after seeing them we have significant uncertainty about whether to make New Incentives a top charity",
+    "url": "https://www.givewell.org/research/incubation-grants/IDinsight-new-incentives-august-2019#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: IDinsight — Endline Evaluation of New Incentives RCT. Resolution: November 2020",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-76",
+    "title": "We cite our learning experience from the New Incentives RCT as part of our reasoning for funding a future RCT",
+    "url": "https://www.givewell.org/research/incubation-grants/IDinsight-new-incentives-august-2019#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "(including any RCTs related to current GiveWell Incubation Grant recipients, such as Evidence Action's Beta Incubator). Associated grant: IDinsight — Endline Evaluation of New Incentives RCT. Resolution: December 2024",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-77",
+    "title": "The New Incentives RCT results are cited by another funder or agency when making a recommendation for or against pursuing CCTs for immunization, or as a reference in future research",
+    "url": "https://www.givewell.org/research/incubation-grants/IDinsight-new-incentives-august-2019#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: IDinsight — Endline Evaluation of New Incentives RCT. Resolution: December 2024",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-78",
+    "title": "We believe direct funding of IFA in India is no more than 2x less cost-effective than we believe it is now",
+    "url": "https://www.givewell.org/research/incubation-grants/march-2018-evidence-action-beta-iron-folic-acid#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "(as discussed above, we currently estimate it's roughly 9x as cost-effective as cash transfers, using our January 2018 CEA as a baseline). Associated grant: Evidence Action Beta — Iron and Folic Acid Supplementation",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-79",
+    "title": "Evidence Action believes that it can add substantial value to India's IFA program and requests over $500,000 for a follow-up grant to move past scoping.",
+    "url": "https://www.givewell.org/research/incubation-grants/march-2018-evidence-action-beta-iron-folic-acid#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Evidence Action Beta — Iron and Folic Acid Supplementation",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-80",
+    "title": "Conditional on Evidence Action getting funding to do technical assistance past the scoping stage, Evidence Action ultimately spends at least $6 million total on IFA technical assistance that GiveWell models as 10x as effective (or more) than cash transfers",
+    "url": "https://www.givewell.org/research/incubation-grants/march-2018-evidence-action-beta-iron-folic-acid#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "(using our January 2018 CEA as a baseline). Associated grant: Evidence Action Beta — Iron and Folic Acid Supplementation",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-81",
+    "title": "Conditional on Evidence Action getting funding to do technical assistance past the scoping stage, Evidence Action ultimately spends at least $15 million total on IFA technical assistance that we model as 10x as effective (or more) than cash transfers",
+    "url": "https://www.givewell.org/research/incubation-grants/march-2018-evidence-action-beta-iron-folic-acid#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "(using our January 2018 CEA as a baseline). Associated grant: Evidence Action Beta — Iron and Folic Acid Supplementation",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.2,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-82",
+    "title": "Implied from other calculations: Evidence Action ultimately spends at least $15 million total on IFA technical assistance that we model as 10x as effective (or more) than cash transfers",
+    "url": "https://www.givewell.org/research/incubation-grants/march-2018-evidence-action-beta-iron-folic-acid#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "(using our January 2018 CEA as a baseline). Associated grant: Evidence Action Beta — Iron and Folic Acid Supplementation",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-83",
+    "title": "Nick produces a paper summarizing his work on this project.",
+    "url": "https://www.givewell.org/research/incubation-grants/may-2018-forecasting-research-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Nick Otis — Forecasting Research. Resolution: By end of 2019.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.09999999999999998,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-84",
+    "title": "Nick collects forecasts from at least 10 academics on at least four studies.",
+    "url": "https://www.givewell.org/research/incubation-grants/may-2018-forecasting-research-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Nick Otis — Forecasting Research. Resolution: By end of 2019.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-85",
+    "title": "The academics' pooled forecast of the probability that New Incentives' intervention increases vaccine coverage by 15 percentage points differs from GiveWell's internal forecast by at least 10 percentage points",
+    "url": "https://www.givewell.org/research/incubation-grants/may-2018-forecasting-research-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "(for instance, the academics give a 45% chance while we give a 60% chance). Associated grant: Nick Otis — Forecasting Research. Resolution: By end of 2019.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-86",
+    "title": "R4D or an R4D program is a top charity",
+    "url": "https://www.givewell.org/research/incubation-grants/results-for-development/january-2019-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Results for Development — Childhood Pneumonia Treatment Program (2019). Resolution: December 2023",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-87",
+    "title": "R4D or an R4D program is a top charity and we estimate that donations to that program are at least half as cost-effective as the most cost-effective unfunded giving opportunity among top charities",
+    "url": "https://www.givewell.org/research/incubation-grants/results-for-development/january-2019-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "(i.e. where we recommend donors give on the margin). Associated grant: Results for Development — Childhood Pneumonia Treatment Program (2019). Resolution: December 2023",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-88",
+    "title": "R4D or an R4D program is a top charity and we estimate that donations to that program are at least twice as cost-effective as the most cost-effective unfunded giving opportunity among top charities",
+    "url": "https://www.givewell.org/research/incubation-grants/results-for-development/january-2019-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "(i.e. where we recommend donors give on the margin). Associated grant: Results for Development — Childhood Pneumonia Treatment Program (2019). Resolution: December 2023",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-89",
+    "title": "Charity Science Health receives enough funding from other donors to continue its operations through the end of 2020.",
+    "url": "https://www.givewell.org/research/incubation-grants/charity-science-exit-grant-july-2019#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Charity Science Health — Exit Grant",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-90",
+    "title": "The RCT will NOT find a statistically significant result on self-reported respiratory symptoms, AND it will not find a statistically significant result on COVID-19.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.15,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-91",
+    "title": "The RCT will find a statistically significant result on self-reported respiratory symptoms, but NOT COVID-19.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.2,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-92",
+    "title": "The RCT will NOT generate a statistically significant result on AT LEAST ONE of the outcomes, and the authors will say in their first preprint that an important reason was lower than expected incidence of COVID-19 or self-reported respiratory symptoms.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-93",
+    "title": "The RCT will NOT generate a statistically significant result on AT LEAST ONE of the outcomes, and the authors will say in their first preprint that an important reason was a failure to increase mask-wearing.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.2,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-94",
+    "title": "The RCT will NOT find a statistically significant (p>0.05) impact on self-reported respiratory symptoms.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.13,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.87,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-95",
+    "title": "Statistically significant result and reduction in respiratory symptoms of 0-10%.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-96",
+    "title": "Statistically significant result and reduction in respiratory symptoms of 10-20%.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.2,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-97",
+    "title": "Statistically significant result and reduction in respiratory symptoms of 20-30%.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.3,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-98",
+    "title": "Statistically significant result and reduction in respiratory symptoms of 30-40%.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.22,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.78,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-99",
+    "title": "Statistically significant result and reduction in respiratory symptoms of >40%.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-100",
+    "title": "The paper will not report an objectively measured disease outcome confirmed with diagnostic tests.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-101",
+    "title": "The RCT will NOT find a statistically significant (p>0.05) impact on preferred measure of COVID-19.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Conditional on a COVID-19 outcome being reported in the published paper. Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-102",
+    "title": "Statistically significant result and reduction in COVID-19 of 0-10%.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Conditional on a COVID-19 outcome being reported in the published paper. Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-103",
+    "title": "Statistically significant result and reduction in COVID-19 of 10-20%.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Conditional on a COVID-19 outcome being reported in the published paper. Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.14,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.86,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-104",
+    "title": "Statistically significant result and reduction in COVID-19 of 20-30%.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Conditional on a COVID-19 outcome being reported in the published paper. Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.28,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.72,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-105",
+    "title": "Statistically significant result and reduction in COVID-19 of 30-40%.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Conditional on a COVID-19 outcome being reported in the published paper. Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.2,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-106",
+    "title": "Statistically significant result and reduction in COVID-19 of >40%.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Conditional on a COVID-19 outcome being reported in the published paper. Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.08,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.92,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-107",
+    "title": "At least one academic paper will be published in a top 200 academic journal on the basis of this RCT.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.15000000000000002,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-108",
+    "title": "Conditional on the study getting a statistically significant result on EITHER respiratory symptoms OR COVID-19, it will be mentioned in over 50,000 tweets according to altmetrics.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.19999999999999996,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-109",
+    "title": "Conditional on a preprint being published the study will receive justified criticism.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Criticisms to be as bad as: https://metrics.stanford.edu/PNAS%20retraction%20request%20LoE%20061820; determined by a panel of three GiveWell researchers if it's not obvious. Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.01,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.99,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-110",
+    "title": "Conditional on the study getting a statistically significant result on EITHER respiratory symptoms OR COVID-19, the WHO will publish an update to its guidance on masks mentioning this study.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-111",
+    "title": "Conditional on the study getting a statistically significant result on EITHER respiratory symptoms OR COVID-19, we will see at least one country with a population >20 million update its guidance on mask-wearing, explicitly referring to EITHER this evidence OR updated WHO guidance that refers to this evidence.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-112",
+    "title": "Conditional on the study getting a statistically significant result on EITHER respiratory symptoms OR COVID-19, it will be mentioned in the minutes of the UK's SAGE discussions.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: June 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-113",
+    "title": "A preprint is published (i.e., a draft paper is published on the internet) on the basis of this RCT by October 1, 2020.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: October 1, 2020",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.2,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-114",
+    "title": "A preprint is published (i.e., a draft paper is published on the internet) on the basis of this RCT by December 1, 2020.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: December 1, 2020",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.55,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.44999999999999996,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-115",
+    "title": "A preprint is published (i.e., a draft paper is published on the internet) on the basis of this RCT by February 1, 2021.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: February 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-116",
+    "title": "A preprint is published (i.e., a draft paper is published on the internet) on the basis of this RCT by April 1, 2021.",
+    "url": "https://www.givewell.org/research/incubation-grants/innovations-for-poverty-action-masks-rct-july-2020#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovations for Poverty Action — Randomized Controlled Trial on the Effect of Face Masks on COVID-19. Resolution: April 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-117",
+    "title": "By the end of 2019 we will fund at least one long-term follow-up study because of this project",
+    "url": "https://www.givewell.org/research/incubation-grants/cega-uc-berkeley/july-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Center for Effective Global Action at UC Berkeley — Scoping RCTs for Long-Term Follow-Ups",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-118",
+    "title": "By the end of 2019 we will fund at least two long-term follow-up studies because of this project",
+    "url": "https://www.givewell.org/research/incubation-grants/cega-uc-berkeley/july-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Center for Effective Global Action at UC Berkeley — Scoping RCTs for Long-Term Follow-Ups",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.2,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-119",
+    "title": "By the end of 2019 we renew the grant to fund further research into intervention areas where we could potentially fund long-term follow-up studies",
+    "url": "https://www.givewell.org/research/incubation-grants/cega-uc-berkeley/july-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Center for Effective Global Action at UC Berkeley — Scoping RCTs for Long-Term Follow-Ups",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-120",
+    "title": "By the end of 2020 we will fund at least five long-term follow-up studies because of this project",
+    "url": "https://www.givewell.org/research/incubation-grants/cega-uc-berkeley/july-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Center for Effective Global Action at UC Berkeley — Scoping RCTs for Long-Term Follow-Ups",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-121",
+    "title": "By the end of 2020 non-GiveWell funder(s) will fund at least three long-term follow-up studies because of this project",
+    "url": "https://www.givewell.org/research/incubation-grants/cega-uc-berkeley/july-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Center for Effective Global Action at UC Berkeley — Scoping RCTs for Long-Term Follow-Ups",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-122",
+    "title": "By the end of 2020 a long-term follow-up study funded because of this project (by us or another funder) will affect how we allocated more than $10 million in funding from 2018-2020.",
+    "url": "https://www.givewell.org/research/incubation-grants/cega-uc-berkeley/july-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Center for Effective Global Action at UC Berkeley — Scoping RCTs for Long-Term Follow-Ups",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-123",
+    "title": "By the end of 2025 a long-term follow-up study funded because of this project (by us or another funder) will affect how we allocate more than $10 million in funding from 2018-2025",
+    "url": "https://www.givewell.org/research/incubation-grants/cega-uc-berkeley/july-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Center for Effective Global Action at UC Berkeley — Scoping RCTs for Long-Term Follow-Ups",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-124",
+    "title": "By the end of 2025 a long-term follow-up study funded because of this project (by us or another funder) will affect how we allocate more than $40 million in funding from 2018-2025",
+    "url": "https://www.givewell.org/research/incubation-grants/cega-uc-berkeley/july-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Center for Effective Global Action at UC Berkeley — Scoping RCTs for Long-Term Follow-Ups",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-125",
+    "title": "We recommend a second grant to CPSP",
+    "url": "https://www.givewell.org/research/incubation-grants/centre-pesticide-suicide-prevention/august-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Average of two forecasts: 65% and 67%. Associated grant: Centre for Pesticide Suicide Prevention — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.66,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.33999999999999997,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-126",
+    "title": "Conditional on CPSP entering Nepal, Nepal will pass legislation to ban at least one of the three pesticides most commonly used in suicide.",
+    "url": "https://www.givewell.org/research/incubation-grants/centre-pesticide-suicide-prevention/august-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Average of two forecasts: 33% and 55%. Associated grant: Centre for Pesticide Suicide Prevention — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.44,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.56,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-127",
+    "title": "Conditional on CPSP entering India, India will pass legislation to ban at least one of the three pesticides most commonly used in suicide.",
+    "url": "https://www.givewell.org/research/incubation-grants/centre-pesticide-suicide-prevention/august-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Average of two forecasts: 5% and 10%. Associated grant: Centre for Pesticide Suicide Prevention — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.08,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.92,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-128",
+    "title": "Conditional on CPSP entering India, a state in India will pass legislation to ban at least one of the three pesticides most commonly used in suicide.",
+    "url": "https://www.givewell.org/research/incubation-grants/centre-pesticide-suicide-prevention/august-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Average of two forecasts: 35% and 15%. Associated grant: Centre for Pesticide Suicide Prevention — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-129",
+    "title": "Conditional on legislation to ban pesticides used in suicide being passed in Nepal, the pesticide suicide rate is lower in the combined three years after the ban than it is in the three years before the ban",
+    "url": "https://www.givewell.org/research/incubation-grants/centre-pesticide-suicide-prevention/august-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "(as determined by national level data or representative survey data). Associated grant: Centre for Pesticide Suicide Prevention — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.15000000000000002,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-130",
+    "title": "Conditional on legislation to ban pesticides used in suicide being passed in India, the pesticide suicide rate is lower in the combined three years after the ban than it is in the three years before the ban",
+    "url": "https://www.givewell.org/research/incubation-grants/centre-pesticide-suicide-prevention/august-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "(as determined by national level data or representative survey data). Associated grant: Centre for Pesticide Suicide Prevention — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.85,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.15000000000000002,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-131",
+    "title": "Conditional on legislation to ban pesticides used in suicide being passed in Nepal, the pesticide suicide rate is >10% lower in the combined three years after the ban than it is in the three years before the ban (as determined by national level data or representative survey data)",
+    "url": "https://www.givewell.org/research/incubation-grants/centre-pesticide-suicide-prevention/august-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Centre for Pesticide Suicide Prevention — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-132",
+    "title": "Conditional on legislation to ban pesticides used in suicide being passed in India, the pesticide suicide rate is >10% lower in the combined three years after the ban than it is in the three years before the ban (as determined by national level data or representative survey data)",
+    "url": "https://www.givewell.org/research/incubation-grants/centre-pesticide-suicide-prevention/august-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Centre for Pesticide Suicide Prevention — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-133",
+    "title": "Conditional on legislation to ban pesticides used in suicide being passed in Nepal, the pesticide suicide rate is >15% lower in the combined three years after the ban than it is in the three years before the ban (as determined by national level data or representative survey data)",
+    "url": "https://www.givewell.org/research/incubation-grants/centre-pesticide-suicide-prevention/august-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Centre for Pesticide Suicide Prevention — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.2,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-134",
+    "title": "Conditional on legislation to ban pesticides used in suicide being passed in India, the pesticide suicide rate is >15% lower in the combined three years after the ban than it is in the three years before the ban (as determined by national level data or representative survey data)",
+    "url": "https://www.givewell.org/research/incubation-grants/centre-pesticide-suicide-prevention/august-2017-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Centre for Pesticide Suicide Prevention — General Support",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.2,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-135",
+    "title": "GiveWell makes another grant to IGI",
+    "url": "https://www.givewell.org/research/incubation-grants/innovation-in-government-initiative/december-2018-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovation in Government Initiative — General Support. Resolution: January 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-136",
+    "title": "IGI is able to raise more than $1 million in funding from other sources",
+    "url": "https://www.givewell.org/research/incubation-grants/innovation-in-government-initiative/december-2018-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Innovation in Government Initiative — General Support. Resolution: January 1, 2021",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-137",
+    "title": "At least four GiveWell staff members with inputs in our cost-effectiveness model change their moral weights for either valuing health vs. income or age-weighting by at least 25%, and they attribute that change to this research",
+    "url": "https://www.givewell.org/research/incubation-grants/IDinsight-beneficiary-preferences-march-2019#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: IDinsight — Beneficiary Preferences Survey (2019)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-138",
+    "title": "Fortify Health becomes a top charity.",
+    "url": "https://www.givewell.org/research/incubation-grants/fortify-health/august-2019-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Fortify Health — General Support (2019). Resolution: November 2022",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-139",
+    "title": "Fortify Health has successfully signed agreements to install equipment with at least an additional 8 mills.",
+    "url": "https://www.givewell.org/research/incubation-grants/fortify-health/august-2019-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Fortify Health — General Support (2019). Resolution: July 2020",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-140",
+    "title": "Fortify Health has successfully signed agreements to install equipment with at least an additional 16 mills.",
+    "url": "https://www.givewell.org/research/incubation-grants/fortify-health/august-2019-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Fortify Health — General Support (2019). Resolution: July 2020",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-141",
+    "title": "Fortify Health has successfully installed equipment in at least 8 additional partner mills.",
+    "url": "https://www.givewell.org/research/incubation-grants/fortify-health/august-2019-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Fortify Health — General Support (2019). Resolution: July 2020",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.33,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.6699999999999999,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-142",
+    "title": "Fortify Health has successfully installed equipment in at least 16 additional partner mills.",
+    "url": "https://www.givewell.org/research/incubation-grants/fortify-health/august-2019-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Fortify Health — General Support (2019). Resolution: July 2020",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-143",
+    "title": "Fortify Health successfully maintains its four existing miller partnerships.",
+    "url": "https://www.givewell.org/research/incubation-grants/fortify-health/august-2019-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Fortify Health — General Support (2019). Resolution: July 2020",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.09999999999999998,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-144",
+    "title": "Laboratory tests from random samples of atta produced by Fortify Health's partner mills do not fall more than 1mg below the target (21.25 mg of iron per kilogram of wheat flour) in more than 25% of cases.",
+    "url": "https://www.givewell.org/research/incubation-grants/fortify-health/august-2019-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Fortify Health — General Support (2019). Resolution: July 2020",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-145",
+    "title": "GiveWell makes another grant to Fortify Health to work on iron fortification in India",
+    "url": "https://www.givewell.org/research/incubation-grants/fortify-health/june-2018-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Fortify Health — General Support (2018)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-146",
+    "title": "Fortify Health completes installation of fortification equipment in at least one mill",
+    "url": "https://www.givewell.org/research/incubation-grants/fortify-health/june-2018-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Fortify Health — General Support (2018)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-147",
+    "title": "Fortify Health completes installation of fortification equipment in at least five mills",
+    "url": "https://www.givewell.org/research/incubation-grants/fortify-health/june-2018-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Fortify Health — General Support (2018)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.2,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-148",
+    "title": "Fortify Health becomes a GiveWell top charity",
+    "url": "https://www.givewell.org/research/incubation-grants/fortify-health/june-2018-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Fortify Health — General Support (2018)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-149",
+    "title": "GiveWell models Fortify Health as more than 10x as cost-effective as cash after updating our CEA based on the Cochrane review of iron fortification that is scheduled to be released in 2018",
+    "url": "https://www.givewell.org/research/incubation-grants/fortify-health/june-2018-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Fortify Health — General Support (2018)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-150",
+    "title": "GiveWell will make a decision by September 30, 2020, about whether to recommend that Open Philanthropy and other donors continue to fund New Incentives",
+    "url": "https://www.givewell.org/research/incubation-grants/new-incentives/april-2020-grant#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: New Incentives — General Support (April 2020)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-151",
+    "title": "We will consider this grant a success in 10 years. ",
+    "url": "https://www.openphilanthropy.org/focus/global-catastrophic-risks/miscellaneous/harvard-university-solar-geoengineering-research-program",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Harvard University — Solar Geoengineering Research Program ",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.19999999999999996,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-152",
+    "title": "Two years from now, the Center for Human-Compatible AI will be spending at least $2 million a year, and will be considered by one or more of our relevant technical advisors to have a reasonably good reputation in the field",
+    "url": "https://www.openphilanthropy.org/focus/global-catastrophic-risks/potential-risks-advanced-artificial-intelligence/uc-berkeley-center-human-compatible-ai",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: UC Berkeley — Center for Human-Compatible AI (2016). Resolution: 2018",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-153",
+    "title": "CIWF USA will persuade at least one major poultry company to adopt a meaningful broiler chicken welfare policy",
+    "url": "https://www.openphilanthropy.org/focus/us-policy/farm-animal-welfare/CIWF-USA-general-support#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Compassion in World Farming USA — General Support (2016)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-154",
+    "title": "CIWF USA will play a major role in securing five or more new corporate cage-free pledges",
+    "url": "https://www.openphilanthropy.org/focus/us-policy/farm-animal-welfare/CIWF-USA-general-support#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Compassion in World Farming USA — General Support (2016)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-155",
+    "title": "We will consider this grant a cost-effective success in one year",
+    "url": "https://www.openphilanthropy.org/focus/us-policy/criminal-justice-reform/impact-justice-restorative-justice-project#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Impact Justice — Restorative Justice Project ",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-156",
+    "title": "This grant will play an important role in getting traction for the concept of restorative justice on a national level over the next three years",
+    "url": "https://www.openphilanthropy.org/focus/us-policy/criminal-justice-reform/impact-justice-restorative-justice-project#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: Impact Justice — Restorative Justice Project ",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.30000000000000004,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-157",
+    "title": "80,000 Hours claims at least 1,500 impact-adjusted plan changes in 2017",
+    "url": "https://www.openphilanthropy.org/giving/grants/80000-hours-general-support#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: 80,000 Hours — General Support ",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.66,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.33999999999999997,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-158",
+    "title": "80,000 Hours claims at least 2,400 impact-adjusted plan changes in 2017",
+    "url": "https://www.openphilanthropy.org/giving/grants/80000-hours-general-support#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: 80,000 Hours — General Support ",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.33,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.6699999999999999,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-159",
+    "title": "80,000 Hours hires at least two staff members in 2017",
+    "url": "https://www.openphilanthropy.org/giving/grants/80000-hours-general-support#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: 80,000 Hours — General Support ",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-160",
+    "title": "80,000 Hours raises at least $750,000 by February 1, 2017, not including funding from the Open Philanthropy Project",
+    "url": "https://www.openphilanthropy.org/giving/grants/80000-hours-general-support#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: 80,000 Hours — General Support ",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.30000000000000004,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-161",
+    "title": "80,000 Hours raises at least $1,250,000 by February 1, 2017, not including funding from the Open Philanthropy Project",
+    "url": "https://www.openphilanthropy.org/giving/grants/80000-hours-general-support#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: 80,000 Hours — General Support ",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "id": "givewellopenphil-2021-162",
+    "title": "The Alpha Pundit Challenge, or something like it, will have converted five or more vague predictions from pundits into numerical predictions, beyond those described in Tetlock, Alpha Pundit Challenge Proposal, by December 31, 2016%",
+    "url": "https://www.openphilanthropy.org/giving/grants/university-pennsylvania-philip-tetlock-forecasting#Internal_forecasts",
+    "platform": "GiveWell/OpenPhilanthropy",
+    "description": "Associated grant: University of Pennsylvania — Philip Tetlock on Forecasting ",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "timestamp": "2021-02-23T15∶21∶37.005Z",
+    "qualityindicators": {
+      "stars": 2
+    }
+  }
+]

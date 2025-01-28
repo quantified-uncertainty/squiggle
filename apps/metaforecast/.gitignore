@@ -1,0 +1,21 @@
+# Security
+**/betfaircertificates/
+**/secrets.json
+
+# Build artifacts
+*.swp
+
+# next.js
+/.next/
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+
+# vercel
+.vercel
+
+/.env*

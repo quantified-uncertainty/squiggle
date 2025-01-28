@@ -1,0 +1,225 @@
+input CreateDashboardInput {
+  """
+  The creator of the dashboard, e.g. "Peter Parker"
+  """
+  creator: String
+
+  """The longer description of the dashboard"""
+  description: String
+
+  """List of question ids"""
+  ids: [ID!]!
+
+  """The title of the dashboard"""
+  title: String!
+}
+
+type CreateDashboardResult {
+  dashboard: Dashboard!
+}
+
+type Dashboard {
+  """
+  The creator of the dashboard, e.g. "Peter Parker"
+  """
+  creator: String!
+
+  """The longer description of the dashboard"""
+  description: String!
+  id: ID!
+
+  """The list of questions on the dashboard"""
+  questions: [Question!]!
+
+  """The title of the dashboard"""
+  title: String!
+}
+
+"""Date serialized as the Unix timestamp."""
+scalar Date
+
+type History implements QuestionShape {
+  description: String!
+
+  """Last timestamp at which metaforecast fetched the question"""
+  fetched: Date!
+
+  """
+  Last timestamp at which metaforecast fetched the question, in ISO 8601 format
+  """
+  fetchedStr: String!
+
+  """History items are identified by their integer ids"""
+  id: ID!
+  options: [ProbabilityOption!]!
+  platform: Platform!
+  qualityIndicators: QualityIndicators!
+
+  """Unique string which identifies the question"""
+  questionId: ID!
+
+  """Last timestamp at which metaforecast fetched the question"""
+  timestamp: Date! @deprecated(reason: "Renamed to `fetched`")
+  title: String!
+
+  """
+  Non-unique, a very small number of platforms have a page for more than one prediction
+  """
+  url: String!
+}
+
+type Mutation {
+  """
+  Create a new dashboard; if the dashboard with given ids already exists then it will be returned instead.
+  """
+  createDashboard(input: CreateDashboardInput!): CreateDashboardResult!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+"""Forecasting platform supported by Metaforecast"""
+type Platform {
+  """
+  Short unique platform name, e.g. "xrisk"
+  """
+  id: ID!
+
+  """
+  Platform name for displaying on frontend etc., e.g. "X-risk estimates"
+  """
+  label: String!
+  lastUpdated: Date
+}
+
+type ProbabilityOption {
+  name: String
+
+  """0 to 1"""
+  probability: Float
+}
+
+"""Various indicators of the question's quality"""
+type QualityIndicators {
+  liquidity: Float
+  numForecasters: Int
+  numForecasts: Int
+  openInterest: Float
+  sharesVolume: Float
+  spread: Float
+
+  """0 to 5"""
+  stars: Int!
+  tradeVolume: Float
+  volume: Float
+}
+
+type Query {
+  """Look up a single dashboard by its id"""
+  dashboard(id: ID!): Dashboard
+
+  """Get a list of questions that are currently on the frontpage"""
+  frontpage: [Question!]!
+  platforms: [Platform!]!
+
+  """Look up a single question by its id"""
+  question(id: ID!): Question
+  questions(after: String, before: String, first: Int, last: Int, orderBy: QuestionsOrderBy): QueryQuestionsConnection!
+
+  """
+  Search for questions; uses Elasticsearch instead of the primary metaforecast database
+  """
+  searchQuestions(input: SearchInput!): [Question!]!
+}
+
+type QueryQuestionsConnection {
+  edges: [QueryQuestionsConnectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type QueryQuestionsConnectionEdge {
+  cursor: String!
+  node: Question!
+}
+
+type Question implements QuestionShape {
+  description: String!
+
+  """Last timestamp at which metaforecast fetched the question"""
+  fetched: Date!
+
+  """
+  Last timestamp at which metaforecast fetched the question, in ISO 8601 format
+  """
+  fetchedStr: String!
+
+  """First timestamp at which metaforecast fetched the question"""
+  firstSeen: Date!
+
+  """
+  First timestamp at which metaforecast fetched the question, in ISO 8601 format
+  """
+  firstSeenStr: String!
+  history: [History!]!
+
+  """Unique string which identifies the question"""
+  id: ID!
+  options: [ProbabilityOption!]!
+  platform: Platform!
+  qualityIndicators: QualityIndicators!
+
+  """Last timestamp at which metaforecast fetched the question"""
+  timestamp: Date! @deprecated(reason: "Renamed to `fetched`")
+  title: String!
+
+  """
+  Non-unique, a very small number of platforms have a page for more than one prediction
+  """
+  url: String!
+  visualization: String
+}
+
+interface QuestionShape {
+  description: String!
+
+  """Last timestamp at which metaforecast fetched the question"""
+  fetched: Date!
+
+  """
+  Last timestamp at which metaforecast fetched the question, in ISO 8601 format
+  """
+  fetchedStr: String!
+  options: [ProbabilityOption!]!
+  platform: Platform!
+  qualityIndicators: QualityIndicators!
+
+  """Last timestamp at which metaforecast fetched the question"""
+  timestamp: Date! @deprecated(reason: "Renamed to `fetched`")
+  title: String!
+
+  """
+  Non-unique, a very small number of platforms have a page for more than one prediction
+  """
+  url: String!
+}
+
+enum QuestionsOrderBy {
+  FIRST_SEEN_DESC
+}
+
+input SearchInput {
+  """List of platform ids to filter by"""
+  forecastingPlatforms: [String!]
+
+  """Minimum number of forecasts on a question"""
+  forecastsThreshold: Int
+  limit: Int
+  query: String!
+
+  """Minimum number of stars on a question"""
+  starsThreshold: Int
+}

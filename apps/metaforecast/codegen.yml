@@ -1,0 +1,32 @@
+schema: src/graphql/build-schema.js
+documents:
+  - "src/**/*.graphql"
+
+# This should be updated to match your client files
+# documents: 'client/**/!(*.d).{ts,tsx}'
+generates:
+  # This will take your schema and print an SDL schema.
+  schema.graphql:
+    plugins:
+      - schema-ast
+
+  src/graphql/types.generated.ts:
+    plugins:
+      - typescript
+
+  src/graphql/introspection.json:
+    plugins:
+      - introspection:
+          minify: true
+
+  src/:
+    preset: near-operation-file
+    presetConfig:
+      extension: .generated.tsx
+      baseTypesPath: graphql/types.generated.ts
+    plugins:
+      - typescript-operations:
+          strictScalars: true
+          scalars:
+            Date: number
+      - typed-document-node

@@ -1,0 +1,23 @@
+fragment Dashboard on Dashboard {
+  id
+  title
+  description
+  creator
+  questions {
+    ...Question
+  }
+}
+
+query DashboardById($id: ID!) {
+  result: dashboard(id: $id) {
+    ...Dashboard
+  }
+}
+
+mutation CreateDashboard($input: CreateDashboardInput!) {
+  result: createDashboard(input: $input) {
+    dashboard {
+      ...Dashboard
+    }
+  }
+}

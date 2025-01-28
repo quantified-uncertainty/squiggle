@@ -1,0 +1,61 @@
+{
+  "settings": {
+    "minWordSizefor1Typo": 4,
+    "minWordSizefor2Typos": 8,
+    "hitsPerPage": 300,
+    "maxValuesPerFacet": 100,
+    "attributesToIndex": [
+      "unordered(title)",
+      "unordered(description)",
+      "unordered(optionsstringforsearch)",
+      "unordered(platform)"
+    ],
+    "numericAttributesToIndex": null,
+    "attributesToRetrieve": null,
+    "ignorePlurals": true,
+    "removeStopWords": true,
+    "unretrievableAttributes": null,
+    "optionalWords": null,
+    "queryLanguages": [
+      "en"
+    ],
+    "attributesForFaceting": null,
+    "attributesToSnippet": null,
+    "attributesToHighlight": [],
+    "paginationLimitedTo": 1000,
+    "attributeForDistinct": null,
+    "exactOnSingleWordQuery": "attribute",
+    "ranking": [
+      "typo",
+      "geo",
+      "words",
+      "filters",
+      "proximity",
+      "attribute",
+      "exact",
+      "custom"
+    ],
+    "customRanking": [
+      "desc(title)",
+      "desc(description)",
+      "desc(optionsstringforsearch)",
+      "desc(platform)"
+    ],
+    "separatorsToIndex": "",
+    "removeWordsIfNoResults": "allOptional",
+    "queryType": "prefixLast",
+    "highlightPreTag": "<em>",
+    "highlightPostTag": "</em>",
+    "snippetEllipsisText": "",
+    "alternativesAsExact": [
+      "ignorePlurals",
+      "singleWordSynonym",
+      "multiWordsSynonym"
+    ],
+    "indexLanguages": [
+      "en"
+    ]
+  },
+  "rules": [],
+  "synonyms": []
+}

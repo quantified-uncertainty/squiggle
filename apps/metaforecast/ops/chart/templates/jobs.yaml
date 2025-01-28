@@ -1,0 +1,29 @@
+{{- range $jobname, $job := .Values.jobs }}
+---  
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ $.Release.Name }}-{{ $jobname }}
+spec:
+  concurrencyPolicy: Forbid
+  schedule: {{ $job.schedule | required "schedule is required" }}
+  timeZone: Etc/UTC
+  jobTemplate:
+    metadata:
+      labels:
+        app: {{ $.Release.Name }}
+        cronjob: {{ $jobname }}
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: cronjob
+            image: "{{ required "image.name is required" $.Values.image.name }}:{{ required "image.tag is required" $.Values.image.tag }}"
+            imagePullPolicy: Always
+            envFrom:
+            - secretRef:
+                name: {{ $.Values.envSecret }}
+            command:
+              {{- $job.command | required "command is required" | toYaml | nindent 12 }}
+{{- end }}

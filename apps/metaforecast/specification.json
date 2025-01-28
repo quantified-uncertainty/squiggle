@@ -1,0 +1,48 @@
+{
+  "id": "Unique string which identifies the question, not optional",
+  "title": " String, not optional",
+  "url": " String. A very few number of platforms have a page for more than one prediction.",
+  "platform": " String, not optional",
+  "description": " String, optional",
+  "options-description": " Optional. Saved as a string. If this is a binary question, it gets converted to having Yes/No options. The probabilities should be probabilities, i.e., normalized to 1 first. Eventually I'll want this to also include distributions.",
+  "options": [
+    "description: optional. Some prediction platforms have distributions, rather than probabilities.",
+    {
+      "name": "Option 1",
+      "probability": "Number, 0 to 1",
+      "type": "for now just 'PROBABILITY', but could include others, like 'DISTRIBUTION'"
+    },
+    {
+      "name": "Option 2",
+      "probability": "Number, 0 to 1",
+      "type": "for now just 'PROBABILITY', but could include others, like 'DISTRIBUTION'"
+    }
+  ],
+  "timestamp": " Timestamp at which metaforecast fetches the probability",
+  "qualityindicators": {
+    "stars": "required, 0 to 5",
+    "numforecasts": " optional",
+    "numforecasters": " optional",
+    "liquidity": "optional",
+    "tradevolume": "optional",
+    "volume": "optional",
+    "address": "optional",
+    "other properties": "optional"
+  },
+  "extra": {
+    "field_description": "arbitrary extra information",
+    "country_name": " country.country_name",
+    "regime_type": " country.regime_type",
+    "month": " country.month",
+    "year": " country.year",
+    "leader_name": " country.leader_name",
+    "month_risk": " country.month_risk",
+    "annual_risk": " country.annual_risk",
+    "risk_change_percent": " country.risk_change_percent",
+    "regime_years": " country.regime_years",
+    "leader_years": " country.leader_years",
+    "country_code": " country.country_code",
+    "country_abb": " country.country_abb",
+    "superforecastercommentary": "some analysis"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "extends": ["next", "prettier"], 
+	"rules": {
+		"next/no-document-import-in-page": "off"
+  }
+}

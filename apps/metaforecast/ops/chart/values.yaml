@@ -1,0 +1,15 @@
+image:
+  name: ghcr.io/quantified-uncertainty/metaforecast
+  # do not edit; this tag will be updated by the CI GitHub Action on each commit
+  tag: sha-474261cff1e4b5adbb90c7a2674e9ad5ccbb962d
+
+# Secret; you should create this in your k8s cluster.
+envSecret: metaforecast-env
+
+jobs:
+  scheduler:
+    command: ['./node_modules/.bin/ts-node', '-T', 'src/backend/flow/doEverythingForScheduler.ts']
+    schedule: '0 3 * * *' # every day at 3am
+  frontpage:
+    command: ['./node_modules/.bin/ts-node', '-T', 'src/backend/index.ts', 'frontpage']
+    schedule: '0 6 * * *' # every day at 6am
