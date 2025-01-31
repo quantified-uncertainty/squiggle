@@ -42,7 +42,6 @@ resource "heroku_app" "backend" {
 
 resource "vercel_project" "main" {
   name           = "metaforecast"
-  framework      = "nextjs"
   root_directory = "apps/metaforecast"
 
   git_repository = {

@@ -1,1 +1,3 @@
 ops
+src/graphql/introspection.json
+schema.graphql
