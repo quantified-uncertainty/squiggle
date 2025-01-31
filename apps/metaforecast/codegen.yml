@@ -1,4 +1,4 @@
-schema: src/graphql/build-schema.js
+schema: schema.graphql
 documents:
   - "src/**/*.graphql"
 

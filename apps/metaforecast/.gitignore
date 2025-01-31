@@ -19,3 +19,6 @@ npm-debug.log*
 .vercel
 
 /.env*
+
+/src/**/*.generated.tsx
+/src/**/*.generated.ts

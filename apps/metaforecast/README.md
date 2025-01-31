@@ -94,7 +94,7 @@ Overall, the services which we use are:
 - This repository is released under the [MIT license](https://opensource.org/licenses/MIT). See `LICENSE.md`
 - Commits follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summary)
 - For elicit and metaculus, this library currently filters out questions with <10 predictions.
-- The database is updated once a day, at 3:00 AM UTC, with the command `ts-node -T src/backend/flow/doEverythingForScheduler.ts`. The frontpage is updated after that, at 6:00 AM UTC with the command `ts-node -T src/backend/cli/index.ts frontpage`. It's possible that either of these two operations makes the webpage briefly go down.
+- The database is updated once a day, at 3:00 AM UTC, with the command `tsx src/backend/flow/doEverythingForScheduler.ts`. The frontpage is updated after that, at 6:00 AM UTC with the command `tsx src/backend/cli/index.ts frontpage`. It's possible that either of these two operations makes the webpage briefly go down.
 
 ## To do
 
