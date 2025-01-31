@@ -152,7 +152,7 @@ async function infer_inner(cookie: string) {
       );
       // console.log(questionHrefs)
 
-      if (process.env.DEBUG_MODE == "on" || DEBUG_MODE == "on") {
+      if (process.env["DEBUG_MODE"] == "on" || DEBUG_MODE == "on") {
         console.log("questionHrefs: ");
         console.log(questionHrefs);
       }
@@ -184,13 +184,13 @@ async function infer_inner(cookie: string) {
           console.log(JSON.stringify(question, null, 4));
           if (
             i % 30 == 0 &&
-            !(process.env.DEBUG_MODE == "on" || DEBUG_MODE == "on")
+            !(process.env["DEBUG_MODE"] == "on" || DEBUG_MODE == "on")
           ) {
             console.log(`Page #${i}`);
             console.log(question);
           }
           results.push(question);
-          if (process.env.DEBUG_MODE == "on" || DEBUG_MODE == "on") {
+          if (process.env["DEBUG_MODE"] == "on" || DEBUG_MODE == "on") {
             console.log(url);
             console.log(question);
           }
@@ -233,7 +233,7 @@ export const infer: Platform = {
   color: "#223900",
   version: "v1",
   async fetcher() {
-    let cookie = process.env.INFER_COOKIE;
+    let cookie = process.env["INFER_COOKIE"]!;
     return (await applyIfSecretExists(cookie, infer_inner)) || null;
   },
   calculateStars(data) {

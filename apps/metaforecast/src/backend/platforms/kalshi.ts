@@ -12,8 +12,8 @@ let jsonEndpoint = "https://trading-api.kalshi.com/v2";
 async function fetchAllMarkets() {
   try {
     let response = await kalshi_api.login({
-      email: process.env.KALSHI_EMAIL,
-      password: process.env.KALSHI_PASSWORD,
+      email: process.env["KALSHI_EMAIL"]!,
+      password: process.env["KALSHI_PASSWORD"]!,
     });
     console.log(response.data);
     let exchange_status = await kalshi_api.getExchangeStatus();

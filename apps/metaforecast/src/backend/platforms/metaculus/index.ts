@@ -174,7 +174,7 @@ export const metaculus: Platform = {
   async fetcher() {
     let allQuestions: FetchedQuestion[] = [];
 
-    const debug = !!process.env.DEBUG;
+    const debug = !!process.env["DEBUG"]!;
 
     let next: string | null = "https://www.metaculus.com/api2/questions/";
     let i = 1;

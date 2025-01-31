@@ -188,7 +188,7 @@ export const smarkets: Platform = {
       .action(async (eventId) => {
         const events = [
           await fetchSingleEvent(eventId, {
-            verbose: !!process.env.DEBUG,
+            verbose: !!process.env["DEBUG"]!,
           }),
         ];
         await saveQuestions(smarkets, events, true);
@@ -197,7 +197,7 @@ export const smarkets: Platform = {
 
   async fetcher() {
     const ctx = {
-      verbose: !!process.env.DEBUG,
+      verbose: !!process.env["DEBUG"]!,
     };
 
     const partial = false;

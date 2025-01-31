@@ -1,7 +1,6 @@
-import crypto from "crypto";
-
 import { Client as ElasticClient } from "@elastic/elasticsearch";
 import { Question } from "@prisma/client";
+import crypto from "crypto";
 
 import { prisma } from "../database/prisma";
 import { platformNameToLabel } from "../platforms/registry";
@@ -10,17 +9,17 @@ let _CACHED_CLIENT: ElasticClient | null = null;
 function getClient() {
   if (!_CACHED_CLIENT) {
     _CACHED_CLIENT = new ElasticClient({
-      node: process.env.ELASTIC_HOST,
+      node: process.env["ELASTIC_HOST"]!,
       auth: {
-        username: process.env.ELASTIC_USER!,
-        password: process.env.ELASTIC_PASSWORD!,
+        username: process.env["ELASTIC_USER"]!,
+        password: process.env["ELASTIC_PASSWORD"]!,
       },
     });
   }
   return _CACHED_CLIENT;
 }
 
-const ALIAS_NAME = process.env.ELASTIC_INDEX!;
+const ALIAS_NAME = process.env["ELASTIC_INDEX"]!;
 
 export type ElasticQuestion = Omit<Question, "fetched" | "firstSeen"> & {
   fetched: string;

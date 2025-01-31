@@ -230,7 +230,7 @@ export const goodjudgmentopen: Platform = {
   color: "#002455",
   version: "v1",
   async fetcher() {
-    let cookie = process.env.GOODJUDGMENTOPENCOOKIE;
+    let cookie = process.env["GOODJUDGMENTOPENCOOKIE"]!;
     return (await applyIfSecretExists(cookie, goodjudgmentopen_inner)) || null;
   },
   calculateStars(data) {

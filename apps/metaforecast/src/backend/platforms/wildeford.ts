@@ -43,10 +43,10 @@ async function fetchGoogleDoc(google_api_key: string) {
   const sheet = doc.sheetsByIndex[0];
   const rows = await sheet.getRows();
 
-  console.log("# " + rows[0]._sheet.headerValues.join(","));
+  console.log("# " + rows[0]["_sheet"].headerValues.join(","));
   let isEnd = false;
   for (let i in rows) {
-    let data = rows[i]._rawData;
+    let data = rows[i]["_rawData"];
     if (data.length == 0) isEnd = true;
     if (!isEnd) {
       let result = {
@@ -124,7 +124,7 @@ export const wildeford: Platform = {
   color: "#984158",
   version: "v1",
   async fetcher() {
-    const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY; // See: https://developers.google.com/sheets/api/guides/authorizing#APIKey
+    const GOOGLE_API_KEY = process.env["GOOGLE_API_KEY"]!; // See: https://developers.google.com/sheets/api/guides/authorizing#APIKey
     return (await applyIfSecretExists(GOOGLE_API_KEY, wildeford_inner)) || null;
   },
   calculateStars(data) {

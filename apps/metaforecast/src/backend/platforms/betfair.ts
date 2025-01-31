@@ -8,7 +8,7 @@ import { FetchedQuestion, Platform } from "../types";
 const platformName = "betfair";
 
 /* Definitions */
-const endpoint = process.env.SECRET_BETFAIR_ENDPOINT;
+const endpoint = process.env["SECRET_BETFAIR_ENDPOINT"]!;
 
 /* Utilities */
 const arraysEqual = (a: string[], b: string[]) => {

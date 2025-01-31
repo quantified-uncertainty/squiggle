@@ -10,7 +10,7 @@ export async function uploadToImgur(dataURL: string): Promise<string> {
     method: "post",
     url: "https://api.imgur.com/3/image",
     headers: {
-      Authorization: `Bearer ${process.env.IMGUR_BEARER}`,
+      Authorization: `Bearer ${process.env["IMGUR_BEARER"]}`,
     },
     data: {
       type: "base64",

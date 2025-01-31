@@ -1,8 +1,7 @@
-import { Client as ElasticClient } from "@elastic/elasticsearch";
 import {
-  QueryDslQueryContainer,
-  SearchHit,
-} from "@elastic/elasticsearch/lib/api/types";
+  Client as ElasticClient,
+  estypes as ElasticTypes,
+} from "@elastic/elasticsearch";
 
 import { ElasticQuestion } from "../../backend/utils/elastic";
 
@@ -10,17 +9,17 @@ let _CACHED_CLIENT: ElasticClient | null = null;
 function getClient() {
   if (!_CACHED_CLIENT) {
     _CACHED_CLIENT = new ElasticClient({
-      node: process.env.ELASTIC_HOST,
+      node: process.env["ELASTIC_HOST"]!,
       auth: {
-        username: process.env.ELASTIC_USER!,
-        password: process.env.ELASTIC_PASSWORD!,
+        username: process.env["ELASTIC_USER"]!,
+        password: process.env["ELASTIC_PASSWORD"]!,
       },
     });
   }
   return _CACHED_CLIENT;
 }
 
-const INDEX_NAME = process.env.ELASTIC_INDEX!;
+const INDEX_NAME = process.env["ELASTIC_INDEX"]!;
 
 interface SearchOpts {
   queryString: string;
@@ -38,7 +37,7 @@ function buildFilter({
   SearchOpts,
   "starsThreshold" | "filterByPlatforms" | "forecastsThreshold"
 >) {
-  const filters: QueryDslQueryContainer[] = [];
+  const filters: ElasticTypes.QueryDslQueryContainer[] = [];
 
   if (starsThreshold) {
     filters.push({
@@ -71,7 +70,10 @@ function buildFilter({
   return filters;
 }
 
-function noExactMatch(queryString: string, result: SearchHit<ElasticQuestion>) {
+function noExactMatch(
+  queryString: string,
+  result: ElasticTypes.SearchHit<ElasticQuestion>
+) {
   queryString = queryString.toLowerCase();
 
   const title = result._source?.title.toLowerCase();
@@ -94,7 +96,7 @@ export async function searchWithElastic({
   starsThreshold,
   filterByPlatforms,
   forecastsThreshold,
-}: SearchOpts): Promise<SearchHit<ElasticQuestion>[]> {
+}: SearchOpts): Promise<ElasticTypes.SearchHit<ElasticQuestion>[]> {
   const response = await getClient().search<ElasticQuestion>({
     index: INDEX_NAME,
     sort: [{ "qualityindicators.stars": "desc" }, "_score"],

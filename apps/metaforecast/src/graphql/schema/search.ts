@@ -1,4 +1,4 @@
-import { SearchHit } from "@elastic/elasticsearch/lib/api/types";
+import { estypes as ElasticTypes } from "@elastic/elasticsearch";
 
 import { guesstimate } from "../../backend/platforms/guesstimate";
 import { ElasticQuestion } from "../../backend/utils/elastic";
@@ -51,7 +51,7 @@ builder.queryField("searchQuestions", (t) =>
 
       let results: ElasticQuestion[] = [];
 
-      const toDocs = (hits: SearchHit<ElasticQuestion>[]) =>
+      const toDocs = (hits: ElasticTypes.SearchHit<ElasticQuestion>[]) =>
         hits
           .map((hit) => hit._source)
           .filter((doc): doc is NonNullable<typeof doc> => !!doc);

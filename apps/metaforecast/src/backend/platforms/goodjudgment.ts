@@ -1,6 +1,6 @@
 /* Imports */
 import axios from "axios";
-import { Tabletojson } from "tabletojson";
+import { tabletojson } from "tabletojson";
 
 import { average } from "../../utils";
 import { FetchedQuestion, Platform } from "../types";
@@ -55,7 +55,7 @@ export const goodjudgment: Platform = {
 
     // Processing
     let results: FetchedQuestion[] = [];
-    let jsonTable = Tabletojson.convert(content, { stripHtmlFromCells: false });
+    let jsonTable = tabletojson.convert(content, { stripHtmlFromCells: false });
     jsonTable.shift(); // deletes first element
     jsonTable.pop(); // deletes last element
 

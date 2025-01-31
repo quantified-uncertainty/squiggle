@@ -12,7 +12,7 @@ export class ErrorBoundary extends Component<
     this.state = { error: null, errorInfo: null };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Catch errors in any components below and re-render with error message
     this.setState({
       error: error,
@@ -21,7 +21,7 @@ export class ErrorBoundary extends Component<
     // You can also log error messages to an error reporting service here
   }
 
-  render() {
+  override render() {
     if (this.state.errorInfo) {
       // Error path
       return (
