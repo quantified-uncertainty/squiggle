@@ -29,23 +29,23 @@ export function searchParamsToQuery(
     forecastingPlatforms: defaultForecastingPlatforms,
   };
 
-  if (searchParams.query) {
-    searchQuery.query = String(searchParams.query);
+  if (searchParams["query"]) {
+    searchQuery.query = String(searchParams["query"]);
   }
-  if (searchParams.starsThreshold) {
-    searchQuery.starsThreshold = Number(searchParams.starsThreshold);
+  if (searchParams["starsThreshold"]) {
+    searchQuery.starsThreshold = Number(searchParams["starsThreshold"]);
   }
-  if (searchParams.forecastsThreshold !== undefined) {
-    searchQuery.forecastsThreshold = Number(searchParams.forecastsThreshold);
+  if (searchParams["forecastsThreshold"]) {
+    searchQuery.forecastsThreshold = Number(searchParams["forecastsThreshold"]);
   }
-  if (searchParams.forecastingPlatforms !== undefined) {
+  if (searchParams["forecastingPlatforms"]) {
     searchQuery.forecastingPlatforms = String(
-      searchParams.forecastingPlatforms
+      searchParams["forecastingPlatforms"]
     ).split("|");
   }
 
-  if (searchParams.limit) {
-    searchQuery.limit = Number(searchParams.limit);
+  if (searchParams["limit"]) {
+    searchQuery.limit = Number(searchParams["limit"]);
   }
 
   return searchQuery;
