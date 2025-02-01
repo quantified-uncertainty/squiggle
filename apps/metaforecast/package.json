@@ -4,7 +4,7 @@
   "private": true,
   "description": "Get forecasts from various platforms",
   "engines": {
-    "node": ">=20.x"
+    "node": "22.x"
   },
   "keywords": [
     "forecasts",
