@@ -17,7 +17,7 @@
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.13",
     "commander": "^12.1.0",
-    "glob": "^10.3.12",
+    "glob": "^11.0.1",
     "json-diff": "^1.0.6",
     "lodash": "^4.17.21",
     "squiggle-components-0.10.0": "npm:@quri/squiggle-components@0.10.0",
