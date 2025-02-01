@@ -647,8 +647,8 @@ importers:
         specifier: ^1.0.6
         version: 1.0.6(react@19.0.0)
       '@hookform/resolvers':
-        specifier: ^3.3.4
-        version: 3.3.4(react-hook-form@7.53.2(react@19.0.0))
+        specifier: ^3.10.0
+        version: 3.10.0(react-hook-form@7.53.2(react@19.0.0))
       '@lezer/common':
         specifier: ^1.2.2
         version: 1.2.3
@@ -2870,6 +2870,11 @@ packages:
     resolution: {integrity: sha512-JJCXydOFWMDpCP4q13iEplA503MQO3xLoZiKum+955ZCtHINWnx26CUxVxxFQu/uLb4LW3ge15ZpzIkXKkJ8oQ==}
     peerDependencies:
       react: '>= 16'
+
+  '@hookform/resolvers@3.10.0':
+    resolution: {integrity: sha512-79Dv+3mDF7i+2ajj7SkypSKHhl1cbln1OGavqrsF7p6mbUv11xpqpacPsGDCTRvCSjEEIez2ef1NveSVL3b0Ag==}
+    peerDependencies:
+      react-hook-form: ^7.0.0
 
   '@hookform/resolvers@3.3.4':
     resolution: {integrity: sha512-o5cgpGOuJYrd+iMKvkttOclgwRW86EsWJZZRC23prf0uU2i48Htq4PuT73AVb9ionFyZrwYEITuOFGF+BydEtQ==}
@@ -12430,6 +12435,10 @@ snapshots:
   '@heroicons/react@1.0.6(react@19.0.0)':
     dependencies:
       react: 19.0.0
+
+  '@hookform/resolvers@3.10.0(react-hook-form@7.53.2(react@19.0.0))':
+    dependencies:
+      react-hook-form: 7.53.2(react@19.0.0)
 
   '@hookform/resolvers@3.3.4(react-hook-form@7.53.2(react@19.0.0))':
     dependencies:
