@@ -723,8 +723,8 @@ importers:
         specifier: ^3.4.0
         version: 3.4.0
       '@lezer/generator':
-        specifier: ^1.7.1
-        version: 1.7.1
+        specifier: ^1.7.2
+        version: 1.7.2
       '@lezer/highlight':
         specifier: ^1.2.1
         version: 1.2.1
@@ -3115,8 +3115,8 @@ packages:
   '@lezer/common@1.2.3':
     resolution: {integrity: sha512-w7ojc8ejBqr2REPsWxJjrMFsA/ysDCFICn8zEOR9mrqzOu2amhITYuLD8ag6XZf0CFXDrhKqw7+tW8cX66NaDA==}
 
-  '@lezer/generator@1.7.1':
-    resolution: {integrity: sha512-MgPJN9Si+ccxzXl3OAmCeZuUKw4XiPl4y664FX/hnnyG9CTqUPq65N3/VGPA2jD23D7QgMTtNqflta+cPN+5mQ==}
+  '@lezer/generator@1.7.2':
+    resolution: {integrity: sha512-CwgULPOPPmH54tv4gki18bElLCdJ1+FBC+nGVSVD08vFWDsMjS7KEjNTph9JOypDnet90ujN3LzQiW3CyVODNQ==}
     hasBin: true
 
   '@lezer/highlight@1.2.1':
@@ -12808,7 +12808,7 @@ snapshots:
 
   '@lezer/common@1.2.3': {}
 
-  '@lezer/generator@1.7.1':
+  '@lezer/generator@1.7.2':
     dependencies:
       '@lezer/common': 1.2.3
       '@lezer/lr': 1.4.2
