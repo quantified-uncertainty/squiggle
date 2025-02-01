@@ -1,0 +1,12 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "env": ["DATABASE_URL", "VERCEL_ENV"]
+    },
+    "bundle": {
+      "dependsOn": ["^build", "build:ts"],
+      "outputs": ["dist"]
+    }
+  }
+}
