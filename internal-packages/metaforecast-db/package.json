@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:ts": "prisma generate && tsc",
+    "gen:prisma": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma generate --no-hints",
+    "build:ts": "pnpm gen:prisma && tsc",
     "build": "pnpm run build:ts"
   },
   "dependencies": {
