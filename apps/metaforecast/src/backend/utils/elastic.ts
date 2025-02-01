@@ -1,5 +1,5 @@
 import { Client as ElasticClient } from "@elastic/elasticsearch";
-import { Question } from "@prisma/client";
+import { Question } from "@prisma-generated";
 import crypto from "crypto";
 
 import { prisma } from "../database/prisma";

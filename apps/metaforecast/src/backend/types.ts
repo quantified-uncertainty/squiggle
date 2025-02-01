@@ -1,5 +1,5 @@
 import { type Command } from "@commander-js/extra-typings";
-import { Question } from "@prisma/client";
+import { Question } from "@prisma-generated";
 
 import { QuestionOption } from "@/common/types";
 

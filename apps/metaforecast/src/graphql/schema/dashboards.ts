@@ -1,4 +1,4 @@
-import { Dashboard } from "@prisma/client";
+import { Dashboard } from "@prisma-generated";
 
 import { prisma } from "../../backend/database/prisma";
 import { hash } from "../../backend/utils/hash";

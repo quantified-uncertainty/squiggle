@@ -1,6 +1,6 @@
 // Saving data to Manifold-specific tables.
 
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma-generated";
 import fs from "fs/promises";
 import { z } from "zod";
 

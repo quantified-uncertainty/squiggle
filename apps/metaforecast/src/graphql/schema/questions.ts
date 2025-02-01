@@ -1,4 +1,4 @@
-import { History, Question } from "@prisma/client";
+import { History, Question } from "@prisma-generated";
 
 import { QualityIndicators } from "@/backend/types";
 

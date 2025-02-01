@@ -1,4 +1,4 @@
-import { Question } from "@prisma/client";
+import { Question } from "@prisma-generated";
 
 import { prisma } from "./database/prisma";
 import { measureTime } from "./utils/measureTime";

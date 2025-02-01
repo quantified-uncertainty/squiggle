@@ -2,7 +2,15 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "env": ["DATABASE_URL", "VERCEL_ENV"]
+      "env": ["DATABASE_URL", "VERCEL_ENV"],
+      "outputs": [
+        "dist",
+        "prisma/generated",
+        "build",
+        ".next",
+        "*.tsbuildinfo",
+        "!.next/cache"
+      ]
     }
   }
 }
