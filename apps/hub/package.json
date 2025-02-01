@@ -64,7 +64,7 @@
     "@types/invariant": "^2.2.37",
     "@types/jest": "^29.5.12",
     "@types/lodash": "^4.14.202",
-    "@types/node": "^20.12.7",
+    "@types/node": "^22.13.0",
     "@types/pako": "^2.0.3",
     "@types/react": "^19.0.2",
     "dotenv-cli": "^8.0.0",
