@@ -1,12 +1,11 @@
 import SchemaBuilder from "@pothos/core";
 import PrismaPlugin from "@pothos/plugin-prisma";
-import type PrismaTypes from "@pothos/plugin-prisma/generated";
 import RelayPlugin from "@pothos/plugin-relay";
 
-import { prisma } from "@quri/metaforecast-db";
+import { type PothosPrismaTypes, prisma } from "@quri/metaforecast-db";
 
 export const builder = new SchemaBuilder<{
-  PrismaTypes: PrismaTypes;
+  PrismaTypes: PothosPrismaTypes;
   Scalars: {
     Date: {
       Input: Date;
