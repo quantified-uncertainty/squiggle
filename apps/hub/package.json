@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
-    "@prisma/client": "5.22.0",
+    "@prisma/client": "6.3.0",
     "@quri/squiggle-ai": "workspace:*",
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
