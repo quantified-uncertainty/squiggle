@@ -55,7 +55,7 @@
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.12.7",
     "@types/react": "^19.0.2",
-    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/eslint-plugin": "^8.22.0",
     "@typescript-eslint/parser": "^8.22.0",
     "codecov": "^3.8.3",
     "date-fns": "^4.1.0",
