@@ -1,4 +1,5 @@
-import { prisma } from "../../backend/database/prisma";
+import { prisma } from "@quri/metaforecast-db";
+
 import { getPlatforms } from "../../backend/platforms/registry";
 import { builder } from "../builder";
 

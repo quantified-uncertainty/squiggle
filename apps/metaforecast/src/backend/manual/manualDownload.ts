@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import fs from "fs";
 
-import { prisma } from "../database/prisma";
+import { prisma } from "@quri/metaforecast-db";
 
 let main = async () => {
   let json = await prisma.question.findMany({});

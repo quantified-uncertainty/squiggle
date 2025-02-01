@@ -1,9 +1,9 @@
 /* Imports */
 import fs from "fs";
 
-import { QualityIndicators } from "@/backend/types";
+import { prisma } from "@quri/metaforecast-db";
 
-import { prisma } from "../../database/prisma";
+import { QualityIndicators } from "@/backend/types";
 
 /* Definitions */
 let locationData = "./data/";

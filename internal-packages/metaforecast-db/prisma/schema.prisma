@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "./generated"
+  output   = "../generated"
 }
 
 generator pothos {
@@ -9,7 +9,7 @@ generator pothos {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DIGITALOCEAN_POSTGRES")
+  url      = env("METAFORECAST_DB_URL")
 }
 
 model Dashboard {

@@ -1,6 +1,5 @@
-import { Question } from "@prisma-generated";
+import { prisma, Question } from "@quri/metaforecast-db";
 
-import { prisma } from "./database/prisma";
 import { measureTime } from "./utils/measureTime";
 
 export async function getFrontpage(): Promise<Question[]> {

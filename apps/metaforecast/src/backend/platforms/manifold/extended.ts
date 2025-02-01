@@ -1,10 +1,9 @@
 // Saving data to Manifold-specific tables.
 
-import { Prisma } from "@prisma-generated";
 import fs from "fs/promises";
 import { z } from "zod";
 
-import { prisma } from "@/backend/database/prisma";
+import { prisma, Prisma } from "@quri/metaforecast-db";
 
 import { fetchAllMarketsLite, fetchFullMarket, fetchGroup } from "./api";
 import { fullMarketSchema, ManifoldFullMarket } from "./apiSchema";

@@ -1,5 +1,6 @@
-import { Question } from "@prisma-generated";
 import axios from "axios";
+
+import { Question } from "@quri/metaforecast-db";
 
 import { prepareQuestion, upsertSingleQuestion } from "../robot";
 import { FetchedQuestion, Platform } from "../types";

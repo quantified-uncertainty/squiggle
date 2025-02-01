@@ -1,6 +1,5 @@
-import { Dashboard } from "@prisma-generated";
+import { Dashboard, prisma } from "@quri/metaforecast-db";
 
-import { prisma } from "../../backend/database/prisma";
 import { hash } from "../../backend/utils/hash";
 import { builder } from "../builder";
 import { QuestionObj } from "./questions";

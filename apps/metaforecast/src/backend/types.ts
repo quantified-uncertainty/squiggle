@@ -1,5 +1,6 @@
 import { type Command } from "@commander-js/extra-typings";
-import { Question } from "@prisma-generated";
+
+import { Question } from "@quri/metaforecast-db";
 
 import { QuestionOption } from "@/common/types";
 

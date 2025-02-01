@@ -1,8 +1,8 @@
 import { Client as ElasticClient } from "@elastic/elasticsearch";
-import { Question } from "@prisma-generated";
 import crypto from "crypto";
 
-import { prisma } from "../database/prisma";
+import { prisma, Question } from "@quri/metaforecast-db";
+
 import { platformNameToLabel } from "../platforms/registry";
 
 let _CACHED_CLIENT: ElasticClient | null = null;
