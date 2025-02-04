@@ -61,7 +61,7 @@
     "@types/d3": "^7.4.3",
     "@types/hast": "^3.0.4",
     "@types/jest": "^29.5.12",
-    "@types/lodash": "^4.14.202",
+    "@types/lodash": "^4.17.15",
     "@types/node": "^20.12.7",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.3",

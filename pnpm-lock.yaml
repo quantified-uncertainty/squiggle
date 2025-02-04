@@ -142,8 +142,8 @@ importers:
         specifier: ^29.5.12
         version: 29.5.14
       '@types/lodash':
-        specifier: ^4.14.202
-        version: 4.17.13
+        specifier: ^4.17.15
+        version: 4.17.15
       '@types/node':
         specifier: ^20.12.7
         version: 20.17.6
@@ -443,7 +443,7 @@ importers:
         specifier: workspace:*
         version: link:../../internal-packages/configs
       '@types/lodash':
-        specifier: ^4.17.13
+        specifier: ^4.17.15
         version: 4.17.15
       '@types/pg':
         specifier: ^8.11.10
@@ -765,8 +765,8 @@ importers:
         specifier: ^7.20.5
         version: 7.20.5
       '@types/lodash':
-        specifier: ^4.17.10
-        version: 4.17.13
+        specifier: ^4.17.15
+        version: 4.17.15
       '@types/node':
         specifier: ^20.16.11
         version: 20.17.6
@@ -865,8 +865,8 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
       '@types/lodash':
-        specifier: ^4.14.202
-        version: 4.17.13
+        specifier: ^4.17.15
+        version: 4.17.15
       '@types/node':
         specifier: ^22.10.2
         version: 22.10.2
@@ -1055,8 +1055,8 @@ importers:
         specifier: ^29.5.12
         version: 29.5.14
       '@types/lodash':
-        specifier: ^4.14.202
-        version: 4.17.13
+        specifier: ^4.17.15
+        version: 4.17.15
       '@types/node':
         specifier: ^20.12.7
         version: 20.17.6
@@ -1264,8 +1264,8 @@ importers:
         specifier: ^29.5.12
         version: 29.5.14
       '@types/lodash':
-        specifier: ^4.14.202
-        version: 4.17.13
+        specifier: ^4.17.15
+        version: 4.17.15
       '@types/node':
         specifier: ^20.12.7
         version: 20.17.6
@@ -5851,9 +5851,6 @@ packages:
 
   '@types/katex@0.16.3':
     resolution: {integrity: sha512-CeVMX9EhVUW8MWnei05eIRks4D5Wscw/W9Byz1s3PA+yJvcdvq9SaDjiUKvRvEgjpdTyJMjQA43ae4KTwsvOPg==}
-
-  '@types/lodash@4.17.13':
-    resolution: {integrity: sha512-lfx+dftrEZcdBPczf9d0Qv0x+j/rfNCMuC6OcfXmO8gkfeNAY88PgKUbvG56whcN23gc27yenwF6oJZXGFpYxg==}
 
   '@types/lodash@4.17.15':
     resolution: {integrity: sha512-w/P33JFeySuhN6JLkysYUK2gEmy9kHHFN7E8ro0tkfmlDOgxBDzWEZ/J8cWA+fHqFevpswDTFZnDx+R9lbL6xw==}
@@ -19345,8 +19342,6 @@ snapshots:
   '@types/json5@0.0.29': {}
 
   '@types/katex@0.16.3': {}
-
-  '@types/lodash@4.17.13': {}
 
   '@types/lodash@4.17.15': {}
 
