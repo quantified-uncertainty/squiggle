@@ -1,5 +1,5 @@
-# Use the official Node.js 20 image for builds
-ARG DOCKER_NODE_VERSION=20-bookworm-slim
+# Use the official Node.js 22 image for builds
+ARG DOCKER_NODE_VERSION=22-bookworm-slim
 
 FROM node:$DOCKER_NODE_VERSION AS build
 
