@@ -1,4 +1,4 @@
-name: Create and publish a Docker image for Metaforecast
+name: Docker image for Metaforecast
 
 on:
   push:
@@ -9,6 +9,7 @@ env:
   REGISTRY: registry.k8s.quantifieduncertainty.org
   REGISTRY_USERNAME: quri
   IMAGE_NAME: metaforecast
+  APP_DIR: apps/metaforecast
 
 jobs:
   build-and-push-image:
@@ -47,10 +48,10 @@ jobs:
       # TODO - `turbo prune`
       - name: Build and push Docker image
         id: push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: .
-          file: ops/Dockerfile
+          context: ${{ env.APP_DIR }}
+          file: ${{ env.APP_DIR }}/ops/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
