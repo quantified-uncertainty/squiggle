@@ -58,7 +58,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@parcel/watcher": "^2.4.1",
+    "@parcel/watcher": "^2.5.1",
     "@quri/configs": "workspace:*",
     "@types/d3": "^7.4.3",
     "@types/invariant": "^2.2.37",
