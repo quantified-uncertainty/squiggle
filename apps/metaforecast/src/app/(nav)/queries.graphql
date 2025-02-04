@@ -1,0 +1,11 @@
+query Frontpage {
+  result: frontpage {
+    ...Question
+  }
+}
+
+query Search($input: SearchInput!) {
+  result: searchQuestions(input: $input) {
+    ...Question
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "env": ["DATABASE_URL", "VERCEL_ENV"],
+      "outputs": ["dist", "build", ".next", "*.tsbuildinfo", "!.next/cache"]
+    }
+  }
+}

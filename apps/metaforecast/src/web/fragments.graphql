@@ -1,0 +1,38 @@
+fragment Question on Question {
+  id
+  url
+  title
+  description
+  fetched
+  options {
+    name
+    probability
+  }
+  platform {
+    id
+    label
+  }
+  qualityIndicators {
+    stars
+    numForecasts
+    numForecasters
+    volume
+    spread
+    sharesVolume
+    openInterest
+    liquidity
+    tradeVolume
+  }
+  visualization
+}
+
+fragment QuestionWithHistory on Question {
+  ...Question
+  history {
+    fetched
+    options {
+      name
+      probability
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "extends": "@quri/configs/tsconfig.nextjs.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@prisma-generated": ["./prisma/generated"],
+    },
+    // type check settings
+    "plugins": [
+      {
+        "name": "next",
+      },
+    ],
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts",
+  ],
+}

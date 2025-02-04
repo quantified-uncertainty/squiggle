@@ -1,0 +1,2162 @@
+[
+  {
+    "title": "Total existential risk by 2120",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=0",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Toby Ord (~2020)"
+    },
+    "description": "Actual estimate: ~17% (~1 in 6)\n\nOrd writes: \"Don’t take these numbers to be completely objective. [...] And don’t take the estimates to be precise. Their purpose is to show the right order of magnitude, rather than a more precise probability.\"\n\nThis estimate already incorporates Ord's expectation that people will start taking these risks more seriously in future. For his \"business as usual\" estimate, see the conditional estimates sheet.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.17,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.83,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Overall risk of extinction prior to 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.19,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.81,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Existential risk in the 21st century",
+    "url": "https://80000hours.org/podcast/episodes/will-macaskill-paralysis-and-hinge-of-history/#transcript",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Will MacAskill (~2019)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.01,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.99,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Extinction risk in the next century",
+    "url": "https://80000hours.org/articles/extinction-risk/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Ben Todd or 80,000 Hours (~2017)"
+    },
+    "description": "Actual estimate: Probably at or above 3%\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.03,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.97,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Risk of extinction over the next five centuries",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=0",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "John Leslie (~1996)"
+    },
+    "description": "Actual estimate: At or above 30%\n\nThe probability of the human race avoiding extinction for the next five centuries is encouragingly high, perhaps as high as 70 percent",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.3,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Our present civilization on earth will survive to the end of the present century",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=0",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Martin Rees (~2003)"
+    },
+    "description": "Actual estimate: ≤50% (\"no better than fifty-fifty\")\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "There be zero living humans on planet earth on January 1, 2100",
+    "url": "https://www.metaculus.com/questions/578/human-extinction-by-2100/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Metaculus responders (~2021)"
+    },
+    "description": "Actual estimate: Median: 1%. Mean: 7%.\n\nWhile the general feeling of most people, especially now that the cold war is (mostly) over, is that the risk of human extinction is extremely small, experts have assigned a significantly higher probability to the event.\n\nIn 2008 an informal poll at the Global Catastrophic Risk Conference at the University of Oxford yielded a median probability of human extinction by 2100 of 19%. Yet, one might want to be cautious when using this result as a good estimate of the true probability of human extinction, as there may be a powerful selection effect at play. Only those who assign a high probability to human extinction are likely to attend the Global Catastrophic Risk Conference in the first place, meaning that the survey was effectively sampling opinions from one extreme tail of the opinion distribution on the subject. Indeed, the conference report itself stated that the findings should be taken 'with a grain of salt'..\n\nTherefore, it is asked: will there be zero living humans on planet earth on January 1, 2100?.\n\nFor these purposes we'll define humans as biological creatures who have as their ancestors – via a chain of live births from mothers – circa 2000 humans OR who could mate with circa 2000 humans to produce viable offspring. (So AIs, ems, genetically engineered beings of a different species brought up in artificial wombs, etc. would not count.).\n\nN.B. Even though it is obviously the case that if human extinction occurs Metaculus points won't be very valuable anymore and that it will be practically impossible to check for true human extinction (zero humans left), I would like to ask people not to let this fact influence their prediction and to predict in good faith.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.08,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.92,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Existential disaster will do us in",
+    "url": "https://www.nickbostrom.com/existential/risks.html",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Nick Bostrom (~2002)"
+    },
+    "description": "Actual estimate: Probably at or above 25%\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Humanity will cease to exist before 5,100 years or thrive beyond 7.8 million years",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=0",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Gott III (~1993)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Annual probability as of 2009 of extinction",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=0",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Wells (~2009)"
+    },
+    "description": "Actual estimate: 0.3-0.4%\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.0035,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9965,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Global catastrophic risk per year.",
+    "url": "https://arxiv.org/abs/1611.03072",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Simpson (~2016)"
+    },
+    "description": "Actual estimate: 0.2%\n\nBeard et al. seem to imply this is about extinction, but the quote suggests it's about \"global catastrophic risk\".",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.002,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.998,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Humanity avoids every existential catastrophe and eventually fulfils its potential: achieving something close to the best future open to us",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=0",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Toby Ord (~2020)"
+    },
+    "description": "Actual estimate: 50% (~1 in 2)\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Sentient life will survive for at least billions of years",
+    "url": "https://forum.effectivealtruism.org/posts/MSYhEatxkEfg46j3D/the-case-of-the-missing-cause-prioritisation-research?commentId=iWkoScDxocaAJE4Jg",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Ozzie Gooen (~2020)"
+    },
+    "description": "Actual estimate: >20%\n\nI think it's fairly likely (>20%) that sentient life will survive for at least billions of years; and that there may be a fair amount of lock-in, so changing the trajectory of things could be great.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.2,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Existential catastrophe by 2120 as a result of unaligned AI",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=0",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Toby Ord (~2020)"
+    },
+    "description": "Actual estimate: ~10%\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Human extinction by 2100 as a result of superintelligent AI",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Global Catastrophic Risk Conference (~2008)"
+    },
+    "description": "This is the median. Beard et al.'s appendix says \"Note that for these predictions no time frame was given.\" I think that that's incorrect, based on phrasings in the original source, but I'm not certain.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Extremely bad (e.g. extinction) long-run impact on humanity from “high-level machine intelligence",
+    "url": "https://arxiv.org/abs/1705.08807",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Survey of AI experts (~2017)"
+    },
+    "description": "The report's authors discuss potential concerns around non-response bias and the fact that “NIPS and ICML authors are representative of machine learning but not of the field of artificial intelligence as a whole”. There was also evidence of apparent inconsistencies in estimates of AI timelines as a result of small changes to how questions were asked, providing further reason to wonder how meaningful these experts’ predictions were. https://web.archive.org/web/20171030220008/https://aiimpacts.org/some-survey-results/",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "A state where civilization collapses and does not recover, or a situation where all human life ends, due to AI",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=0",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Pamlin & Armstrong (~2015)"
+    },
+    "description": "Actual estimate: 0-10%\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "AI causing an existential catastrophe in the next century",
+    "url": "https://forum.effectivealtruism.org/posts/7gxtXrMeqw78ZZeY9/ama-or-discuss-my-80k-podcast-episode-ben-garfinkel-fhi?commentId=uxiKooRc6d7JpjMSg",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Ben Garfinkel (~2020)"
+    },
+    "description": "Actual estimate: ~0.1-1%\n\nGarfinkel was asked for his estimate during an AMA, and replied \"I currently give it something in the .1%-1% range.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.055,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.945,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Chance that AI, through adversarial optimization against humans only, will cause existential catastrophe",
+    "url": "https://www.lesswrong.com/posts/TdwpN484eTbPSvZkm/rohin-shah-on-reasons-for-ai-optimism",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Rohin Shah (~2020)"
+    },
+    "description": "Actual estimate: ~5%\n\nThis is my interpretation of some comments that may not have been meant to be taken very literally. Elsewhere, Rohin noted that this was “[his] opinion before updating on other people's views\": https://forum.effectivealtruism.org/posts/tugs9KQyNqi4yRTsb/does-80-000-hours-focus-too-much-on-ai-risk#ZmtPji3pQaZK7Y4FF I think he updated this in 2020 to ~9%, due to pessimism about discontinuous scenarios: https://www.lesswrong.com/posts/TdwpN484eTbPSvZkm/rohin-shah-on-reasons-for-ai-optimism?commentId=n577gwGB3vRpwkBmj Rohin also discusses his estimates here: https://futureoflife.org/2020/04/15/an-overview-of-technical-ai-alignment-in-2018-and-2019-with-buck-shlegeris-and-rohin-shah/",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "AI-induced existential catastrophe",
+    "url": "https://futureoflife.org/2020/04/15/an-overview-of-technical-ai-alignment-in-2018-and-2019-with-buck-shlegeris-and-rohin-shah/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Buck Schlegris (~2020)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Existential risk from unaligned AI over the coming 100 years",
+    "url": "https://forum.effectivealtruism.org/posts/2sMR7n32FSvLCoJLQ/critical-review-of-the-precipice-a-reassessment-of-the-risks",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "James Fodor (~2020)"
+    },
+    "description": "Actual estimate: 0.05%\n\nThis was a direct response to Ord's estimate. It focuses on one pathway to x-risk from AI, not all pathways (e.g., not AI misuse or risks from competition between powerful AIs). \"These estimates should not be taken very seriously. I do not believe we have enough information to make sensible quantitative estimates about these eventualities. Nevertheless, I present my estimates largely in order to illustrate the extent of my disagreement with Ord’s estimates, and to illustrate the key considerations I examine in order to arrive at an estimate.\" In comments on the source, Rohin Shah critiques some of the inputs to this estimate, and provides his own, substantially higher estimates.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.0005,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9995,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Existential risk from AI",
+    "url": "https://youtu.be/WLXuZtWoRcE?t=1229",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Stuart Armstrong (~2020)"
+    },
+    "description": "Actual estimate: 5-30%\n\nI put the probability that [AI/AGI] is an existential risk roughly in the 30% to 5% range, depending on how the problem is phrased.\" I assume he means the probability of existential catastrophe from AI/AGI, not the probability that AI/AGI poses an existential risk.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.175,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.825,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Chance of humanity not surviving AI",
+    "url": "https://www.youtube.com/watch?v=i4LjoJGpqIY& (from 39:40)",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Stuart Armstrong (~2014)"
+    },
+    "description": "Actual estimate: 50, 40, or 33%\n\nStated verbally during an interview. Not totally clear precisely what was being estimated (e.g. just extinction, or existential catastrophe more broadly?). He noted \"This number fluctuates a lot\". He indicated he thought we had a 2/3 chance of surviving, then said he'd adjust to 50%, which is his number for an \"actually superintelligent\" AI, whereas for \"AI in general\" it'd be 60%. This is notably higher than his 2020 estimate, implying either that he updated towards somewhat more \"optimism\" between 2014 and 2020, or that one or both of these estimates don't reflect stable beliefs.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Existential catastrophe happening this century (maybe just from AI?)",
+    "url": "https://youtu.be/aFAI8itZCGk?t=854",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Jaan Tallinn (~2020)"
+    },
+    "description": "Actual estimate: 33-50%\n\nThis comes from a verbal interview (from the 14:14 mark). The interview was focused on AI, and this estimate may have been as well. Tallinn said he's not very confident, but is fairly confident his estimate would be in double-digits, and then said \"two obvious Schelling points\" are 33% or 50%, so he'd guess somewhere in between those. Other comments during the interview seem to imply Tallinn is either just talking about extinction risk or thinks existential risk happens to be dominated by extinction risk.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.415,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.585,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Existential catastrophe from engineered pandemics by 2120",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=0",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Toby Ord (~2020)"
+    },
+    "description": "Actual estimate: ~3% (~1 in 30)\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.03,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.97,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Human extinction by 2100 as a result of the single biggest natural pandemic",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "Actual estimate: 0.05%\n\nThis is the median. Beard et al.'s appendix says \"Note that for these predictions no time frame was given.\" I think that that's incorrect, based on phrasings in the original source, but I'm not certain.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.0005,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9995,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Existential catastrophe from naturally arising pandemics by 2120",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=0",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Toby Ord (~2020)"
+    },
+    "description": "Actual estimate: ~0.01% (~1 in 10,000)\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.0001,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9999,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Human extinction by 2100 as a result of single biggest engineered pandemic",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. Beard et al.'s appendix says \"Note that for these predictions no time frame was given.\" I think that that's incorrect, based on phrasings in the original source, but I'm not certain.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.02,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.98,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Annual probability of an existential catastrophe arising from a global pandemic",
+    "url": "https://www.liebertpub.com/doi/10.1089/hs.2017.0028",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Millet & Snyder-Beattie (~2017)"
+    },
+    "description": "Actual estimate: 0.008% to 0.0000016% (between 8 x 10-5 and 1.6 x 10-8)\n\nThe fact that there's a separate estimate from the same source for biowarfare and bioterrorism suggests to me that  this is meant to be an estimate of the risk from a natural pandemic only. But I'm not sure. This might also include \"accidental\" release of a bioengineered pathogen.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.00004,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.99996,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Annual probability of an existential catastrophe arising from biowarfare or bioterrorism",
+    "url": "https://www.liebertpub.com/doi/10.1089/hs.2017.0028",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Millet & Snyder-Beattie (~2017)"
+    },
+    "description": "Actual estimate: 0.00019% (0.0000019)\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.0000019,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9999981,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Civilization collapses and does not recover, or a situation where all human life ends due to a global pandemic",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=0",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Pamlin & Armstrong (~2015)"
+    },
+    "description": "Actual estimate: 0.0001%\n\nThe fact that there's a separate estimate from the same source for \"synthetic biology\" suggests to me that this is meant to be an estimate of the risk from a natural pandemic only.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.000001,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.999999,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Civilization collapses and does not recover, or a situation where all human life ends, due to synthetic biology",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=0",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Pamlin & Armstrong (~2015)"
+    },
+    "description": "Actual estimate: 0.0001%\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.000001,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.999999,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Extinction risk from engineered pandemics over the coming 100 years",
+    "url": "https://forum.effectivealtruism.org/posts/2sMR7n32FSvLCoJLQ/critical-review-of-the-precipice-a-reassessment-of-the-risks",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "James Fodor (~2020)"
+    },
+    "description": "Actual estimate: 0.0002%\n\nThis was a direct response to Ord's estimate, although this estimate is of extinction risk rather than existential risk. \"These estimates should not be taken very seriously. I do not believe we have enough information to make sensible quantitative estimates about these eventualities. Nevertheless, I present my estimates largely in order to illustrate the extent of my disagreement with Ord’s estimates, and to illustrate the key considerations I examine in order to arrive at an estimate.\" In comments on the source, Will Bradshaw critiques some of the inputs to this estimate.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.000002,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.999998,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Human extinction by 2100 as a result of molecular nanotech weapons",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. Beard et al.'s appendix says \"Note that for these predictions no time frame was given.\" I think that that's incorrect, based on phrasings in the original source, but I'm not certain.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Human extinction by 2100 as a result of the single biggest nanotech accident",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "Actual estimate: 0.5%\n\nThis is the median. Beard et al.'s appendix says \"Note that for these predictions no time frame was given.\" I think that that's incorrect, based on phrasings in the original source, but I'm not certain.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.005,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.995,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Civilization collapses and does not recover, or a situation where all human life ends due to nanotechnology",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=0",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Pamlin & Armstrong (~2015)"
+    },
+    "description": "Actual estimate: 0.0100%\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.0001,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9999,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Existential catastrophe from other anthropogenic risks (which includes but is not limited to nanotechnology) by 2120",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=0",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Toby Ord (~2020)"
+    },
+    "description": "Actual estimate: ~2% (~1 in 50)\n\nSee this post for some commentary: [Some thoughts on Toby Ord’s existential risk estimates](https://forum.effectivealtruism.org/posts/Z5KZ2cui8WDjyF6gJ/my-thoughts-on-toby-ord-s-existential-risk-estimates#_Unforeseen__and__other__anthropogenic_risks__Surprisingly_risky_)",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.02,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.98,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Total existential risk by 2120 if we just carry on as we are, with business as usual (which Ord doesn't expect us to do)",
+    "url": "https://80000hours.org/podcast/episodes/toby-ord-the-precipice-existential-risk-future-humanity/#estimates-for-specific-x-risks-000810",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Toby Ord (~2020)"
+    },
+    "description": "Actual estimate: ~33% (\"about one in three\")\n\nOrd: \"one in six is my best guess as to the chance [an existential catastrophe] happens [by 2120]. That’s not a business as usual estimate. Whereas I think often people are assuming that estimates like this are, if we just carry on as we are, what’s the chance that something will happen?\n\nMy best guess for that is actually about one in three this century. If we carry on mostly ignoring these risks with humanity’s escalating power during the century and some of these threats being very serious. But I think that there’s a good chance that we will rise to these challenges and do something about them. So you could think of my overall estimate as being something like Russian roulette, but my initial business as usual estimate being there’s something like two bullets in the chamber of the gun, but then we’ll probably remove one and that if we really got our act together, we could basically remove both of them. And so, in some sense, maybe the headline figure should be one in three being the difference between the business as usual risk and how much of that we could eliminate if we really got our act together.\"\"\n\nArden Koehler replies \"\"Okay. So business as usual means doing what we are approximately doing now extrapolated into the future but we don’t put much more effort into it as opposed to doing nothing at all?\"\"\n\nOrd replies: \"\"That’s right, and it turns out to be quite hard to define business as usual. That’s the reason why, for my key estimate, that I make it… In some sense, it’s difficult to define estimates where they take into account whether or not people follow the advice that you’re giving; that introduces its own challenges. But at least that’s just what a probability normally means. It means that your best guess of the chance something happens, whereas a best guess that something happens conditional upon certain trends either staying at the same level or continuing on the same trajectory or something is just quite a bit more unclear as to what you’re even talking about.\"\"",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.33,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.6699999999999999,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "The probability that the long-run overall impact on humanity of human level machine intelligence will be Extremely bad (existential catastrophe), assuming Human Level Machine Intelligence will at some point exist.",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=511918904",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Survey of experts in the AI field (~2016)"
+    },
+    "description": "This is the mean. According to Beard et al., the question was \"4. Assume for the purpose of this question that such Human Level Machine Intelligence (HLMI) will at some point exist. How positive or negative would be overall impact on humanity, in the long run?",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.18,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8200000000000001,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Chance that AI, through “adversarial optimization against humans only”, will cause existential catastrophe, conditional on there not being “additional intervention by longtermists” (or perhaps “no intervention from longtermists”)",
+    "url": "https://www.lesswrong.com/posts/TdwpN484eTbPSvZkm/rohin-shah-on-reasons-for-ai-optimism",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Rohin Shah (~2019)"
+    },
+    "description": "Actual estimate: ~10%\n\nThis is my interpretation of some comments that may not have been meant to be taken very literally. I think he updated this in 2020 to ~15%, due to pessimism about discontinuous scenarios: https://www.lesswrong.com/posts/TdwpN484eTbPSvZkm/rohin-shah-on-reasons-for-ai-optimism?commentId=n577gwGB3vRpwkBmj Rohin also discusses his estimates here: https://futureoflife.org/2020/04/15/an-overview-of-technical-ai-alignment-in-2018-and-2019-with-buck-shlegeris-and-rohin-shah/",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Chance that AI, through “adversarial optimization against humans only”, will cause existential catastrophe, conditional on “discontinuous takeoff”",
+    "url": "https://www.lesswrong.com/posts/TdwpN484eTbPSvZkm/rohin-shah-on-reasons-for-ai-optimism",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Rohin Shah (~2019)"
+    },
+    "description": "Actual estimate: ~70% (but with “way more uncertainty” than his other estimates)\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.30000000000000004,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Chance that we don't manage to survive that transition [to there being something that's more intelligent than humanity], being in charge of our future.",
+    "url": "https://80000hours.org/podcast/episodes/toby-ord-the-precipice-existential-risk-future-humanity/#transcript",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Toby Ord (~2020)"
+    },
+    "description": "Actual estimate: ~20%\n\nThis may have been specifically if the transition happens in the net 100 years; it's possible Ord would estimate we'd have a different chance if this transition happened at a later time.\n\"Basically, you can look at my [estimate that the existential risk from AI in the next 100 years is] 10% as, there’s about a 50% chance that we create something that’s more intelligent than humanity this century. And then there’s only an 80% chance that we manage to survive that transition, being in charge of our future. If you put that together, you get a 10% chance that’s the time where we lost control of the future in a negative way.\n\n[For people who would disagree, a question] is why would they think that we have much higher than an 80% chance of surviving this ‘passing this baton to these other entities’, but still retaining control of our future or making sure that they build a future that is excellent, surpassingly good by our own perspective? I think that the very people who are working on trying to actually make sure that artificial intelligence would be aligned with our values are finding it extremely difficult. They’re not that hopeful about it. So it seems hard to think there’s more than 80% chance, based on what we know, to get through that.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.2,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.8,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Chance that a full-scale nuclear war in the next century would be the end of human potential",
+    "url": "https://80000hours.org/podcast/episodes/toby-ord-the-precipice-existential-risk-future-humanity/#transcript",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Toby Ord (~2020)"
+    },
+    "description": "Actual estimate: ~2%\n\nI give existential risk over the next century from nuclear war at about one in a thousand. I initially thought it would be higher than that. That’s actually something that while researching the book, thought was a lower risk than I had initially thought. And how I’d break it down is to something like a 5% chance of a full-scale nuclear war in the next century and a 2% chance that that would be the end of human potential.\" Ord discusses his reasoning more both in that interview and in The Precipice.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.02,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.98,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Global human population of zero resulting from the 150 Tg of black carbon scenario in our 2007 paper",
+    "url": "http://www.overcomingbias.com/2012/11/nuclear-winter-and-human-extinction-qa-with-luke-oman.html",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Luke Oman (~2012)"
+    },
+    "description": "Actual estimate: 0.001-0.01% (“in the range of 1 in 10,000 to 1 in 100,000”)\n\nI think that this is Oman’s estimate of the chance that extinction would occur if that black carbon scenario occurred, rather than an estimate that also takes into account the low probability that that black carbon scenario occurs. I.e., I think that this estimate was conditional on a particular type of nuclear war occurring. But I’m not sure about that, and the full context doesn’t make it much clearer.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.000055,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.999945,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Full-scale collapse of society, perhaps due to very, very widespread famine, if there's 2 degrees of warming",
+    "url": "https://80000hours.org/podcast/episodes/mark-lynas-climate-change-nuclear-energy/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Mark Lynas (~2020)"
+    },
+    "description": "Arden Koehler: \"...do you have a guess at what degree of warming we would need to reach for the full-scale collapse of society, perhaps due to very, very widespread famine to have say a 10% chance of happening?\nMark Lynas: \"Oh, I think… You want to put me on the spot. I would say it has a 30 to 40% chance of happening at three degrees, and a 60% chance of happening at four degrees, and 90% at five degrees, and 97% at six degrees. [...] Maybe 10% at two degrees.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Full-scale collapse of society, perhaps due to very, very widespread famine, if there's 3 degrees of warming",
+    "url": "https://80000hours.org/podcast/episodes/mark-lynas-climate-change-nuclear-energy/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Mark Lynas (~2020)"
+    },
+    "description": "Actual estimate: 30-40%\n\nArden Koehler: \"...do you have a guess at what degree of warming we would need to reach for the full-scale collapse of society, perhaps due to very, very widespread famine to have say a 10% chance of happening?\nMark Lynas: \"Oh, I think… You want to put me on the spot. I would say it has a 30 to 40% chance of happening at three degrees, and a 60% chance of happening at four degrees, and 90% at five degrees, and 97% at six degrees. [...] Maybe 10% at two degrees.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.35,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.65,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Full-scale collapse of society, perhaps due to very, very widespread famine, if there's 4 degrees of warming",
+    "url": "https://80000hours.org/podcast/episodes/mark-lynas-climate-change-nuclear-energy/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Mark Lynas (~2020)"
+    },
+    "description": "Arden Koehler: \"...do you have a guess at what degree of warming we would need to reach for the full-scale collapse of society, perhaps due to very, very widespread famine to have say a 10% chance of happening?\nMark Lynas: \"Oh, I think… You want to put me on the spot. I would say it has a 30 to 40% chance of happening at three degrees, and a 60% chance of happening at four degrees, and 90% at five degrees, and 97% at six degrees. [...] Maybe 10% at two degrees.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Full-scale collapse of society, perhaps due to very, very widespread famine, if there's 5 degrees of warming",
+    "url": "https://80000hours.org/podcast/episodes/mark-lynas-climate-change-nuclear-energy/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Mark Lynas (~2020)"
+    },
+    "description": "Arden Koehler: \"...do you have a guess at what degree of warming we would need to reach for the full-scale collapse of society, perhaps due to very, very widespread famine to have say a 10% chance of happening?\nMark Lynas: \"Oh, I think… You want to put me on the spot. I would say it has a 30 to 40% chance of happening at three degrees, and a 60% chance of happening at four degrees, and 90% at five degrees, and 97% at six degrees. [...] Maybe 10% at two degrees.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.09999999999999998,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Full-scale collapse of society, perhaps due to very, very widespread famine, if there's 6 degrees of warming",
+    "url": "https://80000hours.org/podcast/episodes/mark-lynas-climate-change-nuclear-energy/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Mark Lynas (~2020)"
+    },
+    "description": "Arden Koehler: \"...do you have a guess at what degree of warming we would need to reach for the full-scale collapse of society, perhaps due to very, very widespread famine to have say a 10% chance of happening?\nMark Lynas: \"Oh, I think… You want to put me on the spot. I would say it has a 30 to 40% chance of happening at three degrees, and a 60% chance of happening at four degrees, and 90% at five degrees, and 97% at six degrees. [...] Maybe 10% at two degrees.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.97,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.030000000000000027,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "A world totalitarian government will emerge during the next one thousand years and last for a thousand years or more, conditional on genetic screening for personality traits becom[ing] cheap and accurate, but the principle of reproductive freedom prevail[ing]",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=511918904",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Bryan Caplan (~2006)"
+    },
+    "description": "Reduced from his 5% unconditional probability",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.03,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.97,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "A world totalitarian government will emerge during the next one thousand years and last for a thousand years or more, conditional on genetic screening for personality traits becom[ing] cheap and accurate and extensive government regulation",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=511918905",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Bryan Caplan (~2006)"
+    },
+    "description": "Increased from his 5% unconditional probability",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "A world totalitarian government will emerge during the next one thousand years and last for a thousand years or more, conditional on the number of independent countries on earth [not decreasing] during the next thousand years",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=511918906",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Bryan Caplan (~2006)"
+    },
+    "description": "Actual estimate: 0.1%\n\nReduced from his 5% unconditional probability",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.001,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.999,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "A world totalitarian government will emerge during the next one thousand years and last for a thousand years or more, conditional on the number of independent countries on earth [falling to 1] during the next thousand years",
+    "url": "https://docs.google.com/spreadsheets/d/1W10B6NJjicD8O0STPiT3tNV3oFnT8YsfjmtYR8RO_RI/edit#gid=511918907",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Bryan Caplan (~2006)"
+    },
+    "description": "Increased from his 5% unconditional probability",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 million dead as a result of superintelligent AI before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 billion dead as a result of superintelligent AI before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A. Interestingly, this is the same as the estimate from this source of the chance of human as a result of superintelligent AI by 2100.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "AI safety is as hard as a (caricature of) MIRI suggests",
+    "url": "https://aiimpacts.org/conversation-with-adam-gleave/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Adam Gleave (~2019)"
+    },
+    "description": "Actual estimate: ~10%\n\nSo, decent chance– I think I put a reasonable probability, like 10% probability, on the hard-mode MIRI version of the world being true. In which case, I think there’s probably nothing we can do.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "AI safety basically [doesn't need] to be solved, we’ll just solve it by default unless we’re completely completely careless",
+    "url": "https://aiimpacts.org/conversation-with-adam-gleave/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Adam Gleave (~2019)"
+    },
+    "description": "Actual estimate: ~20-30%\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "The first thing we try just works and we don’t even need to solve any sort of alignment problem",
+    "url": "https://futureoflife.org/2020/04/15/an-overview-of-technical-ai-alignment-in-2018-and-2019-with-buck-shlegeris-and-rohin-shah/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Rohin Shah (~2020)"
+    },
+    "description": "Actual estimate: ~30%\n\nThere’s some chance that the first thing we try just works and we don’t even need to solve any sort of alignment problem. It might just be fine. This is not implausible to me. Maybe that’s 30% or something.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.3,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "We have good competitive alignment techniques by the time that it’s important",
+    "url": "https://futureoflife.org/2020/04/15/an-overview-of-technical-ai-alignment-in-2018-and-2019-with-buck-shlegeris-and-rohin-shah/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Buck Schlegris (~2020)"
+    },
+    "description": "Actual estimate: ~30%\n\nI haven’t actually written down these numbers since I last changed my mind about a lot of the inputs to them, so maybe I’m being really dumb. I guess, it feels to me that in fast takeoff worlds, we are very sad unless we have competitive alignment techniques, and so then we’re just only okay if we have these competitive alignment techniques. I guess I would say that I’m something like 30% on us having good competitive alignment techniques by the time that it’s important, which incidentally is higher than Rohin I think. [...] So I’m like 30% that we can just solve the AI alignment problem in this excellent way, such that anyone who wants to can have a little extra cost and then make AI systems that are aligned. I feel like in worlds where we did that, it’s pretty likely that things are reasonably okay.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.3,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "We create something that’s more intelligent than humanity in the next 100 years",
+    "url": "https://80000hours.org/podcast/episodes/toby-ord-the-precipice-existential-risk-future-humanity/#transcript",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Toby Ord (~2020)"
+    },
+    "description": "Actual estimate: ~50%\n\nBasically, you can look at my [estimate that the existential risk from AI in the next 100 years is] 10% as, there’s about a 50% chance that we create something that’s more intelligent than humanity this century. And then there’s only an 80% chance that we manage to survive that transition, being in charge of our future. If you put that together, you get a 10% chance that’s the time where we lost control of the future in a negative way.\n\nToby Ord: With that number, I’ve spent a lot of time thinking about this. Actually, my first degree was in computer science, and I’ve been involved in artificial intelligence for a long time, although it’s not what I did my PhD on. But, if you ask the typical AI expert’s view of the chance that we develop smarter than human AGI, artificial general intelligence, this century is about 50%. If you survey the public, which has been done, it’s about 50%. So, my 50% is both based on the information I know actually about what’s going on in AI, and also is in line with all of the relevant outside views. It feels difficult to have a wildly different number on that. The onus would be on the other person.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Soft AGI takeoff",
+    "url": "https://reducing-suffering.org/summary-beliefs-values-big-questions/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Brian Tomasik (~2015)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.30000000000000004,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "By at least 10 years before human-level AGI is built, debate about AGI risk will be as mainstream as global warming is in 2015",
+    "url": "https://reducing-suffering.org/summary-beliefs-values-big-questions/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Brian Tomasik (~2015)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.67,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.32999999999999996,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "A government will build the first human-level AGI, assuming humans build one at all",
+    "url": "https://reducing-suffering.org/summary-beliefs-values-big-questions/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Brian Tomasik (~2015)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.62,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.38,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "A government will build the first human-level AGI, assuming humans build one at all",
+    "url": "http://www.stafforini.com/blog/what_i_believe/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Pablo Stafforini (~2015)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Human-controlled AGI in expectation would result in less suffering than uncontrolled",
+    "url": "https://reducing-suffering.org/summary-beliefs-values-big-questions/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Brian Tomasik (~2015)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.52,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.48,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "A design very close to CEV will be implemented in humanity's AGI, conditional on AGI being built (excluding other value-learning approaches and other machine-ethics proposals)",
+    "url": "https://reducing-suffering.org/summary-beliefs-values-big-questions/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Brian Tomasik (~2015)"
+    },
+    "description": "Actual estimate: 0.5%\n\n",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.005,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.995,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "A design very close to CEV will be implemented in humanity's AGI, conditional on AGI being built (excluding other value-learning approaches and other machine-ethics proposals)",
+    "url": "http://www.stafforini.com/blog/what_i_believe/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Pablo Stafforini (~2015)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 million dead as a result of the single biggest engineered pandemic before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.3,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 billion dead as a result of the single biggest engineered pandemic before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 million dead as a result of the single biggest natural pandemic before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.6,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.4,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 billion dead as a result of the single biggest natural pandemic before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 million dead as a result of molecular nanotech weapons before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.25,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.75,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 billion dead as a result of molecular nanotech weapons before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 million dead as a result of the single biggest nanotech accident before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 billion dead as a result of the single biggest nanotech accident before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.01,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.99,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 million dead as a result of all nuclear wars before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.3,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 billion dead as a result of all nuclear wars before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 million dead as a result of all acts of nuclear terrorism before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.3,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 billion dead as a result of all acts of nuclear terrorism before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "This is the median. The report about these estimates also plots the results for each question “with individual response distributions visible” in Appendix A.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "chance of a full-scale nuclear war in the next century",
+    "url": "https://80000hours.org/podcast/episodes/toby-ord-the-precipice-existential-risk-future-humanity/#transcript",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Toby Ord (~2020)"
+    },
+    "description": "Actual estimate: ~5%\n\nI give existential risk over the next century from nuclear war at about one in a thousand. I initially thought it would be higher than that. That’s actually something that while researching the book, thought was a lower risk than I had initially thought. And how I’d break it down is to something like a 5% chance of a full-scale nuclear war in the next century and a 2% chance that that would be the end of human potential.\" Ord discusses his reasoning more both in that interview and in The Precipice.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.05,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.95,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Per year chance of nuclear war",
+    "url": "https://forum.effectivealtruism.org/posts/PAYa6on5gJKwAywrF/how-likely-is-a-nuclear-exchange-between-the-us-and-russia-1",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Aggregation by Luisa Rodriguez (~2019)"
+    },
+    "description": "Actual estimate: 1.10%\n\nIn this post, I get a rough sense of how probable a nuclear war might be by looking at historical evidence, the views of experts, and predictions made by forecasters. I find that, if we aggregate those perspectives, there’s about a 1.1% chance of nuclear war each year, and that the chances of a nuclear war between the US and Russia, in particular, are around 0.38% per year.\" This is not presented as Luisa's own credence; this may not be the number she herself would give. Readers may also be interested in the estimates implied by each of the perspectives Luisa aggregates.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.011,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.989,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Per year chance of nuclear war between the US and Russia",
+    "url": "https://forum.effectivealtruism.org/posts/PAYa6on5gJKwAywrF/how-likely-is-a-nuclear-exchange-between-the-us-and-russia-1",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Aggregation by Luisa Rodriguez (~2019)"
+    },
+    "description": "Actual estimate: 0.38%\n\nIn this post, I get a rough sense of how probable a nuclear war might be by looking at historical evidence, the views of experts, and predictions made by forecasters. I find that, if we aggregate those perspectives, there’s about a 1.1% chance of nuclear war each year, and that the chances of a nuclear war between the US and Russia, in particular, are around 0.38% per year.\" This is not presented as Luisa's own credence; this may not be the number she herself would give. Readers may also be interested in the estimates implied by each of the perspectives Luisa aggregates.",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.0038,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9962,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Climate change will cause more suffering than it prevents",
+    "url": "https://reducing-suffering.org/summary-beliefs-values-big-questions/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Brian Tomasik (~2015)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 million dead as a result of all wars (including civil wars) before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.98,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.020000000000000018,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "At least 1 billion dead as a result of all wars (including civil wars) before 2100",
+    "url": "https://www.fhi.ox.ac.uk/reports/2008-1.pdf",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "GCR Conference (~2008)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.3,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Human-inspired colonization of space will cause more suffering than it prevents if it happens",
+    "url": "https://reducing-suffering.org/summary-beliefs-values-big-questions/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Brian Tomasik (~2015)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.72,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.28,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Earth will eventually be controlled by a singleton of some sort",
+    "url": "https://reducing-suffering.org/summary-beliefs-values-big-questions/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Brian Tomasik (~2015)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.72,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.28,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Earth will eventually be controlled by a singleton of some sort",
+    "url": "http://www.stafforini.com/blog/what_i_believe/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Pablo Stafforini (~2015)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.7,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.30000000000000004,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Earth-originating intelligence will colonize the entire galaxy (ignoring anthropic arguments)",
+    "url": "https://reducing-suffering.org/summary-beliefs-values-big-questions/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Brian Tomasik (~2015)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.5,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  },
+  {
+    "title": "Earth-originating intelligence will colonize the entire galaxy (ignoring anthropic arguments)",
+    "url": "http://www.stafforini.com/blog/what_i_believe/",
+    "platform": "X-risk estimates",
+    "moreoriginsdata": {
+      "author": "Pablo Stafforini (~2015)"
+    },
+    "description": "",
+    "options": [
+      {
+        "name": "Yes",
+        "probability": 0.1,
+        "type": "PROBABILITY"
+      },
+      {
+        "name": "No",
+        "probability": 0.9,
+        "type": "PROBABILITY"
+      }
+    ],
+    "qualityindicators": {
+      "stars": 2
+    }
+  }
+]

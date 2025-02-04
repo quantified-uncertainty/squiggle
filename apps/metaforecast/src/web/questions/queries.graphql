@@ -1,0 +1,5 @@
+query QuestionPage($id: ID!) {
+  result: question(id: $id) {
+    ...QuestionWithHistory
+  }
+}
