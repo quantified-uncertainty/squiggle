@@ -144,7 +144,7 @@
     "@types/react-dom": "^19.0.3",
     "@types/vscode": "^1.86.0",
     "@types/vscode-webview": "^1.57.5",
-    "esbuild": "^0.24.0",
+    "esbuild": "^0.24.2",
     "eslint": "^9.19.0",
     "js-yaml": "^4.1.0",
     "prettier": "^3.4.2",
@@ -157,6 +157,6 @@
     "@vscode/vsce": "^2.26.1",
     "vscode-languageclient": "^9.0.1",
     "vscode-languageserver": "^9.0.1",
-    "vscode-languageserver-textdocument": "^1.0.11"
+    "vscode-languageserver-textdocument": "^1.0.12"
   }
 }
