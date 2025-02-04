@@ -88,8 +88,8 @@
     "vite": "^5.2.10"
   },
   "peerDependencies": {
-    "react": "^18 | ^19",
-    "react-dom": "^18 | ^19"
+    "react": ">=18.2",
+    "react-dom": ">=18.2"
   },
   "scripts": {
     "start": "pnpm dev",

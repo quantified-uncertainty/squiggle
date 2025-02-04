@@ -55,8 +55,8 @@
     "typescript": "^5.6.3"
   },
   "peerDependencies": {
-    "react": "^18 | ^19",
-    "react-dom": "^18 | ^19"
+    "react": ">=19",
+    "react-dom": ">=19"
   },
   "type": "module",
   "exports": {
