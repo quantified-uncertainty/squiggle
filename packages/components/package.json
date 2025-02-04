@@ -43,6 +43,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@babel/plugin-syntax-import-attributes": "^7.26.0",
     "@babel/preset-react": "^7.24.6",
     "@babel/preset-typescript": "^7.24.1",
     "@jest/globals": "^29.7.0",
