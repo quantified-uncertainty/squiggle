@@ -117,6 +117,7 @@
     "@graphql-typed-document-node/core": "^3.2.0",
     "@quri/configs": "workspace:*",
     "@types/lodash": "^4.17.13",
+    "@types/node": "^22.13.1",
     "@types/pg": "^8.11.10",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.19.0",
