@@ -141,7 +141,7 @@
     "@quri/versioned-squiggle-components": "workspace:*",
     "@types/node": "^20.12.7",
     "@types/react": "^19.0.2",
-    "@types/react-dom": "^19.0.2",
+    "@types/react-dom": "^19.0.3",
     "@types/vscode": "^1.86.0",
     "@types/vscode-webview": "^1.57.5",
     "esbuild": "^0.24.0",
