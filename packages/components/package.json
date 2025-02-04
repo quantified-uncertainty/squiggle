@@ -10,7 +10,7 @@
   "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
     "@codemirror/autocomplete": "^6.16.2",
-    "@codemirror/commands": "^6.5.0",
+    "@codemirror/commands": "^6.8.0",
     "@codemirror/language": "^6.10.1",
     "@codemirror/lint": "^6.8.0",
     "@codemirror/search": "^6.5.6",
