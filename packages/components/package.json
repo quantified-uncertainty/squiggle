@@ -55,7 +55,7 @@
     "@storybook/addon-links": "8.5.3",
     "@storybook/react": "8.5.3",
     "@storybook/react-vite": "8.5.3",
-    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.6.1",
     "@types/d3": "^7.4.3",
