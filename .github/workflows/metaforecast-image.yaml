@@ -3,7 +3,7 @@ name: Create and publish a Docker image for Metaforecast
 on:
   push:
     branches:
-      - master
+      - main
 
 env:
   REGISTRY: registry.k8s.quantifieduncertainty.org
