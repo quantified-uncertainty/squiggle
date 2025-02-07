@@ -17,13 +17,13 @@ RUN --mount=type=cache,id=apt-lists,target=/var/lib/apt/lists,sharing=locked \
 RUN npm install -g pnpm
 
 # FIXME - how to install the exact version from package.json?
-RUN pnpm install turbo@2.4.0
+RUN pnpm install -g turbo@2.4.0
 
 # Pruned files
 FROM base AS builder
 WORKDIR /app
 COPY . .
-RUN pnpm turbo prune metaforecast --docker
+RUN turbo prune metaforecast --docker
 
 # Install dependencies and build
 FROM base AS runner
@@ -36,4 +36,4 @@ COPY --from=builder /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 
 COPY --from=builder /app/out/full/ .
-RUN pnpm turbo run build
+RUN turbo run build
