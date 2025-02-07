@@ -42,7 +42,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@mdx-js/typescript-plugin": "^0.0.6",
+    "@mdx-js/typescript-plugin": "^0.0.8",
     "@quri/configs": "workspace:*",
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@types/mdx": "^2.0.13",
