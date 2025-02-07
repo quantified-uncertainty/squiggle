@@ -14,7 +14,7 @@
     "build": "content-collections build && tsc -b && cp -r .content-collections dist/"
   },
   "dependencies": {
-    "@content-collections/cli": "^0.1.5",
+    "@content-collections/cli": "^0.1.6",
     "@content-collections/core": "^0.7.2",
     "@fumadocs/content-collections": "^1.1.5",
     "@quri/squiggle-lang": "workspace:*",
