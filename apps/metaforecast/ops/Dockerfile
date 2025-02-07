@@ -23,7 +23,7 @@ RUN pnpm install turbo@2.4.0
 FROM base AS builder
 WORKDIR /app
 COPY . .
-RUN turbo prune metaforecast --docker
+RUN pnpm turbo prune metaforecast --docker
 
 # Install dependencies and build
 FROM base AS runner
