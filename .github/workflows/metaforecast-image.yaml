@@ -28,6 +28,9 @@ jobs:
         with:
           fetch-depth: 2 # for turbo-ignore
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
