@@ -14,4 +14,14 @@ function cjsHack<T>(v: { default: T }) {
 }
 
 export const useWindowScroll = cjsHack(useWindowScrollImport);
-export const useWindowSize = cjsHack(useWindowSizeImport);
+export const useWindowSize = cjsHack<
+  // explicit type because of "cannot be named" error
+  (arg?: {
+    initialWidth?: number;
+    initialHeight?: number;
+    onChange?: (width: number, height: number) => void;
+  }) => {
+    width: number;
+    height: number;
+  }
+>(useWindowSizeImport);
