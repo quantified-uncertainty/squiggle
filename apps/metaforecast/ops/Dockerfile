@@ -1,7 +1,7 @@
 # Use the official Node.js 22 image for builds
 ARG DOCKER_NODE_VERSION=22-bookworm-slim
 
-FROM node:$DOCKER_NODE_VERSION AS build
+FROM node:$DOCKER_NODE_VERSION AS base
 
 WORKDIR /app
 
@@ -13,14 +13,24 @@ RUN --mount=type=cache,id=apt-lists,target=/var/lib/apt/lists,sharing=locked \
     && apt-get update \
     && apt-get install -y openssl
 
-# Install pnpm globally
-RUN npm install -g pnpm
+# Install pnpm and turbo globally
+RUN npm install -g pnpm turbo@^2
 
+# Pruned files
+FROM base AS builder
+WORKDIR /app
 COPY . .
+RUN turbo prune metaforecast --docker
 
-# Install dependencies
-RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store/v3 pnpm install --frozen-lockfile
+# Install dependencies and build
+FROM base AS runner
+WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN pnpm build
+COPY --from=builder /app/out/json/ .
+# TODO: --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store/v3
+RUN pnpm install --frozen-lockfile
+
+COPY --from=builder /app/out/full/ .
+RUN pnpm turbo run build
