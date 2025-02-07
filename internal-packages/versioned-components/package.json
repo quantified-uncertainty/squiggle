@@ -14,7 +14,7 @@
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
     "@quri/ui": "workspace:*",
-    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
     "commander": "^13.1.0",
     "glob": "^11.0.1",
