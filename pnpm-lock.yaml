@@ -37,10 +37,10 @@ importers:
     dependencies:
       '@auth/prisma-adapter':
         specifier: ^2.7.4
-        version: 2.7.4(@prisma/client@5.22.0(prisma@5.22.0))(nodemailer@6.9.13)
+        version: 2.7.4(@prisma/client@5.22.0(prisma@6.3.1(typescript@5.7.3)))(nodemailer@6.9.13)
       '@prisma/client':
         specifier: 5.22.0
-        version: 5.22.0(prisma@5.22.0)
+        version: 5.22.0(prisma@6.3.1(typescript@5.7.3))
       '@quri/squiggle-ai':
         specifier: workspace:*
         version: link:../../internal-packages/ai
@@ -58,7 +58,7 @@ importers:
         version: link:../../internal-packages/versioned-components
       '@vercel/analytics':
         specifier: ^1.3.1
-        version: 1.3.1(next@15.1.3(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
+        version: 1.3.1(next@15.1.3(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
       base64-js:
         specifier: ^1.5.1
         version: 1.5.1
@@ -178,8 +178,8 @@ importers:
         specifier: ^3.4.2
         version: 3.4.2
       prisma:
-        specifier: ^5.22.0
-        version: 5.22.0
+        specifier: ^6.3.1
+        version: 6.3.1(typescript@5.7.3)
       tailwindcss:
         specifier: ^3.4.3
         version: 3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3))
@@ -212,7 +212,7 @@ importers:
         version: 4.3.0(graphql@16.10.0)
       '@pothos/plugin-prisma':
         specifier: ^4.3.1
-        version: 4.4.0(@pothos/core@4.3.0(graphql@16.10.0))(@prisma/client@6.3.0(prisma@6.3.0(typescript@5.7.3))(typescript@5.7.3))(graphql@16.10.0)(typescript@5.7.3)
+        version: 4.4.0(@pothos/core@4.3.0(graphql@16.10.0))(@prisma/client@6.3.0(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3))(graphql@16.10.0)(typescript@5.7.3)
       '@pothos/plugin-relay':
         specifier: ^4.3.0
         version: 4.3.0(@pothos/core@4.3.0(graphql@16.10.0))(graphql@16.10.0)
@@ -486,7 +486,7 @@ importers:
         version: link:../../internal-packages/versioned-components
       '@vercel/analytics':
         specifier: ^1.3.1
-        version: 1.3.1(next@15.1.3(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
+        version: 1.3.1(next@15.1.3(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
       base64-js:
         specifier: ^1.5.1
         version: 1.5.1
@@ -701,14 +701,14 @@ importers:
     dependencies:
       '@prisma/client':
         specifier: ^6.3.0
-        version: 6.3.0(prisma@6.3.0(typescript@5.7.3))(typescript@5.7.3)
+        version: 6.3.0(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)
       prisma:
-        specifier: ^6.3.0
-        version: 6.3.0(typescript@5.7.3)
+        specifier: ^6.3.1
+        version: 6.3.1(typescript@5.7.3)
     devDependencies:
       '@pothos/plugin-prisma':
         specifier: ^4.3.1
-        version: 4.4.0(@pothos/core@4.3.0(graphql@16.10.0))(@prisma/client@6.3.0(prisma@6.3.0(typescript@5.7.3))(typescript@5.7.3))(graphql@16.10.0)(typescript@5.7.3)
+        version: 4.4.0(@pothos/core@4.3.0(graphql@16.10.0))(@prisma/client@6.3.0(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3))(graphql@16.10.0)(typescript@5.7.3)
       '@quri/configs':
         specifier: workspace:*
         version: link:../configs
@@ -805,7 +805,7 @@ importers:
         version: 4.17.21
       squiggle-components-0.10.0:
         specifier: npm:@quri/squiggle-components@0.10.0
-        version: '@quri/squiggle-components@0.10.0(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))'
+        version: '@quri/squiggle-components@0.10.0(@emotion/is-prop-valid@0.8.8)(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))'
       squiggle-components-0.8.5:
         specifier: npm:@quri/squiggle-components@0.8.5
         version: '@quri/squiggle-components@0.8.5(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))'
@@ -4188,38 +4188,26 @@ packages:
       typescript:
         optional: true
 
-  '@prisma/debug@5.22.0':
-    resolution: {integrity: sha512-AUt44v3YJeggO2ZU5BkXI7M4hu9BF2zzH2iF2V5pyXT/lRTyWiElZ7It+bRH1EshoMRxHgpYg4VB6rCM+mG5jQ==}
-
   '@prisma/debug@6.3.0':
     resolution: {integrity: sha512-m1lQv//0Rc5RG8TBpNUuLCxC35Ghi5XfpPmL83Gh04/GICHD2J5H2ndMlaljrUNaQDF9dOxIuFAYP1rE9wkXkg==}
 
-  '@prisma/engines-version@5.22.0-44.605197351a3c8bdd595af2d2a9bc3025bca48ea2':
-    resolution: {integrity: sha512-2PTmxFR2yHW/eB3uqWtcgRcgAbG1rwG9ZriSvQw+nnb7c4uCr3RAcGMb6/zfE88SKlC1Nj2ziUvc96Z379mHgQ==}
+  '@prisma/debug@6.3.1':
+    resolution: {integrity: sha512-RrEBkd+HLZx+ydfmYT0jUj7wjLiS95wfTOSQ+8FQbvb6vHh5AeKfEPt/XUQ5+Buljj8hltEfOslEW57/wQIVeA==}
 
   '@prisma/engines-version@6.3.0-17.acc0b9dd43eb689cbd20c9470515d719db10d0b0':
     resolution: {integrity: sha512-R/ZcMuaWZT2UBmgX3Ko6PAV3f8//ZzsjRIG1eKqp3f2rqEqVtCv+mtzuH2rBPUC9ujJ5kCb9wwpxeyCkLcHVyA==}
 
-  '@prisma/engines@5.22.0':
-    resolution: {integrity: sha512-UNjfslWhAt06kVL3CjkuYpHAWSO6L4kDCVPegV6itt7nD1kSJavd3vhgAEhjglLJJKEdJ7oIqDJ+yHk6qO8gPA==}
+  '@prisma/engines@6.3.1':
+    resolution: {integrity: sha512-sXdqEVLyGAJ5/iUoG/Ea5AdHMN71m6PzMBWRQnLmhhOejzqAaEr8rUd623ql6OJpED4s/U4vIn4dg1qkF7vGag==}
 
-  '@prisma/engines@6.3.0':
-    resolution: {integrity: sha512-RXqYhlZb9sx/xkUfYIZuEPn7sT0WgTxNOuEYQ7AGw3IMpP9QGVEDVsluc/GcNkM8NTJszeqk8AplJzI9lm7Jxw==}
-
-  '@prisma/fetch-engine@5.22.0':
-    resolution: {integrity: sha512-bkrD/Mc2fSvkQBV5EpoFcZ87AvOgDxbG99488a5cexp5Ccny+UM6MAe/UFkUC0wLYD9+9befNOqGiIJhhq+HbA==}
-
-  '@prisma/fetch-engine@6.3.0':
-    resolution: {integrity: sha512-GBy0iT4f1mH31ePzfcpVSUa7JLRTeq4914FG2vR3LqDwRweSm4ja1o5flGDz+eVIa/BNYfkBvRRxv4D6ve6Eew==}
+  '@prisma/fetch-engine@6.3.1':
+    resolution: {integrity: sha512-HOf/0umOgt+/S2xtZze+FHKoxpVg4YpVxROr6g2YG09VsI3Ipyb+rGvD6QGbCqkq5NTWAAZoOGNL+oy7t+IhaQ==}
 
   '@prisma/generator-helper@6.3.0':
     resolution: {integrity: sha512-UhNTcfGP/mcWTih84lS4W8/qAdV6WzMDHz8r/LEmipmbpaw+6EDfa4giyGTHFSvfCXgG8HqA4S57/zDEzlGcyA==}
 
-  '@prisma/get-platform@5.22.0':
-    resolution: {integrity: sha512-pHhpQdr1UPFpt+zFfnPazhulaZYCUqeIcPpJViYoq9R+D/yw4fjE+CtnsnKzPYm0ddUbeXUzjGVGIRVgPDCk4Q==}
-
-  '@prisma/get-platform@6.3.0':
-    resolution: {integrity: sha512-V8zZ1d0xfyi6FjpNP4AcYuwSpGcdmu35OXWnTPm8IW594PYALzKXHwIa9+o0f+Lo9AecFWrwrwaoYe56UNfTtQ==}
+  '@prisma/get-platform@6.3.1':
+    resolution: {integrity: sha512-AYLq6Hk9xG73JdLWJ3Ip9Wg/vlP7xPvftGBalsPzKDOHr/ImhwJ09eS8xC2vNT12DlzGxhfk8BkL0ve2OriNhQ==}
 
   '@quri/prettier-plugin-squiggle@0.10.0':
     resolution: {integrity: sha512-CALqGTkNNFLik3VFZjEFYHL7rDloUOdpY7RUlsFM68fyXeOSsWJf/lKm6ugVjzkdgpEM6YUNIE8tWRYzqR+0Rw==}
@@ -4244,6 +4232,9 @@ packages:
 
   '@quri/prettier-plugin-squiggle@0.9.5':
     resolution: {integrity: sha512-1sgxOV2E7/t5ZZEgKqmG7OV3BOiwY0HVfh7qaXz8HQf6tRsUTTH558XpmrrTQuddObQjqZXQlnYbqDFRaHySzA==}
+
+  '@quri/serializer@1.0.0':
+    resolution: {integrity: sha512-MHaz3jcIsOC2c9iUlxRMrAppa84ZPf8Mnoio2/z5KtojoBu4sHt5360FYD7uOBgUz3fq2hp/aLATV9g5/A7q2g==}
 
   '@quri/squiggle-components@0.10.0':
     resolution: {integrity: sha512-q4at8cvVrLj9vtcbuWLp5ELXxkhzLcFGqOlCwrfUGZuxYOmCMYksOpRQijASMPE6T8lFGQc/+sSZcBYCdicuGA==}
@@ -4373,6 +4364,14 @@ packages:
     peerDependencies:
       react: ^18
       react-dom: ^18
+
+  '@quri/ui@0.2.3':
+    resolution: {integrity: sha512-Q+kPjMbNbXyQHw+5/MDXQRSSFUuWSqz1+g/4lnmRXxJGk8JqfeOAFrS8P+E2ChjSKWihart2lsq11wMwMxLUUw==}
+    engines: {node: '>=20.x'}
+    peerDependencies:
+      react: ^18 | ^19
+      react-dom: ^18 | ^19
+      react-hook-form: ^7.53.2
 
   '@radix-ui/number@1.1.0':
     resolution: {integrity: sha512-V3gRzhVNU1ldS5XhAPTom1fOIo4ccrjjJgmE+LI2h/WaFpHmx0MQApT+KZHnx8abG6Avtfcz4WoEciMnpFT3HQ==}
@@ -7836,6 +7835,20 @@ packages:
       react-dom:
         optional: true
 
+  framer-motion@11.18.2:
+    resolution: {integrity: sha512-5F5Och7wrvtLVElIpclDT0CBzMVg3dL22B64aZwHtsIY8RB4mXICLrkajK4G9R+ieSAGcgrLeae2SeUTg2pr6w==}
+    peerDependencies:
+      '@emotion/is-prop-valid': '*'
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@emotion/is-prop-valid':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
   fs-constants@1.0.0:
     resolution: {integrity: sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow==}
 
@@ -9700,8 +9713,14 @@ packages:
   motion-dom@11.14.3:
     resolution: {integrity: sha512-lW+D2wBy5vxLJi6aCP0xyxTxlTfiu+b+zcpVbGVFUxotwThqhdpPRSmX8xztAgtZMPMeU0WGVn/k1w4I+TbPqA==}
 
+  motion-dom@11.18.1:
+    resolution: {integrity: sha512-g76KvA001z+atjfxczdRtw/RXOM3OMSdd1f4DL77qCTF/+avrRJiawSG4yDibEQ215sr9kpinSlX2pCTJ9zbhw==}
+
   motion-utils@11.14.3:
     resolution: {integrity: sha512-Xg+8xnqIJTpr0L/cidfTTBFkvRw26ZtGGuIhA94J9PQ2p4mEa06Xx7QVYZH0BP+EpMSaDlu+q0I0mmvwADPsaQ==}
+
+  motion-utils@11.18.1:
+    resolution: {integrity: sha512-49Kt+HKjtbJKLtgO/LKj9Ld+6vw9BjH5d9sc40R/kVyH8GLAXgT42M2NnuPcJNuA3s9ZfZBUcwIgpmZWGEE+hA==}
 
   mri@1.2.0:
     resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}
@@ -10609,13 +10628,8 @@ packages:
     resolution: {integrity: sha512-66hKPCr+72mlfiSjlEB1+45IjXSqvVAIy6mocupoww4tBFE9R9IhwwUGoI4G++Tc9Aq+2rxOt0RFU6gPcrte0A==}
     engines: {node: '>= 0.8'}
 
-  prisma@5.22.0:
-    resolution: {integrity: sha512-vtpjW3XuYCSnMsNVBjLMNkTj6OZbudcPPTPYHqX0CJfpcdWciI1dM8uHETwmDxxiqEwCIE6WvXucWUetJgfu/A==}
-    engines: {node: '>=16.13'}
-    hasBin: true
-
-  prisma@6.3.0:
-    resolution: {integrity: sha512-y+Zh3Qg+xGCWyyrNUUNaFW/OltaV/yXYuTa0WRgYkz5LGyifmAsgpv94I47+qGRocZrMGcbF2A/78/oO2zgifA==}
+  prisma@6.3.1:
+    resolution: {integrity: sha512-JKCZWvBC3enxk51tY4TWzS4b5iRt4sSU1uHn2I183giZTvonXaQonzVtjLzpOHE7qu9MxY510kAtFGJwryKe3Q==}
     engines: {node: '>=18.18'}
     hasBin: true
     peerDependencies:
@@ -10909,6 +10923,12 @@ packages:
 
   react-textarea-autosize@8.5.3:
     resolution: {integrity: sha512-XT1024o2pqCuZSuBt9FwHlaDeNtVrtCXu0Rnz88t1jUGheCLa3PhjE1GH8Ctm2axEtvdCl5SUHYschyQ0L5QHQ==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+
+  react-textarea-autosize@8.5.4:
+    resolution: {integrity: sha512-eSSjVtRLcLfFwFcariT77t9hcbVJHQV76b51QjQGarQIHml2+gM2lms0n3XrhnDmgK5B+/Z7TmQk5OHNzqYm/A==}
     engines: {node: '>=10'}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -13137,10 +13157,10 @@ snapshots:
     optionalDependencies:
       nodemailer: 6.9.13
 
-  '@auth/prisma-adapter@2.7.4(@prisma/client@5.22.0(prisma@5.22.0))(nodemailer@6.9.13)':
+  '@auth/prisma-adapter@2.7.4(@prisma/client@5.22.0(prisma@6.3.1(typescript@5.7.3)))(nodemailer@6.9.13)':
     dependencies:
       '@auth/core': 0.37.4(nodemailer@6.9.13)
-      '@prisma/client': 5.22.0(prisma@5.22.0)
+      '@prisma/client': 5.22.0(prisma@6.3.1(typescript@5.7.3))
     transitivePeerDependencies:
       - '@simplewebauthn/browser'
       - '@simplewebauthn/server'
@@ -16217,10 +16237,10 @@ snapshots:
     dependencies:
       graphql: 16.10.0
 
-  '@pothos/plugin-prisma@4.4.0(@pothos/core@4.3.0(graphql@16.10.0))(@prisma/client@6.3.0(prisma@6.3.0(typescript@5.7.3))(typescript@5.7.3))(graphql@16.10.0)(typescript@5.7.3)':
+  '@pothos/plugin-prisma@4.4.0(@pothos/core@4.3.0(graphql@16.10.0))(@prisma/client@6.3.0(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3))(graphql@16.10.0)(typescript@5.7.3)':
     dependencies:
       '@pothos/core': 4.3.0(graphql@16.10.0)
-      '@prisma/client': 6.3.0(prisma@6.3.0(typescript@5.7.3))(typescript@5.7.3)
+      '@prisma/client': 6.3.0(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)
       '@prisma/generator-helper': 6.3.0
       graphql: 16.10.0
       typescript: 5.7.3
@@ -16230,60 +16250,41 @@ snapshots:
       '@pothos/core': 4.3.0(graphql@16.10.0)
       graphql: 16.10.0
 
-  '@prisma/client@5.22.0(prisma@5.22.0)':
+  '@prisma/client@5.22.0(prisma@6.3.1(typescript@5.7.3))':
     optionalDependencies:
-      prisma: 5.22.0
+      prisma: 6.3.1(typescript@5.7.3)
 
-  '@prisma/client@6.3.0(prisma@6.3.0(typescript@5.7.3))(typescript@5.7.3)':
+  '@prisma/client@6.3.0(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)':
     optionalDependencies:
-      prisma: 6.3.0(typescript@5.7.3)
+      prisma: 6.3.1(typescript@5.7.3)
       typescript: 5.7.3
-
-  '@prisma/debug@5.22.0': {}
 
   '@prisma/debug@6.3.0': {}
 
-  '@prisma/engines-version@5.22.0-44.605197351a3c8bdd595af2d2a9bc3025bca48ea2': {}
+  '@prisma/debug@6.3.1': {}
 
   '@prisma/engines-version@6.3.0-17.acc0b9dd43eb689cbd20c9470515d719db10d0b0': {}
 
-  '@prisma/engines@5.22.0':
+  '@prisma/engines@6.3.1':
     dependencies:
-      '@prisma/debug': 5.22.0
-      '@prisma/engines-version': 5.22.0-44.605197351a3c8bdd595af2d2a9bc3025bca48ea2
-      '@prisma/fetch-engine': 5.22.0
-      '@prisma/get-platform': 5.22.0
-
-  '@prisma/engines@6.3.0':
-    dependencies:
-      '@prisma/debug': 6.3.0
+      '@prisma/debug': 6.3.1
       '@prisma/engines-version': 6.3.0-17.acc0b9dd43eb689cbd20c9470515d719db10d0b0
-      '@prisma/fetch-engine': 6.3.0
-      '@prisma/get-platform': 6.3.0
+      '@prisma/fetch-engine': 6.3.1
+      '@prisma/get-platform': 6.3.1
 
-  '@prisma/fetch-engine@5.22.0':
+  '@prisma/fetch-engine@6.3.1':
     dependencies:
-      '@prisma/debug': 5.22.0
-      '@prisma/engines-version': 5.22.0-44.605197351a3c8bdd595af2d2a9bc3025bca48ea2
-      '@prisma/get-platform': 5.22.0
-
-  '@prisma/fetch-engine@6.3.0':
-    dependencies:
-      '@prisma/debug': 6.3.0
+      '@prisma/debug': 6.3.1
       '@prisma/engines-version': 6.3.0-17.acc0b9dd43eb689cbd20c9470515d719db10d0b0
-      '@prisma/get-platform': 6.3.0
+      '@prisma/get-platform': 6.3.1
 
   '@prisma/generator-helper@6.3.0':
     dependencies:
       '@prisma/debug': 6.3.0
 
-  '@prisma/get-platform@5.22.0':
+  '@prisma/get-platform@6.3.1':
     dependencies:
-      '@prisma/debug': 5.22.0
-
-  '@prisma/get-platform@6.3.0':
-    dependencies:
-      '@prisma/debug': 6.3.0
+      '@prisma/debug': 6.3.1
 
   '@quri/prettier-plugin-squiggle@0.10.0(@types/react@19.0.8)':
     dependencies:
@@ -16330,7 +16331,9 @@ snapshots:
       '@quri/squiggle-lang': 0.9.5
       prettier: 3.4.2
 
-  '@quri/squiggle-components@0.10.0(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))':
+  '@quri/serializer@1.0.0': {}
+
+  '@quri/squiggle-components@0.10.0(@emotion/is-prop-valid@0.8.8)(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))':
     dependencies:
       '@codemirror/autocomplete': 6.18.4
       '@codemirror/commands': 6.5.0
@@ -16348,7 +16351,7 @@ snapshots:
       '@quri/prettier-plugin-squiggle': 0.10.0(@types/react@19.0.8)
       '@quri/squiggle-lang': 0.10.0(@types/react@19.0.8)
       '@quri/squiggle-textmate-grammar': 0.10.0
-      '@quri/ui': link:packages/ui
+      '@quri/ui': 0.2.3(@emotion/is-prop-valid@0.8.8)(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react-hook-form@7.54.2(react@19.0.0))(react@19.0.0)
       '@tailwindcss/typography': 0.5.16(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))
       clsx: 2.1.1
       codemirror: 6.0.1
@@ -16367,6 +16370,7 @@ snapshots:
       unist-util-visit-parents: 6.0.1
       zod: 3.24.1
     transitivePeerDependencies:
+      - '@emotion/is-prop-valid'
       - '@types/react'
       - bufferutil
       - immer
@@ -16661,7 +16665,7 @@ snapshots:
   '@quri/squiggle-lang@0.10.0(@types/react@19.0.8)':
     dependencies:
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
-      '@quri/serializer': link:packages/serializer
+      '@quri/serializer': 1.0.0
       commander: 12.1.0
       d3-format: 3.1.0
       d3-time-format: 4.1.0
@@ -16833,6 +16837,24 @@ snapshots:
       react-hook-form: 7.54.2(react@19.0.0)
       react-select: 5.10.0(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-textarea-autosize: 8.5.3(@types/react@19.0.8)(react@19.0.0)
+      react-use: 17.6.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+    transitivePeerDependencies:
+      - '@emotion/is-prop-valid'
+      - '@types/react'
+      - supports-color
+
+  '@quri/ui@0.2.3(@emotion/is-prop-valid@0.8.8)(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react-hook-form@7.54.2(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      '@floating-ui/react': 0.26.16(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@headlessui/react': 2.2.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      clsx: 2.1.1
+      framer-motion: 11.18.2(@emotion/is-prop-valid@0.8.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react: 19.0.0
+      react-colorful: 5.6.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react-dom: 19.0.0(react@19.0.0)
+      react-hook-form: 7.54.2(react@19.0.0)
+      react-select: 5.10.0(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react-textarea-autosize: 8.5.4(@types/react@19.0.8)(react@19.0.0)
       react-use: 17.6.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
@@ -18347,7 +18369,7 @@ snapshots:
       react: 19.0.0
       urql: 4.2.1(@urql/core@5.0.8(graphql@16.10.0))(react@19.0.0)
 
-  '@vercel/analytics@1.3.1(next@15.1.3(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)':
+  '@vercel/analytics@1.3.1(next@15.1.3(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)':
     dependencies:
       server-only: 0.0.1
     optionalDependencies:
@@ -20999,6 +21021,16 @@ snapshots:
     dependencies:
       motion-dom: 11.14.3
       motion-utils: 11.14.3
+      tslib: 2.8.1
+    optionalDependencies:
+      '@emotion/is-prop-valid': 0.8.8
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+
+  framer-motion@11.18.2(@emotion/is-prop-valid@0.8.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
+    dependencies:
+      motion-dom: 11.18.1
+      motion-utils: 11.18.1
       tslib: 2.8.1
     optionalDependencies:
       '@emotion/is-prop-valid': 0.8.8
@@ -23960,7 +23992,13 @@ snapshots:
 
   motion-dom@11.14.3: {}
 
+  motion-dom@11.18.1:
+    dependencies:
+      motion-utils: 11.18.1
+
   motion-utils@11.14.3: {}
+
+  motion-utils@11.18.1: {}
 
   mri@1.2.0: {}
 
@@ -24878,15 +24916,9 @@ snapshots:
 
   pretty-hrtime@1.0.3: {}
 
-  prisma@5.22.0:
+  prisma@6.3.1(typescript@5.7.3):
     dependencies:
-      '@prisma/engines': 5.22.0
-    optionalDependencies:
-      fsevents: 2.3.3
-
-  prisma@6.3.0(typescript@5.7.3):
-    dependencies:
-      '@prisma/engines': 6.3.0
+      '@prisma/engines': 6.3.1
     optionalDependencies:
       fsevents: 2.3.3
       typescript: 5.7.3
@@ -25264,6 +25296,15 @@ snapshots:
       - '@types/react'
 
   react-textarea-autosize@8.5.3(@types/react@19.0.8)(react@19.0.0):
+    dependencies:
+      '@babel/runtime': 7.26.7
+      react: 19.0.0
+      use-composed-ref: 1.4.0(@types/react@19.0.8)(react@19.0.0)
+      use-latest: 1.3.0(@types/react@19.0.8)(react@19.0.0)
+    transitivePeerDependencies:
+      - '@types/react'
+
+  react-textarea-autosize@8.5.4(@types/react@19.0.8)(react@19.0.0):
     dependencies:
       '@babel/runtime': 7.26.7
       react: 19.0.0
