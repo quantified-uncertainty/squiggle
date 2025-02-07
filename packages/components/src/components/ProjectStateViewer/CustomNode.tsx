@@ -32,7 +32,7 @@ export const CustomNode: FC<NodeProps<NodeData>> = ({ data }) => {
     return (
       <Tooltip
         render={() => (
-          <div className="max-w-80 rounded border bg-white px-3 py-2 text-xs shadow-lg">
+          <div className="max-w-80 rounded border border-gray-200 bg-white px-3 py-2 text-xs shadow-lg">
             {tooltip()}
           </div>
         )}

@@ -54,10 +54,9 @@ const StyledTabInner: FC<StyledTabButtonType> = ({
       className={clsx(
         "flex flex-1 items-center justify-center rounded-md p-1 pl-2.5 pr-2.5 text-sm font-medium",
         isSelected && [
-          theme === "default" &&
-            "bg-white shadow-sm ring-1 ring-black ring-opacity-5",
+          theme === "default" && "bg-white shadow-sm ring-1 ring-black/5",
           theme === "primary" &&
-            "bg-blue-500 text-white shadow-sm ring-1 ring-black ring-opacity-5",
+            "bg-blue-500 text-white shadow-sm ring-1 ring-black/5",
         ]
       )}
     >

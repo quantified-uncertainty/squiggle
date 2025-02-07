@@ -41,7 +41,7 @@ export const VariableRevisionsPanel: FC<{
 
   return (
     <div className="ml-4 flex flex-col rounded-sm bg-gray-50 px-3 py-2">
-      <h3 className="mb-1 border-b pb-0.5 text-sm font-medium text-gray-700">
+      <h3 className="mb-1 border-b border-gray-200 pb-0.5 text-sm font-medium text-gray-700">
         Revisions
       </h3>
       <div className="w-full">
