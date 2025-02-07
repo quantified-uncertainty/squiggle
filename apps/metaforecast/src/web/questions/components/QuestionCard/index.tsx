@@ -1,6 +1,5 @@
-import { FC, ReactElement, ReactNode } from "react";
-
 import Link from "next/link";
+import { FC, ReactElement, ReactNode } from "react";
 import { FaExpand } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
@@ -41,7 +40,7 @@ const DisplayMarkdown: React.FC<{ description: string }> = ({
   description,
 }) => {
   const formatted = truncateText(250, cleanText(description));
-  // overflow-hidden overflow-ellipsis h-24
+  // overflow-hidden text-ellipsis h-24
   return formatted === "" ? null : (
     <div className="overflow-clip">
       <ReactMarkdown

@@ -30,7 +30,7 @@ export const Alert: FC<{
     >
       <div className="flex">
         <Icon
-          className={clsx("ml-1 mt-1 h-4 w-4 flex-shrink-0", iconColor)}
+          className={clsx("ml-1 mt-1 h-4 w-4 shrink-0", iconColor)}
           aria-hidden="true"
         />
         <div className="ml-3 grow">

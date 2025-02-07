@@ -71,7 +71,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
             return (
               <code
                 {...rest}
-                className="not-prose border-black/4 break-words rounded-sm border bg-black bg-opacity-[0.03] px-1 py-0.5 font-mono text-[.9em]"
+                className="not-prose border-black/4 bg-black/3 break-words rounded-sm border px-1 py-0.5 font-mono text-[.9em]"
               >
                 {children}
               </code>
