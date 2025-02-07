@@ -15,7 +15,9 @@ RUN --mount=type=cache,id=apt-lists,target=/var/lib/apt/lists,sharing=locked \
 
 # Install pnpm and turbo
 RUN npm install -g pnpm
-RUN pnpm install
+
+# FIXME - how to install the exact version from package.json?
+RUN pnpm install turbo@2.4.0
 
 # Pruned files
 FROM base AS builder
