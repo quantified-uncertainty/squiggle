@@ -13,8 +13,9 @@ RUN --mount=type=cache,id=apt-lists,target=/var/lib/apt/lists,sharing=locked \
     && apt-get update \
     && apt-get install -y openssl
 
-# Install pnpm and turbo globally
-RUN npm install -g pnpm turbo@^2
+# Install pnpm and turbo
+RUN npm install -g pnpm
+RUN pnpm install
 
 # Pruned files
 FROM base AS builder

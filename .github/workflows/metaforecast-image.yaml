@@ -51,7 +51,7 @@ jobs:
         id: push
         uses: docker/build-push-action@v6
         with:
-          context: ${{ env.APP_DIR }}
+          context: .
           file: ${{ env.APP_DIR }}/ops/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
