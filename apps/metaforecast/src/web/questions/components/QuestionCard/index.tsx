@@ -135,7 +135,7 @@ export const QuestionCard: FC<Props> = ({
 
         {question.platform.id === "guesstimate" && question.visualization && (
           <img
-            className="rounded-sm"
+            className="rounded-xs"
             src={question.visualization}
             alt="Guesstimate Screenshot"
           />

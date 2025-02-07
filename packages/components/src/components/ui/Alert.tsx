@@ -25,7 +25,7 @@ export const Alert: FC<{
 }) => {
   return (
     <div
-      className={clsx("rounded-sm px-2 py-1.5", backgroundColor)}
+      className={clsx("rounded-xs px-2 py-1.5", backgroundColor)}
       role="status"
     >
       <div className="flex">
