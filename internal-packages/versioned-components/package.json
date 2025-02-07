@@ -16,7 +16,7 @@
     "@quri/ui": "workspace:*",
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.16",
-    "commander": "^12.1.0",
+    "commander": "^13.1.0",
     "glob": "^11.0.1",
     "json-diff": "^1.0.6",
     "lodash": "^4.17.21",
@@ -38,7 +38,7 @@
     "squiggle-lang-0.9.5": "npm:@quri/squiggle-lang@0.9.5"
   },
   "devDependencies": {
-    "@commander-js/extra-typings": "^12.1.0",
+    "@commander-js/extra-typings": "^13.1.0",
     "@quri/configs": "workspace:*",
     "@types/json-diff": "^1.0.3",
     "@types/lodash": "^4.17.15",
