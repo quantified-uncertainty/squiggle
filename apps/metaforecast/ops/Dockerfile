@@ -29,11 +29,13 @@ RUN turbo prune metaforecast --docker
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
+# FIXME - non-production env is needed for the build, add more docker stages?
+# ENV NODE_ENV=production
 
 COPY --from=builder /app/out/json/ .
 # TODO: --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store/v3
 RUN pnpm install --frozen-lockfile
 
 COPY --from=builder /app/out/full/ .
+
 RUN turbo run build
