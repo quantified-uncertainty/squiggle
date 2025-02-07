@@ -72,8 +72,8 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0
       immutable:
-        specifier: ^4.3.6
-        version: 4.3.6
+        specifier: ^5.0.3
+        version: 5.0.3
       invariant:
         specifier: ^2.2.4
         version: 2.2.4
@@ -1218,8 +1218,8 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0
       immutable:
-        specifier: ^4.3.7
-        version: 4.3.7
+        specifier: ^5.0.3
+        version: 5.0.3
       ink:
         specifier: ^5.1.0
         version: 5.1.0(@types/react@19.0.8)(react@19.0.0)
@@ -8425,11 +8425,11 @@ packages:
     resolution: {integrity: sha512-AizQPcaofEtO11RZhPPHBOJRdo/20MKQF9mBLnVkBoyHi1/zXK8fzVdnEpSV9gxqtnh6Qomfp3F0xT5qP/vThw==}
     engines: {node: '>=0.8.0'}
 
-  immutable@4.3.6:
-    resolution: {integrity: sha512-Ju0+lEMyzMVZarkTn/gqRpdqd5dOPaz1mCZ0SH3JV6iFw81PldE/PEB1hWVEA288HPt4WXW8O7AWxB10M+03QQ==}
-
   immutable@4.3.7:
     resolution: {integrity: sha512-1hqclzwYwjRDFLjcFxOM5AYkkG0rpFPpr1RLPMEuGczoS7YA8gLhy8SWXYRAA/XwfEHpfo3cw5JGioS32fnMRw==}
+
+  immutable@5.0.3:
+    resolution: {integrity: sha512-P8IdPQHq3lA1xVeBRi5VPqUm5HDgKnx0Ru51wZz5mjxHr5n3RWhjIpOFU7ybkUxfB+5IToy+OLaHYDBIWsv+uw==}
 
   import-fresh@3.3.0:
     resolution: {integrity: sha512-veYYhQa+D1QBKznvhUHxb8faxlrwUnxseDAbAp457E0wLNio2bOSKnjYDhMj+YiAq61xrMGhQk9iXVk5FzgQMw==}
@@ -21949,9 +21949,9 @@ snapshots:
 
   immutable@3.7.6: {}
 
-  immutable@4.3.6: {}
-
   immutable@4.3.7: {}
+
+  immutable@5.0.3: {}
 
   import-fresh@3.3.0:
     dependencies:

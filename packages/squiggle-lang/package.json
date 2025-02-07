@@ -35,7 +35,7 @@
     "commander": "^13.1.0",
     "d3-format": "^3.1.0",
     "d3-time-format": "^4.1.0",
-    "immutable": "^4.3.7",
+    "immutable": "^5.0.3",
     "ink": "^5.1.0",
     "jstat": "^1.9.6",
     "lodash": "^4.17.21",
