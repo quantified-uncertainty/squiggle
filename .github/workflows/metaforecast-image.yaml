@@ -41,7 +41,7 @@ jobs:
       - name: Check if build can be skipped
         id: turbo-ignore
         run: |
-          if turbo-ignore; then
+          if pnpm turbo-ignore metaforecast; then
             echo "::set-output name=SHOULD_BUILD::false"
           else
             echo "::set-output name=SHOULD_BUILD::true"
