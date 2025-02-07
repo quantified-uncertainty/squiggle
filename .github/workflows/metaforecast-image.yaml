@@ -1,6 +1,7 @@
 name: Docker image for Metaforecast
 
 on:
+  workflow_dispatch: {}
   push:
     branches:
       - main
