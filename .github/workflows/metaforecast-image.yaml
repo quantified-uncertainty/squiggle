@@ -44,10 +44,10 @@ jobs:
       - name: Check if build can be skipped
         id: turbo-ignore
         run: |
-          if pnpm turbo-ignore metaforecast; then
-            echo "::set-output name=SHOULD_BUILD::false"
+          if turbo-ignore metaforecast; then
+            echo "SHOULD_BUILD=false" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=SHOULD_BUILD::true"
+            echo "SHOULD_BUILD=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Log in to registry
