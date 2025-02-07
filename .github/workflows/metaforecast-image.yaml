@@ -37,8 +37,8 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - name: Install turbo
-        run: pnpm install -g turbo@2.4.0
+      - name: Install turbo-ignore
+        run: pnpm install -g turbo-ignore@2.4.0
 
       # Run turbo-ignore check
       - name: Check if build can be skipped
