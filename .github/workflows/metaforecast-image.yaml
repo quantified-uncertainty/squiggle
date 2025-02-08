@@ -24,7 +24,7 @@ jobs:
 
     outputs:
       should-build: ${{ steps.turbo-ignore.outputs.SHOULD_BUILD }}
-      image-tag: ${{ steps.meta.outputs.json && format('sha-{0}', fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision']) || "" }}
+      image-tag: ${{ steps.meta.outputs.json && format('sha-{0}', fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision']) || '' }}
 
     steps:
       - name: Checkout
