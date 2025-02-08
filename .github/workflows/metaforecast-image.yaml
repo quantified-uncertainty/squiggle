@@ -132,4 +132,4 @@ jobs:
           git config --global user.name "GitHub Actions"
           git add .
           git commit -m 'Update image tag'
-          git push origin ${{ github.ref_name }}
+          git push origin master
