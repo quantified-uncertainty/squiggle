@@ -22,6 +22,10 @@ jobs:
       attestations: write
       id-token: write
 
+    outputs:
+      should-build: ${{ steps.turbo-ignore.outputs.SHOULD_BUILD }}
+      image-tag: "sha-${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -96,3 +100,31 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+
+  update-image-tag:
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    if: needs.build-and-push-image.outputs.should-build == 'true'
+
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Checkout ops repo
+        uses: actions/checkout@v4
+        with:
+          repository: quantifieduncertainty/ops
+
+      - name: Commit new image tag to ops repo
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          echo "image:\n  tag: ${{ needs.build-and-push-image.outputs.image-tag }}" >> ./metaforecast-image-tag.yaml
+          git config --global user.email "ops@quantifieduncertainty.org"
+          git config --global user.name "GitHub Actions"
+          git add .
+          git commit -m 'Update image tag'
+          git push origin ${{ github.ref_name }}
