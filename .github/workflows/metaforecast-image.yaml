@@ -28,7 +28,7 @@ jobs:
       id-token: write
 
     outputs:
-      should-build: ${{ steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force == 'true' }}
+      should-build: ${{ steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force }}
       image-tag: ${{ steps.meta.outputs.json && format('sha-{0}', fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision']) || '' }}
 
     steps:
@@ -109,7 +109,7 @@ jobs:
   update-image-tag:
     needs: build-and-push-image
     runs-on: ubuntu-latest
-    if: needs.build-and-push-image.outputs.should-build == 'true'
+    if: needs.build-and-push-image.outputs.should-build
 
     steps:
       - uses: actions/create-github-app-token@v1
