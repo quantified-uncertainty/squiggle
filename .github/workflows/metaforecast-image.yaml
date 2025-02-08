@@ -1,7 +1,12 @@
 name: Docker image for Metaforecast
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      force:
+        type: boolean
+        description: "Force build and push image even when turbo-ignore would skip it"
+        default: false
   push:
     branches:
       - main
@@ -23,7 +28,7 @@ jobs:
       id-token: write
 
     outputs:
-      should-build: ${{ steps.turbo-ignore.outputs.SHOULD_BUILD }}
+      should-build: ${{ steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force == 'true' }}
       image-tag: ${{ steps.meta.outputs.json && format('sha-{0}', fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision']) || '' }}
 
     steps:
@@ -55,7 +60,7 @@ jobs:
           fi
 
       - name: Log in to registry
-        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true'
+        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force == 'true'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -64,7 +69,7 @@ jobs:
 
       # This step uses [docker/metadata-action](https://github.com/docker/metadata-action#about) to extract tags and labels that will be applied to the specified image. The `id` "meta" allows the output of this step to be referenced in a subsequent step. The `images` value provides the base name for the tags and labels.
       - name: Extract metadata (tags, labels) for Docker
-        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true'
+        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force == 'true'
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
@@ -74,11 +79,11 @@ jobs:
             type=ref,event=branch
 
       - name: Set up Docker Buildx
-        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true'
+        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force == 'true'
         uses: docker/setup-buildx-action@v3
 
       - name: Build and push Docker image
-        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true'
+        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force == 'true'
         id: push
         uses: docker/build-push-action@v6
         with:
@@ -94,7 +99,7 @@ jobs:
       # It increases supply chain security for people who consume the image.
       # For more information, see https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds
       - name: Generate artifact attestation
-        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true'
+        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force == 'true'
         uses: actions/attest-build-provenance@v1
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
