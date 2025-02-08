@@ -130,7 +130,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          echo -e "image:\n  tag: ${{ needs.build-and-push-image.outputs.image-tag }}" >> ./k8s/tags/metaforecast.yaml
+          echo -e "image:\n  tag: ${{ needs.build-and-push-image.outputs.image-tag }}" >./k8s/tags/metaforecast.yaml
           git config --global user.email "ops@quantifieduncertainty.org"
           git config --global user.name "GitHub Actions"
           git add .
