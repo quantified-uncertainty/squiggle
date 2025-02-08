@@ -1,6 +1,6 @@
 image:
   name: ghcr.io/quantified-uncertainty/metaforecast
-  tag: ''
+  tag: latest # in production for QURI, we use argocd-image-updater to update the tag
 
 # Secret; you should create this in your k8s cluster.
 envSecret: metaforecast-env
