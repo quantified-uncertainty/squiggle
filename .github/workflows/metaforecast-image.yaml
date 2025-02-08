@@ -117,11 +117,13 @@ jobs:
         with:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ops
 
       - name: Checkout ops repo
         uses: actions/checkout@v4
         with:
-          repository: quantified-uncertainty/ops
+          repository: ${{ github.repository_owner }}/ops
 
       - name: Commit new image tag to ops repo
         env:
