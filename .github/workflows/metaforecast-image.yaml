@@ -121,7 +121,7 @@ jobs:
       - name: Checkout ops repo
         uses: actions/checkout@v4
         with:
-          repository: quantifieduncertainty/ops
+          repository: quantified-uncertainty/ops
 
       - name: Commit new image tag to ops repo
         env:
