@@ -4,7 +4,7 @@ All configuration is done through environment variables.
 
 Not all of these are necessary to run the code. The most important ones are:
 
-- `DIGITALOCEAN_POSTGRES` pointing to the working Postgres database
+- `iMETAFORECAST_DB_URL` pointing to the working Postgres database
 
 Environment for production deployments is configured through Terraform, see [infra.md](./infra.md) for details.
 
@@ -14,7 +14,7 @@ There's also a template configuration file in `../env.example`.
 
 ## Database endpoints
 
-- `DIGITALOCEAN_POSTGRES`, of the form `postgres://username:password@domain.com:port/configvars`. (Disregard `DIGITALOCEAN_` prefix, you can use any endpoint you like).
+- `METAFORECAST_DB_URL`, of the form `postgres://username:password@domain.com:port/configvars`. (Disregard `DIGITALOCEAN_` prefix, you can use any endpoint you like).
 
 Elasticsearch:
 

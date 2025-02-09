@@ -25,7 +25,7 @@
     "gen": "pnpm run gen:schema && pnpm run gen:gql",
     "build:ts": "pnpm gen && tsc",
     "build": "pnpm run gen && next build",
-    "dbshell": ". .env && psql $DIGITALOCEAN_POSTGRES",
+    "dbshell": ". .env && psql $METAFORECAST_DB_URL",
     "lint": "pnpm lint:prettier && pnpm eslint",
     "lint:prettier": "prettier --check .",
     "eslint": "ESLINT_USE_FLAT_CONFIG=false NODE_NO_WARNINGS=1 eslint src",

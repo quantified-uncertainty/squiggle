@@ -3,6 +3,6 @@ output "vercel_project_id" {
 }
 
 output "db_url" {
-  value     = local.generated_env.DIGITALOCEAN_POSTGRES
+  value     = local.generated_env.METAFORECAST_DB_URL
   sensitive = true
 }
