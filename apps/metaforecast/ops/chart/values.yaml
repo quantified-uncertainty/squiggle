@@ -9,13 +9,8 @@ envSecret: metaforecast-env
 
 jobs:
   scheduler:
-    command:
-      [
-        "./node_modules/.bin/tsx",
-        "src/backend/flow/doEverythingForScheduler.ts",
-      ]
+    command: ["pnpm", "run", "cli", "all"]
     schedule: "0 3 * * *" # every day at 3am
   frontpage:
-    command:
-      ["./node_modules/.bin/tsx", "src/backend/index.ts", "frontpage"]
+    command: ["pnpm", "run", "cli", "frontpage"]
     schedule: "0 6 * * *" # every day at 6am
