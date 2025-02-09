@@ -5,4 +5,7 @@ import path from "path";
 export default {
   // this includes files from the monorepo base two directories up
   outputFileTracingRoot: path.join(import.meta.dirname, "../../"),
+  outputFileTracingInclude: {
+    "*": ["node_modules/@quri/metaforecast-db/generated/*.node"],
+  },
 };
