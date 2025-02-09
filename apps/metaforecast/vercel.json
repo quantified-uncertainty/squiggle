@@ -1,5 +1,5 @@
 {
-  "buildCommand": "PLATFORM=vercel npx turbo build && mkdir generated && cp ../../internal-packages/metaforecast-db/generated/libquery_engine* generated/",
+  "buildCommand": "PLATFORM=vercel npx turbo build && cp ../../internal-packages/metaforecast-db/generated/libquery_engine* .next/server/",
   "framework": "nextjs",
   "ignoreCommand": "npx turbo-ignore || ../../skip-dependabot.sh"
 }
