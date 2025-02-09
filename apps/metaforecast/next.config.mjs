@@ -1,6 +1,8 @@
+import path from "path";
+
 // via https://nextjs.org/docs/pages/api-reference/config/next-config-js/output#caveats
 // should help with prisma
-module.exports = {
+export default {
   // this includes files from the monorepo base two directories up
-  outputFileTracingRoot: path.join(__dirname, "../../"),
+  outputFileTracingRoot: path.join(import.meta.dirname, "../../"),
 };
