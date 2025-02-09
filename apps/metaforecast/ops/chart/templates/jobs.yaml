@@ -14,6 +14,8 @@ spec:
         app: {{ $.Release.Name }}
         cronjob: {{ $jobname }}
     spec:
+      imagePullSecrets:
+      - name: {{ .Values.image.pullSecret }}
       template:
         spec:
           restartPolicy: Never
