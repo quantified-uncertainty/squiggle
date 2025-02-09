@@ -11,11 +11,11 @@ jobs:
   scheduler:
     command:
       [
-        "tsx",
+        "./node_modules/.bin/tsx",
         "src/backend/flow/doEverythingForScheduler.ts",
       ]
     schedule: "0 3 * * *" # every day at 3am
   frontpage:
     command:
-      ["tsx", "src/backend/index.ts", "frontpage"]
+      ["./node_modules/.bin/tsx", "src/backend/index.ts", "frontpage"]
     schedule: "0 6 * * *" # every day at 6am
