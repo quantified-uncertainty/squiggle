@@ -38,4 +38,5 @@ RUN pnpm install --frozen-lockfile
 
 COPY --from=builder /app/out/full/ .
 
+WORKDIR /app/apps/metaforecast
 RUN turbo run build
