@@ -1,5 +1,5 @@
 image:
-  name: ghcr.io/quantified-uncertainty/metaforecast
+  name: registry.k8s.quantifieduncertainty.org/metaforecast
   tag: latest # In production for QURI deployment, we use argocd-image-updater to update the tag
 
 # Secret; you should create this in your k8s cluster.
