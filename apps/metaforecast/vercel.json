@@ -1,5 +1,5 @@
 {
-  "buildCommand": "PLATFORM=vercel npx turbo build && mkdir generated && cp ../../internal-packages/metaforecast-db/generated/libquery_engine-darwin-arm64.dylib.node",
+  "buildCommand": "PLATFORM=vercel npx turbo build && mkdir generated && cp ../../internal-packages/metaforecast-db/generated/libquery_engine-darwin-arm64.dylib.node generated/",
   "framework": "nextjs",
   "ignoreCommand": "npx turbo-ignore || ../../skip-dependabot.sh"
 }
