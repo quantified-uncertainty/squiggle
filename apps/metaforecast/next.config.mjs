@@ -1,11 +1,8 @@
-import path from "path";
-
-// via https://nextjs.org/docs/pages/api-reference/config/next-config-js/output#caveats
-// should help with prisma
+/** @type {import('next').NextConfig} */
 export default {
   // this includes files from the monorepo base two directories up
-  outputFileTracingRoot: path.join(import.meta.dirname, "../../"),
-  outputFileTracingInclude: {
-    "*": ["node_modules/@quri/metaforecast-db/generated/*.node"],
+  // outputFileTracingRoot: path.join(import.meta.dirname, "../../"),
+  outputFileTracingIncludes: {
+    "/*": ["./node_modules/@quri/metaforecast-db/generated/*.node"],
   },
 };
