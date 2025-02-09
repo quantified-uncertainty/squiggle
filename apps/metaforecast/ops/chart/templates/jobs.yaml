@@ -14,11 +14,11 @@ spec:
         app: {{ $.Release.Name }}
         cronjob: {{ $jobname }}
     spec:
-      imagePullSecrets:
-      - name: {{ $.Values.image.pullSecret }}
       template:
         spec:
           restartPolicy: Never
+          imagePullSecrets:
+          - name: {{ $.Values.image.pullSecret }}
           containers:
           - name: cronjob
             image: "{{ required "image.name is required" $.Values.image.name }}:{{ required "image.tag is required" $.Values.image.tag }}"
