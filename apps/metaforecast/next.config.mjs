@@ -1,3 +1,5 @@
+import path from "path";
+
 /** @type {import('next').NextConfig} */
 export default {
   // this includes files from the monorepo base two directories up
