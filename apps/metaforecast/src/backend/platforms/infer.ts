@@ -231,10 +231,13 @@ export const infer: Platform = {
   name: platformName,
   label: "Infer",
   color: "#223900",
-  version: "v1",
   async fetcher() {
     let cookie = process.env["INFER_COOKIE"]!;
-    return (await applyIfSecretExists(cookie, infer_inner)) || null;
+    const questions = await applyIfSecretExists(cookie, infer_inner);
+    if (!questions) {
+      return null;
+    }
+    return { questions };
   },
   calculateStars(data) {
     let nuno = () => 2;

@@ -349,9 +349,8 @@ export const insight: Platform = {
   name: platformName,
   label: "Insight Prediction",
   color: "#ff0000",
-  version: "v1",
   async fetcher() {
-    return []; // insight API seems down.
+    return { questions: [] }; // insight API seems down.
     /*
     let bearer = process.env.INSIGHT_BEARER;
     if (!!bearer) {

@@ -89,7 +89,6 @@ export const guesstimate: Platform & {
   label: "Guesstimate",
   color: "#223900",
   search,
-  version: "v1",
   fetchQuestion,
   calculateStars: (q) => (q.description?.length > 250 ? 2 : 1),
   fetcher: async () => {

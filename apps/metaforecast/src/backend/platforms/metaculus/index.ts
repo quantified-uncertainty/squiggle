@@ -152,7 +152,6 @@ export const metaculus: Platform = {
   name: platformName,
   label: "Metaculus",
   color: "#006669",
-  version: "v2",
 
   extendCliCommand(command) {
     command

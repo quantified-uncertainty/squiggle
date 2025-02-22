@@ -39,14 +39,12 @@ export type FetchedQuestion = Omit<
 };
 
 // fetcher should return null if platform failed to fetch questions for some reason
-type PlatformFetcherV1 = () => Promise<FetchedQuestion[] | null>;
-
-type PlatformFetcherV2Result = {
+type PlatformFetcherResult = {
   questions: FetchedQuestion[];
   // if partial is true then we won't cleanup old questions from the database; this is useful when manually invoking a fetcher with arguments for updating a single question
-  partial: boolean;
+  partial?: boolean;
 } | null;
-type PlatformFetcherV2 = () => Promise<PlatformFetcherV2Result>;
+type PlatformFetcher = () => Promise<PlatformFetcherResult>;
 
 // using "" as ArgNames default is technically incorrect, but shouldn't cause any real issues
 // (I couldn't find a better solution for signifying an empty value, though there probably is one)
@@ -57,16 +55,8 @@ export type Platform = {
   calculateStars: (question: FetchedQuestion) => number;
   // extended commander configuration, e.g. subcommands
   extendCliCommand?: (command: Command) => void;
-} & (
-  | {
-      version: "v1";
-      fetcher: PlatformFetcherV1;
-    }
-  | {
-      version: "v2";
-      fetcher?: PlatformFetcherV2;
-    }
-);
+  fetcher?: PlatformFetcher;
+};
 
 export type PlatformConfig = {
   name: string;

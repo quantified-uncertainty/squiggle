@@ -113,11 +113,10 @@ export const fantasyscotus: Platform = {
   name: platformName,
   label: "FantasySCOTUS",
   color: "#231149",
-  version: "v1",
   async fetcher() {
-    let rawData = await fetchData();
-    let results = await processData(rawData);
-    return results;
+    const rawData = await fetchData();
+    const results = await processData(rawData);
+    return { questions: results };
   },
   calculateStars(data) {
     return 2;

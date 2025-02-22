@@ -15,7 +15,6 @@ export const goodjudgment: Platform = {
   name: platformName,
   label: "Good Judgment",
   color: "#7d4f1b",
-  version: "v1",
   async fetcher() {
     // Proxy fuckery
     // let proxy;
@@ -116,7 +115,7 @@ export const goodjudgment: Platform = {
       "Note that failing is not unexpected; see utils/pullSuperforecastsManually.sh/js"
     );
 
-    return results;
+    return { questions: results };
   },
   calculateStars(data) {
     let nuno = () => 4;

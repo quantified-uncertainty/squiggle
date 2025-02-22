@@ -104,11 +104,10 @@ export const kalshi: Platform = {
   name: platformName,
   label: "Kalshi",
   color: "#615691",
-  version: "v1",
   fetcher: async function () {
     // let markets = await fetchAllMarkets();
     // console.log(markets)
-    return [];
+    return { questions: [] };
   },
   calculateStars(data) {
     let nuno = () =>

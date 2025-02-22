@@ -122,10 +122,16 @@ export const wildeford: Platform = {
   name: platformName,
   label: "Peter Wildeford",
   color: "#984158",
-  version: "v1",
   async fetcher() {
     const GOOGLE_API_KEY = process.env["GOOGLE_API_KEY"]!; // See: https://developers.google.com/sheets/api/guides/authorizing#APIKey
-    return (await applyIfSecretExists(GOOGLE_API_KEY, wildeford_inner)) || null;
+    const questions = await applyIfSecretExists(
+      GOOGLE_API_KEY,
+      wildeford_inner
+    );
+    if (!questions) {
+      return null;
+    }
+    return { questions };
   },
   calculateStars(data) {
     let nuno = () => 3;

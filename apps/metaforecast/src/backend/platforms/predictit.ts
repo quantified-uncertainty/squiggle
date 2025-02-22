@@ -40,7 +40,6 @@ export const predictit: Platform = {
   name: platformName,
   label: "PredictIt",
   color: "#460c00",
-  version: "v1",
   async fetcher() {
     let markets = await fetchmarkets();
     let marketVolumes = await fetchmarketvolumes();
@@ -110,7 +109,7 @@ export const predictit: Platform = {
       results.push(obj);
     }
 
-    return results;
+    return { questions: results };
   },
   calculateStars(data) {
     let nuno = () => 3;

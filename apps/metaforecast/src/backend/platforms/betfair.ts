@@ -141,11 +141,10 @@ export const betfair: Platform = {
   name: platformName,
   label: "Betfair",
   color: "#3d674a",
-  version: "v1",
   async fetcher() {
     const data = await fetchPredictions();
     const results = await processPredictions(data);
-    return results;
+    return { questions: results };
   },
   calculateStars(data) {
     const volume = data.qualityindicators.volume || 0;

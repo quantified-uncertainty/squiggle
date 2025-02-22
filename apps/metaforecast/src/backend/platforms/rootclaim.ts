@@ -48,7 +48,6 @@ export const rootclaim: Platform = {
   name: platformName,
   label: "Rootclaim",
   color: "#0d1624",
-  version: "v1",
   async fetcher() {
     const claims = await fetchAllRootclaims();
     const results: FetchedQuestion[] = [];
@@ -84,7 +83,7 @@ export const rootclaim: Platform = {
       };
       results.push(obj);
     }
-    return results;
+    return { questions: results };
   },
   calculateStars(data) {
     let nuno = () => 4;

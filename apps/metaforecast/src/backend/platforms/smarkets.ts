@@ -179,7 +179,6 @@ export const smarkets: Platform = {
   name: platformName,
   label: "Smarkets",
   color: "#6f5b41",
-  version: "v2",
 
   extendCliCommand(command) {
     command

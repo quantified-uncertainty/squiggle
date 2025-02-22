@@ -62,10 +62,9 @@ export const foretold: Platform = {
   name: platformName,
   label: "Foretold",
   color: "#62520b",
-  version: "v1",
   async fetcher() {
-    let results: FetchedQuestion[] = [];
-    for (let community of highQualityCommunities) {
+    const results: FetchedQuestion[] = [];
+    for (const community of highQualityCommunities) {
       let questions = await fetchAllCommunityQuestions(community);
       questions = questions.map((question) => question.node);
       questions = questions.filter((question) => question.previousAggregate); // Questions without any predictions
@@ -106,7 +105,7 @@ export const foretold: Platform = {
         results.push(result);
       });
     }
-    return results;
+    return { questions: results };
   },
   calculateStars(data) {
     let nuno = () => 2;

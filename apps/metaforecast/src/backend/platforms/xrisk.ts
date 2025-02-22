@@ -9,7 +9,6 @@ export const xrisk: Platform = {
   name: "xrisk",
   label: "X-risk estimates",
   color: "#272600",
-  version: "v1",
   async fetcher() {
     // return; // not necessary to refill the DB every time
     let fileRaw = fs.readFileSync("./input/xrisk-questions.json", {
@@ -24,7 +23,7 @@ export const xrisk: Platform = {
         id: `${platformName}-${hash(item.title + " | " + item.url)}`, // some titles are non-unique, but title+url pair is always unique
       };
     });
-    return results;
+    return { questions: results };
   },
   calculateStars: () => 2,
 };
