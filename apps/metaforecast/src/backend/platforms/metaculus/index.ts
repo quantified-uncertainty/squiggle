@@ -163,7 +163,10 @@ export const metaculus: Platform = {
           const apiQuestion = await fetchSingleApiQuestion(id);
           const questions = await apiQuestionToFetchedQuestions(apiQuestion);
           console.log(questions);
-          await saveQuestions(metaculus, questions, true);
+          await saveQuestions({
+            platform: metaculus,
+            fetchedQuestions: questions,
+          });
         } catch (error) {
           console.log(error);
         }
@@ -203,7 +206,7 @@ export const metaculus: Platform = {
       i += 1;
     }
 
-    return { questions: allQuestions, partial: false };
+    return { questions: allQuestions };
   },
 
   calculateStars(data) {

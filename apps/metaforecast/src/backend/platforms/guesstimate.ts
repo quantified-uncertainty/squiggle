@@ -12,7 +12,7 @@ const searchEndpoint =
 
 const apiEndpoint = "https://api.getguesstimate.com";
 
-const modelToQuestion = (model: any): ReturnType<typeof prepareQuestion> => {
+function modelToQuestion(model: any): ReturnType<typeof prepareQuestion> {
   const { description } = model;
   // const description = model.description
   //   ? model.description.replace(/\n/g, " ").replace(/  /g, " ")
@@ -36,7 +36,7 @@ const modelToQuestion = (model: any): ReturnType<typeof prepareQuestion> => {
   };
   const q = prepareQuestion(fq, guesstimate);
   return q;
-};
+}
 
 async function search(query: string): Promise<ElasticQuestion[]> {
   const response = await axios({
@@ -45,10 +45,10 @@ async function search(query: string): Promise<ElasticQuestion[]> {
       Accept: "application/json",
       "Content-Type": "application/x-www-form-urlencoded",
     },
-    data: `{\"params\":\"query=${query.replace(
+    data: `{"params":"query=${query.replace(
       / /g,
       "%20"
-    )}&hitsPerPage=20&page=0&getRankingInfo=true\"}`,
+    )}&hitsPerPage=20&page=0&getRankingInfo=true"}`,
     method: "POST",
   });
 
@@ -63,8 +63,8 @@ async function search(query: string): Promise<ElasticQuestion[]> {
   });
 
   // filter for duplicates. Surprisingly common.
-  let uniqueTitles: string[] = [];
-  let uniqueModels: ElasticQuestion[] = [];
+  const uniqueTitles: string[] = [];
+  const uniqueModels: ElasticQuestion[] = [];
   for (let model of mappedModels) {
     if (!uniqueTitles.includes(model.title) && !model.title.includes("copy")) {
       uniqueModels.push(model);

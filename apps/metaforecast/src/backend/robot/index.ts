@@ -52,11 +52,15 @@ type SaveStats = {
   deleted?: number;
 };
 
-export async function saveQuestions(
-  platform: Platform,
-  fetchedQuestions: FetchedQuestion[],
-  partial?: boolean
-): Promise<SaveStats> {
+export async function saveQuestions({
+  platform,
+  fetchedQuestions,
+  partial,
+}: {
+  platform: Platform;
+  fetchedQuestions: FetchedQuestion[];
+  partial?: boolean;
+}): Promise<SaveStats> {
   // Bulk update, optimized for performance.
 
   const oldQuestions = await prisma.question.findMany({
@@ -143,7 +147,11 @@ export async function processPlatform(platform: Platform) {
     return;
   }
 
-  const stats = await saveQuestions(platform, questions, partial);
+  const stats = await saveQuestions({
+    platform,
+    fetchedQuestions: questions,
+    partial,
+  });
 
   console.log(
     "Done, " +
