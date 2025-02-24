@@ -104,8 +104,8 @@ function aiRequestToWorkflow(request: AiRequestBody) {
   // Create a SquiggleWorkflow instance
   const llmConfig: LlmConfig = {
     llmId: request.model ?? "Claude-Sonnet",
-    priceLimit: 0.3,
-    durationLimitMinutes: 2,
+    priceLimit: 0.8,
+    durationLimitMinutes: 6,
     messagesInHistoryToKeep: 4,
     numericSteps: request.numericSteps,
     styleGuideSteps: request.styleGuideSteps,
