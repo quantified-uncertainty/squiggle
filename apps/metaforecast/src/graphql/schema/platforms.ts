@@ -17,10 +17,6 @@ export const PlatformObj = builder.objectRef<string>("Platform").implement({
         if (platformName === "metaforecast") {
           return "Metaforecast";
         }
-        if (platformName === "guesstimate") {
-          return "Guesstimate";
-        }
-        // kinda slow and repetitive, TODO - store a map {name => platform} somewhere and `getPlatform` util function?
         const platform = getPlatforms().find((p) => p.name === platformName);
         if (!platform) {
           throw new Error(`Unknown platform ${platformName}`);

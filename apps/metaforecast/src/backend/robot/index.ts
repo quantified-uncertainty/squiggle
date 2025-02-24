@@ -128,6 +128,7 @@ export async function saveQuestions({
   return stats;
 }
 
+// Run the platform's daily fetcher and save the results.
 export async function processPlatform(platform: Platform) {
   if (!platform.fetcher) {
     console.log(`Platform ${platform.name} doesn't have a fetcher, skipping`);
