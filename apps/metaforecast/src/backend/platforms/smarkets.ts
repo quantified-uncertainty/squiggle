@@ -1,7 +1,6 @@
 import axios from "axios";
 
 import { QuestionOption } from "../../common/types";
-import { average } from "../../utils";
 import { saveQuestions } from "../robot";
 import { FetchedQuestion, Platform } from "../types";
 
@@ -179,7 +178,6 @@ export const smarkets: Platform = {
   name: platformName,
   label: "Smarkets",
   color: "#6f5b41",
-  version: "v2",
 
   extendCliCommand(command) {
     command
@@ -191,7 +189,11 @@ export const smarkets: Platform = {
             verbose: !!process.env["DEBUG"]!,
           }),
         ];
-        await saveQuestions(smarkets, events, true);
+        await saveQuestions({
+          platform: smarkets,
+          fetchedQuestions: events,
+          partial: true,
+        });
       });
   },
 
@@ -200,26 +202,18 @@ export const smarkets: Platform = {
       verbose: !!process.env["DEBUG"]!,
     };
 
-    const partial = false;
     const events = await fetchEvents(ctx);
 
-    let results: FetchedQuestion[] = [];
+    let questions: FetchedQuestion[] = [];
     for (const event of events) {
       const eventResults = await processEventMarkets(event, ctx);
-      results.push(...eventResults);
+      questions.push(...eventResults);
     }
 
-    return {
-      questions: results,
-      partial,
-    };
+    return { questions };
   },
-  calculateStars(data) {
-    const nuno = () => 2;
-    const eli = () => null;
-    const misha = () => null;
-    const starsDecimal = average([nuno()]); //, eli(), misha()])
-    const starsInteger = Math.round(starsDecimal);
-    return starsInteger;
+
+  calculateStars() {
+    return 2; // Nuño
   },
 };

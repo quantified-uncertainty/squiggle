@@ -1,7 +1,6 @@
 /* Imports */
 import { GoogleSpreadsheet } from "google-spreadsheet";
 
-import { average } from "../../utils";
 import { FetchedQuestion, Platform } from "../types";
 import { applyIfSecretExists } from "../utils/getSecrets";
 import { hash } from "../utils/hash";
@@ -14,7 +13,7 @@ const endpoint = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit#gid=0`
 /* Support functions */
 
 const formatRow = (row: string[]) => {
-  let colNames = [
+  const colNames = [
     "Prediction Date",
     "Prediction",
     "Odds",
@@ -24,7 +23,8 @@ const formatRow = (row: string[]) => {
     "Brier Score",
     "Notes",
   ] as const;
-  let result: Partial<{ [k in (typeof colNames)[number]]: string }> = {};
+
+  const result: Partial<{ [k in (typeof colNames)[number]]: string }> = {};
   row.forEach((col: string, i) => {
     result[colNames[i]] = col;
   });
@@ -122,17 +122,20 @@ export const wildeford: Platform = {
   name: platformName,
   label: "Peter Wildeford",
   color: "#984158",
-  version: "v1",
+
   async fetcher() {
     const GOOGLE_API_KEY = process.env["GOOGLE_API_KEY"]!; // See: https://developers.google.com/sheets/api/guides/authorizing#APIKey
-    return (await applyIfSecretExists(GOOGLE_API_KEY, wildeford_inner)) || null;
+    const questions = await applyIfSecretExists(
+      GOOGLE_API_KEY,
+      wildeford_inner
+    );
+    if (!questions) {
+      return null;
+    }
+    return { questions };
   },
-  calculateStars(data) {
-    let nuno = () => 3;
-    let eli = () => null;
-    let misha = () => null;
-    let starsDecimal = average([nuno()]); //, eli(), misha()])
-    let starsInteger = Math.round(starsDecimal);
-    return starsInteger;
+
+  calculateStars() {
+    return 3; // Nuño
   },
 };

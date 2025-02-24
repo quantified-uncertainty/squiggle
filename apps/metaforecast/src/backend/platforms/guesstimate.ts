@@ -12,7 +12,7 @@ const searchEndpoint =
 
 const apiEndpoint = "https://api.getguesstimate.com";
 
-const modelToQuestion = (model: any): ReturnType<typeof prepareQuestion> => {
+function modelToQuestion(model: any): ReturnType<typeof prepareQuestion> {
   const { description } = model;
   // const description = model.description
   //   ? model.description.replace(/\n/g, " ").replace(/  /g, " ")
@@ -36,64 +36,63 @@ const modelToQuestion = (model: any): ReturnType<typeof prepareQuestion> => {
   };
   const q = prepareQuestion(fq, guesstimate);
   return q;
-};
-
-async function search(query: string): Promise<ElasticQuestion[]> {
-  const response = await axios({
-    url: searchEndpoint,
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    data: `{\"params\":\"query=${query.replace(
-      / /g,
-      "%20"
-    )}&hitsPerPage=20&page=0&getRankingInfo=true\"}`,
-    method: "POST",
-  });
-
-  const models: any[] = response.data.hits;
-  const mappedModels: ElasticQuestion[] = models.map((model) => {
-    const q = modelToQuestion(model);
-    return questionToElasticDocument({
-      ...q,
-      fetched: new Date(),
-      firstSeen: new Date(),
-    });
-  });
-
-  // filter for duplicates. Surprisingly common.
-  let uniqueTitles: string[] = [];
-  let uniqueModels: ElasticQuestion[] = [];
-  for (let model of mappedModels) {
-    if (!uniqueTitles.includes(model.title) && !model.title.includes("copy")) {
-      uniqueModels.push(model);
-      uniqueTitles.push(model.title);
-    }
-  }
-
-  return uniqueModels;
 }
 
-const fetchQuestion = async (id: number): Promise<Question> => {
-  const response = await axios({ url: `${apiEndpoint}/spaces/${id}` });
-  const q = modelToQuestion(response.data);
-  return await upsertSingleQuestion(q);
-};
+class Guesstimate implements Platform {
+  name = "guesstimate";
+  label = "Guesstimate";
+  color = "#223900";
 
-export const guesstimate: Platform & {
-  search: typeof search;
-  fetchQuestion: typeof fetchQuestion;
-} = {
-  name: "guesstimate",
-  label: "Guesstimate",
-  color: "#223900",
-  search,
-  version: "v1",
-  fetchQuestion,
-  calculateStars: (q) => (q.description?.length > 250 ? 2 : 1),
-  fetcher: async () => {
-    console.log(`Platform Guesstimate doesn't have a fetcher, skipping`);
-    return null;
-  },
-};
+  calculateStars(q: FetchedQuestion) {
+    return q.description?.length > 250 ? 2 : 1;
+  }
+
+  // extra, guesstimate-specific methods
+  async fetchQuestion(id: number): Promise<Question> {
+    const response = await axios({ url: `${apiEndpoint}/spaces/${id}` });
+    const q = modelToQuestion(response.data);
+    return await upsertSingleQuestion(q);
+  }
+
+  async search(query: string): Promise<ElasticQuestion[]> {
+    const response = await axios({
+      url: searchEndpoint,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      data: `{"params":"query=${query.replace(
+        / /g,
+        "%20"
+      )}&hitsPerPage=20&page=0&getRankingInfo=true"}`,
+      method: "POST",
+    });
+
+    const models: any[] = response.data.hits;
+    const mappedModels: ElasticQuestion[] = models.map((model) => {
+      const q = modelToQuestion(model);
+      return questionToElasticDocument({
+        ...q,
+        fetched: new Date(),
+        firstSeen: new Date(),
+      });
+    });
+
+    // filter for duplicates. Surprisingly common.
+    const uniqueTitles: string[] = [];
+    const uniqueModels: ElasticQuestion[] = [];
+    for (let model of mappedModels) {
+      if (
+        !uniqueTitles.includes(model.title) &&
+        !model.title.includes("copy")
+      ) {
+        uniqueModels.push(model);
+        uniqueTitles.push(model.title);
+      }
+    }
+
+    return uniqueModels;
+  }
+}
+
+export const guesstimate = new Guesstimate();

@@ -3,7 +3,7 @@ import crypto from "crypto";
 
 import { prisma, Question } from "@quri/metaforecast-db";
 
-import { platformNameToLabel } from "../platforms/registry";
+import { platformNameToLabel } from "../platformRegistry";
 
 let _CACHED_CLIENT: ElasticClient | null = null;
 function getClient() {

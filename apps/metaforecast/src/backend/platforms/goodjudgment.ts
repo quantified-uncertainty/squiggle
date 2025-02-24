@@ -2,7 +2,6 @@
 import axios from "axios";
 import { tabletojson } from "tabletojson";
 
-import { average } from "../../utils";
 import { FetchedQuestion, Platform } from "../types";
 import { hash } from "../utils/hash";
 
@@ -15,7 +14,7 @@ export const goodjudgment: Platform = {
   name: platformName,
   label: "Good Judgment",
   color: "#7d4f1b",
-  version: "v1",
+
   async fetcher() {
     // Proxy fuckery
     // let proxy;
@@ -116,14 +115,10 @@ export const goodjudgment: Platform = {
       "Note that failing is not unexpected; see utils/pullSuperforecastsManually.sh/js"
     );
 
-    return results;
+    return { questions: results };
   },
-  calculateStars(data) {
-    let nuno = () => 4;
-    let eli = () => 4;
-    let misha = () => 3.5;
-    let starsDecimal = average([nuno()]); // , eli(), misha()])
-    let starsInteger = Math.round(starsDecimal);
-    return starsInteger;
+
+  calculateStars() {
+    return 4; // Nuño
   },
 };

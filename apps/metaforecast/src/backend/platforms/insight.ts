@@ -344,14 +344,14 @@ async function processPredictions(predictions : any[]) {
   return results; // resultsProcessed
 }
 */
-/* Body */
+
 export const insight: Platform = {
   name: platformName,
   label: "Insight Prediction",
   color: "#ff0000",
-  version: "v1",
+
   async fetcher() {
-    return []; // insight API seems down.
+    return { questions: [] }; // insight API seems down.
     /*
     let bearer = process.env.INSIGHT_BEARER;
     if (!!bearer) {
@@ -364,6 +364,7 @@ export const insight: Platform = {
     // let results: FetchedQuestion[] = []; // await processPredictions(data); // somehow needed
     // return results;
   },
+
   calculateStars(data) {
     let nuno = () => {
       if ((data.qualityindicators.volume || 0) > 10000) {

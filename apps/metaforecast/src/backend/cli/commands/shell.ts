@@ -2,7 +2,7 @@ import { Command } from "@commander-js/extra-typings";
 import { select, Separator } from "@inquirer/prompts";
 
 import { rebuildFrontpage } from "@/backend/frontpage";
-import { getPlatforms } from "@/backend/platforms/registry";
+import { getPlatforms } from "@/backend/platformRegistry";
 import { processPlatform } from "@/backend/robot";
 import { rebuildElasticDatabase } from "@/backend/utils/elastic";
 

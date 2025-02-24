@@ -83,8 +83,6 @@ export const manifold: Platform = {
   name: platformName,
   label: "Manifold Markets",
   color: "#793466",
-  version: "v1",
-
   extendCliCommand(command) {
     command
       .command("fetch-one")
@@ -108,7 +106,7 @@ export const manifold: Platform = {
     const data = await fetchAllMarketsLite();
     const results = processPredictions(data); // somehow needed
     showStatistics(results);
-    return results;
+    return { questions: results };
   },
 
   calculateStars(data) {

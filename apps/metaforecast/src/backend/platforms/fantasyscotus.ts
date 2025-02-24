@@ -6,11 +6,11 @@ import { FetchedQuestion, Platform } from "../types";
 const platformName = "fantasyscotus";
 
 /* Definitions */
-let unixtime = new Date().getTime();
-let endpoint = `https://fantasyscotus.net/case/list/?filterscount=0&groupscount=0&pagenum=0&pagesize=20&recordstartindex=0&recordendindex=12&_=${unixtime}`;
+const unixtime = new Date().getTime();
+const endpoint = `https://fantasyscotus.net/case/list/?filterscount=0&groupscount=0&pagenum=0&pagesize=20&recordstartindex=0&recordendindex=12&_=${unixtime}`;
 
 async function fetchData() {
-  let response = await axios({
+  const response = await axios({
     method: "GET",
     url: endpoint,
     headers: {
@@ -30,9 +30,9 @@ async function fetchData() {
 }
 
 async function getPredictionsData(caseUrl: string) {
-  let newCaseUrl = `https://fantasyscotus.net/user-predictions${caseUrl}?filterscount=0&groupscount=0&sortdatafield=username&sortorder=asc&pagenum=0&pagesize=20&recordstartindex=0&recordendindex=20&_=${unixtime}`;
-  //console.log(newCaseUrl)
-  let predictions = await axios({
+  const newCaseUrl = `https://fantasyscotus.net/user-predictions${caseUrl}?filterscount=0&groupscount=0&sortdatafield=username&sortorder=asc&pagenum=0&pagesize=20&recordstartindex=0&recordendindex=20&_=${unixtime}`;
+
+  const predictions = await axios({
     method: "GET",
     url: newCaseUrl,
     headers: {
@@ -48,11 +48,9 @@ async function getPredictionsData(caseUrl: string) {
     // mode: "cors",
   }).then((res) => res.data);
 
-  let predictionsAffirm = predictions.filter(
+  const predictionsAffirm = predictions.filter(
     (prediction: any) => prediction.percent_affirm > 50
   );
-  //console.log(predictions)
-  //console.log(predictionsAffirm.length/predictions.length)
 
   return {
     numAffirm: predictionsAffirm.length,
@@ -62,11 +60,12 @@ async function getPredictionsData(caseUrl: string) {
 }
 
 async function processData(data: any) {
-  let events = data.object_list;
-  let historicalPercentageCorrect = data.stats.pcnt_correct;
-  let historicalProbabilityCorrect =
+  const events = data.object_list;
+  const historicalPercentageCorrect = data.stats.pcnt_correct;
+  const historicalProbabilityCorrect =
     Number(historicalPercentageCorrect.replace("%", "")) / 100;
-  let results: FetchedQuestion[] = [];
+
+  const results: FetchedQuestion[] = [];
   for (let event of events) {
     if (event.accuracy == "") {
       let id = `${platformName}-${event.id}`;
@@ -108,18 +107,18 @@ async function processData(data: any) {
   return results;
 }
 
-/* Body */
 export const fantasyscotus: Platform = {
   name: platformName,
   label: "FantasySCOTUS",
   color: "#231149",
-  version: "v1",
+
   async fetcher() {
-    let rawData = await fetchData();
-    let results = await processData(rawData);
-    return results;
+    const rawData = await fetchData();
+    const questions = await processData(rawData);
+    return { questions };
   },
-  calculateStars(data) {
+
+  calculateStars() {
     return 2;
   },
 };

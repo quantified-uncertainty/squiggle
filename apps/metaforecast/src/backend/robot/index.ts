@@ -52,11 +52,15 @@ type SaveStats = {
   deleted?: number;
 };
 
-export async function saveQuestions(
-  platform: Platform,
-  fetchedQuestions: FetchedQuestion[],
-  partial: boolean
-): Promise<SaveStats> {
+export async function saveQuestions({
+  platform,
+  fetchedQuestions,
+  partial,
+}: {
+  platform: Platform;
+  fetchedQuestions: FetchedQuestion[];
+  partial?: boolean;
+}): Promise<SaveStats> {
   // Bulk update, optimized for performance.
 
   const oldQuestions = await prisma.question.findMany({
@@ -129,24 +133,25 @@ export async function processPlatform(platform: Platform) {
     console.log(`Platform ${platform.name} doesn't have a fetcher, skipping`);
     return;
   }
-  const result =
-    platform.version === "v1"
-      ? { questions: await platform.fetcher(), partial: false } // this is not exactly PlatformFetcherV2Result, since `questions` can be null
-      : await platform.fetcher();
+  const result = await platform.fetcher();
 
   if (!result) {
     console.log(`Platform ${platform.name} didn't return any results`);
     return;
   }
 
-  const { questions: fetchedQuestions, partial } = result;
+  const { questions, partial } = result;
 
-  if (!fetchedQuestions || !fetchedQuestions.length) {
+  if (!questions || !questions.length) {
     console.log(`Platform ${platform.name} didn't return any results`);
     return;
   }
 
-  const stats = await saveQuestions(platform, fetchedQuestions, partial);
+  const stats = await saveQuestions({
+    platform,
+    fetchedQuestions: questions,
+    partial,
+  });
 
   console.log(
     "Done, " +

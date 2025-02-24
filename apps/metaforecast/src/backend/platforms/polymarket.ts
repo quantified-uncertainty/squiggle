@@ -65,16 +65,16 @@ export const polymarket: Platform = {
   name: platformName,
   label: "PolyMarket",
   color: "#00314e",
-  version: "v1",
+
   async fetcher() {
-    let results: FetchedQuestion[] = [];
-    let strapi_matic_items = await fetchFromStrapiMaticEndpoint();
-    for (let strapi_matic_item of strapi_matic_items) {
+    const results: FetchedQuestion[] = [];
+    const strapi_matic_items = await fetchFromStrapiMaticEndpoint();
+    for (const strapi_matic_item of strapi_matic_items) {
       // metaforecast id, using mm address for backwards compatibility
       if (verbose) console.log(strapi_matic_item.id);
-      let address = strapi_matic_item.marketMakerAddress;
-      let addressLowerCase = address.toLowerCase();
-      let metaforecast_id = `${platformName}-${addressLowerCase.slice(0, 10)}`;
+      const address = strapi_matic_item.marketMakerAddress;
+      const addressLowerCase = address.toLowerCase();
+      const metaforecast_id = `${platformName}-${addressLowerCase.slice(0, 10)}`;
 
       if (
         strapi_matic_item.outcomes[0] != "Long" &&
@@ -126,8 +126,8 @@ export const polymarket: Platform = {
       }
     }
     if (verbose) console.log(results);
-    // return [];
-    return results;
+
+    return { questions: results };
   },
   calculateStars(data) {
     // let nuno = (data) => (data.volume > 10000 ? 4 : data.volume > 1000 ? 3 : 2);
@@ -137,7 +137,7 @@ export const polymarket: Platform = {
     const liquidity = Number(data.qualityindicators.liquidity) || 0;
     const volume = Number(data.qualityindicators.tradevolume) || 0;
 
-    let nuno = () =>
+    const nuno = () =>
       liquidity > 1000 && volume > 10000
         ? 4
         : liquidity > 500 && volume > 1000
@@ -156,7 +156,7 @@ export const polymarket: Platform = {
       starsDecimal = starsDecimal - 1;
     }
 
-    let starsInteger = Math.round(starsDecimal);
+    const starsInteger = Math.round(starsDecimal);
     return starsInteger;
   },
 };

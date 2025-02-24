@@ -1,6 +1,5 @@
 import api from "api";
 
-import { average } from "../../utils";
 import { Platform } from "../types";
 
 const kalshi_api = api("@trading-api/v2.0#13mtbs10lc863irx");
@@ -104,24 +103,22 @@ export const kalshi: Platform = {
   name: platformName,
   label: "Kalshi",
   color: "#615691",
-  version: "v1",
+
   fetcher: async function () {
     // let markets = await fetchAllMarkets();
     // console.log(markets)
-    return [];
+    return { questions: [] };
   },
+
   calculateStars(data) {
-    let nuno = () =>
+    const nuno = () =>
       ((data.extra as any)?.open_interest || 0) > 500 &&
       data.qualityindicators.shares_volume > 10000
         ? 4
         : data.qualityindicators.shares_volume > 2000
           ? 3
           : 2;
-    // let eli = (data) => data.interest > 10000 ? 5 : 4
-    // let misha = (data) => 4
-    let starsDecimal = average([nuno()]);
-    // , eli(data), misha(data)])
+    let starsDecimal = nuno();
 
     // Substract 1 star if probability is above 90% or below 10%
     if (
@@ -133,7 +130,7 @@ export const kalshi: Platform = {
       starsDecimal = starsDecimal - 1;
     }
 
-    let starsInteger = Math.round(starsDecimal);
+    const starsInteger = Math.round(starsDecimal);
     return starsInteger;
   },
 };

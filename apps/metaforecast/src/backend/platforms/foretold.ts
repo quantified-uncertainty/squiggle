@@ -1,15 +1,14 @@
 /* Imports */
 import axios from "axios";
 
-import { average } from "../../utils";
 import { FetchedQuestion, Platform } from "../types";
 
 /* Definitions */
 
 const platformName = "foretold";
 
-let graphQLendpoint = "https://api.foretold.io/graphql";
-let highQualityCommunities = [
+const graphQLendpoint = "https://api.foretold.io/graphql";
+const highQualityCommunities = [
   "0104d8e8-07e4-464b-8b32-74ef22b49f21",
   "c47c6bc8-2c9b-4a83-9583-d1ed80a40fa2",
   "cf663021-f87f-4632-ad82-962d889a2d39",
@@ -62,10 +61,10 @@ export const foretold: Platform = {
   name: platformName,
   label: "Foretold",
   color: "#62520b",
-  version: "v1",
+
   async fetcher() {
-    let results: FetchedQuestion[] = [];
-    for (let community of highQualityCommunities) {
+    const results: FetchedQuestion[] = [];
+    for (const community of highQualityCommunities) {
       let questions = await fetchAllCommunityQuestions(community);
       questions = questions.map((question) => question.node);
       questions = questions.filter((question) => question.previousAggregate); // Questions without any predictions
@@ -106,14 +105,10 @@ export const foretold: Platform = {
         results.push(result);
       });
     }
-    return results;
+    return { questions: results };
   },
-  calculateStars(data) {
-    let nuno = () => 2;
-    let eli = () => null;
-    let misha = () => null;
-    let starsDecimal = average([nuno()]); //, eli(), misha()])
-    let starsInteger = Math.round(starsDecimal);
-    return starsInteger;
+
+  calculateStars() {
+    return 2; // Nuño
   },
 };
