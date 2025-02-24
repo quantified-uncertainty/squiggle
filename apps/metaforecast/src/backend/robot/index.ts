@@ -32,6 +32,16 @@ export function prepareQuestion(
   };
 }
 
+async function updateHistory(questions: PreparedQuestion[]) {
+  // TODO - check for duplicates
+  await prisma.history.createMany({
+    data: questions.map((q) => ({
+      ...q,
+      idref: q.id,
+    })),
+  });
+}
+
 export async function upsertSingleQuestion(
   q: PreparedQuestion
 ): Promise<Question> {
@@ -64,9 +74,8 @@ export async function saveQuestions({
   // Bulk update, optimized for performance.
 
   const oldQuestions = await prisma.question.findMany({
-    where: {
-      platform: platform.name,
-    },
+    where: { platform: platform.name },
+    select: { id: true },
   });
 
   const fetchedIds = fetchedQuestions.map((q) => q.id);
@@ -79,9 +88,14 @@ export async function saveQuestions({
   const updatedQuestions: PreparedQuestion[] = [];
   const deletedIds = oldIds.filter((id) => !fetchedIdsSet.has(id));
 
-  for (const q of fetchedQuestions.map((q) => prepareQuestion(q, platform))) {
+  const preparedQuestions = fetchedQuestions.map((q) =>
+    prepareQuestion(q, platform)
+  );
+
+  // Sort questions into "created" and "updated" lists.
+  for (const q of preparedQuestions) {
     if (oldIdsSet.has(q.id)) {
-      // TODO - check if question has changed for better performance
+      // TODO - check if question has changed for better performance; bulk selects are faster than one-by-one updates.
       updatedQuestions.push(q);
     } else {
       createdQuestions.push(q);
@@ -102,6 +116,7 @@ export async function saveQuestions({
     await prisma.question.update({
       where: { id: q.id },
       data: q,
+      select: { id: true }, // not possible to select nothing, https://github.com/prisma/prisma/issues/6252
     });
     stats.updated ??= 0;
     stats.updated++;
@@ -110,20 +125,13 @@ export async function saveQuestions({
   if (!partial) {
     await prisma.question.deleteMany({
       where: {
-        id: {
-          in: deletedIds,
-        },
+        id: { in: deletedIds },
       },
     });
     stats.deleted = deletedIds.length;
   }
 
-  await prisma.history.createMany({
-    data: [...createdQuestions, ...updatedQuestions].map((q) => ({
-      ...q,
-      idref: q.id,
-    })),
-  });
+  await updateHistory([...createdQuestions, ...updatedQuestions]);
 
   return stats;
 }
