@@ -1,19 +1,26 @@
+import { FC } from "react";
+
 import { QuestionWithHistoryFragment } from "../../fragments.generated";
 import { HistoryChart } from "./HistoryChart";
 
-type Props = {
+export const QuestionChartOrVisualization: FC<{
   question: QuestionWithHistoryFragment;
-};
+}> = ({ question }) => {
+  if (question.platform.id === "guesstimate" && question.visualization) {
+    return (
+      <a className="no-underline" href={question.url} target="_blank">
+        <img
+          className="rounded-sm"
+          src={question.visualization}
+          alt="Guesstimate Screenshot"
+        />
+      </a>
+    );
+  }
 
-export const QuestionChartOrVisualization: React.FC<Props> = ({ question }) =>
-  question.platform.id === "guesstimate" && question.visualization ? (
-    <a className="no-underline" href={question.url} target="_blank">
-      <img
-        className="rounded-sm"
-        src={question.visualization}
-        alt="Guesstimate Screenshot"
-      />
-    </a>
-  ) : question.options.length > 0 ? (
-    <HistoryChart question={question} />
-  ) : null; /* Don't display chart if there are no options, for now. */
+  if (question.options.length > 0) {
+    return <HistoryChart question={question} />;
+  }
+
+  return null; /* Don't display chart if there are no options, for now. */
+};
