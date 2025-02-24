@@ -72,18 +72,21 @@ model Question {
 }
 
 model History {
-  id                String
-  idref             String?
-  question          Question? @relation(fields: [idref], references: [id], onDelete: SetNull, onUpdate: Restrict)
+  // short primary key
+  pk Int @id @default(autoincrement())
+
+  id       String // original id
+  idref    String? // ref id to the question; we need both ids, because questions can be removed
+  question Question? @relation(fields: [idref], references: [id], onDelete: SetNull, onUpdate: Restrict)
+
   title             String
   url               String
   platform          String
   description       String
   options           Json
-  fetched           DateTime  @db.Timestamp(6)
+  fetched           DateTime @db.Timestamp(6)
   qualityindicators Json
   extra             Json
-  pk                Int       @id @default(autoincrement())
 
   @@index([id])
   @@index([platform])
