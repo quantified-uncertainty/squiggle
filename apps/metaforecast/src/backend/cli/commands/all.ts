@@ -1,6 +1,6 @@
 import { Command } from "@commander-js/extra-typings";
 
-import { getPlatforms } from "@/backend/platforms/registry";
+import { getPlatforms } from "@/backend/platformRegistry";
 import { processPlatform } from "@/backend/robot";
 import { rebuildElasticDatabase } from "@/backend/utils/elastic";
 

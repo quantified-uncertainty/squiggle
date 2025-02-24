@@ -55,6 +55,8 @@ export type Platform = {
   calculateStars: (question: FetchedQuestion) => number;
   // extended commander configuration, e.g. subcommands
   extendCliCommand?: (command: Command) => void;
+
+  // fetchers are optional
   fetcher?: PlatformFetcher;
 };
 

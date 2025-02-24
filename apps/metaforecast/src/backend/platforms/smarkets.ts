@@ -1,7 +1,6 @@
 import axios from "axios";
 
 import { QuestionOption } from "../../common/types";
-import { average } from "../../utils";
 import { saveQuestions } from "../robot";
 import { FetchedQuestion, Platform } from "../types";
 
@@ -214,12 +213,7 @@ export const smarkets: Platform = {
     return { questions };
   },
 
-  calculateStars(data) {
-    const nuno = () => 2;
-    const eli = () => null;
-    const misha = () => null;
-    const starsDecimal = average([nuno()]); //, eli(), misha()])
-    const starsInteger = Math.round(starsDecimal);
-    return starsInteger;
+  calculateStars() {
+    return 2; // Nuño
   },
 };

@@ -1,6 +1,6 @@
 import { prisma } from "@quri/metaforecast-db";
 
-import { getPlatforms } from "../../backend/platforms/registry";
+import { getPlatforms } from "../../backend/platformRegistry";
 import { builder } from "../builder";
 
 export const PlatformObj = builder.objectRef<string>("Platform").implement({

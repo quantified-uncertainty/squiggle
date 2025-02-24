@@ -1,7 +1,6 @@
 import axios from "axios";
 import { JSDOM } from "jsdom";
 
-import { average } from "../../utils";
 import { FetchedQuestion, Platform } from "../types";
 import toMarkdown from "../utils/toMarkdown";
 
@@ -9,7 +8,7 @@ const platformName = "rootclaim";
 const jsonEndpoint =
   "https://live-rootclaim-backend.herokuapp.com/analysis/public-list?limit=1000&offset=0";
 
-const fetchAllRootclaims = async () => {
+async function fetchAllRootclaims() {
   console.log(`Fetching ${jsonEndpoint}`);
   const response = await axios
     .get(jsonEndpoint)
@@ -20,9 +19,9 @@ const fetchAllRootclaims = async () => {
     throw new Error("Expected result.main_page_stories field in API response");
   }
   return claims;
-};
+}
 
-const fetchDescription = async (url: string, isclaim: boolean) => {
+async function fetchDescription(url: string, isclaim: boolean) {
   console.log(`Fetching description for ${url}`);
   const response = await axios.get(url).then((response) => response.data);
 
@@ -42,21 +41,22 @@ const fetchDescription = async (url: string, isclaim: boolean) => {
     throw new Error(`Couldn't find description for page ${url}`);
   }
   return info;
-};
+}
 
 export const rootclaim: Platform = {
   name: platformName,
   label: "Rootclaim",
   color: "#0d1624",
+
   async fetcher() {
     const claims = await fetchAllRootclaims();
-    const results: FetchedQuestion[] = [];
+    const questions: FetchedQuestion[] = [];
 
     for (const claim of claims) {
       const id = `${platformName}-${claim.slug.toLowerCase()}`;
 
-      let options: FetchedQuestion["options"] = [];
-      for (let scenario of claim.scenarios) {
+      const options: FetchedQuestion["options"] = [];
+      for (const scenario of claim.scenarios) {
         options.push({
           name: toMarkdown(scenario.name || scenario.text)
             .replace("\n", "")
@@ -66,12 +66,12 @@ export const rootclaim: Platform = {
         });
       }
 
-      let claimUrlPath = claim.isclaim ? "claims" : "analysis";
+      const claimUrlPath = claim.isclaim ? "claims" : "analysis";
       const url = `https://www.rootclaim.com/${claimUrlPath}/${claim.slug}`;
 
       const description = await fetchDescription(url, claim.isclaim);
 
-      let obj: FetchedQuestion = {
+      const obj: FetchedQuestion = {
         id,
         title: toMarkdown(claim.question).replace("\n", ""),
         url,
@@ -81,16 +81,12 @@ export const rootclaim: Platform = {
           numforecasts: 1,
         },
       };
-      results.push(obj);
+      questions.push(obj);
     }
-    return { questions: results };
+    return { questions };
   },
-  calculateStars(data) {
-    let nuno = () => 4;
-    let eli = () => null;
-    let misha = () => null;
-    let starsDecimal = average([nuno() /*, eli(data), misha(data)*/]);
-    let starsInteger = Math.round(starsDecimal);
-    return starsInteger;
+
+  calculateStars() {
+    return 4; // Nuño
   },
 };

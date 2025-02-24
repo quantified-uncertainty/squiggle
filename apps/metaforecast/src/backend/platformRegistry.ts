@@ -1,22 +1,22 @@
-import { Platform, PlatformConfig } from "../types";
-import { betfair } from "./betfair";
-import { fantasyscotus } from "./fantasyscotus";
-import { foretold } from "./foretold";
-import { givewellopenphil } from "./givewellopenphil";
-import { goodjudgment } from "./goodjudgment";
-import { goodjudgmentopen } from "./goodjudgmentopen";
-import { guesstimate } from "./guesstimate";
-import { infer } from "./infer";
-import { insight } from "./insight";
-import { kalshi } from "./kalshi";
-import { manifold } from "./manifold";
-import { metaculus } from "./metaculus";
-import { polymarket } from "./polymarket";
-import { predictit } from "./predictit";
-import { rootclaim } from "./rootclaim";
-import { smarkets } from "./smarkets";
-import { wildeford } from "./wildeford";
-import { xrisk } from "./xrisk";
+import { betfair } from "./platforms/betfair";
+import { fantasyscotus } from "./platforms/fantasyscotus";
+import { foretold } from "./platforms/foretold";
+import { givewellopenphil } from "./platforms/givewellopenphil";
+import { goodjudgment } from "./platforms/goodjudgment";
+import { goodjudgmentopen } from "./platforms/goodjudgmentopen";
+import { guesstimate } from "./platforms/guesstimate";
+import { infer } from "./platforms/infer";
+import { insight } from "./platforms/insight";
+import { kalshi } from "./platforms/kalshi";
+import { manifold } from "./platforms/manifold";
+import { metaculus } from "./platforms/metaculus";
+import { polymarket } from "./platforms/polymarket";
+import { predictit } from "./platforms/predictit";
+import { rootclaim } from "./platforms/rootclaim";
+import { smarkets } from "./platforms/smarkets";
+import { wildeford } from "./platforms/wildeford";
+import { xrisk } from "./platforms/xrisk";
+import { Platform, PlatformConfig } from "./types";
 
 // function instead of const array, this helps with circular dependencies
 export function getPlatforms(): Platform[] {

@@ -35,7 +35,6 @@ async function fetchmarketvolumes() {
   return response.data;
 }
 
-/* Body */
 export const predictit: Platform = {
   name: platformName,
   label: "PredictIt",
@@ -111,12 +110,13 @@ export const predictit: Platform = {
 
     return { questions: results };
   },
-  calculateStars(data) {
-    let nuno = () => 3;
-    let eli = () => 3.5;
-    let misha = () => 2.5;
-    let starsDecimal = average([nuno(), eli(), misha()]);
-    let starsInteger = Math.round(starsDecimal);
+
+  calculateStars() {
+    const nuno = () => 3;
+    const eli = () => 3.5;
+    const misha = () => 2.5;
+    const starsDecimal = average([nuno(), eli(), misha()]);
+    const starsInteger = Math.round(starsDecimal);
     return starsInteger;
   },
 };

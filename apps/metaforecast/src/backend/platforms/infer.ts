@@ -2,7 +2,6 @@
 import axios from "axios";
 
 import { FullQuestionOption } from "../../common/types";
-import { average } from "../../utils";
 import { FetchedQuestion, Platform } from "../types";
 import { applyIfSecretExists } from "../utils/getSecrets";
 import { measureTime } from "../utils/measureTime";
@@ -232,19 +231,14 @@ export const infer: Platform = {
   label: "Infer",
   color: "#223900",
   async fetcher() {
-    let cookie = process.env["INFER_COOKIE"]!;
+    const cookie = process.env["INFER_COOKIE"]!;
     const questions = await applyIfSecretExists(cookie, infer_inner);
     if (!questions) {
       return null;
     }
     return { questions };
   },
-  calculateStars(data) {
-    let nuno = () => 2;
-    let eli = () => null;
-    let misha = () => null;
-    let starsDecimal = average([nuno()]); //, eli(), misha()])
-    let starsInteger = Math.round(starsDecimal);
-    return starsInteger;
+  calculateStars() {
+    return 2; // Nuño
   },
 };

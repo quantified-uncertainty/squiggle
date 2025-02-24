@@ -1,7 +1,7 @@
 import React from "react";
 
 import { SearchDocument } from "@/app/(nav)/queries.generated";
-import { getPlatforms } from "@/backend/platforms/registry";
+import { getPlatforms } from "@/backend/platformRegistry";
 import { QuestionFragment } from "@/web/fragments.generated";
 import { QuestionCard } from "@/web/questions/components/QuestionCard";
 import { getUrqlRscClient } from "@/web/urql";

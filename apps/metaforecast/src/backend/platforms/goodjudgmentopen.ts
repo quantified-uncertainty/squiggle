@@ -228,6 +228,7 @@ export const goodjudgmentopen: Platform = {
   name: platformName,
   label: "Good Judgment Open",
   color: "#002455",
+
   async fetcher() {
     let cookie = process.env["GOODJUDGMENTOPENCOOKIE"]!;
     const questions = await applyIfSecretExists(cookie, goodjudgmentopen_inner);
@@ -236,18 +237,19 @@ export const goodjudgmentopen: Platform = {
     }
     return { questions };
   },
+
   calculateStars(data) {
-    let minProbability = Math.min(
+    const minProbability = Math.min(
       ...data.options.map((option) => option.probability || 0)
     );
-    let maxProbability = Math.max(
+    const maxProbability = Math.max(
       ...data.options.map((option) => option.probability || 0)
     );
 
-    let nuno = () =>
+    const nuno = () =>
       Number(data.qualityindicators.numforecasts || 0) > 100 ? 3 : 2;
-    let eli = () => 3;
-    let misha = () =>
+    const eli = () => 3;
+    const misha = () =>
       minProbability > 0.1 || maxProbability < 0.9 ? 3.1 : 2.5;
 
     let starsDecimal = average([nuno(), eli(), misha()]);

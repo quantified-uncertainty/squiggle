@@ -2,7 +2,6 @@
 import axios from "axios";
 import https from "https";
 
-import { average } from "../../utils";
 import { FetchedQuestion, Platform } from "../types";
 
 const platformName = "betfair";
@@ -141,17 +140,16 @@ export const betfair: Platform = {
   name: platformName,
   label: "Betfair",
   color: "#3d674a",
+
   async fetcher() {
     const data = await fetchPredictions();
     const results = await processPredictions(data);
     return { questions: results };
   },
+
   calculateStars(data) {
     const volume = data.qualityindicators.volume || 0;
-    let nuno = () => (volume > 10000 ? 4 : volume > 1000 ? 3 : 2);
-    let eli = () => (volume > 10000 ? null : null);
-    let misha = () => null;
-    let starsDecimal = average([nuno()]); //, eli(), misha()])
+    let starsDecimal = volume > 10000 ? 4 : volume > 1000 ? 3 : 2; // Nuño
 
     const firstOption = data.options[0];
 

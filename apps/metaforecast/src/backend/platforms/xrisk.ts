@@ -9,6 +9,7 @@ export const xrisk: Platform = {
   name: "xrisk",
   label: "X-risk estimates",
   color: "#272600",
+
   async fetcher() {
     // return; // not necessary to refill the DB every time
     let fileRaw = fs.readFileSync("./input/xrisk-questions.json", {
@@ -25,5 +26,8 @@ export const xrisk: Platform = {
     });
     return { questions: results };
   },
-  calculateStars: () => 2,
+
+  calculateStars() {
+    return 2;
+  },
 };

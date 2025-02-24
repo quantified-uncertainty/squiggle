@@ -2,7 +2,6 @@
 import axios from "axios";
 import fs from "fs";
 
-import { average } from "../../utils";
 import { Platform } from "../types";
 
 const platformName = "givewellopenphil";
@@ -18,8 +17,6 @@ async function fetchPage(url: string): Promise<string> {
   }).then((res) => res.data);
   return response;
 }
-
-/* Body */
 
 async function main1() {
   let rawdata = fs.readFileSync("./input/givewellopenphil-urls.txt");
@@ -68,6 +65,7 @@ export const givewellopenphil: Platform = {
   name: platformName,
   label: "GiveWell/OpenPhilanthropy",
   color: "#32407e",
+
   async fetcher() {
     // main1()
     return null; // not necessary to refill the DB every time
@@ -82,12 +80,8 @@ export const givewellopenphil: Platform = {
     }));
     return { questions: dataWithDate };
   },
+
   calculateStars(data) {
-    let nuno = () => 2;
-    let eli = () => null;
-    let misha = () => null;
-    let starsDecimal = average([nuno()]); //, eli(), misha()])
-    let starsInteger = Math.round(starsDecimal);
-    return starsInteger;
+    return 2; // Nuño
   },
 };

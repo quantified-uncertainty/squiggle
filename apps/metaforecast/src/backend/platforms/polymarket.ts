@@ -65,6 +65,7 @@ export const polymarket: Platform = {
   name: platformName,
   label: "PolyMarket",
   color: "#00314e",
+
   async fetcher() {
     const results: FetchedQuestion[] = [];
     const strapi_matic_items = await fetchFromStrapiMaticEndpoint();
@@ -136,7 +137,7 @@ export const polymarket: Platform = {
     const liquidity = Number(data.qualityindicators.liquidity) || 0;
     const volume = Number(data.qualityindicators.tradevolume) || 0;
 
-    let nuno = () =>
+    const nuno = () =>
       liquidity > 1000 && volume > 10000
         ? 4
         : liquidity > 500 && volume > 1000
@@ -155,7 +156,7 @@ export const polymarket: Platform = {
       starsDecimal = starsDecimal - 1;
     }
 
-    let starsInteger = Math.round(starsDecimal);
+    const starsInteger = Math.round(starsDecimal);
     return starsInteger;
   },
 };

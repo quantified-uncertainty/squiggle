@@ -59,11 +59,13 @@ export const example: Platform = {
   name: platformName,
   label: "Example platform",
   color: "#ff0000",
+
   async fetcher() {
     const data = await fetchData();
     const results = await processPredictions(data); // somehow needed
     return { questions: results };
   },
+
   calculateStars(data) {
     return 2;
   },

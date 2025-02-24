@@ -1,6 +1,6 @@
 import React from "react";
 
-import { getPlatforms, getPlatformsConfig } from "@/backend/platforms/registry";
+import { getPlatforms, getPlatformsConfig } from "@/backend/platformRegistry";
 
 import { searchParamsToQuery } from "./common";
 import { SearchForm } from "./SearchForm";
