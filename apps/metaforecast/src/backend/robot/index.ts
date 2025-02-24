@@ -149,7 +149,7 @@ export async function processPlatform(platform: Platform) {
     return;
   }
 
-  const { questions, partial } = result;
+  const { questions } = result;
 
   if (!questions || !questions.length) {
     console.log(`Platform ${platform.name} didn't return any results`);
@@ -159,7 +159,6 @@ export async function processPlatform(platform: Platform) {
   const stats = await saveQuestions({
     platform,
     fetchedQuestions: questions,
-    partial,
   });
 
   console.log(

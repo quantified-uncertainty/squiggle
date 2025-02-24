@@ -41,8 +41,6 @@ export type FetchedQuestion = Omit<
 // fetcher should return null if platform failed to fetch questions for some reason
 type PlatformFetcherResult = {
   questions: FetchedQuestion[];
-  // if partial is true then we won't cleanup old questions from the database; this is useful when manually invoking a fetcher with arguments for updating a single question
-  partial?: boolean;
 } | null;
 type PlatformFetcher = () => Promise<PlatformFetcherResult>;
 
