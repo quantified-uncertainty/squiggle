@@ -7,12 +7,13 @@ terraform {
 }
 
 resource "digitalocean_database_cluster" "main" {
-  name       = "postgres-green"
-  engine     = "pg"
-  size       = "db-s-1vcpu-1gb"
-  region     = "nyc1"
-  node_count = 1
-  version    = 14
+  name             = "postgres-green"
+  engine           = "pg"
+  size             = "db-s-1vcpu-2gb"
+  region           = "nyc1"
+  node_count       = 1
+  version          = 14
+  storage_size_mib = 50 * 1024
 }
 
 locals {
@@ -27,17 +28,6 @@ resource "digitalocean_project_resources" "main" {
   resources = [
     digitalocean_database_cluster.main.urn
   ]
-}
-
-resource "heroku_app" "backend" {
-  name   = "metaforecast-backend"
-  region = "us"
-
-  config_vars = local.generated_env
-
-  organization {
-    name = "quantified-uncertainty-researc"
-  }
 }
 
 resource "vercel_project" "main" {
