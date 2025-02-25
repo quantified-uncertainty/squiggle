@@ -33,13 +33,84 @@ export function prepareQuestion(
 }
 
 async function updateHistory(questions: PreparedQuestion[]) {
-  // TODO - check for duplicates
-  await prisma.history.createMany({
-    data: questions.map((q) => ({
-      ...q,
-      idref: q.id,
-    })),
+  if (questions.length === 0) return;
+
+  // Get all question IDs
+  const questionIds = questions.map((q) => q.id);
+
+  // Find the latest history entries for these questions
+  const latestHistoryEntries = await prisma.history.findMany({
+    where: {
+      id: { in: questionIds },
+    },
+    orderBy: {
+      fetched: "desc",
+    },
+    distinct: ["id"],
+    select: {
+      id: true,
+      pk: true,
+      fetched: true,
+    },
   });
+
+  // Create a map of question ID to latest history entry for quick lookup
+  const historyMap = new Map(
+    latestHistoryEntries.map((entry) => [entry.id, entry])
+  );
+
+  // Define a function to calculate the "bucket" for a timestamp
+  // Each bucket represents a 24-hour period since Unix epoch
+  const getBucket = (date: Date): number => {
+    return Math.floor(date.getTime() / (24 * 60 * 60 * 1000));
+  };
+
+  // Split questions into those needing new history entries and those that need updates
+  const questionsToCreate: PreparedQuestion[] = [];
+  const questionsToUpdate: Array<{
+    question: PreparedQuestion;
+    historyPk: number;
+  }> = [];
+
+  for (const q of questions) {
+    const latestEntry = historyMap.get(q.id);
+
+    if (!latestEntry || getBucket(latestEntry.fetched) < getBucket(q.fetched)) {
+      // Create new history entry if:
+      // 1. No previous history exists, or
+      // 2. The latest history entry is older than our threshold
+      questionsToCreate.push(q);
+    } else {
+      // Update existing history entry if it's recent
+      questionsToUpdate.push({ question: q, historyPk: latestEntry.pk });
+    }
+  }
+
+  // Create new history entries in bulk
+  if (questionsToCreate.length > 0) {
+    await prisma.history.createMany({
+      data: questionsToCreate.map((q) => ({
+        ...q,
+        idref: q.id,
+      })),
+    });
+  }
+
+  // Update existing history entries one by one
+  for (const { question, historyPk } of questionsToUpdate) {
+    await prisma.history.update({
+      where: { pk: historyPk },
+      data: {
+        ...question,
+        idref: question.id,
+      },
+    });
+  }
+
+  // Log the number of created and updated history entries
+  console.log(
+    `History updated: ${questionsToCreate.length} created, ${questionsToUpdate.length} updated`
+  );
 }
 
 export async function upsertSingleQuestion(
