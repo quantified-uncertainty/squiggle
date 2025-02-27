@@ -1,6 +1,11 @@
-import { FetchedQuestion, Platform } from "@/backend/types";
+import { z } from "zod";
 
-import { average } from "../../../utils";
+import { getPlatformState, setPlatformState } from "@/backend/platformUtils";
+import { saveQuestionsWithStats } from "@/backend/robot";
+import { FetchedQuestion, Platform } from "@/backend/types";
+import { QuestionOption } from "@/common/types";
+
+import { average, sum } from "../../../utils";
 import { fetchAllMarketsLite } from "./api";
 import { ManifoldLiteMarket } from "./apiSchema";
 import {
@@ -8,50 +13,53 @@ import {
   importSingleMarket,
 } from "./extended";
 
-/* Definitions */
 const platformName = "manifold";
 
-function showStatistics(results: FetchedQuestion[]) {
-  console.log(`Num unresolved markets: ${results.length}`);
-  const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
+function showStatistics(questions: FetchedQuestion[]) {
+  console.log(`Unresolved markets: ${questions.length}`);
 
-  const num2StarsOrMore = results.filter(
+  const num2StarsOrMore = questions.filter(
     (result) => manifold.calculateStars(result) >= 2
   );
 
   console.log(
     `Manifold has ${num2StarsOrMore.length} markets with 2 stars or more`
   );
-  console.log(
-    `Mean volume: ${
-      sum(results.map((result) => result.qualityindicators.volume7Days || 0)) /
-      results.length
-    }; mean pool: ${
-      sum(results.map((result) => result.qualityindicators.pool)) /
-      results.length
-    }`
-  );
+
+  if (questions.length > 0) {
+    console.log(
+      `Mean volume: ${
+        sum(
+          questions.map((question) => question.qualityindicators.volume || 0)
+        ) / questions.length
+      }; mean pool: ${
+        sum(
+          questions.map((question) =>
+            average(Object.values(question.qualityindicators.pool || {}))
+          )
+        ) / questions.length
+      }`
+    );
+  }
 }
 
-function processPredictions(
-  predictions: ManifoldLiteMarket[]
-): FetchedQuestion[] {
-  const results: FetchedQuestion[] = predictions
+function marketsToQuestions(markets: ManifoldLiteMarket[]): FetchedQuestion[] {
+  const questions: FetchedQuestion[] = markets
     .filter(
       (
-        p
-      ): p is ManifoldLiteMarket & {
+        market
+      ): market is ManifoldLiteMarket & {
         probability: NonNullable<ManifoldLiteMarket["probability"]>;
-      } => p.isResolved && p.probability !== undefined
+      } => market.isResolved && market.probability !== undefined
     )
-    .map((prediction) => {
-      const id = `${platformName}-${prediction.id}`;
-      const probability = prediction.probability;
+    .map((market) => {
+      const id = `${platformName}-${market.id}`;
+      const probability = market.probability;
 
-      const options: FetchedQuestion["options"] = [
+      const options: QuestionOption[] = [
         {
           name: "Yes",
-          probability: probability,
+          probability,
           type: "PROBABILITY",
         },
         {
@@ -63,23 +71,24 @@ function processPredictions(
 
       const result: FetchedQuestion = {
         id,
-        title: prediction.question,
-        url: prediction.url,
+        title: market.question,
+        url: market.url,
         description: "", // TODO - fetch FullMarket and decode from JSON
         options,
         qualityindicators: {
-          createdTime: prediction.createdTime,
-          volume24Hours: prediction.volume24Hours,
-          pool: prediction.pool, // normally liquidity, but I don't actually want to show it.
+          createdTime: market.createdTime,
+          volume24Hours: market.volume24Hours,
+          volume: market.volume,
+          pool: market.pool, // normally liquidity, but I don't actually want to show it.
         },
       };
       return result;
     });
 
-  return results;
+  return questions;
 }
 
-export const manifold: Platform = {
+export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
   name: platformName,
   label: "Manifold Markets",
   color: "#793466",
@@ -100,25 +109,51 @@ export const manifold: Platform = {
       .action(async (filename) => {
         await importMarketsFromJsonArchiveFile(filename);
       });
+
+    command.command("fetch-new").action(async () => {
+      const state = await getPlatformState(this);
+      const upToUpdatedTime = state?.lastFetched
+        ? new Date(state.lastFetched)
+        : new Date(Date.now() - 1000 * 60 * 60 * 24); // 1 day ago
+
+      const liteMarkets = await fetchAllMarketsLite({
+        upToUpdatedTime,
+      });
+      const questions = marketsToQuestions(liteMarkets);
+      showStatistics(questions);
+      await saveQuestionsWithStats(this, questions);
+
+      // take the first market - they're sorted by lastUpdatedTime
+      const lastUpdatedTime = liteMarkets.at(0)?.lastUpdatedTime;
+      if (lastUpdatedTime) {
+        await setPlatformState(this, {
+          lastFetched: lastUpdatedTime.getTime(),
+        });
+      }
+    });
   },
 
   async fetcher() {
-    const data = await fetchAllMarketsLite();
-    const results = processPredictions(data); // somehow needed
-    showStatistics(results);
-    return { questions: results };
+    const liteMarkets = await fetchAllMarketsLite();
+    const questions = marketsToQuestions(liteMarkets);
+    showStatistics(questions);
+    return { questions };
   },
 
   calculateStars(data) {
-    const nuno = () =>
+    // Nuño
+    if (
       (data.qualityindicators.volume24Hours || 0) > 100 ||
       ((data.qualityindicators.pool || 0) > 500 &&
         (data.qualityindicators.volume24Hours || 0) > 50)
-        ? 2
-        : 1;
-
-    const starsDecimal = average([nuno()]);
-    const starsInteger = Math.round(starsDecimal);
-    return starsInteger;
+    ) {
+      return 2;
+    } else {
+      return 1;
+    }
   },
+
+  stateSchema: z.object({
+    lastFetched: z.number(), // timestamp
+  }),
 };

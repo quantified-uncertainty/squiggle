@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { fetchJson } from "@/backend/utils/fetchUtils";
+
 import {
   fullMarketSchema,
   groupSchema,
@@ -12,54 +14,62 @@ import {
 // See https://docs.manifold.markets/api
 const ENDPOINT = "https://api.manifold.markets/v0";
 
-async function fetchPage(endpoint: string): Promise<unknown> {
-  const response = await fetch(endpoint);
-  return response.json();
-}
-
 const v0MarketsSchema = z.array(liteMarketSchema);
 
-export async function fetchAllMarketsLite(): Promise<ManifoldLiteMarket[]> {
+export async function fetchAllMarketsLite({
+  upToUpdatedTime,
+}: {
+  upToUpdatedTime?: Date;
+} = {}): Promise<ManifoldLiteMarket[]> {
   const endpoint = `${ENDPOINT}/markets`;
+
   let lastId = "";
-  let end = false;
-  const allData = [];
+  const allMarkets: ManifoldLiteMarket[] = [];
   let counter = 1;
-  while (!end) {
-    const url = lastId ? `${endpoint}?before=${lastId}` : endpoint;
-    console.log(`Query #${counter}: ${url}`);
-    const newData = await fetchPage(url);
-
-    const parsedData = v0MarketsSchema.parse(newData);
-
-    allData.push(...parsedData);
-    const hasReachedEnd =
-      parsedData.length == 0 ||
-      parsedData[parsedData.length - 1] == undefined ||
-      parsedData[parsedData.length - 1].id == undefined;
-
-    if (!hasReachedEnd) {
-      lastId = parsedData[parsedData.length - 1].id;
-    } else {
-      end = true;
+  while (1) {
+    const url = new URL(endpoint);
+    url.searchParams.set("sort", "updated-time");
+    if (lastId) {
+      url.searchParams.set("before", lastId);
     }
+    console.log(`Query #${counter}: ${url}`);
+
+    const json = await fetchJson(url.toString());
+    const markets = v0MarketsSchema.parse(json);
+
+    let filteredMarkets = markets;
+    if (upToUpdatedTime) {
+      filteredMarkets = markets.filter(
+        (market) => market.lastUpdatedTime! >= upToUpdatedTime // keep only the markets that were updated after upToUpdatedTime
+      );
+    }
+
+    if (filteredMarkets.length === 0) {
+      break;
+    }
+
+    allMarkets.push(...filteredMarkets);
+    console.log(
+      `Total: ${allMarkets.length}, added: ${filteredMarkets.length}`
+    );
+
+    lastId = markets[markets.length - 1].id;
     counter = counter + 1;
-    console.log(`Total: ${allData.length}`);
   }
-  return allData;
+  return allMarkets;
 }
 
 export async function fetchFullMarket(
   marketId: string
 ): Promise<ManifoldFullMarket> {
   const endpoint = `${ENDPOINT}/market/${marketId}`;
-  const data = await fetchPage(endpoint);
+  const data = await fetchJson(endpoint);
   return fullMarketSchema.parse(data);
 }
 
 export async function fetchGroup(slug: string): Promise<ManifoldGroup> {
   console.log(`Fetching group ${slug}`);
   const endpoint = `${ENDPOINT}/group/${slug}`;
-  const data = await fetchPage(endpoint);
+  const data = await fetchJson(endpoint);
   return groupSchema.parse(data);
 }

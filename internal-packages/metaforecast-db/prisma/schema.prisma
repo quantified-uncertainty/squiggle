@@ -14,18 +14,6 @@ datasource db {
   url      = env("METAFORECAST_DB_URL")
 }
 
-model Dashboard {
-  id          String   @id
-  title       String
-  description String
-  contents    Json
-  timestamp   DateTime @db.Timestamp(6)
-  creator     String
-  extra       Json
-
-  @@map("dashboards")
-}
-
 model Question {
   /// E.g. "fantasyscotus-580"
   id          String @id
@@ -95,12 +83,33 @@ model History {
   @@map("history")
 }
 
+model PlatformState {
+  platform String @id
+  state    Json
+
+  @@map("platform_state")
+}
+
+model Dashboard {
+  id          String   @id
+  title       String
+  description String
+  contents    Json
+  timestamp   DateTime @db.Timestamp(6)
+  creator     String
+  extra       Json
+
+  @@map("dashboards")
+}
+
 model FrontpageId {
   question Question @relation(fields: [id], references: [id], onDelete: Cascade)
   id       String   @unique
 }
 
-// Manifold-specific tables
+// ****************************** Platform-specific tables ******************************
+
+// *************** Manifold-specific tables ***************
 
 enum ManifoldToken {
   MANA

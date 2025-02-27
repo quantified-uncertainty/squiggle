@@ -222,14 +222,21 @@ export async function processPlatform(platform: Platform) {
 
   const { questions } = result;
 
-  if (!questions || !questions.length) {
+  await saveQuestionsWithStats(platform, questions);
+}
+
+export async function saveQuestionsWithStats(
+  platform: Platform,
+  fetchedQuestions: FetchedQuestion[]
+) {
+  if (!fetchedQuestions.length) {
     console.log(`Platform ${platform.name} didn't return any results`);
     return;
   }
 
   const stats = await saveQuestions({
     platform,
-    fetchedQuestions: questions,
+    fetchedQuestions,
   });
 
   console.log(
