@@ -84,28 +84,21 @@ Judge on a curve, where a 5 represents the median expectation.`,
 
 export type Criterion = keyof typeof CRITERIA;
 
+type EvaluatorConfig = {
+  anthropicApiKey: string;
+  llmModel: string; // Default model to use
+  runsPerSubmission: number; // Number of runs to average (default 3)
+};
+
 // Class for evaluating Fermi model submissions
 export class FermiContestEvaluator {
-  private anthropicClient?: Anthropic;
+  private anthropicClient: Anthropic;
 
-  constructor(
-    private config: {
-      anthropicApiKey?: string;
-      llmModel?: string; // Default model to use
-      runsPerSubmission?: number; // Number of runs to average (default 3)
-    } = {}
-  ) {
-    // Initialize Anthropic client if API key is provided
-    if (config.anthropicApiKey) {
-      this.anthropicClient = new Anthropic({
-        apiKey: config.anthropicApiKey,
-      });
-    }
-
-    // Default to 3 runs per submission if not specified
-    if (!config.runsPerSubmission) {
-      this.config.runsPerSubmission = 3;
-    }
+  constructor(private config: EvaluatorConfig) {
+    // Initialize Anthropic client
+    this.anthropicClient = new Anthropic({
+      apiKey: config.anthropicApiKey,
+    });
   }
 
   // Main evaluation function
@@ -135,7 +128,7 @@ export class FermiContestEvaluator {
         const evaluations = await this.runMultipleEvaluations(
           prompt,
           fullSubmissionText,
-          this.config.runsPerSubmission || 3
+          this.config.runsPerSubmission
         );
 
         // Average the scores
@@ -213,16 +206,7 @@ export class FermiContestEvaluator {
     submissionText: string
   ): Promise<{ score: number; explanation: string }> {
     // Choose the client based on configuration
-    if (
-      this.anthropicClient &&
-      (!this.config.llmModel || this.config.llmModel.includes("claude"))
-    ) {
-      return this.evaluateWithAnthropic(prompt, submissionText);
-    } else {
-      throw new Error(
-        "No LLM client configured. Please provide Anthropic API key."
-      );
-    }
+    return this.evaluateWithAnthropic(prompt, submissionText);
   }
 
   // Evaluate using Anthropic's Claude
@@ -230,17 +214,13 @@ export class FermiContestEvaluator {
     prompt: string,
     submissionText: string
   ): Promise<{ score: number; explanation: string }> {
-    if (!this.anthropicClient) {
-      throw new Error("Anthropic client not initialized");
-    }
-
-    const modelToUse = this.config.llmModel || "claude-3-5-sonnet-20240620";
+    const modelToUse = this.config.llmModel;
 
     const response = await this.anthropicClient.messages.create({
       model: modelToUse,
       max_tokens: 1000,
-      system:
-        "You are an expert evaluator of Fermi estimates for a contest. Extract both a numeric score (0-10) and your reasoning.",
+      // system:
+      //   "You are an expert evaluator of Fermi estimates for a contest. Extract both a numeric score (0-10) and your reasoning.",
       messages: [
         {
           role: "user",
@@ -303,18 +283,13 @@ export class FermiContestEvaluator {
     scores: Record<string, EvaluationResult>
   ): number {
     let totalScore = 0;
-    let totalWeight = 0;
 
     for (const [criterionKey, criterion] of Object.entries(CRITERIA)) {
-      const result = scores[criterionKey];
-      if (result) {
-        totalScore += result.score * criterion.weight;
-        totalWeight += criterion.weight;
-      }
+      const result = scores[criterionKey as Criterion];
+      totalScore += result.score * criterion.weight;
     }
 
-    // Normalize by total weight if we have any valid scores
-    return totalWeight > 0 ? totalScore / totalWeight : 0;
+    return totalScore;
   }
 
   // Rank submissions by final score
@@ -344,11 +319,10 @@ export class FermiContestEvaluator {
       "|------|--------|-------------|----------|-----------------|------------|--------------|--------|\n";
 
     for (const evaluation of evaluations) {
-      const surprise = evaluation.scores.SURPRISE?.score.toFixed(1) || "N/A";
-      const relevance = evaluation.scores.RELEVANCE?.score.toFixed(1) || "N/A";
-      const robustness =
-        evaluation.scores.ROBUSTNESS?.score.toFixed(1) || "N/A";
-      const quality = evaluation.scores.QUALITY?.score.toFixed(1) || "N/A";
+      const surprise = evaluation.scores.SURPRISE.score.toFixed(1);
+      const relevance = evaluation.scores.RELEVANCE.score.toFixed(1);
+      const robustness = evaluation.scores.ROBUSTNESS.score.toFixed(1);
+      const quality = evaluation.scores.QUALITY.score.toFixed(1);
       const penalty =
         evaluation.goodhartingPenalty > 0
           ? `${(evaluation.goodhartingPenalty * 100).toFixed(0)}%`

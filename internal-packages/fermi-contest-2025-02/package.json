@@ -6,9 +6,7 @@
     "dev": "tsx src/index.ts",
     "build": "tsc",
     "collect": "tsx src/collect.ts",
-    "evaluate": "tsx src/index.ts",
-    "test": "echo 'Add test script here'",
-    "lint": "echo 'Add lint script here'"
+    "evaluate": "tsx src/index.ts"
   },
   "devDependencies": {
     "@quri/configs": "workspace:*",
