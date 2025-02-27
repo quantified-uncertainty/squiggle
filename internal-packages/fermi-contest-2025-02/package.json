@@ -6,10 +6,18 @@
     "dev": "tsx src/index.ts",
     "build": "tsc",
     "collect": "tsx src/collect.ts",
-    "evaluate": "tsx src/index.ts"
+    "evaluate": "tsx src/index.ts",
+    "web": "next dev",
+    "web:build": "next build"
   },
   "devDependencies": {
     "@quri/configs": "workspace:*",
+    "@tailwindcss/typography": "^0.5.10",
+    "@types/react": "^18.2.57",
+    "@types/react-dom": "^18.2.19",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3"
   },
@@ -17,6 +25,10 @@
     "@anthropic-ai/sdk": "^0.18.0",
     "@inquirer/prompts": "^7.2.3",
     "dotenv": "^16.4.5",
+    "next": "^15.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
     "zod": "^3.22.4"
   }
 }

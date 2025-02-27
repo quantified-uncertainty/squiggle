@@ -1,6 +1,23 @@
 {
-  "extends": "@quri/configs/tsconfig.base.json",
+  "extends": "@quri/configs/tsconfig.nextjs.json",
   "compilerOptions": {
-    "noEmit": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*",
+        "./app/*"
+      ]
+    }
   },
+  "include": [
+    "src/**/*.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "next-env.d.ts",
+    ".next/types/**/*.ts"
+  ]
 }
