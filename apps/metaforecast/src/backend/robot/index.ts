@@ -1,6 +1,7 @@
 import { prisma, Question } from "@quri/metaforecast-db";
 
 import { FetchedQuestion, Platform } from "../types";
+import { indexQuestions } from "../utils/elastic";
 
 // Typing notes:
 // There's a difference between prisma's Question type (type returned from `find` and `findMany`) and its input types due to JsonValue vs InputJsonValue mismatch.
@@ -133,15 +134,19 @@ type SaveStats = {
   deleted?: number;
 };
 
+type SaveParams = {
+  platform: Platform;
+  fetchedQuestions: FetchedQuestion[];
+  partial?: boolean;
+  index?: boolean;
+};
+
 export async function saveQuestions({
   platform,
   fetchedQuestions,
   partial,
-}: {
-  platform: Platform;
-  fetchedQuestions: FetchedQuestion[];
-  partial?: boolean;
-}): Promise<SaveStats> {
+  index,
+}: SaveParams): Promise<SaveStats> {
   // Bulk update, optimized for performance.
 
   const oldQuestions = await prisma.question.findMany({
@@ -155,9 +160,9 @@ export async function saveQuestions({
   const fetchedIdsSet = new Set(fetchedIds);
   const oldIdsSet = new Set(oldIds);
 
-  const createdQuestions: PreparedQuestion[] = [];
-  const updatedQuestions: PreparedQuestion[] = [];
-  const deletedIds = oldIds.filter((id) => !fetchedIdsSet.has(id));
+  const questionsToCreate: PreparedQuestion[] = [];
+  const questionsToUpdate: PreparedQuestion[] = [];
+  const idsToDelete = oldIds.filter((id) => !fetchedIdsSet.has(id));
 
   const preparedQuestions = fetchedQuestions.map((q) =>
     prepareQuestion(q, platform)
@@ -167,28 +172,29 @@ export async function saveQuestions({
   for (const q of preparedQuestions) {
     if (oldIdsSet.has(q.id)) {
       // TODO - check if question has changed for better performance; bulk selects are faster than one-by-one updates.
-      updatedQuestions.push(q);
+      questionsToUpdate.push(q);
     } else {
-      createdQuestions.push(q);
+      questionsToCreate.push(q);
     }
   }
 
   const stats: SaveStats = {};
 
   await prisma.question.createMany({
-    data: createdQuestions.map((q) => ({
+    data: questionsToCreate.map((q) => ({
       ...q,
       firstSeen: new Date(),
     })),
   });
-  stats.created = createdQuestions.length;
+  stats.created = questionsToCreate.length;
 
-  for (const q of updatedQuestions) {
-    await prisma.question.update({
+  const updatedQuestions: Question[] = [];
+  for (const q of questionsToUpdate) {
+    const updatedQuestion = await prisma.question.update({
       where: { id: q.id },
       data: q,
-      select: { id: true }, // not possible to select nothing, https://github.com/prisma/prisma/issues/6252
     });
+    updatedQuestions.push(updatedQuestion);
     stats.updated ??= 0;
     stats.updated++;
   }
@@ -196,13 +202,24 @@ export async function saveQuestions({
   if (!partial) {
     await prisma.question.deleteMany({
       where: {
-        id: { in: deletedIds },
+        id: { in: idsToDelete },
       },
     });
-    stats.deleted = deletedIds.length;
+    stats.deleted = idsToDelete.length;
   }
 
-  await updateHistory([...createdQuestions, ...updatedQuestions]);
+  await updateHistory([...questionsToCreate, ...questionsToUpdate]);
+
+  if (index) {
+    const questionsToIndex = await prisma.question.findMany({
+      where: {
+        id: {
+          in: [...questionsToCreate, ...questionsToUpdate].map((q) => q.id),
+        },
+      },
+    });
+    await indexQuestions(questionsToIndex);
+  }
 
   return stats;
 }
@@ -215,29 +232,18 @@ export async function processPlatform(platform: Platform) {
   }
   const result = await platform.fetcher();
 
-  if (!result) {
+  if (!result || !result.questions) {
     console.log(`Platform ${platform.name} didn't return any results`);
     return;
   }
 
   const { questions } = result;
 
-  await saveQuestionsWithStats(platform, questions);
+  await saveQuestionsWithStats({ platform, fetchedQuestions: questions });
 }
 
-export async function saveQuestionsWithStats(
-  platform: Platform,
-  fetchedQuestions: FetchedQuestion[]
-) {
-  if (!fetchedQuestions.length) {
-    console.log(`Platform ${platform.name} didn't return any results`);
-    return;
-  }
-
-  const stats = await saveQuestions({
-    platform,
-    fetchedQuestions,
-  });
+export async function saveQuestionsWithStats(params: SaveParams) {
+  const stats = await saveQuestions(params);
 
   console.log(
     "Done, " +

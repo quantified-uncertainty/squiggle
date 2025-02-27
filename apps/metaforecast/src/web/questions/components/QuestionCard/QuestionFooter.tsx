@@ -76,10 +76,13 @@ const getCurrencySymbolIfNeeded = ({
     "openInterest",
     "liquidity",
   ];
-  let dollarPlatforms = ["predictit", "kalshi", "polymarket", "insight"];
+  const dollarPlatforms = ["predictit", "kalshi", "polymarket", "insight"];
+  const manaPlatforms = ["manifold"];
   if (indicatorsWhichNeedCurrencySymbol.includes(indicator)) {
     if (dollarPlatforms.includes(platform)) {
       return "$";
+    } else if (manaPlatforms.includes(platform)) {
+      return "M";
     } else {
       return "£";
     }

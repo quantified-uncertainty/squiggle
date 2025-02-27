@@ -49,9 +49,15 @@ export async function fetchAllMarketsLite({
     }
 
     allMarkets.push(...filteredMarkets);
-    console.log(
-      `Total: ${allMarkets.length}, added: ${filteredMarkets.length}`
-    );
+    {
+      const total = allMarkets.length;
+      const added = filteredMarkets.length;
+      const minDate = filteredMarkets[0].lastUpdatedTime!;
+      const maxDate = filteredMarkets.at(-1)?.lastUpdatedTime!;
+      console.log(
+        `Total: ${total}, added: ${added}, minDate: ${minDate}, maxDate: ${maxDate}`
+      );
+    }
 
     lastId = markets[markets.length - 1].id;
     counter = counter + 1;

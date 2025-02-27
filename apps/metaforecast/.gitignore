@@ -23,3 +23,6 @@ npm-debug.log*
 /src/**/*.generated.tsx
 /src/**/*.generated.ts
 /prisma/generated
+
+# can be used for local elastic, https://www.elastic.co/guide/en/elasticsearch/reference/current/run-elasticsearch-locally.html
+/elastic-start-local

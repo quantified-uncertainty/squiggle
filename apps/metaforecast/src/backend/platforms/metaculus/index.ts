@@ -166,6 +166,7 @@ export const metaculus: Platform = {
           await saveQuestions({
             platform: metaculus,
             fetchedQuestions: questions,
+            partial: true,
           });
         } catch (error) {
           console.log(error);

@@ -44,46 +44,45 @@ function showStatistics(questions: FetchedQuestion[]) {
 }
 
 function marketsToQuestions(markets: ManifoldLiteMarket[]): FetchedQuestion[] {
-  const questions: FetchedQuestion[] = markets
-    .filter(
-      (
-        market
-      ): market is ManifoldLiteMarket & {
-        probability: NonNullable<ManifoldLiteMarket["probability"]>;
-      } => market.isResolved && market.probability !== undefined
-    )
-    .map((market) => {
-      const id = `${platformName}-${market.id}`;
-      const probability = market.probability;
+  const usedMarkets = markets.filter(
+    (
+      market
+    ): market is ManifoldLiteMarket & {
+      probability: NonNullable<ManifoldLiteMarket["probability"]>;
+    } => !market.isResolved && market.probability !== undefined
+  );
+  const questions: FetchedQuestion[] = usedMarkets.map((market) => {
+    const id = `${platformName}-${market.id}`;
+    const probability = market.probability;
 
-      const options: QuestionOption[] = [
-        {
-          name: "Yes",
-          probability,
-          type: "PROBABILITY",
-        },
-        {
-          name: "No",
-          probability: 1 - probability,
-          type: "PROBABILITY",
-        },
-      ];
+    const options: QuestionOption[] = [
+      {
+        name: "Yes",
+        probability,
+        type: "PROBABILITY",
+      },
+      {
+        name: "No",
+        probability: 1 - probability,
+        type: "PROBABILITY",
+      },
+    ];
 
-      const result: FetchedQuestion = {
-        id,
-        title: market.question,
-        url: market.url,
-        description: "", // TODO - fetch FullMarket and decode from JSON
-        options,
-        qualityindicators: {
-          createdTime: market.createdTime,
-          volume24Hours: market.volume24Hours,
-          volume: market.volume,
-          pool: market.pool, // normally liquidity, but I don't actually want to show it.
-        },
-      };
-      return result;
-    });
+    const result: FetchedQuestion = {
+      id,
+      title: market.question,
+      url: market.url,
+      description: "", // TODO - fetch FullMarket and decode from JSON
+      options,
+      qualityindicators: {
+        createdTime: market.createdTime,
+        volume24Hours: market.volume24Hours,
+        volume: market.volume,
+        pool: market.pool, // normally liquidity, but I don't actually want to show it.
+      },
+    };
+    return result;
+  });
 
   return questions;
 }
@@ -119,9 +118,16 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
       const liteMarkets = await fetchAllMarketsLite({
         upToUpdatedTime,
       });
+      console.log(`Fetched ${liteMarkets.length} markets`);
       const questions = marketsToQuestions(liteMarkets);
       showStatistics(questions);
-      await saveQuestionsWithStats(this, questions);
+
+      await saveQuestionsWithStats({
+        platform: this,
+        fetchedQuestions: questions,
+        index: true,
+        partial: true,
+      });
 
       // take the first market - they're sorted by lastUpdatedTime
       const lastUpdatedTime = liteMarkets.at(0)?.lastUpdatedTime;
@@ -144,7 +150,7 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
     // Nuño
     if (
       (data.qualityindicators.volume24Hours || 0) > 100 ||
-      ((data.qualityindicators.pool || 0) > 500 &&
+      ((sum(Object.values(data.qualityindicators.pool || {})) || 0) > 500 &&
         (data.qualityindicators.volume24Hours || 0) > 50)
     ) {
       return 2;
