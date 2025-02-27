@@ -7,10 +7,11 @@ import { QuestionOption } from "@/common/types";
 
 import { average, sum } from "../../../utils";
 import { fetchAllMarketsLite } from "./api";
-import { ManifoldLiteMarket } from "./apiSchema";
+import { ManifoldFullMarket } from "./apiSchema";
 import {
   importMarketsFromJsonArchiveFile,
   importSingleMarket,
+  upgradeLiteMarketsAndSaveExtended,
 } from "./extended";
 
 const platformName = "manifold";
@@ -43,12 +44,15 @@ function showStatistics(questions: FetchedQuestion[]) {
   }
 }
 
-function marketsToQuestions(markets: ManifoldLiteMarket[]): FetchedQuestion[] {
+// We need full markets to get the description
+function fullMarketsToQuestions(
+  markets: ManifoldFullMarket[]
+): FetchedQuestion[] {
   const usedMarkets = markets.filter(
     (
       market
-    ): market is ManifoldLiteMarket & {
-      probability: NonNullable<ManifoldLiteMarket["probability"]>;
+    ): market is ManifoldFullMarket & {
+      probability: NonNullable<ManifoldFullMarket["probability"]>;
     } => !market.isResolved && market.probability !== undefined
   );
   const questions: FetchedQuestion[] = usedMarkets.map((market) => {
@@ -72,7 +76,7 @@ function marketsToQuestions(markets: ManifoldLiteMarket[]): FetchedQuestion[] {
       id,
       title: market.question,
       url: market.url,
-      description: "", // TODO - fetch FullMarket and decode from JSON
+      description: market.textDescription,
       options,
       qualityindicators: {
         createdTime: market.createdTime,
@@ -119,7 +123,11 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
         upToUpdatedTime,
       });
       console.log(`Fetched ${liteMarkets.length} markets`);
-      const questions = marketsToQuestions(liteMarkets);
+
+      // TODO - filter before upgrading
+      const fullMarkets = await upgradeLiteMarketsAndSaveExtended(liteMarkets);
+
+      const questions = fullMarketsToQuestions(fullMarkets);
       showStatistics(questions);
 
       await saveQuestionsWithStats({
@@ -137,13 +145,19 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
         });
       }
     });
-  },
 
-  async fetcher() {
-    const liteMarkets = await fetchAllMarketsLite();
-    const questions = marketsToQuestions(liteMarkets);
-    showStatistics(questions);
-    return { questions };
+    // not a daily fetcher because we'll usually use an incremental fetcher
+    command.command("fetch-all").action(async () => {
+      const liteMarkets = await fetchAllMarketsLite();
+      const fullMarkets = await upgradeLiteMarketsAndSaveExtended(liteMarkets);
+      const questions = fullMarketsToQuestions(fullMarkets);
+      showStatistics(questions);
+
+      await saveQuestionsWithStats({
+        platform: this,
+        fetchedQuestions: questions,
+      });
+    });
   },
 
   calculateStars(data) {

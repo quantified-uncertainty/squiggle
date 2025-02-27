@@ -5,10 +5,14 @@ import { z } from "zod";
 
 import { prisma, Prisma } from "@quri/metaforecast-db";
 
-import { fetchAllMarketsLite, fetchFullMarket, fetchGroup } from "./api";
-import { fullMarketSchema, ManifoldFullMarket } from "./apiSchema";
+import { fetchFullMarket, fetchGroup } from "./api";
+import {
+  fullMarketSchema,
+  ManifoldFullMarket,
+  ManifoldLiteMarket,
+} from "./apiSchema";
 
-async function saveMarket(market: ManifoldFullMarket) {
+async function saveExtendedMarket(market: ManifoldFullMarket) {
   const {
     // extracted to separate User table
     creatorUsername,
@@ -139,13 +143,17 @@ async function saveMarket(market: ManifoldFullMarket) {
   });
 }
 
-// unused
-async function importAllMarketsToExtendedDb() {
-  const allMarketsLite = await fetchAllMarketsLite();
-  allMarketsLite.map(async (market) => {
+export async function upgradeLiteMarketsAndSaveExtended(
+  markets: ManifoldLiteMarket[]
+): Promise<ManifoldFullMarket[]> {
+  const fullMarkets: ManifoldFullMarket[] = [];
+  for (const market of markets) {
+    console.log(`Fetching full market ${market.url}`);
     const fullMarket = await fetchFullMarket(market.id);
-    await saveMarket(fullMarket);
-  });
+    await saveExtendedMarket(fullMarket);
+    fullMarkets.push(fullMarket);
+  }
+  return fullMarkets;
 }
 
 // exposed as manifold-extended cli command
@@ -200,7 +208,7 @@ export async function importMarketsFromJsonArchiveFile(filename: string) {
         );
       }
 
-      await saveMarket(parsed.data);
+      await saveExtendedMarket(parsed.data);
     } catch (e) {
       console.error(e);
       console.log("Retrying with API...");
@@ -210,8 +218,8 @@ export async function importMarketsFromJsonArchiveFile(filename: string) {
   }
 }
 
-// exposed as manifold-one cli command
+// exposed as fetch-one cli command
 export async function importSingleMarket(id: string) {
   const fullMarket = await fetchFullMarket(id);
-  await saveMarket(fullMarket);
+  await saveExtendedMarket(fullMarket);
 }
