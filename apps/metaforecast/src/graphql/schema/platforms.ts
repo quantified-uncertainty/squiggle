@@ -1,5 +1,8 @@
 import { prisma } from "@quri/metaforecast-db";
 
+import { manifold } from "@/backend/platforms/manifold";
+import { getPlatformState } from "@/backend/platformUtils";
+
 import { getPlatforms } from "../../backend/platformRegistry";
 import { builder } from "../builder";
 
@@ -28,6 +31,14 @@ export const PlatformObj = builder.objectRef<string>("Platform").implement({
       type: "Date",
       nullable: true,
       resolve: async (platformName) => {
+        if (platformName === "manifold") {
+          const state = await getPlatformState(manifold);
+          if (state?.lastFetched) {
+            return new Date(state.lastFetched);
+          }
+          return null;
+        }
+
         const res = await prisma.question.aggregate({
           where: {
             platform: platformName,

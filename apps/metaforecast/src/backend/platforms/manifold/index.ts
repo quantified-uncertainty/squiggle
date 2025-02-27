@@ -82,6 +82,7 @@ function fullMarketsToQuestions(
         createdTime: market.createdTime,
         volume24Hours: market.volume24Hours,
         volume: market.volume,
+        numforecasters: market.uniqueBettorCount,
         pool: market.pool, // normally liquidity, but I don't actually want to show it.
       },
     };
@@ -137,7 +138,7 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
         partial: true,
       });
 
-      // take the first market - they're sorted by lastUpdatedTime
+      // take the first lite market - they're sorted by lastUpdatedTime in reverse
       const lastUpdatedTime = liteMarkets.at(0)?.lastUpdatedTime;
       if (lastUpdatedTime) {
         await setPlatformState(this, {
@@ -161,11 +162,9 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
   },
 
   calculateStars(data) {
-    // Nuño
     if (
-      (data.qualityindicators.volume24Hours || 0) > 100 ||
-      ((sum(Object.values(data.qualityindicators.pool || {})) || 0) > 500 &&
-        (data.qualityindicators.volume24Hours || 0) > 50)
+      (data.qualityindicators.numforecasters || 0) > 10 ||
+      (data.qualityindicators.volume || 0) > 1000
     ) {
       return 2;
     } else {

@@ -21,12 +21,11 @@ export async function rebuildFrontpage() {
       SELECT questions.id FROM questions, history
       WHERE
         questions.id = history.id
-        AND (questions.qualityindicators->>'stars')::int >= 3
+        AND (questions.qualityindicators->>'stars')::int >= 2
         AND questions.description != ''
 				AND questions.url NOT LIKE '%kalshi%'
         AND JSONB_ARRAY_LENGTH(questions.options) > 0
       GROUP BY questions.id
-      HAVING COUNT(DISTINCT history.fetched) >= 7
       ORDER BY RANDOM() LIMIT 50
     `;
 
