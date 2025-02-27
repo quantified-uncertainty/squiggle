@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc",
+    "collect": "tsx src/collect.ts",
+    "evaluate": "tsx src/index.ts",
     "test": "echo 'Add test script here'",
     "lint": "echo 'Add lint script here'"
   },
@@ -15,6 +17,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.18.0",
+    "@inquirer/prompts": "^7.2.3",
     "dotenv": "^16.4.5",
     "zod": "^3.22.4"
   }

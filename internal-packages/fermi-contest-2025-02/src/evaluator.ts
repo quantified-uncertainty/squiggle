@@ -4,6 +4,8 @@
 
 import { Anthropic } from "@anthropic-ai/sdk";
 
+import { EvaluationResult, Submission, SubmissionEvaluation } from "./types";
+
 // Evaluation criteria and weights
 const CRITERIA = {
   SURPRISE: { name: "Surprise", weight: 0.4 },
@@ -18,15 +20,15 @@ const PROMPTS = {
  
 Please provide a numeric score of how surprising the key findings or conclusions of this model are to members of the rationalist and effective altruism communities. In your assessment, consider the following:
 
-    Contradiction of Expectations: Do the results challenge widely held beliefs, intuitive assumptions, or established theories within the communities?
-    Counterintuitiveness: Are the findings non-obvious or do they reveal hidden complexities that are not immediately apparent?
-    Discovery of Unknowns: Does the model uncover previously unrecognized issues, opportunities, or risks?
-    Magnitude of Difference: How significant is the deviation of the model's results from common expectations or prior studies?
+- Contradiction of Expectations: Do the results challenge widely held beliefs, intuitive assumptions, or established theories within the communities?
+- Counterintuitiveness: Are the findings non-obvious or do they reveal hidden complexities that are not immediately apparent?
+- Discovery of Unknowns: Does the model uncover previously unrecognized issues, opportunities, or risks?
+- Magnitude of Difference: How significant is the deviation of the model's results from common expectations or prior studies?
 
 Please provide specific details or examples that illustrate the surprising aspects of the findings. Assign a rating from 0 to 10, where:
 
-    0 indicates 'Not Surprising'
-    10 indicates 'Highly Surprising'
+- 0 indicates 'Not Surprising'
+- 10 indicates 'Highly Surprising'
 
 Judge on a curve, where a 5 represents the median expectation.`,
 
@@ -34,13 +36,13 @@ Judge on a curve, where a 5 represents the median expectation.`,
 
 Please provide a numeric score of the importance of the model's subject matter to the rationalist and effective altruism communities. In your evaluation, consider the following:
 
-    Relevance: How directly does the model address issues, challenges, or questions that are central to the interests and goals of these communities?
-    Impact Potential: To what extent could the findings influence decision-making, policy, or priority-setting within the communities?
+- Relevance: How directly does the model address issues, challenges, or questions that are central to the interests and goals of these communities?
+- Impact Potential: To what extent could the findings influence decision-making, policy, or priority-setting within the communities?
 
 Assign a rating from 0 to 10, where:
 
-    0 indicates 'Not Important'
-    10 indicates 'Highly Important'
+- 0 indicates 'Not Important'
+- 10 indicates 'Highly Important'
 
 Judge on a curve, where a 5 represents the median expectation.`,
 
@@ -48,15 +50,15 @@ Judge on a curve, where a 5 represents the median expectation.`,
  
 Please provide a numeric score of the robustness of the model's key findings. In your evaluation, consider the following factors:
 
-    Sensitivity to Assumptions: How dependent are the results on specific assumptions, parameters, or data inputs? Would reasonable changes to these significantly alter the conclusions?
-    Evidence Base: How strong and reliable is the data supporting the model? Are the data sources credible and up-to-date?
-    Methodological Rigor: Does the model use sound reasoning and appropriate methods? Are potential biases or limitations acknowledged and addressed?
-    Consensus of Assumptions: To what extent are the underlying assumptions accepted within the rationalist and effective altruism communities?
+- Sensitivity to Assumptions: How dependent are the results on specific assumptions, parameters, or data inputs? Would reasonable changes to these significantly alter the conclusions?
+- Evidence Base: How strong and reliable is the data supporting the model? Are the data sources credible and up-to-date?
+- Methodological Rigor: Does the model use sound reasoning and appropriate methods? Are potential biases or limitations acknowledged and addressed?
+- Consensus of Assumptions: To what extent are the underlying assumptions accepted within the rationalist and effective altruism communities?
 
 Provide a detailed justification, citing specific aspects of the model that contribute to its robustness or lack thereof. Assign a rating from 0 to 10, where:
 
-    0 indicates 'Not Robust'
-    10 indicates 'Highly Robust'
+- 0 indicates 'Not Robust'
+- 10 indicates 'Highly Robust'
 
 Judge on a curve, where a 5 represents the median expectation.`,
 
@@ -64,48 +66,23 @@ Judge on a curve, where a 5 represents the median expectation.`,
  
 Please provide a numeric score of the model's quality, focusing on both its construction and presentation. Consider the following elements:
 
-    Comprehensiveness: Does the model account for all key factors and variables relevant to the problem it addresses?
-    Data Integration: Are data sources appropriately selected and accurately integrated? Is there evidence of data validation or cross-referencing with established studies?
-    Clarity of Assumptions: Are the model's assumptions clearly stated, justified, and reasonable? Does the model distinguish between empirical data and speculative inputs?
-    Transparency and Replicability: Is the modeling process transparent enough that others could replicate or audit the results? Are the methodologies and calculations well-documented?
-    Logical Consistency: Does the model follow a logical structure, with coherent reasoning leading from premises to conclusions?
-    Communication: Are the findings and their significance clearly communicated? Does the model include summaries, visual aids (e.g., charts, graphs), or other tools to enhance understanding?
-    Practical Relevance: Does the model provide actionable insights or recommendations? Is it practical for use by stakeholders in the community?
+- Comprehensiveness: Does the model account for all key factors and variables relevant to the problem it addresses?
+- Data Integration: Are data sources appropriately selected and accurately integrated? Is there evidence of data validation or cross-referencing with established studies?
+- Clarity of Assumptions: Are the model's assumptions clearly stated, justified, and reasonable? Does the model distinguish between empirical data and speculative inputs?
+- Transparency and Replicability: Is the modeling process transparent enough that others could replicate or audit the results? Are the methodologies and calculations well-documented?
+- Logical Consistency: Does the model follow a logical structure, with coherent reasoning leading from premises to conclusions?
+- Communication: Are the findings and their significance clearly communicated? Does the model include summaries, visual aids (e.g., charts, graphs), or other tools to enhance understanding?
+- Practical Relevance: Does the model provide actionable insights or recommendations? Is it practical for use by stakeholders in the community?
 
 Please provide specific observations and examples to support your evaluation. Assign a rating from 0 to 10, where:
 
-    0 indicates 'Poor Quality'
-    10 indicates 'Excellent Quality'
+- 0 indicates 'Poor Quality'
+- 10 indicates 'Excellent Quality'
 
 Judge on a curve, where a 5 represents the median expectation.`,
 };
 
-// Types for submission data
-export interface Submission {
-  id: string;
-  author: string;
-  model: string;
-  summary: string;
-  technique: string;
-  fullText?: string; // Optional complete submission text
-}
-
-// Types for evaluation results
-export interface EvaluationResult {
-  criterionName: string;
-  score: number;
-  explanation: string;
-}
-
-export interface SubmissionEvaluation {
-  submissionId: string;
-  author: string;
-  scores: Record<string, EvaluationResult>;
-  totalScore: number;
-  finalScore: number; // After any goodharting penalties
-  goodhartingPenalty: number; // 0 to 1 (percentage)
-  rank?: number;
-}
+export type Criterion = keyof typeof CRITERIA;
 
 // Class for evaluating Fermi model submissions
 export class FermiContestEvaluator {
@@ -144,10 +121,10 @@ export class FermiContestEvaluator {
       );
 
       // Combine all submission fields for evaluation
-      const fullSubmissionText = this.formatSubmissionForEvaluation(submission);
+      const fullSubmissionText = submission.text;
 
       // Evaluate each criterion with multiple runs and average
-      const criteriaScores: Record<string, EvaluationResult> = {};
+      const criteriaScores = {} as Record<Criterion, EvaluationResult>; // will be populated below
 
       // Evaluate each criterion
       for (const [criterionKey, criterion] of Object.entries(CRITERIA)) {
@@ -163,7 +140,7 @@ export class FermiContestEvaluator {
 
         // Average the scores
         const averageScore =
-          evaluations.reduce((sum, eval) => sum + eval.score, 0) /
+          evaluations.reduce((sum, evaluation) => sum + evaluation.score, 0) /
           evaluations.length;
 
         // Combine explanations
@@ -171,7 +148,7 @@ export class FermiContestEvaluator {
           evaluations.map((e) => e.explanation)
         );
 
-        criteriaScores[criterionKey] = {
+        criteriaScores[criterionKey as Criterion] = {
           criterionName: criterion.name,
           score: averageScore,
           explanation: combinedExplanation,
@@ -207,26 +184,6 @@ export class FermiContestEvaluator {
 
     // Rank submissions by final score
     return this.rankSubmissions(evaluationResults);
-  }
-
-  // Format a submission for evaluation
-  private formatSubmissionForEvaluation(submission: Submission): string {
-    // If fullText is provided, use that directly
-    if (submission.fullText) {
-      return submission.fullText;
-    }
-
-    // Otherwise, combine the fields
-    return `
-MODEL:
-${submission.model}
-
-SUMMARY:
-${submission.summary}
-
-TECHNIQUE:
-${submission.technique}
-`;
   }
 
   // Run multiple evaluations and return all results
@@ -403,19 +360,19 @@ ${submission.technique}
     // Add detailed results for each submission
     report += "\n## Detailed Evaluation Results\n\n";
 
-    for (const eval of evaluations) {
-      report += `### ${eval.rank}. ${eval.author} (${eval.submissionId})\n\n`;
-      report += `**Final Score**: ${eval.finalScore.toFixed(2)}/10`;
+    for (const evaluation of evaluations) {
+      report += `### ${evaluation.rank}. ${evaluation.author} (${evaluation.submissionId})\n\n`;
+      report += `**Final Score**: ${evaluation.finalScore.toFixed(2)}/10`;
 
-      if (eval.goodhartingPenalty > 0) {
-        report += ` (after ${(eval.goodhartingPenalty * 100).toFixed(0)}% penalty)`;
+      if (evaluation.goodhartingPenalty > 0) {
+        report += ` (after ${(evaluation.goodhartingPenalty * 100).toFixed(0)}% penalty)`;
       }
 
       report += `\n\n`;
 
       // Add details for each criterion
       for (const [criterionKey, criterion] of Object.entries(CRITERIA)) {
-        const result = eval.scores[criterionKey];
+        const result = evaluation.scores[criterionKey as Criterion];
         if (result) {
           report += `#### ${criterion.name} (${(criterion.weight * 100).toFixed(0)}%): ${result.score.toFixed(2)}/10\n\n`;
 
