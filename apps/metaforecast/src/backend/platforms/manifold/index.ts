@@ -125,7 +125,8 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
       });
       console.log(`Fetched ${liteMarkets.length} markets`);
 
-      // TODO - filter before upgrading
+      // since we're interested in full manifold data, we do this before filtering markets for questions
+      // (e.g., we want to save markets that are multiple choice and so won't be displayed in current metaforecast UI)
       const fullMarkets = await upgradeLiteMarketsAndSaveExtended(liteMarkets);
 
       const questions = fullMarketsToQuestions(fullMarkets);

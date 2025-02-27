@@ -30,7 +30,7 @@ builder.queryField("searchQuestions", (t) =>
     args: {
       input: t.arg({ type: SearchInput, required: true }),
     },
-    resolve: async (parent, { input }) => {
+    resolve: async (_, { input }) => {
       // defs
       const query = input.query === undefined ? "" : input.query;
       if (query === "") return [];
