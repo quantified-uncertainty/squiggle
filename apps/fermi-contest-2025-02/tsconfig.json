@@ -3,21 +3,17 @@
   "compilerOptions": {
     "plugins": [
       {
-        "name": "next"
-      }
+        "name": "next",
+      },
     ],
     "paths": {
-      "@/*": [
-        "./src/*",
-        "./app/*"
-      ]
-    }
+      "@/*": ["./src/*"],
+    },
   },
   "include": [
     "src/**/*.ts",
-    "app/**/*.ts",
-    "app/**/*.tsx",
+    "src/**/*.tsx",
     "next-env.d.ts",
-    ".next/types/**/*.ts"
-  ]
+    ".next/types/**/*.ts",
+  ],
 }

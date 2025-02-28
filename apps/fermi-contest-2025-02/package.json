@@ -3,12 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "tsx src/index.ts",
-    "build": "tsc",
+    "dev": "next dev",
+    "build": "next build",
     "collect": "tsx src/collect.ts",
-    "evaluate": "tsx src/index.ts",
-    "web": "next dev",
-    "web:build": "next build"
+    "evaluate": "tsx src/index.ts"
   },
   "devDependencies": {
     "@quri/configs": "workspace:*",

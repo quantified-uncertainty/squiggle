@@ -30,28 +30,13 @@ export default async function SubmissionPage({ params }: Props) {
       <div className="overflow-hidden rounded-lg bg-white shadow-sm">
         <div className="border-b bg-gray-50 px-6 py-4">
           <h1 className="text-2xl font-bold">{submission.author}</h1>
-          <p className="mt-1 text-gray-600">
-            {submission.timestamp
-              ? new Date(submission.timestamp).toLocaleString()
-              : "No timestamp"}
-          </p>
         </div>
 
         <div className="px-6 py-4">
           <div className="mb-6">
-            <h2 className="mb-2 text-xl font-semibold">Summary</h2>
-            <p className="text-gray-700">{submission.summary}</p>
-          </div>
-
-          <div className="mb-6">
-            <h2 className="mb-2 text-xl font-semibold">Technique</h2>
-            <p className="text-gray-700">{submission.technique}</p>
-          </div>
-
-          <div className="mb-6">
             <h2 className="mb-2 text-xl font-semibold">Model</h2>
             <div className="prose prose-sm max-w-none overflow-auto rounded-lg bg-gray-50 p-4">
-              <ReactMarkdown>{submission.model}</ReactMarkdown>
+              <ReactMarkdown>{submission.text}</ReactMarkdown>
             </div>
           </div>
 
