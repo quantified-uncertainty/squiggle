@@ -1,3 +1,0 @@
-{
-  "extends": "@quri/configs/tsconfig.base.json",
-}

@@ -7,6 +7,13 @@ https://forum.effectivealtruism.org/posts/Zc5jki9nXihueDcKj/usd300-fermi-model-c
 
 ## Usage
 
+### Setup
+
+```bash
+# Install dependencies
+pnpm install
+```
+
 ### Collecting Submissions
 
 Run the interactive submission collector:
@@ -45,6 +52,20 @@ Evaluation results will be saved to:
 
 - `data/evaluation-report.md` - Formatted report with rankings and explanations
 - `data/evaluation-results.json` - Raw evaluation data
+
+### Viewing Results in Web Interface
+
+The project includes a Next.js web interface for browsing submissions and results:
+
+```bash
+# Start the web interface on http://localhost:3000
+pnpm web
+```
+
+The web interface provides:
+- Home page with competition information
+- Submissions browser with full model details
+- Results page with rankings and detailed scores
 
 ### Goodharting Penalties
 
