@@ -1,7 +1,7 @@
 import { prisma, Question } from "@quri/metaforecast-db";
 
 import { FetchedQuestion, Platform } from "./types";
-import { indexQuestions } from "./utils/elastic";
+import { deleteQuestionsFromIndex, indexQuestions } from "./utils/elastic";
 
 // Typing notes:
 // There's a difference between prisma's Question type (type returned from `find` and `findMany`) and its input types due to JsonValue vs InputJsonValue mismatch.
@@ -235,4 +235,20 @@ export async function saveQuestionsWithStats(params: SaveParams) {
         .map(([k, v]) => `${v} ${k}`)
         .join(", ")
   );
+}
+
+export async function saveResolvedQuestions(questionIds: string[]) {
+  // Metaforecast doesn't support resolved questions yet, so we delete them.
+
+  console.log(`Deleting ${questionIds.length} resolved questions from DB`);
+  await prisma.question.deleteMany({
+    where: {
+      id: { in: questionIds },
+    },
+  });
+
+  console.log(`Deleting ${questionIds.length} resolved questions from index`);
+  await deleteQuestionsFromIndex(questionIds);
+
+  console.log(`Deleted ${questionIds.length} resolved questions`);
 }

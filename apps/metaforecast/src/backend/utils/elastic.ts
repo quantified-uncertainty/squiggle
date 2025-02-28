@@ -84,6 +84,14 @@ export async function indexQuestions(questions: Question[]) {
   console.log(`Pushed ${count} records to Elasticsearch.`);
 }
 
+export async function deleteQuestionsFromIndex(questionIds: string[]) {
+  const client = getClient();
+  await client.deleteByQuery({
+    index: ALIAS_NAME,
+    body: { query: { ids: { values: questionIds } } },
+  });
+}
+
 export async function rebuildElasticDatabase() {
   const questions = await prisma.question.findMany();
 

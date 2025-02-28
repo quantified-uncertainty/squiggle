@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { saveQuestionsWithStats } from "@/backend/dbUtils";
+import {
+  saveQuestionsWithStats,
+  saveResolvedQuestions,
+} from "@/backend/dbUtils";
 import { getPlatformState, setPlatformState } from "@/backend/platformUtils";
 import { FetchedQuestion, Platform } from "@/backend/types";
 import { QuestionOption } from "@/common/types";
@@ -45,25 +48,28 @@ function showStatistics(questions: FetchedQuestion[]) {
 }
 
 // We need full markets to get the description
-function fullMarketsToQuestions(
-  markets: ManifoldFullMarket[]
-): FetchedQuestion[] {
-  const usedMarkets = markets.filter(
-    (
-      market
-    ): market is ManifoldFullMarket & {
-      probability: NonNullable<ManifoldFullMarket["probability"]>;
-    } => {
-      return (
-        !market.isResolved && // metaforecast doesn't support resolved questions yet
-        market.probability !== undefined // metaforecast doesn't support multiple choice questions yet
-      );
-    }
-  );
-  const questions: FetchedQuestion[] = usedMarkets.map((market) => {
-    const id = `${platformName}-${market.id}`;
-    const probability = market.probability;
+function fullMarketsToQuestions(markets: ManifoldFullMarket[]): {
+  questions: FetchedQuestion[];
+  resolvedQuestionIds: string[];
+} {
+  const questions: FetchedQuestion[] = [];
+  const resolvedQuestionIds: string[] = [];
 
+  for (const market of markets) {
+    const id = `${platformName}-${market.id}`;
+
+    // Handle resolved markets
+    if (market.isResolved) {
+      resolvedQuestionIds.push(id);
+      continue;
+    }
+
+    // Skip markets without probability (multiple choice questions)
+    if (market.probability === undefined) {
+      continue;
+    }
+
+    const probability = market.probability;
     const options: QuestionOption[] = [
       {
         name: "Yes",
@@ -91,10 +97,11 @@ function fullMarketsToQuestions(
         pool: market.pool, // normally liquidity, but I don't actually want to show it.
       },
     };
-    return result;
-  });
 
-  return questions;
+    questions.push(result);
+  }
+
+  return { questions, resolvedQuestionIds };
 }
 
 export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
@@ -134,7 +141,8 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
       // (e.g., we want to save markets that are multiple choice and so won't be displayed in current metaforecast UI)
       const fullMarkets = await upgradeLiteMarketsAndSaveExtended(liteMarkets);
 
-      const questions = fullMarketsToQuestions(fullMarkets);
+      const { questions, resolvedQuestionIds } =
+        fullMarketsToQuestions(fullMarkets);
       showStatistics(questions);
 
       await saveQuestionsWithStats({
@@ -142,6 +150,7 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
         fetchedQuestions: questions,
         index: true,
       });
+      await saveResolvedQuestions(resolvedQuestionIds);
 
       // take the first lite market - they're sorted by lastUpdatedTime in reverse
       const lastUpdatedTime = liteMarkets.at(0)?.lastUpdatedTime;
@@ -157,7 +166,7 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
     command.command("fetch-all").action(async () => {
       const liteMarkets = await fetchAllMarketsLite();
       const fullMarkets = await upgradeLiteMarketsAndSaveExtended(liteMarkets);
-      const questions = fullMarketsToQuestions(fullMarkets);
+      const { questions } = fullMarketsToQuestions(fullMarkets);
       showStatistics(questions);
 
       await saveQuestionsWithStats({
