@@ -1,7 +1,7 @@
 import { prisma, Question } from "@quri/metaforecast-db";
 
-import { FetchedQuestion, Platform } from "../types";
-import { indexQuestions } from "../utils/elastic";
+import { FetchedQuestion, Platform } from "./types";
+import { indexQuestions } from "./utils/elastic";
 
 // Typing notes:
 // There's a difference between prisma's Question type (type returned from `find` and `findMany`) and its input types due to JsonValue vs InputJsonValue mismatch.
@@ -114,6 +114,7 @@ async function updateHistory(questions: PreparedQuestion[]) {
   );
 }
 
+// Used only by Guesstimate platform
 export async function upsertSingleQuestion(
   q: PreparedQuestion
 ): Promise<Question> {
@@ -137,14 +138,14 @@ type SaveStats = {
 type SaveParams = {
   platform: Platform;
   fetchedQuestions: FetchedQuestion[];
-  partial?: boolean;
+  replaceAll?: boolean; // if set, delete all existing questions for this platform
   index?: boolean;
 };
 
 export async function saveQuestions({
   platform,
   fetchedQuestions,
-  partial,
+  replaceAll,
   index,
 }: SaveParams): Promise<SaveStats> {
   // Bulk update, optimized for performance.
@@ -199,7 +200,8 @@ export async function saveQuestions({
     stats.updated++;
   }
 
-  if (!partial) {
+  if (replaceAll) {
+    // TODO - transaction?
     await prisma.question.deleteMany({
       where: {
         id: { in: idsToDelete },
@@ -222,24 +224,6 @@ export async function saveQuestions({
   }
 
   return stats;
-}
-
-// Run the platform's daily fetcher and save the results.
-export async function processPlatform(platform: Platform) {
-  if (!platform.fetcher) {
-    console.log(`Platform ${platform.name} doesn't have a fetcher, skipping`);
-    return;
-  }
-  const result = await platform.fetcher();
-
-  if (!result || !result.questions) {
-    console.log(`Platform ${platform.name} didn't return any results`);
-    return;
-  }
-
-  const { questions } = result;
-
-  await saveQuestionsWithStats({ platform, fetchedQuestions: questions });
 }
 
 export async function saveQuestionsWithStats(params: SaveParams) {

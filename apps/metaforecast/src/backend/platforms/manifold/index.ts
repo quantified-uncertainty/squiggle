@@ -1,7 +1,7 @@
 import { z } from "zod";
 
+import { saveQuestionsWithStats } from "@/backend/dbUtils";
 import { getPlatformState, setPlatformState } from "@/backend/platformUtils";
-import { saveQuestionsWithStats } from "@/backend/robot";
 import { FetchedQuestion, Platform } from "@/backend/types";
 import { QuestionOption } from "@/common/types";
 
@@ -53,7 +53,12 @@ function fullMarketsToQuestions(
       market
     ): market is ManifoldFullMarket & {
       probability: NonNullable<ManifoldFullMarket["probability"]>;
-    } => !market.isResolved && market.probability !== undefined
+    } => {
+      return (
+        !market.isResolved && // metaforecast doesn't support resolved questions yet
+        market.probability !== undefined // metaforecast doesn't support multiple choice questions yet
+      );
+    }
   );
   const questions: FetchedQuestion[] = usedMarkets.map((market) => {
     const id = `${platformName}-${market.id}`;
@@ -136,7 +141,6 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
         platform: this,
         fetchedQuestions: questions,
         index: true,
-        partial: true,
       });
 
       // take the first lite market - they're sorted by lastUpdatedTime in reverse
@@ -149,6 +153,7 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
     });
 
     // not a daily fetcher because we'll usually use an incremental fetcher
+    // this command probably won't work, because it will run out of memory
     command.command("fetch-all").action(async () => {
       const liteMarkets = await fetchAllMarketsLite();
       const fullMarkets = await upgradeLiteMarketsAndSaveExtended(liteMarkets);
@@ -158,6 +163,7 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
       await saveQuestionsWithStats({
         platform: this,
         fetchedQuestions: questions,
+        replaceAll: true,
       });
     });
   },

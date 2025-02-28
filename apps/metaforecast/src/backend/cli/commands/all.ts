@@ -1,7 +1,7 @@
 import { Command } from "@commander-js/extra-typings";
 
 import { getPlatforms } from "@/backend/platformRegistry";
-import { processPlatform } from "@/backend/robot";
+import { processPlatform } from "@/backend/platformUtils";
 import { rebuildElasticDatabase } from "@/backend/utils/elastic";
 
 import { tryCatchTryAgain } from "../utils";
@@ -19,7 +19,7 @@ export async function processAll() {
   console.log("");
   console.log("");
 
-  for (const platform of getPlatforms()) {
+  for (const platform of getPlatforms({ withDailyFetcherOnly: true })) {
     console.log("");
     console.log("");
     console.log("****************************");

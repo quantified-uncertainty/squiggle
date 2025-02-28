@@ -1,4 +1,4 @@
-import { saveQuestions } from "@/backend/robot";
+import { saveQuestions } from "@/backend/dbUtils";
 import { FetchedQuestion, Platform } from "@/backend/types";
 
 import { average } from "../../../utils";
@@ -166,7 +166,6 @@ export const metaculus: Platform = {
           await saveQuestions({
             platform: metaculus,
             fetchedQuestions: questions,
-            partial: true,
           });
         } catch (error) {
           console.log(error);

@@ -1,7 +1,7 @@
 import { type Command } from "@commander-js/extra-typings";
 
 import { getPlatforms } from "../../platformRegistry";
-import { processPlatform } from "../../robot";
+import { processPlatform } from "../../platformUtils";
 
 export function addPlatformCommands(program: Command) {
   for (const platform of getPlatforms()) {

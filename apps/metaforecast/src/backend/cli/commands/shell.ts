@@ -3,7 +3,6 @@ import { select, Separator } from "@inquirer/prompts";
 
 import { rebuildFrontpage } from "@/backend/frontpage";
 import { getPlatforms } from "@/backend/platformRegistry";
-import { processPlatform } from "@/backend/robot";
 import { rebuildElasticDatabase } from "@/backend/utils/elastic";
 
 import { processAll } from "./all";
@@ -23,11 +22,14 @@ export function addShellCommand(program: Command) {
         message: "Choose one option, wisely:",
         pageSize: 100,
         choices: [
-          ...getPlatforms().map((platform) => ({
+          new Separator("─── Daily fetchers ───"),
+          ...getPlatforms({ withDailyFetcherOnly: true }).map((platform) => ({
             name: platform.name,
-            value: async () => await processPlatform(platform),
+            value: async () => {
+              await program.parseAsync([platform.name]);
+            },
           })),
-          new Separator(),
+          new Separator("─── Other commands ───"),
           {
             name: "Elastic",
             value: rebuildElasticDatabase,

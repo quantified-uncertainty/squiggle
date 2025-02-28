@@ -182,7 +182,7 @@ builder.queryField("question", (t) =>
     args: {
       id: t.arg({ type: "ID", required: true }),
     },
-    resolve: async (parent, args) => {
+    resolve: async (_, args) => {
       const parts = String(args.id).split("-");
       const [platform, id] = [parts[0], parts.slice(1).join("-")];
       if (platform === "guesstimate") {

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { prisma } from "@quri/metaforecast-db";
 
+import { saveQuestionsWithStats } from "./dbUtils";
 import { Platform } from "./types";
 
 export async function getPlatformState<TState extends z.ZodTypeAny>(
@@ -39,5 +40,27 @@ export async function setPlatformState<TState extends z.ZodTypeAny>(
       platform: platform.name,
       state,
     },
+  });
+}
+
+// Run the platform's daily fetcher and save the results.
+export async function processPlatform(platform: Platform) {
+  if (!platform.fetcher) {
+    console.log(`Platform ${platform.name} doesn't have a fetcher, skipping`);
+    return;
+  }
+  const result = await platform.fetcher();
+
+  if (!result || !result.questions) {
+    console.log(`Platform ${platform.name} didn't return any results`);
+    return;
+  }
+
+  const { questions } = result;
+
+  await saveQuestionsWithStats({
+    platform,
+    fetchedQuestions: questions,
+    replaceAll: true,
   });
 }
