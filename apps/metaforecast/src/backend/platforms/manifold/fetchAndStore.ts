@@ -13,18 +13,15 @@ export async function fetchAndStoreMarketsFromApi(
   params: FetchParams = {}
 ): Promise<{
   prismaMarkets: ManifoldMarket[];
-  resolvedMarketIds: string[];
   latestUpdateTime?: Date;
 }> {
   const { fullMarkets, latestUpdateTime } = await fetchFullMarkets(params);
 
   // Step 3: Save to extended tables and get Prisma objects
-  const { prismaMarkets, resolvedMarketIds } =
-    await saveMarketsToExtendedTables(fullMarkets);
+  const prismaMarkets = await saveMarketsToExtendedTables(fullMarkets);
 
   return {
     prismaMarkets,
-    resolvedMarketIds,
     latestUpdateTime,
   };
 }

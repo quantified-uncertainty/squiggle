@@ -157,40 +157,28 @@ async function saveExtendedMarket(
 
 /**
  * Process full markets and save them to extended tables.
- * Returns Prisma market objects and resolved market IDs.
+ * Returns Prisma market objects.
  */
 export async function saveMarketsToExtendedTables(
   markets: ManifoldApiFullMarket[]
-): Promise<{
-  prismaMarkets: ManifoldMarket[];
-  resolvedMarketIds: string[];
-}> {
+): Promise<ManifoldMarket[]> {
   const prismaMarkets: ManifoldMarket[] = [];
-  const resolvedMarketIds: string[] = [];
 
   for (const market of markets) {
-    if (market.isResolved) {
-      resolvedMarketIds.push(`${platformName}-${market.id}`);
-      continue;
-    }
-
     const prismaMarket = await saveExtendedMarket(market);
     prismaMarkets.push(prismaMarket);
   }
 
-  return { prismaMarkets, resolvedMarketIds };
+  return prismaMarkets;
 }
 
 /**
- * Imports markets from a JSON archive file, saves to extended tables.
- * Returns Prisma markets and resolved market IDs.
+ * Imports markets from a JSON archive file and saves to extended tables.
+ * Returns the saved Prisma market objects.
  */
 export async function importMarketsFromJsonArchiveFile(
   filename: string
-): Promise<{
-  prismaMarkets: ManifoldMarket[];
-  resolvedMarketIds: string[];
-}> {
+): Promise<ManifoldMarket[]> {
   console.log("Loading JSON archive");
   const file = await fs.readFile(filename, "utf8");
   console.log("Parsing JSON");

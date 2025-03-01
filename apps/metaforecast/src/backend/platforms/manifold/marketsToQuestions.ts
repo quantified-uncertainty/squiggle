@@ -10,12 +10,8 @@ const platformName = "manifold";
  * This is the third step in the pipeline, after API fetching and saving to extended tables.
  */
 export function marketsToQuestions(
-  markets: ManifoldMarket[],
-  resolvedMarketIds: string[]
-): {
-  questions: FetchedQuestion[];
-  resolvedQuestionIds: string[];
-} {
+  markets: ManifoldMarket[]
+): FetchedQuestion[] {
   const questions: FetchedQuestion[] = [];
 
   for (const market of markets) {
@@ -56,5 +52,5 @@ export function marketsToQuestions(
     questions.push(question);
   }
 
-  return { questions, resolvedQuestionIds: resolvedMarketIds };
+  return questions;
 }
