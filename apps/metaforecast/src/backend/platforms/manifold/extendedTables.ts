@@ -3,7 +3,7 @@
 import fs from "fs/promises";
 import { z } from "zod";
 
-import { prisma, Prisma } from "@quri/metaforecast-db";
+import { ManifoldMarket, prisma, Prisma } from "@quri/metaforecast-db";
 
 import { fetchFullMarket, fetchGroup } from "./api";
 import {
@@ -12,7 +12,14 @@ import {
   ManifoldApiLiteMarket,
 } from "./apiSchema";
 
-async function saveExtendedMarket(market: ManifoldApiFullMarket) {
+const platformName = "manifold";
+
+/**
+ * Saves a full market from API to Manifold-specific tables and returns the Prisma market object.
+ */
+async function saveExtendedMarket(
+  market: ManifoldApiFullMarket
+): Promise<ManifoldMarket> {
   const {
     // extracted to separate User table
     creatorUsername,
@@ -68,13 +75,11 @@ async function saveExtendedMarket(market: ManifoldApiFullMarket) {
       groupIds.push(dbGroup.id);
     } catch {
       // not fatal - some old markets can have invalid group slugs
-      // example: https://api.manifold.markets/v0/market/uT1j2SWhZuiaA0myti9q, https://manifold.markets/Austin/will-at-least-75-of-the-usa-covid19
-      // slug `covid` exists in API, but doesn't exist on the website
       console.warn(`${slug} group not found`);
     }
   }
 
-  await prisma.$transaction(async (tx) => {
+  return await prisma.$transaction<ManifoldMarket>(async (tx) => {
     const dbMarket = await tx.manifoldMarket.upsert({
       where: {
         id: data.id,
@@ -88,10 +93,18 @@ async function saveExtendedMarket(market: ManifoldApiFullMarket) {
         options: data.options ?? Prisma.JsonNull,
         creatorId: creator.id,
       },
+      include: {
+        creator: true,
+        answers: true,
+        groups: {
+          include: {
+            group: true,
+          },
+        },
+      },
     });
 
     // Upsert answers
-    // TODO - can old answers disappear?
     for (const answer of answers) {
       await tx.manifoldMarketAnswer.upsert({
         where: {
@@ -140,9 +153,43 @@ async function saveExtendedMarket(market: ManifoldApiFullMarket) {
         },
       });
     }
+
+    // TODO - re-select with some nested relations?
+    return dbMarket;
   });
 }
 
+/**
+ * Process full markets and save them to extended tables.
+ * Returns Prisma market objects and resolved market IDs.
+ */
+export async function saveMarketsToExtendedTables(
+  markets: ManifoldApiFullMarket[]
+): Promise<{
+  prismaMarkets: ManifoldMarket[];
+  resolvedMarketIds: string[];
+}> {
+  const prismaMarkets: ManifoldMarket[] = [];
+  const resolvedMarketIds: string[] = [];
+
+  for (const market of markets) {
+    if (market.isResolved) {
+      resolvedMarketIds.push(`${platformName}-${market.id}`);
+      continue;
+    }
+
+    const prismaMarket = await saveExtendedMarket(market);
+    prismaMarkets.push(prismaMarket);
+  }
+
+  return { prismaMarkets, resolvedMarketIds };
+}
+
+/**
+ * Legacy function - kept for backward compatibility.
+ * Upgrades lite markets to full markets and saves them to extended tables.
+ * Returns full market API objects (not Prisma objects).
+ */
 export async function upgradeLiteMarketsAndSaveExtended(
   markets: ManifoldApiLiteMarket[]
 ): Promise<ManifoldApiFullMarket[]> {
@@ -156,8 +203,16 @@ export async function upgradeLiteMarketsAndSaveExtended(
   return fullMarkets;
 }
 
-// exposed as manifold-extended cli command
-export async function importMarketsFromJsonArchiveFile(filename: string) {
+/**
+ * Imports markets from a JSON archive file, saves to extended tables.
+ * Returns Prisma markets and resolved market IDs.
+ */
+export async function importMarketsFromJsonArchiveFile(
+  filename: string
+): Promise<{
+  prismaMarkets: ManifoldMarket[];
+  resolvedMarketIds: string[];
+}> {
   console.log("Loading JSON archive");
   const file = await fs.readFile(filename, "utf8");
   console.log("Parsing JSON");
@@ -165,22 +220,23 @@ export async function importMarketsFromJsonArchiveFile(filename: string) {
   console.log("Parsing with zod");
 
   const parsedArray = z.array(z.any()).parse(json);
+  const fullMarkets: ManifoldApiFullMarket[] = [];
 
-  // patch legacy data
+  // process each market in the JSON archive
   for (let i = 0; i < parsedArray.length; i++) {
     const market = parsedArray[i];
     console.log(
-      `Saving market ${market.id} (${i + 1} / ${parsedArray.length})`
+      `Processing market ${market.id} (${i + 1} / ${parsedArray.length})`
     );
 
     try {
       if (market.outcomeType === "QUADRATIC_FUNDING") {
-        // quadratic funding markets are not available anymore, e.g. see https://manifold.markets/FranklinBaldo/best-markets-of-the-week-contest-20
+        // quadratic funding markets are not available anymore
         continue;
       }
 
       if (!("url" in market)) {
-        // archive markets can miss URL; I don't want to make url optional in the schema because it's not optional in the API
+        // archive markets can miss URL
         market.url = `https://manifold.markets/${market.creatorUsername}/${market.slug}`;
       }
 
@@ -208,18 +264,29 @@ export async function importMarketsFromJsonArchiveFile(filename: string) {
         );
       }
 
-      await saveExtendedMarket(parsed.data);
+      fullMarkets.push(parsed.data);
     } catch (e) {
       console.error(e);
       console.log("Retrying with API...");
-      // maybe the broken market? let's refetch it from API and try again
-      await importSingleMarket(market.id);
+      // if there's an error, try to fetch from API
+      try {
+        const fullMarket = await fetchFullMarket(market.id);
+        fullMarkets.push(fullMarket);
+      } catch (apiError) {
+        console.error("Failed to fetch from API as well:", apiError);
+      }
     }
   }
+
+  // Save all markets to extended tables
+  return await saveMarketsToExtendedTables(fullMarkets);
 }
 
-// exposed as fetch-one cli command
-export async function importSingleMarket(id: string) {
+/**
+ * Imports a single market by ID, fetches it from API and saves to extended tables.
+ * Returns the Prisma market object.
+ */
+export async function importSingleMarket(id: string): Promise<ManifoldMarket> {
   const fullMarket = await fetchFullMarket(id);
-  await saveExtendedMarket(fullMarket);
+  return await saveExtendedMarket(fullMarket);
 }
