@@ -54,8 +54,8 @@ importers:
         specifier: ^19.0.0
         version: 19.0.0(react@19.0.0)
       react-markdown:
-        specifier: ^9.0.1
-        version: 9.0.3(@types/react@19.0.10)(react@19.0.0)
+        specifier: ^10.0.0
+        version: 10.0.0(@types/react@19.0.10)(react@19.0.0)
       zod:
         specifier: ^3.22.4
         version: 3.24.1
@@ -163,8 +163,8 @@ importers:
         specifier: ^3.5.0
         version: 3.5.0(react@19.0.0)
       react-markdown:
-        specifier: ^9.0.3
-        version: 9.0.3(@types/react@19.0.8)(react@19.0.0)
+        specifier: ^10.0.0
+        version: 10.0.0(@types/react@19.0.8)(react@19.0.0)
       react-select:
         specifier: ^5.9.0
         version: 5.9.0(patch_hash=wq67jk5fcdm5ibgcxfd7dcf7iq)(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -428,8 +428,8 @@ importers:
         specifier: ^3.5.0
         version: 3.5.0(react@19.0.0)
       react-markdown:
-        specifier: ^9.0.3
-        version: 9.0.3(@types/react@19.0.8)(react@19.0.0)
+        specifier: ^10.0.0
+        version: 10.0.0(@types/react@19.0.8)(react@19.0.0)
       react-select:
         specifier: ^5.10.0
         version: 5.10.0(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -863,7 +863,7 @@ importers:
         version: 4.17.21
       squiggle-components-0.10.0:
         specifier: npm:@quri/squiggle-components@0.10.0
-        version: '@quri/squiggle-components@0.10.0(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))'
+        version: '@quri/squiggle-components@0.10.0(@emotion/is-prop-valid@0.8.8)(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))'
       squiggle-components-0.8.5:
         specifier: npm:@quri/squiggle-components@0.8.5
         version: '@quri/squiggle-components@0.8.5(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))'
@@ -1034,8 +1034,8 @@ importers:
         specifier: ^7.53.2
         version: 7.53.2(react@19.0.0)
       react-markdown:
-        specifier: ^9.0.3
-        version: 9.0.3(@types/react@19.0.8)(react@19.0.0)
+        specifier: ^10.0.0
+        version: 10.0.0(@types/react@19.0.8)(react@19.0.0)
       reactflow:
         specifier: ^11.11.4
         version: 11.11.4(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -4493,6 +4493,9 @@ packages:
   '@quri/prettier-plugin-squiggle@0.9.5':
     resolution: {integrity: sha512-1sgxOV2E7/t5ZZEgKqmG7OV3BOiwY0HVfh7qaXz8HQf6tRsUTTH558XpmrrTQuddObQjqZXQlnYbqDFRaHySzA==}
 
+  '@quri/serializer@1.0.0':
+    resolution: {integrity: sha512-MHaz3jcIsOC2c9iUlxRMrAppa84ZPf8Mnoio2/z5KtojoBu4sHt5360FYD7uOBgUz3fq2hp/aLATV9g5/A7q2g==}
+
   '@quri/squiggle-components@0.10.0':
     resolution: {integrity: sha512-q4at8cvVrLj9vtcbuWLp5ELXxkhzLcFGqOlCwrfUGZuxYOmCMYksOpRQijASMPE6T8lFGQc/+sSZcBYCdicuGA==}
     engines: {node: '>=20.x'}
@@ -4621,6 +4624,14 @@ packages:
     peerDependencies:
       react: ^18
       react-dom: ^18
+
+  '@quri/ui@0.2.3':
+    resolution: {integrity: sha512-Q+kPjMbNbXyQHw+5/MDXQRSSFUuWSqz1+g/4lnmRXxJGk8JqfeOAFrS8P+E2ChjSKWihart2lsq11wMwMxLUUw==}
+    engines: {node: '>=20.x'}
+    peerDependencies:
+      react: ^18 | ^19
+      react-dom: ^18 | ^19
+      react-hook-form: ^7.53.2
 
   '@radix-ui/number@1.1.0':
     resolution: {integrity: sha512-V3gRzhVNU1ldS5XhAPTom1fOIo4ccrjjJgmE+LI2h/WaFpHmx0MQApT+KZHnx8abG6Avtfcz4WoEciMnpFT3HQ==}
@@ -5080,6 +5091,7 @@ packages:
 
   '@readme/json-schema-ref-parser@1.2.0':
     resolution: {integrity: sha512-Bt3QVovFSua4QmHa65EHUmh2xS0XJ3rgTEUPH998f4OW4VVJke3BuS16f+kM0ZLOGdvIrzrPRqwihuv5BAjtrA==}
+    deprecated: This package is no longer maintained. Please use `@apidevtools/json-schema-ref-parser` instead.
 
   '@readme/oas-extensions@17.0.1':
     resolution: {integrity: sha512-PCU7WLz8TkbdxsiE4eQGvJYDYZQPiyLhXme3SvLboSmH+8G6AJPJ5OymzSAdlf5sXpSSoD2q3dTIou3Cb2DirQ==}
@@ -8109,6 +8121,20 @@ packages:
       react-dom:
         optional: true
 
+  framer-motion@11.18.2:
+    resolution: {integrity: sha512-5F5Och7wrvtLVElIpclDT0CBzMVg3dL22B64aZwHtsIY8RB4mXICLrkajK4G9R+ieSAGcgrLeae2SeUTg2pr6w==}
+    peerDependencies:
+      '@emotion/is-prop-valid': '*'
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@emotion/is-prop-valid':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
   fs-constants@1.0.0:
     resolution: {integrity: sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow==}
 
@@ -8395,8 +8421,8 @@ packages:
   hast-util-to-html@9.0.3:
     resolution: {integrity: sha512-M17uBDzMJ9RPCqLMO92gNNUDuBSq10a25SDBI08iCCxmorf4Yy6sYHK57n9WAbRAAaU+DuR4W6GN9K4DFZesYg==}
 
-  hast-util-to-jsx-runtime@2.3.2:
-    resolution: {integrity: sha512-1ngXYb+V9UT5h+PxNRa1O1FYguZK/XL+gkeqvp7EdHlB9oHUG0eYRo/vY5inBdcqo3RkPMC58/H94HvkbfGdyg==}
+  hast-util-to-jsx-runtime@2.3.5:
+    resolution: {integrity: sha512-gHD+HoFxOMmmXLuq9f2dZDMQHVcplCVpMfBNRpJsF03yyLZvJGzsFORe8orVuYDX9k2w0VH0uF8oryFd1whqKQ==}
 
   hast-util-to-string@3.0.1:
     resolution: {integrity: sha512-XelQVTDWvqcl3axRfI0xSeoVKzyIFPwsAGSLIsKdJKQMXDYJS4WYrBNF/8J7RdhIcFI2BOHgAifggsvsxp/3+A==}
@@ -9426,6 +9452,7 @@ packages:
 
   lodash.setwith@4.3.2:
     resolution: {integrity: sha512-Cv2pndcuNDaqDMJ0gbLm5qNG5jyfsL6f8+f5PfZVVNhQCv+y+P5gAKkCdZbtiQlux7nsnWF7UmZd8JEFIo/4tg==}
+    deprecated: This package is deprecated.
 
   lodash.sortby@4.7.0:
     resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}
@@ -9879,6 +9906,9 @@ packages:
   micromark-util-types@2.0.1:
     resolution: {integrity: sha512-534m2WhVTddrcKVepwmVEVnUAmtrx9bfIjNoQHRqfnvdaHQiFytEhJoTgpWJvDEXCO5gLTQh3wYC1PgOJA4NSQ==}
 
+  micromark-util-types@2.0.2:
+    resolution: {integrity: sha512-Yw0ECSpJoViF1qTU4DC6NwtC4aWGt1EkzaQB8KPPyCRR8z9TWeV0HbEFGTO+ZY1wB22zmxnJqhPyTpOVCpeHTA==}
+
   micromark@3.2.0:
     resolution: {integrity: sha512-uD66tJj54JLYq0De10AhWycZWGQNUvDI55xPgk2sQM5kn1JYlhbCMTtEeT27+vAhW2FBQxLlOmS3pmA7/2z4aA==}
 
@@ -9976,8 +10006,14 @@ packages:
   motion-dom@11.14.3:
     resolution: {integrity: sha512-lW+D2wBy5vxLJi6aCP0xyxTxlTfiu+b+zcpVbGVFUxotwThqhdpPRSmX8xztAgtZMPMeU0WGVn/k1w4I+TbPqA==}
 
+  motion-dom@11.18.1:
+    resolution: {integrity: sha512-g76KvA001z+atjfxczdRtw/RXOM3OMSdd1f4DL77qCTF/+avrRJiawSG4yDibEQ215sr9kpinSlX2pCTJ9zbhw==}
+
   motion-utils@11.14.3:
     resolution: {integrity: sha512-Xg+8xnqIJTpr0L/cidfTTBFkvRw26ZtGGuIhA94J9PQ2p4mEa06Xx7QVYZH0BP+EpMSaDlu+q0I0mmvwADPsaQ==}
+
+  motion-utils@11.18.1:
+    resolution: {integrity: sha512-49Kt+HKjtbJKLtgO/LKj9Ld+6vw9BjH5d9sc40R/kVyH8GLAXgT42M2NnuPcJNuA3s9ZfZBUcwIgpmZWGEE+hA==}
 
   mri@1.2.0:
     resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}
@@ -10955,6 +10991,9 @@ packages:
   property-information@6.5.0:
     resolution: {integrity: sha512-PgTgs/BlvHxOu8QuEN7wi5A0OmXaBcHpmCSTehcs6Uuu9IkDIEo13Hy7n898RHfrQ49vKCoGeWZSaAK01nwVig==}
 
+  property-information@7.0.0:
+    resolution: {integrity: sha512-7D/qOz/+Y4X/rzSB6jKxKUsQnphO046ei8qxG59mtM3RG3DHgTK81HrxrmoDVINJb8NKT5ZsRbwHvQ6B68Iyhg==}
+
   proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
 
@@ -11119,14 +11158,20 @@ packages:
     peerDependencies:
       react: '>=16.8.0'
 
+  react-markdown@10.0.0:
+    resolution: {integrity: sha512-4mTz7Sya/YQ1jYOrkwO73VcFdkFJ8L8I9ehCxdcV0XrClHyOJGKbBk5FR4OOOG+HnyKw5u+C/Aby9TwinCteYA==}
+    peerDependencies:
+      '@types/react': '>=18'
+      react: '>=18'
+
   react-markdown@8.0.7:
     resolution: {integrity: sha512-bvWbzG4MtOU62XqBx3Xx+zB2raaFFsq4mYiAzfjXJMEz2sixgeAfraA3tvzULF02ZdOMUOKTBFFaZJDDrq+BJQ==}
     peerDependencies:
       '@types/react': '>=16'
       react: '>=16'
 
-  react-markdown@9.0.3:
-    resolution: {integrity: sha512-Yk7Z94dbgYTOrdk41Z74GoKA7rThnsbbqBTRYuxoe08qvfQ9tJVhmAKw6BJS/ZORG7kTy/s1QvYzSuaoBA1qfw==}
+  react-markdown@9.1.0:
+    resolution: {integrity: sha512-xaijuJB0kzGiUdG7nc2MOMDUDBWPyGAjZtUrow9XxUeua8IqeP+VlIfAZ3bphpcLTnSZXz6z9jcVC/TCwbfgdw==}
     peerDependencies:
       '@types/react': '>=18'
       react: '>=18'
@@ -11198,6 +11243,12 @@ packages:
 
   react-textarea-autosize@8.5.3:
     resolution: {integrity: sha512-XT1024o2pqCuZSuBt9FwHlaDeNtVrtCXu0Rnz88t1jUGheCLa3PhjE1GH8Ctm2axEtvdCl5SUHYschyQ0L5QHQ==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+
+  react-textarea-autosize@8.5.4:
+    resolution: {integrity: sha512-eSSjVtRLcLfFwFcariT77t9hcbVJHQV76b51QjQGarQIHml2+gM2lms0n3XrhnDmgK5B+/Z7TmQk5OHNzqYm/A==}
     engines: {node: '>=10'}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -11670,19 +11721,19 @@ packages:
 
   shikiji-core@0.10.2:
     resolution: {integrity: sha512-9Of8HMlF96usXJHmCL3Gd0Fcf0EcyJUF9m8EoAKKd98mHXi0La2AZl1h6PegSFGtiYcBDK/fLuKbDa1l16r1fA==}
-    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
+    deprecated: Deprecated, use @shikijs/core instead
 
   shikiji-core@0.9.15:
     resolution: {integrity: sha512-7hqIcUKS15OMs/61Qp2GvO1fSajBB36bDqi8vexIg5kp80V6v6SGtBrlq+nLlo7erMG2d1kvIuTIq1bwKI6fEg==}
-    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
+    deprecated: Deprecated, use @shikijs/core instead
 
   shikiji@0.10.2:
     resolution: {integrity: sha512-wtZg3T0vtYV2PnqusWQs3mDaJBdCPWxFDrBM/SE5LfrX92gjUvfEMlc+vJnoKY6Z/S44OWaCRzNIsdBRWcTAiw==}
-    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
+    deprecated: Deprecated, use shiki instead
 
   shikiji@0.9.15:
     resolution: {integrity: sha512-+inN4cN+nY7b0uCPOiqFHAk+cn2DEdM3AIQgPhAV7QKqhww/o7OGS5xvLh3SNnjke9C/HispALqGOQGYHVq7KQ==}
-    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
+    deprecated: Deprecated, use shiki instead
 
   should-equal@2.0.0:
     resolution: {integrity: sha512-ZP36TMrK9euEuWQYBig9W55WPC7uo37qzAEmbjHz4gfyuXrEUgF8cUvQVO+w+d3OMfPvSRQJ22lSm8MQJ43LTA==}
@@ -16349,7 +16400,7 @@ snapshots:
       estree-util-is-identifier-name: 3.0.0
       estree-util-scope: 1.0.0
       estree-walker: 3.0.3
-      hast-util-to-jsx-runtime: 2.3.2
+      hast-util-to-jsx-runtime: 2.3.5
       markdown-extensions: 2.0.0
       recma-build-jsx: 1.0.0
       recma-jsx: 1.0.0(acorn@8.14.0)
@@ -16725,7 +16776,9 @@ snapshots:
       '@quri/squiggle-lang': 0.9.5
       prettier: 3.4.2
 
-  '@quri/squiggle-components@0.10.0(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))':
+  '@quri/serializer@1.0.0': {}
+
+  '@quri/squiggle-components@0.10.0(@emotion/is-prop-valid@0.8.8)(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))':
     dependencies:
       '@codemirror/autocomplete': 6.18.4
       '@codemirror/commands': 6.5.0
@@ -16743,7 +16796,7 @@ snapshots:
       '@quri/prettier-plugin-squiggle': 0.10.0(@types/react@19.0.8)
       '@quri/squiggle-lang': 0.10.0(@types/react@19.0.8)
       '@quri/squiggle-textmate-grammar': 0.10.0
-      '@quri/ui': link:packages/ui
+      '@quri/ui': 0.2.3(@emotion/is-prop-valid@0.8.8)(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react-hook-form@7.54.2(react@19.0.0))(react@19.0.0)
       '@tailwindcss/typography': 0.5.16(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))
       clsx: 2.1.1
       codemirror: 6.0.1
@@ -16754,7 +16807,7 @@ snapshots:
       react-dom: 19.0.0(react@19.0.0)
       react-draggable: 4.4.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-hook-form: 7.54.2(react@19.0.0)
-      react-markdown: 9.0.3(@types/react@19.0.8)(react@19.0.0)
+      react-markdown: 9.1.0(@types/react@19.0.8)(react@19.0.0)
       reactflow: 11.11.4(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       remark-gfm: 4.0.0
       shikiji: 0.10.2
@@ -16762,6 +16815,7 @@ snapshots:
       unist-util-visit-parents: 6.0.1
       zod: 3.24.1
     transitivePeerDependencies:
+      - '@emotion/is-prop-valid'
       - '@types/react'
       - bufferutil
       - immer
@@ -16840,7 +16894,7 @@ snapshots:
       react-dom: 19.0.0(react@19.0.0)
       react-error-boundary: 4.0.11(react@19.0.0)
       react-hook-form: 7.54.2(react@19.0.0)
-      react-markdown: 9.0.3(@types/react@19.0.8)(react@19.0.0)
+      react-markdown: 9.1.0(@types/react@19.0.8)(react@19.0.0)
       react-resizable: 3.0.5(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       vscode-uri: 3.0.8
       zod: 3.24.1
@@ -16880,7 +16934,7 @@ snapshots:
       react-dom: 19.0.0(react@19.0.0)
       react-draggable: 4.4.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-hook-form: 7.54.2(react@19.0.0)
-      react-markdown: 9.0.3(@types/react@19.0.8)(react@19.0.0)
+      react-markdown: 9.1.0(@types/react@19.0.8)(react@19.0.0)
       zod: 3.24.1
     transitivePeerDependencies:
       - '@types/react'
@@ -16918,7 +16972,7 @@ snapshots:
       react-dom: 19.0.0(react@19.0.0)
       react-draggable: 4.4.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-hook-form: 7.54.2(react@19.0.0)
-      react-markdown: 9.0.3(@types/react@19.0.8)(react@19.0.0)
+      react-markdown: 9.1.0(@types/react@19.0.8)(react@19.0.0)
       remark-gfm: 4.0.0
       shikiji: 0.9.15
       unist-util-visit: 5.0.0
@@ -16960,7 +17014,7 @@ snapshots:
       react-dom: 19.0.0(react@19.0.0)
       react-draggable: 4.4.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-hook-form: 7.54.2(react@19.0.0)
-      react-markdown: 9.0.3(@types/react@19.0.8)(react@19.0.0)
+      react-markdown: 9.1.0(@types/react@19.0.8)(react@19.0.0)
       remark-gfm: 4.0.0
       shikiji: 0.10.2
       unist-util-visit: 5.0.0
@@ -17000,7 +17054,7 @@ snapshots:
       react-dom: 19.0.0(react@19.0.0)
       react-draggable: 4.4.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-hook-form: 7.54.2(react@19.0.0)
-      react-markdown: 9.0.3(@types/react@19.0.8)(react@19.0.0)
+      react-markdown: 9.1.0(@types/react@19.0.8)(react@19.0.0)
       remark-gfm: 4.0.0
       shikiji: 0.10.2
       unist-util-visit: 5.0.0
@@ -17041,7 +17095,7 @@ snapshots:
       react-dom: 19.0.0(react@19.0.0)
       react-draggable: 4.4.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-hook-form: 7.54.2(react@19.0.0)
-      react-markdown: 9.0.3(@types/react@19.0.8)(react@19.0.0)
+      react-markdown: 9.1.0(@types/react@19.0.8)(react@19.0.0)
       remark-gfm: 4.0.0
       shikiji: 0.10.2
       unist-util-visit: 5.0.0
@@ -17056,7 +17110,7 @@ snapshots:
   '@quri/squiggle-lang@0.10.0(@types/react@19.0.8)':
     dependencies:
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
-      '@quri/serializer': link:packages/serializer
+      '@quri/serializer': 1.0.0
       commander: 12.1.0
       d3-format: 3.1.0
       d3-time-format: 4.1.0
@@ -17228,6 +17282,24 @@ snapshots:
       react-hook-form: 7.54.2(react@19.0.0)
       react-select: 5.10.0(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-textarea-autosize: 8.5.3(@types/react@19.0.8)(react@19.0.0)
+      react-use: 17.6.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+    transitivePeerDependencies:
+      - '@emotion/is-prop-valid'
+      - '@types/react'
+      - supports-color
+
+  '@quri/ui@0.2.3(@emotion/is-prop-valid@0.8.8)(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react-hook-form@7.54.2(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      '@floating-ui/react': 0.26.16(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@headlessui/react': 2.2.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      clsx: 2.1.1
+      framer-motion: 11.18.2(@emotion/is-prop-valid@0.8.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react: 19.0.0
+      react-colorful: 5.6.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react-dom: 19.0.0(react@19.0.0)
+      react-hook-form: 7.54.2(react@19.0.0)
+      react-select: 5.10.0(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react-textarea-autosize: 8.5.4(@types/react@19.0.8)(react@19.0.0)
       react-use: 17.6.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
@@ -21451,6 +21523,16 @@ snapshots:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
+  framer-motion@11.18.2(@emotion/is-prop-valid@0.8.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
+    dependencies:
+      motion-dom: 11.18.1
+      motion-utils: 11.18.1
+      tslib: 2.8.1
+    optionalDependencies:
+      '@emotion/is-prop-valid': 0.8.8
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+
   fs-constants@1.0.0:
     optional: true
 
@@ -21902,7 +21984,7 @@ snapshots:
       devlop: 1.1.0
       hast-util-from-parse5: 8.0.1
       parse5: 7.2.1
-      vfile: 6.0.1
+      vfile: 6.0.3
       vfile-message: 4.0.2
 
   hast-util-from-parse5@8.0.1:
@@ -21912,7 +21994,7 @@ snapshots:
       devlop: 1.1.0
       hastscript: 8.0.0
       property-information: 6.5.0
-      vfile: 6.0.1
+      vfile: 6.0.3
       vfile-location: 5.0.2
       web-namespaces: 2.0.1
 
@@ -21959,7 +22041,7 @@ snapshots:
       stringify-entities: 4.0.4
       zwitch: 2.0.4
 
-  hast-util-to-jsx-runtime@2.3.2:
+  hast-util-to-jsx-runtime@2.3.5:
     dependencies:
       '@types/estree': 1.0.6
       '@types/hast': 3.0.4
@@ -21971,7 +22053,7 @@ snapshots:
       mdast-util-mdx-expression: 2.0.1
       mdast-util-mdx-jsx: 3.2.0
       mdast-util-mdxjs-esm: 2.0.1
-      property-information: 6.5.0
+      property-information: 7.0.0
       space-separated-tokens: 2.0.2
       style-to-object: 1.0.8
       unist-util-position: 5.0.0
@@ -23464,7 +23546,7 @@ snapshots:
 
   mdast-util-find-and-replace@3.0.1:
     dependencies:
-      '@types/mdast': 4.0.2
+      '@types/mdast': 4.0.4
       escape-string-regexp: 5.0.0
       unist-util-is: 6.0.0
       unist-util-visit-parents: 6.0.1
@@ -23495,7 +23577,7 @@ snapshots:
 
   mdast-util-from-markdown@2.0.0:
     dependencies:
-      '@types/mdast': 4.0.2
+      '@types/mdast': 4.0.4
       '@types/unist': 3.0.3
       decode-named-character-reference: 1.0.2
       devlop: 1.1.0
@@ -23598,7 +23680,7 @@ snapshots:
   mdast-util-math@3.0.0:
     dependencies:
       '@types/hast': 3.0.4
-      '@types/mdast': 4.0.2
+      '@types/mdast': 4.0.4
       devlop: 1.1.0
       longest-streak: 3.1.0
       mdast-util-from-markdown: 2.0.0
@@ -23675,7 +23757,7 @@ snapshots:
 
   mdast-util-newline-to-break@2.0.0:
     dependencies:
-      '@types/mdast': 4.0.2
+      '@types/mdast': 4.0.4
       mdast-util-find-and-replace: 3.0.1
 
   mdast-util-phrasing@4.0.0:
@@ -23713,7 +23795,7 @@ snapshots:
 
   mdast-util-to-markdown@2.1.0:
     dependencies:
-      '@types/mdast': 4.0.2
+      '@types/mdast': 4.0.4
       '@types/unist': 3.0.3
       longest-streak: 3.1.0
       mdast-util-phrasing: 4.0.0
@@ -23953,7 +24035,7 @@ snapshots:
       micromark-util-character: 2.1.1
       micromark-util-events-to-acorn: 2.0.2
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
 
   micromark-extension-mdx-jsx@3.0.1:
     dependencies:
@@ -23966,12 +24048,12 @@ snapshots:
       micromark-util-character: 2.1.1
       micromark-util-events-to-acorn: 2.0.2
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
       vfile-message: 4.0.2
 
   micromark-extension-mdx-md@2.0.0:
     dependencies:
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
 
   micromark-extension-mdxjs-esm@3.0.0:
     dependencies:
@@ -23981,7 +24063,7 @@ snapshots:
       micromark-util-character: 2.1.1
       micromark-util-events-to-acorn: 2.0.2
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
       unist-util-position-from-estree: 2.0.0
       vfile-message: 4.0.2
 
@@ -24006,13 +24088,13 @@ snapshots:
     dependencies:
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
 
   micromark-factory-destination@2.0.1:
     dependencies:
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
 
   micromark-factory-label@1.1.0:
     dependencies:
@@ -24026,14 +24108,14 @@ snapshots:
       devlop: 1.1.0
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
 
   micromark-factory-label@2.0.1:
     dependencies:
       devlop: 1.1.0
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
 
   micromark-factory-mdx-expression@2.0.2:
     dependencies:
@@ -24043,7 +24125,7 @@ snapshots:
       micromark-util-character: 2.1.1
       micromark-util-events-to-acorn: 2.0.2
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
       unist-util-position-from-estree: 2.0.0
       vfile-message: 4.0.2
 
@@ -24074,14 +24156,14 @@ snapshots:
       micromark-factory-space: 2.0.0
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
 
   micromark-factory-title@2.0.1:
     dependencies:
       micromark-factory-space: 2.0.1
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
 
   micromark-factory-whitespace@1.1.0:
     dependencies:
@@ -24095,14 +24177,14 @@ snapshots:
       micromark-factory-space: 2.0.0
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
 
   micromark-factory-whitespace@2.0.1:
     dependencies:
       micromark-factory-space: 2.0.1
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
 
   micromark-util-character@1.2.0:
     dependencies:
@@ -24117,7 +24199,7 @@ snapshots:
   micromark-util-character@2.1.1:
     dependencies:
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
 
   micromark-util-chunked@1.1.0:
     dependencies:
@@ -24200,7 +24282,7 @@ snapshots:
       devlop: 1.1.0
       estree-util-visit: 2.0.0
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
       vfile-message: 4.0.2
 
   micromark-util-html-tag-name@1.2.0: {}
@@ -24264,7 +24346,7 @@ snapshots:
       devlop: 1.1.0
       micromark-util-chunked: 2.0.1
       micromark-util-symbol: 2.0.1
-      micromark-util-types: 2.0.1
+      micromark-util-types: 2.0.2
 
   micromark-util-symbol@1.1.0: {}
 
@@ -24277,6 +24359,8 @@ snapshots:
   micromark-util-types@2.0.0: {}
 
   micromark-util-types@2.0.1: {}
+
+  micromark-util-types@2.0.2: {}
 
   micromark@3.2.0:
     dependencies:
@@ -24410,7 +24494,13 @@ snapshots:
 
   motion-dom@11.14.3: {}
 
+  motion-dom@11.18.1:
+    dependencies:
+      motion-utils: 11.18.1
+
   motion-utils@11.14.3: {}
+
+  motion-utils@11.18.1: {}
 
   mri@1.2.0: {}
 
@@ -25377,6 +25467,8 @@ snapshots:
 
   property-information@6.5.0: {}
 
+  property-information@7.0.0: {}
+
   proxy-from-env@1.1.0: {}
 
   prr@0.0.0: {}
@@ -25554,6 +25646,42 @@ snapshots:
     dependencies:
       react: 19.0.0
 
+  react-markdown@10.0.0(@types/react@19.0.10)(react@19.0.0):
+    dependencies:
+      '@types/hast': 3.0.4
+      '@types/mdast': 4.0.4
+      '@types/react': 19.0.10
+      devlop: 1.1.0
+      hast-util-to-jsx-runtime: 2.3.5
+      html-url-attributes: 3.0.1
+      mdast-util-to-hast: 13.2.0
+      react: 19.0.0
+      remark-parse: 11.0.0
+      remark-rehype: 11.1.1
+      unified: 11.0.5
+      unist-util-visit: 5.0.0
+      vfile: 6.0.3
+    transitivePeerDependencies:
+      - supports-color
+
+  react-markdown@10.0.0(@types/react@19.0.8)(react@19.0.0):
+    dependencies:
+      '@types/hast': 3.0.4
+      '@types/mdast': 4.0.4
+      '@types/react': 19.0.8
+      devlop: 1.1.0
+      hast-util-to-jsx-runtime: 2.3.5
+      html-url-attributes: 3.0.1
+      mdast-util-to-hast: 13.2.0
+      react: 19.0.0
+      remark-parse: 11.0.0
+      remark-rehype: 11.1.1
+      unified: 11.0.5
+      unist-util-visit: 5.0.0
+      vfile: 6.0.3
+    transitivePeerDependencies:
+      - supports-color
+
   react-markdown@8.0.7(@types/react@19.0.8)(react@19.0.0):
     dependencies:
       '@types/hast': 2.3.10
@@ -25576,29 +25704,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  react-markdown@9.0.3(@types/react@19.0.10)(react@19.0.0):
+  react-markdown@9.1.0(@types/react@19.0.8)(react@19.0.0):
     dependencies:
       '@types/hast': 3.0.4
-      '@types/react': 19.0.10
-      devlop: 1.1.0
-      hast-util-to-jsx-runtime: 2.3.2
-      html-url-attributes: 3.0.1
-      mdast-util-to-hast: 13.2.0
-      react: 19.0.0
-      remark-parse: 11.0.0
-      remark-rehype: 11.1.1
-      unified: 11.0.5
-      unist-util-visit: 5.0.0
-      vfile: 6.0.3
-    transitivePeerDependencies:
-      - supports-color
-
-  react-markdown@9.0.3(@types/react@19.0.8)(react@19.0.0):
-    dependencies:
-      '@types/hast': 3.0.4
+      '@types/mdast': 4.0.4
       '@types/react': 19.0.8
       devlop: 1.1.0
-      hast-util-to-jsx-runtime: 2.3.2
+      hast-util-to-jsx-runtime: 2.3.5
       html-url-attributes: 3.0.1
       mdast-util-to-hast: 13.2.0
       react: 19.0.0
@@ -25735,6 +25847,15 @@ snapshots:
   react-textarea-autosize@8.5.3(@types/react@19.0.8)(react@19.0.0):
     dependencies:
       '@babel/runtime': 7.26.7
+      react: 19.0.0
+      use-composed-ref: 1.4.0(@types/react@19.0.8)(react@19.0.0)
+      use-latest: 1.3.0(@types/react@19.0.8)(react@19.0.0)
+    transitivePeerDependencies:
+      - '@types/react'
+
+  react-textarea-autosize@8.5.4(@types/react@19.0.8)(react@19.0.0):
+    dependencies:
+      '@babel/runtime': 7.26.9
       react: 19.0.0
       use-composed-ref: 1.4.0(@types/react@19.0.8)(react@19.0.0)
       use-latest: 1.3.0(@types/react@19.0.8)(react@19.0.0)
@@ -27515,7 +27636,7 @@ snapshots:
   vfile-location@5.0.2:
     dependencies:
       '@types/unist': 3.0.3
-      vfile: 6.0.1
+      vfile: 6.0.3
 
   vfile-message@3.1.4:
     dependencies:
