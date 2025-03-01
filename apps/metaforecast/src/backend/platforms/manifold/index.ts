@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { ManifoldMarket } from "@quri/metaforecast-db";
 
 import {
@@ -37,6 +38,34 @@ function separateResolvedMarkets(markets: ManifoldMarket[]): {
   }
 
   return { unresolvedMarkets, resolvedQuestionIds };
+}
+
+/**
+ * Common processing pipeline for markets, showing statistics and saving to DB.
+ */
+async function processMarketsAndSave(
+  platform: Platform,
+  prismaMarkets: ManifoldMarket[],
+  options: {
+    replaceAll?: boolean;
+    index?: boolean;
+  } = {}
+) {
+  const { unresolvedMarkets, resolvedQuestionIds } =
+    separateResolvedMarkets(prismaMarkets);
+  const questions = marketsToQuestions(unresolvedMarkets);
+
+  showStatistics(questions);
+
+  await saveQuestionsWithStats({
+    platform,
+    fetchedQuestions: questions,
+    ...options,
+  });
+
+  await saveResolvedQuestions(resolvedQuestionIds);
+
+  return { questions, resolvedQuestionIds };
 }
 
 /**
@@ -96,18 +125,7 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
       .argument("<filename>", "Filename of the JSON archive")
       .action(async (filename) => {
         const prismaMarkets = await importMarketsFromJsonArchiveFile(filename);
-        const { unresolvedMarkets, resolvedQuestionIds } = separateResolvedMarkets(prismaMarkets);
-        const questions = marketsToQuestions(unresolvedMarkets);
-
-        showStatistics(questions);
-
-        await saveQuestionsWithStats({
-          platform: this,
-          fetchedQuestions: questions,
-          index: true,
-        });
-
-        await saveResolvedQuestions(resolvedQuestionIds);
+        await processMarketsAndSave(this, prismaMarkets, { index: true });
       });
 
     command.command("fetch-new").action(async () => {
@@ -121,18 +139,7 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
           upToUpdatedTime,
         });
 
-      const { unresolvedMarkets, resolvedQuestionIds } = separateResolvedMarkets(prismaMarkets);
-      const questions = marketsToQuestions(unresolvedMarkets);
-
-      showStatistics(questions);
-
-      await saveQuestionsWithStats({
-        platform: this,
-        fetchedQuestions: questions,
-        index: true,
-      });
-
-      await saveResolvedQuestions(resolvedQuestionIds);
+      await processMarketsAndSave(this, prismaMarkets, { index: true });
 
       if (latestUpdateTime) {
         await setPlatformState(this, {
@@ -145,19 +152,7 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
     // this command probably won't work, because it will run out of memory
     command.command("fetch-all").action(async () => {
       const { prismaMarkets } = await fetchAndStoreMarketsFromApi();
-
-      const { unresolvedMarkets, resolvedQuestionIds } = separateResolvedMarkets(prismaMarkets);
-      const questions = marketsToQuestions(unresolvedMarkets);
-
-      showStatistics(questions);
-
-      await saveQuestionsWithStats({
-        platform: this,
-        fetchedQuestions: questions,
-        replaceAll: true,
-      });
-
-      await saveResolvedQuestions(resolvedQuestionIds);
+      await processMarketsAndSave(this, prismaMarkets, { replaceAll: true });
     });
   },
 
