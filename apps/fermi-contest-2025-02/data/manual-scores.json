@@ -1,0 +1,50 @@
+{
+  "submission-dmartin89-1740680874350": {
+    "surprise": [8, 8, 7],
+    "relevance": [7.5, 7.5, 7.5],
+    "robustness": [7, 7, 7.5],
+    "quality": [8.9, 9, 8.5]
+  },
+  "submission-kairos_-1740681077355": {
+    "surprise": [7, 7, 7],
+    "relevance": [9, 9, 9],
+    "robustness": [7, 7, 7],
+    "quality": [8, 8, 8]
+  },
+  "submission-shankar-sivarajan-1740680164317": {
+    "surprise": [7, 8, 8],
+    "relevance": [7.5, 7.5, 7.5],
+    "robustness": [6, 7, 7],
+    "quality": [8, 7, 8]
+  },
+  "submission-joey-marcellino-1740680813666": {
+    "surprise": [7, 7, 7],
+    "relevance": [7.5, 8.5, 8.5],
+    "robustness": [6, 7, 6],
+    "quality": [7, 7, 7]
+  },
+  "submission-denkenberger-1740680034357": {
+    "surprise": [4, 6, 6],
+    "relevance": [8, 8, 8],
+    "robustness": [7, 6, 6],
+    "quality": [8, 8, 8]
+  },
+  "submission-steven-byrnes-1740680581686": {
+    "surprise": [7, 7, 7],
+    "relevance": [5, 5, 6],
+    "robustness": [7, 6, 6],
+    "quality": [7, 7, 6]
+  },
+  "submission-niplav-1740680316520": {
+    "surprise": [3, 4, 3],
+    "relevance": [7.5, 7.5, 7],
+    "robustness": [7, 7, 7],
+    "quality": [8, 8, 8]
+  },
+  "submission-shankar-sivarajan-1740680462489": {
+    "surprise": [7, 7, 7],
+    "relevance": [2, 2.5, 2],
+    "robustness": [6, 6, 4],
+    "quality": [6.5, 6, 6]
+  }
+}
