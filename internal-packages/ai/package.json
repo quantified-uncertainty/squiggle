@@ -29,7 +29,7 @@
     "@quri/squiggle-lang": "workspace:*",
     "chalk": "^5.4.1",
     "clsx": "^2.1.1",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.7",
     "openai": "^4.82.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.1",
