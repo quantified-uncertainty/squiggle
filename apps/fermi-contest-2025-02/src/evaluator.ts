@@ -273,9 +273,10 @@ export class FermiContestEvaluator {
 
   // Combine multiple explanations from different runs
   private combineExplanations(explanations: string[]): string {
-    // For now, just use the first explanation to keep it simple
-    // Could be enhanced to extract and combine key points from all explanations
-    return explanations[0] || "";
+    // Store all explanations, separated by run number
+    return explanations
+      .map((explanation, index) => `##### Run ${index + 1}:\n\n${explanation}`)
+      .join("\n\n---\n\n");
   }
 
   // Calculate total weighted score
@@ -366,27 +367,7 @@ export class FermiContestEvaluator {
 
   // Helper to condense LLM responses to key points
   private condenseLLMResponse(response: string): string {
-    // Extract only a few paragraphs to keep the report manageable
-    const paragraphs = response
-      .split("\n\n")
-      .filter((p) => p.trim().length > 0);
-
-    // Find paragraphs that likely contain the core reasoning
-    const keyParagraphs = paragraphs.filter(
-      (p) =>
-        p.includes("score") ||
-        p.includes("rating") ||
-        p.includes("evaluation") ||
-        p.includes("assess") ||
-        p.includes("conclusion")
-    );
-
-    // If we found key paragraphs, use those, otherwise take the first few
-    const relevantParagraphs =
-      keyParagraphs.length > 0
-        ? keyParagraphs.slice(0, 2)
-        : paragraphs.slice(0, 2);
-
-    return relevantParagraphs.join("\n\n");
+    // don't condense the response
+    return response;
   }
 }
