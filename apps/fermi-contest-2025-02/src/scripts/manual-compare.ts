@@ -18,7 +18,8 @@ async function printManualScores() {
     let score = 0;
     for (const [topic, values] of Object.entries(entry as any)) {
       const avg =
-        (values as number[]).reduce((a, b) => a + b, 0) / values.length;
+        (values as number[]).reduce((a, b) => a + b, 0) /
+        (values as any).length;
       score += avg * weights[topic];
     }
     console.log(key.padEnd(45), score);
