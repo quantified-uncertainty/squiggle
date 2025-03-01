@@ -11,6 +11,10 @@ import {
   ManifoldApiLiteMarket,
 } from "./apiSchema";
 
+/**
+ * Low-level API functions for Manifold. Should map to the Manifold API pretty closely.
+ */
+
 // See https://docs.manifold.markets/api
 const ENDPOINT = "https://api.manifold.markets/v0";
 

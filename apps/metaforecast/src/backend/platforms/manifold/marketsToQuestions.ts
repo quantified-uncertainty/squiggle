@@ -9,7 +9,7 @@ const platformName = "manifold";
  * Converts Prisma-level ManifoldMarket objects to FetchedQuestion objects.
  * This is the third step in the pipeline, after API fetching and saving to extended tables.
  */
-export function prismaMarketsToQuestions(
+export function marketsToQuestions(
   markets: ManifoldMarket[],
   resolvedMarketIds: string[]
 ): {

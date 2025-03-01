@@ -12,8 +12,8 @@ import {
   importMarketsFromJsonArchiveFile,
   importSingleMarket,
 } from "./extendedTables";
-import { fetchMarketsFromApi } from "./fetch";
-import { prismaMarketsToQuestions } from "./pipeline";
+import { fetchAndStoreMarketsFromApi } from "./fetchAndStore";
+import { marketsToQuestions } from "./marketsToQuestions";
 
 /**
  * The code for this platform has been refactored to follow a clear pipeline:
@@ -73,7 +73,7 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
       .action(async (filename) => {
         const { prismaMarkets, resolvedMarketIds } =
           await importMarketsFromJsonArchiveFile(filename);
-        const { questions, resolvedQuestionIds } = prismaMarketsToQuestions(
+        const { questions, resolvedQuestionIds } = marketsToQuestions(
           prismaMarkets,
           resolvedMarketIds
         );
@@ -96,11 +96,11 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
         : new Date(Date.now() - 1000 * 60 * 60 * 24); // 1 day ago
 
       const { prismaMarkets, resolvedMarketIds, latestUpdateTime } =
-        await fetchMarketsFromApi({
+        await fetchAndStoreMarketsFromApi({
           upToUpdatedTime,
         });
 
-      const { questions, resolvedQuestionIds } = prismaMarketsToQuestions(
+      const { questions, resolvedQuestionIds } = marketsToQuestions(
         prismaMarkets,
         resolvedMarketIds
       );
@@ -125,9 +125,10 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
     // not a daily fetcher because we'll usually use an incremental fetcher
     // this command probably won't work, because it will run out of memory
     command.command("fetch-all").action(async () => {
-      const { prismaMarkets, resolvedMarketIds } = await fetchMarketsFromApi();
+      const { prismaMarkets, resolvedMarketIds } =
+        await fetchAndStoreMarketsFromApi();
 
-      const { questions, resolvedQuestionIds } = prismaMarketsToQuestions(
+      const { questions, resolvedQuestionIds } = marketsToQuestions(
         prismaMarkets,
         resolvedMarketIds
       );

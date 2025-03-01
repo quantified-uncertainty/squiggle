@@ -6,11 +6,7 @@ import { z } from "zod";
 import { ManifoldMarket, prisma, Prisma } from "@quri/metaforecast-db";
 
 import { fetchFullMarket, fetchGroup } from "./api";
-import {
-  fullMarketSchema,
-  ManifoldApiFullMarket,
-  ManifoldApiLiteMarket,
-} from "./apiSchema";
+import { fullMarketSchema, ManifoldApiFullMarket } from "./apiSchema";
 
 const platformName = "manifold";
 
@@ -183,24 +179,6 @@ export async function saveMarketsToExtendedTables(
   }
 
   return { prismaMarkets, resolvedMarketIds };
-}
-
-/**
- * Legacy function - kept for backward compatibility.
- * Upgrades lite markets to full markets and saves them to extended tables.
- * Returns full market API objects (not Prisma objects).
- */
-export async function upgradeLiteMarketsAndSaveExtended(
-  markets: ManifoldApiLiteMarket[]
-): Promise<ManifoldApiFullMarket[]> {
-  const fullMarkets: ManifoldApiFullMarket[] = [];
-  for (const market of markets) {
-    console.log(`Fetching full market ${market.url}`);
-    const fullMarket = await fetchFullMarket(market.id);
-    await saveExtendedMarket(fullMarket);
-    fullMarkets.push(fullMarket);
-  }
-  return fullMarkets;
 }
 
 /**

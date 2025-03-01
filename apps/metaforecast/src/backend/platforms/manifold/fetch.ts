@@ -1,17 +1,16 @@
-import { ManifoldMarket } from "@quri/metaforecast-db";
-
 import { fetchAllMarketsLite, fetchFullMarket } from "./api";
 import { ManifoldApiFullMarket, ManifoldApiLiteMarket } from "./apiSchema";
-import { saveMarketsToExtendedTables } from "./extendedTables";
+
+export type FetchParams = {
+  upToUpdatedTime?: Date;
+};
 
 /**
  * Fetches all lite markets from the Manifold API.
  */
 export async function fetchLiteMarkets({
   upToUpdatedTime,
-}: {
-  upToUpdatedTime?: Date;
-} = {}): Promise<{
+}: FetchParams = {}): Promise<{
   liteMarkets: ManifoldApiLiteMarket[];
   latestUpdateTime?: Date;
 }> {
@@ -47,36 +46,11 @@ export async function upgradeLiteMarketsToFull(
   return fullMarkets;
 }
 
-/**
- * High-level function that orchestrates the fetching pipeline.
- * 1. Fetch lite markets from API
- * 2. Upgrade lite markets to full markets
- * 3. Save to extended tables and return Prisma objects
- */
-export async function fetchMarketsFromApi({
-  upToUpdatedTime,
-}: {
-  upToUpdatedTime?: Date;
-} = {}): Promise<{
-  prismaMarkets: ManifoldMarket[];
-  resolvedMarketIds: string[];
+export async function fetchFullMarkets(params: FetchParams = {}): Promise<{
+  fullMarkets: ManifoldApiFullMarket[];
   latestUpdateTime?: Date;
 }> {
-  // Step 1: Fetch lite markets from API
-  const { liteMarkets, latestUpdateTime } = await fetchLiteMarkets({
-    upToUpdatedTime,
-  });
-
-  // Step 2: Upgrade lite markets to full markets
+  const { liteMarkets, latestUpdateTime } = await fetchLiteMarkets(params);
   const fullMarkets = await upgradeLiteMarketsToFull(liteMarkets);
-
-  // Step 3: Save to extended tables and get Prisma objects
-  const { prismaMarkets, resolvedMarketIds } =
-    await saveMarketsToExtendedTables(fullMarkets);
-
-  return {
-    prismaMarkets,
-    resolvedMarketIds,
-    latestUpdateTime,
-  };
+  return { fullMarkets, latestUpdateTime };
 }
