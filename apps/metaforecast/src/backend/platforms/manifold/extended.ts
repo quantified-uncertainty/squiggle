@@ -8,11 +8,11 @@ import { prisma, Prisma } from "@quri/metaforecast-db";
 import { fetchFullMarket, fetchGroup } from "./api";
 import {
   fullMarketSchema,
-  ManifoldFullMarket,
-  ManifoldLiteMarket,
+  ManifoldApiFullMarket,
+  ManifoldApiLiteMarket,
 } from "./apiSchema";
 
-async function saveExtendedMarket(market: ManifoldFullMarket) {
+async function saveExtendedMarket(market: ManifoldApiFullMarket) {
   const {
     // extracted to separate User table
     creatorUsername,
@@ -144,9 +144,9 @@ async function saveExtendedMarket(market: ManifoldFullMarket) {
 }
 
 export async function upgradeLiteMarketsAndSaveExtended(
-  markets: ManifoldLiteMarket[]
-): Promise<ManifoldFullMarket[]> {
-  const fullMarkets: ManifoldFullMarket[] = [];
+  markets: ManifoldApiLiteMarket[]
+): Promise<ManifoldApiFullMarket[]> {
+  const fullMarkets: ManifoldApiFullMarket[] = [];
   for (const market of markets) {
     console.log(`Fetching full market ${market.url}`);
     const fullMarket = await fetchFullMarket(market.id);

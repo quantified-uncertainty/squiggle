@@ -6,9 +6,9 @@ import {
   fullMarketSchema,
   groupSchema,
   liteMarketSchema,
-  ManifoldFullMarket,
-  ManifoldGroup,
-  ManifoldLiteMarket,
+  ManifoldApiFullMarket,
+  ManifoldApiGroup,
+  ManifoldApiLiteMarket,
 } from "./apiSchema";
 
 // See https://docs.manifold.markets/api
@@ -20,11 +20,11 @@ export async function fetchAllMarketsLite({
   upToUpdatedTime,
 }: {
   upToUpdatedTime?: Date;
-} = {}): Promise<ManifoldLiteMarket[]> {
+} = {}): Promise<ManifoldApiLiteMarket[]> {
   const endpoint = `${ENDPOINT}/markets`;
 
   let lastId = "";
-  const allMarkets: ManifoldLiteMarket[] = [];
+  const allMarkets: ManifoldApiLiteMarket[] = [];
   let counter = 1;
   while (1) {
     const url = new URL(endpoint);
@@ -67,13 +67,13 @@ export async function fetchAllMarketsLite({
 
 export async function fetchFullMarket(
   marketId: string
-): Promise<ManifoldFullMarket> {
+): Promise<ManifoldApiFullMarket> {
   const endpoint = `${ENDPOINT}/market/${marketId}`;
   const data = await fetchJson(endpoint);
   return fullMarketSchema.parse(data);
 }
 
-export async function fetchGroup(slug: string): Promise<ManifoldGroup> {
+export async function fetchGroup(slug: string): Promise<ManifoldApiGroup> {
   console.log(`Fetching group ${slug}`);
   const endpoint = `${ENDPOINT}/group/${slug}`;
   const data = await fetchJson(endpoint);

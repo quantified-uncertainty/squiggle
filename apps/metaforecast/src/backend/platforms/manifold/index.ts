@@ -10,12 +10,32 @@ import { QuestionOption } from "@/common/types";
 
 import { average, sum } from "../../../utils";
 import { fetchAllMarketsLite } from "./api";
-import { ManifoldFullMarket } from "./apiSchema";
+import { ManifoldApiFullMarket } from "./apiSchema";
 import {
   importMarketsFromJsonArchiveFile,
   importSingleMarket,
   upgradeLiteMarketsAndSaveExtended,
 } from "./extended";
+
+/**
+ * The code for this platform fetches API questions, then saves them to "extended" tables and to the primary "questions" table, and does indexing to Elasticsearch.
+ *
+ * Type types are somewhat messy; here's the refactoring plan: make a clear pipeline from API to extended tables to questions/elastic.
+ *
+ * Pipeline:
+ * 1. API or JSON archive -> fetch and parse to ApiFullMarket[]
+ * 2. ApiFullMarket[] -> extended tables (i.e., manifold-specific tables); return the Prisma-level objects instead of keeping them as API objects. (This will allow us to reuse the code on the following stages.)
+ * 3. Prisma-level objects -> `questions` table and Elasticsearch
+ *
+ * So, one of the main goals here is to deal in Prisma-level objects as soon as they're available.
+ *
+ * Because the "extended" tables reference each other, I assume you'll need to do nested selects when inserting markets there in step (2) of the pipeline. It might make sense to write out the type for the results of these selects, to use in TypeScript in the following step of the pipeline.
+ *
+ * I think with this pipeline it'll be possible to implement all of these by calling different stages from it:
+ * - `fetch-new` - API -> extended tables -> questions/elastic
+ * - `fetch-all` - API -> extended tables -> questions/elastic, with different fetching parameters
+ * - `json-archive` - JSON archive -> extended tables -> questions/elastic
+ */
 
 const platformName = "manifold";
 
@@ -48,7 +68,7 @@ function showStatistics(questions: FetchedQuestion[]) {
 }
 
 // We need full markets to get the description
-function fullMarketsToQuestions(markets: ManifoldFullMarket[]): {
+function fullMarketsToQuestions(markets: ManifoldApiFullMarket[]): {
   questions: FetchedQuestion[];
   resolvedQuestionIds: string[];
 } {
