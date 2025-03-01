@@ -258,7 +258,7 @@ importers:
         version: 0.7.2(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@graphql-yoga/plugin-response-cache':
         specifier: ^3.10.0
-        version: 3.12.11(graphql-yoga@5.10.11(graphql@16.10.0))(graphql@16.10.0)
+        version: 3.12.11(graphql-yoga@5.12.1(graphql@16.10.0))(graphql@16.10.0)
       '@inquirer/prompts':
         specifier: ^7.2.3
         version: 7.2.3(@types/node@22.13.1)
@@ -356,8 +356,8 @@ importers:
         specifier: ^16.9.0
         version: 16.10.0
       graphql-yoga:
-        specifier: ^5.8.0
-        version: 5.10.11(graphql@16.10.0)
+        specifier: ^5.12.1
+        version: 5.12.1(graphql@16.10.0)
       html-to-image:
         specifier: ^1.11.11
         version: 1.11.11
@@ -863,7 +863,7 @@ importers:
         version: 4.17.21
       squiggle-components-0.10.0:
         specifier: npm:@quri/squiggle-components@0.10.0
-        version: '@quri/squiggle-components@0.10.0(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))'
+        version: '@quri/squiggle-components@0.10.0(@emotion/is-prop-valid@0.8.8)(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))'
       squiggle-components-0.8.5:
         specifier: npm:@quri/squiggle-components@0.8.5
         version: '@quri/squiggle-components@0.8.5(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))'
@@ -2678,6 +2678,10 @@ packages:
     resolution: {integrity: sha512-SE3JxL7odst8igN6x77QWyPpXKXz/Hs5o5Y27r+9Br6WHIhkW90lYYVITWIJQ/qYgn5PkpbaVgeFY9rgqQaZ/A==}
     engines: {node: '>=18.0.0'}
 
+  '@envelop/core@5.1.1':
+    resolution: {integrity: sha512-6+OukzuNsm33DtLnOats3e7VnnHndqINJbp/vlIyIlSGBc/wtgQiTAijNWwHhnozHc7WmCKzTsPSrGObvkJazg==}
+    engines: {node: '>=18.0.0'}
+
   '@envelop/response-cache@6.3.0':
     resolution: {integrity: sha512-H+Pg3qWwaCg7zFG/W3aBFXuXJL6YXA78wl3bae3wOQbhMeYqjZFxou+GvZDZb2KliAxELMCrm68cbGRyFUuiLQ==}
     engines: {node: '>=18.0.0'}
@@ -2687,6 +2691,10 @@ packages:
 
   '@envelop/types@5.0.0':
     resolution: {integrity: sha512-IPjmgSc4KpQRlO4qbEDnBEixvtb06WDmjKfi/7fkZaryh5HuOmTtixe1EupQI5XfXO8joc3d27uUZ0QdC++euA==}
+    engines: {node: '>=18.0.0'}
+
+  '@envelop/types@5.1.1':
+    resolution: {integrity: sha512-uJyCPQRSqxH/4q8/TTTY2fMYIK/Tgv1IhOm6aFUUxuE/EI7muJM/UI85iv9Qo1OCpaafthwRLWzufRp20FyXaA==}
     engines: {node: '>=18.0.0'}
 
   '@esbuild-plugins/node-resolve@0.2.2':
@@ -3545,8 +3553,8 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  '@graphql-tools/executor@1.3.12':
-    resolution: {integrity: sha512-FzLXZQJOZHB75SecYFOIEEHw/qcxkRFViw0lVqHpaL07c+GqDxv6VOto0FZCIiV9RgGdyRj3O8lXDCp9Cw1MbA==}
+  '@graphql-tools/executor@1.4.2':
+    resolution: {integrity: sha512-TzXh4SIfkOp969xeX3Z2dArzLXisAuj+YOnlhqphX+rC/OzZ1m4cZxsxaqosp/hTwlt5xXJFCoOPYjHEAU42Rw==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
@@ -3599,6 +3607,12 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
+  '@graphql-tools/merge@9.0.21':
+    resolution: {integrity: sha512-5EiVL2InZeBlsZXlXjqyNMD697QP44j/dipXEogHlZcZzWEP/JTDwx9hTfFbmrePVR8+p89gFg1tE25iEgSong==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+
   '@graphql-tools/optimize@1.4.0':
     resolution: {integrity: sha512-dJs/2XvZp+wgHH8T5J2TqptT9/6uVzIYvA6uFACha+ufvdMBedkfR4b4GbT8jAKLRARiqRTxy3dctnwkTM2tdw==}
     peerDependencies:
@@ -3627,8 +3641,8 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  '@graphql-tools/schema@10.0.16':
-    resolution: {integrity: sha512-G2zgb8hNg9Sx6Z2FSXm57ToNcwMls9A9cUm+EsCrnGGDsryzN5cONYePUpSGj5NCFivVp3o1FT5dg19P/1qeqQ==}
+  '@graphql-tools/schema@10.0.20':
+    resolution: {integrity: sha512-BmDqXS9gHJF2Cl1k+IOiPCYWApBU6LhqSEPc8WmAxn08HtmhKoCizwiUuWtt8SOV67yoMzC1zJFkBdm3wZX9Fw==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
@@ -3641,6 +3655,12 @@ packages:
 
   '@graphql-tools/utils@10.7.2':
     resolution: {integrity: sha512-Wn85S+hfkzfVFpXVrQ0hjnePa3p28aB6IdAGCiD1SqBCSMDRzL+OFEtyAyb30nV9Mqflqs9lCqjqlR2puG857Q==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+
+  '@graphql-tools/utils@10.8.3':
+    resolution: {integrity: sha512-4QCvx3SWRsbH7wnktl51mBek+zE9hsjsv796XVlJlOUdWpAghJmA3ID2P7/Vwuy7BivVNfuAKe4ucUdE1fG7vA==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
@@ -4493,6 +4513,9 @@ packages:
   '@quri/prettier-plugin-squiggle@0.9.5':
     resolution: {integrity: sha512-1sgxOV2E7/t5ZZEgKqmG7OV3BOiwY0HVfh7qaXz8HQf6tRsUTTH558XpmrrTQuddObQjqZXQlnYbqDFRaHySzA==}
 
+  '@quri/serializer@1.0.0':
+    resolution: {integrity: sha512-MHaz3jcIsOC2c9iUlxRMrAppa84ZPf8Mnoio2/z5KtojoBu4sHt5360FYD7uOBgUz3fq2hp/aLATV9g5/A7q2g==}
+
   '@quri/squiggle-components@0.10.0':
     resolution: {integrity: sha512-q4at8cvVrLj9vtcbuWLp5ELXxkhzLcFGqOlCwrfUGZuxYOmCMYksOpRQijASMPE6T8lFGQc/+sSZcBYCdicuGA==}
     engines: {node: '>=20.x'}
@@ -4621,6 +4644,14 @@ packages:
     peerDependencies:
       react: ^18
       react-dom: ^18
+
+  '@quri/ui@0.2.3':
+    resolution: {integrity: sha512-Q+kPjMbNbXyQHw+5/MDXQRSSFUuWSqz1+g/4lnmRXxJGk8JqfeOAFrS8P+E2ChjSKWihart2lsq11wMwMxLUUw==}
+    engines: {node: '>=20.x'}
+    peerDependencies:
+      react: ^18 | ^19
+      react-dom: ^18 | ^19
+      react-hook-form: ^7.53.2
 
   '@radix-ui/number@1.1.0':
     resolution: {integrity: sha512-V3gRzhVNU1ldS5XhAPTom1fOIo4ccrjjJgmE+LI2h/WaFpHmx0MQApT+KZHnx8abG6Avtfcz4WoEciMnpFT3HQ==}
@@ -5080,6 +5111,7 @@ packages:
 
   '@readme/json-schema-ref-parser@1.2.0':
     resolution: {integrity: sha512-Bt3QVovFSua4QmHa65EHUmh2xS0XJ3rgTEUPH998f4OW4VVJke3BuS16f+kM0ZLOGdvIrzrPRqwihuv5BAjtrA==}
+    deprecated: This package is no longer maintained. Please use `@apidevtools/json-schema-ref-parser` instead.
 
   '@readme/oas-extensions@17.0.1':
     resolution: {integrity: sha512-PCU7WLz8TkbdxsiE4eQGvJYDYZQPiyLhXme3SvLboSmH+8G6AJPJ5OymzSAdlf5sXpSSoD2q3dTIou3Cb2DirQ==}
@@ -6065,6 +6097,10 @@ packages:
     resolution: {integrity: sha512-9lXugdknoIequO4OYvIjhygvfSEgnO8oASLqLelnDhkRjgBZhc39shC3QSlZuyDO9bgYSIVa2cHAiN+St3ty4w==}
     engines: {node: '>=18.0.0'}
 
+  '@whatwg-node/disposablestack@0.0.6':
+    resolution: {integrity: sha512-LOtTn+JgJvX8WfBVJtF08TGrdjuFzGJc4mkP8EdDI8ADbvO7kiexYep1o8dwnt0okb0jYclCDXF13xU7Ge4zSw==}
+    engines: {node: '>=18.0.0'}
+
   '@whatwg-node/events@0.1.2':
     resolution: {integrity: sha512-ApcWxkrs1WmEMS2CaLLFUEem/49erT3sxIVjpzU5f6zmVcnijtDSrhoK2zVobOIikZJdH63jdAXOrvjf6eOUNQ==}
     engines: {node: '>=18.0.0'}
@@ -6073,12 +6109,24 @@ packages:
     resolution: {integrity: sha512-jCTL/qYcIW2GihbBRHypQ/Us7saWMNZ5fsumsta+qPY0Pmi1ccba/KRQvgctmQsbP69FWemJSs8zVcFaNwdL0w==}
     engines: {node: '>=18.0.0'}
 
+  '@whatwg-node/fetch@0.10.5':
+    resolution: {integrity: sha512-+yFJU3hmXPAHJULwx0VzCIsvr/H0lvbPvbOH3areOH3NAuCxCwaJsQ8w6/MwwMcvEWIynSsmAxoyaH04KeosPg==}
+    engines: {node: '>=18.0.0'}
+
+  '@whatwg-node/node-fetch@0.7.12':
+    resolution: {integrity: sha512-ec9ZPDImceXD9gShv0VTc6q0waZ7ccpiYXNbAeGMjGQAZ8hkAeAYOXoiJsfaHO5Pt0UR+SbNVTJGP2aeFMYz0Q==}
+    engines: {node: '>=18.0.0'}
+
   '@whatwg-node/node-fetch@0.7.7':
     resolution: {integrity: sha512-BDbIMOenThOTFDBLh1WscgBNAxfDAdAdd9sMG8Ff83hYxApJVbqEct38bUAj+zn8bTsfBx/lyfnVOTyq5xUlvg==}
     engines: {node: '>=18.0.0'}
 
-  '@whatwg-node/server@0.9.65':
-    resolution: {integrity: sha512-CnYTFEUJkbbAcuBXnXirVIgKBfs2YA6sSGjxeq07AUiyXuoQ0fbvTIQoteMglmn09QeGzcH/l0B7nIml83xvVw==}
+  '@whatwg-node/promise-helpers@1.2.1':
+    resolution: {integrity: sha512-+faGtJlS4U8NSaSzRVN37xAprPdhoobYzUSUo4DgH8APtfFyizmNxp0ckwKcURoL8cy2B+bKxOWU/VIH2nFeLg==}
+    engines: {node: '>=18.0.0'}
+
+  '@whatwg-node/server@0.9.70':
+    resolution: {integrity: sha512-YjZgF5E29R8QwtYo5WWIERXA0Hn7TSmrpVsIGYZpJDSQNE0gFpcsijmzxpviYtSm69Ayu8B9xOg+EFVk+sVtgA==}
     engines: {node: '>=18.0.0'}
 
   '@wogns3623/eslint-plugin-better-exhaustive-deps@1.1.0':
@@ -8109,6 +8157,20 @@ packages:
       react-dom:
         optional: true
 
+  framer-motion@11.18.2:
+    resolution: {integrity: sha512-5F5Och7wrvtLVElIpclDT0CBzMVg3dL22B64aZwHtsIY8RB4mXICLrkajK4G9R+ieSAGcgrLeae2SeUTg2pr6w==}
+    peerDependencies:
+      '@emotion/is-prop-valid': '*'
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@emotion/is-prop-valid':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
   fs-constants@1.0.0:
     resolution: {integrity: sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow==}
 
@@ -8315,8 +8377,8 @@ packages:
     peerDependencies:
       graphql: '>=0.11 <=16'
 
-  graphql-yoga@5.10.11:
-    resolution: {integrity: sha512-r4Mg6nXIqvAh6IO82JlJNJOAL1MADKZsesytsBw/qvuYdE7vyo3PNCHMleBoWj3dzx83aRajBQQNh3WzBmsy8g==}
+  graphql-yoga@5.12.1:
+    resolution: {integrity: sha512-5XI+SNkwJQoACoSWDKzBjHpbd6V32tZZ68lpJZ/7uvAq5kzTLPmsi1V7trOA/k1GDf+XYaeUnpl8dqWDtohdeg==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
@@ -9426,6 +9488,7 @@ packages:
 
   lodash.setwith@4.3.2:
     resolution: {integrity: sha512-Cv2pndcuNDaqDMJ0gbLm5qNG5jyfsL6f8+f5PfZVVNhQCv+y+P5gAKkCdZbtiQlux7nsnWF7UmZd8JEFIo/4tg==}
+    deprecated: This package is deprecated.
 
   lodash.sortby@4.7.0:
     resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}
@@ -9976,8 +10039,14 @@ packages:
   motion-dom@11.14.3:
     resolution: {integrity: sha512-lW+D2wBy5vxLJi6aCP0xyxTxlTfiu+b+zcpVbGVFUxotwThqhdpPRSmX8xztAgtZMPMeU0WGVn/k1w4I+TbPqA==}
 
+  motion-dom@11.18.1:
+    resolution: {integrity: sha512-g76KvA001z+atjfxczdRtw/RXOM3OMSdd1f4DL77qCTF/+avrRJiawSG4yDibEQ215sr9kpinSlX2pCTJ9zbhw==}
+
   motion-utils@11.14.3:
     resolution: {integrity: sha512-Xg+8xnqIJTpr0L/cidfTTBFkvRw26ZtGGuIhA94J9PQ2p4mEa06Xx7QVYZH0BP+EpMSaDlu+q0I0mmvwADPsaQ==}
+
+  motion-utils@11.18.1:
+    resolution: {integrity: sha512-49Kt+HKjtbJKLtgO/LKj9Ld+6vw9BjH5d9sc40R/kVyH8GLAXgT42M2NnuPcJNuA3s9ZfZBUcwIgpmZWGEE+hA==}
 
   mri@1.2.0:
     resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}
@@ -11202,6 +11271,12 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
 
+  react-textarea-autosize@8.5.4:
+    resolution: {integrity: sha512-eSSjVtRLcLfFwFcariT77t9hcbVJHQV76b51QjQGarQIHml2+gM2lms0n3XrhnDmgK5B+/Z7TmQk5OHNzqYm/A==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+
   react-textarea-autosize@8.5.7:
     resolution: {integrity: sha512-2MqJ3p0Jh69yt9ktFIaZmORHXw4c4bxSIhCeWiFwmJ9EYKgLmuNII3e9c9b2UO+ijl4StnpZdqpxNIhTdHvqtQ==}
     engines: {node: '>=10'}
@@ -11670,19 +11745,19 @@ packages:
 
   shikiji-core@0.10.2:
     resolution: {integrity: sha512-9Of8HMlF96usXJHmCL3Gd0Fcf0EcyJUF9m8EoAKKd98mHXi0La2AZl1h6PegSFGtiYcBDK/fLuKbDa1l16r1fA==}
-    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
+    deprecated: Deprecated, use @shikijs/core instead
 
   shikiji-core@0.9.15:
     resolution: {integrity: sha512-7hqIcUKS15OMs/61Qp2GvO1fSajBB36bDqi8vexIg5kp80V6v6SGtBrlq+nLlo7erMG2d1kvIuTIq1bwKI6fEg==}
-    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
+    deprecated: Deprecated, use @shikijs/core instead
 
   shikiji@0.10.2:
     resolution: {integrity: sha512-wtZg3T0vtYV2PnqusWQs3mDaJBdCPWxFDrBM/SE5LfrX92gjUvfEMlc+vJnoKY6Z/S44OWaCRzNIsdBRWcTAiw==}
-    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
+    deprecated: Deprecated, use shiki instead
 
   shikiji@0.9.15:
     resolution: {integrity: sha512-+inN4cN+nY7b0uCPOiqFHAk+cn2DEdM3AIQgPhAV7QKqhww/o7OGS5xvLh3SNnjke9C/HispALqGOQGYHVq7KQ==}
-    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
+    deprecated: Deprecated, use shiki instead
 
   should-equal@2.0.0:
     resolution: {integrity: sha512-ZP36TMrK9euEuWQYBig9W55WPC7uo37qzAEmbjHz4gfyuXrEUgF8cUvQVO+w+d3OMfPvSRQJ22lSm8MQJ43LTA==}
@@ -14821,11 +14896,17 @@ snapshots:
       '@envelop/types': 5.0.0
       tslib: 2.8.1
 
+  '@envelop/core@5.1.1':
+    dependencies:
+      '@envelop/types': 5.1.1
+      '@whatwg-node/promise-helpers': 1.2.1
+      tslib: 2.8.1
+
   '@envelop/response-cache@6.3.0(@envelop/core@5.0.3)(graphql@16.10.0)':
     dependencies:
       '@envelop/core': 5.0.3
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
-      '@whatwg-node/fetch': 0.10.3
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
+      '@whatwg-node/fetch': 0.10.5
       fast-json-stable-stringify: 2.1.0
       graphql: 16.10.0
       lru-cache: 10.4.3
@@ -14833,6 +14914,11 @@ snapshots:
 
   '@envelop/types@5.0.0':
     dependencies:
+      tslib: 2.8.1
+
+  '@envelop/types@5.1.1':
+    dependencies:
+      '@whatwg-node/promise-helpers': 1.2.1
       tslib: 2.8.1
 
   '@esbuild-plugins/node-resolve@0.2.2(esbuild@0.21.5)':
@@ -15358,7 +15444,7 @@ snapshots:
   '@graphql-codegen/core@4.0.2(graphql@16.10.0)':
     dependencies:
       '@graphql-codegen/plugin-helpers': 5.1.0(graphql@16.10.0)
-      '@graphql-tools/schema': 10.0.16(graphql@16.10.0)
+      '@graphql-tools/schema': 10.0.20(graphql@16.10.0)
       '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
       graphql: 16.10.0
       tslib: 2.6.3
@@ -15367,7 +15453,7 @@ snapshots:
     dependencies:
       '@graphql-codegen/plugin-helpers': 5.1.0(graphql@16.10.0)
       '@graphql-codegen/visitor-plugin-common': 5.6.1(@babel/core@7.26.7)(encoding@0.1.12)(graphql@16.10.0)
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       auto-bind: 4.0.0
       graphql: 16.10.0
       tslib: 2.6.3
@@ -15498,7 +15584,7 @@ snapshots:
       '@graphql-codegen/plugin-helpers': 5.1.0(graphql@16.10.0)
       '@graphql-tools/optimize': 2.0.0(graphql@16.10.0)
       '@graphql-tools/relay-operation-optimizer': 7.0.12(@babel/core@7.26.7)(encoding@0.1.12)(graphql@16.10.0)
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       auto-bind: 4.0.0
       change-case-all: 1.0.15
       dependency-graph: 0.11.0
@@ -15513,7 +15599,7 @@ snapshots:
 
   '@graphql-hive/gateway-abort-signal-any@0.0.3(graphql@16.10.0)':
     dependencies:
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       graphql: 16.10.0
       tslib: 2.8.1
 
@@ -15527,7 +15613,7 @@ snapshots:
 
   '@graphql-tools/batch-execute@9.0.11(graphql@16.10.0)':
     dependencies:
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       dataloader: 2.2.3
       graphql: 16.10.0
       tslib: 2.8.1
@@ -15546,9 +15632,9 @@ snapshots:
   '@graphql-tools/delegate@10.2.10(graphql@16.10.0)':
     dependencies:
       '@graphql-tools/batch-execute': 9.0.11(graphql@16.10.0)
-      '@graphql-tools/executor': 1.3.12(graphql@16.10.0)
-      '@graphql-tools/schema': 10.0.16(graphql@16.10.0)
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/executor': 1.4.2(graphql@16.10.0)
+      '@graphql-tools/schema': 10.0.20(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       '@repeaterjs/repeater': 3.0.6
       dataloader: 2.2.3
       dset: 3.1.4
@@ -15563,14 +15649,14 @@ snapshots:
 
   '@graphql-tools/executor-common@0.0.1(graphql@16.10.0)':
     dependencies:
-      '@envelop/core': 5.0.3
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@envelop/core': 5.1.1
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       graphql: 16.10.0
 
   '@graphql-tools/executor-graphql-ws@1.3.7(graphql@16.10.0)':
     dependencies:
       '@graphql-tools/executor-common': 0.0.1(graphql@16.10.0)
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       '@whatwg-node/disposablestack': 0.0.5
       graphql: 16.10.0
       graphql-ws: 5.16.2(graphql@16.10.0)
@@ -15585,10 +15671,10 @@ snapshots:
     dependencies:
       '@graphql-hive/gateway-abort-signal-any': 0.0.3(graphql@16.10.0)
       '@graphql-tools/executor-common': 0.0.1(graphql@16.10.0)
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       '@repeaterjs/repeater': 3.0.6
       '@whatwg-node/disposablestack': 0.0.5
-      '@whatwg-node/fetch': 0.10.3
+      '@whatwg-node/fetch': 0.10.5
       extract-files: 11.0.0
       graphql: 16.10.0
       meros: 1.3.0(@types/node@22.13.1)
@@ -15599,7 +15685,7 @@ snapshots:
 
   '@graphql-tools/executor-legacy-ws@1.1.10(graphql@16.10.0)':
     dependencies:
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       '@types/ws': 8.5.14
       graphql: 16.10.0
       isomorphic-ws: 5.0.0(ws@8.18.0)
@@ -15609,15 +15695,15 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@graphql-tools/executor@1.3.12(graphql@16.10.0)':
+  '@graphql-tools/executor@1.4.2(graphql@16.10.0)':
     dependencies:
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.10.0)
       '@repeaterjs/repeater': 3.0.6
-      '@whatwg-node/disposablestack': 0.0.5
+      '@whatwg-node/disposablestack': 0.0.6
+      '@whatwg-node/promise-helpers': 1.2.1
       graphql: 16.10.0
       tslib: 2.8.1
-      value-or-promise: 1.0.12
 
   '@graphql-tools/git-loader@8.0.17(graphql@16.10.0)':
     dependencies:
@@ -15661,7 +15747,7 @@ snapshots:
       '@babel/plugin-syntax-import-assertions': 7.26.0(@babel/core@7.26.7)
       '@babel/traverse': 7.26.7
       '@babel/types': 7.26.7
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       graphql: 16.10.0
       tslib: 2.8.1
     transitivePeerDependencies:
@@ -15669,7 +15755,7 @@ snapshots:
 
   '@graphql-tools/import@7.0.11(graphql@16.10.0)':
     dependencies:
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       graphql: 16.10.0
       resolve-from: 5.0.0
       tslib: 2.8.1
@@ -15684,7 +15770,7 @@ snapshots:
 
   '@graphql-tools/load@8.0.12(graphql@16.10.0)':
     dependencies:
-      '@graphql-tools/schema': 10.0.16(graphql@16.10.0)
+      '@graphql-tools/schema': 10.0.20(graphql@16.10.0)
       '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
       graphql: 16.10.0
       p-limit: 3.1.0
@@ -15692,7 +15778,13 @@ snapshots:
 
   '@graphql-tools/merge@9.0.17(graphql@16.10.0)':
     dependencies:
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
+      graphql: 16.10.0
+      tslib: 2.8.1
+
+  '@graphql-tools/merge@9.0.21(graphql@16.10.0)':
+    dependencies:
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       graphql: 16.10.0
       tslib: 2.8.1
 
@@ -15745,7 +15837,7 @@ snapshots:
   '@graphql-tools/relay-operation-optimizer@7.0.12(@babel/core@7.26.7)(encoding@0.1.12)(graphql@16.10.0)':
     dependencies:
       '@ardatan/relay-compiler': 12.0.1(@babel/core@7.26.7)(encoding@0.1.12)(graphql@16.10.0)
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       graphql: 16.10.0
       tslib: 2.8.1
     transitivePeerDependencies:
@@ -15753,13 +15845,12 @@ snapshots:
       - encoding
       - supports-color
 
-  '@graphql-tools/schema@10.0.16(graphql@16.10.0)':
+  '@graphql-tools/schema@10.0.20(graphql@16.10.0)':
     dependencies:
-      '@graphql-tools/merge': 9.0.17(graphql@16.10.0)
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/merge': 9.0.21(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       graphql: 16.10.0
       tslib: 2.8.1
-      value-or-promise: 1.0.12
 
   '@graphql-tools/url-loader@8.0.24(@types/node@22.13.1)(graphql@16.10.0)':
     dependencies:
@@ -15789,6 +15880,15 @@ snapshots:
       graphql: 16.10.0
       tslib: 2.8.1
 
+  '@graphql-tools/utils@10.8.3(graphql@16.10.0)':
+    dependencies:
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.10.0)
+      '@whatwg-node/promise-helpers': 1.2.1
+      cross-inspect: 1.0.1
+      dset: 3.1.4
+      graphql: 16.10.0
+      tslib: 2.8.1
+
   '@graphql-tools/utils@8.13.1(graphql@16.10.0)':
     dependencies:
       graphql: 16.10.0
@@ -15803,8 +15903,8 @@ snapshots:
   '@graphql-tools/wrap@10.0.28(graphql@16.10.0)':
     dependencies:
       '@graphql-tools/delegate': 10.2.10(graphql@16.10.0)
-      '@graphql-tools/schema': 10.0.16(graphql@16.10.0)
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@graphql-tools/schema': 10.0.20(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       graphql: 16.10.0
       tslib: 2.8.1
 
@@ -15816,12 +15916,12 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@graphql-yoga/plugin-response-cache@3.12.11(graphql-yoga@5.10.11(graphql@16.10.0))(graphql@16.10.0)':
+  '@graphql-yoga/plugin-response-cache@3.12.11(graphql-yoga@5.12.1(graphql@16.10.0))(graphql@16.10.0)':
     dependencies:
       '@envelop/core': 5.0.3
       '@envelop/response-cache': 6.3.0(@envelop/core@5.0.3)(graphql@16.10.0)
       graphql: 16.10.0
-      graphql-yoga: 5.10.11(graphql@16.10.0)
+      graphql-yoga: 5.12.1(graphql@16.10.0)
 
   '@graphql-yoga/subscription@5.0.3':
     dependencies:
@@ -16725,7 +16825,9 @@ snapshots:
       '@quri/squiggle-lang': 0.9.5
       prettier: 3.4.2
 
-  '@quri/squiggle-components@0.10.0(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))':
+  '@quri/serializer@1.0.0': {}
+
+  '@quri/squiggle-components@0.10.0(@emotion/is-prop-valid@0.8.8)(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))':
     dependencies:
       '@codemirror/autocomplete': 6.18.4
       '@codemirror/commands': 6.5.0
@@ -16743,7 +16845,7 @@ snapshots:
       '@quri/prettier-plugin-squiggle': 0.10.0(@types/react@19.0.8)
       '@quri/squiggle-lang': 0.10.0(@types/react@19.0.8)
       '@quri/squiggle-textmate-grammar': 0.10.0
-      '@quri/ui': link:packages/ui
+      '@quri/ui': 0.2.3(@emotion/is-prop-valid@0.8.8)(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react-hook-form@7.54.2(react@19.0.0))(react@19.0.0)
       '@tailwindcss/typography': 0.5.16(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.13.1)(typescript@5.7.3)))
       clsx: 2.1.1
       codemirror: 6.0.1
@@ -16762,6 +16864,7 @@ snapshots:
       unist-util-visit-parents: 6.0.1
       zod: 3.24.1
     transitivePeerDependencies:
+      - '@emotion/is-prop-valid'
       - '@types/react'
       - bufferutil
       - immer
@@ -17056,7 +17159,7 @@ snapshots:
   '@quri/squiggle-lang@0.10.0(@types/react@19.0.8)':
     dependencies:
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
-      '@quri/serializer': link:packages/serializer
+      '@quri/serializer': 1.0.0
       commander: 12.1.0
       d3-format: 3.1.0
       d3-time-format: 4.1.0
@@ -17228,6 +17331,24 @@ snapshots:
       react-hook-form: 7.54.2(react@19.0.0)
       react-select: 5.10.0(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-textarea-autosize: 8.5.3(@types/react@19.0.8)(react@19.0.0)
+      react-use: 17.6.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+    transitivePeerDependencies:
+      - '@emotion/is-prop-valid'
+      - '@types/react'
+      - supports-color
+
+  '@quri/ui@0.2.3(@emotion/is-prop-valid@0.8.8)(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react-hook-form@7.54.2(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      '@floating-ui/react': 0.26.16(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@headlessui/react': 2.2.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      clsx: 2.1.1
+      framer-motion: 11.18.2(@emotion/is-prop-valid@0.8.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react: 19.0.0
+      react-colorful: 5.6.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react-dom: 19.0.0(react@19.0.0)
+      react-hook-form: 7.54.2(react@19.0.0)
+      react-select: 5.10.0(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react-textarea-autosize: 8.5.4(@types/react@19.0.8)(react@19.0.0)
       react-use: 17.6.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
@@ -18852,6 +18973,11 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  '@whatwg-node/disposablestack@0.0.6':
+    dependencies:
+      '@whatwg-node/promise-helpers': 1.2.1
+      tslib: 2.8.1
+
   '@whatwg-node/events@0.1.2':
     dependencies:
       tslib: 2.8.1
@@ -18861,16 +18987,33 @@ snapshots:
       '@whatwg-node/node-fetch': 0.7.7
       urlpattern-polyfill: 10.0.0
 
+  '@whatwg-node/fetch@0.10.5':
+    dependencies:
+      '@whatwg-node/node-fetch': 0.7.12
+      urlpattern-polyfill: 10.0.0
+
+  '@whatwg-node/node-fetch@0.7.12':
+    dependencies:
+      '@whatwg-node/disposablestack': 0.0.6
+      '@whatwg-node/promise-helpers': 1.2.1
+      busboy: 1.6.0
+      tslib: 2.8.1
+
   '@whatwg-node/node-fetch@0.7.7':
     dependencies:
       '@whatwg-node/disposablestack': 0.0.5
       busboy: 1.6.0
       tslib: 2.8.1
 
-  '@whatwg-node/server@0.9.65':
+  '@whatwg-node/promise-helpers@1.2.1':
     dependencies:
-      '@whatwg-node/disposablestack': 0.0.5
-      '@whatwg-node/fetch': 0.10.3
+      tslib: 2.8.1
+
+  '@whatwg-node/server@0.9.70':
+    dependencies:
+      '@whatwg-node/disposablestack': 0.0.6
+      '@whatwg-node/fetch': 0.10.5
+      '@whatwg-node/promise-helpers': 1.2.1
       tslib: 2.8.1
 
   '@wogns3623/eslint-plugin-better-exhaustive-deps@1.1.0(eslint@9.19.0(jiti@2.4.2))':
@@ -21451,6 +21594,16 @@ snapshots:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
+  framer-motion@11.18.2(@emotion/is-prop-valid@0.8.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
+    dependencies:
+      motion-dom: 11.18.1
+      motion-utils: 11.18.1
+      tslib: 2.8.1
+    optionalDependencies:
+      '@emotion/is-prop-valid': 0.8.8
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+
   fs-constants@1.0.0:
     optional: true
 
@@ -21815,16 +21968,16 @@ snapshots:
     dependencies:
       graphql: 16.10.0
 
-  graphql-yoga@5.10.11(graphql@16.10.0):
+  graphql-yoga@5.12.1(graphql@16.10.0):
     dependencies:
-      '@envelop/core': 5.0.3
-      '@graphql-tools/executor': 1.3.12(graphql@16.10.0)
-      '@graphql-tools/schema': 10.0.16(graphql@16.10.0)
-      '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
+      '@envelop/core': 5.1.1
+      '@graphql-tools/executor': 1.4.2(graphql@16.10.0)
+      '@graphql-tools/schema': 10.0.20(graphql@16.10.0)
+      '@graphql-tools/utils': 10.8.3(graphql@16.10.0)
       '@graphql-yoga/logger': 2.0.1
       '@graphql-yoga/subscription': 5.0.3
-      '@whatwg-node/fetch': 0.10.3
-      '@whatwg-node/server': 0.9.65
+      '@whatwg-node/fetch': 0.10.5
+      '@whatwg-node/server': 0.9.70
       dset: 3.1.4
       graphql: 16.10.0
       lru-cache: 10.4.3
@@ -24410,7 +24563,13 @@ snapshots:
 
   motion-dom@11.14.3: {}
 
+  motion-dom@11.18.1:
+    dependencies:
+      motion-utils: 11.18.1
+
   motion-utils@11.14.3: {}
+
+  motion-utils@11.18.1: {}
 
   mri@1.2.0: {}
 
@@ -25735,6 +25894,15 @@ snapshots:
   react-textarea-autosize@8.5.3(@types/react@19.0.8)(react@19.0.0):
     dependencies:
       '@babel/runtime': 7.26.7
+      react: 19.0.0
+      use-composed-ref: 1.4.0(@types/react@19.0.8)(react@19.0.0)
+      use-latest: 1.3.0(@types/react@19.0.8)(react@19.0.0)
+    transitivePeerDependencies:
+      - '@types/react'
+
+  react-textarea-autosize@8.5.4(@types/react@19.0.8)(react@19.0.0):
+    dependencies:
+      '@babel/runtime': 7.26.9
       react: 19.0.0
       use-composed-ref: 1.4.0(@types/react@19.0.8)(react@19.0.0)
       use-latest: 1.3.0(@types/react@19.0.8)(react@19.0.0)
