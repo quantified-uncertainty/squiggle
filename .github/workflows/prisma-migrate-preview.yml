@@ -1,0 +1,55 @@
+name: Prisma Migrate Preview DB
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Note: we don't have a metaforecast db in preview environment, so we don't need to migrate it.
+
+jobs:
+  check-changes:
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    outputs:
+      should_run_hub: ${{ steps.check-hub.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if Hub Prisma files changed
+        id: check-hub
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          git diff --name-only origin/${{ github.base_ref }} HEAD | grep -q "apps/hub/prisma/schema.prisma" && echo "changed=true" >> $GITHUB_OUTPUT || echo "changed=false" >> $GITHUB_OUTPUT
+
+  migrate-hub:
+    needs: check-changes
+    if: ${{ needs.check-changes.outputs.should_run_hub == 'true' }}
+    runs-on: ubuntu-latest
+    environment: Preview
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Migrate Hub
+        working-directory: ./apps/hub
+        env:
+          DATABASE_URL: "${{ secrets.DATABASE_DIRECT_URL }}"
+        run: npx prisma migrate deploy
