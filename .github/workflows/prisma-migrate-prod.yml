@@ -60,5 +60,5 @@ jobs:
       - name: Migrate Metaforecast
         working-directory: ./internal-packages/metaforecast-db
         env:
-          DATABASE_URL: "${{ secrets.METAFORECAST_DATABASE_URL }}"
+          METAFORECAST_DB_URL: "${{ secrets.METAFORECAST_DATABASE_URL }}"
         run: npx prisma migrate deploy
