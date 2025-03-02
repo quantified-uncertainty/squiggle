@@ -241,14 +241,29 @@ export async function saveResolvedQuestions(questionIds: string[]) {
   // Metaforecast doesn't support resolved questions yet, so we delete them.
 
   console.log(`Deleting ${questionIds.length} resolved questions from DB`);
-  await prisma.question.deleteMany({
-    where: {
-      id: { in: questionIds },
-    },
-  });
+  // Process in batches of 1000 to avoid potential issues with large arrays
+  for (let i = 0; i < questionIds.length; i += 1000) {
+    const batch = questionIds.slice(i, i + 1000);
+    await prisma.question.deleteMany({
+      where: {
+        id: { in: batch },
+      },
+    });
+    console.log(
+      `Deleted batch ${i / 1000 + 1}: ${batch.length} questions from database`
+    );
+  }
 
   console.log(`Deleting ${questionIds.length} resolved questions from index`);
-  await deleteQuestionsFromIndex(questionIds);
+
+  // Process in batches of 1000 to avoid potential issues with large arrays
+  for (let i = 0; i < questionIds.length; i += 1000) {
+    const batch = questionIds.slice(i, i + 1000);
+    await deleteQuestionsFromIndex(batch);
+    console.log(
+      `Deleted batch ${i / 1000 + 1}: ${batch.length} questions from index`
+    );
+  }
 
   console.log(`Deleted ${questionIds.length} resolved questions`);
 }

@@ -8,11 +8,10 @@ import { ManifoldMarket, prisma, Prisma } from "@quri/metaforecast-db";
 import { fetchFullMarket, fetchGroup } from "./api";
 import { fullMarketSchema, ManifoldApiFullMarket } from "./apiSchema";
 
-const platformName = "manifold";
-
 /**
  * Saves a full market from API to Manifold-specific tables and returns the Prisma market object.
  */
+const invalidGroupSlugsCache = new Set<string>();
 async function saveExtendedMarket(
   market: ManifoldApiFullMarket
 ): Promise<ManifoldMarket> {
@@ -58,9 +57,13 @@ async function saveExtendedMarket(
     (slug) => !existingGroups.some((g) => g.slug === slug)
   );
 
-  for (const slug of groupsToCreate) {
+  for (const groupSlug of groupsToCreate) {
+    if (invalidGroupSlugsCache.has(groupSlug)) {
+      continue;
+    }
+
     try {
-      const group = await fetchGroup(slug);
+      const group = await fetchGroup(groupSlug);
       const dbGroup = await prisma.manifoldGroup.create({
         data: {
           id: group.id,
@@ -71,7 +74,8 @@ async function saveExtendedMarket(
       groupIds.push(dbGroup.id);
     } catch {
       // not fatal - some old markets can have invalid group slugs
-      console.warn(`${slug} group not found`);
+      console.warn(`${groupSlug} group not found`);
+      invalidGroupSlugsCache.add(groupSlug);
     }
   }
 
@@ -150,7 +154,6 @@ async function saveExtendedMarket(
       });
     }
 
-    // TODO - re-select with some nested relations?
     return dbMarket;
   });
 }
@@ -164,9 +167,13 @@ export async function saveMarketsToExtendedTables(
 ): Promise<ManifoldMarket[]> {
   const prismaMarkets: ManifoldMarket[] = [];
 
-  for (const market of markets) {
+  for (let i = 0; i < markets.length; i++) {
+    const market = markets[i];
     const prismaMarket = await saveExtendedMarket(market);
     prismaMarkets.push(prismaMarket);
+    if ((i + 1) % 1000 === 0) {
+      console.log(`Saved market ${market.id} (${i + 1} / ${markets.length})`);
+    }
   }
 
   return prismaMarkets;
@@ -176,7 +183,7 @@ export async function saveMarketsToExtendedTables(
  * Imports markets from a JSON archive file and saves to extended tables.
  * Returns the saved Prisma market objects.
  */
-export async function importMarketsFromJsonArchiveFile(
+export async function storeMarketsFromJsonArchiveFile(
   filename: string
 ): Promise<ManifoldMarket[]> {
   console.log("Loading JSON archive");
@@ -191,9 +198,12 @@ export async function importMarketsFromJsonArchiveFile(
   // process each market in the JSON archive
   for (let i = 0; i < parsedArray.length; i++) {
     const market = parsedArray[i];
-    console.log(
-      `Processing market ${market.id} (${i + 1} / ${parsedArray.length})`
-    );
+
+    if ((i + 1) % 1000 === 0) {
+      console.log(
+        `Processing market ${market.id} (${i + 1} / ${parsedArray.length})`
+      );
+    }
 
     try {
       if (market.outcomeType === "QUADRATIC_FUNDING") {
@@ -204,6 +214,10 @@ export async function importMarketsFromJsonArchiveFile(
       if (!("url" in market)) {
         // archive markets can miss URL
         market.url = `https://manifold.markets/${market.creatorUsername}/${market.slug}`;
+      }
+
+      if ("prob" in market) {
+        market.probability = market.prob;
       }
 
       if ("answers" in market) {

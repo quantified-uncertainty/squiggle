@@ -80,6 +80,6 @@ export async function fetchFullMarket(
 export async function fetchGroup(slug: string): Promise<ManifoldApiGroup> {
   console.log(`Fetching group ${slug}`);
   const endpoint = `${ENDPOINT}/group/${slug}`;
-  const data = await fetchJson(endpoint);
+  const data = await fetchJson(endpoint, { retries: 1 });
   return groupSchema.parse(data);
 }

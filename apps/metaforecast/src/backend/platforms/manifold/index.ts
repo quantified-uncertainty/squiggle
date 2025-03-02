@@ -11,8 +11,8 @@ import { FetchedQuestion, Platform } from "@/backend/types";
 
 import { average, sum } from "../../../utils";
 import {
-  importMarketsFromJsonArchiveFile,
   importSingleMarket,
+  storeMarketsFromJsonArchiveFile,
 } from "./extendedTables";
 import { fetchAndStoreMarketsFromApi } from "./fetchAndStore";
 import { marketsToQuestions } from "./marketsToQuestions";
@@ -29,6 +29,7 @@ function separateResolvedMarkets(markets: ManifoldMarket[]): {
   const unresolvedMarkets: ManifoldMarket[] = [];
   const resolvedQuestionIds: string[] = [];
 
+  console.log(`Sorting out ${markets.length} markets`);
   for (const market of markets) {
     if (market.isResolved) {
       resolvedQuestionIds.push(`${platformName}-${market.id}`);
@@ -36,6 +37,9 @@ function separateResolvedMarkets(markets: ManifoldMarket[]): {
       unresolvedMarkets.push(market);
     }
   }
+  console.log(
+    `${unresolvedMarkets.length} unresolved markets, ${resolvedQuestionIds.length} resolved markets`
+  );
 
   return { unresolvedMarkets, resolvedQuestionIds };
 }
@@ -124,7 +128,7 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
       .command("json-archive")
       .argument("<filename>", "Filename of the JSON archive")
       .action(async (filename) => {
-        const prismaMarkets = await importMarketsFromJsonArchiveFile(filename);
+        const prismaMarkets = await storeMarketsFromJsonArchiveFile(filename);
         await processMarketsAndSave(this, prismaMarkets, { index: true });
       });
 
