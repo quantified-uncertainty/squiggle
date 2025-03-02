@@ -1,3 +1,4 @@
 /generated
 /dist
 /src/pothos-types.generated.ts
+/.env
